@@ -224,20 +224,14 @@ public class JdbcStatementResource extends ResourceValue {
    * if statement passed to mysqli_prepare() is one that produces a result set, then this function returns a
    * JdbcResultResource with the metadata
    * <p/>
-   * XXX: THIS HELPER FUNCTION SO FAR IS NEVER USED
    */
-  public ResultSetMetaData getMetaData()
+  protected ResultSetMetaData getMetaData()
+    throws SQLException
   {
-    try {
+    if (_metaData == null)
+      _metaData = _rs.getMetaData();
 
-      if (_metaData != null)
-        _metaData = _rs.getMetaData();
-
-    } catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-
-    return null;
+    return _metaData;
   }
 
   /**

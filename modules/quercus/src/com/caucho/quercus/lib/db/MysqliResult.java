@@ -93,7 +93,6 @@ public class MysqliResult extends JdbcResultResource {
   /**
    * Returns an associative array representing the row.
    */
-  @ReturnNullAsFalse
   public ArrayValue fetch_assoc()
   {
     return fetchArray(JdbcResultResource.FETCH_ASSOC);
@@ -102,7 +101,6 @@ public class MysqliResult extends JdbcResultResource {
   /**
    * Returns the field metadata
    */
-  @ReturnNullAsFalse
   public Value fetch_field(Env env)
   {
     return fetchNextField(env);
@@ -183,7 +181,6 @@ public class MysqliResult extends JdbcResultResource {
   /**
    * Returns an object representing the row.
    */
-  @ReturnNullAsFalse
   public Value fetch_object(Env env)
   {
     return fetchObject(env);
@@ -192,7 +189,6 @@ public class MysqliResult extends JdbcResultResource {
   /**
    * Returns an object representing the row.
    */
-  @ReturnNullAsFalse
   public ArrayValue fetch_row()
   {
     return fetchArray(JdbcResultResource.FETCH_NUM);

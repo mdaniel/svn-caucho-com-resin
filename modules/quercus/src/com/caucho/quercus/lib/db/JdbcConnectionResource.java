@@ -227,7 +227,7 @@ public abstract class JdbcConnectionResource implements Closeable {
   /**
    * Returns JdbcResultResource of available databases
    */
-  public Value getCatalogs()
+  protected JdbcResultResource getCatalogs()
   {
     clearErrors();
 
@@ -240,21 +240,21 @@ public abstract class JdbcConnectionResource implements Closeable {
       if (rs != null)
         return createResult(_stmt, rs);
       else
-        return BooleanValue.FALSE;
+        return null;
     } catch (SQLException e) {
       _errorMessage = e.getMessage();
       _errorCode = e.getErrorCode();
 
       log.log(Level.WARNING, e.toString(), e);
 
-      return BooleanValue.FALSE;
+      return null;
     }
   }
 
   /**
    * @return current catalog or false if error
    */
-  public Value getCatalog()
+  protected Value getCatalog()
   {
     clearErrors();
 
@@ -619,7 +619,8 @@ public abstract class JdbcConnectionResource implements Closeable {
     return false;
   }
 
-  public Value list_dbs()
+  @ReturnNullAsFalse
+  public JdbcResultResource list_dbs()
   {
     return validateConnection().getCatalogs();
   }
@@ -681,8 +682,8 @@ public abstract class JdbcConnectionResource implements Closeable {
    *
    * @return a {@link JdbcResultResource}, or null for failure
    */
-  protected Value query(String sql,
-                        @Optional("MYSQLI_STORE_RESULT") int resultMode)
+  public Value query(String sql,
+		     @Optional("MYSQLI_STORE_RESULT") int resultMode)
   {
     // XXX: the query can return true for successful update, e.g. mysql
     try {
@@ -842,7 +843,8 @@ public abstract class JdbcConnectionResource implements Closeable {
    *
    * Used in conjunction with mysqli_multi_query
    */
-  public Value store_result(Env env)
+  @ReturnNullAsFalse
+  public JdbcResultResource store_result(Env env)
   {
     return validateConnection().storeResult();
   }
@@ -853,7 +855,8 @@ public abstract class JdbcConnectionResource implements Closeable {
    *
    * Used in conjunction with mysqli_multi_query
    */
-  public Value use_result(Env env)
+  @ReturnNullAsFalse
+  public JdbcResultResource use_result(Env env)
   {
     return validateConnection().storeResult();
   }
@@ -911,14 +914,14 @@ public abstract class JdbcConnectionResource implements Closeable {
   /**
    * returns the next jdbcResultValue
    */
-  public Value storeResult()
+  protected JdbcResultResource storeResult()
   {
     if (!_hasBeenUsed) {
       _hasBeenUsed = true;
 
       return _resultValues.get(_nextResultValue);
     } else
-      return BooleanValue.FALSE;
+      return null;
   }
 
   /**
@@ -1045,7 +1048,7 @@ public abstract class JdbcConnectionResource implements Closeable {
     if (_resultValues.size() > 0) {
       _nextResultValue = 0;
       _hasBeenUsed = false;
-      return _resultValues.get(0);
+      return _env.wrapJava(_resultValues.get(0));
     } else
       return BooleanValue.TRUE;
   }
@@ -1068,8 +1071,8 @@ public abstract class JdbcConnectionResource implements Closeable {
    *
    * This function DOES NOT clear existing resultsets.
    */
-  public Value metaQuery(String sql,
-                         String catalog)
+  protected JdbcResultResource metaQuery(String sql,
+					 String catalog)
   {
     clearErrors();
 
@@ -1084,18 +1087,18 @@ public abstract class JdbcConnectionResource implements Closeable {
       stmt.setEscapeProcessing(false);
 
       if (stmt.execute(sql)) {
-        Value result = createResult(stmt, stmt.getResultSet());
+        JdbcResultResource result = createResult(stmt, stmt.getResultSet());
         _conn.setCatalog(currentCatalog.toString());
         return result;
       } else {
         _conn.setCatalog(currentCatalog.toString());
-        return BooleanValue.FALSE;
+        return null;
       }
     } catch (SQLException e) {
       _errorMessage = e.getMessage();
       _errorCode = e.getErrorCode();
       log.log(Level.WARNING, e.toString(), e);
-      return BooleanValue.FALSE;
+      return null;
     }
   }
 
@@ -1326,12 +1329,13 @@ public abstract class JdbcConnectionResource implements Closeable {
   public int getWarningCount()
   {
     if (_warnings != null) {
-      Value warningResult = metaQuery("SHOW WARNINGS",getCatalog().toString());
+      JdbcResultResource warningResult;
+      warningResult = metaQuery("SHOW WARNINGS",getCatalog().toString());
       Value warningCount = null;
 
-      if (warningResult instanceof JdbcResultResource) {
+      if (warningResult != null) {
         warningCount =
-          JdbcResultResource.getNumRows(((JdbcResultResource) warningResult).getResultSet());
+          JdbcResultResource.getNumRows(warningResult.getResultSet());
       }
 
       if ((warningCount != null) && (warningCount != BooleanValue.FALSE))

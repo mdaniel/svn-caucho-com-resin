@@ -2283,10 +2283,10 @@ public final class Env {
   /**
    * Creates a stdClass object.
    */
-  public Value createObject()
+  public ObjectValue createObject()
   {
     try {
-      return _quercus.getStdClass().newInstance(this);
+      return (ObjectValue) _quercus.getStdClass().newInstance(this);
     }
     catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);

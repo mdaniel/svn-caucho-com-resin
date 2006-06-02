@@ -40,7 +40,7 @@ import java.util.logging.Logger;
 /**
  * Represents a JDBC Result value.
  */
-public class JdbcResultResource extends ResourceValue {
+public class JdbcResultResource {
   private static final Logger log = Log.open(JdbcResultResource.class);
 
   public static final int FETCH_ASSOC = 0x1;
@@ -218,52 +218,52 @@ public class JdbcResultResource extends ResourceValue {
                           String tableName,
                           String type)
   {
-    Value result = env.createObject();
+    ObjectValue result = env.createObject();
     LongValue one = new LongValue(1);
     LongValue zero = new LongValue(0);
 
     try {
       _rs.next();
-      result.put(new StringValueImpl("name"), new StringValueImpl(_rs.getString(1)));
-      result.put(new StringValueImpl("table"), new StringValueImpl(tableName));
-      result.put(new StringValueImpl("max_length"), new LongValue(maxLength));
+      result.putField(env, "name", new StringValueImpl(_rs.getString(1)));
+      result.putField(env, "table", new StringValueImpl(tableName));
+      result.putField(env, "max_length", new LongValue(maxLength));
 
       if (_rs.getString(4).indexOf("YES") == -1)
-        result.put(new StringValueImpl("not_null"), one);
+        result.putField(env, "not_null", one);
       else
-        result.put(new StringValueImpl("not_null"), zero);
+        result.putField(env, "not_null", zero);
 
       if (_rs.getString(5).indexOf("PRI") != -1)
-        result.put(new StringValueImpl("primary_key"), one);
+        result.putField(env, "primary_key", one);
       else
-        result.put(new StringValueImpl("primary_key"), zero);
+        result.putField(env, "primary_key", zero);
 
       if (_rs.getString(5).indexOf("MUL") != -1)
-        result.put(new StringValueImpl("multiple_key"), one);
+        result.putField(env, "multiple_key", one);
       else
-        result.put(new StringValueImpl("multiple_key"), zero);
+        result.putField(env, "multiple_key", zero);
 
       if ((_rs.getString(2).indexOf("int") != -1) || (_rs.getString(2).indexOf("real") != -1))
-        result.put(new StringValueImpl("numeric"), one);
+        result.putField(env, "numeric", one);
       else
-        result.put(new StringValueImpl("numeric"), zero);
+        result.putField(env, "numeric", zero);
 
       if (_rs.getString(2).indexOf("blob") != -1)
-        result.put(new StringValueImpl("blob"), one);
+        result.putField(env, "blob", one);
       else
-        result.put(new StringValueImpl("blob"), zero);
+        result.putField(env, "blob", zero);
 
-      result.put(new StringValueImpl("type"), new StringValueImpl(type));
+      result.putField(env, "type", new StringValueImpl(type));
 
       if (_rs.getString(2).indexOf("unsigned") != -1)
-        result.put(new StringValueImpl("unsigned"), one);
+        result.putField(env, "unsigned", one);
       else
-        result.put(new StringValueImpl("unsigned"), zero);
+        result.putField(env, "unsigned", zero);
 
       if (_rs.getString(2).indexOf("zerofill") != -1)
-        result.put(new StringValueImpl("zerofill"), one);
+        result.putField(env, "zerofill", one);
       else
-        result.put(new StringValueImpl("zerofill"), zero);
+        result.putField(env, "zerofill", zero);
 
       return result;
     } catch (SQLException e) {
@@ -300,16 +300,16 @@ public class JdbcResultResource extends ResourceValue {
         _metaData = _rs.getMetaData();
 
       _rs.next();
-      result.put(new StringValueImpl("name"), new StringValueImpl(name));
-      result.put(new StringValueImpl("orgname"), new StringValueImpl(originalName));
-      result.put(new StringValueImpl("table"), new StringValueImpl(table));
+      result.putField(env, "name", new StringValueImpl(name));
+      result.putField(env, "orgname", new StringValueImpl(originalName));
+      result.putField(env, "table", new StringValueImpl(table));
       //XXX: orgtable same as table
-      result.put(new StringValueImpl("orgtable"), new StringValueImpl(table));
+      result.putField(env, "orgtable", new StringValueImpl(table));
       if (_rs.getString(6) != null)
-        result.put(new StringValueImpl("def"), new StringValueImpl(_rs.getString(6)));
+        result.putField(env, "def", new StringValueImpl(_rs.getString(6)));
       else
-        result.put(new StringValueImpl("def"), new StringValueImpl(""));
-      result.put(new StringValueImpl("max_length"), new LongValue(maxLength));
+        result.putField(env, "def", new StringValueImpl(""));
+      result.putField(env, "max_length", new LongValue(maxLength));
 
       //generate flags
       long flags = 0;
@@ -363,7 +363,7 @@ public class JdbcResultResource extends ResourceValue {
           (type == Types.SMALLINT))
         flags += MysqliModule.NUM_FLAG;
 
-      result.put(new StringValueImpl("flags"), new LongValue(flags));
+      result.putField(env, "flags", new LongValue(flags));
       //generate PHP type
       int quercusType = 0;
       switch (type) {
@@ -413,8 +413,8 @@ public class JdbcResultResource extends ResourceValue {
         quercusType = MysqliModule.MYSQL_TYPE_NULL;
         break;
       }
-      result.put(new StringValueImpl("type"), new LongValue(quercusType));
-      result.put(new StringValueImpl("decimals"), new LongValue(scale));
+      result.putField(env, "type", new LongValue(quercusType));
+      result.putField(env, "decimals", new LongValue(scale));
 
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -596,18 +596,18 @@ public class JdbcResultResource extends ResourceValue {
 
     String sql = "SHOW FULL COLUMNS FROM " + fieldTable + " LIKE \'" + fieldName + "\'";
 
-    Value metaResult = _conn.metaQuery(sql, fieldCatalog.toString());
+    JdbcResultResource metaResult = _conn.metaQuery(sql, fieldCatalog.toString());
 
-    if (!(metaResult instanceof JdbcResultResource))
+    if (metaResult == null)
       return BooleanValue.FALSE;
 
-    return ((JdbcResultResource) metaResult).fetchFieldImproved(env,
-                                                             fieldLength.toInt(),
-                                                             fieldAlias.toString(),
-                                                             fieldName.toString(),
-                                                             fieldTable.toString(),
-                                                             fieldType.toInt(),
-                                                             fieldScale.toInt());
+    return metaResult.fetchFieldImproved(env,
+					 fieldLength.toInt(),
+					 fieldAlias.toString(),
+					 fieldName.toString(),
+					 fieldTable.toString(),
+					 fieldType.toInt(),
+					 fieldScale.toInt());
   }
 
   /**

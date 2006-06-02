@@ -62,7 +62,7 @@ public class Mysqli extends JdbcConnectionResource {
     realConnect(env, host, user, password, db, port, socket, flags, driver, url);
   }
 
-  public Mysqli(Env env)
+  protected Mysqli(Env env)
   {
     super(env);
   }

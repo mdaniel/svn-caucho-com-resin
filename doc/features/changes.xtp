@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - May 31, 2006'>
 <ul>
+<li>isapi plugin issue waiting for non-post (#1150, rep by Matt Pangaro)
 <li>(2006-05-31) HttpProxyServlet needs to clear attributes on reading response (#1143, rep by Anoop Achuthan)
 <li>Quercus: mysql_query regression with UPDATE (#1131, rep by koreth)
 <li>TransactionManagerImpl._transactionList was not properly synchronized (#1151, rep by Matt Pangaro)

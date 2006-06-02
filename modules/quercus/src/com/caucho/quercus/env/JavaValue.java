@@ -62,6 +62,11 @@ public class JavaValue extends ResourceValue {
     _object = object;
   }
 
+  public String getClassName()
+  {
+    return _classDef.getName();
+  }
+
   @Override
   protected void printRImpl(Env env,
                             WriteStream out,
