@@ -416,7 +416,7 @@ public class JdbcStatementResource extends ResourceValue {
    *
    * @return FALSE if _resultResource == null, otherwise _resultResource
    */
-  public Value getResultMetadata()
+  public JdbcResultResource getResultMetadata()
   {
     if (_resultResource != null) {
       _resultResource.setFieldOffset(0);
@@ -424,7 +424,7 @@ public class JdbcStatementResource extends ResourceValue {
     }
 
     if ((_stmt == null) || (_rs == null))
-      return BooleanValue.FALSE;
+      return null;
 
     _resultResource = new JdbcResultResource(_stmt, _rs, _conn);
     return _resultResource;

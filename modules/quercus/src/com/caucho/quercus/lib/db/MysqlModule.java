@@ -614,7 +614,7 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Returns a result pointer containing the databases available from the current mysql daemon.
    */
-  public Value mysql_list_dbs(Env env, @Optional Mysqli conn)
+  public JdbcResultResource mysql_list_dbs(Env env, @Optional Mysqli conn)
   {
     if (conn == null)
       conn = getConnection(env);
@@ -659,9 +659,9 @@ public class MysqlModule extends AbstractQuercusModule {
       return null; // BooleanValue.FALSE;
 
     Value value = conn.query(query, 1);
-
-    if (value instanceof MysqliResult) {
-      return (MysqliResult) value;
+    Object o = value.toJavaObject();
+    if (o instanceof MysqliResult) {
+      return (MysqliResult) o;
     }
 
     return null;

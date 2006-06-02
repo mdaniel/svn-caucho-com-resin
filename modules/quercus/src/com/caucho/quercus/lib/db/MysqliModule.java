@@ -730,11 +730,13 @@ public class MysqliModule extends AbstractQuercusModule {
   /**
    * Returns result information for metadata
    */
-  public static Value mysqli_stmt_result_metadata(Env env,
-              @NotNull MysqliStatement stmt)
+  @ReturnNullAsFalse
+  public static JdbcResultResource
+    mysqli_stmt_result_metadata(Env env,
+				@NotNull MysqliStatement stmt)
   {
     if (stmt == null)
-      return BooleanValue.FALSE;
+      return null;
 
     return stmt.result_metadata(env);
   }
@@ -1155,7 +1157,8 @@ public class MysqliModule extends AbstractQuercusModule {
     return mysqli_stmt_execute(env, stmt);
   }
 
-  public static Value mysqli_get_metadata(Env env,
+  @ReturnNullAsFalse
+  public static JdbcResultResource mysqli_get_metadata(Env env,
             @NotNull MysqliStatement stmt)
   {
     return mysqli_stmt_result_metadata(env, stmt);

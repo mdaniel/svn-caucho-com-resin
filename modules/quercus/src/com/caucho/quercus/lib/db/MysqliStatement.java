@@ -44,6 +44,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;
 
 import com.caucho.quercus.module.Reference;
+import com.caucho.quercus.module.ReturnNullAsFalse;
 
 /**
  * mysqli object oriented API facade
@@ -217,7 +218,8 @@ public class MysqliStatement extends JdbcStatementResource {
    * way to get at the metadata from a resultset generated
    * by a prepared statement.
    */
-  public Value result_metadata(Env env)
+  @ReturnNullAsFalse
+  public MysqliResult result_metadata(Env env)
   {
     try {
 
