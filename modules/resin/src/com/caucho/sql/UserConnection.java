@@ -179,8 +179,8 @@ public class UserConnection implements java.sql.Connection {
 
     try {
       stmt = conn.createStatement(resultSetType,
-          resultSetConcurrency,
-          resultSetHoldability);
+                                  resultSetConcurrency,
+                                  resultSetHoldability);
     } catch (SQLException e) {
       fatalEvent();
       throw e;
@@ -230,8 +230,8 @@ public class UserConnection implements java.sql.Connection {
    * @param sql the prepared sql.
    */
   public PreparedStatement prepareStatement(String sql,
-              int resultSetType,
-              int resultSetConcurrency)
+                                            int resultSetType,
+                                            int resultSetConcurrency)
     throws SQLException
   {
     PreparedStatement stmt;
@@ -276,9 +276,9 @@ public class UserConnection implements java.sql.Connection {
 
     try {
       stmt = getConnection().prepareStatement(sql,
-                resultSetType,
-                resultSetConcurrency,
-                resultSetHoldability);
+                                              resultSetType,
+                                              resultSetConcurrency,
+                                              resultSetHoldability);
     } catch (SQLException e) {
       fatalEvent();
       throw e;
@@ -451,9 +451,9 @@ public class UserConnection implements java.sql.Connection {
 
     try {
       stmt = getConnection().prepareCall(sql,
-           resultSetType,
-           resultSetConcurrency,
-           resultSetHoldability);
+                                         resultSetType,
+                                         resultSetConcurrency,
+                                         resultSetHoldability);
     } catch (SQLException e) {
       fatalEvent();
       throw e;
@@ -567,9 +567,9 @@ public class UserConnection implements java.sql.Connection {
       Connection conn = getConnection();
 
       if (conn != null)
-  return conn.getWarnings();
+        return conn.getWarnings();
       else
-  return null;
+        return null;
     } catch (SQLException e) {
       fatalEvent();
       throw e;
@@ -583,7 +583,7 @@ public class UserConnection implements java.sql.Connection {
       Connection conn = getConnection();
 
       if (conn != null)
-  conn.clearWarnings();
+        conn.clearWarnings();
     } catch (SQLException e) {
       fatalEvent();
       throw e;
@@ -631,7 +631,7 @@ public class UserConnection implements java.sql.Connection {
       Connection conn = getConnection();
 
       if (conn != null)
-  conn.commit();
+        conn.commit();
     } catch (SQLException e) {
       fatalEvent();
       throw e;
@@ -645,7 +645,7 @@ public class UserConnection implements java.sql.Connection {
       Connection conn = getConnection();
 
       if (conn != null)
-  conn.rollback();
+        conn.rollback();
     } catch (SQLException e) {
       fatalEvent();
       throw e;
@@ -680,7 +680,7 @@ public class UserConnection implements java.sql.Connection {
       _mConn = null;
 
       if (mConn == null)
-  return;
+        return;
     }
 
     try {
@@ -799,15 +799,15 @@ public class UserConnection implements java.sql.Connection {
 
     for (int i = 0; statements != null && i < statements.size(); i++) {
       try {
-  stmt = statements.get(i);
+        stmt = statements.get(i);
 
-  if (stmt != null)
-    stmt.close();
+        if (stmt != null)
+          stmt.close();
       } catch (Throwable e) {
         log.log(Level.FINE, e.toString(), e);
 
-  // Can't set fatalEvent because Sybase throws an exception
-  // if statements are closed twice
+        // Can't set fatalEvent because Sybase throws an exception
+        // if statements are closed twice
         // fatalEvent();
       }
     }
