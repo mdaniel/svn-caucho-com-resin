@@ -1169,9 +1169,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       Object userconn = conn.getConnection();
 
-      Object spyconn = ((com.caucho.sql.UserConnection)userconn).getConnection();
-
-      Object pgconn = ((com.caucho.sql.spy.SpyConnection)spyconn).getConnection();
+      Object pgconn = ((com.caucho.sql.UserConnection)userconn).getConnection();
 
       // getNotifications()
       Object notifications[] = (Object[]) method.invoke(pgconn, new Object[] {});
@@ -1451,9 +1449,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       Object userconn = conn.getConnection();
 
-      Object spyconn = ((com.caucho.sql.UserConnection)userconn).getConnection();
-
-      Object pgconn = ((com.caucho.sql.spy.SpyConnection)spyconn).getConnection();
+      Object pgconn = ((com.caucho.sql.UserConnection)userconn).getConnection();
 
       // Large Objects may not be used in auto-commit mode.
       ((java.sql.Connection)pgconn).setAutoCommit(false);
@@ -1503,9 +1499,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       Object userconn = conn.getConnection();
 
-      Object spyconn = ((com.caucho.sql.UserConnection)userconn).getConnection();
-
-      Object pgconn = ((com.caucho.sql.spy.SpyConnection)spyconn).getConnection();
+      Object pgconn = ((com.caucho.sql.UserConnection)userconn).getConnection();
 
       lobManager = method.invoke(pgconn, new Object[] {});
       // lobManager = ((org.postgresql.PGConnection)conn).getLargeObjectAPI();
@@ -1610,9 +1604,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       Object userconn = conn.getConnection();
 
-      Object spyconn = ((com.caucho.sql.UserConnection)userconn).getConnection();
-
-      Object pgconn = ((com.caucho.sql.spy.SpyConnection)spyconn).getConnection();
+      Object pgconn = ((com.caucho.sql.UserConnection)userconn).getConnection();
 
       lobManager = method.invoke(pgconn, new Object[] {});
 
@@ -1779,9 +1771,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       Object userconn = conn.getConnection();
 
-      Object spyconn = ((com.caucho.sql.UserConnection)userconn).getConnection();
-
-      Object pgconn = ((com.caucho.sql.spy.SpyConnection)spyconn).getConnection();
+      Object pgconn = ((com.caucho.sql.UserConnection)userconn).getConnection();
 
       lobManager = method.invoke(pgconn, new Object[] {});
 
