@@ -66,22 +66,22 @@ public class Postgres extends JdbcConnectionResource {
   {
     super(env);
 
-    real_connect(env, host, user, password, db, port, "", 0, driver, url);
+    realConnect(env, host, user, password, db, port, "", 0, driver, url);
   }
 
   /**
    * Connects to the underlying database.
    */
-  public boolean real_connect(Env env,
-                              @Optional("localhost") String host,
-                              @Optional String userName,
-                              @Optional String password,
-                              @Optional String dbname,
-                              @Optional("5432") int port,
-                              @Optional String socket,
-                              @Optional int flags,
-                              @Optional String driver,
-                              @Optional String url)
+  public boolean realConnect(Env env,
+                             @Optional("localhost") String host,
+                             @Optional String userName,
+                             @Optional String password,
+                             @Optional String dbname,
+                             @Optional("5432") int port,
+                             @Optional String socket,
+                             @Optional int flags,
+                             @Optional String driver,
+                             @Optional String url)
   {
     if (isConnected()) {
       env.warning(L.l("Connection is already opened to '{0}'", this));
@@ -98,7 +98,7 @@ public class Postgres extends JdbcConnectionResource {
       }
 
       if (url == null || url.equals("")) {
-        url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
+        url = "jdbc:postgresql://" + host + ":" + port + "/" + dbname;
       }
 
       Connection jConn = env.getConnection(driver, url, userName, password);
@@ -163,12 +163,12 @@ public class Postgres extends JdbcConnectionResource {
 
   public PostgresStatement getStatement(String name)
   {
-    return (PostgresStatement) _stmtTable.get(name);
+    return _stmtTable.get(name);
   }
 
   public PostgresStatement removeStatement(String name)
   {
-    return (PostgresStatement) _stmtTable.remove(name);
+    return _stmtTable.remove(name);
   }
 
   /**

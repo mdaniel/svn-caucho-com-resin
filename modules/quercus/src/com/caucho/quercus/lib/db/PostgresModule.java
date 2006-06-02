@@ -50,11 +50,13 @@ import com.caucho.quercus.UnimplementedException;
 
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.ResourceValue;
+import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 
@@ -168,7 +170,7 @@ public class PostgresModule extends AbstractQuercusModule {
    * Gets the client encoding
    */
   @ReturnNullAsFalse
-  public Object pg_client_encoding(Env env,
+  public String pg_client_encoding(Env env,
                                    @Optional Postgres conn)
   {
     try {
@@ -214,9 +216,9 @@ public class PostgresModule extends AbstractQuercusModule {
    * Open a PostgreSQL connection
    */
   @ReturnNullAsFalse
-  public Object pg_connect(Env env,
-                           String connectionString,
-                           @Optional int connectionType)
+  public Postgres pg_connect(Env env,
+                             String connectionString,
+                             @Optional int connectionType)
   {
     try {
       String host = "localhost";
@@ -339,11 +341,11 @@ public class PostgresModule extends AbstractQuercusModule {
    * Convert associative array values into suitable for SQL statement
    */
   @ReturnNullAsFalse
-  public Object pg_convert(Env env,
-                           @NotNull Postgres conn,
-                           String tableName,
-                           ArrayValue assocArray,
-                           @Optional("-1") int options)
+  public ArrayValue pg_convert(Env env,
+                               @NotNull Postgres conn,
+                               String tableName,
+                               ArrayValue assocArray,
+                               @Optional("-1") int options)
   {
     try {
 
@@ -353,13 +355,11 @@ public class PostgresModule extends AbstractQuercusModule {
 
       ArrayValueImpl newArray = new ArrayValueImpl();
 
-      ArrayValueImpl assocArrayImpl = (ArrayValueImpl) assocArray;
-
-      for (Map.Entry<Value,Value> entry : assocArrayImpl.entrySet()) {
+      for (Map.Entry<Value,Value> entry : assocArray.entrySet()) {
         Value k = entry.getKey();
         Value v = entry.getValue();
 
-        newArray.put(k, StringValue.create("'"+v+"'"));
+        newArray.put(k, new StringBuilderValue().append("'").append(v).append("'"));
       }
 
       return newArray;
@@ -376,7 +376,7 @@ public class PostgresModule extends AbstractQuercusModule {
   public boolean pg_copy_from(Env env,
                               @NotNull Postgres conn,
                               String tableName,
-                              Value rows,
+                              ArrayValue rows,
                               @Optional("") String delimiter,
                               @Optional("") String nullAs)
   {
@@ -457,7 +457,7 @@ public class PostgresModule extends AbstractQuercusModule {
         nullAs = "\n";
       }
 
-      PostgresResult result = (PostgresResult) pg_query(env, conn, "SELECT * FROM " + tableName);
+      PostgresResult result = pg_query(env, conn, "SELECT * FROM " + tableName);
 
       ArrayValueImpl newArray = new ArrayValueImpl();
 
@@ -539,13 +539,11 @@ public class PostgresModule extends AbstractQuercusModule {
         throw new UnimplementedException("pg_delete with options");
       }
 
-      ArrayValueImpl assocArrayImpl = (ArrayValueImpl) assocArray;
-
       StringBuilder condition = new StringBuilder();
 
       boolean isFirst = true;
 
-      for (Map.Entry<Value,Value> entry : assocArrayImpl.entrySet()) {
+      for (Map.Entry<Value,Value> entry : assocArray.entrySet()) {
         Value k = entry.getKey();
         Value v = entry.getValue();
         if (isFirst) {
@@ -638,10 +636,10 @@ public class PostgresModule extends AbstractQuercusModule {
    * and waits for the result
    */
   @ReturnNullAsFalse
-  public Object pg_execute(Env env,
-                           @NotNull Postgres conn,
-                           String stmtName,
-                           ArrayValue params)
+  public ResourceValue pg_execute(Env env,
+                                  @NotNull Postgres conn,
+                                  String stmtName,
+                                  ArrayValue params)
   {
     try {
 
@@ -681,9 +679,9 @@ public class PostgresModule extends AbstractQuercusModule {
    * Fetches all rows in a particular result column as an array
    */
   @ReturnNullAsFalse
-  public Object pg_fetch_all_columns(Env env,
-                                     @NotNull PostgresResult result,
-                                     @Optional("0") int column)
+  public ArrayValue pg_fetch_all_columns(Env env,
+                                         @NotNull PostgresResult result,
+                                         @Optional("0") int column)
   {
     try {
       ArrayValueImpl newArray = new ArrayValueImpl();
@@ -711,8 +709,8 @@ public class PostgresModule extends AbstractQuercusModule {
    * Fetches all rows from a result as an array
    */
   @ReturnNullAsFalse
-  public Object pg_fetch_all(Env env,
-                             @NotNull PostgresResult result)
+  public ArrayValue pg_fetch_all(Env env,
+                                 @NotNull PostgresResult result)
   {
     try {
 
@@ -740,18 +738,29 @@ public class PostgresModule extends AbstractQuercusModule {
    * Fetch a row as an array
    */
   @ReturnNullAsFalse
-  public Object pg_fetch_array(Env env,
-                               @NotNull PostgresResult result,
-                               @Optional("-1") int row,
-                               @Optional("PGSQL_BOTH") int resultType)
+  public ArrayValue pg_fetch_array(Env env,
+                                   @NotNull PostgresResult result,
+                                   @Optional("-1") Value row,
+                                   @Optional("PGSQL_BOTH") int resultType)
   {
     try {
+
+      // NOTE: row is of type Value because row is optional and there is
+      // only one way to specify that 'row' will not be used:
+      //
+      // pg_fetch_array(result, NULL, resultType)
+      //
+      // The resultType will be used above though.
+      //
+      // For such a case, the marshalling code passes row in as NullValue.NULL
+      // If we used 'int row' there would be no way to distinguish row 'zero'
+      // from row 'null'.
 
       if (result == null)
         return  null;
 
-      if (row >= 0) {
-        result.data_seek(env, row);
+      if (row.isLongConvertible() && row.toInt() >= 0) {
+        result.data_seek(env, row.toInt());
       }
 
       Value value = result.fetchArray(resultType);
@@ -771,9 +780,9 @@ public class PostgresModule extends AbstractQuercusModule {
    * Fetch a row as an associative array
    */
   @ReturnNullAsFalse
-  public Object pg_fetch_assoc(Env env,
-                               @NotNull PostgresResult result,
-                               @Optional("-1") Value row)
+  public ArrayValue pg_fetch_assoc(Env env,
+                                   @NotNull PostgresResult result,
+                                   @Optional("-1") Value row)
   {
     try {
 
@@ -852,7 +861,7 @@ public class PostgresModule extends AbstractQuercusModule {
         fieldNumber = pg_field_num(env, result, fieldNameOrNumber.toString());
       }
 
-      return ((ArrayValueImpl)fetchRow).get(LongValue.create(fieldNumber)).toString();
+      return fetchRow.get(LongValue.create(fieldNumber)).toString();
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -864,9 +873,9 @@ public class PostgresModule extends AbstractQuercusModule {
    * Get a row as an enumerated array
    */
   @ReturnNullAsFalse
-  public Object pg_fetch_row(Env env,
-                             @NotNull PostgresResult result,
-                             @Optional("-1") Value row)
+  public ArrayValue pg_fetch_row(Env env,
+                                 @NotNull PostgresResult result,
+                                 @Optional("-1") Value row)
   {
     try {
 
@@ -1054,7 +1063,7 @@ public class PostgresModule extends AbstractQuercusModule {
    * @return By default the tables name that field belongs to is returned but if oid_only is set to TRUE, then the oid will instead be returned.
    */
   @ReturnNullAsFalse
-  public Object pg_field_table(Env env,
+  public String pg_field_table(Env env,
                                @NotNull PostgresResult result,
                                int fieldNumber,
                                @Optional("false") boolean oidOnly)
@@ -1083,7 +1092,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       String metaQuery = ("SELECT oid FROM pg_type WHERE typname='"+columnTypeName+"'");
 
-      result = (PostgresResult) pg_query(env, (Postgres) result.getConnection(), metaQuery);
+      result = pg_query(env, (Postgres) result.getConnection(), metaQuery);
 
       return new Integer(pg_fetch_result(env,
                                          result,
@@ -1142,9 +1151,9 @@ public class PostgresModule extends AbstractQuercusModule {
    * Gets SQL NOTIFY message
    */
   @ReturnNullAsFalse
-  public Object pg_get_notify(Env env,
-                              @NotNull Postgres conn,
-                              @Optional("-1") int resultType)
+  public ArrayValue pg_get_notify(Env env,
+                                  @NotNull Postgres conn,
+                                  @Optional("-1") int resultType)
   {
     try {
 
@@ -1216,7 +1225,7 @@ public class PostgresModule extends AbstractQuercusModule {
       pg_query(env, conn, "LISTEN "+randomLabel);
       pg_query(env, conn, "NOTIFY "+randomLabel);
 
-      ArrayValueImpl arrayValue = (ArrayValueImpl) pg_get_notify(env, conn, -1);
+      ArrayValue arrayValue = pg_get_notify(env, conn, -1);
 
       LongValue pid = (LongValue) arrayValue.get(StringValue.create(randomLabel));
 
@@ -1232,8 +1241,8 @@ public class PostgresModule extends AbstractQuercusModule {
    * Get asynchronous query result
    */
   @ReturnNullAsFalse
-  public Object pg_get_result(Env env,
-                              @Optional Postgres conn)
+  public ResourceValue pg_get_result(Env env,
+                                     @Optional Postgres conn)
   {
     try {
 
@@ -1287,14 +1296,12 @@ public class PostgresModule extends AbstractQuercusModule {
         throw new UnimplementedException("pg_convert with options");
       }
 
-      ArrayValueImpl newArray = (ArrayValueImpl) assocArray;
-
       StringBuilder names = new StringBuilder();
       StringBuilder values = new StringBuilder();
 
       boolean isFirst = true;
 
-      for (Map.Entry<Value,Value> entry : newArray.entrySet()) {
+      for (Map.Entry<Value,Value> entry : assocArray.entrySet()) {
         Value k = entry.getKey();
         Value v = entry.getValue();
         if (isFirst) {
@@ -1330,7 +1337,7 @@ public class PostgresModule extends AbstractQuercusModule {
    * Get the last error message string of a connection
    */
   @ReturnNullAsFalse
-  public Object pg_last_error(Env env,
+  public String pg_last_error(Env env,
                               @Optional Postgres conn)
   {
     try {
@@ -1830,21 +1837,21 @@ public class PostgresModule extends AbstractQuercusModule {
    * Get meta data for table
    */
   @ReturnNullAsFalse
-  public Object pg_meta_data(Env env,
-                             @NotNull Postgres conn,
-                             String tableName)
+  public ArrayValue pg_meta_data(Env env,
+                                 @NotNull Postgres conn,
+                                 String tableName)
   {
     try {
 
       String metaQuery = "SELECT a.attnum,t.typname,a.attlen,t.typnotnull,t.typdefault,a.attndims FROM pg_class c, pg_attribute a, pg_type t WHERE c.relname='"+tableName+"' AND a.attnum > 0 AND a.attrelid = c.oid AND a.atttypid = t.oid ORDER BY a.attnum";
 
-      PostgresResult result = (PostgresResult) pg_query(env, conn, metaQuery);
+      PostgresResult result = pg_query(env, conn, metaQuery);
 
       return pg_fetch_all(env, result);
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return BooleanValue.FALSE;
+      return null;
     }
   }
 
@@ -1899,7 +1906,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
 
-      PostgresResult result = (PostgresResult) pg_query(env, conn, "SHOW "+paramName);
+      PostgresResult result = pg_query(env, conn, "SHOW "+paramName);
 
       return pg_fetch_result(env, result, LongValue.create(0), LongValue.create(0));
 
@@ -1913,9 +1920,9 @@ public class PostgresModule extends AbstractQuercusModule {
    * Open a persistent PostgreSQL connection
    */
   @ReturnNullAsFalse
-  public Object pg_pconnect(Env env,
-                            String connectionString,
-                            @Optional int connectType)
+  public Postgres pg_pconnect(Env env,
+                              String connectionString,
+                              @Optional int connectType)
   {
     return pg_connect(env, connectionString, connectType);
   }
@@ -1964,10 +1971,10 @@ public class PostgresModule extends AbstractQuercusModule {
    * and waits for completion
    */
   @ReturnNullAsFalse
-  public Object pg_prepare(Env env,
-                           @NotNull Postgres conn,
-                           String stmtName,
-                           String query)
+  public PostgresStatement pg_prepare(Env env,
+                                      @NotNull Postgres conn,
+                                      String stmtName,
+                                      String query)
   {
     try {
 
@@ -2022,10 +2029,10 @@ public class PostgresModule extends AbstractQuercusModule {
    * with the ability to pass parameters separately from the SQL command text
    */
   @ReturnNullAsFalse
-  public Object pg_query_params(Env env,
-                                @NotNull Postgres conn,
-                                String query,
-                                ArrayValue params)
+  public ResourceValue pg_query_params(Env env,
+                                       @NotNull Postgres conn,
+                                       String query,
+                                       ArrayValue params)
   {
     try {
 
@@ -2045,9 +2052,9 @@ public class PostgresModule extends AbstractQuercusModule {
    * Execute a query
    */
   @ReturnNullAsFalse
-  public Object pg_query(Env env,
-                         @NotNull Postgres conn,
-                         String query)
+  public PostgresResult pg_query(Env env,
+                                 @NotNull Postgres conn,
+                                 String query)
   {
     try {
 
@@ -2085,10 +2092,18 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Get error message associated with result
    */
+  @ReturnNullAsFalse
   public String pg_result_error(Env env,
                                 @NotNull PostgresResult result)
   {
-    throw new UnimplementedException("pg_result_error");
+    try {
+
+      return result.getConnection().getErrorMessage();
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return null;
+    }
   }
 
   /**
@@ -2099,6 +2114,9 @@ public class PostgresModule extends AbstractQuercusModule {
                                 int offset)
   {
     try {
+
+      if (result == null)
+        return false;
 
       return result.data_seek(env, offset);
 
@@ -2122,21 +2140,22 @@ public class PostgresModule extends AbstractQuercusModule {
    * Select records
    */
   @ReturnNullAsFalse
-  public Object pg_select(Env env,
-                          @NotNull Postgres conn,
-                          String tableName,
-                          ArrayValue assocArray,
-                          @Optional("-1") int options)
+  public ArrayValue pg_select(Env env,
+                              @NotNull Postgres conn,
+                              String tableName,
+                              ArrayValue assocArray,
+                              @Optional("-1") int options)
   {
     try {
 
-      ArrayValueImpl conditionArray = (ArrayValueImpl) assocArray;
+      if (conn == null)
+        return null;
 
-      StringBuilder whereClause = new StringBuilder();
+      StringBuilderValue whereClause = new StringBuilderValue();
 
       boolean isFirst = true;
 
-      for (Map.Entry<Value,Value> entry : conditionArray.entrySet()) {
+      for (Map.Entry<Value,Value> entry : assocArray.entrySet()) {
         Value k = entry.getKey();
         Value v = entry.getValue();
         if (isFirst) {
@@ -2144,21 +2163,15 @@ public class PostgresModule extends AbstractQuercusModule {
         } else {
           whereClause.append(" AND ");
         }
-        whereClause.append(k.toString());
-        whereClause.append("='");
+        whereClause.append(k.toString()).append("='").append(v.toString()).append("'");
         // String pi = conn.real_escape_string(p).toString();
         // pi = pi.replaceAll("\\\\", "\\\\\\\\");
-        whereClause.append(v.toString());
-        whereClause.append("'");
       }
 
-      StringBuilder query = new StringBuilder();
-      query.append("SELECT * FROM ");
-      query.append(tableName);
-      query.append(" WHERE ");
-      query.append(whereClause);
+      StringBuilderValue query = new StringBuilderValue();
+      query.append("SELECT * FROM ").append(tableName).append(" WHERE ").append(whereClause);
 
-      PostgresResult result = (PostgresResult) pg_query(env, conn, query.toString());
+      PostgresResult result = pg_query(env, conn, query.toString());
 
       return pg_fetch_all(env, result);
 
@@ -2209,7 +2222,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       // Note: for now, this is the same as pg_prepare.
 
-      PostgresStatement stmt = (PostgresStatement) pg_prepare(env, conn, stmtName, query);
+      PostgresStatement stmt = pg_prepare(env, conn, stmtName, query);
 
       conn.setAsynchronousResult(stmt);
 
@@ -2263,13 +2276,13 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
 
-      PostgresResult result = (PostgresResult) pg_query(env, conn, query);
+      PostgresResult result = pg_query(env, conn, query);
 
       conn.setAsynchronousResult(result);
 
-      if (result != null) {
-        return true;
-      }
+      // This is to be compliant with real expected results.
+      // Even a SELECT * FROM doesnotexist returns true from pg_send_query.
+      return true;
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -2307,9 +2320,9 @@ public class PostgresModule extends AbstractQuercusModule {
 
       String verbosity;
 
-      PostgresResult result = (PostgresResult) pg_query(env, conn, "SHOW log_error_verbosity");
+      PostgresResult result = pg_query(env, conn, "SHOW log_error_verbosity");
 
-      ArrayValueImpl arr = (ArrayValueImpl) pg_fetch_row(env, result, LongValue.create(0));
+      ArrayValue arr = pg_fetch_row(env, result, LongValue.create(0));
 
       String prevVerbosity = arr.get(LongValue.create(0)).toString();
 
@@ -2348,7 +2361,9 @@ public class PostgresModule extends AbstractQuercusModule {
                           @Optional String mode,
                           @Optional Postgres conn)
   {
-    throw new UnimplementedException("pg_trace");
+    env.stub("pg_trace");
+
+    return false;
   }
 
   /**
@@ -2373,8 +2388,8 @@ public class PostgresModule extends AbstractQuercusModule {
    * Unescape binary for bytea type
    */
   @ReturnNullAsFalse
-  public String pg_unescape_bytea(Env env,
-                                  String data)
+  public BinaryBuilderValue pg_unescape_bytea(Env env,
+                                              String data)
   {
     try {
 
@@ -2384,7 +2399,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       Method method = cl.getDeclaredMethod("toBytes", new Class[] {byte[].class});
 
-      return new String((byte[]) method.invoke(cl, new Object[] {dataBytes}));
+      return new BinaryBuilderValue((byte[]) method.invoke(cl, new Object[] {dataBytes}));
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -2395,12 +2410,14 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Disable tracing of a PostgreSQL connection
    */
-  public Value pg_untrace(Env env,
-                          @Optional Postgres conn)
+  public boolean pg_untrace(Env env,
+                            @Optional Postgres conn)
   {
     // Always returns TRUE
 
-    throw new UnimplementedException("pg_untrace");
+    env.stub("pg_untrace");
+
+    return false;
   }
 
   /**
@@ -2425,13 +2442,11 @@ public class PostgresModule extends AbstractQuercusModule {
         throw new UnimplementedException("pg_update with options");
       }
 
-      ArrayValueImpl dataArray = (ArrayValueImpl) data;
-
       StringBuilder values = new StringBuilder();
 
       boolean isFirst = true;
 
-      for (Map.Entry<Value,Value> entry : dataArray.entrySet()) {
+      for (Map.Entry<Value,Value> entry : data.entrySet()) {
         Value k = entry.getKey();
         Value v = entry.getValue();
         if (isFirst) {
@@ -2445,13 +2460,11 @@ public class PostgresModule extends AbstractQuercusModule {
         values.append("'");
       }
 
-      ArrayValueImpl conditionArray = (ArrayValueImpl) condition;
-
       StringBuilder whereClause = new StringBuilder();
 
       isFirst = true;
 
-      for (Map.Entry<Value,Value> entry : conditionArray.entrySet()) {
+      for (Map.Entry<Value,Value> entry : condition.entrySet()) {
         Value k = entry.getKey();
         Value v = entry.getValue();
         if (isFirst) {
@@ -2487,7 +2500,7 @@ public class PostgresModule extends AbstractQuercusModule {
    * Returns an array with client, protocol and server version (when available)
    */
   @ReturnNullAsFalse
-  public Object pg_version(Env env,
+  public String pg_version(Env env,
                            @Optional Postgres conn)
   {
     try {

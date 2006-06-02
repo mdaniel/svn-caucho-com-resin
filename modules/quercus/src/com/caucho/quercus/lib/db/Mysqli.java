@@ -59,7 +59,7 @@ public class Mysqli extends JdbcConnectionResource {
   {
     super(env);
 
-    real_connect(env, host, user, password, db, port, socket, flags, driver, url);
+    realConnect(env, host, user, password, db, port, socket, flags, driver, url);
   }
 
   public Mysqli(Env env)
@@ -70,16 +70,16 @@ public class Mysqli extends JdbcConnectionResource {
   /**
    * Connects to the underlying database.
    */
-  public boolean real_connect(Env env,
-                              @Optional("localhost") String host,
-                              @Optional String userName,
-                              @Optional String password,
-                              @Optional String dbname,
-                              @Optional("3306") int port,
-                              @Optional String socket,
-                              @Optional int flags,
-                              @Optional String driver,
-                              @Optional String url)
+  public boolean realConnect(Env env,
+                             @Optional("localhost") String host,
+                             @Optional String userName,
+                             @Optional String password,
+                             @Optional String dbname,
+                             @Optional("3306") int port,
+                             @Optional String socket,
+                             @Optional int flags,
+                             @Optional String driver,
+                             @Optional String url)
   {
     if (isConnected()) {
       env.warning(L.l("Connection is already opened to '{0}'", this));

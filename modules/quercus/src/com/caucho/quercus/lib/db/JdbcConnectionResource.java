@@ -157,14 +157,14 @@ public abstract class JdbcConnectionResource implements Closeable {
    * @param port server port
    * @param dbname database name
    */
-  public void setConnection(String host,
-                            String userName,
-                            String password,
-                            String dbname,
-                            int port,
-                            Connection conn,
-                            String driver,
-                            String url)
+  protected void setConnection(String host,
+                               String userName,
+                               String password,
+                               String dbname,
+                               int port,
+                               Connection conn,
+                               String driver,
+                               String url)
   {
     _host = host;
     _userName = userName;
@@ -188,16 +188,16 @@ public abstract class JdbcConnectionResource implements Closeable {
   /**
    * Connects to the underlying database.
    */
-  public abstract boolean real_connect(Env env,
-                                       @Optional("localhost") String host,
-                                       @Optional String userName,
-                                       @Optional String password,
-                                       @Optional String dbname,
-                                       @Optional int port,
-                                       @Optional String socket,
-                                       @Optional int flags,
-                                       @Optional String driver,
-                                       @Optional String url);
+  protected abstract boolean realConnect(Env env,
+                                         @Optional("localhost") String host,
+                                         @Optional String userName,
+                                         @Optional String password,
+                                         @Optional String dbname,
+                                         @Optional int port,
+                                         @Optional String socket,
+                                         @Optional int flags,
+                                         @Optional String driver,
+                                         @Optional String url);
 
   /**
    * Returns the affected rows from the last query.
@@ -432,7 +432,7 @@ public abstract class JdbcConnectionResource implements Closeable {
   {
     close(_env);
 
-    return real_connect(_env, _host, user, password, db, _port, "", 0, _driver, _url);
+    return realConnect(_env, _host, user, password, db, _port, "", 0, _driver, _url);
   }
 
   /**
@@ -1033,8 +1033,13 @@ public abstract class JdbcConnectionResource implements Closeable {
     } catch (SQLException e) {
       _errorMessage = e.getMessage();
       _errorCode = e.getErrorCode();
-      log.log(Level.WARNING, e.toString(), e);
-      return BooleanValue.FALSE;
+      // php/4365
+      if (keepStatementOpen()) {
+        keepResourceValues(stmt);
+      } else {
+        log.log(Level.WARNING, e.toString(), e);
+        return BooleanValue.FALSE;
+      }
     }
 
     if (_resultValues.size() > 0) {

@@ -504,7 +504,7 @@ public class MysqliModule extends AbstractQuercusModule {
    */
   @ReturnNullAsFalse
   public static ArrayValue mysqli_fetch_array(@NotNull MysqliResult result,
-					      @Optional("MYSQLI_BOTH") int type)
+                @Optional("MYSQLI_BOTH") int type)
   {
     if (result == null)
       return null;
@@ -856,7 +856,7 @@ public class MysqliModule extends AbstractQuercusModule {
               @Optional int flags)
   {
     if (mysqli != null)
-      return mysqli.real_connect(env, host, userName, password,
+      return mysqli.realConnect(env, host, userName, password,
          dbname, port, socket, flags,
          null, null);
     else
@@ -1045,7 +1045,7 @@ public class MysqliModule extends AbstractQuercusModule {
       return false;
 
     stmt.close();
-    
+
     return true;
   }
 
@@ -1186,7 +1186,7 @@ public class MysqliModule extends AbstractQuercusModule {
       return false;
 
     stmt.close();
-    
+
     return true;
   }
 

@@ -258,7 +258,7 @@ public class OracleModule extends AbstractQuercusModule {
       throw new UnimplementedException("oci_connect with session mode");
     }
 
-    return internal_oci_connect(env, true, username, password, db, charset, sessionMode);
+    return connectInternal(env, true, username, password, db, charset, sessionMode);
   }
 
   /**
@@ -290,20 +290,12 @@ public class OracleModule extends AbstractQuercusModule {
     if (resource == null) {
       conn = getConnection(env).validateConnection();
     } else {
-      try {
-        conn = ((Oracle)(((JavaValue)resource).toJavaObject())).validateConnection();
-      } catch(Exception ex) {
-        log.log(Level.FINE, ex.toString(), ex);
-      }
+      Object object = resource.toJavaObject();
 
-      if (conn == null) {
-        try {
-          OracleStatement stmt = (OracleStatement)(((JavaValue)resource).toJavaObject());
-
-          conn = stmt.validateConnection();
-        } catch(Exception ex) {
-          log.log(Level.FINE, ex.toString(), ex);
-        }
+      if (object instanceof Oracle) {
+        conn = ((Oracle) object).validateConnection();
+      } else {
+        conn = ((OracleStatement) object).validateConnection();
       }
     }
 
@@ -752,7 +744,7 @@ public class OracleModule extends AbstractQuercusModule {
       throw new UnimplementedException("oci_new_connect with session mode");
     }
 
-    return internal_oci_connect(env, false, username, password, db, charset, sessionMode);
+    return connectInternal(env, false, username, password, db, charset, sessionMode);
   }
 
   /**
@@ -873,7 +865,7 @@ public class OracleModule extends AbstractQuercusModule {
       throw new UnimplementedException("oci_pconnect with session mode");
     }
 
-    return internal_oci_connect(env, true, username, password, db, charset, sessionMode);
+    return connectInternal(env, true, username, password, db, charset, sessionMode);
   }
 
   /**
@@ -1423,11 +1415,11 @@ public class OracleModule extends AbstractQuercusModule {
   {
     Oracle conn = null;
 
-    Object connectionInfo[] = (Object[])env.getSpecialValue("caucho.oracle");
+    ConnectionInfo connectionInfo = (ConnectionInfo)env.getSpecialValue("caucho.oracle");
 
     if (connectionInfo != null) {
       // Reuse the cached connection
-      conn = (Oracle)connectionInfo[1];
+      conn = connectionInfo.getConnection();
       return conn;
     }
 
@@ -1441,18 +1433,18 @@ public class OracleModule extends AbstractQuercusModule {
     return conn;
   }
 
-  private Value internal_oci_connect(Env env,
-                                     boolean reuseConnection,
-                                     String username,
-                                     String password,
-                                     String db,
-                                     String charset,
-                                     int sessionMode)
+  private Value connectInternal(Env env,
+                                boolean reuseConnection,
+                                String username,
+                                String password,
+                                String db,
+                                String charset,
+                                int sessionMode)
   {
     String host = "localhost";
     int port = 1521;
 
-    String driver = "org.postgresql.Driver";
+    String driver = "oracle.jdbc.driver.OracleDriver";
 
     String url;
 
@@ -1466,17 +1458,15 @@ public class OracleModule extends AbstractQuercusModule {
 
     Oracle conn = null;
 
-    Object connectionInfo[] = (Object[])env.getSpecialValue("caucho.oracle");
+    ConnectionInfo connectionInfo = (ConnectionInfo)env.getSpecialValue("caucho.oracle");
 
-    if (reuseConnection && (connectionInfo != null) && url.equals(connectionInfo[0])) {
+    if (reuseConnection && (connectionInfo != null) && url.equals(connectionInfo.getUrl())) {
       // Reuse the cached connection
-      conn = (Oracle) connectionInfo[1];
+      conn = connectionInfo.getConnection();
     } else {
       conn = new Oracle(env, host, username, password, db, port, driver, url);
 
-      connectionInfo = new Object[2];
-      connectionInfo[0] = url;
-      connectionInfo[1] = conn;
+      connectionInfo = new ConnectionInfo(url, conn);
 
       env.setSpecialValue("caucho.oracle", connectionInfo);
     }
@@ -1484,5 +1474,26 @@ public class OracleModule extends AbstractQuercusModule {
     Value value = env.wrapJava(conn);
 
     return value;
+  }
+
+  private class ConnectionInfo {
+    private String _url;
+    private Oracle _conn;
+
+    public ConnectionInfo(String url, Oracle conn)
+    {
+      _url = url;
+      _conn = conn;
+    }
+
+    public String getUrl()
+    {
+      return _url;
+    }
+
+    public Oracle getConnection()
+    {
+      return _conn;
+    }
   }
 }

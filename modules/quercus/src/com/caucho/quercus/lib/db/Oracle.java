@@ -57,22 +57,22 @@ public class Oracle extends JdbcConnectionResource {
   {
     super(env);
 
-    real_connect(env, host, user, password, db, port, "", 0, driver, url);
+    realConnect(env, host, user, password, db, port, "", 0, driver, url);
   }
 
   /**
    * Connects to the underlying database.
    */
-  public boolean real_connect(Env env,
-                              @Optional("localhost") String host,
-                              @Optional String userName,
-                              @Optional String password,
-                              @Optional String dbname,
-                              @Optional("5432") int port,
-                              @Optional String socket,
-                              @Optional int flags,
-                              @Optional String driver,
-                              @Optional String url)
+  public boolean realConnect(Env env,
+                             @Optional("localhost") String host,
+                             @Optional String userName,
+                             @Optional String password,
+                             @Optional String dbname,
+                             @Optional("5432") int port,
+                             @Optional String socket,
+                             @Optional int flags,
+                             @Optional String driver,
+                             @Optional String url)
   {
     if (isConnected()) {
       env.warning(L.l("Connection is already opened to '{0}'", this));
@@ -85,11 +85,17 @@ public class Oracle extends JdbcConnectionResource {
         host = "localhost";
 
       if (driver == null || driver.equals("")) {
-        driver = "org.postgresql.Driver";
+        driver = "oracle.jdbc.driver.OracleDriver";
       }
 
       if (url == null || url.equals("")) {
-        url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
+        if (dbname.indexOf("//") == 0) {
+          // db is the url itself: "//db_host[:port]/database_name"
+          url = "jdbc:oracle:thin:@" + dbname.substring(2);
+          url = url.replace('/', ':');
+        } else {
+          url = "jdbc:oracle:thin:@" + host + ":" + port + ":" + dbname;
+        }
       }
 
       Connection jConn = env.getConnection(driver, url, userName, password);
@@ -100,15 +106,15 @@ public class Oracle extends JdbcConnectionResource {
 
     } catch (SQLException e) {
       env.warning("A link to the server could not be established. " + e.toString());
-      env.setSpecialValue("postgres.connectErrno",new LongValue(e.getErrorCode()));
-      env.setSpecialValue("postgres.connectError", new StringValueImpl(e.getMessage()));
+      env.setSpecialValue("oracle.connectErrno",new LongValue(e.getErrorCode()));
+      env.setSpecialValue("oracle.connectError", new StringValueImpl(e.getMessage()));
 
       log.log(Level.FINE, e.toString(), e);
 
       return false;
     } catch (Exception e) {
       env.warning("A link to the server could not be established. " + e.toString());
-      env.setSpecialValue("postgres.connectError", new StringValueImpl(e.getMessage()));
+      env.setSpecialValue("oracle.connectError", new StringValueImpl(e.getMessage()));
 
       log.log(Level.FINE, e.toString(), e);
       return false;
