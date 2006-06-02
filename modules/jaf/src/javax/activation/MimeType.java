@@ -53,6 +53,8 @@ public class MimeType implements Serializable, Externalizable {
    */  
   public MimeType()
   {
+    _primary = "application";
+    _sub = "*";
     _parameters = new MimeTypeParameterList();
   }
 
@@ -64,7 +66,7 @@ public class MimeType implements Serializable, Externalizable {
   {
     int slash = rawData.indexOf('/');
     if (slash == -1)
-      throw new javax.activation.MimeTypeParseException("Unable to find a sub type.");
+      throw new MimeTypeParseException("Unable to find a sub type.");
     _primary = rawData.substring(0, slash);
     _sub = rawData.substring(slash+1);
     _parameters = new MimeTypeParameterList();
@@ -151,6 +153,14 @@ public class MimeType implements Serializable, Externalizable {
     getParameters().remove(name);
   }
 
+  /**                                                                      
+   * Return the String representation of this object.                      
+   */
+  public String toString()
+  {
+    return getBaseType() + _parameters;
+  }
+
   /**
    * Return a String representation of this object without the
    * parameter list.
@@ -160,17 +170,7 @@ public class MimeType implements Serializable, Externalizable {
     return getPrimaryType() + "/" + getSubType();
   }
 
-  /**
-   * Determine if the primary and sub type of this object is the same
-   * as the content type described in rawdata.
-   */
-  public boolean match(String rawData)
-    throws MimeTypeParseException
-  {
-    return getBaseType().equals(rawData);
-  }
-
-  /**
+ /**
    * Determine if the primary and sub type of this object is the same
    * as what is in the given type.
    */
@@ -180,6 +180,25 @@ public class MimeType implements Serializable, Externalizable {
     return getBaseType().equals(type.getBaseType());
   }
 
+  /**
+   * Determine if the primary and sub type of this object is the same
+   * as the content type described in rawdata.
+   */
+  public boolean match(String rawdata)
+    throws MimeTypeParseException
+  {
+     return match(new MimeType(rawdata));
+  }
+
+  /**
+   * The object implements the writeExternal method to save its contents
+   * by calling the methods of DataOutput for its primitive values or
+   * calling the writeObject method of ObjectOutput for objects, strings   
+   * and arrays.
+   *                                                                       
+   * @param out the ObjectOutput object to write to
+   * @exception java.io.IOException Includes any I/O exceptions that may occur
+   */
   public void writeExternal(ObjectOutput out)
     throws IOException
   {
@@ -187,6 +206,19 @@ public class MimeType implements Serializable, Externalizable {
     out.writeUTF(getSubType());
   }
 
+  /**
+   * The object implements the readExternal method to restore its
+   * contents by calling the methods of DataInput for primitive
+   * types and readObject for objects, strings and arrays.
+
+   * The readExternal method must read the values in the same sequence
+   * and with the same types as were written by writeExternal.
+   *                                                                       
+   * @param in the ObjectInput object to read from                         
+   * @exception ClassNotFoundException If the class for an object being
+   *            stored cannot be found.
+   * @exception java.io.IOException                                        
+   */
   public void readExternal(ObjectInput in)
     throws IOException
   {

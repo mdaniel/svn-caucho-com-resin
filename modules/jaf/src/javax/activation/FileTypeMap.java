@@ -37,6 +37,10 @@ import java.io.File;
 abstract public class FileTypeMap {
   private static FileTypeMap _defaultMap
     = new MimetypesFileTypeMap();
+
+  public FileTypeMap()
+  {
+  }
   
   /**
    * Returns the content-type of the given file.

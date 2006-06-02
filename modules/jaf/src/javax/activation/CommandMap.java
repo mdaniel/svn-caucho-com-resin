@@ -33,13 +33,20 @@ package javax.activation;
  * Map of command objects.
  */
 abstract public class CommandMap {
+
   private static CommandMap _commandMap;
+
+  public CommandMap()
+  {
+  }
 
   /**
    * Returns the default command map.
    */
   public static CommandMap getDefaultCommandMap()
   {
+    if (_commandMap==null)
+      _commandMap = new MailcapCommandMap();
     return _commandMap;
   }
 
@@ -56,10 +63,48 @@ abstract public class CommandMap {
    */
   public abstract CommandInfo []getPreferredCommands(String mimeType);
 
+  /**                                                                      
+   * Get the preferred command list from a MIME Type. The actual
+   * semantics are determined by the implementation of the CommandMap.
+   * The DataSource provides extra information, such as the file name,
+   * that a CommandMap implementation may use to further refine the
+   * list of commands that are returned.  The implementation in this
+   * class simply calls the getPreferredCommands method that ignores
+   * this argument.
+   *                                                                       
+   * @param mimeType the MIME type                                         
+   * @param ds a DataSource for the data                                   
+   * @return the CommandInfo classes that represent the command Beans.     
+   * @since  JAF 1.1                                                       
+   */
+  public CommandInfo[] getPreferredCommands(String mimeType, DataSource ds)
+  {
+    return getPreferredCommands(mimeType);
+  }
+
   /**
    * Returns all the command list.
    */
   public abstract CommandInfo []getAllCommands(String mimeType);
+
+  /**                                                                      
+   * Get all the available commands for this type. This method should
+   * return all the possible commands for this MIME type.  The
+   * DataSource provides extra information, such as the file name,
+   * that a CommandMap implementation may use to further refine the
+   * list of commands that are returned.  The implementation in this
+   * class simply calls the getAllCommands method that ignores this
+   * argument.
+   *                                                                       
+   * @param mimeType the MIME type                                         
+   * @param ds a DataSource for the data                                   
+   * @return the CommandInfo objects representing all the commands.        
+   * @since  JAF 1.1                                                       
+   */
+  public CommandInfo[] getAllCommands(String mimeType, DataSource ds)
+  {
+    return getAllCommands(mimeType);
+  }
 
   /**
    * Returns the default command.
@@ -67,7 +112,60 @@ abstract public class CommandMap {
   public abstract CommandInfo getCommand(String mimeType, String cmdName);
 
   /**
+   * Get the default command corresponding to the MIME type.  The
+   * DataSource provides extra information, such as the file name,
+   * that a CommandMap implementation may use to further refine the
+   * command that is chosen.  The implementation in this class simply
+   * calls the getCommand method that ignores this argument.
+   *
+   * @param mimeType the MIME type
+   * @param cmdName the command name
+   * @param ds a DataSource for the data 
+   * @return the CommandInfo corresponding to the command. 
+   * @since  JAF 1.1 
+   */
+  public CommandInfo getCommand(String mimeType, String cmdName, DataSource ds)
+  {
+    return getCommand(mimeType, cmdName);
+  }
+
+  /**
    * Returns the content handler
    */
   public abstract DataContentHandler createDataContentHandler(String mimeType);
+
+  /**                                                                      
+   * Locate a DataContentHandler that corresponds to the MIME type.
+   * The mechanism and semantics for determining this are determined
+   * by the implementation of the particular CommandMap.  The
+   * DataSource provides extra information, such as the file name,
+   * that a CommandMap implementation may use to further refine the
+   * choice of DataContentHandler.  The implementation in this class
+   * simply calls the createDataContentHandler method that ignores
+   * this argument.
+   *                                                                       
+   * @param mimeType the MIME type                                         
+   * @param ds a DataSource for the data                                   
+   * @return the DataContentHandler for the MIME type                      
+   * @since  JAF 1.1                                                       
+   */
+  public DataContentHandler createDataContentHandler(String mimeType,
+						     DataSource ds)
+  {
+    return createDataContentHandler(mimeType);
+  }
+
+
+  /**                                                                      
+   * Get all the MIME types known to this command map.  If the command
+   * map doesn't support this operation, null is returned.
+   *                                                                       
+   * @return array of MIME types as strings, or null if not supported      
+   * @since  JAF 1.1                                                       
+   */
+  public String[] getMimeTypes()
+  {
+    return null;
+  }
+
 }

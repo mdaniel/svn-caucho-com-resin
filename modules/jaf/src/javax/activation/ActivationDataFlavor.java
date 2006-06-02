@@ -30,42 +30,82 @@
 package javax.activation;
 
 import java.awt.datatransfer.DataFlavor;
+import java.io.*;
+import java.util.logging.*;
 
 /**
  * Supports the DataFlavor.
  */
 public class ActivationDataFlavor extends DataFlavor  {
-  private String mimeType;
-  
+
+  private static Logger log =
+    Logger.getLogger("javax.activation.ActivationDataFlavor");
+
+  private Class _representationClass;
+
   /**
    * Creates the data flavor.
    */
   public ActivationDataFlavor(Class representationClass,
 			      String mimeType,
-			      String displayName)
+			      String humanPresentableName)
   {
-    super(representationClass, displayName);
-
-    this.mimeType = mimeType;
+    super(mimeType, humanPresentableName);
+    this._representationClass = representationClass;
   }
   
   /**
    * Creates the data flavor.
    */
   public ActivationDataFlavor(Class representationClass,
-			      String displayName)
+			      String humanPresentableName)
   {
-    super(representationClass, displayName);
+    this(representationClass,
+	 "application/x-java-serialized-object; class="+
+	 representationClass.getName(),
+	 humanPresentableName);
   }
   
   /**
    * Creates the data flavor.
+   *        
+   * NOTE: Sun's Javadoc claims "If the mimeType is
+   *       "application/x-java-serialized-object; class=", the result
+   *       is the same as calling new DataFlavor(Class.forName()) as
+   *       above.", but their implementation DOES NOT DO THIS, so we
+   *       don't do it either.
    */
-  public ActivationDataFlavor(String mimeType, String displayName)
+  public ActivationDataFlavor(String mimeType, String humanPresentableName)
   {
-    super(mimeType, displayName);
+    this(InputStream.class, mimeType, humanPresentableName);
+  }
 
-    this.mimeType = mimeType;
+  /**
+   * Compares the DataFlavor passed in with this DataFlavor; calls
+   * the isMimeTypeEqual method.
+   *
+   * @param dataFlavor the DataFlavor to compare with 
+   * @return true if the MIME type and representation class are the same 
+   */
+  public boolean equals(DataFlavor dataFlavor)
+  {
+    if (dataFlavor == null)
+      return false;
+
+    if (getRepresentationClass() != dataFlavor.getRepresentationClass())
+      return false;
+
+    return isMimeTypeEqual(dataFlavor.getMimeType());
+  }
+
+  /**
+   * Return the Human Presentable name.
+   *
+   * @return the human presentable name 
+   */
+  public String getHumanPresentableName()
+  {
+    return super.getHumanPresentableName();
   }
 
   /**
@@ -73,6 +113,69 @@ public class ActivationDataFlavor extends DataFlavor  {
    */
   public String getMimeType()
   {
-    return this.mimeType;
+    return super.getMimeType();
   }
+
+  /**
+   * Return the representation class.
+   *
+   * @return the representation class 
+   */
+  public Class getRepresentationClass()
+  {
+    return _representationClass;
+  }
+
+  /**
+   * Is the string representation of the MIME type passed in
+   * equivalent to the MIME type of this DataFlavor.
+   * ActivationDataFlavor delegates the comparison of MIME types to
+   * the MimeType class included as part of the JavaBeans Activation
+   * Framework. This provides a more robust comparison than is
+   * normally available in the DataFlavor class.
+   *
+   * @param mimeType the MIME type 
+   * @return true if the same MIME type 
+   */
+  public boolean isMimeTypeEqual(String mimeType)
+  {
+    try {
+      return new MimeType(getMimeType()).match(mimeType);
+    }
+    catch (Exception e) {
+      // deliberately ignored
+      log.log(Level.FINER, e.toString(), e);
+      return false;
+    }
+  }
+
+  /**
+   * Deprecated.
+   * @deprecated as of JAF 1.1
+   */
+  protected String normalizeMimeTypeParameter(String parameterName,
+					      String parameterValue)
+  {
+    throw new UnsupportedOperationException("you should not be calling this");
+  }
+
+  /**
+   * Deprecated.
+   * @deprecated as of JAF 1.1
+   */
+  protected String normalizeMimeType(String mimeType)
+  {
+    throw new UnsupportedOperationException("you should not be calling this");
+  }
+
+  /**
+   * Set the human presentable name.
+   *
+   * @param humanPresentableName the name to set
+   */
+  public void setHumanPresentableName(String humanPresentableName)
+  {
+    super.setHumanPresentableName(humanPresentableName);
+  }
+
 }

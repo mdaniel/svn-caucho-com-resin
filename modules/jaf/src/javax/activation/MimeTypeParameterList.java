@@ -58,7 +58,44 @@ public class MimeTypeParameterList {
   protected void parse(String parameterList)
     throws MimeTypeParseException
   {
-    throw new UnsupportedOperationException();
+    // can't use split() here because of quoting
+    String s = parameterList.trim();
+    if (s.charAt(0)!=';')
+      throw new MimeTypeParseException("argument must begin with ';'");
+    s = s.substring(1).trim();
+
+    while(s.length()>0) {
+      int equals = s.indexOf('=');
+
+      if (equals==-1)
+	throw new MimeTypeParseException("parameter does not contain '=': "+s);
+
+      String key = s.substring(0, equals);
+      s = s.substring(equals+1);
+
+      String val = null;
+
+      if (s.charAt(0)=='\"') {
+	int otherquote = s.indexOf('\"', 1);
+
+	if (otherquote==-1)
+	  throw new MimeTypeParseException("missing close-quote: "+s);
+	val = s.substring(1, otherquote);
+	s = s.substring(otherquote+1);
+      }
+      else {
+	int semi = s.indexOf(';');
+	if (semi==-1)
+	  semi = s.length();
+	val = s.substring(0, semi);
+	s = s.substring(semi);
+      }
+
+      if (s.length() > 0 && s.charAt(0)==';')
+	s = s.substring(1);
+
+      _map.put(key, val);
+    }
   }
 
   /**
@@ -108,4 +145,33 @@ public class MimeTypeParameterList {
   {
     return Collections.enumeration(_map.keySet());
   }
+
+  public String toString()
+  {
+    if (size()==0)
+      return "";
+
+    StringBuffer sb = new StringBuffer();
+    sb.append("; ");
+
+    for(Enumeration e = getNames(); e.hasMoreElements();) {
+
+      String key = (String)e.nextElement();
+      sb.append(key);
+      sb.append("=");
+      String val = get(key);
+
+      if (val.indexOf(' ')==-1 || val.indexOf(';')==-1) {
+	sb.append("\"");
+	sb.append(val);
+	sb.append("\"");
+      }
+      else {
+	sb.append(val);
+      }
+
+    }
+    return sb.toString();
+  }
+
 }

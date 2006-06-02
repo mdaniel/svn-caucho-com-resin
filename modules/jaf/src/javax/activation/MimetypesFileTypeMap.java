@@ -31,11 +31,15 @@ package javax.activation;
 
 import java.util.*;
 import java.io.*;
+import java.util.logging.*;
 
 /**
  * API for finding the mime-type for a file.
  */
 public class MimetypesFileTypeMap extends FileTypeMap {
+
+  private static Logger log =
+    Logger.getLogger("javax.activation.MimetypesFileTypeMap");
 
   /**
    * The key is a filename extension, the value is the mime type
@@ -50,19 +54,41 @@ public class MimetypesFileTypeMap extends FileTypeMap {
     ClassLoader cl = getClass().getClassLoader();
 
     // added in reverse priority order
-    //addMimeTypes(new ReadStream(cl.getResourceStream("META-INF/mimetypes.default")).openRead());
-    //addMimeTypes(new ReadStream(cl.getResourceStream("META-INF/mime.types")).openRead());
-    //addMimeTypes(Vfs.lookup("file:"+System.getProperty("java.home")+"/lib/mime.types"));
-    //addMimeTypes(Vfs.lookup("file:"+System.getProperty("user.home")+"/.mime.types"));
-  }
-  
-  /**
-   * Fills the map with programmatic entries from the input stream.
-   */
-  public MimetypesFileTypeMap(InputStream is)
-  {
-    this();
-    addMimeTypes(is);
+    try {
+      addMimeTypes(cl.getResourceAsStream("META-INF/mimetypes.default"));
+    }
+    catch (IOException e) {
+      // cyclic dependency in <clinit>
+      if (log != null)
+	log.log(Level.FINER, e.toString(), e);
+    }
+
+    try {
+      addMimeTypes(cl.getResourceAsStream("META-INF/mime.types"));
+    }
+    catch (IOException e) {
+      // cyclic dependency in <clinit>
+      if (log != null)
+	log.log(Level.FINER, e.toString(), e);
+    }
+
+    try {
+      addMimeTypes(new File(System.getProperty("java.home")+"/lib/mime.types"));
+    }
+    catch (IOException e) {
+      // cyclic dependency in <clinit>
+      if (log != null)
+	log.log(Level.FINER, e.toString(), e);
+    }
+
+    try {
+      addMimeTypes(new File(System.getProperty("user.home")+"/.mime.types"));
+    }
+    catch (IOException e) {
+      // cyclic dependency in <clinit>
+      if (log != null)
+	log.log(Level.FINER, e.toString(), e);
+    }
   }
   
   /**
@@ -80,34 +106,17 @@ public class MimetypesFileTypeMap extends FileTypeMap {
     }
   }
 
-  private void addMimeTypes(InputStream is)
+  /**
+   * Fills the map with programmatic entries from the input stream.
+   */
+  public MimetypesFileTypeMap(InputStream is)
   {
-    try
-      {
-	BufferedReader mimeTypes =
-	  new BufferedReader(new InputStreamReader(is));
-	// XXX: use CharScanner
-	for(String s = mimeTypes.readLine(); s!=null;
-	    s = mimeTypes.readLine())
-	  {
-	    s = s.trim();
-	    if (s.charAt(0)=='#') continue;
-	    int space = s.indexOf(' ');
-	    if (space==-1) continue;
-	    String mimeType = s.substring(0, space);
-	    while(true) {
-	      while(space < s.length() && s.charAt(space)==' ') space++;
-	      if (space==s.length()) break;
-	      int nextSpace = s.indexOf(' ', space+1);
-	      if (nextSpace==-1) nextSpace = s.length() + 1;
-	      String extension = s.substring(space+1, nextSpace);
-	      _mimeTypesByExtension.put(extension, mimeType);
-	      space = nextSpace;
-	    }
-	  }
-      }
+    this();
+    try {
+      addMimeTypes(is);
+    }
     catch (IOException e) {
-      throw new RuntimeException(e);
+      log.log(Level.FINER, e.toString(), e);
     }
   }
 
@@ -115,8 +124,9 @@ public class MimetypesFileTypeMap extends FileTypeMap {
    * Prepend the values to the registry.
    */
   public void addMimeTypes(String mimeTypes)
+    throws IOException
   {
-    addMimeTypes(new ByteArrayInputStream(mimeTypes.getBytes()));
+      addMimeTypes(new StringReader(mimeTypes));
   }
 
   /**
@@ -124,7 +134,6 @@ public class MimetypesFileTypeMap extends FileTypeMap {
    */
   public String getContentType(File file)
   {
-    // XXX: could do better here?
     return getContentType(file.getName());
   }
 
@@ -134,12 +143,58 @@ public class MimetypesFileTypeMap extends FileTypeMap {
   public String getContentType(String fileName)
   {
     int dot = fileName.indexOf('.');
+
     if (dot==-1)
       return "application/octet-stream";
+
     String extension = fileName.substring(fileName.lastIndexOf('.')+1);
+
     String mimeType = (String)_mimeTypesByExtension.get(extension);
-    if (mimeType != null) return mimeType;
-    // XXX
-    return null;
+
+    if (mimeType != null)
+      return mimeType;
+
+    return "application/octet-stream";
   }
+
+  private void addMimeTypes(File f)
+    throws IOException
+  {
+    InputStream is = new FileInputStream(f);
+    try {
+      addMimeTypes(is);
+    } finally {
+      is.close();
+    }
+  }
+
+  private void addMimeTypes(InputStream is)
+    throws IOException
+  {
+    if (is==null) return;
+    addMimeTypes(new InputStreamReader(is));
+  }
+
+  private void addMimeTypes(Reader r)
+    throws IOException
+  {
+    if (r==null) return;
+    BufferedReader br = new BufferedReader(r);
+    
+    for(String s = br.readLine(); s!=null; s = br.readLine()) {
+      int p = s.indexOf('#');
+      
+      if (p >= 0)
+	s  = s.substring(0, p);
+      
+      String []values = s.split("[ \t]");
+      
+      if (values.length < 2)
+	continue;
+      
+      for(int i=1; i<values.length; i++)
+	_mimeTypesByExtension.put(values[i], values[0]);
+    }
+  }
+
 }

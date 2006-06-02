@@ -34,6 +34,7 @@ import java.io.*;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.util.logging.*;
 
 /**
  * MailcapCommandMap extends the CommandMap
@@ -89,19 +90,57 @@ import java.awt.datatransfer.UnsupportedFlavorException;
  *  # and comply to RFC 1524 are simply ignored:<br>
  *  image/gif; /usr/dt/bin/sdtimage %s<br>
  *  </code>
- *  
- *
- *@author 
  */
 public class MailcapCommandMap extends CommandMap {
 
+  private static Logger log =
+    Logger.getLogger("javax.activation.MailcapCommandMap");
+
+  /** HashMap<String,HashMap<String,CommandInfo>> */
   HashMap _preferredCommands = new HashMap();
+
+  /** HashMap<String,HashSet<CommandInfo>> */
+  HashMap _allCommands = new HashMap();
 
   /**
    * The default Constructor.
    */
   public MailcapCommandMap()
   {
+    // add mailcaps in reverse order
+    ClassLoader currentCL = this.getClass().getClassLoader();
+
+    try {
+      addMailcap(currentCL.getResourceAsStream("META-INF/mailcap.default"));
+    }
+    catch(IOException e) {
+      log.log(Level.FINER, "ignoring exception", e);
+    }
+
+    try {
+      addMailcap(currentCL.getResourceAsStream("META-INF/mailcap"));
+    }
+    catch(IOException e) {
+      log.log(Level.FINER, "ignoring exception", e);
+    }
+
+    String uhome = System.getProperty("user.home");
+    String jhome = System.getProperty("java.home");
+
+    try {
+      addMailcap(new File(jhome+File.separatorChar+
+			  "lib"+File.separatorChar+"mailcap"));
+    }
+    catch(IOException e) {
+      log.log(Level.FINER, "ignoring exception", e);
+    }
+
+    try {
+      addMailcap(new File(uhome+File.separatorChar+".mailcap"));
+    }
+    catch(IOException e) {
+      log.log(Level.FINER, "ignoring exception", e);
+    }
   }
 
   /**
@@ -112,6 +151,7 @@ public class MailcapCommandMap extends CommandMap {
    */
   public MailcapCommandMap(String fileName) throws IOException
   {
+    this();
     FileInputStream is = new FileInputStream(fileName);
 
     try {
@@ -130,6 +170,7 @@ public class MailcapCommandMap extends CommandMap {
   public MailcapCommandMap(InputStream is)
     throws IOException
   {
+    this();
     addMailcap(is);
   }
 
@@ -146,15 +187,15 @@ public class MailcapCommandMap extends CommandMap {
    */
   public CommandInfo[] getPreferredCommands(String mimeType)
   {
-    HashMap commandInfoHashMap =
+    HashMap commandInfoMap =
       (HashMap)_preferredCommands.get(mimeType);
 
-    if (commandInfoHashMap==null)
-      return null;
+    if (commandInfoMap==null)
+      return new CommandInfo[0];
 
-    return
-      (CommandInfo[])commandInfoHashMap.values()
-      .toArray(new CommandInfo[commandInfoHashMap.size()]);
+    CommandInfo []commands = new CommandInfo[commandInfoMap.size()];
+    commandInfoMap.values().toArray(commands);
+    return commands;
   }
 
   /**
@@ -166,7 +207,15 @@ public class MailcapCommandMap extends CommandMap {
    */
   public CommandInfo[] getAllCommands(String mimeType)
   {
-    throw new UnsupportedOperationException("not implemented");
+    HashSet commandInfoSet =
+      (HashSet)_allCommands.get(mimeType);
+
+    if (commandInfoSet==null)
+      return new CommandInfo[0];
+
+    CommandInfo []commands = new CommandInfo[commandInfoSet.size()];
+    commandInfoSet.toArray(commands);
+    return commands;
   }
 
   /**
@@ -178,13 +227,13 @@ public class MailcapCommandMap extends CommandMap {
    */
   public CommandInfo getCommand(String mimeType, String cmdName)
   {
-    HashMap _commandHashMap = 
+    HashMap commandMap = 
       (HashMap)_preferredCommands.get(mimeType);
 
-    if (_commandHashMap==null)
+    if (commandMap==null)
       return null;
 
-    return (CommandInfo)_commandHashMap.get(cmdName);
+    return (CommandInfo)commandMap.get(cmdName);
   }
 
   /**
@@ -192,14 +241,17 @@ public class MailcapCommandMap extends CommandMap {
    * searched before other entries.  The string that is passed in
    * should be in mailcap format.
    *
+   * NOTE: this can be a multiline string.
+   *
    * @param mail_cap a correctly formatted mailcap string
    */
   public void addMailcap(String mail_cap)
   {
     try {
-      addMailcap(new ByteArrayInputStream(mail_cap.getBytes()));
+      addMailcap(new StringReader(mail_cap));
     }
     catch (IOException e) {
+      // this should not happen
       throw new RuntimeException(e);
     }
   }
@@ -215,10 +267,114 @@ public class MailcapCommandMap extends CommandMap {
     return new MailcapDataContentHandler(mimeType);
   }
 
-  private void addMailcap(InputStream mailcap)
-		 throws IOException
+  /**                                                                      
+   * Get all the MIME types known to this command map.                     
+   *                                                                       
+   * @overrides getMimeTypes  in class                                     
+   * @overrides CommandMap                                                 
+   * @return array of MIME types as strings                                
+   * @since  JAF 1.1                                                       
+   */
+  public String[] getMimeTypes() {
+    String[] mimeTypes = new String[_preferredCommands.size()];
+    return 
+      (String[])_preferredCommands.keySet().toArray(mimeTypes);
+  }
+
+  /**                                                                      
+   * Get the native commands for the given MIME type.  Returns an
+   * array of strings where each string is an entire mailcap file
+   * entry.  The application will need to parse the entry to extract
+   * the actual command as well as any attributes it needs. See RFC
+   * 1524 for details of the mailcap entry syntax.  Only mailcap
+   * entries that specify a view command for the specified MIME type
+   * are returned.
+   *                                                                       
+   * @return array of native command entries                               
+   * @since  JAF 1.1                                                       
+   */
+  public String []getNativeCommands(String mimeType) {
+
+    // Apparently this function is broken in Sun's implementation and
+    // the specified behavior is unclear; see test case 340c.
+    return new String[0];
+  }
+
+  private void addMailcap(InputStream is)
+    throws IOException
   {
-    throw new UnsupportedOperationException("not implemented");
+    if (is==null) return;
+    addMailcap(new InputStreamReader(is));
+  }
+
+  private void addMailcap(Reader reader)
+    throws IOException
+  {
+    if (reader==null) return;
+    BufferedReader br = new BufferedReader(reader);
+
+    for(String s = br.readLine(); s!=null; s = br.readLine())
+      addMailcapLine(s);
+  }
+
+  public void addMailcap(File file)
+    throws IOException
+  {
+    InputStream is = new FileInputStream(file);
+    try {
+      addMailcap(is);
+    } finally {
+      is.close();
+    }
+  }
+
+  private void addMailcapLine(String line)
+    throws IOException
+  {
+    line = line.trim();
+
+    if (line.length() == 0)
+      return;
+
+    if (line.charAt(0) == '#')
+      return;
+
+    String[] fields = line.split(";");
+
+    if (fields.length<3) {
+      log.log(Level.FINER, "malformed mailcap line: " + line);
+      return;
+    }
+
+    String mimeType = fields[0];
+
+    for(int i=2; i<fields.length; i++) {
+
+      String field = fields[i].trim();
+
+      if (field.indexOf('=')==-1)
+	continue;
+
+      String key = field.substring(0, field.indexOf('='));
+      String className = field.substring(field.indexOf('=')+1);
+
+      if (!key.startsWith("x-java-")) continue;
+      String verb = key.substring(7);
+
+      CommandInfo commandInfo = new CommandInfo(verb, className);
+      
+      HashSet commandSet =
+	(HashSet)_allCommands.get(mimeType);
+      if (commandSet==null)
+	_allCommands.put(mimeType, commandSet = new HashSet());
+      commandSet.add(commandInfo);
+      
+      HashMap commandMap =
+	(HashMap)_preferredCommands.get(mimeType);
+      if (commandMap==null)
+	_preferredCommands.put(mimeType, commandMap = new HashMap());
+      commandMap.put(verb, commandInfo);
+    }
   }
 
   private class MailcapDataContentHandler implements DataContentHandler {

@@ -47,8 +47,7 @@ public interface DataContentHandler {
   /**
    * Returns the data to be transferred.
    */
-  public Object getTransferData(DataFlavor flavor, DataSource dataSource)
-    throws IOException, UnsupportedFlavorException;
+  public Object getTransferData(DataFlavor flavor, DataSource dataSource);
 
   /**
    * Returns an object from the data in its preferred form.

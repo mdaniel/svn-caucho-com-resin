@@ -31,10 +31,9 @@ package javax.activation;
 
 import java.net.URL;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
+import java.io.*;
 
+import java.util.logging.*;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -43,9 +42,14 @@ import java.awt.datatransfer.UnsupportedFlavorException;
  * Facade to data from multiple sources.
  */
 public class DataHandler implements Transferable {
+
+  private static Logger log =
+    Logger.getLogger("javax.activation.DataHandler");
+
   private static DataContentHandlerFactory _factory;
   
   private DataSource _dataSource;
+  private DataSource _cachedDataSource;
   
   private Object _object;
   private String _mimeType;
@@ -82,7 +86,13 @@ public class DataHandler implements Transferable {
    */
   public DataSource getDataSource()
   {
-    return _dataSource;
+    if (_dataSource!=null)
+      return _dataSource;
+
+    if (_cachedDataSource==null)
+      _cachedDataSource = new DataHandlerDataSource();
+
+    return _cachedDataSource;
   }
 
   /**
@@ -115,8 +125,26 @@ public class DataHandler implements Transferable {
   {
     if (_dataSource != null)
       return _dataSource.getInputStream();
-    else
-      throw new UnsupportedOperationException();
+
+    final DataContentHandler dch = getDataContentHandler();
+
+    if (dch==null)
+      throw new UnsupportedDataTypeException("dch==null");
+    
+    final PipedOutputStream pos = new PipedOutputStream();
+    new Thread() {
+      public void run() {
+	try {
+	  dch.writeTo(_object, _mimeType, pos);
+	}
+	catch (IOException e) {
+	  log.log(Level.FINER, e.toString(), e);
+	  return;
+	}
+      }
+    }.start();
+
+    return new PipedInputStream(pos);
   }
 
   /**
@@ -125,11 +153,25 @@ public class DataHandler implements Transferable {
   public void writeTo(OutputStream os)
     throws IOException
   {
-    // XXX: ?
-    String text = (String) _object;
-    byte []bytes = text.getBytes();
+    if (_dataSource != null) {
+      InputStream is = _dataSource.getInputStream();
 
-    os.write(bytes, 0, bytes.length);
+      try {
+
+	byte[] buf = new byte[1024];
+	while(true) {
+	  int numread = is.read(buf, 0, buf.length);
+	  if (numread==-1) break;
+	  os.write(buf, 0, numread);
+	}
+
+      } finally {
+	is.close();
+      }
+    }
+    else {
+      getDataContentHandler().writeTo(_object, _mimeType, os);
+    }
   }
 
   /**
@@ -149,10 +191,25 @@ public class DataHandler implements Transferable {
    */
   public DataFlavor []getTransferDataFlavors()
   {
-    DataContentHandler handler = getDataContentHandler();
-    
-    if (handler != null)
-      return handler.getTransferDataFlavors();
+    try {
+      DataContentHandler handler = getDataContentHandler();
+      
+      if (handler != null)
+	return handler.getTransferDataFlavors();
+    }
+    catch (UnsupportedDataTypeException e) {
+      log.log(Level.FINER, e.toString(), e);
+      return null;
+    }
+
+    // XXX: If a DataContentHandler can not be located, and if the
+    // DataHandler was created with a DataSource (or URL), one
+    // DataFlavor is returned that represents this object's MIME type
+    // and the java.io.InputStream class. If the DataHandler was
+    // created with an object and a MIME type, getTransferDataFlavors
+    // returns one DataFlavor that represents this object's MIME type
+    // and the object's class.
+
     throw new UnsupportedOperationException();
   }
 
@@ -182,6 +239,32 @@ public class DataHandler implements Transferable {
   public Object getTransferData(DataFlavor flavor)
     throws UnsupportedFlavorException, IOException
   {
+    // XXX:
+
+    // Returns an object that represents the data to be
+    // transferred. The class of the object returned is defined by the
+    // representation class of the data flavor.
+
+    // For DataHandler's created with DataSources or URLs:
+
+    // The DataHandler attempts to locate a DataContentHandler for
+    // this MIME type. If one is found, the passed in DataFlavor and
+    // the type of the data are passed to its getTransferData
+    // method. If the DataHandler fails to locate a DataContentHandler
+    // and the flavor specifies this object's MIME type and the
+    // java.io.InputStream class, this object's InputStream is
+    // returned. Otherwise it throws an UnsupportedFlavorException.
+
+    // For DataHandler's created with Objects:
+
+    // The DataHandler attempts to locate a DataContentHandler for
+    // this MIME type. If one is found, the passed in DataFlavor and
+    // the type of the data are passed to its getTransferData
+    // method. If the DataHandler fails to locate a DataContentHandler
+    // and the flavor specifies this object's MIME type and its class,
+    // this DataHandler's referenced object is returned. Otherwise it
+    // throws an UnsupportedFlavorException.
+
     throw new UnsupportedFlavorException(flavor);
   }
 
@@ -190,18 +273,8 @@ public class DataHandler implements Transferable {
    */
   public void setCommandMap(CommandMap map)
   {
-    _commandMap = map;
-  }
-
-  /**
-   * Gets the command map.
-   */
-  private CommandMap getCommandMap()
-  {
-    if (_commandMap != null)
-      return _commandMap;
-    else
-      return CommandMap.getDefaultCommandMap();
+    _commandMap = map==null ? CommandMap.getDefaultCommandMap() : map;
+    _cachedDataSource = null;
   }
 
   /**
@@ -234,7 +307,15 @@ public class DataHandler implements Transferable {
   public Object getContent()
     throws IOException
   {
-    return _object;
+    if (_object==null) {
+      DataContentHandler dch = getDataContentHandler();
+      if (dch==null)
+	return getInputStream();
+      return dch.getContent(getDataSource());
+    }
+    else {
+      return _object;
+    }
   }
 
   /**
@@ -249,7 +330,8 @@ public class DataHandler implements Transferable {
   /**
    * Sets the DataContentHandlerFactory
    */
-  public static void setDataContentHandlerFactory(DataContentHandlerFactory factory)
+  public static void setDataContentHandlerFactory(DataContentHandlerFactory
+						  factory)
   {
     if (_factory != null)
       throw new Error("factory already set.");
@@ -258,14 +340,48 @@ public class DataHandler implements Transferable {
   }
 
   /**
+   * Gets the command map.
+   */
+  private CommandMap getCommandMap()
+  {
+    if (_commandMap != null)
+      return _commandMap;
+    else
+      return CommandMap.getDefaultCommandMap();
+  }
+
+  /**
    * Returns the handler.
    */
   private DataContentHandler getDataContentHandler()
+    throws UnsupportedDataTypeException
   {
-    if (_factory != null) {
+    if (_factory != null)
       return _factory.createDataContentHandler(getContentType());
-    }
     else
-      throw new UnsupportedOperationException();
+      throw new UnsupportedDataTypeException();
+  }
+
+  private class DataHandlerDataSource implements DataSource {
+    public InputStream getInputStream()
+      throws IOException
+    {
+      return DataHandler.this.getInputStream();
+    }
+
+    public OutputStream getOutputStream()
+      throws IOException
+    {
+      return DataHandler.this.getOutputStream();
+    }
+  
+    public String getContentType()
+    {
+      return DataHandler.this.getContentType();
+    }
+    public String getName()
+    {
+      return DataHandler.this.getName();
+    }      
   }
 }

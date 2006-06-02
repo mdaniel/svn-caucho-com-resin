@@ -34,11 +34,16 @@ import java.net.URL;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
+import java.util.logging.*;
 
 /**
  * An abstraction of serialized data.
  */
 public class URLDataSource implements DataSource {
+
+  private static Logger log =
+    Logger.getLogger("javax.activation.URLDataSource");
+
   private URL _url;
 
   public URLDataSource(URL url)
@@ -46,6 +51,41 @@ public class URLDataSource implements DataSource {
     _url = url;
   }
   
+  /**
+   * Returns the MIME type of the data.  Note: this method attempts to
+   * call the openConnection method on the URL. If this method fails,
+   * or if a content type is not returned from the URLConnection,
+   * getContentType returns "application/octet-stream" as the content
+   * type.
+   */
+  public String getContentType()
+  {
+    try {
+	String mimeType =
+	  _url.openConnection().getContentType();
+
+	if (mimeType!=null)
+	  return mimeType;
+    }
+    catch (Exception e) {
+      // deliberately ignored
+      log.log(Level.FINER, e.toString(), e);
+    }
+    return "application/octet-stream";
+  }
+
+  /**
+   * Returns the name of the data.  e.g. the last component of
+   * a filename, not the entire path name.
+   */
+  public String getName()
+  {
+    String name = getURL().getFile();
+    if (name.indexOf('/') != -1)
+      name = name.substring(name.lastIndexOf('/')+1);
+    return name;
+  }
+
   /**
    * Returns an InputStream to the data.
    */
@@ -65,41 +105,10 @@ public class URLDataSource implements DataSource {
   }
   
   /**
-   * Returns the MIME type of the data.  Note: this method attempts to
-   * call the openConnection method on the URL. If this method fails,
-   * or if a content type is not returned from the URLConnection,
-   * getContentType returns "application/octet-stream" as the content
-   * type.
-   */
-  public String getContentType()
-  {
-    try
-      {
-	String mimeType =
-	  _url.openConnection().getContentType();
-
-	if (mimeType!=null)
-	  return mimeType;
-      } catch (Throwable t) {
-	// deliberately ignored
-      }
-    return "application/octet-stream";
-  }
-
-  /**
    * Returns the URL.
    */
   public URL getURL()
   {
     return _url;
-  }
-  
-  /**
-   * Returns the name of the data.  e.g. the last component of
-   * a filename, not the entire path name.
-   */
-  public String getName()
-  {
-    return getURL().getPath();
   }
 }
