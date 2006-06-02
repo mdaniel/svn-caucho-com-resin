@@ -242,11 +242,8 @@ public abstract class JdbcConnectionResource implements Closeable {
       else
         return null;
     } catch (SQLException e) {
-      _errorMessage = e.getMessage();
-      _errorCode = e.getErrorCode();
-
+      saveErrors(e);
       log.log(Level.WARNING, e.toString(), e);
-
       return null;
     }
   }
@@ -261,11 +258,8 @@ public abstract class JdbcConnectionResource implements Closeable {
     try {
       return new StringValueImpl(_conn.getCatalog());
     } catch (SQLException e) {
-      _errorMessage = e.getMessage();
-      _errorCode = e.getErrorCode();
-
+      saveErrors(e);
       log.log(Level.WARNING, e.toString(), e);
-
       return BooleanValue.FALSE;
     }
   }
@@ -683,7 +677,7 @@ public abstract class JdbcConnectionResource implements Closeable {
    * @return a {@link JdbcResultResource}, or null for failure
    */
   public Value query(String sql,
-		     @Optional("MYSQLI_STORE_RESULT") int resultMode)
+         @Optional("MYSQLI_STORE_RESULT") int resultMode)
   {
     // XXX: the query can return true for successful update, e.g. mysql
     try {
@@ -1028,14 +1022,14 @@ public abstract class JdbcConnectionResource implements Closeable {
         _affectedRows = stmt.getUpdateCount();
         _warnings = stmt.getWarnings();
       } catch (SQLException e) {
-        _errorMessage = e.getMessage();
-        _errorCode = e.getErrorCode();
+        saveErrors(e);
         log.log(Level.WARNING, e.toString(), e);
         return BooleanValue.FALSE;
       }
     } catch (SQLException e) {
-      _errorMessage = e.getMessage();
-      _errorCode = e.getErrorCode();
+
+      saveErrors(e);
+
       // php/4365
       if (keepStatementOpen()) {
         keepResourceValues(stmt);
@@ -1072,7 +1066,7 @@ public abstract class JdbcConnectionResource implements Closeable {
    * This function DOES NOT clear existing resultsets.
    */
   protected JdbcResultResource metaQuery(String sql,
-					 String catalog)
+           String catalog)
   {
     clearErrors();
 
@@ -1095,8 +1089,7 @@ public abstract class JdbcConnectionResource implements Closeable {
         return null;
       }
     } catch (SQLException e) {
-      _errorMessage = e.getMessage();
-      _errorCode = e.getErrorCode();
+      saveErrors(e);
       log.log(Level.WARNING, e.toString(), e);
       return null;
     }
@@ -1151,14 +1144,12 @@ public abstract class JdbcConnectionResource implements Closeable {
         _affectedRows = stmt.getUpdateCount();
         _warnings = stmt.getWarnings();
       } catch (SQLException e) {
-        _errorMessage = e.getMessage();
-        _errorCode = e.getErrorCode();
+        saveErrors(e);
         log.log(Level.WARNING, e.toString(), e);
         return false;
       }
     } catch (SQLException e) {
-      _errorMessage = e.getMessage();
-      _errorCode = e.getErrorCode();
+      saveErrors(e);
       log.log(Level.WARNING, e.toString(), e);
       return false;
     }
@@ -1181,9 +1172,7 @@ public abstract class JdbcConnectionResource implements Closeable {
     try {
       _conn.setAutoCommit(mode);
     } catch (SQLException e) {
-      _errorMessage = e.getMessage();
-      _errorCode = e.getErrorCode();
-
+      saveErrors(e);
       log.log(Level.WARNING, e.toString(), e);
       return false;
     }
@@ -1201,9 +1190,7 @@ public abstract class JdbcConnectionResource implements Closeable {
     try {
       _conn.commit();
     } catch (SQLException e) {
-      _errorMessage = e.getMessage();
-      _errorCode = e.getErrorCode();
-
+      saveErrors(e);
       log.log(Level.WARNING, e.toString(), e);
       return false;
     }
@@ -1224,9 +1211,7 @@ public abstract class JdbcConnectionResource implements Closeable {
     try {
       _conn.rollback();
     } catch (SQLException e) {
-      _errorMessage = e.getMessage();
-      _errorCode = e.getErrorCode();
-
+      saveErrors(e);
       log.log(Level.WARNING, e.toString(), e);
       return false;
     }
@@ -1269,11 +1254,8 @@ public abstract class JdbcConnectionResource implements Closeable {
 
       return new StringValueImpl(str.toString());
     } catch (SQLException e) {
-      _errorMessage = e.getMessage();
-      _errorCode = e.getErrorCode();
-
+      saveErrors(e);
       log.log(Level.WARNING, e.toString(), e);
-
       return BooleanValue.FALSE;
     }
   }
@@ -1398,11 +1380,17 @@ public abstract class JdbcConnectionResource implements Closeable {
     return _warnings;
   }
 
-  private void clearErrors()
+  protected void clearErrors()
   {
     _errorMessage = null;
     _errorCode = 0;
     _warnings = null;
+  }
+
+  protected void saveErrors(SQLException e)
+  {
+    _errorMessage = e.getMessage();
+    _errorCode = e.getErrorCode();
   }
 
   static class TableKey {

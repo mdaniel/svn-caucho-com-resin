@@ -29,7 +29,12 @@
 
 package com.caucho.quercus.lib.db;
 
-import java.sql.*;
+import java.lang.reflect.Method;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.sql.SQLException;
 
 import java.util.HashMap;
 
@@ -38,7 +43,9 @@ import java.util.logging.Level;
 
 import com.caucho.util.L10N;
 
-import com.caucho.quercus.env.*;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringValueImpl;
 
 import com.caucho.quercus.module.Optional;
 
@@ -55,6 +62,10 @@ public class Postgres extends JdbcConnectionResource {
   // named prepared statements for postgres
   private HashMap<String,PostgresStatement> _stmtTable
     = new HashMap<String,PostgresStatement>();
+
+  // Postgres specific server error message
+  // org.postgresql.util.ServerErrorMessage
+  Object _serverErrorMessage;
 
   public Postgres(Env env,
                   @Optional("localhost") String host,
@@ -199,6 +210,42 @@ public class Postgres extends JdbcConnectionResource {
   protected boolean keepStatementOpen()
   {
     return true;
+  }
+
+  /**
+   * This function is overriden in Postgres to clear
+   * any postgres specific server error message
+   */
+  protected void clearErrors()
+  {
+    super.clearErrors();
+    _serverErrorMessage = null;
+  }
+
+  /**
+   * This function is overriden in Postgres to save
+   * the postgres specific server error message
+   */
+  protected void saveErrors(SQLException e)
+  {
+    try {
+      super.saveErrors(e);
+
+      // Get the postgres specific server error message
+      Class cl = Class.forName("org.postgresql.util.PSQLException");
+      Method method = cl.getDeclaredMethod("getServerErrorMessage", null);
+      _serverErrorMessage = method.invoke(e, new Object[] {});
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+    }
+  }
+
+  /**
+   * Return the postgres server specific error message
+   */
+  protected Object getServerErrorMessage()
+  {
+    return _serverErrorMessage;
   }
 
   public String toString()

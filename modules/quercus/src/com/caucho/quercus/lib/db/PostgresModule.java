@@ -32,8 +32,6 @@ package com.caucho.quercus.lib.db;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-// Do not add new compile dependencies (use reflection instead)
-// import org.postgresql.largeobject.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
@@ -42,8 +40,8 @@ import java.sql.Statement;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.Map;
 
 import com.caucho.quercus.UnimplementedException;
@@ -70,6 +68,9 @@ import com.caucho.util.Log;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
+
+// Do not add new compile dependencies (use reflection instead)
+// import org.postgresql.largeobject.*;
 
 
 /**
@@ -442,11 +443,12 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Copy a table to an array
    */
-  public Value pg_copy_to(Env env,
-                          @NotNull Postgres conn,
-                          String tableName,
-                          @Optional("") String delimiter,
-                          @Optional("") String nullAs)
+  @ReturnNullAsFalse
+  public ArrayValue pg_copy_to(Env env,
+                               @NotNull Postgres conn,
+                               String tableName,
+                               @Optional("") String delimiter,
+                               @Optional("") String nullAs)
   {
     try {
       if (delimiter.equals("")) {
@@ -496,25 +498,26 @@ public class PostgresModule extends AbstractQuercusModule {
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return BooleanValue.FALSE;
+      return null;
     }
   }
 
   /**
    * Get the database name
    */
-  public Value pg_dbname(Env env,
-                         @Optional Postgres conn)
+  @ReturnNullAsFalse
+  public String pg_dbname(Env env,
+                          @Optional Postgres conn)
   {
     try {
       if (conn == null)
         conn = getConnection(env);
 
-      return StringValue.create(conn.get_dbname());
+      return conn.get_dbname();
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return BooleanValue.FALSE;
+      return null;
     }
   }
 
@@ -637,9 +640,9 @@ public class PostgresModule extends AbstractQuercusModule {
    */
   @ReturnNullAsFalse
   public PostgresResult pg_execute(Env env,
-				   @NotNull Postgres conn,
-				   String stmtName,
-				   ArrayValue params)
+           @NotNull Postgres conn,
+           String stmtName,
+           ArrayValue params)
   {
     try {
       PostgresStatement pstmt = conn.getStatement(stmtName);
@@ -665,8 +668,8 @@ public class PostgresModule extends AbstractQuercusModule {
       if (pstmt.getStatementType().equals("SELECT")) {
         return new PostgresResult(null, pstmt.getResultSet(), null);
       } else {
-	// XXX: ??? return type?
-	return null;
+  // XXX: ??? return type?
+  return null;
         // return pstmt;
       }
 
@@ -1074,7 +1077,9 @@ public class PostgresModule extends AbstractQuercusModule {
     // driver cannot report anything useful to the caller. Thus the driver always
     // returns "" to ResultSetMetaData.getTableName(fieldNumber+1)
 
-    throw new UnimplementedException("pg_field_table");
+    env.stub("pg_field_table");
+
+    return "";
   }
 
   /**
@@ -1170,7 +1175,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       Object userconn = conn.getConnection();
 
-      Object pgconn = ((com.caucho.sql.UserConnection)userconn).getConnection();
+      Object pgconn = ((com.caucho.sql.UserConnection) userconn).getConnection();
 
       // getNotifications()
       Object notifications[] = (Object[]) method.invoke(pgconn, new Object[] {});
@@ -1450,7 +1455,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       Object userconn = conn.getConnection();
 
-      Object pgconn = ((com.caucho.sql.UserConnection)userconn).getConnection();
+      Object pgconn = ((com.caucho.sql.UserConnection) userconn).getConnection();
 
       // Large Objects may not be used in auto-commit mode.
       ((java.sql.Connection)pgconn).setAutoCommit(false);
@@ -1500,7 +1505,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       Object userconn = conn.getConnection();
 
-      Object pgconn = ((com.caucho.sql.UserConnection)userconn).getConnection();
+      Object pgconn = ((com.caucho.sql.UserConnection) userconn).getConnection();
 
       lobManager = method.invoke(pgconn, new Object[] {});
       // lobManager = ((org.postgresql.PGConnection)conn).getLargeObjectAPI();
@@ -1605,7 +1610,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       Object userconn = conn.getConnection();
 
-      Object pgconn = ((com.caucho.sql.UserConnection)userconn).getConnection();
+      Object pgconn = ((com.caucho.sql.UserConnection) userconn).getConnection();
 
       lobManager = method.invoke(pgconn, new Object[] {});
 
@@ -1651,20 +1656,6 @@ public class PostgresModule extends AbstractQuercusModule {
     // binary data like images or sound.
 
     throw new UnimplementedException("pg_lo_read_all");
-
-    /*
-      InputStream in = largeObject.getInputStream();
-
-      byte buf[] = new byte[2048];
-      int s, tl = 0;
-      while ((s = fis.read(buf, 0, 2048)) > 0)
-      {
-      obj.write(buf, 0, s);
-      tl += s;
-      }
-
-      return 0;
-    */
   }
 
   /**
@@ -1772,7 +1763,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       Object userconn = conn.getConnection();
 
-      Object pgconn = ((com.caucho.sql.UserConnection)userconn).getConnection();
+      Object pgconn = ((com.caucho.sql.UserConnection) userconn).getConnection();
 
       lobManager = method.invoke(pgconn, new Object[] {});
 
@@ -1988,9 +1979,6 @@ public class PostgresModule extends AbstractQuercusModule {
                              @NotNull Postgres conn,
                              String data)
   {
-    //throw new UnimplementedException("pg_put_line");
-
-
     try {
 
       Class cl = Class.forName("org.postgresql.core.PGStream");
@@ -2078,7 +2066,66 @@ public class PostgresModule extends AbstractQuercusModule {
                                       @NotNull PostgresResult result,
                                       int fieldCode)
   {
-    throw new UnimplementedException("pg_result_error_field");
+    try {
+
+      // Get the postgres specific server error message
+      // org.postgresql.util.ServerErrorMessage
+      Object serverError = ((Postgres) result.getConnection()).getServerErrorMessage();
+
+      Class cl = Class.forName("org.postgresql.util.ServerErrorMessage");
+
+      String methodName;
+
+      switch (fieldCode) {
+      case PGSQL_DIAG_SEVERITY:
+        methodName = "getSeverity";
+        break;
+      case PGSQL_DIAG_SQLSTATE:
+        methodName = "getSQLState";
+        break;
+      case PGSQL_DIAG_MESSAGE_PRIMARY:
+        methodName = "getMessage";
+        break;
+      case PGSQL_DIAG_MESSAGE_DETAIL:
+        methodName = "getDetail";
+        break;
+      case PGSQL_DIAG_MESSAGE_HINT:
+        methodName = "getHint";
+        break;
+      case PGSQL_DIAG_STATEMENT_POSITION:
+        methodName = "getPosition";
+        break;
+      case PGSQL_DIAG_INTERNAL_POSITION:
+        methodName = "getInternalPosition";
+        break;
+      case PGSQL_DIAG_INTERNAL_QUERY:
+        methodName = "getInternalQuery";
+        break;
+      case PGSQL_DIAG_CONTEXT:
+        methodName = "getWhere";
+        break;
+      case PGSQL_DIAG_SOURCE_FILE:
+        methodName = "getFile";
+        break;
+      case PGSQL_DIAG_SOURCE_LINE:
+        methodName = "getLine";
+        break;
+      case PGSQL_DIAG_SOURCE_FUNCTION:
+        methodName = "getRoutine";
+        break;
+      default:
+        return null;
+      }
+
+      Method method = cl.getDeclaredMethod(methodName, null);
+      Object errorField = method.invoke(serverError, new Object[] {});
+
+      return errorField.toString();
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return null;
+    }
   }
 
   /**
@@ -2373,7 +2420,12 @@ public class PostgresModule extends AbstractQuercusModule {
   public String pg_tty(Env env,
                        @Optional Postgres conn)
   {
-    throw new UnimplementedException("pg_tty");
+    // Note:  pg_tty() is obsolete, since the server no longer pays attention to
+    // the TTY setting, but the function remains for backwards compatibility.
+
+    env.stub("pg_tty");
+
+    return "";
   }
 
   /**
@@ -2409,7 +2461,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
     env.stub("pg_untrace");
 
-    return false;
+    return true;
   }
 
   /**
