@@ -83,9 +83,9 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
     return _controller;
   }
 
-  public ObjectName getObjectName()
+  public String getObjectName()
   {
-    return _controller.getObjectName();
+    return _controller.getObjectName().toString();
   }
 
   public String getStartupMode()

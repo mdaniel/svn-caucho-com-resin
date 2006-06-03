@@ -47,7 +47,7 @@ public interface DeployControllerMBean
    */
   @MBeanAttribute(description="The JMX ObjectName for the MBean",
                   category = MBeanAttributeCategory.CONFIGURATION)
-  public ObjectName getObjectName();
+  public String getObjectName();
 
   /**
    * Returns the startup mode, one of "default", "automatic", "lazy", or "manual".

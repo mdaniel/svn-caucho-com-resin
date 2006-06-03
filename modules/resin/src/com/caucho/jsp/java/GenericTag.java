@@ -50,6 +50,9 @@ import com.caucho.jsp.*;
  */
 abstract public class GenericTag extends JspContainerNode {
   private static final String DEFAULT_VAR_TYPE = "java.lang.String";
+
+  private static final HashSet<String> _primTypes
+    = new HashSet<String>();
   
   protected TagInstance _tag;
   protected TagInfo _tagInfo;
@@ -899,11 +902,32 @@ abstract public class GenericTag extends JspContainerNode {
     throws JspParseException
   {
     try {
+      if (_primTypes.contains(className))
+	return;
+      else if (className.endsWith("[]")) {
+	validateClass(className.substring(0, className.length() - 2), varName);
+	return;
+      }
+
+      if (className.indexOf('.') < 0)
+	className = "java.lang." + className;
+      
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
       Class cl = Class.forName(className, false, loader);
     } catch (ClassNotFoundException e) {
       throw error(L.l("'{0}' is an unknown class for tag variable '{1}'.",
 		      className, varName));
     }
+  }
+
+  static {
+    _primTypes.add("boolean");
+    _primTypes.add("byte");
+    _primTypes.add("short");
+    _primTypes.add("int");
+    _primTypes.add("long");
+    _primTypes.add("float");
+    _primTypes.add("double");
+    _primTypes.add("char");
   }
 }

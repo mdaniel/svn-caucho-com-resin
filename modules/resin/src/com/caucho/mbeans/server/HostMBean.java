@@ -39,11 +39,6 @@ import javax.management.ObjectName;
 
 public interface HostMBean extends DeployControllerMBean {
   /**
-   * Returns the host's JMX name.
-   */
-  public ObjectName getObjectName();
-
-  /**
    * Returns the host name.
    */
   public String getHostName();
