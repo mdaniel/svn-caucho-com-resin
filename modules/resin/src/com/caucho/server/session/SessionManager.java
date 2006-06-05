@@ -113,6 +113,7 @@ public class SessionManager implements ObjectManager, AlarmListener {
 
   private boolean _isModuloSessionId = false;
   private boolean _isAppendServerIndex = false;
+  private boolean _isTwoDigitSessionIndex = false;
   
   // invalidate the session after the listeners have been called
   private boolean _isInvalidateAfterListener;
@@ -1018,30 +1019,11 @@ public class SessionManager implements ObjectManager, AlarmListener {
       if (index < 0)
         index = 0;
 
-      long random = RandomUtil.getRandomLong();
-
-      int digit;
-
-      if (_srunLength <= 0)
-	digit = 0;
-      else if (_isModuloSessionId) {
-	digit = RandomUtil.nextInt(64);
-	
-	digit = (digit - digit % _srunLength) + index;
-      }
-      else
-	digit = index;
-
-      // server/01l3 - check for overflow 
-      if (digit >= 64)
-	digit = index;
-
       int length = _cookieLength;
 
-      if (_srunLength > 0) {
-	cb.append(convert(digit));
-	length--;
-      }
+      addBackup(cb, index);
+
+      long random = RandomUtil.getRandomLong();
 
       for (int i = 0; i < 11 && length-- > 0; i++) {
         cb.append(convert(random));
@@ -1076,6 +1058,63 @@ public class SessionManager implements ObjectManager, AlarmListener {
       throw new RuntimeException();
 
     return id;
+  }
+
+  /**
+   * Adds the primary/backup/third digits to the session id.
+   */
+  private void addBackup(StringBuffer cb, int index)
+  {
+    addDigit(cb, index);
+
+    int backupLength = _srunLength;
+    if (backupLength < 3)
+      backupLength = 3;
+    int backup;
+
+    if (_srunLength <= 1) {
+      addDigit(cb, 1);
+      backup = 0;
+    }
+    else if (_srunLength == 2) {
+      backup = 0;
+      
+      addDigit(cb, (index + 1) % 2);
+    }
+    else {
+      int sublen = _srunLength - 1;
+      if (sublen > 7)
+	sublen = 7;
+	
+      backup = RandomUtil.nextInt(sublen);
+      
+      addDigit(cb, (index + backup + 1) % backupLength);
+    }
+      
+    if (_srunLength <= 2)
+      addDigit(cb, 2);
+    else {
+      int sublen = _srunLength - 2;
+      if (sublen > 6)
+	sublen = 6;
+
+      int third = RandomUtil.nextInt(sublen);
+
+      if (backup <= third)
+	third += 1;
+      
+      addDigit(cb, (index + third + 1) % backupLength);
+    }
+  }
+
+  private void addDigit(StringBuffer cb, int digit)
+  {
+    if (_srunLength <= 64 && ! _isTwoDigitSessionIndex)
+      cb.append(convert(digit));
+    else {
+      cb.append(convert(digit / 64));
+      cb.append(convert(digit));
+    }
   }
 
   /**
