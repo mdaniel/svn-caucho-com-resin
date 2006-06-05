@@ -35,7 +35,6 @@ import java.util.logging.Level;
 import java.io.IOException;
 
 import javax.management.ObjectName;
-import javax.management.MBeanOperationInfo;
 
 import com.caucho.log.Log;
 
@@ -45,14 +44,16 @@ import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadWritePair;
 
-import com.caucho.mbeans.server.ClusterClientMBean;
 import com.caucho.util.L10N;
 
 /**
- * Defines a connection to one of the servers in a distribution group.
+ * Defines a member of the cluster.
+ *
+ * A {@link ClusterClient} obtained with {@link #getClient} is used to actually
+ * communicate with this ClusterServer when it is active in another instance of
+ * Resin .
  */
 public class ClusterServer
-  implements ClusterClientMBean
 {
   private static final Logger log = Log.open(ClusterServer.class);
   private static final L10N L = new L10N(ClusterServer.class);
@@ -68,6 +69,8 @@ public class ClusterServer
   private Path _tcpPath;
 
   private ClusterClient _client;
+
+  private ClusterClientAdmin _admin;
 
   public ClusterServer()
   {
@@ -203,9 +206,10 @@ public class ClusterServer
     return _cluster.getClientWriteTimeout();
   }
 
-  /**
-   * Returns the socket timeout when reading and writing to the
-   * target server.
+   /**
+   * @deprecated
+   *
+   * Use {@link #getReadTimeout} or {@link #getWriteTimeout}
    */
   public long getTimeout()
   {
@@ -229,14 +233,6 @@ public class ClusterServer
   }
 
   /**
-   * Returns the number of active connections.
-   */
-  public int getActiveCount()
-  {
-    return _client.getActiveCount();
-  }
-
-  /**
    * Initialize
    */
   public void init()
@@ -254,6 +250,8 @@ public class ClusterServer
 
     _client = new ClusterClient(this);
 
+    _admin = new ClusterClientAdmin(this);
+
     try {
       String clusterName = _cluster.getId();
       if (clusterName == null || clusterName.equals(""))
@@ -265,14 +263,35 @@ public class ClusterServer
                                       ",host=" + host +
                                       ",port=" + getPort());
 
-      Jmx.register(this, objectName);
+      Jmx.register(_admin, objectName);
 
       _objectName = objectName.toString();
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
     }
+
   }
 
+  /**
+   * Returns the number of active connections.
+   */
+  public int getActiveCount()
+  {
+    return _client.getActiveCount();
+  }
+
+  /**
+   * Returns the number of idle connections.
+   */
+  public int getIdleCount()
+  {
+    return _client.getIdleCount();
+  }
+
+  public int getLifetimeConnectionCount()
+  {
+    return _client.getLifetimeConnectionCount();
+  }
   /**
    * Returns true if the server is dead.
    */
@@ -286,7 +305,7 @@ public class ClusterServer
    */
   public boolean isActive()
   {
-    return _client.isActive();
+    return _client.isEnabled();
   }
 
   /**
@@ -371,4 +390,5 @@ public class ClusterServer
             " host=" + _port.getHost() + ":" + _port.getPort() +
             " cluster=" + _cluster.getId() + "]");
   }
+
 }

@@ -159,12 +159,12 @@ abstract public class QSocket {
   /**
    * Returns the total number of bytes read from the socket connection.
    */
-  abstract public int getTotalReadBytes();
+  abstract public long getTotalReadBytes();
 
   /**
    * Returns the total number of bytes written to the socket connection.
    */
-  abstract public int getTotalWriteBytes();
+  abstract public long getTotalWriteBytes();
 
   /**
    * returns true if it's closed.

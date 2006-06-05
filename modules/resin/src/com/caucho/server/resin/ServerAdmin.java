@@ -40,8 +40,6 @@ import com.caucho.server.cluster.Cluster;
 import com.caucho.server.host.HostController;
 
 import com.caucho.mbeans.server.ServerMBean;
-import com.caucho.jmx.MBeanAttribute;
-import com.caucho.jmx.MBeanAttributeCategory;
 
 import java.util.ArrayList;
 
@@ -136,118 +134,97 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return hostNameList.toArray(new ObjectName[hostNameList.size()]);
   }
 
-  public int getTotalConnectionCount()
+  public int getActiveThreadCount()
   {
     ServletServer server = getDeployInstance();
 
     if (server == null)
       return -1;
 
-    int connectionCount = -1;
+    int activeThreadCount = -1;
 
     for (Port port : server.getPorts()) {
-      if (port.getTotalConnectionCount() >= 0) {
-        if (connectionCount == -1)
-          connectionCount = 0;
+      if (port.getActiveThreadCount() >= 0) {
+        if (activeThreadCount == -1)
+          activeThreadCount = 0;
 
-        connectionCount += port.getTotalConnectionCount();
+        activeThreadCount += port.getActiveThreadCount();
       }
     }
 
-    return connectionCount;
+    return activeThreadCount;
   }
 
-  public int getActiveConnectionCount()
+  public int getKeepaliveThreadCount()
   {
     ServletServer server = getDeployInstance();
 
     if (server == null)
       return -1;
 
-    int activeConnectionCount = -1;
-
-    for (Port port : server.getPorts()) {
-      if (port.getActiveConnectionCount() >= 0) {
-        if (activeConnectionCount == -1)
-          activeConnectionCount = 0;
-
-        activeConnectionCount += port.getActiveConnectionCount();
-      }
-    }
-
-    return activeConnectionCount;
-  }
-
-  public int getKeepaliveConnectionCount()
-  {
-    ServletServer server = getDeployInstance();
-
-    if (server == null)
-      return -1;
-
-    int keepaliveConnectionCount = -1;
+    int keepaliveThreadCount = -1;
 
     for (Port port : server.getPorts()) {
       if (port.getKeepaliveConnectionCount() >= 0) {
-        if (keepaliveConnectionCount == -1)
-          keepaliveConnectionCount = 0;
+        if (keepaliveThreadCount == -1)
+          keepaliveThreadCount = 0;
 
-        keepaliveConnectionCount += port.getKeepaliveConnectionCount();
+        keepaliveThreadCount += port.getKeepaliveConnectionCount();
       }
     }
 
-    return keepaliveConnectionCount;
+    return keepaliveThreadCount;
   }
 
-  public int getSelectConnectionCount()
+  public int getKeepaliveSelectCount()
   {
     ServletServer server = getDeployInstance();
 
     if (server == null)
       return -1;
 
-    int selectConnectionCount = -1;
+    int keepaliveSelectCount = -1;
 
     for (Port port : server.getPorts()) {
       if (port.getSelectConnectionCount() >= 0) {
-        if (selectConnectionCount == -1)
-          selectConnectionCount = 0;
+        if (keepaliveSelectCount == -1)
+          keepaliveSelectCount = 0;
 
-        selectConnectionCount += port.getSelectConnectionCount();
+        keepaliveSelectCount += port.getSelectConnectionCount();
       }
     }
 
-    return selectConnectionCount;
+    return keepaliveSelectCount;
   }
 
-  public long getLifetimeConnectionCount()
+  public long getLifetimeRequestCount()
   {
     ServletServer server = getDeployInstance();
 
     if (server == null)
       return -1;
 
-    long lifetimeConnectionCount = 0;
+    long lifetimeRequestCount = 0;
 
     for (Port port : server.getPorts())
-      lifetimeConnectionCount += port.getLifetimeConnectionCount();
+      lifetimeRequestCount += port.getLifetimeRequestCount();
 
-    return lifetimeConnectionCount;
+    return lifetimeRequestCount;
   }
 
-  public long getLifetimeConnectionTime()
+  public long getLifetimeRequestTime()
   {
     ServletServer server = getDeployInstance();
 
     if (server == null)
       return -1;
 
-    long lifetimeConnectionTime = 0;
+    long lifetimeRequestTime = 0;
 
     for (Port port : server.getPorts())
-      lifetimeConnectionTime += port.getLifetimeConnectionTime();
+      lifetimeRequestTime += port.getLifetimeRequestTime();
 
-    return lifetimeConnectionTime;
+    return lifetimeRequestTime;
   }
 
   public long getLifetimeReadBytes()

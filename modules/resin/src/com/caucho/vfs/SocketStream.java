@@ -52,8 +52,8 @@ public class SocketStream extends StreamImpl {
 
   private boolean _throwReadInterrupts = false;
 
-  private int _totalReadBytes;
-  private int _totalWriteBytes;
+  private long _totalReadBytes;
+  private long _totalWriteBytes;
 
   public SocketStream()
   {
@@ -246,12 +246,12 @@ public class SocketStream extends StreamImpl {
     _totalWriteBytes = 0;
   }
 
-  public int getTotalReadBytes()
+  public long getTotalReadBytes()
   {
     return _totalReadBytes;
   }
 
-  public int getTotalWriteBytes()
+  public long getTotalWriteBytes()
   {
     return _totalWriteBytes;
   }

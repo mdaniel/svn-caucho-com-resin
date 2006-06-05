@@ -57,7 +57,7 @@ import com.caucho.mbeans.server.ClusterMBean;
 /**
  * Defines a set of clustered servers.
  */
-public class Cluster implements EnvironmentListener, ClusterMBean {
+public class Cluster implements EnvironmentListener {
   static protected final L10N L = new L10N(ClusterGroup.class);
   static protected final Logger log = Log.open(Cluster.class);
 
@@ -452,7 +452,9 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
       ObjectName objectName = Jmx.getObjectName("type=Cluster,name=" + name);
       _objectName = objectName.toString();
 
-      Jmx.register(this, objectName);
+      ClusterAdmin admin = new ClusterAdmin(this);
+
+      Jmx.register(admin, objectName);
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
     }

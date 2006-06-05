@@ -285,12 +285,12 @@ public class QSocketWrapper extends QSocket {
       _streamImpl.resetTotalBytes();
   }
 
-  public int getTotalReadBytes()
+  public long getTotalReadBytes()
   {
     return (_streamImpl == null) ? 0 : _streamImpl.getTotalReadBytes();
   }
 
-  public int getTotalWriteBytes()
+  public long getTotalWriteBytes()
   {
     return (_streamImpl == null) ? 0 : _streamImpl.getTotalWriteBytes();
   }

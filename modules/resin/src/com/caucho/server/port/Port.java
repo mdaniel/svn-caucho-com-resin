@@ -58,19 +58,15 @@ import com.caucho.lifecycle.Lifecycle;
 
 import com.caucho.jmx.Jmx;
 
-import com.caucho.mbeans.server.PortMBean;
-
 /**
  * Represents a protocol connection.
  */
 public class Port
-  implements EnvironmentListener, Runnable, PortMBean
+  implements EnvironmentListener, Runnable
 {
   private static final L10N L = new L10N(Port.class);
 
   private static final Logger log = Log.open(Port.class);
-
-  private static final long CLOSE_INTERVAL = 1000L;
 
   // started at 128, but that seems wasteful since the active threads
   // themselves are buffering the free connections
@@ -107,7 +103,6 @@ public class Port
   private int _minSpareConnection = 16;
 
   private int _keepaliveMax = -1;
-  private long _keepaliveTimeout = 120000L;
 
   private int _minSpareListen = 5;
   private int _maxSpareListen = 10;
@@ -134,14 +129,12 @@ public class Port
   private volatile int _idleThreadCount;
   private volatile int _startThreadCount;
 
-  private volatile long _lastThreadTime;
-
   private volatile int _connectionCount;
 
-  private volatile long _lifetimeConnectionCount;
+  private volatile long _lifetimeRequestCount;
   private volatile long _lifetimeKeepaliveCount;
   private volatile long _lifetimeClientDisconnectCount;
-  private volatile long _lifetimeConnectionTime;
+  private volatile long _lifetimeRequestTime;
   private volatile long _lifetimeReadBytes;
   private volatile long _lifetimeWriteBytes;
 
@@ -512,14 +505,14 @@ public class Port
   /**
    * Returns the number of connections
    */
-  public int getTotalConnectionCount()
+  public int getConnectionCount()
   {
     return _connectionCount;
   }
 
-  public long getLifetimeConnectionCount()
+  public long getLifetimeRequestCount()
   {
-    return _lifetimeConnectionCount;
+    return _lifetimeRequestCount;
   }
 
   public long getLifetimeKeepaliveCount()
@@ -532,9 +525,9 @@ public class Port
     return _lifetimeClientDisconnectCount;
   }
 
-  public long getLifetimeConnectionTime()
+  public long getLifetimeRequestTime()
   {
-    return _lifetimeConnectionTime;
+    return _lifetimeRequestTime;
   }
 
   public long getLifetimeReadBytes()
@@ -576,6 +569,11 @@ public class Port
     synchronized (_keepaliveCountLock) {
       return _keepaliveCount;
     }
+  }
+
+  public Lifecycle getLifecycleState()
+  {
+    return null;
   }
 
   /**
@@ -649,7 +647,7 @@ public class Port
       else
         _objectName = Jmx.getObjectName("type=Port,port=" + _port +",host=" + _host);
 
-      Jmx.register(this, _objectName);
+      Jmx.register(new PortAdmin(this), _objectName);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -850,19 +848,10 @@ public class Port
   /**
    * Marks a new thread as stopped.
    */
-  void threadEnd(TcpConnection conn,
-                 long milliseconds,
-                 int readBytes,
-                 int writeBytes,
-                 boolean isClientDisconnect)
+  void threadEnd(TcpConnection conn)
   {
     synchronized (_threadCountLock) {
       _threadCount--;
-      _lifetimeConnectionCount++;
-      if (isClientDisconnect) _lifetimeClientDisconnectCount++;
-      _lifetimeConnectionTime += milliseconds;
-      _lifetimeReadBytes += readBytes;
-      _lifetimeWriteBytes += writeBytes;
     }
   }
 
@@ -877,7 +866,6 @@ public class Port
       else if (_connectionMax <= _connectionCount + _minSpareConnection)
         return false;
 
-      _lifetimeKeepaliveCount++;
       _keepaliveCount++;
 
       return true;

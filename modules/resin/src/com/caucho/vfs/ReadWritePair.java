@@ -28,39 +28,32 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 public class ReadWritePair {
-  private ReadStream readStream;
-  private WriteStream writeStream;
+  private ReadStream _readStream;
+  private WriteStream _writeStream;
 
   /**
    * Creates a ReadWritePair
-   */ 
+   */
   ReadWritePair(ReadStream readStream, WriteStream writeStream)
   {
-    this.readStream = readStream;
-    this.writeStream = writeStream;
+    this._readStream = readStream;
+    this._writeStream = writeStream;
   }
-  
+
   /**
    * Return the read stream of the pair.
    */
   public ReadStream getReadStream()
   {
-    return readStream;
+    return _readStream;
   }
-  
+
   /**
    * Return the write stream of the pair.
    */
   public WriteStream getWriteStream()
   {
-    return writeStream;
+    return _writeStream;
   }
 }

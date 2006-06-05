@@ -29,105 +29,182 @@
 
 package com.caucho.mbeans.server;
 
+import com.caucho.jmx.MBeanAttribute;
+import com.caucho.jmx.MBeanAttributeCategory;
+
+import javax.management.ObjectName;
+
 /**
  * Represents a protocol connection.
+ * A typical ObjectName for a ClusterMBean is
+ * <tt>resin:type=Port,Server=default,port=80</tt>.
  */
 public interface PortMBean {
   /**
+   * Returns the {@link javax.management.ObjectName} of the mbean.
+   */
+  @MBeanAttribute(description="The JMX ObjectName for the MBean",
+                  category=MBeanAttributeCategory.CONFIGURATION)
+  public ObjectName getObjectName();
+
+  /**
    * Returns the port's protocol name.
    */
+  @MBeanAttribute(description="The protocol for the port",
+                  category=MBeanAttributeCategory.CONFIGURATION)
   public String getProtocolName();
-  
+
   /**
-   * Returns the port's host.
+   * Returns the ip address or used to bind the port.
    */
+  @MBeanAttribute(description="The ip address or host name used to bind the port",
+                  category=MBeanAttributeCategory.CONFIGURATION)
   public String getHost();
-  
+
   /**
-   * Returns the port's port.
+   * Returns the port number used to bind the port.
    */
+  @MBeanAttribute(description="The port number used to bind the port",
+                  category=MBeanAttributeCategory.CONFIGURATION)
   public int getPort();
-  
+
   /**
-   * Returns the maximum connections.
+   * Returns the maximum number of active connections allowed for the port.
    */
+  @MBeanAttribute(description="The maximum number of current connections" +
+                              " allowed for the port",
+                  category=MBeanAttributeCategory.CONFIGURATION)
   public int getConnectionMax();
 
   /**
-   * Returns the maximum keepalive connections.
+   * Returns the maximum number of keepalive connections allowed for the port.
    */
+  @MBeanAttribute(description="The maximum number of keepalive connections" +
+                              " allowed for the port",
+                  category=MBeanAttributeCategory.CONFIGURATION)
   public int getKeepaliveMax();
 
-  /**
-   * Returns true for an active port.
-   */
-  public boolean isActive();
+  @MBeanAttribute(description="True if the port is using SSL encryption",
+                  category=MBeanAttributeCategory.CONFIGURATION)
+  public boolean isSSL();
 
   /**
-   * Returns the thread count.
+   * Returns the timeout for socket reads when waiting for data from a client.
+   *
+   * Corresponds to the functionality described in
+   * {@link java.net.Socket#setSoTimeout(int)}, although the actual
+   * socket connection may be handled in different ways.
    */
-  public int getThreadCount();
+  @MBeanAttribute(description="Timeout for socket reads when waiting for data" +
+                              " from a client",
+                  category=MBeanAttributeCategory.CONFIGURATION)
+  public long getReadTimeout();
 
   /**
-   * Returns the active thread count.
+   * Returns the timeout for socket writes when writing data to a client.
    */
+  @MBeanAttribute(description="Timeout for socket writes when sending data" +
+                              " to a client",
+                  category=MBeanAttributeCategory.CONFIGURATION)
+  public long getWriteTimeout();
+
+  /*
+   * Returns the lifecycle state.
+   */
+  @MBeanAttribute(description="The lifecycle state",
+                  category=MBeanAttributeCategory.STATISTIC)
+  public String getState();
+
+  /**
+   * Returns the current number of threads that are servicing requests.
+   */
+  @MBeanAttribute(description="The current number of threads that are"
+                              + " servicing requests",
+                  category=MBeanAttributeCategory.STATISTIC)
   public int getActiveThreadCount();
 
   /**
-   * Returns the idle thread count.
+   * Returns the current number of threads that are idle and
+   * waiting to service requests.
    */
+  @MBeanAttribute(description="The current number of threads that are"
+                              + " idle and waiting to service requests",
+                  category=MBeanAttributeCategory.STATISTIC)
   public int getIdleThreadCount();
 
-  /**
-   * Returns the current number of connections.
-   */
-  public int getTotalConnectionCount();
 
   /**
-   * Returns the current number of active connections.
+   * Returns the current number of connections that are in the keepalive
+   * state and are using a thread to maintain the connection.
    */
-  public int getActiveConnectionCount();
+  @MBeanAttribute(description="The current number of connections that are" +
+                              " in the keepalive state and are using" +
+                              " a thread to maintain the connection",
+                  category=MBeanAttributeCategory.STATISTIC)
+  public int getKeepaliveThreadCount();
 
   /**
-   * Returns the current number of keepalive connections.
+   * Returns the current number of connections that are in the keepalive
+   * state and are using select to maintain the connection.
    */
-  public int getKeepaliveConnectionCount();
+  @MBeanAttribute(description="The current number of connections that are" +
+                              " in the keepalive state and are using" +
+                              " select to maintain the connection",
+                  category=MBeanAttributeCategory.STATISTIC)
+  public int getKeepaliveSelectCount();
 
   /**
-   * Returns the current number of select connections.
+   * Returns the total number of requests serviced by the server
+   * since it started.
    */
-  public int getSelectConnectionCount();
+  @MBeanAttribute(description="The total number of requests serviced by the"
+                              + " server since it started",
+                  category=MBeanAttributeCategory.STATISTIC)
+  public long getLifetimeRequestCount();
 
   /**
-   * Returns the number of connections that have been serviced by this
-   * port in it's lifetime.
+   * Returns the number of requests that have ended up in the keepalive state
+   * for this server in it's lifetime.
    */
-  public long getLifetimeConnectionCount();
-
-  /**
-   * Returns the number of connections that have ended up in the keepalive state
-   * for this port in it's lifetime.
-   */
+  @MBeanAttribute(description="The total number of requests that have ended"
+                              + " up in the keepalive state",
+                  category=MBeanAttributeCategory.STATISTIC)
   public long getLifetimeKeepaliveCount();
 
   /**
-   * Returns the number of connections that have ended with a {@link com.caucho.vfs.ClientDisconnectException}
-   * for this port in it's lifetime.
+   * The total number of connections that have terminated with
+   * {@link com.caucho.vfs.ClientDisconnectException}.
    */
+  @MBeanAttribute(description="The total number of connections that have " +
+                              " terminated with a client disconnect",
+                  category=MBeanAttributeCategory.STATISTIC)
   public long getLifetimeClientDisconnectCount();
 
   /**
-   * Returns the total duration in milliseconds that connections serviced by this port have taken.
+   * Returns the total duration in milliseconds that requests serviced by
+   * this port have taken.
    */
-  public long getLifetimeConnectionTime();
+  @MBeanAttribute(description="The total duration in milliseconds that"
+                              + " requests serviced by this service have taken",
+                  category=MBeanAttributeCategory.STATISTIC)
+  public long getLifetimeRequestTime();
 
   /**
-   * Returns the total number of bytes that connections serviced by this port have read.
+   * Returns the total number of bytes that requests serviced by this
+   * port have read.
    */
+  @MBeanAttribute(description="The total number of bytes that requests"
+                              + " serviced by this port have read",
+                  category=MBeanAttributeCategory.STATISTIC)
   public long getLifetimeReadBytes();
 
   /**
-   * Returns the total number of bytes that connections serviced by this port have written.
+   * Returns the total number of bytes that requests serviced by this
+   * port have written.
    */
+  @MBeanAttribute(description="The total number of bytes that requests"
+                              + " serviced by this port have written",
+                  category=MBeanAttributeCategory.STATISTIC)
   public long getLifetimeWriteBytes();
+
 }

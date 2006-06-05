@@ -29,39 +29,156 @@
 
 package com.caucho.mbeans.server;
 
+import com.caucho.jmx.MBeanAttributeCategory;
+import com.caucho.jmx.MBeanAttribute;
+import com.caucho.jmx.MBeanOperation;
+import com.caucho.jmx.MBean;
+
 import javax.management.ObjectName;
 
 /**
- * Admin for a cluster.
+ * A representation of a member of a cluster, a target server with which this instance can communicate.
  */
+@MBean(description="A representation of a member of a cluster, a target server with which this instance can communicate")
 public interface ClusterClientMBean {
   /**
-   * Returns the cluster client's object name.
+   * Returns the {@link ObjectName} of the mbean.
    */
+  @MBeanAttribute(description="The JMX ObjectName for the MBean",
+                  category=MBeanAttributeCategory.CONFIGURATION)
   public String getObjectName();
-  
-  /**
-   * Returns true if active.
-   */
-  public boolean isActive();
 
   /**
-   * Returns the active count.
+  * The server id that identifies the target server.
    */
-  public int getActiveCount();
-  
+  @MBeanAttribute(description="The server id that identifies the target server",
+                  category =MBeanAttributeCategory.CONFIGURATION)
+  public String getServerId();
+
   /**
-   * Check if can connect.
    */
+  @MBeanAttribute(description="The unique index of the target server",
+                  category=MBeanAttributeCategory.CONFIGURATION)
+  public int getIndex();
+
+  /**
+   * Returns the ip address or host name of the target server.
+   */
+  @MBeanAttribute(description="The ip address or host name of the target server",
+                  category=MBeanAttributeCategory.CONFIGURATION)
+  public String getHost();
+
+  /**
+   * Returns the srun port number of the target server.
+   */
+  @MBeanAttribute(description="The srun port number of the target server",
+                  category=MBeanAttributeCategory.CONFIGURATION)
+  public int getPort();
+
+  /**
+   * Returns true if the target server is only used by the load balancer
+   * as a backup.
+   */
+  @MBeanAttribute(description="True if the target server is only used by the"  +
+                              " load balancer as a backup",
+                  category=MBeanAttributeCategory.CONFIGURATION)
+  public boolean isBackup();
+
+  /**
+   * Returns the timeout to use for reads when communicating with
+   * the target server.
+   */
+  @MBeanAttribute(description="Timeout to use for reads when communicating" +
+                              " with the target server",
+                  category=MBeanAttributeCategory.CONFIGURATION)
+  public long getReadTimeout();
+
+  /**
+   * Returns the timeout to use for writes when communicating with
+   * the target server.
+   */
+  @MBeanAttribute(description="Timeout to use for writes when communicating" +
+                              " with the target server",
+                  category=MBeanAttributeCategory.CONFIGURATION)
+  public long getWriteTimeout();
+
+  /**
+   * Returns the timeout for an idle socket that is connected to the target
+   * server. If the socket is not used within the timeout period the idle
+   * connection is closed.
+   */
+  @MBeanAttribute(description="Timeout for an idle socket that is connected" +
+                              " to the target server. If the socket is not" +
+                              " used within the timeout period the idle" +
+                              " connection is closed",
+                  category=MBeanAttributeCategory.CONFIGURATION)
+  public long getLiveTime();
+
+  /**
+   * Returns the timeout for assuming a target server remains unavailable once
+   * a connection attempt fails. When the timeout period elapses another attempt
+   * is made to connect to the target server
+   */
+  @MBeanAttribute(description="Timeout for assuming a target server remains" +
+                              " unavailable once a connection attempt fails." +
+                              " When the timeout period elapses another" +
+                              " attempt is made to connect to the target server",
+                  category=MBeanAttributeCategory.CONFIGURATION)
+  public long getDeadTime();
+
+  /**
+   * Returns the lifecycle state.
+   */
+  @MBeanAttribute(description="The lifecycle state",
+                  category=MBeanAttributeCategory.STATISTIC)
+  public String getState();
+
+  @MBeanAttribute(description="True if the target server is not reachable",
+                  category=MBeanAttributeCategory.STATISTIC)
+  public boolean isDead();
+
+  /**
+   * Returns The number of connections actively being used to communicate with
+   * the target server.
+   */
+  @MBeanAttribute(description="The number of connections actively being used"
+                              + " to communicate with the target server",
+                  category=MBeanAttributeCategory.STATISTIC)
+  public int getActiveConnectionCount();
+
+  /**
+   * Returns the number of open but currently unused connections to the
+   * target server.
+   */
+  @MBeanAttribute(description="The number of open but currently unused" +
+                              " connections to the target server",
+                  category=MBeanAttributeCategory.STATISTIC)
+  public int getIdleConnectionCount();
+
+  /**
+   * Returns the number of connections that have been made to the target server.
+   */
+  @MBeanAttribute(description="The number of connections that have been made" +
+                              " to the target server",
+                  category=MBeanAttributeCategory.STATISTIC)
+  public int getLifetimeConnectionCount();
+
+  /**
+   * Enables connections to the target server.
+   */
+  @MBeanOperation(description="Enables connections to the target server")
+  public void start();
+
+  /**
+   * Disables connections to the target server.
+   */
+  @MBeanOperation(description="Disables connections to the target server")
+  public void stop();
+
+  /**
+   * Returns true if a connection can be made to the target server.
+   */
+  @MBeanOperation(description="Returns true if a connection can be made to the" +
+                              " target server")
   public boolean canConnect();
-
-  /**
-   * enable the client
-   */
-  public void enable();
-
-  /**
-   * disable the client
-   */
-  public void disable();
 }

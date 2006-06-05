@@ -366,7 +366,7 @@ public class ResinStatusServlet extends GenericServlet {
         for (int i = 0; i < portList.length; i++) {
           PortMBean port = (PortMBean) Jmx.findGlobal(portList[i]);
 
-          if (port == null || ! port.isActive())
+          if (port == null || ! "active".equals(port.getState()))
             continue;
 
           String host = port.getHost();
@@ -379,9 +379,9 @@ public class ResinStatusServlet extends GenericServlet {
 
           out.print("    <td>" + port.getActiveThreadCount());
           out.print("<td>" + port.getIdleThreadCount());
-          out.print("<td>" + port.getThreadCount());
-          out.print("<td>" + port.getKeepaliveConnectionCount());
-          out.print("<td>" + port.getSelectConnectionCount());
+          out.print("<td>" + port.getActiveThreadCount());
+          out.print("<td>" + port.getKeepaliveThreadCount());
+          out.print("<td>" + port.getKeepaliveSelectCount());
           out.println();
 
           out.println();
@@ -444,7 +444,7 @@ public class ResinStatusServlet extends GenericServlet {
           else
             out.println(" (down)");
 
-          out.println("<td>" + client.getActiveCount());
+          out.println("<td>" + client.getActiveConnectionCount());
         }
 
         out.println("</table>");

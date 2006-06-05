@@ -66,7 +66,7 @@ public class TcpConnection extends PortConnection implements ThreadTask {
   private boolean _isKeepalive;
   private boolean _isDead;
 
-  private Object _requestLock = new Object();
+  private final Object _requestLock = new Object();
 
   private String _id = "tcp-connection-" + _g_id++;
 
@@ -106,7 +106,7 @@ public class TcpConnection extends PortConnection implements ThreadTask {
       Port port = getPort();
 
       if (port != null)
-	log.fine("starting connection " + this + ", total=" + port.getTotalConnectionCount());
+	log.fine("starting connection " + this + ", total=" + port.getConnectionCount());
       else
 	log.fine("starting connection " + this);
     }
@@ -315,6 +315,9 @@ public class TcpConnection extends PortConnection implements ThreadTask {
     Port port = getPort();
 
     if (! port.keepaliveBegin(this)) {
+      if (log.isLoggable(Level.FINE))
+        log.fine("[" + getId() + "] failed keepalive");
+
       free();
     }
     else if (port.getSelectManager() != null) {
@@ -322,11 +325,21 @@ public class TcpConnection extends PortConnection implements ThreadTask {
         // XXX: s/b
         // setKeepalive();
         // ThreadPool.schedule(this);
+        if (log.isLoggable(Level.FINE))
+          log.fine("[" + getId() + "] FAILED keepalive (select)");
+
         port.keepaliveEnd(this);
 	free();
       }
+      else {
+        if (log.isLoggable(Level.FINE))
+          log.fine("[" + getId() + "] keepalive (select)");
+      }
     }
     else {
+      if (log.isLoggable(Level.FINE))
+        log.fine("[" + getId() + "] keepalive (thread)");
+
       setKeepalive();
       ThreadPool.schedule(this);
     }
@@ -368,10 +381,6 @@ public class TcpConnection extends PortConnection implements ThreadTask {
 
     ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
 
-    boolean isClientDisconnect = false;
-    int readBytes = 0;
-    int writeBytes = 0;
-
     long startTime = Alarm.getExactTime();
 
     try {
@@ -382,9 +391,6 @@ public class TcpConnection extends PortConnection implements ThreadTask {
 	  return;
 	}
 
-        int startReadBytes = _socket.getTotalReadBytes();
-        int startWriteBytes = _socket.getTotalWriteBytes();
-
         isFirst = false;
 	
 	try {
@@ -393,12 +399,13 @@ public class TcpConnection extends PortConnection implements ThreadTask {
 	  
 	  do {
 	    thread.setContextClassLoader(systemLoader);
-	    
-	    isKeepalive = false;
+
+            isKeepalive = false;
 
 	    if (! port.isClosed() &&
 		(! isWaitForRead || getReadStream().waitForRead())) {
-	      synchronized (_requestLock) {
+
+              synchronized (_requestLock) {
 		isKeepalive = request.handleRequest();
 	      }
 	    }
@@ -413,7 +420,6 @@ public class TcpConnection extends PortConnection implements ThreadTask {
 	}
 	catch (ClientDisconnectException e) {
 	  isKeepalive = false;
-          isClientDisconnect = true;
 
           if (log.isLoggable(Level.FINER))
 	    log.finer("[" + getId() + "] " + e);
@@ -428,9 +434,6 @@ public class TcpConnection extends PortConnection implements ThreadTask {
 	finally {
 	  thread.setContextClassLoader(systemLoader);
 
-          readBytes = _socket.getTotalReadBytes() - startReadBytes;
-          writeBytes = _socket.getTotalWriteBytes() - startWriteBytes;
-
           if (! isKeepalive)
 	    closeImpl();
 	}
@@ -439,9 +442,7 @@ public class TcpConnection extends PortConnection implements ThreadTask {
       log.log(Level.WARNING, e.toString(), e);
       isKeepalive = false;
     } finally {
-      long time = Alarm.getExactTime() - startTime;
-
-      port.threadEnd(this, time, readBytes, writeBytes, isClientDisconnect);
+      port.threadEnd(this);
 
       if (isKeepalive)
 	keepalive();
@@ -512,7 +513,7 @@ public class TcpConnection extends PortConnection implements ThreadTask {
 	  prefix = "[" + serverId + "] ";
     
 	if (port != null)
-	  log.fine(prefix + "closing connection " + this + ", total=" + port.getTotalConnectionCount());
+	  log.fine(prefix + "closing connection " + this + ", total=" + port.getConnectionCount());
 	else
 	  log.fine(prefix + "closing connection " + this);
       }

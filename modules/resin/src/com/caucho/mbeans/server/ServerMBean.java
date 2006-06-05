@@ -44,7 +44,7 @@ public interface ServerMBean extends DeployControllerMBean {
   /**
    * Returns true if a {@link com.caucho.server.port.AbstractSelectManager} is enabled and active
    */
-  @MBeanAttribute(description="A SelectManager handles keepalive connections without requiring a thread",
+  @MBeanAttribute(description="A SelectManager handles keepalive without requiring a thread",
                   category=MBeanAttributeCategory.CONFIGURATION)
   public boolean isSelectManager();
 
@@ -72,32 +72,32 @@ public interface ServerMBean extends DeployControllerMBean {
   public String []getClusterObjectNames();
 
   /**
-   * Returns the current number of requests being serviced by the controller.
+   * Returns the current number of threads that are servicing requests.
    */
-  @MBeanAttribute(description="The total number of connections",
-                  category= MBeanAttributeCategory.STATISTIC)
-  public int getTotalConnectionCount();
+  @MBeanAttribute(description="The current number of threads that are"
+                              + " servicing requests",
+                  category=MBeanAttributeCategory.STATISTIC)
+  public int getActiveThreadCount();
 
   /**
-   * Returns the current number of active connections.
+   * Returns the current number of connections that are in the keepalive
+   * state and are using a thread to maintain the connection.
    */
-  @MBeanAttribute(description="The number of connections actively servicing requests",
+  @MBeanAttribute(description="The current number of connections that are" +
+                              " in the keepalive state and are using" +
+                              " a thread to maintain the connection",
                   category=MBeanAttributeCategory.STATISTIC)
-  public int getActiveConnectionCount();
+  public int getKeepaliveThreadCount();
 
   /**
-   * Returns the current number of keepalive connections.
+   * Returns the current number of connections that are in the keepalive
+   * state and are using select to maintain the connection.
    */
-  @MBeanAttribute(description="The number of connections in the keepalive state",
+  @MBeanAttribute(description="The current number of connections that are" +
+                              " in the keepalive state and are using" +
+                              " select to maintain the connection",
                   category=MBeanAttributeCategory.STATISTIC)
-  public int getKeepaliveConnectionCount();
-
-  /**
-   * Returns the current number of select connections.
-   */
-  @MBeanAttribute(description="The number of keepalive connections in the select state",
-                  category=MBeanAttributeCategory.STATISTIC)
-  public int getSelectConnectionCount();
+  public int getKeepaliveSelectCount();
 
   /**
    * Returns the total number of requests serviced by the server
@@ -106,54 +106,52 @@ public interface ServerMBean extends DeployControllerMBean {
   @MBeanAttribute(description="The total number of requests serviced by the"
                               + " server since it started",
                   category=MBeanAttributeCategory.STATISTIC)
-  public long getLifetimeConnectionCount();
+  public long getLifetimeRequestCount();
 
   /**
-   * Returns the total duration in milliseconds that connections serviced by
+   * Returns the number of requests that have ended up in the keepalive state
+   * for this server in it's lifetime.
+   */
+  @MBeanAttribute(description="The total number of requests that have ended"
+                              + " up in the keepalive state",
+                  category=MBeanAttributeCategory.STATISTIC)
+  public long getLifetimeKeepaliveCount();
+
+  /**
+   * The total number of connections that have terminated with
+   * {@link com.caucho.vfs.ClientDisconnectException}.
+   */
+  @MBeanAttribute(description="The total number of connections that have " +
+                              " terminated with a client disconnect",
+                  category=MBeanAttributeCategory.STATISTIC)
+  long getLifetimeClientDisconnectCount();
+
+  /**
+   * Returns the total duration in milliseconds that requests serviced by
    * this server have taken.
    */
   @MBeanAttribute(description="The total duration in milliseconds that"
-                              + " connections serviced by this service have taken",
+                              + " requests serviced by this service have taken",
                   category=MBeanAttributeCategory.STATISTIC)
-  long getLifetimeConnectionTime();
+  long getLifetimeRequestTime();
 
   /**
-   * Returns the total number of bytes that connections serviced by this
+   * Returns the total number of bytes that requests serviced by this
    * server have read.
    */
-  @MBeanAttribute(description="The total number of bytes that connections"
+  @MBeanAttribute(description="The total number of bytes that requests"
                               + " serviced by this server have read",
                   category=MBeanAttributeCategory.STATISTIC)
   long getLifetimeReadBytes();
 
   /**
-   * Returns the total number of bytes that connections serviced by this
+   * Returns the total number of bytes that requests serviced by this
    * server have written.
    */
-  @MBeanAttribute(description="The total number of bytes that connections"
+  @MBeanAttribute(description="The total number of bytes that requests"
                               + " serviced by this server have written",
                   category=MBeanAttributeCategory.STATISTIC)
   long getLifetimeWriteBytes();
-
-  /**
-   * Returns the number of connections that have ended with a
-   * {@link com.caucho.vfs.ClientDisconnectException}
-   * for this server in it's lifetime.
-   */
-  @MBeanAttribute(description="The total number of connections"
-                              + " serviced by this server that have termintated"
-                              + " with a client disconnect",
-                  category=MBeanAttributeCategory.STATISTIC)
-  long getLifetimeClientDisconnectCount();
-
-  /**
-   * Returns the number of connections that have ended up in the keepalive state
-   * for this server in it's lifetime.
-   */
-  @MBeanAttribute(description="The total number of connections that have ended"
-                              + " up in the keepalive state",
-                  category=MBeanAttributeCategory.STATISTIC)
-  public long getLifetimeKeepaliveCount();
 
   /**
    * Returns the invocation cache hit count.

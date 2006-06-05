@@ -23,24 +23,62 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
 package com.caucho.mbeans.server;
 
+import com.caucho.jmx.MBeanAttribute;
+import com.caucho.jmx.MBeanAttributeCategory;
+import com.caucho.jmx.MBean;
+
 import javax.management.ObjectName;
 
 /**
- * Admin for a cluster.
+ * A Cluster is a collection of cluster members,
+ *
+ * Each instance of Resin has 0 or 1 active srun ports and accept
+ * inbound connections, available here with {@link #getPortObjectName}.
+ *
+ * Every instance of Resin can use
+ * {@link com.caucho.server.cluster.ClusterClient}s to establish
+ * outbound connections to other memebers of the cluster, available
+ * here with {@link #getClientObjectNames()}.
+ *
+ * A typical ObjectName for a ClusterMBean is
+ * <tt>resin:type=Cluster,Server=default,name=default</tt>.
  */
 public interface ClusterMBean {
   /**
-   * Returns the cluster's object name.
+   * Returns the {@link ObjectName} of the mbean.
    */
+  @MBeanAttribute(description="The JMX ObjectName for the MBean",
+                  category=MBeanAttributeCategory.CONFIGURATION)
   public String getObjectName();
 
   /**
-   * Returns the cluster client's object names.
+   * Returns the ObjectName of the port that is active for this instance, null
+   * if there is no active port for this instance. Connections to the port are
+   * inbound connections from a load balancer or from other
+   " members of the cluster.
    */
+  @MBeanAttribute(description="The port that is active for this instance." +
+                              " Connections to the port are inbound" +
+                              " connections from a load balancer or from other" +
+                              " members of the cluster",
+                  category=MBeanAttributeCategory.CONFIGURATION)
+  public ObjectName getPortObjectName();
+
+  /**
+   * Returns a list of {@link ObjectName}s for the
+   * {@link com.caucho.server.cluster.ClusterClient}s that
+   * are used to create outbound connections to communicate with
+   * members of the cluster.
+   */
+  @MBeanAttribute(description="The ClusterClients that are used to create" +
+                              " outbound connections to communicate with" +
+                              " members of the cluster",
+                  category=MBeanAttributeCategory.CONFIGURATION)
   public String []getClientObjectNames();
+
 }

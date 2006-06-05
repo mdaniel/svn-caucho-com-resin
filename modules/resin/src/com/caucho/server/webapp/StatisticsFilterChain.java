@@ -69,8 +69,8 @@ public class StatisticsFilterChain
 
         long time = Alarm.getExactTime();
 
-        int readBytes = -1;
-        int writeBytes = -1;
+        long readBytes = -1;
+        long writeBytes = -1;
 
         readBytes = tcpConnection.getSocket().getTotalReadBytes();
         writeBytes = tcpConnection.getSocket().getTotalWriteBytes();
@@ -89,7 +89,7 @@ public class StatisticsFilterChain
         readBytes = tcpConnection.getSocket().getTotalReadBytes() - readBytes;
         writeBytes = tcpConnection.getSocket().getTotalReadBytes() - writeBytes;
 
-        _application.updateStatistics(time, readBytes, writeBytes, clientDisconnectException != null);
+        _application.updateStatistics(time, (int) readBytes, (int) writeBytes, clientDisconnectException != null);
 
         if (clientDisconnectException != null)
           throw clientDisconnectException;

@@ -50,7 +50,7 @@ public class JavaModule extends AbstractQuercusModule {
   private static final L10N L = new L10N(JavaModule.class);
 
   /**
-   * Call the Java contructor and return the wrapped Java object.
+   * Call the Java constructor and return the wrapped Java object.
    */
   public static Value java(Env env,
 			   String className,

@@ -128,17 +128,25 @@
 The ThreadPool manages all threads used by Resin.
 </div>
 
+
+    descriptor.createAdminAttributeInfo("SpareThreadMin")
+      .setCategory(AdminAttributeCategory.CONFIGURATION)
+      .setDescription(L.l(
+
+    descriptor.createAdminAttributeInfo("IdleThreadCount")
+      .setCategory(AdminAttributeCategory.CONFIGURATION)
+      .setDescription(L.l(
 <table>
 <tr>
 <th colspan='2'>Config</th>
 <th colspan='3'>Threads</th>
 </tr>
 <tr>
-<th>thread-max</th>
-<th>spare-thread-min</th>
-<th>Active thread count</th>
-<th>Idle thread count</th>
-<th>Total count</th>
+<th title="The maximum number of threads that Resin can allocate.">thread-max</th>
+<th title="The minimum number of threads Resin should have available for new requests or other tasks.  This value causes a minimum number of idle threads, useful for situations where there is a sudden increase in the number of threads required.">spare-thread-min</th>
+<th title="The number of active threads. These threads are busy servicing requests or performing other tasks.">Active thread count</th>
+<th title="The number of idle threads. These threads are allocated but inactive, available for new requests or tasks.">Idle thread count</th>
+<th title="The current total number of threads managed by the pool.">Total count</th>
 </tr>
 <tr align='right'>
 <td><?= $threadPool->threadMax ?></td>
@@ -175,8 +183,8 @@ The ThreadPool manages all threads used by Resin.
 </tr>
 
 <?php
-    foreach ($poolObjectNames as $poolObjectName) {
-      $pool = $mbeanServer->lookup($poolObjectName);
+  foreach ($poolObjectNames as $poolObjectName) {
+    $pool = $mbeanServer->lookup($poolObjectName);
 ?>
 
 <tr>
@@ -241,6 +249,7 @@ The ThreadPool manages all threads used by Resin.
 <!-- Cluster -->
 
 <?php
+  # XXX: sort by $cluster->index
   foreach ($server->clusterObjectNames as $clusterObjectName) {
     $cluster = $mbeanServer->lookup($clusterObjectName);
 ?>

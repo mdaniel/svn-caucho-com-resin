@@ -51,11 +51,11 @@ public interface ResinServerMBean {
   public ObjectName getObjectName();
 
   /**
-   * Returns the ip address of the machine that is running this ResinServer.
+   * Returns the ip address or host name  of the machine that is running this ResinServer.
    */
-  @MBeanAttribute(description="The ip address of the machine that is running"
-                              + " this instance of Resin",
-                  category = MBeanAttributeCategory.CONFIGURATION)
+  @MBeanAttribute(description="The ip address or host name of the machine that"
+                              + " is running this instance of Resin",
+                  category=MBeanAttributeCategory.CONFIGURATION)
   public String getLocalHost();
 
   /**

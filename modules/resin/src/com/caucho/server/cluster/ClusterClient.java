@@ -30,7 +30,6 @@
 package com.caucho.server.cluster;
 
 import java.io.*;
-import java.net.*;
 import java.util.*;
 import java.util.logging.*;
 
@@ -39,10 +38,10 @@ import com.caucho.vfs.*;
 
 import com.caucho.log.Log;
 
-import com.caucho.config.types.Period;
-
 /**
- * Defines a connection to one of the servers in a distribution group.
+ * Represents a connection to one of the servers in a distribution group.
+ * A {@link ClusterServer} is used to define the properties of the server
+ * that is connected to.
  */
 public class ClusterClient {
   static protected final Logger log = Log.open(ClusterClient.class);
@@ -58,16 +57,18 @@ public class ClusterClient {
   private int _maxPoolSize = 16;
 
   private ClusterStream []_free = new ClusterStream[64];
-  private int _freeHead;
-  private int _freeTail;
+  private volatile int _freeHead;
+  private volatile int _freeTail;
   private int _freeSize = 16;
 
-  private long _lastFailTime;
+  private volatile long _lastFailTime;
 
-  private int _activeCount;
+  private volatile int _activeCount;
+  private volatile int _lifetimeConnectionCount;
 
-  private boolean _isActive = true;
-  private boolean _isClosed;
+  private volatile boolean _isEnabled = true;
+  private volatile boolean _isClosed;
+
 
   public ClusterClient(ClusterServer server)
   {
@@ -125,6 +126,19 @@ public class ClusterClient {
   }
 
   /**
+   * Returns the number of idle connections.
+   */
+  public int getIdleCount()
+  {
+    return (_freeHead - _freeTail + _free.length) % _free.length;
+  }
+
+  public int getLifetimeConnectionCount()
+  {
+    return _lifetimeConnectionCount;
+  }
+
+  /**
    * Sets the recycle pool size.
    */
   public void setMaxPoolSize(int size)
@@ -147,15 +161,15 @@ public class ClusterClient {
   {
     long now = Alarm.getCurrentTime();
 
-    return (now < _lastFailTime + _server.getDeadTime() || ! _isActive);
+    return (now < _lastFailTime + _server.getDeadTime() || ! _isEnabled);
   }
 
   /**
    * Return true if active.
    */
-  public boolean isActive()
+  public boolean isEnabled()
   {
-    return _isActive;
+    return _isEnabled;
   }
 
   /**
@@ -164,7 +178,7 @@ public class ClusterClient {
   public void enable()
   {
     if (! _isClosed)
-      _isActive = true;
+      _isEnabled = true;
   }
 
   /**
@@ -172,7 +186,7 @@ public class ClusterClient {
    */
   public void disable()
   {
-    _isActive = false;
+    _isEnabled = false;
   }
 
   /**
@@ -182,7 +196,7 @@ public class ClusterClient {
    */
   public ClusterStream openRecycle()
   {
-    if (! _isActive)
+    if (! _isEnabled)
       return null;
 
     long now = Alarm.getCurrentTime();
@@ -257,6 +271,8 @@ public class ClusterClient {
   void free(ClusterStream stream)
   {
     synchronized (this) {
+      _lifetimeConnectionCount++;
+
       int size = (_freeHead - _freeTail + _free.length) % _free.length;
 
       if (! _isClosed && size < _freeSize) {
@@ -326,7 +342,7 @@ public class ClusterClient {
         return;
 
       _isClosed = true;
-      _isActive = false;
+      _isEnabled = false;
       _freeHead = _freeTail = 0;
     }
 

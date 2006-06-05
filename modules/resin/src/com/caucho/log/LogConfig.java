@@ -74,6 +74,8 @@ public class LogConfig extends RotateLog implements LogMBean {
 
   /**
    * Sets the name of the logger to configure.
+   *
+   * @deprecated Use setName()
    */
   public void setId(String name)
   {

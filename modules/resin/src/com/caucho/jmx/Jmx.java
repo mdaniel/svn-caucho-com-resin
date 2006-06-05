@@ -678,7 +678,7 @@ public class Jmx {
   }
 
   // static
-  private Jmx() {}
+  public Jmx() {}
 
   private static void initStaticMBeans()
   {
