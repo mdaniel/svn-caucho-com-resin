@@ -157,6 +157,7 @@ public class PostgresModule extends AbstractQuercusModule {
                                  @NotNull Postgres conn)
   {
     try {
+      conn.setAsynchronousStatement(null);
       conn.setAsynchronousResult(null);
 
       return true;
@@ -640,9 +641,9 @@ public class PostgresModule extends AbstractQuercusModule {
    */
   @ReturnNullAsFalse
   public PostgresResult pg_execute(Env env,
-           @NotNull Postgres conn,
-           String stmtName,
-           ArrayValue params)
+                                   @NotNull Postgres conn,
+                                   String stmtName,
+                                   ArrayValue params)
   {
     try {
       PostgresStatement pstmt = conn.getStatement(stmtName);
@@ -666,15 +667,18 @@ public class PostgresModule extends AbstractQuercusModule {
         return null;
 
       if (pstmt.getStatementType().equals("SELECT")) {
-        return new PostgresResult(null, pstmt.getResultSet(), null);
+        PostgresResult result = new PostgresResult(null, pstmt.getResultSet(), null);
+        conn.setResultResource(result);
+        return result;
       } else {
-  // XXX: ??? return type?
-  return null;
+        // XXX: ??? return type?
+        return null;
         // return pstmt;
       }
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
+      conn.setResultResource(null);
       return null;
     }
   }
@@ -1246,18 +1250,69 @@ public class PostgresModule extends AbstractQuercusModule {
    */
   @ReturnNullAsFalse
   public PostgresResult pg_get_result(Env env,
-                                     @Optional Postgres conn)
+                                      @Optional Postgres conn)
   {
+    // Two different scenarios for pg_get_result:
+    //
+    // 1. pg_send_prepare/pg_send_execute - php/4370
+    //
+    //    pg_send_prepare($conn, "my_query", 'SELECT * FROM test WHERE data = $1');
+    //    $res1 = pg_get_result($conn);
+    //
+    //    pg_send_execute($conn, "my_query", array("Joe's Widgets"));
+    //    $res2 = pg_get_result($conn);
+    //
+    //    pg_send_execute($conn, "my_query", array("Clothes Clothes Clothes"));
+    //    $res3 = pg_get_result($conn);
+    //
+    // 2. pg_send_query - php/4334
+    //
+    //    pg_send_query($conn, "select * from test; select count(*) from test;");
+    //
+    //    // select * from test
+    //    $res = pg_get_result($conn);
+    //    $rows = pg_num_rows($res);
+    //
+    //    // select count(*) from test
+    //    $res = pg_get_result($conn);
+    //    $rows = pg_num_rows($res);
+
     try {
 
       if (conn == null)
         conn = getConnection(env);
 
-      PostgresResult resource = conn.getAsynchronousResult();
+      PostgresResult result = (PostgresResult) conn.getResultResource();
 
-      conn.setAsynchronousResult(null);
+      // 1. pg_send_prepare/pg_send_execute
+      if (conn.getAsynchronousStatement() != null) {
+        if (conn.getAsynchronousResult() != null) {
+          conn.setAsynchronousResult(null);
+          return result;
+        }
+        return null;
+      }
 
-      return resource;
+      // 2. pg_send_query
+      if (conn.getAsynchronousResult() != null) {
+
+        // Check for next result
+        // Ex: pg_send_query($conn, "select * from test; select count(*) from test;");
+
+        Statement stmt = result.getStatement();
+
+        stmt = ((com.caucho.sql.UserStatement) stmt).getStatement();
+
+        result = null;
+
+        if (stmt.getMoreResults()) {
+          result = (PostgresResult) conn.createResult(stmt, stmt.getResultSet());
+        }
+      }
+
+      conn.setAsynchronousResult(result);
+
+      return result;
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -1390,7 +1445,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       Statement stmt = result.getStatement();
 
-      stmt = ((com.caucho.sql.UserStatement)stmt).getStatement();
+      stmt = ((com.caucho.sql.UserStatement) stmt).getStatement();
 
       Class cl = Class.forName("org.postgresql.jdbc2.AbstractJdbc2Statement");
 
@@ -2009,9 +2064,9 @@ public class PostgresModule extends AbstractQuercusModule {
    */
   @ReturnNullAsFalse
   public PostgresResult pg_query_params(Env env,
-                                       @NotNull Postgres conn,
-                                       String query,
-                                       ArrayValue params)
+                                        @NotNull Postgres conn,
+                                        String query,
+                                        ArrayValue params)
   {
     try {
 
@@ -2233,11 +2288,11 @@ public class PostgresModule extends AbstractQuercusModule {
 
       // Note: for now, this is essentially the same as pg_execute.
 
-      PostgresResult resource = pg_execute(env, conn, stmtName, params);
+      PostgresResult result = pg_execute(env, conn, stmtName, params);
 
-      conn.setAsynchronousResult(resource);
+      conn.setAsynchronousResult(result);
 
-      if (resource != null) {
+      if (result != null) {
         return true;
       }
 
@@ -2317,7 +2372,8 @@ public class PostgresModule extends AbstractQuercusModule {
 
       PostgresResult result = pg_query(env, conn, query);
 
-      conn.setAsynchronousResult(result);
+      // We probably won't need this for now. See pg_get_result().
+      // conn.setAsynchronousResult(result);
 
       // This is to be compliant with real expected results.
       // Even a SELECT * FROM doesnotexist returns true from pg_send_query.
@@ -2338,6 +2394,8 @@ public class PostgresModule extends AbstractQuercusModule {
                                     String encoding)
   {
     //@todo conn should be optional
+    if (conn == null)
+      conn = getConnection(env);
 
     if (pg_query(env, conn, "SET CLIENT_ENCODING TO '" + encoding +"'") == null) {
       return -1;
