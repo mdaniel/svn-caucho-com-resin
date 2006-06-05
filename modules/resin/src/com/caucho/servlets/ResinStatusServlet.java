@@ -397,7 +397,7 @@ public class ResinStatusServlet extends GenericServlet {
     throws IOException, ServletException
   {
     try {
-      ObjectName[]clusterList = _servletServer.getClusterObjectNames();
+      String[]clusterList = _servletServer.getClusterObjectNames();
 
       for (int i = 0; i < clusterList.length; i++) {
         ClusterMBean cluster = (ClusterMBean) Jmx.findGlobal(clusterList[i]);
@@ -407,7 +407,7 @@ public class ResinStatusServlet extends GenericServlet {
           continue;
         }
 
-        ObjectName objectName = cluster.getObjectName();
+        ObjectName objectName = new ObjectName(cluster.getObjectName());
 
         String clusterName = objectName.getKeyProperty("name");
 
@@ -416,10 +416,10 @@ public class ResinStatusServlet extends GenericServlet {
         out.println("<tr><th>Host");
         out.println("    <th>Active");
 
-        ObjectName []srunNames = cluster.getClientObjectNames();
+        String []srunNames = cluster.getClientObjectNames();
 
         for (int j = 0; j < srunNames.length; j++) {
-          ObjectName srunName = srunNames[j];
+          ObjectName srunName = new ObjectName(srunNames[j]);
 
           ClusterClientMBean client;
           client = (ClusterClientMBean) Jmx.findGlobal(srunName);

@@ -37,10 +37,10 @@ public interface ClusterMBean {
   /**
    * Returns the cluster's object name.
    */
-  public ObjectName getObjectName();
+  public String getObjectName();
 
   /**
    * Returns the cluster client's object names.
    */
-  public ObjectName []getClientObjectNames();
+  public String []getClientObjectNames();
 }

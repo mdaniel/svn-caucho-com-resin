@@ -98,23 +98,23 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return portNameList.toArray(new ObjectName[portNameList.size()]);
   }
 
-  public ObjectName []getClusterObjectNames()
+  public String []getClusterObjectNames()
   {
     ServletServer server = getDeployInstance();
 
     if (server == null)
-      return new ObjectName[0];
+      return new String[0];
 
-    ArrayList<ObjectName> clusterNameList = new ArrayList<ObjectName>();
+    ArrayList<String> clusterNameList = new ArrayList<String>();
 
     for (Cluster cluster : server.getClusters()) {
-      ObjectName name = cluster.getObjectName();
+      String name = cluster.getObjectName();
 
       if (name != null)
         clusterNameList.add(name);
     }
 
-    return clusterNameList.toArray(new ObjectName[clusterNameList.size()]);
+    return clusterNameList.toArray(new String[clusterNameList.size()]);
   }
 
   public ObjectName []getHostObjectNames()

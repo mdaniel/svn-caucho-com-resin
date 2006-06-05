@@ -38,7 +38,7 @@ public interface ClusterClientMBean {
   /**
    * Returns the cluster client's object name.
    */
-  public ObjectName getObjectName();
+  public String getObjectName();
   
   /**
    * Returns true if active.

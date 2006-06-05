@@ -71,12 +71,14 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
 
   private String _serverId = "";
 
-  private ObjectName _objectName;
+  private String _objectName;
 
-  private ClusterServer []_serverList = new ClusterServer[0];
+  private ArrayList<ClusterServer> _serverList
+    = new ArrayList<ClusterServer>();
 
-  private ClusterGroup _defaultGroup;
-  private ArrayList<ClusterGroup> _groupList = new ArrayList<ClusterGroup>();
+  private ClusterServer[] _serverArray = new ClusterServer[0];
+
+  private ClusterGroup _group;
 
   private StoreManager _clusterStore;
 
@@ -92,6 +94,9 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
   public Cluster()
   {
     Environment.addEnvironmentListener(this);
+
+    _group = ClusterGroup.createClusterGroup();
+    _group.addCluster(this);
   }
 
   /**
@@ -143,8 +148,8 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
    */
   public ClusterServer findServer(String id)
   {
-    for (int i = 0; i < _serverList.length; i++) {
-      ClusterServer server = _serverList[i];
+    for (int i = _serverList.size() - 1; i >= 0; i--) {
+      ClusterServer server = _serverList.get(i);
 
       if (server != null && server.getId().equals(id))
         return server;
@@ -165,41 +170,33 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
       log.warning(L.l("duplicate <srun> with server-id='{0}'",
                       server.getId()));
 
-    if (_serverList.length <= server.getIndex()) {
-      int newLength = server.getIndex() + 1;
-      ClusterServer []newList = new ClusterServer[newLength];
-
-      System.arraycopy(_serverList, 0, newList, 0, _serverList.length);
-
-      _serverList = newList;
-    }
-
-    if (_serverList[server.getIndex()] != null)
-      throw new ConfigException(L.l("Cluster server `{0}' conflicts with a previous server.", server.getIndex()));
-
-    _serverList[server.getIndex()] = server;
+    _serverList.add(server);
+    _serverArray = new ClusterServer[_serverList.size()];
+    _serverList.toArray(_serverArray);
   }
-
-  /**
-   * Adds a new group to the cluster.
-   */
-  public ClusterGroup createGroup()
-  {
-    ClusterGroup group = new ClusterGroup();
-    group.setCluster(this);
-
-    _groupList.add(group);
-
-    return group;
-  }
-
   /**
    * Adds a srun server.
    */
   public void addPort(ClusterPort port)
     throws Exception
   {
-    createDefaultGroup().addPort(port);
+    ClusterServer server = new ClusterServer();
+    server.setCluster(this);
+    server.setPort(port);
+
+    if (port.getIndex() >= 0 &&
+	port.getIndex() != _serverList.size() + 1) {
+      log.config(L.l("srun index '{0}' for port 'id={1}' does not match expected cluster index '{2}'",
+		     port.getIndex(),
+		     port.getServerId(),
+		     _serverList.size() + 1));
+    }
+
+    port.setIndex(_serverList.size() + 1);
+    
+    server.init();
+    
+    addServer(server);
   }
 
   /**
@@ -212,14 +209,20 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
   }
 
   /**
-   * Creates the default group.
+   * Adds a srun server.
    */
-  ClusterGroup createDefaultGroup()
+  public ClusterClient findClient(String host, int port)
   {
-    if (_defaultGroup == null)
-      _defaultGroup = createGroup();
+    for (int i = _serverList.size() - 1; i >= 0; i--) {
+      ClusterServer server = _serverList.get(i);
+      ClusterPort clusterPort = server.getClusterPort();
 
-    return _defaultGroup;
+      if (host.equals(clusterPort.getHost()) &&
+	  port == clusterPort.getPort())
+	return server.getClient();
+    }
+
+    return null;
   }
 
   /**
@@ -398,8 +401,8 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
   {
     ClusterContainer container = ClusterContainer.create();
 
-    for (int i = 0; i < _serverList.length; i++) {
-      ClusterServer server = _serverList[i];
+    for (int i = 0; i < _serverList.size(); i++) {
+      ClusterServer server = _serverList.get(i);
 
       if (server == null)
         continue;
@@ -434,7 +437,7 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
 
       if (self != null)
         _clusterLocal.set(this);
-      else if (_clusterLocal.get() == null && _serverList.length == 0) {
+      else if (_clusterLocal.get() == null && _serverList.size() == 0) {
         // if it's the empty cluster, add it
         _clusterLocal.set(this);
       }
@@ -446,9 +449,10 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
       if (name == null || name.equals(""))
         name = "default";
 
-      _objectName = Jmx.getObjectName("type=Cluster,name=" + name);
+      ObjectName objectName = Jmx.getObjectName("type=Cluster,name=" + name);
+      _objectName = objectName.toString();
 
-      Jmx.register(this, _objectName);
+      Jmx.register(this, objectName);
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
     }
@@ -465,7 +469,7 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
   /**
    * Returns the JMX object name.
    */
-  public ObjectName getObjectName()
+  public String getObjectName()
   {
     return _objectName;
   }
@@ -485,18 +489,18 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
    */
   public ClusterServer []getServerList()
   {
-    return _serverList;
+    return _serverArray;
   }
 
   /**
    * Returns the client name list.
    */
-  public ObjectName []getClientObjectNames()
+  public String []getClientObjectNames()
   {
-    ObjectName []objectNames = new ObjectName[_serverList.length];
+    String []objectNames = new String[_serverList.size()];
 
-    for (int i = 0; i < _serverList.length; i++) {
-      ClusterServer client = _serverList[i];
+    for (int i = 0; i < _serverList.size(); i++) {
+      ClusterServer client = _serverList.get(i);
 
       objectNames[i] = client.getObjectName();
     }
@@ -509,8 +513,8 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
    */
   public ClusterServer getServer(String serverId)
   {
-    for (int i = 0; i < _serverList.length; i++) {
-      ClusterServer server = _serverList[i];
+    for (int i = 0; i < _serverList.size(); i++) {
+      ClusterServer server = _serverList.get(i);
 
       if (server != null && server.getId().equals(serverId))
         return server;
@@ -524,8 +528,8 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
    */
   public ClusterServer getServer(int index)
   {
-    for (int i = 0; i < _serverList.length; i++) {
-      ClusterServer server = _serverList[i];
+    for (int i = 0; i < _serverList.size(); i++) {
+      ClusterServer server = _serverList.get(i);
 
       if (server != null && server.getIndex() == index)
         return server;
@@ -541,8 +545,8 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
   {
     ArrayList<ClusterPort> ports = new ArrayList<ClusterPort>();
 
-    for (int i = 0; i < _serverList.length; i++) {
-      ClusterServer server = _serverList[i];
+    for (int i = 0; i < _serverList.size(); i++) {
+      ClusterServer server = _serverList.get(i);
 
       if (server != null) {
         ClusterPort port = server.getClusterPort();
@@ -606,8 +610,8 @@ public class Cluster implements EnvironmentListener, ClusterMBean {
       _isClosed = true;
     }
 
-    for (int i = 0; i < _serverList.length; i++) {
-      ClusterServer server = _serverList[i];
+    for (int i = 0; i < _serverList.size(); i++) {
+      ClusterServer server = _serverList.get(i);
 
       try {
         if (server != null)

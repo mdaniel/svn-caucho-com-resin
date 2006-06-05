@@ -240,7 +240,7 @@ public class SessionManager implements ObjectManager, AlarmListener {
 	  
 	  selfServer = _cluster.getSelfServer();
 	  if (selfServer != null) {
-	    _srunGroup = selfServer.getGroup().getServerList();
+	    _srunGroup = _cluster.getServerList();
 	    _srunIndex = selfServer.getIndex();
 	  }
 	}

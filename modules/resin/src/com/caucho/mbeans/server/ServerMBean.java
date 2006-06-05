@@ -69,7 +69,7 @@ public interface ServerMBean extends DeployControllerMBean {
   @MBeanAttribute(description="Cluster members are used for load balancing and"
                               + " distributed sessions",
                   category=MBeanAttributeCategory.CONFIGURATION)
-  public ObjectName []getClusterObjectNames();
+  public String []getClusterObjectNames();
 
   /**
    * Returns the current number of requests being serviced by the controller.

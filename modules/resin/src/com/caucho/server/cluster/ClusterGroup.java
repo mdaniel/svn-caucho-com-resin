@@ -43,111 +43,93 @@ import com.caucho.config.ConfigException;
 import com.caucho.loader.EnvironmentLocal;
 
 /**
- * Defines a group of cluster servers.  The group is an advanced
- * configuration in the case where the cluster is comprised of several
+ * Defines a group of clusters.  Normally, the group is the entire
+ * set of clusters in the server.
  * subgroups of servers.
  */
 public class ClusterGroup {
-  static protected final L10N L = new L10N(ClusterGroup.class);
-  static protected final Logger log = Log.open(ClusterGroup.class);
+  private static final L10N L = new L10N(ClusterGroup.class);
+  private static final Logger log = Log.open(ClusterGroup.class);
 
-  private Cluster _cluster;
-  private ClusterServer []_serverList = new ClusterServer[0];
+  static protected final EnvironmentLocal<ClusterGroup> _clusterGroupLocal
+    = new EnvironmentLocal<ClusterGroup>();
 
-  public ClusterGroup()
+  private final ArrayList<Cluster> _clusterList
+    = new ArrayList<Cluster>();
+
+  private ClusterGroup()
   {
   }
 
   /**
-   * Sets the group's server.
+   * Returns the cluster group for the current level.
    */
-  public void setCluster(Cluster cluster)
+  public static ClusterGroup getClusterGroup()
   {
-    _cluster = cluster;
+    return _clusterGroupLocal.get();
+  }
+    
+  /**
+   * Returns the cluster group for the current level.
+   */
+  public static ClusterGroup createClusterGroup()
+  {
+    ClusterGroup group = _clusterGroupLocal.getLevel();
+
+    if (group == null) {
+      group = new ClusterGroup();
+      _clusterGroupLocal.set(group);
+    }
+
+    return group;
   }
 
   /**
-   * Gets the group's server.
+   * Adds a cluster.
    */
-  public Cluster getCluster()
+  public void addCluster(Cluster cluster)
   {
-    return _cluster;
+    if (! _clusterList.contains(cluster))
+      _clusterList.add(cluster);
   }
 
   /**
-   * Adds a srun server.
+   * Returns all the clusters.
    */
-  public void addPort(ClusterPort port)
-    throws Exception
+  public ArrayList<Cluster> getClusterList()
   {
-    ClusterServer server = new ClusterServer();
-    server.setCluster(getCluster());
-    server.setGroup(this);
-    server.setPort(port);
+    return _clusterList;
+  }
 
-    if (port.getIndex() < 0)
-      port.setIndex(getCluster().getServerList().length + 1);
-    else if (port.getIndex() != getCluster().getServerList().length) {
-      log.config(L.l("srun index '{0}' for port 'id={1}' does not match expected cluster index '{2}'",
-		     port.getIndex(),
-		     port.getServerId(),
-		     getCluster().getServerList().length));
+  /**
+   * Returns the cluster with the matching name.
+   */
+  public Cluster findCluster(String id)
+  {
+    for (int i = _clusterList.size() - 1; i >= 0; i--) {
+      Cluster cluster = _clusterList.get(i);
+
+      if (cluster.getId().equals(id))
+	return cluster;
     }
     
-    server.init();
-
-    add(server);
+    return null;
   }
 
   /**
-   * Adds a srun server.
+   * Finds the srun client port matching the host and port.
    */
-  public void addSrun(ClusterPort port)
-    throws Exception
+  public ClusterClient findClient(String host, int port)
   {
-    addPort(port);
-  }
+    for (int i = _clusterList.size() - 1; i >= 0; i--) {
+      Cluster cluster = _clusterList.get(i);
 
-  /**
-   * Returns the array of servers in the group.
-   */
-  public ClusterServer []getServerList()
-  {
-    return _serverList;
-  }
-  
-  /**
-   * Adds a new server to the cluster.
-   */
-  void add(ClusterServer server)
-    throws ConfigException
-  {
-    int newLength = _serverList.length + 1;
-    ClusterServer []newList = new ClusterServer[newLength];
+      ClusterClient clusterClient = cluster.findClient(host, port);
 
-    System.arraycopy(_serverList, 0, newList, 0, _serverList.length);
-    _serverList = newList;
-
-    int i = newLength - 1;
-    for (; i > 0; i--) {
-      ClusterServer oldServer = _serverList[i - 1];
-
-      if (oldServer.getIndex() == server.getIndex())
-	throw new ConfigException(L.l("Cluster server `{0}' conflicts with a previous server.", server.getIndex()));
-
-      else if (oldServer.getIndex() < server.getIndex()) {
-	break;
-      }
-      else {
-	_serverList[i] = oldServer;
-	oldServer.setGroupIndex(i);
-      }
+      if (clusterClient != null)
+	return clusterClient;
     }
-
-    _serverList[i] = server;
-    server.setGroup(this);
-    server.setGroupIndex(i);
-
-    getCluster().addServer(server);
+    
+    return null;
   }
 }

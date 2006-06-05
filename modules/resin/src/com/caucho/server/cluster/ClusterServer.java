@@ -57,7 +57,7 @@ public class ClusterServer
   private static final Logger log = Log.open(ClusterServer.class);
   private static final L10N L = new L10N(ClusterServer.class);
 
-  private ObjectName _objectName;
+  private String _objectName;
 
   private Cluster _cluster;
   private ClusterGroup _group;
@@ -92,7 +92,7 @@ public class ClusterServer
   /**
    * Returns the object name.
    */
-  public ObjectName getObjectName()
+  public String getObjectName()
   {
     return _objectName;
   }
@@ -259,12 +259,15 @@ public class ClusterServer
       if (clusterName == null || clusterName.equals(""))
         clusterName = "default";
 
-      _objectName = Jmx.getObjectName("type=ClusterClient," +
+      ObjectName objectName;
+      objectName = Jmx.getObjectName("type=ClusterClient," +
                                       "Cluster=" + clusterName +
                                       ",host=" + host +
                                       ",port=" + getPort());
 
-      Jmx.register(this, _objectName);
+      Jmx.register(this, objectName);
+
+      _objectName = objectName.toString();
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
     }
