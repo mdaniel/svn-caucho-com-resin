@@ -44,7 +44,9 @@ import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadWritePair;
 
+
 import com.caucho.util.L10N;
+import com.caucho.util.RandomUtil;
 
 /**
  * Defines a member of the cluster.
@@ -376,7 +378,61 @@ public class ClusterServer
   }
 
   /**
-   * We now know that the server is live.
+   * Generate the primary, secondary, tertiary, returning the value encoded
+   * in a long.
+   */
+  public long generateBackupCode()
+  {
+    ClusterServer []srunList = getCluster().getServerList();
+    int srunLength = srunList.length;
+
+    long index = _groupIndex;
+    long backupCode = index;
+    
+    long backupLength = srunLength;
+    if (backupLength < 3)
+      backupLength = 3;
+    int backup;
+
+    if (srunLength <= 1) {
+      backup = 0;
+      backupCode |= 1L << 16;
+    }
+    else if (srunLength == 2) {
+      backup = 0;
+      
+      backupCode |= ((index + 1L) % 2) << 16;
+    }
+    else {
+      int sublen = srunLength - 1;
+      if (sublen > 7)
+	sublen = 7;
+	
+      backup = RandomUtil.nextInt(sublen);
+      
+      backupCode |= ((index + backup + 1L) % backupLength) << 16;
+    }
+
+    if (srunLength <= 2)
+      backupCode |= 2L << 32;
+    else {
+      int sublen = srunLength - 2;
+      if (sublen > 6)
+	sublen = 6;
+
+      int third = RandomUtil.nextInt(sublen);
+
+      if (backup <= third)
+	third += 1;
+
+      backupCode |= ((index + third + 1) % backupLength) << 32;
+    }
+
+    return backupCode;
+  }
+
+  /**
+   * Close any clients.
    */
   public void close()
   {

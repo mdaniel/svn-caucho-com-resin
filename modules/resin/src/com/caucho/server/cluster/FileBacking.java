@@ -139,14 +139,10 @@ public class FileBacking {
 
     if (length <= 0)
       length = 1;
-
-    int backupLength = length - 1;
-    if (backupLength <= 0)
-      backupLength = 1;
     
     _loadQuery = "SELECT access_time,data FROM " + _tableName + " WHERE id=?";
-    _insertQuery = ("INSERT into " + _tableName + " (id,data,mod_time,access_time,expire_interval,owner,backup) " +
-		    "VALUES(?,?,?,?,?,?,?)");
+    _insertQuery = ("INSERT into " + _tableName + " (id,data,mod_time,access_time,expire_interval,server1,server2,server3) " +
+		    "VALUES(?,?,?,?,?,?,?,?)");
     _updateQuery = "UPDATE " + _tableName + " SET data=?, mod_time=?, access_time=? WHERE id=?";
     _accessQuery = "UPDATE " + _tableName + " SET access_time=? WHERE id=?";
     _setExpiresQuery = "UPDATE " + _tableName + " SET expire_interval=? WHERE id=?";
@@ -157,9 +153,8 @@ public class FileBacking {
 
     _dumpQuery = ("SELECT id, expire_interval, data FROM " + _tableName +
 		  " WHERE ? <= mod_time AND " +
-		  "   (?=owner % " + length + " OR " +
-		  "    ?=((owner + backup % " + backupLength + " + 1) % " + length + "))");
-
+		  "   (?=server1 OR ?=server2 OR ?=server3)");
+    
     try {
       _path.mkdirs();
     } catch (IOException e) {
@@ -216,15 +211,16 @@ public class FileBacking {
 	log.log(Level.FINEST, e.toString(), e);
       }
 
-      String sql = ("CREATE TABLE " + _tableName + "(\n" +
+      String sql = ("CREATE TABLE " + _tableName + " (\n" +
 		    "  id VARCHAR(128) PRIMARY KEY,\n" +
 		    "  data BLOB,\n" +
 		    "  expire_interval INTEGER,\n" +
 		    "  access_time INTEGER,\n" +
 		    "  mod_time INTEGER,\n" +
 		    "  mod_count BIGINT,\n" +
-		    "  owner INTEGER,\n" +
-		    "  backup INTEGER)");
+		    "  server1 INTEGER,\n" +
+		    "  server2 INTEGER,\n" + 
+		    "  server3 INTEGER)");
 
       log.fine(sql);
 
@@ -466,7 +462,7 @@ public class FileBacking {
   public void storeSelf(String uniqueId,
 			ReadStream is, int length,
 			long expireInterval,
-			int owner, int backup)
+			int primary, int secondary, int tertiary)
   {
     ClusterConnection conn = null;
 
@@ -479,7 +475,7 @@ public class FileBacking {
       if (storeSelfUpdate(conn, uniqueId, is, length)) {
       }
       else if (storeSelfInsert(conn, uniqueId, is, length, expireInterval,
-			       owner, backup)) {
+			       primary, secondary, tertiary)) {
       }
       else if (! storeSelfUpdate(conn, uniqueId, is, length)) {
 	// The second update is for the rare case where
@@ -534,7 +530,7 @@ public class FileBacking {
   private boolean storeSelfInsert(ClusterConnection conn, String uniqueId,
 				  ReadStream is, int length,
 				  long expireInterval,
-				  int owner, int backup)
+				  int primary, int secondary, int tertiary)
   {
     try {
       PreparedStatement stmt = conn.prepareInsert();
@@ -549,8 +545,9 @@ public class FileBacking {
       stmt.setInt(4, nowMinutes);
       stmt.setInt(5, (int) (expireInterval / 60000L));
 
-      stmt.setInt(6, owner);
-      stmt.setInt(7, backup);
+      stmt.setInt(6, primary);
+      stmt.setInt(7, secondary);
+      stmt.setInt(8, tertiary);
       
       stmt.executeUpdate();
         

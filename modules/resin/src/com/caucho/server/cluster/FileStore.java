@@ -153,7 +153,7 @@ public class FileStore extends StoreManager {
     ReadStream is = tempStream.openRead(true);
     try {
       _backing.storeSelf(obj.getUniqueId(), is, length,
-			 obj.getExpireInterval(), 0, 0);
+			 obj.getExpireInterval(), 0, 0, 0);
 
       if (log.isLoggable(Level.FINE))
         log.fine("file store: " + obj.getUniqueId() + " length=" +

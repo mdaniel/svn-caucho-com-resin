@@ -172,6 +172,7 @@ public class SessionManager implements ObjectManager, AlarmListener {
 
   private String _distributionId;
   private Cluster _cluster;
+  private ClusterServer _selfServer;
   private ClusterServer []_srunGroup = new ClusterServer[0];
 
   private Alarm _alarm = new Alarm(this);
@@ -240,6 +241,7 @@ public class SessionManager implements ObjectManager, AlarmListener {
 	  _srunLength = _cluster.getServerList().length;
 	  
 	  selfServer = _cluster.getSelfServer();
+	  _selfServer = selfServer;
 	  if (selfServer != null) {
 	    _srunGroup = _cluster.getServerList();
 	    _srunIndex = selfServer.getIndex();
@@ -1065,46 +1067,16 @@ public class SessionManager implements ObjectManager, AlarmListener {
    */
   private void addBackup(StringBuffer cb, int index)
   {
-    addDigit(cb, index);
+    long backupCode;
 
-    int backupLength = _srunLength;
-    if (backupLength < 3)
-      backupLength = 3;
-    int backup;
-
-    if (_srunLength <= 1) {
-      addDigit(cb, 1);
-      backup = 0;
-    }
-    else if (_srunLength == 2) {
-      backup = 0;
-      
-      addDigit(cb, (index + 1) % 2);
-    }
-    else {
-      int sublen = _srunLength - 1;
-      if (sublen > 7)
-	sublen = 7;
-	
-      backup = RandomUtil.nextInt(sublen);
-      
-      addDigit(cb, (index + backup + 1) % backupLength);
-    }
-      
-    if (_srunLength <= 2)
-      addDigit(cb, 2);
-    else {
-      int sublen = _srunLength - 2;
-      if (sublen > 6)
-	sublen = 6;
-
-      int third = RandomUtil.nextInt(sublen);
-
-      if (backup <= third)
-	third += 1;
-      
-      addDigit(cb, (index + third + 1) % backupLength);
-    }
+    if (_selfServer != null)
+      backupCode = _selfServer.generateBackupCode();
+    else
+      backupCode = 0x000200010000L;
+    
+    addDigit(cb, (int) (backupCode & 0xffff));
+    addDigit(cb, (int) ((backupCode >> 16) & 0xffff));
+    addDigit(cb, (int) ((backupCode >> 32) & 0xffff));
   }
 
   private void addDigit(StringBuffer cb, int digit)
