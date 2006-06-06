@@ -41,6 +41,18 @@ import com.caucho.quercus.gen.PhpWriter;
  * Represents a PHP output buffer
  */
 public class OutputBuffer {
+  public static final int PHP_OUTPUT_HANDLER_START = 0;
+  public static final int PHP_OUTPUT_HANDLER_CONT = 1;
+  public static final int PHP_OUTPUT_HANDLER_END = 2;
+
+  private int _state;
+  private boolean _haveFlushed;
+  
+  private final boolean _erase;
+  private final int _chunkSize;
+  private final int _level;
+
+  private OutputBuffer _previous;
   private final OutputBuffer _next;
 
   private final TempStream _tempStream;
@@ -49,15 +61,26 @@ public class OutputBuffer {
   private final Env _env;
   private final Callback _callback;
 
-  OutputBuffer(OutputBuffer next, Env env, Callback callback)
+  OutputBuffer(OutputBuffer next, Env env, Callback callback, 
+               int chunkSize, boolean erase)
   {
     _next = next;
+    if (_next != null) {
+        _level = _next._level + 1;
+        _next._previous = this;
+    } else {
+        _level = 1;
+    }
+    _erase = erase;
+    _chunkSize = chunkSize;
 
     _env = env;
     _callback = callback;
 
     _tempStream = new TempStream();
     _out = new WriteStream(_tempStream);
+    _state = 1 << PHP_OUTPUT_HANDLER_START;
+    _haveFlushed = false;
   }
 
   /**
@@ -66,6 +89,14 @@ public class OutputBuffer {
   public OutputBuffer getNext()
   {
     return _next;
+  }
+
+  /**
+   * Returns the next output buffer;
+   */
+  public OutputBuffer getPrevious()
+  {
+    return _previous;
   }
 
   /**
@@ -90,7 +121,7 @@ public class OutputBuffer {
 
       // XXX: encoding
       while ((ch = rs.read()) >= 0) {
-	sb.append((char) ch);
+        sb.append((char) ch);
       }
 
       return new StringValueImpl(sb.toString());
@@ -118,7 +149,45 @@ public class OutputBuffer {
   }
 
   /**
-   * Returns the buffer length.
+   * Returns the nesting level.
+   */
+  public int getLevel()
+  {
+    return _level;
+  }
+
+  /**
+   * Returns true if this buffer has ever been flushed.
+   */
+  public boolean haveFlushed()
+  {
+    return _haveFlushed;
+  }
+
+  /**
+   * Returns the erase flag.
+   */
+  public boolean getEraseFlag()
+  {
+    // XXX: Why would anyone need this?  If the erase flag is false,
+    // that supposedly means that the buffer will not be destroyed 
+    // until the script finishes, but you can't access the buffer 
+    // after it has been popped anyway, so who cares if you delete 
+    // it or not?  It is also confusingly named.  More research may 
+    // be necessary...
+    return _erase;
+  }
+
+  /**
+   * Returns the chunk size.
+   */
+  public int getChunkSize()
+  {
+    return _chunkSize;
+  }
+
+  /**
+   * Cleans (clears) the buffer.
    */
   public void clean()
   {
@@ -132,28 +201,79 @@ public class OutputBuffer {
   }
 
   /**
-   * Closes the output buffer.
+   * Flushes the data without calling the callback.
    */
-  public void close()
+  private void doFlush()
   {
     try {
       _out.flush();
-      
+
       ReadStream rs = _tempStream.openRead(true);
 
       WriteStream out;
 
       if (_next != null)
-	out = _next.getOut();
+        out = _next.getOut();
       else
-	out = _env.getOriginalOut();
+        out = _env.getOriginalOut();
 
       rs.writeToStream(out);
-      
+
       rs.close();
     } catch (IOException e) {
       _env.error(e.toString(), e);
     }
+  }
+
+  /**
+   * Invokes the callback using the data in the current buffer.
+   */
+  private void callCallback()
+  {
+    if (_callback != null) {
+      Value result = 
+        _callback.call(_env, getContents(), LongValue.create(_state));
+      clean();
+      try {
+        _out.print(result.toString(_env).toString());
+      } catch (IOException e) {
+        _env.error(e.toString(), e);
+      }
+    }
+  }
+
+  /**
+   * Flushs the data in the stream, calling the callback with appropriate
+   * flags if necessary.
+   */
+  public void flush()
+  {
+    _state |= 1 << PHP_OUTPUT_HANDLER_CONT;
+    callCallback();
+    // clear the start and cont flags
+    _state &= ~(1 << PHP_OUTPUT_HANDLER_START);
+    _state &= ~(1 << PHP_OUTPUT_HANDLER_CONT);
+    doFlush();
+    _haveFlushed = true;
+  }
+
+  /**
+   * Closes the output buffer.
+   */
+  public void close()
+  {
+    _state |= 1 << PHP_OUTPUT_HANDLER_END;
+    callCallback();
+    // all data that has and ever will be written has now been processed
+    _state = 0; 
+    doFlush();
+    if (_next != null)
+      _next._previous = null;
+  }
+
+  public Callback getCallback()
+  {
+    return _callback;
   }
 }
 

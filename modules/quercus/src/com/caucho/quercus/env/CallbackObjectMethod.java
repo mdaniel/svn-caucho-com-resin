@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import com.caucho.vfs.WriteStream;
+import com.caucho.quercus.program.AbstractFunction;
 
 import java.util.IdentityHashMap;
 import java.io.IOException;
@@ -40,12 +41,13 @@ import java.io.IOException;
 public class CallbackObjectMethod extends Callback {
   private final Value _obj;
   private final String _methodName;
+  private final AbstractFunction _fun;
 
-  public CallbackObjectMethod(Value obj, String methodName)
+  public CallbackObjectMethod(Env env, Value obj, String methodName)
   {
     _obj = obj;
     _methodName = methodName.intern();
-    // XXX: should be able to cache actual method
+    _fun = env.findMethod(_obj.getType(), _methodName);
   }
 
   /**
@@ -132,5 +134,14 @@ public class CallbackObjectMethod extends Callback {
   {
     return true;
   }
-}
 
+  public String getCallbackName() 
+  {
+    return _methodName;
+  }
+
+  public boolean isInternal()
+  {
+    return _fun instanceof JavaInvoker;
+  }
+}

@@ -240,6 +240,7 @@ public final class Env {
 
   private WriteStream _originalOut;
   private OutputBuffer _outputBuffer;
+  private OutputBuffer _bottomOutputBuffer;
 
   private WriteStream _out;
 
@@ -606,11 +607,28 @@ public final class Env {
   }
 
   /**
+   * Returns the bottom output buffer.  Necessary for correct output
+   * in functions <code>ob_list_handlers()</code> and <code>ob_status()</code>.
+   */
+  public OutputBuffer getBottomOutputBuffer()
+  {
+    return _bottomOutputBuffer;
+  }
+
+  /**
    * Returns the writer.
    */
   public void pushOutputBuffer(Callback callback, int chunkSize, boolean erase)
   {
-    _outputBuffer = new OutputBuffer(_outputBuffer, this, callback);
+    if (_outputBuffer == null) {
+      _outputBuffer = 
+        new OutputBuffer(_outputBuffer, this, callback, chunkSize, erase);
+      _bottomOutputBuffer = _outputBuffer;
+    } 
+    else
+      _outputBuffer = 
+        new OutputBuffer(_outputBuffer, this, callback, chunkSize, erase);
+
     _out = _outputBuffer.getOut();
   }
 
@@ -630,8 +648,10 @@ public final class Env {
 
     if (_outputBuffer != null)
       _out = _outputBuffer.getOut();
-    else
+    else {
       _out = _originalOut;
+      _bottomOutputBuffer = null;
+    }
 
     return true;
   }
@@ -2663,7 +2683,7 @@ public final class Env {
         return new CallbackFunction(cl.getFunction(name.toString()));
       }
       else {
-        return new CallbackObjectMethod(obj, name.toString());
+        return new CallbackObjectMethod(this, obj, name.toString());
       }
     }
     else

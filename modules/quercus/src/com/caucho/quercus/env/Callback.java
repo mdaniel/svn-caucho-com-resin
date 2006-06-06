@@ -89,5 +89,17 @@ abstract public class Callback extends Value {
    * @return true if this is an invalid callback reference
    */
   abstract public boolean isValid();
+
+  /**
+   * Returns the name of the callback.
+   * 
+   */
+  abstract public String getCallbackName();
+
+  /**
+   * Returns true if this callback is implemented internally (i.e. in Java).
+   *
+   */
+  abstract public boolean isInternal();
 }
 

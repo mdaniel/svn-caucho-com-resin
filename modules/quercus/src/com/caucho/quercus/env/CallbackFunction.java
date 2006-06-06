@@ -143,6 +143,11 @@ public class CallbackFunction extends Callback {
     return _funName;
   }
 
+  public String getCallbackName()
+  {
+    return _funName;
+  }
+
   public AbstractFunction getFunction()
   {
     if (_fun == null)
@@ -154,5 +159,10 @@ public class CallbackFunction extends Callback {
   public String toString()
   {
     return getClass().getName() + '[' + _funName + ']';
+  }
+
+  public boolean isInternal()
+  {
+    return getFunction() instanceof JavaInvoker;
   }
 }
