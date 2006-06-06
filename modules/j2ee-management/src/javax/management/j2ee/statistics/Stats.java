@@ -19,36 +19,35 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
-package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.MBean;
+package javax.management.j2ee.statistics;
 
 /**
- * Management interface for the JVM.
+ * Base class interface for management objects that provide statistics.
  */
-@MBean(j2eeType="JVM")
-public interface JVM extends J2EEManagedObject {
+public interface Stats {
   /**
-   * Returns the java version
+   * A list of the statistic providing attributes.
+   * Each name in this list corresponds to the name of an attribute that returns
+   * a type of {@link Statistic}
    */
-  public String getJavaVersion();
+  public String []getSatisticNames();
 
   /**
-   * Returns the java vendor
+   * Returns the named statistic.
    */
-  public String getJavaVendor();
+  public Statistic getStatistic(String name);
 
   /**
-   * Returns the machine the JVM is running on, i.e. the fully
-   * qualified hostname.
+   * Returns a list of all {@link Statistic} supported by this
+   * management object.
    */
-  public String getNode();
+  public Statistic []getStatistics();
 }

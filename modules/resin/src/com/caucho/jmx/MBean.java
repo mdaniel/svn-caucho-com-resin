@@ -37,5 +37,6 @@ import java.lang.annotation.RetentionPolicy;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MBean {
-  public String description();
+  public String description() default "";
+  public String j2eeType() default "";
 }

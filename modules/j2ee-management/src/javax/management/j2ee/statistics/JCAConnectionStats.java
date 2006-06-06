@@ -19,36 +19,38 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
-package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.MBean;
+package javax.management.j2ee.statistics;
 
 /**
- * Management interface for the JVM.
+ * Statistics interface for JCA connections.
  */
-@MBean(j2eeType="JVM")
-public interface JVM extends J2EEManagedObject {
+public interface JCAConnectionStats extends Stats {
   /**
-   * Returns the java version
+   * Returns the ObjectName of the {@link JCAConnectionFactory}
+   * management bean for the connections.
    */
-  public String getJavaVersion();
+  public String getConnectionFactory();
+  /**
+   * Returns the ObjectName of the {@link JCAManagedConnectionFactory}
+   * management bean for the connections.
+   */
+  public String getManagedConnectionFactory();
 
   /**
-   * Returns the java vendor
+   * Returns the time spent waiting for a connection to be available.
    */
-  public String getJavaVendor();
+  public TimeStatistic getWaitTime();
 
   /**
-   * Returns the machine the JVM is running on, i.e. the fully
-   * qualified hostname.
+   * Returns the time spent using a connection.
    */
-  public String getNode();
+  public TimeStatistic getUseTime();
 }

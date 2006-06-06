@@ -19,36 +19,33 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
-package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.MBean;
+package javax.management.j2ee.statistics;
 
 /**
- * Management interface for the JVM.
+ * A statistic about a managed object, the current
+ * value and it's highest and lowest values.
  */
-@MBean(j2eeType="JVM")
-public interface JVM extends J2EEManagedObject {
+public interface RangeStatistic extends Statistic {
   /**
-   * Returns the java version
+   * The largest value that has occured.
    */
-  public String getJavaVersion();
+  public long getHighWaterMark();
 
   /**
-   * Returns the java vendor
+   * The smallest value that has occured.
    */
-  public String getJavaVendor();
+  public long getLowWaterMark();
 
   /**
-   * Returns the machine the JVM is running on, i.e. the fully
-   * qualified hostname.
+   * The current value.
    */
-  public String getNode();
+  public long getCurrent();
 }

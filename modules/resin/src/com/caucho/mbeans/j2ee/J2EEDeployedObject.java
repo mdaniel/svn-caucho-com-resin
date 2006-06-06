@@ -19,36 +19,28 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
+
 
 package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.MBean;
-
 /**
- * Management interface for the JVM.
+ * Base class management interface for deployed objects.
  */
-@MBean(j2eeType="JVM")
-public interface JVM extends J2EEManagedObject {
+public interface J2EEDeployedObject extends J2EEManagedObject {
   /**
-   * Returns the java version
+   * The original XML deployment descriptor that was created for this
+   * object.
    */
-  public String getJavaVersion();
-
+  public String getDeploymentDescriptor();
   /**
-   * Returns the java vendor
+   * Returns the ObjectName of the {@link J2EEServer}
+   * management bean on which this object is deployed.
    */
-  public String getJavaVendor();
-
-  /**
-   * Returns the machine the JVM is running on, i.e. the fully
-   * qualified hostname.
-   */
-  public String getNode();
+  public String getServer();
 }

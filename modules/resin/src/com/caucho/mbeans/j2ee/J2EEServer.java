@@ -29,32 +29,47 @@
 
 package com.caucho.mbeans.j2ee;
 
+import com.caucho.jmx.MBean;
+
 /**
- * J2EE Server.  The server corresponds to an instance of the product.
+ * Management interface for a J2EE server.
+ * The J2EEServer corresponds to one instance of the product.
  */
+@MBean(j2eeType="J2EEServer")
 public interface J2EEServer extends J2EEManagedObject {
   /**
-   * Returns the deployed object ObjectNames
+   * Returns the ObjectNames of the
+   * {@link J2EEApplication}, {@link AppClientModule},
+   * {@link ResourceAdapterModule}, {@link EJBModule}, and
+   * {@link WebModule}
+   * management beans for this server.
    */
-  public String []getdeployedObjects();
-  
+  public String []getDeployedObjects();
+
   /**
-   * Returns the deployed resource ObjectNamess
+   * Returns the ObjectNames of the
+   * {@link JCAResource}, {@link JavaMailResource},
+   * {@link JDBCResource}, {@link JMSResource},
+   * {@link JNDIResource}, {@link JTAResource},
+   * {@link RMI_IIOPResource}, {and @link URLResource},
+   * management beans for this server.
    */
-  public String []getdeployedResources();
-  
+  public String []getDeployedResources();
+
   /**
-   * Returns the deployed JVMs ObjectNames
+   * Returns the ObjectNames of the {@link JVM}
+   * management beans for each virtual machine on which
+   * this J2EEServer has running threads.
    */
-  public String []getjavaVMs();
-  
+  public String []getJavaVMs();
+
   /**
    * Returns the server vendor
    */
-  public String getserverVendor();
-  
+  public String getServerVendor();
+
   /**
    * Returns the server version
    */
-  public String getserverVersion();
+  public String getServerVersion();
 }

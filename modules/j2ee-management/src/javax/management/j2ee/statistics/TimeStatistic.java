@@ -19,36 +19,38 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
-package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.MBean;
+package javax.management.j2ee.statistics;
 
 /**
- * Management interface for the JVM.
+ * A time statistic about the performance of a task.
  */
-@MBean(j2eeType="JVM")
-public interface JVM extends J2EEManagedObject {
+public interface TimeStatistic extends Statistic {
   /**
-   * Returns the java version
+   * The number of times that the task being timed has been invoked
+   * since the measurement started.
    */
-  public String getJavaVersion();
+  public long getCount();
 
   /**
-   * Returns the java vendor
+   * The maximum amount of time that the task has taken.
    */
-  public String getJavaVendor();
+  public long getMaxTime();
 
   /**
-   * Returns the machine the JVM is running on, i.e. the fully
-   * qualified hostname.
+   * The minimum amount of time that the task has taken.
    */
-  public String getNode();
+  public long getMinTime();
+
+  /**
+   * The total amount of time that the task has taken.
+   */
+  public long getTotalTime();
 }

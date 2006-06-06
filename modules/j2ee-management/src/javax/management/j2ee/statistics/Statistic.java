@@ -19,36 +19,49 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
-package com.caucho.mbeans.j2ee;
-
-import com.caucho.jmx.MBean;
+package javax.management.j2ee.statistics;
 
 /**
- * Management interface for the JVM.
+ * A statistic about a managed object.
  */
-@MBean(j2eeType="JVM")
-public interface JVM extends J2EEManagedObject {
+public interface Statistic
+{
   /**
-   * Returns the java version
+   * Returns the name of this statistics, corresponding to the name of the {@link Stats}
+   * attribute that provides the value.
    */
-  public String getJavaVersion();
+  public String getName();
 
   /**
-   * Returns the java vendor
+   * Returns the unit of measurement for this statistic.
+   *
+   * TimeStatistic returns one of "HOUR", "MINUTE",
+   * "SECOND", "MILLISECOND", "MICROSECOND", or "NANOSECOND".
+   * @return
    */
-  public String getJavaVendor();
+  public String getUnit();
 
   /**
-   * Returns the machine the JVM is running on, i.e. the fully
-   * qualified hostname.
+   * A description of the statistic.
    */
-  public String getNode();
+  public String getDescription();
+
+  /**
+   * Returns the time that the first measurement was taken for this statistic,
+   * the number of milliseconds sinch 00:00 January 1, 1970.
+   */
+  public String getStartTime();
+
+  /**
+   * Returns the time that the last measurement was taken for this statistic,
+   * the number of milliseconds sinch 00:00 January 1, 1970.
+   */
+  public String getLastSampleTime();
 }

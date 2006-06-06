@@ -147,7 +147,8 @@ public class Notification extends java.util.EventObject {
   }
 
   /**
-   * Returns the timestamp.
+   * Returns the timestamp for the time that notification was created.
+   * Represented as the number of milliseconds since 00:00:00 January 1, 1970.
    */
   public long getTimeStamp()
   {

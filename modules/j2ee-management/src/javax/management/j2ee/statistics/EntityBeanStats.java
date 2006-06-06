@@ -19,36 +19,28 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
-package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.MBean;
+package javax.management.j2ee.statistics;
 
 /**
- * Management interface for the JVM.
+ * Statistics interface for an entity bean.
  */
-@MBean(j2eeType="JVM")
-public interface JVM extends J2EEManagedObject {
+public interface EntityBeanStats extends EJBStats
+{
   /**
-   * Returns the java version
+   * Returns the number of beans that are ready.
    */
-  public String getJavaVersion();
-
+  public RangeStatistic getReadyCount();
+  
   /**
-   * Returns the java vendor
+   * Returns the number of beans that are pooled.
    */
-  public String getJavaVendor();
-
-  /**
-   * Returns the machine the JVM is running on, i.e. the fully
-   * qualified hostname.
-   */
-  public String getNode();
+  public RangeStatistic getPooledCount();
 }

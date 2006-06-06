@@ -29,27 +29,29 @@
 
 package com.caucho.mbeans.j2ee;
 
+import com.caucho.jmx.MBean;
+
 /**
- * Base J2EE Managed Object
+ * Base class management interface for all managed objects.
  */
 public interface J2EEManagedObject {
   /**
    * Returns the object name
    */
-  public String getobjectName();
-  
+  public String getObjectName();
+
   /**
    * Returns true if the state is manageable
    */
-  public boolean getstateManageable();
-  
+  public boolean getStateManageable();
+
   /**
    * Returns true if the object provides statistics
    */
-  public boolean getstatisticsProvider();
-  
+  public boolean isStatisticsProvider();
+
   /**
    * Returns true if the object provides events
    */
-  public boolean geteventsProvider();
+  public boolean isEventsProvider();
 }
