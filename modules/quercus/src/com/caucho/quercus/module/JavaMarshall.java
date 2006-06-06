@@ -101,14 +101,17 @@ public class JavaMarshall extends Marshall {
 
     if (obj == null) {
       if (_isNotNull) {
-	env.warning(L.l("null is an unexpected argument, expected {0}",
-			shortName(argClass)));
+        env.warning(L.l("null is an unexpected argument, expected {0}",
+                        shortName(argClass)));
       }
 
       return null;
     }
-    else if (! argClass.isAssignableFrom(obj.getClass()))
-      env.error(L.l("Can't assign {0} to {1}", obj, argClass));
+    else if (! argClass.isAssignableFrom(obj.getClass())) {
+      //env.error(L.l("Can't assign {0} to {1}", obj, argClass));
+      env.warning(L.l("'{0}' of type '{1}' is an unexpected argument, expected {2}", value, shortName(value.getClass()), shortName(argClass)));
+      return null;
+    }
 
     return obj;
   }

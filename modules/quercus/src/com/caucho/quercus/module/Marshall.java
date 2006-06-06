@@ -152,12 +152,12 @@ abstract public class Marshall {
     }
     else {
       String typeName = argType.getName();
-      
+
       JavaClassDef javaDef = moduleContext.getJavaClassDefinition(typeName);
-      
+
       marshall = new JavaMarshall(javaDef, isNotNull, isNullAsFalse);
     }
-    
+
     if (!isNullAsFalse)
       return marshall;
     else {
@@ -1094,11 +1094,11 @@ abstract public class Marshall {
     public Value unmarshall(Env env, Object value)
     {
       if (value instanceof StringValue)
-	return (StringValue) value;
+        return (StringValue) value;
       else if (value instanceof Value)
-	return ((Value) value).toStringValue();
+        return ((Value) value).toStringValue();
       else
-	return new StringValueImpl(String.valueOf(value));
+        return new StringValueImpl(String.valueOf(value));
     }
 
     public void generate(PhpWriter out, Expr expr, Class argClass)
@@ -1112,7 +1112,7 @@ abstract public class Marshall {
       throws IOException
     {
     }
-      
+
     public void generateResultEnd(PhpWriter out)
       throws IOException
       {
@@ -1138,11 +1138,11 @@ abstract public class Marshall {
     public Value unmarshall(Env env, Object value)
     {
       if (value instanceof UnicodeValue)
-	return (UnicodeValue) value;
+        return (UnicodeValue) value;
       else if (value instanceof Value)
-	return ((Value) value).toUnicodeValue(env);
+        return ((Value) value).toUnicodeValue(env);
       else
-	return new StringValueImpl(String.valueOf(value));
+        return new StringValueImpl(String.valueOf(value));
     }
 
     public void generate(PhpWriter out, Expr expr, Class argClass)
@@ -1156,7 +1156,7 @@ abstract public class Marshall {
       throws IOException
     {
     }
-      
+
     public void generateResultEnd(PhpWriter out)
       throws IOException
       {
@@ -1182,11 +1182,11 @@ abstract public class Marshall {
     public Value unmarshall(Env env, Object value)
     {
       if (value instanceof BinaryValue)
-	return (BinaryValue) value;
+        return (BinaryValue) value;
       else if (value instanceof Value)
-	return ((Value) value).toBinaryValue(env);
+        return ((Value) value).toBinaryValue(env);
       else
-	return new StringValueImpl(String.valueOf(value));
+        return new StringValueImpl(String.valueOf(value));
     }
 
     public void generate(PhpWriter out, Expr expr, Class argClass)
@@ -1200,7 +1200,7 @@ abstract public class Marshall {
       throws IOException
     {
     }
-      
+
     public void generateResultEnd(PhpWriter out)
       throws IOException
       {
@@ -1293,11 +1293,11 @@ abstract public class Marshall {
     public Value unmarshall(Env env, Object value)
     {
       if (value instanceof ArrayValue)
-	return (ArrayValue) value;
+        return (ArrayValue) value;
       else if (value instanceof Value)
-	return ((Value) value).toArrayValue(env);
+        return ((Value) value).toArrayValue(env);
       else
-	return NullValue.NULL;
+        return NullValue.NULL;
     }
 
     public void generate(PhpWriter out, Expr expr, Class argClass)
@@ -1311,7 +1311,7 @@ abstract public class Marshall {
       throws IOException
     {
     }
-      
+
     public void generateResultEnd(PhpWriter out)
       throws IOException
       {
@@ -1405,7 +1405,7 @@ abstract public class Marshall {
     {
       _marshall = marshall;
     }
-    
+
     public boolean isBoolean()
     {
       return _marshall.isBoolean();
@@ -1454,6 +1454,11 @@ abstract public class Marshall {
 
     public Value unmarshall(Env env, Object value)
     {
+      // php/1427
+      if (value == null) {
+        return BooleanValue.FALSE;
+      }
+
       Value result = _marshall.unmarshall(env, value);
 
       return (result == null || result.isNull()) ? BooleanValue.FALSE : result;
