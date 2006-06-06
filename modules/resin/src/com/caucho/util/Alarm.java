@@ -203,17 +203,6 @@ public class Alarm implements ThreadTask {
   {
     if (_testTime > 0)
       return _testTime * 1000000L;
-    else if (_nanoTimeMethod != null) {
-      try {
-        return (Long) _nanoTimeMethod.invoke(null);
-      }
-      catch (IllegalAccessException ex) {
-        log.log(Level.WARNING, ex.toString(), ex);
-      }
-      catch (InvocationTargetException ex) {
-        log.log(Level.WARNING, ex.toString(), ex);
-      }
-    }
 
     return getExactTime() * 1000000L;
   }

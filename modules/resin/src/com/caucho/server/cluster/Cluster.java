@@ -71,7 +71,7 @@ public class Cluster implements EnvironmentListener {
 
   private String _serverId = "";
 
-  private String _objectName;
+  private ObjectName _objectName;
 
   private ArrayList<ClusterServer> _serverList
     = new ArrayList<ClusterServer>();
@@ -450,11 +450,12 @@ public class Cluster implements EnvironmentListener {
         name = "default";
 
       ObjectName objectName = Jmx.getObjectName("type=Cluster,name=" + name);
-      _objectName = objectName.toString();
 
       ClusterAdmin admin = new ClusterAdmin(this);
 
       Jmx.register(admin, objectName);
+
+      _objectName = objectName;
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
     }
@@ -473,7 +474,7 @@ public class Cluster implements EnvironmentListener {
    */
   public String getObjectName()
   {
-    return _objectName;
+    return _objectName == null ? null : _objectName.toString();
   }
 
   /**

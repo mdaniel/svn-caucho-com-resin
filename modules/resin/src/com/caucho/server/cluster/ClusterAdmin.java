@@ -48,7 +48,7 @@ public class ClusterAdmin
     return _cluster.getObjectName();
   }
 
-  public ObjectName getPortObjectName()
+  public String getPortObjectName()
   {
     ClusterServer clusterServer = _cluster.getSelfServer();
 

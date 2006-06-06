@@ -81,8 +81,8 @@ public class ResinStatusServlet extends GenericServlet {
   private String _enable;
 
   private MBeanServer _mbeanServer;
-  private ResinServerMBean _resinServer;
-  private ServerMBean _servletServer;
+  private ResinMBean _resin;
+  private ServerMBean _server;
 
   /**
    * Set to read or write.
@@ -112,13 +112,14 @@ public class ResinStatusServlet extends GenericServlet {
       // _mbeanServer = Jmx.findMBeanServer();
 
       // _mbeanServer = Jmx.getMBeanServer();
-      _mbeanServer = Jmx.getGlobalMBeanServer();
+      _mbeanServer =
+        Jmx.getGlobalMBeanServer();
 
       //_resinServer = (ResinServerMBean) Jmx.find("resin:type=ResinServer");
       //_servletServer = (ServletServerMBean) Jmx.find("resin:name=default,type=Server");
 
-      _resinServer = (ResinServerMBean) Jmx.findGlobal("resin:type=ResinServer");
-      _servletServer = (ServerMBean) Jmx.findGlobal("resin:name=default,type=Server");
+      _resin = (ResinMBean) Jmx.findGlobal("resin:type=Resin");
+      _server = (ServerMBean) Jmx.findGlobal("resin:name=default,type=Server");
     } catch (Exception e) {
       throw new ServletException(e);
     }
@@ -204,18 +205,18 @@ public class ResinStatusServlet extends GenericServlet {
   {
     out.println("<b>resin-status</b><br><br>");
 
-    String id = _resinServer.getServerId();
+    String id = _resin.getServerId();
 
     out.println("<table border=\"0\">");
     if (id != null)
       out.println("<tr><td><b>Server:</b><td>" + id);
 
-    String configFile = _resinServer.getConfigFile();
+    String configFile = _resin.getConfigFile();
     if (configFile != null)
       out.println("<tr><td><b>Config:</b><td>" + configFile);
 
-    long initialStartTime = _resinServer.getInitialStartTime().getTime();
-    long startTime = _resinServer.getStartTime().getTime();
+    long initialStartTime = _resin.getInitialStartTime().getTime();
+    long startTime = _resin.getStartTime().getTime();
 
     out.println("<tr><td><b>Server Start:</b><td>" +
                 QDate.formatLocal(initialStartTime));
@@ -235,8 +236,8 @@ public class ResinStatusServlet extends GenericServlet {
                 (freeMemory / 10000) % 10 +
                 "Meg");
 
-    long invocationHitCount = _servletServer.getInvocationCacheHitCount();
-    long invocationMissCount = _servletServer.getInvocationCacheMissCount();
+    long invocationHitCount = _server.getInvocationCacheHitCount();
+    long invocationMissCount = _server.getInvocationCacheMissCount();
 
     long totalCount = invocationHitCount + invocationMissCount;
     if (totalCount == 0)
@@ -250,8 +251,8 @@ public class ResinStatusServlet extends GenericServlet {
               (hitRatio) % 10 + "%");
     out.println(" (" + invocationHitCount + "/" + totalCount + ")");
 
-    long proxyHitCount = _servletServer.getProxyCacheHitCount();
-    long proxyMissCount = _servletServer.getProxyCacheMissCount();
+    long proxyHitCount = _server.getProxyCacheHitCount();
+    long proxyMissCount = _server.getProxyCacheMissCount();
 
     totalCount = proxyHitCount + proxyMissCount;
     if (totalCount == 0)
@@ -353,7 +354,7 @@ public class ResinStatusServlet extends GenericServlet {
     throws IOException, ServletException
   {
     try {
-      ObjectName[]portList = _servletServer.getPortObjectNames();
+      String []portList = _server.getPortObjectNames();
 
       if (portList.length > 0) {
         out.println("<h3>TCP ports</h3>");
@@ -397,7 +398,7 @@ public class ResinStatusServlet extends GenericServlet {
     throws IOException, ServletException
   {
     try {
-      String[]clusterList = _servletServer.getClusterObjectNames();
+      String[]clusterList = _server.getClusterObjectNames();
 
       for (int i = 0; i < clusterList.length; i++) {
         ClusterMBean cluster = (ClusterMBean) Jmx.findGlobal(clusterList[i]);

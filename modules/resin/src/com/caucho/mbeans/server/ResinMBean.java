@@ -31,8 +31,8 @@ package com.caucho.mbeans.server;
 
 import com.caucho.jmx.MBean;
 import com.caucho.jmx.MBeanAttribute;
-import com.caucho.jmx.MBeanOperation;
 import com.caucho.jmx.MBeanAttributeCategory;
+import com.caucho.jmx.MBeanOperation;
 
 import javax.management.ObjectName;
 import java.util.Date;
@@ -41,14 +41,14 @@ import java.util.Date;
  * Management interface for the server.
  * There is one ResinServer global for the entire JVM.
  */
-@MBean(description="A single ResinServer for each JVM provides a global environment for Resin")
-public interface ResinServerMBean {
+@MBean(description="A single Resin for each JVM provides a global environment for Resin")
+public interface ResinMBean {
   /**
    * Returns the {@link ObjectName} of the mbean.
    */
   @MBeanAttribute(description="The JMX ObjectName for the MBean",
                   category =MBeanAttributeCategory.CONFIGURATION)
-  public ObjectName getObjectName();
+  public String getObjectName();
 
   /**
    * Returns the ip address or host name  of the machine that is running this ResinServer.
@@ -104,11 +104,11 @@ public interface ResinServerMBean {
 
   @MBeanAttribute(description="",
                   category =MBeanAttributeCategory.CONFIGURATION)
-  public ObjectName getThreadPoolObjectName();
+  public String getThreadPoolObjectName();
 
   @MBeanAttribute(description="",
                   category =MBeanAttributeCategory.STATISTIC)
-  public ObjectName[] getServerObjectNames();
+  public String[] getServerObjectNames();
 
   /**
    * The current lifecycle state.

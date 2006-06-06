@@ -34,13 +34,7 @@ import java.util.Date;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-import javax.management.ObjectName;
-import javax.management.NotificationBroadcasterSupport;
-import javax.management.NotificationListener;
-import javax.management.NotificationFilter;
-import javax.management.ListenerNotFoundException;
-import javax.management.MBeanNotificationInfo;
-import javax.management.NotificationEmitter;
+import javax.management.*;
 
 import com.caucho.jmx.MBeanHandle;
 
@@ -85,7 +79,7 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
 
   public String getObjectName()
   {
-    return _controller.getObjectName().toString();
+    return _controller.getObjectName();
   }
 
   public String getStartupMode()
@@ -154,7 +148,12 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
    */
   public Object writeReplace()
   {
-    return new MBeanHandle(getController().getObjectName());
+    try {
+      return new MBeanHandle(new ObjectName(getController().getObjectName()));
+    }
+    catch (MalformedObjectNameException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public void addNotificationListener(NotificationListener listener,

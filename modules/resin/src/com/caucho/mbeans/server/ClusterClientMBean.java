@@ -29,10 +29,10 @@
 
 package com.caucho.mbeans.server;
 
-import com.caucho.jmx.MBeanAttributeCategory;
-import com.caucho.jmx.MBeanAttribute;
-import com.caucho.jmx.MBeanOperation;
 import com.caucho.jmx.MBean;
+import com.caucho.jmx.MBeanAttribute;
+import com.caucho.jmx.MBeanAttributeCategory;
+import com.caucho.jmx.MBeanOperation;
 
 import javax.management.ObjectName;
 

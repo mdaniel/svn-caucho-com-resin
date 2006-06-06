@@ -32,8 +32,6 @@ package com.caucho.mbeans.server;
 import com.caucho.jmx.MBeanAttribute;
 import com.caucho.jmx.MBeanAttributeCategory;
 
-import javax.management.ObjectName;
-
 /**
  * Represents a protocol connection.
  * A typical ObjectName for a ClusterMBean is
@@ -45,7 +43,7 @@ public interface PortMBean {
    */
   @MBeanAttribute(description="The JMX ObjectName for the MBean",
                   category=MBeanAttributeCategory.CONFIGURATION)
-  public ObjectName getObjectName();
+  public String getObjectName();
 
   /**
    * Returns the port's protocol name.

@@ -62,14 +62,11 @@ import com.caucho.loader.EnvironmentListener;
 import com.caucho.util.L10N;
 
 import com.caucho.jmx.Jmx;
-import com.caucho.jmx.IntrospectionMBean;
 
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
 import com.caucho.server.deploy.ExpandDeployController;
-
-import com.caucho.mbeans.server.DeployControllerMBean;
 
 /**
  * A deploy controller for an environment.
@@ -89,7 +86,7 @@ abstract public class
 
   private Object _mbean;
 
-  private ObjectName _mbeanName;
+  private ObjectName _objectName;
 
   // The default configurations
   private ArrayList<C> _configDefaults =  new ArrayList<C>();
@@ -243,9 +240,9 @@ abstract public class
   /**
    * Returns the object name.
    */
-  public ObjectName getObjectName()
+  public String getObjectName()
   {
-    return _mbeanName;
+    return _objectName == null ? null : _objectName.toString();
   }
 
   /**
@@ -268,12 +265,15 @@ abstract public class
 
       properties = Jmx.copyContextProperties(getParentClassLoader());
 
-      _mbeanName = createObjectName(properties);
+      ObjectName objectName = createObjectName(properties);
 
-      if (_mbeanName != null) {
-        _mbean = createMBean();
+      if (objectName != null) {
+        Object mbean = createMBean();
 
-        Jmx.register(_mbean, _mbeanName);
+        Jmx.register(mbean, objectName);
+
+        _objectName = objectName;
+        _mbean = mbean;
       }
     } catch (Exception e) {
       // XXX: thrown?
@@ -288,8 +288,6 @@ abstract public class
   protected ObjectName createObjectName(Map<String,String> properties)
     throws MalformedObjectNameException
   {
-    String type = getMBeanTypeName();
-
     properties.put("type", getMBeanTypeName());
     properties.put("name", getMBeanId());
 
@@ -366,11 +364,11 @@ abstract public class
       thread.setContextClassLoader(getParentClassLoader());
 
       try {
-        ObjectName mbeanName = _mbeanName;
-        _mbeanName = null;
+        ObjectName objectName = _objectName;
+        _objectName = null;
 
-        if (mbeanName != null)
-          Jmx.unregister(mbeanName);
+        if (objectName != null)
+          Jmx.unregister(objectName);
       } catch (Exception e) {
         log.log(Level.FINER, e.toString(), e);
       }

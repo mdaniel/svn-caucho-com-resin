@@ -29,13 +29,10 @@
 
 package com.caucho.mbeans.server;
 
-import com.caucho.jmx.MBean;
 import com.caucho.jmx.MBeanAttribute;
+import com.caucho.jmx.MBeanAttributeCategory;
 import com.caucho.jmx.MBeanOperation;
 import com.caucho.jmx.MBeanParameter;
-import com.caucho.jmx.MBeanAttributeCategory;
-
-import javax.management.ObjectName;
 
 /**
  * Management interface for the server.
@@ -53,7 +50,7 @@ public interface ServerMBean extends DeployControllerMBean {
    */
   @MBeanAttribute(description="Ports accept socket connections",
                   category=MBeanAttributeCategory.CONFIGURATION)
-  public ObjectName []getPortObjectNames();
+  public String []getPortObjectNames();
 
   /**
    * Returns the array of hosts.
@@ -61,7 +58,7 @@ public interface ServerMBean extends DeployControllerMBean {
   @MBeanAttribute(description="Hosts are containers that are uniquely identified"
                               + " by the hostname used in making an HTTP request",
                   category=MBeanAttributeCategory.CONFIGURATION)
-  public ObjectName []getHostObjectNames();
+  public String []getHostObjectNames();
 
   /**
    * Returns the array of cluster.

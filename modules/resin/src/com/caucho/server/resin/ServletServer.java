@@ -108,8 +108,6 @@ public class ServletServer extends ProtocolDispatchServer
 
   private HostContainer _hostContainer;
 
-  private ObjectName _objectName;
-
   private String _serverId = "";
 
   private String _serverHeader = "Resin/" + com.caucho.Version.VERSION;

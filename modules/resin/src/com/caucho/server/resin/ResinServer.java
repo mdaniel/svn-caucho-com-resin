@@ -77,25 +77,15 @@ public class ResinServer
   private static final Logger log = Log.open(ResinServer.class);
   private static final L10N L = new L10N(ResinServer.class);
 
+  private static final String OBJECT_NAME= "resin:type=Resin";
+
   private static ResinServer _resinServer;
 
-  private static final ObjectName OBJECT_NAME;
-
-  static {
-    try {
-      OBJECT_NAME = Jmx.getObjectName("resin:type=ResinServer");
-    }
-    catch (MalformedObjectNameException e) {
-      throw new AssertionError(e);
-    }
-  }
 
   private final EnvironmentLocal<String> _serverIdLocal =
     new EnvironmentLocal<String>("caucho.server-id");
 
   private ClassLoader _classLoader;
-
-  private final ResinServerAdmin _resinServerAdmin;
 
   private String _serverId;
   private String _configFile;
@@ -159,10 +149,8 @@ public class ResinServer
     EL.setVariableMap(_variableMap, _classLoader);
     _variableMap.put("fmt", new com.caucho.config.functions.FmtFunctions());
 
-    _resinServerAdmin = new ResinServerAdmin(this);
-
     try {
-      Jmx.register(_resinServerAdmin, OBJECT_NAME);
+      Jmx.register(new ResinAdmin(this), OBJECT_NAME);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -184,7 +172,7 @@ public class ResinServer
     return _classLoader;
   }
 
-  public ObjectName getObjectName()
+  public String getObjectName()
   {
     return OBJECT_NAME;
   }

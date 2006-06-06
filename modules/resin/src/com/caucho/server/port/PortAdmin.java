@@ -43,7 +43,7 @@ public class PortAdmin
     _port = port;
   }
 
-  public ObjectName getObjectName()
+  public String getObjectName()
   {
     return _port.getObjectName();
   }

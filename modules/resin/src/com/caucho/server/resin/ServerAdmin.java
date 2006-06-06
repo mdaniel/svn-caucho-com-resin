@@ -77,23 +77,23 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return getController().getId();
   }
 
-  public ObjectName []getPortObjectNames()
+  public String []getPortObjectNames()
   {
     ServletServer server = getDeployInstance();
 
     if (server == null)
-      return new ObjectName[0];
+      return new String[0];
 
-    ArrayList<ObjectName> portNameList = new ArrayList<ObjectName>();
+    ArrayList<String> portNameList = new ArrayList<String>();
 
     for (Port port : server.getPorts()) {
-      ObjectName name = port.getObjectName();
+      String name = port.getObjectName();
 
       if (name != null)
         portNameList.add(name);
     }
 
-    return portNameList.toArray(new ObjectName[portNameList.size()]);
+    return portNameList.toArray(new String[portNameList.size()]);
   }
 
   public String []getClusterObjectNames()
@@ -115,23 +115,23 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return clusterNameList.toArray(new String[clusterNameList.size()]);
   }
 
-  public ObjectName []getHostObjectNames()
+  public String []getHostObjectNames()
   {
     ServletServer server = getDeployInstance();
 
     if (server == null)
-      return new ObjectName[0];
+      return new String[0];
 
-    ArrayList<ObjectName> hostNameList = new ArrayList<ObjectName>();
+    ArrayList<String> hostNameList = new ArrayList<String>();
 
     for (HostController host : server.getHostControllers()) {
-      ObjectName name = host.getObjectName();
+      String name = host.getObjectName();
 
       if (name != null)
         hostNameList.add(name);
     }
 
-    return hostNameList.toArray(new ObjectName[hostNameList.size()]);
+    return hostNameList.toArray(new String[hostNameList.size()]);
   }
 
   public int getActiveThreadCount()

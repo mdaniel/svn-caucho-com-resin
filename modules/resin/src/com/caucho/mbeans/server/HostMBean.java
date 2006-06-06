@@ -29,10 +29,6 @@
 
 package com.caucho.mbeans.server;
 
-import java.util.Date;
-
-import javax.management.ObjectName;
-
 /**
  * Management interface for the host.
  */
@@ -71,13 +67,13 @@ public interface HostMBean extends DeployControllerMBean {
   /**
    * Returns an array of the webapp names.
    */
-  public ObjectName []getWebAppObjectNames();
+  public String []getWebAppObjectNames();
 
   /**
    * Returns an array of the webapp names
    * (obsolete, use {@link #getWebAppObjectNames()}.
    */
-  public ObjectName []getWebAppNames();
+  public String []getWebAppNames();
 
 
   /**

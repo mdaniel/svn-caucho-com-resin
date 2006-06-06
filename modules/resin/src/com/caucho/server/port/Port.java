@@ -205,9 +205,9 @@ public class Port
   /**
    * Returns the JMX object name.
    */
-  public ObjectName getObjectName()
+  public String getObjectName()
   {
-    return _objectName;
+    return _objectName == null ? null : _objectName.toString();
   }
 
   /**
@@ -641,13 +641,18 @@ public class Port
     if (_protocol == null)
       throw new IllegalStateException(L.l("`{0}' must have a configured protocol before starting.", this));
 
-    try {
-      if (_host == null)
-        _objectName = Jmx.getObjectName("type=Port,port=" + _port);
-      else
-        _objectName = Jmx.getObjectName("type=Port,port=" + _port +",host=" + _host);
 
-      Jmx.register(new PortAdmin(this), _objectName);
+    try {
+      ObjectName objectName;
+
+      if (_host == null)
+        objectName = Jmx.getObjectName("type=Port,port=" + _port);
+      else
+        objectName = Jmx.getObjectName("type=Port,port=" + _port +",host=" + _host);
+
+      Jmx.register(new PortAdmin(this), objectName);
+
+      _objectName = objectName;
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -1049,8 +1054,12 @@ public class Port
     }
 
     try {
-      if (_objectName != null)
-        Jmx.unregister(_objectName);
+      if (_objectName != null) {
+        ObjectName objectName = _objectName;
+        _objectName = null;
+
+        Jmx.unregister(objectName);
+      }
     } catch (Throwable e) {
     }
 

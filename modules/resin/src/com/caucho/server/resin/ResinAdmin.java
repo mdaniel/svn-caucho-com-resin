@@ -30,35 +30,26 @@ package com.caucho.server.resin;
 
 import com.caucho.util.CauchoSystem;
 import com.caucho.util.L10N;
-import com.caucho.mbeans.server.ResinServerMBean;
+import com.caucho.mbeans.server.ResinMBean;
 
 import javax.management.ObjectName;
 import javax.management.MalformedObjectNameException;
 import java.util.Date;
 import java.util.ArrayList;
 
-public class ResinServerAdmin
-  implements ResinServerMBean
+public class ResinAdmin
+  implements ResinMBean
 {
-  private static final L10N L = new L10N(ResinServerAdmin.class);
+  private static final L10N L = new L10N(ResinAdmin.class);
 
-  private static final ObjectName THREAD_POOL_OBJECT_NAME;
-
-  static {
-    try {
-      THREAD_POOL_OBJECT_NAME = new ObjectName("resin:type=ThreadPool");
-    }
-    catch (MalformedObjectNameException e) {
-      throw new AssertionError(e);
-    }
-  }
+  private static final String THREAD_POOL_OBJECT_NAME = "resin:type=ThreadPool";
 
   private final ResinServer _resinServer;
 
   /**
    * Creates the admin object and registers with JMX.
    */
-  public ResinServerAdmin(ResinServer resinServer)
+  public ResinAdmin(ResinServer resinServer)
   {
     _resinServer = resinServer;
   }
@@ -66,7 +57,7 @@ public class ResinServerAdmin
   /**
    * Returns the JMX {@link ObjectName}.
    */
-  public ObjectName getObjectName()
+  public String getObjectName()
   {
     return _resinServer.getObjectName();
   }
@@ -101,16 +92,16 @@ public class ResinServerAdmin
     return CauchoSystem.isDetailedStatistics();
   }
 
-  public ObjectName getThreadPoolObjectName()
+  public String getThreadPoolObjectName()
   {
     return THREAD_POOL_OBJECT_NAME;
   }
 
-  public ObjectName[] getServerObjectNames()
+  public String[] getServerObjectNames()
   {
     ArrayList<ServerController> servers = _resinServer.getServerList();
 
-    ObjectName[] objectNames = new ObjectName[servers.size()];
+    String[] objectNames = new String[servers.size()];
 
     int i = 0;
 

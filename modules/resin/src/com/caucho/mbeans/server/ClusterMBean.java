@@ -30,7 +30,6 @@ package com.caucho.mbeans.server;
 
 import com.caucho.jmx.MBeanAttribute;
 import com.caucho.jmx.MBeanAttributeCategory;
-import com.caucho.jmx.MBean;
 
 import javax.management.ObjectName;
 
@@ -67,7 +66,7 @@ public interface ClusterMBean {
                               " connections from a load balancer or from other" +
                               " members of the cluster",
                   category=MBeanAttributeCategory.CONFIGURATION)
-  public ObjectName getPortObjectName();
+  public String getPortObjectName();
 
   /**
    * Returns a list of {@link ObjectName}s for the

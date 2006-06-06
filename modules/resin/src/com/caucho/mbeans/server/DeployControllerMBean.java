@@ -30,12 +30,10 @@
 package com.caucho.mbeans.server;
 
 import com.caucho.jmx.MBeanAttribute;
-import com.caucho.jmx.MBeanOperation;
 import com.caucho.jmx.MBeanAttributeCategory;
+import com.caucho.jmx.MBeanOperation;
 
 import java.util.Date;
-
-import javax.management.ObjectName;
 
 /**
  * Management interface for the deploy controller.
