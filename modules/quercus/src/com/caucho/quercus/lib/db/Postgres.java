@@ -149,6 +149,18 @@ public class Postgres extends JdbcConnectionResource {
   }
 
   /**
+   * Executes a query.
+   *
+   * @param sql the escaped query string (can contain escape sequences like `\n' and `\Z')
+   *
+   * @return a {@link JdbcResultResource}, or null for failure
+   */
+  public PostgresResult query(String sql)
+  {
+    return (PostgresResult) realQuery(sql);
+  }
+
+  /**
    * Creates a database-specific result.
    */
   protected JdbcResultResource createResult(Statement stmt,
@@ -200,7 +212,6 @@ public class Postgres extends JdbcConnectionResource {
   protected void keepResourceValues(Statement stmt)
   {
     setResultResource(createResult(stmt, null));
-    addResultValue(getResultResource());
   }
 
   /**
@@ -251,7 +262,7 @@ public class Postgres extends JdbcConnectionResource {
   public String toString()
   {
     if (isConnected())
-      return "Postgres[" + get_host_name() + "]";
+      return "Postgres[" + getHost() + "]";
     else
       return "Postgres[]";
   }

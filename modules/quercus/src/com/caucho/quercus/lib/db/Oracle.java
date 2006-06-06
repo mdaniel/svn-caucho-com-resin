@@ -142,4 +142,12 @@ public class Oracle extends JdbcConnectionResource {
     return new OracleResult(stmt, rs, this);
   }
 
+
+  public String toString()
+  {
+    if (isConnected())
+      return "Oracle[" + getHost() + "]";
+    else
+      return "Oracle[]";
+  }
 }

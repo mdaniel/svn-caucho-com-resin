@@ -48,14 +48,14 @@ import com.caucho.util.Log;
 import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.Reference;
-import com.caucho.quercus.module.NotNull;
-
-//@todo remove (still using MYSQL_xxx constants)
+import com.caucho.quercus.module.ReturnNullAsFalse;
 
 import java.lang.reflect.*;
 import java.io.*;
+
 
 /**
  * PHP oracle routines.
@@ -788,19 +788,20 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Returns number of rows affected during statement execution
    */
-  public Value oci_num_rows(Env env,
-                            @NotNull OracleStatement stmt)
+  @ReturnNullAsFalse
+  public Integer oci_num_rows(Env env,
+                              @NotNull OracleStatement stmt)
   {
     try {
       if (stmt == null)
-        return BooleanValue.FALSE;
+        return null;
 
       JdbcResultResource resource = new JdbcResultResource(null, stmt.getResultSet(), null);
 
-      return resource.getNumRows();
+      return new Integer(resource.getNumRows());
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return BooleanValue.FALSE;
+      return null;
     }
   }
 
@@ -905,13 +906,19 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Returns server version
    */
+  @ReturnNullAsFalse
   public String oci_server_version(Env env,
                                    @NotNull Oracle conn)
   {
-    if (conn == null)
-      conn = getConnection(env);
+    try {
+      if (conn == null)
+        conn = getConnection(env);
 
-    return conn.get_server_info();
+      return conn.getServerInfo();
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return null;
+    }
   }
 
   /**
@@ -1341,8 +1348,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_num_rows()
    */
-  public Value ocirowcount(Env env,
-                           @NotNull OracleStatement stmt)
+  @ReturnNullAsFalse
+  public Integer ocirowcount(Env env,
+                             @NotNull OracleStatement stmt)
   {
     return oci_num_rows(env, stmt);
   }

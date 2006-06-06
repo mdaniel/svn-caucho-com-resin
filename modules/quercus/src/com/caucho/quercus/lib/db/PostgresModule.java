@@ -29,23 +29,6 @@
 
 package com.caucho.quercus.lib.db;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-
-import java.sql.ResultSetMetaData;
-import java.sql.Statement;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.Map;
-
-import com.caucho.quercus.UnimplementedException;
-
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BinaryBuilderValue;
@@ -63,11 +46,28 @@ import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.ReturnNullAsFalse;
 
+import com.caucho.quercus.UnimplementedException;
+
 import com.caucho.util.Log;
 
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+
+import java.sql.ResultSetMetaData;
+import java.sql.Statement;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.Map;
 
 // Do not add new compile dependencies (use reflection instead)
 // import org.postgresql.largeobject.*;
@@ -179,7 +179,7 @@ public class PostgresModule extends AbstractQuercusModule {
       if (conn == null)
         conn = getConnection(env);
 
-      return conn.client_encoding();
+      return conn.getClientEncoding();
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -514,7 +514,7 @@ public class PostgresModule extends AbstractQuercusModule {
       if (conn == null)
         conn = getConnection(env);
 
-      return conn.get_dbname();
+      return conn.getDbName();
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -607,7 +607,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       String s = (String) method.invoke(cl, new Object[] {dataBytes});
 
-      return conn.real_escape_string((StringValue)StringValue.create(s)).toString();
+      return conn.realEscapeString((StringValue)StringValue.create(s)).toString();
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -627,7 +627,7 @@ public class PostgresModule extends AbstractQuercusModule {
       if (conn == null)
         return BooleanValue.FALSE;
 
-      return conn.real_escape_string(data);
+      return conn.realEscapeString(data);
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -696,9 +696,9 @@ public class PostgresModule extends AbstractQuercusModule {
 
       int curr = 0;
 
-      for (ArrayValue row = result.fetch_row();
+      for (ArrayValue row = result.fetchRow();
            row != null;
-           row = result.fetch_row()) {
+           row = result.fetchRow()) {
 
         newArray.put(LongValue.create(curr++),
                      row.get(LongValue.create(column)));
@@ -726,9 +726,9 @@ public class PostgresModule extends AbstractQuercusModule {
 
       int curr = 0;
 
-      for (ArrayValue row = result.fetch_assoc();
+      for (ArrayValue row = result.fetchAssoc();
            row != null;
-           row = result.fetch_assoc()) {
+           row = result.fetchAssoc()) {
 
         newArray.put(LongValue.create(curr++), row);
 
@@ -768,7 +768,7 @@ public class PostgresModule extends AbstractQuercusModule {
         return  null;
 
       if (row.isLongConvertible() && row.toInt() >= 0) {
-        result.data_seek(env, row.toInt());
+        result.seek(env, row.toInt());
       }
 
       Value value = result.fetchArray(resultType);
@@ -795,10 +795,10 @@ public class PostgresModule extends AbstractQuercusModule {
     try {
 
       if ((row != null) && (!row.equals(NullValue.NULL)) && (row.toInt() >= 0)) {
-        result.data_seek(env, row.toInt());
+        result.seek(env, row.toInt());
       }
 
-      return result.fetch_assoc();
+      return result.fetchAssoc();
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -818,10 +818,10 @@ public class PostgresModule extends AbstractQuercusModule {
 
       //@todo use optional resultType
       if ((row != null) && (!row.equals(NullValue.NULL)) && (row.toInt() >= 0)) {
-        result.data_seek(env, row.toInt());
+        result.seek(env, row.toInt());
       }
 
-      return result.fetch_object(env);
+      return result.fetchObject(env);
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -856,10 +856,10 @@ public class PostgresModule extends AbstractQuercusModule {
       }
 
       if (rowNumber >= 0) {
-        result.data_seek(env, rowNumber);
+        result.seek(env, rowNumber);
       }
 
-      Value fetchRow = result.fetch_row();
+      Value fetchRow = result.fetchRow();
 
       int fieldNumber;
 
@@ -888,10 +888,10 @@ public class PostgresModule extends AbstractQuercusModule {
     try {
 
       if ((row != null) && (!row.equals(NullValue.NULL)) && (row.toInt() >= 0)) {
-        result.data_seek(env, row.toInt());
+        result.seek(env, row.toInt());
       }
 
-      return result.fetch_row();
+      return result.fetchRow();
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -926,7 +926,7 @@ public class PostgresModule extends AbstractQuercusModule {
       }
 
       if (rowNumber >= 0) {
-        result.data_seek(env, rowNumber);
+        result.seek(env, rowNumber);
       }
 
       int fieldNumber;
@@ -963,7 +963,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
 
-      return result.fetch_field_name(env, fieldNumber);
+      return result.getFieldName(env, fieldNumber);
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -1054,7 +1054,7 @@ public class PostgresModule extends AbstractQuercusModule {
       if (value.toString().equals("varchar")) {
         value = LongValue.create(-1);
       } else {
-        value = result.fetch_field_length(env, fieldNumber);
+        value = result.getFieldLength(env, fieldNumber);
       }
 
       return value;
@@ -1124,7 +1124,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
 
-      Value value = result.fetch_field_type(env, fieldNumber);
+      Value value = result.getFieldType(env, fieldNumber);
 
       if (value instanceof StringValue) {
         if (value.toString().equals("string")) {
@@ -1252,7 +1252,7 @@ public class PostgresModule extends AbstractQuercusModule {
   public PostgresResult pg_get_result(Env env,
                                       @Optional Postgres conn)
   {
-    // Two different scenarios for pg_get_result:
+    // Three different scenarios for pg_get_result:
     //
     // 1. pg_send_prepare/pg_send_execute - php/4370
     //
@@ -1265,7 +1265,7 @@ public class PostgresModule extends AbstractQuercusModule {
     //    pg_send_execute($conn, "my_query", array("Clothes Clothes Clothes"));
     //    $res3 = pg_get_result($conn);
     //
-    // 2. pg_send_query - php/4334
+    // 2. Multiquery with pg_send_query - php/4334
     //
     //    pg_send_query($conn, "select * from test; select count(*) from test;");
     //
@@ -1276,6 +1276,18 @@ public class PostgresModule extends AbstractQuercusModule {
     //    // select count(*) from test
     //    $res = pg_get_result($conn);
     //    $rows = pg_num_rows($res);
+    //
+    // 3. Individual pg_send_query - php/4364
+    //
+    //    pg_send_query($conn, "select * from test;");
+    //    var_dump($res);
+    //    $res = pg_get_result($conn);
+    //    var_dump($res);
+    //
+    //    $res = pg_send_query($conn, "select * from doesnotexist;");
+    //    var_dump($res);
+    //    $res = pg_get_result($conn);
+    //    var_dump($res);
 
     try {
 
@@ -1303,10 +1315,11 @@ public class PostgresModule extends AbstractQuercusModule {
 
         stmt = ((com.caucho.sql.UserStatement) stmt).getStatement();
 
-        result = null;
-
         if (stmt.getMoreResults()) {
           result = (PostgresResult) conn.createResult(stmt, stmt.getResultSet());
+        } else {
+          // 3. Individual pg_send_query (clean up; no futher results)
+          conn.setResultResource(null);
         }
       }
 
@@ -1332,7 +1345,7 @@ public class PostgresModule extends AbstractQuercusModule {
       if (conn == null)
         conn = getConnection(env);
 
-      return conn.get_host_name();
+      return conn.getHost();
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -1900,7 +1913,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
 
-      return result.num_fields();
+      return result.getFieldCount();
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -1916,7 +1929,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
 
-      return result.num_rows().toInt();
+      return result.getNumRows();
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -1995,7 +2008,7 @@ public class PostgresModule extends AbstractQuercusModule {
       if (conn == null)
         conn = getConnection(env);
 
-      return new Integer(conn.get_port_number());
+      return new Integer(conn.getPort());
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -2071,7 +2084,7 @@ public class PostgresModule extends AbstractQuercusModule {
     try {
 
       if (pg_send_query_params(env, conn, query, params)) {
-        return conn.getAsynchronousResult();
+        return (PostgresResult) conn.getResultResource();
       }
 
       return null;
@@ -2096,16 +2109,9 @@ public class PostgresModule extends AbstractQuercusModule {
       if (conn == null)
         conn = getConnection(env);
 
-      Value queryV = conn.query(query, 1);
-      Object queryO = queryV.toJavaObject();
+      PostgresResult result = conn.query(query);
 
-      if (queryO instanceof PostgresResult) {
-        PostgresResult resultResource = (PostgresResult) queryO;
-
-        if (resultResource != null) {
-          return resultResource;
-        }
-      }
+      return result;
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -2212,7 +2218,7 @@ public class PostgresModule extends AbstractQuercusModule {
       if (result == null)
         return false;
 
-      return result.data_seek(env, offset);
+      return result.seek(env, offset);
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -2258,7 +2264,7 @@ public class PostgresModule extends AbstractQuercusModule {
           whereClause.append(" AND ");
         }
         whereClause.append(k.toString()).append("='").append(v.toString()).append("'");
-        // String pi = conn.real_escape_string(p).toString();
+        // String pi = conn.realEscapeString(p).toString();
         // pi = pi.replaceAll("\\\\", "\\\\\\\\");
       }
 
@@ -2346,7 +2352,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       for (int i=0; i<sz; i++) {
         StringValue p = arrayImpl.get(LongValue.create(i)).toStringValue();
-        String pi = conn.real_escape_string(p).toString();
+        String pi = conn.realEscapeString(p).toString();
         pi = pi.replaceAll("\\\\", "\\\\\\\\");
         query = query.replaceAll("\\$"+(i+1), "\\'"+pi+"\\'");
       }
@@ -2612,7 +2618,7 @@ public class PostgresModule extends AbstractQuercusModule {
       if (conn == null)
         conn = getConnection(env);
 
-      return conn.get_server_info();
+      return conn.getServerInfo();
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);

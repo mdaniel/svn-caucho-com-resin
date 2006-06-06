@@ -29,7 +29,9 @@
 
 package com.caucho.quercus.lib.db;
 
+import com.caucho.util.L10N;
 import com.caucho.util.Log;
+
 import com.caucho.quercus.env.*;
 
 import java.sql.*;
@@ -42,6 +44,7 @@ import java.util.logging.Logger;
  */
 public class JdbcResultResource {
   private static final Logger log = Log.open(JdbcResultResource.class);
+  private static final L10N L = new L10N(JdbcResultResource.class);
 
   public static final int FETCH_ASSOC = 0x1;
   public static final int FETCH_NUM = 0x2;
@@ -83,6 +86,22 @@ public class JdbcResultResource {
 
     _metaData = md;
     _conn = conn;
+  }
+
+  /**
+   * seeks to an arbitrary result pointer specified
+   * by the offset in the result set represented by result.
+   * Returns TRUE on success or FALSE on failure
+   */
+  public boolean seek(Env env, int rowNumber)
+  {
+    if (setRowNumber(rowNumber))
+      return true;
+    else {
+      env.warning(L.l("Offset {0} is invalid (or the query data is unbuffered)", rowNumber));
+
+      return false;
+    }
   }
 
   /**
@@ -183,30 +202,6 @@ public class JdbcResultResource {
   }
 
   /**
-   * @return array of fieldDirect objects
-   */
-  public Value getFieldDirectArray(Env env)
-  {
-    ArrayValue array = new ArrayValueImpl();
-
-    try {
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
-
-      int numColumns = _metaData.getColumnCount();
-
-      for (int i = 0; i < numColumns; i++) {
-        array.put(fetchFieldDirect(env, i));
-      }
-
-      return array;
-    } catch (SQLException e) {
-      log.log(Level.FINE,  e.toString(), e);
-      return BooleanValue.FALSE;
-    }
-  }
-
-  /**
    * returns an object with the following fields: name, table, max_length,
    * not_null, primary_key, multiple_key, numeric,
    * blob, type, unsigned, zerofill.
@@ -285,13 +280,13 @@ public class JdbcResultResource {
    * type: An integer respresenting the data type used for this field
    * decimals: The number of decimals used (for integer fields)
    */
-  private Value fetchFieldImproved(Env env,
-                                   int maxLength,
-                                   String name,
-                                   String originalName,
-                                   String table,
-                                   int type,
-                                   int scale)
+  protected Value fetchFieldImproved(Env env,
+                                     int maxLength,
+                                     String name,
+                                     String originalName,
+                                     String table,
+                                     int type,
+                                     int scale)
   {
     Value result = env.createObject();
 
@@ -543,74 +538,6 @@ public class JdbcResultResource {
   }
 
   /**
-   * @see Value fetchFieldDirect
-   *
-   * increments the fieldOffset counter by one;
-   */
-  public Value fetchNextField(Env env)
-  {
-    int fieldOffset = getFieldOffset();
-
-    Value result = fetchFieldDirect(env, fieldOffset);
-
-    setFieldOffset(fieldOffset + 1);
-
-    return result;
-  }
-
-  /**
-   * returns an object containing the following field information:
-   *
-   * name: The name of the column
-   * orgname: The original name if an alias was specified
-   * table: The name of the table
-   * orgtable: The original name if an alias was specified
-   * def: default value for this field, represented as a string
-   * max_length: The maximum width of the field for the result set
-   * flags: An integer representing the bit-flags for the field (see _constMap).
-   * type: The data type used for this field (an integer... also see _constMap)
-   * decimals: The number of decimals used (for integer fields)
-   *
-   * @param fieldOffset 0 <= fieldOffset < number of fields
-   * @return an object or BooleanValue.FALSE
-   */
-  public Value fetchFieldDirect(Env env,
-                                int fieldOffset)
-  {
-    Value fieldTable = getFieldTable(env, fieldOffset);
-    Value fieldName = getFieldName(env, fieldOffset);
-    Value fieldAlias = getFieldNameAlias(fieldOffset);
-    Value fieldType = getJdbcType(fieldOffset);
-    Value fieldLength = getFieldLength(env, fieldOffset);
-    Value fieldScale = getFieldScale(fieldOffset);
-    Value fieldCatalog = getFieldCatalog(fieldOffset);
-
-    if ((fieldTable == BooleanValue.FALSE)
-      || (fieldName == BooleanValue.FALSE)
-      || (fieldAlias == BooleanValue.FALSE)
-      || (fieldType == BooleanValue.FALSE)
-      || (fieldLength == BooleanValue.FALSE)
-      || (fieldScale == BooleanValue.FALSE)) {
-      return BooleanValue.FALSE;
-    }
-
-    String sql = "SHOW FULL COLUMNS FROM " + fieldTable + " LIKE \'" + fieldName + "\'";
-
-    JdbcResultResource metaResult = _conn.metaQuery(sql, fieldCatalog.toString());
-
-    if (metaResult == null)
-      return BooleanValue.FALSE;
-
-    return metaResult.fetchFieldImproved(env,
-					 fieldLength.toInt(),
-					 fieldAlias.toString(),
-					 fieldName.toString(),
-					 fieldTable.toString(),
-					 fieldType.toInt(),
-					 fieldScale.toInt());
-  }
-
-  /**
    * returns an ArrayValue of lengths of the columns in the most
    * recently accessed row. If a function like
    * mysql_fetch_array() has not yet been called this will return BooleanValue.FALSE
@@ -682,7 +609,7 @@ public class JdbcResultResource {
     }
   }
 
-  public Value getNumRows()
+  public int getNumRows()
   {
     return getNumRows(_rs);
   }
@@ -690,22 +617,20 @@ public class JdbcResultResource {
   /**
    * returns number of rows returned in query
    */
-  public static Value getNumRows(ResultSet rs)
+  public static int getNumRows(ResultSet rs)
   {
     if (rs == null)
-      return BooleanValue.FALSE;
+      return -1;
 
     try {
       int currentRow = rs.getRow();
 
       try {
         rs.last();
-        int count = rs.getRow();
-        return new LongValue((long) count);
+        return rs.getRow();
       } catch (Exception e) {
         log.log(Level.FINE, e.toString(), e);
-
-        return BooleanValue.FALSE;
+        return -1;
       } finally {
         if (currentRow == 0)
           rs.beforeFirst();
@@ -715,7 +640,7 @@ public class JdbcResultResource {
 
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
-      return BooleanValue.FALSE;
+      return -1;
     }
   }
 
@@ -814,7 +739,7 @@ public class JdbcResultResource {
   /**
    * gets type from Types enumeration
    */
-  private Value getJdbcType(int fieldOffset)
+  protected Value getJdbcType(int fieldOffset)
   {
     try {
       if (_metaData == null)
@@ -925,6 +850,22 @@ public class JdbcResultResource {
       log.log(Level.FINE, e.toString(), e);
       return null;
     }
+  }
+
+  /**
+   * Returns an associative array representing the row.
+   */
+  public ArrayValue fetchAssoc()
+  {
+    return fetchArray(JdbcResultResource.FETCH_ASSOC);
+  }
+
+  /**
+   * Returns an object representing the row.
+   */
+  public ArrayValue fetchRow()
+  {
+    return fetchArray(JdbcResultResource.FETCH_NUM);
   }
 
   /**
@@ -1062,8 +1003,8 @@ public class JdbcResultResource {
                                      int rowNumber)
   {
     // throw error if rowNumber is after last row
-    Value numRows = getNumRows(rs);
-    if (!numRows.isNumberConvertible() || numRows.toLong() < rowNumber || rowNumber < 0) {
+    int numRows = getNumRows(rs);
+    if (numRows < rowNumber || rowNumber < 0) {
       return false;
     }
 
@@ -1124,6 +1065,14 @@ public class JdbcResultResource {
 
   public int getAffectedRows() {
     return _affectedRows;
+  }
+
+  /**
+   * Returns a string representation for this object
+   */
+  public JdbcResultResource validateResult()
+  {
+    return this;
   }
 }
 

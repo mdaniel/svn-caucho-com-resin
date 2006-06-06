@@ -371,7 +371,7 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Executes a query and returns a result set.
    *
-   * Returns true on update success, false on failture, and a result set
+   * Returns true on update success, false on failure, and a result set
    * for a successful select
    */
   public Value mysql_query(Env env, String sql, @Optional Mysqli conn)
@@ -379,7 +379,17 @@ public class MysqlModule extends AbstractQuercusModule {
     if (conn == null)
       conn = getConnection(env);
 
-    return conn.query(sql, MYSQL_STORE_RESULT);
+    MysqliResult result = conn.query(sql, MYSQL_STORE_RESULT);
+
+    if (result != null) {
+      return env.wrapJava(result);
+    }
+
+    if (conn.getErrorCode() == 0) {
+      return BooleanValue.TRUE;
+    }
+
+    return BooleanValue.FALSE;
   }
 
   /**
@@ -456,7 +466,7 @@ public class MysqlModule extends AbstractQuercusModule {
 
     Mysqli conn = getConnection(env);
 
-    Object metaResult = conn.validateConnection().query(sql, 1);
+    Object metaResult = conn.validateConnection().realQuery(sql);
 
     if (metaResult instanceof MysqliResult)
       return ((MysqliResult) metaResult).getFieldFlags();
@@ -508,8 +518,8 @@ public class MysqlModule extends AbstractQuercusModule {
    * Returns the field type.
    */
   public static Value mysql_field_type(Env env,
-				       @NotNull MysqliResult result,
-				       int fieldOffset)
+                                       @NotNull MysqliResult result,
+                                       int fieldOffset)
   {
     if (result == null)
       return BooleanValue.FALSE;
@@ -521,8 +531,8 @@ public class MysqlModule extends AbstractQuercusModule {
    * Deprecated alias for mysql_field_len.
    */
   public static Value mysql_fieldlen(Env env,
-				     @NotNull MysqliResult result,
-				     int fieldOffset)
+                                     @NotNull MysqliResult result,
+                                     int fieldOffset)
   {
     return mysql_field_len(env, result, fieldOffset);
   }
@@ -531,8 +541,8 @@ public class MysqlModule extends AbstractQuercusModule {
    * Returns the length of the specified field
    */
   public static Value mysql_field_len(Env env,
-				      @NotNull MysqliResult result,
-				      int fieldOffset)
+                                      @NotNull MysqliResult result,
+                                      int fieldOffset)
   {
     if (result == null)
       return BooleanValue.FALSE;
@@ -627,9 +637,9 @@ public class MysqlModule extends AbstractQuercusModule {
    */
   @ReturnNullAsFalse
   public MysqliResult mysql_list_fields(Env env,
-					String databaseName,
-					String tableName,
-					@Optional Mysqli conn)
+                                        String databaseName,
+                                        String tableName,
+                                        @Optional Mysqli conn)
   {
     if (databaseName == null)
       return null; // BooleanValue.FALSE;
@@ -648,7 +658,7 @@ public class MysqlModule extends AbstractQuercusModule {
    */
   @ReturnNullAsFalse
   public MysqliResult mysql_db_query(Env env,
-				     String databaseName,
+                                     String databaseName,
                                      String query,
                                      @Optional Mysqli conn)
   {
@@ -656,15 +666,9 @@ public class MysqlModule extends AbstractQuercusModule {
       conn = getConnection(env);
 
     if (! conn.select_db(databaseName))
-      return null; // BooleanValue.FALSE;
+      return null;
 
-    Value value = conn.query(query, 1);
-    Object o = value.toJavaObject();
-    if (o instanceof MysqliResult) {
-      return (MysqliResult) o;
-    }
-
-    return null;
+    return conn.query(query, 1);
   }
 
   /**
@@ -701,10 +705,11 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Retrieves the number of rows in a result set.
    */
-  public Value mysql_num_rows(Env env, @NotNull MysqliResult result)
+  @ReturnNullAsFalse
+  public Integer mysql_num_rows(Env env, @NotNull MysqliResult result)
   {
     if (result == null)
-      return BooleanValue.FALSE;
+      return null;
 
     return result.num_rows();
   }

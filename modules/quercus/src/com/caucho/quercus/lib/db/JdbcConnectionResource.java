@@ -83,34 +83,30 @@ public abstract class JdbcConnectionResource implements Closeable {
 
   private boolean _connected;
 
-  /**
-   * mysqli_multi_query populates _resultValues
-   * NB: any updates (ie: INSERT, UPDATE, DELETE) will
-   * have the update counts ignored.
-   *
-   * Has been stored tells moreResults whether the
-   * _nextResultValue has been stored already.
-   * If so, more results will return true only if
-   * there is another result.
-   *
-   * _hasBeenStored is set to true by default.
-   * if _hasBeenUsed == false, then
-   * _resultValues.get(_nextResultValue)
-   * is ready to be used by the next call to
-   * mysqli_store_result or mysqli_use_result.
-   */
-  private ArrayList<JdbcResultResource> _resultValues = new ArrayList<JdbcResultResource>();
-  private int _nextResultValue = 0;
-  private boolean _hasBeenUsed = true;
-
   public JdbcConnectionResource(Env env)
   {
     _env = env;
   }
 
+  /**
+   * Returns the error string for the most recent function call
+   */
+  public String error()
+  {
+    if (isConnected())
+      return getErrorMessage();
+    else
+      return null;
+  }
+
   public boolean isConnected()
   {
     return _connected;
+  }
+
+  public Env getEnv()
+  {
+    return _env;
   }
 
   public String getHost()
@@ -200,6 +196,59 @@ public abstract class JdbcConnectionResource implements Closeable {
                                          @Optional String url);
 
   /**
+   * Escape the given string for SQL statements.
+   *
+   * @param str a string
+   * @return the string escaped for SQL statements
+   */
+  protected Value realEscapeString(StringValue str)
+  {
+    StringBuilderValue buf = new StringBuilderValue(str.length());
+
+    final int strLength = str.length();
+
+    for (int i = 0; i < strLength; i++) {
+      char c = str.charAt(i);
+
+      switch (c) {
+      case '\u0000':
+        buf.append('\\');
+        buf.append('\u0000');
+        break;
+      case '\n':
+        buf.append('\\');
+        buf.append('n');
+        break;
+      case '\r':
+        buf.append('\\');
+        buf.append('r');
+        break;
+      case '\\':
+        buf.append('\\');
+        buf.append('\\');
+        break;
+      case '\'':
+        buf.append('\\');
+        buf.append('\'');
+        break;
+      case '"':
+        buf.append('\\');
+        buf.append('\"');
+        break;
+      case '\032':
+        buf.append('\\');
+        buf.append('Z');
+        break;
+      default:
+        buf.append(c);
+        break;
+      }
+    }
+
+    return buf;
+  }
+
+  /**
    * Returns the affected rows from the last query.
    */
   public int getAffectedRows()
@@ -262,6 +311,25 @@ public abstract class JdbcConnectionResource implements Closeable {
       log.log(Level.WARNING, e.toString(), e);
       return BooleanValue.FALSE;
     }
+  }
+
+  /**
+   * Returns the client encoding.
+   *
+   * XXX: stubbed out. has to be revised once we
+   * figure out what to do with character encoding
+   */
+  public String getCharacterSetName()
+  {
+    return "latin1";
+  }
+
+  /**
+   * Alias for getCharacterSetName
+   */
+  public String getClientEncoding()
+  {
+    return getCharacterSetName();
   }
 
   /**
@@ -371,187 +439,6 @@ public abstract class JdbcConnectionResource implements Closeable {
     return _dmd;
   }
 
-  /**
-   * indicates if one or more result sets are
-   * available from a multi query
-   *
-   * _hasBeenStored tells moreResults whether the
-   * _nextResultValue has been stored already.
-   * If so, more results will return true only if
-   * there is another result.
-   */
-  public boolean moreResults()
-  {
-    return !_hasBeenUsed || _nextResultValue < _resultValues.size() - 1;
-  }
-
-  /**
-   * prepares the next resultset from
-   * a multi_query
-   */
-  public boolean nextResult()
-  {
-    if (_nextResultValue + 1 < _resultValues.size()) {
-      _hasBeenUsed = false;
-      _nextResultValue++;
-      return true;
-    } else
-      return false;
-  }
-
-  /**
-   * returns the number of affected rows.
-   */
-  public int affected_rows()
-  {
-    return validateConnection().getAffectedRows();
-  }
-
-  /**
-   * sets the autocommit mode
-   */
-  public boolean autocommit(boolean isAutoCommit)
-  {
-    return validateConnection().setAutoCommit(isAutoCommit);
-  }
-
-  /**
-   * Changes the user and database
-   *
-   * @param user the new user
-   * @param password the new password
-   * @param db the new database
-   */
-  public boolean change_user(String user, String password, String db)
-  {
-    close(_env);
-
-    return realConnect(_env, _host, user, password, db, _port, "", 0, _driver, _url);
-  }
-
-  /**
-   * Returns the client encoding.
-   *
-   * XXX: stubbed out. has to be revised once we
-   * figure out what to do with character encoding
-   */
-  public String character_set_name()
-  {
-    return "latin1";
-  }
-
-  /**
-   * Alias for character_set_name
-   */
-  public String client_encoding()
-  {
-    return character_set_name();
-  }
-
-  /**
-   * Returns the error code for the most recent function call
-   */
-  public int errno()
-  {
-    if (_connected)
-      return getErrorCode();
-    else
-      return 0;
-  }
-
-  /**
-   * Returns the error string for the most recent function call
-   */
-  public String error()
-  {
-    if (_connected)
-      return getErrorMessage();
-    else
-      return null;
-  }
-
-  /**
-   * Escapes the string
-   */
-  public Value escape_string(StringValue str)
-  {
-    return real_escape_string(str);
-  }
-
-  /**
-   * Returns the host information.
-   */
-  public String get_client_info()
-  {
-    return validateConnection().getClientInfo();
-  }
-
-  /**
-   * Returns the database name.
-   */
-  public String get_dbname()
-  {
-    return _dbname;
-  }
-
-  /**
-   * Returns the host information.
-   */
-  public String get_host_info()
-  {
-    return _host + " via TCP socket";
-  }
-
-  /**
-   * Returns the host name.
-   */
-  public String get_host_name()
-  {
-    return _host;
-  }
-
-  /**
-   * Returns the port number.
-   */
-  public int get_port_number()
-  {
-    return _port;
-  }
-
-  /**
-   * Returns the protocol information.
-   */
-  public int get_proto_info()
-  {
-    return 10;
-  }
-
-  /**
-   * Returns the server information.
-   */
-  public String get_server_info()
-  {
-    try {
-      return validateConnection().getServerInfo();
-    } catch (SQLException e) {
-      return null;
-    }
-  }
-
-  /**
-   * Returns the server information.
-   */
-  public int get_server_version()
-  {
-    try {
-      String info = validateConnection().getServerInfo();
-
-      return infoToVersion(info);
-    } catch (SQLException e) {
-      return 0;
-    }
-  }
-
   static int infoToVersion(String info)
   {
     String[] result = info.split("[.a-z-]");
@@ -562,324 +449,6 @@ public abstract class JdbcConnectionResource implements Closeable {
     return (Integer.parseInt(result[0]) * 10000 +
             Integer.parseInt(result[1]) * 100 +
             Integer.parseInt(result[2]));
-  }
-
-  /**
-   * Returns the number of columns in the last query.
-   */
-  public int field_count()
-  {
-    return validateConnection().getFieldCount();
-  }
-
-  /**
-   * returns ID generated for an AUTO_INCREMENT column by the previous
-   * INSERT query on success, 0 if the previous query does not generate
-   * an AUTO_INCREMENT value, or FALSE if no MySQL connection was established
-   *
-   */
-  public Value insert_id()
-  {
-    try {
-      JdbcConnectionResource connV = validateConnection();
-      Connection conn = connV.getConnection();
-
-      Statement stmt = null;
-
-      try {
-        stmt = conn.createStatement();
-
-        ResultSet rs = stmt.executeQuery("SELECT @@identity");
-
-        if (rs.next())
-          return new LongValue(rs.getLong(1));
-        else
-          return BooleanValue.FALSE;
-      } finally {
-        if (stmt != null)
-          stmt.close();
-      }
-    } catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
-      return BooleanValue.FALSE;
-    }
-  }
-
-  /**
-   * Stub: kills the given mysql thread.
-   */
-  public boolean kill(int processId)
-  {
-    return false;
-  }
-
-  @ReturnNullAsFalse
-  public JdbcResultResource list_dbs()
-  {
-    return validateConnection().getCatalogs();
-  }
-
-  /**
-   * Check for more results in a multi-query
-   */
-  public boolean more_results()
-  {
-    return validateConnection().moreResults();
-  }
-
-  /**
-   * executes one or multiple queries which are
-   * concatenated by a semicolon.
-   */
-  public boolean multi_query(String query)
-  {
-    return validateConnection().multiQuery(query);
-  }
-
-  /**
-   * prepares next result set from a previous call to
-   * mysqli_multi_query
-   */
-  public boolean next_result()
-  {
-    return validateConnection().nextResult();
-  }
-
-  /**
-   * Sets a mysqli options
-   */
-  public boolean options(int option, Value value)
-  {
-    return false;
-  }
-
-  /**
-   * Pings the database
-   */
-  public boolean ping()
-  {
-    try {
-
-      return _connected && ! getConnection().isClosed();
-
-    } catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
-      return false;
-    }
-  }
-
-  /**
-   * Executes a query.
-   *
-   * @param sql the escaped query string (can contain escape sequences like `\n' and `\Z')
-   * @param resultMode ignored
-   *
-   * @return a {@link JdbcResultResource}, or null for failure
-   */
-  public Value query(String sql,
-         @Optional("MYSQLI_STORE_RESULT") int resultMode)
-  {
-    // XXX: the query can return true for successful update, e.g. mysql
-    try {
-      return real_query(sql);
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-
-    return BooleanValue.FALSE;
-  }
-
-  /*
-  public JdbcResultResource query(String sql)
-  {
-    return query(sql, MysqliModule.MYSQLI_STORE_RESULT);
-  }
-  */
-
-  /**
-   * Escapes the string
-   */
-  public Value real_escape_string(StringValue str)
-  {
-    StringBuilderValue buf = new StringBuilderValue(str.length());
-
-    final int strLength = str.length();
-
-    for (int i = 0; i < strLength; i++) {
-      char c = str.charAt(i);
-
-      switch (c) {
-      case '\u0000':
-        buf.append('\\');
-        buf.append('\u0000');
-        break;
-      case '\n':
-        buf.append('\\');
-        buf.append('n');
-        break;
-      case '\r':
-        buf.append('\\');
-        buf.append('r');
-        break;
-      case '\\':
-        buf.append('\\');
-        buf.append('\\');
-        break;
-      case '\'':
-        buf.append('\\');
-        buf.append('\'');
-        break;
-      case '"':
-        buf.append('\\');
-        buf.append('\"');
-        break;
-      case '\032':
-        buf.append('\\');
-        buf.append('Z');
-        break;
-      default:
-        buf.append(c);
-        break;
-      }
-    }
-
-    return buf;
-  }
-
-  /**
-   * Selects the underlying database/catalog to use.
-   *
-   * @param dbname the name of the database to select.
-   */
-  public boolean select_db(String dbname)
-  {
-    try {
-      if (_connected) {
-        validateConnection().setCatalog(dbname);
-
-        return true;
-      }
-      else
-        return false;
-    } catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
-      _env.warning(e.getMessage());
-      return false;
-    }
-  }
-
-  /**
-   * Sets the character set
-   */
-  public boolean set_charset(String charset)
-  {
-    return false;
-  }
-
-  /**
-   * Sets a mysqli option
-   */
-  public boolean set_opt(int option, Value value)
-  {
-    return options(option, value);
-  }
-
-  /**
-   * Returns the SQLSTATE error
-   */
-  public String sqlstate()
-  {
-    return "HY" + validateConnection().getErrorCode();
-  }
-
-  /**
-   * returns a string with the status of the connection
-   * or FALSE if error
-   */
-  public Value stat(Env env)
-  {
-    try {
-      JdbcConnectionResource connV = validateConnection();
-
-      Connection conn = connV.getConnection();
-      Statement stmt = null;
-
-      StringBuilder str = new StringBuilder();
-
-      try {
-        stmt = conn.createStatement();
-        stmt.execute("SHOW STATUS");
-
-        ResultSet rs = stmt.getResultSet();
-
-        while (rs.next()) {
-          if (str.length() > 0)
-            str.append(' ');
-          str.append(rs.getString(1));
-          str.append(": ");
-          str.append(rs.getString(2));
-        }
-
-        return new StringValueImpl(str.toString());
-      } finally {
-        if (stmt != null)
-          stmt.close();
-      }
-    } catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
-      return BooleanValue.FALSE;
-    }
-  }
-
-  /**
-   * Transfers the result set from the last query on the
-   * database connection represented by conn.
-   *
-   * Used in conjunction with mysqli_multi_query
-   */
-  @ReturnNullAsFalse
-  public JdbcResultResource store_result(Env env)
-  {
-    return validateConnection().storeResult();
-  }
-
-  /**
-   * Transfers the result set from the last query on the
-   * database connection represented by conn.
-   *
-   * Used in conjunction with mysqli_multi_query
-   */
-  @ReturnNullAsFalse
-  public JdbcResultResource use_result(Env env)
-  {
-    return validateConnection().storeResult();
-  }
-
-  /**
-   * Returns a bogus thread id
-   */
-  public int thread_id()
-  {
-    return 1;
-  }
-
-  /**
-   * Returns true for thread_safe
-   */
-  public boolean thread_safe()
-  {
-    return true;
-  }
-
-  /**
-   * returns the number of warnings from the last query
-   * in the connection object.
-   *
-   * @return number of warnings
-   */
-  public int warning_count()
-  {
-    return validateConnection().getWarningCount();
   }
 
   /**
@@ -906,80 +475,12 @@ public abstract class JdbcConnectionResource implements Closeable {
   }
 
   /**
-   * returns the next jdbcResultValue
-   */
-  protected JdbcResultResource storeResult()
-  {
-    if (!_hasBeenUsed) {
-      _hasBeenUsed = true;
-
-      return _resultValues.get(_nextResultValue);
-    } else
-      return null;
-  }
-
-  /**
-   * splits a string of multiple queries separated
-   * by ";" into an arraylist of strings
-   */
-  private ArrayList<String> splitMultiQuery(String sql)
-  {
-    ArrayList<String> result = new ArrayList<String>();
-    String query = "";
-    int length = sql.length();
-    boolean inQuotes = false;
-    char c;
-
-    for (int i = 0; i < length; i++) {
-      c = sql.charAt(i);
-
-      if (c == '\\') {
-        query += c;
-        if (i < length - 1) {
-          query += sql.charAt(i+1);
-          i++;
-        }
-        continue;
-      }
-
-      if (inQuotes) {
-        query += c;
-        if (c == '\'') {
-          inQuotes = false;
-        }
-        continue;
-      }
-
-      if (c == '\'') {
-        query += c;
-        inQuotes = true;
-        continue;
-      }
-
-      if (c == ';') {
-        result.add(query.trim());
-        query = "";
-      } else
-        query += c;
-    }
-
-    if (query != null)
-      result.add(query.trim());
-
-    return result;
-  }
-
-  /**
    * Execute a single query.
    */
-  private Value real_query(String sql)
+  protected JdbcResultResource realQuery(String sql)
   {
     clearErrors();
 
-    // Empty _resultValues on new call to query
-    // But DO NOT close the individual result sets.
-    // They may still be in use.
-    _resultValues.clear();
     _rs = null;
 
     Statement stmt = null;
@@ -993,7 +494,6 @@ public abstract class JdbcConnectionResource implements Closeable {
         ResultSet rs = stmt.getResultSet();
         _rs = createResult(stmt, rs);
         _affectedRows = 0;
-        _resultValues.add(_rs);
         _warnings = stmt.getWarnings();
       } else {
         // php/4310 should return a result set
@@ -1024,7 +524,7 @@ public abstract class JdbcConnectionResource implements Closeable {
       } catch (SQLException e) {
         saveErrors(e);
         log.log(Level.WARNING, e.toString(), e);
-        return BooleanValue.FALSE;
+        return null;
       }
     } catch (SQLException e) {
 
@@ -1035,16 +535,11 @@ public abstract class JdbcConnectionResource implements Closeable {
         keepResourceValues(stmt);
       } else {
         log.log(Level.WARNING, e.toString(), e);
-        return BooleanValue.FALSE;
+        return null;
       }
     }
 
-    if (_resultValues.size() > 0) {
-      _nextResultValue = 0;
-      _hasBeenUsed = false;
-      return _env.wrapJava(_resultValues.get(0));
-    } else
-      return BooleanValue.TRUE;
+    return _rs;
   }
 
   /**
@@ -1056,111 +551,6 @@ public abstract class JdbcConnectionResource implements Closeable {
     return new JdbcResultResource(stmt, rs, this);
   }
 
-
-  /**
-   * Used by the
-   * various mysqli functions to query the database
-   * for metadata about the resultset which is
-   * not in ResultSetMetaData.
-   *
-   * This function DOES NOT clear existing resultsets.
-   */
-  protected JdbcResultResource metaQuery(String sql,
-           String catalog)
-  {
-    clearErrors();
-
-    Value currentCatalog = getCatalog();
-
-    try {
-      _conn.setCatalog(catalog);
-
-      // need to create statement after setting catalog or
-      // else statement will have wrong catalog
-      Statement stmt = _conn.createStatement();
-      stmt.setEscapeProcessing(false);
-
-      if (stmt.execute(sql)) {
-        JdbcResultResource result = createResult(stmt, stmt.getResultSet());
-        _conn.setCatalog(currentCatalog.toString());
-        return result;
-      } else {
-        _conn.setCatalog(currentCatalog.toString());
-        return null;
-      }
-    } catch (SQLException e) {
-      saveErrors(e);
-      log.log(Level.WARNING, e.toString(), e);
-      return null;
-    }
-  }
-
-  /**
-   * Used for multiple queries. the
-   * JdbcConnectionResource now stores the
-   * result sets so that mysqli_store_result
-   * and mysqli_use_result can return result values.
-   *
-   * XXX: this may not function correctly in the
-   * context of a transaction.  Unclear wether
-   * mysqli_multi_query was designed with transactions
-   * in mind.
-   *
-   * XXX: multiQuery sets fieldCount to true or false
-   * depending on the last query entered.  Not sure what
-   * actual PHP intention is.
-   */
-  public boolean multiQuery(String sql)
-  {
-    clearErrors();
-
-    // Empty _resultValues on new call to query
-    // But DO NOT close the individual result sets.
-    // They may still be in use.
-    _resultValues.clear();
-
-    ArrayList<String> splitQuery = splitMultiQuery(sql);
-
-    Statement stmt = null;
-
-    try {
-      _rs = null;
-
-      for (String s : splitQuery) {
-        stmt = _conn.createStatement();
-        stmt.setEscapeProcessing(false);
-        if (stmt.execute(s)) {
-          _affectedRows = 0;
-          _rs = createResult(stmt, stmt.getResultSet());
-          _resultValues.add(_rs);
-          _warnings = stmt.getWarnings();
-        } else {
-          _affectedRows = stmt.getUpdateCount();
-          _warnings = stmt.getWarnings();
-        }
-      }
-    } catch (DataTruncation truncationError) {
-      try {
-        _affectedRows = stmt.getUpdateCount();
-        _warnings = stmt.getWarnings();
-      } catch (SQLException e) {
-        saveErrors(e);
-        log.log(Level.WARNING, e.toString(), e);
-        return false;
-      }
-    } catch (SQLException e) {
-      saveErrors(e);
-      log.log(Level.WARNING, e.toString(), e);
-      return false;
-    }
-
-    if (_resultValues.size() > 0) {
-      _nextResultValue = 0;
-      _hasBeenUsed = false;
-    }
-
-    return true;
-  }
 
   /**
    * sets auto-commmit to true or false
@@ -1230,37 +620,6 @@ public abstract class JdbcConnectionResource implements Closeable {
   }
 
   /**
-   * returns a string with the status of the connection
-   */
-  public Value stat()
-  {
-    clearErrors();
-
-    StringBuilder str = new StringBuilder();
-
-    try {
-      Statement stmt = _conn.createStatement();
-      stmt.execute("SHOW STATUS");
-
-      ResultSet rs = stmt.getResultSet();
-
-      while (rs.next()) {
-        if (str.length() > 0)
-          str.append(' ');
-        str.append(rs.getString(1));
-        str.append(": ");
-        str.append(rs.getString(2));
-      }
-
-      return new StringValueImpl(str.toString());
-    } catch (SQLException e) {
-      saveErrors(e);
-      log.log(Level.WARNING, e.toString(), e);
-      return BooleanValue.FALSE;
-    }
-  }
-
-  /**
    * Converts to an object.
    */
   public Object toObject()
@@ -1304,31 +663,6 @@ public abstract class JdbcConnectionResource implements Closeable {
   }
 
   /**
-   * This functions queries the connection with "SHOW WARNING"
-   *
-   * @return # of warnings
-   */
-  public int getWarningCount()
-  {
-    if (_warnings != null) {
-      JdbcResultResource warningResult;
-      warningResult = metaQuery("SHOW WARNINGS",getCatalog().toString());
-      Value warningCount = null;
-
-      if (warningResult != null) {
-        warningCount =
-          JdbcResultResource.getNumRows(warningResult.getResultSet());
-      }
-
-      if ((warningCount != null) && (warningCount != BooleanValue.FALSE))
-        return warningCount.toInt();
-      else
-        return 0;
-    } else
-      return 0;
-  }
-
-  /**
    * This function is overriden in Postgres to keep
    * result set references for php/4310 (see also php/1f33)
    */
@@ -1363,21 +697,38 @@ public abstract class JdbcConnectionResource implements Closeable {
   }
 
   /**
-   * Add a result resource value
-   */
-  protected void addResultValue(JdbcResultResource rs)
-  {
-    _resultValues.add(rs);
-  }
-
-  /**
    * This function was added for PostgreSQL pg_last_notice
    *
    * @return warning messages
    */
-  public SQLWarning getWarnings()
+  protected SQLWarning getWarnings()
   {
     return _warnings;
+  }
+
+  /**
+   * Pings the database
+   */
+  public boolean ping()
+  {
+    try {
+
+      return isConnected() && ! getConnection().isClosed();
+
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+      return false;
+    }
+  }
+
+  /**
+   * Set the current SQL warnings.
+   *
+   * @param warnings the new SQL warnings
+   */
+  protected void setWarnings(SQLWarning warnings)
+  {
+    _warnings = warnings;
   }
 
   protected void clearErrors()

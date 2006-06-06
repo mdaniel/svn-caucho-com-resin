@@ -29,29 +29,24 @@
 
 package com.caucho.quercus.lib.db;
 
-import java.sql.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-import java.util.HashMap;
-
 import com.caucho.util.L10N;
 
-import com.caucho.quercus.QuercusModuleException;
+import java.util.logging.Logger;
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.BooleanValue;
-
-import com.caucho.quercus.module.Reference;
 
 /**
- * postgres statement class (postgres has NO object oriented API)
+ * Postgres statement class. Since Postgres has no object oriented API,
+ * this is essentially a JdbcStatementResource.
  */
 public class PostgresStatement extends JdbcStatementResource {
   private static final Logger log = Logger.getLogger(PostgresStatement.class.getName());
   private static final L10N L = new L10N(PostgresStatement.class);
 
+  /**
+   * Constructor for PostgresStatement
+   *
+   * @param conn a Postgres connection
+   */
   PostgresStatement(Postgres conn)
   {
     super(conn);

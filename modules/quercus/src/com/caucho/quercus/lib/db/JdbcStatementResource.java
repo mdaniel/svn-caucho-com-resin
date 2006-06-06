@@ -29,11 +29,14 @@
 
 package com.caucho.quercus.lib.db;
 
-import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.ResourceValue;
+import com.caucho.quercus.env.Value;
 
 import com.caucho.util.Log;
 import com.caucho.util.L10N;
-import com.caucho.quercus.env.*;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -68,6 +71,12 @@ public class JdbcStatementResource extends ResourceValue {
   // (SELECT, UPDATE, DELETE, INSERT, CREATE, DROP, ALTER, BEGIN, DECLARE, UNKNOWN)
   private String _stmtType;
 
+  /**
+   * Constructor for JdbcStatementResource
+   *
+   * @param connV a JdbcConnectionResource connection
+   * @param query a query string to prepare this statement
+   */
   public JdbcStatementResource(JdbcConnectionResource connV,
                                String query)
     throws SQLException
@@ -76,85 +85,30 @@ public class JdbcStatementResource extends ResourceValue {
     prepareStatement(query);
   }
 
-  public JdbcStatementResource(JdbcConnectionResource conn)
-  {
-    _conn = conn;
-  }
-
   /**
-   * prepares statement for query
+   * Constructor for JdbcStatementResource
    *
-   * @param query SQL query
-   * @return true on success or false on failure
+   * @param connV a JdbcConnectionResource connection
    */
-  public boolean prepareStatement(String query)
+  public JdbcStatementResource(JdbcConnectionResource connV)
   {
-    try {
-      if (_stmt != null)
-        _stmt.close();
-      _query = query;
-      _stmt = _conn.getConnection().prepareStatement(query);
-      return true;
-    } catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
-      _errorMessage = e.getMessage();
-      _errorCode = e.getErrorCode();
-      return false;
-    }
+    _conn = connV;
   }
 
   /**
-   * counts the number of markers in the query string
-   */
-  public int countMarkers()
-  {
-    if (_query == null)
-      return -1;
-
-    int count = 0;
-    int length = _query.length();
-    boolean inQuotes = false;
-    char c;
-
-    for (int i = 0; i < length; i++) {
-      c = _query.charAt(i);
-
-      if (c == '\\') {
-        if (i < length - 1)
-          i++;
-        continue;
-      }
-
-      if (inQuotes) {
-        if (c == '\'')
-          inQuotes = false;
-        continue;
-      }
-
-      if (c == '\'') {
-        inQuotes = true;
-        continue;
-      }
-
-      if (c == '?') {
-        count++;
-      }
-    }
-
-    return count;
-  }
-
-  /**
-   * creates _types and _params array for this prepared statement.
+   * Creates _types and _params array for this prepared statement.
    *
    * @param types  = string of i,d,s,b (ie: "idds")
    * @param params = array of values (probably Vars)
-   * @return true on success false on failure
+   * @return true on success ir false on failure
    */
-  public boolean bindParams(Env env,
-                            String types,
-                            Value[] params)
+  protected boolean bindParams(Env env,
+                               String types,
+                               Value[] params)
   {
+    // This will create the _types and _params arrays
+    // for this prepared statement.
+
     final int size = types.length();
 
     // Check to see that types and params have the same length
@@ -183,15 +137,22 @@ public class JdbcStatementResource extends ResourceValue {
   }
 
   /**
-   * associate (bind) columns in the result set to variables.
+   * Associate (bind) columns in the result set to variables.
    * <p/>
-   * NB: we assume that the statement has been executed and compare the # of outParams w/ the # of columns in the
-   * resultset because we cannot know in advance how many columns "SELECT * FROM TableName" can return.
+   * NB: we assume that the statement has been executed and
+   * compare the # of outParams w/ the # of columns in the
+   * resultset because we cannot know in advance how many
+   * columns "SELECT * FROM TableName" can return.
    * <p/>
-   * PHP 5.0 seems to provide some rudimentary checking on # of outParams even before the statement has been executed
+   * PHP 5.0 seems to provide some rudimentary checking on # of
+   * outParams even before the statement has been executed
    * and only issues a warning in the case of "SELECT * FROM TableName".
    * <p/>
    * Our implementation REQUIRES the execute happen first.
+   *
+   * @param env the PHP executing environment
+   * @param outParams the output variables
+   * @return true on success or false on failure
    */
   public boolean bindResults(Env env,
                              Value[] outParams)
@@ -221,40 +182,60 @@ public class JdbcStatementResource extends ResourceValue {
   }
 
   /**
-   * if statement passed to mysqli_prepare() is one that produces a result set, then this function returns a
-   * JdbcResultResource with the metadata
-   * <p/>
+   * Closes the result set, if any, and closes this statement.
    */
-  protected ResultSetMetaData getMetaData()
-    throws SQLException
+  public void close()
   {
-    if (_metaData == null)
-      _metaData = _rs.getMetaData();
+    try {
+      if (_rs != null)
+        _rs.close();
 
-    return _metaData;
+      if (_stmt != null)
+        _stmt.close();
+
+    } catch (SQLException e) {
+      _errorMessage = e.getMessage();
+      _errorCode = e.getErrorCode();
+      log.log(Level.FINE, e.toString(), e);
+    }
   }
 
   /**
-   * Returns the last error code.
+   * Advance the cursor the number of rows given by offset.
+   *
+   * @param offset the number of rows to move the cursor
+   * @return true on success or false on failure
    */
-  public int getErrorCode()
+  protected boolean dataSeek(int offset)
+  {
+    return JdbcResultResource.setRowNumber(_rs, offset);
+  }
+
+  /**
+   * Returns the error number for the last error.
+   *
+   * @return the error number
+   */
+  public int errorCode()
   {
     return _errorCode;
   }
 
   /**
-   * Returns the last error message.
+   * Returns the error message for the last error.
+   *
+   * @return the error message
    */
-  public String getErrorMessage()
+  public String errorMessage()
   {
     return _errorMessage;
   }
 
-
   /**
-   * executes statement stored in resultV. The statement has been prepared using mysqli_prepare.
-   * <p/>
-   * returns true on success or false on failure
+   * Executes a prepared Query.
+   *
+   * @param env the PHP executing environment
+   * @return true on success or false on failure
    */
   public boolean execute(Env env)
   {
@@ -303,10 +284,10 @@ public class JdbcStatementResource extends ResourceValue {
 
   /**
    * Fetch results from a prepared statement into bound variables.
-   * <p/>
-   * returns true on success, false on error null if no more rows
+   *
+   * @return true on success, false on error null if no more rows
    */
-  public boolean fetch()
+  public Value fetch()
   {
     try {
       if (_rs.next()) {
@@ -317,48 +298,20 @@ public class JdbcStatementResource extends ResourceValue {
         for (int i = 0; i < size; i++) {
           _results[i].set(JdbcResultResource.getColumnValue(_rs, _metaData, i + 1));
         }
-        return true;
+        return BooleanValue.TRUE;
       } else
-        return false;
+        return BooleanValue.FALSE;
 
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
-      return false;
+      return NullValue.NULL;
     }
-  }
-
-  public void close()
-  {
-    try {
-      if (_rs != null)
-        _rs.close();
-
-      if (_stmt != null)
-        _stmt.close();
-
-    } catch (SQLException e) {
-      _errorMessage = e.getMessage();
-      _errorCode = e.getErrorCode();
-      log.log(Level.FINE, e.toString(), e);
-    }
-  }
-
-  public boolean dataSeek(int offset)
-  {
-    return JdbcResultResource.setRowNumber(_rs, offset);
-  }
-
-  public Value getNumRows()
-    throws SQLException
-  {
-    if (_rs != null)
-      return JdbcResultResource.getNumRows(_rs);
-    else
-      return BooleanValue.FALSE;
   }
 
   /**
-   * Frees the associated result
+   * Frees the associated result.
+   *
+   * @return true on success or false on failure
    */
   public boolean freeResult()
   {
@@ -381,6 +334,79 @@ public class JdbcStatementResource extends ResourceValue {
     }
   }
 
+  /**
+   * Returns the meta data for corresponding to the current result set.
+   *
+   * @return the result set meta data
+   */
+  protected ResultSetMetaData getMetaData()
+    throws SQLException
+  {
+    if (_metaData == null)
+      _metaData = _rs.getMetaData();
+
+    return _metaData;
+  }
+
+  /**
+   * Returns the number of rows in the result set.
+   *
+   * @return the number of rows in the result set
+   */
+  public int getNumRows()
+    throws SQLException
+  {
+    if (_rs != null)
+      return JdbcResultResource.getNumRows(_rs);
+    else
+      return 0;
+  }
+
+  /**
+   * Returns the internal prepared statement.
+   *
+   * @return the internal prepared statement
+   */
+  protected PreparedStatement getPreparedStatement()
+  {
+    return _stmt;
+  }
+
+  /**
+   * Resets _fieldOffset in _resultResource
+   *
+   * @return null if _resultResource == null, otherwise _resultResource
+   */
+  public JdbcResultResource getResultMetadata()
+  {
+    if (_resultResource != null) {
+      _resultResource.setFieldOffset(0);
+      return _resultResource;
+    }
+
+    if ((_stmt == null) || (_rs == null))
+      return null;
+
+    _resultResource = new JdbcResultResource(_stmt, _rs, _conn);
+    return _resultResource;
+  }
+
+  /**
+   * Returns the internal result set.
+   *
+   * @return the internal result set
+   */
+  protected ResultSet getResultSet()
+  {
+    return _rs;
+  }
+
+  /**
+   * Returns this statement type.
+   *
+   * @return this statement type:
+   * SELECT, UPDATE, DELETE, INSERT, CREATE, DROP, ALTER, BEGIN, DECLARE, or UNKNOWN.
+   */
   public String getStatementType()
   {
     // Oracle Statement type
@@ -402,52 +428,9 @@ public class JdbcStatementResource extends ResourceValue {
   }
 
   /**
-   * checks to see if a resultset was created by a call to mysqli_stmt_execute
-   * <p/>
-   * Our implementation has no concept of a buffered query.
-   */
-  public boolean storeResult()
-  {
-    return (_rs != null);
-  }
-
-  /**
-   * resets _fieldOffset in _resultResource
+   * Counts the number of parameter markers in the query string.
    *
-   * @return FALSE if _resultResource == null, otherwise _resultResource
-   */
-  public JdbcResultResource getResultMetadata()
-  {
-    if (_resultResource != null) {
-      _resultResource.setFieldOffset(0);
-      return _resultResource;
-    }
-
-    if ((_stmt == null) || (_rs == null))
-      return null;
-
-    _resultResource = new JdbcResultResource(_stmt, _rs, _conn);
-    return _resultResource;
-  }
-
-  /**
-   * Returns the error number
-   */
-  public int errorCode()
-  {
-    return _errorCode;
-  }
-
-  /**
-   * Returns the error message
-   */
-  public String errorMessage()
-  {
-    return _errorMessage;
-  }
-
-  /**
-   * counts the number of markers in the query string
+   * @return the number of parameter markers in the query string
    */
   public int paramCount()
   {
@@ -488,10 +471,9 @@ public class JdbcStatementResource extends ResourceValue {
   }
 
   /**
-   * prepares statement for query
+   * Prepares this statement with the given query.
    *
    * @param query SQL query
-   *
    * @return true on success or false on failure
    */
   public boolean prepare(String query)
@@ -513,24 +495,46 @@ public class JdbcStatementResource extends ResourceValue {
     }
   }
 
-  public JdbcConnectionResource validateConnection()
+  /**
+   * Prepares statement with the given query.
+   *
+   * @param query SQL query
+   * @return true on success or false on failure
+   */
+  public boolean prepareStatement(String query)
   {
-    return _conn;
+    try {
+      if (_stmt != null)
+        _stmt.close();
+      _query = query;
+      _stmt = _conn.getConnection().prepareStatement(query);
+      return true;
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+      _errorMessage = e.getMessage();
+      _errorCode = e.getErrorCode();
+      return false;
+    }
   }
 
-  public ResultSet getResultSet()
-  {
-    return _rs;
-  }
-
-  public PreparedStatement getPreparedStatement()
-  {
-    return _stmt;
-  }
-
+  /**
+   * Returns a string representation for this object.
+   *
+   * @return the string representation for this object
+   */
   public String toString()
   {
     return getClass().getName() + "[" + _conn + "]";
+  }
+
+  /**
+   * Validates the connection resource.
+   *
+   * @return the validated connection resource
+   */
+  public JdbcConnectionResource validateConnection()
+  {
+    return _conn;
   }
 }
 

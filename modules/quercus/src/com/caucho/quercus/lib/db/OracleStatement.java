@@ -29,36 +29,30 @@
 
 package com.caucho.quercus.lib.db;
 
-import java.sql.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-import java.util.HashMap;
+import com.caucho.quercus.env.Value;
 
 import com.caucho.util.L10N;
 
-import com.caucho.quercus.QuercusModuleException;
+import java.util.logging.Logger;
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.BooleanValue;
+import java.util.HashMap;
 
-import com.caucho.quercus.module.Reference;
 
 /**
- * oracle statement class (oracle has NO object oriented API)
+ * Oracle statement class. Since Oracle has no object oriented API,
+ * this is essentially a JdbcStatementResource.
  */
 public class OracleStatement extends JdbcStatementResource {
   private static final Logger log = Logger.getLogger(OracleStatement.class.getName());
   private static final L10N L = new L10N(OracleStatement.class);
 
-  // Binding variables for oracle statements
+  // Binding variables for Oracle statements
   private HashMap<String,Integer> _bindingVariables = new HashMap<String,Integer>();
 
   // Oracle internal result buffer
   private Value _resultBuffer;
 
-  // Binding variables for oracle statements with define_by_name (TOTALLY DIFFERENT FROM ?)
+  // Binding variables for Oracle statements with define_by_name (TOTALLY DIFFERENT FROM ?)
   //
   // Example:
   //
@@ -78,66 +72,131 @@ public class OracleStatement extends JdbcStatementResource {
   //
   private HashMap<String,Value> _byNameVariables = new HashMap<String,Value>();
 
+  /**
+   * Constructor for OracleStatement
+   *
+   * @param conn Oracle connection
+   */
   OracleStatement(Oracle conn)
   {
     super(conn);
   }
 
+  /**
+   * Assign a variable name to the corresponding index
+   *
+   * @param name the variable name
+   * @param value the corresponding index
+   */
   public void putBindingVariable(String name, Integer value)
   {
     _bindingVariables.put(name, value);
   }
 
+  /**
+   * Return a binding variable index
+   *
+   * @param name the variable name
+   * @return the binding variable index
+   */
   public Integer getBindingVariable(String name)
   {
     return _bindingVariables.get(name);
   }
 
+  /**
+   * Remove a binding variable
+   *
+   * @param name the binding variable name
+   * @return the binding variable index
+   */
   public Integer removeBindingVariable(String name)
   {
     return _bindingVariables.remove(name);
   }
 
+  /**
+   * Return all binding variables
+   *
+   * @return a HashMap of variable name to index values
+   */
   public HashMap<String,Integer> getBindingVariables()
   {
     return _bindingVariables;
   }
 
+  /**
+   * Remove all binding variables
+   */
   public void resetBindingVariables()
   {
     _bindingVariables = new HashMap<String,Integer>();
   }
 
+  /**
+   * Set the internal result buffer
+   */
   public void setResultBuffer(Value resultBuffer)
   {
     _resultBuffer = resultBuffer;
   }
 
+  /**
+   * Return the internal result buffer
+   *
+   * @return the result buffer
+   */
   public Value getResultBuffer()
   {
     return _resultBuffer;
   }
 
+  /**
+   * Assign a value to a variable
+   *
+   * @param name a variable name
+   * @param value the variable value
+   */
   public void putByNameVariable(String name, Value value)
   {
     _byNameVariables.put(name, value);
   }
 
+  /**
+   * Return the variable value by name
+   *
+   * @param name the variable name
+   * @return the variable value
+   */
   public Value getByNameVariable(String name)
   {
     return _byNameVariables.get(name);
   }
 
+  /**
+   * Remove a variable given the corresponding name
+   *
+   * @param name the variable name
+   * @return the variable value
+   */
   public Value removeByNameVariable(String name)
   {
     return _byNameVariables.remove(name);
   }
 
+  /**
+   * Return all variable names and corresponding values
+   *
+   * @return a HashMap of variable names to corresponding values
+   */
   public HashMap<String,Value> getByNameVariables()
   {
     return _byNameVariables;
   }
 
+  /**
+   * Remove all variables
+   */
   public void resetByNameVariables()
   {
     _byNameVariables = new HashMap<String,Value>();

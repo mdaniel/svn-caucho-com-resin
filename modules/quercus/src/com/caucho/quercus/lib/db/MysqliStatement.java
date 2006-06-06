@@ -29,22 +29,22 @@
 
 package com.caucho.quercus.lib.db;
 
-import java.sql.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-import java.util.HashMap;
-
-import com.caucho.util.L10N;
-
-import com.caucho.quercus.QuercusModuleException;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.NullValue;
+
+import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.UnimplementedException;
 
 import com.caucho.quercus.module.Reference;
 import com.caucho.quercus.module.ReturnNullAsFalse;
+
+import com.caucho.util.L10N;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 
 /**
  * mysqli object oriented API facade
@@ -53,127 +53,248 @@ public class MysqliStatement extends JdbcStatementResource {
   private static final Logger log = Logger.getLogger(MysqliStatement.class.getName());
   private static final L10N L = new L10N(MysqliStatement.class);
 
-  // Oracle Statement type:
-  // (SELECT, UPDATE, DELETE, INSERT, CREATE, DROP, ALTER, BEGIN, DECLARE, UNKNOWN)
-  private String _stmtType;
-
-  // Binding variables for oracle statements
-  private HashMap<String,Integer> _bindingVariables = new HashMap<String,Integer>();
-
-  // Oracle internal result buffer
-  private Value _resultBuffer;
-
-  // Binding variables for oracle statements with define_by_name (TOTALLY DIFFERENT FROM ?)
-  //
-  // Example:
-  //
-  // $stmt = oci_parse($conn, "SELECT empno, ename FROM emp");
-  //
-  // /* the define MUST be done BEFORE oci_execute! */
-  //
-  // oci_define_by_name($stmt, "EMPNO", $empno);
-  // oci_define_by_name($stmt, "ENAME", $ename);
-  //
-  // oci_execute($stmt);
-  //
-  // while (oci_fetch($stmt)) {
-  //    echo "empno:" . $empno . "\n";
-  //    echo "ename:" . $ename . "\n";
-  // }
-  //
-  private HashMap<String,Value> _byNameVariables = new HashMap<String,Value>();
-
+  /**
+   * Constructor for MysqliStatement
+   *
+   * @param conn a Mysqli connection
+   */
   MysqliStatement(Mysqli conn)
   {
     super(conn);
   }
 
   /**
-   * returns the number of affected rows.
+   * Returns the total number of rows changed, deleted,
+   * or inserted by the last executed statement.
+   *
+   * @param env the PHP executing environment
+   * @return  an integer greater than zero indicates the number of
+   * rows affected or retrieved. Zero indicates that no records were
+   * updated for an UPDATE/DELETE statement, no rows matched the
+   * WHERE clause in the query or that no query has yet been
+   * executed. -1 indicates that the query has returned an error.
    */
-  public int affected_rows()
+  public int affected_rows(Env env)
   {
-    return validateConnection().getAffectedRows();
+    try {
+      return validateConnection().getAffectedRows();
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      return -1;
+    }
   }
 
   /**
-   * creates _types and _params array for this prepared statement.
+   * Binds variables to a prepared statement as parameters.
    *
-   * @param types  = string of i,d,s,b (ie: "idds")
-   * @param params = array of values (probably Vars)
-   * @return true on success false on failure
+   * @param env the PHP executing environment
+   * @param types string of i,d,s,b (ie: "idds")
+   * @param params array of values (probably Vars)
+   * @return true on success or false on failure
    */
   public boolean bind_param(Env env,
                             String types,
                             @Reference Value[] params)
   {
-    return bindParams(env, types, params);
+    try {
+      return bindParams(env, types, params);
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      return false;
+    }
   }
 
   /**
-   * binds outparams to result set
+   * Binds variables to a prepared statement for result storage.
+   *
+   * @param env the PHP executing environment
+   * @param outParams the output variables
+   * @return true on success or false on failure
    */
   public boolean bind_result(Env env,
                              @Reference Value[] outParams)
   {
-    return bindResults(env, outParams);
+    try {
+      return bindResults(env, outParams);
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      return false;
+    }
   }
 
   /**
-   * Seeks to a given result
+   * Closes a prepared statement.
+   *
+   * @param env the PHP executing environment
+   * @return true on success or false on failure
    */
-  public void data_seek(int offset)
+  public boolean close(Env env)
   {
-    dataSeek(offset);
+    try {
+      super.close();
+      return true;
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      return false;
+    }
   }
 
   /**
-   * Returns the mysql error number
+   * Seeks to an arbitrary row in statement result set.
+   *
+   * @param env the PHP executing environment
+   * @param offset row offset
    */
-  public int errno()
+  public void data_seek(Env env,
+                        int offset)
   {
-    return errorCode();
+    try {
+      dataSeek(offset);
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
   }
 
   /**
-   * Returns the mysql error message
+   * Returns the error code for the most recent statement call.
+   *
+   * @param env the PHP executing environment
+   * @return the error code or zero if no error occurred
    */
-  public String error()
+  public int errno(Env env)
   {
-    return errorMessage();
+    try {
+      return errorCode();
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      return -1;
+    }
   }
 
   /**
-   * Frees the associated result
+   * Returns a string description for last statement error
+   *
+   * @param env the PHP executing environment
+   * @return a string that describes the error or an empty string if no error occurred.
    */
-  public void free_result()
+  @ReturnNullAsFalse
+  public String error(Env env)
   {
-    freeResult();
+    try {
+      return errorMessage();
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      return null;
+    }
   }
 
   /**
-   * Returns the number of rows in the result
+   * Executes a prepared Query. The statement has been prepared using mysqli_prepare.
+   *
+   * @param env the PHP executing environment
+   * @return true on success or false on failure
    */
-  public Value num_rows()
+  public boolean execute(Env env)
   {
-    if (getResultSet() != null)
-      return JdbcResultResource.getNumRows(getResultSet());
-    else
+    try {
+      return super.execute(env);
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      return false;
+    }
+  }
+
+  /**
+   * Fetch results from a prepared statement into the bound variables.
+   *
+   * @param env the PHP executing environment
+   * @return true on success, false on failure or null if no more rows/data exists
+   */
+  public Value fetch(Env env)
+  {
+    try {
+      return super.fetch();
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
+    }
   }
 
   /**
-   * counts the number of markers in the query string
+   * Frees the associated result.
+   *
+   * @param env the PHP executing environment
    */
-  public int param_count()
+  public void free_result(Env env)
   {
-    return paramCount();
+    try {
+      freeResult();
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
   }
 
   /**
-   * Resets the statement
+   * Returns the number of rows in the result.
+   *
+   * @param env the PHP executing environment
+   * @return the number of rows in the result set
    */
-  public boolean reset()
+  @ReturnNullAsFalse
+  public Integer num_rows(Env env)
+  {
+    try {
+      if (getResultSet() != null)
+        return new Integer(JdbcResultResource.getNumRows(getResultSet()));
+      else
+        return null;
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      return null;
+    }
+  }
+
+  /**
+   * Returns the number of parameter markers for this statement.
+   *
+   * @param env the PHP executing environment
+   * @return the number of parameter markers for this statement
+   */
+  public int param_count(Env env)
+  {
+    try {
+      return paramCount();
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      return -1;
+    }
+  }
+
+  /**
+   * Prepare a SQL statement for execution.
+   *
+   * @param env the PHP executing environment
+   * @param query SQL query
+   * @return true on success or false on failure
+   */
+  public boolean prepare(Env env,
+                         String query)
+  {
+    try {
+      return super.prepare(query);
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      return false;
+    }
+  }
+
+  /**
+   * Resets the statement.
+   *
+   * @param env the PHP executing environment
+   * @return true on success or false on failure
+   */
+  public boolean reset(Env env)
   {
     return true;
   }
@@ -217,6 +338,9 @@ public class MysqliStatement extends JdbcStatementResource {
    * So basically, this function seems to exist only to be a
    * way to get at the metadata from a resultset generated
    * by a prepared statement.
+   *
+   * @param env the PHP executing environment
+   * @return a result with meta data or false on failure
    */
   @ReturnNullAsFalse
   public MysqliResult result_metadata(Env env)
@@ -225,9 +349,8 @@ public class MysqliStatement extends JdbcStatementResource {
 
       if (getResultSet() != null) {
         return new MysqliResult(getMetaData(),
-                                validateConnection());
-      }
-      else
+                                (Mysqli) validateConnection());
+      } else
         return null;
 
     } catch (Exception e) {
@@ -236,17 +359,44 @@ public class MysqliStatement extends JdbcStatementResource {
   }
 
   /**
-   * Returns the SQLSTATE error
+   * Send data in blocks.
+   *
+   * @param env the PHP executing environment
+   * @param paramNumber indicates which parameter to associate the data with
+   * @param data the data to be sent
+   * @return true on success or false on failure
    */
-  public String sqlstate()
+  public boolean send_long_data(Env env,
+                                int paramNumber,
+                                String data)
   {
-    return "HY" + errno();
+    throw new UnimplementedException("mysqli_stmt_send_long_data");
+  }
+
+  /**
+   * Returns SQLSTATE error from previous statement operation.
+   *
+   * @param env the PHP executing environment
+   * @return the SQLSTATE (5-characters string) for the last error. '00000' means no error
+   */
+  @ReturnNullAsFalse
+  public String sqlstate(Env env)
+  {
+    try {
+      return "HY" + errno(env);
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      return null;
+    }
   }
 
   /**
    * Saves the result as buffered.
+   *
+   * @param env the PHP executing environment
+   * @return true on success or false on failure
    */
-  public boolean store_result()
+  public boolean store_result(Env env)
   {
     return true;
   }

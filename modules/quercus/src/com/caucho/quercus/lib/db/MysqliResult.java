@@ -29,17 +29,19 @@
 
 package com.caucho.quercus.lib.db;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.sql.Statement;
 
-import com.caucho.util.L10N;
-
+import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
 
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.ReturnNullAsFalse;
@@ -50,8 +52,14 @@ import com.caucho.quercus.module.ReturnNullAsFalse;
 public class MysqliResult extends JdbcResultResource {
   private static final Logger log
     = Logger.getLogger(MysqliResult.class.getName());
-  private static final L10N L = new L10N(MysqliResult.class);
 
+  /**
+   * Constructor for MysqliResult
+   *
+   * @param stmt the corresponding statement
+   * @param rs the corresponding result set
+   * @param conn the corresponding connection
+   */
   public MysqliResult(Statement stmt,
                       ResultSet rs,
                       Mysqli conn)
@@ -59,10 +67,16 @@ public class MysqliResult extends JdbcResultResource {
     super(stmt, rs, conn);
   }
 
-  public MysqliResult(ResultSetMetaData md,
-                      JdbcConnectionResource conn)
+  /**
+   * Constructor for MysqliResult
+   *
+   * @param metaData the corresponding result set meta data
+   * @param conn the corresponding connection
+   */
+  public MysqliResult(ResultSetMetaData metaData,
+                      Mysqli conn)
   {
-    super(md, conn);
+    super(metaData, conn);
   }
 
   /**
@@ -72,13 +86,7 @@ public class MysqliResult extends JdbcResultResource {
    */
   public boolean data_seek(Env env, int rowNumber)
   {
-    if (setRowNumber(rowNumber))
-      return true;
-    else {
-      env.warning(L.l("Offset {0} is invalid (or the query data is unbuffered)", rowNumber));
-
-      return false;
-    }
+    return seek(env, rowNumber);
   }
 
   /**
@@ -195,6 +203,76 @@ public class MysqliResult extends JdbcResultResource {
   }
 
   /**
+   * returns an object containing the following field information:
+   *
+   * name: The name of the column
+   * orgname: The original name if an alias was specified
+   * table: The name of the table
+   * orgtable: The original name if an alias was specified
+   * def: default value for this field, represented as a string
+   * max_length: The maximum width of the field for the result set
+   * flags: An integer representing the bit-flags for the field (see _constMap).
+   * type: The data type used for this field (an integer... also see _constMap)
+   * decimals: The number of decimals used (for integer fields)
+   *
+   * @param fieldOffset 0 <= fieldOffset < number of fields
+   * @return an object or BooleanValue.FALSE
+   */
+  protected Value fetchFieldDirect(Env env,
+                                   int fieldOffset)
+  {
+    Value fieldTable = getFieldTable(env, fieldOffset);
+    Value fieldName = getFieldName(env, fieldOffset);
+    Value fieldAlias = getFieldNameAlias(fieldOffset);
+    Value fieldType = getJdbcType(fieldOffset);
+    Value fieldLength = getFieldLength(env, fieldOffset);
+    Value fieldScale = getFieldScale(fieldOffset);
+    Value fieldCatalog = getFieldCatalog(fieldOffset);
+
+    if ((fieldTable == BooleanValue.FALSE)
+      || (fieldName == BooleanValue.FALSE)
+      || (fieldAlias == BooleanValue.FALSE)
+      || (fieldType == BooleanValue.FALSE)
+      || (fieldLength == BooleanValue.FALSE)
+      || (fieldScale == BooleanValue.FALSE)) {
+      return BooleanValue.FALSE;
+    }
+
+    String sql = "SHOW FULL COLUMNS FROM " + fieldTable + " LIKE \'" + fieldName + "\'";
+
+    MysqliResult metaResult;
+
+    metaResult = ((Mysqli) getConnection()).metaQuery(sql, fieldCatalog.toString());
+
+    if (metaResult == null)
+      return BooleanValue.FALSE;
+
+    return metaResult.fetchFieldImproved(env,
+                                         fieldLength.toInt(),
+                                         fieldAlias.toString(),
+                                         fieldName.toString(),
+                                         fieldTable.toString(),
+                                         fieldType.toInt(),
+                                         fieldScale.toInt());
+  }
+
+  /**
+   * @see Value fetchFieldDirect
+   *
+   * increments the fieldOffset counter by one;
+   */
+  public Value fetchNextField(Env env)
+  {
+    int fieldOffset = getFieldOffset();
+
+    Value result = fetchFieldDirect(env, fieldOffset);
+
+    setFieldOffset(fieldOffset + 1);
+
+    return result;
+  }
+
+  /**
    * Returns the number of fields
    */
   public int field_count(Env env)
@@ -237,6 +315,27 @@ public class MysqliResult extends JdbcResultResource {
   }
 
   /**
+   * @return array of fieldDirect objects
+   */
+  public Value getFieldDirectArray(Env env)
+  {
+    ArrayValue array = new ArrayValueImpl();
+
+    try {
+      int numColumns = getMetaData().getColumnCount();
+
+      for (int i = 0; i < numColumns; i++) {
+        array.put(fetchFieldDirect(env, i));
+      }
+
+      return array;
+    } catch (SQLException e) {
+      log.log(Level.FINE,  e.toString(), e);
+      return BooleanValue.FALSE;
+    }
+  }
+
+  /**
    * returns the number of columns in the result set.
    */
   public int num_fields()
@@ -248,9 +347,9 @@ public class MysqliResult extends JdbcResultResource {
    * Returns the number of rows in the result set.
    */
   @ReturnNullAsFalse
-  public Value num_rows()
+  public Integer num_rows()
   {
-    return getNumRows();
+    return new Integer(getNumRows());
   }
 
   /**
@@ -263,13 +362,8 @@ public class MysqliResult extends JdbcResultResource {
   }
 
   /**
-   * Returns a string representation for this object
+   * Returns a string representation for this object.
    */
-  public JdbcResultResource validateResult()
-  {
-    return this;
-  }
-
   public String toString()
   {
     return "MysqliResult[" + super.toString() + "]";
