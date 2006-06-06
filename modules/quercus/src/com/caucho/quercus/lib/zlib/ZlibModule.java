@@ -77,7 +77,7 @@ public class ZlibModule extends AbstractQuercusModule {
   public Zlib gzopen(Env env,
 		     String fileName,
 		     String mode,
-		     @Optional("0") int useIncludePath)
+		     @Optional("false") boolean useIncludePath)
   {
     return new Zlib(env, fileName, mode, useIncludePath);
   }
@@ -91,7 +91,7 @@ public class ZlibModule extends AbstractQuercusModule {
    */
   public Value gzfile(Env env,
 		     String fileName,
-		     @Optional("0") int useIncludePath)
+		     @Optional("false") boolean useIncludePath)
   {
     return (new Zlib(env, fileName, "r", useIncludePath)).gzfile();
   }
@@ -108,7 +108,7 @@ public class ZlibModule extends AbstractQuercusModule {
    */
   public boolean readgzfile(Env env,
                             String fileName,
-                            @Optional("0") int useIncludePath)
+                            @Optional("false") boolean useIncludePath)
   {
     try {
       Zlib zlib = new Zlib(env, fileName,"r",useIncludePath);
@@ -122,13 +122,13 @@ public class ZlibModule extends AbstractQuercusModule {
 
   public int gzwrite(Env env,
                      @NotNull Zlib zp,
-                     String s,
+                     InputStream is,
                      @Optional("0") int length)
   {
-    if (zp == null || "".equals(s))
+    if (zp == null)
       return 0;
 
-    return zp.gzwrite(env, s,length);
+    return zp.gzwrite(env, is,length);
   }
 
   /**
@@ -141,10 +141,10 @@ public class ZlibModule extends AbstractQuercusModule {
    */
   public int gzputs(Env env,
                     @NotNull Zlib zp,
-                    String s,
+                    InputStream is,
                     @Optional("0") int length)
   {
-    return gzwrite(env, zp, s, length);
+    return gzwrite(env, zp, is, length);
   }
 
   public boolean gzclose(@NotNull Zlib zp)

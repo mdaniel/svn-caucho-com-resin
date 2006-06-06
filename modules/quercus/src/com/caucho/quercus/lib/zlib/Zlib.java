@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.zlib;
 
+import java.io.ByteArrayInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,15 +40,18 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
+import java.util.zip.CRC32;
 
 import com.caucho.quercus.QuercusModuleException;
 
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.NotNull;
@@ -58,6 +62,7 @@ import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.util.ByteBuffer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.TempBuffer;
 
 /**
  * Zlib object oriented API facade
@@ -68,12 +73,15 @@ public class Zlib {
   private static final L10N L = new L10N(Zlib.class);
 
   private BufferedReader _bufferedReader;
+  private GZIPFileValueWriter _gout;
 
   private Path _path;
   private Value _fileValue; // Created by fopen... can be BooleanValue.FALSE
 
   /**
-   * Creates and sets _deflater.
+   * XXX: todo - implement additional read/write modes (a,+,etc)
+   *
+   * Creates and sets GZIP stream if mode is 'w'
    * Also creates _fileValue.  All write functions are wrappers around
    * the _fileValue functions using _deflater to compress the
    * byte stream.
@@ -85,94 +93,94 @@ public class Zlib {
    * @param useIncludePath is always on
    */
   public Zlib(Env env,
-              String fileName,
+              String filename,
               String mode,
-              int useIncludePath)
+              boolean useIncludePath)
   {
 
-    Pattern pattern = Pattern.compile("[0-9]");
-    Matcher matcher = pattern.matcher(mode);
+    String filemode = getFileMode( mode );
+    int compressionLevel = getCompressionLevel( mode );
+    int compressionStrategy = getCompressionStrategy( mode );
 
-    if (matcher.find())
-      mode = mode.substring(0,matcher.start());
-
-   /**
-    * XXX: GZIP has only one compression method and level (deflate)
-    *
-    * if (matcher.find()) {
-    *  _deflater = new Deflater((int) mode.charAt(matcher.start()) - (int) '0');
-    *   mode = mode.substring(0,matcher.start());
-    * } else
-    *   _deflater = new Deflater();
-    *
-    */
-
-    /**
-     * XXX: Skipping strategy for now because it breaks
-     * _deflater.deflate later (ie: makes it always return
-     * 0 for bytes compressed).
-     *
-     * // Set Strategy (ie: filtered)
-     * if (mode.indexOf("f") != -1)
-     *   _deflater.setStrategy(Deflater.FILTERED);
-     *
-     * // Set Strategy Huffman only
-     * if (mode.indexOf("h") != -1)
-     *   _deflater.setStrategy(Deflater.HUFFMAN_ONLY);
-     */
-
-     // Strip everything to the right of the level
-     // before sending mode to fopen
-     _fileValue = FileModule.fopen(env, fileName, mode, true, null);
-
-
-    _path = env.getPwd().lookup(fileName);
-
+    try {
+      if( filemode.equals("r") )
+      {
+        _fileValue = FileModule.fopen(env, filename, mode, useIncludePath, null);
+        _path = env.getPwd().lookup(filename);
+        getBufferedReader();
+      }
+      else if( filemode.equals("w") )
+      {
+        _fileValue = FileModule.fopen(env, filename, mode, useIncludePath, null);
+        _path = env.getPwd().lookup(filename);
+        _gout = new GZIPFileValueWriter( compressionLevel, compressionStrategy, (FileValue)_fileValue );
+      }
+    }
+    catch (IOException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(L.l(e.getMessage()));
+    }
   }
 
+
   /**
-   *
+   * Reads from the input and writes to the gzip stream
    * @param s
    * @param length # of bytes to compress
    * @return # of uncompressed bytes
    */
   public int gzwrite(Env env,
-		     String s,
-                     @Optional("0") int length)
+		     InputStream is, int length )
   {
     if ((_fileValue == null) || (_fileValue == BooleanValue.FALSE)) {
       env.warning(L.l("file could not be open for writing"));
       return -1;
     }
 
-    FileValue fileValue = (FileValue) _fileValue;
+    // default size that would have been allocated by ByteBuffer
+    byte[] buffer = new byte[32];
 
-    if (length == 0)
-      length = s.length();
-    else
-      length = Math.min(length, s.length());
-
-    byte[] input = s.getBytes();
-    ByteBuffer buf = new ByteBuffer();
-    OutputStream out = buf.createOutputStream();
+    int inputSize = 0;
+    int bytesin = 0;
 
     try {
+      if( length == 0 ) {
+        for (bytesin=is.read(buffer, 0, buffer.length); bytesin > 0; bytesin=is.read(buffer, 0, buffer.length)) {
+          _gout.write(buffer, 0, bytesin);
+          inputSize += bytesin;
+        }
+      }
+      else {
+        for (int left = length; left > 0; left -= bytesin ) {
+          if (buffer.length < left)
+            bytesin = buffer.length;
+          else
+            bytesin = left;
 
-      GZIPOutputStream gout = new GZIPOutputStream( out );
-      gout.write( input, 0, length );
-      gout.close();
+          bytesin = is.read(buffer, 0, bytesin);
 
-      fileValue.write(buf.getBuffer(), 0, buf.size());
-      fileValue.flush();
+          if (bytesin <= 0)
+            break;
+
+          _gout.write(buffer, 0, bytesin);
+          inputSize += bytesin;
+        }
+      }
+
     }
     catch (IOException e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(L.l(e.getMessage()));
     }
 
-    return length;
+    return inputSize;
   }
 
+
+  /**
+   * Closes the gzip stream
+   * @return true if successful, false otherwise
+   */
   public boolean gzclose()
   {
     if ((_fileValue == null) || (_fileValue == BooleanValue.FALSE)) {
@@ -180,6 +188,16 @@ public class Zlib {
     }
 
     FileValue fv = (FileValue) _fileValue;
+
+    try {
+      if( _gout != null ) {
+        _gout.close();
+        _gout = null;
+      }
+    }
+    catch (Exception e) {
+      throw QuercusModuleException.create(e);
+    }
 
     fv.close();
 
@@ -194,10 +212,10 @@ public class Zlib {
    * @return # of uncompressed bytes
    */
   public int gzputs(Env env,
-                    @NotNull String s,
+                    @NotNull InputStream is,
                     @Optional("0") int length)
   {
-    return gzwrite(env, s, length);
+    return gzwrite(env, is, length);
   }
 
   /**
@@ -222,35 +240,35 @@ public class Zlib {
   }
 
   /**
-   * Gets a (uncompressed) string of up to length - 1 bytes read
-   * from the given file pointer. Reading ends when length - 1 bytes
+   * Gets a (uncompressed) string of up to 'length' bytes read
+   * from the given file pointer. Reading ends when 'length' bytes
    * have been read, on a newline, or on EOF (whichever comes first).
    *
    * @param length
-   * @return StringValue
+   * @return StringBuilderValue
    */
   public Value gzgets(int length)
   {
     try {
       if (_bufferedReader == null) {
-	getBufferedReader();
+        getBufferedReader();
       }
 
-      StringBuffer sb = new StringBuffer();
+      StringBuilderValue sbv = new StringBuilderValue();
       int readChar;
       for (int i=0; i < length - 1; i++) {
 	readChar = _bufferedReader.read();
 	if (readChar >= 0) {
-	  sb.append(Character.toString((char) readChar));
+                    sbv.append( (char)readChar );
 	  if ((((char) readChar) == '\n') || (((char) readChar) == '\r'))
 	    break;
 	} else
 	  break;
       }
-      if (sb.length() > 0)
-	return new StringValueImpl(sb.toString());
+      if( sbv.length() > 0)
+        return sbv;
       else
-	return BooleanValue.FALSE;
+        return BooleanValue.FALSE;
     } catch (Exception e) {
       throw QuercusModuleException.create(e);
     }
@@ -266,28 +284,26 @@ public class Zlib {
    */
   public Value gzfile()
   {
+    Value line;
+    int oldLength = 0; 
+
+    ArrayValue array = new ArrayValueImpl();
+    StringBuilderValue sbv = new StringBuilderValue();
+
     try {
-      ArrayValue array = new ArrayValueImpl();
+      //read in String BuilderValue's initial capacity
+      while( (line=gzgets(128)) != BooleanValue.FALSE )
+      {
+        oldLength = sbv.length();
+        line.appendTo( sbv );
 
-      if (_bufferedReader == null) {
-	getBufferedReader();
+        //if read less than the maximum, then know that a newline or EOF has been encountered
+        if( sbv.length() < oldLength+128 )
+        {
+          array.put( sbv.toString() );
+          sbv = new StringBuilderValue();
+        }
       }
-
-      StringBuffer sb = new StringBuffer();
-      int readChar;
-      while (true) {
-	readChar = _bufferedReader.read();
-	if (readChar >= 0) {
-	  sb.append(Character.toString((char) readChar));
-	  if ((((char) readChar) == '\n') || (((char) readChar) == '\r')) {
-	    array.put(sb.toString());
-	    sb = new StringBuffer();
-	  }
-	} else
-	  break;
-      }
-
-      array.put(sb.toString());
 
       return array;
     } catch (Exception e) {
@@ -304,16 +320,20 @@ public class Zlib {
    * @throws DataFormatException
    */
   InputStream readgzfile()
-    throws IOException, DataFormatException
   {
-    try
-    {
-      return new GZIPInputStream(_path.openRead());
+    try {
+      try
+      {
+        return new GZIPInputStream(_path.openRead());
+      }
+      catch(IOException e)
+      {
+        // read uncompressed file
+        return _path.openRead();
+      }
     }
-    catch(IOException e)
-    {
-      // read uncompressed file
-      return _path.openRead();
+    catch (Exception e) {
+      throw QuercusModuleException.create(e);
     }
   }
 
@@ -331,17 +351,17 @@ public class Zlib {
 	 getBufferedReader();
        }
 
-       StringBuffer sb = new StringBuffer();
+       BinaryBuilderValue bbv = new BinaryBuilderValue();
        int readChar;
-       for (int i=0; i < length - 1; i++) {
+       for (int i=0; i < length; i++) {
 	 readChar = _bufferedReader.read();
 	 if (readChar >= 0) {
-	   sb.append(Character.toString((char) readChar));
+                     bbv.append( readChar );
 	 } else
 	   break;
        }
-       if (sb.length() > 0)
-	 return new StringValueImpl(sb.toString());
+       if (bbv.length() > 0)
+	 return new StringValueImpl(bbv.toString());
        else
 	 return BooleanValue.FALSE;
      } catch (Exception e) {
@@ -388,7 +408,7 @@ public class Zlib {
 
       StringBuffer sb = new StringBuffer();
       int readChar;
-      for (int i=0; i < length - 1; i++) {
+      for (int i=0; i < length; i++) {
 	readChar = _bufferedReader.read();
 	if (readChar >= 0) {
 	  sb.append(Character.toString((char) readChar));
@@ -414,13 +434,15 @@ public class Zlib {
    */
   public boolean gzrewind()
   {
-    try {
+    try
+    {
       getBufferedReader();
-    
-      return true;
-    } catch (Exception e) {
+    }
+    catch (IOException e)
+    {
       throw QuercusModuleException.create(e);
     }
+    return true;
   }
 
   /**
@@ -448,8 +470,162 @@ public class Zlib {
     }
   }
 
+  /**
+   * Helper function to retrieve the filemode like how PHP5 does it (returns the file mode nearest to the end)
+   *
+   * XXX: todo:
+   *		1. warning if mode is 'x', set mode to 'w'
+   *			- "cannot open a zlib stream for reading and writing at the same time!"
+   *
+   *
+   */
+  private String getFileMode( String input )
+  {
+    String filemode = input.substring( 0, 1 );
+    if( "x".equals(filemode) )
+      filemode = "w";
+
+    int i = input.lastIndexOf( 'r' );
+    int j = input.lastIndexOf( 'w' );
+    if( j > i )
+      i = j;
+    j = input.lastIndexOf( 'a' );
+    if( j > i )
+      i = j;
+
+    if( i > 0 )
+      filemode = input.substring( i, i+1 );
+
+    return filemode;
+  }
+
+  /**
+   * Helper function to retrieve the compression level like how PHP5 does it.
+   * 	1. finds the compression level nearest to the end and returns that
+   */
+  private int getCompressionLevel( String input )
+  {
+    int len = input.length();
+    char[] c = new char[len];
+    input.getChars( 0, len, c, 0 );
+
+    for( int i = len-1; i >= 0; i-- )
+    {
+      if( c[i] >= '0' && c[i] <= '9' )
+        return c[i] - '0';
+    }
+    return Deflater.DEFAULT_COMPRESSION;
+  }
+
+  /**
+   * Helper function to retrieve the compression strategy like how PHP5 does it.
+   * 	1. finds the compression strategy nearest to the end and returns that
+   */
+  private int getCompressionStrategy( String input )
+  {
+    int h = input.lastIndexOf( 'h' );
+    int f = input.lastIndexOf( 'f' );
+
+    if( h > f && h > -1 )
+      return Deflater.HUFFMAN_ONLY;
+    else if( f > -1 )
+      return Deflater.FILTERED;
+    else
+      return Deflater.DEFAULT_STRATEGY;
+  }
+
   public String toString()
   {
     return "Zlib[]";
+  }
+}
+
+class GZIPFileValueWriter
+{
+  private Deflater _deflater;
+  private FileValue _fileValue;
+  private TempBuffer tb = TempBuffer.allocate();
+  private byte[] buffer = tb.getBuffer();
+  private CRC32 _crc32 = new CRC32();
+
+  private byte[] header = { (byte)0x1f, (byte)0x8b,  //gzip file identifier (ID1, ID2)
+                                            8, //Deflate compression method (CM)
+                                            0, //optional flags (FLG)
+                                            0, 0, 0, 0,  //modification time (MTIME)
+                                            0, //extra optional flags (XFL)
+                                            0 //operating system (OS)
+                                         };
+
+  private byte[] trailer = new byte[8];
+
+  /**
+   * Helper class to seamlessly write gzip compressed data directly to the FileValue
+   *
+   * XXX: todo	1. set operating system (file architecure) header
+   *
+   */
+  private GZIPFileValueWriter( Deflater def, int strategy, FileValue fv ) throws IOException
+  {
+    def.setStrategy( strategy );
+    _deflater = def;
+    _fileValue = fv;
+    _fileValue.write( header, 0, header.length );
+  }
+
+  public GZIPFileValueWriter( int compressionLevel, int strategy, FileValue fv ) throws IOException
+  {
+    this( new Deflater(compressionLevel, true), strategy, fv );
+  }
+
+  public GZIPFileValueWriter( FileValue fv ) throws IOException
+  {
+    this( Deflater.DEFAULT_COMPRESSION, Deflater.DEFAULT_STRATEGY, fv );
+  }
+
+  /**
+   *
+   * Blocking write to the FileValue unless not enough input data passed in to compress.
+   * If not enough data to compress, then write will be postponed until call to close()
+   *
+   */
+  public void write( byte[] input, int offset, int length ) throws IOException
+  {
+      int clength;
+
+      _deflater.setInput( input, offset, length );
+      while(  !_deflater.needsInput() ) {
+        clength = _deflater.deflate( buffer, 0, buffer.length );
+        if( clength > 0 )
+          _fileValue.write( buffer, 0, clength );
+      }
+
+      _crc32.update( input, offset, length );
+  }
+
+  public void close() throws IOException
+  {
+    _deflater.finish();
+
+    int clength = _deflater.deflate( buffer, 0, buffer.length );
+    if(  clength > 0 )
+      _fileValue.write( buffer, 0, clength );
+
+    long value = _crc32.getValue();
+    long inputSize = _deflater.getBytesRead();
+
+    trailer[0] = (byte) value;
+    trailer[1] = (byte) (value >> 8);
+    trailer[2] = (byte) (value >> 16);
+    trailer[3] = (byte) (value >> 24);
+
+    trailer[4] = (byte) inputSize;
+    trailer[5] = (byte) (inputSize >> 8);
+    trailer[6] = (byte) (inputSize >> 16);
+    trailer[7] = (byte) (inputSize >> 24);
+
+    _fileValue.write( trailer, 0, trailer.length );
+    _fileValue.flush();
+
+    TempBuffer.free( tb );
   }
 }
