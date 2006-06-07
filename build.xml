@@ -66,7 +66,7 @@
   </target>
 
   <target name="compile" 
-          depends="init, ejb, ejb30, j2eedeploy, j2ee-management, jaxrpc, jca, jms, jmx, jsdk, jstl, jta, mail, portlet, script, resin-jdk15, resin, quercus, webutil, deploy, conf, ext">
+          depends="init, ejb, ejb30, j2ee-deploy, j2ee-management, jaxrpc, jca, jms, jmx, jsdk, jstl, jta, mail, portlet, script, resin-jdk15, resin, quercus, webutil, deploy, conf, ext">
   </target>
 
   <target name="ejb" depends="init, jta">
@@ -84,17 +84,17 @@
     </antcall>
   </target>
 
-  <target name="j2eedeploy" depends="init">
+  <target name="j2ee-deploy" depends="init">
     <antcall target="module" inheritRefs="true">
-      <param name="module.name" value="j2eedeploy"/>
-      <param name="module.jar" value="j2eedeploy.jar"/>
+      <param name="module.name" value="j2ee-deploy"/>
+      <param name="module.jar" value="j2ee-deploy-10.jar"/>
     </antcall>
   </target>
 
   <target name="j2ee-management" depends="init,ejb,jmx">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="j2ee-management"/>
-      <param name="module.jar" value="j2ee-management.jar"/>
+      <param name="module.jar" value="j2ee-management-10.jar"/>
     </antcall>
   </target>
 
@@ -175,7 +175,7 @@
     </antcall>
   </target>
 
-  <target name="resin-dev" depends="init, ejb, ejb30, jca, jms, jmx, jsdk, jstl, jta, j2eedeploy, j2ee-management, jaf, saaj, jaxrpc, portlet, script, resin-jdk15">
+  <target name="resin-dev" depends="init, ejb, ejb30, jca, jms, jmx, jsdk, jstl, jta, j2ee-deploy, j2ee-management, jaf, saaj, jaxrpc, portlet, script, resin-jdk15">
 
     <!-- filter to insert version -->
 
@@ -423,7 +423,7 @@
       <packageset dir="${modules}/jsdk/src"/>
       <packageset dir="${modules}/ejb/src"/>
       <packageset dir="${modules}/ejb30/src"/>
-      <packageset dir="${modules}/j2eedeploy/src"/>
+      <packageset dir="${modules}/j2ee-deploy/src"/>
       <packageset dir="${modules}/j2ee-management/src"/>
       <packageset dir="${modules}/jaf/src"/>
       <packageset dir="${modules}/jaxrpc/src"/>
@@ -660,8 +660,8 @@
         <include name="lib/aopalliance.jar"/>
         <include name="lib/ejb-20.jar"/>
         <include name="lib/ejb-30.jar"/>
-        <include name="lib/j2eedeploy.jar"/>
-        <include name="lib/j2ee-management.jar"/>
+        <include name="lib/j2ee-deploy-10.jar"/>
+        <include name="lib/j2ee-management-10.jar"/>
         <include name="lib/jca-15.jar"/>
         <include name="lib/jms-11.jar"/>
         <include name="lib/jmx-12.jar"/>
