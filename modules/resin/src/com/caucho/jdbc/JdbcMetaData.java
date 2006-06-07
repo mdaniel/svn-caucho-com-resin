@@ -192,6 +192,14 @@ public class JdbcMetaData {
   }
 
   /**
+   * True if blobs must be truncated on delete.
+   */
+  public boolean isTruncateBlobBeforeDelete()
+  {
+    return false;
+  }
+
+  /**
    * Returns the long type.
    */
   public String getLongType()

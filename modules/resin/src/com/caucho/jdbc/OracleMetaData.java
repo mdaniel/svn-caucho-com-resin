@@ -52,6 +52,14 @@ public class OracleMetaData extends JdbcMetaData {
   {
     super(ds);
   }
+
+  /**
+   * True if blobs must be truncated on delete.
+   */
+  public boolean isTruncateBlobBeforeDelete()
+  {
+    return true;
+  }
   
   /**
    * Returns the SQL for the table with the given SQL type.
