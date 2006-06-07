@@ -55,8 +55,7 @@ import com.caucho.util.RandomUtil;
  * communicate with this ClusterServer when it is active in another instance of
  * Resin .
  */
-public class ClusterServer
-{
+public class ClusterServer {
   private static final Logger log = Log.open(ClusterServer.class);
   private static final L10N L = new L10N(ClusterServer.class);
 
@@ -67,7 +66,7 @@ public class ClusterServer
 
   private ClusterPort _port;
 
-  private int _groupIndex;
+  private int _srunIndex;
   private Path _tcpPath;
 
   private ClusterClient _client;
@@ -179,7 +178,7 @@ public class ClusterServer
    */
   public int getGroupIndex()
   {
-    return _groupIndex;
+    return _srunIndex;
   }
 
   /**
@@ -187,7 +186,7 @@ public class ClusterServer
    */
   public void setGroupIndex(int index)
   {
-    _groupIndex = index;
+    _srunIndex = index;
   }
 
   /**
@@ -384,7 +383,7 @@ public class ClusterServer
     ClusterServer []srunList = getCluster().getServerList();
     int srunLength = srunList.length;
 
-    long index = _groupIndex;
+    long index = _port.getIndex();
     long backupCode = index;
     
     long backupLength = srunLength;

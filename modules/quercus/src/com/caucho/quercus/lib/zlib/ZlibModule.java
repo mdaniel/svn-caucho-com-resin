@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2005 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -98,13 +98,6 @@ public class ZlibModule extends AbstractQuercusModule {
 
   /**
    * outputs uncompressed bytes directly to browser
-   *
-   * @param env
-   * @param fileName
-   * @param useIncludePath
-   * @return
-   * @throws IOException
-   * @throws DataFormatException
    */
   public boolean readgzfile(Env env,
                             String fileName,
@@ -132,12 +125,7 @@ public class ZlibModule extends AbstractQuercusModule {
   }
 
   /**
-   *
-   * @param env
-   * @param zp
-   * @param s
-   * @param length
-   * @return alias of gzwrite
+   * alias of gzwrite
    */
   public int gzputs(Env env,
                     @NotNull Zlib zp,
