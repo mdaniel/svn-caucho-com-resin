@@ -29,18 +29,21 @@
 
 package com.caucho.quercus.lib.db;
 
-import java.sql.*;
-
-import java.util.logging.Logger;
-
-import com.caucho.util.L10N;
-
+import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.ArrayValue;
 
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.ReturnNullAsFalse;
+
+import com.caucho.util.L10N;
+
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Statement;
+
+import java.util.logging.Logger;
+
 
 /**
  * oracle result set class (postgres has NO object oriented API)
@@ -78,6 +81,8 @@ public class OracleResult extends JdbcResultResource {
 
   /**
    * Returns a string representation for this object.
+   *
+   * @return a string representation for this object
    */
   public String toString()
   {
