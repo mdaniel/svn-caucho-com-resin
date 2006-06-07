@@ -29,12 +29,26 @@
 
 package com.caucho.quercus.lib.db;
 
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.DoubleValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.ObjectValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.Value;
+
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.quercus.env.*;
-
-import java.sql.*;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -69,6 +83,13 @@ public class JdbcResultResource {
 
   boolean _closed;
 
+  /**
+   * Constructor for JdbcResultResource
+   *
+   * @param stmt the corresponding statement
+   * @param rs the corresponding result set
+   * @param conn the corresponding connection
+   */
   public JdbcResultResource(Statement stmt,
                             ResultSet rs,
                             JdbcConnectionResource conn)
@@ -79,134 +100,115 @@ public class JdbcResultResource {
     _conn = conn;
   }
 
-  public JdbcResultResource(ResultSetMetaData md,
+  /**
+   * Constructor for JdbcResultResource
+   *
+   * @param metaData the corresponding result set meta data
+   * @param conn the corresponding connection
+   */
+  public JdbcResultResource(ResultSetMetaData metaData,
                             JdbcConnectionResource conn)
   {
     _closed = true;
 
-    _metaData = md;
+    _metaData = metaData;
     _conn = conn;
   }
 
   /**
-   * seeks to an arbitrary result pointer specified
-   * by the offset in the result set represented by result.
-   * Returns TRUE on success or FALSE on failure
+   * Closes the result set.
    */
-  public boolean seek(Env env, int rowNumber)
-  {
-    if (setRowNumber(rowNumber))
-      return true;
-    else {
-      env.warning(L.l("Offset {0} is invalid (or the query data is unbuffered)", rowNumber));
-
-      return false;
-    }
-  }
-
-  /**
-   * getter and setter for _conn needed by fetch_field and other functions
-   * that do a query on the connection which created this result set
-   */
-  public JdbcConnectionResource getConnection()
-  {
-    return _conn;
-  }
-
-  /**
-   * Returns column count.
-   */
-  public int getFieldCount()
+  public void close()
   {
     try {
-      return getMetaData().getColumnCount();
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
-    }
-  }
+      if (_rs != null)
+        _rs.close();
 
-  /**
-   * helper function for getResultField returns a 0-based column number
-   */
-  private int getColumnNumber(String colName,
-                              ResultSetMetaData rsmd)
-    throws SQLException
-  {
+      _stmt = null;
 
-    int numColumns = rsmd.getColumnCount();
-
-    if (colName.indexOf('.') == -1) {
-      for (int i = 1; i <= numColumns; i++) {
-        if (colName.equals(rsmd.getColumnName(i)))
-          return (i - 1);
-      }
-      return -1;
-    } else {
-      for (int i = 1; i <= numColumns; i++) {
-        if (colName.equals(rsmd.getTableName(i) + '.' + rsmd.getColumnName(i)))
-          return (i - 1);
-      }
-      return -1;
-    }
-
-  }
-
-  /**
-   * Returns the value at a particular row and column.
-   */
-  public Value getResultField(Env env, int row, Value field)
-  {
-    try {
-      ResultSetMetaData md = getMetaData();
-
-      int colNumber;
-
-      if (field.isNumberConvertible())
-        colNumber = field.toInt();
-      else
-        colNumber = getColumnNumber(field.toString(), _metaData);
-
-      if (colNumber < 0 || colNumber >= md.getColumnCount()) {
-        env.invalidArgument("field", field);
-        return BooleanValue.FALSE;
-      }
-
-      int currentRow = _rs.getRow();
-
-      if ((!_rs.absolute(row + 1)) || _rs.isAfterLast()) {
-        if (currentRow > 0)
-          _rs.absolute(currentRow);
-        else
-          _rs.beforeFirst();
-
-        return BooleanValue.FALSE;
-      }
-
-      return getColumnValue(_rs, _metaData, colNumber + 1);
+      _closed = true;
 
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
-      return BooleanValue.FALSE;
     }
-  }
 
-  // XXX: s/b removed
-  public ResultSet getResultSet()
-  {
-    return _rs;
-  }
-
-  public Statement getStatement()
-  {
-    return _stmt;
   }
 
   /**
-   * returns an object with the following fields: name, table, max_length,
+   * Fetch the next line as an array.
+   *
+   * @param type one of FETCH_ASSOC, FETCH_NUM, or FETCH_BOTH (default)
+   * By using the FETCH_ASSOC constant this function will behave
+   * identically to the mysqli_fetch_assoc(), while FETCH_NUM will
+   * behave identically to the mysqli_fetch_row() function. The final
+   * option FETCH_BOTH will create a single array with the attributes
+   * of both.
+   *
+   * @return the next result row as an associative,
+   * a numeric array, or both.
+   */
+  public ArrayValue fetchArray(int type)
+  {
+    try {
+      if (_rs.next()) {
+        ArrayValue array = new ArrayValueImpl();
+
+        if (_metaData == null)
+          _metaData = _rs.getMetaData();
+
+        int count = _metaData.getColumnCount();
+
+        if ((type & FETCH_ASSOC) != 0) {
+          _columnNames = new Value[count];
+
+          for (int i = 0; i < count; i++)
+            _columnNames[i] = new StringValueImpl(_metaData.getColumnName(i + 1));
+        }
+
+        for (int i = 0; i < count; i++) {
+          Value value = getColumnValue(_rs, _metaData, i + 1);
+
+          if ((type & FETCH_NUM) != 0)
+            array.put(LongValue.create(i), value);
+
+          if ((type & FETCH_ASSOC) != 0)
+            array.put(_columnNames[i], value);
+        }
+
+        return array;
+      } else {
+        return null;
+      }
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+      return null;
+    }
+  }
+
+  /**
+   * Returns an associative array representing the row.
+   *
+   * @return an associative array representing the row
+   * or null if there are no more rows in the result set
+   */
+  public ArrayValue fetchAssoc()
+  {
+    return fetchArray(JdbcResultResource.FETCH_ASSOC);
+  }
+
+  /**
+   * Returns an object with the following fields: name, table, max_length,
    * not_null, primary_key, multiple_key, numeric,
    * blob, type, unsigned, zerofill.
    * <p/>
    * NOTE: does not have a field for unique_key.
+   *
+   * @param env the PHP executing environment
+   * @param maxLength the field maximum length
+   * @param tableName the field table name
+   * @param type the field type
+   * @return the next field in the result set or
+   * false if no information is available
    */
   public Value fetchField(Env env,
                           int maxLength,
@@ -268,7 +270,7 @@ public class JdbcResultResource {
   }
 
   /**
-   * returns an object with the following fields:
+   * Returns an object with the following fields:
    *
    * name: The name of the column
    * orgname: The original name if an alias was specified
@@ -279,6 +281,15 @@ public class JdbcResultResource {
    * flags: An integer representing the bit-flags for the field
    * type: An integer respresenting the data type used for this field
    * decimals: The number of decimals used (for integer fields)
+   *
+   * @param env the PHP executing environment
+   * @param maxLength the field maximum length
+   * @param name the field name
+   * @param originalName the field original name
+   * @param table the field table name
+   * @param type the field type
+   * @param scale the field scale
+   * @return an object containing field metadata
    */
   protected Value fetchFieldImproved(Env env,
                                      int maxLength,
@@ -419,14 +430,247 @@ public class JdbcResultResource {
     return result;
   }
 
+  /**
+   * Returns an object with properties that correspond to the fetched row and
+   * moves the internal data pointer ahead.
+   *
+   * @param env the PHP executing environment
+   * @return an object representing the current fetched row
+   */
+  public Value fetchObject(Env env)
+  {
+    try {
+      if (_rs.next()) {
+        Value result = env.createObject();
+
+        if (_metaData == null)
+          _metaData = _rs.getMetaData();
+
+        int count = _metaData.getColumnCount();
+
+        for (int i = 0; i < count; i++) {
+          String name = _metaData.getColumnName(i + 1);
+          Value value = getColumnValue(_rs, _metaData, i + 1);
+
+          result.putField(env, name, value);
+        }
+
+        return result;
+
+      } else {
+        return NullValue.NULL;
+      }
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+      return BooleanValue.FALSE;
+    }
+  }
 
   /**
-   * returns the following field flags: not_null, primary_key, multiple_key, blob,
+   * Returns an array representing the row.
+   *
+   * @return an array containing the fecthed row
+   */
+  public ArrayValue fetchRow()
+  {
+    return fetchArray(JdbcResultResource.FETCH_NUM);
+  }
+
+  /**
+   * Returns a StringValue corresponding to the PHP return string
+   *
+   * @param dataType the column data type
+   * @return the column PHP name
+   */
+  private Value getColumnPHPName(int dataType)
+  {
+    switch (dataType) {
+    case Types.BIGINT:
+    case Types.BIT:
+    case Types.INTEGER:
+    case Types.SMALLINT:
+      {
+        return INTEGER;
+      }
+    case Types.LONGVARBINARY:
+    case Types.LONGVARCHAR:
+      {
+        return BLOB;
+      }
+    case Types.CHAR:
+    case Types.VARCHAR:
+      {
+        return STRING;
+      }
+    case Types.DATE:
+      {
+        return DATE;
+      }
+    case Types.TIMESTAMP:
+      {
+        return DATETIME;
+      }
+    case Types.DECIMAL:
+    case Types.DOUBLE:
+    case Types.REAL:
+      {
+        return REAL;
+      }
+    default:
+      {
+        return NullValue.NULL;
+      }
+    }
+  }
+
+  /**
+   * Get the number of affected rows.
+   *
+   * @return the number of affected rows
+   */
+  public int getAffectedRows() {
+    return _affectedRows;
+  }
+
+  /**
+   * Helper function for getResultField returns a 0-based column number
+   *
+   * @param colName the column name
+   * @param rsmd the result set meta data
+   * @return the column number
+   */
+  private int getColumnNumber(String colName,
+                              ResultSetMetaData rsmd)
+    throws SQLException
+  {
+
+    int numColumns = rsmd.getColumnCount();
+
+    if (colName.indexOf('.') == -1) {
+      for (int i = 1; i <= numColumns; i++) {
+        if (colName.equals(rsmd.getColumnName(i)))
+          return (i - 1);
+      }
+      return -1;
+    } else {
+      for (int i = 1; i <= numColumns; i++) {
+        if (colName.equals(rsmd.getTableName(i) + '.' + rsmd.getColumnName(i)))
+          return (i - 1);
+      }
+      return -1;
+    }
+
+  }
+
+  /**
+   * Get the column value in the specified result set.
+   *
+   * @param rs the result set
+   * @param metaData the result set meta data
+   * @param column the column number
+   * @return the column value
+   */
+  public static Value getColumnValue(ResultSet rs,
+                                     ResultSetMetaData metaData,
+                                     int column)
+    throws SQLException
+  {
+    switch (metaData.getColumnType(column)) {
+    case Types.NULL:
+      return NullValue.NULL;
+
+    case Types.BIT:
+    case Types.TINYINT:
+    case Types.SMALLINT:
+    case Types.INTEGER:
+    case Types.BIGINT:
+      {
+        long value = rs.getLong(column);
+
+        if (rs.wasNull())
+          return NullValue.NULL;
+        else
+          return LongValue.create(value);
+      }
+
+    case Types.DOUBLE:
+      {
+        double value = rs.getDouble(column);
+
+        if (rs.wasNull())
+          return NullValue.NULL;
+        else
+          return new DoubleValue(value);
+      }
+
+    default:
+      {
+        String strValue = rs.getString(column);
+
+        if (strValue == null || rs.wasNull())
+          return NullValue.NULL;
+        else
+          return new StringValueImpl(strValue);
+      }
+    }
+  }
+
+  /**
+   * Get the connection corresponding to this result resource.
+   *
+   * @return a JDBC connection resource
+   */
+  public JdbcConnectionResource getConnection()
+  {
+    return _conn;
+  }
+
+  /**
+   * Get the field catalog name.
+   *
+   * @param fieldOffset the field number
+   * @return the field catalog name
+   */
+  public Value getFieldCatalog(int fieldOffset)
+  {
+    try {
+      if (_metaData == null)
+        _metaData = _rs.getMetaData();
+
+      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0)
+        return BooleanValue.FALSE;
+      else
+        return new StringValueImpl(_metaData.getCatalogName(fieldOffset + 1));
+
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+      return BooleanValue.FALSE;
+    }
+  }
+
+  /**
+   * Returns column count.
+   *
+   * @return the number of columns in the result set
+   */
+  public int getFieldCount()
+  {
+    try {
+      return getMetaData().getColumnCount();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Returns the following field flags: not_null, primary_key, multiple_key, blob,
    * unsigned zerofill, binary, enum, auto_increment and timestamp
    * <p/>
    * it does not return the MySQL / PHP flag unique_key
    * <p/>
    * MysqlModule generates a special result set with the appropriate values
+   *
+   * @return the field flags
    */
   public Value getFieldFlags()
   {
@@ -500,7 +744,123 @@ public class JdbcResultResource {
   }
 
   /**
+   * Get field length.
+   *
+   * @param env the PHP executing environment
+   * @param fieldOffset the field number
+   * @return length of field for specified column
+   */
+  public Value getFieldLength(Env env, int fieldOffset)
+  {
+    try {
+      if (_metaData == null)
+        _metaData = _rs.getMetaData();
+
+      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0) {
+        env.invalidArgument("field", fieldOffset);
+        return BooleanValue.FALSE;
+      }
+      else
+        return new LongValue((long) _metaData.getPrecision(fieldOffset + 1));
+
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+      return BooleanValue.FALSE;
+    }
+  }
+
+  /**
+   * Returns the column name.
+   *
+   * @param env the PHP executing environment
+   * @param fieldOffset need to add 1 because java is 1 based index and quercus is 0 based
+   *
+   * @return a StringValue containing the column name
+   */
+  public Value getFieldName(Env env, int fieldOffset)
+  {
+
+    try {
+      if (_metaData == null)
+        _metaData = _rs.getMetaData();
+
+      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0) {
+        env.invalidArgument("field", fieldOffset);
+        return BooleanValue.FALSE;
+      }
+      else
+        return new StringValueImpl(_metaData.getColumnName(fieldOffset + 1));
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      return BooleanValue.FALSE;
+    }
+  }
+
+  /**
+   * Returns a StringValue containing the column Alias.
+   *
+   * @param fieldOffset need to add 1 because java is 1 based index and quercus is 0 based
+   *
+   * @return the column alias
+   */
+  public Value getFieldNameAlias(int fieldOffset)
+  {
+
+    try {
+
+      if (_metaData == null)
+        _metaData = _rs.getMetaData();
+
+      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0)
+        return BooleanValue.FALSE;
+      else
+        return new StringValueImpl(_metaData.getColumnLabel(fieldOffset + 1));
+
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      return BooleanValue.FALSE;
+    }
+  }
+
+  /**
+   * Get field offset.
+   *
+   * @return the current field offset
+   */
+  public int getFieldOffset()
+  {
+    return this._fieldOffset;
+  }
+
+  /**
+   * Get field scale.
+   *
+   * @param fieldOffset the field offset
+   * @return number of digits to the right of the decimal point
+   */
+  public Value getFieldScale(int fieldOffset)
+  {
+    try {
+      if (_metaData == null)
+        _metaData = _rs.getMetaData();
+
+      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0)
+        return BooleanValue.FALSE;
+      else
+        return new LongValue((long) _metaData.getScale(fieldOffset + 1));
+
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+      return BooleanValue.FALSE;
+    }
+  }
+
+  /**
    * Returns the table corresponding to the field.
+   *
+   * @param env the PHP executing environment
+   * @param fieldOffset the field number
+   * @return the field table name
    */
   public Value getFieldTable(Env env, int fieldOffset)
   {
@@ -527,20 +887,60 @@ public class JdbcResultResource {
   }
 
   /**
-   * special function used my mysql_insert_id() to return the ID generated
-   * for an AUTO_INCREMENT column by the previous INSERT query
+   * Get a StringValue with the column type.
+   *
+   * @param env the PHP executing environment
+   * @param fieldOffset need to add 1 because java is 1 based index and quercus is 0 based
+   *
+   * @return a StringValue containing the column type
    */
-  public long getInsertID()
-    throws SQLException
+  public Value getFieldType(Env env, int fieldOffset)
   {
-    _rs.next();
-    return _rs.getLong(1);
+    try {
+
+      if (_metaData == null)
+        _metaData = _rs.getMetaData();
+
+      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0) {
+        env.invalidArgument("field", fieldOffset);
+        return BooleanValue.FALSE;
+      }
+      else
+        return getColumnPHPName(_metaData.getColumnType(fieldOffset + 1));
+
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      return BooleanValue.FALSE;
+    }
   }
 
   /**
-   * returns an ArrayValue of lengths of the columns in the most
-   * recently accessed row. If a function like
-   * mysql_fetch_array() has not yet been called this will return BooleanValue.FALSE
+   * Get type from Types enumeration
+   *
+   * @param fieldOffset the field number
+   * @return the JDBC type
+   */
+  protected Value getJdbcType(int fieldOffset)
+  {
+    try {
+      if (_metaData == null)
+        _metaData = _rs.getMetaData();
+
+      return new LongValue(_metaData.getColumnType(fieldOffset + 1));
+
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      return BooleanValue.FALSE;
+    }
+  }
+
+  /**
+   * Returns an ArrayValue column lengths in the most
+   * recently accessed row. If a fetch function has not
+   * yet been called this will return BooleanValue.FALSE
+   *
+   * @return an ArrayValue of column lengths in the most
+   * recently accessed row
    */
   public Value getLengths()
   {
@@ -567,55 +967,62 @@ public class JdbcResultResource {
   }
 
   /**
-   * @return length of field for specified column
+   * Get the result set meta data.
+   *
+   * @return the meta data for this result set
    */
-  public Value getFieldLength(Env env, int fieldOffset)
+  public ResultSetMetaData getMetaData()
+    throws SQLException
   {
+    if (_metaData == null && _rs != null)
+      _metaData = _rs.getMetaData();
+
+    return _metaData;
+  }
+
+  /**
+   * Returns the number of columns returned in query.
+   *
+   * @return the number of columns for this result set
+   */
+  public Value getNumFields()
+  {
+
     try {
+      Value result = NullValue.NULL;
+
       if (_metaData == null)
         _metaData = _rs.getMetaData();
 
-      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0) {
-        env.invalidArgument("field", fieldOffset);
-        return BooleanValue.FALSE;
-      }
-      else
-        return new LongValue((long) _metaData.getPrecision(fieldOffset + 1));
+      int count = _metaData.getColumnCount();
 
-    } catch (SQLException e) {
+      if (count != 0) {
+        result = new LongValue((long) count);
+      }
+
+      return result;
+
+    } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
-      return BooleanValue.FALSE;
+      return NullValue.NULL;
     }
   }
 
   /**
+   * Get the number of rows in this result set.
    *
-   * @return number of digits to the right of the decimal point
+   * @return the number of rows in this result set
    */
-  public Value getFieldScale(int fieldOffset)
-  {
-    try {
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
-
-      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0)
-        return BooleanValue.FALSE;
-      else
-        return new LongValue((long) _metaData.getScale(fieldOffset + 1));
-
-    } catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
-      return BooleanValue.FALSE;
-    }
-  }
-
   public int getNumRows()
   {
     return getNumRows(_rs);
   }
 
   /**
-   * returns number of rows returned in query
+   * Returns number of rows returned in query
+   *
+   * @param rs a result set
+   * @return the number of rows in the specified result set
    */
   public static int getNumRows(ResultSet rs)
   {
@@ -645,166 +1052,43 @@ public class JdbcResultResource {
   }
 
   /**
-   * returns number of columns returned in query
-   */
-  public Value getNumFields()
-  {
-
-    try {
-      Value result = NullValue.NULL;
-
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
-
-      int count = _metaData.getColumnCount();
-
-      if (count != 0) {
-        result = new LongValue((long) count);
-      }
-
-      return result;
-
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-      return NullValue.NULL;
-    }
-  }
-
-  /**
-   * helper function for mysql_tablename expects that this _rs was created
-   * by a call to mysql_list_tables().
-   * <p/>
-   * note PHP i is zero based
-   */
-  public Value getTable(int i)
-  {
-    try {
-      _rs.absolute(i + 1);
-      return new StringValueImpl(_rs.getString(1));
-
-    } catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
-      return BooleanValue.FALSE;
-    }
-  }
-
-  /**
-   * getFieldName returns a StringValue with the column name
+   * Returns the value at a particular row and column.
    *
-   * @param fieldOffset need to add 1 because java is 1 based index and quercus is 0 based
+   * @param env the PHP executing environment
+   * @param row a particular row to get the field value from
+   * @param field the field name or number
+   * @return the value of the specified field
    */
-  public Value getFieldName(Env env, int fieldOffset)
+  public Value getResultField(Env env, int row, Value field)
   {
-
     try {
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
+      ResultSetMetaData md = getMetaData();
 
-      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0) {
-        env.invalidArgument("field", fieldOffset);
+      int colNumber;
+
+      if (field.isNumberConvertible())
+        colNumber = field.toInt();
+      else
+        colNumber = getColumnNumber(field.toString(), _metaData);
+
+      if (colNumber < 0 || colNumber >= md.getColumnCount()) {
+        env.invalidArgument("field", field);
         return BooleanValue.FALSE;
       }
-      else
-        return new StringValueImpl(_metaData.getColumnName(fieldOffset + 1));
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-      return BooleanValue.FALSE;
-    }
-  }
 
-  /**
-   * getFieldNameAlias returns a StringValue with the column Alias
-   *
-   * @param fieldOffset need to add 1 because java is 1 based index and quercus is 0 based
-   */
-  public Value getFieldNameAlias(int fieldOffset)
-  {
+      int currentRow = _rs.getRow();
 
-    try {
+      if ((!_rs.absolute(row + 1)) || _rs.isAfterLast()) {
+        if (currentRow > 0)
+          _rs.absolute(currentRow);
+        else
+          _rs.beforeFirst();
 
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
-
-      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0)
-        return BooleanValue.FALSE;
-      else
-        return new StringValueImpl(_metaData.getColumnLabel(fieldOffset + 1));
-
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-      return BooleanValue.FALSE;
-    }
-  }
-
-  /**
-   * gets type from Types enumeration
-   */
-  protected Value getJdbcType(int fieldOffset)
-  {
-    try {
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
-
-      return new LongValue(_metaData.getColumnType(fieldOffset + 1));
-
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-      return BooleanValue.FALSE;
-    }
-  }
-
-  /**
-   * getFieldType returns a StringValue with the column type
-   *
-   * @param fieldOffset need to add 1 because java is 1 based index and quercus is 0 based
-   */
-  public Value getFieldType(Env env, int fieldOffset)
-  {
-    try {
-
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
-
-      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0) {
-        env.invalidArgument("field", fieldOffset);
         return BooleanValue.FALSE;
       }
-      else
-        return getColumnPHPName(_metaData.getColumnType(fieldOffset + 1));
 
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-      return BooleanValue.FALSE;
-    }
-  }
+      return getColumnValue(_rs, _metaData, colNumber + 1);
 
-  /**
-   * returns an object with properties that correspond to the fetched row and
-   * moves the internal data pointer ahead.
-   */
-  public Value fetchObject(Env env)
-  {
-    try {
-      if (_rs.next()) {
-        Value result = env.createObject();
-
-        if (_metaData == null)
-          _metaData = _rs.getMetaData();
-
-        int count = _metaData.getColumnCount();
-
-        for (int i = 0; i < count; i++) {
-          String name = _metaData.getColumnName(i + 1);
-          Value value = getColumnValue(_rs, _metaData, i + 1);
-
-          result.putField(env, name, value);
-        }
-
-        return result;
-
-      } else {
-        return NullValue.NULL;
-      }
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
@@ -812,199 +1096,88 @@ public class JdbcResultResource {
   }
 
   /**
-   * Fetch the next line as an array.
+   * Get the underlying result set.
+   *
+   * @return the underlying ResultSet object
    */
-  public ArrayValue fetchArray(int type)
+  public ResultSet getResultSet()
   {
-    try {
-      if (_rs.next()) {
-        ArrayValue array = new ArrayValueImpl();
-
-        if (_metaData == null)
-          _metaData = _rs.getMetaData();
-
-        int count = _metaData.getColumnCount();
-
-        if ((type & FETCH_ASSOC) != 0) {
-          _columnNames = new Value[count];
-
-          for (int i = 0; i < count; i++)
-            _columnNames[i] = new StringValueImpl(_metaData.getColumnName(i + 1));
-        }
-
-        for (int i = 0; i < count; i++) {
-          Value value = getColumnValue(_rs, _metaData, i + 1);
-
-          if ((type & FETCH_NUM) != 0)
-            array.put(LongValue.create(i), value);
-
-          if ((type & FETCH_ASSOC) != 0)
-            array.put(_columnNames[i], value);
-        }
-
-        return array;
-      } else {
-        return null;
-      }
-    } catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
-      return null;
-    }
+    return _rs;
   }
 
   /**
-   * Returns an associative array representing the row.
+   * Get the underlying statement.
+   *
+   * @return the underlying Statement object
    */
-  public ArrayValue fetchAssoc()
+  public Statement getStatement()
   {
-    return fetchArray(JdbcResultResource.FETCH_ASSOC);
+    return _stmt;
   }
 
   /**
-   * Returns an object representing the row.
+   * Seeks to an arbitrary result pointer specified
+   * by the offset in the result set represented by result.
+   * Returns TRUE on success or FALSE on failure
+   *
+   * @param env the PHP executing environment
+   * @param rowNumber the row offset
+   * @return true on success or false on failure
    */
-  public ArrayValue fetchRow()
+  public boolean seek(Env env, int rowNumber)
   {
-    return fetchArray(JdbcResultResource.FETCH_NUM);
+    if (setRowNumber(rowNumber))
+      return true;
+
+    return false;
   }
 
   /**
-   * returns a StringValue corresponding to the PHP return string
+   * Set the number of affected rows to the specified value.
+   *
+   * @param affectedRows the new number of affected rows
    */
-  private Value getColumnPHPName(int dataType)
-  {
-    switch (dataType) {
-    case Types.BIGINT:
-    case Types.BIT:
-    case Types.INTEGER:
-    case Types.SMALLINT:
-      {
-        return INTEGER;
-      }
-    case Types.LONGVARBINARY:
-    case Types.LONGVARCHAR:
-      {
-        return BLOB;
-      }
-    case Types.CHAR:
-    case Types.VARCHAR:
-      {
-        return STRING;
-      }
-    case Types.DATE:
-      {
-        return DATE;
-      }
-    case Types.TIMESTAMP:
-      {
-        return DATETIME;
-      }
-    case Types.DECIMAL:
-    case Types.DOUBLE:
-    case Types.REAL:
-      {
-        return REAL;
-      }
-    default:
-      {
-        return NullValue.NULL;
-      }
-    }
-  }
-
-  public static Value getColumnValue(ResultSet rs,
-                                     ResultSetMetaData metaData,
-                                     int column)
-    throws SQLException
-  {
-    switch (metaData.getColumnType(column)) {
-    case Types.NULL:
-      return NullValue.NULL;
-
-    case Types.BIT:
-    case Types.TINYINT:
-    case Types.SMALLINT:
-    case Types.INTEGER:
-    case Types.BIGINT:
-      {
-        long value = rs.getLong(column);
-
-        if (rs.wasNull())
-          return NullValue.NULL;
-        else
-          return LongValue.create(value);
-      }
-
-    case Types.DOUBLE:
-      {
-        double value = rs.getDouble(column);
-
-        if (rs.wasNull())
-          return NullValue.NULL;
-        else
-          return new DoubleValue(value);
-      }
-
-    default:
-      {
-        String strValue = rs.getString(column);
-
-        if (strValue == null || rs.wasNull())
-          return NullValue.NULL;
-        else
-          return new StringValueImpl(strValue);
-      }
-    }
+  public void setAffectedRows(int affectedRows) {
+    _affectedRows = affectedRows;
   }
 
   /**
-   * Closes the connection.
+   * Set a value for field offset.
+   *
+   * @param fieldOffset PHP is 0-based
    */
-  public void close()
+  public void setFieldOffset(int fieldOffset)
   {
-    try {
-      if (_rs != null)
-        _rs.close();
-
-      if (_stmt != null)
-        _stmt.close();
-
-      _closed = true;
-
-    } catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-
-  }
-
-  // XXX: quercusbb seems to want this?
-  public Value toKey()
-  {
-    return new StringValueImpl("JdbcResultResource$" + System.identityHashCode(this));
+    this._fieldOffset = fieldOffset;
   }
 
   /**
-   * created so tests will pass
-   */
-  public String toString()
-  {
-    return "com.caucho.quercus.resources.JdbcResultResource";
-  }
-
-  /**
-   * points to row right before "rowNumber" next fetch_array will increment to proper row
+   * Points to the row right before "rowNumber".
+   * Next fetchArray will increment to proper row.
+   *
+   * @param rowNumber the row offset
+   * @return true on success or false on failure
    */
   public boolean setRowNumber(int rowNumber)
   {
     return setRowNumber(_rs, rowNumber);
   }
 
+  /**
+   * Points to the row right before "rowNumber".
+   * Next fetchArray will increment to proper row.
+   *
+   * @param rs the result set to move the row pointer
+   * @param rowNumber the row offset
+   * @return true on success or false on failure
+   */
   public static boolean setRowNumber(ResultSet rs,
                                      int rowNumber)
   {
     // throw error if rowNumber is after last row
     int numRows = getNumRows(rs);
-    if (numRows < rowNumber || rowNumber < 0) {
+
+    if (numRows <= rowNumber || rowNumber < 0) {
       return false;
     }
 
@@ -1020,55 +1193,32 @@ public class JdbcResultResource {
 
     return true;
   }
+
   /**
-   * @param fieldOffset PHP is 0-based
+   * Convert this JDBC result resource to a hash code.
+   *
+   * @return a hash code of this JDBC result resource
    */
-  public void setFieldOffset(int fieldOffset)
+  public Value toKey()
   {
-    this._fieldOffset = fieldOffset;
-  }
-
-  public int getFieldOffset()
-  {
-    return this._fieldOffset;
-  }
-
-  public Value getFieldCatalog(int fieldOffset)
-  {
-    try {
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
-
-      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0)
-        return BooleanValue.FALSE;
-      else
-        return new StringValueImpl(_metaData.getCatalogName(fieldOffset + 1));
-
-    } catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
-      return BooleanValue.FALSE;
-    }
-  }
-
-  public ResultSetMetaData getMetaData()
-    throws SQLException
-  {
-    if (_metaData == null && _rs != null)
-      _metaData = _rs.getMetaData();
-
-    return _metaData;
-  }
-
-  public void setAffectedRows(int affectedRows) {
-    _affectedRows = affectedRows;
-  }
-
-  public int getAffectedRows() {
-    return _affectedRows;
+    // XXX: quercusbb seems to want this?
+    return new StringValueImpl("JdbcResultResource$" + System.identityHashCode(this));
   }
 
   /**
-   * Returns a string representation for this object
+   * Returns a string representation for this object.
+   *
+   * @return a string representation for this object
+   */
+  public String toString()
+  {
+    return "com.caucho.quercus.resources.JdbcResultResource";
+  }
+
+  /**
+   * Validate this result set and return it.
+   *
+   * @return the validated result set
    */
   public JdbcResultResource validateResult()
   {

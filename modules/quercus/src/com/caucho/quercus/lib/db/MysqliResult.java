@@ -37,14 +37,17 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
 
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.ReturnNullAsFalse;
+
+import com.caucho.util.L10N;
+
 
 /**
  * mysqli object oriented API facade
@@ -52,6 +55,8 @@ import com.caucho.quercus.module.ReturnNullAsFalse;
 public class MysqliResult extends JdbcResultResource {
   private static final Logger log
     = Logger.getLogger(MysqliResult.class.getName());
+  private static final L10N L
+    = new L10N(MysqliResult.class);
 
   /**
    * Constructor for MysqliResult
@@ -80,26 +85,48 @@ public class MysqliResult extends JdbcResultResource {
   }
 
   /**
-   * seeks to an arbitrary result pointer specified
+   * Seeks to an arbitrary result pointer specified
    * by the offset in the result set represented by result.
-   * Returns TRUE on success or FALSE on failure
+   *
+   * @param env the PHP executing environment
+   * @param rowNumber the row offset
+   * @return true on success or false on failure
    */
   public boolean data_seek(Env env, int rowNumber)
   {
-    return seek(env, rowNumber);
+    if (seek(env, rowNumber)) {
+      return true;
+    } else {
+      env.warning(L.l("Offset {0} is invalid for MySQL (or the query data is unbuffered)",
+                      rowNumber));
+      return false;
+    }
   }
 
   /**
-   * Returns an array representing the row.
+   * Fetch a result row as an associative, a numeric array, or both.
+   *
+   * @param type one of MYSQLI_ASSOC, MYSQLI_NUM, or MYSQLI_BOTH (default)
+   * By using the MYSQLI_ASSOC constant this function will behave
+   * identically to the mysqli_fetch_assoc(), while MYSQLI_NUM will
+   * behave identically to the mysqli_fetch_row() function. The final
+   * option MYSQLI_BOTH will create a single array with the attributes
+   * of both.
+   *
+   * @return a result row as an associative, a numeric array, or both
+   * or null if there are no more rows in the result set
    */
   @ReturnNullAsFalse
-  public ArrayValue fetch_array(@Optional("MYSQLI_BOTH") int type)
+  public ArrayValue fetch_array(@Optional("FETCH_BOTH") int type)
   {
     return fetchArray(type);
   }
 
   /**
    * Returns an associative array representing the row.
+   *
+   * @return an associative array representing the row
+   * or null if there are no more rows in the result set
    */
   public ArrayValue fetch_assoc()
   {
@@ -107,42 +134,12 @@ public class MysqliResult extends JdbcResultResource {
   }
 
   /**
-   * Returns the field metadata
-   */
-  public Value fetch_field(Env env)
-  {
-    return fetchNextField(env);
-  }
-
-  /**
-   * Returns the field metadata
-   */
-  @ReturnNullAsFalse
-  public Value fetch_fields(Env env)
-  {
-    return getFieldDirectArray(env);
-  }
-
-  /**
-   * Returns the field lengths
-   */
-  @ReturnNullAsFalse
-  public Value fetch_lengths()
-  {
-    return getLengths();
-  }
-
-  /**
-   * Returns the field table
-   */
-  @ReturnNullAsFalse
-  public Value fetch_field_catalog(int offset)
-  {
-    return getFieldCatalog(offset);
-  }
-
-  /**
-   * Returns the field metadata.
+   * Returns field metadata for a single field.
+   *
+   * @param env the PHP executing environment
+   * @param offset the field number
+   * @return the field metadata or false if no field
+   * information for specified offset is available
    */
   @ReturnNullAsFalse
   public Value fetch_field_direct(Env env, int offset)
@@ -151,43 +148,54 @@ public class MysqliResult extends JdbcResultResource {
   }
 
   /**
-   * Returns the field length
+   * Returns the next field in the result set.
+   *
+   * @param env the PHP executing environment
+   * @return the next field in the result set or
+   * false if no information is available
    */
-  @ReturnNullAsFalse
-  public Value fetch_field_length(Env env, int offset)
+  public Value fetch_field(Env env)
   {
-    return getFieldLength(env, offset);
+    return fetchNextField(env);
   }
 
   /**
-   * Returns the field name
+   * Returns metadata for all fields in the result set.
+   *
+   * @param env the PHP executing environment
+   * @return an array of objects which contains field
+   * definition information or FALSE if no field
+   * information is available
    */
   @ReturnNullAsFalse
-  public Value fetch_field_name(Env env, int offset)
+  public Value fetch_fields(Env env)
   {
-    return getFieldName(env, offset);
+    return getFieldDirectArray(env);
   }
 
   /**
-   * Returns the table corresponding to the field.
+   * Returns the lengths of the columns of the
+   * current row in the result set.
+   *
+   * @return an array with the lengths of the
+   * columns of the current row in the result set
+   * or false if you call it before calling
+   * mysqli_fetch_row/array/object or after
+   * retrieving all rows in the result set
    */
   @ReturnNullAsFalse
-  public Value fetch_field_table(Env env, int offset)
+  public Value fetch_lengths()
   {
-    return getFieldTable(env, offset);
+    return getLengths();
   }
 
   /**
-   * Returns the field type
-   */
-  @ReturnNullAsFalse
-  public Value fetch_field_type(Env env, int offset)
-  {
-    return getFieldType(env, offset);
-  }
-
-  /**
-   * Returns an object representing the row.
+   * Returns an object representing the current row.
+   *
+   * @param env the PHP executing environment
+   * @return an object that corresponds to the
+   * fetched row or NULL if there are no more
+   * rows in resultset
    */
   public Value fetch_object(Env env)
   {
@@ -195,11 +203,26 @@ public class MysqliResult extends JdbcResultResource {
   }
 
   /**
-   * Returns an object representing the row.
+   * Returns an array representing the current row.
+   *
+   * @return an array that corresponds to the
+   * fetched row or NULL if there are no more
+   * rows in result set
    */
   public ArrayValue fetch_row()
   {
     return fetchArray(JdbcResultResource.FETCH_NUM);
+  }
+
+  /**
+   * Returns the number of fields in the result set.
+   *
+   * @param env the PHP executing environment
+   * @return the number of fields in the result set
+   */
+  public int field_count(Env env)
+  {
+    return getFieldCount();
   }
 
   /**
@@ -215,6 +238,7 @@ public class MysqliResult extends JdbcResultResource {
    * type: The data type used for this field (an integer... also see _constMap)
    * decimals: The number of decimals used (for integer fields)
    *
+   * @param env the PHP executing environment
    * @param fieldOffset 0 <= fieldOffset < number of fields
    * @return an object or BooleanValue.FALSE
    */
@@ -260,8 +284,11 @@ public class MysqliResult extends JdbcResultResource {
    * @see Value fetchFieldDirect
    *
    * increments the fieldOffset counter by one;
+   *
+   * @param env the PHP executing environment
+   * @return
    */
-  public Value fetchNextField(Env env)
+  protected Value fetchNextField(Env env)
   {
     int fieldOffset = getFieldOffset();
 
@@ -273,15 +300,14 @@ public class MysqliResult extends JdbcResultResource {
   }
 
   /**
-   * Returns the number of fields
-   */
-  public int field_count(Env env)
-  {
-    return getFieldCount();
-  }
-
-  /**
-   * Sets the index into field metadata
+   * Sets the field metadata cursor to the
+   * given offset. The next call to
+   * mysqli_fetch_field() will retrieve the
+   * field definition of the column associated
+   * with that offset.
+   *
+   * @param env the PHP executing environment
+   * @return previous value of field cursor
    */
   public boolean field_seek(Env env, int offset)
   {
@@ -291,7 +317,10 @@ public class MysqliResult extends JdbcResultResource {
   }
 
   /**
-   * Returns the index into field metadata
+   * Get current field offset of a result pointer.
+   *
+   * @param env the PHP executing environment
+   * @return current offset of field cursor
    */
   public int field_tell(Env env)
   {
@@ -299,7 +328,7 @@ public class MysqliResult extends JdbcResultResource {
   }
 
   /**
-   * Closes the result
+   * Closes the result.
    */
   public void free()
   {
@@ -315,6 +344,8 @@ public class MysqliResult extends JdbcResultResource {
   }
 
   /**
+   *
+   * @param env the PHP executing environment
    * @return array of fieldDirect objects
    */
   public Value getFieldDirectArray(Env env)
@@ -336,7 +367,9 @@ public class MysqliResult extends JdbcResultResource {
   }
 
   /**
-   * returns the number of columns in the result set.
+   * Get the number of fields in the result set.
+   *
+   * @return the number of columns in the result set
    */
   public int num_fields()
   {
@@ -344,25 +377,26 @@ public class MysqliResult extends JdbcResultResource {
   }
 
   /**
-   * Returns the number of rows in the result set.
+   * Get the number of rows in the result set.
+   *
+   * @return the number of rows in the result set
    */
   @ReturnNullAsFalse
   public Integer num_rows()
   {
-    return new Integer(getNumRows());
-  }
+    int numRows = getNumRows();
 
-  /**
-   * Returns the value of a result field.
-   */
-  @ReturnNullAsFalse
-  public Value result(Env env, int row, Value field)
-  {
-    return getResultField(env, row, field);
+    if (numRows < 0) {
+      return null;
+    }
+
+    return new Integer(numRows);
   }
 
   /**
    * Returns a string representation for this object.
+   *
+   * @return a string representation for this object
    */
   public String toString()
   {

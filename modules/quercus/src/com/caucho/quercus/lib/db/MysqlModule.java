@@ -181,7 +181,7 @@ public class MysqlModule extends AbstractQuercusModule {
     if (result == null)
       return BooleanValue.FALSE;
 
-    return result.result(env, row, field);
+    return result.getResultField(env, row, field);
   }
 
   /**
@@ -218,7 +218,12 @@ public class MysqlModule extends AbstractQuercusModule {
     if (conn == null)
       conn = getConnection(env);
 
-    return conn.error();
+    String error = conn.error();
+
+    if (error == null)
+      return "";
+
+    return error;
   }
 
   public Value mysql_escape_string(Env env, StringValue unescapedString)
@@ -309,11 +314,11 @@ public class MysqlModule extends AbstractQuercusModule {
       if (fieldOffset == -1)
         fieldOffset = result.field_tell(env);
 
-      Value fieldTable = result.fetch_field_table(env, fieldOffset);
-      Value fieldName = result.fetch_field_name(env, fieldOffset);
-      Value fieldType = result.fetch_field_type(env, fieldOffset);
-      Value fieldLength = result.fetch_field_length(env, fieldOffset);
-      Value fieldCatalog = result.fetch_field_catalog(fieldOffset);
+      Value fieldTable = result.getFieldTable(env, fieldOffset);
+      Value fieldName = result.getFieldName(env, fieldOffset);
+      Value fieldType = result.getFieldType(env, fieldOffset);
+      Value fieldLength = result.getFieldLength(env, fieldOffset);
+      Value fieldCatalog = result.getFieldCatalog(fieldOffset);
 
       if ((fieldTable == BooleanValue.FALSE)
           || (fieldName == BooleanValue.FALSE)
@@ -452,12 +457,12 @@ public class MysqlModule extends AbstractQuercusModule {
     if (result == null)
       return BooleanValue.FALSE;
 
-    Value fieldName = result.fetch_field_name(env, fieldOffset);
+    Value fieldName = result.getFieldName(env, fieldOffset);
 
     if (fieldName == BooleanValue.FALSE)
       return BooleanValue.FALSE;
 
-    Value fieldTable = result.fetch_field_table(env, fieldOffset);
+    Value fieldTable = result.getFieldTable(env, fieldOffset);
 
     if (fieldTable == BooleanValue.FALSE)
       return BooleanValue.FALSE;
@@ -484,7 +489,7 @@ public class MysqlModule extends AbstractQuercusModule {
     if (result == null)
       return BooleanValue.FALSE;
 
-    return result.fetch_field_name(env, fieldOffset);
+    return result.getFieldName(env, fieldOffset);
   }
 
   /**
@@ -511,7 +516,7 @@ public class MysqlModule extends AbstractQuercusModule {
     if (result == null)
       return BooleanValue.FALSE;
 
-    return result.fetch_field_table(env, fieldOffset);
+    return result.getFieldTable(env, fieldOffset);
   }
 
   /**
@@ -524,7 +529,7 @@ public class MysqlModule extends AbstractQuercusModule {
     if (result == null)
       return BooleanValue.FALSE;
 
-    return result.fetch_field_type(env, fieldOffset);
+    return result.getFieldType(env, fieldOffset);
   }
 
   /**
@@ -549,7 +554,7 @@ public class MysqlModule extends AbstractQuercusModule {
 
     // ERRATUM: Returns 10 for datatypes DEC and NUMERIC instead of 11
 
-    return result.fetch_field_length(env, fieldOffset);
+    return result.getFieldLength(env, fieldOffset);
   }
 
   /**
@@ -782,7 +787,7 @@ public class MysqlModule extends AbstractQuercusModule {
     if (result == null)
       return BooleanValue.FALSE;
 
-    return result.result(env, i, LongValue.ZERO);
+    return result.getResultField(env, i, LongValue.ZERO);
   }
 
   /**

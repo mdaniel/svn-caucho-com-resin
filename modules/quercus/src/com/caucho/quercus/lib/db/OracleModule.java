@@ -29,10 +29,34 @@
 
 package com.caucho.quercus.lib.db;
 
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.BinaryBuilderValue;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.ResourceValue;
+import com.caucho.quercus.env.StringBuilderValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.module.NotNull;
+import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.Reference;
+import com.caucho.quercus.module.ReturnNullAsFalse;
+
+import com.caucho.quercus.UnimplementedException;
+
+import com.caucho.util.Log;
+
+import java.lang.reflect.Method;
+
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import java.util.logging.Level;
@@ -40,25 +64,12 @@ import java.util.logging.Logger;
 
 import java.util.Map;
 
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-
-import com.caucho.util.Log;
-
-import com.caucho.quercus.UnimplementedException;
-import com.caucho.quercus.env.*;
-import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.NotNull;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.Reference;
-import com.caucho.quercus.module.ReturnNullAsFalse;
-
-import java.lang.reflect.*;
-import java.io.*;
+import java.util.regex.Pattern;
 
 
 /**
- * PHP oracle routines.
+ * Quercus oracle routines.
  *
  * NOTE from php.net:
  *
@@ -80,7 +91,6 @@ import java.io.*;
  *
  */
 public class OracleModule extends AbstractQuercusModule {
-
   private static final Logger log = Log.open(OracleModule.class);
 
   public static final int OCI_DEFAULT = 0x01;
@@ -151,13 +161,13 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Binds PHP array to Oracle PL/SQL array by name
    */
-  public Value oci_bind_array_by_name(Env env,
-                                      @NotNull OracleStatement stmt,
-                                      @NotNull String name,
-                                      @NotNull String varArray,
-                                      @NotNull int maxTableLength,
-                                      @Optional("0") int maxItemLength,
-                                      @Optional("0") int type)
+  public static Value oci_bind_array_by_name(Env env,
+                                             @NotNull OracleStatement stmt,
+                                             @NotNull String name,
+                                             @NotNull String varArray,
+                                             @NotNull int maxTableLength,
+                                             @Optional("0") int maxItemLength,
+                                             @Optional("0") int type)
   {
     throw new UnimplementedException("oci_bind_array_by_name");
   }
@@ -165,12 +175,12 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Binds the PHP variable to the Oracle placeholder
    */
-  public Value oci_bind_by_name(Env env,
-                                @NotNull OracleStatement stmt,
-                                @NotNull String variable,
-                                @NotNull Value value,
-                                @Optional("0") int maxLength,
-                                @Optional("0") int type)
+  public static Value oci_bind_by_name(Env env,
+                                       @NotNull OracleStatement stmt,
+                                       @NotNull String variable,
+                                       @NotNull Value value,
+                                       @Optional("0") int maxLength,
+                                       @Optional("0") int type)
   {
     try {
       Integer index = (Integer)stmt.removeBindingVariable(variable);
@@ -192,8 +202,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Cancels reading from cursor
    */
-  public boolean oci_cancel(Env env,
-                            @NotNull OracleStatement stmt)
+  public static boolean oci_cancel(Env env,
+                                   @NotNull OracleStatement stmt)
   {
     return oci_free_statement(env, stmt);
   }
@@ -201,8 +211,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Closes Oracle connection
    */
-  public Value oci_close(Env env,
-                         @NotNull Oracle conn)
+  public static Value oci_close(Env env,
+                                @NotNull Oracle conn)
   {
     if (conn == null)
       conn = getConnection(env);
@@ -222,8 +232,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Commits outstanding statements
    */
-  public Value oci_commit(Env env,
-                          @NotNull Oracle conn)
+  public static Value oci_commit(Env env,
+                                 @NotNull Oracle conn)
   {
     try {
       return BooleanValue.create(conn.commit());
@@ -236,12 +246,12 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Establishes a connection to the Oracle server
    */
-  public Value oci_connect(Env env,
-                           @NotNull String username,
-                           @NotNull String password,
-                           @Optional String db,
-                           @Optional String charset,
-                           @Optional("0") int sessionMode)
+  public static Value oci_connect(Env env,
+                                  @NotNull String username,
+                                  @NotNull String password,
+                                  @Optional String db,
+                                  @Optional String charset,
+                                  @Optional("0") int sessionMode)
   {
     // Note:  The second and subsequent calls to oci_connect() with the same parameters
     // will return the connection handle returned from the first call. This means that
@@ -264,11 +274,11 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Uses a PHP variable for the define-step during a SELECT
    */
-  public Value oci_define_by_name(Env env,
-                                  @NotNull OracleStatement stmt,
-                                  @NotNull String columnName,
-                                  @NotNull @Reference Value variable,
-                                  @Optional("0") int type)
+  public static Value oci_define_by_name(Env env,
+                                         @NotNull OracleStatement stmt,
+                                         @NotNull String columnName,
+                                         @NotNull @Reference Value variable,
+                                         @Optional("0") int type)
   {
     try {
       stmt.putByNameVariable(columnName, variable);
@@ -282,8 +292,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Returns the last error found
    */
-  public String oci_error(Env env,
-                          @Optional Value resource)
+  public static String oci_error(Env env,
+                                 @Optional Value resource)
   {
     JdbcConnectionResource conn = null;
 
@@ -305,9 +315,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Executes a statement
    */
-  public Value oci_execute(Env env,
-                           @NotNull OracleStatement stmt,
-                           @Optional("0") int mode)
+  public static Value oci_execute(Env env,
+                                  @NotNull OracleStatement stmt,
+                                  @Optional("0") int mode)
   {
     try {
       if (mode == OCI_COMMIT_ON_SUCCESS) {
@@ -332,12 +342,12 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Fetches all rows of result data into an array
    */
-  public Value oci_fetch_all(Env env,
-                             @NotNull OracleStatement stmt,
-                             @NotNull Value output,
-                             @Optional int skip,
-                             @Optional int maxrows,
-                             @Optional int flags)
+  public static Value oci_fetch_all(Env env,
+                                    @NotNull OracleStatement stmt,
+                                    @NotNull Value output,
+                                    @Optional int skip,
+                                    @Optional int maxrows,
+                                    @Optional int flags)
   {
     JdbcResultResource resource = null;
 
@@ -371,9 +381,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Returns the next row from the result data as an associative or numeric array, or both
    */
-  public Value oci_fetch_array(Env env,
-                               @NotNull OracleStatement stmt,
-                               @Optional("OCI_BOTH") int mode)
+  public static Value oci_fetch_array(Env env,
+                                      @NotNull OracleStatement stmt,
+                                      @Optional("OCI_BOTH") int mode)
   {
     try {
       if (stmt == null)
@@ -390,8 +400,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Returns the next row from the result data as an associative array
    */
-  public Value oci_fetch_assoc(Env env,
-                               @NotNull OracleStatement stmt)
+  public static Value oci_fetch_assoc(Env env,
+                                      @NotNull OracleStatement stmt)
   {
     try {
       if (stmt == null)
@@ -408,8 +418,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Returns the next row from the result data as an object
    */
-  public Value oci_fetch_object(Env env,
-                                @NotNull OracleStatement stmt)
+  public static Value oci_fetch_object(Env env,
+                                       @NotNull OracleStatement stmt)
   {
     try {
       if (stmt == null)
@@ -426,8 +436,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Returns the next row from the result data as a numeric array
    */
-  public Value oci_fetch_row(Env env,
-                             @NotNull OracleStatement stmt)
+  public static Value oci_fetch_row(Env env,
+                                    @NotNull OracleStatement stmt)
   {
     try {
       if (stmt == null)
@@ -444,8 +454,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Fetches the next row into result-buffer
    */
-  public Value oci_fetch(Env env,
-                         @NotNull OracleStatement stmt)
+  public static Value oci_fetch(Env env,
+                                @NotNull OracleStatement stmt)
   {
     try {
       if (stmt == null)
@@ -481,9 +491,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Checks if the field is NULL
    */
-  public Value oci_field_is_null(Env env,
-                                 @NotNull OracleStatement stmt,
-                                 @NotNull Value field)
+  public static Value oci_field_is_null(Env env,
+                                        @NotNull OracleStatement stmt,
+                                        @NotNull Value field)
   {
     if (stmt == null)
       return BooleanValue.FALSE;
@@ -526,9 +536,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Returns the name of a field from the statement
    */
-  public Value oci_field_name(Env env,
-                              @NotNull OracleStatement stmt,
-                              @NotNull int fieldNumber)
+  public static Value oci_field_name(Env env,
+                                     @NotNull OracleStatement stmt,
+                                     @NotNull int fieldNumber)
   {
     try {
       if (stmt == null)
@@ -546,9 +556,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Tell the precision of a field
    */
-  public Value oci_field_precision(Env env,
-                                   @NotNull OracleStatement stmt,
-                                   @NotNull int field)
+  public static Value oci_field_precision(Env env,
+                                          @NotNull OracleStatement stmt,
+                                          @NotNull int field)
   {
     if (stmt == null)
       return BooleanValue.FALSE;
@@ -571,9 +581,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Tell the scale of the field
    */
-  public Value oci_field_scale(Env env,
-                               @NotNull OracleStatement stmt,
-                               @NotNull int field)
+  public static Value oci_field_scale(Env env,
+                                      @NotNull OracleStatement stmt,
+                                      @NotNull int field)
   {
     if (stmt == null)
       return BooleanValue.FALSE;
@@ -596,9 +606,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Returns field's size
    */
-  public Value oci_field_size(Env env,
-                              @NotNull OracleStatement stmt,
-                              @Optional Value field)
+  public static Value oci_field_size(Env env,
+                                     @NotNull OracleStatement stmt,
+                                     @Optional Value field)
   {
     try {
       if (stmt == null)
@@ -638,9 +648,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Tell the raw Oracle data type of the field
    */
-  public Value oci_field_type_raw(Env env,
-                                  @NotNull OracleStatement stmt,
-                                  @Optional int field)
+  public static Value oci_field_type_raw(Env env,
+                                         @NotNull OracleStatement stmt,
+                                         @Optional int field)
   {
     throw new UnimplementedException("oci_field_type_raw");
   }
@@ -648,9 +658,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Returns field's data type
    */
-  public Value oci_field_type(Env env,
-                              @NotNull OracleStatement stmt,
-                              @Optional int fieldNumber)
+  public static Value oci_field_type(Env env,
+                                     @NotNull OracleStatement stmt,
+                                     @Optional int fieldNumber)
   {
     try {
       if (stmt == null)
@@ -668,8 +678,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    *  Frees all resources associated with statement or cursor
    */
-  public boolean oci_free_statement(Env env,
-                                    @NotNull OracleStatement stmt)
+  public static boolean oci_free_statement(Env env,
+                                           @NotNull OracleStatement stmt)
   {
     try {
 
@@ -686,8 +696,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Enables or disables internal debug output
    */
-  public void oci_internal_debug(Env env,
-                                 @NotNull int onoff)
+  public static void oci_internal_debug(Env env,
+                                        @NotNull int onoff)
   {
     throw new UnimplementedException("oci_internal_debug");
   }
@@ -695,10 +705,10 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Copies large object
    */
-  public Value oci_lob_copy(Env env,
-                            @NotNull Value lobTo,
-                            @NotNull Value lobFrom,
-                            @Optional("-1") int length)
+  public static Value oci_lob_copy(Env env,
+                                   @NotNull Value lobTo,
+                                   @NotNull Value lobFrom,
+                                   @Optional("-1") int length)
   {
     throw new UnimplementedException("oci_lob_copy");
   }
@@ -706,9 +716,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Compares two LOB/FILE locators for equality
    */
-  public Value oci_lob_is_equal(Env env,
-                                @NotNull Value lob1,
-                                @NotNull Value lob2)
+  public static Value oci_lob_is_equal(Env env,
+                                       @NotNull Value lob1,
+                                       @NotNull Value lob2)
   {
     throw new UnimplementedException("oci_lob_is_equal");
   }
@@ -716,10 +726,10 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Allocates new collection object
    */
-  public Value oci_new_collection(Env env,
-                                  @NotNull Oracle conn,
-                                  @NotNull String tdo,
-                                  @Optional String schema)
+  public static Value oci_new_collection(Env env,
+                                         @NotNull Oracle conn,
+                                         @NotNull String tdo,
+                                         @Optional String schema)
   {
     throw new UnimplementedException("oci_new_collection");
   }
@@ -727,12 +737,12 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Establishes a new connection to the Oracle server
    */
-  public Value oci_new_connect(Env env,
-                               @NotNull String username,
-                               @NotNull String password,
-                               @Optional String db,
-                               @Optional String charset,
-                               @Optional("0") int sessionMode)
+  public static Value oci_new_connect(Env env,
+                                      @NotNull String username,
+                                      @NotNull String password,
+                                      @Optional String db,
+                                      @Optional String charset,
+                                      @Optional("0") int sessionMode)
   {
     if (!((charset == null) || charset.length() == 0)) {
       throw new UnimplementedException("oci_new_connect with charset");
@@ -750,8 +760,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Allocates and returns a new cursor (statement handle)
    */
-  public Value oci_new_cursor(Env env,
-                              @NotNull Oracle conn)
+  public static Value oci_new_cursor(Env env,
+                                     @NotNull Oracle conn)
   {
     throw new UnimplementedException("oci_new_cursor");
   }
@@ -759,9 +769,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Initializes a new empty LOB or FILE descriptor
    */
-  public Value oci_new_descriptor(Env env,
-                                  @NotNull Oracle conn,
-                                  @Optional("-1") int type)
+  public static Value oci_new_descriptor(Env env,
+                                         @NotNull Oracle conn,
+                                         @Optional("-1") int type)
   {
     throw new UnimplementedException("oci_new_descriptor");
   }
@@ -769,8 +779,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    *  Returns the number of result columns in a statement
    */
-  public Value oci_num_fields(Env env,
-                              @NotNull OracleStatement stmt)
+  public static Value oci_num_fields(Env env,
+                                     @NotNull OracleStatement stmt)
   {
     try {
       if (stmt == null)
@@ -789,8 +799,8 @@ public class OracleModule extends AbstractQuercusModule {
    * Returns number of rows affected during statement execution
    */
   @ReturnNullAsFalse
-  public Integer oci_num_rows(Env env,
-                              @NotNull OracleStatement stmt)
+  public static Integer oci_num_rows(Env env,
+                                     @NotNull OracleStatement stmt)
   {
     try {
       if (stmt == null)
@@ -808,9 +818,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Prepares Oracle statement for execution
    */
-  public Value oci_parse(Env env,
-                         @NotNull Oracle conn,
-                         String query)
+  public static Value oci_parse(Env env,
+                                @NotNull Oracle conn,
+                                String query)
   {
     try {
       // Make the PHP query a JDBC like query replacing (:mydata -> ?) with question marks.
@@ -837,11 +847,11 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Changes password of Oracle's user
    */
-  public Value oci_password_change(Env env,
-                                   @NotNull Oracle conn,
-                                   @NotNull String username,
-                                   @NotNull String oldPassword,
-                                   @NotNull String newPassword)
+  public static Value oci_password_change(Env env,
+                                          @NotNull Oracle conn,
+                                          @NotNull String username,
+                                          @NotNull String oldPassword,
+                                          @NotNull String newPassword)
   {
     throw new UnimplementedException("oci_password_change");
   }
@@ -849,12 +859,12 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Connect to an Oracle database using a persistent connection
    */
-  public Value oci_pconnect(Env env,
-                            @NotNull String username,
-                            @NotNull String password,
-                            @Optional String db,
-                            @Optional String charset,
-                            @Optional("0") int sessionMode)
+  public static Value oci_pconnect(Env env,
+                                   @NotNull String username,
+                                   @NotNull String password,
+                                   @Optional String db,
+                                   @Optional String charset,
+                                   @Optional("0") int sessionMode)
   {
     if (!((charset == null) || charset.length() == 0)) {
       throw new UnimplementedException("oci_pconnect with charset");
@@ -872,9 +882,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Returns field's value from the fetched row
    */
-  public Value oci_result(Env env,
-                          @NotNull OracleStatement stmt,
-                          @NotNull Value field)
+  public static Value oci_result(Env env,
+                                 @NotNull OracleStatement stmt,
+                                 @NotNull Value field)
   {
     try {
       if (stmt == null)
@@ -892,8 +902,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Rolls back outstanding transaction
    */
-  public Value oci_rollback(Env env,
-                            @NotNull Oracle conn)
+  public static Value oci_rollback(Env env,
+                                   @NotNull Oracle conn)
   {
     try {
       return BooleanValue.create(conn.rollback());
@@ -907,8 +917,8 @@ public class OracleModule extends AbstractQuercusModule {
    * Returns server version
    */
   @ReturnNullAsFalse
-  public String oci_server_version(Env env,
-                                   @NotNull Oracle conn)
+  public static String oci_server_version(Env env,
+                                          @NotNull Oracle conn)
   {
     try {
       if (conn == null)
@@ -924,9 +934,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Sets number of rows to be prefetched
    */
-  public Value oci_set_prefetch(Env env,
-                                @NotNull OracleStatement stmt,
-                                @Optional("1") int rows)
+  public static Value oci_set_prefetch(Env env,
+                                       @NotNull OracleStatement stmt,
+                                       @Optional("1") int rows)
   {
     throw new UnimplementedException("oci_set_prefetch");
   }
@@ -934,8 +944,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Returns the type of an OCI statement
    */
-  public String oci_statement_type(Env env,
-                                   @NotNull OracleStatement stmt)
+  public static String oci_statement_type(Env env,
+                                          @NotNull OracleStatement stmt)
   {
     return stmt.getStatementType();
   }
@@ -943,12 +953,12 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_bind_by_name()
    */
-  public Value ocibindbyname(Env env,
-                             @NotNull OracleStatement stmt,
-                             @NotNull String variable,
-                             @NotNull Value value,
-                             @Optional("0") int maxLength,
-                             @Optional("0") int type)
+  public static Value ocibindbyname(Env env,
+                                    @NotNull OracleStatement stmt,
+                                    @NotNull String variable,
+                                    @NotNull Value value,
+                                    @Optional("0") int maxLength,
+                                    @Optional("0") int type)
   {
     return oci_bind_by_name(env, stmt, variable, value, maxLength, type);
   }
@@ -956,8 +966,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_cancel()
    */
-  public boolean ocicancel(Env env,
-                           @NotNull OracleStatement stmt)
+  public static boolean ocicancel(Env env,
+                                  @NotNull OracleStatement stmt)
   {
     return oci_cancel(env, stmt);
   }
@@ -965,8 +975,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of OCI-Lob->close
    */
-  public Value ocicloselob(Env env,
-                           @NotNull Oracle conn)
+  public static Value ocicloselob(Env env,
+                                  @NotNull Oracle conn)
   {
     throw new UnimplementedException("ocicloselob");
   }
@@ -974,8 +984,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of OCI-Collection->append
    */
-  public Value ocicollappend(Env env,
-                             @NotNull Oracle conn)
+  public static Value ocicollappend(Env env,
+                                    @NotNull Oracle conn)
   {
     throw new UnimplementedException("ocicollappend");
   }
@@ -983,8 +993,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of OCI-Collection->assign
    */
-  public Value ocicollassign(Env env,
-                             @NotNull Oracle conn)
+  public static Value ocicollassign(Env env,
+                                    @NotNull Oracle conn)
   {
     throw new UnimplementedException("ocicollassign");
   }
@@ -992,8 +1002,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of OCI-Collection->assignElem
    */
-  public Value ocicollassignelem(Env env,
-                                 @NotNull Oracle conn)
+  public static Value ocicollassignelem(Env env,
+                                        @NotNull Oracle conn)
   {
     throw new UnimplementedException("ocicollassignelem");
   }
@@ -1001,8 +1011,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of OCI-Collection->getElem
    */
-  public Value ocicollgetelem(Env env,
-                              @NotNull Oracle conn)
+  public static Value ocicollgetelem(Env env,
+                                     @NotNull Oracle conn)
   {
     throw new UnimplementedException("ocicollgetelem");
   }
@@ -1010,8 +1020,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of OCI-Collection->max
    */
-  public Value ocicollmax(Env env,
-                          @NotNull Oracle conn)
+  public static Value ocicollmax(Env env,
+                                 @NotNull Oracle conn)
   {
     throw new UnimplementedException("ocicollmax");
   }
@@ -1019,8 +1029,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of OCI-Collection->size
    */
-  public Value ocicollsize(Env env,
-                           @NotNull Oracle conn)
+  public static Value ocicollsize(Env env,
+                                  @NotNull Oracle conn)
   {
     throw new UnimplementedException("ocicollsize");
   }
@@ -1028,8 +1038,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of OCI-Collection->trim
    */
-  public Value ocicolltrim(Env env,
-                           @NotNull Oracle conn)
+  public static Value ocicolltrim(Env env,
+                                  @NotNull Oracle conn)
   {
     throw new UnimplementedException("ocicolltrim");
   }
@@ -1037,9 +1047,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_field_is_null()
    */
-  public Value ocicolumnisnull(Env env,
-                               @NotNull OracleStatement stmt,
-                               @NotNull Value field)
+  public static Value ocicolumnisnull(Env env,
+                                      @NotNull OracleStatement stmt,
+                                      @NotNull Value field)
   {
     return oci_field_is_null(env, stmt, field);
   }
@@ -1047,9 +1057,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_field_name()
    */
-  public Value ocicolumnname(Env env,
-                             @NotNull OracleStatement stmt,
-                             @NotNull int fieldNumber)
+  public static Value ocicolumnname(Env env,
+                                    @NotNull OracleStatement stmt,
+                                    @NotNull int fieldNumber)
   {
     return oci_field_name(env, stmt, fieldNumber);
   }
@@ -1057,9 +1067,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_field_precision()
    */
-  public Value ocicolumnprecision(Env env,
-                                  @NotNull OracleStatement stmt,
-                                  @NotNull int field)
+  public static Value ocicolumnprecision(Env env,
+                                         @NotNull OracleStatement stmt,
+                                         @NotNull int field)
   {
     return oci_field_precision(env, stmt, field);
   }
@@ -1067,9 +1077,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_field_scale()
    */
-  public Value ocicolumnscale(Env env,
-                              @NotNull OracleStatement stmt,
-                              @NotNull int field)
+  public static Value ocicolumnscale(Env env,
+                                     @NotNull OracleStatement stmt,
+                                     @NotNull int field)
   {
     return oci_field_scale(env, stmt, field);
   }
@@ -1077,9 +1087,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_field_size()
    */
-  public Value ocicolumnsize(Env env,
-                             @NotNull OracleStatement stmt,
-                             @Optional Value field)
+  public static Value ocicolumnsize(Env env,
+                                    @NotNull OracleStatement stmt,
+                                    @Optional Value field)
   {
     return oci_field_size(env, stmt, field);
   }
@@ -1087,9 +1097,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_field_type()
    */
-  public Value ocicolumntype(Env env,
-                             @NotNull OracleStatement stmt,
-                             @Optional int fieldNumber)
+  public static Value ocicolumntype(Env env,
+                                    @NotNull OracleStatement stmt,
+                                    @Optional int fieldNumber)
   {
     return oci_field_type(env, stmt, fieldNumber);
   }
@@ -1097,9 +1107,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_field_type_raw()
    */
-  public Value ocicolumntyperaw(Env env,
-                                @NotNull OracleStatement stmt,
-                                @Optional int field)
+  public static Value ocicolumntyperaw(Env env,
+                                       @NotNull OracleStatement stmt,
+                                       @Optional int field)
   {
     return oci_field_type_raw(env, stmt, field);
   }
@@ -1107,8 +1117,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_commit()
    */
-  public Value ocicommit(Env env,
-                         @NotNull Oracle conn)
+  public static Value ocicommit(Env env,
+                                @NotNull Oracle conn)
   {
     return oci_commit(env, conn);
   }
@@ -1116,11 +1126,11 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_define_by_name()
    */
-  public Value ocidefinebyname(Env env,
-                               @NotNull OracleStatement stmt,
-                               @NotNull String columnName,
-                               @NotNull Value variable,
-                               @Optional("0") int type)
+  public static Value ocidefinebyname(Env env,
+                                      @NotNull OracleStatement stmt,
+                                      @NotNull String columnName,
+                                      @NotNull Value variable,
+                                      @Optional("0") int type)
   {
     return oci_define_by_name(env, stmt, columnName, variable, type);
   }
@@ -1128,8 +1138,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_error()
    */
-  public String ocierror(Env env,
-                         @Optional Value resource)
+  public static String ocierror(Env env,
+                                @Optional Value resource)
   {
     return oci_error(env, resource);
   }
@@ -1137,9 +1147,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_execute()
    */
-  public Value ociexecute(Env env,
-                          @NotNull OracleStatement stmt,
-                          @Optional("0") int mode)
+  public static Value ociexecute(Env env,
+                                 @NotNull OracleStatement stmt,
+                                 @Optional("0") int mode)
   {
     return oci_execute(env, stmt, mode);
   }
@@ -1147,8 +1157,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_fetch()
    */
-  public Value ocifetch(Env env,
-                        @NotNull OracleStatement stmt)
+  public static Value ocifetch(Env env,
+                               @NotNull OracleStatement stmt)
   {
     return oci_fetch(env, stmt);
   }
@@ -1156,8 +1166,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Fetches the next row into an array
    */
-  public Value ocifetchinto(Env env,
-                            @NotNull Oracle conn)
+  public static Value ocifetchinto(Env env,
+                                   @NotNull Oracle conn)
   {
     throw new UnimplementedException("ocifetchinto");
   }
@@ -1165,12 +1175,12 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_fetch_all()
    */
-  public Value ocifetchstatement(Env env,
-                                 @NotNull OracleStatement stmt,
-                                 @NotNull Value output,
-                                 @Optional int skip,
-                                 @Optional int maxrows,
-                                 @Optional int flags)
+  public static Value ocifetchstatement(Env env,
+                                        @NotNull OracleStatement stmt,
+                                        @NotNull Value output,
+                                        @Optional int skip,
+                                        @Optional int maxrows,
+                                        @Optional int flags)
   {
     return oci_fetch_all(env, stmt, output, skip, maxrows, flags);
   }
@@ -1178,8 +1188,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of OCI-Collection->free
    */
-  public Value ocifreecollection(Env env,
-                                 @NotNull Oracle conn)
+  public static Value ocifreecollection(Env env,
+                                        @NotNull Oracle conn)
   {
     throw new UnimplementedException("ocifreecollection");
   }
@@ -1187,8 +1197,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_free_statement()
    */
-  public boolean ocifreecursor(Env env,
-                               @NotNull OracleStatement stmt)
+  public static boolean ocifreecursor(Env env,
+                                      @NotNull OracleStatement stmt)
   {
     return oci_free_statement(env, stmt);
   }
@@ -1196,8 +1206,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of OCI-Lob->free
    */
-  public Value ocifreedesc(Env env,
-                           @NotNull Oracle conn)
+  public static Value ocifreedesc(Env env,
+                                  @NotNull Oracle conn)
   {
     throw new UnimplementedException("ocifreedesc");
   }
@@ -1205,8 +1215,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_free_statement()
    */
-  public boolean ocifreestatement(Env env,
-                                  @NotNull OracleStatement stmt)
+  public static boolean ocifreestatement(Env env,
+                                         @NotNull OracleStatement stmt)
   {
     return oci_free_statement(env, stmt);
   }
@@ -1214,8 +1224,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_internal_debug()
    */
-  public void ociinternaldebug(Env env,
-                               @NotNull int onoff)
+  public static void ociinternaldebug(Env env,
+                                      @NotNull int onoff)
   {
     oci_internal_debug(env, onoff);
   }
@@ -1223,8 +1233,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of OCI-Lob->load
    */
-  public Value ociloadlob(Env env,
-                          @NotNull Oracle conn)
+  public static Value ociloadlob(Env env,
+                                 @NotNull Oracle conn)
   {
     throw new UnimplementedException("ociloadlob");
   }
@@ -1232,8 +1242,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_close()
    */
-  public Value ocilogoff(Env env,
-                         @NotNull Oracle conn)
+  public static Value ocilogoff(Env env,
+                                @NotNull Oracle conn)
   {
     return oci_close(env, conn);
   }
@@ -1241,12 +1251,12 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_connect()
    */
-  public Value ocilogon(Env env,
-                        @NotNull String username,
-                        @NotNull String password,
-                        @Optional String db,
-                        @Optional String charset,
-                        @Optional("0") int sessionMode)
+  public static Value ocilogon(Env env,
+                               @NotNull String username,
+                               @NotNull String password,
+                               @Optional String db,
+                               @Optional String charset,
+                               @Optional("0") int sessionMode)
   {
     return oci_connect(env, username, password, db, charset, sessionMode);
   }
@@ -1254,10 +1264,10 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_new_collection()
    */
-  public Value ocinewcollection(Env env,
-                                @NotNull Oracle conn,
-                                @NotNull String tdo,
-                                @Optional String schema)
+  public static Value ocinewcollection(Env env,
+                                       @NotNull Oracle conn,
+                                       @NotNull String tdo,
+                                       @Optional String schema)
   {
     return oci_new_collection(env, conn, tdo, schema);
   }
@@ -1265,8 +1275,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_new_cursor()
    */
-  public Value ocinewcursor(Env env,
-                            @NotNull Oracle conn)
+  public static Value ocinewcursor(Env env,
+                                   @NotNull Oracle conn)
   {
     return oci_new_cursor(env, conn);
   }
@@ -1274,9 +1284,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_new_descriptor()
    */
-  public Value ocinewdescriptor(Env env,
-                                @NotNull Oracle conn,
-                                @Optional("-1") int type)
+  public static Value ocinewdescriptor(Env env,
+                                       @NotNull Oracle conn,
+                                       @Optional("-1") int type)
   {
     return oci_new_descriptor(env, conn, type);
   }
@@ -1284,12 +1294,12 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_new_connect()
    */
-  public Value ocinlogon(Env env,
-                         @NotNull String username,
-                         @NotNull String password,
-                         @Optional String db,
-                         @Optional String charset,
-                         @Optional("0") int sessionMode)
+  public static Value ocinlogon(Env env,
+                                @NotNull String username,
+                                @NotNull String password,
+                                @Optional String db,
+                                @Optional String charset,
+                                @Optional("0") int sessionMode)
   {
     return oci_new_connect(env, username, password, db, charset, sessionMode);
   }
@@ -1297,8 +1307,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_num_fields()
    */
-  public Value ocinumcols(Env env,
-                          @NotNull OracleStatement stmt)
+  public static Value ocinumcols(Env env,
+                                 @NotNull OracleStatement stmt)
   {
     return oci_num_fields(env, stmt);
   }
@@ -1306,9 +1316,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_parse()
    */
-  public Value ociparse(Env env,
-                        @NotNull Oracle conn,
-                        @NotNull String query)
+  public static Value ociparse(Env env,
+                               @NotNull Oracle conn,
+                               @NotNull String query)
   {
     return oci_parse(env, conn, query);
   }
@@ -1316,12 +1326,12 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_pconnect()
    */
-  public Value ociplogon(Env env,
-                         @NotNull String username,
-                         @NotNull String password,
-                         @Optional String db,
-                         @Optional String charset,
-                         @Optional("0") int sessionMode)
+  public static Value ociplogon(Env env,
+                                @NotNull String username,
+                                @NotNull String password,
+                                @Optional String db,
+                                @Optional String charset,
+                                @Optional("0") int sessionMode)
   {
     return oci_pconnect(env, username, password, db, charset, sessionMode);
   }
@@ -1329,9 +1339,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_result()
    */
-  public Value ociresult(Env env,
-                         @NotNull OracleStatement stmt,
-                         @NotNull Value field)
+  public static Value ociresult(Env env,
+                                @NotNull OracleStatement stmt,
+                                @NotNull Value field)
   {
     return oci_result(env, stmt, field);
   }
@@ -1339,8 +1349,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_rollback()
    */
-  public Value ocirollback(Env env,
-                           @NotNull Oracle conn)
+  public static Value ocirollback(Env env,
+                                  @NotNull Oracle conn)
   {
     return oci_rollback(env, conn);
   }
@@ -1349,8 +1359,8 @@ public class OracleModule extends AbstractQuercusModule {
    * Alias of oci_num_rows()
    */
   @ReturnNullAsFalse
-  public Integer ocirowcount(Env env,
-                             @NotNull OracleStatement stmt)
+  public static Integer ocirowcount(Env env,
+                                    @NotNull OracleStatement stmt)
   {
     return oci_num_rows(env, stmt);
   }
@@ -1358,8 +1368,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of OCI-Lob->save
    */
-  public Value ocisavelob(Env env,
-                          @NotNull Oracle conn)
+  public static Value ocisavelob(Env env,
+                                 @NotNull Oracle conn)
   {
     throw new UnimplementedException("ocisavelob");
   }
@@ -1367,8 +1377,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of OCI-Lob->import
    */
-  public Value ocisavelobfile(Env env,
-                              @NotNull Oracle conn)
+  public static Value ocisavelobfile(Env env,
+                                     @NotNull Oracle conn)
   {
     throw new UnimplementedException("ocisavelobfile");
   }
@@ -1376,8 +1386,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_server_version()
    */
-  public String ociserverversion(Env env,
-                                 @NotNull Oracle conn)
+  public static String ociserverversion(Env env,
+                                        @NotNull Oracle conn)
   {
     return oci_server_version(env, conn);
   }
@@ -1385,9 +1395,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_set_prefetch()
    */
-  public Value ocisetprefetch(Env env,
-                              @NotNull OracleStatement stmt,
-                              @Optional("1") int rows)
+  public static Value ocisetprefetch(Env env,
+                                     @NotNull OracleStatement stmt,
+                                     @Optional("1") int rows)
   {
     return oci_set_prefetch(env, stmt, rows);
   }
@@ -1395,8 +1405,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_statement_type()
    */
-  public String ocistatementtype(Env env,
-                                 @NotNull OracleStatement stmt)
+  public static String ocistatementtype(Env env,
+                                        @NotNull OracleStatement stmt)
   {
     return oci_statement_type(env, stmt);
   }
@@ -1404,8 +1414,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of OCI-Lob->export
    */
-  public Value ociwritelobtofile(Env env,
-                                 @NotNull Oracle conn)
+  public static Value ociwritelobtofile(Env env,
+                                        @NotNull Oracle conn)
   {
     throw new UnimplementedException("ociwritelobtofile");
   }
@@ -1413,17 +1423,17 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of OCI-Lob->writeTemporary
    */
-  public Value ociwritetemporarylob(Env env,
-                                    @NotNull Oracle conn)
+  public static Value ociwritetemporarylob(Env env,
+                                           @NotNull Oracle conn)
   {
     throw new UnimplementedException("ociwritetemporarylob");
   }
 
-  private Oracle getConnection(Env env)
+  private static Oracle getConnection(Env env)
   {
     Oracle conn = null;
 
-    ConnectionInfo connectionInfo = (ConnectionInfo)env.getSpecialValue("caucho.oracle");
+    ConnectionInfo connectionInfo = (ConnectionInfo) env.getSpecialValue("caucho.oracle");
 
     if (connectionInfo != null) {
       // Reuse the cached connection
@@ -1441,13 +1451,13 @@ public class OracleModule extends AbstractQuercusModule {
     return conn;
   }
 
-  private Value connectInternal(Env env,
-                                boolean reuseConnection,
-                                String username,
-                                String password,
-                                String db,
-                                String charset,
-                                int sessionMode)
+  private static Value connectInternal(Env env,
+                                       boolean reuseConnection,
+                                       String username,
+                                       String password,
+                                       String db,
+                                       String charset,
+                                       int sessionMode)
   {
     String host = "localhost";
     int port = 1521;
@@ -1484,7 +1494,7 @@ public class OracleModule extends AbstractQuercusModule {
     return value;
   }
 
-  private class ConnectionInfo {
+  private static class ConnectionInfo {
     private String _url;
     private Oracle _conn;
 

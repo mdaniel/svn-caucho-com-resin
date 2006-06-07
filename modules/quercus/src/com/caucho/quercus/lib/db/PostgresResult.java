@@ -73,6 +73,8 @@ public class PostgresResult extends JdbcResultResource {
 
   /**
    * Returns a string representation for this object.
+   *
+   * @return a string representation for this object
    */
   public String toString()
   {
