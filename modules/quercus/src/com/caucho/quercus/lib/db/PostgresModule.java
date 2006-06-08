@@ -48,6 +48,7 @@ import com.caucho.quercus.module.ReturnNullAsFalse;
 
 import com.caucho.quercus.UnimplementedException;
 
+import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
 import com.caucho.vfs.Path;
@@ -79,6 +80,7 @@ import java.util.Map;
 public class PostgresModule extends AbstractQuercusModule {
 
   private static final Logger log = Log.open(PostgresModule.class);
+  private static final L10N L = new L10N(PostgresModule.class);
 
   public static final int PGSQL_ASSOC = 0x01;
   public static final int PGSQL_NUM = 0x02;
@@ -772,7 +774,11 @@ public class PostgresModule extends AbstractQuercusModule {
         return  null;
 
       if (row.isLongConvertible() && row.toInt() >= 0) {
-        result.seek(env, row.toInt());
+        if (!result.seek(env, row.toInt())) {
+          env.warning(L.l("Unable to jump to row {0} on PostgreSQL result",
+                          row.toInt()));
+          return null;
+        }
       }
 
       Value value = result.fetchArray(resultType);
@@ -1928,10 +1934,18 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Returns the number of rows in a result
    */
-  public static int pg_num_rows(Env env,
-                                @NotNull PostgresResult result)
+  @ReturnNullAsFalse
+  public static Integer pg_num_rows(Env env,
+                                    @NotNull PostgresResult result)
   {
     try {
+
+      // (result.getResultSet() == null) should be cleaned and
+      // pg_get_result should return a null PostgresResult php/43c9
+      if ((result == null) || (result.getResultSet() == null)) {
+        env.warning(L.l("supplied argument is not a valid PostgreSQL result resource"));
+        return null;
+      }
 
       return result.getNumRows();
 

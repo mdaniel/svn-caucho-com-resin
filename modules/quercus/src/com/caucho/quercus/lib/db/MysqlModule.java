@@ -155,7 +155,13 @@ public class MysqlModule extends AbstractQuercusModule {
     if (result == null)
       return false;
 
-    return result.data_seek(env, rowNumber);
+    if (result.seek(env, rowNumber)) {
+      return true;
+    } else {
+      env.warning(L.l("Offset {0} is invalid for MySQL (or the query data is unbuffered)",
+                      rowNumber));
+      return false;
+    }
   }
 
   /**
