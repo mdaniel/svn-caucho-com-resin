@@ -144,15 +144,21 @@ public class MysqliStatement extends JdbcStatementResource {
    *
    * @param env the PHP executing environment
    * @param offset row offset
+   * @return NULL on sucess or FALSE on failure
    */
-  public void data_seek(Env env,
-                        int offset)
+  public Value data_seek(Env env,
+                         int offset)
   {
     try {
-      dataSeek(offset);
+
+      if (dataSeek(offset))
+        return NullValue.NULL;
+
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
+
+    return BooleanValue.FALSE;
   }
 
   /**

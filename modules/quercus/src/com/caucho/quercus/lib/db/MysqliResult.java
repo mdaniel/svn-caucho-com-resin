@@ -97,8 +97,6 @@ public class MysqliResult extends JdbcResultResource {
     if (seek(env, rowNumber)) {
       return true;
     } else {
-      env.warning(L.l("Offset {0} is invalid for MySQL (or the query data is unbuffered)",
-                      rowNumber));
       return false;
     }
   }
@@ -117,7 +115,7 @@ public class MysqliResult extends JdbcResultResource {
    * or null if there are no more rows in the result set
    */
   @ReturnNullAsFalse
-  public ArrayValue fetch_array(@Optional("FETCH_BOTH") int type)
+  public ArrayValue fetch_array(@Optional("MYSQLI_BOTH") int type)
   {
     return fetchArray(type);
   }
@@ -141,7 +139,6 @@ public class MysqliResult extends JdbcResultResource {
    * @return the field metadata or false if no field
    * information for specified offset is available
    */
-  @ReturnNullAsFalse
   public Value fetch_field_direct(Env env, int offset)
   {
     return fetchFieldDirect(env, offset);
@@ -167,7 +164,6 @@ public class MysqliResult extends JdbcResultResource {
    * definition information or FALSE if no field
    * information is available
    */
-  @ReturnNullAsFalse
   public Value fetch_fields(Env env)
   {
     return getFieldDirectArray(env);
@@ -183,7 +179,6 @@ public class MysqliResult extends JdbcResultResource {
    * mysqli_fetch_row/array/object or after
    * retrieving all rows in the result set
    */
-  @ReturnNullAsFalse
   public Value fetch_lengths()
   {
     return getLengths();

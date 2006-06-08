@@ -34,7 +34,7 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
+import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
 import com.caucho.quercus.env.*;
@@ -43,12 +43,14 @@ import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.ReturnNullAsFalse;
 
+
 /**
  * PHP mysql routines.
  */
 public class MysqlModule extends AbstractQuercusModule {
 
   private static final Logger log = Log.open(MysqlModule.class);
+  private static final L10N L = new L10N(MysqlModule.class);
 
   public static final int MYSQL_ASSOC = 0x1;
   public static final int MYSQL_NUM = 0x2;
@@ -384,17 +386,7 @@ public class MysqlModule extends AbstractQuercusModule {
     if (conn == null)
       conn = getConnection(env);
 
-    MysqliResult result = conn.query(sql, MYSQL_STORE_RESULT);
-
-    if (result != null) {
-      return env.wrapJava(result);
-    }
-
-    if (conn.getErrorCode() == 0) {
-      return BooleanValue.TRUE;
-    }
-
-    return BooleanValue.FALSE;
+    return conn.query(env, sql, MYSQL_STORE_RESULT);
   }
 
   /**
@@ -526,8 +518,10 @@ public class MysqlModule extends AbstractQuercusModule {
                                        @NotNull MysqliResult result,
                                        int fieldOffset)
   {
-    if (result == null)
+    if (result == null) {
+      env.warning(L.l("null is an unexpected argument, expected MysqliResult"));
       return BooleanValue.FALSE;
+    }
 
     return result.getFieldType(env, fieldOffset);
   }
@@ -549,8 +543,10 @@ public class MysqlModule extends AbstractQuercusModule {
                                       @NotNull MysqliResult result,
                                       int fieldOffset)
   {
-    if (result == null)
+    if (result == null) {
+      env.warning(L.l("null is an unexpected argument, expected MysqliResult"));
       return BooleanValue.FALSE;
+    }
 
     // ERRATUM: Returns 10 for datatypes DEC and NUMERIC instead of 11
 
@@ -640,17 +636,16 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Retrieves information about the given table name
    */
-  @ReturnNullAsFalse
-  public MysqliResult mysql_list_fields(Env env,
-                                        String databaseName,
-                                        String tableName,
-                                        @Optional Mysqli conn)
+  public Value mysql_list_fields(Env env,
+                                 String databaseName,
+                                 String tableName,
+                                 @Optional Mysqli conn)
   {
     if (databaseName == null)
-      return null; // BooleanValue.FALSE;
+      return BooleanValue.FALSE;
 
     if (tableName == null)
-      return null; // BooleanValue.FALSE;
+      return BooleanValue.FALSE;
 
     return mysql_db_query(env,
                           databaseName,
@@ -661,19 +656,18 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Returns result set or false on error
    */
-  @ReturnNullAsFalse
-  public MysqliResult mysql_db_query(Env env,
-                                     String databaseName,
-                                     String query,
-                                     @Optional Mysqli conn)
+  public Value mysql_db_query(Env env,
+                              String databaseName,
+                              String query,
+                              @Optional Mysqli conn)
   {
     if (conn == null)
       conn = getConnection(env);
 
     if (! conn.select_db(databaseName))
-      return null;
+      return BooleanValue.FALSE;
 
-    return conn.query(query, 1);
+    return conn.query(env, query, 1);
   }
 
   /**

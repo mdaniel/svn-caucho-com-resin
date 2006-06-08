@@ -57,22 +57,22 @@ public class Oracle extends JdbcConnectionResource {
   {
     super(env);
 
-    realConnect(env, host, user, password, db, port, "", 0, driver, url);
+    connectInternal(env, host, user, password, db, port, "", 0, driver, url);
   }
 
   /**
    * Connects to the underlying database.
    */
-  public boolean realConnect(Env env,
-                             @Optional("localhost") String host,
-                             @Optional String userName,
-                             @Optional String password,
-                             @Optional String dbname,
-                             @Optional("5432") int port,
-                             @Optional String socket,
-                             @Optional int flags,
-                             @Optional String driver,
-                             @Optional String url)
+  public boolean connectInternal(Env env,
+                                 @Optional("localhost") String host,
+                                 @Optional String userName,
+                                 @Optional String password,
+                                 @Optional String dbname,
+                                 @Optional("5432") int port,
+                                 @Optional String socket,
+                                 @Optional int flags,
+                                 @Optional String driver,
+                                 @Optional String url)
   {
     if (isConnected()) {
       env.warning(L.l("Connection is already opened to '{0}'", this));

@@ -184,16 +184,16 @@ public abstract class JdbcConnectionResource implements Closeable {
   /**
    * Connects to the underlying database.
    */
-  protected abstract boolean realConnect(Env env,
-                                         @Optional("localhost") String host,
-                                         @Optional String userName,
-                                         @Optional String password,
-                                         @Optional String dbname,
-                                         @Optional int port,
-                                         @Optional String socket,
-                                         @Optional int flags,
-                                         @Optional String driver,
-                                         @Optional String url);
+  protected abstract boolean connectInternal(Env env,
+                                             @Optional("localhost") String host,
+                                             @Optional String userName,
+                                             @Optional String password,
+                                             @Optional String dbname,
+                                             @Optional int port,
+                                             @Optional String socket,
+                                             @Optional int flags,
+                                             @Optional String driver,
+                                             @Optional String url);
 
   /**
    * Escape the given string for SQL statements.

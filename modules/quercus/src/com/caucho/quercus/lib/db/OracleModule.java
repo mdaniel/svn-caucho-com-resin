@@ -159,15 +159,63 @@ public class OracleModule extends AbstractQuercusModule {
   }
 
   /**
-   * Binds PHP array to Oracle PL/SQL array by name
+   * Binds PHP array to Oracle PL/SQL array by name.
+   *
+   * oci_bind_array_by_name() binds the PHP array
+   * varArray to the Oracle placeholder name, which
+   * points to Oracle PL/SQL array. Whether it will
+   * be used for input or output will be determined
+   * at run-time. The maxTableLength parameter sets
+   * the maximum length both for incoming and result
+   * arrays. Parameter maxItemLength sets maximum
+   * length for array items. If maxItemLength was
+   * not specified or equals to -1,
+   * oci_bind_array_by_name() will find the longest
+   * element in the incoming array and will use it as
+   * maximum length for array items. type parameter
+   * should be used to set the type of PL/SQL array
+   * items. See list of available types below.
+   *
+   * @param env the PHP executing environment
+   * @param stmt the Oracle statement
+   * @param name the Oracle placeholder
+   * @param varArray the array to be binded
+   * @param maxTableLength maximum table length
+   * @param maxItemLength maximum item length
+   * @param type one of the following types:
+   * <br/>
+   * SQLT_NUM - for arrays of NUMBER.
+   * <br/>
+   * SQLT_INT - for arrays of INTEGER
+   * (Note: INTEGER it is actually a synonym for
+   *  NUMBER(38), but SQLT_NUM type won't work in
+   *  this case even though they are synonyms).
+   * <br/>
+   * SQLT_FLT - for arrays of FLOAT.
+   * <br/>
+   * SQLT_AFC - for arrays of CHAR.
+   * <br/>
+   * SQLT_CHR - for arrays of VARCHAR2.
+   * <br/>
+   * SQLT_VCS - for arrays of VARCHAR.
+   * <br/>
+   * SQLT_AVC - for arrays of CHARZ.
+   * <br/>
+   * SQLT_STR - for arrays of STRING.
+   * <br/>
+   * SQLT_LVC - for arrays of LONG VARCHAR.
+   * <br/>
+   * SQLT_ODT - for arrays of DATE.
+   *
+   * @return true on success of false on failure
    */
-  public static Value oci_bind_array_by_name(Env env,
-                                             @NotNull OracleStatement stmt,
-                                             @NotNull String name,
-                                             @NotNull String varArray,
-                                             @NotNull int maxTableLength,
-                                             @Optional("0") int maxItemLength,
-                                             @Optional("0") int type)
+  public static boolean oci_bind_array_by_name(Env env,
+                                               @NotNull OracleStatement stmt,
+                                               @NotNull String name,
+                                               @NotNull String varArray,
+                                               @NotNull int maxTableLength,
+                                               @Optional("0") int maxItemLength,
+                                               @Optional("0") int type)
   {
     throw new UnimplementedException("oci_bind_array_by_name");
   }
@@ -825,7 +873,7 @@ public class OracleModule extends AbstractQuercusModule {
     try {
       // Make the PHP query a JDBC like query replacing (:mydata -> ?) with question marks.
       // Store binding names for future reference (see oci_execute)
-      String regex = ":[a-zA-Z]+";
+      String regex = ":[a-zA-Z0-9]+";
       String jdbcQuery = query.replaceAll(regex, "?");
       OracleStatement pstmt = conn.prepare(env, jdbcQuery);
 

@@ -246,15 +246,27 @@ public class MysqliModule extends AbstractQuercusModule {
 
   /**
    * Seeks the specified row.
+   *
+   * @param env the PHP executing environment
+   * @param result the mysqli_result
+   * @param rowNumber the row offset
+   * @return true on success or false if the row number
+   * does not exist. NULL is returned if an error occurred.
    */
-  public static boolean mysqli_data_seek(Env env,
-                                         @NotNull MysqliResult result,
-                                         int rowNumber)
+  public static Value mysqli_data_seek(Env env,
+                                       @NotNull MysqliResult result,
+                                       int rowNumber)
   {
     if (result == null)
-      return false;
+      return NullValue.NULL;
 
-    return result.data_seek(env, rowNumber);
+    if (result.seek(env, rowNumber)) {
+      return BooleanValue.TRUE;
+    } else {
+      env.warning(L.l("Offset {0} is invalid for MySQL (or the query data is unbuffered)",
+                      rowNumber));
+      return BooleanValue.FALSE;
+    }
   }
 
   /**
@@ -327,11 +339,17 @@ public class MysqliModule extends AbstractQuercusModule {
   /**
    * Returns an array of integers respresenting the size of each column
    * FALSE if an error occurred.
+   *
+   * @param env the PHP executing environment
+   * @param result the mysqli_result
+   * @return true on success or false if an error occurred.
+   * NULL is returned if result is null.
    */
-  public static Value mysqli_fetch_lengths(@NotNull MysqliResult result)
+  public static Value mysqli_fetch_lengths(Env env,
+                                           @NotNull MysqliResult result)
   {
     if (result == null)
-      return BooleanValue.FALSE;
+      return NullValue.NULL;
 
     return result.fetch_lengths();
   }
@@ -397,12 +415,12 @@ public class MysqliModule extends AbstractQuercusModule {
   /**
    * Returns the number of fields from specified result set.
    */
-  public static int mysqli_num_fields(@NotNull MysqliResult result)
+  public static Value mysqli_num_fields(@NotNull MysqliResult result)
   {
     if (result == null)
-      return -1;
+      return NullValue.NULL;
 
-    return result.num_fields();
+    return LongValue.create(result.num_fields());
   }
 
   /**
@@ -542,8 +560,14 @@ public class MysqliModule extends AbstractQuercusModule {
   /**
    * Returns an object with properties that correspond
    * to the fetched row and moves the data pointer ahead.
+   *
+   * @param env the PHP executing environment
+   * @param result the mysqli_result
+   * @return an object that corresponds to the fetched
+   * row or NULL if there are no more rows in resultset
    */
-  public static Value mysqli_fetch_object(Env env, @NotNull MysqliResult result)
+  public static Value mysqli_fetch_object(Env env,
+                                          @NotNull MysqliResult result)
   {
     if (result == null)
       return NullValue.NULL;
@@ -620,15 +644,19 @@ public class MysqliModule extends AbstractQuercusModule {
 
   /**
    * Returns the number of rows in the result set.
+   *
+   * @param env the PHP executing environment
+   * @param result the mysqli_result
+   * @return the number of rows in the result set
+   * or NULL, if an error occurred
    */
-  @ReturnNullAsFalse
-  public static Integer mysqli_num_rows(Env env,
-                                        @NotNull MysqliResult result)
+  public static Value mysqli_num_rows(Env env,
+                                      @NotNull MysqliResult result)
   {
     if (result == null)
-      return null;
+      return NullValue.NULL;
 
-    return result.num_rows();
+    return LongValue.create(result.num_rows());
   }
 
   /**
@@ -827,31 +855,40 @@ public class MysqliModule extends AbstractQuercusModule {
    * Executes a query and returns the result.
    *
    */
-  @ReturnNullAsFalse
-  public static MysqliResult mysqli_query(Env env,
-                                          @NotNull Mysqli conn,
-                                          String sql,
-                                          @Optional("MYSQLI_STORE_RESULT") int resultMode)
+  public static Value mysqli_query(Env env,
+                                   @NotNull Mysqli conn,
+                                   String sql,
+                                   @Optional("MYSQLI_STORE_RESULT") int resultMode)
   {
     // ERRATUM: <i>resultMode</i> is ignored, MYSQLI_USE_RESULT would represent
     //  an unbuffered query, but that is not supported.
 
-    return query(conn, sql);
+    Value value = query(env, conn, sql);
+
+    if (value == null) {
+      return BooleanValue.FALSE;
+    }
+
+    return value;
   }
 
-  @ReturnNullAsFalse
-  private static MysqliResult query(Mysqli conn,
-                                    String sql)
+  private static Value query(Env env,
+                             Mysqli conn,
+                             String sql)
   {
-    if (conn == null)
-      return null;
+    Value value = null;
 
     try {
-      return conn.query(sql, MYSQLI_STORE_RESULT);
+      value = conn.query(env, sql, MYSQLI_STORE_RESULT);
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
-      return null;
     }
+
+    if (value == null) {
+      return BooleanValue.FALSE;
+    }
+
+    return value;
   }
 
   /**
@@ -868,9 +905,9 @@ public class MysqliModule extends AbstractQuercusModule {
                                             @Optional int flags)
   {
     if (mysqli != null)
-      return mysqli.realConnect(env, host, userName, password,
-                                dbname, port, socket, flags,
-                                null, null);
+      return mysqli.connectInternal(env, host, userName, password,
+                                    dbname, port, socket, flags,
+                                    null, null);
     else
       return false;
   }
@@ -937,16 +974,24 @@ public class MysqliModule extends AbstractQuercusModule {
   /**
    * Alias for {@link #mysqli_query}.
    */
-  public static Object mysqli_real_query(@NotNull Mysqli conn,
-                                         String query)
+  public static Value mysqli_real_query(Env env,
+                                        @NotNull Mysqli conn,
+                                        String query)
   {
-    return query(conn, query);
+    Value value =  query(env, conn, query);
+
+    if (value == null) {
+      return BooleanValue.FALSE;
+    }
+
+    return value;
   }
 
   /**
    * Execute a query with arguments and return a result.
    */
-  static Object mysqli_query(Mysqli conn,
+  static Value mysqli_query(Env env,
+                             Mysqli conn,
                              String query,
                              Object ... args)
   {
@@ -973,7 +1018,7 @@ public class MysqliModule extends AbstractQuercusModule {
         buf.append(ch);
     }
 
-    return query(conn, buf.toString());
+    return query(env, conn, buf.toString());
   }
 
 
@@ -1071,9 +1116,7 @@ public class MysqliModule extends AbstractQuercusModule {
     if (stmt == null)
       return BooleanValue.FALSE;
 
-    stmt.data_seek(env, offset);
-
-    return NullValue.NULL;
+    return stmt.data_seek(env, offset);
   }
 
   /**

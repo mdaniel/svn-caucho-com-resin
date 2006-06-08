@@ -93,7 +93,7 @@ public class Mysqli extends JdbcConnectionResource {
   {
     super(env);
 
-    realConnect(env, host, user, password, db, port, socket, flags, driver, url);
+    connectInternal(env, host, user, password, db, port, socket, flags, driver, url);
   }
 
   protected Mysqli(Env env)
@@ -104,16 +104,16 @@ public class Mysqli extends JdbcConnectionResource {
   /**
    * Connects to the underlying database.
    */
-  public boolean realConnect(Env env,
-                             @Optional("localhost") String host,
-                             @Optional String userName,
-                             @Optional String password,
-                             @Optional String dbname,
-                             @Optional("3306") int port,
-                             @Optional String socket,
-                             @Optional int flags,
-                             @Optional String driver,
-                             @Optional String url)
+  protected boolean connectInternal(Env env,
+                                    @Optional("localhost") String host,
+                                    @Optional String userName,
+                                    @Optional String password,
+                                    @Optional String dbname,
+                                    @Optional("3306") int port,
+                                    @Optional String socket,
+                                    @Optional int flags,
+                                    @Optional String driver,
+                                    @Optional String url)
   {
     if (isConnected()) {
       env.warning(L.l("Connection is already opened to '{0}'", this));
@@ -183,8 +183,20 @@ public class Mysqli extends JdbcConnectionResource {
   {
     close(getEnv());
 
-    return realConnect(getEnv(), getHost(), user, password, db, getPort(),
-                       "", 0, getDriver(), getUrl());
+    if ((user == null) || user.equals("")) {
+      user = getUserName();
+    }
+
+    if ((password == null) || password.equals("")) {
+      password = getPassword();
+    }
+
+    if ((db == null) || db.equals("")) {
+      db = getDbName();
+    }
+
+    return connectInternal(getEnv(), getHost(), user, password, db, getPort(),
+                           "", 0, getDriver(), getUrl());
   }
 
   /**
@@ -222,7 +234,13 @@ public class Mysqli extends JdbcConnectionResource {
    */
   public String error()
   {
-    return super.error();
+    String errorString = super.error();
+
+    if (errorString == null) {
+      return "";
+    }
+
+    return errorString;
   }
 
   /**
@@ -407,26 +425,27 @@ public class Mysqli extends JdbcConnectionResource {
   /**
    * Executes a query.
    *
+   * @param env the PHP executing environment
    * @param sql the escaped query string (can contain escape sequences like `\n' and `\Z')
    * @param resultMode ignored
    *
    * @return a {@link JdbcResultResource}, or null for failure
    */
-  public MysqliResult query(String sql,
-                            @Optional("MYSQLI_STORE_RESULT") int resultMode)
+  public Value query(Env env,
+                     String sql,
+                     @Optional("MYSQLI_STORE_RESULT") int resultMode)
   {
-    return (MysqliResult) realQuery(sql);
+    MysqliResult result = (MysqliResult) realQuery(sql);
 
-    /*
-    // XXX: the query can return true for successful update, e.g. mysql
-    try {
-      ResultSet rs = realQuery(sql);
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
+    if (result == null) {
+      if (getErrorCode() == 0) {
+        // No error, this was an UPDATE, DELETE, etc.
+        return BooleanValue.TRUE;
+      }
+      return BooleanValue.FALSE;
     }
 
-    return BooleanValue.FALSE;
-    */
+    return env.wrapJava(result);
   }
 
   /**
@@ -442,11 +461,35 @@ public class Mysqli extends JdbcConnectionResource {
   }
 
   /**
+   * Connects to the underlying database.
+   */
+  public boolean real_connect(Env env,
+                              @Optional("localhost") String host,
+                              @Optional String userName,
+                              @Optional String password,
+                              @Optional String dbname,
+                              @Optional("3306") int port,
+                              @Optional String socket,
+                              @Optional int flags)
+  {
+    return connectInternal(env, host, userName, password, dbname, port, socket,
+                           flags, "", "");
+  }
+
+  /**
    * Escapes the string
    */
   public Value real_escape_string(StringValue str)
   {
     return realEscapeString(str);
+  }
+
+  /**
+   * Rolls the current transaction back.
+   */
+  public boolean rollback()
+  {
+    return super.rollback();
   }
 
   /**
@@ -572,7 +615,7 @@ public class Mysqli extends JdbcConnectionResource {
    */
   public MysqliStatement stmt_init(Env env)
   {
-    return new MysqliStatement((Mysqli)validateConnection());
+    return new MysqliStatement((Mysqli) validateConnection());
   }
 
   /**
