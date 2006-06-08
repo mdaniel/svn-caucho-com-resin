@@ -220,17 +220,17 @@ public class ClusterServer {
   /**
    * Returns how long the connection can be cached in the free pool.
    */
-  public long getLiveTime()
+  public long getMaxIdleTime()
   {
-    return _cluster.getClientLiveTime();
+    return _cluster.getClientMaxIdleTime();
   }
 
   /**
    * Returns how long the connection will be treated as dead.
    */
-  public long getDeadTime()
+  public long getFailRecoverTime()
   {
-    return _cluster.getClientDeadTime();
+    return _cluster.getClientFailRecoverTime();
   }
 
   /**
@@ -287,7 +287,7 @@ public class ClusterServer {
     return _client.getIdleCount();
   }
 
-  public int getLifetimeConnectionCount()
+  public long getLifetimeConnectionCount()
   {
     return _client.getLifetimeConnectionCount();
   }
@@ -296,7 +296,7 @@ public class ClusterServer {
    */
   public boolean isDead()
   {
-    return _client.isDead();
+    return ! _client.isActive();
   }
 
   /**
@@ -361,7 +361,7 @@ public class ClusterServer {
       ClusterStream stream = _client.open();
 
       if (stream != null) {
-        stream.close();
+        stream.free();
 
         return true;
       }

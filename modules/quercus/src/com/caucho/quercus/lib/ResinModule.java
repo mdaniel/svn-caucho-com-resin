@@ -29,12 +29,17 @@
 
 package com.caucho.quercus.lib;
 
+import java.util.Hashtable;
+import java.util.Map;
+
 import javax.transaction.UserTransaction;
 import javax.transaction.SystemException;
 import javax.transaction.NotSupportedException;
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
 import javax.transaction.RollbackException;
+
+import javax.management.*;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -49,7 +54,13 @@ import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.module.ReadOnly;
+import com.caucho.quercus.module.NotNull;
 
 import com.caucho.util.L10N;
 
@@ -188,6 +199,77 @@ public class ResinModule
       
       return ((UserTransaction) ic.lookup("java:comp/UserTransaction"));
     } catch (NamingException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  /**
+   * Explode an object name into an array with key value pairs that
+   * correspond to the keys and values in the object name.
+   * The domain is stored in the returned array under the key named ":".
+   */
+  public ArrayValue mbean_explode(String name)
+  {
+    try {
+      ObjectName objectName = new ObjectName(name);
+
+      ArrayValueImpl exploded = new ArrayValueImpl();
+
+      exploded.put(":domain:", objectName.getDomain());
+
+      Hashtable<String, String> entries = objectName.getKeyPropertyList();
+
+      for (Map.Entry<String, String> entry : entries.entrySet()) {
+	exploded.put(entry.getKey(), entry.getValue());
+      }
+
+      return exploded;
+    } catch (MalformedObjectNameException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  /**
+   * Implode an array into an object name.  The array contains key value pairs
+   * that become key vlaue pairs in the object name.  The key with the name
+   * ":" becomes the domain of the object name.
+   */
+  public static String mbean_implode(@NotNull @ReadOnly ArrayValue exploded)
+  {
+    try {
+      if (exploded == null)
+	return null;
+
+      String domain;
+
+      Value domainValue = exploded.get(StringValue.create(":domain:"));
+
+      if (domainValue.isNull())
+	domain = "*";
+      else
+	domain = domainValue.toString();
+
+      Hashtable<String, String> entries = new Hashtable<String, String>();
+
+      for (Map.Entry<Value, Value> entry : exploded.entrySet()) {
+	String key = entry.getKey().toString();
+	String value = entry.getValue().toString();
+
+	if (":".equals(key))
+	  continue;
+
+	entries.put(key, value);
+      }
+
+      ObjectName objectName;
+
+      if (entries.isEmpty())
+	objectName = new ObjectName(domain + ":" + "*");
+      else
+	objectName = new ObjectName(domain, entries);
+
+      return objectName.getCanonicalName();
+    } catch (MalformedObjectNameException e) {
       throw new QuercusModuleException(e);
     }
   }

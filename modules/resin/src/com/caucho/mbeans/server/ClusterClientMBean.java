@@ -37,7 +37,8 @@ import com.caucho.jmx.MBeanOperation;
 import javax.management.ObjectName;
 
 /**
- * A representation of a member of a cluster, a target server with which this instance can communicate.
+ * A representation of a member of a cluster, a target server
+ * with which this instance can communicate.
  */
 @MBean(description="A representation of a member of a cluster, a target server with which this instance can communicate")
 public interface ClusterClientMBean {
@@ -112,7 +113,7 @@ public interface ClusterClientMBean {
                               " used within the timeout period the idle" +
                               " connection is closed",
                   category=MBeanAttributeCategory.CONFIGURATION)
-  public long getLiveTime();
+  public long getMaxIdleTime();
 
   /**
    * Returns the timeout for assuming a target server remains unavailable once
@@ -124,7 +125,7 @@ public interface ClusterClientMBean {
                               " When the timeout period elapses another" +
                               " attempt is made to connect to the target server",
                   category=MBeanAttributeCategory.CONFIGURATION)
-  public long getDeadTime();
+  public long getFailRecoverTime();
 
   /**
    * Returns the lifecycle state.
@@ -161,7 +162,15 @@ public interface ClusterClientMBean {
   @MBeanAttribute(description="The number of connections that have been made" +
                               " to the target server",
                   category=MBeanAttributeCategory.STATISTIC)
-  public int getLifetimeConnectionCount();
+  public long getLifetimeConnectionCount();
+
+  /**
+   * Returns the number of connections that have been made to the target server.
+   */
+  @MBeanAttribute(description="The number of keepalive connections that have been made" +
+                              " to the target server",
+                  category=MBeanAttributeCategory.STATISTIC)
+  public long getLifetimeKeepaliveCount();
 
   /**
    * Enables connections to the target server.

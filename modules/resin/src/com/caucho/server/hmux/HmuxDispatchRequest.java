@@ -384,10 +384,10 @@ public class HmuxDispatchRequest {
     crc64 = Crc64.generate(crc64, cluster.getId());
 
     writeString(os, HmuxRequest.HMUX_HEADER, "live-time");
-    writeString(os, HmuxRequest.HMUX_STRING, "" + (cluster.getClientLiveTime() / 1000));
+    writeString(os, HmuxRequest.HMUX_STRING, "" + (cluster.getClientMaxIdleTime() / 1000));
 
     writeString(os, HmuxRequest.HMUX_HEADER, "dead-time");
-    writeString(os, HmuxRequest.HMUX_STRING, "" + (cluster.getClientDeadTime() / 1000));
+    writeString(os, HmuxRequest.HMUX_STRING, "" + (cluster.getClientFailRecoverTime() / 1000));
 
     ClusterServer []servers = cluster.getServerList();
 

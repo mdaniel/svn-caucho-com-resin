@@ -84,14 +84,14 @@ public class ClusterClientAdmin
     return _clusterServer.getWriteTimeout();
   }
 
-  public long getLiveTime()
+  public long getMaxIdleTime()
   {
-    return _clusterServer.getLiveTime();
+    return _clusterServer.getMaxIdleTime();
   }
 
-  public long getDeadTime()
+  public long getFailRecoverTime()
   {
-    return _clusterServer.getDeadTime();
+    return _clusterServer.getFailRecoverTime();
   }
 
   public String getState()
@@ -104,7 +104,7 @@ public class ClusterClientAdmin
 
   public boolean isDead()
   {
-    return _clusterServer.isDead();
+    return ! _clusterServer.isActive();
   }
 
   public int getActiveConnectionCount()
@@ -117,9 +117,14 @@ public class ClusterClientAdmin
     return _clusterServer.getIdleCount();
   }
 
-  public int getLifetimeConnectionCount()
+  public long getLifetimeConnectionCount()
   {
-    return _clusterServer.getLifetimeConnectionCount();
+    return _clusterServer.getClient().getLifetimeConnectionCount();
+  }
+
+  public long getLifetimeKeepaliveCount()
+  {
+    return _clusterServer.getClient().getLifetimeKeepaliveCount();
   }
 
   public void start()

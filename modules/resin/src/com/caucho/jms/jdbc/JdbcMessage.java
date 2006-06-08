@@ -169,7 +169,9 @@ public class JdbcMessage {
 	     ")");
 
       if (_isTruncateBlob) {
-	// oracle recommends using retention for performance
+	// oracle recommends using retention (over pctversion) for performance
+	// Oracle will keep deleted lobs for the retention time before
+	// releasing them (e.g. 900 seconds)
 	sql += (" LOB(header) STORE AS (cache retention)");
 	sql += (" LOB(body) STORE AS (cache retention)");
       }
@@ -179,35 +181,6 @@ public class JdbcMessage {
       if (_messageSequence != null) {
 	stmt.executeUpdate(metaData.createSequenceSQL(_messageSequence, 1));
       }
-
-      /*
-      if (_isTruncateBlob) {
-	sql = ("CREATE OR REPLACE TRIGGER DELETE_" + _messageTable +
-	       " BEFORE DELETE ON " + _messageTable +
-	       " FOR EACH ROW" +
-	       " DECLARE " +
-	       //"   h " + _messageTable + ".header%TYPE;" +
-	       "   r " + _messageTable + "%ROWTYPE;" +
-	       "   CURSOR c IS" +
-	       "     SELECT header, body FROM " + _messageTable +
-	       "     WHERE m_id=:Old.m_id FOR UPDATE;" +
-	       " BEGIN" +
-	       "  OPEN c;" +
-	       //"  FOR r IN c" +
-	       "    dbms_output.put('test');" +
-	       //"  END LOOP" +
-	       //"   DBMS_LOB.trim(:Old.header, 0);" +
-	       // "   DBMS_LOB.trim(:Old.body, 0);" +
-	       " END;");// Delete" + _messageTable);
-
-	  System.out.println("SQL: " + sql);
-	try {
-	  stmt.executeUpdate(sql);
-	} catch (SQLException e) {
-	  e.printStackTrace();
-	}
-      }
-      */
     } finally {
       conn.close();
     }
@@ -545,7 +518,7 @@ public class JdbcMessage {
     CharBuffer cb = new CharBuffer();
 
     while (names.hasMoreElements()) {
-       String name = (String) names.nextElement();
+      String name = (String) names.nextElement();
       writeValue(ws, cb, name);
       
       String value = msg.getStringProperty(name);

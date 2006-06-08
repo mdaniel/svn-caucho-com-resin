@@ -44,36 +44,37 @@ import com.caucho.log.Log;
  * that is connected to.
  */
 public class ClusterClient {
-  static protected final Logger log = Log.open(ClusterClient.class);
+  private static final Logger log = Log.open(ClusterClient.class);
 
   private ClusterServer _server;
 
   private String _debugId;
-  private int _streamCount;
 
-  // XXX: the load balance and the tcp-session want different timeouts
-  private int _timeout = 2000;
-
-  private int _maxPoolSize = 16;
-
+  private long _slowStartDoublePeriod = 10000L;
+  private int _maxConnections = Integer.MAX_VALUE / 2;
+  
   private ClusterStream []_free = new ClusterStream[64];
   private volatile int _freeHead;
   private volatile int _freeTail;
   private int _freeSize = 16;
 
+  private int _streamCount;
+  
   private volatile long _lastFailTime;
+  private volatile long _firstConnectTime;
 
   private volatile int _activeCount;
-  private volatile int _lifetimeConnectionCount;
+  private volatile int _startingCount;
+  
+  private volatile long _lifetimeKeepaliveCount;
+  private volatile long _lifetimeConnectionCount;
 
   private volatile boolean _isEnabled = true;
   private volatile boolean _isClosed;
 
-
-  public ClusterClient(ClusterServer server)
+  ClusterClient(ClusterServer server)
   {
     _server = server;
-    _timeout = (int) server.getReadTimeout();
 
     Cluster cluster = Cluster.getLocal();
 
@@ -100,24 +101,6 @@ public class ClusterClient {
   }
 
   /**
-   * Returns the socket timeout when reading and writing to the
-   * target server.
-   */
-  public int getTimeout()
-  {
-    return _timeout;
-  }
-
-  /**
-   * Sets the socket timeout when reading and writing to the
-   * target server.
-   */
-  public void setTimeout(long timeout)
-  {
-    _timeout = (int) timeout;
-  }
-
-  /**
    * Returns the number of active connections.
    */
   public int getActiveCount()
@@ -133,17 +116,14 @@ public class ClusterClient {
     return (_freeHead - _freeTail + _free.length) % _free.length;
   }
 
-  public int getLifetimeConnectionCount()
+  public long getLifetimeConnectionCount()
   {
     return _lifetimeConnectionCount;
   }
 
-  /**
-   * Sets the recycle pool size.
-   */
-  public void setMaxPoolSize(int size)
+  public long getLifetimeKeepaliveCount()
   {
-    _maxPoolSize = size;
+    return _lifetimeKeepaliveCount;
   }
 
   /**
@@ -155,13 +135,41 @@ public class ClusterClient {
   }
 
   /**
-   * Returns true if the server is dead.
+   * Returns true if the server is active.
    */
-  public boolean isDead()
+  public boolean isActive()
   {
     long now = Alarm.getCurrentTime();
 
-    return (now < _lastFailTime + _server.getDeadTime() || ! _isEnabled);
+    return _isEnabled && (_lastFailTime + _server.getFailRecoverTime() <= now);
+  }
+
+  /**
+   * Returns true if the server can open a connection.
+   */
+  public boolean canOpenSoft()
+  {
+    if (! _isEnabled)
+      return false;
+    
+    long now = Alarm.getCurrentTime();
+
+    if (now < _lastFailTime + _server.getFailRecoverTime())
+      return false;
+
+    long slowStartCount;
+
+    if (_firstConnectTime <= 0)
+      slowStartCount = 0;
+    else
+      slowStartCount = (now - _firstConnectTime) / _slowStartDoublePeriod;
+
+    if (slowStartCount > 16)
+      return true;
+    else if (_activeCount + _startingCount < (1 << slowStartCount))
+      return true;
+    else
+      return false;
   }
 
   /**
@@ -190,28 +198,106 @@ public class ClusterClient {
   }
 
   /**
-   * Open a read/write pair, trying to recycle.
+   * Open a stream to the target server.
    *
    * @return the socket's read/write pair.
    */
-  public ClusterStream openRecycle()
+  public ClusterStream openSoft()
   {
     if (! _isEnabled)
       return null;
 
     long now = Alarm.getCurrentTime();
+
+    ClusterStream stream = openRecycle();
+
+    if (stream != null)
+      return stream;
+
+    if (now < _lastFailTime + _server.getFailRecoverTime())
+      return null;
+
+    long slowStartCount;
+
+    if (_firstConnectTime <= 0)
+      slowStartCount = 0;
+    else
+      slowStartCount = (now - _firstConnectTime) / _slowStartDoublePeriod;
+
+    if (slowStartCount > 16)
+      return connect();
+    else if (_activeCount + _startingCount < (1 << slowStartCount))
+      return connect();
+    else
+      return null;
+  }
+
+  /**
+   * Open a stream to the target server.
+   *
+   * @return the socket's read/write pair.
+   */
+  public ClusterStream openIfLive()
+  {
+    if (! _isEnabled)
+      return null;
+
+    long now = Alarm.getCurrentTime();
+
+    ClusterStream stream = openRecycle();
+
+    if (stream != null)
+      return stream;
+
+    if (now < _lastFailTime + _server.getFailRecoverTime())
+      return null;
+
+    return connect();
+  }
+
+  /**
+   * Open a stream to the target server, forcing a connect.
+   *
+   * @return the socket's read/write pair.
+   */
+  public ClusterStream open()
+  {
+    if (! _isEnabled)
+      return null;
+
+    ClusterStream stream = openRecycle();
+
+    if (stream != null)
+      return stream;
+
+    return connect();
+  }
+
+  /**
+   * Returns a valid recycled stream from the idle pool to the backend.
+   *
+   * If the stream has been in the pool for too long (> live_time),
+   * close it instead.
+   *
+   * @return the socket's read/write pair.
+   */
+  private ClusterStream openRecycle()
+  {
+    long now = Alarm.getCurrentTime();
     ClusterStream stream = null;
 
     synchronized (this) {
       if (_freeHead != _freeTail) {
-        stream = _free[_freeTail];
+        stream = _free[_freeHead];
         long freeTime = stream.getFreeTime();
 
-        _free[_freeTail] = null;
-        _freeTail = (_freeTail + 1) % _free.length;
+        _free[_freeHead] = null;
+        _freeHead = (_freeHead + _free.length - 1) % _free.length;
 
-        if (now < freeTime + _server.getLiveTime()) {
+        if (now < freeTime + _server.getMaxIdleTime()) {
           _activeCount++;
+	  _lifetimeKeepaliveCount++;
+	  
           return stream;
         }
       }
@@ -224,19 +310,19 @@ public class ClusterClient {
   }
 
   /**
-   * Open a read/write pair to the target srun connection.
+   * Connect to the backend server.
    *
    * @return the socket's read/write pair.
    */
-  public ClusterStream open()
+  private ClusterStream connect()
   {
-    if (isDead())
-      return null;
-
-    ClusterStream recycleStream = openRecycle();
-    if (recycleStream != null)
-      return recycleStream;
-
+    synchronized (this) {
+      if (_maxConnections <= _activeCount + _startingCount)
+	return null;
+      
+      _startingCount++;
+    }
+	  
     try {
       ReadWritePair pair = _server.openTCPPair();
       ReadStream rs = pair.getReadStream();
@@ -244,20 +330,36 @@ public class ClusterClient {
 
       synchronized (this) {
         _activeCount++;
+	_lifetimeConnectionCount++;
+
+	if (_firstConnectTime <= 0)
+	  _firstConnectTime = Alarm.getCurrentTime();
       }
 
-      return new ClusterStream(_streamCount++, this,
-                               rs, pair.getWriteStream());
+      ClusterStream stream = new ClusterStream(_streamCount++, this,
+					       rs, pair.getWriteStream());
+      
+      if (log.isLoggable(Level.FINER))
+	log.finer("connect " + stream);
+      
+      return stream;
     } catch (IOException e) {
       log.log(Level.FINER, e.toString(), e);
 
       _lastFailTime = Alarm.getCurrentTime();
+      _firstConnectTime = 0;
+      
       return null;
+    } finally {
+      synchronized (this) {
+	_startingCount--;
+      }
     }
   }
 
   /**
-   * We now know that the server is live.
+   * We now know that the server is live, e.g. if a sibling has
+   * contacted us.
    */
   public void wake()
   {
@@ -271,15 +373,13 @@ public class ClusterClient {
   void free(ClusterStream stream)
   {
     synchronized (this) {
-      _lifetimeConnectionCount++;
+      _activeCount--;
 
       int size = (_freeHead - _freeTail + _free.length) % _free.length;
 
       if (! _isClosed && size < _freeSize) {
-        _activeCount--;
-
-        _free[_freeHead] = stream;
         _freeHead = (_freeHead + 1) % _free.length;
+        _free[_freeHead] = stream;
 
         return;
       }
@@ -294,6 +394,9 @@ public class ClusterClient {
    */
   void close(ClusterStream stream)
   {
+    if (log.isLoggable(Level.FINER))
+      log.finer("close " + stream);
+    
     synchronized (this) {
       _activeCount--;
     }
@@ -301,7 +404,7 @@ public class ClusterClient {
 
   /**
    * Clears the recycled connections, e.g. on detection of backend
-   * server going down..
+   * server going down.
    */
   public void clearRecycle()
   {

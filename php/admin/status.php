@@ -21,8 +21,9 @@
       return sprintf("%.2f%% (%d / %d)", 100 * $hit / $total, $hit, $total);
   }
 
-  $resin = $mbeanServer->lookup("resin:type=ResinServer");
-  $server = $mbeanServer->lookup("resin:name=default,type=Server");
+  $resin = $mbeanServer->lookup("resin:type=Resin");
+  $domain = $mbeanServer->lookup("resin:name=CurrentDomain");
+  $server = $domain;
 
   $title = "Resin status";
 
@@ -45,7 +46,7 @@
 
 <table>
 
-<h2>Server <?= $resin->serverId ?></h2>
+<h2>Server: <?= $resin->serverId ?></h2>
 
 
  <?php if (! empty($resin->serverId)) {  ?>
@@ -102,7 +103,7 @@
 
 <tr title="Percentage of requests that have been served from the proxy cache:">
 <th>Proxy cache hit ratio:</th>
-<td><?= format_hit_ratio($server->$proxyHitCount, $server->$proxyMissCount) ?></td>
+<td><?= format_hit_ratio($server->proxyCacheHitCount, $server->proxyCacheMissCount) ?></td>
 </tr>
 
 <!-- XXX: show how cacheable apps are: cacheable/non-cacheable -->
@@ -128,14 +129,6 @@
 The ThreadPool manages all threads used by Resin.
 </div>
 
-
-    descriptor.createAdminAttributeInfo("SpareThreadMin")
-      .setCategory(AdminAttributeCategory.CONFIGURATION)
-      .setDescription(L.l(
-
-    descriptor.createAdminAttributeInfo("IdleThreadCount")
-      .setCategory(AdminAttributeCategory.CONFIGURATION)
-      .setDescription(L.l(
 <table>
 <tr>
 <th colspan='2'>Config</th>
@@ -205,7 +198,7 @@ The ThreadPool manages all threads used by Resin.
 <!-- TCP ports -->
 
 <?php
-  $portObjectNames = $server->portObjectNames;
+  $portObjectNames = $server->PortObjectNames;
 
   if ($portObjectNames) {
 ?>
@@ -252,16 +245,22 @@ The ThreadPool manages all threads used by Resin.
   # XXX: sort by $cluster->index
   foreach ($server->clusterObjectNames as $clusterObjectName) {
     $cluster = $mbeanServer->lookup($clusterObjectName);
+
+    if (empty($cluster->clientObjectNames))
+      continue;
 ?>
 
-<h2>Cluster <?= $clusterObjectName->name ?></h2>
+<h2>Cluster: <?= mbean_explode($clusterObjectName)['name'] ?></h2>
 
 <table>
 
 <tr>
-<th>Host</th>
+<th>Id</th>
+<th>Address</th>
 <th>Status</th>
 <th>Active</th>
+<th>Idle</th>
+<th>Connection</th>
 </tr>
 <?php
   foreach ($cluster->clientObjectNames as $clientObjectName) {
@@ -270,9 +269,19 @@ The ThreadPool manages all threads used by Resin.
 ?>
 
 <tr>
-<td class='<?= $client->canConnect() ? "active" : "inactive" ?>'><?= $clientParts["host"] ?>:<?= $clientParts["port"] ?></td>
-<td><?= $client->canConnect() ? "up" : "down" ?></td>
-<td><?= $client->activeCount ?></td>
+<td><?= $client->serverId ?></td>
+<td class='<?= $client->canConnect() ? "active" : "inactive" ?>'>
+<?= $clientParts["host"] ?>:<?= $clientParts["port"] ?></td>
+<?php
+if ($client->canConnect())
+  echo "<td style='background:#66ff66'>up</td>\n";
+else
+  echo "<td style='background:#ff6666'>down</td>\n";
+?>
+<td><?= $client->activeConnectionCount ?></td>
+<td><?= $client->idleConnectionCount ?></td>
+<td><?= format_hit_ratio($client->lifetimeKeepaliveCount,
+                         $client->lifetimeConnectionCount) ?></td>
 </tr>
 <?php 
 }

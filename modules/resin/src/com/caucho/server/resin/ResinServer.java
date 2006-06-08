@@ -267,6 +267,15 @@ public class ResinServer
   public void addServer(ServerConfig config)
     throws Exception
   {
+    addDomain(config);
+  }
+
+  /**
+   * Creates the domain.
+   */
+  public void addDomain(ServerConfig config)
+    throws Exception
+  {
     if (Alarm.isTest() && _servers.size() == 1) {
       _servers.get(0).addConfigDefault(config);
     }

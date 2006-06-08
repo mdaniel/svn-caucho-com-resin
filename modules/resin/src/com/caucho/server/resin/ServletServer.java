@@ -810,6 +810,8 @@ public class ServletServer extends ProtocolDispatchServer
     try {
       Jmx.register(_controller.getMBean(), "resin:name=default,type=Server");
       
+      Jmx.register(_controller.getMBean(), "resin:name=CurrentDomain");
+      
       //ObjectName name = new ObjectName("resin:type=ThreadPool");
       ThreadPoolAdmin threadPoolAdmin = new ThreadPoolAdmin();
       

@@ -291,7 +291,7 @@ r_select-manager = element select-manager {
   r_enable?
 }
 
-r_server = element server {
+r_server = element (server|domain) {
   attribute id { string }?,
 
   r_root-directory?,

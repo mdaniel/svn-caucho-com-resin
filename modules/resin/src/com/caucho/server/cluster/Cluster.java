@@ -82,8 +82,8 @@ public class Cluster implements EnvironmentListener {
 
   private StoreManager _clusterStore;
 
-  private long _clientLiveTime = 30000L;
-  private long _clientDeadTime = 15000L;
+  private long _clientMaxIdleTime = 30000L;
+  private long _clientFailRecoverTime = 15000L;
   private long _clientReadTimeout = 60000L;
   private long _clientWriteTimeout = 60000L;
 
@@ -242,35 +242,55 @@ public class Cluster implements EnvironmentListener {
   }
 
   /**
-   * Sets the live time.
+   * Sets the max-idle time.
    */
-  public void setClientLiveTime(Period period)
+  public void setClientMaxIdleTime(Period period)
   {
-    _clientLiveTime = period.getPeriod();
+    _clientMaxIdleTime = period.getPeriod();
   }
 
   /**
    * Gets the live time.
    */
-  public long getClientLiveTime()
+  public long getClientMaxIdleTime()
   {
-    return _clientLiveTime;
+    return _clientMaxIdleTime;
+  }
+
+  /**
+   * Sets the live time.
+   *
+   * @deprecated
+   */
+  public void setClientLiveTime(Period period)
+  {
+    setClientMaxIdleTime(period);
+  }
+
+  /**
+   * Sets the client connection fail-recover time.
+   */
+  public void setClientFailRecoverTime(Period period)
+  {
+    _clientFailRecoverTime = period.getPeriod();
+  }
+
+  /**
+   * Gets the client fail-recover time.
+   */
+  public long getClientFailRecoverTime()
+  {
+    return _clientFailRecoverTime;
   }
 
   /**
    * Sets the dead time.
+   *
+   * @deprecated
    */
   public void setClientDeadTime(Period period)
   {
-    _clientDeadTime = period.getPeriod();
-  }
-
-  /**
-   * Gets the dead time.
-   */
-  public long getClientDeadTime()
-  {
-    return _clientDeadTime;
+    setClientFailRecoverTime(period);
   }
 
   /**
@@ -409,9 +429,9 @@ public class Cluster implements EnvironmentListener {
 
       ClusterPort port = server.getClusterPort();
 
-      if (port.getReadTimeout() < getClientLiveTime()) {
-        throw new ConfigException(L.l("client-live-time '{0}s' must be less than the read-timeout '{1}s'.",
-                                      getClientLiveTime() / 1000L,
+      if (port.getReadTimeout() < getClientMaxIdleTime()) {
+        throw new ConfigException(L.l("client-max-idle-time '{0}s' must be less than the read-timeout '{1}s'.",
+                                      getClientMaxIdleTime() / 1000L,
                                       port.getReadTimeout() / 1000L));
       }
     }
