@@ -49,6 +49,7 @@ import com.caucho.quercus.QuercusModuleException;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.StaticFunction;
 
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;
@@ -58,9 +59,12 @@ import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Callback;
+import com.caucho.quercus.env.CallbackFunction;
 import com.caucho.quercus.env.SessionArrayValue;
 import com.caucho.quercus.env.SessionCallback;
+
 import com.caucho.quercus.lib.UnserializeReader;
+import com.caucho.quercus.lib.OutputModule;
 
 /**
  * Quercus session handling
@@ -424,52 +428,91 @@ public class SessionModule extends AbstractQuercusModule {
     if (callback != null)
       callback.open(env, WorkDir.getLocalWorkDir().getPath(), cookieName);
 
-    boolean generateCookie = true;
+    if (env.getIni("session.use_trans_sid").toBoolean()) {
+      //
+      // Use URL rewriting to transmit session id
+      // 
+      if (sessionIdValue != null)
+        sessionId = sessionIdValue.toString();
 
-    if (sessionIdValue != null)
-      sessionId = sessionIdValue.toString();
+      if (sessionId == null || "".equals(sessionId)) {
+        String queryString = env.getRequest().getQueryString();
+        if (queryString != null) {
+          String [] queryElements = queryString.split("&");
 
-    if (sessionId == null || "".equals(sessionId)) {
-      Cookie []cookies = env.getRequest().getCookies();
-
-      for (int i = 0; cookies != null && i < cookies.length; i++) {
-        if (cookies[i].getName().equals(cookieName)) {
-          sessionId = cookies[i].getValue();
-          generateCookie = false;
+          for (String queryElement : queryElements) {
+            String [] nameValue = queryElement.split("=");
+            if (nameValue.length == 2 && nameValue[0].equals(cookieName))
+              sessionId = nameValue[1];
+          }
         }
       }
-    }
 
-    if (! generateCookie) {
-      env.addConstant("SID", StringValue.EMPTY, false);
-    }
-    else {
       if (sessionId == null || "".equals(sessionId))
         sessionId = generateSessionId(env);
 
-      env.addConstant("SID", new StringValueImpl(cookieName + '=' + sessionId), false);
+      env.addConstant("SID", new StringValueImpl(cookieName + '=' + sessionId), 
+                      false);
 
-      Cookie cookie = new Cookie(cookieName, sessionId);
-      cookie.setVersion(1);
+      StaticFunction urlRewriterFunction= 
+        env.getQuercus().findFunction("_internal_url_rewriter");
+      // Change the name to be compatible with PHP
+      Callback urlRewriter = 
+        new CallbackFunction(urlRewriterFunction, "URL-Rewriter");
+      OutputModule.ob_start(env, urlRewriter, 0, true);
+    } else {
+      //
+      // Use cookies to transmit session id
+      // 
+      boolean generateCookie = true;
 
-      if (response.isCommitted()) {
-        env.warning(L.l("cannot send session cookie because response is committed"));
+      if (sessionIdValue != null)
+        sessionId = sessionIdValue.toString();
+
+      if (sessionId == null || "".equals(sessionId)) {
+        Cookie []cookies = env.getRequest().getCookies();
+
+        for (int i = 0; cookies != null && i < cookies.length; i++) {
+          if (cookies[i].getName().equals(cookieName)) {
+            sessionId = cookies[i].getValue();
+            generateCookie = false;
+          }
+        }
+      }
+
+      if (! generateCookie) {
+        env.addConstant("SID", StringValue.EMPTY, false);
       }
       else {
-        Value path = env.getIni("session.cookie_path");
-        cookie.setPath(path.toString());
+        if (sessionId == null || "".equals(sessionId))
+          sessionId = generateSessionId(env);
 
-        Value maxAge = env.getIni("session.cookie_lifetime");
-        if (maxAge.toInt() != 0)
-          cookie.setMaxAge(maxAge.toInt());
+        env.addConstant("SID", 
+                        new StringValueImpl(cookieName + '=' + sessionId), 
+                        false);
 
-        Value domain = env.getIni("session.cookie_domain");
-        cookie.setDomain(domain.toString());
+        Cookie cookie = new Cookie(cookieName, sessionId);
+        cookie.setVersion(1);
 
-        Value secure = env.getIni("session.cookie_secure");
-        cookie.setSecure(secure.toBoolean());
+        if (response.isCommitted()) {
+          env.warning(L.l("cannot send session cookie because response is committed"));
+        }
+        else {
+          Value path = env.getIni("session.cookie_path");
+          cookie.setPath(path.toString());
 
-        response.addCookie(cookie);
+          Value maxAge = env.getIni("session.cookie_lifetime");
+          if (maxAge.toInt() != 0)
+            cookie.setMaxAge(maxAge.toInt());
+
+          Value domain = env.getIni("session.cookie_domain");
+          cookie.setDomain(domain.toString());
+
+          Value secure = env.getIni("session.cookie_secure");
+          cookie.setSecure(secure.toBoolean());
+
+          response.addCookie(cookie);
+        }
       }
     }
 
@@ -613,6 +656,6 @@ public class SessionModule extends AbstractQuercusModule {
     addIni(_iniMap, "session.bug_compat_warn", "1", PHP_INI_ALL);
     addIni(_iniMap, "session.hash_function", "0", PHP_INI_ALL);
     addIni(_iniMap, "session.hash_bits_per_character", "4", PHP_INI_ALL);
-    addIni(_iniMap, "user_rewriter.tags", "a=href,area=href,frame=src,form=,fieldset=", PHP_INI_ALL);
+    addIni(_iniMap, "url_rewriter.tags", "a=href,area=href,frame=src,form=,fieldset=", PHP_INI_ALL);
   }
 }

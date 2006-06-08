@@ -241,6 +241,8 @@ public final class Env {
   private WriteStream _originalOut;
   private OutputBuffer _outputBuffer;
   private OutputBuffer _bottomOutputBuffer;
+  private StringBuffer _rewriteQuery = new StringBuffer();
+  private ArrayList<String[]> _rewriteVars = new ArrayList<String[]>();
 
   private WriteStream _out;
 
@@ -654,6 +656,42 @@ public final class Env {
     }
 
     return true;
+  }
+
+  public ArrayList<String[]> getRewriteVars()
+  {
+    return _rewriteVars;
+  }
+
+  /**
+   * Returns the query associated with the rewrite variables.
+   * 
+   */
+  public String getRewriteVarQuery()
+  {
+    return _rewriteQuery.toString();
+  }
+
+  /**
+   * Adds a rewrite variable.  Intended for 
+   * <code>output_add_rewrite_var()</code>.
+   */
+  public void addRewriteVar(String var, String value)
+  {
+    if (_rewriteQuery.length() > 0)
+      _rewriteQuery.append("&");
+    _rewriteQuery.append(var + "=" + value);
+    _rewriteVars.add(new String[] {var, value});
+  }
+
+  /**
+   * Resets (clears) all the rewrite variables.  Intended for 
+   * <code>output_reset_rewrite_vars()</code>.
+   */
+  public void resetRewriteVars()
+  {
+    _rewriteQuery = new StringBuffer();
+    _rewriteVars.clear();
   }
 
   /**

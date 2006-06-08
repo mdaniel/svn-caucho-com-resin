@@ -54,6 +54,12 @@ public class CallbackFunction extends Callback {
   {
     _fun = fun;
   }
+
+  public CallbackFunction(AbstractFunction fun, String funName)
+  {
+    _fun = fun;
+    _funName = funName;
+  }
 /*
   public CallbackFunction(String funName, boolean isInvalid)
   {

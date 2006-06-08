@@ -29,9 +29,26 @@
 
 package com.caucho.quercus.lib;
 
+import java.io.StringWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.ByteArrayInputStream;
+
+import java.util.Map;
 import java.util.logging.Logger;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Element;
+
+import org.xml.sax.SAXException;
+
+import com.caucho.xml.LooseHtml;
+import com.caucho.xml.XmlPrinter;
 
 import com.caucho.util.L10N;
 
@@ -39,11 +56,12 @@ import com.caucho.quercus.QuercusModuleException;
 
 import com.caucho.quercus.program.AbstractFunction;
 
-import com.caucho.quercus.lib.zlib.ZlibModule;
 import com.caucho.quercus.lib.HttpModule;
+import com.caucho.quercus.lib.session.SessionModule;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.StaticFunction;
 
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;
@@ -55,6 +73,7 @@ import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Callback;
+import com.caucho.quercus.env.CallbackFunction;
 import com.caucho.quercus.env.OutputBuffer;
 
 /**
@@ -313,12 +332,11 @@ public class OutputModule extends AbstractQuercusModule {
   }
 
   /**
-   * Clears the output buffer
+   * Makes the original "output buffer" flush on every write.
    */
-  public static Value ob_implicit_flush(Env env, @Optional int flag)
+  public static Value ob_implicit_flush(Env env, @Optional("true") boolean flag)
   {
-    // XXX: stubbed out
-
+    env.getOriginalOut().setImplicitFlush(flag);
     return NullValue.NULL;
   }
 
@@ -326,12 +344,51 @@ public class OutputModule extends AbstractQuercusModule {
    * Pushes the output buffer
    */
   public static boolean ob_start(Env env,
-                          @Optional Callback callback,
-                          @Optional int chunkSize,
-                          @Optional("true") boolean erase)
+                                 @Optional Callback callback,
+                                 @Optional int chunkSize,
+                                 @Optional("true") boolean erase)
   {
     env.pushOutputBuffer(callback, chunkSize, erase);
 
+    return true;
+  }
+
+  /**
+   * Adds a variable to the list for rewritten URLs.
+   */
+  public static boolean output_add_rewrite_var(Env env, 
+                                               String name, String value)
+  {
+    boolean pushUrlRewriter = true;
+    OutputBuffer ob = env.getOutputBuffer();
+    for (; ob != null; ob = ob.getNext()) {
+      Callback callback = ob.getCallback();
+      if (callback != null && 
+          "URL-Rewriter".equals(callback.getCallbackName()) && 
+          callback.isInternal()) {
+        pushUrlRewriter = false;
+      }
+    }
+
+    if (pushUrlRewriter) {
+      StaticFunction urlRewriterFunction= 
+        env.getQuercus().findFunction("_internal_url_rewriter");
+      // Change the name to be compatible with PHP
+      Callback urlRewriter = 
+        new CallbackFunction(urlRewriterFunction, "URL-Rewriter");
+      ob_start(env, urlRewriter, 0, true);
+    }
+    
+    env.addRewriteVar(name, value);
+    return true;
+  }
+
+  /**
+   * Clears the list of variables for rewritten URLs.
+   */
+  public static boolean output_reset_rewrite_vars(Env env)
+  {
+    env.resetRewriteVars();
     return true;
   }
 
@@ -378,5 +435,139 @@ public class OutputModule extends AbstractQuercusModule {
     }
     
     return buffer;
+  }
+
+  /**
+   * Callback function to rewrite URLs to include session information.
+   */
+  public static Value _internal_url_rewriter(Env env, Value buffer)
+  {
+    boolean includeSessionInfo = false;
+    String sessionName = null;
+    String sessionId = null;
+
+    if (env.getSession() != null) {
+      includeSessionInfo = true;
+      sessionName = env.getIni("session.name").toString();
+      sessionId = SessionModule.session_id(env, null);
+    }
+
+    if (includeSessionInfo == false && env.getRewriteVars().isEmpty())
+      return buffer;
+
+    Document doc;
+    NodeList list;
+    try {
+      doc = new LooseHtml().parseDocumentString(buffer.toString());
+    } catch (IOException e) {
+      return buffer;
+    } catch (SAXException e) {
+      return buffer;
+    }
+
+    if (doc.getDocumentElement() == null) {
+      return buffer;
+    }
+
+    String [] tagPairs = env.getIni("url_rewriter.tags").toString().split(",");
+    for (String tagPair : tagPairs) {
+      String [] tagAttribute = tagPair.split("=");
+      switch (tagAttribute.length) {
+        case 1:
+          // add input nodes as children to this tag
+          list = doc.getElementsByTagName(tagAttribute[0]);
+          for (int i = 0; i < list.getLength(); i++) {
+            Node node = list.item(i);
+            if (includeSessionInfo) {
+              Element inputElement = doc.createElement("input");
+              inputElement.setAttribute("type", "hidden");
+              inputElement.setAttribute("name", sessionName);
+              inputElement.setAttribute("value", sessionId);
+              node.appendChild(inputElement);
+            }
+            for (String[] entry : env.getRewriteVars()) {
+              Element inputElement = doc.createElement("input");
+              inputElement.setAttribute("type", "hidden");
+              inputElement.setAttribute("name", entry[0]);
+              inputElement.setAttribute("value", entry[1]);
+              node.appendChild(inputElement);
+            }
+          }
+          break;
+        case 2:
+          // translate the url in the given attribute
+          list = doc.getElementsByTagName(tagAttribute[0]);
+          for (int i = 0; i < list.getLength(); i++) {
+            Element element = (Element)list.item(i);
+            if (!element.hasAttribute(tagAttribute[1]))
+              continue;
+
+            String attribute = element.getAttribute(tagAttribute[1]);
+
+            // according to php documentation, it only adds tags to the
+            // end of relative URLs, but according to RFC 2396, any
+            // URI beginning with '/' (e.g. <a href="/foo">link</a>) is
+            // absolute.  Nonetheless, php does add session ids to these
+            // links.  Thus php must be defining "relative" as relative
+            // to the host, not the hierarchy.  Thus we only check to make
+            // sure that the scheme and authority are undefined, not that
+            // the first character of the path begins with '/'.
+
+            URI uri;
+            try {
+              uri = new URI(attribute);
+            } catch (URISyntaxException e) {
+              continue;
+            }
+            if ((uri.getScheme() != null) || (uri.getAuthority() != null))
+              continue;
+
+            StringBuffer query = new StringBuffer();
+            if (uri.getQuery() != null) {
+              query.append(uri.getQuery());
+              query.append("&");
+            } 
+            else
+              query.append("?");
+
+            if (includeSessionInfo) {
+              query.append(sessionName);
+              query.append("=");
+              query.append(sessionId);
+            }
+
+            String varsQuery = env.getRewriteVarQuery();
+            if (! "".equals(varsQuery)) {
+              if (includeSessionInfo)
+                query.append("&");
+              query.append(varsQuery);
+            }
+
+            StringBuffer newUri = new StringBuffer();
+            if (uri.getPath() != null)
+              newUri.append(uri.getPath());
+            newUri.append(query);
+            if (uri.getFragment() != null) {
+              newUri.append("#");
+              newUri.append(uri.getFragment());
+            }
+
+            element.setAttribute(tagAttribute[1], newUri.toString());
+          }
+          break;
+        default:
+          // malformed entry => ignore
+          break;
+      }
+    }
+
+    try {
+      StringWriter sw = new StringWriter();
+      XmlPrinter printer = new XmlPrinter(sw);
+      printer.printXml(doc);
+      return new StringValueImpl(sw.toString());
+    } catch (IOException e) {
+      return buffer;
+    }
   }
 }

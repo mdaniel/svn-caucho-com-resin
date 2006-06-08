@@ -83,6 +83,7 @@ public class WriteStream extends OutputStreamWithBuffer {
   private EncodingWriter _writeEncoding;
   private String _writeEncodingName;
 
+  private boolean _implicitFlush = false;
   private boolean flushOnNewline;
   private boolean _disableClose;
   private boolean _disableFlush;
@@ -243,6 +244,11 @@ public class WriteStream extends OutputStreamWithBuffer {
       return _writeBuffer.length - _writeLength;
   }
 
+  public void setImplicitFlush(boolean implicitFlush)
+  {
+    _implicitFlush = implicitFlush;
+  }
+
   /**
    * Writes a byte.
    */
@@ -258,6 +264,9 @@ public class WriteStream extends OutputStreamWithBuffer {
     }
 
     _writeBuffer[_writeLength++] = (byte) ch;
+
+    if (_implicitFlush)
+      flush();
   }
 
   /**
@@ -300,6 +309,9 @@ public class WriteStream extends OutputStreamWithBuffer {
     }
 
     _writeLength = writeLength;
+
+    if (_implicitFlush)
+      flush();
   }
 
   /**
@@ -309,6 +321,9 @@ public class WriteStream extends OutputStreamWithBuffer {
   {
     _writeLength = 0;
     _source.write(_writeBuffer, 0, offset, false);
+
+    if (_implicitFlush)
+      flush();
 
     return _writeBuffer;
   }
@@ -536,6 +551,9 @@ public class WriteStream extends OutputStreamWithBuffer {
       offset += sublen;
       length -= sublen;
     }
+
+    if (_implicitFlush)
+      flush();
   }
 
   /**
@@ -936,7 +954,7 @@ public class WriteStream extends OutputStreamWithBuffer {
       }
     }
 
-    if (flushOnNewline)
+    if (flushOnNewline || _implicitFlush)
       flush();
   }
 
@@ -1000,7 +1018,7 @@ public class WriteStream extends OutputStreamWithBuffer {
       }
     }
 
-    if (flushOnNewline)
+    if (flushOnNewline || _implicitFlush)
       flush();
   }
 
@@ -1036,7 +1054,7 @@ public class WriteStream extends OutputStreamWithBuffer {
       }
     }
 
-    if (flushOnNewline)
+    if (flushOnNewline || _implicitFlush)
       flush();
   }
 
