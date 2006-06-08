@@ -41,6 +41,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.Connection;
+import java.sql.Blob;
 import java.sql.SQLException;
 
 import javax.jms.Message;
@@ -499,6 +500,7 @@ public class JdbcTopicConsumer extends MessageConsumerImpl
 
       try {
 	String sql;
+	
 	sql = ("DELETE FROM " + messageTable +
 	       " WHERE queue=? AND NOT EXISTS(" + 
                "   SELECT * FROM " + consumerTable +
@@ -508,6 +510,7 @@ public class JdbcTopicConsumer extends MessageConsumerImpl
 	pstmt = conn.prepareStatement(sql);
 	pstmt.setInt(1, _topic.getId());
 	pstmt.setInt(2, _topic.getId());
+
 	pstmt.executeUpdate();
       } finally {
 	conn.close();
@@ -516,6 +519,11 @@ public class JdbcTopicConsumer extends MessageConsumerImpl
       throw new JMSExceptionWrapper(e);
     }
   }
+
+  /**
+   * Truncates all blobs before a deletion.
+   */
+  
 
   /**
    * Rollback all received messages from the session.

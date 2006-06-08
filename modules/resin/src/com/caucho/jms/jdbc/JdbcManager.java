@@ -68,6 +68,8 @@ public class JdbcManager {
   private String _blob;
   private String _longType;
 
+  private boolean _isTruncateBlob;
+
   private long _purgeInterval = 60000L;
 
   private JdbcMessage _jdbcMessage;
@@ -213,6 +215,14 @@ public class JdbcManager {
   }
 
   /**
+   * Return true if blobs need to be truncated before deletion.
+   */
+  public boolean isTruncateBlob()
+  {
+      return _isTruncateBlob;
+  }
+
+  /**
    * Initializes the JdbcManager
    */
   public void init()
@@ -228,8 +238,11 @@ public class JdbcManager {
     _jdbcMessage = new JdbcMessage(this);
 
     _jdbcMessage.init();
+
     initDestinationTable();
     initConsumerTable();
+    
+    _isTruncateBlob = getMetaData().isTruncateBlobBeforeDelete();
   }
 
   /**

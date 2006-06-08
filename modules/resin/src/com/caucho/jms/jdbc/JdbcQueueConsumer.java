@@ -261,9 +261,11 @@ public class JdbcQueueConsumer extends MessageConsumerImpl
 	  log.log(Level.FINER, e.toString(), e);
 	}
 
-	if (_autoAck)
+	if (_autoAck) {
+	    System.out.println("DELETE:-auto");
 	  sql = ("DELETE FROM " + messageTable +
 		 " WHERE m_id=? AND consumer IS NULL");
+	}
 	else
 	  sql = ("UPDATE " + messageTable +
 		 " SET consumer=?, delivered=1" +
@@ -339,6 +341,7 @@ public class JdbcQueueConsumer extends MessageConsumerImpl
       Connection conn = dataSource.getConnection();
 
       try {
+	  System.out.println("DELETE-ack");
 	String sql = ("DELETE FROM " +  messageTable + " " +
 		      "WHERE consumer=?");
       

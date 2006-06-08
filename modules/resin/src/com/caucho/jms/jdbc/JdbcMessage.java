@@ -108,6 +108,8 @@ public class JdbcMessage {
   private String _messageTable;
   private String _messageSequence;
 
+ private boolean _isTruncateBlob;
+
   public JdbcMessage(JdbcManager jdbcManager)
   {
     _jdbcManager = jdbcManager;
@@ -123,6 +125,8 @@ public class JdbcMessage {
     _dataSource = _jdbcManager.getDataSource();
 
     JdbcMetaData metaData = _jdbcManager.getMetaData();
+
+    _isTruncateBlob = metaData.isTruncateBlobBeforeDelete();
       
     String identity = "";
 
@@ -164,11 +168,46 @@ public class JdbcMessage {
 	     "  body " + blob +
 	     ")");
 
+      if (_isTruncateBlob) {
+	// oracle recommends using retention for performance
+	sql += (" LOB(header) STORE AS (cache retention)");
+	sql += (" LOB(body) STORE AS (cache retention)");
+      }
+
       stmt.executeUpdate(sql);
 
       if (_messageSequence != null) {
 	stmt.executeUpdate(metaData.createSequenceSQL(_messageSequence, 1));
       }
+
+      /*
+      if (_isTruncateBlob) {
+	sql = ("CREATE OR REPLACE TRIGGER DELETE_" + _messageTable +
+	       " BEFORE DELETE ON " + _messageTable +
+	       " FOR EACH ROW" +
+	       " DECLARE " +
+	       //"   h " + _messageTable + ".header%TYPE;" +
+	       "   r " + _messageTable + "%ROWTYPE;" +
+	       "   CURSOR c IS" +
+	       "     SELECT header, body FROM " + _messageTable +
+	       "     WHERE m_id=:Old.m_id FOR UPDATE;" +
+	       " BEGIN" +
+	       "  OPEN c;" +
+	       //"  FOR r IN c" +
+	       "    dbms_output.put('test');" +
+	       //"  END LOOP" +
+	       //"   DBMS_LOB.trim(:Old.header, 0);" +
+	       // "   DBMS_LOB.trim(:Old.body, 0);" +
+	       " END;");// Delete" + _messageTable);
+
+	  System.out.println("SQL: " + sql);
+	try {
+	  stmt.executeUpdate(sql);
+	} catch (SQLException e) {
+	  e.printStackTrace();
+	}
+      }
+      */
     } finally {
       conn.close();
     }
@@ -380,6 +419,8 @@ public class JdbcMessage {
     try {
       String sql = ("DELETE FROM " +  _messageTable + " " +
 		    "WHERE consumer=?");
+
+      System.out.println("DEL:");
       
       PreparedStatement pstmt;
       pstmt = conn.prepareStatement(sql);
