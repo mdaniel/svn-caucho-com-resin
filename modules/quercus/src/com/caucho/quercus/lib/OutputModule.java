@@ -35,6 +35,7 @@ import java.io.InputStream;
 import java.io.ByteArrayInputStream;
 
 import java.util.Map;
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 import java.net.URI;
@@ -437,6 +438,60 @@ public class OutputModule extends AbstractQuercusModule {
     return buffer;
   }
 
+  private static class Token {
+    private int _startPosition;
+    private int _endPosition;
+    private String _token;
+
+    public Token(String token, int startPosition, int endPosition) 
+    {
+      _token = token;
+      _startPosition = startPosition;
+      _endPosition = endPosition;
+    }
+
+    public int getStartPosition()
+    {
+      return _startPosition;
+    }
+
+    public int getEndPosition()
+    {
+      return _endPosition;
+    }
+
+    public String getToken()
+    {
+      return _token;
+    }
+
+    /**
+     * Helper function for the URL rewriter below.
+     */
+    public static Token nextToken(StringBuffer buffer, 
+                                   int startPosition, int endIndex)
+    {
+      while (startPosition < endIndex && startPosition < buffer.length() &&
+             Character.isWhitespace(buffer.charAt(startPosition))) {
+        startPosition++;
+      }
+      int endPosition = startPosition;
+      while (endPosition < endIndex && endPosition < buffer.length() &&
+             !Character.isWhitespace(buffer.charAt(endPosition))) {
+        endPosition++;
+      }
+      if (startPosition == endPosition)
+        return null;
+      return new Token(buffer.substring(startPosition, endPosition), 
+                       startPosition, endPosition);
+    }
+    
+    public static Token nextToken(StringBuffer buffer, int startPosition)
+    {
+      return nextToken(buffer, startPosition, Integer.MAX_VALUE);
+    }
+  }
+  
   /**
    * Callback function to rewrite URLs to include session information.
    */
@@ -455,119 +510,148 @@ public class OutputModule extends AbstractQuercusModule {
     if (includeSessionInfo == false && env.getRewriteVars().isEmpty())
       return buffer;
 
-    Document doc;
-    NodeList list;
-    try {
-      doc = new LooseHtml().parseDocumentString(buffer.toString());
-    } catch (IOException e) {
-      return buffer;
-    } catch (SAXException e) {
-      return buffer;
-    }
-
-    if (doc.getDocumentElement() == null) {
-      return buffer;
-    }
-
     String [] tagPairs = env.getIni("url_rewriter.tags").toString().split(",");
+    HashMap<String,String> tags = new HashMap<String,String>();
     for (String tagPair : tagPairs) {
       String [] tagAttribute = tagPair.split("=");
       switch (tagAttribute.length) {
         case 1:
-          // add input nodes as children to this tag
-          list = doc.getElementsByTagName(tagAttribute[0]);
-          for (int i = 0; i < list.getLength(); i++) {
-            Node node = list.item(i);
-            if (includeSessionInfo) {
-              Element inputElement = doc.createElement("input");
-              inputElement.setAttribute("type", "hidden");
-              inputElement.setAttribute("name", sessionName);
-              inputElement.setAttribute("value", sessionId);
-              node.appendChild(inputElement);
-            }
-            for (String[] entry : env.getRewriteVars()) {
-              Element inputElement = doc.createElement("input");
-              inputElement.setAttribute("type", "hidden");
-              inputElement.setAttribute("name", entry[0]);
-              inputElement.setAttribute("value", entry[1]);
-              node.appendChild(inputElement);
-            }
-          }
+          tags.put(tagAttribute[0], null);
           break;
         case 2:
-          // translate the url in the given attribute
-          list = doc.getElementsByTagName(tagAttribute[0]);
-          for (int i = 0; i < list.getLength(); i++) {
-            Element element = (Element)list.item(i);
-            if (!element.hasAttribute(tagAttribute[1]))
-              continue;
-
-            String attribute = element.getAttribute(tagAttribute[1]);
-
-            // according to php documentation, it only adds tags to the
-            // end of relative URLs, but according to RFC 2396, any
-            // URI beginning with '/' (e.g. <a href="/foo">link</a>) is
-            // absolute.  Nonetheless, php does add session ids to these
-            // links.  Thus php must be defining "relative" as relative
-            // to the host, not the hierarchy.  Thus we only check to make
-            // sure that the scheme and authority are undefined, not that
-            // the first character of the path begins with '/'.
-
-            URI uri;
-            try {
-              uri = new URI(attribute);
-            } catch (URISyntaxException e) {
-              continue;
-            }
-            if ((uri.getScheme() != null) || (uri.getAuthority() != null))
-              continue;
-
-            StringBuffer query = new StringBuffer();
-            if (uri.getQuery() != null) {
-              query.append(uri.getQuery());
-              query.append("&");
-            } 
-            else
-              query.append("?");
-
-            if (includeSessionInfo) {
-              query.append(sessionName);
-              query.append("=");
-              query.append(sessionId);
-            }
-
-            String varsQuery = env.getRewriteVarQuery();
-            if (! "".equals(varsQuery)) {
-              if (includeSessionInfo)
-                query.append("&");
-              query.append(varsQuery);
-            }
-
-            StringBuffer newUri = new StringBuffer();
-            if (uri.getPath() != null)
-              newUri.append(uri.getPath());
-            newUri.append(query);
-            if (uri.getFragment() != null) {
-              newUri.append("#");
-              newUri.append(uri.getFragment());
-            }
-
-            element.setAttribute(tagAttribute[1], newUri.toString());
-          }
+          tags.put(tagAttribute[0], tagAttribute[1]);
           break;
         default:
-          // malformed entry => ignore
           break;
       }
     }
 
-    try {
-      StringWriter sw = new StringWriter();
-      XmlPrinter printer = new XmlPrinter(sw);
-      printer.printXml(doc);
-      return new StringValueImpl(sw.toString());
-    } catch (IOException e) {
-      return buffer;
+    StringBuffer output = new StringBuffer(buffer.toString());
+
+    int [] ref = new int[1];
+    for (int i = 0; i < output.length();) {
+      // get the first token after a '<'
+      i = output.indexOf("<", i);
+      if (i == -1) break;
+      Token token = Token.nextToken(output, i+1);
+      if (token == null) break;
+      i = token.getEndPosition();
+
+      if (tags.containsKey(token.getToken())) {
+        String attribute = tags.get(token.getToken());
+        if (attribute == null) {
+          i = output.indexOf(">", i);
+          if (i == -1) break;
+
+          if (includeSessionInfo) {
+            String inputTag = 
+              "<input type=\"hidden\" name=\"" + sessionName + "\"" +
+              " value=\"" + sessionId + "\" />";
+            output.insert(i+1, inputTag);
+            i += inputTag.length();
+          }
+          for (String[] entry : env.getRewriteVars()) {
+            String inputTag = 
+              "<input type=\"hidden\" name=\"" + entry[0] + "\"" +
+              " value=\"" + entry[1] + "\" />";
+            output.insert(i+1, inputTag);
+            i += inputTag.length();
+          }
+        } else {
+          int tagEnd = output.indexOf(">", i);
+          for (token = Token.nextToken(output, i, tagEnd); 
+               token != null;
+               token = Token.nextToken(output, i, tagEnd)) {
+            i = token.getStartPosition();
+            int j = token.getToken().indexOf("=");
+            if (j == -1) {
+              i = token.getEndPosition();
+              continue;
+            }
+
+            String attributeName = token.getToken().substring(0, j);
+
+            j++; // skip the '='
+
+            // unquote
+            if (token.getToken().charAt(j) == '"' ||
+                token.getToken().charAt(j) == '\'') 
+              j++;
+
+            int valueEnd;
+            int quotePad = 0;
+            if (token.getToken().endsWith("'") ||
+                token.getToken().endsWith("\"")) {
+              valueEnd = token.getToken().length() - 1;
+              quotePad = 1;
+            }
+            else 
+              valueEnd = token.getToken().length();
+
+            String value = token.getToken().substring(j, valueEnd);
+
+            if (attributeName.equalsIgnoreCase(attribute)) {
+              // according to php documentation, it only adds tags to the
+              // end of relative URLs, but according to RFC 2396, any
+              // URI beginning with '/' (e.g. <a href="/foo">link</a>) is
+              // absolute.  Nonetheless, php does add session ids to these
+              // links.  Thus php must be defining "relative" as relative
+              // to the host, not the hierarchy.  Thus we only check to make
+              // sure that the scheme and authority are undefined, not that
+              // the first character of the path begins with '/'.
+
+              URI uri;
+              try {
+                uri = new URI(value);
+              } catch (URISyntaxException e) {
+                i = token.getEndPosition();
+                continue;
+              }
+              if ((uri.getScheme() != null) || (uri.getAuthority() != null)) {
+                i = token.getEndPosition();
+                continue;
+              }
+
+              StringBuffer query = new StringBuffer();
+              if (uri.getQuery() != null) {
+                query.append(uri.getQuery());
+                query.append("&");
+              } 
+              else
+                query.append("?");
+
+              if (includeSessionInfo) {
+                query.append(sessionName);
+                query.append("=");
+                query.append(sessionId);
+              }
+
+              String varsQuery = env.getRewriteVarQuery();
+              if (! "".equals(varsQuery)) {
+                if (includeSessionInfo)
+                  query.append("&");
+                query.append(varsQuery);
+              }
+
+              StringBuffer newUri = new StringBuffer();
+              if (uri.getPath() != null)
+                newUri.append(uri.getPath());
+              newUri.append(query);
+              if (uri.getFragment() != null) {
+                newUri.append("#");
+                newUri.append(uri.getFragment());
+              }
+
+              output.replace(i + j, i + j + value.length(), newUri.toString());
+              i += j + newUri.length() + quotePad;
+            } 
+            else
+              i = token.getEndPosition();
+          }
+        }
+      }
     }
+
+    return new StringValueImpl(output.toString());
   }
 }

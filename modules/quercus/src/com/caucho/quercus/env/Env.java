@@ -87,6 +87,7 @@ import com.caucho.util.IntMap;
 import com.caucho.util.LruCache;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
+import com.caucho.util.URLUtil;
 import com.caucho.vfs.ByteToChar;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
@@ -680,8 +681,10 @@ public final class Env {
   {
     if (_rewriteQuery.length() > 0)
       _rewriteQuery.append("&");
-    _rewriteQuery.append(var + "=" + value);
-    _rewriteVars.add(new String[] {var, value});
+    String encodedVar = URLUtil.encodeURL(var.replaceAll(" ", "+"));
+    String encodedValue = URLUtil.encodeURL(value.replaceAll(" ", "+"));
+    _rewriteQuery.append(encodedVar + "=" + encodedValue);
+    _rewriteVars.add(new String[] {encodedVar, encodedValue});
   }
 
   /**
