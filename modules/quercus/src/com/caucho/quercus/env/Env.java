@@ -368,7 +368,12 @@ public final class Env {
                                   String userName, String password)
     throws Exception
   {
-    DataSource database = getDataSource(driver, url);
+    DataSource database = _quercus.getDatabase();
+
+    if (database != null)
+      return database.getConnection();
+
+    database = DatabaseManager.findDatabase(driver, url);
 
     if (userName == null || userName.equals(""))
       return database.getConnection();
@@ -395,6 +400,9 @@ public final class Env {
    */
   public void setTimeLimit(long ms)
   {
+    if (ms <= 0)
+      ms = Long.MAX_VALUE / 2;
+
     _timeLimit = ms;
   }
 

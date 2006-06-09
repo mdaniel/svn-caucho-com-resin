@@ -69,7 +69,7 @@ public class ClusterServer {
   private int _srunIndex;
   private Path _tcpPath;
 
-  private long _loadBalanceWeight;
+  private long _loadBalanceWeight = 1;
 
   private ClusterClient _client;
 
@@ -176,19 +176,11 @@ public class ClusterServer {
   }
 
   /**
-   * Gets the group index.
+   * Returns the time in milliseconds for the slow start throttling.
    */
-  public int getGroupIndex()
+  public long getSlowStartTime()
   {
-    return _srunIndex;
-  }
-
-  /**
-   * Sets the group index.
-   */
-  public void setGroupIndex(int index)
-  {
-    _srunIndex = index;
+    return _cluster.getClientSlowStartTime();
   }
 
   /**

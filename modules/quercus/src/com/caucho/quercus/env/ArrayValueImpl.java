@@ -375,6 +375,8 @@ public class ArrayValueImpl extends ArrayValue {
     for (; ptr != null; ptr = next) {
       next = ptr._next;
       
+      Value key = ptr.getKey();
+      
       if (index < start) {
       }
       else if (index < end) {

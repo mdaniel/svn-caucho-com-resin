@@ -47,7 +47,8 @@ public class CallbackObjectMethod extends Callback {
   {
     _obj = obj;
     _methodName = methodName.intern();
-    _fun = env.findMethod(_obj.getType(), _methodName);
+    // _fun = env.findMethod(_obj.getType(), _methodName);
+    _fun = env.findMethod(_obj.getClassName(), _methodName);
   }
 
   /**

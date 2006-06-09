@@ -280,10 +280,6 @@ public class RegexpModule
   {
     Matcher matcher = pattern.matcher(subject);
 
-    if (! (matcher.find())) {
-      return 0;
-    }
-
     int groupCount = matcher.groupCount();
 
     ArrayValue []matchList = new ArrayValue[groupCount + 1];
@@ -292,6 +288,10 @@ public class RegexpModule
       ArrayValue values = new ArrayValueImpl();
       matches.put(values);
       matchList[j] = values;
+    }
+
+    if (! (matcher.find())) {
+      return 0;
     }
 
     int count = 0;
@@ -1072,6 +1072,12 @@ public class RegexpModule
 
     if (pattern != null)
       return pattern;
+
+    if (rawRegexp.length() < 2) {
+      throw new IllegalStateException(L.l(
+        "Can't find delimiters in regexp '{0}'.",
+        rawRegexp));
+    }
 
     char delim = rawRegexp.charAt(0);
 

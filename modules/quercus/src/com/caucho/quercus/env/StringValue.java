@@ -536,6 +536,17 @@ abstract public class StringValue extends Value implements CharSequence {
   }
 
   /**
+   * Adds to the following value.
+   */
+  public Value add(long rValue)
+  {
+    if (isLongConvertible())
+      return LongValue.create(toLong() + rValue);
+    
+    return DoubleValue.create(toDouble() + rValue);
+  }
+
+  /**
    * Serializes the value.
    */
   @Override

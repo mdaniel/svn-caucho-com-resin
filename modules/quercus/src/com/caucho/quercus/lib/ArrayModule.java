@@ -945,11 +945,16 @@ public class ArrayModule
    * @return the part of the arrayV removed from input
    */
   public Value array_splice(Env env,
-			    ArrayValue array, //array gets spliced at offset
+			    @Reference Value arrayVar, //array gets spliced at offset
                             int offset,
                             @Optional("NULL") Value length,
-                            @Optional ArrayValue replace)
+                            @Optional Value replace)
   {
+    if (! arrayVar.isset())
+      return NullValue.NULL;
+
+    ArrayValue array = arrayVar.toArrayValue(env);
+
     if (array == null)
       return NullValue.NULL;
     
@@ -971,7 +976,60 @@ public class ArrayModule
         endIndex += startIndex;
     }
 
-    return array.splice(startIndex, endIndex, replace);
+    return spliceImpl(arrayVar, array, startIndex, endIndex,
+		      (ArrayValue) replace.toArray());
+  }
+
+  public Value spliceImpl(Value var,
+			  ArrayValue array,
+			  int start,
+			  int end,
+			  ArrayValue replace)
+  {
+    int index = 0;
+
+    ArrayValue newArray = new ArrayValueImpl();
+    ArrayValue result = new ArrayValueImpl();
+
+    var.set(newArray);
+
+    ArrayValue.Entry ptr = array.getHead();
+    for (; ptr != null; ptr = ptr.getNext()) {
+      Value key = ptr.getKey();
+      
+      if (start == index && replace != null) {
+	for (ArrayValue.Entry replaceEntry = replace.getHead();
+	     replaceEntry != null;
+	     replaceEntry = replaceEntry.getNext()) {
+	  newArray.put(replaceEntry.getValue());
+	}
+      }
+      
+      if (start <= index && index < end) {
+	if (ptr.getKey() instanceof StringValue)
+	  result.put(ptr.getKey(), ptr.getValue());
+	else
+	  result.put(ptr.getValue());
+      }
+      else {
+	if (ptr.getKey() instanceof StringValue)
+	  newArray.put(ptr.getKey(), ptr.getValue());
+	else
+	  newArray.put(ptr.getValue());
+      }
+
+      index++;
+    }
+
+    if (index <= start && replace != null) {
+      for (ArrayValue.Entry replaceEntry = replace.getHead();
+	   replaceEntry != null;
+	   replaceEntry = replaceEntry.getNext()) {
+	newArray.put(replaceEntry.getValue());
+      }
+    }
+
+    return result;
   }
 
   /**

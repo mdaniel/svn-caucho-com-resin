@@ -127,6 +127,26 @@ public class ClassesModule extends AbstractQuercusModule {
   }
 
   /**
+   * Returns true if the object implements the given class.
+   */
+  public static boolean is_subclass_of(Env env,
+				       @ReadOnly Value value,
+				       String name)
+  {
+    QuercusClass cl;
+    
+    if (value instanceof StringValue)
+      cl = env.findClass(value.toString());
+    else
+      cl = value.getQuercusClass();
+
+    if (cl.getName().equalsIgnoreCase(name))
+      return false;
+    else
+      return cl.isA(name);
+  }
+
+  /**
    * Returns the object's class name
    */
   public Value get_parent_class(Env env, @ReadOnly Value value)

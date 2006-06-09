@@ -4,6 +4,13 @@
 
 <s2 title='3.0.snap - June 2, 2006'>
 <ul>
+<li>Quercus: is_subclass_of (#1180, rep by koreth)
+<li>Quercus: parent::foo(1,2,3,4,5,6) generated code (#1177, rep by koreth)
+<li>Quercus: dirname/__FILE__ issue (#1135, rep by Alex Sharaz)
+<li>Quercus: set_time_limit(0) should be treated as infinite (#1178, rep by koreth)
+<li>Quercus: adding double + long incorrect (#1179, rep by koreth)
+<li>Add load-balance-weight, client-slow-start-time, client-max-idle-time, client-fail-recover-time (#1168, rep by Serge Knystautas)
+<li>Jdk15Compat was missing astore_0 for _resin_compat_class (#1159, rep by L Plaetinck)
 <li>Added session support for triplicate, i.e. two backups (#1088, rep by wet745)
 <li>JMS: changed blobs for oracle to use RETENTION
 <li>(2006-06-02) isapi plugin issue waiting for non-post (#1150, rep by Matt Pangaro)

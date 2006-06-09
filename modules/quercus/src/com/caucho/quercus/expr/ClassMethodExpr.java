@@ -168,7 +168,7 @@ public class ClassMethodExpr extends Expr {
 	_args[i].generate(out);
       }
 	
-      out.print("})");
+      out.print("}");
     }
 
     out.print(")");

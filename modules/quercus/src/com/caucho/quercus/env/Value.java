@@ -858,6 +858,7 @@ abstract public class Value {
   {
     if (isLongConvertible() && rValue.isLongConvertible())
       return LongValue.create(toLong() + rValue.toLong());
+    
     return DoubleValue.create(toDouble() + rValue.toDouble());
   }
 

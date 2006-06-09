@@ -50,7 +50,6 @@ public class ClusterClient {
 
   private String _debugId;
 
-  private long _slowStartDoublePeriod = 10000L;
   private int _maxConnections = Integer.MAX_VALUE / 2;
   
   private ClusterStream []_free = new ClusterStream[64];
@@ -151,22 +150,28 @@ public class ClusterClient {
   {
     if (! _isEnabled)
       return false;
-    
+
     long now = Alarm.getCurrentTime();
 
     if (now < _lastFailTime + _server.getFailRecoverTime())
       return false;
 
     long slowStartCount;
+    long slowStartTime = _server.getSlowStartTime();
 
     if (_firstConnectTime <= 0)
       slowStartCount = 0;
+    else if (slowStartTime <= 0)
+      slowStartCount = Integer.MAX_VALUE;
     else
-      slowStartCount = (now - _firstConnectTime) / _slowStartDoublePeriod;
+      slowStartCount = 16 * (now - _firstConnectTime) / slowStartTime;
+
+    // Slow start time splits into 16 parts.  The first 4 allow 1 request
+    // at a time.  After that, each segment doubles the allowed requests
 
     if (slowStartCount > 16)
       return true;
-    else if (_activeCount + _startingCount < (1 << slowStartCount))
+    else if (_activeCount + _startingCount < (1 << (slowStartCount - 3)))
       return true;
     else
       return false;
@@ -214,19 +219,7 @@ public class ClusterClient {
     if (stream != null)
       return stream;
 
-    if (now < _lastFailTime + _server.getFailRecoverTime())
-      return null;
-
-    long slowStartCount;
-
-    if (_firstConnectTime <= 0)
-      slowStartCount = 0;
-    else
-      slowStartCount = (now - _firstConnectTime) / _slowStartDoublePeriod;
-
-    if (slowStartCount > 16)
-      return connect();
-    else if (_activeCount + _startingCount < (1 << slowStartCount))
+    if (canOpenSoft())
       return connect();
     else
       return null;
@@ -363,6 +356,7 @@ public class ClusterClient {
    */
   public void wake()
   {
+    clearRecycle();
     _lastFailTime = 0;
   }
 

@@ -155,7 +155,7 @@ public class DoubleValue extends NumberValue {
    */
   public Value add(long lValue)
   {
-    return new DoubleValue(lValue * _value);
+    return new DoubleValue(lValue + _value);
   }
 
   /**

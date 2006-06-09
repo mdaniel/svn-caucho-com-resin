@@ -84,6 +84,8 @@ public class Cluster implements EnvironmentListener {
 
   private long _clientMaxIdleTime = 30000L;
   private long _clientFailRecoverTime = 15000L;
+  private long _clientSlowStartTime = 60000L;
+  
   private long _clientReadTimeout = 60000L;
   private long _clientWriteTimeout = 60000L;
 
@@ -291,6 +293,22 @@ public class Cluster implements EnvironmentListener {
   public void setClientDeadTime(Period period)
   {
     setClientFailRecoverTime(period);
+  }
+
+  /**
+   * Sets the client slow-start time.
+   */
+  public void setClientSlowStartTime(Period period)
+  {
+    _clientSlowStartTime = period.getPeriod();
+  }
+
+  /**
+   * Gets the client slow-start time.
+   */
+  public long getClientSlowStartTime()
+  {
+    return _clientSlowStartTime;
   }
 
   /**
