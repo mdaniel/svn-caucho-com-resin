@@ -33,13 +33,13 @@ package javax.mail;
  * Represents a name/value for headers.
  */
 public class Header {
-  private final String _name;
-  private final String _value;
+  protected String name;
+  protected String value;
 
   public Header(String name, String value)
   {
-    _name = name;
-    _value = value;
+    this.name = name;
+    this.value = value;
   }
 
   /**
@@ -47,7 +47,7 @@ public class Header {
    */
   public String getName()
   {
-    return _name;
+    return name;
   }
 
   /**
@@ -55,6 +55,6 @@ public class Header {
    */
   public String getValue()
   {
-    return _value;
+    return value;
   }
 }

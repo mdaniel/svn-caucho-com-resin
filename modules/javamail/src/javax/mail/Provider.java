@@ -105,7 +105,8 @@ public class Provider {
 
   public String toString()
   {
-    return getClass().getName() + "[" + getProtocol() + "," + getClassName() + "]";
+    return getClass().getName() + "[" + getProtocol() + "," +
+      getClassName() + "]";
   }
 
   public static class Type {

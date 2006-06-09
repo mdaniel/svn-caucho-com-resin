@@ -74,6 +74,26 @@ public final class Session {
   }
   
   /**
+   * Get the default Session object. If a default has not yet been
+   * setup, a new Session object is created and installed as the
+   * default.  Note that a default session created with no
+   * Authenticator is available to all code executing in the same Java
+   * virtual machine, and the session can contain security sensitive
+   * information such as user names and passwords.
+   */
+  public static Session getDefaultInstance(Properties props)
+  {
+    throw new UnsupportedOperationException("not implemented");    
+  }
+
+  /**
+   * Add a provider to the session.
+   */
+  public void addProvider(Provider provider){
+    throw new UnsupportedOperationException("not implemented");    
+  }
+
+  /**
    * Returns the default session object.
    */
   public static Session getDefaultInstance(Properties props,

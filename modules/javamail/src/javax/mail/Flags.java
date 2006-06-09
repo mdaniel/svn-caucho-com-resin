@@ -270,6 +270,10 @@ public class Flags implements Cloneable, java.io.Serializable {
     return new Flags(this);
   }
     
+  /**
+   * This inner class represents an individual system flag. A set of
+   * standard system flag objects are predefined here.
+   */
   public static final class Flag {
     public final static Flag ANSWERED = new Flag(0x01);
     public final static Flag DELETED = new Flag(0x02);

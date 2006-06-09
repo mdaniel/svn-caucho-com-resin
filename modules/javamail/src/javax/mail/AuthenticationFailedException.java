@@ -31,6 +31,10 @@ package javax.mail;
 
 /**
  * Represents a messaing exception
+ *
+ * This exception is thrown when the connect method on a Store or
+ * Transport object fails due to an authentication failure (e.g., bad
+ * user name or password).  See Also:Serialized Form
  */
 public class AuthenticationFailedException extends MessagingException {
   /**

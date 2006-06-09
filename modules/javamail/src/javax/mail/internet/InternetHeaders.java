@@ -28,10 +28,12 @@
  */
 
 package javax.mail.internet;
+import javax.mail.*;
 
 import java.io.InputStream;
 import java.io.IOException;
 
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
@@ -43,7 +45,7 @@ import javax.mail.MessagingException;
  * Represents the headers for a smtp message
  */
 public class InternetHeaders {
-  private ArrayList _headers = new ArrayList();
+  protected List headers = new ArrayList();
   
   /**
    * Creates an empty set of headers.
@@ -75,7 +77,7 @@ public class InternetHeaders {
    */
   public void addHeader(String name, String value)
   {
-    _headers.add(new Header(name, value));
+    headers.add(new Header(name, value));
   }
 
   /**
@@ -85,7 +87,7 @@ public class InternetHeaders {
   {
     removeHeader(name);
     
-    _headers.add(new Header(name, value));
+    headers.add(new Header(name, value));
   }
 
   /**
@@ -93,11 +95,11 @@ public class InternetHeaders {
    */
   public void removeHeader(String name)
   {
-    for (int i = _headers.size() - 1; i >= 0; i--) {
-      Header header = (Header) _headers.get(i);
+    for (int i = headers.size() - 1; i >= 0; i--) {
+      Header header = (Header) headers.get(i);
 
       if (header.getName().equalsIgnoreCase(name))
-	_headers.remove(i);
+	headers.remove(i);
     }
   }
 
@@ -108,8 +110,8 @@ public class InternetHeaders {
   {
     ArrayList list = new ArrayList();
 
-    for (int i = 0; i < _headers.size(); i++) {
-      Header header = (Header) _headers.get(i);
+    for (int i = 0; i < headers.size(); i++) {
+      Header header = (Header) headers.get(i);
 
       if (header.getName().equals(name))
 	list.add(header.getValue());
@@ -125,13 +127,25 @@ public class InternetHeaders {
   {
     Vector list = new Vector();
 
-    for (int i = 0; i < _headers.size(); i++) {
-      Header header = (Header) _headers.get(i);
+    for (int i = 0; i < headers.size(); i++) {
+      Header header = (Header) headers.get(i);
 
       list.add(header);
     }
 
     return list.elements();
+  }
+
+  /**
+   * Add an RFC822 header line to the header store. If the line starts
+   * with a space or tab (a continuation line), add it to the last
+   * header line in the list. Otherwise, append the new header line to
+   * the list.  Note that RFC822 headers can only contain US-ASCII
+   * characters
+   */
+  public void addHeaderLine(String line)
+  {
+    throw new UnsupportedOperationException("not implemented");
   }
 
   /**
@@ -141,8 +155,8 @@ public class InternetHeaders {
   {
     Vector list = new Vector();
 
-    for (int i = 0; i < _headers.size(); i++) {
-      Header header = (Header) _headers.get(i);
+    for (int i = 0; i < headers.size(); i++) {
+      Header header = (Header) headers.get(i);
 
       if (isNameInArray(header.getName(), names)) {
 	list.add(header);
@@ -159,8 +173,8 @@ public class InternetHeaders {
   {
     Vector list = new Vector();
 
-    for (int i = 0; i < _headers.size(); i++) {
-      Header header = (Header) _headers.get(i);
+    for (int i = 0; i < headers.size(); i++) {
+      Header header = (Header) headers.get(i);
 
       if (! isNameInArray(header.getName(), names)) {
 	list.add(header);
@@ -177,8 +191,8 @@ public class InternetHeaders {
   {
     Vector list = new Vector();
 
-    for (int i = 0; i < _headers.size(); i++) {
-      Header header = (Header) _headers.get(i);
+    for (int i = 0; i < headers.size(); i++) {
+      Header header = (Header) headers.get(i);
 
       String line = header.getName() + ": " + header.getValue();
 
@@ -195,8 +209,8 @@ public class InternetHeaders {
   {
     Vector list = new Vector();
 
-    for (int i = 0; i < _headers.size(); i++) {
-      Header header = (Header) _headers.get(i);
+    for (int i = 0; i < headers.size(); i++) {
+      Header header = (Header) headers.get(i);
 
       if (isNameInArray(header.getName(), names)) {
 	String line = header.getName() + ": " + header.getValue();
@@ -215,8 +229,8 @@ public class InternetHeaders {
   {
     Vector list = new Vector();
 
-    for (int i = 0; i < _headers.size(); i++) {
-      Header header = (Header) _headers.get(i);
+    for (int i = 0; i < headers.size(); i++) {
+      Header header = (Header) headers.get(i);
 
       if (! isNameInArray(header.getName(), names)) {
 	String line = header.getName() + ": " + header.getValue();
@@ -237,4 +251,44 @@ public class InternetHeaders {
 
     return false;
   }
+
+  /**
+   * An individual internet header. This class is only used by
+   * subclasses of InternetHeaders.  An InternetHeader object with a
+   * null value is used as a placeholder for headers of that name, to
+   * preserve the order of headers. A placeholder InternetHeader
+   * object with a name of ":" marks the location in the list of
+   * headers where new headers are added by default.  Since: JavaMail
+   * 1.4
+   */
+  protected static final class InternetHeader extends Header
+  {
+    /**
+     * Constructor that takes a line and splits out the header name.
+     */
+    public InternetHeader(String l)
+    {
+      super(null,null);
+      throw new UnsupportedOperationException("not implemented");
+    }
+
+    /**
+     * Constructor that takes a header name and value.
+     */
+    public InternetHeader(String n, String v)
+    {
+      super(null,null);
+      throw new UnsupportedOperationException("not implemented");
+    }
+
+    /**
+     * Return the "value" part of the header line.
+     */
+    public String getValue()
+    {
+      throw new UnsupportedOperationException("not implemented");
+    }
+
+  }
+
 }

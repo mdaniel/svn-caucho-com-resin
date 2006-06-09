@@ -28,6 +28,7 @@
  */
 
 package javax.mail.internet;
+import javax.mail.*;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -56,6 +57,20 @@ public class MimeMessage extends Message {
   protected InternetHeaders headers = new InternetHeaders();
   protected boolean modified;
   protected boolean saved;
+
+  /**
+   * If the data for this message was supplied by an InputStream that
+   * implements the SharedInputStream interface, contentStream is
+   * another such stream representing the content of this message. In
+   * this case, content will be null.  Since: JavaMail 1.2
+   */
+  protected InputStream contentStream;
+
+  /**
+   * The DataHandler object representing this Message's content.
+   */
+  protected DataHandler dh;
+
   
   /**
    * Creates a message with a session
@@ -63,6 +78,71 @@ public class MimeMessage extends Message {
   public MimeMessage(Session session)
   {
     super(session);
+  }
+
+  /**
+   * Constructs a MimeMessage by reading and parsing the data from the
+   * specified MIME InputStream. The InputStream will be left
+   * positioned at the end of the data for the message. Note that the
+   * input stream parse is done within this constructor itself.  This
+   * method is for providers subclassing MimeMessage.  folder - The
+   * containing folder.is - the message input streammsgnum - Message
+   * number of this message within its folder
+   */
+  protected MimeMessage(Folder folder, InputStream is, int msgnum)
+    throws MessagingException
+  {
+    throw new UnsupportedOperationException("not implemented");
+  }
+
+  /**
+   * Constructs an empty MimeMessage object with the given Folder and
+   * message number.  This method is for providers subclassing
+   * MimeMessage.
+   */
+  protected MimeMessage(javax.mail.Folder folder, int msgnum){
+    throw new UnsupportedOperationException("not implemented");
+  }
+
+  /**
+   * Constructs a MimeMessage from the given InternetHeaders object
+   * and content. This method is for providers subclassing
+   * MimeMessage.  folder - The containing folder.headers - The
+   * headerscontent - The message contentmsgnum - Message number of
+   * this message within its folder
+   */
+  protected MimeMessage(Folder folder,
+			InternetHeaders headers,
+			byte[] content, int msgnum)
+    throws javax.mail.MessagingException
+  {
+    throw new UnsupportedOperationException("not implemented");
+  }
+
+  /**
+   * Constructs a new MimeMessage with content initialized from the
+   * source MimeMessage. The new message is independent of the
+   * original.  Note: The current implementation is rather
+   * inefficient, copying the data more times than strictly necessary.
+   * source - the message to copy content from JavaMail 1.2
+   */
+  public MimeMessage(MimeMessage source) throws MessagingException
+  {
+    throw new UnsupportedOperationException("not implemented");
+  }
+
+  /**
+   * Constructs a MimeMessage by reading and parsing the data from the
+   * specified MIME InputStream. The InputStream will be left
+   * positioned at the end of the data for the message. Note that the
+   * input stream parse is done within this constructor itself.  The
+   * input stream contains an entire MIME formatted message with
+   * headers and data.  session - Session object for this messageis -
+   * the message input stream
+   */
+  public MimeMessage(Session session, InputStream is) throws MessagingException
+  {
+    throw new UnsupportedOperationException("not implemented");
   }
 
   /**

@@ -42,9 +42,36 @@ import javax.activation.DataHandler;
 import javax.mail.search.SearchTerm;
 
 /**
- * Represents a mail message.
+ * This class models an email message. This is an abstract
+ * class. Subclasses provide actual implementations.
+ *
+ * Message implements the Part interface. Message contains a set of
+ * attributes and a "content". Messages within a folder also have a
+ * set of flags that describe its state within the folder.
+ *
+ * Message defines some new attributes in addition to those defined in
+ * the Part interface. These attributes specify meta-data for the
+ * message - i.e., addressing and descriptive information about the
+ * message.
+ *
+ * Message objects are obtained either from a Folder or by
+ * constructing a new Message object of the appropriate
+ * subclass. Messages that have been received are normally retrieved
+ * from a folder named "INBOX".
+ *
+ * A Message object obtained from a folder is just a lightweight
+ * reference to the actual message. The Message is 'lazily' filled up
+ * (on demand) when each item is requested from the message. Note that
+ * certain folder implementations may return Message objects that are
+ * pre-filled with certain user-specified items. To send a message, an
+ * appropriate subclass of Message (e.g., MimeMessage) is
+ * instantiated, the attributes and content are filled in, and the
+ * message is sent using the Transport.send method.
+ *
+ * See Also:Part
  */
 public abstract class Message implements Part {
+
   /**
    * True if the message has been expunged.
    */
@@ -306,7 +333,19 @@ public abstract class Message implements Part {
   }
 
   /**
-   * The recipient type of a message.
+   * This inner class defines the types of recipients allowed by the
+   * Message class. The currently defined types are TO, CC and
+   * BCC. Note that this class only has a protected constructor,
+   * thereby restricting new Recipient types to either this class or
+   * subclasses. This effectively implements an enumeration of the
+   * allowed Recipient types. The following code sample shows how to
+   * use this class to obtain the "TO" recipients from a message.
+   *
+   * See Also:Message.getRecipients(javax.mail.Message.RecipientType),
+   * Message.setRecipients(javax.mail.Message.RecipientType,
+   * javax.mail.Address[]),
+   * Message.addRecipients(javax.mail.Message.RecipientType,
+   * javax.mail.Address[]), Serialized Form
    */
   public static class RecipientType implements java.io.Serializable {
     public static final RecipientType BCC = new RecipientType("Bcc");

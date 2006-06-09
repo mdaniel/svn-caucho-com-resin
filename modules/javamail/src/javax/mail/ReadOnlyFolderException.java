@@ -52,4 +52,12 @@ public class ReadOnlyFolderException extends MessagingException {
 
     this.folder = folder;
   }
+
+  /**
+   * Returns the dead Folder object.
+   */
+  public Folder getFolder()
+  {
+    return folder;
+  }
 }

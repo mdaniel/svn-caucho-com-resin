@@ -28,6 +28,7 @@
  */
 
 package javax.mail.event;
+import javax.mail.*;
 
 import javax.mail.Message;
 import javax.mail.Folder;

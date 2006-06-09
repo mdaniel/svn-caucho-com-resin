@@ -69,4 +69,12 @@ public class FolderNotFoundException extends MessagingException {
 
     this.folder = folder;
   }
+
+  /**
+   * Returns the offending Folder object.
+   */
+  public Folder getFolder()
+  {
+    throw new UnsupportedOperationException("not implemented");
+  }
 }

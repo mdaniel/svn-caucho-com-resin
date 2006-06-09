@@ -30,11 +30,33 @@
 package javax.mail;
 
 /**
- * Represents a mail address.
+ * This abstract class models the addresses in a message. Subclasses
+ * provide specific implementations. Subclasses will typically be
+ * serializable so that (for example) the use of Address objects in
+ * search terms can be serialized along with the search terms.  See
+ * Also:Serialized Form
  */
 public abstract class Address implements java.io.Serializable {
+
+  /**
+   * The equality operator. Subclasses should provide an
+   * implementation of this method that supports value equality (do
+   * the two Address objects represent the same destination?), not
+   * object reference equality. A subclass must also provide a
+   * corresponding implementation of the hashCode method that
+   * preserves the general contract of equals and hashCode - objects
+   * that compare as equal must have the same hashCode.
+   */
+  public abstract boolean equals(java.lang.Object address);
+
   /**
    * Returns the address type.
    */
   public abstract String getType();
+
+  /**
+   * Return a String representation of this address object.
+   */
+  public abstract String toString();
+
 }

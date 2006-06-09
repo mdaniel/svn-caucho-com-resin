@@ -32,7 +32,27 @@ package javax.mail;
 import java.util.ArrayList;
 
 /**
- * Represents attributes the message wants to prefetch.
+ * Clients use a FetchProfile to list the Message attributes that it
+ * wishes to prefetch from the server for a range of messages.
+ *
+ * Messages obtained from a Folder are light-weight objects that
+ * typically start off as empty references to the actual
+ * messages. Such a Message object is filled in "on-demand" when the
+ * appropriate get*() methods are invoked on that particular
+ * Message. Certain server-based message access protocols (Ex: IMAP)
+ * allow batch fetching of message attributes for a range of messages
+ * in a single request. Clients that want to use message attributes
+ * for a range of Messages (Example: to display the top-level headers
+ * in a headerlist) might want to use the optimization provided by
+ * such servers. The FetchProfile allows the client to indicate this
+ * desire to the server.
+ *
+ * Note that implementations are not obligated to support
+ * FetchProfiles, since there might be cases where the backend service
+ * does not allow easy, efficient fetching of such profiles.
+ *
+ * Sample code that illustrates the use of a FetchProfile is given below:
+ * See Also:Folder.fetch(javax.mail.Message[], javax.mail.FetchProfile)
  */
 public class FetchProfile {
   private ArrayList _items = new ArrayList();
@@ -114,6 +134,15 @@ public class FetchProfile {
     return headers;
   }
 
+  /**
+   * This inner class is the base class of all items that can be
+   * requested in a FetchProfile. The items currently defined here
+   * are ENVELOPE, CONTENT_INFO and FLAGS. The UIDFolder interface
+   * defines the UID Item as well.  Note that this class only has a
+   * protected constructor, therby restricting new Item types to
+   * either this class or subclasses. This effectively implements a
+   * enumeration of allowed Item types.  See Also:UIDFolder
+   */
   public static class Item {
     private static final Item ENVELOPE
       = new Item(new String [] {
@@ -129,7 +158,13 @@ public class FetchProfile {
     
     private String []_headers;
 
-    protected Item(String []headers)
+    protected Item(String headers)
+    {
+      // XXX this function declaration was wrong
+      throw new UnsupportedOperationException("unimplemented");
+    }
+
+    Item(String[] headers)
     {
       _headers = headers;
     }

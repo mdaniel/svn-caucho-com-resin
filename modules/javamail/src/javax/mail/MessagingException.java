@@ -74,4 +74,24 @@ public class MessagingException extends Exception {
 
     return true;
   }
+
+  /**
+   * Overrides the getCause method of Throwable to return the next
+   * exception in the chain of nested exceptions.
+   */
+  public Throwable getCause()
+  {
+    return getNextException();
+  }
+
+  /**
+   * Override toString method to provide information on nested
+   * exceptions.
+   */
+  public String toString()
+  {
+    // XXX:
+    return super.toString();
+  }
+
 }

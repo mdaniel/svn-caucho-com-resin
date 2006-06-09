@@ -28,6 +28,7 @@
  */
 
 package javax.mail.event;
+import javax.mail.*;
 
 /**
  * Represents a store event.

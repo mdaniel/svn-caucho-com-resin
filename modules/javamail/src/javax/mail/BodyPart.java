@@ -27,10 +27,19 @@
  */
 
 package javax.mail;
+
 /**
- * Represents part of a mail message.
+ * This class models a Part that is contained within a Multipart. This
+ * is an abstract class. Subclasses provide actual implementations.
+ * BodyPart implements the Part interface. Thus, it contains a set of
+ * attributes and a "content".
  */
 public abstract class BodyPart implements Part {
+
+  /**
+   * The Multipart object containing this BodyPart, if known.
+   * Since: JavaMail 1.1
+   */
   protected Multipart parent;
 
   /**

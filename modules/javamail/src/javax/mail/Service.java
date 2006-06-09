@@ -28,6 +28,8 @@
  */
 
 package javax.mail;
+import java.util.Vector;
+import javax.mail.event.*;
 
 /**
  * Represents a mail service
@@ -132,5 +134,94 @@ public abstract class Service {
     throws MessagingException
   {
     setConnected(false);
+  }
+
+  /**
+   * Add a listener for Connection events on this service.  The
+   * default implementation provided here adds this listener to an
+   * internal list of ConnectionListeners.
+   */
+  public void addConnectionListener(ConnectionListener l){
+    throw new UnsupportedOperationException("not implemented");
+  }
+  
+
+  /**
+   * Stop the event dispatcher thread so the queue can be garbage
+   * collected.
+   */
+  protected void finalize() throws Throwable
+  {
+    throw new UnsupportedOperationException("not implemented");
+  }
+
+  /**
+   * Return a URLName representing this service. The returned
+   * URLName does not include the password field.  Subclasses should
+   * only override this method if their URLName does not follow the
+   * standard format.  The implementation in the Service class
+   * returns (usually a copy of) the url field with the password and
+   * file information stripped out.
+   */
+  public URLName getURLName(){
+    throw new UnsupportedOperationException("not implemented");
+  }
+
+  /**
+   * Notify all ConnectionListeners. Service implementations are
+   * expected to use this method to broadcast connection events.
+   * The provided default implementation queues the event into an
+   * internal event queue. An event dispatcher thread dequeues
+   * events from the queue and dispatches them to the registered
+   * ConnectionListeners. Note that the event dispatching occurs in
+   * a separate thread, thus avoiding potential deadlock problems.
+   */
+  protected void notifyConnectionListeners(int type){
+    throw new UnsupportedOperationException("not implemented");
+  }
+
+  /**
+   * Add the event and vector of listeners to the queue to be delivered.
+   */
+  protected void queueEvent(MailEvent event, Vector vector)
+  {
+    throw new UnsupportedOperationException("not implemented");
+  }
+
+  /**
+   * Remove a Connection event listener.  The default implementation
+   * provided here removes this listener from the internal list of
+   * ConnectionListeners.
+   */
+  public void removeConnectionListener(ConnectionListener l)
+  {
+    throw new UnsupportedOperationException("not implemented");
+  }
+
+  /**
+   * Set the URLName representing this service. Normally used to
+   * update the url field after a service has successfully connected.
+   * Subclasses should only override this method if their URL does not
+   * follow the standard format. In particular, subclasses should
+   * override this method if their URL does not require all the
+   * possible fields supported by URLName; a new URLName should be
+   * constructed with any unneeded fields removed.  The implementation
+   * in the Service class simply sets the url field.
+   */
+  protected void setURLName(javax.mail.URLName url)
+  {
+    throw new UnsupportedOperationException("not implemented");
+  }
+
+  /**
+   * Return getURLName.toString() if this service has a URLName,
+   * otherwise it will return the default toString.
+   */
+  public String toString()
+  {
+    if (getURLName()!=null)
+      return getURLName().toString();
+
+    return super.toString();
   }
 }

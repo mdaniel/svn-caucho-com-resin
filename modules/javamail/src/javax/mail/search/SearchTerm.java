@@ -28,6 +28,7 @@
  */
 
 package javax.mail.search;
+import javax.mail.*;
 
 import javax.mail.Message;
 
