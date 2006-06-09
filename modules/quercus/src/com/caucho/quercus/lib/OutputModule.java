@@ -32,7 +32,6 @@ package com.caucho.quercus.lib;
 import java.io.StringWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ByteArrayInputStream;
 
 import java.util.Map;
 import java.util.HashMap;

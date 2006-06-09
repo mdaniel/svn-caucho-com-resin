@@ -69,6 +69,8 @@ public class ClusterServer {
   private int _srunIndex;
   private Path _tcpPath;
 
+  private long _loadBalanceWeight;
+
   private ClusterClient _client;
 
   private ClusterClientAdmin _admin;
@@ -231,6 +233,22 @@ public class ClusterServer {
   public long getFailRecoverTime()
   {
     return _cluster.getClientFailRecoverTime();
+  }
+
+  /**
+   * Sets the load balance weight.
+   */
+  public void setLoadBalanceWeight(long weight)
+  {
+    _loadBalanceWeight = weight;
+  }
+
+  /**
+   * Returns the load balance weight.
+   */
+  public long getLoadBalanceWeight()
+  {
+    return _loadBalanceWeight;
   }
 
   /**
