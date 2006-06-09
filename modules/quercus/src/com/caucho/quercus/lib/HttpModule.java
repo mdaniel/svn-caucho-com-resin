@@ -29,21 +29,19 @@
 
 package com.caucho.quercus.lib;
 
-import java.io.IOException;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Cookie;
-
-import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
-
 import com.caucho.quercus.QuercusModuleException;
-
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.Reference;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
 
-import com.caucho.quercus.env.*;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * PHP HTTP functions
@@ -143,7 +141,7 @@ public class HttpModule extends AbstractQuercusModule {
     if (value == null || value.equals(""))
       value = "";
 
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     int len = value.length();
     for (int i = 0; i < len; i++) {
       char ch = value.charAt(i);

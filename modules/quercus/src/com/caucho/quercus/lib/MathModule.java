@@ -151,7 +151,7 @@ public class MathModule extends AbstractQuercusModule {
     if (result == 0)
       return new StringValueImpl("0");
 
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
 
     do {
       int d = (int) (result % toBase);

@@ -29,11 +29,45 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.java.LineMap;
+import com.caucho.java.ScriptStackTrace;
+import com.caucho.java.WorkDir;
+import com.caucho.loader.SimpleLoader;
+import com.caucho.quercus.*;
+import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.lib.VariableModule;
+import com.caucho.quercus.lib.session.SessionModule;
+import com.caucho.quercus.module.Marshall;
+import com.caucho.quercus.module.ModuleContext;
+import com.caucho.quercus.page.QuercusPage;
+import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.program.ClassDef;
+import com.caucho.quercus.program.JavaClassDef;
+import com.caucho.quercus.program.QuercusProgram;
+import com.caucho.quercus.resources.StreamContextResource;
+import com.caucho.sql.DatabaseManager;
+import com.caucho.util.Alarm;
+import com.caucho.util.IntMap;
+import com.caucho.util.L10N;
+import com.caucho.util.Log;
+import com.caucho.util.LruCache;
+import com.caucho.util.URLUtil;
+import com.caucho.vfs.ByteToChar;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
+
+import javax.script.ScriptContext;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
 import java.io.Closeable;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 import java.sql.Connection;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,58 +75,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
-
-import javax.script.ScriptContext;
-
-import java.lang.ref.WeakReference;
-
-import com.caucho.java.LineMap;
-import com.caucho.java.ScriptStackTrace;
-import com.caucho.java.WorkDir;
-import com.caucho.loader.SimpleLoader;
-
-import com.caucho.quercus.Quercus;
-import com.caucho.quercus.QuercusException;
-import com.caucho.quercus.QuercusDieException;
-import com.caucho.quercus.QuercusExitException;
-import com.caucho.quercus.QuercusRuntimeException;
-import com.caucho.quercus.QuercusModuleException;
-import com.caucho.quercus.Location;
-
-import com.caucho.quercus.module.Marshall;
-import com.caucho.quercus.module.ModuleContext;
-
-import com.caucho.quercus.expr.Expr;
-
-import com.caucho.quercus.lib.session.SessionModule;
-import com.caucho.quercus.lib.string.StringModule;
-import com.caucho.quercus.lib.VariableModule;
-import com.caucho.quercus.page.QuercusPage;
-
-import com.caucho.quercus.program.ClassDef;
-import com.caucho.quercus.program.JavaClassDef;
-import com.caucho.quercus.program.AbstractFunction;
-import com.caucho.quercus.program.QuercusProgram;
-
-import com.caucho.quercus.resources.StreamContextResource;
-
-import com.caucho.sql.DatabaseManager;
-import com.caucho.util.Alarm;
-import com.caucho.util.IntMap;
-import com.caucho.util.LruCache;
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
-import com.caucho.util.URLUtil;
-import com.caucho.vfs.ByteToChar;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
 
 /**
  * Represents the Quercus environment.
@@ -242,7 +224,7 @@ public final class Env {
   private WriteStream _originalOut;
   private OutputBuffer _outputBuffer;
   private OutputBuffer _bottomOutputBuffer;
-  private StringBuffer _rewriteQuery = new StringBuffer();
+  private StringBuilder _rewriteQuery = new StringBuilder();
   private ArrayList<String[]> _rewriteVars = new ArrayList<String[]>();
 
   private WriteStream _out;
@@ -693,7 +675,7 @@ public final class Env {
    */
   public void resetRewriteVars()
   {
-    _rewriteQuery = new StringBuffer();
+    _rewriteQuery = new StringBuilder();
     _rewriteVars.clear();
   }
 

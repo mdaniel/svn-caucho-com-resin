@@ -103,7 +103,7 @@ public class Xml {
 
   SAXParserFactory _factory = SAXParserFactory.newInstance();
 
-  private StringBuffer _xmlString = new StringBuffer();
+  private StringBuilder _xmlString = new StringBuilder();
 
   public Xml(Env env,
              String outputEncoding,
