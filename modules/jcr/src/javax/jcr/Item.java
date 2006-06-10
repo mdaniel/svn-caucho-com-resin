@@ -97,7 +97,6 @@ public interface Item {
   /**
    * Returns true if the item is identical to another item.
    */
-   */
   public boolean isSame(Item otherItem)
     throws RepositoryException;
 
