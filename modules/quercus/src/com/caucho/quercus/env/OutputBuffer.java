@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.env;
 
+import java.util.logging.Logger;
+
 import java.io.IOException;
 
 import com.caucho.vfs.WriteStream;
@@ -45,32 +47,34 @@ public class OutputBuffer {
   public static final int PHP_OUTPUT_HANDLER_CONT = 1;
   public static final int PHP_OUTPUT_HANDLER_END = 2;
 
+  private static final Logger log
+    = Logger.getLogger(OutputBuffer.class.getName());
+
   private int _state;
   private boolean _haveFlushed;
+  private Callback _callback;
   
   private final boolean _erase;
   private final int _chunkSize;
   private final int _level;
 
-  private OutputBuffer _previous;
   private final OutputBuffer _next;
 
   private final TempStream _tempStream;
   private final WriteStream _out;
 
   private final Env _env;
-  private final Callback _callback;
 
   OutputBuffer(OutputBuffer next, Env env, Callback callback, 
                int chunkSize, boolean erase)
   {
     _next = next;
-    if (_next != null) {
-        _level = _next._level + 1;
-        _next._previous = this;
-    } else {
-        _level = 1;
-    }
+
+    if (_next != null)
+      _level = _next._level + 1;
+    else
+      _level = 1;
+
     _erase = erase;
     _chunkSize = chunkSize;
 
@@ -92,14 +96,6 @@ public class OutputBuffer {
   }
 
   /**
-   * Returns the next output buffer;
-   */
-  public OutputBuffer getPrevious()
-  {
-    return _previous;
-  }
-
-  /**
    * Returns the writer.
    */
   public WriteStream getOut()
@@ -116,15 +112,15 @@ public class OutputBuffer {
       _out.flush();
 
       ReadStream rs = _tempStream.openRead(false);
-      StringBuilder sb = new StringBuilder();
+      BinaryBuilderValue bb = new BinaryBuilderValue();
       int ch;
 
       // XXX: encoding
       while ((ch = rs.read()) >= 0) {
-        sb.append((char) ch);
+        bb.append(ch);
       }
 
-      return new StringValueImpl(sb.toString());
+      return new StringValueImpl(bb.toString());
     } catch (IOException e) {
       _env.error(e.toString(), e);
 
@@ -135,16 +131,16 @@ public class OutputBuffer {
   /**
    * Returns the buffer length.
    */
-  public Value getLength()
+  public long getLength()
   {
     try {
       _out.flush();
 
-      return new LongValue(_tempStream.getLength());
+      return (long)_tempStream.getLength();
     } catch (IOException e) {
       _env.error(e.toString(), e);
 
-      return BooleanValue.FALSE;
+      return -1L;
     }
   }
 
@@ -233,7 +229,13 @@ public class OutputBuffer {
     if (_callback != null) {
       Value result = 
         _callback.call(_env, getContents(), LongValue.create(_state));
+
+      // special code to do nothing to the buffer
+      if (result.isNull())
+        return;
+      
       clean();
+
       try {
         _out.print(result.toString(_env).toString());
       } catch (IOException e) {
@@ -249,11 +251,15 @@ public class OutputBuffer {
   public void flush()
   {
     _state |= 1 << PHP_OUTPUT_HANDLER_CONT;
+
     callCallback();
+
     // clear the start and cont flags
     _state &= ~(1 << PHP_OUTPUT_HANDLER_START);
     _state &= ~(1 << PHP_OUTPUT_HANDLER_CONT);
+
     doFlush();
+
     _haveFlushed = true;
   }
 
@@ -263,17 +269,29 @@ public class OutputBuffer {
   public void close()
   {
     _state |= 1 << PHP_OUTPUT_HANDLER_END;
+
     callCallback();
+    
     // all data that has and ever will be written has now been processed
     _state = 0; 
+
     doFlush();
-    if (_next != null)
-      _next._previous = null;
   }
 
+  /**
+   * Returns the callback for this output buffer.
+   */
   public Callback getCallback()
   {
     return _callback;
+  }
+
+  /**
+   * Sets the callback for this output buffer.
+   */
+  public void setCallback(Callback callback)
+  {
+    _callback = callback;
   }
 }
 

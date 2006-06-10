@@ -59,7 +59,6 @@ import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Callback;
-import com.caucho.quercus.env.CallbackFunction;
 import com.caucho.quercus.env.SessionArrayValue;
 import com.caucho.quercus.env.SessionCallback;
 
@@ -454,12 +453,7 @@ public class SessionModule extends AbstractQuercusModule {
       env.addConstant("SID", new StringValueImpl(cookieName + '=' + sessionId), 
                       false);
 
-      StaticFunction urlRewriterFunction= 
-        env.getQuercus().findFunction("_internal_url_rewriter");
-      // Change the name to be compatible with PHP
-      Callback urlRewriter = 
-        new CallbackFunction(urlRewriterFunction, "URL-Rewriter");
-      OutputModule.ob_start(env, urlRewriter, 0, true);
+      OutputModule.pushUrlRewriter(env);
     } else {
       //
       // Use cookies to transmit session id

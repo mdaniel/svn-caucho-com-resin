@@ -40,16 +40,6 @@ import java.util.logging.Logger;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Element;
-
-import org.xml.sax.SAXException;
-
-import com.caucho.xml.LooseHtml;
-import com.caucho.xml.XmlPrinter;
-
 import com.caucho.util.L10N;
 
 import com.caucho.quercus.QuercusModuleException;
@@ -83,13 +73,18 @@ public class OutputModule extends AbstractQuercusModule {
   private static final L10N L = new L10N(OutputModule.class);
   private static final Logger log
     = Logger.getLogger(OutputModule.class.getName());
+  private static final StringValue HTTP_ACCEPT_ENCODING = 
+      new StringValueImpl("HTTP_ACCEPT_ENCODING");
 
   /**
-   * Sets the implicit flush.
+   * Flushes the original output buffer.
    */
   public Value flush(Env env)
   {
-    env.flush();
+    try {
+      env.getOriginalOut().flush();
+    } catch (IOException e) {
+    }
 
     return NullValue.NULL;
   }
@@ -206,7 +201,7 @@ public class OutputModule extends AbstractQuercusModule {
     OutputBuffer ob = env.getOutputBuffer();
 
     if (ob != null)
-      return ob.getLength();
+      return LongValue.create(ob.getLength());
     else
       return BooleanValue.FALSE;
   }
@@ -225,22 +220,112 @@ public class OutputModule extends AbstractQuercusModule {
   }
 
   /**
+   * Helper recursive function that ensures the handlers are listed
+   * in the correct order in the array.
+   */
+  private static void listHandlers(OutputBuffer ob, ArrayValue handlers)
+  {
+    if (ob == null)
+      return;
+
+    listHandlers(ob.getNext(), handlers);
+
+    Callback callback = ob.getCallback();
+
+    if (callback != null) 
+      handlers.put(new StringValueImpl(callback.getCallbackName()));
+    else
+      handlers.put(new StringValueImpl("default output handler"));
+  }
+  
+  /**
    * Returns a list of all the output handlers in use.
    */
   public static Value ob_list_handlers(Env env)
   {
-    OutputBuffer ob = env.getBottomOutputBuffer();
+    OutputBuffer ob = env.getOutputBuffer();
     ArrayValue handlers = new ArrayValueImpl();
 
-    for (; ob != null; ob = ob.getPrevious()) {
-      Callback callback = ob.getCallback();
-      if (callback != null) 
-        handlers.put(new StringValueImpl(callback.getCallbackName()));
-      else
-        handlers.put(new StringValueImpl("default output handler".intern()));
-    }
+    listHandlers(ob, handlers);
 
     return handlers;
+  }
+
+  /**
+   * Inserts the common values for ob_get_status into an array.  Used
+   * by getFullStatus() and ob_get_status().
+   */
+  private static void putCommonStatus(ArrayValue element, OutputBuffer ob,
+                                      Env env, boolean fullStatus)
+  {
+    LongValue type = LongValue.ONE;
+    Callback callback = ob.getCallback();
+
+    if (callback != null && callback.isInternal())
+      type = LongValue.ZERO;
+
+    element.put(new StringValueImpl("type"), type);
+
+    // the rewriter is a special case where it includes a field
+    // "buffer_size" right in the middle of the common elements, 
+    // but only when called with full status.  It appears always 
+    // to be 0 and there is no interface to change this buffer_size
+    // and no indication of its meaning.
+    if (fullStatus && callback != null &&
+        callback == UrlRewriterCallback.getInstance(env))
+      element.put(new StringValueImpl("buffer_size"), LongValue.ZERO);
+
+    // Technically, there are supposed to be three possible values
+    // for status: 
+    //   0 if the stream has never been flushed (PHP_OUTPUT_HANDLER_START)
+    //   1 if the stream has been flushed (PHP_OUTPUT_HANDLER_CONT)
+    //   2 if the stream was flushed at the end (PHP_OUTPUT_HANDLER_END)
+    // However, there is no way to access the buffer after it has ended, 
+    // so the final case doesn't seem to be an issue!  (Even calling
+    // ob_get_status() in the handler on a ob_end_flush() does not
+    // invoke this state.)
+    LongValue status = ob.haveFlushed() ? LongValue.ONE : LongValue.ZERO;
+    element.put(new StringValueImpl("status"), status);
+
+    StringValue name;
+
+    if (callback != null)
+      name = new StringValueImpl(callback.getCallbackName());
+    else
+      name = new StringValueImpl("default output handler".intern());
+
+    element.put(new StringValueImpl("name".intern()), name);
+
+    Value del = ob.getEraseFlag() ? BooleanValue.TRUE : 
+      BooleanValue.FALSE;
+    element.put(new StringValueImpl("del"), del);
+  }
+
+  /**
+   * Gets the status for all the output buffers on the stack.
+   * Recursion ensures the results are ordered correctly in the array.
+   */
+  private static void getFullStatus(OutputBuffer ob, Env env, ArrayValue result)
+  {
+    if (ob == null)
+      return;
+
+    getFullStatus(ob.getNext(), env, result);
+
+    ArrayValue element = new ArrayValueImpl();
+
+    element.put(new StringValueImpl("chunk_size"), 
+                LongValue.create(ob.getChunkSize()));
+    
+    // XXX: Not sure why we even need to list a size -- PHP doesn't 
+    // even seem to respect it.  -1 => infinity?  
+    // (Note: "size" == "capacity")
+    element.put(new StringValueImpl("size"), LongValue.create(-1));
+    element.put(new StringValueImpl("block_size"), LongValue.create(-1));
+
+    putCommonStatus(element, ob, env, true);
+   
+    result.put(element);
   }
 
   /**
@@ -248,86 +333,26 @@ public class OutputModule extends AbstractQuercusModule {
    */ 
   public static Value ob_get_status(Env env, @Optional boolean full_status)
   {
-    OutputBuffer ob;
-    if (full_status)
-      ob = env.getBottomOutputBuffer();
-    else 
-      ob = env.getOutputBuffer();
+    if (full_status) {
+      OutputBuffer ob = env.getOutputBuffer();
+      ArrayValue result = new ArrayValueImpl();
 
+      getFullStatus(ob, env, result);
+
+      return result;
+    }
+
+    OutputBuffer ob = env.getOutputBuffer();
     ArrayValue result = new ArrayValueImpl();
 
     if (ob != null) {
-      if (full_status) {
-        for (; ob != null; ob = ob.getPrevious()) {
-          ArrayValue element = new ArrayValueImpl();
+      result.put(new StringValueImpl("level"), 
+                 LongValue.create(ob.getLevel()));
 
-          element.put(new StringValueImpl("chunk_size"), 
-                      LongValue.create(ob.getChunkSize()));
-          
-          // XXX: Not sure why we even need to list a size -- c-php doesn't 
-          // even seem to respect it.  -1 => infinity?  
-          // (Note: "size" == "capacity")
-          element.put(new StringValueImpl("size"), LongValue.create(-1));
-          element.put(new StringValueImpl("block_size"), LongValue.create(-1));
+      putCommonStatus(result, ob, env, false);
+    }
 
-          LongValue type = LongValue.ONE;
-          Callback callback = ob.getCallback();
-          if (callback != null && callback.isInternal()) {
-            type = LongValue.ZERO;
-          }
-          element.put(new StringValueImpl("type"), type);
-
-          // Technically, there are supposed to be three possible values
-          // for status: 
-          //   0 if the stream has never been flushed (PHP_OUTPUT_HANDLER_START)
-          //   1 if the stream has been flushed (PHP_OUTPUT_HANDLER_CONT)
-          //   2 if the stream was flushed at the end (PHP_OUTPUT_HANDLER_END)
-          // However, there is no way to access the buffer after it has ended, 
-          // so the final case doesn't seem to be an issue!  (Even calling
-          // ob_get_status() in the handler on a ob_end_flush() does not
-          // invoke this state.)
-          LongValue status = ob.haveFlushed() ? LongValue.ONE : LongValue.ZERO;
-          element.put(new StringValueImpl("status"), status);
-
-          StringValue name;
-          if (callback != null)
-            name = new StringValueImpl(callback.getCallbackName());
-          else
-            name = new StringValueImpl("default output handler".intern());
-          element.put(new StringValueImpl("name".intern()), name);
-
-          Value del = ob.getEraseFlag() ? BooleanValue.TRUE : 
-                                          BooleanValue.FALSE;
-          element.put(new StringValueImpl("del"), del);
-          
-          result.put(element);
-        }
-      } else {
-        result.put(new StringValueImpl("level"), 
-                   LongValue.create(ob.getLevel()));
-
-        LongValue type = LongValue.ONE;
-        Callback callback = ob.getCallback();
-        if (callback != null && callback.isInternal()) {
-          type = LongValue.ZERO;
-        }
-        result.put(new StringValueImpl("type"), type);
-
-        LongValue status = ob.haveFlushed() ? LongValue.ONE : LongValue.ZERO;
-        result.put(new StringValueImpl("status"), status);
-
-        StringValue name;
-        if (callback != null)
-          name = new StringValueImpl(callback.getCallbackName());
-        else
-          name = new StringValueImpl("default output handler".intern());
-        result.put(new StringValueImpl("name".intern()), name);
-
-        Value del = ob.getEraseFlag() ? BooleanValue.TRUE : BooleanValue.FALSE;
-        result.put(new StringValueImpl("del"), del);
-      }
-    } // returns an empty array when no output buffer exists
-
+    // returns an empty array when no output buffer exists
     return result;
   }
 
@@ -354,32 +379,38 @@ public class OutputModule extends AbstractQuercusModule {
   }
 
   /**
+   * Pushes a new UrlRewriter callback onto the output buffer stack
+   * if one does not already exist.
+   */
+  public static UrlRewriterCallback pushUrlRewriter(Env env)
+  {
+    UrlRewriterCallback rewriter = UrlRewriterCallback.getInstance(env);
+
+    if (rewriter == null) {
+      OutputBuffer ob = env.getOutputBuffer();
+      rewriter = new UrlRewriterCallback(env);
+
+      // PHP installs the URL rewriter into the top output buffer if
+      // its callback is null
+      if (ob != null && ob.getCallback() == null)
+        ob.setCallback(rewriter);
+      else 
+        ob_start(env, rewriter, 0, true);
+    }
+
+    return rewriter;
+  }
+
+  /**
    * Adds a variable to the list for rewritten URLs.
    */
   public static boolean output_add_rewrite_var(Env env, 
                                                String name, String value)
   {
-    boolean pushUrlRewriter = true;
-    OutputBuffer ob = env.getOutputBuffer();
-    for (; ob != null; ob = ob.getNext()) {
-      Callback callback = ob.getCallback();
-      if (callback != null && 
-          "URL-Rewriter".equals(callback.getCallbackName()) && 
-          callback.isInternal()) {
-        pushUrlRewriter = false;
-      }
-    }
+    UrlRewriterCallback rewriter = pushUrlRewriter(env);
+   
+    rewriter.addRewriterVar(name, value);
 
-    if (pushUrlRewriter) {
-      StaticFunction urlRewriterFunction= 
-        env.getQuercus().findFunction("_internal_url_rewriter");
-      // Change the name to be compatible with PHP
-      Callback urlRewriter = 
-        new CallbackFunction(urlRewriterFunction, "URL-Rewriter");
-      ob_start(env, urlRewriter, 0, true);
-    }
-    
-    env.addRewriteVar(name, value);
     return true;
   }
 
@@ -388,7 +419,10 @@ public class OutputModule extends AbstractQuercusModule {
    */
   public static boolean output_reset_rewrite_vars(Env env)
   {
-    env.resetRewriteVars();
+    UrlRewriterCallback rewriter = UrlRewriterCallback.getInstance(env); 
+
+    rewriter.resetRewriterVars();
+
     return true;
   }
 
@@ -402,16 +436,15 @@ public class OutputModule extends AbstractQuercusModule {
    */
   public static Value ob_gzhandler(Env env, StringValue buffer, int mode)
   {
-    final StringValue HTTP_ACCEPT_ENCODING = 
-      new StringValueImpl("HTTP_ACCEPT_ENCODING");
-
     Encoding encoding = Encoding.NONE;
     Value _SERVER = env.getSpecialRef("_SERVER");
 
     String [] acceptedList = 
       _SERVER.get(HTTP_ACCEPT_ENCODING).toString().split(",");
+
     for (String accepted : acceptedList) {
       accepted = accepted.trim();
+
       if (accepted.equalsIgnoreCase("gzip")) {
         encoding = Encoding.GZIP;
         break;
@@ -435,222 +468,5 @@ public class OutputModule extends AbstractQuercusModule {
     }
     
     return buffer;
-  }
-
-  private static class Token {
-    private int _startPosition;
-    private int _endPosition;
-    private String _token;
-
-    public Token(String token, int startPosition, int endPosition) 
-    {
-      _token = token;
-      _startPosition = startPosition;
-      _endPosition = endPosition;
-    }
-
-    public int getStartPosition()
-    {
-      return _startPosition;
-    }
-
-    public int getEndPosition()
-    {
-      return _endPosition;
-    }
-
-    public String getToken()
-    {
-      return _token;
-    }
-
-    /**
-     * Helper function for the URL rewriter below.
-     */
-    public static Token nextToken(StringBuffer buffer, 
-                                   int startPosition, int endIndex)
-    {
-      while (startPosition < endIndex && startPosition < buffer.length() &&
-             Character.isWhitespace(buffer.charAt(startPosition))) {
-        startPosition++;
-      }
-      int endPosition = startPosition;
-      while (endPosition < endIndex && endPosition < buffer.length() &&
-             !Character.isWhitespace(buffer.charAt(endPosition))) {
-        endPosition++;
-      }
-      if (startPosition == endPosition)
-        return null;
-      return new Token(buffer.substring(startPosition, endPosition), 
-                       startPosition, endPosition);
-    }
-    
-    public static Token nextToken(StringBuffer buffer, int startPosition)
-    {
-      return nextToken(buffer, startPosition, Integer.MAX_VALUE);
-    }
-  }
-  
-  /**
-   * Callback function to rewrite URLs to include session information.
-   */
-  public static Value _internal_url_rewriter(Env env, Value buffer)
-  {
-    boolean includeSessionInfo = false;
-    String sessionName = null;
-    String sessionId = null;
-
-    if (env.getSession() != null) {
-      includeSessionInfo = true;
-      sessionName = env.getIni("session.name").toString();
-      sessionId = SessionModule.session_id(env, null);
-    }
-
-    if (includeSessionInfo == false && env.getRewriteVars().isEmpty())
-      return buffer;
-
-    String [] tagPairs = env.getIni("url_rewriter.tags").toString().split(",");
-    HashMap<String,String> tags = new HashMap<String,String>();
-    for (String tagPair : tagPairs) {
-      String [] tagAttribute = tagPair.split("=");
-      switch (tagAttribute.length) {
-        case 1:
-          tags.put(tagAttribute[0], null);
-          break;
-        case 2:
-          tags.put(tagAttribute[0], tagAttribute[1]);
-          break;
-        default:
-          break;
-      }
-    }
-
-    StringBuffer output = new StringBuffer(buffer.toString());
-
-    int [] ref = new int[1];
-    for (int i = 0; i < output.length();) {
-      // get the first token after a '<'
-      i = output.indexOf("<", i);
-      if (i == -1) break;
-      Token token = Token.nextToken(output, i+1);
-      if (token == null) break;
-      i = token.getEndPosition();
-
-      if (tags.containsKey(token.getToken())) {
-        String attribute = tags.get(token.getToken());
-        if (attribute == null) {
-          i = output.indexOf(">", i);
-          if (i == -1) break;
-
-          if (includeSessionInfo) {
-            String inputTag = 
-              "<input type=\"hidden\" name=\"" + sessionName + "\"" +
-              " value=\"" + sessionId + "\" />";
-            output.insert(i+1, inputTag);
-            i += inputTag.length();
-          }
-          for (String[] entry : env.getRewriteVars()) {
-            String inputTag = 
-              "<input type=\"hidden\" name=\"" + entry[0] + "\"" +
-              " value=\"" + entry[1] + "\" />";
-            output.insert(i+1, inputTag);
-            i += inputTag.length();
-          }
-        } else {
-          int tagEnd = output.indexOf(">", i);
-          for (token = Token.nextToken(output, i, tagEnd); 
-               token != null;
-               token = Token.nextToken(output, i, tagEnd)) {
-            i = token.getStartPosition();
-            int j = token.getToken().indexOf("=");
-            if (j == -1) {
-              i = token.getEndPosition();
-              continue;
-            }
-
-            String attributeName = token.getToken().substring(0, j);
-
-            j++; // skip the '='
-
-            // unquote
-            if (token.getToken().charAt(j) == '"' ||
-                token.getToken().charAt(j) == '\'') 
-              j++;
-
-            int valueEnd;
-            int quotePad = 0;
-            if (token.getToken().endsWith("'") ||
-                token.getToken().endsWith("\"")) {
-              valueEnd = token.getToken().length() - 1;
-              quotePad = 1;
-            }
-            else 
-              valueEnd = token.getToken().length();
-
-            String value = token.getToken().substring(j, valueEnd);
-
-            if (attributeName.equalsIgnoreCase(attribute)) {
-              // according to php documentation, it only adds tags to the
-              // end of relative URLs, but according to RFC 2396, any
-              // URI beginning with '/' (e.g. <a href="/foo">link</a>) is
-              // absolute.  Nonetheless, php does add session ids to these
-              // links.  Thus php must be defining "relative" as relative
-              // to the host, not the hierarchy.  Thus we only check to make
-              // sure that the scheme and authority are undefined, not that
-              // the first character of the path begins with '/'.
-
-              URI uri;
-              try {
-                uri = new URI(value);
-              } catch (URISyntaxException e) {
-                i = token.getEndPosition();
-                continue;
-              }
-              if ((uri.getScheme() != null) || (uri.getAuthority() != null)) {
-                i = token.getEndPosition();
-                continue;
-              }
-
-              StringBuffer query = new StringBuffer();
-              if (uri.getQuery() != null) {
-                query.append(uri.getQuery());
-                query.append("&");
-              } 
-              else
-                query.append("?");
-
-              if (includeSessionInfo) {
-                query.append(sessionName);
-                query.append("=");
-                query.append(sessionId);
-              }
-
-              String varsQuery = env.getRewriteVarQuery();
-              if (! "".equals(varsQuery)) {
-                if (includeSessionInfo)
-                  query.append("&");
-                query.append(varsQuery);
-              }
-
-              StringBuffer newUri = new StringBuffer();
-              if (uri.getPath() != null)
-                newUri.append(uri.getPath());
-              newUri.append(query);
-              if (uri.getFragment() != null) {
-                newUri.append("#");
-                newUri.append(uri.getFragment());
-              }
-
-              output.replace(i + j, i + j + value.length(), newUri.toString());
-              i += j + newUri.length() + quotePad;
-            } 
-            else
-              i = token.getEndPosition();
-          }
-        }
-      }
-    }
-
-    return new StringValueImpl(output.toString());
   }
 }

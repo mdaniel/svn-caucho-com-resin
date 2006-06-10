@@ -67,6 +67,15 @@ public class CallbackFunction extends Callback {
     _isInvalid = isInvalid;
   }
   */
+
+  /**
+   * Allow subclasses to set the abstract function directly.
+   */
+  protected void setFunction(AbstractFunction fun)
+  {
+    _fun = fun;
+  }
+  
   public boolean isValid()
   {
     if (_fun != null)

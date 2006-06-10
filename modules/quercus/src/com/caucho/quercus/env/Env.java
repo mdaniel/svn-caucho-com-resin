@@ -223,9 +223,6 @@ public final class Env {
 
   private WriteStream _originalOut;
   private OutputBuffer _outputBuffer;
-  private OutputBuffer _bottomOutputBuffer;
-  private StringBuilder _rewriteQuery = new StringBuilder();
-  private ArrayList<String[]> _rewriteVars = new ArrayList<String[]>();
 
   private WriteStream _out;
 
@@ -600,15 +597,6 @@ public final class Env {
   }
 
   /**
-   * Returns the bottom output buffer.  Necessary for correct output
-   * in functions <code>ob_list_handlers()</code> and <code>ob_status()</code>.
-   */
-  public OutputBuffer getBottomOutputBuffer()
-  {
-    return _bottomOutputBuffer;
-  }
-
-  /**
    * Returns the writer.
    */
   public void pushOutputBuffer(Callback callback, int chunkSize, boolean erase)
@@ -616,7 +604,6 @@ public final class Env {
     if (_outputBuffer == null) {
       _outputBuffer = 
         new OutputBuffer(_outputBuffer, this, callback, chunkSize, erase);
-      _bottomOutputBuffer = _outputBuffer;
     } 
     else
       _outputBuffer = 
@@ -643,48 +630,9 @@ public final class Env {
       _out = _outputBuffer.getOut();
     else {
       _out = _originalOut;
-      _bottomOutputBuffer = null;
     }
 
     return true;
-  }
-
-  public ArrayList<String[]> getRewriteVars()
-  {
-    return _rewriteVars;
-  }
-
-  /**
-   * Returns the query associated with the rewrite variables.
-   * 
-   */
-  public String getRewriteVarQuery()
-  {
-    return _rewriteQuery.toString();
-  }
-
-  /**
-   * Adds a rewrite variable.  Intended for 
-   * <code>output_add_rewrite_var()</code>.
-   */
-  public void addRewriteVar(String var, String value)
-  {
-    if (_rewriteQuery.length() > 0)
-      _rewriteQuery.append("&");
-    String encodedVar = URLUtil.encodeURL(var.replaceAll(" ", "+"));
-    String encodedValue = URLUtil.encodeURL(value.replaceAll(" ", "+"));
-    _rewriteQuery.append(encodedVar + "=" + encodedValue);
-    _rewriteVars.add(new String[] {encodedVar, encodedValue});
-  }
-
-  /**
-   * Resets (clears) all the rewrite variables.  Intended for 
-   * <code>output_reset_rewrite_vars()</code>.
-   */
-  public void resetRewriteVars()
-  {
-    _rewriteQuery = new StringBuilder();
-    _rewriteVars.clear();
   }
 
   /**
