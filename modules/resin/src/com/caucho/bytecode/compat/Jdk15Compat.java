@@ -351,7 +351,7 @@ public class Jdk15Compat {
 
     int end = bb.getLength();
 
-    bb.addByte(CodeVisitor.ASTORE_0);
+    bb.addByte(CodeVisitor.POP);
     bb.addByte(CodeVisitor.ACONST_NULL);
     bb.addByte(CodeVisitor.ARETURN);
 
