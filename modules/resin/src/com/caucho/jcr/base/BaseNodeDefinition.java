@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cms.base;
+package com.caucho.jcr.base;
 
 import javax.jcr.*;
 import javax.jcr.nodetype.*;

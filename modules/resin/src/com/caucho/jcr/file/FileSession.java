@@ -27,11 +27,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cms.file;
+package com.caucho.jcr.file;
 
 import javax.jcr.*;
 
-import com.caucho.cms.base.*;
+import com.caucho.jcr.base.*;
 
 import com.caucho.config.ConfigException;
 

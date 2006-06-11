@@ -27,14 +27,14 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cms.file;
+package com.caucho.jcr.file;
 
 import java.io.IOException;
 
 import javax.jcr.*;
 import javax.jcr.nodetype.*;
 
-import com.caucho.cms.base.*;
+import com.caucho.jcr.base.*;
 
 import com.caucho.vfs.Path;
 
