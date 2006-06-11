@@ -27,56 +27,85 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cms.file;
+package com.caucho.cms.base;
 
 import javax.jcr.*;
 
-import com.caucho.cms.base.*;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.util.L10N;
-
-import com.caucho.vfs.Path;
-
 /**
- * Represents a open session for a file repository.
+ * Iterates over an array array of base nodes.
  */
-public class FileSession extends BaseSession {
-  private static final L10N L = new L10N(FileSession.class);
-  
-  private FileRepository _repository;
-  private BaseNode _rootNode;
+public class BaseNodeIterator implements NodeIterator {
+  private BaseNode []_nodes;
+  private int _index;
 
-  /**
-   * Creates the new session.
-   */
-  FileSession(FileRepository repository)
+  public BaseNodeIterator(BaseNode []nodes)
   {
-    _repository = repository;
-
-    Path root = repository.getRoot();
-
-    if (root.isDirectory())
-      _rootNode = new DirectoryNode(this, root);
+    _nodes = nodes;
+  }
+  /**
+   * Returns the next node.
+   */
+  public Node nextNode()
+  {
+    if (_index < _nodes.length)
+      return _nodes[_index++];
     else
-      _rootNode = new FileNode(this, root);
+      return null;
   }
-  
+
+  //
+  // javax.jcr.RangeIterator
+  //
+
   /**
-   * Returns the owning repository.
+   * Skips the next 'n' nodes.
    */
-  public Repository getRepository()
+  public void skip(long skipNum)
   {
-    return _repository;
+    _index += skipNum;
   }
 
   /**
-   * Returns the session's root node.
+   * Returns the total number of nodes.
    */
-  public Node getRootNode()
-    throws RepositoryException
+  public long getSize()
   {
-    return _rootNode;
+    return _nodes.length;
+  }
+
+  /**
+   * Returns the current position.
+   */
+  public long getPosition()
+  {
+    return _index;
+  }
+
+  //
+  // java.util.iterator
+  //
+
+  /**
+   * Returns the next node.
+   */
+  public Object next()
+  {
+    return nextNode();
+  }
+
+  /**
+   * Returns true if there are more nodes.
+   */
+  public boolean hasNext()
+  {
+    return _index < _nodes.length;
+  }
+
+  /**
+   * Removes the current item.
+   */
+  public void remove()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 }

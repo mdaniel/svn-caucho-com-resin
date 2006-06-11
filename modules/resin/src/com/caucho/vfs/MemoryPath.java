@@ -77,11 +77,6 @@ public class MemoryPath extends FilesystemPath {
     return getScheme() + ":" + getFullPath();
   }
 
-  public String getFullPath()
-  {
-    return getPath();
-  }
-
   public boolean exists()
   {
     synchronized (_rootNode) {
@@ -91,16 +86,28 @@ public class MemoryPath extends FilesystemPath {
 
   private Node lookupAll()
   {
-    Node node = lookupAllButTail();
-    if (node == null)
-      return null;
+    String fullPath = getFullPath();
 
-    String tail = getTail();
+    int head = 0;
+    Node node = _rootNode;
 
-    if (tail == null || tail.equals(""))
-      return node;
-    else
-      return node.lookup(tail);
+    while (node != null && head < fullPath.length()) {
+      int tail = fullPath.indexOf('/', head);
+
+      if (tail == -1) {
+	if (head + 1 < fullPath.length())
+	  return node.lookup(fullPath.substring(head));
+	else
+	  return node;
+      }
+
+      if (head != tail)
+        node = node.lookup(fullPath.substring(head, tail));
+
+      head = tail + 1;
+    }
+
+    return node;
   }
 
   private Node lookupAllButTail()

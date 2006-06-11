@@ -67,6 +67,7 @@ public final class ReadStream extends InputStream {
   private int _specialEncoding;
 
   private boolean _disableClose;
+  private boolean _isDisableCloseSource;
   private boolean _reuseBuffer;
   private Reader _reader;
 
@@ -107,6 +108,7 @@ public final class ReadStream extends InputStream {
   public void init(StreamImpl source, WriteStream sibling)
   {
     _disableClose = false;
+    _isDisableCloseSource = false;
 
     if (_source != null && _source != source) {
       try {
@@ -967,6 +969,14 @@ public final class ReadStream extends InputStream {
   }
 
   /**
+   * Disables closing of the underlying source.
+   */
+  public void setDisableCloseSource(boolean disableClose)
+  {
+    _isDisableCloseSource = disableClose;
+  }
+
+  /**
    * Close the stream.
    */
   public final void close() throws IOException
@@ -988,7 +998,7 @@ public final class ReadStream extends InputStream {
       reader.close();
     }
     
-    if (_source != null) {
+    if (_source != null && ! _isDisableCloseSource) {
       StreamImpl s = _source;
       _source = null;
       s.close();

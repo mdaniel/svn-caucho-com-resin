@@ -86,6 +86,7 @@ public class WriteStream extends OutputStreamWithBuffer {
   private boolean _implicitFlush = false;
   private boolean flushOnNewline;
   private boolean _disableClose;
+  private boolean _isDisableCloseSource;
   private boolean _disableFlush;
   private boolean reuseBuffer;
 
@@ -120,6 +121,7 @@ public class WriteStream extends OutputStreamWithBuffer {
   public void init(StreamImpl source)
   {
     _disableClose = false;
+    _isDisableCloseSource = false;
 
     if (this._source != null && this._source != source) {
       try {
@@ -1093,6 +1095,14 @@ public class WriteStream extends OutputStreamWithBuffer {
   }
 
   /**
+   * Disables close of the underlying source.
+   */
+  public void setDisableCloseSource(boolean disableClose)
+  {
+    _isDisableCloseSource = disableClose;
+  }
+
+  /**
    * Returns true if the stream is closed.
    */
   public final boolean isClosed()
@@ -1130,7 +1140,7 @@ public class WriteStream extends OutputStreamWithBuffer {
         _writeBuffer = null;
       }
 
-      if (s != null)
+      if (s != null && ! _isDisableCloseSource)
 	s.closeWrite();
     }
   }

@@ -257,6 +257,24 @@ public class SocketStream extends StreamImpl {
   }
 
   /**
+   * Closes the write half of the stream.
+   */
+  public void closeWrite() throws IOException
+  {
+    OutputStream os = _os;
+    _os = null;
+
+    // since the output stream is opened lazily, we might
+    // need to open it
+    if (_s != null)
+      _s.shutdownOutput();
+    /*
+    if (os != null)
+      os.close();
+    */
+  }
+
+  /**
    * Closes the underlying sockets and socket streams.
    */
   public void close() throws IOException

@@ -67,6 +67,14 @@ public class FileRepository extends BaseRepository {
   }
 
   /**
+   * Returns the file root.
+   */
+  public Path getRoot()
+  {
+    return _root;
+  }
+
+  /**
    * Initialize the FileRespository.
    */
   public void init()
@@ -99,6 +107,6 @@ public class FileRepository extends BaseRepository {
 	   NoSuchWorkspaceException,
 	   RepositoryException
   {
-    throw new UnsupportedRepositoryOperationException(getClass().getName());
+    return new FileSession(this);
   }
 }
