@@ -74,7 +74,8 @@ public class SubversionClient {
     readHello();
 
     // anonymous login (?)
-    println("( 2 ( edit-pipeline ) 20:svn://" + host + ":" + port + " )");
+    String svnurl = "svn://" + host + ":" + port;
+    println("( 2 ( edit-pipeline ) "+svnurl.length()+":"+svnurl+ " )");
 
     readLoginResponse();
     
