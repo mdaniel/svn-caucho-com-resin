@@ -29,14 +29,15 @@
 
 package javax.activation;
 
+import java.util.*;
 import java.io.File;
 
 /**
  * Abstract API for datatyping for files.
  */
 abstract public class FileTypeMap {
-  private static FileTypeMap _defaultMap
-    = new MimetypesFileTypeMap();
+
+  private static WeakHashMap _fileTypeMaps = new WeakHashMap();
 
   public FileTypeMap()
   {
@@ -57,7 +58,11 @@ abstract public class FileTypeMap {
    */
   public static void setDefaultFileTypeMap(FileTypeMap map)
   {
-    _defaultMap = map;
+    ClassLoader cl = Thread.currentThread().getContextClassLoader();
+    if (cl==null)
+      cl = CommandMap.class.getClassLoader();
+
+    _fileTypeMaps.put(cl, map);
   }
 
   /**
@@ -65,6 +70,18 @@ abstract public class FileTypeMap {
    */
   public static FileTypeMap getDefaultFileTypeMap()
   {
-    return _defaultMap;
+    ClassLoader cl = Thread.currentThread().getContextClassLoader();
+    if (cl==null)
+      cl = CommandMap.class.getClassLoader();
+
+    FileTypeMap fileTypeMap =
+      (FileTypeMap)_fileTypeMaps.get(cl);
+
+    if (fileTypeMap==null) {
+      fileTypeMap = new MimetypesFileTypeMap();
+      _fileTypeMaps.put(cl, fileTypeMap);
+    }
+
+    return fileTypeMap;
   }
 }

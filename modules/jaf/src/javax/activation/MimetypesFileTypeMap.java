@@ -51,7 +51,10 @@ public class MimetypesFileTypeMap extends FileTypeMap {
    */
   public MimetypesFileTypeMap()
   {
-    ClassLoader cl = getClass().getClassLoader();
+    ClassLoader cl = Thread.currentThread().getContextClassLoader();
+
+    if (cl==null)
+      cl = MimetypesFileTypeMap.class.getClassLoader();
 
     // added in reverse priority order
     try {

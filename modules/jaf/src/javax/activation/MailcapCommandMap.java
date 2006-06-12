@@ -108,7 +108,10 @@ public class MailcapCommandMap extends CommandMap {
   public MailcapCommandMap()
   {
     // add mailcaps in reverse order
-    ClassLoader currentCL = this.getClass().getClassLoader();
+    ClassLoader currentCL = Thread.currentThread().getContextClassLoader();
+
+    if (currentCL==null)
+      currentCL = MimetypesFileTypeMap.class.getClassLoader();
 
     try {
       addMailcap(currentCL.getResourceAsStream("META-INF/mailcap.default"));

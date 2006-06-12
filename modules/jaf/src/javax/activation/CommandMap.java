@@ -29,12 +29,14 @@
 
 package javax.activation;
 
+import java.util.*;
+
 /**
  * Map of command objects.
  */
 abstract public class CommandMap {
 
-  private static CommandMap _commandMap;
+  private static WeakHashMap _commandMaps = new WeakHashMap();
 
   public CommandMap()
   {
@@ -45,9 +47,19 @@ abstract public class CommandMap {
    */
   public static CommandMap getDefaultCommandMap()
   {
-    if (_commandMap==null)
-      _commandMap = new MailcapCommandMap();
-    return _commandMap;
+    ClassLoader cl = Thread.currentThread().getContextClassLoader();
+    if (cl==null)
+      cl = CommandMap.class.getClassLoader();
+
+    CommandMap commandMap =
+      (CommandMap)_commandMaps.get(cl);
+
+    if (commandMap==null) {
+      commandMap = new MailcapCommandMap();
+      _commandMaps.put(cl, commandMap);
+    }
+
+    return commandMap;
   }
 
   /**
@@ -55,7 +67,11 @@ abstract public class CommandMap {
    */
   public static void setDefaultCommandMap(CommandMap map)
   {
-    _commandMap = map;
+    ClassLoader cl = Thread.currentThread().getContextClassLoader();
+    if (cl==null)
+      cl = CommandMap.class.getClassLoader();
+
+    _commandMaps.put(cl, map);
   }
 
   /**
