@@ -29,10 +29,22 @@
 
 package javax.jcr.nodetype;
 
+/**
+ * Definition for a node type.
+ */
 public interface NodeDefinition extends ItemDefinition {
+  /**
+   * Returns the node types required as children.
+   */
   public NodeType[] getRequiredPrimaryTypes();
   
+  /**
+   * Returns the default primary type.
+   */
   public NodeType getDefaultPrimaryType();
-  
+
+  /**
+   * Returns true if siblings of the same name are allowed.
+   */
   public boolean allowsSameNameSiblings();
 }

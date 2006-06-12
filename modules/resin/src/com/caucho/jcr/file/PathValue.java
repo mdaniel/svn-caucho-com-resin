@@ -27,55 +27,41 @@
  * @author Scott Ferguson
  */
 
-package javax.jcr;
+package com.caucho.jcr.file;
 
 import java.io.InputStream;
+import java.io.IOException;
 
-import java.util.Calendar;
+import javax.jcr.*;
+import javax.jcr.nodetype.*;
 
-public interface ValueFactory {
-  /**
-   * Creates a value based on a string.
-   */
-  public Value createValue(String value);
+import com.caucho.jcr.base.*;
 
-  /**
-   * Creates a value based on a string, coerced to the expected PropertyType.
-   *
-   * @param value the new value
-   * @param type the expected PropertyType.
-   */
-  public Value createValue(String value, int type)
-    throws ValueFormatException;
+import com.caucho.vfs.Path;
 
-  /**
-   * Creates a value based on a long.
-   */
-  public Value createValue(long value);
-  
-  /**
-   * Creates a value based on a double.
-   */
-  public Value createValue(double value);
-  
-  /**
-   * Creates a value based on a boolean.
-   */
-  public Value createValue(boolean value);
-  
-  /**
-   * Creates a value based on a date.
-   */
-  public Value createValue(Calendar value);
-  
-  /**
-   * Creates a value based on a binary stream.
-   */
-  public Value createValue(InputStream value);
-  
-  /**
-   * Creates a value based on a node reference
-   */
-  public Value createValue(Node value)
-    throws RepositoryException;
+/**
+ * Represents a file's contents in the filesystem
+ */
+public class PathValue extends BinaryValue {
+  private Path _path;
+
+  PathValue(Path path)
+  {
+    _path = path;
+  }
+
+  public InputStream getStream()
+    throws RepositoryException
+  {
+    try {
+      return _path.openRead();
+    } catch (IOException e) {
+      throw new RepositoryException(e);
+    }
+  }
+
+  public String toString()
+  {
+    return "PathValue[" + _path + "]";
+  }
 }

@@ -44,10 +44,6 @@ import org.xml.sax.*;
 abstract public class BaseSession implements Session {
   private boolean _isActive = true;
   
-  protected BaseSession()
-  {
-  }
-  
   /**
    * Returns the owning repository.
    */
@@ -84,7 +80,7 @@ abstract public class BaseSession implements Session {
    */
   public Workspace getWorkspace()
   {
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   /**

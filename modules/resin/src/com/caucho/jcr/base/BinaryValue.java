@@ -27,55 +27,55 @@
  * @author Scott Ferguson
  */
 
-package javax.jcr;
+package com.caucho.jcr.base;
 
 import java.io.InputStream;
+import java.io.IOException;
 
 import java.util.Calendar;
 
-public interface ValueFactory {
-  /**
-   * Creates a value based on a string.
-   */
-  public Value createValue(String value);
+import javax.jcr.*;
+import javax.jcr.lock.*;
+import javax.jcr.nodetype.*;
+import javax.jcr.version.*;
 
-  /**
-   * Creates a value based on a string, coerced to the expected PropertyType.
-   *
-   * @param value the new value
-   * @param type the expected PropertyType.
-   */
-  public Value createValue(String value, int type)
-    throws ValueFormatException;
+import com.caucho.util.L10N;
 
-  /**
-   * Creates a value based on a long.
-   */
-  public Value createValue(long value);
+/**
+ * Represents a binary stream value
+ */
+abstract public class BinaryValue extends BaseValue {
+  private static final L10N L = new L10N(BaseValue.class);
   
-  /**
-   * Creates a value based on a double.
-   */
-  public Value createValue(double value);
+  public String getString()
+    throws ValueFormatException,
+	   IllegalStateException,
+	   RepositoryException
+  {
+    StringBuilder sb = new StringBuilder();
+
+    try {
+      InputStream is = getStream();
+
+      // XXX: encoding
+      int ch;
+
+      while ((ch = is.read()) >= 0) {
+	sb.append((char) ch);
+      }
+
+      return sb.toString();
+    } catch (IOException e) {
+      throw new ValueFormatException(e);
+    }
+  }
   
-  /**
-   * Creates a value based on a boolean.
-   */
-  public Value createValue(boolean value);
+  abstract public InputStream getStream()
+    throws IllegalStateException,
+	   RepositoryException;
   
-  /**
-   * Creates a value based on a date.
-   */
-  public Value createValue(Calendar value);
-  
-  /**
-   * Creates a value based on a binary stream.
-   */
-  public Value createValue(InputStream value);
-  
-  /**
-   * Creates a value based on a node reference
-   */
-  public Value createValue(Node value)
-    throws RepositoryException;
+  public int getType()
+  {
+    return PropertyType.STRING;
+  }
 }

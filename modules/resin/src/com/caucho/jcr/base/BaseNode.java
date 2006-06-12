@@ -38,10 +38,13 @@ import javax.jcr.lock.*;
 import javax.jcr.nodetype.*;
 import javax.jcr.version.*;
 
+import com.caucho.util.L10N;
+
 /**
  * Represents a directory node in the repository.
  */
 public class BaseNode extends BaseItem implements Node {
+  private static final L10N L = new L10N(BaseNode.class);
   /**
    * Returns true for a node.
    */
@@ -344,7 +347,36 @@ public class BaseNode extends BaseItem implements Node {
     throws PathNotFoundException,
 	   RepositoryException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    String []segments = relPath.split("/");
+
+    Node node = this;
+    for (int i = 0; i < segments.length; i++) {
+      String subPath = segments[i];
+
+      if (subPath.length() == 0)
+	continue;
+
+      Node nextNode = null;
+      
+      NodeIterator iter = node.getNodes();
+      while (iter.hasNext()) {
+	Node subNode = iter.nextNode();
+
+	if (subPath.equals(subNode.getName())) {
+	  nextNode = subNode;
+	  break;
+	}
+      }
+
+      if (nextNode == null) {
+	throw new PathNotFoundException(L.l("'{0}' is an unknown node in {1}",
+					    relPath, this));
+      }
+
+      node = nextNode;
+    }
+
+    return node;
   }
   
   /**
@@ -372,7 +404,17 @@ public class BaseNode extends BaseItem implements Node {
     throws PathNotFoundException,
 	   RepositoryException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    int p = relPath.lastIndexOf('/');
+
+    if (p >= 0) {
+      String nodePath = relPath.substring(0, p);
+      String tailPath = relPath.substring(p + 1);
+    
+      return getNode(nodePath).getProperty(tailPath);
+    }
+
+    throw new PathNotFoundException(L.l("'{0}' is an unknown property in {1}'",
+					relPath, this));
   }
   
   /**
@@ -420,7 +462,7 @@ public class BaseNode extends BaseItem implements Node {
   public int getIndex()
     throws RepositoryException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return 0;
   }
   
   /**
@@ -440,7 +482,11 @@ public class BaseNode extends BaseItem implements Node {
   public boolean hasNode(String relPath)
     throws RepositoryException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    try {
+      return getNode(relPath) != null;
+    } catch (PathNotFoundException e) {
+      return false;
+    }
   }
   
   /**
@@ -451,7 +497,11 @@ public class BaseNode extends BaseItem implements Node {
   public boolean hasProperty(String relPath)
     throws RepositoryException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    try {
+      return getProperty(relPath) != null;
+    } catch (PathNotFoundException e) {
+      return false;
+    }
   }
   
   /**
@@ -460,7 +510,7 @@ public class BaseNode extends BaseItem implements Node {
   public boolean hasNodes()
     throws RepositoryException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return false;
   }
   
   /**
@@ -503,7 +553,7 @@ public class BaseNode extends BaseItem implements Node {
 
     NodeType []superTypes = nodeType.getSupertypes();
     
-    for (int i = superTypes.length; i >= 0; i--) {
+    for (int i = superTypes.length - 1; i >= 0; i--) {
       if (superTypes[i].getName().equals(nodeTypeName))
 	return true;
     }
@@ -544,7 +594,7 @@ public class BaseNode extends BaseItem implements Node {
     throws NoSuchNodeTypeException,
 	   RepositoryException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return false;
   }
   
   /**

@@ -130,5 +130,19 @@ public class StreamResource extends ResourceValue {
   public void close()
   {
   }
+
+  /**
+   * Closes the stream for reading
+   */
+  public void closeRead()
+  {
+  }
+
+  /**
+   * Closes the stream for writing
+   */
+  public void closeWrite()
+  {
+  }
 }
 

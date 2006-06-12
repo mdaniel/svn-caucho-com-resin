@@ -46,6 +46,7 @@ public class FileSession extends BaseSession {
   private static final L10N L = new L10N(FileSession.class);
   
   private FileRepository _repository;
+  private BaseWorkspace _workspace;
   private BaseNode _rootNode;
 
   /**
@@ -61,6 +62,8 @@ public class FileSession extends BaseSession {
       _rootNode = new DirectoryNode(this, root);
     else
       _rootNode = new FileNode(this, root);
+
+    _workspace = new BaseWorkspace("default", this);
   }
   
   /**
@@ -69,6 +72,14 @@ public class FileSession extends BaseSession {
   public Repository getRepository()
   {
     return _repository;
+  }
+  
+  /**
+   * Returns the workspace.
+   */
+  public Workspace getWorkspace()
+  {
+    return _workspace;
   }
 
   /**

@@ -30,5 +30,8 @@
 package javax.jcr;
 
 public interface NodeIterator extends RangeIterator {
+  /**
+   * Returns the next node.
+   */
   public Node nextNode();
 }

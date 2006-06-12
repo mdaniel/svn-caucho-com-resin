@@ -26,40 +26,59 @@
  *
  * @author Scott Ferguson
  */
-package javax.jcr.nodetype;
+
+package com.caucho.quercus.file;
+
+import java.io.IOException;
+
+import java.net.Socket;
+
+import com.caucho.vfs.SocketStream;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.WriteStream;
+
+import com.caucho.quercus.QuercusException;
+
+import com.caucho.quercus.env.ResourceValue;
+import com.caucho.quercus.env.Env;
+
+import com.caucho.quercus.resources.StreamReadWrite;
 
 /**
- * Definition for types of items.
+ * Represents read/write stream
  */
-public interface ItemDefinition {
-  /**
-   * Returns the declaring node type.
-   */
-  NodeType getDeclaringNodeType();
+public class SocketReadWrite extends StreamReadWrite {
+  private Socket _s;
+
+  public SocketReadWrite(Env env, Socket s)
+  {
+    super(env);
+
+    _s = s;
+    
+    SocketStream sock = new SocketStream(s);
+
+    WriteStream os = new WriteStream(sock);
+    ReadStream is = new ReadStream(sock, os);
+
+    init(is, os);
+  }
 
   /**
-   * Returns the item definition name.
+   * Closes the stream.
    */
-  String getName();
+  public void close()
+  {
+    Socket s = _s;
+    _s = null;
+    
+    super.close();
 
-  /**
-   * Returns true if this item is automatically created by the
-   * repository.
-   */
-  boolean isAutoCreated();
-
-  /**
-   * Returns true if this item always exists.
-   */
-  boolean isMandatory();
-
-  /**
-   * Returns the action when the parent is versioned.
-   */
-  int getOnParentVersion();
-
-  /**
-   * Returns true for a read-only item.
-   */
-  boolean isProtected();
+    try {
+      if (s != null)
+	s.close();
+    } catch (IOException e) {
+    }
+  }
 }
+

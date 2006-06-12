@@ -32,9 +32,18 @@ package javax.jcr;
 import java.util.Iterator;
 
 public interface RangeIterator extends Iterator {
+  /**
+   * Skips items.
+   */
   public void skip(long skipNum);
-  
+
+  /**
+   * Returns the total number of items.
+   */
   public long getSize();
-  
+
+  /**
+   * Returns the current position.
+   */
   public long getPosition();
 }

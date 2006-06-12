@@ -27,18 +27,40 @@
  * @author Scott Ferguson
  */
 
-package javax.jcr;
+package com.caucho.jcr.base;
 
 import java.io.InputStream;
 
 import java.util.Calendar;
 
-public interface ValueFactory {
+import javax.jcr.*;
+
+import com.caucho.util.L10N;
+
+/**
+ * Creates a value.
+ */
+public class BaseValueFactory implements ValueFactory {
+  private static final L10N L = new L10N(BaseValueFactory.class);
+
+  public static final ValueFactory FACTORY = new BaseValueFactory();
+
+  /**
+   * Returns the expected property type.
+   */
+  protected int getPropertyType()
+  {
+    return PropertyType.STRING;
+  }
+  
   /**
    * Creates a value based on a string.
    */
-  public Value createValue(String value);
-
+  public Value createValue(String value)
+  {
+    throw new UnsupportedOperationException();
+  }
+  
   /**
    * Creates a value based on a string, coerced to the expected PropertyType.
    *
@@ -46,36 +68,57 @@ public interface ValueFactory {
    * @param type the expected PropertyType.
    */
   public Value createValue(String value, int type)
-    throws ValueFormatException;
+    throws ValueFormatException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 
   /**
    * Creates a value based on a long.
    */
-  public Value createValue(long value);
+  public Value createValue(long value)
+  {
+    throw new UnsupportedOperationException();
+  }
   
   /**
    * Creates a value based on a double.
    */
-  public Value createValue(double value);
+  public Value createValue(double value)
+  {
+    throw new UnsupportedOperationException();
+  }
   
   /**
    * Creates a value based on a boolean.
    */
-  public Value createValue(boolean value);
+  public Value createValue(boolean value)
+  {
+    throw new UnsupportedOperationException();
+  }
   
   /**
    * Creates a value based on a date.
    */
-  public Value createValue(Calendar value);
+  public Value createValue(Calendar value)
+  {
+    throw new UnsupportedOperationException();
+  }
   
   /**
    * Creates a value based on a binary stream.
    */
-  public Value createValue(InputStream value);
+  public Value createValue(InputStream value)
+  {
+    throw new UnsupportedOperationException();
+  }
   
   /**
    * Creates a value based on a node reference
    */
   public Value createValue(Node value)
-    throws RepositoryException;
+    throws RepositoryException
+  {
+    return createValue(String.valueOf(value), getPropertyType());
+  }
 }

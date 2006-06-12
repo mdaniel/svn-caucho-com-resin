@@ -39,18 +39,16 @@ import com.caucho.jcr.base.*;
 import com.caucho.vfs.Path;
 
 /**
- * Represents a node in the filesystem
+ * Represents a file's contents in the filesystem
  */
-public class FileNode extends BaseNode {
+public class FileContentNode extends BaseNode {
   private FileSession _session;
-  private FileContentNode _child;
   private Path _path;
 
-  FileNode(FileSession session, Path path)
+  FileContentNode(FileSession session, Path path)
   {
     _session = session;
     _path = path;
-    _child = new FileContentNode(session, path);
   }
   
   /**
@@ -59,7 +57,7 @@ public class FileNode extends BaseNode {
   public String getPath()
     throws RepositoryException
   {
-    return _path.getPath();
+    return _path.getPath() + "/" + getName();
   }
   
   /**
@@ -68,7 +66,7 @@ public class FileNode extends BaseNode {
   public String getName()
     throws RepositoryException
   {
-    return _path.getTail();
+    return "jcr:content";
   }
 
   /**
@@ -76,7 +74,21 @@ public class FileNode extends BaseNode {
    */
   public NodeType getPrimaryNodeType()
   {
-    return BaseNodeType.NT_FILE;
+    return BaseNodeType.NT_RESOURCE;
+  }
+  
+  /**
+   * Returns the property based on the relative path.
+   */
+  public Property getProperty(String relPath)
+    throws PathNotFoundException,
+	   RepositoryException
+  {
+    if (relPath.equals("jcr:data")) {
+      return new FileDataProperty(_path);
+    }
+    else
+      return super.getProperty(relPath);
   }
 
   /**
@@ -88,19 +100,8 @@ public class FileNode extends BaseNode {
     return _session;
   }
 
-  /**
-   * Returns the children nodes.
-   */
-  public NodeIterator getNodes()
-    throws RepositoryException
-  {
-    FileContentNode []children = new FileContentNode[] { _child };
-
-    return new BaseNodeIterator(children);
-  }
-
   public String toString()
   {
-    return "FileNode[" + _path + "]";
+    return "FileContentNode[" + _path + "]";
   }
 }

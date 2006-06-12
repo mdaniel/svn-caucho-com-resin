@@ -26,40 +26,40 @@
  *
  * @author Scott Ferguson
  */
-package javax.jcr.nodetype;
+
+package com.caucho.jcr.svn;
+
+import java.io.IOException;
+
+import java.util.ArrayList;
+import java.util.Date;
+
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.ReadWritePair;
+
+import com.caucho.util.L10N;
 
 /**
- * Definition for types of items.
+ * Subversion folder class.
  */
-public interface ItemDefinition {
-  /**
-   * Returns the declaring node type.
-   */
-  NodeType getDeclaringNodeType();
+public class SubversionFolder extends SubversionNode {
+  private final L10N L = new L10N(SubversionFolder.class);
+  private final Logger log
+    = Logger.getLogger(SubversionFolder.class.getName());;
 
-  /**
-   * Returns the item definition name.
-   */
-  String getName();
+  public SubversionFolder(String name)
+  {
+    super(name);
+  }
 
-  /**
-   * Returns true if this item is automatically created by the
-   * repository.
-   */
-  boolean isAutoCreated();
-
-  /**
-   * Returns true if this item always exists.
-   */
-  boolean isMandatory();
-
-  /**
-   * Returns the action when the parent is versioned.
-   */
-  int getOnParentVersion();
-
-  /**
-   * Returns true for a read-only item.
-   */
-  boolean isProtected();
+  public String toString()
+  {
+    return "SubversionFolder[" + getName() + ",rev=" + getVersion() + "," + getUser() + "]";
+  }
 }

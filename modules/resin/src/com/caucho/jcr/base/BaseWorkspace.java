@@ -27,12 +27,13 @@
  * @author Scott Ferguson
  */
 
-package javax.jcr;
+package com.caucho.jcr.base;
 
 import java.io.*;
 
 import org.xml.sax.*;
 
+import javax.jcr.*;
 import javax.jcr.lock.*;
 import javax.jcr.nodetype.*;
 import javax.jcr.observation.*;
@@ -42,16 +43,31 @@ import javax.jcr.version.*;
 /**
  * Represents a open workspace to a repository.
  */
-public interface Workspace {
+public class BaseWorkspace implements Workspace {
+  private String _name;
+  private Session _session;
+
+  public BaseWorkspace(String name, Session session)
+  {
+    _name = name;
+    _session = session;
+  }
+  
   /**
    * Returns the owning session.
    */
-  public Session getSession();
-
+  public Session getSession()
+  {
+    return _session;
+  }
+  
   /**
    * Returns the workspace name.
    */
-  public String getName();
+  public String getName()
+  {
+    return _name;
+  }
 
   /**
    * Copy from one node to another.
@@ -63,7 +79,10 @@ public interface Workspace {
 	   PathNotFoundException,
 	   ItemExistsException,
 	   LockException,
-	   RepositoryException;
+	   RepositoryException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
   
   /**
    * Copy from one node to another, starting in another workspace
@@ -78,7 +97,10 @@ public interface Workspace {
 	   PathNotFoundException,
 	   ItemExistsException,
 	   LockException,
-	   RepositoryException;
+	   RepositoryException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
   
   /**
    * Clones a node from another workspace.
@@ -94,8 +116,10 @@ public interface Workspace {
 	   PathNotFoundException,
 	   ItemExistsException,
 	   LockException,
-	   RepositoryException;
-  
+	   RepositoryException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 
   /**
    * Move a node from another workspace.
@@ -107,7 +131,10 @@ public interface Workspace {
 	   PathNotFoundException,
 	   ItemExistsException,
 	   LockException,
-	   RepositoryException;
+	   RepositoryException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
   
   /**
    * Restores from given versions.
@@ -118,38 +145,56 @@ public interface Workspace {
 	   VersionException,
 	   LockException,
 	   InvalidItemStateException,
-	   RepositoryException;
+	   RepositoryException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
   
   /**
    * Returns the query manager.
    */
   public QueryManager getQueryManager()
-    throws RepositoryException;
+    throws RepositoryException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
   
   /**
    * Returns the namespace registry.
    */
   public NamespaceRegistry getNamespaceRegistry()
-    throws RepositoryException;
+    throws RepositoryException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
   
   /**
    * Returns the node type manager.
    */
   public NodeTypeManager getNodeTypeManager()
-    throws RepositoryException;
+    throws RepositoryException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
   
   /**
    * Returns the observation manager.
    */
   public ObservationManager getObservationManager()
     throws UnsupportedRepositoryOperationException,
-	   RepositoryException;
+	   RepositoryException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
   
   /**
    * Returns the workspace names.
    */
   public String[] getAccessibleWorkspaceNames()
-    throws RepositoryException;
+    throws RepositoryException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
   
   /**
    * Returns a handler for importing data.
@@ -161,7 +206,10 @@ public interface Workspace {
 	   VersionException,
 	   LockException,
 	   AccessDeniedException,
-	   RepositoryException;
+	   RepositoryException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
   
   /**
    * Import based on XML.
@@ -176,5 +224,8 @@ public interface Workspace {
 	   InvalidSerializedDataException,
 	   LockException,
 	   AccessDeniedException,
-	   RepositoryException;
+	   RepositoryException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 }

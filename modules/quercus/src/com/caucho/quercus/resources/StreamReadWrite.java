@@ -46,10 +46,20 @@ public class StreamReadWrite extends StreamResource {
   private ReadStream _is;
   private WriteStream _os;
 
-  public StreamReadWrite(Env env, ReadStream is, WriteStream os)
+  public StreamReadWrite(Env env)
   {
     env.addClose(this);
-    
+  }
+
+  public StreamReadWrite(Env env, ReadStream is, WriteStream os)
+  {
+    this(env);
+
+    init(is, os);
+  }
+
+  protected void init(ReadStream is, WriteStream os)
+  {
     _is = is;
     _os = os;
   }
@@ -167,6 +177,36 @@ public class StreamReadWrite extends StreamResource {
   public long getPosition()
   {
     return 0;
+  }
+
+  /**
+   * Closes the stream for reading.
+   */
+  public void closeRead()
+  {
+    ReadStream is = _is;
+    _is = null;
+
+    try {
+      if (is != null)
+	is.close();
+    } catch (IOException e) {
+    }
+  }
+
+  /**
+   * Closes the stream for writing
+   */
+  public void closeWrite()
+  {
+    WriteStream os = _os;
+    _os = null;
+
+    try {
+      if (os != null)
+	os.close();
+    } catch (IOException e) {
+    }
   }
 
   /**

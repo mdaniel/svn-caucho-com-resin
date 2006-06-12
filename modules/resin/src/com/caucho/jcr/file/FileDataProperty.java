@@ -26,40 +26,31 @@
  *
  * @author Scott Ferguson
  */
-package javax.jcr.nodetype;
+
+package com.caucho.jcr.file;
+
+import java.io.IOException;
+
+import javax.jcr.*;
+import javax.jcr.nodetype.*;
+
+import com.caucho.jcr.base.*;
+
+import com.caucho.vfs.Path;
 
 /**
- * Definition for types of items.
+ * Represents a file's contents in the filesystem
  */
-public interface ItemDefinition {
-  /**
-   * Returns the declaring node type.
-   */
-  NodeType getDeclaringNodeType();
+public class FileDataProperty extends BaseProperty {
+  private Path _path;
 
-  /**
-   * Returns the item definition name.
-   */
-  String getName();
+  FileDataProperty(Path path)
+  {
+    super(new PathValue(path));
+  }
 
-  /**
-   * Returns true if this item is automatically created by the
-   * repository.
-   */
-  boolean isAutoCreated();
-
-  /**
-   * Returns true if this item always exists.
-   */
-  boolean isMandatory();
-
-  /**
-   * Returns the action when the parent is versioned.
-   */
-  int getOnParentVersion();
-
-  /**
-   * Returns true for a read-only item.
-   */
-  boolean isProtected();
+  public String toString()
+  {
+    return "FileDataProperty[]";
+  }
 }

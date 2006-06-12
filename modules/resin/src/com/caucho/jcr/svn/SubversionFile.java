@@ -27,55 +27,57 @@
  * @author Scott Ferguson
  */
 
-package javax.jcr;
+package com.caucho.jcr.svn;
 
-import java.io.InputStream;
+import java.io.IOException;
 
-import java.util.Calendar;
+import java.util.ArrayList;
+import java.util.Date;
 
-public interface ValueFactory {
-  /**
-   * Creates a value based on a string.
-   */
-  public Value createValue(String value);
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.ReadWritePair;
+
+import com.caucho.util.L10N;
+
+/**
+ * Subversion folder class.
+ */
+public class SubversionFile extends SubversionNode {
+  private final L10N L = new L10N(SubversionFile.class);
+  private final Logger log
+    = Logger.getLogger(SubversionFile.class.getName());;
+
+  private long _length;
+
+  public SubversionFile(String name)
+  {
+    super(name);
+  }
 
   /**
-   * Creates a value based on a string, coerced to the expected PropertyType.
-   *
-   * @param value the new value
-   * @param type the expected PropertyType.
+   * Sets the length of the file.
    */
-  public Value createValue(String value, int type)
-    throws ValueFormatException;
+  public void setLength(long length)
+  {
+    _length = length;
+  }
 
   /**
-   * Creates a value based on a long.
+   * Gets the length of the file.
    */
-  public Value createValue(long value);
-  
-  /**
-   * Creates a value based on a double.
-   */
-  public Value createValue(double value);
-  
-  /**
-   * Creates a value based on a boolean.
-   */
-  public Value createValue(boolean value);
-  
-  /**
-   * Creates a value based on a date.
-   */
-  public Value createValue(Calendar value);
-  
-  /**
-   * Creates a value based on a binary stream.
-   */
-  public Value createValue(InputStream value);
-  
-  /**
-   * Creates a value based on a node reference
-   */
-  public Value createValue(Node value)
-    throws RepositoryException;
+  public long getLength()
+  {
+    return _length;
+  }
+
+  public String toString()
+  {
+    return "SubversionFile[" + getName() + ",rev=" + getVersion() + "," + getUser() + "]";
+  }
 }

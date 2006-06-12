@@ -31,12 +31,27 @@ package javax.jcr.nodetype;
 
 import javax.jcr.*;
 
+/**
+ * Information about property type.
+ */
 public interface PropertyDefinition extends ItemDefinition {
+  /**
+   * Returns the property's type.
+   */
   public int getRequiredType();
-  
+
+  /**
+   * Returns constraints on the property value.
+   */
   public String[] getValueConstraints();
-  
+
+  /**
+   * Returns the property's defaults.
+   */
   public Value[] getDefaultValues();
-  
+
+  /**
+   * Returns true if multiple values are allowed.
+   */
   public boolean isMultiple();
 }
