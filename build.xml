@@ -221,7 +221,7 @@
   <target name="jaf" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="jaf"/>
-      <param name="module.jar" value="jaf.jar"/>
+      <param name="module.jar" value="jaf-11.jar"/>
     </antcall>
   </target>
 
