@@ -1016,8 +1016,8 @@ public class ImageModule extends AbstractQuercusModule {
    * Copy and resize part of an image with resampling
    */
   public static boolean imagecopyresampled(QuercusImage dest, QuercusImage src,
-					   int dx, int dy, int dw, int dh,
-					   int sx, int sy, int sw, int sh)
+					   int dx, int dy, int sx, int sy, 
+					   int dw, int dh, int sw, int sh)
   {
     Graphics2D g = (Graphics2D)dest.getGraphics().create();
     g.setRenderingHint(RenderingHints.KEY_RENDERING,
@@ -1034,8 +1034,8 @@ public class ImageModule extends AbstractQuercusModule {
    * Copy and resize part of an image
    */
   public static boolean imagecopyresized(QuercusImage dest, QuercusImage src,
-					 int dx, int dy, int dw, int dh,
-					 int sx, int sy, int sw, int sh)
+					 int dx, int dy, int sx, int sy, 
+					 int dw, int dh, int sw, int sh)
   {
     Graphics2D g = (Graphics2D)dest.getGraphics().create();
     g.drawImage(src._bufferedImage,
