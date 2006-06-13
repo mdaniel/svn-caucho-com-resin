@@ -62,18 +62,23 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
     = new EnvironmentLocal<Boolean>();
 
   private boolean _hasLocalLevel;
+  
   // Application level override
   private final EnvironmentLocal<Level> _localLevel
     = new EnvironmentLocal<Level>();
 
-  private Logger _parent;
-  
-  // The lowest level currently configured for this logger.
-  private int _level = Level.OFF.intValue();
+  private EnvironmentLogger _parent;
 
-  // Soft list of all the children
-  private final ArrayList<SoftReference<EnvironmentLogger>> _children
-    = new ArrayList<SoftReference<EnvironmentLogger>>();
+  // The finest assigned level accessible from this logger
+  private Level _assignedLevel = Level.INFO;
+  
+  // The finest handler level accessible from this logger
+  private Level _handlerLevel = Level.OFF;
+
+  // Can be a weak reference because any configuration in an
+  // environment will be held in the EnvironmentLocal.
+  private final ArrayList<WeakReference<EnvironmentLogger>> _children
+    = new ArrayList<WeakReference<EnvironmentLogger>>();
   
   // Weak list of all the class loaders
   private final ArrayList<WeakReference<ClassLoader>> _loaders
@@ -82,10 +87,12 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
   public EnvironmentLogger(String name, String resourceBundleName)
   {
     super(name, resourceBundleName);
-
-    doSetLevel(Level.OFF);
   }
 
+  /**
+   * Sets the logger's parent.  This should only be called by the LogManager
+   * code.
+   */
   public void setParent(Logger parent)
   {
     if (parent.equals(_parent))
@@ -93,20 +100,29 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
     
     super.setParent(parent);
 
-    _parent = parent;
-
-    doSetLevel(parent.getLevel());
-
     if (parent instanceof EnvironmentLogger) {
-      EnvironmentLogger envParent = (EnvironmentLogger) parent;
+      _parent = (EnvironmentLogger) parent;
 
-      envParent.addChild(this);
+      _assignedLevel = _parent.getAssignedLevel();
+      _handlerLevel = _parent.getHandlerLevel();
+
+      setEffectiveLevel();
+      
+      _parent.addChild(this);
     }
   }
 
+  private Level getHandlerLevel()
+  {
+    return _handlerLevel;
+  }
+
+  /**
+   * Adds a new logger as a child, triggered by a setParent.
+   */
   void addChild(EnvironmentLogger child)
   {
-    _children.add(new SoftReference<EnvironmentLogger>(child));
+    _children.add(new WeakReference<EnvironmentLogger>(child));
   }
 
   /**
@@ -146,8 +162,12 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
     ownHandlers.addHandler(handler);
   }
 
+  /**
+   * Adds a new handler with a given classloader context.
+   */
   private void addHandler(Handler handler, ClassLoader loader)
   {
+    // handlers ordered by level
     ArrayList<Handler> handlers = new ArrayList<Handler>();
 
     handlers.add(handler);
@@ -179,8 +199,7 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
 
     _localHandlers.set(newHandlers);
 
-    if (handler.getLevel().intValue() < _level)
-      doSetLevel(handler.getLevel());
+    setHandlerLevel(handler.getLevel());
   }
 
   /**
@@ -240,10 +259,15 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
 
     _localHandlers.set(newHandlers);
 
-    if (handler.getLevel().intValue() < _level)
-      doSetLevel(handler.getLevel());
+    setHandlerLevel(handler.getLevel());
   }
 
+  /**
+   * Returns true if 'parent' is a parent classloader of 'child'.
+   *
+   * @param parent the classloader to test as a parent.
+   * @param child the classloader to test as a child.
+   */
   private boolean isParentLoader(ClassLoader parent, ClassLoader child)
   {
     for (; child != null; child = child.getParent()) {
@@ -282,6 +306,21 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
   }
 
   /**
+   * Logs the message.
+   */
+  public void log(LogRecord record)
+  {
+    if (_hasLocalLevel) {
+      Level level = _localLevel.get();
+
+      if (record.getLevel().intValue() < level.intValue())
+	return;
+    }
+
+    super.log(record);
+  }
+
+  /**
    * Returns the handlers.
    */
   public Handler []getHandlers()
@@ -296,11 +335,10 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
   {
     Boolean value = _useParentHandlers.get();
 
-    if (value == null) {
-      return super.getUseParentHandlers();
-    }
-    else
+    if (value != null)
       return Boolean.TRUE.equals(value);
+    else
+      return true;
   }
 
   /**
@@ -336,21 +374,22 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
 
     _localLevel.remove(loader);
 
-    updateLevel();
+    updateAssignedLevel();
+    updateHandlerLevel();
   }
 
   /**
-   * Update the level when class loaders change.
+   * Recalculate the dynamic assigned levels.
    */
-  private synchronized void updateLevel()
+  private synchronized void updateAssignedLevel()
   {
-    int oldLevel = _level;
-    Level level = Level.OFF;
+    Level oldAssignedLevel = _assignedLevel;
+    
+    _assignedLevel = Level.INFO;
+    _hasLocalLevel = false;
 
-    boolean hasLocalLevel = false;
-
-    if (_parent != null && _parent.getLevel().intValue() < level.intValue()) {
-      level = _parent.getLevel();
+    if (_parent != null) {
+      _assignedLevel = _parent.getAssignedLevel();
     }
 
     for (int i = _loaders.size() - 1; i >= 0; i--) {
@@ -364,47 +403,93 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
         if (loader instanceof EnvironmentClassLoader) {
           EnvironmentClassLoader envLoader = (EnvironmentClassLoader) loader;
 
-	  if (_localLevel.get(envLoader) != null)
-	    hasLocalLevel = true;
+	  Level localLevel = _localLevel.get(envLoader);
+	  
+	  if (localLevel != null) {
+	    _hasLocalLevel = true;
+
+	    if (localLevel.intValue() < _assignedLevel.intValue())
+	      _assignedLevel = localLevel;
+	  }
+        }
+      }
+    }
+
+    setEffectiveLevel();
+
+    // If this level has become less permissive, need to update all children
+    // since they may depend on this value
+    if (oldAssignedLevel.intValue() < _assignedLevel.intValue()) {
+      for (int i = _children.size() - 1; i >= 0; i--) {
+        WeakReference<EnvironmentLogger> ref = _children.get(i);
+        EnvironmentLogger child = ref.get();
+
+        if (child != null)
+          child.updateAssignedLevel();
+        else
+          _children.remove(i);
+      }
+    }
+  }
+
+  /**
+   * Recalculate the handler level levels.
+   */
+  private synchronized void updateHandlerLevel()
+  {
+    Level oldHandlerLevel = _handlerLevel;
+    
+    _handlerLevel = Level.OFF;
+
+    if (_parent != null)
+      _handlerLevel = _parent.getHandlerLevel();
+
+    for (int i = _loaders.size() - 1; i >= 0; i--) {
+      WeakReference<ClassLoader> ref = _loaders.get(i);
+      ClassLoader loader = ref.get();
+
+      if (loader == null)
+        _loaders.remove(i);
+
+      for (; loader != null; loader = loader.getParent()) {
+        if (loader instanceof EnvironmentClassLoader) {
+          EnvironmentClassLoader envLoader = (EnvironmentClassLoader) loader;
 	  
           Handler []handlers = _localHandlers.getLevel(envLoader);
 
           for (int j = 0; handlers != null && j < handlers.length; j++) {
-            Level handlerLevel = Level.INFO;
-            
-            if (handlers[j].getLevel() != null)
-              handlerLevel = handlers[j].getLevel();
+            if (handlers[j].getLevel() != null) {
+              Level subLevel = handlers[j].getLevel();
 
-            if (handlerLevel.intValue() < level.intValue()) {
-              level = handlerLevel;
+	      if (subLevel.intValue() < _handlerLevel.intValue())
+		_handlerLevel = subLevel;
             }
           }
         }
       }
     }
 
-    doSetLevel(level);
-    
-    _hasLocalLevel = hasLocalLevel;
+    setEffectiveLevel();
 
     // If this level has become less permissive, need to update all children
     // since they may depend on this value
-    if (oldLevel < level.intValue()) {
+    if (oldHandlerLevel.intValue() < _handlerLevel.intValue()) {
       for (int i = _children.size() - 1; i >= 0; i--) {
-        SoftReference<EnvironmentLogger> ref = _children.get(i);
+        WeakReference<EnvironmentLogger> ref = _children.get(i);
         EnvironmentLogger child = ref.get();
 
         if (child != null)
-          child.updateLevel();
+          child.updateHandlerLevel();
         else
           _children.remove(i);
       }
     }
-
   }
 
   /**
    * Application API to set the level.
+   *
+   * @param level the logging level to set for the logger.
    */
   public void setLevel(Level level)
   {
@@ -412,7 +497,11 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
     
     _localLevel.set(level);
 
-    doSetLevel(level);
+    if (level.intValue() < _assignedLevel.intValue()) {
+      _assignedLevel = level;
+      
+      setEffectiveLevel();
+    }
     
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
@@ -433,7 +522,7 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
   }
 
   /**
-   * Returns the local level.
+   * Returns the logger's assigned level.
    */
   public Level getLevel()
   {
@@ -445,46 +534,62 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
       }
     }
 
-    return super.getLevel();
+    return null;
   }
 
   /**
-   * Returns true for loggable.
+   * Returns the assigned level, calculated through the normal
+   * Logger rules, i.e. if unassigned, use the parent's value.
    */
-  /*
-  public boolean isLoggable(Level level)
+  private Level getAssignedLevel()
   {
-    int value = level.intValue();
-    
-    if (value < _level)
-      return false;
-    else
-      return _level < getLevel().intValue();
+    for (Logger log = this; log != null; log = log.getParent()) {
+      Level level = log.getLevel();
+
+      if (level != null)
+	return level;
+    }
+
+    return Level.INFO;
   }
-  */
 
   /**
    * Sets the level, updating any children.
    */
-  public void doSetLevel(Level level)
+  private void setHandlerLevel(Level level)
   {
-    super.setLevel(level);
+    if (_handlerLevel.intValue() <= level.intValue())
+      return;
 
-    _level = getLevel().intValue();
+    _handlerLevel = level;
+    
+    setEffectiveLevel();
 
     synchronized (this) {
       for (int i = _children.size() - 1; i >= 0; i--) {
-        SoftReference<EnvironmentLogger> ref = _children.get(i);
+        WeakReference<EnvironmentLogger> ref = _children.get(i);
         EnvironmentLogger child = ref.get();
 
         if (child != null) {
-          if (_level < child._level)
-            child.doSetLevel(level);
+	  // XXX: use parent handlers
+          if (_handlerLevel.intValue() < child._handlerLevel.intValue())
+            child.setHandlerLevel(level);
         }
         else
           _children.remove(i);
       }
     }
+  }
+
+  /**
+   * Sets the static effective logging level.  Use the coarsest level.
+   */
+  private void setEffectiveLevel()
+  {
+    if (_handlerLevel.intValue() < _assignedLevel.intValue())
+      super.setLevel(_assignedLevel);
+    else
+      super.setLevel(_handlerLevel);
   }
 
   /**

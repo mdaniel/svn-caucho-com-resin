@@ -58,6 +58,8 @@
 
     <log>com.caucho.log.LogConfig</log>
 
+    <logger>com.caucho.log.LoggerConfig</logger>
+
     <mbean>com.caucho.jmx.MBeanConfig</mbean>
 
     <persistent-store>com.caucho.server.cluster.PersistentStoreConfig</persistent-store>

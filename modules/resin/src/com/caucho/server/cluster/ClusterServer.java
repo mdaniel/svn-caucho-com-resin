@@ -69,7 +69,7 @@ public class ClusterServer {
   private int _srunIndex;
   private Path _tcpPath;
 
-  private long _loadBalanceWeight = 1;
+  private long _loadBalanceWeight = 100;
 
   private ClusterClient _client;
 
