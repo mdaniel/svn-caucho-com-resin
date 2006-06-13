@@ -50,6 +50,7 @@ import com.caucho.quercus.lib.HttpModule;
 import com.caucho.quercus.lib.session.SessionModule;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.module.ModuleStartupListener;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.StaticFunction;
 
@@ -69,12 +70,39 @@ import com.caucho.quercus.env.OutputBuffer;
 /**
  * PHP output routines.
  */
-public class OutputModule extends AbstractQuercusModule {
+public class OutputModule extends AbstractQuercusModule 
+  implements ModuleStartupListener {
   private static final L10N L = new L10N(OutputModule.class);
   private static final Logger log
     = Logger.getLogger(OutputModule.class.getName());
   private static final StringValue HTTP_ACCEPT_ENCODING = 
       new StringValueImpl("HTTP_ACCEPT_ENCODING");
+
+  private static final HashMap<String,StringValue> _iniMap
+    = new HashMap<String,StringValue>();
+
+  /**
+   * Returns the default php.ini values.
+   */
+  public Map<String,StringValue> getDefaultIni()
+  {
+    return _iniMap;
+  }
+
+  public void startup(Env env)
+  {
+    String handlerName = env.getConfigVar("output_handler").toString();
+
+    if (! "".equals(handlerName) && env.getFunction(handlerName) != null) {
+      Callback callback = env.createCallback(new StringValueImpl(handlerName));
+
+      ob_start(env, callback, 0, true);
+    } else if (env.getConfigVar("output_buffering").toBoolean()) {
+      ob_start(env, null, 0, true);
+    }
+
+    ob_implicit_flush(env, env.getConfigVar("output_buffering").toBoolean());
+  }
 
   /**
    * Flushes the original output buffer.
@@ -362,6 +390,7 @@ public class OutputModule extends AbstractQuercusModule {
   public static Value ob_implicit_flush(Env env, @Optional("true") boolean flag)
   {
     env.getOriginalOut().setImplicitFlush(flag);
+
     return NullValue.NULL;
   }
 
@@ -468,5 +497,11 @@ public class OutputModule extends AbstractQuercusModule {
     }
     
     return buffer;
+  }
+
+  static {
+    addIni(_iniMap, "output_buffering", "0", PHP_INI_PERDIR);
+    addIni(_iniMap, "output_handler", "", PHP_INI_PERDIR);
+    addIni(_iniMap, "implicit_flush", "0", PHP_INI_ALL);
   }
 }

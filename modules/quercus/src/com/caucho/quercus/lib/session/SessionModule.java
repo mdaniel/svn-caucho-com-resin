@@ -50,6 +50,7 @@ import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.StaticFunction;
+import com.caucho.quercus.module.ModuleStartupListener;
 
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;
@@ -68,7 +69,8 @@ import com.caucho.quercus.lib.OutputModule;
 /**
  * Quercus session handling
  */
-public class SessionModule extends AbstractQuercusModule {
+public class SessionModule extends AbstractQuercusModule 
+  implements ModuleStartupListener {
   private static final L10N L = new L10N(SessionModule.class);
   private static final Logger log
     = Logger.getLogger(SessionModule.class.getName());
@@ -82,6 +84,12 @@ public class SessionModule extends AbstractQuercusModule {
   public Map<String,StringValue> getDefaultIni()
   {
     return _iniMap;
+  }
+
+  public void startup(Env env)
+  {
+    if (env.getConfigVar("session.auto_start").toBoolean())
+      session_start(env);
   }
 
   /**
@@ -138,8 +146,8 @@ public class SessionModule extends AbstractQuercusModule {
       Value session = env.getGlobalValue("_SESSION");
 
       if (! session.isArray()) {
-	env.warning(L.l("session_decode requires valid session"));
-	return false;
+        env.warning(L.l("session_decode requires valid session"));
+        return false;
       }
 
       UnserializeReader is = new UnserializeReader(value);
@@ -147,20 +155,20 @@ public class SessionModule extends AbstractQuercusModule {
       StringBuilder sb = new StringBuilder();
 
       while (true) {
-	int ch;
+        int ch;
 
-	sb.setLength(0);
+        sb.setLength(0);
 
-	while ((ch = is.read()) > 0 && ch != '|') {
-	  sb.append((char) ch);
-	}
+        while ((ch = is.read()) > 0 && ch != '|') {
+          sb.append((char) ch);
+        }
 
-	if (sb.length() == 0)
-	  return true;
+        if (sb.length() == 0)
+          return true;
 
-	String key = sb.toString();
+        String key = sb.toString();
 
-	session.put(new StringValueImpl(key), is.unserialize(env));
+        session.put(new StringValueImpl(key), is.unserialize(env));
       }
     } catch (IOException e) {
       throw new QuercusModuleException(e);
@@ -225,8 +233,7 @@ public class SessionModule extends AbstractQuercusModule {
   /**
    * Returns the session id
    */
-  public static String session_id(Env env,
-                                  @Optional String id)
+  public static String session_id(Env env, @Optional String id)
   {
     Value sessionIdValue = (Value) env.getSpecialValue("caucho.session_id");
 
@@ -441,6 +448,7 @@ public class SessionModule extends AbstractQuercusModule {
 
           for (String queryElement : queryElements) {
             String [] nameValue = queryElement.split("=");
+
             if (nameValue.length == 2 && nameValue[0].equals(cookieName))
               sessionId = nameValue[1];
           }

@@ -35,6 +35,7 @@ import com.caucho.quercus.module.QuercusModule;
 import com.caucho.quercus.module.StaticFunction;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.ModuleInfo;
+import com.caucho.quercus.module.ModuleStartupListener;
 import com.caucho.quercus.module.ClassImplementation;
 import com.caucho.quercus.page.PageManager;
 import com.caucho.quercus.page.QuercusPage;
@@ -90,6 +91,9 @@ public class Quercus {
 
   private HashMap<String, QuercusModule> _modules
     = new HashMap<String, QuercusModule>();
+
+  private HashSet<ModuleStartupListener> _moduleStartupListeners
+    = new HashSet<ModuleStartupListener>();
 
   private HashSet<String> _extensionSet
     = new HashSet<String>();
@@ -612,6 +616,14 @@ public class Quercus {
   }
 
   /**
+   * Returns a list of the modules that have some startup code to run.
+   */
+  public HashSet<ModuleStartupListener> getModuleStartupListeners()
+  {
+    return _moduleStartupListeners;
+  }
+
+  /**
    * Returns true if an extension is loaded.
    */
   public boolean isExtensionLoaded(String name)
@@ -830,6 +842,9 @@ public class Quercus {
 					      module);
 
     _modules.put(info.getName(), info.getModule());
+
+    if (info.getModule() instanceof ModuleStartupListener)
+      _moduleStartupListeners.add((ModuleStartupListener)info.getModule());
 
     for (String ext : info.getLoadedExtensions())
       _extensionSet.add(ext);

@@ -39,6 +39,7 @@ import com.caucho.quercus.lib.VariableModule;
 import com.caucho.quercus.lib.session.SessionModule;
 import com.caucho.quercus.module.Marshall;
 import com.caucho.quercus.module.ModuleContext;
+import com.caucho.quercus.module.ModuleStartupListener;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.ClassDef;
@@ -303,8 +304,11 @@ public final class Env {
   
   public void start()
   {
-    if (getIniBoolean("session.auto_start"))
-      SessionModule.session_start(this);
+    HashSet<ModuleStartupListener> listeners = 
+      _quercus.getModuleStartupListeners(); 
+
+    for (ModuleStartupListener listener : listeners)
+      listener.startup(this);
   }
 
   /**
