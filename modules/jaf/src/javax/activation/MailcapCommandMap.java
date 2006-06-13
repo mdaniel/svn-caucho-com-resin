@@ -267,7 +267,18 @@ public class MailcapCommandMap extends CommandMap {
    */
   public DataContentHandler createDataContentHandler(String mimeType)
   {
-    return new MailcapDataContentHandler(mimeType);
+    CommandInfo ci = getCommand(mimeType, "content-handler");
+
+    if (ci==null)
+      return null;
+
+    try {
+      ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+      return (DataContentHandler)classLoader.loadClass(ci.getCommandClass()).newInstance();
+    }
+    catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**                                                                      
@@ -377,48 +388,6 @@ public class MailcapCommandMap extends CommandMap {
       if (commandMap==null)
 	_preferredCommands.put(mimeType, commandMap = new HashMap());
       commandMap.put(verb, commandInfo);
-    }
-  }
-
-  private class MailcapDataContentHandler implements DataContentHandler {
-
-    public MailcapDataContentHandler(String mimeType)
-    {
-    }
-
-    /**
-     * Returns the data flavors of the object.
-     */
-    public DataFlavor []getTransferDataFlavors()
-    {
-      throw new UnsupportedOperationException("not implemented");
-    }
-    
-    /**
-     * Returns the data to be transferred.
-     */
-    public Object getTransferData(DataFlavor flavor, DataSource dataSource)
-      throws IOException, UnsupportedFlavorException
-    {
-      throw new UnsupportedOperationException("not implemented");
-    }
-    
-    /**
-     * Returns an object from the data in its preferred form.
-     */
-    public Object getContent(DataSource dataSource)
-      throws IOException
-    {
-      throw new UnsupportedOperationException("not implemented");
-    }
-    
-    /**
-     * Converts an object to a byte stream.
-     */
-    public void writeTo(Object obj, String mimeType, OutputStream os)
-      throws IOException
-    {
-      throw new UnsupportedOperationException("not implemented");
     }
   }
 

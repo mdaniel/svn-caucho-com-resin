@@ -119,6 +119,8 @@ public class DataHandler implements Transferable {
 
   /**
    * Returns the input stream to the object.
+   *
+   * WARNING: this method cannot be tested (see server/340g.qa)
    */
   public InputStream getInputStream()
     throws IOException
@@ -149,6 +151,8 @@ public class DataHandler implements Transferable {
 
   /**
    * Writes to the output stream.
+   *
+   * WARNING: this method cannot be tested (see server/340g.qa)
    */
   public void writeTo(OutputStream os)
     throws IOException
@@ -188,6 +192,8 @@ public class DataHandler implements Transferable {
 
   /**
    * Returns the data transfer flavors.
+   *
+   * WARNING: this method cannot be tested (see server/340g.qa)
    */
   public DataFlavor []getTransferDataFlavors()
   {
@@ -303,6 +309,8 @@ public class DataHandler implements Transferable {
 
   /**
    * Returns the object.
+   *
+   * WARNING: this method cannot be tested (see server/340g.qa)
    */
   public Object getContent()
     throws IOException
@@ -329,12 +337,14 @@ public class DataHandler implements Transferable {
 
   /**
    * Sets the DataContentHandlerFactory
+   *
+   * WARNING: this method cannot be tested (see server/340g.qa)
    */
   public static void setDataContentHandlerFactory(DataContentHandlerFactory
 						  factory)
   {
     if (_factory != null)
-      throw new Error("factory already set.");
+      throw new IllegalStateException("factory already set.");
 
     _factory = factory;
   }
@@ -352,6 +362,8 @@ public class DataHandler implements Transferable {
 
   /**
    * Returns the handler.
+   *
+   * WARNING: this method cannot be tested (see server/340g.qa)
    */
   private DataContentHandler getDataContentHandler()
     throws UnsupportedDataTypeException
