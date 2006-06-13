@@ -39,11 +39,13 @@ import java.util.zip.*;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.TempBufferStringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.NotNull;
+import com.caucho.quercus.module.ReturnNullAsFalse;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.lib.zlib.Zlib;
 import com.caucho.util.ByteBuffer;
@@ -55,8 +57,8 @@ import com.caucho.vfs.*;
  */
 public class ZlibModule extends AbstractQuercusModule {
 
- // private static final Logger log = Log.open(QuercusZlibModule.class);
-  //private static final L10N L = new L10N(QuercusZlibModule.class);
+  //private static final Logger log = Logger.getLogger(ZlibModule.class.getName());
+  //private static final L10N L = new L10N(ZlibModule.class);
 
   public static final int FORCE_GZIP = 0x1;
   public static final int FORCE_DEFLATE = 0x2;
@@ -97,26 +99,48 @@ public class ZlibModule extends AbstractQuercusModule {
   }
 
   /**
-   * outputs uncompressed bytes directly to browser
+   * outputs uncompressed bytes directly to browser, writes a warning message if an error occurred
+   * Note: PHP5 is supposed to print an error message but doesn't do it in practice
+   *
+   * @param env
+   * @param fileName
+   * @param useIncludePath
+   * @return number of bytes read from file, or FALSE if an error occurred
    */
-  public boolean readgzfile(Env env,
+  public Value readgzfile(Env env,
                             String fileName,
                             @Optional("false") boolean useIncludePath)
   {
+    TempBuffer tb = TempBuffer.allocate();
+    byte[] buffer = tb.getBuffer();
+
     try {
       Zlib zlib = new Zlib(env, fileName,"r",useIncludePath);
-      env.getOut().writeStream(zlib.readgzfile());
-      
-      return true;
+
+      InputStream in = zlib.getGZIPInputStream();
+      WriteStream out = env.getOut();
+
+      int length = 0;
+      int sublen = in.read(buffer, 0, buffer.length);
+      while (sublen > 0) {
+        out.write(buffer, 0, sublen);
+        length += sublen;
+        sublen = in.read(buffer, 0, buffer.length);
+      }
+
+      in.close();
+      TempBuffer.free(tb);
+      return new LongValue(length);
     } catch (Exception e) {
-      throw QuercusModuleException.create(e);
+      TempBuffer.free(tb);
+      return BooleanValue.FALSE;
     }
   }
 
   public int gzwrite(Env env,
                      @NotNull Zlib zp,
                      InputStream is,
-                     @Optional("0") int length)
+                     @Optional("-1") int length)
   {
     if (zp == null)
       return 0;
@@ -125,12 +149,17 @@ public class ZlibModule extends AbstractQuercusModule {
   }
 
   /**
-   * alias of gzwrite
+   *
+   * @param env
+   * @param zp
+   * @param s
+   * @param length
+   * @return alias of gzwrite
    */
   public int gzputs(Env env,
                     @NotNull Zlib zp,
                     InputStream is,
-                    @Optional("0") int length)
+                    @Optional("-1") int length)
   {
     return gzwrite(env, zp, is, length);
   }
@@ -398,18 +427,40 @@ public class ZlibModule extends AbstractQuercusModule {
 
   /**
    *
-   * XXX: treated as a wrapper for gzcompress
+   * Compresses data using the Deflate algorithm, output is compatible with gzwrite's output
    *
-   * @param data
-   * @param level
-   * @param encodingMode XXX:ignored for now
-   * @return gzcompress
+   * @param data compressed with the Deflate algorithm
+   * @param level Deflate compresion level [0-9]
+   * @param encodingMode CRC32 trailer is not written if encoding mode is FORCE_DEFLATE, default is to write CRC32
+   * @return StringValue with gzip header and trailer
    */
-  public Value gzencode(InputStream data,
+  public Value gzencode(InputStream is,
                         @Optional("-1") int level,
-                        @Optional int encodingMode)
+                        @Optional("1") int encodingMode)
   {
-    return gzcompress(data, level);
+    TempBuffer tb = TempBuffer.allocate();
+    byte[] buffer = tb.getBuffer();
+
+    TempStream ts = new TempStream();
+    StreamImplOutputStream siout = new StreamImplOutputStream(ts);
+
+    try {
+      GZIPOutputStream gzout = new GZIPOutputStream(siout, level,Deflater.DEFAULT_STRATEGY,encodingMode);
+
+      int sublen = is.read(buffer, 0, buffer.length);
+      while (sublen > 0) {
+        gzout.write(buffer, 0, sublen);
+        sublen = is.read(buffer, 0, buffer.length);
+      }
+
+      gzout.finish();
+      TempBuffer.free(tb);
+      //siout.close();
+      //ts.close();
+      return new TempBufferStringValue(ts.getHead());
+    } catch(IOException e) {
+      throw QuercusModuleException.create(e);
+    }
   }
 
   // @todo gzpassthru()
