@@ -452,7 +452,7 @@ public class FileModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns the next character
+   * Returns the next character as a boolean
    */
   public Value fgetc(Env env, StreamResource file)
   {
@@ -462,11 +462,11 @@ public class FileModule extends AbstractQuercusModule {
 	return BooleanValue.FALSE;
       }
 
-      // quercus/1612
+      // php/1612
       int ch = file.read();
 
       if (ch >= 0)
-	return new StringValueImpl(String.valueOf((char) ch));
+	return new BinaryBuilderValue(new byte[] { (byte) ch });
       else
 	return BooleanValue.FALSE;
     } catch (IOException e) {
