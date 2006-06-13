@@ -74,12 +74,12 @@ public class StaticFunction extends JavaInvoker {
                         Method method)
   {
     super(moduleContext,
-	  method.getName(),
-	  method.getParameterTypes(),
-	  method.getParameterAnnotations(),
-	  method.getAnnotations(),
-	  method.getReturnType());
-    
+          method.getName(),
+          method.getParameterTypes(),
+          method.getParameterAnnotations(),
+          method.getAnnotations(),
+          method.getReturnType());
+
     _method = method;
     _quercusModule = quercusModule;
   }
@@ -131,7 +131,7 @@ public class StaticFunction extends JavaInvoker {
   public void analyzeArguments(Expr []args, AnalyzeInfo info)
   {
     init();
-    
+
     int env = getHasEnv() ? 1 : 0;
 
     Marshall []marshallArgs = getMarshallArgs();
@@ -178,8 +178,15 @@ public class StaticFunction extends JavaInvoker {
     throws IOException
   {
     init();
-    
-    getUnmarshallReturn().generateResultStart(out);
+
+    Marshall marshall = getUnmarshallReturn();
+
+    if (marshall instanceof Marshall.MarshallNullAsFalse) {
+      generateImpl(out, funExpr, args);
+      out.print(" == null ? BooleanValue.FALSE : ");
+    }
+
+    marshall.generateResultStart(out);
 
     generateImpl(out, funExpr, args);
 
@@ -195,7 +202,7 @@ public class StaticFunction extends JavaInvoker {
     throws IOException
   {
     init();
-    
+
     if (isBoolean())
       generateImpl(out, funExpr, args);
     else if (isLong() || isDouble()) {
@@ -216,7 +223,7 @@ public class StaticFunction extends JavaInvoker {
     throws IOException
   {
     init();
-    
+
     if (isLong())
       generateImpl(out, funExpr, args);
     else
@@ -232,7 +239,7 @@ public class StaticFunction extends JavaInvoker {
     throws IOException
   {
     init();
-    
+
     if (isLong() || isDouble())
       generateImpl(out, funExpr, args);
     else
@@ -248,7 +255,7 @@ public class StaticFunction extends JavaInvoker {
     throws IOException
   {
     init();
-    
+
     if (isString())
       generateImpl(out, funExpr, args);
     else
@@ -264,7 +271,7 @@ public class StaticFunction extends JavaInvoker {
     throws IOException
   {
     init();
-    
+
     generateImpl(out, funExpr, args);
   }
 
@@ -277,7 +284,7 @@ public class StaticFunction extends JavaInvoker {
     throws IOException
   {
     init();
-    
+
     generate(out, funExpr, args);
   }
 
@@ -290,7 +297,7 @@ public class StaticFunction extends JavaInvoker {
     throws IOException
   {
     init();
-    
+
     String var = out.addModule(_quercusModule);
 
     if (Modifier.isStatic(_method.getModifiers())) {
@@ -308,7 +315,7 @@ public class StaticFunction extends JavaInvoker {
 
     Class []param = _method.getParameterTypes();
     Marshall []marshallArgs = getMarshallArgs();
-    
+
     boolean isFirst = true;
 
     boolean hasEnv = getHasEnv();
@@ -328,16 +335,16 @@ public class StaticFunction extends JavaInvoker {
         marshallArgs[i].generate(out, args[i], param[hasEnv ? i + 1 : i]);
       else if (defaultExprs[i] != null)
         marshallArgs[i].generate(out,
-				 defaultExprs[i],
-				 param[hasEnv ? i + 1 : i]);
+                                 defaultExprs[i],
+                                 param[hasEnv ? i + 1 : i]);
       else if (! getHasRestArgs()) {
-	// XXX: error?
-	log.warning(L.l(funExpr.getLocation().getMessagePrefix() +
-			"argument length mismatch for '{0}'",
-			_method.getName()));
-	marshallArgs[i].generate(out,
-				 RequiredExpr.REQUIRED,
-				 param[hasEnv ? i + 1 : i]);
+        // XXX: error?
+        log.warning(L.l(funExpr.getLocation().getMessagePrefix() +
+                        "argument length mismatch for '{0}'",
+                        _method.getName()));
+        marshallArgs[i].generate(out,
+                                 RequiredExpr.REQUIRED,
+                                 param[hasEnv ? i + 1 : i]);
       }
     }
 
