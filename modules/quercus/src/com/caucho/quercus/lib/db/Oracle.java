@@ -126,7 +126,7 @@ public class Oracle extends JdbcConnectionResource {
    */
   public OracleStatement prepare(Env env, String query)
   {
-    OracleStatement stmt = new OracleStatement((Oracle)validateConnection());
+    OracleStatement stmt = new OracleStatement((Oracle) validateConnection());
 
     stmt.prepare(query);
 

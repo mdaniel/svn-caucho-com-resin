@@ -48,6 +48,8 @@ import com.caucho.quercus.module.ReturnNullAsFalse;
 
 import com.caucho.quercus.UnimplementedException;
 
+import com.caucho.sql.UserConnection;
+
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
@@ -423,7 +425,6 @@ public class PostgresModule extends AbstractQuercusModule {
 
       for (int i=0; i<nasize; i++) {
         String values = newArray.get(LongValue.create(i)).toString();
-        StringBuffer stringBuffer = new StringBuffer();
         // For testing only:
         // String values = "\n\tNUMBER1stcolumn\t\n\t\n\tNUMBER2ndcolumn\tNUMBER3rdcolumn\tNUMBER4thcolumn\t\n";
         values = "'"+values.replaceAll(delimiterRegex, "','")+"'";
@@ -1189,7 +1190,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       Object userconn = conn.getConnection();
 
-      Object pgconn = ((com.caucho.sql.UserConnection) userconn).getConnection();
+      Object pgconn = ((UserConnection) userconn).getConnection();
 
       // getNotifications()
       Object notifications[] = (Object[]) method.invoke(pgconn, new Object[] {});
@@ -1533,7 +1534,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       Object userconn = conn.getConnection();
 
-      Object pgconn = ((com.caucho.sql.UserConnection) userconn).getConnection();
+      Object pgconn = ((UserConnection) userconn).getConnection();
 
       // Large Objects may not be used in auto-commit mode.
       ((java.sql.Connection)pgconn).setAutoCommit(false);
@@ -1583,7 +1584,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       Object userconn = conn.getConnection();
 
-      Object pgconn = ((com.caucho.sql.UserConnection) userconn).getConnection();
+      Object pgconn = ((UserConnection) userconn).getConnection();
 
       lobManager = method.invoke(pgconn, new Object[] {});
       // lobManager = ((org.postgresql.PGConnection)conn).getLargeObjectAPI();
@@ -1688,7 +1689,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       Object userconn = conn.getConnection();
 
-      Object pgconn = ((com.caucho.sql.UserConnection) userconn).getConnection();
+      Object pgconn = ((UserConnection) userconn).getConnection();
 
       lobManager = method.invoke(pgconn, new Object[] {});
 
@@ -1841,7 +1842,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       Object userconn = conn.getConnection();
 
-      Object pgconn = ((com.caucho.sql.UserConnection) userconn).getConnection();
+      Object pgconn = ((UserConnection) userconn).getConnection();
 
       lobManager = method.invoke(pgconn, new Object[] {});
 
@@ -2665,7 +2666,9 @@ public class PostgresModule extends AbstractQuercusModule {
                                            Pattern pattern,
                                            String chars)
   {
-    StringBuffer stringBuffer = new StringBuffer();
+    // Change to StringBuilder when Matcher.appendReplacement/appendTail is available
+    // for StringBuilder. Currently, only StringBuffer is supported.
+    StringBuffer stringBuilder = new StringBuffer();
     // For testing only:
     // String delimiter = "\n\tNUMBER\r1stco*lumn\t\n\t\n\tNUM|BER(2nd)column\tNUMBER\\3rdcolumn\tNUMBER4thcolumn\t\naa";
     Matcher matcher = pattern.matcher(chars);
@@ -2677,11 +2680,11 @@ public class PostgresModule extends AbstractQuercusModule {
       } else if (c == '\\') {
         replacement = "\\\\";
       }
-      matcher.appendReplacement(stringBuffer, "\\\\"+replacement);
+      matcher.appendReplacement(stringBuilder, "\\\\"+replacement);
     }
-    matcher.appendTail(stringBuffer);
+    matcher.appendTail(stringBuilder);
 
-    return stringBuffer.toString();
+    return stringBuilder.toString();
   }
 
   private static int writeLobInternal(Object largeObject,

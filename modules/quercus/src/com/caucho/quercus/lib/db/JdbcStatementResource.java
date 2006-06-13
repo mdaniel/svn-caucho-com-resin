@@ -484,7 +484,7 @@ public class JdbcStatementResource {
 
       _query = query;
 
-      _stmt = _conn.getConnection().prepareStatement(query);
+      _stmt = _conn.getConnection().prepareCall(query);
 
       return true;
     } catch (SQLException e) {
@@ -507,7 +507,7 @@ public class JdbcStatementResource {
       if (_stmt != null)
         _stmt.close();
       _query = query;
-      _stmt = _conn.getConnection().prepareStatement(query);
+      _stmt = _conn.getConnection().prepareCall(query);
       return true;
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -515,6 +515,22 @@ public class JdbcStatementResource {
       _errorCode = e.getErrorCode();
       return false;
     }
+  }
+
+  /**
+   * Changes the internal statement.
+   */
+  protected void setPreparedStatement(PreparedStatement stmt)
+  {
+    _stmt = stmt;
+  }
+
+  /**
+   * Changes the internal result set.
+   */
+  protected void setResultSet(ResultSet rs)
+  {
+    _rs = rs;
   }
 
   /**
