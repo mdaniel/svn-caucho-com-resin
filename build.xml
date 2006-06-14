@@ -669,6 +669,7 @@
         <include name="lib/ejb-30.jar"/>
         <include name="lib/j2ee-deploy-10.jar"/>
         <include name="lib/j2ee-management-10.jar"/>
+        <include name="lib/jaf-11.jar"/>
         <include name="lib/jca-15.jar"/>
         <include name="lib/jms-11.jar"/>
         <include name="lib/jmx-12.jar"/>
