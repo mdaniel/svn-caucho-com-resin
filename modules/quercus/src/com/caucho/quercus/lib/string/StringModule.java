@@ -52,6 +52,7 @@ import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.Reference;
 import com.caucho.quercus.module.UsesSymbolTable;
 import com.caucho.quercus.lib.file.FileModule;
+import com.caucho.quercus.lib.file.BinaryOutput;
 import com.caucho.quercus.lib.ArrayModule;
 import com.caucho.quercus.resources.StreamResource;
 import com.caucho.util.L10N;
@@ -597,13 +598,14 @@ v   *
    * @param args the valujes to apply to the format string
    */
   public static Value fprintf(Env env,
-                              @NotNull StreamResource fd,
+                              @NotNull BinaryOutput os,
                               String format,
                               Value []args)
   {
     Value value = sprintf(format, args);
 
-    return FileModule.fwrite(env, fd, value.toString(), -1);
+    return FileModule.fwrite(env, os, value.toInputStream(),
+			     Integer.MAX_VALUE);
   }
 
   /**

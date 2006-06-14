@@ -50,6 +50,11 @@ public class Provider {
     _version = version;
   }
 
+  // XXX: temp for compilation of Session
+  Provider()
+  {
+  }
+
   /**
    * Return the implementing class name.
    */

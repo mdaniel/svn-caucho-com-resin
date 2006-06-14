@@ -1141,7 +1141,7 @@ public class FileModule extends AbstractQuercusModule {
   public static Value fputs(Env env,
 			    BinaryOutput os,
 			    InputStream value,
-			    @Optional("-1") int length)
+			    @Optional("0x7fffffff") int length)
   {
     return fwrite(env, os, value, length);
   }
