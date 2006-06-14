@@ -41,6 +41,7 @@ import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.module.Optional;
@@ -376,16 +377,15 @@ public class MysqliResult extends JdbcResultResource {
    *
    * @return the number of rows in the result set
    */
-  @ReturnNullAsFalse
-  public Integer num_rows()
+  public Value num_rows()
   {
     int numRows = getNumRows();
 
     if (numRows < 0) {
-      return null;
+      return BooleanValue.FALSE;
     }
 
-    return new Integer(numRows);
+    return LongValue.create(numRows);
   }
 
   /**

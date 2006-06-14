@@ -982,20 +982,21 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Returns number of rows affected during statement execution
    */
-  @ReturnNullAsFalse
-  public static Integer oci_num_rows(Env env,
-                                     @NotNull OracleStatement stmt)
+  public static Value oci_num_rows(Env env,
+                                   @NotNull OracleStatement stmt)
   {
     try {
+
       if (stmt == null)
         return null;
 
       JdbcResultResource resource = new JdbcResultResource(null, stmt.getResultSet(), null);
 
-      return new Integer(resource.getNumRows());
+      return LongValue.create(resource.getNumRows());
+
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return null;
+      return BooleanValue.FALSE;
     }
   }
 
@@ -1578,9 +1579,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_num_rows()
    */
-  @ReturnNullAsFalse
-  public static Integer ocirowcount(Env env,
-                                    @NotNull OracleStatement stmt)
+  public static Value ocirowcount(Env env,
+                                  @NotNull OracleStatement stmt)
   {
     return oci_num_rows(env, stmt);
   }

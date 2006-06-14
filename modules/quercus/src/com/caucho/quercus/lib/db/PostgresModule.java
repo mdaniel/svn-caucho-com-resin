@@ -913,11 +913,10 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Test if a field is SQL NULL
    */
-  @ReturnNullAsFalse
-  public static Integer pg_field_is_null(Env env,
-                                         @NotNull PostgresResult result,
-                                         Value row,
-                                         @Optional("-1") Value fieldNameOrNumber)
+  public static Value pg_field_is_null(Env env,
+                                       @NotNull PostgresResult result,
+                                       Value row,
+                                       @Optional("-1") Value fieldNameOrNumber)
   {
     try {
 
@@ -954,14 +953,14 @@ public class PostgresModule extends AbstractQuercusModule {
                                      LongValue.create(fieldNumber));
 
       if (field == null) {
-        return new Integer(1);
+        return LongValue.create(1);
       }
 
-      return new Integer(0);
+      return LongValue.create(0);
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return null;
+      return BooleanValue.FALSE;
     }
   }
 
@@ -1100,10 +1099,9 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Returns the type ID (OID) for the corresponding field number
    */
-  @ReturnNullAsFalse
-  public static Integer pg_field_type_oid(Env env,
-                                          @NotNull PostgresResult result,
-                                          int fieldNumber)
+  public static Value pg_field_type_oid(Env env,
+                                        @NotNull PostgresResult result,
+                                        int fieldNumber)
   {
     try {
 
@@ -1115,14 +1113,16 @@ public class PostgresModule extends AbstractQuercusModule {
 
       result = pg_query(env, (Postgres) result.getConnection(), metaQuery);
 
-      return new Integer(pg_fetch_result(env,
-                                         result,
-                                         LongValue.create(-1),
-                                         LongValue.create(0)));
+      String s = pg_fetch_result(env,
+                                 result,
+                                 LongValue.create(-1),
+                                 LongValue.create(0));
+
+      return LongValue.create(new Integer(s));
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return null;
+      return BooleanValue.FALSE;
     }
   }
 
@@ -1513,9 +1513,8 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Create a large object
    */
-  @ReturnNullAsFalse
-  public static Integer pg_lo_create(Env env,
-                                     @Optional Postgres conn)
+  public static Value pg_lo_create(Env env,
+                                   @Optional Postgres conn)
   {
     try {
 
@@ -1553,11 +1552,11 @@ public class PostgresModule extends AbstractQuercusModule {
 
       // oid = lobManager.create();
 
-      return new Integer(oid);
+      return LongValue.create(oid);
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return null;
+      return BooleanValue.FALSE;
     }
   }
 
@@ -1628,41 +1627,46 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Import a large object from file
    */
-  @ReturnNullAsFalse
-  public static Integer pg_lo_import(Env env,
-                                     @NotNull Postgres conn,
-                                     Path path)
+  public static Value pg_lo_import(Env env,
+                                   @NotNull Postgres conn,
+                                   Path path)
   {
     try {
 
       //@todo conn should be optional
 
-      int oid = ((Integer)pg_lo_create(env, conn)).intValue();
-      Object largeObject = pg_lo_open(env, conn, oid, "w");
+      Value value = pg_lo_create(env, conn);
 
-      String data = "";
+      if ((value != null) && (value instanceof LongValue)) {
 
-      // Open the file
-      ReadStream is = path.openRead();
+        int oid = value.toInt();
+        Object largeObject = pg_lo_open(env, conn, oid, "w");
 
-      // copy the data from the large object to the file
-      // int read;
-      // byte buf[] = new byte[2048];
-      // while ((read = is.read(buf, 0, 2048)) > 0) {
-      // }
+        String data = "";
 
-      writeLobInternal(largeObject, is, Integer.MAX_VALUE);
+        // Open the file
+        ReadStream is = path.openRead();
 
-      pg_lo_close(env, largeObject);
+        // copy the data from the large object to the file
+        // int read;
+        // byte buf[] = new byte[2048];
+        // while ((read = is.read(buf, 0, 2048)) > 0) {
+        // }
 
-      is.close();
+        writeLobInternal(largeObject, is, Integer.MAX_VALUE);
 
-      return new Integer(oid);
+        pg_lo_close(env, largeObject);
+
+        is.close();
+
+        return LongValue.create(oid);
+      }
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return null;
     }
+
+    return BooleanValue.FALSE;
   }
 
   /**
@@ -1863,11 +1867,10 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Write to a large object
    */
-  @ReturnNullAsFalse
-  public static Integer pg_lo_write(Env env,
-                                    @NotNull Object largeObject,
-                                    String data,
-                                    @Optional int len)
+  public static Value pg_lo_write(Env env,
+                                  @NotNull Object largeObject,
+                                  String data,
+                                  @Optional int len)
   {
     try {
 
@@ -1886,11 +1889,11 @@ public class PostgresModule extends AbstractQuercusModule {
 
       method.invoke(largeObject, new Object[] {data.getBytes(), 0, len});
 
-      return new Integer(written);
+      return LongValue.create(written);
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return null;
+      return BooleanValue.FALSE;
     }
   }
 
@@ -1935,9 +1938,8 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Returns the number of rows in a result
    */
-  @ReturnNullAsFalse
-  public static Integer pg_num_rows(Env env,
-                                    @NotNull PostgresResult result)
+  public static Value pg_num_rows(Env env,
+                                  @NotNull PostgresResult result)
   {
     try {
 
@@ -1948,11 +1950,11 @@ public class PostgresModule extends AbstractQuercusModule {
         return null;
       }
 
-      return result.getNumRows();
+      return LongValue.create(result.getNumRows());
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return -1;
+      return LongValue.create(-1);
     }
   }
 
@@ -2018,20 +2020,19 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Return the port number associated with the connection
    */
-  @ReturnNullAsFalse
-  public static Integer pg_port(Env env,
-                                @Optional Postgres conn)
+  public static Value pg_port(Env env,
+                              @Optional Postgres conn)
   {
     try {
 
       if (conn == null)
         conn = getConnection(env);
 
-      return new Integer(conn.getPort());
+      return LongValue.create(conn.getPort());
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return null;
+      return BooleanValue.FALSE;
     }
   }
 

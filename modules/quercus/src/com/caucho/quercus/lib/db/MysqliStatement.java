@@ -29,10 +29,11 @@
 
 package com.caucho.quercus.lib.db;
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.UnimplementedException;
@@ -246,17 +247,16 @@ public class MysqliStatement extends JdbcStatementResource {
    * @param env the PHP executing environment
    * @return the number of rows in the result set
    */
-  @ReturnNullAsFalse
-  public Integer num_rows(Env env)
+  public Value num_rows(Env env)
   {
     try {
       if (getResultSet() != null)
-        return new Integer(JdbcResultResource.getNumRows(getResultSet()));
+        return LongValue.create(JdbcResultResource.getNumRows(getResultSet()));
       else
-        return null;
+        return BooleanValue.FALSE;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
-      return null;
+      return BooleanValue.FALSE;
     }
   }
 

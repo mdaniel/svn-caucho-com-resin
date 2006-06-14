@@ -656,7 +656,7 @@ public class MysqliModule extends AbstractQuercusModule {
     if (result == null)
       return NullValue.NULL;
 
-    return LongValue.create(result.num_rows());
+    return result.num_rows();
   }
 
   /**
@@ -719,12 +719,11 @@ public class MysqliModule extends AbstractQuercusModule {
   /**
    * Returns the number of rows.
    */
-  @ReturnNullAsFalse
-  public static Integer mysqli_stmt_num_rows(Env env,
-                                             @NotNull MysqliStatement stmt)
+  public static Value mysqli_stmt_num_rows(Env env,
+                                           @NotNull MysqliStatement stmt)
   {
     if (stmt == null)
-      return null;
+      return BooleanValue.FALSE;
 
     return stmt.num_rows(env);
   }
@@ -771,7 +770,7 @@ public class MysqliModule extends AbstractQuercusModule {
   @ReturnNullAsFalse
   public static JdbcResultResource
     mysqli_stmt_result_metadata(Env env,
-        @NotNull MysqliStatement stmt)
+                                @NotNull MysqliStatement stmt)
   {
     if (stmt == null)
       return null;

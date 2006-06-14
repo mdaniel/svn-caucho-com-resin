@@ -710,11 +710,10 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Retrieves the number of rows in a result set.
    */
-  @ReturnNullAsFalse
-  public Integer mysql_num_rows(Env env, @NotNull MysqliResult result)
+  public Value mysql_num_rows(Env env, @NotNull MysqliResult result)
   {
     if (result == null)
-      return null;
+      return BooleanValue.FALSE;
 
     return result.num_rows();
   }
