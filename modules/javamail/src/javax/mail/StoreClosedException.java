@@ -33,14 +33,14 @@ package javax.mail;
  * Represents a messaing exception
  */
 public class StoreClosedException extends MessagingException {
-  private Store store;
+  private Store _store;
   
   /**
    * Creates an exception.
    */
   public StoreClosedException(Store store)
   {
-    this.store = store;
+    _store = store;
   }
   
   /**
@@ -49,8 +49,7 @@ public class StoreClosedException extends MessagingException {
   public StoreClosedException(Store store, String msg)
   {
     super(msg);
-
-    this.store = store;
+    _store = store;
   }
 
   /**
@@ -58,6 +57,6 @@ public class StoreClosedException extends MessagingException {
    */
   public Store getStore()
   {
-    return this.store;
+    return _store;
   }
 }

@@ -40,12 +40,7 @@ public class Provider {
   private String _vendor;
   private String _version;
   
-  Provider()
-  {
-    // XXX:
-  }
-  
-  Provider(String className, String protocol, Type type,
+  Provider(Type type, String protocol, String className,
 	   String vendor, String version)
   {
     _className = className;

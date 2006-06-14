@@ -32,6 +32,9 @@ package javax.mail;
  * Represents a messaing exception
  */
 public class MessagingException extends Exception {
+
+  Exception _nextException = null;
+
   /**
    * Creates an exception.
    */
@@ -52,7 +55,8 @@ public class MessagingException extends Exception {
    */
   public MessagingException(String msg, Exception exn)
   {
-    super(msg, exn);
+    super(msg);
+    _nextException = exn;
   }
 
   /**
@@ -68,10 +72,11 @@ public class MessagingException extends Exception {
    */
   public boolean setNextException(Exception e)
   {
-    initCause(e);
-    
-    // XXX:
-
+    if (getCause()!=null)
+      return false;
+    if (!(e instanceof MessagingException))
+      return false;
+    _nextException = e;
     return true;
   }
 
@@ -81,7 +86,7 @@ public class MessagingException extends Exception {
    */
   public Throwable getCause()
   {
-    return getNextException();
+    return _nextException;
   }
 
   /**
@@ -90,8 +95,10 @@ public class MessagingException extends Exception {
    */
   public String toString()
   {
-    // XXX:
-    return super.toString();
+    if (getCause()==null)
+      return super.toString();
+    return
+      super.toString() + ";\n  nested exception is:\n\t" + getCause();
   }
 
 }

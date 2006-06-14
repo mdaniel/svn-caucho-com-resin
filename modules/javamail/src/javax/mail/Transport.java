@@ -41,9 +41,6 @@ public abstract class Transport extends Service {
 
   /**
    * Sends a message to the specified recipients.
-   *
-   * @param msg the message to send
-   * @param addresses the destination addresses
    */
   public abstract void sendMessage(Message msg,
 				   Address []addresses)

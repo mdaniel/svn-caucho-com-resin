@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -35,30 +35,56 @@ import java.net.InetAddress;
  * Represents a mail authenticator.
  */
 public abstract class Authenticator {
+
+  private InetAddress _requestingSite = null;
+  private int         _requestingPort = 1;
+  private String      _requestingProtocol = null;
+  private String      _requestingPrompt = null;
+  private String      _defaultUserName = null;
+
+  public Authenticator()
+  {
+  }
+
   /**
    * Returns the requesting site.
    */
-  public abstract InetAddress getRequestingSite();
+  protected final InetAddress getRequestingSite()
+  {
+    return _requestingSite;
+  }
 
   /**
    * Returns the requested connectin port.
    */
-  public abstract int getRequestingPort();
+  protected final int getRequestingPort()
+  {
+    return _requestingPort;
+  }
 
   /**
    * Returns the protocol.
    */
-  public abstract String getRequestingProtocol();
+  protected final String getRequestingProtocol()
+  {
+    return _requestingProtocol;
+  }
 
   /**
    * Returns the prompt string.
    */
-  public abstract String getRequestingPrompt();
+  protected final String getRequestingPrompt()
+  {
+    return _requestingPrompt;
+  }
 
   /**
    * Returns the default user name.
    */
-  public abstract String getDefaultUserName();
+  protected final String getDefaultUserName()
+  {
+    return _defaultUserName;
+  }
   
   /**
    * Override for the passwor dauth.

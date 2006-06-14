@@ -70,7 +70,7 @@ public interface UIDFolder {
 
     protected FetchProfileItem(String name)
     {
-      super(new String[] { name });
+      super(name);
     }
   }
   

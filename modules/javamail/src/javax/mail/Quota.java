@@ -30,11 +30,7 @@
 package javax.mail;
 
 /**
- * This class represents a set of quotas for a given quota root. Each
- * quota root has a set of resources, represented by the
- * Quota.Resource class. Each resource has a name (for example,
- * "STORAGE"), a current usage, and a usage limit. See RFC 2087.
- * Since: JavaMail 1.4
+ * This class represents a set of quotas for a given quota root.
  */
 public class Quota {
 
@@ -46,7 +42,7 @@ public class Quota {
   /**
    * The set of resources associated with this quota root.
    */
-  public Quota.Resource[] resources;
+  public Quota.Resource[] resources = new Resource[0];
 
   /**
    * Create a Quota object for the named quotaroot with no associated resources.
@@ -54,7 +50,7 @@ public class Quota {
    */
   public Quota(String quotaRoot)
   {
-    throw new UnsupportedOperationException("not implemented");
+    this.quotaRoot = quotaRoot;
   }
 
   /**
@@ -62,14 +58,24 @@ public class Quota {
    */
   public void setResourceLimit(String name, long limit)
   {
-    throw new UnsupportedOperationException("not implemented");
+    for(int i=0; i<resources.length; i++)
+      if (resources[i].name.equals(name)) {
+	resources[i].limit = limit;
+	return;
+      }
+
+    Quota.Resource[] resources =
+      new Quota.Resource[this.resources.length+1];
+    System.arraycopy(this.resources, 0, resources, 0, this.resources.length);
+    resources[resources.length-1] = new Resource(name, 0, limit);
+    this.resources = resources;
   }
 
   /**
    * An individual resource in a quota root.
-   * Since: JavaMail 1.4
    */
   public static class Resource {
+
     /**
      * The usage limit for the resource.
      */
@@ -87,12 +93,13 @@ public class Quota {
 
     /**
      * Construct a Resource object with the given name, usage, and
-     * limit.  name - the resource nameusage - the current usage of
-     * the resourcelimit - the usage limit for the resource
+     * limit.
      */
     public Resource(String name, long usage, long limit)
     {
-      throw new UnsupportedOperationException("not implemented");
+      this.name = name;
+      this.usage = usage;
+      this.limit = limit;
     }
 
   }

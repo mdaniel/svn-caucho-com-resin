@@ -32,12 +32,11 @@ package javax.mail;
  * Context of a Message.
  */
 public class MessageContext {
+
   private Part _part;
   
   /**
    * Creates a context.
-   *
-   * @param part the part owning the context
    */
   public MessageContext(Part part)
   {
@@ -49,7 +48,14 @@ public class MessageContext {
    */
   public Message getMessage()
   {
-    return (Message) getPart();
+    return unwrap(_part);
+  }
+
+  private static Message unwrap(Part p)
+  {
+    if (p==null || p instanceof Message)
+      return (Message)p;
+    return unwrap(((BodyPart)p).getParent().getParent());
   }
 
   /**
@@ -65,7 +71,6 @@ public class MessageContext {
    */
   public Session getSession()
   {
-    throw new UnsupportedOperationException();
-    // return getMessage().getSession();
+    return getMessage().getSession();
   }
 }

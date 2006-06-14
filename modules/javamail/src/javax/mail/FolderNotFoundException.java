@@ -33,7 +33,7 @@ package javax.mail;
  * Represents a messaing exception
  */
 public class FolderNotFoundException extends MessagingException {
-  private Folder folder;
+  private Folder _folder;
   
   /**
    * Creates an exception.
@@ -47,7 +47,7 @@ public class FolderNotFoundException extends MessagingException {
    */
   public FolderNotFoundException(Folder folder)
   {
-    this.folder = folder;
+    _folder = folder;
   }
   
   /**
@@ -56,8 +56,7 @@ public class FolderNotFoundException extends MessagingException {
   public FolderNotFoundException(Folder folder, String msg)
   {
     super(msg);
-
-    this.folder = folder;
+    _folder = folder;
   }
   
   /**
@@ -66,8 +65,7 @@ public class FolderNotFoundException extends MessagingException {
   public FolderNotFoundException(String msg, Folder folder)
   {
     super(msg);
-
-    this.folder = folder;
+    _folder = folder;
   }
 
   /**
@@ -75,6 +73,6 @@ public class FolderNotFoundException extends MessagingException {
    */
   public Folder getFolder()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return _folder;
   }
 }
