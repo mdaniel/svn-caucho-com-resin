@@ -27,123 +27,63 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.resources;
+package com.caucho.quercus.lib.file;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.IOException;
-
-import com.caucho.vfs.Path;
 
 import com.caucho.quercus.env.ResourceValue;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.StringValue;
+
+import com.caucho.quercus.QuercusModuleException;
 
 /**
- * Represents a PHP open stream
+ * Represents a Quercus output stream
  */
-public class StreamResource extends ResourceValue {
+public interface BinaryOutput extends BinaryStream {
   /**
-   * Reads the next byte, returning -1 on eof.
+   * Returns an OutputStream.
    */
-  public int read()
-    throws IOException
-  {
-    return -1;
-  }
+  public OutputStream getOutputStream();
   
   /**
-   * Reads a buffer, returning -1 on eof.
-   */
-  public int read(byte []buffer, int offset, int length)
-    throws IOException
-  {
-    return -1;
-  }
-
-  /**
-   * Reads the optional linefeed character from a \r\n
-   */
-  public boolean readOptionalLinefeed()
-    throws IOException
-  {
-    return false;
-  }
-  
-  /**
-   * Reads a line from the buffer.
-   */
-  public StringValue readLine()
-    throws IOException
-  {
-    return null;
-  }
-  
-  /**
-   * Writes to a buffer.
+   * Writes a buffer.
    */
   public void write(byte []buffer, int offset, int length)
-    throws IOException
-  {
-  }
+    throws IOException;
   
   /**
-   * prints
+   * Writes a buffer.
+   */
+  public int write(InputStream is, int length)
+    throws IOException;
+  
+  /**
+   * prints a unicode character
    */
   public void print(char ch)
-    throws IOException
-  {
-    print(String.valueOf(ch));
-  }
+    throws IOException;
   
   /**
    * prints
    */
   public void print(String s)
-    throws IOException
-  {
-  }
-
-  /**
-   * Returns true on the end of file.
-   */
-  public boolean isEOF()
-  {
-    return true;
-  }
+    throws IOException;
 
   /**
    * Flushes the output
    */
-  public void flush()
-  {
-  }
-
-  /**
-   * Returns the current location in the file.
-   */
-  public long getPosition()
-  {
-    return 0;
-  }
-
-  /**
-   * Closes the stream.
-   */
-  public void close()
-  {
-  }
-
-  /**
-   * Closes the stream for reading
-   */
-  public void closeRead()
-  {
-  }
+  public void flush();
 
   /**
    * Closes the stream for writing
    */
-  public void closeWrite()
-  {
-  }
+  public void closeWrite();
+
+  /**
+   * Closes the stream.
+   */
+  public void close();
 }
 

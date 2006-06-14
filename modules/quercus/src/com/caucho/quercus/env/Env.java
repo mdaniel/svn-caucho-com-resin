@@ -2772,6 +2772,14 @@ public final class Env {
     return lookupInclude(getSelfDirectory(), relPath);
   }
 
+  /**
+   * Looks up the path.
+   */
+  public Path lookupInclude(String relPath)
+  {
+    return lookupInclude(relPath, getPwd(), getSelfDirectory());
+  }
+
   private Path lookupInclude(String include, Path pwd, Path scriptPwd)
   {
     String includePath = getIniString("include_path");

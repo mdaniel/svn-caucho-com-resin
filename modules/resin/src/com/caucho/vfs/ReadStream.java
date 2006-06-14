@@ -202,11 +202,32 @@ public final class ReadStream extends InputStream {
   
   /**
    * Returns the sets current read position.
-   *
-   * <p>Note: currently unavailable
    */
-  public void setPosition(long pos)
+  public boolean setPosition(long pos)
+    throws IOException
   {
+    if (pos < _position) {
+      _position = pos;
+      _readLength = _readOffset = 0;
+
+      if (_source != null) {
+	_source.seekStart(pos);
+
+	return true;
+      }
+      else
+	return false;
+    }
+    else if (pos < _position + _readLength) {
+      _readOffset = (int) (pos - _position);
+
+      return true;
+    }
+    else {
+      long n = pos - _position - _readOffset;
+      
+      return skip(n) == n;
+    }
   }
 
   /**

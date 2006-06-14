@@ -47,6 +47,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
@@ -294,18 +295,24 @@ public class StreamModule extends AbstractQuercusModule {
       if (length < 0)
 	length = Integer.MAX_VALUE;
 
-      String line = file.readLine();
+      StringValue line = file.readLine();
+
 
       if (line == null)
 	return BooleanValue.FALSE;
-      else if (line.endsWith("\r\n"))
-	return new StringValueImpl(line.substring(0, line.length() - 2));
-      else if (line.endsWith("\r"))
-	return new StringValueImpl(line.substring(0, line.length() - 1));
-      else if (line.endsWith("\n"))
-	return new StringValueImpl(line.substring(0, line.length() - 1));
+
+      int lineLength = line.length();
+      if (lineLength == 0)
+	return line;
+
+      char tail = line.charAt(lineLength - 1);
+
+      if (tail == '\n')
+	return line.substring(0, line.length() - 1);
+      else if (tail == '\r')
+	return line.substring(0, line.length() - 1);
       else
-	return new StringValueImpl(line);
+	return line;
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }

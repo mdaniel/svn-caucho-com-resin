@@ -29,15 +29,11 @@
 
 package com.caucho.quercus.lib.zlib;
 
-import java.io.ByteArrayInputStream;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 
@@ -49,15 +45,22 @@ import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringBuilderValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.BinaryValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.module.NotNull;
-import com.caucho.quercus.module.Optional;
+
 import com.caucho.quercus.lib.file.FileValue;
 import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.lib.string.StringModule;
+
+import com.caucho.quercus.module.NotNull;
+import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.ReturnNullAsFalse;
+
 import com.caucho.util.ByteBuffer;
 import com.caucho.util.L10N;
+
 import com.caucho.vfs.Path;
 import com.caucho.vfs.TempBuffer;
 
@@ -70,7 +73,7 @@ public class Zlib {
   private static final L10N L = new L10N(Zlib.class);
 
   private InputStream _in;
-  private GZIPOutputStream _gzout;
+  private ZlibOutputStream _gzout;
 
   private FileValue _fileValue;
   private boolean _isGZIPInputStream;
@@ -90,33 +93,42 @@ public class Zlib {
    */
   public Zlib(Env env, String filename, String mode, boolean useIncludePath)
   {
+    String filemode = getFileMode(mode);
+    int compressionLevel = getCompressionLevel(mode);
+    int compressionStrategy = getCompressionStrategy(mode);
 
-    String filemode = getFileMode( mode );
-    int compressionLevel = getCompressionLevel( mode );
-    int compressionStrategy = getCompressionStrategy( mode );
-
-    Value val = FileModule.fopen(env, filename, mode, useIncludePath, null);
+    Value val = null;
+    // FileModule.fopen(env, filename, mode, useIncludePath, null);
+    
     if (val != BooleanValue.FALSE)
       _fileValue = (FileValue)val;
 
+      /*
     try {
       if (filemode.equals("r")) {
         _in = getGZIPInputStream();
       }
       else if (filemode.equals("w")) {
-        _gzout = new GZIPOutputStream(_fileValue.getPath().openWrite(), compressionLevel, compressionStrategy);
+        _gzout = new ZlibOutputStream(_fileValue.getPath().openWrite(),
+				      compressionLevel,
+				      compressionStrategy);
       }
       else if (filemode.equals("a")) {
-        _gzout = new GZIPOutputStream(_fileValue.getPath().openAppend(), compressionLevel, compressionStrategy);
+        _gzout = new ZlibOutputStream(_fileValue.getPath().openAppend(),
+				      compressionLevel,
+				      compressionStrategy);
       }
       else if (filemode.equals("x")) {
-        _gzout = new GZIPOutputStream(_fileValue.getPath().openWrite(), compressionLevel, compressionStrategy);
+        _gzout = new ZlibOutputStream(_fileValue.getPath().openWrite(),
+				      compressionLevel,
+				      compressionStrategy);
       }
     }
     catch (IOException e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(L.l(e.getMessage()));
     }
+      */
   }
 
 
@@ -139,39 +151,32 @@ public class Zlib {
     int inputSize = 0;
     int sublen;
 
+    if (length < 0)
+      length = Integer.MAX_VALUE;
+
     try {
-      if( length == -1 ) {
-        sublen = is.read(buffer, 0, buffer.length);
-        while (sublen > 0) {
-          _gzout.write(buffer, 0, sublen);
+      while (length > 0) {
+	if (buffer.length < length)
+	  sublen = buffer.length;
+	else
+	  sublen = length;
 
-          inputSize += sublen;
-          sublen = is.read(buffer, 0, buffer.length);
-        }
+	sublen = is.read(buffer, 0, sublen);
+
+	if (sublen <= 0)
+	  break;
+
+	_gzout.write(buffer, 0, sublen);
+	
+	inputSize += sublen;
+	length -= sublen;
       }
-      else {
-        while (length > 0) {
-          if (buffer.length < length)
-            sublen = buffer.length;
-          else
-            sublen = length;
-
-          sublen = is.read(buffer, 0, sublen);
-
-          if (sublen <= 0)
-            break;
-
-          _gzout.write(buffer, 0, sublen);
-          inputSize += sublen;
-          length -= sublen;
-        }
-      }
-
     }
     catch (IOException e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(L.l(e.getMessage()));
     }
+    
     TempBuffer.free(tb);
     return inputSize;
   }
@@ -183,7 +188,7 @@ public class Zlib {
    */
   public boolean gzclose()
   {
-    if ((_fileValue == null)) {
+    if (_fileValue == null) {
       return false;
     }
 
@@ -192,6 +197,7 @@ public class Zlib {
         _gzout.close();
         _gzout = null;
       }
+      
       if (_in != null) {
         _in.close();
         _in = null;
@@ -211,8 +217,8 @@ public class Zlib {
    * @return # of uncompressed bytes
    */
   public int gzputs(Env env,
-                               @NotNull InputStream is,
-                               @Optional("-1") int length)
+		    @NotNull InputStream is,
+		    @Optional("-1") int length)
   {
     return gzwrite(env, is, length);
   }
@@ -243,19 +249,22 @@ public class Zlib {
    * @param length
    * @return StringValue
    */
-  public Value gzgets(int length)
+  @ReturnNullAsFalse
+  public StringValue gzgets(int length)
   {
     if (_in == null)
-      return BooleanValue.FALSE;
+      return null;
 
     StringBuilderValue sbv = new StringBuilderValue();
     int readChar;
 
     try {
-      for (int i=0; i < length - 1; i++) {
+      for (int i = 0; i < length - 1; i++) {
         readChar = _in.read();
+	
         if (readChar >= 0) {
-          sbv.append( (char)readChar );
+          sbv.append((char) readChar);
+	  
           if (readChar == '\n' || readChar == '\r')
             break;
         } else
@@ -267,7 +276,8 @@ public class Zlib {
 
     if (sbv.length() > 0)
       return sbv;
-    else return BooleanValue.FALSE;
+    else
+      return null;
   }
 
   /**
@@ -278,7 +288,7 @@ public class Zlib {
    * @throws IOException
    * @throws DataFormatException
    */
-  public Value gzfile()
+  public ArrayValue gzfile()
   {
     Value line;
     int oldLength = 0; 
@@ -287,7 +297,7 @@ public class Zlib {
 
     try {
       //read in String BuilderValue's initial capacity
-      while ((line=gzgets(Integer.MAX_VALUE)) != BooleanValue.FALSE) {
+      while ((line = gzgets(Integer.MAX_VALUE)) != BooleanValue.FALSE) {
         array.put(line);
       }
 
@@ -304,7 +314,7 @@ public class Zlib {
    * @throws IOException
    * @throws DataFormatException
    */
-  public Value gzread(int length)
+  public BinaryValue gzread(int length)
   {
     BinaryBuilderValue sbv = new BinaryBuilderValue();
     int readChar;
@@ -313,14 +323,14 @@ public class Zlib {
       return sbv;
 
     try {
-      for (int i=0; i < length; i++) {
+      for (int i = 0; i < length; i++) {
         readChar = _in.read();
+	
         if (readChar >= 0) {
           sbv.append(readChar);
         } else
           break;
       }
-
     } catch (Exception e) {
       throw QuercusModuleException.create(e);
     }
@@ -356,13 +366,13 @@ public class Zlib {
    * @throws IOException
    * @throws DataFormatException
    */
-  public Value gzgetss(int length,
-                                       @Optional String allowedTags)
+  @ReturnNullAsFalse
+  public StringValue gzgetss(int length,
+			     @Optional String allowedTags)
   {
     try {
-      //PHP5 returns false if file was not opened for reading
       if (_in == null)
-        return BooleanValue.FALSE;
+        return null;
 
       StringBuilderValue sbv = new StringBuilderValue();
       int readChar;
@@ -376,9 +386,9 @@ public class Zlib {
           break;
       }
       if (sbv.length() > 0)
-	return new StringValueImpl(StringModule.strip_tags(sbv.toString(), allowedTags));
+	return StringModule.strip_tags(sbv, allowedTags);
       else
-	return BooleanValue.FALSE;
+	return null;
     } catch (Exception e) {
       throw QuercusModuleException.create(e);
     }

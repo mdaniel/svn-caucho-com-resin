@@ -34,31 +34,43 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import java.util.logging.*;
+
 import java.util.zip.*;
 
 import com.caucho.quercus.QuercusModuleException;
+
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.BinaryValue;
+import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.TempBufferStringValue;
 import com.caucho.quercus.env.Value;
+
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.ReturnNullAsFalse;
 import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.lib.zlib.Zlib;
+
+import com.caucho.quercus.lib.file.*;
+
 import com.caucho.util.ByteBuffer;
+import com.caucho.util.L10N;
 
 import com.caucho.vfs.*;
 
 /**
- * PHP ZLib
+ * PHP Zlib
  */
 public class ZlibModule extends AbstractQuercusModule {
-
-  //private static final Logger log = Logger.getLogger(ZlibModule.class.getName());
-  //private static final L10N L = new L10N(ZlibModule.class);
+  private static final Logger log
+    = Logger.getLogger(ZlibModule.class.getName());
+  private static final L10N L = new L10N(ZlibModule.class);
 
   public static final int FORCE_GZIP = 0x1;
   public static final int FORCE_DEFLATE = 0x2;
@@ -76,12 +88,51 @@ public class ZlibModule extends AbstractQuercusModule {
    * @param useIncludePath always on
    * @return Zlib
    */
-  public Zlib gzopen(Env env,
-		     String fileName,
-		     String mode,
-		     @Optional("false") boolean useIncludePath)
+  @ReturnNullAsFalse
+  public static Object gzopen(Env env,
+			      String fileName,
+			      String mode,
+			      @Optional("false") boolean useIncludePath)
   {
-    return new Zlib(env, fileName, mode, useIncludePath);
+    String filemode = getFileMode(mode);
+    int compressionLevel = getCompressionLevel(mode);
+    int compressionStrategy = getCompressionStrategy(mode);
+
+    Object val = FileModule.fopen(env, fileName,
+				  mode, useIncludePath,
+				  null);
+
+    if (val == null)
+      return null;
+
+    try {
+      if (filemode.equals("r")) {
+	BinaryInput is = (BinaryInput) val;
+	
+        return new ZlibInputStream(is);
+      }
+      else if (filemode.equals("w")) {
+        return new ZlibOutputStream(((BinaryOutput) val).getOutputStream(),
+				    compressionLevel,
+				    compressionStrategy);
+      }
+      else if (filemode.equals("a")) {
+        return new ZlibOutputStream(((BinaryOutput) val).getOutputStream(),
+				    compressionLevel,
+				    compressionStrategy);
+      }
+      else if (filemode.equals("x")) {
+        return new ZlibOutputStream(((BinaryOutput) val).getOutputStream(),
+				    compressionLevel,
+				    compressionStrategy);
+      }
+    }
+    catch (IOException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(L.l(e.getMessage()));
+    }
+
+    return null;
   }
 
   /**
@@ -91,11 +142,31 @@ public class ZlibModule extends AbstractQuercusModule {
    * @param useIncludePath
    * @return array of uncompressed lines from fileName
    */
-  public Value gzfile(Env env,
-		     String fileName,
-		     @Optional("false") boolean useIncludePath)
+  @ReturnNullAsFalse
+  public static ArrayValue gzfile(Env env,
+				  String fileName,
+				  @Optional boolean useIncludePath)
   {
-    return (new Zlib(env, fileName, "r", useIncludePath)).gzfile();
+    BinaryInput is = (BinaryInput) gzopen(env, fileName, "r", useIncludePath);
+
+    if (is == null)
+      return null;
+
+    try {
+      ArrayValue result = new ArrayValueImpl();
+
+      StringValue line;
+
+      while ((line = is.readLine(Integer.MAX_VALUE)) != null &&
+	     line.length() > 0)
+	result.put(line);
+
+      return result;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    } finally {
+      is.close();
+    }
   }
 
   /**
@@ -107,45 +178,39 @@ public class ZlibModule extends AbstractQuercusModule {
    * @param useIncludePath
    * @return number of bytes read from file, or FALSE if an error occurred
    */
-  public Value readgzfile(Env env,
-                            String fileName,
-                            @Optional("false") boolean useIncludePath)
+  public static Value readgzfile(Env env,
+				 String fileName,
+				 @Optional boolean useIncludePath)
   {
-    TempBuffer tb = TempBuffer.allocate();
-    byte[] buffer = tb.getBuffer();
+    BinaryInput is = (BinaryInput) gzopen(env, fileName, "r", useIncludePath);
+
+    if (is == null)
+      return BooleanValue.FALSE;
 
     try {
-      Zlib zlib = new Zlib(env, fileName,"r",useIncludePath);
-
-      InputStream in = zlib.getGZIPInputStream();
-      WriteStream out = env.getOut();
-
-      int length = 0;
-      int sublen = in.read(buffer, 0, buffer.length);
-      while (sublen > 0) {
-        out.write(buffer, 0, sublen);
-        length += sublen;
-        sublen = in.read(buffer, 0, buffer.length);
-      }
-
-      in.close();
-      TempBuffer.free(tb);
-      return new LongValue(length);
-    } catch (Exception e) {
-      TempBuffer.free(tb);
-      return BooleanValue.FALSE;
+      return LongValue.create(env.getOut().writeStream(is.getInputStream()));
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    } finally {
+      is.close();
     }
   }
 
-  public int gzwrite(Env env,
-                     @NotNull Zlib zp,
-                     InputStream is,
-                     @Optional("-1") int length)
+  /**
+   * Writes a string to the gzip stream.
+   */
+  public static int gzwrite(@NotNull BinaryOutput os,
+			    InputStream is,
+			    @Optional("0x7fffffff") int length)
   {
-    if (zp == null)
+    if (os == null)
       return 0;
 
-    return zp.gzwrite(env, is,length);
+    try {
+      return os.write(is, length);
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   /**
@@ -157,71 +222,107 @@ public class ZlibModule extends AbstractQuercusModule {
    * @return alias of gzwrite
    */
   public int gzputs(Env env,
-                    @NotNull Zlib zp,
+                    @NotNull BinaryOutput os,
                     InputStream is,
-                    @Optional("-1") int length)
+                    @Optional("0x7ffffff") int length)
   {
-    return gzwrite(env, zp, is, length);
+    if (os == null)
+      return 0;
+
+    try {
+      return os.write(is, length);
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
-  public boolean gzclose(@NotNull Zlib zp)
+  /**
+   * Closes the stream.
+   */
+  public boolean gzclose(@NotNull BinaryStream os)
   {
-    if (zp == null)
+    if (os == null)
+      return false;
+    
+    os.close();
+
+    return true;
+  }
+
+  /**
+   * Returns true if the GZip stream is ended.
+   */
+  public boolean gzeof(@NotNull BinaryInput is)
+  {
+    if (is == null)
+      return true;
+
+    return is.isEOF();
+  }
+
+  /**
+   * Reads a character from the stream.
+   */
+  public static Value gzgetc(@NotNull BinaryInput is)
+  {
+    if (is == null)
+      return BooleanValue.FALSE;
+
+    try {
+      int ch = is.read();
+
+      if (ch < 0)
+	return BooleanValue.FALSE;
+      else
+	return new BinaryBuilderValue(new byte[] { (byte) ch });
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  /**
+   * Reads a chunk of data from the gzip stream.
+   */
+  @ReturnNullAsFalse
+  public BinaryValue gzread(@NotNull BinaryInput is, int length)
+  {
+    if (is == null)
+      return null;
+
+    try {
+      return is.read(length);
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  /**
+   * Reads a line from the input stream.
+   */
+  public static Value gzgets(Env env,
+			      @NotNull BinaryInput is,
+			      int length)
+  {
+    return FileModule.fgets(env, is, length);
+  }
+
+  /**
+   * Reads a line from the zip stream, stripping tags.
+   */
+  public static Value gzgetss(Env env,
+			      @NotNull BinaryInput is,
+			      int length,
+			      @Optional String allowedTags)
+  {
+    return FileModule.fgetss(env, is, length, allowedTags);
+  }
+
+  public boolean gzrewind(@NotNull BinaryInput is)
+  {
+    if (is == null)
       return false;
 
-    return zp.gzclose();
-  }
-
-  public boolean gzeof(@NotNull Zlib zp)
-  {
-    if (zp == null)
-      return false;
-
-    return zp.gzeof();
-  }
-
-  public Value gzgetc(@NotNull Zlib zp)
-  {
-    if (zp == null)
-      return BooleanValue.FALSE;
-
-    return zp.gzgetc();
-  }
-
-  public Value gzread(@NotNull Zlib zp,
-                      int length)
-  {
-    if (zp == null)
-      return BooleanValue.FALSE;
-
-    return zp.gzread(length);
-  }
-
-  public Value gzgets(@NotNull Zlib zp,
-                      int length)
-  {
-    if (zp == null)
-      return BooleanValue.FALSE;
-
-    return zp.gzgets(length);
-  }
-
-  public Value gzgetss(@NotNull Zlib zp,
-                       int length,
-                       @Optional String allowedTags)
-  {
-    if (zp == null)
-      return BooleanValue.FALSE;
-
-    return zp.gzgetss(length,allowedTags);
-  }
-
-  public boolean gzrewind(@NotNull Zlib zp)
-  {
-    if (zp == null)
-      return false;
-
-    return zp.gzrewind();
+    return is.setPosition(0);
   }
 
   /**
@@ -427,36 +528,40 @@ public class ZlibModule extends AbstractQuercusModule {
 
   /**
    *
-   * Compresses data using the Deflate algorithm, output is compatible with gzwrite's output
+   * Compresses data using the Deflate algorithm, output is
+   * compatible with gzwrite's output
    *
    * @param data compressed with the Deflate algorithm
    * @param level Deflate compresion level [0-9]
-   * @param encodingMode CRC32 trailer is not written if encoding mode is FORCE_DEFLATE, default is to write CRC32
+   * @param encodingMode CRC32 trailer is not written if encoding mode
+   *    is FORCE_DEFLATE, default is to write CRC32
    * @return StringValue with gzip header and trailer
    */
   public Value gzencode(InputStream is,
-                        @Optional("-1") int level,
+                        @Optional("6") int level,
                         @Optional("1") int encodingMode)
   {
     TempBuffer tb = TempBuffer.allocate();
     byte[] buffer = tb.getBuffer();
 
     TempStream ts = new TempStream();
-    StreamImplOutputStream siout = new StreamImplOutputStream(ts);
+    StreamImplOutputStream out = new StreamImplOutputStream(ts);
 
     try {
-      GZIPOutputStream gzout = new GZIPOutputStream(siout, level,Deflater.DEFAULT_STRATEGY,encodingMode);
+      ZlibOutputStream gzOut;
 
-      int sublen = is.read(buffer, 0, buffer.length);
-      while (sublen > 0) {
-        gzout.write(buffer, 0, sublen);
-        sublen = is.read(buffer, 0, buffer.length);
+      gzOut = new ZlibOutputStream(out, level, Deflater.DEFAULT_STRATEGY,
+				   encodingMode);
+
+      int len;
+      while ((len = is.read(buffer, 0, buffer.length)) > 0) {
+        gzOut.write(buffer, 0, len);
       }
 
-      gzout.finish();
+      gzOut.close();
+      
       TempBuffer.free(tb);
-      //siout.close();
-      //ts.close();
+
       return new TempBufferStringValue(ts.getHead());
     } catch(IOException e) {
       throw QuercusModuleException.create(e);
@@ -467,4 +572,77 @@ public class ZlibModule extends AbstractQuercusModule {
   // @todo gzseek()
   // @todo gztell()
   // @todo zlib_get_coding_type()
+
+  /**
+   * Helper function to retrieve the filemode closest to the end
+   * Note: PHP5 unexpectedly fails when 'x' is the mode.
+   *
+   * XXX todo: toss a warning if '+' is found (gzip cannot be open for both reading and writing at the same time)
+   *
+   */
+  private static String getFileMode(String input)
+  {
+    String modifier = "";
+    String filemode = input.substring(0, 1);
+
+    for (int i = 1; i < input.length(); i++ )
+    {
+      char ch = input.charAt(i);
+      switch (ch) {
+        case 'r':
+          filemode = "r";
+          break;
+        case 'w':
+          filemode = "w";
+          break;
+        case 'a':
+          filemode = "a";
+          break;
+        case 'b':
+          modifier = "b";
+          break;
+        case 't':
+          modifier = "t";
+          break;
+      }
+    }
+    return filemode + modifier;
+  }
+
+  /**
+   * Helper function to retrieve the compression level like how PHP5 does it.
+   * 	1. finds the compression level nearest to the end and returns that
+   */
+  private static int getCompressionLevel(String input)
+  {
+    for (int i = input.length() - 1; i >= 0; i--) {
+      char ch = input.charAt(i);
+      
+      if (ch >= '0' && ch <= '9')
+        return ch - '0';
+    }
+    
+    return Deflater.DEFAULT_COMPRESSION;
+  }
+
+  /**
+   * Helper function to retrieve the compression strategy like how PHP5 does it.
+   * 	1. finds the compression strategy nearest to the end and returns that
+   */
+  private static int getCompressionStrategy(String input)
+  {
+    for (int i = input.length() - 1; i >= 0; i--) {
+      char ch = input.charAt(i);
+      
+      switch (ch) {
+      case 'f':
+        return Deflater.FILTERED;
+	
+      case 'h':
+        return Deflater.HUFFMAN_ONLY;
+      }
+    }
+    
+    return Deflater.DEFAULT_STRATEGY;
+  }
 }

@@ -38,6 +38,8 @@ import com.caucho.quercus.QuercusException;
 
 import com.caucho.quercus.env.ResourceValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 
 /**
  * Represents read/write stream
@@ -112,13 +114,13 @@ public class StreamReadWrite extends StreamResource {
   /**
    * Reads a line from the buffer.
    */
-  public String readLine()
+  public StringValue readLine()
     throws IOException
   {
     if (_is != null)
-      return _is.readLineNoChop();
+      return new StringValueImpl(_is.readLineNoChop());
     else
-      return "";
+      return StringValueImpl.EMPTY;
   }
   
   /**

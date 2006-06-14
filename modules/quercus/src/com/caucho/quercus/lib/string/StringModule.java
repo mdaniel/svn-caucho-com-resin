@@ -1780,8 +1780,8 @@ v   *
    *
    * @return the formatted string
    */
-  public static Value sscanf(String string,
-                             String format,
+  public static Value sscanf(StringValue string,
+                             StringValue format,
                              @Optional Value []args)
   {
     // quercus/113-
@@ -1860,7 +1860,7 @@ v   *
   /**
    * Scans a string with a given length.
    */
-  private static int sscanfString(String string, int sIndex, int maxLen,
+  private static int sscanfString(StringValue string, int sIndex, int maxLen,
                                   ArrayValue array)
   {
     // quercus/1131
@@ -1869,20 +1869,20 @@ v   *
     if (maxLen < 0)
       maxLen = Integer.MAX_VALUE;
 
-    StringBuilder sb = new StringBuilder();
+    StringBuilderValue sb = new StringBuilderValue();
 
     for (; sIndex < strlen && maxLen-- > 0; sIndex++) {
       char ch = string.charAt(sIndex);
 
       if (isWhitespace(ch)) {
-        array.append(new StringValueImpl(sb.toString()));
+        array.append(sb);
         return sIndex;
       }
       else
         sb.append(ch);
     }
 
-    array.append(new StringValueImpl(sb.toString()));
+    array.append(sb);
 
     return sIndex;
   }
@@ -2741,11 +2741,12 @@ v   *
    * @param string the string to remove
    * @param allowTags the allowable tags
    */
-  public static String strip_tags(String string, @Optional String allowTags)
+  public static StringValue strip_tags(StringValue string,
+				       @Optional String allowTags)
   {
     // XXX: allowTags is stubbed
 
-    StringBuilder result = new StringBuilder();
+    StringBuilderValue result = new StringBuilderValue();
 
     int len = string.length();
 
@@ -2765,7 +2766,7 @@ v   *
       }
     }
 
-    return result.toString();
+    return result;
   }
 
   /**
@@ -2809,7 +2810,7 @@ v   *
    * @param b right value
    * @return -1, 0, or 1
    */
-  public static int strncasecmp(String a, String b, int length)
+  public static int strncasecmp(StringValue a, StringValue b, int length)
   {
     int aLen = a.length();
     int bLen = b.length();

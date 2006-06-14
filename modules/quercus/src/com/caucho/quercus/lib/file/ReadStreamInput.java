@@ -32,39 +32,58 @@ package com.caucho.quercus.lib.file;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.IOException;
+
+import com.caucho.quercus.QuercusModuleException;
+
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringBuilderValue;
+import com.caucho.quercus.env.BinaryValue;
+import com.caucho.quercus.env.BinaryBuilderValue;
 
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
-
 /**
- * Represents a Quercus open file
+ * Represents a Quercus file open for reading
  */
-public class FileReadValue extends FileValue {
+public class ReadStreamInput extends InputStream implements BinaryInput {
   private static final Logger log
-    = Logger.getLogger(FileReadValue.class.getName());
+    = Logger.getLogger(ReadStreamInput.class.getName());
 
   private ReadStream _is;
-  private long _offset;
 
-  public FileReadValue(Path path)
-    throws IOException
+  public ReadStreamInput()
   {
-    super(path);
+  }
 
-    _is = path.openRead();
+  public ReadStreamInput(ReadStream is)
+  {
+    init(is);
+  }
+
+  public void init(ReadStream is)
+  {
+    _is = is;
   }
 
   /**
-   * Returns the number of bytes available to be read, 0 if no known.
+   * Returns the input stream.
    */
-  public long getLength()
+  public InputStream getInputStream()
   {
-    return getPath().getLength();
+    return _is;
+  }
+
+  /**
+   * Opens a copy.
+   */
+  public BinaryInput openCopy()
+    throws IOException
+  {
+    return new ReadStreamInput(_is.getPath().openRead());
   }
 
   /**
@@ -73,16 +92,8 @@ public class FileReadValue extends FileValue {
   public int read()
     throws IOException
   {
-    if (_is != null) {
-      int v = _is.read();
-
-      if (v >= 0)
-        _offset++;
-      else
-        close();
-
-      return v;
-    }
+    if (_is != null)
+      return _is.read();
     else
       return -1;
   }
@@ -94,17 +105,42 @@ public class FileReadValue extends FileValue {
     throws IOException
   {
     if (_is != null) {
-      int len = _is.read(buffer, offset, length);
-
-      if (len >= 0)
-        _offset += len;
-      else
-        close();
-
-      return len;
+      return _is.read(buffer, offset, length);
     }
     else
       return -1;
+  }
+
+  /**
+   * Reads into a binary builder.
+   */
+  public BinaryValue read(int length)
+    throws IOException
+  {
+    if (_is == null)
+      return null;
+
+    BinaryBuilderValue bb = new BinaryBuilderValue();
+
+    while (length > 0) {
+      bb.prepareReadBuffer();
+
+      int sublen = bb.getLength() - bb.getOffset();
+
+      if (length < sublen)
+	sublen = length;
+
+      sublen = read(bb.getBuffer(), bb.getOffset(), sublen);
+
+      if (sublen > 0) {
+	bb.setOffset(bb.getOffset() + sublen);
+	length -= sublen;
+      }
+      else
+	return bb;
+    }
+
+    return bb;
   }
 
   /**
@@ -113,23 +149,20 @@ public class FileReadValue extends FileValue {
   public boolean readOptionalLinefeed()
     throws IOException
   {
-    if (_is != null) {
-      int ch = _is.read();
-
-      if (ch == '\n') {
-        _offset++;
-        return true;
-      }
-      else {
-        _is.unread();
-        return false;
-      }
-    }
-    else
+    if (_is == null)
       return false;
+    
+    int ch = _is.read();
+
+    if (ch == '\n') {
+      return true;
+    }
+    else {
+      _is.unread();
+      return false;
+    }
   }
 
-  @Override
   public void writeToStream(OutputStream os, int length)
     throws IOException
   {
@@ -141,15 +174,38 @@ public class FileReadValue extends FileValue {
   /**
    * Reads a line from a file, returning null on EOF.
    */
-  public StringValue readLine()
+  public StringValue readLine(int length)
     throws IOException
   {
-    // XXX: offset messed up
-
-    if (_is != null)
-      return new StringValueImpl(_is.readLineNoChop());
-    else
+    if (_is == null)
       return null;
+    
+    StringBuilderValue sb = new StringBuilderValue();
+
+    int ch;
+
+    for (; length > 0 && (ch = _is.readChar()) >= 0; length--) {
+      if (ch == '\n') {
+	sb.append((char) ch);
+	return sb;
+      }
+      else if (ch == '\r') {
+	sb.append('\r');
+	
+	int ch2 = _is.read();
+
+	if (ch == '\n')
+	  sb.append('\n');
+	else
+	  _is.unread();
+	
+	return sb;
+      }
+      else
+	sb.append((char) ch);
+    }
+
+    return sb;
   }
 
   /**
@@ -183,6 +239,31 @@ public class FileReadValue extends FileValue {
   }
 
   /**
+   * Returns the current location in the file.
+   */
+  public boolean setPosition(long offset)
+  {
+    if (_is == null)
+      return false;
+
+    try {
+      _is.setPosition(offset);
+
+      return true;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  /**
+   * Closes the stream for reading.
+   */
+  public void closeRead()
+  {
+    close();
+  }
+
+  /**
    * Closes the file.
    */
   public void close()
@@ -200,12 +281,10 @@ public class FileReadValue extends FileValue {
 
   /**
    * Converts to a string.
-   * @param env
    */
   public String toString()
   {
-    return "File[" + getPath() + "]";
+    return "ReadStreamInput[" + _is.getPath() + "]";
   }
-
 }
 

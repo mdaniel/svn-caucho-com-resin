@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.file;
 
+import java.io.InputStream;
 import java.io.IOException;
 
 import java.util.HashMap;
@@ -56,6 +57,7 @@ import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.lib.StreamModule;
 
 import com.caucho.quercus.module.NotNull;
+import com.caucho.quercus.module.ReturnNullAsFalse;
 
 import com.caucho.util.Alarm;
 
@@ -84,6 +86,9 @@ public class FileModule extends AbstractQuercusModule {
   public static final int UPLOAD_ERR_FORM_SIZE = 2;
   public static final int UPLOAD_ERR_PARTIAL = 3;
   public static final int UPLOAD_ERR_NO_FILE = 4;
+
+  public static final int FILE_USE_INCLUDE_PATH = 1;
+  public static final int FILE_APPEND = 2;
 
   private static final HashMap<String,StringValue> _iniMap
     = new HashMap<String,StringValue>();
@@ -404,16 +409,12 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * Closes a file.
    */
-  public boolean fclose(Env env, StreamResource file)
+  public static boolean fclose(Env env, @NotNull BinaryStream s)
   {
-    // quercus/1611
-    
-    if (file == null) {
-      env.warning(L.l("{0} is null", "handle"));
+    if (s == null)
       return false;
-    }
 
-    file.close();
+    s.close();
 
     return true;
   }
@@ -421,32 +422,23 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * Checks for the end of file.
    */
-  public boolean feof(Env env, StreamResource file)
+  public static boolean feof(Env env, @NotNull BinaryInput is)
   {
-    // quercus/1618
-
-    if (file == null) {
-      env.warning(L.l("{0} is null", "handle"));
+    if (is == null)
       return false;
-    }
 
-    return file.isEOF();
+    return is.isEOF();
   }
 
   /**
    * Flushes a file.
    */
-  public boolean fflush(Env env, StreamResource file)
+  public static boolean fflush(Env env, @NotNull BinaryOutput os)
   {
-    // quercus/1619
-
-    if (file == null) {
-      env.warning(L.l("{0} is null", "handle"));
-
+    if (os == null)
       return false;
-    }
 
-    file.flush();
+    os.flush();
 
     return true;
   }
@@ -454,16 +446,14 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * Returns the next character as a boolean
    */
-  public Value fgetc(Env env, StreamResource file)
+  public static Value fgetc(Env env, @NotNull BinaryInput is)
   {
     try {
-      if (file == null) {
-	env.warning(L.l("{0} is null", "handle"));
+      if (is == null)
 	return BooleanValue.FALSE;
-      }
 
       // php/1612
-      int ch = file.read();
+      int ch = is.read();
 
       if (ch >= 0)
 	return new BinaryBuilderValue(new byte[] { (byte) ch });
@@ -582,20 +572,20 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * Returns the next line
    */
-  public Value fgets(Env env,
-		     @NotNull StreamResource file,
-		     @Optional long length)
+  public static Value fgets(Env env,
+			    @NotNull BinaryInput is,
+			    @Optional("0x7fffffff") int length)
   {
     // php/1615
 
     try {
-      if (file == null)
+      if (is == null)
 	return BooleanValue.FALSE;
 
-      String value = file.readLine();
+      StringValue value = is.readLine(length);
 
       if (value != null)
-	return new StringValueImpl(value);
+	return value;
       else
 	return BooleanValue.FALSE;
     } catch (IOException e) {
@@ -606,23 +596,23 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * Returns the next line stripping tags
    */
-  public Value fgetss(Env env,
-                      StreamResource file,
-                      @Optional long length,
-                      @Optional String allowedTags)
+  public static Value fgetss(Env env,
+			     BinaryInput is,
+			     @Optional("0x7fffffff") int length,
+			     @Optional String allowedTags)
   {
     // php/161a
 
     try {
-      if (file == null) {
+      if (is == null) {
 	env.warning(L.l("{0} is null", "handle"));
 	return BooleanValue.FALSE;
       }
 
-      String value = file.readLine();
+      StringValue value = is.readLine(length);
 
       if (value != null)
-	return new StringValueImpl(StringModule.strip_tags(value, allowedTags));
+	return StringModule.strip_tags(value, allowedTags);
       else
 	return BooleanValue.FALSE;
     } catch (IOException e) {
@@ -639,29 +629,28 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static Value file(Env env,
                            String filename,
-                           @Optional int useIncludePath,
+                           @Optional boolean useIncludePath,
                            @Optional Value context)
   {
     try {
-      Value fileValue = fopen(env, filename, "r", useIncludePath == 1, context);
+      BinaryStream stream = fopen(env, filename, "r", useIncludePath, context);
 
-      if (fileValue instanceof FileValue) {
-	FileValue file = (FileValue) fileValue;
+      if (stream == null)
+	return BooleanValue.FALSE;
 
-	try {
-	  ArrayValue result = new ArrayValueImpl();
-	  String line;
+      BinaryInput is = (BinaryInput) stream;
 
-	  while ((line = file.readLine()) != null)
-	    result.append(new StringValueImpl(line));
+      try {
+	ArrayValue result = new ArrayValueImpl();
+	StringValue line;
 
-	  return result;
-	} finally {
-	  file.close();
-	}
+	while ((line = is.readLine(Integer.MAX_VALUE)) != null)
+	  result.append(line);
+
+	return result;
+      } finally {
+	is.close();
       }
-
-      return BooleanValue.FALSE;
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
@@ -858,20 +847,22 @@ public class FileModule extends AbstractQuercusModule {
    * @param useIncludePath if true, use the include path
    * @param context the resource context
    */
-  public static Value file_get_contents(Env env,
-                                        String filename,
-                                        @Optional boolean useIncludePath,
-                                        @Optional Value context,
-                                        @Optional long offset,
-                                        @Optional("4294967296") long maxLen)
+  @ReturnNullAsFalse
+  public static BinaryValue
+    file_get_contents(Env env,
+		      String filename,
+		      @Optional boolean useIncludePath,
+		      @Optional Value context,
+		      @Optional long offset,
+		      @Optional("4294967296") long maxLen)
   {
     try {
-      Value fileValue = fopen(env, filename, "r", useIncludePath, context);
+      BinaryStream s = fopen(env, filename, "r", useIncludePath, context);
 
-      if (! (fileValue instanceof FileValue))
-	return BooleanValue.FALSE;
+      if (! (s instanceof BinaryInput))
+	return null;
 
-      FileValue file = (FileValue) fileValue;
+      BinaryInput is = (BinaryInput) s;
 
       try {
 	BinaryBuilderValue bb = new BinaryBuilderValue();
@@ -881,8 +872,8 @@ public class FileModule extends AbstractQuercusModule {
 	do {
 	  bb.prepareReadBuffer();
 
-	  len = file.read(bb.getBuffer(), bb.getOffset(),
-			  bb.getLength() - bb.getOffset());
+	  len = is.read(bb.getBuffer(), bb.getOffset(),
+			bb.getLength() - bb.getOffset());
 
 	  if (len > 0)
 	    bb.setOffset(bb.getOffset() + len);
@@ -890,7 +881,7 @@ public class FileModule extends AbstractQuercusModule {
 
 	return bb;
       } finally {
-	file.close();
+	is.close();
       }
     } catch (IOException e) {
       throw new QuercusModuleException(e);
@@ -910,28 +901,32 @@ public class FileModule extends AbstractQuercusModule {
 
     try {
       // XXX: bug862, flags check for FILE_USE_INCLUDE_PATH, FILE_APPEND, LOCK_EX
-      Value fileV = fopen(env, filename, "w", false, context);
 
-      if (! (fileV instanceof StreamResource))
-	return fileV;
+      boolean useIncludePath = (flags & FILE_USE_INCLUDE_PATH) != 0;
+      String mode = (flags & FILE_APPEND) != 0 ? "a" : "w";
+      
+      BinaryStream s = fopen(env, filename, mode, useIncludePath, context);
 
-      StreamResource file = (StreamResource) fileV;
+      if (! (s instanceof BinaryOutput))
+	return BooleanValue.FALSE;
 
-      long dataWritten = 0;
+      BinaryOutput os = (BinaryOutput) s;
 
       try {
+	long dataWritten = 0;
+
 	if (data instanceof ArrayValue) {
 	  for (Value item : ((ArrayValue) data).values()) {
-	    file.print(item.toString());
+	    os.print(item.toString());
 	  }
 	}
 	else
-	  file.print(data.toString());
-      } finally {
-	file.close();
-      }
+	  os.print(data.toString());
 
-      return new LongValue(dataWritten);
+	return new LongValue(dataWritten);
+      } finally {
+	os.close();
+      }
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
@@ -963,72 +958,92 @@ public class FileModule extends AbstractQuercusModule {
 
   /**
    * Opens a file.
+   *
+   * @param filename the path to the file to open
+   * @param mode the mode the file should be opened as.
+   * @param useIncludePath if true, search the current include path
    */
-  public static Value fopen(Env env,
-                            String filename,
-                            String mode,
-                            @Optional boolean useIncludePath,
-                            @Optional Value context)
+  @ReturnNullAsFalse
+  public static BinaryStream fopen(Env env,
+				   String filename,
+				   String mode,
+				   @Optional boolean useIncludePath,
+				   @Optional Value context)
   {
-    // XXX: useInputPath
     // XXX: context
     try {
-      Path path = env.getPwd().lookup(filename);
+      Path path;
 
-      if (mode.startsWith("r")) {
+      if (useIncludePath)
+	path = env.lookupInclude(filename);
+      else
+	path = env.getPwd().lookup(filename);
+
+      if (mode.startsWith("r+")) {
+	throw new UnsupportedOperationException("read/write not yet supported");
+      }
+      else if (mode.startsWith("r")) {
 	try {
-	  return new FileReadValue(path);
+	  return new FileInput(path);
 	} catch (IOException e) {
 	  log.log(Level.FINE, e.toString(), e);
 
           env.warning(L.l("{0} cannot be read", path.getFullPath()));
 
-          return BooleanValue.FALSE;
+          return null;
         }
+      }
+      else if (mode.startsWith("w+")) {
+	throw new UnsupportedOperationException("read/write not yet supported");
       }
       else if (mode.startsWith("w")) {
 	try {
-	  return new FileWriteValue(path);
+	  return new FileOutput(path);
 	} catch (IOException e) {
 	  log.log(Level.FINE, e.toString(), e);
 
           env.warning(L.l("{0} cannot be written", path.getFullPath()));
 
-          return BooleanValue.FALSE;
+          return null;
         }
+      }
+      else if (mode.startsWith("a+")) {
+	throw new UnsupportedOperationException("read/write not yet supported");
       }
       else if (mode.startsWith("a")) {
 	try {
-	  return new FileWriteValue(path, true);
+	  return new FileOutput(path, true);
 	} catch (IOException e) {
 	  log.log(Level.FINE, e.toString(), e);
 
           env.warning(L.l("{0} cannot be written", path.getFullPath()));
 
-          return BooleanValue.FALSE;
+          return null;
         }
       }
+      else if (mode.startsWith("x+")) {
+	throw new UnsupportedOperationException("read/write not yet supported");
+      }
       else if (mode.startsWith("x") && ! path.exists())
-        return new FileWriteValue(path);
+        return new FileOutput(path);
 
       env.warning(L.l("bad mode `{0}'", mode));
 
-      return NullValue.NULL;
+      return null;
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
       
       env.warning(L.l("{0} can't be opened.\n{1}",
 		      filename, e.toString()));
 
-      return BooleanValue.FALSE;
+      return null;
     }
   }
 
   /**
    * Output the filepointer data to the output stream.
    */
-  public Value fpassthru(Env env,
-                         @NotNull StreamResource is)
+  public Value fpassthru(Env env, @NotNull BinaryInput is)
   {
     // php/1635
 
@@ -1036,24 +1051,11 @@ public class FileModule extends AbstractQuercusModule {
       if (is == null)
 	return BooleanValue.FALSE;
 
-      TempBuffer temp = TempBuffer.allocate();
-      byte []buffer = temp.getBuffer();
-
-      int len;
-
       WriteStream out = env.getOut();
 
-      long writeLength = 0;
+      long writeLength = out.writeStream(is.getInputStream());
 
-      while ((len = is.read(buffer, 0, buffer.length)) > 0) {
-	out.write(buffer, 0, len);
-
-	writeLength += len;
-      }
-
-      TempBuffer.free(temp);
-
-      return new LongValue(writeLength);
+      return LongValue.create(writeLength);
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
@@ -1137,11 +1139,11 @@ public class FileModule extends AbstractQuercusModule {
    * Writes a string to the file.
    */
   public static Value fputs(Env env,
-			    StreamResource file,
-			    String value,
+			    BinaryOutput os,
+			    InputStream value,
 			    @Optional("-1") int length)
   {
-    return fwrite(env, file, value, length);
+    return fwrite(env, os, value, length);
   }
 
   /**
@@ -1186,14 +1188,14 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static Value fscanf(Env env,
                              @NotNull StreamResource file,
-                             String format,
+                             StringValue format,
                              @Optional Value []args)
   {
     try {
       if (file == null)
 	return BooleanValue.FALSE;
 
-      String value = file.readLine();
+      StringValue value = file.readLine();
 
       if (value == null)
 	return BooleanValue.FALSE;
@@ -1227,17 +1229,15 @@ public class FileModule extends AbstractQuercusModule {
    * Writes a string to the file.
    */
   public static Value fwrite(Env env,
-			     @NotNull StreamResource file,
-			     String value,
-			     @Optional("-1") int length)
+			     @NotNull BinaryOutput os,
+			     InputStream value,
+			     @Optional("0x7fffffff") int length)
   {
     try {
-      if (file == null)
+      if (os == null)
 	return BooleanValue.FALSE;
 
-      file.print(value);
-
-      return LongValue.create(value.length());
+      return LongValue.create(os.write(value, length));
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
@@ -1626,18 +1626,18 @@ public class FileModule extends AbstractQuercusModule {
                         @Optional boolean useIncludePath,
                         @Optional Value context)
   {
-    Value fileValue = fopen(env, filename, "r", useIncludePath, context);
+    BinaryStream s = fopen(env, filename, "r", useIncludePath, context);
 
-    Value result = BooleanValue.FALSE;
+    if (! (s instanceof BinaryInput))
+      return BooleanValue.FALSE;
 
-    if (fileValue instanceof StreamResource) {
-      StreamResource streamValue = (StreamResource) fileValue;
+    BinaryInput is = (BinaryInput) s;
 
-      result = fpassthru(env, streamValue);
-      fclose(env, streamValue);
+    try {
+      return fpassthru(env, is);
+    } finally {
+      is.close();
     }
-
-    return result;
   }
 
   /**

@@ -8,6 +8,36 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="java.util.logging fixes">
+
+<p>The operation of the java.util.logging has changed to properly
+implement/configure the java.util.logging API.</p>
+
+<p>For clarification, the &lt;log> tag's "level" attribute sets
+the level of the logging Handler.  It does not set the level of
+the Logger.</p>
+
+<section title="&lt;logging>">
+
+<p>The new &lt;logging> tag configures the Logger, e.g.</p>
+
+<example>
+&lt;logger name="com.caucho" level="fine"/>
+</example>
+
+Is equivalent to:
+
+<example>
+Logger.getLogger("com.caucho").setLevel(Level.FINE);
+</example>
+
+<p>If no &lt;logger> is supplied, the level default to the parent.
+If no parent has a &lt;logger>, the level defaults to INFO.</p>
+
+</section>
+
+</section>
+
 <section title="Load Balancing enhancements">
 
 <section title="load-balance-weight">

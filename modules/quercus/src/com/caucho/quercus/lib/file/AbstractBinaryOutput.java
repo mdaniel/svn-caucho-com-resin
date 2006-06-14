@@ -29,81 +29,81 @@
 
 package com.caucho.quercus.lib.file;
 
-import java.io.IOException;
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.IOException;
 
 import com.caucho.vfs.Path;
+import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.quercus.env.ResourceValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringBuilderValue;
-import com.caucho.quercus.env.Env;
+import com.caucho.quercus.lib.file.FileReadValue;
+import com.caucho.quercus.lib.file.FileValue;
 
-import com.caucho.quercus.resources.StreamResource;
+import com.caucho.quercus.QuercusModuleException;
 
 /**
- * Represents a Quercus open file
+ * Represents a PHP open file
  */
-public class FileValue extends StreamResource {
-  private Path _path;
-
-  public FileValue(Path path)
+abstract public class AbstractBinaryOutput
+  extends OutputStream
+  implements BinaryOutput {
+  /**
+   * Returns self as the output stream.
+   */
+  public OutputStream getOutputStream()
   {
-    _path = path;
+    return this;
   }
 
   /**
-   * Returns the path.
+   * Writes to a stream.
    */
-  public Path getPath()
+  public int write(InputStream is, int length)
   {
-    return _path;
-  }
+    int writeLength = 0;
 
-  /**
-   * Reads a character from a file, returning -1 on EOF.
-   */
-  public int read()
-    throws IOException
-  {
-    return -1;
-  }
+    TempBuffer tb = TempBuffer.allocate();
+    byte []buffer = tb.getBuffer();
 
-  /**
-   * Reads a line from a file, returning null.
-   */
-  public StringValue readLine()
-    throws IOException
-  {
-    StringBuilderValue sb = new StringBuilderValue();
+    try {
+      while (length > 0) {
+	int sublen;
 
-    int ch;
+	if (length < buffer.length)
+	  sublen = length;
+	else
+	  sublen = buffer.length;
 
-    while ((ch = read()) >= 0) {
-      sb.append((char) ch);
+	sublen = is.read(buffer, 0, sublen);
 
-      if (ch == '\n')
-	return sb;
-      // XXX: issues with mac
+	if (sublen < 0)
+	  break;
+
+	write(buffer, 0, sublen);
+
+	writeLength += sublen;
+	length -= sublen;
+      }
+
+      return writeLength;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    } finally {
+      TempBuffer.free(tb);
     }
-
-    if (sb.length() > 0)
-      return sb;
-    else
-      return null;
   }
-
+  
   /**
-   * Read a maximum of <i>length</i> bytes from the file and write
-   * them to the outputStream.
-   *
-   * @param os the {@link OutputStream}
-   * @param length the maximum number of bytes to read
+   * Prints a string to a file.
    */
-  public void writeToStream(OutputStream os, int length)
+  public void print(char v)
     throws IOException
   {
+    write((byte) v);
   }
 
   /**
@@ -112,22 +112,31 @@ public class FileValue extends StreamResource {
   public void print(String v)
     throws IOException
   {
+    for (int i = 0; i < v.length(); i++)
+      write(v.charAt(i));
   }
+
+  /**
+   * Flushes the output.
+   */
+  public void flush()
+  {
+  }
+
 
   /**
    * Closes the file.
    */
-  public void close()
+  public void closeWrite()
   {
+    close();
   }
 
   /**
-   * Converts to a string.
-   * @param env
+   * Closes the stream.
    */
-  public String toString()
+  public void close()
   {
-    return "File[" + _path + "]";
   }
 }
 

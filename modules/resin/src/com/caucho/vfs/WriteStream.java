@@ -931,24 +931,28 @@ public class WriteStream extends OutputStreamWithBuffer {
    *
    * @param source InputStream to read.
    */
-  public void writeStream(InputStream source) throws IOException
+  public long writeStream(InputStream source) throws IOException
   {
     if (source == null)
-      return;
+      return 0;
 
     int len;
     int length = _writeBuffer.length;
+    long outputLength = 0;
 
     if (_writeLength >= length) {
       int tmplen = _writeLength;
       _writeLength = 0;
       _source.write(_writeBuffer, 0, tmplen, false);
+      outputLength += tmplen;
     }
 
     while ((len = source.read(_writeBuffer,
 			      _writeLength,
 			      length - _writeLength)) >= 0) {
       _writeLength += len;
+      outputLength += len;
+      
       if (length <= _writeLength) {
 	int tmplen = _writeLength;
 	_writeLength = 0;
@@ -958,6 +962,8 @@ public class WriteStream extends OutputStreamWithBuffer {
 
     if (flushOnNewline || _implicitFlush)
       flush();
+
+    return outputLength;
   }
 
   /**

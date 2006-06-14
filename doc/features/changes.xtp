@@ -4,6 +4,10 @@
 
 <s2 title='3.0.snap - June 2, 2006'>
 <ul>
+<li>java.util.logging.Logger getLevel() should return null if unassigned (#1085, rep by Bill Au)
+<li>java.util.logging Logger add &lt;logger> (#1186, rep by Michael Earl)
+<li>java.util.logging Logger defaults to INFO (#1186, rep by Michael Earl)
+<li>java.util.logging significant fixes to logger vs handler level (#1186, rep by Michael Earl)
 <li>Quercus: is_subclass_of (#1180, rep by koreth)
 <li>Quercus: parent::foo(1,2,3,4,5,6) generated code (#1177, rep by koreth)
 <li>Quercus: dirname/__FILE__ issue (#1135, rep by Alex Sharaz)

@@ -29,28 +29,34 @@
 
 package com.caucho.quercus.lib.file;
 
-import java.io.IOException;
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.IOException;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.quercus.env.ResourceValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringBuilderValue;
-import com.caucho.quercus.env.Env;
 
-import com.caucho.quercus.resources.StreamResource;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
 
 /**
- * Represents a Quercus open file
+ * Represents a Quercus file open for reading
  */
-public class FileValue extends StreamResource {
+public class FileInput extends ReadStreamInput {
+  private static final Logger log
+    = Logger.getLogger(FileInput.class.getName());
+
   private Path _path;
 
-  public FileValue(Path path)
+  public FileInput(Path path)
+    throws IOException
   {
     _path = path;
+
+    init(path.openRead());
   }
 
   /**
@@ -62,72 +68,28 @@ public class FileValue extends StreamResource {
   }
 
   /**
-   * Reads a character from a file, returning -1 on EOF.
+   * Opens a copy.
    */
-  public int read()
+  public BinaryInput openCopy()
     throws IOException
   {
-    return -1;
+    return new FileInput(_path);
   }
 
   /**
-   * Reads a line from a file, returning null.
+   * Returns the number of bytes available to be read, 0 if no known.
    */
-  public StringValue readLine()
-    throws IOException
+  public long getLength()
   {
-    StringBuilderValue sb = new StringBuilderValue();
-
-    int ch;
-
-    while ((ch = read()) >= 0) {
-      sb.append((char) ch);
-
-      if (ch == '\n')
-	return sb;
-      // XXX: issues with mac
-    }
-
-    if (sb.length() > 0)
-      return sb;
-    else
-      return null;
-  }
-
-  /**
-   * Read a maximum of <i>length</i> bytes from the file and write
-   * them to the outputStream.
-   *
-   * @param os the {@link OutputStream}
-   * @param length the maximum number of bytes to read
-   */
-  public void writeToStream(OutputStream os, int length)
-    throws IOException
-  {
-  }
-
-  /**
-   * Prints a string to a file.
-   */
-  public void print(String v)
-    throws IOException
-  {
-  }
-
-  /**
-   * Closes the file.
-   */
-  public void close()
-  {
+    return getPath().getLength();
   }
 
   /**
    * Converts to a string.
-   * @param env
    */
   public String toString()
   {
-    return "File[" + _path + "]";
+    return "FileInput[" + getPath() + "]";
   }
 }
 

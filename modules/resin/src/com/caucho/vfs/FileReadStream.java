@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -39,7 +40,7 @@ import com.caucho.vfs.*;
  * Stream encapsulating FileInputStream
  */
 public class FileReadStream extends StreamImpl {
-  FileInputStream _is;
+  private FileInputStream _is;
   
   /**
    * Create a new FileReadStream.
@@ -105,6 +106,16 @@ public class FileReadStream extends StreamImpl {
       return _is.skip(n);
     else
       return -1;
+  }
+
+  /**
+   * Seeks based on the start.
+   */
+  public void seekStart(long offset)
+    throws IOException
+  {
+    if (_is != null)
+      _is.getChannel().position(offset);
   }
 
   /**
