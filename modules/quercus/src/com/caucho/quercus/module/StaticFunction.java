@@ -179,14 +179,7 @@ public class StaticFunction extends JavaInvoker {
   {
     init();
 
-    Marshall marshall = getUnmarshallReturn();
-
-    if (marshall instanceof Marshall.MarshallNullAsFalse) {
-      generateImpl(out, funExpr, args);
-      out.print(" == null ? BooleanValue.FALSE : ");
-    }
-
-    marshall.generateResultStart(out);
+    getUnmarshallReturn().generateResultStart(out);
 
     generateImpl(out, funExpr, args);
 
