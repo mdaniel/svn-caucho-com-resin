@@ -453,7 +453,7 @@ public class Mysqli extends JdbcConnectionResource {
    */
   public MysqliStatement prepare(Env env, String query)
   {
-    MysqliStatement stmt = new MysqliStatement((Mysqli)validateConnection());
+    MysqliStatement stmt = new MysqliStatement((Mysqli) validateConnection());
 
     stmt.prepare(query);
 

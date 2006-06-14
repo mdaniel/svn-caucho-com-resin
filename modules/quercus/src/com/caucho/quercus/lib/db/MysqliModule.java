@@ -1073,10 +1073,17 @@ public class MysqliModule extends AbstractQuercusModule {
                                                String types,
                                                @Reference Value[] params)
   {
-    if (stmt == null)
-      return false;
+    try {
 
-    return stmt.bind_param(env, types, params);
+      if (stmt == null)
+        return false;
+
+      return stmt.bind_param(env, types, params);
+
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      return false;
+    }
   }
 
   /**
@@ -1150,10 +1157,17 @@ public class MysqliModule extends AbstractQuercusModule {
   public static boolean mysqli_stmt_execute(Env env,
                                             @NotNull MysqliStatement stmt)
   {
-    if (stmt == null)
-      return false;
+    try {
 
-    return stmt.execute(env);
+      if (stmt == null)
+        return false;
+
+      return stmt.execute(env);
+
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      return false;
+    }
   }
 
   /**

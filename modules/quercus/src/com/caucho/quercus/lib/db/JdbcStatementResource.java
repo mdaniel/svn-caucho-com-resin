@@ -479,14 +479,20 @@ public class JdbcStatementResource {
   public boolean prepare(String query)
   {
     try {
+
       if (_stmt != null)
         _stmt.close();
 
       _query = query;
 
-      _stmt = _conn.getConnection().prepareCall(query);
+      if (this instanceof OracleStatement) {
+        _stmt = _conn.getConnection().prepareCall(query);
+      } else {
+        _stmt = _conn.getConnection().prepareStatement(query);
+      }
 
       return true;
+
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
       _errorMessage = e.getMessage();
@@ -504,11 +510,20 @@ public class JdbcStatementResource {
   public boolean prepareStatement(String query)
   {
     try {
+
       if (_stmt != null)
         _stmt.close();
+
       _query = query;
-      _stmt = _conn.getConnection().prepareCall(query);
+
+      if (this instanceof OracleStatement) {
+        _stmt = _conn.getConnection().prepareCall(query);
+      } else {
+        _stmt = _conn.getConnection().prepareStatement(query);
+      }
+
       return true;
+
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
       _errorMessage = e.getMessage();
