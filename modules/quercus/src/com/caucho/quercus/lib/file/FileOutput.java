@@ -38,6 +38,8 @@ import java.io.IOException;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.WriteStream;
 
+import com.caucho.quercus.env.Env;
+
 import com.caucho.quercus.lib.file.FileReadValue;
 import com.caucho.quercus.lib.file.FileValue;
 
@@ -48,21 +50,30 @@ public class FileOutput extends AbstractBinaryOutput {
   private static final Logger log
     = Logger.getLogger(FileReadValue.class.getName());
 
+  private Env _env;
   private Path _path;
   private WriteStream _os;
   private long _offset;
 
-  public FileOutput(Path path)
+  public FileOutput(Env env, Path path)
     throws IOException
   {
+    _env = env;
+    
+    env.addClose(this);
+    
     _path = path;
 
     _os = path.openWrite();
   }
 
-  public FileOutput(Path path, boolean isAppend)
+  public FileOutput(Env env, Path path, boolean isAppend)
     throws IOException
   {
+    _env = env;
+    
+    env.addClose(this);
+    
     _path = path;
 
     if (isAppend)
@@ -155,6 +166,8 @@ public class FileOutput extends AbstractBinaryOutput {
   public void close()
   {
     try {
+      _env.removeClose(this);
+      
       WriteStream os = _os;
       _os = null;
 

@@ -473,7 +473,7 @@ public class FileModule extends AbstractQuercusModule {
    * @param enclosure optional quote replacement
    */
   public Value fgetcsv(Env env,
-                       @NotNull StreamResource file,
+                       @NotNull BinaryInput is,
                        @Optional int length,
                        @Optional String delimiter,
                        @Optional String enclosure)
@@ -481,7 +481,7 @@ public class FileModule extends AbstractQuercusModule {
     // php/1619
 
     try {
-      if (file == null)
+      if (is == null)
 	return BooleanValue.FALSE;
 
       // XXX: length is never used
@@ -505,12 +505,12 @@ public class FileModule extends AbstractQuercusModule {
       while (true) {
 	// scan whitespace
 	while (true) {
-	  ch = file.read();
+	  ch = is.read();
 
 	  if (ch < 0 || ch == '\n')
 	    return array;
 	  else if (ch == '\r') {
-	    file.readOptionalLinefeed();
+	    is.readOptionalLinefeed();
 	    return array;
 	  }
 	  else if (ch == ' ' || ch == '\t')
@@ -519,12 +519,12 @@ public class FileModule extends AbstractQuercusModule {
 	    break;
 	}
 
-	StringBuilder sb = new StringBuilder();
+	StringBuilderValue sb = new StringBuilderValue();
 
 	if (ch == quote) {
-	  for (ch = file.read(); ch >= 0; ch = file.read()) {
+	  for (ch = is.read(); ch >= 0; ch = is.read()) {
 	    if (ch == quote) {
-	      ch = file.read();
+	      ch = is.read();
 
 	      if (ch == quote)
 		sb.append((char) ch);
@@ -535,19 +535,19 @@ public class FileModule extends AbstractQuercusModule {
 	      sb.append((char) ch);
 	  }
 
-	  array.append(new StringValueImpl(sb.toString()));
+	  array.append(sb);
 
-	  for (; ch >= 0 && ch == ' ' || ch == '\t'; ch = file.read()) {
+	  for (; ch >= 0 && ch == ' ' || ch == '\t'; ch = is.read()) {
 	  }
 	}
 	else {
 	  for (;
 	       ch >= 0 && ch != comma && ch != '\r' && ch != '\n';
-	       ch = file.read()) {
+	       ch = is.read()) {
 	    sb.append((char) ch);
 	  }
 
-	  array.append(new StringValueImpl(sb.toString()));
+	  array.append(sb);
 	}
 
 	if (ch < 0)
@@ -555,7 +555,7 @@ public class FileModule extends AbstractQuercusModule {
 	else if (ch == '\n')
 	  return array;
 	else if (ch == '\r') {
-	  file.readOptionalLinefeed();
+	  is.readOptionalLinefeed();
 	  return array;
 	}
 	else if (ch == comma) {
@@ -998,7 +998,7 @@ public class FileModule extends AbstractQuercusModule {
       }
       else if (mode.startsWith("w")) {
 	try {
-	  return new FileOutput(path);
+	  return new FileOutput(env, path);
 	} catch (IOException e) {
 	  log.log(Level.FINE, e.toString(), e);
 
@@ -1012,7 +1012,7 @@ public class FileModule extends AbstractQuercusModule {
       }
       else if (mode.startsWith("a")) {
 	try {
-	  return new FileOutput(path, true);
+	  return new FileOutput(env, path, true);
 	} catch (IOException e) {
 	  log.log(Level.FINE, e.toString(), e);
 
@@ -1025,7 +1025,7 @@ public class FileModule extends AbstractQuercusModule {
 	throw new UnsupportedOperationException("read/write not yet supported");
       }
       else if (mode.startsWith("x") && ! path.exists())
-        return new FileOutput(path);
+        return new FileOutput(env, path);
 
       env.warning(L.l("bad mode `{0}'", mode));
 
@@ -1069,15 +1069,15 @@ public class FileModule extends AbstractQuercusModule {
    * @param enclosure optional quote replacement
    */
   public Value fputcsv(Env env,
-                       @NotNull StreamResource file,
+                       @NotNull BinaryOutput os,
                        @NotNull ArrayValue value,
-                       @Optional String delimiter,
-                       @Optional String enclosure)
+                       @Optional StringValue delimiter,
+                       @Optional StringValue enclosure)
   {
     // php/1636
 
     try {
-      if (file == null)
+      if (os == null)
 	return BooleanValue.FALSE;
 
       if (value == null)
@@ -1097,36 +1097,36 @@ public class FileModule extends AbstractQuercusModule {
 
       for (Value data : value.values()) {
 	if (! isFirst) {
-	  file.print(comma);
+	  os.print(comma);
 	  writeLength++;
 	}
 	isFirst = false;
 
-	String s = data.toString();
+	StringValue s = data.toStringValue();
 	int strlen = s.length();
 
 	writeLength++;
-	file.print(quote);
+	os.print(quote);
 
 	for (int i = 0; i < strlen; i++) {
 	  char ch = s.charAt(i);
 
 	  if (ch != quote) {
-	    file.print(ch);
+	    os.print(ch);
 	    writeLength++;
 	  }
 	  else {
-	    file.print(quote);
-	    file.print(quote);
+	    os.print(quote);
+	    os.print(quote);
 	    writeLength += 2;
 	  }
 	}
 
-	file.print(quote);
+	os.print(quote);
 	writeLength++;
       }
 
-      file.print("\n");
+      os.print("\n");
       writeLength++;
 
       return LongValue.create(writeLength);
@@ -1152,12 +1152,17 @@ public class FileModule extends AbstractQuercusModule {
    * @param fileValue the file
    */
   public static Value fread(Env env,
-			    @NotNull StreamResource file,
+			    @NotNull BinaryInput is,
 			    int length)
   {
     try {
-      if (file == null)
+      if (is == null)
 	return BooleanValue.FALSE;
+
+      if (length < 0)
+	length = Integer.MAX_VALUE;
+
+      // XXX: should use the buffer directly (?)
 
       TempBuffer tempBuf = TempBuffer.allocate();
       byte []buffer = tempBuf.getBuffer();
@@ -1165,7 +1170,7 @@ public class FileModule extends AbstractQuercusModule {
       if (buffer.length < length)
 	length = buffer.length;
 
-      length = file.read(buffer, 0, length);
+      length = is.read(buffer, 0, length);
 
       Value s;
 
@@ -1187,15 +1192,15 @@ public class FileModule extends AbstractQuercusModule {
    * Reads and parses a line.
    */
   public static Value fscanf(Env env,
-                             @NotNull StreamResource file,
+                             @NotNull BinaryInput is,
                              StringValue format,
                              @Optional Value []args)
   {
     try {
-      if (file == null)
+      if (is == null)
 	return BooleanValue.FALSE;
 
-      StringValue value = file.readLine();
+      StringValue value = is.readLine(Integer.MAX_VALUE);
 
       if (value == null)
 	return BooleanValue.FALSE;
@@ -1206,7 +1211,24 @@ public class FileModule extends AbstractQuercusModule {
     }
   }
 
-  // XXX: fseek
+  /**
+   * Sets the current position.
+   *
+   * @param is the stream to test
+   */
+  public static Value fseek(Env env,
+			    @NotNull BinaryInput is,
+			    long offset)
+  {
+    if (is == null)
+      return BooleanValue.FALSE;
+
+    if (! is.setPosition(offset))
+      return BooleanValue.FALSE;
+
+    return new LongValue(is.getPosition());
+  }
+
   // XXX: fstat
 
   /**
@@ -1215,12 +1237,12 @@ public class FileModule extends AbstractQuercusModule {
    * @param file the stream to test
    */
   public static Value ftell(Env env,
-			    @NotNull StreamResource file)
+			    @NotNull BinaryInput is)
   {
-    if (file == null)
+    if (is == null)
       return BooleanValue.FALSE;
 
-    return new LongValue(file.getPosition());
+    return new LongValue(is.getPosition());
   }
 
   // XXX: ftruncate
@@ -1680,7 +1702,21 @@ public class FileModule extends AbstractQuercusModule {
     }
   }
 
-  // XXX: rewind
+  /**
+   * Rewinds the stream.
+   *
+   * @param is the file resource
+   */
+  public static Value rewind(Env env,
+			     @NotNull BinaryInput is)
+  {
+    if (is == null)
+      return BooleanValue.FALSE;
+
+    fseek(env, is, 0);
+    
+    return BooleanValue.TRUE;
+  }
 
   /**
    * Rewinds the directory listing
@@ -1875,7 +1911,8 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * Creates a temporary file.
    */
-  public static Value tmpfile(Env env)
+  @ReturnNullAsFalse
+  public static FileOutput tmpfile(Env env)
   {
     try {
       // XXX: remove on exit
@@ -1887,11 +1924,11 @@ public class FileModule extends AbstractQuercusModule {
 
       Path file = tmp.createTempFile("resin", "tmp");
 
-      return new FileWriteValue(file);
+      return new FileOutput(env, file);
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
 
-      return NullValue.NULL;
+      return null;
     }
   }
 

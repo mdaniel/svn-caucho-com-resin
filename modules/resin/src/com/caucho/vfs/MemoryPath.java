@@ -601,9 +601,9 @@ public class MemoryPath extends FilesystemPath {
       return _offset;
     }
 
-    public void setPosition(int pos)
+    public void seekStart(long pos)
     {
-      _offset = pos;
+      _offset = (int) pos;
       if (_offset < 0)
         _offset = 0;
       if (_offset > _bb.length())

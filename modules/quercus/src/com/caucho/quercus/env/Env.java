@@ -3671,7 +3671,10 @@ public final class Env {
 
     sessionWriteClose();
 
-    for (SoftReference<Closeable> ref : _closeList) {
+    ArrayList<SoftReference<Closeable>> closeList;
+    closeList = new ArrayList<SoftReference<Closeable>>(_closeList);
+    
+    for (SoftReference<Closeable> ref : closeList) {
       try {
         Closeable close = ref.get();
 

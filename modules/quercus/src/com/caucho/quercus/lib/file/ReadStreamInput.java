@@ -205,7 +205,10 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
 	sb.append((char) ch);
     }
 
-    return sb;
+    if (sb.length() == 0)
+      return null;
+    else
+      return sb;
   }
 
   /**

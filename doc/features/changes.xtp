@@ -2,8 +2,9 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - June 2, 2006'>
+<s2 title='3.0.snap - June 14, 2006'>
 <ul>
+<li>(2005-06-14) Added jaf to distribution
 <li>java.util.logging.Logger getLevel() should return null if unassigned (#1085, rep by Bill Au)
 <li>java.util.logging Logger add &lt;logger> (#1186, rep by Michael Earl)
 <li>java.util.logging Logger defaults to INFO (#1186, rep by Michael Earl)
