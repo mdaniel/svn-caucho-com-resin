@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -129,7 +129,7 @@ public class MimetypesFileTypeMap extends FileTypeMap {
   public void addMimeTypes(String mimeTypes)
     throws IOException
   {
-      addMimeTypes(new StringReader(mimeTypes));
+    addMimeTypes(new StringReader(mimeTypes));
   }
 
   /**
@@ -188,7 +188,7 @@ public class MimetypesFileTypeMap extends FileTypeMap {
       int p = s.indexOf('#');
       
       if (p >= 0)
-	s  = s.substring(0, p);
+	s = s.substring(0, p);
       
       String []values = s.split("[ \t]");
       
