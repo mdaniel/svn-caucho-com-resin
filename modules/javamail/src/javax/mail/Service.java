@@ -30,6 +30,9 @@
 package javax.mail;
 import java.util.Vector;
 import javax.mail.event.*;
+import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Represents a mail service
@@ -41,11 +44,25 @@ public abstract class Service {
 
   private boolean _isConnected;
 
+  private ArrayList _listeners = new ArrayList();
+  private BlockingQueue _blockingQueue = new LinkedBlockingQueue();
+  /* XXX
+  private TransportDispatcherThread _transportDispatcherThread =
+    new TransportDispatcherThread();
+  */
+
+  /** used to tell the dispatcher thread to quit */
+  private static MailEvent SHUTDOWN =
+    new MailEvent(null) {
+      public void dispatch(Object o) { }
+    };
+  
   protected Service(Session session, URLName urlname)
   {
     this.session = session;
     this.url = urlname;
     this.debug = session.getDebug();
+    //_transportDispatcherThread.start();
   }
 
   /**
@@ -54,7 +71,7 @@ public abstract class Service {
   public void connect()
     throws MessagingException
   {
-    connect(null, -1, null, null);
+    connect(null, null, null);
   }
 
   /**
@@ -104,11 +121,7 @@ public abstract class Service {
 				    String password)
     throws MessagingException
   {
-    // XXX:
-    
-    setConnected(true);
-
-    return true;
+    return false;
   }
 
   /**
@@ -137,47 +150,39 @@ public abstract class Service {
   }
 
   /**
-   * Add a listener for Connection events on this service.  The
-   * default implementation provided here adds this listener to an
-   * internal list of ConnectionListeners.
+   * Add a listener for Connection events on this service.
    */
   public void addConnectionListener(ConnectionListener l){
-    throw new UnsupportedOperationException("not implemented");
+    _listeners.add(l);
   }
   
-
   /**
    * Stop the event dispatcher thread so the queue can be garbage
    * collected.
    */
   protected void finalize() throws Throwable
   {
-    throw new UnsupportedOperationException("not implemented");
+    // XXX
+    //_queue.add(SHUTDOWN);
   }
 
   /**
-   * Return a URLName representing this service. The returned
-   * URLName does not include the password field.  Subclasses should
-   * only override this method if their URLName does not follow the
-   * standard format.  The implementation in the Service class
-   * returns (usually a copy of) the url field with the password and
-   * file information stripped out.
+   * Return a URLName representing this service w/o username or passord.
    */
   public URLName getURLName(){
-    throw new UnsupportedOperationException("not implemented");
+    return new URLName(url.getProtocol(),
+		       url.getHost(),
+		       url.getPort(),
+		       url.getFile(),
+		       null,
+		       null);
   }
 
   /**
-   * Notify all ConnectionListeners. Service implementations are
-   * expected to use this method to broadcast connection events.
-   * The provided default implementation queues the event into an
-   * internal event queue. An event dispatcher thread dequeues
-   * events from the queue and dispatches them to the registered
-   * ConnectionListeners. Note that the event dispatching occurs in
-   * a separate thread, thus avoiding potential deadlock problems.
+   * Notify all ConnectionListeners.
    */
   protected void notifyConnectionListeners(int type){
-    throw new UnsupportedOperationException("not implemented");
+    _blockingQueue.add(new Integer(type));
   }
 
   /**
@@ -189,13 +194,11 @@ public abstract class Service {
   }
 
   /**
-   * Remove a Connection event listener.  The default implementation
-   * provided here removes this listener from the internal list of
-   * ConnectionListeners.
+   * Remove a Connection event listener.
    */
   public void removeConnectionListener(ConnectionListener l)
   {
-    throw new UnsupportedOperationException("not implemented");
+    _listeners.remove(l);
   }
 
   /**
@@ -223,5 +226,26 @@ public abstract class Service {
       return getURLName().toString();
 
     return super.toString();
+  }
+
+  private class ConnectionDispatcherThread extends Thread {
+    public void run()
+    {
+      while(true)
+	{
+	  ConnectionEvent te =
+	    (ConnectionEvent)_blockingQueue.remove();
+	  
+	  ConnectionListener[] listeners = null;
+	  synchronized(_listeners)
+	    {
+	      listeners = new ConnectionListener[_listeners.size()];
+	      _listeners.toArray(listeners);
+	    }
+	  
+	  for(int i = 0; i < listeners.length; i++)
+	    te.dispatch(listeners[i]);
+	}
+    }
   }
 }

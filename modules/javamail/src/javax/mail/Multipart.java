@@ -51,9 +51,11 @@ public abstract class Multipart {
   protected void setMultipartDataSource(MultipartDataSource mp)
     throws MessagingException
   {
-    // XXX:
-    
-    throw new UnsupportedOperationException();
+    contentType = mp.getContentType();
+
+    parts.clear();
+    for(int i=0; i<mp.getCount(); i++)
+      parts.add(mp.getBodyPart(i));
   }
 
   /**

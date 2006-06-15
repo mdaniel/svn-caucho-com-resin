@@ -29,14 +29,26 @@
 
 package javax.mail;
 import javax.mail.event.*;
+import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Represents a mail transport, e.g. smtp
  */
 public abstract class Transport extends Service {
+
+  private ArrayList _listeners = new ArrayList();
+
+  private BlockingQueue _blockingQueue = new LinkedBlockingQueue();
+
+  private TransportDispatcherThread _transportDispatcherThread =
+    new TransportDispatcherThread();
+
   protected Transport(Session session, URLName urlname)
   {
     super(session, urlname);
+    _transportDispatcherThread.start();
   }
 
   /**
@@ -47,74 +59,80 @@ public abstract class Transport extends Service {
     throws MessagingException;
 
   /**
-   * Add a listener for Transport events.  The default
-   * implementation provided here adds this listener to an internal
-   * list of TransportListeners.
+   * Add a listener for Transport events.
    */
   public void addTransportListener(TransportListener l)
   {
-    throw new UnsupportedOperationException("not implemented");
+    synchronized(_listeners)
+      {
+	_listeners.add(l);
+      }
   }
 
   /**
-   * Notify all TransportListeners. Transport implementations are
-   * expected to use this method to broadcast TransportEvents.  The
-   * provided default implementation queues the event into an internal
-   * event queue. An event dispatcher thread dequeues events from the
-   * queue and dispatches them to the registered
-   * TransportListeners. Note that the event dispatching occurs in a
-   * separate thread, thus avoiding potential deadlock problems.
+   * Notify all TransportListeners.
    */
   protected void notifyTransportListeners(int type,
 					  Address[] validSent,
 					  Address[] validUnsent,
 					  Address[] invalid,
 					  Message msg){
-    throw new UnsupportedOperationException("not implemented");
+    TransportEvent te =
+      new TransportEvent(this, type, validSent, validUnsent, invalid, msg);
+    _blockingQueue.add(te);
   }
 
   /**
-   * Remove a listener for Transport events.  The default
-   * implementation provided here removes this listener from the
-   * internal list of TransportListeners.
+   * Remove a listener for Transport events.
    */
   public void removeTransportListener(TransportListener l)
   {
-    throw new UnsupportedOperationException("not implemented");
+    synchronized(_listeners)
+      {
+	_listeners.remove(l);
+      }
   }
 
   /**
-   * Send a message. The message will be sent to all recipient
-   * addresses specified in the message (as returned from the Message
-   * method getAllRecipients), using message transports appropriate to
-   * each address. The send method calls the saveChanges method on the
-   * message before sending it.  If any of the recipient addresses is
-   * detected to be invalid by the Transport during message
-   * submission, a SendFailedException is thrown. Clients can get more
-   * detail about the failure by examining the exception. Whether or
-   * not the message is still sent succesfully to any valid addresses
-   * depends on the Transport implementation. See SendFailedException
-   * for more details. Note also that success does not imply that the
-   * message was delivered to the ultimate recipient, as failures may
-   * occur in later stages of delivery. Once a Transport accepts a
-   * message for delivery to a recipient, failures that occur later
-   * should be reported to the user via another mechanism, such as
-   * returning the undeliverable message.
+   * Send a message.
    */
   public static void send(Message msg) throws MessagingException
   {
-    throw new UnsupportedOperationException("not implemented");
+    send(msg, msg.getAllRecipients());
   }
 
   /**
    * Send the message to the specified addresses, ignoring any
-   * recipients specified in the message itself. The send method calls
-   * the saveChanges method on the message before sending it.
+   * recipients specified in the message itself.
    */
   public static void send(Message msg, Address[] addresses)
     throws MessagingException
   {
-    throw new UnsupportedOperationException("not implemented");
+    msg.saveChanges();
+    
+    // XXX: use Session.getTransport() here
+  }
+
+
+  private class TransportDispatcherThread extends Thread {
+    public void run()
+    {
+      while(true)
+	{
+	  TransportEvent te =
+	    (TransportEvent)_blockingQueue.remove();
+	  
+	  TransportListener[] listeners = null;
+	  synchronized(_listeners)
+	    {
+	      listeners = new TransportListener[_listeners.size()];
+	      _listeners.toArray(listeners);
+	    }
+	  
+	  for(int i = 0; i < listeners.length; i++)
+	    te.dispatch(listeners[i]);
+	}
+    }
   }
 
 }
