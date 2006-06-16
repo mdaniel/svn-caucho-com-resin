@@ -430,8 +430,7 @@ public class ResinStatusServlet extends GenericServlet {
 
           out.println("<tr>");
 
-          boolean canConnect = client.canConnect();
-
+          boolean canConnect = client.ping();
 
           if (canConnect)
             out.print("<td bgcolor='#80ff80'>");
@@ -445,7 +444,7 @@ public class ResinStatusServlet extends GenericServlet {
           else
             out.println(" (down)");
 
-          out.println("<td>" + client.getActiveConnectionCount());
+          out.println("<td>" + client.getActiveCount());
         }
 
         out.println("</table>");
