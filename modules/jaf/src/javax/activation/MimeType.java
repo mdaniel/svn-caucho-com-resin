@@ -65,11 +65,23 @@ public class MimeType implements Serializable, Externalizable {
     throws MimeTypeParseException
   {
     int slash = rawData.indexOf('/');
+
     if (slash == -1)
       throw new MimeTypeParseException("Unable to find a sub type.");
+
     _primary = rawData.substring(0, slash);
     _sub = rawData.substring(slash+1);
-    _parameters = new MimeTypeParameterList();
+
+    int semicolon = _sub.indexOf(';');
+
+    if (semicolon != -1) {
+      _parameters =
+	new MimeTypeParameterList(_sub.substring(semicolon));
+      _sub = _sub.substring(0, semicolon);
+    }
+    else {
+      _parameters = new MimeTypeParameterList();
+    }
   }
 
   /**

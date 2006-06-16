@@ -85,12 +85,9 @@ public class FileDataSource implements DataSource {
       ? _fileTypeMap
       : FileTypeMap.getDefaultFileTypeMap();
 
-    if (map==null)
-      return "application/octet-stream";
-
     String contentType = map.getContentType(getFile());
 
-    if (contentType==null)
+    if (contentType == null)
       return "application/octet-stream";
 
     return contentType;

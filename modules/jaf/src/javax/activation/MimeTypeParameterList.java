@@ -161,14 +161,17 @@ public class MimeTypeParameterList {
       sb.append("=");
       String val = get(key);
 
-      if (val.indexOf(' ')==-1 || val.indexOf(';')==-1) {
-	sb.append("\"");
+      if (val.indexOf(' ')==-1 && val.indexOf(';')==-1) {
 	sb.append(val);
-	sb.append("\"");
       }
       else {
+	sb.append("\"");
 	sb.append(val);
+	sb.append("\"");
       }
+
+      if (e.hasMoreElements())
+	sb.append("; ");
 
     }
     return sb.toString();

@@ -156,7 +156,8 @@ public class ActivationDataFlavor extends DataFlavor  {
   protected String normalizeMimeTypeParameter(String parameterName,
 					      String parameterValue)
   {
-    throw new UnsupportedOperationException("you should not be calling this");
+    throw new
+      UnsupportedOperationException("normalizeMimeTypeParameter is deprecated");
   }
 
   /**
@@ -165,7 +166,7 @@ public class ActivationDataFlavor extends DataFlavor  {
    */
   protected String normalizeMimeType(String mimeType)
   {
-    throw new UnsupportedOperationException("you should not be calling this");
+    throw new UnsupportedOperationException("normalizeMimeType is deprecated");
   }
 
   /**

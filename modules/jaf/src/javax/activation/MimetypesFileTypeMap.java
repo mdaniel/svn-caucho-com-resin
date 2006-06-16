@@ -61,7 +61,6 @@ public class MimetypesFileTypeMap extends FileTypeMap {
       addMimeTypes(cl.getResourceAsStream("META-INF/mimetypes.default"));
     }
     catch (IOException e) {
-      // cyclic dependency in <clinit>
       if (log != null)
 	log.log(Level.FINER, e.toString(), e);
     }
@@ -70,7 +69,6 @@ public class MimetypesFileTypeMap extends FileTypeMap {
       addMimeTypes(cl.getResourceAsStream("META-INF/mime.types"));
     }
     catch (IOException e) {
-      // cyclic dependency in <clinit>
       if (log != null)
 	log.log(Level.FINER, e.toString(), e);
     }
@@ -79,7 +77,6 @@ public class MimetypesFileTypeMap extends FileTypeMap {
       addMimeTypes(new File(System.getProperty("java.home")+"/lib/mime.types"));
     }
     catch (IOException e) {
-      // cyclic dependency in <clinit>
       if (log != null)
 	log.log(Level.FINER, e.toString(), e);
     }
@@ -88,7 +85,6 @@ public class MimetypesFileTypeMap extends FileTypeMap {
       addMimeTypes(new File(System.getProperty("user.home")+"/.mime.types"));
     }
     catch (IOException e) {
-      // cyclic dependency in <clinit>
       if (log != null)
 	log.log(Level.FINER, e.toString(), e);
     }
@@ -181,7 +177,8 @@ public class MimetypesFileTypeMap extends FileTypeMap {
   private void addMimeTypes(Reader r)
     throws IOException
   {
-    if (r==null) return;
+    if (r == null) return;
+
     BufferedReader br = new BufferedReader(r);
     
     for(String s = br.readLine(); s!=null; s = br.readLine()) {
@@ -191,9 +188,6 @@ public class MimetypesFileTypeMap extends FileTypeMap {
 	s = s.substring(0, p);
       
       String []values = s.split("[ \t]");
-      
-      if (values.length < 2)
-	continue;
       
       for(int i=1; i<values.length; i++)
 	_mimeTypesByExtension.put(values[i], values[0]);
