@@ -38,11 +38,27 @@ If no parent has a &lt;logger>, the level defaults to INFO.</p>
 
 </section>
 
+<section title="Admin enhancements">
+
+<p>Some MBeans have been reworked and extended:</p>
+<ul>
+<li>ClusterClientMBean (resin:type=ClusterClient,name=app-a)
+</ul>
+
+</section>
+
 <section title="Load Balancing enhancements">
 
-<section title="load-balance-weight">
+<section title="client-connect-timeout">
 
-<p>The backend &lt;srun> servers can now have a load-balance-weight, so
+<p>Sets the time a client should wait for a connection to a backend server.
+Defaults to 5s.</p>
+
+<section>
+
+<section title="client-weight">
+
+<p>The backend &lt;srun> servers can now have a client-weight, so
 the load balancer can distribute more or less load to more or
 less powerful servers.</p>
 
@@ -50,10 +66,10 @@ less powerful servers.</p>
 
 <example>
 &lt;cluster id="app-tier">
-  &lt;srun id="app-a" load-balance-weight="200" host="192.168.0.10"/>
+  &lt;srun id="app-a" client-weight="200" host="192.168.0.10"/>
   &lt;srun id="app-b" host="192.168.0.10"/>
 
-  &lt;srun id="app-test" load-balance-weight="1" host="192.168.0.200"/>
+  &lt;srun id="app-test" client-weight="1" host="192.168.0.200"/>
 &lt;/cluster>
 </example>
 

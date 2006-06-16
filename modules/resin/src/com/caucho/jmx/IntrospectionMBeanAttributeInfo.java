@@ -61,27 +61,18 @@ public class IntrospectionMBeanAttributeInfo
     _category = createCategory(getter, setter);
   }
 
-  @SuppressWarnings({"unchecked"})
+  /**
+   * Finds the @Description from the getter or setter.
+   */
   private static String createDescription(Method getter, Method setter)
   {
-    String description = null;
+    String description = "";
 
-    if (getter != null) {
-      MBeanAttribute ann = getter.getAnnotation(MBeanAttribute.class);
+    if (getter != null)
+      description = getDescription(getter);
 
-      if (ann != null)
-        description = ann.description();
-    }
-
-    if (description == null && setter != null) {
-      MBeanAttribute ann = setter.getAnnotation(MBeanAttribute.class);
-
-      if (ann != null)
-        description = ann.description();
-    }
-
-    if (description == null)
-      description = "";
+    if ("".equals(description) && setter != null)
+      description = getDescription(setter);
 
     return description;
   }
@@ -117,6 +108,7 @@ public class IntrospectionMBeanAttributeInfo
 
   public int compareTo(IntrospectionMBeanAttributeInfo o)
   {
+    /*
     if (o._category != _category) {
       switch (_category) {
         case CONFIGURATION:
@@ -127,9 +119,14 @@ public class IntrospectionMBeanAttributeInfo
           throw new AssertionError(_category);
       }
     }
+    */
 
     String name = getName();
     String oName = o.getName();
+
+    return name.compareTo(oName);
+
+    /*
 
     // if the point of difference occurs at the word `Lifetime',
     // then then one with `Lifetime' comes after
@@ -153,5 +150,14 @@ public class IntrospectionMBeanAttributeInfo
       return -1;
     else
       return 1;
+    */
+  }
+
+  /**
+   * Returns the value of any @Description annotation on the method.
+   */
+  private static String getDescription(Method method)
+  {
+    return IntrospectionMBean.getDescription(method);
   }
 }

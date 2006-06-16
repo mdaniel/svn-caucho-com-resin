@@ -48,13 +48,18 @@ class TcpStream extends StreamImpl {
   private InputStream _is;
   private OutputStream _os;
 
-  private TcpStream(Path path, long timeout) throws IOException
+  private TcpStream(TcpPath path, long timeout) throws IOException
   {
     setPath(path);
 
-    _s = new Socket(path.getHost(), path.getPort());
+    //_s = new Socket(path.getHost(), path.getPort());
+    _s = new Socket();
+    if (timeout > 0)
+      _s.connect(path.getSocketAddress(), (int) timeout);
+    else
+      _s.connect(path.getSocketAddress());
 
-    if (_s == null)
+    if (! _s.isConnected())
       throw new IOException("connection timeout");
 
     try {

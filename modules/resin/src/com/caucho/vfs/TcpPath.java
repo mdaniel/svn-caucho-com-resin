@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -38,9 +39,13 @@ import com.caucho.util.*;
  * Implements a tcp stream, essentially just a socket pair.
  */
 public class TcpPath extends Path {
+  // Attribute name for connection timeouts
+  public static final String CONNECT_TIMEOUT = "connect-timeout";
+  
   protected String _host;
   protected int _port;
-  protected long _timeout;
+  protected SocketAddress _address;
+  protected long _timeout = 5000L;
 
   TcpPath(TcpPath root, String userPath, Map<String,Object> newAttributes,
 	  String host, int port)
@@ -51,6 +56,13 @@ public class TcpPath extends Path {
 
     _host = host;
     _port = port == 0 ? 80 : port;
+
+    if (newAttributes != null) {
+      Object timeout = newAttributes.get("connect-timeout");
+
+      if (timeout instanceof Number)
+	_timeout = ((Number) timeout).longValue();
+    }
   }
 
   /**
@@ -120,6 +132,14 @@ public class TcpPath extends Path {
   public int getPort()
   {
     return _port;
+  }
+
+  public SocketAddress getSocketAddress()
+  {
+    if (_address == null)
+      _address = new InetSocketAddress(_host, _port);
+
+    return _address;
   }
 
   /*

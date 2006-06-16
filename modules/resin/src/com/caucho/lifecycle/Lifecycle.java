@@ -40,12 +40,17 @@ import java.util.logging.Logger;
  * Lifecycle class.
  */
 public final class Lifecycle implements LifecycleState {
-
   private final Logger _log;
   private String _name;
   private Level _level = Level.FINE;
   
   private int _state;
+
+  private long _activeCount;
+  private long _failCount;
+
+  private long _lastFailTime;
+  private long _lastChangeTime;
 
   private ArrayList<WeakReference<LifecycleListener>> _listeners;
 
@@ -101,7 +106,7 @@ public final class Lifecycle implements LifecycleState {
   }
 
   /**
-   * Gets the lifecycle level.
+   * Gets the lifecycle logging level.
    */
   public Level getLevel()
   {
@@ -109,7 +114,7 @@ public final class Lifecycle implements LifecycleState {
   }
 
   /**
-   * Sets the lifecycle level.
+   * Sets the lifecycle logging level.
    */
   public void setLevel(Level level)
   {
@@ -220,10 +225,10 @@ public final class Lifecycle implements LifecycleState {
         return "init";
       case IS_STARTING:
         return "starting";
-      case IS_ERROR:
-        return "error";
       case IS_ACTIVE:
         return "active";
+      case IS_FAILED:
+        return "failed";
       case IS_STOPPING:
         return "stopping";
       case IS_STOPPED:
@@ -243,6 +248,38 @@ public final class Lifecycle implements LifecycleState {
   public String getStateName()
   {
     return getStateName(_state);
+  }
+
+  /**
+   * Returns the last lifecycle change time.
+   */
+  public long getLastChangeTime()
+  {
+    return _lastChangeTime;
+  }
+
+  /**
+   * Returns the last failure time.
+   */
+  public long getLastFailTime()
+  {
+    return _lastFailTime;
+  }
+
+  /**
+   * Returns the number of times the lifecycle has switched to active.
+   */
+  public long getActiveCount()
+  {
+    return _activeCount;
+  }
+
+  /**
+   * Returns the number of times the lifecycle has switched to failing.
+   */
+  public long getFailCount()
+  {
+    return _failCount;
   }
 
   /**
@@ -343,7 +380,15 @@ public final class Lifecycle implements LifecycleState {
    */
   public boolean isError()
   {
-    return _state == IS_ERROR;
+    return isFailed();
+  }
+
+  /**
+   * Returns true for the failed state.
+   */
+  public boolean isFailed()
+  {
+    return _state == IS_FAILED;
   }
 
   /**
@@ -391,6 +436,7 @@ public final class Lifecycle implements LifecycleState {
     int oldState = _state;
 
     _state = IS_INITIALIZING;
+    _lastChangeTime = Alarm.getCurrentTime();
 
     if (_log != null && _log.isLoggable(Level.FINE))
       _log.fine(_name + " initializing");
@@ -413,6 +459,7 @@ public final class Lifecycle implements LifecycleState {
      int oldState = _state;
 
      _state = IS_INIT;
+     _lastChangeTime = Alarm.getCurrentTime();
 
      if (_log != null && _log.isLoggable(Level.FINE))
        _log.fine(_name + " initialized");
@@ -432,6 +479,7 @@ public final class Lifecycle implements LifecycleState {
        int oldState = _state;
 
        _state = IS_INIT;
+       _lastChangeTime = Alarm.getCurrentTime();
 
        notifyListeners(oldState, _state);
 
@@ -455,6 +503,7 @@ public final class Lifecycle implements LifecycleState {
       int oldState = _state;
 
       _state = IS_STARTING;
+       _lastChangeTime = Alarm.getCurrentTime();
 
       if (_log != null && _log.isLoggable(_level))
 	_log.log(_level, _name + " starting");
@@ -474,11 +523,13 @@ public final class Lifecycle implements LifecycleState {
    */
   public synchronized boolean toActive()
   {
-    if (_state < IS_ACTIVE || _state == IS_STOPPED) {
+    if (_state < IS_ACTIVE || IS_FAILED <= _state && _state <= IS_STOPPED) {
       int oldState = _state;
 
       _state = IS_ACTIVE;
-
+      _lastChangeTime = Alarm.getCurrentTime();
+      _activeCount++;
+       
       if (_log != null && _log.isLoggable(Level.FINE))
 	_log.fine(_name + " active");
 
@@ -497,12 +548,24 @@ public final class Lifecycle implements LifecycleState {
    *
    * @return true if the transition is allowed
    */
-  public synchronized boolean toError()
+  public boolean toError()
   {
-    if (_state < IS_DESTROYING && _state != IS_ERROR) {
+    return toFail();
+  }
+  
+  /**
+   * Changes to the error state.
+   *
+   * @return true if the transition is allowed
+   */
+  public synchronized boolean toFail()
+  {
+    if (_state < IS_DESTROYING && _state != IS_FAILED) {
       int oldState = _state;
 
-      _state = IS_ERROR;
+      _state = IS_FAILED;
+      _lastChangeTime = Alarm.getCurrentTime();
+      _failCount++;
 
       if (_log != null && _log.isLoggable(_level))
 	_log.log(_level, _name + " error");
@@ -528,6 +591,7 @@ public final class Lifecycle implements LifecycleState {
       int oldState = _state;
 
       _state = IS_STOPPING;
+      _lastChangeTime = Alarm.getCurrentTime();
 
       if (_log != null && _log.isLoggable(_level))
 	_log.log(_level, _name + " stopping");
@@ -558,6 +622,7 @@ public final class Lifecycle implements LifecycleState {
       int oldState = _state;
 
       _state = IS_STOPPED;
+      _lastChangeTime = Alarm.getCurrentTime();
 
       notifyListeners(oldState, _state);
 
@@ -580,6 +645,7 @@ public final class Lifecycle implements LifecycleState {
       int oldState = _state;
 
       _state = IS_DESTROYING;
+      _lastChangeTime = Alarm.getCurrentTime();
 
       if (_log != null && _log.isLoggable(Level.FINE))
 	_log.fine(_name + " destroying");
@@ -603,6 +669,7 @@ public final class Lifecycle implements LifecycleState {
       int oldState = _state;
 
       _state = IS_DESTROYED;
+      _lastChangeTime = Alarm.getCurrentTime();
 
       if (_log != null && _log.isLoggable(Level.FINE))
 	_log.fine(_name + " destroyed");

@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -29,117 +30,200 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.mbeans.server.ClusterClientMBean;
-import com.caucho.lifecycle.Lifecycle;
+import java.util.Date;
 
 import javax.management.ObjectName;
 
+import com.caucho.mbeans.server.ClusterClientMBean;
+import com.caucho.lifecycle.Lifecycle;
+
+/**
+ * Implementation of the administration mbean.
+ */
 public class ClusterClientAdmin
   implements ClusterClientMBean
 {
-  private final ClusterServer _clusterServer;
+  private final ClusterClient _client;
 
-  public ClusterClientAdmin(ClusterServer clusterServer)
+  public ClusterClientAdmin(ClusterClient client)
   {
-    _clusterServer = clusterServer;
+    _client = client;
   }
 
+  /**
+   * Returns the MBean's object name.
+   */
   public String getObjectName()
   {
-    return _clusterServer.getObjectName();
+    return _client.getServer().getObjectName();
   }
 
-  public String getServerId()
+  /**
+   * Returns the -server id.
+   */
+  public String getName()
   {
-    return _clusterServer.getId();
+    return _client.getServer().getId();
   }
 
-  public int getIndex()
+  /**
+   * Returns the mbean type
+   */
+  public String getType()
   {
-    return _clusterServer.getIndex();
+    return "ClusterClient";
   }
 
-  public String getHost()
+  /**
+   * Returns the owning cluster's object name.
+   */
+  public String getCluster()
   {
-    return _clusterServer.getHost();
+    return _client.getServer().getCluster().getObjectName();
   }
 
+  /**
+   * Returns the cluster index.
+   */
+  public int getClusterIndex()
+  {
+    return _client.getServer().getIndex();
+  }
+
+  /**
+   * Returns the server's IP address.
+   */
+  public String getAddress()
+  {
+    return _client.getServer().getHost();
+  }
+
+  /**
+   * Returns the server's port.
+   */
   public int getPort()
   {
-    return _clusterServer.getPort();
+    return _client.getServer().getPort();
   }
 
-  public boolean isBackup()
-  {
-    return _clusterServer.isBackup();
-  }
+  //
+  // Client connection/load-balancing parameters
+  //
 
-  public long getReadTimeout()
-  {
-    return _clusterServer.getReadTimeout();
-  }
-
-  public long getWriteTimeout()
-  {
-    return _clusterServer.getWriteTimeout();
-  }
-
-  public long getMaxIdleTime()
-  {
-    return _clusterServer.getMaxIdleTime();
-  }
-
+  /**
+   * Returns the time the client will consider the connection dead
+   * before retrying.
+   */
   public long getFailRecoverTime()
   {
-    return _clusterServer.getFailRecoverTime();
+    return _client.getServer().getFailRecoverTime();
   }
+
+  /**
+   * Returns the maximum time a socket can remain idle in the pool.
+   */
+  public long getMaxIdleTime()
+  {
+    return _client.getServer().getMaxIdleTime();
+  }
+
+  /**
+   * Returns the connect timeout for a client.
+   */
+  public long getConnectTimeout()
+  {
+    return _client.getServer().getClientConnectTimeout();
+  }
+
+  /**
+   * Returns the read timeout for a client.
+   */
+  public long getReadTimeout()
+  {
+    return _client.getServer().getClientReadTimeout();
+  }
+
+  /**
+   * Returns the write timeout for a client.
+   */
+  public long getWriteTimeout()
+  {
+    return _client.getServer().getClientWriteTimeout();
+  }
+
+  /**
+   * Returns the slow-start time in milliseconds.
+   */
+  public long getSlowStartTime()
+  {
+    return _client.getServer().getSlowStartTime();
+  }
+
+  /**
+   * Returns the load-balance weight.
+   */
+  public int getWeight()
+  {
+    return _client.getServer().getClientWeight();
+  }
+
+  //
+  // State
+  //
 
   public String getState()
   {
-    if (_clusterServer.isActive())
-      return Lifecycle.getStateName(Lifecycle.IS_ACTIVE);
-    else
-      return Lifecycle.getStateName(Lifecycle.IS_STOPPED);
+    return _client.getState();
   }
 
   public boolean isDead()
   {
-    return ! _clusterServer.isActive();
+    return ! _client.getServer().isActive();
   }
 
-  public int getActiveConnectionCount()
+  public int getActiveCount()
   {
-    return _clusterServer.getActiveCount();
+    return _client.getActiveCount();
   }
 
-  public int getIdleConnectionCount()
+  public int getIdleCount()
   {
-    return _clusterServer.getIdleCount();
+    return _client.getIdleCount();
   }
 
-  public long getLifetimeConnectionCount()
+  public long getConnectTotalCount()
   {
-    return _clusterServer.getClient().getLifetimeConnectionCount();
+    return _client.getConnectTotalCount();
   }
 
-  public long getLifetimeKeepaliveCount()
+  public long getFailTotalCount()
   {
-    return _clusterServer.getClient().getLifetimeKeepaliveCount();
+    return _client.getFailTotalCount();
+  }
+
+  public Date getLastFailTime()
+  {
+    return _client.getLastFailTime();
+  }
+
+  public long getKeepaliveTotalCount()
+  {
+    return _client.getServer().getClient().getKeepaliveTotalCount();
   }
 
   public void start()
   {
-    _clusterServer.enable();
+    _client.getServer().enable();
   }
 
   public void stop()
   {
-    _clusterServer.disable();
+    _client.getServer().disable();
   }
 
-  public boolean canConnect()
+  public boolean ping()
   {
-    return _clusterServer.canConnect();
+    return _client.getServer().canConnect();
   }
 
   public String toString()

@@ -62,8 +62,6 @@ import com.caucho.relaxng.CompactVerifierFactoryImpl;
 import com.caucho.make.Dependency;
 import com.caucho.make.AlwaysModified;
 
-import com.caucho.jmx.Jmx;
-
 import com.caucho.naming.Jndi;
 
 import com.caucho.lifecycle.Lifecycle;

@@ -27,50 +27,52 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.lifecycle;
+package com.caucho.mbeans.server;
+
+import java.util.Date;
+
+import com.caucho.jmx.Description;
 
 /**
- * Lifecycle constants.
+ * MBeans which have lifecycle transitions will normally implement
+ * the lifecycle mbean.
  */
-public interface LifecycleState {
-  public static final int IS_NEW = 0;
-  public static final int IS_INITIALIZING = 1;
-  public static final int IS_INIT = 2;
-  public static final int IS_STARTING = 3;
-  public static final int IS_ACTIVE = 4;
-  public static final int IS_FAILED = 5;
-  public static final int IS_STOPPING = 6;
-  public static final int IS_STOPPED = 7;
-  public static final int IS_DESTROYING = 8;
-  public static final int IS_DESTROYED = 9;
+public interface LifecycleMBean {
+  /**
+   * Returns the lifecycle state.
+   */
+  @Description("The lifecycle state of the client")
+  public String getState();
 
-  public int getState();
+  //
+  // Statistics attributes
+  //
 
-  public String getStateName();
+  /**
+   * Returns the number of transitions to the failed state.
+   */
+  @Description("The total number of failures")
+  public long getFailTotalCount();
 
-  public boolean isInitializing();
+  /**
+   * Returns the time of the last failure.
+   */
+  @Description("The time of the last failure")
+  public Date getLastFailTime();
 
-  public boolean isInit();
+  //
+  // Operations on the mbean
+  //
 
-  public boolean isBeforeInit();
+  /**
+   * Enables the mbean
+   */
+  @Description("Enables the mbean")
+  public void start();
 
-  public boolean isAfterInit();
-
-  public boolean isStarting();
-
-  public boolean isBeforeActive();
-
-  public boolean isAfterActive();
-
-  public boolean isActive();
-
-  public boolean isError();
-
-  public boolean isStopping();
-
-  public boolean isStopped();
-
-  public boolean isDestroying();
-
-  public boolean isDestroyed();
+  /**
+   * Disables the mbean
+   */
+  @Description("Disables the mbean")
+  public void stop();
 }

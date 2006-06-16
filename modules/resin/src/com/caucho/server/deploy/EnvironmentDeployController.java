@@ -409,7 +409,7 @@ abstract public class
 
       configureInstanceVariables(instance);
 
-      _jmxContext.put(getMBeanTypeName(), getMBeanId());
+      extendJMXContext(_jmxContext);
 
       Jmx.setContextProperties(_jmxContext, classLoader);
 
@@ -447,6 +447,11 @@ abstract public class
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+
+  protected void extendJMXContext(Map<String,String> context)
+  {
+    // _jmxContext.put(getMBeanTypeName(), getMBeanId());
   }
 
   protected void fillInitList(ArrayList<DeployConfig> initList)

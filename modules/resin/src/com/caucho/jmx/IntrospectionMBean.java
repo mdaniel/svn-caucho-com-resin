@@ -65,8 +65,11 @@ import javax.management.ReflectionException;
 public class IntrospectionMBean implements DynamicMBean {
   private static final Logger log
     = Logger.getLogger(IntrospectionMBean.class.getName());
+  
   private static final Class[] NULL_ARG = new Class[0];
-
+  
+  private static final Class _descriptionAnn;
+  
   private static final WeakHashMap<Class,SoftReference<MBeanInfo>> _cachedInfo
     = new WeakHashMap<Class,SoftReference<MBeanInfo>>();
   
@@ -326,7 +329,6 @@ public class IntrospectionMBean implements DynamicMBean {
 	return info;
       
       String className = cl.getName();
-      String description = "Standard MBean for " + className;
 
       TreeSet<IntrospectionMBeanAttributeInfo> attributes
         = new TreeSet<IntrospectionMBeanAttributeInfo>();
@@ -469,5 +471,40 @@ public class IntrospectionMBean implements DynamicMBean {
     }
 
     return null;
+  }
+
+  static Class getDescriptionClass()
+  {
+    return _descriptionAnn;
+  }
+  
+  /**
+   * Returns the method's description.
+   */
+  static String getDescription(Method method)
+  {
+    try {
+      Description desc = (Description) method.getAnnotation(_descriptionAnn);
+
+      if (desc != null)
+	return desc.value();
+      else
+	return "";
+    } catch (Throwable e) {
+      return "";
+    }
+  }
+
+  private static Class findClass(String name)
+  {
+    try {
+      return Class.forName(name);
+    } catch (Throwable e) {
+      return null;
+    }
+  }
+
+  static {
+    _descriptionAnn = findClass("com.caucho.jmx.Description");
   }
 }

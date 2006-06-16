@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -51,6 +52,7 @@ public class ClusterPort extends Port {
   private int _index = -1;
   private boolean _isBackup;
   private String _protocolName = "hmux";
+  private int _clientWeight = 100;
 
   /**
    * Sets the srun protocol (srun or hmux)
@@ -108,6 +110,22 @@ public class ClusterPort extends Port {
   public boolean isBackup()
   {
     return _isBackup;
+  }
+
+  /**
+   * Set the client weight.
+   */
+  public void setClientWeight(int weight)
+  {
+    _clientWeight = weight;
+  }
+
+  /**
+   * Return the client weight.
+   */
+  public int getClientWeight()
+  {
+    return _clientWeight;
   }
 
   public void init()

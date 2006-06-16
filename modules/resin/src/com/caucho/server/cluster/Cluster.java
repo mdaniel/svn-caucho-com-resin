@@ -88,6 +88,7 @@ public class Cluster implements EnvironmentListener {
   
   private long _clientReadTimeout = 60000L;
   private long _clientWriteTimeout = 60000L;
+  private long _clientConnectTimeout = 5000L;
 
   private String _ref;
 
@@ -309,6 +310,22 @@ public class Cluster implements EnvironmentListener {
   public long getClientSlowStartTime()
   {
     return _clientSlowStartTime;
+  }
+
+  /**
+   * Sets the connect timeout.
+   */
+  public void setClientConnectTimeout(Period period)
+  {
+    _clientConnectTimeout = period.getPeriod();
+  }
+
+  /**
+   * Gets the connect timeout.
+   */
+  public long getClientConnectTimeout()
+  {
+    return _clientConnectTimeout;
   }
 
   /**

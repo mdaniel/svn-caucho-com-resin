@@ -52,51 +52,49 @@ public class IntrospectionMBeanOperationInfo
           createImpact(method));
   }
 
-  @SuppressWarnings({"unchecked"})
   private static String createDescription(Method method)
   {
-    MBeanOperation ann = (MBeanOperation) method.getAnnotation(MBeanOperation.class);
-
-    if (ann != null)
-      return ann.description();
-    else
-      return "";
+    return getDescription(method);
   }
 
-  @SuppressWarnings({"unchecked"})
   private static MBeanParameterInfo[] createSignature(Method method)
   {
     Class[] types = method.getParameterTypes();
-    Annotation[][] anns = method.getParameterAnnotations();
-    MBeanParameterInfo[] parameters = new MBeanParameterInfo[types.length];
+    String[] descriptions = new String[types.length];
+
+    if (IntrospectionMBean.getDescriptionClass() != null)
+      fillDescriptions(descriptions, method);
+
+    MBeanParameterInfo paramInfo[] = new MBeanParameterInfo[types.length];
 
     for (int i = 0; i < types.length; i++) {
-      String parameterName;
-      String description;
+      String name = "p" + i;
+      
+      paramInfo[i] = new MBeanParameterInfo(name,
+					    types[i].getName(),
+					    descriptions[i]);
+    }
 
-      MBeanParameter ann = null;
+    return paramInfo;
+  }
+  
 
-      for (Annotation a : anns[i]) {
-        if (a instanceof MBeanParameter) {
-          ann = (MBeanParameter) a;
-          break;
+  private static void fillDescriptions(String []descriptions, Method method)
+  {
+    Annotation[][] anns = method.getParameterAnnotations();
+
+    for (int i = 0; i < anns.length; i++) {
+      String name;
+      String description = "";
+
+      for (Annotation ann : anns[i]) {
+        if (ann instanceof Description) {
+          description = ((Description) ann).value();
         }
       }
 
-      if (ann != null) {
-        parameterName = ann.name();
-        description = ann.description();
-      }
-      else {
-        parameterName = "p" + (i + 1);
-        description = "";
-      }
-
-      parameters[i] = new MBeanParameterInfo(parameterName, types[i].getName(), description);
+      descriptions[i] = description;
     }
-
-
-    return parameters;
   }
 
   private static String createType(Method method)
@@ -118,5 +116,13 @@ public class IntrospectionMBeanOperationInfo
   public int compareTo(IntrospectionMBeanOperationInfo o)
   {
     return getName().compareTo(o.getName());
+  }
+
+  /**
+   * Returns the value of any @Description annotation on the method.
+   */
+  private static String getDescription(Method method)
+  {
+    return IntrospectionMBean.getDescription(method);
   }
 }

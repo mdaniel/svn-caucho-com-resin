@@ -30,7 +30,10 @@
 package com.caucho.server.webapp;
 
 import java.io.IOException;
+
 import java.util.ArrayList;
+import java.util.Map;
+
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -428,6 +431,11 @@ public class WebAppController
     app.setDynamicDeploy(isDynamicDeploy());
 
     super.configureInstanceVariables(app);
+  }
+  
+  protected void extendJMXContext(Map<String,String> context)
+  {
+    context.put("WebApp", getMBeanId());
   }
 
   protected Path calculateRootDirectory()

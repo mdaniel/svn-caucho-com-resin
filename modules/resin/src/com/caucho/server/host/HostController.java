@@ -490,6 +490,11 @@ public class HostController extends EnvironmentDeployController<Host,HostConfig>
     super.configureInstance(host);
   }
 
+  protected void extendJMXContext(Map<String,String> context)
+  {
+    context.put("Host", getMBeanId());
+  }
+
   /**
    * Returns equality.
    */

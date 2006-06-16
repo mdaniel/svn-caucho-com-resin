@@ -39,6 +39,8 @@ import javax.management.MBeanNotificationInfo;
 public class IntrospectionMBeanInfo
   extends MBeanInfo
 {
+  private static final Class _descriptionAnn;
+  
   public IntrospectionMBeanInfo(Class cl,
                                 MBeanAttributeInfo[] attributes,
                                 MBeanConstructorInfo[] constructors,
@@ -54,14 +56,43 @@ public class IntrospectionMBeanInfo
           notifications);
   }
 
-  @SuppressWarnings({"unchecked"})
   private static String createDescription(Class cl)
   {
-    MBean ann = (MBean) cl.getAnnotation(MBean.class);
+    String description = getDescription(cl);
 
-    if (ann != null)
-      return ann.description();
+    if (! "".equals(description))
+      return description;
     else
-      return "Standard MBean for " + cl.getName();
+      return "Introspected " + cl.getName() + " MBean";
+  }
+
+  /**
+   * Returns the method's description.
+   */
+  private static String getDescription(Class cl)
+  {
+    try {
+      Description desc = (Description) cl.getAnnotation(_descriptionAnn);
+
+      if (desc != null)
+	return desc.value();
+      else
+	return "";
+    } catch (Throwable e) {
+      return "";
+    }
+  }
+
+  private static Class findClass(String name)
+  {
+    try {
+      return Class.forName(name);
+    } catch (Throwable e) {
+      return null;
+    }
+  }
+
+  static {
+    _descriptionAnn = findClass("com.caucho.jmx.Description");
   }
 }

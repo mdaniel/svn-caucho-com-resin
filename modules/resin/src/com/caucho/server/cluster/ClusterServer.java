@@ -29,6 +29,8 @@
 
 package com.caucho.server.cluster;
 
+import java.util.HashMap;
+
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -68,8 +70,6 @@ public class ClusterServer {
 
   private int _srunIndex;
   private Path _tcpPath;
-
-  private long _loadBalanceWeight = 100;
 
   private ClusterClient _client;
 
@@ -184,10 +184,19 @@ public class ClusterServer {
   }
 
   /**
+   * Returns the socket timeout when connecting to the
+   * target server.
+   */
+  public long getClientConnectTimeout()
+  {
+    return _cluster.getClientConnectTimeout();
+  }
+
+  /**
    * Returns the socket timeout when reading from the
    * target server.
    */
-  public long getReadTimeout()
+  public long getClientReadTimeout()
   {
     return _cluster.getClientReadTimeout();
   }
@@ -196,7 +205,7 @@ public class ClusterServer {
    * Returns the socket timeout when writing to the
    * target server.
    */
-  public long getWriteTimeout()
+  public long getClientWriteTimeout()
   {
     return _cluster.getClientWriteTimeout();
   }
@@ -208,7 +217,7 @@ public class ClusterServer {
    */
   public long getTimeout()
   {
-    return getReadTimeout();
+    return getClientReadTimeout();
   }
 
   /**
@@ -228,19 +237,11 @@ public class ClusterServer {
   }
 
   /**
-   * Sets the load balance weight.
-   */
-  public void setLoadBalanceWeight(long weight)
-  {
-    _loadBalanceWeight = weight;
-  }
-
-  /**
    * Returns the load balance weight.
    */
-  public long getLoadBalanceWeight()
+  public int getClientWeight()
   {
-    return _loadBalanceWeight;
+    return _port.getClientWeight();
   }
 
   /**
@@ -254,53 +255,31 @@ public class ClusterServer {
     if (host == null)
       host = "localhost";
 
+    HashMap<String,Object> attr = new HashMap<String,Object>();
+    attr.put("connect-timeout", new Long(getClientConnectTimeout()));
+
     if (_port.isSSL())
-      _tcpPath = Vfs.lookup("tcps://" + host + ":" + getPort());
+      _tcpPath = Vfs.lookup("tcps://" + host + ":" + getPort(), attr);
     else
-      _tcpPath = Vfs.lookup("tcp://" + host + ":" + getPort());
+      _tcpPath = Vfs.lookup("tcp://" + host + ":" + getPort(), attr);
 
     _client = new ClusterClient(this);
 
-    _admin = new ClusterClientAdmin(this);
+    _admin = new ClusterClientAdmin(_client);
 
     try {
-      String clusterName = _cluster.getId();
-      if (clusterName == null || clusterName.equals(""))
-        clusterName = "default";
+      String name = getId();
+      if (name == null || name.equals(""))
+        name = "default";
 
-      _objectName = Jmx.getObjectName("type=ClusterClient," +
-                                      "Cluster=" + clusterName +
-                                      ",host=" + host +
-                                      ",port=" + getPort());
+      _objectName = new ObjectName("resin:type=ClusterClient,name=" + name);
 
       Jmx.register(_admin, _objectName);
-
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
     }
-
   }
-
-  /**
-   * Returns the number of active connections.
-   */
-  public int getActiveCount()
-  {
-    return _client.getActiveCount();
-  }
-
-  /**
-   * Returns the number of idle connections.
-   */
-  public int getIdleCount()
-  {
-    return _client.getIdleCount();
-  }
-
-  public long getLifetimeConnectionCount()
-  {
-    return _client.getLifetimeConnectionCount();
-  }
+  
   /**
    * Returns true if the server is dead.
    */
@@ -322,7 +301,7 @@ public class ClusterServer {
    */
   public void enable()
   {
-    _client.enable();
+    _client.start();
   }
 
   /**
@@ -330,7 +309,7 @@ public class ClusterServer {
    */
   public void disable()
   {
-    _client.disable();
+    _client.stop();
   }
 
   /**

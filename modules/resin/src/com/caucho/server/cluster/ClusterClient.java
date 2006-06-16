@@ -36,7 +36,7 @@ import java.util.logging.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
-import com.caucho.log.Log;
+import com.caucho.lifecycle.Lifecycle;
 
 /**
  * Represents a connection to one of the servers in a distribution group.
@@ -44,13 +44,16 @@ import com.caucho.log.Log;
  * that is connected to.
  */
 public class ClusterClient {
-  private static final Logger log = Log.open(ClusterClient.class);
+  private static final Logger log
+    = Logger.getLogger(ClusterClient.class.getName());
 
   private ClusterServer _server;
 
   private String _debugId;
 
   private int _maxConnections = Integer.MAX_VALUE / 2;
+
+  private final Lifecycle _lifecycle = new Lifecycle();
   
   private ClusterStream []_free = new ClusterStream[64];
   private volatile int _freeHead;
@@ -65,8 +68,9 @@ public class ClusterClient {
   private volatile int _activeCount;
   private volatile int _startingCount;
   
-  private volatile long _lifetimeKeepaliveCount;
-  private volatile long _lifetimeConnectionCount;
+  private volatile long _keepaliveTotalCount;
+  private volatile long _connectTotalCount;
+  private volatile long _failTotalCount;
 
   private volatile boolean _isEnabled = true;
   private volatile boolean _isClosed;
@@ -89,6 +93,8 @@ public class ClusterClient {
       targetId = String.valueOf(server.getIndex());
 
     _debugId = selfId + "->" + targetId;
+
+    _lifecycle.toInit();
   }
 
   /**
@@ -115,14 +121,36 @@ public class ClusterClient {
     return (_freeHead - _freeTail + _free.length) % _free.length;
   }
 
-  public long getLifetimeConnectionCount()
+  /**
+   * Returns the total number of successful socket connections
+   */
+  public long getConnectTotalCount()
   {
-    return _lifetimeConnectionCount;
+    return _connectTotalCount;
   }
 
-  public long getLifetimeKeepaliveCount()
+  /**
+   * Returns the number of times a keepalive connection has been used.
+   */
+  public long getKeepaliveTotalCount()
   {
-    return _lifetimeKeepaliveCount;
+    return _keepaliveTotalCount;
+  }
+
+  /**
+   * Returns the total number of failed connect attempts.
+   */
+  public long getFailTotalCount()
+  {
+    return _lifecycle.getFailCount();
+  }
+
+  /**
+   * Returns the time of the last failure.
+   */
+  public Date getLastFailTime()
+  {
+    return new Date(_lifecycle.getLastFailTime());
   }
 
   /**
@@ -140,7 +168,18 @@ public class ClusterClient {
   {
     long now = Alarm.getCurrentTime();
 
-    return _isEnabled && (_lastFailTime + _server.getFailRecoverTime() <= now);
+    if (_lifecycle.isStopped())
+      return false;
+    else
+      return (_lastFailTime + _server.getFailRecoverTime() <= now);
+  }
+
+  /**
+   * Returns the lifecycle state.
+   */
+  public String getState()
+  {
+    return _lifecycle.getStateName();
   }
 
   /**
@@ -148,7 +187,7 @@ public class ClusterClient {
    */
   public boolean canOpenSoft()
   {
-    if (! _isEnabled)
+    if (_lifecycle.isStopped())
       return false;
 
     long now = Alarm.getCurrentTime();
@@ -169,8 +208,11 @@ public class ClusterClient {
     // Slow start time splits into 16 parts.  The first 4 allow 1 request
     // at a time.  After that, each segment doubles the allowed requests
 
-    if (slowStartCount > 16)
+    if (slowStartCount > 16) {
+      _lifecycle.toActive();
+      
       return true;
+    }
     else if (_activeCount + _startingCount < (1 << (slowStartCount - 3)))
       return true;
     else
@@ -182,24 +224,23 @@ public class ClusterClient {
    */
   public boolean isEnabled()
   {
-    return _isEnabled;
+    return ! _lifecycle.isStopped();
   }
 
   /**
    * Enable the client.
    */
-  public void enable()
+  public void start()
   {
-    if (! _isClosed)
-      _isEnabled = true;
+    _lifecycle.toStarting();
   }
 
   /**
    * Enable the client.
    */
-  public void disable()
+  public void stop()
   {
-    _isEnabled = false;
+    _lifecycle.toStop();
   }
 
   /**
@@ -209,7 +250,7 @@ public class ClusterClient {
    */
   public ClusterStream openSoft()
   {
-    if (! _isEnabled)
+    if (_lifecycle.isStopped())
       return null;
 
     long now = Alarm.getCurrentTime();
@@ -232,7 +273,7 @@ public class ClusterClient {
    */
   public ClusterStream openIfLive()
   {
-    if (! _isEnabled)
+    if (_lifecycle.isStopped())
       return null;
 
     long now = Alarm.getCurrentTime();
@@ -255,7 +296,7 @@ public class ClusterClient {
    */
   public ClusterStream open()
   {
-    if (! _isEnabled)
+    if (_lifecycle.isStopped())
       return null;
 
     ClusterStream stream = openRecycle();
@@ -289,7 +330,7 @@ public class ClusterClient {
 
         if (now < freeTime + _server.getMaxIdleTime()) {
           _activeCount++;
-	  _lifetimeKeepaliveCount++;
+	  _keepaliveTotalCount++;
 	  
           return stream;
         }
@@ -319,14 +360,16 @@ public class ClusterClient {
     try {
       ReadWritePair pair = _server.openTCPPair();
       ReadStream rs = pair.getReadStream();
-      rs.setAttribute("timeout", new Integer((int) _server.getReadTimeout()));
+      rs.setAttribute("timeout", new Integer((int) _server.getClientReadTimeout()));
 
       synchronized (this) {
         _activeCount++;
-	_lifetimeConnectionCount++;
+	_connectTotalCount++;
 
-	if (_firstConnectTime <= 0)
+	if (_firstConnectTime <= 0) {
+	  _lifecycle.toStarting();
 	  _firstConnectTime = Alarm.getCurrentTime();
+	}
       }
 
       ClusterStream stream = new ClusterStream(_streamCount++, this,
@@ -339,6 +382,7 @@ public class ClusterClient {
     } catch (IOException e) {
       log.log(Level.FINER, e.toString(), e);
 
+      _lifecycle.toFail();
       _lastFailTime = Alarm.getCurrentTime();
       _firstConnectTime = 0;
       
@@ -357,6 +401,7 @@ public class ClusterClient {
   public void wake()
   {
     clearRecycle();
+    _lifecycle.toStarting();
     _lastFailTime = 0;
   }
 
@@ -430,16 +475,14 @@ public class ClusterClient {
   }
 
   /**
-   * Close the connection.
+   * Close the client
    */
   public void close()
   {
+    if (! _lifecycle.toDestroy())
+      return;
+    
     synchronized (this) {
-      if (_isClosed)
-        return;
-
-      _isClosed = true;
-      _isEnabled = false;
       _freeHead = _freeTail = 0;
     }
 

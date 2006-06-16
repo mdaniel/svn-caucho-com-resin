@@ -4,6 +4,9 @@
 
 <s2 title='3.0.snap - June 14, 2006'>
 <ul>
+<li>Added client-connect-timeout as a load balancing configuration (#1195, rep by jornsvendsen)
+<li>JMX/Admin: expand/complete ClusterClientMBean
+<li>JMX/Admin: removed Server as a context
 <li>(2005-06-14) Added jaf to distribution
 <li>java.util.logging.Logger getLevel() should return null if unassigned (#1085, rep by Bill Au)
 <li>java.util.logging Logger add &lt;logger> (#1186, rep by Michael Earl)
