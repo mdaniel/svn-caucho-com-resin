@@ -486,9 +486,13 @@ public class JdbcStatementResource {
       _query = query;
 
       if (this instanceof OracleStatement) {
-        _stmt = _conn.getConnection().prepareCall(query);
+        _stmt = _conn.getConnection().prepareCall(query,
+                                                  ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                                  ResultSet.CONCUR_READ_ONLY);
       } else {
-        _stmt = _conn.getConnection().prepareStatement(query);
+        _stmt = _conn.getConnection().prepareStatement(query,
+                                                       ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                                       ResultSet.CONCUR_READ_ONLY);
       }
 
       return true;
@@ -517,9 +521,13 @@ public class JdbcStatementResource {
       _query = query;
 
       if (this instanceof OracleStatement) {
-        _stmt = _conn.getConnection().prepareCall(query);
+        _stmt = _conn.getConnection().prepareCall(query,
+                                                  ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                                  ResultSet.CONCUR_READ_ONLY);
       } else {
-        _stmt = _conn.getConnection().prepareStatement(query);
+        _stmt = _conn.getConnection().prepareStatement(query,
+                                                       ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                                       ResultSet.CONCUR_READ_ONLY);
       }
 
       return true;

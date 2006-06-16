@@ -46,6 +46,10 @@ public class OracleStatement extends JdbcStatementResource {
   private static final Logger log = Logger.getLogger(OracleStatement.class.getName());
   private static final L10N L = new L10N(OracleStatement.class);
 
+  // Oracle statement has a notion of number of fetched rows
+  // (See also: OracleModule.oci_num_rows)
+  private int _fetchedRows;
+
   // Binding variables for Oracle statements
   private HashMap<String,Integer> _bindingVariables = new HashMap<String,Integer>();
 
@@ -80,6 +84,7 @@ public class OracleStatement extends JdbcStatementResource {
   OracleStatement(Oracle conn)
   {
     super(conn);
+    _fetchedRows = 0;
   }
 
   /**
@@ -200,5 +205,23 @@ public class OracleStatement extends JdbcStatementResource {
   public void resetByNameVariables()
   {
     _byNameVariables = new HashMap<String,Value>();
+  }
+
+  /**
+   * Increase the number of fetched rows.
+   *
+   * @return the new number of fetched rows
+   */
+  protected int increaseFetchedRows() {
+    return ++_fetchedRows;
+  }
+
+  /**
+   * Get the number of fetched rows.
+   *
+   * @return the number of fetched rows
+   */
+  protected int getFetchedRows() {
+    return _fetchedRows;
   }
 }

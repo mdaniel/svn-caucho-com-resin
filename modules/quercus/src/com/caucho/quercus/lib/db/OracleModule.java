@@ -152,8 +152,9 @@ public class OracleModule extends AbstractQuercusModule {
   public static final int OCI_TEMP_CLOB = 0x33;
   public static final int OCI_TEMP_BLOB = 0x34;
 
-  // This is documented in the oci_bind_by_name (not in the main list though)
   public static final int SQLT_RSET = 0x35;
+  public static final int SQLT_FILE = 0x36;
+  public static final int SQLT_CFILE = 0x37;
 
   public OracleModule()
   {
@@ -282,29 +283,108 @@ public class OracleModule extends AbstractQuercusModule {
 
   /**
    * Binds the PHP variable to the Oracle placeholder
+   *
+   * @param type one of the following types:
+   *
+   * SQLT_INT - for integers;
+   *
+   * SQLT_CHR - for VARCHARs;
+   *
+   * SQLT_RSET - for cursors, that were created before with oci_new_cursor()
+   *
+   * OCI_B_BFILE (integer)
+   *
+   *    Used with oci_bind_by_name() when binding BFILEs.
+   *
+   * OCI_B_CFILEE (integer)
+   *
+   *    Used with oci_bind_by_name() when binding CFILEs.
+   *
+   * OCI_B_CLOB (integer)
+   *
+   *    Used with oci_bind_by_name() when binding CLOBs.
+   *
+   * OCI_B_BLOB (integer)
+   *
+   *    Used with oci_bind_by_name() when binding BLOBs.
+   *
+   * OCI_B_ROWID (integer)
+   *
+   *    Used with oci_bind_by_name() when binding ROWIDs.
+   *
+   * OCI_B_CURSOR (integer)
+   *
+   *    Used with oci_bind_by_name() when binding cursors, previously allocated with oci_new_descriptor().
+   *
+   * OCI_B_NTY (integer)
+   *
+   *    Used with oci_bind_by_name() when binding named data types. Note: in PHP < 5.0 it was called OCI_B_SQLT_NTY.
+   *
+   * OCI_B_BIN (integer)
+   *
+   * SQLT_FILE (integer)
+   *
+   * SQLT_BFILEE (integer)
+   *
+   *    The same as OCI_B_BFILE.
+   *
+   * SQLT_CFILE (integer)
+   *
+   * SQLT_CFILEE (integer)
+   *
+   *    The same as OCI_B_CFILEE.
+   *
+   * SQLT_CLOB (integer)
+   *
+   *    The same as OCI_B_CLOB.
+   *
+   * SQLT_BLOB (integer)
+   *
+   *    The same as OCI_B_BLOB.
+   *
+   * SQLT_RDD (integer)
+   *
+   *    The same as OCI_B_ROWID.
+   *
+   * SQLT_NTY (integer)
+   *
+   *    The same as OCI_B_NTY.
+   *
+   * SQLT_LNG (integer)
+   *
+   *    Used with oci_bind_by_name() to bind LONG values.
+   *
+   * SQLT_LBI (integer)
+   *
+   *    Used with oci_bind_by_name() to bind LONG RAW values.
+   *
+   * SQLT_BIN (integer)
+   *
+   *    Used with oci_bind_by_name() to bind RAW values.
+   *
    */
   public static boolean oci_bind_by_name(Env env,
                                          @NotNull OracleStatement stmt,
-                                         @NotNull String variable,
-                                         @NotNull Object value,
+                                         @NotNull String placeholderName,
+                                         @Reference Object variable,
                                          @Optional("0") int maxLength,
                                          @Optional("0") int type)
   {
     try {
 
-      if (variable == null) {
+      if (placeholderName == null) {
         return false;
       }
 
-      if (!variable.startsWith(":")) {
-        variable = ":" + variable;
+      if (!placeholderName.startsWith(":")) {
+        placeholderName = ":" + placeholderName;
       }
 
-      if (variable.length() < 2) {
+      if (placeholderName.length() < 2) {
         return false;
       }
 
-      Integer index = (Integer) stmt.removeBindingVariable(variable);
+      Integer index = (Integer) stmt.removeBindingVariable(placeholderName);
 
       int i = index.intValue();
 
@@ -315,10 +395,13 @@ public class OracleModule extends AbstractQuercusModule {
         Class cl = Class.forName("oracle.jdbc.OracleTypes");
         int cursorType = cl.getDeclaredField("CURSOR").getInt(null);
         cstmt.registerOutParameter(i, cursorType);
-        OracleStatement cursor = (OracleStatement) value;
+        OracleStatement cursor = (OracleStatement) variable;
         cursor.setPreparedStatement(cstmt);
       } else {
-        pstmt.setString(i, value.toString());
+        // XXX: Check the spec. if there is a case where the
+        // variable would not be initialized yet
+        // stmt.putByNameVariable(placeholderName, variable);
+        pstmt.setString(i, variable.toString());
       }
 
       return true;
@@ -369,14 +452,14 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Commits outstanding statements
    */
-  public static Value oci_commit(Env env,
-                                 @NotNull Oracle conn)
+  public static boolean oci_commit(Env env,
+                                   @NotNull Oracle conn)
   {
     try {
-      return BooleanValue.create(conn.commit());
+      return conn.commit();
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return BooleanValue.FALSE;
+      return false;
     }
   }
 
@@ -628,12 +711,13 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Fetches the next row into result-buffer
    */
-  public static Value oci_fetch(Env env,
-                                @NotNull OracleStatement stmt)
+  public static boolean oci_fetch(Env env,
+                                  @NotNull OracleStatement stmt)
   {
     try {
+
       if (stmt == null)
-        return BooleanValue.FALSE;
+        return false;
 
       JdbcResultResource resource = new JdbcResultResource(null, stmt.getResultSet(), null);
 
@@ -642,7 +726,7 @@ public class OracleModule extends AbstractQuercusModule {
       stmt.setResultBuffer(result);
 
       if (!(result instanceof ArrayValue)) {
-        return BooleanValue.FALSE;
+        return false;
       }
 
       ArrayValue arrayValue = (ArrayValue) result;
@@ -655,10 +739,14 @@ public class OracleModule extends AbstractQuercusModule {
         var.set(newValue);
       }
 
-      return BooleanValue.TRUE;
+      // See oci_num_rows()
+      stmt.increaseFetchedRows();
+
+      return true;
+
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return BooleanValue.FALSE;
+      return false;
     }
   }
 
@@ -952,12 +1040,36 @@ public class OracleModule extends AbstractQuercusModule {
 
   /**
    * Initializes a new empty LOB or FILE descriptor
+   *
+   * @param type one of the following types:
+   *
+   * OCI_D_FILE - a FILE descriptor
+   *
+   * OCI_D_LOB - a LOB descriptor
+   *
+   * OCI_D_ROWID - a ROWID descriptor
    */
-  public static Value oci_new_descriptor(Env env,
-                                         @NotNull Oracle conn,
-                                         @Optional("-1") int type)
+  @ReturnNullAsFalse
+  public static OracleOciLob oci_new_descriptor(Env env,
+                                                @NotNull Oracle conn,
+                                                @Optional("-1") int type)
   {
-    throw new UnimplementedException("oci_new_descriptor");
+    try {
+
+      if ((type == OCI_D_FILE) ||
+          (type == OCI_D_LOB) ||
+          (type == OCI_D_ROWID)) {
+
+        OracleOciLob oracleLob = new OracleOciLob(type);
+
+        return oracleLob;
+      }
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+    }
+
+    return null;
   }
 
   /**
@@ -981,22 +1093,29 @@ public class OracleModule extends AbstractQuercusModule {
 
   /**
    * Returns number of rows affected during statement execution
+   *
+   * Note:  This function does not return number of rows selected!
+   * For SELECT statements this function will return the number of rows,
+   * that were fetched to the buffer with oci_fetchxxxx() functions.
    */
-  public static Value oci_num_rows(Env env,
-                                   @NotNull OracleStatement stmt)
+  @ReturnNullAsFalse
+  public static LongValue oci_num_rows(Env env,
+                                       @NotNull OracleStatement stmt)
   {
     try {
 
       if (stmt == null)
         return null;
 
-      JdbcResultResource resource = new JdbcResultResource(null, stmt.getResultSet(), null);
+      // JdbcResultResource resource = new JdbcResultResource(null, stmt.getResultSet(), null);
 
-      return LongValue.create(resource.getNumRows());
+      // return LongValue.create(resource.getNumRows());
+
+      return LongValue.create(stmt.getFetchedRows());
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return BooleanValue.FALSE;
+      return null;
     }
   }
 
@@ -1336,8 +1455,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_commit()
    */
-  public static Value ocicommit(Env env,
-                                @NotNull Oracle conn)
+  public static boolean ocicommit(Env env,
+                                  @NotNull Oracle conn)
   {
     return oci_commit(env, conn);
   }
@@ -1376,8 +1495,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_fetch()
    */
-  public static Value ocifetch(Env env,
-                               @NotNull OracleStatement stmt)
+  public static boolean ocifetch(Env env,
+                                 @NotNull OracleStatement stmt)
   {
     return oci_fetch(env, stmt);
   }
