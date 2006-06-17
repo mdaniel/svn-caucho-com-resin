@@ -8,6 +8,28 @@
 
 <summary objsummary='localtoc'/>
 
+<section title="session enhancements">
+
+<section title="save-mode">
+
+<p>The session-config now has a save-mode attribute, specifying when
+Resin should save changes.  The possible values are:</p>
+
+<ul>
+<li>before-headers
+<li>after-request
+<li>on-shutdown.
+</ul>
+
+<p>The default is "after-request", which is the current Resin behavior.
+Sites which have distribted sessions, but do not have a sticky-session
+load balancer may need to use "before-headers".  "before-headers" does
+add a latency penalty.</p>
+
+</section>
+
+</section>
+
 <section title="java.util.logging fixes">
 
 <p>The operation of the java.util.logging has changed to properly

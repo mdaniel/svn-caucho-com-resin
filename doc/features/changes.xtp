@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - June 14, 2006'>
 <ul>
+<li>Added session-manager save-mode='before-flush' (#936, rep by Michael Harper)
 <li>Added client-connect-timeout as a load balancing configuration (#1168, #1195, rep by jornsvendsen, Serge Knystautas)
 <li>JMX/Admin: expand/complete ClusterClientMBean
 <li>JMX/Admin: removed Server as a context
