@@ -147,7 +147,7 @@ public class JdbcResultResource {
    * @return the next result row as an associative,
    * a numeric array, or both.
    */
-  public ArrayValue fetchArray(int type)
+  public ArrayValue fetchArray(Env env, int type)
   {
     try {
       if (_rs.next()) {
@@ -166,7 +166,7 @@ public class JdbcResultResource {
         }
 
         for (int i = 0; i < count; i++) {
-          Value value = getColumnValue(_rs, _metaData, i + 1);
+          Value value = getColumnValue(env, _rs, _metaData, i + 1);
 
           if ((type & FETCH_NUM) != 0)
             array.put(LongValue.create(i), value);
@@ -191,9 +191,9 @@ public class JdbcResultResource {
    * @return an associative array representing the row
    * or null if there are no more rows in the result set
    */
-  public ArrayValue fetchAssoc()
+  public ArrayValue fetchAssoc(Env env)
   {
-    return fetchArray(JdbcResultResource.FETCH_ASSOC);
+    return fetchArray(env, JdbcResultResource.FETCH_ASSOC);
   }
 
   /**
@@ -450,7 +450,7 @@ public class JdbcResultResource {
 
         for (int i = 0; i < count; i++) {
           String name = _metaData.getColumnName(i + 1);
-          Value value = getColumnValue(_rs, _metaData, i + 1);
+          Value value = getColumnValue(env, _rs, _metaData, i + 1);
 
           result.putField(env, name, value);
         }
@@ -471,9 +471,9 @@ public class JdbcResultResource {
    *
    * @return an array containing the fecthed row
    */
-  public ArrayValue fetchRow()
+  public ArrayValue fetchRow(Env env)
   {
-    return fetchArray(JdbcResultResource.FETCH_NUM);
+    return fetchArray(env, JdbcResultResource.FETCH_NUM);
   }
 
   /**
@@ -565,12 +565,14 @@ public class JdbcResultResource {
   /**
    * Get the column value in the specified result set.
    *
+   * @param env the PHP executing environment
    * @param rs the result set
    * @param metaData the result set meta data
    * @param column the column number
    * @return the column value
    */
-  public static Value getColumnValue(ResultSet rs,
+  public static Value getColumnValue(Env env,
+                                     ResultSet rs,
                                      ResultSetMetaData metaData,
                                      int column)
     throws SQLException
@@ -601,6 +603,17 @@ public class JdbcResultResource {
           return NullValue.NULL;
         else
           return new DoubleValue(value);
+      }
+
+    case Types.CLOB:
+      {
+        Object object = rs.getClob(column);
+        if (object.getClass().getName().equals("oracle.sql.CLOB")) {
+          OracleOciLob ociLob = new OracleOciLob(OracleModule.OCI_D_LOB);
+          ociLob.setLob(object);
+          object = ociLob;
+        }
+        return env.wrapJava(object);
       }
 
     default:
@@ -1087,7 +1100,7 @@ public class JdbcResultResource {
         return BooleanValue.FALSE;
       }
 
-      return getColumnValue(_rs, _metaData, colNumber + 1);
+      return getColumnValue(env, _rs, _metaData, colNumber + 1);
 
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);

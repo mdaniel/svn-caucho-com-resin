@@ -116,9 +116,10 @@ public class MysqliResult extends JdbcResultResource {
    * or null if there are no more rows in the result set
    */
   @ReturnNullAsFalse
-  public ArrayValue fetch_array(@Optional("MYSQLI_BOTH") int type)
+  public ArrayValue fetch_array(Env env,
+                                @Optional("MYSQLI_BOTH") int type)
   {
-    return fetchArray(type);
+    return fetchArray(env, type);
   }
 
   /**
@@ -127,9 +128,9 @@ public class MysqliResult extends JdbcResultResource {
    * @return an associative array representing the row
    * or null if there are no more rows in the result set
    */
-  public ArrayValue fetch_assoc()
+  public ArrayValue fetch_assoc(Env env)
   {
-    return fetchArray(JdbcResultResource.FETCH_ASSOC);
+    return fetchArray(env, JdbcResultResource.FETCH_ASSOC);
   }
 
   /**
@@ -205,9 +206,9 @@ public class MysqliResult extends JdbcResultResource {
    * fetched row or NULL if there are no more
    * rows in result set
    */
-  public ArrayValue fetch_row()
+  public ArrayValue fetch_row(Env env)
   {
-    return fetchArray(JdbcResultResource.FETCH_NUM);
+    return fetchArray(env, JdbcResultResource.FETCH_NUM);
   }
 
   /**

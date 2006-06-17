@@ -287,7 +287,7 @@ public class JdbcStatementResource {
    *
    * @return true on success, false on error null if no more rows
    */
-  public Value fetch()
+  public Value fetch(Env env)
   {
     try {
       if (_rs.next()) {
@@ -296,7 +296,7 @@ public class JdbcStatementResource {
 
         int size = _results.length;
         for (int i = 0; i < size; i++) {
-          _results[i].set(JdbcResultResource.getColumnValue(_rs, _metaData, i + 1));
+          _results[i].set(JdbcResultResource.getColumnValue(env, _rs, _metaData, i + 1));
         }
         return BooleanValue.TRUE;
       } else

@@ -293,9 +293,10 @@ public class MysqliModule extends AbstractQuercusModule {
     return conn.real_escape_string(unescapedString);
   }
 
-  public static Value mysqli_fetch(MysqliStatement stmt)
+  public static Value mysqli_fetch(Env env,
+                                   MysqliStatement stmt)
   {
-    return mysqli_stmt_fetch(stmt);
+    return mysqli_stmt_fetch(env, stmt);
   }
 
   /**
@@ -524,37 +525,40 @@ public class MysqliModule extends AbstractQuercusModule {
    * Returns a row for the result.
    */
   @ReturnNullAsFalse
-  public static ArrayValue mysqli_fetch_array(@NotNull MysqliResult result,
-                @Optional("MYSQLI_BOTH") int type)
+  public static ArrayValue mysqli_fetch_array(Env env,
+                                              @NotNull MysqliResult result,
+                                              @Optional("MYSQLI_BOTH") int type)
   {
     if (result == null)
       return null;
 
-    return result.fetch_array(type);
+    return result.fetch_array(env, type);
   }
 
   /**
    * Returns an associative array from the result.
    */
   @ReturnNullAsFalse
-  public static ArrayValue mysqli_fetch_assoc(@NotNull MysqliResult result)
+  public static ArrayValue mysqli_fetch_assoc(Env env,
+                                              @NotNull MysqliResult result)
   {
     if (result == null)
       return null;
 
-    return result.fetch_assoc();
+    return result.fetch_assoc(env);
   }
 
   /**
    * Returns a row for the result.
    */
   @ReturnNullAsFalse
-  public static ArrayValue mysqli_fetch_row(@NotNull MysqliResult result)
+  public static ArrayValue mysqli_fetch_row(Env env,
+                                            @NotNull MysqliResult result)
   {
     if (result == null)
       return null;
 
-    return result.fetch_row();
+    return result.fetch_row(env);
   }
 
   /**
@@ -1174,12 +1178,13 @@ public class MysqliModule extends AbstractQuercusModule {
    * Fetch results from a prepared statement.
    * @return true on success, false on error, null if no more rows.
    */
-  public static Value mysqli_stmt_fetch(@NotNull MysqliStatement stmt)
+  public static Value mysqli_stmt_fetch(Env env,
+                                        @NotNull MysqliStatement stmt)
   {
     if (stmt == null)
       return BooleanValue.FALSE;
 
-    return stmt.fetch();
+    return stmt.fetch(env);
   }
 
   /**

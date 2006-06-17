@@ -470,7 +470,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       ArrayValueImpl newArray = new ArrayValueImpl();
 
-      Object value = result.fetchArray(PGSQL_BOTH);
+      Object value = result.fetchArray(env, PGSQL_BOTH);
 
       if (value != null) {
         int curr = 0;
@@ -497,7 +497,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
           curr++;
 
-          value = result.fetchArray(PGSQL_BOTH);
+          value = result.fetchArray(env, PGSQL_BOTH);
         } while (value != null);
       }
 
@@ -703,9 +703,9 @@ public class PostgresModule extends AbstractQuercusModule {
 
       int curr = 0;
 
-      for (ArrayValue row = result.fetchRow();
+      for (ArrayValue row = result.fetchRow(env);
            row != null;
-           row = result.fetchRow()) {
+           row = result.fetchRow(env)) {
 
         newArray.put(LongValue.create(curr++),
                      row.get(LongValue.create(column)));
@@ -733,9 +733,9 @@ public class PostgresModule extends AbstractQuercusModule {
 
       int curr = 0;
 
-      for (ArrayValue row = result.fetchAssoc();
+      for (ArrayValue row = result.fetchAssoc(env);
            row != null;
-           row = result.fetchAssoc()) {
+           row = result.fetchAssoc(env)) {
 
         newArray.put(LongValue.create(curr++), row);
 
@@ -782,7 +782,7 @@ public class PostgresModule extends AbstractQuercusModule {
         }
       }
 
-      Value value = result.fetchArray(resultType);
+      Value value = result.fetchArray(env, resultType);
 
       if (value instanceof ArrayValue) {
         return (ArrayValue) value;
@@ -809,7 +809,7 @@ public class PostgresModule extends AbstractQuercusModule {
         result.seek(env, row.toInt());
       }
 
-      return result.fetchAssoc();
+      return result.fetchAssoc(env);
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -870,7 +870,7 @@ public class PostgresModule extends AbstractQuercusModule {
         result.seek(env, rowNumber);
       }
 
-      Value fetchRow = result.fetchRow();
+      Value fetchRow = result.fetchRow(env);
 
       int fieldNumber;
 
@@ -902,7 +902,7 @@ public class PostgresModule extends AbstractQuercusModule {
         result.seek(env, row.toInt());
       }
 
-      return result.fetchRow();
+      return result.fetchRow(env);
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);

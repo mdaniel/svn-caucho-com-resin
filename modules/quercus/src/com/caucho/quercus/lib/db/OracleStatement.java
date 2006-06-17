@@ -52,6 +52,7 @@ public class OracleStatement extends JdbcStatementResource {
 
   // Binding variables for Oracle statements
   private HashMap<String,Integer> _bindingVariables = new HashMap<String,Integer>();
+  private Object _outParameter;
 
   // Oracle internal result buffer
   private Value _resultBuffer;
@@ -77,7 +78,7 @@ public class OracleStatement extends JdbcStatementResource {
   private HashMap<String,Value> _byNameVariables = new HashMap<String,Value>();
 
   /**
-   * Constructor for OracleStatement
+   * Constructs an OracleStatement
    *
    * @param conn Oracle connection
    */
@@ -85,10 +86,11 @@ public class OracleStatement extends JdbcStatementResource {
   {
     super(conn);
     _fetchedRows = 0;
+    _outParameter = null;
   }
 
   /**
-   * Assign a variable name to the corresponding index
+   * Assigns a variable name to the corresponding index
    *
    * @param name the variable name
    * @param value the corresponding index
@@ -99,7 +101,7 @@ public class OracleStatement extends JdbcStatementResource {
   }
 
   /**
-   * Return a binding variable index
+   * Returns a binding variable index
    *
    * @param name the variable name
    * @return the binding variable index
@@ -110,7 +112,7 @@ public class OracleStatement extends JdbcStatementResource {
   }
 
   /**
-   * Remove a binding variable
+   * Removes a binding variable
    *
    * @param name the binding variable name
    * @return the binding variable index
@@ -121,7 +123,7 @@ public class OracleStatement extends JdbcStatementResource {
   }
 
   /**
-   * Return all binding variables
+   * Returns all binding variables
    *
    * @return a HashMap of variable name to index values
    */
@@ -131,7 +133,7 @@ public class OracleStatement extends JdbcStatementResource {
   }
 
   /**
-   * Remove all binding variables
+   * Removes all binding variables
    */
   public void resetBindingVariables()
   {
@@ -139,7 +141,7 @@ public class OracleStatement extends JdbcStatementResource {
   }
 
   /**
-   * Set the internal result buffer
+   * Sets the internal result buffer
    */
   public void setResultBuffer(Value resultBuffer)
   {
@@ -147,7 +149,7 @@ public class OracleStatement extends JdbcStatementResource {
   }
 
   /**
-   * Return the internal result buffer
+   * Returns the internal result buffer
    *
    * @return the result buffer
    */
@@ -157,7 +159,7 @@ public class OracleStatement extends JdbcStatementResource {
   }
 
   /**
-   * Assign a value to a variable
+   * Assigns a value to a variable
    *
    * @param name a variable name
    * @param value the variable value
@@ -168,7 +170,7 @@ public class OracleStatement extends JdbcStatementResource {
   }
 
   /**
-   * Return the variable value by name
+   * Returns the variable value by name
    *
    * @param name the variable name
    * @return the variable value
@@ -179,7 +181,7 @@ public class OracleStatement extends JdbcStatementResource {
   }
 
   /**
-   * Remove a variable given the corresponding name
+   * Removes a variable given the corresponding name
    *
    * @param name the variable name
    * @return the variable value
@@ -190,7 +192,7 @@ public class OracleStatement extends JdbcStatementResource {
   }
 
   /**
-   * Return all variable names and corresponding values
+   * Returns all variable names and corresponding values
    *
    * @return a HashMap of variable names to corresponding values
    */
@@ -200,7 +202,7 @@ public class OracleStatement extends JdbcStatementResource {
   }
 
   /**
-   * Remove all variables
+   * Removes all variables
    */
   public void resetByNameVariables()
   {
@@ -208,7 +210,7 @@ public class OracleStatement extends JdbcStatementResource {
   }
 
   /**
-   * Increase the number of fetched rows.
+   * Increases the number of fetched rows.
    *
    * @return the new number of fetched rows
    */
@@ -217,11 +219,29 @@ public class OracleStatement extends JdbcStatementResource {
   }
 
   /**
-   * Get the number of fetched rows.
+   * Gets the number of fetched rows.
    *
    * @return the number of fetched rows
    */
   protected int getFetchedRows() {
     return _fetchedRows;
+  }
+
+  /**
+   * Gets the out parameter.
+   *
+   * @return the out parameter
+   */
+  protected Object getOutParameter() {
+    return _outParameter;
+  }
+
+  /**
+   * Sets the out parameter.
+   *
+   * @param outParameter the new out parameter
+   */
+  protected void setOutParameter(Object outParameter) {
+    _outParameter = outParameter;
   }
 }

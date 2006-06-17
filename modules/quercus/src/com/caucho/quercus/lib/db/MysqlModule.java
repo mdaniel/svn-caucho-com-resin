@@ -267,7 +267,7 @@ public class MysqlModule extends AbstractQuercusModule {
     if (result == null)
       return BooleanValue.FALSE;
 
-    Value value = result.fetch_array(type);
+    Value value = result.fetch_array(env, type);
 
     if (value != null)
       return value;
@@ -284,7 +284,7 @@ public class MysqlModule extends AbstractQuercusModule {
     if (result == null)
       return null;
 
-    return result.fetch_array(MYSQL_ASSOC);
+    return result.fetch_array(env, MYSQL_ASSOC);
   }
 
   /**
@@ -427,7 +427,7 @@ public class MysqlModule extends AbstractQuercusModule {
     if (result == null)
       return null;
 
-    return result.fetch_row();
+    return result.fetch_row(env);
   }
 
   /**

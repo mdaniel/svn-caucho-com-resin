@@ -220,7 +220,7 @@ public class MysqliStatement extends JdbcStatementResource {
   public Value fetch(Env env)
   {
     try {
-      return super.fetch();
+      return super.fetch(env);
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
