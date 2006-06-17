@@ -50,16 +50,17 @@ import com.caucho.xml.XmlChar;
 
 import com.caucho.log.Log;
 
-import com.caucho.server.webapp.Application;
-import com.caucho.server.webapp.ErrorPageManager;
-
-import com.caucho.server.session.SessionManager;
-import com.caucho.server.session.CookieImpl;
+import com.caucho.server.cache.AbstractCacheFilterChain;
+import com.caucho.server.cache.AbstractCacheEntry;
 
 import com.caucho.server.dispatch.InvocationDecoder;
 
-import com.caucho.server.cache.AbstractCacheFilterChain;
-import com.caucho.server.cache.AbstractCacheEntry;
+import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.ErrorPageManager;
+
+import com.caucho.server.session.CookieImpl;
+import com.caucho.server.session.SessionManager;
+import com.caucho.server.session.SessionImpl;
 
 /**
  * Encapsulates the servlet response, controlling response headers and the
@@ -1550,6 +1551,10 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     if (_request.getMethod().equals("HEAD")) {
       _originalResponseStream.setHead();
     }
+
+    SessionImpl session = (SessionImpl) _request.getSession(false);
+    if (session != null)
+      session.saveBeforeHeaders();
 
     if (_sessionId != null && ! _hasSessionCookie) {
       _hasSessionCookie = true;

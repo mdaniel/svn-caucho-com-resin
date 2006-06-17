@@ -619,7 +619,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     if (_isValid && ! _isInvalidating && clusterObject != null) {
       clusterObject.update();
 
-      if (_manager.getSaveOnlyOnShutdown()) {
+      if (_manager.isSaveOnlyOnShutdown()) {
 	try {
 	  clusterObject.store(this);
 	} catch (Throwable e) {
@@ -799,14 +799,47 @@ public class SessionImpl implements HttpSession, CacheListener {
     if (count < 0)
       throw new IllegalStateException();
 
-    flush();
+    saveAfterRequest();
   }
 
-  public void flush()
+  /**
+   * Save changes before any flush.
+   */
+  public final void saveBeforeFlush()
   {
-    if (_manager != null && _manager.getSaveOnlyOnShutdown())
+    if (_manager == null || ! _manager.isSaveBeforeFlush())
       return;
 
+    save();
+  }
+
+  /**
+   * Flush changes before the headers.
+   */
+  public final void saveBeforeHeaders()
+  {
+    if (_manager == null || ! _manager.isSaveBeforeHeaders())
+      return;
+
+    save();
+  }
+
+  /**
+   * Flush changes after a request completes.
+   */
+  public final void saveAfterRequest()
+  {
+    if (_manager == null || ! _manager.isSaveAfterRequest())
+      return;
+
+    save();
+  }
+
+  /**
+   * Saves changes to the session.
+   */
+  public final void save()
+  {
     try {
       ClusterObject clusterObject = _clusterObject;
       if (clusterObject != null) {
@@ -820,7 +853,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   /**
    * Store on shutdown.
    */
-  void storeOnShutdown()
+  void saveOnShutdown()
   {
     try {
       ClusterObject clusterObject = _clusterObject;

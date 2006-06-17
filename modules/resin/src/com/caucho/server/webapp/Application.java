@@ -334,7 +334,7 @@ public class Application extends ServletContextImpl
       _lifecycle = new Lifecycle(log, toString(), Level.INFO);
     }
   }
-
+  
   /**
    * Sets the parent container.
    */
@@ -527,6 +527,14 @@ public class Application extends ServletContextImpl
 
     // XXX:
     // _classLoader.setAttribute("caucho.vfs.pwd", appDir);
+  }
+
+  /**
+   * Returns the ObjectName.
+   */
+  public String getObjectName()
+  {
+    return _controller.getObjectName();
   }
 
   /**

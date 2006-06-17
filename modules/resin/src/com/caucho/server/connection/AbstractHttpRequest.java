@@ -1272,7 +1272,7 @@ public abstract class AbstractHttpRequest
   {
     SessionManager manager = getSessionManager();
     
-    if (manager.enableSessionCookies()) {
+    if (manager != null && manager.enableSessionCookies()) {
       setVaryCookie(getSessionCookie(manager));
 
       String id = findSessionIdFromCookie();
@@ -1288,7 +1288,7 @@ public abstract class AbstractHttpRequest
       return id;
     }
 
-    if (manager.enableSessionCookies())
+    if (manager != null && manager.enableSessionCookies())
       return null;
     else
       return findSessionIdFromConnection();
@@ -2288,7 +2288,7 @@ public abstract class AbstractHttpRequest
   {
     SessionImpl session = _session;
     if (session != null)
-      session.flush();
+      session.save();
   }
   
   /**

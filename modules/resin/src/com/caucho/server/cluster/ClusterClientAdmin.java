@@ -24,7 +24,7 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam
+ * @author Scott Ferguson
  */
 
 
@@ -32,13 +32,10 @@ package com.caucho.server.cluster;
 
 import java.util.Date;
 
-import javax.management.ObjectName;
-
 import com.caucho.mbeans.server.ClusterClientMBean;
-import com.caucho.lifecycle.Lifecycle;
 
 /**
- * Implementation of the administration mbean.
+ * Implementation of the ClusterClient's administration mbean.
  */
 public class ClusterClientAdmin
   implements ClusterClientMBean

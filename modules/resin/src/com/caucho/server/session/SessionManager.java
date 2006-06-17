@@ -76,19 +76,24 @@ import com.caucho.config.types.JndiBuilder;
 /**
  * Manages sessions in a web-app.
  */
-public class SessionManager implements ObjectManager, AlarmListener {
+public final class SessionManager implements ObjectManager, AlarmListener {
   static protected final L10N L = new L10N(SessionManager.class);
   static protected final Logger log = Log.open(SessionManager.class);
 
-  private static int FALSE = 0;
-  private static int COOKIE = 1;
-  private static int TRUE = 2;
+  private static final int FALSE = 0;
+  private static final int COOKIE = 1;
+  private static final int TRUE = 2;
 
-  private static int UNSET = 0;
-  private static int SET_TRUE = 1;
-  private static int SET_FALSE = 2;
+  private static final int UNSET = 0;
+  private static final int SET_TRUE = 1;
+  private static final int SET_FALSE = 2;
+
+  private static final int SAVE_BEFORE_HEADERS = 0x1;
+  private static final int SAVE_BEFORE_FLUSH = 0x2;
+  private static final int SAVE_AFTER_REQUEST = 0x4;
+  private static final int SAVE_ON_SHUTDOWN = 0x8;
   
-  private static int DECODE[];
+  private static final int DECODE[];
   
   private Application _application;
 
@@ -135,23 +140,18 @@ public class SessionManager implements ObjectManager, AlarmListener {
   private String _cookieDomain;
   private long _cookieMaxAge;
   private boolean _cookieSecure;
+  private int _isCookieHttpOnly;
   private String _cookiePort;
   private int _reuseSessionId = COOKIE;
   private int _cookieLength = 18;
 
-  private int _distributedPort;
+  private int _sessionSaveMode = SAVE_AFTER_REQUEST;
 
   //private SessionStore sessionStore;
   private StoreManager _storeManager;
-  private boolean _isWebAppStore; // i.e. for old-style compatibility
-  private Store _sessionStore;
-  private int _alwaysLoadSession;
-  private boolean _alwaysSaveSession;
-  private boolean _saveOnlyOnShutdown;
-  
-  private boolean _distributedRing;
-  private Path _persistentPath;
-  private long _lastDistributedFail;
+
+  // If true, serialization errors should not be logged
+  private boolean _ignoreSerializationErrors = false;
 
   // List of the HttpSessionListeners from the configuration file
   private ArrayList<HttpSessionListener> _listeners;
@@ -162,11 +162,17 @@ public class SessionManager implements ObjectManager, AlarmListener {
   // List of the HttpSessionAttributeListeners from the configuration file
   private ArrayList<HttpSessionAttributeListener> _attributeListeners;
 
-  // If true, serialization errors should not be logged
-  private boolean _ignoreSerializationErrors = false;
+  //
+  // Compatibility fields
+  //
+  
+  private boolean _isWebAppStore; // i.e. for old-style compatibility
+  private Store _sessionStore;
+  private int _alwaysLoadSession;
+  private boolean _alwaysSaveSession;
 
-  private int _srunIndex;
-  private int _srunLength;
+  private boolean _distributedRing;
+  private Path _persistentPath;
 
   private boolean _isClosed;
 
@@ -174,6 +180,9 @@ public class SessionManager implements ObjectManager, AlarmListener {
   private Cluster _cluster;
   private ClusterServer _selfServer;
   private ClusterServer []_srunGroup = new ClusterServer[0];
+
+  private int _srunIndex;
+  private int _srunLength;
 
   private Alarm _alarm = new Alarm(this);
 
@@ -220,12 +229,7 @@ public class SessionManager implements ObjectManager, AlarmListener {
 
     _persistentPath = Vfs.lookup("WEB-INF/sessions");
 
-    // _sessionFactory = new SessionFactory();
-    
-    // _sessionFactory.setSessionManager(this);
-    // _sessionFactory.init();
-
-    // String backingPath = "WEB-INF/sessions";
+    new SessionManagerAdmin(this);
   }
 
   /**
@@ -318,6 +322,14 @@ public class SessionManager implements ObjectManager, AlarmListener {
   }
 
   /**
+   * Returns the application's object name.
+   */
+  String getWebAppObjectName()
+  {
+    return getApplication().getObjectName();
+  }
+
+  /**
    * Returns the SessionManager's authenticator
    */
   ServletAuthenticator getAuthenticator()
@@ -336,6 +348,11 @@ public class SessionManager implements ObjectManager, AlarmListener {
     if (_storeManager == null)
       throw new ConfigException(L.l("{0} is an unknown persistent store.",
 				    store.getJndiName()));
+  }
+
+  public String getPersistentStoreObjectName()
+  {
+    return null;
   }
   
   /**
@@ -371,11 +388,95 @@ public class SessionManager implements ObjectManager, AlarmListener {
   }
 
   /**
+   * True if sessions should be saved on shutdown.
+   */
+  public boolean isSaveOnShutdown()
+  {
+    return (_sessionSaveMode & SAVE_ON_SHUTDOWN) != 0;
+  }
+
+  /**
    * True if sessions should only be saved on shutdown.
    */
-  public boolean getSaveOnlyOnShutdown()
+  public boolean isSaveOnlyOnShutdown()
   {
-    return _saveOnlyOnShutdown;
+    return (_sessionSaveMode & SAVE_ON_SHUTDOWN) == SAVE_ON_SHUTDOWN;
+  }
+
+  /**
+   * True if sessions should be saved before the HTTP headers.
+   */
+  public boolean isSaveBeforeHeaders()
+  {
+    return (_sessionSaveMode & SAVE_BEFORE_HEADERS) != 0;
+  }
+
+  /**
+   * True if sessions should be saved before each flush.
+   */
+  public boolean isSaveBeforeFlush()
+  {
+    return (_sessionSaveMode & SAVE_BEFORE_FLUSH) != 0;
+  }
+
+  /**
+   * True if sessions should be saved after the request.
+   */
+  public boolean isSaveAfterRequest()
+  {
+    return (_sessionSaveMode & SAVE_AFTER_REQUEST) != 0;
+  }
+
+  /**
+   * Sets the save-mode: before-flush, before-headers, after-request,
+   * on-shutdown
+   */
+  public void setSaveMode(String mode)
+    throws ConfigException
+  {
+    /* XXX: probably don't want to implement this.
+    if ("before-flush".equals(mode)) {
+      _sessionSaveMode = (SAVE_BEFORE_FLUSH|
+			  SAVE_BEFORE_HEADERS|
+			  SAVE_AFTER_REQUEST|
+			  SAVE_ON_SHUTDOWN);
+    }
+    else
+    */
+    
+    if ("before-headers".equals(mode)) {
+      _sessionSaveMode = (SAVE_BEFORE_HEADERS|
+			  SAVE_AFTER_REQUEST|
+			  SAVE_ON_SHUTDOWN);
+    }
+    else if ("after-request".equals(mode)) {
+      _sessionSaveMode = (SAVE_AFTER_REQUEST|
+			  SAVE_ON_SHUTDOWN);
+    }
+    else if ("on-shutdown".equals(mode)) {
+      _sessionSaveMode = (SAVE_ON_SHUTDOWN);
+    }
+    else
+      throw new ConfigException(L.l("'{0}' is an unknown session save-mode.  Values are: before-headers, after-request, and on-shutdown.",
+				    mode));
+
+  }
+
+  /**
+   * Returns the string value of the save-mode.
+   */
+  public String getSaveMode()
+  {
+    if (isSaveBeforeFlush())
+      return "before-flush";
+    else if (isSaveBeforeHeaders())
+      return "before-headers";
+    else if (isSaveAfterRequest())
+      return "after-request";
+    else if (isSaveOnShutdown())
+      return "on-shutdown";
+    else
+      return "unknown";
   }
 
   /**
@@ -383,7 +484,10 @@ public class SessionManager implements ObjectManager, AlarmListener {
    */
   public void setSaveOnlyOnShutdown(boolean save)
   {
-    _saveOnlyOnShutdown = save;
+    log.warning("<save-only-on-shutdown> is deprecated.  Use <save-mode>on-shutdown</save-mode> instead");
+    
+    if (save)
+      _sessionSaveMode = SAVE_ON_SHUTDOWN;
   }
 
   /**
@@ -880,6 +984,27 @@ public class SessionManager implements ObjectManager, AlarmListener {
   }
 
   /**
+   * Returns the http-only of the session cookie.
+   */
+  public boolean isCookieHttpOnly()
+  {
+    if (_isCookieHttpOnly == SET_TRUE)
+      return true;
+    else if (_isCookieHttpOnly == SET_FALSE)
+      return true;
+    else
+      return getApplication().getCookieHttpOnly();
+  }
+
+  /**
+   * Sets the http-only of the session cookie.
+   */
+  public void setCookieHttpOnly(boolean httpOnly)
+  {
+    _isCookieHttpOnly = httpOnly ? SET_TRUE : SET_FALSE;
+  }
+
+  /**
    * Sets the cookie length
    */
   public void setCookieLength(int cookieLength)
@@ -888,6 +1013,14 @@ public class SessionManager implements ObjectManager, AlarmListener {
       cookieLength = 7;
 
     _cookieLength = cookieLength;
+  }
+
+  /**
+   * Returns the cookie length.
+   */
+  public long getCookieLength()
+  {
+    return _cookieLength;
   }
 
   /**
@@ -904,6 +1037,14 @@ public class SessionManager implements ObjectManager, AlarmListener {
   public void setCookieAppendServerIndex(boolean isAppend)
   {
     _isAppendServerIndex = isAppend;
+  }
+
+  /**
+   * Sets module session id generation.
+   */
+  public boolean isCookieAppendServerIndex()
+  {
+    return _isAppendServerIndex;
   }
 
   public void start()
@@ -1132,12 +1273,11 @@ public class SessionManager implements ObjectManager, AlarmListener {
       killSession = ! load(session, now);
       isNew = killSession;
     }
-    else if (! getSaveOnlyOnShutdown() && ! session.load()) {
+    else if (! session.load()) {
       // if the load failed, then the session died out from underneath
       session.reset(now);
       isNew = true;
     }
-      
 
     if (killSession && (! create || ! reuseSessionId(fromCookie))) {
       // XXX: session.setClosed();
@@ -1475,7 +1615,7 @@ public class SessionManager implements ObjectManager, AlarmListener {
           synchronized (session) {
 	    // server/016i, server/018x
 	    if (! session.isEmpty())
-	      session.storeOnShutdown();
+	      session.saveOnShutdown();
           }
         }
 

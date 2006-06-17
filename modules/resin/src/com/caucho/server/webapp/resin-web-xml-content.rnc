@@ -589,6 +589,9 @@ r_session-config = element session-config {
   & (attribute reuse-session-id { r_boolean-Type }
      | element reuse-session-id { r_boolean-Type })?
 
+  & (attribute save-mode { string }
+     | element save-mode { string })?
+
   & (attribute save-on-shutdown { r_boolean-Type }
      | element save-on-shutdown { r_boolean-Type })?
 
