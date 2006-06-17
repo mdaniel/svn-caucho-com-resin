@@ -422,6 +422,41 @@ abstract public class AbstractHessianOutput {
     throws IOException;
 
   /**
+   * Writes the object header to the stream (for Hessian 2.0), or a
+   * Map for Hessian 1.0.  Object writers will call
+   * <code>writeObjectBegin</code> followed by the map contents and then
+   * call <code>writeObjectEnd</code>.
+   *
+   * <code><pre>
+   * Ot b16 b8 type (<key> <value>)* z
+   * o b32 b24 b16 b8 <value>* z
+   * </pre></code>
+   *
+   * @return true if the object has already been defined.
+   */
+  public int writeObjectBegin(String type)
+    throws IOException
+  {
+    return -1;
+  }
+
+  /**
+   * Writes the end of the class.
+   */
+  public void writeClassEnd()
+    throws IOException
+  {
+  }
+
+  /**
+   * Writes the tail of the object to the stream.
+   */
+  public void writeObjectEnd()
+    throws IOException
+  {
+  }
+
+  /**
    * Writes a remote object reference to the stream.  The type is the
    * type of the remote interface.
    *

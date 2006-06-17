@@ -144,18 +144,54 @@ public class JavaSerializer extends AbstractSerializer {
     } catch (Exception e) {
     }
 
-    try {
+    int ref = out.writeObjectBegin(cl.getName());
+
+    if (ref < 0) {
       out.writeMapBegin(cl.getName());
 
       for (int i = 0; i < _fields.length; i++) {
 	Field field = _fields[i];
       
 	out.writeString(field.getName());
-	out.writeObject(field.get(obj));
+	
+	Object value = null;
+	try {
+	  value = field.get(obj);
+	} catch (IllegalAccessException e) {
+	  // XXX: log when available
+	}
+
+	out.writeObject(value);
       }
+      
       out.writeMapEnd();
-    } catch (IllegalAccessException e) {
-      throw new IOException(String.valueOf(e));
+    }
+    else {
+      if (ref == 0) {
+	for (int i = 0; i < _fields.length; i++) {
+	  Field field = _fields[i];
+      
+	  out.writeString(field.getName());
+	}
+
+	out.writeClassEnd();
+      }
+      
+      for (int i = 0; i < _fields.length; i++) {
+	Field field = _fields[i];
+      
+	Object value = null;
+	
+	try {
+	  value = field.get(obj);
+	} catch (IllegalAccessException e) {
+	  // XXX: log when available
+	}
+
+	out.writeObject(value);
+      }
+      
+      out.writeObjectEnd();
     }
   }
 }

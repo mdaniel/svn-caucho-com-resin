@@ -178,22 +178,52 @@ public class BeanSerializer extends AbstractSerializer {
     } catch (Exception e) {
     }
 
-    out.writeMapBegin(cl.getName());
+    int ref = out.writeObjectBegin(cl.getName());
 
-    for (int i = 0; i < _methods.length; i++) {
-      Method method = _methods[i];
+    if (ref < 0) {
+      // Hessian 1.1 uses a map
 
-      try {
-	Object value = _methods[i].invoke(obj, (Object []) null);
+      out.writeMapBegin(cl.getName());
       
-	out.writeString(_names[i]);
-	out.writeObject(value);
-      } catch (Throwable e) {
-	// XXX: log when available
+      for (int i = 0; i < _methods.length; i++) {
+	Method method = _methods[i];
+
+	try {
+	  Object value = _methods[i].invoke(obj, (Object []) null);
+
+	  out.writeString(_names[i]);
+	
+	  out.writeObject(value);
+	} catch (Throwable e) {
+	  // XXX: log when available
+	}
+      }
+      
+      out.writeMapEnd();
+    }
+    else {
+      if (ref == 0) {
+	for (int i = 0; i < _names.length; i++)
+	  out.writeString(_names[i]);
+
+	out.writeClassEnd();
+      
+	for (int i = 0; i < _methods.length; i++) {
+	  Method method = _methods[i];
+	  Object value = null;
+
+	  try {
+	    value = _methods[i].invoke(obj, (Object []) null);
+	  } catch (Throwable e) {
+	    // log when available
+	  }
+	
+	  out.writeObject(value);
+	}
+
+	out.writeObjectEnd();
       }
     }
-      
-    out.writeMapEnd();
   }
 
   /**
