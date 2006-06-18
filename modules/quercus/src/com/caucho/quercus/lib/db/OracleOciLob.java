@@ -30,11 +30,14 @@
 package com.caucho.quercus.lib.db;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.ReturnNullAsFalse;
+
+import com.caucho.quercus.UnimplementedException;
 
 import com.caucho.util.L10N;
 
@@ -76,6 +79,66 @@ public class OracleOciLob {
   }
 
   /**
+   * Appends data from the large object to another large object
+   */
+  public boolean append(Env env,
+                        OracleOciLob lobFrom)
+  {
+    throw new UnimplementedException("append");
+  }
+
+  /**
+   * Closes LOB descriptor
+   */
+  public boolean close(Env env)
+  {
+    throw new UnimplementedException("close");
+  }
+
+  /**
+   * Tests for end-of-file on a large object's descriptor
+   */
+  public boolean eof(Env env)
+  {
+    throw new UnimplementedException("eof");
+  }
+
+  /**
+   * Erases a specified portion of the internal LOB data
+   *
+   * @return the actual number of characters/bytes erased or
+   * FALSE in case of error.
+   */
+  @ReturnNullAsFalse
+  public LongValue erase(Env env,
+                         @Optional("0") int offset,
+                         @Optional("-1") int length)
+  {
+    throw new UnimplementedException("erase");
+  }
+
+  /**
+   * Exports LOB's contents to a file
+   */
+  public boolean export(Env env,
+                        String fileName,
+                        @Optional("0") int start,
+                        @Optional("-1") int length)
+  {
+    throw new UnimplementedException("export");
+  }
+
+  /**
+   * Flushes/writes buffer of the LOB to the server
+   */
+  public boolean flush(Env env,
+                       @Optional("-1") int flag)
+  {
+    throw new UnimplementedException("flush");
+  }
+
+
+  /**
    * Frees resources associated with the LOB descriptor
    */
   public boolean free(Env env)
@@ -93,6 +156,23 @@ public class OracleOciLob {
   }
 
   /**
+   * Returns current state of buffering for the large object
+   */
+  public boolean getBuffering(Env env)
+  {
+    throw new UnimplementedException("getBuffering");
+  }
+
+  /*
+   * Imports file data to the LOB
+   *
+  public boolean import(Env env,
+                        String fileName)
+  {
+    throw new UnimplementedException("import");
+    }*/
+
+  /**
    * Returns large object's contents
    */
   @ReturnNullAsFalse
@@ -100,33 +180,61 @@ public class OracleOciLob {
   {
     try {
 
-      StringBuilder contents = new StringBuilder();
-
       switch (_type) {
       case OracleModule.OCI_D_FILE:
         break;
       case OracleModule.OCI_D_LOB:
         if (_lob instanceof Clob) {
-          Clob clob = (Clob) _lob;
-          Reader reader = clob.getCharacterStream();
-          int nchars;
-          char buffer[] = new char[10];
-          while( (nchars = reader.read(buffer)) != -1 )
-            contents.append(buffer, 0, nchars);
-          reader.close();
+          return readInternalClob(env, -1);
         }
         break;
       case OracleModule.OCI_D_ROWID:
         break;
       }
 
-      return contents.toString();
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+    }
+
+    return null;
+  }
+
+  /**
+   * Reads part of the large object
+   */
+  @ReturnNullAsFalse
+  public String read(Env env,
+                     int length)
+  {
+    try {
+
+      switch (_type) {
+      case OracleModule.OCI_D_FILE:
+        break;
+      case OracleModule.OCI_D_LOB:
+        if (_lob instanceof Clob) {
+          return readInternalClob(env, length);
+        }
+        break;
+      case OracleModule.OCI_D_ROWID:
+        break;
+      }
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return null;
     }
+
+    return null;
   }
+
+  /**
+   * Moves the internal pointer to the beginning of the large object
+   */
+  public boolean rewind(Env env)
+  {
+    throw new UnimplementedException("rewind");
+  }
+
 
   /**
    * Saves data to the large object
@@ -160,8 +268,59 @@ public class OracleOciLob {
     }
   }
 
+  /**
+   * Alias of import()
+   */
+  public boolean saveFile(Env env,
+                          String fileName)
+  {
+    // return import(env, fileName);
+    throw new UnimplementedException("saveFile");
+  }
+
+  /**
+   * Sets the internal pointer of the large object
+   */
+  public boolean seek(Env env,
+                      int offset,
+                      @Optional("-1") int whence)
+  {
+    throw new UnimplementedException("seek");
+  }
+
+  /**
+   * Changes current state of buffering for the large object
+   */
+  public boolean setBuffering(Env env,
+                              boolean onOff)
+  {
+    throw new UnimplementedException("setBuffering");
+  }
+
+
+  /**
+   * Sets the underlying LOB
+   */
   protected void setLob(Object lob) {
     _lob = lob;
+  }
+
+  /**
+   * Returns size of large object
+   */
+  @ReturnNullAsFalse
+  public LongValue size(Env env)
+  {
+    throw new UnimplementedException("size");
+  }
+
+  /**
+   * Returns current position of internal pointer of large object
+   */
+  @ReturnNullAsFalse
+  public LongValue tell(Env env)
+  {
+    throw new UnimplementedException("tell");
   }
 
   public String toString() {
@@ -181,5 +340,98 @@ public class OracleOciLob {
     }
 
     return "OracleOciLob("+typeName+")";
+  }
+
+  /**
+   * Truncates large object
+   */
+  public boolean truncate(Env env,
+                          @Optional("0") int length)
+  {
+    try {
+
+      switch (_type) {
+      case OracleModule.OCI_D_FILE:
+        break;
+      case OracleModule.OCI_D_LOB:
+        if (_lob instanceof Clob) {
+          Clob clob = (Clob) _lob;
+          clob.truncate(length);
+        }
+        break;
+      case OracleModule.OCI_D_ROWID:
+        break;
+      }
+
+      return true;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return false;
+    }
+  }
+
+  /**
+   * Writes data to the large object
+   */
+  @ReturnNullAsFalse
+  public LongValue write(Env env,
+                         String data,
+                         @Optional("-1") int length)
+  {
+    throw new UnimplementedException("write");
+  }
+
+  /**
+   * Writes temporary large object
+   */
+  public boolean writeTemporary(Env env,
+                                String data,
+                                @Optional("-1") int lobType)
+  {
+    throw new UnimplementedException("writeTemporary");
+  }
+
+  /**
+   * Alias of export()
+   */
+  public boolean writeToFile(Env env,
+                             String fileName,
+                             @Optional("0") int start,
+                             @Optional("-1") int length)
+  {
+    return export(env, fileName, start, length);
+  }
+
+  private String readInternalClob(Env env,
+                                  int length)
+  {
+    try {
+
+      StringBuilder contents = new StringBuilder();
+
+      Clob clob = (Clob) _lob;
+      Reader reader = clob.getCharacterStream();
+
+      int remaining = length < 0 ? Integer.MAX_VALUE : length;
+
+      int nchars;
+      char buffer[] = new char[10];
+      while( (remaining > 0) &&
+             ((nchars = reader.read(buffer)) != -1) ) {
+        if (nchars > remaining)
+          nchars = remaining;
+        contents.append(buffer, 0, nchars);
+        remaining -= nchars;
+      }
+
+      reader.close();
+
+      return contents.toString();
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return null;
+    }
   }
 }

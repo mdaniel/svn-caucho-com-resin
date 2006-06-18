@@ -1022,22 +1022,36 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Copies large object
    */
-  public static Value oci_lob_copy(Env env,
-                                   @NotNull Value lobTo,
-                                   @NotNull Value lobFrom,
-                                   @Optional("-1") int length)
+  public static boolean oci_lob_copy(Env env,
+                                     @NotNull OracleOciLob lobTo,
+                                     @NotNull OracleOciLob lobFrom,
+                                     @Optional("-1") int length)
   {
-    throw new UnimplementedException("oci_lob_copy");
+    try {
+
+      return lobTo.save(env, lobFrom.read(env, length), 0);
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return false;
+    }
   }
 
   /**
    * Compares two LOB/FILE locators for equality
    */
-  public static Value oci_lob_is_equal(Env env,
-                                       @NotNull Value lob1,
-                                       @NotNull Value lob2)
+  public static boolean oci_lob_is_equal(Env env,
+                                         @NotNull OracleOciLob lob1,
+                                         @NotNull OracleOciLob lob2)
   {
-    throw new UnimplementedException("oci_lob_is_equal");
+    try {
+
+      return lob1.equals(lob2);
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return false;
+    }
   }
 
   /**
