@@ -83,14 +83,16 @@ public class JavaDeserializer extends AbstractMapDeserializer {
       for (int j = 0; j < param.length; j++) {
 	cost = 10 * cost;
 
-	if (String.class.equals(param[j]))
+	if (Object.class.equals(param[j]))
 	  cost += 1;
-	else if (int.class.equals(param[j]))
+	else if (String.class.equals(param[j]))
 	  cost += 2;
-	else if (long.class.equals(param[j]))
+	else if (int.class.equals(param[j]))
 	  cost += 3;
-	else if (param[j].isPrimitive())
+	else if (long.class.equals(param[j]))
 	  cost += 4;
+	else if (param[j].isPrimitive())
+	  cost += 5;
 	else
 	  cost += 9;
       }
@@ -228,7 +230,7 @@ public class JavaDeserializer extends AbstractMapDeserializer {
     } catch (IOException e) {
       throw e;
     } catch (Exception e) {
-      throw new IOExceptionWrapper(e);
+      throw new IOExceptionWrapper(obj.getClass().getName() + ":" + e, e);
     }
   }
 

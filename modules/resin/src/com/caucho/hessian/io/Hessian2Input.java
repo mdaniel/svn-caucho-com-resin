@@ -2264,7 +2264,11 @@ public class Hessian2Input
     return readLength;
   }
 
-  final int read()
+  /**
+   * Normally, shouldn't be called externally, but needed for QA, e.g.
+   * ejb/3b01.
+   */
+  public final int read()
     throws IOException
   {
     if (_length <= _offset && ! readBuffer())

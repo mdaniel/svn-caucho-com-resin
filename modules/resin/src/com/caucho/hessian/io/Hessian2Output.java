@@ -52,7 +52,7 @@ import java.io.*;
 import java.util.*;
 import java.lang.reflect.*;
 
-import com.caucho.hessian.util.IntMap;
+import com.caucho.hessian.util.IdentityIntMap;
 
 /**
  * Output stream for Hessian 2 requests.
@@ -81,15 +81,15 @@ public class Hessian2Output
   protected OutputStream _os;
   
   // map of references
-  private IntMap _refs = new IntMap();
+  private IdentityIntMap _refs = new IdentityIntMap();
 
   private HashMap _serializerMap = new HashMap();
   
   // map of classes
-  private IntMap _classRefs;
+  private HashMap _classRefs;
   
   // map of types
-  private IntMap _typeRefs;
+  private HashMap _typeRefs;
 
   private final static int SIZE = 1024;
   
@@ -359,13 +359,13 @@ public class Hessian2Output
     throws IOException
   {
     flushIfFull();
-    
-    if (0 <= length && length < 0x10 && _typeRefs != null) {
-      int ref = _typeRefs.get(type);
 
-      if (ref >= 0) {
+    if (0 <= length && length < 0x10 && _typeRefs != null) {
+      Integer refV = (Integer) _typeRefs.get(type);
+
+      if (refV != null) {
 	_buffer[_offset++] = (byte) (LIST_DIRECT + length);
-	writeInt(ref);
+	writeInt(refV.intValue());
 
 	return false;
       }
@@ -448,11 +448,13 @@ public class Hessian2Output
     throws IOException
   {
     if (_classRefs == null)
-      _classRefs = new IntMap();
+      _classRefs = new HashMap();
 
-    int ref = _classRefs.get(type);
+    Integer refV = (Integer) _classRefs.get(type);
 
-    if (ref >= 0) {
+    if (refV != null) {
+      int ref = refV.intValue();
+      
       if (SIZE < _offset + 32)
 	flush();
 
@@ -462,9 +464,9 @@ public class Hessian2Output
       return ref;
     }
     else {
-      ref = _classRefs.size() + 1;
+      int ref = _classRefs.size() + 1;
       
-      _classRefs.put(type, ref);
+      _classRefs.put(type, new Integer(ref));
       
       if (SIZE < _offset + 32)
 	flush();
@@ -533,11 +535,13 @@ public class Hessian2Output
       return;
 
     if (_typeRefs == null)
-      _typeRefs = new IntMap();
+      _typeRefs = new HashMap();
 
-    int typeRef = _typeRefs.get(type);
-
-    if (typeRef >= 0) {
+    Integer typeRefV = (Integer) _typeRefs.get(type);
+    
+    if (typeRefV != null) {
+      int typeRef = typeRefV.intValue();
+      
       flushIfFull();
       
       _buffer[_offset++] = (byte) TYPE_REF;
@@ -545,7 +549,7 @@ public class Hessian2Output
       writeInt(typeRef);
     }
     else {
-      _typeRefs.put(type, _typeRefs.size());
+      _typeRefs.put(type, new Integer(_typeRefs.size()));
 
       if (SIZE < _offset + 32)
 	flush();
@@ -674,6 +678,8 @@ public class Hessian2Output
       buffer[offset + 6] = (byte) (value >> 16);
       buffer[offset + 7] = (byte) (value >> 8);
       buffer[offset + 8] = (byte) (value);
+
+      offset += 9;
     }
 
     _offset = offset;

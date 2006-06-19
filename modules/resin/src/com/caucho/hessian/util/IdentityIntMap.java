@@ -56,7 +56,7 @@ import java.util.*;
  * <p>The convenience of IntMap is avoiding all the silly wrapping of
  * integers.
  */
-public class IntMap {
+public class IdentityIntMap {
   /**
    * Encoding of a null entry.  Since NULL is equal to Integer.MIN_VALUE, 
    * it's impossible to distinguish between the two.
@@ -74,7 +74,7 @@ public class IntMap {
   /**
    * Create a new IntMap.  Default size is 16.
    */
-  public IntMap()
+  public IdentityIntMap()
   {
     _keys = new Object[256];
     _values = new int[256];
@@ -112,7 +112,7 @@ public class IntMap {
   public int get(Object key)
   {
     int mask = _mask;
-    int hash = key.hashCode() % mask & mask;
+    int hash = System.identityHashCode(key) % mask & mask;
 
     Object []keys = _keys;
 
@@ -121,7 +121,7 @@ public class IntMap {
 
       if (mapKey == null)
 	return NULL;
-      else if (mapKey == key || mapKey.equals(key))
+      else if (mapKey == key)
 	return _values[hash];
 
       hash = (hash + 1) % mask;
@@ -147,7 +147,7 @@ public class IntMap {
       if (key == null || key == DELETED)
 	continue;
 
-      int hash = key.hashCode() % mask & mask;
+      int hash = System.identityHashCode(key) % mask & mask;
 
       while (true) {
 	if (newKeys[hash] == null) {
@@ -170,7 +170,7 @@ public class IntMap {
   public int put(Object key, int value)
   {
     int mask = _mask;
-    int hash = key.hashCode() % mask & mask;
+    int hash = System.identityHashCode(key) % mask & mask;
 
     Object []keys = _keys;
 
@@ -188,7 +188,7 @@ public class IntMap {
 
 	return NULL;
       }
-      else if (key != testKey && ! key.equals(testKey)) {
+      else if (key != testKey) {
 	hash = (hash + 1) % mask;
 	
 	continue;
@@ -209,7 +209,7 @@ public class IntMap {
   public int remove(Object key)
   {
     int mask = _mask;
-    int hash = key.hashCode() % mask & mask;
+    int hash = System.identityHashCode(key) % mask & mask;
 
     while (true) {
       Object mapKey = _keys[hash];
