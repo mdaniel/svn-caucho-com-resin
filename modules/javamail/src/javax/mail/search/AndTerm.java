@@ -32,7 +32,6 @@ import javax.mail.*;
 
 /**
  * This class implements the logical AND operator on individual SearchTerms.
- * See Also:Serialized Form
  */
 public final class AndTerm extends SearchTerm {
 
@@ -43,28 +42,48 @@ public final class AndTerm extends SearchTerm {
 
   /**
    * Constructor that takes an array of SearchTerms.
-   * t - array of terms
    */
   public AndTerm(SearchTerm[] t)
   {
-    throw new UnsupportedOperationException("not implemented");
+    this.terms = t;
   }
 
   /**
    * Constructor that takes two terms.
-   * t1 - first termt2 - second term
    */
   public AndTerm(SearchTerm t1, SearchTerm t2)
   {
-    throw new UnsupportedOperationException("not implemented");
+    this(new SearchTerm[] { t1, t2 });
   }
 
+  // XXX: test if Sun's AndTerm-equality is commutative
   /**
    * Equality comparison.
    */
   public boolean equals(Object obj)
   {
-    throw new UnsupportedOperationException("not implemented");
+    if (! (obj instanceof AndTerm))
+      return false;
+
+    SearchTerm[] objTerms = ((AndTerm)obj).terms;
+
+    if (terms.length != objTerms.length)
+      return false;
+
+    // XXX: need a test to determine if this should be .equals()
+
+    OUTER: for(int i=0; i<terms.length; i++) {
+
+      for(int j=0; j<objTerms.length; j++) {
+
+	if (objTerms[j] == terms[i])
+	  continue OUTER;
+      }
+      return false;
+
+    }
+
+    return true;
   }
 
   /**
@@ -72,7 +91,7 @@ public final class AndTerm extends SearchTerm {
    */
   public SearchTerm[] getTerms()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return terms;
   }
 
   /**
@@ -80,17 +99,25 @@ public final class AndTerm extends SearchTerm {
    */
   public int hashCode()
   {
-    throw new UnsupportedOperationException("not implemented");
+    int hash = 0;
+
+    // we have to use a commutative operator here
+    for(int i=0; i<terms.length; i++)
+      hash ^= terms[i].hashCode();
+
+    return hash;
   }
 
   /**
-   * The AND operation.  The terms specified in the constructor are
-   * applied to the given object and the AND operator is applied to
-   * their results.
+   * The AND operation.
    */
   public boolean match(Message msg)
   {
-    throw new UnsupportedOperationException("not implemented");
+    for(int i=0; i<terms.length; i++)
+      if (!terms[i].match(msg))
+	return false;
+
+    return true;
   }
 
 }

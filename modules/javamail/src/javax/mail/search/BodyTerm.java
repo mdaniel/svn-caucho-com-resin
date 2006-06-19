@@ -29,21 +29,17 @@
 
 package javax.mail.search;
 import javax.mail.*;
+import javax.mail.internet.*;
 
 /**
  * This class implements searches on a Message Body. All parts of the
- * message that are of MIME type "text/*" are searched.  See
- * Also:Serialized Form
+ * message that are of MIME type "text/*" are searched.
  */
 public final class BodyTerm extends StringTerm {
 
-  /**
-   * Constructor
-   * pattern - The String to search for
-   */
   public BodyTerm(String pattern)
   {
-    throw new UnsupportedOperationException("not implemented");
+    super(pattern);
   }
 
   /**
@@ -51,7 +47,10 @@ public final class BodyTerm extends StringTerm {
    */
   public boolean equals(Object obj)
   {
-    throw new UnsupportedOperationException("not implemented");
+    if (! (obj instanceof BodyTerm))
+      return false;
+
+    return super.equals(obj);
   }
 
   /**
@@ -59,7 +58,9 @@ public final class BodyTerm extends StringTerm {
    */
   public boolean match(Message msg)
   {
-    throw new UnsupportedOperationException("not implemented");
+    // XXX: need to test Sun's implementation; the semantics here are
+    // not obvious.
+    return false;
   }
 
 }

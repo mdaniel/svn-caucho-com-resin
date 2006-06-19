@@ -29,22 +29,17 @@
 
 package javax.mail.search;
 import javax.mail.*;
+import javax.mail.internet.*;
 
 /**
- * This term models the RFC822 "MessageId" - a message-id for Internet
- * messages that is supposed to be unique per message. Clients can use
- * this term to search a folder for a message given its MessageId.
- * The MessageId is represented as a String.  See Also:Serialized Form
+ * Match the messageid
  */
 public final class MessageIDTerm extends StringTerm {
 
-  /**
-   * Constructor.
-   * msgid - the msgid to search for
-   */
   public MessageIDTerm(String msgid)
   {
-    throw new UnsupportedOperationException("not implemented");
+    // XXX: is this really supposed to be a substring match?
+    super(msgid, false);
   }
 
   /**
@@ -52,7 +47,10 @@ public final class MessageIDTerm extends StringTerm {
    */
   public boolean equals(Object obj)
   {
-    throw new UnsupportedOperationException("not implemented");
+    if (! (obj instanceof MessageIDTerm))
+      return false;
+
+    return super.equals(obj);
   }
 
   /**
@@ -60,7 +58,21 @@ public final class MessageIDTerm extends StringTerm {
    */
   public boolean match(Message msg)
   {
-    throw new UnsupportedOperationException("not implemented");
+    try {
+      MimeMessage mimeMessage = (MimeMessage)msg;
+      
+      String[] messageIDs = mimeMessage.getHeader("Message-ID");
+      
+      for(int i=0; i<messageIDs.length; i++)
+	if (super.match(messageIDs[i]))
+	  return true;
+      
+      return false;
+    }
+
+    catch (MessagingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }

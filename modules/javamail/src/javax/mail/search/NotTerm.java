@@ -32,7 +32,6 @@ import javax.mail.*;
 
 /**
  * This class implements the logical NEGATION operator.
- * See Also:Serialized Form
  */
 public final class NotTerm extends SearchTerm {
 
@@ -43,7 +42,7 @@ public final class NotTerm extends SearchTerm {
 
   public NotTerm(SearchTerm t)
   {
-    throw new UnsupportedOperationException("not implemented");
+    this.term = t;
   }
 
   /**
@@ -51,7 +50,12 @@ public final class NotTerm extends SearchTerm {
    */
   public boolean equals(Object obj)
   {
-    throw new UnsupportedOperationException("not implemented");
+    if (! (obj instanceof NotTerm))
+      return false;
+
+    NotTerm notTerm = (NotTerm)obj;
+
+    return term.equals(notTerm.term);
   }
 
   /**
@@ -59,7 +63,7 @@ public final class NotTerm extends SearchTerm {
    */
   public SearchTerm getTerm()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return term;
   }
 
   /**
@@ -67,16 +71,12 @@ public final class NotTerm extends SearchTerm {
    */
   public int hashCode()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return ~term.hashCode();
   }
 
-  /**
-   * Description copied from class: This method applies a specific
-   * match criterion to the given message and returns the result.
-   */
   public boolean match(Message msg)
   {
-    throw new UnsupportedOperationException("not implemented");
+    return !term.match(msg);
   }
 
 }

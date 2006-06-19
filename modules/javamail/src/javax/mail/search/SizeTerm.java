@@ -32,18 +32,15 @@ import javax.mail.*;
 
 /**
  * This class implements comparisons for Message sizes.
- * See Also:Serialized Form
  */
 public final class SizeTerm extends IntegerComparisonTerm {
 
   /**
    * Constructor.
-   * comparison - the Comparison typesize - the size
    */
   public SizeTerm(int comparison, int size)
   {
-    super(0,0); // XXX: remove this
-    throw new UnsupportedOperationException("not implemented");
+    super(comparison, size);
   }
 
   /**
@@ -51,7 +48,10 @@ public final class SizeTerm extends IntegerComparisonTerm {
    */
   public boolean equals(Object obj)
   {
-    throw new UnsupportedOperationException("not implemented");
+    if (! (obj instanceof SizeTerm))
+      return false;
+
+    return super.equals(obj);
   }
 
   /**
@@ -59,7 +59,13 @@ public final class SizeTerm extends IntegerComparisonTerm {
    */
   public boolean match(Message msg)
   {
-    throw new UnsupportedOperationException("not implemented");
+    try {
+      return match(msg.getSize());
+    }
+
+    catch (MessagingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }

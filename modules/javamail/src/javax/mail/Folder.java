@@ -50,6 +50,7 @@ import javax.mail.event.MessageCountListener;
 
 import javax.mail.search.SearchTerm;
 
+// XXX: revisit once we have an SPI
 /**
  * Represents a mail folder.
  */

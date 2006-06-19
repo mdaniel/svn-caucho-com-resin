@@ -29,11 +29,13 @@
 
 package javax.mail.event;
 import javax.mail.*;
+import java.util.EventListener;
 
 /**
  * Represents a MessageCount event.
  */
-public interface MessageCountListener extends java.util.EventListener {
+public interface MessageCountListener extends EventListener {
+
   /**
    * Called when a message is added
    */
@@ -43,4 +45,5 @@ public interface MessageCountListener extends java.util.EventListener {
    * Called when a message is removed
    */
   public void messagesRemoved(MessageCountEvent e);
+
 }

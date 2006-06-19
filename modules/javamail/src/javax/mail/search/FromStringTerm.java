@@ -31,22 +31,16 @@ package javax.mail.search;
 import javax.mail.*;
 
 /**
- * This class implements string comparisons for the From Address
- * header.  Note that this class differs from the FromTerm class in
- * that this class does comparisons on address strings rather than
- * Address objects. The string comparisons are case-insensitive.
- * Since: JavaMail 1.1 See Also:Serialized Form
+ * Stringwise comparison of the From: header.
  */
 public final class FromStringTerm extends AddressStringTerm {
 
   /**
    * Constructor.
-   * pattern - the address pattern to be compared.
    */
   public FromStringTerm(String pattern)
   {
-    super(null); // XXX: remove this
-    throw new UnsupportedOperationException("not implemented");
+    super(pattern);
   }
 
   /**
@@ -54,16 +48,29 @@ public final class FromStringTerm extends AddressStringTerm {
    */
   public boolean equals(Object obj)
   {
-    throw new UnsupportedOperationException("not implemented");
+    if (! (obj instanceof FromTerm))
+      return false;
+
+    return super.equals(obj);
   }
 
-  /**
-   * Check whether the address string specified in the constructor is
-   * a substring of the From address of this Message.
-   */
   public boolean match(Message msg)
   {
-    throw new UnsupportedOperationException("not implemented");
+    try {
+      // XXX: test if this is an any-match
+      Address []from = msg.getFrom();
+      
+      for(int i=0; i<from.length; i++)
+	{
+	  if (super.match(from[i]))
+	    return true;
+	}
+      return false;
+    }
+
+    catch (MessagingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }

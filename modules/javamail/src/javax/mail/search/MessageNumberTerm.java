@@ -32,18 +32,12 @@ import javax.mail.*;
 
 /**
  * This class implements comparisons for Message numbers.
- * See Also:Serialized Form
  */
 public final class MessageNumberTerm extends IntegerComparisonTerm {
 
-  /**
-   * Constructor.
-   * number - the Message number
-   */
   public MessageNumberTerm(int number)
   {
-    super(0,0); // XXX: remove this
-    throw new UnsupportedOperationException("not implemented");
+    super(EQ, number);
   }
 
   /**
@@ -51,7 +45,10 @@ public final class MessageNumberTerm extends IntegerComparisonTerm {
    */
   public boolean equals(Object obj)
   {
-    throw new UnsupportedOperationException("not implemented");
+    if (! (obj instanceof MessageNumberTerm))
+      return false;
+
+    return super.equals(obj);
   }
 
   /**
@@ -59,7 +56,7 @@ public final class MessageNumberTerm extends IntegerComparisonTerm {
    */
   public boolean match(Message msg)
   {
-    throw new UnsupportedOperationException("not implemented");
+    return match(msg.getMessageNumber());
   }
 
 }

@@ -31,43 +31,24 @@ package javax.mail.event;
 import javax.mail.*;
 
 /**
- * The adapter which receives Transport events. The methods in this
- * class are empty; this class is provided as a convenience for easily
- * creating listeners by extending this class and overriding only the
- * methods of interest.
+ * A convenience implementation of TransportListener; all methods are no-ops.
  */
 public abstract class TransportAdapter implements TransportListener {
 
   public TransportAdapter()
   {
-    throw new UnsupportedOperationException("not implemented");
   }
 
-  /**
-   * Description copied from interface:
-   * Invoked when a Message is succesfully delivered.
-   */
   public void messageDelivered(TransportEvent e)
   {
-    throw new UnsupportedOperationException("not implemented");
   }
 
-  /**
-   * Description copied from interface:
-   * Invoked when a Message is not delivered.
-   */
   public void messageNotDelivered(TransportEvent e)
   {
-    throw new UnsupportedOperationException("not implemented");
   }
 
-  /**
-   * Description copied from interface:
-   * Invoked when a Message is partially delivered.
-   */
   public void messagePartiallyDelivered(TransportEvent e)
   {
-    throw new UnsupportedOperationException("not implemented");
   }
 
 }

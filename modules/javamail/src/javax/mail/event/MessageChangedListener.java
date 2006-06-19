@@ -29,13 +29,16 @@
 
 package javax.mail.event;
 import javax.mail.*;
+import java.util.EventListener;
 
 /**
  * Represents a MessageChanged event.
  */
-public interface MessageChangedListener extends java.util.EventListener {
+public interface MessageChangedListener extends EventListener {
+
   /**
    * Called when a message is changed
    */
   public void messageChanged(MessageChangedEvent e);
+
 }

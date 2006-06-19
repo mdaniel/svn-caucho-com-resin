@@ -32,23 +32,16 @@ import javax.mail.*;
 
 /**
  * This class implements comparisons for the Recipient Address headers.
- * See Also:Serialized Form
  */
 public final class RecipientTerm extends AddressTerm {
 
-  /**
-   * The recipient type.
-   */
-  protected Message.RecipientType type;
+  private Message.RecipientType _type;
 
-  /**
-   * Constructor.
-   * type - the recipient typeaddress - the address to match for
-   */
-  public RecipientTerm(Message.RecipientType type, Address address)
+  public RecipientTerm(Message.RecipientType type, Address pattern)
   {
-    super(null); // XXX: remove this
-    throw new UnsupportedOperationException("not implemented");
+    super(pattern);
+
+    this._type = type;
   }
 
   /**
@@ -56,7 +49,16 @@ public final class RecipientTerm extends AddressTerm {
    */
   public boolean equals(Object obj)
   {
-    throw new UnsupportedOperationException("not implemented");
+    if (! (obj instanceof RecipientTerm))
+      return false;
+
+    RecipientTerm recipientStringTerm =
+      (RecipientTerm)obj;
+    
+    if (! recipientStringTerm._type.equals(_type))
+      return false;
+
+    return super.equals(obj);
   }
 
   /**
@@ -64,7 +66,7 @@ public final class RecipientTerm extends AddressTerm {
    */
   public Message.RecipientType getRecipientType()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return _type;
   }
 
   /**
@@ -72,15 +74,32 @@ public final class RecipientTerm extends AddressTerm {
    */
   public int hashCode()
   {
-    throw new UnsupportedOperationException("not implemented");
+    int hash = super.hashCode();
+
+    hash = hash * 65521 + _type.hashCode();
+    
+    return hash;
   }
 
   /**
-   * The match method.
+   * Check whether the address specified in the constructor is a
+   * substring of the recipient address of this Message.
    */
   public boolean match(Message msg)
   {
-    throw new UnsupportedOperationException("not implemented");
+    try {
+      Address []recipients = msg.getRecipients(_type);
+      
+      for(int i=0; i<recipients.length; i++)
+	if (match(recipients[i]))
+	  return true;
+      
+      return false;
+
+    }
+    catch (MessagingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }

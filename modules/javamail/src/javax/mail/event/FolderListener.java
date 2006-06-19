@@ -29,11 +29,13 @@
 
 package javax.mail.event;
 import javax.mail.*;
+import java.util.EventListener;
 
 /**
  * Represents a folder event.
  */
-public interface FolderListener extends java.util.EventListener {
+public interface FolderListener extends EventListener {
+
   /**
    * Called when a folder is created.
    */
@@ -48,4 +50,5 @@ public interface FolderListener extends java.util.EventListener {
    * Called when a folder is renamed
    */
   public void folderRenamed(FolderEvent e);
+
 }

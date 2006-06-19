@@ -31,10 +31,16 @@ package javax.mail.search;
 import javax.mail.*;
 
 import javax.mail.Message;
+import java.io.Serializable;
 
 /**
  * Represents a search term.
  */
-public abstract class SearchTerm implements java.io.Serializable {
+public abstract class SearchTerm implements Serializable {
+
+  /**
+   *  Does the message match or not.
+   */
   public abstract boolean match(Message msg);
+
 }

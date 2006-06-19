@@ -32,7 +32,6 @@ import javax.mail.*;
 
 /**
  * This class implements comparisons for Message Flags.
- * See Also:Serialized Form
  */
 public final class FlagTerm extends SearchTerm {
 
@@ -43,9 +42,7 @@ public final class FlagTerm extends SearchTerm {
 
   /**
    * Indicates whether to test for the presence or absence of the
-   * specified Flag. If true, then test whether all the specified
-   * flags are present, else test whether all the specified flags are
-   * absent.
+   * specified Flag.
    */
   protected boolean set;
 
@@ -55,7 +52,8 @@ public final class FlagTerm extends SearchTerm {
    */
   public FlagTerm(Flags flags, boolean set)
   {
-    throw new UnsupportedOperationException("not implemented");
+    this.flags = flags;
+    this.set = set;
   }
 
   /**
@@ -63,7 +61,17 @@ public final class FlagTerm extends SearchTerm {
    */
   public boolean equals(Object obj)
   {
-    throw new UnsupportedOperationException("not implemented");
+    if (! (obj instanceof FlagTerm))
+      return false;
+
+    FlagTerm flagTerm = (FlagTerm)obj;
+    if (! flags.equals(flagTerm.getFlags()))
+      return false;
+
+    if (set != flagTerm.getTestSet())
+      return false;
+
+    return true;
   }
 
   /**
@@ -71,7 +79,7 @@ public final class FlagTerm extends SearchTerm {
    */
   public Flags getFlags()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return flags;
   }
 
   /**
@@ -79,7 +87,7 @@ public final class FlagTerm extends SearchTerm {
    */
   public boolean getTestSet()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return set;
   }
 
   /**
@@ -87,7 +95,11 @@ public final class FlagTerm extends SearchTerm {
    */
   public int hashCode()
   {
-    throw new UnsupportedOperationException("not implemented");
+    int hash = flags.hashCode();
+
+    if (set) hash = ~hash;
+
+    return hash;
   }
 
   /**
@@ -95,7 +107,26 @@ public final class FlagTerm extends SearchTerm {
    */
   public boolean match(Message msg)
   {
-    throw new UnsupportedOperationException("not implemented");
+    try {
+      Flags f = msg.getFlags();
+      
+      Flags.Flag[] systemFlags = flags.getSystemFlags();
+      String[]     userFlags   = flags.getUserFlags();
+      
+      for(int i=0; i<systemFlags.length; i++)
+	if (f.contains(systemFlags[i]) != set)
+	  return false;
+      
+      for(int i=0; i<userFlags.length; i++)
+	if (f.contains(userFlags[i]) != set)
+	  return false;
+      
+      return true;
+    }
+
+    catch (MessagingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }

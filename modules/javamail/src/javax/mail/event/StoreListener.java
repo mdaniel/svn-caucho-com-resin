@@ -29,13 +29,16 @@
 
 package javax.mail.event;
 import javax.mail.*;
+import java.util.EventListener;
 
 /**
  * Represents a store event.
  */
-public interface StoreListener extends java.util.EventListener {
+public interface StoreListener extends EventListener {
+
   /**
    * Called for a store notification
    */
   public void notification(StoreEvent e);
+
 }

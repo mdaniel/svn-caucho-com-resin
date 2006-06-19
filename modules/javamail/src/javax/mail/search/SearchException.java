@@ -32,7 +32,6 @@ import javax.mail.*;
 
 /**
  * The exception thrown when a Search expression could not be handled.
- * See Also:Serialized Form
  */
 public class SearchException extends MessagingException {
 
@@ -41,16 +40,14 @@ public class SearchException extends MessagingException {
    */
   public SearchException()
   {
-    throw new UnsupportedOperationException("not implemented");
   }
 
   /**
    * Constructs a SearchException with the specified detail message.
-   * s - the detail message
    */
   public SearchException(String s)
   {
-    throw new UnsupportedOperationException("not implemented");
+    super(s);
   }
 
 }

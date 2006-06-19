@@ -33,18 +33,15 @@ import java.util.*;
 
 /**
  * This class implements comparisons for the Message Received date
- * See Also:Serialized Form
  */
 public final class ReceivedDateTerm extends DateTerm {
 
   /**
    * Constructor.
-   * comparison - the Comparison typedate - the date to be compared
    */
   public ReceivedDateTerm(int comparison, Date date)
   {
-    super(0, null); // XXX: remove this
-    throw new UnsupportedOperationException("not implemented");
+    super(comparison, date);
   }
 
   /**
@@ -52,7 +49,10 @@ public final class ReceivedDateTerm extends DateTerm {
    */
   public boolean equals(Object obj)
   {
-    throw new UnsupportedOperationException("not implemented");
+    if (! (obj instanceof ReceivedDateTerm))
+      return false;
+
+    return super.equals(obj);
   }
 
   /**
@@ -60,7 +60,13 @@ public final class ReceivedDateTerm extends DateTerm {
    */
   public boolean match(Message msg)
   {
-    throw new UnsupportedOperationException("not implemented");
+    try {
+      return match(msg.getReceivedDate());
+    }
+
+    catch (MessagingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }

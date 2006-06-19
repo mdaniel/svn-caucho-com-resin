@@ -32,7 +32,6 @@ import javax.mail.*;
 
 /**
  * This class implements Message Address comparisons.
- * See Also:Serialized Form
  */
 public abstract class AddressTerm extends SearchTerm {
 
@@ -43,7 +42,7 @@ public abstract class AddressTerm extends SearchTerm {
 
   protected AddressTerm(Address address)
   {
-    throw new UnsupportedOperationException("not implemented");
+    this.address = address;
   }
 
   /**
@@ -51,7 +50,12 @@ public abstract class AddressTerm extends SearchTerm {
    */
   public boolean equals(Object obj)
   {
-    throw new UnsupportedOperationException("not implemented");
+    if (! (obj instanceof AddressTerm))
+      return false;
+
+    AddressTerm addressTerm = (AddressTerm)obj;
+
+    return addressTerm.address.equals(address);
   }
 
   /**
@@ -59,7 +63,7 @@ public abstract class AddressTerm extends SearchTerm {
    */
   public Address getAddress()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return address;
   }
 
   /**
@@ -67,7 +71,7 @@ public abstract class AddressTerm extends SearchTerm {
    */
   public int hashCode()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return address.hashCode();
   }
 
   /**
@@ -75,7 +79,7 @@ public abstract class AddressTerm extends SearchTerm {
    */
   protected boolean match(Address a)
   {
-    throw new UnsupportedOperationException("not implemented");
+    return address.equals(a);
   }
 
 }

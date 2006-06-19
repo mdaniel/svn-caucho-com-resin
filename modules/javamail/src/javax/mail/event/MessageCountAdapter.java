@@ -31,34 +31,20 @@ package javax.mail.event;
 import javax.mail.*;
 
 /**
- * The adapter which receives MessageCount events. The methods in this
- * class are empty; this class is provided as a convenience for easily
- * creating listeners by extending this class and overriding only the
- * methods of interest.
+ * A convenience implementation of MessageCountListener; all methods are no-ops.
  */
 public abstract class MessageCountAdapter implements MessageCountListener {
 
   public MessageCountAdapter()
   {
-    throw new UnsupportedOperationException("not implemented");
   }
 
-  /**
-   * Description copied from interface:
-   * Invoked when messages are added into a folder.
-   */
   public void messagesAdded(MessageCountEvent e)
   {
-    throw new UnsupportedOperationException("not implemented");
   }
 
-  /**
-   * Description copied from interface:
-   * Invoked when messages are removed (expunged) from a folder.
-   */
   public void messagesRemoved(MessageCountEvent e)
   {
-    throw new UnsupportedOperationException("not implemented");
   }
 
 }

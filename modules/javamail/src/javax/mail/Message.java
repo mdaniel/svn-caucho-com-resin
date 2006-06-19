@@ -41,6 +41,7 @@ import javax.activation.DataHandler;
 
 import javax.mail.search.SearchTerm;
 
+// XXX: revisit once we have an SPI
 /**
  * This class models an email message. This is an abstract
  * class. Subclasses provide actual implementations.

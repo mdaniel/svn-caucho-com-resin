@@ -31,22 +31,17 @@ package javax.mail.search;
 import javax.mail.*;
 
 /**
- * This class implements string comparisons for the Recipient Address
- * headers.  Note that this class differs from the RecipientTerm class
- * in that this class does comparisons on address strings rather than
- * Address objects. The string comparisons are case-insensitive.
- * Since: JavaMail 1.1 See Also:Serialized Form
+ * Match a recipient using string-matching
  */
 public final class RecipientStringTerm extends AddressStringTerm {
 
-  /**
-   * Constructor.
-   * type - the recipient typepattern - the address pattern to be compared.
-   */
+  private Message.RecipientType _type;
+
   public RecipientStringTerm(Message.RecipientType type, String pattern)
   {
-    super(null); // XXX: remove this
-    throw new UnsupportedOperationException("not implemented");
+    super(pattern);
+
+    this._type = type;
   }
 
   /**
@@ -54,7 +49,16 @@ public final class RecipientStringTerm extends AddressStringTerm {
    */
   public boolean equals(Object obj)
   {
-    throw new UnsupportedOperationException("not implemented");
+    if (! (obj instanceof RecipientStringTerm))
+      return false;
+
+    RecipientStringTerm recipientStringTerm =
+      (RecipientStringTerm)obj;
+    
+    if (! recipientStringTerm._type.equals(_type))
+      return false;
+
+    return super.equals(obj);
   }
 
   /**
@@ -62,7 +66,7 @@ public final class RecipientStringTerm extends AddressStringTerm {
    */
   public Message.RecipientType getRecipientType()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return _type;
   }
 
   /**
@@ -70,7 +74,11 @@ public final class RecipientStringTerm extends AddressStringTerm {
    */
   public int hashCode()
   {
-    throw new UnsupportedOperationException("not implemented");
+    int hash = super.hashCode();
+
+    hash = hash * 65521 + _type.hashCode();
+    
+    return hash;
   }
 
   /**
@@ -79,7 +87,19 @@ public final class RecipientStringTerm extends AddressStringTerm {
    */
   public boolean match(Message msg)
   {
-    throw new UnsupportedOperationException("not implemented");
+    try {
+      Address []recipients = msg.getRecipients(_type);
+
+      for(int i=0; i<recipients.length; i++)
+	if (match(recipients[i]))
+	  return true;
+
+      return false;
+    }
+
+    catch (MessagingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }

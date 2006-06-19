@@ -32,18 +32,12 @@ import javax.mail.*;
 
 /**
  * This class implements comparisons for the From Address header.
- * See Also:Serialized Form
  */
 public final class FromTerm extends AddressTerm {
 
-  /**
-   * Constructor
-   * address - The Address to be compared
-   */
   public FromTerm(Address address)
   {
-    super(null); // XXX: remove this
-    throw new UnsupportedOperationException("not implemented");
+    super(address);
   }
 
   /**
@@ -51,7 +45,10 @@ public final class FromTerm extends AddressTerm {
    */
   public boolean equals(Object obj)
   {
-    throw new UnsupportedOperationException("not implemented");
+    if (! (obj instanceof FromTerm))
+      return false;
+
+    return super.equals(obj);
   }
 
   /**
@@ -59,7 +56,19 @@ public final class FromTerm extends AddressTerm {
    */
   public boolean match(Message msg)
   {
-    throw new UnsupportedOperationException("not implemented");
+    try {
+      Address []from = msg.getFrom();
+      
+      for(int i=0; i<from.length; i++)
+	if (match(from[i]))
+	  return true;
+      
+      return false;
+    }
+
+    catch (MessagingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }

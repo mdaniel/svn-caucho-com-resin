@@ -31,40 +31,34 @@ package javax.mail.search;
 import javax.mail.*;
 
 /**
- * This abstract class implements string comparisons for Message
- * addresses.  Note that this class differs from the AddressTerm class
- * in that this class does comparisons on address strings rather than
- * Address objects.  Since: JavaMail 1.1 See Also:Serialized Form
+ * Stringwise comparision of Address fields
  */
 public abstract class AddressStringTerm extends StringTerm {
 
-  /**
-   * Constructor.
-   * pattern - the address pattern to be compared.
-   */
   protected AddressStringTerm(String pattern)
   {
-    throw new UnsupportedOperationException("not implemented");
+    super(pattern);
   }
 
-  /**
-   * Equality comparison.
-   */
   public boolean equals(Object obj)
   {
-    throw new UnsupportedOperationException("not implemented");
+    if (! (obj instanceof AddressStringTerm))
+      return false;
+
+    return super.equals(obj);
   }
 
   /**
-   * Check whether the address pattern specified in the constructor is
-   * a substring of the string representation of the given Address
-   * object.  Note that if the string representation of the given
-   * Address object contains charset or transfer encodings, the
-   * encodings must be accounted for, during the match process.
+   * XXX: from javadoc: Note that if the string representation of the
+   *                    given Address object contains charset or
+   *                    transfer encodings, the encodings must be
+   *                    accounted for, during the match process.
+   *
+   *                    Write a test to figure out precisely how this works
    */
   protected boolean match(Address a)
   {
-    throw new UnsupportedOperationException("not implemented");
+    return super.match(a.toString());
   }
 
 }

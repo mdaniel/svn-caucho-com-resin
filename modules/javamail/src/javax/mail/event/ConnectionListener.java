@@ -29,11 +29,13 @@
 
 package javax.mail.event;
 import javax.mail.*;
+import java.util.EventListener;
 
 /**
  * Represents a connection event.
  */
-public interface ConnectionListener extends java.util.EventListener {
+public interface ConnectionListener extends EventListener {
+
   /**
    * Called when a store or folder is opened.
    */
@@ -48,4 +50,5 @@ public interface ConnectionListener extends java.util.EventListener {
    * Called when a store is closed.
    */
   public void closed(ConnectionEvent e);
+
 }

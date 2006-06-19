@@ -33,7 +33,6 @@ import java.util.*;
 
 /**
  * This class implements comparisons for Dates
- * See Also:Serialized Form
  */
 public abstract class DateTerm extends ComparisonTerm {
 
@@ -44,11 +43,12 @@ public abstract class DateTerm extends ComparisonTerm {
 
   /**
    * Constructor.
-   * comparison - the comparison typedate - The Date to be compared against
    */
   protected DateTerm(int comparison, Date date)
   {
-    throw new UnsupportedOperationException("not implemented");
+    super(comparison);
+
+    this.date = date;
   }
 
   /**
@@ -56,7 +56,10 @@ public abstract class DateTerm extends ComparisonTerm {
    */
   public boolean equals(Object obj)
   {
-    throw new UnsupportedOperationException("not implemented");
+    if (! (obj instanceof DateTerm))
+      return false;
+
+    return super.equals(obj);
   }
 
   /**
@@ -64,7 +67,7 @@ public abstract class DateTerm extends ComparisonTerm {
    */
   public int getComparison()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return comparison;
   }
 
   /**
@@ -72,7 +75,7 @@ public abstract class DateTerm extends ComparisonTerm {
    */
   public Date getDate()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return date;
   }
 
   /**
@@ -80,7 +83,11 @@ public abstract class DateTerm extends ComparisonTerm {
    */
   public int hashCode()
   {
-    throw new UnsupportedOperationException("not implemented");
+    int hash = super.hashCode();
+
+    hash = hash * 65521 + date.hashCode();
+
+    return hash;
   }
 
   /**
@@ -88,7 +95,29 @@ public abstract class DateTerm extends ComparisonTerm {
    */
   protected boolean match(Date d)
   {
-    throw new UnsupportedOperationException("not implemented");
+    int comp = d.compareTo(date);
+
+    switch(comparison)
+      {
+	case EQ:
+	  return comp == 0;
+
+	case GE:
+	  return comp >= 0;
+
+	case GT:
+	  return comp >  0;
+
+	case LE:
+	  return comp <= 0;
+
+	case LT:
+	  return comp <  0;
+
+	case NE:
+	  return comp != 0;
+      }
+    return false;
   }
 
 }

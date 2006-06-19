@@ -31,40 +31,59 @@ package javax.mail.search;
 import javax.mail.*;
 
 /**
- * This class implements the logical OR operator on individual SearchTerms.
- * See Also:Serialized Form
+ * This class implements the logical AND operator on individual SearchTerms.
  */
 public final class OrTerm extends SearchTerm {
 
   /**
-   * The array of terms on which the OR operator should be applied.
+   * The array of terms on which the AND operator should be applied.
    */
   protected SearchTerm[] terms;
 
   /**
    * Constructor that takes an array of SearchTerms.
-   * t - array of search terms
    */
   public OrTerm(SearchTerm[] t)
   {
-    throw new UnsupportedOperationException("not implemented");
+    this.terms = t;
   }
 
   /**
-   * Constructor that takes two operands.
-   * t1 - first termt2 - second term
+   * Constructor that takes two terms.
    */
   public OrTerm(SearchTerm t1, SearchTerm t2)
   {
-    throw new UnsupportedOperationException("not implemented");
+    this(new SearchTerm[] { t1, t2 });
   }
 
+  // XXX: test if Sun's OrTerm-equality is commutative
   /**
    * Equality comparison.
    */
   public boolean equals(Object obj)
   {
-    throw new UnsupportedOperationException("not implemented");
+    if (! (obj instanceof OrTerm))
+      return false;
+
+    SearchTerm[] objTerms = ((OrTerm)obj).terms;
+
+    if (terms.length != objTerms.length)
+      return false;
+
+    // XXX: need a test to determine if this should be .equals()
+
+    OUTER: for(int i=0; i<terms.length; i++) {
+
+      for(int j=0; j<objTerms.length; j++) {
+
+	if (objTerms[j] == terms[i])
+	  continue OUTER;
+      }
+      return false;
+
+    }
+
+    return true;
   }
 
   /**
@@ -72,7 +91,7 @@ public final class OrTerm extends SearchTerm {
    */
   public SearchTerm[] getTerms()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return terms;
   }
 
   /**
@@ -80,17 +99,25 @@ public final class OrTerm extends SearchTerm {
    */
   public int hashCode()
   {
-    throw new UnsupportedOperationException("not implemented");
+    int hash = 0;
+
+    // we have to use a commutative operator here
+    for(int i=0; i<terms.length; i++)
+      hash ^= terms[i].hashCode();
+
+    return hash;
   }
 
   /**
-   * The OR operation.  The terms specified in the constructor are
-   * applied to the given object and the OR operator is applied to
-   * their results.
+   * The AND operation.
    */
   public boolean match(Message msg)
   {
-    throw new UnsupportedOperationException("not implemented");
+    for(int i=0; i<terms.length; i++)
+      if (terms[i].match(msg))
+	return true;
+
+    return false;
   }
 
 }

@@ -29,15 +29,18 @@
 
 package javax.mail.event;
 import javax.mail.*;
+import java.util.EventObject;
 
 /**
  * Represents a mail event.
  */
-public abstract class MailEvent extends java.util.EventObject {
+public abstract class MailEvent extends EventObject {
+
   public MailEvent(Object source)
   {
     super(source);
   }
 
   public abstract void dispatch(Object listener);
+
 }

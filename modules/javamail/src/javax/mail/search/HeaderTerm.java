@@ -31,8 +31,7 @@ package javax.mail.search;
 import javax.mail.*;
 
 /**
- * This class implements comparisons for Message headers. The
- * comparison is case-insensitive.  See Also:Serialized Form
+ * This class implements comparisons for Message headers.
  */
 public final class HeaderTerm extends StringTerm {
 
@@ -47,7 +46,8 @@ public final class HeaderTerm extends StringTerm {
    */
   public HeaderTerm(String headerName, String pattern)
   {
-    throw new UnsupportedOperationException("not implemented");
+    super(pattern);
+    this.headerName = headerName;
   }
 
   /**
@@ -55,7 +55,10 @@ public final class HeaderTerm extends StringTerm {
    */
   public boolean equals(Object obj)
   {
-    throw new UnsupportedOperationException("not implemented");
+    if (! (obj instanceof HeaderTerm))
+      return false;
+
+    return super.equals(obj);
   }
 
   /**
@@ -63,7 +66,7 @@ public final class HeaderTerm extends StringTerm {
    */
   public String getHeaderName()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return headerName;
   }
 
   /**
@@ -71,7 +74,11 @@ public final class HeaderTerm extends StringTerm {
    */
   public int hashCode()
   {
-    throw new UnsupportedOperationException("not implemented");
+    int hash = super.hashCode();
+
+    hash = 65521 * hash + headerName.hashCode();
+
+    return hash;
   }
 
   /**
@@ -79,6 +86,7 @@ public final class HeaderTerm extends StringTerm {
    */
   public boolean match(Message msg)
   {
+    // XXX: do tests -- how should this work?
     throw new UnsupportedOperationException("not implemented");
   }
 

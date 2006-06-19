@@ -31,44 +31,24 @@ package javax.mail.event;
 import javax.mail.*;
 
 /**
- * The adapter which receives connection events. The methods in this
- * class are empty; this class is provided as a convenience for easily
- * creating listeners by extending this class and overriding only the
- * methods of interest.
+ * A convenience implementation of ConnectionListener; all methods are no-ops.
  */
 public abstract class ConnectionAdapter implements ConnectionListener {
 
   public ConnectionAdapter()
   {
-    throw new UnsupportedOperationException("not implemented");
   }
 
-  /**
-   * Description copied from interface:
-   * Invoked when a Store/Folder/Transport is closed.
-   */
   public void closed(ConnectionEvent e)
   {
-    throw new UnsupportedOperationException("not implemented");
   }
 
-  /**
-   * Description copied from interface: Invoked when a Store is
-   * disconnected. Note that a folder cannot be disconnected, so a
-   * folder will not fire this event
-   */
   public void disconnected(ConnectionEvent e)
   {
-    throw new UnsupportedOperationException("not implemented");
   }
 
-  /**
-   * Description copied from interface:
-   * Invoked when a Store/Folder/Transport is opened.
-   */
   public void opened(ConnectionEvent e)
   {
-    throw new UnsupportedOperationException("not implemented");
   }
 
 }

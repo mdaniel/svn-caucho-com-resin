@@ -29,11 +29,13 @@
 
 package javax.mail.event;
 import javax.mail.*;
+import java.util.EventListener;
 
 /**
  * Represents a Transport event.
  */
-public interface TransportListener extends java.util.EventListener {
+public interface TransportListener extends EventListener {
+
   /**
    * Called when a message is delivered
    */

@@ -31,9 +31,7 @@ package javax.mail.search;
 import javax.mail.*;
 
 /**
- * This class models the comparison operator. This is an abstract
- * class; subclasses implement comparisons for different datatypes.
- * See Also:Serialized Form
+ * This class models the comparison operator.
  */
 public abstract class ComparisonTerm extends SearchTerm {
 
@@ -56,7 +54,12 @@ public abstract class ComparisonTerm extends SearchTerm {
 
   public ComparisonTerm()
   {
-    throw new UnsupportedOperationException("not implemented");
+    this(0);
+  }
+
+  ComparisonTerm(int comparison)
+  {
+    this.comparison = comparison;
   }
 
   /**
@@ -64,7 +67,11 @@ public abstract class ComparisonTerm extends SearchTerm {
    */
   public boolean equals(Object obj)
   {
-    throw new UnsupportedOperationException("not implemented");
+    if (! (obj instanceof ComparisonTerm))
+      return false;
+
+    ComparisonTerm comparisonTerm = (ComparisonTerm)obj;
+    return comparisonTerm.comparison == comparison;
   }
 
   /**
@@ -72,7 +79,7 @@ public abstract class ComparisonTerm extends SearchTerm {
    */
   public int hashCode()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return comparison;
   }
 
 }

@@ -32,34 +32,31 @@ import javax.mail.*;
 
 /**
  * This class implements comparisons for the Message Subject
- * header. The comparison is case-insensitive.  See Also:Serialized
- * Form
+ * header. The comparison is case-insensitive.
  */
 public final class SubjectTerm extends StringTerm {
 
-  /**
-   * Constructor.
-   * pattern - the pattern to search for
-   */
   public SubjectTerm(String pattern)
   {
-    throw new UnsupportedOperationException("not implemented");
+    super(pattern, true);
   }
 
-  /**
-   * Equality comparison.
-   */
   public boolean equals(Object obj)
   {
-    throw new UnsupportedOperationException("not implemented");
+    if (! (obj instanceof SubjectTerm)) return false;
+    return
+      ((SubjectTerm)obj).pattern.equalsIgnoreCase(pattern);
   }
 
-  /**
-   * The match method.
-   */
   public boolean match(Message msg)
   {
-    throw new UnsupportedOperationException("not implemented");
+    try {
+      return match(msg.getSubject());
+    }
+
+    catch (MessagingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }

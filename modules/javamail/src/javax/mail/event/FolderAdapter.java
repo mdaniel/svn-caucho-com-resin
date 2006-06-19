@@ -31,43 +31,24 @@ package javax.mail.event;
 import javax.mail.*;
 
 /**
- * The adapter which receives Folder events. The methods in this class
- * are empty; this class is provided as a convenience for easily
- * creating listeners by extending this class and overriding only the
- * methods of interest.
+ * A convenience implementation of FolderListener; all methods are no-ops.
  */
 public abstract class FolderAdapter implements FolderListener {
 
   public FolderAdapter()
   {
-    throw new UnsupportedOperationException("not implemented");
   }
 
-  /**
-   * Description copied from interface:
-   * Invoked when a Folder is created.
-   */
   public void folderCreated(FolderEvent e)
   {
-    throw new UnsupportedOperationException("not implemented");
   }
 
-  /**
-   * Description copied from interface:
-   * Invoked when a folder is deleted.
-   */
   public void folderDeleted(FolderEvent e)
   {
-    throw new UnsupportedOperationException("not implemented");
   }
 
-  /**
-   * Description copied from interface:
-   * Invoked when a folder is renamed.
-   */
   public void folderRenamed(FolderEvent e)
   {
-    throw new UnsupportedOperationException("not implemented");
   }
 
 }

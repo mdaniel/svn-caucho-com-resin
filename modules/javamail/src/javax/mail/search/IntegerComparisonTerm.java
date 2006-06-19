@@ -32,26 +32,29 @@ import javax.mail.*;
 
 /**
  * This class implements comparisons for integers.
- * See Also:Serialized Form
  */
 public abstract class IntegerComparisonTerm extends ComparisonTerm {
 
-  /**
-   * The number.
-   */
   protected int number;
 
   protected IntegerComparisonTerm(int comparison, int number)
   {
-    throw new UnsupportedOperationException("not implemented");
+    super(comparison);
+
+    this.number = number;
   }
 
-  /**
-   * Equality comparison.
-   */
   public boolean equals(Object obj)
   {
-    throw new UnsupportedOperationException("not implemented");
+    if (! (obj instanceof IntegerComparisonTerm))
+      return false;
+
+    IntegerComparisonTerm integerComparisonTerm =
+      (IntegerComparisonTerm)obj;
+
+    return
+      integerComparisonTerm.number == number &&
+      integerComparisonTerm.comparison == comparison;
   }
 
   /**
@@ -59,7 +62,7 @@ public abstract class IntegerComparisonTerm extends ComparisonTerm {
    */
   public int getComparison()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return comparison;
   }
 
   /**
@@ -67,7 +70,7 @@ public abstract class IntegerComparisonTerm extends ComparisonTerm {
    */
   public int getNumber()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return number;
   }
 
   /**
@@ -75,12 +78,35 @@ public abstract class IntegerComparisonTerm extends ComparisonTerm {
    */
   public int hashCode()
   {
-    throw new UnsupportedOperationException("not implemented");
+    int hash = super.hashCode();
+
+    hash = 65521 * hash + number;
+    return hash;
   }
 
   protected boolean match(int i)
   {
-    throw new UnsupportedOperationException("not implemented");
+    switch(comparison)
+      {
+	case EQ:
+	  return i == number;
+
+	case GE:
+	  return i >= number;
+
+	case GT:
+	  return i >  number;
+
+	case LE:
+	  return i <= number;
+
+	case LT:
+	  return i <  number;
+
+	case NE:
+	  return i != number;
+      }
+    return false;
   }
 
 }

@@ -34,6 +34,7 @@ import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+// XXX: revisit once we have an SPI
 /**
  * Represents a mail service
  */

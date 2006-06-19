@@ -37,6 +37,7 @@ import java.net.InetAddress;
 
 import java.io.PrintStream;
 
+// XXX: revisit once we have an SPI
 /**
  * Represents a mail session.
  */

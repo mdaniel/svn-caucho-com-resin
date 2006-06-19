@@ -31,14 +31,12 @@ package javax.mail.search;
 import javax.mail.*;
 
 /**
- * This class implements the match method for Strings. The current
- * implementation provides only for substring matching. We could add
- * comparisons (like strcmp ...).  See Also:Serialized Form
+ * Substring matching.
  */
 public abstract class StringTerm extends SearchTerm {
 
   /**
-   * Ignore case when comparing?
+   * Ignore case when comparing
    */
   protected boolean ignoreCase;
 
@@ -47,23 +45,15 @@ public abstract class StringTerm extends SearchTerm {
    */
   protected String pattern;
 
-  /**
-   * XXX: remove this once subclass constructors are written
-   */
-  StringTerm()
-  {
-    throw new Error("this method should be removed; it was a hack " +
-		    "to get half-written code to compile");
-  }
-
   protected StringTerm(String pattern)
   {
-    throw new UnsupportedOperationException("not implemented");
+    this(pattern, false);
   }
 
   protected StringTerm(String pattern, boolean ignoreCase)
   {
-    throw new UnsupportedOperationException("not implemented");
+    this.pattern = pattern;
+    this.ignoreCase = ignoreCase;
   }
 
   /**
@@ -71,7 +61,9 @@ public abstract class StringTerm extends SearchTerm {
    */
   public boolean equals(Object obj)
   {
-    throw new UnsupportedOperationException("not implemented");
+    if (! (obj instanceof StringTerm)) return false;
+    return
+      ((StringTerm)obj).pattern.equalsIgnoreCase(pattern);
   }
 
   /**
@@ -79,7 +71,7 @@ public abstract class StringTerm extends SearchTerm {
    */
   public boolean getIgnoreCase()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return ignoreCase;
   }
 
   /**
@@ -87,7 +79,7 @@ public abstract class StringTerm extends SearchTerm {
    */
   public String getPattern()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return pattern;
   }
 
   /**
@@ -95,12 +87,25 @@ public abstract class StringTerm extends SearchTerm {
    */
   public int hashCode()
   {
-    throw new UnsupportedOperationException("not implemented");
+    int hash = pattern.hashCode();
+
+    hash = 65521 * hash + (ignoreCase ? 1 : 0);
+
+    return hash;
   }
 
   protected boolean match(String s)
   {
-    throw new UnsupportedOperationException("not implemented");
+
+    if (ignoreCase) {
+      s = s.toLowerCase();
+      return s.indexOf(pattern.toLowerCase()) != -1;
+    }
+
+    else {
+      return s.indexOf(pattern) != -1;
+    }
+
   }
 
 }
