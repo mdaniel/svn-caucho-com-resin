@@ -624,7 +624,10 @@ public class Hessian2Input
     case 'I':
     case LONG_INT:
     case DOUBLE_INT:
-      return parseInt();
+      return ((read() << 24)
+	      + (read() << 16)
+	      + (read() << 8)
+	      + read());
 
       // direct long
     case 0x20: case 0x21: case 0x22: case 0x23:
@@ -854,6 +857,13 @@ public class Hessian2Input
 
     case DOUBLE_256_SHORT:
       return D_256 * ((short) (256 * read() + read()));
+
+    case DOUBLE_FLOAT:
+      {
+	int f = parseInt();
+
+	return Float.intBitsToFloat(f);
+      }
       
     case 'D':
       return parseDouble();
@@ -1796,7 +1806,7 @@ public class Hessian2Input
     int code;
 
     if (_offset < _length)
-      code = (_buffer[_offset++] & 0xff);
+      code = (_buffer[_offset] & 0xff);
     else {
       code = read();
 
@@ -2013,23 +2023,7 @@ public class Hessian2Input
   private double parseDouble()
     throws IOException
   {
-    long b64 = read();
-    long b56 = read();
-    long b48 = read();
-    long b40 = read();
-    long b32 = read();
-    long b24 = read();
-    long b16 = read();
-    long b8 = read();
-
-    long bits = ((b64 << 56) +
-                 (b56 << 48) +
-                 (b48 << 40) +
-                 (b40 << 32) +
-                 (b32 << 24) +
-                 (b24 << 16) +
-                 (b16 << 8) +
-                 b8);
+    long bits = parseLong();
   
     return Double.longBitsToDouble(bits);
   }
@@ -2290,6 +2284,8 @@ public class Hessian2Input
       System.arraycopy(buffer, offset, buffer, 0, length - offset);
       offset = length - offset;
     }
+    else
+      offset = 0;
     
     int len = _is.read(buffer, offset, SIZE - offset);
 
@@ -2297,7 +2293,7 @@ public class Hessian2Input
       _length = offset;
       _offset = 0;
       
-      return _length > 0;
+      return offset > 0;
     }
 
     _length = offset + len;

@@ -745,6 +745,22 @@ public class Hessian2Output
 
       return;
     }
+
+    float f = (float) value;
+
+    if (f == value) {
+      int bits = Float.floatToIntBits(f);
+      
+      buffer[offset + 0] = (byte) (DOUBLE_FLOAT);
+      buffer[offset + 1] = (byte) (bits >> 24);
+      buffer[offset + 2] = (byte) (bits >> 16);
+      buffer[offset + 3] = (byte) (bits >> 8);
+      buffer[offset + 4] = (byte) (bits);
+
+      _offset = offset + 5;
+
+      return;
+    }
     
     long bits = Double.doubleToLongBits(value);
     

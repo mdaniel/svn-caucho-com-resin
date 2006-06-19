@@ -90,7 +90,8 @@ public interface Hessian2Constants
   public static final int DOUBLE_256_SHORT = 0x0c;
 
   // skip 0x0d
-  public static final int LENGTH_BYTE = 0x0e;
+  public static final int DOUBLE_FLOAT = 0x0e;
+  public static final int LENGTH_BYTE = 0x0f;
   
   public static final int REF_BYTE = 0x5b;
   public static final int REF_SHORT = 0x5c;
