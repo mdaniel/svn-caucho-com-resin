@@ -790,19 +790,29 @@ public final class Env {
     if (session != null) {
       setGlobalValue("_SESSION", session);
       setGlobalValue("HTTP_SESSION_VARS", session);
+
+      session.addUse();
     }
     else {
       // php/1k0v
       Value v = getGlobalVar("_SESSION");
 
       if (v != null)
-	v.set(UnsetValue.UNSET);
-      
+        v.set(UnsetValue.UNSET);
+
       v = getGlobalVar("HTTP_SESSION_VARS");
-      
+
       if (v != null)
-	v.set(UnsetValue.UNSET);
+        v.set(UnsetValue.UNSET);
     }
+  }
+
+  /**
+   * Returns a new session id.
+   */
+  public String generateSessionId()
+  {
+    return _quercus.getSessionManager().createSessionId(this);
   }
 
   /**
@@ -810,9 +820,11 @@ public final class Env {
    */
   public SessionArrayValue createSession(String sessionId)
   {
+    long now = Alarm.getCurrentTime();
+
     SessionCallback callback = getSessionCallback();
 
-    SessionArrayValue session = null;
+    SessionArrayValue session = _quercus.loadSession(this, sessionId);
 
     if (callback != null) {
       StringValue value = callback.read(this, sessionId);
@@ -823,16 +835,11 @@ public final class Env {
         if (unserialize instanceof ArrayValue) {
           ArrayValue arrayValue = (ArrayValue) unserialize;
 
-          session = new SessionArrayValue(this, sessionId, arrayValue);
+          session.reset(now);
+          session.putAll(arrayValue);
         }
       }
     }
-    else {
-      session = _quercus.loadSession(this, sessionId);
-    }
-
-    if (session == null)
-      session = new SessionArrayValue(this, sessionId);
 
     setSession(session);
 
@@ -850,7 +857,7 @@ public final class Env {
       callback.destroy(this, sessionId);
     }
     else {
-      _quercus.destroySession(this, sessionId);
+      _quercus.destroySession(sessionId);
     }
 
     setSession(null);
@@ -3701,6 +3708,7 @@ public final class Env {
   public void sessionWriteClose()
   {
     SessionArrayValue session = _session;
+
     _session = null;
 
     if (session != null && session.getSize() > 0) {
@@ -3714,7 +3722,10 @@ public final class Env {
         callback.close(this);
       }
       else {
-        _quercus.saveSession(this, session.getId(), session);
+        _quercus.saveSession(this, session);
+
+        setGlobalValue("_SESSION", session.copy(this));
+        setGlobalValue("HTTP_SESSION_VARS", session.copy(this));
       }
     }
   }

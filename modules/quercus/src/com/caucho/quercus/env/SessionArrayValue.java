@@ -30,6 +30,9 @@
 package com.caucho.quercus.env;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.Map;
@@ -39,31 +42,50 @@ import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.IdentityHashMap;
 
+import java.util.logging.*;
+
+import com.caucho.log.Log;
+
 import javax.servlet.http.HttpServletRequest;
 
 import com.caucho.vfs.WriteStream;
+
+import com.caucho.server.cluster.ClusterObject;
+
+import com.caucho.quercus.lib.UnserializeReader;
+
+import com.caucho.quercus.QuercusModuleException;
 
 /**
  * Represents the $_SESSION
  */
 public class SessionArrayValue extends ArrayValueWrapper {
+  static protected final Logger log = Log.open(SessionArrayValue.class);
+
   private String _id;
   private transient Env _env;
+
+  private ClusterObject _clusterObject;
   
-  public SessionArrayValue(Env env, String id)
+  private int _useCount;
+
+  private long _accessTime;
+  private long _maxInactiveInterval;
+
+  private boolean _isValid;
+
+  public SessionArrayValue(Env env, String id, long now)
   {
-    super(new ArrayValueImpl());
-    
-    _env = env;
-    _id = id;
+    this(env, id, now, new ArrayValueImpl());
   }
   
-  public SessionArrayValue(Env env, String id, ArrayValue array)
+  public SessionArrayValue(Env env, String id, long now, ArrayValue array)
   {
     super(array);
     
     _env = env;
     _id = id;
+    _accessTime = now;
   }
 
   /**
@@ -87,7 +109,231 @@ public class SessionArrayValue extends ArrayValueWrapper {
    */
   public Value copy(Env env, IdentityHashMap<Value,Value> map)
   {
-    return new SessionArrayValue(env, _id, (ArrayValue) getArray().copy(env, map));
+    long accessTime = _accessTime;
+
+    return new SessionArrayValue(env, _id, accessTime,
+                                 (ArrayValue) getArray().copy(env, map));
+  }
+
+  /**
+   * Encoding for serialization.
+   */
+  public String encode()
+  {
+    StringBuilder sb = new StringBuilder();
+    ArrayValue array = getArray();
+
+    synchronized (array) {
+      for (Map.Entry<Value,Value> entry : array.entrySet()) {
+        sb.append(entry.getKey().toString());
+        sb.append("|");
+        entry.getValue().serialize(sb);
+      }
+    }
+
+    return sb.toString();
+  }
+
+  /**
+   * Decodes encoded values, adding them to this object.
+   */
+  public boolean decode(Env env, String encoded)
+  {
+    ArrayValue array = getArray();
+
+    try {
+      UnserializeReader is = new UnserializeReader(encoded);
+
+      StringBuilder sb = new StringBuilder();
+
+      synchronized (array) {
+        while (true) {
+          int ch;
+
+          sb.setLength(0);
+
+          while ((ch = is.read()) > 0 && ch != '|') {
+            sb.append((char) ch);
+          }
+
+          if (sb.length() == 0)
+            return true;
+
+          String key = sb.toString();
+
+          array.put(new StringValueImpl(key), is.unserialize(env));
+        }
+      }
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  public synchronized boolean inUse()
+  {
+    return _useCount > 0;
+  }
+
+  public synchronized void addUse()
+  {
+    _useCount++;
+  }
+
+  public boolean load()
+  {
+    if (_clusterObject != null)
+      return _clusterObject.load(this);
+    else
+      return true;
+  }
+
+  /**
+   * Saves the object to the output stream.
+   */
+  public void store(ObjectOutputStream out)
+    throws IOException
+  {
+    out.writeObject(encode());
+  }
+
+  public void load(ObjectInputStream in)
+    throws IOException
+  {
+    try {
+      String encoded = in.readObject().toString();
+
+      decode(_env, encoded);
+    } catch (ClassNotFoundException e) {
+      log.log(Level.WARNING, "Can't deserialize session", e);
+    }
+  }
+
+  /**
+   * Cleaning up session stuff at the end of a request.
+   *
+   * <p>If the session data has changed and we have persistent sessions,
+   * save the session.  However, if save-on-shutdown is true, only save
+   * on a server shutdown.
+   */
+  public void finish()
+  {
+    int count;
+
+    synchronized (this) {
+      count = --_useCount;
+    }
+
+    if (count > 0)
+      return;
+
+    if (count < 0)
+      throw new IllegalStateException();
+
+
+    try {
+      ClusterObject clusterObject = _clusterObject;
+
+      if (clusterObject != null)
+        clusterObject.store(this);
+
+    } catch (Throwable e) {
+      log.log(Level.WARNING, "Can't serialize session", e);
+    }
+  }
+
+  /**
+   * Store on shutdown.
+   */
+  public void storeOnShutdown()
+  {
+    try {
+      ClusterObject clusterObject = _clusterObject;
+
+      if (clusterObject != null) {
+        clusterObject.change();
+        clusterObject.store(this);
+      }
+    } catch (Throwable e) {
+      log.log(Level.WARNING, "Can't serialize session", e);
+    }
+  }
+
+  public int getMaxInactiveInterval()
+  {
+    if (Long.MAX_VALUE / 2 <= _maxInactiveInterval)
+      return -1;
+    else
+      return (int) (_maxInactiveInterval / 1000);
+  }
+
+  public void setMaxInactiveInterval(long maxInactiveInterval) 
+  {
+    if (maxInactiveInterval < 0)
+      _maxInactiveInterval = Long.MAX_VALUE / 2;
+    else
+      _maxInactiveInterval = ((long) maxInactiveInterval) * 1000;
+
+    if (_clusterObject != null)
+      _clusterObject.setExpireInterval(_maxInactiveInterval);
+  }
+
+  public void setClusterObject(ClusterObject clusterObject)
+  {
+    _clusterObject = clusterObject;
+  }
+
+  public void reset(long now)
+  {
+    setValid(true);
+    setAccess(now);
+    clear();
+  }
+
+  public synchronized long getAccessTime()
+  {
+    return _accessTime;
+  }
+  
+  public synchronized void setAccess(long now)
+  {
+    _accessTime = now;
+  }
+
+  public synchronized boolean isValid()
+  {
+    return _isValid;
+  }
+
+  public synchronized void setValid(boolean isValid)
+  {
+    _isValid = isValid;
+  }
+
+  /**
+   * Invalidates the session.
+   */
+  public void invalidate()
+  {
+    if (! _isValid)
+      throw new IllegalStateException(L.l("Can't call invalidate() when session is no longer valid."));
+
+    try {
+      ClusterObject clusterObject = _clusterObject;
+      _clusterObject = null;
+
+      if (clusterObject != null)
+        clusterObject.remove();
+
+      clear();
+ 
+      _isValid = false;
+    } finally {
+      _isValid = false;
+    }
+  }
+  
+  public boolean isEmpty()
+  {
+    return getSize() == 0;
   }
 }
-

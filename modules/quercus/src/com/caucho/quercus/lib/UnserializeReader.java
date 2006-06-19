@@ -60,6 +60,12 @@ public final class UnserializeReader {
     _length = s.length();
   }
 
+  public UnserializeReader(String s)
+  {
+    _buffer = s.toCharArray();
+    _length = s.length();
+  }
+
   public Value unserialize(Env env)
     throws IOException
   {

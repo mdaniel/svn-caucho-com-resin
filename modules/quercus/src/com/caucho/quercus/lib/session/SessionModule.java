@@ -142,37 +142,14 @@ public class SessionModule extends AbstractQuercusModule
    */
   public static boolean session_decode(Env env, StringValue value)
   {
-    try {
-      Value session = env.getGlobalValue("_SESSION");
+    Value session = env.getGlobalValue("_SESSION");
 
-      if (! session.isArray()) {
-        env.warning(L.l("session_decode requires valid session"));
-        return false;
-      }
-
-      UnserializeReader is = new UnserializeReader(value);
-
-      StringBuilder sb = new StringBuilder();
-
-      while (true) {
-        int ch;
-
-        sb.setLength(0);
-
-        while ((ch = is.read()) > 0 && ch != '|') {
-          sb.append((char) ch);
-        }
-
-        if (sb.length() == 0)
-          return true;
-
-        String key = sb.toString();
-
-        session.put(new StringValueImpl(key), is.unserialize(env));
-      }
-    } catch (IOException e) {
-      throw new QuercusModuleException(e);
+    if (! (session instanceof SessionArrayValue)) {
+      env.warning(L.l("session_decode requires valid session"));
+      return false;
     }
+
+    return ((SessionArrayValue)session).decode(env, value.toString());
   }
 
   /**
@@ -182,22 +159,12 @@ public class SessionModule extends AbstractQuercusModule
   {
     Value session = env.getGlobalValue("_SESSION");
 
-    if (! session.isArray()) {
+    if (! (session instanceof SessionArrayValue)) {
       env.warning(L.l("session_encode requires valid session"));
       return null;
     }
 
-    ArrayValue array = (ArrayValue) session.toValue();
-
-    StringBuilder sb = new StringBuilder();
-
-    for (Map.Entry<Value,Value> entry : array.entrySet()) {
-      sb.append(entry.getKey().toString());
-      sb.append("|");
-      entry.getValue().serialize(sb);
-    }
-
-    return sb.toString();
+    return ((SessionArrayValue)session).encode();
   }
 
   /**
@@ -297,7 +264,8 @@ public class SessionModule extends AbstractQuercusModule
 
     env.setSession(null);
 
-    String sessionId = generateSessionId(env);
+    String sessionId = env.generateSessionId();
+
     session_id(env, sessionId);
 
     session_start(env);
@@ -456,9 +424,9 @@ public class SessionModule extends AbstractQuercusModule
       }
 
       if (sessionId == null || "".equals(sessionId))
-        sessionId = generateSessionId(env);
+        sessionId = env.generateSessionId();
 
-      env.addConstant("SID", new StringValueImpl(cookieName + '=' + sessionId), 
+      env.addConstant("SID", new StringValueImpl(cookieName + '=' + sessionId),
                       false);
 
       OutputModule.pushUrlRewriter(env);
@@ -487,7 +455,7 @@ public class SessionModule extends AbstractQuercusModule
       }
       else {
         if (sessionId == null || "".equals(sessionId))
-          sessionId = generateSessionId(env);
+          sessionId = env.generateSessionId();
 
         env.addConstant("SID", 
                         new StringValueImpl(cookieName + '=' + sessionId), 
@@ -594,24 +562,6 @@ public class SessionModule extends AbstractQuercusModule
     env.sessionWriteClose();
 
     return NullValue.NULL;
-  }
-
-  private static String generateSessionId(Env env)
-  {
-    StringBuilder sb = new StringBuilder();
-
-    long random = RandomUtil.getRandomLong();
-    long date = Alarm.getCurrentTime();
-
-    for (int i = 0; i < (64 + 5) / 6; i++) {
-      sb.append(encode(random >> (i * 6)));
-    }
-
-    for (int i = 0; i < 8; i++) {
-      sb.append(encode(date >> (i * 6)));
-    }
-
-    return sb.toString();
   }
 
   /**

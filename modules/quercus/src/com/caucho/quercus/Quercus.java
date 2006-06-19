@@ -30,6 +30,7 @@
 package com.caucho.quercus;
 
 import com.caucho.config.ConfigException;
+import com.caucho.quercus.lib.session.SessionManager;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.QuercusModule;
 import com.caucho.quercus.module.StaticFunction;
@@ -51,6 +52,7 @@ import com.caucho.quercus.lib.file.FileModule;
 
 import com.caucho.loader.Environment;
 
+import com.caucho.util.Alarm;
 import com.caucho.util.Log;
 import com.caucho.util.LruCache;
 import com.caucho.util.TimedCache;
@@ -83,6 +85,7 @@ public class Quercus {
   private static final Logger log = Log.open(Quercus.class);
 
   private final PageManager _pageManager;
+  private final SessionManager _sessionManager;
 
   private ModuleContext _moduleContext = new ModuleContext();
 
@@ -160,6 +163,8 @@ public class Quercus {
     initStaticClassServices();
 
     _pageManager = new PageManager(this);
+    _sessionManager = new SessionManager();
+    _sessionManager.start();
   }
 
   /**
@@ -168,6 +173,11 @@ public class Quercus {
   public ModuleContext getModuleContext()
   {
     return _moduleContext;
+  }
+
+  public SessionManager getSessionManager()
+  {
+    return _sessionManager;
   }
 
   /**
@@ -249,9 +259,9 @@ public class Quercus {
   {
     try {
       if (type.isAnnotationPresent(ClassImplementation.class))
-	introspectJavaImplClass(name, type, null);
+        introspectJavaImplClass(name, type, null);
       else
-	introspectJavaClass(name, type, null);
+        introspectJavaClass(name, type, null);
     } catch (Exception e) {
       throw new ConfigException(e);
     }
@@ -708,29 +718,31 @@ public class Quercus {
    */
   public SessionArrayValue loadSession(Env env, String sessionId)
   {
+    long now = Alarm.getCurrentTime();
+    
+    SessionArrayValue session = 
+      _sessionManager.getSession(env, sessionId, now);
+    
+    if (session == null) 
+      session = _sessionManager.createSession(env, sessionId, now);
 
-    SessionArrayValue session = _sessionMap.get(sessionId);
-
-    if (session != null)
-      return (SessionArrayValue) session.copy(env);
-    else
-      return null;
+    return session;
   }
 
   /**
    * Saves the session to the backing.
    */
-  public void saveSession(Env env, String sessionId, SessionArrayValue session)
+  public void saveSession(Env env, SessionArrayValue session)
   {
-    _sessionMap.put(sessionId, (SessionArrayValue) session.copy(env));
+    _sessionManager.saveSession(env, session);
   }
 
   /**
    * Removes the session to the backing.
    */
-  public void destroySession(Env env, String sessionId)
+  public void destroySession(String sessionId)
   {
-    _sessionMap.remove(sessionId);
+    _sessionManager.removeSession(sessionId);
   }
 
   /**
