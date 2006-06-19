@@ -41,6 +41,8 @@ import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 
+import com.caucho.sql.UserStatement;
+
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
@@ -533,11 +535,50 @@ public class JdbcResultResource {
   }
 
   /**
+   * Gets the column number based on a generic Value.
+   *
+   * @param fieldNameOrNumber the field index or it's name
+   * @param base the numbering base: 0 or 1 (usually zero).
+   * @return the column number (always 0-based) or -1 on error
+   */
+  protected int getColumnNumber(Value fieldNameOrNumber,
+                                int base)
+    throws SQLException
+  {
+    int fieldNumber = -1;
+
+    if ((fieldNameOrNumber != null) && fieldNameOrNumber.isLongConvertible()) {
+      // fieldNameOrNumber is the field number.
+      // Convert it to 0-based.
+      fieldNumber = fieldNameOrNumber.toInt() - base;
+    }
+
+    if (fieldNumber < 0) {
+      // fieldNameOrNumber is the field name
+      // Get column number (0-based).
+      fieldNumber = getColumnNumber(fieldNameOrNumber.toString());
+    }
+
+    return fieldNumber;
+  }
+
+  /**
+   * Gets the column number.
+   *
+   * @return the column number (0-based) or -1 on error
+   */
+  protected int getColumnNumber(String colName)
+    throws SQLException
+  {
+    return getColumnNumber(colName, getMetaData());
+  }
+
+  /**
    * Helper function for getResultField returns a 0-based column number
    *
    * @param colName the column name
    * @param rsmd the result set meta data
-   * @return the column number
+   * @return the column number (0-based) or -1 on error
    */
   private int getColumnNumber(String colName,
                               ResultSetMetaData rsmd)
@@ -760,7 +801,7 @@ public class JdbcResultResource {
    * Get field length.
    *
    * @param env the PHP executing environment
-   * @param fieldOffset the field number
+   * @param fieldOffset the field number (0-based)
    * @return length of field for specified column
    */
   public Value getFieldLength(Env env, int fieldOffset)
@@ -925,6 +966,15 @@ public class JdbcResultResource {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
     }
+  }
+
+  /**
+   * Returns the underlying SQL statement
+   * associated to this result resource.
+   */
+  protected Statement getJavaStatement()
+  {
+    return ((UserStatement) getStatement()).getStatement();
   }
 
   /**

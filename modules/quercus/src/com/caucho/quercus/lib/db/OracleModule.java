@@ -276,7 +276,6 @@ public class OracleModule extends AbstractQuercusModule {
       return true;
 
     } catch (Exception e) {
-      Throwable cause = e.getCause();
       log.log(Level.FINE, e.toString(), e);
       return false;
     }
@@ -315,11 +314,13 @@ public class OracleModule extends AbstractQuercusModule {
    *
    * OCI_B_CURSOR (integer)
    *
-   *    Used with oci_bind_by_name() when binding cursors, previously allocated with oci_new_descriptor().
+   *    Used with oci_bind_by_name() when binding cursors,
+   *    previously allocated with oci_new_descriptor().
    *
    * OCI_B_NTY (integer)
    *
-   *    Used with oci_bind_by_name() when binding named data types. Note: in PHP < 5.0 it was called OCI_B_SQLT_NTY.
+   *    Used with oci_bind_by_name() when binding named data
+   *    types. Note: in PHP < 5.0 it was called OCI_B_SQLT_NTY.
    *
    * OCI_B_BIN (integer)
    *
@@ -441,8 +442,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Closes Oracle connection
    */
-  public static Value oci_close(Env env,
-                                @NotNull Oracle conn)
+  public static boolean oci_close(Env env,
+                                  @NotNull Oracle conn)
   {
     if (conn == null)
       conn = getConnection(env);
@@ -453,10 +454,10 @@ public class OracleModule extends AbstractQuercusModule {
 
       conn.close(env);
 
-      return BooleanValue.TRUE;
+      return true;
     }
     else
-      return BooleanValue.FALSE;
+      return false;
   }
 
   /**
@@ -504,11 +505,11 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Uses a PHP variable for the define-step during a SELECT
    */
-  public static Value oci_define_by_name(Env env,
-                                         @NotNull OracleStatement stmt,
-                                         @NotNull String columnName,
-                                         @NotNull @Reference Value variable,
-                                         @Optional("0") int type)
+  public static boolean oci_define_by_name(Env env,
+                                           @NotNull OracleStatement stmt,
+                                           @NotNull String columnName,
+                                           @NotNull @Reference Value variable,
+                                           @Optional("0") int type)
   {
     // Example:
     //
@@ -528,10 +529,10 @@ public class OracleModule extends AbstractQuercusModule {
 
     try {
       stmt.putByNameVariable(columnName, variable);
-      return BooleanValue.TRUE;
+      return true;
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return BooleanValue.FALSE;
+      return false;
     }
   }
 
@@ -572,11 +573,8 @@ public class OracleModule extends AbstractQuercusModule {
       }
 
       // Large Objects may not be used in auto-commit mode.
-      Oracle oracle = (Oracle) stmt.validateConnection();
-
-      Object conn = ((UserConnection) oracle.getConnection()).getConnection();
-
-      ((java.sql.Connection) conn).setAutoCommit(false);
+      Connection conn = stmt.getJavaConnection();
+      conn.setAutoCommit(false);
 
       // This is the case for oci_execute($cursor);
       // A previous statement has been executed and holds the result set.
@@ -610,11 +608,6 @@ public class OracleModule extends AbstractQuercusModule {
           }
         } catch (Exception e) {
         }
-        //if (outParameter != null) {
-          // ResultSet rs = (ResultSet) outParameter;
-          // stmt.setResultSet(rs);
-          //return true;
-        //}
       }
 
       // Fetch and assign values to corresponding binded variables
@@ -641,12 +634,13 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Fetches all rows of result data into an array
    */
-  public static Value oci_fetch_all(Env env,
-                                    @NotNull OracleStatement stmt,
-                                    @NotNull Value output,
-                                    @Optional int skip,
-                                    @Optional int maxrows,
-                                    @Optional int flags)
+  @ReturnNullAsFalse
+  public static ArrayValue oci_fetch_all(Env env,
+                                         @NotNull OracleStatement stmt,
+                                         @NotNull Value output,
+                                         @Optional int skip,
+                                         @Optional int maxrows,
+                                         @Optional int flags)
   {
     JdbcResultResource resource = null;
 
@@ -654,7 +648,7 @@ public class OracleModule extends AbstractQuercusModule {
 
     try {
       if (stmt == null)
-        return BooleanValue.FALSE;
+        return null;
 
       resource = new JdbcResultResource(null, stmt.getResultSet(), null);
 
@@ -671,7 +665,7 @@ public class OracleModule extends AbstractQuercusModule {
       }
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return BooleanValue.FALSE;
+      return null;
     }
 
     return newArray;
@@ -680,19 +674,20 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Returns the next row from the result data as an associative or numeric array, or both
    */
-  public static Value oci_fetch_array(Env env,
-                                      @NotNull OracleStatement stmt,
-                                      @Optional("OCI_BOTH") int mode)
+  @ReturnNullAsFalse
+  public static ArrayValue oci_fetch_array(Env env,
+                                           @NotNull OracleStatement stmt,
+                                           @Optional("OCI_BOTH") int mode)
   {
     try {
       if (stmt == null)
-        return BooleanValue.FALSE;
+        return null;
 
       JdbcResultResource resource = new JdbcResultResource(null, stmt.getResultSet(), null);
       return resource.fetchArray(env, mode);
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return BooleanValue.FALSE;
+      return null;
     }
   }
 
@@ -807,46 +802,36 @@ public class OracleModule extends AbstractQuercusModule {
 
   /**
    * Checks if the field is NULL
+   *
+   * @param stmt oracle statement
+   * @param fieldNameOrNumber field's index (1-based) or it's name
+   * @return TRUE if the field is null or FALSE otherwise.
    */
-  public static Value oci_field_is_null(Env env,
-                                        @NotNull OracleStatement stmt,
-                                        @NotNull Value field)
+  public static boolean oci_field_is_null(Env env,
+                                          @NotNull OracleStatement stmt,
+                                          @NotNull Value fieldNameOrNumber)
   {
     if (stmt == null)
-      return BooleanValue.FALSE;
+      return false;
 
     try {
+
       ResultSet rs = stmt.getResultSet();
+
+      JdbcResultResource resource = new JdbcResultResource(null, rs, null);
+
+      int fieldNumber = resource.getColumnNumber(fieldNameOrNumber, 1);
+
+      if (fieldNumber < 0)
+        return false;
+
       ResultSetMetaData metaData = rs.getMetaData();
 
-      int columnNumber = 0;
-
-      try {
-        columnNumber = field.toInt();
-      } catch(Exception ex2) {
-        log.log(Level.FINE, ex2.toString(), ex2);
-      }
-
-      if (columnNumber <= 0) {
-        String fieldName = field.toString();
-
-        int n = metaData.getColumnCount();
-
-        for (int i=1; i<=n; i++) {
-          if (metaData.getColumnName(i).equals(fieldName)) {
-            columnNumber = i;
-          }
-        }
-      }
-
-      boolean isNull = metaData.isNullable(columnNumber) == ResultSetMetaData.columnNullable;
-      return BooleanValue.create( isNull );
+      return metaData.isNullable(fieldNumber + 1) == ResultSetMetaData.columnNullable;
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-
-      return BooleanValue.FALSE;
-
+      return false;
     }
   }
 
@@ -873,14 +858,16 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Tell the precision of a field
    */
-  public static Value oci_field_precision(Env env,
-                                          @NotNull OracleStatement stmt,
-                                          @NotNull int field)
+  @ReturnNullAsFalse
+  public static LongValue oci_field_precision(Env env,
+                                              @NotNull OracleStatement stmt,
+                                              @NotNull int field)
   {
     if (stmt == null)
-      return BooleanValue.FALSE;
+      return null;
 
     try {
+
       ResultSet rs = stmt.getResultSet();
       ResultSetMetaData metaData = rs.getMetaData();
 
@@ -889,23 +876,23 @@ public class OracleModule extends AbstractQuercusModule {
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-
-      return BooleanValue.FALSE;
-
+      return null;
     }
   }
 
   /**
    * Tell the scale of the field
    */
-  public static Value oci_field_scale(Env env,
-                                      @NotNull OracleStatement stmt,
-                                      @NotNull int field)
+  @ReturnNullAsFalse
+  public static LongValue oci_field_scale(Env env,
+                                          @NotNull OracleStatement stmt,
+                                          @NotNull int field)
   {
     if (stmt == null)
-      return BooleanValue.FALSE;
+      return null;
 
     try {
+
       ResultSet rs = stmt.getResultSet();
       ResultSetMetaData metaData = rs.getMetaData();
 
@@ -914,48 +901,34 @@ public class OracleModule extends AbstractQuercusModule {
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-
-      return BooleanValue.FALSE;
-
+      return null;
     }
   }
 
   /**
    * Returns field's size
+   *
+   * @param stmt oracle statement
+   * @param fieldNameOrNumber field's index (1-based) or it's name
+   * @return the field's size
    */
   public static Value oci_field_size(Env env,
                                      @NotNull OracleStatement stmt,
-                                     @Optional Value field)
+                                     @Optional("-1") Value fieldNameOrNumber)
   {
     try {
+
       if (stmt == null)
         return BooleanValue.FALSE;
 
       ResultSet rs = stmt.getResultSet();
-      ResultSetMetaData metaData = rs.getMetaData();
 
       JdbcResultResource resource = new JdbcResultResource(null, rs, null);
 
-      int columnNumber = 0;
+      int fieldNumber = resource.getColumnNumber(fieldNameOrNumber, 1);
 
-      try {
-        columnNumber = field.toInt();
-      } catch(Exception ex2) {
-      }
+      return resource.getFieldLength(env, fieldNumber);
 
-      if (columnNumber <= 0) {
-        String fieldName = field.toString();
-
-        int n = metaData.getColumnCount();
-
-        for (int i=1; i<=n; i++) {
-          if (metaData.getColumnName(i).equals(fieldName)) {
-            columnNumber = i;
-          }
-        }
-      }
-
-      return resource.getFieldLength(env, columnNumber);
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
       return BooleanValue.FALSE;
@@ -1202,16 +1175,20 @@ public class OracleModule extends AbstractQuercusModule {
       // or stored procedure call can be executed with a CallableStatement.
       query = query.trim();
 
-      if (!query.toLowerCase().startsWith("select")) {
-        if (!query.startsWith("begin ")) {
+      String lowerCaseQuery = query.toLowerCase();
+
+      if (lowerCaseQuery.startsWith("insert") ||
+          lowerCaseQuery.startsWith("update") ||
+          lowerCaseQuery.startsWith("delete")) {
+        if (!lowerCaseQuery.startsWith("begin ")) {
           query = "begin " + query;
         }
 
-        if (!query.endsWith(";")) {
+        if (!lowerCaseQuery.endsWith(";")) {
           query += ";";
         }
 
-        if (!query.endsWith(" end;")) {
+        if (!lowerCaseQuery.endsWith(" end;")) {
           query += " end;";
         }
       }
@@ -1472,9 +1449,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_field_is_null()
    */
-  public static Value ocicolumnisnull(Env env,
-                                      @NotNull OracleStatement stmt,
-                                      @NotNull Value field)
+  public static boolean ocicolumnisnull(Env env,
+                                        @NotNull OracleStatement stmt,
+                                        @NotNull Value field)
   {
     return oci_field_is_null(env, stmt, field);
   }
@@ -1551,11 +1528,11 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_define_by_name()
    */
-  public static Value ocidefinebyname(Env env,
-                                      @NotNull OracleStatement stmt,
-                                      @NotNull String columnName,
-                                      @NotNull Value variable,
-                                      @Optional("0") int type)
+  public static boolean ocidefinebyname(Env env,
+                                        @NotNull OracleStatement stmt,
+                                        @NotNull String columnName,
+                                        @NotNull Value variable,
+                                        @Optional("0") int type)
   {
     return oci_define_by_name(env, stmt, columnName, variable, type);
   }
@@ -1667,8 +1644,8 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_close()
    */
-  public static Value ocilogoff(Env env,
-                                @NotNull Oracle conn)
+  public static boolean ocilogoff(Env env,
+                                  @NotNull Oracle conn)
   {
     return oci_close(env, conn);
   }

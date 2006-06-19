@@ -201,7 +201,7 @@ public abstract class JdbcConnectionResource implements Closeable {
    * @param str a string
    * @return the string escaped for SQL statements
    */
-  protected Value realEscapeString(StringValue str)
+  protected StringBuilderValue realEscapeString(StringValue str)
   {
     StringBuilderValue buf = new StringBuilderValue(str.length());
 
@@ -352,9 +352,18 @@ public abstract class JdbcConnectionResource implements Closeable {
    * Returns the connection
    */
   public Connection getConnection()
-    throws SQLException
   {
     return _conn;
+  }
+
+  /**
+   * Returns the underlying SQL connection
+   * associated to this statement.
+   */
+  protected Connection getJavaConnection()
+    throws SQLException
+  {
+    return ((UserConnection) _conn).getConnection();
   }
 
   /**

@@ -35,9 +35,12 @@ import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.ResourceValue;
 import com.caucho.quercus.env.Value;
 
+import com.caucho.sql.UserConnection;
+
 import com.caucho.util.Log;
 import com.caucho.util.L10N;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -399,6 +402,16 @@ public class JdbcStatementResource {
   protected ResultSet getResultSet()
   {
     return _rs;
+  }
+
+  /**
+   * Returns the underlying SQL connection
+   * associated to this statement.
+   */
+  protected Connection getJavaConnection()
+    throws SQLException
+  {
+    return validateConnection().getJavaConnection();
   }
 
   /**
