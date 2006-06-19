@@ -57,6 +57,7 @@ import java.lang.reflect.*;
  */
 public class JavaSerializer extends AbstractSerializer {
   private Field []_fields;
+  private FieldSerializer []_fieldSerializers;
   private Method _writeReplace;
   
   public JavaSerializer(Class cl)
@@ -99,6 +100,12 @@ public class JavaSerializer extends AbstractSerializer {
 
     _fields = new Field[fields.size()];
     fields.toArray(_fields);
+
+    _fieldSerializers = new FieldSerializer[_fields.length];
+
+    for (int i = 0; i < _fields.length; i++) {
+      _fieldSerializers[i] = getFieldSerializer(_fields[i].getType());
+    }
   }
 
   /**
@@ -147,51 +154,182 @@ public class JavaSerializer extends AbstractSerializer {
     int ref = out.writeObjectBegin(cl.getName());
 
     if (ref < 0) {
-      out.writeMapBegin(cl.getName());
-
-      for (int i = 0; i < _fields.length; i++) {
-	Field field = _fields[i];
-      
-	out.writeString(field.getName());
-	
-	Object value = null;
-	try {
-	  value = field.get(obj);
-	} catch (IllegalAccessException e) {
-	  // XXX: log when available
-	}
-
-	out.writeObject(value);
-      }
-      
-      out.writeMapEnd();
+      writeObject10(obj, out);
     }
     else {
-      if (ref == 0) {
-	for (int i = 0; i < _fields.length; i++) {
-	  Field field = _fields[i];
-      
-	  out.writeString(field.getName());
-	}
+      if (ref == 0)
+	writeDefinition20(out);
 
-	out.writeClassEnd();
-      }
-      
-      for (int i = 0; i < _fields.length; i++) {
-	Field field = _fields[i];
-      
-	Object value = null;
+      writeInstance(obj, out);
+    }
+  }
+  
+  private void writeObject10(Object obj, AbstractHessianOutput out)
+    throws IOException
+  {
+    for (int i = 0; i < _fields.length; i++) {
+      Field field = _fields[i];
+
+      out.writeString(field.getName());
 	
-	try {
-	  value = field.get(obj);
-	} catch (IllegalAccessException e) {
-	  // XXX: log when available
-	}
-
-	out.writeObject(value);
-      }
+      _fieldSerializers[i].serialize(out, obj, field);
+    }
       
-      out.writeObjectEnd();
+    out.writeMapEnd();
+  }
+  
+  private void writeDefinition20(AbstractHessianOutput out)
+    throws IOException
+  {
+    out.writeClassFieldLength(_fields.length);
+	
+    for (int i = 0; i < _fields.length; i++) {
+      Field field = _fields[i];
+      
+      out.writeString(field.getName());
+    }
+  }
+  
+  public void writeInstance(Object obj, AbstractHessianOutput out)
+    throws IOException
+  {
+    for (int i = 0; i < _fields.length; i++) {
+      Field field = _fields[i];
+
+      _fieldSerializers[i].serialize(out, obj, field);
+    }
+  }
+
+  private static FieldSerializer getFieldSerializer(Class type)
+  {
+    if (int.class.equals(type) ||
+	byte.class.equals(type) ||
+	short.class.equals(type) ||
+	int.class.equals(type)) {
+      return IntFieldSerializer.SER;
+    }
+    else if (long.class.equals(type)) {
+      return LongFieldSerializer.SER;
+    }
+    else if (double.class.equals(type) ||
+	     float.class.equals(type)) {
+      return DoubleFieldSerializer.SER;
+    }
+    else if (boolean.class.equals(type)) {
+      return BooleanFieldSerializer.SER;
+    }
+    else if (String.class.equals(type)) {
+      return StringFieldSerializer.SER;
+    }
+    else
+      return FieldSerializer.SER;
+  }
+
+  static class FieldSerializer {
+    static final FieldSerializer SER = new FieldSerializer();
+    
+    void serialize(AbstractHessianOutput out, Object obj, Field field)
+      throws IOException
+    {
+      Object value = null;
+	
+      try {
+	value = field.get(obj);
+      } catch (IllegalAccessException e) {
+	// XXX: log when available
+      }
+
+      out.writeObject(value);
+    }
+  }
+
+  static class BooleanFieldSerializer extends FieldSerializer {
+    static final FieldSerializer SER = new BooleanFieldSerializer();
+    
+    void serialize(AbstractHessianOutput out, Object obj, Field field)
+      throws IOException
+    {
+      boolean value = false;
+	
+      try {
+	value = field.getBoolean(obj);
+      } catch (IllegalAccessException e) {
+	// XXX: log when available
+      }
+
+      out.writeBoolean(value);
+    }
+  }
+
+  static class IntFieldSerializer extends FieldSerializer {
+    static final FieldSerializer SER = new IntFieldSerializer();
+    
+    void serialize(AbstractHessianOutput out, Object obj, Field field)
+      throws IOException
+    {
+      int value = 0;
+	
+      try {
+	value = field.getInt(obj);
+      } catch (IllegalAccessException e) {
+	// XXX: log when available
+      }
+
+      out.writeInt(value);
+    }
+  }
+
+  static class LongFieldSerializer extends FieldSerializer {
+    static final FieldSerializer SER = new LongFieldSerializer();
+    
+    void serialize(AbstractHessianOutput out, Object obj, Field field)
+      throws IOException
+    {
+      long value = 0;
+	
+      try {
+	value = field.getLong(obj);
+      } catch (IllegalAccessException e) {
+	// XXX: log when available
+      }
+
+      out.writeLong(value);
+    }
+  }
+
+  static class DoubleFieldSerializer extends FieldSerializer {
+    static final FieldSerializer SER = new DoubleFieldSerializer();
+    
+    void serialize(AbstractHessianOutput out, Object obj, Field field)
+      throws IOException
+    {
+      double value = 0;
+	
+      try {
+	value = field.getDouble(obj);
+      } catch (IllegalAccessException e) {
+	// XXX: log when available
+      }
+
+      out.writeDouble(value);
+    }
+  }
+
+  static class StringFieldSerializer extends FieldSerializer {
+    static final FieldSerializer SER = new StringFieldSerializer();
+    
+    void serialize(AbstractHessianOutput out, Object obj, Field field)
+      throws IOException
+    {
+      String value = null;
+	
+      try {
+	value = (String) field.get(obj);
+      } catch (IllegalAccessException e) {
+	// XXX: log when available
+      }
+
+      out.writeString(value);
     }
   }
 }

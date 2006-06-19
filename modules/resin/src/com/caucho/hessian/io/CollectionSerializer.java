@@ -84,10 +84,12 @@ public class CollectionSerializer extends AbstractSerializer {
     Collection list = (Collection) obj;
 
     Class cl = obj.getClass();
+    boolean hasEnd;
+    
     if (cl.equals(ArrayList.class) || ! _sendJavaType)
-      out.writeListBegin(list.size(), null);
+      hasEnd = out.writeListBegin(list.size(), null);
     else
-      out.writeListBegin(list.size(), obj.getClass().getName());
+      hasEnd = out.writeListBegin(list.size(), obj.getClass().getName());
 
     Iterator iter = list.iterator();
     while (iter.hasNext()) {
@@ -95,6 +97,8 @@ public class CollectionSerializer extends AbstractSerializer {
 
       out.writeObject(value);
     }
-    out.writeListEnd();
+
+    if (hasEnd)
+      out.writeListEnd();
   }
 }

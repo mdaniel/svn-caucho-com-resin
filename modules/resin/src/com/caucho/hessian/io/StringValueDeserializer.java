@@ -77,23 +77,45 @@ public class StringValueDeserializer extends AbstractDeserializer {
   public Object readMap(AbstractHessianInput in)
     throws IOException
   {
-    String initValue = null;
+    String value = null;
     
     while (! in.isEnd()) {
       String key = in.readString();
-      String value = in.readString();
 
       if (key.equals("value"))
-        initValue = value;
+        value = in.readString();
+      else
+	in.readObject();
     }
 
     in.readMapEnd();
-    
-    if (initValue == null)
+
+    return create(value);
+  }
+  
+  public Object readObject(AbstractHessianInput in, String []fieldNames)
+    throws IOException
+  {
+    String value = null;
+
+    for (int i = 0; i < fieldNames.length; i++) {
+      if ("value".equals(fieldNames[i]))
+        value = in.readString();
+      else
+	in.readObject();
+    }
+
+    return create(value);
+  }
+
+  private Object create(String value)
+    throws IOException
+  {
+    if (value == null)
       throw new IOException(_cl.getName() + " expects name.");
 
     try {
-      return _constructor.newInstance(new Object[] { initValue });
+      return _constructor.newInstance(new Object[] { value });
     } catch (Exception e) {
       throw new IOExceptionWrapper(e);
     }

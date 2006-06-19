@@ -129,10 +129,13 @@ public class BasicSerializer extends AbstractSerializer {
         return;
       
       boolean []data = (boolean []) obj;
-      out.writeListBegin(data.length, "[boolean");
+      boolean hasEnd = out.writeListBegin(data.length, "[boolean");
       for (int i = 0; i < data.length; i++)
         out.writeBoolean(data[i]);
-      out.writeListEnd();
+
+      if (hasEnd)
+	out.writeListEnd();
+      
       break;
     }
 
@@ -149,10 +152,13 @@ public class BasicSerializer extends AbstractSerializer {
         return;
       
       short []data = (short []) obj;
-      out.writeListBegin(data.length, "[short");
+      boolean hasEnd = out.writeListBegin(data.length, "[short");
+      
       for (int i = 0; i < data.length; i++)
         out.writeInt(data[i]);
-      out.writeListEnd();
+
+      if (hasEnd)
+	out.writeListEnd();
       break;
     }
 
@@ -162,10 +168,15 @@ public class BasicSerializer extends AbstractSerializer {
         return;
       
       int []data = (int []) obj;
-      out.writeListBegin(data.length, "[int");
+      
+      boolean hasEnd = out.writeListBegin(data.length, "[int");
+      
       for (int i = 0; i < data.length; i++)
         out.writeInt(data[i]);
-      out.writeListEnd();
+
+      if (hasEnd)
+	out.writeListEnd();
+      
       break;
     }
 
@@ -175,10 +186,14 @@ public class BasicSerializer extends AbstractSerializer {
         return;
       
       long []data = (long []) obj;
-      out.writeListBegin(data.length, "[long");
+      
+      boolean hasEnd = out.writeListBegin(data.length, "[long");
+      
       for (int i = 0; i < data.length; i++)
         out.writeLong(data[i]);
-      out.writeListEnd();
+
+      if (hasEnd)
+	out.writeListEnd();
       break;
     }
 
@@ -188,10 +203,14 @@ public class BasicSerializer extends AbstractSerializer {
         return;
       
       float []data = (float []) obj;
-      out.writeListBegin(data.length, "[float");
+      
+      boolean hasEnd = out.writeListBegin(data.length, "[float");
+      
       for (int i = 0; i < data.length; i++)
         out.writeDouble(data[i]);
-      out.writeListEnd();
+
+      if (hasEnd)
+	out.writeListEnd();
       break;
     }
 
@@ -201,10 +220,13 @@ public class BasicSerializer extends AbstractSerializer {
         return;
       
       double []data = (double []) obj;
-      out.writeListBegin(data.length, "[double");
+      boolean hasEnd = out.writeListBegin(data.length, "[double");
+      
       for (int i = 0; i < data.length; i++)
         out.writeDouble(data[i]);
-      out.writeListEnd();
+
+      if (hasEnd)
+	out.writeListEnd();
       break;
     }
 
@@ -214,11 +236,15 @@ public class BasicSerializer extends AbstractSerializer {
         return;
       
       String []data = (String []) obj;
-      out.writeListBegin(data.length, "[string");
+      
+      boolean hasEnd = out.writeListBegin(data.length, "[string");
+      
       for (int i = 0; i < data.length; i++) {
         out.writeString(data[i]);
       }
-      out.writeListEnd();
+
+      if (hasEnd)
+	out.writeListEnd();
       break;
     }
 
@@ -235,11 +261,15 @@ public class BasicSerializer extends AbstractSerializer {
         return;
       
       Object []data = (Object []) obj;
-      out.writeListBegin(data.length, "[object");
+      
+      boolean hasEnd = out.writeListBegin(data.length, "[object");
+      
       for (int i = 0; i < data.length; i++) {
         out.writeObject(data[i]);
       }
-      out.writeListEnd();
+
+      if (hasEnd)
+	out.writeListEnd();
       break;
     }
 

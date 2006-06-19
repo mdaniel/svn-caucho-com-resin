@@ -300,6 +300,27 @@ public class SerializerFactory extends AbstractSerializerFactory {
       return _hashMapDeserializer.readMap(in);
     }
   }
+  
+  /**
+   * Reads the object as a map.
+   */
+  public Object readObject(AbstractHessianInput in,
+			   String type,
+			   String []fieldNames)
+    throws HessianProtocolException, IOException
+  {
+    Deserializer deserializer = getDeserializer(type);
+
+    if (deserializer != null)
+      return deserializer.readObject(in, fieldNames);
+    else if (_hashMapDeserializer != null)
+      return _hashMapDeserializer.readObject(in, fieldNames);
+    else {
+      _hashMapDeserializer = new MapDeserializer(HashMap.class);
+      
+      return _hashMapDeserializer.readObject(in, fieldNames);
+    }
+  }
 
   /**
    * Reads the object as a map.

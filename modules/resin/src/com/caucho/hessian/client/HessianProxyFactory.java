@@ -63,6 +63,8 @@ import javax.naming.spi.*;
 import com.caucho.hessian.io.HessianRemoteResolver;
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
+import com.caucho.hessian.io.Hessian2Input;
+import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.hessian.io.AbstractHessianInput;
 import com.caucho.hessian.io.AbstractHessianOutput;
 import com.caucho.hessian.io.HessianRemoteObject;
@@ -119,6 +121,9 @@ public class HessianProxyFactory implements ServiceProxyFactory, ObjectFactory {
   private String _basicAuth;
 
   private boolean _isOverloadEnabled = false;
+
+  private boolean _isHessian2Reply = false;
+  private boolean _isHessian2Request = false;
 
   private long _readTimeout = -1;
 
@@ -178,6 +183,25 @@ public class HessianProxyFactory implements ServiceProxyFactory, ObjectFactory {
   public void setReadTimeout(long timeout)
   {
     _readTimeout = timeout;
+  }
+
+  /**
+   * True if the proxy can read Hessian 2 responses.
+   */
+  public void setHessian2Reply(boolean isHessian2)
+  {
+    _isHessian2Reply = isHessian2;
+  }
+
+  /**
+   * True if the proxy should send Hessian 2 requests.
+   */
+  public void setHessian2Request(boolean isHessian2)
+  {
+    _isHessian2Request = isHessian2;
+
+    if (isHessian2)
+      _isHessian2Reply = true;
   }
 
   /**
@@ -309,7 +333,13 @@ public class HessianProxyFactory implements ServiceProxyFactory, ObjectFactory {
 
   public AbstractHessianInput getHessianInput(InputStream is)
   {
-    HessianInput in = new HessianInput(is);
+    AbstractHessianInput in;
+
+    if (_isHessian2Reply)
+      in = new Hessian2Input(is);
+    else
+      in = new HessianInput(is);
+    
     in.setRemoteResolver(getRemoteResolver());
 
     in.setSerializerFactory(getSerializerFactory());
@@ -317,9 +347,20 @@ public class HessianProxyFactory implements ServiceProxyFactory, ObjectFactory {
     return in;
   }
 
-  public HessianOutput getHessianOutput(OutputStream os)
+  public AbstractHessianOutput getHessianOutput(OutputStream os)
   {
-    HessianOutput out = new HessianOutput(os);
+    AbstractHessianOutput out;
+
+    if (_isHessian2Request)
+      out = new Hessian2Output(os);
+    else {
+      HessianOutput out1 = new HessianOutput(os);
+      out = out1;
+
+      if (_isHessian2Reply)
+	out1.setVersion(2);
+    }
+      
     out.setSerializerFactory(getSerializerFactory());
 
     return out;

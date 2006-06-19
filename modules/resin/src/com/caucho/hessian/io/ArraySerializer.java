@@ -64,12 +64,14 @@ public class ArraySerializer extends AbstractSerializer {
 
     Object []array = (Object []) obj;
 
-    out.writeListBegin(array.length, getArrayType(obj.getClass()));
+    boolean hasEnd = out.writeListBegin(array.length,
+					getArrayType(obj.getClass()));
 
     for (int i = 0; i < array.length; i++)
       out.writeObject(array[i]);
 
-    out.writeListEnd();
+    if (hasEnd)
+      out.writeListEnd();
   }
 
   /**

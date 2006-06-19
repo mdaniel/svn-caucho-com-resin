@@ -71,13 +71,15 @@ public class EnumerationSerializer extends AbstractSerializer {
   {
     Enumeration iter = (Enumeration) obj;
 
-    out.writeListBegin(-1, null);
+    boolean hasEnd = out.writeListBegin(-1, null);
 
     while (iter.hasMoreElements()) {
       Object value = iter.nextElement();
 
       out.writeObject(value);
     }
-    out.writeListEnd();
+
+    if (hasEnd)
+      out.writeListEnd();
   }
 }

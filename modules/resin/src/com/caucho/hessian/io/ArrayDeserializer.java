@@ -133,6 +133,28 @@ public class ArrayDeserializer extends AbstractListDeserializer {
     }
   }
 
+  /**
+   * Reads the array.
+   */
+  public Object readLengthList(AbstractHessianInput in, int length)
+    throws IOException
+  {
+    Object []data = createArray(length);
+
+    in.addRef(data);
+      
+    if (_componentType != null) {
+      for (int i = 0; i < data.length; i++)
+	data[i] = in.readObject(_componentType);
+    }
+    else {
+      for (int i = 0; i < data.length; i++)
+	data[i] = in.readObject();
+    }
+
+    return data;
+  }
+
   protected Object []createArray(int length)
   {
     if (_componentType != null)

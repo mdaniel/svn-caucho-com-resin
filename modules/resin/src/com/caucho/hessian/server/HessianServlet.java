@@ -63,8 +63,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.caucho.hessian.io.AbstractHessianOutput;
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
+import com.caucho.hessian.io.Hessian2Input;
+import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.hessian.io.SerializerFactory;
 
 import com.caucho.services.server.Service;
@@ -332,15 +335,29 @@ public class HessianServlet extends GenericServlet {
       InputStream is = request.getInputStream();
       OutputStream os = response.getOutputStream();
 
-      HessianInput in = new HessianInput(is);
-      HessianOutput out = new HessianOutput();
+      Hessian2Input in = new Hessian2Input(is);
+      AbstractHessianOutput out;
 
       SerializerFactory serializerFactory = getSerializerFactory();
       
       in.setSerializerFactory(serializerFactory);
-      out.setSerializerFactory(serializerFactory);
+
+      int code = is.read();
+
+      if (code != 'c') {
+	// XXX: deflate
+	throw new IOException("expected 'c' in hessian input");
+      }
+
+      int major = is.read();
+      int minor = is.read();
+
+      if (major >= 2)
+	out = new Hessian2Output(os);
+      else
+	out = new HessianOutput(os);
       
-      out.init(os);
+      out.setSerializerFactory(serializerFactory);
 
       if (objectId != null)
 	_objectSkeleton.invoke(in, out);

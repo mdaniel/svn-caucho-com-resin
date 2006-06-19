@@ -72,14 +72,34 @@ public class ClassDeserializer extends AbstractDeserializer {
     
     while (! in.isEnd()) {
       String key = in.readString();
-      String value = in.readString();
 
       if (key.equals("name"))
-        name = value;
+	name = in.readString();
+      else
+	in.readObject();
     }
 
-    in.readMapEnd();
+    return create(name);
+  }
+  
+  public Object readObject(AbstractHessianInput in, String []fieldNames)
+    throws IOException
+  {
+    String name = null;
     
+    for (int i = 0; i < fieldNames.length; i++) {
+      if ("name".equals(fieldNames[i]))
+        name = in.readString();
+      else
+	in.readObject();
+    }
+
+    return create(name);
+  }
+
+  Object create(String name)
+    throws IOException
+  {
     if (name == null)
       throw new IOException("Serialized Class expects name.");
 

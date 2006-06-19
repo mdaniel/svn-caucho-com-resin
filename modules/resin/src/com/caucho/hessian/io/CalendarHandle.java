@@ -61,14 +61,22 @@ public class CalendarHandle implements java.io.Serializable {
 
   public CalendarHandle(Class type, long time)
   {
-    this.type = type;
+    if (! GregorianCalendar.class.equals(type))
+      this.type = type;
+    
     this.date = new Date(time);
   }
 
   private Object readResolve()
   {
     try {
-      Calendar cal = (Calendar) this.type.newInstance();
+      Calendar cal;
+      
+      if (this.type != null)
+	cal = (Calendar) this.type.newInstance();
+      else
+	cal = new GregorianCalendar();
+      
       cal.setTimeInMillis(this.date.getTime());
 
       return cal;

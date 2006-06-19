@@ -73,7 +73,19 @@ abstract public class AbstractDeserializer implements Deserializer {
     throw new UnsupportedOperationException(String.valueOf(this));
   }
   
+  public Object readLengthList(AbstractHessianInput in, int length)
+    throws IOException
+  {
+    throw new UnsupportedOperationException(String.valueOf(this));
+  }
+  
   public Object readMap(AbstractHessianInput in)
+    throws IOException
+  {
+    throw new UnsupportedOperationException(String.valueOf(this));
+  }
+  
+  public Object readObject(AbstractHessianInput in, String []fieldNames)
     throws IOException
   {
     throw new UnsupportedOperationException(String.valueOf(this));

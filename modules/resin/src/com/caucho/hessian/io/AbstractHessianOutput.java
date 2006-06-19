@@ -83,11 +83,42 @@ abstract public class AbstractHessianOutput {
   {
     return _serializerFactory;
   }
+
+  /**
+   * Gets the serializer factory.
+   */
+  protected final SerializerFactory findSerializerFactory()
+  {
+    SerializerFactory factory = _serializerFactory;
+
+    if (factory == null)
+      _serializerFactory = factory = new SerializerFactory();
+
+    return factory;
+  }
   
   /**
    * Initialize the output with a new underlying stream.
    */
-  abstract public void init(OutputStream os);
+  public void init(OutputStream os)
+  {
+  }
+
+  /**
+   * Writes a complete method call.
+   */
+  public void call(String method, Object []args)
+    throws IOException
+  {
+    startCall(method);
+    
+    if (args != null) {
+      for (int i = 0; i < args.length; i++)
+        writeObject(args[i]);
+    }
+    
+    completeCall();
+  }
 
   /**
    * Starts the method call:
@@ -394,7 +425,7 @@ abstract public class AbstractHessianOutput {
    * &lt;/list>
    * </pre></code>
    */
-  abstract public void writeListBegin(int length, String type)
+  abstract public boolean writeListBegin(int length, String type)
     throws IOException;
 
   /**
@@ -437,13 +468,15 @@ abstract public class AbstractHessianOutput {
   public int writeObjectBegin(String type)
     throws IOException
   {
+    writeMapBegin(type);
+    
     return -1;
   }
 
   /**
    * Writes the end of the class.
    */
-  public void writeClassEnd()
+  public void writeClassFieldLength(int len)
     throws IOException
   {
   }
@@ -466,4 +499,29 @@ abstract public class AbstractHessianOutput {
    */
   abstract public void writeRemote(String type, String url)
     throws IOException;
+  
+  public void startReply()
+    throws IOException
+  {
+  }
+  
+  public void completeReply()
+    throws IOException
+  {
+  }
+  
+  public void writeFault(String code, String message, Object detail)
+    throws IOException
+  {
+  }
+
+  public void flush()
+    throws IOException
+  {
+  }
+
+  public void close()
+    throws IOException
+  {
+  }
 }

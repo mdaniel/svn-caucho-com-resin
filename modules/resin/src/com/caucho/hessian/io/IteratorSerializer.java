@@ -71,13 +71,15 @@ public class IteratorSerializer extends AbstractSerializer {
   {
     Iterator iter = (Iterator) obj;
 
-    out.writeListBegin(-1, null);
+    boolean hasEnd = out.writeListBegin(-1, null);
 
     while (iter.hasNext()) {
       Object value = iter.next();
 
       out.writeObject(value);
     }
-    out.writeListEnd();
+
+    if (hasEnd)
+      out.writeListEnd();
   }
 }

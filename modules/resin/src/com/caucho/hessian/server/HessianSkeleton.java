@@ -62,6 +62,8 @@ import java.lang.reflect.InvocationTargetException;
 import com.caucho.services.server.AbstractSkeleton;
 import com.caucho.services.server.ServiceContext;
 
+import com.caucho.hessian.io.AbstractHessianInput;
+import com.caucho.hessian.io.AbstractHessianOutput;
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
 
@@ -95,11 +97,9 @@ public class HessianSkeleton extends AbstractSkeleton {
    * @param in the Hessian input stream
    * @param out the Hessian output stream
    */
-  public void invoke(HessianInput in, HessianOutput out)
+  public void invoke(AbstractHessianInput in, AbstractHessianOutput out)
     throws Throwable
   {
-    in.readCall();
-
     ServiceContext context = ServiceContext.getContext();
     
     String header;

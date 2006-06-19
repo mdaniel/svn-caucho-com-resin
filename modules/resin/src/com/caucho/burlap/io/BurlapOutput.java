@@ -315,15 +315,19 @@ public class BurlapOutput extends AbstractBurlapOutput {
    * &lt;/list>
    * </pre></code>
    */
-  public void writeListBegin(int length, String type)
+  public boolean writeListBegin(int length, String type)
     throws IOException
   {
     print("<list><type>");
+    
     if (type != null)
       print(type);
+    
     print("</type><length>");
     print(length);
     print("</length>");
+
+    return true;
   }
 
   /**

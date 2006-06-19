@@ -212,13 +212,27 @@ public class BasicDeserializer extends AbstractDeserializer {
     case DOUBLE_ARRAY:
     case STRING_ARRAY:
     {
-      if (in.readListStart() == 'N')
-        return null;
-      
-      String type = in.readType();
-      int length = in.readLength();
+      int code = in.readListStart();
 
-      return readList(in, length);
+      switch (code) {
+      case 'N':
+	return null;
+
+      case 0x10: case 0x11: case 0x12: case 0x13:
+      case 0x14: case 0x15: case 0x16: case 0x17:
+      case 0x18: case 0x19: case 0x1a: case 0x1b:
+      case 0x1c: case 0x1d: case 0x1e: case 0x1f:
+	int length = code - 0x10;
+	in.readInt();
+
+	return readLengthList(in, length);
+
+      default:
+	String type = in.readType();
+	length = in.readLength();
+
+	return readList(in, length);
+      }
     }
 
     default:
@@ -238,7 +252,7 @@ public class BasicDeserializer extends AbstractDeserializer {
 
         for (int i = 0; i < data.length; i++)
           data[i] = in.readBoolean();
-
+	
         in.readEnd();
 
         return data;
@@ -248,9 +262,9 @@ public class BasicDeserializer extends AbstractDeserializer {
 
         while (! in.isEnd())
           list.add(new Boolean(in.readBoolean()));
-
+	
         in.readEnd();
-        
+
         boolean []data = new boolean[list.size()];
         
         in.addRef(data);
@@ -270,7 +284,7 @@ public class BasicDeserializer extends AbstractDeserializer {
         
         for (int i = 0; i < data.length; i++)
           data[i] = (short) in.readInt();
-
+	
         in.readEnd();
 
         return data;
@@ -282,7 +296,7 @@ public class BasicDeserializer extends AbstractDeserializer {
           list.add(new Short((short) in.readInt()));
 
         in.readEnd();
-        
+
         short []data = new short[list.size()];
         for (int i = 0; i < data.length; i++)
           data[i] = ((Short) list.get(i)).shortValue();
@@ -303,7 +317,7 @@ public class BasicDeserializer extends AbstractDeserializer {
           data[i] = in.readInt();
 
         in.readEnd();
-
+	
         return data;
       }
       else {
@@ -312,8 +326,9 @@ public class BasicDeserializer extends AbstractDeserializer {
         while (! in.isEnd())
           list.add(new Integer(in.readInt()));
 
+
         in.readEnd();
-        
+	
         int []data = new int[list.size()];
         for (int i = 0; i < data.length; i++)
           data[i] = ((Integer) list.get(i)).intValue();
@@ -410,6 +425,8 @@ public class BasicDeserializer extends AbstractDeserializer {
         for (int i = 0; i < data.length; i++)
           data[i] = ((Double) list.get(i)).intValue();
 
+        in.readEnd();
+
         return data;
       }
     }
@@ -438,6 +455,8 @@ public class BasicDeserializer extends AbstractDeserializer {
         in.addRef(data);
         for (int i = 0; i < data.length; i++)
           data[i] = (String) list.get(i);
+
+        in.readEnd();
 
         return data;
       }
@@ -471,6 +490,88 @@ public class BasicDeserializer extends AbstractDeserializer {
 
         return data;
       }
+    }
+    
+    default:
+      throw new UnsupportedOperationException(String.valueOf(this));
+    }
+  }
+  
+  public Object readLengthList(AbstractHessianInput in, int length)
+    throws IOException
+  {
+    switch (_code) {
+    case BOOLEAN_ARRAY: {
+      boolean []data = new boolean[length];
+
+      in.addRef(data);
+
+      for (int i = 0; i < data.length; i++)
+	data[i] = in.readBoolean();
+
+      return data;
+    }
+    
+    case SHORT_ARRAY: {
+      short []data = new short[length];
+
+      in.addRef(data);
+        
+      for (int i = 0; i < data.length; i++)
+	data[i] = (short) in.readInt();
+
+      return data;
+    }
+    
+    case INTEGER_ARRAY: {
+      int []data = new int[length];
+
+      in.addRef(data);
+        
+      for (int i = 0; i < data.length; i++)
+	data[i] = in.readInt();
+
+      return data;
+    }
+    
+    case FLOAT_ARRAY: {
+      float []data = new float[length];
+      in.addRef(data);
+
+      for (int i = 0; i < data.length; i++)
+	data[i] = (float) in.readDouble();
+
+      return data;
+    }
+    
+    case DOUBLE_ARRAY: {
+      double []data = new double[length];
+      in.addRef(data);
+
+      for (int i = 0; i < data.length; i++)
+	data[i] = in.readDouble();
+
+      return data;
+    }
+    
+    case STRING_ARRAY: {
+      String []data = new String[length];
+      in.addRef(data);
+
+      for (int i = 0; i < data.length; i++)
+	data[i] = in.readString();
+
+      return data;
+    }
+    
+    case OBJECT_ARRAY: {
+      Object []data = new Object[length];
+      in.addRef(data);
+
+      for (int i = 0; i < data.length; i++)
+	data[i] = in.readObject();
+
+      return data;
     }
     
     default:

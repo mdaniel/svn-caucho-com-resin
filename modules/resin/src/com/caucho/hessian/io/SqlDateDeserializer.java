@@ -86,7 +86,30 @@ public class SqlDateDeserializer extends AbstractDeserializer {
     }
 
     in.readMapEnd();
-    
+
+    return create(initValue);
+  }
+  
+  public Object readObject(AbstractHessianInput in, String []fieldNames)
+    throws IOException
+  {
+    long initValue = Long.MIN_VALUE;
+
+    for (int i = 0; i < fieldNames.length; i++) {
+      String key = fieldNames[i];
+
+      if (key.equals("value"))
+	initValue = in.readUTCDate();
+      else
+	in.readObject();
+    }
+
+    return create(initValue);
+  }
+
+  private Object create(long initValue)
+    throws IOException
+  {
     if (initValue == Long.MIN_VALUE)
       throw new IOException(_cl.getName() + " expects name.");
 

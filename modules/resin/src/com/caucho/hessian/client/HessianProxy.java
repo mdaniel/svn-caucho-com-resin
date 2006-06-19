@@ -221,7 +221,7 @@ public class HessianProxy implements InvocationHandler {
     }
 
     try {
-      HessianOutput out = _factory.getHessianOutput(os);
+      AbstractHessianOutput out = _factory.getHessianOutput(os);
 
       out.call(methodName, args);
     

@@ -70,7 +70,9 @@ abstract public class AbstractHessianInput {
   /**
    * Initialize the Hessian stream with the underlying input stream.
    */
-  abstract public void init(InputStream is);
+  public void init(InputStream is)
+  {
+  }
 
   /**
    * Returns the call's method
@@ -91,6 +93,13 @@ abstract public class AbstractHessianInput {
   public HessianRemoteResolver getRemoteResolver()
   {
     return resolver;
+  }
+
+  /**
+   * Sets the serializer factory.
+   */
+  public void setSerializerFactory(SerializerFactory ser)
+  {
   }
 
   /**

@@ -64,6 +64,12 @@ public interface Deserializer {
   public Object readList(AbstractHessianInput in, int length)
     throws IOException;
   
+  public Object readLengthList(AbstractHessianInput in, int length)
+    throws IOException;
+  
   public Object readMap(AbstractHessianInput in)
+    throws IOException;
+  
+  public Object readObject(AbstractHessianInput in, String []fieldNames)
     throws IOException;
 }

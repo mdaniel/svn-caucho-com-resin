@@ -77,6 +77,8 @@ public class HessianOutput extends AbstractHessianOutput {
   protected OutputStream os;
   // map of references
   private IdentityHashMap _refs;
+  private int _version = 1;
+  
   /**
    * Creates a new Hessian output stream, initialized with an
    * underlying output stream.
@@ -106,6 +108,14 @@ public class HessianOutput extends AbstractHessianOutput {
 
     if (_serializerFactory == null)
       _serializerFactory = new SerializerFactory();
+  }
+
+  /**
+   * Sets the client's version.
+   */
+  public void setVersion(int version)
+  {
+    _version = version;
   }
 
   /**
@@ -140,7 +150,7 @@ public class HessianOutput extends AbstractHessianOutput {
     throws IOException
   {
     os.write('c');
-    os.write(1);
+    os.write(_version);
     os.write(0);
 
     os.write('m');
@@ -318,7 +328,7 @@ public class HessianOutput extends AbstractHessianOutput {
    * l b32 b24 b16 b8
    * </pre></code>
    */
-  public void writeListBegin(int length, String type)
+  public boolean writeListBegin(int length, String type)
     throws IOException
   {
     os.write('V');
@@ -335,6 +345,8 @@ public class HessianOutput extends AbstractHessianOutput {
       os.write(length >> 8);
       os.write(length);
     }
+
+    return true;
   }
 
   /**
