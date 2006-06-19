@@ -63,12 +63,6 @@ import com.caucho.quercus.env.CallbackFunction;
  * variables.
  */
 public class UrlRewriterCallback extends CallbackFunction {
-  private static final Logger log
-    = Logger.getLogger(OutputModule.class.getName());
-
-  private static HashMap<Env,UrlRewriterCallback> _instances =
-    new HashMap<Env,UrlRewriterCallback>();
-
   private StringBuilder _rewriterQuery = new StringBuilder();
   private ArrayList<String[]> _rewriterVars = new ArrayList<String[]>();
 

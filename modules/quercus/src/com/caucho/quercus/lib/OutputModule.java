@@ -32,10 +32,15 @@ package com.caucho.quercus.lib;
 import java.io.StringWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import java.util.Map;
 import java.util.HashMap;
 import java.util.logging.Logger;
+
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.GZIPOutputStream;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -66,6 +71,11 @@ import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Callback;
 import com.caucho.quercus.env.CallbackFunction;
 import com.caucho.quercus.env.OutputBuffer;
+import com.caucho.quercus.env.BinaryBuilderValue;
+import com.caucho.quercus.env.TempBufferStringValue;
+
+import com.caucho.vfs.TempStream;
+import com.caucho.vfs.StreamImplOutputStream;
 
 /**
  * PHP output routines.
@@ -75,11 +85,23 @@ public class OutputModule extends AbstractQuercusModule
   private static final L10N L = new L10N(OutputModule.class);
   private static final Logger log
     = Logger.getLogger(OutputModule.class.getName());
-  private static final StringValue HTTP_ACCEPT_ENCODING = 
-      new StringValueImpl("HTTP_ACCEPT_ENCODING");
+  private static final StringValue HTTP_ACCEPT_ENCODING 
+    = new StringValueImpl("HTTP_ACCEPT_ENCODING");
 
   private static final HashMap<String,StringValue> _iniMap
     = new HashMap<String,StringValue>();
+
+  // ob_gzhandler related variables/types
+  private enum Encoding {NONE, GZIP, DEFLATE};
+
+  private static class GZOutputPair {
+    public TempStream tempStream;
+    public OutputStream outputStream;
+  }
+
+  private static HashMap<Env,GZOutputPair> _gzOutputPairs 
+    = new HashMap<Env,GZOutputPair>();
+
 
   /**
    * Returns the default php.ini values.
@@ -140,8 +162,18 @@ public class OutputModule extends AbstractQuercusModule
   {
     OutputBuffer ob = env.getOutputBuffer();
 
-    if (ob != null)
+    if (ob != null) {
       ob.clean();
+
+      Callback callback = ob.getCallback();
+
+      if (callback != null) {
+        if (callback.getCallbackName().equals("ob_gzhandler"))
+          _gzOutputPairs.remove(env);
+
+        ob.setCallback(null);
+      }
+    }
 
     return env.popOutputBuffer();
   }
@@ -402,6 +434,19 @@ public class OutputModule extends AbstractQuercusModule
                                  @Optional int chunkSize,
                                  @Optional("true") boolean erase)
   {
+    if (callback.getCallbackName().equals("ob_gzhandler")) {
+      OutputBuffer ob = env.getOutputBuffer();
+
+      for (; ob != null; ob = ob.getNext()) {
+        Callback cb = ob.getCallback();
+
+        if (cb.getCallbackName().equals("ob_gzhandler")) {
+          env.warning(L.l("output handler 'ob_gzhandler' cannot be used twice"));
+          return false;
+        }
+      }
+    }
+    
     env.pushOutputBuffer(callback, chunkSize, erase);
 
     return true;
@@ -455,15 +500,15 @@ public class OutputModule extends AbstractQuercusModule
     return true;
   }
 
-  private enum Encoding {NONE, GZIP, DEFLATE};
   /**
    * Output buffering compatible callback that automatically compresses
-   * the output.  This is a very simple implementation of this idea.
-   * Specifically, repeated calls to this function (e.g. because of flushing
-   * the buffer twice, etc.) create multiple gzip/deflate headers.  This
-   * is the same functionality provided by the C-based PHP.
+   * the output.  The output of this function depends on the value of 
+   * state.  Specifically, if the PHP_OUTPUT_HANDLER_START bit is on
+   * in the state field, the function supplies a header with the output
+   * and initializes a gzip/deflate stream which will be used for 
+   * subsequent calls.
    */
-  public static Value ob_gzhandler(Env env, StringValue buffer, int mode)
+  public static Value ob_gzhandler(Env env, StringValue buffer, int state)
   {
     Encoding encoding = Encoding.NONE;
     Value _SERVER = env.getSpecialRef("_SERVER");
@@ -483,20 +528,62 @@ public class OutputModule extends AbstractQuercusModule
       }
     }
 
-    switch (encoding) {
-      case GZIP:
-        HttpModule.header(env, "Vary: Accept-Encoding", true, 0);
-        HttpModule.header(env, "Content-Encoding: gzip", true, 0);
-        AbstractFunction gzcompress = env.getFunction("gzencode");
-        return gzcompress.call(env, buffer);
-      case DEFLATE:
-        HttpModule.header(env, "Vary: Accept-Encoding", true, 0);
-        HttpModule.header(env, "Content-Encoding: deflate", true, 0);
-        AbstractFunction gzdeflate = env.getFunction("gzdeflate");
-        return gzdeflate.call(env, buffer);
+    if (encoding == Encoding.NONE)
+      return NullValue.NULL;
+
+    GZOutputPair pair = null;
+
+    if ((state & (1 << OutputBuffer.PHP_OUTPUT_HANDLER_START)) != 0) {
+      HttpModule.header(env, "Vary: Accept-Encoding", true, 0);
+
+      int encodingFlag = 0;
+
+      pair = new GZOutputPair();
+      pair.tempStream = new TempStream();
+      StreamImplOutputStream siout = 
+        new StreamImplOutputStream(pair.tempStream);
+
+      try {
+        if (encoding == Encoding.GZIP) {
+          HttpModule.header(env, "Content-Encoding: gzip", true, 0);
+
+          pair.outputStream = new GZIPOutputStream(siout);
+        } else if (encoding == Encoding.DEFLATE) {
+          HttpModule.header(env, "Content-Encoding: deflate", true, 0);
+
+          pair.outputStream = new DeflaterOutputStream(siout);
+        }
+      } catch (IOException e) {
+        return NullValue.NULL;
+      }
+
+      _gzOutputPairs.put(env, pair);
+    } else {
+      pair = _gzOutputPairs.get(env);
+      
+      if (pair == null)
+        return NullValue.NULL;
     }
-    
-    return buffer;
+
+    try {
+      pair.outputStream.write(buffer.toString().getBytes());
+      pair.outputStream.flush();
+
+      if ((state & (1 << OutputBuffer.PHP_OUTPUT_HANDLER_END)) != 0) {
+        pair.outputStream.close();
+
+        _gzOutputPairs.remove(env);
+      }
+      
+    } catch (IOException e) {
+      return NullValue.NULL;
+    }
+
+    Value result = new TempBufferStringValue(pair.tempStream.getHead());
+
+    pair.tempStream.discard();
+
+    return result;
   }
 
   static {
