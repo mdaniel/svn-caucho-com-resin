@@ -690,7 +690,7 @@ public final class SessionManager implements ObjectManager, AlarmListener {
   /**
    * Returns the index of this JVM in the ring.
    */
-  int getSrunIndex()
+  public int getSrunIndex()
   {
     return _srunIndex;
   }
@@ -698,7 +698,7 @@ public final class SessionManager implements ObjectManager, AlarmListener {
   /**
    * Returns the number of sruns in the cluster
    */
-  int getSrunLength()
+  public int getSrunLength()
   {
     return _srunLength;
   }
@@ -1150,57 +1150,61 @@ public final class SessionManager implements ObjectManager, AlarmListener {
   public String createSessionId(HttpServletRequest request,
                                 boolean create)
   {
-    String str;
     String id;
 
     do {
-      StringBuffer cb = new StringBuffer();
-      // this section is the host specific session index
-      // the most random bit is the high bit
-      int index = _srunIndex;
-
-      if (index < 0)
-        index = 0;
-
-      int length = _cookieLength;
-
-      addBackup(cb, index);
-
-      long random = RandomUtil.getRandomLong();
-
-      for (int i = 0; i < 11 && length-- > 0; i++) {
-        cb.append(convert(random));
-        random = random >> 6;
-      }
-
-      if (length > 0) {
-	long time = Alarm.getCurrentTime();
-	for (int i = 0; i < 7 && length-- > 0; i++) {
-	  cb.append(convert(time));
-	  time = time >> 6;
-	}
-      }
-
-      while (length > 0) {
-	random = RandomUtil.getRandomLong();
-	for (int i = 0; i < 11 && length-- > 0; i++) {
-	  cb.append(convert(random));
-	  random = random >> 6;
-	}
-      }
-
-      if (_isAppendServerIndex) {
-	cb.append('.');
-	cb.append(index);
-      }
-
-      id = cb.toString();
+      id = createSessionIdImpl();
     } while (create && getSession(id, 0, create, true) != null);
 
     if (id == null || id.equals(""))
       throw new RuntimeException();
 
     return id;
+  }
+
+  public String createSessionIdImpl()
+  {
+    StringBuffer cb = new StringBuffer();
+    // this section is the host specific session index
+    // the most random bit is the high bit
+    int index = _srunIndex;
+
+    if (index < 0)
+      index = 0;
+
+    int length = _cookieLength;
+
+    addBackup(cb, index);
+
+    long random = RandomUtil.getRandomLong();
+
+    for (int i = 0; i < 11 && length-- > 0; i++) {
+      cb.append(convert(random));
+      random = random >> 6;
+    }
+
+    if (length > 0) {
+      long time = Alarm.getCurrentTime();
+      for (int i = 0; i < 7 && length-- > 0; i++) {
+        cb.append(convert(time));
+        time = time >> 6;
+      }
+    }
+
+    while (length > 0) {
+      random = RandomUtil.getRandomLong();
+      for (int i = 0; i < 11 && length-- > 0; i++) {
+        cb.append(convert(random));
+        random = random >> 6;
+      }
+    }
+
+    if (_isAppendServerIndex) {
+      cb.append('.');
+      cb.append(index);
+    }
+
+    return cb.toString();
   }
 
   /**
@@ -1294,7 +1298,7 @@ public final class SessionManager implements ObjectManager, AlarmListener {
     return session;
   }
 
-  private boolean isInSessionGroup(String id)
+  public boolean isInSessionGroup(String id)
   {
     if (_srunLength == 0 || _srunGroup.length == 0)
       return true;
@@ -1372,7 +1376,7 @@ public final class SessionManager implements ObjectManager, AlarmListener {
       return '-';
   }
 
-  static int decode(int code)
+  public static int decode(int code)
   {
     return DECODE[code & 0x7f];
   }

@@ -59,6 +59,9 @@ import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
+import com.caucho.server.cluster.Cluster;
+import com.caucho.server.cluster.ClusterServer;
+
 import javax.script.ScriptContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -262,10 +265,10 @@ public final class Env {
     if (page != null) {
       _page.init(this);
       try {
-	_page.importDefinitions(this);
+        _page.importDefinitions(this);
       }
       catch (Throwable e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
     }
 
@@ -282,6 +285,15 @@ public final class Env {
                     _files,
                     _request,
                     getIniBoolean("magic_quotes_gpc"));
+    }
+
+    Cluster cluster = Cluster.getLocal();
+
+    if (cluster != null) {
+      ClusterServer selfServer = cluster.getSelfServer();
+
+      if (selfServer != null)
+        setIni("caucho.server_id", selfServer.getId());
     }
 
     _startTime = Alarm.getCurrentTime();
@@ -812,7 +824,7 @@ public final class Env {
    */
   public String generateSessionId()
   {
-    return _quercus.getSessionManager().createSessionId(this);
+    return _quercus.getQuercusSessionManager().createSessionId(this);
   }
 
   /**

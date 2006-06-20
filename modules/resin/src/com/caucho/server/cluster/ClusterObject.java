@@ -46,10 +46,11 @@ public class ClusterObject {
   private final StoreManager _storeManager;
   private final Store _store;
   private final String _storeId;
-  private final ObjectManager _objectManager;
   private final String _objectId;
 
   private final String _uniqueId;
+
+  private ObjectManager _objectManager;
 
   private boolean _isPrimary;
   private long _maxIdleTime;
@@ -100,6 +101,11 @@ public class ClusterObject {
     _isPrimary = isPrimary(_objectId);
 
     _expireInterval = getMaxIdleTime() + getAccessWindow();
+  }
+
+  public void setObjectManager(ObjectManager objectManager)
+  {
+    _objectManager = objectManager;
   }
 
   private boolean isPrimary(String id)

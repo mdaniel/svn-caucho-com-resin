@@ -55,6 +55,8 @@ import com.caucho.server.cluster.ObjectManager;
 import com.caucho.server.cluster.Store;
 import com.caucho.server.cluster.StoreManager;
 
+import com.caucho.server.session.SessionManager;
+
 import com.caucho.server.webapp.Application;
 
 import com.caucho.quercus.env.Env;
@@ -62,11 +64,11 @@ import com.caucho.quercus.env.SessionArrayValue;
 
 /**
  * Stripped down version of com.caucho.server.session.SessionManager,
- * customized to PHP instead of J2EE session.
+ * customized to PHP instead of J2EE sessions.
  */
-public class SessionManager implements ObjectManager, AlarmListener {
-  static protected final L10N L = new L10N(SessionManager.class);
-  static protected final Logger log = Log.open(SessionManager.class);
+public class QuercusSessionManager implements ObjectManager, AlarmListener {
+  static protected final L10N L = new L10N(QuercusSessionManager.class);
+  static protected final Logger log = Log.open(QuercusSessionManager.class);
 
   private static int FALSE = 0;
   private static int COOKIE = 1;
@@ -76,7 +78,6 @@ public class SessionManager implements ObjectManager, AlarmListener {
   private static int SET_TRUE = 1;
   private static int SET_FALSE = 2;
   
-  private static int DECODE[];
   // active sessions
   private LruCache<String,SessionArrayValue> _sessions;
   // total sessions
@@ -103,19 +104,11 @@ public class SessionManager implements ObjectManager, AlarmListener {
   private boolean _alwaysSaveSession;
   private boolean _saveOnlyOnShutdown;
 
-  private int _srunIndex;
-  private int _srunLength;
-
   private boolean _isModuloSessionId = false;
   private boolean _isAppendServerIndex = false;
   private boolean _isTwoDigitSessionIndex = false;
   
   private boolean _isClosed;
-
-  private String _distributionId;
-  private Cluster _cluster;
-  private ClusterServer _selfServer;
-  private ClusterServer []_srunGroup = new ClusterServer[0];
 
   private Alarm _alarm = new Alarm(this);
 
@@ -123,153 +116,34 @@ public class SessionManager implements ObjectManager, AlarmListener {
   private Object _statisticsLock = new Object();
   private long _sessionCreateCount;
   private long _sessionTimeoutCount;
-  private long _sessionInvalidateCount;
+
+  private SessionManager _sessionManager;
 
   /**
-   * Creates and initializes a new session manager
-   *
-   * @param app the web-app application
-   * @param registry the web-app configuration node
+   * Creates and initializes a new session manager.
    */
-  public SessionManager()
-  {
-    Application app = Application.getLocal();
-    
-    String hostName = app.getHostName();
-    String contextPath = app.getContextPath();
-    
-    if (hostName == null || hostName.equals(""))
-      hostName = "default";
-
-    String name = hostName + contextPath;
-
-    _distributionId = name;
-  }
-
-  /**
-   * Gets the cluster.
-   */
-  protected Cluster getCluster()
-  {
-    synchronized (this) {
-      if (_cluster == null) {
-        _cluster = Cluster.getLocal();
-
-        if (_cluster != null) {
-          _srunLength = _cluster.getServerList().length;
-
-          _selfServer = _cluster.getSelfServer();
-
-          if (_selfServer != null) {
-            _srunGroup = _cluster.getServerList();
-            _srunIndex = _selfServer.getIndex();
-          }
-        }
-      }
-    }
-
-    return _cluster;
-  }
-
-  /**
-   * Sets the persistent store.
-   */
-  public void setPersistentStore(JndiBuilder store)
-    throws javax.naming.NamingException, ConfigException
-  {
-    _storeManager = (StoreManager) store.getObject();
-
-    if (_storeManager == null)
-      throw new ConfigException(L.l("{0} is an unknown persistent store.",
-            store.getJndiName()));
-  }
-
-  /**
-   * Sets the tcp store.
-   */
-  public void setTcpStore(boolean isEnable)
-    throws Exception
-  {
-    setClusterStore(isEnable);
-  }
-
-  /**
-   * Sets the cluster store.
-   */
-  public void setClusterStore(boolean isEnable)
-    throws Exception
-  {
-    if (! isEnable)
-      return;
-    
-    Cluster cluster = getCluster();
-
-    if (cluster == null)
-      throw new ConfigException(L.l("<cluster-store> needs a defined <cluster>."));
-    
-    StoreManager store = cluster.getStore();
-
-    if (store == null)
-      throw new ConfigException(L.l("cluster-store in <session-config> requires a configured cluster-store in the <cluster>"));
-    
-    _storeManager = store;
-  }
-
-  /**
-   * Sets the cluster store.
-   */
-  public void setUsePersistentStore(boolean enable) 
-    throws Exception
-  {
-    if (! enable)
-      return;
-
-    Cluster cluster = getCluster();
-
-    if (cluster == null)
-      throw new ConfigException(L.l("<use-persistent-store> needs a defined <cluster>."));
-
-    StoreManager store = cluster.getStore();
-
-    if (store == null) {
-      try {
-        Context ic = new InitialContext();
-        store = (StoreManager) ic.lookup("java:comp/env/caucho/persistent-store");
-      } catch (Throwable e) {
-        log.log(Level.FINER, e.toString(), e);
-      }
-    }
-
-    if (store != null) {
-    }
-    else if (! Config.evalBoolean("${resin.isProfessional()}")) {
-      throw new ConfigException(L.l("use-persistent-store in <session-config> requires Resin professional."));
-    }
-    else
-      throw new ConfigException(L.l("use-persistent-store in <session-config> requires a configured <persistent-store> in the <server>"));
-
-    _storeManager = store;
-  }
-
-  public void start() 
+  public QuercusSessionManager()
   {
     _sessions = new LruCache<String,SessionArrayValue>(_sessionMax);
     _sessionIter = _sessions.values();
+  }
 
-    if (_cluster == null)
-      getCluster();
+  /**
+   * Sets the SessionManager for this QuercusSessionManager.
+   */
+  public void setSessionManager(SessionManager sessionManager)
+  {
+    _sessionManager = sessionManager;
 
-    if (_storeManager != null) {
-      _sessionStore = _storeManager.createStore(_distributionId, this);
-      _sessionStore.setMaxIdleTime(_sessionTimeout);
-
-      if (_alwaysLoadSession == SET_TRUE)
-        _sessionStore.setAlwaysLoad(true);
-      else if (_alwaysLoadSession == SET_FALSE)
-        _sessionStore.setAlwaysLoad(false);
-    }
+    // the session manager should already be started
+    _sessionStore = _sessionManager.getSessionStore();
 
     _alarm.queue(60000);
+  }
+
+  public SessionManager getSessionManager()
+  {
+    return _sessionManager;
   }
 
   /**
@@ -283,7 +157,7 @@ public class SessionManager implements ObjectManager, AlarmListener {
   {
     String id = oldId;
 
-    if (id == null || id.length() < 4 || ! isInSessionGroup(id))
+    if (id == null || id.length() < 4 || ! _sessionManager.isInSessionGroup(id))
       id = createSessionId(env);
 
     SessionArrayValue session = create(env, id, now);
@@ -309,51 +183,10 @@ public class SessionManager implements ObjectManager, AlarmListener {
    */
   public String createSessionId(Env env)
   {
-    String str;
     String id;
 
     do {
-      StringBuffer cb = new StringBuffer();
-      // this section is the host specific session index
-      // the most random bit is the high bit
-      int index = _srunIndex;
-
-      if (index < 0)
-        index = 0;
-
-      int length = _cookieLength;
-
-      addBackup(cb, index);
-
-      long random = RandomUtil.getRandomLong();
-
-      for (int i = 0; i < 11 && length-- > 0; i++) {
-        cb.append(convert(random));
-        random = random >> 6;
-      }
-
-      if (length > 0) {
-        long time = Alarm.getCurrentTime();
-        for (int i = 0; i < 7 && length-- > 0; i++) {
-          cb.append(convert(time));
-          time = time >> 6;
-        }
-      }
-
-      while (length > 0) {
-        random = RandomUtil.getRandomLong();
-        for (int i = 0; i < 11 && length-- > 0; i++) {
-          cb.append(convert(random));
-          random = random >> 6;
-        }
-      }
-
-      if (_isAppendServerIndex) {
-        cb.append('.');
-        cb.append(index);
-      }
-
-      id = cb.toString();
+      id = _sessionManager.createSessionIdImpl();
     } while (getSession(env, id, 0) != null);
 
     if (id == null || id.equals(""))
@@ -394,7 +227,7 @@ public class SessionManager implements ObjectManager, AlarmListener {
         return (SessionArrayValue)session.copy(env);
     }
     else if (now > 0 && _sessionStore != null) {
-      if (! isInSessionGroup(key))
+      if (! _sessionManager.isInSessionGroup(key))
         return null;
 
       session = create(env, key, now);
@@ -450,6 +283,12 @@ public class SessionManager implements ObjectManager, AlarmListener {
 
     if (_sessionStore != null) {
       ClusterObject clusterObject = _sessionStore.createClusterObject(key);
+
+      // make sure the object always saves - PHP references can make changes
+      // without directly calling on the session object
+      clusterObject.change(); 
+      clusterObject.setObjectManager(this);
+
       session.setClusterObject(clusterObject);
     }
 
@@ -539,11 +378,13 @@ public class SessionManager implements ObjectManager, AlarmListener {
           int sessionSrunIndex = -1; 
           char ch = session.getId().charAt(0);
 
-          if (_srunLength > 0)
-            sessionSrunIndex = decode(ch) % _srunLength;
+          if (_sessionManager.getSrunLength() > 0)
+            sessionSrunIndex = 
+              _sessionManager.decode(ch) % _sessionManager.getSrunLength();
 
           if (_storeManager == null ||
-              (sessionSrunIndex == _srunIndex && _srunIndex >= 0))
+              (sessionSrunIndex == _sessionManager.getSrunIndex() && 
+               _sessionManager.getSrunIndex() >= 0))
             session.invalidate();
         } catch (Throwable e) {
           log.log(Level.FINER, e.toString(), e);
@@ -607,75 +448,6 @@ public class SessionManager implements ObjectManager, AlarmListener {
       }
     }
   }
-
-  /**
-   * Adds the primary/backup/third digits to the session id.
-   */
-  private void addBackup(StringBuffer cb, int index)
-  {
-    long backupCode;
-
-    if (_selfServer != null)
-      backupCode = _selfServer.generateBackupCode();
-    else
-      backupCode = 0x000200010000L;
-    
-    addDigit(cb, (int) (backupCode & 0xffff));
-    addDigit(cb, (int) ((backupCode >> 16) & 0xffff));
-    addDigit(cb, (int) ((backupCode >> 32) & 0xffff));
-  }
-
-  private void addDigit(StringBuffer cb, int digit)
-  {
-    if (_srunLength <= 64 && ! _isTwoDigitSessionIndex)
-      cb.append(convert(digit));
-    else {
-      cb.append(convert(digit / 64));
-      cb.append(convert(digit));
-    }
-  }
-
-  private boolean isInSessionGroup(String id)
-  {
-    if (_srunLength == 0 || _srunGroup.length == 0)
-      return true;
-
-    int group = decode(id.charAt(0)) % _srunLength;
-
-    for (int i = _srunGroup.length - 1; i >= 0; i--) {
-      ClusterServer server = _srunGroup[i];
-      
-      if (server != null && group == server.getIndex())
-        return true;
-    }
-    
-    return false;
-  }
-
-  /**
-   * Converts an integer to a printable character
-   */
-  private static char convert(long code)
-  {
-    code = code & 0x3f;
-    
-    if (code < 26)
-      return (char) ('a' + code);
-    else if (code < 52)
-      return (char) ('A' + code - 26);
-    else if (code < 62)
-      return (char) ('0' + code - 52);
-    else if (code == 62)
-      return '_';
-    else
-      return '-';
-  }
-
-  static int decode(int code)
-  {
-    return DECODE[code & 0x7f];
-  }
-
 
   /**
    * True if sessions should always be saved.
@@ -774,14 +546,6 @@ public class SessionManager implements ObjectManager, AlarmListener {
   }
 
   /**
-   * Returns the invalidate sessions.
-   */
-  public long getSessionInvalidateCount()
-  {
-    return _sessionInvalidateCount;
-  }
-
-  /**
    * True if the server should reuse the current session id if the
    * session doesn't exist.
    */
@@ -813,35 +577,6 @@ public class SessionManager implements ObjectManager, AlarmListener {
   }
 
   /**
-   * Returns the owning server.
-   */
-  ClusterServer getServer(int index)
-  {
-    Cluster cluster = getCluster();
-    
-    if (cluster != null)
-      return cluster.getServer(index);
-    else
-      return null;
-  }
-  
-  /**
-   * Returns the index of this JVM in the ring.
-   */
-  int getSrunIndex()
-  {
-    return _srunIndex;
-  }
-  
-  /**
-   * Returns the number of sruns in the cluster
-   */
-  int getSrunLength()
-  {
-    return _srunLength;
-  }
-
-  /**
    * Returns true if the sessions are closed.
    */
   public boolean isClosed()
@@ -849,11 +584,6 @@ public class SessionManager implements ObjectManager, AlarmListener {
     return _isClosed;
   }
 
-
-  public String getDistributionId()
-  {
-    return _distributionId;
-  }
 
   /**
    * Returns the default session timeout in milliseconds.
@@ -897,24 +627,7 @@ public class SessionManager implements ObjectManager, AlarmListener {
   {
     _sessionMax = max;
   }
-
   
-  /**
-   * Returns the session store.
-   */
-  public Store getSessionStore()
-  {
-    return _sessionStore;
-  }
-
- /**
-   * Adds a session from the cache.
-   */
-  void addSession(SessionArrayValue session)
-  {
-    _sessions.put(session.getId(), session);
-  }
-
   /**
    * Removes a session from the cache and deletes it from the backing store,
    * if applicable.
@@ -991,11 +704,5 @@ public class SessionManager implements ObjectManager, AlarmListener {
   public void setCookieAppendServerIndex(boolean isAppend)
   {
     _isAppendServerIndex = isAppend;
-  }
-
-  static {
-    DECODE = new int[128];
-    for (int i = 0; i < 64; i++)
-      DECODE[(int) convert(i)] = i;
   }
 }

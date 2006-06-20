@@ -45,6 +45,10 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
+import com.caucho.server.session.SessionManager;
+
+import com.caucho.server.webapp.Application;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -320,6 +324,16 @@ public class QuercusServlet
   {
     if (_quercus == null)
       _quercus = new Quercus();
+
+    if (_quercus.getQuercusSessionManager().getSessionManager() == null) {
+      Application app = (Application) getServletContext();
+
+      if (app != null) {
+        SessionManager sm = app.getSessionManager();
+
+        _quercus.getQuercusSessionManager().setSessionManager(sm);
+      }
+    }
 
     return _quercus;
   }

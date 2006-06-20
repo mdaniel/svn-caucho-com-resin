@@ -30,18 +30,24 @@
 package com.caucho.quercus;
 
 import com.caucho.config.ConfigException;
-import com.caucho.quercus.lib.session.SessionManager;
+
+import com.caucho.quercus.lib.session.QuercusSessionManager;
+
 import com.caucho.quercus.env.*;
+
 import com.caucho.quercus.module.QuercusModule;
 import com.caucho.quercus.module.StaticFunction;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.ModuleInfo;
 import com.caucho.quercus.module.ModuleStartupListener;
 import com.caucho.quercus.module.ClassImplementation;
+
 import com.caucho.quercus.page.PageManager;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.quercus.page.InterpretedPage;
+
 import com.caucho.quercus.parser.QuercusParser;
+
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.quercus.program.JavaClassDef;
@@ -61,6 +67,8 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Depend;
+
+import com.caucho.server.session.SessionManager;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -85,7 +93,7 @@ public class Quercus {
   private static final Logger log = Log.open(Quercus.class);
 
   private final PageManager _pageManager;
-  private final SessionManager _sessionManager;
+  private final QuercusSessionManager _sessionManager;
 
   private ModuleContext _moduleContext = new ModuleContext();
 
@@ -163,8 +171,7 @@ public class Quercus {
     initStaticClassServices();
 
     _pageManager = new PageManager(this);
-    _sessionManager = new SessionManager();
-    _sessionManager.start();
+    _sessionManager = new QuercusSessionManager();
   }
 
   /**
@@ -175,7 +182,7 @@ public class Quercus {
     return _moduleContext;
   }
 
-  public SessionManager getSessionManager()
+  public QuercusSessionManager getQuercusSessionManager()
   {
     return _sessionManager;
   }

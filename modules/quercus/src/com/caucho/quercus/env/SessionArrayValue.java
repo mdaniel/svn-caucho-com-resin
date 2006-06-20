@@ -111,8 +111,13 @@ public class SessionArrayValue extends ArrayValueWrapper {
   {
     long accessTime = _accessTime;
 
-    return new SessionArrayValue(env, _id, accessTime,
-                                 (ArrayValue) getArray().copy(env, map));
+    SessionArrayValue theCopy = 
+      new SessionArrayValue(env, _id, accessTime,
+                            (ArrayValue) getArray().copy(env, map));
+
+    theCopy.setClusterObject(_clusterObject);
+
+    return theCopy;
   }
 
   /**
