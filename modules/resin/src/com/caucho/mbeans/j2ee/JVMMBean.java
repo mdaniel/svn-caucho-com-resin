@@ -35,7 +35,7 @@ import com.caucho.jmx.MBean;
  * Management interface for the JVM.
  */
 @MBean(j2eeType="JVM")
-public interface JVM extends J2EEManagedObject {
+public interface JVMMBean extends J2EEManagedObject {
   /**
    * Returns the java version
    */

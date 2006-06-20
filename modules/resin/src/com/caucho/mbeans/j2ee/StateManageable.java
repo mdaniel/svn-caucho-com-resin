@@ -30,7 +30,7 @@
 package com.caucho.mbeans.j2ee;
 
 /**
- * Base calss interface for managed objects that have lifecycle state management.
+ * Base class interface for managed objects that have lifecycle state management.
  *
  * {@link #getState()} returns an integer representing the current state.
  *

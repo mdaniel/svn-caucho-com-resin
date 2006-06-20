@@ -32,6 +32,7 @@ package com.caucho.mbeans.server;
 import com.caucho.jmx.MBeanAttribute;
 import com.caucho.jmx.MBeanAttributeCategory;
 import com.caucho.jmx.MBeanOperation;
+import com.caucho.jmx.Description;
 
 import java.util.Date;
 
@@ -43,73 +44,64 @@ public interface DeployControllerMBean
   /**
    * Returns the ObjectName.
    */
-  @MBeanAttribute(description="The JMX ObjectName for the MBean",
-                  category = MBeanAttributeCategory.CONFIGURATION)
+  @Description("The JMX ObjectName for the MBean")
   public String getObjectName();
 
   /**
    * Returns the startup mode, one of "default", "automatic", "lazy", or "manual".
    */
-  @MBeanAttribute(description="The startup-mode, one of `default', `automatic',"
-                              + " `lazy', or `manual'",
-                  category =MBeanAttributeCategory.CONFIGURATION)
+  @Description("The startup-mode, one of `default', `automatic', `lazy', or `manual'")
   public String getStartupMode();
 
   /**
    * Returns the redeploy mode, one of "default", "automatic", "lazy", or "manual".
    */
-  @MBeanAttribute(description="The redeploy-mode, one of `default', `automatic',"
-                              + " `lazy', or `manual'",
-                  category =MBeanAttributeCategory.CONFIGURATION)
+  @Description("The redeploy-mode, one of `default', `automatic', `lazy', or `manual'")
   public String getRedeployMode();
 
   /**
    * Returns the interval between redploy checks.
    */
-  @MBeanAttribute(description="The millisecond interval between checks for the"
-                              + " need to redeploy",
-                  category =MBeanAttributeCategory.CONFIGURATION)
+  @Description("The millisecond interval between checks for the need to redeploy")
   public long getRedeployCheckInterval();
 
   /**
    * Returns the controller's state.
    */
-  @MBeanAttribute(description="The lifecycle state",
-                  category =MBeanAttributeCategory.STATISTIC)
+  @Description("The lifecycle state")
   public String getState();
 
   /**
    * Returns the time the controller was last started.
    */
-  @MBeanAttribute(description="The time of the last start",
-                  category =MBeanAttributeCategory.STATISTIC)
+  @Description("The time of the last start")
   public Date getStartTime();
 
   /**
    * Starts the instance.
    */
-  @MBeanOperation(description="Start")
+  @Description("Start")
   public void start()
     throws Exception;
 
   /**
    * Stops the instance.
    */
-  @MBeanOperation(description="Stop")
+  @Description("Stop")
   public void stop()
     throws Exception;
 
   /**
    * Restarts the instance.
    */
-  @MBeanOperation(description="Restart (Stop then Start)")
+  @Description("Restart (Stop then Start)")
   public void restart()
     throws Exception;
 
   /**
    * Restarts the instance if any changes are detected.
    */
-  @MBeanOperation(description="Update")
+  @Description("Update")
   public void update()
     throws Exception;
 }

@@ -33,6 +33,8 @@ import com.caucho.jmx.MBeanAttribute;
 import com.caucho.jmx.MBeanAttributeCategory;
 import com.caucho.jmx.MBeanOperation;
 import com.caucho.jmx.MBeanParameter;
+import com.caucho.jmx.Description;
+import com.caucho.jmx.Name;
 
 /**
  * Management interface for the server.
@@ -41,151 +43,133 @@ public interface ServerMBean extends DeployControllerMBean {
   /**
    * Returns true if a {@link com.caucho.server.port.AbstractSelectManager} is enabled and active
    */
-  @MBeanAttribute(description="A SelectManager handles keepalive without requiring a thread",
-                  category=MBeanAttributeCategory.CONFIGURATION)
+  @Description("A SelectManager handles keepalive without requiring a thread")
   public boolean isSelectManager();
 
   /**
    * Returns the array of ports.
    */
-  @MBeanAttribute(description="Ports accept socket connections",
-                  category=MBeanAttributeCategory.CONFIGURATION)
+  @Description("Ports accept socket connections")
   public String []getPortObjectNames();
 
   /**
    * Returns the array of hosts.
    */
-  @MBeanAttribute(description="Hosts are containers that are uniquely identified"
-                              + " by the hostname used in making an HTTP request",
-                  category=MBeanAttributeCategory.CONFIGURATION)
+  @Description("Hosts are containers that are uniquely identified"
+               + " by the hostname used in making an HTTP request")
   public String []getHostObjectNames();
 
   /**
    * Returns the array of cluster.
    */
-  @MBeanAttribute(description="Cluster members are used for load balancing and"
-                              + " distributed sessions",
-                  category=MBeanAttributeCategory.CONFIGURATION)
+  @Description("Cluster members are used for load balancing and"
+               + " distributed sessions")
   public String []getClusterObjectNames();
 
   /**
    * Returns the current number of threads that are servicing requests.
    */
-  @MBeanAttribute(description="The current number of threads that are"
-                              + " servicing requests",
-                  category=MBeanAttributeCategory.STATISTIC)
+  @Description("The current number of threads that are servicing requests")
   public int getActiveThreadCount();
 
   /**
    * Returns the current number of connections that are in the keepalive
    * state and are using a thread to maintain the connection.
    */
-  @MBeanAttribute(description="The current number of connections that are" +
-                              " in the keepalive state and are using" +
-                              " a thread to maintain the connection",
-                  category=MBeanAttributeCategory.STATISTIC)
+  @Description("The current number of connections that are" +
+               " in the keepalive state and are using" +
+               " a thread to maintain the connection")
   public int getKeepaliveThreadCount();
 
   /**
    * Returns the current number of connections that are in the keepalive
    * state and are using select to maintain the connection.
    */
-  @MBeanAttribute(description="The current number of connections that are" +
-                              " in the keepalive state and are using" +
-                              " select to maintain the connection",
-                  category=MBeanAttributeCategory.STATISTIC)
+  @Description("The current number of connections that are" +
+               " in the keepalive state and are using" +
+               " select to maintain the connection")
   public int getKeepaliveSelectCount();
 
   /**
    * Returns the total number of requests serviced by the server
    * since it started.
    */
-  @MBeanAttribute(description="The total number of requests serviced by the"
-                              + " server since it started",
-                  category=MBeanAttributeCategory.STATISTIC)
+  @Description("The total number of requests serviced by the"
+               + " server since it started")
   public long getLifetimeRequestCount();
 
   /**
    * Returns the number of requests that have ended up in the keepalive state
    * for this server in it's lifetime.
    */
-  @MBeanAttribute(description="The total number of requests that have ended"
-                              + " up in the keepalive state",
-                  category=MBeanAttributeCategory.STATISTIC)
+  @Description("The total number of requests that have ended"
+               + " up in the keepalive state")
   public long getLifetimeKeepaliveCount();
 
   /**
    * The total number of connections that have terminated with
    * {@link com.caucho.vfs.ClientDisconnectException}.
    */
-  @MBeanAttribute(description="The total number of connections that have " +
-                              " terminated with a client disconnect",
-                  category=MBeanAttributeCategory.STATISTIC)
+  @Description("The total number of connections that have " +
+               " terminated with a client disconnect")
   long getLifetimeClientDisconnectCount();
 
   /**
    * Returns the total duration in milliseconds that requests serviced by
    * this server have taken.
    */
-  @MBeanAttribute(description="The total duration in milliseconds that"
-                              + " requests serviced by this service have taken",
-                  category=MBeanAttributeCategory.STATISTIC)
+  @Description("The total duration in milliseconds that"
+               + " requests serviced by this service have taken")
   long getLifetimeRequestTime();
 
   /**
    * Returns the total number of bytes that requests serviced by this
    * server have read.
    */
-  @MBeanAttribute(description="The total number of bytes that requests"
-                              + " serviced by this server have read",
-                  category=MBeanAttributeCategory.STATISTIC)
+  @Description("The total number of bytes that requests"
+               + " serviced by this server have read")
   long getLifetimeReadBytes();
 
   /**
    * Returns the total number of bytes that requests serviced by this
    * server have written.
    */
-  @MBeanAttribute(description="The total number of bytes that requests"
-                              + " serviced by this server have written",
-                  category=MBeanAttributeCategory.STATISTIC)
+  @Description("The total number of bytes that requests"
+               + " serviced by this server have written")
   long getLifetimeWriteBytes();
 
   /**
    * Returns the invocation cache hit count.
    */
-  @MBeanAttribute(description="The invocation cache is an internal cache used"
-                              + " by Resin to optimize the handling of urls",
-                  category=MBeanAttributeCategory.STATISTIC)
+  @Description("The invocation cache is an internal cache used"
+               + " by Resin to optimize the handling of urls")
   public long getInvocationCacheHitCount();
 
   /**
    * Returns the invocation cache miss count.
    */
-  @MBeanAttribute(description="The invocation cache is an internal cache used"
-                              + " by Resin to optimize the handling of urls",
-                  category=MBeanAttributeCategory.STATISTIC)
+  @Description("The invocation cache is an internal cache used"
+               + " by Resin to optimize the handling of urls")
   public long getInvocationCacheMissCount();
 
   /**
    * Returns the proxy cache hit count.
    */
-  @MBeanAttribute(description="The proxy cache is used to cache responses that"
-                              + " set appropriate HTTP headers",
-                  category=MBeanAttributeCategory.STATISTIC)
+  @Description("The proxy cache is used to cache responses that"
+               + " set appropriate HTTP headers")
   public long getProxyCacheHitCount();
 
   /**
    * Returns the proxy cache miss count.
    */
-  @MBeanAttribute(description="The proxy cache is used to cache responses that"
-                              + " set appropriate HTTP headers",
-                  category=MBeanAttributeCategory.STATISTIC)
+  @Description("The proxy cache is used to cache responses that"
+               + " set appropriate HTTP headers")
   public long getProxyCacheMissCount();
 
   /**
    * Clears the cache.
    */
-  @MBeanOperation(description="Clear the cache")
+  @Description("Clear the cache")
   public void clearCache();
 
   /**
@@ -194,14 +178,13 @@ public interface ServerMBean extends DeployControllerMBean {
    * @param hostRegexp the regexp to match the host.  Null matches all.
    * @param urlRegexp the regexp to match the url. Null matches all.
    */
-  @MBeanOperation(description="Selectively clear the cache using patterns")
+  @Description("Selectively clear the cache using patterns")
   public void clearCacheByPattern(
-    @MBeanParameter(name="hostRegexp",
-                    description="A regular expression that matches a host name,"
-                                + " null to match all host names")
+    @Name("hostRegexp")
+    @Description("A regular expression that matches a host name, null to match all host names")
     String hostRegexp,
-    @MBeanParameter(name="urlRegexp",
-                    description="A regular expression that matches a url,"
-                                + " null to match all urls")
+
+    @Name("urlRegexp")
+    @Description("A regular expression that matches a url, null to match all urls")
     String urlRegexp);
 }

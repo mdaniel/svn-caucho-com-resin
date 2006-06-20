@@ -33,6 +33,7 @@ import java.lang.ref.SoftReference;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.annotation.Annotation;
 
 import java.util.WeakHashMap;
 import java.util.ArrayList;
@@ -43,21 +44,7 @@ import java.util.TreeSet;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-import javax.management.DynamicMBean;
-import javax.management.MBeanInfo;
-import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanOperationInfo;
-import javax.management.MBeanConstructorInfo;
-import javax.management.MBeanNotificationInfo;
-import javax.management.NotificationBroadcaster;
-import javax.management.Attribute;
-import javax.management.AttributeList;
-import javax.management.NotCompliantMBeanException;
-import javax.management.AttributeNotFoundException;
-import javax.management.InvalidAttributeValueException;
-import javax.management.IntrospectionException;
-import javax.management.MBeanException;
-import javax.management.ReflectionException;
+import javax.management.*;
 
 /**
  * Resin implementation of StandardMBean.
@@ -65,22 +52,24 @@ import javax.management.ReflectionException;
 public class IntrospectionMBean implements DynamicMBean {
   private static final Logger log
     = Logger.getLogger(IntrospectionMBean.class.getName());
-  
+
   private static final Class[] NULL_ARG = new Class[0];
-  
+
   private static final Class _descriptionAnn;
-  
+  private static final Class _nameAnn;
+
   private static final WeakHashMap<Class,SoftReference<MBeanInfo>> _cachedInfo
     = new WeakHashMap<Class,SoftReference<MBeanInfo>>();
-  
+
   private Object _impl;
   private Class _mbeanInterface;
   private MBeanInfo _mbeanInfo;
 
-  private static final Comparator<MBeanNotificationInfo> MBEAN_NOTIFICATION_INFO_COMPARATOR
-    = new Comparator<MBeanNotificationInfo>() {
 
-    public int compare(MBeanNotificationInfo o1, MBeanNotificationInfo o2)
+  private static final Comparator<MBeanFeatureInfo> MBEAN_FEATURE_INFO_COMPARATOR
+    = new Comparator<MBeanFeatureInfo>() {
+
+    public int compare(MBeanFeatureInfo o1, MBeanFeatureInfo o2)
     {
       return o1.getName().compareTo(o2.getName());
     }
@@ -108,7 +97,7 @@ public class IntrospectionMBean implements DynamicMBean {
   {
     return _impl;
   }
-  
+
   /**
    * Returns an attribute value.
    */
@@ -119,35 +108,35 @@ public class IntrospectionMBean implements DynamicMBean {
       Method method = getGetMethod(attribute);
 
       if (method != null)
-	return method.invoke(_impl, (Object []) null);
+        return method.invoke(_impl, (Object []) null);
       else
-	throw new AttributeNotFoundException(attribute);
+        throw new AttributeNotFoundException(attribute);
     } catch (IllegalAccessException e) {
       throw new MBeanException(e);
     } catch (InvocationTargetException e) {
       if (e.getCause() instanceof Exception)
-	throw new ReflectionException((Exception) e.getCause());
+        throw new ReflectionException((Exception) e.getCause());
       else
-	throw (Error) e.getCause();
+        throw (Error) e.getCause();
     } catch (Throwable e) {
       throw new RuntimeException(e);
     }
   }
-  
+
   /**
    * Sets an attribute value.
    */
   public void setAttribute(Attribute attribute)
     throws AttributeNotFoundException, InvalidAttributeValueException,
-	   MBeanException, ReflectionException
+           MBeanException, ReflectionException
   {
     try {
       Method method = getSetMethod(attribute.getName(), attribute.getValue());
 
       if (method != null)
-	method.invoke(_impl, new Object[] { attribute.getValue() });
+        method.invoke(_impl, new Object[] { attribute.getValue() });
       else
-	throw new AttributeNotFoundException(attribute.getName());
+        throw new AttributeNotFoundException(attribute.getName());
     } catch (IllegalAccessException e) {
       throw new MBeanException(e);
     } catch (InvocationTargetException e) {
@@ -156,52 +145,52 @@ public class IntrospectionMBean implements DynamicMBean {
       throw new RuntimeException(e.toString());
     }
   }
-  
+
   /**
    * Returns matching attribute values.
    */
   public AttributeList getAttributes(String []attributes)
   {
     AttributeList list = new AttributeList();
-    
+
     for (int i = 0; i < attributes.length; i++) {
       try {
-	Method method = getGetMethod(attributes[i]);
+        Method method = getGetMethod(attributes[i]);
 
-	if (method != null) {
-	  Object value = method.invoke(_impl, (Object []) null);
-	  
-	  list.add(new Attribute(attributes[i], value));
-	}
+        if (method != null) {
+          Object value = method.invoke(_impl, (Object []) null);
+
+          list.add(new Attribute(attributes[i], value));
+        }
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
-    
+
     return list;
   }
-  
+
   /**
    * Sets attribute values.
    */
   public AttributeList setAttributes(AttributeList attributes)
   {
     AttributeList list = new AttributeList();
-    
+
     for (int i = 0; i < attributes.size(); i++) {
       try {
-	Attribute attr = (Attribute) attributes.get(i);
-	Method method = getSetMethod(attr.getName(), attr.getValue());
+        Attribute attr = (Attribute) attributes.get(i);
+        Method method = getSetMethod(attr.getName(), attr.getValue());
 
-	if (method != null) {
-	  method.invoke(_impl, new Object[] { attr.getValue() });
-	  list.add(new Attribute(attr.getName(), attr.getValue()));
-	}
+        if (method != null) {
+          method.invoke(_impl, new Object[] { attr.getValue() });
+          list.add(new Attribute(attr.getName(), attr.getValue()));
+        }
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
-    
+
     return list;
   }
 
@@ -217,13 +206,13 @@ public class IntrospectionMBean implements DynamicMBean {
 
     for (int i = 0; i < methods.length; i++) {
       if (! methods[i].getName().equals(getName) &&
-	  ! methods[i].getName().equals(isName))
-	continue;
+          ! methods[i].getName().equals(isName))
+        continue;
 
       Class []args = methods[i].getParameterTypes();
 
       if (args.length == 0 && ! methods[i].getReturnType().equals(void.class))
-	return methods[i];
+        return methods[i];
     }
 
     return null;
@@ -240,24 +229,24 @@ public class IntrospectionMBean implements DynamicMBean {
 
     for (int i = 0; i < methods.length; i++) {
       if (! methods[i].getName().equals(name))
-	continue;
+        continue;
 
       Class []args = methods[i].getParameterTypes();
 
       if (args.length != 1)
-	continue;
+        continue;
 
       /*
       if (value != null && ! args[0].isAssignableFrom(value.getClass()))
 	continue;
       */
-      
+
       return methods[i];
     }
 
     return null;
   }
-  
+
   /**
    * Invokes a method on the bean.
    */
@@ -271,42 +260,42 @@ public class IntrospectionMBean implements DynamicMBean {
 
       int length = 0;
       if (signature != null)
-	length = signature.length;
+        length = signature.length;
       if (params != null)
-	length = params.length;
-      
+        length = params.length;
+
       for (int i = 0; i < methods.length; i++) {
-	if (! methods[i].getName().equals(actionName))
-	  continue;
+        if (! methods[i].getName().equals(actionName))
+          continue;
 
-	Class []args = methods[i].getParameterTypes();
+        Class []args = methods[i].getParameterTypes();
 
-	if (args.length != length)
-	  continue;
+        if (args.length != length)
+          continue;
 
-	boolean isMatch = true;
-	for (int j = length - 1; j >= 0; j--) {
-	  if (! args[j].getName().equals(signature[j]))
-	    isMatch = false;
-	}
+        boolean isMatch = true;
+        for (int j = length - 1; j >= 0; j--) {
+          if (! args[j].getName().equals(signature[j]))
+            isMatch = false;
+        }
 
-	if (isMatch)
-	  return methods[i].invoke(_impl, params);
+        if (isMatch)
+          return methods[i].invoke(_impl, params);
       }
 
       if (actionName.equals("hashCode") && signature.length == 0)
-	return _impl.hashCode();
+        return _impl.hashCode();
       else if (actionName.equals("toString") && signature.length == 0)
-	return _impl.toString();
+        return _impl.toString();
       else
-	return null;
+        return null;
     } catch (IllegalAccessException e) {
       throw new MBeanException(e);
     } catch (InvocationTargetException e) {
       if (e.getCause() instanceof Exception)
-	throw new ReflectionException((Exception) e.getCause());
+        throw new ReflectionException((Exception) e.getCause());
       else
-	throw (Error) e.getCause();
+        throw (Error) e.getCause();
     }
   }
 
@@ -326,54 +315,67 @@ public class IntrospectionMBean implements DynamicMBean {
       MBeanInfo info = null;
 
       if (infoRef != null && (info = infoRef.get()) != null)
-	return info;
-      
+        return info;
+
       String className = cl.getName();
 
-      TreeSet<IntrospectionMBeanAttributeInfo> attributes
-        = new TreeSet<IntrospectionMBeanAttributeInfo>();
+      TreeSet<MBeanAttributeInfo> attributes
+        = new TreeSet<MBeanAttributeInfo>(MBEAN_FEATURE_INFO_COMPARATOR);
 
       ArrayList<MBeanConstructorInfo> constructors
         = new ArrayList<MBeanConstructorInfo>();
 
-      TreeSet<IntrospectionMBeanOperationInfo> operations
-        = new TreeSet<IntrospectionMBeanOperationInfo>();
+      TreeSet<MBeanOperationInfo> operations
+        = new TreeSet<MBeanOperationInfo>(MBEAN_FEATURE_INFO_COMPARATOR);
 
       Method []methods = cl.getMethods();
       for (int i = 0; i < methods.length; i++) {
-	Method method = methods[i];
+        Method method = methods[i];
 
-	String methodName = method.getName();
-	Class []args = method.getParameterTypes();
-	Class retType = method.getReturnType();
-      
-	if (methodName.startsWith("get") && args.length == 0 &&
-	    ! retType.equals(void.class)) {
-	  String name = methodName.substring(3);
+        String methodName = method.getName();
+        Class []args = method.getParameterTypes();
+        Class retType = method.getReturnType();
 
-	  Method setter = getSetter(methods, name, retType);
-	
-	  attributes.add(new IntrospectionMBeanAttributeInfo(name, method, setter));
-	}
-	else if (methodName.startsWith("is") && args.length == 0 &&
-	    (retType.equals(boolean.class) ||
-	     retType.equals(Boolean.class))) {
-	  String name = methodName.substring(2);
+        if (methodName.startsWith("get") && args.length == 0 &&
+            ! retType.equals(void.class)) {
+          String name = methodName.substring(3);
 
-	  Method setter = getSetter(methods, name, retType);
-	
-	  attributes.add(new IntrospectionMBeanAttributeInfo(name, method, setter));
-	}
-	else if (methodName.startsWith("set") && args.length == 1) {
-	  String name = methodName.substring(3);
+          Method setter = getSetter(methods, name, retType);
 
-	  Method getter = getGetter(methods, name, args[0]);
+          attributes.add(new MBeanAttributeInfo(name,
+                                                getDescription(method),
+                                                method,
+                                                setter));
+        }
+        else if (methodName.startsWith("is") && args.length == 0 &&
+                 (retType.equals(boolean.class) ||
+                  retType.equals(Boolean.class))) {
+          String name = methodName.substring(2);
 
-	  if (getter == null)
-	    attributes.add(new IntrospectionMBeanAttributeInfo(name, method, null));
-	}
-	else {
-	  operations.add(new IntrospectionMBeanOperationInfo(method));
+          Method setter = getSetter(methods, name, retType);
+
+          attributes.add(new MBeanAttributeInfo(name,
+                                                getDescription(method),
+                                                method,
+                                                setter));
+        }
+        else if (methodName.startsWith("set") && args.length == 1) {
+          String name = methodName.substring(3);
+
+          Method getter = getGetter(methods, name, args[0]);
+
+          if (getter == null)
+            attributes.add(new MBeanAttributeInfo(name,
+                                                  getDescription(method),
+                                                  method,
+                                                  null));
+        }
+        else {
+          operations.add(new MBeanOperationInfo(getName(method),
+                                                getDescription(method),
+                                                getSignature(method),
+                                                method.getReturnType().getName(),
+                                                MBeanOperationInfo.UNKNOWN));
         }
       }
 
@@ -381,18 +383,18 @@ public class IntrospectionMBean implements DynamicMBean {
         = new ArrayList<MBeanNotificationInfo>();
 
       if (obj instanceof NotificationBroadcaster) {
-	NotificationBroadcaster broadcaster;
-	broadcaster = (NotificationBroadcaster) obj;
+        NotificationBroadcaster broadcaster;
+        broadcaster = (NotificationBroadcaster) obj;
 
-	MBeanNotificationInfo[] notifs = broadcaster.getNotificationInfo();
+        MBeanNotificationInfo[] notifs = broadcaster.getNotificationInfo();
 
-	if (notifs != null) {
+        if (notifs != null) {
           for (int i = 0; i < notifs.length; i++)
             notifications.add((MBeanNotificationInfo) notifs[i].clone());
-	}
+        }
       }
 
-      Collections.sort(notifications, MBEAN_NOTIFICATION_INFO_COMPARATOR);
+      Collections.sort(notifications, MBEAN_FEATURE_INFO_COMPARATOR);
 
       MBeanAttributeInfo []attrArray = new MBeanAttributeInfo[attributes.size()];
       attributes.toArray(attrArray);
@@ -403,11 +405,12 @@ public class IntrospectionMBean implements DynamicMBean {
       MBeanNotificationInfo []notifArray = new MBeanNotificationInfo[notifications.size()];
       notifications.toArray(notifArray);
 
-      info = new IntrospectionMBeanInfo(cl,
-                                        attrArray,
-                                        conArray,
-                                        opArray,
-                                        notifArray);
+      info = new MBeanInfo(cl.getName(),
+                           getDescription(cl),
+                           attrArray,
+                           conArray,
+                           opArray,
+                           notifArray);
 
       _cachedInfo.put(cl, new SoftReference<MBeanInfo>(info));
 
@@ -454,18 +457,18 @@ public class IntrospectionMBean implements DynamicMBean {
 
     for (int i = 0; i < methods.length; i++) {
       if (! methods[i].getName().equals(getName) &&
-	  ! methods[i].getName().equals(isName))
-	continue;
+          ! methods[i].getName().equals(isName))
+        continue;
 
       Class []args = methods[i].getParameterTypes();
 
       if (args.length != 0)
-	continue;
+        continue;
 
       Class retType = methods[i].getReturnType();
 
       if (! retType.equals(type))
-	continue;
+        continue;
 
       return methods[i];
     }
@@ -473,11 +476,23 @@ public class IntrospectionMBean implements DynamicMBean {
     return null;
   }
 
-  static Class getDescriptionClass()
+  /**
+   * Returns the class's description.
+   */
+  static String getDescription(Class cl)
   {
-    return _descriptionAnn;
+    try {
+      Description desc = (Description) cl.getAnnotation(_descriptionAnn);
+
+      if (desc != null)
+        return desc.value();
+      else
+        return "";
+    } catch (Throwable e) {
+      return "";
+    }
   }
-  
+
   /**
    * Returns the method's description.
    */
@@ -487,12 +502,53 @@ public class IntrospectionMBean implements DynamicMBean {
       Description desc = (Description) method.getAnnotation(_descriptionAnn);
 
       if (desc != null)
-	return desc.value();
+        return desc.value();
       else
-	return "";
+        return "";
     } catch (Throwable e) {
       return "";
     }
+  }
+
+  /**
+   * Returns the method's name, the optional {@link Name} annotation overrides.
+   */
+  static String getName(Method method)
+  {
+    try {
+      Name name = (Name) method.getAnnotation(_nameAnn);
+
+      if (name != null)
+        return name.value();
+      else
+        return method.getName();
+    } catch (Throwable e) {
+      return method.getName();
+    }
+  }
+
+  private static MBeanParameterInfo[] getSignature(Method method)
+  {
+    Class[] params = method.getParameterTypes();
+    MBeanParameterInfo[] paramInfos = new MBeanParameterInfo[params.length];
+
+    for (int i = 0; i < params.length; i++) {
+      Class  cl = params[i];
+
+      String name = "p" + i;
+      String description = "";
+
+      for (Annotation ann : method.getParameterAnnotations()[i]) {
+        if (ann instanceof Name)
+          name = ((Name) ann).value();
+        else if (ann instanceof Description)
+          description = ((Description) ann).value();
+      }
+
+      paramInfos[i] = new MBeanParameterInfo(name, cl.getName(), description);
+    }
+
+    return paramInfos;
   }
 
   private static Class findClass(String name)
@@ -506,5 +562,6 @@ public class IntrospectionMBean implements DynamicMBean {
 
   static {
     _descriptionAnn = findClass("com.caucho.jmx.Description");
+    _nameAnn = findClass("com.caucho.jmx.Name");
   }
 }

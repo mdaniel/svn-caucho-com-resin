@@ -57,7 +57,7 @@ public interface J2EEServer extends J2EEManagedObject {
   public String []getDeployedResources();
 
   /**
-   * Returns the ObjectNames of the {@link JVM}
+   * Returns the ObjectNames of the {@link JVMMBean}
    * management beans for each virtual machine on which
    * this J2EEServer has running threads.
    */

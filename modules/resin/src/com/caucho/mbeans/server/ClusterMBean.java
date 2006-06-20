@@ -30,6 +30,7 @@ package com.caucho.mbeans.server;
 
 import com.caucho.jmx.MBeanAttribute;
 import com.caucho.jmx.MBeanAttributeCategory;
+import com.caucho.jmx.Description;
 
 import javax.management.ObjectName;
 
@@ -51,8 +52,7 @@ public interface ClusterMBean {
   /**
    * Returns the {@link ObjectName} of the mbean.
    */
-  @MBeanAttribute(description="The JMX ObjectName for the MBean",
-                  category=MBeanAttributeCategory.CONFIGURATION)
+  @Description("The JMX ObjectName for the MBean")
   public String getObjectName();
 
   /**
@@ -61,11 +61,10 @@ public interface ClusterMBean {
    * inbound connections from a load balancer or from other
    " members of the cluster.
    */
-  @MBeanAttribute(description="The port that is active for this instance." +
-                              " Connections to the port are inbound" +
-                              " connections from a load balancer or from other" +
-                              " members of the cluster",
-                  category=MBeanAttributeCategory.CONFIGURATION)
+  @Description("The port that is active for this instance." +
+               " Connections to the port are inbound" +
+               " connections from a load balancer or from other" +
+               " members of the cluster")
   public String getPortObjectName();
 
   /**
@@ -74,10 +73,9 @@ public interface ClusterMBean {
    * are used to create outbound connections to communicate with
    * members of the cluster.
    */
-  @MBeanAttribute(description="The ClusterClients that are used to create" +
-                              " outbound connections to communicate with" +
-                              " members of the cluster",
-                  category=MBeanAttributeCategory.CONFIGURATION)
+  @Description("The ClusterClients that are used to create" +
+               " outbound connections to communicate with" +
+               " members of the cluster")
   public String []getClientObjectNames();
 
 }

@@ -19,46 +19,23 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
-package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.MBean;
+package com.caucho.jmx;
 
-/**
- * J2EE Domain
- */
-@MBean(j2eeType="J2EEDomain")
-public interface J2EEDomain extends J2EEManagedObject {
-  /**
-   * For example, <tt>j2ee:j2eeType=J2EEDomain,name=default</tt>
-   */
-  public String getObjectName();
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-  /**
-   * Returns the servers running in this domain
-   */
-  public String []getServers();
-
-  /**
-   * For J2EEDomain this is a special case.  If true, the domain
-   * supports event notifications and the J2EEDomain managed object
-   * emits notifications from all events providers in the domain.
-   *
-   * <h3>Events specifric to this managed object</h2>
-   * <dl>
-   * <dt>j2ee.object.created
-   * <dd>occurs when the managed object is created
-   * <dt>j2ee.object.deleted
-   * <dd>occurs when the managed object is deleted
-   * </dl>
-   * @return
-   */
-  boolean isEventProvider();
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Name {
+  public String value();
 }

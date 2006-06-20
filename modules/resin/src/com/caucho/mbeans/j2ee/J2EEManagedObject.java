@@ -35,15 +35,12 @@ import com.caucho.jmx.MBean;
  * Base class management interface for all managed objects.
  */
 public interface J2EEManagedObject {
-  /**
-   * Returns the object name
-   */
   public String getObjectName();
 
   /**
    * Returns true if the state is manageable
    */
-  public boolean getStateManageable();
+  public boolean isStateManageable();
 
   /**
    * Returns true if the object provides statistics
@@ -53,5 +50,5 @@ public interface J2EEManagedObject {
   /**
    * Returns true if the object provides events
    */
-  public boolean isEventsProvider();
+  public boolean isEventProvider();
 }

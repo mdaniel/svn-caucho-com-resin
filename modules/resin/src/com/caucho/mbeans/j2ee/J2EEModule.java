@@ -34,7 +34,7 @@ package com.caucho.mbeans.j2ee;
  */
 public interface J2EEModule extends J2EEDeployedObject {
   /**
-   * Returns the ObjectNames of the {@link JVM}
+   * Returns the ObjectNames of the {@link JVMMBean}
    * management beans for each virtual machine on which
    * this Module has running threads.
    */
