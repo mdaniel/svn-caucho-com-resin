@@ -81,11 +81,6 @@ public interface BinaryInput extends BinaryStream {
     throws IOException;
 
   /**
-   * Returns true on the end of file.
-   */
-  public boolean isEOF();
-
-  /**
    * Returns the current location in the stream
    */
   public long getPosition();

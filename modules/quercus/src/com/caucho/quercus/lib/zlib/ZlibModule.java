@@ -34,6 +34,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import java.util.Collection;
+
 import java.util.logging.*;
 
 import java.util.zip.*;
@@ -51,6 +53,7 @@ import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.TempBufferStringValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.ServerArrayValue;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.NotNull;
@@ -170,8 +173,9 @@ public class ZlibModule extends AbstractQuercusModule {
   }
 
   /**
-   * outputs uncompressed bytes directly to browser, writes a warning message if an error occurred
-   * Note: PHP5 is supposed to print an error message but doesn't do it in practice
+   * outputs uncompressed bytes directly to browser, writes a warning message
+   *   if an error has occured
+   * Note: PHP5 is supposed to print an error message but it doesn't do it
    *
    * @param env
    * @param fileName
@@ -252,12 +256,12 @@ public class ZlibModule extends AbstractQuercusModule {
   /**
    * Returns true if the GZip stream is ended.
    */
-  public boolean gzeof(@NotNull BinaryInput is)
+  public boolean gzeof(@NotNull BinaryStream bs)
   {
-    if (is == null)
+    if (bs == null)
       return true;
 
-    return is.isEOF();
+    return bs.isEOF();
   }
 
   /**
@@ -317,12 +321,108 @@ public class ZlibModule extends AbstractQuercusModule {
     return FileModule.fgetss(env, is, length, allowedTags);
   }
 
+  /**
+   * Rewinds the stream to the very beginning
+   */
   public boolean gzrewind(@NotNull BinaryInput is)
   {
     if (is == null)
       return false;
 
     return is.setPosition(0);
+  }
+
+  /**
+   * Set stream position to the offset
+   * @param offset absolute position to set stream to
+   * @return 0 upon success, else -1 for error
+   */
+  public int gzseek(@NotNull BinaryStream bs, long offset)
+  {
+    if (bs == null)
+      return -1;
+    if (bs.setPosition(offset) == false)
+      return -1;
+    if (bs.getPosition() != offset)
+      return -1;
+
+    return 0;
+  }
+
+  /**
+   * Gets the current position in the stream
+   * @return the position in the stream, or FALSE for error
+   */
+  public Value gztell(@NotNull BinaryStream bs)
+  {
+    if (bs == null)
+      return BooleanValue.FALSE;
+    return new LongValue(bs.getPosition());
+  }
+
+  /**
+   * Prints out the remaining data in the stream to stdout
+   */
+  public Value gzpassthru(Env env, @NotNull BinaryInput is)
+  {
+    WriteStream out = env.getOut();
+    TempBuffer tb = TempBuffer.allocate();
+    byte[] buffer = tb.getBuffer();
+
+    int length = 0;
+    try {
+      int sublen = is.read(buffer, 0, buffer.length);
+      while (sublen > 0) {
+        out.write(buffer, 0, sublen);
+        length += sublen;
+        sublen = is.read(buffer, 0, buffer.length);
+      }
+
+      return new LongValue(length);
+
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return BooleanValue.FALSE;
+
+    } finally {
+      TempBuffer.free(tb);
+    }
+  }
+
+  /**
+   * Returns the encoding type both allowed by the server
+   *   and supported by the user's browser.
+   */
+  public Value zlib_get_coding_type(Env env)
+  {
+    String ini = env.getIniString("zlib.output_compression");
+
+    if (ini == null || ini == "")
+      return BooleanValue.FALSE;
+
+    //zlib_get_coding_type can also be an integer > 0
+    if (! ini.equalsIgnoreCase("on")) {
+      try {
+        if (Integer.parseInt(ini) <= 0)
+          return BooleanValue.FALSE;
+      } catch (NumberFormatException e) {
+        return BooleanValue.FALSE;
+      }
+    }
+
+    ServerArrayValue sav = new ServerArrayValue(env);
+    Value val = sav.get(new StringValueImpl("HTTP_ACCEPT_ENCODING"));
+
+    if (!val.isset())
+      return BooleanValue.FALSE;
+
+    String s = val.toString();
+    if (s.contains("gzip"))
+      return new StringValueImpl("gzip");
+    else if(s.contains("deflate"))
+      return new StringValueImpl("deflate");
+    else return BooleanValue.FALSE;
   }
 
   /**
@@ -577,7 +677,8 @@ public class ZlibModule extends AbstractQuercusModule {
    * Helper function to retrieve the filemode closest to the end
    * Note: PHP5 unexpectedly fails when 'x' is the mode.
    *
-   * XXX todo: toss a warning if '+' is found (gzip cannot be open for both reading and writing at the same time)
+   * XXX todo: toss a warning if '+' is found
+   *    (gzip cannot be open for both reading and writing at the same time)
    *
    */
   private static String getFileMode(String input)
@@ -610,8 +711,8 @@ public class ZlibModule extends AbstractQuercusModule {
   }
 
   /**
-   * Helper function to retrieve the compression level like how PHP5 does it.
-   * 	1. finds the compression level nearest to the end and returns that
+   * Helper function to retrieve the compression level
+   *     - finds the compression level nearest to the end and returns that
    */
   private static int getCompressionLevel(String input)
   {
@@ -626,8 +727,8 @@ public class ZlibModule extends AbstractQuercusModule {
   }
 
   /**
-   * Helper function to retrieve the compression strategy like how PHP5 does it.
-   * 	1. finds the compression strategy nearest to the end and returns that
+   * Helper function to retrieve the compression strategy.
+   *     - finds the compression strategy nearest to the end and returns that
    */
   private static int getCompressionStrategy(String input)
   {

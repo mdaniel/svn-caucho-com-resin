@@ -36,6 +36,8 @@ import java.util.zip.CRC32;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 
+import com.caucho.quercus.QuercusModuleException;
+
 import com.caucho.quercus.lib.file.BinaryOutput;
 import com.caucho.quercus.lib.file.AbstractBinaryOutput;
 
@@ -61,7 +63,7 @@ public class ZlibOutputStream extends AbstractBinaryOutput {
 
   private int _encodingMode;
   private boolean _isGzip;
-  private int _inputSize;
+  private long _inputSize;
 
   /**
    * Writes gzip header to OutputStream upon construction.
@@ -212,9 +214,6 @@ public class ZlibOutputStream extends AbstractBinaryOutput {
     close();
   }
   
-  /**
-   * Calls super function, which in turn closes the underlying 'in' stream
-   */
   public void close()
   {
     try {
@@ -230,6 +229,46 @@ public class ZlibOutputStream extends AbstractBinaryOutput {
       _os.close();
     } catch (IOException e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Returns false always for an write stream.
+   */
+  public boolean isEOF()
+  {
+    return false;
+  }
+
+  /**
+   * Tells the position in the gzip stream
+   */
+  public long getPosition()
+  {
+    return _inputSize;
+  }
+
+  /**
+   * Sets the position.
+   */
+  public boolean setPosition(long offset)
+  {
+    if (offset < _inputSize)
+      return false;
+
+    offset -= _inputSize;
+    byte[] buffer = new byte[128];
+
+    try {
+      while (offset > 0) {
+        int sublen = (int)Math.min(offset, buffer.length);
+        write(buffer, 0, sublen);
+        offset -= sublen;
+      }
+
+      return true;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
     }
   }
 

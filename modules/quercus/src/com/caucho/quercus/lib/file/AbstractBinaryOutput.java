@@ -138,5 +138,29 @@ abstract public class AbstractBinaryOutput
   public void close()
   {
   }
+
+  /**
+   * Returns false always for output streams
+   */
+  public boolean isEOF()
+  {
+    return false;
+  }
+
+  /**
+   * Tells the position in the stream
+   */
+  public long getPosition()
+  {
+    return 0;
+  }
+
+  /**
+   * Sets the position.
+   */
+  public boolean setPosition(long offset)
+  {
+    return false;
+  }
 }
 

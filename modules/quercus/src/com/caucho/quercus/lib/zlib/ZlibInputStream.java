@@ -50,6 +50,7 @@ import com.caucho.vfs.Vfs;
 public class ZlibInputStream extends ReadStreamInput {
   private BinaryInput _in;
   private GZIPInputStream _gzIn;
+  private long _position;
   
   public ZlibInputStream(BinaryInput in) throws IOException
   {
@@ -60,12 +61,22 @@ public class ZlibInputStream extends ReadStreamInput {
     throws IOException
   {
     _in = in;
-    
-    _gzIn = new GZIPInputStream(in.getInputStream());
-    
-    ReadStream is = Vfs.openRead(_gzIn);
+    _position = 0;
 
-    init(is);
+    ReadStream rs;
+
+    // Try opening a GZIP stream.
+    // If error, then try opening uncompressed stream.
+    try {
+      _gzIn = new GZIPInputStream(in.getInputStream());
+      rs = Vfs.openRead(_gzIn);
+    } catch (IOException e) {
+      _in = in.openCopy();
+      in.close();
+      rs = Vfs.openRead(_in.getInputStream());
+    }
+
+    init(rs);
   }
 
   /**

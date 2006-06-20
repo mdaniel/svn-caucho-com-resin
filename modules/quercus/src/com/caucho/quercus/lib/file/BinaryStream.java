@@ -39,4 +39,19 @@ public interface BinaryStream {
    * All streams can be closed.
    */
   public void close();
+
+  /**
+   * Tells the position in the stream
+   */
+  public long getPosition();
+
+  /**
+   * Sets the position.
+   */
+  public boolean setPosition(long offset);
+
+  /**
+   * Returns true if end-of-file has been reached
+   */
+  public boolean isEOF();
 }

@@ -85,5 +85,7 @@ public interface BinaryOutput extends BinaryStream {
    * Closes the stream.
    */
   public void close();
+
+
 }
 
