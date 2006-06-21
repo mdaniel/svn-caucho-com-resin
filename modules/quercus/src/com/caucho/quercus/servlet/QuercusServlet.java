@@ -331,7 +331,7 @@ public class QuercusServlet
       if (app != null) {
         SessionManager sm = app.getSessionManager();
 
-        _quercus.getQuercusSessionManager().setSessionManager(sm);
+        _quercus.getQuercusSessionManager().setSessionManager(sm, app);
       }
     }
 

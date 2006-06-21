@@ -234,13 +234,16 @@ public class SessionArrayValue extends ArrayValueWrapper {
     if (count < 0)
       throw new IllegalStateException();
 
-
     try {
       ClusterObject clusterObject = _clusterObject;
 
-      if (clusterObject != null)
-        clusterObject.store(this);
+      if (clusterObject != null) {
+        // make sure the object always saves - PHP references can make changes
+        // without directly calling on the session object
+        clusterObject.change(); 
 
+        clusterObject.store(this);
+      }
     } catch (Throwable e) {
       log.log(Level.WARNING, "Can't serialize session", e);
     }

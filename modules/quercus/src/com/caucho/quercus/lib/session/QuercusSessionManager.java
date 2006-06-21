@@ -119,6 +119,8 @@ public class QuercusSessionManager implements ObjectManager, AlarmListener {
 
   private SessionManager _sessionManager;
 
+  private Application _app;
+
   /**
    * Creates and initializes a new session manager.
    */
@@ -131,14 +133,46 @@ public class QuercusSessionManager implements ObjectManager, AlarmListener {
   /**
    * Sets the SessionManager for this QuercusSessionManager.
    */
-  public void setSessionManager(SessionManager sessionManager)
+  public void setSessionManager(SessionManager sessionManager, Application app)
   {
     _sessionManager = sessionManager;
 
-    // the session manager should already be started
-    _sessionStore = _sessionManager.getSessionStore();
+    _app = app;
 
     _alarm.queue(60000);
+  }
+
+  private StoreManager getStoreManager()
+  {
+    if (_storeManager == null) {
+      Cluster cluster = Cluster.getLocal();
+
+      if (cluster != null)
+        _storeManager = cluster.getStore();
+    }
+
+    return _storeManager;
+  }
+
+  private Store getSessionStore()
+  {
+    if (_sessionStore == null) {
+      StoreManager manager = getStoreManager();
+
+      if (manager != null) {
+        String hostName = _app.getHostName();
+        String contextPath = _app.getContextPath();
+
+        if (hostName == null || hostName.equals(""))
+          hostName = "default";
+
+        String storeId = hostName + contextPath + "-PHP";
+
+        _sessionStore = manager.createStore(storeId, this);
+      }
+    }
+
+    return _sessionStore;
   }
 
   public SessionManager getSessionManager()
@@ -169,7 +203,7 @@ public class QuercusSessionManager implements ObjectManager, AlarmListener {
       _sessionCreateCount++;
     }
 
-    if (_sessionStore != null && id.equals(oldId))
+    if (getSessionStore() != null && id.equals(oldId))
       load(session, now);
     
     return session;
@@ -226,7 +260,7 @@ public class QuercusSessionManager implements ObjectManager, AlarmListener {
       if (session.inUse())
         return (SessionArrayValue)session.copy(env);
     }
-    else if (now > 0 && _sessionStore != null) {
+    else if (now > 0 && getSessionStore() != null) {
       if (! _sessionManager.isInSessionGroup(key))
         return null;
 
@@ -281,12 +315,9 @@ public class QuercusSessionManager implements ObjectManager, AlarmListener {
     if (! key.equals(session.getId()))
       throw new IllegalStateException(key + " != " + session.getId());
 
-    if (_sessionStore != null) {
-      ClusterObject clusterObject = _sessionStore.createClusterObject(key);
+    if (getSessionStore() != null) {
+      ClusterObject clusterObject = getSessionStore().createClusterObject(key);
 
-      // make sure the object always saves - PHP references can make changes
-      // without directly calling on the session object
-      clusterObject.change(); 
       clusterObject.setObjectManager(this);
 
       session.setClusterObject(clusterObject);
@@ -344,8 +375,8 @@ public class QuercusSessionManager implements ObjectManager, AlarmListener {
       long now = Alarm.getCurrentTime();
       long accessWindow = 0;
 
-      if (_sessionStore != null)
-        accessWindow = _sessionStore.getAccessWindowTime();
+      if (getSessionStore() != null)
+        accessWindow = getSessionStore().getAccessWindowTime();
 
       synchronized (_sessions) {
         _sessionIter = _sessions.values(_sessionIter);
@@ -382,7 +413,7 @@ public class QuercusSessionManager implements ObjectManager, AlarmListener {
             sessionSrunIndex = 
               _sessionManager.decode(ch) % _sessionManager.getSrunLength();
 
-          if (_storeManager == null ||
+          if (getStoreManager() == null ||
               (sessionSrunIndex == _sessionManager.getSrunIndex() && 
                _sessionManager.getSrunIndex() >= 0))
             session.invalidate();
@@ -636,9 +667,9 @@ public class QuercusSessionManager implements ObjectManager, AlarmListener {
   {
     _sessions.remove(sessionId);
 
-    if (_sessionStore != null) {
+    if (getSessionStore() != null) {
       try {
-        _sessionStore.remove(sessionId);
+        getSessionStore().remove(sessionId);
       } catch (Exception e) {
         log.log(Level.WARNING, e.toString(), e);
       }
