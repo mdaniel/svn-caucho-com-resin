@@ -32,5 +32,10 @@ package com.caucho.mbeans.j2ee;
 /**
  * Base class management interface for enterpise java beans.
  */
-public interface EJB extends J2EEManagedObject {
+public class EJB extends J2EEManagedObject {
+  protected String getName()
+  {
+    // XXX:
+    return null;
+  }
 }

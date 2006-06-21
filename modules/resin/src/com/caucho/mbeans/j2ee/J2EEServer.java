@@ -29,14 +29,31 @@
 
 package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.MBean;
+import com.caucho.Version;
+import com.caucho.server.cluster.Cluster;
 
 /**
  * Management interface for a J2EE server.
  * The J2EEServer corresponds to one instance of the product.
  */
-@MBean(j2eeType="J2EEServer")
-public interface J2EEServer extends J2EEManagedObject {
+public class J2EEServer extends J2EEManagedObject {
+  static String getLocalName()
+  {
+    String name = Cluster.getLocal().getId();
+
+    return (name == null || name.length() == 0) ? "default" : name;
+  }
+
+  protected String getName()
+  {
+    return getLocalName();
+  }
+
+  protected String getJ2EEApplication()
+  {
+    return null;
+  }
+
   /**
    * Returns the ObjectNames of the
    * {@link J2EEApplication}, {@link AppClientModule},
@@ -44,7 +61,15 @@ public interface J2EEServer extends J2EEManagedObject {
    * {@link WebModule}
    * management beans for this server.
    */
-  public String []getDeployedObjects();
+  public String []getDeployedObjects()
+  {
+    return queryObjectNames("j2eeType=J2EEApplciation,*",
+                            "j2eeType=AppClientModule,*",
+                            "j2eeType=ResourceAdapterModule,*",
+                            "j2eeType=EJBModule,*",
+                            "j2eeType=WebModule,*"
+                            );
+  }
 
   /**
    * Returns the ObjectNames of the
@@ -54,22 +79,43 @@ public interface J2EEServer extends J2EEManagedObject {
    * {@link RMI_IIOPResource}, {and @link URLResource},
    * management beans for this server.
    */
-  public String []getDeployedResources();
+  public String []getResources()
+  {
+    return queryObjectNames("j2eeType=JCAResource,*",
+                            "j2eeType=JavaMailResource,*",
+                            "j2eeType=JDBCResource,*",
+                            "j2eeType=JMSResource,*",
+                            "j2eeType=JNDIResource,*",
+                            "j2eeType=JTAResource,*",
+                            "j2eeType=RMI_IIOPResource,*",
+                            "j2eeType=URLResource,*"
+                            );
+  }
 
   /**
-   * Returns the ObjectNames of the {@link JVMMBean}
+   * Returns the ObjectNames of the {@link JVM}
    * management beans for each virtual machine on which
    * this J2EEServer has running threads.
    */
-  public String []getJavaVMs();
+  public String []getJavaVMs()
+  {
+    return queryObjectNames("j2eeType=JVM,*");
+  }
 
   /**
    * Returns the server vendor
    */
-  public String getServerVendor();
+  public String getServerVendor()
+  {
+    return "Caucho Technology, Inc.";
+  }
 
   /**
    * Returns the server version
    */
-  public String getServerVersion();
+  public String getServerVersion()
+  {
+    return Version.FULL_VERSION;
+  }
+
 }

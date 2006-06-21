@@ -32,11 +32,14 @@ package com.caucho.mbeans.j2ee;
 /**
  * Base class management interface for modules.
  */
-public interface J2EEModule extends J2EEDeployedObject {
+abstract public class J2EEModule extends J2EEDeployedObject {
   /**
-   * Returns the ObjectNames of the {@link JVMMBean}
+   * Returns the ObjectNames of the {@link JVM}
    * management beans for each virtual machine on which
    * this Module has running threads.
    */
-  public String []getJavaVMs();
+  public String []getJavaVMs()
+  {
+    return queryObjectNames("j2eeType=JVM,*");
+  }
 }

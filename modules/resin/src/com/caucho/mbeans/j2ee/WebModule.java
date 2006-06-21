@@ -29,16 +29,30 @@
 
 package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.MBean;
-
 /**
  * Management interface for a web module (WAR).
  */
-@MBean(j2eeType="WebModule")
-public interface WebModule extends J2EEModule {
+public class WebModule extends J2EEModule {
+  protected String getName()
+  {
+    // XXX:
+    return null;
+  }
+
+  public String getDeploymentDescriptor()
+  {
+    // XXX:
+    return "";
+  }
+
   /**
    * Returns the ObjectNames of the {@link Servlet}
    * management beans that are contained within this web module.
    */
-  public String []getServlets();
+  public String []getServlets()
+  {
+    // XXX:
+    return new String[] {};
+  }
+
 }

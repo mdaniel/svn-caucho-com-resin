@@ -29,12 +29,16 @@
 
 package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.MBean;
-
 /**
  * Management interface for a message driven bean.
  */
-@MBean(j2eeType="MessageDrivenBean")
-public class MessageDrivenBean {
+public class MessageDrivenBean extends EJB
+{
+  protected String getName()
+  {
+    // XXX:
+    return null;
+  }
+
   // no attributes
 }

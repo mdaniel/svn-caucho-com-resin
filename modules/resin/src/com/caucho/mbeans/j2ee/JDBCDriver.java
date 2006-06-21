@@ -29,12 +29,15 @@
 
 package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.MBean;
-
 /**
  * Management interface for a JDBC driver.
  */
-@MBean(j2eeType="JDBCDriver")
-public interface JDBCDriver extends J2EEManagedObject {
+public class JDBCDriver extends J2EEManagedObject {
   // no attributes
+
+  protected String getName()
+  {
+    // XXX:
+    return null;
+  }
 }

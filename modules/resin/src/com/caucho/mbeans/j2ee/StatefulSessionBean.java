@@ -29,12 +29,15 @@
 
 package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.MBean;
-
 /**
  * Management interface for a stateful session bean.
  */
-@MBean(j2eeType="StatefulSessionBean")
-public interface StatefulSessionBean extends EJB {
+public class StatefulSessionBean extends EJB {
+  protected String getName()
+  {
+    // XXX:
+    return null;
+  }
+
   // no attributes
 }

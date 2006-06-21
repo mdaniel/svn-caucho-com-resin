@@ -29,12 +29,16 @@
 
 package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.MBean;
-
 /**
  * Management interface for a JTA resource.
  */
-@MBean(j2eeType="JTAResource")
-public interface JTAResource extends J2EEResource {
+public class JTAResource extends J2EEResource {
+  protected String getName()
+  {
+    // XXX:
+
+    return null;
+  }
+
   // no attributes
 }

@@ -29,12 +29,15 @@
 
 package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.MBean;
-
 /**
  * Management interface for a URL resource.
  */
-@MBean(j2eeType="URLResource")
-public interface URLResource extends J2EEResource {
+public class URLResource extends J2EEResource {
+  protected String getName()
+  {
+    // XXX:
+    return null;
+  }
+
   // no attributes
 }

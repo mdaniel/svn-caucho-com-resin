@@ -29,16 +29,29 @@
 
 package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.MBean;
-
 /**
  * Management interface for a resource adapter module (RAR).
  */
-@MBean(j2eeType="ResourceAdapterModule")
-public interface ResourceAdapterModule extends J2EEModule {
+public class ResourceAdapterModule extends J2EEModule {
+  protected String getName()
+  {
+    // XXX:
+    return null;
+  }
+
+  public String getDeploymentDescriptor()
+  {
+    // XXX:
+    return "";
+  }
+
   /**
    * Returns the ObjectNames of the {@link ResourceAdapter}
    * management beans that are contained within this application.
    */
-  public String []getServlets();
+  public String []getServlets()
+  {
+    // XXX:
+    return new String[] {};
+  }
 }

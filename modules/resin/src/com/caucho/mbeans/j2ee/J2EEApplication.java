@@ -29,16 +29,29 @@
 
 package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.MBean;
-
 /**
  * Management interface for a J2EE Application (EAR).
  */
-@MBean(j2eeType="J2EEApplciation")
-public interface J2EEApplication extends J2EEDeployedObject {
+public class J2EEApplication extends J2EEDeployedObject {
+  protected String getName()
+  {
+    // XXX:
+    return null;
+  }
+
+  public String getDeploymentDescriptor()
+  {
+    // XXX:
+    return "";
+  }
+
   /**
    * Returns the ObjectNames of the {@link J2EEModule}
    * management beans that are contained within this application.
    */
-  public String []getModules();
+  public String []getModules()
+  {
+    return new String[] {};
+  }
+
 }

@@ -29,16 +29,23 @@
 
 package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.MBean;
-
 /**
  * Management interface for a JCA resource.
  */
-@MBean(j2eeType="JCAResource")
-public interface JCAResource extends J2EEResource {
+public class JCAResource extends J2EEResource {
+  protected String getName()
+  {
+    // XXX:
+    return null;
+  }
+
   /**
    * Returns the ObjectNames of the {@link JCAConnectionFactory}
    * management beans that are contained within this resource.
    */
-  public String []getConnectionFactories();
+  public String []getConnectionFactories()
+  {
+    // XXX:
+    return new String[] {};
+  }
 }

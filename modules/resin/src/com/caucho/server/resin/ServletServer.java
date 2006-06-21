@@ -67,23 +67,23 @@ import com.caucho.server.port.Port;
 import com.caucho.server.port.ProtocolDispatchServer;
 import com.caucho.server.webapp.Application;
 import com.caucho.server.webapp.ErrorPage;
-import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.server.webapp.RewriteInvocation;
+import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
 import com.caucho.util.ThreadPool;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
+import com.caucho.mbeans.j2ee.J2EEAdmin;
+import com.caucho.mbeans.j2ee.J2EEServer;
 
-import javax.management.ObjectName;
 import javax.resource.spi.ResourceAdapter;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Collections;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -135,7 +135,9 @@ public class ServletServer extends ProtocolDispatchServer
   private volatile boolean _isStartedPorts;
 
   private final Lifecycle _lifecycle;
-  
+
+  private final J2EEAdmin _j2eeServerAdmin = new J2EEAdmin(new J2EEServer());
+
   /**
    * Creates a new servlet server.
    */
@@ -928,13 +930,15 @@ public class ServletServer extends ProtocolDispatchServer
 	}
       }
 
+      _j2eeServerAdmin.start();
+
       if (! _isBindPortsAtEnd) {
 	bindPorts();
 
 	if (_controller != null)
 	  _controller.setuid();
       }
-      
+
       _lifecycle.toActive();
 
       _classLoader.start();
@@ -1269,13 +1273,15 @@ public class ServletServer extends ProtocolDispatchServer
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }
-      
+
+      _j2eeServerAdmin.stop();
+
       try {
         _classLoader.stop();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }
-      
+
       _lifecycle.toStop();
     } finally {
       thread.setContextClassLoader(oldLoader);

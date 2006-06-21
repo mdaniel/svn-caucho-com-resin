@@ -29,18 +29,25 @@
 
 package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.MBean;
-
 /**
  * Management interface for a resource adpater.
  */
-@MBean(j2eeType="ResourceAdapter")
-public interface ResourceAdapter
+public class ResourceAdapter
   extends J2EEManagedObject
 {
+  protected String getName()
+  {
+    // XXX:
+    return null;
+  }
+
   /**
    * Returns the ObjectName of the {@link JCAResource}
    * management bean that is associated with this resource adapter.
    */
-  public String getJcaResource();
+  public String getJcaResource()
+  {
+    // XXX:
+    return null;
+  }
 }

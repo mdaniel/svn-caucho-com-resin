@@ -29,9 +29,12 @@
 
 package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.MBean;
+public class Servlet extends J2EEManagedObject {
+  protected String getName()
+  {
+    // XXX:
+    return null;
+  }
 
-@MBean(j2eeType="Servlet")
-public class Servlet {
   // no attributes
 }

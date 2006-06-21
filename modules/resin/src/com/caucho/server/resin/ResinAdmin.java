@@ -31,7 +31,6 @@ package com.caucho.server.resin;
 import com.caucho.util.CauchoSystem;
 import com.caucho.util.L10N;
 import com.caucho.mbeans.server.ResinMBean;
-import com.caucho.mbeans.j2ee.JVMMBean;
 
 import javax.management.ObjectName;
 import java.util.Date;
@@ -142,21 +141,6 @@ public class ResinAdmin
     _resinServer.destroy();
   }
 
-  public String getJavaVersion()
-  {
-    return System.getProperty("java.version");
-  }
-
-  public String getJavaVendor()
-  {
-    return System.getProperty("java.vendor");
-  }
-
-  public String getNode()
-  {
-    return getLocalHost();
-  }
-  
   public String toString()
   {
     return "ResinServerAdmin[" + getObjectName() + "]";

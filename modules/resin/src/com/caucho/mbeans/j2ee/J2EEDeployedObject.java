@@ -29,18 +29,27 @@
 
 package com.caucho.mbeans.j2ee;
 
+import com.caucho.server.cluster.Cluster;
+
+import javax.management.ObjectName;
+import javax.management.MalformedObjectNameException;
+
 /**
  * Base class management interface for deployed objects.
  */
-public interface J2EEDeployedObject extends J2EEManagedObject {
+abstract public class J2EEDeployedObject extends J2EEManagedObject {
   /**
    * The original XML deployment descriptor that was created for this
    * object.
    */
-  public String getDeploymentDescriptor();
+  abstract public String getDeploymentDescriptor();
+
   /**
    * Returns the ObjectName of the {@link J2EEServer}
    * management bean on which this object is deployed.
    */
-  public String getServer();
+  public String getServer()
+  {
+    return "j2ee:j2eeType=J2EEServer,name=" + J2EEServer.getLocalName();
+  }
 }

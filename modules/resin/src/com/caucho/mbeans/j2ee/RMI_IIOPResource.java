@@ -29,12 +29,15 @@
 
 package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.MBean;
-
 /**
  * Management interface for a RMI_IIOP resource.
  */
-@MBean(j2eeType="RMI_IIOPResource")
-public interface RMI_IIOPResource extends J2EEResource {
+public class RMI_IIOPResource extends J2EEResource {
+  protected String getName()
+  {
+    // XXX:
+    return null;
+  }
+
   // no attributes
 }

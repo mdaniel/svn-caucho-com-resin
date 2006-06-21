@@ -29,20 +29,6 @@
 
 package com.caucho.server.resin;
 
-import java.security.Provider;
-import java.security.Security;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.servlet.jsp.el.VariableResolver;
-import javax.management.ObjectName;
-import javax.management.MalformedObjectNameException;
-
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.types.Bytes;
@@ -51,15 +37,18 @@ import com.caucho.config.types.Period;
 import com.caucho.el.EL;
 import com.caucho.el.MapVariableResolver;
 import com.caucho.el.SystemPropertiesResolver;
+import com.caucho.jmx.Jmx;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.lifecycle.LifecycleState;
-
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.EnvironmentProperties;
+import com.caucho.mbeans.j2ee.J2EEAdmin;
+import com.caucho.mbeans.j2ee.J2EEDomain;
+import com.caucho.mbeans.j2ee.JVM;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.ServerListener;
 import com.caucho.transaction.cfg.TransactionManagerConfig;
@@ -69,7 +58,15 @@ import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
-import com.caucho.jmx.Jmx;
+
+import javax.servlet.jsp.el.VariableResolver;
+import java.security.Provider;
+import java.security.Security;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ResinServer
   implements EnvironmentBean, SchemaBean,
@@ -80,7 +77,6 @@ public class ResinServer
   private static final String OBJECT_NAME= "resin:type=Resin";
 
   private static ResinServer _resinServer;
-
 
   private final EnvironmentLocal<String> _serverIdLocal =
     new EnvironmentLocal<String>("caucho.server-id");
@@ -104,6 +100,10 @@ public class ResinServer
   private SecurityManager _securityManager;
 
   private HashMap<String,Object> _variableMap = new HashMap<String,Object>();
+
+  private final J2EEAdmin _j2eeDomainAdmin = new J2EEAdmin(new J2EEDomain());
+  private final J2EEAdmin _jvmAdmin = new J2EEAdmin(new JVM());
+
 
   private ArrayList<ServerController> _servers
     = new ArrayList<ServerController>();
@@ -498,6 +498,9 @@ public class ResinServer
 
     long start = Alarm.getCurrentTime();
 
+    _j2eeDomainAdmin.start();
+    _jvmAdmin.start();
+
     // force a GC on start
     System.gc();
 
@@ -588,6 +591,9 @@ public class ResinServer
 
         listener.closeEvent(this);
       }
+
+      _j2eeDomainAdmin.stop();
+      _jvmAdmin.stop();
 
       Environment.closeGlobal();
     } finally {

@@ -29,16 +29,29 @@
 
 package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.MBean;
-
 /**
  * Management interface for an ejb module.
  */
-@MBean(j2eeType="EJBModule")
-public interface EJBModule extends J2EEModule {
+public class EJBModule extends J2EEModule {
+  protected String getName()
+  {
+    // XXX:
+    return null;
+  }
+
+  public String getDeploymentDescriptor()
+  {
+    // XXX:
+    return "";
+  }
+
   /**
    * Returns the ObjectNames of the {@link EJB}
    * management beans that are contained within this application.
    */
-  public String []getEJbs();
+  public String []getEJbs()
+  {
+    // XXX:
+    return new String[] {};
+  }
 }

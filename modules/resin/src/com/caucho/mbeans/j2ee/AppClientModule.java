@@ -29,9 +29,18 @@
 
 package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.MBean;
+public class AppClientModule extends J2EEModule {
+  protected String getName()
+  {
+    // XXX:
+    return null;
+  }
 
-@MBean(j2eeType="AppClientModule")
-public interface AppClientModule extends J2EEModule {
+  public String getDeploymentDescriptor()
+  {
+    // XXX:
+    return "";
+  }
+
   // no attributes
 }

@@ -29,12 +29,15 @@
 
 package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.MBean;
-
 /**
  * Management interface for an entity bean.
  */
-@MBean(j2eeType="EntityBean")
-public interface EntityBean extends EJB {
+public class EntityBean extends EJB {
+  protected String getName()
+  {
+    // XXX:
+    return null;
+  }
+
   // no attributes
 }

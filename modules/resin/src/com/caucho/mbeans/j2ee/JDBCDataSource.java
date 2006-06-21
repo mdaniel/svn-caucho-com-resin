@@ -29,16 +29,23 @@
 
 package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.MBean;
-
 /**
  * Management interface for a JDBC data source.
  */
-@MBean(j2eeType="JDBCDataSource")
-public interface JDBCDataSource extends J2EEManagedObject {
+public class JDBCDataSource extends J2EEManagedObject {
+  protected String getName()
+  {
+    // XXX:
+    return null;
+  }
+
   /**
    * Returns the ObjectName of the {@link JDBCDriver}
    * management bean that is associated with this data source.
    */
-  public String []getJdbcDriver();
+  public String []getJdbcDriver()
+  {
+    // XXX:
+    return null;
+  }
 }

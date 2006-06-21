@@ -33,6 +33,6 @@ package com.caucho.mbeans.j2ee;
  * Base class management interface for resources.
  * Resources are services provided to the applciation by Resin.
  */
-public interface J2EEResource  extends J2EEManagedObject {
+abstract public class J2EEResource  extends J2EEManagedObject {
   // no attributes
 }

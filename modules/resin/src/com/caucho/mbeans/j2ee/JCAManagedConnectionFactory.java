@@ -29,12 +29,16 @@
 
 package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.MBean;
-
 /**
  * Management interface for a JCA managed connection factory.
  */
-@MBean(j2eeType="JCAManagedConnectionFactory")
-public interface JCAManagedConnectionFactory extends J2EEManagedObject  {
+public class JCAManagedConnectionFactory extends J2EEManagedObject
+{
+  protected String getName()
+  {
+    // XXX:
+    return null;
+  }
+
   // no attributes
 }

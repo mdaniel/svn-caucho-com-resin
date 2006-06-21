@@ -51,6 +51,7 @@ import com.caucho.el.MapVariableResolver;
 
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentBean;
+import com.caucho.loader.EnvironmentLocal;
 
 import com.caucho.loader.enhancer.EnhancingClassLoader;
 
@@ -83,7 +84,10 @@ public class Host extends ApplicationContainer
 	     EnvironmentDeployInstance {
   static final Logger log = Log.open(Host.class);
   static final L10N L = new L10N(Host.class);
-  
+
+  private static EnvironmentLocal<Host> _hostLocal
+    = new EnvironmentLocal<Host>("caucho.host");
+
   private HostContainer _parent;
 
   // The Host entry
@@ -126,11 +130,21 @@ public class Host extends ApplicationContainer
 
       setParent(parent);
       setHostName(hostName);
+
+      _hostLocal.set(this, getClassLoader());
     } catch (Throwable e) {
       _configException = e;
     } finally {
       _lifecycle = new Lifecycle(log, toString(), Level.INFO);
     }
+  }
+
+  /**
+   * Returns the local host.
+   */
+  public static Host getLocal()
+  {
+    return _hostLocal.get();
   }
 
   /**

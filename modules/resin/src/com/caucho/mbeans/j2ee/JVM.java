@@ -29,39 +29,22 @@
 
 package com.caucho.mbeans.j2ee;
 
-/**
- * J2EE Domain
- *
- * For example, <tt>j2ee:j2eeType=J2EEDomain,name=j2ee</tt>
- *
- * For J2EEDomain {@link #isEventProvider()} is a special case.  If true, the
- * domain supports event notifications and the J2EEDomain managed object
- * emits notifications from all events providers in the domain.
- *
- * <h3>Events specific to this managed object</h2>
- * <dl>
- * <dt>j2ee.object.created
- * <dd>occurs when the managed object is created
- * <dt>j2ee.object.deleted
- * <dd>occurs when the managed object is deleted
- * </dl>
- * @return
- */
-public class J2EEDomain
-  extends J2EEManagedObject
-  implements EventProvider
-{
-  private static final String[] EVENT_TYPES = new String[] {
-    "j2ee.object.created",
-    "j2ee.object.deleted"
-  };
+import com.caucho.util.CauchoSystem;
+import com.caucho.server.resin.ResinServer;
 
-  /**
-   * {@inheritDoc}
-   */
+/**
+ * Management interface for the JVM.
+ */
+public class JVM extends J2EEManagedObject {
+  public JVM()
+  {
+  }
+
   protected String getName()
   {
-    return "j2ee";
+    String name =  ResinServer.getResinServer().getServerId();
+
+    return name == null ? "default" : name;
   }
 
   protected String getJ2EEApplication()
@@ -70,18 +53,27 @@ public class J2EEDomain
   }
 
   /**
-   * {@inheritDoc}
+   * Returns the java version
    */
-  public String[] getEventTypes()
+  public String getJavaVersion()
   {
-    return EVENT_TYPES;
+    return System.getProperty("java.version");
   }
 
   /**
-   * Returns the ObjectNames of the servers running in this domain.
+   * Returns the java vendor
    */
-  public String []getServers()
+  public String getJavaVendor()
   {
-    return queryObjectNames("j2eeType=J2EEServer,*");
+    return System.getProperty("java.vendor");
+  }
+
+  /**
+   * Returns the machine the JVM is running on, i.e. the fully
+   * qualified hostname.
+   */
+  public String getNode()
+  {
+    return CauchoSystem.getLocalHost();
   }
 }

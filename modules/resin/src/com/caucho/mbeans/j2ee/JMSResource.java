@@ -29,12 +29,15 @@
 
 package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.MBean;
-
 /**
  * Management interface for a JMS resource.
  */
-@MBean(j2eeType="JMSResource")
-public interface JMSResource extends J2EEResource {
+public class JMSResource extends J2EEResource {
+  protected String getName()
+  {
+    // XXX:
+    return null;
+  }
+
   // no attributes
 }

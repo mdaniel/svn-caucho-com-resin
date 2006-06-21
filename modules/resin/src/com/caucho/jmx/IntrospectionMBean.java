@@ -29,22 +29,18 @@
 
 package com.caucho.jmx;
 
-import java.lang.ref.SoftReference;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
+import javax.management.*;
 import java.lang.annotation.Annotation;
-
-import java.util.WeakHashMap;
+import java.lang.ref.SoftReference;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.TreeSet;
-
-import java.util.logging.Logger;
+import java.util.WeakHashMap;
 import java.util.logging.Level;
-
-import javax.management.*;
+import java.util.logging.Logger;
 
 /**
  * Resin implementation of StandardMBean.
@@ -61,9 +57,11 @@ public class IntrospectionMBean implements DynamicMBean {
   private static final WeakHashMap<Class,SoftReference<MBeanInfo>> _cachedInfo
     = new WeakHashMap<Class,SoftReference<MBeanInfo>>();
 
-  private Object _impl;
-  private Class _mbeanInterface;
-  private MBeanInfo _mbeanInfo;
+  private final Object _impl;
+  private final Class _mbeanInterface;
+  private final boolean _isLowercaseAttributeNames;
+
+  private final MBeanInfo _mbeanInfo;
 
 
   private static final Comparator<MBeanFeatureInfo> MBEAN_FEATURE_INFO_COMPARATOR
@@ -76,18 +74,33 @@ public class IntrospectionMBean implements DynamicMBean {
   };
 
   /**
-   * Makes a DynamicMBean out of this.
+   * Makes a DynamicMBean.
    */
   public IntrospectionMBean(Object impl, Class mbeanInterface)
+    throws NotCompliantMBeanException
+  {
+    this(impl, mbeanInterface, false);
+  }
+
+  /**
+   * Makes a DynamicMBean.
+   * @param isLowercaseAttributeNames true if attributes should have first
+   * letter lowercased
+   */
+  public IntrospectionMBean(Object impl,
+                            Class mbeanInterface,
+                            boolean isLowercaseAttributeNames)
     throws NotCompliantMBeanException
   {
     if (impl == null)
       throw new NullPointerException();
 
     _mbeanInterface = mbeanInterface;
+    _isLowercaseAttributeNames = isLowercaseAttributeNames;
 
-    _mbeanInfo = introspect(impl, mbeanInterface);
+    _mbeanInfo = introspect(impl, mbeanInterface, isLowercaseAttributeNames);
     _impl = impl;
+
   }
 
   /**
@@ -199,8 +212,18 @@ public class IntrospectionMBean implements DynamicMBean {
    */
   private Method getGetMethod(String name)
   {
-    String getName = "get" + name;
-    String isName = "is" + name;
+    String methodName;
+
+    if (_isLowercaseAttributeNames)  {
+      StringBuilder builder = new StringBuilder(name);
+      builder.setCharAt(0, Character.toUpperCase(builder.charAt(0)));
+      methodName = builder.toString();
+    }
+    else
+      methodName = name;
+
+    String getName = "get" + methodName;
+    String isName = "is" + methodName;
 
     Method []methods = _mbeanInterface.getMethods();
 
@@ -223,12 +246,22 @@ public class IntrospectionMBean implements DynamicMBean {
    */
   private Method getSetMethod(String name, Object value)
   {
-    name = "set" + name;
+    String methodName;
+
+    if (_isLowercaseAttributeNames)  {
+      StringBuilder builder = new StringBuilder(name);
+      builder.setCharAt(0, Character.toUpperCase(builder.charAt(0)));
+      methodName = builder.toString();
+    }
+    else
+      methodName = name;
+
+    String setName = "set" + methodName;
 
     Method []methods = _mbeanInterface.getMethods();
 
     for (int i = 0; i < methods.length; i++) {
-      if (! methods[i].getName().equals(name))
+      if (! methods[i].getName().equals(setName))
         continue;
 
       Class []args = methods[i].getParameterTypes();
@@ -307,7 +340,7 @@ public class IntrospectionMBean implements DynamicMBean {
     return _mbeanInfo;
   }
 
-  static MBeanInfo introspect(Object obj, Class cl)
+  static MBeanInfo introspect(Object obj, Class cl, boolean isLowercaseAttributeNames)
     throws NotCompliantMBeanException
   {
     try {
@@ -332,6 +365,9 @@ public class IntrospectionMBean implements DynamicMBean {
       for (int i = 0; i < methods.length; i++) {
         Method method = methods[i];
 
+        if (method.getDeclaringClass() == Object.class)
+          continue;
+
         String methodName = method.getName();
         Class []args = method.getParameterTypes();
         Class retType = method.getReturnType();
@@ -342,7 +378,17 @@ public class IntrospectionMBean implements DynamicMBean {
 
           Method setter = getSetter(methods, name, retType);
 
-          attributes.add(new MBeanAttributeInfo(name,
+          String attributeName;
+
+          if (isLowercaseAttributeNames)  {
+            StringBuilder builder = new StringBuilder(name);
+            builder.setCharAt(0, Character.toLowerCase(builder.charAt(0)));
+            attributeName = builder.toString();
+          }
+          else
+            attributeName = name;
+
+          attributes.add(new MBeanAttributeInfo(attributeName,
                                                 getDescription(method),
                                                 method,
                                                 setter));
@@ -354,7 +400,17 @@ public class IntrospectionMBean implements DynamicMBean {
 
           Method setter = getSetter(methods, name, retType);
 
-          attributes.add(new MBeanAttributeInfo(name,
+          String attributeName;
+
+          if (isLowercaseAttributeNames)  {
+            StringBuilder builder = new StringBuilder(name);
+            builder.setCharAt(0, Character.toLowerCase(builder.charAt(0)));
+            attributeName = builder.toString();
+          }
+          else
+            attributeName = name;
+
+          attributes.add(new MBeanAttributeInfo(attributeName,
                                                 getDescription(method),
                                                 method,
                                                 setter));
@@ -364,11 +420,22 @@ public class IntrospectionMBean implements DynamicMBean {
 
           Method getter = getGetter(methods, name, args[0]);
 
-          if (getter == null)
-            attributes.add(new MBeanAttributeInfo(name,
+          if (getter == null) {
+            String attributeName;
+
+            if (isLowercaseAttributeNames)  {
+              StringBuilder builder = new StringBuilder(name);
+              builder.setCharAt(0, Character.toLowerCase(builder.charAt(0)));
+              attributeName = builder.toString();
+            }
+            else
+              attributeName = name;
+
+            attributes.add(new MBeanAttributeInfo(attributeName,
                                                   getDescription(method),
                                                   method,
                                                   null));
+          }
         }
         else {
           operations.add(new MBeanOperationInfo(getName(method),

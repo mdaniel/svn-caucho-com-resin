@@ -396,7 +396,7 @@ The certificates must be in that order, and must be in PEM format.
 <section title="Example certificate chain for Instant SSL">
 
 <p>
-<a href="http://instanssl.com">Comodo (http://instanssl.com)</a> is a signing
+<a href="http://instantssl.com">Comodo (http://instantssl.com)</a> is a signing
 authority that is untrusted by most browsers.  Comodo has their certificate
 signed by GTECyberTrust.
 </p>
