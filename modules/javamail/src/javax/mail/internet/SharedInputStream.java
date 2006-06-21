@@ -32,20 +32,7 @@ import javax.mail.*;
 import java.io.*;
 
 /**
- * An InputStream that is backed by data that can be shared by
- * multiple readers may implement this interface. This allows users of
- * such an InputStream to determine the current position in the
- * InputStream, and to create new InputStreams representing a subset
- * of the data in the original InputStream. The new InputStream will
- * access the same underlying data as the original, without copying
- * the data.
- *
- * Note that implementations of this interface must ensure that the
- * close method does not close any underlying stream that might be
- * shared by multiple instances of SharedInputStream until all shared
- * instances have been closed.
- *
- * Since: JavaMail 1.2
+ * InputStream with "reopen" and "subset" capabilities
  */
 public interface SharedInputStream {
 
@@ -56,12 +43,7 @@ public interface SharedInputStream {
     public abstract long getPosition();
 
     /**
-     * Return a new InputStream representing a subset of the data from
-     * this InputStream, starting at start (inclusive) up to end
-     * (exclusive). start must be non-negative. If end is -1, the new
-     * stream ends at the same place as this stream. The returned
-     * InputStream will also implement the SharedInputStream
-     * interface.
+     * Return a subset of the backing data
      */
     public abstract InputStream newStream(long start, long end);
 

@@ -29,31 +29,41 @@
 
 package javax.mail.internet;
 import javax.mail.*;
+import javax.activation.MimeType;
+import javax.activation.MimeTypeParseException;
+import java.util.*;
+import java.util.logging.*;
 
 /**
- * This class represents a MIME ContentType value. It provides methods
- * to parse a ContentType string into individual components and to
- * generate a MIME style ContentType string.
+ * This class represents a MIME ContentType value.
  */
 public class ContentType {
 
-  /**
-   * No-arg Constructor.
-   */
+  private MimeType _mimeType;
+
+  private static Logger log =
+    Logger.getLogger("javax.mail.internet.ContentType");
+
   public ContentType()
   {
-    throw new UnsupportedOperationException("not implemented");
+    // RFC 2024 default
+    try {
+      _mimeType = new MimeType("text", "plain");
+      _mimeType.setParameter("charset", "us-ascii");
+    }
+    catch (MimeTypeParseException e) {
+      throw new RuntimeException(e);
+    }
   }
 
-  /**
-   * Constructor that takes a Content-Type string. The String is
-   * parsed into its constituents: primaryType, subType and
-   * parameters. A ParseException is thrown if the parse fails.  s -
-   * the Content-Type string.  - if the parse fails.
-   */
   public ContentType(String s) throws ParseException
   {
-    throw new UnsupportedOperationException("not implemented");
+    try {
+      _mimeType = new MimeType(s);
+    }
+    catch (MimeTypeParseException e) {
+      throw new ParseException(e.getMessage());
+    }
   }
 
   /**
@@ -62,35 +72,45 @@ public class ContentType {
    */
   public ContentType(String primaryType, String subType, ParameterList list)
   {
-    throw new UnsupportedOperationException("not implemented");
+    try {
+      _mimeType = new MimeType(primaryType, subType);
+    }
+    catch (MimeTypeParseException e) {
+      throw new RuntimeException(e);
+    }
+
+    setParameterList(list);
   }
 
   /**
-   * Return the MIME type string, without the parameters. The returned
-   * value is basically the concatenation of the primaryType, the '/'
-   * character and the secondaryType.
+   * Return the MIME type string, without the parameters.
    */
   public String getBaseType()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return _mimeType.getBaseType();
   }
 
   /**
-   * Return the specified parameter value. Returns null if this
-   * parameter is absent.
+   * Return the specified parameter value.
    */
   public String getParameter(String name)
   {
-    throw new UnsupportedOperationException("not implemented");
+    return _mimeType.getParameter(name);
   }
 
   /**
    * Return a ParameterList object that holds all the available
-   * parameters. Returns null if no parameters are available.
+   * parameters.
+   *  // XXX: does calling set() on this impact the parent ContentType?
    */
   public ParameterList getParameterList()
   {
-    throw new UnsupportedOperationException("not implemented");
+    try {
+      return new ParameterList(_mimeType.getParameters());
+    }
+    catch (ParseException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -98,7 +118,7 @@ public class ContentType {
    */
   public String getPrimaryType()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return _mimeType.getPrimaryType();
   }
 
   /**
@@ -106,66 +126,58 @@ public class ContentType {
    */
   public String getSubType()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return _mimeType.getSubType();
   }
 
   /**
-   * Match with the specified ContentType object. This method compares
-   * only the primaryType and subType . The parameters of both
-   * operands are ignored.
-   *
-   * For example, this method will return true when comparing the
-   * ContentTypes for "text/plain" and "text/plain;
-   * charset=foobar". If the subType of either operand is the special
-   * character '*', then the subtype is ignored during the match. For
-   * example, this method will return true when comparing the
-   * ContentTypes for "text/plain" and "text/*"
+   * Match with the specified ContentType object, ingoring parameters
    */
   public boolean match(ContentType cType)
   {
-    throw new UnsupportedOperationException("not implemented");
+    try {
+      return _mimeType.match(cType._mimeType);
+    }
+    catch (MimeTypeParseException e) {
+      throw new RuntimeException(e);
+    }
   }
 
-  /**
-   * Match with the specified content-type string. This method
-   * compares only the primaryType and subType . The parameters of
-   * both operands are ignored.
-   *
-   * For example, this method will return true when comparing the
-   * ContentType for "text/plain" with "text/plain;
-   * charset=foobar". If the subType of either operand is the special
-   * character '*', then the subtype is ignored during the match. For
-   * example, this method will return true when comparing the
-   * ContentType for "text/plain" with "text/*"
-   */
   public boolean match(String s)
   {
-    throw new UnsupportedOperationException("not implemented");
+    try {
+      return match(new ContentType(s));
+    }
+    catch (ParseException e) {
+      log.log(Level.FINER, "ignoring exception", e);
+      return false;
+    }
   }
 
-  /**
-   * Set the specified parameter. If this parameter already exists, it
-   * is replaced by this new value.
-   */
   public void setParameter(String name, String value)
   {
-    throw new UnsupportedOperationException("not implemented");
+    _mimeType.setParameter(name, value);
   }
 
-  /**
-   * Set a new ParameterList.
-   */
   public void setParameterList(ParameterList list)
   {
-    throw new UnsupportedOperationException("not implemented");
+    for(Enumeration enu = list.getNames();
+	enu.hasMoreElements();) {
+
+      String key = (String)enu.nextElement();
+      String val = list.get(key);
+
+      _mimeType.setParameter(key, val);
+    }
   }
 
-  /**
-   * Set the primary type. Overrides existing primary type.
-   */
   public void setPrimaryType(String primaryType)
   {
-    throw new UnsupportedOperationException("not implemented");
+    try {
+      _mimeType.setPrimaryType(primaryType);
+    }
+    catch (MimeTypeParseException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -173,7 +185,13 @@ public class ContentType {
    */
   public void setSubType(String subType)
   {
-    throw new UnsupportedOperationException("not implemented");
+    try {
+      _mimeType.setSubType(subType);
+    }
+    catch (MimeTypeParseException e) {
+      throw new RuntimeException(e);
+    }
+
   }
 
   /**
@@ -182,7 +200,7 @@ public class ContentType {
    */
   public String toString()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return _mimeType.toString();
   }
 
 }

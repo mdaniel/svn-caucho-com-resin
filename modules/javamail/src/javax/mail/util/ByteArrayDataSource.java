@@ -30,89 +30,94 @@
 package javax.mail.util;
 import javax.mail.*;
 import java.io.*;
+import javax.activation.*;
+import java.util.logging.*;
 
 /**
- * A DataSource backed by a byte array. The byte array may be passed
- * in directly, or may be initialized from an InputStream or a String.
- * Since: JavaMail 1.4
+ * A DataSource backed by a byte[]
  */
-public class ByteArrayDataSource {
+public class ByteArrayDataSource implements DataSource {
 
-  /**
-   * Create a ByteArrayDataSource with data from the specified byte
-   * array and with the specified MIME type.  data - the datatype -
-   * the MIME type
-   */
+  private static Logger log =
+    Logger.getLogger("javax.mail.util.ByteArrayDataSource");
+
+  private byte[] _data;
+  private String _type;
+  private String _name = "";
+
   public ByteArrayDataSource(byte[] data, String type)
   {
-    throw new UnsupportedOperationException("not implemented");
+    this._data = data;
+    this._type = type;
   }
 
-  /**
-   * Create a ByteArrayDataSource with data from the specified
-   * InputStream and with the specified MIME type. The InputStream is
-   * read completely and the data is stored in a byte array.  is - the
-   * InputStreamtype - the MIME type IOException - errors reading the
-   * stream
-   */
   public ByteArrayDataSource(InputStream is, String type) throws IOException
   {
-    throw new UnsupportedOperationException("not implemented");
+    this._type = type;
+
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+    byte[] buf = new byte[1024];
+
+    while(true)
+      {
+	int numread = is.read(buf, 0, buf.length);
+
+	if (numread == -1) {
+	  _data = baos.toByteArray();
+	  return;
+	}
+
+	baos.write(buf, 0, numread);
+      }
   }
 
-  /**
-   * Create a ByteArrayDataSource with data from the specified String
-   * and with the specified MIME type. The MIME type should include a
-   * charset parameter specifying the charset to be used for the
-   * string. If the parameter is not included, the default charset is
-   * used.  data - the Stringtype - the MIME type IOException - errors
-   * reading the String
-   */
   public ByteArrayDataSource(String data, String type) throws IOException
   {
-    throw new UnsupportedOperationException("not implemented");
+    this._type = type;
+
+    String charset = null;
+
+    try {
+      MimeType mimeType = new MimeType(type);
+      charset = mimeType.getParameter("charset");
+    }
+    catch (Exception e) {
+      log.log(Level.FINER, "ignoring exception", e);
+    }
+
+    if (charset == null) {
+	_data = data.getBytes();
+    }
+    else {
+	_data = data.getBytes(charset);
+    }
   }
 
-  /**
-   * Get the MIME content type of the data.
-   */
   public String getContentType()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return _type;
   }
 
-  /**
-   * Return an InputStream for the data. Note that a new stream is
-   * returned each time this method is called.
-   */
   public InputStream getInputStream() throws IOException
   {
-    throw new UnsupportedOperationException("not implemented");
+    return new ByteArrayInputStream(_data);
   }
 
-  /**
-   * Get the name of the data. By default, an empty string ("") is returned.
-   */
   public String getName()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return _name;
   }
 
-  /**
-   * Return an OutputStream for the data. Writing the data is not
-   * supported; an IOException is always thrown.
-   */
   public OutputStream getOutputStream() throws IOException
   {
-    throw new UnsupportedOperationException("not implemented");
+    throw
+      new IOException("you are not allowed to write to a ByteArrayDataSource");
   }
 
-  /**
-   * Set the name of the data.
-   */
   public void setName(String name)
   {
-    throw new UnsupportedOperationException("not implemented");
+    _name = name;
   }
 
 }

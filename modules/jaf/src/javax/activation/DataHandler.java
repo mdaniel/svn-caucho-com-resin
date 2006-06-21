@@ -133,20 +133,11 @@ public class DataHandler implements Transferable {
     if (dch==null)
       throw new UnsupportedDataTypeException("dch==null");
     
-    final PipedOutputStream pos = new PipedOutputStream();
-    new Thread() {
-      public void run() {
-	try {
-	  dch.writeTo(_object, _mimeType, pos);
-	}
-	catch (IOException e) {
-	  log.log(Level.FINER, e.toString(), e);
-	  return;
-	}
-      }
-    }.start();
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    dch.writeTo(_object, _mimeType, baos);
 
-    return new PipedInputStream(pos);
+    return
+      new ByteArrayInputStream(baos.toByteArray());
   }
 
   /**

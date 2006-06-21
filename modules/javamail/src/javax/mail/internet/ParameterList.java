@@ -30,21 +30,16 @@
 package javax.mail.internet;
 import javax.mail.*;
 import java.util.*;
+import javax.activation.MimeTypeParameterList;
+import javax.activation.MimeTypeParseException;
 
 /**
- * This class holds MIME parameters (attribute-value pairs). The
- * mail.mime.encodeparameters and mail.mime.decodeparameters System
- * properties control whether encoded parameters, as specified by RFC
- * 2231, are supported. By default, such encoded parameters are not
- * supported.
- *
- * Also, in the current implementation, setting the System property
- * mail.mime.decodeparameters.strict to "true" will cause a
- * ParseException to be thrown for errors detected while decoding
- * encoded parameters. By default, if any decoding errors occur, the
- * original (undecoded) string is used.
+ * This class holds MIME parameters (attribute-value pairs).
  */
 public class ParameterList {
+
+  // Hashtable used in order to support Enumeration API
+  private Hashtable _hash = new Hashtable();
 
   /**
    * No-arg Constructor.
@@ -55,16 +50,36 @@ public class ParameterList {
   }
 
   /**
-   * Constructor that takes a parameter-list string. The String is
-   * parsed and the parameters are collected and stored internally. A
-   * ParseException is thrown if the parse fails. Note that an empty
-   * parameter-list string is valid and will be parsed into an empty
-   * ParameterList.  s - the parameter-list string.  - if the parse
-   * fails.
+   * Constructor that takes a parameter-list string.
    */
   public ParameterList(String s) throws ParseException
   {
-    throw new UnsupportedOperationException("not implemented");
+    try {
+      if (s.length() > 0)
+	addParameterList(new MimeTypeParameterList(s));
+    }
+    catch (MimeTypeParseException e) {
+      throw new ParseException(e.getMessage());
+    }
+  }
+
+  ParameterList(MimeTypeParameterList mimeTypeParameterList)
+    throws ParseException
+  {
+    addParameterList(mimeTypeParameterList);
+  }
+
+  private void addParameterList(MimeTypeParameterList mimeTypeParameterList)
+    throws ParseException {
+
+    for(Enumeration enu = mimeTypeParameterList.getNames();
+	enu.hasMoreElements();) {
+      
+      String key = (String)enu.nextElement();
+      String val = mimeTypeParameterList.get(key);
+      
+      set(key, val);
+    }
   }
 
   /**
@@ -73,7 +88,7 @@ public class ParameterList {
    */
   public String get(String name)
   {
-    throw new UnsupportedOperationException("not implemented");
+    return (String)_hash.get(name.toLowerCase());    
   }
 
   /**
@@ -81,25 +96,23 @@ public class ParameterList {
    */
   public Enumeration getNames()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return _hash.keys();
   }
 
   /**
-   * Removes the specified parameter from this ParameterList. This
-   * method does nothing if the parameter is not present.
+   * Removes the specified parameter from this ParameterList.
    */
   public void remove(String name)
   {
-    throw new UnsupportedOperationException("not implemented");
+    _hash.remove(name);
   }
 
   /**
-   * Set a parameter. If this parameter already exists, it is replaced
-   * by this new value.
+   * Set a parameter.
    */
   public void set(String name, String value)
   {
-    throw new UnsupportedOperationException("not implemented");
+    _hash.put(name, value);
   }
 
   /**
@@ -118,7 +131,7 @@ public class ParameterList {
    */
   public int size()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return _hash.size();
   }
 
   /**
@@ -127,7 +140,7 @@ public class ParameterList {
    */
   public String toString()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return "FIXME XXX";
   }
 
   /**

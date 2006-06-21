@@ -33,14 +33,17 @@ import javax.mail.*;
 import java.io.*;
 
 /**
- * A SharedFileInputStream is a BufferedInputStream that buffers data
- * from the file and supports the mark and reset methods. It also
- * supports the newStream method that allows you to create other
- * streams that represent subsets of the file. A RandomAccessFile
- * object is used to access the file data.  Since: JavaMail 1.4
+ * SharedFileInputStream backed by a File
+ *
+ * XXX: this is not implemented the way Sun intends; I need to go back
+ *      and actually use the RandomAccessFile.  But the current form
+ *      works and should be indistinguishable.
  */
 public class SharedFileInputStream extends BufferedInputStream
   implements SharedInputStream {
+
+  private int  _pos;
+  private File _file;
 
   /**
    * The file offset that corresponds to the first byte in the read buffer.
@@ -57,9 +60,6 @@ public class SharedFileInputStream extends BufferedInputStream
    */
   protected long datalen;
 
-  /**
-   * The file containing the data. Shared by all related SharedFileInputStreams.
-   */
   protected RandomAccessFile in;
 
   /**
@@ -67,151 +67,137 @@ public class SharedFileInputStream extends BufferedInputStream
    */
   protected long start;
 
-  /**
-   * Creates a SharedFileInputStream for the file.
-   * file - the file
-   */
   public SharedFileInputStream(File file) throws IOException
   {
-    super(null); // remove this
-    throw new UnsupportedOperationException("not implemented");
+    this(file, (int)file.length());
   }
 
-  /**
-   * Creates a SharedFileInputStream with the specified buffer size.
-   * file - the filesize - the buffer size.
-   * IllegalArgumentException - if size <= 0. IOException
-   */
   public SharedFileInputStream(File file, int size) throws IOException
   {
-    super(null); // remove this
-    throw new UnsupportedOperationException("not implemented");
+    this(file, 0, size);
   }
 
-  /**
-   * Creates a SharedFileInputStream for the named file
-   * file - the file
-   */
+  SharedFileInputStream(File file, int offset, int size) throws IOException
+  {
+    super(new FileInputStream(file));
+    if (size <= 0)
+      throw new IllegalArgumentException("SharedFileInputStream size <= 0");
+
+    this.in      = new RandomAccessFile(file, "r");
+    this.datalen = size;
+    this.start   = offset;
+    this._pos    = offset;
+    this._file   = file;
+
+    // skip over the part at the beginning
+    long mustskip = start;
+    
+    while(mustskip > 0)
+      mustskip -= super.skip(start);
+  }
+
   public SharedFileInputStream(String file) throws IOException
   {
-    super(null); // remove this
-    throw new UnsupportedOperationException("not implemented");
+    this(new File(file));
   }
 
-  /**
-   * Creates a SharedFileInputStream with the specified buffer size.
-   * file - the filesize - the buffer size.
-   * IllegalArgumentException - if size <= 0. IOException
-   */
   public SharedFileInputStream(String file, int size) throws IOException
   {
-    super(null); // remove this
-    throw new UnsupportedOperationException("not implemented");
+    this(new File(file), size);
   }
 
-  /**
-   * Returns the number of bytes that can be read from this input
-   * stream without blocking.
-   */
   public int available() throws IOException
   {
-    throw new UnsupportedOperationException("not implemented");
+    return super.available();
   }
 
-  /**
-   * Closes this input stream and releases any system resources
-   * associated with the stream.
-   */
   public void close() throws IOException
   {
-    throw new UnsupportedOperationException("not implemented");
+    // XXX: implement this
   }
 
-  /**
-   * Force this stream to close.
-   */
   protected void finalize() throws Throwable
   {
-    throw new UnsupportedOperationException("not implemented");
+    // XXX: implement this
   }
 
-  /**
-   * Return the current position in the InputStream, as an offset from
-   * the beginning of the InputStream.
-   */
   public long getPosition()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return _pos - start;
   }
 
+  // XXX: test this
   /**
    * See the general contract of the mark method of InputStream.
    */
   public void mark(int readlimit)
   {
-    throw new UnsupportedOperationException("not implemented");
+    super.mark(readlimit);
   }
 
-  /**
-   * Tests if this input stream supports the mark and reset
-   * methods. The markSupported method of SharedFileInputStream
-   * returns true.
-   */
   public boolean markSupported()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return true;
   }
 
-  /**
-   * Return a new InputStream representing a subset of the data from
-   * this InputStream, starting at start (inclusive) up to end
-   * (exclusive). start must be non-negative. If end is -1, the new
-   * stream ends at the same place as this stream. The returned
-   * InputStream will also implement the SharedInputStream interface.
-   */
   public InputStream newStream(long start, long end)
   {
-    throw new UnsupportedOperationException("not implemented");
+    try {
+      return new SharedFileInputStream(_file, (int)start, (int)(end-start));
+    }
+    catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
-  /**
-   * See the general contract of the read method of InputStream.
-   */
   public int read() throws IOException
   {
-    throw new UnsupportedOperationException("not implemented");
+    if (getPosition() >= datalen)
+      return -1;
+
+    int valueRead = super.read();
+
+    if (valueRead != -1)
+      _pos++;
+
+    return valueRead;
   }
 
-  /**
-   * Reads bytes from this stream into the specified byte array,
-   * starting at the given offset.
-   *
-   * This method implements the general contract of the corresponding
-   * read method of the InputStream class.
-   */
   public int read(byte[] b, int off, int len) throws IOException
   {
-    throw new UnsupportedOperationException("not implemented");
+    if (getPosition() >= datalen)
+      return -1;
+
+    if (len + getPosition() > datalen)
+      len = (int)(datalen - getPosition());
+    
+    int numread = super.read(b, off, len);
+
+    if (numread >= -1)
+      _pos += numread;
+
+    return numread;
   }
 
-  /**
-   * See the general contract of the reset method of InputStream.
-   *
-   * If markpos is -1 (no mark has been set or the mark has been
-   * invalidated), an IOException is thrown. Otherwise, pos is set
-   * equal to markpos.
-   */
   public void reset() throws IOException
   {
-    throw new UnsupportedOperationException("not implemented");
+    super.reset();
   }
 
-  /**
-   * See the general contract of the skip method of InputStream.
-   */
   public long skip(long n) throws IOException
   {
-    throw new UnsupportedOperationException("not implemented");
+    if (getPosition() >= datalen)
+      return -1;
+    
+    if (n + getPosition() > datalen)
+      n = datalen - getPosition();
+    
+    long numskipped = super.skip(n);
+
+    if (numskipped >= 0)
+      _pos += numskipped;
+
+    return numskipped;
   }
 
 }

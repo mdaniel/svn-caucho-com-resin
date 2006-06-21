@@ -33,9 +33,7 @@ import javax.mail.*;
 import java.io.*;
 
 /**
- * A ByteArrayInputStream that implements the SharedInputStream
- * interface, allowing the underlying byte array to be shared between
- * multiple readers.  Since: JavaMail 1.4
+ * SharedInputStream using byte[] as backing
  */
 public class SharedByteArrayInputStream extends ByteArrayInputStream
   implements SharedInputStream {
@@ -45,47 +43,32 @@ public class SharedByteArrayInputStream extends ByteArrayInputStream
    */
   protected int start;
 
-  /**
-   * Create a SharedByteArrayInputStream representing the entire byte array.
-   * buf - the byte array
-   */
   public SharedByteArrayInputStream(byte[] buf)
   {
-    super(null); // XXX: remove this
-    throw new UnsupportedOperationException("not implemented");
+    super(buf);
+    this.start = 0;
   }
 
-  /**
-   * Create a SharedByteArrayInputStream representing the part of the
-   * byte array from offset for length bytes.  buf - the byte
-   * arrayoffset - offset in byte array to first byte to includelength
-   * - number of bytes to include
-   */
   public SharedByteArrayInputStream(byte[] buf, int offset, int length)
   {
-    super(null); // XXX: remove this
-    throw new UnsupportedOperationException("not implemented");
+    super(buf, offset, length);
+    this.start = offset;
   }
 
-  /**
-   * Return the current position in the InputStream, as an offset from
-   * the beginning of the InputStream.
-   */
   public long getPosition()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return pos-start;
   }
 
   /**
    * Return a new InputStream representing a subset of the data from
-   * this InputStream, starting at start (inclusive) up to end
-   * (exclusive). start must be non-negative. If end is -1, the new
-   * stream ends at the same place as this stream. The returned
-   * InputStream will also implement the SharedInputStream interface.
+   * this InputStream
    */
   public InputStream newStream(long start, long end)
   {
-    throw new UnsupportedOperationException("not implemented");
+    long newOffset = this.start + start;
+    long newLength = end - start;
+    return new SharedByteArrayInputStream(buf, (int)newOffset, (int)newLength);
   }
 
 }
