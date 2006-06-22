@@ -32,12 +32,7 @@ import javax.mail.*;
 import java.util.*;
 
 /**
- * The MimePart interface models an Entity as defined by MIME
- * (RFC2045, Section 2.4).
- *
- * MimePart extends the Part interface to add additional RFC822 and
- * MIME specific semantics and attributes. It provides the base
- * interface for the MimeMessage and MimeBodyPart classes
+ * RFC2045, Section 2.4
  */
 public interface MimePart extends Part {
 
@@ -47,9 +42,7 @@ public interface MimePart extends Part {
     public abstract void addHeaderLine(String line) throws MessagingException;
 
     /**
-     * Get all header lines as an Enumeration of Strings. A Header
-     * line is a raw RFC822 header-line, containing both the "name"
-     * and "value" field.
+     * Get all header lines as an Enumeration of Strings.
      */
     public abstract Enumeration getAllHeaderLines() throws MessagingException;
 

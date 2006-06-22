@@ -32,7 +32,6 @@ import javax.mail.*;
 
 /**
  * The exception thrown due to an error in parsing RFC822 or MIME headers
- * See Also:Serialized Form
  */
 public class ParseException extends MessagingException {
 
@@ -41,16 +40,14 @@ public class ParseException extends MessagingException {
    */
   public ParseException()
   {
-    throw new UnsupportedOperationException("not implemented");
   }
 
   /**
    * Constructs a ParseException with the specified detail message.
-   * s - the detail message
    */
   public ParseException(String s)
   {
-    throw new UnsupportedOperationException("not implemented");
+    super(s);
   }
 
 }

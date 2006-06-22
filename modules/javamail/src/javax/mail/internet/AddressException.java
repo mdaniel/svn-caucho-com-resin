@@ -32,7 +32,6 @@ import javax.mail.*;
 
 /**
  * The exception thrown when a wrongly formatted address is encountered.
- * See Also:Serialized Form
  */
 public class AddressException extends ParseException {
 
@@ -51,25 +50,24 @@ public class AddressException extends ParseException {
    */
   public AddressException()
   {
-    throw new UnsupportedOperationException("not implemented");
+    this(null);
   }
 
   /**
    * Constructs an AddressException with the specified detail message.
-   * s - the detail message
    */
   public AddressException(String s)
   {
-    throw new UnsupportedOperationException("not implemented");
+    this(s, null);
   }
 
   /**
    * Constructs an AddressException with the specified detail message
-   * and reference info.  s - the detail message
+   * and reference info.
    */
   public AddressException(String s, String ref)
   {
-    throw new UnsupportedOperationException("not implemented");
+    this(s, ref, -1);
   }
 
   /**
@@ -78,7 +76,9 @@ public class AddressException extends ParseException {
    */
   public AddressException(String s, String ref, int pos)
   {
-    throw new UnsupportedOperationException("not implemented");
+    super(s);
+    this.ref = ref;
+    this.pos = pos;
   }
 
   /**
@@ -87,7 +87,7 @@ public class AddressException extends ParseException {
    */
   public int getPos()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return pos;
   }
 
   /**
@@ -96,16 +96,12 @@ public class AddressException extends ParseException {
    */
   public String getRef()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return ref;
   }
 
-  /**
-   * Description copied from class: Override toString method to
-   * provide information on nested exceptions.
-   */
   public String toString()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return super.toString();
   }
 
 }

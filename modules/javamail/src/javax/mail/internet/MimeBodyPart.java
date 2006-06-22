@@ -34,11 +34,7 @@ import java.io.*;
 import java.util.*;
 
 /**
- * This class represents a MIME body part. It implements the BodyPart
- * abstract class and the MimePart interface. MimeBodyParts are
- * contained in MimeMultipart objects.  MimeBodyPart uses the
- * InternetHeaders class to parse and store the headers of that body
- * part.
+ * This class represents a MIME body part.
  */
 public class MimeBodyPart extends BodyPart implements MimePart {
 
@@ -63,7 +59,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
   /**
    * The InternetHeaders object that stores all the headers of this body part.
    */
-  protected InternetHeaders headers;
+  protected InternetHeaders headers = new InternetHeaders();
 
   /**
    * An empty MimeBodyPart object is created. This body part maybe
@@ -71,7 +67,9 @@ public class MimeBodyPart extends BodyPart implements MimePart {
    */
   public MimeBodyPart()
   {
-    throw new UnsupportedOperationException("not implemented");
+    this.content = null;
+    this.contentStream = null;
+    this.dh = null; /* XXX */;
   }
 
   /**
@@ -91,7 +89,38 @@ public class MimeBodyPart extends BodyPart implements MimePart {
    */
   public MimeBodyPart(InputStream is) throws MessagingException
   {
-    throw new UnsupportedOperationException("not implemented");
+    try {
+      // XXX: read headers off the top
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+      byte[] buf = new byte[1024];
+
+      int totalread = 0;
+
+      while(true)
+	{
+	  int numread = is.read(buf, 0, buf.length);
+
+	  if (numread == -1) {
+	    content = baos.toByteArray();
+	    break;
+	  }
+
+	  baos.write(buf, 0, numread);
+	  totalread += numread;
+	}
+
+      // 
+      if (is instanceof SharedInputStream) {
+	SharedInputStream sis = (SharedInputStream)is;
+	contentStream = sis.newStream(0, totalread);
+      } else {
+	contentStream = null;
+      }
+    }
+    catch (IOException e) {
+      throw new MessagingException(e.getMessage());
+    }
   }
 
   /**

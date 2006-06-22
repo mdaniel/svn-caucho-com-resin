@@ -36,6 +36,7 @@ import javax.mail.Address;
  * Represents an internet address
  */
 public class InternetAddress extends Address {
+
   protected String address;
   protected String encodedPersonalName;
   protected String personal;
@@ -55,6 +56,13 @@ public class InternetAddress extends Address {
     this.address = address;
 
     setPersonal(personalName);
+  }
+
+  public InternetAddress(String address, boolean strict)
+    throws AddressException
+  {
+    // XXX: what should we do here?
+    this(address);
   }
 
   public InternetAddress(String address, String personalName, String charset)
@@ -121,7 +129,7 @@ public class InternetAddress extends Address {
 
   public String toString()
   {
-    // XXX: is a clean rfc-822 address
+    // XXX: is a clean rfc-822 address; use RFC 2047 encoding
     
     return this.address;
   }
@@ -131,7 +139,12 @@ public class InternetAddress extends Address {
    */
   public Object clone()
   {
-    throw new UnsupportedOperationException("not implemented");
+    try {
+      return new InternetAddress(address, personal);
+    }
+    catch (java.io.UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**

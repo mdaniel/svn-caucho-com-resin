@@ -29,10 +29,10 @@
 
 package javax.mail.internet;
 import javax.mail.*;
+import java.util.*;
 
 /**
  * This class models an RFC1036 newsgroup address.
- * See Also:Serialized Form
  */
 public class NewsAddress extends Address {
 
@@ -51,7 +51,7 @@ public class NewsAddress extends Address {
    */
   public NewsAddress()
   {
-    throw new UnsupportedOperationException("not implemented");
+    this(null, null);
   }
 
   /**
@@ -60,7 +60,7 @@ public class NewsAddress extends Address {
    */
   public NewsAddress(String newsgroup)
   {
-    throw new UnsupportedOperationException("not implemented");
+    this(newsgroup, null);
   }
 
   /**
@@ -69,15 +69,32 @@ public class NewsAddress extends Address {
    */
   public NewsAddress(String newsgroup, String host)
   {
-    throw new UnsupportedOperationException("not implemented");
+    this.host = host;
+    this.newsgroup = newsgroup;
   }
 
   /**
    * The equality operator.
    */
-  public boolean equals(Object a)
+  public boolean equals(Object o)
   {
-    throw new UnsupportedOperationException("not implemented");
+    if (! (o instanceof NewsAddress))
+      return false;
+    
+    NewsAddress na = (NewsAddress)o;
+    return equal(na.host, host) && equal(na.newsgroup, newsgroup);
+  }
+
+  private static boolean equal(Object o1, Object o2) {
+
+    if (o1 == null && o2 == null)
+      return true;
+
+    if (o1 == null || o2 == null)
+      return false;
+
+    return o1.equals(o2);
+
   }
 
   /**
@@ -85,7 +102,7 @@ public class NewsAddress extends Address {
    */
   public String getHost()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return host;
   }
 
   /**
@@ -93,7 +110,7 @@ public class NewsAddress extends Address {
    */
   public String getNewsgroup()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return newsgroup;
   }
 
   /**
@@ -101,7 +118,7 @@ public class NewsAddress extends Address {
    */
   public String getType()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return "news";
   }
 
   /**
@@ -109,7 +126,7 @@ public class NewsAddress extends Address {
    */
   public int hashCode()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return newsgroup.hashCode() * 65521 + newsgroup.hashCode();
   }
 
   /**
@@ -118,7 +135,22 @@ public class NewsAddress extends Address {
    */
   public static NewsAddress[] parse(String newsgroups) throws AddressException
   {
-    throw new UnsupportedOperationException("not implemented");
+    ArrayList newsAddresses = new ArrayList();
+    String s = newsgroups;
+
+    while(true) {
+      int comma = s.indexOf(',');
+      if (comma == -1) {
+	newsAddresses.add(new NewsAddress(s));
+	break;
+      }
+      newsAddresses.add(new NewsAddress(s.substring(0, comma)));
+      s = s.substring(comma+1);
+    }
+
+    NewsAddress[] returnArray = new NewsAddress[newsAddresses.size()];
+
+    return (NewsAddress[])newsAddresses.toArray(returnArray);
   }
 
   /**
@@ -126,7 +158,7 @@ public class NewsAddress extends Address {
    */
   public void setHost(String host)
   {
-    throw new UnsupportedOperationException("not implemented");
+    this.host = host;
   }
 
   /**
@@ -134,7 +166,7 @@ public class NewsAddress extends Address {
    */
   public void setNewsgroup(String newsgroup)
   {
-    throw new UnsupportedOperationException("not implemented");
+    this.newsgroup = newsgroup;
   }
 
   /**
@@ -142,7 +174,7 @@ public class NewsAddress extends Address {
    */
   public String toString()
   {
-    throw new UnsupportedOperationException("not implemented");
+    return newsgroup;
   }
 
   /**
@@ -152,7 +184,18 @@ public class NewsAddress extends Address {
    */
   public static String toString(Address[] addresses)
   {
-    throw new UnsupportedOperationException("not implemented");
+    StringBuffer sb = new StringBuffer();
+
+    for(int i=0; i<addresses.length; i++) {
+      if (i>0)
+	sb.append(',');
+
+      NewsAddress na = (NewsAddress)addresses[i];
+
+      sb.append(na.getNewsgroup());
+    }
+
+    return sb.toString();
   }
 
 }
