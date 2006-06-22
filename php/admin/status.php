@@ -22,12 +22,11 @@
   }
 
   $resin = $mbeanServer->lookup("resin:type=Resin");
-  $domain = $mbeanServer->lookup("resin:name=CurrentDomain");
-  $server = $domain;
+  $server = $mbeanServer->lookup("resin:type=Server");
 
   $title = "Resin status";
 
-  if (! empty($resin->serverId)) {
+  if (! empty($server->Id)) {
     $title = $title . " for server " . $resin->serverId;
   }
 ?>
@@ -46,15 +45,20 @@
 
 <table>
 
-<h2>Server: <?= $resin->serverId ?></h2>
+<h2>Server: <?= $server->Id ?></h2>
 
 
- <?php if (! empty($resin->serverId)) {  ?>
+ <?php if (! empty($server->Id)) {  ?>
 <tr title="The server id used when starting this instance of Resin, the value of `-server'.">
 <th>Server id:</th>
-<td><?= $resin->serverId ?></td>
+<td><?= $server->Id ?></td>
 </tr>
 <? } ?>
+
+<tr title="The configuration file used when starting this instance of Resin, the value of `-conf'.">
+<th>Version:</th>
+<td><?= $resin->version ?></td>
+</tr>
 
 <tr title="The configuration file used when starting this instance of Resin, the value of `-conf'.">
 <th>Config file:</th>
@@ -73,37 +77,43 @@
 
 <tr title="The ip address of the machine that is running this instance of Resin.">
 <th>Local host:</th>
-<td><?= $resin->localHost ?></td>
+<td><?= $server->localHost ?></td>
 </tr>
 
 <tr title="The current lifecycle state">
 <th>State:</th>
-<td><?= $resin->state ?></td>
+<td><?= $server->state ?></td>
 </tr>
 
 <tr title="The time that this instance was first started.">
 <th>Inital start time:</th>
-<td><?= format_datetime($resin->initialStartTime) ?></td>
+<td><?= format_datetime($server->initialStartTime) ?></td>
 </tr>
 
 <tr title="The time that this instance was last started or restarted.">
 <th>Start time:</th>
-<td><?= format_datetime($resin->startTime) ?></td>
+<td><?= format_datetime($server->startTime) ?></td>
 </tr>
 
 <tr title="The current total amount of memory available for the JVM, in bytes.">
 <th>Total memory:</th>
-<td><?= format_memory($resin->totalMemory) ?></td>
+<td><?= format_memory($server->totalMemory) ?></td>
 </tr>
 
 <tr title="The current free amount of memory available for the JVM, in bytes.">
 <th>Free memory:</th>
-<td><?= format_memory($resin->freeMemory) ?></td>
+<td><?= format_memory($server->freeMemory) ?></td>
 </tr>
+
+<?php
+
+$proxyCache = $mbeanServer->lookup("resin:type=ProxyCache");
+
+?>
 
 <tr title="Percentage of requests that have been served from the proxy cache:">
 <th>Proxy cache hit ratio:</th>
-<td><?= format_hit_ratio($server->proxyCacheHitCount, $server->proxyCacheMissCount) ?></td>
+<td><?= format_hit_ratio($proxyCache->HitCount, $proxyCache->MissCount) ?></td>
 </tr>
 
 <!-- XXX: show how cacheable apps are: cacheable/non-cacheable -->
@@ -124,10 +134,11 @@
 -->
 
 <h2>Thread pool</h2>
-
+<!--
 <div class="description">
 The ThreadPool manages all threads used by Resin.
 </div>
+-->
 
 <table>
 <tr>
@@ -198,9 +209,9 @@ The ThreadPool manages all threads used by Resin.
 <!-- TCP ports -->
 
 <?php
-  $portObjectNames = $server->PortObjectNames;
+  $portNames = $server->Ports;
 
-  if ($portObjectNames) {
+  if ($portNames) {
 ?>
 <h2>TCP ports</h2>
 
@@ -243,7 +254,7 @@ The ThreadPool manages all threads used by Resin.
 
 <?php
   # XXX: sort by $cluster->index
-  foreach ($server->clusterObjectNames as $clusterObjectName) {
+  foreach ($resin->Clusters as $clusterObjectName) {
     $cluster = $mbeanServer->lookup($clusterObjectName);
 
     if (empty($cluster->clientObjectNames))
@@ -263,21 +274,16 @@ The ThreadPool manages all threads used by Resin.
 <th>Connection</th>
 </tr>
 <?php
-  foreach ($cluster->clientObjectNames as $clientObjectName) {
+  foreach ($cluster->clients as $clientObjectName) {
     $client = $mbeanServer->lookup($clientObjectName);
     $clientParts = $mbeanServer->explode($clientObjectName);
 ?>
 
+<tr class='<?= $client->ping() ? "active" : "inactive" ?>'>
 <tr>
 <td><?= $client->serverId ?></td>
-<td class='<?= $client->canConnect() ? "active" : "inactive" ?>'>
-<?= $clientParts["host"] ?>:<?= $clientParts["port"] ?></td>
-<?php
-if ($client->canConnect())
-  echo "<td style='background:#66ff66'>up</td>\n";
-else
-  echo "<td style='background:#ff6666'>down</td>\n";
-?>
+<td><?= $client->Address ?>:<?= $client->Port ?></td>
+<td><?= $client->State ?></td>\n";
 <td><?= $client->activeConnectionCount ?></td>
 <td><?= $client->idleConnectionCount ?></td>
 <td><?= format_hit_ratio($client->lifetimeKeepaliveCount,

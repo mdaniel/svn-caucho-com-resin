@@ -49,7 +49,7 @@ public class ClusterAdmin
     return _cluster.getObjectName();
   }
 
-  public String getPortObjectName()
+  public String getPort()
   {
     ClusterServer clusterServer = _cluster.getSelfServer();
 
@@ -59,7 +59,17 @@ public class ClusterAdmin
      return clusterServer.getClusterPort().getObjectName();
   }
 
-  public String []getClientObjectNames()
+  public String getPersistentStore()
+  {
+    return "resin:type=PersistentStore";
+  }
+
+  public String []getHosts()
+  {
+    return new String[0];
+  }
+
+  public String []getServers()
   {
     ClusterServer selfServer = _cluster.getSelfServer();
 

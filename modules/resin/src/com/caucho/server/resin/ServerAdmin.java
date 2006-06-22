@@ -29,6 +29,8 @@
 
 package com.caucho.server.resin;
 
+import java.util.Date;
+
 import javax.management.ObjectName;
 
 import com.caucho.util.*;
@@ -77,7 +79,27 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return getController().getId();
   }
 
-  public String []getPortObjectNames()
+  public String getCluster()
+  {
+    return null;
+  }
+  
+  public String getThreadPool()
+  {
+    return "resin:type=ThreadPool";
+  }
+
+  public String getLocalHost()
+  {
+    return CauchoSystem.getLocalHost();
+  }
+
+  public boolean isDetailedStatistics()
+  {
+    return CauchoSystem.isDetailedStatistics();
+  }
+
+  public String []getPorts()
   {
     ServletServer server = getDeployInstance();
 
@@ -96,7 +118,12 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return portNameList.toArray(new String[portNameList.size()]);
   }
 
-  public String []getClusterObjectNames()
+  public String getClusterPort()
+  {
+    return null;
+  }
+
+  public String []getClusters()
   {
     ServletServer server = getDeployInstance();
 
@@ -115,7 +142,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return clusterNameList.toArray(new String[clusterNameList.size()]);
   }
 
-  public String []getHostObjectNames()
+  public String []getHosts()
   {
     ServletServer server = getDeployInstance();
 
@@ -285,6 +312,38 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
       lifetimeKeepaliveCount += port.getLifetimeKeepaliveCount();
 
     return lifetimeKeepaliveCount;
+  }
+
+  public String getState()
+  {
+    return getController().getState();
+  }
+
+  public Date getInitialStartTime()
+  {
+    return new Date(getController().getStartTime());
+  }
+
+  public Date getStartTime()
+  {
+    return new Date(getController().getStartTime());
+  }
+
+  public long getTotalMemory()
+  {
+    System.out.println("MEM: " + Runtime.getRuntime().totalMemory());
+
+    return Runtime.getRuntime().totalMemory());
+  }
+
+  public long getFreeMemory()
+  {
+    return Runtime.getRuntime().freeMemory();
+  }
+
+  public void restart()
+  {
+    getController().restart();
   }
 
   public void clearCache()

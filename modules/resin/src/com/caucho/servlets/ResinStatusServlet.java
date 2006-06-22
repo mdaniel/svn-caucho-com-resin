@@ -83,6 +83,8 @@ public class ResinStatusServlet extends GenericServlet {
   private MBeanServer _mbeanServer;
   private ResinMBean _resin;
   private ServerMBean _server;
+  private ClusterMBean _cluster;
+  private ProxyCacheMBean _proxyCache;
 
   /**
    * Set to read or write.
@@ -119,7 +121,9 @@ public class ResinStatusServlet extends GenericServlet {
       //_servletServer = (ServletServerMBean) Jmx.find("resin:name=default,type=Server");
 
       _resin = (ResinMBean) Jmx.findGlobal("resin:type=Resin");
-      _server = (ServerMBean) Jmx.findGlobal("resin:name=default,type=Server");
+      _server = (ServerMBean) Jmx.findGlobal("resin:type=Server");
+      _cluster = (ClusterMBean) Jmx.findGlobal("resin:type=Cluster");
+      _proxyCache = (ProxyCacheMBean) Jmx.findGlobal("resin:type=ProxyCache");
     } catch (Exception e) {
       throw new ServletException(e);
     }
@@ -205,7 +209,7 @@ public class ResinStatusServlet extends GenericServlet {
   {
     out.println("<b>resin-status</b><br><br>");
 
-    String id = _resin.getServerId();
+    String id = _server.getId();
 
     out.println("<table border=\"0\">");
     if (id != null)
@@ -215,8 +219,8 @@ public class ResinStatusServlet extends GenericServlet {
     if (configFile != null)
       out.println("<tr><td><b>Config:</b><td>" + configFile);
 
-    long initialStartTime = _resin.getInitialStartTime().getTime();
-    long startTime = _resin.getStartTime().getTime();
+    long initialStartTime = _server.getInitialStartTime().getTime();
+    long startTime = _server.getStartTime().getTime();
 
     out.println("<tr><td><b>Server Start:</b><td>" +
                 QDate.formatLocal(initialStartTime));
@@ -251,20 +255,22 @@ public class ResinStatusServlet extends GenericServlet {
               (hitRatio) % 10 + "%");
     out.println(" (" + invocationHitCount + "/" + totalCount + ")");
 
-    long proxyHitCount = _server.getProxyCacheHitCount();
-    long proxyMissCount = _server.getProxyCacheMissCount();
+    if (_proxyCache != null) {
+      long proxyHitCount = _proxyCache.getHitCount();
+      long proxyMissCount = _proxyCache.getMissCount();
 
-    totalCount = proxyHitCount + proxyMissCount;
-    if (totalCount == 0)
-      totalCount = 1;
+      totalCount = proxyHitCount + proxyMissCount;
+      if (totalCount == 0)
+	totalCount = 1;
 
-    hitRatio = (10000 * proxyHitCount) / totalCount;
+      hitRatio = (10000 * proxyHitCount) / totalCount;
 
-    out.print("<tr><td><b>Proxy Cache Hit Ratio:</b><td> " +
-              (hitRatio / 100) + "." +
-              (hitRatio / 10) % 10 +
-              (hitRatio) % 10 + "%");
-    out.println(" (" + proxyHitCount + "/" + totalCount + ")");
+      out.print("<tr><td><b>Proxy Cache Hit Ratio:</b><td> " +
+		(hitRatio / 100) + "." +
+		(hitRatio / 10) % 10 +
+		(hitRatio) % 10 + "%");
+      out.println(" (" + proxyHitCount + "/" + totalCount + ")");
+    }
 
     out.println("</table>");
 
@@ -354,7 +360,7 @@ public class ResinStatusServlet extends GenericServlet {
     throws IOException, ServletException
   {
     try {
-      String []portList = _server.getPortObjectNames();
+      String []portList = _server.getPorts();
 
       if (portList.length > 0) {
         out.println("<h3>TCP ports</h3>");
@@ -398,7 +404,7 @@ public class ResinStatusServlet extends GenericServlet {
     throws IOException, ServletException
   {
     try {
-      String[]clusterList = _server.getClusterObjectNames();
+      String[]clusterList = new String[0]; // _server.getClusterObjectNames();
 
       for (int i = 0; i < clusterList.length; i++) {
         ClusterMBean cluster = (ClusterMBean) Jmx.findGlobal(clusterList[i]);
@@ -417,7 +423,7 @@ public class ResinStatusServlet extends GenericServlet {
         out.println("<tr><th>Host");
         out.println("    <th>Active");
 
-        String []srunNames = cluster.getClientObjectNames();
+        String []srunNames = cluster.getServers();
 
         for (int j = 0; j < srunNames.length; j++) {
           ObjectName srunName = new ObjectName(srunNames[j]);

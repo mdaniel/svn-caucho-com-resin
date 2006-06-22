@@ -235,6 +235,14 @@ public class ResinServer
   }
 
   /**
+   * Set true for Resin pro.
+   */
+  public boolean isProfessional()
+  {
+    return _isResinProfessional;
+  }
+
+  /**
    * Set true if the server should restart rather than exit when
    * the instance shuts down.
    */

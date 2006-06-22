@@ -44,7 +44,7 @@ import javax.management.ObjectName;
  * here with {@link #getClientObjectNames()}.
  *
  * A typical ObjectName for a ClusterMBean is
- * <tt>resin:type=Cluster,Server=default,name=default</tt>.
+ * <tt>resin:type=Cluster,name=app-tier</tt>.
  */
 public interface ClusterMBean {
   /**
@@ -52,18 +52,6 @@ public interface ClusterMBean {
    */
   @Description("The JMX ObjectName for the MBean")
   public String getObjectName();
-
-  /**
-   * Returns the ObjectName of the port that is active for this instance, null
-   * if there is no active port for this instance. Connections to the port are
-   * inbound connections from a load balancer or from other
-   " members of the cluster.
-   */
-  @Description("The port that is active for this instance." +
-               " Connections to the port are inbound" +
-               " connections from a load balancer or from other" +
-               " members of the cluster")
-  public String getPortObjectName();
 
   /**
    * Returns a list of {@link ObjectName}s for the
@@ -74,6 +62,19 @@ public interface ClusterMBean {
   @Description("The ClusterClients that are used to create" +
                " outbound connections to communicate with" +
                " members of the cluster")
-  public String []getClientObjectNames();
+  public String []getServers();
+  
+  /**
+   * Returns the array of virtual hosts.
+   */
+  @Description("Hosts are containers that are uniquely identified"
+               + " by the hostname used in making an HTTP request")
+  public String []getHosts();
 
+  /**
+   * Returns the persistent-store.
+   */
+  @Description("The PersistentStore saves persistent and distributed session" +
+	       " information")
+  public String getPersistentStore();
 }

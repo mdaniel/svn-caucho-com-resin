@@ -29,13 +29,37 @@
 
 package com.caucho.mbeans.server;
 
+import java.util.Date;
+
 import com.caucho.jmx.Description;
 import com.caucho.jmx.Name;
 
 /**
  * Management interface for the server.
+ *
+ * <tt>resin:type=Server</tt>.
  */
 public interface ServerMBean extends DeployControllerMBean {
+  /**
+   * Returns the -server id.
+   */
+  @Description("The server id used when starting this instance"
+               + " of Resin, the value of `-server'")
+  public String getId();
+  
+  /**
+   * Returns the cluster owning this server
+   */
+  @Description("The cluster contains the peer servers")
+  public String getCluster();
+
+  /**
+   * Returns the ip address or host name  of the machine that is running this ResinServer.
+   */
+  @Description("The ip address or host name of the machine that is running"
+               + " this instance of Resin")
+  public String getLocalHost();
+
   /**
    * Returns true if a {@link com.caucho.server.port.AbstractSelectManager} is enabled and active
    */
@@ -46,21 +70,49 @@ public interface ServerMBean extends DeployControllerMBean {
    * Returns the array of ports.
    */
   @Description("Ports accept socket connections")
-  public String []getPortObjectNames();
+  public String []getPorts();
 
   /**
-   * Returns the array of hosts.
+   * Returns the cluster port
    */
-  @Description("Hosts are containers that are uniquely identified"
-               + " by the hostname used in making an HTTP request")
-  public String []getHostObjectNames();
+  @Description("The cluster port handles management and cluster messages")
+  public String getClusterPort();
 
   /**
-   * Returns the array of cluster.
+   * Returns true if detailed statistics are being kept.
    */
-  @Description("Cluster members are used for load balancing and"
-               + " distributed sessions")
-  public String []getClusterObjectNames();
+  @Description("Detailed statistics causes various parts of Resin to keep"
+               + " more detailed statistics at the possible expense of"
+               +" some performance")
+  public boolean isDetailedStatistics();
+
+  public String getThreadPool();
+
+  //
+  // state
+  //
+
+  /**
+   * The current lifecycle state.
+   */
+  @Description("The current lifecycle state")
+  public String getState();
+
+  /**
+   * Returns the initial start time.
+   */
+  @Description("The time that this instance was first started")
+  public Date getInitialStartTime();
+
+  /**
+   * Returns the last start time.
+   */
+  @Description("The time that this instance was last started or restarted")
+  public Date getStartTime();
+
+  //
+  // statistics
+  //
 
   /**
    * Returns the current number of threads that are servicing requests.
@@ -149,38 +201,26 @@ public interface ServerMBean extends DeployControllerMBean {
   public long getInvocationCacheMissCount();
 
   /**
-   * Returns the proxy cache hit count.
+   * Returns the current total amount of memory available for the JVM, in bytes.
    */
-  @Description("The proxy cache is used to cache responses that"
-               + " set appropriate HTTP headers")
-  public long getProxyCacheHitCount();
+  @Description("The current total amount of memory available for the JVM, in bytes")
+  public long getTotalMemory();
 
   /**
-   * Returns the proxy cache miss count.
+   * Returns the current free amount of memory available for the JVM, in bytes.
    */
-  @Description("The proxy cache is used to cache responses that"
-               + " set appropriate HTTP headers")
-  public long getProxyCacheMissCount();
+  @Description("The current free amount of memory available for the JVM, in bytes")
+  public long getFreeMemory();
+
+  //
+  // Operations
+  //
 
   /**
-   * Clears the cache.
+   * Restart this Resin server.
    */
-  @Description("Clear the cache")
-  public void clearCache();
+  @Description("Exit this instance cleanly and allow the wrapper script to"
+               + " start a new JVM")
+  public void restart();
 
-  /**
-   * Clears the cache by regexp patterns.
-   *
-   * @param hostRegexp the regexp to match the host.  Null matches all.
-   * @param urlRegexp the regexp to match the url. Null matches all.
-   */
-  @Description("Selectively clear the cache using patterns")
-  public void clearCacheByPattern(
-    @Name("hostRegexp")
-    @Description("A regular expression that matches a host name, null to match all host names")
-    String hostRegexp,
-
-    @Name("urlRegexp")
-    @Description("A regular expression that matches a url, null to match all urls")
-    String urlRegexp);
 }

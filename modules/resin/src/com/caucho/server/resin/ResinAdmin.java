@@ -28,6 +28,8 @@
 
 package com.caucho.server.resin;
 
+import com.caucho.Version;
+
 import com.caucho.util.CauchoSystem;
 import com.caucho.util.L10N;
 import com.caucho.mbeans.server.ResinMBean;
@@ -61,16 +63,6 @@ public class ResinAdmin
     return _resinServer.getObjectName();
   }
 
-  public String getLocalHost()
-  {
-    return CauchoSystem.getLocalHost();
-  }
-
-  public String getServerId()
-  {
-    return _resinServer.getServerId();
-  }
-
   public String getConfigFile()
   {
     return _resinServer.getConfigFile();
@@ -86,16 +78,22 @@ public class ResinAdmin
     return CauchoSystem.getServerRoot().getNativePath();
   }
 
-  public boolean isDetailedStatistics()
+  public String getServer()
   {
-    return CauchoSystem.isDetailedStatistics();
+    return "resin:type=Server";
   }
 
-  public String getThreadPoolObjectName()
+  public String getVersion()
   {
-    return THREAD_POOL_OBJECT_NAME;
+    return Version.FULL_VERSION;
+  }
+  
+  public boolean isProfessional()
+  {
+    return _resinServer.isProfessional();
   }
 
+  /*
   public String[] getServerObjectNames()
   {
     ArrayList<ServerController> servers = _resinServer.getServerList();
@@ -110,36 +108,7 @@ public class ResinAdmin
 
     return objectNames;
   }
-
-  public String getState()
-  {
-    return _resinServer.getLifecycleState().getStateName();
-  }
-
-  public Date getInitialStartTime()
-  {
-    return _resinServer.getInitialStartTime();
-  }
-
-  public Date getStartTime()
-  {
-    return _resinServer.getStartTime();
-  }
-
-  public long getTotalMemory()
-  {
-    return Runtime.getRuntime().totalMemory();
-  }
-
-  public long getFreeMemory()
-  {
-    return Runtime.getRuntime().freeMemory();
-  }
-
-  public void restart()
-  {
-    _resinServer.destroy();
-  }
+  */
 
   public String toString()
   {
