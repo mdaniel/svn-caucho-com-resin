@@ -745,7 +745,7 @@ public class Quercus {
   }
 
   /**
-   * Removes the session to the backing.
+   * Removes the session from the backing.
    */
   public void destroySession(String sessionId)
   {

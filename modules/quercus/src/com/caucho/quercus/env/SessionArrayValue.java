@@ -44,9 +44,12 @@ import java.util.IdentityHashMap;
 
 import java.util.logging.*;
 
+import javax.servlet.http.HttpServletRequest;
+
 import com.caucho.log.Log;
 
-import javax.servlet.http.HttpServletRequest;
+import com.caucho.util.Alarm;
+import com.caucho.util.CacheListener;
 
 import com.caucho.vfs.WriteStream;
 
@@ -59,7 +62,8 @@ import com.caucho.quercus.QuercusModuleException;
 /**
  * Represents the $_SESSION
  */
-public class SessionArrayValue extends ArrayValueWrapper {
+public class SessionArrayValue extends ArrayValueWrapper 
+  implements CacheListener {
   static protected final Logger log = Log.open(SessionArrayValue.class);
 
   private String _id;
@@ -74,18 +78,21 @@ public class SessionArrayValue extends ArrayValueWrapper {
 
   private boolean _isValid;
 
-  public SessionArrayValue(Env env, String id, long now)
+  public SessionArrayValue(Env env, String id, long now, 
+                           long maxInactiveInterval)
   {
-    this(env, id, now, new ArrayValueImpl());
+    this(env, id, now, maxInactiveInterval, new ArrayValueImpl());
   }
   
-  public SessionArrayValue(Env env, String id, long now, ArrayValue array)
+  public SessionArrayValue(Env env, String id, long now,
+                           long maxInactiveInterval, ArrayValue array)
   {
     super(array);
     
     _env = env;
     _id = id;
     _accessTime = now;
+    _maxInactiveInterval = maxInactiveInterval;
   }
 
   /**
@@ -112,7 +119,7 @@ public class SessionArrayValue extends ArrayValueWrapper {
     long accessTime = _accessTime;
 
     SessionArrayValue theCopy = 
-      new SessionArrayValue(env, _id, accessTime,
+      new SessionArrayValue(env, _id, accessTime, _maxInactiveInterval,
                             (ArrayValue) getArray().copy(env, map));
 
     theCopy.setClusterObject(_clusterObject);
@@ -266,23 +273,9 @@ public class SessionArrayValue extends ArrayValueWrapper {
     }
   }
 
-  public int getMaxInactiveInterval()
+  public long getMaxInactiveInterval()
   {
-    if (Long.MAX_VALUE / 2 <= _maxInactiveInterval)
-      return -1;
-    else
-      return (int) (_maxInactiveInterval / 1000);
-  }
-
-  public void setMaxInactiveInterval(long maxInactiveInterval) 
-  {
-    if (maxInactiveInterval < 0)
-      _maxInactiveInterval = Long.MAX_VALUE / 2;
-    else
-      _maxInactiveInterval = ((long) maxInactiveInterval) * 1000;
-
-    if (_clusterObject != null)
-      _clusterObject.setExpireInterval(_maxInactiveInterval);
+    return _maxInactiveInterval;
   }
 
   public void setClusterObject(ClusterObject clusterObject)
@@ -343,5 +336,30 @@ public class SessionArrayValue extends ArrayValueWrapper {
   public boolean isEmpty()
   {
     return getSize() == 0;
+  }
+
+  /**
+   * Callback when the session is removed from the session cache, generally
+   * because the session cache is full.
+   */
+  public void removeEvent()
+  {
+    boolean isValid = _isValid;
+
+    if (log.isLoggable(Level.FINE))
+      log.fine("remove session " + _id);
+
+    long now = Alarm.getCurrentTime();
+
+    ClusterObject clusterObject = _clusterObject;
+
+    if (_isValid && clusterObject != null) {
+      try {
+        clusterObject.update();
+        clusterObject.store(this);
+      } catch (Throwable e) {
+        log.log(Level.WARNING, "Can't serialize session", e);
+      }
+    }
   }
 }

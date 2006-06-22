@@ -66,6 +66,7 @@ import javax.script.ScriptContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 import java.io.Closeable;
 import java.io.IOException;
@@ -222,6 +223,7 @@ public final class Env {
   private ArrayValue _post;
   private ArrayValue _files;
   private SessionArrayValue _session;
+  private HttpSession _javaSession;
 
   private ScriptContext _scriptContext;
 
@@ -837,6 +839,10 @@ public final class Env {
     SessionCallback callback = getSessionCallback();
 
     SessionArrayValue session = _quercus.loadSession(this, sessionId);
+
+    // XXX: The php and java sessions may have different secondary and/or
+    // tertiary backups.
+    _javaSession = _request.getSession(true);
 
     if (callback != null) {
       StringValue value = callback.read(this, sessionId);

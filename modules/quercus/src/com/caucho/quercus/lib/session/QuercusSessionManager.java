@@ -91,8 +91,6 @@ public class QuercusSessionManager implements ObjectManager, AlarmListener {
 
   // maximum number of sessions
   private int _sessionMax = 4096;
-  // how long a session will be inactive before it times out
-  private long _sessionTimeout = 30 * 60 * 1000;
 
   private int _reuseSessionId = COOKIE;
   private int _cookieLength = 18;
@@ -137,6 +135,13 @@ public class QuercusSessionManager implements ObjectManager, AlarmListener {
   {
     _sessionManager = sessionManager;
 
+    synchronized(this) {
+      if (_sessions.size() == 0) {
+        _sessionMax = _sessionManager.getSessionMax();
+        _sessions = new LruCache<String,SessionArrayValue>(_sessionMax);
+      }
+    }
+
     _app = app;
 
     _alarm.queue(60000);
@@ -169,6 +174,7 @@ public class QuercusSessionManager implements ObjectManager, AlarmListener {
         String storeId = hostName + contextPath + "-PHP";
 
         _sessionStore = manager.createStore(storeId, this);
+        _sessionStore.setMaxIdleTime(_sessionManager.getMaxIdleTime());
       }
     }
 
@@ -306,7 +312,8 @@ public class QuercusSessionManager implements ObjectManager, AlarmListener {
    */
   private SessionArrayValue create(Env env, String key, long now)
   {
-    SessionArrayValue session = new SessionArrayValue(env, key, now);
+    SessionArrayValue session = 
+      new SessionArrayValue(env, key, now, _sessionManager.getSessionTimeout());
 
     // If another thread has created and stored a new session,
     // putIfNew will return the old session
@@ -357,6 +364,11 @@ public class QuercusSessionManager implements ObjectManager, AlarmListener {
     }
 
     return false;
+  }
+
+  public long getMaxIdleTime()
+  {
+    return _sessionManager.getMaxIdleTime();
   }
 
   /**
@@ -613,34 +625,6 @@ public class QuercusSessionManager implements ObjectManager, AlarmListener {
   public boolean isClosed()
   {
     return _isClosed;
-  }
-
-
-  /**
-   * Returns the default session timeout in milliseconds.
-   */
-  public long getSessionTimeout()
-  {
-    return _sessionTimeout;
-  }
-
-  /**
-   * Set the default session timeout in minutes
-   */
-  public void setSessionTimeout(long timeout)
-  {
-    if (timeout <= 0 || Integer.MAX_VALUE / 2 < timeout)
-      _sessionTimeout = Long.MAX_VALUE / 2;
-    else
-      _sessionTimeout = 60000L * timeout;
-  }
-
-  /**
-   * Returns the idle time.
-   */
-  public long getMaxIdleTime()
-  {
-    return _sessionTimeout;
   }
 
   /**
