@@ -66,7 +66,7 @@
   </target>
 
   <target name="compile" 
-          depends="init, ejb, ejb30, j2ee-deploy, j2ee-management, jaxrpc, jca, jms, jmx, jsdk, jstl, jta, mail, portlet, script, resin-jdk15, resin, quercus, webutil, deploy, conf, ext">
+          depends="init, ejb, ejb30, j2ee-deploy, j2ee-management, jaxrpc, jca, jms, jmx, jsdk, jstl, jta, portlet, script, resin-jdk15, resin, quercus, webutil, deploy, conf, ext">
   </target>
 
   <target name="ejb" depends="init, jta">
@@ -160,6 +160,9 @@
       <param name="module.jar" value="jta-101.jar"/>
     </antcall>
   </target>
+
+  <--
+   We now ship Sun's mail.jar in modules/ext/javamail-XX.jar
   
   <target name="mail" depends="init,jaf">
     <antcall target="module" inheritRefs="true">
@@ -167,6 +170,7 @@
       <param name="module.jar" value="javamail-11.jar"/>
     </antcall>
   </target>
+  -->
   
   <target name="portlet" depends="init">
     <antcall target="module" inheritRefs="true">
@@ -665,6 +669,7 @@
         <include name="automake/**"/>
 	
         <include name="lib/aopalliance.jar"/>
+        <include name="lib/javamail-14.jar"/>
         <include name="lib/ejb-20.jar"/>
         <include name="lib/ejb-30.jar"/>
         <include name="lib/j2ee-deploy-10.jar"/>
