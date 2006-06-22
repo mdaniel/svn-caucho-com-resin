@@ -331,9 +331,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
 
   public long getTotalMemory()
   {
-    System.out.println("MEM: " + Runtime.getRuntime().totalMemory());
-
-    return Runtime.getRuntime().totalMemory());
+    return Runtime.getRuntime().totalMemory();
   }
 
   public long getFreeMemory()
