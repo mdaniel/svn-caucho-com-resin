@@ -29,50 +29,31 @@
 
 package com.caucho.ejb.cfg;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.bytecode.JMethod;
 import com.caucho.bytecode.JClass;
-
-import com.caucho.util.L10N;
-
-import com.caucho.log.Log;
-
-import com.caucho.vfs.Path;
-import com.caucho.vfs.MergePath;
-
+import com.caucho.bytecode.JMethod;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
-
 import com.caucho.config.types.FileSetType;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.SimpleLoader;
-
-import com.caucho.loader.EnvironmentClassLoader;
-
-import com.caucho.java.WorkDir;
-
-import com.caucho.java.gen.JavaClassGenerator;
-
-import com.caucho.relaxng.CompactVerifierFactoryImpl;
-
-import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.AbstractServer;
-
-import com.caucho.ejb.ql.FunExpr;
-
+import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.amber.AmberConfig;
+import com.caucho.ejb.ql.FunExpr;
+import com.caucho.java.WorkDir;
+import com.caucho.java.gen.JavaClassGenerator;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Manages the EJB configuration files.
@@ -121,13 +102,15 @@ public class EjbConfig {
   /**
    * Adds a path for an EJB config file to the config list.
    */
-  public void addEJBPath(Path path)
+  public void addEJBPath(String ejbModuleName, Path path)
     throws ConfigException
   {
     if (_pathList.contains(path))
       return;
 
     _pathList.add(path);
+
+    _ejbManager.addEJBModule(ejbModuleName);
 
     if (path.getScheme().equals("jar"))
       path.setUserPath(path.getURL());
@@ -429,7 +412,7 @@ public class EjbConfig {
   {
     for (FileSetType fileSet : _fileSetList) {
       for (Path path : fileSet.getPaths()) {
-	addEJBPath(path);
+	addEJBPath(fileSet.getDir().toString(), path);
       }
     }
   }

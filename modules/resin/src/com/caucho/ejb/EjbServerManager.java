@@ -29,70 +29,37 @@
 
 package com.caucho.ejb;
 
-import java.io.*;
-
-import java.util.*;
-
-import java.util.logging.*;
-
-import java.rmi.*;
-
-import java.sql.*;
-
-import javax.ejb.*;
-import javax.sql.*;
-import javax.naming.*;
-import javax.transaction.*;
-
-import javax.jms.ConnectionFactory;
-
-import com.caucho.bytecode.JClassLoader;
-
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
-import com.caucho.util.LruCache;
-
-import com.caucho.vfs.Path;
-import com.caucho.vfs.JarPath;
-
-import com.caucho.java.WorkDir;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.SimpleLoader;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.loader.EnvironmentListener;
-
-import com.caucho.loader.enhancer.EnhancingClassLoader;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.config.types.FileSetType;
-
-import com.caucho.relaxng.CompactVerifierFactoryImpl;
-
 import com.caucho.amber.entity.AmberEntityHome;
-
-import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.manager.AmberContainer;
-
-import com.caucho.lifecycle.Lifecycle;
-
-import com.caucho.ejb.cfg.EjbConfig;
-
-import com.caucho.ejb.protocol.EjbProtocolManager;
-import com.caucho.ejb.protocol.ProtocolContainer;
-
-import com.caucho.ejb.xa.EjbTransactionManager;
-
+import com.caucho.amber.manager.AmberPersistenceUnit;
+import com.caucho.bytecode.JClassLoader;
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.FileSetType;
 import com.caucho.ejb.admin.EJBAdmin;
-
+import com.caucho.ejb.cfg.EjbConfig;
+import com.caucho.ejb.entity.EntityKey;
 import com.caucho.ejb.entity.EntityServer;
 import com.caucho.ejb.entity.QEntityContext;
-import com.caucho.ejb.entity.EntityKey;
+import com.caucho.ejb.protocol.EjbProtocolManager;
+import com.caucho.ejb.xa.EjbTransactionManager;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentListener;
+import com.caucho.util.L10N;
+import com.caucho.util.Log;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.Path;
+import com.caucho.mbeans.j2ee.EJBModule;
+import com.caucho.mbeans.j2ee.J2EEAdmin;
 
-import com.caucho.ejb.enhancer.EjbEnhancer;
+import javax.jms.ConnectionFactory;
+import javax.sql.DataSource;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Manages the EJBs.
@@ -130,6 +97,8 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
 
   private final Lifecycle _lifecycle = new Lifecycle(log, "ejb-manager");
 
+  private Map<String, J2EEAdmin> _ejbModuleAdminMap = new LinkedHashMap<String, J2EEAdmin>();
+
   /**
    * Create a server with the given prefix name.
    */
@@ -137,7 +106,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
   {
     try {
       _amberContainer = AmberContainer.getLocalContainer();
-      
+
       _amberPersistenceUnit = AmberContainer.getLocalContainer().createPersistenceUnit("resin-ejb");
       _amberPersistenceUnit.setBytecodeGenerator(false);
 
@@ -499,6 +468,8 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
   public void addEJBJar(Path path)
     throws Exception
   {
+    String ejbModuleName = path.toString();
+
     JarPath jar;
 
     if (path instanceof JarPath)
@@ -509,12 +480,12 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
     Path descriptorPath = jar.lookup("META-INF/ejb-jar.xml");
 
     if (descriptorPath.exists())
-      addEJBPath(descriptorPath);
+      addEJBPath(ejbModuleName, descriptorPath);
     
     descriptorPath = jar.lookup("META-INF/resin-ejb-jar.xml");
 
     if (descriptorPath.exists())
-      addEJBPath(descriptorPath);
+      addEJBPath(ejbModuleName, descriptorPath);
 
     Path metaInf = jar.lookup("META-INF");
     if (metaInf.isDirectory()) {
@@ -524,20 +495,30 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
 	if (metaName.endsWith(".ejb")) {
 	  Path metaPath = metaInf.lookup(metaName);
 	
-	  addEJBPath(metaPath);
+	  addEJBPath(ejbModuleName, metaPath);
 	}
       }
+    }
+  }
+
+  // callback
+  public void addEJBModule(String ejbModuleName)
+  {
+    J2EEAdmin ejbModuleAdmin = _ejbModuleAdminMap.get(ejbModuleName);
+
+    if (ejbModuleAdmin == null) {
+      ejbModuleAdmin = new J2EEAdmin(new EJBModule(ejbModuleName));
+      _ejbModuleAdminMap.put(ejbModuleName, ejbModuleAdmin);
     }
   }
 
   /**
    * Adds an EJB configuration file.
    */
-  public void addEJBPath(Path path)
+  public void addEJBPath(String ejbModuleName, Path path)
     throws ConfigException
   {
-    
-    _ejbConfig.addEJBPath(path);
+    _ejbConfig.addEJBPath(ejbModuleName, path);
   }
 
   /**
@@ -558,6 +539,9 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
     _envServerManager.init();
     
     build();
+
+    for (J2EEAdmin ejbModuleAdmin : _ejbModuleAdminMap.values())
+      ejbModuleAdmin.start();
   }
   
   /**
@@ -687,6 +671,9 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
   {
     if (! _lifecycle.toDestroy())
       return;
+
+    for (J2EEAdmin ejbModuleAdmin : _ejbModuleAdminMap.values())
+      ejbModuleAdmin.stop();
 
     _envServerManager.destroy();
 

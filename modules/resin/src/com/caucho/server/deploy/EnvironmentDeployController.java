@@ -29,44 +29,32 @@
 
 package com.caucho.server.deploy;
 
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.PathBuilder;
+import com.caucho.el.EL;
+import com.caucho.el.MapVariableResolver;
+import com.caucho.jmx.Jmx;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentListener;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+import com.caucho.mbeans.j2ee.J2EEAdmin;
+
+import javax.management.JMException;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.servlet.jsp.el.ELException;
+import javax.servlet.jsp.el.VariableResolver;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
 import java.util.logging.Level;
-
-import javax.management.ObjectName;
-import javax.management.MalformedObjectNameException;
-import javax.management.JMException;
-
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
-
-import com.caucho.log.Log;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentClassLoader;
-
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.ConfigException;
-
-import com.caucho.config.types.PathBuilder;
-
-import com.caucho.el.EL;
-import com.caucho.el.MapVariableResolver;
-
-import com.caucho.loader.EnvironmentListener;
-
-import com.caucho.util.L10N;
-
-import com.caucho.jmx.Jmx;
-
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
-
-import com.caucho.server.deploy.ExpandDeployController;
+import java.util.logging.Logger;
 
 /**
  * A deploy controller for an environment.
@@ -87,6 +75,7 @@ abstract public class
   private Object _mbean;
 
   private ObjectName _objectName;
+  private J2EEAdmin _j2eeAdmin;
 
   // The default configurations
   private ArrayList<C> _configDefaults =  new ArrayList<C>();
@@ -274,11 +263,17 @@ abstract public class
 
         _objectName = objectName;
         _mbean = mbean;
+
       }
     } catch (Exception e) {
       // XXX: thrown?
       log.log(Level.FINE, e.toString(), e);
     }
+
+    _j2eeAdmin = createJ2EEAdmin();
+
+    if (_j2eeAdmin != null)
+      _j2eeAdmin.start();
   }
 
   /**
@@ -299,6 +294,14 @@ abstract public class
    */
   abstract protected Object createMBean()
     throws JMException;
+
+  /**
+   * Returns the J2EEAdmin, null if there is no J2EEAdmin.
+   */
+  protected J2EEAdmin createJ2EEAdmin()
+  {
+    return null;
+  }
 
   /**
    * Returns true if the entry matches.
@@ -364,8 +367,14 @@ abstract public class
       thread.setContextClassLoader(getParentClassLoader());
 
       try {
+        J2EEAdmin j2eeAdmin = _j2eeAdmin;
+        _j2eeAdmin = null;
+
         ObjectName objectName = _objectName;
         _objectName = null;
+
+        if (j2eeAdmin != null)
+          j2eeAdmin.stop();
 
         if (objectName != null)
           Jmx.unregister(objectName);

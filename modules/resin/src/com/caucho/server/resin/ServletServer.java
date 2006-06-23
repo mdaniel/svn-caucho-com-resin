@@ -75,8 +75,6 @@ import com.caucho.util.L10N;
 import com.caucho.util.ThreadPool;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
-import com.caucho.mbeans.j2ee.J2EEAdmin;
-import com.caucho.mbeans.j2ee.J2EEServer;
 
 import javax.resource.spi.ResourceAdapter;
 import javax.servlet.http.HttpServletResponse;
@@ -135,8 +133,6 @@ public class ServletServer extends ProtocolDispatchServer
   private volatile boolean _isStartedPorts;
 
   private final Lifecycle _lifecycle;
-
-  private final J2EEAdmin _j2eeServerAdmin = new J2EEAdmin(new J2EEServer());
 
   /**
    * Creates a new servlet server.
@@ -930,8 +926,6 @@ public class ServletServer extends ProtocolDispatchServer
 	}
       }
 
-      _j2eeServerAdmin.start();
-
       if (! _isBindPortsAtEnd) {
 	bindPorts();
 
@@ -1273,8 +1267,6 @@ public class ServletServer extends ProtocolDispatchServer
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }
-
-      _j2eeServerAdmin.stop();
 
       try {
         _classLoader.stop();

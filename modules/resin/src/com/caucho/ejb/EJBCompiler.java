@@ -29,29 +29,17 @@
 
 package com.caucho.ejb;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.rmi.*;
-
-import java.sql.*;
-
-import javax.ejb.*;
-import javax.sql.*;
-import javax.naming.*;
-import javax.transaction.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.sql.*;
-import com.caucho.ejb.*;
-import com.caucho.naming.*;
-import com.caucho.loader.*;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.SimpleLoader;
 import com.caucho.log.Log;
-import com.caucho.server.http.*;
+import com.caucho.util.ExceptionWrapper;
+import com.caucho.util.L10N;
+import com.caucho.vfs.MergePath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
-import com.caucho.ejb.admin.*;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Compiles EJB classes prior to instantiating in the server.
@@ -128,7 +116,7 @@ public class EJBCompiler {
       // container.setSearchPath(mergePath);
 
       for (int i = 0; i < _ejbPath.size(); i++)
-	container.addEJBPath(mergePath.lookup(_ejbPath.get(i)));
+	container.addEJBPath(_ejbPath.toString(), mergePath.lookup(_ejbPath.get(i)));
     
       container.build();
     } finally {

@@ -30,28 +30,46 @@
 package com.caucho.mbeans.j2ee;
 
 import com.caucho.Version;
-import com.caucho.server.cluster.Cluster;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.server.resin.ServerController;
 
 /**
  * Management interface for a J2EE server.
  * The J2EEServer corresponds to one instance of the product.
  */
 public class J2EEServer extends J2EEManagedObject {
-  static String getLocalName()
-  {
-    String name = Cluster.getLocal().getId();
+  private static EnvironmentLocal<J2EEServer> _j2eeServerLocal
+    = new EnvironmentLocal<J2EEServer>("caucho.jmx.j2ee.J2EEServer");
 
-    return (name == null || name.length() == 0) ? "default" : name;
+  private final ServerController _serverController;
+
+  static J2EEServer getLocal()
+  {
+    return _j2eeServerLocal.get();
+  }
+
+  public J2EEServer(ServerController serverController)
+  {
+    _serverController = serverController;
+
+    _j2eeServerLocal.set(this);
   }
 
   protected String getName()
   {
-    return getLocalName();
+    String name = _serverController.getId();
+
+    return name == null || name.length() == 0 ? "default" : name;
   }
 
-  protected String getJ2EEApplication()
+  protected boolean isJ2EEServer()
   {
-    return null;
+    return false;
+  }
+
+  protected boolean isJ2EEApplication()
+  {
+    return false;
   }
 
   /**
@@ -63,11 +81,11 @@ public class J2EEServer extends J2EEManagedObject {
    */
   public String []getDeployedObjects()
   {
-    return queryObjectNames("j2eeType=J2EEApplciation,*",
-                            "j2eeType=AppClientModule,*",
-                            "j2eeType=ResourceAdapterModule,*",
-                            "j2eeType=EJBModule,*",
-                            "j2eeType=WebModule,*"
+    return queryObjectNames("j2eeType=J2EEApplication",
+                            "j2eeType=AppClientModule",
+                            "j2eeType=ResourceAdapterModule",
+                            "j2eeType=EJBModule",
+                            "j2eeType=WebModule"
                             );
   }
 
@@ -81,14 +99,14 @@ public class J2EEServer extends J2EEManagedObject {
    */
   public String []getResources()
   {
-    return queryObjectNames("j2eeType=JCAResource,*",
-                            "j2eeType=JavaMailResource,*",
-                            "j2eeType=JDBCResource,*",
-                            "j2eeType=JMSResource,*",
-                            "j2eeType=JNDIResource,*",
-                            "j2eeType=JTAResource,*",
-                            "j2eeType=RMI_IIOPResource,*",
-                            "j2eeType=URLResource,*"
+    return queryObjectNames("j2eeType=JCAResource",
+                            "j2eeType=JavaMailResource",
+                            "j2eeType=JDBCResource",
+                            "j2eeType=JMSResource",
+                            "j2eeType=JNDIResource",
+                            "j2eeType=JTAResource",
+                            "j2eeType=RMI_IIOPResource",
+                            "j2eeType=URLResource"
                             );
   }
 
@@ -99,7 +117,7 @@ public class J2EEServer extends J2EEManagedObject {
    */
   public String []getJavaVMs()
   {
-    return queryObjectNames("j2eeType=JVM,*");
+    return queryObjectNames("j2eeType=JVM");
   }
 
   /**

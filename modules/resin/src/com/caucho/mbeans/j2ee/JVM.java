@@ -47,9 +47,9 @@ public class JVM extends J2EEManagedObject {
     return name == null ? "default" : name;
   }
 
-  protected String getJ2EEApplication()
+  protected boolean isJ2EEApplication()
   {
-    return null;
+    return false;
   }
 
   /**

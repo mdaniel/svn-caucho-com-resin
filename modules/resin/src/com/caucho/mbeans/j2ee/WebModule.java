@@ -29,14 +29,24 @@
 
 package com.caucho.mbeans.j2ee;
 
+import com.caucho.server.webapp.WebAppController;
+
 /**
  * Management interface for a web module (WAR).
  */
 public class WebModule extends J2EEModule {
+  private final WebAppController _webAppController;
+
+  public WebModule(WebAppController webAppController)
+  {
+    _webAppController = webAppController;
+  }
+
   protected String getName()
   {
-    // XXX:
-    return null;
+    String name = _webAppController.getContextPath();
+
+    return  name == null || name.length() == 0 ? "/" : name;
   }
 
   public String getDeploymentDescriptor()
@@ -51,8 +61,6 @@ public class WebModule extends J2EEModule {
    */
   public String []getServlets()
   {
-    // XXX:
-    return new String[] {};
+    return queryObjectNames("j2eeType=Servlet");
   }
-
 }

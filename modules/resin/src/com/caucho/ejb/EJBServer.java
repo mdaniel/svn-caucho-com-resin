@@ -29,62 +29,39 @@
 
 package com.caucho.ejb;
 
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.*;
-
-import javax.ejb.*;
-import javax.sql.*;
-import javax.naming.*;
-
-import javax.persistence.EntityManager;
-
-import javax.jms.ConnectionFactory;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.loader.EnvironmentBean;
-import com.caucho.loader.Environment;
-
+import com.caucho.amber.cfg.EntityIntrospector;
+import com.caucho.amber.manager.PersistenceEnvironmentListener;
 import com.caucho.config.ConfigException;
-
 import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.JndiBuilder;
 import com.caucho.config.types.PathPatternType;
 import com.caucho.config.types.Period;
-
-import com.caucho.sql.*;
-import com.caucho.ejb.*;
-import com.caucho.naming.*;
-import com.caucho.naming.Jndi;
-
-import com.caucho.loader.EnvironmentLocal;
+import com.caucho.ejb.cfg.EjbMethod;
+import com.caucho.ejb.metadata.Bean;
+import com.caucho.ejb.protocol.ProtocolContainer;
 import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentListener;
+import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
-
+import com.caucho.loader.EnvironmentListener;
+import com.caucho.loader.EnvironmentLocal;
 import com.caucho.log.Log;
-
 import com.caucho.naming.AbstractModel;
 import com.caucho.naming.ContextImpl;
+import com.caucho.naming.Jndi;
+import com.caucho.naming.ObjectProxy;
+import com.caucho.util.L10N;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.MergePath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
-import com.caucho.amber.manager.PersistenceEnvironmentListener;
-
-import com.caucho.ejb.cfg.EjbMethod;
-
-import com.caucho.ejb.protocol.ProtocolContainer;
-
-import com.caucho.ejb.admin.*;
-
-import com.caucho.ejb.metadata.Bean;
-
-import com.caucho.amber.cfg.EntityIntrospector;
+import javax.jms.ConnectionFactory;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Server containing all the EJBs for a given configuration.
@@ -696,7 +673,7 @@ public class EJBServer
         Path path = _descriptors.get(i);
 
         // XXX: app.addDepend(path);
-        _ejbManager.addEJBPath(path);
+        _ejbManager.addEJBPath(path.toString(), path);
       }
     }
   }

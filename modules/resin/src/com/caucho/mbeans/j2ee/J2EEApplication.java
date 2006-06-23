@@ -29,14 +29,39 @@
 
 package com.caucho.mbeans.j2ee;
 
+import com.caucho.server.e_app.EarDeployController;
+import com.caucho.loader.EnvironmentLocal;
+
 /**
  * Management interface for a J2EE Application (EAR).
  */
 public class J2EEApplication extends J2EEDeployedObject {
+  private static EnvironmentLocal<J2EEApplication> _j2eeApplicationLocal
+    = new EnvironmentLocal<J2EEApplication>("caucho.jmx.j2ee.J2EEApplication");
+
+  private final EarDeployController _earDeployController;
+
+  static J2EEApplication getLocal()
+  {
+    return _j2eeApplicationLocal.get();
+  }
+
+  public J2EEApplication(EarDeployController earDeployController)
+  {
+    _earDeployController = earDeployController;
+    _j2eeApplicationLocal.set(this);
+  }
+
   protected String getName()
   {
-    // XXX:
-    return null;
+    String name = _earDeployController.getId();
+
+    return name == null ? "default" : name;
+  }
+
+  protected boolean isJ2EEApplication()
+  {
+    return false;
   }
 
   public String getDeploymentDescriptor()
@@ -51,7 +76,10 @@ public class J2EEApplication extends J2EEDeployedObject {
    */
   public String []getModules()
   {
-    return new String[] {};
+    return queryObjectNames("j2eeType=AppClientModule",
+                            "j2eeType=EJBModule",
+                            "j2eeType=WebModule",
+                            "j2eeType=ResourceAdapterModule");
   }
 
 }

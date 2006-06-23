@@ -29,27 +29,26 @@
 
 package com.caucho.server.webapp;
 
-import java.io.IOException;
-
-import java.util.ArrayList;
-import java.util.Map;
-
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.management.JMException;
-import javax.servlet.jsp.el.ELException;
-
 import com.caucho.config.types.PathBuilder;
 import com.caucho.jmx.IntrospectionMBean;
 import com.caucho.log.Log;
+import com.caucho.mbeans.j2ee.J2EEAdmin;
+import com.caucho.mbeans.j2ee.WebModule;
+import com.caucho.mbeans.server.WebAppMBean;
 import com.caucho.server.deploy.DeployConfig;
 import com.caucho.server.deploy.EnvironmentDeployController;
-import com.caucho.mbeans.server.WebAppMBean;
 import com.caucho.util.CauchoSystem;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
+
+import javax.management.JMException;
+import javax.servlet.jsp.el.ELException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 /**
  * A configuration entry for a web-app.
  */
@@ -295,6 +294,11 @@ public class WebAppController
     throws JMException
   {
     return new IntrospectionMBean(_admin, WebAppMBean.class);
+  }
+
+  protected J2EEAdmin createJ2EEAdmin()
+  {
+    return new J2EEAdmin(new WebModule(this));
   }
 
   /**

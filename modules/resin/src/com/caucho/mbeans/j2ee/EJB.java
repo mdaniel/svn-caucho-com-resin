@@ -33,6 +33,7 @@ package com.caucho.mbeans.j2ee;
  * Base class management interface for enterpise java beans.
  */
 public class EJB extends J2EEManagedObject {
+
   protected String getName()
   {
     // XXX:

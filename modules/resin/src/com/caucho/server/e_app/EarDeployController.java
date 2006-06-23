@@ -29,47 +29,22 @@
 
 package com.caucho.server.e_app;
 
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.IOException;
-
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
-import javax.management.JMException;
-
+import com.caucho.jmx.IntrospectionMBean;
+import com.caucho.log.Log;
+import com.caucho.mbeans.j2ee.J2EEAdmin;
+import com.caucho.mbeans.j2ee.J2EEApplication;
+import com.caucho.mbeans.server.EarMBean;
+import com.caucho.server.deploy.EnvironmentDeployController;
+import com.caucho.server.webapp.ApplicationContainer;
+import com.caucho.server.webapp.WebAppController;
 import com.caucho.util.L10N;
-
-import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Path;
 
-import com.caucho.log.Log;
-
-import com.caucho.loader.Environment;
-
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.PathBuilder;
-
-import com.caucho.make.Dependency;
-
-import com.caucho.lifecycle.Lifecycle;
-
-import com.caucho.el.EL;
-import com.caucho.el.MapVariableResolver;
-
-import com.caucho.server.webapp.WebAppConfig;
-import com.caucho.server.webapp.WebAppController;
-import com.caucho.server.webapp.ApplicationContainer;
-
-import com.caucho.server.deploy.EnvironmentDeployController;
-import com.caucho.server.deploy.DeployContainer;
-import com.caucho.jmx.IntrospectionMBean;
-import com.caucho.mbeans.server.EarMBean;
+import javax.management.JMException;
+import javax.servlet.jsp.el.ELException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A configuration entry for an Enterprise Application
@@ -142,6 +117,11 @@ public class EarDeployController
     throws JMException
   {
     return new IntrospectionMBean(new EarAdmin(this), EarMBean.class);
+  }
+
+  protected J2EEAdmin createJ2EEAdmin()
+  {
+    return new J2EEAdmin(new J2EEApplication(this));
   }
 
   /**

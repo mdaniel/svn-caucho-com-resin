@@ -28,21 +28,12 @@
 
 package com.caucho.iiop;
 
-import java.util.Iterator;
-
-import com.caucho.vfs.Path;
-import com.caucho.vfs.JarPath;
-
-import com.caucho.java.WorkDir;
-
 import com.caucho.config.ConfigException;
-
-import com.caucho.loader.DynamicClassLoader;
-
 import com.caucho.ejb.EJBClientInterface;
-
-import com.caucho.ejb.cfg.EjbConfig;
 import com.caucho.ejb.cfg.EjbBean;
+import com.caucho.ejb.cfg.EjbConfig;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.Path;
 
 public class IiopClient implements EJBClientInterface {
   private EjbConfig _ejbConfig = new EjbConfig(null);
@@ -57,7 +48,7 @@ public class IiopClient implements EJBClientInterface {
     Path path = JarPath.create(jar).lookup("META-INF/ejb-jar.xml");
 
     if (path.canRead())
-      _ejbConfig.addEJBPath(path);
+      _ejbConfig.addEJBPath(jar.toString(), path);
   }
 
   /**

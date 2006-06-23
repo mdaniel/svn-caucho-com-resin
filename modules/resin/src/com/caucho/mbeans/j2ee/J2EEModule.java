@@ -40,6 +40,6 @@ abstract public class J2EEModule extends J2EEDeployedObject {
    */
   public String []getJavaVMs()
   {
-    return queryObjectNames("j2eeType=JVM,*");
+    return queryObjectNames("j2eeType=JVM");
   }
 }

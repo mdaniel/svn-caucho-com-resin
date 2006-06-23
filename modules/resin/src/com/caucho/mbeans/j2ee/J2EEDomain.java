@@ -64,9 +64,9 @@ public class J2EEDomain
     return "j2ee";
   }
 
-  protected String getJ2EEApplication()
+  protected boolean isJ2EEApplication()
   {
-    return null;
+    return false;
   }
 
   /**
@@ -82,6 +82,6 @@ public class J2EEDomain
    */
   public String []getServers()
   {
-    return queryObjectNames("j2eeType=J2EEServer,*");
+    return queryObjectNames("j2eeType=J2EEServer");
   }
 }

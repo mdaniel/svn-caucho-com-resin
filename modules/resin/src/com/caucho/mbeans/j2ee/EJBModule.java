@@ -33,10 +33,16 @@ package com.caucho.mbeans.j2ee;
  * Management interface for an ejb module.
  */
 public class EJBModule extends J2EEModule {
+  private final String _name;
+
+  public EJBModule(String name)
+  {
+    _name = name;
+  }
+
   protected String getName()
   {
-    // XXX:
-    return null;
+    return _name;
   }
 
   public String getDeploymentDescriptor()
@@ -51,7 +57,14 @@ public class EJBModule extends J2EEModule {
    */
   public String []getEJbs()
   {
-    // XXX:
-    return new String[] {};
+    String postfix = ",EJBModule=" + _objectName.getKeyProperty("name");
+
+    return queryObjectNames(
+      "j2eeType=EntityBean" + postfix,
+      "j2eeType=StatefulSessionBean" + postfix,
+      "j2eeType=StatelessSessionBean" + postfix,
+      "j2eeType=MessageDrivenSessionBean" + postfix
+    );
+
   }
 }

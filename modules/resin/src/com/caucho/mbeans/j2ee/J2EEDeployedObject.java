@@ -29,11 +29,6 @@
 
 package com.caucho.mbeans.j2ee;
 
-import com.caucho.server.cluster.Cluster;
-
-import javax.management.ObjectName;
-import javax.management.MalformedObjectNameException;
-
 /**
  * Base class management interface for deployed objects.
  */
@@ -50,6 +45,6 @@ abstract public class J2EEDeployedObject extends J2EEManagedObject {
    */
   public String getServer()
   {
-    return "j2ee:j2eeType=J2EEServer,name=" + J2EEServer.getLocalName();
+    return "j2ee:j2eeType=J2EEServer,name=" + J2EEServer.getLocal().getName();
   }
 }
