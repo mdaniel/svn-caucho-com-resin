@@ -939,6 +939,8 @@ public class Port
             conn.setRequest(_protocol.createRequest(conn));
           }
 
+	  conn.start();
+
           ThreadPool.schedule(conn);
         }
       } catch (Throwable e) {

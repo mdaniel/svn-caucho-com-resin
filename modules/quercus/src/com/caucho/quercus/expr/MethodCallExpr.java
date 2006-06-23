@@ -90,24 +90,17 @@ public class MethodCallExpr extends Expr {
 
     Value obj = _objExpr.eval(env);
 
-    AbstractFunction fun = obj.findFunction(_name);
+    Value []args = new Value[_args.length];
 
-    if (fun == null) {
-      env.error(getLocationLine(),
-		L.l("'{0}::{1}' is an unknown function.",
-		    obj.getClassName(), _name));
+    for (int i = 0; i < _args.length; i++)
+      args[i] = _args[i].eval(env);
 
-      return NullValue.NULL;
-    }
-
-    Value []args = fun.evalArguments(env, this, _args);
-    
     env.pushCall(this, obj);
     
     try {
       env.checkTimeout();
 
-      return fun.callMethod(env, obj, args);
+      return obj.callMethod(env, _name, args);
     } finally {
       env.popCall();
     }

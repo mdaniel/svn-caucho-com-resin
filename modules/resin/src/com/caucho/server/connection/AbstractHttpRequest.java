@@ -275,6 +275,9 @@ public abstract class AbstractHttpRequest
     _oldProvider = null;
 
     _attributeListeners = NULL_LISTENERS;
+
+    if (_conn instanceof TcpConnection)
+      ((TcpConnection) _conn).beginActive();
   }
 
   /**
@@ -2324,6 +2327,9 @@ public abstract class AbstractHttpRequest
         }
       }
       _closeOnExit.clear();
+      
+      if (_conn instanceof TcpConnection)
+	((TcpConnection) _conn).beginActive();
     }
   }
 

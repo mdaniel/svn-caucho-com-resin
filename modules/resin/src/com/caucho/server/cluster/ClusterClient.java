@@ -42,6 +42,10 @@ import com.caucho.lifecycle.Lifecycle;
  * Represents a connection to one of the servers in a distribution group.
  * A {@link ClusterServer} is used to define the properties of the server
  * that is connected to.
+ *
+ * <pre>
+ *  resin:name=web-a,type=ClusterServer
+ * </pre>
  */
 public class ClusterClient {
   private static final Logger log

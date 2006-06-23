@@ -98,6 +98,8 @@ public class JavaClassDef extends ClassDef {
 
   private JavaMethod __setField = null;
 
+  private JavaMethod __call = null;
+
   private Method _printRImpl = null;
   private Method _varDumpImpl = null;
 
@@ -350,7 +352,10 @@ public class JavaClassDef extends ClassDef {
    */
   public Value callNew(Env env, Value []args)
   {
-    return _cons.call(env, (Object) null, args);
+    if (_cons != null)
+      return _cons.call(env, (Object) null, args);
+    else
+      return NullValue.NULL;
   }
 
   /**
@@ -362,13 +367,23 @@ public class JavaClassDef extends ClassDef {
   }
 
   /**
+   * Returns the __call.
+   */
+  public AbstractFunction getCallMethod()
+  {
+    return __call;
+  }
+
+  /**
    * Eval a method
    */
   public Value callMethod(Env env, Object obj, String name, Expr []args)
   {
     JavaMethod method = _functionMap.get(name);
 
-    if (method == null) {
+    if (method != null) {
+    }
+    else if (method == null) {
       env.warning(env.getLocation().getMessagePrefix() + L.l("{0}::{1} is an unknown method.",
                                           _name, name));
 
@@ -399,7 +414,25 @@ public class JavaClassDef extends ClassDef {
    */
   public Value callMethod(Env env, Object obj, String name, Value []args)
   {
-    return getMethod(env, name).call(env, obj, args);
+    JavaMethod method = _functionMap.get(name);
+
+    if (method != null)
+      return method.call(env, obj, args);
+    else if (__call != null) {
+      Value []extArgs = new Value[args.length + 1];
+
+      extArgs[0] = new StringValueImpl(name);
+
+      System.arraycopy(args, 0, extArgs, 1, args.length);
+      
+      return __call.call(env, obj, extArgs);
+    }
+    else {
+      env.error(L.l("'{0}::{1}' is an unknown method",
+		    _name, name));
+
+      return NullValue.NULL;
+    }
   }
 
   /**
@@ -407,7 +440,18 @@ public class JavaClassDef extends ClassDef {
    */
   public Value callMethod(Env env, Object obj, String name)
   {
-    return getMethod(env, name).call(env, obj);
+    JavaMethod method = _functionMap.get(name);
+
+    if (method != null)
+      return method.call(env, obj);
+    else if (__call != null)
+      return __call.call(env, obj, new StringValueImpl(name));
+    else {
+      env.error(L.l("'{0}::{1}' is an unknown method",
+		    _name, name));
+
+      return NullValue.NULL;
+    }
   }
 
   /**
@@ -415,7 +459,18 @@ public class JavaClassDef extends ClassDef {
    */
   public Value callMethod(Env env, Object obj, String name, Value a1)
   {
-    return getMethod(env, name).call(env, obj, a1);
+    JavaMethod method = _functionMap.get(name);
+
+    if (method != null)
+      return method.call(env, obj, a1);
+    else if (__call != null)
+      return __call.call(env, obj, new StringValueImpl(name), a1);
+    else {
+      env.error(L.l("'{0}::{1}' is an unknown method",
+		    _name, name));
+
+      return NullValue.NULL;
+    }
   }
 
   /**
@@ -424,7 +479,18 @@ public class JavaClassDef extends ClassDef {
   public Value callMethod(Env env, Object obj, String name,
                           Value a1, Value a2)
   {
-    return getMethod(env, name).call(env, obj, a1, a2);
+    JavaMethod method = _functionMap.get(name);
+
+    if (method != null)
+      return method.call(env, obj, a1, a2);
+    else if (__call != null)
+      return __call.call(env, obj, new StringValueImpl(name), a1, a2);
+    else {
+      env.error(L.l("'{0}::{1}' is an unknown method",
+		    _name, name));
+
+      return NullValue.NULL;
+    }
   }
 
   /**
@@ -490,7 +556,9 @@ public class JavaClassDef extends ClassDef {
   {
     JavaMethod method = _functionMap.get(name);
 
-    if (method == null) {
+    if (method != null)
+      return method;
+    else if (method == null) {
       env.error(L.l("`{0}' is an unknown method of {1}.", name, _name));
     }
 
@@ -513,6 +581,9 @@ public class JavaClassDef extends ClassDef {
     for (Map.Entry<String,JavaMethod> entry : _functionMap.entrySet()) {
       cl.addMethod(entry.getKey(), entry.getValue());
     }
+
+    if (__call != null)
+      cl.setCall(__call);
 
     for (Map.Entry<String,Value> entry : _constMap.entrySet()) {
       cl.addConstant(entry.getKey(), new LiteralExpr(entry.getValue()));
@@ -634,7 +705,6 @@ public class JavaClassDef extends ClassDef {
     Method[] methods = type.getMethods();
 
     for (Method method : methods) {
-
       if (Modifier.isStatic(method.getModifiers()))
         continue;
 
@@ -780,7 +850,9 @@ public class JavaClassDef extends ClassDef {
         _printRImpl = method;
       } else if ("varDumpImpl".equals(method.getName())) {
         _varDumpImpl = method;
-      }else {
+      } else if ("__call".equals(method.getName())) {
+	__call = new JavaMethod(moduleContext, method);
+      } else {
         JavaMethod javaMethod = new JavaMethod(moduleContext, method);
 
         _functionMap.put(method.getName(), javaMethod);

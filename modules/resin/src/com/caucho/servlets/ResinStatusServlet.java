@@ -428,8 +428,8 @@ public class ResinStatusServlet extends GenericServlet {
         for (int j = 0; j < srunNames.length; j++) {
           ObjectName srunName = new ObjectName(srunNames[j]);
 
-          ClusterClientMBean client;
-          client = (ClusterClientMBean) Jmx.findGlobal(srunName);
+          ClusterServerMBean client;
+          client = (ClusterServerMBean) Jmx.findGlobal(srunName);
 
           String host = srunName.getKeyProperty("host");
           String port = srunName.getKeyProperty("port");

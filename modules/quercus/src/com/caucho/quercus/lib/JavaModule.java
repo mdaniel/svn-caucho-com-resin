@@ -35,6 +35,7 @@ import com.caucho.util.L10N;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.JavaValue;
 
 import com.caucho.quercus.program.JavaClassDef;
 
@@ -52,13 +53,26 @@ public class JavaModule extends AbstractQuercusModule {
   /**
    * Call the Java constructor and return the wrapped Java object.
    */
-  public static Value java(Env env,
+  public static Object java(Env env,
 			   String className,
 			   Value []args)
   {
-    JavaClassDef def = env.getJavaClassDefinition(className);
+    try {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      
+      Class cl = Class.forName(className, false, loader);
 
-    return def.callNew(env, args);
+      try {
+	return cl.newInstance();
+      } catch (Throwable e) {
+      }
+
+      return new JavaValue(env, null, env.getJavaClassDefinition(cl.getName()));
+    } catch (Throwable e) {
+      env.warning(e);
+
+      return null;
+    }
   }
 }
 

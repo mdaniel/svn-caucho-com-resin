@@ -272,7 +272,7 @@ public class ClusterServer {
       if (name == null || name.equals(""))
         name = "default";
 
-      _objectName = new ObjectName("resin:type=ClusterClient,name=" + name);
+      _objectName = new ObjectName("resin:type=ClusterServer,name=" + name);
 
       Jmx.register(_admin, _objectName);
     } catch (Throwable e) {

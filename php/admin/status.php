@@ -27,7 +27,7 @@
   $title = "Resin status";
 
   if (! empty($server->Id)) {
-    $title = $title . " for server " . $resin->serverId;
+    $title = $title . " for server " . $server->Id;
   }
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Strict//EN" "http://www.w3.org/TR/html4/strict.dtd">
@@ -57,52 +57,52 @@
 
 <tr title="The configuration file used when starting this instance of Resin, the value of `-conf'.">
 <th>Version:</th>
-<td><?= $resin->version ?></td>
+<td><?= $resin->Version ?></td>
 </tr>
 
 <tr title="The configuration file used when starting this instance of Resin, the value of `-conf'.">
 <th>Config file:</th>
-<td><?= $resin->configFile ?></td>
+<td><?= $resin->ConfigFile ?></td>
 </tr>
 
 <tr title="The Resin home directory used when starting this instance of Resin. This is the location of the Resin program files.">
 <th>Resin home:</th>
-<td><?= $resin->resinHome ?></td>
+<td><?= $resin->ResinHome ?></td>
 </tr>
 
 <tr title="The server root directory used when starting this instance of Resin. This is the root directory of the web server files.">
 <th>Server root:</th>
-<td><?= $resin->serverRoot ?></td>
+<td><?= $resin->ServerRoot ?></td>
 </tr>
 
 <tr title="The ip address of the machine that is running this instance of Resin.">
 <th>Local host:</th>
-<td><?= $server->localHost ?></td>
+<td><?= $server->LocalHost ?></td>
 </tr>
 
 <tr title="The current lifecycle state">
 <th>State:</th>
-<td><?= $server->state ?></td>
+<td><?= $server->State ?></td>
 </tr>
 
 <tr title="The time that this instance was first started.">
 <th>Inital start time:</th>
-<td><?= format_datetime($server->initialStartTime) ?></td>
+<td><?= format_datetime($server->InitialStartTime) ?></td>
 </tr>
 
 <tr title="The time that this instance was last started or restarted.">
 <th>Start time:</th>
-<td><?= format_datetime($server->startTime) ?></td>
+<td><?= format_datetime($server->StartTime) ?></td>
 </tr>
 
 <tr title="The current total amount of memory available for the JVM, in bytes.">
 <th>Total memory:</th>
-<td><?= format_memory($server->totalMemory) ?></td>
+<td><?= format_memory($server->TotalMemory) ?></td>
 </tr>
 
 <tr title="The current free amount of memory available for the JVM, in bytes.">
 <th>Free memory:</th>
-<td><?= format_memory($server->freeMemory) ?></td>
+<td><?= format_memory($server->FreeMemory) ?></td>
 </tr>
 
 <?php
@@ -120,7 +120,8 @@ $proxyCache = $mbeanServer->lookup("resin:type=ProxyCache");
 
 <tr>
 <th>Invocation hit ratio:</th>
-<td><?= format_hit_ratio($server->invocationCacheHitCount, $server->invocationCacheMissCount) ?></td>
+<td><?= format_hit_ratio($server->InvocationCacheHitCount,
+                         $server->InvocationCacheMissCount) ?></td>
 </tr>
 
 </table>
@@ -153,11 +154,11 @@ The ThreadPool manages all threads used by Resin.
 <th title="The current total number of threads managed by the pool.">Total count</th>
 </tr>
 <tr align='right'>
-<td><?= $threadPool->threadMax ?></td>
-<td><?= $threadPool->spareThreadMin ?></td>
-<td><?= $threadPool->activeThreadCount ?></td>
-<td><?= $threadPool->idleThreadCount ?></td>
-<td><?= $threadPool->threadCount ?></td>
+<td><?= $threadPool->ThreadMax ?></td>
+<td><?= $threadPool->SpareThreadMin ?></td>
+<td><?= $threadPool->ActiveThreadCount ?></td>
+<td><?= $threadPool->IdleThreadCount ?></td>
+<td><?= $threadPool->ThreadCount ?></td>
 </tr>
 </table>
 
@@ -192,12 +193,12 @@ The ThreadPool manages all threads used by Resin.
 ?>
 
 <tr>
-<td><?= $pool->name ?></td>
-<td><?= $pool->activeConnectionCount ?></td>
-<td><?= $pool->idleConnectionCount ?></td>
-<td><?= $pool->connectionCount ?></td>
-<td><?= $pool->maxConnections ?></td>
-<td><?= $pool->maxIdleTime ?></td>
+<td><?= $pool->Name ?></td>
+<td><?= $pool->ActiveConnectionCount ?></td>
+<td><?= $pool->IdleConnectionCount ?></td>
+<td><?= $pool->ConnectionCount ?></td>
+<td><?= $pool->MaxConnections ?></td>
+<td><?= $pool->MaxIdleTime ?></td>
 </tr>
 
 <?php
@@ -236,13 +237,13 @@ The ThreadPool manages all threads used by Resin.
 ?>
 
 <tr>
-<td><?= $port->protocolName ?>://<?= $port->host ? $port->host : "*" ?>:<?= $port->port ?></td>
-<td><?= $port->active ? "active" : "inacative" ?></td>
-<td><?= $port->activeThreadCount ?></td>
-<td><?= $port->idleThreadCount ?></td>
-<td><?= $port->threadCount ?></td>
-<td><?= $port->keepaliveCount ?></td>
-<td><?= $port->selectConnectionCount < 0 ? "N/A" : $port->selectConnectionCount ?></td>
+<td><?= $port->ProtocolName ?>://<?= $port->Address ? $port->Address : "*" ?>:<?= $port->Port ?></td>
+<td><?= $port->Active ? "active" : "inacative" ?></td>
+<td><?= $port->ActiveThreadCount ?></td>
+<td><?= $port->IdleThreadCount ?></td>
+<td><?= $port->ThreadCount ?></td>
+<td><?= $port->KeepaliveCount ?></td>
+<td><?= $port->SelectConnectionCount < 0 ? "N/A" : $port->SelectConnectionCount ?></td>
 </tr>
 <?php 
   }
@@ -257,7 +258,7 @@ The ThreadPool manages all threads used by Resin.
   foreach ($resin->Clusters as $clusterObjectName) {
     $cluster = $mbeanServer->lookup($clusterObjectName);
 
-    if (empty($cluster->clientObjectNames))
+    if (empty($cluster->ClientObjectNames))
       continue;
 ?>
 
@@ -274,20 +275,20 @@ The ThreadPool manages all threads used by Resin.
 <th>Connection</th>
 </tr>
 <?php
-  foreach ($cluster->clients as $clientObjectName) {
+  foreach ($cluster->Clients as $clientObjectName) {
     $client = $mbeanServer->lookup($clientObjectName);
     $clientParts = $mbeanServer->explode($clientObjectName);
 ?>
 
 <tr class='<?= $client->ping() ? "active" : "inactive" ?>'>
 <tr>
-<td><?= $client->serverId ?></td>
+<td><?= $client->Id ?></td>
 <td><?= $client->Address ?>:<?= $client->Port ?></td>
 <td><?= $client->State ?></td>\n";
-<td><?= $client->activeConnectionCount ?></td>
-<td><?= $client->idleConnectionCount ?></td>
-<td><?= format_hit_ratio($client->lifetimeKeepaliveCount,
-                         $client->lifetimeConnectionCount) ?></td>
+<td><?= $client->ActiveConnectionCount ?></td>
+<td><?= $client->IdleConnectionCount ?></td>
+<td><?= format_hit_ratio($client->LifetimeKeepaliveCount,
+                         $client->LifetimeConnectionCount) ?></td>
 </tr>
 <?php 
 }
@@ -325,7 +326,7 @@ The ThreadPool manages all threads used by Resin.
   usort($hosts, "sort_host");
 
   foreach ($hosts as $host) {
-    $hostName = empty($host->hostName) ? "default" : $host->hostName;
+    $hostName = empty($host->hostName) ? "default" : $host->HostName;
 ?>
 
 <tr title='<?= $hostObjectName ?>'><td colspan='4'><?= $host->URL ?></td></tr>
@@ -350,11 +351,11 @@ The ThreadPool manages all threads used by Resin.
   foreach ($webapps as $webapp) {
 ?>
 
-<tr class="<?= $webapp->state ?>" title='<?= $webappObjectName ?>'>
+<tr class="<?= $webapp->State ?>" title='<?= $webappObjectName ?>'>
 <td>&nbsp;</td>
-<td><?= empty($webapp->contextPath) ? "/" : $webapp->contextPath ?>
-<td><?= $webapp->state ?>
-<td><?= $webapp->activeSessionCount ?>
+<td><?= empty($webapp->ContextPath) ? "/" : $webapp->ContextPath ?>
+<td><?= $webapp->State ?>
+<td><?= $webapp->ActiveSessionCount ?>
 </tr>
 <?php
     } // webapps
@@ -362,6 +363,46 @@ The ThreadPool manages all threads used by Resin.
 ?>
 
 </table>
+
+<?php
+/*
+$tcp_conn = $mbeanServer->query("resin:*,type=TcpConnection");
+$slow_conn = array();
+
+echo "<table>";
+
+foreach ($tcp_conn as $conn_name) {
+  $conn = $mbeanServer->lookup($conn_name);
+
+  echo "<tr><td>" . $conn->ThreadId . "<td>" . $conn->State . "<td>" . $conn->ActiveTime;
+
+  if ($conn->ActiveTime > 60000)
+    $slow_conn[] = $conn;
+}
+
+echo "</table>";
+
+$thread_mgr = $mbeanServer->lookup("java.lang:type=Threading");
+
+foreach ($slow_conn as $slow) {
+  echo "<h3>" . $slow->ObjectName . " " . ($slow->ActiveTime / 1000) . "</h3>";
+
+  $thread_id = $slow->ThreadId;
+
+  resin_var_dump($thread_id);
+  $info = $thread_mgr->getThreadInfo($thread_id, 16);
+
+  if ($info) {
+    $bean = Java("java.lang.management.ThreadInfo");
+    $info = $bean->from($info);
+  }
+
+  resin_var_dump($info->getStackTrace());
+
+}
+*/
+
+?>
 
 <!-- Footer -->
 <p>

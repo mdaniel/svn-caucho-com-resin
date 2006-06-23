@@ -34,14 +34,21 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import javax.management.ObjectName;
+import javax.management.MalformedObjectNameException;
+
 import com.caucho.log.Log;
+
+import com.caucho.jmx.Jmx;
+
+import com.caucho.mbeans.server.ThreadMBean;
 
 import com.caucho.vfs.EnvironmentStream;
 
 /**
  * A generic pool of threads available for Alarms and Work tasks.
  */
-public class ThreadPool implements Runnable {
+public class ThreadPool implements Runnable, ThreadMBean {
   private static final Logger log
     = Logger.getLogger(ThreadPool.class.getName());
   
@@ -83,8 +90,9 @@ public class ThreadPool implements Runnable {
 
   private static int _g_id;
 
-  private int _id = _g_id++;
-  private String _name;
+  private final int _id;
+  private final String _name;
+  private String _objectName;
 
   private Thread _thread;
   private Thread _queueThread;
@@ -100,7 +108,15 @@ public class ThreadPool implements Runnable {
 
   private ThreadPool()
   {
-    _name = "resin-" + _id;
+    synchronized (ThreadPool.class) {
+      _id = _g_id++;
+      _name = "resin-" + _id;
+    }
+
+    try {
+      _objectName = new ObjectName("resin:type=Thread,name=" + _name).toString();
+    } catch (MalformedObjectNameException e) {
+    }
   }
 
   /**
@@ -383,9 +399,25 @@ public class ThreadPool implements Runnable {
   /**
    * Returns the name.
    */
-  String getName()
+  public String getName()
   {
     return _name;
+  }
+
+  /**
+   * Returns the ObjectName
+   */
+  public String getObjectName()
+  {
+    return _objectName;
+  }
+
+  /**
+   * Returns the thread id.
+   */
+  public long getThreadId()
+  {
+    return _thread.getId();
   }
 
   /**
@@ -417,7 +449,7 @@ public class ThreadPool implements Runnable {
   public void run()
   {
     _thread = Thread.currentThread();
-    
+
     synchronized (_idleLock) {
       _threadCount++;
       _startCount--;

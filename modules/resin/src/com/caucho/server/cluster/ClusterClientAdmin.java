@@ -32,13 +32,13 @@ package com.caucho.server.cluster;
 
 import java.util.Date;
 
-import com.caucho.mbeans.server.ClusterClientMBean;
+import com.caucho.mbeans.server.ClusterServerMBean;
 
 /**
  * Implementation of the ClusterClient's administration mbean.
  */
 public class ClusterClientAdmin
-  implements ClusterClientMBean
+  implements ClusterServerMBean
 {
   private final ClusterClient _client;
 

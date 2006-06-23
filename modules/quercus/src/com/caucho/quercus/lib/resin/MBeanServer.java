@@ -51,77 +51,6 @@ public class MBeanServer {
   {
   }
 
-  /**
-   * Explode an object name into an array with key value pairs that
-   * correspond to the keys and values in the object name.
-   * The domain is stored in the returned array under the key named ":".
-   */
-  public ArrayValue explode(String name)
-  {
-    try {
-      ObjectName objectName = new ObjectName(name);
-
-      ArrayValueImpl exploded = new ArrayValueImpl();
-
-      exploded.put(":", objectName.getDomain());
-
-      Hashtable<String, String> entries = objectName.getKeyPropertyList();
-
-      for (Map.Entry<String, String> entry : entries.entrySet()) {
-	exploded.put(entry.getKey(), entry.getValue());
-      }
-
-      return exploded;
-    } catch (MalformedObjectNameException e) {
-      throw new QuercusModuleException(e);
-    }
-  }
-
-  /**
-   * Implode an array into an object name.  The array contains key value pairs
-   * that become key vlaue pairs in the object name.  The key with the name
-   * ":" becomes the domain of the object name.
-   */
-  public String implode(@NotNull @ReadOnly ArrayValue exploded)
-  {
-    try {
-      if (exploded == null)
-	return null;
-
-      String domain;
-
-      Value domainValue = exploded.get(StringValue.create(":"));
-
-      if (domainValue.isNull())
-	domain = "*";
-      else
-	domain = domainValue.toString();
-
-      Hashtable<String, String> entries = new Hashtable<String, String>();
-
-      for (Map.Entry<Value, Value> entry : exploded.entrySet()) {
-	String key = entry.getKey().toString();
-	String value = entry.getValue().toString();
-
-	if (":".equals(key))
-	  continue;
-
-	entries.put(key, value);
-      }
-
-      ObjectName objectName;
-
-      if (entries.isEmpty())
-	objectName = new ObjectName(domain + ":" + "*");
-      else
-	objectName = new ObjectName(domain, entries);
-
-      return objectName.getCanonicalName();
-    } catch (MalformedObjectNameException e) {
-      throw new QuercusModuleException(e);
-    }
-  }
-
   public MBeanInfo info(String name)
   {
     javax.management.MBeanServer mbeanServer;
@@ -154,15 +83,21 @@ public class MBeanServer {
    *
    * @return the mbean object, or null if it is not found.
    */
-  public Object lookup(Env env, @Optional String name)
+  public MBean lookup(Env env, @Optional String name)
   {
     try {
       if (name == null || name.length() == 0)
-	return Application.getLocal().getAdmin();
-      else if (name.contains(":"))
-	return Jmx.findGlobal(name);
+	return null;
+
+      javax.management.MBeanServer server;
+      server = Jmx.getGlobalMBeanServer();
+
+      ObjectName objectName = Jmx.getObjectName(name);
+
+      if (server.isRegistered(objectName))
+	return new MBean(server, objectName);
       else
-	return Jmx.find(name);
+	return null;
     } catch (MalformedObjectNameException e) {
       throw new QuercusModuleException(e);
     }

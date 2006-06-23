@@ -291,6 +291,8 @@ public class HttpRequest extends AbstractHttpRequest
     } finally {
       if (hasRequest)
         _response.finish();
+      else
+	super.finish();
     }
 
     if (log.isLoggable(Level.FINE)) {

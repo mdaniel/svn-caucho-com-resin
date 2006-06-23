@@ -42,11 +42,11 @@ import com.caucho.jmx.Description;
  *
  * The JMX name looks like:
  * <pre>
- *   resin:type=ClusterClient,name=web-a
+ *   resin:type=ClusterServer,name=web-a
  * </pre>
  */
 @Description("Client-view of a cluster's server, i.e. a target server with which this instance can communicate")
-public interface ClusterClientMBean {
+public interface ClusterServerMBean {
   /**
    * Returns the {@link ObjectName} of the mbean.
    */

@@ -40,7 +40,11 @@ import com.caucho.util.Alarm;
 import com.caucho.vfs.QSocket;
 import com.caucho.vfs.ClientDisconnectException;
 
+import com.caucho.jmx.Jmx;
+
 import com.caucho.loader.Environment;
+
+import com.caucho.mbeans.server.TcpConnectionMBean;
 
 import com.caucho.server.connection.BroadcastTask;
 
@@ -52,7 +56,9 @@ import com.caucho.log.Log;
  *
  * <p>Each TcpConnection has its own thread.
  */
-public class TcpConnection extends PortConnection implements ThreadTask {
+public class TcpConnection extends PortConnection
+  implements ThreadTask, TcpConnectionMBean
+{
   private static final Logger log = Log.open(TcpConnection.class);
 
   private static int _g_id;
@@ -69,6 +75,11 @@ public class TcpConnection extends PortConnection implements ThreadTask {
   private final Object _requestLock = new Object();
 
   private String _id = "tcp-connection-" + _g_id++;
+  private String _objectName;
+  
+  private String _state = "unknown";
+  private long _startTime;
+  private Thread _thread;
 
   /**
    * Creates a new TcpConnection.
@@ -80,13 +91,33 @@ public class TcpConnection extends PortConnection implements ThreadTask {
   {
     setPort(port);
 
-    if (port.getHost() == null)
-      _id = "resin-tcp-connection-*:" + port.getPort() + "-" + _g_id++;
-    else
+    int id;
+    
+    synchronized (TcpConnection.class) {
+      id = _g_id++;
+    }
+
+    if (port.getHost() == null) {
+      _id = "resin-tcp-connection-*:" + port.getPort() + "-" + id;
+      _objectName = ("resin:type=TcpConnection,name=any-"
+		     + port.getPort() + "-" + id);
+    }
+    else {
       _id = ("resin-tcp-connection-" + port.getHost() + ":" +
-             port.getPort() + "-" + _g_id++);
+             port.getPort() + "-" + id);
+      _objectName = ("resin:type=TcpConnection,name=" + port.getHost()
+		     + "-" + port.getPort() + "-" + id);
+    }
 
     _socket = socket;
+  }
+
+  /**
+   * Returns the object name for jmx.
+   */
+  public String getObjectName()
+  {
+    return _objectName;
   }
 
   /**
@@ -303,6 +334,64 @@ public class TcpConnection extends PortConnection implements ThreadTask {
   }
 
   /**
+   * Returns the state string.
+   */
+  public final String getState()
+  {
+    return _state;
+  }
+
+  /**
+   * Sets the state string.
+   */
+  public final void setState(String state)
+  {
+    _state = state;
+  }
+
+  /**
+   * Begins an active connection.
+   */
+  public final void beginActive()
+  {
+    _state = "active";
+    _startTime = Alarm.getCurrentTime();
+  }
+
+  /**
+   * Ends an active connection.
+   */
+  public final void endActive()
+  {
+    _state = "idle";
+    _startTime = 0;
+  }
+
+  /**
+   * Returns the thread id.
+   */
+  public final long getThreadId()
+  {
+    Thread thread = _thread;
+
+    if (thread != null)
+      return thread.getId();
+    else
+      return -1;
+  }
+
+  /**
+   * Returns the time the current request has taken.
+   */
+  public final long getActiveTime()
+  {
+    if (_startTime > 0)
+      return Alarm.getCurrentTime() - _startTime;
+    else
+      return -1;
+  }
+
+  /**
    * Tries to mark the connection as a keepalive connection
    *
    * At exit, the connection is either:
@@ -353,6 +442,18 @@ public class TcpConnection extends PortConnection implements ThreadTask {
     _isDead = true;
     close();
   }
+
+  /**
+   * Starts the connection.
+   */
+  public void start()
+  {
+    try {
+      Jmx.register(this, _objectName);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+  }
   
   /**
    * Runs as a task.
@@ -384,6 +485,8 @@ public class TcpConnection extends PortConnection implements ThreadTask {
     long startTime = Alarm.getExactTime();
 
     try {
+      _thread = thread;
+      
       while (! _isDead) {
 	if (isKeepalive) {
 	}
@@ -449,6 +552,7 @@ public class TcpConnection extends PortConnection implements ThreadTask {
       else
 	free();
 
+      _thread = null;
       thread.setName(oldThreadName);
     }
   }
@@ -557,6 +661,14 @@ public class TcpConnection extends PortConnection implements ThreadTask {
   {
     closeImpl();
 
+    try {
+      Jmx.unregister(_objectName);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+
+    setState("free");
+    
     if (! _isDead)
       getPort().free(this);
     else
