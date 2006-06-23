@@ -161,7 +161,7 @@
     </antcall>
   </target>
 
-  <--
+  <!--
    We now ship Sun's mail.jar in modules/ext/javamail-XX.jar
   
   <target name="mail" depends="init,jaf">
