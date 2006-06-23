@@ -41,6 +41,8 @@ import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.lib.file.BinaryOutput;
 import com.caucho.quercus.lib.file.AbstractBinaryOutput;
 
+import com.caucho.vfs.TempBuffer;
+
 /**
  * As opposed to java's GZIPOutputStream, this class allows for more control on
  * what is written to the underlying OutputStream. 

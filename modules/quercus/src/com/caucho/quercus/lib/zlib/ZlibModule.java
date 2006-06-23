@@ -101,30 +101,29 @@ public class ZlibModule extends AbstractQuercusModule {
     int compressionLevel = getCompressionLevel(mode);
     int compressionStrategy = getCompressionStrategy(mode);
 
-    Object val = FileModule.fopen(env, fileName,
-				  mode, useIncludePath,
-				  null);
+    Object val = FileModule.fopen(env, fileName, mode, useIncludePath, null);
 
     if (val == null)
       return null;
 
     try {
-      if (filemode.equals("r")) {
-	BinaryInput is = (BinaryInput) val;
-	
+      int ch = filemode.charAt(0);
+
+      if (ch == 'r') {
+        BinaryInput is = (BinaryInput) val;
         return new ZlibInputStream(is);
       }
-      else if (filemode.equals("w")) {
+      else if (ch == 'w') {
         return new ZlibOutputStream(((BinaryOutput) val).getOutputStream(),
 				    compressionLevel,
 				    compressionStrategy);
       }
-      else if (filemode.equals("a")) {
+      else if (ch == 'a') {
         return new ZlibOutputStream(((BinaryOutput) val).getOutputStream(),
 				    compressionLevel,
 				    compressionStrategy);
       }
-      else if (filemode.equals("x")) {
+      else if (ch == 'x') {
         return new ZlibOutputStream(((BinaryOutput) val).getOutputStream(),
 				    compressionLevel,
 				    compressionStrategy);
@@ -159,7 +158,6 @@ public class ZlibModule extends AbstractQuercusModule {
       ArrayValue result = new ArrayValueImpl();
 
       StringValue line;
-
       while ((line = is.readLine(Integer.MAX_VALUE)) != null &&
 	     line.length() > 0)
 	result.put(line);
@@ -256,12 +254,12 @@ public class ZlibModule extends AbstractQuercusModule {
   /**
    * Returns true if the GZip stream is ended.
    */
-  public boolean gzeof(@NotNull BinaryStream bs)
+  public boolean gzeof(@NotNull BinaryStream binaryStream)
   {
-    if (bs == null)
+    if (binaryStream == null)
       return true;
 
-    return bs.isEOF();
+    return binaryStream.isEOF();
   }
 
   /**
@@ -276,9 +274,9 @@ public class ZlibModule extends AbstractQuercusModule {
       int ch = is.read();
 
       if (ch < 0)
-	return BooleanValue.FALSE;
+        return BooleanValue.FALSE;
       else
-	return new BinaryBuilderValue(new byte[] { (byte) ch });
+        return new BinaryBuilderValue(new byte[] { (byte) ch });
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
@@ -324,12 +322,12 @@ public class ZlibModule extends AbstractQuercusModule {
   /**
    * Rewinds the stream to the very beginning
    */
-  public boolean gzrewind(@NotNull BinaryInput is)
+  public boolean gzrewind(@NotNull BinaryStream binaryStream)
   {
-    if (is == null)
+    if (binaryStream == null)
       return false;
 
-    return is.setPosition(0);
+    return binaryStream.setPosition(0);
   }
 
   /**
@@ -337,13 +335,13 @@ public class ZlibModule extends AbstractQuercusModule {
    * @param offset absolute position to set stream to
    * @return 0 upon success, else -1 for error
    */
-  public int gzseek(@NotNull BinaryStream bs, long offset)
+  public int gzseek(@NotNull BinaryStream binaryStream, long offset)
   {
-    if (bs == null)
+    if (binaryStream == null)
       return -1;
-    if (bs.setPosition(offset) == false)
+    if (binaryStream.setPosition(offset) == false)
       return -1;
-    if (bs.getPosition() != offset)
+    if (binaryStream.getPosition() != offset)
       return -1;
 
     return 0;
@@ -353,11 +351,11 @@ public class ZlibModule extends AbstractQuercusModule {
    * Gets the current position in the stream
    * @return the position in the stream, or FALSE for error
    */
-  public Value gztell(@NotNull BinaryStream bs)
+  public Value gztell(@NotNull BinaryStream binaryStream)
   {
-    if (bs == null)
+    if (binaryStream == null)
       return BooleanValue.FALSE;
-    return new LongValue(bs.getPosition());
+    return new LongValue(binaryStream.getPosition());
   }
 
   /**
@@ -366,8 +364,8 @@ public class ZlibModule extends AbstractQuercusModule {
   public Value gzpassthru(Env env, @NotNull BinaryInput is)
   {
     WriteStream out = env.getOut();
-    TempBuffer tb = TempBuffer.allocate();
-    byte[] buffer = tb.getBuffer();
+    TempBuffer tempBuf = TempBuffer.allocate();
+    byte[] buffer = tempBuf.getBuffer();
 
     int length = 0;
     try {
@@ -386,7 +384,7 @@ public class ZlibModule extends AbstractQuercusModule {
       return BooleanValue.FALSE;
 
     } finally {
-      TempBuffer.free(tb);
+      TempBuffer.free(tempBuf);
     }
   }
 
@@ -403,12 +401,10 @@ public class ZlibModule extends AbstractQuercusModule {
 
     //zlib_get_coding_type can also be an integer > 0
     if (! ini.equalsIgnoreCase("on")) {
-      try {
-        if (Integer.parseInt(ini) <= 0)
-          return BooleanValue.FALSE;
-      } catch (NumberFormatException e) {
+      int ch = ini.charAt(0);
+
+      if (ch < '0' || ch > '9')
         return BooleanValue.FALSE;
-      }
     }
 
     ServerArrayValue sav = new ServerArrayValue(env);
@@ -422,7 +418,8 @@ public class ZlibModule extends AbstractQuercusModule {
       return new StringValueImpl("gzip");
     else if(s.contains("deflate"))
       return new StringValueImpl("deflate");
-    else return BooleanValue.FALSE;
+    else
+      return BooleanValue.FALSE;
   }
 
   /**
@@ -435,47 +432,47 @@ public class ZlibModule extends AbstractQuercusModule {
   public Value gzcompress(InputStream data,
                           @Optional("6") int level)
   {
+    TempBuffer tempBuf = TempBuffer.allocate();
+    byte []buffer = tempBuf.getBuffer();
+
     try {
       Deflater deflater = new Deflater(level, true);
       Adler32 crc = new Adler32();
 
-      TempBuffer buf = TempBuffer.allocate();
-      byte []buffer = buf.getBuffer();
       boolean isFinished = false;
       TempStream out = new TempStream();
 
       buffer[0] = (byte) 0x78;
 
       if (level <= 1)
-	buffer[1] = (byte) 0x01;
+        buffer[1] = (byte) 0x01;
       else if (level < 6)
-	buffer[1] = (byte) 0x5e;
+        buffer[1] = (byte) 0x5e;
       else if (level == 6)
-	buffer[1] = (byte) 0x9c;
+        buffer[1] = (byte) 0x9c;
       else
-	buffer[1] = (byte) 0xda;
+        buffer[1] = (byte) 0xda;
 
       out.write(buffer, 0, 2, false);
 
+      int len;
       while (! isFinished) {
-	while (! isFinished && deflater.needsInput()) {
-	  int len = data.read(buffer, 0, buffer.length);
+        while (! isFinished && deflater.needsInput()) {
+          len = data.read(buffer, 0, buffer.length);
 
-	  if (len > 0) {
-	    crc.update(buffer, 0, len);
-	    deflater.setInput(buffer, 0, len);
-	  }
-	  else {
-	    isFinished = true;
-	    deflater.finish();
-	  }
-	}
+          if (len > 0) {
+            crc.update(buffer, 0, len);
+            deflater.setInput(buffer, 0, len);
+          }
+          else {
+            isFinished = true;
+            deflater.finish();
+          }
+        }
 
-	int len;
-
-	while ((len = deflater.deflate(buffer, 0, buffer.length)) > 0) {
-	  out.write(buffer, 0, len, false);
-	}
+        while ((len = deflater.deflate(buffer, 0, buffer.length)) > 0) {
+          out.write(buffer, 0, len, false);
+        }
       }
 
       long value = crc.getValue();
@@ -484,14 +481,14 @@ public class ZlibModule extends AbstractQuercusModule {
       buffer[1] = (byte) (value >> 16);
       buffer[2] = (byte) (value >> 8);
       buffer[3] = (byte) (value >> 0);
-    
+
       out.write(buffer, 0, 4, true);
-    
-      TempBuffer.free(buf);
 
       return new TempBufferStringValue(out.getHead());
     } catch (Exception e) {
       throw QuercusModuleException.create(e);
+    } finally {
+      TempBuffer.free(tempBuf);
     }
   }
 
@@ -504,30 +501,30 @@ public class ZlibModule extends AbstractQuercusModule {
   public Value gzuncompress(InputStream is,
                             @Optional("0") long length)
   {
+    TempBuffer tempBuf = TempBuffer.allocate();
+    byte []buffer = tempBuf.getBuffer();
+
     try {
       if (length == 0)
-	length = Long.MAX_VALUE;
-
-      //    is.skip(2);
+        length = Long.MAX_VALUE;
 
       InflaterInputStream in = new InflaterInputStream(is);
-
       TempStream out = new TempStream();
 
-      TempBuffer tempBuf = TempBuffer.allocate();
-      byte []buffer = tempBuf.getBuffer();
+
 
       int len;
       while ((len = in.read(buffer, 0, buffer.length)) >= 0) {
-	out.write(buffer, 0, len, false);
+        out.write(buffer, 0, len, false);
       }
 
-      TempBuffer.free(tempBuf);
       in.close();
 
       return new TempBufferStringValue(out.getHead());
     } catch (Exception e) {
       throw QuercusModuleException.create(e);
+    } finally {
+      TempBuffer.free(tempBuf);
     }
   }
 
@@ -539,41 +536,40 @@ public class ZlibModule extends AbstractQuercusModule {
   public Value gzdeflate(InputStream data,
                          @Optional("6") int level)
   {
+    TempBuffer tempBuf = TempBuffer.allocate();
+    byte []buffer = tempBuf.getBuffer();
+
     try {
       Deflater deflater = new Deflater(level, true);
 
-      TempBuffer buf = TempBuffer.allocate();
-      byte []buffer = buf.getBuffer();
       boolean isFinished = false;
       TempStream out = new TempStream();
 
+      int len;
       while (! isFinished) {
-	while (! isFinished && deflater.needsInput()) {
-	  int len = data.read(buffer, 0, buffer.length);
+        while (! isFinished && deflater.needsInput()) {
+          len = data.read(buffer, 0, buffer.length);
 
-	  if (len > 0) {
-	    deflater.setInput(buffer, 0, len);
-	  }
-	  else {
-	    isFinished = true;
-	    deflater.finish();
-	  }
-	}
+          if (len > 0)
+            deflater.setInput(buffer, 0, len);
+          else {
+            isFinished = true;
+            deflater.finish();
+          }
+        }
 
-	int len;
-
-	while ((len = deflater.deflate(buffer, 0, buffer.length)) > 0) {
-	  out.write(buffer, 0, len, false);
-	}
+        while ((len = deflater.deflate(buffer, 0, buffer.length)) > 0) {
+          out.write(buffer, 0, len, false);
+        }
       }
-
       deflater.end();
 
-      TempBuffer.free(buf);
-
       return new TempBufferStringValue(out.getHead());
+
     } catch (Exception e) {
       throw QuercusModuleException.create(e);
+    } finally {
+      TempBuffer.free(tempBuf);
     }
   }
 
@@ -584,45 +580,42 @@ public class ZlibModule extends AbstractQuercusModule {
    * @return uncompressed string
    */
   public Value gzinflate(Env env,
-			 InputStream data,
+                         InputStream data,
                          @Optional("0") long length)
   {
+    TempBuffer tempBuf = TempBuffer.allocate();
+    byte []buffer = tempBuf.getBuffer();
+
     try {
       Inflater inflater = new Inflater(true);
 
-      TempBuffer buf = TempBuffer.allocate();
-      byte []buffer = buf.getBuffer();
       boolean isFinished = false;
       TempStream out = new TempStream();
 
+      int len;
       while (! isFinished) {
-	while (! isFinished && inflater.needsInput()) {
-	  int len = data.read(buffer, 0, buffer.length);
+        while (! isFinished && inflater.needsInput()) {
+          len = data.read(buffer, 0, buffer.length);
 
-	  if (len > 0) {
-	    inflater.setInput(buffer, 0, len);
-	  }
-	  else {
-	    isFinished = true;
-	  }
-	}
+          if (len > 0)
+            inflater.setInput(buffer, 0, len);
+          else
+            isFinished = true;
+        }
 
-	int len;
-
-	while ((len = inflater.inflate(buffer, 0, buffer.length)) > 0) {
-	  out.write(buffer, 0, len, false);
-	}
+        while ((len = inflater.inflate(buffer, 0, buffer.length)) > 0) {
+          out.write(buffer, 0, len, false);
+        }
       }
 
       inflater.end();
 
-      TempBuffer.free(buf);
-
       return new TempBufferStringValue(out.getHead());
     } catch (Exception e) {
       env.warning(e);
-
       return BooleanValue.FALSE;
+    } finally {
+      TempBuffer.free(tempBuf);
     }
   }
 
@@ -641,8 +634,8 @@ public class ZlibModule extends AbstractQuercusModule {
                         @Optional("6") int level,
                         @Optional("1") int encodingMode)
   {
-    TempBuffer tb = TempBuffer.allocate();
-    byte[] buffer = tb.getBuffer();
+    TempBuffer tempBuf = TempBuffer.allocate();
+    byte[] buffer = tempBuf.getBuffer();
 
     TempStream ts = new TempStream();
     StreamImplOutputStream out = new StreamImplOutputStream(ts);
@@ -650,28 +643,23 @@ public class ZlibModule extends AbstractQuercusModule {
     try {
       ZlibOutputStream gzOut;
 
-      gzOut = new ZlibOutputStream(out, level, Deflater.DEFAULT_STRATEGY,
-				   encodingMode);
+      gzOut = new ZlibOutputStream(out, level,
+			   Deflater.DEFAULT_STRATEGY,
+			   encodingMode);
 
       int len;
       while ((len = is.read(buffer, 0, buffer.length)) > 0) {
         gzOut.write(buffer, 0, len);
       }
-
       gzOut.close();
-      
-      TempBuffer.free(tb);
-
       return new TempBufferStringValue(ts.getHead());
+
     } catch(IOException e) {
       throw QuercusModuleException.create(e);
+    } finally {
+      TempBuffer.free(tempBuf);
     }
   }
-
-  // @todo gzpassthru()
-  // @todo gzseek()
-  // @todo gztell()
-  // @todo zlib_get_coding_type()
 
   /**
    * Helper function to retrieve the filemode closest to the end

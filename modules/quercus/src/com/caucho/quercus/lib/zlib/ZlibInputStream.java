@@ -31,8 +31,7 @@ package com.caucho.quercus.lib.zlib;
 
 import java.io.InputStream;
 import java.io.IOException;
-
-import java.util.zip.GZIPInputStream;
+import java.util.zip.CRC32;
 
 import com.caucho.quercus.QuercusModuleException;
 
@@ -47,10 +46,10 @@ import com.caucho.vfs.Vfs;
  *
  * 
  */
-public class ZlibInputStream extends ReadStreamInput {
+public class ZlibInputStream extends ReadStreamInput
+{
   private BinaryInput _in;
-  private GZIPInputStream _gzIn;
-  private long _position;
+  private GZInputStream _gzIn;
   
   public ZlibInputStream(BinaryInput in) throws IOException
   {
@@ -61,20 +60,9 @@ public class ZlibInputStream extends ReadStreamInput {
     throws IOException
   {
     _in = in;
-    _position = 0;
 
-    ReadStream rs;
-
-    // Try opening a GZIP stream.
-    // If error, then try opening uncompressed stream.
-    try {
-      _gzIn = new GZIPInputStream(in.getInputStream());
-      rs = Vfs.openRead(_gzIn);
-    } catch (IOException e) {
-      _in = in.openCopy();
-      in.close();
-      rs = Vfs.openRead(_in.getInputStream());
-    }
+    _gzIn = new GZInputStream(in.getInputStream());
+    ReadStream rs = Vfs.openRead(_gzIn);
 
     init(rs);
   }
@@ -102,7 +90,7 @@ public class ZlibInputStream extends ReadStreamInput {
       init(newIn);
 
       if (offset > 0)
-	skip(offset);
+        skip(offset);
 
       return true;
     } catch (IOException e) {
