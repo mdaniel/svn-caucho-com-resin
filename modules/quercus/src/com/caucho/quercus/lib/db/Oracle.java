@@ -85,7 +85,7 @@ public class Oracle extends JdbcConnectionResource {
         host = "localhost";
 
       if (driver == null || driver.equals("")) {
-        driver = "oracle.jdbc.driver.OracleDriver";
+        driver = "oracle.jdbc.OracleDriver";
       }
 
       if (url == null || url.equals("")) {

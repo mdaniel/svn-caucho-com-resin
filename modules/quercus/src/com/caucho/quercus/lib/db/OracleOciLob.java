@@ -29,22 +29,32 @@
 
 package com.caucho.quercus.lib.db;
 
+import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.ReturnNullAsFalse;
 
-import com.caucho.quercus.UnimplementedException;
-
 import com.caucho.util.L10N;
 
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.WriteStream;
+
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 
+import java.lang.reflect.Method;
+
+import java.sql.Blob;
 import java.sql.Clob;
+import java.sql.Connection;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -57,8 +67,52 @@ public class OracleOciLob {
   private static final Logger log = Logger.getLogger(OracleOciLob.class.getName());
   private static final L10N L = new L10N(OracleOciLob.class);
 
+  // The large object
   private Object _lob;
+
+  // Cache the connection. See writeTemporary()
+  private Oracle _conn;
+
+  // Current position (seek)
+  private long _currentPointer;
+
+  // OCI Lob type: OCI_D_FILE, OCI_D_LOB or OCI_D_ROWID
   private int _type;
+
+  // This could be refactored in two classes: OracleOciBlob and OracleOciClob
+  private OutputStream _outputStream;
+  private Writer _writer;
+
+  // Cache classes and methods for oracle.sql.BLOB and oracle.sql.CLOB
+  private static Class classOracleBLOB;
+  private static Class classOracleCLOB;
+  private static Method createTemporaryBLOB;
+  private static Method createTemporaryCLOB;
+  private static int BLOB_DURATION_CALL;
+  private static int BLOB_DURATION_SESSION;
+  private static int CLOB_DURATION_CALL;
+  private static int CLOB_DURATION_SESSION;
+
+  static {
+    try {
+      classOracleBLOB = Class.forName("oracle.sql.BLOB");
+      classOracleCLOB = Class.forName("oracle.sql.CLOB");
+      createTemporaryBLOB = classOracleBLOB.getDeclaredMethod("createTemporary",
+                                                              new Class[] {Connection.class,
+                                                                           Boolean.TYPE,
+                                                                           Integer.TYPE});
+      createTemporaryCLOB = classOracleCLOB.getDeclaredMethod("createTemporary",
+                                                              new Class[] {Connection.class,
+                                                                           Boolean.TYPE,
+                                                                           Integer.TYPE});
+      BLOB_DURATION_CALL = classOracleBLOB.getDeclaredField("DURATION_CALL").getInt(null);
+      BLOB_DURATION_SESSION = classOracleBLOB.getDeclaredField("DURATION_SESSION").getInt(null);
+      CLOB_DURATION_CALL = classOracleCLOB.getDeclaredField("DURATION_CALL").getInt(null);
+      CLOB_DURATION_SESSION = classOracleCLOB.getDeclaredField("DURATION_SESSION").getInt(null);
+    } catch (Exception e) {
+      L.l("Unable to load LOB classes or methods for oracle.sql.BLOB and oracle.sql.CLOB.");
+    }
+  }
 
 
   /**
@@ -72,10 +126,14 @@ public class OracleOciLob {
    *
    * OCI_D_ROWID - a ROWID descriptor
    */
-  OracleOciLob(int type)
+  OracleOciLob(Oracle conn, int type)
   {
-    _type = type;
+    _conn = conn;
     _lob = null;
+    _currentPointer = 0;
+    _type = type;
+    _outputStream = null;
+    _writer = null;
   }
 
   /**
@@ -84,7 +142,30 @@ public class OracleOciLob {
   public boolean append(Env env,
                         OracleOciLob lobFrom)
   {
-    throw new UnimplementedException("append");
+    try {
+
+      switch (_type) {
+      case OracleModule.OCI_D_FILE:
+        break;
+      case OracleModule.OCI_D_LOB:
+        if (_lob instanceof Blob) {
+          Blob blob = (Blob) _lob;
+          return appendInternalBlob(env, lobFrom);
+        } else if (_lob instanceof Clob) {
+          Clob clob = (Clob) _lob;
+          return appendInternalClob(env, lobFrom);
+        }
+        break;
+      case OracleModule.OCI_D_ROWID:
+        break;
+      }
+
+      return true;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return false;
+    }
   }
 
   /**
@@ -92,7 +173,26 @@ public class OracleOciLob {
    */
   public boolean close(Env env)
   {
-    throw new UnimplementedException("close");
+    try {
+
+      _currentPointer = 0;
+
+      if (_outputStream != null) {
+        _outputStream.close();
+        _outputStream = null;
+      }
+
+      if (_writer != null) {
+        _writer.close();
+        _writer = null;
+      }
+
+      return true;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return false;
+    }
   }
 
   /**
@@ -100,7 +200,35 @@ public class OracleOciLob {
    */
   public boolean eof(Env env)
   {
-    throw new UnimplementedException("eof");
+    try {
+
+      long length = -1;
+
+      switch (_type) {
+      case OracleModule.OCI_D_FILE:
+        break;
+      case OracleModule.OCI_D_LOB:
+        if (_lob instanceof Blob) {
+          Blob blob = (Blob) _lob;
+          length = blob.length();
+        } else if (_lob instanceof Clob) {
+          Clob clob = (Clob) _lob;
+          length = clob.length();
+        }
+        break;
+      case OracleModule.OCI_D_ROWID:
+        break;
+      }
+
+      if (_currentPointer == length) {
+        return true;
+      }
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+    }
+
+    return false;
   }
 
   /**
@@ -111,21 +239,111 @@ public class OracleOciLob {
    */
   @ReturnNullAsFalse
   public LongValue erase(Env env,
-                         @Optional("0") int offset,
-                         @Optional("-1") int length)
+                         @Optional("0") long offset,
+                         @Optional("-1") long length)
   {
-    throw new UnimplementedException("erase");
+    try {
+
+      if (offset < 0) {
+        offset = 0;
+      }
+
+      switch (_type) {
+      case OracleModule.OCI_D_FILE:
+        break;
+      case OracleModule.OCI_D_LOB:
+        if (_lob instanceof Blob) {
+          Blob blob = (Blob) _lob;
+          if (_outputStream != null) {
+            _outputStream.close();
+          }
+          _outputStream = blob.setBinaryStream(offset);
+          long blobLength = blob.length();
+          if ((length < 0) || (offset + length > blobLength)) {
+            length = blobLength - offset;
+          }
+          long remaining = length;
+          byte zeroBuffer[] = new byte[128];
+          while (remaining >= 128) {
+            _outputStream.write(zeroBuffer, 0, 128);
+            remaining -= 128;
+          }
+          if (remaining > 0) {
+            _outputStream.write(zeroBuffer, 0, (int) remaining);
+          }
+        } else if (_lob instanceof Clob) {
+          Clob clob = (Clob) _lob;
+          if (_writer != null) {
+            _writer.close();
+          }
+          _writer = clob.setCharacterStream(offset);
+          long clobLength = clob.length();
+          if ((length < 0) || (offset + length > clobLength)) {
+            length = clobLength - offset;
+          }
+          long remaining = length;
+          char spaceBuffer[] = new char[128];
+          while (remaining >= 128) {
+            _writer.write(spaceBuffer, 0, 128);
+            remaining -= 128;
+          }
+          if (remaining > 0) {
+            _writer.write(spaceBuffer, 0, (int) remaining);
+          }
+        }
+        _currentPointer = offset + length;
+        break;
+      case OracleModule.OCI_D_ROWID:
+        break;
+      }
+
+      if (length > 0) {
+        return LongValue.create(length);
+      }
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+    }
+
+    return null;
   }
 
   /**
    * Exports LOB's contents to a file
    */
   public boolean export(Env env,
-                        String fileName,
-                        @Optional("0") int start,
-                        @Optional("-1") int length)
+                        Path file,
+                        @Optional("0") long start,
+                        @Optional("-1") long length)
   {
-    throw new UnimplementedException("export");
+    try {
+
+      WriteStream writeStream = file.openWrite();
+
+      if (_lob instanceof Blob) {
+        Blob blob = (Blob) _lob;
+        InputStream is = blob.getBinaryStream();
+        is.skip(start);
+        writeStream.writeStream(is);
+        is.close();
+      } else if (_lob instanceof Clob) {
+        Clob clob = (Clob) _lob;
+        Reader reader = clob.getCharacterStream();
+        reader.skip(start);
+        writeStream.writeStream(reader);
+        reader.close();
+      } else {
+        writeStream.close();
+        return false;
+      }
+
+      writeStream.close();
+      return true;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return false;
+    }
   }
 
   /**
@@ -134,7 +352,26 @@ public class OracleOciLob {
   public boolean flush(Env env,
                        @Optional("-1") int flag)
   {
-    throw new UnimplementedException("flush");
+    try {
+
+      if (_outputStream != null) {
+        _outputStream.flush();
+      }
+
+      if (_writer != null) {
+        _writer.flush();
+      }
+
+      if (flag == OracleModule.OCI_LOB_BUFFER_FREE) {
+        close(env);
+      }
+
+      return true;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return false;
+    }
   }
 
 
@@ -160,31 +397,74 @@ public class OracleOciLob {
    */
   public boolean getBuffering(Env env)
   {
-    throw new UnimplementedException("getBuffering");
+    // XXX: we assume buffering is always turned on.
+    return true;
   }
 
-  /*
+  /**
    * Imports file data to the LOB
-   *
-  public boolean import(Env env,
-                        String fileName)
+   */
+  public boolean quercus_import(Env env,
+                                Path file)
   {
-    throw new UnimplementedException("import");
-    }*/
+    try {
+
+      ReadStream readStream = file.openRead();
+
+      if (_lob instanceof Blob) {
+        Blob blob = (Blob) _lob;
+        blob.truncate(0);
+        if (_outputStream != null) {
+          _outputStream.close();
+        }
+        _outputStream = blob.setBinaryStream(0);
+        long nbytes;
+        byte buffer[] = new byte[128];
+        while ((nbytes = readStream.read(buffer, 0, 128)) > 0) {
+          _outputStream.write(buffer, 0, (int) nbytes);
+          _currentPointer += nbytes;
+        }
+      } else if (_lob instanceof Clob) {
+        Clob clob = (Clob) _lob;
+        clob.truncate(0);
+        if (_writer != null) {
+          _writer.close();
+        }
+        _writer = clob.setCharacterStream(0);
+        long nchars;
+        char buffer[] = new char[128];
+        while ((nchars = readStream.read(buffer, 0, 128)) > 0) {
+          _writer.write(buffer, 0, (int) nchars);
+          _currentPointer += nchars;
+        }
+      } else {
+        readStream.close();
+        return false;
+      }
+
+      readStream.close();
+      return true;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return false;
+    }
+  }
 
   /**
    * Returns large object's contents
    */
   @ReturnNullAsFalse
-  public String load(Env env)
+  public Object load(Env env)
   {
     try {
-
       switch (_type) {
       case OracleModule.OCI_D_FILE:
         break;
       case OracleModule.OCI_D_LOB:
-        if (_lob instanceof Clob) {
+        if (_lob instanceof Blob) {
+          return readInternalBlob(env, -1);
+        } else if (_lob instanceof Clob) {
           return readInternalClob(env, -1);
         }
         break;
@@ -203,8 +483,8 @@ public class OracleOciLob {
    * Reads part of the large object
    */
   @ReturnNullAsFalse
-  public String read(Env env,
-                     int length)
+  public Object read(Env env,
+                     long length)
   {
     try {
 
@@ -212,7 +492,9 @@ public class OracleOciLob {
       case OracleModule.OCI_D_FILE:
         break;
       case OracleModule.OCI_D_LOB:
-        if (_lob instanceof Clob) {
+        if (_lob instanceof Blob) {
+          return readInternalBlob(env, length);
+        } else if (_lob instanceof Clob) {
           return readInternalClob(env, length);
         }
         break;
@@ -232,7 +514,7 @@ public class OracleOciLob {
    */
   public boolean rewind(Env env)
   {
-    throw new UnimplementedException("rewind");
+    return seek(env, 0, OracleModule.OCI_SEEK_SET);
   }
 
 
@@ -241,7 +523,7 @@ public class OracleOciLob {
    */
   public boolean save(Env env,
                       @NotNull String data,
-                      @Optional("0") int offset)
+                      @Optional("0") long offset)
   {
     try {
 
@@ -249,12 +531,22 @@ public class OracleOciLob {
       case OracleModule.OCI_D_FILE:
         break;
       case OracleModule.OCI_D_LOB:
-        if (_lob instanceof Clob) {
+        if (_lob instanceof Blob) {
+          Blob blob = (Blob) _lob;
+          if (_outputStream != null) {
+            _outputStream.close();
+          }
+          _outputStream = blob.setBinaryStream(offset);
+          _outputStream.write(data.getBytes());
+        } else if (_lob instanceof Clob) {
           Clob clob = (Clob) _lob;
-          Writer writer = clob.setCharacterStream(offset);
-          writer.write(data);
-          writer.close();
+          if (_writer != null) {
+            _writer.close();
+          }
+          _writer = clob.setCharacterStream(offset);
+          _writer.write(data);
         }
+        _currentPointer = offset + data.length();
         break;
       case OracleModule.OCI_D_ROWID:
         break;
@@ -272,20 +564,46 @@ public class OracleOciLob {
    * Alias of import()
    */
   public boolean saveFile(Env env,
-                          String fileName)
+                          Path file)
   {
-    // return import(env, fileName);
-    throw new UnimplementedException("saveFile");
+    return quercus_import(env, file);
   }
 
   /**
    * Sets the internal pointer of the large object
    */
   public boolean seek(Env env,
-                      int offset,
+                      long offset,
                       @Optional("-1") int whence)
   {
-    throw new UnimplementedException("seek");
+    try {
+
+      switch (whence) {
+      case OracleModule.OCI_SEEK_SET:
+        _currentPointer = offset;
+        break;
+      case OracleModule.OCI_SEEK_END:
+        long length = 0;
+        if (_lob instanceof Blob) {
+          length = ((Blob) _lob).length();
+        } else if (_lob instanceof Clob) {
+          length = ((Clob) _lob).length();
+        } else {
+          L.l("Unable to determine large object's length trying to seek with OCI_SEEK_END");
+          return false;
+        }
+        _currentPointer = length + offset;
+        break;
+      default: // OCI_SEEK_CUR
+        _currentPointer += offset;
+      }
+
+      return true;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return false;
+    }
   }
 
   /**
@@ -294,7 +612,8 @@ public class OracleOciLob {
   public boolean setBuffering(Env env,
                               boolean onOff)
   {
-    throw new UnimplementedException("setBuffering");
+    // XXX: we assume buffering is always turned on.
+    return true;
   }
 
 
@@ -311,7 +630,29 @@ public class OracleOciLob {
   @ReturnNullAsFalse
   public LongValue size(Env env)
   {
-    throw new UnimplementedException("size");
+    try {
+
+      switch (_type) {
+      case OracleModule.OCI_D_FILE:
+        break;
+      case OracleModule.OCI_D_LOB:
+        if (_lob instanceof Blob) {
+          Blob blob = (Blob) _lob;
+          return LongValue.create(blob.length());
+        } else if (_lob instanceof Clob) {
+          Clob clob = (Clob) _lob;
+          return LongValue.create(clob.length());
+        }
+        break;
+      case OracleModule.OCI_D_ROWID:
+        break;
+      }
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+    }
+
+    return null;
   }
 
   /**
@@ -320,7 +661,14 @@ public class OracleOciLob {
   @ReturnNullAsFalse
   public LongValue tell(Env env)
   {
-    throw new UnimplementedException("tell");
+    try {
+
+      return LongValue.create(_currentPointer);
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return null;
+    }
   }
 
   public String toString() {
@@ -346,7 +694,7 @@ public class OracleOciLob {
    * Truncates large object
    */
   public boolean truncate(Env env,
-                          @Optional("0") int length)
+                          @Optional("0") long length)
   {
     try {
 
@@ -354,7 +702,10 @@ public class OracleOciLob {
       case OracleModule.OCI_D_FILE:
         break;
       case OracleModule.OCI_D_LOB:
-        if (_lob instanceof Clob) {
+        if (_lob instanceof Blob) {
+          Blob blob = (Blob) _lob;
+          blob.truncate(length);
+        } else if (_lob instanceof Clob) {
           Clob clob = (Clob) _lob;
           clob.truncate(length);
         }
@@ -377,9 +728,45 @@ public class OracleOciLob {
   @ReturnNullAsFalse
   public LongValue write(Env env,
                          String data,
-                         @Optional("-1") int length)
+                         @Optional("-1") long length)
   {
-    throw new UnimplementedException("write");
+    try {
+
+      long dataLength = data.length();
+
+      if ((length < 0) || (length > dataLength)) {
+        length = dataLength;
+      }
+
+      switch (_type) {
+      case OracleModule.OCI_D_FILE:
+        break;
+      case OracleModule.OCI_D_LOB:
+        long written = 0;
+        if (_lob instanceof Blob) {
+          Blob blob = (Blob) _lob;
+          if (_outputStream == null) {
+            _outputStream = blob.setBinaryStream(0);
+          }
+          _outputStream.write(data.getBytes());
+        } else if (_lob instanceof Clob) {
+          Clob clob = (Clob) _lob;
+          if (_writer == null) {
+            _writer = clob.setCharacterStream(0);
+          }
+          _writer.write(data);
+        }
+        _currentPointer += length;
+        break;
+      case OracleModule.OCI_D_ROWID:
+        break;
+      }
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+    }
+
+    return null;
   }
 
   /**
@@ -389,45 +776,175 @@ public class OracleOciLob {
                                 String data,
                                 @Optional("-1") int lobType)
   {
-    throw new UnimplementedException("writeTemporary");
+    try {
+
+      if (_type != OracleModule.OCI_D_LOB) {
+        L.l("Unable to write a temporary LOB into a non-lob object");
+        return false;
+      }
+
+      if (lobType == OracleModule.OCI_TEMP_BLOB) {
+        _lob = createTemporaryBLOB.invoke(classOracleBLOB,
+                                          new Object[] {_conn,
+                                                        true,
+                                                        BLOB_DURATION_SESSION});
+      } else {
+        _lob = createTemporaryCLOB.invoke(classOracleCLOB,
+                                          new Object[] {_conn,
+                                                        true,
+                                                        CLOB_DURATION_SESSION});
+      }
+
+      return true;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return false;
+    }
   }
 
   /**
    * Alias of export()
    */
   public boolean writeToFile(Env env,
-                             String fileName,
-                             @Optional("0") int start,
-                             @Optional("-1") int length)
+                             Path file,
+                             @Optional("0") long start,
+                             @Optional("-1") long length)
   {
-    return export(env, fileName, start, length);
+    return export(env, file, start, length);
   }
 
-  private String readInternalClob(Env env,
-                                  int length)
+  private boolean appendInternalBlob(Env env,
+                                     OracleOciLob lobFrom)
   {
     try {
 
-      StringBuilder contents = new StringBuilder();
+      Blob blob = (Blob) _lob;
+      long blobLength = blob.length();
+      if (_currentPointer != blobLength) {
+        if (_outputStream != null) {
+          _outputStream.close();
+        }
+        _outputStream = blob.setBinaryStream(blobLength);
+        _currentPointer = blobLength;
+      }
+
+      Blob blobFrom = (Blob) lobFrom;
+      InputStream is = blobFrom.getBinaryStream();
+
+      long nbytes;
+      byte buffer[] = new byte[128];
+      while ((nbytes = is.read(buffer)) > 0) {
+        _outputStream.write(buffer, 0, (int) nbytes);
+        _currentPointer += nbytes;
+      }
+
+      is.close();
+      // Keep this output stream open to be reused.
+
+      return true;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return false;
+    }
+  }
+
+  private boolean appendInternalClob(Env env,
+                                     OracleOciLob lobFrom)
+  {
+    try {
+
+      Clob clob = (Clob) _lob;
+      long clobLength = clob.length();
+      if (_currentPointer != clobLength) {
+        if (_writer != null) {
+          _writer.close();
+        }
+        _writer = clob.setCharacterStream(clobLength);
+        _currentPointer = clobLength;
+      }
+
+      Clob clobFrom = (Clob) lobFrom;
+      Reader reader = clobFrom.getCharacterStream();
+
+      long nchars;
+      char buffer[] = new char[128];
+      while ((nchars = reader.read(buffer)) > 0) {
+        _writer.write(buffer, 0, (int) nchars);
+        _currentPointer += nchars;
+      }
+
+      reader.close();
+      // Keep this writer open to be reused.
+
+      return true;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return false;
+    }
+  }
+
+  private BinaryBuilderValue readInternalBlob(Env env,
+                                              long length)
+  {
+    try {
+
+      BinaryBuilderValue contents = new BinaryBuilderValue();
+
+      Blob blob = (Blob) _lob;
+      InputStream is = blob.getBinaryStream();
+      is.skip(_currentPointer);
+
+      long remaining = length < 0 ? Integer.MAX_VALUE : length;
+
+      long nbytes;
+      byte buffer[] = new byte[128];
+      while ( (remaining > 0) &&
+              ((nbytes = is.read(buffer)) > 0) ) {
+        if (nbytes > remaining)
+          nbytes = remaining;
+        contents.append(buffer, 0, (int) nbytes);
+        remaining -= nbytes;
+      }
+
+      is.close();
+
+      return contents;
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return null;
+    }
+  }
+
+  private StringBuilderValue readInternalClob(Env env,
+                                              long length)
+  {
+    try {
+
+      StringBuilderValue contents = new StringBuilderValue();
 
       Clob clob = (Clob) _lob;
       Reader reader = clob.getCharacterStream();
+      reader.skip(_currentPointer);
 
-      int remaining = length < 0 ? Integer.MAX_VALUE : length;
+      long remaining = length < 0 ? Integer.MAX_VALUE : length;
 
-      int nchars;
-      char buffer[] = new char[10];
-      while( (remaining > 0) &&
-             ((nchars = reader.read(buffer)) != -1) ) {
+      long nchars;
+      char buffer[] = new char[128];
+      while ( (remaining > 0) &&
+              ((nchars = reader.read(buffer)) > 0) ) {
         if (nchars > remaining)
           nchars = remaining;
-        contents.append(buffer, 0, nchars);
+        contents.append(buffer, 0, (int) nchars);
         remaining -= nchars;
       }
 
       reader.close();
 
-      return contents.toString();
+      return contents;
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);

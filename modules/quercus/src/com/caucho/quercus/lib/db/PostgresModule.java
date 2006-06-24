@@ -589,7 +589,9 @@ public class PostgresModule extends AbstractQuercusModule {
   public static boolean pg_end_copy(Env env,
                                     @Optional Postgres conn)
   {
-    throw new UnimplementedException("pg_end_copy");
+    env.stub("pg_end_copy");
+
+    return false;
   }
 
   /**
@@ -1601,9 +1603,9 @@ public class PostgresModule extends AbstractQuercusModule {
 
       //@todo conn should be optional
 
-      Value value = pg_lo_create(env, conn);
+      LongValue value = pg_lo_create(env, conn);
 
-      if ((value != null) && value.isLongConvertible()) {
+      if (value != null) {
 
         int oid = value.toInt();
         Object largeObject = pg_lo_open(env, conn, oid, "w");
@@ -1862,18 +1864,9 @@ public class PostgresModule extends AbstractQuercusModule {
                                         @NotNull Postgres conn,
                                         String tableName)
   {
-    try {
+    env.stub("pg_meta_data");
 
-      String metaQuery = "SELECT a.attnum,t.typname,a.attlen,t.typnotnull,t.typdefault,a.attndims FROM pg_class c, pg_attribute a, pg_type t WHERE c.relname='"+tableName+"' AND a.attnum > 0 AND a.attrelid = c.oid AND a.atttypid = t.oid ORDER BY a.attnum";
-
-      PostgresResult result = pg_query(env, conn, metaQuery);
-
-      return pg_fetch_all(env, result);
-
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
-      return null;
-    }
+    return null;
   }
 
   /**
@@ -2453,7 +2446,7 @@ public class PostgresModule extends AbstractQuercusModule {
   public static int pg_transaction_status(Env env,
                                           @Optional Postgres conn)
   {
-    throw new UnimplementedException("pg_transaction_status");
+    return PGSQL_TRANSACTION_IDLE;
   }
 
   /**

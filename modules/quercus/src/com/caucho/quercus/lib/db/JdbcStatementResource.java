@@ -299,7 +299,7 @@ public class JdbcStatementResource {
 
         int size = _results.length;
         for (int i = 0; i < size; i++) {
-          _results[i].set(JdbcResultResource.getColumnValue(env, _rs, _metaData, i + 1));
+          _results[i].set(_resultResource.getColumnValue(env, _rs, _metaData, i + 1));
         }
         return BooleanValue.TRUE;
       } else

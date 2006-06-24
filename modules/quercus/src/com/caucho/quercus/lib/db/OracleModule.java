@@ -52,6 +52,7 @@ import com.caucho.quercus.UnimplementedException;
 
 import com.caucho.sql.UserConnection;
 
+import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
 import java.lang.reflect.Constructor;
@@ -60,11 +61,14 @@ import java.lang.reflect.Method;
 import java.sql.Array;
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.sql.SQLException;
+
+import java.util.HashMap;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -93,69 +97,137 @@ import java.util.regex.Pattern;
  *
  * ..."
  *
- * PS: We use the Thin driver for the oci_xxx functions as opposed to the OCI driver
- * so you don't need the Oracle native client libraries.
- *
  */
 public class OracleModule extends AbstractQuercusModule {
   private static final Logger log = Log.open(OracleModule.class);
+  private static final L10N L = new L10N(OracleModule.class);
 
-  public static final int OCI_DEFAULT = 0x01;
-  public static final int OCI_DESCRIBE_ONLY = 0x02;
-  public static final int OCI_COMMIT_ON_SUCCESS = 0x03;
-  public static final int OCI_EXACT_FETCH = 0x04;
-  public static final int OCI_SYSDATE = 0x05;
-  public static final int OCI_B_BFILE = 0x06;
-  public static final int OCI_B_CFILEE = 0x07;
-  public static final int OCI_B_CLOB = 0x08;
-  public static final int OCI_B_BLOB = 0x09;
-  public static final int OCI_B_ROWID = 0x0A;
-  public static final int OCI_B_CURSOR = 0x0B;
-  public static final int OCI_B_NTY = 0x0C;
-  public static final int OCI_B_BIN = 0x0D;
-  public static final int SQLT_BFILEE = 0x0E;
-  public static final int SQLT_CFILEE = 0x0F;
-  public static final int SQLT_CLOB = 0x10;
-  public static final int SQLT_BLOB = 0x11;
-  public static final int SQLT_RDD = 0x12;
-  public static final int SQLT_NTY = 0x13;
-  public static final int SQLT_LNG = 0x14;
-  public static final int SQLT_LBI = 0x15;
-  public static final int SQLT_BIN = 0x16;
-  public static final int SQLT_NUM = 0x17;
-  public static final int SQLT_INT = 0x18;
-  public static final int SQLT_AFC = 0x19;
-  public static final int SQLT_CHR = 0x1A;
-  public static final int SQLT_VCS = 0x1B;
-  public static final int SQLT_AVC = 0x1C;
-  public static final int SQLT_STR = 0x1D;
-  public static final int SQLT_LVC = 0x1E;
-  public static final int SQLT_FLT = 0x1F;
-  public static final int SQLT_ODT = 0x20;
-  public static final int SQLT_BDOUBLE = 0x21;
-  public static final int SQLT_BFLOAT = 0x22;
-  public static final int OCI_FETCHSTATEMENT_BY_COLUMN = 0x23;
-  public static final int OCI_FETCHSTATEMENT_BY_ROW = 0x24;
-  public static final int OCI_ASSOC = 0x25;
-  public static final int OCI_NUM = 0x26;
-  public static final int OCI_BOTH = 0x27;
-  public static final int OCI_RETURN_NULLS = 0x28;
-  public static final int OCI_RETURN_LOBS = 0x29;
-  public static final int OCI_DTYPE_FILE = 0x2A;
-  public static final int OCI_DTYPE_LOB = 0x2B;
-  public static final int OCI_DTYPE_ROWID = 0x2C;
-  public static final int OCI_D_FILE = 0x2D;
-  public static final int OCI_D_LOB = 0x2E;
-  public static final int OCI_D_ROWID = 0x2F;
-  public static final int OCI_SYSOPER = 0x30;
-  public static final int OCI_SYSDBA = 0x31;
-  public static final int OCI_LOB_BUFFER_FREE = 0x32;
-  public static final int OCI_TEMP_CLOB = 0x33;
-  public static final int OCI_TEMP_BLOB = 0x34;
+  // WARNING: Do not change order or constant values.
+  // They are mapped to oracle types below.
+  // See arrayPhpToOracleType.
+  public static final int OCI_B_BFILE                    = 0x01;
+  public static final int OCI_B_CFILEE                   = 0x02;
+  public static final int OCI_B_CLOB                     = 0x03;
+  public static final int OCI_B_BLOB                     = 0x04;
+  public static final int OCI_B_ROWID                    = 0x05;
+  public static final int OCI_B_CURSOR                   = 0x06;
+  public static final int OCI_B_NTY                      = 0x07;
+  public static final int OCI_B_BIN                      = 0x08;
+  public static final int OCI_DTYPE_FILE                 = 0x09;
+  public static final int OCI_DTYPE_LOB                  = 0x0A;
+  public static final int OCI_DTYPE_ROWID                = 0x0B;
+  public static final int OCI_D_FILE                     = 0x0C;
+  public static final int OCI_D_LOB                      = 0x0D;
+  public static final int OCI_D_ROWID                    = 0x0E;
+  public static final int OCI_SYSDATE                    = 0x0F;
+  public static final int OCI_TEMP_CLOB                  = 0x10;
+  public static final int OCI_TEMP_BLOB                  = 0x11;
+  public static final int SQLT_BFILEE                    = 0x12;
+  public static final int SQLT_CFILEE                    = 0x13;
+  public static final int SQLT_CLOB                      = 0x14;
+  public static final int SQLT_BLOB                      = 0x15;
+  public static final int SQLT_RDD                       = 0x16;
+  public static final int SQLT_NTY                       = 0x17;
+  public static final int SQLT_LNG                       = 0x18;
+  public static final int SQLT_LBI                       = 0x19;
+  public static final int SQLT_BIN                       = 0x1A;
+  public static final int SQLT_NUM                       = 0x1B;
+  public static final int SQLT_INT                       = 0x1C;
+  public static final int SQLT_AFC                       = 0x1D;
+  public static final int SQLT_CHR                       = 0x1E;
+  public static final int SQLT_VCS                       = 0x1F;
+  public static final int SQLT_AVC                       = 0x20;
+  public static final int SQLT_STR                       = 0x21;
+  public static final int SQLT_LVC                       = 0x22;
+  public static final int SQLT_FLT                       = 0x23;
+  public static final int SQLT_ODT                       = 0x24;
+  public static final int SQLT_BDOUBLE                   = 0x25;
+  public static final int SQLT_BFLOAT                    = 0x26;
+  public static final int SQLT_RSET                      = 0x27;
+  public static final int SQLT_FILE                      = 0x28;
+  public static final int SQLT_CFILE                     = 0x29;
 
-  public static final int SQLT_RSET = 0x35;
-  public static final int SQLT_FILE = 0x36;
-  public static final int SQLT_CFILE = 0x37;
+  // Reserved for future types and extensions
+  // 0x30 - 0x4F
+
+  // OCI Control Constants 0x50 - ...
+  public static final int OCI_DEFAULT                    = 0x50;
+  public static final int OCI_DESCRIBE_ONLY              = 0x51;
+  public static final int OCI_COMMIT_ON_SUCCESS          = 0x52;
+  public static final int OCI_EXACT_FETCH                = 0x53;
+  public static final int OCI_FETCHSTATEMENT_BY_COLUMN   = 0x54;
+  public static final int OCI_FETCHSTATEMENT_BY_ROW      = 0x55;
+  public static final int OCI_ASSOC                      = 0x56;
+  public static final int OCI_NUM                        = 0x57;
+  public static final int OCI_BOTH                       = 0x58;
+  public static final int OCI_RETURN_NULLS               = 0x59;
+  public static final int OCI_RETURN_LOBS                = 0x5A;
+  public static final int OCI_SYSOPER                    = 0x5B;
+  public static final int OCI_SYSDBA                     = 0x5C;
+  public static final int OCI_LOB_BUFFER_FREE            = 0x5D;
+  public static final int OCI_SEEK_SET                   = 0x5E;
+  public static final int OCI_SEEK_CUR                   = 0x5F;
+  public static final int OCI_SEEK_END                   = 0x6A;
+
+
+  // Cache class oracle.jdbc.OracleTypes to be used below.
+  private static Class classOracleTypes;
+
+  // Map php to oracle type
+  private static int arrayPhpToOracleType[];
+
+  static {
+    try {
+      classOracleTypes = Class.forName("oracle.jdbc.OracleTypes");
+
+      arrayPhpToOracleType = new int[] {
+        -1,
+        classOracleTypes.getDeclaredField("BFILE").getInt(null), // OCI_B_BFILE
+        -1, // OCI_B_CFILEE
+        classOracleTypes.getDeclaredField("CLOB").getInt(null), // OCI_B_CLOB
+        classOracleTypes.getDeclaredField("BLOB").getInt(null), // OCI_B_BLOB
+        classOracleTypes.getDeclaredField("ROWID").getInt(null), // OCI_B_ROWID
+        classOracleTypes.getDeclaredField("CURSOR").getInt(null), // OCI_B_CURSOR
+        classOracleTypes.getDeclaredField("OTHER").getInt(null), // OCI_B_NTY
+        classOracleTypes.getDeclaredField("RAW").getInt(null), // OCI_B_BIN
+        -1, // OCI_DTYPE_FILE
+        -1, // OCI_DTYPE_LOB
+        -1, // OCI_DTYPE_ROWID
+        -1, // OCI_D_FILE
+        -1, // OCI_D_LOB
+        -1, // OCI_D_ROWID
+        classOracleTypes.getDeclaredField("TIMESTAMP").getInt(null), // OCI_SYSDATE
+        -1, // OCI_TEMP_CLOB
+        -1, // OCI_TEMP_BLOB
+        classOracleTypes.getDeclaredField("BFILE").getInt(null), // SQLT_BFILEE
+        -1, // SQLT_CFILEE
+        classOracleTypes.getDeclaredField("CLOB").getInt(null), // SQLT_CLOB
+        classOracleTypes.getDeclaredField("BLOB").getInt(null), // SQLT_BLOB
+        classOracleTypes.getDeclaredField("ROWID").getInt(null), // SQLT_RDD
+        classOracleTypes.getDeclaredField("OTHER").getInt(null), // SQLT_NTY
+        classOracleTypes.getDeclaredField("NUMBER").getInt(null), // SQLT_LNG
+        classOracleTypes.getDeclaredField("RAW").getInt(null), // SQLT_LBI
+        classOracleTypes.getDeclaredField("RAW").getInt(null), // SQLT_BIN
+        classOracleTypes.getDeclaredField("NUMBER").getInt(null), // SQLT_NUM
+        classOracleTypes.getDeclaredField("INTEGER").getInt(null), // SQLT_INT
+        classOracleTypes.getDeclaredField("CHAR").getInt(null), // SQLT_AFC
+        classOracleTypes.getDeclaredField("CHAR").getInt(null), // SQLT_CHR
+        classOracleTypes.getDeclaredField("VARCHAR").getInt(null), // SQLT_VCS
+        classOracleTypes.getDeclaredField("CHAR").getInt(null), // SQLT_AVC
+        classOracleTypes.getDeclaredField("VARCHAR").getInt(null), // SQLT_STR
+        classOracleTypes.getDeclaredField("LONGVARCHAR").getInt(null), // SQLT_LVC
+        classOracleTypes.getDeclaredField("FLOAT").getInt(null), // SQLT_FLT
+        classOracleTypes.getDeclaredField("DATE").getInt(null), // SQLT_ODT
+        classOracleTypes.getDeclaredField("DOUBLE").getInt(null), // SQLT_BDOUBLE
+        classOracleTypes.getDeclaredField("FLOAT").getInt(null), // SQLT_BFLOAT
+        classOracleTypes.getDeclaredField("CURSOR").getInt(null), // SQLT_RSET
+        classOracleTypes.getDeclaredField("BFILE").getInt(null), // SQLT_FILE
+        -1 // SQLT_CFILE
+      };
+    } catch (Exception e) {
+      L.l("Unable to load Oracle types from oracle.jdbc.OracleTypes. Check your Oracle JDBC driver version.");
+    }
+  }
 
   public OracleModule()
   {
@@ -230,21 +302,33 @@ public class OracleModule extends AbstractQuercusModule {
   {
     try {
 
+      // JDBC underlying connection
+      Connection conn = stmt.getJavaConnection();
+
+      // Oracle underlying statement
       PreparedStatement oracleStmt = stmt.getPreparedStatement();
-      java.sql.Connection conn = ((UserConnection) oracleStmt.getConnection()).getConnection();
 
       // Create an oracle.sql.ARRAY object to hold the values
       // oracle.sql.ArrayDescriptor arrayDesc =
       //   oracle.sql.ArrayDescriptor.createDescriptor("number_varray", conn);
 
+
       Class clArrayDescriptor = Class.forName("oracle.sql.ArrayDescriptor");
 
-      Method method = clArrayDescriptor.getDeclaredMethod("createDescriptor",
-                                           new Class[] {String.class, java.sql.Connection.class});
+      Method method
+        = clArrayDescriptor.getDeclaredMethod("createDescriptor",
+                                              new Class[] {String.class, Connection.class});
 
-      Object arrayDesc = method.invoke(clArrayDescriptor, new Object[] {"NUMBERVARRAY", conn});
+      Object arrayDesc = method.invoke(clArrayDescriptor,
+                                       new Object[] {"NUMBER_VARRAY", conn});
 
-      Value keyArray[] = varArray.getKeyArray(); // int arrayValues[] = {123, 234};
+      Value valueArray[] = varArray.valuesToArray(); // int arrayValues[] = {123, 234};
+
+      Object objectArray[] = new Object[5]; // {"aaa", "bbb", "ccc"};
+      for (int i=0; i<valueArray.length; i++) {
+        Object obj = valueArray[i].toJavaObject();
+        objectArray[i] = obj;
+      }
 
       // oracle.sql.ARRAY array = new oracle.sql.ARRAY(arrayDesc, conn, arrayValues);
 
@@ -254,22 +338,49 @@ public class OracleModule extends AbstractQuercusModule {
         clArrayDescriptor, Connection.class, Object.class});
 
       Array oracleArray = (Array) constructor.newInstance(new Object[]
-        {arrayDesc, conn, keyArray});
+        {arrayDesc, conn, objectArray});
 
       // Bind array
-      // ((oracle.jdbc.driver.OraclePreparedStatement)oracleStmt).setARRAY(1, array);
+      // ((oracle.jdbc.OraclePreparedStatement)oracleStmt).setARRAY(1, array);
 
-      // cl = Class.forName("oracle.jdbc.driver.OraclePreparedStatement");
+      // cl = Class.forName("oracle.jdbc.OraclePreparedStatement");
 
       // method = cl.getDeclaredMethod("setARRAY",
       //                              new Class[] {Integer.TYPE, Object[].class});
 
-      if (name.startsWith(":")) {
-        name = name.substring(1);
+      if (name == null) {
+        return false;
+      }
+
+      if (!name.startsWith(":")) {
+        name = ":" + name;
+      }
+
+      if (name.length() < 2) {
+        return false;
       }
 
       // method.invoke(oracleStmt, new Object[] {name, oracleArray});
-      oracleStmt.setArray(1, oracleArray);
+
+      Integer index = stmt.getBindingVariable(name);
+
+      if (index == null)
+        return false;
+
+      int i = index.intValue();
+      Object object = varArray.toJavaObject();
+
+      if (object instanceof OracleOciCollection) {
+        oracleArray = ((OracleOciCollection) object).getCollection();
+        oracleStmt.setArray(i, oracleArray);
+      } else if (varArray instanceof ArrayValueImpl) {
+        // oracleStmt.setObject(i, varArray.getKeyArray());
+        // Object objectArray[] = new Object[] {"aaa", "bbb", "ccc"};
+        // oracleStmt.setObject(i, objectArray);
+        oracleStmt.setArray(i, oracleArray);
+      } else {
+        oracleStmt.setObject(i, object);
+      }
 
       // drop descriptor ???? 'number_varray' ????
 
@@ -372,6 +483,12 @@ public class OracleModule extends AbstractQuercusModule {
                                          @Optional("0") int maxLength,
                                          @Optional("0") int type)
   {
+    if ((type == OCI_B_CFILEE) ||
+        (type == SQLT_CFILE) ||
+        (type == SQLT_CFILEE)) {
+      throw new UnimplementedException("oci_bind_by_name with CFILE");
+    }
+
     try {
 
       if (placeholderName == null) {
@@ -386,32 +503,96 @@ public class OracleModule extends AbstractQuercusModule {
         return false;
       }
 
-      Integer index = (Integer) stmt.getBindingVariable(placeholderName);
+      Integer index = stmt.getBindingVariable(placeholderName);
+
+      if (index == null)
+        return false;
 
       int i = index.intValue();
 
       PreparedStatement pstmt = stmt.getPreparedStatement();
 
-      CallableStatement cstmt = (CallableStatement) pstmt;
-      Class cl = Class.forName("oracle.jdbc.OracleTypes");
+      CallableStatement callableStmt = (CallableStatement) pstmt;
 
-      if (type == SQLT_RSET) {
-        int cursorType = cl.getDeclaredField("CURSOR").getInt(null);
-        cstmt.registerOutParameter(i, cursorType);
-        // Set the cursor's underlying prepared statement
-        // to be executed (see php/4404).
-        OracleStatement cursor = (OracleStatement) variable.toJavaObject();
-        cursor.setPreparedStatement(cstmt);
-      } else if ((type == OCI_B_CLOB) || (type == SQLT_CLOB)) {
-        // stmt.putByNameVariable(placeholderName, (Value) variable);
-        int clobType = cl.getDeclaredField("CLOB").getInt(null);
-        cstmt.registerOutParameter(i, clobType);
-        stmt.setOutParameter(variable);
-      } else {
-        // XXX: Check the spec. if there is a case where the
-        // variable would not be initialized yet
-        // stmt.putByNameVariable(placeholderName, variable);
-        pstmt.setString(i, variable.toString());
+      // XXX: We could use ParameterMetaData.getParameterMode
+      // to figure out which parameters are IN and/or OUT and
+      // then setObject and/or registerOutParameter according
+      // to the parameter mode. However, getParameterMode()
+      // is unsupported from Oracle JDBC drivers (Jun-2006).
+      //
+      // ParameterMetaData metaData = pstmt.getParameterMetaData();
+      //
+      // int paramMode = metaData.getParameterMode(i);
+      //
+      //  switch (paramMode) {
+      // case ParameterMetaData.parameterModeInOut:
+      //   {
+      //     int oracleType = arrayPhpToOracleType[type];
+      //     callableStmt.registerOutParameter(i, oracleType);
+      //     pstmt.setObject(i, variable.toJavaObject());
+      //     break;
+      //   }
+      // case ParameterMetaData.parameterModeOut:
+      //   {
+      //     int oracleType = arrayPhpToOracleType[type];
+      //     callableStmt.registerOutParameter(i, oracleType);
+      //     break;
+      //   }
+      // default: // case ParameterMetaData.parameterModeIn:
+      //   {
+      //     pstmt.setObject(i, variable.toJavaObject());
+      //     break;
+      //   }
+      // }
+
+      switch (type) {
+      case OCI_B_CURSOR:
+      case SQLT_RSET:
+        {
+          // Assume the most common scenario: OUT parameter mode.
+          int oracleType = arrayPhpToOracleType[type];
+          callableStmt.registerOutParameter(i, oracleType);
+          // Set the cursor's underlying statement (see php/4404).
+          Object cursor = variable.toJavaObject();
+          if ((cursor == null) || !(cursor instanceof OracleStatement)) {
+            return false;
+          }
+          ((OracleStatement) cursor).setPreparedStatement(callableStmt);
+          break;
+        }
+      case OCI_B_BFILE:   // BFILE
+      case SQLT_BFILEE:   // ...
+      case SQLT_FILE:     // ...
+      case SQLT_BLOB:     // BLOB
+      case OCI_B_BLOB:    // ...
+      case SQLT_CLOB:     // CLOB
+      case OCI_B_CLOB:    // ...
+      case OCI_B_ROWID:   // ROWID
+      case SQLT_RDD:      // ...
+        {
+          // Assume the most common scenario: OUT parameter mode.
+          int oracleType = arrayPhpToOracleType[type];
+          callableStmt.registerOutParameter(i, oracleType);
+          Object ociLob = variable.toJavaObject();
+          if ((ociLob == null) || !(ociLob instanceof OracleOciLob)) {
+            return false;
+          }
+          stmt.setOutParameter((OracleOciLob) ociLob);
+          break;
+        }
+      default:
+        {
+          // Assume the most common scenario: IN parameter mode.
+
+          // XXX: Check the spec. if there is a case where the
+          // variable would not be initialized yet
+          // stmt.putByNameVariable(placeholderName, variable);
+          Object object = variable.toJavaObject();
+          if (object instanceof OracleOciCollection) {
+            object = ((OracleOciCollection) object).getCollection();
+          }
+          pstmt.setObject(i, object);
+        }
       }
 
       return true;
@@ -568,52 +749,112 @@ public class OracleModule extends AbstractQuercusModule {
   {
     try {
 
-      if (mode == OCI_COMMIT_ON_SUCCESS) {
-        throw new UnimplementedException("oci_execute with mode OCI_COMMIT_ON_SUCCESS");
-      }
+      //  Scenarios for oci_execute.
+      //
+      //
+      //  1. Simple query: oci_parse / oci_execute
+      //
+      //  $query = 'SELECT * FROM TEST';
+      //
+      //  $stmt = oci_parse($conn, $query);
+      //
+      //  oci_execute($stmt, OCI_DEFAULT);
+      //
+      //  $result = oci_fetch_array($stid, OCI_BOTH);
+      //
+      //
+      //  2. Define by name: oci_parse / oci_define_by_name / oci_execute
+      //
+      //  $stmt = oci_parse($conn, "SELECT id, data FROM test");
+      //
+      //  /* the define MUST be done BEFORE oci_execute! */
+      //
+      //  oci_define_by_name($stmt, "ID", $myid);
+      //  oci_define_by_name($stmt, "DATA", $mydata);
+      //
+      //  oci_execute($stmt, OCI_DEFAULT);
+      //
+      //  while ($row = oci_fetch($stmt)) {
+      //     echo "id:" . $myid . "\n";
+      //     echo "data:" . $mydata . "\n";
+      //  }
+      //
+      //
+      //  3. Cursors: oci_new_cursor / oci_parse /
+      //     oci_bind_by_name / oci_execute($stmt) / oci_execute($cursor)
+      //
+      //  $stmt = oci_parse($conn,
+      //  "CREATE OR REPLACE PACKAGE cauchopkgtestoci AS ".
+      //  "TYPE refcur IS REF CURSOR; ".
+      //  "PROCEDURE testproc (var_result out cauchopkgtestoci.refcur); ".
+      //  "END cauchopkgtestoci; ");
+      //
+      //  oci_execute($stmt);
+      //
+      //  $stmt = oci_parse($conn,
+      //  "CREATE OR REPLACE PACKAGE BODY cauchopkgtestoci IS ".
+      //  "PROCEDURE testproc (var_result out cauchopkgtestoci.refcur) IS ".
+      //  "BEGIN ".
+      //  "OPEN var_result FOR SELECT data FROM caucho.test; ".
+      //  "END testproc; ".
+      //  "END; ");
+      //
+      //  oci_execute($stmt);
+      //
+      //  $curs = oci_new_cursor($conn);
+      //
+      //  $stmt = oci_parse($conn, "begin cauchopkgtestoci.testproc(:dataCursor); end;");
+      //
+      //  oci_bind_by_name($stmt, "dataCursor", $curs, 255, SQLT_RSET);
+      //
+      //  oci_execute($stmt);
+      //
+      //  oci_execute($curs);
+      //
+      //  while ($data = oci_fetch_row($curs)) {
+      //     var_dump($data);
+      //  }
 
-      // Large Objects may not be used in auto-commit mode.
+      // Get the underlying JDBC connection.
       Connection conn = stmt.getJavaConnection();
+
+      // Large Objects can not be used in auto-commit mode.
       conn.setAutoCommit(false);
 
-      // This is the case for oci_execute($cursor);
+      // Use the underlying callable statement to check different scenarios.
+      CallableStatement callableStatement = stmt.getCallableStatement();
+
+      // Check for case (3) oci_execute($cursor);
       // A previous statement has been executed and holds the result set.
-      PreparedStatement pstmt = stmt.getPreparedStatement();
-      if (pstmt instanceof CallableStatement) {
-        Object cursorResult = null;
-        try {
-          cursorResult = ((CallableStatement) pstmt).getObject(1);
-        } catch (Exception e) {
-        }
-        if (cursorResult != null) {
+      Object cursorResult = null;
+      try {
+        cursorResult = callableStatement.getObject(1);
+        if ((cursorResult != null) && (cursorResult instanceof ResultSet)) {
           ResultSet rs = (ResultSet) cursorResult;
           stmt.setResultSet(rs);
           return true;
         }
+      } catch (Exception e) {
+        // We assume this is not case (3). No error.
       }
 
+      // Case (1) or executing a more complex query.
       stmt.execute(env);
 
-      if (pstmt instanceof CallableStatement) {
-        try {
-          Value outValue = (Value) stmt.getOutParameter();
-          Object object = outValue.toJavaObject();
-          if (object instanceof OracleOciLob) {
-            java.sql.Clob outParameter = ((CallableStatement) pstmt).getClob(1);
-            OracleOciLob ociLob = (OracleOciLob) object;
-            ociLob.setLob(outParameter);
-          } else {
-            String outParameter = ((CallableStatement) pstmt).getString(1);
-            outValue.set(new StringValueImpl(outParameter));
-          }
-        } catch (Exception e) {
-        }
+      OracleOciLob ociLob = stmt.getOutParameter();
+      if (ociLob != null) {
+        // Ex: java.sql.Clob outParameter = callableStatement.getClob(1);
+        ociLob.setLob(callableStatement.getObject(1));
       }
 
       // Fetch and assign values to corresponding binded variables
       // This is necessary for LOB support and
       // should be reworked calling a private fetch method instead.
       // oci_fetch(env, stmt);
+
+      if (mode == OCI_COMMIT_ON_SUCCESS) {
+        conn.commit();
+      }
 
       return true;
 
@@ -677,14 +918,30 @@ public class OracleModule extends AbstractQuercusModule {
   @ReturnNullAsFalse
   public static ArrayValue oci_fetch_array(Env env,
                                            @NotNull OracleStatement stmt,
-                                           @Optional("OCI_BOTH") int mode)
+                                           @Optional("-1") int mode)
   {
+    if (stmt == null)
+      return null;
+
+    if (mode == OCI_RETURN_LOBS)
+      throw new UnimplementedException("oci_fetch_array with OCI_RETURN_LOBS");
+
+    if (mode == OCI_RETURN_NULLS)
+      throw new UnimplementedException("oci_fetch_array with OCI_RETURN_NULLS");
+
     try {
-      if (stmt == null)
-        return null;
 
       JdbcResultResource resource = new JdbcResultResource(null, stmt.getResultSet(), null);
-      return resource.fetchArray(env, mode);
+
+      switch (mode) {
+      case OCI_ASSOC:
+        return resource.fetchArray(env, JdbcResultResource.FETCH_ASSOC);
+      case OCI_NUM:
+        return resource.fetchArray(env, JdbcResultResource.FETCH_NUM);
+      default: // case OCI_BOTH:
+        return resource.fetchArray(env, JdbcResultResource.FETCH_BOTH);
+      }
+
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
       return null;
@@ -766,7 +1023,7 @@ public class OracleModule extends AbstractQuercusModule {
 
       JdbcResultResource resource = new JdbcResultResource(null, stmt.getResultSet(), null);
 
-      Value result = resource.fetchArray(env, OCI_BOTH);
+      Value result = resource.fetchArray(env, JdbcResultResource.FETCH_BOTH);
 
       stmt.setResultBuffer(result);
 
@@ -1002,7 +1259,7 @@ public class OracleModule extends AbstractQuercusModule {
   {
     try {
 
-      return lobTo.save(env, lobFrom.read(env, length), 0);
+      return lobTo.save(env, lobFrom.read(env, length).toString(), 0);
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -1030,12 +1287,50 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Allocates new collection object
    */
-  public static Value oci_new_collection(Env env,
-                                         @NotNull Oracle conn,
-                                         @NotNull String tdo,
-                                         @Optional String schema)
+  @ReturnNullAsFalse
+  public static OracleOciCollection oci_new_collection(Env env,
+                                                       @NotNull Oracle conn,
+                                                       @NotNull String tdo,
+                                                       @Optional String schema)
   {
-    throw new UnimplementedException("oci_new_collection");
+    try {
+
+      String typeName = tdo;
+
+      if ((schema != null) && (schema.length() > 0)) {
+        typeName = schema + "." + tdo;
+      }
+
+      // XXX: Is this case ever possible?
+      // StructDescriptor structDesc = StructDescriptor.createDescriptor(typeName, jdbcConn);
+
+      // JDBC underlying connection
+      Connection jdbcConn = conn.getJavaConnection();
+
+      // Oracle underlying statement
+      // PreparedStatement oracleStmt = stmt.getPreparedStatement();
+
+      // Use reflection
+      // ArrayDescriptor arrayDesc = ArrayDescriptor.createDescriptor(typeName, jdbcConn);
+
+      Class clArrayDescriptor = Class.forName("oracle.sql.ArrayDescriptor");
+
+      Method method = clArrayDescriptor.getDeclaredMethod("createDescriptor",
+                                                          new Class[] {String.class,
+                                                                       Connection.class});
+
+      Object arrayDesc = method.invoke(clArrayDescriptor,
+                                       new Object[] {typeName, jdbcConn});
+
+      if (arrayDesc != null) {
+        return new OracleOciCollection(jdbcConn, arrayDesc);
+      }
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+    }
+
+    return null;
   }
 
   /**
@@ -1102,7 +1397,7 @@ public class OracleModule extends AbstractQuercusModule {
           (type == OCI_D_LOB) ||
           (type == OCI_D_ROWID)) {
 
-        OracleOciLob oracleLob = new OracleOciLob(type);
+        OracleOciLob oracleLob = new OracleOciLob(conn, type);
 
         return oracleLob;
       }
@@ -1666,10 +1961,11 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_new_collection()
    */
-  public static Value ocinewcollection(Env env,
-                                       @NotNull Oracle conn,
-                                       @NotNull String tdo,
-                                       @Optional String schema)
+  @ReturnNullAsFalse
+  public static OracleOciCollection ocinewcollection(Env env,
+                                                     @NotNull Oracle conn,
+                                                     @NotNull String tdo,
+                                                     @Optional String schema)
   {
     return oci_new_collection(env, conn, tdo, schema);
   }
@@ -1844,7 +2140,7 @@ public class OracleModule extends AbstractQuercusModule {
       return conn;
     }
 
-    String driver = "oracle.jdbc.driver.OracleDriver";
+    String driver = "oracle.jdbc.OracleDriver";
     String url = "jdbc:oracle:thin:@localhost:1521";
 
     conn = new Oracle(env, "localhost", "", "", "", 1521, driver, url);
@@ -1865,7 +2161,7 @@ public class OracleModule extends AbstractQuercusModule {
     String host = "localhost";
     int port = 1521;
 
-    String driver = "oracle.jdbc.driver.OracleDriver";
+    String driver = "oracle.jdbc.OracleDriver";
 
     String url;
 

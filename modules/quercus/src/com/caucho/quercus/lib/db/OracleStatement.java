@@ -33,6 +33,8 @@ import com.caucho.quercus.env.Value;
 
 import com.caucho.util.L10N;
 
+import java.sql.CallableStatement;
+
 import java.util.logging.Logger;
 
 import java.util.HashMap;
@@ -52,7 +54,7 @@ public class OracleStatement extends JdbcStatementResource {
 
   // Binding variables for Oracle statements
   private HashMap<String,Integer> _bindingVariables = new HashMap<String,Integer>();
-  private Object _outParameter;
+  private OracleOciLob _outParameter;
 
   // Oracle internal result buffer
   private Value _resultBuffer;
@@ -219,6 +221,14 @@ public class OracleStatement extends JdbcStatementResource {
   }
 
   /**
+   * Gets the underlying callable statement.
+   */
+  protected CallableStatement getCallableStatement()
+  {
+    return (CallableStatement) getPreparedStatement();
+  }
+
+  /**
    * Gets the number of fetched rows.
    *
    * @return the number of fetched rows
@@ -232,7 +242,7 @@ public class OracleStatement extends JdbcStatementResource {
    *
    * @return the out parameter
    */
-  protected Object getOutParameter() {
+  protected OracleOciLob getOutParameter() {
     return _outParameter;
   }
 
@@ -241,7 +251,7 @@ public class OracleStatement extends JdbcStatementResource {
    *
    * @param outParameter the new out parameter
    */
-  protected void setOutParameter(Object outParameter) {
+  protected void setOutParameter(OracleOciLob outParameter) {
     _outParameter = outParameter;
   }
 }

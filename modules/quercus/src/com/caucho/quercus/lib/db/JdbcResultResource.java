@@ -612,10 +612,10 @@ public class JdbcResultResource {
    * @param column the column number
    * @return the column value
    */
-  public static Value getColumnValue(Env env,
-                                     ResultSet rs,
-                                     ResultSetMetaData metaData,
-                                     int column)
+  public Value getColumnValue(Env env,
+                              ResultSet rs,
+                              ResultSetMetaData metaData,
+                              int column)
     throws SQLException
   {
     switch (metaData.getColumnType(column)) {
@@ -646,11 +646,24 @@ public class JdbcResultResource {
           return new DoubleValue(value);
       }
 
+    case Types.BLOB:
+      {
+        Object object = rs.getBlob(column);
+        if (object.getClass().getName().equals("oracle.sql.BLOB")) {
+          OracleOciLob ociLob = new OracleOciLob((Oracle) _conn,
+                                                 OracleModule.OCI_D_LOB);
+          ociLob.setLob(object);
+          object = ociLob;
+        }
+        return env.wrapJava(object);
+      }
+
     case Types.CLOB:
       {
         Object object = rs.getClob(column);
         if (object.getClass().getName().equals("oracle.sql.CLOB")) {
-          OracleOciLob ociLob = new OracleOciLob(OracleModule.OCI_D_LOB);
+          OracleOciLob ociLob = new OracleOciLob((Oracle) _conn,
+                                                 OracleModule.OCI_D_LOB);
           ociLob.setLob(object);
           object = ociLob;
         }
