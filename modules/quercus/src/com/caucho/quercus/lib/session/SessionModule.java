@@ -398,6 +398,8 @@ public class SessionModule extends AbstractQuercusModule
     env.removeConstant("SID");
 
     String cookieName = env.getIni("session.name").toString();
+    boolean generateCookie = true;
+    boolean create = false;
 
     if (callback != null)
       callback.open(env, WorkDir.getLocalWorkDir().getPath(), cookieName);
@@ -423,8 +425,10 @@ public class SessionModule extends AbstractQuercusModule
         }
       }
 
-      if (sessionId == null || "".equals(sessionId))
+      if (sessionId == null || "".equals(sessionId)) {
         sessionId = env.generateSessionId();
+        create = true;
+      }
 
       env.addConstant("SID", new StringValueImpl(cookieName + '=' + sessionId),
                       false);
@@ -434,7 +438,6 @@ public class SessionModule extends AbstractQuercusModule
       //
       // Use cookies to transmit session id
       // 
-      boolean generateCookie = true;
 
       if (sessionIdValue != null)
         sessionId = sessionIdValue.toString();
@@ -443,50 +446,21 @@ public class SessionModule extends AbstractQuercusModule
         Cookie []cookies = env.getRequest().getCookies();
 
         for (int i = 0; cookies != null && i < cookies.length; i++) {
-          if (cookies[i].getName().equals(cookieName)) {
+          if (cookies[i].getName().equals(cookieName) &&
+              ! "".equals(cookies[i].getValue())) {
             sessionId = cookies[i].getValue();
             generateCookie = false;
           }
         }
       }
 
-      if (! generateCookie) {
+      if (! generateCookie)
         env.addConstant("SID", StringValue.EMPTY, false);
-      }
-      else {
-        if (sessionId == null || "".equals(sessionId))
-          sessionId = env.generateSessionId();
-
-        env.addConstant("SID", 
-                        new StringValueImpl(cookieName + '=' + sessionId), 
-                        false);
-
-        Cookie cookie = new Cookie(cookieName, sessionId);
-        cookie.setVersion(1);
-
-        if (response.isCommitted()) {
-          env.warning(L.l("cannot send session cookie because response is committed"));
-        }
-        else {
-          Value path = env.getIni("session.cookie_path");
-          cookie.setPath(path.toString());
-
-          Value maxAge = env.getIni("session.cookie_lifetime");
-          if (maxAge.toInt() != 0)
-            cookie.setMaxAge(maxAge.toInt());
-
-          Value domain = env.getIni("session.cookie_domain");
-          cookie.setDomain(domain.toString());
-
-          Value secure = env.getIni("session.cookie_secure");
-          cookie.setSecure(secure.toBoolean());
-
-          response.addCookie(cookie);
-        }
+      else if (sessionId == null || "".equals(sessionId)) {
+        sessionId = env.generateSessionId();
+        create = true;
       }
     }
-
-    env.setSpecialValue("caucho.session_id", new StringValueImpl(sessionId));
 
     if (response.isCommitted())
       env.warning(L.l("cannot send session cache limiter headers because response is committed"));
@@ -499,26 +473,59 @@ public class SessionModule extends AbstractQuercusModule
 
       if ("nocache".equals(cacheLimiter)) {
         response.setHeader("Expires", "Thu, 19 Nov 1981 08:52:00 GMT");
-        response.addHeader("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
-        response.addHeader("Pragma", "no-cache");
+        response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
+        response.setHeader("Pragma", "no-cache");
       }
       else if ("private".equals(cacheLimiter)) {
         response.setHeader("Expires", "Thu, 19 Nov 1981 08:52:00 GMT");
-        response.addHeader("Cache-Control", "private, max-age=" + cacheExpire + ", pre-check=" + cacheExpire);
+        response.setHeader("Cache-Control", "private, max-age=" + cacheExpire + ", pre-check=" + cacheExpire);
         response.setDateHeader("Last-Modified", env.getLastModified());
       }
       else if ("private_no_expire".equals(cacheLimiter)) {
-        response.addHeader("Cache-Control", "private, max-age=" + cacheExpire + ", pre-check=" + cacheExpire);
+        response.setHeader("Cache-Control", "private, max-age=" + cacheExpire + ", pre-check=" + cacheExpire);
         response.setDateHeader("Last-Modified", env.getLastModified());
       }
       else if ("public".equals(cacheLimiter)) {
         response.setDateHeader("Expires", Alarm.getCurrentTime());
-        response.addHeader("Cache-Control", "public, max-age=" + cacheExpire);
+        response.setHeader("Cache-Control", "public, max-age=" + cacheExpire);
         response.setDateHeader("Last-Modified", env.getLastModified());
       }
     }
 
-    env.createSession(sessionId);
+    SessionArrayValue session = env.createSession(sessionId, create);
+    sessionId = session.getId();
+
+    if (! env.getIni("session.use_trans_sid").toBoolean() && generateCookie) {
+      env.addConstant("SID", 
+          new StringValueImpl(cookieName + '=' + sessionId), 
+          false);
+
+      Cookie cookie = new Cookie(cookieName, sessionId);
+      cookie.setVersion(1);
+
+      if (response.isCommitted()) {
+        env.warning(L.l("cannot send session cookie because response is committed"));
+      }
+      else {
+        Value path = env.getIni("session.cookie_path");
+        cookie.setPath(path.toString());
+
+        Value maxAge = env.getIni("session.cookie_lifetime");
+
+        if (maxAge.toInt() != 0)
+          cookie.setMaxAge(maxAge.toInt());
+
+        Value domain = env.getIni("session.cookie_domain");
+        cookie.setDomain(domain.toString());
+
+        Value secure = env.getIni("session.cookie_secure");
+        cookie.setSecure(secure.toBoolean());
+
+        response.addCookie(cookie);
+      }
+    }
+
+    env.setSpecialValue("caucho.session_id", new StringValueImpl(sessionId));
 
     return true;
   }

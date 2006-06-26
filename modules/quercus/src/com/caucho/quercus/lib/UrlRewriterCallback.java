@@ -46,6 +46,8 @@ import java.net.URISyntaxException;
 
 import com.caucho.util.URLUtil;
 
+import com.caucho.server.session.SessionManager;
+
 import com.caucho.quercus.lib.session.SessionModule;
 
 import com.caucho.quercus.env.Value;
@@ -145,6 +147,8 @@ public class UrlRewriterCallback extends CallbackFunction {
     private boolean _includeSessionInfo = false;
     private String _sessionName = null;
     private String _sessionId = null;
+    private String _javaSessionName = null;
+    private String _javaSessionId = null;
 
     private int _index;
     private String _value;
@@ -162,11 +166,18 @@ public class UrlRewriterCallback extends CallbackFunction {
 
     public Value parse()
     {
-      if (_env.getSession() != null &&
+      if (_env.getSession() != null && _env.getJavaSession() != null &&
           _env.getIni("session.use_trans_sid").toBoolean()) {
         _includeSessionInfo = true;
+
         _sessionName = _env.getIni("session.name").toString();
-        _sessionId = SessionModule.session_id(_env, null);
+        _sessionId = _env.getSession().getId();
+
+        SessionManager sessionManager = 
+          _env.getQuercus().getQuercusSessionManager().getSessionManager();
+
+        _javaSessionName = sessionManager.getCookieName();
+        _javaSessionId = _env.getJavaSession().getId();
       }
 
       if (_includeSessionInfo == false && _rewriterVars.isEmpty())
@@ -202,10 +213,17 @@ public class UrlRewriterCallback extends CallbackFunction {
             consumeToEndOfTag();
             
             if (_includeSessionInfo) {
-              String inputTag = 
+              String phpSessionInputTag = 
                 "<input type=\"hidden\" name=\"" + _sessionName + "\"" +
                 " value=\"" + _sessionId + "\" />";
-              _output.append(inputTag);
+
+              _output.append(phpSessionInputTag );
+
+              String javaSessionInputTag = 
+                "<input type=\"hidden\" name=\"" + _javaSessionName + "\"" +
+                " value=\"" + _javaSessionId + "\" />";
+
+              _output.append(javaSessionInputTag);
             }
 
             for (String[] entry : _rewriterVars) {
@@ -421,9 +439,15 @@ public class UrlRewriterCallback extends CallbackFunction {
         query.append(_sessionName);
         query.append("=");
         query.append(_sessionId);
+
+        query.append("&");
+        
+        query.append(_javaSessionName);
+        query.append("=");
+        query.append(_javaSessionId);
       }
 
-      if (! "".equals(_rewriterQuery)) {
+      if (_rewriterQuery.length() != 0) {
         if (_includeSessionInfo)
           query.append("&");
 

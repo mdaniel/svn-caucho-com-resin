@@ -795,6 +795,14 @@ public final class Env {
   }
 
   /**
+   * Returns the Java Http session.
+   */
+  public HttpSession getJavaSession()
+  {
+    return _javaSession;
+  }
+
+  /**
    * Sets the session.
    */
   public void setSession(SessionArrayValue session)
@@ -826,23 +834,30 @@ public final class Env {
    */
   public String generateSessionId()
   {
-    return _quercus.getQuercusSessionManager().createSessionId(this);
+    String sessionId = 
+      _quercus.getQuercusSessionManager().createSessionId(this);
+
+    if (_javaSession != null)
+      sessionId = _javaSession.getId().substring(0, 3) + sessionId.substring(3);
+
+    return sessionId;
   }
 
   /**
    * Create the session.
    */
-  public SessionArrayValue createSession(String sessionId)
+  public SessionArrayValue createSession(String sessionId, boolean create)
   {
     long now = Alarm.getCurrentTime();
 
     SessionCallback callback = getSessionCallback();
 
-    SessionArrayValue session = _quercus.loadSession(this, sessionId);
-
-    // XXX: The php and java sessions may have different secondary and/or
-    // tertiary backups.
     _javaSession = _request.getSession(true);
+
+    if (create && _javaSession.getId().length() >= 3 && sessionId.length() >= 3)
+      sessionId = _javaSession.getId().substring(0, 3) + sessionId.substring(3);
+
+    SessionArrayValue session = _quercus.loadSession(this, sessionId);
 
     if (callback != null) {
       StringValue value = callback.read(this, sessionId);
