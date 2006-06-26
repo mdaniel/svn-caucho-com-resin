@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -28,15 +29,19 @@
 
 package com.caucho.server.resin;
 
+import java.util.Date;
+import java.util.ArrayList;
+
+import javax.management.ObjectName;
+
 import com.caucho.Version;
+
+import com.caucho.mbeans.server.ResinMBean;
+import com.caucho.mbeans.server.ClusterMBean;
+import com.caucho.mbeans.server.ServerMBean;
 
 import com.caucho.util.CauchoSystem;
 import com.caucho.util.L10N;
-import com.caucho.mbeans.server.ResinMBean;
-
-import javax.management.ObjectName;
-import java.util.Date;
-import java.util.ArrayList;
 
 public class ResinAdmin
   implements ResinMBean
@@ -58,10 +63,26 @@ public class ResinAdmin
   /**
    * Returns the JMX {@link ObjectName}.
    */
-  public String getObjectName()
+  public ObjectName getObjectName()
   {
     return _resinServer.getObjectName();
   }
+
+  //
+  // Hierarchy attributes
+  //
+
+  /**
+   * Returns the Clusters known to Resin.
+   */
+  public ClusterMBean []getClusters()
+  {
+    return new ClusterMBean[0];
+  }
+
+  //
+  // Configuration attributes
+  //
 
   public String getConfigFile()
   {
@@ -78,9 +99,9 @@ public class ResinAdmin
     return CauchoSystem.getServerRoot().getNativePath();
   }
 
-  public String getServer()
+  public ServerMBean getServer()
   {
-    return "resin:type=Server";
+    return null;
   }
 
   public String getVersion()
@@ -93,22 +114,10 @@ public class ResinAdmin
     return _resinServer.isProfessional();
   }
 
-  /*
-  public String[] getServerObjectNames()
+  public String getLocalHost()
   {
-    ArrayList<ServerController> servers = _resinServer.getServerList();
-
-    String[] objectNames = new String[servers.size()];
-
-    int i = 0;
-
-    for (ServerController server : servers) {
-      objectNames[i++] = server.getObjectName();
-    }
-
-    return objectNames;
+    return CauchoSystem.getLocalHost();
   }
-  */
 
   public String toString()
   {

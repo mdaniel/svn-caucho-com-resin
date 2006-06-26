@@ -91,7 +91,8 @@ public class HostController extends EnvironmentDeployController<Host,HostConfig>
   private ArrayList<String> _hostAliases = new ArrayList<String>();
 
   // The host variables.
-  private Var _hostVar = new Var();
+  private final Var _hostVar = new Var();
+  private final HostAdmin _admin = new HostAdmin(this);
 
   private ArrayList<Dependency> _dependList = new ArrayList<Dependency>();
 
@@ -244,6 +245,14 @@ public class HostController extends EnvironmentDeployController<Host,HostConfig>
   }
 
   /**
+   * Returns the host admin.
+   */
+  public HostMBean getAdmin()
+  {
+    return _admin;
+  }
+
+  /**
    * Initialize the entry.
    */
   protected void initBegin()
@@ -311,7 +320,7 @@ public class HostController extends EnvironmentDeployController<Host,HostConfig>
   protected Object createMBean()
     throws JMException
   {
-    return new IntrospectionMBean(new HostAdmin(this), HostMBean.class);
+    return new IntrospectionMBean(_admin, HostMBean.class);
   }
 
   /**

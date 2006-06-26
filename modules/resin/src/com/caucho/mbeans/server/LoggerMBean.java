@@ -29,31 +29,29 @@
 
 package com.caucho.mbeans.server;
 
-import java.util.Date;
-
-import javax.management.ObjectName;
-
-import com.caucho.jmx.Description;
+import com.caucho.config.ConfigException;
 
 /**
- * Parent mbean of all Resin's managed objects.
+ * Interface for a logger, letting applications change the logging level.
+ *
+ * <pre>
+ * resin:type=Logger,name=com.caucho.server.cluster
+ * </pre>
  */
-public interface ManagedObjectMBean {
+public interface LoggerMBean {
   /**
-   * Returns the {@link ObjectName} of the mbean.
+   * Returns the name.
    */
-  @Description("The JMX ObjectName for the MBean")
-  public ObjectName getObjectName();
-
-  /**
-   * The JMX name property of the mbean.
-   */
-  @Description("The name property of the JMX ObjectName")
   public String getName();
-
+  
   /**
-   * The JMX type of this MBean.
+   * Returns the level.
    */
-  @Description("The type property of the JMX ObjectName")
-  public String getType();
+  public String getLevel();
+  
+  /**
+   * Sets the level.
+   */
+  public void setLevel(String level)
+    throws ConfigException;
 }

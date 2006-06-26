@@ -29,18 +29,22 @@
 
 package com.caucho.jmx;
 
-import javax.management.*;
 import java.lang.annotation.Annotation;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.TreeSet;
 import java.util.WeakHashMap;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.management.*;
 
 /**
  * Resin implementation of StandardMBean.
@@ -63,15 +67,8 @@ public class IntrospectionMBean implements DynamicMBean {
 
   private final MBeanInfo _mbeanInfo;
 
-
-  private static final Comparator<MBeanFeatureInfo> MBEAN_FEATURE_INFO_COMPARATOR
-    = new Comparator<MBeanFeatureInfo>() {
-
-    public int compare(MBeanFeatureInfo o1, MBeanFeatureInfo o2)
-    {
-      return o1.getName().compareTo(o2.getName());
-    }
-  };
+  private final HashMap<String,OpenModelMethod> _attrGetMap
+    = new HashMap<String,OpenModelMethod>();
 
   /**
    * Makes a DynamicMBean.
@@ -84,6 +81,7 @@ public class IntrospectionMBean implements DynamicMBean {
 
   /**
    * Makes a DynamicMBean.
+   *
    * @param isLowercaseAttributeNames true if attributes should have first
    * letter lowercased
    */
@@ -118,7 +116,7 @@ public class IntrospectionMBean implements DynamicMBean {
     throws AttributeNotFoundException, MBeanException, ReflectionException
   {
     try {
-      Method method = getGetMethod(attribute);
+      OpenModelMethod method = getGetMethod(attribute);
 
       if (method != null)
         return method.invoke(_impl, (Object []) null);
@@ -168,7 +166,7 @@ public class IntrospectionMBean implements DynamicMBean {
 
     for (int i = 0; i < attributes.length; i++) {
       try {
-        Method method = getGetMethod(attributes[i]);
+        OpenModelMethod method = getGetMethod(attributes[i]);
 
         if (method != null) {
           Object value = method.invoke(_impl, (Object []) null);
@@ -210,7 +208,25 @@ public class IntrospectionMBean implements DynamicMBean {
   /**
    * Returns the set method matching the name.
    */
-  private Method getGetMethod(String name)
+  private OpenModelMethod getGetMethod(String name)
+  {
+    OpenModelMethod method = _attrGetMap.get(name);
+
+    if (method != null)
+      return method;
+
+    method = createGetMethod(name);
+
+    if (method != null)
+      _attrGetMap.put(name, method);
+
+    return method;
+  }
+
+  /**
+   * Returns the set method matching the name.
+   */
+  private OpenModelMethod createGetMethod(String name)
   {
     String methodName;
 
@@ -234,8 +250,50 @@ public class IntrospectionMBean implements DynamicMBean {
 
       Class []args = methods[i].getParameterTypes();
 
-      if (args.length == 0 && ! methods[i].getReturnType().equals(void.class))
-        return methods[i];
+      if (args.length == 0 &&
+	  ! methods[i].getReturnType().equals(void.class)) {
+	Class retType = methods[i].getReturnType();
+	
+        return new OpenModelMethod(methods[i], createUnmarshall(retType));
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Returns the open mbean unmarshaller for the given return type.
+   */
+  private Unmarshall createUnmarshall(Class cl)
+  {
+    Unmarshall mbean = getMBeanObjectName(cl);
+
+    if (mbean != null)
+      return mbean;
+
+    if (cl.isArray()) {
+      Class componentType = cl.getComponentType();
+      
+      mbean = getMBeanObjectName(componentType);
+
+      if (mbean != null)
+	return new UnmarshallArray(ObjectName.class, mbean);
+    }
+
+    return Unmarshall.IDENTITY;
+  }
+
+  private Unmarshall getMBeanObjectName(Class cl)
+  {
+    try {
+      Method method = cl.getMethod("getObjectName");
+
+      if (method != null
+	  && ObjectName.class.equals(method.getReturnType()))
+	return new UnmarshallMBean(method);
+    } catch (NoSuchMethodException e) {
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
     }
 
     return null;
@@ -626,6 +684,15 @@ public class IntrospectionMBean implements DynamicMBean {
       return null;
     }
   }
+
+  private static final Comparator<MBeanFeatureInfo> MBEAN_FEATURE_INFO_COMPARATOR
+    = new Comparator<MBeanFeatureInfo>() {
+
+    public int compare(MBeanFeatureInfo o1, MBeanFeatureInfo o2)
+    {
+      return o1.getName().compareTo(o2.getName());
+    }
+  };
 
   static {
     _descriptionAnn = findClass("com.caucho.jmx.Description");

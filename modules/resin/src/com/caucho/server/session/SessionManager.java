@@ -322,14 +322,6 @@ public final class SessionManager implements ObjectManager, AlarmListener {
   }
 
   /**
-   * Returns the application's object name.
-   */
-  String getWebAppObjectName()
-  {
-    return getApplication().getObjectName();
-  }
-
-  /**
    * Returns the SessionManager's authenticator
    */
   ServletAuthenticator getAuthenticator()
@@ -348,11 +340,6 @@ public final class SessionManager implements ObjectManager, AlarmListener {
     if (_storeManager == null)
       throw new ConfigException(L.l("{0} is an unknown persistent store.",
 				    store.getJndiName()));
-  }
-
-  public String getPersistentStoreObjectName()
-  {
-    return null;
   }
   
   /**

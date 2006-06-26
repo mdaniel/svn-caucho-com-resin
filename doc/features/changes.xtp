@@ -2,8 +2,9 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - June 14, 2006'>
+<s2 title='3.0.snap - June 23, 2006'>
 <ul>
+<li>(2005-06-23) Hessian 2.0 draft implementation
 <li>Added session-manager save-mode='before-flush' (#936, rep by Michael Harper)
 <li>Added client-connect-timeout as a load balancing configuration (#1168, #1195, rep by jornsvendsen, Serge Knystautas)
 <li>JMX/Admin: expand/complete ClusterClientMBean

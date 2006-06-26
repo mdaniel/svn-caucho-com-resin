@@ -29,19 +29,25 @@
 
 package com.caucho.mbeans.server;
 
+import javax.management.ObjectName;
+
 import com.caucho.jmx.Description;
 
 /**
  * Represents a protocol connection.
- * A typical ObjectName for a ClusterMBean is
- * <tt>resin:type=Port,Server=default,port=80</tt>.
+ *
+ * A typical ObjectName for a Port is
+ *
+ * <pre>
+ * resin:type=Port,port=80,address=INADDR_ANY
+ * </pre>
  */
 public interface PortMBean {
   /**
    * Returns the {@link javax.management.ObjectName} of the mbean.
    */
   @Description("The JMX ObjectName for the MBean")
-  public String getObjectName();
+  public ObjectName getObjectName();
 
   /**
    * Returns the port's protocol name.
@@ -53,7 +59,7 @@ public interface PortMBean {
    * Returns the ip address or used to bind the port.
    */
   @Description("The ip address or host name used to bind the port")
-  public String getHost();
+  public String getAddress();
 
   /**
    * Returns the port number used to bind the port.

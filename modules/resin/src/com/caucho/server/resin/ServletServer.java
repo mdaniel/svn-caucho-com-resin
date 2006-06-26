@@ -29,6 +29,21 @@
 
 package com.caucho.server.resin;
 
+import java.lang.reflect.Method;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.resource.spi.ResourceAdapter;
+import javax.servlet.http.HttpServletResponse;
+
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.types.Period;
@@ -76,16 +91,10 @@ import com.caucho.util.ThreadPool;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
-import javax.resource.spi.ResourceAdapter;
-import javax.servlet.http.HttpServletResponse;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.caucho.mbeans.j2ee.J2EEAdmin;
+import com.caucho.mbeans.j2ee.J2EEServer;
+
+import com.caucho.mbeans.server.ThreadPoolMBean;
 
 public class ServletServer extends ProtocolDispatchServer
   implements EnvironmentBean, SchemaBean, AlarmListener,
@@ -107,7 +116,7 @@ public class ServletServer extends ProtocolDispatchServer
   private HostContainer _hostContainer;
 
   private String _serverId = "";
-
+  
   private String _serverHeader = "Resin/" + com.caucho.Version.VERSION;
 
   private String _id = "";
@@ -192,7 +201,7 @@ public class ServletServer extends ProtocolDispatchServer
   {
     return _classLoader;
   }
-
+  
   /**
    * Returns the configuration exception
    */
@@ -330,6 +339,14 @@ public class ServletServer extends ProtocolDispatchServer
   public String getServerHeader()
   {
     return _serverHeader;
+  }
+
+  /**
+   * Returns the owning cluster.
+   */
+  public Cluster getCluster()
+  {
+    return Cluster.getLocal();
   }
 
   /**
@@ -738,11 +755,11 @@ public class ServletServer extends ProtocolDispatchServer
     port.setServer(this);
     
     if (_url.equals("") && port.matchesServerId(_serverId)) {
-      if (port.getHost() == null || port.getHost().equals("") ||
-          port.getHost().equals("*"))
+      if (port.getAddress() == null || port.getAddress().equals("") ||
+          port.getAddress().equals("*"))
         _url = "http://localhost";
       else
-        _url = "http://" + port.getHost();
+        _url = "http://" + port.getAddress();
 
       if (port.getPort() != 0)
         _url += ":" + port.getPort();
@@ -806,14 +823,8 @@ public class ServletServer extends ProtocolDispatchServer
   public void classLoaderInit(DynamicClassLoader loader)
   {
     try {
-      Jmx.register(_controller.getMBean(), "resin:name=default,type=Server");
-      
-      Jmx.register(_controller.getMBean(), "resin:name=CurrentDomain");
-      
       //ObjectName name = new ObjectName("resin:type=ThreadPool");
-      ThreadPoolAdmin threadPoolAdmin = new ThreadPoolAdmin();
-      
-      Jmx.register(threadPoolAdmin, "resin:type=ThreadPool");
+      Jmx.register(_controller.getThreadPool(), "resin:type=ThreadPool");
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }

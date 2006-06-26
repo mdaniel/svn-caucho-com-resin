@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -40,18 +41,20 @@ import javax.management.ObjectName;
  *
  * Every instance of Resin can use
  * {@link com.caucho.server.cluster.ClusterClient}s to establish
- * outbound connections to other memebers of the cluster, available
- * here with {@link #getClientObjectNames()}.
+ * outbound connections to other members of the cluster, available
+ * here with {@link #getServers()}.
  *
  * A typical ObjectName for a ClusterMBean is
- * <tt>resin:type=Cluster,name=app-tier</tt>.
+ * <pre>
+ * resin:type=Cluster,name=app-tier
+ * </pre>
  */
 public interface ClusterMBean {
   /**
    * Returns the {@link ObjectName} of the mbean.
    */
   @Description("The JMX ObjectName for the MBean")
-  public String getObjectName();
+  public ObjectName getObjectName();
 
   /**
    * Returns a list of {@link ObjectName}s for the
@@ -62,19 +65,19 @@ public interface ClusterMBean {
   @Description("The ClusterClients that are used to create" +
                " outbound connections to communicate with" +
                " members of the cluster")
-  public String []getServers();
+  public ClusterServerMBean []getServers();
   
   /**
-   * Returns the array of virtual hosts.
+   * Returns a list of the ObjectNames for the virtual hosts.
    */
   @Description("Hosts are containers that are uniquely identified"
                + " by the hostname used in making an HTTP request")
-  public String []getHosts();
+  public HostMBean []getHosts();
 
   /**
-   * Returns the persistent-store.
+   * Returns the persistent-store ObjectName.
    */
   @Description("The PersistentStore saves persistent and distributed session" +
 	       " information")
-  public String getPersistentStore();
+  public PersistentStoreMBean getPersistentStore();
 }

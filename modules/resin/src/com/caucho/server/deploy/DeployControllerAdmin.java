@@ -77,7 +77,7 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
     return _controller;
   }
 
-  public String getObjectName()
+  public ObjectName getObjectName()
   {
     return _controller.getObjectName();
   }
@@ -141,19 +141,6 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
   public String getRootDirectory()
   {
     return _controller.getRootDirectory().getNativePath();
-  }
-
-  /**
-   * Returns the handle for serialization.
-   */
-  public Object writeReplace()
-  {
-    try {
-      return new MBeanHandle(new ObjectName(getController().getObjectName()));
-    }
-    catch (MalformedObjectNameException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   public void addNotificationListener(NotificationListener listener,

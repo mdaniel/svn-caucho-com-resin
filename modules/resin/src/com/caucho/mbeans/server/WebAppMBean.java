@@ -29,10 +29,30 @@
 
 package com.caucho.mbeans.server;
 
+import com.caucho.jmx.Description;
+
 /**
  * MBean API for the WebApp.
+ *
+ * <pre>
+ * resin:type=WebAppMBean,name=/wiki,Host=foo.com
+ * </pre>
  */
 public interface WebAppMBean extends DeployControllerMBean {
+  //
+  // Hierarchy attributes
+  //
+
+  /**
+   * Returns the owning host
+   */
+  @Description("The web-app's host")
+  public HostMBean getHost();
+
+  //
+  // Configuration attributes
+  //
+  
   /**
    * Returns the root directory.
    */
@@ -53,6 +73,10 @@ public interface WebAppMBean extends DeployControllerMBean {
    */
   public String getSessionStoreType();
 
+  //
+  // statistics attributes
+  //
+  
   /**
    * Returns the current number of requests being serviced by the web-app.
    */

@@ -30,15 +30,20 @@
 
 package com.caucho.server.cluster;
 
+import java.io.Serializable;
+
 import java.util.Date;
 
+import javax.management.ObjectName;
+
 import com.caucho.mbeans.server.ClusterServerMBean;
+import com.caucho.mbeans.server.ClusterMBean;
 
 /**
  * Implementation of the ClusterClient's administration mbean.
  */
 public class ClusterClientAdmin
-  implements ClusterServerMBean
+  implements ClusterServerMBean, Serializable
 {
   private final ClusterClient _client;
 
@@ -50,7 +55,7 @@ public class ClusterClientAdmin
   /**
    * Returns the MBean's object name.
    */
-  public String getObjectName()
+  public ObjectName getObjectName()
   {
     return _client.getServer().getObjectName();
   }
@@ -74,9 +79,9 @@ public class ClusterClientAdmin
   /**
    * Returns the owning cluster's object name.
    */
-  public String getCluster()
+  public ClusterMBean getCluster()
   {
-    return _client.getServer().getCluster().getObjectName();
+    return _client.getServer().getCluster().getAdmin();
   }
 
   /**
@@ -92,7 +97,7 @@ public class ClusterClientAdmin
    */
   public String getAddress()
   {
-    return _client.getServer().getHost();
+    return _client.getServer().getAddress();
   }
 
   /**
@@ -149,11 +154,11 @@ public class ClusterClientAdmin
   }
 
   /**
-   * Returns the slow-start time in milliseconds.
+   * Returns the warmup time in milliseconds.
    */
-  public long getSlowStartTime()
+  public long getWarmupTime()
   {
-    return _client.getServer().getSlowStartTime();
+    return _client.getServer().getWarmupTime();
   }
 
   /**

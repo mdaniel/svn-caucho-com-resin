@@ -71,6 +71,7 @@ public class Cluster implements EnvironmentListener {
 
   private String _serverId = "";
 
+  private ClusterAdmin _admin;
   private ObjectName _objectName;
 
   private ArrayList<ClusterServer> _serverList
@@ -84,7 +85,7 @@ public class Cluster implements EnvironmentListener {
 
   private long _clientMaxIdleTime = 30000L;
   private long _clientFailRecoverTime = 15000L;
-  private long _clientSlowStartTime = 60000L;
+  private long _clientWarmupTime = 60000L;
   
   private long _clientReadTimeout = 60000L;
   private long _clientWriteTimeout = 60000L;
@@ -144,6 +145,14 @@ public class Cluster implements EnvironmentListener {
   public void setClusterRef(String ref)
   {
     _ref = ref;
+  }
+
+  /**
+   * Returns the admin.
+   */
+  public ClusterMBean getAdmin()
+  {
+    return _admin;
   }
 
   /**
@@ -214,13 +223,13 @@ public class Cluster implements EnvironmentListener {
   /**
    * Adds a srun server.
    */
-  public ClusterClient findClient(String host, int port)
+  public ClusterClient findClient(String address, int port)
   {
     for (int i = _serverList.size() - 1; i >= 0; i--) {
       ClusterServer server = _serverList.get(i);
       ClusterPort clusterPort = server.getClusterPort();
 
-      if (host.equals(clusterPort.getHost()) &&
+      if (address.equals(clusterPort.getAddress()) &&
 	  port == clusterPort.getPort())
 	return server.getClient();
     }
@@ -299,17 +308,17 @@ public class Cluster implements EnvironmentListener {
   /**
    * Sets the client slow-start time.
    */
-  public void setClientSlowStartTime(Period period)
+  public void setClientWarmupTime(Period period)
   {
-    _clientSlowStartTime = period.getPeriod();
+    _clientWarmupTime = period.getPeriod();
   }
 
   /**
    * Gets the client slow-start time.
    */
-  public long getClientSlowStartTime()
+  public long getClientWarmupTime()
   {
-    return _clientSlowStartTime;
+    return _clientWarmupTime;
   }
 
   /**
@@ -506,9 +515,9 @@ public class Cluster implements EnvironmentListener {
 
       ObjectName objectName = Jmx.getObjectName("type=Cluster,name=" + name);
 
-      ClusterAdmin admin = new ClusterAdmin(this);
+      _admin = new ClusterAdmin(this);
 
-      Jmx.register(admin, objectName);
+      Jmx.register(_admin, objectName);
 
       _objectName = objectName;
     } catch (Throwable e) {
@@ -527,9 +536,9 @@ public class Cluster implements EnvironmentListener {
   /**
    * Returns the JMX object name.
    */
-  public String getObjectName()
+  public ObjectName getObjectName()
   {
-    return _objectName == null ? null : _objectName.toString();
+    return _objectName == null ? null : _objectName;
   }
 
   /**
@@ -548,22 +557,6 @@ public class Cluster implements EnvironmentListener {
   public ClusterServer []getServerList()
   {
     return _serverArray;
-  }
-
-  /**
-   * Returns the client name list.
-   */
-  public String []getClientObjectNames()
-  {
-    String []objectNames = new String[_serverList.size()];
-
-    for (int i = 0; i < _serverList.size(); i++) {
-      ClusterServer client = _serverList.get(i);
-
-      objectNames[i] = client.getObjectName();
-    }
-
-    return objectNames;
   }
 
   /**

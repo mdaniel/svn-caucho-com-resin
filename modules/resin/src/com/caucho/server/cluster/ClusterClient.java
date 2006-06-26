@@ -199,25 +199,25 @@ public class ClusterClient {
     if (now < _lastFailTime + _server.getFailRecoverTime())
       return false;
 
-    long slowStartCount;
-    long slowStartTime = _server.getSlowStartTime();
+    long warmupCount;
+    long warmupTime = _server.getWarmupTime();
 
     if (_firstConnectTime <= 0)
-      slowStartCount = 0;
-    else if (slowStartTime <= 0)
-      slowStartCount = Integer.MAX_VALUE;
+      warmupCount = 0;
+    else if (warmupTime <= 0)
+      warmupCount = Integer.MAX_VALUE;
     else
-      slowStartCount = 16 * (now - _firstConnectTime) / slowStartTime;
+      warmupCount = 16 * (now - _firstConnectTime) / warmupTime;
 
-    // Slow start time splits into 16 parts.  The first 4 allow 1 request
+    // Warmup time splits into 16 parts.  The first 4 allow 1 request
     // at a time.  After that, each segment doubles the allowed requests
 
-    if (slowStartCount > 16) {
+    if (warmupCount > 16) {
       _lifecycle.toActive();
       
       return true;
     }
-    else if (_activeCount + _startingCount < (1 << (slowStartCount - 3)))
+    else if (_activeCount + _startingCount < (1 << (warmupCount - 3)))
       return true;
     else
       return false;

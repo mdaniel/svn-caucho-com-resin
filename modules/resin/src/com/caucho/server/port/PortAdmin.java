@@ -29,12 +29,14 @@
 
 package com.caucho.server.port;
 
-import com.caucho.mbeans.server.PortMBean;
+import java.io.Serializable;
 
 import javax.management.ObjectName;
 
+import com.caucho.mbeans.server.PortMBean;
+
 public class PortAdmin
-  implements PortMBean
+  implements PortMBean, Serializable
 {
   private Port _port;
 
@@ -43,7 +45,7 @@ public class PortAdmin
     _port = port;
   }
 
-  public String getObjectName()
+  public ObjectName getObjectName()
   {
     return _port.getObjectName();
   }
@@ -53,9 +55,9 @@ public class PortAdmin
     return _port.getProtocolName();
   }
 
-  public String getHost()
+  public String getAddress()
   {
-    return _port.getHost();
+    return _port.getAddress();
   }
 
   public int getPort()
@@ -141,6 +143,14 @@ public class PortAdmin
   public long getLifetimeWriteBytes()
   {
     return _port.getLifetimeWriteBytes();
+  }
+
+  /**
+   * Replace the Admin object with its ObjectName for JMX.
+   */
+  public Object writeReplace()
+  {
+    return _port.getObjectName();
   }
 
   public String toString()

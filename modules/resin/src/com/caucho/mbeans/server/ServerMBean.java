@@ -35,48 +35,66 @@ import com.caucho.jmx.Description;
 import com.caucho.jmx.Name;
 
 /**
- * Management interface for the server.
+ * Management interface for the server.  Each server corresponds to a
+ * JVM instance running Resin.
  *
- * <tt>resin:type=Server</tt>.
+ * <p>Since exactly on ServerMBean is running at a time it has a unique
+ * mbean name,
+ *
+ * <pre>
+ * resin:type=Server
+ * </pre>
  */
+@Description("The Resin Server running on this JVM instance")
 public interface ServerMBean extends DeployControllerMBean {
+  //
+  // ID attributes
+  //
+  
   /**
    * Returns the -server id.
    */
   @Description("The server id used when starting this instance"
                + " of Resin, the value of `-server'")
   public String getId();
+
+  //
+  // Hierarchy
+  //
   
   /**
    * Returns the cluster owning this server
    */
   @Description("The cluster contains the peer servers")
-  public String getCluster();
-
-  /**
-   * Returns the ip address or host name  of the machine that is running this ResinServer.
-   */
-  @Description("The ip address or host name of the machine that is running"
-               + " this instance of Resin")
-  public String getLocalHost();
-
-  /**
-   * Returns true if a {@link com.caucho.server.port.AbstractSelectManager} is enabled and active
-   */
-  @Description("A SelectManager handles keepalive without requiring a thread")
-  public boolean isSelectManager();
+  public ClusterMBean getCluster();
 
   /**
    * Returns the array of ports.
    */
   @Description("Ports accept socket connections")
-  public String []getPorts();
+  public PortMBean []getPorts();
+
+  /**
+   * Returns the server's thread pool administration
+   */
+  @Description("The thread pool for the server")
+  public ThreadPoolMBean getThreadPool();
 
   /**
    * Returns the cluster port
    */
   @Description("The cluster port handles management and cluster messages")
-  public String getClusterPort();
+  public PortMBean getClusterPort();
+
+  //
+  // Configuration attributes
+  //
+
+  /**
+   * Returns true if a {@link com.caucho.server.port.AbstractSelectManager} is enabled and active
+   */
+  @Description("A SelectManager handles keepalive without requiring a thread")
+  public boolean isSelectManagerEnabled();
 
   /**
    * Returns true if detailed statistics are being kept.
@@ -85,8 +103,6 @@ public interface ServerMBean extends DeployControllerMBean {
                + " more detailed statistics at the possible expense of"
                +" some performance")
   public boolean isDetailedStatistics();
-
-  public String getThreadPool();
 
   //
   // state

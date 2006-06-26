@@ -46,31 +46,12 @@ import com.caucho.jmx.Description;
  * </pre>
  */
 @Description("Client-view of a cluster's server, i.e. a target server with which this instance can communicate")
-public interface ClusterServerMBean {
+public interface ClusterServerMBean extends ManagedObjectMBean {
   /**
-   * Returns the {@link ObjectName} of the mbean.
+   * The containing cluster.
    */
-  @Description("The JMX ObjectName for the MBean")
-  public String getObjectName();
-
-  /**
-   * The server id that identifies the target server.  Also, the
-   * JMX name of the mbean.
-   */
-  @Description("The -server name for this server.  Also, the JMX name property")
-  public String getName();
-
-  /**
-   * The JMX type of this MBean.
-   */
-  @Description("The JMX type property, 'ClusterClient'")
-  public String getType();
-
-  /**
-   * The object name of the containing cluster.
-   */
-  @Description("The object name of the containing Cluster")
-  public String getCluster();
+  @Description("The Cluster which contains the server")
+  public ClusterMBean getCluster();
 
   /**
    * The cluster index of the server.
@@ -126,10 +107,10 @@ public interface ClusterServerMBean {
   public long getReadTimeout();
 
   /**
-   * Returns the slow-start time in milliseconds.
+   * Returns the warmup time in milliseconds.
    */
-  @Description("Returns the slow-start time in milliseconds for ramping up connections to the server")
-  public long getSlowStartTime();
+  @Description("Returns the warmup time in milliseconds for ramping up connections to the server")
+  public long getWarmupTime();
 
   /**
    * Returns the load-balancer weight, defaulting to 100.

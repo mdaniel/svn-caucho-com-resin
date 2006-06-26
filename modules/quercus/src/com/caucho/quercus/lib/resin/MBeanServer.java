@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -29,10 +30,11 @@
 
 package com.caucho.quercus.lib.resin;
 
-import javax.management.*;
 import java.util.Map;
 import java.util.Hashtable;
 import java.util.Set;
+
+import javax.management.*;
 
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.env.ArrayValue;
@@ -125,8 +127,14 @@ public class MBeanServer {
       else
 	objectNames = Jmx.getMBeanServer().queryNames(patternObjectName, null);
 
+      if (objectNames == null)
+	return null;
+
+      javax.management.MBeanServer server;
+      server = Jmx.getGlobalMBeanServer();
+
       for (ObjectName objectName : objectNames)
-	values.put(objectName.toString());
+	values.put(env.wrapJava(new MBean(server, objectName)));
 
       return values;
     } catch (MalformedObjectNameException e) {

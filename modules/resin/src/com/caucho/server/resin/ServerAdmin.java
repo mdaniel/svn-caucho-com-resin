@@ -38,10 +38,15 @@ import com.caucho.vfs.*;
 
 import com.caucho.server.deploy.DeployControllerAdmin;
 import com.caucho.server.port.Port;
+import com.caucho.server.port.AbstractSelectManager;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.host.HostController;
 
 import com.caucho.mbeans.server.ServerMBean;
+import com.caucho.mbeans.server.HostMBean;
+import com.caucho.mbeans.server.PortMBean;
+import com.caucho.mbeans.server.ClusterMBean;
+import com.caucho.mbeans.server.ThreadPoolMBean;
 
 import java.util.ArrayList;
 
@@ -66,9 +71,11 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
       return null;
   }
 
-  public boolean isSelectManager()
+  public boolean isSelectManagerEnabled()
   {
-    return getDeployInstance().getSelectManager() != null;
+    AbstractSelectManager manager = getDeployInstance().getSelectManager();
+
+    return manager != null;
   }
 
   /**
@@ -78,15 +85,50 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
   {
     return getController().getId();
   }
+  
+  public ThreadPoolMBean getThreadPool()
+  {
+    return getController().getThreadPool();
+  }
 
-  public String getCluster()
+  public PortMBean []getPorts()
+  {
+    ServletServer server = getDeployInstance();
+
+    if (server == null)
+      return new PortMBean[0];
+
+    ArrayList<PortMBean> portList = new ArrayList<PortMBean>();
+
+    for (Port port : server.getPorts()) {
+      PortMBean admin = port.getAdmin();
+
+      if (admin != null)
+        portList.add(admin);
+    }
+
+    return portList.toArray(new PortMBean[portList.size()]);
+  }
+
+  public PortMBean getClusterPort()
   {
     return null;
   }
-  
-  public String getThreadPool()
+
+  public ClusterMBean getCluster()
   {
-    return "resin:type=ThreadPool";
+    ServletServer server = getDeployInstance();
+
+    if (server == null)
+      return null;
+    else {
+      Cluster cluster = server.getCluster();
+
+      if (cluster != null)
+	return cluster.getAdmin();
+      else
+	return null;
+    }
   }
 
   public String getLocalHost()
@@ -99,66 +141,25 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return CauchoSystem.isDetailedStatistics();
   }
 
-  public String []getPorts()
+  public HostMBean []getHosts()
   {
     ServletServer server = getDeployInstance();
 
     if (server == null)
-      return new String[0];
+      return new HostMBean[0];
 
-    ArrayList<String> portNameList = new ArrayList<String>();
-
-    for (Port port : server.getPorts()) {
-      String name = port.getObjectName();
-
-      if (name != null)
-        portNameList.add(name);
-    }
-
-    return portNameList.toArray(new String[portNameList.size()]);
-  }
-
-  public String getClusterPort()
-  {
-    return null;
-  }
-
-  public String []getClusters()
-  {
-    ServletServer server = getDeployInstance();
-
-    if (server == null)
-      return new String[0];
-
-    ArrayList<String> clusterNameList = new ArrayList<String>();
-
-    for (Cluster cluster : server.getClusters()) {
-      String name = cluster.getObjectName();
-
-      if (name != null)
-        clusterNameList.add(name);
-    }
-
-    return clusterNameList.toArray(new String[clusterNameList.size()]);
-  }
-
-  public String []getHosts()
-  {
-    ServletServer server = getDeployInstance();
-
-    if (server == null)
-      return new String[0];
-
-    ArrayList<String> hostNameList = new ArrayList<String>();
+    ArrayList<HostMBean> hostList = new ArrayList<HostMBean>();
 
     for (HostController host : server.getHostControllers()) {
-      String name = host.getObjectName();
+      HostMBean admin = host.getAdmin();
 
-      if (name != null)
-        hostNameList.add(name);
+      if (admin != null)
+        hostList.add(admin);
     }
 
-    return hostNameList.toArray(new String[hostNameList.size()]);
+    // XXX: sort
+
+    return hostList.toArray(new HostMBean[hostList.size()]);
   }
 
   public int getActiveThreadCount()

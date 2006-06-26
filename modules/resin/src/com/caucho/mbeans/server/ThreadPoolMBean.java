@@ -31,6 +31,10 @@ package com.caucho.mbeans.server;
 
 /**
  * Management interface for the thread pool.
+ *
+ * <pre>
+ * resin:type=ThreadPool
+ * </pre>
  */
 public interface ThreadPoolMBean {
   /**

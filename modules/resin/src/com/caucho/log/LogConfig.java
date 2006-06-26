@@ -47,14 +47,12 @@ import com.caucho.jmx.Jmx;
 import com.caucho.loader.Environment;
 import com.caucho.loader.CloseListener;
 
-import com.caucho.mbeans.server.LogMBean;
-
 import com.caucho.util.L10N;
 
 /**
  * Environment-specific configuration.
  */
-public class LogConfig extends RotateLog implements LogMBean {
+public class LogConfig extends RotateLog {
   private static final L10N L = new L10N(LogConfig.class);
   
   private ArrayList<Handler> _handlers;

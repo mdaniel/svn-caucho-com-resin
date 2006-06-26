@@ -97,15 +97,15 @@ public class TcpConnection extends PortConnection
       id = _g_id++;
     }
 
-    if (port.getHost() == null) {
+    if (port.getAddress() == null) {
       _id = "resin-tcp-connection-*:" + port.getPort() + "-" + id;
       _objectName = ("resin:type=TcpConnection,name=any-"
 		     + port.getPort() + "-" + id);
     }
     else {
-      _id = ("resin-tcp-connection-" + port.getHost() + ":" +
+      _id = ("resin-tcp-connection-" + port.getAddress() + ":" +
              port.getPort() + "-" + id);
-      _objectName = ("resin:type=TcpConnection,name=" + port.getHost()
+      _objectName = ("resin:type=TcpConnection,name=" + port.getAddress()
 		     + "-" + port.getPort() + "-" + id);
     }
 

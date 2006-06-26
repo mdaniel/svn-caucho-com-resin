@@ -36,35 +36,27 @@ import com.caucho.jmx.Description;
  *
  * The JMX name looks like:
  * <pre>
- *   resin:type=SessionManager,WebApp=/wiki,Host=caucho.com
+ *  resin:type=SessionManager,WebApp=/wiki,Host=caucho.com
  * </pre>
  */
 @Description("The session manager for a web-app")
-public interface SessionManagerMBean
+public interface SessionManagerMBean extends ManagedObjectMBean
 {
-  /**
-   * Returns the {@link ObjectName} of the mbean.
-   */
-  @Description("The JMX ObjectName for the SessionManager")
-  public String getObjectName();
-
-  /**
-   * The Name of the SessionManagerMBean is null.
-   */
-  @Description("The name of the SessionManagerMBean is null")
-  public String getName();
-
-  /**
-   * The type of the SessionManagerMBean is "SessionManager"
-   */
-  @Description("The JMX type property, 'SessionManager'")
-  public String getType();
-
+  //
+  // Hierarchy Attributes
+  //
+  
   /**
    * Returns the owning WebApp.
    */
-  @Description("The ObjectName of the owning WebApp for this session manager")
-  public String getWebApp();
+  @Description("The owning WebApp for this session manager")
+  public WebAppMBean getWebApp();
+
+  /**
+   * Returns the ObjectName for the persistent store.
+   */
+  @Description("Returns the persistent store mbean")
+  public PersistentStoreMBean getPersistentStore();
 
   //
   // Configuration attributes
@@ -184,10 +176,4 @@ public interface SessionManagerMBean
    */
   @Description("The maximum time an idle session will be saved in milliseconds.  SessionTimeout affects persistent sessions")
   public long getSessionTimeout();
-
-  /**
-   * Returns the ObjectName for the persistent store.
-   */
-  @Description("The ObjectName for the persistent store")
-  public String getPersistentStore();
 }

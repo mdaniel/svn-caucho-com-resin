@@ -31,9 +31,13 @@ package com.caucho.mbeans.server;
 
 /**
  * Management interface for the host.
+ *
+ * <pre>
+ * resin:type=Host,name=foo.com
+ * </pre>
  */
-
-public interface HostMBean extends DeployControllerMBean {
+public interface HostMBean extends DeployControllerMBean
+{
   /**
    * Returns the host name.
    */
@@ -65,15 +69,10 @@ public interface HostMBean extends DeployControllerMBean {
   public String getWarExpandDirectory();
 
   /**
-   * Returns an array of the webapp names.
-   */
-  public String []getWebAppObjectNames();
-
-  /**
    * Returns an array of the webapp names
    * (obsolete, use {@link #getWebAppObjectNames()}.
    */
-  public String []getWebAppNames();
+  public WebAppMBean []getWebApps();
 
 
   /**

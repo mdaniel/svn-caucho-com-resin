@@ -29,8 +29,29 @@
 
 package com.caucho.server.resin;
 
+import java.lang.reflect.Method;
+
+import java.util.Map;
+
+import java.util.logging.Logger;
+
+import javax.management.ObjectName;
+import javax.management.JMException;
+import javax.management.MalformedObjectNameException;
+
+import com.caucho.util.*;
+import com.caucho.vfs.*;
+
+import com.caucho.naming.Jndi;
+
+import com.caucho.log.Log;
+
 import com.caucho.config.ConfigException;
 import com.caucho.jmx.IntrospectionMBean;
+
+import com.caucho.server.cluster.Cluster;
+
+import com.caucho.server.deploy.EnvironmentDeployController;
 import com.caucho.log.Log;
 import com.caucho.mbeans.j2ee.J2EEAdmin;
 import com.caucho.mbeans.j2ee.J2EEServer;
@@ -44,6 +65,7 @@ import com.caucho.vfs.Path;
 import javax.management.JMException;
 import java.lang.reflect.Method;
 import java.util.logging.Logger;
+import com.caucho.mbeans.server.ThreadPoolMBean;
 
 /**
  * Controls the server.
@@ -59,6 +81,7 @@ public class ServerController
   private String _serverId = "";
 
   private ServerAdmin _admin;
+  private ThreadPoolMBean _threadPool = new ThreadPoolAdmin();
 
   public ServerController()
   {
@@ -124,6 +147,14 @@ public class ServerController
   }
 
   /**
+   * Returns the thread pool.
+   */
+  public ThreadPoolMBean getThreadPool()
+  {
+    return _threadPool;
+  }
+
+  /**
    * Returns true if there's a listening port.
    */
   public boolean hasListeningPort()
@@ -149,6 +180,14 @@ public class ServerController
   {
     return new IntrospectionMBean(getDeployAdmin(),
                                   ServerMBean.class);
+  }
+
+  /**
+   * Returns the owning cluster.
+   */
+  public Cluster getCluster()
+  {
+    return Cluster.getLocal();
   }
 
   /**
@@ -214,6 +253,16 @@ public class ServerController
   {
     if (_resinServer != null)
       _resinServer.setuid();
+  }
+
+  /**
+   * Creates the object name.  The default is to use getId() as
+   * the 'name' property, and the classname as the 'type' property.
+   */
+  protected ObjectName createObjectName(Map<String,String> properties)
+    throws MalformedObjectNameException
+  {
+    return new ObjectName("resin:type=Server");
   }
 
   protected String getMBeanTypeName()

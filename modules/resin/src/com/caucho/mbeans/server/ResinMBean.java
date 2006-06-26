@@ -37,6 +37,10 @@ import java.util.Date;
 /**
  * Management interface for the server.
  * There is one ResinServer global for the entire JVM.
+ *
+ * <pre>
+ * resin:type=Resin
+ * </pre>
  */
 @Description("A single Resin for each JVM provides a global environment for Resin")
 public interface ResinMBean {
@@ -44,8 +48,28 @@ public interface ResinMBean {
    * Returns the {@link ObjectName} of the mbean.
    */
   @Description("The JMX ObjectName for the MBean")
-  public String getObjectName();
+  public ObjectName getObjectName();
 
+  //
+  // Hierarchy Attributes
+  //
+
+  /**
+   * Returns the Cluster mbean-names for all clusters managed by Resin.
+   */
+  @Description("The ClusterMBean names managed by Resin")
+  public ClusterMBean []getClusters();
+
+  /**
+   * Returns the server MBean's ObjectName for this instance.
+   */
+  @Description("The current Server instance")
+  public ServerMBean getServer();
+
+  //
+  // Configuration Attributes
+  //
+  
   /**
    * Returns the version.
    */
@@ -84,8 +108,9 @@ public interface ResinMBean {
   public String getConfigFile();
 
   /**
-   * Returns the server for this instance.
+   * Returns the ip address or host name  of the machine that is running this ResinServer.
    */
-  @Description("The current Server instance")
-  public String getServer();
+  @Description("The ip address or host name of the machine that is running"
+               + " this instance of Resin")
+  public String getLocalHost();
 }

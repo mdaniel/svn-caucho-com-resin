@@ -30,12 +30,18 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.mbeans.server.ClusterMBean;
+import java.io.Serializable;
 
 import javax.management.ObjectName;
 
+import com.caucho.mbeans.server.ClusterMBean;
+import com.caucho.mbeans.server.ClusterServerMBean;
+import com.caucho.mbeans.server.HostMBean;
+import com.caucho.mbeans.server.PersistentStoreMBean;
+import com.caucho.mbeans.server.PortMBean;
+
 public class ClusterAdmin
-  implements ClusterMBean
+  implements ClusterMBean, Serializable
 {
   private final Cluster _cluster;
 
@@ -44,32 +50,32 @@ public class ClusterAdmin
     _cluster = cluster;
   }
 
-  public String getObjectName()
+  public ObjectName getObjectName()
   {
     return _cluster.getObjectName();
   }
 
-  public String getPort()
+  public PortMBean getPort()
   {
     ClusterServer clusterServer = _cluster.getSelfServer();
 
     if (clusterServer == null)
       return null;
 
-     return clusterServer.getClusterPort().getObjectName();
+     return clusterServer.getClusterPort().getAdmin();
   }
 
-  public String getPersistentStore()
+  public PersistentStoreMBean getPersistentStore()
   {
-    return "resin:type=PersistentStore";
+    return null;
   }
 
-  public String []getHosts()
+  public HostMBean []getHosts()
   {
-    return new String[0];
+    return new HostMBean[0];
   }
 
-  public String []getServers()
+  public ClusterServerMBean []getServers()
   {
     ClusterServer selfServer = _cluster.getSelfServer();
 
@@ -80,7 +86,7 @@ public class ClusterAdmin
     if (selfServer != null)
       len--;
 
-    String []objectNames = new String[len];
+    ClusterServerMBean []serverMBeans = new ClusterServerMBean[len];
 
     int j = 0;
 
@@ -88,10 +94,10 @@ public class ClusterAdmin
       ClusterServer server = serverList[i];
 
       if (server != selfServer)
-        objectNames[j++] = server.getObjectName();
+        serverMBeans[j++] = server.getAdmin();
     }
 
-    return objectNames;
+    return serverMBeans;
   }
 
   public String toString()

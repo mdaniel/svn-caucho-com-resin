@@ -29,9 +29,11 @@
 
 package com.caucho.mbeans.server;
 
-import com.caucho.jmx.Description;
-
 import java.util.Date;
+
+import javax.management.ObjectName;
+
+import com.caucho.jmx.Description;
 
 /**
  * Management interface for the deploy controller.
@@ -42,7 +44,7 @@ public interface DeployControllerMBean
    * Returns the ObjectName.
    */
   @Description("The JMX ObjectName for the MBean")
-  public String getObjectName();
+  public ObjectName getObjectName();
 
   /**
    * Returns the startup mode, one of "default", "automatic", "lazy", or "manual".

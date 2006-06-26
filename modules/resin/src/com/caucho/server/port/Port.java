@@ -54,6 +54,8 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.config.types.Period;
 
+import com.caucho.mbeans.server.PortMBean;
+
 import com.caucho.lifecycle.Lifecycle;
 
 import com.caucho.jmx.Jmx;
@@ -79,8 +81,8 @@ public class Port
   // The id
   private String _serverId = "";
 
-  // The host
-  private String _host;
+  // The address
+  private String _address;
   // The port
   private int _port;
 
@@ -116,6 +118,7 @@ public class Port
 
   // The JMX name
   private ObjectName _objectName;
+  private final PortAdmin _admin = new PortAdmin(this);
 
   // the server socket
   private QServerSocket _serverSocket;
@@ -205,9 +208,14 @@ public class Port
   /**
    * Returns the JMX object name.
    */
-  public String getObjectName()
+  public ObjectName getObjectName()
   {
-    return _objectName == null ? null : _objectName.toString();
+    return _objectName;
+  }
+
+  public PortMBean getAdmin()
+  {
+    return _admin;
   }
 
   /**
@@ -245,25 +253,34 @@ public class Port
   }
 
   /**
-   * Sets the host.
+   * Sets the address
    */
-  public void setHost(String host)
+  public void setAddress(String address)
     throws UnknownHostException
   {
-    if ("*".equals(host))
-      host = null;
+    if ("*".equals(address))
+      address = null;
 
-    _host = host;
-    if (host != null)
-      _socketAddress = InetAddress.getByName(host);
+    _address = address;
+    if (address != null)
+      _socketAddress = InetAddress.getByName(address);
   }
 
   /**
-   * Gets the host.
+   * @deprecated
    */
-  public String getHost()
+  public void setHost(String address)
+    throws UnknownHostException
   {
-    return _host;
+    setAddress(address);
+  }
+
+  /**
+   * Gets the IP address
+   */
+  public String getAddress()
+  {
+    return _address;
   }
 
   /**
@@ -573,7 +590,7 @@ public class Port
 
   public Lifecycle getLifecycleState()
   {
-    return null;
+    return _lifecycle;
   }
 
   /**
@@ -643,16 +660,14 @@ public class Port
 
 
     try {
-      ObjectName objectName;
+      String address = _address;
 
-      if (_host == null)
-        objectName = Jmx.getObjectName("type=Port,port=" + _port);
-      else
-        objectName = Jmx.getObjectName("type=Port,port=" + _port +",host=" + _host);
+      if (address == null)
+	address = "INADDR_ANY";
 
-      Jmx.register(new PortAdmin(this), objectName);
+      _objectName = new ObjectName("resin:type=Port,port=" + _port + ",address=" + address);
 
-      _objectName = objectName;
+      Jmx.register(_admin, _objectName);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -660,8 +675,8 @@ public class Port
     if (_serverSocket != null) {
       if (_port == 0) {
       }
-      else if (_host != null)
-        log.info("listening to " + _host + ":" + _port);
+      else if (_address != null)
+        log.info("listening to " + _address + ":" + _port);
       else
         log.info("listening to " + _port);
     }
@@ -671,16 +686,16 @@ public class Port
       log.info(_protocol.getProtocolName() + "s listening to " + _socketAddress.getHostName() + ":" + _port);
     }
     else if (_sslFactory != null) {
-      if (_host == null) {
+      if (_address == null) {
         _serverSocket = _sslFactory.create(null, _port);
         log.info(_protocol.getProtocolName() + "s listening to *:" + _port);
       }
       else {
-        InetAddress addr = InetAddress.getByName(_host);
+        InetAddress addr = InetAddress.getByName(_address);
 
         _serverSocket = _sslFactory.create(addr, _port);
 
-        log.info(_protocol.getProtocolName() + "s listening to " + _host + ":" + _port);
+        log.info(_protocol.getProtocolName() + "s listening to " + _address + ":" + _port);
       }
     }
     else if (_socketAddress != null) {
@@ -1107,6 +1122,6 @@ public class Port
 
   public String toString()
   {
-    return "Port[" + getHost() + ":" + getPort() + "]";
+    return "Port[" + getAddress() + ":" + getPort() + "]";
   }
 }

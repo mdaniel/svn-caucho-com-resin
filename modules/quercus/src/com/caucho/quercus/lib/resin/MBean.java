@@ -52,13 +52,18 @@ public class MBean {
     _name = name;
   }
 
+  public String getMbeanName()
+  {
+    return _name.toString();
+  }
+
   /**
    * Returns an attribute.
    */
   public Object __getField(String attrName)
   {
     try {
-      return _server.getAttribute(_name, attrName);
+      return unmarshall(_server.getAttribute(_name, attrName));
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
       
@@ -102,9 +107,8 @@ public class MBean {
 
       sig = findClosestOperation(name, sig);
       
-      return _server.invoke(_name, name, args, sig);
+      return unmarshall(_server.invoke(_name, name, args, sig));
     } catch (Exception e) {
-      e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
       
       return null;
@@ -141,6 +145,27 @@ public class MBean {
     }
 
     return null;
+  }
+
+  private Object unmarshall(Object value)
+  {
+    if (value instanceof ObjectName) {
+      ObjectName name = (ObjectName) value;
+
+      return new MBean(_server, name);
+    }
+    else if (value instanceof ObjectName[]) {
+      ObjectName []names = (ObjectName []) value;
+
+      MBean []mbeans = new MBean[names.length];
+
+      for (int i = 0; i < names.length; i++)
+	mbeans[i] = new MBean(_server, names[i]);
+
+      return mbeans;
+    }
+    else
+      return value;
   }
 
   public String toString()

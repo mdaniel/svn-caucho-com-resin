@@ -395,7 +395,7 @@ public class HmuxDispatchRequest {
       ClusterServer server = servers[i];
 
       if (server != null) {
-	String srunHost = server.getHost() + ":" + server.getPort();
+	String srunHost = server.getAddress() + ":" + server.getPort();
 
 	if (server.isBackup())
 	  writeString(os, HMUX_SRUN_BACKUP, srunHost);

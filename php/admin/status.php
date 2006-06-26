@@ -107,13 +107,13 @@
 
 <?php
 
-$proxyCache = $mbeanServer->lookup("resin:type=ProxyCache");
+$proxy_cache = $mbeanServer->lookup("resin:type=ProxyCache");
 
 ?>
 
 <tr title="Percentage of requests that have been served from the proxy cache:">
 <th>Proxy cache hit ratio:</th>
-<td><?= format_hit_ratio($proxyCache->HitCount, $proxyCache->MissCount) ?></td>
+<td><?= format_hit_ratio($proxy_cache->HitCount, $proxy_cache->MissCount) ?></td>
 </tr>
 
 <!-- XXX: show how cacheable apps are: cacheable/non-cacheable -->
@@ -127,7 +127,7 @@ $proxyCache = $mbeanServer->lookup("resin:type=ProxyCache");
 </table>
 
 <?php
-  $threadPool = $mbeanServer->lookup("resin:type=ThreadPool");
+  $thread_pool = $server->ThreadPool;
 ?>
 
 <!--
@@ -154,20 +154,20 @@ The ThreadPool manages all threads used by Resin.
 <th title="The current total number of threads managed by the pool.">Total count</th>
 </tr>
 <tr align='right'>
-<td><?= $threadPool->ThreadMax ?></td>
-<td><?= $threadPool->SpareThreadMin ?></td>
-<td><?= $threadPool->ActiveThreadCount ?></td>
-<td><?= $threadPool->IdleThreadCount ?></td>
-<td><?= $threadPool->ThreadCount ?></td>
+<td><?= $thread_pool->ThreadMax ?></td>
+<td><?= $thread_pool->SpareThreadMin ?></td>
+<td><?= $thread_pool->ActiveThreadCount ?></td>
+<td><?= $thread_pool->IdleThreadCount ?></td>
+<td><?= $thread_pool->ThreadCount ?></td>
 </tr>
 </table>
 
 <!-- Connection pools -->
 
 <?php
-  $poolObjectNames = $mbeanServer->query("resin:*,type=ConnectionPool");
+  $db_pools = $mbeanServer->query("resin:*,type=ConnectionPool");
 
-  if ($poolObjectNames) {
+  if ($db_pools) {
 ?>
 
 <h2>Connection pools</h2>
@@ -188,8 +188,7 @@ The ThreadPool manages all threads used by Resin.
 </tr>
 
 <?php
-  foreach ($poolObjectNames as $poolObjectName) {
-    $pool = $mbeanServer->lookup($poolObjectName);
+  foreach ($db_pools as $pool) {
 ?>
 
 <tr>
@@ -210,9 +209,9 @@ The ThreadPool manages all threads used by Resin.
 <!-- TCP ports -->
 
 <?php
-  $portNames = $server->Ports;
+  $ports = $server->Ports;
 
-  if ($portNames) {
+  if ($ports) {
 ?>
 <h2>TCP ports</h2>
 
@@ -232,13 +231,12 @@ The ThreadPool manages all threads used by Resin.
 <th>Select count</th>
 </tr>
 <?php
-  foreach ($portObjectNames as $portObjectName) {
-    $port = $mbeanServer->lookup($portObjectName);
+  foreach ($ports as $port) {
 ?>
 
 <tr>
 <td><?= $port->ProtocolName ?>://<?= $port->Address ? $port->Address : "*" ?>:<?= $port->Port ?></td>
-<td><?= $port->Active ? "active" : "inacative" ?></td>
+<td><?= $port->Active ? "active" : "inactive" ?></td>
 <td><?= $port->ActiveThreadCount ?></td>
 <td><?= $port->IdleThreadCount ?></td>
 <td><?= $port->ThreadCount ?></td>
@@ -255,14 +253,12 @@ The ThreadPool manages all threads used by Resin.
 
 <?php
   # XXX: sort by $cluster->index
-  foreach ($resin->Clusters as $clusterObjectName) {
-    $cluster = $mbeanServer->lookup($clusterObjectName);
-
-    if (empty($cluster->ClientObjectNames))
+  foreach ($resin->Clusters as $clusters) {
+    if (empty($cluster->Clients))
       continue;
 ?>
 
-<h2>Cluster: <?= mbean_explode($clusterObjectName)['name'] ?></h2>
+<h2>Cluster: <?= $cluster->Name ?></h2>
 
 <table>
 
@@ -275,9 +271,7 @@ The ThreadPool manages all threads used by Resin.
 <th>Connection</th>
 </tr>
 <?php
-  foreach ($cluster->Clients as $clientObjectName) {
-    $client = $mbeanServer->lookup($clientObjectName);
-    $clientParts = $mbeanServer->explode($clientObjectName);
+  foreach ($cluster->Clients as $client) {
 ?>
 
 <tr class='<?= $client->ping() ? "active" : "inactive" ?>'>
@@ -315,43 +309,30 @@ The ThreadPool manages all threads used by Resin.
     return strcmp($a->URL, $b->URL);
   }
 
-  $hostObjectNames = $mbeanServer->query("resin:*,type=Host");
-
-  $hosts = array();
-
-  foreach ($hostObjectNames as $hostObjectName) {
-    $hosts[] = $mbeanServer->lookup($hostObjectName);
-  }
+  $hosts = $mbeanServer->query("resin:*,type=Host");
 
   usort($hosts, "sort_host");
 
   foreach ($hosts as $host) {
-    $hostName = empty($host->hostName) ? "default" : $host->HostName;
+    $hostName = empty($host->HostName) ? "default" : $host->HostName;
 ?>
 
 <tr title='<?= $hostObjectName ?>'><td colspan='4'><?= $host->URL ?></td></tr>
 <?php
   function sort_webapp($a, $b)
   {
-    return strcmp($a->contextPath, $b->contextPath);
+    return strcmp($a->ContextPath, $b->ContextPath);
   }
 
-  $webappPattern = "resin:*,Host=" . $hostName . ",type=WebApp";
-
-  $webappObjectNames = $mbeanServer->query($webappPattern);
-
-  $webapps = array();
-
-  foreach ($webappObjectNames as $webappObjectName) {
-    $webapps[] = $mbeanServer->lookup($webappObjectName);
-  }
+  $webapps = $host->WebApps;
 
   usort($webapps, "sort_webapp");
 
   foreach ($webapps as $webapp) {
+    $session = $webapp->SessionManager;
 ?>
 
-<tr class="<?= $webapp->State ?>" title='<?= $webappObjectName ?>'>
+<tr class="<?= $webapp->State ?>" title='<?= $webapp->Name ?>'>
 <td>&nbsp;</td>
 <td><?= empty($webapp->ContextPath) ? "/" : $webapp->ContextPath ?>
 <td><?= $webapp->State ?>

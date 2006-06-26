@@ -29,44 +29,57 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.config.ConfigException;
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.loader.*;
-import com.caucho.log.Log;
-import com.caucho.make.AlwaysModified;
-import com.caucho.server.deploy.DeployContainer;
-import com.caucho.server.deploy.DeployGenerator;
-import com.caucho.server.dispatch.*;
-import com.caucho.server.e_app.EarConfig;
-import com.caucho.server.e_app.EarDeployController;
-import com.caucho.server.e_app.EarDeployGenerator;
-import com.caucho.server.e_app.EarSingleDeployGenerator;
-import com.caucho.server.log.AbstractAccessLog;
-import com.caucho.server.log.AccessLog;
-import com.caucho.server.resin.ServletServer;
-import com.caucho.server.session.SessionManager;
-import com.caucho.util.CauchoSystem;
-import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import java.io.FileNotFoundException;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.FilterChain;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletResponse;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.caucho.config.ConfigException;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.loader.*;
+import com.caucho.log.Log;
+import com.caucho.make.AlwaysModified;
+
+import com.caucho.server.deploy.DeployContainer;
+import com.caucho.server.deploy.DeployGenerator;
+
+import com.caucho.server.dispatch.*;
+
+import com.caucho.server.e_app.EarConfig;
+import com.caucho.server.e_app.EarDeployController;
+import com.caucho.server.e_app.EarDeployGenerator;
+import com.caucho.server.e_app.EarSingleDeployGenerator;
+
+import com.caucho.server.host.Host;
+
+import com.caucho.server.log.AbstractAccessLog;
+import com.caucho.server.log.AccessLog;
+
+import com.caucho.server.resin.ServletServer;
+
+import com.caucho.server.session.SessionManager;
+
+import com.caucho.util.CauchoSystem;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
+
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 /**
  * Resin's application implementation.
  */
 public class ApplicationContainer
-  implements DispatchBuilder, ClassLoaderListener, EnvironmentListener {
+  implements DispatchBuilder, ClassLoaderListener, EnvironmentListener
+{
   static final L10N L = new L10N(Application.class);
   static final Logger log = Log.open(ApplicationContainer.class);
 
@@ -201,6 +214,14 @@ public class ApplicationContainer
   public void setEnvironmentClassLoader(EnvironmentClassLoader loader)
   {
     _classLoader = loader;
+  }
+
+  /**
+   * Returns the owning host.
+   */
+  public Host getHost()
+  {
+    return null;
   }
 
   /**

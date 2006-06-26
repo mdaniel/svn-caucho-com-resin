@@ -31,6 +31,10 @@ package com.caucho.mbeans.server;
 
 /**
  * MBean API for the JCA connection pool.
+ *
+ * <pre>
+ * resin:type=ConnectionPool,name=jdbc/resin,...
+ * </pre>
  */
 public interface ConnectionPoolMBean {
   /**

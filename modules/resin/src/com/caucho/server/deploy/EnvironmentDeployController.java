@@ -229,9 +229,9 @@ abstract public class
   /**
    * Returns the object name.
    */
-  public String getObjectName()
+  public ObjectName getObjectName()
   {
-    return _objectName == null ? null : _objectName.toString();
+    return _objectName;
   }
 
   /**

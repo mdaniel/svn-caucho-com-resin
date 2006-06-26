@@ -33,6 +33,10 @@ import com.caucho.jmx.Description;
 
 /**
  * Represents a Resin-managed Thread.
+ *
+ * <pre>
+ * resin:type=Thread,name=123
+ * </pre>
  */
 @Description("A Resin-managed Thread from the thread pool.")
 public interface ThreadMBean {

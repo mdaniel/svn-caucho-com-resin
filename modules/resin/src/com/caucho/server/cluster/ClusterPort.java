@@ -153,9 +153,9 @@ public class ClusterPort extends Port {
 
   public String toString()
   {
-    if (getHost() == null)
-      return "ClusterPort[host=*,port=" + getPort() + "]";
+    if (getAddress() != null)
+      return "ClusterPort[address=" + getAddress() + ",port=" + getPort() + "]";
     else
-      return "ClusterPort[host=" + getHost() + ",port=" + getPort() + "]";
+      return "ClusterPort[address=*,port=" + getPort() + "]";
   }
 }

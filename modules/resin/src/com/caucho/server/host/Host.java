@@ -63,6 +63,8 @@ import com.caucho.relaxng.CompactVerifierFactoryImpl;
 import com.caucho.make.Dependency;
 import com.caucho.make.AlwaysModified;
 
+import com.caucho.mbeans.server.HostMBean;
+
 import com.caucho.naming.Jndi;
 
 import com.caucho.lifecycle.Lifecycle;
@@ -91,7 +93,7 @@ public class Host extends ApplicationContainer
   private HostContainer _parent;
 
   // The Host entry
-  private HostController _hostEntry;
+  private HostController _controller;
 
   // The canonical host name.  The host name may include the port.
   private String _hostName = "";
@@ -121,12 +123,12 @@ public class Host extends ApplicationContainer
   /**
    * Creates the application with its environment loader.
    */
-  public Host(HostContainer parent, HostController hostEntry, String hostName)
+  public Host(HostContainer parent, HostController controller, String hostName)
   {
     super(new EnvironmentClassLoader());
 
     try {
-      _hostEntry = hostEntry;
+      _controller = controller;
 
       setParent(parent);
       setHostName(hostName);
@@ -196,7 +198,7 @@ public class Host extends ApplicationContainer
    */
   public String getName()
   {
-    return _hostEntry.getName();
+    return _controller.getName();
   }
 
   /**
@@ -206,6 +208,14 @@ public class Host extends ApplicationContainer
   public String getHostName()
   {
     return _hostName;
+  }
+
+  /**
+   * Returns the host (as an application container)
+   */
+  public Host getHost()
+  {
+    return this;
   }
 
   /**
@@ -262,7 +272,7 @@ public class Host extends ApplicationContainer
       _isDefaultHost = true;
 
 
-    _hostEntry.addExtHostAlias(name);
+    _controller.addExtHostAlias(name);
   }
 
   /**
@@ -369,6 +379,14 @@ public class Host extends ApplicationContainer
   public void setConfigETag(String etag)
   {
     _configETag = etag;
+  }
+
+  /**
+   * Returns the admin.
+   */
+  public HostMBean getAdmin()
+  {
+    return _controller.getAdmin();
   }
 
   /**

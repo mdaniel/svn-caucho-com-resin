@@ -18,14 +18,10 @@
   </class-loader>
 
   <database jndi-name="jdbc/resin-javadoc">
-    <driver type="org.gjt.mm.mysql.Driver">
-      <url>jdbc:mysql://localhost:3306/resin_javadoc</url>
-      <user></user>
-      <password></password>
+    <driver type="com.caucho.db.jdbc.ConnectionPoolDataSourceImpl">
+      <path>WEB-INF/db</path>
+      <remove-on-error/>
     </driver>
-    <prepared-statement-cache-size>8</prepared-statement-cache-size>
-    <max-connections>20</max-connections>
-    <max-idle-time>30s</max-idle-time>
   </database>
 
   <resource jndi-name="resin-javadoc/store" type="com.caucho.doc.javadoc.Store">

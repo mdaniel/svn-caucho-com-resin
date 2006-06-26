@@ -29,44 +29,60 @@
 
 package com.caucho.server.resin;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.SchemaBean;
-import com.caucho.config.types.Bytes;
-import com.caucho.config.types.InitProgram;
-import com.caucho.config.types.Period;
-import com.caucho.el.EL;
-import com.caucho.el.MapVariableResolver;
-import com.caucho.el.SystemPropertiesResolver;
-import com.caucho.jmx.Jmx;
-import com.caucho.jsp.cfg.JspPropertyGroup;
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.lifecycle.LifecycleState;
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentBean;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.loader.EnvironmentProperties;
-import com.caucho.mbeans.j2ee.J2EEAdmin;
-import com.caucho.mbeans.j2ee.J2EEDomain;
-import com.caucho.mbeans.j2ee.JVM;
-import com.caucho.server.dispatch.DispatchServer;
-import com.caucho.server.dispatch.ServerListener;
-import com.caucho.transaction.cfg.TransactionManagerConfig;
-import com.caucho.util.Alarm;
-import com.caucho.util.CauchoSystem;
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
-
-import javax.servlet.jsp.el.VariableResolver;
 import java.security.Provider;
 import java.security.Security;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.management.ObjectName;
+
+import javax.servlet.jsp.el.VariableResolver;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.SchemaBean;
+import com.caucho.config.types.Bytes;
+import com.caucho.config.types.InitProgram;
+import com.caucho.config.types.Period;
+
+import com.caucho.el.EL;
+import com.caucho.el.MapVariableResolver;
+import com.caucho.el.SystemPropertiesResolver;
+
+import com.caucho.jmx.Jmx;
+
+import com.caucho.jsp.cfg.JspPropertyGroup;
+
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.lifecycle.LifecycleState;
+
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentBean;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.loader.EnvironmentProperties;
+
+import com.caucho.mbeans.j2ee.J2EEAdmin;
+import com.caucho.mbeans.j2ee.J2EEDomain;
+import com.caucho.mbeans.j2ee.JVM;
+
+import com.caucho.mbeans.server.ClusterMBean;
+
+import com.caucho.server.dispatch.DispatchServer;
+import com.caucho.server.dispatch.ServerListener;
+
+import com.caucho.transaction.cfg.TransactionManagerConfig;
+
+import com.caucho.util.Alarm;
+import com.caucho.util.CauchoSystem;
+import com.caucho.util.L10N;
+import com.caucho.util.Log;
+
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 public class ResinServer
   implements EnvironmentBean, SchemaBean,
@@ -80,6 +96,8 @@ public class ResinServer
 
   private final EnvironmentLocal<String> _serverIdLocal =
     new EnvironmentLocal<String>("caucho.server-id");
+
+  private ObjectName _objectName;
 
   private ClassLoader _classLoader;
 
@@ -150,6 +168,8 @@ public class ResinServer
     _variableMap.put("fmt", new com.caucho.config.functions.FmtFunctions());
 
     try {
+      _objectName = new ObjectName("resin:type=Resin");
+      
       Jmx.register(new ResinAdmin(this), OBJECT_NAME);
     } catch (Exception e) {
       e.printStackTrace();
@@ -172,9 +192,9 @@ public class ResinServer
     return _classLoader;
   }
 
-  public String getObjectName()
+  public ObjectName getObjectName()
   {
-    return OBJECT_NAME;
+    return _objectName;
   }
 
   /**
@@ -240,6 +260,14 @@ public class ResinServer
   public boolean isProfessional()
   {
     return _isResinProfessional;
+  }
+
+  /**
+   * Returns the cluster names.
+   */
+  public ClusterMBean []getClusters()
+  {
+    return new ClusterMBean[0];
   }
 
   /**

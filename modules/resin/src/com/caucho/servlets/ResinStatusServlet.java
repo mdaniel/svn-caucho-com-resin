@@ -360,7 +360,7 @@ public class ResinStatusServlet extends GenericServlet {
     throws IOException, ServletException
   {
     try {
-      String []portList = _server.getPorts();
+      PortMBean []portList = _server.getPorts();
 
       if (portList.length > 0) {
         out.println("<h3>TCP ports</h3>");
@@ -371,12 +371,12 @@ public class ResinStatusServlet extends GenericServlet {
         out.println("    <th>Keepalive<th>Select");
 
         for (int i = 0; i < portList.length; i++) {
-          PortMBean port = (PortMBean) Jmx.findGlobal(portList[i]);
+          PortMBean port = portList[i];
 
           if (port == null || ! "active".equals(port.getState()))
             continue;
 
-          String host = port.getHost();
+          String host = port.getAddress();
           if (host == null)
             host = "*";
 
@@ -414,7 +414,7 @@ public class ResinStatusServlet extends GenericServlet {
           continue;
         }
 
-        ObjectName objectName = new ObjectName(cluster.getObjectName());
+        ObjectName objectName = cluster.getObjectName();
 
         String clusterName = objectName.getKeyProperty("name");
 
@@ -423,16 +423,13 @@ public class ResinStatusServlet extends GenericServlet {
         out.println("<tr><th>Host");
         out.println("    <th>Active");
 
-        String []srunNames = cluster.getServers();
+        ClusterServerMBean []servers = cluster.getServers();
 
-        for (int j = 0; j < srunNames.length; j++) {
-          ObjectName srunName = new ObjectName(srunNames[j]);
-
-          ClusterServerMBean client;
-          client = (ClusterServerMBean) Jmx.findGlobal(srunName);
-
-          String host = srunName.getKeyProperty("host");
-          String port = srunName.getKeyProperty("port");
+        for (int j = 0; j < servers.length; j++) {
+	  ClusterServerMBean client = servers[j];
+	  
+          String host = client.getAddress();
+          String port = String.valueOf(client.getPort());
 
           out.println("<tr>");
 

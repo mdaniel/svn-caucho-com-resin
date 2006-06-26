@@ -33,6 +33,10 @@ import com.caucho.jmx.Description;
 
 /**
  * Represents a tcp-connection
+ *
+ * <pre>
+ * resin:type=TcpConnection,name=foo.com-80-237
+ * <pre>
  */
 @Description("A TCP connection")
 public interface TcpConnectionMBean {

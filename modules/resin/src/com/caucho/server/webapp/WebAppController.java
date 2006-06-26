@@ -32,11 +32,18 @@ package com.caucho.server.webapp;
 import com.caucho.config.types.PathBuilder;
 import com.caucho.jmx.IntrospectionMBean;
 import com.caucho.log.Log;
+
 import com.caucho.mbeans.j2ee.J2EEAdmin;
 import com.caucho.mbeans.j2ee.WebModule;
 import com.caucho.mbeans.server.WebAppMBean;
+
 import com.caucho.server.deploy.DeployConfig;
 import com.caucho.server.deploy.EnvironmentDeployController;
+
+import com.caucho.server.host.Host;
+
+import com.caucho.mbeans.server.WebAppMBean;
+
 import com.caucho.util.CauchoSystem;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -207,6 +214,17 @@ public class WebAppController
   public void setParentWebApp(WebAppController parent)
   {
     _parent = parent;
+  }
+
+  /**
+   * Returns the containing host.
+   */
+  public Host getHost()
+  {
+    if (_container != null)
+      return _container.getHost();
+    else
+      return null;
   }
 
   /**

@@ -33,7 +33,11 @@ package com.caucho.server.session;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import javax.management.ObjectName;
+
 import com.caucho.mbeans.server.SessionManagerMBean;
+import com.caucho.mbeans.server.WebAppMBean;
+import com.caucho.mbeans.server.PersistentStoreMBean;
 
 import com.caucho.jmx.Jmx;
 
@@ -46,16 +50,16 @@ public class SessionManagerAdmin implements SessionManagerMBean
     = Logger.getLogger(SessionManagerAdmin.class.getName());
   
   private final SessionManager _manager;
-  private final String _objectName;
+  private final ObjectName _objectName;
 
   public SessionManagerAdmin(SessionManager manager)
   {
     _manager = manager;
 
-    String objectName = null;
+    ObjectName objectName = null;
     
     try {
-      objectName = Jmx.getObjectName("type=SessionManager").toString();
+      objectName = Jmx.getObjectName("type=SessionManager");
 
       Jmx.register(this, objectName);
     } catch (Throwable e) {
@@ -68,7 +72,7 @@ public class SessionManagerAdmin implements SessionManagerMBean
   /**
    * Returns the MBean's object name.
    */
-  public String getObjectName()
+  public ObjectName getObjectName()
   {
     return _objectName;
   }
@@ -92,9 +96,9 @@ public class SessionManagerAdmin implements SessionManagerMBean
   /**
    * Returns the owning web-app's
    */
-  public String getWebApp()
+  public WebAppMBean getWebApp()
   {
-    return _manager.getWebAppObjectName();
+    return _manager.getApplication().getAdmin();
   }
 
   //
@@ -249,9 +253,9 @@ public class SessionManagerAdmin implements SessionManagerMBean
   /**
    * Returns the object name for the persistent store
    */
-  public String getPersistentStore()
+  public PersistentStoreMBean getPersistentStore()
   {
-    return _manager.getPersistentStoreObjectName();
+    return null;
   }
 
   public String toString()

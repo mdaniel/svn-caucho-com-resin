@@ -195,37 +195,6 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
   }
 
   /**
-   * Returns the web-app names.
-   */
-  public String []getWebAppObjectNames()
-  {
-    Host host = getHost();
-
-    if (host == null)
-      return new String[0];
-
-    ArrayList<WebAppController> webappList = host.getApplicationList();
-
-    int size = webappList.size();
-
-    ArrayList<String> webappNameList = new ArrayList<String>(size);
-
-    for (int i = 0; i < size; i++) {
-      String name = webappList.get(i).getObjectName();
-
-      if (name != null)
-        webappNameList.add(name);
-    }
-
-    return webappNameList.toArray(new String[webappNameList.size()]);
-  }
-
-  final public String []getWebAppNames()
-  {
-    return getWebAppObjectNames();
-  }
-
-  /**
    * Returns the webapps.
    */
   public WebAppMBean []getWebApps()

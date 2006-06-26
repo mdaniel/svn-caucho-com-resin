@@ -34,8 +34,11 @@ import com.caucho.server.deploy.DeployControllerAdmin;
 import com.caucho.server.session.SessionManager;
 
 import com.caucho.mbeans.server.WebAppMBean;
+import com.caucho.mbeans.server.HostMBean;
 
 import com.caucho.server.cluster.Store;
+
+import com.caucho.server.host.Host;
 
 import com.caucho.util.L10N;
 
@@ -50,6 +53,23 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
   public WebAppAdmin(WebAppController controller)
   {
     super(controller);
+  }
+
+  //
+  // Hierarchy attributes
+  //
+
+  /**
+   * Returns the owning host
+   */
+  public HostMBean getHost()
+  {
+    Host host = getController().getHost();
+
+    if (host != null)
+      return host.getAdmin();
+    else
+      return null;
   }
 
   /**

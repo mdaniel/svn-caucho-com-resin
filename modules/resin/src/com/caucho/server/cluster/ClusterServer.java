@@ -42,10 +42,11 @@ import com.caucho.log.Log;
 
 import com.caucho.jmx.Jmx;
 
+import com.caucho.mbeans.server.ClusterServerMBean;
+
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadWritePair;
-
 
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
@@ -98,9 +99,17 @@ public class ClusterServer {
   /**
    * Returns the object name.
    */
-  public String getObjectName()
+  public ObjectName getObjectName()
   {
-    return _objectName == null ? null : _objectName.toString();
+    return _objectName;
+  }
+
+  /**
+   * Returns the admin.
+   */
+  public ClusterServerMBean getAdmin()
+  {
+    return _admin;
   }
 
   /**
@@ -154,9 +163,9 @@ public class ClusterServer {
   /**
    * Returns the hostname of the target server.
    */
-  public String getHost()
+  public String getAddress()
   {
-    return _port.getHost();
+    return _port.getAddress();
   }
 
   /**
@@ -178,9 +187,9 @@ public class ClusterServer {
   /**
    * Returns the time in milliseconds for the slow start throttling.
    */
-  public long getSlowStartTime()
+  public long getWarmupTime()
   {
-    return _cluster.getClientSlowStartTime();
+    return _cluster.getClientWarmupTime();
   }
 
   /**
@@ -250,18 +259,18 @@ public class ClusterServer {
   public void init()
     throws Exception
   {
-    String host = getHost();
+    String address = getAddress();
 
-    if (host == null)
-      host = "localhost";
+    if (address == null)
+      address = "localhost";
 
     HashMap<String,Object> attr = new HashMap<String,Object>();
     attr.put("connect-timeout", new Long(getClientConnectTimeout()));
 
     if (_port.isSSL())
-      _tcpPath = Vfs.lookup("tcps://" + host + ":" + getPort(), attr);
+      _tcpPath = Vfs.lookup("tcps://" + address + ":" + getPort(), attr);
     else
-      _tcpPath = Vfs.lookup("tcp://" + host + ":" + getPort(), attr);
+      _tcpPath = Vfs.lookup("tcp://" + address + ":" + getPort(), attr);
 
     _client = new ClusterClient(this);
 
@@ -429,7 +438,7 @@ public class ClusterServer {
   {
     return ("ClusterServer[id=" + _port.getServerId() +
             " index=" + _port.getIndex() +
-            " host=" + _port.getHost() + ":" + _port.getPort() +
+            " address=" + _port.getAddress() + ":" + _port.getPort() +
             " cluster=" + _cluster.getId() + "]");
   }
 

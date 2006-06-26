@@ -27,27 +27,57 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mbeans.server;
+package com.caucho.log;
 
-import com.caucho.config.ConfigException;
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
 
 /**
- * Interface for a log.
+ * Wrapper for a level-based handler.
  */
-public interface LogMBean {
+public class LevelHandler extends Handler {
+  private final int _level;
+  private final Handler []_handlers;
+
+  public LevelHandler(Level level, Handler []handlers)
+  {
+    _level = level.intValue();
+    _handlers = handlers;
+  }
+
   /**
-   * Returns the name.
+   * Publishes the record.
    */
-  public String getName();
-  
+  public void publish(LogRecord record)
+  {
+    int recordLevel = record.getLevel().intValue();
+
+    if (recordLevel < _level)
+      return;
+
+    for (int i = 0; i < _handlers.length; i++) {
+      Handler handler = _handlers[i];
+
+      if (_level <= handler.getLevel().intValue())
+	handler.publish(record);
+    }
+  }
+
   /**
-   * Returns the level.
+   * Flush the handler.
    */
-  public String getLevel();
-  
-  /**
-   * Sets the level.
-   */
-  public void setLevel(String level)
-    throws ConfigException;
+  public void flush()
+  {
+    for (int i = 0; i < _handlers.length; i++) {
+      Handler handler = _handlers[i];
+
+      if (_level <= handler.getLevel().intValue())
+	handler.flush();
+    }
+  }
+
+  public void close()
+  {
+  }
 }
