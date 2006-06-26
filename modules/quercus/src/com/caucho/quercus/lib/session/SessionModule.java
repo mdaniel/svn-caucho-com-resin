@@ -54,6 +54,7 @@ import com.caucho.quercus.module.ModuleStartupListener;
 
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
@@ -117,16 +118,17 @@ public class SessionModule extends AbstractQuercusModule
     return value;
   }
 
-  public Value session_cache_expire(Env env, @Optional String newValue)
+  public Value session_cache_expire(Env env, @Optional LongValue newValue)
   {
-    Value value = env.getIni("session.cache_expire");
+    Value value = (LongValue) env.getSpecialValue("cache_expire");
 
-    if (newValue == null || newValue.length() == 0)
-      return value;
+    if (value == null)
+      value = env.getIni("session.cache_expire");
 
-    env.setIni("session.cache_expire", newValue);
+    if (newValue != null && ! newValue.isNull())
+      env.setSpecialValue("cache_expire", newValue);
 
-    return value;
+    return LongValue.create(value.toLong());
   }
 
   /**
@@ -468,7 +470,11 @@ public class SessionModule extends AbstractQuercusModule
       Value cacheLimiterValue = env.getIni("session.cache_limiter");
       String cacheLimiter = String.valueOf(cacheLimiterValue);
 
-      Value cacheExpireValue = env.getIni("session.cache_expire");
+      Value cacheExpireValue = (LongValue)env.getSpecialValue("cache_expire");
+
+      if (cacheExpireValue == null)
+        cacheExpireValue = env.getIni("session.cache_expire");
+
       int cacheExpire = cacheExpireValue.toInt() * 60;
 
       if ("nocache".equals(cacheLimiter)) {
