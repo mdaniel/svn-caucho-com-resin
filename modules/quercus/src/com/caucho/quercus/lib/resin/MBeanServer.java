@@ -30,47 +30,27 @@
 
 package com.caucho.quercus.lib.resin;
 
-import java.util.Map;
-import java.util.Hashtable;
-import java.util.Set;
-
-import javax.management.*;
-
+import com.caucho.jmx.Jmx;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.module.NotNull;
-import com.caucho.quercus.module.ReadOnly;
 import com.caucho.quercus.module.Optional;
-import com.caucho.server.webapp.Application;
-import com.caucho.jmx.Jmx;
+
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import java.util.Set;
+import java.util.logging.Logger;
 
 public class MBeanServer {
+  private static Logger log = Logger.getLogger(MBeanServer.class.getName());
+
   public MBeanServer()
   {
   }
 
-  public MBeanInfo info(String name)
-  {
-    javax.management.MBeanServer mbeanServer;
-
-    if (name.contains(":"))
-      mbeanServer = Jmx.getGlobalMBeanServer();
-    else
-      mbeanServer = Jmx.getMBeanServer();
-
-    try {
-      return mbeanServer.getMBeanInfo(new ObjectName(name));
-    } catch (Exception e) {
-      throw new QuercusModuleException(e);
-    }
-  }
-
   /**
-   * Perform a jmx lookup to retrieve an mbean object.
+   * Perform a jmx lookup to retrieve an {@link MBean} object.
    *
    * If the optional name is not provided, the mbean for the current web-app
    * is returned.
@@ -106,7 +86,7 @@ public class MBeanServer {
   }
 
   /**
-   * Returns an array of names that match a JMX pattern.
+   * Returns an array of {@link MBean}s that match a JMX pattern.
    * If the name contains a ":", it is a query in the global jmx namespace.
    * If the name does not contain a ":", it is a search in the JMX namespace
    * of the current web application.

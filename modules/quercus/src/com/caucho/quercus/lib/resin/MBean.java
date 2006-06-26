@@ -30,14 +30,15 @@
 
 package com.caucho.quercus.lib.resin;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.management.*;
-
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.QuercusModuleException;
+import javax.management.Attribute;
+import javax.management.MBeanInfo;
+import javax.management.MBeanOperationInfo;
+import javax.management.MBeanParameterInfo;
+import javax.management.ObjectName;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class MBean {
   private static final Logger log = Logger.getLogger(MBean.class.getName());
@@ -55,6 +56,20 @@ public class MBean {
   public String getMbeanName()
   {
     return _name.toString();
+  }
+
+  public MBeanInfo getInfo()
+  {
+    try {
+      if (_info == null)
+        _info = _server.getMBeanInfo(_name);
+
+      return _info;
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return null;
+    }
   }
 
   /**
@@ -110,7 +125,7 @@ public class MBean {
       return unmarshall(_server.invoke(_name, name, args, sig));
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
-      
+
       return null;
     }
   }
@@ -118,10 +133,7 @@ public class MBean {
   private String []findClosestOperation(String name, String []sig)
     throws Exception
   {
-    MBeanInfo info = _info;
-
-    if (info == null)
-      info = _server.getMBeanInfo(_name);
+    MBeanInfo info = getInfo();
 
     MBeanOperationInfo []ops = info.getOperations();
 

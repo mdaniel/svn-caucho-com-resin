@@ -274,8 +274,8 @@ abstract public class J2EEManagedObject {
       catch (Exception ex) {
         _lifecycle.toError();
 
-        if (log.isLoggable(Level.WARNING))
-          log.log(Level.WARNING, _objectName.toString() + " " + ex.toString(), ex);
+        if (log.isLoggable(Level.FINER))
+          log.log(Level.FINER, _objectName.toString() + " " + ex.toString(), ex);
       }
     }
 

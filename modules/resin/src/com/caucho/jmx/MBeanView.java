@@ -28,42 +28,12 @@
 
 package com.caucho.jmx;
 
-import java.lang.reflect.Proxy;
-
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-
-import java.util.logging.Logger;
-
-import javax.management.ObjectName;
-import javax.management.ObjectInstance;
-import javax.management.QueryExp;
-import javax.management.DynamicMBean;
-import javax.management.StandardMBean;
-import javax.management.MBeanServerDelegate;
-import javax.management.MBeanServerDelegateMBean;
-import javax.management.MalformedObjectNameException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanRegistrationException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.IntrospectionException;
-import javax.management.BadStringOperationException;
-import javax.management.BadBinaryOpValueExpException;
-import javax.management.BadAttributeValueExpException;
-import javax.management.InvalidApplicationException;
-
-import javax.management.loading.ClassLoaderRepository;
-
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.loader.EnvironmentClassLoader;
+import javax.management.*;
+import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * The view for administration.
@@ -71,6 +41,9 @@ import com.caucho.loader.EnvironmentClassLoader;
 public class MBeanView {
   private static final Logger log = Log.open(MBeanView.class);
   private static final L10N L = new L10N(MBeanView.class);
+
+  private static final Comparator<ObjectName> OBJECTNAME_COMPARATOR;
+  private static final Comparator<ObjectInstance> OBJECTINSTANCE_COMPARATOR;
 
   private ClassLoader _classLoader;
 
@@ -82,11 +55,11 @@ public class MBeanView {
     new HashMap<ObjectName,MBeanWrapper>(8);
 
   MBeanView(AbstractMBeanServer mbeanServer,
-	    ClassLoader loader,
-	    String agentId)
+            ClassLoader loader,
+            String agentId)
   {
     _mbeanServer = mbeanServer;
-    
+
     _classLoader = loader;
     _delegate = new MBeanServerDelegateImpl(agentId);
   }
@@ -191,7 +164,7 @@ public class MBeanView {
 	   BadAttributeValueExpException,
 	   InvalidApplicationException
   {
-    HashSet<ObjectName> set = new HashSet<ObjectName>();
+    TreeSet<ObjectName> set = new TreeSet<ObjectName>(OBJECTNAME_COMPARATOR);
 
     queryNames(set, queryName, query);
     
@@ -236,7 +209,7 @@ public class MBeanView {
 	   BadAttributeValueExpException,
 	   InvalidApplicationException
   {
-    HashSet<ObjectInstance> set = new HashSet<ObjectInstance>();
+    TreeSet<ObjectInstance> set = new TreeSet<ObjectInstance>(OBJECTINSTANCE_COMPARATOR);
 
     queryMBeans(set, name, query);
 
@@ -396,6 +369,35 @@ public class MBeanView {
   public String toString()
   {
     return "MBeanView[" + _classLoader + "]";
+  }
+
+  static {
+    OBJECTNAME_COMPARATOR = new Comparator<ObjectName>() {
+      public int compare(ObjectName o1, ObjectName o2)
+      {
+        if (o1 == null)
+          return -1;
+
+        if (o2 == null)
+          return 1;
+
+        return o1.getCanonicalName().compareTo(o2.getCanonicalName());
+      }
+    };
+
+    OBJECTINSTANCE_COMPARATOR = new Comparator<ObjectInstance>() {
+      public int compare(ObjectInstance o1, ObjectInstance o2)
+      {
+        if (o1 == null)
+          return -1;
+
+        if (o2 == null)
+          return 1;
+
+        return o1.getObjectName().getCanonicalName().compareTo(o2.getObjectName().getCanonicalName());
+      }
+    };
+
   }
 }
 
