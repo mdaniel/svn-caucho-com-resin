@@ -62,6 +62,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 
@@ -1691,33 +1692,56 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Reads an entire large object and send straight to browser
    */
-  public static int pg_lo_read_all(Env env,
-                                   Object largeObject)
+  @ReturnNullAsFalse
+  public static LongValue pg_lo_read_all(Env env,
+                                         Object largeObject)
   {
-    //@todo pg_lo_read_all() reads a large object and passes it straight through
-    // to the browser after sending all pending headers. Mainly intended for sending
-    // binary data like images or sound.
+    try {
 
-    throw new UnimplementedException("pg_lo_read_all");
+      BinaryBuilderValue contents = pg_lo_read(env, largeObject, -1);
+      if (contents != null) {
+        env.getOut().print(contents);
+      }
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+    }
+
+    return null;
   }
 
   /**
    * Read a large object
    */
   @ReturnNullAsFalse
-  public static String pg_lo_read(Env env,
-                                  Object largeObject,
-                                  @Optional("8192") int len)
+  public static BinaryBuilderValue pg_lo_read(Env env,
+                                              Object largeObject,
+                                              @Optional("-1") int len)
   {
     try {
 
+      if (len < 0) {
+        len = Integer.MAX_VALUE;
+      }
+
       Class cl = Class.forName("org.postgresql.largeobject.LargeObject");
 
-      Method method = cl.getDeclaredMethod("read", new Class[] {Integer.TYPE});
+      Method method = cl.getDeclaredMethod("getInputStream", null);
 
-      byte data[] = (byte[]) method.invoke(largeObject, new Object[] {len});
+      InputStream is = (InputStream) method.invoke(largeObject, new Object[] {});
 
-      return new String(data);
+      BinaryBuilderValue binaryBuilder = new BinaryBuilderValue();
+
+      int nbytes;
+      byte buffer[] = new byte[128];
+      while ((len > 0) && ((nbytes = is.read(buffer, 0, 128)) > 0)) {
+        binaryBuilder.append(buffer, 0, nbytes);
+        len -= nbytes;
+      }
+
+      is.close();
+
+      return binaryBuilder;
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -2200,11 +2224,35 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Get status of query result
    */
-  public static Value pg_result_status(Env env,
-                                       @NotNull PostgresResult result,
-                                       @Optional int type)
+  public static int pg_result_status(Env env,
+                                     @NotNull PostgresResult result,
+                                     @Optional("PGSQL_STATUS_LONG") int type)
   {
-    throw new UnimplementedException("pg_result_status");
+    try {
+
+      if (type == PGSQL_STATUS_STRING) {
+        throw new UnimplementedException("pg_result_status with PGSQL_STATUS_STRING");
+      }
+
+      if (result != null) {
+        Statement stmt = result.getStatement();
+        if (stmt.getUpdateCount() >= 0) {
+          return PGSQL_COMMAND_OK;
+        }
+
+        ResultSet rs = result.getResultSet();
+        if (rs == null) {
+          return PGSQL_EMPTY_QUERY;
+        }
+
+        return PGSQL_TUPLES_OK;
+      }
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+    }
+
+    return -1;
   }
 
   /**
