@@ -29,50 +29,47 @@
 
 package com.caucho.server.webapp;
 
-import java.io.FileNotFoundException;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.caucho.config.ConfigException;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.loader.ClassLoaderListener;
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentListener;
+import com.caucho.log.Log;
+import com.caucho.make.AlwaysModified;
+import com.caucho.server.deploy.DeployContainer;
+import com.caucho.server.deploy.DeployGenerator;
+import com.caucho.server.dispatch.DispatchBuilder;
+import com.caucho.server.dispatch.DispatchServer;
+import com.caucho.server.dispatch.ErrorFilterChain;
+import com.caucho.server.dispatch.ExceptionFilterChain;
+import com.caucho.server.dispatch.Invocation;
+import com.caucho.server.dispatch.InvocationDecoder;
+import com.caucho.server.e_app.EarConfig;
+import com.caucho.server.e_app.EarDeployController;
+import com.caucho.server.e_app.EarDeployGenerator;
+import com.caucho.server.e_app.EarSingleDeployGenerator;
+import com.caucho.server.host.Host;
+import com.caucho.server.log.AbstractAccessLog;
+import com.caucho.server.log.AccessLog;
+import com.caucho.server.resin.ServletServer;
+import com.caucho.server.session.SessionManager;
+import com.caucho.util.CauchoSystem;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 import javax.servlet.FilterChain;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletResponse;
-
-import com.caucho.config.ConfigException;
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.loader.*;
-import com.caucho.log.Log;
-import com.caucho.make.AlwaysModified;
-
-import com.caucho.server.deploy.DeployContainer;
-import com.caucho.server.deploy.DeployGenerator;
-
-import com.caucho.server.dispatch.*;
-
-import com.caucho.server.e_app.EarConfig;
-import com.caucho.server.e_app.EarDeployController;
-import com.caucho.server.e_app.EarDeployGenerator;
-import com.caucho.server.e_app.EarSingleDeployGenerator;
-
-import com.caucho.server.host.Host;
-
-import com.caucho.server.log.AbstractAccessLog;
-import com.caucho.server.log.AccessLog;
-
-import com.caucho.server.resin.ServletServer;
-
-import com.caucho.server.session.SessionManager;
-
-import com.caucho.util.CauchoSystem;
-import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
-
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Resin's application implementation.
@@ -102,7 +99,7 @@ public class ApplicationContainer
   private ArrayList<EarConfig> _earDefaultList
     = new ArrayList<EarConfig>();
 
-  // List of ear-deploy
+  // List of ear-deploy dead code: 2006-06-26
   //private ArrayList<EarDeployGeneratorGenerator> _earDeployList = new ArrayList<EarDeployGeneratorGenerator>();
 
   private DeployContainer<EarDeployController> _earDeploy;
@@ -116,7 +113,7 @@ public class ApplicationContainer
     = new LruCache<String,WebAppController>(8192);
 
   // include dispatch cache
-  /*
+  /*  dead code: 2006-06-26
   private LruCache<String,Invocation> _includeCache
     = new LruCache<String,Invocation>(4096);
   */
@@ -125,11 +122,14 @@ public class ApplicationContainer
   private ArrayList<WebAppConfig> _webAppDefaultList
     = new ArrayList<WebAppConfig>();
 
-  // url-regexp apps
+  // url-regexp apps  dead code: 2006-06-26
   //private ArrayList<WebAppConfig> _regexpApps = new ArrayList<WebAppConfig>();
 
+  /*
+  dead code: 2006-06-26
   private HashMap<String,WebAppConfig> _configAppMap
     =  new HashMap<String,WebAppConfig>();
+    */
 
   private AbstractAccessLog _accessLog;
   private ErrorPageManager _errorPageManager;

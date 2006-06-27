@@ -29,25 +29,20 @@
 
 package com.caucho.server.deploy;
 
-import java.util.ArrayList;
-import java.util.TreeSet;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.Iterator;
-
-import java.util.logging.Logger;
-
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.loader.Environment;
+import com.caucho.log.Log;
+import com.caucho.make.CachedDependency;
+import com.caucho.make.Dependency;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.loader.Environment;
-
-import com.caucho.make.Dependency;
-import com.caucho.make.CachedDependency;
-
-import com.caucho.lifecycle.Lifecycle;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.logging.Logger;
 
 /**
  * A container of deploy objects.
@@ -58,7 +53,7 @@ public class DeployContainer<C extends DeployController>
   private static final Logger log = Log.open(DeployContainer.class);
   private static final L10N L = new L10N(DeployContainer.class);
 
-  private final DeployListGenerator<C> _generatorList
+  private final DeployListGenerator<C> _deployListGenerator
     = new DeployListGenerator<C>(this);
 
   private final ArrayList<C> _controllerList = new ArrayList<C>();
@@ -81,7 +76,7 @@ public class DeployContainer<C extends DeployController>
     Set<String> names = new TreeSet<String>();
     generator.fillDeployedKeys(names);
 
-    _generatorList.add(generator);
+    _deployListGenerator.add(generator);
 
     if (_lifecycle.isActive())
       update(names);
@@ -95,7 +90,7 @@ public class DeployContainer<C extends DeployController>
     Set<String> names = new TreeSet<String>();
     generator.fillDeployedKeys(names);
 
-    _generatorList.remove(generator);
+    _deployListGenerator.remove(generator);
 
     if (_lifecycle.isActive())
       update(names);
@@ -106,7 +101,7 @@ public class DeployContainer<C extends DeployController>
    */
   public boolean isModifiedImpl()
   {
-    return _generatorList.isModified();
+    return _deployListGenerator.isModified();
   }
 
   /**
@@ -114,7 +109,7 @@ public class DeployContainer<C extends DeployController>
    */
   public void update()
   {
-    _generatorList.update();
+    _deployListGenerator.update();
   }
 
   /**
@@ -136,11 +131,11 @@ public class DeployContainer<C extends DeployController>
     if (! _lifecycle.toActive())
       return;
 
-    _generatorList.start();
+    _deployListGenerator.start();
 
     HashSet<String> keys = new LinkedHashSet<String>();
 
-    _generatorList.fillDeployedKeys(keys);
+    _deployListGenerator.fillDeployedKeys(keys);
 
     for (String key : keys) {
       startImpl(key);
@@ -302,7 +297,7 @@ public class DeployContainer<C extends DeployController>
     if (! _lifecycle.isActive())
       return null;
     
-    C newController = _generatorList.generateController(name);
+    C newController = _deployListGenerator.generateController(name);
 
     // server/1h00,13g4
     // generated controller might match the name, e.g.
@@ -396,10 +391,19 @@ public class DeployContainer<C extends DeployController>
     if (! _lifecycle.toDestroy())
       return;
     
-    _generatorList.destroy();
-    
+    _deployListGenerator.destroy();
+
+    ArrayList<C> controllerList;
+
     synchronized (_controllerList) {
+      controllerList = new ArrayList<C>(_controllerList);
       _controllerList.clear();
+    }
+
+    for (int i = 0; i < controllerList.size(); i++) {
+      C controller = controllerList.get(i);
+
+      controller.destroy();
     }
   }
 
