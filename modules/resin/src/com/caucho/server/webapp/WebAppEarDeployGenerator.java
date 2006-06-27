@@ -28,22 +28,13 @@
 
 package com.caucho.server.webapp;
 
-import java.util.ArrayList;
+import com.caucho.log.Log;
+import com.caucho.server.deploy.DeployContainer;
+import com.caucho.server.deploy.DeployGenerator;
+import com.caucho.server.e_app.EarDeployController;
+import com.caucho.server.e_app.EarDeployGenerator;
 
 import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.log.Log;
-
-import com.caucho.vfs.Path;
-
-import com.caucho.config.types.PathBuilder;
-
-import com.caucho.server.deploy.DeployGenerator;
-import com.caucho.server.deploy.DeployContainer;
-
-import com.caucho.server.e_app.EarDeployGenerator;
-import com.caucho.server.e_app.EarDeployController;
 
 /**
  * The generator for the ear deploy
@@ -190,6 +181,9 @@ public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> 
    */
   public void destroy()
   {
+    super.destroy();
+
+    _earContainer.destroy();
   }
 
   public String toString()

@@ -124,6 +124,11 @@ public class EarDeployController
     return new J2EEAdmin(new J2EEApplication(this));
   }
 
+  protected void initEnd()
+  {
+    super.initEnd();
+  }
+
   /**
    * Finds any web-app in the ear matching the contextPath.
    */
