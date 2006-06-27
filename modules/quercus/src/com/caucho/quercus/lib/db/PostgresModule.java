@@ -455,51 +455,47 @@ public class PostgresModule extends AbstractQuercusModule {
   public static ArrayValue pg_copy_to(Env env,
                                       @NotNull Postgres conn,
                                       String tableName,
-                                      @Optional("") String delimiter,
-                                      @Optional("") String nullAs)
+                                      @Optional("\t") String delimiter,
+                                      @Optional("\n") String nullAs)
   {
     try {
-      if (delimiter.equals("")) {
-        delimiter = "\t";
-      }
-
-      if (nullAs.equals("")) {
-        nullAs = "\n";
-      }
 
       PostgresResult result = pg_query(env, conn, "SELECT * FROM " + tableName);
 
       ArrayValueImpl newArray = new ArrayValueImpl();
 
-      Object value = result.fetchArray(env, PGSQL_BOTH);
+      Object value;
 
-      if (value != null) {
-        int curr = 0;
+      int curr = 0;
 
-        do {
-          ArrayValueImpl arr = (ArrayValueImpl)value;
-          int count = arr.size() / 2;
-          for(int i=0; i<count; i++) {
-            Value v = newArray.get(LongValue.create(curr));
-            if (!v.toString().equals("")) {
-              v = StringValue.create(v.toString() + delimiter);
-            }
-            LongValue lv = LongValue.create(i);
-            Value fieldValue = arr.get(lv);
-            String fieldString;
-            if (fieldValue instanceof NullValue) {
-              fieldString = nullAs;
-            } else {
-              fieldString = fieldValue.toString();
-            }
-            newArray.put(LongValue.create(curr),
-                         StringValue.create(v.toString() + fieldString));
+      while ((value = result.fetchArray(env, PGSQL_NUM)) != null) {
+
+        ArrayValueImpl arr = (ArrayValueImpl) value;
+        int count = arr.size();
+
+        StringBuilderValue sb = new StringBuilderValue();
+
+        LongValue currValue = LongValue.create(curr);
+
+        for (int i=0; i<count; i++) {
+
+          if (sb.length() > 0)
+            sb.append(delimiter);
+
+          Value v = newArray.get(currValue);
+
+          Value fieldValue = arr.get(LongValue.create(i));
+
+          if (fieldValue instanceof NullValue) {
+            sb.append(nullAs);
+          } else {
+            sb.append(fieldValue.toString());
           }
+        }
 
-          curr++;
+        newArray.put(currValue, sb);
 
-          value = result.fetchArray(env, PGSQL_BOTH);
-        } while (value != null);
+        curr++;
       }
 
       return newArray;
@@ -704,6 +700,7 @@ public class PostgresModule extends AbstractQuercusModule {
                                                 @Optional("0") int column)
   {
     try {
+
       ArrayValueImpl newArray = new ArrayValueImpl();
 
       int curr = 0;
@@ -717,12 +714,15 @@ public class PostgresModule extends AbstractQuercusModule {
 
       }
 
-      return newArray;
+      if (newArray.getSize() > 0) {
+        return newArray;
+      }
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return null;
     }
+
+    return null;
   }
 
   /**
@@ -746,12 +746,15 @@ public class PostgresModule extends AbstractQuercusModule {
 
       }
 
-      return newArray;
+      if (newArray.getSize() > 0) {
+        return newArray;
+      }
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return null;
     }
+
+    return null;
   }
 
   /**
@@ -1698,7 +1701,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
 
-      BinaryBuilderValue contents = pg_lo_read(env, largeObject, -1);
+      String contents = pg_lo_read(env, largeObject, -1);
       if (contents != null) {
         env.getOut().print(contents);
       }
@@ -1714,9 +1717,9 @@ public class PostgresModule extends AbstractQuercusModule {
    * Read a large object
    */
   @ReturnNullAsFalse
-  public static BinaryBuilderValue pg_lo_read(Env env,
-                                              Object largeObject,
-                                              @Optional("-1") int len)
+  public static String pg_lo_read(Env env,
+                                  Object largeObject,
+                                  @Optional("-1") int len)
   {
     try {
 
@@ -1735,13 +1738,16 @@ public class PostgresModule extends AbstractQuercusModule {
       int nbytes;
       byte buffer[] = new byte[128];
       while ((len > 0) && ((nbytes = is.read(buffer, 0, 128)) > 0)) {
+        if (nbytes > len) {
+          nbytes = len;
+        }
         binaryBuilder.append(buffer, 0, nbytes);
         len -= nbytes;
       }
 
       is.close();
 
-      return binaryBuilder;
+      return binaryBuilder.toString();
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -2100,7 +2106,9 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
 
-      //@todo conn should be optional
+      // XXX: the PHP api allows conn to be optional but we
+      // totally disallow this case.
+
       if (conn == null)
         conn = getConnection(env);
 
@@ -2515,8 +2523,8 @@ public class PostgresModule extends AbstractQuercusModule {
    * Unescape binary for bytea type
    */
   @ReturnNullAsFalse
-  public static BinaryBuilderValue pg_unescape_bytea(Env env,
-                                                     String data)
+  public static String pg_unescape_bytea(Env env,
+                                         String data)
   {
     try {
 
@@ -2526,7 +2534,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       Method method = cl.getDeclaredMethod("toBytes", new Class[] {byte[].class});
 
-      return new BinaryBuilderValue((byte[]) method.invoke(cl, new Object[] {dataBytes}));
+      return new String((byte[]) method.invoke(cl, new Object[] {dataBytes}));
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
