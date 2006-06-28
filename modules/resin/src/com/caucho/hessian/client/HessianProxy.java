@@ -203,7 +203,7 @@ public class HessianProxy implements InvocationHandler {
     conn.setRequestProperty("Content-Type", "text/xml");
 
     // Used chunked mode when available, i.e. JDK 1.5.
-    if (_factor.isChunkedPost() && conn instanceof HttpURLConnection) {
+    if (_factory.isChunkedPost() && conn instanceof HttpURLConnection) {
       try {
 	HttpURLConnection httpConn = (HttpURLConnection) conn;
 
