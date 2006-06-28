@@ -290,7 +290,8 @@ public class UrlRewriterCallback extends CallbackFunction {
 
       int attributeStart = _index;
 
-      while (isValidAttributeCharacter(_input.charAt(_index)))
+      while (_index < _input.length() &&
+             isValidAttributeCharacter(_input.charAt(_index)))
         consumeOneCharacter();
         
       // no valid attribute was found (we're probably at the end of the tag)
@@ -302,7 +303,7 @@ public class UrlRewriterCallback extends CallbackFunction {
       consumeWhiteSpace();
 
       // Any attributes that we will affect are of the form attr=value
-      if (_input.charAt(_index) != '=')
+      if (_index >= _input.length() || _input.charAt(_index) != '=')
         return -1;
 
       consumeOneCharacter();
@@ -325,10 +326,7 @@ public class UrlRewriterCallback extends CallbackFunction {
         valueEnd = _input.indexOf(quote, _index);
       
         // try to account for unclosed quotes
-        int tagEnd = _input.indexOf('/', _index);
-
-        if (tagEnd < 0) 
-          tagEnd = _input.indexOf('>', _index);
+        int tagEnd = _input.indexOf('>', _index);
 
         if (valueEnd < 0) {
           if (tagEnd > 0) 

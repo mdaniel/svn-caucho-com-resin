@@ -29,15 +29,33 @@
 
 package com.caucho.quercus.lib;
 
-import java.io.InputStream;
+import java.io.Reader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PushbackReader;
+import java.io.LineNumberReader;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+
+import java.net.URL;
+import java.net.Socket;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.caucho.util.L10N;
 import com.caucho.util.Base64;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.URLUtil;
 
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.Path;
 import com.caucho.vfs.TempBuffer;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
@@ -45,16 +63,23 @@ import com.caucho.quercus.module.Optional;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.ObjectValue;
+import com.caucho.quercus.env.BooleanValue;
 
 /**
  * PHP URL
  */
 public class UrlModule extends AbstractQuercusModule {
   private static final L10N L = new L10N(UrlModule.class);
+  private static final Logger log 
+    = Logger.getLogger(UrlModule.class.getName());
 
   /**
    * Encodes base64
@@ -189,7 +214,7 @@ public class UrlModule extends AbstractQuercusModule {
 	sb.append(ch);
       else if ('A' <= ch && ch <= 'Z')
 	sb.append(ch);
-      else if ('0' <= ch && ch <= '0')
+      else if ('0' <= ch && ch <= '9')
 	sb.append(ch);
       else if (ch == '-' || ch == '_' || ch == '.')
 	sb.append(ch);
@@ -523,6 +548,392 @@ public class UrlModule extends AbstractQuercusModule {
       value.put("path", sb.toString());
 
     return value;
+  }
+
+  public static Value http_build_query(Env env, Value formdata, 
+                                       @Optional String numeric_prefix)
+  {
+    String result = httpBuildQueryImpl("", formdata, numeric_prefix).toString();
+
+    return new StringValueImpl(result);
+  }
+
+  public static StringBuilder httpBuildQueryImpl(String path, Value formdata, 
+                                                 String numeric_prefix)
+  {
+    StringBuilder result = new StringBuilder();
+    
+    Set<Map.Entry<Value,Value>> entrySet;
+
+    if (formdata.isArray())
+      entrySet = ((ArrayValue)formdata).entrySet();
+    else if (formdata.isObject()) {
+      Set<Map.Entry<String,Value>> stringEntrySet
+        = ((ObjectValue)formdata).entrySet();
+
+      LinkedHashMap<Value,Value> valueMap = new LinkedHashMap<Value,Value>();
+
+      for (Map.Entry<String,Value> entry : stringEntrySet)
+        valueMap.put(new StringValueImpl(entry.getKey()), entry.getValue());
+
+      entrySet = valueMap.entrySet();
+    } else {
+      env.warning("formdata must be an array or object");
+
+      return result; 
+    }
+
+    for (Map.Entry<Value,Value> entry : entrySet) {
+      String newPath = makeNewPath(path, entry.getKey(), numeric_prefix);
+
+      if (entry.getValue().isArray() || entry.getValue().isObject()) {
+        // can always throw away the numeric prefix on recursive calls
+        result.append(httpBuildQueryImpl(newPath, entry.getValue(), null));
+        result.append("&");
+      } else {
+        result.append(newPath + "=");
+        result.append(urlencode(entry.getValue().toString()));
+        result.append("&");
+      }
+    }
+
+    // trim any trailing &'s
+    if (result.length() > 0) 
+      result.deleteCharAt(result.length() - 1);
+
+    return result;
+  }
+
+  private static String makeNewPath(String oldPath, Value key, 
+                                    String numeric_prefix)
+  {
+    if (oldPath.length() == 0) {
+      if (key.isLongConvertible() && numeric_prefix != null)
+        return urlencode(numeric_prefix + key.toString());
+      else
+        return urlencode(key.toString());
+    } else
+      return oldPath + "[" + urlencode(key.toString()) + "]";
+  }
+
+  /**
+   * Connects to the given URL using a HEAD request to retreive
+   * the headers sent in the response.
+   */
+  public static Value get_headers(Env env, String urlString, 
+                                  @Optional Value format)
+  {
+    Socket socket = null;
+    
+    try {
+      URL url = new URL(urlString);
+
+      if (! url.getProtocol().equals("http") && 
+          ! url.getProtocol().equals("https")) {
+        env.warning("Not an HTTP URL");
+        return null;
+      }
+
+      int port = 80;
+
+      if (url.getPort() < 0) {
+        if (url.getProtocol().equals("http"))
+          port = 80;
+        else if (url.getProtocol().equals("https"))
+          port = 443;
+      } else {
+        port = url.getPort();
+      }
+
+      socket = new Socket(url.getHost(), port);
+      
+      OutputStream out = socket.getOutputStream();
+      InputStream in = socket.getInputStream();
+
+      StringBuilder request = new StringBuilder();
+
+      request.append("HEAD ");
+
+      if (url.getPath() != null)
+        request.append(url.getPath());
+
+      if (url.getQuery() != null) 
+        request.append("?" + url.getQuery());
+
+      if (url.getRef() != null)
+        request.append("#" + url.getRef());
+
+      request.append(" HTTP/1.0\r\n");
+
+      if (url.getHost() != null)
+        request.append("Host: " + url.getHost() + "\r\n");
+
+      request.append("\r\n");
+
+      OutputStreamWriter writer = new OutputStreamWriter(out);
+      writer.write(request.toString());
+      writer.flush();
+
+      LineNumberReader reader = new LineNumberReader(new InputStreamReader(in));
+
+      ArrayValue result = new ArrayValueImpl();
+
+      if (format.toBoolean()) {
+        for (String line = reader.readLine(); 
+             line != null; 
+             line = reader.readLine()) {
+          line = line.trim();
+          
+          if (line.length() == 0)
+            continue;
+
+          int colon = line.indexOf(':');
+
+          ArrayValue values;
+
+          if (colon < 0)
+            result.put(new StringValueImpl(line.trim()));
+          else {
+            StringValueImpl key = 
+              new StringValueImpl(line.substring(0, colon).trim());
+
+            StringValueImpl value;
+
+            if (colon < line.length())
+              value = new StringValueImpl(line.substring(colon + 1).trim());
+            else
+              value = new StringValueImpl("");
+
+
+            if (result.get(key) != UnsetValue.UNSET)
+              values = (ArrayValue)result.get(key);
+            else {
+              values = new ArrayValueImpl();
+
+              result.put(key, values);
+            }
+
+            values.put(value);
+          }
+        }
+
+        // collapse single entries
+        for (Value key : result.keySet()) {
+          Value value = result.get(key);
+
+          if (value.isArray() && ((ArrayValue)value).getSize() == 1)
+            result.put(key, ((ArrayValue)value).get(LongValue.ZERO));
+        }
+      } else {
+        for (String line = reader.readLine(); 
+            line != null; 
+            line = reader.readLine()) {
+          line = line.trim();
+
+          if (line.length() == 0)
+            continue; 
+
+          result.put(new StringValueImpl(line.trim()));
+        }
+      }
+
+      return result;
+    } catch (Exception e) {
+      env.warning(e);
+
+      return BooleanValue.FALSE;
+    } finally {
+      try {
+        if (socket != null)
+          socket.close();
+      } catch (IOException e) {
+        env.warning(e);
+      }
+    }
+  }
+
+  /**
+   * Extracts the meta tags from a file and returns them as an array.
+   */
+  public static Value get_meta_tags(Env env, String filename, 
+                                    @Optional("false") boolean use_include_path)
+  {
+    Path file = null;
+
+    ArrayValue result = new ArrayValueImpl();
+    
+    if (use_include_path) {
+      String [] includePaths = env.getIni("include_path").toString().split(":");
+
+      for (String includePath : includePaths) {
+        Path oldPath = Vfs.getPwd();
+
+        Path newPath = oldPath.lookup(includePath);
+
+        if (! newPath.exists())
+          break;
+
+        Vfs.setPwd(newPath);
+
+        // can only be a local file
+        file = Vfs.lookupNative(filename);
+
+        Vfs.setPwd(oldPath);
+
+        if (file.exists())
+          break;
+      }
+    } else
+      file = Vfs.lookup(filename);
+    
+    if (file == null || ! file.exists())
+      return result;
+
+    try {
+      InputStream in = file.openRead();
+
+      PushbackReader reader = new PushbackReader(new InputStreamReader(in));
+
+      while (reader.ready()) {
+        String tag = getNextTag(reader);
+
+        if (tag.equalsIgnoreCase("meta")) {
+          String name = null;
+          String content = null;
+
+          String [] attr;
+
+          while ((attr = getNextAttribute(reader)) != null) {
+            if (name == null && attr[0].equalsIgnoreCase("name")) {
+              if (attr.length > 1)
+                name = attr[1];
+            } else if (content == null && attr[0].equalsIgnoreCase("content")) {
+              if (attr.length > 1)
+                content = attr[1];
+            }
+
+            if (name != null && content != null) {
+              result.put(new StringValueImpl(name), 
+                         new StringValueImpl(content));
+              break;
+            }
+          }
+        } else if (tag.equalsIgnoreCase("/head"))
+          break;
+      }
+    } catch (IOException e) {
+      env.warning(e);
+    }
+
+    return result;
+  }
+
+  private static String getNextTag(Reader reader)
+    throws IOException
+  {
+    StringBuilder tag = new StringBuilder();
+
+    for (int ch = 0; reader.ready() && ch != '<'; ch = reader.read()) {}
+
+    while (reader.ready()) {
+      int ch = reader.read();
+
+      if (Character.isWhitespace(ch))
+        break;
+
+      tag.append((char) ch);
+    }
+
+    return tag.toString();
+  }
+
+  /**
+   * Finds the next attribute in the stream and return the key and value
+   * as an array.
+   */
+  private static String [] getNextAttribute(PushbackReader reader)
+    throws IOException
+  {
+    int ch;
+
+    consumeWhiteSpace(reader);
+
+    StringBuilder attribute = new StringBuilder();
+
+    while (reader.ready()) {
+      ch = reader.read();
+
+      if (isValidAttributeCharacter(ch))
+        attribute.append((char) ch);
+      else {
+        reader.unread(ch);
+        break;
+      }
+    }
+
+    if (attribute.length() == 0)
+      return null;
+
+    consumeWhiteSpace(reader);
+
+    if (! reader.ready())
+      return new String[] { attribute.toString() };
+    
+    ch = reader.read();
+    if (ch != '=') {
+      reader.unread(ch);
+
+      return new String[] { attribute.toString() };
+    }
+
+    consumeWhiteSpace(reader);
+
+    // check for quoting
+    int quote = ' ';
+    boolean quoted = false;
+
+    if (! reader.ready())
+      return new String[] { attribute.toString() };
+
+    ch = reader.read();
+
+    if (ch == '"' || ch == '\'') {
+      quoted = true;
+      quote = ch;
+    } else 
+      reader.unread(ch);
+
+    StringBuilder value = new StringBuilder();
+
+    while (reader.ready()) {
+      ch = reader.read();
+  
+      // mimics PHP behavior
+      if ((quoted && ch == quote) ||
+          (! quoted && Character.isWhitespace(ch)) || ch == '>')
+        break;
+
+      value.append((char) ch);
+    }
+
+    return new String[] { attribute.toString(), value.toString() };
+  }
+
+  private static void consumeWhiteSpace(PushbackReader reader)
+    throws IOException
+  {
+    int ch = 0;
+
+    while (reader.ready() && Character.isWhitespace(ch = reader.read())) {}
+
+    if (! Character.isWhitespace(ch))
+      reader.unread(ch);
+  }
+
+  private static boolean isValidAttributeCharacter(int ch)
+  {
+    return Character.isLetterOrDigit(ch) || 
+      (ch == '-') || (ch == '.') || (ch == '_') || (ch == ':');
   }
 
   private static char toHexDigit(int d)

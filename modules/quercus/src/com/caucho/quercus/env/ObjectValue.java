@@ -29,10 +29,19 @@
 
 package com.caucho.quercus.env;
 
+import java.util.Set;
+import java.util.Map;
+
 /**
  * Represents a Quercus object value.
  */
 abstract public class ObjectValue extends Value {
+
+  /**
+   * Returns a Set of entries.
+   */
+  abstract public Set<Map.Entry<String,Value>> entrySet();
+
   /**
    * Returns the class name.
    */
