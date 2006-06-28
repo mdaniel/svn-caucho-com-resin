@@ -32,18 +32,12 @@ package com.caucho.server.webapp;
 import com.caucho.config.types.PathBuilder;
 import com.caucho.jmx.IntrospectionMBean;
 import com.caucho.log.Log;
-
-import com.caucho.mbeans.j2ee.J2EEAdmin;
+import com.caucho.mbeans.j2ee.J2EEManagedObject;
 import com.caucho.mbeans.j2ee.WebModule;
 import com.caucho.mbeans.server.WebAppMBean;
-
 import com.caucho.server.deploy.DeployConfig;
 import com.caucho.server.deploy.EnvironmentDeployController;
-
 import com.caucho.server.host.Host;
-
-import com.caucho.mbeans.server.WebAppMBean;
-
 import com.caucho.util.CauchoSystem;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -314,9 +308,9 @@ public class WebAppController
     return new IntrospectionMBean(_admin, WebAppMBean.class);
   }
 
-  protected J2EEAdmin createJ2EEAdmin()
+  protected J2EEManagedObject createJ2EEManagedObject()
   {
-    return new J2EEAdmin(new WebModule(this));
+    return new WebModule(this);
   }
 
   /**

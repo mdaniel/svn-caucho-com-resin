@@ -101,7 +101,7 @@ abstract public class J2EEManagedObject {
    * @param deflt A default to return if the value is null or the empty string.
    * @return
    */
-  private String escapeForObjectName(String value, String deflt)
+  protected String escapeForObjectName(String value, String deflt)
   {
     if (value == null || value.length() == 0)
       return deflt;
@@ -260,6 +260,11 @@ abstract public class J2EEManagedObject {
     }
 
     _lifecycle.toActive();
+  }
+
+  boolean isActive()
+  {
+    return _lifecycle.isActive();
   }
 
   void stop()

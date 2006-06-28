@@ -29,60 +29,47 @@
 
 package com.caucho.server.resin;
 
-import java.security.Provider;
-import java.security.Security;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.management.ObjectName;
-
-import javax.servlet.jsp.el.VariableResolver;
-
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.InitProgram;
 import com.caucho.config.types.Period;
-
 import com.caucho.el.EL;
 import com.caucho.el.MapVariableResolver;
 import com.caucho.el.SystemPropertiesResolver;
-
 import com.caucho.jmx.Jmx;
-
 import com.caucho.jsp.cfg.JspPropertyGroup;
-
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.lifecycle.LifecycleState;
-
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.EnvironmentProperties;
-
 import com.caucho.mbeans.j2ee.J2EEAdmin;
 import com.caucho.mbeans.j2ee.J2EEDomain;
+import com.caucho.mbeans.j2ee.J2EEManagedObject;
 import com.caucho.mbeans.j2ee.JVM;
-
 import com.caucho.mbeans.server.ClusterMBean;
-
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.ServerListener;
-
 import com.caucho.transaction.cfg.TransactionManagerConfig;
-
 import com.caucho.util.Alarm;
 import com.caucho.util.CauchoSystem;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
-
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
+
+import javax.management.ObjectName;
+import javax.servlet.jsp.el.VariableResolver;
+import java.security.Provider;
+import java.security.Security;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ResinServer
   implements EnvironmentBean, SchemaBean,
@@ -119,8 +106,8 @@ public class ResinServer
 
   private HashMap<String,Object> _variableMap = new HashMap<String,Object>();
 
-  private final J2EEAdmin _j2eeDomainAdmin = new J2EEAdmin(new J2EEDomain());
-  private final J2EEAdmin _jvmAdmin = new J2EEAdmin(new JVM());
+  private J2EEManagedObject _j2eeDomainManagedObject;
+  private J2EEManagedObject _jvmManagedObject;
 
 
   private ArrayList<ServerController> _servers
@@ -534,8 +521,8 @@ public class ResinServer
 
     long start = Alarm.getCurrentTime();
 
-    _j2eeDomainAdmin.start();
-    _jvmAdmin.start();
+    _j2eeDomainManagedObject = J2EEAdmin.register(new J2EEDomain());
+    _jvmManagedObject = J2EEAdmin.register(new JVM());
 
     // force a GC on start
     System.gc();
@@ -615,21 +602,36 @@ public class ResinServer
     if (! _lifecycle.toDestroying())
       return;
 
+    J2EEManagedObject jvmManagedObject;
+    J2EEManagedObject j2eeDomainManagedObject;
+    ArrayList<ResinServerListener> listeners;
+    ArrayList<ServerController> servers;
+
+    jvmManagedObject = _jvmManagedObject;
+    _jvmManagedObject = null;
+
+    j2eeDomainManagedObject = _j2eeDomainManagedObject;
+    _j2eeDomainManagedObject = null;
+
+    listeners = new ArrayList<ResinServerListener>(_listeners);
+    _listeners.clear();
+
+    servers = new ArrayList<ServerController>(_servers);
+    _servers.clear();
+
+    J2EEAdmin.unregister(j2eeDomainManagedObject);
+    J2EEAdmin.unregister(jvmManagedObject);
+
     try {
-      for (ServerController server : _servers) {
+      for (ServerController server : servers) {
         server.destroy();
       }
-
-      ArrayList<ResinServerListener> listeners = _listeners;
 
       for (int i = 0; i < listeners.size(); i++) {
         ResinServerListener listener = listeners.get(i);
 
         listener.closeEvent(this);
       }
-
-      _j2eeDomainAdmin.stop();
-      _jvmAdmin.stop();
 
       Environment.closeGlobal();
     } finally {

@@ -51,6 +51,7 @@ import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
 import com.caucho.mbeans.j2ee.EJBModule;
 import com.caucho.mbeans.j2ee.J2EEAdmin;
+import com.caucho.mbeans.j2ee.J2EEManagedObject;
 
 import javax.jms.ConnectionFactory;
 import javax.sql.DataSource;
@@ -97,7 +98,8 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
 
   private final Lifecycle _lifecycle = new Lifecycle(log, "ejb-manager");
 
-  private Map<String, J2EEAdmin> _ejbModuleAdminMap = new LinkedHashMap<String, J2EEAdmin>();
+  private Map<String, J2EEManagedObject> _ejbModuleManagedObjectMap
+    = new LinkedHashMap<String, J2EEManagedObject>();
 
   /**
    * Create a server with the given prefix name.
@@ -504,11 +506,11 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
   // callback
   public void addEJBModule(String ejbModuleName)
   {
-    J2EEAdmin ejbModuleAdmin = _ejbModuleAdminMap.get(ejbModuleName);
+    J2EEManagedObject ejbModuleManagedObject = _ejbModuleManagedObjectMap.get(ejbModuleName);
 
-    if (ejbModuleAdmin == null) {
-      ejbModuleAdmin = new J2EEAdmin(new EJBModule(ejbModuleName));
-      _ejbModuleAdminMap.put(ejbModuleName, ejbModuleAdmin);
+    if (ejbModuleManagedObject == null) {
+      ejbModuleManagedObject = J2EEAdmin.register(new EJBModule(ejbModuleName));
+      _ejbModuleManagedObjectMap.put(ejbModuleName, ejbModuleManagedObject);
     }
   }
 
@@ -539,9 +541,6 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
     _envServerManager.init();
     
     build();
-
-    for (J2EEAdmin ejbModuleAdmin : _ejbModuleAdminMap.values())
-      ejbModuleAdmin.start();
   }
   
   /**
@@ -672,14 +671,26 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
     if (! _lifecycle.toDestroy())
       return;
 
-    for (J2EEAdmin ejbModuleAdmin : _ejbModuleAdminMap.values())
-      ejbModuleAdmin.stop();
+    ArrayList<J2EEManagedObject> ejbModuleManagedObjects;
+    EjbConfig ejbConfig;
+    EnvServerManager envServerManager;
+    
+    ejbModuleManagedObjects = new ArrayList<J2EEManagedObject>(_ejbModuleManagedObjectMap.values());
+    _ejbModuleManagedObjectMap.clear();
 
-    _envServerManager.destroy();
+    envServerManager = _envServerManager;
+    _envServerManager = null;
+
+    ejbConfig = _ejbConfig;
+    _ejbConfig = null;
+
+    for (J2EEManagedObject ejbModuleManagedObject : ejbModuleManagedObjects)
+      J2EEAdmin.unregister(ejbModuleManagedObject);
+
+    // ejbConfig does not need destroy
 
     try {
-      _ejbConfig = null;
-      _envServerManager = null;
+      envServerManager.destroy();
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     }

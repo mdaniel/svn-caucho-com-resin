@@ -29,29 +29,56 @@
 
 package com.caucho.mbeans.j2ee;
 
+/**
+ * Static utility class for registering and unregistering J2EEManagedObject
+ * management beans.
+ */
 public class J2EEAdmin {
-  private final J2EEManagedObject _managedObject;
 
-  public J2EEAdmin(J2EEManagedObject managedObject)
+  private J2EEAdmin()
   {
-    _managedObject = managedObject;
   }
 
-  public void start()
+  /**
+   * Register a {@link J2EEManagedObject}.
+   * This method never throws an exception, any {@link Throwable} is caught
+   * and logged.
+   *
+   * @return the managed object if it is registered, null if there is an error.
+   */
+  public static <T extends J2EEManagedObject> T register(T managedObject)
   {
+    if (managedObject == null)
+      return null;
+
     try {
-      _managedObject.start();
+      managedObject.start();
+
+      return managedObject.isActive() ? managedObject : null;
     }
     catch (Throwable ex) {
       // should never happen
       ex.printStackTrace();
+
+      return null;
     }
   }
 
-  public void stop()
+  /**
+   * Unregister a {@link J2EEManagedObject}.
+   * This method never throws an exception, any {@link Throwable} is caught
+   * and logged.
+   *
+   * @param managedObject the managed object, can be null in which case
+   * nothing is done.
+   */
+  public static void unregister(J2EEManagedObject managedObject)
   {
+    if (managedObject == null)
+      return;
+
     try {
-      _managedObject.stop();
+      managedObject.stop();
     }
     catch (Throwable ex) {
       // should never happen

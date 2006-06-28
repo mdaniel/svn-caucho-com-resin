@@ -35,11 +35,16 @@ package com.caucho.mbeans.j2ee;
 public class ResourceAdapter
   extends J2EEManagedObject
 {
+  public ResourceAdapter()
+  {
+  }
+
   protected String getName()
   {
     // XXX:
     return null;
   }
+
 
   /**
    * Returns the ObjectName of the {@link JCAResource}

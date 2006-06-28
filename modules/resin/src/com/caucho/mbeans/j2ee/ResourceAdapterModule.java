@@ -33,10 +33,15 @@ package com.caucho.mbeans.j2ee;
  * Management interface for a resource adapter module (RAR).
  */
 public class ResourceAdapterModule extends J2EEModule {
+
+  public ResourceAdapterModule()
+  {
+  }
+
   protected String getName()
   {
     // XXX:
-    return null;
+    return "default";
   }
 
   public String getDeploymentDescriptor()
@@ -49,9 +54,9 @@ public class ResourceAdapterModule extends J2EEModule {
    * Returns the ObjectNames of the {@link ResourceAdapter}
    * management beans that are contained within this application.
    */
-  public String []getServlets()
+  public String []getResourceAdapters()
   {
-    // XXX:
-    return new String[] {};
+    return queryObjectNames("j2eeType=ResourceAdapater,"
+                            + "ResourceAdapaterModule=" + _objectName.getKeyProperty("name"));
   }
 }

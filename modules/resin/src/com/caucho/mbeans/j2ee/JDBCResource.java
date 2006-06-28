@@ -29,14 +29,22 @@
 
 package com.caucho.mbeans.j2ee;
 
+import com.caucho.sql.DBPool;
+
 /**
  * Management interface for a JDBC resource.
  */
 public class JDBCResource extends J2EEResource {
+  private final DBPool _dbPool;
+
+  public JDBCResource(DBPool dbPool)
+  {
+    _dbPool = dbPool;
+  }
+
   protected String getName()
   {
-    // XXX:
-    return null;
+    return _dbPool.getName();
   }
 
   /**
@@ -45,7 +53,7 @@ public class JDBCResource extends J2EEResource {
    */
   public String []getJdbcDataSources()
   {
-    // XXX:
-    return new String[] {};
+    return queryObjectNames("j2eeType=JDBCDataSource," +
+                            "JDBCResource=" + _objectName.getKeyProperty("name"));
   }
 }

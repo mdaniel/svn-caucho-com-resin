@@ -80,7 +80,7 @@ public final class Lifecycle implements LifecycleState {
   }
 
   /**
-   * Creates an lifecycle with logger and name.
+   * Creates an lifecycle with logger,  a name, and a level.
    */
   public Lifecycle(Logger log, String name, Level level)
   {
@@ -98,7 +98,7 @@ public final class Lifecycle implements LifecycleState {
   }
 
   /**
-   * Sets the lifecycle name.
+   * Sets the lifecycle name, and the level to Level.INFO.
    */
   public void setName(String name)
   {

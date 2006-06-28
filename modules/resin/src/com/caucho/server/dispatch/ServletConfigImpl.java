@@ -29,8 +29,6 @@
 
 package com.caucho.server.dispatch;
 
-import java.io.IOException;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 
@@ -44,7 +42,6 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 
 import javax.servlet.*;
-import javax.servlet.http.*;
 
 import com.caucho.config.types.InitParam;
 import com.caucho.config.types.InitProgram;
@@ -63,6 +60,8 @@ import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
+import com.caucho.mbeans.j2ee.J2EEAdmin;
+import com.caucho.mbeans.j2ee.J2EEManagedObject;
 
 /**
  * Configuration for a servlet.
@@ -72,7 +71,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
   protected static final Logger log = Log.open(ServletConfigImpl.class);
 
   private String _location;
-  
+
   private String _servletName;
   private String _servletClassName;
   private Class _servletClass;
@@ -86,7 +85,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
   private HashMap<String,String> _roleMap;
 
   private InitProgram _init;
-  
+
   private RunAt _runAt;
   private Alarm _alarm;
 
@@ -95,10 +94,11 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
 
   private ServletException _initException;
   private long _nextInitTime;
-  
+
   private Servlet _servlet;
   private FilterChain _servletChain;
-  
+  private J2EEManagedObject _j2eeManagedObject;
+
   /**
    * Creates a new servlet configuration object.
    */
@@ -382,12 +382,12 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
   public void setInitException(ServletException exn)
   {
     _initException = exn;
-    
+
     _nextInitTime = Long.MAX_VALUE / 2;
 
     if (exn instanceof UnavailableException) {
       UnavailableException unExn = (UnavailableException) exn;
-      
+
       if (! unExn.isPermanent())
         _nextInitTime = (Alarm.getCurrentTime() +
                          1000L * unExn.getUnavailableSeconds());
@@ -421,10 +421,10 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
   {
     if (_runAt != null || _loadOnStartup >= 0)
       requireClass = true;
-    
+
     Thread thread = Thread.currentThread();
     ClassLoader loader = thread.getContextClassLoader();
-    
+
     if (_servletClassName == null) {
     }
     else if (_servletClassName.equals("invoker")) {
@@ -433,7 +433,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
       try {
         _servletClass = Class.forName(_servletClassName, false, loader);
       } catch (ClassNotFoundException e) {
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
       }
 
       if (_servletClass != null) {
@@ -442,17 +442,17 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
         throw error(L.l("`{0}' is not a known servlet.  Servlets belong in the classpath, often in WEB-INF/classes.", _servletClassName));
       }
       else {
-	String location = _location != null ? _location : "";
-	  
+        String location = _location != null ? _location : "";
+
         log.warning(L.l(location + "`{0}' is not a known servlet.  Servlets belong in the classpath, often in WEB-INF/classes.", _servletClassName));
-	return;
+        return;
       }
 
       if (! Servlet.class.isAssignableFrom(_servletClass))
         throw error(L.l("`{0}' must implement javax.servlet.Servlet.  All servlets must implement the Servlet interface.", _servletClassName));
       if (Modifier.isAbstract(_servletClass.getModifiers()))
         throw error(L.l("`{0}' must not be abstract.  Servlets must be fully-implemented classes.", _servletClassName));
-      
+
       if (! Modifier.isPublic(_servletClass.getModifiers()))
         throw error(L.l("`{0}' must be public.  Servlets must be public classes.", _servletClassName));
 
@@ -471,19 +471,19 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     Constructor zeroArg = null;
     for (int i = 0; i < constructors.length; i++) {
       if (constructors[i].getParameterTypes().length == 0) {
-	zeroArg = constructors[i];
-	break;
+        zeroArg = constructors[i];
+        break;
       }
     }
 
     if (zeroArg == null)
       throw error(L.l("`{0}' must have a zero arg constructor.  Servlets must have public zero-arg constructors.\n{1} is not a valid constructor.", _servletClassName, constructors[0]));
 
-      
+
     if (! Modifier.isPublic(zeroArg.getModifiers()))
         throw error(L.l("`{0}' must be public.  '{1}' must have a public, zero-arg constructor.",
-					     zeroArg,
-					     _servletClassName));
+                        zeroArg,
+                        _servletClassName));
   }
 
   /**
@@ -493,9 +493,9 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
   {
     try {
       log.fine(this + " cron");
-      
+
       FilterChain chain = createServletChain();
-      
+
       ServletRequest req = new StubServletRequest();
       ServletResponse res = new StubServletResponse();
 
@@ -513,8 +513,8 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
   {
     synchronized (this) {
       if (_servletChain == null)
-	_servletChain = createServletChainImpl();
-      
+        _servletChain = createServletChainImpl();
+
       return _servletChain;
     }
   }
@@ -534,12 +534,12 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     }
 
     validateClass(true);
-    
+
     Class servletClass = getServletClass();
 
     if (servletClass == null) {
       throw new IllegalStateException(L.l("servlet class for {0} can't be null",
-					  getServletName()));
+                                          getServletName()));
     }
     else if (QServlet.class.isAssignableFrom(servletClass)) {
       servletChain = new PageFilterChain(_servletContext, (QServlet) createServlet());
@@ -556,7 +556,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
 
     return servletChain;
   }
-  
+
   /**
    * Instantiates a servlet given its configuration.
    *
@@ -575,9 +575,11 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
 
     if (log.isLoggable(Level.FINE))
       log.fine("Servlet[" + _servletName + "] starting");
-    
+
     try {
       _servlet = createServletImpl();
+
+      _j2eeManagedObject = J2EEAdmin.register(new com.caucho.mbeans.j2ee.Servlet(this));
 
       // If the servlet has an MBean, register it
       try {
@@ -590,13 +592,13 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
       }
 
       if (_runAt != null && _alarm != null) {
-	long nextTime = _runAt.getNextTimeout(Alarm.getCurrentTime());
-	_alarm.queue(nextTime - Alarm.getCurrentTime());
+        long nextTime = _runAt.getNextTimeout(Alarm.getCurrentTime());
+        _alarm.queue(nextTime - Alarm.getCurrentTime());
       }
-      
+
       if (log.isLoggable(Level.FINER))
         log.finer("Servlet[" + _servletName + "] started");
-        
+
       return _servlet;
     } catch (ServletException e) {
       throw e;
@@ -611,22 +613,22 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     throws Throwable
   {
     Class servletClass = getServletClass();
-    
+
     Servlet servlet;
     if (_jspFile != null) {
       servlet = createJspServlet(_servletName, _jspFile);
 
       if (servlet == null)
-	throw new ServletException(L.l("'{0}' is a missing JSP file.",
-				       _jspFile));
+        throw new ServletException(L.l("'{0}' is a missing JSP file.",
+                                       _jspFile));
     }
 
     else if (servletClass != null)
       servlet = (Servlet) servletClass.newInstance();
-      
+
     else
       throw new ServletException(L.l("Null servlet class for `{0}'.",
-				     _servletName));
+                                     _servletName));
 
     InjectIntrospector.configure(servlet);
 
@@ -645,7 +647,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
 
     return servlet;
   }
-  
+
   /**
    * Instantiates a servlet given its configuration.
    *
@@ -662,7 +664,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
       QServlet jsp = (QServlet) jspConfig.createServlet();
 
       Page page = jsp.getPage(servletName, jspFile);
-    
+
       return page;
     } catch (ServletException e) {
       throw e;
@@ -676,8 +678,13 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     Servlet servlet = _servlet;
     _servlet = null;
 
+    J2EEManagedObject j2eeManagedObject = _j2eeManagedObject;
+    _j2eeManagedObject = null;
+
     if (_alarm != null)
       _alarm.dequeue();
+
+    J2EEAdmin.unregister(j2eeManagedObject);
 
     if (servlet != null)
       servlet.destroy();

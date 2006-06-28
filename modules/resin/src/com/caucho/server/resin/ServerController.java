@@ -29,43 +29,26 @@
 
 package com.caucho.server.resin;
 
-import java.lang.reflect.Method;
-
-import java.util.Map;
-
-import java.util.logging.Logger;
-
-import javax.management.ObjectName;
-import javax.management.JMException;
-import javax.management.MalformedObjectNameException;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.naming.Jndi;
-
-import com.caucho.log.Log;
-
 import com.caucho.config.ConfigException;
 import com.caucho.jmx.IntrospectionMBean;
-
-import com.caucho.server.cluster.Cluster;
-
-import com.caucho.server.deploy.EnvironmentDeployController;
 import com.caucho.log.Log;
-import com.caucho.mbeans.j2ee.J2EEAdmin;
+import com.caucho.mbeans.j2ee.J2EEManagedObject;
 import com.caucho.mbeans.j2ee.J2EEServer;
 import com.caucho.mbeans.server.ServerMBean;
+import com.caucho.mbeans.server.ThreadPoolMBean;
 import com.caucho.naming.Jndi;
+import com.caucho.server.cluster.Cluster;
 import com.caucho.server.deploy.DeployControllerAdmin;
 import com.caucho.server.deploy.EnvironmentDeployController;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
 import javax.management.JMException;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.logging.Logger;
-import com.caucho.mbeans.server.ThreadPoolMBean;
 
 /**
  * Controls the server.
@@ -198,9 +181,9 @@ public class ServerController
     return _admin;
   }
 
-  protected J2EEAdmin createJ2EEAdmin()
+  protected J2EEManagedObject createJ2EEManagedObject()
   {
-    return new J2EEAdmin(new J2EEServer(this));
+    return new J2EEServer(this);
   }
 
   /**

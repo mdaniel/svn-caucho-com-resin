@@ -29,11 +29,19 @@
 
 package com.caucho.mbeans.j2ee;
 
+import javax.servlet.ServletConfig;
+
 public class Servlet extends J2EEManagedObject {
+  private final ServletConfig _servletConfig;
+
+  public Servlet(ServletConfig servletConfig)
+  {
+    _servletConfig = servletConfig;
+  }
+
   protected String getName()
   {
-    // XXX:
-    return null;
+    return _servletConfig.getServletName();
   }
 
   // no attributes
