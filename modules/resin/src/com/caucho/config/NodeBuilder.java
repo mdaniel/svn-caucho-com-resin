@@ -107,16 +107,20 @@ public class NodeBuilder {
   private ArrayList<ValidatorEntry> _validators
     = new ArrayList<ValidatorEntry>();
 
-  private ConfigVariableResolver _varResolver = new ConfigVariableResolver();
+  private ConfigVariableResolver _varResolver;
 
   NodeBuilder()
   {
-
+    _varResolver = new ConfigVariableResolver();
   }
   
   NodeBuilder(Config config)
   {
     _config = config;
+    _varResolver = config.getConfigVariableResolver();
+
+    if (_varResolver == null)
+      _varResolver = new ConfigVariableResolver();
   }
 
   public static NodeBuilder getCurrentBuilder()

@@ -187,7 +187,8 @@ public class QuercusProgram extends GenClass {
     if (fun != null)
       return fun;
 
-    fun = _functionMapLowerCase.get(name.toLowerCase());
+    if (! _quercus.isStrict())
+      fun = _functionMapLowerCase.get(name.toLowerCase());
     
     return fun;
   }

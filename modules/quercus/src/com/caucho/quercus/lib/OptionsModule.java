@@ -211,6 +211,16 @@ public class OptionsModule extends AbstractQuercusModule {
   }
 
   /**
+   * Returns the owner of the current script.
+   */
+  public static String get_current_user(Env env)
+  {
+    env.stub("get_current_user");
+    
+    return String.valueOf(env.getSelfPath().getOwner());
+  }
+
+  /**
    * Returns the constants as an array
    */
   public static Value get_defined_constants(Env env)

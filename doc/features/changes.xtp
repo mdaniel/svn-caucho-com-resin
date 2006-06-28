@@ -4,7 +4,29 @@
 
 <s2 title='3.0.snap - June 23, 2006'>
 <ul>
-<li>(2005-06-23) Hessian 2.0 draft implementation
+<li>Hessian: add setChunkedPost option to HessianProxyFactory (#1149, rep by Alon Salant)
+<li>Quercus: register_long_arrays (#992, rep by tyson)
+<li>Quercus: mail (#617)
+<li>Quercus: openlog, syslog (#699, #700)
+<li>Quercus: fopen can use include path (#631)
+<li>Quercus: add strict option (#621)
+<li>JSP: preliminary trim-directive-whitespaces (#1204, rep by Bill Au)
+<li>Hessian: added enum support for both Hessian 1 and 2 (#1209, rep by Thomas Wang)
+<li>Catch exceptions thrown by compileBatch so following classes can be compiled (rep by Bill Au)
+<li>Improved error message for &lt;database> max-active-time close and attempted use (#1137, rep by Neil Fradkin)
+<li>JSP: Allow tablespace as JDBC JMS parameter (#1077, rep by Tom Gennaro)
+<li>resin:import was not establishing proper environment context (#1060, rep by Bill Au)
+<li>Check for invalid j_uri for j-security-check (#1206, rep by De Leeuw Thierry)
+<li>Avoid javax. and java. differences from changing ClassDependency (#1044, rep by Serge Knystautas)
+<li>ErrorPageManager should log servlet errors as log level="warning" (#1184, rep by Bill Au)
+<li>Hessian: string chunk can't end in high surrogate (#1203, rep by Thomas Wang)
+<li>JSP: x:parse needs to use Reader instead of input stream (#1083, rep by jrg745)
+<li>Added -javaagent, etc to wrapper.pl (#1211)
+<li>Missing synchronized on _mbeans in MBeanView (#1183, rep by lschumacher)
+<li>wrapper.pl should have pro.jar before resin.jar (#1202, rep by Bill Au)
+<li>Quercus: global $$foo (#1216)
+<li>EJB: Check for null in EjbSessionBean.deployServer (#1138, rep by Andrew Barton)
+<li>(2005-06-23) Hessian 2.0 draft implementation (#2006, rep by Mattias Arbin)
 <li>Added session-manager save-mode='before-flush' (#936, rep by Michael Harper)
 <li>Added client-connect-timeout as a load balancing configuration (#1168, #1195, rep by jornsvendsen, Serge Knystautas)
 <li>JMX/Admin: expand/complete ClusterClientMBean

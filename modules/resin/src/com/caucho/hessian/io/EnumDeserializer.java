@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2006 Caucho Technology, Inc.  All rights reserved.
+ * Copyright (c) 2001-2004 Caucho Technology, Inc.  All rights reserved.
  *
  * The Apache Software License, Version 1.1
  *
@@ -22,7 +22,7 @@
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "Burlap", "Resin", and "Caucho" must not be used to
+ * 4. The names "Hessian", "Resin", and "Caucho" must not be used to
  *    endorse or promote products derived from this software without prior
  *    written permission. For written permission, please contact
  *    info@caucho.com.
@@ -52,51 +52,82 @@ import java.io.*;
 import java.util.*;
 import java.lang.reflect.*;
 
-public interface Hessian2Constants
-{
-  public static final int INT_DIRECT_MIN = -0x10;
-  public static final int INT_DIRECT_MAX = 0x1f;
-  public static final int INT_ZERO = 0x90;
-  // 0xb0-0xcf is reserved
+/**
+ * Deserializing an enum valued object
+ */
+public class EnumDeserializer extends AbstractDeserializer {
+  private Class _enumType;
+  private Method _valueOf;
+  
+  public EnumDeserializer(Class cl)
+  {
+    try {
+      _enumType = cl;
+      _valueOf = cl.getMethod("valueOf",
+			     new Class[] { Class.class, String.class });
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
+  public Class getType()
+  {
+    return _enumType;
+  }
+  
+  public Object readMap(AbstractHessianInput in)
+    throws IOException
+  {
+    String name = null;
+    
+    while (! in.isEnd()) {
+      String key = in.readString();
 
-  public static final int INT_BYTE_MIN = -0x800;
-  public static final int INT_BYTE_MAX = 0x7ff;
-  public static final int INT_BYTE_ZERO = 0xd8;
-  
-  public static final long LONG_DIRECT_MIN = -0x08;
-  public static final long LONG_DIRECT_MAX =  0x07;
-  public static final int LONG_ZERO = 0xe8;
-  // 0xf0-0xff is reserved
-  
-  public static final int STRING_DIRECT_MAX = 0x0f;
-  public static final int STRING_DIRECT = 0x00;
-  // 0x10-0x1f is reserved
-  
-  public static final int BYTES_DIRECT_MAX = 0x0f;
-  public static final int BYTES_DIRECT = 0x20;
-  // 0x30-0x3f is reserved
-  
-  public static final int INT_BYTE = 'a';
-  public static final int INT_SHORT = 'c';
-  
-  public static final int LONG_BYTE = 'e';
-  public static final int LONG_SHORT = 'f';
-  public static final int LONG_INT = 'g';
-  
-  public static final int DOUBLE_ZERO = 'h';
-  public static final int DOUBLE_ONE = 'i';
-  public static final int DOUBLE_BYTE = 'j';
-  public static final int DOUBLE_SHORT = 'k';
+      if (key.equals("name"))
+        name = in.readString();
+      else
+	in.readObject();
+    }
 
-  public static final int DOUBLE_INT = 'n';
-  public static final int DOUBLE_256_SHORT = 'p';
+    in.readMapEnd();
 
-  public static final int DOUBLE_FLOAT = 'q';
-  public static final int LENGTH_BYTE = 'u';
-  public static final int LIST_FIXED = 'v';
+    Object obj = create(name);
+    
+    in.addRef(obj);
+
+    return obj;
+  }
   
-  public static final int REF_BYTE = 'w';
-  public static final int REF_SHORT = 'x';
+  public Object readObject(AbstractHessianInput in, String []fieldNames)
+    throws IOException
+  {
+    String name = null;
 
-  public static final int TYPE_REF = 'T';
+    for (int i = 0; i < fieldNames.length; i++) {
+      if ("name".equals(fieldNames[i]))
+        name = in.readString();
+      else
+	in.readObject();
+    }
+
+    Object obj = create(name);
+
+    System.out.println("REF: " + obj);
+    in.addRef(obj);
+
+    return obj;
+  }
+
+  private Object create(String name)
+    throws IOException
+  {
+    if (name == null)
+      throw new IOException(_enumType.getName() + " expects name.");
+
+    try {
+      return _valueOf.invoke(null, _enumType, name);
+    } catch (Exception e) {
+      throw new IOExceptionWrapper(e);
+    }
+  }
 }

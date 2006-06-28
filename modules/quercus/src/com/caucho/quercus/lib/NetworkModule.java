@@ -90,6 +90,41 @@ public class NetworkModule extends AbstractQuercusModule {
   private static final LinkedHashMap<String, ServiceNode> _servToNum =
     		  new LinkedHashMap<String, ServiceNode>();
 
+  public static final int LOG_EMERG = 0;
+  public static final int LOG_ALERT = 1;
+  public static final int LOG_CRIT = 2;
+  public static final int LOG_ERR = 3;
+  public static final int LOG_WARNING = 4;
+  public static final int LOG_NOTICE = 5;
+  public static final int LOG_INFO = 6;
+  public static final int LOG_DEBUG = 7;
+
+  public static final int LOG_CONS = 0x01;
+  public static final int LOG_NDELAY = 0x02;
+  public static final int LOG_ODELAY = 0x04;
+  public static final int LOG_PERROR = 0x08;
+  public static final int LOG_PID = 0x10;
+
+  public static final int LOG_AUTH = 0;
+  public static final int LOG_AUTHPRIV = 1;
+  public static final int LOG_CRON = 2;
+  public static final int LOG_DAEMON = 3;
+  public static final int LOG_KERN = 4;
+  public static final int LOG_LOCAL0 = 5;
+  public static final int LOG_LOCAL1 = 6;
+  public static final int LOG_LOCAL2 = 7;
+  public static final int LOG_LOCAL3 = 8;
+  public static final int LOG_LOCAL4 = 9;
+  public static final int LOG_LOCAL5 = 10;
+  public static final int LOG_LOCAL6 = 11;
+  public static final int LOG_LOCAL7 = 12;
+  public static final int LOG_LPR = 13;
+  public static final int LOG_MAIL = 14;
+  public static final int LOG_NEWS = 15;
+  public static final int LOG_SYSLOG = 16;
+  public static final int LOG_USER = 17;
+  public static final int LOG_UUCP = 18;
+
   /**
    * Adds the constant to the PHP engine's constant map.
    *
@@ -497,6 +532,65 @@ public class NetworkModule extends AbstractQuercusModule {
     } catch (NamingException e) {
       throw new QuercusModuleException(e);
     }
+  }
+
+  /**
+   * Initialization of syslog.
+   */
+  public static Value define_syslog_variables()
+  {
+    return NullValue.NULL;
+  }
+  
+  /**
+   * Opens syslog.
+   *
+   * XXX: stubbed for now
+   */
+  public static boolean openlog(String ident, int option, int facility)
+  {
+    return true;
+  }
+
+  /**
+   * Closes syslog.
+   */
+  public static boolean closelog()
+  {
+    return true;
+  }
+  
+  /**
+   * syslog
+   */
+  public static boolean syslog(Env env, int priority, String message)
+  {
+    Level level = Level.OFF;
+    
+    switch (priority) {
+    case LOG_EMERG:
+    case LOG_ALERT:
+    case LOG_CRIT:
+      level = Level.SEVERE;
+      break;
+    case LOG_ERR:
+    case LOG_WARNING:
+      level = Level.WARNING;
+      break;
+    case LOG_NOTICE:
+      level = Level.CONFIG;
+      break;
+    case LOG_INFO:
+      level = Level.INFO;
+      break;
+    case LOG_DEBUG:
+      level = Level.FINE;
+      break;
+    }
+
+    env.getLogger().log(level, message);
+
+    return true;
   }
 
   private static class ServiceNode {

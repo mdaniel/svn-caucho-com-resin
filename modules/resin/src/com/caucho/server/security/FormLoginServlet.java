@@ -122,6 +122,10 @@ public class FormLoginServlet extends GenericServlet {
     if (uri == null)
       throw new ServletException(L.l("No forwarding URI for form authentication.  Either the login form must specify j_uri or the session must have a saved URI."));
 
+    if (uri.indexOf('\n') >= 0 || uri.indexOf('\r') >= 0)
+      throw new ServletException(L.l("Forwarding URI '{0}' is invalid.",
+				     uri));
+
     String uriPwd = req.getRequestURI();
     int p = uriPwd.indexOf("/j_security_check");
     if (p >= 0)

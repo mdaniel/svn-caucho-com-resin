@@ -110,6 +110,14 @@ public class QuercusServlet
   }
 
   /**
+   * Sets the strict mode.
+   */
+  public void setStrict(boolean isStrict)
+  {
+    getQuercus().setStrict(isStrict);
+  }
+
+  /**
    * Adds a quercus module.
    */
   public void addModule(QuercusModule module)

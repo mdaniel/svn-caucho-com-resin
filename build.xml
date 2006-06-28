@@ -186,7 +186,7 @@
     </antcall>
   </target>
 
-  <target name="resin-dev" depends="init, ejb, ejb30, jca, jcr, jms, jmx, jsdk, jstl, jta, j2ee-deploy, j2ee-management, jaf, saaj, jaxrpc, portlet, script, resin-jdk15">
+  <target name="resin-dev" depends="init, ejb, ejb30, jca, jcr, jms, jmx, jsdk, jstl, jta, j2ee-deploy, j2ee-management, saaj, jaxrpc, portlet, script, resin-jdk15">
 
     <!-- filter to insert version -->
 
@@ -222,14 +222,16 @@
   
   <target name="resin" depends="resin-dev"/>
 
+  <!--
   <target name="jaf" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="jaf"/>
       <param name="module.jar" value="jaf-11.jar"/>
     </antcall>
   </target>
+  -->
 
-  <target name="saaj" depends="init,jaf">
+  <target name="saaj" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="saaj"/>
       <param name="module.jar" value="saaj.jar"/>
@@ -436,7 +438,9 @@
       <packageset dir="${modules}/ejb30/src"/>
       <packageset dir="${modules}/j2ee-deploy/src"/>
       <packageset dir="${modules}/j2ee-management/src"/>
+      <!--
       <packageset dir="${modules}/jaf/src"/>
+      -->
       <packageset dir="${modules}/jaxrpc/src"/>
       <packageset dir="${modules}/jca/src"/>
       <packageset dir="${modules}/jms/src"/>
@@ -669,12 +673,12 @@
         <include name="automake/**"/>
 	
         <include name="lib/aopalliance.jar"/>
+        <include name="lib/activation.jar"/>
         <include name="lib/javamail-14.jar"/>
         <include name="lib/ejb-20.jar"/>
         <include name="lib/ejb-30.jar"/>
         <include name="lib/j2ee-deploy-10.jar"/>
         <include name="lib/j2ee-management-10.jar"/>
-        <include name="lib/jaf-11.jar"/>
         <include name="lib/jca-15.jar"/>
         <include name="lib/jms-11.jar"/>
         <include name="lib/jmx-12.jar"/>

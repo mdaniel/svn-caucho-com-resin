@@ -70,6 +70,7 @@ import com.caucho.log.Log;
 import com.caucho.config.ConfigException;
 
 import com.caucho.jdbc.JdbcMetaData;
+import com.caucho.jdbc.OracleMetaData;
 
 import com.caucho.jms.AbstractDestination;
 import com.caucho.jms.JMSExceptionWrapper;
@@ -108,7 +109,7 @@ public class JdbcMessage {
   private String _messageTable;
   private String _messageSequence;
 
- private boolean _isTruncateBlob;
+ private boolean _isOracle;
 
   public JdbcMessage(JdbcManager jdbcManager)
   {
@@ -126,7 +127,7 @@ public class JdbcMessage {
 
     JdbcMetaData metaData = _jdbcManager.getMetaData();
 
-    _isTruncateBlob = metaData.isTruncateBlobBeforeDelete();
+    _isOracle = metaData instanceof OracleMetaData;
       
     String identity = "";
 
@@ -168,12 +169,18 @@ public class JdbcMessage {
 	     "  body " + blob +
 	     ")");
 
-      if (_isTruncateBlob) {
+      if (_isOracle) {
+	String extent = "";
+	
+	if (_jdbcManager.getTablespace() != null) {
+	  extent = " tablespace " + _jdbcManager.getTablespace();
+	}
+
 	// oracle recommends using retention (over pctversion) for performance
 	// Oracle will keep deleted lobs for the retention time before
 	// releasing them (e.g. 900 seconds)
-	sql += (" LOB(header) STORE AS (cache retention)");
-	sql += (" LOB(body) STORE AS (cache retention)");
+	sql += (" LOB(header) STORE AS (cache retention" + extent + ")");
+	sql += (" LOB(body) STORE AS (cache retention" + extent + ")");
       }
 
       stmt.executeUpdate(sql);

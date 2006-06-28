@@ -232,6 +232,12 @@ while ( $#ARGV >= 0) {
 	$JAVA_ARGS .= " " . $ARGV[0];
 	shift(@ARGV);
     }
+    elsif ($ARGV[0] =~ "^-javaagent"
+	   || $ARGV[0] =~ "^-agentlib"
+	   || $ARGV[0] =~ "^-agentpath") {
+	$JAVA_ARGS .= " " . $ARGV[0];
+	shift(@ARGV);
+    }
     elsif ($ARGV[0] =~ "^-X") {
         $val = $ARGV[0];
 	$JAVA_ARGS .= " " . $val;

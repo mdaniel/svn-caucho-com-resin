@@ -559,6 +559,12 @@ public class HessianOutput extends AbstractHessianOutput {
       
       while (length > 0x8000) {
         int sublen = 0x8000;
+
+	// chunk can't end in high surrogate
+	char tail = value.charAt(offset + sublen - 1);
+
+	if (0xd800 <= tail && tail <= 0xdbff)
+	  sublen--;
         
         os.write('s');
         os.write(sublen >> 8);
@@ -604,6 +610,12 @@ public class HessianOutput extends AbstractHessianOutput {
       while (length > 0x8000) {
         int sublen = 0x8000;
 
+	// chunk can't end in high surrogate
+	char tail = buffer[offset + sublen - 1];
+
+	if (0xd800 <= tail && tail <= 0xdbff)
+	  sublen--;
+        
         os.write('s');
         os.write(sublen >> 8);
         os.write(sublen);

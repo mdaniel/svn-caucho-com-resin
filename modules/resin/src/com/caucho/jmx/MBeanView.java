@@ -139,14 +139,16 @@ public class MBeanView {
    */
   protected void getDomains(ArrayList<String> domains)
   {
-    Iterator<ObjectName> names = _mbeans.keySet().iterator();
-    while (names.hasNext()) {
-      ObjectName name = names.next();
+    synchronized (_mbeans) {
+      Iterator<ObjectName> names = _mbeans.keySet().iterator();
+      while (names.hasNext()) {
+	ObjectName name = names.next();
 
-      String domain = name.getDomain();
+	String domain = name.getDomain();
 
-      if (! domains.contains(domain))
-	domains.add(domain);
+	if (! domains.contains(domain))
+	  domains.add(domain);
+      }
     }
 
     MBeanView parent = getParentView();
@@ -310,13 +312,15 @@ public class MBeanView {
    */
   boolean add(ObjectName name, MBeanWrapper mbean, boolean overwrite)
   {
-    if (overwrite || _mbeans.get(name) == null) {
-      _mbeans.put(name, mbean);
+    synchronized (_mbeans) {
+      if (overwrite || _mbeans.get(name) == null) {
+	_mbeans.put(name, mbean);
 
-      return true;
+	return true;
+      }
+      else
+	return false;
     }
-    else
-      return false;
   }
 
   /**
@@ -324,7 +328,9 @@ public class MBeanView {
    */
   MBeanWrapper remove(ObjectName name)
   {
-    return _mbeans.remove(name);
+    synchronized (_mbeans) {
+      return _mbeans.remove(name);
+    }
   }
 
   /**
@@ -332,10 +338,12 @@ public class MBeanView {
    */
   MBeanWrapper remove(ObjectName name, MBeanWrapper mbean)
   {
-    if (mbean != null && _mbeans.get(name) != mbean)
-      return null;
+    synchronized (_mbeans) {
+      if (mbean != null && _mbeans.get(name) != mbean)
+	return null;
     
-    return _mbeans.remove(name);
+      return _mbeans.remove(name);
+    }
   }
   
   /**
@@ -343,19 +351,21 @@ public class MBeanView {
    */
   public MBeanWrapper getMBean(ObjectName name)
   {
-    MBeanWrapper mbean = _mbeans.get(name);
-    if (mbean != null)
-      return mbean;
+    synchronized (_mbeans) {
+      MBeanWrapper mbean = _mbeans.get(name);
+      if (mbean != null)
+	return mbean;
 
-    if (_classLoader == null)
-      return null;
+      if (_classLoader == null)
+	return null;
 
-    MBeanView parentView = getParentView();
+      MBeanView parentView = getParentView();
 
-    if (parentView != null)
-      return parentView.getMBean(name);
-    else
-      return null;
+      if (parentView != null)
+	return parentView.getMBean(name);
+      else
+	return null;
+    }
   }
 
   /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2006 Caucho Technology, Inc.  All rights reserved.
+ * Copyright (c) 2001-2004 Caucho Technology, Inc.  All rights reserved.
  *
  * The Apache Software License, Version 1.1
  *
@@ -52,51 +52,49 @@ import java.io.*;
 import java.util.*;
 import java.lang.reflect.*;
 
-public interface Hessian2Constants
-{
-  public static final int INT_DIRECT_MIN = -0x10;
-  public static final int INT_DIRECT_MAX = 0x1f;
-  public static final int INT_ZERO = 0x90;
-  // 0xb0-0xcf is reserved
+/**
+ * Serializing an object for known object types.
+ */
+public class EnumSerializer extends AbstractSerializer {
+  private Method _name;
+  
+  public EnumSerializer(Class cl)
+  {
+    try {
+      _name = cl.getMethod("name", new Class[0]);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
+  public void writeObject(Object obj, AbstractHessianOutput out)
+    throws IOException
+  {
+    if (out.addRef(obj))
+      return;
 
-  public static final int INT_BYTE_MIN = -0x800;
-  public static final int INT_BYTE_MAX = 0x7ff;
-  public static final int INT_BYTE_ZERO = 0xd8;
-  
-  public static final long LONG_DIRECT_MIN = -0x08;
-  public static final long LONG_DIRECT_MAX =  0x07;
-  public static final int LONG_ZERO = 0xe8;
-  // 0xf0-0xff is reserved
-  
-  public static final int STRING_DIRECT_MAX = 0x0f;
-  public static final int STRING_DIRECT = 0x00;
-  // 0x10-0x1f is reserved
-  
-  public static final int BYTES_DIRECT_MAX = 0x0f;
-  public static final int BYTES_DIRECT = 0x20;
-  // 0x30-0x3f is reserved
-  
-  public static final int INT_BYTE = 'a';
-  public static final int INT_SHORT = 'c';
-  
-  public static final int LONG_BYTE = 'e';
-  public static final int LONG_SHORT = 'f';
-  public static final int LONG_INT = 'g';
-  
-  public static final int DOUBLE_ZERO = 'h';
-  public static final int DOUBLE_ONE = 'i';
-  public static final int DOUBLE_BYTE = 'j';
-  public static final int DOUBLE_SHORT = 'k';
+    Class cl = obj.getClass();
 
-  public static final int DOUBLE_INT = 'n';
-  public static final int DOUBLE_256_SHORT = 'p';
+    String name = null;
+    try {
+      name = (String) _name.invoke(obj, (Object[]) null);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
 
-  public static final int DOUBLE_FLOAT = 'q';
-  public static final int LENGTH_BYTE = 'u';
-  public static final int LIST_FIXED = 'v';
-  
-  public static final int REF_BYTE = 'w';
-  public static final int REF_SHORT = 'x';
+    int ref = out.writeObjectBegin(cl.getName());
 
-  public static final int TYPE_REF = 'T';
+    if (ref < 0) {
+      out.writeString("name");
+      out.writeString(name);
+    }
+    else {
+      if (ref == 0) {
+	out.writeClassFieldLength(1);
+	out.writeString("name");
+      }
+
+      out.writeString(name);
+    }
+  }
 }

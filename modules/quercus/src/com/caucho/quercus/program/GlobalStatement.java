@@ -59,6 +59,7 @@ public class GlobalStatement extends Statement {
   public GlobalStatement(Location location, VarExpr var)
   {
     super(location);
+    
     _var = var;
   }
   

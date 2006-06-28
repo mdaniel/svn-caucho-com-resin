@@ -29,14 +29,6 @@
 
 package com.caucho.mbeans.j2ee;
 
-import com.caucho.jmx.IntrospectionMBean;
-import com.caucho.jmx.Jmx;
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.server.host.Host;
-import com.caucho.server.webapp.Application;
-
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
 import java.util.Hashtable;
 import java.util.Set;
 import java.util.Map;
@@ -44,11 +36,21 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+
+import com.caucho.jmx.IntrospectionMBean;
+import com.caucho.jmx.Jmx;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.server.host.Host;
+import com.caucho.server.webapp.Application;
+
 /**
  * Base class management interface for all managed objects.
  */
 abstract public class J2EEManagedObject {
-  private static final Logger log = Logger.getLogger(J2EEManagedObject.class.getName());
+  private static final Logger log
+    = Logger.getLogger(J2EEManagedObject.class.getName());
 
   private static final String[] CONTEXT_KEYS = {
     "J2EEServer",
@@ -164,7 +166,6 @@ abstract public class J2EEManagedObject {
    * key/value pairs are added to the pattern.
    * The pattern does not need to include ",*", it is added automatically.
    */
-  @SuppressWarnings("unchecked")
   protected String[] queryObjectNames(String ... patterns)
   {
     TreeSet<String> objectNames = new TreeSet<String>();
@@ -201,8 +202,8 @@ abstract public class J2EEManagedObject {
           objectNames.add(matchingObjectName.toString());
       }
       catch (MalformedObjectNameException ex) {
-        if (log.isLoggable(Level.WARNING))
-          log.log(Level.WARNING, ex.toString(), ex);
+        if (log.isLoggable(Level.FINE))
+          log.log(Level.FINE, ex.toString(), ex);
       }
     }
 
@@ -221,13 +222,12 @@ abstract public class J2EEManagedObject {
         _objectName = createObjectName(properties);
       }
       catch (MalformedObjectNameException ex) {
-
         _lifecycle.toError();
 
-        if (log.isLoggable(Level.WARNING)) {
+        if (log.isLoggable(Level.FINE)) {
           StringBuilder builder = new StringBuilder();
 
-          builder.append('`');
+          builder.append('\'');
           for (Map.Entry<String,String> entry : properties.entrySet()) {
             if (builder.length() > 0)
               builder.append(',');
@@ -240,7 +240,7 @@ abstract public class J2EEManagedObject {
           builder.append("' ");
           builder.append(ex.toString());
 
-          log.log(Level.WARNING, builder.toString(), ex);
+          log.log(Level.FINE, builder.toString(), ex);
         }
       }
     }
@@ -253,8 +253,8 @@ abstract public class J2EEManagedObject {
     catch (Exception ex) {
       _lifecycle.toError();
 
-      if (log.isLoggable(Level.WARNING))
-        log.log(Level.WARNING, _objectName.toString() + " " + ex.toString(), ex);
+      if (log.isLoggable(Level.FINE))
+        log.log(Level.FINE, _objectName.toString() + " " + ex.toString(), ex);
 
       return;
     }

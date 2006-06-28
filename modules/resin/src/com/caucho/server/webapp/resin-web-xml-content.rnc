@@ -253,6 +253,9 @@ r_jsp = element jsp {
 
  & element tld-file-set { r_fileset }?
 
+ & (attribute trim-directive-whitespaces { r_boolean-Type }
+    | element trim-directive-whitespaces { r_boolean-Type })?
+
  & (attribute validate-taglib-schema { r_boolean-Type }
     | element validate-taglib-schema { r_boolean-Type })?
 

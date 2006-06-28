@@ -1824,12 +1824,29 @@ public class JspParser {
     String string = _text.toString();
 
     setLocation(_filename, _lineStart);
-    _jspBuilder.text(string, _filename, _lineStart, _line);
+
+    if (_parseState.isTrimWhitespace() && isWhitespace(string)) {
+    }
+    else
+      _jspBuilder.text(string, _filename, _lineStart, _line);
     
     _lineStart = _line;
     _text.clear();
     _startText = _charCount;
   }
+
+  private boolean isWhitespace(String s)
+  {
+    int length = s.length();
+
+    for (int i = 0; i < length; i++) {
+      if (! Character.isWhitespace(s.charAt(i)))
+	return false;
+    }
+
+    return true;
+  }
+  
 
   /**
    * Checks to see if the element name represents a tag.

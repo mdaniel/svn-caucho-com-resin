@@ -508,12 +508,20 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     }
   }
 
-  synchronized FilterChain createServletChain()
+  FilterChain createServletChain()
     throws ServletException
   {
-    if (_servletChain != null)
+    synchronized (this) {
+      if (_servletChain == null)
+	_servletChain = createServletChainImpl();
+      
       return _servletChain;
+    }
+  }
 
+  private FilterChain createServletChainImpl()
+    throws ServletException
+  {
     String jspFile = getJspFile();
     FilterChain servletChain = null;
 
@@ -565,45 +573,11 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     if (Alarm.getCurrentTime() < _nextInitTime)
       throw _initException;
 
-    Class servletClass = getServletClass();
-
     if (log.isLoggable(Level.FINE))
       log.fine("Servlet[" + _servletName + "] starting");
     
     try {
-      Servlet servlet = null;
-      
-      if (_jspFile != null) {
-        servlet = createJspServlet(_servletName, _jspFile);
-
-	if (servlet == null)
-	  throw new ServletException(L.l("'{0}' is a missing JSP file.",
-					 _jspFile));
-      }
-
-      else if (servletClass != null)
-        servlet = (Servlet) servletClass.newInstance();
-      
-      else
-        throw new ServletException(L.l("Null servlet class for `{0}'.",
-                                       _servletName));
-
-      InjectIntrospector.configure(servlet);
-
-      // Initialize bean properties
-      InitProgram init = getInit();
-
-      if (init != null)
-        init.getBuilderProgram().configure(servlet);
-
-      try {
-        servlet.init(this);
-      } catch (UnavailableException e) {
-        setInitException(e);
-        throw e;
-      }
-
-      _servlet = servlet;
+      _servlet = createServletImpl();
 
       // If the servlet has an MBean, register it
       try {
@@ -632,6 +606,45 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
       throw new ServletException(e);
     }
   }
+
+  private Servlet createServletImpl()
+    throws Throwable
+  {
+    Class servletClass = getServletClass();
+    
+    Servlet servlet;
+    if (_jspFile != null) {
+      servlet = createJspServlet(_servletName, _jspFile);
+
+      if (servlet == null)
+	throw new ServletException(L.l("'{0}' is a missing JSP file.",
+				       _jspFile));
+    }
+
+    else if (servletClass != null)
+      servlet = (Servlet) servletClass.newInstance();
+      
+    else
+      throw new ServletException(L.l("Null servlet class for `{0}'.",
+				     _servletName));
+
+    InjectIntrospector.configure(servlet);
+
+    // Initialize bean properties
+    InitProgram init = getInit();
+
+    if (init != null)
+      init.getBuilderProgram().configure(servlet);
+
+    try {
+      servlet.init(this);
+    } catch (UnavailableException e) {
+      setInitException(e);
+      throw e;
+    }
+
+    return servlet;
+  }
   
   /**
    * Instantiates a servlet given its configuration.
@@ -640,7 +653,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
    *
    * @return the initialized servlet.
    */
-  Servlet createJspServlet(String servletName, String jspFile)
+  private Servlet createJspServlet(String servletName, String jspFile)
     throws ServletException
   {
     try {

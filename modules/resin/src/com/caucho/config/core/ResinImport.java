@@ -32,6 +32,8 @@ import java.util.ArrayList;
 
 import java.util.logging.Logger;
 
+import javax.servlet.jsp.el.VariableResolver;
+
 import com.caucho.util.L10N;
 
 import com.caucho.log.Log;
@@ -44,6 +46,7 @@ import com.caucho.loader.Environment;
 import com.caucho.config.Config;
 import com.caucho.config.NodeBuilder;
 import com.caucho.config.SchemaBean;
+import com.caucho.config.ConfigVariableResolver;
 import com.caucho.config.ConfigException;
 
 import com.caucho.config.types.FileSetType;
@@ -130,6 +133,11 @@ public class ResinImport extends ResinControl {
       Config config = new Config();
       // server/10hc
       // config.setResinInclude(true);
+
+      VariableResolver varResolver = Config.getEnvironment();
+      if (varResolver instanceof ConfigVariableResolver) {
+	config.setConfigVariableResolver((ConfigVariableResolver) varResolver);
+      }
 
       config.configureBean(object, path, schema);
     }

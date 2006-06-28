@@ -125,6 +125,8 @@ public class HessianProxyFactory implements ServiceProxyFactory, ObjectFactory {
   private boolean _isHessian2Reply = false;
   private boolean _isHessian2Request = false;
 
+  private boolean _isChunkedPost = true;
+
   private long _readTimeout = -1;
 
   /**
@@ -167,6 +169,22 @@ public class HessianProxyFactory implements ServiceProxyFactory, ObjectFactory {
   public void setOverloadEnabled(boolean isOverloadEnabled)
   {
     _isOverloadEnabled = isOverloadEnabled;
+  }
+
+  /**
+   * Set true if should use chunked encoding on the request.
+   */
+  public void setChunkedPost(boolean isChunked)
+  {
+    _isChunkedPost = isChunked;
+  }
+
+  /**
+   * Set true if should use chunked encoding on the request.
+   */
+  public boolean isChunkedPost()
+  {
+    return _isChunkedPost;
   }
 
   /**

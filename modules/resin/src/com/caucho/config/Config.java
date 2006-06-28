@@ -84,6 +84,9 @@ public class Config {
   private static LruCache<Path,SoftReference<QDocument>> _parseCache =
     new LruCache<Path,SoftReference<QDocument>>(32);
 
+  // Copied from parent for resin:import, server/13jk
+  private ConfigVariableResolver _varResolver;
+  
   private HashMap<String,Object> _vars
     = new HashMap<String,Object>();
   
@@ -132,6 +135,22 @@ public class Config {
   public void setEL(boolean isEL)
   {
     _isEL = isEL;
+  }
+
+  /**
+   * Sets the variable resolver.
+   */
+  public void setConfigVariableResolver(ConfigVariableResolver varResolver)
+  {
+    _varResolver = varResolver;
+  }
+
+  /**
+   * Gets the variable resolver.
+   */
+  public ConfigVariableResolver getConfigVariableResolver()
+  {
+    return _varResolver;
   }
 
   /**

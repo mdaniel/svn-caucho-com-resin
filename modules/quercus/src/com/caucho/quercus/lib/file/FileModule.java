@@ -89,6 +89,7 @@ public class FileModule extends AbstractQuercusModule {
 
   public static final int FILE_USE_INCLUDE_PATH = 1;
   public static final int FILE_APPEND = 2;
+  public static final int LOCK_EX = 4;
 
   private static final HashMap<String,StringValue> _iniMap
     = new HashMap<String,StringValue>();
@@ -900,10 +901,13 @@ public class FileModule extends AbstractQuercusModule {
     // php/1634
 
     try {
-      // XXX: bug862, flags check for FILE_USE_INCLUDE_PATH, FILE_APPEND, LOCK_EX
-
       boolean useIncludePath = (flags & FILE_USE_INCLUDE_PATH) != 0;
       String mode = (flags & FILE_APPEND) != 0 ? "a" : "w";
+
+      // XXX: LOCK_EX
+
+      if ((flags & LOCK_EX) != 0)
+	throw new UnsupportedOperationException("LOCK_EX");
       
       BinaryStream s = fopen(env, filename, mode, useIncludePath, context);
 
@@ -917,11 +921,20 @@ public class FileModule extends AbstractQuercusModule {
 
 	if (data instanceof ArrayValue) {
 	  for (Value item : ((ArrayValue) data).values()) {
-	    os.print(item.toString());
+	    InputStream is = item.toInputStream();
+	    
+	    dataWritten += os.write(is, Integer.MAX_VALUE);
+
+	    is.close();
 	  }
 	}
-	else
-	  os.print(data.toString());
+	else {
+	  InputStream is = data.toInputStream();
+	  
+	  dataWritten += os.write(is, Integer.MAX_VALUE);
+
+	  is.close();
+	}
 
 	return new LongValue(dataWritten);
       } finally {
@@ -974,15 +987,21 @@ public class FileModule extends AbstractQuercusModule {
     try {
       Path path;
 
-      if (useIncludePath)
-	path = env.lookupInclude(filename);
-      else
-	path = env.getPwd().lookup(filename);
+      path = env.getPwd().lookup(filename);
 
       if (mode.startsWith("r+")) {
 	throw new UnsupportedOperationException("read/write not yet supported");
       }
       else if (mode.startsWith("r")) {
+	if (useIncludePath)
+	  path = env.lookupInclude(filename);
+
+	if (path == null) {
+          env.warning(L.l("{0} cannot be read", filename));
+
+	  return null;
+	}
+
 	try {
 	  return new FileInput(path);
 	} catch (IOException e) {

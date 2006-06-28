@@ -163,8 +163,8 @@ public class ErrorPageManager {
                                ServletResponse res)
     throws IOException
   {
-    if (log.isLoggable(Level.FINE))
-      log.log(Level.FINE, e.toString(), e);
+    if (log.isLoggable(Level.WARNING))
+      log.log(Level.WARNING, e.toString(), e);
 
     HttpServletResponse response = (HttpServletResponse) res;
     HttpServletRequest request = (HttpServletRequest) req;

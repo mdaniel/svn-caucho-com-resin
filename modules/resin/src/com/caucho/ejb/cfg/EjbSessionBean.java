@@ -263,7 +263,7 @@ public class EjbSessionBean extends EjbBean {
 
     BuilderProgramContainer initContainer = getInitProgram();
 
-    if (initList.size() > 0) {
+    if (initList != null && initList.size() > 0) {
       if (initContainer == null)
 	initContainer = new BuilderProgramContainer();
 

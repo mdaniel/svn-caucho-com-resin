@@ -152,11 +152,14 @@ public class DataHandler implements Transferable {
       InputStream is = _dataSource.getInputStream();
 
       try {
-
 	byte[] buf = new byte[1024];
-	while(true) {
+	
+	while (true) {
 	  int numread = is.read(buf, 0, buf.length);
-	  if (numread==-1) break;
+	  
+	  if (numread < 0)
+	    break;
+	  
 	  os.write(buf, 0, numread);
 	}
 

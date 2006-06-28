@@ -137,18 +137,21 @@ public class ClassDependency implements PersistentDependency {
     digest = addDigest(digest, cl.getModifiers());
 
     Class superClass = cl.getSuperclass();
-    if (superClass != null)
+    if (superClass != null
+	&& superClass.getName().startsWith("java.")
+	&& ! superClass.getName().startsWith("javax.")) {
       digest = addDigest(digest, superClass);
+    }
 
     Class []interfaces = cl.getInterfaces();
-    Arrays.sort(interfaces, new ClassComparator());
+    Arrays.sort(interfaces, ClassComparator.CMP);
     for (int i = 0; i < interfaces.length; i++)
       digest = addDigest(digest, interfaces[i].getName());
 
     if (_checkFields) {
       Field []fields = cl.getDeclaredFields();
 
-      Arrays.sort(fields, new FieldComparator());
+      Arrays.sort(fields, FieldComparator.CMP);
 
       for (int i = 0; i < fields.length; i++) {
 	int modifiers = fields[i].getModifiers();
@@ -165,7 +168,7 @@ public class ClassDependency implements PersistentDependency {
     }
 
     Method []methods = cl.getDeclaredMethods();
-    Arrays.sort(methods, new MethodComparator());
+    Arrays.sort(methods, MethodComparator.CMP);
       
     for (int i = 0; i < methods.length; i++) {
       Method method = methods[i];
@@ -189,7 +192,7 @@ public class ClassDependency implements PersistentDependency {
       digest = addDigest(digest, method.getReturnType().getName());
 
       Class []exn = method.getExceptionTypes();
-      Arrays.sort(exn, new ClassComparator());
+      Arrays.sort(exn, ClassComparator.CMP);
       for (int j = 0; j < exn.length; j++)
 	digest = addDigest(digest, exn[j].getName());
     }
@@ -211,7 +214,6 @@ public class ClassDependency implements PersistentDependency {
    */
   private static long addDigest(long digest, long v)
   {
-    
     digest = Crc64.generate(digest, (byte) (v >> 24));
     digest = Crc64.generate(digest, (byte) (v >> 16));
     digest = Crc64.generate(digest, (byte) (v >> 8));
@@ -247,6 +249,8 @@ public class ClassDependency implements PersistentDependency {
   }
 
   static class ClassComparator implements Comparator<Class> {
+    static final ClassComparator CMP = new ClassComparator();
+    
     public int compare(Class a, Class b)
     {
       if (a == b)
@@ -255,14 +259,14 @@ public class ClassDependency implements PersistentDependency {
 	return -1;
       else if (b == null)
 	return 1;
-      else if (a.equals(b))
-	return 0;
 
       return a.getName().compareTo(b.getName());
     }
   }
 
   static class FieldComparator implements Comparator<Field> {
+    static final FieldComparator CMP = new FieldComparator();
+    
     public int compare(Field a, Field b)
     {
       if (a == b)
@@ -285,6 +289,8 @@ public class ClassDependency implements PersistentDependency {
   }
 
   static class MethodComparator implements Comparator<Method> {
+    static final MethodComparator CMP = new MethodComparator();
+    
     public int compare(Method a, Method b)
     {
       if (a == b)

@@ -118,6 +118,14 @@ public class JdbcDestination extends AbstractDestination {
   }
 
   /**
+   * Sets the tablespace for Oracle.
+   */
+  public void setTablespace(String tablespace)
+  {
+    _jdbcManager.setTablespace(tablespace);
+  }
+
+  /**
    * Initializes the JdbcQueue
    */
   public void init()

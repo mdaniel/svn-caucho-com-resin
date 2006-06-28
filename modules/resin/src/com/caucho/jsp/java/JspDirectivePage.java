@@ -61,6 +61,7 @@ public class JspDirectivePage extends JspNode {
   private static final QName AUTO_FLUSH = new QName("autoFlush");
   private static final QName IS_THREAD_SAFE = new QName("isThreadSafe");
   private static final QName EXTENDS = new QName("extends");
+  private static final QName TRIM_WS = new QName("trimDirectiveWhitespaces");
 
   private Boolean _isElIgnored;
   
@@ -236,6 +237,15 @@ public class JspDirectivePage extends JspNode {
         throw error(L.l("extends `{0}' conflicts with previous value of extends `{1}'.  Check the .jsp and any included .jsp files for conflicts.", value, oldExtends.getName()));
       
       _parseState.setExtends(cl);
+    }
+    else if (TRIM_WS.equals(name)) {
+      if (value.equals("true"))
+        _parseState.setTrimWhitespace(true);
+      else if (value.equals("false"))
+        _parseState.setTrimWhitespace(false);
+      else
+        throw error(L.l("trimDirectiveWhitespaces expects `true' or `false' at `{0}'",
+                        value));
     }
     else {
       throw error(L.l("`{0}' is an unknown JSP page directive attribute.  See the JSP documentation for a complete list of page directive attributes.",

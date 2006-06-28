@@ -35,6 +35,7 @@ import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
 
 import org.w3c.dom.*;
+import org.xml.sax.*;
 
 import com.caucho.vfs.*;
 import com.caucho.util.*;
@@ -144,13 +145,13 @@ public class XmlParseTag extends BodyTagSupport {
       else
 	throw new JspException(L.l("x:parse requires a body"));
 
-      ReadStream rs = Vfs.openRead(reader);
+      InputSource is = new InputSource(reader);
 
       XmlParser parser = new Xml();
 
-      Document doc = parser.parseDocument(rs);
+      Document doc = parser.parseDocument(is);
 
-      rs.close();
+      reader.close();
 
       if (_var != null)
         CoreSetTag.setValue(pageContext, _var, _scope, doc);

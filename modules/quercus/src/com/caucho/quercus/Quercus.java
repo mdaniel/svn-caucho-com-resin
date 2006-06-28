@@ -156,6 +156,8 @@ public class Quercus {
     = new HashMap<String, Object>();
 
   private String _scriptEncoding = "utf-8";
+
+  private boolean _isStrict;
   
   private DataSource _database;
 
@@ -243,6 +245,22 @@ public class Quercus {
   public DataSource getDatabase()
   {
     return _database;
+  }
+
+  /**
+   * Sets the strict mode.
+   */
+  public void setStrict(boolean isStrict)
+  {
+    _isStrict = isStrict;
+  }
+
+  /**
+   * Gets the strict mode.
+   */
+  public boolean isStrict()
+  {
+    return _isStrict;
   }
 
   /**

@@ -67,6 +67,8 @@ public class JdbcManager {
   
   private String _blob;
   private String _longType;
+  
+  private String _tablespace;  // oracle tablespace for blobs
 
   private boolean _isTruncateBlob;
 
@@ -177,6 +179,22 @@ public class JdbcManager {
       _blob = getMetaData().getBlobType();
 
     return _blob;
+  }
+
+  /**
+   * Sets the oracle tablespace.
+   */
+  public void setTablespace(String tablespace)
+  {
+    _tablespace = tablespace;
+  }
+
+  /**
+   * Gets the oracle tablespace
+   */
+  public String getTablespace()
+  {
+    return _tablespace;
   }
 
   /**

@@ -76,6 +76,8 @@ public class JspPropertyGroup {
   private boolean _recompileOnError = false;
   private FileSetType _tldFileSet;
 
+  private boolean _isTrimWhitespace = false;
+
   /**
    * Returns the group's identifier.
    */
@@ -496,6 +498,22 @@ public class JspPropertyGroup {
   public boolean getStaticPageGeneratesClass()
   {
     return _staticPageGeneratesClass;
+  }
+
+  /**
+   * True if whitespace is trimmed.
+   */
+  public boolean isTrimDirectiveWhitespaces()
+  {
+    return _isTrimWhitespace;
+  }
+
+  /**
+   * Set if whitespace is trimmed.
+   */
+  public void setTrimDirectiveWhitespaces(boolean isTrim)
+  {
+    _isTrimWhitespace = isTrim;
   }
 
   /**

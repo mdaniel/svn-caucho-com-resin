@@ -34,6 +34,7 @@ com.caucho.quercus.lib.file.SocketModule
 com.caucho.quercus.lib.StreamModule
 com.caucho.quercus.lib.string.StringModule
 com.caucho.quercus.lib.UrlModule
+com.caucho.quercus.lib.i18n.UnicodeModule
 com.caucho.quercus.lib.VariableModule
 com.caucho.quercus.lib.xml.XmlModule
 com.caucho.quercus.lib.zip.ZipModule

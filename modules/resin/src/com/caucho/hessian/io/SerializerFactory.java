@@ -61,6 +61,8 @@ import com.caucho.burlap.io.BurlapRemoteObject;
  * Factory for returning serialization methods.
  */
 public class SerializerFactory extends AbstractSerializerFactory {
+  private static Class _enumClass;
+  
   private static HashMap _serializerMap;
   private static HashMap _deserializerMap;
   private static HashMap _typeMap;
@@ -166,6 +168,9 @@ public class SerializerFactory extends AbstractSerializerFactory {
     
     else if (Calendar.class.isAssignableFrom(cl))
       serializer = CalendarSerializer.create();
+    
+    else if (_enumClass != null && _enumClass.isAssignableFrom(cl))
+      serializer = new EnumSerializer(cl);
 
     if (serializer == null)
       serializer = getDefaultSerializer(cl);
@@ -243,6 +248,9 @@ public class SerializerFactory extends AbstractSerializerFactory {
     else if (Enumeration.class.isAssignableFrom(cl))
       deserializer = EnumerationDeserializer.create();
 
+    else if (_enumClass != null && _enumClass.isAssignableFrom(cl))
+      deserializer = new EnumDeserializer(cl);
+    
     else
       deserializer = getDefaultDeserializer(cl);
 
@@ -473,6 +481,11 @@ public class SerializerFactory extends AbstractSerializerFactory {
       Class stackTrace = Class.forName("java.lang.StackTraceElement");
       
       _deserializerMap.put(stackTrace, new StackTraceElementDeserializer());
+    } catch (Throwable e) {
+    }
+
+    try {
+      _enumClass = Class.forName("java.lang.Enum");
     } catch (Throwable e) {
     }
   }

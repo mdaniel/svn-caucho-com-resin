@@ -94,6 +94,7 @@ public class ParseState {
   private Class _extends;
 
   private boolean _recycleTags = true;
+  private boolean _isTrimWhitespace;
 
   private JspResourceManager _resourceManager;
 
@@ -472,6 +473,22 @@ public class ParseState {
   public boolean isPrintNullAsBlank()
   {
     return _jspPropertyGroup.isPrintNullAsBlank();
+  }
+
+  /**
+   * Returns true if JSP whitespace is trimmed.
+   */
+  public boolean isTrimWhitespace()
+  {
+    return _isTrimWhitespace;
+  }
+
+  /**
+   * Set true if JSP whitespace is trimmed.
+   */
+  public void setTrimWhitespace(boolean trim)
+  {
+    _isTrimWhitespace = trim;
   }
   
   /**

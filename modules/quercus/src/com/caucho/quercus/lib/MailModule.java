@@ -30,9 +30,12 @@
 package com.caucho.quercus.lib;
 
 import java.util.Properties;
+import java.util.ArrayList;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.activation.DataHandler;
 
 import javax.mail.Address;
 import javax.mail.Message;
@@ -44,6 +47,8 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 import com.caucho.util.L10N;
+
+import com.caucho.quercus.QuercusModuleException;
 
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Env;
@@ -66,7 +71,7 @@ public class MailModule extends AbstractQuercusModule {
   public static boolean mail(Env env,
 			     String to,
 			     String subject,
-			     String message,
+			     StringValue message,
 			     @Optional String additionalHeaders,
 			     @Optional String additionalParameters)
   {
@@ -93,17 +98,25 @@ public class MailModule extends AbstractQuercusModule {
       MimeMessage msg = new MimeMessage(mailSession);
       msg.setFrom();
       msg.setSubject(subject);
-      msg.setText(message);
+      msg.setContent(message.toString(), "text/plain");
 
-      Address addr = new InternetAddress(to);
-      msg.addRecipient(Message.RecipientType.TO, addr);
+      ArrayList<Address> addrList;
+      addrList = addRecipients(msg, Message.RecipientType.TO, to);
 
       if (additionalHeaders != null)
 	addHeaders(msg, additionalHeaders);
 
+      msg.saveChanges();
+
+      if (addrList.size() == 0)
+	throw new QuercusModuleException(L.l("mail has no recipients"));
+
       smtp.connect();
 
-      smtp.sendMessage(msg, new Address[] { addr });
+      Address[] addr = new Address[addrList.size()];
+      addrList.toArray(addr);
+      
+      smtp.sendMessage(msg, addr);
 
       log.fine("quercus-mail: sent mail to " + to);
 
@@ -132,6 +145,27 @@ public class MailModule extends AbstractQuercusModule {
 	log.log(Level.FINER, e.toString(), e);
       }
     }
+  }
+
+  private static ArrayList<Address> addRecipients(MimeMessage msg,
+						  Message.RecipientType type,
+						  String to)
+    throws MessagingException
+  {
+    String []split = to.split("[ \t,<>]");
+
+    ArrayList<Address> addresses = new ArrayList<Address>();
+
+    for (int i = 0; i < split.length; i++) {
+      if (split[i].indexOf('@') > 0) {
+	Address addr = new InternetAddress(split[i]);
+	
+	addresses.add(addr);
+	msg.addRecipient(type, addr);
+      }
+    }
+
+    return addresses;
   }
 
   private static void addHeaders(MimeMessage msg, String headers)

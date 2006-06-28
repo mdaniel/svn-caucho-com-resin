@@ -323,6 +323,8 @@ public class JspCompilerInstance {
       pageConfig.setStaticEncoding(_jspPropertyGroup.isStaticEncoding());
 
       _parseState.setRecycleTags(_jspPropertyGroup.isRecycleTags());
+      
+      _parseState.setTrimWhitespace(_jspPropertyGroup.isTrimDirectiveWhitespaces());
 
       if (_jspPropertyGroup.getTldFileSet() != null)
         taglibManager.setTldFileSet(_jspPropertyGroup.getTldFileSet());

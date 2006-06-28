@@ -138,6 +138,9 @@ public final class Env {
   private static final StringValue PHP_SELF_STRING
     = new StringValueImpl("PHP_SELF");
 
+  private static final StringValue UTF8_STRING
+    = new StringValueImpl("utf-8");
+
   private static final
     LruCache<ClassKey,SoftReference<QuercusClass>> _classCache
     = new LruCache<ClassKey,SoftReference<QuercusClass>>(4096);
@@ -217,6 +220,8 @@ public final class Env {
   private Path _uploadPath;
   private ArrayList<Path> _removePaths;
 
+  private final boolean _isStrict;
+
   private HttpServletRequest _request;
   private HttpServletResponse _response;
 
@@ -246,6 +251,8 @@ public final class Env {
 
   private int _objectId = 0;
 
+  private Logger _logger;
+
   public Env(Quercus quercus,
              QuercusPage page,
              WriteStream out,
@@ -253,6 +260,8 @@ public final class Env {
              HttpServletResponse response)
   {
     _quercus = quercus;
+
+    _isStrict = quercus.isStrict();
 
     _page = page;
 
@@ -306,14 +315,85 @@ public final class Env {
     this(quercus, null, null, null, null);
   }
 
+  //
+  // i18n
+  //
+
+  /**
+   * Returns the encoding used for scripts.
+   */
   public String getScriptEncoding()
   {
-    return getQuercus().getScriptEncoding();
+    StringValue encoding = getIni("unicode.script_encoding");
+
+    if (encoding == null)
+      encoding = getIni("unicode.fallback");
+
+    if (encoding != null)
+      return encoding.toString();
+    else
+      return getQuercus().getScriptEncoding();
+  }
+
+  /**
+   * Returns the encoding used for runtime conversions, e.g. files
+   */
+  public StringValue getRuntimeEncoding()
+  {
+    StringValue encoding = getIni("unicode.runtime_encoding");
+
+    if (encoding == null)
+      encoding = getIni("unicode.fallback_encoding");
+
+    if (encoding != null)
+      return encoding;
+    else
+      return UTF8_STRING;
+  }
+
+  /**
+   * Returns the encoding used for input, i.e. post
+   */
+  public StringValue getHttpInputEncoding()
+  {
+    StringValue encoding = getIni("unicode.http_input_encoding");
+
+    if (encoding == null)
+      encoding = getIni("unicode.fallback_encoding");
+
+    if (encoding != null)
+      return encoding;
+    else
+      return UTF8_STRING;
+  }
+
+  /**
+   * Returns the encoding used for output
+   */
+  public StringValue getOutputEncoding()
+  {
+    StringValue encoding = getIni("unicode.output_encoding");
+
+    if (encoding == null)
+      encoding = getIni("unicode.fallback_encoding");
+
+    if (encoding != null)
+      return encoding;
+    else
+      return UTF8_STRING;
   }
 
   public void setScriptContext(ScriptContext context)
   {
     _scriptContext = context;
+  }
+
+  /**
+   * Returns true for strict mode.
+   */
+  public final boolean isStrict()
+  {
+    return _isStrict;
   }
   
   public void start()
@@ -897,6 +977,17 @@ public final class Env {
   }
 
   /**
+   * Returns the logger used for syslog.
+   */
+  public Logger getLogger()
+  {
+    if (_logger == null)
+      _logger = Logger.getLogger("quercus.quercus");
+
+    return _logger;
+  }
+
+  /**
    * Returns the configuration value of an init var.
    */
   public Value getConfigVar(String var)
@@ -915,6 +1006,21 @@ public final class Env {
       _iniMap = new HashMap<String, StringValue>();
 
     _iniMap.put(var, new StringValueImpl(value));
+
+    return oldValue;
+  }
+
+  /**
+   * Sets an ini value.
+   */
+  public Value setIni(String var, StringValue value)
+  {
+    StringValue oldValue = getIni(var);
+
+    if (_iniMap == null)
+      _iniMap = new HashMap<String, StringValue>();
+
+    _iniMap.put(var, value);
 
     return oldValue;
   }
@@ -1300,6 +1406,8 @@ public final class Env {
     }
 
     case HTTP_POST_VARS:
+      if (! getIniBoolean("register_long_arrays"))
+	return null;
     case _POST: {
       var = new Var();
 
@@ -1328,7 +1436,10 @@ public final class Env {
     }
     break;
 
+
     case HTTP_POST_FILES:
+      if (! getIniBoolean("register_long_arrays"))
+	return null;
     case _FILES: {
       var = new Var();
 
@@ -1346,9 +1457,12 @@ public final class Env {
     }
     break;
 
+    case HTTP_GET_VARS:
+      if (! getIniBoolean("register_long_arrays"))
+	return null;
+      
     case _GET:
-    case _REQUEST:
-    case HTTP_GET_VARS: {
+    case _REQUEST: {
       var = new Var();
 
       ArrayValue array = new ArrayValueImpl();
@@ -1378,6 +1492,8 @@ public final class Env {
     }
 
     case HTTP_SERVER_VARS:
+      if (! getIniBoolean("register_long_arrays"))
+	return null;
     case _SERVER: {
       var = new Var();
 
@@ -1398,8 +1514,10 @@ public final class Env {
       return var;
     }
 
-    case _COOKIE:
-    case HTTP_COOKIE_VARS: {
+    case HTTP_COOKIE_VARS:
+      if (! getIniBoolean("register_long_arrays"))
+	return null;
+    case _COOKIE: {
       var = new Var();
       _globalMap.put(name, var);
 
@@ -1751,10 +1869,12 @@ public final class Env {
     if (value != null)
       return value;
 
-    value = _lowerConstMap.get(name.toLowerCase());
+    if (! isStrict()) {
+      value = _lowerConstMap.get(name.toLowerCase());
 
-    if (value != null)
-      return value;
+      if (value != null)
+	return value;
+    }
 
     /* XXX:
        notice(L.l("Converting undefined constant '{0}' to string.",
@@ -1804,7 +1924,7 @@ public final class Env {
 
     _constMap.put(name, value);
 
-    if (isCaseInsensitive)
+    if (! isStrict() && isCaseInsensitive)
       _lowerConstMap.put(name.toLowerCase(), value);
 
     return value;
@@ -1906,8 +2026,10 @@ public final class Env {
 
       return fun;
     }
-    else
+    else if (! isStrict())
       return _lowerFunMap.get(name.toLowerCase());
+    else
+      return null;
   }
 
   /**
@@ -1981,7 +2103,9 @@ public final class Env {
     }
 
     _funMap.put(name, fun);
-    _lowerFunMap.put(name.toLowerCase(), fun);
+
+    if (! isStrict())
+      _lowerFunMap.put(name.toLowerCase(), fun);
 
     return BooleanValue.TRUE;
   }
@@ -2008,7 +2132,9 @@ public final class Env {
     */
 
     _funMap.put(name, fun);
-    _lowerFunMap.put(lowerName, fun);
+
+    if (! isStrict())
+      _lowerFunMap.put(lowerName, fun);
 
     return BooleanValue.TRUE;
   }
@@ -2031,7 +2157,7 @@ public final class Env {
 
     AbstractFunction fun = cl.findFunction(methodName);
 
-    if (fun == null)
+    if (fun == null && ! isStrict())
       fun = cl.findFunctionLowerCase(methodName.toLowerCase());
 
     if (fun == null) {
@@ -2311,7 +2437,9 @@ public final class Env {
     */
 
     _classMap.put(name, cl);
-    _lowerClassMap.put(name.toLowerCase(), cl);
+
+    if (! isStrict())
+      _lowerClassMap.put(name.toLowerCase(), cl);
   }
 
   /**
@@ -2320,7 +2448,9 @@ public final class Env {
   public void addClassDef(String name, ClassDef cl)
   {
     _classDefMap.put(name, cl);
-    _lowerClassDefMap.put(name.toLowerCase(), cl);
+
+    if (! isStrict())
+      _lowerClassDefMap.put(name.toLowerCase(), cl);
   }
 
   /**
@@ -2460,7 +2590,8 @@ public final class Env {
     if (cl != null)
       return cl;
 
-    cl = _lowerClassMap.get(name.toLowerCase());
+    if (! isStrict())
+      cl = _lowerClassMap.get(name.toLowerCase());
 
     if (cl != null)
       return cl;
@@ -2469,7 +2600,9 @@ public final class Env {
 
     if (cl != null) {
       _classMap.put(name, cl);
-      _lowerClassMap.put(name.toLowerCase(), cl);
+
+      if (! isStrict())
+	_lowerClassMap.put(name.toLowerCase(), cl);
 
       return cl;
     }
@@ -2590,7 +2723,7 @@ public final class Env {
     */
     ClassDef classDef = _classDefMap.get(name);
 
-    if (classDef == null)
+    if (classDef == null && ! isStrict())
       classDef = _lowerClassDefMap.get(name.toLowerCase());
     
     if (classDef == null)

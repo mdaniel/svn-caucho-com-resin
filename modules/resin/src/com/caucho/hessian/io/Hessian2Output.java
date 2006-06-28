@@ -360,12 +360,13 @@ public class Hessian2Output
   {
     flushIfFull();
 
-    if (0 <= length && length < 0x10 && _typeRefs != null) {
+    if (_typeRefs != null) {
       Integer refV = (Integer) _typeRefs.get(type);
 
       if (refV != null) {
-	_buffer[_offset++] = (byte) (LIST_DIRECT + length);
+	_buffer[_offset++] = (byte) (LIST_FIXED);
 	writeInt(refV.intValue());
+	writeInt(length);
 
 	return false;
       }
@@ -606,8 +607,8 @@ public class Hessian2Output
     
     if (INT_DIRECT_MIN <= value && value <= INT_DIRECT_MAX)
       buffer[offset++] = (byte) (value + INT_ZERO);
-    else if (-0x80 <= value && value < 0x80) {
-      buffer[offset++] = (byte) (INT_BYTE);
+    else if (INT_BYTE_MIN <= value && value <= INT_BYTE_MAX) {
+      buffer[offset++] = (byte) (INT_BYTE_ZERO + (value >> 8));
       buffer[offset++] = (byte) (value);
     }
     else if (-0x8000 <= value && value <= 0x7fff) {
@@ -886,6 +887,12 @@ public class Hessian2Output
 	  offset = 0;
 	}
 
+	// chunk can't end in high surrogate
+	char tail = value.charAt(strOffset + sublen - 1);
+
+	if (0xd800 <= tail && tail <= 0xdbff)
+	  sublen--;
+
 	buffer[offset + 0] = (byte) 's';
         buffer[offset + 1] = (byte) (sublen >> 8);
         buffer[offset + 2] = (byte) (sublen);
@@ -951,6 +958,12 @@ public class Hessian2Output
 
 	if (SIZE < _offset + 16)
 	  flush();
+
+	// chunk can't end in high surrogate
+	char tail = buffer[offset + sublen - 1];
+
+	if (0xd800 <= tail && tail <= 0xdbff)
+	  sublen--;
 	
         _buffer[_offset++] = (byte) 's';
         _buffer[_offset++] = (byte) (sublen >> 8);

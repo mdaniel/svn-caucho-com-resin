@@ -530,6 +530,8 @@ public class JavaCompiler {
     else if (batchCount == 0)
       batchCount = 1;
 
+    IOException exn = null;
+
     synchronized (LOCK) {
       for (int i = 0; i < files.length; i += batchCount) {
 	int len = files.length - i;
@@ -542,10 +544,20 @@ public class JavaCompiler {
 	System.arraycopy(files, i, batchFiles, 0, len);
 
 	Arrays.sort(batchFiles);
-	
-	compileInt(batchFiles, null);
+
+	try {
+	  compileInt(batchFiles, null);
+	} catch (IOException e) {
+	  if (exn == null)
+	    exn = e;
+	  else
+	    log.log(Level.WARNING, e.toString(), e);
+	}
       }
     }
+
+    if (exn != null)
+      throw exn;
   }
 
   protected void compileInt(String []path, LineMap lineMap)

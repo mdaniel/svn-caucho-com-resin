@@ -69,15 +69,12 @@ public class MapSerializer extends AbstractSerializer {
     else
       out.writeMapBegin(obj.getClass().getName());
 
-    Iterator iter = map.keySet().iterator();
+    Iterator iter = map.entrySet().iterator();
     while (iter.hasNext()) {
-      Object key = iter.next();
+      Map.Entry entry = (Map.Entry) iter.next();
 
-      out.writeObject(key);
-
-      Object value = map.get(key);
-        
-      out.writeObject(value);
+      out.writeObject(entry.getKey());
+      out.writeObject(entry.getValue());
     }
     out.writeMapEnd();
   }
