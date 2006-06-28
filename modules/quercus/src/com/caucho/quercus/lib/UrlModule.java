@@ -38,8 +38,11 @@ import java.io.LineNumberReader;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
+import java.net.URI;
 import java.net.URL;
 import java.net.Socket;
+import java.net.URLConnection;
+import java.net.URISyntaxException;
 
 import java.util.Map;
 import java.util.Set;
@@ -553,12 +556,14 @@ public class UrlModule extends AbstractQuercusModule {
   public static Value http_build_query(Env env, Value formdata, 
                                        @Optional String numeric_prefix)
   {
-    String result = httpBuildQueryImpl("", formdata, numeric_prefix).toString();
+    String result = 
+      httpBuildQueryImpl(env, "", formdata, numeric_prefix).toString();
 
     return new StringValueImpl(result);
   }
 
-  public static StringBuilder httpBuildQueryImpl(String path, Value formdata, 
+  public static StringBuilder httpBuildQueryImpl(Env env, String path, 
+                                                 Value formdata, 
                                                  String numeric_prefix)
   {
     StringBuilder result = new StringBuilder();
@@ -588,7 +593,7 @@ public class UrlModule extends AbstractQuercusModule {
 
       if (entry.getValue().isArray() || entry.getValue().isObject()) {
         // can always throw away the numeric prefix on recursive calls
-        result.append(httpBuildQueryImpl(newPath, entry.getValue(), null));
+        result.append(httpBuildQueryImpl(env, newPath, entry.getValue(), null));
         result.append("&");
       } else {
         result.append(newPath + "=");
@@ -758,39 +763,61 @@ public class UrlModule extends AbstractQuercusModule {
   public static Value get_meta_tags(Env env, String filename, 
                                     @Optional("false") boolean use_include_path)
   {
-    Path file = null;
+    InputStream in = null;
 
     ArrayValue result = new ArrayValueImpl();
-    
-    if (use_include_path) {
-      String [] includePaths = env.getIni("include_path").toString().split(":");
-
-      for (String includePath : includePaths) {
-        Path oldPath = Vfs.getPwd();
-
-        Path newPath = oldPath.lookup(includePath);
-
-        if (! newPath.exists())
-          break;
-
-        Vfs.setPwd(newPath);
-
-        // can only be a local file
-        file = Vfs.lookupNative(filename);
-
-        Vfs.setPwd(oldPath);
-
-        if (file.exists())
-          break;
-      }
-    } else
-      file = Vfs.lookup(filename);
-    
-    if (file == null || ! file.exists())
-      return result;
 
     try {
-      InputStream in = file.openRead();
+      Path file = null;
+
+      if (use_include_path) {
+        String [] includePaths = 
+          env.getIni("include_path").toString().split(":");
+
+        for (String includePath : includePaths) {
+          Path oldPath = Vfs.getPwd();
+
+          Path newPath = oldPath.lookup(includePath);
+
+          if (! newPath.exists())
+            break;
+
+          Vfs.setPwd(newPath);
+
+          // can only be a local file when using include path
+          file = Vfs.lookupNative(filename);
+
+          Vfs.setPwd(oldPath);
+
+          if (file.exists())
+            break;
+        }
+
+        if (file == null || ! file.exists())
+          return result;
+
+        in = file.openRead();
+      } else {
+        URI uri = new URI(filename);
+
+        if (uri.getScheme() == null || 
+            uri.getScheme().equalsIgnoreCase("file")) {
+          file = Vfs.lookup(filename);
+
+          if (file == null || ! file.exists())
+            return result;
+
+          in = file.openRead();
+        } else {
+          URLConnection connection = uri.toURL().openConnection();
+
+          connection.setDoInput(true);
+
+          connection.connect();
+
+          in = connection.getInputStream();
+        }
+      }
 
       PushbackReader reader = new PushbackReader(new InputStreamReader(in));
 
@@ -823,6 +850,15 @@ public class UrlModule extends AbstractQuercusModule {
       }
     } catch (IOException e) {
       env.warning(e);
+    } catch (URISyntaxException e) {
+      env.warning(e);
+    } finally {
+      try {
+        if (in != null)
+          in.close();
+      } catch (IOException e) {
+        env.warning(e);
+      }
     }
 
     return result;
