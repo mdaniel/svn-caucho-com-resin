@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2005 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -28,101 +28,138 @@
 
 package com.caucho.quercus.lib.zip;
 
+import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Optional;
 import com.caucho.util.L10N;
 
+import com.caucho.vfs.TempBuffer;
+
+import java.io.InputStream;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipEntry;
 
 public class QuercusZipEntry {
-  private static final Logger log = Logger.getLogger(QuercusZipEntry.class.getName());
+  private static final Logger log =
+                             Logger.getLogger(QuercusZipEntry.class.getName());
   private static final L10N L = new L10N(QuercusZipEntry.class);
 
-  private java.util.zip.ZipEntry _zipEntry;
-  private Zip _zip;
+  private InputStream _in;
+  private long _position;
+  private ZipEntry _zipEntry;
 
-  public QuercusZipEntry(java.util.zip.ZipEntry zipEntry)
+  public QuercusZipEntry(long position, ZipEntry zipEntry)
   {
+    _position = position;
     _zipEntry = zipEntry;
   }
 
+  /**
+   * Returns the file name.
+   */
   public String zip_entry_name()
   {
     return _zipEntry.getName();
   }
 
+  /**
+   * Returns the file's uncompressed size.
+   */
   public long zip_entry_filesize()
   {
     return _zipEntry.getSize();
   }
 
   /**
-   *
-   * @param zip
-   * @return always returns true because we are using ZipInputStream
+   * Opens this zip entry for reading.
    */
-  public boolean zip_entry_open(@NotNull Zip zip)
+  public boolean zip_entry_open(Env env, Zip zip)
   {
-    _zip = zip;
-    return true;
-  }
-
-  /**
-   * stubbed out for now.  Not sure if zip_entry_close is
-   * applicable given we are using ZipInputStream
-   *
-   * @return true.  has no meaning
-   */
-  public boolean zip_entry_close()
-  {
-    return true;
-  }
-
-  /**
-   *
-   *
-   * @param length
-   * @return FALSE if end of file or IOException
-   */
-  public Value zip_entry_read (@Optional("1024") int length)
-  {
-    byte[] buf = new byte[length];
-    int numBytes;
-    ZipInputStream zis = _zip.getZipInputStream();
-
     try {
-      numBytes = zis.read(buf,0,length);
-    } catch (IOException ex) {
-      log.log(Level.FINE,  ex.toString(),  ex);
-      return BooleanValue.FALSE;
-    }
+      _in = zip.openInputStream(this);
+      return true;
 
-    if (numBytes == 0)
-      return BooleanValue.FALSE;
-    else
-      return new StringValueImpl(new String(buf));
+    } catch (IOException e) {
+      env.warning(L.l(e.toString()));
+      log.log(Level.FINE,  e.toString(),  e);
+      return false;
+    }
   }
 
-  public long zip_entry_compressedsize()
+  /**
+   * Closes the zip entry.
+   */
+  public void zip_entry_close()
+    throws IOException
+  {
+    if (_in != null)
+      _in.close();
+  }
+
+  /**
+   * Reads and decompresses entry's compressed data.
+   *
+   * @param entry
+   * @param length
+   * @return decompressed BinaryValue or FALSE on error
+   */
+  public Value zip_entry_read(Env env,
+                                @Optional("1024") int length)
+  {
+    if (_in == null)
+      return BooleanValue.FALSE;
+
+    BinaryBuilderValue bbv = new BinaryBuilderValue();
+    TempBuffer tb = TempBuffer.allocate();
+    byte[] buffer = tb.getBuffer();
+
+    int sublen;
+    try {
+      while (length > 0) {
+        sublen = _in.read(buffer, 0, buffer.length);
+        bbv.append(buffer, 0, sublen);
+        length -= sublen;
+      }
+      if (bbv.length() < 0)
+        return BooleanValue.FALSE;
+
+      return bbv;
+
+    } catch (IOException e) {
+      env.warning(L.l(e.toString()));
+      log.log(Level.FINE,  e.toString(),  e);
+      return BooleanValue.FALSE;
+    } finally {
+      TempBuffer.free(tb);
+    }
+  }
+
+  /**
+   * Returns the size of the compressed data.
+   *
+   * @return -1, or compressed size
+   */
+  public Value zip_entry_compressedsize()
   {
     if (_zipEntry == null)
-      return -1;
+      return new LongValue(-1);
 
-    return _zipEntry.getCompressedSize();
+    return new LongValue(_zipEntry.getCompressedSize());
   }
 
   /**
-   * seems like only two values are:
-   * QuercusZipEntry.DEFLATED
-   * QuercusZipEntry.STORED
+   * Only "deflate" and "store" methods are supported.
    *
-   * @return the compression method
+   * @return the compression method used for this entry
    */
   public String zip_entry_compressionmethod()
   {
@@ -139,5 +176,23 @@ public class QuercusZipEntry {
       default:
         return method.toString();
     }
+  }
+
+  /**
+   * Returns the position fo this entry in the stream.
+   */
+  public long getPosition()
+  {
+    return _position;
+  }
+
+  public ZipEntry getZipEntry()
+  {
+    return _zipEntry;
+  }
+
+  public String toString()
+  {
+    return "QuercusZipEntry[]";
   }
 }

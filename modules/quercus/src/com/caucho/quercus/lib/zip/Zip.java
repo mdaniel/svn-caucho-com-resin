@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2005 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -26,71 +26,184 @@
  * @author Charles Reich
  */
 
-
 package com.caucho.quercus.lib.zip;
 
 import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.TempBufferStringValue;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.lib.zip.QuercusZipEntry;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
+import com.caucho.quercus.lib.file.BinaryInput;
+import com.caucho.quercus.lib.file.ReadStreamInput;
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.module.NotNull;
+import com.caucho.quercus.module.Optional;
 
+import com.caucho.util.L10N;
+import com.caucho.vfs.Vfs;
+
+import java.io.InputStream;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.ZipInputStream;
+import java.util.zip.ZipEntry;
 
 /**
- * Zip object oriented API facade
+ * Reads the zip header and prepares zip entries.
  */
+public class Zip
+{
+  private BinaryInput _oldIn;
+  private ReadStreamInput _in;
+  private byte[] _tmpBuf;
+  private ZipEntry _currentEntry;
 
-public class Zip {
-  private static final Logger log = Logger.getLogger(Zip.class.getName());
-  private static final L10N L = new L10N(Zip.class);
+  private boolean _eof;
+  private boolean _ddescriptor;
 
-  private ZipInputStream _zipInputStream;
-
-  public Zip(Path zipPath)
+  public Zip(BinaryInput in)
   {
-    try {
-      _zipInputStream = new ZipInputStream(zipPath.openRead());
-    } catch (IOException ex) {
-      log.log(Level.FINE,  ex.toString(),  ex);
-    }
+    _oldIn = in;
+    _in = new ReadStreamInput(Vfs.openRead(in.getInputStream()));
+    _tmpBuf = new byte[32];
+    _eof = false;
   }
 
   /**
-   *
-   *
-   * @return next zip_entry or null
+   * Closes the previous entry and returns the next entry's metadata.
    */
-  public Value zip_read(Env env)
+  public QuercusZipEntry zip_read()
     throws IOException
   {
-    java.util.zip.ZipEntry entry;
+    closeEntry();
 
-    if ((entry = _zipInputStream.getNextEntry()) != null)
-      return env.wrapJava(new QuercusZipEntry(entry));
+    long position = _in.getPosition();
+    ZipEntry entry = readEntry();
+
+    // If not using ZipInputStream to decompress,
+    //   then get entry's position AFTER readEntry() to skip over zip header
+    //long position = _in.getPosition();
+
+    if (entry == null)
+      return null;
     else
-      return BooleanValue.FALSE;
+      return new QuercusZipEntry(position, entry);
   }
 
   /**
-   *
-   * @return always true, just there so Quercus can see the function
-   * @throws IOException
+   * Reads the next entry's metadata from the current stream position.
    */
-  public boolean zip_close()
+  protected ZipEntry readEntry()
     throws IOException
   {
-    _zipInputStream.close();
-    return true;
+    if (_eof || _currentEntry != null)
+      return null;
+
+    int sublen = _in.read(_tmpBuf, 0, 30);
+    if (sublen < 30) {
+      _eof = true;
+      return null;
+    }
+
+    // Zip file signature check
+    if ((((_tmpBuf[3] & 0xff) << 24) | ((_tmpBuf[2] & 0xff) << 16) |
+          ((_tmpBuf[1] & 0xff) << 8) | (_tmpBuf[0] & 0xff)) != 0x04034b50) {
+      _eof = true;
+      return null;
+    }
+
+    // Extra data descriptors after the compressed data
+    if ((_tmpBuf[6] & 0x04) == 0x04)
+      _ddescriptor = true;
+    else 
+      _ddescriptor = false;
+
+    int compressionMethod = (_tmpBuf[8] & 0xff) | ((_tmpBuf[9] & 0xff) << 8);
+
+    //if (compressionMethod != 0 && compressionMethod != 8)
+    //  throw new IOException("Unsupported zip compression method (" + compressionMethod + ").");
+
+    long crc32 = _tmpBuf[14] & 0xff;
+    crc32 |= (_tmpBuf[15] & 0xff) << 8;
+    crc32 |= (_tmpBuf[16] & 0xff) << 16;
+    crc32 |= ((long)_tmpBuf[17] & 0xff) << 24;
+
+    long compressedSize = _tmpBuf[18] & 0xff;
+    compressedSize |= (_tmpBuf[19] & 0xff) << 8;
+    compressedSize |= (_tmpBuf[20] & 0xff) << 16;
+    compressedSize |= ((long)_tmpBuf[21] & 0xff) << 24;
+
+    long uncompressedSize = _tmpBuf[22] & 0xff;
+    uncompressedSize |= (_tmpBuf[23] & 0xff) << 8;
+    uncompressedSize |= (_tmpBuf[24] & 0xff) << 16;
+    uncompressedSize |= ((long)_tmpBuf[25] & 0xff) << 24;
+
+    int filenameLength = _tmpBuf[26] & 0xff;
+    filenameLength |= (_tmpBuf[27] & 0xff) << 8;
+
+    int extraLength = _tmpBuf[28] & 0xff;
+    extraLength |= (_tmpBuf[29] & 0xff) << 8;
+
+    // XXX: correct char encoding?
+    String name;
+    if (filenameLength <= _tmpBuf.length) {
+      sublen = _in.read(_tmpBuf, 0, filenameLength);
+      if (sublen < filenameLength)
+        return null;
+      name = new String(_tmpBuf, 0, sublen);
+    }
+    else {
+      byte[] buffer = new byte[filenameLength];
+      sublen = _in.read(buffer, 0, buffer.length);
+      if (sublen < filenameLength)
+        return null;
+      name = new String(buffer, 0, sublen);
+    }
+
+    if (extraLength > 0)
+      _in.skip(extraLength);
+
+    ZipEntry entry = new ZipEntry(name);
+    entry.setMethod(compressionMethod);
+    entry.setCrc(crc32);
+    entry.setCompressedSize(compressedSize);
+    entry.setSize(uncompressedSize);
+
+    _currentEntry = entry;
+    return entry;
   }
 
-  public ZipInputStream getZipInputStream()
+  /**
+   * Positions stream to beginning of next entry
+   */
+  protected void closeEntry()
+    throws IOException
   {
-    return _zipInputStream;
+    if (_currentEntry == null)
+      return;
+
+    long length = _currentEntry.getCompressedSize();
+
+    if (_ddescriptor)
+      length += 12;
+
+    _in.skip(length);
+    _currentEntry = null;
+  }
+
+  /**
+   * Opens a decompressed stream positioned at this entry's position.
+   */
+  protected InputStream openInputStream(QuercusZipEntry entry)
+    throws IOException
+  {
+    return new ZipEntryInputStream(_in.openCopy(), entry);
+  }
+
+  public void zip_close()
+  {
+    _in.close();
+    _oldIn.close();
   }
 
   public String toString()
