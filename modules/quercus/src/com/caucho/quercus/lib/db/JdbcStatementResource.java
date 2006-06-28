@@ -267,12 +267,7 @@ public class JdbcStatementResource {
         }
       }
 
-      if (_stmt.execute()) {
-        _conn.setAffectedRows(0);
-        _rs = _stmt.getResultSet();
-      } else {
-        _conn.setAffectedRows(_stmt.getUpdateCount());
-      }
+      return executeStatement();
 
     } catch (SQLException e) {
       env.warning(L.l(e.toString()));
@@ -281,8 +276,31 @@ public class JdbcStatementResource {
       _errorCode = e.getErrorCode();
       return false;
     }
+  }
 
-    return true;
+  /**
+   * Executes underlying statement
+   * Known subclasses: see PostgresStatement.execute
+   */
+  protected boolean executeStatement()
+    throws SQLException
+  {
+    try {
+
+      if (_stmt.execute()) {
+        _conn.setAffectedRows(0);
+        _rs = _stmt.getResultSet();
+      } else {
+        _conn.setAffectedRows(_stmt.getUpdateCount());
+      }
+
+      return true;
+
+    } catch (SQLException e) {
+      _errorMessage = e.getMessage();
+      _errorCode = e.getErrorCode();
+      throw e;
+    }
   }
 
   /**
@@ -554,6 +572,15 @@ public class JdbcStatementResource {
   }
 
   /**
+   * Returns a parameter value
+   * Known subclasses: see PostgresStatement.execute
+   */
+  protected Value getParam(int i)
+  {
+    return _params[i];
+  }
+
+  /**
    * Changes the internal statement.
    */
   protected void setPreparedStatement(PreparedStatement stmt)
@@ -567,6 +594,22 @@ public class JdbcStatementResource {
   protected void setResultSet(ResultSet rs)
   {
     _rs = rs;
+  }
+
+  /**
+   * Sets the given string parameter
+   * Known subclasses: see PostgresStatement.execute
+   */
+  protected void setString(int i, String param)
+    throws SQLException
+  {
+    try {
+      _stmt.setString(i, param);
+    } catch (SQLException e) {
+      _errorMessage = e.getMessage();
+      _errorCode = e.getErrorCode();
+      throw e;
+    }
   }
 
   /**

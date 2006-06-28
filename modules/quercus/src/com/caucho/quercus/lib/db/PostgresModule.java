@@ -355,11 +355,19 @@ public class PostgresModule extends AbstractQuercusModule {
                                       @NotNull Postgres conn,
                                       String tableName,
                                       ArrayValue assocArray,
-                                      @Optional("-1") int options)
+                                      @Optional("0") int options)
   {
     try {
 
-      if (options > 0) {
+      // XXX: options has not been implemented yet.
+
+      // XXX: the following PHP note has not been implemented yet.
+      // Note:  If there are boolean fields in table_name don't use
+      // the constant TRUE in assoc_array. It will be converted to the
+      // string 'TRUE' which is no valid entry for boolean fields in
+      // PostgreSQL. Use one of t, true, 1, y, yes instead.
+
+      if (options == 0) {
         throw new UnimplementedException("pg_convert with options");
       }
 
@@ -455,10 +463,20 @@ public class PostgresModule extends AbstractQuercusModule {
   public static ArrayValue pg_copy_to(Env env,
                                       @NotNull Postgres conn,
                                       String tableName,
-                                      @Optional("\t") String delimiter,
-                                      @Optional("\n") String nullAs)
+                                      @Optional("") String delimiter,
+                                      @Optional("") String nullAs)
   {
     try {
+
+      // XXX: This should be replaced when @Optional("\t") is fixed.
+      if (delimiter.equals("")) {
+        delimiter = "\t";
+      }
+
+      // XXX: This should be replaced when @Optional("\n") is fixed.
+      if (nullAs.equals("")) {
+        nullAs = "\n";
+      }
 
       PostgresResult result = pg_query(env, conn, "SELECT * FROM " + tableName);
 
@@ -595,8 +613,8 @@ public class PostgresModule extends AbstractQuercusModule {
    * Escape a string for insertion into a bytea field
    */
   @ReturnNullAsFalse
-  public static String pg_escape_bytea(Env env,
-                                       String data)
+  public static StringValue pg_escape_bytea(Env env,
+                                            InputStream is)
   {
     try {
 
@@ -605,15 +623,21 @@ public class PostgresModule extends AbstractQuercusModule {
       if (conn == null)
         return null;
 
-      byte dataBytes[] = data.getBytes();
+      BinaryBuilderValue binaryBuilder = new BinaryBuilderValue();
+
+      int nbytes;
+      byte buffer[] = new byte[128];
+      while ((nbytes = is.read(buffer, 0, 128)) > 0) {
+        binaryBuilder.append(buffer, 0, nbytes);
+      }
 
       Class cl = Class.forName("org.postgresql.util.PGbytea");
 
       Method method = cl.getDeclaredMethod("toPGString", new Class[] {byte[].class});
 
-      String s = (String) method.invoke(cl, new Object[] {dataBytes});
+      String s = (String) method.invoke(cl, new Object[] {binaryBuilder.toBytes()});
 
-      return conn.realEscapeString((StringValue)StringValue.create(s)).toString();
+      return conn.realEscapeString((StringValue) StringValue.create(s));
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -625,8 +649,8 @@ public class PostgresModule extends AbstractQuercusModule {
    * Escape a string for insertion into a text field
    */
   @ReturnNullAsFalse
-  public static String pg_escape_string(Env env,
-                                        StringValue data)
+  public static StringValue pg_escape_string(Env env,
+                                             StringValue data)
   {
     try {
 
@@ -635,7 +659,7 @@ public class PostgresModule extends AbstractQuercusModule {
       if (conn == null)
         return null;
 
-      return conn.realEscapeString(data).toString();
+      return conn.realEscapeString(data);
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -658,10 +682,6 @@ public class PostgresModule extends AbstractQuercusModule {
 
       ArrayValueImpl arr = (ArrayValueImpl)params;
       int sz = arr.size();
-
-      for (int i=0; i<sz; i++) {
-        String p = arr.get(LongValue.create(i)).toString();
-      }
 
       char buf[] = new char[sz];
       for (int i=0; i<sz; i++)
@@ -1918,8 +1938,8 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Returns the number of rows in a result
    */
-  public static LongValue pg_num_rows(Env env,
-                                      @NotNull PostgresResult result)
+  public static Value pg_num_rows(Env env,
+                                  @NotNull PostgresResult result)
   {
     try {
 
@@ -1927,7 +1947,7 @@ public class PostgresModule extends AbstractQuercusModule {
       // pg_get_result should return a null PostgresResult php/43c9
       if ((result == null) || (result.getResultSet() == null)) {
         env.warning(L.l("supplied argument is not a valid PostgreSQL result resource"));
-        return null;
+        return NullValue.NULL;
       }
 
       return LongValue.create(result.getNumRows());
@@ -2029,8 +2049,6 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
 
-      // Make the PHP query a JDBC like query replacing ($1 -> ?) with question marks.
-      query = query.replaceAll("\\$[0-9]+", "?");
       PostgresStatement pstmt = conn.prepare(env, query);
       conn.putStatement(stmtName, pstmt);
       return pstmt;
