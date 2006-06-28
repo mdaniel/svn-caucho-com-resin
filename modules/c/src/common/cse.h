@@ -382,6 +382,8 @@ cse_open_connection(stream_t *s, cluster_t *cluster,
                     time_t request_time, void *pool);
 int cse_open_any_connection(stream_t *s, cluster_t *cluster,
 			    time_t now);
+int cse_open_live_connection(stream_t *s, cluster_t *cluster,
+			     time_t now);
 void close_srun(srun_t *srun, time_t now);
 
 void *cse_create_lock(config_t *config);

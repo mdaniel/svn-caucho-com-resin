@@ -44,6 +44,10 @@ fi
 #  exit 1
 #fi
 
+if test ! -d "$APACHE_DIR"; then
+  APACHE_DIR="/tmp"
+fi
+
 if test -d "$APACHE_DIR/conf.d"; then
   if test ! -r "$APACHE_DIR/conf.d/resin.conf"; then
     cat >> $APACHE_DIR/conf.d/resin.conf <<EOF
@@ -53,7 +57,8 @@ if test -d "$APACHE_DIR/conf.d"; then
 
 LoadModule caucho_module $LIBEXECDIR/mod_caucho.so
 
-ResinConfigServer localhost 6802
+ResinConfigServer localhost 6800
+CauchoConfigCacheDirectory $APACHE_DIR
 CauchoStatus yes
 EOF
 
@@ -68,7 +73,8 @@ else
 
 LoadModule caucho_module $LIBEXECDIR/mod_caucho.so
 
-ResinConfigServer localhost 6802
+ResinConfigServer localhost 6800
+CauchoConfigCacheDirectory $APACHE_DIR
 CauchoStatus yes
 EOF
 

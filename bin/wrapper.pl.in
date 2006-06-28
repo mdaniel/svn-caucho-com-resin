@@ -450,7 +450,12 @@ if ($cmd eq "stop" || $cmd eq "restart") {
 	if ($cmd eq "stop") {
 	    print("Stopping ${name}\n");
 	}
-	kill(15, $pid);
+	$signal = 15;
+	$count = 10;
+	while (kill($signal, $pid) && $count-- > 0) {
+	    sleep(1);
+	}
+	
 	unlink($pid_file);
     }
     elsif ($cmd eq "stop") {

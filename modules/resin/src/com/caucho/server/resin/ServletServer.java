@@ -115,6 +115,8 @@ public class ServletServer extends ProtocolDispatchServer
 
   private HostContainer _hostContainer;
 
+  private Cluster _cluster;
+
   private String _serverId = "";
   
   private String _serverHeader = "Resin/" + com.caucho.Version.VERSION;
@@ -342,14 +344,6 @@ public class ServletServer extends ProtocolDispatchServer
   }
 
   /**
-   * Returns the owning cluster.
-   */
-  public Cluster getCluster()
-  {
-    return Cluster.getLocal();
-  }
-
-  /**
    * Adds a WebAppDefault.
    */
   public void addWebAppDefault(WebAppConfig init)
@@ -396,6 +390,30 @@ public class ServletServer extends ProtocolDispatchServer
     throws Exception
   {
     _hostContainer.addHost(host);
+  }
+
+  /**
+   * Returns the cluster.
+   */
+  public Cluster getCluster()
+  {
+    return _cluster;
+  }
+
+  /**
+   * Adds a cluster.
+   */
+  public void addCluster(Cluster cluster)
+  {
+    if (cluster.getServer(_serverId) != null)
+      _cluster = cluster;
+  }
+
+  /**
+   * Adds a cluster definition.
+   */
+  public void addClusterDefinition(Cluster cluster)
+  {
   }
 
   /**
@@ -868,7 +886,6 @@ public class ServletServer extends ProtocolDispatchServer
 	log.log(Level.FINER, e.toString());
       }
     }
-
   }
     
   /**

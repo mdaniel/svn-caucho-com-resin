@@ -903,7 +903,7 @@ cse_update_host_from_resin(resin_host_t *host, time_t now)
   if (host->has_data)
     host->last_update = now;
     
-  if (cse_open_any_connection(&s, &host->config->config_cluster, now)) {
+  if (cse_open_live_connection(&s, &host->config->config_cluster, now)) {
     int code;
     int len;
     int is_change;

@@ -170,7 +170,7 @@ public class ServerController
    */
   public Cluster getCluster()
   {
-    return Cluster.getLocal();
+    return getDeployInstance().getCluster();
   }
 
   /**

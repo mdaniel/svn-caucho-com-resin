@@ -30,10 +30,6 @@
 
     <class-update-interval>com.caucho.loader.DependencyCheckInterval</class-update-interval>
 
-    <cluster>com.caucho.server.cluster.Cluster</cluster>
-
-    <cluster-definition>com.caucho.server.cluster.ClusterDef</cluster-definition>
-
     <connector>com.caucho.jca.ConnectorResource</connector>
 
     <database>com.caucho.sql.DBPool</database>

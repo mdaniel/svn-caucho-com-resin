@@ -72,9 +72,11 @@ import com.caucho.lifecycle.Lifecycle;
 import com.caucho.server.deploy.EnvironmentDeployInstance;
 
 import com.caucho.server.dispatch.Invocation;
+import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.ExceptionFilterChain;
 
 import com.caucho.server.cluster.Cluster;
+import com.caucho.server.resin.ServletServer;
 
 import com.caucho.server.webapp.ApplicationContainer;
 
@@ -358,11 +360,31 @@ public class Host extends ApplicationContainer
   }
 
   /**
+   * Returns the owning server.
+   */
+  public ServletServer getServer()
+  {
+    if (_parent != null) {
+      DispatchServer server = _parent.getDispatchServer();
+
+      if (server instanceof ServletServer)
+	return (ServletServer) server;
+    }
+
+    return null;
+  }
+  
+  /**
    * Returns the current cluster.
    */
   public Cluster getCluster()
   {
-    return Cluster.getCluster(getClassLoader());
+    ServletServer server = getServer();
+
+    if (server != null)
+      return server.getCluster();
+    else
+      return null;
   }
 
   /**

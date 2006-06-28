@@ -4,6 +4,11 @@
 
 <s2 title='3.0.snap - June 23, 2006'>
 <ul>
+<li>mod_caucho.c should return the actual status code in caucho_request (#1075, fixed! by Rudy D'Hauwe)
+<li>BundleManager must not add '/' prefix (#1110)
+<li>wrapper.pl enhancements to clean up shutdown (#1194, rep by slamb)
+<li>HttpProxyServlet not properly handling 100 Continue (#1171)
+<li>mod_caucho should always obey dead-time even in config updates (#1174, rep by jdane)
 <li>Hessian: add setChunkedPost option to HessianProxyFactory (#1149, rep by Alon Salant)
 <li>Quercus: register_long_arrays (#992, rep by tyson)
 <li>Quercus: mail (#617)

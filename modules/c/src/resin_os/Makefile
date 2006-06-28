@@ -7,10 +7,10 @@ CPU=powerpc
 LDFLAGS=
 LDFLAGS_SHLIB=-bundle -undefined suppress -flat_namespace -L/usr/lib
 PROXY_LIBS=
-APACHE_INC=-I/usr/local/apache22/include  -I/usr/local/apache2/include 
-resin_conf=/usr/local/apache22/conf/httpd.conf
-resin_libexec=/usr/local/apache22/modules
-resin_home=/Users/ferg/ws/resin
+APACHE_INC=-I/usr/local/apache2/include  -I/usr/local/apache2/include 
+resin_conf=/usr/local/apache2/conf/httpd.conf
+resin_libexec=/usr/local/apache2/modules
+resin_home=/Users/ferg/ws/test-resin
 JNI_INCLUDE=-I/System/Library/Frameworks/JavaVM.framework/Versions/1.5/Home/include
 INCLUDES =  -I/usr/include $(JNI_INCLUDE) -I../common
 CFLAGS = -g -O2 -DPOLL -DHAS_JVMTI -DHAS_JVMDI  -DRESIN_HOME=\"$(resin_home)\" $(INCLUDES) -DCPU=\"$(CPU)\" -DOS=$(OS)

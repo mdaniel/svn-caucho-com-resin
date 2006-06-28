@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -606,11 +607,37 @@ class HttpStream extends StreamImpl {
     // Skip blank lines
     int count = 0;
     do {
+      line.clear();
       if (! _rs.readln(line)) {
         _isKeepalive = false;
         return;
       }
     } while (line.length() == 0 && ++count < 10);
+
+    if (line.length() == 0) {
+      _isKeepalive = false;
+      return;
+    }
+
+    if (line.startsWith("HTTP/1.1 100")) {
+      count = 100;
+      do {
+	line.clear();
+	if (! _rs.readln(line)) {
+	  _isKeepalive = false;
+	  return;
+	}
+      } while (line.length() != 0 && count-- > 0);
+      
+      count = 100;
+      do {
+	line.clear();
+	if (! _rs.readln(line)) {
+	  _isKeepalive = false;
+	  return;
+	}
+      } while (line.length() == 0 && count-- > 0);
+    }
 
     if (line.length() == 0) {
       _isKeepalive = false;

@@ -105,7 +105,7 @@ parseResinIni(FILE *file, config_t *config)
 			port = port * 10 + ch - '0';
 
 		  if (port == 0)
-		    port = 6802;
+		    port = 6800;
 
 		  /*
 		  cse_add_host(&config->config_cluster, host, port);
@@ -177,7 +177,7 @@ findResinIni(char *pwd, config_t *config)
 	else
 	  config->enable_caucho_status = 1;
 
-	cse_add_host(&config->config_cluster, "localhost", 6802);
+	cse_add_host(&config->config_cluster, "localhost", 6800);
 }
 
 BOOL WINAPI GetExtensionVersion(HSE_VERSION_INFO* pVer)

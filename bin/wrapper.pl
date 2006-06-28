@@ -38,7 +38,6 @@ $JAVA_ARGS="";
 #
 $EXTRA_JAVA_ARGS="-Djava.util.logging.manager=com.caucho.log.LogManagerImpl";
 $EXTRA_JAVA_ARGS.=" -Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl";
-$EXTRA_JAVA_ARGS.=" -Djava.awt.headless=true";
 
 #
 # Default stack size.  The 1m is a good tradeoff between stack size and
@@ -230,6 +229,12 @@ while ( $#ARGV >= 0) {
 	shift(@ARGV);
     }
     elsif ($ARGV[0] =~ "^-D") {
+	$JAVA_ARGS .= " " . $ARGV[0];
+	shift(@ARGV);
+    }
+    elsif ($ARGV[0] =~ "^-javaagent"
+	   || $ARGV[0] =~ "^-agentlib"
+	   || $ARGV[0] =~ "^-agentpath") {
 	$JAVA_ARGS .= " " . $ARGV[0];
 	shift(@ARGV);
     }
@@ -484,6 +489,9 @@ if (-d "$RESIN_HOME/classes") {
 #$CLASSPATH="$CLASSPATH:$RESIN_HOME/lib/pro.jar";
 #$CLASSPATH="$CLASSPATH:$RESIN_HOME/lib/license.jar";
 
+$CLASSPATH="$CLASSPATH:$RESIN_HOME/lib/pro.jar";
+$CLASSPATH="$CLASSPATH:$RESIN_HOME/lib/resin.jar";
+
 opendir(RESINLIB, "$RESIN_HOME/lib");
 while ($file = readdir(RESINLIB)) {
     if ($file =~ /\.jar$/ || $file =~ /\.zip$/) {
@@ -521,7 +529,7 @@ if ($JAVA_EXE) {
     $JAVA_ARGS .= " -Xrunhprof:format=b,cpu=samples $thread";
 } elsif ($VMTYPE eq "cpuprof-ascii") {
     $JAVA_EXE="$JAVA_HOME/bin/java";
-    $JAVA_ARGS .= "  -agentlib:hprof=cpu=samples,depth=$depth $thread";
+    $JAVA_ARGS .= "  -Xrunhprof:cpu=samples,heap=sites,depth=$depth $thread";
 #    $JAVA_EXE="$JAVA_HOME/bin/java -Xrunhprof:cpu=samples,depth=$depth $thread";
 } elsif (-x "$JAVA_HOME/sh/java") {        # hack for AIX
     $JAVA_EXE="$JAVA_HOME/sh/java";

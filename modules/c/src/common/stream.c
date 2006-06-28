@@ -1326,7 +1326,7 @@ open_connection_group(stream_t *s, cluster_t *cluster,
   else if (ignore_dead &&
            srun->is_dead && now < srun->fail_time + srun->dead_time) {
   }
-  else if (cse_open(s, cluster, cluster_srun, web_pool, ! ignore_dead)) {
+  else if (cse_open(s, cluster, cluster_srun, web_pool, 0)) {
     srun->is_dead = 0;
     return 1;
   }
@@ -1364,7 +1364,7 @@ open_connection_any_host(stream_t *s, cluster_t *cluster, int host,
     else if (ignore_dead &&
              srun->is_dead && now < srun->fail_time + srun->dead_time) {
     }
-    else if (cse_open(s, cluster, cluster_srun, web_pool, ! ignore_dead)) {
+    else if (cse_open(s, cluster, cluster_srun, web_pool, 0)) {
       srun->is_dead = 0;
       return 1;
     }
@@ -1480,4 +1480,19 @@ cse_open_any_connection(stream_t *s, cluster_t *cluster, time_t now)
 {
   return cse_open_connection(s, cluster, -1, -1, now,
 			     cluster->config->web_pool);
+}
+
+int
+cse_open_live_connection(stream_t *s, cluster_t *cluster, time_t now)
+{
+  int host;
+  void *web_pool = cluster->config->web_pool;
+
+  host = select_host(cluster, now);
+
+  if (host < 0)
+    return 0;
+
+  /* open, but ignore dead servers and backups */
+  return open_connection_any_host(s, cluster, host, now, web_pool, 1) > 0;
 }
