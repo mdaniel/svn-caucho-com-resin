@@ -42,6 +42,6 @@ import java.lang.annotation.ElementType;
 public @interface ManyToMany {
   Class targetEntity() default void.class;
   CascadeType []cascade() default {};
-  FetchType fetch() default FetchType.EAGER;
+  FetchType fetch() default FetchType.LAZY;
   String mappedBy() default "";
 }

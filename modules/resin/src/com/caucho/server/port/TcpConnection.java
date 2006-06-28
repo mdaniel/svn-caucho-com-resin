@@ -448,10 +448,17 @@ public class TcpConnection extends PortConnection
    */
   public void start()
   {
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+    
     try {
+      thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
+      
       Jmx.register(this, _objectName);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
     }
   }
   
@@ -661,10 +668,17 @@ public class TcpConnection extends PortConnection
   {
     closeImpl();
 
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+    
     try {
+      thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
+      
       Jmx.unregister(_objectName);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
     }
 
     setState("free");

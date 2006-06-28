@@ -502,18 +502,11 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
         if (loader instanceof EnvironmentClassLoader) {
           EnvironmentClassLoader envLoader = (EnvironmentClassLoader) loader;
 
-	  Level localLevel = _localLevel.get(envLoader);
-	  
-	  if (localLevel != null) {
-	    if (! _hasLocalLevel)
-	      _assignedLevel = localLevel;
-	    else if (localLevel.intValue() < _assignedLevel.intValue())
-	      _assignedLevel = localLevel;
-	    
-	    _hasLocalLevel = true;
-	  }
+	  updateClassLoaderLevel(envLoader);
         }
       }
+      
+      updateClassLoaderLevel(ClassLoader.getSystemClassLoader());
     }
 
     setEffectiveLevel();
@@ -530,6 +523,20 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
         else
           _children.remove(i);
       }
+    }
+  }
+
+  private void updateClassLoaderLevel(ClassLoader loader)
+  {
+    Level localLevel = _localLevel.get(loader);
+
+    if (localLevel != null) {
+      if (! _hasLocalLevel)
+	_assignedLevel = localLevel;
+      else if (localLevel.intValue() < _assignedLevel.intValue())
+	_assignedLevel = localLevel;
+	    
+      _hasLocalLevel = true;
     }
   }
 
