@@ -29,9 +29,7 @@
 
 package javax.xml.ws;
 import javax.xml.transform.*;
-/* XXX: uncomment when we have jaxb
 import javax.xml.bind.*;
-*/
 
 /**
  * The LogicalMessage interface represents a protocol agnostic XML message and
@@ -57,16 +55,12 @@ public interface LogicalMessage {
    * connection between the returned object and the message payload, changes to
    * the payload require calling setPayload.
    */
-/* XXX: uncomment when we have jaxb
   abstract Object getPayload(JAXBContext context);
-*/
 
   /**
    * Sets the message payload
    */
-/* XXX: uncomment when we have jaxb
   abstract void setPayload(Object payload, JAXBContext context);
-*/
 
   /**
    * Sets the message payload

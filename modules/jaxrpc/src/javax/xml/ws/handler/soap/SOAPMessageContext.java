@@ -31,9 +31,7 @@ package javax.xml.ws.handler.soap;
 import javax.xml.soap.*;
 import javax.xml.namespace.*;
 import javax.xml.ws.handler.*;
-/* XXX: uncomment when we have JAXB
 import javax.xml.bind.*;
-*/
 import java.util.*;
 
 /**
@@ -50,9 +48,7 @@ public interface SOAPMessageContext
    * message context. Note that a SOAP message can contain multiple headers
    * with the same qualified name.
    */
-    /* XXX: uncomment when we have JAXB
   abstract Object[] getHeaders(QName header, JAXBContext context, boolean allRoles);
-    */
 
   /**
    * Gets the SOAPMessage from this message context. Modifications to the

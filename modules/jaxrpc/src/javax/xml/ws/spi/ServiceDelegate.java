@@ -32,9 +32,7 @@ import javax.xml.namespace.*;
 import javax.xml.ws.*;
 import javax.xml.ws.handler.*;
 import javax.xml.ws.Service.*;
-/* XXX: uncomment when we have jaxb
 import javax.xml.bind.*;
-*/
 import java.net.*;
 import java.util.concurrent.*;
 import java.util.*;
@@ -70,9 +68,7 @@ public abstract class ServiceDelegate {
   /**
    * Creates a Dispatch instance for use with JAXB generated objects.
    */
-    /* XXX: uncomment when we have JAXB
   public abstract Dispatch<Object> createDispatch(QName portName, JAXBContext context, Mode mode);
-    */
 
   /**
    * Returns the executor for this Serviceinstance. The executor is used for

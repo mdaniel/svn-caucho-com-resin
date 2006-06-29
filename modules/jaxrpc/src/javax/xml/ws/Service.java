@@ -31,9 +31,7 @@ package javax.xml.ws;
 import javax.xml.namespace.*;
 import javax.xml.ws.handler.*;
 import javax.xml.ws.Service.*;
-/* XXX: uncomment when we have JAXB
 import javax.xml.bind.*;
-*/
 import java.net.*;
 import java.util.concurrent.*;
 import java.util.*;
@@ -103,13 +101,11 @@ public class Service {
    * Creates a Dispatch instance for use with JAXB generated objects.
    */
     /*
-      XXX: uncomment when we have JAXB
   public Dispatch<Object> createDispatch(QName portName,
                                          JAXBContext context, Mode mode)
   {
     throw new UnsupportedOperationException();
   }
-    */
 
   /**
    * Returns the executor for this Serviceinstance. The executor is used for
