@@ -993,7 +993,7 @@ public class JdbcResultResource {
   /**
    * Get type from Types enumeration
    *
-   * @param fieldOffset the field number
+   * @param fieldOffset the field number (0-based)
    * @return the JDBC type
    */
   protected Value getJdbcType(int fieldOffset)

@@ -67,6 +67,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import java.util.HashMap;
 
@@ -1194,12 +1195,67 @@ public class OracleModule extends AbstractQuercusModule {
 
   /**
    * Tell the raw Oracle data type of the field
+   *
+   * @param field the field number (1-based)
    */
-  public static Value oci_field_type_raw(Env env,
-                                         @NotNull OracleStatement stmt,
-                                         @Optional int field)
+  public static int oci_field_type_raw(Env env,
+                                       @NotNull OracleStatement stmt,
+                                       int field)
   {
-    throw new UnimplementedException("oci_field_type_raw");
+    try {
+
+      if (stmt == null)
+        return -1;
+
+      if (field <= 0)
+        return -1;
+
+      JdbcResultResource resource = new JdbcResultResource(null, stmt.getResultSet(), null);
+
+      Value typeV = resource.getJdbcType(--field);
+
+      if (typeV instanceof LongValue) {
+
+        int type = typeV.toInt();
+
+        switch (type) {
+
+        case Types.BLOB:
+        case Types.LONGVARCHAR:
+        case Types.LONGVARBINARY:
+          type = SQLT_BLOB;
+          break;
+
+        case Types.CLOB:
+          type = SQLT_CLOB;
+          break;
+
+        case Types.BIGINT:
+        case Types.BIT:
+        case Types.BOOLEAN:
+        case Types.DECIMAL:
+        case Types.DOUBLE:
+        case Types.FLOAT:
+        case Types.INTEGER:
+        case Types.NUMERIC:
+        case Types.REAL:
+        case Types.SMALLINT:
+        case Types.TINYINT:
+          type = SQLT_NUM;
+          break;
+
+        default:
+          type = SQLT_CHR;
+        }
+
+        return type;
+      }
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+    }
+
+    return -1;
   }
 
   /**
@@ -1207,7 +1263,7 @@ public class OracleModule extends AbstractQuercusModule {
    */
   public static Value oci_field_type(Env env,
                                      @NotNull OracleStatement stmt,
-                                     @Optional int fieldNumber)
+                                     int fieldNumber)
   {
     try {
       if (stmt == null)
@@ -1804,9 +1860,9 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_field_type_raw()
    */
-  public static Value ocicolumntyperaw(Env env,
-                                       @NotNull OracleStatement stmt,
-                                       @Optional int field)
+  public static int ocicolumntyperaw(Env env,
+                                     @NotNull OracleStatement stmt,
+                                     @Optional int field)
   {
     return oci_field_type_raw(env, stmt, field);
   }

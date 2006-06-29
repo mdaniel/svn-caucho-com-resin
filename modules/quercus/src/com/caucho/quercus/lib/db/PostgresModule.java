@@ -399,53 +399,76 @@ public class PostgresModule extends AbstractQuercusModule {
                                      @Optional("") String nullAs)
   {
     try {
-      // The character that makes the special char: '\u0009' .. '\u001F'
-      String stringMap[] = new String[] {"t",  // u0009 (horizontal tab)
-                                         "n",  // u000A (new line)
-                                         "v",  // u000B (vertical tab)
-                                         "f",  // u000C (form feed)
-                                         "r",  // u000D (carriage return)
-                                         "\u000E-\u001B",          //@todo
-                                         "\u001Cfileseparator",    //@todo
-                                         "\u001Dgroupseparator",   //@todo
-                                         "\u001Erecordseparator",  //@todo
-                                         "\u001Funitseparator"};   //@todo
 
-      Pattern pattern = Pattern.compile("(\\p{Cntrl}|\\\\|\\.|\\-|\\*|\\+|\\?|\\]|\\[|\\^|\\{|\\}|\\(|\\)|\\|)");
+      // XXX: At the time this was implemented, the JDBC driver
+      // did not support SQL COPY operations that could simplify
+      // the code below.
 
       String delimiterRegex;
       if (delimiter.equals("")) {
         delimiter = "\t";
         delimiterRegex = "\\t";
       } else {
-        delimiterRegex = escapeCharsToRegex(stringMap, pattern, delimiter);
+        // XXX: even the native php version does not seem to do it very well.
+        throw new UnimplementedException("pg_copy_from with non-default delimiter");
       }
 
-      String nullAsRegex;
       if (nullAs.equals("")) {
-        nullAs = "\n";
-        nullAsRegex = "\\n";
+        nullAs = "\\N";
       } else {
-        nullAsRegex = escapeCharsToRegex(stringMap, pattern, nullAs);
+        // XXX: even the native php version does not seem to do it very well.
+        throw new UnimplementedException("pg_copy_from with non-default nullAs");
       }
 
-      ArrayValueImpl newArray = (ArrayValueImpl) rows;
-      int nasize = newArray.size();
+      ArrayValueImpl array = (ArrayValueImpl) rows;
+      int size = array.size();
 
-      for (int i=0; i<nasize; i++) {
-        String values = newArray.get(LongValue.create(i)).toString();
-        // For testing only:
-        // String values = "\n\tNUMBER1stcolumn\t\n\t\n\tNUMBER2ndcolumn\tNUMBER3rdcolumn\tNUMBER4thcolumn\t\n";
-        values = "'"+values.replaceAll(delimiterRegex, "','")+"'";
-        values = values.replaceAll(",'"+nullAsRegex+"',", ",NULL,");
-        // We need to call it twice because the replaceAll(regexp) would not
-        // replace adjacent ",'\\n'," matches.
-        values = values.replaceAll(",'"+nullAsRegex+"',", ",NULL,");
-        values = values.replaceAll("^'"+nullAsRegex+"',", "NULL,");
-        values = values.replaceAll(",'"+nullAsRegex+"'$", ",NULL");
+      String baseInsert = "INSERT INTO " + tableName + " VALUES(";
 
-        String query = "INSERT INTO "+tableName+" VALUES("+values+")";
-        pg_query(env, conn, query);
+      StringBuilder sb = new StringBuilder(baseInsert);
+
+      int lenBaseInsert = sb.length();
+
+      for (int i=0; i<size; i++) {
+        // Every line has a new-line '\n' character and
+        // possibly many NULL values "\\N". Ex:
+        // line = "\\N\tNUMBER1col\t\\N\t\\N\tNUMBER2col\tNUMBER3col\tNUMBER4col\t\\N\n";
+        String line = array.get(LongValue.create(i)).toString();
+        line = line.substring(0, line.length()-1);
+
+        // "INSERT INTO " + tableName + " VALUES("
+        sb.setLength(lenBaseInsert);
+
+        // Split columns
+        String cols[] = line.split(delimiterRegex);
+
+        int len = cols.length;
+
+        if (len > 0) {
+
+          len--;
+
+          for (int j=0; j<len; j++) {
+            if (cols[j].equals(nullAs)) {
+              sb.append("NULL, ");
+            } else {
+              sb.append("'");
+              sb.append(cols[j]);
+              sb.append("', ");
+            }
+          }
+
+          if (cols[len].equals(nullAs)) {
+            sb.append("NULL)");
+          } else {
+            sb.append("'");
+            sb.append(cols[len]);
+            sb.append("')");
+          }
+
+          // Insert record
+          pg_query(env, conn, sb.toString());
+        }
       }
 
       return true;
@@ -468,14 +491,20 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
 
+      // XXX: At the time this was implemented, the JDBC driver
+      // did not support SQL COPY operations that could simplify
+      // the code below.
+
       // XXX: This should be replaced when @Optional("\t") is fixed.
       if (delimiter.equals("")) {
         delimiter = "\t";
       }
 
-      // XXX: This should be replaced when @Optional("\n") is fixed.
+      // XXX: This should be replaced when @Optional("\\N") is fixed.
+      // Note: this must be \\N, i.e. the
+      // two-character sequence: {'\\', 'N'}
       if (nullAs.equals("")) {
-        nullAs = "\n";
+        nullAs = "\\N";
       }
 
       PostgresResult result = pg_query(env, conn, "SELECT * FROM " + tableName);
@@ -510,6 +539,9 @@ public class PostgresModule extends AbstractQuercusModule {
             sb.append(fieldValue.toString());
           }
         }
+
+        // Every line has a new-line character.
+        sb.append("\n");
 
         newArray.put(currValue, sb);
 
@@ -2686,31 +2718,6 @@ public class PostgresModule extends AbstractQuercusModule {
     env.setSpecialValue("caucho.postgres", conn);
 
     return conn;
-  }
-
-  private static String escapeCharsToRegex(String []stringMap,
-                                           Pattern pattern,
-                                           String chars)
-  {
-    // Change to StringBuilder when Matcher.appendReplacement/appendTail is available
-    // for StringBuilder. Currently, only StringBuffer is supported.
-    StringBuffer stringBuilder = new StringBuffer();
-    // For testing only:
-    // String delimiter = "\n\tNUMBER\r1stco*lumn\t\n\t\n\tNUM|BER(2nd)column\tNUMBER\\3rdcolumn\tNUMBER4thcolumn\t\naa";
-    Matcher matcher = pattern.matcher(chars);
-    if (matcher.find()) {
-      String replacement = matcher.group();
-      char c = replacement.charAt(0);
-      if (c < 32) {
-        replacement = stringMap[c-9];
-      } else if (c == '\\') {
-        replacement = "\\\\";
-      }
-      matcher.appendReplacement(stringBuilder, "\\\\"+replacement);
-    }
-    matcher.appendTail(stringBuilder);
-
-    return stringBuilder.toString();
   }
 
   private static int writeLobInternal(Object largeObject,
