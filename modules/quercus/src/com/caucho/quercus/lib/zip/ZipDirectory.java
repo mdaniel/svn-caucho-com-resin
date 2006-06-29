@@ -51,7 +51,7 @@ import java.util.zip.ZipEntry;
 /**
  * Reads the zip header and prepares zip entries.
  */
-public class Zip
+public class ZipDirectory
 {
   private BinaryInput _oldIn;
   private ReadStreamInput _in;
@@ -61,7 +61,7 @@ public class Zip
   private boolean _eof;
   private boolean _ddescriptor;
 
-  public Zip(BinaryInput in)
+  public ZipDirectory(BinaryInput in)
   {
     _oldIn = in;
     _in = new ReadStreamInput(Vfs.openRead(in.getInputStream()));
@@ -200,14 +200,16 @@ public class Zip
     return new ZipEntryInputStream(_in.openCopy(), entry);
   }
 
-  public void zip_close()
+  public boolean zip_close()
   {
     _in.close();
     _oldIn.close();
+
+    return true;
   }
 
   public String toString()
   {
-    return "Zip[]";
+    return "ZipDirectory[]";
   }
 }

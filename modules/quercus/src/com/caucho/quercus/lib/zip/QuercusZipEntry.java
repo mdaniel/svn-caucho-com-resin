@@ -55,12 +55,12 @@ public class QuercusZipEntry {
 
   private InputStream _in;
   private long _position;
-  private ZipEntry _zipEntry;
+  private ZipEntry _entry;
 
   public QuercusZipEntry(long position, ZipEntry zipEntry)
   {
     _position = position;
-    _zipEntry = zipEntry;
+    _entry = zipEntry;
   }
 
   /**
@@ -68,7 +68,7 @@ public class QuercusZipEntry {
    */
   public String zip_entry_name()
   {
-    return _zipEntry.getName();
+    return _entry.getName();
   }
 
   /**
@@ -76,16 +76,20 @@ public class QuercusZipEntry {
    */
   public long zip_entry_filesize()
   {
-    return _zipEntry.getSize();
+    return _entry.getSize();
   }
 
   /**
    * Opens this zip entry for reading.
    */
-  public boolean zip_entry_open(Env env, Zip zip)
+  public boolean zip_entry_open(Env env, ZipDirectory directory)
   {
     try {
-      _in = zip.openInputStream(this);
+      // php/1u07.qa
+      if (_in != null)
+        return true;
+
+      _in = directory.openInputStream(this);
       return true;
 
     } catch (IOException e) {
@@ -98,11 +102,14 @@ public class QuercusZipEntry {
   /**
    * Closes the zip entry.
    */
-  public void zip_entry_close()
+  public boolean zip_entry_close()
     throws IOException
   {
-    if (_in != null)
-      _in.close();
+    if (_in == null)
+      return false;
+
+    _in.close();
+    return true;
   }
 
   /**
@@ -125,7 +132,9 @@ public class QuercusZipEntry {
     int sublen;
     try {
       while (length > 0) {
-        sublen = _in.read(buffer, 0, buffer.length);
+        sublen = _in.read(buffer, 0, Math.min(length, buffer.length));
+        if (sublen <= 0)
+          break;
         bbv.append(buffer, 0, sublen);
         length -= sublen;
       }
@@ -150,10 +159,10 @@ public class QuercusZipEntry {
    */
   public Value zip_entry_compressedsize()
   {
-    if (_zipEntry == null)
+    if (_entry == null)
       return new LongValue(-1);
 
-    return new LongValue(_zipEntry.getCompressedSize());
+    return new LongValue(_entry.getCompressedSize());
   }
 
   /**
@@ -163,10 +172,10 @@ public class QuercusZipEntry {
    */
   public String zip_entry_compressionmethod()
   {
-    if (_zipEntry == null)
+    if (_entry == null)
       return "";
 
-    Integer method = _zipEntry.getMethod();
+    Integer method = _entry.getMethod();
 
     switch(method) {
       case java.util.zip.ZipEntry.DEFLATED:
@@ -188,7 +197,7 @@ public class QuercusZipEntry {
 
   public ZipEntry getZipEntry()
   {
-    return _zipEntry;
+    return _entry;
   }
 
   public String toString()

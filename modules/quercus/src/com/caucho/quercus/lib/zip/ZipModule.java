@@ -72,7 +72,7 @@ public class ZipModule extends AbstractQuercusModule {
    * Since we're only reading, fopen mode is always "rb".
    */
   @ReturnNullAsFalse
-  public Zip zip_open(Env env,
+  public ZipDirectory zip_open(Env env,
                                 String filename)
   {
     if (filename == null || filename == "")
@@ -83,21 +83,26 @@ public class ZipModule extends AbstractQuercusModule {
     if (s == null)
       return null;
 
-    return new Zip((BinaryInput)s);
+    return new ZipDirectory((BinaryInput)s);
   }
 
   /**
    * Reads an entry's metadata from the zip stream.
+   * It appears PHP's zip_read also does a zip_entry_open.
    */
   @ReturnNullAsFalse
   public QuercusZipEntry zip_read(Env env,
-                        @NotNull Zip zip)
+                        @NotNull ZipDirectory directory)
   {
     try {
-      if (zip == null)
+      if (directory == null)
         return null;
 
-      return zip.zip_read();
+      QuercusZipEntry qze = directory.zip_read();
+      zip_entry_open(env, directory, qze, "rb");
+
+      return qze;
+
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
@@ -136,10 +141,11 @@ public class ZipModule extends AbstractQuercusModule {
   /**
    * Closes the file.
    */
-  public void zip_close(@NotNull Zip zip)
+  public boolean zip_close(@NotNull ZipDirectory directory)
   {
-    if (zip != null)
-      zip.zip_close();
+    if (directory == null)
+      return false;
+    return directory.zip_close();
   }
 
   /**
@@ -151,31 +157,34 @@ public class ZipModule extends AbstractQuercusModule {
    * @return true on success or false on failure
    */
   public boolean zip_entry_open(Env env,
-                                @NotNull Zip zip,
+                                @NotNull ZipDirectory directory,
                                 @NotNull QuercusZipEntry entry,
                                 @Optional String mode)
   {
-    if ((zip == null) || (entry == null))
+    if ((directory == null) || (entry == null))
       return false;
 
-    return entry.zip_entry_open(env, zip);
+    return entry.zip_entry_open(env, directory);
   }
 
   /**
    * Closes this entry's stream.
    *
    * @param entry
-   * @return no return value;
+   * @return true if successful, else false;
    */
-  public void zip_entry_close(Env env,
+  public boolean zip_entry_close(Env env,
                               @NotNull QuercusZipEntry entry)
   {
     try {
-      if (entry != null)
-        entry.zip_entry_close();
+      if (entry == null)
+        return false;
+      return entry.zip_entry_close();
+
     } catch (IOException e) {
         env.warning(L.l(e.toString()));
         log.log(Level.FINE, e.toString(), e);
+        return false;
     }
   }
 
