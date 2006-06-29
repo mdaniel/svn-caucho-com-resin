@@ -30,33 +30,33 @@
 package javax.xml.soap;
 
 /**
- * A factory for creating SOAPConnection objects. Implementation of this class
- * is optional. If SOAPConnectionFactory.newInstance() throws an
- * UnsupportedOperationException then the implementation does not support the
- * SAAJ communication infrastructure. Otherwise SOAPConnection objects can be
- * created by calling createConnection() on the newly created
- * SOAPConnectionFactory object.
+ * The access point for the implementation classes of the factories defined in
+ * the SAAJ API. All of the newInstance methods defined on factories in SAAJ
+ * 1.3 defer to instances of this class to do the actual object creation. The
+ * implementations of newInstance() methods (in SOAPFactory and MessageFactory)
+ * that existed in SAAJ 1.2 have been updated to also delegate to the
+ * SAAJMetaFactory when the SAAJ 1.2 defined lookup fails to locate the Factory
+ * implementation class name. SAAJMetaFactory is a service provider interface.
+ * There are no public methods on this class. Since: SAAJ 1.3 Author: SAAJ RI
+ * Development Team
  */
-public abstract class SOAPConnectionFactory {
-  public SOAPConnectionFactory()
+public abstract class SAAJMetaFactory {
+  protected SAAJMetaFactory()
   {
     throw new UnsupportedOperationException();
   }
 
 
   /**
-   * Create a new SOAPConnection.
+   * Creates a MessageFactory object for the given String protocol.
    */
-  public abstract SOAPConnection createConnection() throws SOAPException;
+  protected abstract MessageFactory newMessageFactory(String protocol) throws SOAPException;
 
 
   /**
-   * Creates an instance of the default SOAPConnectionFactory object.
+   * Creates a SOAPFactory object for the given String protocol.
    */
-  public static SOAPConnectionFactory newInstance() throws SOAPException, UnsupportedOperationException
-  {
-    throw new UnsupportedOperationException();
-  }
+  protected abstract SOAPFactory newSOAPFactory(String protocol) throws SOAPException;
 
 }
 
