@@ -618,67 +618,74 @@ public class JdbcResultResource {
                               int column)
     throws SQLException
   {
-    switch (metaData.getColumnType(column)) {
-    case Types.NULL:
+    try {
+      switch (metaData.getColumnType(column)) {
+      case Types.NULL:
+	return NullValue.NULL;
+
+      case Types.BIT:
+      case Types.TINYINT:
+      case Types.SMALLINT:
+      case Types.INTEGER:
+      case Types.BIGINT:
+	{
+	  long value = rs.getLong(column);
+
+	  if (rs.wasNull())
+	    return NullValue.NULL;
+	  else
+	    return LongValue.create(value);
+	}
+
+      case Types.DOUBLE:
+	{
+	  double value = rs.getDouble(column);
+
+	  if (rs.wasNull())
+	    return NullValue.NULL;
+	  else
+	    return new DoubleValue(value);
+	}
+
+      case Types.BLOB:
+	{
+	  Object object = rs.getBlob(column);
+	  if (object.getClass().getName().equals("oracle.sql.BLOB")) {
+	    OracleOciLob ociLob = new OracleOciLob((Oracle) _conn,
+						   OracleModule.OCI_D_LOB);
+	    ociLob.setLob(object);
+	    object = ociLob;
+	  }
+	  return env.wrapJava(object);
+	}
+
+      case Types.CLOB:
+	{
+	  Object object = rs.getClob(column);
+	  if (object.getClass().getName().equals("oracle.sql.CLOB")) {
+	    OracleOciLob ociLob = new OracleOciLob((Oracle) _conn,
+						   OracleModule.OCI_D_LOB);
+	    ociLob.setLob(object);
+	    object = ociLob;
+	  }
+	  return env.wrapJava(object);
+	}
+
+      default:
+	{
+	  String strValue = rs.getString(column);
+
+	  if (strValue == null || rs.wasNull())
+	    return NullValue.NULL;
+	  else
+	    return new StringValueImpl(strValue);
+	}
+      }
+    } catch (SQLException e) {
+      // php/141e
+      log.log(Level.FINE, e.toString(), e);
+
       return NullValue.NULL;
-
-    case Types.BIT:
-    case Types.TINYINT:
-    case Types.SMALLINT:
-    case Types.INTEGER:
-    case Types.BIGINT:
-      {
-        long value = rs.getLong(column);
-
-        if (rs.wasNull())
-          return NullValue.NULL;
-        else
-          return LongValue.create(value);
-      }
-
-    case Types.DOUBLE:
-      {
-        double value = rs.getDouble(column);
-
-        if (rs.wasNull())
-          return NullValue.NULL;
-        else
-          return new DoubleValue(value);
-      }
-
-    case Types.BLOB:
-      {
-        Object object = rs.getBlob(column);
-        if (object.getClass().getName().equals("oracle.sql.BLOB")) {
-          OracleOciLob ociLob = new OracleOciLob((Oracle) _conn,
-                                                 OracleModule.OCI_D_LOB);
-          ociLob.setLob(object);
-          object = ociLob;
-        }
-        return env.wrapJava(object);
-      }
-
-    case Types.CLOB:
-      {
-        Object object = rs.getClob(column);
-        if (object.getClass().getName().equals("oracle.sql.CLOB")) {
-          OracleOciLob ociLob = new OracleOciLob((Oracle) _conn,
-                                                 OracleModule.OCI_D_LOB);
-          ociLob.setLob(object);
-          object = ociLob;
-        }
-        return env.wrapJava(object);
-      }
-
-    default:
-      {
-        String strValue = rs.getString(column);
-
-        if (strValue == null || rs.wasNull())
-          return NullValue.NULL;
-        else
-          return new StringValueImpl(strValue);
-      }
     }
   }
 

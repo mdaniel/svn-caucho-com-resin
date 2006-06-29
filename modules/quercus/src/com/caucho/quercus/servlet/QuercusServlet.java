@@ -216,25 +216,17 @@ public class QuercusServlet
 
       QuercusPage page = getQuercus().parse(path);
 
-      // quercus/1b06
-      String encoding = getQuercus().getScriptEncoding();
-      if (encoding != null)
-	response.setContentType("text/html; charset=" + encoding);
-      else
-	response.setContentType("text/html");
-
       WriteStream ws;
-
+      
       // XXX: check if correct.  PHP doesn't expect the lower levels
       // to deal with the encoding, so this may be okay
       if (response instanceof CauchoResponse) {
-        ws = Vfs.openWrite(((CauchoResponse) response).getResponseStream());
+	ws = Vfs.openWrite(((CauchoResponse) response).getResponseStream());
       } else {
-        OutputStream out = response.getOutputStream();
+	OutputStream out = response.getOutputStream();
 
-        ws = Vfs.openWrite(out);
+	ws = Vfs.openWrite(out);
       }
-      ws.setEncoding(encoding);
 
       Env env = new Env(getQuercus(), page, ws, request, response);
       try {

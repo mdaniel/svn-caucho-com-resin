@@ -421,7 +421,8 @@ public class OutputModule extends AbstractQuercusModule
    */
   public static Value ob_implicit_flush(Env env, @Optional("true") boolean flag)
   {
-    env.getOriginalOut().setImplicitFlush(flag);
+    if (env.getOriginalOut() != null)
+      env.getOriginalOut().setImplicitFlush(flag);
 
     return NullValue.NULL;
   }

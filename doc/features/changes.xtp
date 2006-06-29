@@ -4,6 +4,10 @@
 
 <s2 title='3.0.snap - June 23, 2006'>
 <ul>
+<li>GzipFilter wasn't handling late changes of status properly (#1087, rep by Frank Nestel)
+<li>Quercus: _GET/_POST needs to handle i18n (#1193, rep by artem)
+<li>Quercus: handle while(false) (#1176, rep by koreth)
+<li>Quercus: fetch with SQLException should return null (#1221, rep by artem)
 <li>OneToMany fetchType had incorrect default (rep by Christopher Stach)
 <li>mod_caucho.c should return the actual status code in caucho_request (#1075, fixed! by Rudy D'Hauwe)
 <li>BundleManager must not add '/' prefix (#1110)

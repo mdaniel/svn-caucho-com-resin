@@ -147,6 +147,14 @@ abstract public class Expr {
   }
 
   /**
+   * Returns true if a static false value.
+   */
+  public boolean isFalse()
+  {
+    return false;
+  }
+
+  /**
    * Returns true for an expression that can be read (only $a[] uses this)
    */
   public boolean canRead()

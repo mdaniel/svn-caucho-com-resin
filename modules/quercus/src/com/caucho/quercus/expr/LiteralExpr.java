@@ -80,6 +80,19 @@ public class LiteralExpr extends Expr {
   }
 
   /**
+   * Returns true if a static true value.
+   */
+  public boolean isFalse()
+  {
+    if (_value == BooleanValue.FALSE)
+      return true;
+    else if (_value instanceof LongValue)
+      return _value.toLong() == 0;
+    else
+      return false;
+  }
+
+  /**
    * Returns true for a long value.
    */
   public boolean isLong()

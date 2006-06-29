@@ -126,6 +126,8 @@ public class WhileStatement extends Statement {
     out.print("while (");
     if (_test.isTrue())
       out.print("BooleanValue.TRUE.toBoolean()");
+    else if (_test.isFalse())
+      out.print("BooleanValue.FALSE.toBoolean()");
     else
       _test.generateBoolean(out);
     out.println(") {");

@@ -264,7 +264,7 @@ public final class Env {
     _isStrict = quercus.isStrict();
 
     _page = page;
-
+    
     _originalOut = out;
     _out = out;
 
@@ -398,6 +398,25 @@ public final class Env {
   
   public void start()
   {
+    // quercus/1b06
+    String encoding = getOutputEncoding().toString();
+    String type = getIni("default_mimetype").toString();
+    
+    if ("".equals(type) || _response == null) {
+    }
+    else if (! "".equals(encoding))
+      _response.setContentType(type + "; charset=" + encoding);
+    else
+      _response.setContentType(type);
+
+    if (_out != null) {
+      try {
+	_out.setEncoding(encoding);
+      } catch (Exception e) {
+	log.log(Level.WARNING, e.toString(), e);
+      }
+    }
+	
     HashSet<ModuleStartupListener> listeners = 
       _quercus.getModuleStartupListeners(); 
 
@@ -1423,6 +1442,12 @@ public final class Env {
 
       var.set(post);
 
+      try {
+	_request.setCharacterEncoding(getHttpInputEncoding().toString());
+      } catch (Exception e) {
+	log.log(Level.FINE, e.toString(), e);
+      }
+
       ArrayList<String> keys = new ArrayList<String>();
       keys.addAll(_request.getParameterMap().keySet());
 
@@ -1471,6 +1496,12 @@ public final class Env {
 
       _globalMap.put(name, var);
 
+      try {
+	_request.setCharacterEncoding(getHttpInputEncoding().toString());
+      } catch (Exception e) {
+	log.log(Level.FINE, e.toString(), e);
+      }
+	  
       ArrayList<String> keys = new ArrayList<String>();
       keys.addAll(_request.getParameterMap().keySet());
 
