@@ -115,9 +115,11 @@ public class EJBCompiler {
 
       // container.setSearchPath(mergePath);
 
-      for (int i = 0; i < _ejbPath.size(); i++)
-	container.addEJBPath(_ejbPath.toString(), mergePath.lookup(_ejbPath.get(i)));
-    
+      for (int i = 0; i < _ejbPath.size(); i++) {
+        Path path = mergePath.lookup(_ejbPath.get(i));
+	container.addEJBPath(path, path);
+      }
+
       container.build();
     } finally {
       Thread.currentThread().setContextClassLoader(oldLoader);

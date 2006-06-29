@@ -29,14 +29,15 @@
 
 package com.caucho.mbeans.j2ee;
 
+import com.caucho.ejb.cfg.EjbSessionBean;
+
 /**
  * Management interface for a stateless session bean.
  */
 public class StatelessSessionBean extends EJB {
-  protected String getName()
+  public StatelessSessionBean(EjbSessionBean ejbBean)
   {
-    // XXX:
-    return null;
+    super(ejbBean);
   }
 
   // no attributes

@@ -29,50 +29,25 @@
 
 package com.caucho.ejb.metadata;
 
-import java.lang.reflect.Method;
-
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-
-import javax.sql.DataSource;
-
-import javax.transaction.UserTransaction;
-
-import javax.ejb.Stateless;
-import javax.ejb.Stateful;
-import javax.ejb.Local;
-import javax.ejb.Remote;
-import javax.ejb.MethodPermissions;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.ejb.Inject;
-
-import javax.persistence.Entity;
-
+import com.caucho.amber.cfg.EntityIntrospector;
 import com.caucho.bytecode.JAnnotation;
 import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JClassLoader;
-import com.caucho.bytecode.JClassWrapper;
 import com.caucho.bytecode.JMethod;
-
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.InitProgram;
+import com.caucho.ejb.EjbServerManager;
+import com.caucho.ejb.cfg.EjbBean;
+import com.caucho.ejb.cfg.EjbMethod;
+import com.caucho.ejb.cfg.EjbMethodPattern;
+import com.caucho.ejb.cfg.EjbSessionBean;
+import com.caucho.ejb.cfg.MethodSignature;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.config.ConfigException;
-
-import com.caucho.config.types.InitProgram;
-
-import com.caucho.ejb.EjbServerManager;
-
-import com.caucho.ejb.cfg.EjbConfig;
-import com.caucho.ejb.cfg.EjbBean;
-import com.caucho.ejb.cfg.EjbSessionBean;
-import com.caucho.ejb.cfg.MethodSignature;
-import com.caucho.ejb.cfg.EjbMethod;
-import com.caucho.ejb.cfg.EjbMethodPattern;
-
-import com.caucho.amber.cfg.EntityIntrospector;
+import javax.ejb.*;
+import javax.persistence.Entity;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Configuration for a new bean based on metadata.
@@ -97,6 +72,12 @@ public class Bean {
     
     _ejbManager = ejbManager;
     _introspector = introspector;
+  }
+
+  protected String getEJBModuleName()
+  {
+    // XXX: s/b what?
+    return "introspected";
   }
 
   /**
@@ -172,7 +153,7 @@ public class Bean {
     
     JAnnotation stateless = type.getAnnotation(Stateless.class);
 
-    EjbSessionBean bean = new EjbSessionBean(_ejbManager.getConfig());
+    EjbSessionBean bean = new EjbSessionBean(_ejbManager.getConfig(), getEJBModuleName());
     bean.setAllowPOJO(true);
 
     bean.setSessionType("Stateless");
@@ -188,7 +169,7 @@ public class Bean {
     
     JAnnotation stateful = type.getAnnotation(Stateful.class);
 
-    EjbSessionBean bean = new EjbSessionBean(_ejbManager.getConfig());
+    EjbSessionBean bean = new EjbSessionBean(_ejbManager.getConfig(), getEJBModuleName());
     bean.setAllowPOJO(true);
 
     bean.setSessionType("Stateful");

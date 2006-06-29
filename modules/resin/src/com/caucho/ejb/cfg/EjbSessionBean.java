@@ -29,40 +29,30 @@
 
 package com.caucho.ejb.cfg;
 
-import java.util.*;
+import com.caucho.bytecode.JClass;
+import com.caucho.bytecode.JMethod;
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.ConfigException;
+import com.caucho.config.LineConfigException;
+import com.caucho.config.j2ee.InjectIntrospector;
+import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.EjbServerManager;
+import com.caucho.ejb.gen.BeanAssembler;
+import com.caucho.ejb.gen.SessionAssembler;
+import com.caucho.ejb.gen.StatelessAssembler;
+import com.caucho.ejb.session.SessionServer;
+import com.caucho.ejb.session.StatelessServer;
+import com.caucho.java.gen.JavaClassGenerator;
+import com.caucho.util.L10N;
 
-import java.lang.reflect.Modifier;
-
+import javax.ejb.CreateException;
 import javax.ejb.EJBHome;
 import javax.ejb.EJBLocalHome;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionSynchronization;
-import javax.ejb.CreateException;
-
-import com.caucho.bytecode.JMethod;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JClassWrapper;
-
-import com.caucho.util.L10N;
-
-import com.caucho.config.ConfigException;
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BuilderProgramContainer;
-import com.caucho.config.LineConfigException;
-
-import com.caucho.config.j2ee.InjectIntrospector;
-
-import com.caucho.java.gen.JavaClassGenerator;
-
-import com.caucho.ejb.EjbServerManager;
-import com.caucho.ejb.AbstractServer;
-
-import com.caucho.ejb.session.SessionServer;
-import com.caucho.ejb.session.StatelessServer;
-
-import com.caucho.ejb.gen.BeanAssembler;
-import com.caucho.ejb.gen.StatelessAssembler;
-import com.caucho.ejb.gen.SessionAssembler;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 
 /**
  * Configuration for an ejb entity bean.
@@ -76,9 +66,9 @@ public class EjbSessionBean extends EjbBean {
   /**
    * Creates a new session bean configuration.
    */
-  public EjbSessionBean(EjbConfig ejbConfig)
+  public EjbSessionBean(EjbConfig ejbConfig, String ejbModuleName)
   {
-    super(ejbConfig);
+    super(ejbConfig, ejbModuleName);
   }
 
   /**

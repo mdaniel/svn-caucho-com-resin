@@ -29,11 +29,19 @@
 
 package com.caucho.mbeans.j2ee;
 
+import com.caucho.jmx.IntrospectionMBean;
+import com.caucho.jmx.Jmx;
+
+import javax.management.ObjectName;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Static utility class for registering and unregistering J2EEManagedObject
  * management beans.
  */
 public class J2EEAdmin {
+  private static final Logger log = Logger.getLogger(J2EEAdmin.class.getName());
 
   private J2EEAdmin()
   {
@@ -51,14 +59,20 @@ public class J2EEAdmin {
     if (managedObject == null)
       return null;
 
-    try {
-      managedObject.start();
+    ObjectName objectName = null;
 
-      return managedObject.isActive() ? managedObject : null;
+    try {
+      objectName = managedObject.createObjectName();
+
+      Object mbean = new IntrospectionMBean(managedObject, managedObject.getClass(), true);
+
+      Jmx.register(mbean, objectName);
+
+      return managedObject;
     }
-    catch (Throwable ex) {
-      // should never happen
-      ex.printStackTrace();
+    catch (Exception ex) {
+      if (log.isLoggable(Level.FINE))
+        log.log(Level.FINE, managedObject.getClass() + " " + objectName + " " + ex.toString(), ex);
 
       return null;
     }
@@ -77,12 +91,31 @@ public class J2EEAdmin {
     if (managedObject == null)
       return;
 
+    ObjectName objectName = null;
+
     try {
-      managedObject.stop();
+      objectName = managedObject.createObjectName();
+
+      Jmx.unregister(objectName);
     }
     catch (Throwable ex) {
-      // should never happen
-      ex.printStackTrace();
+      if (log.isLoggable(Level.FINEST))
+        log.log(Level.FINEST, managedObject.getClass() + " " + objectName + " " + ex.toString(), ex);
+    }
+  }
+
+  public static void unregister(String name)
+  {
+    ObjectName objectName;
+
+    try {
+      objectName = new ObjectName(name);
+
+      Jmx.unregister(objectName);
+    }
+    catch (Throwable ex) {
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, name + " " + ex.toString(), ex);
     }
   }
 }

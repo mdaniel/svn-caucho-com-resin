@@ -57,9 +57,7 @@ public class J2EEServer extends J2EEManagedObject {
 
   protected String getName()
   {
-    String name = _serverController.getId();
-
-    return name == null || name.length() == 0 ? "default" : name;
+    return _serverController.getId();
   }
 
   protected boolean isJ2EEServer()
@@ -81,12 +79,14 @@ public class J2EEServer extends J2EEManagedObject {
    */
   public String []getDeployedObjects()
   {
-    return queryObjectNames("j2eeType=J2EEApplication",
-                            "j2eeType=AppClientModule",
-                            "j2eeType=ResourceAdapterModule",
-                            "j2eeType=EJBModule",
-                            "j2eeType=WebModule"
-                            );
+    return queryObjectNames(
+      new String[][] {
+        { "j2eeType", "J2EEApplication"},
+        { "j2eeType", "AppClientModule"},
+        { "j2eeType", "ResourceAdapterModule"},
+        { "j2eeType", "EJBModule"},
+        { "j2eeType", "WebModule"}
+      });
   }
 
   /**
@@ -99,15 +99,17 @@ public class J2EEServer extends J2EEManagedObject {
    */
   public String []getResources()
   {
-    return queryObjectNames("j2eeType=JCAResource",
-                            "j2eeType=JavaMailResource",
-                            "j2eeType=JDBCResource",
-                            "j2eeType=JMSResource",
-                            "j2eeType=JNDIResource",
-                            "j2eeType=JTAResource",
-                            "j2eeType=RMI_IIOPResource",
-                            "j2eeType=URLResource"
-                            );
+    return queryObjectNames(
+      new String[][] {
+        { "j2eeType", "JCAResource" },
+        { "j2eeType", "JavaMailResource" },
+        { "j2eeType", "JDBCResource" },
+        { "j2eeType", "JMSResource" },
+        { "j2eeType", "JNDIResource" },
+        { "j2eeType", "JTAResource" },
+        { "j2eeType", "RMI_IIOPResource" },
+        { "j2eeType", "URLResource" },
+      });
   }
 
   /**
@@ -117,7 +119,7 @@ public class J2EEServer extends J2EEManagedObject {
    */
   public String []getJavaVMs()
   {
-    return queryObjectNames("j2eeType=JVM");
+    return queryObjectNamesNew("j2eeType", "JVM");
   }
 
   /**

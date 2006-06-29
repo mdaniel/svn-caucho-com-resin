@@ -29,22 +29,19 @@
 
 package com.caucho.jmx;
 
+import javax.management.*;
 import java.lang.annotation.Annotation;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.TreeSet;
 import java.util.WeakHashMap;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.management.*;
 
 /**
  * Resin implementation of StandardMBean.
@@ -224,7 +221,7 @@ public class IntrospectionMBean implements DynamicMBean {
   }
 
   /**
-   * Returns the set method matching the name.
+   * Returns the get or is method matching the name.
    */
   private OpenModelMethod createGetMethod(String name)
   {

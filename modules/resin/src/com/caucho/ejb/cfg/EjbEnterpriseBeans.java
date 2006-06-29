@@ -38,16 +38,18 @@ import com.caucho.config.ConfigException;
 public class EjbEnterpriseBeans {
   private static final L10N L = new L10N(EjbEnterpriseBeans.class);
 
-  private EjbConfig _config;
+  private final EjbConfig _config;
+  private final String _ejbModuleName;
 
-  public EjbEnterpriseBeans(EjbConfig config)
+  public EjbEnterpriseBeans(EjbConfig config, String ejbModuleName)
   {
     _config = config;
+    _ejbModuleName = ejbModuleName;
   }
 
   public EjbSessionConfigProxy createSession()
   {
-    return new EjbSessionConfigProxy(_config);
+    return new EjbSessionConfigProxy(_config, _ejbModuleName);
   }
   
   public void addSession(EjbSessionConfigProxy sessionProxy)
@@ -60,7 +62,7 @@ public class EjbEnterpriseBeans {
 
   public EjbEntityConfigProxy createEntity()
   {
-    return new EjbEntityConfigProxy(_config);
+    return new EjbEntityConfigProxy(_config, _ejbModuleName);
   }
   
   public void addEntity(EjbEntityConfigProxy entityProxy)
@@ -73,7 +75,7 @@ public class EjbEnterpriseBeans {
 
   public EjbBeanConfigProxy createEjbBean()
   {
-    return new EjbBeanConfigProxy(_config);
+    return new EjbBeanConfigProxy(_config, _ejbModuleName);
   }
   
   public void addEjbBean(EjbBeanConfigProxy beanProxy)
@@ -86,7 +88,7 @@ public class EjbEnterpriseBeans {
 
   public EjbMessageConfigProxy createMessageDriven()
   {
-    return new EjbMessageConfigProxy(_config);
+    return new EjbMessageConfigProxy(_config, _ejbModuleName);
   }
 
   public void addMessageDriven(EjbMessageConfigProxy messageProxy)

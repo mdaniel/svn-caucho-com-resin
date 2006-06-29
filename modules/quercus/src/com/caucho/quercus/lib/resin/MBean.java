@@ -55,7 +55,7 @@ public class MBean {
 
   public String getMbeanName()
   {
-    return _name.toString();
+    return _name.getCanonicalName();
   }
 
   public MBeanInfo getInfo()
@@ -182,6 +182,6 @@ public class MBean {
 
   public String toString()
   {
-    return "MBean[" + _name + "]";
+    return "MBean[" + _name.getCanonicalName() + "]";
   }
 }

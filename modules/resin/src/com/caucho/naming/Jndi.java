@@ -28,12 +28,18 @@
 
 package com.caucho.naming;
 
-import java.util.logging.*;
-
-import javax.naming.*;
-
-import com.caucho.util.L10N;
 import com.caucho.log.Log;
+import com.caucho.util.L10N;
+import com.caucho.mbeans.j2ee.JNDIResource;
+import com.caucho.mbeans.j2ee.J2EEAdmin;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.Name;
+import javax.naming.NameNotFoundException;
+import javax.naming.NameParser;
+import javax.naming.NamingException;
+import java.util.logging.Logger;
 
 /**
  * Static utility functions.
@@ -41,6 +47,17 @@ import com.caucho.log.Log;
 public class Jndi {
   private static Logger log = Log.open(Jndi.class);
   private static L10N L = new L10N(Jndi.class);
+
+  /**
+   * Returns the full name.
+   */
+  public static String getFullName(String shortName)
+  {
+    if (shortName.startsWith("java:comp"))
+      return shortName;
+    else
+      return "java:comp/env/" + shortName;
+  }
 
   public static void bindDeepShort(String name, Object obj)
     throws NamingException
@@ -55,9 +72,11 @@ public class Jndi {
     throws NamingException
   {
     bindDeep(new InitialContext(), name, obj, name);
+
+    J2EEAdmin.register(new JNDIResource(name));
   }
   
-  public static void bindDeep(Context context, String name,
+  private static void bindDeep(Context context, String name,
 			      Object obj, String fullName)
     throws NamingException
   {
@@ -76,8 +95,9 @@ public class Jndi {
         log.warning(L.l("`{0}' is a conflicting JNDI resource for `{1}'",
                         fullName, obj));
       }
-      
+
       context.rebind(name, obj);
+
       return;
     }
 
@@ -115,31 +135,26 @@ public class Jndi {
   }
 
   /**
-   * Returns the full name.
-   */
-  public static String getFullName(String shortName)
-  {
-    if (shortName.startsWith("java:comp"))
-      return shortName;
-    else
-      return "java:comp/env/" + shortName;
-  }
-
-  /**
    * Binds the object into JNDI without warnings if an old
    * object exists, using the full JNDI name.
    */
   public static void rebindDeep(String name, Object obj)
     throws NamingException
   {
+    JNDIResource jndiResource = new JNDIResource(name);
+
+    J2EEAdmin.unregister(jndiResource);
+
     rebindDeep(new InitialContext(), name, obj, name);
+
+    J2EEAdmin.register(jndiResource);
   }
 
   /**
    * Binds the object into JNDI without warnings if an old
    * object exists.
    */
-  public static void rebindDeep(Context context, String name,
+  private static void rebindDeep(Context context, String name,
 				Object obj, String fullName)
     throws NamingException
   {

@@ -46,6 +46,7 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -102,7 +103,7 @@ public class EjbConfig {
   /**
    * Adds a path for an EJB config file to the config list.
    */
-  public void addEJBPath(String ejbModuleName, Path path)
+  public void addEJBPath(Path ejbModulePath, Path path)
     throws ConfigException
   {
     if (_pathList.contains(path))
@@ -110,14 +111,20 @@ public class EjbConfig {
 
     _pathList.add(path);
 
-    _ejbManager.addEJBModule(ejbModuleName);
-
     if (path.getScheme().equals("jar"))
       path.setUserPath(path.getURL());
     
     Environment.addDependency(path);
 
-    EjbJar ejbJar = new EjbJar(this);
+    String ejbModuleName = ejbModulePath.getPath();
+    String pwd = Vfs.getPwd().getPath();
+
+    if (ejbModuleName.startsWith(pwd))
+      ejbModuleName = ejbModuleName.substring(pwd.length());
+
+    _ejbManager.addEJBModule(ejbModuleName);
+
+    EjbJar ejbJar = new EjbJar(this, ejbModuleName);
 
     try {
       new Config().configure(ejbJar, path, getSchema());
@@ -412,7 +419,7 @@ public class EjbConfig {
   {
     for (FileSetType fileSet : _fileSetList) {
       for (Path path : fileSet.getPaths()) {
-	addEJBPath(fileSet.getDir().toString(), path);
+	addEJBPath(fileSet.getDir(), path);
       }
     }
   }

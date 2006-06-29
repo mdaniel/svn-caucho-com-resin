@@ -60,11 +60,12 @@ public class EJBModule extends J2EEModule {
     String postfix = ",EJBModule=" + _objectName.getKeyProperty("name");
 
     return queryObjectNames(
-      "j2eeType=EntityBean" + postfix,
-      "j2eeType=StatefulSessionBean" + postfix,
-      "j2eeType=StatelessSessionBean" + postfix,
-      "j2eeType=MessageDrivenSessionBean" + postfix
-    );
+      new String[][] {
+        { "j2eeType", "EntityBean", "EJBModule", getName() },
+        { "j2eeType", "StatefulSessionBean", "EJBModule", getName() },
+        { "j2eeType", "StatelessSessionBean", "EJBModule", getName() },
+        { "j2eeType", "MessageDrivenSessionBean", "EJBModule", getName() },
+      });
 
   }
 }

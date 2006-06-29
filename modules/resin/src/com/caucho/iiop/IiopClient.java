@@ -48,7 +48,7 @@ public class IiopClient implements EJBClientInterface {
     Path path = JarPath.create(jar).lookup("META-INF/ejb-jar.xml");
 
     if (path.canRead())
-      _ejbConfig.addEJBPath(jar.toString(), path);
+      _ejbConfig.addEJBPath(jar, path);
   }
 
   /**

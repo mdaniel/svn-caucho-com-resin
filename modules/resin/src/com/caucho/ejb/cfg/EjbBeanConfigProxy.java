@@ -28,16 +28,14 @@
 
 package com.caucho.ejb.cfg;
 
-import java.util.ArrayList;
-
-import com.caucho.util.L10N;
-
-import com.caucho.config.ConfigException;
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.ConfigException;
 import com.caucho.config.DependencyBean;
-
 import com.caucho.make.PersistentDependency;
+import com.caucho.util.L10N;
+
+import java.util.ArrayList;
 
 /**
  * Proxy for an ejb bean configuration.  This proxy is needed to handle
@@ -46,7 +44,8 @@ import com.caucho.make.PersistentDependency;
 public class EjbBeanConfigProxy implements DependencyBean {
   private static final L10N L = new L10N(EjbBeanConfigProxy.class);
 
-  private EjbConfig _config;
+  private final EjbConfig _config;
+  private final String _ejbModuleName;
 
   private String _ejbName;
 
@@ -64,9 +63,10 @@ public class EjbBeanConfigProxy implements DependencyBean {
   /**
    * Creates a new entity bean configuration.
    */
-  public EjbBeanConfigProxy(EjbConfig config)
+  public EjbBeanConfigProxy(EjbConfig config, String ejbModuleName)
   {
     _config = config;
+    _ejbModuleName = ejbModuleName;
   }
 
   /**
@@ -76,7 +76,12 @@ public class EjbBeanConfigProxy implements DependencyBean {
   {
     return _config;
   }
-  
+
+   public String getEJBModuleName()
+  {
+    return _ejbModuleName;
+  }
+
   /**
    * Sets the location
    */

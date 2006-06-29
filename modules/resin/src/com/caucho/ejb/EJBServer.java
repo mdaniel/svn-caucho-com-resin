@@ -673,7 +673,7 @@ public class EJBServer
         Path path = _descriptors.get(i);
 
         // XXX: app.addDepend(path);
-        _ejbManager.addEJBPath(path.toString(), path);
+        _ejbManager.addEJBPath(path, path);
       }
     }
   }

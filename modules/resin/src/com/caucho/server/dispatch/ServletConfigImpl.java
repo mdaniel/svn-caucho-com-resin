@@ -97,7 +97,6 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
 
   private Servlet _servlet;
   private FilterChain _servletChain;
-  private J2EEManagedObject _j2eeManagedObject;
 
   /**
    * Creates a new servlet configuration object.
@@ -579,7 +578,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     try {
       _servlet = createServletImpl();
 
-      _j2eeManagedObject = J2EEAdmin.register(new com.caucho.mbeans.j2ee.Servlet(this));
+      J2EEAdmin.register(new com.caucho.mbeans.j2ee.Servlet(this));
 
       // If the servlet has an MBean, register it
       try {
@@ -678,13 +677,8 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     Servlet servlet = _servlet;
     _servlet = null;
 
-    J2EEManagedObject j2eeManagedObject = _j2eeManagedObject;
-    _j2eeManagedObject = null;
-
     if (_alarm != null)
       _alarm.dequeue();
-
-    J2EEAdmin.unregister(j2eeManagedObject);
 
     if (servlet != null)
       servlet.destroy();

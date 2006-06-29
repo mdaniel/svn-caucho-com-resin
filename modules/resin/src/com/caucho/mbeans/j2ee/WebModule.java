@@ -61,6 +61,6 @@ public class WebModule extends J2EEModule {
    */
   public String []getServlets()
   {
-    return queryObjectNames("j2eeType=Servlet");
+    return queryObjectNamesNew("j2eeType", "Servlet");
   }
 }

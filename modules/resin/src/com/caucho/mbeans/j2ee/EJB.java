@@ -29,14 +29,33 @@
 
 package com.caucho.mbeans.j2ee;
 
+import com.caucho.ejb.cfg.EjbBean;
+
+import javax.management.ObjectName;
+import javax.management.MalformedObjectNameException;
+import java.util.Hashtable;
+
 /**
  * Base class management interface for enterpise java beans.
  */
 public class EJB extends J2EEManagedObject {
+  private final EjbBean _ejbBean;
+
+  public EJB(EjbBean ejbBean)
+  {
+    _ejbBean = ejbBean;
+  }
+
+  protected ObjectName createObjectName(Hashtable<String, String> properties)
+    throws MalformedObjectNameException
+  {
+    properties.put("EJBModule", ObjectName.quote(_ejbBean.getEJBModuleName()));
+
+    return super.createObjectName(properties);
+  }
 
   protected String getName()
   {
-    // XXX:
-    return null;
+    return _ejbBean.getEJBName();
   }
 }

@@ -76,7 +76,6 @@ abstract public class
   private Object _mbean;
 
   private ObjectName _objectName;
-  private J2EEManagedObject _j2eeManagedObject;
 
   // The default configurations
   private ArrayList<C> _configDefaults =  new ArrayList<C>();
@@ -271,7 +270,7 @@ abstract public class
       log.log(Level.FINE, e.toString(), e);
     }
 
-    _j2eeManagedObject = J2EEAdmin.register(createJ2EEManagedObject());
+    J2EEAdmin.register(createJ2EEManagedObject());
   }
 
   /**
@@ -365,13 +364,8 @@ abstract public class
       thread.setContextClassLoader(getParentClassLoader());
 
       try {
-        J2EEManagedObject j2eeManagedObject = _j2eeManagedObject;
-        _j2eeManagedObject = null;
-
         ObjectName objectName = _objectName;
         _objectName = null;
-
-        J2EEAdmin.unregister(j2eeManagedObject);
 
         if (objectName != null)
           Jmx.unregister(objectName);

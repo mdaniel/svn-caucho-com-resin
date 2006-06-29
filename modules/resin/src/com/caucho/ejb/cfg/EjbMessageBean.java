@@ -29,32 +29,24 @@
 
 package com.caucho.ejb.cfg;
 
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Method;
-
-import javax.naming.NamingException;
-
-import javax.jms.MessageListener;
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
-import javax.jms.Session;
-
-import javax.ejb.MessageDrivenBean;
-
-import com.caucho.bytecode.JMethod;
 import com.caucho.bytecode.JClass;
-
-import com.caucho.util.L10N;
-
+import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.JndiBuilder;
-
-import com.caucho.java.gen.JavaClassGenerator;
-
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EjbServerManager;
-
 import com.caucho.ejb.message.MessageServer;
+import com.caucho.java.gen.JavaClassGenerator;
+import com.caucho.util.L10N;
+import com.caucho.mbeans.j2ee.J2EEAdmin;
+
+import javax.ejb.MessageDrivenBean;
+import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
+import javax.jms.MessageListener;
+import javax.jms.Session;
+import javax.naming.NamingException;
+import java.lang.reflect.Modifier;
 
 /**
  * Configuration for an ejb entity bean.
@@ -75,9 +67,9 @@ public class EjbMessageBean extends EjbBean {
   /**
    * Creates a new message bean configuration.
    */
-  public EjbMessageBean(EjbConfig config)
+  public EjbMessageBean(EjbConfig config, String ejbModuleName)
   {
-    super(config);
+    super(config, ejbModuleName);
 
     _consumerMax = config.getEJBManager().getMessageConsumerMax();
   }
@@ -297,6 +289,7 @@ public class EjbMessageBean extends EjbBean {
   public void init()
     throws ConfigException
   {
+    J2EEAdmin.register(new com.caucho.mbeans.j2ee.MessageDrivenBean(this));
   }
 
   /**

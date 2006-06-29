@@ -76,10 +76,12 @@ public class J2EEApplication extends J2EEDeployedObject {
    */
   public String []getModules()
   {
-    return queryObjectNames("j2eeType=AppClientModule",
-                            "j2eeType=EJBModule",
-                            "j2eeType=WebModule",
-                            "j2eeType=ResourceAdapterModule");
+    return queryObjectNames(new String[][] {
+      { "j2eeType", "AppClientModule" },
+      { "j2eeType", "EJBModule" },
+      { "j2eeType", "WebModule" },
+      { "j2eeType", "ResourceAdapterModule"}
+    });
   }
 
 }

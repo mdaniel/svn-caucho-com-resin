@@ -470,8 +470,6 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
   public void addEJBJar(Path path)
     throws Exception
   {
-    String ejbModuleName = path.toString();
-
     JarPath jar;
 
     if (path instanceof JarPath)
@@ -482,12 +480,12 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
     Path descriptorPath = jar.lookup("META-INF/ejb-jar.xml");
 
     if (descriptorPath.exists())
-      addEJBPath(ejbModuleName, descriptorPath);
+      addEJBPath(path, descriptorPath);
     
     descriptorPath = jar.lookup("META-INF/resin-ejb-jar.xml");
 
     if (descriptorPath.exists())
-      addEJBPath(ejbModuleName, descriptorPath);
+      addEJBPath(path, descriptorPath);
 
     Path metaInf = jar.lookup("META-INF");
     if (metaInf.isDirectory()) {
@@ -497,7 +495,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
 	if (metaName.endsWith(".ejb")) {
 	  Path metaPath = metaInf.lookup(metaName);
 	
-	  addEJBPath(ejbModuleName, metaPath);
+	  addEJBPath(path, metaPath);
 	}
       }
     }
@@ -517,10 +515,10 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
   /**
    * Adds an EJB configuration file.
    */
-  public void addEJBPath(String ejbModuleName, Path path)
+  public void addEJBPath(Path ejbModulePath, Path path)
     throws ConfigException
   {
-    _ejbConfig.addEJBPath(ejbModuleName, path);
+    _ejbConfig.addEJBPath(ejbModulePath, path);
   }
 
   /**
@@ -672,22 +670,16 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
       return;
 
     ArrayList<J2EEManagedObject> ejbModuleManagedObjects;
-    EjbConfig ejbConfig;
     EnvServerManager envServerManager;
     
-    ejbModuleManagedObjects = new ArrayList<J2EEManagedObject>(_ejbModuleManagedObjectMap.values());
+    // ejbModuleManagedObjects does not need destroy
     _ejbModuleManagedObjectMap.clear();
 
     envServerManager = _envServerManager;
     _envServerManager = null;
 
-    ejbConfig = _ejbConfig;
-    _ejbConfig = null;
-
-    for (J2EEManagedObject ejbModuleManagedObject : ejbModuleManagedObjects)
-      J2EEAdmin.unregister(ejbModuleManagedObject);
-
     // ejbConfig does not need destroy
+    _ejbConfig = null;
 
     try {
       envServerManager.destroy();

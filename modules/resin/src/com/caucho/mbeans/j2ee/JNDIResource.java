@@ -29,14 +29,28 @@
 
 package com.caucho.mbeans.j2ee;
 
+import javax.naming.Name;
+
 /**
  * Management interface for a JNDI resource.
  */
 public class JNDIResource extends J2EEResource {
+  private final String _name;
+
+  public JNDIResource(String name)
+  {
+    _name = name;
+  }
+
+  public JNDIResource(Name name)
+  {
+    // XXX: probably not correct:
+    _name = name.toString();
+  }
+
   protected String getName()
   {
-    // XXX:
-    return null;
+    return _name;
   }
 
   // no attributes

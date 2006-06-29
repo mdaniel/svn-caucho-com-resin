@@ -28,20 +28,10 @@
 
 package com.caucho.ejb.cfg;
 
-import java.util.*;
-import java.lang.reflect.*;
-
-import javax.ejb.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.loader.EnvironmentLocal;
-
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Signature;
-
 import com.caucho.j2ee.cfg.J2eeSecurityRole;
+import com.caucho.util.L10N;
 
 /**
  * Configuration for an ejb bean.
@@ -49,11 +39,13 @@ import com.caucho.j2ee.cfg.J2eeSecurityRole;
 public class EjbJar {
   private static final L10N L = new L10N(EjbJar.class);
 
-  private EjbConfig _config;
+  private final EjbConfig _config;
+  private final String _ejbModuleName;
 
-  public EjbJar(EjbConfig config)
+  public EjbJar(EjbConfig config, String ejbModuleName)
   {
     _config = config;
+    _ejbModuleName = ejbModuleName;
   }
 
   public void setVersion(String version)
@@ -75,7 +67,7 @@ public class EjbJar {
   public EjbEnterpriseBeans createEnterpriseBeans()
     throws ConfigException
   {
-    return new EjbEnterpriseBeans(_config);
+    return new EjbEnterpriseBeans(_config, _ejbModuleName);
   }
   
   public Relationships createRelationships()

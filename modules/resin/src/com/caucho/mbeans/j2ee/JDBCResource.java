@@ -53,7 +53,7 @@ public class JDBCResource extends J2EEResource {
    */
   public String []getJdbcDataSources()
   {
-    return queryObjectNames("j2eeType=JDBCDataSource," +
-                            "JDBCResource=" + _objectName.getKeyProperty("name"));
+    return queryObjectNamesNew("j2eeType", "JDBCDataSource",
+                               "JDBCResource", getName());
   }
 }

@@ -98,7 +98,8 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   private static EnvironmentLocal<Map<JClass,SoftReference<JMethod[]>>> _methodCache
     = new EnvironmentLocal<Map<JClass,SoftReference<JMethod[]>>>();
 
-  private EjbConfig _ejbConfig;
+  private final EjbConfig _ejbConfig;
+  private final String _ejbModuleName;
 
   private ClassLoader _loader;
 
@@ -148,10 +149,11 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Creates a new entity bean configuration.
    */
-  public EjbBean(EjbConfig ejbConfig)
+  public EjbBean(EjbConfig ejbConfig, String ejbModuleName)
   {
     _ejbConfig = ejbConfig;
-    
+    _ejbModuleName = ejbModuleName;
+
     _loader = Thread.currentThread().getContextClassLoader();
 
     _jClassLoader = JClassLoaderWrapper.create(_loader);
@@ -163,6 +165,11 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   public EjbConfig getConfig()
   {
     return _ejbConfig;
+  }
+
+  public String getEJBModuleName()
+  {
+    return _ejbModuleName;
   }
 
   /**

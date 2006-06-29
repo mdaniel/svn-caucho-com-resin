@@ -29,21 +29,20 @@
 
 package com.caucho.mbeans.j2ee;
 
-import java.util.Hashtable;
-import java.util.Set;
-import java.util.Map;
-import java.util.TreeSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.caucho.jmx.Jmx;
+import com.caucho.server.host.Host;
+import com.caucho.server.webapp.Application;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-
-import com.caucho.jmx.IntrospectionMBean;
-import com.caucho.jmx.Jmx;
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.server.host.Host;
-import com.caucho.server.webapp.Application;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Base class management interface for all managed objects.
@@ -59,17 +58,54 @@ abstract public class J2EEManagedObject {
     "WebModule"
   };
 
-  private final Lifecycle _lifecycle = new Lifecycle();
-
   protected ObjectName _objectName;
 
   public J2EEManagedObject()
   {
   }
 
+  public String getObjectName()
+  {
+    return createObjectName().getCanonicalName();
+  }
+
+  ObjectName createObjectName()
+  {
+    if (_objectName == null) {
+      Hashtable<String,String> properties = new Hashtable<String, String>();
+
+      try {
+        _objectName = createObjectName(properties);
+      }
+      catch (MalformedObjectNameException ex) {
+        if (log.isLoggable(Level.FINE)) {
+          StringBuilder builder = new StringBuilder();
+
+          builder.append('\'');
+          for (Map.Entry<String,String> entry : properties.entrySet()) {
+            if (builder.length() > 0)
+              builder.append(',');
+
+            builder.append(entry.getKey());
+            builder.append('=');
+            builder.append(entry.getValue());
+          }
+
+          builder.append("' ");
+          builder.append(ex.toString());
+
+          log.log(Level.FINE, builder.toString(), ex);
+        }
+      }
+    }
+
+    return _objectName;
+  }
+
   /**
    * Returns the value to use for the the `name' key of the
-   * ObjectName.
+   * ObjectName. The returned value is raw, users of the method must escape
+   * the returned value for use in an ObjectName.
    */
   abstract protected String getName();
 
@@ -95,19 +131,12 @@ abstract public class J2EEManagedObject {
     return true;
   }
 
-  /**
-   * Format a String for use as a JMX value, escaping any special characters.
-   * @param value The value to format
-   * @param deflt A default to return if the value is null or the empty string.
-   * @return
-   */
-  protected String escapeForObjectName(String value, String deflt)
+  private String quote(String value)
   {
-    if (value == null || value.length() == 0)
-      return deflt;
-
-    // XXX: s/b ObjectName.quote
-    return value.replace(':', '-');
+    if (value == null)
+      return ObjectName.quote("null");
+    else
+      return ObjectName.quote(value);
   }
 
   /**
@@ -116,12 +145,16 @@ abstract public class J2EEManagedObject {
   protected ObjectName createObjectName(Hashtable<String,String> properties)
     throws MalformedObjectNameException
   {
-    // reverse order of what appears in ObjectName
-
     Application application = Application.getLocal();
 
-    if (application != null)
-      properties.put("WebModule", escapeForObjectName(application.getContextPath(), "/"));
+    if (application != null) {
+      String contextPath = application.getContextPath();
+
+      if (contextPath == null || contextPath.length() == 0)
+        contextPath = "/";
+
+      properties.put("WebModule", quote(contextPath));
+    }
 
     Host host = Host.getLocal();
 
@@ -129,19 +162,19 @@ abstract public class J2EEManagedObject {
       J2EEApplication j2eeApplication = J2EEApplication.getLocal();
 
       if (j2eeApplication == null)
-        properties.put("J2EEApplication", "null");
+        properties.put("J2EEApplication", quote("null"));
       else
-        properties.put("J2EEApplication", j2eeApplication.getName());
+        properties.put("J2EEApplication", quote(j2eeApplication.getName()));
     }
 
     if (host != null)
-      properties.put("Host", escapeForObjectName(host.getName(), "default"));
+      properties.put("Host", quote(host.getName()));
 
     if (isJ2EEServer()) {
       J2EEServer j2eeServer = J2EEServer.getLocal();
 
       if (j2eeServer != null)
-        properties.put("J2EEServer", j2eeServer.getName());
+        properties.put("J2EEServer", quote(j2eeServer.getName()));
     }
 
     String j2eeType;
@@ -152,32 +185,67 @@ abstract public class J2EEManagedObject {
 
     j2eeType = className.substring(lastDot + 1);
 
-    properties.put("j2eeType", j2eeType);
+    properties.put("j2eeType", quote(j2eeType));
 
-    properties.put("name", escapeForObjectName(getName(), null));
+    String name = getName();
+
+    if (name == null)
+      name = "null";
+
+    properties.put("name", quote(name));
 
     return new ObjectName("j2ee", properties);
   }
 
   /**
-   * Returns a list of ObjectNames that match the specified pattern(s).
-   * The context of this mbean is added to the patterns, which means that if
-   * there is a J2EEServer, Host, J2EEApplication, and/or WebModule for this mbean their
-   * key/value pairs are added to the pattern.
+   * Returns a list of ObjectNames that match the specified keys and values.
    * The pattern does not need to include ",*", it is added automatically.
    */
-  protected String[] queryObjectNames(String ... patterns)
+  protected String[] queryObjectNamesNew(String ... pattern)
+  {
+
+    ArrayList<String> objectNames = new ArrayList<String>();
+
+    queryObjectNames(objectNames, pattern);
+
+    return objectNames.toArray(new String[objectNames.size()]);
+  }
+
+  /**
+   * Returns a list of ObjectNames that match the specified keys and values.
+   * The pattern does not need to include ",*", it is added automatically.
+   */
+  protected String[] queryObjectNames(String[][] patterns)
   {
     TreeSet<String> objectNames = new TreeSet<String>();
 
-    for (String pattern : patterns) {
+    for (String[] pattern : patterns) {
+      queryObjectNames(objectNames, pattern);
+    }
+
+    return objectNames.toArray(new String[objectNames.size()]);
+  }
+
+  private void queryObjectNames(Collection<String> objectNames, String[] pattern)
+  {
+    try {
       StringBuilder patternBuilder = new StringBuilder();
 
-      if (pattern.indexOf(':') < 0)
-        patternBuilder.append("j2ee:");
+      patternBuilder.append("j2ee:");
+
+      int length = pattern.length;
+
+      for (int i =- 0; i < length; i++) {
+        String key = pattern[i];
+        String value = pattern[++i];
+
+        patternBuilder.append(key);
+        patternBuilder.append('=');
+        patternBuilder.append(ObjectName.quote(value));
+      }
 
       for (String contextKey : CONTEXT_KEYS) {
-        if (pattern.indexOf(contextKey) >= 0)
+        if (patternBuilder.indexOf(contextKey) >= 0)
           continue;
 
         String value = _objectName.getKeyProperty(contextKey);
@@ -186,110 +254,24 @@ abstract public class J2EEManagedObject {
           patternBuilder.append(',');
           patternBuilder.append(contextKey);
           patternBuilder.append('=');
-          patternBuilder.append(value);
+          patternBuilder.append(ObjectName.quote(value));
         }
       }
 
       patternBuilder.append(",*");
 
-      try {
-        ObjectName queryObjectName = new ObjectName(patternBuilder.toString());
+      ObjectName queryObjectName = new ObjectName(patternBuilder.toString());
 
-        Set<ObjectName> matchingObjectNames
-          = Jmx.getGlobalMBeanServer().queryNames(queryObjectName, null);
+      Set<ObjectName> matchingObjectNames
+        = Jmx.getGlobalMBeanServer().queryNames(queryObjectName, null);
 
-        for (ObjectName matchingObjectName : matchingObjectNames)
-          objectNames.add(matchingObjectName.toString());
-      }
-      catch (MalformedObjectNameException ex) {
-        if (log.isLoggable(Level.FINE))
-          log.log(Level.FINE, ex.toString(), ex);
-      }
-    }
-
-    return objectNames.toArray(new String[objectNames.size()]);
-  }
-
-  void start()
-  {
-    if (!_lifecycle.toStarting())
-      return;
-
-    if (_objectName == null) {
-      Hashtable<String,String> properties = new Hashtable<String, String>();
-
-      try {
-        _objectName = createObjectName(properties);
-      }
-      catch (MalformedObjectNameException ex) {
-        _lifecycle.toError();
-
-        if (log.isLoggable(Level.FINE)) {
-          StringBuilder builder = new StringBuilder();
-
-          builder.append('\'');
-          for (Map.Entry<String,String> entry : properties.entrySet()) {
-            if (builder.length() > 0)
-              builder.append(',');
-
-            builder.append(entry.getKey());
-            builder.append('=');
-            builder.append(entry.getValue());
-          }
-
-          builder.append("' ");
-          builder.append(ex.toString());
-
-          log.log(Level.FINE, builder.toString(), ex);
-        }
-      }
-    }
-
-    try {
-      Object mbean = new IntrospectionMBean(this, getClass(), true);
-
-      Jmx.getGlobalMBeanServer().registerMBean(mbean, _objectName);
+      for (ObjectName matchingObjectName : matchingObjectNames)
+        objectNames.add(matchingObjectName.getCanonicalName());
     }
     catch (Exception ex) {
-      _lifecycle.toError();
-
       if (log.isLoggable(Level.FINE))
-        log.log(Level.FINE, _objectName.toString() + " " + ex.toString(), ex);
-
-      return;
+        log.log(Level.FINE, ex.toString(), ex);
     }
-
-    _lifecycle.toActive();
-  }
-
-  boolean isActive()
-  {
-    return _lifecycle.isActive();
-  }
-
-  void stop()
-  {
-    if (!_lifecycle.toStopping())
-      return;
-
-    if (_objectName != null) {
-      try {
-        Jmx.getGlobalMBeanServer().unregisterMBean(_objectName);
-      }
-      catch (Exception ex) {
-        _lifecycle.toError();
-
-        if (log.isLoggable(Level.FINER))
-          log.log(Level.FINER, _objectName.toString() + " " + ex.toString(), ex);
-      }
-    }
-
-    _lifecycle.toStop();
-  }
-
-  public String getObjectName()
-  {
-    return _objectName.toString();
   }
 
   /**

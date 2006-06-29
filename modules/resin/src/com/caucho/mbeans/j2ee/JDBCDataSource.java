@@ -29,23 +29,44 @@
 
 package com.caucho.mbeans.j2ee;
 
+import com.caucho.sql.DBPool;
+
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import java.util.Hashtable;
+
 /**
- * Management interface for a JDBC data source.
+ * Management interface for a JDBC data source, corresponds to a &ltdriver> in Resin.
  */
 public class JDBCDataSource extends J2EEManagedObject {
+  private final DBPool _dbPool;
+
+  public JDBCDataSource(DBPool dbPool)
+  {
+    _dbPool = dbPool;
+  }
+
   protected String getName()
   {
-    // XXX:
-    return null;
+    return _dbPool.getName();
+  }
+
+  protected ObjectName createObjectName(Hashtable<String, String> properties)
+    throws MalformedObjectNameException
+  {
+    properties.put("JDBCResource", ObjectName.quote(_dbPool.getName()));
+    return super.createObjectName(properties);
   }
 
   /**
    * Returns the ObjectName of the {@link JDBCDriver}
    * management bean that is associated with this data source.
    */
-  public String []getJdbcDriver()
+  public String getJdbcDriver()
   {
-    // XXX:
-    return null;
+    String[] names = queryObjectNamesNew("j2eeType", "JDBCDriver",
+                                         "JDBCDataSource", getName());
+
+    return names.length > 0 ? names[0] : null;
   }
 }

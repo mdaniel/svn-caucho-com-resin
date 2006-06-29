@@ -28,11 +28,8 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.util.L10N;
-
 import com.caucho.config.ConfigException;
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BuilderProgramContainer;
+import com.caucho.util.L10N;
 
 /**
  * Proxy for an ejb bean configuration.  This proxy is needed to handle
@@ -46,9 +43,9 @@ public class EjbSessionConfigProxy extends EjbBeanConfigProxy {
   /**
    * Creates a new session bean configuration.
    */
-  public EjbSessionConfigProxy(EjbConfig config)
+  public EjbSessionConfigProxy(EjbConfig config, String ejbModuleName)
   {
-    super(config);
+    super(config, ejbModuleName);
   }
 
   /**
@@ -60,7 +57,7 @@ public class EjbSessionConfigProxy extends EjbBeanConfigProxy {
     EjbBean oldBean = getConfig().getBeanConfig(getEJBName());
 
     if (oldBean == null) {
-      _session = new EjbSessionBean(getConfig());
+      _session = new EjbSessionBean(getConfig(), getEJBModuleName());
       _session.setEJBName(getEJBName());
       _session.setLocation(getLocation());
       _session.setAllowPOJO(getConfig().isAllowPOJO());

@@ -42,9 +42,9 @@ public class JVM extends J2EEManagedObject {
 
   protected String getName()
   {
-    String name =  ResinServer.getResinServer().getServerId();
+    String name = ResinServer.getResinServer().getServerId();
 
-    return name == null ? "default" : name;
+    return (name == null) ? "" : name;
   }
 
   protected boolean isJ2EEApplication()

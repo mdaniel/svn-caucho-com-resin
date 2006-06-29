@@ -29,15 +29,34 @@
 
 package com.caucho.mbeans.j2ee;
 
+import com.caucho.sql.DriverConfig;
+
+import javax.management.ObjectName;
+import javax.management.MalformedObjectNameException;
+import java.util.Hashtable;
+
 /**
  * Management interface for a JDBC driver.
  */
 public class JDBCDriver extends J2EEManagedObject {
-  // no attributes
+  private final DriverConfig _driverConfig;
+
+  public JDBCDriver(DriverConfig driverConfig)
+  {
+    _driverConfig = driverConfig;
+  }
 
   protected String getName()
   {
-    // XXX:
-    return null;
+    return _driverConfig.getURL();
   }
+
+  protected ObjectName createObjectName(Hashtable<String, String> properties)
+    throws MalformedObjectNameException
+  {
+    properties.put("JDBCDataSource", ObjectName.quote(_driverConfig.getDBPool().getName()));
+
+    return super.createObjectName(properties);
+  }
+
 }

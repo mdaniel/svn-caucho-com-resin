@@ -48,7 +48,6 @@ import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.EnvironmentProperties;
 import com.caucho.mbeans.j2ee.J2EEAdmin;
 import com.caucho.mbeans.j2ee.J2EEDomain;
-import com.caucho.mbeans.j2ee.J2EEManagedObject;
 import com.caucho.mbeans.j2ee.JVM;
 import com.caucho.mbeans.server.ClusterMBean;
 import com.caucho.server.dispatch.DispatchServer;
@@ -105,10 +104,6 @@ public class ResinServer
   private SecurityManager _securityManager;
 
   private HashMap<String,Object> _variableMap = new HashMap<String,Object>();
-
-  private J2EEManagedObject _j2eeDomainManagedObject;
-  private J2EEManagedObject _jvmManagedObject;
-
 
   private ArrayList<ServerController> _servers
     = new ArrayList<ServerController>();
@@ -521,8 +516,8 @@ public class ResinServer
 
     long start = Alarm.getCurrentTime();
 
-    _j2eeDomainManagedObject = J2EEAdmin.register(new J2EEDomain());
-    _jvmManagedObject = J2EEAdmin.register(new JVM());
+    J2EEAdmin.register(new J2EEDomain());
+    J2EEAdmin.register(new JVM());
 
     // force a GC on start
     System.gc();
@@ -602,25 +597,14 @@ public class ResinServer
     if (! _lifecycle.toDestroying())
       return;
 
-    J2EEManagedObject jvmManagedObject;
-    J2EEManagedObject j2eeDomainManagedObject;
     ArrayList<ResinServerListener> listeners;
     ArrayList<ServerController> servers;
-
-    jvmManagedObject = _jvmManagedObject;
-    _jvmManagedObject = null;
-
-    j2eeDomainManagedObject = _j2eeDomainManagedObject;
-    _j2eeDomainManagedObject = null;
 
     listeners = new ArrayList<ResinServerListener>(_listeners);
     _listeners.clear();
 
     servers = new ArrayList<ServerController>(_servers);
     _servers.clear();
-
-    J2EEAdmin.unregister(j2eeDomainManagedObject);
-    J2EEAdmin.unregister(jvmManagedObject);
 
     try {
       for (ServerController server : servers) {

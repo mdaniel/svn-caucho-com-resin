@@ -38,7 +38,7 @@ import com.caucho.loader.EnvironmentLocal;
 import com.caucho.log.Log;
 import com.caucho.mbeans.j2ee.J2EEAdmin;
 import com.caucho.mbeans.j2ee.JDBCResource;
-import com.caucho.mbeans.j2ee.J2EEManagedObject;
+import com.caucho.mbeans.j2ee.JDBCDataSource;
 import com.caucho.naming.Jndi;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.L10N;
@@ -118,7 +118,6 @@ public class DBPool implements DataSource {
   private DBPoolImpl _poolImpl;
   private DataSource _dataSource;
   private DataSourceImpl _resinDataSource;
-  private J2EEManagedObject _j2eeManagedObject;
 
   /**
    * Null constructor for the Driver interface; called by the JNDI
@@ -605,7 +604,8 @@ public class DBPool implements DataSource {
       Jndi.bindDeep(name, this);
     }
 
-    _j2eeManagedObject = J2EEAdmin.register(new JDBCResource(this));
+    J2EEAdmin.register(new JDBCResource(this));
+    J2EEAdmin.register(new JDBCDataSource(this));
   }
 
   /**

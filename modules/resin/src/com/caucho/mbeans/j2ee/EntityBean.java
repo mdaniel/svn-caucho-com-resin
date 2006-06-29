@@ -29,10 +29,17 @@
 
 package com.caucho.mbeans.j2ee;
 
+import com.caucho.ejb.cfg.EjbEntityBean;
+
 /**
  * Management interface for an entity bean.
  */
 public class EntityBean extends EJB {
+  public EntityBean(EjbEntityBean ejbBean)
+  {
+    super(ejbBean);
+  }
+
   protected String getName()
   {
     // XXX:
