@@ -207,7 +207,7 @@ public class Postgres extends JdbcConnectionResource {
 
   /**
    * This function is overriden in Postgres to keep
-   * result set references for php/4310 (see also php/1f33)
+   * result set references for php/430a (see also php/1f33)
    */
   protected void keepResourceValues(Statement stmt)
   {
@@ -216,7 +216,7 @@ public class Postgres extends JdbcConnectionResource {
 
   /**
    * This function is overriden in Postgres to keep
-   * statement references for php/4310
+   * statement references for php/430a
    */
   protected boolean keepStatementOpen()
   {

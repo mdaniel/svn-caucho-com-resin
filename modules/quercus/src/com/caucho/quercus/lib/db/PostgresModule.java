@@ -1068,7 +1068,7 @@ public class PostgresModule extends AbstractQuercusModule {
                                       LongValue.create(fieldNumber));
 
       // Step the cursor back to the original position
-      // See php/4325
+      // See php/430p
       result.getResultSet().relative(-1);
 
       return object.toString().length();
@@ -1295,7 +1295,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     // Three different scenarios for pg_get_result:
     //
-    // 1. pg_send_prepare/pg_send_execute - php/4370
+    // 1. pg_send_prepare/pg_send_execute - php/431m
     //
     //    pg_send_prepare($conn, "my_query", 'SELECT * FROM test WHERE data = $1');
     //    $res1 = pg_get_result($conn);
@@ -1306,7 +1306,7 @@ public class PostgresModule extends AbstractQuercusModule {
     //    pg_send_execute($conn, "my_query", array("Clothes Clothes Clothes"));
     //    $res3 = pg_get_result($conn);
     //
-    // 2. Multiquery with pg_send_query - php/4334
+    // 2. Multiquery with pg_send_query - php/430y
     //
     //    pg_send_query($conn, "select * from test; select count(*) from test;");
     //
@@ -1318,7 +1318,7 @@ public class PostgresModule extends AbstractQuercusModule {
     //    $res = pg_get_result($conn);
     //    $rows = pg_num_rows($res);
     //
-    // 3. Individual pg_send_query - php/4364
+    // 3. Individual pg_send_query - php/431g
     //
     //    pg_send_query($conn, "select * from test;");
     //    var_dump($res);
@@ -1976,7 +1976,7 @@ public class PostgresModule extends AbstractQuercusModule {
     try {
 
       // (result.getResultSet() == null) should be cleaned and
-      // pg_get_result should return a null PostgresResult php/43c9
+      // pg_get_result should return a null PostgresResult php/433t
       if ((result == null) || (result.getResultSet() == null)) {
         env.warning(L.l("supplied argument is not a valid PostgreSQL result resource"));
         return NullValue.NULL;

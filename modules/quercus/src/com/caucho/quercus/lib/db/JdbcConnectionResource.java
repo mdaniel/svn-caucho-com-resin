@@ -505,7 +505,7 @@ public abstract class JdbcConnectionResource implements Closeable {
         _affectedRows = 0;
         _warnings = stmt.getWarnings();
       } else {
-        // php/4310 should return a result set
+        // php/430a should return a result set
         // for update statements. It is always
         // null though. So keep the stmt for
         // future reference (PostgresModule.pg_last_oid)
@@ -521,7 +521,7 @@ public abstract class JdbcConnectionResource implements Closeable {
           _rs.setAffectedRows(_affectedRows);
         _warnings = stmt.getWarnings();
 
-        // for php/4310
+        // for php/430a
         if (!keepStatementOpen()) {
           stmt.close();
         }
@@ -539,7 +539,7 @@ public abstract class JdbcConnectionResource implements Closeable {
 
       saveErrors(e);
 
-      // php/4365
+      // php/431h
       if (keepStatementOpen()) {
         keepResourceValues(stmt);
       } else {
@@ -673,7 +673,7 @@ public abstract class JdbcConnectionResource implements Closeable {
 
   /**
    * This function is overriden in Postgres to keep
-   * result set references for php/4310 (see also php/1f33)
+   * result set references for php/430a (see also php/1f33)
    */
   protected void keepResourceValues(Statement stmt)
   {
@@ -682,7 +682,7 @@ public abstract class JdbcConnectionResource implements Closeable {
 
   /**
    * This function is overriden in Postgres to keep
-   * statement references for php/4310
+   * statement references for php/430a
    */
   protected boolean keepStatementOpen()
   {
