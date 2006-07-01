@@ -529,7 +529,7 @@ public class OutputModule extends AbstractQuercusModule
       }
     }
 
-    if (encoding == Encoding.NONE)
+    if (true || encoding == Encoding.NONE)
       return NullValue.NULL;
 
     GZOutputPair pair = null;

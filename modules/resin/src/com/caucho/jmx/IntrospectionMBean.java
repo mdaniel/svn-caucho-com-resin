@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2002 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -35,6 +35,9 @@ import java.lang.ref.SoftReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -259,7 +262,7 @@ public class IntrospectionMBean implements DynamicMBean {
   }
 
   /**
-   * Returns the open mbean unmarshaller for the given return type.
+v   * Returns the open mbean unmarshaller for the given return type.
    */
   private Unmarshall createUnmarshall(Class cl)
   {
@@ -413,8 +416,8 @@ public class IntrospectionMBean implements DynamicMBean {
       ArrayList<MBeanConstructorInfo> constructors
         = new ArrayList<MBeanConstructorInfo>();
 
-      TreeSet<MBeanOperationInfo> operations
-        = new TreeSet<MBeanOperationInfo>(MBEAN_FEATURE_INFO_COMPARATOR);
+      ArrayList<MBeanOperationInfo> operations
+        = new ArrayList<MBeanOperationInfo>();
 
       Method []methods = cl.getMethods();
       for (int i = 0; i < methods.length; i++) {
@@ -522,8 +525,10 @@ public class IntrospectionMBean implements DynamicMBean {
       attributes.toArray(attrArray);
       MBeanConstructorInfo []conArray = new MBeanConstructorInfo[constructors.size()];
       constructors.toArray(conArray);
+
       MBeanOperationInfo []opArray = new MBeanOperationInfo[operations.size()];
       operations.toArray(opArray);
+      Arrays.sort(opArray, MBEAN_FEATURE_INFO_COMPARATOR);
       MBeanNotificationInfo []notifArray = new MBeanNotificationInfo[notifications.size()];
       notifications.toArray(notifArray);
 

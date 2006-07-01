@@ -29,6 +29,18 @@
 
 package com.caucho.quercus.lib.db;
 
+import java.io.InputStream;
+import java.io.IOException;
+
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
@@ -39,21 +51,13 @@ import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.sql.UserStatement;
 
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
-
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Represents a JDBC Result value.
@@ -454,6 +458,7 @@ public class JdbcResultResource {
           String name = _metaData.getColumnName(i + 1);
           Value value = getColumnValue(env, _rs, _metaData, i + 1);
 
+
           result.putField(env, name, value);
         }
 
@@ -669,6 +674,40 @@ public class JdbcResultResource {
 	    object = ociLob;
 	  }
 	  return env.wrapJava(object);
+	}
+
+      case Types.LONGVARBINARY:
+      case Types.VARBINARY:
+      case Types.BINARY:
+	{
+	  BinaryBuilderValue bb = new BinaryBuilderValue();
+
+	  InputStream is = rs.getBinaryStream(column);
+	  
+	  if (is == null || rs.wasNull())
+	    return NullValue.NULL;
+	  
+	  try {
+	    while (true) {
+	      bb.prepareReadBuffer();
+
+	      int len = is.read(bb.getBuffer(),
+				bb.getOffset(),
+				bb.getLength() - bb.getOffset());
+
+	      if (len > 0) {
+		bb.setOffset(bb.getOffset() + len);
+	      }
+	      else
+		break;
+	    }
+	  } catch (IOException e) {
+	    log.log(Level.WARNING, e.toString(), e);
+
+	    return NullValue.NULL;
+	  }
+
+	  return bb;
 	}
 
       default:

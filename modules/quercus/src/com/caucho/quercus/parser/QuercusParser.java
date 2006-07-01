@@ -56,6 +56,7 @@ import com.caucho.quercus.env.CallbackFunction;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
 import com.caucho.util.CharBuffer;
+import com.caucho.vfs.IOExceptionWrapper;
 
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Path;
@@ -2670,21 +2671,21 @@ public class QuercusParser {
       {
 	ArrayList<Expr> args = new ArrayList<Expr>();
 	args.add(new StringLiteralExpr(getLocation(), _lexeme));
-	return new FunctionExpr(getLocation(), "system", args);
+	return new FunctionExpr(getLocation(), "shell_exec", args);
       }
       
     case SIMPLE_SYSTEM_STRING:
       {
 	ArrayList<Expr> args = new ArrayList<Expr>();
 	args.add(parseEscapedString(_lexeme, SIMPLE_STRING_ESCAPE, true));
-	return new FunctionExpr(getLocation(), "system", args);
+	return new FunctionExpr(getLocation(), "shell_exec", args);
       }
 
     case COMPLEX_SYSTEM_STRING:
       {
 	ArrayList<Expr> args = new ArrayList<Expr>();
 	args.add(parseEscapedString(_lexeme, COMPLEX_STRING_ESCAPE, true));
-	return new FunctionExpr(getLocation(), "system", args);
+	return new FunctionExpr(getLocation(), "shell_exec", args);
       }
       
     case SIMPLE_STRING_ESCAPE:
@@ -4389,18 +4390,22 @@ public class QuercusParser {
       return peek;
     }
 
-    int ch = _is.read();
+    try {
+      int ch = _is.read();
 
-    if (ch == '\r') {
-      _parserLocation.incrementLineNumber();
-      _hasCr = true;
+      if (ch == '\r') {
+	_parserLocation.incrementLineNumber();
+	_hasCr = true;
+      }
+      else if (ch == '\n' && ! _hasCr)
+	_parserLocation.incrementLineNumber();
+      else
+	_hasCr = false;
+
+      return ch;
+    } catch (IOException e) {
+      throw new IOExceptionWrapper(getFileName() + ":" + getLine() + ":" + e, e);
     }
-    else if (ch == '\n' && ! _hasCr)
-      _parserLocation.incrementLineNumber();
-    else
-      _hasCr = false;
-
-    return ch;
   }
 
   /**

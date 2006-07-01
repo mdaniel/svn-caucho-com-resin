@@ -39,6 +39,8 @@ import java.util.Hashtable;
  * Management interface for a JDBC driver.
  */
 public class JDBCDriver extends J2EEManagedObject {
+  private static int _g_id;
+
   private final DriverConfig _driverConfig;
 
   public JDBCDriver(DriverConfig driverConfig)
@@ -54,7 +56,12 @@ public class JDBCDriver extends J2EEManagedObject {
   protected ObjectName createObjectName(Hashtable<String, String> properties)
     throws MalformedObjectNameException
   {
-    properties.put("JDBCDataSource", ObjectName.quote(_driverConfig.getDBPool().getName()));
+    String name = _driverConfig.getDBPool().getName();
+
+    if (name != null)
+      properties.put("JDBCDataSource", ObjectName.quote(name));
+    else
+      properties.put("JDBCDataSource", ObjectName.quote("tmp-" + _g_id++));
 
     return super.createObjectName(properties);
   }

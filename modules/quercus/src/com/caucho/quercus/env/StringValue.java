@@ -31,6 +31,7 @@ package com.caucho.quercus.env;
 
 import java.util.IdentityHashMap;
 
+import java.io.InputStream;
 import java.io.IOException;
 
 import com.caucho.vfs.WriteStream;
@@ -455,8 +456,9 @@ abstract public class StringValue extends Value implements CharSequence {
 
     if (index < 0 || len <= index)
       return StringValue.EMPTY;
-    else
+    else {
       return StringValue.create(charAt((int) index));
+    }
   }
 
   /**
@@ -767,6 +769,17 @@ abstract public class StringValue extends Value implements CharSequence {
       buffer[offset + i] = charAt(stringOffset + i);
   }
 
+  /**
+   * Returns a byteArrayInputStream for the value.
+   * See TempBufferStringValue for how this can be overriden
+   *
+   * @return InputStream
+   */
+  public InputStream toInputStream()
+  {
+    return new StringValueInputStream();
+  }
+
   //
   // java.lang.Object methods
   //
@@ -822,6 +835,50 @@ abstract public class StringValue extends Value implements CharSequence {
     String s = toString();
 
     out.print("string(" + s.length() + ") \"" + s + "\"");
+  }
+
+  class StringValueInputStream extends java.io.InputStream {
+    private final int _length;
+    private int _index;
+
+    StringValueInputStream()
+    {
+      _length = length();
+    }
+    
+    /**
+     * Reads the next byte.
+     */
+    public int read()
+    {
+      if (_index < _length)
+	return charAt(_index++);
+      else
+	return -1;
+    }
+
+    /**
+     * Reads into a buffer.
+     */
+    public int read(byte []buffer, int offset, int length)
+    {
+      int sublen = _length - _index;
+
+      if (length < sublen)
+	sublen = length;
+
+      if (sublen <= 0)
+	return -1;
+
+      int index = _index;
+
+      for (int i = 0; i < sublen; i++)
+	buffer[offset + i] = (byte) charAt(index + i);
+
+      _index += sublen;
+
+      return sublen;
+    }
   }
 
   static {

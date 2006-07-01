@@ -60,14 +60,6 @@ class NamedDispatcherImpl implements RequestDispatcher {
   public void include(ServletRequest request, ServletResponse response)
     throws IOException, ServletException
   {
-    /*
-    ResponseAdapter resAdapt = null;
-    if (! (response instanceof CauchoResponse)) {
-      resAdapt = ResponseAdapter.create((HttpServletResponse) response);
-      response = resAdapt;
-    }
-    */
-
     HttpServletResponse res = (HttpServletResponse) response;
 
     RequestAdapter reqAdapt = null;
@@ -92,13 +84,6 @@ class NamedDispatcherImpl implements RequestDispatcher {
     } finally {
       subResponse.finish();
     }
-
-    /*
-    if (resAdapt != null) {
-      resAdapt.finish();
-      ResponseAdapter.free(resAdapt);
-    }
-    */
 
     if (reqAdapt != null)
       RequestAdapter.free(reqAdapt);

@@ -511,10 +511,12 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     throws ServletException
   {
     synchronized (this) {
-      if (_servletChain == null)
-        _servletChain = createServletChainImpl();
-
-      return _servletChain;
+      // JSP files need to have separate chains created for each JSP
+      
+      if (_servletChain != null)
+	return _servletChain;
+      else
+        return createServletChainImpl();
     }
   }
 
@@ -552,6 +554,10 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
 
     if (_roleMap != null)
       servletChain = new SecurityRoleMapFilterChain(servletChain, _roleMap);
+
+    // server/10a8.  JSP pages need a fresh PageFilterChain
+    if (! QServlet.class.isAssignableFrom(servletClass))
+      _servletChain = servletChain;
 
     return servletChain;
   }

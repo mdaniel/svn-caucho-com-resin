@@ -4,6 +4,13 @@
 
 <s2 title='3.0.snap - June 23, 2006'>
 <ul>
+<li>EL: "1.0" was not properly interpreted as double (#1225, rep by Jill Wetzler)
+<li>Quercus: token_name and token_get_all (#746, #1182, rep by koreth)
+<li>Quercus: improve error message when database driver missing (#1113, rep by koreth)
+<li>Quercus: shell_exec (#1205)
+<li>transactions with db-pool and max-idle-time (#1136, rep by Takahiro Fukuda)
+<li>c:set issue with jstl (rep by Nicholas Berry)
+<li>hmux issues with forward and response not skipping final bytes (#1190, mpavel)
 <li>GzipFilter wasn't handling late changes of status properly (#1087, rep by Frank Nestel)
 <li>Quercus: _GET/_POST needs to handle i18n (#1193, rep by artem)
 <li>Quercus: handle while(false) (#1176, rep by koreth)

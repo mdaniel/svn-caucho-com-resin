@@ -284,7 +284,7 @@ class PoolItem implements ConnectionEventListener, XAResource {
     long maxPoolTime = _cm.getMaxPoolTime();
     long maxActiveTime = _cm.getMaxActiveTime();
 
-    boolean isActive = isActive();
+    boolean isActive = isActive() || _xid != null;
     boolean isDead = false;
 
     if (! isActive && _hasConnectionError) {

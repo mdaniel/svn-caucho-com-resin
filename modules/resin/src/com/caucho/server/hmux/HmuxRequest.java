@@ -1287,7 +1287,7 @@ public class HmuxRequest extends AbstractHttpRequest
   {
   }
 
-  String dbgId()
+  public final String dbgId()
   {
     String id = _server.getServerId();
 
@@ -1295,6 +1295,11 @@ public class HmuxRequest extends AbstractHttpRequest
       return "[" + getConnection().getId() + "] ";
     else
       return "[" + id + ":" + getConnection().getId() + "] ";
+  }
+
+  public String toString()
+  {
+    return "HmuxRequest" + dbgId();
   }
 
   /**
@@ -1394,6 +1399,7 @@ public class HmuxRequest extends AbstractHttpRequest
           _pendingData = len;
         }
         else if (code == HMUX_QUIT) {
+	  Thread.dumpStack();
           if (log.isLoggable(Level.FINE))
             log.fine(_request.dbgId() + "Q:quit");
 	  

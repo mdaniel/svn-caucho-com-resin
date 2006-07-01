@@ -567,4 +567,9 @@ class DispatchRequest extends RequestAdapter {
     if (_is != null)
       _is.free();
   }
+
+  public String toString()
+  {
+    return "DispatchRequest[" + getRequest() + "]";
+  }
 }

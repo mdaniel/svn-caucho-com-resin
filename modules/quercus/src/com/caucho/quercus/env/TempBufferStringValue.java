@@ -79,6 +79,26 @@ public class TempBufferStringValue extends BinaryValue {
 
     return len;
   }
+  
+  /**
+   * Returns the character at a given position
+   */
+  public char charAt(int index)
+  {
+    int len = 0;
+
+    for (TempBuffer ptr = _head; ptr != null; ptr = ptr.getNext()) {
+      int sublen = ptr.getLength();
+
+      if (index < len + sublen) {
+	return (char) (ptr.getBuffer()[index - len] & 0xff);
+      }
+      
+      len += sublen;
+    }
+
+    return 0;
+  }
 
   /**
    * Prints the value.
@@ -107,13 +127,71 @@ public class TempBufferStringValue extends BinaryValue {
 	int len = ptr.getLength();
 
 	for (int j = 0; j < len; j++)
-	  cbuf[i++] = (char) buf[j];
+	  cbuf[i++] = (char) (buf[j] & 0xff);
       }
 
       _string = new String(cbuf);
     }
 
     return _string;
+  }
+
+  /**
+   * Calculate the hash code
+   */
+  public int hashCode()
+  {
+    // Matches hashCode calculated in StringValue
+    
+    int hash = 37;
+    
+    for (TempBuffer ptr = _head; ptr != null; ptr = ptr.getNext()) {
+      byte []buffer = ptr.getBuffer();
+      int length = ptr.getLength();
+
+      for (int i = 0; i < length; i++)
+	hash = 65521 * hash + (buffer[i] & 0xff);
+    }
+
+    return hash;
+  }
+
+  /**
+   * Test for equality.
+   */
+  public boolean equals(Object o)
+  {
+    if (this == o)
+      return true;
+    else if ((o instanceof TempBufferStringValue)) {
+      TempBufferStringValue tb = (TempBufferStringValue) o;
+
+      TempBuffer ptrA = _head;
+      TempBuffer ptrB = tb._head;
+      
+      while (ptrA != null && ptrB != null) {
+	byte []bufferA = ptrA.getBuffer();
+	int lengthA = ptrA.getLength();
+	
+	byte []bufferB = ptrB.getBuffer();
+	int lengthB = ptrB.getLength();
+
+	if (lengthA != lengthB)
+	  return false;
+
+	while (--lengthA >= 0) {
+	  if (bufferA[lengthA] != bufferB[lengthA])
+	    return false;
+	}
+
+	ptrA = ptrA.getNext();
+	ptrB = ptrB.getNext();
+      }
+
+      return ptrA == null && ptrB == null;
+    }
+    else
+      return super.equals(o);
   }
 }
 

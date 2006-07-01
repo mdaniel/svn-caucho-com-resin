@@ -320,6 +320,78 @@ public class MiscModule extends AbstractQuercusModule {
   }
 
   /**
+   * Execute a system command.
+   */
+  public static Value shell_exec(Env env, String command)
+  {
+    String []args = new String[3];
+
+    try {
+      args[0] = "sh";
+      args[1] = "-c";
+      args[2] = command;
+      Process process = Runtime.getRuntime().exec(args);
+
+      InputStream is = process.getInputStream();
+      OutputStream os = process.getOutputStream();
+      os.close();
+
+      StringBuilderValue sb = new StringBuilderValue();
+
+      int ch;
+      boolean hasCr = false;
+      while ((ch = is.read()) >= 0) {
+	sb.append((char) ch);
+      }
+
+      is.close();
+
+      int status = process.waitFor();
+
+      return sb;
+    } catch (Exception e) {
+      env.warning(e.getMessage(), e);
+
+      return NullValue.NULL;
+    }
+  }
+
+  /**
+   * Execute a system command.
+   */
+  public static Value passthru(Env env, String command,
+			       @Optional @Reference Value result)
+  {
+    String []args = new String[3];
+
+    try {
+      args[0] = "sh";
+      args[1] = "-c";
+      args[2] = command;
+      Process process = Runtime.getRuntime().exec(args);
+
+      InputStream is = process.getInputStream();
+      OutputStream os = process.getOutputStream();
+      os.close();
+
+      StringBuilderValue sb = new StringBuilderValue();
+
+      int ch;
+      boolean hasCr = false;
+      env.getOut().writeStream(is);
+      is.close();
+
+      int status = process.waitFor();
+
+      return sb;
+    } catch (Exception e) {
+      env.warning(e.getMessage(), e);
+
+      return NullValue.NULL;
+    }
+  }
+
+  /**
    * Returns the disconnect ignore setting
    */
   public static int ignore_user_abort(@Optional boolean set)
@@ -394,39 +466,7 @@ public class MiscModule extends AbstractQuercusModule {
   public static String system(Env env, String command,
 			      @Optional @Reference Value result)
   {
-    String []args = new String[3];
-
-    try {
-      args[0] = "sh";
-      args[1] = "-c";
-      args[2] = command;
-      Process process = Runtime.getRuntime().exec(args);
-
-      InputStream is = process.getInputStream();
-      OutputStream os = process.getOutputStream();
-      os.close();
-
-      StringBuilder sb = new StringBuilder();
-      String line = "";
-
-      int ch;
-      boolean hasCr = false;
-      while ((ch = is.read()) >= 0) {
-	sb.append((char) ch);
-      }
-
-      is.close();
-
-      int status = process.waitFor();
-
-      result.set(new LongValue(status));
-
-      return sb.toString();
-    } catch (Exception e) {
-      env.warning(e.getMessage(), e);
-
-      return null;
-    }
+    return exec(env, command, null, result);
   }
 
   private static ArrayList<PackSegment> parsePackFormat(String format)

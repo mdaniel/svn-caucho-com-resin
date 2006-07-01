@@ -476,8 +476,9 @@ public abstract class JdbcConnectionResource implements Closeable {
 
   public JdbcConnectionResource validateConnection()
   {
-    if (!_connected) {
-      throw _env.errorException(L.l("Connection is not properly initialized"));
+    if (! _connected) {
+      throw _env.errorException(L.l("Connection is not properly initialized {0}\nDriver {1}",
+				    _url, _driver));
     }
 
     return this;
@@ -498,7 +499,7 @@ public abstract class JdbcConnectionResource implements Closeable {
       stmt = _conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                                    ResultSet.CONCUR_READ_ONLY);
       stmt.setEscapeProcessing(false); // php/1406
-
+      
       if (stmt.execute(sql)) {
         ResultSet rs = stmt.getResultSet();
         _rs = createResult(stmt, rs);

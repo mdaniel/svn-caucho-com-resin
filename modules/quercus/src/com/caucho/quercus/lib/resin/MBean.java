@@ -30,18 +30,24 @@
 
 package com.caucho.quercus.lib.resin;
 
-import com.caucho.quercus.env.Value;
+import java.util.HashMap;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.management.Attribute;
 import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanParameterInfo;
 import javax.management.ObjectName;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.caucho.quercus.env.Value;
 
 public class MBean {
   private static final Logger log = Logger.getLogger(MBean.class.getName());
+
+  private static final HashMap<String,Marshall> _marshallMap
+    = new HashMap<String,Marshall>();
   
   private javax.management.MBeanServer _server;
   private ObjectName _name;
@@ -120,9 +126,15 @@ public class MBean {
 	  sig[i] = "java.lang.Object";
       }
 
-      sig = findClosestOperation(name, sig);
-      
-      return unmarshall(_server.invoke(_name, name, args, sig));
+      String []mbeanSig = findClosestOperation(name, sig);
+
+      if (mbeanSig != null) {
+	marshall(args, mbeanSig);
+	
+	return unmarshall(_server.invoke(_name, name, args, mbeanSig));
+      }
+      else
+	return null;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 
@@ -130,12 +142,15 @@ public class MBean {
     }
   }
 
-  private String []findClosestOperation(String name, String []sig)
+  protected String []findClosestOperation(String name, String []sig)
     throws Exception
   {
     MBeanInfo info = getInfo();
 
     MBeanOperationInfo []ops = info.getOperations();
+    
+    MBeanOperationInfo bestOp = null;
+    long bestCost = Long.MAX_VALUE;
 
     for (int i = 0; i < ops.length; i++) {
       MBeanOperationInfo op = ops[i];
@@ -144,19 +159,56 @@ public class MBean {
 	continue;
 
       if (op.getSignature().length == sig.length) {
-	sig = new String[sig.length];
+	long cost = calculateCost(op.getSignature(), sig);
 
-	MBeanParameterInfo []params = op.getSignature();
-
-	for (int j = 0; j < params.length; j++) {
-	  sig[j] = params[j].getType();
+	if (cost < bestCost) {
+	  bestCost = cost;
+	  bestOp = op;
 	}
-
-	return sig;
       }
     }
 
+    if (bestOp != null) {
+      String []mbeanSig = new String[sig.length];
+
+      MBeanParameterInfo []params = bestOp.getSignature();
+
+      for (int j = 0; j < params.length; j++) {
+	mbeanSig[j] = params[j].getType();
+      }
+
+      return mbeanSig;
+    }
+      
     return null;
+  }
+
+  private static long calculateCost(MBeanParameterInfo []paramInfo,
+				    String []args)
+  {
+    long cost = 0;
+    
+    for (int i = 0; i < paramInfo.length; i++) {
+      String param = paramInfo[i].getType();
+      String arg = args[i];
+      
+      if (param.equals(arg)) {
+      }
+      else if ((param.indexOf('[') >= 0) != (arg.indexOf('[') >= 0)) {
+	cost += 100;
+      }
+      else
+	cost += 1;
+    }
+
+    return cost;
+  }
+
+  private void marshall(Object []args, String []sig)
+  {
+    for (int i = 0; i < sig.length; i++) {
+      args[i] = findMarshall(sig[i]).marshall(args[i]);
+    }
   }
 
   private Object unmarshall(Object value)
@@ -180,8 +232,91 @@ public class MBean {
       return value;
   }
 
+  private Marshall findMarshall(String sig)
+  {
+    Marshall marshall = _marshallMap.get(sig);
+
+    if (marshall != null)
+      return marshall;
+    else
+      return Marshall.MARSHALL;
+  }
+
   public String toString()
   {
     return "MBean[" + _name.getCanonicalName() + "]";
+  }
+
+  static class Marshall {
+    static final Marshall MARSHALL = new Marshall();
+    
+    public Object marshall(Object value)
+    {
+      return value;
+    }
+  }
+
+  static class IntMarshall extends Marshall {
+    static final Marshall MARSHALL = new IntMarshall();
+    
+    public Object marshall(Object value)
+    {
+      if (value instanceof Integer)
+	return value;
+      else if (value instanceof Number)
+	return new Integer(((Number) value).intValue());
+      else if (value == null)
+	return new Integer(0);
+      else {
+	try {
+	  return new Integer(Integer.parseInt(String.valueOf(value)));
+	} catch (Exception e) {
+	  return new Integer(0);
+	}
+      }
+    }
+  }
+
+  static class LongMarshall extends Marshall {
+    static final Marshall MARSHALL = new LongMarshall();
+    
+    public Object marshall(Object value)
+    {
+      if (value instanceof Long)
+	return value;
+      else if (value instanceof Number)
+	return new Long(((Number) value).longValue());
+      else if (value == null)
+	return new Long(0);
+      else {
+	try {
+	  return new Long(Long.parseLong(String.valueOf(value)));
+	} catch (Exception e) {
+	  return new Long(0);
+	}
+      }
+    }
+  }
+
+  static class StringMarshall extends Marshall {
+    static final Marshall MARSHALL = new StringMarshall();
+    
+    public Object marshall(Object value)
+    {
+      if (value == null)
+	return null;
+      else
+	return value.toString();
+    }
+  }
+
+  static {
+    _marshallMap.put("int", IntMarshall.MARSHALL);
+    _marshallMap.put("java.lang.Integer", IntMarshall.MARSHALL);
+    
+    _marshallMap.put("long", LongMarshall.MARSHALL);
+    _marshallMap.put("java.lang.Long", LongMarshall.MARSHALL);
+    
+    _marshallMap.put("java.lang.String", StringMarshall.MARSHALL);
   }
 }

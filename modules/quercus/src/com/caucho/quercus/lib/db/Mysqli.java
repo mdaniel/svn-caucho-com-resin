@@ -140,7 +140,8 @@ public class Mysqli extends JdbcConnectionResource {
       return true;
 
     } catch (SQLException e) {
-      env.warning("A link to the server could not be established. " + e.toString());
+      env.warning(L.l("A link to the server could not be established.\n  url={0}\n  driver={1}\n  {2}", url, driver, e.toString()));
+
       env.setSpecialValue("mysqli.connectErrno",new LongValue(e.getErrorCode()));
       env.setSpecialValue("mysqli.connectError", new StringValueImpl(e.getMessage()));
 
@@ -148,7 +149,7 @@ public class Mysqli extends JdbcConnectionResource {
 
       return false;
     } catch (Exception e) {
-      env.warning("A link to the server could not be established. " + e.toString());
+      env.warning(L.l("A link to the server could not be established.\n  url={0}\n  driver={1}\n  {2}", url, driver, e.toString()));
       env.setSpecialValue("mysqli.connectError", new StringValueImpl(e.getMessage()));
 
       log.log(Level.FINE, e.toString(), e);

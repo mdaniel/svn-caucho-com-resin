@@ -99,8 +99,11 @@ public class CmpExpr extends AbstractBooleanExpr {
     }
     
     if (aObj instanceof Number || bObj instanceof Number) {
-      long a = toLong(aObj, env);
-      long b = toLong(bObj, env);
+      //long a = toLong(aObj, env);
+      //long b = toLong(bObj, env);
+      // #1225 -- XXX: need to change type system
+      double a = toDouble(aObj, env);
+      double b = toDouble(bObj, env);
 
       switch (_op) {
       case LT: return a < b;

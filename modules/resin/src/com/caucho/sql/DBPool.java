@@ -106,11 +106,14 @@ public class DBPool implements DataSource {
   protected static final Logger log = Log.open(DBPool.class);
   private static final L10N L = new L10N(DBPool.class);
 
+  private static int _g_id;
+  
   private EnvironmentLocal<DBPoolImpl> _localPoolImpl;
   private EnvironmentLocal<DataSource> _localDataSourceImpl;
 
   private String _var;
   private String _jndiName;
+  private String _tmpName;
 
   private ResourceManagerImpl _resourceManager;
   private ConnectionPool _connectionPool;
@@ -168,8 +171,13 @@ public class DBPool implements DataSource {
   {
     if (_var != null)
       return _var;
-    else
+    else if (getJndiName() != null)
       return getJndiName();
+    else {
+      _tmpName = "dbpool-" + _g_id;
+      return _tmpName;
+    }
+      
   }
 
   /**

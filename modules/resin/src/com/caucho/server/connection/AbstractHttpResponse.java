@@ -1938,8 +1938,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       return;
 
     try {
-      if (_request instanceof AbstractHttpRequest) {
-	AbstractHttpRequest request = (AbstractHttpRequest) _request;
+      if (_originalRequest instanceof AbstractHttpRequest) {
+	AbstractHttpRequest request = (AbstractHttpRequest) _originalRequest;
 
 	request.skip();
       }

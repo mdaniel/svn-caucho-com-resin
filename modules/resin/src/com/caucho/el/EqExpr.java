@@ -100,8 +100,11 @@ public class EqExpr extends AbstractBooleanExpr {
       }
     
       if (aObj instanceof Number || bObj instanceof Number) {
-	long a = toLong(aObj, env);
-	long b = toLong(bObj, env);
+	//long a = toLong(aObj, env);
+	//long b = toLong(bObj, env);
+	// jsp/1c18
+	double a = toDouble(aObj, env);
+	double b = toDouble(bObj, env);
 
 	switch (_op) {
 	case EQ: return a == b;

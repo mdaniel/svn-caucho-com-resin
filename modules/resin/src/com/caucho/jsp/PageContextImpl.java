@@ -1207,6 +1207,7 @@ public class PageContextImpl extends PageContext
       _topOut = null;
       _nodeEnv = null;
       _jspOutputStream.release();
+      AbstractResponseStream responseStream = _responseStream;
       _responseStream = null;
 
       if (_responseAdapter != null) {
@@ -1219,8 +1220,8 @@ public class PageContextImpl extends PageContext
 
       /*
 	// server/137q
-      if (! _hasException)
-      	_responseStream.close();
+      if (! _hasException && responseStream != null)
+      	responseStream.close();
       */
 	
       _response = null;
@@ -1563,7 +1564,10 @@ public class PageContextImpl extends PageContext
    */
   public void pageSetOrRemove(String var, Object value)
   {
-    putAttribute(var, value);
+    if (value != null)
+      putAttribute(var, value);
+    else
+      removeAttribute(var);
   }
 
   /**

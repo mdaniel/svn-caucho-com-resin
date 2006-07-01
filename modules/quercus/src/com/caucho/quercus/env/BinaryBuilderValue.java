@@ -256,6 +256,14 @@ public class BinaryBuilderValue extends BinaryValue {
   }
 
   /**
+   * Convert to an input stream.
+   */
+  public InputStream toInputStream()
+  {
+    return new BuilderInputStream();
+  }
+
+  /**
    * Converts to a string.
    */
   public String toString()
@@ -284,6 +292,15 @@ public class BinaryBuilderValue extends BinaryValue {
   public void appendTo(BinaryBuilderValue bb)
   {
     bb.append(_buffer, 0, _length);
+  }
+
+  /**
+   * Append to a string builder.
+   */
+  public void appendTo(StringBuilderValue sb)
+  {
+    for (int i = 0; i < _length; i++)
+      sb.append((char) (_buffer[i] & 0xff));
   }
 
   /**
@@ -366,7 +383,7 @@ public class BinaryBuilderValue extends BinaryValue {
     if (index < 0 || len <= index)
       return StringValue.EMPTY;
     else
-      return StringValue.create(_buffer[(int) index]);
+      return StringValue.create((char) (_buffer[(int) index] & 0xff));
   }
 
   /**
@@ -583,6 +600,41 @@ public class BinaryBuilderValue extends BinaryValue {
       System.arraycopy(_buffer, _offset, buffer, offset, sublen);
 
       _offset += sublen;
+
+      return sublen;
+    }
+  }
+
+  class BuilderInputStream extends InputStream {
+    private int _index;
+    
+    /**
+     * Reads the next byte.
+     */
+    public int read()
+    {
+      if (_index < _length)
+	return _buffer[_index++] & 0xff;
+      else
+	return -1;
+    }
+
+    /**
+     * Reads into a buffer.
+     */
+    public int read(byte []buffer, int offset, int length)
+    {
+      int sublen = _length - _index;
+
+      if (length < sublen)
+	sublen = length;
+
+      if (sublen <= 0)
+	return -1;
+
+      System.arraycopy(_buffer, _index, buffer, offset, sublen);
+
+      _index += sublen;
 
       return sublen;
     }
