@@ -567,7 +567,8 @@ public class VarExpr
    *
    * @param out the writer to the Java source code.
    */
-  public void generateAssign(PhpWriter out, Expr value, boolean isTop)
+  public void generateAssign(PhpWriter out, Expr value,
+			      boolean isTop)
     throws IOException
   {
     VarState state = getVarState();
@@ -582,12 +583,12 @@ public class VarExpr
         // php/3a60
         out.print(getJavaVar());
         out.print(" = ");
-        value.generateCopy(out);
+	value.generateCopy(out);
       } else {
         out.print("(");
         out.print(getJavaVar());
         out.print(" = ");
-        value.generateCopy(out);
+	value.generateCopy(out);
         out.print(")");
       }
     }
@@ -605,7 +606,7 @@ public class VarExpr
         out.printJavaString(_name);
         out.print("\"))");
         out.print(".set(");
-        value.generateCopy(out);
+	value.generateCopy(out);
         out.print(")");
       }
       else { // VarState.UNKNOWN
@@ -617,7 +618,7 @@ public class VarExpr
         out.print(getJavaVar());
         out.print("))");
         out.print(".set(");
-        value.generateCopy(out);
+	value.generateCopy(out);
         out.print(")");
       }
     }
@@ -635,7 +636,7 @@ public class VarExpr
         out.printJavaString(_name);
         out.print("\"))");
         out.print(".set(");
-        value.generateCopy(out);  // php/3a51
+	value.generateCopy(out); // php/3a51
         out.print(")");
       }
       else { // VarState.UNKNOWN
@@ -647,7 +648,7 @@ public class VarExpr
         out.print(getJavaVar());
         out.print("))");
         out.print(".set(");
-        value.generateCopy(out);
+	value.generateCopy(out);
         out.print(")");
       }
     }
@@ -663,7 +664,7 @@ public class VarExpr
         out.print(getJavaVar());
         out.print(" = new Var())");
         out.print(".set(");
-        value.generateCopy(out);
+	value.generateCopy(out);
         out.print(")");
       }
       else { // VarState.UNKNOWN
@@ -673,7 +674,7 @@ public class VarExpr
         out.print(getJavaVar());
         out.print("))");
         out.print(".set(");
-        value.generateCopy(out);
+	value.generateCopy(out);
         out.print(")");
       }
     }

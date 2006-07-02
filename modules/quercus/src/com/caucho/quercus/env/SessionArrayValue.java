@@ -67,7 +67,6 @@ public class SessionArrayValue extends ArrayValueWrapper
   static protected final Logger log = Log.open(SessionArrayValue.class);
 
   private String _id;
-  private transient Env _env;
 
   private ClusterObject _clusterObject;
   
@@ -78,18 +77,17 @@ public class SessionArrayValue extends ArrayValueWrapper
 
   private boolean _isValid;
 
-  public SessionArrayValue(Env env, String id, long now, 
+  public SessionArrayValue(String id, long now, 
                            long maxInactiveInterval)
   {
-    this(env, id, now, maxInactiveInterval, new ArrayValueImpl());
+    this(id, now, maxInactiveInterval, new ArrayValueImpl());
   }
   
-  public SessionArrayValue(Env env, String id, long now,
+  public SessionArrayValue(String id, long now,
                            long maxInactiveInterval, ArrayValue array)
   {
     super(array);
     
-    _env = env;
     _id = id;
     _accessTime = now;
     _maxInactiveInterval = maxInactiveInterval;
@@ -119,7 +117,7 @@ public class SessionArrayValue extends ArrayValueWrapper
     long accessTime = _accessTime;
 
     SessionArrayValue theCopy = 
-      new SessionArrayValue(env, _id, accessTime, _maxInactiveInterval,
+      new SessionArrayValue(_id, accessTime, _maxInactiveInterval,
                             (ArrayValue) getArray().copy(env, map));
 
     theCopy.setClusterObject(_clusterObject);
@@ -208,13 +206,13 @@ public class SessionArrayValue extends ArrayValueWrapper
     out.writeObject(encode());
   }
 
-  public void load(ObjectInputStream in)
+  public void load(Env env, ObjectInputStream in)
     throws IOException
   {
     try {
       String encoded = in.readObject().toString();
 
-      decode(_env, encoded);
+      decode(env, encoded);
     } catch (ClassNotFoundException e) {
       log.log(Level.WARNING, "Can't deserialize session", e);
     }

@@ -664,12 +664,14 @@ public class Function extends AbstractFunction {
         }
         else if (var.isReadOnly() && var.isValue()) {
           // php/3a70, php/343k
-          out.println(varName + " = " + argName + ".toArgValue();");
+          out.println(varName + " = " + argName + ".toArgValueReadOnly();");
         }
+	/*
         else if (var.isReadOnly()) {
           // php/3783
           out.println(varName + " = " + argName + ".toRefValue();");
         }
+	*/
         else if (var.isRefArgument()) {
           // php/344r, 3a57
           out.println(varName + " = " + argName + ".toRefVar();");

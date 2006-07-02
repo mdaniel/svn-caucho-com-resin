@@ -123,13 +123,40 @@ public class Post {
           os.close();
         }
 
-        ArrayValue entry = new ArrayValueImpl();
-        entry.put("name", filename);
+	int p = name.indexOf('[');
+	String index = "";
+	if (p >= 0) {
+	  index = name.substring(p);
+	  name = name.substring(0, p);
+	}
+
+	StringValue nameValue = new StringValueImpl(name);
+	Value v = files.get(nameValue).toValue();
+	ArrayValue entry = null;
+	if (v instanceof ArrayValue)
+	  entry = (ArrayValue) v;
+
+	if (entry == null) {
+	  entry = new ArrayValueImpl();
+	  files.put(nameValue, entry);
+	}
+
+	addFormValue(entry, "name" + index, new StringValueImpl(filename),
+		     null, addSlashesToValues);
+	
         String mimeType = getAttribute(attr, "mime-type");
-        if (mimeType != null)
+        if (mimeType != null) {
+	  addFormValue(entry, "type" + index, new StringValueImpl(mimeType),
+		       null, addSlashesToValues);
           entry.put("type", mimeType);
-        entry.put("size", tmpName.getLength());
-        entry.put("tmp_name", tmpName.getTail());
+	}
+	
+	addFormValue(entry, "size" + index, new LongValue(tmpName.getLength()),
+		     null, addSlashesToValues);
+	
+	addFormValue(entry, "tmp_name" + index,
+		     new StringValueImpl(tmpName.getTail()),
+		     null, addSlashesToValues);
 
         // XXX: error
 
@@ -161,24 +188,29 @@ public class Post {
     int p = key.indexOf('[');
     int q = key.indexOf(']', p);
 
-    if (p > 0 && p < q) {
+    if (p >= 0 && p < q) {
       String index = key;
+      
+      Value keyValue;
+      Value existingValue;
 
-      key = key.substring(0, p);
+      if (p > 0) {
+	key = key.substring(0, p);
 
-      Value keyValue = new StringValueImpl(key);
-      Value existingValue = array.get(keyValue);
+	keyValue = new StringValueImpl(key);
+	existingValue = array.get(keyValue);
 
-      if (existingValue == null || ! existingValue.isset()) {
-        existingValue = new ArrayValueImpl();
-        array.put(keyValue, existingValue);
+	if (existingValue == null || ! existingValue.isset()) {
+	  existingValue = new ArrayValueImpl();
+	  array.put(keyValue, existingValue);
+	}
+	else if (! existingValue.isArray()) {
+	  existingValue = new ArrayValueImpl().put(existingValue);
+	  array.put(keyValue, existingValue);
+	}
+
+	array = (ArrayValue) existingValue;
       }
-      else if (! existingValue.isArray()) {
-        existingValue = new ArrayValueImpl().put(existingValue);
-        array.put(keyValue, existingValue);
-      }
-
-      array = (ArrayValue) existingValue;
 
       int p1;
       while ((p1 = index.indexOf('[', q)) > 0) {

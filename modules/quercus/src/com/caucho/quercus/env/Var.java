@@ -270,25 +270,38 @@ public class Var extends Value {
   }
 
   /**
+   * Converts to a function argument value that is never assigned or modified.
+   */
+  @Override
+  public Value toArgValueReadOnly()
+  {
+    return _value;
+  }
+
+  /**
    * Converts to a raw value.
    */
+  @Override
   public Value toArgValue()
   {
     return _value.toArgValue();
   }
 
   /**
-   * Converts to a function argument ref value.
+   * Converts to a function argument ref value, i.e. an argument
+   * declared as a reference, but not assigned
    */
+  @Override
   public Value toRefValue()
   {
     // php/344r
-    return _value;
+    return _value.toRefValue();
   }
 
   /**
    * Converts to a variable
    */
+  @Override
   public Var toVar()
   {
     // php/3d04

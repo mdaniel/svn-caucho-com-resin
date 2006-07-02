@@ -431,8 +431,9 @@ public class ArrayModule
 	key.getType()));
       return false;
     }
+    
     if (searchArray instanceof ArrayValue)
-      return ! ((ArrayValue) searchArray).containsKey(key).isNull();
+      return ((ArrayValue) searchArray).containsKey(key) != null;
     else
       return ! searchArray.getField(env, key.toString()).isNull();
   }
@@ -1975,8 +1976,7 @@ public class ArrayModule
           return NullValue.NULL;
         }
 
-        keyFound =
-          ((ArrayValue) arrays[k]).containsKey(entryKey) != NullValue.NULL;
+        keyFound = ((ArrayValue) arrays[k]).containsKey(entryKey) != null;
       }
 
       if (! keyFound)
@@ -2199,7 +2199,7 @@ public class ArrayModule
 
         Value searchValue = ((ArrayValue) arrays[k]).containsKey(entryKey);
 
-        if (searchValue != NullValue.NULL)
+        if (searchValue != null)
           valueFound = searchValue.eq(entryValue);
         else
           valueFound = false;
@@ -2250,8 +2250,7 @@ public class ArrayModule
         if (k > 0 && ! keyFound)
           break;
 
-        keyFound =
-          ((ArrayValue) arrays[k]).containsKey(entryKey) != NullValue.NULL;
+        keyFound = ((ArrayValue) arrays[k]).containsKey(entryKey) != null;
       }
 
       if (keyFound)
@@ -2313,7 +2312,7 @@ public class ArrayModule
 
         Value searchValue = ((ArrayValue) arrays[k]).containsKey(entryKey);
 
-        if (searchValue != NullValue.NULL)
+        if (searchValue != null)
           valueFound = func.call(env, searchValue, entryValue).toLong() == 0;
         else
           valueFound = false;

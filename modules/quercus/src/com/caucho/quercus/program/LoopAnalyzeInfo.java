@@ -77,7 +77,10 @@ public class LoopAnalyzeInfo {
    */
   public void mergeContinueInfo(AnalyzeInfo info)
   {
-    _continueInfo.merge(info);
+    if (_continueInfo != null)
+      _continueInfo.merge(info);
+    else // XXX: for switch inside while
+      _parentLoop.mergeContinueInfo(info);
   }
 
   /**

@@ -157,6 +157,16 @@ public class RefVar extends Value {
   /**
    * Converts to an argument value.
    */
+  @Override
+  public Value toArgValueReadOnly()
+  {
+    return _var;
+  }
+
+  /**
+   * Converts to an argument value.
+   */
+  @Override
   public Value toArgValue()
   {
     // php/343k
@@ -164,8 +174,18 @@ public class RefVar extends Value {
   }
 
   /**
+   * Converts to an argument value.
+   */
+  @Override
+  public Value toRefValue()
+  {
+    return _var;
+  }
+
+  /**
    * Converts to a variable
    */
+  @Override
   public Var toVar()
   {
     return _var;
@@ -174,6 +194,7 @@ public class RefVar extends Value {
   /**
    * Converts to a reference variable
    */
+  @Override
   public Var toRefVar()
   {
     return _var;

@@ -128,6 +128,27 @@ public class StaticMethodExpr extends Expr {
 
     return cl.callMethod(env, thisValue, _name, _args);
   }
+  
+  /**
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  public Value evalRef(Env env)
+  {
+    QuercusClass cl = env.findClass(_className);
+
+    if (cl == null) {
+      throw new QuercusException(L.l("no matching class {0}", _className));
+    }
+
+    // qa/0954 - what appears to be a static call may be a call to a super constructor
+    Value thisValue = env.getThis();
+
+    return cl.callMethodRef(env, thisValue, _name, _args);
+  }
 
   //
   // Java code generation
@@ -158,11 +179,36 @@ public class StaticMethodExpr extends Expr {
   public void generate(PhpWriter out)
     throws IOException
   {
+    generate(out, false);
+  }
+
+  /**
+   * Generates code to recreate the expression.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateRef(PhpWriter out)
+    throws IOException
+  {
+    generate(out, true);
+  }
+
+  /**
+   * Generates code to recreate the expression.
+   *
+   * @param out the writer to the Java source code.
+   */
+  private void generate(PhpWriter out, boolean isRef)
+    throws IOException
+  {
     Expr []args = _args;
 
     out.print("env.getClass(\"");
     out.printJavaString(_className);
-    out.print("\").callMethod(env, ");
+    if (isRef)
+      out.print("\").callMethodRef(env, ");
+    else
+      out.print("\").callMethod(env, ");
 
     // XXX: needed for mediawiki
     if (isMethod())

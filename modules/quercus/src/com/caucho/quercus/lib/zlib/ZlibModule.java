@@ -547,16 +547,10 @@ public class ZlibModule extends AbstractQuercusModule {
       boolean isFinished = false;
       TempStream out = new TempStream();
 
-      int dbg = _dbg++;
-      WriteStream dbgIn = Vfs.openWrite("file:/tmp/td" + dbg + ".in");
-      WriteStream dbgOut = Vfs.openWrite("file:/tmp/td" + dbg + ".out");
-
       int len;
       while (! isFinished) {
         if (! isFinished && deflater.needsInput()) {
           len = data.read(buffer, 0, buffer.length);
-
-	  dbgIn.write(buffer, 0, len);
 
           if (len > 0)
             deflater.setInput(buffer, 0, len);
@@ -568,13 +562,9 @@ public class ZlibModule extends AbstractQuercusModule {
 
         while ((len = deflater.deflate(buffer, 0, buffer.length)) > 0) {
           out.write(buffer, 0, len, false);
-	  dbgOut.write(buffer, 0, len);
         }
       }
       deflater.end();
-
-      dbgIn.close();
-      dbgOut.close();
 
       return new TempBufferStringValue(out.getHead());
 
@@ -604,19 +594,12 @@ public class ZlibModule extends AbstractQuercusModule {
       boolean isFinished = false;
       TempStream out = new TempStream();
 
-      int dbg = _dbg++;
-      WriteStream dbgIn = Vfs.openWrite("file:/tmp/ti" + dbg + ".in");
-      WriteStream dbgOut = Vfs.openWrite("file:/tmp/ti" + dbg + ".out");
-
       int len;
       while (! isFinished) {
         if (! isFinished && inflater.needsInput()) {
           len = data.read(buffer, 0, buffer.length);
 
           if (len > 0) {
-	    dbgIn.write(buffer, 0, len);
-	    dbgIn.flush();
-	    
             inflater.setInput(buffer, 0, len);
 	  }
           else
@@ -625,8 +608,6 @@ public class ZlibModule extends AbstractQuercusModule {
 
         while ((len = inflater.inflate(buffer, 0, buffer.length)) > 0) {
           out.write(buffer, 0, len, false);
-	  dbgOut.write(buffer, 0, len);
-	  dbgOut.flush();
         }
       }
 

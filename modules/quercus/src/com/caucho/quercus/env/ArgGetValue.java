@@ -69,6 +69,7 @@ public class ArgGetValue extends Value {
   /**
    * Converts to a reference variable.
    */
+  @Override
   public Var toRefVar()
   {
     // php/3d55, php/3d49
@@ -78,6 +79,7 @@ public class ArgGetValue extends Value {
   /**
    * Converts to a reference variable.
    */
+  @Override
   public Value toRefValue()
   {
     // php/3a57
@@ -87,9 +89,19 @@ public class ArgGetValue extends Value {
   /**
    * Converts to a value.
    */
+  @Override
   public Value toValue()
   {
     return _obj.get(_index);
+  }
+
+  /**
+   * Converts to a read-only value.
+   */
+  @Override
+  public Value toArgValueReadOnly()
+  {
+    return toValue();
   }
 
   /**

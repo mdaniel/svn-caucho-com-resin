@@ -213,16 +213,14 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static boolean chmod(Env env, Path file, int mode)
   {
-    if (!file.canRead()) {
-      env.warning(L.l("{0} cannot be read", file.getFullPath()));
+    if (! file.canRead()) {
+      // XXX: gallery?
+      // env.warning(L.l("{0} cannot be read", file.getFullPath()));
 
       return false;
     }
 
     // quercus/160j
-
-    // XXX: safe_mode
-
     file.chmod(mode);
 
     return true;

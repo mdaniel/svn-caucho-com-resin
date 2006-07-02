@@ -210,7 +210,7 @@ public class QuercusSessionManager implements ObjectManager, AlarmListener {
     }
 
     if (getSessionStore() != null && id.equals(oldId))
-      load(session, now);
+      load(env, session, now);
     
     return session;
   }
@@ -278,7 +278,7 @@ public class QuercusSessionManager implements ObjectManager, AlarmListener {
       return null;
 
     if (isNew) {
-      killSession = ! load(session, now);
+      killSession = ! load(env, session, now);
       isNew = killSession;
     }
     else if (! getSaveOnlyOnShutdown() && ! session.load()) {
@@ -313,7 +313,7 @@ public class QuercusSessionManager implements ObjectManager, AlarmListener {
   private SessionArrayValue create(Env env, String key, long now)
   {
     SessionArrayValue session = 
-      new SessionArrayValue(env, key, now, _sessionManager.getSessionTimeout());
+      new SessionArrayValue(key, now, _sessionManager.getSessionTimeout());
 
     // If another thread has created and stored a new session,
     // putIfNew will return the old session
@@ -342,7 +342,7 @@ public class QuercusSessionManager implements ObjectManager, AlarmListener {
    * the cache and do not intend actually to load it if it is not.
    *
    */
-  private boolean load(SessionArrayValue session, long now)
+  private boolean load(Env env, SessionArrayValue session, long now)
   {
     try {
       if (session.inUse()) {
@@ -671,7 +671,7 @@ public class QuercusSessionManager implements ObjectManager, AlarmListener {
   {
     SessionArrayValue session = (SessionArrayValue) obj;
 
-    session.load(in);
+    session.load(null, in);
   }
 
   /**

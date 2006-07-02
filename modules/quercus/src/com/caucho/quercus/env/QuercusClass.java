@@ -459,7 +459,7 @@ public class QuercusClass {
   }
 
   /**
-   * calluates the function.
+   * calls the function.
    */
   public Value callMethod(Env env, Value thisValue, String name, Expr []args)
   {
@@ -467,7 +467,7 @@ public class QuercusClass {
   }  
 
   /**
-   * calluates the function.
+   * calls the function.
    */
   public Value callMethod(Env env, Value thisValue, String name, Value []args)
   {
@@ -475,7 +475,7 @@ public class QuercusClass {
   }  
 
   /**
-   * calluates the function.
+   * calls the function.
    */
   public Value callMethod(Env env, Value thisValue, String name)
   {
@@ -483,7 +483,7 @@ public class QuercusClass {
   }  
 
   /**
-   * calluates the function.
+   * calls the function.
    */
   public Value callMethod(Env env, Value thisValue, String name,
 			  Value a1)
@@ -492,7 +492,7 @@ public class QuercusClass {
   }  
 
   /**
-   * calluates the function.
+   * calls the function.
    */
   public Value callMethod(Env env, Value thisValue, String name,
 			  Value a1, Value a2)
@@ -501,7 +501,7 @@ public class QuercusClass {
   }  
 
   /**
-   * calluates the function.
+   * calls the function.
    */
   public Value callMethod(Env env, Value thisValue, String name,
 			  Value a1, Value a2, Value a3)
@@ -510,7 +510,7 @@ public class QuercusClass {
   }  
 
   /**
-   * calluates the function.
+   * calls the function.
    */
   public Value callMethod(Env env, Value thisValue, String name,
 			  Value a1, Value a2, Value a3, Value a4)
@@ -519,12 +519,81 @@ public class QuercusClass {
   }  
 
   /**
-   * calluates the function.
+   * calls the function.
    */
   public Value callMethod(Env env, Value thisValue, String name,
 			  Value a1, Value a2, Value a3, Value a4, Value a5)
   {
     return getFunction(name).callMethod(env, thisValue, a1, a2, a3, a4, a5);
+  }  
+
+  /**
+   * calls the function.
+   */
+  public Value callMethodRef(Env env, Value thisValue, String name, Expr []args)
+  {
+    return getFunction(name).callMethodRef(env, thisValue, args);
+  }  
+
+  /**
+   * calls the function.
+   */
+  public Value callMethodRef(Env env, Value thisValue, String name, Value []args)
+  {
+    return getFunction(name).callMethodRef(env, thisValue, args);
+  }  
+
+  /**
+   * calls the function.
+   */
+  public Value callMethodRef(Env env, Value thisValue, String name)
+  {
+    return getFunction(name).callMethodRef(env, thisValue);
+  }  
+
+  /**
+   * calls the function.
+   */
+  public Value callMethodRef(Env env, Value thisValue, String name,
+			  Value a1)
+  {
+    return getFunction(name).callMethodRef(env, thisValue, a1);
+  }  
+
+  /**
+   * calls the function.
+   */
+  public Value callMethodRef(Env env, Value thisValue, String name,
+			  Value a1, Value a2)
+  {
+    return getFunction(name).callMethodRef(env, thisValue, a1, a2);
+  }  
+
+  /**
+   * calls the function.
+   */
+  public Value callMethodRef(Env env, Value thisValue, String name,
+			  Value a1, Value a2, Value a3)
+  {
+    return getFunction(name).callMethodRef(env, thisValue, a1, a2, a3);
+  }  
+
+  /**
+   * calls the function.
+   */
+  public Value callMethodRef(Env env, Value thisValue, String name,
+			  Value a1, Value a2, Value a3, Value a4)
+  {
+    return getFunction(name).callMethodRef(env, thisValue, a1, a2, a3, a4);
+  }  
+
+  /**
+   * calls the function.
+   */
+  public Value callMethodRef(Env env, Value thisValue, String name,
+			  Value a1, Value a2, Value a3, Value a4, Value a5)
+  {
+    return getFunction(name).callMethodRef(env, thisValue, a1, a2, a3, a4, a5);
   }  
 
   /**

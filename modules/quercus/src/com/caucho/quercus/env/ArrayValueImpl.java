@@ -249,9 +249,19 @@ public class ArrayValueImpl extends ArrayValue {
   /**
    * Convert to an argument value.
    */
+  @Override
   public Value toArgValue()
   {
     return copy();
+  }
+  
+  /**
+   * Convert to an argument declared as a reference
+   */
+  @Override
+  public Value toRefValue()
+  {
+    return this;
   }
 
   /**
@@ -583,7 +593,7 @@ public class ArrayValueImpl extends ArrayValue {
     if (entry != null)
       return entry.getValue();
     else
-      return NullValue.NULL;
+      return null;
   }
 
   /**
@@ -655,6 +665,11 @@ public class ArrayValueImpl extends ArrayValue {
 	_entries[hash] = null;
 	shiftEntries(hash + 1);
 
+	if (key instanceof LongValue
+	    && key.toLong() + 1 == _nextAvailableIndex) {
+	  updateNextAvailableIndex();
+	}
+
 	return value;
       }
 
@@ -670,9 +685,6 @@ public class ArrayValueImpl extends ArrayValue {
   private void shiftEntries(int index)
   {
     int capacity = _entries.length;
-
-    // we'll be re-addEntry()ing all entries, so it's safe to reset this
-    _nextAvailableIndex = 0;
 
     for (; index < capacity; index++) {
       Entry entry = _entries[index];
@@ -803,16 +815,28 @@ public class ArrayValueImpl extends ArrayValue {
   }
 
   /**
+   * Updates _nextAvailableIndex on a remove of the highest value
+   */
+  private void updateNextAvailableIndex()
+  {
+    _nextAvailableIndex = 0;
+
+    for (Entry entry = _head; entry != null; entry = entry._next) {
+      updateNextAvailableIndex(entry);
+    }
+  }
+
+  /**
    * Updates _nextAvailableIndex; this must be invoked for every insertion
    */
   private void updateNextAvailableIndex(Entry entry)
   {
-    if (entry._key instanceof LongValue)
-      {
-	long key = entry._key.toLong();
-	if (key >= _nextAvailableIndex)
-	  _nextAvailableIndex = key+1;
-      }
+    if (entry._key instanceof LongValue) {
+      long key = entry._key.toLong();
+	
+      if (_nextAvailableIndex <= key)
+	_nextAvailableIndex = key + 1;
+    }
   }
 
 

@@ -60,6 +60,7 @@ public class ArgGetFieldValue extends Value {
   /**
    * Creates an argument which may create the given field.
    */
+  @Override
   public Value getFieldArg(Env env, String index)
   {
     // php/3d2q
@@ -69,18 +70,11 @@ public class ArgGetFieldValue extends Value {
   /**
    * Converts to a reference variable.
    */
+  @Override
   public Var toRefVar()
   {
     // php/3d2t
     return _obj.getFieldRef(_env, _index).toRefVar();
-  }
-
-  /**
-   * Converts to a reference variable.
-   */
-  public Value toRefValue()
-  {
-    return _obj.getFieldRef(_env, _index);
   }
 
   /**
@@ -93,12 +87,30 @@ public class ArgGetFieldValue extends Value {
   }
 
   /**
-   * Converts to a value.
+   * Converts to a read-only function argument.
+   */
+  @Override
+  public Value toArgValueReadOnly()
+  {
+    return toValue();
+  }
+
+  /**
+   * Converts to a function argument.
    */
   @Override
   public Value toArgValue()
   {
     return toValue();
+  }
+
+  /**
+   * Converts to a reference variable.
+   */
+  @Override
+  public Value toRefValue()
+  {
+    return _obj.getFieldRef(_env, _index);
   }
 
   /**

@@ -419,7 +419,19 @@ abstract public class Value {
    *
    * function foo($a)
    *
-   * where $a is never assigned in the function
+   * where $a is never assigned or modified
+   */
+  public Value toArgValueReadOnly()
+  {
+    return this;
+  }
+
+  /**
+   * Convert to a function argument value, e.g. for
+   *
+   * function foo($a)
+   *
+   * where $a is never assigned, but might be modified, e.g. $a[3] = 9
    */
   public Value toArgValue()
   {

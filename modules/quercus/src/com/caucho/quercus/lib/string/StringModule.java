@@ -560,7 +560,7 @@ v   *
                               StringValue string,
                               @Optional("0x7fffffff") long limit)
   {
-    if (separator.equals(""))
+    if (separator.length() == 0)
       return BooleanValue.FALSE;
 
     ArrayValue array = new ArrayValueImpl();

@@ -1891,21 +1891,10 @@ public final class Env {
    */
   public Value getConstant(String name)
   {
-    Value value = _constMap.get(name);
+    Value value = getConstantImpl(name);
 
     if (value != null)
       return value;
-
-    value = _quercus.getConstant(name);
-    if (value != null)
-      return value;
-
-    if (! isStrict()) {
-      value = _lowerConstMap.get(name.toLowerCase());
-
-      if (value != null)
-	return value;
-    }
 
     /* XXX:
        notice(L.l("Converting undefined constant '{0}' to string.",
@@ -1922,9 +1911,33 @@ public final class Env {
    */
   public boolean isDefined(String name)
   {
-    return _constMap.get(name) != null;
+    return getConstantImpl(name) != null;
   }
 
+  /**
+   * Returns a constant.
+   */
+  private Value getConstantImpl(String name)
+  {
+    Value value = _constMap.get(name);
+
+    if (value != null)
+      return value;
+
+    value = _quercus.getConstant(name);
+    if (value != null)
+      return value;
+
+    if (! isStrict()) {
+      value = _lowerConstMap.get(name.toLowerCase());
+
+      if (value != null)
+	return value;
+    }
+
+    return null;
+  }
+  
   /**
    * Removes a constant.
    */
@@ -2049,6 +2062,16 @@ public final class Env {
 
     if (fun != null)
       return fun;
+    
+    if (! isStrict()) {
+      fun = _lowerFunMap.get(name.toLowerCase());
+
+      if (fun != null) {
+	_funMap.put(name, fun);
+
+	return fun;
+      }
+    }
 
     fun = findFunctionImpl(name);
 
@@ -2057,8 +2080,6 @@ public final class Env {
 
       return fun;
     }
-    else if (! isStrict())
-      return _lowerFunMap.get(name.toLowerCase());
     else
       return null;
   }
@@ -2078,8 +2099,9 @@ public final class Env {
     
     fun = findFunction(name);
     
-    if (fun != null)
+    if (fun != null) {
       return fun;
+    }
 
     throw errorException(L.l("'{0}' is an unknown function.", name));
   }
@@ -3782,13 +3804,16 @@ public final class Env {
    */
   public static Value setRef(Value oldValue, Value value)
   {
+    // php/3243
     if (value instanceof Var)
       return value;
+    /*
     else if (oldValue instanceof Var) {
       oldValue.set(value);
 
-      return value;
+      return oldValue;
     }
+    */
     else
       return new Var(value);
   }

@@ -446,11 +446,12 @@ public class RegexpModule
 
       return result;
 
-    } else if (subject instanceof StringValue) {
+    }
+    else if (subject.isset()) {
       return pregReplace(env, pattern, replacement, subject.toStringValue(),
 			 limit, count);
     } else
-      return NullValue.NULL;
+      return StringValue.EMPTY;
 
   }
 

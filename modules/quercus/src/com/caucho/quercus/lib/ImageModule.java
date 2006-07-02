@@ -29,12 +29,19 @@
 
 package com.caucho.quercus.lib;
 
+import java.awt.*;
+import java.awt.color.*;
+import java.awt.image.*;
+import java.awt.geom.*;
+
 import java.io.IOException;
 import java.io.InputStream;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.util.LinkedList;
+
+import javax.imageio.*;
 
 import com.caucho.util.L10N;
 
@@ -43,17 +50,14 @@ import com.caucho.quercus.QuercusModuleException;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.NotNull;
+import com.caucho.quercus.module.ReturnNullAsFalse;
 
 import com.caucho.quercus.env.*;
 
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
-
-import java.awt.*;
-import java.awt.color.*;
-import java.awt.image.*;
-import java.awt.geom.*;
-import javax.imageio.*;
+import com.caucho.vfs.WriteStream;
 
 /**
  * PHP image
@@ -62,6 +66,13 @@ public class ImageModule extends AbstractQuercusModule {
   private static final Logger log
     = Logger.getLogger(ImageModule.class.getName());
   private static final L10N L = new L10N(ImageModule.class);
+
+  public static final long IMG_GIF = 0x1;
+  public static final long IMG_JPG = 0x2;
+  public static final long IMG_JPEG = 0x2;
+  public static final long IMG_PNG = 0x4;
+  public static final long IMG_WBMP = 0x8;
+  public static final long IMG_XPM = 0x10;
 
   public static final int IMAGETYPE_GIF = 1;
   public static final int IMAGETYPE_JPG = 2;
@@ -333,34 +344,39 @@ public class ImageModule extends AbstractQuercusModule {
    */
   public static Value gd_info()
   {
-    Value[] keys = new Value[] {
-      StringValue.create("GD Version"), // ] => 2.0 or higher
-      StringValue.create("FreeType Support"), // ] => 1
-      StringValue.create("FreeType Linkage"), // ] => with freetype
-      StringValue.create("T1Lib Support"), // ] => 1
-      StringValue.create("GIF Read Support"), // ] => 1
-      StringValue.create("GIF Create Support"), // ] => 1
-      StringValue.create("JPG Support"), // ] => 1
-      StringValue.create("PNG Support"), // ] => 1
-      StringValue.create("WBMP Support"), // ] => 1
-      StringValue.create("XPM Support"), // ] => 
-      StringValue.create("XBM Support"), // ] => 
-      StringValue.create("JIS-mapped Japanese Font Support"), // ] => 
-    };
-    Value[] vals = new Value[] {
-      StringValue.create("2.0 or higher"),
-      BooleanValue.TRUE,
-      StringValue.create("with freetype"),
-      BooleanValue.TRUE,
-      BooleanValue.TRUE,
-      BooleanValue.TRUE,
-      BooleanValue.TRUE,
-      BooleanValue.TRUE,
-      BooleanValue.TRUE,
-      BooleanValue.FALSE,
-      BooleanValue.FALSE,
-    };
-    return new ArrayValueImpl(keys, vals);
+    return (new ArrayValueImpl()
+	    .append(StringValue.create("GD Version"), // ] => 2.0 or higher
+		    StringValue.create("2.0 or higher"))
+	    .append(StringValue.create("FreeType Support"), // ] => 1
+		    BooleanValue.TRUE)
+	    .append(StringValue.create("FreeType Linkage"), // ] => with freetype
+		    StringValue.create("with freetype"))
+	    .append(StringValue.create("T1Lib Support"), // ] => 1
+		    BooleanValue.TRUE)
+	    .append(StringValue.create("GIF Read Support"), // ] => 1
+		    BooleanValue.TRUE)
+	    .append(StringValue.create("GIF Create Support"), // ] => 1
+		    BooleanValue.TRUE)
+	    .append(StringValue.create("JPG Support"), // ] => 1
+		    BooleanValue.TRUE)
+	    .append(StringValue.create("PNG Support"), // ] => 1
+		    BooleanValue.TRUE)
+	    .append(StringValue.create("WBMP Support"), // ] => 1
+		    BooleanValue.TRUE)
+	    .append(StringValue.create("XPM Support"), // ] => 
+		    BooleanValue.FALSE)
+	    .append(StringValue.create("XBM Support"), // ] => 
+		    BooleanValue.FALSE)
+	    .append(StringValue.create("JIS-mapped Japanese Font Support"), // ] => 
+		    BooleanValue.FALSE));
+  }
+
+  /**
+   * Returns the imagetypes.
+   */
+  public static long imagetypes()
+  {
+    return IMG_GIF | IMG_JPG | IMG_PNG;
   }
 
   /**
@@ -464,14 +480,27 @@ public class ImageModule extends AbstractQuercusModule {
   /**
    * Output image to browser or file
    */
-  public static boolean imagejpeg(Env env, QuercusImage image)
+  public static boolean imagejpeg(Env env, QuercusImage image,
+				  @Optional Path path,
+				  @Optional int quality)
   {
     try {
-      ImageIO.write(image._bufferedImage, "jpeg", env.getOut());
+      if (path != null) {
+	WriteStream os = path.openWrite();
+	try {
+	  ImageIO.write(image._bufferedImage, "jpeg", os);
+	} finally {
+	  os.close();
+	}
+      }
+      else
+	ImageIO.write(image._bufferedImage, "jpeg", env.getOut());
       return true;
     }
     catch (IOException e) {
-      throw new QuercusModuleException(e);
+      log.log(Level.FINE, e.toString(), e);
+      
+      return false;
     }
   }
 
@@ -649,9 +678,17 @@ public class ImageModule extends AbstractQuercusModule {
   /**
    * Create a new image from file or URL
    */
+  @ReturnNullAsFalse
   public static QuercusImage imagecreatefromjpeg(Env env, Path filename)
   {
-    return new QuercusImage(env, filename);
+    try {
+      return new QuercusImage(env, filename);
+    } catch (Exception e) {
+      env.warning(L.l("Can't open {0} as a jpeg image", filename));
+      log.log(Level.FINE, e.toString(), e);
+
+      return null;
+    }
   }
 
   /**
@@ -910,6 +947,22 @@ public class ImageModule extends AbstractQuercusModule {
   }
 
   /**
+   * Draw a string horizontally
+   */
+  public static boolean imagestring(QuercusImage image, int font,
+				  int x, int y, String s, int color)
+  {
+    Graphics2D g = image.getGraphics();
+    g.setColor(intToColor(color));
+    Font awtfont = image.getFont(font);
+    int height = image.getGraphics().getFontMetrics(awtfont).getAscent();
+    g.setFont(awtfont);
+    g.drawString(s, x, y+height);
+    
+    return true;
+  }
+
+  /**
    * Draw a character vertically
    */
   public static boolean imagecharup(QuercusImage image, int font,
@@ -923,6 +976,37 @@ public class ImageModule extends AbstractQuercusModule {
     g.setFont(awtfont);
     g.drawString(c.substring(0, 1), -1 * y, x+height);
     return true;
+  }
+
+  /**
+   * Returns the width of the image.
+   */
+  public static int imagesx(@NotNull QuercusImage image)
+  {
+    if (image == null)
+      return 0;
+    
+    Graphics2D g = (Graphics2D) image.getGraphics();
+
+    Rectangle bounds = g.getDeviceConfiguration().getBounds();
+
+    return (int) bounds.getWidth();
+  }
+
+  /**
+   * Returns the height of the image.
+   */
+  public static int imagesy(@NotNull QuercusImage image)
+  {
+    if (image == null)
+      return 0;
+    
+    Graphics2D g = (Graphics2D) image.getGraphics();
+
+    Rectangle bounds = g.getDeviceConfiguration().getBounds();
+
+    return (int) bounds.getHeight();
+
   }
 
   /**
