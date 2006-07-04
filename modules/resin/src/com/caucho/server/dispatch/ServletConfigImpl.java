@@ -556,8 +556,11 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
       servletChain = new SecurityRoleMapFilterChain(servletChain, _roleMap);
 
     // server/10a8.  JSP pages need a fresh PageFilterChain
+    // XXX: lock contention issues with JSPs?
+    /*
     if (! QServlet.class.isAssignableFrom(servletClass))
       _servletChain = servletChain;
+    */
 
     return servletChain;
   }

@@ -282,6 +282,11 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
     }
   }
 
+  public Object toJavaObject()
+  {
+    return this;
+  }
+
   /**
    * Converts to a string.
    */

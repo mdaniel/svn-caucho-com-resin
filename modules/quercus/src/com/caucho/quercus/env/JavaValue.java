@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.env;
 
+import java.io.*;
+
 import java.util.IdentityHashMap;
 
 import java.util.logging.Logger;
@@ -341,9 +343,22 @@ public class JavaValue extends ResourceValue {
   /**
    * Converts to an object.
    */
+  @Override
   public Object toJavaObject()
   {
     return _object;
+  }
+
+  /**
+   * Converts to an object.
+   */
+  @Override
+  public InputStream toInputStream()
+  {
+    if (_object instanceof InputStream)
+      return (InputStream) _object;
+    else
+      return super.toInputStream();
   }
 }
 

@@ -58,6 +58,11 @@ public class JavaModule extends AbstractQuercusModule {
 			   Value []args)
   {
     try {
+      JavaClassDef def = env.getJavaClassDefinition(className);
+
+      if (def != null)
+	return def.callNew(env, args);
+      
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
       
       Class cl = Class.forName(className, false, loader);
@@ -67,7 +72,24 @@ public class JavaModule extends AbstractQuercusModule {
       } catch (Throwable e) {
       }
 
-      return new JavaValue(env, null, env.getJavaClassDefinition(cl.getName()));
+      return new JavaValue(env, null, def);
+    } catch (Throwable e) {
+      env.warning(e);
+
+      return null;
+    }
+  }
+
+  /**
+   * Call the Java constructor and return the wrapped Java object.
+   */
+  public static Object java_class(Env env,
+				  String className)
+  {
+    try {
+      JavaClassDef def = env.getJavaClassDefinition(className);
+
+      return new JavaValue(env, null, def);
     } catch (Throwable e) {
       env.warning(e);
 
