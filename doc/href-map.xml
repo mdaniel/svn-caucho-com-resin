@@ -72,10 +72,16 @@
         </href>
         <href id="jstl">
           <reconsider>
-            <withhref>jstl10</withhref>
+            <withhref>jstl11</withhref>
           </reconsider>
         </href>
         <href id="jstl10">
+          <reconsider>
+            <withtopic>www.jcp.org</withtopic>
+            <withhref>en/jsr/detail?id=052</withhref>
+          </reconsider>
+        </href>
+        <href id="jstl11">
           <reconsider>
             <withtopic>www.jcp.org</withtopic>
             <withhref>en/jsr/detail?id=052</withhref>
