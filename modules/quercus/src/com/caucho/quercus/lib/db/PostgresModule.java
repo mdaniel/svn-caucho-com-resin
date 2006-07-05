@@ -62,6 +62,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
@@ -367,9 +368,25 @@ public class PostgresModule extends AbstractQuercusModule {
       // string 'TRUE' which is no valid entry for boolean fields in
       // PostgreSQL. Use one of t, true, 1, y, yes instead.
 
-      if (options == 0) {
+      if (options > 0) {
         throw new UnimplementedException("pg_convert with options");
       }
+
+      PostgresResult result;
+
+      // XXX: need to review and prevent SQL injection.
+      String query = "SELECT count(*) FROM pg_attribute a, pg_class c WHERE a.attnum > 0 and a.attrelid =  c.oid and c.relname=?";
+      PreparedStatement pstmt = conn.getJavaConnection().prepareStatement(query);
+      pstmt.setString(1, tableName);
+      if (!pstmt.execute())
+        return null;
+      ResultSet rs = pstmt.getResultSet();
+      rs.next();
+      int n = rs.getInt(1);
+      pstmt.close();
+
+      if (n < assocArray.getSize())
+        return null;
 
       ArrayValueImpl newArray = new ArrayValueImpl();
 
@@ -377,7 +394,15 @@ public class PostgresModule extends AbstractQuercusModule {
         Value k = entry.getKey();
         Value v = entry.getValue();
 
-        newArray.put(k, new StringBuilderValue().append("'").append(v).append("'"));
+        if (v instanceof StringValue) {
+          StringBuilderValue sb = new StringBuilderValue();
+          sb.append("'").append(v).append("'");
+          newArray.put(k, sb);
+        } else if (v instanceof NullValue) {
+          newArray.put(k, StringValue.create("NULL"));
+        } else {
+          newArray.put(k, v);
+        }
       }
 
       return newArray;
@@ -1404,7 +1429,7 @@ public class PostgresModule extends AbstractQuercusModule {
     try {
 
       if (options > 0) {
-        throw new UnimplementedException("pg_convert with options");
+        throw new UnimplementedException("pg_insert with options");
       }
 
       StringBuilder names = new StringBuilder();
