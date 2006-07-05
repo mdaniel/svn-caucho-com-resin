@@ -27,10 +27,11 @@
  */
 
 
-package javax.management.j2ee.statistics;
+package javax.management.j2ee;
 
 import javax.ejb.EJBObject;
 import javax.management.*;
+import javax.management.j2ee.statistics.ListenerRegistration;
 import java.rmi.RemoteException;
 import java.util.Set;
 
@@ -51,7 +52,7 @@ public interface Management extends EJBObject {
     throws InstanceNotFoundException, ReflectionException, RemoteException;
 
   /**
-   * Returns the value of the default domain.l
+   * Returns the value of the default domain.
    */
   public String getDefaultDomain()
     throws RemoteException;
@@ -92,7 +93,7 @@ public interface Management extends EJBObject {
   public Set queryNames(ObjectName objectName, QueryExp queryExp)
     throws RemoteException;
 
-  public void setAttributes(ObjectName objectName, Attribute attribute)
+  public void setAttribute(ObjectName objectName, Attribute attribute)
     throws InstanceNotFoundException,
            AttributeNotFoundException,
            InvalidAttributeValueException,

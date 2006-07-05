@@ -35,8 +35,6 @@ import java.util.logging.Level;
 
 import java.io.IOException;
 
-import javax.transaction.Status;
-
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.FilterChain;
@@ -54,10 +52,7 @@ import com.caucho.server.connection.AbstractHttpResponse;
 
 import com.caucho.server.log.AbstractAccessLog;
 
-import com.caucho.loader.Environment;
-
 import com.caucho.transaction.TransactionManagerImpl;
-import com.caucho.transaction.TransactionImpl;
 
 import com.caucho.jca.UserTransactionProxy;
 

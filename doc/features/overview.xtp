@@ -210,10 +210,10 @@ database driver.
 </ul>
 </section>
 
-<section name="jstl" title="Java Server Pages Standard Template Library (JSTL) 1.0">
+<section name="jstl" title="Java Server Pages Standard Template Library (JSTL) 1.01">
 <ul>
 <li><a href="doc|jsp|jstl">Resin documentation</a>
-<li><a href="external|spec|jstl10">External: specification (JSR-052)</a>
+<li><a href="external|spec|jstl11">External: specification (JSR-052)</a>
 </ul>
 </section>
 

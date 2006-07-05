@@ -29,16 +29,62 @@
 
 package com.caucho.mbeans.j2ee;
 
+import com.caucho.transaction.TransactionManagerImpl;
+
+import javax.management.j2ee.statistics.JTAStats;
+import javax.management.j2ee.statistics.CountStatistic;
+
 /**
  * Management interface for a JTA resource.
  */
-public class JTAResource extends J2EEResource {
-  protected String getName()
-  {
-    // XXX:
+public class JTAResource
+  extends J2EEResource
+  implements StatisticsProvider<JTAStats>
+{
+  private final TransactionManagerImpl _tm;
 
-    return null;
+  public JTAResource(TransactionManagerImpl tm)
+  {
+    _tm = tm;
   }
 
-  // no attributes
+  protected boolean isJ2EEApplication()
+  {
+    return false;
+  }
+
+  protected String getName()
+  {
+    return "global";
+  }
+
+  public JTAStats getStats()
+  {
+    return new JTAStatsImpl(this);
+  }
+
+  class JTAStatsImpl
+    extends StatsSupport
+    implements JTAStats
+  {
+    public JTAStatsImpl(J2EEManagedObject j2eeManagedObject)
+    {
+      super(j2eeManagedObject);
+    }
+
+    public CountStatistic getActiveCount()
+    {
+      return new UnimplementedCountStatistic("ActiveCount");
+    }
+
+    public CountStatistic getCommittedCount()
+    {
+      return new UnimplementedCountStatistic("CommittedCount");
+    }
+
+    public CountStatistic getRolledbackCount()
+    {
+      return new UnimplementedCountStatistic("RolledbackCount");
+    }
+  }
 }

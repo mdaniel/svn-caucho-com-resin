@@ -29,15 +29,37 @@
 
 package com.caucho.mbeans.j2ee;
 
+import javax.management.j2ee.statistics.URLStats;
+
 /**
  * Management interface for a URL resource.
  */
-public class URLResource extends J2EEResource {
+public class URLResource
+  extends J2EEResource
+  implements StatisticsProvider<URLStats>
+{
   protected String getName()
   {
     // XXX:
     return null;
   }
 
+  public URLStats getStats()
+  {
+    return new URLStatsImpl(this);
+  }
+
   // no attributes
+
+  class URLStatsImpl
+    extends StatsSupport
+    implements URLStats
+  {
+    public URLStatsImpl(J2EEManagedObject j2eeManagedObject)
+    {
+      super(j2eeManagedObject);
+    }
+
+    // no statistics
+  }
 }

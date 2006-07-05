@@ -67,6 +67,9 @@ import com.caucho.ejb.EjbServerManager;
 //import com.caucho.ejb.naming.LocalContext;
 
 import com.caucho.ejb.protocol.HandleEncoder;
+import com.caucho.mbeans.j2ee.J2EEAdmin;
+import com.caucho.mbeans.j2ee.RMI_IIOPResource;
+
 /**
  * The main class for the HTTP server.
  *
@@ -77,7 +80,7 @@ import com.caucho.ejb.protocol.HandleEncoder;
  */
 public class IiopProtocol extends Protocol {
   private static final Logger log = Log.open(IiopProtocol.class);
-  
+
   static final String COPYRIGHT =
     "Copyright (c) 1998-2006 Caucho Technology.  All rights reserved.";
 
@@ -97,7 +100,7 @@ public class IiopProtocol extends Protocol {
 
     IiopContext.setLocalContext(_iiopContext);
   }
-    
+
   /**
    * Returns the protocol name.
    */
@@ -105,13 +108,19 @@ public class IiopProtocol extends Protocol {
   {
     return _protocolName;
   }
-  
+
   /**
    * Sets the protocol name.
    */
   public void setProtocolName(String name)
   {
     _protocolName = name;
+  }
+
+  public void init()
+  {
+    J2EEAdmin.register(new RMI_IIOPResource(this));
+
   }
 
   public CosServer getCos()
@@ -131,7 +140,7 @@ public class IiopProtocol extends Protocol {
   {
     String url;
     String local;
-    
+
     int p = oid.indexOf('?');
 
     if (p < 0) {
@@ -144,23 +153,23 @@ public class IiopProtocol extends Protocol {
     }
 
     IiopRemoteService service = _iiopContext.getService(url);
-    
+
     if (service == null)
       return null;
     else if (local == null) {
       return new IiopSkeleton(service.getHome(), service.getHomeAPI(),
-			      service.getClassLoader(),
-			      host, port, url);
+                              service.getClassLoader(),
+                              host, port, url);
     }
     else {
       Object obj = service.getObject(local);
 
       if (obj == null)
-	return null;
-      
+        return null;
+
       return new IiopSkeleton(obj, service.getObjectAPI(),
-			      service.getClassLoader(),
-			      host, port, url + '?' + local);
+                              service.getClassLoader(),
+                              host, port, url + '?' + local);
     }
   }
 

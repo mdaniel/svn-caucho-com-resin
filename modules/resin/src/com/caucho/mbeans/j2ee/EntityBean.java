@@ -31,20 +31,56 @@ package com.caucho.mbeans.j2ee;
 
 import com.caucho.ejb.cfg.EjbEntityBean;
 
+import javax.management.j2ee.statistics.CountStatistic;
+import javax.management.j2ee.statistics.EntityBeanStats;
+import javax.management.j2ee.statistics.RangeStatistic;
+
 /**
  * Management interface for an entity bean.
  */
-public class EntityBean extends EJB {
+public class EntityBean
+  extends EJB
+  implements StatisticsProvider<EntityBeanStats>
+{
   public EntityBean(EjbEntityBean ejbBean)
   {
     super(ejbBean);
   }
 
-  protected String getName()
+  // no attributes
+
+  public EntityBeanStats getStats()
   {
-    // XXX:
-    return null;
+    return new EntityBeanStatsImpl(this);
   }
 
-  // no attributes
+  class EntityBeanStatsImpl
+    extends StatsSupport
+    implements EntityBeanStats
+  {
+    public EntityBeanStatsImpl(J2EEManagedObject j2eeManagedObject)
+    {
+      super(j2eeManagedObject);
+    }
+
+    public RangeStatistic getReadyCount()
+    {
+      return new UnimplementedRangeStatistic("ReadyCount");
+    }
+
+    public RangeStatistic getPooledCount()
+    {
+      return new UnimplementedRangeStatistic("PooledCount");
+    }
+
+    public CountStatistic getCreateCount()
+    {
+      return new UnimplementedCountStatistic("CreateCount");
+    }
+
+    public CountStatistic getRemoveCount()
+    {
+      return new UnimplementedCountStatistic("RemoveCount");
+    }
+  }
 }

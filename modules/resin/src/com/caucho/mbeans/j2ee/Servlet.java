@@ -30,8 +30,13 @@
 package com.caucho.mbeans.j2ee;
 
 import javax.servlet.ServletConfig;
+import javax.management.j2ee.statistics.ServletStats;
+import javax.management.j2ee.statistics.TimeStatistic;
 
-public class Servlet extends J2EEManagedObject {
+public class Servlet
+  extends J2EEManagedObject
+  implements StatisticsProvider<ServletStats>
+{
   private final ServletConfig _servletConfig;
 
   public Servlet(ServletConfig servletConfig)
@@ -44,5 +49,25 @@ public class Servlet extends J2EEManagedObject {
     return _servletConfig.getServletName();
   }
 
+  public ServletStats getStats()
+  {
+    return new ServletStatsImpl(this);
+  }
+
   // no attributes
+
+  class ServletStatsImpl
+    extends StatsSupport
+    implements ServletStats
+  {
+    public ServletStatsImpl(J2EEManagedObject j2eeManagedObject)
+    {
+      super(j2eeManagedObject);
+    }
+
+    public TimeStatistic getServiceTime()
+    {
+      return new UnimplementedTimeStatistic("ServiceTime");
+    }
+  }
 }

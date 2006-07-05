@@ -31,14 +31,56 @@ package com.caucho.mbeans.j2ee;
 
 import com.caucho.ejb.cfg.EjbSessionBean;
 
+import javax.management.j2ee.statistics.StatelessSessionBeanStats;
+import javax.management.j2ee.statistics.RangeStatistic;
+import javax.management.j2ee.statistics.CountStatistic;
+
 /**
  * Management interface for a stateless session bean.
  */
-public class StatelessSessionBean extends EJB {
+public class StatelessSessionBean
+  extends EJB
+  implements StatisticsProvider<StatelessSessionBeanStats>
+{
   public StatelessSessionBean(EjbSessionBean ejbBean)
   {
     super(ejbBean);
   }
 
+  public StatelessSessionBeanStats getStats()
+  {
+    return new StatelessSessionBeanStatsImpl(this);
+  }
+
   // no attributes
+
+  class StatelessSessionBeanStatsImpl
+    extends StatsSupport
+    implements StatelessSessionBeanStats
+  {
+    public StatelessSessionBeanStatsImpl(J2EEManagedObject j2eeManagedObject)
+    {
+      super(j2eeManagedObject);
+    }
+
+    public RangeStatistic getMethodReadyCount()
+    {
+      return new UnimplementedRangeStatistic("MethodReadyCount");
+    }
+
+    public RangeStatistic getPooledCount()
+    {
+      return new UnimplementedRangeStatistic("PooledCount");
+    }
+
+    public CountStatistic getCreateCount()
+    {
+      return new UnimplementedCountStatistic("CreateCount");
+    }
+
+    public CountStatistic getRemoveCount()
+    {
+      return new UnimplementedCountStatistic("RemoveCount");
+    }
+  }
 }

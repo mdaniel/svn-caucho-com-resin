@@ -31,14 +31,17 @@ package com.caucho.mbeans.j2ee;
 
 import com.caucho.ejb.cfg.EjbBean;
 
-import javax.management.ObjectName;
 import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.management.j2ee.statistics.EJBStats;
 import java.util.Hashtable;
 
 /**
  * Base class management interface for enterpise java beans.
  */
-public class EJB extends J2EEManagedObject {
+abstract public class EJB
+  extends J2EEManagedObject
+{
   private final EjbBean _ejbBean;
 
   public EJB(EjbBean ejbBean)

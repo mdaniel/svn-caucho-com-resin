@@ -29,8 +29,16 @@
 
 package com.caucho.mbeans.j2ee;
 
+import com.caucho.ejb.cfg.EjbBean;
+
 /**
  * Base class management interface for session beans.
  */
-public class SessionBean {
+abstract public class SessionBean
+  extends EJB
+{
+  public SessionBean(EjbBean ejbBean)
+  {
+    super(ejbBean);
+  }
 }

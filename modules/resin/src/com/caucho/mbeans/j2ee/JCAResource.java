@@ -29,10 +29,17 @@
 
 package com.caucho.mbeans.j2ee;
 
+import javax.management.j2ee.statistics.JCAStats;
+import javax.management.j2ee.statistics.JCAConnectionStats;
+import javax.management.j2ee.statistics.JCAConnectionPoolStats;
+
 /**
  * Management interface for a JCA resource.
  */
-public class JCAResource extends J2EEResource {
+public class JCAResource
+  extends J2EEResource
+  implements StatisticsProvider<JCAStats>
+{
   protected String getName()
   {
     // XXX:
@@ -47,5 +54,32 @@ public class JCAResource extends J2EEResource {
   {
     // XXX:
     return new String[] {};
+  }
+
+  public JCAStats getStats()
+  {
+    return new JCAStatsImpl(this);
+  }
+
+  class JCAStatsImpl
+    extends StatsSupport
+    implements JCAStats
+  {
+    public JCAStatsImpl(J2EEManagedObject j2eeManagedObject)
+    {
+      super(j2eeManagedObject);
+    }
+
+    public JCAConnectionStats []getConnections()
+    {
+      // XXX: unimplemented
+      return new JCAConnectionStats[0];
+    }
+
+    public JCAConnectionPoolStats []getConnectionPools()
+    {
+      // XXX: unimplemented
+      return new JCAConnectionPoolStats[0];
+    }
   }
 }

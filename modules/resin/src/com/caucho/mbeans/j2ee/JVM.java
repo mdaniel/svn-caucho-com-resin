@@ -29,13 +29,20 @@
 
 package com.caucho.mbeans.j2ee;
 
-import com.caucho.util.CauchoSystem;
 import com.caucho.server.resin.ResinServer;
+import com.caucho.util.CauchoSystem;
+
+import javax.management.j2ee.statistics.JVMStats;
+import javax.management.j2ee.statistics.BoundedRangeStatistic;
+import javax.management.j2ee.statistics.CountStatistic;
 
 /**
  * Management interface for the JVM.
  */
-public class JVM extends J2EEManagedObject {
+public class JVM
+  extends J2EEManagedObject
+  implements StatisticsProvider<JVMStats>
+{
   public JVM()
   {
   }
@@ -75,5 +82,30 @@ public class JVM extends J2EEManagedObject {
   public String getNode()
   {
     return CauchoSystem.getLocalHost();
+  }
+
+  public JVMStats getStats()
+  {
+    return new JVMStatsImpl(this);
+  }
+
+  class JVMStatsImpl
+    extends StatsSupport
+    implements JVMStats
+  {
+    public JVMStatsImpl(J2EEManagedObject j2eeManagedObject)
+    {
+      super(j2eeManagedObject);
+    }
+
+    public BoundedRangeStatistic getHeapSize()
+    {
+      return new UnimplementedBoundedRangeStatistic("HeapSize");
+    }
+
+    public CountStatistic getUpTime()
+    {
+      return new UnimplementedCountStatistic("UpTime");
+    }
   }
 }

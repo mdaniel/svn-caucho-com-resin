@@ -29,15 +29,46 @@
 
 package com.caucho.mbeans.j2ee;
 
+import javax.management.j2ee.statistics.JavaMailStats;
+import javax.management.j2ee.statistics.CountStatistic;
+
 /**
  * Management interface for a JavaMail resource.
  */
-public class JavaMailResource extends J2EEResource {
+public class JavaMailResource
+  extends J2EEResource
+  implements StatisticsProvider<JavaMailStats>
+{
   protected String getName()
   {
     // XXX:
     return null;
   }
 
+  protected boolean isJ2EEApplication()
+  {
+    return false;
+  }
+
   // no attributes
+
+  public JavaMailStats getStats()
+  {
+    return new JavaMailStatsImpl(this);
+  }
+
+  class JavaMailStatsImpl
+    extends StatsSupport
+    implements JavaMailStats
+  {
+    public JavaMailStatsImpl(J2EEManagedObject j2eeManagedObject)
+    {
+      super(j2eeManagedObject);
+    }
+
+    public CountStatistic getSentMailCount()
+    {
+      return new UnimplementedCountStatistic("SentMailCount");
+    }
+  }
 }

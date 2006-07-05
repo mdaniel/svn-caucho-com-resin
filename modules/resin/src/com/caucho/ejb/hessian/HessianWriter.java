@@ -30,8 +30,6 @@
 package com.caucho.ejb.hessian;
 
 import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
 
 import javax.ejb.*;
 
@@ -127,7 +125,7 @@ public class HessianWriter extends HessianSerializerOutput {
       Object value = in.readObject();
 
       if (header.equals("xa-resource")) {
-	TransactionImpl xa = (TransactionImpl) TransactionManagerImpl.getLocal().getTransaction();
+	TransactionImpl xa = (TransactionImpl) TransactionManagerImpl.getInstance().getTransaction();
 
 	if (xa != null) {
 	  HessianXAResource xaRes = new HessianXAResource((String) value);

@@ -27,7 +27,7 @@
  */
 
 
-package javax.management.j2ee.statistics;
+package javax.management.j2ee;
 
 import javax.ejb.CreateException;
 import javax.ejb.EJBHome;

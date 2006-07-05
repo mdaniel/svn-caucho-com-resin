@@ -57,11 +57,11 @@ public interface Statistic
    * Returns the time that the first measurement was taken for this statistic,
    * the number of milliseconds sinch 00:00 January 1, 1970.
    */
-  public String getStartTime();
+  public long getStartTime();
 
   /**
    * Returns the time that the last measurement was taken for this statistic,
    * the number of milliseconds sinch 00:00 January 1, 1970.
    */
-  public String getLastSampleTime();
+  public long getLastSampleTime();
 }

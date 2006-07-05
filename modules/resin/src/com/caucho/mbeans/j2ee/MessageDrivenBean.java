@@ -31,15 +31,50 @@ package com.caucho.mbeans.j2ee;
 
 import com.caucho.ejb.cfg.EjbMessageBean;
 
+import javax.management.j2ee.statistics.MessageDrivenBeanStats;
+import javax.management.j2ee.statistics.CountStatistic;
+
 /**
  * Management interface for a message driven bean.
  */
-public class MessageDrivenBean extends EJB
+public class MessageDrivenBean
+  extends EJB
+  implements StatisticsProvider<MessageDrivenBeanStats>
 {
   public MessageDrivenBean(EjbMessageBean ejbMessageBean)
   {
     super(ejbMessageBean);
   }
 
+  public MessageDrivenBeanStats getStats()
+  {
+    return new MessageDrivenBeanStatsImpl(this);
+  }
+
   // no attributes
+
+  class MessageDrivenBeanStatsImpl
+    extends StatsSupport
+    implements MessageDrivenBeanStats
+  {
+    public MessageDrivenBeanStatsImpl(J2EEManagedObject j2eeManagedObject)
+    {
+      super(j2eeManagedObject);
+    }
+
+    public CountStatistic getMessageCount()
+    {
+      return new UnimplementedCountStatistic("MessageCount");
+    }
+
+    public CountStatistic getCreateCount()
+    {
+      return new UnimplementedCountStatistic("CreateCount");
+    }
+
+    public CountStatistic getRemoveCount()
+    {
+      return new UnimplementedCountStatistic("RemoveCount");
+    }
+  }
 }

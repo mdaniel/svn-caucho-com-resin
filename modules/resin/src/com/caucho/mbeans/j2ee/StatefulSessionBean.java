@@ -31,20 +31,61 @@ package com.caucho.mbeans.j2ee;
 
 import com.caucho.ejb.cfg.EjbSessionBean;
 
+import javax.management.j2ee.statistics.StatefulSessionBeanStats;
+import javax.management.j2ee.statistics.RangeStatistic;
+import javax.management.j2ee.statistics.CountStatistic;
+
 /**
  * Management interface for a stateful session bean.
  */
-public class StatefulSessionBean extends EJB {
+public class StatefulSessionBean
+  extends SessionBean
+  implements StatisticsProvider<StatefulSessionBeanStats>
+{
   public StatefulSessionBean(EjbSessionBean ejbBean)
   {
     super(ejbBean);
   }
 
-  protected String getName()
+  public StatefulSessionBeanStats getStats()
   {
-    // XXX:
-    return null;
+    return new StatefulSessionBeanStatsImpl(this);
   }
 
   // no attributes
+
+  class StatefulSessionBeanStatsImpl
+    extends StatsSupport
+    implements StatefulSessionBeanStats
+  {
+    public StatefulSessionBeanStatsImpl(J2EEManagedObject j2eeManagedObject)
+    {
+      super(j2eeManagedObject);
+    }
+
+    public RangeStatistic getPassiveCount()
+    {
+      return new UnimplementedRangeStatistic("PassiveCount");
+    }
+
+    public RangeStatistic getMethodReadyCount()
+    {
+      return new UnimplementedRangeStatistic("MethodReadyCount");
+    }
+
+    public RangeStatistic getPooledCount()
+    {
+      return new UnimplementedRangeStatistic("PooledCount");
+    }
+
+    public CountStatistic getCreateCount()
+    {
+      return new UnimplementedCountStatistic("CreateCount");
+    }
+
+    public CountStatistic getRemoveCount()
+    {
+      return new UnimplementedCountStatistic("RemoveCount");
+    }
+  }
 }

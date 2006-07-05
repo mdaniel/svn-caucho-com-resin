@@ -28,29 +28,17 @@
 
 package com.caucho.server.webapp;
 
-import java.util.*;
 import java.util.logging.*;
 import java.io.*;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
-import javax.naming.*;
 import javax.transaction.*;
-import javax.transaction.xa.*;
-
-import com.caucho.vfs.*;
 
 import com.caucho.log.Log;
 
-import com.caucho.security.SecurityContext;
-import com.caucho.security.SecurityContextProvider;
-
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.AbstractHttpResponse;
-
-import com.caucho.server.log.AccessLog;
-
-import com.caucho.loader.Environment;
 
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.transaction.TransactionImpl;
@@ -85,7 +73,7 @@ public class ContextFilterChain implements FilterChain {
     _classLoader = Thread.currentThread().getContextClassLoader();
 
     try {
-      _tm = TransactionManagerImpl.getLocal();
+      _tm = TransactionManagerImpl.getInstance();
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     }

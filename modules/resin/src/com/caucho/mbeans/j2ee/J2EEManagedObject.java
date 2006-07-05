@@ -32,6 +32,7 @@ package com.caucho.mbeans.j2ee;
 import com.caucho.jmx.Jmx;
 import com.caucho.server.host.Host;
 import com.caucho.server.webapp.Application;
+import com.caucho.util.Alarm;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -58,10 +59,13 @@ abstract public class J2EEManagedObject {
     "WebModule"
   };
 
+  private final long _startTime;
+
   protected ObjectName _objectName;
 
   public J2EEManagedObject()
   {
+    _startTime = Alarm.getCurrentTime();
   }
 
   public String getObjectName()
@@ -296,5 +300,10 @@ abstract public class J2EEManagedObject {
   public boolean isEventProvider()
   {
     return (this instanceof EventProvider);
+  }
+
+  long getStartTime()
+  {
+    return _startTime;
   }
 }

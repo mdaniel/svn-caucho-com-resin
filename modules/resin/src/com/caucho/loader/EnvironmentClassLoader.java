@@ -29,34 +29,23 @@
 
 package com.caucho.loader;
 
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.lang.ref.WeakReference;
-
-import java.lang.reflect.Method;
-import java.net.URLStreamHandlerFactory;
-import java.net.URL;
-
-import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
-
+import com.caucho.jca.UserTransactionProxy;
+import com.caucho.jmx.Jmx;
+import com.caucho.mbeans.j2ee.J2EEAdmin;
+import com.caucho.mbeans.j2ee.JTAResource;
+import com.caucho.naming.Jndi;
+import com.caucho.security.PolicyImpl;
+import com.caucho.transaction.TransactionManagerImpl;
+import com.caucho.util.ThreadPool;
 import com.caucho.vfs.EnvironmentStream;
 import com.caucho.vfs.SchemeMap;
 
-import com.caucho.naming.Jndi;
-
-import com.caucho.transaction.TransactionManagerImpl;
-
-import com.caucho.jca.UserTransactionProxy;
-
-import com.caucho.util.ThreadPool;
-
-import com.caucho.jmx.Jmx;
-
-import com.caucho.security.PolicyImpl;
+import javax.management.MBeanServerFactory;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Properties;
+import java.util.logging.Level;
 
 /**
  * Class loader which checks for changes in class files and automatically
@@ -75,11 +64,11 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
 
   // The owning bean
   private EnvironmentBean _owner;
-  
+
   // Class loader specific attributes
   private Hashtable<String,Object> _attributes =
     new Hashtable<String,Object>(8);
-  
+
   // Array of listeners
   // XXX: this used to be a weak reference list, but that caused problems
   // server/306i  - can't be weak reference, instead create WeakStopListener
@@ -88,15 +77,15 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
 
   // Returns true once the environment has started
   private volatile boolean _isStarted;
-  
+
   // Returns true if the environment is active
   private volatile boolean _isActive;
-  
+
   // Returns true if the environment is stopped
   private volatile boolean _isStopped;
 
   private Throwable _configException;
-  
+
   /**
    * Creates a new environment class loader.
    */
@@ -115,9 +104,9 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
   public EnvironmentClassLoader(ClassLoader parent)
   {
     super(parent);
-    
+
     // initializeEnvironment();
-    
+
     initListeners();
   }
 
@@ -194,10 +183,10 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
       else
         return _attributes.remove(name);
     }
-    
+
     if (_attributes == null)
       _attributes = new Hashtable<String,Object>(8);
-    
+
     return _attributes.put(name, obj);
   }
 
@@ -219,21 +208,21 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
   {
     synchronized (this) {
       if (_listeners == null) {
-	_listeners = new ArrayList<EnvironmentListener>();
+        _listeners = new ArrayList<EnvironmentListener>();
 
-	initListeners();
+        initListeners();
       }
     }
-    
+
     synchronized (_listeners) {
       for (int i = _listeners.size() - 1; i >= 0; i--) {
-	EnvironmentListener oldListener = _listeners.get(i);
+        EnvironmentListener oldListener = _listeners.get(i);
 
-	if (listener == oldListener) {
-	  return;
-	}
-	else if (oldListener == null)
-	  _listeners.remove(i);
+        if (listener == oldListener) {
+          return;
+        }
+        else if (oldListener == null)
+          _listeners.remove(i);
       }
 
       _listeners.add(listener);
@@ -241,11 +230,11 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
 
     if (_isStarted) {
       try {
-	listener.environmentStart(this);
+        listener.environmentStart(this);
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Throwable e) {
-	throw new StartRuntimeException(e);
+        throw new StartRuntimeException(e);
       }
     }
   }
@@ -256,17 +245,17 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
   private void initListeners()
   {
     ClassLoader parent = getParent();
-    
+
     for (; parent != null; parent = parent.getParent()) {
       if (parent instanceof EnvironmentClassLoader) {
         EnvironmentClassLoader loader = (EnvironmentClassLoader) parent;
 
-	if (_stopListener == null)
-	  _stopListener = new WeakStopListener(this);
-	
+        if (_stopListener == null)
+          _stopListener = new WeakStopListener(this);
+
         loader.addListener(_stopListener);
 
-	return;
+        return;
       }
     }
   }
@@ -278,17 +267,17 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
   {
     if (_listeners == null)
       return;
-    
+
     synchronized (_listeners) {
       for (int i = _listeners.size() - 1; i >= 0; i--) {
-	EnvironmentListener oldListener = _listeners.get(i);
+        EnvironmentListener oldListener = _listeners.get(i);
 
-	if (listener == oldListener) {
-	  _listeners.remove(i);
-	  return;
-	}
-	else if (oldListener == null)
-	  _listeners.remove(i);
+        if (listener == oldListener) {
+          _listeners.remove(i);
+          return;
+        }
+        else if (oldListener == null)
+          _listeners.remove(i);
       }
     }
   }
@@ -300,12 +289,12 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
   {
     synchronized (_childListeners) {
       ArrayList<EnvironmentListener> listeners
-	= _childListeners.getLevel(this);
+        = _childListeners.getLevel(this);
 
       if (listeners == null) {
-	listeners = new ArrayList<EnvironmentListener>();
+        listeners = new ArrayList<EnvironmentListener>();
 
-	_childListeners.set(listeners, this);
+        _childListeners.set(listeners, this);
       }
 
       listeners.add(listener);
@@ -313,9 +302,9 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
 
     if (_lifecycle.isStarting()) {
       try {
-	listener.environmentStart(this);
+        listener.environmentStart(this);
       } catch (Throwable e) {
-	log().log(Level.WARNING, e.toString(), e);
+        log().log(Level.WARNING, e.toString(), e);
       }
     }
   }
@@ -327,10 +316,10 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
   {
     synchronized (_childListeners) {
       ArrayList<EnvironmentListener> listeners
-	= _childListeners.getLevel(this);
+        = _childListeners.getLevel(this);
 
       if (listeners != null)
-	listeners.remove(listener);
+        listeners.remove(listener);
     }
   }
 
@@ -347,29 +336,29 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
       ClassLoader loader;
 
       for (loader = this; loader != null; loader = loader.getParent()) {
-	if (loader instanceof EnvironmentClassLoader) {
-	  ArrayList<EnvironmentListener> childListeners;
-	  childListeners = _childListeners.getLevel(loader);
+        if (loader instanceof EnvironmentClassLoader) {
+          ArrayList<EnvironmentListener> childListeners;
+          childListeners = _childListeners.getLevel(loader);
 
-	  if (childListeners != null)
-	    listeners.addAll(childListeners);	    
-	}
+          if (childListeners != null)
+            listeners.addAll(childListeners);
+        }
       }
     }
 
     if (_listeners == null)
       return listeners;
-    
+
     synchronized (_listeners) {
       for (int i = 0; i < _listeners.size(); i++) {
-	EnvironmentListener listener = _listeners.get(i);
+        EnvironmentListener listener = _listeners.get(i);
 
-	if (listener != null)
-	  listeners.add(listener);
-	else {
-	  _listeners.remove(i);
-	  i--;
-	}
+        if (listener != null)
+          listeners.add(listener);
+        else {
+          _listeners.remove(i);
+          i--;
+        }
       }
     }
 
@@ -385,7 +374,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
     synchronized (this) {
       if (_isStarted)
         return;
-      
+
       _isStarted = true;
     }
 
@@ -394,9 +383,9 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
 
       int size = listeners.size();
       for (int i = 0; listeners != null && i < size; i++) {
-	EnvironmentListener listener = listeners.get(i);
+        EnvironmentListener listener = listeners.get(i);
 
-	listener.environmentStart(this);
+        listener.environmentStart(this);
       }
     } catch (RuntimeException e) {
       throw e;
@@ -423,7 +412,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
       _isStopped = true;
       _isActive = false;
     }
-    
+
     ArrayList<EnvironmentListener> listeners = getEnvironmentListeners();
 
     Thread thread = Thread.currentThread();
@@ -433,16 +422,16 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
     try {
       // closing down in reverse
       if (listeners != null) {
-	for (int i = listeners.size() - 1; i >= 0; i--) {
-	  EnvironmentListener listener = listeners.get(i);
+        for (int i = listeners.size() - 1; i >= 0; i--) {
+          EnvironmentListener listener = listeners.get(i);
 
-	  try {
-	    listener.environmentStop(this);
-	  } catch (Throwable e) {
-	    e.printStackTrace();
-	    log().log(Level.WARNING, e.toString(), e);
-	  }
-	}
+          try {
+            listener.environmentStop(this);
+          } catch (Throwable e) {
+            e.printStackTrace();
+            log().log(Level.WARNING, e.toString(), e);
+          }
+        }
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -461,7 +450,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
     _attributes = source._attributes;
     if (source._listeners != null) {
       if (_listeners == null)
-	_listeners = new ArrayList<EnvironmentListener>();
+        _listeners = new ArrayList<EnvironmentListener>();
       _listeners.addAll(source._listeners);
       source._listeners.clear();
     }
@@ -470,7 +459,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
     _isActive = source._isActive;
     _isStopped = source._isStopped;
   }
-  
+
   /**
    * Destroys the class loader.
    */
@@ -479,19 +468,19 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
     try {
       WeakStopListener stopListener = _stopListener;
       _stopListener = null;
-      
+
       // make sure it's stopped first
       stop();
-    
+
       super.destroy();
 
       ClassLoader parent = getParent();
       for (; parent != null; parent = parent.getParent()) {
-	if (parent instanceof EnvironmentClassLoader) {
-	  EnvironmentClassLoader loader = (EnvironmentClassLoader) parent;
+        if (parent instanceof EnvironmentClassLoader) {
+          EnvironmentClassLoader loader = (EnvironmentClassLoader) parent;
 
-	  loader.removeListener(stopListener);
-	}
+          loader.removeListener(stopListener);
+        }
       }
     } finally {
       _owner = null;
@@ -509,7 +498,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
     else
       return "EnvironmentClassLoader$" + System.identityHashCode(this) + getLoaders();
   }
-  
+
   /**
    * Initializes the environment
    */
@@ -528,12 +517,12 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
       ClassLoader loader = thread.getContextClassLoader();
 
       PolicyImpl.init();
-      
+
       EnvironmentStream.setStdout(System.out);
       EnvironmentStream.setStderr(System.err);
 
       try {
-	SchemeMap.initJNI();
+        SchemeMap.initJNI();
       } catch (Throwable e) {
       }
 
@@ -565,7 +554,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
 
       String oldBuilder = props.getProperty("javax.management.builder.initial");
       if (oldBuilder == null)
-	oldBuilder = "com.caucho.jmx.MBeanServerBuilderImpl";
+        oldBuilder = "com.caucho.jmx.MBeanServerBuilderImpl";
 
       /*
       props.put("javax.management.builder.initial",
@@ -575,19 +564,22 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
       props.put("javax.management.builder.initial", oldBuilder);
 
       if (MBeanServerFactory.findMBeanServer(null).size() == 0)
-	MBeanServerFactory.createMBeanServer("Resin");
+        MBeanServerFactory.createMBeanServer("Resin");
 
       try {
-	Class cl = Class.forName("java.lang.management.ManagementFactory");
-	Method method = cl.getMethod("getPlatformMBeanServer", new Class[0]);
-	method.invoke(null, new Object[0]);
+        Class cl = Class.forName("java.lang.management.ManagementFactory");
+        Method method = cl.getMethod("getPlatformMBeanServer", new Class[0]);
+        method.invoke(null, new Object[0]);
       } catch (Throwable e) {
       }
-      
+
       Jndi.bindDeep("java:comp/env/jmx/MBeanServer",
-		    Jmx.getContextMBeanServer());
+                    Jmx.getContextMBeanServer());
       Jndi.bindDeep("java:comp/env/jmx/GlobalMBeanServer",
-		    Jmx.getGlobalMBeanServer());
+                    Jmx.getGlobalMBeanServer());
+
+      J2EEAdmin.register(new JTAResource(tm));
+
     } catch (Throwable e) {
       e.printStackTrace();
     } finally {

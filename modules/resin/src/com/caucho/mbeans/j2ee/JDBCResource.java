@@ -31,10 +31,17 @@ package com.caucho.mbeans.j2ee;
 
 import com.caucho.sql.DBPool;
 
+import javax.management.j2ee.statistics.JDBCStats;
+import javax.management.j2ee.statistics.JDBCConnectionStats;
+import javax.management.j2ee.statistics.JDBCConnectionPoolStats;
+
 /**
  * Management interface for a JDBC resource.
  */
-public class JDBCResource extends J2EEResource {
+public class JDBCResource
+  extends J2EEResource
+  implements StatisticsProvider<JDBCStats>
+{
   private final DBPool _dbPool;
 
   public JDBCResource(DBPool dbPool)
@@ -55,5 +62,32 @@ public class JDBCResource extends J2EEResource {
   {
     return queryObjectNamesNew("j2eeType", "JDBCDataSource",
                                "JDBCResource", getName());
+  }
+
+  public JDBCStats getStats()
+  {
+    return new JDBCStatsImpl(this);
+  }
+
+  class JDBCStatsImpl
+    extends StatsSupport
+    implements JDBCStats
+  {
+    public JDBCStatsImpl(J2EEManagedObject j2eeManagedObject)
+    {
+      super(j2eeManagedObject);
+    }
+
+    public JDBCConnectionStats []getConnections()
+    {
+      // XXX: unimplemented
+      return new JDBCConnectionStats[0];
+    }
+
+    public JDBCConnectionPoolStats []getConnectionPools()
+    {
+      // XXX: unimplemented
+      return new JDBCConnectionPoolStats[0];
+    }
   }
 }

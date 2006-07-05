@@ -32,6 +32,8 @@ package javax.management.j2ee.statistics;
 /**
  * Statistics interface for a URLResource
  */
-public class URLStats {
+public interface URLStats
+  extends Stats
+{
   // no attributes
 }

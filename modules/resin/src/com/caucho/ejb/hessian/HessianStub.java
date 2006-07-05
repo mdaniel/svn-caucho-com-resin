@@ -31,27 +31,17 @@ package com.caucho.ejb.hessian;
 
 import java.io.*;
 
-import java.lang.reflect.*;
-
 import java.rmi.*;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-import javax.transaction.Transaction;
-
 import javax.transaction.xa.Xid;
 
-import javax.ejb.*;
-
 import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.util.*;
-import com.caucho.ejb.*;
 
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.transaction.TransactionImpl;
-import com.caucho.transaction.XidImpl;
 
 import com.caucho.hessian.io.*;
 
@@ -131,7 +121,7 @@ public abstract class HessianStub implements HessianRemoteObject {
     throws IOException
   {
     try {
-      TransactionImpl xa = (TransactionImpl) TransactionManagerImpl.getLocal().getTransaction();
+      TransactionImpl xa = (TransactionImpl) TransactionManagerImpl.getInstance().getTransaction();
 
       if (xa != null) {
 	Xid xid = xa.getXid();

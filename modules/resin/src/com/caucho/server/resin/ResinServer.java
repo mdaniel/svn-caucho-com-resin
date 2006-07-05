@@ -49,6 +49,7 @@ import com.caucho.loader.EnvironmentProperties;
 import com.caucho.mbeans.j2ee.J2EEAdmin;
 import com.caucho.mbeans.j2ee.J2EEDomain;
 import com.caucho.mbeans.j2ee.JVM;
+import com.caucho.mbeans.j2ee.J2EEManagedObject;
 import com.caucho.mbeans.server.ClusterMBean;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.ServerListener;
@@ -115,6 +116,8 @@ public class ResinServer
 
   private long _initialStartTime;
   private long _startTime;
+  private J2EEDomain _j2eeDomainManagedObject;
+  private JVM _jvmManagedObject;
 
   /**
    * Creates a new resin server.
@@ -151,7 +154,7 @@ public class ResinServer
 
     try {
       _objectName = new ObjectName("resin:type=Resin");
-      
+
       Jmx.register(new ResinAdmin(this), OBJECT_NAME);
     } catch (Exception e) {
       e.printStackTrace();
@@ -516,8 +519,8 @@ public class ResinServer
 
     long start = Alarm.getCurrentTime();
 
-    J2EEAdmin.register(new J2EEDomain());
-    J2EEAdmin.register(new JVM());
+    _j2eeDomainManagedObject = J2EEAdmin.register(new J2EEDomain());
+    _jvmManagedObject = J2EEAdmin.register(new JVM());
 
     // force a GC on start
     System.gc();
@@ -599,12 +602,23 @@ public class ResinServer
 
     ArrayList<ResinServerListener> listeners;
     ArrayList<ServerController> servers;
+    J2EEManagedObject jvmManagedObject;
+    J2EEManagedObject j2eeDomainManagedObject;
+
+    jvmManagedObject = _jvmManagedObject;
+    _jvmManagedObject = null;
+    
+    j2eeDomainManagedObject = _j2eeDomainManagedObject;
+    _j2eeDomainManagedObject = null;
 
     listeners = new ArrayList<ResinServerListener>(_listeners);
     _listeners.clear();
 
     servers = new ArrayList<ServerController>(_servers);
     _servers.clear();
+
+    J2EEAdmin.unregister(jvmManagedObject);
+    J2EEAdmin.unregister(j2eeDomainManagedObject);
 
     try {
       for (ServerController server : servers) {

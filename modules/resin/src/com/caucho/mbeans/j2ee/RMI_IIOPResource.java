@@ -29,14 +29,27 @@
 
 package com.caucho.mbeans.j2ee;
 
+import com.caucho.iiop.IiopProtocol;
+
 /**
  * Management interface for a RMI_IIOP resource.
  */
 public class RMI_IIOPResource extends J2EEResource {
+  private final IiopProtocol _iiopProtocol;
+
+  public RMI_IIOPResource(IiopProtocol iiopProtocol)
+  {
+    _iiopProtocol = iiopProtocol;
+  }
+
+  protected boolean isJ2EEApplication()
+  {
+    return false;
+  }
+
   protected String getName()
   {
-    // XXX:
-    return null;
+    return String.valueOf(_iiopProtocol.getPort().getPort());
   }
 
   // no attributes

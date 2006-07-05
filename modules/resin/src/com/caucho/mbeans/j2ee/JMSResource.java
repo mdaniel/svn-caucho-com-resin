@@ -29,15 +29,50 @@
 
 package com.caucho.mbeans.j2ee;
 
+import com.caucho.jms.ConnectionFactoryImpl;
+
+import javax.management.j2ee.statistics.JMSStats;
+import javax.management.j2ee.statistics.JMSConnectionStats;
+
 /**
  * Management interface for a JMS resource.
  */
-public class JMSResource extends J2EEResource {
+public class JMSResource
+  extends J2EEResource
+  implements StatisticsProvider<JMSStats>
+{
+  private final ConnectionFactoryImpl _connectionFactory;
+
+  public JMSResource(ConnectionFactoryImpl connectionFactory)
+  {
+    _connectionFactory = connectionFactory;
+  }
+
   protected String getName()
   {
-    // XXX:
-    return null;
+    return _connectionFactory.getName();
+  }
+
+  public JMSStats getStats()
+  {
+    return new JMSStatsImpl(this);
   }
 
   // no attributes
+
+  class JMSStatsImpl
+    extends StatsSupport
+    implements JMSStats
+  {
+    public JMSStatsImpl(J2EEManagedObject j2eeManagedObject)
+    {
+      super(j2eeManagedObject);
+    }
+
+    public JMSConnectionStats []getConnections()
+    {
+      // XXX: unimplemented
+      return new JMSConnectionStats[0];
+    }
+  }
 }

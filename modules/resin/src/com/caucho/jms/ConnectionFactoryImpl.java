@@ -28,39 +28,31 @@
 
 package com.caucho.jms;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Collections;
-import java.util.HashMap;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.SQLException;
-
-import javax.sql.DataSource;
-
-import javax.jms.ConnectionFactory;
-import javax.jms.Connection;
-import javax.jms.Queue;
-import javax.jms.Topic;
-import javax.jms.JMSException;
-import javax.jms.JMSSecurityException;
-
-import com.caucho.util.L10N;
-
-import com.caucho.log.Log;
-
 import com.caucho.config.ConfigException;
-
-import com.caucho.jms.session.ConnectionImpl;
-
 import com.caucho.jms.jdbc.JdbcManager;
 import com.caucho.jms.jdbc.JdbcQueue;
 import com.caucho.jms.jdbc.JdbcTopic;
-
 import com.caucho.jms.memory.MemoryQueue;
 import com.caucho.jms.memory.MemoryTopic;
+import com.caucho.jms.session.ConnectionImpl;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
+import com.caucho.mbeans.j2ee.J2EEAdmin;
+import com.caucho.mbeans.j2ee.JMSResource;
+
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
+import javax.jms.Queue;
+import javax.jms.Topic;
+import javax.sql.DataSource;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * A sample connection factory.
@@ -69,6 +61,7 @@ public class ConnectionFactoryImpl implements ConnectionFactory  {
   static final Logger log = Log.open(ConnectionFactoryImpl.class);
   static final L10N L = new L10N(ConnectionFactoryImpl.class);
 
+  private String _name;
   private String _clientID;
   
   private String _user;
@@ -106,6 +99,24 @@ public class ConnectionFactoryImpl implements ConnectionFactory  {
   }
 
   /**
+   * Sets the name of the connection factory.
+   */
+  public void setName(String name)
+  {
+    _name = name;
+  }
+
+  /**
+   * Returns the name of the connection factory.
+   */
+  public String getName()
+  {
+    // XXX: should this default to client-id and/or jndi-name? (jndi-name is there
+    // when it is configured as a resource)
+    return _name;
+  }
+
+  /**
    * Sets the client id.
    */
   public void setClientID(String id)
@@ -140,6 +151,8 @@ public class ConnectionFactoryImpl implements ConnectionFactory  {
   {
     if (_jdbcManager != null)
       _jdbcManager.init();
+
+    J2EEAdmin.register(new JMSResource(this));
   }
 
   /**

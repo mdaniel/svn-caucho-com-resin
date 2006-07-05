@@ -38,7 +38,7 @@ public interface Stats {
    * Each name in this list corresponds to the name of an attribute that returns
    * a type of {@link Statistic}
    */
-  public String []getSatisticNames();
+  public String []getStatisticNames();
 
   /**
    * Returns the named statistic.
