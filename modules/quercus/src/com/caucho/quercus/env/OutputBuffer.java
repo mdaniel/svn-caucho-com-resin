@@ -120,7 +120,7 @@ public class OutputBuffer {
         bb.append(ch);
       }
 
-      return new StringValueImpl(bb.toString());
+      return bb;
     } catch (IOException e) {
       _env.error(e.toString(), e);
 

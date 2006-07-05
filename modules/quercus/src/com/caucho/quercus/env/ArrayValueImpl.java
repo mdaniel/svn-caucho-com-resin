@@ -124,6 +124,31 @@ public class ArrayValueImpl extends ArrayValue {
     _nextAvailableIndex = copy._nextAvailableIndex;
   }
 
+  public ArrayValueImpl(Env env,
+			IdentityHashMap<Value,Value> map,
+			ArrayValue copy)
+  {
+    this();
+    
+    map.put(copy, this);
+
+    for (Entry ptr = copy.getHead(); ptr != null; ptr = ptr._next) {
+      put(ptr._key, ptr._value.toValue().copy(env, map));
+    }
+  }
+
+  public ArrayValueImpl(Value []keys, Value []values)
+  {
+    this();
+
+    for (int i = 0; i < keys.length; i++) {
+      if (keys[i] != null)
+	put(keys[i], values[i]);
+      else
+	put(values[i]);
+    }
+  }
+
   private void copyOnWrite()
   {
     if (! _isDirty)
@@ -153,31 +178,6 @@ public class ArrayValueImpl extends ArrayValue {
     _tail = prev;
 
     _entries = entries;
-  }
-
-  public ArrayValueImpl(Env env,
-			IdentityHashMap<Value,Value> map,
-			ArrayValue copy)
-  {
-    this();
-    
-    map.put(copy, this);
-
-    for (Entry ptr = copy.getHead(); ptr != null; ptr = ptr._next) {
-      put(ptr._key, ptr._value.toValue().copy(env, map));
-    }
-  }
-
-  public ArrayValueImpl(Value []keys, Value []values)
-  {
-    this();
-
-    for (int i = 0; i < keys.length; i++) {
-      if (keys[i] != null)
-	put(keys[i], values[i]);
-      else
-	put(values[i]);
-    }
   }
   
   /**

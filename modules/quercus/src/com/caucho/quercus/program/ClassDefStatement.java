@@ -62,16 +62,11 @@ public class ClassDefStatement extends Statement {
   
   public Value execute(Env env)
   {
-    try {
-      if (env.findClass(_cl.getName()) == null) {
-	QuercusClass qClass = new QuercusClass(_cl, null);
+    if (env.findClass(_cl.getName()) == null) {
+      QuercusClass qClass = new QuercusClass(_cl, null);
 
-	qClass.validate(env);
-        env.addClass(_cl.getName(), qClass);
-      }
-    }
-    catch (RuntimeException e) {
-      rethrow(e, RuntimeException.class);
+      qClass.validate(env);
+      env.addClass(_cl.getName(), qClass);
     }
 
     return null;
@@ -102,7 +97,9 @@ public class ClassDefStatement extends Statement {
     out.println("\") == null)");
     out.print("  env.addClass(\"");
     out.printJavaString(_cl.getName());
-    out.print("\", new QuercusClass(new quercus_" + _cl.getName() + "(), ");
+    out.print("\", new QuercusClass(env.findClassDef(\"");
+    out.printJavaString(_cl.getName());
+    out.print("\", ");
 
     if (_cl.getParentName() != null) {
       out.print("env.getClass(\"");

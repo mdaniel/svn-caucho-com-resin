@@ -570,6 +570,63 @@ public class BinaryBuilderValue extends BinaryValue {
     _buffer = buffer;
   }
 
+  /**
+   * Returns the hash code.
+   */
+  public int hashCode()
+  {
+    int hash = 37;
+
+    int length = _length;
+
+    byte []buffer = _buffer;
+    for (int i = 0; i < length; i++) {
+      hash = 65521 * hash + (buffer[i] & 0xff);
+    }
+
+    return hash;
+  }
+
+  public boolean equals(Object o)
+  {
+    if (o instanceof BinaryBuilderValue) {
+      BinaryBuilderValue value = (BinaryBuilderValue) o;
+
+      int length = _length;
+      
+      if (length != value._length)
+	return false;
+
+      byte []bufferA = _buffer;
+      byte []bufferB = value._buffer;
+
+      for (int i = length - 1; i >= 0; i--) {
+	if (bufferA[i] != bufferB[i])
+	  return false;
+      }
+
+      return true;
+    }
+    else if (o instanceof StringValue) {
+      StringValue value = (StringValue) o;
+
+      int length = _length;
+      if (length != value.length())
+	return false;
+
+      byte []buffer = _buffer;
+
+      for (int i = length - 1; i >= 0; i--) {
+	if ((buffer[i] & 0xff) != value.charAt(i))
+	  return false;
+      }
+
+      return true;
+    }
+    else
+      return false;
+  }
+
   class BinaryInputStream extends InputStream {
     private int _offset;
 

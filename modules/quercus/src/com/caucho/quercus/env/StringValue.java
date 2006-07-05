@@ -64,7 +64,7 @@ abstract public class StringValue extends Value implements CharSequence {
   /**
    * Creates the string.
    */
-  public static Value create(char value)
+  public static StringValue create(char value)
   {
     if (value < CHAR_STRINGS.length)
       return CHAR_STRINGS[value];
@@ -144,33 +144,28 @@ abstract public class StringValue extends Value implements CharSequence {
    */
   public boolean eq(Value rValue)
   {
-    String v = toString();
-
     rValue = rValue.toValue();
 
     if (rValue instanceof BooleanValue) {
-      if (rValue.toBoolean())
-        return ! v.equals("") && ! v.equals("0");
-      else
-        return v.equals("") || v.equals("0");
+      return toBoolean() == rValue.toBoolean();
     }
 
     int type = getNumericType();
 
     if (type == IS_STRING) {
       if (rValue instanceof StringValue)
-        return v.equals(rValue.toString());
+        return equals(rValue);
       else if (rValue.isLongConvertible())
         return toLong() ==  rValue.toLong();
       else if (rValue instanceof BooleanValue)
         return toLong() == rValue.toLong();
       else
-        return v.equals(rValue.toString());
+        return equals(rValue.toStringValue());
     }
     else if (rValue.isNumberConvertible())
       return toDouble() == rValue.toDouble();
     else
-      return toString().equals(rValue.toString());
+      return equals(rValue.toStringValue());
   }
 
   /**
@@ -767,6 +762,32 @@ abstract public class StringValue extends Value implements CharSequence {
   {
     for (int i = 0; i < length; i++)
       buffer[offset + i] = charAt(stringOffset + i);
+  }
+
+  /**
+   * Convert to lower case.
+   */
+  public StringValue toLowerCase()
+  {
+    int length = length();
+    
+    StringBuilderValue string = new StringBuilderValue(length);
+
+    char []buffer = string.toCharArray();
+    getChars(0, buffer, 0, length);
+
+    for (int i = 0; i < length; i++) {
+      char ch = buffer[i];
+      
+      if ('A' <= ch && ch <= 'Z')
+	buffer[i] = (char) (ch + 'a' - 'A');
+      else if (ch < 0x80) {
+      }
+      else if (Character.isUpperCase(ch))
+	buffer[i] = Character.toLowerCase(ch);
+    }
+
+    return string;
   }
 
   /**

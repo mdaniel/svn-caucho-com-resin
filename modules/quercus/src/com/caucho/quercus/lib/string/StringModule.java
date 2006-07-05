@@ -645,7 +645,7 @@ v   *
 	 entry != null;
 	 entry = entry.getNext()) {
       if (! isFirst)
-        sb.append(glue);
+        glue.appendTo(sb);
 
       isFirst = false;
 
@@ -2728,8 +2728,8 @@ v   *
    *
    * @return the length of the match or FALSE if the offset or length are invalid
    */
-  public static Value strcspn(String string,
-                              String characters,
+  public static Value strcspn(StringValue string,
+                              StringValue characters,
                               @Optional("0") int offset,
                               @Optional("-2147483648") int length)
   {
@@ -2866,25 +2866,23 @@ v   *
    * @param haystack the string to search in
    * @param needleV the string to search for
    */
-  public static Value strpos(String haystack,
+  public static Value strpos(StringValue haystack,
                              Value needleV,
-                             @Optional Value offsetV)
+                             @Optional int offset)
   {
-    String needle;
+    StringValue needle;
 
     if (needleV instanceof StringValue)
-      needle = needleV.toString();
+      needle = (StringValue) needleV;
     else
-      needle = String.valueOf((char) needleV.toInt());
-
-    int offset = offsetV.toInt();
+      needle = StringValue.create((char) needleV.toInt());
 
     int pos = haystack.indexOf(needle, offset);
 
     if (pos < 0)
       return BooleanValue.FALSE;
     else
-      return new LongValue(pos);
+      return LongValue.create(pos);
   }
 
   /**
@@ -2894,18 +2892,16 @@ v   *
    * @param needleV the substring argument to check
    * @param offsetV optional starting position
    */
-  public static Value stripos(String haystack,
-                              Value needleV,
-                              @Optional Value offsetV)
+  public static Value stripos(StringValue haystack,
+				    Value needleV,
+				    @Optional int offset)
   {
-    String needle;
+    StringValue needle;
 
     if (needleV instanceof StringValue)
-      needle = needleV.toString();
+      needle = (StringValue) needleV;
     else
-      needle = String.valueOf((char) needleV.toInt());
-
-    int offset = offsetV.toInt();
+      needle = StringValue.create((char) needleV.toInt());
 
     haystack = haystack.toLowerCase();
     needle = needle.toLowerCase();
@@ -2915,7 +2911,7 @@ v   *
     if (pos < 0)
       return BooleanValue.FALSE;
     else
-      return new LongValue(pos);
+      return LongValue.create(pos);
   }
 
   /**
@@ -3204,16 +3200,16 @@ v   *
    *
    * @return the length of the match or FALSE if the offset or length are invalid
    */
-  public static Value strspn(String string,
-                             String characters,
+  public static Value strspn(StringValue string,
+                             StringValue characters,
                              @Optional int offset,
                              @Optional("-2147483648") int length)
   {
     return strspnImpl(string, characters, offset, length, true);
   }
 
-  private static Value strspnImpl(String string,
-                                  String characters,
+  private static Value strspnImpl(StringValue string,
+                                  StringValue characters,
                                   int offset,
                                   int length,
                                   boolean isMatch)
@@ -3256,10 +3252,10 @@ v   *
       if (isPresent == isMatch)
         count++;
       else
-        return new LongValue(count);
+        return LongValue.create(count);
     }
 
-    return new LongValue(count);
+    return LongValue.create(count);
   }
 
   /**
@@ -3421,15 +3417,15 @@ v   *
    * @param fromV the from characters
    * @param to the to character map
    */
-  public static String strtr(Env env,
-                             String string,
+  public static StringValue strtr(Env env,
+                             StringValue string,
                              Value fromV,
                              @Optional String to)
   {
     if (fromV instanceof ArrayValue)
-      return strtr_array(string, (ArrayValue) fromV);
+      return strtrArray(string, (ArrayValue) fromV);
 
-    String from = fromV.toString();
+    StringValue from = fromV.toStringValue();
 
     int len = from.length();
 
@@ -3440,7 +3436,7 @@ v   *
     for (int i = len - 1; i >= 0; i--)
       map[from.charAt(i)] = to.charAt(i);
 
-    StringBuilder sb = new StringBuilder();
+    StringBuilderValue sb = new StringBuilderValue();
 
     len = string.length();
     for (int i = 0; i < len; i++) {
@@ -3452,7 +3448,7 @@ v   *
         sb.append(ch);
     }
 
-    return sb.toString();
+    return sb;
   }
 
   /**
@@ -3461,22 +3457,22 @@ v   *
    * @param string the source string
    * @param map the character map
    */
-  private static String strtr_array(String string, ArrayValue map)
+  private static StringValue strtrArray(StringValue string, ArrayValue map)
   {
     int size = map.getSize();
 
-    String []from = new String[size];
-    String []to = new String[size];
+    StringValue []from = new StringValue[size];
+    StringValue []to = new StringValue[size];
     int k = 0;
 
     for (Map.Entry<Value,Value> entry : map.entrySet()) {
-      from[k] = entry.getKey().toString();
-      to[k] = entry.getValue().toString();
+      from[k] = entry.getKey().toStringValue();
+      to[k] = entry.getValue().toStringValue();
 
       k++;
     }
 
-    StringBuilder result = new StringBuilder();
+    StringBuilderValue result = new StringBuilderValue();
     int len = string.length();
     int head = 0;
 
@@ -3505,7 +3501,7 @@ v   *
       head = bestHead + bestLength;
     }
 
-    return result.toString();
+    return result;
   }
 
   /**
@@ -3517,7 +3513,7 @@ v   *
    * @param lenV the optional length
    */
   public static Value substr(Env env,
-                             String string,
+                             StringValue string,
                              int start,
                              @Optional Value lenV)
   {
@@ -3529,7 +3525,7 @@ v   *
       return BooleanValue.FALSE;
 
     if (lenV instanceof DefaultValue) {
-      return new StringValueImpl(string.substring(start));
+      return string.substring(start);
     }
     else {
       int len = lenV.toInt();
@@ -3543,9 +3539,9 @@ v   *
       if (end <= start)
         return StringValue.EMPTY;
       else if (strLen <= end)
-        return new StringValueImpl(string.substring(start));
+        return string.substring(start);
       else
-        return new StringValueImpl(string.substring(start, end));
+        return string.substring(start, end);
     }
   }
 

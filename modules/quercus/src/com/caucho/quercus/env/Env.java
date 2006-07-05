@@ -145,6 +145,10 @@ public final class Env {
     LruCache<ClassKey,SoftReference<QuercusClass>> _classCache
     = new LruCache<ClassKey,SoftReference<QuercusClass>>(4096);
 
+  private static final
+    LruCache<IncludeKey,SoftReference<IncludeCache>> _includeCache
+    = new LruCache<IncludeKey,SoftReference<IncludeCache>>(4096);
+
   private Quercus _quercus;
   private QuercusPage _page;
 
@@ -164,23 +168,29 @@ public final class Env {
   
   private HashMap<String, Var> _map = _globalMap;
 
+  private DefinitionState _defState;
+
   private HashMap<String, Value> _constMap
     = new HashMap<String, Value>(1024);
 
   private HashMap<String, Value> _lowerConstMap
     = new HashMap<String, Value>(1024);
 
+  /*
   private HashMap<String, AbstractFunction> _funMap
     = new HashMap<String, AbstractFunction>(8192, 0.5F);
 
   private HashMap<String, AbstractFunction> _lowerFunMap
     = new HashMap<String, AbstractFunction>(8192, 0.5F);
+  */
 
+  /*
   private HashMap<String, ClassDef> _classDefMap
     = new HashMap<String, ClassDef>();
 
   private HashMap<String, ClassDef> _lowerClassDefMap
     = new HashMap<String, ClassDef>();
+  */
 
   private HashMap<String, QuercusClass> _classMap
     = new HashMap<String, QuercusClass>();
@@ -264,6 +274,9 @@ public final class Env {
     _isStrict = quercus.isStrict();
 
     _page = page;
+
+    // XXX: grab initial from page
+    _defState = new DefinitionState(quercus);
     
     _originalOut = out;
     _out = out;
@@ -271,16 +284,10 @@ public final class Env {
     _request = request;
     _response = response;
 
-    _constMap = new HashMap<String, Value>();
-
     if (page != null) {
       _page.init(this);
-      try {
-        _page.importDefinitions(this);
-      }
-      catch (Throwable e) {
-        throw new RuntimeException(e);
-      }
+
+      importPage(_page);
     }
 
     setPwd(Vfs.lookup());
@@ -1887,6 +1894,14 @@ public final class Env {
   }
 
   /**
+   * Removes a specialValue
+   */
+  public Object removeSpecialValue(String name)
+  {
+    return _specialMap.remove(name);
+  }
+
+  /**
    * Returns a constant.
    */
   public Value getConstant(String name)
@@ -1928,7 +1943,7 @@ public final class Env {
     if (value != null)
       return value;
 
-    if (! isStrict()) {
+    if (_lowerConstMap != null) {
       value = _lowerConstMap.get(name.toLowerCase());
 
       if (value != null)
@@ -1947,14 +1962,6 @@ public final class Env {
   }
 
   /**
-   * Removes a specialValue
-   */
-  public Object removeSpecialValue(String name)
-  {
-    return _specialMap.remove(name);
-  }
-
-  /**
    * Sets a constant.
    */
   public Value addConstant(String name,
@@ -1968,10 +1975,28 @@ public final class Env {
 
     _constMap.put(name, value);
 
-    if (! isStrict() && isCaseInsensitive)
+    if (_lowerConstMap != null && isCaseInsensitive)
       _lowerConstMap.put(name.toLowerCase(), value);
 
     return value;
+  }
+
+  /**
+   * Returns an array of the defined functions.
+   */
+  public ArrayValue getDefinedConstants()
+  {
+    ArrayValue result = new ArrayValueImpl();
+
+    for (Map.Entry<String, Value> entry : _quercus.getConstMap().entrySet()) {
+      result.put(new StringValueImpl(entry.getKey()), entry.getValue());
+    }
+
+    for (Map.Entry<String, Value> entry : _constMap.entrySet()) {
+      result.put(new StringValueImpl(entry.getKey()), entry.getValue());
+    }
+
+    return result;
   }
 
   /**
@@ -2012,24 +2037,7 @@ public final class Env {
   /**
    * Returns an array of the defined functions.
    */
-  public ArrayValue getDefinedConstants()
-  {
-    ArrayValue result = new ArrayValueImpl();
-
-    for (Map.Entry<String, Value> entry : _quercus.getConstMap().entrySet()) {
-      result.put(new StringValueImpl(entry.getKey()), entry.getValue());
-    }
-
-    for (Map.Entry<String, Value> entry : _constMap.entrySet()) {
-      result.put(new StringValueImpl(entry.getKey()), entry.getValue());
-    }
-
-    return result;
-  }
-
-  /**
-   * Returns an array of the defined functions.
-   */
+  /*
   public ArrayValue getDefinedFunctions()
   {
     ArrayValue result = new ArrayValueImpl();
@@ -2049,6 +2057,12 @@ public final class Env {
 
     return result;
   }
+  */
+  
+  public ArrayValue getDefinedFunctions()
+  {
+    return _defState.getDefinedFunctions();
+  }
 
   /**
    * Finds the java reflection method for the function with the given name.
@@ -2056,6 +2070,7 @@ public final class Env {
    * @param name the method name
    * @return the found method or null if no method found.
    */
+  /*
   public AbstractFunction findFunction(String name)
   {
     AbstractFunction fun = _funMap.get(name);
@@ -2083,6 +2098,11 @@ public final class Env {
     else
       return null;
   }
+  */
+  public AbstractFunction findFunction(String name)
+  {
+    return _defState.findFunction(name);
+  }
 
   /**
    * Finds the java reflection method for the function with the given name.
@@ -2090,6 +2110,7 @@ public final class Env {
    * @param name the method name
    * @return the found method or null if no method found.
    */
+  /*
   public AbstractFunction getFunction(String name)
   {
     AbstractFunction fun = _funMap.get(name);
@@ -2105,6 +2126,16 @@ public final class Env {
 
     throw errorException(L.l("'{0}' is an unknown function.", name));
   }
+  */
+  public AbstractFunction getFunction(String name)
+  {
+    AbstractFunction fun = _defState.findFunction(name);
+
+    if (fun != null)
+      return fun;
+    else
+      throw errorException(L.l("'{0}' is an unknown function", name));
+  }
 
   /**
    * Finds the java reflection method for the function with the given name.
@@ -2119,7 +2150,7 @@ public final class Env {
     if (name instanceof CallbackFunction)
       return ((CallbackFunction) name).getFunction();
 
-    AbstractFunction fun = findFunction(name.toString());
+    AbstractFunction fun = _defState.findFunction(name.toString());
 
     if (fun != null)
       return fun;
@@ -2133,6 +2164,7 @@ public final class Env {
    * @param name the method name
    * @return the found method or null if no method found.
    */
+  /*
   private AbstractFunction findFunctionImpl(String name)
   {
     AbstractFunction fun = null;
@@ -2143,10 +2175,12 @@ public final class Env {
 
     return fun;
   }
+  */
 
   /**
    * Adds a function, e.g. from an include.
    */
+  /*
   public Value addFunction(String name, AbstractFunction fun)
   {
     AbstractFunction oldFun = findFunction(name);
@@ -2162,6 +2196,17 @@ public final class Env {
 
     return BooleanValue.TRUE;
   }
+  */
+
+  public DefinitionState getDefinitionState()
+  {
+    return _defState;
+  }
+  
+  public Value addFunction(String name, AbstractFunction fun)
+  {
+    return _defState.addFunction(name, fun);
+  }
 
   /**
    * Adds a function from a compiled include
@@ -2169,7 +2214,7 @@ public final class Env {
    * @param name the function name, must be an intern() string
    * @param lowerName the function name, must be an intern() string
    */
-  public Value addFunction(String name, String lowerName, AbstractFunction fun)
+  public Value addFunctionFromPage(String name, String lowerName, AbstractFunction fun)
   {
     // XXX: skip the old function check since the include for compiled
     // pages is already verified.  Might have a switch here?
@@ -2182,12 +2227,12 @@ public final class Env {
     if (oldFun != null) {
       throw new QuercusException(L.l("can't redefine function {0}", name));
     }
-    */
 
     _funMap.put(name, fun);
 
     if (! isStrict())
       _lowerFunMap.put(lowerName, fun);
+    */
 
     return BooleanValue.TRUE;
   }
@@ -2479,31 +2524,14 @@ public final class Env {
   /**
    * Adds a class, e.g. from an include.
    */
-  public void addClass(String name, QuercusClass cl)
-  {
-    /*
-    QuercusClass oldClass = findClass(name);
-
-    if (oldClass != null) {
-      throw new Exception(L.l("can't redefine function {0}", name));
-    }
-    */
-
-    _classMap.put(name, cl);
-
-    if (! isStrict())
-      _lowerClassMap.put(name.toLowerCase(), cl);
-  }
-
-  /**
-   * Adds a class, e.g. from an include.
-   */
   public void addClassDef(String name, ClassDef cl)
   {
-    _classDefMap.put(name, cl);
+    _defState.addClassDef(name, cl);
+  }
 
-    if (! isStrict())
-      _lowerClassDefMap.put(name.toLowerCase(), cl);
+  public ClassDef findClassDef(String name)
+  {
+    return _defState.findClassDef(name);
   }
 
   /**
@@ -2515,9 +2543,7 @@ public final class Env {
       return (ObjectValue) _quercus.getStdClass().newInstance(this);
     }
     catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
-
-      throw new RuntimeException(e);
+      throw new QuercusModuleException(e);
     }
   }
 
@@ -2643,7 +2669,7 @@ public final class Env {
     if (cl != null)
       return cl;
 
-    if (! isStrict())
+    if (_lowerClassMap != null)
       cl = _lowerClassMap.get(name.toLowerCase());
 
     if (cl != null)
@@ -2654,89 +2680,13 @@ public final class Env {
     if (cl != null) {
       _classMap.put(name, cl);
 
-      if (! isStrict())
+      if (_lowerClassMap != null)
 	_lowerClassMap.put(name.toLowerCase(), cl);
 
       return cl;
     }
     else
       return null;
-  }
-
-  /**
-   * Returns the declared classes.
-   *
-   * @return an array of the declared classes()
-   */
-  public Value getDeclaredClasses()
-  {
-    ArrayList<String> names = new ArrayList<String>();
-
-    for (String name : _classMap.keySet()) {
-      if (! names.contains(name))
-        names.add(name);
-    }
-
-    for (String name : _classDefMap.keySet()) {
-      if (! names.contains(name))
-        names.add(name);
-    }
-
-    if (_page != null) {
-      for (String name : _page.getClassMap().keySet()) {
-        if (! names.contains(name))
-          names.add(name);
-      }
-    }
-
-    for (String name : _quercus.getClassMap().keySet()) {
-      if (! names.contains(name))
-        names.add(name);
-    }
-
-    Collections.sort(names);
-
-    ArrayValue array = new ArrayValueImpl();
-
-    for (String name : names) {
-      array.put(new StringValueImpl(name));
-    }
-
-    return array;
-  }
-
-  /**
-   * Finds the class with the given name.
-   *
-   * @param name the class name
-   * @return the found class or null if no class found.
-   */
-  public QuercusClass findAbstractClass(String name)
-  {
-    QuercusClass cl = findClass(name);
-
-    if (cl != null)
-      return cl;
-
-    // return _quercus.findJavaClassWrapper(name);
-
-    return null;
-  }
-
-  /**
-   * Finds the class with the given name.
-   *
-   * @param name the class name
-   * @return the found class or null if no class found.
-   */
-  public QuercusClass getClass(String name)
-  {
-    QuercusClass cl = findClass(name);
-
-    if (cl != null)
-      return cl;
-    else
-      throw errorException(L.l("'{0}' is an unknown class.", name));
   }
 
   /**
@@ -2747,40 +2697,7 @@ public final class Env {
    */
   private QuercusClass createClassImpl(String name)
   {
-    /*
-    QuercusClass cl = null;
-
-    cl = _quercus.findClass(name);
-    if (cl != null)
-      return cl;
-
-    if (_page != null) {
-      cl = _page.findClass(name);
-
-      if (cl != null)
-	return cl;
-
-      if (_autoload == null)
-	_autoload = findFunction("__autoload");
-
-      if (_autoload != null) {
-	try {
-	  _autoload.call(this, new StringValueImpl(name));
-	} catch (Throwable e) {
-	  throw new RuntimeException(e);
-	}
-      }
-
-      return _classMap.get(name);
-    }
-    */
-    ClassDef classDef = _classDefMap.get(name);
-
-    if (classDef == null && ! isStrict())
-      classDef = _lowerClassDefMap.get(name.toLowerCase());
-    
-    if (classDef == null)
-      classDef = _page.findClass(name);
+    ClassDef classDef = _defState.findClassDef(name);
 
     if (classDef != null) {
       String parentName = classDef.getParentName();
@@ -2813,6 +2730,53 @@ public final class Env {
     }
 
     return null;
+  }
+
+  /**
+   * Returns the declared classes.
+   *
+   * @return an array of the declared classes()
+   */
+  public Value getDeclaredClasses()
+  {
+    return _defState.getDeclaredClasses();
+  }
+
+  /**
+   * Finds the class with the given name.
+   *
+   * @param name the class name
+   * @return the found class or null if no class found.
+   */
+  public QuercusClass findAbstractClass(String name)
+  {
+    QuercusClass cl = findClass(name, true);
+
+    if (cl != null)
+      return cl;
+
+    throw errorException(L.l("{0} is an unknown name.", name));
+    /*
+    // return _quercus.findJavaClassWrapper(name);
+
+    return null;
+    */
+  }
+
+  /**
+   * Finds the class with the given name.
+   *
+   * @param name the class name
+   * @return the found class or null if no class found.
+   */
+  public QuercusClass getClass(String name)
+  {
+    QuercusClass cl = findClass(name);
+
+    if (cl != null)
+      return cl;
+    else
+      throw errorException(L.l("'{0}' is an unknown class.", name));
   }
 
   private QuercusClass createQuercusClass(ClassDef def, QuercusClass parent)
@@ -2962,11 +2926,29 @@ public final class Env {
 
       page = _quercus.parse(path);
 
-      page.importDefinitions(this);
+      importPage(page);
 
       return page.execute(this);
     } catch (IOException e) {
       throw new QuercusModuleException(e);
+    }
+  }
+
+  private void importPage(QuercusPage page)
+  {
+    long crc = _defState.getCrc();
+
+    DefinitionKey key = new DefinitionKey(crc, page);
+      
+    DefinitionState defState = _quercus.getDefinitionCache(key);
+
+    if (defState != null) {
+      _defState = defState;
+    }
+    else {
+      page.importDefinitions(this);
+
+      _quercus.putDefinitionCache(key, _defState);
     }
   }
 

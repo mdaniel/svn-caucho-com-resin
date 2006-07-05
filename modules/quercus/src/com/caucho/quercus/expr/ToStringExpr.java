@@ -52,6 +52,14 @@ public class ToStringExpr extends UnaryExpr {
     super(expr);
   }
 
+  public static Expr create(Expr expr)
+  {
+    if (expr.isString())
+      return expr;
+    else
+      return new ToStringExpr(expr);
+  }
+  
   /**
    * Evaluates the expression.
    *

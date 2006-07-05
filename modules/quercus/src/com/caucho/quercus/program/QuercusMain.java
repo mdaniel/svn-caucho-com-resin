@@ -190,10 +190,11 @@ public class QuercusMain extends ClassComponent {
     out.println("public void importDefinitions(Env env)");
     out.println("{");
     out.pushDepth();
-    
+
+    out.println("DefinitionState defState = env.getDefinitionState();");
     for (Function fun : _program.getFunctions()) {
       if (fun.isGlobal()) {
-	out.print("env.addFunction(\"");
+	out.print("defState.addFunction(\"");
 	out.printJavaString(fun.getName());
 	out.print("\", \"");
 	out.printJavaString(fun.getName().toLowerCase());
@@ -204,7 +205,7 @@ public class QuercusMain extends ClassComponent {
     }
 
     for (InterpretedClassDef clDef : _program.getClasses()) {
-      out.println("env.addClassDef(\"" + clDef.getName() + "\", q_cl_" + clDef.getName() + ");");
+      out.println("defState.addClassDef(\"" + clDef.getName() + "\", q_cl_" + clDef.getName() + ");");
     }
 
     out.popDepth();

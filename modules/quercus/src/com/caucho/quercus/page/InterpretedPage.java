@@ -126,10 +126,20 @@ public class InterpretedPage extends QuercusPage {
   {
     return _program.getClassMap();
   }
+
+  public boolean equals(Object o)
+  {
+    if (! (o instanceof InterpretedPage))
+      return false;
+
+    InterpretedPage page = (InterpretedPage) o;
+
+    return _program == page._program;
+  }
   
   public String toString()
   {
-    return "InterpretedPage[]";
+    return "InterpretedPage[" +  _program.getSourcePath() + "]";
   }
 }
 

@@ -1615,7 +1615,7 @@ public class QuercusParser {
   /**
    * Parses a class definition
    */
-  private InterpretedClassDef parseClassDefinition(int modifiers)
+  private Statement parseClassDefinition(int modifiers)
     throws IOException
   {
     String name = parseIdentifier();
@@ -1659,7 +1659,7 @@ public class QuercusParser {
 
       expect('}');
 
-      return _quercusClass;
+      return new ClassDefStatement(getLocation(), _quercusClass);
     } finally {
       _quercusClass = oldClass;
       _scope = oldScope;

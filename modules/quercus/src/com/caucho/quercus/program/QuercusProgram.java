@@ -202,27 +202,11 @@ public class QuercusProgram extends GenClass {
   }
 
   /**
-   * Returns the classes.
+   * Returns the functions.
    */
   public Collection<InterpretedClassDef> getClasses()
   {
     return _classMap.values();
-  }
-
-  /**
-   * Finds a function.
-   */
-  public InterpretedClassDef findClass(String name)
-  {
-    return _classMap.get(name);
-  }
-
-  /**
-   * Finds a function.
-   */
-  public HashMap<String,ClassDef> getClassMap()
-  {
-    return new HashMap<String,ClassDef>(_classMap);
   }
 
   /**

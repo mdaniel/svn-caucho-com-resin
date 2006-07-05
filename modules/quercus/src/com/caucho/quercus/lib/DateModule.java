@@ -631,7 +631,10 @@ public class DateModule extends AbstractQuercusModule {
       return new DoubleValue(((double) now) / 1e6);
     }
     else {
-      return new StringValueImpl(now % 1000000L / 1e6 + " " + now / 1000000L);
+      return (new StringBuilderValue()
+	      .append(now % 1000000L / 1e6)
+	      .append(' ')
+	      .append(now / 1000000L));
     }
   }
 

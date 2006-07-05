@@ -29,6 +29,16 @@
 
 package com.caucho.quercus;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.ref.*;
+import java.lang.reflect.*;
+import java.net.URL;
+import java.util.*;
+import java.util.logging.*;
+
+import javax.sql.DataSource;
+
 import com.caucho.config.ConfigException;
 
 import com.caucho.quercus.lib.session.QuercusSessionManager;
@@ -70,27 +80,15 @@ import com.caucho.vfs.Depend;
 
 import com.caucho.server.session.SessionManager;
 
-import javax.sql.DataSource;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.net.URL;
-import java.util.Enumeration;
-import java.util.IdentityHashMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  * Facade for the PHP language.
  */
 public class Quercus {
   private static L10N L = new L10N(Quercus.class);
   private static final Logger log = Log.open(Quercus.class);
+
+  private static HashSet<String> _superGlobals
+    = new HashSet<String>();
 
   private final PageManager _pageManager;
   private final QuercusSessionManager _sessionManager;
@@ -145,12 +143,15 @@ public class Quercus {
   private TimedCache<IncludeKey, Path> _includeCache
     = new TimedCache<IncludeKey, Path>(4096, 10000);
 
-  private static HashSet<String> _superGlobals
-    = new HashSet<String>();
+  private LruCache<DefinitionKey,SoftReference<DefinitionState>> _defCache
+    = new LruCache<DefinitionKey,SoftReference<DefinitionState>>(4096);
+
+  private long _defCacheHitCount;
+  private long _defCacheMissCount;
 
   // XXX: needs to be a timed LRU
-  private HashMap<String, SessionArrayValue> _sessionMap
-    = new HashMap<String, SessionArrayValue>();
+  private LruCache<String, SessionArrayValue> _sessionMap
+    = new LruCache<String, SessionArrayValue>(4096);
 
   private HashMap<String, Object> _specialMap
     = new HashMap<String, Object>();
@@ -446,7 +447,9 @@ public class Quercus {
   {
     IncludeKey key = new IncludeKey(include, includePath, pwd, scriptPwd);
     
-    return _includeCache.get(key);
+    Path path = _includeCache.get(key);
+
+    return path;
   }
 
   /**
@@ -461,6 +464,53 @@ public class Quercus {
     IncludeKey key = new IncludeKey(include, includePath, pwd, scriptPwd);
     
     _includeCache.put(key, path);
+  }
+
+  /**
+   * Returns the definition cache hit count.
+   */
+  public long getDefCacheHitCount()
+  {
+    return _defCacheHitCount;
+  }
+
+  /**
+   * Returns the definition cache miss count.
+   */
+  public long getDefCacheMisstCount()
+  {
+    return _defCacheMissCount;
+  }
+
+  /**
+   * Returns the definition state for an include.
+   */
+  public DefinitionState getDefinitionCache(DefinitionKey key)
+  {
+    SoftReference<DefinitionState> defStateRef = _defCache.get(key);
+
+    if (defStateRef != null) {
+      DefinitionState defState = defStateRef.get();
+
+      if (defState != null) {
+	_defCacheHitCount++;
+	
+	return defState.copyLazy();
+      }
+    }
+
+    _defCacheMissCount++;
+    
+    return null;
+  }
+
+  /**
+   * Returns the definition state for an include.
+   */
+  public void putDefinitionCache(DefinitionKey key,
+				 DefinitionState defState)
+  {
+    _defCache.put(key, new SoftReference<DefinitionState>(defState.copy()));
   }
   
   /**

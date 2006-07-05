@@ -73,19 +73,39 @@ public class AppendExpr extends Expr {
 
   public static Expr create(Expr left, Expr right)
   {
-    AppendExpr next;
-
-    if (right instanceof AppendExpr)
-      next = (AppendExpr) right;
-    else
-      next = new AppendExpr(right.getLocation(), right, null);
-
     AppendExpr leftAppend;
+
+    if (left instanceof ToStringExpr)
+      left = ((ToStringExpr) left).getExpr();
+
+    if (left instanceof StringLiteralExpr) {
+      StringLiteralExpr string = (StringLiteralExpr) left;
+
+      if (string.evalConstant().length() == 0)
+	return ToStringExpr.create(right);
+    }
 
     if (left instanceof AppendExpr)
       leftAppend = (AppendExpr) left;
     else
       leftAppend = new AppendExpr(left.getLocation(), left, null);
+    
+    AppendExpr next;
+    
+    if (right instanceof ToStringExpr)
+      right = ((ToStringExpr) right).getExpr();
+
+    if (right instanceof StringLiteralExpr) {
+      StringLiteralExpr string = (StringLiteralExpr) right;
+
+      if (string.evalConstant().length() == 0)
+	return ToStringExpr.create(left);
+    }
+
+    if (right instanceof AppendExpr)
+      next = (AppendExpr) right;
+    else
+      next = new AppendExpr(right.getLocation(), right, null);
 
     AppendExpr result = append(leftAppend, next);
 
@@ -179,6 +199,21 @@ public class AppendExpr extends Expr {
   {
     out.print("new StringBuilderValue()");
 
+    for (AppendExpr ptr = this; ptr != null; ptr = ptr._next) {
+      out.print(".append(");
+      ptr._value.generateAppend(out);
+      out.print(")");
+    }
+  }
+
+  /**
+   * Generates code to evaluate the expression as a string.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateAppend(PhpWriter out)
+    throws IOException
+  {
     for (AppendExpr ptr = this; ptr != null; ptr = ptr._next) {
       out.print(".append(");
       ptr._value.generateAppend(out);

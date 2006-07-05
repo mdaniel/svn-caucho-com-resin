@@ -186,7 +186,19 @@ public class StringLiteralExpr extends Expr {
   public void generateAppend(PhpWriter out)
     throws IOException
   {
-    generateString(out);
+    if (_value.length() == 1) {
+      char ch = _value.charAt(0);
+
+      if (ch ==  '\'')
+	out.print("'\\''");
+      else {
+	out.print('\'');
+	out.printJavaString(_value.toString());
+	out.print('\'');
+      }
+    }
+    else
+      generateString(out);
   }
 
   /**
