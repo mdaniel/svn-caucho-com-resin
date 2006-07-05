@@ -58,6 +58,7 @@ public class StringMarshall extends Marshall {
     //  xsi:type=\"xsd:string\">");
     
     if (obj != null)
+      // XXX: escapification
       out.print((String) obj);
     
     out.print("</");

@@ -56,6 +56,7 @@ public class DirectSkeleton extends Skeleton {
 		     WriteStream out)
     throws IOException, XMLStreamException
   {
+    /*
     in.nextTag();
 
     if (! "Envelope".equals(in.getName().getLocalPart()))
@@ -71,6 +72,9 @@ public class DirectSkeleton extends Skeleton {
     in.nextTag();
 
     String action = in.getName().getLocalPart();
+    */
+    String action = "hello";
+    // XXX: parse arguments
 
     out.println("<?xml version=\"1.0\"?>");
     out.print("<env:Envelope xmlns:env=\"" + SOAP_ENVELOPE + "\"");
@@ -80,11 +84,13 @@ public class DirectSkeleton extends Skeleton {
 
     PojoMethodSkeleton method = _actionMap.get(action);
 
+    // XXX: exceptions<->faults
     if (method != null)
       method.invoke(service, in, out);    
     else
+      // XXX: fault
       out.println("no such action:" + action);
-
+    /*
     if (in.nextTag() != in.END_ELEMENT)
       throw new IOException("expected </" + action + ">");
     else if (! action.equals(in.getName().getLocalPart()))
@@ -99,7 +105,7 @@ public class DirectSkeleton extends Skeleton {
       throw new IOException("expected </Envelope>");
     else if (! "Envelope".equals(in.getName().getLocalPart()))
       throw new IOException("expected </Envelope>");
-    
+    */
     out.print("\n</env:Body></env:Envelope>");
   }
 }
