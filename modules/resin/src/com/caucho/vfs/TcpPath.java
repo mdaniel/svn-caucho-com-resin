@@ -165,6 +165,11 @@ public class TcpPath extends Path {
     return TcpStream.openReadWrite(this, _timeout);
   }
 
+  protected Path copy()
+  {
+    return new TcpPath(null, getUserPath(), null, _host, _port);
+  }
+
   public String toString()
   {
     return getURL();

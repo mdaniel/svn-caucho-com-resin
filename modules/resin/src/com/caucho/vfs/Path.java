@@ -60,7 +60,7 @@ public abstract class Path {
   private static final Integer LOCK = new Integer(0);
 
   private static final LruCache<PathKey,Path> _pathLookupCache
-    = new LruCache<PathKey,Path>(1024);
+    = new LruCache<PathKey,Path>(8192);
 
   private static final PathKey _key = new PathKey();
 
@@ -105,22 +105,26 @@ public abstract class Path {
    {
      if (newAttributes != null)
        return lookupImpl(userPath, newAttributes);
-
-     /*
+     
      synchronized (_key) {
        _key.init(this, userPath);
 
-       // server/2d33
-       Path path = null; //  _pathLookupCache.get(_key);
+       Path path = _pathLookupCache.get(_key);
 
-       if (path != null)
-         return path;
+       if (path != null) {
+	 return path.copy();
+       }
      }
-     */
 
-     Path path = lookupImpl(userPath, newAttributes);
+     Path path = lookupImpl(userPath, null);
 
-     // _pathLookupCache.putIfNew(new PathKey(this, userPath), path);
+     synchronized (_key) {
+       Path copy = path.copy();
+
+       if (copy != null) {
+	 _pathLookupCache.putIfNew(new PathKey(this, userPath), copy);
+       }
+     }
 
      return path;
    }
@@ -1107,6 +1111,11 @@ public abstract class Path {
       return cb.toString();
     else
       return rawURL;
+  }
+
+  protected Path copy()
+  {
+    return this;
   }
 
   private class ArrayIterator implements Iterator<String> {

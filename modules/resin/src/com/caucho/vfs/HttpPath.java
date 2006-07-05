@@ -438,6 +438,13 @@ public class HttpPath extends FilesystemPath {
     return HttpStream.openReadWrite(this);
   }
 
+  protected Path copy()
+  {
+    return new HttpPath(getRoot(), getUserPath(),
+			null,
+			getPath(), _query);
+  }
+  
   /**
    * Returns the string form of the http path.
    */

@@ -116,7 +116,8 @@ public class InterpretedPage extends QuercusPage {
    */
   public InterpretedClassDef findClass(String name)
   {
-    return _program.findClass(name);
+    //return _program.findClass(name);
+    return null;
   }
 
   /**
@@ -124,7 +125,8 @@ public class InterpretedPage extends QuercusPage {
    */
   public HashMap<String,ClassDef> getClassMap()
   {
-    return _program.getClassMap();
+    //return _program.getClassMap();
+    return null;
   }
 
   public boolean equals(Object o)

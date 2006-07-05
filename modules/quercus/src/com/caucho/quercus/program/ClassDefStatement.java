@@ -66,7 +66,8 @@ public class ClassDefStatement extends Statement {
       QuercusClass qClass = new QuercusClass(_cl, null);
 
       qClass.validate(env);
-      env.addClass(_cl.getName(), qClass);
+      //env.addClass(_cl.getName(), qClass);
+      throw new UnsupportedOperationException();
     }
 
     return null;

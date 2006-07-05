@@ -59,13 +59,18 @@ public class JdbcColumnMetaData {
   {
     _table = table;
 
-    _name = rs.getString("COLUMN_NAME");
-    _jdbcType = rs.getInt("DATA_TYPE");
-    _length = rs.getInt("COLUMN_SIZE");
+    // COLUMN_NAME
+    _name = rs.getString(4);
+    // DATA_TYPE
+    _jdbcType = rs.getInt(5);
+    // COLUMN_SIZE
+    _length = rs.getInt(7);
 
-    _isNotNull = rs.getInt("NULLABLE") == DatabaseMetaData.columnNoNulls;
+    // NULLABLE
+    _isNotNull = rs.getInt(11) == DatabaseMetaData.columnNoNulls;
 
-    String type = rs.getString("TYPE_NAME").toLowerCase();
+    // TYPE_NAME
+    String type = rs.getString(6).toLowerCase();
 
     _isUnsigned = type.indexOf("unsigned") >= 0;
     _isZeroFill = type.indexOf("zerofill") >= 0;

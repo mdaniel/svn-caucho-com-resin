@@ -69,7 +69,8 @@ public class JdbcTableMetaData {
     ResultSet rs = md.getColumns(_catalog, _schema, _name, null);
     try {
       while (rs.next()) {
-	String columnName = rs.getString("COLUMN_NAME");
+	// COLUMN_NAME
+	String columnName = rs.getString(4);
 
 	JdbcColumnMetaData column = new JdbcColumnMetaData(this, rs);
 
@@ -80,7 +81,8 @@ public class JdbcTableMetaData {
 
       rs = md.getPrimaryKeys(_catalog, _schema, _name);
       while (rs.next()) {
-	String columnName = rs.getString("COLUMN_NAME");
+	// COLUMN_NAME
+	String columnName = rs.getString(4);
 
 	JdbcColumnMetaData column = _columnMap.get(columnName);
 
@@ -90,7 +92,8 @@ public class JdbcTableMetaData {
 
       rs = md.getIndexInfo(_catalog, _schema, _name, false, true);
       while (rs.next()) {
-	String columnName = rs.getString("COLUMN_NAME");
+	// COLUMN_NAME
+	String columnName = rs.getString(9);
 
 	JdbcColumnMetaData column = _columnMap.get(columnName);
 

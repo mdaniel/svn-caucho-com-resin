@@ -424,6 +424,11 @@ public class MemoryPath extends FilesystemPath {
     }
   }
 
+  public Path copy()
+  {
+    return null;
+  }
+
   public MemoryPath copyDeep()
   {
     MemoryPath path = new MemoryPath();

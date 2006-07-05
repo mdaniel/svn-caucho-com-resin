@@ -224,6 +224,15 @@ public class LongValue extends NumberValue {
   }
 
   /**
+   * Append to a string builder.
+   */
+  @Override
+  public void appendTo(StringBuilderValue sb)
+  {
+    sb.append(_value);
+  }
+
+  /**
    * Serializes the value.
    */
   public void serialize(StringBuilder sb)

@@ -260,6 +260,14 @@ abstract public class FilesystemPath extends Path {
   }
 
   /**
+   * Returns the root.
+   */
+  protected FilesystemPath getRoot()
+  {
+    return _root;
+  }
+
+  /**
    * Returns the path portion of the URL.
    */
   public String getPath()
@@ -352,11 +360,6 @@ abstract public class FilesystemPath extends Path {
     }
 
     _bindRoot.bind(getPath(), context);
-  }
-
-  public Path copy()
-  {
-    return _root.fsWalk(_userPath, null, _pathname);
   }
 
   public int hashCode()
