@@ -739,11 +739,13 @@ with large spikes in connection loads may need to increase the
 <defun title="user-name" version="Resin 3.0">
 <parents>resin</parents>
 
+<p>Note: at present, this directive is deprecated because of timing
+issues with log file creation and ownership.  It is recommended that
+you use some other method to remap port 80 to port 8080.</p>
+
 <p>Configures the Unix setuid user name used after Resin binds the
 reserved ports as root.</p>
 
-<p>Note, Linux requires the new thread package (e.g. RedHat 9.0 or
-later) to support user-name.</p>
 </defun>
 
 </section> <!-- resin.conf -->

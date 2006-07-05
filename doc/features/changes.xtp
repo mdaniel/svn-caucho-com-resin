@@ -2,8 +2,9 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - June 23, 2006'>
+<s2 title='3.0.snap - July 5, 2006'>
 <ul>
+<li>(2006-07-05) Quercus: performance work for includes (rep by koreth)
 <li>EL: "1.0" was not properly interpreted as double (#1225, rep by Jill Wetzler)
 <li>Quercus: token_name and token_get_all (#746, #1182, rep by koreth)
 <li>Quercus: improve error message when database driver missing (#1113, rep by koreth)

@@ -86,6 +86,7 @@ public class Cluster implements EnvironmentListener {
   private long _clientMaxIdleTime = 30000L;
   private long _clientFailRecoverTime = 15000L;
   private long _clientWarmupTime = 60000L;
+  private long _clientBusyTime = 15000L;
   
   private long _clientReadTimeout = 60000L;
   private long _clientWriteTimeout = 60000L;

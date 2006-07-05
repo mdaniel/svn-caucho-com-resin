@@ -76,7 +76,7 @@ If no parent has a &lt;logger>, the level defaults to INFO.</p>
 <p>Sets the time a client should wait for a connection to a backend server.
 Defaults to 5s.</p>
 
-<section>
+</section>
 
 <section title="client-weight">
 
@@ -84,7 +84,7 @@ Defaults to 5s.</p>
 the load balancer can distribute more or less load to more or
 less powerful servers.</p>
 
-<p.The default value is 100.</p>
+<p>The default value is 100.</p>
 
 <example>
 &lt;cluster id="app-tier">
@@ -97,17 +97,17 @@ less powerful servers.</p>
 
 </section>
 
-<section title="client-slow-start-time">
+<section title="client-warmup-time">
 
-<p>The backend &lt;srun> servers can now have a slow-start-time.
-The client-slow-start-time will throttle requests to the backend
+<p>The backend &lt;srun> servers can now have a warmup-time.
+The client-warmup-time will throttle requests to the backend
 server while the client "warms up".</p>
 
 <p>The default value is 60s.</p>
 
 <example>
 &lt;cluster id="app-tier">
-  &lt;client-slow-start-time>60s&lt;/client-slow-start-time>
+  &lt;client-warmup-time>60s&lt;/client-warmup-time>
 
   &lt;srun id="app-a" host="192.168.0.10"/>
   &lt;srun id="app-b" host="192.168.0.11"/>
