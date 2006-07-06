@@ -31,6 +31,7 @@ package com.caucho.quercus.lib.file;
 
 import java.io.InputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.BinaryValue;
@@ -56,6 +57,12 @@ public interface BinaryInput extends BinaryStream {
   public int read()
     throws IOException;
   
+  /**
+   * Unreads the last byte.
+   */
+  public void unread()
+    throws IOException;
+
   /**
    * Reads into a buffer, returning -1 on eof.
    */
@@ -99,5 +106,14 @@ public interface BinaryInput extends BinaryStream {
    * Closes the stream for reading
    */
   public void closeRead();
+
+  /**
+   * Sets the current read encoding.  The encoding can either be a
+   * Java encoding name or a mime encoding.
+   *
+   * @param encoding name of the read encoding
+   */
+  public void setEncoding(String encoding)
+    throws UnsupportedEncodingException;
 }
 

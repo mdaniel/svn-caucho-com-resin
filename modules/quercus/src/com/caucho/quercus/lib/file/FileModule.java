@@ -39,6 +39,10 @@ import java.util.Arrays;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import java.util.regex.PatternSyntaxException;
+
 import com.caucho.util.L10N;
 
 import com.caucho.quercus.QuercusModuleException;
@@ -47,6 +51,7 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.*;
 
 import com.caucho.quercus.resources.StreamResource;
 import com.caucho.quercus.lib.file.DirectoryValue;
@@ -91,8 +96,23 @@ public class FileModule extends AbstractQuercusModule {
   public static final int FILE_APPEND = 2;
   public static final int LOCK_EX = 4;
 
+  public static final int FNM_PATHNAME = 1;
+  public static final int FNM_NOESCAPE = 2;
+  public static final int FNM_PERIOD = 4;
+  public static final int FNM_CASEFOLD = 16;
+
+  public static final int GLOB_MARK = 2;
+  public static final int GLOB_NOSORT = 4;
+  public static final int GLOB_NOCHECK = 16;
+  public static final int GLOB_NOESCAPE = 64;
+  public static final int GLOB_BRACE = 1024;
+  public static final int GLOB_ONLYDIR = 8192;
+
   private static final HashMap<String,StringValue> _iniMap
     = new HashMap<String,StringValue>();
+
+  private static final HashMap<String,Value> _constMap
+    = new HashMap<String,Value>();
 
   /**
    * Returns the default quercus.ini values.
@@ -100,6 +120,14 @@ public class FileModule extends AbstractQuercusModule {
   public Map<String,StringValue> getDefaultIni()
   {
     return _iniMap;
+  }
+  
+  /**
+   * Returns the constants defined by this module.
+   */
+  public Map<String,Value> getConstMap()
+  {
+    return _constMap;
   }
   
   /**
@@ -965,7 +993,230 @@ public class FileModule extends AbstractQuercusModule {
     return true;
   }
 
-  // XXX: fnmatch
+
+  /**
+   * Converts a glob pattern to a regular expression.
+   */
+  private static String globToRegex(String pattern, int flags, boolean brace) 
+  {
+    StringBuilder globRegex = new StringBuilder();
+
+    int bracketCount = 0;
+    boolean inSquareBrackets = false;
+    boolean inCurlyBrackets = false;
+    char lastCh = ' ';
+
+    for (int i = 0; i < pattern.length(); i++) {
+      char ch = pattern.charAt(i);
+
+      switch (ch) {
+        case '*':
+          if (inSquareBrackets || inCurlyBrackets) {
+            globRegex.append("*");
+
+            if (inSquareBrackets)
+              bracketCount++;
+          } else {
+            if ((flags & FNM_PATHNAME) != 0)
+              globRegex.append("[^/]*");
+            else
+              globRegex.append(".*");
+          }
+
+          break;
+
+        case '?':
+          if (inSquareBrackets || inCurlyBrackets) {
+            globRegex.append("*");
+
+            if (inSquareBrackets)
+              bracketCount++;
+          } else {
+            if ((flags & FNM_PATHNAME) != 0)
+              globRegex.append("[^/]");
+            else
+              globRegex.append(".");
+          }
+
+          break;
+
+        case '^':
+          if (lastCh == '[')
+            globRegex.append(ch);
+          else {
+            globRegex.append("\\" + ch);
+
+            if (inSquareBrackets)
+              bracketCount++;
+          }
+          
+          break;
+
+        case '!':
+          if (lastCh == '[')
+            globRegex.append('^');
+          else {
+            globRegex.append(ch);
+
+            if (inSquareBrackets)
+              bracketCount++;
+          }
+          
+          break;
+
+        case '/':
+          if (! ((inSquareBrackets || inCurlyBrackets) && 
+                 ((flags & FNM_PATHNAME) != 0))) {
+            globRegex.append(ch);
+
+            if (inSquareBrackets)
+              bracketCount++;
+          }
+
+          // don't include '/' in the brackets when FNM_PATHNAME is specified
+          break;
+
+        case '+':
+        case '(':
+        case ')':
+        case '$':
+        case '.':
+        case '|':
+          // escape regex special characters that are not glob 
+          // special characters
+          globRegex.append('\\');
+          globRegex.append(ch);
+
+          if (inSquareBrackets)
+            bracketCount++;
+
+          break;
+
+        case '\\':
+          if ((flags & FNM_NOESCAPE) != 0)
+            globRegex.append('\\');
+
+          globRegex.append(ch);
+
+          if (inSquareBrackets)
+            bracketCount++;
+
+          break;
+
+        case '[':
+          inSquareBrackets = true;
+
+          globRegex.append(ch);
+
+          break;
+
+        case ']':
+          inSquareBrackets = false;
+
+          if (bracketCount == 0)
+            return null;
+
+          globRegex.append(ch);
+
+          break;
+
+        case '{':
+          if (inSquareBrackets || inCurlyBrackets) {
+            globRegex.append(ch);
+
+            if (inSquareBrackets)
+              bracketCount++;
+          } else if (brace) {
+            globRegex.append('(');
+
+            inCurlyBrackets = true;
+          } else {
+            globRegex.append('\\');
+            globRegex.append(ch);
+          }
+
+          break;
+
+        case '}':
+          if (inSquareBrackets) {
+            globRegex.append(ch);
+
+            bracketCount++;
+          } else if (brace && inCurlyBrackets) {
+            globRegex.append(')');
+
+            inCurlyBrackets = false;
+          } else {
+            globRegex.append('\\');
+            globRegex.append(ch);
+          }
+
+          break;
+
+        case ',':
+          if (brace && inCurlyBrackets)
+            globRegex.append('|');
+          else
+            globRegex.append(ch);
+
+          break;
+
+        default:
+          globRegex.append(ch);
+
+          if (inSquareBrackets)
+            bracketCount++;
+
+          break;
+      }
+
+      lastCh = ch;
+    }
+
+    return globRegex.toString();
+  }
+    
+  /**
+   * Returns true if the given string matches the given glob pattern.
+   */
+  public static boolean fnmatch(Env env, String pattern, String string, 
+                                @Optional int flags)
+  {
+    if ((flags & FNM_CASEFOLD) != 0) {
+      string = string.toLowerCase();
+      pattern = pattern.toLowerCase();
+    }
+
+    // match "leading" periods exactly (i.e. no wildcards)
+    if ((flags & FNM_PERIOD) != 0) { 
+      if (string.length() > 0 && string.charAt(0) == '.'){
+        if (! (pattern.length() > 0 && pattern.charAt(0) == '.'))
+          return false;
+
+        string = string.substring(1);
+        pattern = pattern.substring(1);
+      } else if ((flags & FNM_PATHNAME) != 0) {
+        // special case: if the string starts with '/.', then the pattern
+        // must also start with exactly that.
+        if ((string.length() >= 2) &&
+           (string.charAt(0) == '/') && (string.charAt(1) == '.')) {
+          if (! ((pattern.length() >= 2) &&
+                 (pattern.charAt(0) == '/') && (pattern.charAt(1) == '.')))
+            return false;
+
+          string = string.substring(2);
+          pattern = pattern.substring(2);
+        }
+      } 
+    }
+
+    String globRegex = globToRegex(pattern, flags, false);
+
+    if (globRegex == null)
+      return false;
+
+    return string.matches(globRegex.toString());
+  }
 
   /**
    * Opens a file.
@@ -987,71 +1238,78 @@ public class FileModule extends AbstractQuercusModule {
 
       path = env.getPwd().lookup(filename);
 
-      if (mode.startsWith("r+")) {
-	throw new UnsupportedOperationException("read/write not yet supported");
-      }
-      else if (mode.startsWith("r")) {
-	if (useIncludePath)
-	  path = env.lookupInclude(filename);
+      if (mode.startsWith("r")) {
+        if (useIncludePath)
+          path = env.lookupInclude(filename);
 
-	if (path == null) {
+        if (path == null || ! path.exists()) {
           env.warning(L.l("{0} cannot be read", filename));
 
-	  return null;
-	}
+          return null;
+        }
 
-	try {
-	  return new FileInput(path);
-	} catch (IOException e) {
-	  log.log(Level.FINE, e.toString(), e);
+        try {
+          BinaryInput input;
+
+          if (mode.startsWith("r+"))
+            input = new FileInputOutput(env, path);
+          else
+            input = new FileInput(path);
+
+          input.setEncoding(env.getRuntimeEncoding().toString());
+          
+          return input;
+        } catch (IOException e) {
+          log.log(Level.FINE, e.toString(), e);
 
           env.warning(L.l("{0} cannot be read", path.getFullPath()));
 
           return null;
         }
       }
-      else if (mode.startsWith("w+")) {
-	throw new UnsupportedOperationException("read/write not yet supported");
-      }
       else if (mode.startsWith("w")) {
-	try {
-	  return new FileOutput(env, path);
-	} catch (IOException e) {
-	  log.log(Level.FINE, e.toString(), e);
+        try {
+          if (mode.startsWith("w+")) 
+            return new FileInputOutput(env, path, false, true);
+          else
+            return new FileOutput(env, path);
+        } catch (IOException e) {
+          log.log(Level.FINE, e.toString(), e);
 
           env.warning(L.l("{0} cannot be written", path.getFullPath()));
 
           return null;
         }
-      }
-      else if (mode.startsWith("a+")) {
-	throw new UnsupportedOperationException("read/write not yet supported");
       }
       else if (mode.startsWith("a")) {
-	try {
-	  return new FileOutput(env, path, true);
-	} catch (IOException e) {
-	  log.log(Level.FINE, e.toString(), e);
+        try {
+          if (mode.startsWith("a+"))
+            return new FileInputOutput(env, path, true, false);
+          else
+            return new FileOutput(env, path, true);
+        } catch (IOException e) {
+          log.log(Level.FINE, e.toString(), e);
 
           env.warning(L.l("{0} cannot be written", path.getFullPath()));
 
           return null;
         }
       }
-      else if (mode.startsWith("x+")) {
-	throw new UnsupportedOperationException("read/write not yet supported");
+      else if (mode.startsWith("x") && ! path.exists()) {
+        if (mode.startsWith("x+"))
+          return new FileInputOutput(env, path);
+        else 
+          return new FileOutput(env, path);
       }
-      else if (mode.startsWith("x") && ! path.exists())
-        return new FileOutput(env, path);
 
       env.warning(L.l("bad mode `{0}'", mode));
 
       return null;
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
-      
+
       env.warning(L.l("{0} can't be opened.\n{1}",
-		      filename, e.toString()));
+            filename, e.toString()));
 
       return null;
     }
@@ -1262,7 +1520,25 @@ public class FileModule extends AbstractQuercusModule {
     return new LongValue(is.getPosition());
   }
 
-  // XXX: ftruncate
+  /**
+   * Truncates a file.
+   */
+  public static boolean ftruncate(Env env, 
+                                  @NotNull BinaryOutput handle, 
+                                  long size)
+  {
+    if (handle instanceof FileOutput) {
+      Path path = ((FileOutput) handle).getPath();
+
+      try {
+        return path.truncate(size);
+      } catch (IOException e) {
+        return false;
+      }
+    }
+
+    return false;
+  }
 
   /**
    * Writes a string to the file.
@@ -1274,7 +1550,7 @@ public class FileModule extends AbstractQuercusModule {
   {
     try {
       if (os == null)
-	return BooleanValue.FALSE;
+        return BooleanValue.FALSE;
 
       return LongValue.create(os.write(value, length));
     } catch (IOException e) {
@@ -1282,7 +1558,139 @@ public class FileModule extends AbstractQuercusModule {
     }
   }
 
-  // XXX: glob
+  private static boolean globImpl(Env env, String pattern, int flags, 
+                                  Path path, String prefix, ArrayValue result)
+  {
+    String cwdPattern;
+    String subPattern = null;
+
+    int firstSlash = pattern.indexOf('/');
+
+    if (firstSlash < 0)
+      cwdPattern = pattern;
+    else {
+      cwdPattern = pattern.substring(0, firstSlash);
+
+      // strip off any extra slashes
+      for (; firstSlash < pattern.length(); firstSlash++) {
+        if (pattern.charAt(firstSlash) != '/')
+          break;
+      }
+
+      subPattern = pattern.substring(firstSlash);
+    }
+
+    int fnmatchFlags = 0;
+
+    if ((flags & GLOB_NOESCAPE) != 0)
+      fnmatchFlags = FNM_NOESCAPE;
+
+    String globRegex = globToRegex(cwdPattern, fnmatchFlags, true);
+
+    if (globRegex == null)
+      return false;
+
+    Pattern compiledGlobRegex;
+
+    try {
+      compiledGlobRegex = Pattern.compile(globRegex);
+    } catch (PatternSyntaxException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return false;
+    }
+
+    String [] list;
+
+    try {
+      list = path.list();
+    } catch (IOException e) {
+      return false;
+    }
+
+    for (String entry : list) {
+      Matcher matcher = compiledGlobRegex.matcher(entry);
+
+      if (matcher.matches()) {
+        StringBuilderValue sb = new StringBuilderValue();
+
+        sb.append(prefix);
+
+        if (prefix.length() > 0)
+          sb.append("/");
+
+        sb.append(entry);
+
+        Path entryPath = path.lookup(entry);
+
+        if (entryPath != null && entryPath.isDirectory()) {
+          if (firstSlash >= 0 && subPattern.length() > 0) {
+            // ArrayValue.add only adds values when the argument is an
+            // actual array
+            globImpl(env, subPattern, flags, entryPath, sb.toString(), result);
+          } else if ((flags & GLOB_MARK) != 0) {
+            sb.append("/");
+          }
+        }
+
+        if ((firstSlash < 0 || subPattern.length() == 0) && 
+            (((flags & GLOB_ONLYDIR) == 0) ||
+             (((flags & GLOB_ONLYDIR) != 0) && 
+              (entryPath != null && entryPath.isDirectory()))))
+          result.put(sb);
+      }
+    }
+
+    if (result.getSize() == 0)
+      return false;
+
+    return true;
+  }
+
+  /**
+   * Matches all files with the given pattern.
+   */
+  public static Value glob(Env env, StringValue pattern, @Optional int flags)
+  {
+    Path path = env.getPwd();
+
+    String trimmedPattern = pattern.toString();
+
+    if (pattern.length() > 0 && pattern.charAt(0) == '/') {
+      int i;
+
+      // strip off any leading slashes
+      for (i = 0; i < pattern.length(); i++) {
+        if (pattern.charAt(i) != '/')
+          break;
+      }
+
+      path = path.lookup("/");
+
+      trimmedPattern = pattern.substring(i).toString();
+    }
+
+    ArrayValue result = new ArrayValueImpl();
+    
+    boolean success = globImpl(env, trimmedPattern, flags, path, "", result);
+
+    if (! success) {
+      if ((flags & GLOB_NOCHECK) != 0) {
+        if (result.getSize() > 0)
+          result = new ArrayValueImpl();
+
+        result.put(pattern);
+
+        return result;
+      } else
+        return BooleanValue.FALSE;
+    }
+
+    if ((flags & GLOB_NOSORT) == 0 && result.isArray())
+      ((ArrayValue) result).sort(new ArrayValue.ValueComparator(), true, true);
+
+    return result;
+  }
 
   /**
    * Returns the current working directory.
@@ -2010,6 +2418,18 @@ public class FileModule extends AbstractQuercusModule {
   }
 
   static {
+    _constMap.put("FNM_PATHNAME", LongValue.create(FNM_PATHNAME));
+    _constMap.put("FNM_NOESCAPE", LongValue.create(FNM_NOESCAPE));
+    _constMap.put("FNM_PERIOD", LongValue.create(FNM_PERIOD));
+    _constMap.put("FNM_CASEFOLD", LongValue.create(FNM_CASEFOLD));
+
+    _constMap.put("GLOB_MARK", LongValue.create(GLOB_MARK));
+    _constMap.put("GLOB_NOSORT", LongValue.create(GLOB_NOSORT));
+    _constMap.put("GLOB_NOCHECK", LongValue.create(GLOB_NOCHECK));
+    _constMap.put("GLOB_NOESCAPE", LongValue.create(GLOB_NOESCAPE));
+    _constMap.put("GLOB_BRACE", LongValue.create(GLOB_BRACE));
+    _constMap.put("GLOB_ONLYDIR", LongValue.create(GLOB_ONLYDIR));
+    
     addIni(_iniMap, "allow_url_fopen", "1", PHP_INI_SYSTEM);
     addIni(_iniMap, "user_agent", null, PHP_INI_ALL);
     addIni(_iniMap, "default_socket_timeout", "60", PHP_INI_ALL);

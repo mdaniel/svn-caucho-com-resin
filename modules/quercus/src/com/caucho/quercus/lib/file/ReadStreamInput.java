@@ -35,6 +35,7 @@ import java.util.logging.Level;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import com.caucho.quercus.QuercusModuleException;
 
@@ -86,6 +87,23 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
     return new ReadStreamInput(_is.getPath().openRead());
   }
 
+  public void setEncoding(String encoding)
+    throws UnsupportedEncodingException
+  {
+    if (_is != null)
+      _is.setEncoding(encoding);
+  }
+
+  /**
+   *
+   */
+  public void unread()
+    throws IOException
+  {
+    if (_is != null)
+      _is.unread();
+  }
+
   /**
    * Reads a character from a file, returning -1 on EOF.
    */
@@ -116,32 +134,32 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
    */
   public BinaryValue read(int length)
     throws IOException
-  {
-    if (_is == null)
-      return null;
+    {
+      if (_is == null)
+        return null;
 
-    BinaryBuilderValue bb = new BinaryBuilderValue();
+      BinaryBuilderValue bb = new BinaryBuilderValue();
 
-    while (length > 0) {
-      bb.prepareReadBuffer();
+      while (length > 0) {
+        bb.prepareReadBuffer();
 
-      int sublen = bb.getLength() - bb.getOffset();
+        int sublen = bb.getLength() - bb.getOffset();
 
-      if (length < sublen)
-	sublen = length;
+        if (length < sublen)
+          sublen = length;
 
-      sublen = read(bb.getBuffer(), bb.getOffset(), sublen);
+        sublen = read(bb.getBuffer(), bb.getOffset(), sublen);
 
-      if (sublen > 0) {
-	bb.setOffset(bb.getOffset() + sublen);
-	length -= sublen;
+        if (sublen > 0) {
+          bb.setOffset(bb.getOffset() + sublen);
+          length -= sublen;
+        }
+        else
+          return bb;
       }
-      else
-	return bb;
-    }
 
-    return bb;
-  }
+      return bb;
+    }
 
   /**
    * Reads the optional linefeed character from a \r\n
