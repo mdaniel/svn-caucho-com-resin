@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2005 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -24,55 +24,12 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
 package com.caucho.management.server;
 
-import java.util.Date;
-
-import com.caucho.jmx.Description;
-
-/**
- * MBeans which have lifecycle transitions will normally implement
- * the lifecycle mbean.
- */
-public interface LifecycleMBean {
-  /**
-   * Returns the lifecycle state.
-   */
-  @Description("The lifecycle state of the client")
-  public String getState();
-
-  //
-  // Statistics attributes
-  //
-
-  /**
-   * Returns the number of transitions to the failed state.
-   */
-  @Description("The total number of failures")
-  public long getFailTotalCount();
-
-  /**
-   * Returns the time of the last failure.
-   */
-  @Description("The time of the last failure")
-  public Date getLastFailTime();
-
-  //
-  // Operations on the mbean
-  //
-
-  /**
-   * Enables the mbean
-   */
-  @Description("Enables the mbean")
-  public void start();
-
-  /**
-   * Disables the mbean
-   */
-  @Description("Disables the mbean")
-  public void stop();
+public interface EarMXBean
+  extends DeployControllerMXBean
+{
 }

@@ -33,15 +33,41 @@ import java.util.logging.Logger;
 import com.caucho.util.L10N;
 import com.caucho.util.ThreadPool;
 
-import com.caucho.log.Log;
+import com.caucho.management.server.*;
 
-import com.caucho.management.server.ThreadPoolMBean;
-
-public class ThreadPoolAdmin
-  implements ThreadPoolMBean
+public class ThreadPoolAdmin extends AbstractManagedObject
+  implements ThreadPoolMXBean
 {
   private static final L10N L = new L10N(ThreadPoolAdmin.class);
-  private static final Logger log = Log.open(ThreadPoolAdmin.class);
+  private static final Logger log
+    = Logger.getLogger(ThreadPoolAdmin.class.getName());
+
+  private static ThreadPoolAdmin _admin;
+
+  private ThreadPoolAdmin()
+  {
+    registerSelf();
+  }
+
+  /**
+   * The registration needs to be controlled externally to make
+   * the timing work correctly.
+   */
+  public static ThreadPoolMXBean create()
+  {
+    if (_admin != null)
+      _admin = new ThreadPoolAdmin();
+
+    return _admin;
+  }
+
+  /**
+   * The thread pool is unique so it doesn't have a name.
+   */
+  public String getName()
+  {
+    return null;
+  }
 
   /**
    * Returns the maximum number of threads.
@@ -67,7 +93,7 @@ public class ThreadPoolAdmin
   /**
    * Returns the current number of active threads.
    */
-  public int getActiveThreadCount()
+  public int getThreadActiveCount()
   {
     return ThreadPool.getActiveThreadCount();
   }
@@ -75,7 +101,7 @@ public class ThreadPoolAdmin
   /**
    * Returns the current number of idle threads.
    */
-  public int getIdleThreadCount()
+  public int getThreadIdleCount()
   {
     return ThreadPool.getIdleThreadCount();
   }

@@ -36,28 +36,19 @@ import java.util.Date;
 
 import javax.management.ObjectName;
 
-import com.caucho.management.server.ClusterServerMBean;
-import com.caucho.management.server.ClusterMBean;
+import com.caucho.management.server.*;
 
 /**
  * Implementation of the ClusterClient's administration mbean.
  */
-public class ClusterClientAdmin
-  implements ClusterServerMBean, Serializable
+public class ClusterClientAdmin extends AbstractManagedObject
+  implements ClusterServerMXBean
 {
   private final ClusterClient _client;
 
   public ClusterClientAdmin(ClusterClient client)
   {
     _client = client;
-  }
-
-  /**
-   * Returns the MBean's object name.
-   */
-  public ObjectName getObjectName()
-  {
-    return _client.getServer().getObjectName();
   }
 
   /**
@@ -69,17 +60,9 @@ public class ClusterClientAdmin
   }
 
   /**
-   * Returns the mbean type
-   */
-  public String getType()
-  {
-    return "ClusterClient";
-  }
-
-  /**
    * Returns the owning cluster's object name.
    */
-  public ClusterMBean getCluster()
+  public ClusterMXBean getCluster()
   {
     return _client.getServer().getCluster().getAdmin();
   }
@@ -183,22 +166,22 @@ public class ClusterClientAdmin
     return ! _client.getServer().isActive();
   }
 
-  public int getActiveCount()
+  public int getConnectionActiveCount()
   {
     return _client.getActiveCount();
   }
 
-  public int getIdleCount()
+  public int getConnectionIdleCount()
   {
     return _client.getIdleCount();
   }
 
-  public long getConnectTotalCount()
+  public long getConnectionNewCountLifetime()
   {
     return _client.getConnectTotalCount();
   }
 
-  public long getFailTotalCount()
+  public long getConnectionFailCountLifetime()
   {
     return _client.getFailTotalCount();
   }
@@ -208,9 +191,19 @@ public class ClusterClientAdmin
     return _client.getLastFailTime();
   }
 
-  public long getKeepaliveTotalCount()
+  public long getConnectionKeepaliveCountLifetime()
   {
     return _client.getServer().getClient().getKeepaliveTotalCount();
+  }
+
+  public long getConnectionBusyCountLifetime()
+  {
+    return _client.getServer().getClient().getBusyCountTotal();
+  }
+
+  public Date getLastBusyTime()
+  {
+    return null;
   }
 
   public void start()

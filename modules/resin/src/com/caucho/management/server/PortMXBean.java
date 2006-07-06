@@ -29,9 +29,9 @@
 
 package com.caucho.management.server;
 
-import javax.management.ObjectName;
+import javax.management.*;
 
-import com.caucho.jmx.Description;
+import com.caucho.jmx.*;
 
 /**
  * Represents a protocol connection.
@@ -42,13 +42,8 @@ import com.caucho.jmx.Description;
  * resin:type=Port,port=80,address=INADDR_ANY
  * </pre>
  */
-public interface PortMBean {
-  /**
-   * Returns the {@link javax.management.ObjectName} of the mbean.
-   */
-  @Description("The JMX ObjectName for the MBean")
-  public ObjectName getObjectName();
-
+@Description("The protocol listening to an IP address.")
+public interface PortMXBean extends ManagedObjectMXBean {
   /**
    * Returns the port's protocol name.
    */
@@ -90,12 +85,14 @@ public interface PortMBean {
    * socket connection may be handled in different ways.
    */
   @Description("Timeout for socket reads when waiting for data from a client")
+  @Units("milliseconds")    
   public long getReadTimeout();
 
   /**
    * Returns the timeout for socket writes when writing data to a client.
    */
   @Description("Timeout for socket writes when sending data to a client")
+  @Units("milliseconds")    
   public long getWriteTimeout();
 
   /*
@@ -108,7 +105,7 @@ public interface PortMBean {
    * Returns the current number of threads that are servicing requests.
    */
   @Description("The current number of threads that are servicing requests")
-  public int getActiveThreadCount();
+  public int getThreadActiveCount();
 
   /**
    * Returns the current number of threads that are idle and
@@ -116,7 +113,7 @@ public interface PortMBean {
    */
   @Description("The current number of threads that are"
                + " idle and waiting to service requests")
-  public int getIdleThreadCount();
+  public int getThreadIdleCount();
 
 
   /**
@@ -126,7 +123,7 @@ public interface PortMBean {
   @Description("The current number of connections that are" +
                " in the keepalive state and are using" +
                " a thread to maintain the connection")
-  public int getKeepaliveThreadCount();
+  public int getThreadKeepaliveCount();
 
   /**
    * Returns the current number of connections that are in the keepalive
@@ -135,7 +132,7 @@ public interface PortMBean {
   @Description("The current number of connections that are" +
                " in the keepalive state and are using" +
                " select to maintain the connection")
-  public int getKeepaliveSelectCount();
+  public int getSelectKeepaliveCount();
 
   /**
    * Returns the total number of requests serviced by the server
@@ -143,7 +140,7 @@ public interface PortMBean {
    */
   @Description("The total number of requests serviced by the"
                + " server since it started")
-  public long getLifetimeRequestCount();
+  public long getRequestCountLifetime();
 
   /**
    * Returns the number of requests that have ended up in the keepalive state
@@ -151,7 +148,7 @@ public interface PortMBean {
    */
   @Description("The total number of requests that have ended"
                + " up in the keepalive state")
-  public long getLifetimeKeepaliveCount();
+  public long getKeepaliveCountLifetime();
 
   /**
    * The total number of connections that have terminated with
@@ -159,7 +156,7 @@ public interface PortMBean {
    */
   @Description("The total number of connections that have " +
                " terminated with a client disconnect")
-  public long getLifetimeClientDisconnectCount();
+  public long getClientDisconnectCountLifetime();
 
   /**
    * Returns the total duration in milliseconds that requests serviced by
@@ -167,7 +164,8 @@ public interface PortMBean {
    */
   @Description("The total duration in milliseconds that"
                + " requests serviced by this service have taken")
-  public long getLifetimeRequestTime();
+  @Units("milliseconds")
+  public long getRequestTimeLifetime();
 
   /**
    * Returns the total number of bytes that requests serviced by this
@@ -175,7 +173,8 @@ public interface PortMBean {
    */
   @Description("The total number of bytes that requests"
                + " serviced by this port have read")
-  public long getLifetimeReadBytes();
+  @Units("milliseconds")
+  public long getReadBytesLifetime();
 
   /**
    * Returns the total number of bytes that requests serviced by this
@@ -183,6 +182,7 @@ public interface PortMBean {
    */
   @Description("The total number of bytes that requests"
                + " serviced by this port have written")
-  public long getLifetimeWriteBytes();
+  @Units("milliseconds")
+  public long getWriteBytesLifetime();
 
 }

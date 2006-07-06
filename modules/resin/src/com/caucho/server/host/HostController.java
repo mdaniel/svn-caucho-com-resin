@@ -63,7 +63,7 @@ import com.caucho.server.e_app.EarConfig;
 import com.caucho.server.deploy.DeployController;
 import com.caucho.server.deploy.EnvironmentDeployController;
 
-import com.caucho.management.server.HostMBean;
+import com.caucho.management.server.HostMXBean;
 
 /**
  * A configuration entry for a host
@@ -247,7 +247,7 @@ public class HostController extends EnvironmentDeployController<Host,HostConfig>
   /**
    * Returns the host admin.
    */
-  public HostMBean getAdmin()
+  public HostMXBean getAdmin()
   {
     return _admin;
   }
@@ -320,7 +320,7 @@ public class HostController extends EnvironmentDeployController<Host,HostConfig>
   protected Object createMBean()
     throws JMException
   {
-    return new IntrospectionMBean(_admin, HostMBean.class);
+    return new IntrospectionMBean(_admin, HostMXBean.class);
   }
 
   /**

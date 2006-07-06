@@ -52,7 +52,7 @@ import com.caucho.loader.EnvironmentListener;
 
 import com.caucho.jmx.Jmx;
 
-import com.caucho.management.server.ClusterMBean;
+import com.caucho.management.server.*;
 
 /**
  * Defines a set of clustered servers.
@@ -151,7 +151,7 @@ public class Cluster implements EnvironmentListener {
   /**
    * Returns the admin.
    */
-  public ClusterMBean getAdmin()
+  public ClusterMXBean getAdmin()
   {
     return _admin;
   }

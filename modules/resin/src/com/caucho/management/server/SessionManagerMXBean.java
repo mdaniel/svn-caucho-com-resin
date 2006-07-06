@@ -29,7 +29,7 @@
 
 package com.caucho.management.server;
 
-import com.caucho.jmx.Description;
+import com.caucho.jmx.*;
 
 /**
  * Administration for the SessionManager for a WebApp.
@@ -40,7 +40,7 @@ import com.caucho.jmx.Description;
  * </pre>
  */
 @Description("The session manager for a web-app")
-public interface SessionManagerMBean extends ManagedObjectMBean
+public interface SessionManagerMXBean extends ManagedObjectMXBean
 {
   //
   // Hierarchy Attributes
@@ -50,13 +50,13 @@ public interface SessionManagerMBean extends ManagedObjectMBean
    * Returns the owning WebApp.
    */
   @Description("The owning WebApp for this session manager")
-  public WebAppMBean getWebApp();
+  public WebAppMXBean getWebApp();
 
   /**
    * Returns the ObjectName for the persistent store.
    */
   @Description("Returns the persistent store mbean")
-  public PersistentStoreMBean getPersistentStore();
+  public PersistentStoreMXBean getPersistentStore();
 
   //
   // Configuration attributes
@@ -97,6 +97,7 @@ public interface SessionManagerMBean extends ManagedObjectMBean
    * The session cookie max-age sent to the browser.
    */
   @Description("The session cookie max-age sent to the browser")
+  @Units("milliseconds")
   public long getCookieMaxAge();
 
   /**
@@ -159,7 +160,7 @@ public interface SessionManagerMBean extends ManagedObjectMBean
   /**
    * Returns the session save-mode.
    */
-  @Description("The session save-mode is one of: " +
+  @Description("Configured session persistence mode.  The session save-mode is one of: " +
 	       "before-headers, after-request, on-shutdown")
   public String getSaveMode();
     
@@ -167,13 +168,38 @@ public interface SessionManagerMBean extends ManagedObjectMBean
    * The maximum number of sessions in memory.  The number
    * of persistent sessions may be larger.
    */
-  @Description("The maximum number of sessions in memory.  The number of persistent sessions may be larger")
+  @Description("Configured maximum number of sessions in memory.  The number of persistent sessions may be larger")
   public int getSessionMax();
     
   /**
    * The maximum time an idle session will be saved.  session-timeout affects
    * persistent sessions.
    */
-  @Description("The maximum time an idle session will be saved in milliseconds.  SessionTimeout affects persistent sessions")
+  @Description("Configured maximum time an idle session will be saved in milliseconds.  SessionTimeout affects persistent sessions")
+  @Units("milliseconds")
   public long getSessionTimeout();
+
+  //
+  // statistics
+  //
+
+  /**
+   * Returns the count of active sessions.
+   */
+  public long getSessionActiveCount();
+
+  /**
+   * Returns the count of sessions created
+   */
+  public long getSessionCreateCount();
+
+  /**
+   * Returns the count of sessions invalidated
+   */
+  public long getSessionInvalidateCount();
+
+  /**
+   * Returns the count of sessions timeout
+   */
+  public long getSessionTimeoutCount();
 }

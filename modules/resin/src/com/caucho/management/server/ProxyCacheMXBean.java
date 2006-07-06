@@ -39,20 +39,25 @@ import com.caucho.jmx.Name;
  * resin:type=ProxyCache
  * </pre>
  */
-public interface ProxyCacheMBean {
+@Description("Resin's integrated proxy cache")
+public interface ProxyCacheMXBean extends ManagedObjectMXBean {
   /**
    * Returns the proxy cache hit count.
    */
   @Description("The proxy cache is used to cache responses that"
                + " set appropriate HTTP headers")
-  public long getHitCount();
+  public long getHitLifetimeCount();
 
   /**
    * Returns the proxy cache miss count.
    */
   @Description("The proxy cache is used to cache responses that"
                + " set appropriate HTTP headers")
-  public long getMissCount();
+  public long getMissLifetimeCount();
+
+  //
+  // Operations
+  //
 
   /**
    * Clears the cache.

@@ -29,6 +29,8 @@
 
 package com.caucho.management.server;
 
+import com.caucho.jmx.*;
+
 /**
  * Management interface for the host.
  *
@@ -36,27 +38,39 @@ package com.caucho.management.server;
  * resin:type=Host,name=foo.com
  * </pre>
  */
-public interface HostMBean extends DeployControllerMBean
+@Description("The virtual host")
+public interface HostMXBean extends DeployControllerMXBean
 {
   /**
    * Returns the host name.
    */
+  @Description("The canonical host name")
   public String getHostName();
 
   /**
    * Returns the URL
    */
+  @Description("The canonical URL")
   public String getURL();
+
+  //
+  // Relations
+  //
+  
+  /**
+   * Returns an array of the webapps
+   */
+  @Description("The configured webapps for the virtual host")
+  public WebAppMXBean []getWebApps();
+
+  //
+  // Configuration
+  //
 
   /**
    * Returns the root directory.
    */
   public String getRootDirectory();
-
-  /**
-   * Returns the document directory.
-   */
-  public String getDocumentDirectory();
 
   /**
    * Returns the primary war directory.
@@ -68,24 +82,21 @@ public interface HostMBean extends DeployControllerMBean
    */
   public String getWarExpandDirectory();
 
-  /**
-   * Returns an array of the webapp names
-   * (obsolete, use {@link #getWebAppObjectNames()}.
-   */
-  public WebAppMBean []getWebApps();
-
-
+  //
+  // Operations
+  //
+  
   /**
    * Updates a web-app entry from the deployment directories.
    */
   public void updateWebAppDeploy(String name)
-    throws Throwable;
+    throws Exception;
 
   /**
    * Updates an ear entry from the deployment directories.
    */
   public void updateEarDeploy(String name)
-    throws Throwable;
+    throws Exception;
 
   /**
    * Expand an ear entry from the deployment directories.

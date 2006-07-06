@@ -29,28 +29,12 @@
 
 package com.caucho.management.server;
 
-import com.caucho.jmx.Description;
-
 /**
- * Represents a Resin-managed Thread.
+ * Management interface for the persistent store.
  *
  * <pre>
- * resin:type=Thread,name=123
+ * resin:type=PersistentStore
  * </pre>
  */
-@Description("A Resin-managed Thread from the thread pool.")
-public interface ThreadMBean {
-  /**
-   * Returns the thread's ObjectName.
-   */
-  @Description("The Thread's JMX ObjectName")
-  public String getObjectName();
-
-  /**
-   * Returns the thread-id.  Management applications will use the
-   * thread-id in conjunction with the JDK's ThreadMXBean to get more
-   * Thread information.
-   */
-  @Description("The thread's JVM id.  Use with ThreadMXBean")
-  public long getThreadId();
+public interface PersistentStoreMXBean extends ManagedObjectMXBean {
 }

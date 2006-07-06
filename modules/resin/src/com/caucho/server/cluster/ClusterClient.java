@@ -75,6 +75,7 @@ public class ClusterClient {
   private volatile long _keepaliveTotalCount;
   private volatile long _connectTotalCount;
   private volatile long _failTotalCount;
+  private volatile long _busyCountTotal;
 
   private volatile boolean _isEnabled = true;
   private volatile boolean _isClosed;
@@ -147,6 +148,14 @@ public class ClusterClient {
   public long getFailTotalCount()
   {
     return _lifecycle.getFailCount();
+  }
+
+  /**
+   * Returns the count of busy connections.
+   */
+  public long getBusyCountTotal()
+  {
+    return _lifecycle.getBusyCount();
   }
 
   /**

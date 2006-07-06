@@ -46,10 +46,8 @@ import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.EnvironmentProperties;
-import com.caucho.management.j2ee.J2EEDomain;
-import com.caucho.management.j2ee.J2EEManagedObject;
-import com.caucho.management.j2ee.JVM;
-import com.caucho.management.server.ClusterMBean;
+import com.caucho.management.j2ee.*;
+import com.caucho.management.server.*;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.ServerListener;
 import com.caucho.transaction.cfg.TransactionManagerConfig;
@@ -249,9 +247,9 @@ public class ResinServer
   /**
    * Returns the cluster names.
    */
-  public ClusterMBean []getClusters()
+  public ClusterMXBean []getClusters()
   {
-    return new ClusterMBean[0];
+    return new ClusterMXBean[0];
   }
 
   /**

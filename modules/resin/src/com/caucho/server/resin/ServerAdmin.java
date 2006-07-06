@@ -40,22 +40,23 @@ import com.caucho.server.port.AbstractSelectManager;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.host.HostController;
 
-import com.caucho.management.server.ServerMBean;
-import com.caucho.management.server.HostMBean;
-import com.caucho.management.server.PortMBean;
-import com.caucho.management.server.ClusterMBean;
-import com.caucho.management.server.ThreadPoolMBean;
+import com.caucho.management.server.*;
 
 import java.util.ArrayList;
 
 public class ServerAdmin extends DeployControllerAdmin<ServerController>
-  implements ServerMBean
+  implements ServerMXBean
 {
   private static final L10N L = new L10N(ServerAdmin.class);
 
   ServerAdmin(ServerController controller)
   {
     super(controller);
+  }
+
+  public String getName()
+  {
+    return null;
   }
 
   @Override
@@ -84,36 +85,36 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return getController().getId();
   }
   
-  public ThreadPoolMBean getThreadPool()
+  public ThreadPoolMXBean getThreadPool()
   {
     return getController().getThreadPool();
   }
 
-  public PortMBean []getPorts()
+  public PortMXBean []getPorts()
   {
     ServletServer server = getDeployInstance();
 
     if (server == null)
-      return new PortMBean[0];
+      return new PortMXBean[0];
 
-    ArrayList<PortMBean> portList = new ArrayList<PortMBean>();
+    ArrayList<PortMXBean> portList = new ArrayList<PortMXBean>();
 
     for (Port port : server.getPorts()) {
-      PortMBean admin = port.getAdmin();
+      PortMXBean admin = port.getAdmin();
 
       if (admin != null)
         portList.add(admin);
     }
 
-    return portList.toArray(new PortMBean[portList.size()]);
+    return portList.toArray(new PortMXBean[portList.size()]);
   }
 
-  public PortMBean getClusterPort()
+  public PortMXBean getClusterPort()
   {
     return null;
   }
 
-  public ClusterMBean getCluster()
+  public ClusterMXBean getCluster()
   {
     ServletServer server = getDeployInstance();
 
@@ -139,17 +140,17 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return CauchoSystem.isDetailedStatistics();
   }
 
-  public HostMBean []getHosts()
+  public HostMXBean []getHosts()
   {
     ServletServer server = getDeployInstance();
 
     if (server == null)
-      return new HostMBean[0];
+      return new HostMXBean[0];
 
-    ArrayList<HostMBean> hostList = new ArrayList<HostMBean>();
+    ArrayList<HostMXBean> hostList = new ArrayList<HostMXBean>();
 
     for (HostController host : server.getHostControllers()) {
-      HostMBean admin = host.getAdmin();
+      HostMXBean admin = host.getAdmin();
 
       if (admin != null)
         hostList.add(admin);
@@ -157,10 +158,25 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
 
     // XXX: sort
 
-    return hostList.toArray(new HostMBean[hostList.size()]);
+    return hostList.toArray(new HostMXBean[hostList.size()]);
   }
 
-  public int getActiveThreadCount()
+  public String getState()
+  {
+    return getController().getState();
+  }
+
+  public Date getInitialStartTime()
+  {
+    return new Date(getController().getStartTime());
+  }
+
+  public Date getStartTime()
+  {
+    return new Date(getController().getStartTime());
+  }
+
+  public int getThreadActiveCount()
   {
     ServletServer server = getDeployInstance();
 
@@ -181,7 +197,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return activeThreadCount;
   }
 
-  public int getKeepaliveThreadCount()
+  public int getThreadKeepaliveCount()
   {
     ServletServer server = getDeployInstance();
 
@@ -202,7 +218,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return keepaliveThreadCount;
   }
 
-  public int getKeepaliveSelectCount()
+  public int getSelectKeepaliveCount()
   {
     ServletServer server = getDeployInstance();
 
@@ -223,7 +239,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return keepaliveSelectCount;
   }
 
-  public long getLifetimeRequestCount()
+  public long getRequestCountLifetime()
   {
     ServletServer server = getDeployInstance();
 
@@ -238,7 +254,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return lifetimeRequestCount;
   }
 
-  public long getLifetimeRequestTime()
+  public long getRequestTimeLifetime()
   {
     ServletServer server = getDeployInstance();
 
@@ -253,7 +269,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return lifetimeRequestTime;
   }
 
-  public long getLifetimeReadBytes()
+  public long getRequestReadBytesLifetime()
   {
     ServletServer server = getDeployInstance();
 
@@ -268,7 +284,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return lifetimeReadBytes;
   }
 
-  public long getLifetimeWriteBytes()
+  public long getRequestWriteBytesLifetime()
   {
     ServletServer server = getDeployInstance();
 
@@ -283,7 +299,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return lifetimeWriteBytes;
   }
 
-  public long getLifetimeClientDisconnectCount()
+  public long getClientDisconnectCountLifetime()
   {
     ServletServer server = getDeployInstance();
 
@@ -298,7 +314,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return lifetimeClientDisconnectCount;
   }
 
-  public long getLifetimeKeepaliveCount()
+  public long getKeepaliveCountLifetime()
   {
     ServletServer server = getDeployInstance();
 
@@ -313,27 +329,12 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return lifetimeKeepaliveCount;
   }
 
-  public String getState()
-  {
-    return getController().getState();
-  }
-
-  public Date getInitialStartTime()
-  {
-    return new Date(getController().getStartTime());
-  }
-
-  public Date getStartTime()
-  {
-    return new Date(getController().getStartTime());
-  }
-
-  public long getTotalMemory()
+  public long getMemoryTotal()
   {
     return Runtime.getRuntime().totalMemory();
   }
 
-  public long getFreeMemory()
+  public long getMemoryFree()
   {
     return Runtime.getRuntime().freeMemory();
   }
@@ -359,7 +360,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
       server.clearCacheByPattern(hostRegexp, urlRegexp);
   }
 
-  public long getInvocationCacheHitCount()
+  public long getInvocationCacheHitCountLifetime()
   {
     ServletServer server = getDeployInstance();
 
@@ -369,7 +370,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
       return -1;
   }
 
-  public long getInvocationCacheMissCount()
+  public long getInvocationCacheMissCountLifetime()
   {
     ServletServer server = getDeployInstance();
 

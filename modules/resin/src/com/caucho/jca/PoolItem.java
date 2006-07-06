@@ -156,7 +156,7 @@ class PoolItem implements ConnectionEventListener, XAResource {
 
     if (log.isLoggable(Level.FINE))
       log.fine("create: " + this +
-	       "(active:" + _cm.getActiveConnectionCount() +
+	       "(active:" + _cm.getConnectionActiveCount() +
 	       ", total:" + _cm.getConnectionCount() + ")");
   }
 

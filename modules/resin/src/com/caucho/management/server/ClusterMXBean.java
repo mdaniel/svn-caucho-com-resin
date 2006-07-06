@@ -49,13 +49,11 @@ import javax.management.ObjectName;
  * resin:type=Cluster,name=app-tier
  * </pre>
  */
-public interface ClusterMBean {
-  /**
-   * Returns the {@link ObjectName} of the mbean.
-   */
-  @Description("The JMX ObjectName for the MBean")
-  public ObjectName getObjectName();
-
+public interface ClusterMXBean extends ManagedObjectMXBean {
+  //
+  // Hierarchy attributes
+  //
+  
   /**
    * Returns a list of {@link ObjectName}s for the
    * {@link com.caucho.server.cluster.ClusterClient}s that
@@ -65,19 +63,19 @@ public interface ClusterMBean {
   @Description("The ClusterClients that are used to create" +
                " outbound connections to communicate with" +
                " members of the cluster")
-  public ClusterServerMBean []getServers();
+  public ClusterServerMXBean []getServers();
   
   /**
    * Returns a list of the ObjectNames for the virtual hosts.
    */
   @Description("Hosts are containers that are uniquely identified"
                + " by the hostname used in making an HTTP request")
-  public HostMBean []getHosts();
+  public HostMXBean []getHosts();
 
   /**
    * Returns the persistent-store ObjectName.
    */
   @Description("The PersistentStore saves persistent and distributed session" +
 	       " information")
-  public PersistentStoreMBean getPersistentStore();
+  public PersistentStoreMXBean getPersistentStore();
 }

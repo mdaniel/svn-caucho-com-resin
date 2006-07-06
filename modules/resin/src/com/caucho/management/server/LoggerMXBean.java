@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2005 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -24,12 +24,29 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam
+ * @author Scott Ferguson
  */
 
 package com.caucho.management.server;
 
-public interface EarMBean
-  extends DeployControllerMBean
-{
+import com.caucho.config.ConfigException;
+
+/**
+ * Interface for a logger, letting applications change the logging level.
+ *
+ * <pre>
+ * resin:type=Logger,name=com.caucho.server.cluster
+ * </pre>
+ */
+public interface LoggerMXBean extends ManagedObjectMXBean {
+  /**
+   * Returns the level.
+   */
+  public String getLevel();
+  
+  /**
+   * Sets the level.
+   */
+  public void setLevel(String level)
+    throws ConfigException;
 }

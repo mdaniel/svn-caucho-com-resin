@@ -49,6 +49,8 @@ import com.caucho.sql.*;
 
 import com.caucho.loader.Environment;
 
+import com.caucho.management.server.*;
+
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.FileStore;
 import com.caucho.server.cluster.Cluster;
@@ -96,6 +98,7 @@ public final class SessionManager implements ObjectManager, AlarmListener {
   private static final int DECODE[];
   
   private Application _application;
+  private final SessionManagerMXBean _admin;
 
   // factory for creating sessions
   // private SessionFactory _sessionFactory;
@@ -229,7 +232,15 @@ public final class SessionManager implements ObjectManager, AlarmListener {
 
     _persistentPath = Vfs.lookup("WEB-INF/sessions");
 
-    new SessionManagerAdmin(this);
+    _admin = new SessionManagerAdmin(this);
+  }
+
+  /**
+   * Returns the admin.
+   */
+  public SessionManagerMXBean getAdmin()
+  {
+    return _admin;
   }
 
   /**

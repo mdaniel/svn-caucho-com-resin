@@ -44,7 +44,7 @@ import com.caucho.jmx.Jmx;
 
 import com.caucho.loader.Environment;
 
-import com.caucho.management.server.TcpConnectionMBean;
+import com.caucho.management.server.*;
 
 import com.caucho.server.connection.BroadcastTask;
 
@@ -56,10 +56,10 @@ import com.caucho.log.Log;
  *
  * <p>Each TcpConnection has its own thread.
  */
-public class TcpConnection extends PortConnection
-  implements ThreadTask, TcpConnectionMBean
+public class TcpConnection extends PortConnection implements ThreadTask
 {
-  private static final Logger log = Log.open(TcpConnection.class);
+  private static final Logger log
+    = Logger.getLogger(TcpConnection.class.getName());
 
   private static int _g_id;
   
@@ -75,7 +75,9 @@ public class TcpConnection extends PortConnection
   private final Object _requestLock = new Object();
 
   private String _id = "tcp-connection-" + _g_id++;
-  private String _objectName;
+  private String _name;
+
+  private final Admin _admin = new Admin();
   
   private String _state = "unknown";
   private long _startTime;
@@ -99,14 +101,12 @@ public class TcpConnection extends PortConnection
 
     if (port.getAddress() == null) {
       _id = "resin-tcp-connection-*:" + port.getPort() + "-" + id;
-      _objectName = ("resin:type=TcpConnection,name=any-"
-		     + port.getPort() + "-" + id);
+      _name = "name=any-" + port.getPort() + "-" + id;
     }
     else {
       _id = ("resin-tcp-connection-" + port.getAddress() + ":" +
              port.getPort() + "-" + id);
-      _objectName = ("resin:type=TcpConnection,name=" + port.getAddress()
-		     + "-" + port.getPort() + "-" + id);
+      _name = "name=" + port.getAddress() + "-" + port.getPort() + "-" + id;
     }
 
     _socket = socket;
@@ -115,9 +115,9 @@ public class TcpConnection extends PortConnection
   /**
    * Returns the object name for jmx.
    */
-  public String getObjectName()
+  public String getName()
   {
-    return _objectName;
+    return _name;
   }
 
   /**
@@ -383,7 +383,7 @@ public class TcpConnection extends PortConnection
   /**
    * Returns the time the current request has taken.
    */
-  public final long getActiveTime()
+  public final long getRequestActiveTime()
   {
     if (_startTime > 0)
       return Alarm.getCurrentTime() - _startTime;
@@ -450,16 +450,8 @@ public class TcpConnection extends PortConnection
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
-    
-    try {
-      thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
-      
-      Jmx.register(this, _objectName);
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
+
+    _admin.register();
   }
   
   /**
@@ -668,18 +660,7 @@ public class TcpConnection extends PortConnection
   {
     closeImpl();
 
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-    
-    try {
-      thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
-      
-      Jmx.unregister(_objectName);
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
+    _admin.unregister();
 
     setState("free");
     
@@ -695,5 +676,42 @@ public class TcpConnection extends PortConnection
       return "TcpConnection[id=" + _id + ",socket=" + _socket + ",active]";
     else
       return "TcpConnection[id=" + _id + ",socket=" + _socket + ",port=" + getPort() + "]";
+  }
+
+  class Admin extends AbstractManagedObject implements TcpConnectionMXBean {
+    Admin()
+    {
+      super(ClassLoader.getSystemClassLoader());
+    }
+    
+    public String getName()
+    {
+      return _name;
+    }
+
+    public long getThreadId()
+    {
+      return TcpConnection.this.getThreadId();
+    }
+
+    public long getRequestActiveTime()
+    {
+      return TcpConnection.this.getRequestActiveTime();
+    }
+
+    public String getState()
+    {
+      return TcpConnection.this.getState();
+    }
+
+    void register()
+    {
+      registerSelf();
+    }
+
+    void unregister()
+    {
+      unregisterSelf();
+    }
   }
 }

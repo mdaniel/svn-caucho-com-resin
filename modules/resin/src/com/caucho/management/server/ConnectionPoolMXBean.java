@@ -29,6 +29,8 @@
 
 package com.caucho.management.server;
 
+import com.caucho.jmx.*;
+
 /**
  * MBean API for the JCA connection pool.
  *
@@ -36,22 +38,22 @@ package com.caucho.management.server;
  * resin:type=ConnectionPool,name=jdbc/resin,...
  * </pre>
  */
-public interface ConnectionPoolMBean {
-  /**
-   * Returns the pool name.
-   */
-  public String getName();
-
+@Description("The state of a JDBC connection pool")
+public interface ConnectionPoolMXBean extends ManagedObjectMXBean {
+  //
   // Configuration
+  //
   
   /**
    * Returns the maximum number of connections.
    */
+  @Description("Configured maximum connections")
   public int getMaxConnections();
   
   /**
    * Returns the number of overflow connections.
    */
+  @Description("Configured maximum number of overflow connections")
   public int getMaxOverflowConnections();
   
   /**
@@ -62,21 +64,25 @@ public interface ConnectionPoolMBean {
   /**
    * Returns the pool idle time in milliseconds.
    */
+  @Units("milliseconds")
   public long getMaxIdleTime();
   
   /**
    * Returns the pool active time in milliseconds.
    */
+  @Units("milliseconds")
   public long getMaxActiveTime();
   
   /**
    * Returns the pool time in milliseconds.
    */
+  @Units("milliseconds")
   public long getMaxPoolTime();
   
   /**
    * How long to wait for connections when timed out.
    */
+  @Units("milliseconds")
   public long getConnectionWaitTime();
   
   /**
@@ -89,20 +95,25 @@ public interface ConnectionPoolMBean {
    */
   public boolean isLocalTransactionOptimization();
   
-  
+  //
   // Statistics
+  //
+  
   /**
    * Returns the total number of connections.
    */
+  @Description("Returns the current number of idle and active connections")
   public int getConnectionCount();
 
   /**
    * Returns the number of active connections.
    */
-  public int getActiveConnectionCount();
+  @Description("Returns the current number of active connections")
+  public int getConnectionActiveCount();
 
   /**
    * Returns the number of idle connections.
    */
-  public int getIdleConnectionCount();
+  @Description("Returns the current number of idle connections")
+  public int getConnectionIdleCount();
 }

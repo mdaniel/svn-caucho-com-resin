@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2005 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -24,41 +24,12 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
 package com.caucho.management.server;
 
-/**
- * Management interface for the thread pool.
- *
- * <pre>
- * resin:type=ThreadPool
- * </pre>
- */
-public interface ThreadPoolMBean {
-  /**
-   * Returns the maximum number of threads.
-   */
-  public int getThreadMax();
-  
-  /**
-   * Returns the minimum number of spare threads.
-   */
-  public int getSpareThreadMin();
-  
-  /**
-   * Returns the current number of threads.
-   */
-  public int getThreadCount();
-  
-  /**
-   * Returns the current number of active threads.
-   */
-  public int getActiveThreadCount();
-  
-  /**
-   * Returns the current number of idle threads.
-   */
-  public int getIdleThreadCount();
+public interface EAppMXBean
+  extends DeployControllerMXBean
+{
 }

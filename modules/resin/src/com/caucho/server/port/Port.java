@@ -54,7 +54,7 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.config.types.Period;
 
-import com.caucho.management.server.PortMBean;
+import com.caucho.management.server.PortMXBean;
 
 import com.caucho.lifecycle.Lifecycle;
 
@@ -213,7 +213,7 @@ public class Port
     return _objectName;
   }
 
-  public PortMBean getAdmin()
+  public PortMXBean getAdmin()
   {
     return _admin;
   }

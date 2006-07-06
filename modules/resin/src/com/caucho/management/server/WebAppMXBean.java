@@ -29,7 +29,7 @@
 
 package com.caucho.management.server;
 
-import com.caucho.jmx.Description;
+import com.caucho.jmx.*;
 
 /**
  * MBean API for the WebApp.
@@ -38,7 +38,8 @@ import com.caucho.jmx.Description;
  * resin:type=WebAppMBean,name=/wiki,Host=foo.com
  * </pre>
  */
-public interface WebAppMBean extends DeployControllerMBean {
+@Description("The web-app management interface")
+public interface WebAppMXBean extends DeployControllerMXBean {
   //
   // Hierarchy attributes
   //
@@ -47,7 +48,13 @@ public interface WebAppMBean extends DeployControllerMBean {
    * Returns the owning host
    */
   @Description("The web-app's host")
-  public HostMBean getHost();
+  public HostMXBean getHost();
+
+  /**
+   * Returns the session manager
+   */
+  @Description("The web-app's session manager")
+  public SessionManagerMXBean getSessionManager();
 
   //
   // Configuration attributes
@@ -63,77 +70,50 @@ public interface WebAppMBean extends DeployControllerMBean {
    */
   public String getContextPath();
 
-  /**
-   * Returns the session timeout
-   */
-  public long getSessionTimeout();
-
-  /**
-   * Returns the persistent store type.
-   */
-  public String getSessionStoreType();
-
   //
-  // statistics attributes
+  // Statistics attributes
   //
   
   /**
    * Returns the current number of requests being serviced by the web-app.
    */
-  public int getConnectionCount();
-
-  /**
-   * Returns the count of active sessions.
-   */
-  public int getActiveSessionCount();
-
-  /**
-   * Returns the count of active sessions.
-   */
-  public long getSessionActiveCount();
-
-  /**
-   * Returns the count of sessions created
-   */
-  public long getSessionCreateCount();
-
-  /**
-   * Returns the count of sessions invalidated
-   */
-  public long getSessionInvalidateCount();
-
-  /**
-   * Returns the count of sessions timeout
-   */
-  public long getSessionTimeoutCount();
+  @Description("Current number of requests served by the web-app")
+  public int getRequestCount();
 
   /**
    * Returns the total number of requests serviced by the web-app
    * since it started.
    */
-  public long getLifetimeConnectionCount();
+  @Description("Total number of requests served by the web-app since starting")
+  public long getRequestLifetimeCount();
 
   /**
    * Returns the total duration in milliseconds that connections serviced by
    * this web-app have taken.
    */
-  public long getLifetimeConnectionTime();
+  @Description("Total time taken by requests served by the web-app")
+  @Units("milliseconds")
+  public long getRequestLifetimeTime();
 
   /**
-   * Returns the total number of bytes that connections serviced by
+   * Returns the total number of bytes that requests serviced by
    * this web-app have read.
    */
-  public long getLifetimeReadBytes();
+  @Description("Total bytes requests served by the web-app have read")
+  @Units("bytes")
+  public long getRequestLifetimeReadBytes();
 
   /**
    * Returns the total number of bytes that connections serviced by this
    * web-app have written.
    */
-  public long getLifetimeWriteBytes();
+  @Description("Total bytes requests served by the web-app have written")
+  @Units("bytes")
+  public long getRequestLifetimeWriteBytes();
 
   /**
    * Returns the number of connections that have ended with a
    * {@link com.caucho.vfs.ClientDisconnectException} for this web-app in it's lifetime.
    */
-  public long getLifetimeClientDisconnectCount();
+  public long getClientDisconnectLifetimeCount();
 }

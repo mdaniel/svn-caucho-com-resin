@@ -364,7 +364,7 @@ public class DBPool implements DataSource {
    */
   public int getActiveConnections()
   {
-    return _connectionPool.getActiveConnectionCount();
+    return _connectionPool.getConnectionActiveCount();
   }
 
   /**

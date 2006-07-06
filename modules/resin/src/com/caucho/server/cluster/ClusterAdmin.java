@@ -30,18 +30,12 @@
 
 package com.caucho.server.cluster;
 
-import java.io.Serializable;
-
 import javax.management.ObjectName;
 
-import com.caucho.management.server.ClusterMBean;
-import com.caucho.management.server.ClusterServerMBean;
-import com.caucho.management.server.HostMBean;
-import com.caucho.management.server.PersistentStoreMBean;
-import com.caucho.management.server.PortMBean;
+import com.caucho.management.server.*;
 
-public class ClusterAdmin
-  implements ClusterMBean, Serializable
+public class ClusterAdmin extends AbstractManagedObject
+  implements ClusterMXBean
 {
   private final Cluster _cluster;
 
@@ -50,12 +44,12 @@ public class ClusterAdmin
     _cluster = cluster;
   }
 
-  public ObjectName getObjectName()
+  public String getName()
   {
-    return _cluster.getObjectName();
+    return _cluster.getId();
   }
 
-  public PortMBean getPort()
+  public PortMXBean getPort()
   {
     ClusterServer clusterServer = _cluster.getSelfServer();
 
@@ -65,17 +59,17 @@ public class ClusterAdmin
      return clusterServer.getClusterPort().getAdmin();
   }
 
-  public PersistentStoreMBean getPersistentStore()
+  public PersistentStoreMXBean getPersistentStore()
   {
     return null;
   }
 
-  public HostMBean []getHosts()
+  public HostMXBean []getHosts()
   {
-    return new HostMBean[0];
+    return new HostMXBean[0];
   }
 
-  public ClusterServerMBean []getServers()
+  public ClusterServerMXBean []getServers()
   {
     ClusterServer selfServer = _cluster.getSelfServer();
 
@@ -86,7 +80,7 @@ public class ClusterAdmin
     if (selfServer != null)
       len--;
 
-    ClusterServerMBean []serverMBeans = new ClusterServerMBean[len];
+    ClusterServerMXBean []serverMBeans = new ClusterServerMXBean[len];
 
     int j = 0;
 

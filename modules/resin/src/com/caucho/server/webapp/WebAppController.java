@@ -32,9 +32,11 @@ package com.caucho.server.webapp;
 import com.caucho.config.types.PathBuilder;
 import com.caucho.jmx.IntrospectionMBean;
 import com.caucho.log.Log;
-import com.caucho.management.server.WebAppMBean;
+import com.caucho.management.server.WebAppMXBean;
 import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.management.j2ee.WebModule;
+import com.caucho.mbeans.server.*;
+
 import com.caucho.server.deploy.DeployConfig;
 import com.caucho.server.deploy.EnvironmentDeployController;
 import com.caucho.server.host.Host;
@@ -305,7 +307,7 @@ public class WebAppController
   protected Object createMBean()
     throws JMException
   {
-    return new IntrospectionMBean(_admin, WebAppMBean.class);
+    return new IntrospectionMBean(_admin, WebAppMXBean.class);
   }
 
   protected void initEnd()

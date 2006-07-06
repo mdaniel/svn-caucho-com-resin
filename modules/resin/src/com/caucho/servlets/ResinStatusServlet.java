@@ -81,10 +81,10 @@ public class ResinStatusServlet extends GenericServlet {
   private String _enable;
 
   private MBeanServer _mbeanServer;
-  private ResinMBean _resin;
-  private ServerMBean _server;
-  private ClusterMBean _cluster;
-  private ProxyCacheMBean _proxyCache;
+  private ResinMXBean _resin;
+  private ServerMXBean _server;
+  private ClusterMXBean _cluster;
+  private ProxyCacheMXBean _proxyCache;
 
   /**
    * Set to read or write.
@@ -120,10 +120,10 @@ public class ResinStatusServlet extends GenericServlet {
       //_resinServer = (ResinServerMBean) Jmx.find("resin:type=ResinServer");
       //_servletServer = (ServletServerMBean) Jmx.find("resin:name=default,type=Server");
 
-      _resin = (ResinMBean) Jmx.findGlobal("resin:type=Resin");
-      _server = (ServerMBean) Jmx.findGlobal("resin:type=Server");
-      _cluster = (ClusterMBean) Jmx.findGlobal("resin:type=Cluster");
-      _proxyCache = (ProxyCacheMBean) Jmx.findGlobal("resin:type=ProxyCache");
+      _resin = (ResinMXBean) Jmx.findGlobal("resin:type=Resin");
+      _server = (ServerMXBean) Jmx.findGlobal("resin:type=Server");
+      _cluster = (ClusterMXBean) Jmx.findGlobal("resin:type=Cluster");
+      _proxyCache = (ProxyCacheMXBean) Jmx.findGlobal("resin:type=ProxyCache");
     } catch (Exception e) {
       throw new ServletException(e);
     }
@@ -240,8 +240,8 @@ public class ResinStatusServlet extends GenericServlet {
                 (freeMemory / 10000) % 10 +
                 "Meg");
 
-    long invocationHitCount = _server.getInvocationCacheHitCount();
-    long invocationMissCount = _server.getInvocationCacheMissCount();
+    long invocationHitCount = _server.getInvocationCacheHitCountLifetime();
+    long invocationMissCount = _server.getInvocationCacheMissCountLifetime();
 
     long totalCount = invocationHitCount + invocationMissCount;
     if (totalCount == 0)
@@ -256,8 +256,8 @@ public class ResinStatusServlet extends GenericServlet {
     out.println(" (" + invocationHitCount + "/" + totalCount + ")");
 
     if (_proxyCache != null) {
-      long proxyHitCount = _proxyCache.getHitCount();
-      long proxyMissCount = _proxyCache.getMissCount();
+      long proxyHitCount = _proxyCache.getHitLifetimeCount();
+      long proxyMissCount = _proxyCache.getMissLifetimeCount();
 
       totalCount = proxyHitCount + proxyMissCount;
       if (totalCount == 0)
@@ -286,14 +286,14 @@ public class ResinStatusServlet extends GenericServlet {
   {
     out.println("<table border='3'>");
 
-    ThreadPoolMBean threadPool = (ThreadPoolMBean) Jmx.findGlobal("resin:type=ThreadPool");
+    ThreadPoolMXBean threadPool = (ThreadPoolMXBean) Jmx.findGlobal("resin:type=ThreadPool");
     out.println("<tr><th colspan='3'>Threads");
     out.println("    <th colspan='3'>Config");
     out.println("<tr><th>Active<th>Idle<th>Total");
     out.println("    <th>thread-max<th>spare-thread-min");
     out.println("<tr align='right'>");
-    out.println("    <td>" + threadPool.getActiveThreadCount());
-    out.println("    <td>" + threadPool.getIdleThreadCount());
+    out.println("    <td>" + threadPool.getThreadActiveCount());
+    out.println("    <td>" + threadPool.getThreadIdleCount());
     out.println("    <td>" + threadPool.getThreadCount());
 
     out.println("    <td>" + threadPool.getThreadMax());
@@ -360,7 +360,7 @@ public class ResinStatusServlet extends GenericServlet {
     throws IOException, ServletException
   {
     try {
-      PortMBean []portList = _server.getPorts();
+      PortMXBean []portList = _server.getPorts();
 
       if (portList.length > 0) {
         out.println("<h3>TCP ports</h3>");
@@ -371,7 +371,7 @@ public class ResinStatusServlet extends GenericServlet {
         out.println("    <th>Keepalive<th>Select");
 
         for (int i = 0; i < portList.length; i++) {
-          PortMBean port = portList[i];
+          PortMXBean port = portList[i];
 
           if (port == null || ! "active".equals(port.getState()))
             continue;
@@ -384,11 +384,11 @@ public class ResinStatusServlet extends GenericServlet {
           out.print(port.getProtocolName() + "://" + host + ":" + port.getPort());
           out.println();
 
-          out.print("    <td>" + port.getActiveThreadCount());
-          out.print("<td>" + port.getIdleThreadCount());
-          out.print("<td>" + port.getActiveThreadCount());
-          out.print("<td>" + port.getKeepaliveThreadCount());
-          out.print("<td>" + port.getKeepaliveSelectCount());
+          out.print("    <td>" + port.getThreadActiveCount());
+          out.print("<td>" + port.getThreadIdleCount());
+          out.print("<td>" + port.getThreadActiveCount());
+          out.print("<td>" + port.getThreadKeepaliveCount());
+          out.print("<td>" + port.getSelectKeepaliveCount());
           out.println();
 
           out.println();
@@ -407,7 +407,7 @@ public class ResinStatusServlet extends GenericServlet {
       String[]clusterList = new String[0]; // _server.getClusterObjectNames();
 
       for (int i = 0; i < clusterList.length; i++) {
-        ClusterMBean cluster = (ClusterMBean) Jmx.findGlobal(clusterList[i]);
+        ClusterMXBean cluster = (ClusterMXBean) Jmx.findGlobal(clusterList[i]);
 
         if (cluster == null) {
           out.println("<h3>Cluster " + clusterList[i] + " null</h3>");
@@ -423,10 +423,10 @@ public class ResinStatusServlet extends GenericServlet {
         out.println("<tr><th>Host");
         out.println("    <th>Active");
 
-        ClusterServerMBean []servers = cluster.getServers();
+        ClusterServerMXBean []servers = cluster.getServers();
 
         for (int j = 0; j < servers.length; j++) {
-	  ClusterServerMBean client = servers[j];
+	  ClusterServerMXBean client = servers[j];
 	  
           String host = client.getAddress();
           String port = String.valueOf(client.getPort());
@@ -447,7 +447,7 @@ public class ResinStatusServlet extends GenericServlet {
           else
             out.println(" (down)");
 
-          out.println("<td>" + client.getActiveCount());
+          out.println("<td>" + client.getConnectionActiveCount());
         }
 
         out.println("</table>");
@@ -479,12 +479,12 @@ public class ResinStatusServlet extends GenericServlet {
     while (iter.hasNext()) {
       ObjectName name = iter.next();
 
-      ConnectionPoolMBean pool = (ConnectionPoolMBean) Jmx.findGlobal(name);
+      ConnectionPoolMXBean pool = (ConnectionPoolMXBean) Jmx.findGlobal(name);
 
       if (pool != null) {
         out.println("<tr><td>" + pool.getName());
-        out.println("    <td>" + pool.getActiveConnectionCount());
-        out.println("    <td>" + pool.getIdleConnectionCount());
+        out.println("    <td>" + pool.getConnectionActiveCount());
+        out.println("    <td>" + pool.getConnectionIdleCount());
         out.println("    <td>" + pool.getConnectionCount());
 
         out.println("    <td>" + pool.getMaxConnections());
@@ -675,7 +675,7 @@ public class ResinStatusServlet extends GenericServlet {
     }
   }
 
-  public void printJMXServlets(PrintWriter out, MBeanServer server)
+  public void printJMXServlets(PrintWriter out, MXBeanServer server)
     throws IOException, ServletException
   {
     try {
@@ -693,8 +693,8 @@ public class ResinStatusServlet extends GenericServlet {
         ObjectName servletName = (ObjectName) iter.next();
 
         String name = servletName.getKeyProperty("name");
-        MBeanInfo mbeanInfo = server.getMBeanInfo(servletName);
-        MBeanAttributeInfo []attrs = mbeanInfo.getAttributes();
+        MXBeanInfo mbeanInfo = server.getMXBeanInfo(servletName);
+        MXBeanAttributeInfo []attrs = mbeanInfo.getAttributes();
 
         out.println("<table border=\"2\">");
         out.print("<tr><th>Name</th>");
@@ -731,7 +731,7 @@ public class ResinStatusServlet extends GenericServlet {
     Set<ObjectName> names = _mbeanServer.queryNames(hostPattern, null);
     Iterator<ObjectName> iter = names.iterator();
 
-    ArrayList<HostMBean> hosts = new ArrayList<HostMBean>();
+    ArrayList<HostMXBean> hosts = new ArrayList<HostMXBean>();
 
     while (iter.hasNext()) {
       ObjectName name = iter.next();
@@ -740,7 +740,7 @@ public class ResinStatusServlet extends GenericServlet {
       if ("current".equals(name.getKeyProperty("name")))
         continue;
 
-      HostMBean host = (HostMBean) Jmx.findGlobal(name);
+      HostMXBean host = (HostMXBean) Jmx.findGlobal(name);
 
       if (host != null) {
         hosts.add(host);
@@ -750,7 +750,7 @@ public class ResinStatusServlet extends GenericServlet {
     Collections.sort(hosts, new HostCompare());
 
     for (int i = 0; i < hosts.size(); i++) {
-      HostMBean host = hosts.get(i);
+      HostMXBean host = hosts.get(i);
 
       out.println("<tr><td><b>" + host.getURL() + "</b>");
 
@@ -765,17 +765,17 @@ public class ResinStatusServlet extends GenericServlet {
       names = _mbeanServer.queryNames(appPattern, null);
       iter = names.iterator();
 
-      ArrayList<WebAppMBean> apps = new ArrayList<WebAppMBean>();
+      ArrayList<WebAppMXBean> apps = new ArrayList<WebAppMXBean>();
 
       while (iter.hasNext()) {
         ObjectName name = iter.next();
 
         try {
-          WebAppMBean app = (WebAppMBean) Jmx.findGlobal(name);
+          WebAppMXBean app = (WebAppMXBean) Jmx.findGlobal(name);
 
           if (app != null)
             apps.add(app);
-        } catch (Throwable e) {
+        } catch (Exception e) {
           log.log(Level.WARNING, e.toString());
           out.println("<tr><td>" + name + "<td>" + e.toString());
         }
@@ -784,7 +784,8 @@ public class ResinStatusServlet extends GenericServlet {
       Collections.sort(apps, new AppCompare());
 
       for (int j = 0; j < apps.size(); j++) {
-        WebAppMBean app = apps.get(j);
+        WebAppMXBean app = apps.get(j);
+	SessionManagerMXBean session = app.getSessionManager();
 
         String contextPath = app.getContextPath();
 
@@ -802,7 +803,7 @@ public class ResinStatusServlet extends GenericServlet {
           out.print("<td bgcolor='#80ff80'>" + app.getState());
         else
           out.print("<td>" + app.getState());
-        out.print("<td>" + app.getActiveSessionCount());
+        out.print("<td>" + session.getSessionActiveCount());
       }
     }
 
@@ -828,8 +829,8 @@ public class ResinStatusServlet extends GenericServlet {
       out.println("<br><em>" + com.caucho.Version.FULL_VERSION + "</em>");
   }
 
-  static class HostCompare implements Comparator<HostMBean> {
-    public int compare(HostMBean a, HostMBean b)
+  static class HostCompare implements Comparator<HostMXBean> {
+    public int compare(HostMXBean a, HostMXBean b)
     {
       String urlA = a.getURL();
       String urlB = b.getURL();
@@ -845,8 +846,8 @@ public class ResinStatusServlet extends GenericServlet {
     }
   }
 
-  static class AppCompare implements Comparator<WebAppMBean> {
-    public int compare(WebAppMBean a, WebAppMBean b)
+  static class AppCompare implements Comparator<WebAppMXBean> {
+    public int compare(WebAppMXBean a, WebAppMXBean b)
     {
       String cpA = a.getContextPath();
       String cpB = b.getContextPath();

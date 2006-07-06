@@ -29,29 +29,50 @@
 
 package com.caucho.management.server;
 
-import javax.management.ObjectName;
+import java.util.Date;
 
 import com.caucho.jmx.Description;
 
 /**
- * Parent mbean of all Resin's managed objects.
+ * MBeans which have lifecycle transitions will normally implement
+ * the lifecycle mbean.
  */
-public interface ManagedObjectMBean {
+public interface LifecycleMXBean {
   /**
-   * Returns the {@link ObjectName} of the mbean.
+   * Returns the lifecycle state.
    */
-  @Description("The JMX ObjectName for the MBean")
-  public ObjectName getObjectName();
+  @Description("The lifecycle state of the client")
+  public String getState();
+
+  //
+  // Statistics attributes
+  //
 
   /**
-   * The JMX name property of the mbean.
+   * Returns the number of transitions to the failed state.
    */
-  @Description("The name property of the JMX ObjectName")
-  public String getName();
+  @Description("The total number of failures")
+  public long getFailLifetimeCount();
 
   /**
-   * The JMX type of this MBean.
+   * Returns the time of the last failure.
    */
-  @Description("The type property of the JMX ObjectName")
-  public String getType();
+  @Description("The time of the last failure")
+  public Date getLastFailTime();
+
+  //
+  // Operations on the mbean
+  //
+
+  /**
+   * Enables the mbean
+   */
+  @Description("Enables the mbean")
+  public void start();
+
+  /**
+   * Disables the mbean
+   */
+  @Description("Disables the mbean")
+  public void stop();
 }

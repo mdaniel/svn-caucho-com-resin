@@ -243,7 +243,16 @@ public class Jmx {
 	   MBeanRegistrationException,
 	   NotCompliantMBeanException
   {
-    return getMBeanServer().registerMBean(createMBean(object, name), name);
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(loader);
+      
+      return getMBeanServer().registerMBean(createMBean(object, name), name);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
   }
 
   /**
@@ -294,6 +303,27 @@ public class Jmx {
 	   InstanceNotFoundException
   {
     getMBeanServer().unregisterMBean(name);
+  }
+  
+  /**
+   * Unregisters an MBean with the server.
+   *
+   * @param name the name of the mbean.
+   */
+  public static void unregister(ObjectName name, ClassLoader loader)
+    throws MBeanRegistrationException,
+	   InstanceNotFoundException
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(loader);
+      
+      getMBeanServer().unregisterMBean(name);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
   }
   
   /**
@@ -513,7 +543,7 @@ public class Jmx {
 
       String value = properties.get(key);
 
-      if (value.matches("[,=:\"*?]"))
+      if (value.length() == 0 || value.matches("[,=:\"*?]"))
 	value = ObjectName.quote(value);
       
       cb.append(value);

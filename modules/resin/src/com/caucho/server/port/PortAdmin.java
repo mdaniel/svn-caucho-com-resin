@@ -29,14 +29,12 @@
 
 package com.caucho.server.port;
 
-import java.io.Serializable;
-
 import javax.management.ObjectName;
 
-import com.caucho.management.server.PortMBean;
+import com.caucho.management.server.*;
 
-public class PortAdmin
-  implements PortMBean, Serializable
+public class PortAdmin extends AbstractManagedObject
+  implements PortMXBean
 {
   private Port _port;
 
@@ -45,9 +43,9 @@ public class PortAdmin
     _port = port;
   }
 
-  public ObjectName getObjectName()
+  public String getName()
   {
-    return _port.getObjectName();
+    return null;
   }
 
   public String getProtocolName()
@@ -95,62 +93,54 @@ public class PortAdmin
     return _port.getLifecycleState().getStateName();
   }
 
-  public int getActiveThreadCount()
+  public int getThreadActiveCount()
   {
     return _port.getActiveThreadCount();
   }
 
-  public int getIdleThreadCount()
+  public int getThreadIdleCount()
   {
     return _port.getIdleThreadCount();
   }
 
-  public int getKeepaliveThreadCount()
+  public int getThreadKeepaliveCount()
   {
     return _port.getKeepaliveConnectionCount();
   }
 
-  public int getKeepaliveSelectCount()
+  public int getSelectKeepaliveCount()
   {
     return _port.getSelectConnectionCount();
   }
 
-  public long getLifetimeRequestCount()
+  public long getRequestCountLifetime()
   {
     return _port.getLifetimeRequestCount();
   }
 
-  public long getLifetimeKeepaliveCount()
+  public long getKeepaliveCountLifetime()
   {
     return _port.getLifetimeKeepaliveCount();
   }
 
-  public long getLifetimeClientDisconnectCount()
+  public long getClientDisconnectCountLifetime()
   {
     return _port.getLifetimeClientDisconnectCount();
   }
 
-  public long getLifetimeRequestTime()
+  public long getRequestTimeLifetime()
   {
     return _port.getLifetimeRequestTime();
   }
 
-  public long getLifetimeReadBytes()
+  public long getReadBytesLifetime()
   {
     return _port.getLifetimeReadBytes();
   }
 
-  public long getLifetimeWriteBytes()
+  public long getWriteBytesLifetime()
   {
     return _port.getLifetimeWriteBytes();
-  }
-
-  /**
-   * Replace the Admin object with its ObjectName for JMX.
-   */
-  public Object writeReplace()
-  {
-    return _port.getObjectName();
   }
 
   public String toString()

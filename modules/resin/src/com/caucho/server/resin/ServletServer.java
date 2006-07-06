@@ -91,6 +91,9 @@ import com.caucho.util.ThreadPool;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
+import com.caucho.management.j2ee.*;
+import com.caucho.management.server.*;
+
 public class ServletServer extends ProtocolDispatchServer
   implements EnvironmentBean, SchemaBean, AlarmListener,
              ClassLoaderListener, EnvironmentDeployInstance {

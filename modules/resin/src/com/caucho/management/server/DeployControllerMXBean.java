@@ -33,19 +33,17 @@ import java.util.Date;
 
 import javax.management.ObjectName;
 
-import com.caucho.jmx.Description;
+import com.caucho.jmx.*;
 
 /**
  * Management interface for the deploy controller.
  */
-public interface DeployControllerMBean
+public interface DeployControllerMXBean extends ManagedObjectMXBean
 {
-  /**
-   * Returns the ObjectName.
-   */
-  @Description("The JMX ObjectName for the MBean")
-  public ObjectName getObjectName();
-
+  //
+  // Configuration
+  //
+  
   /**
    * Returns the startup mode, one of "default", "automatic", "lazy", or "manual".
    */
@@ -62,7 +60,12 @@ public interface DeployControllerMBean
    * Returns the interval between redploy checks.
    */
   @Description("The millisecond interval between checks for the need to redeploy")
+  @Units("milliseconds")
   public long getRedeployCheckInterval();
+
+  //
+  // Lifecycle
+  //
 
   /**
    * Returns the controller's state.
@@ -75,6 +78,10 @@ public interface DeployControllerMBean
    */
   @Description("The time of the last start")
   public Date getStartTime();
+
+  //
+  // Operations
+  //
 
   /**
    * Starts the instance.

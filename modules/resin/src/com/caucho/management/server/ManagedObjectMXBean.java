@@ -29,38 +29,31 @@
 
 package com.caucho.management.server;
 
+import java.util.Date;
+
+import javax.management.ObjectName;
+
 import com.caucho.jmx.Description;
 
 /**
- * Represents a tcp-connection
- *
- * <pre>
- * resin:type=TcpConnection,name=foo.com-80-237
- * <pre>
+ * Parent mbean of all Resin's managed objects.
  */
-@Description("A TCP connection")
-public interface TcpConnectionMBean {
+public interface ManagedObjectMXBean {
   /**
-   * Returns the ObjectName.
+   * Returns the {@link ObjectName} of the mbean.
    */
-  @Description("The TCP connection's JMX ObjectName")
-  public String getObjectName();
+  @Description("The JMX ObjectName for the MBean")
+  public ObjectName getObjectName();
 
   /**
-   * Returns the thread-id.  Management applications will use the
-   * thread-id in conjunction with the JDK's ThreadMXBean to get more
-   * Thread information.
+   * The JMX name property of the mbean.
    */
-  @Description("The connections thread id.  If no thread is attached, returns -1")
-  public long getThreadId();
+  @Description("The name property of the JMX ObjectName")
+  public String getName();
 
   /**
-   * Returns the connection state.
+   * The JMX type of this MBean.
    */
-  public String getState();
-
-  /**
-   * Returns the time in the active state.
-   */
-  public long getActiveTime();
+  @Description("The type property of the JMX ObjectName")
+  public String getType();
 }

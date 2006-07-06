@@ -61,17 +61,15 @@ import com.caucho.config.types.Period;
 
 import com.caucho.log.Log;
 
-import com.caucho.jmx.Jmx;
-
 import com.caucho.lifecycle.Lifecycle;
 
-import com.caucho.management.server.ConnectionPoolMBean;
+import com.caucho.management.server.*;
 
 /**
  * Implementation of the connection manager.
  */
-public class ConnectionPool
-  implements ConnectionManager, AlarmListener, ConnectionPoolMBean {
+public class ConnectionPool extends AbstractManagedObject
+  implements ConnectionManager, AlarmListener, ConnectionPoolMXBean {
   private static final L10N L = new L10N(ConnectionPool.class);
   private static final Logger log = Log.open(ConnectionPool.class);
 
@@ -438,13 +436,9 @@ public class ConnectionPool
     if (_tm == null)
       throw new ConfigException(L.l("the connection manager needs a transaction manager."));
 
-    _alarm = new WeakAlarm(this);
+    registerSelf();
 
-    try {
-      Jmx.register(this, "type=ConnectionPool,name=" + _name);
-    } catch (Throwable e) {
-      log.log(Level.CONFIG, e.toString(), e);
-    }
+    _alarm = new WeakAlarm(this);
 
     if (! (mcf instanceof ValidatingManagedConnectionFactory)) {
       // never check
@@ -571,7 +565,7 @@ public class ConnectionPool
   /**
    * Returns the idle connections.
    */
-  public int getIdleConnectionCount()
+  public int getConnectionIdleCount()
   {
     return _idlePool.size();
   }
@@ -579,7 +573,7 @@ public class ConnectionPool
   /**
    * Returns the active connections.
    */
-  public int getActiveConnectionCount()
+  public int getConnectionActiveCount()
   {
     return _pool.size() - _idlePool.size();
   }

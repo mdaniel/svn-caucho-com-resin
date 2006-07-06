@@ -48,7 +48,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.make.Dependency;
 import com.caucho.make.AlwaysModified;
 
-import com.caucho.management.server.HostMBean;
+import com.caucho.management.server.HostMXBean;
 
 import com.caucho.lifecycle.Lifecycle;
 
@@ -389,7 +389,7 @@ public class Host extends ApplicationContainer
   /**
    * Returns the admin.
    */
-  public HostMBean getAdmin()
+  public HostMXBean getAdmin()
   {
     return _controller.getAdmin();
   }

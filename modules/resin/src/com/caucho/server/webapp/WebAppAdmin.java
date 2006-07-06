@@ -33,8 +33,7 @@ import com.caucho.server.deploy.DeployControllerAdmin;
 
 import com.caucho.server.session.SessionManager;
 
-import com.caucho.management.server.WebAppMBean;
-import com.caucho.management.server.HostMBean;
+import com.caucho.management.server.*;
 
 import com.caucho.server.cluster.Store;
 
@@ -46,7 +45,7 @@ import com.caucho.util.L10N;
  * The admin implementation for a web-app.
  */
 public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
-  implements WebAppMBean
+  implements WebAppMXBean
 {
   private static L10N L = new L10N(WebAppAdmin.class);
 
@@ -62,7 +61,7 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
   /**
    * Returns the owning host
    */
-  public HostMBean getHost()
+  public HostMXBean getHost()
   {
     Host host = getController().getHost();
 
@@ -72,6 +71,20 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
       return null;
   }
 
+  public SessionManagerMXBean getSessionManager()
+  {
+    Application app = getApplication();
+
+    if (app == null)
+      return null;
+
+    return app.getSessionManager().getAdmin();
+  }
+
+  //
+  // Configuration attribute
+  // 
+
   /**
    * Returns the context path
    */
@@ -80,152 +93,32 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
     return getController().getContextPath();
   }
 
-  /**
-   * Returns the active sessions.
-   */
-  public int getActiveSessionCount()
-  {
-    Application app = getApplication();
-
-    if (app == null)
-      return 0;
-
-    SessionManager manager = app.getSessionManager();
-    if (manager == null)
-      return 0;
-
-    return manager.getActiveSessionCount();
-  }
-
-  /**
-   * Returns the session timeout (in milliseconds)
-   */
-  public long getSessionTimeout()
-  {
-    SessionManager manager = getSessionManager();
-
-    if (manager != null)
-      return manager.getSessionTimeout();
-    else
-      return 0;
-  }
-
-  /**
-   * Returns the active sessions.
-   */
-  public long getSessionActiveCount()
-  {
-    SessionManager manager = getSessionManager();
-
-    if (manager != null)
-      return manager.getSessionActiveCount();
-    else
-      return 0;
-  }
-
-  /**
-   * Returns the session create count
-   */
-  public long getSessionCreateCount()
-  {
-    SessionManager manager = getSessionManager();
-
-    if (manager != null)
-      return manager.getSessionCreateCount();
-    else
-      return 0;
-  }
-
-  /**
-   * Returns the session invalidate count
-   */
-  public long getSessionInvalidateCount()
-  {
-    SessionManager manager = getSessionManager();
-
-    if (manager != null)
-      return manager.getSessionInvalidateCount();
-    else
-      return 0;
-  }
-
-  /**
-   * Returns the session timeout count
-   */
-  public long getSessionTimeoutCount()
-  {
-    SessionManager manager = getSessionManager();
-
-    if (manager != null)
-      return manager.getSessionTimeoutCount();
-    else
-      return 0;
-  }
-
-  /**
-   * Returns the session store type
-   */
-  public String getSessionStoreType()
-  {
-    Store store = getSessionStore();
-
-    if (store == null)
-      return null;
-
-    String className = store.getStoreManager().getClass().getName();
-
-    int p = className.lastIndexOf('.');
-
-    return className.substring(p + 1);
-  }
-
-  private Store getSessionStore()
-  {
-    SessionManager manager = getSessionManager();
-
-    if (manager == null)
-      return null;
-
-    return manager.getSessionStore();
-  }
-
-
-  private SessionManager getSessionManager()
-  {
-    Application app = getApplication();
-
-    if (app == null)
-      return null;
-
-    return app.getSessionManager();
-  }
-
-  public int getConnectionCount()
+  public int getRequestCount()
   {
     return getApplication().getRequestCount();
   }
 
-  public long getLifetimeConnectionCount()
+  public long getRequestLifetimeCount()
   {
     return getController().getLifetimeConnectionCount();
   }
 
-  public long getLifetimeConnectionTime()
+  public long getRequestLifetimeTime()
   {
     return getController().getLifetimeConnectionTime();
   }
 
-  public long getLifetimeReadBytes()
+  public long getRequestLifetimeReadBytes()
   {
     return getController().getLifetimeReadBytes();
   }
 
-  public long getLifetimeWriteBytes()
+  public long getRequestLifetimeWriteBytes()
   {
     return getController().getLifetimeWriteBytes();
   }
 
-  public long getLifetimeClientDisconnectCount()
+  public long getClientDisconnectLifetimeCount()
   {
     return getController().getLifetimeClientDisconnectCount();
   }

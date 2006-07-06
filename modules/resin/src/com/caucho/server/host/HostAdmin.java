@@ -33,10 +33,10 @@ import java.util.ArrayList;
 
 import com.caucho.vfs.Path;
 
-import com.caucho.server.deploy.DeployControllerAdmin;
+import com.caucho.server.deploy.*;
 
-import com.caucho.management.server.HostMBean;
-import com.caucho.management.server.WebAppMBean;
+import com.caucho.management.server.HostMXBean;
+import com.caucho.management.server.WebAppMXBean;
 
 import com.caucho.server.webapp.WebAppController;
 import com.caucho.util.L10N;
@@ -45,7 +45,7 @@ import com.caucho.util.L10N;
  * The admin implementation for a host.
  */
 public class HostAdmin extends DeployControllerAdmin<HostController>
-  implements HostMBean
+  implements HostMXBean
 {
   private static final L10N L = new L10N(HostAdmin.class);
 
@@ -150,24 +150,32 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
    * Updates a .war deployment.
    */
   public void updateWebAppDeploy(String name)
-    throws Throwable
+    throws DeployException
   {
     Host host = getHost();
 
-    if (host != null)
-      host.updateWebAppDeploy(name);
+    try {
+      if (host != null)
+	host.updateWebAppDeploy(name);
+    } catch (Throwable e) {
+      throw new DeployException(e);
+    }
   }
 
   /**
    * Updates a .ear deployment.
    */
   public void updateEarDeploy(String name)
-    throws Throwable
+    throws DeployException
   {
     Host host = getHost();
 
-    if (host != null)
-      host.updateEarDeploy(name);
+    try {
+      if (host != null)
+	host.updateEarDeploy(name);
+    } catch (Throwable e) {
+      throw new DeployException(e);
+    }
   }
 
   /**
@@ -195,16 +203,16 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
   /**
    * Returns the webapps.
    */
-  public WebAppMBean []getWebApps()
+  public WebAppMXBean []getWebApps()
   {
     Host host = getHost();
 
     if (host == null)
-      return new WebAppMBean[0];
+      return new WebAppMXBean[0];
 
     ArrayList<WebAppController> webappList = host.getApplicationList();
 
-    WebAppMBean []webapps = new WebAppMBean[webappList.size()];
+    WebAppMXBean []webapps = new WebAppMXBean[webappList.size()];
 
     for (int i = 0; i < webapps.length; i++) {
       WebAppController controller = webappList.get(i);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,7 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
-*
+ *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -27,19 +27,43 @@
  * @author Scott Ferguson
  */
 
-package com.caucho;
+package com.caucho.management.server;
 
-final public class Version {
-  public static final String COPYRIGHT =
-    "Copyright(c) 1998-2006 Caucho Technology.  All rights reserved.";
+import com.caucho.jmx.*;
 
-  public static String FULL_VERSION = "Resin-3.0.s060706 (built Thu, 06 Jul 2006 03:04:01 PDT)";
-  public static String VERSION = "3.0.s060706";
-  public static String VERSION_DATE = "20060706T030401";
+/**
+ * Represents a tcp-connection
+ *
+ * <pre>
+ * resin:type=TcpConnection,name=foo.com-80-237
+ * <pre>
+ */
+@Description("A TCP connection")
+public interface TcpConnectionMXBean extends ManagedObjectMXBean {
+  //
+  // State
+  //
+  
+  /**
+   * Returns the thread-id.  Management applications will use the
+   * thread-id in conjunction with the JDK's ThreadMXBean to get more
+   * Thread information.
+   */
+  @Description("The connections thread id.  If no thread is attached, returns -1")
+  public long getThreadId();
 
-  public static void main(String []argv)
-  {
-    System.out.println(FULL_VERSION);
-    System.out.println(COPYRIGHT);
-  }
+  /**
+   * Returns the connection state.
+   */
+  public String getState();
+
+  //
+  // Statistics
+  //
+
+  /**
+   * Returns the time this request has spent in the active state.
+   */
+  @Units("milliseconds")
+  public long getRequestActiveTime();
 }

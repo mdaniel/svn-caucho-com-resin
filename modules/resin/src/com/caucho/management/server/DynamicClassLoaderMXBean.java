@@ -32,5 +32,5 @@ package com.caucho.management.server;
 /**
  * MBean interface for the dynamic class loader.
  */
-public interface DynamicClassLoaderMBean {
+public interface DynamicClassLoaderMXBean {
 }

@@ -29,12 +29,12 @@
 
 package com.caucho.server.e_app;
 
-import com.caucho.management.server.EarMBean;
+import com.caucho.management.server.*;
 import com.caucho.server.deploy.DeployControllerAdmin;
 
 public class EarAdmin
   extends DeployControllerAdmin<EarDeployController>
-  implements EarMBean
+  implements EAppMXBean
 {
   public EarAdmin(EarDeployController earDeployController)
   {

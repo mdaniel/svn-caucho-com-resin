@@ -67,7 +67,7 @@ import com.caucho.jmx.Jmx;
 
 import com.caucho.xml.XmlPrinter;
 
-import com.caucho.management.server.HostMBean;
+import com.caucho.management.server.HostMXBean;
 
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
@@ -96,7 +96,7 @@ public class DeployServlet extends GenericServlet {
 
   private Path _deployPath;
 
-  private HostMBean _hostMBean;
+  private HostMXBean _hostMXBean;
 
   /**
    * Sets the deploy path.
@@ -124,7 +124,7 @@ public class DeployServlet extends GenericServlet {
 
       ObjectName hostName = new ObjectName("resin:type=CurrentHost");
 
-      _hostMBean = (HostMBean) Jmx.find(hostName);
+      _hostMXBean = (HostMXBean) Jmx.find(hostName);
     } catch (ServletException e) {
       throw e;
     } catch (Exception e) {
@@ -237,7 +237,7 @@ public class DeployServlet extends GenericServlet {
       os.close();
     }
 
-    _hostMBean.expandEarDeploy(plan.getName());
+    _hostMXBean.expandEarDeploy(plan.getName());
     
     Path metaPath = _deployPath.lookup(plan.getMetaPathName());
     System.out.println("META:" + metaPath);
@@ -263,9 +263,9 @@ public class DeployServlet extends GenericServlet {
     Throwable configException = null;
 
     try {
-      _hostMBean.startEarDeploy(plan.getName());
+      _hostMXBean.startEarDeploy(plan.getName());
       // XXX: would need to get the specific wars in the ear
-      _hostMBean.updateWebAppDeploy("/" + plan.getName());
+      _hostMXBean.updateWebAppDeploy("/" + plan.getName());
     } catch (Throwable e) {
       configException = e;
       
@@ -389,7 +389,7 @@ public class DeployServlet extends GenericServlet {
       Throwable configException = null;
       
       try {
-	_hostMBean.updateWebAppDeploy(name);
+	_hostMXBean.updateWebAppDeploy(name);
       } catch (Throwable e) {
 	log.log(Level.FINE, e.toString(), e);
 	

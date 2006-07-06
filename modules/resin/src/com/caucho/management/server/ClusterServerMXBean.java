@@ -31,7 +31,9 @@ package com.caucho.management.server;
 
 import java.util.Date;
 
-import com.caucho.jmx.Description;
+import javax.management.ObjectName;
+
+import com.caucho.jmx.*;
 
 /**
  * A client-view of a cluster's server.  The load balancer and
@@ -44,12 +46,12 @@ import com.caucho.jmx.Description;
  * </pre>
  */
 @Description("Client-view of a cluster's server, i.e. a target server with which this instance can communicate")
-public interface ClusterServerMBean extends ManagedObjectMBean {
+public interface ClusterServerMXBean extends ManagedObjectMXBean {
   /**
    * The containing cluster.
    */
   @Description("The Cluster which contains the server")
-  public ClusterMBean getCluster();
+  public ClusterMXBean getCluster();
 
   /**
    * The cluster index of the server.
@@ -61,6 +63,7 @@ public interface ClusterServerMBean extends ManagedObjectMBean {
    * The timeout in milliseconds for connecting to the server.
    */
   @Description("Timeout for a client connect to the server")
+  @Units("milliseconds")
   public long getConnectTimeout();
 
   /**
@@ -84,6 +87,7 @@ public interface ClusterServerMBean extends ManagedObjectMBean {
 	      " unavailable once a connection attempt fails." +
 	      " When the timeout period elapses another" +
 	      " attempt is made to connect to the target server")
+  @Units("milliseconds")
   public long getFailRecoverTime();
 
   /**
@@ -91,30 +95,33 @@ public interface ClusterServerMBean extends ManagedObjectMBean {
    * server. If the socket is not used within the timeout period the idle
    * connection is closed.
    */
-  @Description("Timeout for an idle socket that is connected" +
+  @Description("The configured timeout for an idle socket that is connected" +
                " to the target server. If the socket is not" +
 	       " used within the timeout period the idle" +
 	       " connection is closed")
+  @Units("milliseconds")
   public long getMaxIdleTime();
 
   /**
    * Returns the timeout to use for reads when communicating with
    * the target server.
    */
-  @Description("Timeout for a client read from the server")
+  @Description("The configured timeout for a client read from the server")
+  @Units("milliseconds")
   public long getReadTimeout();
 
   /**
    * Returns the warmup time in milliseconds.
    */
-  @Description("Returns the warmup time in milliseconds for ramping up connections to the server")
+  @Description("The configured warmup time in milliseconds for ramping up connections to the server")
+  @Units("milliseconds")
   public long getWarmupTime();
 
   /**
    * Returns the load-balancer weight, defaulting to 100.
    *
    */
-  @Description("The load balance weight.  Weights over 100 will get more traffic and weights less than 100 will get less traffic")
+  @Description("The configured load balance weight.  Weights over 100 will get more traffic and weights less than 100 will get less traffic")
   public int getWeight();
 
   /**
@@ -122,6 +129,7 @@ public interface ClusterServerMBean extends ManagedObjectMBean {
    * the target server.
    */
   @Description("Timeout for a client write to the server")
+  @Units("milliseconds")
   public long getWriteTimeout();
 
   //
@@ -144,28 +152,28 @@ public interface ClusterServerMBean extends ManagedObjectMBean {
    */
   @Description("The number of connections actively being used"
     + " to communicate with the target server")
-  public int getActiveCount();
+  public int getConnectionActiveCount();
 
   /**
    * Returns the number of open but currently unused connections to the
    * target server.
    */
   @Description("The number of idle connections in the connection pool")
-  public int getIdleCount();
+  public int getConnectionIdleCount();
 
   /**
    * Returns the number of connections that have been made to the target server.
    */
   @Description("The number of new connections that have been made" +
 	       " to the target server")
-  public long getConnectTotalCount();
+  public long getConnectionNewCountLifetime();
 
   /**
    * Returns the number of connections that have been made to the target server.
    */
   @Description("The number of keepalive connections that have been made" +
 	       " to the target server")
-  public long getKeepaliveTotalCount();
+  public long getConnectionKeepaliveCountLifetime();
 
   /**
    * Returns the number of connections which could not connect
@@ -173,13 +181,27 @@ public interface ClusterServerMBean extends ManagedObjectMBean {
    */
   @Description("The number of failed connections attempts" +
 	       " to the target server")
-  public long getFailTotalCount();
+  public long getConnectionFailCountLifetime();
 
   /**
    * Returns the time of the last failure.
    */
   @Description("The time of the last failed connection")
   public Date getLastFailTime();
+
+  /**
+   * Returns the number of connections which resulted in a busy
+   * response.
+   */
+  @Description("The number of busy responses" +
+	       " from the target server")
+  public long getConnectionBusyCountLifetime();
+
+  /**
+   * Returns the time of the busy response.
+   */
+  @Description("The time of the busy response connection")
+  public Date getLastBusyTime();
 
   /**
    * Enables connections to the target server.

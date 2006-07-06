@@ -34,17 +34,12 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-import javax.management.ObjectName;
-import javax.management.MalformedObjectNameException;
-
-import com.caucho.management.server.ThreadMBean;
-
 import com.caucho.vfs.EnvironmentStream;
 
 /**
  * A generic pool of threads available for Alarms and Work tasks.
  */
-public class ThreadPool implements Runnable, ThreadMBean {
+public class ThreadPool implements Runnable {
   private static final Logger log
     = Logger.getLogger(ThreadPool.class.getName());
   
@@ -88,7 +83,6 @@ public class ThreadPool implements Runnable, ThreadMBean {
 
   private final int _id;
   private final String _name;
-  private String _objectName;
 
   private Thread _thread;
   private Thread _queueThread;
@@ -107,11 +101,6 @@ public class ThreadPool implements Runnable, ThreadMBean {
     synchronized (ThreadPool.class) {
       _id = _g_id++;
       _name = "resin-" + _id;
-    }
-
-    try {
-      _objectName = new ObjectName("resin:type=Thread,name=" + _name).toString();
-    } catch (MalformedObjectNameException e) {
     }
   }
 
@@ -398,14 +387,6 @@ public class ThreadPool implements Runnable, ThreadMBean {
   public String getName()
   {
     return _name;
-  }
-
-  /**
-   * Returns the ObjectName
-   */
-  public String getObjectName()
-  {
-    return _objectName;
   }
 
   /**

@@ -594,7 +594,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
         props.put("type", "Servlet");
         props.put("name", _servletName);
         Jmx.register(_servlet, props);
-      } catch (Throwable e) {
+      } catch (Exception e) {
         log.finest(e.toString());
       }
 

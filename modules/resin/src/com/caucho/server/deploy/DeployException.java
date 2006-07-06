@@ -27,14 +27,43 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.management.server;
+package com.caucho.server.deploy;
+
+import java.io.*;
 
 /**
- * Management interface for the persistent store.
- *
- * <pre>
- * resin:type=PersistentStore
- * </pre>
+ * Thrown during deployment
  */
-public interface PersistentStoreMBean extends ManagedObjectMBean {
+public class DeployException extends Exception
+{
+  /**
+   * Create a null exception
+   */
+  public DeployException()
+  {
+  }
+
+  /**
+   * Creates an exception with a message
+   */
+  public DeployException(String msg)
+  {
+    super(msg);
+  }
+
+  /**
+   * Creates an exception with a message and throwable
+   */
+  public DeployException(String msg, Throwable e)
+  {
+    super(msg, e);
+  }
+
+  /**
+   * Creates an exception with a throwable
+   */
+  public DeployException(Throwable e)
+  {
+    super(e);
+  }
 }

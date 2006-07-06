@@ -31,7 +31,7 @@ package com.caucho.management.server;
 
 import java.util.Date;
 
-import com.caucho.jmx.Description;
+import com.caucho.jmx.*;
 
 /**
  * Management interface for the server.  Each server corresponds to a
@@ -45,11 +45,11 @@ import com.caucho.jmx.Description;
  * </pre>
  */
 @Description("The Resin Server running on this JVM instance")
-public interface ServerMBean extends DeployControllerMBean {
+public interface ServerMXBean extends DeployControllerMXBean {
   //
   // ID attributes
   //
-
+  
   /**
    * Returns the -server id.
    */
@@ -60,30 +60,30 @@ public interface ServerMBean extends DeployControllerMBean {
   //
   // Hierarchy
   //
-
+  
   /**
    * Returns the cluster owning this server
    */
   @Description("The cluster contains the peer servers")
-  public ClusterMBean getCluster();
+  public ClusterMXBean getCluster();
 
   /**
    * Returns the array of ports.
    */
   @Description("Ports accept socket connections")
-  public PortMBean []getPorts();
+  public PortMXBean []getPorts();
 
   /**
    * Returns the server's thread pool administration
    */
   @Description("The thread pool for the server")
-  public ThreadPoolMBean getThreadPool();
+  public ThreadPoolMXBean getThreadPool();
 
   /**
    * Returns the cluster port
    */
   @Description("The cluster port handles management and cluster messages")
-  public PortMBean getClusterPort();
+  public PortMXBean getClusterPort();
 
   //
   // Configuration attributes
@@ -133,7 +133,7 @@ public interface ServerMBean extends DeployControllerMBean {
    * Returns the current number of threads that are servicing requests.
    */
   @Description("The current number of threads that are servicing requests")
-  public int getActiveThreadCount();
+  public int getThreadActiveCount();
 
   /**
    * Returns the current number of connections that are in the keepalive
@@ -142,7 +142,7 @@ public interface ServerMBean extends DeployControllerMBean {
   @Description("The current number of connections that are" +
                " in the keepalive state and are using" +
                " a thread to maintain the connection")
-  public int getKeepaliveThreadCount();
+  public int getThreadKeepaliveCount();
 
   /**
    * Returns the current number of connections that are in the keepalive
@@ -151,7 +151,7 @@ public interface ServerMBean extends DeployControllerMBean {
   @Description("The current number of connections that are" +
                " in the keepalive state and are using" +
                " select to maintain the connection")
-  public int getKeepaliveSelectCount();
+  public int getSelectKeepaliveCount();
 
   /**
    * Returns the total number of requests serviced by the server
@@ -159,7 +159,7 @@ public interface ServerMBean extends DeployControllerMBean {
    */
   @Description("The total number of requests serviced by the"
                + " server since it started")
-  public long getLifetimeRequestCount();
+  public long getRequestCountLifetime();
 
   /**
    * Returns the number of requests that have ended up in the keepalive state
@@ -167,7 +167,7 @@ public interface ServerMBean extends DeployControllerMBean {
    */
   @Description("The total number of requests that have ended"
                + " up in the keepalive state")
-  public long getLifetimeKeepaliveCount();
+  public long getKeepaliveCountLifetime();
 
   /**
    * The total number of connections that have terminated with
@@ -175,7 +175,7 @@ public interface ServerMBean extends DeployControllerMBean {
    */
   @Description("The total number of connections that have " +
                " terminated with a client disconnect")
-  long getLifetimeClientDisconnectCount();
+  long getClientDisconnectCountLifetime();
 
   /**
    * Returns the total duration in milliseconds that requests serviced by
@@ -183,7 +183,8 @@ public interface ServerMBean extends DeployControllerMBean {
    */
   @Description("The total duration in milliseconds that"
                + " requests serviced by this service have taken")
-  long getLifetimeRequestTime();
+  @Units("milliseconds")
+  long getRequestTimeLifetime();
 
   /**
    * Returns the total number of bytes that requests serviced by this
@@ -191,7 +192,8 @@ public interface ServerMBean extends DeployControllerMBean {
    */
   @Description("The total number of bytes that requests"
                + " serviced by this server have read")
-  long getLifetimeReadBytes();
+  @Units("bytes")
+  long getRequestReadBytesLifetime();
 
   /**
    * Returns the total number of bytes that requests serviced by this
@@ -199,33 +201,36 @@ public interface ServerMBean extends DeployControllerMBean {
    */
   @Description("The total number of bytes that requests"
                + " serviced by this server have written")
-  long getLifetimeWriteBytes();
+  @Units("bytes")
+  long getRequestWriteBytesLifetime();
 
   /**
    * Returns the invocation cache hit count.
    */
   @Description("The invocation cache is an internal cache used"
                + " by Resin to optimize the handling of urls")
-  public long getInvocationCacheHitCount();
+  public long getInvocationCacheHitCountLifetime();
 
   /**
    * Returns the invocation cache miss count.
    */
   @Description("The invocation cache is an internal cache used"
                + " by Resin to optimize the handling of urls")
-  public long getInvocationCacheMissCount();
+  public long getInvocationCacheMissCountLifetime();
 
   /**
    * Returns the current total amount of memory available for the JVM, in bytes.
    */
   @Description("The current total amount of memory available for the JVM, in bytes")
-  public long getTotalMemory();
+  @Units("bytes")
+  public long getMemoryTotal();
 
   /**
    * Returns the current free amount of memory available for the JVM, in bytes.
    */
   @Description("The current free amount of memory available for the JVM, in bytes")
-  public long getFreeMemory();
+  @Units("bytes")
+  public long getMemoryFree();
 
   //
   // Operations

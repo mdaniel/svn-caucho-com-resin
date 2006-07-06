@@ -29,9 +29,10 @@
 
 package com.caucho.management.server;
 
-import com.caucho.jmx.Description;
+import com.caucho.jmx.*;
 
 import javax.management.ObjectName;
+import java.util.Date;
 
 /**
  * Management interface for the server.
@@ -42,13 +43,7 @@ import javax.management.ObjectName;
  * </pre>
  */
 @Description("A single Resin for each JVM provides a global environment for Resin")
-public interface ResinMBean {
-  /**
-   * Returns the {@link ObjectName} of the mbean.
-   */
-  @Description("The JMX ObjectName for the MBean")
-  public ObjectName getObjectName();
-
+public interface ResinMXBean extends ManagedObjectMXBean {
   //
   // Hierarchy Attributes
   //
@@ -57,18 +52,18 @@ public interface ResinMBean {
    * Returns the Cluster mbean-names for all clusters managed by Resin.
    */
   @Description("The ClusterMBean names managed by Resin")
-  public ClusterMBean []getClusters();
+  public ClusterMXBean []getClusters();
 
   /**
    * Returns the server MBean's ObjectName for this instance.
    */
   @Description("The current Server instance")
-  public ServerMBean getServer();
+  public ServerMXBean getServer();
 
   //
   // Configuration Attributes
   //
-
+  
   /**
    * Returns the version.
    */
@@ -89,7 +84,7 @@ public interface ResinMBean {
                + " this instance of Resin. This is the location"
                + " of the Resin program files")
   public String getResinHome();
-
+  
   /**
    * The server root directory used when starting this instance of Resin.
    * This is the root directory of the web server files.

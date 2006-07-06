@@ -32,10 +32,8 @@ package com.caucho.server.resin;
 import com.caucho.config.ConfigException;
 import com.caucho.jmx.IntrospectionMBean;
 import com.caucho.log.Log;
-import com.caucho.management.server.ServerMBean;
-import com.caucho.management.server.ThreadPoolMBean;
-import com.caucho.management.j2ee.J2EEManagedObject;
-import com.caucho.management.j2ee.J2EEServer;
+import com.caucho.management.j2ee.*;
+import com.caucho.management.server.*;
 import com.caucho.naming.Jndi;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.deploy.DeployControllerAdmin;
@@ -43,9 +41,7 @@ import com.caucho.server.deploy.EnvironmentDeployController;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
-import javax.management.JMException;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
+import javax.management.*;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -64,7 +60,7 @@ public class ServerController
   private String _serverId = "";
 
   private ServerAdmin _admin;
-  private ThreadPoolMBean _threadPool = new ThreadPoolAdmin();
+  private ThreadPoolMXBean _threadPool = ThreadPoolAdmin.create();
 
   public ServerController()
   {
@@ -132,7 +128,7 @@ public class ServerController
   /**
    * Returns the thread pool.
    */
-  public ThreadPoolMBean getThreadPool()
+  public ThreadPoolMXBean getThreadPool()
   {
     return _threadPool;
   }
@@ -162,7 +158,7 @@ public class ServerController
     throws JMException
   {
     return new IntrospectionMBean(getDeployAdmin(),
-                                  ServerMBean.class);
+                                  ServerMXBean.class);
   }
 
   /**
@@ -238,21 +234,6 @@ public class ServerController
   {
     if (_resinServer != null)
       _resinServer.setuid();
-  }
-
-  /**
-   * Creates the object name.  The default is to use getId() as
-   * the 'name' property, and the classname as the 'type' property.
-   */
-  protected ObjectName createObjectName(Map<String,String> properties)
-    throws MalformedObjectNameException
-  {
-    return new ObjectName("resin:type=Server");
-  }
-
-  protected String getMBeanTypeName()
-  {
-    return "Server";
   }
 
   /**

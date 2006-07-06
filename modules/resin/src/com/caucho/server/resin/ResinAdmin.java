@@ -33,15 +33,13 @@ import javax.management.ObjectName;
 
 import com.caucho.Version;
 
-import com.caucho.management.server.ResinMBean;
-import com.caucho.management.server.ClusterMBean;
-import com.caucho.management.server.ServerMBean;
+import com.caucho.management.server.*;
 
 import com.caucho.util.CauchoSystem;
 import com.caucho.util.L10N;
 
-public class ResinAdmin
-  implements ResinMBean
+public class ResinAdmin extends AbstractManagedObject
+  implements ResinMXBean
 {
   private static final L10N L = new L10N(ResinAdmin.class);
 
@@ -55,14 +53,13 @@ public class ResinAdmin
   public ResinAdmin(ResinServer resinServer)
   {
     _resinServer = resinServer;
+
+    registerSelf();
   }
 
-  /**
-   * Returns the JMX {@link ObjectName}.
-   */
-  public ObjectName getObjectName()
+  public String getName()
   {
-    return _resinServer.getObjectName();
+    return null;
   }
 
   //
@@ -72,9 +69,9 @@ public class ResinAdmin
   /**
    * Returns the Clusters known to Resin.
    */
-  public ClusterMBean []getClusters()
+  public ClusterMXBean []getClusters()
   {
-    return new ClusterMBean[0];
+    return new ClusterMXBean[0];
   }
 
   //
@@ -96,7 +93,7 @@ public class ResinAdmin
     return CauchoSystem.getServerRoot().getNativePath();
   }
 
-  public ServerMBean getServer()
+  public ServerMXBean getServer()
   {
     return null;
   }

@@ -35,46 +35,27 @@ import java.util.logging.Level;
 
 import javax.management.ObjectName;
 
-import com.caucho.management.server.SessionManagerMBean;
-import com.caucho.management.server.WebAppMBean;
-import com.caucho.management.server.PersistentStoreMBean;
+import com.caucho.server.cluster.Store;
+import com.caucho.management.server.*;
 
 import com.caucho.jmx.Jmx;
 
 /**
  * Implementation of the SessionManager's administration mbean.
  */
-public class SessionManagerAdmin implements SessionManagerMBean
+public class SessionManagerAdmin extends AbstractManagedObject
+  implements SessionManagerMXBean
 {
   private static final Logger log
     = Logger.getLogger(SessionManagerAdmin.class.getName());
   
   private final SessionManager _manager;
-  private final ObjectName _objectName;
 
   public SessionManagerAdmin(SessionManager manager)
   {
     _manager = manager;
 
-    ObjectName objectName = null;
-    
-    try {
-      objectName = Jmx.getObjectName("type=SessionManager");
-
-      Jmx.register(this, objectName);
-    } catch (Throwable e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-
-    _objectName = objectName;
-  }
-
-  /**
-   * Returns the MBean's object name.
-   */
-  public ObjectName getObjectName()
-  {
-    return _objectName;
+    registerSelf();
   }
 
   /**
@@ -86,17 +67,9 @@ public class SessionManagerAdmin implements SessionManagerMBean
   }
 
   /**
-   * Returns the mbean type
-   */
-  public String getType()
-  {
-    return "SessionManager";
-  }
-
-  /**
    * Returns the owning web-app's
    */
-  public WebAppMBean getWebApp()
+  public WebAppMXBean getWebApp()
   {
     return _manager.getApplication().getAdmin();
   }
@@ -253,9 +226,66 @@ public class SessionManagerAdmin implements SessionManagerMBean
   /**
    * Returns the object name for the persistent store
    */
-  public PersistentStoreMBean getPersistentStore()
+  public PersistentStoreMXBean getPersistentStore()
   {
     return null;
+  }
+
+  /**
+   * Returns the active sessions.
+   */
+  public int getActiveSessionCount()
+  {
+    return _manager.getActiveSessionCount();
+  }
+
+  /**
+   * Returns the active sessions.
+   */
+  public long getSessionActiveCount()
+  {
+    return _manager.getSessionActiveCount();
+  }
+
+  /**
+   * Returns the session create count
+   */
+  public long getSessionCreateCount()
+  {
+    return _manager.getSessionCreateCount();
+  }
+
+  /**
+   * Returns the session invalidate count
+   */
+  public long getSessionInvalidateCount()
+  {
+    return _manager.getSessionInvalidateCount();
+  }
+
+  /**
+   * Returns the session timeout count
+   */
+  public long getSessionTimeoutCount()
+  {
+    return _manager.getSessionTimeoutCount();
+  }
+
+  /**
+   * Returns the session store type
+   */
+  public String getSessionStoreType()
+  {
+    Store store = _manager.getSessionStore();
+
+    if (store == null)
+      return null;
+
+    String className = store.getStoreManager().getClass().getName();
+
+    int p = className.lastIndexOf('.');
+
+    return className.substring(p + 1);
   }
 
   public String toString()

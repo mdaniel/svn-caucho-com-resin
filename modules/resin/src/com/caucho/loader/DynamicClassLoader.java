@@ -71,8 +71,6 @@ import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.enhancer.ByteCodeEnhancer;
 import com.caucho.loader.enhancer.EnhancerRuntimeException;
 
-import com.caucho.management.server.DynamicClassLoaderMBean;
-
 /**
  * Class loader which checks for changes in class files and automatically
  * picks up new jars.
@@ -82,7 +80,7 @@ import com.caucho.management.server.DynamicClassLoaderMBean;
  * the class loader chain searches like a classpath.
  */
 public class DynamicClassLoader extends java.net.URLClassLoader
-  implements Dependency, Make, DynamicClassLoaderMBean {
+  implements Dependency, Make {
   private static L10N _L;
   private static Logger _log;
 

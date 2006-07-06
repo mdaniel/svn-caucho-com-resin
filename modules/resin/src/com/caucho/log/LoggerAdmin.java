@@ -32,14 +32,15 @@ package com.caucho.log;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-import com.caucho.management.server.LoggerMBean;
+import com.caucho.management.server.*;
 
 import com.caucho.util.L10N;
 
 /**
  * Environment-specific java.util.logging.Logger configuration.
  */
-public class LoggerAdmin implements LoggerMBean {
+public class LoggerAdmin extends AbstractManagedObject implements LoggerMXBean
+{
   private static final L10N L = new L10N(LoggerAdmin.class);
 
   private final Logger _logger;

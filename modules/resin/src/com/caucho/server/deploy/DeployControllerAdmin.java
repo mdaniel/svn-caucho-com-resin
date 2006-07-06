@@ -36,7 +36,7 @@ import java.util.logging.Level;
 
 import javax.management.*;
 
-import com.caucho.management.server.DeployControllerMBean;
+import com.caucho.management.server.*;
 
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.lifecycle.LifecycleListener;
@@ -48,7 +48,8 @@ import com.caucho.util.Alarm;
  * A deploy controller for an environment.
  */
 abstract public class DeployControllerAdmin<C extends EnvironmentDeployController>
-  implements DeployControllerMBean,
+  extends AbstractManagedObject						      
+  implements DeployControllerMXBean,
              NotificationEmitter,
              LifecycleListener,
              java.io.Serializable
@@ -75,9 +76,9 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
     return _controller;
   }
 
-  public ObjectName getObjectName()
+  public String getName()
   {
-    return _controller.getObjectName();
+    return _controller.getMBeanId();
   }
 
   public String getStartupMode()

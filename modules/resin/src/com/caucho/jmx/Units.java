@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2005 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,31 +27,17 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.management.server;
+package com.caucho.jmx;
 
-import com.caucho.config.ConfigException;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.annotation.Retention;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Documented;
 
-/**
- * Interface for a logger, letting applications change the logging level.
- *
- * <pre>
- * resin:type=Logger,name=com.caucho.server.cluster
- * </pre>
- */
-public interface LoggerMBean {
-  /**
-   * Returns the name.
-   */
-  public String getName();
-  
-  /**
-   * Returns the level.
-   */
-  public String getLevel();
-  
-  /**
-   * Sets the level.
-   */
-  public void setLevel(String level)
-    throws ConfigException;
+@Documented
+@Target({ElementType.METHOD, ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Units {
+  public String value();
 }
