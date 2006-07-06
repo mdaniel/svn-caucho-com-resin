@@ -35,7 +35,6 @@ import com.caucho.log.Log;
 import com.caucho.management.server.WebAppMXBean;
 import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.management.j2ee.WebModule;
-import com.caucho.mbeans.server.*;
 
 import com.caucho.server.deploy.DeployConfig;
 import com.caucho.server.deploy.EnvironmentDeployController;
