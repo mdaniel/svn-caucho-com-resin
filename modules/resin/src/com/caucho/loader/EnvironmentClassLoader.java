@@ -31,8 +31,8 @@ package com.caucho.loader;
 
 import com.caucho.jca.UserTransactionProxy;
 import com.caucho.jmx.Jmx;
-import com.caucho.mbeans.j2ee.JTAResource;
-import com.caucho.mbeans.j2ee.J2EEManagedObject;
+import com.caucho.management.j2ee.JTAResource;
+import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.naming.Jndi;
 import com.caucho.security.PolicyImpl;
 import com.caucho.transaction.TransactionManagerImpl;

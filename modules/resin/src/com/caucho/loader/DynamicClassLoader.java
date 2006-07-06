@@ -71,7 +71,7 @@ import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.enhancer.ByteCodeEnhancer;
 import com.caucho.loader.enhancer.EnhancerRuntimeException;
 
-import com.caucho.mbeans.server.DynamicClassLoaderMBean;
+import com.caucho.management.server.DynamicClassLoaderMBean;
 
 /**
  * Class loader which checks for changes in class files and automatically

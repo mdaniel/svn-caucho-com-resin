@@ -37,7 +37,7 @@ import java.util.logging.Level;
 import javax.management.ObjectName;
 import javax.management.MalformedObjectNameException;
 
-import com.caucho.mbeans.server.ThreadMBean;
+import com.caucho.management.server.ThreadMBean;
 
 import com.caucho.vfs.EnvironmentStream;
 
