@@ -33,7 +33,6 @@ import com.caucho.ejb.cfg.EjbBean;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import javax.management.j2ee.statistics.EJBStats;
 import java.util.Hashtable;
 
 /**
@@ -52,7 +51,7 @@ abstract public class EJB
   protected ObjectName createObjectName(Hashtable<String, String> properties)
     throws MalformedObjectNameException
   {
-    properties.put("EJBModule", ObjectName.quote(_ejbBean.getEJBModuleName()));
+    properties.put("EJBModule", quote(_ejbBean.getEJBModuleName()));
 
     return super.createObjectName(properties);
   }

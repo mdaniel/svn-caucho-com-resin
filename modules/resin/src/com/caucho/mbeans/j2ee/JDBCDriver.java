@@ -59,9 +59,9 @@ public class JDBCDriver extends J2EEManagedObject {
     String name = _driverConfig.getDBPool().getName();
 
     if (name != null)
-      properties.put("JDBCDataSource", ObjectName.quote(name));
+      properties.put("JDBCDataSource", quote(name));
     else
-      properties.put("JDBCDataSource", ObjectName.quote("tmp-" + _g_id++));
+      properties.put("JDBCDataSource", quote("tmp-" + _g_id++));
 
     return super.createObjectName(properties);
   }

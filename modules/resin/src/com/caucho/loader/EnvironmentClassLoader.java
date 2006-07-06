@@ -31,8 +31,8 @@ package com.caucho.loader;
 
 import com.caucho.jca.UserTransactionProxy;
 import com.caucho.jmx.Jmx;
-import com.caucho.mbeans.j2ee.J2EEAdmin;
 import com.caucho.mbeans.j2ee.JTAResource;
+import com.caucho.mbeans.j2ee.J2EEManagedObject;
 import com.caucho.naming.Jndi;
 import com.caucho.security.PolicyImpl;
 import com.caucho.transaction.TransactionManagerImpl;
@@ -578,7 +578,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
       Jndi.bindDeep("java:comp/env/jmx/GlobalMBeanServer",
                     Jmx.getGlobalMBeanServer());
 
-      J2EEAdmin.register(new JTAResource(tm));
+      J2EEManagedObject.register(new JTAResource(tm));
 
     } catch (Throwable e) {
       e.printStackTrace();

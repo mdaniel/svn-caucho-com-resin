@@ -54,7 +54,7 @@ public class JDBCDataSource extends J2EEManagedObject {
   protected ObjectName createObjectName(Hashtable<String, String> properties)
     throws MalformedObjectNameException
   {
-    properties.put("JDBCResource", ObjectName.quote(_dbPool.getName()));
+    properties.put("JDBCResource", quote(_dbPool.getName()));
     return super.createObjectName(properties);
   }
 

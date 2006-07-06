@@ -32,10 +32,10 @@ package com.caucho.server.resin;
 import com.caucho.config.ConfigException;
 import com.caucho.jmx.IntrospectionMBean;
 import com.caucho.log.Log;
-import com.caucho.mbeans.j2ee.J2EEManagedObject;
-import com.caucho.mbeans.j2ee.J2EEServer;
 import com.caucho.mbeans.server.ServerMBean;
 import com.caucho.mbeans.server.ThreadPoolMBean;
+import com.caucho.mbeans.j2ee.J2EEManagedObject;
+import com.caucho.mbeans.j2ee.J2EEServer;
 import com.caucho.naming.Jndi;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.deploy.DeployControllerAdmin;
@@ -181,9 +181,11 @@ public class ServerController
     return _admin;
   }
 
-  protected J2EEManagedObject createJ2EEManagedObject()
+  protected void initEnd()
   {
-    return new J2EEServer(this);
+    super.initEnd();
+
+    J2EEManagedObject.register(new J2EEServer(this));
   }
 
   /**

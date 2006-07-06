@@ -29,9 +29,8 @@
 package com.caucho.naming;
 
 import com.caucho.log.Log;
-import com.caucho.util.L10N;
 import com.caucho.mbeans.j2ee.JNDIResource;
-import com.caucho.mbeans.j2ee.J2EEAdmin;
+import com.caucho.util.L10N;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -72,8 +71,6 @@ public class Jndi {
     throws NamingException
   {
     bindDeep(new InitialContext(), name, obj, name);
-
-    J2EEAdmin.register(new JNDIResource(name));
   }
   
   private static void bindDeep(Context context, String name,
@@ -143,11 +140,7 @@ public class Jndi {
   {
     JNDIResource jndiResource = new JNDIResource(name);
 
-    J2EEAdmin.unregister(jndiResource);
-
     rebindDeep(new InitialContext(), name, obj, name);
-
-    J2EEAdmin.register(jndiResource);
   }
 
   /**

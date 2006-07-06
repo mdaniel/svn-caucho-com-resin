@@ -46,10 +46,9 @@ import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.EnvironmentProperties;
-import com.caucho.mbeans.j2ee.J2EEAdmin;
 import com.caucho.mbeans.j2ee.J2EEDomain;
-import com.caucho.mbeans.j2ee.JVM;
 import com.caucho.mbeans.j2ee.J2EEManagedObject;
+import com.caucho.mbeans.j2ee.JVM;
 import com.caucho.mbeans.server.ClusterMBean;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.ServerListener;
@@ -519,8 +518,8 @@ public class ResinServer
 
     long start = Alarm.getCurrentTime();
 
-    _j2eeDomainManagedObject = J2EEAdmin.register(new J2EEDomain());
-    _jvmManagedObject = J2EEAdmin.register(new JVM());
+    _j2eeDomainManagedObject = J2EEManagedObject.register(new J2EEDomain());
+    _jvmManagedObject = J2EEManagedObject.register(new JVM());
 
     // force a GC on start
     System.gc();
@@ -617,8 +616,8 @@ public class ResinServer
     servers = new ArrayList<ServerController>(_servers);
     _servers.clear();
 
-    J2EEAdmin.unregister(jvmManagedObject);
-    J2EEAdmin.unregister(j2eeDomainManagedObject);
+    J2EEManagedObject.unregister(jvmManagedObject);
+    J2EEManagedObject.unregister(j2eeDomainManagedObject);
 
     try {
       for (ServerController server : servers) {

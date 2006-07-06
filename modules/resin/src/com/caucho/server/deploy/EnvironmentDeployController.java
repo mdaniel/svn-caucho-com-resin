@@ -42,8 +42,6 @@ import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
-import com.caucho.mbeans.j2ee.J2EEAdmin;
-import com.caucho.mbeans.j2ee.J2EEManagedObject;
 
 import javax.management.JMException;
 import javax.management.MalformedObjectNameException;
@@ -269,8 +267,6 @@ abstract public class
       // XXX: thrown?
       log.log(Level.FINE, e.toString(), e);
     }
-
-    J2EEAdmin.register(createJ2EEManagedObject());
   }
 
   /**
@@ -291,14 +287,6 @@ abstract public class
    */
   abstract protected Object createMBean()
     throws JMException;
-
-  /**
-   * Returns the J2EEAdmin, null if there is no J2EEAdmin.
-   */
-  protected J2EEManagedObject createJ2EEManagedObject()
-  {
-    return null;
-  }
 
   /**
    * Returns true if the entry matches.

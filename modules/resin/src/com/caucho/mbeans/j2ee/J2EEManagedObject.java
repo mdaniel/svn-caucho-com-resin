@@ -30,6 +30,7 @@
 package com.caucho.mbeans.j2ee;
 
 import com.caucho.jmx.Jmx;
+import com.caucho.jmx.IntrospectionMBean;
 import com.caucho.server.host.Host;
 import com.caucho.server.webapp.Application;
 import com.caucho.util.Alarm;
@@ -135,12 +136,28 @@ abstract public class J2EEManagedObject {
     return true;
   }
 
-  private String quote(String value)
+  protected String quote(String value)
   {
     if (value == null)
-      return ObjectName.quote("null");
-    else
-      return ObjectName.quote(value);
+      return "null";
+    else if (value.length() == 0)
+      return "default";
+    else {
+      for (int i = 0; i < value.length(); i++) {
+        char ch = value.charAt(i);
+
+        switch (ch) {
+          case ',':
+          case '=':
+          case '?':
+          case '"':
+          case ':':
+            return ObjectName.quote(value);
+        }
+      }
+
+      return value;
+    }
   }
 
   /**
@@ -245,7 +262,7 @@ abstract public class J2EEManagedObject {
 
         patternBuilder.append(key);
         patternBuilder.append('=');
-        patternBuilder.append(ObjectName.quote(value));
+        patternBuilder.append(quote(value));
       }
 
       for (String contextKey : CONTEXT_KEYS) {
@@ -258,7 +275,7 @@ abstract public class J2EEManagedObject {
           patternBuilder.append(',');
           patternBuilder.append(contextKey);
           patternBuilder.append('=');
-          patternBuilder.append(ObjectName.quote(value));
+          patternBuilder.append(quote(value));
         }
       }
 
@@ -305,5 +322,62 @@ abstract public class J2EEManagedObject {
   long getStartTime()
   {
     return _startTime;
+  }
+
+  /**
+   * Register a {@link J2EEManagedObject}.
+   * This method never throws an exception, any {@link Throwable} is caught
+   * and logged.
+   *
+   * @return the managed object if it is registered, null if there is an error.
+   */
+  public static <T extends J2EEManagedObject> T register(T managedObject)
+  {
+    if (managedObject == null)
+      return null;
+
+    ObjectName objectName = null;
+
+    try {
+      objectName = managedObject.createObjectName();
+
+      Object mbean = new IntrospectionMBean(managedObject, managedObject.getClass(), true);
+
+      Jmx.register(mbean, objectName);
+
+      return managedObject;
+    }
+    catch (Exception ex) {
+      if (log.isLoggable(Level.FINE))
+        log.log(Level.FINE, managedObject.getClass() + " " + objectName + " " + ex.toString(), ex);
+
+      return null;
+    }
+  }
+
+  /**
+   * Unregister a {@link J2EEManagedObject}.
+   * This method never throws an exception, any {@link Throwable} is caught
+   * and logged.
+   *
+   * @param managedObject the managed object, can be null in which case
+   * nothing is done.
+   */
+  public static void unregister(J2EEManagedObject managedObject)
+  {
+    if (managedObject == null)
+      return;
+
+    ObjectName objectName = null;
+
+    try {
+      objectName = managedObject.createObjectName();
+
+      Jmx.unregister(objectName);
+    }
+    catch (Throwable ex) {
+      if (log.isLoggable(Level.FINEST))
+        log.log(Level.FINEST, managedObject.getClass() + " " + objectName + " " + ex.toString(), ex);
+    }
   }
 }

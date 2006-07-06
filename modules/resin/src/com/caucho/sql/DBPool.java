@@ -36,9 +36,9 @@ import com.caucho.jca.ConnectionPool;
 import com.caucho.jca.ResourceManagerImpl;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.log.Log;
-import com.caucho.mbeans.j2ee.J2EEAdmin;
-import com.caucho.mbeans.j2ee.JDBCResource;
+import com.caucho.mbeans.j2ee.J2EEManagedObject;
 import com.caucho.mbeans.j2ee.JDBCDataSource;
+import com.caucho.mbeans.j2ee.JDBCResource;
 import com.caucho.naming.Jndi;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.L10N;
@@ -612,8 +612,8 @@ public class DBPool implements DataSource {
       Jndi.bindDeep(name, this);
     }
 
-    J2EEAdmin.register(new JDBCResource(this));
-    J2EEAdmin.register(new JDBCDataSource(this));
+    J2EEManagedObject.register(new JDBCResource(this));
+    J2EEManagedObject.register(new JDBCDataSource(this));
   }
 
   /**

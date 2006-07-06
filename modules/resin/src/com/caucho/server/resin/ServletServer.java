@@ -91,14 +91,9 @@ import com.caucho.util.ThreadPool;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
-import com.caucho.mbeans.j2ee.J2EEAdmin;
-import com.caucho.mbeans.j2ee.J2EEServer;
-
-import com.caucho.mbeans.server.ThreadPoolMBean;
-
 public class ServletServer extends ProtocolDispatchServer
   implements EnvironmentBean, SchemaBean, AlarmListener,
-	     ClassLoaderListener, EnvironmentDeployInstance {
+             ClassLoaderListener, EnvironmentDeployInstance {
   private static final L10N L = new L10N(ServletServer.class);
   private static final Logger log = Log.open(ServletServer.class);
 
@@ -118,13 +113,13 @@ public class ServletServer extends ProtocolDispatchServer
   private Cluster _cluster;
 
   private String _serverId = "";
-  
+
   private String _serverHeader = "Resin/" + com.caucho.Version.VERSION;
 
   private String _id = "";
 
   private String _url = "";
-  
+
   private int _srunCount;
 
   private AccessLog _accessLog;
@@ -168,10 +163,10 @@ public class ServletServer extends ProtocolDispatchServer
 
       PermissionManager permissionManager = new PermissionManager();
       PermissionManager.setPermissionManager(permissionManager);
-    
+
       String serverId = controller.getServerId();
       if (serverId == null)
-	serverId = "";
+        serverId = "";
 
       setServerId(serverId);
 
@@ -179,17 +174,17 @@ public class ServletServer extends ProtocolDispatchServer
       ClassLoader oldLoader = thread.getContextClassLoader();
 
       try {
-	thread.setContextClassLoader(_classLoader);
-      
-	_hostContainer = new HostContainer();
-	_hostContainer.setClassLoader(_classLoader);
-	_hostContainer.setDispatchServer(this);
+        thread.setContextClassLoader(_classLoader);
+
+        _hostContainer = new HostContainer();
+        _hostContainer.setClassLoader(_classLoader);
+        _hostContainer.setDispatchServer(this);
       } finally {
-	thread.setContextClassLoader(oldLoader);
+        thread.setContextClassLoader(oldLoader);
       }
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
-      
+
       _configException = e;
     } finally {
       _lifecycle = new Lifecycle(log, toString(), Level.INFO);
@@ -203,7 +198,7 @@ public class ServletServer extends ProtocolDispatchServer
   {
     return _classLoader;
   }
-  
+
   /**
    * Returns the configuration exception
    */
@@ -278,7 +273,7 @@ public class ServletServer extends ProtocolDispatchServer
   {
     if (serverId == null)
       serverId = "";
-    
+
     _serverIdLocal.set(serverId, _classLoader);
     _serverId = serverId;
 
@@ -451,7 +446,7 @@ public class ServletServer extends ProtocolDispatchServer
   public void setAccessLog(AccessLog log)
   {
     _accessLog = log;
-    
+
     Environment.setAttribute("caucho.server.access-log", log);
   }
 
@@ -551,7 +546,7 @@ public class ServletServer extends ProtocolDispatchServer
       throw new ConfigException(L.l("<ping> is only available in Resin Professional."));
     } catch (Throwable e) {
       log.fine(e.toString());
-      
+
       throw new ConfigException(e);
     }
   }
@@ -586,7 +581,7 @@ public class ServletServer extends ProtocolDispatchServer
     if (selectManager != null)
       selectManager.setSelectMax(max);
   }
-  
+
   /**
    * Sets true if the select manager should be enabled
    */
@@ -594,7 +589,7 @@ public class ServletServer extends ProtocolDispatchServer
   {
     return new SelectManagerConfig();
   }
-  
+
   /**
    * Sets true if the select manager should be enabled
    */
@@ -691,10 +686,10 @@ public class ServletServer extends ProtocolDispatchServer
   {
     try {
       HostContainer hostContainer = _hostContainer;
-      
+
       if (hostContainer == null)
-	return null;
-      
+        return null;
+
       Host host = hostContainer.getHost(hostName, port);
 
       if (host == null)
@@ -771,7 +766,7 @@ public class ServletServer extends ProtocolDispatchServer
     throws Exception
   {
     port.setServer(this);
-    
+
     if (_url.equals("") && port.matchesServerId(_serverId)) {
       if (port.getAddress() == null || port.getAddress().equals("") ||
           port.getAddress().equals("*"))
@@ -781,11 +776,11 @@ public class ServletServer extends ProtocolDispatchServer
 
       if (port.getPort() != 0)
         _url += ":" + port.getPort();
-      
+
       if (_hostContainer != null)
         _hostContainer.setURL(_url);
     }
-    
+
     if (port.getProtocol() == null) {
       HttpProtocol protocol = new HttpProtocol();
       protocol.setParent(port);
@@ -834,7 +829,7 @@ public class ServletServer extends ProtocolDispatchServer
   {
     throw new ConfigException(L.l("<srun> must be in a <cluster> for Resin 3.0.  See http://www.caucho.com/resin-3.0/config/balance.xtp for the new syntax."));
   }
-  
+
   /**
    * Handles the case where a class loader is activated.
    */
@@ -847,7 +842,7 @@ public class ServletServer extends ProtocolDispatchServer
       log.log(Level.WARNING, e.toString(), e);
     }
   }
-  
+
   /**
    * Handles the case where a class loader is dropped.
    */
@@ -874,55 +869,55 @@ public class ServletServer extends ProtocolDispatchServer
 
     if (_enableSelectManager && getSelectManager() == null) {
       try {
-	Class cl = Class.forName("com.caucho.server.port.JniSelectManager");
-	Method method = cl.getMethod("create", new Class[0]);
+        Class cl = Class.forName("com.caucho.server.port.JniSelectManager");
+        Method method = cl.getMethod("create", new Class[0]);
 
-	initSelectManager((AbstractSelectManager) method.invoke(null, null));
+        initSelectManager((AbstractSelectManager) method.invoke(null, null));
       } catch (ClassNotFoundException e) {
-	log.warning(L.l("'select-manager' requires Resin Professional.  See http://www.caucho.com for information and licensing."));
+        log.warning(L.l("'select-manager' requires Resin Professional.  See http://www.caucho.com for information and licensing."));
       } catch (Throwable e) {
-	log.warning(L.l("Cannot enable select-manager {0}", e.toString()));
-	
-	log.log(Level.FINER, e.toString());
+        log.warning(L.l("Cannot enable select-manager {0}", e.toString()));
+
+        log.log(Level.FINER, e.toString());
       }
     }
   }
-    
+
   /**
    * Start the server.
    */
   public void start()
   {
     init();
-    
+
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
     try {
       thread.setContextClassLoader(_classLoader);
-      
+
       if (! _lifecycle.toStarting())
-	return;
+        return;
 
       if (! Alarm.isTest()) {
-	log.info("");
-	log.info(System.getProperty("os.name") + " " +
-		 System.getProperty("os.version") + " " +
-		 System.getProperty("os.arch"));
-	log.info("Java " + System.getProperty("java.vm.version") + ", " +
-		 System.getProperty("sun.arch.data.model") + ", " +
-		 System.getProperty("java.vm.info") + ", " +
-		 System.getProperty("file.encoding") + ", " +
-		 System.getProperty("user.language") + ", " +
-		 System.getProperty("java.vm.vendor"));
+        log.info("");
+        log.info(System.getProperty("os.name") + " " +
+                 System.getProperty("os.version") + " " +
+                 System.getProperty("os.arch"));
+        log.info("Java " + System.getProperty("java.vm.version") + ", " +
+                 System.getProperty("sun.arch.data.model") + ", " +
+                 System.getProperty("java.vm.info") + ", " +
+                 System.getProperty("file.encoding") + ", " +
+                 System.getProperty("user.language") + ", " +
+                 System.getProperty("java.vm.vendor"));
 
-	log.info("resin.home = " + System.getProperty("resin.home"));
-	log.info("server.root = " + System.getProperty("server.root"));
-	log.info("");
+        log.info("resin.home = " + System.getProperty("resin.home"));
+        log.info("server.root = " + System.getProperty("server.root"));
+        log.info("");
       }
 
       AbstractSelectManager selectManager = getSelectManager();
       if (isEnableSelectManager() && selectManager != null)
-	selectManager.start();
+        selectManager.start();
 
       Cluster cluster = Cluster.getLocal();
 
@@ -933,32 +928,32 @@ public class ServletServer extends ProtocolDispatchServer
 
       ClusterContainer clusterContainer = ClusterContainer.getLocal();
       if (clusterContainer != null) {
-	ArrayList<Cluster> clusterList = clusterContainer.getClusterList();
+        ArrayList<Cluster> clusterList = clusterContainer.getClusterList();
 
-	for (int i = 0; i < clusterList.size(); i++) {
-	  Cluster subCluster = clusterList.get(i);
+        for (int i = 0; i < clusterList.size(); i++) {
+          Cluster subCluster = clusterList.get(i);
 
-	  if (subCluster instanceof ClusterDef)
-	    continue;
-	  
-	  ArrayList<ClusterPort> clusterPorts;
-	  clusterPorts = subCluster.getServerPorts(_serverId);
+          if (subCluster instanceof ClusterDef)
+            continue;
 
-	  for (int j = 0; j < clusterPorts.size(); j++) {
-	    ClusterPort port = clusterPorts.get(j);
+          ArrayList<ClusterPort> clusterPorts;
+          clusterPorts = subCluster.getServerPorts(_serverId);
 
-	    port.setServer(this);
+          for (int j = 0; j < clusterPorts.size(); j++) {
+            ClusterPort port = clusterPorts.get(j);
 
-	    addPort(port);
-	  }
-	}
+            port.setServer(this);
+
+            addPort(port);
+          }
+        }
       }
 
       if (! _isBindPortsAtEnd) {
-	bindPorts();
+        bindPorts();
 
-	if (_controller != null)
-	  _controller.setuid();
+        if (_controller != null)
+          _controller.setuid();
       }
 
       _lifecycle.toActive();
@@ -969,10 +964,10 @@ public class ServletServer extends ProtocolDispatchServer
 
       // will only occur if bind-ports-at-end is true
       if (_isBindPortsAtEnd) {
-	bindPorts();
+        bindPorts();
 
-	if (_controller != null)
-	  _controller.setuid();
+        if (_controller != null)
+          _controller.setuid();
       }
 
       startPorts();
@@ -1004,11 +999,11 @@ public class ServletServer extends ProtocolDispatchServer
     ClassLoader oldLoader = thread.getContextClassLoader();
     try {
       thread.setContextClassLoader(_classLoader);
-      
+
       for (int i = 0; i < _ports.size(); i++) {
         Port port = _ports.get(i);
 
-	if (port.matchesServerId(_serverId))
+        if (port.matchesServerId(_serverId))
           port.bind();
       }
     } finally {
@@ -1023,9 +1018,9 @@ public class ServletServer extends ProtocolDispatchServer
   {
     for (int i = 0; i < _ports.size(); i++) {
       Port port = _ports.get(i);
-	
+
       if (port.matchesServerId(_serverId))
-	return true;
+        return true;
     }
 
     return false;
@@ -1041,10 +1036,10 @@ public class ServletServer extends ProtocolDispatchServer
     ClassLoader oldLoader = thread.getContextClassLoader();
     try {
       thread.setContextClassLoader(_classLoader);
-      
+
       for (int i = 0; i < _ports.size(); i++) {
         Port port = _ports.get(i);
-	
+
         if (port.matchesServerId(_serverId))
           port.start();
       }
@@ -1065,29 +1060,29 @@ public class ServletServer extends ProtocolDispatchServer
       long now = Alarm.getCurrentTime();
 
       if (isModified()) {
-	// XXX: message slightly wrong
-	log.info("Resin restarting due to configuration change");
+        // XXX: message slightly wrong
+        log.info("Resin restarting due to configuration change");
 
-	//destroy();
-	_controller.restart();
-	return;
+        //destroy();
+        _controller.restart();
+        return;
       }
 
       try {
-	for (int i = 0; i < _ports.size(); i++) {
-	  Port port = _ports.get(i);
+        for (int i = 0; i < _ports.size(); i++) {
+          Port port = _ports.get(i);
 
-	  if (port.isClosed()) {
-	    log.info("Resin restarting due to closed port: " + port);
-	    // destroy();
-	    _controller.restart();
-	  }
-	}
+          if (port.isClosed()) {
+            log.info("Resin restarting due to closed port: " + port);
+            // destroy();
+            _controller.restart();
+          }
+        }
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
-	// destroy();
-	_controller.restart();
-	return;
+        log.log(Level.WARNING, e.toString(), e);
+        // destroy();
+        _controller.restart();
+        return;
       }
     } finally {
       alarm.queue(ALARM_INTERVAL);
@@ -1170,32 +1165,32 @@ public class ServletServer extends ProtocolDispatchServer
       hostMatcher = Pattern.compile(hostPattern).matcher("");
     else
       hostMatcher = null;
-    
+
     final Matcher uriMatcher;
     if (uriPattern != null)
       uriMatcher = Pattern.compile(uriPattern).matcher("");
     else
       uriMatcher = null;
-    
-    InvocationMatcher matcher = new InvocationMatcher() {
-	public boolean isMatch(Invocation invocation)
-	{
-	  if (hostMatcher != null) {
-	    hostMatcher.reset(invocation.getHost());
-	    if (! hostMatcher.find()) {
-	      return false;
-	    }
-	  }
-	  
-	  if (uriMatcher != null) {
-	    uriMatcher.reset(invocation.getURI());
-	    if (! uriMatcher.find()) {
-	      return false;
-	    }
-	  }
 
-	  return true;
-	}
+    InvocationMatcher matcher = new InvocationMatcher() {
+        public boolean isMatch(Invocation invocation)
+        {
+          if (hostMatcher != null) {
+            hostMatcher.reset(invocation.getHost());
+            if (! hostMatcher.find()) {
+              return false;
+            }
+          }
+
+          if (uriMatcher != null) {
+            uriMatcher.reset(invocation.getURI());
+            if (! uriMatcher.find()) {
+              return false;
+            }
+          }
+
+          return true;
+        }
       };
 
     invalidateMatchingInvocations(matcher);
@@ -1209,7 +1204,7 @@ public class ServletServer extends ProtocolDispatchServer
     // skip the clear on restart
     if (isStopping())
       return;
-    
+
     if (log.isLoggable(Level.FINEST))
       log.finest("ServletServer clearCache");
 
@@ -1217,7 +1212,7 @@ public class ServletServer extends ProtocolDispatchServer
     // filter chain entries must not point to the cache's
     // soon-to-be-invalid entries
     super.clearCache();
-    
+
     if (_cache != null)
       _cache.clear();
   }
@@ -1256,7 +1251,7 @@ public class ServletServer extends ProtocolDispatchServer
       thread.setContextClassLoader(_classLoader);
 
       if (! _lifecycle.toStopping())
-	return;
+        return;
 
       super.stop();
 
@@ -1264,11 +1259,11 @@ public class ServletServer extends ProtocolDispatchServer
       _alarm = null;
 
       if (alarm != null)
-	alarm.dequeue();
-      
+        alarm.dequeue();
+
       if (getSelectManager() != null)
-	getSelectManager().stop();
-      
+        getSelectManager().stop();
+
       for (int i = 0; i < _ports.size(); i++) {
         Port port = _ports.get(i);
 
@@ -1278,15 +1273,15 @@ public class ServletServer extends ProtocolDispatchServer
           log.log(Level.WARNING, e.toString(), e);
         }
       }
-    
+
       try {
-	ThreadPool.interrupt();
+        ThreadPool.interrupt();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }
 
       try {
-	Thread.yield();
+        Thread.yield();
       } catch (Throwable e) {
       }
 
@@ -1347,11 +1342,11 @@ public class ServletServer extends ProtocolDispatchServer
       }
 
       super.destroy();
-    
+
       log.fine(this + " destroyed");
 
       _classLoader.destroy();
-    
+
       _hostContainer = null;
       _ports = null;
       _accessLog = null;
@@ -1360,7 +1355,7 @@ public class ServletServer extends ProtocolDispatchServer
       DynamicClassLoader.setOldLoader(thread, oldLoader);
 
       if (_controller.getResinServer() != null)
-	_controller.getResinServer().closeEvent(this);
+        _controller.getResinServer().closeEvent(this);
     }
   }
 
@@ -1374,7 +1369,7 @@ public class ServletServer extends ProtocolDispatchServer
     {
       _enableSelectManager = enable;
     }
-    
+
     public boolean getEnable()
     {
       return _enableSelectManager;

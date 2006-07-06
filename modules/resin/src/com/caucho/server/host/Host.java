@@ -29,43 +29,26 @@
 
 package com.caucho.server.host;
 
-import java.lang.ref.SoftReference;
-  
 import java.util.*;
 import java.util.logging.*;
-
-import javax.management.ObjectName;
-import javax.management.MBeanServer;
-
-import javax.servlet.jsp.el.VariableResolver;
 
 import com.caucho.util.L10N;
 
 import com.caucho.vfs.Path;
-import com.caucho.vfs.MergePath;
 
 import com.caucho.log.Log;
-
-import com.caucho.el.EL;
-import com.caucho.el.MapVariableResolver;
 
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentLocal;
 
-import com.caucho.loader.enhancer.EnhancingClassLoader;
-
 import com.caucho.config.SchemaBean;
 import com.caucho.config.ConfigException;
-
-import com.caucho.relaxng.CompactVerifierFactoryImpl;
 
 import com.caucho.make.Dependency;
 import com.caucho.make.AlwaysModified;
 
 import com.caucho.mbeans.server.HostMBean;
-
-import com.caucho.naming.Jndi;
 
 import com.caucho.lifecycle.Lifecycle;
 

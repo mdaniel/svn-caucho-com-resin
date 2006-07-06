@@ -30,10 +30,17 @@
 package com.caucho.mbeans.j2ee;
 
 public class AppClientModule extends J2EEModule {
+
+  private final String _name;
+
+  public AppClientModule(String name)
+  {
+    _name = name;
+  }
+
   protected String getName()
   {
-    // XXX:
-    return null;
+    return _name;
   }
 
   public String getDeploymentDescriptor()

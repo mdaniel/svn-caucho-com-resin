@@ -45,20 +45,19 @@ import com.caucho.ejb.xa.EjbTransactionManager;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
+import com.caucho.mbeans.j2ee.EJBModule;
+import com.caucho.mbeans.j2ee.J2EEManagedObject;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
-import com.caucho.mbeans.j2ee.EJBModule;
-import com.caucho.mbeans.j2ee.J2EEAdmin;
-import com.caucho.mbeans.j2ee.J2EEManagedObject;
 
 import javax.jms.ConnectionFactory;
 import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -507,7 +506,7 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
     J2EEManagedObject ejbModuleManagedObject = _ejbModuleManagedObjectMap.get(ejbModuleName);
 
     if (ejbModuleManagedObject == null) {
-      ejbModuleManagedObject = J2EEAdmin.register(new EJBModule(ejbModuleName));
+      ejbModuleManagedObject = J2EEManagedObject.register(new EJBModule(ejbModuleName));
       _ejbModuleManagedObjectMap.put(ejbModuleName, ejbModuleManagedObject);
     }
   }

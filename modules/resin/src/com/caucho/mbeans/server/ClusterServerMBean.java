@@ -31,8 +31,6 @@ package com.caucho.mbeans.server;
 
 import java.util.Date;
 
-import javax.management.ObjectName;
-
 import com.caucho.jmx.Description;
 
 /**

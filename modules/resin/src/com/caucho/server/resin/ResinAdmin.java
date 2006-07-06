@@ -29,9 +29,6 @@
 
 package com.caucho.server.resin;
 
-import java.util.Date;
-import java.util.ArrayList;
-
 import javax.management.ObjectName;
 
 import com.caucho.Version;

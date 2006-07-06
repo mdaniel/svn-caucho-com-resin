@@ -29,15 +29,8 @@
 
 package com.caucho.log;
 
-import java.util.ArrayList;
-
 import java.util.logging.Logger;
 import java.util.logging.Level;
-
-import com.caucho.jmx.Jmx;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.CloseListener;
 
 import com.caucho.mbeans.server.LoggerMBean;
 

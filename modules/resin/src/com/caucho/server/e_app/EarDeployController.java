@@ -31,9 +31,9 @@ package com.caucho.server.e_app;
 
 import com.caucho.jmx.IntrospectionMBean;
 import com.caucho.log.Log;
-import com.caucho.mbeans.j2ee.J2EEApplication;
-import com.caucho.mbeans.j2ee.J2EEManagedObject;
 import com.caucho.mbeans.server.EarMBean;
+import com.caucho.mbeans.j2ee.J2EEManagedObject;
+import com.caucho.mbeans.j2ee.J2EEApplication;
 import com.caucho.server.deploy.EnvironmentDeployController;
 import com.caucho.server.webapp.ApplicationContainer;
 import com.caucho.server.webapp.WebAppController;
@@ -119,14 +119,11 @@ public class EarDeployController
     return new IntrospectionMBean(new EarAdmin(this), EarMBean.class);
   }
 
-  protected J2EEManagedObject createJ2EEManagedObject()
-  {
-    return new J2EEApplication(this);
-  }
-
   protected void initEnd()
   {
     super.initEnd();
+
+    J2EEManagedObject.register(new J2EEApplication(this));
   }
 
   /**

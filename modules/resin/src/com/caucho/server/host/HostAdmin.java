@@ -31,8 +31,6 @@ package com.caucho.server.host;
 
 import java.util.ArrayList;
 
-import javax.management.ObjectName;
-
 import com.caucho.vfs.Path;
 
 import com.caucho.server.deploy.DeployControllerAdmin;

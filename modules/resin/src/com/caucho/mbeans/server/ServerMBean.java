@@ -32,7 +32,6 @@ package com.caucho.mbeans.server;
 import java.util.Date;
 
 import com.caucho.jmx.Description;
-import com.caucho.jmx.Name;
 
 /**
  * Management interface for the server.  Each server corresponds to a
@@ -50,7 +49,7 @@ public interface ServerMBean extends DeployControllerMBean {
   //
   // ID attributes
   //
-  
+
   /**
    * Returns the -server id.
    */
@@ -61,7 +60,7 @@ public interface ServerMBean extends DeployControllerMBean {
   //
   // Hierarchy
   //
-  
+
   /**
    * Returns the cluster owning this server
    */

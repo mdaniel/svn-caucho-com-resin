@@ -60,7 +60,6 @@ import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
-import com.caucho.mbeans.j2ee.J2EEAdmin;
 import com.caucho.mbeans.j2ee.J2EEManagedObject;
 
 /**
@@ -587,7 +586,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     try {
       _servlet = createServletImpl();
 
-      J2EEAdmin.register(new com.caucho.mbeans.j2ee.Servlet(this));
+      J2EEManagedObject.register(new com.caucho.mbeans.j2ee.Servlet(this));
 
       // If the servlet has an MBean, register it
       try {

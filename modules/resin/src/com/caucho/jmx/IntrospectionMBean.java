@@ -34,15 +34,8 @@ import java.lang.annotation.Annotation;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.TreeSet;
-import java.util.WeakHashMap;
+import java.lang.reflect.Modifier;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -424,6 +417,9 @@ v   * Returns the open mbean unmarshaller for the given return type.
         Method method = methods[i];
 
         if (method.getDeclaringClass() == Object.class)
+          continue;
+
+        if (Modifier.isStatic(method.getModifiers()))
           continue;
 
         String methodName = method.getName();

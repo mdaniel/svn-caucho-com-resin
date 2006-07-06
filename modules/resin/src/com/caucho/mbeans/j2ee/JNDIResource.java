@@ -53,5 +53,10 @@ public class JNDIResource extends J2EEResource {
     return _name;
   }
 
+  protected boolean isJ2EEApplication()
+  {
+    return false;
+  }
+
   // no attributes
 }

@@ -55,10 +55,8 @@ import com.caucho.config.types.InitParam;
 import com.caucho.naming.Jndi;
 
 import com.caucho.tools.profiler.*;
-import com.caucho.jmx.Jmx;
-import com.caucho.mbeans.j2ee.J2EEAdmin;
-import com.caucho.mbeans.j2ee.JDBCDataSource;
 import com.caucho.mbeans.j2ee.JDBCDriver;
+import com.caucho.mbeans.j2ee.J2EEManagedObject;
 
 /**
  * Configures the database driver.
@@ -475,7 +473,7 @@ public class DriverConfig {
         _driver = new DriverWrapper(_profilerPoint, _driver);
     }
 
-    J2EEAdmin.register(new JDBCDriver(this));
+    J2EEManagedObject.register(new JDBCDriver(this));
   }
 
   /**

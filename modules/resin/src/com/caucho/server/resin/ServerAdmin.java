@@ -31,8 +31,6 @@ package com.caucho.server.resin;
 
 import java.util.Date;
 
-import javax.management.ObjectName;
-
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 

@@ -29,18 +29,7 @@
 
 package com.caucho.iiop;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
 import java.util.logging.*;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import javax.naming.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
 
 import com.caucho.log.Log;
 
@@ -49,26 +38,11 @@ import com.caucho.server.connection.Connection;
 import com.caucho.server.port.Protocol;
 import com.caucho.server.port.ServerRequest;
 
-import com.caucho.server.webapp.Application;
-
-import com.caucho.server.e_app.EarDeployController;
-
-import com.caucho.server.host.Host;
-
-import com.caucho.server.resin.ServletServer;
-
-import com.caucho.server.dispatch.Invocation;
-
-import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.AbstractContext;
-import com.caucho.ejb.EjbServerManager;
-
 //import com.caucho.ejb.naming.LocalModel;
 //import com.caucho.ejb.naming.LocalContext;
 
-import com.caucho.ejb.protocol.HandleEncoder;
-import com.caucho.mbeans.j2ee.J2EEAdmin;
 import com.caucho.mbeans.j2ee.RMI_IIOPResource;
+import com.caucho.mbeans.j2ee.J2EEManagedObject;
 
 /**
  * The main class for the HTTP server.
@@ -119,7 +93,7 @@ public class IiopProtocol extends Protocol {
 
   public void init()
   {
-    J2EEAdmin.register(new RMI_IIOPResource(this));
+    J2EEManagedObject.register(new RMI_IIOPResource(this));
 
   }
 

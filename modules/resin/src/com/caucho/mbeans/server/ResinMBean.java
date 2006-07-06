@@ -32,7 +32,6 @@ package com.caucho.mbeans.server;
 import com.caucho.jmx.Description;
 
 import javax.management.ObjectName;
-import java.util.Date;
 
 /**
  * Management interface for the server.
@@ -69,7 +68,7 @@ public interface ResinMBean {
   //
   // Configuration Attributes
   //
-  
+
   /**
    * Returns the version.
    */
@@ -90,7 +89,7 @@ public interface ResinMBean {
                + " this instance of Resin. This is the location"
                + " of the Resin program files")
   public String getResinHome();
-  
+
   /**
    * The server root directory used when starting this instance of Resin.
    * This is the root directory of the web server files.
