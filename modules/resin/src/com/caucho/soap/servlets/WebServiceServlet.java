@@ -87,13 +87,11 @@ public class WebServiceServlet extends HttpServlet {
     }
   }
 
-  public void setService(String className)
+  public void setService(Object o)
     throws Exception
   {
-    Class c =
-      Thread.currentThread().getContextClassLoader().loadClass(className);
-    _object = c.newInstance();
-    _skeleton = new WebServiceIntrospector().introspect(c);
+    _object = o;
+    _skeleton = new WebServiceIntrospector().introspect(_object.getClass());
   }
 
 }
