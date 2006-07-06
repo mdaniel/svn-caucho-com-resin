@@ -84,7 +84,7 @@ import com.caucho.ejb.amber.AmberConfig;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.amber.type.EntityType;
-import com.caucho.mbeans.j2ee.J2EEManagedObject;
+import com.caucho.management.j2ee.J2EEManagedObject;
 
 /**
  * Configuration for an ejb entity bean.
@@ -641,7 +641,7 @@ public class EjbEntityBean extends EjbBean {
       throw new LineConfigException(getLocation() + e.getMessage(), e);
     }
 
-    J2EEManagedObject.register(new com.caucho.mbeans.j2ee.EntityBean(this));
+    J2EEManagedObject.register(new com.caucho.management.j2ee.EntityBean(this));
   }
 
   /**

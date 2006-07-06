@@ -37,7 +37,7 @@ import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.message.MessageServer;
 import com.caucho.java.gen.JavaClassGenerator;
-import com.caucho.mbeans.j2ee.J2EEManagedObject;
+import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.util.L10N;
 
 import javax.ejb.MessageDrivenBean;
@@ -289,7 +289,7 @@ public class EjbMessageBean extends EjbBean {
   public void init()
     throws ConfigException
   {
-    J2EEManagedObject.register(new com.caucho.mbeans.j2ee.MessageDrivenBean(this));
+    J2EEManagedObject.register(new com.caucho.management.j2ee.MessageDrivenBean(this));
   }
 
   /**

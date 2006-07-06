@@ -35,9 +35,9 @@ import java.util.logging.Level;
 
 import javax.management.ObjectName;
 
-import com.caucho.mbeans.server.SessionManagerMBean;
-import com.caucho.mbeans.server.WebAppMBean;
-import com.caucho.mbeans.server.PersistentStoreMBean;
+import com.caucho.management.server.SessionManagerMBean;
+import com.caucho.management.server.WebAppMBean;
+import com.caucho.management.server.PersistentStoreMBean;
 
 import com.caucho.jmx.Jmx;
 

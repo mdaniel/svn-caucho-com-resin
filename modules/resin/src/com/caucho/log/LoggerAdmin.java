@@ -32,7 +32,7 @@ package com.caucho.log;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-import com.caucho.mbeans.server.LoggerMBean;
+import com.caucho.management.server.LoggerMBean;
 
 import com.caucho.util.L10N;
 

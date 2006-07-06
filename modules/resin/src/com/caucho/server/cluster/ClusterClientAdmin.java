@@ -36,8 +36,8 @@ import java.util.Date;
 
 import javax.management.ObjectName;
 
-import com.caucho.mbeans.server.ClusterServerMBean;
-import com.caucho.mbeans.server.ClusterMBean;
+import com.caucho.management.server.ClusterServerMBean;
+import com.caucho.management.server.ClusterMBean;
 
 /**
  * Implementation of the ClusterClient's administration mbean.

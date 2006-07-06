@@ -54,7 +54,7 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.config.types.Period;
 
-import com.caucho.mbeans.server.PortMBean;
+import com.caucho.management.server.PortMBean;
 
 import com.caucho.lifecycle.Lifecycle;
 

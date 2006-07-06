@@ -35,8 +35,8 @@ import com.caucho.vfs.Path;
 
 import com.caucho.server.deploy.DeployControllerAdmin;
 
-import com.caucho.mbeans.server.HostMBean;
-import com.caucho.mbeans.server.WebAppMBean;
+import com.caucho.management.server.HostMBean;
+import com.caucho.management.server.WebAppMBean;
 
 import com.caucho.server.webapp.WebAppController;
 import com.caucho.util.L10N;

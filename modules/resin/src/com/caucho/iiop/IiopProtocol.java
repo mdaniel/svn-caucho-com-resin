@@ -41,8 +41,8 @@ import com.caucho.server.port.ServerRequest;
 //import com.caucho.ejb.naming.LocalModel;
 //import com.caucho.ejb.naming.LocalContext;
 
-import com.caucho.mbeans.j2ee.RMI_IIOPResource;
-import com.caucho.mbeans.j2ee.J2EEManagedObject;
+import com.caucho.management.j2ee.RMI_IIOPResource;
+import com.caucho.management.j2ee.J2EEManagedObject;
 
 /**
  * The main class for the HTTP server.

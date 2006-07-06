@@ -65,7 +65,7 @@ import com.caucho.jmx.Jmx;
 
 import com.caucho.lifecycle.Lifecycle;
 
-import com.caucho.mbeans.server.ConnectionPoolMBean;
+import com.caucho.management.server.ConnectionPoolMBean;
 
 /**
  * Implementation of the connection manager.

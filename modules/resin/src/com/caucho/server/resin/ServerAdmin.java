@@ -40,11 +40,11 @@ import com.caucho.server.port.AbstractSelectManager;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.host.HostController;
 
-import com.caucho.mbeans.server.ServerMBean;
-import com.caucho.mbeans.server.HostMBean;
-import com.caucho.mbeans.server.PortMBean;
-import com.caucho.mbeans.server.ClusterMBean;
-import com.caucho.mbeans.server.ThreadPoolMBean;
+import com.caucho.management.server.ServerMBean;
+import com.caucho.management.server.HostMBean;
+import com.caucho.management.server.PortMBean;
+import com.caucho.management.server.ClusterMBean;
+import com.caucho.management.server.ThreadPoolMBean;
 
 import java.util.ArrayList;
 

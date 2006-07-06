@@ -34,11 +34,11 @@ import java.io.Serializable;
 
 import javax.management.ObjectName;
 
-import com.caucho.mbeans.server.ClusterMBean;
-import com.caucho.mbeans.server.ClusterServerMBean;
-import com.caucho.mbeans.server.HostMBean;
-import com.caucho.mbeans.server.PersistentStoreMBean;
-import com.caucho.mbeans.server.PortMBean;
+import com.caucho.management.server.ClusterMBean;
+import com.caucho.management.server.ClusterServerMBean;
+import com.caucho.management.server.HostMBean;
+import com.caucho.management.server.PersistentStoreMBean;
+import com.caucho.management.server.PortMBean;
 
 public class ClusterAdmin
   implements ClusterMBean, Serializable

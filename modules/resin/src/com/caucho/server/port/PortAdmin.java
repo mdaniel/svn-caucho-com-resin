@@ -33,7 +33,7 @@ import java.io.Serializable;
 
 import javax.management.ObjectName;
 
-import com.caucho.mbeans.server.PortMBean;
+import com.caucho.management.server.PortMBean;
 
 public class PortAdmin
   implements PortMBean, Serializable

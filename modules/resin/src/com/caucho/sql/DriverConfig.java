@@ -55,8 +55,8 @@ import com.caucho.config.types.InitParam;
 import com.caucho.naming.Jndi;
 
 import com.caucho.tools.profiler.*;
-import com.caucho.mbeans.j2ee.JDBCDriver;
-import com.caucho.mbeans.j2ee.J2EEManagedObject;
+import com.caucho.management.j2ee.JDBCDriver;
+import com.caucho.management.j2ee.J2EEManagedObject;
 
 /**
  * Configures the database driver.

@@ -36,7 +36,7 @@ import java.util.logging.Level;
 
 import javax.management.*;
 
-import com.caucho.mbeans.server.DeployControllerMBean;
+import com.caucho.management.server.DeployControllerMBean;
 
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.lifecycle.LifecycleListener;

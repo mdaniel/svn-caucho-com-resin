@@ -63,7 +63,7 @@ import com.caucho.server.e_app.EarConfig;
 import com.caucho.server.deploy.DeployController;
 import com.caucho.server.deploy.EnvironmentDeployController;
 
-import com.caucho.mbeans.server.HostMBean;
+import com.caucho.management.server.HostMBean;
 
 /**
  * A configuration entry for a host

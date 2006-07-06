@@ -42,7 +42,7 @@ import com.caucho.log.Log;
 
 import com.caucho.jmx.Jmx;
 
-import com.caucho.mbeans.server.ClusterServerMBean;
+import com.caucho.management.server.ClusterServerMBean;
 
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Path;

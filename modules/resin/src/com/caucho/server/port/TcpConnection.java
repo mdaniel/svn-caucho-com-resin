@@ -44,7 +44,7 @@ import com.caucho.jmx.Jmx;
 
 import com.caucho.loader.Environment;
 
-import com.caucho.mbeans.server.TcpConnectionMBean;
+import com.caucho.management.server.TcpConnectionMBean;
 
 import com.caucho.server.connection.BroadcastTask;
 

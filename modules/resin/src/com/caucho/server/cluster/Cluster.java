@@ -52,7 +52,7 @@ import com.caucho.loader.EnvironmentListener;
 
 import com.caucho.jmx.Jmx;
 
-import com.caucho.mbeans.server.ClusterMBean;
+import com.caucho.management.server.ClusterMBean;
 
 /**
  * Defines a set of clustered servers.

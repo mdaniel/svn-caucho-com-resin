@@ -35,7 +35,7 @@ import com.caucho.util.ThreadPool;
 
 import com.caucho.log.Log;
 
-import com.caucho.mbeans.server.ThreadPoolMBean;
+import com.caucho.management.server.ThreadPoolMBean;
 
 public class ThreadPoolAdmin
   implements ThreadPoolMBean

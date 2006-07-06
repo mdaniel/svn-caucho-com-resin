@@ -33,9 +33,9 @@ import javax.management.ObjectName;
 
 import com.caucho.Version;
 
-import com.caucho.mbeans.server.ResinMBean;
-import com.caucho.mbeans.server.ClusterMBean;
-import com.caucho.mbeans.server.ServerMBean;
+import com.caucho.management.server.ResinMBean;
+import com.caucho.management.server.ClusterMBean;
+import com.caucho.management.server.ServerMBean;
 
 import com.caucho.util.CauchoSystem;
 import com.caucho.util.L10N;

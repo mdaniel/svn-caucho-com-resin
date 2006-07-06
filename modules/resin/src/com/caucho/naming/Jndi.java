@@ -29,7 +29,7 @@
 package com.caucho.naming;
 
 import com.caucho.log.Log;
-import com.caucho.mbeans.j2ee.JNDIResource;
+import com.caucho.management.j2ee.JNDIResource;
 import com.caucho.util.L10N;
 
 import javax.naming.Context;

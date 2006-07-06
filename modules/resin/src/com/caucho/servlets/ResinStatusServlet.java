@@ -60,7 +60,7 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.jmx.Jmx;
 
-import com.caucho.mbeans.server.*;
+import com.caucho.management.server.*;
 
 /**
  * Displays some status information about the Resin server.

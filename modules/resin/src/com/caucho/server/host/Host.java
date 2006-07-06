@@ -48,7 +48,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.make.Dependency;
 import com.caucho.make.AlwaysModified;
 
-import com.caucho.mbeans.server.HostMBean;
+import com.caucho.management.server.HostMBean;
 
 import com.caucho.lifecycle.Lifecycle;
 

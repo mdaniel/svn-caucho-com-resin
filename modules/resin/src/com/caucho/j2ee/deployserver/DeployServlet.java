@@ -67,7 +67,7 @@ import com.caucho.jmx.Jmx;
 
 import com.caucho.xml.XmlPrinter;
 
-import com.caucho.mbeans.server.HostMBean;
+import com.caucho.management.server.HostMBean;
 
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
