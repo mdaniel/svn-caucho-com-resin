@@ -393,6 +393,11 @@ public abstract class Path {
     return getPath();
   }
 
+  public FileStatus getStatus()
+  {
+    return null;
+  }
+
   /**
    * Tests if the file exists.
    */
@@ -682,11 +687,18 @@ public abstract class Path {
   public boolean truncate()
     throws IOException
   {
-    StreamImpl os = openWriteImpl();
+    return truncate(0);
+  }
 
-    os.close();
-
-    return true;
+  /**
+   * Sets the length of the file.
+   *
+   * @return true if successful
+   */
+  public boolean truncate(long length)
+    throws IOException
+  {
+    throw new UnsupportedOperationException("truncate");
   }
 
   /**

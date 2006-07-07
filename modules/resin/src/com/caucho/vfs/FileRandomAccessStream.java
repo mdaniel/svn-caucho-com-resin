@@ -36,10 +36,17 @@ import java.io.*;
  */
 public class FileRandomAccessStream extends RandomAccessStream {
   private RandomAccessFile _file;
+  private OutputStream _os;
+  private InputStream _is;
 
   public FileRandomAccessStream(RandomAccessFile file)
   {
     _file = file;
+  }
+
+  public RandomAccessFile getRandomAccessFile()
+  {
+    return _file;
   }
   
   /**
@@ -52,6 +59,15 @@ public class FileRandomAccessStream extends RandomAccessStream {
   }
   
   /**
+   * Reads a block starting from the current file pointer.
+   */
+  public int read(byte []buffer, int offset, int length)
+    throws IOException
+  {
+    return _file.read(buffer, offset, length);
+  }
+
+  /**
    * Reads a block from a given location.
    */
   public int read(long fileOffset, byte []buffer, int offset, int length)
@@ -63,6 +79,15 @@ public class FileRandomAccessStream extends RandomAccessStream {
   }
 
   /**
+   * Writes a block starting from the current file pointer.
+   */
+  public void write(byte []buffer, int offset, int length)
+    throws IOException
+  {
+    _file.write(buffer, offset, length);
+  }
+
+  /**
    * Writes a block from a given location.
    */
   public void write(long fileOffset, byte []buffer, int offset, int length)
@@ -71,6 +96,71 @@ public class FileRandomAccessStream extends RandomAccessStream {
     _file.seek(fileOffset);
     
     _file.write(buffer, offset, length);
+  }
+
+  /**
+   * Seeks to the given position in the file.
+   */
+  public boolean seek(long position)
+  {
+    try {
+      _file.seek(position);
+
+      return true;
+    } catch (IOException e) {
+      return false;
+    }
+  }
+
+  /**
+   * Returns an OutputStream for this stream.
+   */
+  public OutputStream getOutputStream()
+    throws IOException
+  {
+    if (_os == null)
+      _os = new FileOutputStream(_file.getFD());
+
+    return _os;
+  }
+
+  /**
+   * Returns an InputStream for this stream.
+   */
+  public InputStream getInputStream()
+    throws IOException
+  {
+    if (_is == null)
+      _is = new FileInputStream(_file.getFD());
+
+    return _is;
+  }
+
+  /**
+   * Read a byte from the file, advancing the pointer.
+   */
+  public int read()
+    throws IOException
+  {
+    return _file.read();
+  }
+
+  /**
+   * Write a byte to the file, advancing the pointer.
+   */
+  public void write(int b)
+    throws IOException
+  {
+    _file.write(b);
+  }
+
+  /**
+   * Returns the current position of the file pointer.
+   */
+  public long getFilePointer()
+    throws IOException
+  {
+    return _file.getFilePointer();
   }
 
   /**

@@ -233,6 +233,11 @@ public class FilePath extends FilesystemPath {
     return cb.close();
   }
 
+  public FileStatus getStatus()
+  {
+    return new FileStatus(this);
+  }
+
   public boolean exists()
   {
     if (_separatorChar == '\\' && isAux())
@@ -336,7 +341,7 @@ public class FilePath extends FilesystemPath {
     return false;
   }
   
-  public boolean truncate()
+  public boolean truncate(long length)
     throws IOException
   {
     File file = getFile();
@@ -344,7 +349,7 @@ public class FilePath extends FilesystemPath {
     FileOutputStream fos = new FileOutputStream(file);
 
     try {
-      fos.getChannel().truncate(0);
+      fos.getChannel().truncate(length);
 
       return true;
     } finally {
@@ -410,7 +415,7 @@ public class FilePath extends FilesystemPath {
   public StreamImpl openReadWriteImpl() throws IOException
   {
     VfsStream os;
-    
+
     os = new VfsStream(new FileInputStream(getFile()),
                        new FileOutputStream(getFile()),
                        this);

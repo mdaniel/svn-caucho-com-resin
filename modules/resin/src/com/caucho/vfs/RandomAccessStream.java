@@ -42,6 +42,12 @@ abstract public class RandomAccessStream {
     throws IOException;
   
   /**
+   * Reads a block starting from the current file pointer.
+   */
+  abstract public int read(byte []buffer, int offset, int length)
+    throws IOException;
+
+  /**
    * Reads a block from a given location.
    */
   abstract public int read(long fileOffset,
@@ -49,10 +55,51 @@ abstract public class RandomAccessStream {
     throws IOException;
 
   /**
-   * Writes a block from a given location.
+   * Writes a block starting from the current file pointer.
+   */
+  abstract public void write(byte []buffer, int offset, int length)
+    throws IOException;
+
+  /**
+   * Writes a block to a given location.
    */
   abstract public void write(long fileOffset,
 			     byte []buffer, int offset, int length)
+    throws IOException;
+
+  /**
+   * Seeks to the given position in the file.
+   */
+  abstract public boolean seek(long position);
+
+  /**
+   * Returns an OutputStream for this stream.
+   */
+  abstract public OutputStream getOutputStream()
+    throws IOException;
+
+  /**
+   * Returns an InputStream for this stream.
+   */
+  abstract public InputStream getInputStream()
+    throws IOException;
+
+  /**
+   * Read a byte from the file, advancing the pointer.
+   */
+  abstract public int read()
+    throws IOException;
+
+  /**
+   * Write a byte to the file, advancing the pointer.
+   */
+  abstract public void write(int b)
+    throws IOException;
+
+  /**
+   * Returns the current position of the file pointer.
+   */
+  abstract public long getFilePointer()
     throws IOException;
 
   /**
