@@ -191,15 +191,15 @@ public interface SessionManagerMXBean extends ManagedObjectMXBean
   /**
    * Returns the count of sessions created
    */
-  public long getSessionCreateCount();
+  public long getSessionCreateCountTotal();
 
   /**
    * Returns the count of sessions invalidated
    */
-  public long getSessionInvalidateCount();
+  public long getSessionInvalidateCountTotal();
 
   /**
    * Returns the count of sessions timeout
    */
-  public long getSessionTimeoutCount();
+  public long getSessionTimeoutCountTotal();
 }

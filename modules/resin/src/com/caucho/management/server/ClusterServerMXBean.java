@@ -128,7 +128,7 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
    * Returns the timeout to use for writes when communicating with
    * the target server.
    */
-  @Description("Timeout for a client write to the server")
+  @Description("Configured timeout for a client write to the server")
   @Units("milliseconds")
   public long getWriteTimeout();
 

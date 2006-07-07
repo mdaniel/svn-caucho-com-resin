@@ -285,7 +285,8 @@ public class Jmx {
       for (int i = 0; i < interfaces.length; i++) {
 	Class ifc = interfaces[i];
 	
-	if (ifc.getName().endsWith("MBean"))
+	if (ifc.getName().endsWith("MBean") ||
+	    ifc.getName().endsWith("MXBean"))
 	  return ifc;
       }
     }

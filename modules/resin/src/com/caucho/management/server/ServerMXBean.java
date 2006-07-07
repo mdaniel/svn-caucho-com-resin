@@ -223,14 +223,14 @@ public interface ServerMXBean extends DeployControllerMXBean {
    */
   @Description("The current total amount of memory available for the JVM, in bytes")
   @Units("bytes")
-  public long getMemoryTotal();
+  public long getRuntimeMemory();
 
   /**
    * Returns the current free amount of memory available for the JVM, in bytes.
    */
   @Description("The current free amount of memory available for the JVM, in bytes")
   @Units("bytes")
-  public long getMemoryFree();
+  public long getRuntimeMemoryFree();
 
   //
   // Operations

@@ -85,7 +85,7 @@ public interface WebAppMXBean extends DeployControllerMXBean {
    * since it started.
    */
   @Description("Total number of requests served by the web-app since starting")
-  public long getRequestLifetimeCount();
+  public long getRequestCountTotal();
 
   /**
    * Returns the total duration in milliseconds that connections serviced by
@@ -93,7 +93,7 @@ public interface WebAppMXBean extends DeployControllerMXBean {
    */
   @Description("Total time taken by requests served by the web-app")
   @Units("milliseconds")
-  public long getRequestLifetimeTime();
+  public long getRequestTimeTotal();
 
   /**
    * Returns the total number of bytes that requests serviced by
@@ -101,7 +101,7 @@ public interface WebAppMXBean extends DeployControllerMXBean {
    */
   @Description("Total bytes requests served by the web-app have read")
   @Units("bytes")
-  public long getRequestLifetimeReadBytes();
+  public long getRequestReadBytesTotal();
 
   /**
    * Returns the total number of bytes that connections serviced by this
@@ -109,11 +109,11 @@ public interface WebAppMXBean extends DeployControllerMXBean {
    */
   @Description("Total bytes requests served by the web-app have written")
   @Units("bytes")
-  public long getRequestLifetimeWriteBytes();
+  public long getRequestWriteBytesTotal();
 
   /**
    * Returns the number of connections that have ended with a
    * {@link com.caucho.vfs.ClientDisconnectException} for this web-app in it's lifetime.
    */
-  public long getClientDisconnectLifetimeCount();
+  public long getClientDisconnectCountTotal();
 }

@@ -84,22 +84,30 @@ public interface PortMXBean extends ManagedObjectMXBean {
    * {@link java.net.Socket#setSoTimeout(int)}, although the actual
    * socket connection may be handled in different ways.
    */
-  @Description("Timeout for socket reads when waiting for data from a client")
+  @Description("Configured timeout for socket reads when waiting for data from a client")
   @Units("milliseconds")    
   public long getReadTimeout();
 
   /**
    * Returns the timeout for socket writes when writing data to a client.
    */
-  @Description("Timeout for socket writes when sending data to a client")
+  @Description("Configured timeout for socket writes when sending data to a client")
   @Units("milliseconds")    
   public long getWriteTimeout();
+
+  //
+  // State attributes
+  //
 
   /*
    * Returns the lifecycle state.
    */
   @Description("The lifecycle state")
   public String getState();
+
+  //
+  // Statistics
+  //
 
   /**
    * Returns the current number of threads that are servicing requests.

@@ -55,7 +55,7 @@ public class ThreadPoolAdmin extends AbstractManagedObject
    */
   public static ThreadPoolMXBean create()
   {
-    if (_admin != null)
+    if (_admin == null)
       _admin = new ThreadPoolAdmin();
 
     return _admin;

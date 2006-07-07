@@ -41,19 +41,23 @@ import com.caucho.jmx.Name;
  */
 @Description("Resin's integrated proxy cache")
 public interface ProxyCacheMXBean extends ManagedObjectMXBean {
+  //
+  // Statistics
+  //
+  
   /**
    * Returns the proxy cache hit count.
    */
   @Description("The proxy cache is used to cache responses that"
                + " set appropriate HTTP headers")
-  public long getHitLifetimeCount();
+  public long getHitCountLifetime();
 
   /**
    * Returns the proxy cache miss count.
    */
   @Description("The proxy cache is used to cache responses that"
                + " set appropriate HTTP headers")
-  public long getMissLifetimeCount();
+  public long getMissCountLifetime();
 
   //
   // Operations

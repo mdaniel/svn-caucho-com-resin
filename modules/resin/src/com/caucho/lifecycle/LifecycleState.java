@@ -37,7 +37,7 @@ public interface LifecycleState {
   public static final int IS_INITIALIZING = 1;
   public static final int IS_INIT = 2;
   public static final int IS_STARTING = 3;
-  public static final int IS_BUSY = 4;
+  public static final int IS_STANDBY = 4;
   public static final int IS_WARMUP = 5;
   public static final int IS_ACTIVE = 6;
   public static final int IS_FAILED = 7;
@@ -63,8 +63,6 @@ public interface LifecycleState {
   public boolean isBeforeActive();
 
   public boolean isAfterActive();
-
-  public boolean isBusy();
 
   public boolean isWarmup();
 

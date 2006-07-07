@@ -329,12 +329,12 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return lifetimeKeepaliveCount;
   }
 
-  public long getMemoryTotal()
+  public long getRuntimeMemory()
   {
     return Runtime.getRuntime().totalMemory();
   }
 
-  public long getMemoryFree()
+  public long getRuntimeMemoryFree()
   {
     return Runtime.getRuntime().freeMemory();
   }

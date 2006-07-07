@@ -59,12 +59,14 @@ public interface ConnectionPoolMXBean extends ManagedObjectMXBean {
   /**
    * Returns the max number of connections trying to connect.
    */
+  @Description("Configured maximum number of simultaneous connection creation")
   public int getMaxCreateConnections();
   
   /**
    * Returns the pool idle time in milliseconds.
    */
   @Units("milliseconds")
+  @Description("Configured maximum time allowed in the idle pool")
   public long getMaxIdleTime();
   
   /**

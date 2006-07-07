@@ -48,10 +48,8 @@ public final class Lifecycle implements LifecycleState {
 
   private long _activeCount;
   private long _failCount;
-  private long _busyCount;
 
   private long _lastFailTime;
-  private long _lastBusyTime;
   private long _lastChangeTime;
 
   private ArrayList<WeakReference<LifecycleListener>> _listeners;
@@ -285,14 +283,6 @@ public final class Lifecycle implements LifecycleState {
   }
 
   /**
-   * Returns the number of times the lifecycle has switched to busy.
-   */
-  public long getBusyCount()
-  {
-    return _busyCount;
-  }
-
-  /**
    * Returns true for the initializing state.
    */
   public boolean isInitializing()
@@ -338,14 +328,6 @@ public final class Lifecycle implements LifecycleState {
   public boolean isWarmup()
   {
     return _state == IS_WARMUP;
-  }
-
-  /**
-   * Returns true for the busy state.
-   */
-  public boolean isBusy()
-  {
-    return _state == IS_BUSY;
   }
 
   /**
@@ -595,33 +577,6 @@ public final class Lifecycle implements LifecycleState {
 
       if (_log != null && _log.isLoggable(_level))
 	_log.log(_level, _name + " error");
-
-      notifyListeners(oldState, _state);
-
-      notifyAll();
-
-      return true;
-    }
-    else
-      return false;
-  }
-  
-  /**
-   * Changes to the busy state.
-   *
-   * @return true if the transition is allowed
-   */
-  public synchronized boolean toBusy()
-  {
-    if (_state < IS_STOPPING && _state != IS_FAILED) {
-      int oldState = _state;
-
-      _state = IS_BUSY;
-      _lastChangeTime = Alarm.getCurrentTime();
-      _busyCount++;
-
-      if (_log != null && _log.isLoggable(_level))
-	_log.log(_level, _name + " busy");
 
       notifyListeners(oldState, _state);
 

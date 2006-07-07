@@ -227,19 +227,19 @@ public class ResinStatusServlet extends GenericServlet {
     out.println("<tr><td><b>Server Reload:</b><td> " +
                 QDate.formatLocal(startTime));
 
-    long totalMemory = Runtime.getRuntime().totalMemory();
+    long totalMemory = _server.getRuntimeMemory();
     out.println("<tr><td><b>Total Memory:</b><td> " +
                 (totalMemory / 1000000) + "." +
                 (totalMemory / 100000) % 10 +
                 (totalMemory / 10000) % 10 +
                 "Meg");
-    long freeMemory = Runtime.getRuntime().freeMemory();
+    long freeMemory = _server.getRuntimeMemoryFree();
     out.println("<tr><td><b>Free Memory:</b><td> " +
                 (freeMemory / 1000000) + "." +
                 (freeMemory / 100000) % 10 +
                 (freeMemory / 10000) % 10 +
                 "Meg");
-
+    
     long invocationHitCount = _server.getInvocationCacheHitCountLifetime();
     long invocationMissCount = _server.getInvocationCacheMissCountLifetime();
 
@@ -256,8 +256,8 @@ public class ResinStatusServlet extends GenericServlet {
     out.println(" (" + invocationHitCount + "/" + totalCount + ")");
 
     if (_proxyCache != null) {
-      long proxyHitCount = _proxyCache.getHitLifetimeCount();
-      long proxyMissCount = _proxyCache.getMissLifetimeCount();
+      long proxyHitCount = _proxyCache.getHitCountLifetime();
+      long proxyMissCount = _proxyCache.getMissCountLifetime();
 
       totalCount = proxyHitCount + proxyMissCount;
       if (totalCount == 0)

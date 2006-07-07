@@ -98,27 +98,27 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
     return getApplication().getRequestCount();
   }
 
-  public long getRequestLifetimeCount()
+  public long getRequestCountTotal()
   {
     return getController().getLifetimeConnectionCount();
   }
 
-  public long getRequestLifetimeTime()
+  public long getRequestTimeTotal()
   {
     return getController().getLifetimeConnectionTime();
   }
 
-  public long getRequestLifetimeReadBytes()
+  public long getRequestReadBytesTotal()
   {
     return getController().getLifetimeReadBytes();
   }
 
-  public long getRequestLifetimeWriteBytes()
+  public long getRequestWriteBytesTotal()
   {
     return getController().getLifetimeWriteBytes();
   }
 
-  public long getClientDisconnectLifetimeCount()
+  public long getClientDisconnectCountTotal()
   {
     return getController().getLifetimeClientDisconnectCount();
   }

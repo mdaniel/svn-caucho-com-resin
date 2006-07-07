@@ -250,7 +250,7 @@ public class SessionManagerAdmin extends AbstractManagedObject
   /**
    * Returns the session create count
    */
-  public long getSessionCreateCount()
+  public long getSessionCreateCountTotal()
   {
     return _manager.getSessionCreateCount();
   }
@@ -258,7 +258,7 @@ public class SessionManagerAdmin extends AbstractManagedObject
   /**
    * Returns the session invalidate count
    */
-  public long getSessionInvalidateCount()
+  public long getSessionInvalidateCountTotal()
   {
     return _manager.getSessionInvalidateCount();
   }
@@ -266,7 +266,7 @@ public class SessionManagerAdmin extends AbstractManagedObject
   /**
    * Returns the session timeout count
    */
-  public long getSessionTimeoutCount()
+  public long getSessionTimeoutCountTotal()
   {
     return _manager.getSessionTimeoutCount();
   }

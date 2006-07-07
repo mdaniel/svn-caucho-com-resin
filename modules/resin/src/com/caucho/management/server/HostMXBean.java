@@ -54,7 +54,7 @@ public interface HostMXBean extends DeployControllerMXBean
   public String getURL();
 
   //
-  // Relations
+  // Relation attributes
   //
   
   /**

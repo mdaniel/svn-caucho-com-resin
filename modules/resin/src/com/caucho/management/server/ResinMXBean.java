@@ -63,18 +63,6 @@ public interface ResinMXBean extends ManagedObjectMXBean {
   //
   // Configuration Attributes
   //
-  
-  /**
-   * Returns the version.
-   */
-  @Description("The Resin Version")
-  public String getVersion();
-
-  /**
-   * Returns true for the professional version.
-   */
-  @Description("True for Resin Professional")
-  public boolean isProfessional();
 
   /**
    * The Resin home directory used when starting this instance of Resin.
@@ -100,6 +88,18 @@ public interface ResinMXBean extends ManagedObjectMXBean {
   @Description("The configuration file used when starting this"
                + " instance of Resin, the value of `-conf'")
   public String getConfigFile();
+  
+  /**
+   * Returns the version.
+   */
+  @Description("The Resin Version")
+  public String getVersion();
+
+  /**
+   * Returns true for the professional version.
+   */
+  @Description("True for Resin Professional")
+  public boolean isProfessional();
 
   /**
    * Returns the ip address or host name  of the machine that is running this ResinServer.
