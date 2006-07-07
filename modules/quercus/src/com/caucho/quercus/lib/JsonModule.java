@@ -278,12 +278,15 @@ public class JsonModule
    *     array is be returned when decoding json objects.
    * @return decoded PHP value.
    */
-  public Value json_decode(Env env, String s,
+  public Value json_decode(Env env,
+                                              StringValue stringValue,
                                               @Optional("false") boolean assoc)
   {
     try {
       _associative = assoc;
       _env = env;
+
+      String s = stringValue.toString();
       Value val = jsonDecodeImpl(s, 0);
 
       // Should now be at end of string or have only white spaces left.
