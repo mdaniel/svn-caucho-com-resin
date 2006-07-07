@@ -70,6 +70,7 @@ import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.FileStatus;
 
 /**
  * Information and actions for about files
@@ -1504,7 +1505,32 @@ public class FileModule extends AbstractQuercusModule {
     return new LongValue(is.getPosition());
   }
 
-  // XXX: fstat
+  /**
+   * Returns the status of the given file pointer.
+   */
+  public static Value fstat(Env env, @NotNull BinaryStream stream)
+  {
+    Path path = null;
+
+    if (stream instanceof FileInput) {
+      FileInput input = (FileInput) stream;
+
+      path = input.getPath();
+    } else if (stream instanceof FileOutput) {
+      FileOutput output = (FileOutput) stream;
+
+      path = output.getPath();
+    } else if (stream instanceof FileInputOutput) {
+      FileInputOutput inputOutput = (FileInputOutput) stream;
+
+      path = inputOutput.getPath();
+    } else {
+      return BooleanValue.FALSE;
+    }
+
+    // XXX: Not technically correct... susceptible to race conditions
+    return stat(env, path);
+  }
 
   /**
    * Returns the current position.
@@ -1585,7 +1611,9 @@ public class FileModule extends AbstractQuercusModule {
     if ((flags & GLOB_NOESCAPE) != 0)
       fnmatchFlags = FNM_NOESCAPE;
 
-    String globRegex = globToRegex(cwdPattern, fnmatchFlags, true);
+    boolean doBraces = (flags & GLOB_BRACE) != 0;
+
+    String globRegex = globToRegex(cwdPattern, fnmatchFlags, doBraces);
 
     if (globRegex == null)
       return false;
@@ -2247,53 +2275,47 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static Value stat(Env env, Path path)
   {
-    // XXX: what if it doesn't exist?
+    FileStatus status = path.getStatus();
+
+    if (status == null) {
+      env.warning(L.l("stat failed for {0}", path.toString()));
+
+      return BooleanValue.FALSE;
+    }
+
     ArrayValue result = new ArrayValueImpl();
 
-    int mode = 0;
-    if (path.isDirectory())
-      mode |= 0040111; // S_IFDIR
-    else
-      mode |= 0100000; // S_IFREG
+    result.put(status.getDev());
+    result.put(status.getIno());
+    result.put(status.getMode());
+    result.put(status.getNlink());
+    result.put(status.getUid());
+    result.put(status.getGid());
+    result.put(status.getRdev());
+    result.put(status.getSize());
+
+    result.put(status.getAtime());
+    result.put(status.getMtime());
+    result.put(status.getCtime());
+    result.put(status.getBlksize());
+    result.put(status.getBlocks());
+
+    result.put("dev", status.getDev());
+    result.put("ino", status.getIno());
     
-    if (path.canRead())
-      mode |= 0444;
-    if (path.canWrite())
-      mode |= 0220;
-    if (path.canExecute())
-      mode |= 0110;
-
-    result.put(0); // dev
-    result.put(0); // ino
-    result.put(mode);
-    result.put(1); // nlink
-    result.put(501); // uid
-    result.put(501); // gid
-    result.put(0); // rdev
-    result.put(path.getLength()); // size
-
-    result.put(path.getLastModified() / 1000); // atime
-    result.put(path.getLastModified() / 1000); // mtime
-    result.put(path.getLastModified() / 1000); // ctime
-    result.put(4096); // blksize
-    result.put((path.getLength() + 4095) / 4096); // blocks
-
-    result.put("dev", 0);
-    result.put("ino", 0);
+    result.put("mode", status.getMode());
+    result.put("nlink", status.getNlink());
+    result.put("uid", status.getUid());
+    result.put("gid", status.getGid());
+    result.put("rdev", status.getRdev());
     
-    result.put("mode", mode);
-    result.put("nlink", 1);
-    result.put("uid", 501);
-    result.put("gid", 501);
-    result.put("rdev", 0);
-    
-    result.put(new StringValueImpl("size"), new LongValue(path.getLength()));
+    result.put("size", status.getSize());
 
-    result.put("atime", path.getLastModified() / 1000);
-    result.put("mtime", path.getLastModified() / 1000);
-    result.put("ctime", path.getLastModified() / 1000);
-    result.put("blksize", 4096);
-    result.put("blocks", (path.getLength() + 4095) / 4096);
+    result.put("atime", status.getAtime());
+    result.put("mtime", status.getMtime());
+    result.put("ctime", status.getCtime());
+    result.put("blksize", status.getBlksize());
+    result.put("blocks", status.getBlocks());
 
     return result;
   }
