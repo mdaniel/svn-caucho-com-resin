@@ -33,16 +33,12 @@ import java.io.Reader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PushbackReader;
 import java.io.LineNumberReader;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
-import java.net.URI;
 import java.net.URL;
 import java.net.Socket;
-import java.net.URLConnection;
-import java.net.URISyntaxException;
 
 import java.util.Map;
 import java.util.Set;
@@ -57,12 +53,15 @@ import com.caucho.util.Base64;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.URLUtil;
 
-import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.TempBuffer;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
+
+import com.caucho.quercus.lib.file.FileModule;
+import com.caucho.quercus.lib.file.BinaryInput;
+import com.caucho.quercus.lib.file.BinaryStream;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
@@ -583,7 +582,7 @@ public class UrlModule extends AbstractQuercusModule {
 
       entrySet = valueMap.entrySet();
     } else {
-      env.warning("formdata must be an array or object");
+      env.warning(L.l("formdata must be an array or object"));
 
       return result; 
     }
@@ -635,7 +634,7 @@ public class UrlModule extends AbstractQuercusModule {
 
       if (! url.getProtocol().equals("http") && 
           ! url.getProtocol().equals("https")) {
-        env.warning("Not an HTTP URL");
+        env.warning(L.l("Not an HTTP URL"));
         return null;
       }
 
@@ -768,61 +767,16 @@ public class UrlModule extends AbstractQuercusModule {
     ArrayValue result = new ArrayValueImpl();
 
     try {
-      Path file = null;
+      BinaryStream stream = 
+        FileModule.fopen(env, filename, "r", use_include_path, null);
 
-      if (use_include_path) {
-        String [] includePaths = 
-          env.getIni("include_path").toString().split(":");
+      if (stream == null || ! (stream instanceof BinaryInput))
+        return result;
 
-        for (String includePath : includePaths) {
-          Path oldPath = Vfs.getPwd();
+      BinaryInput input = (BinaryInput) stream;
 
-          Path newPath = oldPath.lookup(includePath);
-
-          if (! newPath.exists())
-            break;
-
-          Vfs.setPwd(newPath);
-
-          // can only be a local file when using include path
-          file = Vfs.lookupNative(filename);
-
-          Vfs.setPwd(oldPath);
-
-          if (file.exists())
-            break;
-        }
-
-        if (file == null || ! file.exists())
-          return result;
-
-        in = file.openRead();
-      } else {
-        URI uri = new URI(filename);
-
-        if (uri.getScheme() == null || 
-            uri.getScheme().equalsIgnoreCase("file")) {
-          file = Vfs.lookup(filename);
-
-          if (file == null || ! file.exists())
-            return result;
-
-          in = file.openRead();
-        } else {
-          URLConnection connection = uri.toURL().openConnection();
-
-          connection.setDoInput(true);
-
-          connection.connect();
-
-          in = connection.getInputStream();
-        }
-      }
-
-      PushbackReader reader = new PushbackReader(new InputStreamReader(in));
-
-      while (reader.ready()) {
-        String tag = getNextTag(reader);
+      while (! input.isEOF()) {
+        String tag = getNextTag(input);
 
         if (tag.equalsIgnoreCase("meta")) {
           String name = null;
@@ -830,7 +784,7 @@ public class UrlModule extends AbstractQuercusModule {
 
           String [] attr;
 
-          while ((attr = getNextAttribute(reader)) != null) {
+          while ((attr = getNextAttribute(input)) != null) {
             if (name == null && attr[0].equalsIgnoreCase("name")) {
               if (attr.length > 1)
                 name = attr[1];
@@ -850,8 +804,6 @@ public class UrlModule extends AbstractQuercusModule {
       }
     } catch (IOException e) {
       env.warning(e);
-    } catch (URISyntaxException e) {
-      env.warning(e);
     } finally {
       try {
         if (in != null)
@@ -864,15 +816,15 @@ public class UrlModule extends AbstractQuercusModule {
     return result;
   }
 
-  private static String getNextTag(Reader reader)
+  private static String getNextTag(BinaryInput input)
     throws IOException
   {
     StringBuilder tag = new StringBuilder();
 
-    for (int ch = 0; reader.ready() && ch != '<'; ch = reader.read()) {}
+    for (int ch = 0; ! input.isEOF() && ch != '<'; ch = input.read()) {}
 
-    while (reader.ready()) {
-      int ch = reader.read();
+    while (! input.isEOF()) {
+      int ch = input.read();
 
       if (Character.isWhitespace(ch))
         break;
@@ -887,22 +839,22 @@ public class UrlModule extends AbstractQuercusModule {
    * Finds the next attribute in the stream and return the key and value
    * as an array.
    */
-  private static String [] getNextAttribute(PushbackReader reader)
+  private static String [] getNextAttribute(BinaryInput input)
     throws IOException
   {
     int ch;
 
-    consumeWhiteSpace(reader);
+    consumeWhiteSpace(input);
 
     StringBuilder attribute = new StringBuilder();
 
-    while (reader.ready()) {
-      ch = reader.read();
+    while (! input.isEOF()) {
+      ch = input.read();
 
       if (isValidAttributeCharacter(ch))
         attribute.append((char) ch);
       else {
-        reader.unread(ch);
+        input.unread();
         break;
       }
     }
@@ -910,39 +862,39 @@ public class UrlModule extends AbstractQuercusModule {
     if (attribute.length() == 0)
       return null;
 
-    consumeWhiteSpace(reader);
+    consumeWhiteSpace(input);
 
-    if (! reader.ready())
+    if (input.isEOF())
       return new String[] { attribute.toString() };
     
-    ch = reader.read();
+    ch = input.read();
     if (ch != '=') {
-      reader.unread(ch);
+      input.unread();
 
       return new String[] { attribute.toString() };
     }
 
-    consumeWhiteSpace(reader);
+    consumeWhiteSpace(input);
 
     // check for quoting
     int quote = ' ';
     boolean quoted = false;
 
-    if (! reader.ready())
+    if (input.isEOF())
       return new String[] { attribute.toString() };
 
-    ch = reader.read();
+    ch = input.read();
 
     if (ch == '"' || ch == '\'') {
       quoted = true;
       quote = ch;
     } else 
-      reader.unread(ch);
+      input.unread();
 
     StringBuilder value = new StringBuilder();
 
-    while (reader.ready()) {
-      ch = reader.read();
+    while (! input.isEOF()) {
+      ch = input.read();
   
       // mimics PHP behavior
       if ((quoted && ch == quote) ||
@@ -955,15 +907,15 @@ public class UrlModule extends AbstractQuercusModule {
     return new String[] { attribute.toString(), value.toString() };
   }
 
-  private static void consumeWhiteSpace(PushbackReader reader)
+  private static void consumeWhiteSpace(BinaryInput input)
     throws IOException
   {
     int ch = 0;
 
-    while (reader.ready() && Character.isWhitespace(ch = reader.read())) {}
+    while (! input.isEOF() && Character.isWhitespace(ch = input.read())) {}
 
     if (! Character.isWhitespace(ch))
-      reader.unread(ch);
+      input.unread();
   }
 
   private static boolean isValidAttributeCharacter(int ch)
