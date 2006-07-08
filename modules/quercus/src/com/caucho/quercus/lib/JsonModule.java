@@ -29,9 +29,6 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.quercus.QuercusModuleException;
-import com.caucho.quercus.UnimplementedException;
-
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
@@ -68,10 +65,6 @@ public class JsonModule
     = Logger.getLogger(JsonModule.class.getName());
   private static final L10N L = new L10N(JsonModule.class);
 
-  private int _lastOffset;
-  private boolean _associative;
-  private Env _env;
-
   public String []getLoadedExtensions()
   {
     return new String[] { "json" };
@@ -90,13 +83,21 @@ public class JsonModule
    */
   public StringValue json_encode(Env env, Value val)
   {
-    _env = env;
     StringBuilderValue sb = new StringBuilderValue();
-    jsonEncodeImpl(sb, val);
-    return sb;
+
+    try {
+      jsonEncodeImpl(sb, val);
+      return sb;
+    } catch (Exception e) {
+      env.warning(L.l(e.toString()));
+      log.log(Level.FINE, e.toString(), e);
+      sb.append("null");
+      return sb;
+    }
   }
 
   private void jsonEncodeImpl(StringBuilderValue sb, Value val)
+    throws Exception
   {
     if (val instanceof StringValue) {
       sb.append('"');
@@ -122,12 +123,13 @@ public class JsonModule
       sb.append("null");
 
     else {
-      _env.warning(L.l("json_encode: type is unsupported; encoded as null."));
-      sb.append("null");
+      throw new Exception(
+          "json_encode: type is unsupported; encoded as null.");
     }
   }
 
   private void encodeArray(StringBuilderValue sb, ArrayValue val)
+    throws Exception
   {
     long length = 0;
     for (Value key : val.keySet()) {
@@ -155,6 +157,7 @@ public class JsonModule
    * Encodes an associative array as a JSON object.
    */
   private void encodeArrayAsObject(StringBuilderValue sb, ArrayValue val)
+    throws Exception
   {
       sb.append('{');
 
@@ -173,6 +176,7 @@ public class JsonModule
   }
 
   private void encodeObject(StringBuilderValue sb, ObjectValue val)
+    throws Exception
   {
       sb.append('{');
 
@@ -195,10 +199,9 @@ public class JsonModule
    */
   private void encodeString(StringBuilderValue sb, StringValue val)
   {
-    String s = val.toString();
-
-    for (int i = 0; i < s.length(); i++) {
-      char c = s.charAt(i);
+    int len = val.length();
+    for (int i = 0; i < len; i++) {
+      char c = val.charAt(i);
       switch (c) {
         case '\b':
           sb.append('\\');
@@ -264,11 +267,6 @@ public class JsonModule
   }
 
 
-
-  /***********************    json_decode functions    ***********************/
-
-
-
   /**
    * Takes a JSON-encoded string and returns a PHP value.
    *
@@ -279,31 +277,11 @@ public class JsonModule
    * @return decoded PHP value.
    */
   public Value json_decode(Env env,
-                                              StringValue stringValue,
+                                              StringValue s,
                                               @Optional("false") boolean assoc)
   {
     try {
-      _associative = assoc;
-      _env = env;
-
-      String s = stringValue.toString();
-      Value val = jsonDecodeImpl(s, 0);
-
-      // Should now be at end of string or have only white spaces left.
-      for (_lastOffset++; _lastOffset < s.length(); _lastOffset++) {
-        char c = s.charAt(_lastOffset);
-        switch (c) {
-          case ' ':
-          case '\n':
-          case '\r':
-          case '\t':
-            continue;
-          default:
-            throw new Exception("Error parsing json text; null returned(1).");
-        }
-      }
-
-      return val;
+      return (new JsonDecoder()).json_decode(env, s, assoc);
     } catch (Exception e) {
       env.warning(L.l(e.toString()));
       log.log(Level.FINE, e.toString(), e);
@@ -311,21 +289,56 @@ public class JsonModule
     }
   }
 
+}
+
+
+  /*********************    JsonDecoder private class    *********************/
+
+
+class JsonDecoder {
+  private int _lastOffset;
+  private boolean _associative;
+  private Env _env;
+
+  public Value json_decode(Env env,
+                                              StringValue s,
+                                              boolean assoc)
+    throws Exception
+  {
+    _associative = assoc;
+    _env = env;
+
+    Value val = jsonDecodeImpl(s, 0);
+    int len = s.length();
+
+    // Should now be at end of string or have only white spaces left.
+    for (_lastOffset++; _lastOffset < len; _lastOffset++) {
+      char c = s.charAt(_lastOffset);
+      if (c == ' ' || c == '\n' || c == '\r' || c == '\t')
+        continue;
+      else
+        throw new Exception("Error parsing json text; null returned(1).");
+    }
+    return val;
+  }
+
   /**
    * Determines if the JSON-encoded string looks like an array, literal,
-   * number, object, or string.  If it is a literal or number, then it decodes
-   * the value on the spot.  For arrays, objects, and strings, it offloads the
-   * decoding work to subfunctions, but consumes the first type-identifying
-   * character to make life a little easier for the subfunctions.
+   * number, object, or string.  If it is a literal, then it decodes
+   * the value on the spot.  For arrays, objects, and strings, it
+   * offloads the decoding work to subfunctions, but consumes the first
+   * type-identifying character to make life a little easier for the
+   * subfunctions.
    *
    * @param s
    * @param offset into s
    * @return decoded PHP value 
    */
-  private Value jsonDecodeImpl(String s, int offset)
+  private Value jsonDecodeImpl(StringValue s, int offset)
     throws Exception
   {
-    for (; offset < s.length(); offset++) {
+    int len = s.length();
+    for (; offset < len; offset++) {
       char c = s.charAt(offset);
 
       switch (c) {
@@ -362,19 +375,15 @@ public class JsonModule
         case '{':
           return decodeObject(s, offset + 1);
 
-        case ' ':
-        case '\n':
-        case '\r':
         case '\t':
+        case '\r':
+        case '\n':
+        case ' ':
           continue;
 
         default:
-          if (c >= '1' && c <= '9')
-            return decodeNumber(s, offset + 1, 2);
-          if (c == 0)
-            return decodeNumber(s, offset + 1, 1);
-          if (c == '-')
-            return decodeNumber(s, offset + 1, 0);
+          if (c == '-' || c == '0' || (c >= '1' && c <= '9'))
+            return decodeNumber(s, offset);
           throw new Exception("Error parsing json text; null returned(24).");
       }
     }
@@ -383,51 +392,72 @@ public class JsonModule
   }
 
   /**
-   * Lazily checks to see if it looks like a number before converting.
-   * XXX: do additional checks.  See JSON Internet Draft.
+   * Checks to see if there is a valid number per JSON Internet Draft.
    */
-  private Value decodeNumber(String s, int offset, int state)
+  private Value decodeNumber(StringValue s, int offset) throws Exception
   {
-    boolean isDouble = false;
-
+    char ch;
     int i = offset;
-    for(; i < s.length(); i++) {
-      char c = s.charAt(i);
+    int len = s.length();
 
-      if (c >= '0' && c <= '9')
-        continue;
-      if (c == 'e' || c == 'E' || c == '.') {
-        isDouble = true;
-        continue;
-      }
-      if (c == '+' || c == '-')
-        continue;
+    // (-)?
+    if ((ch = s.charAt(i)) == '-')
+      i++;
 
-      break;
+    // (0) | ([1-9] [0-9]+)
+    if (i < len) {
+      if ((ch = s.charAt(i)) == '0')
+        i++;
+      else if ('1' <= ch || ch <= '9') {
+        for (i++; i < len && '0' <= (ch = s.charAt(i)) && ch <= '9'; i++) {
+        } 
+      } else
+        throw new Exception("Error decoding number; null returned(11).");
     }
 
-    NumberValue val;
+    int integerEnd = i;
 
-    if (isDouble)
-      val = new DoubleValue(Double.parseDouble(s.substring(offset-1, i)));
+    // ((decimalPoint) [0-9]+)?
+    if (i < len && (ch = s.charAt(i)) == '.') {
+      for (i++; i < len && '0' <= (ch = s.charAt(i)) && ch <= '9'; i++) {
+      }
+    }
+
+    // ((e | E) (+ | -)? [0-9]+)
+    if (ch == 'e' || ch == 'E') {
+      i++;
+      if (i < len && (ch = s.charAt(i)) == '+' || ch == '-')
+        i++;
+      if (i < len && '0' <= (ch = s.charAt(i)) && ch <= '9') {
+        i++;
+        for (; i < len && '0' <= (ch = s.charAt(i)) && ch <= '9'; i++) {
+        }
+      }
+      else
+        throw new Exception("Error decoding number; null returned(12).");
+    }
+
+    StringValue val = s.substring(offset, i);
+    _lastOffset = i - 1;
+
+    if (integerEnd != i)
+      return new DoubleValue(Double.parseDouble(val.toString()));
     else
-      val = new LongValue(Long.parseLong(s.substring(offset-1, i)));
-
-    _lastOffset = i-1;
-    return val;
+      return new LongValue(Long.parseLong(val.toString()));
   }
 
   /**
    * Not meant to be called by itself.  Use jsonDecodeImpl(String, offset).
    */
-  private Value decodeArray(String s, int offset)
+  private Value decodeArray(StringValue s, int offset)
     throws Exception
   {
     boolean commaSeen = false;
 
     ArrayValueImpl array = new ArrayValueImpl();
 
-    for (; offset < s.length(); offset++) {
+    int len = s.length();
+    for (; offset < len; offset++) {
       char c = s.charAt(offset);
 
       switch (c) {
@@ -435,10 +465,11 @@ public class JsonModule
           if (commaSeen || array.getSize() == 0)
             throw new Exception("Error decoding array; null returned(31).");
           commaSeen = true;
-        case ' ':
-        case '\n':
-        case '\r':
+
         case '\t':
+        case '\r':
+        case '\n':
+        case ' ':
           continue;
 
         case ']':
@@ -466,7 +497,7 @@ public class JsonModule
    * Decodes into an stdObject (or an associative array).
    * Not meant to be called by itself.  Use jsonDecodeImpl(String, offset).
    */
-  private Value decodeObject(String s, int offset)
+  private Value decodeObject(StringValue s, int offset)
     throws Exception
   {
     boolean commaSeen = false;
@@ -482,7 +513,8 @@ public class JsonModule
       object = _env.createObject();
 
     int size = 0;
-    for(; offset < s.length(); offset++) {
+    int len = s.length();
+    for(; offset < len; offset++) {
       char c = s.charAt(offset);
 
       switch (c) {
@@ -495,10 +527,10 @@ public class JsonModule
           if (name == null)
             throw new Exception("Error decoding object; null returned(42).");
           colonSeen = true;
-        case ' ':
-        case '\n':
-        case '\r':
         case '\t':
+        case '\r':
+        case '\n':
+        case ' ':
           continue;
 
         case '}':
@@ -532,7 +564,6 @@ public class JsonModule
           }
           else
             throw new Exception("Error decoding object; null returned(46).");
-
           offset = _lastOffset;
       }
     }
@@ -543,19 +574,20 @@ public class JsonModule
   /**
    * Not meant to be called by itself.  Use jsonDecodeImpl(String, offset).
    */
-  private Value decodeString(String s, int offset)
+  private Value decodeString(StringValue s, int offset)
     throws Exception
   {
     StringBuilderValue sbv = new StringBuilderValue();
 
-    for (; offset < s.length(); offset++) {
+    int len = s.length();
+    for (; offset < len; offset++) {
       char c = s.charAt(offset);
 
       switch (c) {
         // Escaped Characters
         case '\\':
           offset++;
-          if (offset >= s.length())
+          if (offset >= len)
             throw new Exception(
               "Error decoding escaped string; null returned(51).");
           c = s.charAt(offset);
@@ -587,7 +619,7 @@ public class JsonModule
               break;
             case 'u':
             case 'U':
-              if (offset + 4 >= s.length())
+              if (offset + 4 >= len)
                 throw new Exception(
                     "Error decoding escaped string; null returned(52).");
 
@@ -603,7 +635,7 @@ public class JsonModule
                   hex += hexChar - 55;
                 else
                   throw new Exception(
-                      "Error decoding escaped string; null returned(52).");
+                      "Error decoding escaped string; null returned(53).");
               }
               offset += 4;
               sbv.append((char)hex);
@@ -621,6 +653,6 @@ public class JsonModule
       } //end switch
     } //end for
 
-    throw new Exception("Error decoding json string; null returned(53).");
+    throw new Exception("Error decoding json string; null returned(54).");
   }
 }
