@@ -17,6 +17,7 @@ import java.io.FileNotFoundException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.Location;
+import javax.xml.namespace.QName;
 
 public class XmlReader {
 	private static final Logger log = Logger.getLogger(XmlReader.class.getName());
@@ -177,10 +178,17 @@ public class XmlReader {
 	 * @return true if this element has attributes, false if not, otherwise null
 	 */
 	public Value getHasAttributes() {
-		if (streamIsOpen())
-			return BooleanValue.create(_hasAttributes);
+		if (! streamIsOpen())
+			return NullValue.NULL;
 
-		return NullValue.NULL;
+		try {
+			return BooleanValue.create(_streamReader.getAttributeCount() > 0);
+		}
+		catch (IllegalStateException ex) {
+			log.log(Level.WARNING, ex.toString(), ex);
+
+			return NullValue.NULL;
+		}
 	}
 
 	/**
@@ -189,24 +197,22 @@ public class XmlReader {
 	 * @return true if this element has content, false if not, otherwise null
 	 */
 	public Value getHasValue() {
-		if (streamIsOpen())
-			return BooleanValue.create(_hasValue);
+		if (! streamIsOpen())
+		  return NullValue.NULL;
 
-		return NullValue.NULL;
+		return BooleanValue.create(_streamReader.hasText());
 	}
 
 	/**
 	 * Determines whether this element is default.
 	 *
-	 * XXX: Not sure what default means, yet.
-	 *
 	 * @return true if this element is default, false if not, otherwise null
 	 */
 	public Value getIsDefault() {
-		if (streamIsOpen())
-			return BooleanValue.create(_isDefault);
+		if (! streamIsOpen())
+			return NullValue.NULL;
 
-		return NullValue.NULL;
+		return BooleanValue.create(_streamReader.isAttributeSpecified(0));
 	}
 
 	/**
@@ -215,10 +221,10 @@ public class XmlReader {
 	 * @return true if this element is empty, false if not, otherwise null
 	 */
 	public Value getIsEmptyElement() {
-		if (streamIsOpen())
-			return BooleanValue.create(_isEmptyElement);
+		if (! streamIsOpen())
+			return NullValue.NULL;
 
-		return NullValue.NULL;
+		return BooleanValue.create(! _streamReader.hasText());
 	}
 
 	/**
@@ -227,10 +233,10 @@ public class XmlReader {
 	 * @return true if this element has attributes, false if not, otherwise null
 	 */
 	public Value getLocalName() {
-		if (streamIsOpen())
-			return StringValue.create(_localName);
+		if (! streamIsOpen())
+			return NullValue.NULL;
 
-		return NullValue.NULL;
+		return StringValue.create(_streamReader.getLocalName());
 	}
 
 	/**
@@ -239,10 +245,10 @@ public class XmlReader {
 	 * @return the name, otherwise null
 	 */
 	public Value getName() {
-		if (streamIsOpen())
-			return StringValue.create(_name);
+		if (! streamIsOpen())
+			return NullValue.NULL;
 
-		return NullValue.NULL;
+		return StringValue.create(_streamReader.getName().toString());
 	}
 
 	/**
@@ -251,10 +257,10 @@ public class XmlReader {
 	 * @return the namespace URI, otherwise null
 	 */
 	public Value getNamespaceURI() {
-		if (streamIsOpen())
-			return StringValue.create(_namespaceURI);
+		if (! streamIsOpen())
+		  return NullValue.NULL;
 
-		return NullValue.NULL;
+		return StringValue.create(_streamReader.getNamespaceURI());
 	}
 
 	/**
@@ -263,10 +269,10 @@ public class XmlReader {
 	 * @return the node type, otherwise null
 	 */
 	public Value getNodeType() {
-		if (streamIsOpen())
-			return LongValue.create(_nodeType);
+		if (! streamIsOpen())
+			return NullValue.NULL;
 
-		return NullValue.NULL;
+	  return LongValue.create(_streamReader.getEventType());
 	}
 
 	/**
@@ -275,10 +281,10 @@ public class XmlReader {
 	 * @return the prefix, otherwise null
 	 */
 	public Value getPrefix() {
-		if (streamIsOpen())
-			return StringValue.create(_prefix);
+		if (! streamIsOpen())
+			return NullValue.NULL;
 
-		return NullValue.NULL;
+		return StringValue.create(_streamReader.getPrefix());
 	}
 
 	/**
@@ -287,10 +293,10 @@ public class XmlReader {
 	 * @return the value, otherwise null
 	 */
 	public Value getValue() {
-		if (streamIsOpen())
-			return StringValue.create(_value);
+		if (! streamIsOpen())
+			return NullValue.NULL;
 
-		return NullValue.NULL;
+		return StringValue.create(_streamReader.getText());
 	}
 
 	/**
@@ -299,10 +305,11 @@ public class XmlReader {
 	 * @return the node type, otherwise null
 	 */
 	public Value getXmlLang() {
-		if (streamIsOpen())
-			return StringValue.create(_xmlLang);
+		if (! streamIsOpen())
+			return NullValue.NULL;
 
-		return NullValue.NULL;
+		// XXX: Not sure if this is the proper implementation or not.
+	  return StringValue.create(_streamReader.getEncoding());
 	}
 
 	/**
