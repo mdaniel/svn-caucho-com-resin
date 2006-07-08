@@ -633,6 +633,7 @@ class ResponseStream extends ToByteResponseStream {
   /**
    * Flushes the buffered response to the output stream.
    */
+  /*
   public void flushBuffer()
     throws IOException
   {
@@ -641,6 +642,7 @@ class ResponseStream extends ToByteResponseStream {
     // jsp/15la
     // _isCommitted = true;
   }
+  */
   
   /**
    * Complete the request.

@@ -240,8 +240,8 @@ public class ResinStatusServlet extends GenericServlet {
                 (freeMemory / 10000) % 10 +
                 "Meg");
     
-    long invocationHitCount = _server.getInvocationCacheHitCountLifetime();
-    long invocationMissCount = _server.getInvocationCacheMissCountLifetime();
+    long invocationHitCount = _server.getInvocationCacheHitCountTotal();
+    long invocationMissCount = _server.getInvocationCacheMissCountTotal();
 
     long totalCount = invocationHitCount + invocationMissCount;
     if (totalCount == 0)

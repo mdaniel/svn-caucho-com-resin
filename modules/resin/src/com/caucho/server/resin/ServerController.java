@@ -152,16 +152,6 @@ public class ServerController
   }
 
   /**
-   * Creates the managed object.
-   */
-  protected Object createMBean()
-    throws JMException
-  {
-    return new IntrospectionMBean(getDeployAdmin(),
-                                  ServerMXBean.class);
-  }
-
-  /**
    * Returns the owning cluster.
    */
   public Cluster getCluster()
@@ -169,6 +159,11 @@ public class ServerController
     return getDeployInstance().getCluster();
   }
 
+  public ServerMXBean getAdmin()
+  {
+    return _admin;
+  }
+  
   /**
    * Returns the deploy admin.
    */

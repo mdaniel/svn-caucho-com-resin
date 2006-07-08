@@ -45,7 +45,12 @@ public class PortAdmin extends AbstractManagedObject
 
   public String getName()
   {
-    return null;
+    String addr = _port.getAddress();
+
+    if (addr == null)
+      addr = "any";
+    
+    return addr + '-' + _port.getPort();
   }
 
   public String getProtocolName()
@@ -93,6 +98,11 @@ public class PortAdmin extends AbstractManagedObject
     return _port.getLifecycleState().getStateName();
   }
 
+  public int getThreadCount()
+  {
+    return _port.getThreadCount();
+  }
+
   public int getThreadActiveCount()
   {
     return _port.getActiveThreadCount();
@@ -113,34 +123,39 @@ public class PortAdmin extends AbstractManagedObject
     return _port.getSelectConnectionCount();
   }
 
-  public long getRequestCountLifetime()
+  public long getRequestCountTotal()
   {
     return _port.getLifetimeRequestCount();
   }
 
-  public long getKeepaliveCountLifetime()
+  public long getKeepaliveCountTotal()
   {
     return _port.getLifetimeKeepaliveCount();
   }
 
-  public long getClientDisconnectCountLifetime()
+  public long getClientDisconnectCountTotal()
   {
     return _port.getLifetimeClientDisconnectCount();
   }
 
-  public long getRequestTimeLifetime()
+  public long getRequestTimeTotal()
   {
     return _port.getLifetimeRequestTime();
   }
 
-  public long getReadBytesLifetime()
+  public long getReadBytesTotal()
   {
     return _port.getLifetimeReadBytes();
   }
 
-  public long getWriteBytesLifetime()
+  public long getWriteBytesTotal()
   {
     return _port.getLifetimeWriteBytes();
+  }
+
+  void register()
+  {
+    registerSelf();
   }
 
   public String toString()

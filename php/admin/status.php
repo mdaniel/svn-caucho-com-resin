@@ -97,12 +97,12 @@
 
 <tr title="The current total amount of memory available for the JVM, in bytes.">
 <th>Total memory:</th>
-<td><?= format_memory($server->TotalMemory) ?></td>
+<td><?= format_memory($server->RuntimeMemory) ?></td>
 </tr>
 
 <tr title="The current free amount of memory available for the JVM, in bytes.">
 <th>Free memory:</th>
-<td><?= format_memory($server->FreeMemory) ?></td>
+<td><?= format_memory($server->RuntimeMemoryFree) ?></td>
 </tr>
 
 <?php
@@ -113,15 +113,15 @@ $proxy_cache = $mbeanServer->lookup("resin:type=ProxyCache");
 
 <tr title="Percentage of requests that have been served from the proxy cache:">
 <th>Proxy cache hit ratio:</th>
-<td><?= format_hit_ratio($proxy_cache->HitCount, $proxy_cache->MissCount) ?></td>
+<td><?= format_hit_ratio($proxy_cache->HitCountTotal, $proxy_cache->MissCountTotal) ?></td>
 </tr>
 
 <!-- XXX: show how cacheable apps are: cacheable/non-cacheable -->
 
 <tr>
 <th>Invocation hit ratio:</th>
-<td><?= format_hit_ratio($server->InvocationCacheHitCount,
-                         $server->InvocationCacheMissCount) ?></td>
+<td><?= format_hit_ratio($server->InvocationCacheHitCountTotal,
+                         $server->InvocationCacheMissCountTotal) ?></td>
 </tr>
 
 </table>
@@ -156,8 +156,8 @@ The ThreadPool manages all threads used by Resin.
 <tr align='right'>
 <td><?= $thread_pool->ThreadMax ?></td>
 <td><?= $thread_pool->SpareThreadMin ?></td>
-<td><?= $thread_pool->ActiveThreadCount ?></td>
-<td><?= $thread_pool->IdleThreadCount ?></td>
+<td><?= $thread_pool->ThreadActiveCount ?></td>
+<td><?= $thread_pool->ThreadIdleCount ?></td>
 <td><?= $thread_pool->ThreadCount ?></td>
 </tr>
 </table>
@@ -236,12 +236,12 @@ The ThreadPool manages all threads used by Resin.
 
 <tr>
 <td><?= $port->ProtocolName ?>://<?= $port->Address ? $port->Address : "*" ?>:<?= $port->Port ?></td>
-<td><?= $port->Active ? "active" : "inactive" ?></td>
-<td><?= $port->ActiveThreadCount ?></td>
-<td><?= $port->IdleThreadCount ?></td>
+<td><?= $port->State ?></td>
+<td><?= $port->ThreadActiveCount ?></td>
+<td><?= $port->ThreadIdleCount ?></td>
 <td><?= $port->ThreadCount ?></td>
-<td><?= $port->KeepaliveCount ?></td>
-<td><?= $port->SelectConnectionCount < 0 ? "N/A" : $port->SelectConnectionCount ?></td>
+<td><?= $port->ThreadKeepaliveCount ?></td>
+<td><?= $port->SelectKeepaliveCount < 0 ? "N/A" : $port->SelectKeepaliveCount ?></td>
 </tr>
 <?php 
   }
@@ -253,8 +253,9 @@ The ThreadPool manages all threads used by Resin.
 
 <?php
   # XXX: sort by $cluster->index
-  foreach ($resin->Clusters as $clusters) {
-    if (empty($cluster->Clients))
+
+  foreach ($resin->Clusters as $cluster) {
+    if (empty($cluster->Servers))
       continue;
 ?>
 
@@ -269,20 +270,28 @@ The ThreadPool manages all threads used by Resin.
 <th>Active</th>
 <th>Idle</th>
 <th>Connection</th>
+<th>Fail Total</th>
+<th>Busy Total</th>
 </tr>
 <?php
-  foreach ($cluster->Clients as $client) {
+  foreach ($cluster->Servers as $client) {
 ?>
 
 <tr class='<?= $client->ping() ? "active" : "inactive" ?>'>
 <tr>
-<td><?= $client->Id ?></td>
+<td><?= $client->Name ?></td>
 <td><?= $client->Address ?>:<?= $client->Port ?></td>
-<td><?= $client->State ?></td>\n";
-<td><?= $client->ActiveConnectionCount ?></td>
-<td><?= $client->IdleConnectionCount ?></td>
-<td><?= format_hit_ratio($client->LifetimeKeepaliveCount,
-                         $client->LifetimeConnectionCount) ?></td>
+<td><?= $client->State ?></td>
+<td><?= $client->ConnectionActiveCount ?></td>
+<td><?= $client->ConnectionIdleCount ?></td>
+<td><?= format_hit_ratio($client->ConnectionKeepaliveCountTotal,
+                         $client->ConnectionNewCountTotal) ?></td>
+<!--
+<td><?= $client->LastFailTime ?></td>
+<td><?= $client->LastBusyTime ?></td>
+-->
+<td><?= $client->ConnectionFailCountTotal ?></td>
+<td><?= $client->ConnectionBusyCountTotal ?></td>
 </tr>
 <?php 
 }
@@ -336,7 +345,7 @@ The ThreadPool manages all threads used by Resin.
 <td>&nbsp;</td>
 <td><?= empty($webapp->ContextPath) ? "/" : $webapp->ContextPath ?>
 <td><?= $webapp->State ?>
-<td><?= $webapp->ActiveSessionCount ?>
+<td><?= $session->SessionActiveCount ?>
 </tr>
 <?php
     } // webapps

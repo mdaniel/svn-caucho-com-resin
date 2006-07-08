@@ -50,6 +50,7 @@ import com.caucho.management.j2ee.*;
 import com.caucho.management.server.*;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.ServerListener;
+import com.caucho.server.cluster.*;
 import com.caucho.transaction.cfg.TransactionManagerConfig;
 import com.caucho.util.Alarm;
 import com.caucho.util.CauchoSystem;
@@ -106,8 +107,11 @@ public class ResinServer
   private ArrayList<ServerController> _servers
     = new ArrayList<ServerController>();
 
-  private ArrayList<ResinServerListener> _listeners =
-    new ArrayList<ResinServerListener>();
+  private ArrayList<ResinServerListener> _listeners
+    = new ArrayList<ResinServerListener>();
+
+  private ArrayList<Cluster> _clusters
+    = new ArrayList<Cluster>();
 
   private final Lifecycle _lifecycle = new Lifecycle(log, "Resin[]");
 
@@ -149,13 +153,7 @@ public class ResinServer
     EL.setVariableMap(_variableMap, _classLoader);
     _variableMap.put("fmt", new com.caucho.config.functions.FmtFunctions());
 
-    try {
-      _objectName = new ObjectName("resin:type=Resin");
-
-      Jmx.register(new ResinAdmin(this), OBJECT_NAME);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    new ResinAdmin(this);
   }
 
   /**
@@ -249,7 +247,17 @@ public class ResinServer
    */
   public ClusterMXBean []getClusters()
   {
-    return new ClusterMXBean[0];
+    ClusterMXBean []clusters = new ClusterMXBean[_clusters.size()];
+
+    for (int i = 0; i < _clusters.size(); i++)
+      clusters[i] = _clusters.get(i).getAdmin();
+
+    return clusters;
+  }
+
+  void addCluster(Cluster cluster)
+  {
+    _clusters.add(cluster);
   }
 
   /**
@@ -306,6 +314,7 @@ public class ResinServer
         id = String.valueOf(_servers.size());
 
       ServerController controller = new ServerController(config);
+      controller.setResinServer(this);
 
       _servers.add(controller);
 
@@ -313,7 +322,6 @@ public class ResinServer
 
       controller.setServerId(_serverId);
       controller.setConfig(config);
-      controller.setResinServer(this);
 
       controller.init();
     }
@@ -325,6 +333,14 @@ public class ResinServer
   public ArrayList<ServerController> getServerList()
   {
     return _servers;
+  }
+
+  /**
+   * Returns the server.
+   */
+  public ServerController getServer()
+  {
+    return _servers.get(0);
   }
 
   /**

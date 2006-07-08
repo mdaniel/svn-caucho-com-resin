@@ -1121,19 +1121,20 @@ public class WriteStream extends OutputStreamWithBuffer {
    */
   public final void close() throws IOException
   {
+    StreamImpl s = _source;
+    
     try {
       int len = _writeLength;
       if (len > 0) {
 	_writeLength = 0;
-        if (_source != null)
-          _source.write(_writeBuffer, 0, len, true);
+        if (s != null)
+          s.write(_writeBuffer, 0, len, true);
       }
     } finally {
       if (_disableClose) {
 	return;
       }
 
-      StreamImpl s = _source;
       _source = null;
 
       if (_writeEncoding != null)

@@ -159,7 +159,7 @@ public interface ServerMXBean extends DeployControllerMXBean {
    */
   @Description("The total number of requests serviced by the"
                + " server since it started")
-  public long getRequestCountLifetime();
+  public long getRequestCountTotal();
 
   /**
    * Returns the number of requests that have ended up in the keepalive state
@@ -167,7 +167,7 @@ public interface ServerMXBean extends DeployControllerMXBean {
    */
   @Description("The total number of requests that have ended"
                + " up in the keepalive state")
-  public long getKeepaliveCountLifetime();
+  public long getKeepaliveCountTotal();
 
   /**
    * The total number of connections that have terminated with
@@ -175,7 +175,7 @@ public interface ServerMXBean extends DeployControllerMXBean {
    */
   @Description("The total number of connections that have " +
                " terminated with a client disconnect")
-  long getClientDisconnectCountLifetime();
+  long getClientDisconnectCountTotal();
 
   /**
    * Returns the total duration in milliseconds that requests serviced by
@@ -184,7 +184,7 @@ public interface ServerMXBean extends DeployControllerMXBean {
   @Description("The total duration in milliseconds that"
                + " requests serviced by this service have taken")
   @Units("milliseconds")
-  long getRequestTimeLifetime();
+  long getRequestTimeTotal();
 
   /**
    * Returns the total number of bytes that requests serviced by this
@@ -193,7 +193,7 @@ public interface ServerMXBean extends DeployControllerMXBean {
   @Description("The total number of bytes that requests"
                + " serviced by this server have read")
   @Units("bytes")
-  long getRequestReadBytesLifetime();
+  long getRequestReadBytesTotal();
 
   /**
    * Returns the total number of bytes that requests serviced by this
@@ -202,21 +202,21 @@ public interface ServerMXBean extends DeployControllerMXBean {
   @Description("The total number of bytes that requests"
                + " serviced by this server have written")
   @Units("bytes")
-  long getRequestWriteBytesLifetime();
+  long getRequestWriteBytesTotal();
 
   /**
    * Returns the invocation cache hit count.
    */
   @Description("The invocation cache is an internal cache used"
                + " by Resin to optimize the handling of urls")
-  public long getInvocationCacheHitCountLifetime();
+  public long getInvocationCacheHitCountTotal();
 
   /**
    * Returns the invocation cache miss count.
    */
   @Description("The invocation cache is an internal cache used"
                + " by Resin to optimize the handling of urls")
-  public long getInvocationCacheMissCountLifetime();
+  public long getInvocationCacheMissCountTotal();
 
   /**
    * Returns the current total amount of memory available for the JVM, in bytes.

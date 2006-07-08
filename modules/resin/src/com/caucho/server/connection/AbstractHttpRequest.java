@@ -116,6 +116,7 @@ public abstract class AbstractHttpRequest
   protected final DispatchServer _server;
   
   protected final Connection _conn;
+  protected final TcpConnection _tcpConn;
 
   private SecurityContextProvider _oldProvider;
   protected AbstractHttpResponse _response;
@@ -203,6 +204,11 @@ public abstract class AbstractHttpRequest
     else
       _rawRead = null;
 
+    if (conn instanceof TcpConnection)
+      _tcpConn = (TcpConnection) conn;
+    else
+      _tcpConn = null;
+
     _readStream = new ReadStream();
     _readStream.setReuseBuffer(true);
 
@@ -276,8 +282,8 @@ public abstract class AbstractHttpRequest
 
     _attributeListeners = NULL_LISTENERS;
 
-    if (_conn instanceof TcpConnection)
-      ((TcpConnection) _conn).beginActive();
+    if (_tcpConn != null)
+      _tcpConn.beginActive();
   }
 
   /**
@@ -314,8 +320,25 @@ public abstract class AbstractHttpRequest
     */
     
     CharSequence rawHost;
-    if (host == null && (rawHost = getHost()) != null)
-      host = rawHost.toString().toLowerCase();
+    if (host == null && (rawHost = getHost()) != null) {
+      if (rawHost instanceof CharSegment) {
+	CharSegment cb = (CharSegment) rawHost;
+	
+	char []buffer = cb.getBuffer();
+	int length = cb.getLength();
+
+	for (int i = length - 1; i >= 0; i--) {
+	  char ch = buffer[i];
+
+	  if ('A' <= ch && ch <= 'Z')
+	    buffer[i] = (char) (ch + 'a' - 'A');
+	}
+	
+	host = new String(buffer, 0, length);
+      }
+      else
+	return rawHost.toString().toLowerCase();
+    }
 
     if (host == null) {
       InetAddress addr = _conn.getLocalAddress();
@@ -343,19 +366,32 @@ public abstract class AbstractHttpRequest
    */
   public int getServerPort()
   {
-    /*
-    if (_invocation != null) {
-      int port = _invocation.getPort();
-      if (port != 0)
-        return port;
-    }
-    */
-    
     String host = _conn.getVirtualHost();
     
     CharSequence rawHost;
-    if (host == null && (rawHost = getHost()) != null)
-      host = rawHost.toString();
+    if (host == null && (rawHost = getHost()) != null) {
+      if (rawHost instanceof CharBuffer) {
+	CharBuffer cb = (CharBuffer) rawHost;
+	char []buf = cb.getBuffer();
+	int length = cb.length();
+	int i;
+
+	for (i = length - 1; i >= 0; i--) {
+	  if (buf[i] == ':') {
+	    int port = 0;
+
+	    for (i++; i < length; i++) {
+	      char ch = buf[i];
+
+	      if ('0' <= ch && ch <= '9')
+		port = 10 * port + ch - '0';
+	    }
+
+	    return port;
+	  }
+	}
+      }
+    }
 
     if (host == null)
       return _conn.getLocalPort();
@@ -363,8 +399,19 @@ public abstract class AbstractHttpRequest
     int p1 = host.lastIndexOf(':');
     if (p1 < 0)
       return isSecure() ? 443 : 80;
-    else
-      return Integer.parseInt(host.substring(p1 + 1));
+    else {
+      int length = host.length();
+      int port = 0;
+
+      for (int i = p1 + 1; i < length; i++) {
+	char ch = host.charAt(i);
+
+	if ('0' <= ch && ch <= '9')
+	  port = 10 * port + ch;
+      }
+
+      return port;
+    }
   }
 
   /**
@@ -515,11 +562,13 @@ public abstract class AbstractHttpRequest
     sb.append(getScheme());
     sb.append("://");
     sb.append(getServerName());
-    if (getServerPort() > 0 &&
-        getServerPort() != 80 &&
-        getServerPort() != 443) {
+    int port = getServerPort();
+    
+    if (port > 0 &&
+        port != 80 &&
+        port != 443) {
       sb.append(":");
-      sb.append(getServerPort());
+      sb.append(port);
     }
     sb.append(getRequestURI());
 
@@ -586,6 +635,30 @@ public abstract class AbstractHttpRequest
    * @param key the header key
    */
   abstract public String getHeader(String key);
+
+  /**
+   * Returns the number of headers.
+   */
+  public int getHeaderSize()
+  {
+    return -1;
+  }
+
+  /**
+   * Returns the header key
+   */
+  public CharSegment getHeaderKey(int index)
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Returns the header value
+   */
+  public CharSegment getHeaderValue(int index)
+  {
+    throw new UnsupportedOperationException();
+  }
 
   /**
    * Fills the result with the header values as
@@ -2259,11 +2332,11 @@ public abstract class AbstractHttpRequest
     if (! _keepalive)
       return false;
 
-    Connection conn = getConnection();
-    if (! (conn instanceof TcpConnection))
+    TcpConnection tcpConn = _tcpConn;
+    
+    if (tcpConn == null)
       return true;
 
-    TcpConnection tcpConn = (TcpConnection) conn;
     Port port = tcpConn.getPort();
 
     // the 16 is spare space for threading, since the keepalive connection
@@ -2328,8 +2401,8 @@ public abstract class AbstractHttpRequest
       }
       _closeOnExit.clear();
       
-      if (_conn instanceof TcpConnection)
-	((TcpConnection) _conn).beginActive();
+      if (_tcpConn != null)
+	_tcpConn.beginActive();
     }
   }
 

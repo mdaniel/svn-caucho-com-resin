@@ -166,14 +166,14 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
    */
   @Description("The number of new connections that have been made" +
 	       " to the target server")
-  public long getConnectionNewCountLifetime();
+  public long getConnectionNewCountTotal();
 
   /**
    * Returns the number of connections that have been made to the target server.
    */
   @Description("The number of keepalive connections that have been made" +
 	       " to the target server")
-  public long getConnectionKeepaliveCountLifetime();
+  public long getConnectionKeepaliveCountTotal();
 
   /**
    * Returns the number of connections which could not connect
@@ -181,7 +181,7 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
    */
   @Description("The number of failed connections attempts" +
 	       " to the target server")
-  public long getConnectionFailCountLifetime();
+  public long getConnectionFailCountTotal();
 
   /**
    * Returns the time of the last failure.
@@ -195,7 +195,7 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
    */
   @Description("The number of busy responses" +
 	       " from the target server")
-  public long getConnectionBusyCountLifetime();
+  public long getConnectionBusyCountTotal();
 
   /**
    * Returns the time of the busy response.
@@ -208,6 +208,12 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
    */
   @Description("Enables connections to the target server")
   public void start();
+
+  /**
+   * Enables connections to the target server.
+   */
+  @Description("Enable only stick-session requests to the target server")
+  public void enableSessionOnly();
 
   /**
    * Disables connections to the target server.

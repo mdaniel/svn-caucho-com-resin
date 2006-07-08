@@ -641,6 +641,8 @@ public class Port
 
     if (_writeTimeout <= 0)
       _writeTimeout = _timeout;
+
+    _admin.register();
   }
 
   /**

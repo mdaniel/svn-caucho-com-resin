@@ -384,6 +384,14 @@ public final class Lifecycle implements LifecycleState {
   }
 
   /**
+   * Returns true for the a runnable state, including warmup
+   */
+  public boolean isRunnable()
+  {
+    return IS_WARMUP <= _state && _state <= IS_ACTIVE;
+  }
+
+  /**
    * Returns true for the failed state.
    */
   public boolean isError()

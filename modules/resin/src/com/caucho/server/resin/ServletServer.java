@@ -405,6 +405,9 @@ public class ServletServer extends ProtocolDispatchServer
   {
     if (cluster.getServer(_serverId) != null)
       _cluster = cluster;
+
+    if (_controller.getResinServer() != null)
+      _controller.getResinServer().addCluster(cluster);
   }
 
   /**
@@ -412,6 +415,8 @@ public class ServletServer extends ProtocolDispatchServer
    */
   public void addClusterDefinition(Cluster cluster)
   {
+    if (_controller.getResinServer() != null)
+      _controller.getResinServer().addCluster(cluster);
   }
 
   /**

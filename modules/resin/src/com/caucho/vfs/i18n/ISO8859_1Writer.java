@@ -35,7 +35,7 @@ import com.caucho.vfs.OutputStreamWithBuffer;
 /**
  * Implements the ISO-8859-1 EncodingWriter factory.
  */
-public class ISO8859_1Writer extends EncodingWriter {
+public final class ISO8859_1Writer extends EncodingWriter {
   private final static ISO8859_1Writer _writer = new ISO8859_1Writer();
 
   /**
@@ -107,16 +107,26 @@ public class ISO8859_1Writer extends EncodingWriter {
     int bOffset = os.getBufferOffset();
     int bEnd = bBuf.length;
 
-    int cEnd = cOffset + cLength;
+    // int cEnd = cOffset + cLength;
 
-    while (cOffset < cEnd) {
+    while (cLength > 0) {
+      int sublen = bEnd - bOffset;
+      if (cLength < sublen)
+	sublen = cLength;
+
+      for (int i = 0; i < sublen; i++) {
+	bBuf[bOffset + i] = (byte) cBuf[cOffset + i];
+      }
+
+      bOffset += sublen;
+      cOffset += sublen;
+      cLength -= sublen;
+      
       if (bOffset == bEnd) {
 	bBuf = os.nextBuffer(bOffset);
 	bOffset = os.getBufferOffset();
 	bEnd = bBuf.length;
       }
-
-      bBuf[bOffset++] = (byte) cBuf[cOffset++];
     }
 
     os.setBufferOffset(bOffset);

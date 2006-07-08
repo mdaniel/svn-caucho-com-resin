@@ -265,13 +265,14 @@ public class CharSegment implements CharSequence {
   /* 
    * Predicate testing if two char segments are equal
    */
-  public boolean equals(Object a)
+  public final boolean equals(Object a)
   {
     if (this == a)
       return true;
     
     else if (a instanceof CharSegment) {
       CharSegment cb = (CharSegment) a;
+      
       int length = _length;
       if (length != cb._length)
 	return false;
@@ -287,7 +288,23 @@ public class CharSegment implements CharSequence {
 	  return false;
       
       return true;
-    } else
+    }
+    else if (a instanceof CharSequence) {
+      CharSequence seq = (CharSequence) a;
+
+      int length = seq.length();
+
+      if (_length != length)
+	return false;
+
+      for (int i = length - 1; i >= 0; i--) {
+	if (_buffer[i] != seq.charAt(i))
+	  return false;
+      }
+
+      return true;
+    }
+    else
       return false;
   }
 

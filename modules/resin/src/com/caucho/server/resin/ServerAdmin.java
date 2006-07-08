@@ -239,7 +239,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return keepaliveSelectCount;
   }
 
-  public long getRequestCountLifetime()
+  public long getRequestCountTotal()
   {
     ServletServer server = getDeployInstance();
 
@@ -254,7 +254,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return lifetimeRequestCount;
   }
 
-  public long getRequestTimeLifetime()
+  public long getRequestTimeTotal()
   {
     ServletServer server = getDeployInstance();
 
@@ -269,7 +269,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return lifetimeRequestTime;
   }
 
-  public long getRequestReadBytesLifetime()
+  public long getRequestReadBytesTotal()
   {
     ServletServer server = getDeployInstance();
 
@@ -284,7 +284,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return lifetimeReadBytes;
   }
 
-  public long getRequestWriteBytesLifetime()
+  public long getRequestWriteBytesTotal()
   {
     ServletServer server = getDeployInstance();
 
@@ -299,7 +299,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return lifetimeWriteBytes;
   }
 
-  public long getClientDisconnectCountLifetime()
+  public long getClientDisconnectCountTotal()
   {
     ServletServer server = getDeployInstance();
 
@@ -314,7 +314,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return lifetimeClientDisconnectCount;
   }
 
-  public long getKeepaliveCountLifetime()
+  public long getKeepaliveCountTotal()
   {
     ServletServer server = getDeployInstance();
 
@@ -360,7 +360,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
       server.clearCacheByPattern(hostRegexp, urlRegexp);
   }
 
-  public long getInvocationCacheHitCountLifetime()
+  public long getInvocationCacheHitCountTotal()
   {
     ServletServer server = getDeployInstance();
 
@@ -370,7 +370,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
       return -1;
   }
 
-  public long getInvocationCacheMissCountLifetime()
+  public long getInvocationCacheMissCountTotal()
   {
     ServletServer server = getDeployInstance();
 

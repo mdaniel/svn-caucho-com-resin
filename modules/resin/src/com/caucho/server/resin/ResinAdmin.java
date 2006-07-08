@@ -71,7 +71,7 @@ public class ResinAdmin extends AbstractManagedObject
    */
   public ClusterMXBean []getClusters()
   {
-    return new ClusterMXBean[0];
+    return _resinServer.getClusters();
   }
 
   //
@@ -95,7 +95,7 @@ public class ResinAdmin extends AbstractManagedObject
 
   public ServerMXBean getServer()
   {
-    return null;
+    return _resinServer.getServer().getAdmin();
   }
 
   public String getVersion()

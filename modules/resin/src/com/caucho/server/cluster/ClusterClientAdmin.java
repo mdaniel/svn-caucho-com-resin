@@ -161,11 +161,6 @@ public class ClusterClientAdmin extends AbstractManagedObject
     return _client.getState();
   }
 
-  public boolean isDead()
-  {
-    return ! _client.getServer().isActive();
-  }
-
   public int getConnectionActiveCount()
   {
     return _client.getActiveCount();
@@ -176,14 +171,14 @@ public class ClusterClientAdmin extends AbstractManagedObject
     return _client.getIdleCount();
   }
 
-  public long getConnectionNewCountLifetime()
+  public long getConnectionNewCountTotal()
   {
-    return _client.getConnectTotalCount();
+    return _client.getConnectCountTotal();
   }
 
-  public long getConnectionFailCountLifetime()
+  public long getConnectionFailCountTotal()
   {
-    return _client.getFailTotalCount();
+    return _client.getFailCountTotal();
   }
 
   public Date getLastFailTime()
@@ -191,29 +186,34 @@ public class ClusterClientAdmin extends AbstractManagedObject
     return _client.getLastFailTime();
   }
 
-  public long getConnectionKeepaliveCountLifetime()
+  public long getConnectionBusyCountTotal()
   {
-    return _client.getServer().getClient().getKeepaliveTotalCount();
-  }
-
-  public long getConnectionBusyCountLifetime()
-  {
-    return _client.getServer().getClient().getBusyCountTotal();
+    return _client.getBusyCountTotal();
   }
 
   public Date getLastBusyTime()
   {
-    return null;
+    return _client.getLastBusyTime();
+  }
+
+  public long getConnectionKeepaliveCountTotal()
+  {
+    return _client.getServer().getClient().getKeepaliveCountTotal();
   }
 
   public void start()
   {
-    _client.getServer().enable();
+    _client.start();
   }
 
   public void stop()
   {
-    _client.getServer().disable();
+    _client.stop();
+  }
+
+  public void enableSessionOnly()
+  {
+    _client.enableSessionOnly();
   }
 
   public boolean ping()

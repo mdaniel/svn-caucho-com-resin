@@ -47,9 +47,24 @@ import com.caucho.lifecycle.Lifecycle;
  *  resin:name=web-a,type=ClusterServer
  * </pre>
  */
-public class ClusterClient {
+public final class ClusterClient {
   private static final Logger log
     = Logger.getLogger(ClusterClient.class.getName());
+
+  private static final int DISABLED = 0;
+  private static final int ENABLED = 1;
+  private static final int ENABLED_SESSION = 2;
+
+  private static final int ST_NEW = 0;
+  private static final int ST_STANDBY = 1;
+  private static final int ST_SESSION_ONLY = 2;
+  // the following 5 are the active states
+  private static final int ST_STARTING = 3;
+  private static final int ST_WARMUP = 4;
+  private static final int ST_BUSY = 5;
+  private static final int ST_FAIL = 6;
+  private static final int ST_ACTIVE = 7;
+  private static final int ST_CLOSED = 8;
 
   private ClusterServer _server;
 
@@ -57,7 +72,7 @@ public class ClusterClient {
 
   private int _maxConnections = Integer.MAX_VALUE / 2;
 
-  private final Lifecycle _lifecycle = new Lifecycle();
+  private volatile int _enabledMode = ENABLED;
   
   private ClusterStream []_free = new ClusterStream[64];
   private volatile int _freeHead;
@@ -65,20 +80,23 @@ public class ClusterClient {
   private int _freeSize = 16;
 
   private int _streamCount;
-  
+
+  private long _failRecoverTime;
+  private long _warmupTime;
+
+  private volatile int _state = ST_NEW;
+
   private volatile long _lastFailTime;
+  private volatile long _lastBusyTime;
   private volatile long _firstConnectTime;
 
   private volatile int _activeCount;
   private volatile int _startingCount;
   
-  private volatile long _keepaliveTotalCount;
-  private volatile long _connectTotalCount;
-  private volatile long _failTotalCount;
+  private volatile long _keepaliveCountTotal;
+  private volatile long _connectCountTotal;
+  private volatile long _failCountTotal;
   private volatile long _busyCountTotal;
-
-  private volatile boolean _isEnabled = true;
-  private volatile boolean _isClosed;
 
   ClusterClient(ClusterServer server)
   {
@@ -99,7 +117,10 @@ public class ClusterClient {
 
     _debugId = selfId + "->" + targetId;
 
-    _lifecycle.toInit();
+    _failRecoverTime = server.getFailRecoverTime();
+    _warmupTime = server.getWarmupTime();
+
+    _state = ST_STARTING;
   }
 
   /**
@@ -129,33 +150,25 @@ public class ClusterClient {
   /**
    * Returns the total number of successful socket connections
    */
-  public long getConnectTotalCount()
+  public long getConnectCountTotal()
   {
-    return _connectTotalCount;
+    return _connectCountTotal;
   }
 
   /**
    * Returns the number of times a keepalive connection has been used.
    */
-  public long getKeepaliveTotalCount()
+  public long getKeepaliveCountTotal()
   {
-    return _keepaliveTotalCount;
+    return _keepaliveCountTotal;
   }
 
   /**
    * Returns the total number of failed connect attempts.
    */
-  public long getFailTotalCount()
+  public long getFailCountTotal()
   {
-    return _lifecycle.getFailCount();
-  }
-
-  /**
-   * Returns the count of busy connections.
-   */
-  public long getBusyCountTotal()
-  {
-    return _lifecycle.getBusyCount();
+    return _failCountTotal;
   }
 
   /**
@@ -163,7 +176,23 @@ public class ClusterClient {
    */
   public Date getLastFailTime()
   {
-    return new Date(_lifecycle.getLastFailTime());
+    return new Date(_lastFailTime);
+  }
+
+  /**
+   * Returns the count of busy connections.
+   */
+  public long getBusyCountTotal()
+  {
+    return _busyCountTotal;
+  }
+
+  /**
+   * Returns the time of the last busy.
+   */
+  public Date getLastBusyTime()
+  {
+    return new Date(_lastBusyTime);
   }
 
   /**
@@ -177,14 +206,22 @@ public class ClusterClient {
   /**
    * Returns true if the server is active.
    */
-  public boolean isActive()
+  public final boolean isActive()
   {
-    long now = Alarm.getCurrentTime();
+    switch (_state) {
+    case ST_ACTIVE:
+      return true;
 
-    if (_lifecycle.isStopped())
+    case ST_STANDBY:
+    case ST_CLOSED:
       return false;
-    else
-      return (_lastFailTime + _server.getFailRecoverTime() <= now);
+
+    case ST_FAIL:
+      return (_lastFailTime + _failRecoverTime <= Alarm.getCurrentTime());
+      
+    default:
+      return false;
+    }
   }
 
   /**
@@ -192,7 +229,26 @@ public class ClusterClient {
    */
   public String getState()
   {
-    return _lifecycle.getStateName();
+    switch (_state) {
+    case ST_NEW:
+      return "init";
+    case ST_STANDBY:
+      return "standby";
+    case ST_SESSION_ONLY:
+      return "session-only";
+    case ST_WARMUP:
+      return "warmup";
+    case ST_BUSY:
+      return "busy";
+    case ST_FAIL:
+      return "fail";
+    case ST_ACTIVE:
+      return "active";
+    case ST_CLOSED:
+      return "closed";
+    default:
+      return "unknown";
+    }
   }
 
   /**
@@ -200,36 +256,46 @@ public class ClusterClient {
    */
   public boolean canOpenSoft()
   {
-    if (_lifecycle.isStopped())
-      return false;
+    int state = _state;
+    
+    if (state == ST_ACTIVE)
+      return true;
+    else if (ST_STARTING <= state && state < ST_ACTIVE) {
+      long now = Alarm.getCurrentTime();
 
-    long now = Alarm.getCurrentTime();
+      if (now < _lastFailTime + _failRecoverTime)
+	return false;
+      if (now < _lastBusyTime + _failRecoverTime)
+	return false;
 
-    if (now < _lastFailTime + _server.getFailRecoverTime())
-      return false;
+      long warmupCount;
+      long warmupTime = _warmupTime;
 
-    long warmupCount;
-    long warmupTime = _server.getWarmupTime();
+      if (_firstConnectTime <= 0) {
+	toWarmup();
+	warmupCount = 0;
+      }
+      else if (warmupTime <= 0)
+	warmupCount = Integer.MAX_VALUE;
+      else
+	warmupCount = 16 * (now - _firstConnectTime) / warmupTime;
 
-    if (_firstConnectTime <= 0)
-      warmupCount = 0;
-    else if (warmupTime <= 0)
-      warmupCount = Integer.MAX_VALUE;
-    else
-      warmupCount = 16 * (now - _firstConnectTime) / warmupTime;
+      // Warmup time splits into 16 parts.  The first 4 allow 1 request
+      // at a time.  After that, each segment doubles the allowed requests
 
-    // Warmup time splits into 16 parts.  The first 4 allow 1 request
-    // at a time.  After that, each segment doubles the allowed requests
-
-    if (warmupCount > 16) {
-      _lifecycle.toActive();
+      if (warmupCount > 16) {
+	toActive();
       
-      return true;
+	return true;
+      }
+      else if (_activeCount + _startingCount < (1 << (warmupCount - 3)))
+	return true;
+      else
+	return false;
     }
-    else if (_activeCount + _startingCount < (1 << (warmupCount - 3)))
-      return true;
-    else
+    else {
       return false;
+    }
   }
 
   /**
@@ -237,7 +303,53 @@ public class ClusterClient {
    */
   public boolean isEnabled()
   {
-    return ! _lifecycle.isStopped();
+    int state = _state;
+    
+    return ST_STARTING <= state && state <= ST_ACTIVE;
+  }
+  
+  private void toActive()
+  {
+    synchronized (this) {
+      if (_state < ST_CLOSED)
+	_state = ST_ACTIVE;
+    }
+  }
+  
+  private void toWarmup()
+  {
+    synchronized (this) {
+      if (ST_STARTING <= _state && _state < ST_CLOSED)
+	_state = ST_WARMUP;
+    }
+  }
+  
+  public void toBusy()
+  {
+    _lastBusyTime = Alarm.getCurrentTime();
+    _firstConnectTime = 0;
+    
+    synchronized (this) {
+      _busyCountTotal++;
+      
+      if (_state < ST_CLOSED)
+	_state = ST_BUSY;
+    }
+  }
+  
+  public void toFail()
+  {
+    _lastFailTime = Alarm.getCurrentTime();
+    _firstConnectTime = 0;
+    
+    synchronized (this) {
+      _failCountTotal++;
+      
+      if (_state < ST_CLOSED)
+	_state = ST_FAIL;
+    }
+
+    clearRecycle();
   }
 
   /**
@@ -245,15 +357,34 @@ public class ClusterClient {
    */
   public void start()
   {
-    _lifecycle.toStarting();
+    synchronized (this) {
+      if (_state == ST_ACTIVE) {
+      }
+      else if (_state < ST_CLOSED)
+	_state = ST_STARTING;
+    }
   }
 
   /**
-   * Enable the client.
+   * Disable the client.
    */
   public void stop()
   {
-    _lifecycle.toStop();
+    synchronized (this) {
+      if (_state < ST_CLOSED)
+	_state = ST_STANDBY;
+    }
+  }
+
+  /**
+   * Session only
+   */
+  public void enableSessionOnly()
+  {
+    synchronized (this) {
+      if (_state < ST_CLOSED && _state != ST_STANDBY)
+	_state = ST_SESSION_ONLY;
+    }
   }
 
   /**
@@ -263,59 +394,99 @@ public class ClusterClient {
    */
   public ClusterStream openSoft()
   {
-    if (_lifecycle.isStopped())
+    int state = _state;
+
+    if (! (ST_STARTING <= state && state <= ST_ACTIVE))
       return null;
 
     long now = Alarm.getCurrentTime();
 
-    ClusterStream stream = openRecycle();
+    if (now < _lastFailTime + _failRecoverTime)
+      return null;
+    if (now < _lastBusyTime + _failRecoverTime)
+      return null;
 
-    if (stream != null)
-      return stream;
+    if (canOpenSoft()) {
+      ClusterStream stream = openRecycle();
 
-    if (canOpenSoft())
+      if (stream != null)
+	return stream;
+
       return connect();
+    }
     else
       return null;
   }
 
   /**
-   * Open a stream to the target server.
+   * Open a stream to the target server object persistence.
    *
    * @return the socket's read/write pair.
    */
   public ClusterStream openIfLive()
   {
-    if (_lifecycle.isStopped())
+    if (_state == ST_CLOSED)
       return null;
-
-    long now = Alarm.getCurrentTime();
 
     ClusterStream stream = openRecycle();
 
     if (stream != null)
       return stream;
 
-    if (now < _lastFailTime + _server.getFailRecoverTime())
+    long now = Alarm.getCurrentTime();
+
+    if (now < _lastFailTime + _failRecoverTime)
       return null;
 
     return connect();
   }
 
   /**
-   * Open a stream to the target server, forcing a connect.
+   * Open a stream to the target server for a session.
    *
    * @return the socket's read/write pair.
    */
-  public ClusterStream open()
+  public ClusterStream openForSession()
   {
-    if (_lifecycle.isStopped())
+    int state = _state;
+    if (! (state <= ST_SESSION_ONLY && state < ST_CLOSED))
       return null;
 
     ClusterStream stream = openRecycle();
 
     if (stream != null)
       return stream;
+
+    long now = Alarm.getCurrentTime();
+
+    if (now < _lastFailTime + _failRecoverTime)
+      return null;
+    if (now < _lastBusyTime + _failRecoverTime)
+      return null;
+
+    return connect();
+  }
+
+  /**
+   * Open a stream to the target server for the load balancer.
+   *
+   * @return the socket's read/write pair.
+   */
+  public ClusterStream open()
+  {
+    int state = _state;
+    if (! (state <= ST_STARTING && state < ST_CLOSED))
+      return null;
+
+    ClusterStream stream = openRecycle();
+
+    if (stream != null)
+      return stream;
+
+    long now = Alarm.getCurrentTime();
+
+    if (now < _lastFailTime + _failRecoverTime)
+      return null;
 
     return connect();
   }
@@ -343,7 +514,7 @@ public class ClusterClient {
 
         if (now < freeTime + _server.getMaxIdleTime()) {
           _activeCount++;
-	  _keepaliveTotalCount++;
+	  _keepaliveCountTotal++;
 	  
           return stream;
         }
@@ -377,11 +548,13 @@ public class ClusterClient {
 
       synchronized (this) {
         _activeCount++;
-	_connectTotalCount++;
+	_connectCountTotal++;
 
 	if (_firstConnectTime <= 0) {
-	  _lifecycle.toStarting();
-	  _firstConnectTime = Alarm.getCurrentTime();
+	  if (ST_STARTING <= _state && _state < ST_ACTIVE) {
+	    _state = ST_WARMUP;
+	    _firstConnectTime = Alarm.getCurrentTime();
+	  }
 	}
       }
 
@@ -395,9 +568,7 @@ public class ClusterClient {
     } catch (IOException e) {
       log.log(Level.FINER, e.toString(), e);
 
-      _lifecycle.toFail();
-      _lastFailTime = Alarm.getCurrentTime();
-      _firstConnectTime = 0;
+      toFail();
       
       return null;
     } finally {
@@ -413,9 +584,12 @@ public class ClusterClient {
    */
   public void wake()
   {
-    clearRecycle();
-    _lifecycle.toStarting();
-    _lastFailTime = 0;
+    synchronized (this) {
+      if (_state == ST_FAIL) {
+	_state = ST_STARTING;
+	_lastFailTime = 0;
+      }
+    }
   }
 
   /**
@@ -429,7 +603,7 @@ public class ClusterClient {
 
       int size = (_freeHead - _freeTail + _free.length) % _free.length;
 
-      if (! _isClosed && size < _freeSize) {
+      if (_state != ST_CLOSED && size < _freeSize) {
         _freeHead = (_freeHead + 1) % _free.length;
         _free[_freeHead] = stream;
 
@@ -492,8 +666,12 @@ public class ClusterClient {
    */
   public void close()
   {
-    if (! _lifecycle.toDestroy())
-      return;
+    synchronized (this) {
+      if (_state == ST_CLOSED)
+	return;
+
+      _state = ST_CLOSED;
+    }
     
     synchronized (this) {
       _freeHead = _freeTail = 0;

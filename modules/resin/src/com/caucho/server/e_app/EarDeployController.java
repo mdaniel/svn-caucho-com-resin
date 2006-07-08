@@ -31,9 +31,9 @@ package com.caucho.server.e_app;
 
 import com.caucho.jmx.IntrospectionMBean;
 import com.caucho.log.Log;
-import com.caucho.management.server.EarMXBean;
 import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.management.j2ee.J2EEApplication;
+import com.caucho.management.server.*;
 import com.caucho.server.deploy.EnvironmentDeployController;
 import com.caucho.server.webapp.ApplicationContainer;
 import com.caucho.server.webapp.WebAppController;
@@ -116,7 +116,7 @@ public class EarDeployController
   protected Object createMBean()
     throws JMException
   {
-    return new IntrospectionMBean(new EarAdmin(this), EarMXBean.class);
+    return new IntrospectionMBean(new EarAdmin(this), EAppMXBean.class);
   }
 
   protected void initEnd()

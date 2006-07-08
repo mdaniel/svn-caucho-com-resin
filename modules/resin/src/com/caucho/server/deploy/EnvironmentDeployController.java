@@ -247,46 +247,8 @@ abstract public class
   {
     super.initEnd();
 
-    try {
-      LinkedHashMap<String,String> properties;
-
-      properties = Jmx.copyContextProperties(getParentClassLoader());
-
-      ObjectName objectName = createObjectName(properties);
-
-      if (objectName != null) {
-        Object mbean = createMBean();
-
-        Jmx.register(mbean, objectName);
-
-        _objectName = objectName;
-        _mbean = mbean;
-
-      }
-    } catch (Exception e) {
-      // XXX: thrown?
-      log.log(Level.FINE, e.toString(), e);
-    }
+    getDeployAdmin().register();
   }
-
-  /**
-   * Creates the object name.  The default is to use getId() as
-   * the 'name' property, and the classname as the 'type' property.
-   */
-  protected ObjectName createObjectName(Map<String,String> properties)
-    throws MalformedObjectNameException
-  {
-    properties.put("type", getMBeanTypeName());
-    properties.put("name", getMBeanId());
-
-    return Jmx.getObjectName("resin", properties);
-  }
-
-  /**
-   * Creates the managed object.
-   */
-  abstract protected Object createMBean()
-    throws JMException;
 
   /**
    * Returns true if the entry matches.

@@ -69,7 +69,7 @@ public class InvocationKey {
   InvocationKey(CharSequence host, int port, byte []uri, int uriLength)
   {
     if (host != null) {
-      CharBuffer cb = CharBuffer.allocate();
+      CharBuffer cb = new CharBuffer();
       cb.append(host);
       _host = cb;
     }

@@ -60,8 +60,7 @@ import com.caucho.server.webapp.WebAppConfig;
 
 import com.caucho.server.e_app.EarConfig;
 
-import com.caucho.server.deploy.DeployController;
-import com.caucho.server.deploy.EnvironmentDeployController;
+import com.caucho.server.deploy.*;
 
 import com.caucho.management.server.HostMXBean;
 
@@ -253,6 +252,14 @@ public class HostController extends EnvironmentDeployController<Host,HostConfig>
   }
 
   /**
+   * Returns the deploy admin.
+   */
+  protected DeployControllerAdmin getDeployAdmin()
+  {
+    return _admin;
+  }
+
+  /**
    * Initialize the entry.
    */
   protected void initBegin()
@@ -312,15 +319,6 @@ public class HostController extends EnvironmentDeployController<Host,HostConfig>
       return "default";
     else
       return name;
-  }
-
-  /**
-   * Creates the managed object.
-   */
-  protected Object createMBean()
-    throws JMException
-  {
-    return new IntrospectionMBean(_admin, HostMXBean.class);
   }
 
   /**

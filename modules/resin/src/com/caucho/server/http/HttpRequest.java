@@ -88,6 +88,7 @@ public class HttpRequest extends AbstractHttpRequest
   static final CharBuffer _http10Cb = new CharBuffer("HTTP/1.0");
 
   private String _scheme;           // "http:" or "https:"
+  private boolean _isSecure;
 
   private CharBuffer _method;       // "GET"
   private String _methodString;
@@ -188,6 +189,8 @@ public class HttpRequest extends AbstractHttpRequest
 	  setStartTime();
 
 	  hasRequest = true;
+
+	  _isSecure = _conn.isSecure() || _conn.getLocalPort() == 443;
 
 	  if (_protocol.length() == 0)
 	    _protocol.append("HTTP/0.9");
@@ -369,7 +372,7 @@ public class HttpRequest extends AbstractHttpRequest
    */
   public boolean isSecure()
   {
-    return _conn.isSecure() || _conn.getLocalPort() == 443;
+    return _isSecure;
   }
 
   /**
@@ -574,14 +577,16 @@ public class HttpRequest extends AbstractHttpRequest
     }
     _protocol.setLength(offset);
 
-    if (offset == 0) {
+    if (offset != 8) {
       _protocol.append("HTTP/0.9");
       _version = HTTP_0_9;
     }
-    else if (buffer[offset - 1] == '1' && _protocol.equals(_http11Cb))
+    else if (buffer[7] == '1') // && _protocol.equals(_http11Cb))
       _version = HTTP_1_1;
-    else if (buffer[offset - 1] == '0' && _protocol.equals(_http10Cb))
+    else if (buffer[7] == '0') // && _protocol.equals(_http10Cb))
       _version = HTTP_1_0;
+    else
+      _version = HTTP_0_9;
 
     // skip to end of line
     while (ch != '\n') {
@@ -909,6 +914,33 @@ public class HttpRequest extends AbstractHttpRequest
 
     _headerValues[_headerSize].init(headerBuffer, tail, value.length());
     _headerSize++;
+  }
+
+  /**
+   * Returns the number of headers.
+   */
+  @Override
+  public int getHeaderSize()
+  {
+    return _headerSize;
+  }
+
+  /**
+   * Returns the header key
+   */
+  @Override
+  public CharSegment getHeaderKey(int index)
+  {
+    return _headerKeys[index];
+  }
+
+  /**
+   * Returns the header value
+   */
+  @Override
+  public CharSegment getHeaderValue(int index)
+  {
+    return _headerValues[index];
   }
 
   /**
@@ -1301,12 +1333,11 @@ public class HttpRequest extends AbstractHttpRequest
    */
   public String findSessionIdFromConnection()
   {
-    Connection conn = getConnection();
-
-    if (! isSecure() || ! (conn instanceof TcpConnection))
+    TcpConnection tcpConn = _tcpConn;
+    
+    if (! _isSecure || tcpConn == null)
       return null;
 
-    TcpConnection tcpConn = (TcpConnection) conn;
     QSocket socket = tcpConn.getSocket(); // XXX:
     /*
     if (! (socket instanceof SSLSocket))
@@ -1348,12 +1379,11 @@ public class HttpRequest extends AbstractHttpRequest
   {
     _initAttributes = true;
 
-    Connection conn = getConnection();
-
-    if (! isSecure() || ! (conn instanceof TcpConnection))
+    TcpConnection tcpConn = _tcpConn;
+    
+    if (! _isSecure || tcpConn == null)
       return;
 
-    TcpConnection tcpConn = (TcpConnection) conn;
     QSocket socket = tcpConn.getSocket();
 
     String cipherSuite = socket.getCipherSuite();

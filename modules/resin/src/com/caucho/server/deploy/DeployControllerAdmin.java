@@ -76,6 +76,11 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
     return _controller;
   }
 
+  protected void register()
+  {
+    registerSelf();
+  }
+
   public String getName()
   {
     return _controller.getMBeanId();
@@ -223,5 +228,4 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
 
     return name + "[" + getObjectName() + "]";
   }
-
 }

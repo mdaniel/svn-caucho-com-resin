@@ -112,6 +112,12 @@ public interface PortMXBean extends ManagedObjectMXBean {
   /**
    * Returns the current number of threads that are servicing requests.
    */
+  @Description("The current number of threads used by the port")
+  public int getThreadCount();
+
+  /**
+   * Returns the current number of threads that are servicing requests.
+   */
   @Description("The current number of threads that are servicing requests")
   public int getThreadActiveCount();
 
@@ -122,7 +128,6 @@ public interface PortMXBean extends ManagedObjectMXBean {
   @Description("The current number of threads that are"
                + " idle and waiting to service requests")
   public int getThreadIdleCount();
-
 
   /**
    * Returns the current number of connections that are in the keepalive
@@ -148,7 +153,7 @@ public interface PortMXBean extends ManagedObjectMXBean {
    */
   @Description("The total number of requests serviced by the"
                + " server since it started")
-  public long getRequestCountLifetime();
+  public long getRequestCountTotal();
 
   /**
    * Returns the number of requests that have ended up in the keepalive state
@@ -156,7 +161,7 @@ public interface PortMXBean extends ManagedObjectMXBean {
    */
   @Description("The total number of requests that have ended"
                + " up in the keepalive state")
-  public long getKeepaliveCountLifetime();
+  public long getKeepaliveCountTotal();
 
   /**
    * The total number of connections that have terminated with
@@ -164,7 +169,7 @@ public interface PortMXBean extends ManagedObjectMXBean {
    */
   @Description("The total number of connections that have " +
                " terminated with a client disconnect")
-  public long getClientDisconnectCountLifetime();
+  public long getClientDisconnectCountTotal();
 
   /**
    * Returns the total duration in milliseconds that requests serviced by
@@ -173,7 +178,7 @@ public interface PortMXBean extends ManagedObjectMXBean {
   @Description("The total duration in milliseconds that"
                + " requests serviced by this service have taken")
   @Units("milliseconds")
-  public long getRequestTimeLifetime();
+  public long getRequestTimeTotal();
 
   /**
    * Returns the total number of bytes that requests serviced by this
@@ -182,7 +187,7 @@ public interface PortMXBean extends ManagedObjectMXBean {
   @Description("The total number of bytes that requests"
                + " serviced by this port have read")
   @Units("milliseconds")
-  public long getReadBytesLifetime();
+  public long getReadBytesTotal();
 
   /**
    * Returns the total number of bytes that requests serviced by this
@@ -191,6 +196,6 @@ public interface PortMXBean extends ManagedObjectMXBean {
   @Description("The total number of bytes that requests"
                + " serviced by this port have written")
   @Units("milliseconds")
-  public long getWriteBytesLifetime();
+  public long getWriteBytesTotal();
 
 }

@@ -36,8 +36,7 @@ import com.caucho.management.server.WebAppMXBean;
 import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.management.j2ee.WebModule;
 
-import com.caucho.server.deploy.DeployConfig;
-import com.caucho.server.deploy.EnvironmentDeployController;
+import com.caucho.server.deploy.*;
 import com.caucho.server.host.Host;
 import com.caucho.util.CauchoSystem;
 import com.caucho.util.L10N;
@@ -301,12 +300,11 @@ public class WebAppController
   }
 
   /**
-   * Creates the managed object.
+   * Returns the deploy admin.
    */
-  protected Object createMBean()
-    throws JMException
+  protected DeployControllerAdmin getDeployAdmin()
   {
-    return new IntrospectionMBean(_admin, WebAppMXBean.class);
+    return _admin;
   }
 
   protected void initEnd()
