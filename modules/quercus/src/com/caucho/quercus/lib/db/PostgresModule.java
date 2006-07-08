@@ -33,6 +33,7 @@ import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.DoubleValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.NullValue;
@@ -40,6 +41,7 @@ import com.caucho.quercus.env.ResourceValue;
 import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.UnsetValue;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.NotNull;
@@ -62,10 +64,12 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
+import java.sql.Types;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -374,36 +378,81 @@ public class PostgresModule extends AbstractQuercusModule {
 
       PostgresResult result;
 
-      // XXX: need to review and prevent SQL injection.
-      String query = "SELECT count(*) FROM pg_attribute a, pg_class c WHERE a.attnum > 0 and a.attrelid =  c.oid and c.relname=?";
-      PreparedStatement pstmt = conn.getJavaConnection().prepareStatement(query);
-      pstmt.setString(1, tableName);
-      if (!pstmt.execute())
-        return null;
-      ResultSet rs = pstmt.getResultSet();
-      rs.next();
-      int n = rs.getInt(1);
-      pstmt.close();
+      Connection jdbcConn = conn.getJavaConnection();
+      DatabaseMetaData dbMetaData = jdbcConn.getMetaData();
 
+      ResultSet rs = dbMetaData.getColumns("", "", tableName, "");
+
+      // Check column count
+      ResultSetMetaData rsMetaData = rs.getMetaData();
+      int n = rsMetaData.getColumnCount();
       if (n < assocArray.getSize())
         return null;
 
       ArrayValueImpl newArray = new ArrayValueImpl();
 
-      for (Map.Entry<Value,Value> entry : assocArray.entrySet()) {
-        Value k = entry.getKey();
-        Value v = entry.getValue();
+      while (rs.next()) {
+        // Retrieve the original value to be converted
+        String columnName = rs.getString("COLUMN_NAME");
+        Value columnNameV = StringValue.create(columnName);
+        Value value = assocArray.get(columnNameV);
 
-        if (v instanceof StringValue) {
-          StringBuilderValue sb = new StringBuilderValue();
-          sb.append("'").append(v).append("'");
-          newArray.put(k, sb);
-        } else if (v instanceof NullValue) {
-          newArray.put(k, StringValue.create("NULL"));
-        } else {
-          newArray.put(k, v);
+        // Check for column not passed in
+        if (value == UnsetValue.UNSET)
+          continue;
+
+        if (value.isNull()) {
+          value = StringValue.create("NULL");
+          // Add the converted value
+          newArray.put(columnNameV, value);
+          continue;
         }
+
+        // Retrieve the database column type
+        int dataType = rs.getInt("DATA_TYPE");
+
+        // Convert the original value to the database type
+        switch (dataType) {
+        case Types.BIT:
+        case Types.TINYINT:
+        case Types.SMALLINT:
+        case Types.INTEGER:
+        case Types.BIGINT:
+          if (value.isLongConvertible()) {
+            value = LongValue.create(value.toLong());
+          } else {
+            StringBuilderValue sb = new StringBuilderValue();
+            value = sb.append("'").append(value).append("'");
+          }
+          break;
+
+        case Types.DECIMAL:
+        case Types.DOUBLE:
+        case Types.FLOAT:
+        case Types.NUMERIC:
+        case Types.REAL:
+          if (value.isDoubleConvertible()) {
+            value = DoubleValue.create(value.toDouble());
+          } else {
+            StringBuilderValue sb = new StringBuilderValue();
+            value = sb.append("'").append(value).append("'");
+          }
+          break;
+
+        default:
+          StringBuilderValue sb = new StringBuilderValue();
+          if (value.isNumberConvertible())  {
+            value = sb.append(value);
+          } else {
+            value = sb.append("'").append(value).append("'");
+          }
+        }
+
+        // Add the converted value
+        newArray.put(columnNameV, value);
       }
+
+      rs.close();
 
       return newArray;
 
@@ -526,7 +575,7 @@ public class PostgresModule extends AbstractQuercusModule {
       }
 
       // XXX: This should be replaced when @Optional("\\N") is fixed.
-      // Note: this must be \\N, i.e. the
+      // Note: according to php.net, it must be \\N, i.e. the
       // two-character sequence: {'\\', 'N'}
       if (nullAs.equals("")) {
         nullAs = "\\N";
@@ -845,6 +894,24 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
 
+      // NOTE: pg_fetch_array has an interesting memory feature.
+      // Calls to pg_fetch_array usually return the next row for
+      // successive calls. There is an exception though.
+      // The first time a NULL row is passed in, the previously
+      // returned row is returned again. After that, successive
+      // calls return the next row as usual.
+      // We set a flag for this. See PostgresResult and php/4342
+
+      if (row == NullValue.NULL) {
+        if (result.getPassedNullRow()) {
+          result.setPassedNullRow();
+        } else {
+          // Step the cursor back to the previous position
+          ResultSet rs = result.getResultSet();
+          rs.previous();
+        }
+      }
+
       // NOTE: row is of type Value because row is optional and there is
       // only one way to specify that 'row' will not be used:
       //
@@ -923,11 +990,10 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Returns values from a result resource
    */
-  @ReturnNullAsFalse
-  public static String pg_fetch_result(Env env,
-                                       @NotNull PostgresResult result,
-                                       Value row,
-                                       @Optional("-1") Value fieldNameOrNumber)
+  public static Value pg_fetch_result(Env env,
+                                      @NotNull PostgresResult result,
+                                      Value row,
+                                      @Optional("-1") Value fieldNameOrNumber)
   {
     try {
 
@@ -954,11 +1020,11 @@ public class PostgresModule extends AbstractQuercusModule {
 
       int fieldNumber = result.getColumnNumber(fieldNameOrNumber, 0);
 
-      return fetchRow.get(LongValue.create(fieldNumber)).toString();
+      return fetchRow.get(LongValue.create(fieldNumber));
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return null;
+      return BooleanValue.FALSE;
     }
   }
 
@@ -1016,12 +1082,12 @@ public class PostgresModule extends AbstractQuercusModule {
 
       int fieldNumber = result.getColumnNumber(fieldNameOrNumber, 0);
 
-      String field = pg_fetch_result(env,
-                                     result,
-                                     LongValue.create(-1),
-                                     LongValue.create(fieldNumber));
+      Value field = pg_fetch_result(env,
+                                    result,
+                                    LongValue.create(-1),
+                                    LongValue.create(fieldNumber));
 
-      if (field == null) {
+      if ((field == null) || (field == NullValue.NULL)) {
         return LongValue.create(1);
       }
 
@@ -1041,6 +1107,9 @@ public class PostgresModule extends AbstractQuercusModule {
                                     int fieldNumber)
   {
     try {
+
+      if (result == null)
+        return BooleanValue.FALSE;
 
       return result.getFieldName(env, fieldNumber);
 
@@ -1087,16 +1156,28 @@ public class PostgresModule extends AbstractQuercusModule {
 
       int fieldNumber = result.getColumnNumber(fieldNameOrNumber, 0);
 
-      Object object = pg_fetch_result(env,
-                                      result,
-                                      LongValue.create(row),
-                                      LongValue.create(fieldNumber));
+      ResultSetMetaData metaData = result.getMetaData();
+      String typeName = metaData.getColumnTypeName(fieldNumber+1);
+      if (typeName.equals("bool")) {
+        return 1;
+      }
+
+      Value value = pg_fetch_result(env,
+                                    result,
+                                    LongValue.create(row),
+                                    LongValue.create(fieldNumber));
 
       // Step the cursor back to the original position
       // See php/430p
-      result.getResultSet().relative(-1);
+      result.getResultSet().previous();
 
-      return object.toString().length();
+      int len = value.toString().length();
+
+      if (typeName.equals("money")) {
+        len++;
+      }
+
+      return len;
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -1107,25 +1188,86 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Returns the internal storage size of the named field
    */
-  public static Value pg_field_size(Env env,
-                                    @NotNull PostgresResult result,
-                                    int fieldNumber)
+  @ReturnNullAsFalse
+  public static LongValue pg_field_size(Env env,
+                                        @NotNull PostgresResult result,
+                                        int fieldNumber)
   {
     try {
 
-      Value value = pg_field_type(env, result, fieldNumber);
+      ResultSetMetaData metaData = result.getMetaData();
 
-      if (value.toString().equals("varchar")) {
-        value = LongValue.create(-1);
-      } else {
-        value = result.getFieldLength(env, fieldNumber);
+      fieldNumber++;
+
+      int dataType = metaData.getColumnType(fieldNumber);
+
+      int size = -1;
+
+      switch (dataType) {
+      case Types.BIT:
+        {
+          String typeName = metaData.getColumnTypeName(fieldNumber);
+          if (typeName.equals("bool")) {
+            size = 1;
+          }
+          break;
+        }
+
+      case Types.TINYINT:
+        size = 1;
+        break;
+
+      case Types.SMALLINT:
+        size = 2;
+        break;
+
+      case Types.DATE:
+      case Types.FLOAT:
+      case Types.INTEGER:
+      case Types.REAL:
+        size = 4;
+        break;
+
+      case Types.BIGINT:
+      case Types.DOUBLE:
+        {
+          size = 8;
+          String typeName = metaData.getColumnTypeName(fieldNumber);
+          if (typeName.equals("money")) {
+            size = 4;
+          }
+        }
+        break;
+
+      case Types.TIME:
+      case Types.TIMESTAMP:
+        size = 8;
+        // fall to specific cases
+
+      default:
+        {
+          String typeName = metaData.getColumnTypeName(fieldNumber);
+          if (typeName.equals("timetz") ||
+              typeName.equals("interval")) {
+            size = 12;
+          } else if (typeName.equals("macaddr")) {
+            size = 6;
+          } else if (typeName.equals("point")) {
+            size = 16;
+          } else if (typeName.equals("circle")) {
+            size = 24;
+          } else if (typeName.equals("box") ||
+                     typeName.equals("lseg")) {
+            size = 32;
+          }
+        }
       }
 
-      return value;
+      return LongValue.create(size);
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return BooleanValue.FALSE;
+      return null;
     }
   }
 
@@ -1170,41 +1312,43 @@ public class PostgresModule extends AbstractQuercusModule {
 
       result = pg_query(env, (Postgres) result.getConnection(), metaQuery);
 
-      String s = pg_fetch_result(env,
-                                 result,
-                                 LongValue.create(-1),
-                                 LongValue.create(0));
+      Value value = pg_fetch_result(env,
+                                    result,
+                                    LongValue.create(-1),
+                                    LongValue.create(0));
 
-      return LongValue.create(new Integer(s));
+      if (value.isLongConvertible()) {
+        return LongValue.create(value.toLong());
+      }
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return null;
     }
+
+    return null;
   }
 
   /**
    * Returns the type name for the corresponding field number
    */
-  public static Value pg_field_type(Env env,
-                                    @NotNull PostgresResult result,
-                                    int fieldNumber)
+  @ReturnNullAsFalse
+  public static StringValue pg_field_type(Env env,
+                                          @NotNull PostgresResult result,
+                                          int fieldNumber)
   {
     try {
 
-      Value value = result.getFieldType(env, fieldNumber);
+      ResultSetMetaData metaData = result.getMetaData();
 
-      if (value instanceof StringValue) {
-        if (value.toString().equals("string")) {
-          value = StringValue.create("varchar");
-        }
-      }
+      fieldNumber++;
 
-      return value;
+      String typeName = metaData.getColumnTypeName(fieldNumber);
+
+      return (StringValue) StringValue.create(typeName);
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return BooleanValue.FALSE;
+      return null;
     }
   }
 
@@ -1995,24 +2139,26 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Returns the number of rows in a result
    */
-  public static Value pg_num_rows(Env env,
-                                  @NotNull PostgresResult result)
+  public static LongValue pg_num_rows(Env env,
+                                      @NotNull PostgresResult result)
   {
+    int numRows = -1;
+
     try {
 
-      // (result.getResultSet() == null) should be cleaned and
-      // pg_get_result should return a null PostgresResult php/433t
-      if ((result == null) || (result.getResultSet() == null)) {
-        env.warning(L.l("supplied argument is not a valid PostgreSQL result resource"));
-        return NullValue.NULL;
+      if ((result != null) && (result.getResultSet() != null)) {
+        numRows = result.getNumRows();
       }
 
-      return LongValue.create(result.getNumRows());
+      if (numRows < 0) {
+        env.warning(L.l("supplied argument is not a valid PostgreSQL result resource"));
+      }
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return LongValue.create(-1);
     }
+
+    return LongValue.create(numRows);
   }
 
   /**
@@ -2028,9 +2174,9 @@ public class PostgresModule extends AbstractQuercusModule {
    * Looks up a current parameter setting of the server
    */
   @ReturnNullAsFalse
-  public static String pg_parameter_status(Env env,
-                                           @NotNull Postgres conn,
-                                           String paramName)
+  public static Value pg_parameter_status(Env env,
+                                          @NotNull Postgres conn,
+                                          String paramName)
   {
     try {
 
@@ -2040,7 +2186,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return null;
+      return BooleanValue.FALSE;
     }
   }
 

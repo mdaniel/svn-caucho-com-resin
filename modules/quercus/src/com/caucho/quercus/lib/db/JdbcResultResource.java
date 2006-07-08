@@ -43,15 +43,16 @@ import java.util.logging.Logger;
 
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.DoubleValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.ObjectValue;
+import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.sql.UserStatement;
@@ -623,12 +624,38 @@ public class JdbcResultResource {
                               int column)
     throws SQLException
   {
+    // Note: typically, the PHP column value is returned as
+    // a String, except for binary values.
+
     try {
       switch (metaData.getColumnType(column)) {
       case Types.NULL:
         return NullValue.NULL;
 
       case Types.BIT:
+        {
+          String typeName = metaData.getColumnTypeName(column);
+          // Postgres matches BIT for BOOL columns
+          if (!typeName.equals("bool")) {
+            long value = rs.getLong(column);
+
+            if (rs.wasNull())
+              return NullValue.NULL;
+            else
+              return StringValue.create(value);
+          }
+          // else fall to boolean
+        }
+
+      case Types.BOOLEAN:
+        {
+          boolean b = rs.getBoolean(column);
+          if (rs.wasNull())
+            return NullValue.NULL;
+          else
+            return StringValue.create(b ? "t" : "f");
+        }
+
       case Types.TINYINT:
       case Types.SMALLINT:
       case Types.INTEGER:
@@ -639,7 +666,7 @@ public class JdbcResultResource {
           if (rs.wasNull())
             return NullValue.NULL;
           else
-            return LongValue.create(value);
+            return StringValue.create(value);
         }
 
       case Types.DOUBLE:
@@ -648,8 +675,13 @@ public class JdbcResultResource {
 
           if (rs.wasNull())
             return NullValue.NULL;
-          else
-            return new DoubleValue(value);
+          else {
+            StringBuilderValue sb = new StringBuilderValue();
+            if (metaData.isCurrency(column)) {
+              sb.append("$");
+            }
+            return sb.append(value);
+          }
         }
 
       case Types.BLOB:
@@ -717,7 +749,7 @@ public class JdbcResultResource {
           if (strValue == null || rs.wasNull())
             return NullValue.NULL;
           else
-            return new StringValueImpl(strValue);
+            return StringValue.create(strValue);
         }
       }
     } catch (SQLException e) {

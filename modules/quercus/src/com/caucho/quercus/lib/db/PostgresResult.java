@@ -45,6 +45,9 @@ public class PostgresResult extends JdbcResultResource {
     = Logger.getLogger(PostgresResult.class.getName());
   private static final L10N L = new L10N(PostgresResult.class);
 
+  // See PostgresModule.pg_fetch_array()
+  private boolean _passedNullRow = false;
+
   /**
    * Constructor for PostgresResult
    *
@@ -69,6 +72,29 @@ public class PostgresResult extends JdbcResultResource {
                         Postgres conn)
   {
     super(metaData, conn);
+  }
+
+  /**
+   * Sets that a NULL row parameter has been passed in.
+   */
+  public void setPassedNullRow()
+  {
+    // After that, the flag is immutable.
+    // See PostgresModule.pg_fetch_array
+
+    _passedNullRow = true;
+  }
+
+  /**
+   * Returns whether a NULL row parameter has been
+   * passed in or not.
+   */
+  public boolean getPassedNullRow()
+  {
+    // After that, the flag is immutable.
+    // See PostgresModule.pg_fetch_array
+
+    return _passedNullRow;
   }
 
   /**
