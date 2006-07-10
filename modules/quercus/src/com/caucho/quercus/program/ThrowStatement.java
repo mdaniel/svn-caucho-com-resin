@@ -99,7 +99,10 @@ public class ThrowStatement extends Statement {
   protected void generateImpl(PhpWriter out)
     throws IOException
   {
-    out.print("if (true) throw ");
+    // php/3g00
+    // out.print("if (true) throw ");
+    
+    out.print("throw ");
 
     // php/3a5h
     _expr.generate(out);

@@ -1291,6 +1291,16 @@ abstract public class Marshall {
   };
 
   static final Marshall MARSHALL_ARRAY_VALUE = new Marshall() {
+    public boolean isReference()
+    {
+      return true;
+    }
+      
+    public boolean isReadOnly()
+    {
+      return false;
+    }
+      
     public Object marshall(Env env, Expr expr, Class expectedClass)
     {
       return expr.eval(env).toArrayValue(env);

@@ -213,7 +213,7 @@ public class MBeanView {
 	   BadAttributeValueExpException,
 	   InvalidApplicationException
   {
-    TreeSet<ObjectInstance> set = new TreeSet<ObjectInstance>(OBJECTINSTANCE_COMPARATOR);
+    HashSet<ObjectInstance> set = new HashSet<ObjectInstance>();
 
     queryMBeans(set, name, query);
 

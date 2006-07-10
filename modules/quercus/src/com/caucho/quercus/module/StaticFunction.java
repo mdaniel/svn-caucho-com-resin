@@ -148,10 +148,12 @@ public class StaticFunction extends JavaInvoker {
       Annotation [][]paramAnn = getParamAnn();
 
       if (isReadOnly(paramAnn[i + env]) || marshall.isReadOnly()) {
-      } else if (marshall.isReference()) {
+      }
+      else if (marshall.isReference()) {
         args[i].analyzeSetModified(info);
         args[i].analyzeSetReference(info);
-      } else {
+      }
+      else {
         // possibly modified, but not reference
         args[i].analyzeSetModified(info);
       }
@@ -363,5 +365,10 @@ public class StaticFunction extends JavaInvoker {
     }
 
     out.print(")");
+  }
+
+  public String toString()
+  {
+    return "StaticFunction[" + _method + "]";
   }
 }

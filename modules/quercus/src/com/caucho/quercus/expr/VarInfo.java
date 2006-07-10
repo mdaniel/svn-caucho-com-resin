@@ -55,8 +55,9 @@ public class VarInfo {
     _name = name.intern();
     _function = function;
 
-    if (function != null && function.isPageMain())
+    if (function != null && function.isPageMain()) {
       _isReference = true;
+    }
   }
 
   /**
@@ -177,7 +178,8 @@ public class VarInfo {
    */
   public boolean isValue()
   {
-    return ! isReference();
+    // php/3a71
+    return ! (_isReference || isGlobal() || isVariable());
   }
   
   /**

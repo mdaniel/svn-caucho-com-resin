@@ -424,7 +424,7 @@ public class MemoryPath extends FilesystemPath {
     }
   }
 
-  public Path copy()
+  public Path copyCache()
   {
     return null;
   }

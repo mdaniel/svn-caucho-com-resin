@@ -177,6 +177,23 @@ public class NullValue extends Value {
   }
 
   /**
+   * Adds to the following value.
+   */
+  @Override
+  public Value add(long lLong)
+  {
+    return LongValue.create(lLong);
+  }
+
+  /**
+   * Subtracts the following value.
+   */
+  public Value sub(long rLong)
+  {
+    return LongValue.create( - rLong);
+  }
+
+  /**
    * Returns true for equality
    */
   public int cmp(Value rValue)

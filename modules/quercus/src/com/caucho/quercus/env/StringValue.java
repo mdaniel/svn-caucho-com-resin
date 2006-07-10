@@ -787,6 +787,8 @@ abstract public class StringValue extends Value implements CharSequence {
 	buffer[i] = Character.toLowerCase(ch);
     }
 
+    string.setLength(length);
+
     return string;
   }
 

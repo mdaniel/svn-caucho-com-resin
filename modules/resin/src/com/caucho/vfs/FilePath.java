@@ -436,6 +436,12 @@ public class FilePath extends FilesystemPath {
     return new FileRandomAccessStream(new RandomAccessFile(getFile(), "rw"));
   }
 
+  @Override
+  protected Path copy()
+  {
+    return new FilePath(getRoot(), getUserPath(), getPath());
+  }
+
   public int hashCode()
   {
     return getFullPath().hashCode();

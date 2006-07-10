@@ -165,7 +165,8 @@ public class TcpPath extends Path {
     return TcpStream.openReadWrite(this, _timeout);
   }
 
-  protected Path copy()
+  @Override
+  protected Path cacheCopy()
   {
     return new TcpPath(null, getUserPath(), null, _host, _port);
   }

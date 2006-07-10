@@ -463,6 +463,11 @@ public class StringBuilderValue extends UnicodeValue {
     return _length;
   }
 
+  void setLength(int length)
+  {
+    _length = length;
+  }
+
   /**
    * Returns the character at a particular location
    */

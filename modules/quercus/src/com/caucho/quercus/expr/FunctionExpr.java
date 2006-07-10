@@ -210,7 +210,7 @@ public class FunctionExpr extends Expr {
     }
 
     // check for read-only and refs
-    
+
     if (fun != null) {
       fun.analyzeArguments(_args, info);
     }

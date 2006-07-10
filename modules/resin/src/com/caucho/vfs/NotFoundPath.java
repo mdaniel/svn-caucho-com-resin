@@ -103,7 +103,7 @@ class NotFoundPath extends Path {
     throw new FileNotFoundException(_url);
   }
 
-  protected Path copy()
+  protected Path copyCache()
   {
     return null;
   }

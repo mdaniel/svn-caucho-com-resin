@@ -438,7 +438,8 @@ public class HttpPath extends FilesystemPath {
     return HttpStream.openReadWrite(this);
   }
 
-  protected Path copy()
+  @Override
+  protected Path cacheCopy()
   {
     return new HttpPath(getRoot(), getUserPath(),
 			null,

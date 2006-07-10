@@ -2893,8 +2893,8 @@ v   *
    * @param offsetV optional starting position
    */
   public static Value stripos(StringValue haystack,
-				    Value needleV,
-				    @Optional int offset)
+			      Value needleV,
+			      @Optional int offset)
   {
     StringValue needle;
 
@@ -2905,6 +2905,8 @@ v   *
 
     haystack = haystack.toLowerCase();
     needle = needle.toLowerCase();
+
+    System.out.println("H: " + haystack + " " + needle);
 
     int pos = haystack.indexOf(needle, offset);
 

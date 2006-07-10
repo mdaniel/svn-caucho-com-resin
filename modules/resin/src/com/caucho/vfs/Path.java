@@ -112,14 +112,14 @@ public abstract class Path {
        Path path = _pathLookupCache.get(_key);
 
        if (path != null) {
-	 return path.copy();
+	 return path.cacheCopy();
        }
      }
 
      Path path = lookupImpl(userPath, null);
 
      synchronized (_key) {
-       Path copy = path.copy();
+       Path copy = path.cacheCopy();
 
        if (copy != null) {
 	 _pathLookupCache.putIfNew(new PathKey(this, userPath), copy);
@@ -1137,6 +1137,14 @@ public abstract class Path {
   }
 
   protected Path copy()
+  {
+    return this;
+  }
+
+  /**
+   * Copy for caching.
+   */
+  protected Path cacheCopy()
   {
     return this;
   }

@@ -75,7 +75,7 @@ abstract public class AbstractManagedObject implements ManagedObjectMXBean {
 	  
 	  props.put("name", name);
 	}
-
+	//
 	_objectName = Jmx.getObjectName("resin", props);
       } catch (MalformedObjectNameException e) {
 	throw new RuntimeException(e);

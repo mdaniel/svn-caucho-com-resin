@@ -177,7 +177,7 @@ abstract public class AbstractFunction {
     Value[]values = new Value[args.length];
 
     for (int i = 0; i < args.length; i++)
-      values[i] = args[i].eval(env);
+      values[i] = args[i].evalArg(env);
 
     return values;
   }

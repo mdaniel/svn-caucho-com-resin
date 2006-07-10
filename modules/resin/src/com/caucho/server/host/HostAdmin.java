@@ -59,7 +59,12 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
 
   public String getName()
   {
-    return getController().getName();
+    String name = getController().getName();
+
+    if (name == null || name.equals(""))
+      return "default";
+    else
+      return name;
   }
 
   public String getHostName()

@@ -591,7 +591,10 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
       // If the servlet has an MBean, register it
       try {
         Hashtable<String,String> props = new Hashtable<String,String>();
-        props.put("type", "Servlet");
+
+	String className = _servlet.getClass().getName();
+	int p = className.lastIndexOf('.');
+        props.put("type", className.substring(p + 1));
         props.put("name", _servletName);
         Jmx.register(_servlet, props);
       } catch (Exception e) {

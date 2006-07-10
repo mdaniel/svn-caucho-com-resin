@@ -255,7 +255,7 @@ public class ResinModule
 	String key = entry.getKey().toString();
 	String value = entry.getValue().toString();
 
-	if (":".equals(key))
+	if (":domain:".equals(key))
 	  continue;
 
 	entries.put(key, value);

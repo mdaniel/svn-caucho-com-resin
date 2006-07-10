@@ -186,6 +186,7 @@ public class LongValue extends NumberValue {
   /**
    * Adds to the following value.
    */
+  @Override
   public Value add(long lLong)
   {
     return LongValue.create(lLong + _value);
