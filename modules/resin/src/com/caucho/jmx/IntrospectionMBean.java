@@ -29,7 +29,6 @@
 
 package com.caucho.jmx;
 
-import javax.management.*;
 import java.lang.annotation.Annotation;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.InvocationTargetException;
@@ -38,6 +37,10 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.management.*;
+import javax.management.modelmbean.*;
+import javax.management.openmbean.*;
 
 /**
  * Resin implementation of StandardMBean.
@@ -403,14 +406,14 @@ v   * Returns the open mbean unmarshaller for the given return type.
 
       String className = cl.getName();
 
-      TreeSet<MBeanAttributeInfo> attributes
-        = new TreeSet<MBeanAttributeInfo>(MBEAN_FEATURE_INFO_COMPARATOR);
+      HashSet<ModelMBeanAttributeInfo> attributes
+        = new HashSet<ModelMBeanAttributeInfo>();
 
-      ArrayList<MBeanConstructorInfo> constructors
-        = new ArrayList<MBeanConstructorInfo>();
+      ArrayList<ModelMBeanConstructorInfo> constructors
+        = new ArrayList<ModelMBeanConstructorInfo>();
 
-      ArrayList<MBeanOperationInfo> operations
-        = new ArrayList<MBeanOperationInfo>();
+      ArrayList<ModelMBeanOperationInfo> operations
+        = new ArrayList<ModelMBeanOperationInfo>();
 
       Method []methods = cl.getMethods();
       for (int i = 0; i < methods.length; i++) {
@@ -442,10 +445,29 @@ v   * Returns the open mbean unmarshaller for the given return type.
           else
             attributeName = name;
 
-          attributes.add(new MBeanAttributeInfo(attributeName,
-                                                getDescription(method),
-                                                method,
-                                                setter));
+	  Class type = method.getReturnType();
+
+	  ModelMBeanAttributeInfo attr;
+
+          attr = new ModelMBeanAttributeInfo(attributeName,
+					     getDescription(method),
+					     method,
+					     setter);
+
+	  Descriptor descriptor = attr.getDescriptor();
+
+	  if (descriptor != null) {
+	    Object openType = getOpenType(type);
+
+	    if (openType != null)
+	      descriptor.setField("openType", openType);
+	  
+	    descriptor.setField("originalType", getTypeName(type));
+
+	    attr.setDescriptor(descriptor);
+	  }
+
+          attributes.add(attr);
         }
         else if (methodName.startsWith("is") && args.length == 0 &&
                  (retType.equals(boolean.class) ||
@@ -464,10 +486,10 @@ v   * Returns the open mbean unmarshaller for the given return type.
           else
             attributeName = name;
 
-          attributes.add(new MBeanAttributeInfo(attributeName,
-                                                getDescription(method),
-                                                method,
-                                                setter));
+          attributes.add(new ModelMBeanAttributeInfo(attributeName,
+						     getDescription(method),
+						     method,
+						     setter));
         }
         else if (methodName.startsWith("set") && args.length == 1) {
           String name = methodName.substring(3);
@@ -485,23 +507,23 @@ v   * Returns the open mbean unmarshaller for the given return type.
             else
               attributeName = name;
 
-            attributes.add(new MBeanAttributeInfo(attributeName,
-                                                  getDescription(method),
-                                                  method,
-                                                  null));
+            attributes.add(new ModelMBeanAttributeInfo(attributeName,
+						       getDescription(method),
+						       method,
+						       null));
           }
         }
         else {
-          operations.add(new MBeanOperationInfo(getName(method),
-                                                getDescription(method),
-                                                getSignature(method),
-                                                method.getReturnType().getName(),
-                                                MBeanOperationInfo.UNKNOWN));
+          operations.add(new ModelMBeanOperationInfo(getName(method),
+						     getDescription(method),
+						     getSignature(method),
+						     method.getReturnType().getName(),
+						     MBeanOperationInfo.UNKNOWN));
         }
       }
 
-      ArrayList<MBeanNotificationInfo> notifications
-        = new ArrayList<MBeanNotificationInfo>();
+      ArrayList<ModelMBeanNotificationInfo> notifications
+        = new ArrayList<ModelMBeanNotificationInfo>();
 
       if (obj instanceof NotificationBroadcaster) {
         NotificationBroadcaster broadcaster;
@@ -510,30 +532,48 @@ v   * Returns the open mbean unmarshaller for the given return type.
         MBeanNotificationInfo[] notifs = broadcaster.getNotificationInfo();
 
         if (notifs != null) {
-          for (int i = 0; i < notifs.length; i++)
-            notifications.add((MBeanNotificationInfo) notifs[i].clone());
+          for (int i = 0; i < notifs.length; i++) {
+	    MBeanNotificationInfo notif = notifs[i];
+
+	    if (notif instanceof ModelMBeanNotificationInfo)
+	      notifications.add((ModelMBeanNotificationInfo) notifs[i].clone());
+	    else {
+	      notifications.add(new ModelMBeanNotificationInfo(notif.getNotifTypes(),
+						     notif.getName(),
+						     notif.getDescription()));
+	    }
+	  }
         }
       }
 
       Collections.sort(notifications, MBEAN_FEATURE_INFO_COMPARATOR);
 
-      MBeanAttributeInfo []attrArray = new MBeanAttributeInfo[attributes.size()];
+      ModelMBeanAttributeInfo []attrArray = new ModelMBeanAttributeInfo[attributes.size()];
       attributes.toArray(attrArray);
-      MBeanConstructorInfo []conArray = new MBeanConstructorInfo[constructors.size()];
+      ModelMBeanConstructorInfo []conArray = new ModelMBeanConstructorInfo[constructors.size()];
       constructors.toArray(conArray);
 
-      MBeanOperationInfo []opArray = new MBeanOperationInfo[operations.size()];
+      ModelMBeanOperationInfo []opArray = new ModelMBeanOperationInfo[operations.size()];
       operations.toArray(opArray);
       Arrays.sort(opArray, MBEAN_FEATURE_INFO_COMPARATOR);
-      MBeanNotificationInfo []notifArray = new MBeanNotificationInfo[notifications.size()];
+      ModelMBeanNotificationInfo []notifArray = new ModelMBeanNotificationInfo[notifications.size()];
       notifications.toArray(notifArray);
 
-      info = new MBeanInfo(cl.getName(),
-                           getDescription(cl),
-                           attrArray,
-                           conArray,
-                           opArray,
-                           notifArray);
+      ModelMBeanInfoSupport modelInfo;
+
+      modelInfo = new ModelMBeanInfoSupport(cl.getName(),
+				     getDescription(cl),
+				     attrArray,
+				     conArray,
+				     opArray,
+				     notifArray);
+      Descriptor descriptor = modelInfo.getMBeanDescriptor();
+      if (descriptor != null) {
+	descriptor.setField("mxbean", "true");
+	modelInfo.setMBeanDescriptor(descriptor);
+      }
+
+      info = modelInfo;
 
       _cachedInfo.put(cl, new SoftReference<MBeanInfo>(info));
 
@@ -658,20 +698,96 @@ v   * Returns the open mbean unmarshaller for the given return type.
     for (int i = 0; i < params.length; i++) {
       Class  cl = params[i];
 
-      String name = "p" + i;
-      String description = "";
-
-      for (Annotation ann : method.getParameterAnnotations()[i]) {
-        if (ann instanceof Name)
-          name = ((Name) ann).value();
-        else if (ann instanceof Description)
-          description = ((Description) ann).value();
-      }
+      String name = getName(method, i);
+      String description = getDescription(method, i);
 
       paramInfos[i] = new MBeanParameterInfo(name, cl.getName(), description);
     }
 
     return paramInfos;
+  }
+
+  private static String getName(Method method, int i)
+  {
+    try {
+      for (Annotation ann : method.getParameterAnnotations()[i]) {
+        if (ann instanceof Name)
+          return ((Name) ann).value();
+      }
+    } catch (Throwable e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+    
+    return "p" + i;
+  }
+
+  private static String getDescription(Method method, int i)
+  {
+    try {
+      for (Annotation ann : method.getParameterAnnotations()[i]) {
+	if (ann instanceof Description)
+          return ((Description) ann).value();
+      }
+    } catch (Throwable e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+    
+    return "";
+  }
+
+  private static String getTypeName(Class type)
+  {
+    if (type.isArray())
+      return getTypeName(type.getComponentType()) + "[]";
+    else
+      return type.getName();
+  }
+
+  private static OpenType getOpenType(Class type)
+  {
+    try {
+      if (type.isArray()) {
+	OpenType component = getOpenType(type.getComponentType());
+
+	if (component != null)
+	  return new ArrayType(1, component);
+	else
+	  return null;
+      }
+      else if (type.getName().endsWith("MXBean")
+	       || type.getName().endsWith("MBean"))
+	return SimpleType.OBJECTNAME;
+      else if (void.class.equals(type))
+	return SimpleType.VOID;
+      else if (boolean.class.equals(type) || Boolean.class.equals(type))
+	return SimpleType.BOOLEAN;
+      else if (byte.class.equals(type) || Byte.class.equals(type))
+	return SimpleType.BYTE;
+      else if (short.class.equals(type) || Short.class.equals(type))
+	return SimpleType.SHORT;
+      else if (int.class.equals(type) || Integer.class.equals(type))
+	return SimpleType.INTEGER;
+      else if (long.class.equals(type) || Long.class.equals(type))
+	return SimpleType.LONG;
+      else if (float.class.equals(type) || Float.class.equals(type))
+	return SimpleType.FLOAT;
+      else if (double.class.equals(type) || Double.class.equals(type))
+	return SimpleType.DOUBLE;
+      else if (String.class.equals(type))
+	return SimpleType.STRING;
+      else if (char.class.equals(type) || Character.class.equals(type))
+	return SimpleType.CHARACTER;
+      else if (java.util.Date.class.equals(type))
+	return SimpleType.DATE;
+      else if (java.util.Calendar.class.equals(type))
+	return SimpleType.DATE;
+      else
+	return null; // can't deal with more complex at the moment
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+
+      return null;
+    }
   }
 
   private static Class findClass(String name)

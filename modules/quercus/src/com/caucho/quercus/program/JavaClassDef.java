@@ -43,17 +43,9 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.lang.reflect.*;
+import java.util.*;
+import java.util.logging.*;
 
 /**
  * Represents an introspected Java class.
@@ -76,8 +68,8 @@ public class JavaClassDef extends ClassDef {
   private final HashMap<String, Value> _constMap
     = new HashMap<String, Value>();
 
-  private final HashMap<String, JavaMethod> _functionMap
-    = new HashMap<String, JavaMethod>();
+  private final HashMap<String, AbstractJavaMethod> _functionMap
+    = new HashMap<String, AbstractJavaMethod>();
 
   private final HashMap<String, JavaMethod> _getMap
     = new HashMap<String, JavaMethod>();
@@ -379,7 +371,7 @@ public class JavaClassDef extends ClassDef {
    */
   public Value callMethod(Env env, Object obj, String name, Expr []args)
   {
-    JavaMethod method = _functionMap.get(name);
+    AbstractJavaMethod method = _functionMap.get(name);
 
     if (method != null) {
     }
@@ -414,7 +406,7 @@ public class JavaClassDef extends ClassDef {
    */
   public Value callMethod(Env env, Object obj, String name, Value []args)
   {
-    JavaMethod method = _functionMap.get(name);
+    AbstractJavaMethod method = _functionMap.get(name);
 
     if (method != null)
       return method.call(env, obj, args);
@@ -440,7 +432,7 @@ public class JavaClassDef extends ClassDef {
    */
   public Value callMethod(Env env, Object obj, String name)
   {
-    JavaMethod method = _functionMap.get(name);
+    AbstractJavaMethod method = _functionMap.get(name);
 
     if (method != null)
       return method.call(env, obj);
@@ -459,7 +451,7 @@ public class JavaClassDef extends ClassDef {
    */
   public Value callMethod(Env env, Object obj, String name, Value a1)
   {
-    JavaMethod method = _functionMap.get(name);
+    AbstractJavaMethod method = _functionMap.get(name);
 
     if (method != null)
       return method.call(env, obj, a1);
@@ -479,7 +471,7 @@ public class JavaClassDef extends ClassDef {
   public Value callMethod(Env env, Object obj, String name,
                           Value a1, Value a2)
   {
-    JavaMethod method = _functionMap.get(name);
+    AbstractJavaMethod method = _functionMap.get(name);
 
     if (method != null)
       return method.call(env, obj, a1, a2);
@@ -552,9 +544,9 @@ public class JavaClassDef extends ClassDef {
     }
   }
 
-  private JavaMethod getMethod(Env env, String name)
+  private AbstractJavaMethod getMethod(Env env, String name)
   {
-    JavaMethod method = _functionMap.get(name);
+    AbstractJavaMethod method = _functionMap.get(name);
 
     if (method != null)
       return method;
@@ -578,7 +570,7 @@ public class JavaClassDef extends ClassDef {
     if (__get != null)
       cl.setGet(__get);
     
-    for (Map.Entry<String,JavaMethod> entry : _functionMap.entrySet()) {
+    for (Map.Entry<String,AbstractJavaMethod> entry : _functionMap.entrySet()) {
       cl.addMethod(entry.getKey(), entry.getValue());
     }
 
@@ -831,14 +823,7 @@ public class JavaClassDef extends ClassDef {
     if (type == null || type.equals(Object.class))
       return;
 
-    Class []ifcs = type.getInterfaces();
-
-    for (Class ifc : ifcs) {
-      introspectMethods(moduleContext, ifc);
-    }
-
-    Method []methods = type.getDeclaredMethods();
-
+    Method []methods = type.getMethods();
 
     for (Method method : methods) {
       if (_functionMap.get(method.getName()) != null)
@@ -853,13 +838,40 @@ public class JavaClassDef extends ClassDef {
       } else if ("__call".equals(method.getName())) {
 	__call = new JavaMethod(moduleContext, method);
       } else {
-        JavaMethod javaMethod = new JavaMethod(moduleContext, method);
+	ArrayList<Method> methodList = getMethods(methods, method.getName());
 
-        _functionMap.put(method.getName(), javaMethod);
+	if (methodList.size() == 1)
+	  _functionMap.put(method.getName(),
+			   new JavaMethod(moduleContext, method));
+	else
+	  _functionMap.put(method.getName(),
+			   new JavaOverloadMethod(moduleContext, methodList));
       }
     }
 
     introspectMethods(moduleContext, type.getSuperclass());
+
+    Class []ifcs = type.getInterfaces();
+
+    for (Class ifc : ifcs) {
+      introspectMethods(moduleContext, ifc);
+    }
+  }
+
+  private ArrayList<Method> getMethods(Method []methods, String name)
+  {
+    ArrayList<Method> methodList = new ArrayList<Method>();
+
+    for (int i = 0; i < methods.length; i++) {
+      if (! Modifier.isPublic(methods[i].getModifiers()))
+	continue;
+      else if (! methods[i].getName().equals(name))
+	continue;
+
+      methodList.add(methods[i]);
+    }
+
+    return methodList;
   }
 
   /**

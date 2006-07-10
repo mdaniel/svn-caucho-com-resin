@@ -392,12 +392,9 @@ public class SessionImpl implements Session, ThreadTask {
   {
     checkOpen();
 
-    if (destination instanceof Queue)
-      return new QueueSenderImpl(this, (Queue) destination);
-    else if (destination instanceof Topic)
-      return new TopicPublisherImpl(this, (Topic) destination);
-    else
-      return new MessageProducerImpl(this, destination);
+    AbstractDestination dest = (AbstractDestination) destination;
+
+    return dest.createProducer(this);
   }
 
   /**

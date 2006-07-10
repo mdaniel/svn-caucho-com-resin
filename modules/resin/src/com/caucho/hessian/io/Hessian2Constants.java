@@ -57,16 +57,27 @@ public interface Hessian2Constants
   public static final int INT_DIRECT_MIN = -0x10;
   public static final int INT_DIRECT_MAX = 0x1f;
   public static final int INT_ZERO = 0x90;
-  // 0xb0-0xcf is reserved
+  // xb0-xbf is reserved
 
   public static final int INT_BYTE_MIN = -0x800;
   public static final int INT_BYTE_MAX = 0x7ff;
   public static final int INT_BYTE_ZERO = 0xd8;
+
+  public static final int INT_SHORT_MIN = -0x40000;
+  public static final int INT_SHORT_MAX = 0x3ffff;
+  public static final int INT_SHORT_ZERO = 0x5c;
   
   public static final long LONG_DIRECT_MIN = -0x08;
-  public static final long LONG_DIRECT_MAX =  0x07;
-  public static final int LONG_ZERO = 0xe8;
-  // 0xf0-0xff is reserved
+  public static final long LONG_DIRECT_MAX =  0x0f;
+  public static final int LONG_ZERO = 0xd8;
+  
+  public static final long LONG_BYTE_MIN = -0x800;
+  public static final long LONG_BYTE_MAX =  0x7ff;
+  public static final int LONG_BYTE_ZERO = 0xf8;
+
+  public static final int LONG_SHORT_MIN = -0x40000;
+  public static final int LONG_SHORT_MAX = 0x3ffff;
+  public static final int LONG_SHORT_ZERO = 0xec;
   
   public static final int STRING_DIRECT_MAX = 0x0f;
   public static final int STRING_DIRECT = 0x00;

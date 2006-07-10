@@ -611,8 +611,8 @@ public class Hessian2Output
       buffer[offset++] = (byte) (INT_BYTE_ZERO + (value >> 8));
       buffer[offset++] = (byte) (value);
     }
-    else if (-0x8000 <= value && value <= 0x7fff) {
-      buffer[offset++] = (byte) (INT_SHORT);
+    else if (INT_SHORT_MIN <= value && value <= INT_SHORT_MAX) {
+      buffer[offset++] = (byte) (INT_SHORT_ZERO + (value >> 16));
       buffer[offset++] = (byte) (value >> 8);
       buffer[offset++] = (byte) (value);
     }
@@ -655,10 +655,14 @@ public class Hessian2Output
       buffer[offset++] = (byte) LONG_BYTE;
       buffer[offset++] = (byte) value;
     }
-    else if (-0x8000 <= value && value <= 0x7fff) {
-      buffer[offset++] = (byte) LONG_SHORT;
+    else if (LONG_BYTE_MIN <= value && value <= LONG_BYTE_MAX) {
+      buffer[offset++] = (byte) (LONG_BYTE_ZERO + (value >> 8));
+      buffer[offset++] = (byte) (value);
+    }
+    else if (LONG_SHORT_MIN <= value && value <= LONG_SHORT_MAX) {
+      buffer[offset++] = (byte) (LONG_SHORT_ZERO + (value >> 16));
       buffer[offset++] = (byte) (value >> 8);
-      buffer[offset++] = (byte) value;
+      buffer[offset++] = (byte) (value);
     }
     else if (-0x80000000L <= value && value <= 0x7fffffffL) {
       buffer[offset + 0] = (byte) LONG_INT;

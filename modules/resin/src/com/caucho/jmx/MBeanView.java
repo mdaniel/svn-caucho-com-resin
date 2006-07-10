@@ -166,7 +166,9 @@ public class MBeanView {
 	   BadAttributeValueExpException,
 	   InvalidApplicationException
   {
-    TreeSet<ObjectName> set = new TreeSet<ObjectName>(OBJECTNAME_COMPARATOR);
+    // causes jconsole to fail
+    //TreeSet<ObjectName> set = new TreeSet<ObjectName>(OBJECTNAME_COMPARATOR);
+    HashSet<ObjectName> set = new HashSet<ObjectName>();
 
     queryNames(set, queryName, query);
     

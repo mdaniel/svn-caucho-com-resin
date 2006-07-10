@@ -38,7 +38,7 @@ import javax.jms.JMSException;
  */
 public class QueueSenderImpl extends MessageProducerImpl
   implements QueueSender  {
-  QueueSenderImpl(SessionImpl session, Queue queue)
+  public QueueSenderImpl(SessionImpl session, Queue queue)
   {
     super(session, queue);
   }

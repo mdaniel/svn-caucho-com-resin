@@ -57,7 +57,7 @@ import com.caucho.util.L10N;
  * Represents the introspected static function information.
  */
 abstract public class JavaInvoker
-  extends AbstractFunction
+  extends AbstractJavaMethod
 {
   private static final L10N L = new L10N(JavaInvoker.class);
 

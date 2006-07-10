@@ -36,6 +36,7 @@ import java.util.regex.Pattern;
 import java.io.*;
 import java.net.*;
 
+import com.caucho.loader.*;
 import com.caucho.vfs.*;
 import com.caucho.java.WorkDir;
 
@@ -46,6 +47,9 @@ import com.caucho.java.WorkDir;
 public class CauchoSystem {
   private static Logger log
     = Logger.getLogger("com.caucho.util.CauchoSystem");
+
+  static EnvironmentLocal<String> _serverIdLocal
+    = new EnvironmentLocal<String>("caucho.server-id");
 
   static char separatorChar = File.separatorChar;
   static char pathSeparatorChar = File.pathSeparatorChar;
@@ -233,6 +237,11 @@ public class CauchoSystem {
     }
 
     return path;
+  }
+
+  public static String getServerId()
+  {
+    return _serverIdLocal.get();
   }
 
   public static String getUserDir()

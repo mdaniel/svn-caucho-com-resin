@@ -363,16 +363,6 @@ abstract public class
 
       Jmx.setContextProperties(_jmxContext, classLoader);
 
-      try {
-        String typeName = "Current" + getMBeanTypeName();
-
-        Jmx.register(getMBean(),
-                     new ObjectName("resin:type=" + typeName),
-                     classLoader);
-      } catch (Exception e) {
-        log.log(Level.FINER, e.toString(), e);
-      }
-
       ArrayList<DeployConfig> initList = new ArrayList<DeployConfig>();
 
       if (getPrologue() != null)

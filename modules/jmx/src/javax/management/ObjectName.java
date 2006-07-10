@@ -164,6 +164,8 @@ public class ObjectName implements java.io.Serializable, QueryExp {
       if (i < len && (ch = name.charAt(i)) == '"') {
 	sb = new StringBuffer();
 
+	sb.append('"');
+
 	for (i++; i < len && (ch = name.charAt(i)) != '"'; i++) {
 	  switch (ch) {
 	  case '\\':
@@ -178,10 +180,9 @@ public class ObjectName implements java.io.Serializable, QueryExp {
 	}
 	i++;
 
-	value = sb.toString();
+	sb.append('"');
 
-	if (value.equals(""))
-	  throw new MalformedObjectNameException(name);
+	value = sb.toString();
       }
       else {
 	begin = i;
@@ -314,7 +315,7 @@ public class ObjectName implements java.io.Serializable, QueryExp {
    */
   public static String quote(String s)
   {
-    return s;
+    return '"' + s + '"';
   }
 
 
@@ -325,7 +326,10 @@ public class ObjectName implements java.io.Serializable, QueryExp {
    */
   public static String unquote(String s)
   {
-    return s;
+    if (s.startsWith("\""))
+      return s.substring(1, s.length() - 1);
+    else
+      return s;
   }
 
   /**

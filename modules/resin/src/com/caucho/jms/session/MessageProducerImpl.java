@@ -56,7 +56,7 @@ public class MessageProducerImpl implements MessageProducer  {
   protected SessionImpl _session;
   protected AbstractDestination _destination;
 
-  MessageProducerImpl(SessionImpl session, Destination destination)
+  public MessageProducerImpl(SessionImpl session, Destination destination)
   {
     _session = session;
     _destination = (AbstractDestination) destination;
@@ -158,10 +158,8 @@ public class MessageProducerImpl implements MessageProducer  {
   public void send(Message message)
     throws JMSException
   {
-    _session.send(_destination,
-		  (MessageImpl) message,
-		  _deliveryMode, _priority,
-		  calculateExpiration(_timeToLive));
+    send(_destination, message,
+	 _deliveryMode, _priority, _timeToLive);
   }
   
   /**
@@ -178,10 +176,8 @@ public class MessageProducerImpl implements MessageProducer  {
                    long timeToLive)
     throws JMSException
   {
-    _session.send(_destination,
-		  (MessageImpl) message,
-		  deliveryMode, priority,
-		  calculateExpiration(timeToLive));
+    send(_destination, message,
+	 deliveryMode, priority, timeToLive);
   }
 
   /**
@@ -193,10 +189,8 @@ public class MessageProducerImpl implements MessageProducer  {
   public void send(Destination destination, Message message)
     throws JMSException
   {
-    _session.send((AbstractDestination) destination,
-		  (MessageImpl) message,
-		  _deliveryMode, _priority,
-		  calculateExpiration(_timeToLive));
+    send(destination, message,
+	 _deliveryMode, _priority, _timeToLive);
   }
   
   /**

@@ -1397,7 +1397,7 @@ public class HttpRequest extends AbstractHttpRequest
     try {
       X509Certificate []certs = socket.getClientCertificates();
       if (certs != null && certs.length > 0) {
-        super.setAttribute("javax.servlet.request.X509Certificate", certs);
+        super.setAttribute("javax.servlet.request.X509Certificate", certs[0]);
         super.setAttribute(com.caucho.server.security.AbstractAuthenticator.LOGIN_NAME,
                            certs[0].getSubjectDN());
       }

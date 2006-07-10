@@ -38,7 +38,7 @@ import javax.jms.JMSException;
  */
 public class TopicPublisherImpl extends MessageProducerImpl
   implements TopicPublisher  {
-  TopicPublisherImpl(SessionImpl session, Topic topic)
+  public TopicPublisherImpl(SessionImpl session, Topic topic)
   {
     super(session, topic);
   }

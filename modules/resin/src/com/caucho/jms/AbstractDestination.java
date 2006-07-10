@@ -39,20 +39,9 @@ import java.util.logging.Logger;
 
 import java.io.Serializable;
 
-import javax.jms.Destination;
-import javax.jms.Message;
-import javax.jms.TextMessage;
-import javax.jms.ObjectMessage;
-import javax.jms.MessageConsumer;
-import javax.jms.QueueBrowser;
-import javax.jms.TopicSubscriber;
-import javax.jms.JMSException;
+import javax.jms.*;
 
-import com.caucho.util.NullEnumeration;
-import com.caucho.util.RandomUtil;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.Base64;
-import com.caucho.util.Alarm;
+import com.caucho.util.*;
 
 import com.caucho.log.Log;
 
@@ -60,12 +49,9 @@ import com.caucho.loader.Environment;
 
 import com.caucho.jms.selector.Selector;
 
-import com.caucho.jms.message.MessageImpl;
-import com.caucho.jms.message.TextMessageImpl;
-import com.caucho.jms.message.ObjectMessageImpl;
+import com.caucho.jms.message.*;
 
-import com.caucho.jms.session.SessionImpl;
-import com.caucho.jms.session.MessageAvailableListener;
+import com.caucho.jms.session.*;
 
 import com.caucho.services.message.MessageSender;
 import com.caucho.services.message.MessageServiceException;
@@ -73,8 +59,10 @@ import com.caucho.services.message.MessageServiceException;
 /**
  * An abstract destination, including the needed send/receive.
  */
-abstract public class AbstractDestination implements Destination, MessageSender  {
-  protected static Logger log = Log.open(AbstractDestination.class);
+abstract public class AbstractDestination implements Destination, MessageSender
+{
+  protected static Logger log
+    = Logger.getLogger(AbstractDestination.class.getName());
 
   private String _idPrefix;
   private long _idCount;
@@ -123,6 +111,16 @@ abstract public class AbstractDestination implements Destination, MessageSender 
   protected synchronized long nextConsumerSequenceId()
   {
     return ++_consumerSequenceId;
+  }
+
+  public MessageProducer createProducer(SessionImpl session)
+  {
+    if (this instanceof Queue)
+      return new QueueSenderImpl(session, (Queue) this);
+    else if (this instanceof Topic)
+      return new TopicPublisherImpl(session, (Topic) this);
+    else
+      return new MessageProducerImpl(session, (Destination) this);
   }
   
   /**
