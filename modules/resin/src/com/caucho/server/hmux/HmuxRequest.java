@@ -1399,7 +1399,6 @@ public class HmuxRequest extends AbstractHttpRequest
           _pendingData = len;
         }
         else if (code == HMUX_QUIT) {
-	  Thread.dumpStack();
           if (log.isLoggable(Level.FINE))
             log.fine(_request.dbgId() + "Q:quit");
 	  

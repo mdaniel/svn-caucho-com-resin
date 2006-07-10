@@ -325,16 +325,17 @@ public abstract class AbstractHttpRequest
 	CharSegment cb = (CharSegment) rawHost;
 	
 	char []buffer = cb.getBuffer();
+	int offset = cb.getOffset();
 	int length = cb.getLength();
 
 	for (int i = length - 1; i >= 0; i--) {
-	  char ch = buffer[i];
+	  char ch = buffer[i + offset];
 
 	  if ('A' <= ch && ch <= 'Z')
-	    buffer[i] = (char) (ch + 'a' - 'A');
+	    buffer[i + offset] = (char) (ch + 'a' - 'A');
 	}
 	
-	host = new String(buffer, 0, length);
+	host = new String(buffer, offset, length);
       }
       else
 	return rawHost.toString().toLowerCase();
@@ -370,25 +371,21 @@ public abstract class AbstractHttpRequest
     
     CharSequence rawHost;
     if (host == null && (rawHost = getHost()) != null) {
-      if (rawHost instanceof CharBuffer) {
-	CharBuffer cb = (CharBuffer) rawHost;
-	char []buf = cb.getBuffer();
-	int length = cb.length();
-	int i;
+      int length = rawHost.length();
+      int i;
 
-	for (i = length - 1; i >= 0; i--) {
-	  if (buf[i] == ':') {
-	    int port = 0;
+      for (i = length - 1; i >= 0; i--) {
+	if (rawHost.charAt(i) == ':') {
+	  int port = 0;
 
-	    for (i++; i < length; i++) {
-	      char ch = buf[i];
+	  for (i++; i < length; i++) {
+	    char ch = rawHost.charAt(i);
 
-	      if ('0' <= ch && ch <= '9')
-		port = 10 * port + ch - '0';
-	    }
-
-	    return port;
+	    if ('0' <= ch && ch <= '9')
+	      port = 10 * port + ch - '0';
 	  }
+
+	  return port;
 	}
       }
     }

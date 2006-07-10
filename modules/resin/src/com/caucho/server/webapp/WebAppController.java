@@ -302,11 +302,13 @@ public class WebAppController
   /**
    * Returns the deploy admin.
    */
+  @Override
   protected DeployControllerAdmin getDeployAdmin()
   {
     return _admin;
   }
 
+  @Override
   protected void initEnd()
   {
     super.initEnd();

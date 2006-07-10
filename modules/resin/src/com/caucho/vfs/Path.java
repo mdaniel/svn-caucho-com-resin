@@ -698,7 +698,18 @@ public abstract class Path {
   public boolean truncate(long length)
     throws IOException
   {
-    throw new UnsupportedOperationException("truncate");
+    if (length == 0) {
+      if (exists()) {
+	StreamImpl stream = openWriteImpl();
+	stream.close();
+
+	return true;
+      }
+      else
+	return false;
+    }
+    else
+      throw new UnsupportedOperationException(getClass().getName() + ": truncate");
   }
 
   /**

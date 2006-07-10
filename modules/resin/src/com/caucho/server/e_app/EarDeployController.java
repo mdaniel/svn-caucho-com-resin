@@ -34,7 +34,7 @@ import com.caucho.log.Log;
 import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.management.j2ee.J2EEApplication;
 import com.caucho.management.server.*;
-import com.caucho.server.deploy.EnvironmentDeployController;
+import com.caucho.server.deploy.*;
 import com.caucho.server.webapp.ApplicationContainer;
 import com.caucho.server.webapp.WebAppController;
 import com.caucho.util.L10N;
@@ -62,6 +62,8 @@ public class EarDeployController
   private Path _earRootDir;
 
   private ArrayList<EarConfig> _eAppDefaults = new ArrayList<EarConfig>();
+
+  private EarAdmin _admin = new EarAdmin(this);
 
   EarDeployController(String name,
                       ApplicationContainer container, EarConfig config)
@@ -113,12 +115,16 @@ public class EarDeployController
     _earRootDir = rootDir;
   }
 
-  protected Object createMBean()
-    throws JMException
+  /**
+   * Returns the deploy admin.
+   */
+  @Override
+  protected DeployControllerAdmin getDeployAdmin()
   {
-    return new IntrospectionMBean(new EarAdmin(this), EAppMXBean.class);
+    return _admin;
   }
 
+  @Override
   protected void initEnd()
   {
     super.initEnd();

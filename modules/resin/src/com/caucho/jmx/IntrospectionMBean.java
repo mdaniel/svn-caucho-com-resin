@@ -406,14 +406,14 @@ v   * Returns the open mbean unmarshaller for the given return type.
 
       String className = cl.getName();
 
-      HashSet<ModelMBeanAttributeInfo> attributes
-        = new HashSet<ModelMBeanAttributeInfo>();
+      HashSet<MBeanAttributeInfo> attributes
+        = new HashSet<MBeanAttributeInfo>();
 
-      ArrayList<ModelMBeanConstructorInfo> constructors
-        = new ArrayList<ModelMBeanConstructorInfo>();
+      ArrayList<MBeanConstructorInfo> constructors
+        = new ArrayList<MBeanConstructorInfo>();
 
-      ArrayList<ModelMBeanOperationInfo> operations
-        = new ArrayList<ModelMBeanOperationInfo>();
+      ArrayList<MBeanOperationInfo> operations
+        = new ArrayList<MBeanOperationInfo>();
 
       Method []methods = cl.getMethods();
       for (int i = 0; i < methods.length; i++) {
@@ -447,13 +447,14 @@ v   * Returns the open mbean unmarshaller for the given return type.
 
 	  Class type = method.getReturnType();
 
-	  ModelMBeanAttributeInfo attr;
+	  MBeanAttributeInfo attr;
 
-          attr = new ModelMBeanAttributeInfo(attributeName,
+          attr = new MBeanAttributeInfo(attributeName,
 					     getDescription(method),
 					     method,
 					     setter);
 
+	  /*
 	  Descriptor descriptor = attr.getDescriptor();
 
 	  if (descriptor != null) {
@@ -466,6 +467,7 @@ v   * Returns the open mbean unmarshaller for the given return type.
 
 	    attr.setDescriptor(descriptor);
 	  }
+	  */
 
           attributes.add(attr);
         }
@@ -486,7 +488,7 @@ v   * Returns the open mbean unmarshaller for the given return type.
           else
             attributeName = name;
 
-          attributes.add(new ModelMBeanAttributeInfo(attributeName,
+          attributes.add(new MBeanAttributeInfo(attributeName,
 						     getDescription(method),
 						     method,
 						     setter));
@@ -507,14 +509,14 @@ v   * Returns the open mbean unmarshaller for the given return type.
             else
               attributeName = name;
 
-            attributes.add(new ModelMBeanAttributeInfo(attributeName,
+            attributes.add(new MBeanAttributeInfo(attributeName,
 						       getDescription(method),
 						       method,
 						       null));
           }
         }
         else {
-          operations.add(new ModelMBeanOperationInfo(getName(method),
+          operations.add(new MBeanOperationInfo(getName(method),
 						     getDescription(method),
 						     getSignature(method),
 						     method.getReturnType().getName(),
@@ -522,8 +524,8 @@ v   * Returns the open mbean unmarshaller for the given return type.
         }
       }
 
-      ArrayList<ModelMBeanNotificationInfo> notifications
-        = new ArrayList<ModelMBeanNotificationInfo>();
+      ArrayList<MBeanNotificationInfo> notifications
+        = new ArrayList<MBeanNotificationInfo>();
 
       if (obj instanceof NotificationBroadcaster) {
         NotificationBroadcaster broadcaster;
@@ -535,43 +537,39 @@ v   * Returns the open mbean unmarshaller for the given return type.
           for (int i = 0; i < notifs.length; i++) {
 	    MBeanNotificationInfo notif = notifs[i];
 
-	    if (notif instanceof ModelMBeanNotificationInfo)
-	      notifications.add((ModelMBeanNotificationInfo) notifs[i].clone());
-	    else {
-	      notifications.add(new ModelMBeanNotificationInfo(notif.getNotifTypes(),
-						     notif.getName(),
-						     notif.getDescription()));
-	    }
+	    notifications.add((MBeanNotificationInfo) notifs[i].clone());
 	  }
         }
       }
 
       Collections.sort(notifications, MBEAN_FEATURE_INFO_COMPARATOR);
 
-      ModelMBeanAttributeInfo []attrArray = new ModelMBeanAttributeInfo[attributes.size()];
+      MBeanAttributeInfo []attrArray = new MBeanAttributeInfo[attributes.size()];
       attributes.toArray(attrArray);
-      ModelMBeanConstructorInfo []conArray = new ModelMBeanConstructorInfo[constructors.size()];
+      MBeanConstructorInfo []conArray = new MBeanConstructorInfo[constructors.size()];
       constructors.toArray(conArray);
 
-      ModelMBeanOperationInfo []opArray = new ModelMBeanOperationInfo[operations.size()];
+      MBeanOperationInfo []opArray = new MBeanOperationInfo[operations.size()];
       operations.toArray(opArray);
       Arrays.sort(opArray, MBEAN_FEATURE_INFO_COMPARATOR);
-      ModelMBeanNotificationInfo []notifArray = new ModelMBeanNotificationInfo[notifications.size()];
+      MBeanNotificationInfo []notifArray = new MBeanNotificationInfo[notifications.size()];
       notifications.toArray(notifArray);
 
-      ModelMBeanInfoSupport modelInfo;
+      MBeanInfo modelInfo;
 
-      modelInfo = new ModelMBeanInfoSupport(cl.getName(),
+      modelInfo = new MBeanInfo(cl.getName(),
 				     getDescription(cl),
 				     attrArray,
 				     conArray,
 				     opArray,
 				     notifArray);
+      /*
       Descriptor descriptor = modelInfo.getMBeanDescriptor();
       if (descriptor != null) {
 	descriptor.setField("mxbean", "true");
 	modelInfo.setMBeanDescriptor(descriptor);
       }
+      */
 
       info = modelInfo;
 
