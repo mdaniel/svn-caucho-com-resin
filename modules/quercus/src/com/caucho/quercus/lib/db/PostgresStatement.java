@@ -78,9 +78,15 @@ public class PostgresStatement extends JdbcStatementResource {
 
       int size = preparedMapping.size();
 
+      if (size > getParamLength()) {
+        env.warning(L.l("Not all parameters are bound"));
+        return false;
+      }
+
       for (int i = 0; i < size; i++) {
         LongValue param = preparedMapping.get(i);
-        setString(i+1, getParam(param.toInt()-1).toString());
+        Object object = getParam(param.toInt()-1).toJavaObject();
+        setObject(i+1, object);
       }
 
       return executeStatement();

@@ -449,6 +449,7 @@ public class JdbcStatementResource {
     if (_stmtType.equals("")) {
       _stmtType = "UNKNOWN";
     } else {
+      _stmtType = _stmtType.toUpperCase();
       String s = _stmtType.replaceAll("(SELECT|UPDATE|DELETE|INSERT|CREATE|DROP|ALTER|BEGIN|DECLARE)", "");
       if (!s.equals("")) {
         _stmtType = "UNKNOWN";
@@ -581,6 +582,15 @@ public class JdbcStatementResource {
   }
 
   /**
+   * Returns the number of parameters available to binding
+   * Known subclasses: see PostgresStatement.execute
+   */
+  protected int getParamLength()
+  {
+    return _params.length;
+  }
+
+  /**
    * Changes the internal statement.
    */
   protected void setPreparedStatement(PreparedStatement stmt)
@@ -597,14 +607,14 @@ public class JdbcStatementResource {
   }
 
   /**
-   * Sets the given string parameter
+   * Sets the given parameter
    * Known subclasses: see PostgresStatement.execute
    */
-  protected void setString(int i, String param)
+  protected void setObject(int i, Object param)
     throws SQLException
   {
     try {
-      _stmt.setString(i, param);
+      _stmt.setObject(i, param);
     } catch (SQLException e) {
       _errorMessage = e.getMessage();
       _errorCode = e.getErrorCode();

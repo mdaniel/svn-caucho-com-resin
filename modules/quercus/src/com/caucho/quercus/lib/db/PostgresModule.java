@@ -784,31 +784,10 @@ public class PostgresModule extends AbstractQuercusModule {
                                           ArrayValue params)
   {
     try {
+
       PostgresStatement pstmt = conn.getStatement(stmtName);
 
-      ArrayValueImpl arr = (ArrayValueImpl)params;
-      int sz = arr.size();
-
-      char buf[] = new char[sz];
-      for (int i=0; i<sz; i++)
-        buf[i] = 's';
-      String types = new String(buf);
-
-      Value value[] = arr.getValueArray(env);
-      pstmt.bindParams(env, types, value);
-
-      if (!pstmt.execute(env))
-        return null;
-
-      if (pstmt.getStatementType().equals("SELECT")) {
-        PostgresResult result = new PostgresResult(null, pstmt.getResultSet(), null);
-        conn.setResultResource(result);
-        return result;
-      } else {
-        // XXX: ??? return type?
-        return null;
-        // return pstmt;
-      }
+      return executeInternal(env, conn, pstmt, params);
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -1173,9 +1152,10 @@ public class PostgresModule extends AbstractQuercusModule {
 
       int len = value.toString().length();
 
-      if (typeName.equals("money")) {
-        len++;
-      }
+      // XXX: check this...
+      // if (typeName.equals("money")) {
+      //  len++;
+      // }
 
       return len;
 
@@ -1489,7 +1469,7 @@ public class PostgresModule extends AbstractQuercusModule {
     //
     // 3. Individual pg_send_query - php/431g
     //
-    //    pg_send_query($conn, "select * from test;");
+    //    $res = pg_send_query($conn, "select * from test;");
     //    var_dump($res);
     //    $res = pg_get_result($conn);
     //    var_dump($res);
@@ -2212,7 +2192,7 @@ public class PostgresModule extends AbstractQuercusModule {
       if (conn == null)
         conn = getConnection(env);
 
-      return conn.ping();
+      return pg_query(env, conn, "SELECT 1") != null;
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -2224,15 +2204,17 @@ public class PostgresModule extends AbstractQuercusModule {
    * Return the port number associated with the connection
    */
   @ReturnNullAsFalse
-  public static LongValue pg_port(Env env,
-                                  @Optional Postgres conn)
+  public static StringValue pg_port(Env env,
+                                    @Optional Postgres conn)
   {
     try {
 
       if (conn == null)
         conn = getConnection(env);
 
-      return LongValue.create(conn.getPort());
+      // In PHP, a real pg_port test case returns String
+
+      return (StringValue) StringValue.create(conn.getPort());
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -2595,6 +2577,11 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
 
+      PostgresStatement pstmt = conn.prepare(env, query);
+
+      return executeInternal(env, conn, pstmt, params) != null;
+
+      /*
       ArrayValueImpl arrayImpl = (ArrayValueImpl)params;
       int sz = arrayImpl.size();
 
@@ -2608,6 +2595,7 @@ public class PostgresModule extends AbstractQuercusModule {
       pg_send_query(env, conn, query);
 
       return true;
+      */
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -2889,6 +2877,43 @@ public class PostgresModule extends AbstractQuercusModule {
     env.setSpecialValue("caucho.postgres", conn);
 
     return conn;
+  }
+
+  private static PostgresResult executeInternal(Env env,
+                                                @NotNull Postgres conn,
+                                                PostgresStatement pstmt,
+                                                ArrayValue params)
+  {
+    try {
+
+      ArrayValueImpl arr = (ArrayValueImpl) params;
+      int sz = arr.size();
+
+      char buf[] = new char[sz];
+      for (int i=0; i<sz; i++)
+        buf[i] = 's';
+      String types = new String(buf);
+
+      Value value[] = arr.getValueArray(env);
+      pstmt.bindParams(env, types, value);
+
+      if (!pstmt.execute(env))
+        return null;
+
+      if (pstmt.getStatementType().equals("SELECT")) {
+        PostgresResult result = new PostgresResult(null, pstmt.getResultSet(), null);
+        conn.setResultResource(result);
+        return result;
+      } else {
+        // XXX: ??? return type?
+        return null;
+        // return pstmt;
+      }
+
+    } catch (Exception ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+      return null;
+    }
   }
 
   private static int writeLobInternal(Object largeObject,
