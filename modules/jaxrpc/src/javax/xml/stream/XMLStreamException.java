@@ -29,93 +29,60 @@
 
 package javax.xml.stream;
 
-/**
- * The base exception for unexpected processing errors. This Exception class is
- * used to report well-formedness errors as well as unexpected processing
- * conditions. Version: 1.0 Author: Copyright (c) 2003 by BEA Systems. All
- * Rights Reserved. See Also:Serialized Form
- */
 public class XMLStreamException extends Exception {
+
   protected Location location;
 
   protected Throwable nested;
 
-
-  /**
-   * Default constructor
-   */
   public XMLStreamException()
   {
-    throw new UnsupportedOperationException();
+    location = null;
+    nested = null;
   }
 
-
-  /**
-   * Construct an exception with the assocated message. Parameters:msg - the
-   * message to report
-   */
   public XMLStreamException(String msg)
   {
-    throw new UnsupportedOperationException();
+    super(msg);
+    location = null;
+    nested = null;
   }
 
-
-  /**
-   * Construct an exception with the assocated message, exception and location.
-   * Parameters:msg - the message to reportlocation - the location of the error
-   */
   public XMLStreamException(String msg, Location location)
   {
-    throw new UnsupportedOperationException();
+    super(msg);
+    this.location = location;
+    nested = null;
   }
 
-
-  /**
-   * Construct an exception with the assocated message, exception and location.
-   * Parameters:th - a nested exceptionmsg - the message to reportlocation -
-   * the location of the error
-   */
   public XMLStreamException(String msg, Location location, Throwable th)
   {
-    throw new UnsupportedOperationException();
+    super(msg);
+    this.location = location;
+    nested = th;
   }
 
-
-  /**
-   * Construct an exception with the assocated message and exception
-   * Parameters:th - a nested exceptionmsg - the message to report
-   */
   public XMLStreamException(String msg, Throwable th)
   {
-    throw new UnsupportedOperationException();
+    super(msg);
+    this.location = null;
+    nested = th;
   }
 
-
-  /**
-   * Construct an exception with the assocated exception Parameters:th - a
-   * nested exception
-   */
   public XMLStreamException(Throwable th)
   {
-    throw new UnsupportedOperationException();
+    this.location = null;
+    nested = th;
   }
 
-
-  /**
-   * Gets the location of the exception
-   */
   public Location getLocation()
   {
-    throw new UnsupportedOperationException();
+    return location;
   }
 
-
-  /**
-   * Gets the nested exception.
-   */
   public Throwable getNestedException()
   {
-    throw new UnsupportedOperationException();
+    return nested;
   }
 
 }

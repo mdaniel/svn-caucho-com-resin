@@ -29,19 +29,9 @@
 
 package javax.xml.stream;
 
-/**
- * This interface declares a simple filter interface that one can create to
- * filter XMLStreamReaders Version: 1.0 Author: Copyright (c) 2003 by BEA
- * Systems. All Rights Reserved.
- */
 public interface StreamFilter {
 
-  /**
-   * Tests whether the current state is part of this stream. This method will
-   * return true if this filter accepts this event and false otherwise. The
-   * method should not change the state of the reader when accepting a state.
-   */
-  abstract boolean accept(XMLStreamReader reader);
+  public boolean accept(XMLStreamReader reader);
 
 }
 

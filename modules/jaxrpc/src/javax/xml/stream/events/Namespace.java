@@ -29,29 +29,13 @@
 
 package javax.xml.stream.events;
 
-/**
- * An interface that contains information about a namespace. Namespaces are
- * accessed from a StartElement. Version: 1.0 Author: Copyright (c) 2003 by BEA
- * Systems. All Rights Reserved. See Also:StartElement
- */
 public interface Namespace extends Attribute {
 
-  /**
-   * Gets the uri bound to the prefix of this namespace
-   */
-  abstract String getNamespaceURI();
+  public String getNamespaceURI();
 
+  public String getPrefix();
 
-  /**
-   * Gets the prefix, returns "" if this is a default namespace declaration.
-   */
-  abstract String getPrefix();
-
-
-  /**
-   * returns true if this attribute declares the default namespace
-   */
-  abstract boolean isDefaultNamespaceDeclaration();
+  public boolean isDefaultNamespaceDeclaration();
 
 }
 

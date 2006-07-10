@@ -29,19 +29,11 @@
 
 package javax.xml.stream;
 
-/**
- * This interface is used to report non-fatal errors. Only warnings should be
- * echoed through this interface. Version: 1.0 Author: Copyright (c) 2003 by
- * BEA Systems. All Rights Reserved.
- */
 public interface XMLReporter {
 
-  /**
-   * Report the desired message in an application specific format. Only
-   * warnings and non-fatal errors should be reported through this interface.
-   * Fatal errors should be thrown as XMLStreamException.
-   */
-  abstract void report(String message, String errorType, Object relatedInformation, Location location) throws XMLStreamException;
+  public void report(String message, String errorType,
+		     Object relatedInformation, Location location)
+    throws XMLStreamException;
 
 }
 

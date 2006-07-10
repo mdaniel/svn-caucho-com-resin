@@ -31,24 +31,11 @@ package javax.xml.stream.events;
 import javax.xml.namespace.*;
 import java.util.*;
 
-/**
- * An interface for the end element event. An EndElement is reported for each
- * End Tag in the document. Version: 1.0 Author: Copyright (c) 2003 by BEA
- * Systems. All Rights Reserved. See Also:XMLEvent
- */
 public interface EndElement extends XMLEvent {
 
-  /**
-   * Get the name of this event
-   */
-  abstract QName getName();
+  public QName getName();
 
-
-  /**
-   * Returns an Iterator of namespaces that have gone out of scope. Returns an
-   * empty iterator if no namespaces have gone out of scope.
-   */
-  abstract Iterator getNamespaces();
+  public Iterator getNamespaces();
 
 }
 

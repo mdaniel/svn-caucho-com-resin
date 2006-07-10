@@ -31,97 +31,100 @@ package javax.xml.stream;
 
 import javax.xml.namespace.*;
 
-/**
- */
 public interface XMLStreamReader extends XMLStreamConstants {
-  abstract void close() throws XMLStreamException;
 
-  abstract int getAttributeCount();
-  
-  abstract String getAttributeLocalName(int index);
-  
-  abstract QName getAttributeName(int index);
-  
-  abstract String getAttributeNamespace(int index);
-  
-  abstract String getAttributePrefix(int index);
-  
-  abstract String getAttributeType(int index);
-  
-  abstract String getAttributeValue(int index);
-  
-  abstract String getAttributeValue(String namespaceURI, String localName);
-  
-  abstract String getCharacterEncodingScheme();
-  
-  abstract String getElementText() throws XMLStreamException;
-  
-  abstract String getEncoding();
-  
-  abstract int getEventType();
-  
-  abstract String getLocalName();
-  
-  abstract Location getLocation();
-  
-  abstract QName getName();
-  
-  abstract NamespaceContext getNamespaceContext();
-  
-  abstract int getNamespaceCount();
-  
-  abstract String getNamespacePrefix(int index);
-  
-  abstract String getNamespaceURI();
-  
-  abstract String getNamespaceURI(int index);
-  
-  abstract String getNamespaceURI(String prefix);
-  
-  abstract String getPIData();
-  
-  abstract String getPITarget();
-  
-  abstract String getPrefix();
-  
-  abstract Object getProperty(String name) throws IllegalArgumentException;
-  
-  abstract String getText();
-  
-  abstract char[] getTextCharacters();
-  
-  abstract int getTextCharacters(int sourceStart, char[] target, int targetStart, int length) throws XMLStreamException;
+  public void close() throws XMLStreamException;
 
-  abstract int getTextLength();
+  public int getAttributeCount();
   
-  abstract int getTextStart();
+  public String getAttributeLocalName(int index);
   
-  abstract String getVersion();
+  public QName getAttributeName(int index);
   
-  abstract boolean hasName();
+  public String getAttributeNamespace(int index);
   
-  abstract boolean hasNext() throws XMLStreamException;
+  public String getAttributePrefix(int index);
+  
+  public String getAttributeType(int index);
+  
+  public String getAttributeValue(int index);
+  
+  public String getAttributeValue(String namespaceURI, String localName);
+  
+  public String getCharacterEncodingScheme();
+  
+  public String getElementText() throws XMLStreamException;
+  
+  public String getEncoding();
+  
+  public int getEventType();
+  
+  public String getLocalName();
+  
+  public Location getLocation();
+  
+  public QName getName();
+  
+  public NamespaceContext getNamespaceContext();
+  
+  public int getNamespaceCount();
+  
+  public String getNamespacePrefix(int index);
+  
+  public String getNamespaceURI();
+  
+  public String getNamespaceURI(int index);
+  
+  public String getNamespaceURI(String prefix);
+  
+  public String getPIData();
+  
+  public String getPITarget();
+  
+  public String getPrefix();
+  
+  public Object getProperty(String name) throws IllegalArgumentException;
+  
+  public String getText();
+  
+  public char[] getTextCharacters();
+  
+  public int getTextCharacters(int sourceStart, char[] target,
+			       int targetStart, int length)
+    throws XMLStreamException;
 
-  abstract boolean hasText();
+  public int getTextLength();
   
-  abstract boolean isAttributeSpecified(int index);
+  public int getTextStart();
   
-  abstract boolean isCharacters();
+  public String getVersion();
   
-  abstract boolean isEndElement();
+  public boolean hasName();
   
-  abstract boolean isStandalone();
+  public boolean hasNext() throws XMLStreamException;
+
+  public boolean hasText();
   
-  abstract boolean isStartElement();
+  public boolean isAttributeSpecified(int index);
   
-  abstract boolean isWhiteSpace();
+  public boolean isCharacters();
   
-  abstract int next() throws XMLStreamException;
+  public boolean isEndElement();
   
-  abstract int nextTag() throws XMLStreamException;
+  public boolean isStandalone();
   
-  abstract void require(int type, String namespaceURI, String localName) throws XMLStreamException;
+  public boolean isStartElement();
   
-  abstract boolean standaloneSet();
+  public boolean isWhiteSpace();
+  
+  public int next() throws XMLStreamException;
+  
+  public int nextTag() throws XMLStreamException;
+  
+  public void require(int type, String namespaceURI, String localName)
+    throws XMLStreamException;
+  
+  public boolean standaloneSet();
+
 }
 

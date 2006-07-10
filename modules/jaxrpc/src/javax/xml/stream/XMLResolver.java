@@ -29,22 +29,11 @@
 
 package javax.xml.stream;
 
-/**
- * This interface is used to resolve resources during an XML parse. If an
- * application wishes to perform custom entity resolution it must register an
- * instance of this interface with the XMLInputFactory using the setXMLResolver
- * method. Version: 1.0 Author: Copyright (c) 2003 by BEA Systems. All Rights
- * Reserved.
- */
 public interface XMLResolver {
 
-  /**
-   * Retrieves a resource. This resource can be of the following three return
-   * types: (1) java.io.InputStream (2) javax.xml.stream.XMLStreamReader (3)
-   * java.xml.stream.XMLEventReader. If this method returns null the processor
-   * will attempt to resolve the entity using its default mechanism.
-   */
-  abstract Object resolveEntity(String publicID, String systemID, String baseURI, String namespace) throws XMLStreamException;
+  public Object resolveEntity(String publicID, String systemID,
+			      String baseURI, String namespace)
+    throws XMLStreamException;
 
 }
 

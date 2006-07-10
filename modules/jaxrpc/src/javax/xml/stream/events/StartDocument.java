@@ -29,48 +29,24 @@
 
 package javax.xml.stream.events;
 
-/**
- * An interface for the start document event Version: 1.0 Author: Copyright (c)
- * 2003 by BEA Systems. All Rights Reserved.
- */
 public interface StartDocument extends XMLEvent {
 
-  /**
-   * Returns true if CharacterEncodingScheme was set in the encoding
-   * declaration of the document
-   */
-  abstract boolean encodingSet();
+  public boolean encodingSet();
 
 
-  /**
-   * Returns the encoding style of the XML data
-   */
-  abstract String getCharacterEncodingScheme();
+  public String getCharacterEncodingScheme();
 
 
-  /**
-   * Returns the system ID of the XML data
-   */
-  abstract String getSystemId();
+  public String getSystemId();
 
 
-  /**
-   * Returns the version of XML of this XML stream
-   */
-  abstract String getVersion();
+  public String getVersion();
 
 
-  /**
-   * Returns if this XML is standalone
-   */
-  abstract boolean isStandalone();
+  public boolean isStandalone();
 
 
-  /**
-   * Returns true if the standalone attribute was set in the encoding
-   * declaration of the document.
-   */
-  abstract boolean standaloneSet();
+  public boolean standaloneSet();
 
 }
 

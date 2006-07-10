@@ -31,40 +31,17 @@ package javax.xml.stream.util;
 import javax.xml.stream.*;
 import javax.xml.stream.events.*;
 
-/**
- * This interface defines a class that allows a user to register a way to
- * allocate events given an XMLStreamReader. An implementation is not required
- * to use the XMLEventFactory implementation but this is recommended. The
- * XMLEventAllocator can be set on an XMLInputFactory using the property
- * "javax.xml.stream.allocator" Version: 1.0 Author: Copyright (c) 2003 by BEA
- * Systems. All Rights Reserved. See Also:XMLInputFactory, XMLEventFactory
- */
 public interface XMLEventAllocator {
 
-  /**
-   * This method allocates an event given the current state of the
-   * XMLStreamReader. If this XMLEventAllocator does not have a one-to-one
-   * mapping between reader states and events this method will return null.
-   * This method must not modify the state of the XMLStreamReader.
-   */
-  abstract XMLEvent allocate(XMLStreamReader reader) throws XMLStreamException;
+  public XMLEvent allocate(XMLStreamReader reader)
+    throws XMLStreamException;
 
 
-  /**
-   * This method allocates an event or set of events given the current state of
-   * the XMLStreamReader and adds the event or set of events to the consumer
-   * that was passed in. This method can be used to expand or contract reader
-   * states into event states. This method may modify the state of the
-   * XMLStreamReader.
-   */
-  abstract void allocate(XMLStreamReader reader, XMLEventConsumer consumer) throws XMLStreamException;
+  public void allocate(XMLStreamReader reader, XMLEventConsumer consumer)
+    throws XMLStreamException;
 
 
-  /**
-   * This method creates an instance of the XMLEventAllocator. This allows the
-   * XMLInputFactory to allocate a new instance per reader.
-   */
-  abstract XMLEventAllocator newInstance();
+  public XMLEventAllocator newInstance();
 
 }
 

@@ -29,17 +29,9 @@
 
 package javax.xml.stream.events;
 
-/**
- * An interface for comment events Version: 1.0 Author: Copyright (c) 2003 by
- * BEA Systems. All Rights Reserved.
- */
 public interface Comment extends XMLEvent {
 
-  /**
-   * Return the string data of the comment, returns empty string if it does not
-   * exist
-   */
-  abstract String getText();
+  public String getText();
 
 }
 

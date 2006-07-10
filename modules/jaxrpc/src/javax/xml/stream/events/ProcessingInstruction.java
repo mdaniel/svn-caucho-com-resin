@@ -29,22 +29,11 @@
 
 package javax.xml.stream.events;
 
-/**
- * An interface that describes the data found in processing instructions
- * Version: 1.0 Author: Copyright (c) 2003 by BEA Systems. All Rights Reserved.
- */
 public interface ProcessingInstruction extends XMLEvent {
 
-  /**
-   * The data section of the processing instruction
-   */
-  abstract String getData();
+  public String getData();
 
-
-  /**
-   * The target section of the processing instruction
-   */
-  abstract String getTarget();
+  public String getTarget();
 
 }
 

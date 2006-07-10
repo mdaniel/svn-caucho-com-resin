@@ -29,77 +29,53 @@
 
 package javax.xml.stream;
 
-/**
- * An error class for reporting factory configuration errors. Version: 1.0
- * Author: Copyright (c) 2003 by BEA Systems. All Rights Reserved. See
- * Also:Serialized Form
- */
 public class FactoryConfigurationError extends Error {
 
-  /**
-   * Default constructor
-   */
+  private Exception _exception;
+  private String _message;
+
   public FactoryConfigurationError()
   {
-    throw new UnsupportedOperationException();
+    _exception = null;
+    _message = null;
   }
 
 
-  /**
-   * Construct an exception with a nested inner exception Parameters:e - the
-   * exception to nest
-   */
   public FactoryConfigurationError(Exception e)
   {
-    throw new UnsupportedOperationException();
+    _exception = e;
+    _message = null;
   }
 
 
-  /**
-   * Construct an exception with a nested inner exception and a message
-   * Parameters:e - the exception to nestmsg - the message to report
-   */
   public FactoryConfigurationError(Exception e, String msg)
   {
-    throw new UnsupportedOperationException();
+    _exception = e;
+    _message = msg;
   }
 
 
-  /**
-   * Construct an exception with associated message Parameters:e - the
-   * exception to nestmsg - the message to report
-   */
   public FactoryConfigurationError(String msg)
   {
-    throw new UnsupportedOperationException();
+    _exception = null;
+    _message = msg;
   }
 
 
-  /**
-   * Construct an exception with a nested inner exception and a message
-   * Parameters:msg - the message to reporte - the exception to nest
-   */
   public FactoryConfigurationError(String msg, Exception e)
   {
-    throw new UnsupportedOperationException();
+    _exception = e;
+    _message = msg;
   }
 
-
-  /**
-   * Return the nested exception (if any)
-   */
   public Exception getException()
   {
-    throw new UnsupportedOperationException();
+    return _exception;
   }
 
-
-  /**
-   * Report the message associated with this error
-   */
   public String getMessage()
   {
-    throw new UnsupportedOperationException();
+    return _message;
   }
 
 }

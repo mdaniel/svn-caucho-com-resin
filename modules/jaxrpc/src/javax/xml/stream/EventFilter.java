@@ -30,18 +30,9 @@
 package javax.xml.stream;
 import javax.xml.stream.events.*;
 
-/**
- * This interface declares a simple filter interface that one can create to
- * filter XMLEventReaders Version: 1.0 Author: Copyright (c) 2003 by BEA
- * Systems. All Rights Reserved.
- */
 public interface EventFilter {
 
-  /**
-   * Tests whether this event is part of this stream. This method will return
-   * true if this filter accepts this event and false otherwise.
-   */
-  abstract boolean accept(XMLEvent event);
+  public boolean accept(XMLEvent event);
 
 }
 

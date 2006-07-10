@@ -29,48 +29,17 @@
 
 package javax.xml.stream;
 
-/**
- * Provides information on the location of an event. All the information
- * provided by a Location is optional. For example an application may only
- * report line numbers. Version: 1.0 Author: Copyright (c) 2003 by BEA Systems.
- * All Rights Reserved.
- */
 public interface Location {
 
-  /**
-   * Return the byte or character offset into the input source this location is
-   * pointing to. If the input source is a file or a byte stream then this is
-   * the byte offset into that stream, but if the input source is a character
-   * media then the offset is the character offset. Returns -1 if there is no
-   * offset available.
-   */
-  abstract int getCharacterOffset();
+  public int getCharacterOffset();
 
+  public int getColumnNumber();
 
-  /**
-   * Return the column number where the current event ends, returns -1 if none
-   * is available.
-   */
-  abstract int getColumnNumber();
+  public int getLineNumber();
 
+  public String getPublicId();
 
-  /**
-   * Return the line number where the current event ends, returns -1 if none is
-   * available.
-   */
-  abstract int getLineNumber();
-
-
-  /**
-   * Returns the public ID of the XML
-   */
-  abstract String getPublicId();
-
-
-  /**
-   * Returns the system ID of the XML
-   */
-  abstract String getSystemId();
+  public String getSystemId();
 
 }
 

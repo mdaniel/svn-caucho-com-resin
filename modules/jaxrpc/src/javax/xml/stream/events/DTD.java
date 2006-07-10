@@ -30,40 +30,18 @@
 package javax.xml.stream.events;
 import java.util.*;
 
-/**
- * This is the top level interface for events dealing with DTDs Version: 1.0
- * Author: Copyright (c) 2003 by BEA Systems. All Rights Reserved.
- */
 public interface DTD extends XMLEvent {
 
-  /**
-   * Returns the entire Document Type Declaration as a string, including the
-   * internal DTD subset. This may be null if there is not an internal subset.
-   * If it is not null it must return the entire Document Type Declaration
-   * which matches the doctypedecl production in the XML 1.0 specification
-   */
-  abstract String getDocumentTypeDeclaration();
+  public String getDocumentTypeDeclaration();
 
 
-  /**
-   * Return a List containing the general entities, both external and internal,
-   * declared in the DTD. This list must contain EntityDeclaration events.
-   */
-  abstract List getEntities();
+  public List getEntities();
 
 
-  /**
-   * Return a List containing the notations declared in the DTD. This list must
-   * contain NotationDeclaration events.
-   */
-  abstract List getNotations();
+  public List getNotations();
 
 
-  /**
-   * Returns an implementation defined representation of the DTD. This method
-   * may return null if no representation is available.
-   */
-  abstract Object getProcessedDTD();
+  public Object getProcessedDTD();
 
 }
 

@@ -29,49 +29,19 @@
 
 package javax.xml.stream.events;
 
-/**
- * An interface for handling Entity Declarations This interface is used to
- * record and report unparsed entity declarations. Version: 1.0 Author:
- * Copyright (c) 2003 by BEA Systems. All Rights Reserved.
- */
 public interface EntityDeclaration extends XMLEvent {
 
-  /**
-   * Get the base URI for this reference or null if this information is not
-   * available
-   */
-  abstract String getBaseURI();
+  public String getBaseURI();
 
+  public String getName();
 
-  /**
-   * The entity's name
-   */
-  abstract String getName();
+  public String getNotationName();
 
+  public String getPublicId();
 
-  /**
-   * The name of the associated notation.
-   */
-  abstract String getNotationName();
+  public String getReplacementText();
 
-
-  /**
-   * The entity's public identifier, or null if none was given
-   */
-  abstract String getPublicId();
-
-
-  /**
-   * The replacement text of the entity. This method will only return non-null
-   * if this is an internal entity.
-   */
-  abstract String getReplacementText();
-
-
-  /**
-   * The entity's system identifier.
-   */
-  abstract String getSystemId();
+  public String getSystemId();
 
 }
 

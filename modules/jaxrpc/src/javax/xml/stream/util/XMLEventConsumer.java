@@ -31,23 +31,9 @@ package javax.xml.stream.util;
 import javax.xml.stream.*;
 import javax.xml.stream.events.*;
 
-/**
- * This interface defines an event consumer interface. The contract of the of a
- * consumer is to accept the event. This interface can be used to mark an
- * object as able to receive events. Add may be called several times in
- * immediate succession so a consumer must be able to cache events it hasn't
- * processed yet. Version: 1.0 Author: Copyright (c) 2003 by BEA Systems. All
- * Rights Reserved.
- */
 public interface XMLEventConsumer {
 
-  /**
-   * This method adds an event to the consumer. Calling this method invalidates
-   * the event parameter. The client application should discard all references
-   * to this event upon calling add. The behavior of an application that
-   * continues to use such references is undefined.
-   */
-  abstract void add(XMLEvent event) throws XMLStreamException;
+  public void add(XMLEvent event) throws XMLStreamException;
 
 }
 

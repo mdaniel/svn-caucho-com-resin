@@ -30,38 +30,15 @@
 package javax.xml.stream.events;
 import javax.xml.namespace.*;
 
-/**
- * An interface that contains information about an attribute. Attributes are
- * reported as a set of events accessible from a StartElement. Other
- * applications may report Attributes as first-order events, for example as the
- * results of an XPath expression. Version: 1.0 Author: Copyright (c) 2003 by
- * BEA Systems. All Rights Reserved. See Also:StartElement
- */
 public interface Attribute extends XMLEvent {
 
-  /**
-   * Gets the type of this attribute, default is the String "CDATA"
-   */
-  abstract String getDTDType();
+  public String getDTDType();
 
+  public QName getName();
 
-  /**
-   * Returns the QName for this attribute
-   */
-  abstract QName getName();
+  public String getValue();
 
-
-  /**
-   * Gets the normalized value of this attribute
-   */
-  abstract String getValue();
-
-
-  /**
-   * A flag indicating whether this attribute was actually specified in the
-   * start-tag of its element, or was defaulted from the schema.
-   */
-  abstract boolean isSpecified();
+  public boolean isSpecified();
 
 }
 
