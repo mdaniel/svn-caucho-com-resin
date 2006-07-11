@@ -33,6 +33,7 @@ import javax.xml.stream.events.*;
 import java.util.*;
 import java.util.logging.*;
 import java.io.*;
+import java.net.*;
 
 class FactoryLoader {
 
@@ -81,19 +82,10 @@ class FactoryLoader {
     }
 
     if (className == null) {
-      try {
-	InputStream is =
-	  classLoader.getResourceAsStream("/META-INF/services/" + factoryId);
-	
-	BufferedReader br =
-	  new BufferedReader(new InputStreamReader(is));
-	className = br.readLine();
-	  
-	if (className.indexOf('#') != -1)
-	  className = className.substring(0, className.indexOf('#'));
-      } catch (Exception e) {
-	throw new FactoryConfigurationError(e);
-      }
+      Object factory = createFactory("META-INF/services/"+factoryId,
+				     classLoader);
+      if (factory != null)
+	return factory;
     }
 
     if (className != null) {
@@ -108,4 +100,100 @@ class FactoryLoader {
 
     return null;
   }
+
+  public static Object createFactory(String name, ClassLoader loader)
+  {
+    Object[] providers = getProviderList(name, loader);
+
+    for (int i = 0; i < providers.length; i++) {
+      Object factory;
+
+      factory = providers[i];
+
+      if (factory != null)
+	return factory;
+    }
+    
+    return null;
+  }
+  
+  private static Object []getProviderList(String service, ClassLoader loader)
+  {
+
+    Object []providers = _providerMap.get(loader);
+
+    if (providers != null)
+      return providers;
+    
+    ArrayList<Object> list = new ArrayList<Object>();
+
+    try {
+      Enumeration e = loader.getResources(service);
+
+      while (e.hasMoreElements()) {
+	URL url = (URL) e.nextElement();
+
+	Object provider = loadProvider(url, loader);
+
+	if (provider != null)
+	  list.add(provider);
+      }
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+
+    providers = new Object[list.size()];
+    list.toArray(providers);
+
+    _providerMap.put(loader, providers);
+    
+    return providers;
+  }
+
+  private static Object loadProvider(URL url, ClassLoader loader)
+  {
+    InputStream is = null;
+    try {
+      is = url.openStream();
+      int ch;
+
+      while ((ch = is.read()) >= 0) {
+	if (Character.isWhitespace((char) ch)) {
+	}
+	else if (ch == '#') {
+	  for (; ch >= 0 && ch != '\n' && ch != '\r'; ch = is.read()) {
+	  }
+	}
+	else {
+	  StringBuilder sb = new StringBuilder();
+
+	  for (;
+	       ch >= 0 && ! Character.isWhitespace((char) ch);
+	       ch = is.read()) {
+	    sb.append((char) ch);
+	  }
+
+	  String className = sb.toString();
+
+	  Class cl = Class.forName(className, false, loader);
+
+	  return (Object) cl.newInstance();
+	}
+      }
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+    } finally {
+      try {
+	if (is != null)
+	  is.close();
+      } catch (Throwable e) {
+      }
+    }
+
+    return null;
+  }
+
+
+  private static WeakHashMap<ClassLoader,Object[]>
+    _providerMap = new WeakHashMap<ClassLoader,Object[]>();
 }
