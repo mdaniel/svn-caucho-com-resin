@@ -24,7 +24,7 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Emil Ong
  */
 
 package com.caucho.quercus.lib.file;
@@ -39,11 +39,11 @@ import java.io.RandomAccessFile;
 
 import java.nio.channels.FileLock;
 import java.nio.channels.FileChannel;
-import java.nio.channels.OverlappingFileLockException;
 
 import com.caucho.vfs.Path;
 import com.caucho.vfs.FilePath;
 import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.VfsStream;
 
 import com.caucho.quercus.env.Env;
 
@@ -51,38 +51,28 @@ import com.caucho.quercus.lib.file.FileReadValue;
 import com.caucho.quercus.lib.file.FileValue;
 
 /**
- * Represents a PHP open file
+ * Represents an output stream for a popen'ed process.
  */
-public class FileOutput extends AbstractBinaryOutput implements LockableStream {
+public class PopenOutput extends AbstractBinaryOutput {
   private static final Logger log
     = Logger.getLogger(FileReadValue.class.getName());
 
   private Env _env;
-  private Path _path;
+  private Process _process;
   private WriteStream _os;
-  private long _offset;
-  private FileLock _fileLock;
-  private FileChannel _fileChannel;
 
-  public FileOutput(Env env, Path path)
-    throws IOException
-  {
-    this(env, path, false);
-  }
-
-  public FileOutput(Env env, Path path, boolean isAppend)
+  public PopenOutput(Env env, Process process)
     throws IOException
   {
     _env = env;
-    
-    env.addClose(this);
-    
-    _path = path;
 
-    if (isAppend)
-      _os = path.openAppend();
-    else
-      _os = path.openWrite();
+    _env.addClose(this);
+    
+    _process = process;
+
+    _os = new WriteStream(new VfsStream(null, _process.getOutputStream()));
+
+    _process.getInputStream().close();
   }
 
   /**
@@ -91,14 +81,6 @@ public class FileOutput extends AbstractBinaryOutput implements LockableStream {
   public OutputStream getOutputStream()
   {
     return _os;
-  }
-
-  /**
-   * Returns the file's path.
-   */
-  public Path getPath()
-  {
-    return _path;
   }
 
   /**
@@ -154,7 +136,6 @@ public class FileOutput extends AbstractBinaryOutput implements LockableStream {
     }
   }
 
-
   /**
    * Closes the file.
    */
@@ -168,72 +149,25 @@ public class FileOutput extends AbstractBinaryOutput implements LockableStream {
    */
   public void close()
   {
+    pclose();
+  }
+
+  public int pclose()
+  {
     try {
-      _env.removeClose(this);
-      
       WriteStream os = _os;
       _os = null;
 
       if (os != null)
         os.close();
 
-      if (_fileLock != null)
-        _fileLock.release();
-
-      if (_fileChannel != null)
-        _fileChannel.close();
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-  }
-
-  /**
-   * Lock the shared advisory lock.
-   */
-  public boolean lock(boolean shared, boolean block)
-  {
-    if (! (getPath() instanceof FilePath))
-      return false;
-
-    try {
-      File file = ((FilePath) getPath()).getFile();
-
-      if (_fileChannel == null) {
-        RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
-
-        _fileChannel = randomAccessFile.getChannel();
-      }
-
-      if (block)
-        _fileLock = _fileChannel.lock(0, Long.MAX_VALUE, shared);
-      else 
-        _fileLock = _fileChannel.tryLock(0, Long.MAX_VALUE, shared);
-
-      return _fileLock != null;
-    } catch (OverlappingFileLockException e) {
-      return false;
-    } catch (IOException e) {
+      return _process.waitFor();
+    } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 
-      return false;
-    }
-  }
-
-  /**
-   * Unlock the advisory lock.
-   */
-  public boolean unlock()
-  {
-    try {
-      if (_fileLock != null) {
-        _fileLock.release();
-
-        return true;
-      }
-
-      return false;
-    } catch (IOException e) {
-      return false;
+      return -1;
+    } finally {
+      _env.removeClose(this);
     }
   }
 
@@ -243,7 +177,7 @@ public class FileOutput extends AbstractBinaryOutput implements LockableStream {
    */
   public String toString()
   {
-    return "FileOutput[" + getPath() + "]";
+    return "PopenOutput[" + _process + "]";
   }
 }
 

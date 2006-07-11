@@ -24,7 +24,7 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Emil Ong
  */
 
 package com.caucho.quercus.lib.file;
@@ -36,43 +36,38 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 
-import java.nio.channels.FileLock;
-import java.nio.channels.FileChannel;
-
+import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringBuilderValue;
 
 import com.caucho.vfs.Path;
 import com.caucho.vfs.FilePath;
 import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.VfsStream;
 
 /**
- * Represents a Quercus file open for reading
+ * Represents an input stream for a popen'ed process.
  */
-public class FileInput extends ReadStreamInput implements LockableStream {
+public class PopenInput extends ReadStreamInput {
   private static final Logger log
     = Logger.getLogger(FileInput.class.getName());
 
-  private Path _path;
-  private FileLock _fileLock;
-  private FileChannel _fileChannel;
+  private Env _env;
+  private Process _process;
 
-  public FileInput(Path path)
+  public PopenInput(Env env, Process process)
     throws IOException
   {
-    _path = path;
+    _env = env;
+    
+    _env.addClose(this);
 
-    init(path.openRead());
-  }
+    _process = process;
 
-  /**
-   * Returns the path.
-   */
-  public Path getPath()
-  {
-    return _path;
+    init(new ReadStream(new VfsStream(_process.getInputStream(), null)));
+
+    _process.getOutputStream().close();
   }
 
   /**
@@ -81,7 +76,7 @@ public class FileInput extends ReadStreamInput implements LockableStream {
   public BinaryInput openCopy()
     throws IOException
   {
-    return new FileInput(_path);
+    return new PopenInput(_env, _process);
   }
 
   /**
@@ -89,53 +84,7 @@ public class FileInput extends ReadStreamInput implements LockableStream {
    */
   public long getLength()
   {
-    return getPath().getLength();
-  }
-
-  /**
-   * Lock the shared advisory lock.
-   */
-  public boolean lock(boolean shared, boolean block)
-  {
-    if (! (getPath() instanceof FilePath))
-      return false;
-
-    try {
-      File file = ((FilePath) getPath()).getFile();
-
-      if (_fileChannel == null) {
-        RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
-
-        _fileChannel = randomAccessFile.getChannel();
-      }
-
-      if (block)
-        _fileLock = _fileChannel.lock(0, Long.MAX_VALUE, shared);
-      else 
-        _fileLock = _fileChannel.tryLock(0, Long.MAX_VALUE, shared);
-
-      return _fileLock != null;
-    } catch (IOException e) {
-      return false;
-    }
-  }
-
-  /**
-   * Unlock the advisory lock.
-   */
-  public boolean unlock()
-  {
-    try {
-      if (_fileLock != null) {
-        _fileLock.release();
-
-        return true;
-      }
-
-      return false;
-    } catch (IOException e) {
-      return false;
-    }
+    return 0;
   }
 
   /**
@@ -143,7 +92,25 @@ public class FileInput extends ReadStreamInput implements LockableStream {
    */
   public String toString()
   {
-    return "FileInput[" + getPath() + "]";
+    return "PopenInput[" + _process + "]";
+  }
+
+  public void close()
+  {
+    pclose();
+  }
+
+  public int pclose() 
+  {
+    super.close();
+
+    try {
+      return _process.waitFor();
+    } catch (Exception e) {
+      return -1;
+    } finally {
+      _env.removeClose(this);
+    }
   }
 }
 

@@ -70,7 +70,6 @@ import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.FileStatus;
 
 /**
  * Information and actions for about files
@@ -94,8 +93,12 @@ public class FileModule extends AbstractQuercusModule {
   public static final int UPLOAD_ERR_NO_FILE = 4;
 
   public static final int FILE_USE_INCLUDE_PATH = 1;
-  public static final int FILE_APPEND = 2;
-  public static final int LOCK_EX = 4;
+  public static final int FILE_APPEND = 8;
+
+  public static final int LOCK_SH = 1;
+  public static final int LOCK_EX = 2;
+  public static final int LOCK_UN = 3;
+  public static final int LOCK_NB = 4;
 
   public static final int FNM_PATHNAME = 1;
   public static final int FNM_NOESCAPE = 2;
@@ -801,22 +804,7 @@ public class FileModule extends AbstractQuercusModule {
       return BooleanValue.FALSE;
     }
 
-    // XXX: stubbed (faked)
-
-    int perms = 0;
-
-    if (path.isDirectory()) {
-      perms += 01000;
-      perms += 0111;
-    }
-
-    if (path.canRead())
-      perms += 0444;
-
-    if (path.canWrite())
-      perms += 0222;
-
-    return new LongValue(perms);
+    return new LongValue(path.getMode());
   }
 
   /**
@@ -846,16 +834,24 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static Value filetype(Env env, Path path)
   {
-    // XXX: incomplete
-
     if (! path.exists()) {
       env.warning(L.l("{0} cannot be read", path.getFullPath()));
       return BooleanValue.FALSE;
     }
     else if (path.isDirectory())
       return new StringValueImpl("dir");
-    else
+    else if (path.isFile())
       return new StringValueImpl("file");
+    else if (path.isFIFO())
+      return new StringValueImpl("fifo");
+    else if (path.isLink())
+      return new StringValueImpl("link");
+    else if (path.isBlockDevice())
+      return new StringValueImpl("block");
+    else if (path.isCharacterDevice())
+      return new StringValueImpl("char");
+    else
+      return new StringValueImpl("unknown");
   }
 
   /**
@@ -927,49 +923,59 @@ public class FileModule extends AbstractQuercusModule {
   {
     // php/1634
 
+    BinaryStream s = null;
+
     try {
       boolean useIncludePath = (flags & FILE_USE_INCLUDE_PATH) != 0;
       String mode = (flags & FILE_APPEND) != 0 ? "a" : "w";
 
-      // XXX: LOCK_EX
-
-      if ((flags & LOCK_EX) != 0)
-	throw new UnsupportedOperationException("LOCK_EX");
-      
-      BinaryStream s = fopen(env, filename, mode, useIncludePath, context);
+      s = fopen(env, filename, mode, useIncludePath, context);
 
       if (! (s instanceof BinaryOutput))
-	return BooleanValue.FALSE;
+        return BooleanValue.FALSE;
+
+      if ((flags & LOCK_EX) != 0) {
+        if (s instanceof LockableStream) {
+          if (! flock(env, (LockableStream) s, LOCK_EX, null))
+            return BooleanValue.FALSE;
+        } else {
+          return BooleanValue.FALSE;
+        }
+      }
 
       BinaryOutput os = (BinaryOutput) s;
 
       try {
-	long dataWritten = 0;
+        long dataWritten = 0;
 
-	if (data instanceof ArrayValue) {
-	  for (Value item : ((ArrayValue) data).values()) {
-	    InputStream is = item.toInputStream();
-	    
-	    dataWritten += os.write(is, Integer.MAX_VALUE);
+        if (data instanceof ArrayValue) {
+          for (Value item : ((ArrayValue) data).values()) {
+            InputStream is = item.toInputStream();
 
-	    is.close();
-	  }
-	}
-	else {
-	  InputStream is = data.toInputStream();
-	  
-	  dataWritten += os.write(is, Integer.MAX_VALUE);
+            dataWritten += os.write(is, Integer.MAX_VALUE);
 
-	  is.close();
-	}
+            is.close();
+          }
+        }
+        else {
+          InputStream is = data.toInputStream();
 
-	return new LongValue(dataWritten);
+          dataWritten += os.write(is, Integer.MAX_VALUE);
+
+          is.close();
+        }
+
+        return new LongValue(dataWritten);
       } finally {
-	os.close();
+        os.close();
       }
     } catch (IOException e) {
       throw new QuercusModuleException(e);
-    }
+    } finally {
+      if (s != null && (s instanceof LockableStream) && 
+          ((flags & LOCK_EX) != 0))
+        flock(env, (LockableStream) s, LOCK_UN, null);
+    } 
   }
 
   /**
@@ -980,18 +986,40 @@ public class FileModule extends AbstractQuercusModule {
    * @param wouldBlock the resource context
    */
   public static boolean flock(Env env,
-                              Value fileV,
+                              LockableStream fileV,
                               int operation,
                               @Optional Value wouldBlock)
   {
-    // XXX: stubbed,  also wouldblock is a ref
+    // XXX: also wouldblock is a ref
 
-    if (fileV == null || fileV.isNull()) {
+    if (fileV == null) {
       env.warning(L.l("{0} is null", "handle"));
       return false;
     }
 
-    return true;
+    boolean shared = false;
+    boolean block = false;
+
+    if (operation > LOCK_NB) {
+      block = true;
+      operation -= LOCK_NB;
+    }
+
+    switch (operation) {
+      case LOCK_SH:
+        shared = true;
+        break;
+      case LOCK_EX:
+        shared = false;
+        break;
+      case LOCK_UN:
+        return fileV.unlock();
+      default:
+        // This is PHP's behavior... 
+        return true;
+    }
+
+    return fileV.lock(shared, block);
   }
 
 
@@ -1767,10 +1795,7 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static boolean is_link(Env env, Path path)
   {
-    // XXX: check win behaviour
-    env.warning(L.l("is_link is not supported"));
-
-    return false;
+    return path.isLink();
   }
 
   /**
@@ -1818,19 +1843,32 @@ public class FileModule extends AbstractQuercusModule {
    */
   public boolean link(Env env, Path source, Path destination)
   {
-    // XXX: check win behaviour
-    env.warning(L.l("link is not supported"));
+    try {
+      return destination.createLink(source, true);
+    } catch (Exception e) {
+      env.warning(e);
 
-    return false;
+      return false;
+    }
   }
 
-  // XXX: linkinfo
+  public static long linkinfo(Env env, Path path)
+  {
+    // XXX: Hack to trigger lstat() in JNI code
+    if (path.isLink())
+      return path.getDevice();
+    else
+      return 0;
+  }
 
   /**
    * Returns file statistics
    */
   public static Value lstat(Env env, Path path)
   {
+    // XXX: Hack to trigger lstat() in JNI code
+    path.isLink();
+
     return stat(env, path);
   }
 
@@ -2076,9 +2114,53 @@ public class FileModule extends AbstractQuercusModule {
     return value;
   }
 
-  // XXX: pclose
-  // XXX: popen
+  public static int pclose(Env env, @NotNull BinaryStream stream)
+  {
+    if (stream instanceof PopenInput)
+      return ((PopenInput) stream).pclose();
+    else if (stream instanceof PopenOutput)
+      return ((PopenOutput) stream).pclose();
+    else {
+      env.warning(L.l("{0} was not returned by popen()", stream));
 
+      return -1;
+    }
+  }
+
+  @ReturnNullAsFalse 
+  public static BinaryStream popen(Env env, 
+                                   @NotNull String command, 
+                                   @NotNull StringValue mode)
+  {
+    boolean doRead = false;
+
+    if (mode.toString().equalsIgnoreCase("r"))
+      doRead = true;
+    else if (mode.toString().equalsIgnoreCase("w"))
+      doRead = false;
+    else
+      return null;
+
+    String []args = new String[3];
+
+    try {
+      args[0] = "sh";
+      args[1] = "-c";
+      args[2] = command;
+
+      Process process = Runtime.getRuntime().exec(args);
+
+      if (doRead)
+        return new PopenInput(env, process);
+      else
+        return new PopenOutput(env, process);
+    } catch (Exception e) {
+      env.warning(e.getMessage(), e);
+
+      return null;
+    }
+  }
+  
   /**
    * Reads the next entry
    *
@@ -2275,47 +2357,39 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static Value stat(Env env, Path path)
   {
-    FileStatus status = path.getStatus();
-
-    if (status == null) {
-      env.warning(L.l("stat failed for {0}", path.toString()));
-
-      return BooleanValue.FALSE;
-    }
-
     ArrayValue result = new ArrayValueImpl();
 
-    result.put(status.getDev());
-    result.put(status.getIno());
-    result.put(status.getMode());
-    result.put(status.getNlink());
-    result.put(status.getUid());
-    result.put(status.getGid());
-    result.put(status.getRdev());
-    result.put(status.getSize());
+    result.put(path.getDevice());
+    result.put(path.getInode());
+    result.put(path.getMode());
+    result.put(path.getNumberOfLinks());
+    result.put(path.getUser());
+    result.put(path.getGroup());
+    result.put(path.getDeviceId());
+    result.put(path.getLength());
 
-    result.put(status.getAtime());
-    result.put(status.getMtime());
-    result.put(status.getCtime());
-    result.put(status.getBlksize());
-    result.put(status.getBlocks());
+    result.put(path.getLastAccessTime() / 1000L);
+    result.put(path.getLastModified() / 1000L);
+    result.put(path.getLastStatusChangeTime() / 1000L);
+    result.put(path.getBlockSize());
+    result.put(path.getBlockCount());
 
-    result.put("dev", status.getDev());
-    result.put("ino", status.getIno());
+    result.put("dev", path.getDevice());
+    result.put("ino", path.getInode());
     
-    result.put("mode", status.getMode());
-    result.put("nlink", status.getNlink());
-    result.put("uid", status.getUid());
-    result.put("gid", status.getGid());
-    result.put("rdev", status.getRdev());
+    result.put("mode", path.getMode());
+    result.put("nlink", path.getNumberOfLinks());
+    result.put("uid", path.getUser());
+    result.put("gid", path.getGroup());
+    result.put("rdev", path.getDeviceId());
     
-    result.put("size", status.getSize());
+    result.put("size", path.getLength());
 
-    result.put("atime", status.getAtime());
-    result.put("mtime", status.getMtime());
-    result.put("ctime", status.getCtime());
-    result.put("blksize", status.getBlksize());
-    result.put("blocks", status.getBlocks());
+    result.put("atime", path.getLastAccessTime() / 1000L);
+    result.put("mtime", path.getLastModified() / 1000L);
+    result.put("ctime", path.getLastStatusChangeTime() / 1000L);
+    result.put("blksize", path.getBlockSize());
+    result.put("blocks", path.getBlockCount());
 
     return result;
   }
@@ -2325,10 +2399,13 @@ public class FileModule extends AbstractQuercusModule {
    */
   public boolean symlink(Env env, Path source, Path destination)
   {
-    // XXX: check win behaviour
-    env.warning(L.l("symlink is not supported"));
+    try {
+      return destination.createLink(source, false);
+    } catch (Exception e) {
+      env.warning(e);
 
-    return false;
+      return false;
+    }
   }
 
   /**
@@ -2344,8 +2421,6 @@ public class FileModule extends AbstractQuercusModule {
     }
 
     try {
-      // XXX: remove on exit
-
       Path path = dir.createTempFile(prefix, ".tmp");
       return new StringValueImpl(path.getTail());
     } catch (IOException e) {
@@ -2359,19 +2434,18 @@ public class FileModule extends AbstractQuercusModule {
    * Creates a temporary file.
    */
   @ReturnNullAsFalse
-  public static FileOutput tmpfile(Env env)
+  public static FileInputOutput tmpfile(Env env)
   {
     try {
-      // XXX: remove on exit
       // XXX: location of tmp files s/b configurable
 
-      Path tmp = env.getPwd().lookup("/tmp");
+      Path tmp = env.getPwd().lookup("file:/tmp");
 
       tmp.mkdirs();
 
       Path file = tmp.createTempFile("resin", "tmp");
 
-      return new FileOutput(env, file);
+      return new FileInputOutput(env, file, false, false, true);
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
 
@@ -2440,6 +2514,11 @@ public class FileModule extends AbstractQuercusModule {
   }
 
   static {
+    _constMap.put("LOCK_SH", LongValue.create(LOCK_SH));
+    _constMap.put("LOCK_EX", LongValue.create(LOCK_EX));
+    _constMap.put("LOCK_UN", LongValue.create(LOCK_UN));
+    _constMap.put("LOCK_NB", LongValue.create(LOCK_NB));
+
     _constMap.put("FNM_PATHNAME", LongValue.create(FNM_PATHNAME));
     _constMap.put("FNM_NOESCAPE", LongValue.create(FNM_NOESCAPE));
     _constMap.put("FNM_PERIOD", LongValue.create(FNM_PERIOD));

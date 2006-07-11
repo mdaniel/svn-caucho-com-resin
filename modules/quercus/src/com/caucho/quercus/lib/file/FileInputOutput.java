@@ -32,6 +32,7 @@ package com.caucho.quercus.lib.file;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import java.io.File;
 import java.io.OutputStream;
 import java.io.InputStream;
 import java.io.IOException;
@@ -39,8 +40,13 @@ import java.io.Closeable;
 import java.io.Reader;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
+import java.io.RandomAccessFile;
+
+import java.nio.channels.FileLock;
+import java.nio.channels.FileChannel;
 
 import com.caucho.vfs.Path;
+import com.caucho.vfs.FilePath;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.RandomAccessStream;
@@ -69,16 +75,29 @@ public class FileInputOutput extends AbstractBinaryOutput
   private RandomAccessStream _stream;
   private int _buffer;
   private boolean _doUnread = false;
+
   private Reader _readEncoding;
   private String _readEncodingName;
+
+  private FileLock _fileLock;
+  private FileChannel _fileChannel;
+
+  private boolean _temporary;
 
   public FileInputOutput(Env env, Path path)
     throws IOException
   {
-    this(env, path, false, false);
+    this(env, path, false, false, false);
   }
 
   public FileInputOutput(Env env, Path path, boolean append, boolean truncate)
+    throws IOException
+  {
+    this(env, path, append, truncate, false);
+  }
+
+  public FileInputOutput(Env env, Path path, 
+                         boolean append, boolean truncate, boolean temporary)
     throws IOException
   {
     _env = env;
@@ -94,6 +113,8 @@ public class FileInputOutput extends AbstractBinaryOutput
 
     if (append && _stream.getLength() > 0)
       _stream.seek(_stream.getLength());
+
+    _temporary = temporary;
   }
 
   /**
@@ -363,6 +384,9 @@ public class FileInputOutput extends AbstractBinaryOutput
   {
     try {
       _stream.close();
+
+      if (_temporary)
+        _path.remove();
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
     }
@@ -399,6 +423,52 @@ public class FileInputOutput extends AbstractBinaryOutput
     throws IOException
   {
     return new FileInputOutput(_env, _path);
+  }
+
+  /**
+   * Lock the shared advisory lock.
+   */
+  public boolean lock(boolean shared, boolean block)
+  {
+    if (! (getPath() instanceof FilePath))
+      return false;
+
+    try {
+      File file = ((FilePath) getPath()).getFile();
+
+      if (_fileChannel == null) {
+        RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
+
+        _fileChannel = randomAccessFile.getChannel();
+      }
+
+      if (block)
+        _fileLock = _fileChannel.lock(0, Long.MAX_VALUE, shared);
+      else 
+        _fileLock = _fileChannel.tryLock(0, Long.MAX_VALUE, shared);
+
+      return _fileLock != null;
+    } catch (IOException e) {
+      return false;
+    }
+  }
+
+  /**
+   * Unlock the advisory lock.
+   */
+  public boolean unlock()
+  {
+    try {
+      if (_fileLock != null) {
+        _fileLock.release();
+
+        return true;
+      }
+
+      return false;
+    } catch (IOException e) {
+      return false;
+    }
   }
 
   /**
