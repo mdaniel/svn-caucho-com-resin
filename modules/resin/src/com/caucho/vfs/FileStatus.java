@@ -30,6 +30,15 @@
 package com.caucho.vfs;
 
 public class FileStatus {
+  private static long S_IFMT = 00170000;
+  private static long S_IFSOCK = 0140000;
+  private static long S_IFLNK	= 0120000;
+  private static long S_IFREG = 0100000;
+  private static long S_IFBLK = 0060000;
+  private static long S_IFDIR = 0040000;
+  private static long S_IFCHR = 0020000;
+  private static long S_IFIFO = 0010000;
+
   private long st_dev;
   private long st_ino;
   private int st_mode;
@@ -44,52 +53,43 @@ public class FileStatus {
   private long st_mtime;
   private long st_ctime;
 
-  public FileStatus(Path path)
+  private boolean isRegularFile;
+  private boolean isDirectory;
+  private boolean isCharacterDevice;
+  private boolean isBlockDevice;
+  private boolean isFIFO;
+  private boolean isLink;
+  private boolean isSocket;
+
+  public FileStatus(long st_dev, long st_ino, int st_mode, int st_nlink,
+                    int st_uid, int st_gid, long st_rdev, long st_size, 
+                    long st_blksize, long st_blocks, 
+                    long st_atime, long st_mtime, long st_ctime,
+                    boolean isRegularFile, boolean isDirectory,
+                    boolean isCharacterDevice, boolean isBlockDevice,
+                    boolean isFIFO, boolean isLink, boolean isSocket)
   {
-    st_dev = 0;
-    st_ino = 0;
-    st_mode = 0;
+    this.st_dev = st_dev;
+    this.st_ino = st_ino;
+    this.st_mode = st_mode;
+    this.st_nlink = st_nlink;
+    this.st_uid = st_uid;
+    this.st_gid = st_gid;
+    this.st_rdev = st_rdev;
+    this.st_size = st_size;
+    this.st_blksize = st_blksize;
+    this.st_blocks = st_blocks;
+    this.st_atime = st_atime;
+    this.st_mtime = st_mtime;
+    this.st_ctime = st_ctime;
 
-    if (path.isDirectory())
-      st_mode |= 0040111; // S_IFDIR
-    else
-      st_mode |= 0100000; // S_IFREG
-    
-    if (path.canRead())
-      st_mode |= 0444;
-    if (path.canWrite())
-      st_mode |= 0220;
-    if (path.canExecute())
-      st_mode |= 0110;
-
-    st_nlink = 1;
-    st_uid = 501;
-    st_gid = 501;
-    st_rdev = 0;
-    st_size = path.getLength();
-    st_blksize = 4096;
-    st_blocks = (path.getLength() + 4095) / 4096;
-
-    st_atime = st_mtime = st_ctime = path.getLastModified() / 1000;
-  }
-
-  public FileStatus(long dev, long ino, int mode, int nlink,
-                    int uid, int gid, long rdev, long size, long blksize,
-                    long blocks, long atime, long mtime, long ctime)
-  {
-    st_dev = dev;
-    st_ino = ino;
-    st_mode = mode;
-    st_nlink = nlink;
-    st_uid = uid;
-    st_gid = gid;
-    st_rdev = rdev;
-    st_size = size;
-    st_blksize = blksize;
-    st_blocks = blocks;
-    st_atime = atime;
-    st_mtime = mtime;
-    st_ctime = ctime;
+    this.isRegularFile = isRegularFile;
+    this.isDirectory = isDirectory;
+    this.isCharacterDevice = isCharacterDevice;
+    this.isBlockDevice = isBlockDevice;
+    this.isFIFO = isFIFO;
+    this.isLink = isLink;
+    this.isSocket = isSocket;
   }
 
   public long getDev()
@@ -155,5 +155,40 @@ public class FileStatus {
   public long getCtime()
   {
     return st_ctime;
+  }
+
+  public boolean isRegularFile() 
+  {
+    return isRegularFile;
+  }
+
+  public boolean isDirectory() 
+  {
+    return isDirectory;
+  }
+
+  public boolean isCharacterDevice() 
+  {
+    return isCharacterDevice;
+  }
+
+  public boolean isBlockDevice() 
+  {
+    return isBlockDevice;
+  }
+
+  public boolean isFIFO() 
+  {
+    return isFIFO;
+  }
+
+  public boolean isLink() 
+  {
+    return isLink;
+  }
+
+  public boolean isSocket() 
+  {
+    return isSocket;
   }
 }

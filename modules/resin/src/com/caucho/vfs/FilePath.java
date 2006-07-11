@@ -233,17 +233,30 @@ public class FilePath extends FilesystemPath {
     return cb.close();
   }
 
-  public FileStatus getStatus()
-  {
-    return new FileStatus(this);
-  }
-
   public boolean exists()
   {
     if (_separatorChar == '\\' && isAux())
       return false;
     else
       return getFile().exists();
+  }
+
+  public int getMode()
+  {
+    int perms = 0;
+    
+    if (isDirectory()) {
+      perms += 01000;
+      perms += 0111;
+    }
+
+    if (canRead())
+      perms += 0444;
+
+    if (canWrite())
+      perms += 0222;
+
+    return perms;
   }
 
   public boolean isDirectory()

@@ -628,7 +628,7 @@ public abstract class PathWrapper extends Path {
     getWrappedPath().setObject(obj);
   }
 
-  public int getInode()
+  public long getInode()
   {
     return getWrappedPath().getInode();
   }

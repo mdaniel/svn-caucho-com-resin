@@ -393,11 +393,6 @@ public abstract class Path {
     return getPath();
   }
 
-  public FileStatus getStatus()
-  {
-    return null;
-  }
-
   /**
    * Tests if the file exists.
    */
@@ -427,6 +422,46 @@ public abstract class Path {
    * Tests if the path refers to a file.
    */
   public boolean isFile()
+  {
+    return false;
+  }
+
+  /**
+   * Tests if the path refers to a symbolic link.
+   */ 
+  public boolean isLink()
+  {
+    return false;
+  }
+
+  /**
+   * Tests if the path refers to a socket.
+   */
+  public boolean isSocket()
+  {
+    return false;
+  }
+
+  /**
+   * Tests if the path refers to a FIFO.
+   */
+  public boolean isFIFO()
+  {
+    return false;
+  }
+
+  /**
+   * Tests if the path refers to a block device.
+   */
+  public boolean isBlockDevice()
+  {
+    return false;
+  }
+
+  /**
+   * Tests if the path refers to a block device.
+   */
+  public boolean isCharacterDevice()
   {
     return false;
   }
@@ -532,12 +567,86 @@ public abstract class Path {
     return false;
   }
 
-  public int getInode()
+  //
+  // POSIX stat() related calls
+  //
+  
+  /**
+   * Returns equivalent of struct stat.st_dev if appropriate.
+   */
+  public long getDevice()
   {
     return 0;
   }
 
+  /**
+   * Returns equivalent of struct stat.st_ino if appropriate.
+   */
+  public long getInode()
+  {
+    return 0;
+  }
+
+  /**
+   * Returns equivalent of struct stat.st_mode if appropriate.
+   */
+  public int getMode()
+  {
+    return 0;
+  }
+
+  /**
+   * Returns equivalent of struct stat.st_nlink if appropriate.
+   */
+  public int getNumberOfLinks()
+  {
+    return 0;
+  }
+
+  /**
+   * Returns equivalent of struct stat.st_uid if appropriate.
+   */
+  public int getUser()
+  {
+    return 0;
+  }
+
+  /**
+   * Returns equivalent of struct stat.st_gid if appropriate.
+   */
   public int getGroup()
+  {
+    return 0;
+  }
+
+  /**
+   * Returns equivalent of struct stat.st_rdev if appropriate.
+   */
+  public long getDeviceId()
+  {
+    return 0;
+  }
+
+  /**
+   * Returns equivalent of struct stat.st_blksize if appropriate.
+   */
+  public long getBlockSize()
+  {
+    return 0;
+  }
+
+  /**
+   * Returns equivalent of struct stat.st_blocks if appropriate.
+   */
+  public long getBlockCount()
+  {
+    return 0;
+  }
+
+  /**
+   * Returns equivalent of struct stat.st_ctime if appropriate.
+   */
+  public long getLastStatusChangeTime()
   {
     return 0;
   }
@@ -921,6 +1030,18 @@ public abstract class Path {
     }
 
     throw new IOException("cannot create temp file");
+  }
+
+  /**
+   * Creates a link named by this path to another path.
+   *
+   * @param target the target of the link
+   * @param hardLink true if the link should be a hard link
+   */
+  public boolean createLink(Path target, boolean hardLink)
+    throws IOException
+  {
+    throw new UnsupportedOperationException(getScheme() + ": doesn't support createLink");
   }
 
   /**
