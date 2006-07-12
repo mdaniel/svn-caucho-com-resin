@@ -28,10 +28,14 @@
 
 package com.caucho.amber;
 
-import java.util.List;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Represents an Amber query
@@ -41,7 +45,7 @@ public interface AmberQuery {
    * Initialize with the connection.
    */
   public void init(com.caucho.amber.manager.AmberConnection aConn);
-  
+
   /**
    * Returns the query string.
    */
@@ -123,13 +127,13 @@ public interface AmberQuery {
    * Sets the cache max age.
    */
   public void setCacheMaxAge(long ms);
-  
+
   /**
    * Execute the query, returning a single value
    */
   public Object getSingleResult()
     throws SQLException;
-  
+
   /**
    * Execute the query, returning a list.
    */
@@ -141,6 +145,15 @@ public interface AmberQuery {
    */
   public void list(List<Object> list)
     throws SQLException;
+
+  /**
+   * Execute the query, filling a map.
+   */
+  public void list(Map<Object, Object> map,
+                   Method methodGetMapKey)
+    throws SQLException,
+           IllegalAccessException,
+           InvocationTargetException;
 
   /**
    * Sets the load on query.

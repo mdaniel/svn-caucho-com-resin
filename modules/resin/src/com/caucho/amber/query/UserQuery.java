@@ -29,12 +29,16 @@
 
 package com.caucho.amber.query;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import com.caucho.jdbc.JdbcMetaData;
 
@@ -86,7 +90,7 @@ public class UserQuery implements AmberQuery {
 
     _argLength = argList.length;
   }
-  
+
   /**
    * Returns the query string.
    */
@@ -99,7 +103,7 @@ public class UserQuery implements AmberQuery {
   {
     setSession(aConn);
   }
-  
+
   public void setSession(AmberConnection aConn)
   {
     _aConn = aConn;
@@ -286,10 +290,10 @@ public class UserQuery implements AmberQuery {
     throws SQLException
   {
     _aConn.flush();
-    
+
     if (_rs == null)
       _rs = new ResultSetImpl();
-    
+
     SelectQuery query = (SelectQuery) _query;
 
     _rs.setQuery(query);
@@ -313,7 +317,7 @@ public class UserQuery implements AmberQuery {
 
     if (isCacheable) {
       int row = 0;
-      
+
       cacheChunk = _aConn.getQueryCacheChunk(query.getSQL(), _argValues, row);
 
       _rs.setCacheChunk(cacheChunk);
@@ -327,19 +331,19 @@ public class UserQuery implements AmberQuery {
       _rs.setResultSet(rs);
 
       if (isCacheable) {
-	cacheChunk = new ResultSetCacheChunk();
-	cacheChunk.setQuery(query);
+        cacheChunk = new ResultSetCacheChunk();
+        cacheChunk.setQuery(query);
 
-	_rs.fillCacheChunk(cacheChunk);
-	
-	_rs.setCacheChunk(cacheChunk);
-	
-	_aConn.putQueryCacheChunk(query.getSQL(), _argValues, 0, cacheChunk);
+        _rs.fillCacheChunk(cacheChunk);
+
+        _rs.setCacheChunk(cacheChunk);
+
+        _aConn.putQueryCacheChunk(query.getSQL(), _argValues, 0, cacheChunk);
       }
     }
-    
+
     _rs.init();
-    
+
     return _rs;
   }
 
@@ -356,10 +360,10 @@ public class UserQuery implements AmberQuery {
 
       sql = metaData.limit(sql, maxResults);
     }
-    
+
     PreparedStatement pstmt = _aConn.prepareStatement(sql);
     ArgExpr []args = _query.getArgList();
-    
+
     if (args.length > 0)
       pstmt.clearParameters();
 
@@ -383,7 +387,7 @@ public class UserQuery implements AmberQuery {
   {
     _aConn.flush();
     // XXX: sync
-    
+
     PreparedStatement pstmt;
 
     pstmt = _aConn.prepareStatement(_query.getSQL());
@@ -391,11 +395,11 @@ public class UserQuery implements AmberQuery {
 
     for (int i = 0; i < _argLength; i++) {
       if (_argValues[i] != null)
-	_argTypes[i].setParameter(pstmt, i + 1, _argValues[i]);
+        _argTypes[i].setParameter(pstmt, i + 1, _argValues[i]);
     }
 
     _query.prepare(this, _aConn);
-    
+
     int count = pstmt.executeUpdate();
 
     if (count != 0)
@@ -438,7 +442,7 @@ public class UserQuery implements AmberQuery {
     try {
       rs = executeQuery();
       if (rs.next())
-	return rs.getObject(1);
+        return rs.getObject(1);
 
       return null;
     } catch (SQLException e) {
@@ -449,7 +453,7 @@ public class UserQuery implements AmberQuery {
       _aConn.popDepth();
 
       if (rs != null)
-	rs.close();
+        rs.close();
     }
   }
 
@@ -465,24 +469,24 @@ public class UserQuery implements AmberQuery {
     _aConn.pushDepth();
     try {
       rs = executeQuery();
-      
+
       int tupleCount = query.getResultCount();
 
       while (rs.next()) {
-	if (tupleCount == 1) {
-	  Object value = rs.getObject(1);
+        if (tupleCount == 1) {
+          Object value = rs.getObject(1);
 
-	  list.add(value);
-	}
-	else {
-	  Object []values = new Object[tupleCount];
+          list.add(value);
+        }
+        else {
+          Object []values = new Object[tupleCount];
 
-	  for (int i = 0; i < tupleCount; i++) {
-	    values[i] = rs.getObject(i + 1);
-	  }
+          for (int i = 0; i < tupleCount; i++) {
+            values[i] = rs.getObject(i + 1);
+          }
 
-	  list.add(values);
-	}
+          list.add(values);
+        }
       }
     } catch (SQLException e) {
       throw e;
@@ -490,7 +494,63 @@ public class UserQuery implements AmberQuery {
       _aConn.popDepth();
 
       if (rs != null)
-	rs.close();
+        rs.close();
+    }
+  }
+
+  /**
+   * Executes the query, filling the map.
+   */
+  public void list(Map<Object,Object> map,
+                   Method methodGetMapKey)
+    throws SQLException,
+           IllegalAccessException,
+           InvocationTargetException
+  {
+    SelectQuery query = (SelectQuery) _query;
+
+    ResultSet rs = null;
+
+    _aConn.pushDepth();
+    try {
+      rs = executeQuery();
+
+      int tupleCount = query.getResultCount();
+
+      while (rs.next()) {
+        if (tupleCount == 1) {
+          Object value = rs.getObject(1);
+
+          com.caucho.amber.entity.Entity entity;
+          entity = (com.caucho.amber.entity.Entity) value;
+
+          Object mapKey;
+          if (methodGetMapKey == null)
+            mapKey = entity.__caucho_getPrimaryKey();
+          else
+            mapKey = methodGetMapKey.invoke(entity, null);
+
+          map.put(mapKey, value);
+        }
+        else {
+          Object []values = new Object[tupleCount];
+
+          for (int i = 0; i < tupleCount; i++) {
+            values[i] = rs.getObject(i + 1);
+          }
+
+          // XXX: for now, assume 1st column is the key.
+          Object mapKey = values[0];
+          map.put(mapKey, values);
+        }
+      }
+    } catch (SQLException e) {
+      throw e;
+    } finally {
+      _aConn.popDepth();
+
+      if (rs != null)
+        rs.close();
     }
   }
 

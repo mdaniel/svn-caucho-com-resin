@@ -19,7 +19,6 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -29,9 +28,12 @@
 
 package com.caucho.amber.collection;
 
-import java.util.AbstractSet;
-import java.util.Iterator;
-import java.util.ArrayList;
+import java.lang.reflect.Method;
+
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import java.sql.SQLException;
 
@@ -47,18 +49,23 @@ import com.caucho.amber.query.UserQuery;
 /**
  * Represents a lazy collection.
  */
-public class SetImpl<E> extends AbstractSet<E>
+public class MapImpl<K, V> extends AbstractMap<K, V>
   implements AmberCollection {
   private AmberQuery _query;
 
   private AmberConnection _aConn;
 
-  private ArrayList<E> _values = new ArrayList<E>();
+  private HashMap<K, V> _values = new HashMap<K, V>();
   private long _expireTime;
 
-  public SetImpl(AmberConnection aConn, String query)
+  private Method _methodGetMapKey;
+
+  public MapImpl(AmberConnection aConn,
+                 String query,
+                 Method methodGetMapKey)
   {
     _aConn = aConn;
+    _methodGetMapKey = methodGetMapKey;
 
     try {
       _query = _aConn.prepareQuery(query);
@@ -67,20 +74,13 @@ public class SetImpl<E> extends AbstractSet<E>
     }
   }
 
-  public SetImpl(AmberQuery query)
+  public MapImpl(AmberQuery query,
+                 Method methodGetMapKey)
   {
     _query = query;
+    _methodGetMapKey = methodGetMapKey;
 
     setSession(((UserQuery) _query).getConnection());
-  }
-
-  /**
-   * Sets the session.
-   */
-  public void setSession(com.caucho.amber.AmberConnection aConn)
-  {
-    throw new UnsupportedOperationException();
-    // setSession(((UserAmberConnection) aConn).getManagedConnection());
   }
 
   /**
@@ -112,23 +112,33 @@ public class SetImpl<E> extends AbstractSet<E>
   }
 
   /**
-   * Returns an iterator of the items.
+   * Returns a set view of the mappings contained in this map.
    */
-  public Iterator iterator()
+  public Set<Map.Entry<K, V>> entrySet()
   {
     fill();
 
-    return new ValuesIterator(_values);
+    return _values.entrySet();
   }
 
   /**
    * Returns an iterator of the items.
    */
-  public E get(int index)
+  public V get(Object key)
   {
     fill();
 
-    return _values.get(index);
+    return _values.get(key);
+  }
+
+  /**
+   * Returns a set view of the keys contained in this map.
+   */
+  public Set<K> keySet()
+  {
+    fill();
+
+    return _values.keySet();
   }
 
   /**
@@ -163,37 +173,9 @@ public class SetImpl<E> extends AbstractSet<E>
 
       ((UserQuery) _query).setSession(_aConn);
       _values.clear();
-      _query.list((ArrayList) _values);
-    } catch (SQLException e) {
+      _query.list((HashMap) _values, _methodGetMapKey);
+    } catch (Exception e) {
       throw new AmberRuntimeException(e);
-    }
-  }
-
-  class ValuesIterator implements Iterator {
-    private ArrayList<E> _values;
-    private int i = 0;
-
-    ValuesIterator(ArrayList<E> values)
-    {
-      _values = new ArrayList<E>(values);
-    }
-
-    public boolean hasNext()
-    {
-      return i < _values.size();
-    }
-
-    public Object next()
-    {
-      if (i < _values.size())
-        return _values.get(i++);
-      else
-        return null;
-    }
-
-    public void remove()
-    {
-      SetImpl.this.remove(_values.get(i - 1));
     }
   }
 }

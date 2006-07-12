@@ -62,7 +62,7 @@ import com.caucho.amber.field.AmberField;
 public class QueryParser {
   static final Logger log = Log.open(QueryParser.class);
   static final L10N L = new L10N(QueryParser.class);
-  
+
   final static int IDENTIFIER = 128;
   final static int INTEGER = IDENTIFIER + 1;
   final static int LONG = INTEGER + 1;
@@ -75,7 +75,7 @@ public class QueryParser {
   final static int OF = MEMBER + 1;
   final static int EMPTY = OF + 1;
   final static int NULL = EMPTY + 1;
-  
+
   final static int FROM = NULL + 1;
   final static int IN = FROM + 1;
   final static int SELECT = IN + 1;
@@ -92,36 +92,36 @@ public class QueryParser {
   final static int DESC = ASC + 1;
   final static int LIMIT = DESC + 1;
   final static int OFFSET = LIMIT + 1;
-  
+
   final static int BETWEEN = OFFSET + 1;
   final static int LIKE = BETWEEN + 1;
   final static int ESCAPE = LIKE + 1;
   final static int IS = ESCAPE + 1;
-  
+
   final static int CONCAT = IS + 1;
-  
+
   final static int EQ = CONCAT + 1;
   final static int NE = EQ + 1;
   final static int LT = NE + 1;
   final static int LE = LT + 1;
   final static int GT = LE + 1;
   final static int GE = GT + 1;
-  
+
   final static int AND = GE + 1;
   final static int OR = AND + 1;
   final static int NOT = OR + 1;
 
   final static int EXTERNAL_DOT = NOT + 1;
-  
+
   final static int ARG = EXTERNAL_DOT + 1;
   final static int THIS = ARG + 1;
-  
+
   final static int NOT_NULL = THIS + 1;
 
   private static IntMap _reserved;
 
   private AmberPersistenceUnit _amberPersistenceUnit;
-  
+
   // The query
   private String _sql;
 
@@ -136,14 +136,14 @@ public class QueryParser {
 
   // True if entities should be lazily loaded
   private boolean _isLazyResult;
-  
+
   // The select query
   private AbstractQuery _query;
-  
+
   // list of relations
   private HashMap<PathExpr,PathExpr> _pathMap
     = new HashMap<PathExpr,PathExpr>();
-  
+
   // parse index
   private int _parseIndex;
   // current token
@@ -216,7 +216,7 @@ public class QueryParser {
   {
     return _sqlArgCount++;
   }
-  
+
   /**
    * Parses the query.
    */
@@ -224,12 +224,12 @@ public class QueryParser {
     throws AmberException
   {
     /*
-    _query = query;
-    _fromList = new ArrayList<FromItem>();
-    _pathMap = new HashMap<Expr,Expr>();
-    _idMap = new HashMap<String,PathExpr>();
-    _argList = new ArrayList<Expr>();
-    _linkList = new ArrayList<LinkItem>();
+      _query = query;
+      _fromList = new ArrayList<FromItem>();
+      _pathMap = new HashMap<Expr,Expr>();
+      _idMap = new HashMap<String,PathExpr>();
+      _argList = new ArrayList<Expr>();
+      _linkList = new ArrayList<LinkItem>();
     */
 
     init();
@@ -257,7 +257,7 @@ public class QueryParser {
     int token;
     while ((token = scanToken()) >= 0 && token != FROM) {
     }
-    
+
     if (token != FROM)
       throw error(L.l("expected FROM at {0}", tokenName(token)));
 
@@ -268,7 +268,7 @@ public class QueryParser {
 
       FromItem from = parseFrom();
     } while ((token = peekToken()) == ',');
-    
+
     int fromParseIndex = _parseIndex;
     int fromToken = _token;
 
@@ -281,24 +281,24 @@ public class QueryParser {
       scanToken();
 
       if (peekToken() == DISTINCT) {
-	scanToken();
-	query.setDistinct(true);
+        scanToken();
+        query.setDistinct(true);
       }
 
       do {
-	AmberExpr expr = parseExpr();
-	expr = expr.bindSelect(this);
+        AmberExpr expr = parseExpr();
+        expr = expr.bindSelect(this);
 
-	if (_isLazyResult) {
-	}
-	else if (expr instanceof PathExpr) {
-	  PathExpr pathExpr = (PathExpr) expr;
-	  
-	  expr = new LoadEntityExpr(pathExpr);
-	  expr = expr.bindSelect(this);
-	}
+        if (_isLazyResult) {
+        }
+        else if (expr instanceof PathExpr) {
+          PathExpr pathExpr = (PathExpr) expr;
 
-	resultList.add(expr);
+          expr = new LoadEntityExpr(pathExpr);
+          expr = expr.bindSelect(this);
+        }
+
+        resultList.add(expr);
       } while ((token = scanToken()) == ',');
 
       _token = token;
@@ -306,25 +306,25 @@ public class QueryParser {
 
     if (peekToken() != FROM)
       throw error(L.l("expected FROM at {0}", tokenName(token)));
-    
+
     if (resultList.size() == 0) {
       ArrayList<FromItem> fromList = _query.getFromList();
-      
+
       if (fromList.size() > 0) {
-	FromItem fromItem = fromList.get(0);
+        FromItem fromItem = fromList.get(0);
 
-	AmberExpr expr = fromItem.getIdExpr();
+        AmberExpr expr = fromItem.getIdExpr();
 
-	if (_isLazyResult) {
-	}
-	else if (expr instanceof PathExpr) {
-	  PathExpr pathExpr = (PathExpr) expr;
-	  
-	  expr = new LoadEntityExpr(pathExpr);
-	  expr = expr.bindSelect(this);
-	}
+        if (_isLazyResult) {
+        }
+        else if (expr instanceof PathExpr) {
+          PathExpr pathExpr = (PathExpr) expr;
 
-	resultList.add(expr);
+          expr = new LoadEntityExpr(pathExpr);
+          expr = expr.bindSelect(this);
+        }
+
+        resultList.add(expr);
       }
     }
 
@@ -334,10 +334,10 @@ public class QueryParser {
     _token = fromToken;
 
     token = peekToken();
-    
+
     if (token == WHERE) {
       scanToken();
-      
+
       query.setWhere(parseExpr().createBoolean().bindSelect(this));
     }
 
@@ -346,32 +346,32 @@ public class QueryParser {
       scanToken();
 
       if (peekToken() == BY)
-	scanToken();
+        scanToken();
 
       ArrayList<AmberExpr> orderList = new ArrayList<AmberExpr>();
       ArrayList<Boolean> ascList = new ArrayList<Boolean>();
 
       while (true) {
-	AmberExpr expr = parseExpr();
-	expr = expr.bindSelect(this);
-	
-	orderList.add(expr);
+        AmberExpr expr = parseExpr();
+        expr = expr.bindSelect(this);
 
-	if (peekToken() == DESC) {
-	  scanToken();
-	  ascList.add(Boolean.FALSE);
-	}
-	else if (peekToken() == ASC) {
-	  scanToken();
-	  ascList.add(Boolean.TRUE);
-	}
-	else
-	  ascList.add(Boolean.TRUE);
-	
-	if (peekToken() == ',')
-	  scanToken();
-	else
-	  break;
+        orderList.add(expr);
+
+        if (peekToken() == DESC) {
+          scanToken();
+          ascList.add(Boolean.FALSE);
+        }
+        else if (peekToken() == ASC) {
+          scanToken();
+          ascList.add(Boolean.TRUE);
+        }
+        else
+          ascList.add(Boolean.TRUE);
+
+        if (peekToken() == ',')
+          scanToken();
+        else
+          break;
       }
 
       query.setOrderList(orderList, ascList);
@@ -380,19 +380,19 @@ public class QueryParser {
     token = peekToken();
     if (token == GROUP) {
       scanToken();
-      
+
       if (peekToken() == BY)
-	scanToken();
+        scanToken();
 
       ArrayList<AmberExpr> groupList = new ArrayList<AmberExpr>();
 
       while (true) {
-	groupList.add(parseExpr());
+        groupList.add(parseExpr());
 
-	if (peekToken() == ',')
-	  scanToken();
-	else
-	  break;
+        if (peekToken() == ',')
+          scanToken();
+        else
+          break;
       }
 
       query.setGroupList(groupList);
@@ -403,7 +403,7 @@ public class QueryParser {
       throw error(L.l("expected end of query at {0}", tokenName(token)));
 
     query.setArgList(_argList.toArray(new ArgExpr[_argList.size()]));
-    
+
     try {
       query.init();
     } catch (SQLException e) {
@@ -436,7 +436,7 @@ public class QueryParser {
     token = scanToken();
     if (token == WHERE) {
       query.setWhere(parseExpr().createBoolean().bindSelect(this));
-      
+
       token = scanToken();
     }
 
@@ -446,7 +446,7 @@ public class QueryParser {
     query.init();
 
     query.setArgList(_argList.toArray(new ArgExpr[_argList.size()]));
-    
+
     return query;
   }
 
@@ -459,7 +459,7 @@ public class QueryParser {
     int token = peekToken();
     if (token == FROM)
       scanToken();
-    
+
     FromItem fromItem = parseFrom();
 
     token = scanToken();
@@ -469,7 +469,7 @@ public class QueryParser {
       where = where.bindSelect(this);
 
       query.setWhere(where);
-      
+
       token = scanToken();
     }
 
@@ -477,9 +477,9 @@ public class QueryParser {
       throw error(L.l("'{0}' not expected at end of query.", tokenName(token)));
 
     query.init();
-    
+
     query.setArgList(_argList.toArray(new ArgExpr[_argList.size()]));
-    
+
     return query;
   }
 
@@ -487,26 +487,26 @@ public class QueryParser {
    * Parses the set values.
    */
   private void parseSetValues(FromItem fromItem,
-			      ArrayList<AmberField> fields,
-			      ArrayList<AmberExpr> values)
+                              ArrayList<AmberField> fields,
+                              ArrayList<AmberExpr> values)
     throws QueryParseException
   {
     EntityType entity = fromItem.getEntityType();
-    
+
     int token;
-    
+
     do {
       String fieldName = parseIdentifier();
 
       AmberField field = entity.getField(fieldName);
 
       if (field == null)
-	throw error(L.l("'{0}' is an unknown field in entity {1}.",
-			fieldName, entity.getName()));
+        throw error(L.l("'{0}' is an unknown field in entity {1}.",
+                        fieldName, entity.getName()));
 
       token = scanToken();
       if (token != EQ)
-	throw error(L.l("expected '=' at {0}", tokenName(token)));
+        throw error(L.l("expected '=' at {0}", tokenName(token)));
 
       AmberExpr expr = parseExpr();
 
@@ -531,7 +531,7 @@ public class QueryParser {
     SchemaExpr schema = parseSchema();
 
     String id;
-    
+
     int token = peekToken();
     if (token == AS) {
       scanToken();
@@ -545,11 +545,11 @@ public class QueryParser {
     }
 
     /*
-    AmberEntityHome home = _amberPersistenceUnitenceUnitenceUnit.getHomeBySchema(schema);
+      AmberEntityHome home = _amberPersistenceUnitenceUnitenceUnit.getHomeBySchema(schema);
 
-    if (home == null)
+      if (home == null)
       throw error(L.l("`{0}' is an unknown persistent class.",
-		      schema));
+      schema));
     */
 
     return schema.addFromItem(this, id);
@@ -630,11 +630,11 @@ public class QueryParser {
   {
     int token = peekToken();
     boolean isIn = token == IN;
-    
+
     if (isIn) {
       scanToken();
       if ((token = scanToken()) != '(')
-	throw error(L.l("expected '(' at '{0}'", tokenName(token)));
+        throw error(L.l("expected '(' at '{0}'", tokenName(token)));
     }
 
     String name = parseIdentifier();
@@ -645,10 +645,10 @@ public class QueryParser {
       AmberEntityHome home = _amberPersistenceUnit.getHomeBySchema(name);
 
       if (home != null) {
-	EntityType type = home.getEntityType();
-	
-	schema = new TableIdExpr(home.getEntityType(),
-				 type.getTable().getName());
+        EntityType type = home.getEntityType();
+
+        schema = new TableIdExpr(home.getEntityType(),
+                                 type.getTable().getName());
       }
     }
 
@@ -656,28 +656,28 @@ public class QueryParser {
       IdExpr id = getIdentifier(name);
 
       if (id != null)
-	schema = new FromIdSchemaExpr(id);
+        schema = new FromIdSchemaExpr(id);
     }
 
     if (! isIn && schema == null) {
       while (peekToken() == '.') {
-	scanToken();
-	String segment = parseIdentifier();
+        scanToken();
+        String segment = parseIdentifier();
 
-	name = name + '.' + segment;
-	
-	AmberEntityHome home = _amberPersistenceUnit.getHomeBySchema(name);
+        name = name + '.' + segment;
 
-	if (home != null) {
-	  schema = new TableIdExpr(home.getEntityType(), name);
-	  break;
-	}
+        AmberEntityHome home = _amberPersistenceUnit.getHomeBySchema(name);
+
+        if (home != null) {
+          schema = new TableIdExpr(home.getEntityType(), name);
+          break;
+        }
       }
     }
 
     if (schema == null) {
       throw error(L.l("'{0}' is an unknown entity.",
-		      name));
+                      name));
     }
 
     while (peekToken() == '.') {
@@ -689,7 +689,7 @@ public class QueryParser {
 
     if (isIn) {
       if ((token = scanToken()) != ')')
-	throw error(L.l("expected ')' at '{0}'", tokenName(token)));
+        throw error(L.l("expected ')' at '{0}'", tokenName(token)));
     }
 
     return schema;
@@ -706,7 +706,7 @@ public class QueryParser {
 
       return new SubSelectExpr(select);
     }
-    
+
     AmberExpr expr = parseOrExpr();
 
     return expr; // .bindSelect(this);
@@ -720,13 +720,13 @@ public class QueryParser {
   {
     AmberExpr expr = parseAndExpr();
     OrExpr orExpr = null;
-    
+
     while (peekToken() == OR) {
       scanToken();
-      
+
       if (orExpr == null) {
-	orExpr = new OrExpr();
-	orExpr.add(expr);
+        orExpr = new OrExpr();
+        orExpr.add(expr);
       }
 
       orExpr.add(parseAndExpr());
@@ -743,13 +743,13 @@ public class QueryParser {
   {
     AmberExpr expr = parseNotExpr();
     AndExpr andExpr = null;
-    
+
     while (peekToken() == AND) {
       scanToken();
-      
+
       if (andExpr == null) {
-	andExpr = new AndExpr();
-	andExpr.add(expr);
+        andExpr = new AndExpr();
+        andExpr.add(expr);
       }
 
       andExpr.add(parseNotExpr());
@@ -757,7 +757,7 @@ public class QueryParser {
 
     return andExpr == null ? expr : andExpr;
   }
-  
+
   /**
    * Parses a NOT expression.
    *
@@ -772,9 +772,9 @@ public class QueryParser {
     }
     else
       return parseCmpExpr();
-    
+
   }
-  
+
   /**
    * Parses a comparison expression.
    *
@@ -792,19 +792,19 @@ public class QueryParser {
     throws QueryParseException
   {
     AmberExpr expr = parseConcatExpr();
-    
+
     int token = peekToken();
     boolean isNot = false;
-    
+
     if (token == NOT) {
       scanToken();
       isNot = true;
       token = peekToken();
 
       if (token != BETWEEN && token != LIKE && token != IN)
-	throw error(L.l("'NOT' is not expected here."));
+        throw error(L.l("'NOT' is not expected here."));
     }
-    
+
     if (token >= EQ && token <= GE) {
       scanToken();
 
@@ -812,7 +812,7 @@ public class QueryParser {
     }
     else if (token == BETWEEN) {
       scanToken();
-      
+
       AmberExpr min = parseConcatExpr();
 
       if ((token = scanToken()) != AND)
@@ -826,11 +826,11 @@ public class QueryParser {
       scanToken();
 
       AmberExpr pattern = parseConcatExpr();
-      
+
       String escape = null;
       if (peekToken() == ESCAPE) {
         scanToken();
-        
+
         if ((token = scanToken()) != STRING)
           throw error(L.l("Expected string at {0}", tokenName(token)));
 
@@ -868,7 +868,7 @@ public class QueryParser {
     }
     else if (token == MEMBER) {
       scanToken();
-      
+
       token = peekToken();
       if (token == OF)
         token = scanToken();
@@ -876,21 +876,21 @@ public class QueryParser {
       AmberExpr collection = parseExpr();
 
       if (! (expr instanceof PathExpr))
-	throw error(L.l("MEMBER OF requires an entity-valued item."));
-      
+        throw error(L.l("MEMBER OF requires an entity-valued item."));
+
       if (collection instanceof OneToManyExpr) {
       }
       else if (collection instanceof CollectionIdExpr) {
       }
       else {
-	throw error(L.l("MEMBER OF requires an entity-valued collection at '{0}'.",
-			collection.getClass().getName()));
+        throw error(L.l("MEMBER OF requires an entity-valued collection at '{0}'.",
+                        collection.getClass().getName()));
       }
-        
+
       return parseIs(MemberExpr.create(this,
-				       (PathExpr) expr,
-				       collection,
-				       isNot));
+                                       (PathExpr) expr,
+                                       collection,
+                                       isNot));
     }
     else
       return parseIs(expr);
@@ -900,7 +900,7 @@ public class QueryParser {
     throws QueryParseException
   {
     int token = peekToken();
-    
+
     if (token != IS)
       return expr;
 
@@ -916,15 +916,15 @@ public class QueryParser {
 
     if (token == NULL) {
       if (isNot)
-	return new UnaryExpr(NOT_NULL, expr);
+        return new UnaryExpr(NOT_NULL, expr);
       else
-	return new UnaryExpr(NULL, expr);
+        return new UnaryExpr(NULL, expr);
     }
     else if (token == EMPTY) {
       expr = new EmptyExpr(expr);
 
       if (! isNot)
-	expr = new UnaryExpr(NOT, expr);
+        expr = new UnaryExpr(NOT, expr);
 
       return expr;
     }
@@ -945,11 +945,11 @@ public class QueryParser {
 
       switch (token) {
       case CONCAT:
-	scanToken();
-	expr = new ConcatExpr(expr, parseAddExpr());
-	break;
+        scanToken();
+        expr = new ConcatExpr(expr, parseAddExpr());
+        break;
       default:
-	return expr;
+        return expr;
       }
     }
   }
@@ -968,11 +968,11 @@ public class QueryParser {
       switch (token) {
       case '+':
       case '-':
-	scanToken();
-	expr = new BinaryExpr(token, expr, parseMulExpr());
-	break;
+        scanToken();
+        expr = new BinaryExpr(token, expr, parseMulExpr());
+        break;
       default:
-	return expr;
+        return expr;
       }
     }
   }
@@ -987,15 +987,15 @@ public class QueryParser {
 
     while (true) {
       int token = peekToken();
-      
+
       switch (token) {
       case '*':
       case '/':
-	scanToken();
-	expr = new BinaryExpr(token, expr, parseTerm());
-	break;
+        scanToken();
+        expr = new BinaryExpr(token, expr, parseTerm());
+        break;
       default:
-	return expr;
+        return expr;
       }
     }
   }
@@ -1013,7 +1013,7 @@ public class QueryParser {
     throws QueryParseException
   {
     int token = peekToken();
-    
+
     switch (token) {
     case '+':
     case '-':
@@ -1021,7 +1021,7 @@ public class QueryParser {
       scanToken();
 
       return new UnaryExpr(token, parseTerm());
-      
+
     default:
       return parseSimpleTerm();
     }
@@ -1048,48 +1048,48 @@ public class QueryParser {
       String name = _lexeme.toString();
 
       if (peekToken() != '(') {
-	IdExpr tableExpr = getIdentifier(name);
+        IdExpr tableExpr = getIdentifier(name);
 
-	if (tableExpr != null)
-	  return parsePath(tableExpr);
+        if (tableExpr != null)
+          return parsePath(tableExpr);
 
-	FromItem fromItem = _query.getFromList().get(0);
+        FromItem fromItem = _query.getFromList().get(0);
 
-	tableExpr = fromItem.getIdExpr();
-	
-	AmberExpr next = tableExpr.createField(this, name);
+        tableExpr = fromItem.getIdExpr();
 
-	if (next instanceof PathExpr)
-	  return addPath((PathExpr) next);
-	else if (next != null)
-	  return next;
-	
-	throw error(L.l("'{0}' is an unknown table or column", name));
+        AmberExpr next = tableExpr.createField(this, name);
+
+        if (next instanceof PathExpr)
+          return addPath((PathExpr) next);
+        else if (next != null)
+          return next;
+
+        throw error(L.l("'{0}' is an unknown table or column", name));
       }
       else if (name.equalsIgnoreCase("exists")) {
-	scanToken();
+        scanToken();
 
-	if (peekToken() != SELECT && peekToken() != FROM)
-	  throw error(L.l("EXISTS requires '(SELECT'"));
-	
-	SelectQuery select = parseSelect();
+        if (peekToken() != SELECT && peekToken() != FROM)
+          throw error(L.l("EXISTS requires '(SELECT'"));
 
-	if (peekToken() != ')')
-	  throw error(L.l("EXISTS requires ')'"));
+        SelectQuery select = parseSelect();
 
-	scanToken();
+        if (peekToken() != ')')
+          throw error(L.l("EXISTS requires ')'"));
 
-	return new ExistsExpr(select);
+        scanToken();
+
+        return new ExistsExpr(select);
       }
       else
         return parseFunction(name);
 
     case FALSE:
       return new LiteralExpr(_lexeme, boolean.class);
-      
+
     case TRUE:
       return new LiteralExpr(_lexeme, boolean.class);
-      
+
     case NULL:
       return new NullExpr();
 
@@ -1106,26 +1106,26 @@ public class QueryParser {
       return new LiteralExpr(_lexeme, String.class);
 
     case ARG:
-    {
-      ArgExpr arg = new ArgExpr(this, Integer.parseInt(_lexeme));
-      /*
-      if (_addArgToQuery)
-        addArg(arg);
-      */
-      return arg;
-    }
+      {
+        ArgExpr arg = new ArgExpr(this, Integer.parseInt(_lexeme));
+        /*
+          if (_addArgToQuery)
+          addArg(arg);
+        */
+        return arg;
+      }
 
       /*
-    case THIS:
-    {
-      if (_thisExpr == null) {
+        case THIS:
+        {
+        if (_thisExpr == null) {
         _thisExpr = new IdExpr(this, "caucho_this", _bean);
         addFromItem("caucho_this", _bean.getSQLTable());
         _argList.add(0, new ThisExpr(this, _bean));
-      }
+        }
 
-      return _thisExpr;
-    }
+        return _thisExpr;
+        }
       */
 
     case '(':
@@ -1134,7 +1134,7 @@ public class QueryParser {
         throw error(L.l("expected `)' at {0}", tokenName(token)));
 
       return expr;
-        
+
 
     default:
       throw error(L.l("expected term at {0}", tokenName(token)));
@@ -1160,36 +1160,36 @@ public class QueryParser {
       AmberExpr next = path.createField(this, field);
 
       if (next == null)
-	throw error(L.l("'{0}' does not have a field '{1}'",
-			path, field));
+        throw error(L.l("'{0}' does not have a field '{1}'",
+                        path, field));
 
       if (! (next instanceof PathExpr))
-	return next;
+        return next;
 
       PathExpr nextPath = addPath((PathExpr) next);
 
       if (peekToken() == '[') {
-	scanToken();
+        scanToken();
 
-	AmberExpr index = parseExpr();
+        AmberExpr index = parseExpr();
 
-	next = nextPath.createArray(index);
+        next = nextPath.createArray(index);
 
-	if (next == null)
-	  throw error(L.l("'{0}' does not have a map field '{1}'",
-			  path, field));
+        if (next == null)
+          throw error(L.l("'{0}' does not have a map field '{1}'",
+                          path, field));
 
-	if (peekToken() != ']') {
-	  throw error(L.l("expected ']' at '{0}'", tokenName(peekToken())));
-	}
+        if (peekToken() != ']') {
+          throw error(L.l("expected ']' at '{0}'", tokenName(peekToken())));
+        }
 
-	scanToken();
+        scanToken();
       }
 
       if (next instanceof PathExpr)
-	path = addPath((PathExpr) next);
+        path = addPath((PathExpr) next);
       else
-	return next;
+        return next;
     }
 
     return path;
@@ -1206,16 +1206,16 @@ public class QueryParser {
     throws QueryParseException
   {
     scanToken();
-    
+
     ArrayList<AmberExpr> args = new ArrayList<AmberExpr>();
-    
+
     while (peekToken() != ')') {
       AmberExpr arg = parseExpr();
 
       args.add(arg);
 
       if (peekToken() != ',')
-	break;
+        break;
 
       scanToken();
     }
@@ -1238,12 +1238,12 @@ public class QueryParser {
 
     for (; query != null; query = query.getParentQuery()) {
       ArrayList<FromItem> fromList = query.getFromList();
-      
-      for (int i = 0; i < fromList.size(); i++) {
-	FromItem from = fromList.get(i);
 
-	if (from.getName().equals(name))
-	  return from.getIdExpr();
+      for (int i = 0; i < fromList.size(); i++) {
+        FromItem from = fromList.get(i);
+
+        if (from.getName().equals(name))
+          return from.getIdExpr();
       }
     }
 
@@ -1251,7 +1251,7 @@ public class QueryParser {
 
     // throw error(L.l("`{0}' is an unknown table", name));
   }
-  
+
   /**
    * Parses an identifier.
    */
@@ -1259,7 +1259,7 @@ public class QueryParser {
     throws QueryParseException
   {
     int token = scanToken();
-    
+
     if (token != IDENTIFIER)
       throw error(L.l("expected identifier at `{0}'", tokenName(token)));
 
@@ -1281,7 +1281,7 @@ public class QueryParser {
 
     return _token;
   }
-  
+
   /**
    * Scan the next token.  If the lexeme is a string, its string
    * representation is in "lexeme".
@@ -1316,7 +1316,7 @@ public class QueryParser {
     case '[':
     case ']':
       return ch;
-      
+
     case '=':
       if ((ch = read()) == '>')
         return EXTERNAL_DOT;
@@ -1324,7 +1324,7 @@ public class QueryParser {
         unread(ch);
         return EQ;
       }
-      
+
     case '!':
       if ((ch = read()) == '=')
         return NE;
@@ -1363,19 +1363,19 @@ public class QueryParser {
       _lexeme = cb.close();
 
       if (_lexeme.length() == 0) {
-	_lexeme = String.valueOf(++_parameterCount);
+        _lexeme = String.valueOf(++_parameterCount);
       }
       else if (index <= 0)
         throw error(L.l("`{0}' must refer to a positive argument",
                         "?" + _lexeme));
-      
+
       return ARG;
-      
+
     case '|':
       if ((ch = read()) == '|')
         return CONCAT;
       else
-	throw error(L.l("unexpected char at {0}", String.valueOf((char) ch)));
+        throw error(L.l("unexpected char at {0}", String.valueOf((char) ch)));
 
       // @@ is useless?
     case '@':
@@ -1400,13 +1400,13 @@ public class QueryParser {
       if (token > 0)
         return token;
       else
-        return IDENTIFIER; 
+        return IDENTIFIER;
     }
     else if (ch >= '0' && ch <= '9') {
       CharBuffer cb = CharBuffer.allocate();
 
       int type = INTEGER;
-      
+
       if (sign < 0)
         cb.append('-');
 
@@ -1415,7 +1415,7 @@ public class QueryParser {
 
       if (ch == '.') {
         type = DOUBLE;
-        
+
         cb.append('.');
         for (ch = read(); ch >= '0' && ch <= '9'; ch = read())
           cb.append((char) ch);
@@ -1429,11 +1429,11 @@ public class QueryParser {
           cb.append((char) ch);
           ch = read();
         }
-        
+
         if (! (ch >= '0' && ch <= '9'))
           throw error(L.l("exponent needs digits at {0}",
                           charName(ch)));
-          
+
         for (; ch >= '0' && ch <= '9'; ch = read())
           cb.append((char) ch);
       }
@@ -1516,7 +1516,7 @@ public class QueryParser {
     else
       return String.valueOf((char) ch);
   }
-  
+
   /**
    * Returns the name of a token
    */
@@ -1543,12 +1543,12 @@ public class QueryParser {
     case ASC: return "ASC";
     case DESC: return "DESC";
     case LIMIT: return "LIMIT";
-      
+
     case EXTERNAL_DOT: return "=>";
 
     case -1:
       return L.l("end of query");
-      
+
     default:
       if (token < 128)
         return "'" + String.valueOf((char) token) + "'";
@@ -1583,16 +1583,16 @@ public class QueryParser {
     _reserved.put("desc", DESC);
     _reserved.put("limit", LIMIT);
     _reserved.put("offset", OFFSET);
-    
+
     _reserved.put("or", OR);
     _reserved.put("and", AND);
     _reserved.put("not", NOT);
-    
+
     _reserved.put("between", BETWEEN);
     _reserved.put("like", LIKE);
     _reserved.put("escape", ESCAPE);
     _reserved.put("is", IS);
-    
+
     _reserved.put("this", THIS);
     _reserved.put("true", TRUE);
     _reserved.put("false", FALSE);
@@ -1603,4 +1603,3 @@ public class QueryParser {
     _reserved.put("null", NULL);
   }
 }
-

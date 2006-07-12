@@ -32,6 +32,7 @@ package com.caucho.amber.field;
 import java.io.IOException;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Set;
 
 import java.util.logging.Logger;
@@ -68,6 +69,8 @@ public class EntityOneToManyField extends CollectionField {
   private static final L10N L = new L10N(EntityOneToManyField.class);
   protected static final Logger log = Log.open(EntityOneToManyField.class);
 
+  private String _mapKey;
+
   private ArrayList<String> _orderByFields;
   private ArrayList<Boolean> _orderByAscending;
 
@@ -88,7 +91,7 @@ public class EntityOneToManyField extends CollectionField {
    * Sets the order by.
    */
   public void setOrderBy(ArrayList<String> orderByFields,
-			 ArrayList<Boolean> orderByAscending)
+                         ArrayList<Boolean> orderByAscending)
   {
     _orderByFields = orderByFields;
     _orderByAscending = orderByAscending;
@@ -135,6 +138,22 @@ public class EntityOneToManyField extends CollectionField {
   }
 
   /**
+   * Gets the map key.
+   */
+  public String getMapKey()
+  {
+    return _mapKey;
+  }
+
+  /**
+   * Sets the map key.
+   */
+  public void setMapKey(String mapKey)
+  {
+    _mapKey = mapKey;
+  }
+
+  /**
    * Initialize.
    */
   public void init()
@@ -155,7 +174,7 @@ public class EntityOneToManyField extends CollectionField {
    * Generates the set clause.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String obj, String index)
+                          String obj, String index)
     throws IOException
   {
   }
@@ -172,8 +191,8 @@ public class EntityOneToManyField extends CollectionField {
    * Updates from the cached copy.
    */
   public void generateCopyLoadObject(JavaWriter out,
-				       String dst, String src,
-				       int loadIndex)
+                                     String dst, String src,
+                                     int loadIndex)
     throws IOException
   {
   }
@@ -186,16 +205,16 @@ public class EntityOneToManyField extends CollectionField {
     CharBuffer cb = CharBuffer.allocate();
 
     Id key = getEntityTargetType().getId();
-    
+
     cb.append(key.generateSelect(id));
 
     String value = getEntityTargetType().generateLoadSelect(id);
 
     if (cb.length() > 0 && value.length() > 0)
       cb.append(", ");
-    
+
     cb.append(value);
-    
+
     return cb.close();
   }
 
@@ -206,8 +225,12 @@ public class EntityOneToManyField extends CollectionField {
     throws IOException
   {
     String var = "_caucho_" + getGetterName();
-    
+
     boolean isSet = getJavaType().isAssignableTo(Set.class);
+    boolean isMap = false;
+    if (!isSet) {
+      isMap = getJavaType().isAssignableTo(Map.class);
+    }
 
     JType type = getJavaType();
     JType []paramArgs = type.getActualTypeArguments();
@@ -215,14 +238,23 @@ public class EntityOneToManyField extends CollectionField {
 
     if (isSet)
       out.print("private com.caucho.amber.collection.SetImpl");
+    else if (isMap)
+      out.print("private com.caucho.amber.collection.MapImpl");
     else
       out.print("private com.caucho.amber.collection.CollectionImpl");
 
-    if (param != null)
-      out.print("<" + param.getPrintName() + ">");
-    
+    if (param != null) {
+      out.print("<");
+      out.print(param.getPrintName());
+      if (isMap) {
+        out.print(", ");
+        out.print(paramArgs[1].getPrintName());
+      }
+      out.print(">");
+    }
+
     out.println(" " + var + ";");
-    
+
     out.println();
     out.println("public " + getJavaTypeName() + " " + getGetterName() + "()");
     out.println("{");
@@ -243,25 +275,25 @@ public class EntityOneToManyField extends CollectionField {
 
     out.println("try {");
     out.pushDepth();
-    
+
     out.print("String sql=\"");
-    
+
     out.print("SELECT c");
     out.print(" FROM " + getSourceType().getName() + " o,");
     out.print("      o." + getName() + " c");
     out.print(" WHERE ");
     out.print(getSourceType().getId().generateRawWhere("o"));
-    
+
     if (_orderByFields != null) {
       out.print(" ORDER BY ");
 
       for (int i = 0; i < _orderByFields.size(); i++) {
-	if (i != 0)
-	  out.print(", ");
-	
-	out.print("c." + _orderByFields.get(i));
-	if (Boolean.FALSE.equals(_orderByAscending.get(i)))
-	  out.print(" DESC");
+        if (i != 0)
+          out.print(", ");
+
+        out.print("c." + _orderByFields.get(i));
+        if (Boolean.FALSE.equals(_orderByAscending.get(i)))
+          out.print(" DESC");
       }
     }
 
@@ -274,33 +306,55 @@ public class EntityOneToManyField extends CollectionField {
 
     if (isSet)
       out.print(var + " = new com.caucho.amber.collection.SetImpl");
+    else if (isMap)
+      out.print(var + " = new com.caucho.amber.collection.MapImpl");
     else
       out.print(var + " = new com.caucho.amber.collection.CollectionImpl");
 
-    if (param != null)
-      out.print("<" + param.getPrintName() + ">");
+    if (param != null) {
+      out.print("<");
+      out.print(param.getPrintName());
+      if (isMap) {
+        out.print(", ");
+        out.print(paramArgs[1].getPrintName());
+      }
+      out.print(">");
+    }
 
-    out.println("(query);");
+    out.print("(query");
+    if (isMap) {
+      out.println(",");
+      out.pushDepth();
+      out.print(paramArgs[1].getPrintName());
+      out.print(".class.getDeclaredMethod(\"get");
+      String getterMapKey = getMapKey();
+      getterMapKey = Character.toUpperCase(getterMapKey.charAt(0)) + getterMapKey.substring(1);
+      out.print(getterMapKey); // "getId");
+      out.print("\", null)");
+      out.popDepth();
+    }
+    out.println(");");
+
     /*
-    out.pushDepth();
+      out.pushDepth();
 
-    //generateAdd(out);
-    //generateRemove(out);
-    //generateClear(out);
-    // generateSize(out);
-    
-    out.popDepth();
-    out.println("};");
+      //generateAdd(out);
+      //generateRemove(out);
+      //generateClear(out);
+      // generateSize(out);
+
+      out.popDepth();
+      out.println("};");
     */
-    
+
     out.println();
     out.println("return " + var + ";");
-    
+
     out.popDepth();
     out.println("} catch (Exception e) {");
     out.println("  throw com.caucho.amber.AmberRuntimeException.create(e);");
     out.println("}");
-    
+
     out.popDepth();
     out.println("}");
   }
@@ -320,15 +374,15 @@ public class EntityOneToManyField extends CollectionField {
 
     out.println("try {");
     out.pushDepth();
-    
+
     out.println("__caucho_session.flush();");
-    
+
     out.print("String sql=\"");
-    
+
     out.print("SELECT count(*) FROM ");
     out.print(getSourceType().getName());
     out.print(" AS o ");
-    
+
     out.print(" WHERE ");
 
     // getKeyColumn().generateRawMatchArgWhere("o");
@@ -336,12 +390,12 @@ public class EntityOneToManyField extends CollectionField {
     ArrayList<IdField> keys = getSourceType().getId().getKeys();
     for (int i = 0; i < keys.size(); i++) {
       if (i != 0)
-	out.print(" AND ");
-      
+        out.print(" AND ");
+
       out.print("o." + keys.get(i).getName());
       out.print("=?");
     }
-    
+
     out.println("\";");
     out.println("com.caucho.amber.AmberQuery query;");
     out.println("query = __caucho_session.prepareQuery(sql);");
@@ -355,7 +409,7 @@ public class EntityOneToManyField extends CollectionField {
     out.println("  return rs.getInt(1);");
     out.println("else");
     out.println("  return 0;");
-    
+
     out.popDepth();
     out.println("} catch (java.sql.SQLException e) {");
     out.println("  throw com.caucho.amber.AmberRuntimeException.create(e);");
@@ -364,7 +418,7 @@ public class EntityOneToManyField extends CollectionField {
     out.popDepth();
     out.println("}");
   }
-  
+
   /**
    * Generates the set property.
    */
@@ -377,7 +431,7 @@ public class EntityOneToManyField extends CollectionField {
       return;
 
     JClass []paramTypes = setter.getParameterTypes();
-    
+
     out.println();
     out.print("public void " + setter.getName() + "(");
     out.print(getJavaTypeName() + " value)");
@@ -385,8 +439,8 @@ public class EntityOneToManyField extends CollectionField {
     out.pushDepth();
     out.popDepth();
     out.println("}");
-  }    
-  
+  }
+
   /**
    * Generates code for foreign entity create/delete
    */
@@ -394,12 +448,12 @@ public class EntityOneToManyField extends CollectionField {
     throws IOException
   {
     Table table = getLinkColumns().getSourceTable();
-    
+
     out.println("if (\"" + table.getName() + "\".equals(table)) {");
     out.pushDepth();
 
     String var = "_caucho_" + getGetterName();
-      
+
     out.println("if (" + var + " != null)");
     out.println("  " + var + ".update();");
     out.popDepth();
@@ -415,7 +469,7 @@ public class EntityOneToManyField extends CollectionField {
     throws IOException
   {
     String var = "_caucho_" + getGetterName();
-    
+
     out.println(var + " = null;");
   }
 }

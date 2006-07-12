@@ -1745,6 +1745,10 @@ public class EntityIntrospector {
 
       oneToMany = new EntityOneToManyField(_entityType, _fieldName);
       oneToMany.setSourceField(sourceField);
+      JAnnotation mapKeyAnn = _field.getAnnotation(MapKey.class);
+      if (mapKeyAnn != null) {
+        oneToMany.setMapKey(mapKeyAnn.getString("name"));
+      }
 
       _entityType.addField(oneToMany);
     }
@@ -2017,6 +2021,7 @@ public class EntityIntrospector {
     // annotations allowed with a @OneToMany annotation
     _oneToManyAnnotations.add("javax.persistence.OneToMany");
     _oneToManyAnnotations.add("javax.persistence.JoinTable");
+    _oneToManyAnnotations.add("javax.persistence.MapKey");
 
     // types allowed with a @OneToMany annotation
     _oneToManyTypes.add("java.util.Collection");
