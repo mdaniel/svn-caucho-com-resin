@@ -334,8 +334,15 @@ public class FilePath extends FilesystemPath {
   public boolean mkdirs()
     throws IOException
   {
-    boolean value = getFile().mkdirs();
-    if (! value && ! getFile().isDirectory())
+    File file = getFile();
+    
+    boolean value;
+
+    synchronized (file) {
+      value = file.mkdirs();
+    }
+    
+    if (! value && ! file.isDirectory())
       throw new IOException("Cannot create directory: " + getFile());
 
     return value;

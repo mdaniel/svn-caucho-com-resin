@@ -204,8 +204,7 @@ public class UrlRewriterCallback extends CallbackFunction {
         }
       }
 
-      for (String tag = getNextTag(); tag != null; tag = getNextTag())
-      {
+      for (String tag = getNextTag(); tag != null; tag = getNextTag()) {
         if (tags.containsKey(tag)) {
           String attribute = tags.get(tag);
           
@@ -218,12 +217,6 @@ public class UrlRewriterCallback extends CallbackFunction {
                 " value=\"" + _sessionId + "\" />";
 
               _output.append(phpSessionInputTag );
-
-              String javaSessionInputTag = 
-                "<input type=\"hidden\" name=\"" + _javaSessionName + "\"" +
-                " value=\"" + _javaSessionId + "\" />";
-
-              _output.append(javaSessionInputTag);
             }
 
             for (String[] entry : _rewriterVars) {
@@ -303,7 +296,7 @@ public class UrlRewriterCallback extends CallbackFunction {
       consumeWhiteSpace();
 
       // Any attributes that we will affect are of the form attr=value
-      if (_index >= _input.length() || _input.charAt(_index) != '=')
+      if (_input.length() <= _index || _input.charAt(_index) != '=')
         return -1;
 
       consumeOneCharacter();
@@ -427,6 +420,7 @@ public class UrlRewriterCallback extends CallbackFunction {
       StringBuilder query = new StringBuilder();
 
       if (uri.getQuery() != null) {
+        query.append("?");
         query.append(uri.getQuery());
         query.append("&");
       } 
@@ -437,12 +431,6 @@ public class UrlRewriterCallback extends CallbackFunction {
         query.append(_sessionName);
         query.append("=");
         query.append(_sessionId);
-
-        query.append("&");
-        
-        query.append(_javaSessionName);
-        query.append("=");
-        query.append(_javaSessionId);
       }
 
       if (_rewriterQuery.length() != 0) {

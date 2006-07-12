@@ -102,8 +102,11 @@ public class JTypeWrapper implements JType {
 	args[i] = _loader.forName(((Class) type).getName());
       else if (type instanceof ParameterizedType)
 	args[i] = new JTypeWrapper(_loader, (ParameterizedType) type);
-      else
-	throw new IllegalStateException(type.toString());
+      else {
+	args[i] = _loader.forName("java.lang.Object");
+	// jpa/0gg0
+	// throw new IllegalStateException(type.toString());
+      }
     }
 
     return args;

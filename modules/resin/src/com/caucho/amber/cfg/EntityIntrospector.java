@@ -349,7 +349,9 @@ public class EntityIntrospector {
     validateConstructor(type);
 
     for (JMethod method : type.getMethods()) {
-      if (method.isFinal())
+      if (method.getDeclaringClass().getName().equals("java.lang.Object")) {
+      }
+      else if (method.isFinal())
         throw error(method, L.l("'{0}' must not be final.  Entity beans methods may not be final.",
                                 method.getFullName()));
     }
@@ -590,6 +592,9 @@ public class EntityIntrospector {
       String methodName = method.getName();
       JClass []paramTypes = method.getParameterTypes();
 
+      if (method.getDeclaringClass().getName().equals("java.lang.Object"))
+	continue;
+
       if (! methodName.startsWith("get") || paramTypes.length != 0) {
         continue;
       }
@@ -641,7 +646,7 @@ public class EntityIntrospector {
   {
     ArrayList<IdField> keys = new ArrayList<IdField>();
 
-    for (JField field : type.getDeclaredFields()) {
+    for (JField field : type.getFields()) {
       String fieldName = field.getName();
 
       if (parentType != null && parentType.getField(fieldName) != null)
@@ -684,6 +689,9 @@ public class EntityIntrospector {
   private boolean isField(JClass type)
     throws ConfigException
   {
+    if (type == null)
+      return false;
+    
     for (JField field : type.getDeclaredFields()) {
       JAnnotation id = field.getAnnotation(javax.persistence.Id.class);
 
@@ -691,7 +699,7 @@ public class EntityIntrospector {
         return true;
     }
 
-    return false;
+    return isField(type.getSuperClass());
   }
 
   private IdField introspectId(AmberPersistenceUnit persistenceUnit,
@@ -905,6 +913,9 @@ public class EntityIntrospector {
       String methodName = method.getName();
       JClass []paramTypes = method.getParameterTypes();
 
+      if (method.getDeclaringClass().getName().equals("java.lang.Object"))
+	continue;
+
       introspectCallbacks(entityType, method);
 
       String propName;
@@ -969,7 +980,7 @@ public class EntityIntrospector {
     if (entityType.getId() == null)
       throw new IllegalStateException(L.l("{0} has no key", entityType));
 
-    for (JField field : type.getDeclaredFields()) {
+    for (JField field : type.getFields()) {
       String fieldName = field.getName();
 
       if (parentType != null && parentType.getField(fieldName) != null)

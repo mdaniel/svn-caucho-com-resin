@@ -463,7 +463,9 @@ public class ArrayValueImpl extends ArrayValue {
 
     if (entry != null) {
       // php/3d48, php/39aj
-      return entry.toArg();
+      Value arg = entry.toArg();
+
+      return arg;
     }
     else {
       // php/3d49

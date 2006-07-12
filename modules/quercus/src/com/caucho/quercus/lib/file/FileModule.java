@@ -1763,8 +1763,11 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static boolean is_dir(Path path)
+  public static boolean is_dir(@NotNull Path path)
   {
+    if (path == null)
+      return false;
+    
     return path.isDirectory();
   }
 
@@ -1773,8 +1776,11 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static boolean is_executable(Path path)
+  public static boolean is_executable(@NotNull Path path)
   {
+    if (path == null)
+      return false;
+    
     return path.isExecutable();
   }
 
@@ -1783,8 +1789,11 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static boolean is_file(Path path)
+  public static boolean is_file(@NotNull Path path)
   {
+    if (path == null)
+      return false;
+    
     return path.isFile();
   }
 
@@ -1793,8 +1802,11 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static boolean is_link(Env env, Path path)
+  public static boolean is_link(Env env, @NotNull Path path)
   {
+    if (path == null)
+      return false;
+    
     return path.isLink();
   }
 
@@ -2346,7 +2358,7 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * Sets the write buffer.
    */
-  public static int set_file_buffer(StreamResource stream,
+  public static int set_file_buffer(BinaryStream stream,
                                     int bufferSize)
   {
     return StreamModule.stream_set_write_buffer(stream, bufferSize);

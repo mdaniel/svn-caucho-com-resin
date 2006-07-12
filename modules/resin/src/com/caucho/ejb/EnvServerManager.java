@@ -512,6 +512,7 @@ public class EnvServerManager implements EnvironmentListener {
    */
   public void environmentStop(EnvironmentClassLoader loader)
   {
+    // XXX: this was missing for some reason
   }
 
   /**

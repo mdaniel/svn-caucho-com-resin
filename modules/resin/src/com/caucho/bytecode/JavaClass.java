@@ -565,7 +565,32 @@ public class JavaClass extends JClass {
    */
   public JMethod []getMethods()
   {
-    return getDeclaredMethods();
+    ArrayList<JMethod> methodList = new ArrayList<JMethod>();
+
+    getMethods(methodList);
+
+    JMethod []methods = new JMethod[methodList.size()];
+    methodList.toArray(methods);
+
+    return methods;
+  }
+  
+  /**
+   * Returns the matching method
+   */
+  private void getMethods(ArrayList<JMethod> methodList)
+  {
+    for (JMethod method : getDeclaredMethods()) {
+      if (! methodList.contains(method))
+	methodList.add(method);
+    }
+
+    if (getSuperClass() != null) {
+      for (JMethod method : getSuperClass().getMethods()) {
+	if (! methodList.contains(method))
+	  methodList.add(method);
+      }
+    }
   }
   
   /**
@@ -587,7 +612,32 @@ public class JavaClass extends JClass {
    */
   public JField []getFields()
   {
-    return getDeclaredFields();
+    ArrayList<JField> fieldList = new ArrayList<JField>();
+
+    getFields(fieldList);
+
+    JField []fields = new JField[fieldList.size()];
+    fieldList.toArray(fields);
+
+    return fields;
+  }
+  
+  /**
+   * Returns all the fields
+   */
+  private void getFields(ArrayList<JField> fieldList)
+  {
+    for (JField field : getDeclaredFields()) {
+      if (! fieldList.contains(field))
+	fieldList.add(field);
+    }
+
+    if (getSuperClass() != null) {
+      for (JField field : getSuperClass().getFields()) {
+	if (! fieldList.contains(field))
+	  fieldList.add(field);
+      }
+    }
   }
 
   /**

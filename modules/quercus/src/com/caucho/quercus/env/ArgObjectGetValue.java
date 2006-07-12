@@ -85,7 +85,6 @@ public class ArgObjectGetValue extends Value {
   /*
   public Var toVar()
   {
-    System.out.println("TO_VAR:");
     // quercus/3d52
     return _obj.get(_index).toVar();
   }

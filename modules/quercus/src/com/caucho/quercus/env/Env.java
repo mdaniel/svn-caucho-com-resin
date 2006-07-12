@@ -2705,12 +2705,12 @@ public final class Env {
       QuercusClass parent = null;
 
       if (parentName != null)
-        parent = getClass(parentName);
+        parent = findClass(parentName);
 
-      if (parent == null || parent instanceof QuercusClass)
+      if (parentName == null || parent instanceof QuercusClass)
         return createQuercusClass(classDef, (QuercusClass) parent);
       else
-        throw new IllegalStateException(parent.toString());
+        return null; // php/
     }
 
     ClassDef staticClass = _quercus.findClass(name);

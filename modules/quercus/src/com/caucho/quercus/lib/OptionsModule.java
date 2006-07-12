@@ -65,6 +65,14 @@ public class OptionsModule extends AbstractQuercusModule {
   public static final int ASSERT_WARNING = 4;
   public static final int ASSERT_QUIET_EVAL = 5;
 
+  public static final int INFO_GENERAL = 1;
+  public static final int INFO_CREDITS = 2;
+  public static final int INFO_CONFIGURATION = 4;
+  public static final int INFO_MODULES = 8;
+  public static final int INFO_ENVIRONMENT = 16;
+  public static final int INFO_VARIABLES = 32;
+  public static final int INFO_LICENSE = 64;
+
   private static final HashMap<String,StringValue> _iniMap
     = new HashMap<String,StringValue>();
 
@@ -367,6 +375,33 @@ public class OptionsModule extends AbstractQuercusModule {
   public static String php_sapi_name()
   {
     return "apache";
+  }
+
+  public static void phpinfo(Env env, @Optional("-1") int what)
+  {
+    if ((what & INFO_GENERAL) != 0)
+      phpinfoGeneral(env);
+  }
+
+  private static void phpinfoGeneral(Env env)
+  {
+    env.print("<h1>Quercus</h1>");
+    env.print("<pre>");
+    env.print("PHP Version => " + phpversion("std"));
+    env.print("System => " + System.getProperty("os.name") + " "
+	      + System.getProperty("os.version") + " "
+	      + System.getProperty("os.arch"));
+    env.print("Build Date => " + Version.VERSION_DATE);
+    env.print("Configure Command => n/a");
+    env.print("Server API => CGI");
+    env.print("Virtual Directory Support => disabled");
+    env.print("Configuration File (php.ini) Path => WEB-INF/php.ini");
+    env.print("PHP API => 20031224");
+    env.print("PHP Extension => 20041030");
+    env.print("Debug Build => no");
+    env.print("Thread Safety => enabled");
+    env.print("Registered PHP Streams => php, file, http, https");
+    env.println("</pre>");
   }
 
   /**

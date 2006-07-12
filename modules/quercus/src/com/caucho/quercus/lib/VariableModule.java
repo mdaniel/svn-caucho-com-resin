@@ -37,12 +37,14 @@ import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.ReadOnly;
 import com.caucho.quercus.module.Reference;
 import com.caucho.quercus.module.UsesSymbolTable;
+import com.caucho.quercus.lib.file.*;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -249,6 +251,25 @@ public class VariableModule extends AbstractQuercusModule {
   public static String gettype(@ReadOnly Value v)
   {
     return v.getType();
+  }
+
+  public static Value get_resource_type(Value v)
+  {
+    if (! (v instanceof JavaValue))
+      return BooleanValue.FALSE;
+
+    Object obj = v.toJavaObject();
+
+    try {
+      Method m = obj.getClass().getMethod("getResourceType",
+					  new Class[0]);
+
+      if (m != null)
+	return StringValue.create(String.valueOf(m.invoke(obj)));
+    } catch (Exception e) {
+    }
+    
+    return StringValue.create("Unknown");
   }
 
   /**

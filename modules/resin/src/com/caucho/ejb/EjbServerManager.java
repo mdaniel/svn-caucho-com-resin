@@ -641,7 +641,10 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
    */
   public void removeBeans(ArrayList<QEntityContext> beans, EntityServer server)
   {
-    _envServerManager.removeBeans(beans, server);
+    EnvServerManager manager = _envServerManager;
+
+    if (manager != null)
+      manager.removeBeans(beans, server);
   }
 
   /**
@@ -675,7 +678,8 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
     _ejbModuleManagedObjectMap.clear();
 
     envServerManager = _envServerManager;
-    _envServerManager = null;
+    // ejb/0200
+    //_envServerManager = null;
 
     // ejbConfig does not need destroy
     _ejbConfig = null;

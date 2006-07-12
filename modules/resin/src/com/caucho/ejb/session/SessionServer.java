@@ -269,7 +269,7 @@ public class SessionServer extends AbstractServer {
     while (iter.hasNext()) {
       values.add(iter.next());
     }
-    
+
     _sessions = null;
     
     log.fine("closing session server " + this);

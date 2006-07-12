@@ -93,6 +93,14 @@ public class GlobalArrayValue extends ArrayValueImpl {
   {
     return _env.getGlobalRef(key.toString());
   }
+
+  /**
+   * Returns the value as an argument which may be a reference.
+   */
+  public Value getArg(Value index)
+  {
+    return getRef(index);
+  }
   
   /**
    * Copy for assignment.

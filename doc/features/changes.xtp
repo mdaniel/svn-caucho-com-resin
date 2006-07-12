@@ -4,6 +4,11 @@
 
 <s2 title='3.0.snap - July 5, 2006'>
 <ul>
+<li>Quercus: get_resource_type (#1156, rep by demian)
+<li>Quercus: update set_file_buffer to BinaryStream (#1242, rep by koreth)
+<li>Amber: resolve nullpointer in map lookup (#1149, rep by plehov)
+<li>Amber: introspection wasn't looking at parent classes (#1090, rep by Alex Cruise)
+<li>File.mkdirs needs to be synchronized (rep by Dave Winterbourne)
 <li>OpenSSL client cert not properly populating javax.servlet (#1185, rep by mattp)
 <li>Fixes for JDK 1.4 compatibility (#1201, rep by vbavin)
 <li>(2006-07-05) Quercus: performance work for includes (rep by koreth)

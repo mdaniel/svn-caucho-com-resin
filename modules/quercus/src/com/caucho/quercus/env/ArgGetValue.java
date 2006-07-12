@@ -101,7 +101,7 @@ public class ArgGetValue extends Value {
   @Override
   public Value toArgValueReadOnly()
   {
-    return toValue();
+    return _obj.get(_index);
   }
 
   /**

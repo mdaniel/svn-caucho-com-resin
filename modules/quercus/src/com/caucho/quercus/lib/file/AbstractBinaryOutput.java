@@ -166,5 +166,10 @@ abstract public class AbstractBinaryOutput
   {
     return false;
   }
+
+  public String getResourceType()
+  {
+    return "stream";
+  }
 }
 

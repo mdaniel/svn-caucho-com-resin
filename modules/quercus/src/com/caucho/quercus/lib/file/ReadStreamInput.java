@@ -305,6 +305,11 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
     return this;
   }
 
+  public String getResourceType()
+  {
+    return "stream";
+  }
+
   /**
    * Converts to a string.
    */

@@ -54,6 +54,7 @@ import com.caucho.quercus.env.ArrayValueImpl;
 
 import com.caucho.quercus.resources.StreamContextResource;
 import com.caucho.quercus.resources.StreamResource;
+import com.caucho.quercus.lib.file.*;
 
 import com.caucho.vfs.TempBuffer;
 
@@ -349,7 +350,7 @@ public class StreamModule extends AbstractQuercusModule {
   /**
    * Sets the write buffer.
    */
-  public static int stream_set_write_buffer(StreamResource stream,
+  public static int stream_set_write_buffer(BinaryStream stream,
                                             int bufferSize)
   {
     return 0;

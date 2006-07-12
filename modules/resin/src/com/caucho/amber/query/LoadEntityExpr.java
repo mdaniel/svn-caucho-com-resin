@@ -213,6 +213,9 @@ public class LoadEntityExpr extends AbstractAmberExpr {
     EntityType entityType = getEntityType();
     
     EntityItem item = entityType.getHome().findItem(aConn, rs, index);
+
+    if (item == null)
+      return null;
     
     int keyLength = entityType.getId().getKeyCount();
 
