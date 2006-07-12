@@ -236,6 +236,8 @@ public final class ClusterClient {
       return "standby";
     case ST_SESSION_ONLY:
       return "session-only";
+    case ST_STARTING:
+      return "starting";
     case ST_WARMUP:
       return "warmup";
     case ST_BUSY:
@@ -247,7 +249,7 @@ public final class ClusterClient {
     case ST_CLOSED:
       return "closed";
     default:
-      return "unknown";
+      return "unknown(" + _state + ")";
     }
   }
 
@@ -449,8 +451,9 @@ public final class ClusterClient {
   public ClusterStream openForSession()
   {
     int state = _state;
-    if (! (state <= ST_SESSION_ONLY && state < ST_CLOSED))
+    if (! (ST_SESSION_ONLY <= state && state < ST_CLOSED)) {
       return null;
+    }
 
     ClusterStream stream = openRecycle();
 
@@ -459,10 +462,13 @@ public final class ClusterClient {
 
     long now = Alarm.getCurrentTime();
 
-    if (now < _lastFailTime + _failRecoverTime)
+    if (now < _lastFailTime + _failRecoverTime) {
       return null;
-    if (now < _lastBusyTime + _failRecoverTime)
+    }
+    
+    if (now < _lastBusyTime + _failRecoverTime) {
       return null;
+    }
 
     return connect();
   }
@@ -585,9 +591,9 @@ public final class ClusterClient {
   public void wake()
   {
     synchronized (this) {
+      _lastFailTime = 0;
       if (_state == ST_FAIL) {
 	_state = ST_STARTING;
-	_lastFailTime = 0;
       }
     }
   }

@@ -388,6 +388,8 @@ public abstract class AbstractHttpRequest
 	  return port;
 	}
       }
+      
+      return isSecure() ? 443 : 80;
     }
 
     if (host == null)

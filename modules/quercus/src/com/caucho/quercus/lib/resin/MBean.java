@@ -59,12 +59,18 @@ public class MBean {
     _name = name;
   }
 
-  public String getMbeanName()
+  /**
+   * Returns the mbean's canonical name.
+   */
+  public String getMbean_name()
   {
     return _name.getCanonicalName();
   }
 
-  public MBeanInfo getInfo()
+  /**
+   * Returns the MBeanInfo for the mbean.
+   */
+  public MBeanInfo getMbean_info()
   {
     try {
       if (_info == null)
@@ -145,7 +151,7 @@ public class MBean {
   protected String []findClosestOperation(String name, String []sig)
     throws Exception
   {
-    MBeanInfo info = getInfo();
+    MBeanInfo info = getMbean_info();
 
     MBeanOperationInfo []ops = info.getOperations();
     

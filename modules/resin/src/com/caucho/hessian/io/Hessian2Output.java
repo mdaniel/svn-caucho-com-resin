@@ -122,7 +122,7 @@ public class Hessian2Output
     
     completeCall();
   }
-
+  
   /**
    * Starts the method call.  Clients would use <code>startCall</code>
    * instead of <code>call</code> if they wanted finer control over
@@ -650,10 +650,6 @@ public class Hessian2Output
     
     if (LONG_DIRECT_MIN <= value && value <= LONG_DIRECT_MAX) {
       buffer[offset++] = (byte) (value + LONG_ZERO);
-    }
-    else if (-0x80 <= value && value < 0x80) {
-      buffer[offset++] = (byte) LONG_BYTE;
-      buffer[offset++] = (byte) value;
     }
     else if (LONG_BYTE_MIN <= value && value <= LONG_BYTE_MAX) {
       buffer[offset++] = (byte) (LONG_BYTE_ZERO + (value >> 8));

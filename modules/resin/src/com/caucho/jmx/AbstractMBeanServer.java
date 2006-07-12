@@ -473,6 +473,9 @@ abstract public class AbstractMBeanServer implements MBeanServer {
       int p = mbeanName.lastIndexOf('.');
       mbeanName = mbeanName.substring(p);
 
+      p = mxbeanName.lastIndexOf('.');
+      mxbeanName = mxbeanName.substring(p);
+
       for (int i = 0; i < interfaces.length; i++) {
         Class ifc = interfaces[i];
 

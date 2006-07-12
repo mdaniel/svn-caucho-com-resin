@@ -141,7 +141,7 @@ the leading byte in the range <code>xd0</code> to <code>xdf</code>.
 The value of the integer is <code>256 * (b0 - xd8) + b1</code>.</p>
 
 <def>
-int ::= [xd0-xdf] b1
+int ::= [xc0-xcf] b1
 </def>
 
 <p>The integer zero is represented by <code>xd8 x00</code>,
@@ -157,12 +157,12 @@ the leading byte in the range <code>x58</code> to <code>x5f</code>.
 The value of the integer is <code>65536 * (b0 - x5c) + 256 * b1 + b0</code>.</p>
 
 <def>
-int ::= [x58-x5f] b1 b2
+int ::= [xd0-xd7] b1 b2
 </def>
 
-<p>The integer zero is represented by <code>x5c x00 x00</code>,
--65536 is represented by <code>x5b x00 x00</code> and
-65537 is represented by <code>x5d x00 x01</code></p>
+<p>The integer zero is represented by <code>xd4 x00 x00</code>,
+-65536 is represented by <code>xd3 x00 x00</code> and
+65537 is represented by <code>xd5 x00 x01</code></p>
 
 </section>
 
@@ -180,6 +180,54 @@ long ::= L b64 b56 b48 b40 b32 b24 b16 b8
 <example title='long 300'>
 L x00 x00 x00 x00 x00 x00 x01 x2c
 </example>
+
+<section title="Compact: single octet longs">
+
+<p>Longs between -8 and 15 are represented by a single byte in the
+range <code>xd8</code> to <code>xef</code>.
+The value of the long is <code>b0 - xe0</code>.</p>
+
+<def>
+long ::= [xd8-xef]
+</def>
+
+<p>The long zero is represented by <code>xe0</code>,
+-1 is represented by <code>xdf</code> and
+15 is represented by <code>xef</code></p>
+
+</section>
+
+<section title="Compact: two octet longs (byte)">
+
+<p>Longs between -2048 and 2047 are encoded in two bytes with
+the leading byte in the range <code>xf0</code> to <code>xff</code>.
+The value of the long is <code>256 * (b0 - xf8) + b1</code>.</p>
+
+<def>
+long ::= [xf0-xff] b1
+</def>
+
+<p>The long zero is represented by <code>xf8 x00</code>,
+-256 is represented by <code>xf7 x00</code> and
+513 is represented by <code>xfa x01</code></p>
+
+</section>
+
+<section title="Compact: three octet longs (short)">
+
+<p>Integers between -262144 and 262143 are encoded in three bytes with
+the leading byte in the range <code>x58</code> to <code>x5f</code>.
+The value of the long is <code>65536 * (b0 - x5c) + 256 * b1 + b0</code>.</p>
+
+<def>
+long ::= [x58-x5f] b1 b2
+</def>
+
+<p>The integer zero is represented by <code>x5c x00 x00</code>,
+-65536 is represented by <code>x5b x00 x00</code> and
+65537 is represented by <code>x5d x00 x01</code></p>
+
+</section>
 
 </defun>
 
@@ -748,17 +796,33 @@ same class name.</p>
 <var/type/>    ::= t b16 b8 type-string
 <var/length/>  ::= l b32 b24 b16 b8
 
-<var/null/>    ::= N
-<var/boolean/> ::= T
-        ::= F
-<var/int/>     ::= I b32 b24 b16 b8
-<var/long/>    ::= L b64 b56 b48 b40 b32 b24 b16 b8
-<var/double/>  ::= D b64 b56 b48 b40 b32 b24 b16 b8
-<var/date/>    ::= d b64 b56 b48 b40 b32 b24 b16 b8
-<var/string/>  ::= (s b16 b8 string-data)* S b16 b8 string-data
-<var/xml/>     ::= (x b16 b8 xml-data)* X b16 b8 xml-data
-<var/binary/>  ::= (b b16 b8 binary-data)* B b16 b8 binary-data
-<var/ref/>     ::= R b32 b24 b16 b8
+<var/null/>    ::= 'N'
+
+<var/boolean/> ::= 'T'
+        ::= 'F'
+
+<var/int/>     ::= 'I' b32 b24 b16 b8
+        ::= [x80-xaf]
+        ::= [xc0-xcf] b8
+        ::= [xd0-xd7] b16 b8
+
+<var/long/>    ::= 'L' b64 b56 b48 b40 b32 b24 b16 b8
+        ::= [xd8-xef]
+        ::= [xf0-xff] b8
+        ::= [x58-x5f] b16 b8
+        ::= 'a' b32 b24 b16 b8
+
+<var/double/>  ::= 'D' b64 b56 b48 b40 b32 b24 b16 b8
+
+<var/date/>    ::= 'd' b64 b56 b48 b40 b32 b24 b16 b8
+
+<var/string/>  ::= ('s' b16 b8 string-data)* 'S' b16 b8 string-data
+
+<var/xml/>     ::= ('x' b16 b8 xml-data)* 'X' b16 b8 xml-data
+
+<var/binary/>  ::= ('b' b16 b8 binary-data)* 'B' b16 b8 binary-data
+
+<var/ref/>     ::= 'R' b32 b24 b16 b8
 </def>
 
 </section>

@@ -46,7 +46,8 @@ import com.caucho.server.connection.Connection;
  * <p>TcpConnection is the most common implementation.  The test harness
  * provides a string based Connection.
  */
-public abstract class PortConnection extends Connection {
+public abstract class PortConnection extends Connection
+{
   private static int _connectionCount;
 
   private Port _port;

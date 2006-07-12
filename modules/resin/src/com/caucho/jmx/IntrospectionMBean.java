@@ -406,8 +406,8 @@ v   * Returns the open mbean unmarshaller for the given return type.
 
       String className = cl.getName();
 
-      HashSet<MBeanAttributeInfo> attributes
-        = new HashSet<MBeanAttributeInfo>();
+      HashMap<String,MBeanAttributeInfo> attributes
+        = new HashMap<String,MBeanAttributeInfo>();
 
       ArrayList<MBeanConstructorInfo> constructors
         = new ArrayList<MBeanConstructorInfo>();
@@ -469,7 +469,8 @@ v   * Returns the open mbean unmarshaller for the given return type.
 	  }
 	  */
 
-          attributes.add(attr);
+	  if (attributes.get(attributeName) == null)
+	    attributes.put(attributeName, attr);
         }
         else if (methodName.startsWith("is") && args.length == 0 &&
                  (retType.equals(boolean.class) ||
@@ -488,10 +489,13 @@ v   * Returns the open mbean unmarshaller for the given return type.
           else
             attributeName = name;
 
-          attributes.add(new MBeanAttributeInfo(attributeName,
-						     getDescription(method),
-						     method,
-						     setter));
+	  if (attributes.get(attributeName) == null) {
+	    attributes.put(attributeName,
+			   new MBeanAttributeInfo(attributeName,
+						  getDescription(method),
+						  method,
+						  setter));
+	  }
         }
         else if (methodName.startsWith("set") && args.length == 1) {
           String name = methodName.substring(3);
@@ -509,18 +513,21 @@ v   * Returns the open mbean unmarshaller for the given return type.
             else
               attributeName = name;
 
-            attributes.add(new MBeanAttributeInfo(attributeName,
-						       getDescription(method),
-						       method,
-						       null));
-          }
-        }
+	    if (attributes.get(attributeName) == null) {
+	      attributes.put(attributeName,
+			     new MBeanAttributeInfo(attributeName,
+						    getDescription(method),
+						    method,
+						    null));
+	    }
+	  }
+	}
         else {
           operations.add(new MBeanOperationInfo(getName(method),
-						     getDescription(method),
-						     getSignature(method),
-						     method.getReturnType().getName(),
-						     MBeanOperationInfo.UNKNOWN));
+						getDescription(method),
+						getSignature(method),
+						method.getReturnType().getName(),
+						MBeanOperationInfo.UNKNOWN));
         }
       }
 
@@ -545,7 +552,9 @@ v   * Returns the open mbean unmarshaller for the given return type.
       Collections.sort(notifications, MBEAN_FEATURE_INFO_COMPARATOR);
 
       MBeanAttributeInfo []attrArray = new MBeanAttributeInfo[attributes.size()];
-      attributes.toArray(attrArray);
+      attributes.values().toArray(attrArray);
+      Arrays.sort(attrArray, MBEAN_FEATURE_INFO_COMPARATOR);
+      
       MBeanConstructorInfo []conArray = new MBeanConstructorInfo[constructors.size()];
       constructors.toArray(conArray);
 
@@ -554,6 +563,7 @@ v   * Returns the open mbean unmarshaller for the given return type.
       Arrays.sort(opArray, MBEAN_FEATURE_INFO_COMPARATOR);
       MBeanNotificationInfo []notifArray = new MBeanNotificationInfo[notifications.size()];
       notifications.toArray(notifArray);
+      Arrays.sort(notifArray, MBEAN_FEATURE_INFO_COMPARATOR);
 
       MBeanInfo modelInfo;
 

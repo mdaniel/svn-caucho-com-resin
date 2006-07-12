@@ -61,15 +61,15 @@ public interface Hessian2Constants
 
   public static final int INT_BYTE_MIN = -0x800;
   public static final int INT_BYTE_MAX = 0x7ff;
-  public static final int INT_BYTE_ZERO = 0xd8;
+  public static final int INT_BYTE_ZERO = 0xc8;
 
   public static final int INT_SHORT_MIN = -0x40000;
   public static final int INT_SHORT_MAX = 0x3ffff;
-  public static final int INT_SHORT_ZERO = 0x5c;
+  public static final int INT_SHORT_ZERO = 0xd4;
   
   public static final long LONG_DIRECT_MIN = -0x08;
   public static final long LONG_DIRECT_MAX =  0x0f;
-  public static final int LONG_ZERO = 0xd8;
+  public static final int LONG_ZERO = 0xe0;
   
   public static final long LONG_BYTE_MIN = -0x800;
   public static final long LONG_BYTE_MAX =  0x7ff;
@@ -77,7 +77,7 @@ public interface Hessian2Constants
 
   public static final int LONG_SHORT_MIN = -0x40000;
   public static final int LONG_SHORT_MAX = 0x3ffff;
-  public static final int LONG_SHORT_ZERO = 0xec;
+  public static final int LONG_SHORT_ZERO = 0x5c;
   
   public static final int STRING_DIRECT_MAX = 0x0f;
   public static final int STRING_DIRECT = 0x00;
@@ -87,12 +87,7 @@ public interface Hessian2Constants
   public static final int BYTES_DIRECT = 0x20;
   // 0x30-0x3f is reserved
   
-  public static final int INT_BYTE = 'a';
-  public static final int INT_SHORT = 'c';
-  
-  public static final int LONG_BYTE = 'e';
-  public static final int LONG_SHORT = 'f';
-  public static final int LONG_INT = 'g';
+  public static final int LONG_INT = 'a';
   
   public static final int DOUBLE_ZERO = 'h';
   public static final int DOUBLE_ONE = 'i';
