@@ -54,8 +54,10 @@ public class StreamReaderImpl implements XMLStreamReader {
   private String _encoding;
 
   private int _token;
+  private int _current;
   private int _state;
   private boolean _isShortTag;
+  private boolean _eofEncountered = false;
   
   private RawName _rawTagName = new RawName();
   private QName _name;
@@ -76,7 +78,8 @@ public class StreamReaderImpl implements XMLStreamReader {
 
     readHeader();
 
-    _token = START_DOCUMENT;
+    _token = 0;
+    _current = START_DOCUMENT;
   }
   
   public int getAttributeCount()
@@ -108,7 +111,13 @@ public class StreamReaderImpl implements XMLStreamReader {
       throw new IllegalArgumentException(L.l("element only has {0} attributes, given index {1}",
 					     _attrCount, index));
     
-    return _attrNames[index].getNamespaceURI();
+    String ret = _attrNames[index].getNamespaceURI();
+
+    // API quirk
+    if ("".equals(ret))
+      return null;
+    
+    return ret;
   }
   
   public String getAttributePrefix(int index)
@@ -117,12 +126,18 @@ public class StreamReaderImpl implements XMLStreamReader {
       throw new IllegalArgumentException(L.l("element only has {0} attributes, given index {1}",
 					     _attrCount, index));
     
-    return _attrNames[index].getPrefix();
+    String ret = _attrNames[index].getPrefix();
+    
+    // API quirk
+    if ("".equals(ret))
+      return null;
+
+    return ret;
   }
   
   public String getAttributeType(int index)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return "CDATA";
   }
   
   public String getAttributeValue(int index)
@@ -149,7 +164,7 @@ public class StreamReaderImpl implements XMLStreamReader {
   
   public String getCharacterEncodingScheme()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return null;
   }
   
   public String getElementText() throws XMLStreamException
@@ -159,17 +174,17 @@ public class StreamReaderImpl implements XMLStreamReader {
   
   public String getEncoding()
   {
-    return _encoding;
+    return null;
   }
   
   public int getEventType()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _current;
   }
   
   public String getLocalName()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _name.getLocalPart();
   }
   
   public Location getLocation()
@@ -182,7 +197,10 @@ public class StreamReaderImpl implements XMLStreamReader {
     if (_name != null)
       return _name;
     else
+      /*
       throw new IllegalStateException(L.l("getName() must be called only on a START_ELEMENT or END_ELEMENT event"));
+      */
+      return null;
   }
   
   public NamespaceContext getNamespaceContext()
@@ -192,7 +210,7 @@ public class StreamReaderImpl implements XMLStreamReader {
   
   public int getNamespaceCount()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return 0;
   }
   
   public String getNamespacePrefix(int index)
@@ -202,7 +220,13 @@ public class StreamReaderImpl implements XMLStreamReader {
   
   public String getNamespaceURI()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    String uri = _name.getNamespaceURI();
+
+    // lame API quirk
+    if ("".equals(uri))
+      return null;
+
+    return uri;
   }
   
   public String getNamespaceURI(int index)
@@ -227,7 +251,13 @@ public class StreamReaderImpl implements XMLStreamReader {
   
   public String getPrefix()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    String prefix = _name.getPrefix();
+
+    // lame API quirk
+    if ("".equals(prefix))
+      return null;
+
+    return prefix;
   }
   
   public Object getProperty(String name) throws IllegalArgumentException
@@ -237,12 +267,12 @@ public class StreamReaderImpl implements XMLStreamReader {
   
   public String getText()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return new String(_cBuf, 0, _cBufLength);
   }
   
   public char[] getTextCharacters()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _cBuf;
   }
   
   public int getTextCharacters(int sourceStart, char[] target, int targetStart, int length) throws XMLStreamException
@@ -252,12 +282,12 @@ public class StreamReaderImpl implements XMLStreamReader {
 
   public int getTextLength()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _cBufLength;
   }
   
   public int getTextStart()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return 0;
   }
   
   public String getVersion()
@@ -277,7 +307,7 @@ public class StreamReaderImpl implements XMLStreamReader {
   
   public boolean isAttributeSpecified(int index)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return true;
   }
   
   public boolean isCharacters()
@@ -292,7 +322,7 @@ public class StreamReaderImpl implements XMLStreamReader {
   
   public boolean isStandalone()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return false;
   }
   
   public boolean isStartElement()
@@ -336,6 +366,9 @@ public class StreamReaderImpl implements XMLStreamReader {
   
   public boolean hasNext() throws XMLStreamException
   {
+    if (_is == null)
+      return false;
+
     if (_token == 0) {
       try {
 	_token = readNext();
@@ -344,7 +377,7 @@ public class StreamReaderImpl implements XMLStreamReader {
       }
     }
 
-    return _token > 0;
+    return !_eofEncountered || _token > 0;
   }
   
   public int next() throws XMLStreamException
@@ -361,9 +394,14 @@ public class StreamReaderImpl implements XMLStreamReader {
     }
 
     if (token > 0)
-      return token;
-    else
-      return END_DOCUMENT;
+      return _current = token;
+    else {
+      if (_eofEncountered)
+	return _current = -1;
+
+      _eofEncountered = true;
+      return _current = END_DOCUMENT;
+    }
   }
 
   private int readNext()
@@ -390,8 +428,13 @@ public class StreamReaderImpl implements XMLStreamReader {
 	_name = new QName(_rawTagName.getLocalName());
 
 	return END_ELEMENT;
-      }
-      else {
+
+      } else if (ch == '!') {
+	expect('-');
+	expect('-');
+	return readComment();
+	
+      } else {
 	unread();
 
 	readElementBegin();
@@ -402,6 +445,7 @@ public class StreamReaderImpl implements XMLStreamReader {
     else if (ch < 0)
       return -1;
     else {
+      unread();
       return readData();
     }
   }
@@ -504,15 +548,15 @@ public class StreamReaderImpl implements XMLStreamReader {
   }
 
   private int readData()
-    throws IOException
+    throws IOException, XMLStreamException
   {
-    int ch;
+    int ch = 0;
     boolean isWhitespace = true;
 
     int index = 0;
     char []cBuf = _cBuf;
     int length = cBuf.length;
-
+    boolean entity = false;
     loop:
     for (; index < length && (ch = read()) >= 0; index++) {
       switch (ch) {
@@ -520,20 +564,87 @@ public class StreamReaderImpl implements XMLStreamReader {
 	unread();
 	break loop;
 	
-      case ' ': case '\t': case '\r': case '\n':
-	cBuf[index++] = (char) ch;
+      case '&':
+	if (index > 0) {
+	  unread();
+	  break loop;
+	}
+	cBuf[index] = (char) ch;
+	entity = true;
 	break;
 
+      case '\r':
+	ch = read();
+	if (ch != '\n') { ch = '\r'; unread(); }
+      case ' ': case '\t': case '\n':
+	cBuf[index] = (char) ch;
+	break;
+
+      case ';':
+	if (entity) {
+	  String resolved = resolveEntity(new String(cBuf, 1, index-1));
+	  resolved.getChars(0, resolved.length(), cBuf, 0);
+	  index = resolved.length()-1;
+	  entity = false;
+	  break;
+	}
       default:
 	isWhitespace = false;
-	cBuf[index++] = (char) ch;
+	cBuf[index] = (char) ch;
+	break;
+      }
+    }
+
+    if (entity)
+      throw new Error("XXX: bad");
+
+    _cBufLength = index;
+
+    // whitespace surrounding the root element is "ignorable" per the XML spec
+    boolean isIgnorableWhitespace =
+      isWhitespace && ((ch == -1) || (_current == START_DOCUMENT));
+
+    return isIgnorableWhitespace ? SPACE : CHARACTERS;
+  }
+
+  private String resolveEntity(String s)
+    throws XMLStreamException
+  {
+    if ("amp".equals(s))    return "&";
+    if ("apos".equals(s))   return "\'";
+    if ("quot".equals(s))   return "\"";
+    if ("lt".equals(s))     return "<";
+    if ("gt".equals(s))     return ">";
+    if (s.startsWith("#x"))
+      return ""+((char)Integer.parseInt(s.substring(2), 16));
+    if (s.startsWith("#"))
+      return ""+((char)Integer.parseInt(s.substring(2)));
+
+    throw new XMLStreamException("unknown entity: \"" + s + "\"");
+  }
+
+  private int readComment()
+    throws IOException
+  {
+    int ch = 0;
+    int index = 0;
+    char []cBuf = _cBuf;
+    int length = cBuf.length;
+    loop:
+    for (; index < length && (ch = read()) >= 0; index++) {
+      cBuf[index] = (char) ch;
+      if (index > 3
+	  && cBuf[index-2] == '-'
+	  && cBuf[index-1] == '-'
+	  && cBuf[index-0] == '>') {
+	index -= 2;
 	break;
       }
     }
 
     _cBufLength = index;
 
-    return isWhitespace ? SPACE : CHARACTERS;
+    return COMMENT;
   }
 
   private void readRawName(RawName name)
@@ -601,7 +712,18 @@ public class StreamReaderImpl implements XMLStreamReader {
 
       ch = _is.read();
 
-      // BOM
+      if (ch == (char)0xFE) {
+	if (_is.read() != (char)0xFF) {
+	  throw new XMLStreamException("found unrecognized BOM");
+	}
+	ch = _is.read();
+      } else if (ch == (char)0xFF) {
+	if (_is.read() != (char)0xFE) {
+	  throw new UnsupportedOperationException("found byte-swapped BOM");
+	} else {
+	  throw new XMLStreamException("found unrecognized BOM");
+	}
+      }
 
       if (ch != '<') {
 	_is.unread();
