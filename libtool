@@ -38,7 +38,7 @@ if test "X${CDPATH+set}" = Xset; then CDPATH=:; export CDPATH; fi
 
 # ### BEGIN LIBTOOL CONFIG
 
-# Libtool was configured on host adsl-70-231-138-50.dsl.snfc21.sbcglobal.net:
+# Libtool was configured on host adsl-71-141-236-66.dsl.snfc21.pacbell.net:
 
 # Shell to use when invoking shell scripts.
 SHELL="/bin/sh"
@@ -284,8 +284,6 @@ exclude_expsyms="_GLOBAL_OFFSET_TABLE_"
 
 # Symbols that must always be exported.
 include_expsyms=""
-
-max_cmd_len=4096
 
 # ### END LIBTOOL CONFIG
 

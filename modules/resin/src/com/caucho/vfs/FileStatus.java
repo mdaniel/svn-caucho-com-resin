@@ -39,27 +39,27 @@ public class FileStatus {
   private static long S_IFCHR = 0020000;
   private static long S_IFIFO = 0010000;
 
-  private long st_dev;
-  private long st_ino;
-  private int st_mode;
-  private int st_nlink;
-  private int st_uid;
-  private int st_gid;
-  private long st_rdev;
-  private long st_size;
-  private long st_blksize;
-  private long st_blocks;
-  private long st_atime;
-  private long st_mtime;
-  private long st_ctime;
+  private long _st_dev;
+  private long _st_ino;
+  private int _st_mode;
+  private int _st_nlink;
+  private int _st_uid;
+  private int _st_gid;
+  private long _st_rdev;
+  private long _st_size;
+  private long _st_blksize;
+  private long _st_blocks;
+  private long _st_atime;
+  private long _st_mtime;
+  private long _st_ctime;
 
-  private boolean isRegularFile;
-  private boolean isDirectory;
-  private boolean isCharacterDevice;
-  private boolean isBlockDevice;
-  private boolean isFIFO;
-  private boolean isLink;
-  private boolean isSocket;
+  private boolean _isRegularFile;
+  private boolean _isDirectory;
+  private boolean _isCharacterDevice;
+  private boolean _isBlockDevice;
+  private boolean _isFIFO;
+  private boolean _isLink;
+  private boolean _isSocket;
 
   public FileStatus(long st_dev, long st_ino, int st_mode, int st_nlink,
                     int st_uid, int st_gid, long st_rdev, long st_size, 
@@ -69,126 +69,126 @@ public class FileStatus {
                     boolean isCharacterDevice, boolean isBlockDevice,
                     boolean isFIFO, boolean isLink, boolean isSocket)
   {
-    this.st_dev = st_dev;
-    this.st_ino = st_ino;
-    this.st_mode = st_mode;
-    this.st_nlink = st_nlink;
-    this.st_uid = st_uid;
-    this.st_gid = st_gid;
-    this.st_rdev = st_rdev;
-    this.st_size = st_size;
-    this.st_blksize = st_blksize;
-    this.st_blocks = st_blocks;
-    this.st_atime = st_atime;
-    this.st_mtime = st_mtime;
-    this.st_ctime = st_ctime;
+    _st_dev = st_dev;
+    _st_ino = st_ino;
+    _st_mode = st_mode;
+    _st_nlink = st_nlink;
+    _st_uid = st_uid;
+    _st_gid = st_gid;
+    _st_rdev = st_rdev;
+    _st_size = st_size;
+    _st_blksize = st_blksize;
+    _st_blocks = st_blocks;
+    _st_atime = st_atime;
+    _st_mtime = st_mtime;
+    _st_ctime = st_ctime;
 
-    this.isRegularFile = isRegularFile;
-    this.isDirectory = isDirectory;
-    this.isCharacterDevice = isCharacterDevice;
-    this.isBlockDevice = isBlockDevice;
-    this.isFIFO = isFIFO;
-    this.isLink = isLink;
-    this.isSocket = isSocket;
+    _isRegularFile = isRegularFile;
+    _isDirectory = isDirectory;
+    _isCharacterDevice = isCharacterDevice;
+    _isBlockDevice = isBlockDevice;
+    _isFIFO = isFIFO;
+    _isLink = isLink;
+    _isSocket = isSocket;
   }
 
   public long getDev()
   {
-    return st_dev;
+    return _st_dev;
   }
 
   public long getIno()
   {
-    return st_ino;
+    return _st_ino;
   }
 
   public int getMode()
   {
-    return st_mode;
+    return _st_mode;
   }
 
   public int getNlink()
   {
-    return st_nlink;
+    return _st_nlink;
   }
 
   public int getUid()
   {
-    return st_uid;
+    return _st_uid;
   }
 
   public int getGid()
   {
-    return st_gid;
+    return _st_gid;
   }
 
   public long getRdev()
   {
-    return st_rdev;
+    return _st_rdev;
   }
 
   public long getSize()
   {
-    return st_size;
+    return _st_size;
   }
 
   public long getBlksize()
   {
-    return st_blksize;
+    return _st_blksize;
   }
 
   public long getBlocks()
   {
-    return st_blocks;
+    return _st_blocks;
   }
 
   public long getAtime()
   {
-    return st_atime;
+    return _st_atime;
   }
 
   public long getMtime()
   {
-    return st_mtime;
+    return _st_mtime;
   }
 
   public long getCtime()
   {
-    return st_ctime;
+    return _st_ctime;
   }
 
   public boolean isRegularFile() 
   {
-    return isRegularFile;
+    return _isRegularFile;
   }
 
   public boolean isDirectory() 
   {
-    return isDirectory;
+    return _isDirectory;
   }
 
   public boolean isCharacterDevice() 
   {
-    return isCharacterDevice;
+    return _isCharacterDevice;
   }
 
   public boolean isBlockDevice() 
   {
-    return isBlockDevice;
+    return _isBlockDevice;
   }
 
   public boolean isFIFO() 
   {
-    return isFIFO;
+    return _isFIFO;
   }
 
   public boolean isLink() 
   {
-    return isLink;
+    return _isLink;
   }
 
   public boolean isSocket() 
   {
-    return isSocket;
+    return _isSocket;
   }
 }
