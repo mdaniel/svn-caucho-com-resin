@@ -24,7 +24,7 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Scott Ferguson, Adam Megacz
  */
 
 package com.caucho.xml.stream;
@@ -503,7 +503,12 @@ public class StreamReaderImpl implements XMLStreamReader {
       ch = skipWhitespace();
 
       if (ch == '\'' || ch == '"') {
-	_attrValues[attrCount] = readValue(ch);
+	if (rawName.getPrefix()==null &&
+	    "xmlns".equals(rawName.getLocalName())) {
+	} else if ("xmlns".equals(rawName.getPrefix())) {
+	} else {
+	  _attrValues[attrCount] = readValue(ch);
+	}
       }
       else
 	throw error(L.l("attribute expects value at {0}", charName(ch)));
@@ -832,6 +837,12 @@ public class StreamReaderImpl implements XMLStreamReader {
     {
       return new String(_buffer, _prefix + 1, _length - _prefix - 1);
     }
+
+    String getPrefix()
+    {
+      if (_prefix==-1) return null;
+      return new String(_buffer, 0, _prefix);
+    }
     
     void expandCapacity()
     {
@@ -842,7 +853,17 @@ public class StreamReaderImpl implements XMLStreamReader {
       _buffer = newBuffer;
     }
   }
+  /*
+  static class NSContext {
 
+    NSContext _parent;
+
+    public NSContext(NSContext parent)
+    {
+      _parent = parent;
+    }
+  }
+  */
   static {
     for (int i = 0; i < IS_XML_NAME.length; i++)
       IS_XML_NAME[i] = isXmlName(i);

@@ -40,13 +40,41 @@ class FactoryLoader {
   private static Logger log =
     Logger.getLogger("javax.xml.stream.FactoryLoader");
 
-  public static Object newInstance(String factoryId,
-				   ClassLoader classLoader)
+  private static HashMap<String,FactoryLoader>
+    _factoryLoaders = new HashMap<String,FactoryLoader>();
+
+  public static FactoryLoader getFactoryLoader(String factoryId) {
+
+    FactoryLoader ret = _factoryLoaders.get(factoryId);
+
+    if (ret == null) {
+      ret = new FactoryLoader(factoryId);
+      _factoryLoaders.put(factoryId, ret);
+    }
+
+    return ret;
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  private String _factoryId;
+
+  private WeakHashMap<ClassLoader,Object[]>
+    _providerMap = new WeakHashMap<ClassLoader,Object[]>();
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  private FactoryLoader(String factoryId)
+  {
+    this._factoryId = factoryId;
+  }
+
+  public Object newInstance(ClassLoader classLoader)
     throws FactoryConfigurationError
   {
     String className = null;
 
-    className = System.getProperty(factoryId);
+    className = System.getProperty(_factoryId);
 
     if (className == null) {
       
@@ -64,7 +92,7 @@ class FactoryLoader {
 	Properties props = new Properties();
 	props.load(is);
 
-	className = props.getProperty(factoryId);
+	className = props.getProperty(_factoryId);
 
       }
       catch (IOException e) {
@@ -82,7 +110,7 @@ class FactoryLoader {
     }
 
     if (className == null) {
-      Object factory = createFactory("META-INF/services/"+factoryId,
+      Object factory = createFactory("META-INF/services/"+_factoryId,
 				     classLoader);
       if (factory != null)
 	return factory;
@@ -101,7 +129,7 @@ class FactoryLoader {
     return null;
   }
 
-  public static Object createFactory(String name, ClassLoader loader)
+  public Object createFactory(String name, ClassLoader loader)
   {
     Object[] providers = getProviderList(name, loader);
 
@@ -117,7 +145,7 @@ class FactoryLoader {
     return null;
   }
   
-  private static Object []getProviderList(String service, ClassLoader loader)
+  private Object []getProviderList(String service, ClassLoader loader)
   {
 
     Object []providers = _providerMap.get(loader);
@@ -150,7 +178,7 @@ class FactoryLoader {
     return providers;
   }
 
-  private static Object loadProvider(URL url, ClassLoader loader)
+  private Object loadProvider(URL url, ClassLoader loader)
   {
     InputStream is = null;
     try {
@@ -192,8 +220,6 @@ class FactoryLoader {
 
     return null;
   }
-
-
-  private static WeakHashMap<ClassLoader,Object[]>
-    _providerMap = new WeakHashMap<ClassLoader,Object[]>();
 }
+
+

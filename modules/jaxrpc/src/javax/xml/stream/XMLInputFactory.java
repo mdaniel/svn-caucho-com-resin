@@ -147,7 +147,8 @@ public abstract class XMLInputFactory {
 					    ClassLoader classLoader)
     throws FactoryConfigurationError
   {
-    return (XMLInputFactory)FactoryLoader.newInstance(factoryId, classLoader);
+    return (XMLInputFactory)FactoryLoader
+      .getFactoryLoader(factoryId).newInstance(classLoader);
   }
 
   public abstract void setEventAllocator(XMLEventAllocator allocator);

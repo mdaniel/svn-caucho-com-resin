@@ -124,7 +124,8 @@ public abstract class XMLEventFactory {
 					    ClassLoader classLoader)
     throws FactoryConfigurationError
   {
-    return (XMLEventFactory)FactoryLoader.newInstance(factoryId, classLoader);
+    return (XMLEventFactory)FactoryLoader
+      .getFactoryLoader(factoryId).newInstance(classLoader);
   }
 
   public abstract void setLocation(Location location);

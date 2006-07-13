@@ -70,16 +70,15 @@ public class WebServiceServlet extends HttpServlet {
     throws ServletException, IOException
   {
     try {
-      /*
+
       XMLInputFactory factory =
 	XMLInputFactory.newInstance();
 
       XMLStreamReader xmlReader =
 	factory.createXMLStreamReader(req.getInputStream());
-      */
       
       WriteStream ws = Vfs.openWrite(resp.getOutputStream());
-      _skeleton.invoke(_object, /*xmlReader*/null, ws);
+      _skeleton.invoke(_object, xmlReader, ws);
       ws.flush();
     }
     catch (XMLStreamException e) {

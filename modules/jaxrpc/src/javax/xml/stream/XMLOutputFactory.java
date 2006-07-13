@@ -81,7 +81,8 @@ public abstract class XMLOutputFactory {
 					     ClassLoader classLoader)
     throws FactoryConfigurationError
   {
-    return (XMLOutputFactory)FactoryLoader.newInstance(factoryId, classLoader);
+    return (XMLOutputFactory)FactoryLoader
+      .getFactoryLoader(factoryId).newInstance(classLoader);
   }
 
   public abstract void setProperty(String name, Object value)
