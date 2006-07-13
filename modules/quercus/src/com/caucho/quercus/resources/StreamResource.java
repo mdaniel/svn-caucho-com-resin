@@ -80,9 +80,10 @@ public class StreamResource extends ResourceValue {
   /**
    * Writes to a buffer.
    */
-  public void write(byte []buffer, int offset, int length)
+  public int write(byte []buffer, int offset, int length)
     throws IOException
   {
+    return -1;
   }
   
   /**

@@ -40,8 +40,8 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.quercus.lib.file.FileReadValue;
-import com.caucho.quercus.lib.file.FileValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.BooleanValue;
 
 import com.caucho.quercus.QuercusModuleException;
 
@@ -124,6 +124,7 @@ abstract public class AbstractBinaryOutput
    * Flushes the output.
    */
   public void flush()
+    throws IOException
   {
   }
 
@@ -170,6 +171,11 @@ abstract public class AbstractBinaryOutput
   public String getResourceType()
   {
     return "stream";
+  }
+
+  public Value stat()
+  {
+    return BooleanValue.FALSE;
   }
 }
 

@@ -67,7 +67,7 @@ import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
 
-import com.caucho.quercus.file.SocketReadWrite;
+import com.caucho.quercus.lib.file.SocketReadWrite;
 
 import com.caucho.quercus.resources.StreamReadWrite;
 
@@ -148,7 +148,7 @@ public class NetworkModule extends AbstractQuercusModule {
     try {
       Socket s = new Socket(host, port);
 
-      return new SocketReadWrite(env, s);
+      return new SocketReadWrite(env, s, SocketReadWrite.Domain.AF_INET);
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }

@@ -24,69 +24,72 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Emil Ong
  */
 
 package com.caucho.quercus.lib.file;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.IOException;
 
 import com.caucho.quercus.env.ResourceValue;
 import com.caucho.quercus.env.Env;
-
-import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.QuercusClass;
 
 /**
- * Represents a Quercus output stream
+ * Represents a PHP directory listing
  */
-public interface BinaryOutput extends BinaryStream {
-  /**
-   * Returns an OutputStream.
-   */
-  public OutputStream getOutputStream();
-  
-  /**
-   * Writes a buffer.
-   */
-  public void write(byte []buffer, int offset, int length)
-    throws IOException;
+public class WrappedDirectoryValue extends DirectoryValue {
+  private Env _env;
+  private Value _wrapper;
+
+  public WrappedDirectoryValue(Env env, QuercusClass qClass)
+  {
+    _env = env;
+    _wrapper = qClass.callNew(_env, new Value[0]);
+  }
+
+  public boolean opendir(StringValue path, LongValue flags)
+  {
+    return _wrapper.callMethod(_env, "dir_opendir", path, flags).toBoolean();
+  }
 
   /**
-   * Writes a buffer.
+   * Returns the next value.
    */
-  public int write(InputStream is, int length)
-    throws IOException;
-  
-  /**
-   * prints a unicode character
-   */
-  public void print(char ch)
-    throws IOException;
-  
-  /**
-   * prints
-   */
-  public void print(String s)
-    throws IOException;
+  public Value readdir()
+  {
+    return _wrapper.callMethod(_env, "dir_readdir");
+  }
 
   /**
-   * Flushes the output
+   * Rewinds the directory
    */
-  public void flush()
-    throws IOException;
+  public void rewinddir()
+  {
+    _wrapper.callMethod(_env, "dir_rewinddir");
+  }
 
   /**
-   * Closes the stream for writing
+   * Closes the directory
    */
-  public void closeWrite();
+  public void close()
+  {
+    _wrapper.callMethod(_env, "dir_closedir");
+  }
 
   /**
-   * Closes the stream.
+   * Converts to a string.
+   * @param env
    */
-  public void close();
-
-
+  public String toString()
+  {
+    return "Directory[]";
+  }
 }
 

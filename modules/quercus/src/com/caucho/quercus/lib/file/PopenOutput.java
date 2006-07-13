@@ -47,15 +47,12 @@ import com.caucho.vfs.VfsStream;
 
 import com.caucho.quercus.env.Env;
 
-import com.caucho.quercus.lib.file.FileReadValue;
-import com.caucho.quercus.lib.file.FileValue;
-
 /**
  * Represents an output stream for a popen'ed process.
  */
 public class PopenOutput extends AbstractBinaryOutput {
   private static final Logger log
-    = Logger.getLogger(FileReadValue.class.getName());
+    = Logger.getLogger(PopenOutput.class.getName());
 
   private Env _env;
   private Process _process;

@@ -27,11 +27,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.file;
+package com.caucho.quercus.lib.file;
 
 import java.io.IOException;
 
-import java.net.Socket;
+import java.net.*;
 
 import com.caucho.vfs.SocketStream;
 import com.caucho.vfs.ReadStream;
@@ -48,15 +48,42 @@ import com.caucho.quercus.resources.StreamReadWrite;
  * Represents read/write stream
  */
 public class SocketReadWrite extends StreamReadWrite {
-  private Socket _s;
+  public enum Domain { AF_INET, AF_INET6, AF_UNIX };
 
-  public SocketReadWrite(Env env, Socket s)
+  private int _lastError;
+  private Domain _domain;
+  private Socket _socket;
+
+  public SocketReadWrite(Env env, Socket socket, Domain domain)
   {
     super(env);
 
-    _s = s;
-    
-    SocketStream sock = new SocketStream(s);
+    _socket = socket;
+    _domain = domain;
+  }
+
+  public void bind(SocketAddress address)
+    throws IOException
+  {
+    _socket.bind(address);
+  }
+
+  public void connect(SocketAddress address)
+    throws IOException
+  {
+    _socket.connect(address);
+
+    init();
+  }
+
+  public void setError(int error)
+  {
+    _lastError = error;
+  }
+
+  public void init()
+  {
+    SocketStream sock = new SocketStream(_socket);
 
     WriteStream os = new WriteStream(sock);
     ReadStream is = new ReadStream(sock, os);
@@ -69,14 +96,14 @@ public class SocketReadWrite extends StreamReadWrite {
    */
   public void close()
   {
-    Socket s = _s;
-    _s = null;
+    Socket s = _socket;
+    _socket = null;
     
     super.close();
 
     try {
       if (s != null)
-	s.close();
+        s.close();
     } catch (IOException e) {
     }
   }

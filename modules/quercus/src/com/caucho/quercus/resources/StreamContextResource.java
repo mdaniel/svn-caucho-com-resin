@@ -46,6 +46,7 @@ import com.caucho.quercus.env.StringValueImpl;
  */
 public class StreamContextResource extends ResourceValue {
   private ArrayValue _options;
+  private ArrayValue _parameters;
   
   public StreamContextResource()
   {
@@ -54,10 +55,19 @@ public class StreamContextResource extends ResourceValue {
 
   public StreamContextResource(ArrayValue options)
   {
+    this(options, null);
+  }
+
+  public StreamContextResource(ArrayValue options, ArrayValue parameters)
+  {
     if (options == null)
       options = new ArrayValueImpl();
+
+    if (parameters == null)
+      parameters = new ArrayValueImpl();
     
     _options = options;
+    _parameters = parameters;
   }
 
   /**
@@ -85,6 +95,14 @@ public class StreamContextResource extends ResourceValue {
     StringValue optionV = new StringValueImpl(option);
 
     _options.getArray(wrapperV).put(optionV, value);
+  }
+
+  /**
+   * Sets the parameters.
+   */
+  public void setParameters(ArrayValue parameters)
+  {
+    _parameters = parameters;
   }
   
   /**

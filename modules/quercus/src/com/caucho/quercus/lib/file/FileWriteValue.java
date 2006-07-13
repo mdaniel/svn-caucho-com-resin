@@ -92,11 +92,16 @@ public class FileWriteValue extends FileValue {
   /**
    * Writes a buffer to a file.
    */
-  public void write(byte []buffer, int offset, int length)
+  public int write(byte []buffer, int offset, int length)
     throws IOException
   {
-    if (_os != null)
+    if (_os != null) {
       _os.write(buffer, offset, length);
+
+      return length;
+    }
+
+    return 0;
   }
 
   /**

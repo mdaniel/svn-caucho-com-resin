@@ -53,13 +53,11 @@ import com.caucho.vfs.RandomAccessStream;
 import com.caucho.vfs.Encoding;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BinaryValue;
 import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringBuilderValue;
-
-import com.caucho.quercus.lib.file.FileReadValue;
-import com.caucho.quercus.lib.file.FileValue;
 
 /**
  * Represents a PHP open file
@@ -68,7 +66,7 @@ public class FileInputOutput extends AbstractBinaryOutput
   implements BinaryInput, BinaryOutput, Closeable {
 
   private static final Logger log
-    = Logger.getLogger(FileReadValue.class.getName());
+    = Logger.getLogger(FileInputOutput.class.getName());
 
   private Env _env;
   private Path _path;
@@ -358,6 +356,7 @@ public class FileInputOutput extends AbstractBinaryOutput
    * Flushes the output.
    */
   public void flush()
+    throws IOException
   {
   }
 
@@ -416,6 +415,31 @@ public class FileInputOutput extends AbstractBinaryOutput
     return true;
   }
 
+  public long seek(long offset, int whence)
+  {
+    switch (whence) {
+      case BinaryInput.SEEK_CUR:
+        offset = getPosition() + offset;
+        break;
+      case BinaryInput.SEEK_END:
+        try {
+          offset = _stream.getLength() + offset;
+        } catch (IOException e) {
+          log.log(Level.FINE, e.toString(), e);
+
+          return getPosition();
+        }
+        break;
+      case SEEK_SET:
+      default:
+        break;
+    }
+
+    _stream.seek(offset);
+
+    return offset;
+  }
+
   /**
    * Opens a copy.
    */
@@ -469,6 +493,11 @@ public class FileInputOutput extends AbstractBinaryOutput
     } catch (IOException e) {
       return false;
     }
+  }
+
+  public Value stat()
+  {
+    return FileModule.statImpl(_env, getPath());
   }
 
   /**

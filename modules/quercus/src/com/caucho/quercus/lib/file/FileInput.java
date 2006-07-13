@@ -41,6 +41,8 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
 import java.nio.channels.FileChannel;
 
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringBuilderValue;
 
@@ -55,13 +57,16 @@ public class FileInput extends ReadStreamInput implements LockableStream {
   private static final Logger log
     = Logger.getLogger(FileInput.class.getName());
 
+  private Env _env;
   private Path _path;
   private FileLock _fileLock;
   private FileChannel _fileChannel;
 
-  public FileInput(Path path)
+  public FileInput(Env env, Path path)
     throws IOException
   {
+    _env = env;
+
     _path = path;
 
     init(path.openRead());
@@ -81,7 +86,7 @@ public class FileInput extends ReadStreamInput implements LockableStream {
   public BinaryInput openCopy()
     throws IOException
   {
-    return new FileInput(_path);
+    return new FileInput(_env, _path);
   }
 
   /**
@@ -90,6 +95,25 @@ public class FileInput extends ReadStreamInput implements LockableStream {
   public long getLength()
   {
     return getPath().getLength();
+  }
+
+  public long seek(long offset, int whence)
+  {
+    switch (whence) {
+      case BinaryInput.SEEK_CUR:
+        offset = getPosition() + offset;
+        break;
+      case BinaryInput.SEEK_END:
+        offset = getLength() + offset;
+        break;
+      case SEEK_SET:
+      default:
+        break;
+    }
+
+    setPosition(offset);
+
+    return offset;
   }
 
   /**
@@ -136,6 +160,11 @@ public class FileInput extends ReadStreamInput implements LockableStream {
     } catch (IOException e) {
       return false;
     }
+  }
+
+  public Value stat()
+  {
+    return FileModule.statImpl(_env, getPath());
   }
 
   /**

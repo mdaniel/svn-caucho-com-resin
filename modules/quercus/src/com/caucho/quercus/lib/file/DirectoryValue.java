@@ -49,6 +49,10 @@ public class DirectoryValue extends ResourceValue {
   private String []_list;
   private int _index;
 
+  protected DirectoryValue()
+  {
+  }
+
   public DirectoryValue(Path path)
     throws IOException
   {
@@ -71,11 +75,9 @@ public class DirectoryValue extends ResourceValue {
   /**
    * Rewinds the directory
    */
-  public Value rewinddir()
+  public void rewinddir()
   {
     _index = 0;
-
-    return NullValue.NULL;
   }
 
   /**
@@ -85,11 +87,15 @@ public class DirectoryValue extends ResourceValue {
   {
     if ("read".equals(method))
       return readdir();
-    else if ("rewind".equals(method))
-      return rewinddir();
+    else if ("rewind".equals(method)) {
+      rewinddir();
+
+      return BooleanValue.TRUE;
+    }
     else if ("close".equals(method)) {
       close();
-      return NullValue.NULL;
+
+      return BooleanValue.TRUE;
     }
     else
       return super.callMethod(env, method);

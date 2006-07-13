@@ -46,16 +46,14 @@ import com.caucho.vfs.FilePath;
 import com.caucho.vfs.WriteStream;
 
 import com.caucho.quercus.env.Env;
-
-import com.caucho.quercus.lib.file.FileReadValue;
-import com.caucho.quercus.lib.file.FileValue;
+import com.caucho.quercus.env.Value;
 
 /**
  * Represents a PHP open file
  */
 public class FileOutput extends AbstractBinaryOutput implements LockableStream {
   private static final Logger log
-    = Logger.getLogger(FileReadValue.class.getName());
+    = Logger.getLogger(FileOutput.class.getName());
 
   private Env _env;
   private Path _path;
@@ -145,13 +143,10 @@ public class FileOutput extends AbstractBinaryOutput implements LockableStream {
    * Flushes the output.
    */
   public void flush()
+    throws IOException
   {
-    try {
-      if (_os != null)
-        _os.flush();
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
+    if (_os != null)
+      _os.flush();
   }
 
 
@@ -235,6 +230,11 @@ public class FileOutput extends AbstractBinaryOutput implements LockableStream {
     } catch (IOException e) {
       return false;
     }
+  }
+
+  public Value stat()
+  {
+    return FileModule.statImpl(_env, getPath());
   }
 
   /**

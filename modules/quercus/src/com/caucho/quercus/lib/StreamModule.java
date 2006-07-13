@@ -39,6 +39,8 @@ import com.caucho.util.L10N;
 
 import com.caucho.quercus.QuercusModuleException;
 
+import com.caucho.quercus.lib.file.ProtocolWrapper;
+
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.NotNull;
@@ -51,6 +53,7 @@ import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.QuercusClass;
 
 import com.caucho.quercus.resources.StreamContextResource;
 import com.caucho.quercus.resources.StreamResource;
@@ -84,33 +87,14 @@ public class StreamModule extends AbstractQuercusModule {
   public static final int STREAM_SERVER_BIND = 4;
   public static final int STREAM_SERVER_LISTEN = 8;
 
-  private static final HashMap<String,Value> _constMap =
-          new HashMap<String,Value>();
+  public static final int STREAM_URL_STAT_LINK = 1;
+  public static final int STREAM_URL_STAT_QUIET = 2;
 
-  static {
-    _constMap.put("STREAM_FILTER_READ", new LongValue(STREAM_FILTER_READ));
-    _constMap.put("STREAM_FILTER_WRITE", new LongValue(STREAM_FILTER_WRITE));
-    _constMap.put("STREAM_FILTER_ALL", new LongValue(STREAM_FILTER_ALL));
+  private static final HashMap<String,Value> _constMap 
+    = new HashMap<String,Value>();
 
-    _constMap.put("PSFS_PASS_ON", new LongValue(PSFS_PASS_ON));
-    _constMap.put("PSFS_FEED_ME", new LongValue(PSFS_FEED_ME));
-    _constMap.put("PSFS_ERR_FATAL", new LongValue(PSFS_ERR_FATAL));
-
-    _constMap.put("STREAM_USE_PATH", new LongValue(STREAM_USE_PATH));
-    _constMap.put("STREAM_REPORT_ERRORS", new LongValue(STREAM_REPORT_ERRORS));
-
-    _constMap.put("STREAM_CLIENT_ASYNC_CONNECT",
-                  new LongValue(STREAM_CLIENT_ASYNC_CONNECT));
-    _constMap.put("STREAM_CLIENT_CONNECT",
-                  new LongValue(STREAM_CLIENT_CONNECT));
-    _constMap.put("STREAM_CLIENT_PERSISTENT",
-                  new LongValue(STREAM_CLIENT_PERSISTENT));
-
-    _constMap.put("STREAM_SERVER_BIND",
-                  new LongValue(STREAM_SERVER_BIND));
-    _constMap.put("STREAM_SERVER_LISTEN",
-                  new LongValue(STREAM_SERVER_LISTEN));
-  }
+  private static final HashMap<String,ProtocolWrapper> _wrapperMap 
+    = new HashMap<String,ProtocolWrapper>();
 
   /**
    * Adds the constant to the PHP engine's constant map.
@@ -189,9 +173,18 @@ public class StreamModule extends AbstractQuercusModule {
                                            Value resource,
                                            ArrayValue value)
   {
-    // XXX: not sure what this does
+    if (resource instanceof StreamContextResource) {
+      StreamContextResource context = (StreamContextResource) resource;
 
-    return false;
+      context.setParameters(value);
+
+      return true;
+    }
+    else {
+      env.warning(L.l("expected resource at '{0}'", resource));
+
+      return false;
+    }
   }
 
   /**
@@ -205,36 +198,36 @@ public class StreamModule extends AbstractQuercusModule {
   {
     try {
       if (in == null)
-	return -1;
+        return -1;
 
       if (out == null)
-	return -1;
+        return -1;
 
       TempBuffer temp = TempBuffer.allocate();
       byte []buffer = temp.getBuffer();
 
       while (offset-- > 0)
-	in.read();
+        in.read();
 
       if (length < 0)
-	length = Integer.MAX_VALUE;
+        length = Integer.MAX_VALUE;
 
       long bytesWritten = 0;
 
       while (length > 0) {
-	int sublen = buffer.length;
+        int sublen = buffer.length;
 
-	if (length < sublen)
-	  sublen = (int) length;
+        if (length < sublen)
+          sublen = (int) length;
 
-	sublen = in.read(buffer, 0, sublen);
-	if (sublen < 0)
-	  return bytesWritten;
+        sublen = in.read(buffer, 0, sublen);
+        if (sublen < 0)
+          return bytesWritten;
 
-	out.write(buffer, 0, sublen);
+        out.write(buffer, 0, sublen);
 
-	bytesWritten += sublen;
-	length -= sublen;
+        bytesWritten += sublen;
+        length -= sublen;
       }
 
       TempBuffer.free(temp);
@@ -259,20 +252,20 @@ public class StreamModule extends AbstractQuercusModule {
   {
     try {
       if (in == null)
-	return BooleanValue.FALSE;
+        return BooleanValue.FALSE;
 
       StringBuilder sb = new StringBuilder();
 
       int ch;
 
       if (maxLen < 0)
-	maxLen = Integer.MAX_VALUE;
+        maxLen = Integer.MAX_VALUE;
 
       while (offset-- > 0)
-	in.read();
+        in.read();
 
       while (maxLen-- > 0 && (ch = in.read()) >= 0) {
-	sb.append((char) ch);
+        sb.append((char) ch);
       }
 
       // XXX: handle offset and maxlen
@@ -291,29 +284,29 @@ public class StreamModule extends AbstractQuercusModule {
   {
     try {
       if (file == null)
-	return BooleanValue.FALSE;
+        return BooleanValue.FALSE;
 
       if (length < 0)
-	length = Integer.MAX_VALUE;
+        length = Integer.MAX_VALUE;
 
       StringValue line = file.readLine();
 
 
       if (line == null)
-	return BooleanValue.FALSE;
+        return BooleanValue.FALSE;
 
       int lineLength = line.length();
       if (lineLength == 0)
-	return line;
+        return line;
 
       char tail = line.charAt(lineLength - 1);
 
       if (tail == '\n')
-	return line.substring(0, line.length() - 1);
+        return line.substring(0, line.length() - 1);
       else if (tail == '\r')
-	return line.substring(0, line.length() - 1);
+        return line.substring(0, line.length() - 1);
       else
-	return line;
+        return line;
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
@@ -350,10 +343,60 @@ public class StreamModule extends AbstractQuercusModule {
   /**
    * Sets the write buffer.
    */
-  public static int stream_set_write_buffer(BinaryStream stream,
+  public static int stream_set_write_buffer(Env env, StreamResource stream,
                                             int bufferSize)
   {
     return 0;
+  }
+
+  /**
+   * Register a wrapper for a protocol.
+   */
+  public static boolean stream_wrapper_register(Env env, StringValue protocol,
+                                                String className)
+  {
+    if (_wrapperMap.containsKey(protocol.toString()))
+      return false;
+
+    QuercusClass qClass = env.getClass(className);
+
+    _wrapperMap.put(protocol.toString(), new ProtocolWrapper(qClass));
+
+    return true;
+  }
+
+  public static ProtocolWrapper getWrapper(String protocol)
+  {
+    return _wrapperMap.get(protocol);
+  }
+
+  static {
+    _constMap.put("STREAM_URL_STAT_LINK", new LongValue(STREAM_URL_STAT_LINK));
+    _constMap.put("STREAM_URL_STAT_QUIET", 
+                  new LongValue(STREAM_URL_STAT_QUIET));
+
+    _constMap.put("STREAM_FILTER_READ", new LongValue(STREAM_FILTER_READ));
+    _constMap.put("STREAM_FILTER_WRITE", new LongValue(STREAM_FILTER_WRITE));
+    _constMap.put("STREAM_FILTER_ALL", new LongValue(STREAM_FILTER_ALL));
+
+    _constMap.put("PSFS_PASS_ON", new LongValue(PSFS_PASS_ON));
+    _constMap.put("PSFS_FEED_ME", new LongValue(PSFS_FEED_ME));
+    _constMap.put("PSFS_ERR_FATAL", new LongValue(PSFS_ERR_FATAL));
+
+    _constMap.put("STREAM_USE_PATH", new LongValue(STREAM_USE_PATH));
+    _constMap.put("STREAM_REPORT_ERRORS", new LongValue(STREAM_REPORT_ERRORS));
+
+    _constMap.put("STREAM_CLIENT_ASYNC_CONNECT",
+                  new LongValue(STREAM_CLIENT_ASYNC_CONNECT));
+    _constMap.put("STREAM_CLIENT_CONNECT",
+                  new LongValue(STREAM_CLIENT_CONNECT));
+    _constMap.put("STREAM_CLIENT_PERSISTENT",
+                  new LongValue(STREAM_CLIENT_PERSISTENT));
+
+    _constMap.put("STREAM_SERVER_BIND",
+                  new LongValue(STREAM_SERVER_BIND));
+    _constMap.put("STREAM_SERVER_LISTEN",
+                  new LongValue(STREAM_SERVER_LISTEN));
   }
 }
 

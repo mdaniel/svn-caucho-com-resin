@@ -43,6 +43,8 @@ import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.BinaryValue;
 import com.caucho.quercus.env.BinaryBuilderValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.BooleanValue;
 
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
@@ -274,6 +276,32 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
+  }
+
+  public long seek(long offset, int whence)
+  {
+    switch (whence) {
+      case BinaryInput.SEEK_CUR:
+        offset = getPosition() + offset;
+        break;
+      case BinaryInput.SEEK_END:
+        // don't necessarily have an end
+        offset = getPosition();
+        break;
+      case SEEK_SET:
+        break;
+      default:
+        break;
+    }
+
+    setPosition(offset);
+
+    return offset;
+  }
+
+  public Value stat()
+  {
+    return BooleanValue.FALSE;
   }
 
   /**

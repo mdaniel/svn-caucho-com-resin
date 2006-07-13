@@ -31,6 +31,8 @@ package com.caucho.quercus.lib.file;
 
 import java.io.IOException;
 
+import com.caucho.quercus.env.Value;
+
 /**
  * Interface for a Quercus stream
  */
@@ -54,4 +56,10 @@ public interface BinaryStream {
    * Returns true if end-of-file has been reached
    */
   public boolean isEOF();
+ 
+  /**
+   * Returns an array filled with stat information.  Mainly for wrapped
+   * stream functionality.
+   */
+  public Value stat();
 }

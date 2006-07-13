@@ -122,15 +122,35 @@ public class StreamReadWrite extends StreamResource {
     else
       return StringValueImpl.EMPTY;
   }
+
+  /**
+   * Reads a line from the stream into a buffer.
+   */
+  public int readLine(char []buffer)
+  {
+    try {
+      if (_is != null)
+        return _is.readLine(buffer, buffer.length, false);
+      else
+        return -1;
+    } catch (IOException e) {
+      return -1;
+    }
+  }
   
   /**
    * Writes to a buffer.
    */
-  public void write(byte []buffer, int offset, int length)
+  public int write(byte []buffer, int offset, int length)
     throws IOException
   {
-    if (_os != null)
+    if (_os != null) {
       _os.write(buffer, offset, length);
+
+      return length;
+    } else {
+      return -1;
+    }
   }
   
   /**
