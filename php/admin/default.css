@@ -15,7 +15,7 @@ table {
 
 h1 {
   font-family : serif;
-  background-image: url(hbleed.gif);
+  background-image: url(images/hbleed.gif);
   padding-top : .3em;
   padding-bottom : .3em;
 }
@@ -32,8 +32,21 @@ th {
   border: thin solid grey;
 }
 
+td.buttons {
+  background: #f9f9f9;
+  padding : 0;
+  border: none;
+  text-align : right;
+}
+
 div.description {
   margin: 1em 0;
   font-style: italic;
 }
 
+pre {
+  background : #ffeecc;
+  color : black;
+  font-family : monospace;
+  font-size : .9em;
+}

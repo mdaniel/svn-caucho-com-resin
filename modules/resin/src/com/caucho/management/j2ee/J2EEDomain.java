@@ -82,6 +82,6 @@ public class J2EEDomain
    */
   public String []getServers()
   {
-    return queryObjectNamesNew("j2eeType", "J2EEServer");
+    return queryObjectNames("j2eeType", "J2EEServer");
   }
 }

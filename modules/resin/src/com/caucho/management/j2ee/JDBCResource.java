@@ -60,8 +60,8 @@ public class JDBCResource
    */
   public String []getJdbcDataSources()
   {
-    return queryObjectNamesNew("j2eeType", "JDBCDataSource",
-                               "JDBCResource", getName());
+    return queryObjectNames("j2eeType", "JDBCDataSource",
+                            "JDBCResource", getName());
   }
 
   public JDBCStats getStats()

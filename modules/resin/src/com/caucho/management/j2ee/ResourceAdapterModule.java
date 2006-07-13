@@ -56,7 +56,7 @@ public class ResourceAdapterModule extends J2EEModule {
    */
   public String []getResourceAdapters()
   {
-    return queryObjectNamesNew("j2eeType", "ResourceAdapater",
-                                "ResourceAdapaterModule",  getName());
+    return queryObjectNames("j2eeType", "ResourceAdapater",
+                            "ResourceAdapaterModule",  getName());
   }
 }

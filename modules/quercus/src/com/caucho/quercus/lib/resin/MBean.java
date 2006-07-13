@@ -30,30 +30,29 @@
 
 package com.caucho.quercus.lib.resin;
 
-import java.util.HashMap;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.caucho.quercus.env.Value;
 
 import javax.management.Attribute;
 import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanParameterInfo;
+import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-
-import com.caucho.quercus.env.Value;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class MBean {
   private static final Logger log = Logger.getLogger(MBean.class.getName());
 
   private static final HashMap<String,Marshall> _marshallMap
     = new HashMap<String,Marshall>();
-  
-  private javax.management.MBeanServer _server;
+
+  private MBeanServerConnection _server;
   private ObjectName _name;
   private MBeanInfo _info;
-  
-  MBean(javax.management.MBeanServer server, ObjectName name)
+
+  MBean(MBeanServerConnection server, ObjectName name)
   {
     _server = server;
     _name = name;
@@ -93,7 +92,7 @@ public class MBean {
       return unmarshall(_server.getAttribute(_name, attrName));
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
-      
+
       return null;
     }
   }
@@ -109,7 +108,7 @@ public class MBean {
       return true;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
-      
+
       return false;
     }
   }

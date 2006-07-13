@@ -29,37 +29,37 @@
 
 package com.caucho.jmx.remote;
 
-import java.util.logging.Logger;
-
-import javax.management.ObjectName;
-import javax.management.ObjectInstance;
-import javax.management.MBeanInfo;
-
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
-
-import com.caucho.services.jmx.RemoteJMX;
-
 import com.caucho.hessian.client.HessianProxyFactory;
 import com.caucho.hessian.jmx.JMXSerializerFactory;
+import com.caucho.services.jmx.RemoteJMX;
+import com.caucho.util.L10N;
+import com.caucho.util.Log;
+import com.caucho.vfs.IOExceptionWrapper;
+
+import javax.management.*;
+import java.io.IOException;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Static convenience methods.
  */
-public class HessianMBeanServerConnection {
+public class HessianMBeanServerConnection
+  implements MBeanServerConnection
+{
   private static final L10N L = new L10N(HessianMBeanServerConnection.class);
   private static final Logger log = Log.open(HessianMBeanServerConnection.class);
-  
+
   private String _url;
   private RemoteJMX _jmxProxy;
-  
+
   /**
    * Creates the MBeanClient.
    */
   public HessianMBeanServerConnection()
   {
   }
-  
+
   /**
    * Creates the MBeanClient.
    */
@@ -80,41 +80,366 @@ public class HessianMBeanServerConnection {
    * Returns the mbean info
    */
   public MBeanInfo getMBeanInfo(ObjectName objectName)
-    throws Exception
+    throws InstanceNotFoundException, IntrospectionException,
+           ReflectionException, IOException
   {
-    return getProxy().getMBeanInfo(objectName.getCanonicalName());
+    try {
+      return getProxy().getMBeanInfo(objectName.getCanonicalName());
+    }
+    catch (JMException ex) {
+      if (ex instanceof InstanceNotFoundException)
+        throw (InstanceNotFoundException) ex;
+
+      if (ex instanceof IntrospectionException)
+        throw (IntrospectionException) ex;
+
+      if (ex instanceof ReflectionException)
+        throw (ReflectionException) ex;
+
+      throw new RuntimeException(ex);
+    }
+  }
+
+  public boolean isInstanceOf(ObjectName name, String className)
+    throws InstanceNotFoundException, IOException
+  {
+
+    // XXX: unimplemented
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+    return false;
   }
 
   /**
    * Gets an attribute.
    */
   public Object getAttribute(ObjectName objectName, String attrName)
-    throws Exception
+    throws MBeanException, AttributeNotFoundException,
+           InstanceNotFoundException, ReflectionException,
+           IOException
   {
-    return getProxy().getAttribute(objectName.getCanonicalName(), attrName);
+    try {
+      return getProxy().getAttribute(objectName.getCanonicalName(), attrName);
+    }
+    catch (JMException ex) {
+      if (ex instanceof MBeanException)
+        throw (MBeanException) ex;
+
+      if (ex instanceof AttributeNotFoundException)
+        throw (AttributeNotFoundException) ex;
+
+      if (ex instanceof InstanceNotFoundException)
+        throw (InstanceNotFoundException) ex;
+
+      if (ex instanceof ReflectionException)
+        throw (ReflectionException) ex;
+
+      throw new RuntimeException(ex);
+    }
+  }
+
+  public AttributeList getAttributes(ObjectName name, String[] attributes)
+    throws InstanceNotFoundException, ReflectionException, IOException
+  {
+
+    // XXX: unimplemented
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+    return null;
+  }
+
+  public void setAttribute(ObjectName name, Attribute attribute)
+    throws
+    InstanceNotFoundException,
+    AttributeNotFoundException,
+    InvalidAttributeValueException,
+    MBeanException,
+    ReflectionException,
+    IOException
+  {
+
+    // XXX: unimplemented
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+
+  }
+
+  public AttributeList setAttributes(ObjectName name, AttributeList attributes)
+    throws InstanceNotFoundException, ReflectionException, IOException
+  {
+
+    // XXX: unimplemented
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+    return null;
+  }
+
+  public Object invoke(ObjectName name,
+                       String operationName,
+                       Object params[],
+                       String signature[])
+    throws
+    InstanceNotFoundException,
+    MBeanException,
+    ReflectionException,
+    IOException
+  {
+
+    // XXX: unimplemented
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+    return null;
+  }
+
+  public String getDefaultDomain()
+    throws IOException
+  {
+
+    // XXX: unimplemented
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+    return null;
+  }
+
+  public String[] getDomains()
+    throws IOException
+  {
+
+    // XXX: unimplemented
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+    return new String[0];
+  }
+
+  public void addNotificationListener(ObjectName name,
+                                      NotificationListener listener,
+                                      NotificationFilter filter,
+                                      Object handback)
+    throws InstanceNotFoundException, IOException
+  {
+
+    // XXX: unimplemented
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+
+  }
+
+  public void addNotificationListener(ObjectName name,
+                                      ObjectName listener,
+                                      NotificationFilter filter,
+                                      Object handback)
+    throws InstanceNotFoundException, IOException
+  {
+
+    // XXX: unimplemented
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+
+  }
+
+  public void removeNotificationListener(ObjectName name, ObjectName listener)
+    throws InstanceNotFoundException, ListenerNotFoundException, IOException
+  {
+
+    // XXX: unimplemented
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+
+  }
+
+  public void removeNotificationListener(ObjectName name,
+                                         ObjectName listener,
+                                         NotificationFilter filter,
+                                         Object handback)
+    throws InstanceNotFoundException, ListenerNotFoundException, IOException
+  {
+
+    // XXX: unimplemented
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+
+  }
+
+  public void removeNotificationListener(ObjectName name,
+                                         NotificationListener listener)
+    throws InstanceNotFoundException, ListenerNotFoundException, IOException
+  {
+
+    // XXX: unimplemented
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+
+  }
+
+  public void removeNotificationListener(ObjectName name,
+                                         NotificationListener listener,
+                                         NotificationFilter filter,
+                                         Object handback)
+    throws InstanceNotFoundException, ListenerNotFoundException, IOException
+  {
+
+    // XXX: unimplemented
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+
+  }
+
+  public ObjectInstance createMBean(String className, ObjectName name)
+    throws
+    ReflectionException,
+    InstanceAlreadyExistsException,
+    MBeanRegistrationException,
+    MBeanException,
+    NotCompliantMBeanException,
+    IOException
+  {
+    // XXX: unimplemented
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+    return null;
+  }
+
+  public ObjectInstance createMBean(String className,
+                                    ObjectName name,
+                                    ObjectName loaderName)
+    throws
+    ReflectionException,
+    InstanceAlreadyExistsException,
+    MBeanRegistrationException,
+    MBeanException,
+    NotCompliantMBeanException,
+    InstanceNotFoundException,
+    IOException
+  {
+
+    // XXX: unimplemented
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+    return null;
+  }
+
+  public ObjectInstance createMBean(String className,
+                                    ObjectName name,
+                                    Object params[],
+                                    String signature[])
+    throws
+    ReflectionException,
+    InstanceAlreadyExistsException,
+    MBeanRegistrationException,
+    MBeanException,
+    NotCompliantMBeanException,
+    IOException
+  {
+
+    // XXX: unimplemented
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+    return null;
+  }
+
+  public ObjectInstance createMBean(String className,
+                                    ObjectName name,
+                                    ObjectName loaderName,
+                                    Object params[],
+                                    String signature[])
+    throws
+    ReflectionException,
+    InstanceAlreadyExistsException,
+    MBeanRegistrationException,
+    MBeanException,
+    NotCompliantMBeanException,
+    InstanceNotFoundException,
+    IOException
+  {
+
+    // XXX: unimplemented
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+    return null;
+  }
+
+  public void unregisterMBean(ObjectName name)
+    throws InstanceNotFoundException, MBeanRegistrationException, IOException
+  {
+
+    // XXX: unimplemented
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+
   }
 
   /**
    * Returns the object instance
    */
   public ObjectInstance getObjectInstance(ObjectName objectName)
-    throws Exception
+    throws InstanceNotFoundException, IOException
   {
-    MBeanInfo info = getMBeanInfo(objectName);
+    MBeanInfo info = null;
+
+    try {
+      info = getMBeanInfo(objectName);
+    }
+    catch (IntrospectionException e) {
+      throw new IOExceptionWrapper(e);
+    }
+    catch (ReflectionException e) {
+      throw new IOExceptionWrapper(e);
+    }
+
     String className = info.getClassName();
 
     return new ObjectInstance(objectName, className);
+  }
+
+  public Set queryMBeans(ObjectName name, QueryExp query)
+    throws IOException
+  {
+
+    // XXX: unimplemented
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+    return null;
+  }
+
+  public Set queryNames(ObjectName name, QueryExp query)
+    throws IOException
+  {
+
+    // XXX: unimplemented
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+    return null;
+  }
+
+  public boolean isRegistered(ObjectName name)
+    throws IOException
+  {
+
+    // XXX: unimplemented
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+    return false;
+  }
+
+  public Integer getMBeanCount()
+    throws IOException
+  {
+
+    // XXX: unimplemented
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+    return null;
   }
 
   private RemoteJMX getProxy()
   {
     if (_jmxProxy == null) {
       try {
-	HessianProxyFactory proxy = new HessianProxyFactory();
-	proxy.getSerializerFactory().addFactory(new JMXSerializerFactory());
-	_jmxProxy = (RemoteJMX) proxy.create(_url);
+        HessianProxyFactory proxy = new HessianProxyFactory();
+        proxy.getSerializerFactory().addFactory(new JMXSerializerFactory());
+        _jmxProxy = (RemoteJMX) proxy.create(_url);
       } catch (Exception e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
     }
 

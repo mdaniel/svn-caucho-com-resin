@@ -219,10 +219,12 @@ abstract public class J2EEManagedObject {
   }
 
   /**
-   * Returns a list of ObjectNames that match the specified keys and values.
+   * Returns a list of ObjectNames that match the specified pattern composed
+   * of keys and values.
+   * The format of the arguments is <code>key1, value1, [keyN, valueN]</code>.
    * The pattern does not need to include ",*", it is added automatically.
    */
-  protected String[] queryObjectNamesNew(String ... pattern)
+  protected String[] queryObjectNames(String ... pattern)
   {
 
     ArrayList<String> objectNames = new ArrayList<String>();
@@ -233,10 +235,11 @@ abstract public class J2EEManagedObject {
   }
 
   /**
-   * Returns a list of ObjectNames that match the specified keys and values.
+   * Returns a list of ObjectNames that match the specified patterns.
+   * Each pattern is an array of keys and values.
    * The pattern does not need to include ",*", it is added automatically.
    */
-  protected String[] queryObjectNames(String[][] patterns)
+  protected String[] queryObjectNamesSet(String[][] patterns)
   {
     TreeSet<String> objectNames = new TreeSet<String>();
 
@@ -256,7 +259,10 @@ abstract public class J2EEManagedObject {
 
       int length = pattern.length;
 
-      for (int i =- 0; i < length; i++) {
+      for (int i = 0; i < length; i++) {
+        if (i != 0)
+          patternBuilder.append(',');
+
         String key = pattern[i];
         String value = pattern[++i];
 

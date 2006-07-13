@@ -112,6 +112,14 @@ public class XmlAuthenticator extends AbstractAuthenticator {
   }
 
   /**
+   * Returns the number of users that are available.
+   */
+  public int getUserCount()
+  {
+    return _userMap.size();
+  }
+
+  /**
    * Reload the authenticator.
    */
   public synchronized void reload()

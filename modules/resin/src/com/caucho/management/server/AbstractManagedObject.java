@@ -29,12 +29,14 @@
 
 package com.caucho.management.server;
 
-import java.util.*;
-import java.util.logging.*;
+import com.caucho.jmx.Description;
+import com.caucho.jmx.Jmx;
 
-import javax.management.*;
-
-import com.caucho.jmx.*;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Parent mbean of all Resin's managed objects.
@@ -63,8 +65,9 @@ abstract public class AbstractManagedObject implements ManagedObjectMXBean {
   public ObjectName getObjectName()
   {
     if (_objectName == null) {
+
       try {
-	Map<String,String> props = Jmx.copyContextProperties(_classLoader);
+        Map<String,String> props = Jmx.copyContextProperties(_classLoader);
 
 	props.put("type", getType());
 
@@ -78,7 +81,7 @@ abstract public class AbstractManagedObject implements ManagedObjectMXBean {
 	//
 	_objectName = Jmx.getObjectName("resin", props);
       } catch (MalformedObjectNameException e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
     }
 

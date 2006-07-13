@@ -79,7 +79,7 @@ public class J2EEServer extends J2EEManagedObject {
    */
   public String []getDeployedObjects()
   {
-    return queryObjectNames(
+    return queryObjectNamesSet(
       new String[][] {
         { "j2eeType", "J2EEApplication"},
         { "j2eeType", "AppClientModule"},
@@ -99,7 +99,7 @@ public class J2EEServer extends J2EEManagedObject {
    */
   public String []getResources()
   {
-    return queryObjectNames(
+    return queryObjectNamesSet(
       new String[][] {
         { "j2eeType", "JCAResource" },
         { "j2eeType", "JavaMailResource" },
@@ -119,7 +119,7 @@ public class J2EEServer extends J2EEManagedObject {
    */
   public String []getJavaVMs()
   {
-    return queryObjectNamesNew("j2eeType", "JVM");
+    return queryObjectNames("j2eeType", "JVM");
   }
 
   /**

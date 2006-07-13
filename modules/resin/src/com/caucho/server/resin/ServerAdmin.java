@@ -29,20 +29,22 @@
 
 package com.caucho.server.resin;
 
-import java.util.Date;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.server.deploy.DeployControllerAdmin;
-import com.caucho.server.port.Port;
-import com.caucho.server.port.AbstractSelectManager;
+import com.caucho.management.server.ClusterMXBean;
+import com.caucho.management.server.HostMXBean;
+import com.caucho.management.server.PortMXBean;
+import com.caucho.management.server.ServerMXBean;
+import com.caucho.management.server.ThreadPoolMXBean;
 import com.caucho.server.cluster.Cluster;
+import com.caucho.server.deploy.DeployControllerAdmin;
 import com.caucho.server.host.HostController;
-
-import com.caucho.management.server.*;
+import com.caucho.server.port.AbstractSelectManager;
+import com.caucho.server.port.Port;
+import com.caucho.util.CauchoSystem;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 public class ServerAdmin extends DeployControllerAdmin<ServerController>
   implements ServerMXBean
@@ -82,7 +84,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
    */
   public String getId()
   {
-    return getController().getId();
+    return getController().getServerId();
   }
   
   public ThreadPoolMXBean getThreadPool()

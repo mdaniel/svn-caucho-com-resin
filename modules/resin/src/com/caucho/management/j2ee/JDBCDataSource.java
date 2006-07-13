@@ -64,8 +64,8 @@ public class JDBCDataSource extends J2EEManagedObject {
    */
   public String getJdbcDriver()
   {
-    String[] names = queryObjectNamesNew("j2eeType", "JDBCDriver",
-                                         "JDBCDataSource", getName());
+    String[] names = queryObjectNames("j2eeType", "JDBCDriver",
+                                      "JDBCDataSource", getName());
 
     return names.length > 0 ? names[0] : null;
   }

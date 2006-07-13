@@ -55,11 +55,9 @@ public class EJBModule extends J2EEModule {
    * Returns the ObjectNames of the {@link EJB}
    * management beans that are contained within this application.
    */
-  public String []getEJbs()
+  public String []getEjbs()
   {
-    String postfix = ",EJBModule=" + _objectName.getKeyProperty("name");
-
-    return queryObjectNames(
+    return queryObjectNamesSet(
       new String[][] {
         { "j2eeType", "EntityBean", "EJBModule", getName() },
         { "j2eeType", "StatefulSessionBean", "EJBModule", getName() },

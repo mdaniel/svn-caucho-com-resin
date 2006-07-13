@@ -230,6 +230,9 @@ public class QuercusServlet
 
       Env env = new Env(getQuercus(), page, ws, request, response);
       try {
+        env.setGlobalValue("request", env.wrapJava(request));
+        env.setGlobalValue("response", env.wrapJava(request));
+
         env.start();
 
 	String prepend = env.getIniString("auto_prepend_file");

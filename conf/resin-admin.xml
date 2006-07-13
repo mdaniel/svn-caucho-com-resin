@@ -1,31 +1,50 @@
 <server xmlns="http://caucho.com/ns/resin"
         xmlns:resin="http://caucho.com/ns/resin/core">
 
-
-  <resource var="admin" type="com.caucho.admin.server.AdminManager">
-    <init>
-    </init>
-  </resource>
-
-
   <host-default>
-    <web-app id="/resin-admin">
-      <servlet-mapping url-pattern="/*">
-        <servlet-class>com.caucho.admin.AdminServlet</servlet-class>
+    <web-app id="/resin-admin" document-directory="${resinHome}/php/admin">
 
-        <init>
-          <admin-manager>${admin}</admin-manager>
-        </init>
-      </servlet-mapping>
-
-      <login-config auth-method="BASIC"/>
-
-      <authenticator type="com.caucho.server.security.XmlAuthenticator">
-        <init>
-          <user>resin-admin:2d8FTxj0FVpE7y/zZRwZMg==:resin-admin</user>
-          <user>resin-monitor:6qCgDEsvkjTw77JI72Se/Q==:resin-monitor</user>
-        </init>
+      <authenticator jndi-name="caucho/admin/auth">
+        <type>com.caucho.server.security.XmlAuthenticator</type>
+        <init path="${serverRoot}/conf/password.xml"/>
       </authenticator>
+
+      <login-config auth-method="DIGEST"
+        authenticator="${jndi:lookup('caucho/admin/auth')}"/>
+
+      <servlet servlet-name="resin-php"
+               servlet-class="com.caucho.quercus.servlet.QuercusServlet">
+      </servlet>
+
+      <servlet-mapping url-pattern="*.php" servlet-name="resin-php"/>
+
+      <security-constraint>
+        <web-resource-collection>
+          <url-pattern>/login.php</url-pattern>
+        </web-resource-collection>
+    
+        <auth-constraint role-name='*'/>
+      </security-constraint>
+
+      <servlet servlet-name='remote'
+               servlet-class='com.caucho.hessian.server.HessianServlet'>
+        <init>
+          <service resin:type="com.caucho.services.jmx.JMXService">
+            <mbean-server>${jndi:lookup("jmx/MBeanServer")}</mbean-server>
+          </service>
+         </init>
+      </servlet>
+
+      <servlet-mapping url-pattern='/remote' servlet-name='remote'/>
+
+      <security-constraint>
+        <web-resource-collection>
+          <url-pattern>/remote</url-pattern>
+        </web-resource-collection>
+    
+        <auth-constraint role-name='*'/>
+      </security-constraint>
+
     </web-app>
   </host-default>
 

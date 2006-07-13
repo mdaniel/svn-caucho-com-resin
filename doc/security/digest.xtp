@@ -130,10 +130,40 @@ pageContext.setAttribute("digest_requestURI",digest_requestURI);
 <p>The class <a href="javadoc|com.caucho.http.security.PasswordDigest|"/> can
 be used to calculate a digest.</p>
 
-<example title="Calculating a digest">
-  com.caucho.http.security.PasswordDigest digest = new com.caucho.http.security.PasswordDigest();
+<example title="Calculating a digest - Java example">
+  import com.caucho.server.security.PasswordDigest;
 
-  String result = digest.getPasswordDigest(user, password, realm);
+  ...
+
+  String username = ...;
+  String password = ...;
+  String realm = "resin";
+
+  PasswordDigest passwordDigest = PasswordDigest();
+
+  String digest = passwordDigest.getPasswordDigest(username, password, realm);
+</example>
+
+<example title="Calculating a digest - PHP example">
+  $username = ...;
+  $password = ...;
+  $realm = "resin";
+
+  $passwordDigest = new Java("com.caucho.server.security.PasswordDigest");
+
+  $digest = $passwordDigest->getPasswordDigest($username, $password, $realm);
+</example>
+
+The realm for JdbcAuthenticator and XmlAuthenticator defaults to "resin";
+the realm can be specified during configuration:
+
+<example title"Specifying a realm">
+
+&lt;authenticator type='com.caucho.server.security.JdbcAuthenticator'&gt;
+  &lt;init&gt;
+    &lt;password-digest-realm&gt;hogwarts&lt;/password-digest-realm&gt;
+
+    ...
 </example>
 
 </section>

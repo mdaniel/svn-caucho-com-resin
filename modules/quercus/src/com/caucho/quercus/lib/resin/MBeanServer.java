@@ -31,6 +31,7 @@
 package com.caucho.quercus.lib.resin;
 
 import com.caucho.jmx.Jmx;
+import com.caucho.jmx.remote.HessianMBeanServerConnection;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
@@ -39,14 +40,33 @@ import com.caucho.quercus.module.Optional;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import javax.management.MBeanServerConnection;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.io.IOException;
 
 public class MBeanServer {
   private static Logger log = Logger.getLogger(MBeanServer.class.getName());
 
+  private final MBeanServerConnection _server;
+
+  /**
+   * Create an MBeanServer for the local server.
+   */
   public MBeanServer()
   {
+    _server = Jmx.getGlobalMBeanServer();
+  }
+
+  /**
+   * Create an MBeanServer that connects to a remote server.
+   *
+   * @param remoteUrl a url that connects to a
+   * {@link com.caucho.services.jmx.JMXService} ussing the hessian protocol.
+   */
+  public MBeanServer(String remoteUrl)
+  {
+    _server = new HessianMBeanServerConnection(remoteUrl);
   }
 
   /**
@@ -69,18 +89,19 @@ public class MBeanServer {
   {
     try {
       if (name == null || name.length() == 0)
-	return null;
-
-      javax.management.MBeanServer server;
-      server = Jmx.getGlobalMBeanServer();
+        return null;
 
       ObjectName objectName = Jmx.getObjectName(name);
 
-      if (server.isRegistered(objectName))
-	return new MBean(server, objectName);
+      if (_server.isRegistered(objectName))
+        return new MBean(_server, objectName);
       else
-	return null;
-    } catch (MalformedObjectNameException e) {
+        return null;
+    }
+    catch (MalformedObjectNameException e) {
+      throw new QuercusModuleException(e);
+    }
+    catch (IOException e) {
       throw new QuercusModuleException(e);
     }
   }
@@ -103,21 +124,25 @@ public class MBeanServer {
       Set<ObjectName> objectNames;
 
       if (pattern.indexOf(':') > 0)
-	objectNames = Jmx.getGlobalMBeanServer().queryNames(patternObjectName, null);
+        objectNames = _server.queryNames(patternObjectName, null);
       else
-	objectNames = Jmx.getMBeanServer().queryNames(patternObjectName, null);
+        objectNames = _server.queryNames(patternObjectName, null);
 
       if (objectNames == null)
-	return null;
+        return null;
 
       javax.management.MBeanServer server;
       server = Jmx.getGlobalMBeanServer();
 
       for (ObjectName objectName : objectNames)
-	values.put(env.wrapJava(new MBean(server, objectName)));
+        values.put(env.wrapJava(new MBean(server, objectName)));
 
       return values;
-    } catch (MalformedObjectNameException e) {
+    }
+    catch (MalformedObjectNameException e) {
+      throw new QuercusModuleException(e);
+    }
+    catch (IOException e) {
       throw new QuercusModuleException(e);
     }
   }
