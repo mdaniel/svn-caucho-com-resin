@@ -2120,49 +2120,21 @@ v   *
   }
 
   /**
-   * Removes leading and trailing whitespace.
+   * replaces substrings.
    *
-   * @param string the string to be trimmed
-   * @param characters optional set of characters to trim
-   * @return the trimmed string
+   * @param search search string
+   * @param replace replacement string
+   * @param subject replacement
+   * @param count return value
    */
-  public static Value trim(StringValue string, @Optional String characters)
+  public static Value str_ireplace(Env env,
+                                  Value search,
+                                  Value replace,
+                                  Value subject,
+                                  @Reference @Optional Value count)
   {
-    boolean []trim;
-
-    if (characters == null || characters.equals(""))
-      trim = TRIM_WHITESPACE;
-    else
-      trim = parseCharsetBitmap(characters.toString());
-
-    int len = string.length();
-
-    int head = 0;
-    for (; head < len; head++) {
-      char ch = string.charAt(head);
-
-      if (ch >= 256 || ! trim[ch]) {
-        break;
-      }
-    }
-
-    int tail = len - 1;
-    for (; tail >= 0; tail--) {
-      char ch = string.charAt(tail);
-
-      if (ch >= 256 || ! trim[ch]) {
-        break;
-      }
-    }
-
-    if (tail < head)
-      return StringValue.EMPTY;
-    else {
-      return (StringValue) string.subSequence(head, tail + 1);
-    }
+    return strReplace(env, search, replace, subject, count, true);
   }
-
-  // XXX: str_ireplace
 
   /**
    * Pads strings
@@ -2249,23 +2221,6 @@ v   *
                                   @Reference @Optional Value count)
   {
     return strReplace(env, search, replace, subject, count, false);
-  }
-
-  /**
-   * replaces substrings.
-   *
-   * @param search search string
-   * @param replace replacement string
-   * @param subject replacement
-   * @param count return value
-   */
-  public static Value str_ireplace(Env env,
-                                  Value search,
-                                  Value replace,
-                                  Value subject,
-                                  @Reference @Optional Value count)
-  {
-    return strReplace(env, search, replace, subject, count, true);
   }
 
   /**
@@ -2905,8 +2860,6 @@ v   *
 
     haystack = haystack.toLowerCase();
     needle = needle.toLowerCase();
-
-    System.out.println("H: " + haystack + " " + needle);
 
     int pos = haystack.indexOf(needle, offset);
 
@@ -3674,6 +3627,49 @@ v   *
     result = string.substring(0, start) + replacement +  string.substring(end);
 
     return new StringValueImpl(result);
+  }
+
+  /**
+   * Removes leading and trailing whitespace.
+   *
+   * @param string the string to be trimmed
+   * @param characters optional set of characters to trim
+   * @return the trimmed string
+   */
+  public static Value trim(StringValue string, @Optional String characters)
+  {
+    boolean []trim;
+
+    if (characters == null || characters.equals(""))
+      trim = TRIM_WHITESPACE;
+    else
+      trim = parseCharsetBitmap(characters.toString());
+
+    int len = string.length();
+
+    int head = 0;
+    for (; head < len; head++) {
+      char ch = string.charAt(head);
+
+      if (ch >= 256 || ! trim[ch]) {
+        break;
+      }
+    }
+
+    int tail = len - 1;
+    for (; tail >= 0; tail--) {
+      char ch = string.charAt(tail);
+
+      if (ch >= 256 || ! trim[ch]) {
+        break;
+      }
+    }
+
+    if (tail < head)
+      return StringValue.EMPTY;
+    else {
+      return (StringValue) string.subSequence(head, tail + 1);
+    }
   }
 
   /**

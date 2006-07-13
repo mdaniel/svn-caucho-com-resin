@@ -392,6 +392,14 @@ public class NetworkModule extends AbstractQuercusModule {
 
     return BooleanValue.FALSE;
   }
+  
+  public static boolean getmxrr(Env env,
+				   String hostname,
+				   @Reference Value mxhosts,
+				   @Optional @Reference Value weight)
+  {
+    return dns_get_mx(env, hostname, mxhosts, weight);
+  }
 
   /**
    * Finds the mx hosts for the given hostname, placing them in mxhosts and
@@ -461,6 +469,14 @@ public class NetworkModule extends AbstractQuercusModule {
     } catch (NamingException e) {
       throw new QuercusModuleException(e);
     }
+  }
+
+  public static boolean checkdnsrr(Env env,
+					 String hostname,
+					 @Reference ArrayValue mxhosts,
+					 @Optional @Reference  ArrayValue weight)
+  {
+    return dns_check_record(env, hostname, mxhosts, weight);
   }
 
   /**

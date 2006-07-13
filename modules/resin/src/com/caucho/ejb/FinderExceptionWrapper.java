@@ -30,16 +30,21 @@ package com.caucho.ejb;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.*;
 
 import javax.ejb.*;
 
 import com.caucho.util.*;
+import com.caucho.amber.*;
 
 /**
  * Wraps the actual exception with an EJB exception
  */
 public class FinderExceptionWrapper extends javax.ejb.FinderException
   implements ExceptionWrapper {
+  private static final Logger log
+    = Logger.getLogger(FinderExceptionWrapper.class.getName());
+  
   /**
    * Null constructors for Serializable
    */
@@ -84,6 +89,11 @@ public class FinderExceptionWrapper extends javax.ejb.FinderException
 
     if (rootCause instanceof FinderException)
       return (FinderException) rootCause;
+    else if (rootCause instanceof AmberObjectNotFoundException) {
+      log.log(Level.FINER, rootCause.toString(), rootCause);
+      
+      return new ObjectNotFoundException(rootCause.getMessage());
+    }
     else
       return new FinderExceptionWrapper(rootCause);
   }

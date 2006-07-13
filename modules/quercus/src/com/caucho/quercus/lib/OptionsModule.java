@@ -387,20 +387,20 @@ public class OptionsModule extends AbstractQuercusModule {
   {
     env.print("<h1>Quercus</h1>");
     env.print("<pre>");
-    env.print("PHP Version => " + phpversion("std"));
-    env.print("System => " + System.getProperty("os.name") + " "
+    env.println("PHP Version => " + phpversion("std"));
+    env.println("System => " + System.getProperty("os.name") + " "
 	      + System.getProperty("os.version") + " "
 	      + System.getProperty("os.arch"));
-    env.print("Build Date => " + Version.VERSION_DATE);
-    env.print("Configure Command => n/a");
-    env.print("Server API => CGI");
-    env.print("Virtual Directory Support => disabled");
-    env.print("Configuration File (php.ini) Path => WEB-INF/php.ini");
-    env.print("PHP API => 20031224");
-    env.print("PHP Extension => 20041030");
-    env.print("Debug Build => no");
-    env.print("Thread Safety => enabled");
-    env.print("Registered PHP Streams => php, file, http, https");
+    env.println("Build Date => " + Version.VERSION_DATE);
+    env.println("Configure Command => n/a");
+    env.println("Server API => CGI");
+    env.println("Virtual Directory Support => disabled");
+    env.println("Configuration File (php.ini) Path => WEB-INF/php.ini");
+    env.println("PHP API => 20031224");
+    env.println("PHP Extension => 20041030");
+    env.println("Debug Build => no");
+    env.println("Thread Safety => enabled");
+    env.println("Registered PHP Streams => php, file, http, https");
     env.println("</pre>");
   }
 

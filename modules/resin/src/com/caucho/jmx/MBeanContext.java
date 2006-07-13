@@ -208,7 +208,10 @@ public class MBeanContext {
    */
   public MBeanWrapper getMBean(ObjectName name)
   {
-    return _mbeans.get(name);
+    if (name != null)
+      return _mbeans.get(name);
+    else
+      return null;
   }
   
   /**

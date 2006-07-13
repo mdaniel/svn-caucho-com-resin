@@ -139,7 +139,7 @@ public class QuercusMain extends ClassComponent {
     _statement.generate(out);
 
     if (! hasReturn)
-      out.println("return NullValue.NULL;");
+      out.println("return LongValue.ONE;");
 
     out.popDepth();
     out.println("}");

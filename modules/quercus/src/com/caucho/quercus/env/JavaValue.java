@@ -350,6 +350,19 @@ public class JavaValue extends ResourceValue {
   }
 
   /**
+   * Converts to a java object.
+   */
+  @Override
+  public Object toJavaObject(Env env, Class type)
+  {
+    if (! type.isAssignableFrom(_object.getClass()))
+      env.warning(L.l("Can't assign {0} to {1}",
+		      _object.getClass().getName(), type.getName()));
+    
+    return null;
+  }
+
+  /**
    * Converts to an object.
    */
   @Override

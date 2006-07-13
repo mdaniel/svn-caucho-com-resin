@@ -507,7 +507,18 @@ public class VariableModule extends AbstractQuercusModule {
     return v.isLongConvertible() || v.isDoubleConvertible();
   }
 
-  // XXX: is_object
+  /**
+   * Returns true for an object
+   *
+   * @param env the calling environment
+   * @param v the value to test
+   *
+   * @return true for object
+   */
+  public static boolean is_object(Env env, @ReadOnly Value v)
+  {
+    return v.isObject();
+  }
 
   /**
    * Returns true for a real

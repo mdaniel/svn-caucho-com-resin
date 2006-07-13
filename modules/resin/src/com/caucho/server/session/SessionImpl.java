@@ -301,7 +301,8 @@ public class SessionImpl implements HttpSession, CacheListener {
         oldValue = _values.remove(name);
     }
 
-    if (_clusterObject != null && value != oldValue)
+    // server/017p
+    if (_clusterObject != null) // && value != oldValue)
       _clusterObject.change();
 
     if (oldValue instanceof HttpSessionBindingListener) {

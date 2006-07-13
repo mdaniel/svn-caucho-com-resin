@@ -380,6 +380,17 @@ abstract public class Value {
   }
 
   /**
+   * Converts to a java object.
+   */
+  public Object toJavaObject(Env env, Class type)
+  {
+    env.warning(L.l("Can't convert {0} to Java {1}",
+		    getClass().getName(), type.getName()));
+    
+    return null;
+  }
+
+  /**
    * Converts to an exception.
    */
   public QuercusException toException(Env env, String file, int line)

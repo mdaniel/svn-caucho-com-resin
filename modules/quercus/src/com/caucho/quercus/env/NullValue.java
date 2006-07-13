@@ -120,6 +120,15 @@ public class NullValue extends Value {
   }
 
   /**
+   * Converts to a java object.
+   */
+  @Override
+  public Object toJavaObject(Env env, Class type)
+  {
+    return null;
+  }
+
+  /**
    * Converts to an object.
    */
   public Value toObject(Env env)

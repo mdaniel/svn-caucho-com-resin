@@ -39,6 +39,7 @@ import java.io.Closeable;
 
 import java.sql.*;
 
+import com.caucho.quercus.*;
 import com.caucho.quercus.env.*;
 import com.caucho.sql.UserConnection;
 import com.caucho.util.LruCache;
@@ -353,7 +354,12 @@ public abstract class JdbcConnectionResource implements Closeable {
    */
   public Connection getConnection()
   {
-    return _conn;
+    if (_conn != null)
+      return _conn;
+    else if (_errorMessage != null)
+      throw new QuercusModuleException(_errorMessage);
+    else
+      throw new QuercusModuleException(L.l("Connection is not available"));
   }
 
   /**
@@ -496,7 +502,7 @@ public abstract class JdbcConnectionResource implements Closeable {
     Statement stmt = null;
 
     try {
-      stmt = _conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+      stmt = getConnection().createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                                    ResultSet.CONCUR_READ_ONLY);
       stmt.setEscapeProcessing(false); // php/1406
       

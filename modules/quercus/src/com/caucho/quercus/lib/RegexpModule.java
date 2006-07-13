@@ -871,14 +871,22 @@ public class RegexpModule
 
       if ((flags & PREG_SPLIT_DELIM_CAPTURE) != 0) {
 	for (int i = 1; i <= matcher.groupCount(); i++) {
+	  String group = matcher.group(i);
+	  Value groupValue;
+
+	  if (group != null)
+	    groupValue = new StringValueImpl(group);
+	  else
+	    groupValue = NullValue.NULL;
+
           if ((flags & PREG_SPLIT_OFFSET_CAPTURE) != 0) {
             ArrayValue part = new ArrayValueImpl();
-            part.put(new StringValueImpl(matcher.group(i)));
+            part.put(groupValue);
             part.put(LongValue.create(matcher.start()));
 
             result.put(part);
           } else {
-            result.put(new StringValueImpl(matcher.group(i)));
+	    result.put(groupValue);
           }
         }
       }

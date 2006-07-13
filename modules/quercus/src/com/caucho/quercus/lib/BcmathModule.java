@@ -107,21 +107,6 @@ public class BcmathModule extends AbstractQuercusModule {
   }
 
   /**
-   * Set the default scale to use for subsequent calls to bcmath functions.
-   * The scale is the number of decimal points to include in the string that
-   * results from bcmath calculations.
-   *
-   * A default scale set with this function overrides the value of the
-   * "bcmath.scale" ini variable.
-   */
-  public static boolean bcscale(Env env, int scale)
-  {
-    env.setIni("bcmath.scale", String.valueOf(scale));
-
-    return true;
-  }
-
-  /**
    * Add two arbitrary precision numbers.
    *
    * The optional scale indicates the number of decimal digits to include in
@@ -143,54 +128,24 @@ public class BcmathModule extends AbstractQuercusModule {
   }
 
   /**
-   * Subtract arbitrary precision number (value2) from another (value1).
+   * Compare two arbitrary precision numbers, return -1 if value 1 < value2,
+   * 0 if value1 == value2, 1 if value1 > value2.
    *
    * The optional scale indicates the number of decimal digits to include in
-   * the result, the default is the value of a previous call to {@link #bcscale}
-   * or the value of the ini variable "bcmath.scale".
+   * comparing the values, the default is the value of a previous call to
+   * {@link #bcscale} or the value of the ini variable "bcmath.scale".
    */
-  public static String bcsub(Env env, Value value1, Value value2, @Optional("-1") int scale)
+  public static int bccomp(Env env, Value value1, Value value2, @Optional("-1") int scale)
   {
     scale = calculateScale(env, scale);
 
     BigDecimal bd1 = toBigDecimal(value1);
     BigDecimal bd2 = toBigDecimal(value2);
 
-    BigDecimal bd = bd1.subtract(bd2);
+    bd1 = bd1.setScale(scale, RoundingMode.DOWN);
+    bd2 = bd2.setScale(scale, RoundingMode.DOWN);
 
-    bd = bd.setScale(scale, RoundingMode.DOWN);
-
-    return bd.toPlainString();
-  }
-
-  /**
-   * Multiply two arbitrary precision numbers.
-   *
-   * The optional scale indicates the number of decimal digits to include in
-   * the result, the default is the value of a previous call to {@link #bcscale}
-   * or the value of the ini variable "bcmath.scale".
-   */
-  public static String bcmul(Env env, Value value1, Value value2, @Optional("-1") int scale)
-  {
-    scale = calculateScale(env, scale);
-
-    BigDecimal bd1 = toBigDecimal(value1);
-    BigDecimal bd2 = toBigDecimal(value2);
-
-    BigDecimal bd = bd1.multiply(bd2);
-
-    // odd php special case for 0, scale is ignored:
-    if (bd.compareTo(ZERO) == 0) {
-      if (scale > 0)
-        return "0.0";
-      else
-        return "0";
-    }
-
-    bd = bd.setScale(scale, RoundingMode.DOWN);
-    bd = bd.stripTrailingZeros();
-
-    return bd.toPlainString();
+    return bd1.compareTo(bd2);
   }
 
   /**
@@ -226,6 +181,61 @@ public class BcmathModule extends AbstractQuercusModule {
     result = result.setScale(scale, RoundingMode.DOWN);
 
     return result.toPlainString();
+  }
+
+  /**
+   * Return the modulus of an aribtrary precison number.
+   * The returned number is always a whole number.
+   *
+   * A modulus of 0 results in a division by zero warning message and a
+   * return value of null.
+   */
+  public static String bcmod(Env env, Value value, Value modulus)
+  {
+    BigDecimal bd1 = toBigDecimal(value).setScale(0, RoundingMode.DOWN);
+    BigDecimal bd2 = toBigDecimal(modulus).setScale(0, RoundingMode.DOWN);
+
+    if (bd2.compareTo(ZERO) == 0) {
+      env.warning(L.l("division by zero"));
+      return null;
+    }
+
+    BigDecimal bd = bd1.remainder(bd2, MathContext.DECIMAL128);
+
+    // scale is always 0 in php
+    bd = bd.setScale(0, RoundingMode.DOWN);
+
+    return bd.toPlainString();
+  }
+
+  /**
+   * Multiply two arbitrary precision numbers.
+   *
+   * The optional scale indicates the number of decimal digits to include in
+   * the result, the default is the value of a previous call to {@link #bcscale}
+   * or the value of the ini variable "bcmath.scale".
+   */
+  public static String bcmul(Env env, Value value1, Value value2, @Optional("-1") int scale)
+  {
+    scale = calculateScale(env, scale);
+
+    BigDecimal bd1 = toBigDecimal(value1);
+    BigDecimal bd2 = toBigDecimal(value2);
+
+    BigDecimal bd = bd1.multiply(bd2);
+
+    // odd php special case for 0, scale is ignored:
+    if (bd.compareTo(ZERO) == 0) {
+      if (scale > 0)
+        return "0.0";
+      else
+        return "0";
+    }
+
+    bd = bd.setScale(scale, RoundingMode.DOWN);
+    bd = bd.stripTrailingZeros();
+
+    return bd.toPlainString();
   }
 
   /**
@@ -274,6 +284,46 @@ public class BcmathModule extends AbstractQuercusModule {
     bd = bd.stripTrailingZeros();
 
     return bd.toPlainString();
+  }
+
+  /**
+   * Raise one arbitrary precision number (base) to the power of another (exp),
+   * and then return the modulus.
+   * The returned number is always a whole number.
+   *
+   * exp must be a whole number. Negative exp is supported.
+   *
+   * The optional scale indicates the number of decimal digits to include in
+   * the pow calculation, the default is the value of a previous call to {@link #bcscale}
+   * or the value of the ini variable "bcmath.scale".
+   */
+  public static String bcpowmod(Env env, Value base, Value exp, Value modulus, @Optional("-1") int scale)
+  {
+    scale = calculateScale(env, scale);
+
+    // XXX: this is inefficient, s/b fast-exponentiation
+    String pow = bcpow(env, base, exp, scale);
+
+    if (pow == null)
+      return null;
+
+    return bcmod(env, new StringValueImpl(pow), modulus);
+  }
+
+
+  /**
+   * Set the default scale to use for subsequent calls to bcmath functions.
+   * The scale is the number of decimal points to include in the string that
+   * results from bcmath calculations.
+   *
+   * A default scale set with this function overrides the value of the
+   * "bcmath.scale" ini variable.
+   */
+  public static boolean bcscale(Env env, int scale)
+  {
+    env.setIni("bcmath.scale", String.valueOf(scale));
+
+    return true;
   }
 
   /**
@@ -358,73 +408,23 @@ public class BcmathModule extends AbstractQuercusModule {
   }
 
   /**
-   * Compare two arbitrary precision numbers, return -1 if value 1 < value2,
-   * 0 if value1 == value2, 1 if value1 > value2.
+   * Subtract arbitrary precision number (value2) from another (value1).
    *
    * The optional scale indicates the number of decimal digits to include in
-   * comparing the values, the default is the value of a previous call to
-   * {@link #bcscale} or the value of the ini variable "bcmath.scale".
+   * the result, the default is the value of a previous call to {@link #bcscale}
+   * or the value of the ini variable "bcmath.scale".
    */
-  public static int bccomp(Env env, Value value1, Value value2, @Optional("-1") int scale)
+  public static String bcsub(Env env, Value value1, Value value2, @Optional("-1") int scale)
   {
     scale = calculateScale(env, scale);
 
     BigDecimal bd1 = toBigDecimal(value1);
     BigDecimal bd2 = toBigDecimal(value2);
 
-    bd1 = bd1.setScale(scale, RoundingMode.DOWN);
-    bd2 = bd2.setScale(scale, RoundingMode.DOWN);
+    BigDecimal bd = bd1.subtract(bd2);
 
-    return bd1.compareTo(bd2);
-  }
-
-  /**
-   * Return the modulus of an aribtrary precison number.
-   * The returned number is always a whole number.
-   *
-   * A modulus of 0 results in a division by zero warning message and a
-   * return value of null.
-   */
-  public static String bcmod(Env env, Value value, Value modulus)
-  {
-    BigDecimal bd1 = toBigDecimal(value).setScale(0, RoundingMode.DOWN);
-    BigDecimal bd2 = toBigDecimal(modulus).setScale(0, RoundingMode.DOWN);
-
-    if (bd2.compareTo(ZERO) == 0) {
-      env.warning(L.l("division by zero"));
-      return null;
-    }
-
-    BigDecimal bd = bd1.remainder(bd2, MathContext.DECIMAL128);
-
-    // scale is always 0 in php
-    bd = bd.setScale(0, RoundingMode.DOWN);
+    bd = bd.setScale(scale, RoundingMode.DOWN);
 
     return bd.toPlainString();
   }
-
-  /**
-   * Raise one arbitrary precision number (base) to the power of another (exp),
-   * and then return the modulus.
-   * The returned number is always a whole number.
-   *
-   * exp must be a whole number. Negative exp is supported.
-   *
-   * The optional scale indicates the number of decimal digits to include in
-   * the pow calculation, the default is the value of a previous call to {@link #bcscale}
-   * or the value of the ini variable "bcmath.scale".
-   */
-  public static String bcpowmod(Env env, Value base, Value exp, Value modulus, @Optional("-1") int scale)
-  {
-    scale = calculateScale(env, scale);
-
-    // XXX: this is inefficient, s/b fast-exponentiation
-    String pow = bcpow(env, base, exp, scale);
-
-    if (pow == null)
-      return null;
-
-    return bcmod(env, new StringValueImpl(pow), modulus);
-  }
-
 }

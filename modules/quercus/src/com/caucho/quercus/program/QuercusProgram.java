@@ -34,10 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Collection;
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.*;
 
 import com.caucho.quercus.page.QuercusPage;
 
@@ -251,7 +248,7 @@ public class QuercusProgram extends GenClass {
     if (value != null)
       return value;
     else
-      return NullValue.NULL;
+      return LongValue.ONE;
   }
 
   /**

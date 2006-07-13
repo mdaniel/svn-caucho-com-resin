@@ -315,6 +315,8 @@ r_server-Basis =
 
   & r_cluster*
 
+  & r_cluster-definition*
+
   & r_ear-default*
 
   & r_error-page*

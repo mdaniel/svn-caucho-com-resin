@@ -130,7 +130,7 @@ public class JavaMarshall extends Marshall {
     else {
       out.print("(" + argClass.getName() + ") ");
       expr.generate(out);
-      out.print(".toJavaObject()");
+      out.print(".toJavaObject(env, " + argClass.getName() + ".class)");
     }
   }
 
