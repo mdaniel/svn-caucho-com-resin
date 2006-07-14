@@ -593,7 +593,7 @@ public class EntityIntrospector {
       JClass []paramTypes = method.getParameterTypes();
 
       if (method.getDeclaringClass().getName().equals("java.lang.Object"))
-	continue;
+  continue;
 
       if (! methodName.startsWith("get") || paramTypes.length != 0) {
         continue;
@@ -691,7 +691,7 @@ public class EntityIntrospector {
   {
     if (type == null)
       return false;
-    
+
     for (JField field : type.getDeclaredFields()) {
       JAnnotation id = field.getAnnotation(javax.persistence.Id.class);
 
@@ -914,7 +914,7 @@ public class EntityIntrospector {
       JClass []paramTypes = method.getParameterTypes();
 
       if (method.getDeclaringClass().getName().equals("java.lang.Object"))
-	continue;
+  continue;
 
       introspectCallbacks(entityType, method);
 
@@ -1047,8 +1047,15 @@ public class EntityIntrospector {
     else if (field.isAnnotationPresent(javax.persistence.OneToMany.class)) {
       validateAnnotations(field, _oneToManyAnnotations);
 
-      if (! _oneToManyTypes.contains(fieldType.getName())) {
-        throw error(field, L.l("'{0}' is an illegal @OneToMany type for {1}.  @OneToMany must be a java.util.Collection or java.util.List.",
+      if (field.isAnnotationPresent(javax.persistence.MapKey.class)) {
+        if (!fieldType.getName().equals("java.util.Map")) {
+          throw error(field, L.l("'{0}' is an illegal @OneToMany/@MapKey type for {1}. @MapKey must be a java.util.Map",
+                                 fieldType.getName(),
+                                 field.getName()));
+        }
+      }
+      else if (! _oneToManyTypes.contains(fieldType.getName())) {
+        throw error(field, L.l("'{0}' is an illegal @OneToMany type for {1}.  @OneToMany must be a java.util.Collection, java.util.List or java.util.Map",
                                fieldType.getName(),
                                field.getName()));
       }
@@ -1066,6 +1073,15 @@ public class EntityIntrospector {
                                                  fieldType));
     }
     else if (field.isAnnotationPresent(javax.persistence.ManyToMany.class)) {
+
+      if (field.isAnnotationPresent(javax.persistence.MapKey.class)) {
+        if (!fieldType.getName().equals("java.util.Map")) {
+          throw error(field, L.l("'{0}' is an illegal @ManyToMany/@MapKey type for {1}. @MapKey must be a java.util.Map",
+                                 fieldType.getName(),
+                                 field.getName()));
+        }
+      }
+
       Completion completion = new ManyToManyCompletion(sourceType,
                                                        field,
                                                        fieldName,
@@ -1473,6 +1489,26 @@ public class EntityIntrospector {
                                                   targetType.getTable(),
                                                   targetColumns));
 
+    JAnnotation mapKeyAnn = field.getAnnotation(MapKey.class);
+
+    if (mapKeyAnn != null) {
+
+      String key = mapKeyAnn.getString("name");
+
+      String getter = "get" +
+        Character.toUpperCase(key.charAt(0)) + key.substring(1);
+
+      AmberField amberField = targetType.getField(getter);
+
+      if (amberField == null) {
+        throw error(field,
+                    L.l("targetEntity '{0}' has no getter for field named '{1}'. Either the @MapKey name or the @ManyToMany targetEntity is incorrect.",
+                        targetName, key));
+      }
+
+      manyToManyField.setMapKey(key);
+    }
+
     sourceType.addField(manyToManyField);
   }
 
@@ -1727,14 +1763,15 @@ public class EntityIntrospector {
       String mappedBy = oneToManyAnn.getString("mappedBy");
 
       if (mappedBy != null && ! mappedBy.equals("")) {
-        oneToManyBidirectional(targetType, mappedBy);
+        oneToManyBidirectional(targetType, targetName, mappedBy);
       }
       else {
-        oneToManyUnidirectional(targetType);
+        oneToManyUnidirectional(targetType, targetName);
       }
     }
 
     private void oneToManyBidirectional(EntityType targetType,
+                                        String targetName,
                                         String mappedBy)
       throws ConfigException
     {
@@ -1756,15 +1793,32 @@ public class EntityIntrospector {
 
       oneToMany = new EntityOneToManyField(_entityType, _fieldName);
       oneToMany.setSourceField(sourceField);
+
       JAnnotation mapKeyAnn = _field.getAnnotation(MapKey.class);
+
       if (mapKeyAnn != null) {
-        oneToMany.setMapKey(mapKeyAnn.getString("name"));
+
+        String key = mapKeyAnn.getString("name");
+
+        String getter = "get" +
+          Character.toUpperCase(key.charAt(0)) + key.substring(1);
+
+        AmberField amberField = targetType.getField(getter);
+
+        if (amberField == null) {
+          throw error(_field,
+                      L.l("targetEntity '{0}' has no getter for field named '{1}'. Either the @MapKey name or the @OneToMany targetEntity is incorrect.",
+                          targetName, key));
+        }
+
+        oneToMany.setMapKey(key);
       }
 
       _entityType.addField(oneToMany);
     }
 
-    private void oneToManyUnidirectional(EntityType targetType)
+    private void oneToManyUnidirectional(EntityType targetType,
+                                         String targetName)
       throws ConfigException
     {
       EntityManyToManyField manyToManyField;
@@ -1822,6 +1876,26 @@ public class EntityIntrospector {
       manyToManyField.setTargetLink(new LinkColumns(mapTable,
                                                     targetType.getTable(),
                                                     targetColumns));
+
+      JAnnotation mapKeyAnn = _field.getAnnotation(MapKey.class);
+
+      if (mapKeyAnn != null) {
+
+        String key = mapKeyAnn.getString("name");
+
+        String getter = "get" +
+          Character.toUpperCase(key.charAt(0)) + key.substring(1);
+
+        AmberField amberField = targetType.getField(getter);
+
+        if (amberField == null) {
+          throw error(_field,
+                      L.l("targetEntity '{0}' has no getter for field named '{1}'. Either the @MapKey name or the @ManyToMany targetEntity is incorrect.",
+                          targetName, key));
+        }
+
+        manyToManyField.setMapKey(key);
+      }
 
       _entityType.addField(manyToManyField);
     }
@@ -2043,6 +2117,7 @@ public class EntityIntrospector {
     // annotations allowed with a @ManyToMany annotation
     _manyToManyAnnotations.add("javax.persistence.ManyToMany");
     _manyToManyAnnotations.add("javax.persistence.JoinTable");
+    _manyToManyAnnotations.add("javax.persistence.MapKey");
 
     // types allowed with a @ManyToMany annotation
     _manyToManyTypes.add("java.util.Collection");

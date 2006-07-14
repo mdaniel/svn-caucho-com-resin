@@ -235,20 +235,29 @@ public class EntityOneToManyField extends CollectionField {
     JType type = getJavaType();
     JType []paramArgs = type.getActualTypeArguments();
     JType param = paramArgs.length > 0 ? paramArgs[0] : null;
+    JType param2 = paramArgs.length > 1 ? paramArgs[1] : null;
+
+    out.print("private ");
+
+    String collectionImpl;
 
     if (isSet)
-      out.print("private com.caucho.amber.collection.SetImpl");
+      collectionImpl = "com.caucho.amber.collection.SetImpl";
     else if (isMap)
-      out.print("private com.caucho.amber.collection.MapImpl");
+      collectionImpl = "com.caucho.amber.collection.MapImpl";
     else
-      out.print("private com.caucho.amber.collection.CollectionImpl");
+      collectionImpl = "com.caucho.amber.collection.CollectionImpl";
+
+    out.print(collectionImpl);
 
     if (param != null) {
       out.print("<");
       out.print(param.getPrintName());
       if (isMap) {
-        out.print(", ");
-        out.print(paramArgs[1].getPrintName());
+        if (param2 != null) {
+          out.print(", ");
+          out.print(param2.getPrintName());
+        }
       }
       out.print(">");
     }
@@ -304,19 +313,17 @@ public class EntityOneToManyField extends CollectionField {
     out.println("int index = 1;");
     getSourceType().getId().generateSet(out, "query", "index", "this");
 
-    if (isSet)
-      out.print(var + " = new com.caucho.amber.collection.SetImpl");
-    else if (isMap)
-      out.print(var + " = new com.caucho.amber.collection.MapImpl");
-    else
-      out.print(var + " = new com.caucho.amber.collection.CollectionImpl");
+    // Ex: _caucho_getChildren = new com.caucho.amber.collection.CollectionImpl
+    out.print(var);
+    out.print(" = new ");
+    out.print(collectionImpl);
 
     if (param != null) {
       out.print("<");
       out.print(param.getPrintName());
       if (isMap) {
         out.print(", ");
-        out.print(paramArgs[1].getPrintName());
+        out.print(param2.getPrintName());
       }
       out.print(">");
     }
@@ -325,7 +332,7 @@ public class EntityOneToManyField extends CollectionField {
     if (isMap) {
       out.println(",");
       out.pushDepth();
-      out.print(paramArgs[1].getPrintName());
+      out.print(getEntityTargetType().getBeanClass().getName());
       out.print(".class.getDeclaredMethod(\"get");
       String getterMapKey = getMapKey();
       getterMapKey = Character.toUpperCase(getterMapKey.charAt(0)) + getterMapKey.substring(1);
