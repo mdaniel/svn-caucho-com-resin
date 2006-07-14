@@ -30,17 +30,23 @@
 package com.caucho.soap.marshall;
 import javax.xml.stream.*;
 import java.util.*;
+import java.math.*;
 
+import java.lang.reflect.*;
 import java.io.*;
-
-import javax.xml.stream.*;
 
 import com.caucho.vfs.WriteStream;
 
 /**
- * Marshalls data to and from soap.
+ * Marshalls data for a string object
  */
-public class Marshall {
+public class BigDecimalMarshall extends Marshall {
+  public static final BigDecimalMarshall MARSHALL = new BigDecimalMarshall();
+
+  private BigDecimalMarshall()
+  {
+  }
+  
   /**
    * Deserializes the data from the input.
    */
@@ -49,13 +55,23 @@ public class Marshall {
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   /**
    * Serializes the data to the result
    */
   public void serialize(WriteStream out, Object obj, String fieldName)
     throws IOException
   {
+    out.print('<');
+    out.print(fieldName);
+    out.print('>');
+    
+    //StringMarshall.escapify((String)obj, out);
+    
+    out.print("</");
+    out.print(fieldName);
+    out.print(">");
+
     throw new UnsupportedOperationException(getClass().getName());
   }
 }

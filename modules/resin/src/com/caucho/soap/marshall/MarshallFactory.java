@@ -29,6 +29,9 @@
 
 package com.caucho.soap.marshall;
 
+import java.util.*;
+import java.math.*;
+
 /**
  * Factory for creating marshall instances
  */
@@ -48,6 +51,24 @@ public class MarshallFactory {
   {
     if (String.class.equals(type))
       return StringMarshall.MARSHALL;
+    if (Map.class.equals(type))
+      return MapMarshall.MARSHALL;
+    if (Double.class.equals(type))
+      return DoubleMarshall.MARSHALL;
+    if (Float.class.equals(type))
+      return FloatMarshall.MARSHALL;
+    if (Long.class.equals(type))
+      return LongMarshall.MARSHALL;
+    if (BigDecimal.class.equals(type))
+      return BigDecimalMarshall.MARSHALL;
+    if (List.class.equals(type))
+      return ListMarshall.MARSHALL;
+    if (Date.class.equals(type))
+      return DateMarshall.MARSHALL;
+    if (byte[].class.equals(type))
+      return ByteArrayMarshall.MARSHALL;
+    if (Object[].class.isAssignableFrom(type))
+      return ArrayMarshall.MARSHALL;
     else
       throw new UnsupportedOperationException(type.getName());
   }

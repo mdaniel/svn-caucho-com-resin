@@ -28,6 +28,8 @@
  */
 
 package com.caucho.soap.marshall;
+import javax.xml.stream.*;
+import java.io.*;
 
 import java.lang.reflect.*;
 import java.io.*;
@@ -45,6 +47,15 @@ public class StringMarshall extends Marshall {
   }
   
   /**
+   * Deserializes the data from the input.
+   */
+  public Object deserialize(XMLStreamReader in)
+    throws IOException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
    * Serializes the data to the result
    */
   public void serialize(WriteStream out, Object obj, String fieldName)
@@ -58,12 +69,30 @@ public class StringMarshall extends Marshall {
     //  xsi:type=\"xsd:string\">");
     
     if (obj != null)
-      // XXX: escapification
-      out.print((String) obj);
+      escapify((String)obj, out);
     
     out.print("</");
     out.print(fieldName);
     out.print(">");
+  }
+
+  public static void escapify(String s, WriteStream out)
+    throws IOException
+  {
+    int len = s.length();
+
+    for(int i=0; i<len; i++) {
+      char c = s.charAt(i);
+      if ((c < 32 || c > 127) || c=='\'' || c=='\"' ||
+	  c=='<' || c=='>' || c=='&') {
+	out.print("&#");
+	out.print((int)c);
+	out.print(";");
+      } else {
+	out.print(c);
+      }
+    }
+
   }
 }
 
