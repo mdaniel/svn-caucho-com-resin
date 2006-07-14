@@ -29,11 +29,10 @@
 
 package com.caucho.management.server;
 
+import com.caucho.jmx.Description;
+import com.caucho.jmx.Units;
+
 import java.util.Date;
-
-import javax.management.ObjectName;
-
-import com.caucho.jmx.*;
 
 /**
  * A client-view of a cluster's server.  The load balancer and
@@ -50,32 +49,32 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
   /**
    * The containing cluster.
    */
-  @Description("The Cluster which contains the server")
+  @Description("The configured Cluster which contains the server")
   public ClusterMXBean getCluster();
 
   /**
    * The cluster index of the server.
    */
-  @Description("The index of this server in the cluster, used for distributed objects.")
+  @Description("The configured index of this server in the cluster, used for distributed objects.")
   public int getClusterIndex();
 
   /**
    * The timeout in milliseconds for connecting to the server.
    */
-  @Description("Timeout for a client connect to the server")
+  @Description("The configured timeout for a client connect to the server")
   @Units("milliseconds")
   public long getConnectTimeout();
 
   /**
    * Returns the ip address or host name of the server.
    */
-  @Description("The IP address or host name of the server")
+  @Description("The configured IP address or host name of the server")
   public String getAddress();
 
   /**
    * Returns the resin/admin port number of the server.
    */
-  @Description("The port number of the target server")
+  @Description("The configured port number of the target server")
   public int getPort();
 
   /**
@@ -83,7 +82,7 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
    * a connection attempt fails. When the timeout period elapses another attempt
    * is made to connect to the target server
    */
-  @Description("Timeout for assuming a target server remains" +
+  @Description("The configured timeout for assuming a target server remains" +
 	      " unavailable once a connection attempt fails." +
 	      " When the timeout period elapses another" +
 	      " attempt is made to connect to the target server")
@@ -128,7 +127,7 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
    * Returns the timeout to use for writes when communicating with
    * the target server.
    */
-  @Description("Configured timeout for a client write to the server")
+  @Description("The configured timeout for a client write to the server")
   @Units("milliseconds")
   public long getWriteTimeout();
 
@@ -150,15 +149,15 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
    * Returns the number of connections actively being used to communicate with
    * the target server.
    */
-  @Description("The number of connections actively being used"
-    + " to communicate with the target server")
+  @Description("The current number of connections actively being used" +
+               " to communicate with the target server")
   public int getConnectionActiveCount();
 
   /**
    * Returns the number of open but currently unused connections to the
    * target server.
    */
-  @Description("The number of idle connections in the connection pool")
+  @Description("The current number of idle connections in the connection pool")
   public int getConnectionIdleCount();
 
   /**
@@ -186,7 +185,7 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
   /**
    * Returns the time of the last failure.
    */
-  @Description("The time of the last failed connection")
+  @Description("The last time a connection attempt failed")
   public Date getLastFailTime();
 
   /**
@@ -198,9 +197,9 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
   public long getConnectionBusyCountTotal();
 
   /**
-   * Returns the time of the busy response.
+   * Returns the last time of the busy response.
    */
-  @Description("The time of the busy response connection")
+  @Description("The last time the target server refused a request because it was busy")
   public Date getLastBusyTime();
 
   /**

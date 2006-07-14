@@ -42,8 +42,6 @@ public class MBeanView {
   private static final Logger log = Log.open(MBeanView.class);
   private static final L10N L = new L10N(MBeanView.class);
 
-  private static final Comparator<ObjectName> OBJECTNAME_COMPARATOR;
-  private static final Comparator<ObjectInstance> OBJECTINSTANCE_COMPARATOR;
 
   private ClassLoader _classLoader;
 
@@ -166,8 +164,7 @@ public class MBeanView {
 	   BadAttributeValueExpException,
 	   InvalidApplicationException
   {
-    // causes jconsole to fail
-    //TreeSet<ObjectName> set = new TreeSet<ObjectName>(OBJECTNAME_COMPARATOR);
+    // TreeSet would be better but it causes jconsole to fail
     HashSet<ObjectName> set = new HashSet<ObjectName>();
 
     queryNames(set, queryName, query);
@@ -383,33 +380,5 @@ public class MBeanView {
     return "MBeanView[" + _classLoader + "]";
   }
 
-  static {
-    OBJECTNAME_COMPARATOR = new Comparator<ObjectName>() {
-      public int compare(ObjectName o1, ObjectName o2)
-      {
-        if (o1 == null)
-          return -1;
-
-        if (o2 == null)
-          return 1;
-
-        return o1.getCanonicalName().compareTo(o2.getCanonicalName());
-      }
-    };
-
-    OBJECTINSTANCE_COMPARATOR = new Comparator<ObjectInstance>() {
-      public int compare(ObjectInstance o1, ObjectInstance o2)
-      {
-        if (o1 == null)
-          return -1;
-
-        if (o2 == null)
-          return 1;
-
-        return o1.getObjectName().getCanonicalName().compareTo(o2.getObjectName().getCanonicalName());
-      }
-    };
-
-  }
 }
 

@@ -29,30 +29,22 @@
 
 package com.caucho.server.cluster;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.management.ObjectName;
-
-import com.caucho.util.*;
-
-import com.caucho.log.Log;
-
 import com.caucho.config.ConfigException;
-
 import com.caucho.config.types.Period;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentLocal;
+import com.caucho.jmx.Jmx;
 import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.log.Log;
+import com.caucho.management.server.ClusterMXBean;
+import com.caucho.util.L10N;
 
-import com.caucho.jmx.Jmx;
-
-import com.caucho.management.server.*;
+import javax.management.ObjectName;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Defines a set of clustered servers.
@@ -307,7 +299,7 @@ public class Cluster implements EnvironmentListener {
   }
 
   /**
-   * Sets the client slow-start time.
+   * Sets the client warmup time.
    */
   public void setClientWarmupTime(Period period)
   {
@@ -315,7 +307,7 @@ public class Cluster implements EnvironmentListener {
   }
 
   /**
-   * Gets the client slow-start time.
+   * Gets the client warmup time.
    */
   public long getClientWarmupTime()
   {

@@ -29,9 +29,10 @@
 
 package com.caucho.management.server;
 
-import java.util.Date;
+import com.caucho.jmx.Description;
+import com.caucho.jmx.Units;
 
-import com.caucho.jmx.*;
+import java.util.Date;
 
 /**
  * Management interface for the server.  Each server corresponds to a
@@ -173,7 +174,7 @@ public interface ServerMXBean extends DeployControllerMXBean {
    * The total number of connections that have terminated with
    * {@link com.caucho.vfs.ClientDisconnectException}.
    */
-  @Description("The total number of connections that have " +
+  @Description("The total number of connections that have" +
                " terminated with a client disconnect")
   long getClientDisconnectCountTotal();
 

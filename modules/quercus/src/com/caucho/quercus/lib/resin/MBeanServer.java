@@ -38,15 +38,19 @@ import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.module.Optional;
 
+import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import javax.management.MBeanServerConnection;
-import java.util.Set;
-import java.util.logging.Logger;
 import java.io.IOException;
+import java.util.Comparator;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.logging.Logger;
 
 public class MBeanServer {
   private static Logger log = Logger.getLogger(MBeanServer.class.getName());
+
+  private static final Comparator<ObjectName> OBJECTNAME_COMPARATOR;
 
   private final MBeanServerConnection _server;
 
@@ -123,18 +127,20 @@ public class MBeanServer {
 
       Set<ObjectName> objectNames;
 
-      if (pattern.indexOf(':') > 0)
-        objectNames = _server.queryNames(patternObjectName, null);
-      else
-        objectNames = _server.queryNames(patternObjectName, null);
+      objectNames = _server.queryNames(patternObjectName, null);
 
       if (objectNames == null)
-        return null;
+        return values;
 
       javax.management.MBeanServer server;
       server = Jmx.getGlobalMBeanServer();
 
-      for (ObjectName objectName : objectNames)
+      TreeSet<ObjectName> sortedObjectNames
+        = new TreeSet<ObjectName>(OBJECTNAME_COMPARATOR);
+
+      sortedObjectNames.addAll(objectNames);
+
+      for (ObjectName objectName : sortedObjectNames)
         values.put(env.wrapJava(new MBean(server, objectName)));
 
       return values;
@@ -145,5 +151,20 @@ public class MBeanServer {
     catch (IOException e) {
       throw new QuercusModuleException(e);
     }
+  }
+
+  static {
+    OBJECTNAME_COMPARATOR = new Comparator<ObjectName>() {
+      public int compare(ObjectName o1, ObjectName o2)
+      {
+        if (o1 == null)
+          return -1;
+
+        if (o2 == null)
+          return 1;
+
+        return o1.getCanonicalName().compareTo(o2.getCanonicalName());
+      }
+    };
   }
 }
