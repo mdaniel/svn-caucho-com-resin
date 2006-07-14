@@ -310,10 +310,13 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
    */
   public void log(LogRecord record)
   {
+    if (record == null)
+      return;
+    
     if (_hasLocalLevel) {
       Level level = _localLevel.get();
 
-      if (record.getLevel().intValue() < level.intValue())
+      if (level != null && record.getLevel().intValue() < level.intValue())
 	return;
     }
 

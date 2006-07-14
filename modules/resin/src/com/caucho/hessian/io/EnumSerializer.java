@@ -87,6 +87,7 @@ public class EnumSerializer extends AbstractSerializer {
     if (ref < 0) {
       out.writeString("name");
       out.writeString(name);
+      out.writeMapEnd();
     }
     else {
       if (ref == 0) {

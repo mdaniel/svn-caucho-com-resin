@@ -85,12 +85,7 @@ public class UserConnection implements java.sql.Connection {
   public Connection getConnection()
     throws SQLException
   {
-    ManagedConnectionImpl mConn = getMConn();
-
-    if (mConn == null)
-      throw new IllegalStateException(L.l("Cannot use closed connection.  Check max-active-time and review application code. "));
-    
-    Connection conn = mConn.getDriverConnection();
+    Connection conn = getConnection();
 
     if (conn instanceof com.caucho.sql.spy.SpyConnection)
       conn = ((com.caucho.sql.spy.SpyConnection)conn).getConnection();
@@ -123,7 +118,7 @@ public class UserConnection implements java.sql.Connection {
   {
     Statement stmt;
 
-    Connection conn = getConnection();
+    Connection conn = getDriverConnection();
 
     try {
       stmt = conn.createStatement();
@@ -152,7 +147,7 @@ public class UserConnection implements java.sql.Connection {
   {
     Statement stmt;
 
-    Connection conn = getConnection();
+    Connection conn = getDriverConnection();
 
     try {
       stmt = conn.createStatement(resultSetType, resultSetConcurrency);
@@ -179,7 +174,7 @@ public class UserConnection implements java.sql.Connection {
   {
     Statement stmt;
 
-    Connection conn = getConnection();
+    Connection conn = getDriverConnection();
 
     try {
       stmt = conn.createStatement(resultSetType,
@@ -208,7 +203,7 @@ public class UserConnection implements java.sql.Connection {
   {
     PreparedStatement stmt;
 
-    if (getConnection() == null) {
+    if (getDriverConnection() == null) {
       fatalEvent();
       throw new SQLException(L.l("can't create statement from closed connection."));
     }
@@ -240,13 +235,13 @@ public class UserConnection implements java.sql.Connection {
   {
     PreparedStatement stmt;
 
-    if (getConnection() == null) {
+    if (getDriverConnection() == null) {
       fatalEvent();
       throw new SQLException(L.l("can't create statement from closed connection."));
     }
 
     try {
-      stmt = getConnection().prepareStatement(sql, resultSetType, resultSetConcurrency);
+      stmt = getDriverConnection().prepareStatement(sql, resultSetType, resultSetConcurrency);
     } catch (SQLException e) {
       fatalEvent();
       throw e;
@@ -273,13 +268,13 @@ public class UserConnection implements java.sql.Connection {
   {
     PreparedStatement stmt;
 
-    if (getConnection() == null) {
+    if (getDriverConnection() == null) {
       fatalEvent();
       throw new SQLException(L.l("can't create statement from closed connection."));
     }
 
     try {
-      stmt = getConnection().prepareStatement(sql,
+      stmt = getDriverConnection().prepareStatement(sql,
                                               resultSetType,
                                               resultSetConcurrency,
                                               resultSetHoldability);
@@ -307,7 +302,7 @@ public class UserConnection implements java.sql.Connection {
   {
     PreparedStatement stmt;
 
-    if (getConnection() == null) {
+    if (getDriverConnection() == null) {
       fatalEvent();
       throw new SQLException(L.l("can't create statement from closed connection."));
     }
@@ -338,13 +333,13 @@ public class UserConnection implements java.sql.Connection {
   {
     PreparedStatement stmt;
 
-    if (getConnection() == null) {
+    if (getDriverConnection() == null) {
       fatalEvent();
       throw new SQLException(L.l("can't create statement from closed connection."));
     }
 
     try {
-      stmt = getConnection().prepareStatement(sql, columnIndexes);
+      stmt = getDriverConnection().prepareStatement(sql, columnIndexes);
     } catch (SQLException e) {
       fatalEvent();
       throw e;
@@ -369,13 +364,13 @@ public class UserConnection implements java.sql.Connection {
   {
     PreparedStatement stmt;
 
-    if (getConnection() == null) {
+    if (getDriverConnection() == null) {
       fatalEvent();
       throw new SQLException(L.l("can't create statement from closed connection."));
     }
 
     try {
-      stmt = getConnection().prepareStatement(sql, columnNames);
+      stmt = getDriverConnection().prepareStatement(sql, columnNames);
     } catch (SQLException e) {
       fatalEvent();
       throw e;
@@ -395,13 +390,13 @@ public class UserConnection implements java.sql.Connection {
   {
     CallableStatement stmt;
 
-    if (getConnection() == null) {
+    if (getDriverConnection() == null) {
       fatalEvent();
       throw new SQLException(L.l("can't create statement from closed connection."));
     }
 
     try {
-      stmt = getConnection().prepareCall(sql, resultSetType, resultSetConcurrency);
+      stmt = getDriverConnection().prepareCall(sql, resultSetType, resultSetConcurrency);
     } catch (SQLException e) {
       fatalEvent();
       throw e;
@@ -420,13 +415,13 @@ public class UserConnection implements java.sql.Connection {
   {
     CallableStatement stmt;
 
-    if (getConnection() == null) {
+    if (getDriverConnection() == null) {
       fatalEvent();
       throw new SQLException(L.l("can't create statement from closed connection."));
     }
 
     try {
-      stmt = getConnection().prepareCall(sql);
+      stmt = getDriverConnection().prepareCall(sql);
     } catch (SQLException e) {
       fatalEvent();
       throw e;
@@ -448,13 +443,13 @@ public class UserConnection implements java.sql.Connection {
   {
     CallableStatement stmt;
 
-    if (getConnection() == null) {
+    if (getDriverConnection() == null) {
       fatalEvent();
       throw new SQLException(L.l("can't create statement from closed connection."));
     }
 
     try {
-      stmt = getConnection().prepareCall(sql,
+      stmt = getDriverConnection().prepareCall(sql,
                                          resultSetType,
                                          resultSetConcurrency,
                                          resultSetHoldability);
@@ -480,7 +475,7 @@ public class UserConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      return getConnection().getCatalog();
+      return getDriverConnection().getCatalog();
     } catch (SQLException e) {
       fatalEvent();
       throw e;
@@ -503,7 +498,7 @@ public class UserConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      return getConnection().getMetaData();
+      return getDriverConnection().getMetaData();
     } catch (SQLException e) {
       fatalEvent();
       throw e;
@@ -517,7 +512,7 @@ public class UserConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      return getConnection().getTypeMap();
+      return getDriverConnection().getTypeMap();
     } catch (SQLException e) {
       fatalEvent();
       throw e;
@@ -540,7 +535,7 @@ public class UserConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      return getConnection().nativeSQL(sql);
+      return getDriverConnection().nativeSQL(sql);
     } catch (SQLException e) {
       fatalEvent();
       throw e;
@@ -551,7 +546,7 @@ public class UserConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      return getConnection().getTransactionIsolation();
+      return getDriverConnection().getTransactionIsolation();
     } catch (SQLException e) {
       fatalEvent();
       throw e;
@@ -568,7 +563,7 @@ public class UserConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      Connection conn = getConnection();
+      Connection conn = getDriverConnection();
 
       if (conn != null)
         return conn.getWarnings();
@@ -584,7 +579,7 @@ public class UserConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      Connection conn = getConnection();
+      Connection conn = getDriverConnection();
 
       if (conn != null)
         conn.clearWarnings();
@@ -604,7 +599,7 @@ public class UserConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      return getConnection().isReadOnly();
+      return getDriverConnection().isReadOnly();
     } catch (SQLException e) {
       fatalEvent();
       throw e;
@@ -615,7 +610,7 @@ public class UserConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      return getConnection().getAutoCommit();
+      return getDriverConnection().getAutoCommit();
     } catch (SQLException e) {
       fatalEvent();
       throw e;
@@ -632,7 +627,7 @@ public class UserConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      Connection conn = getConnection();
+      Connection conn = getDriverConnection();
 
       if (conn != null)
         conn.commit();
@@ -646,7 +641,7 @@ public class UserConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      Connection conn = getConnection();
+      Connection conn = getDriverConnection();
 
       if (conn != null)
         conn.rollback();
@@ -663,7 +658,7 @@ public class UserConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      return _mConn == null || getConnection() == null || getConnection().isClosed();
+      return _mConn == null || getDriverConnection() == null || getDriverConnection().isClosed();
     } catch (SQLException e) {
       log.log(Level.FINER, e.toString(), e);
 
@@ -726,37 +721,37 @@ public class UserConnection implements java.sql.Connection {
   public void setHoldability(int hold)
     throws SQLException
   {
-    getConnection().setHoldability(hold);
+    getDriverConnection().setHoldability(hold);
   }
 
   public int getHoldability()
     throws SQLException
   {
-    return getConnection().getHoldability();
+    return getDriverConnection().getHoldability();
   }
 
   public Savepoint setSavepoint()
     throws SQLException
   {
-    return getConnection().setSavepoint();
+    return getDriverConnection().setSavepoint();
   }
 
   public Savepoint setSavepoint(String name)
     throws SQLException
   {
-    return getConnection().setSavepoint(name);
+    return getDriverConnection().setSavepoint(name);
   }
 
   public void releaseSavepoint(Savepoint savepoint)
     throws SQLException
   {
-    getConnection().releaseSavepoint(savepoint);
+    getDriverConnection().releaseSavepoint(savepoint);
   }
 
   public void rollback(Savepoint savepoint)
     throws SQLException
   {
-    getConnection().rollback(savepoint);
+    getDriverConnection().rollback(savepoint);
   }
 
   /**
@@ -815,6 +810,22 @@ public class UserConnection implements java.sql.Connection {
         // fatalEvent();
       }
     }
+  }
+
+  /**
+   * Returns the underlying connection.
+   */
+  public Connection getDriverConnection()
+    throws SQLException
+  {
+    ManagedConnectionImpl mConn = getMConn();
+
+    if (mConn == null)
+      throw new IllegalStateException(L.l("Cannot use closed connection.  Check max-active-time and review application code. "));
+    
+    Connection conn = mConn.getDriverConnection();
+
+    return conn;
   }
 
   /**

@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - July 5, 2006'>
 <ul>
+<li>Quercus: token module needs to expose "tokenizer" extension (#1232, rep by koreth)
 <li>Quercus: preg_split with null group (#1240, rep by George Cox)
 <li>Quercus: get_resource_type (#1156, rep by demian)
 <li>Quercus: update set_file_buffer to BinaryStream (#1242, rep by koreth)

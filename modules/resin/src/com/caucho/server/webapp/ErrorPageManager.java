@@ -163,9 +163,6 @@ public class ErrorPageManager {
                                ServletResponse res)
     throws IOException
   {
-    if (log.isLoggable(Level.WARNING))
-      log.log(Level.WARNING, e.toString(), e);
-
     HttpServletResponse response = (HttpServletResponse) res;
     HttpServletRequest request = (HttpServletRequest) req;
     Throwable rootExn = e;
@@ -280,6 +277,8 @@ public class ErrorPageManager {
       log.warning(compileException.getMessage());
     else if (! doStackTrace)
       log.warning(rootExn.toString());
+    else
+      log.log(Level.WARNING, e.toString(), e);
 
     if (badRequest) {
       title = rootExn.getMessage();

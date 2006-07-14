@@ -69,7 +69,6 @@ public class SqlDateSerializer extends AbstractSerializer {
       int ref = out.writeObjectBegin(cl.getName());
 
       if (ref < 0) {
-	out.writeMapBegin(cl.getName());
 	out.writeString("value");
 	out.writeUTCDate(((Date) obj).getTime());
 	out.writeMapEnd();

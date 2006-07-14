@@ -133,6 +133,16 @@ time the load balancer will skip a dead backend server before retrying.</p>
 
 </section>
 
+<section title="Hessian">
+
+<section title="Enum">
+
+<p>Hessian will now read and write JDK 1.5 enums.</p>
+
+</section>
+
+</section>
+
 <section title="Quercus">
 
 <p>The QuercusServlet now allows &lt;server-env> to define environment

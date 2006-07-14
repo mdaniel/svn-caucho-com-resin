@@ -179,6 +179,11 @@ public class TokenModule extends AbstractQuercusModule {
 
   private static final IntMap _reservedMap = new IntMap();
 
+  public String []getLoadedExtensions()
+  {
+    return new String[] { "tokenizer" };
+  }
+
   /**
    * Parses the string.
    */

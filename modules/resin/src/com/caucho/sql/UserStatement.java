@@ -431,4 +431,9 @@ public class UserStatement implements Statement {
   {
     return _stmt.getResultSetHoldability();
   }
+
+  public String toString()
+  {
+    return "UserStatement[" + _stmt + "]";
+  }
 }

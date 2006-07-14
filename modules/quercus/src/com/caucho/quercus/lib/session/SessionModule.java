@@ -483,18 +483,13 @@ public class SessionModule extends AbstractQuercusModule
         response.setHeader("Pragma", "no-cache");
       }
       else if ("private".equals(cacheLimiter)) {
-        response.setHeader("Expires", "Thu, 19 Nov 1981 08:52:00 GMT");
         response.setHeader("Cache-Control", "private, max-age=" + cacheExpire + ", pre-check=" + cacheExpire);
-        response.setDateHeader("Last-Modified", env.getLastModified());
       }
       else if ("private_no_expire".equals(cacheLimiter)) {
         response.setHeader("Cache-Control", "private, max-age=" + cacheExpire + ", pre-check=" + cacheExpire);
-        response.setDateHeader("Last-Modified", env.getLastModified());
       }
       else if ("public".equals(cacheLimiter)) {
-        response.setDateHeader("Expires", Alarm.getCurrentTime());
-        response.setHeader("Cache-Control", "public, max-age=" + cacheExpire);
-        response.setDateHeader("Last-Modified", env.getLastModified());
+        response.setHeader("Cache-Control", "max-age=" + cacheExpire + ", pre-check=" + cacheExpire);
       }
     }
 

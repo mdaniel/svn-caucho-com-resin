@@ -847,6 +847,7 @@ public final class Env {
    * Returns the most recently modified time of all of the {@link Path}'s that
    * have been used for this Env, or 0 if that cannot be determined.
    */
+  /*
   public long getLastModified()
   {
     long lastModified = 0;
@@ -861,12 +862,13 @@ public final class Env {
     for (Path includePath : _includeSet) {
       long includeLastModified = includePath.getLastModified();
 
-      if (includeLastModified > lastModified)
+      if (lastModified < includeLastModified)
         lastModified = includeLastModified;
     }
 
     return lastModified;
   }
+  */
 
   /**
    * Returns the response.

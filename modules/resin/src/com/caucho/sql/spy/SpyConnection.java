@@ -227,7 +227,7 @@ public class SpyConnection implements java.sql.Connection {
   {
     try {
       log.info(_id + ":clearWarnings()");
-      
+
       _conn.clearWarnings();
     } catch (SQLException e) {
       log.info(_id + ":exn-clearWarnings(" + e + ")");
