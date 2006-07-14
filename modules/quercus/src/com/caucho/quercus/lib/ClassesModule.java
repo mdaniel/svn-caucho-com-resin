@@ -140,7 +140,7 @@ public class ClassesModule extends AbstractQuercusModule {
     else
       cl = value.getQuercusClass();
 
-    if (cl.getName().equalsIgnoreCase(name))
+    if (cl == null || cl.getName().equalsIgnoreCase(name))
       return false;
     else
       return cl.isA(name);
