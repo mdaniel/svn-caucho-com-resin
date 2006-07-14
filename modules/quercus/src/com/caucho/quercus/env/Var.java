@@ -220,6 +220,15 @@ public class Var extends Value {
   }
 
   /**
+   * Converts to an object.
+   */
+  @Override
+  public Object toJavaObjectNotNull(Env env, Class type)
+  {
+    return _value.toJavaObjectNotNull(env, type);
+  }
+
+  /**
    * Converts to an array
    */
   public Value toArray()

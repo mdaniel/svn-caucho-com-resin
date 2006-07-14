@@ -92,6 +92,11 @@ public class XmlModule extends AbstractQuercusModule {
   public static final int XML_ERROR_FINISHED = 36;
   public static final int XML_ERROR_SUSPEND_PE = 37;
 
+  public String []getLoadedExtensions()
+  {
+    return new String[] { "xml" };
+  }
+  
   /**
    * Converts from iso-8859-1 to utf8
    */

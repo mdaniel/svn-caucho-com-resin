@@ -79,6 +79,11 @@ public class RegexpModule
   private static final HashMap<String, Value> _constMap
     = new HashMap<String, Value>();
 
+  public String []getLoadedExtensions()
+  {
+    return new String[] { "pcre" };
+  }
+
   /**
    * Returns the index of the first match.
    *

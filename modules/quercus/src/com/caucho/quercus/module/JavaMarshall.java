@@ -79,7 +79,7 @@ public class JavaMarshall extends Marshall {
 
   public Object marshall(Env env, Value value, Class argClass)
   {
-    if (value.isNull()) {
+    if (! value.isset()) {
       if (_isNotNull) {
         env.warning(L.l("null is an unexpected argument, expected {0}",
                         shortName(argClass)));
@@ -127,7 +127,11 @@ public class JavaMarshall extends Marshall {
       out.print(componentType.getName());
       out.print(".class)");
     }
-    else {
+    else if (_isNotNull) {
+      out.print("(" + argClass.getName() + ") ");
+      expr.generate(out);
+      out.print(".toJavaObjectNotNull(env, " + argClass.getName() + ".class)");
+    } else {
       out.print("(" + argClass.getName() + ") ");
       expr.generate(out);
       out.print(".toJavaObject(env, " + argClass.getName() + ".class)");

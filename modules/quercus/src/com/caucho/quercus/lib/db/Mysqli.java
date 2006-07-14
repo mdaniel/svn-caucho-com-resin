@@ -101,6 +101,11 @@ public class Mysqli extends JdbcConnectionResource {
     super(env);
   }
 
+  public String getResourceType()
+  {
+    return "mysql link";
+  }
+
   /**
    * Connects to the underlying database.
    */

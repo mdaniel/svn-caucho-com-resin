@@ -85,6 +85,11 @@ public class MysqliResult extends JdbcResultResource {
     super(metaData, conn);
   }
 
+  public String getResourceType()
+  {
+    return "mysql result";
+  }
+
   /**
    * Seeks to an arbitrary result pointer specified
    * by the offset in the result set represented by result.

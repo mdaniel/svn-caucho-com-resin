@@ -522,14 +522,16 @@ public class MysqlModule extends AbstractQuercusModule {
    */
   public static Value mysql_field_type(Env env,
                                        @NotNull MysqliResult result,
-                                       int fieldOffset)
+                                       Value fieldOffset)
   {
     if (result == null) {
-      env.warning(L.l("null is an unexpected argument, expected MysqliResult"));
-      return BooleanValue.FALSE;
+      return NullValue.NULL;
     }
 
-    return result.getFieldType(env, fieldOffset);
+    if (! fieldOffset.isset())
+      return NullValue.NULL;
+
+    return result.getFieldType(env, fieldOffset.toInt());
   }
 
   /**
@@ -549,10 +551,8 @@ public class MysqlModule extends AbstractQuercusModule {
                                       @NotNull MysqliResult result,
                                       int fieldOffset)
   {
-    if (result == null) {
-      env.warning(L.l("null is an unexpected argument, expected MysqliResult"));
+    if (result == null)
       return BooleanValue.FALSE;
-    }
 
     // ERRATUM: Returns 10 for datatypes DEC and NUMERIC instead of 11
 

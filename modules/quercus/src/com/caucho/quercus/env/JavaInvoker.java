@@ -41,14 +41,7 @@ import com.caucho.quercus.expr.RequiredExpr;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.NullLiteralExpr;
 import com.caucho.quercus.gen.PhpWriter;
-import com.caucho.quercus.module.ModuleContext;
-import com.caucho.quercus.module.Marshall;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.Reference;
-import com.caucho.quercus.module.This;
-import com.caucho.quercus.module.UsesSymbolTable;
-import com.caucho.quercus.module.VariableArguments;
-import com.caucho.quercus.module.ReturnNullAsFalse;
+import com.caucho.quercus.module.*;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
@@ -171,6 +164,7 @@ abstract public class JavaInvoker
 
       for (int i = 0; i < argLength - envOffset; i++) {
 	boolean isReference = false;
+	boolean isNotNull = false;
 
 	for (Annotation ann : _paramAnn[i + envOffset]) {
 	  if (Optional.class.isAssignableFrom(ann.annotationType())) {
@@ -184,6 +178,8 @@ abstract public class JavaInvoker
 	      _defaultExprs[i] = new DefaultExpr(getLocation());
 	  } else if (Reference.class.isAssignableFrom(ann.annotationType())) {
 	    isReference = true;
+	  } else if (NotNull.class.isAssignableFrom(ann.annotationType())) {
+	    isNotNull = true;
 	  }
 	}
 
@@ -192,7 +188,9 @@ abstract public class JavaInvoker
 	if (isReference)
 	  _marshallArgs[i] = Marshall.MARSHALL_REFERENCE;
 	else
-	  _marshallArgs[i] = Marshall.create(_moduleContext, argType);
+	  _marshallArgs[i] = Marshall.create(_moduleContext,
+					     argType,
+					     isNotNull);
       }
 
       _unmarshallReturn = Marshall.create(_moduleContext, _retType, false,

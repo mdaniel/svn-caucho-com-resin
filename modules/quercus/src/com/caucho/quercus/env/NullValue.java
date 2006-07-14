@@ -129,6 +129,17 @@ public class NullValue extends Value {
   }
 
   /**
+   * Converts to a java object.
+   */
+  public Object toJavaObjectNotNull(Env env, Class type)
+  {
+    env.warning(L.l("null is an unexpected argument; expected '{0}'",
+		    type.getName()));
+    
+    return null;
+  }
+
+  /**
    * Converts to an object.
    */
   public Value toObject(Env env)
