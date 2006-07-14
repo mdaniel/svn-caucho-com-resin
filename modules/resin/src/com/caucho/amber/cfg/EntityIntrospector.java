@@ -1498,9 +1498,9 @@ public class EntityIntrospector {
       String getter = "get" +
         Character.toUpperCase(key.charAt(0)) + key.substring(1);
 
-      AmberField amberField = targetType.getField(getter);
+      JMethod method = targetType.getGetter(getter);
 
-      if (amberField == null) {
+      if (method == null) {
         throw error(field,
                     L.l("targetEntity '{0}' has no getter for field named '{1}'. Either the @MapKey name or the @ManyToMany targetEntity is incorrect.",
                         targetName, key));
@@ -1803,9 +1803,9 @@ public class EntityIntrospector {
         String getter = "get" +
           Character.toUpperCase(key.charAt(0)) + key.substring(1);
 
-        AmberField amberField = targetType.getField(getter);
+        JMethod method = targetType.getGetter(getter);
 
-        if (amberField == null) {
+        if (method == null) {
           throw error(_field,
                       L.l("targetEntity '{0}' has no getter for field named '{1}'. Either the @MapKey name or the @OneToMany targetEntity is incorrect.",
                           targetName, key));
@@ -1886,9 +1886,9 @@ public class EntityIntrospector {
         String getter = "get" +
           Character.toUpperCase(key.charAt(0)) + key.substring(1);
 
-        AmberField amberField = targetType.getField(getter);
+        JMethod method = targetType.getGetter(getter);
 
-        if (amberField == null) {
+        if (method == null) {
           throw error(_field,
                       L.l("targetEntity '{0}' has no getter for field named '{1}'. Either the @MapKey name or the @ManyToMany targetEntity is incorrect.",
                           targetName, key));
