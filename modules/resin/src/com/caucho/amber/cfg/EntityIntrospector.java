@@ -593,7 +593,7 @@ public class EntityIntrospector {
       JClass []paramTypes = method.getParameterTypes();
 
       if (method.getDeclaringClass().getName().equals("java.lang.Object"))
-  continue;
+        continue;
 
       if (! methodName.startsWith("get") || paramTypes.length != 0) {
         continue;
@@ -914,7 +914,7 @@ public class EntityIntrospector {
       JClass []paramTypes = method.getParameterTypes();
 
       if (method.getDeclaringClass().getName().equals("java.lang.Object"))
-  continue;
+        continue;
 
       introspectCallbacks(entityType, method);
 
