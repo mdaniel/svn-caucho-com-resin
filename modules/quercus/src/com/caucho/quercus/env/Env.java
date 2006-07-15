@@ -2664,8 +2664,6 @@ public final class Env {
    */
   public QuercusClass findClass(String name, boolean useAutoload)
   {
-    // XXX: useAutoload not implemented
-
     QuercusClass cl = _classMap.get(name);
 
     if (cl != null)
@@ -2677,7 +2675,7 @@ public final class Env {
     if (cl != null)
       return cl;
 
-    cl = createClassImpl(name);
+    cl = createClassImpl(name, useAutoload);
 
     if (cl != null) {
       _classMap.put(name, cl);
@@ -2695,9 +2693,10 @@ public final class Env {
    * Finds the class with the given name.
    *
    * @param name the class name
+   * @param useAutoload use autoload to locate the class if necessary
    * @return the found class or null if no class found.
    */
-  private QuercusClass createClassImpl(String name)
+  private QuercusClass createClassImpl(String name, boolean useAutoload)
   {
     ClassDef classDef = _defState.findClassDef(name);
 
@@ -2719,17 +2718,21 @@ public final class Env {
     if (staticClass != null)
       return createQuercusClass(staticClass, null); // XXX: cache
 
-    if (_autoload == null)
-      _autoload = findFunction("__autoload");
+    if (useAutoload) {
+      if (_autoload == null)
+        _autoload = findFunction("__autoload");
 
-    if (_autoload != null) {
-      try {
-        _autoload.call(this, new StringValueImpl(name));
-      }
-      catch (Throwable e) {
-        throw new RuntimeException(e);
+      if (_autoload != null) {
+        try {
+          _autoload.call(this, new StringValueImpl(name));
+          return createClassImpl(name, false);
+        }
+        catch (Throwable e) {
+          throw new RuntimeException(e);
+        }
       }
     }
+
 
     return null;
   }
