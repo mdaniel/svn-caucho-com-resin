@@ -30,10 +30,16 @@
 package com.caucho.soap.skeleton;
 
 import java.lang.reflect.*;
+import java.lang.annotation.*;
 
 import java.io.*;
+import java.util.*;
 
+import javax.xml.namespace.*;
 import javax.xml.stream.*;
+
+import javax.jws.*;
+import javax.jws.soap.*;
 
 import com.caucho.vfs.*;
 
@@ -43,35 +49,100 @@ import com.caucho.soap.marshall.*;
  * Invokes a SOAP request on a Java POJO method
  */
 public class PojoMethodSkeleton {
-  private final Method _method;
 
-  private final Marshall []_argMarshall;
+  private final Method _method;
+  private final QName _resultName;
+  private boolean  _wrapped = true;
+
+  private final ParameterMarshall []_argMarshall;
+  private final HashMap<String,ParameterMarshall> argNames =
+    new HashMap<String,ParameterMarshall>();
+
   private final Marshall _retMarshall;
+
+  private static class ParameterMarshall {
+    public int _arg;
+    public Marshall _marshall;
+    public ParameterMarshall(int arg, Marshall marshall) {
+      this._arg = arg;
+      this._marshall = marshall;
+    }
+  }
 
   public PojoMethodSkeleton(Method method, MarshallFactory factory)
   {
+    Class clazz = method.getDeclaringClass();
+    if (clazz.isAnnotationPresent(SOAPBinding.class))
+      _wrapped =
+	((SOAPBinding)clazz.getAnnotation(SOAPBinding.class)).parameterStyle()
+	== SOAPBinding.ParameterStyle.WRAPPED;
+    
+    if (method.isAnnotationPresent(SOAPBinding.class))
+      _wrapped =
+	((SOAPBinding)method.getAnnotation(SOAPBinding.class)).parameterStyle()
+	== SOAPBinding.ParameterStyle.WRAPPED;
+    
     _method = method;
 
     Class []param = _method.getParameterTypes();
+    Annotation [][]annotations = _method.getParameterAnnotations();
 
-    _argMarshall = new Marshall[param.length];
+    _argMarshall = new ParameterMarshall[param.length];
 
-    for (int i = 0; i < param.length; i++)
-      _argMarshall[i] = factory.createDeserializer(param[i]);
+    for (int i = 0; i < param.length; i++) {
+
+      _argMarshall[i] =
+	new ParameterMarshall(i, factory.createDeserializer(param[i]));
+
+      for(Annotation a : annotations[i]) {
+
+	if (a instanceof WebParam) {
+	  WebParam webParam = (WebParam)a;
+
+	  if (!webParam.name().equals("")) {
+	    argNames.put(webParam.name(), _argMarshall[i]);
+	    _argMarshall[i] = null;
+	  }
+
+	}
+      }
+    }
+
 
     _retMarshall = factory.createSerializer(method.getReturnType());
+
+    if (method.isAnnotationPresent(WebResult.class))
+      _resultName =
+	new QName(method.getAnnotation(WebResult.class).targetNamespace(),
+		  method.getAnnotation(WebResult.class).name());
+    else
+      _resultName = new QName("Result");
   }
   
   /**
    * Invokes the request.
    */
   public void invoke(Object service, XMLStreamReader in, WriteStream out)
-    throws IOException
+    throws IOException, XMLStreamException
   {
     Object []args = new Object[_argMarshall.length];
 
-    for (int i = 0; i < args.length; i++)
-      args[i] = _argMarshall[i].deserialize(in);
+    for (int i = 0; i < args.length; i++) {
+
+      if (in.nextTag() != in.START_ELEMENT)
+	throw new IOException("expected <argName>");
+
+      String tagName = in.getLocalName();
+
+      ParameterMarshall marshall = argNames.get(tagName);
+      if (marshall == null)
+	marshall = _argMarshall[i];
+
+      args[marshall._arg] = marshall._marshall.deserialize(in);
+
+      if (in.nextTag() != in.END_ELEMENT)
+          throw new IOException("expected close-tag");
+    }
 
     Object value = null;
 
@@ -83,15 +154,19 @@ public class PojoMethodSkeleton {
       throw new MarshallException(e.getCause());
     }
 
-    out.print('<');
-    out.print(getResponseName());
-    out.print('>');
+    if (_wrapped) {
+      out.print('<');
+      out.print(getResponseName());
+      out.print('>');
+    }    
+
+    _retMarshall.serialize(out, value, _resultName);
     
-    _retMarshall.serialize(out, value, "Result");
-    
-    out.print("</");
-    out.print(getResponseName());
-    out.print('>');
+    if (_wrapped) {
+      out.print("</");
+      out.print(getResponseName());
+      out.print('>');
+    }
   }
 
   private String getResponseName()

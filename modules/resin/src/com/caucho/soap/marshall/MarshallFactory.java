@@ -41,6 +41,39 @@ public class MarshallFactory {
    */
   public Marshall createDeserializer(Class type)
   {
+    if (String.class.equals(type))
+      return StringMarshall.MARSHALL;
+
+    if (Map.class.equals(type))
+      return MapMarshall.MARSHALL;
+
+    if (Double.class.equals(type))
+      return DoubleMarshall.MARSHALL;
+
+    if (Float.class.equals(type))
+      return FloatMarshall.MARSHALL;
+
+    if (Integer.class.equals(type) || Integer.TYPE.equals(type))
+      return IntMarshall.MARSHALL;
+
+    if (Long.class.equals(type))
+      return LongMarshall.MARSHALL;
+
+    if (BigDecimal.class.equals(type))
+      return BigDecimalMarshall.MARSHALL;
+
+    if (List.class.equals(type))
+      return ListMarshall.MARSHALL;
+
+    if (Date.class.equals(type))
+      return DateMarshall.MARSHALL;
+
+    if (byte[].class.equals(type))
+      return ByteArrayMarshall.MARSHALL;
+
+    if (Object[].class.isAssignableFrom(type))
+      return ArrayMarshall.MARSHALL;
+
     throw new UnsupportedOperationException(type.getName());
   }
   
@@ -51,26 +84,38 @@ public class MarshallFactory {
   {
     if (String.class.equals(type))
       return StringMarshall.MARSHALL;
+
     if (Map.class.equals(type))
       return MapMarshall.MARSHALL;
+
     if (Double.class.equals(type))
       return DoubleMarshall.MARSHALL;
+
     if (Float.class.equals(type))
       return FloatMarshall.MARSHALL;
+
+    if (Integer.class.equals(type) || Integer.TYPE.equals(type))
+      return IntMarshall.MARSHALL;
+
     if (Long.class.equals(type))
       return LongMarshall.MARSHALL;
+
     if (BigDecimal.class.equals(type))
       return BigDecimalMarshall.MARSHALL;
+
     if (List.class.equals(type))
       return ListMarshall.MARSHALL;
+
     if (Date.class.equals(type))
       return DateMarshall.MARSHALL;
+
     if (byte[].class.equals(type))
       return ByteArrayMarshall.MARSHALL;
+
     if (Object[].class.isAssignableFrom(type))
       return ArrayMarshall.MARSHALL;
-    else
-      throw new UnsupportedOperationException(type.getName());
+
+    throw new UnsupportedOperationException(type.getName());
   }
 }
 

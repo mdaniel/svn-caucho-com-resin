@@ -28,6 +28,7 @@
  */
 
 package com.caucho.soap.marshall;
+import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
 
@@ -50,15 +51,20 @@ public class IntMarshall extends Marshall {
    * Deserializes the data from the input.
    */
   public Object deserialize(XMLStreamReader in)
-    throws IOException
+      throws IOException, XMLStreamException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+      if (in.next() != in.CHARACTERS)
+          throw new IOException("expected element to have CDATA");
+
+      Integer ret = new Integer(in.getText());
+
+      return ret;
   }
 
   /**
    * Serializes the data to the result
    */
-  public void serialize(WriteStream out, Object obj, String fieldName)
+  public void serialize(WriteStream out, Object obj, QName fieldName)
     throws IOException
   {
     out.print('<');

@@ -58,16 +58,26 @@ public class WebServiceIntrospector {
     MarshallFactory marshallFactory = new MarshallFactory();
     DirectSkeleton skel = new DirectSkeleton();
 
+    WebService webService = (WebService)type.getAnnotation(WebService.class);
+    // webService.name() ... => only for WSDL
+
     Method []methods = type.getMethods();
 
     for (int i = 0; i < methods.length; i++) {
       if (! methods[i].isAnnotationPresent(WebMethod.class))
 	continue;
 
+      WebMethod webMethod = methods[i].getAnnotation(WebMethod.class);
+
       PojoMethodSkeleton methodSkel
 	= new PojoMethodSkeleton(methods[i], marshallFactory);
 
-      skel.addAction(methods[i].getName(), methodSkel);
+      String name = webMethod.operationName();
+
+      if (name.equals(""))
+          name = methods[i].getName();
+
+      skel.addAction(name, methodSkel);
     }
     
     return skel;

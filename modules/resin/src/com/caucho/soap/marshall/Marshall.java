@@ -28,6 +28,7 @@
  */
 
 package com.caucho.soap.marshall;
+import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
 
@@ -45,7 +46,7 @@ public class Marshall {
    * Deserializes the data from the input.
    */
   public Object deserialize(XMLStreamReader in)
-    throws IOException
+      throws IOException, XMLStreamException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -53,7 +54,7 @@ public class Marshall {
   /**
    * Serializes the data to the result
    */
-  public void serialize(WriteStream out, Object obj, String fieldName)
+  public void serialize(WriteStream out, Object obj, QName fieldName)
     throws IOException
   {
     throw new UnsupportedOperationException(getClass().getName());

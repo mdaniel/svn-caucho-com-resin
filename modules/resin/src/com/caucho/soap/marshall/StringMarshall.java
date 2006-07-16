@@ -28,6 +28,7 @@
  */
 
 package com.caucho.soap.marshall;
+import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.io.*;
 
@@ -58,11 +59,20 @@ public class StringMarshall extends Marshall {
   /**
    * Serializes the data to the result
    */
-  public void serialize(WriteStream out, Object obj, String fieldName)
+  public void serialize(WriteStream out, Object obj, QName fieldName)
     throws IOException
   {
     out.print('<');
-    out.print(fieldName);
+    out.print(fieldName.getLocalPart());
+
+    String nsuri = fieldName.getNamespaceURI();
+    if (nsuri != null && !nsuri.equals("")) {
+      out.print(" xmlns=\"");
+      // XXX: escapify
+      out.print(nsuri);
+      out.print("\"");
+    }
+
     out.print('>');
     
     // assume a different Marshall will add the type
@@ -72,7 +82,7 @@ public class StringMarshall extends Marshall {
       escapify((String)obj, out);
     
     out.print("</");
-    out.print(fieldName);
+    out.print(fieldName.getLocalPart());
     out.print(">");
   }
 

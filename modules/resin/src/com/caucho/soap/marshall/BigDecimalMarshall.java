@@ -28,6 +28,7 @@
  */
 
 package com.caucho.soap.marshall;
+import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
 import java.math.*;
@@ -59,7 +60,7 @@ public class BigDecimalMarshall extends Marshall {
   /**
    * Serializes the data to the result
    */
-  public void serialize(WriteStream out, Object obj, String fieldName)
+  public void serialize(WriteStream out, Object obj, QName fieldName)
     throws IOException
   {
     out.print('<');

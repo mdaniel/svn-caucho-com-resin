@@ -40,6 +40,7 @@ import com.caucho.vfs.*;
  * Invokes a SOAP request on a Java POJO
  */
 public class DirectSkeleton extends Skeleton {
+
   private HashMap<String,PojoMethodSkeleton> _actionMap
     = new HashMap<String,PojoMethodSkeleton>();
 
