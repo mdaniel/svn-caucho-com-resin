@@ -34,31 +34,75 @@ import java.util.*;
 
 import java.lang.reflect.*;
 import java.io.*;
-import com.caucho.util.*;
 
 import com.caucho.vfs.WriteStream;
 
 /**
  * Marshalls data for a string object
  */
-public class ByteArrayMarshall extends CDataMarshall {
-  public static final ByteArrayMarshall MARSHALL = new ByteArrayMarshall();
+public abstract class CDataMarshall extends Marshall {
 
-  private ByteArrayMarshall()
+  protected CDataMarshall()
   {
   }
   
-  protected String serialize(Object in)
+  protected abstract Object deserialize(String in)
+    throws IOException, XMLStreamException;
+
+  public Object deserialize(XMLStreamReader in)
       throws IOException, XMLStreamException
   {
-    return Base64.encodeFromByteArray((byte[])in);
+      if (in.next() != in.CHARACTERS)
+          throw new IOException("expected element to have CDATA");
+
+      return deserialize(in.getText());
   }
 
-  protected Object deserialize(String in)
+  protected abstract String serialize(Object in)
+    throws IOException, XMLStreamException;
+
+  public void serialize(WriteStream out, Object obj, QName fieldName)
     throws IOException, XMLStreamException
   {
-    return Base64.decodeToByteArray(in);
+    out.print('<');
+    out.print(fieldName.getLocalPart());
+
+    String nsuri = fieldName.getNamespaceURI();
+    if (nsuri != null && !nsuri.equals("")) {
+      out.print(" xmlns=\"");
+      escapify(nsuri, out);
+      out.print("\"");
+    }
+
+    out.print('>');
+
+    escapify(serialize(obj), out);
+
+    out.print("</");
+    out.print(fieldName.getLocalPart());
+    out.print(">");
+    
   }
+
+  public static void escapify(String s, WriteStream out)
+    throws IOException
+  {
+    int len = s.length();
+
+    for(int i=0; i<len; i++) {
+      char c = s.charAt(i);
+      if ((c < 32 || c > 127) || c=='\'' || c=='\"' ||
+	  c=='<' || c=='>' || c=='&') {
+	out.print("&#");
+	out.print((int)c);
+	out.print(";");
+      } else {
+	out.print(c);
+      }
+    }
+
+  }
+
 }
 
 

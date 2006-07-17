@@ -40,39 +40,23 @@ import com.caucho.vfs.WriteStream;
 /**
  * Marshalls data for a string object
  */
-public class LongMarshall extends Marshall {
+public class LongMarshall extends CDataMarshall {
   public static final LongMarshall MARSHALL = new LongMarshall();
 
   private LongMarshall()
   {
   }
   
-  /**
-   * Deserializes the data from the input.
-   */
-  public Object deserialize(XMLStreamReader in)
-    throws IOException
+  protected String serialize(Object in)
+      throws IOException, XMLStreamException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return ((Long)in).longValue()+"";
   }
 
-  /**
-   * Serializes the data to the result
-   */
-  public void serialize(WriteStream out, Object obj, QName fieldName)
-    throws IOException
+  protected Object deserialize(String in)
+    throws IOException, XMLStreamException
   {
-    out.print('<');
-    out.print(fieldName);
-    out.print('>');
-    
-    //StringMarshall.escapify((String)obj, out);
-    
-    out.print("</");
-    out.print(fieldName);
-    out.print(">");
-
-    throw new UnsupportedOperationException(getClass().getName());
+    return new Long(in);
   }
 }
 

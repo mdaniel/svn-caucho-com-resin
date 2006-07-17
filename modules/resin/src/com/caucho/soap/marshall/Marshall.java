@@ -55,7 +55,7 @@ public class Marshall {
    * Serializes the data to the result
    */
   public void serialize(WriteStream out, Object obj, QName fieldName)
-    throws IOException
+    throws IOException, XMLStreamException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

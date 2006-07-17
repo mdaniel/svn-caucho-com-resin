@@ -40,70 +40,25 @@ import com.caucho.vfs.WriteStream;
 /**
  * Marshalls data for a string object
  */
-public class StringMarshall extends Marshall {
+public class StringMarshall extends CDataMarshall {
   public static final StringMarshall MARSHALL = new StringMarshall();
 
   private StringMarshall()
   {
   }
   
-  /**
-   * Deserializes the data from the input.
-   */
-  public Object deserialize(XMLStreamReader in)
-    throws IOException
+  protected String serialize(Object in)
+      throws IOException, XMLStreamException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return in.toString();
   }
 
-  /**
-   * Serializes the data to the result
-   */
-  public void serialize(WriteStream out, Object obj, QName fieldName)
-    throws IOException
+  protected Object deserialize(String in)
+    throws IOException, XMLStreamException
   {
-    out.print('<');
-    out.print(fieldName.getLocalPart());
-
-    String nsuri = fieldName.getNamespaceURI();
-    if (nsuri != null && !nsuri.equals("")) {
-      out.print(" xmlns=\"");
-      // XXX: escapify
-      out.print(nsuri);
-      out.print("\"");
-    }
-
-    out.print('>');
-    
-    // assume a different Marshall will add the type
-    //  xsi:type=\"xsd:string\">");
-    
-    if (obj != null)
-      escapify((String)obj, out);
-    
-    out.print("</");
-    out.print(fieldName.getLocalPart());
-    out.print(">");
+    return in;
   }
 
-  public static void escapify(String s, WriteStream out)
-    throws IOException
-  {
-    int len = s.length();
-
-    for(int i=0; i<len; i++) {
-      char c = s.charAt(i);
-      if ((c < 32 || c > 127) || c=='\'' || c=='\"' ||
-	  c=='<' || c=='>' || c=='&') {
-	out.print("&#");
-	out.print((int)c);
-	out.print(";");
-      } else {
-	out.print(c);
-      }
-    }
-
-  }
 }
 
 

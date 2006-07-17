@@ -41,39 +41,23 @@ import com.caucho.vfs.WriteStream;
 /**
  * Marshalls data for a string object
  */
-public class BigDecimalMarshall extends Marshall {
+public class BigDecimalMarshall extends CDataMarshall {
   public static final BigDecimalMarshall MARSHALL = new BigDecimalMarshall();
 
   private BigDecimalMarshall()
   {
   }
-  
-  /**
-   * Deserializes the data from the input.
-   */
-  public Object deserialize(XMLStreamReader in)
-    throws IOException
+
+  protected String serialize(Object in)
+      throws IOException, XMLStreamException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return ((BigDecimal)in).toString();
   }
 
-  /**
-   * Serializes the data to the result
-   */
-  public void serialize(WriteStream out, Object obj, QName fieldName)
-    throws IOException
+  protected Object deserialize(String in)
+    throws IOException, XMLStreamException
   {
-    out.print('<');
-    out.print(fieldName);
-    out.print('>');
-    
-    //StringMarshall.escapify((String)obj, out);
-    
-    out.print("</");
-    out.print(fieldName);
-    out.print(">");
-
-    throw new UnsupportedOperationException(getClass().getName());
+    return new BigDecimal(in);
   }
 }
 

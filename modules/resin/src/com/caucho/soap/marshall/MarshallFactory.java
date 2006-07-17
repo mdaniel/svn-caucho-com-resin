@@ -47,16 +47,16 @@ public class MarshallFactory {
     if (Map.class.equals(type))
       return MapMarshall.MARSHALL;
 
-    if (Double.class.equals(type))
+    if (Double.class.equals(type) || Double.TYPE.equals(type))
       return DoubleMarshall.MARSHALL;
 
-    if (Float.class.equals(type))
+    if (Float.class.equals(type) || Float.TYPE.equals(type))
       return FloatMarshall.MARSHALL;
 
     if (Integer.class.equals(type) || Integer.TYPE.equals(type))
       return IntMarshall.MARSHALL;
 
-    if (Long.class.equals(type))
+    if (Long.class.equals(type) || Long.TYPE.equals(type))
       return LongMarshall.MARSHALL;
 
     if (BigDecimal.class.equals(type))
@@ -88,16 +88,16 @@ public class MarshallFactory {
     if (Map.class.equals(type))
       return MapMarshall.MARSHALL;
 
-    if (Double.class.equals(type))
+    if (Double.class.equals(type) || Double.TYPE.equals(type))
       return DoubleMarshall.MARSHALL;
 
-    if (Float.class.equals(type))
+    if (Float.class.equals(type) || Float.TYPE.equals(type))
       return FloatMarshall.MARSHALL;
 
     if (Integer.class.equals(type) || Integer.TYPE.equals(type))
       return IntMarshall.MARSHALL;
 
-    if (Long.class.equals(type))
+    if (Long.class.equals(type) || Long.TYPE.equals(type))
       return LongMarshall.MARSHALL;
 
     if (BigDecimal.class.equals(type))

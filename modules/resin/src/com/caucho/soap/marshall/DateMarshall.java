@@ -18,7 +18,7 @@
  * details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Resin Open Source; if not, write to the
+ * adate with Resin Open Source; if not, write to the
  *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
@@ -31,6 +31,7 @@ package com.caucho.soap.marshall;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
+import java.text.*;
 
 import java.lang.reflect.*;
 import java.io.*;
@@ -40,39 +41,27 @@ import com.caucho.vfs.WriteStream;
 /**
  * Marshalls data for a string object
  */
-public class DateMarshall extends Marshall {
+public class DateMarshall extends CDataMarshall {
   public static final DateMarshall MARSHALL = new DateMarshall();
 
   private DateMarshall()
   {
   }
   
-  /**
-   * Deserializes the data from the input.
-   */
-  public Object deserialize(XMLStreamReader in)
-    throws IOException
+  protected String serialize(Object in)
+      throws IOException, XMLStreamException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return DateFormat.getDateInstance().format((Date)in);
   }
 
-  /**
-   * Serializes the data to the result
-   */
-  public void serialize(WriteStream out, Object obj, QName fieldName)
-    throws IOException
+  protected Object deserialize(String in)
+    throws IOException, XMLStreamException
   {
-    out.print('<');
-    out.print(fieldName);
-    out.print('>');
-    
-    //StringMarshall.escapify((String)obj, out);
-    
-    out.print("</");
-    out.print(fieldName);
-    out.print(">");
-
-    throw new UnsupportedOperationException(getClass().getName());
+    try {
+      return DateFormat.getDateInstance().parse(in);
+    } catch (ParseException pe) {
+      throw new XMLStreamException(pe);
+    }
   }
 }
 

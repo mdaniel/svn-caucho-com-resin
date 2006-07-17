@@ -40,44 +40,23 @@ import com.caucho.vfs.WriteStream;
 /**
  * Marshalls data for a string object
  */
-public class IntMarshall extends Marshall {
+public class IntMarshall extends CDataMarshall {
   public static final IntMarshall MARSHALL = new IntMarshall();
 
   private IntMarshall()
   {
   }
   
-  /**
-   * Deserializes the data from the input.
-   */
-  public Object deserialize(XMLStreamReader in)
+  protected String serialize(Object in)
       throws IOException, XMLStreamException
   {
-      if (in.next() != in.CHARACTERS)
-          throw new IOException("expected element to have CDATA");
-
-      Integer ret = new Integer(in.getText());
-
-      return ret;
+    return ((Integer)in).intValue()+"";
   }
 
-  /**
-   * Serializes the data to the result
-   */
-  public void serialize(WriteStream out, Object obj, QName fieldName)
-    throws IOException
+  protected Object deserialize(String in)
+    throws IOException, XMLStreamException
   {
-    out.print('<');
-    out.print(fieldName);
-    out.print('>');
-    
-    //StringMarshall.escapify((String)obj, out);
-    
-    out.print("</");
-    out.print(fieldName);
-    out.print(">");
-
-    throw new UnsupportedOperationException(getClass().getName());
+    return new Integer(in);
   }
 }
 
