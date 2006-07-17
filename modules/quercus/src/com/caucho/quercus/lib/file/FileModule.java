@@ -56,7 +56,6 @@ import com.caucho.quercus.*;
 import com.caucho.quercus.resources.StreamResource;
 import com.caucho.quercus.lib.file.DirectoryValue;
 import com.caucho.quercus.lib.string.StringModule;
-import com.caucho.quercus.lib.StreamModule;
 import com.caucho.quercus.lib.UrlModule;
 
 import com.caucho.quercus.module.NotNull;
@@ -241,7 +240,7 @@ public class FileModule extends AbstractQuercusModule {
   {
     if (! file.canRead()) {
       // XXX: gallery?
-      // env.warning(L.l("{0} cannot be read", file.getFullPath()));
+      env.warning(L.l("{0} cannot be read", file.getFullPath()));
 
       return false;
     }
@@ -2391,7 +2390,7 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * Sets the write buffer.
    */
-  public static int set_file_buffer(Env env, StreamResource stream,
+  public static int set_file_buffer(Env env, BinaryOutput stream,
                                     int bufferSize)
   {
     return StreamModule.stream_set_write_buffer(env, stream, bufferSize);
@@ -2415,6 +2414,11 @@ public class FileModule extends AbstractQuercusModule {
 
   static Value statImpl(Env env, Path path)
   {
+    if (! path.exists()) {
+      env.warning(L.l("stat failed for {0}", path.getFullPath().toString()));
+      return BooleanValue.FALSE;
+    }
+
     ArrayValue result = new ArrayValueImpl();
 
     result.put(path.getDevice());

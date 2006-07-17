@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.lib;
+package com.caucho.quercus.lib.file;
 
 import java.io.IOException;
 import java.util.Map;
@@ -44,6 +44,7 @@ import com.caucho.quercus.lib.file.ProtocolWrapper;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.NotNull;
+import com.caucho.quercus.module.ReturnNullAsFalse;
 
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;
@@ -57,7 +58,6 @@ import com.caucho.quercus.env.QuercusClass;
 
 import com.caucho.quercus.resources.StreamContextResource;
 import com.caucho.quercus.resources.StreamResource;
-import com.caucho.quercus.lib.file.*;
 
 import com.caucho.vfs.TempBuffer;
 
@@ -96,6 +96,11 @@ public class StreamModule extends AbstractQuercusModule {
   private static final HashMap<String,ProtocolWrapper> _wrapperMap 
     = new HashMap<String,ProtocolWrapper>();
 
+  private static final HashMap<String,ProtocolWrapper> _unregisteredWrapperMap 
+    = new HashMap<String,ProtocolWrapper>();
+
+  private static final ArrayValue _wrapperArray = new ArrayValueImpl();
+
   /**
    * Adds the constant to the PHP engine's constant map.
    *
@@ -106,10 +111,26 @@ public class StreamModule extends AbstractQuercusModule {
     return _constMap;
   }
 
+  public static void stream_bucket_append(Env env, 
+                                          @NotNull StreamBucketBrigade brigade,
+                                          @NotNull StreamBucket bucket)
+  {
+    brigade.append(bucket);
+  }
+
+  @ReturnNullAsFalse
+  public static Value stream_bucket_make_writable(Env env, 
+      @NotNull StreamBucketBrigade brigade)
+  {
+    return brigade.popTop();
+  }
+                                           
+
   /**
    * Creates a stream context.
    */
-  public Value stream_context_create(@Optional ArrayValue options)
+  public static Value stream_context_create(Env env, 
+                                            @Optional ArrayValue options)
   {
     return new StreamContextResource(options);
   }
@@ -117,7 +138,7 @@ public class StreamModule extends AbstractQuercusModule {
   /**
    * Returns the options from a stream context.
    */
-  public Value stream_context_get_options(Env env, Value resource)
+  public static Value stream_context_get_options(Env env, Value resource)
   {
     if (resource instanceof StreamContextResource) {
       return ((StreamContextResource) resource).getOptions();
@@ -132,8 +153,8 @@ public class StreamModule extends AbstractQuercusModule {
   /**
    * Returns the default stream context.
    */
-  public Value stream_context_get_default(Env env,
-                                          @Optional ArrayValue options)
+  public static Value stream_context_get_default(Env env,
+                                                 @Optional ArrayValue options)
   {
     StreamContextResource context = env.getDefaultStreamContext();
 
@@ -330,20 +351,19 @@ public class StreamModule extends AbstractQuercusModule {
    */
   public Value stream_get_wrappers()
   {
-    ArrayValue value = new ArrayValueImpl();
+    return _wrapperArray;
+  }
 
-    value.append(new StringValueImpl("quercus"));
-    value.append(new StringValueImpl("file"));
-    value.append(new StringValueImpl("http"));
-    value.append(new StringValueImpl("ftp"));
-
-    return value;
+  public static boolean stream_register_wrapper(Env env, StringValue protocol,
+                                                String className)
+  {
+    return stream_wrapper_register(env, protocol, className);
   }
 
   /**
    * Sets the write buffer.
    */
-  public static int stream_set_write_buffer(Env env, StreamResource stream,
+  public static int stream_set_write_buffer(Env env, BinaryOutput stream,
                                             int bufferSize)
   {
     return 0;
@@ -361,6 +381,40 @@ public class StreamModule extends AbstractQuercusModule {
     QuercusClass qClass = env.getClass(className);
 
     _wrapperMap.put(protocol.toString(), new ProtocolWrapper(qClass));
+    
+    _wrapperArray.append(protocol);
+
+    return true;
+  }
+
+  /**
+   * Register a wrapper for a protocol.
+   */
+  public static boolean stream_wrapper_restore(Env env, StringValue protocol)
+  {
+    if (! _unregisteredWrapperMap.containsKey(protocol.toString()))
+      return false;
+
+    _wrapperMap.put(protocol.toString(), 
+                    _unregisteredWrapperMap.remove(protocol.toString()));
+
+    _wrapperArray.append(protocol);
+
+    return true;
+  }
+
+  /**
+   * Register a wrapper for a protocol.
+   */
+  public static boolean stream_wrapper_unregister(Env env, StringValue protocol)
+  {
+    if (! _wrapperMap.containsKey(protocol.toString()))
+      return false;
+
+    _unregisteredWrapperMap.put(protocol.toString(), 
+                                _wrapperMap.remove(protocol.toString()));
+
+    _wrapperArray.remove(protocol);
 
     return true;
   }
@@ -368,6 +422,13 @@ public class StreamModule extends AbstractQuercusModule {
   public static ProtocolWrapper getWrapper(String protocol)
   {
     return _wrapperMap.get(protocol);
+  }
+
+  static {
+    _wrapperArray.append(new StringValueImpl("quercus"));
+    _wrapperArray.append(new StringValueImpl("file"));
+    _wrapperArray.append(new StringValueImpl("http"));
+    _wrapperArray.append(new StringValueImpl("ftp"));
   }
 
   static {

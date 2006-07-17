@@ -52,7 +52,7 @@ import com.caucho.quercus.env.*;
 import com.caucho.quercus.resources.StreamResource;
 import com.caucho.quercus.lib.file.DirectoryValue;
 import com.caucho.quercus.lib.string.StringModule;
-import com.caucho.quercus.lib.StreamModule;
+import com.caucho.quercus.lib.file.StreamModule;
 
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.ReturnNullAsFalse;
