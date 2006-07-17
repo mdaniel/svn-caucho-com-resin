@@ -69,7 +69,7 @@ public class Table {
   private String _configLocation;
 
   private AmberPersistenceUnit _manager;
-  
+
   // The entity type is used to generate primary keys for cascade deletes
   private EntityType _type;
 
@@ -77,10 +77,10 @@ public class Table {
 
   private ArrayList<LinkColumns> _incomingLinks = new ArrayList<LinkColumns>();
   private ArrayList<LinkColumns> _outgoingLinks = new ArrayList<LinkColumns>();
-  
+
   private ArrayList<Column> _idColumns = new ArrayList<Column>();
   private LinkColumns _dependentIdLink;
-  
+
   private boolean _isReadOnly;
   private long _cacheTimeout = 250;
 
@@ -88,7 +88,7 @@ public class Table {
     = new ArrayList<EntityListener>();
 
   private TableInvalidateCompletion _invalidateCompletion;
-  
+
   public Table(AmberPersistenceUnit manager, String name)
   {
     _manager = manager;
@@ -185,11 +185,11 @@ public class Table {
       Column oldColumn = _columns.get(i);
 
       if (oldColumn.getName().equals(name))
-	return oldColumn;
+        return oldColumn;
     }
 
     Column column = new Column(this, name, type);
-    
+
     _columns.add(column);
     Collections.sort(_columns, new ColumnCompare());
 
@@ -207,23 +207,23 @@ public class Table {
       if (! oldColumn.getName().equals(name)) {
       }
       else if (oldColumn instanceof ForeignColumn) {
-	// XXX: check type
-	return (ForeignColumn) oldColumn;
+        // XXX: check type
+        return (ForeignColumn) oldColumn;
       }
       else {
-	// XXX: copy props(?)
+        // XXX: copy props(?)
 
-	ForeignColumn column = new ForeignColumn(this, name, key);
-	_columns.set(i, column);
-	return column;
+        ForeignColumn column = new ForeignColumn(this, name, key);
+        _columns.set(i, column);
+        return column;
       }
     }
 
     ForeignColumn column = new ForeignColumn(this, name, key);
-    
+
     _columns.add(column);
     Collections.sort(_columns, new ColumnCompare());
-    
+
     return column;
   }
 
@@ -238,15 +238,15 @@ public class Table {
       if (! oldColumn.getName().equals(column.getName())) {
       }
       else if (oldColumn instanceof ForeignColumn)
-	return oldColumn;
+        return oldColumn;
       else if (column instanceof ForeignColumn) {
-	_columns.set(i, column);
-	return column;
+        _columns.set(i, column);
+        return column;
       }
       else
-	return oldColumn;
+        return oldColumn;
     }
-    
+
     _columns.add(column);
     Collections.sort(_columns, new ColumnCompare());
 
@@ -267,7 +267,7 @@ public class Table {
   void addIncomingLink(LinkColumns link)
   {
     assert(! _incomingLinks.contains(link));
-    
+
     _incomingLinks.add(link);
   }
 
@@ -323,26 +323,26 @@ public class Table {
       DataSource ds = amberPersistenceUnit.getDataSource();
       Connection conn = ds.getConnection();
       try {
-	Statement stmt = conn.createStatement();
+        Statement stmt = conn.createStatement();
 
-	try {
-	  // If the table exists, return
-	  
-	  String sql = "select 1 from " + getName() + " o where 1=0";
+        try {
+          // If the table exists, return
 
-	  ResultSet rs = stmt.executeQuery(sql);
-	  rs.close();
-	  return;
-	} catch (SQLException e) {
-	}
+          String sql = "select 1 from " + getName() + " o where 1=0";
 
-	String createSQL = generateCreateTableSQL(amberPersistenceUnit);
+          ResultSet rs = stmt.executeQuery(sql);
+          rs.close();
+          return;
+        } catch (SQLException e) {
+        }
 
-	stmt.executeUpdate(createSQL);
+        String createSQL = generateCreateTableSQL(amberPersistenceUnit);
 
-	stmt.close();
+        stmt.executeUpdate(createSQL);
+
+        stmt.close();
       } finally {
-	conn.close();
+        conn.close();
       }
     } catch (Exception e) {
       throw error(e);
@@ -365,11 +365,11 @@ public class Table {
       if (columnSQL == null) {
       }
       else if (! hasColumn) {
-	hasColumn = true;
-	cb.append("\n  " + columnSQL);
+        hasColumn = true;
+        cb.append("\n  " + columnSQL);
       }
       else {
-	cb.append(",\n  " + columnSQL);
+        cb.append(",\n  " + columnSQL);
       }
     }
 
@@ -388,35 +388,35 @@ public class Table {
       DataSource ds = amberPersistenceUnit.getDataSource();
       Connection conn = ds.getConnection();
       try {
-	Statement stmt = conn.createStatement();
+        Statement stmt = conn.createStatement();
 
-	try {
-	  // If the table exists, return
-	  
-	  String sql = "select 1 from " + getName() + " o where 1=0";
+        try {
+          // If the table exists, return
 
-	  ResultSet rs = stmt.executeQuery(sql);
-	  rs.close();
-	} catch (SQLException e) {
-	  throw error(L.l("'{0}' is not a valid database table.  Either the table needs to be created or the create-database-tables attribute must be set.\n\n{1}",
-					getName(), e.toString()), e);
-	}
+          String sql = "select 1 from " + getName() + " o where 1=0";
+
+          ResultSet rs = stmt.executeQuery(sql);
+          rs.close();
+        } catch (SQLException e) {
+          throw error(L.l("'{0}' is not a valid database table.  Either the table needs to be created or the create-database-tables attribute must be set.\n\n{1}",
+                          getName(), e.toString()), e);
+        }
       } finally {
-	conn.close();
+        conn.close();
       }
-    
+
       for (Column column : _columns) {
-	column.validateDatabase(amberPersistenceUnit);
+        column.validateDatabase(amberPersistenceUnit);
       }
     } catch (ConfigException e) {
       if (_type != null)
-	_type.setConfigException(e);
-      
+        _type.setConfigException(e);
+
       throw e;
     } catch (Exception e) {
       if (_type != null)
-	_type.setConfigException(e);
-      
+        _type.setConfigException(e);
+
       throw error(e);
     }
   }
@@ -475,20 +475,20 @@ public class Table {
       LinkColumns link = _incomingLinks.get(i);
 
       if (link.isSourceCascadeDelete())
-	return true;
+        return true;
     }
-    
+
     // check if any of the outgoing links have a source cascade delete
     for (int i = 0; i < _outgoingLinks.size(); i++) {
       LinkColumns link = _outgoingLinks.get(i);
 
       if (link.isTargetCascadeDelete())
-	return true;
+        return true;
     }
 
     return false;
   }
-  
+
   /**
    * Called before the entity is deleted.
    */
@@ -496,16 +496,16 @@ public class Table {
   {
     try {
       for (int i = 0; i < _entityListeners.size(); i++) {
-	EntityListener listener = _entityListeners.get(i);
+        EntityListener listener = _entityListeners.get(i);
 
-	listener.beforeEntityDelete(aConn, entity);
+        listener.beforeEntityDelete(aConn, entity);
       }
       // getHome().completeDelete(aConn, key);
 
       for (int i = 0; i < _incomingLinks.size(); i++) {
-	LinkColumns link = _incomingLinks.get(i);
+        LinkColumns link = _incomingLinks.get(i);
 
-	link.beforeTargetDelete(aConn, entity);
+        link.beforeTargetDelete(aConn, entity);
       }
 
       aConn.addCompletion(getDeleteCompletion());

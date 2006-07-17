@@ -64,7 +64,7 @@ public class EntityComponent extends ClassComponent {
 
   private String _baseClassName;
   private String _extClassName;
-  
+
   private EntityType _entityType;
 
   private ArrayList<PersistentDependency> _dependencies =
@@ -73,7 +73,7 @@ public class EntityComponent extends ClassComponent {
   public EntityComponent()
   {
   }
-  
+
   /**
    * Sets the bean info for the generator
    */
@@ -86,7 +86,7 @@ public class EntityComponent extends ClassComponent {
     for (int i = 0; i < _dependencies.size(); i++)
       Environment.addDependency(_dependencies.get(i));
   }
-  
+
   /**
    * Sets the base class name
    */
@@ -94,7 +94,7 @@ public class EntityComponent extends ClassComponent {
   {
     _baseClassName = baseClassName;
   }
-  
+
   /**
    * Gets the base class name
    */
@@ -102,7 +102,7 @@ public class EntityComponent extends ClassComponent {
   {
     return _baseClassName;
   }
-  
+
   /**
    * Sets the ext class name
    */
@@ -110,7 +110,7 @@ public class EntityComponent extends ClassComponent {
   {
     _extClassName = extClassName;
   }
-  
+
   /**
    * Sets the ext class name
    */
@@ -135,7 +135,7 @@ public class EntityComponent extends ClassComponent {
   {
     return _dependencies;
   }
-  
+
   /**
    * Starts generation of the Java code
    */
@@ -144,58 +144,64 @@ public class EntityComponent extends ClassComponent {
   {
     try {
       generateHeader(out);
-      
-      generateInit(out);
 
-      HashSet<Object> completedSet = new HashSet<Object>();
-      
-      generatePrologue(out, completedSet);
-      
+      if (!_entityType.isEmbedded()) {
+        generateInit(out);
+
+        HashSet<Object> completedSet = new HashSet<Object>();
+
+        generatePrologue(out, completedSet);
+      }
+
       generateGetEntityType(out);
-      
-      generateMatch(out);
+
+      if (!_entityType.isEmbedded())
+        generateMatch(out);
 
       generateFields(out);
-      
+
       generateMethods(out);
 
-      generateDetach(out);
-      
-      generateLoad(out);
-      
-      int min = 0;
-      if (_entityType.getParentType() != null)
-	min = _entityType.getParentType().getLoadGroupIndex() + 1;
-      int max = _entityType.getLoadGroupIndex();
+      if (!_entityType.isEmbedded()) {
+        generateDetach(out);
 
-      for (int i = min; i <= max; i++)
-	generateLoadGroup(out, i);
-      
-      generateResultSetLoad(out);
-      
-      generateSetQuery(out);
+        generateLoad(out);
 
-      // generateLoadFromObject();
+        int min = 0;
+        if (_entityType.getParentType() != null)
+          min = _entityType.getParentType().getLoadGroupIndex() + 1;
+        int max = _entityType.getLoadGroupIndex();
 
-      // generateCopy();
-      
-      generateCopy(out);
+        for (int i = min; i <= max; i++)
+          generateLoadGroup(out, i);
 
-      generateMakePersistent(out);
+        if (!_entityType.isEmbedded())
+          generateResultSetLoad(out);
 
-      generateCreate(out);
+        generateSetQuery(out);
 
-      generateDelete(out);
+        // generateLoadFromObject();
 
-      generateDeleteForeign(out);
+        // generateCopy();
 
-      generateFlush(out);
+        generateCopy(out);
 
-      generateAfterCommit(out);
-      
-      generateAfterRollback(out);
-      
-      generateHome(out);
+        generateMakePersistent(out);
+
+        generateCreate(out);
+
+        generateDelete(out);
+
+        generateDeleteForeign(out);
+
+        generateFlush(out);
+
+        generateAfterCommit(out);
+
+        generateAfterRollback(out);
+
+        generateHome(out);
+      }
 
       // printDependList(out, _dependencies);
     } catch (IOException e) {
@@ -225,14 +231,14 @@ public class EntityComponent extends ClassComponent {
 
       int loadCount = _entityType.getLoadGroupIndex();
       for (int i = 0; i <= loadCount / 64; i++) {
-	out.println("protected transient long __caucho_loadMask_" + i + ";");
+        out.println("protected transient long __caucho_loadMask_" + i + ";");
       }
 
       int dirtyCount = _entityType.getDirtyIndex();
-      
+
       for (int i = 0; i <= dirtyCount / 64; i++) {
-	out.println("protected transient long __caucho_dirtyMask_" + i + ";");
-	out.println("protected transient long __caucho_updateMask_" + i + ";");
+        out.println("protected transient long __caucho_dirtyMask_" + i + ";");
+        out.println("protected transient long __caucho_updateMask_" + i + ";");
       }
     }
   }
@@ -245,7 +251,7 @@ public class EntityComponent extends ClassComponent {
   {
     if (_entityType.getParentType() != null)
       return;
-    
+
     out.println();
     out.println("public void __caucho_setPrimaryKey(Object key)");
     out.println("{");
@@ -254,7 +260,7 @@ public class EntityComponent extends ClassComponent {
     Id id = _entityType.getId();
     if (id == null)
       throw new IllegalStateException(L.l("`{0}' is missing a key.",
-					  _entityType.getName()));
+                                          _entityType.getName()));
 
     id.generateSet(out, id.generateCastFromObject("key"));
 
@@ -274,27 +280,27 @@ public class EntityComponent extends ClassComponent {
     out.println("}");
 
     /*
-    println();
-    println("public com.caucho.amber.entity.EntityItem __caucho_getItem()");
-    println("{");
-    pushDepth();
+      println();
+      println("public com.caucho.amber.entity.EntityItem __caucho_getItem()");
+      println("{");
+      pushDepth();
 
-    println("return __caucho_item;");
+      println("return __caucho_item;");
 
-    popDepth();
-    println("}");
-    
-    println();
-    println("public void __caucho_setItem(com.caucho.amber.entity.EntityItem item)");
-    println("{");
-    pushDepth();
+      popDepth();
+      println("}");
 
-    println("__caucho_item = item;");
+      println();
+      println("public void __caucho_setItem(com.caucho.amber.entity.EntityItem item)");
+      println("{");
+      pushDepth();
 
-    popDepth();
-    println("}");
+      println("__caucho_item = item;");
+
+      popDepth();
+      println("}");
     */
-    
+
     out.println();
     out.println("public void __caucho_setConnection(com.caucho.amber.manager.AmberConnection aConn)");
     out.println("{");
@@ -317,14 +323,14 @@ public class EntityComponent extends ClassComponent {
     out.println();
     out.println("public void __caucho_expire()");
     out.println("{");
-    
+
     int loadCount = _entityType.getLoadGroupIndex();
     for (int i = 0; i <= loadCount / 64; i++) {
       out.println("  __caucho_loadMask_" + i + " = 0L;");
     }
 
     _entityType.generateExpire(out);
-    
+
     out.println("}");
   }
 
@@ -336,15 +342,15 @@ public class EntityComponent extends ClassComponent {
   {
     if (_entityType.getParentType() != null)
       return;
-    
+
     out.println();
     out.println("public boolean __caucho_match(String className, Object key)");
     out.println("{");
     out.pushDepth();
 
     /*
-    out.println("if (! (" + getBeanClassName() + ".class.isAssignableFrom(cl)))");
-    out.println("  return false;");
+      out.println("if (! (" + getBeanClassName() + ".class.isAssignableFrom(cl)))");
+      out.println("  return false;");
     */
     out.println("if (! (\"" + getBeanClassName() + "\".equals(className)))");
     out.println("  return false;");
@@ -360,7 +366,7 @@ public class EntityComponent extends ClassComponent {
     out.popDepth();
     out.println("}");
   }
-  
+
   /**
    * Generates the prologue.
    */
@@ -370,12 +376,12 @@ public class EntityComponent extends ClassComponent {
     for (Column column : _entityType.getColumns()) {
       column.generatePrologue(out);
     }
-    
+
     Id id = _entityType.getId();
 
     if (id != null)
       id.generatePrologue(out, completedSet);
-    
+
     ArrayList<AmberField> _fields = _entityType.getFields();
 
     for (int i = 0; i < _fields.size(); i++) {
@@ -401,7 +407,7 @@ public class EntityComponent extends ClassComponent {
     out.popDepth();
     out.println("}");
   }
-  
+
   /**
    * Generates the fields.
    */
@@ -415,12 +421,12 @@ public class EntityComponent extends ClassComponent {
 
       prop.generateSuperGetter(out);
       prop.generateGetProperty(out);
-      
+
       prop.generateSuperSetter(out);
       prop.generateSetProperty(out);
     }
   }
-  
+
   /**
    * Generates the stub methods (needed for EJB)
    */
@@ -440,7 +446,7 @@ public class EntityComponent extends ClassComponent {
   {
     if (_entityType.getParentType() != null)
       return;
-    
+
     out.println();
     out.println("public boolean __caucho_makePersistent(com.caucho.amber.manager.AmberConnection aConn, com.caucho.amber.type.EntityType home)");
     out.println("  throws java.sql.SQLException");
@@ -450,14 +456,14 @@ public class EntityComponent extends ClassComponent {
     out.println("__caucho_session = aConn;");
     out.println("if (home != null)");
     out.println("  __caucho_home = home;");
-    
+
     out.println("__caucho_state = com.caucho.amber.entity.Entity.P_NON_TRANSACTIONAL;");
-    
+
     int loadCount = _entityType.getLoadGroupIndex();
     for (int i = 0; i <= loadCount / 64; i++) {
       out.println("  __caucho_loadMask_" + i + " = 0L;");
     }
-    
+
     int dirtyCount = _entityType.getDirtyIndex();
     for (int i = 0; i <= dirtyCount / 64; i++) {
       out.println("  __caucho_dirtyMask_" + i + " = 0L;");
@@ -477,7 +483,7 @@ public class EntityComponent extends ClassComponent {
     out.pushDepth();
 
     out.println("__caucho_load_0(aConn);");
-    
+
     out.popDepth();
     out.println("}");
   }
@@ -490,7 +496,7 @@ public class EntityComponent extends ClassComponent {
   {
     if (_entityType.getParentType() != null)
       return;
-    
+
     out.println();
     out.println("public void __caucho_detach()");
     out.println("{");
@@ -498,7 +504,7 @@ public class EntityComponent extends ClassComponent {
 
     out.println("__caucho_session = null;");
     out.println("__caucho_home = null;");
-    
+
     out.println("__caucho_state = com.caucho.amber.entity.Entity.TRANSIENT;");
 
     out.popDepth();
@@ -511,8 +517,9 @@ public class EntityComponent extends ClassComponent {
   private void generateLoadGroup(JavaWriter out, int groupIndex)
     throws IOException
   {
-    if (_entityType.hasLoadGroup(groupIndex))
+    if (_entityType.hasLoadGroup(groupIndex)) {
       new LoadGroupGenerator(_extClassName, _entityType, groupIndex).generate(out);
+    }
   }
 
   /**
@@ -523,7 +530,7 @@ public class EntityComponent extends ClassComponent {
   {
     if (_entityType.getParentType() != null)
       return;
-    
+
     out.println();
     out.println("public void __caucho_load(com.caucho.amber.manager.AmberConnection aConn, java.sql.ResultSet rs, int index)");
     out.println("  throws java.sql.SQLException");
@@ -535,14 +542,14 @@ public class EntityComponent extends ClassComponent {
     out.println("__caucho_loadMask_0 |= 1L;");
 
     int dirtyCount = _entityType.getDirtyIndex();
-      
+
     for (int i = 0; i <= dirtyCount / 64; i++) {
       out.println("__caucho_dirtyMask_" + i + " = 0;");
 
       // ejb/0645
       // out.println("__caucho_updateMask_" + i + " = 0;");
     }
-    
+
     out.println();
     out.println("if (__caucho_state == com.caucho.amber.entity.Entity.P_TRANSACTIONAL || __caucho_state == com.caucho.amber.entity.Entity.P_NEW) {");
     out.println("}");
@@ -561,7 +568,7 @@ public class EntityComponent extends ClassComponent {
       out.println();
       out.println("__caucho_load_callback();");
     }
-    
+
     out.popDepth();
     out.println("}");
   }
@@ -574,7 +581,7 @@ public class EntityComponent extends ClassComponent {
   {
     if (_entityType.getParentType() != null)
       return;
-    
+
     out.println();
     out.println("public void __caucho_setKey(java.sql.PreparedStatement pstmt, int index)");
     out.println("  throws java.sql.SQLException");
@@ -598,7 +605,7 @@ public class EntityComponent extends ClassComponent {
     out.println("  throws java.sql.SQLException");
     out.println("{");
     out.println("}");
-    
+
     out.println();
     out.println("public boolean __caucho_flush()");
     out.println("  throws java.sql.SQLException");
@@ -611,9 +618,9 @@ public class EntityComponent extends ClassComponent {
     out.println("}");
     out.println();
     out.println("boolean isDirty = false;");
-    
+
     int dirtyCount = _entityType.getDirtyIndex();
-      
+
     for (int i = 0; i <= dirtyCount / 64; i++) {
       out.println("long mask_" + i + " = __caucho_dirtyMask_" + i + ";");
       out.println("__caucho_dirtyMask_" + i + " = 0L;");
@@ -626,12 +633,12 @@ public class EntityComponent extends ClassComponent {
 
     out.println("if (! isDirty)");
     out.println("  return true;");
-    
+
     generateCallbacks(out, "this", _entityType.getPreUpdateCallbacks());
-    
+
     out.println();
     out.println("__caucho_flush_callback();");
-    
+
     out.println();
     out.println("com.caucho.util.CharBuffer cb = new com.caucho.util.CharBuffer();");
     out.println("__caucho_home.generateUpdateSQLPrefix(cb);");
@@ -642,9 +649,9 @@ public class EntityComponent extends ClassComponent {
       out.println("  isFirst = __caucho_home.generateUpdateSQLComponent(cb, " + i + ", mask_" + i + ", isFirst);");
     }
     out.println("__caucho_home.generateUpdateSQLSuffix(cb);");
-    
+
     out.println("java.sql.PreparedStatement pstmt = __caucho_session.prepareStatement(cb.toString());");
-    
+
     out.println("int index = 1;");
 
     ArrayList<AmberField> fields = _entityType.getFields();
@@ -661,7 +668,7 @@ public class EntityComponent extends ClassComponent {
     out.println("pstmt.executeUpdate();");
 
     generateCallbacks(out, "this", _entityType.getPostUpdateCallbacks());
-    
+
     out.println();
     out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
     out.println("  __caucho_log.fine(\"amber update \" + this);");
@@ -694,9 +701,9 @@ public class EntityComponent extends ClassComponent {
 
     out.println("if (sql != null) {");
     out.pushDepth();
-    
+
     out.println("java.sql.PreparedStatement pstmt = __caucho_session.prepareStatement(sql);");
-    
+
     out.println("int index = 1;");
 
     ArrayList<AmberField> fields = _entityType.getFields();
@@ -715,7 +722,7 @@ public class EntityComponent extends ClassComponent {
     out.println();
     out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
     out.println("  __caucho_log.fine(\"amber update \" + this);");
-    
+
     // println();
     // println("pstmt.close();");
 
@@ -750,11 +757,11 @@ public class EntityComponent extends ClassComponent {
 
     out.println();
     out.println("__caucho_state = com.caucho.amber.entity.Entity.P_NON_TRANSACTIONAL;");
-    
+
     for (int i = 0; i <= dirtyCount / 64; i++) {
       out.println("__caucho_updateMask_" + i + " = 0L;");
     }
-    
+
     out.print("if (updateMask_0 != 0L");
     for (int i = 1; i <= dirtyCount / 64; i++)
       out.print(" || updateMask_" + i + " != 0L");
@@ -772,24 +779,24 @@ public class EntityComponent extends ClassComponent {
       out.println("if ((__caucho_loadMask_0 & 1L) != 0) {");
       out.pushDepth();
       out.println("item.__caucho_loadMask_0 = 1L;");
-    
+
       _entityType.generateCopyLoadObject(out, "item", "super", 0);
     }
-    
+
     for (int i = 1; i < _entityType.getLoadGroupIndex(); i++) {
       String loadVar = "__caucho_loadMask_" + (i / 64);
       long mask = (1L << (i % 64));
 
       if (_entityType.isLoadGroupOwnedByType(i)) {
-	out.println("if ((" + loadVar + " & " + mask + "L) != 0) {");
-	out.pushDepth();
-      
-	_entityType.generateCopyLoadObject(out, "item", "super", i);
+        out.println("if ((" + loadVar + " & " + mask + "L) != 0) {");
+        out.pushDepth();
 
-	out.println("item." + loadVar + " |= " + mask + "L;");
+        _entityType.generateCopyLoadObject(out, "item", "super", i);
 
-	out.popDepth();
-	out.println("}");
+        out.println("item." + loadVar + " |= " + mask + "L;");
+
+        out.popDepth();
+        out.println("}");
       }
     }
 
@@ -797,22 +804,22 @@ public class EntityComponent extends ClassComponent {
       out.popDepth();
       out.println("}");
     }
-    
+
     for (int i = 0; i < _entityType.getDirtyIndex(); i++) {
       int group = i / 64;
       long mask = (1L << (i % 64));
-      
-      if (_entityType.isDirtyIndexOwnedByType(i)) {
-	out.println("if ((updateMask_" + group + " & " + mask + "L) != 0) {");
-	out.pushDepth();
-      
-	_entityType.generateCopyUpdateObject(out, "item", "super", i);
 
-	out.popDepth();
-	out.println("}");
+      if (_entityType.isDirtyIndexOwnedByType(i)) {
+        out.println("if ((updateMask_" + group + " & " + mask + "L) != 0) {");
+        out.pushDepth();
+
+        _entityType.generateCopyUpdateObject(out, "item", "super", i);
+
+        out.popDepth();
+        out.println("}");
       }
     }
-    
+
     out.popDepth();
     out.println("}");
 
@@ -836,7 +843,7 @@ public class EntityComponent extends ClassComponent {
     for (int i = 0; i <= loadCount / 64; i++) {
       out.println("__caucho_loadMask_" + i + " = 0L;");
     }
-    
+
     int dirtyCount = _entityType.getDirtyIndex();
     for (int i = 0; i <= dirtyCount / 64; i++) {
       out.println("__caucho_dirtyMask_" + i + " = 0L;");
@@ -850,7 +857,7 @@ public class EntityComponent extends ClassComponent {
   {
     return "this";
   }
-  
+
   /**
    * Generates the update
    */
@@ -859,9 +866,9 @@ public class EntityComponent extends ClassComponent {
   {
     ArrayList<IdField> fields = _entityType.getId().getKeys();
     IdField idField = fields.size() > 0 ? fields.get(0) : null;
-    
+
     if (! _entityType.getPersistenceUnit().hasReturnGeneratedKeys() &&
-	idField != null && idField.getType().isAutoIncrement()) {
+        idField != null && idField.getType().isAutoIncrement()) {
       out.println();
       out.println("private static com.caucho.amber.field.Generator __caucho_id_gen;");
       out.println("static {");
@@ -873,7 +880,7 @@ public class EntityComponent extends ClassComponent {
       out.popDepth();
       out.println("}");
     }
-    
+
     out.println();
     out.println("public boolean __caucho_create(com.caucho.amber.manager.AmberConnection aConn, com.caucho.amber.type.EntityType home)");
     out.println("  throws java.sql.SQLException");
@@ -884,12 +891,12 @@ public class EntityComponent extends ClassComponent {
     out.println("  throw new com.caucho.amber.AmberException(\"object \" + " + getDebug() + " + \" is already persistent.\");");
 
     out.println("__caucho_state = com.caucho.amber.entity.Entity.P_NEW;");
-    
+
     int loadCount = _entityType.getLoadGroupIndex();
     for (int i = 0; i <= loadCount / 64; i++) {
       out.println("__caucho_loadMask_" + i + " = " + _entityType.getCreateLoadMask(i) + ";");
     }
-    
+
     int dirtyCount = _entityType.getDirtyIndex();
     for (int i = 0; i <= dirtyCount / 64; i++) {
       out.println("__caucho_dirtyMask_" + i + " = 0L;");
@@ -904,9 +911,9 @@ public class EntityComponent extends ClassComponent {
     out.print("String sql = \"");
     out.print(_entityType.generateCreateSQL(table));
     out.println("\";");
-    
+
     _entityType.getId().generateCheckCreateKey(out);
-    
+
     out.println("java.sql.PreparedStatement pstmt = aConn.prepareInsertStatement(sql);");
 
     out.println("int index = 1;");
@@ -927,7 +934,7 @@ public class EntityComponent extends ClassComponent {
       out.print("sql = \"");
       out.print(_entityType.generateCreateSQL(subTable));
       out.println("\";");
-    
+
       out.println("pstmt = aConn.prepareStatement(sql);");
 
       out.println("index = 1;");
@@ -943,11 +950,11 @@ public class EntityComponent extends ClassComponent {
       out.println();
       _entityType.getId().generateSetGeneratedKeys(out, "pstmt");
     }
-    
+
     out.println();
     out.println("__caucho_session = aConn;");
     out.println("__caucho_home = home;");
-    
+
     // println("pstmt.close();");
 
     out.println("__caucho_item = new com.caucho.amber.entity.CacheableEntityItem(home.getHome(), new " + getClassName() + "());");
@@ -957,10 +964,10 @@ public class EntityComponent extends ClassComponent {
     ArrayList<IdField> keys = _entityType.getId().getKeys();
     for (IdField key : keys) {
       String value = key.generateGet("super");
-      
+
       out.println(key.generateSet("entity", value) + ";");
     }
-      
+
     for (int i = 0; i < 1; i++) {
       _entityType.generateCopyUpdateObject(out, "entity", "super", i);
     }
@@ -998,7 +1005,7 @@ public class EntityComponent extends ClassComponent {
 
     out.println("if (__caucho_state >= com.caucho.amber.entity.Entity.P_DELETING)");
     out.println("  return;");
-    
+
     _entityType.generatePreDelete(out);
     out.println("__caucho_state = com.caucho.amber.entity.Entity.P_DELETING;");
 
@@ -1012,18 +1019,18 @@ public class EntityComponent extends ClassComponent {
     out.println("}");
     out.println("else");
     out.println("  __caucho_state = com.caucho.amber.entity.Entity.P_DELETED;");
-    
+
     out.popDepth();
     out.println("}");
 
     Id id = _entityType.getId();
-    
+
     out.println();
     out.println("private void __caucho_delete_int()");
     out.println("  throws java.sql.SQLException");
     out.println("{");
     out.pushDepth();
-    
+
     generateCallbacks(out, "this", _entityType.getPreRemoveCallbacks());
 
     out.print("__caucho_home.delete(__caucho_session, ");
@@ -1031,23 +1038,23 @@ public class EntityComponent extends ClassComponent {
     out.println(");");
 
     out.println("__caucho_session.removeEntity(this);");
-    
+
     String table = _entityType.getTable().getName();
     String where = _entityType.getId().generateMatchArgWhere(null);
 
     String sql = "delete from " + table + " where " + where;
 
     out.println("String sql = \"" + sql + "\";");
-    
+
     out.println();
     out.println("java.sql.PreparedStatement pstmt = __caucho_session.prepareStatement(sql);");
 
     out.println("int index = 1;");
     id.generateSet(out, "pstmt", "index", "this");
-    
+
     out.println();
     out.println("pstmt.executeUpdate();");
-    
+
     generateCallbacks(out, "this", _entityType.getPostRemoveCallbacks());
 
     out.popDepth();
@@ -1066,11 +1073,11 @@ public class EntityComponent extends ClassComponent {
     out.pushDepth();
 
     _entityType.generateInvalidateForeign(out);
-    
+
     out.popDepth();
     out.println("}");
   }
-    
+
 
   /**
    * Generates the cache load
@@ -1090,25 +1097,25 @@ public class EntityComponent extends ClassComponent {
     else {
       int loadCount = _entityType.getLoadGroupIndex();
       for (int i = 0; i <= loadCount / 64; i++) {
-	out.println("__caucho_loadMask_" + i + " = o.__caucho_loadMask_" + i + ";");
+        out.println("__caucho_loadMask_" + i + " = o.__caucho_loadMask_" + i + ";");
       }
     }
-      
+
     int dirtyCount = _entityType.getDirtyIndex();
     for (int i = 0; i <= dirtyCount / 64; i++) {
       out.println("__caucho_dirtyMask_" + i + " = 0;");
     }
-    
+
     _entityType.generateLoadFromObject(out, "o");
 
     /* XXX:
-    if (Lifecycle.class.isAssignableFrom(_entityType.getBeanClass())) {
-      println("if (src instanceof com.caucho.ormap.Lifecycle)");
-      println("  ((com.caucho.ormap.Lifecycle) src).afterLoad(__caucho_session, " +
-	      _entityType.getId().getGetterName() + "());");
-    }
+       if (Lifecycle.class.isAssignableFrom(_entityType.getBeanClass())) {
+       println("if (src instanceof com.caucho.ormap.Lifecycle)");
+       println("  ((com.caucho.ormap.Lifecycle) src).afterLoad(__caucho_session, " +
+       _entityType.getId().getGetterName() + "());");
+       }
     */
-    
+
     out.popDepth();
     out.println("}");
   }
@@ -1117,9 +1124,9 @@ public class EntityComponent extends ClassComponent {
    * Generates the copy
    */
   /*
-  private void generateCopy(JavaWriter out)
+    private void generateCopy(JavaWriter out)
     throws IOException
-  {
+    {
     out.println();
     out.println("public com.caucho.amber.entity.Entity __caucho_copy()");
     out.println("{");
@@ -1132,10 +1139,10 @@ public class EntityComponent extends ClassComponent {
     out.println("o.__caucho_loadMask = 0;");
 
     out.println("return o;");
-    
+
     out.popDepth();
     out.println("}");
-  }
+    }
   */
 
   /**
@@ -1159,7 +1166,7 @@ public class EntityComponent extends ClassComponent {
 
     for (int i = 0; i < keys.size(); i++) {
       IdField key = keys.get(i);
-      
+
       out.println(key.generateSet("o", key.generateGet("super")) + ";");
     }
 
@@ -1173,11 +1180,11 @@ public class EntityComponent extends ClassComponent {
 
     out.println();
     out.println("return o;");
-    
+
     out.popDepth();
     out.println("}");
   }
-  
+
   /**
    * Generates the copy
    */
@@ -1200,13 +1207,13 @@ public class EntityComponent extends ClassComponent {
 
     for (int i = 0; i < keys.size(); i++) {
       IdField key = keys.get(i);
-      
+
       out.println(key.generateSet("super", key.generateGet("entity")) + ";");
     }
 
     out.println("__caucho_session = aConn;");
     out.println("__caucho_state = com.caucho.amber.entity.Entity.P_NON_TRANSACTIONAL;");
-    
+
     out.popDepth();
     out.println("}");
   }
@@ -1236,7 +1243,7 @@ public class EntityComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    
+
     out.print("Object key = ");
     int index = _entityType.getId().generateLoadForeign(out, "rs", "index", 0);
     out.println(";");
@@ -1249,7 +1256,7 @@ public class EntityComponent extends ClassComponent {
       out.println();
       out.println("return home.findDiscriminatorEntityItem(aConn, key, discriminator);");
     }
-    
+
     out.popDepth();
     out.println("}");
   }
@@ -1276,7 +1283,7 @@ public class EntityComponent extends ClassComponent {
 
       out.println("entity.__caucho_home = home.getEntityType();");
       out.println("entity.__caucho_setPrimaryKey(key);");
-      
+
       out.println("return entity;");
     }
     else {
@@ -1289,9 +1296,9 @@ public class EntityComponent extends ClassComponent {
       out.println("java.sql.PreparedStatement pstmt = aConn.prepareStatement(sql);");
 
       String keyType = _entityType.getId().getForeignTypeName();
-      
+
       out.println(keyType + " keyValue = (" + keyType + ") key;");
-	      
+
       out.println("int index = 1;");
       _entityType.getId().generateSetKey(out, "pstmt", "index", "keyValue");
 
@@ -1307,14 +1314,14 @@ public class EntityComponent extends ClassComponent {
       out.println("rs.close();");
       out.println("return entity;");
     }
-    
+
     out.popDepth();
     out.println("}");
   }
 
   private void generateCallbacks(JavaWriter out,
-				 String object,
-				 ArrayList<JMethod> callbacks)
+                                 String object,
+                                 ArrayList<JMethod> callbacks)
     throws IOException
   {
     if (callbacks.size() == 0)

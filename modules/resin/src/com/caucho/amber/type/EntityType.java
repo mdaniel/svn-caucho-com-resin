@@ -89,41 +89,41 @@ public class EntityType extends Type {
   private AmberPersistenceUnit _amberPersistenceUnit;
 
   private String _name;
-  
+
   private Table _table;
-  
+
   private ArrayList<Table> _secondaryTables = new ArrayList<Table>();
-  
+
   private Id _id;
-  
+
   private Column _discriminator;
   private String _discriminatorValue;
   private boolean _isJoinedSubClass;
-  
+
   private ArrayList<AmberField> _fields = new ArrayList<AmberField>();
 
   private HashMap<String,EntityType> _subEntities;
-  
+
   private JClass _beanClass;
 
   private boolean _isFieldAccess;
 
   private Throwable _exception;
-  
+
   private String _instanceClassName;
   private boolean _isEnhanced;
   private ClassLoader _instanceLoader;
   private Class _instanceClass;
 
   private JClass _proxyClass;
-  
+
   private AmberEntityHome _home;
 
   private ArrayList<StubMethod> _methods = new ArrayList<StubMethod>();
 
   protected int _defaultLoadGroupIndex;
   protected int _loadGroupIndex;
-  
+
   protected int _minDirtyIndex;
   protected int _dirtyIndex;
 
@@ -160,7 +160,8 @@ public class EntityType extends Type {
 
   private volatile boolean _isConfigured;
   private volatile boolean _isGenerated;
-  
+  private boolean _isEmbedded;
+
   public EntityType(AmberPersistenceUnit amberPersistenceUnit)
   {
     _amberPersistenceUnit = amberPersistenceUnit;
@@ -179,9 +180,12 @@ public class EntityType extends Type {
    */
   public Table getTable()
   {
+    if (_isEmbedded)
+      return null;
+
     if (_table == null)
       setTable(_amberPersistenceUnit.createTable(getName()));
-    
+
     return _table;
   }
 
@@ -222,7 +226,7 @@ public class EntityType extends Type {
   {
     for (Table table : _secondaryTables) {
       if (table.getName().equals(name))
-	return table;
+        return table;
     }
 
     return null;
@@ -272,7 +276,7 @@ public class EntityType extends Type {
       int p = name.lastIndexOf('.');
 
       if (p > 0)
-	name = name.substring(p + 1);
+        name = name.substring(p + 1);
 
       setName(name);
     }
@@ -329,6 +333,22 @@ public class EntityType extends Type {
   }
 
   /**
+   * Sets true if the class is embedded.
+   */
+  public void setEmbedded(boolean isEmbedded)
+  {
+    _isEmbedded = isEmbedded;
+  }
+
+  /**
+   * Returns true if the class is embedded.
+   */
+  public boolean isEmbedded()
+  {
+    return _isEmbedded;
+  }
+
+  /**
    * Sets true if the class is enhanced.
    */
   public void setEnhanced(boolean isEnhanced)
@@ -357,7 +377,7 @@ public class EntityType extends Type {
     if (_exception == null)
       _exception = e;
   }
-  
+
   /**
    * Gets the instance class.
    */
@@ -365,41 +385,41 @@ public class EntityType extends Type {
   {
     if (_instanceClass == null) {
       if (getInstanceClassName() == null) {
-	throw new RuntimeException("No instance class:" + this);
+        throw new RuntimeException("No instance class:" + this);
       }
 
       try {
-	if (_isEnhanced) {
-	  ClassLoader loader = getPersistenceUnit().getEnhancedLoader();
+        if (_isEnhanced) {
+          ClassLoader loader = getPersistenceUnit().getEnhancedLoader();
 
           if (log.isLoggable(Level.FINEST))
             log.finest(L.l("loading bean class `{0}' from `{1}'", getBeanClass().getName(), loader));
 
           _instanceClass = Class.forName(getBeanClass().getName(), false, loader);
-	}
-	else {
-	  ClassLoader loader = _instanceLoader;
+        }
+        else {
+          ClassLoader loader = _instanceLoader;
 
-	  if (loader == null)
-	    loader = getPersistenceUnit().getEnhancedLoader();
+          if (loader == null)
+            loader = getPersistenceUnit().getEnhancedLoader();
 
           if (log.isLoggable(Level.FINEST))
             log.finest(L.l("loading instance class `{0}' from `{1}'", getInstanceClassName(), loader));
 
           _instanceClass = Class.forName(getInstanceClassName(), false, loader);
-	}
+        }
       } catch (ClassNotFoundException e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
 
       if (! Entity.class.isAssignableFrom(_instanceClass)) {
-	if (_exception != null)
-	  throw new AmberRuntimeException(_exception);
-	else if (_amberPersistenceUnit.getConfigException() != null)
-	  throw new AmberRuntimeException(_amberPersistenceUnit.getConfigException());
-	
-	throw new AmberRuntimeException(L.l("'{0}' with classloader {1} is an illegal instance class",
-					    _instanceClass.getName(), _instanceClass.getClassLoader()));
+        if (_exception != null)
+          throw new AmberRuntimeException(_exception);
+        else if (_amberPersistenceUnit.getConfigException() != null)
+          throw new AmberRuntimeException(_amberPersistenceUnit.getConfigException());
+
+        throw new AmberRuntimeException(L.l("'{0}' with classloader {1} is an illegal instance class",
+                                            _instanceClass.getName(), _instanceClass.getClassLoader()));
       }
     }
 
@@ -474,7 +494,7 @@ public class EntityType extends Type {
     else
       return _isJoinedSubClass;
   }
-  
+
   /**
    * Sets the discriminator value.
    */
@@ -483,13 +503,13 @@ public class EntityType extends Type {
     if (_discriminatorValue != null)
       return _discriminatorValue;
     else {
-      String name = getBeanClass().getName(); 
+      String name = getBeanClass().getName();
 
       int p = name.lastIndexOf('.');
       if (p > 0)
-	return name.substring(0, p);
+        return name.substring(0, p);
       else
-	return name;
+        return name;
     }
   }
 
@@ -575,20 +595,20 @@ public class EntityType extends Type {
       ArrayList<IdField> keys = _id.getKeys();
 
       for (int i = 0; i < keys.size(); i++) {
-	IdField key = keys.get(i);
+        IdField key = keys.get(i);
 
-	if (key.getName().equals(name))
-	  return key;
+        if (key.getName().equals(name))
+          return key;
       }
     }
-    
+
     for (int i = 0; i < _fields.size(); i++) {
       AmberField field = _fields.get(i);
 
       if (field.getName().equals(name))
-	return field;
+        return field;
     }
-    
+
     return null;
   }
 
@@ -599,7 +619,7 @@ public class EntityType extends Type {
   {
     return getTable().getColumns();
   }
-  
+
   /**
    * True if the load lifecycle callback should be generated.
    */
@@ -607,7 +627,7 @@ public class EntityType extends Type {
   {
     _hasLoadCallback = hasCallback;
   }
-  
+
   /**
    * True if the load lifecycle callback should be generated.
    */
@@ -628,7 +648,7 @@ public class EntityType extends Type {
     else
       return this;
   }
-  
+
   /**
    * Returns the parent type.
    */
@@ -857,7 +877,7 @@ public class EntityType extends Type {
     int nextLoadGroupIndex = getLoadGroupIndex() + 1;
 
     _loadGroupIndex = nextLoadGroupIndex;
-    
+
     return nextLoadGroupIndex;
   }
 
@@ -901,7 +921,7 @@ public class EntityType extends Type {
     int dirtyIndex = getDirtyIndex();
 
     _dirtyIndex = dirtyIndex + 1;
-    
+
     return dirtyIndex;
   }
 
@@ -936,8 +956,8 @@ public class EntityType extends Type {
   {
     synchronized (this) {
       if (_isConfigured)
-	return false;
-      
+        return false;
+
       _isConfigured = true;
 
       return true;
@@ -952,29 +972,31 @@ public class EntityType extends Type {
   {
     if (_exception != null)
       return;
-    
+
     if (! _lifecycle.toInit())
       return;
 
     // forces table lazy load
     getTable();
 
-    assert getId() != null : "null id for " + _name;
+    if (!_isEmbedded) {
+      assert getId() != null : "null id for " + _name;
 
-    getId().init();
-      
+      getId().init();
+    }
+
     for (AmberField field : _fields) {
       if (field.isUpdateable())
-	field.setIndex(nextDirtyIndex());
+        field.setIndex(nextDirtyIndex());
 
       field.init();
     }
 
     /*
-    if (_amberPersistenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnit.getCreateDatabaseTables())
-     getTable().createDatabaseTable(_amberPersistenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnit);
+      if (_amberPersistenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnit.getCreateDatabaseTables())
+      getTable().createDatabaseTable(_amberPersistenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnit);
 
-    if (_amberPersistenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnit.getValidateDatabaseTables())
+      if (_amberPersistenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnit.getValidateDatabaseTables())
       getTable().validateDatabaseTable(_amberPersistenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnit);
     */
   }
@@ -986,7 +1008,7 @@ public class EntityType extends Type {
     throws ConfigException
   {
     init();
-    
+
     if (! _lifecycle.toActive())
       return;
   }
@@ -1003,12 +1025,12 @@ public class EntityType extends Type {
    * Generates a string to load the field.
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index)
+                          String indexVar, int index)
     throws IOException
   {
     // ejb/0ag3
     // out.print("(" + getInstanceClassName() + ") ");
-    
+
     out.print("aConn.loadProxy(\"" + getName() + "\", ");
 
     index = getId().generateLoadForeign(out, rs, indexVar, index);
@@ -1028,17 +1050,17 @@ public class EntityType extends Type {
 
     for (AmberField field : getFields()) {
       if (field.hasLoadGroup(loadGroupIndex))
-	return true;
+        return true;
     }
 
     return false;
   }
-    
+
   /**
    * Generates a string to load the field.
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index, int loadGroupIndex)
+                          String indexVar, int index, int loadGroupIndex)
     throws IOException
   {
     if (loadGroupIndex == 0 && _discriminator != null)
@@ -1049,7 +1071,7 @@ public class EntityType extends Type {
       AmberField field = fields.get(i);
 
       if (field.getLoadGroupIndex() == loadGroupIndex)
-	index = field.generateLoad(out, rs, indexVar, index);
+        index = field.generateLoad(out, rs, indexVar, index);
     }
 
     return index;
@@ -1059,7 +1081,7 @@ public class EntityType extends Type {
    * Generates a string to set the field.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String value)
+                          String index, String value)
     throws IOException
   {
     if (getId() != null)
@@ -1088,7 +1110,7 @@ public class EntityType extends Type {
    * Gets the value.
    */
   public Object getLoadObject(AmberConnection aConn,
-			      ResultSet rs, int index)
+                              ResultSet rs, int index)
     throws SQLException
   {
     return getHome().loadFull(aConn, rs, index);
@@ -1126,7 +1148,7 @@ public class EntityType extends Type {
     throws IOException
   {
     getId().generateLoadFromObject(out, obj);
-    
+
     ArrayList<AmberField> fields = getFields();
     for (int i = 0; i < fields.size(); i++) {
       AmberField field = fields.get(i);
@@ -1139,13 +1161,13 @@ public class EntityType extends Type {
    * Copy from an object.
    */
   public void generateCopyLoadObject(JavaWriter out,
-				     String dst, String src,
-				     int loadGroup)
+                                     String dst, String src,
+                                     int loadGroup)
     throws IOException
   {
     if (getParentType() != null)
       getParentType().generateCopyUpdateObject(out, dst, src, loadGroup);
-    
+
     ArrayList<AmberField> fields = getFields();
     for (int i = 0; i < fields.size(); i++) {
       AmberField field = fields.get(i);
@@ -1160,13 +1182,13 @@ public class EntityType extends Type {
    * Copy from an object.
    */
   public void generateCopyUpdateObject(JavaWriter out,
-				       String dst, String src,
-				       int updateIndex)
+                                       String dst, String src,
+                                       int updateIndex)
     throws IOException
   {
     if (getParentType() != null)
       getParentType().generateCopyUpdateObject(out, dst, src, updateIndex);
-    
+
     ArrayList<AmberField> fields = getFields();
     for (int i = 0; i < fields.size(); i++) {
       AmberField field = fields.get(i);
@@ -1184,7 +1206,7 @@ public class EntityType extends Type {
 
     if (getDiscriminator() != null) {
       if (select != null && ! select.equals(""))
-	select = select + ", ";
+        select = select + ", ";
 
       select = select + getDiscriminator().getName();
     }
@@ -1208,7 +1230,7 @@ public class EntityType extends Type {
 
     if (! idSelect.equals("") && ! loadSelect.equals(""))
       cb.append(",");
-    
+
     cb.append(loadSelect);
 
     return cb.close();
@@ -1241,15 +1263,15 @@ public class EntityType extends Type {
 
     if (loadGroup == 0 && getParentType() != null) {
       String parentSelect =
-	getParentType().generateLoadSelect(table, id, loadGroup);
+        getParentType().generateLoadSelect(table, id, loadGroup);
 
       cb.append(parentSelect);
       if (! parentSelect.equals(""))
-	hasSelect = true;
+        hasSelect = true;
     }
     else if (loadGroup == 0 && getDiscriminator() != null) {
       if (id != null) {
-	cb.append(id + ".");
+        cb.append(id + ".");
       }
       cb.append(getDiscriminator().getName());
       hasSelect = true;
@@ -1260,14 +1282,14 @@ public class EntityType extends Type {
       AmberField field = fields.get(i);
 
       if (field.getLoadGroupIndex() != loadGroup)
-	continue;
+        continue;
 
       String propSelect = field.generateLoadSelect(table, id);
       if (propSelect == null)
-	continue;
-      
+        continue;
+
       if (hasSelect)
-	cb.append(", ");
+        cb.append(", ");
       hasSelect = true;
 
       cb.append(propSelect);
@@ -1292,7 +1314,7 @@ public class EntityType extends Type {
 
     return mask;
   }
-    
+
   /**
    * Generates the update sql.
    */
@@ -1303,41 +1325,41 @@ public class EntityType extends Type {
     sql.append("insert into " + table.getName() + " (");
 
     boolean isFirst = true;
-    
+
     ArrayList<String> idColumns = new ArrayList<String>();
     for (IdField field : getId().getKeys()) {
       for (Column key : field.getColumns()) {
-	String name;
-	
-	if (table == key.getTable())
-	  name = key.getName();
-	else
-	  name = table.getDependentIdLink().getSourceColumn(key).getName();
-	    
-	idColumns.add(name);
+        String name;
 
-	if (! isFirst)
-	  sql.append(", ");
-	isFirst = false;
+        if (table == key.getTable())
+          name = key.getName();
+        else
+          name = table.getDependentIdLink().getSourceColumn(key).getName();
 
-	sql.append(name);
+        idColumns.add(name);
+
+        if (! isFirst)
+          sql.append(", ");
+        isFirst = false;
+
+        sql.append(name);
       }
     }
 
     if (table == getTable() && getDiscriminator() != null) {
       if (! isFirst)
-	sql.append(", ");
+        sql.append(", ");
       isFirst = false;
 
       sql.append(getDiscriminator().getName());
     }
-    
+
     ArrayList<String> columns = new ArrayList<String>();
     generateInsertColumns(table, columns);
 
     for (String columnName : columns) {
       if (! isFirst)
-	sql.append(", ");
+        sql.append(", ");
       isFirst = false;
 
       sql.append(columnName);
@@ -1348,7 +1370,7 @@ public class EntityType extends Type {
     isFirst = true;
     for (int i = 0; i < idColumns.size(); i++) {
       if (! isFirst)
-	sql.append(", ");
+        sql.append(", ");
       isFirst = false;
 
       sql.append("?");
@@ -1356,7 +1378,7 @@ public class EntityType extends Type {
 
     if (table == getTable() && getDiscriminator() != null) {
       if (! isFirst)
-	sql.append(", ");
+        sql.append(", ");
       isFirst = false;
 
       sql.append("'" + getDiscriminatorValue() + "'");
@@ -1364,14 +1386,14 @@ public class EntityType extends Type {
 
     for (int i = 0; i < columns.size(); i++) {
       if (! isFirst)
-	sql.append(", ");
+        sql.append(", ");
       isFirst = false;
 
       sql.append("?");
     }
-    
+
     sql.append(")");
-    
+
     return sql.toString();
   }
 
@@ -1379,10 +1401,10 @@ public class EntityType extends Type {
   {
     if (getParentType() != null)
       getParentType().generateInsertColumns(table, columns);
-    
+
     for (AmberField field : getFields()) {
       if (field.getTable() == table)
-	field.generateInsertColumns(columns);
+        field.generateInsertColumns(columns);
     }
   }
 
@@ -1390,10 +1412,10 @@ public class EntityType extends Type {
    * Generates the update sql.
    */
   public void generateInsertSet(JavaWriter out,
-				Table table, 
-				String pstmt,
-				String query,
-				String obj)
+                                Table table,
+                                String pstmt,
+                                String query,
+                                String obj)
     throws IOException
   {
     if (getParentType() != null)
@@ -1401,7 +1423,7 @@ public class EntityType extends Type {
 
     for (AmberField field : getFields()) {
       if (field.getTable() == table)
-	field.generateInsertSet(out, pstmt, query, obj);
+        field.generateInsertSet(out, pstmt, query, obj);
     }
   }
 
@@ -1464,7 +1486,7 @@ public class EntityType extends Type {
       String methodName = methods[i].getName();
 
       if (name.equals(methodName) && param.length == 0)
-	return methods[i];
+        return methods[i];
     }
 
     cl = cl.getSuperClass();
@@ -1484,7 +1506,7 @@ public class EntityType extends Type {
 
     for (int i = 0; i < fields.length; i++) {
       if (name.equals(fields[i].getName()))
-	return fields[i];
+        return fields[i];
     }
 
     cl = cl.getSuperClass();
@@ -1507,7 +1529,7 @@ public class EntityType extends Type {
       String methodName = methods[i].getName();
 
       if (name.equals(methodName) && param.length == 1)
-	return methods[i];
+        return methods[i];
     }
 
     cl = cl.getSuperClass();
@@ -1535,9 +1557,9 @@ public class EntityType extends Type {
    * @param isFirst marks the first set group
    */
   public boolean generateUpdateSQLComponent(CharBuffer sql,
-					    int group,
-					    long mask,
-					    boolean isFirst)
+                                            int group,
+                                            long mask,
+                                            boolean isFirst)
   {
     ArrayList<AmberField> fields = getFields();
 
@@ -1551,20 +1573,20 @@ public class EntityType extends Type {
       AmberField field = null;
 
       for (int j = 0; j < fields.size(); j++) {
-	field = fields.get(j);
-	
-	if (field.getIndex() == i + group * 64)
-	  break;
-	else
-	  field = null;
+        field = fields.get(j);
+
+        if (field.getIndex() == i + group * 64)
+          break;
+        else
+          field = null;
       }
 
       if (field != null) {
-	if (! isFirst)
-	  sql.append(", ");
-	isFirst = false;
-	
-	field.generateUpdate(sql);
+        if (! isFirst)
+          sql.append(", ");
+        isFirst = false;
+
+        field.generateUpdate(sql);
       }
     }
 
@@ -1588,7 +1610,7 @@ public class EntityType extends Type {
   {
     if (mask == 0)
       return null;
-    
+
     CharBuffer sql = CharBuffer.allocate();
 
     sql.append("update " + getTable().getName() + " set ");
@@ -1607,20 +1629,20 @@ public class EntityType extends Type {
       AmberField field = null;
 
       for (int j = 0; j < fields.size(); j++) {
-	field = fields.get(j);
-	
-	if (field.getIndex() == i)
-	  break;
-	else
-	  field = null;
+        field = fields.get(j);
+
+        if (field.getIndex() == i)
+          break;
+        else
+          field = null;
       }
 
       if (field != null) {
-	if (! isFirst)
-	  sql.append(", ");
-	isFirst = false;
-	
-	field.generateUpdate(sql);
+        if (! isFirst)
+          sql.append(", ");
+        isFirst = false;
+
+        field.generateUpdate(sql);
       }
     }
 
@@ -1630,7 +1652,7 @@ public class EntityType extends Type {
     sql.append(" where ");
 
     sql.append(getId().generateMatchArgWhere(null));
-    
+
     return sql.toString();
   }
 
@@ -1655,7 +1677,7 @@ public class EntityType extends Type {
       field.generatePostDelete(out);
     }
   }
-  
+
   /**
    * Deletes by the primary key.
    */
@@ -1664,7 +1686,7 @@ public class EntityType extends Type {
   {
     getHome().delete(aConn, key);
   }
-  
+
   /**
    * Deletes by the primary key.
    */
@@ -1678,8 +1700,8 @@ public class EntityType extends Type {
    * Returns a completion for the given field.
    */
   public AmberCompletion createManyToOneCompletion(String name,
-						   Entity source,
-						   Object newTarget)
+                                                   Entity source,
+                                                   Object newTarget)
   {
     AmberField field = getField(name);
 
@@ -1698,7 +1720,7 @@ public class EntityType extends Type {
   public boolean isEJBProxy(String typeName)
   {
     return (getBeanClass() != getProxyClass() &&
-	    getProxyClass().getName().equals(typeName));
+            getProxyClass().getName().equals(typeName));
   }
 
   /**

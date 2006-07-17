@@ -109,13 +109,13 @@ public class AmberPersistenceUnit {
 
   // basic data source
   private DataSource _dataSource;
-  
+
   // data source for read-only requests
   private DataSource _readDataSource;
-  
+
   // data source for requests in a transaction
   private DataSource _xaDataSource;
-  
+
   private JdbcMetaData _jdbcMetaData;
 
   private boolean _createDatabaseTables;
@@ -147,7 +147,7 @@ public class AmberPersistenceUnit {
   private EntityKey _entityKey = new EntityKey();
 
   private ArrayList<EntityType> _lazyConfigure = new ArrayList<EntityType>();
-  
+
   private ArrayList<EntityType> _lazyGenerate = new ArrayList<EntityType>();
   private ArrayList<AmberEntityHome> _lazyHomeInit =
     new ArrayList<AmberEntityHome>();
@@ -177,7 +177,7 @@ public class AmberPersistenceUnit {
     _createDatabaseTables = container.getCreateDatabaseTables();
 
     _introspector = new EntityIntrospector(this);
-    
+
     // needed to support JDK 1.4 compatibility
     try {
       bindProxy();
@@ -200,10 +200,10 @@ public class AmberPersistenceUnit {
     throws Exception
   {
     Jndi.bindDeep(_amberContainer.getPersistenceUnitJndiPrefix() + getName(),
-		    new FactoryProxy(this));
-    
+                  new FactoryProxy(this));
+
     Jndi.bindDeep(_amberContainer.getPersistenceContextJndiPrefix() + getName(),
-		  new EntityManagerNamingProxy(this));
+                  new EntityManagerNamingProxy(this));
   }
 
   public EntityManager getEntityManager()
@@ -273,8 +273,8 @@ public class AmberPersistenceUnit {
   {
     if (_jdbcMetaData == null) {
       if (getDataSource() == null)
-	throw new NullPointerException("No data-source specified for PersistenceUnit");
-      
+        throw new NullPointerException("No data-source specified for PersistenceUnit");
+
       _jdbcMetaData = JdbcMetaData.create(getDataSource());
     }
 
@@ -392,22 +392,22 @@ public class AmberPersistenceUnit {
 
     if (type == null) {
       throw new ConfigException(L.l("'{0}' is an unknown type",
-				    className));
+                                    className));
     }
-      
+
     if (type.getAnnotation(javax.persistence.Entity.class) == null) {
       throw new ConfigException(L.l("'{0}' must implement javax.persistence.Entity",
-				    className));
+                                    className));
     }
 
     try {
       _introspector.introspect(type);
     } catch (Throwable e) {
       _amberContainer.addEntityException(className, e);
-      
+
       throw new ConfigException(e);
     }
-    
+
     EntityType entity = createEntity(type);
 
     _amberContainer.addEntity(className, entity);
@@ -426,6 +426,16 @@ public class AmberPersistenceUnit {
    */
   public EntityType createEntity(String name, JClass beanClass)
   {
+    return createEntity(name, beanClass, false);
+  }
+
+  /**
+   * Adds an entity.
+   */
+  public EntityType createEntity(String name,
+                                 JClass beanClass,
+                                 boolean embedded)
+  {
     EntityType entityType = (EntityType) _typeManager.get(name);
 
     if (entityType != null)
@@ -438,15 +448,15 @@ public class AmberPersistenceUnit {
       EntityType parentType = null;
 
       for (JClass parentClass = beanClass.getSuperClass();
-	   parentType == null && parentClass != null;
-	   parentClass = parentClass.getSuperClass()) {
-	parentType = (EntityType) _typeManager.get(parentClass.getName());
+           parentType == null && parentClass != null;
+           parentClass = parentClass.getSuperClass()) {
+        parentType = (EntityType) _typeManager.get(parentClass.getName());
       }
 
       if (parentType != null)
-	entityType = new SubEntityType(this, parentType);
+        entityType = new SubEntityType(this, parentType);
       else
-	entityType = new EntityType(this);
+        entityType = new EntityType(this);
     }
 
     // _typeManager.put(name, entityType);
@@ -458,21 +468,25 @@ public class AmberPersistenceUnit {
     entityType.setName(name);
     entityType.setBeanClass(beanClass);
 
-    _lazyConfigure.add(entityType);
-    // getEnvManager().addLazyConfigure(entityType);
+    entityType.setEmbedded(embedded);
 
-    AmberEntityHome entityHome = _entityHomeMap.get(beanClass.getName());
+    if (!embedded) {
+      _lazyConfigure.add(entityType);
+      // getEnvManager().addLazyConfigure(entityType);
 
-    if (entityHome == null) {
-      entityHome = new AmberEntityHome(this, entityType);
-      _lazyHomeInit.add(entityHome);
-      _isInit = false;
+      AmberEntityHome entityHome = _entityHomeMap.get(beanClass.getName());
+
+      if (entityHome == null) {
+        entityHome = new AmberEntityHome(this, entityType);
+        _lazyHomeInit.add(entityHome);
+        _isInit = false;
+      }
+
+      addEntityHome(name, entityHome);
+      // XXX: some confusion about the double entry, related to the EJB 3.0
+      // confuction of named instances.
+      addEntityHome(beanClass.getName(), entityHome);
     }
-
-    addEntityHome(name, entityHome);
-    // XXX: some confusion about the double entry, related to the EJB 3.0
-    // confuction of named instances.
-    addEntityHome(beanClass.getName(), entityHome);
 
     return entityType;
   }
@@ -483,10 +497,10 @@ public class AmberPersistenceUnit {
   private void addEntityHome(String name, AmberEntityHome home)
   {
     _entityHomeMap.put(name, home);
-    
+
     // getEnvManager().addEntityHome(name, home);
   }
-  
+
   /**
    * Returns a table generator.
    */
@@ -504,10 +518,10 @@ public class AmberPersistenceUnit {
       IdGenerator oldGen = _tableGenMap.get(name);
 
       if (oldGen != null)
-	return oldGen;
+        return oldGen;
       else {
-	_tableGenMap.put(name, gen);
-	return gen;
+        _tableGenMap.put(name, gen);
+        return gen;
       }
     }
   }
@@ -524,7 +538,7 @@ public class AmberPersistenceUnit {
 
     if (type != null)
       throw new RuntimeException(L.l("'{0}' is a duplicate generator table.",
-				     type));
+                                     type));
 
     GeneratorTableType genType = new GeneratorTableType(this, name);
 
@@ -545,9 +559,9 @@ public class AmberPersistenceUnit {
       SequenceIdGenerator gen = _sequenceGenMap.get(name);
 
       if (gen == null) {
-	gen = new SequenceIdGenerator(this, name, size);
+        gen = new SequenceIdGenerator(this, name, size);
 
-	_sequenceGenMap.put(name, gen);
+        _sequenceGenMap.put(name, gen);
       }
 
       return gen;
@@ -566,15 +580,15 @@ public class AmberPersistenceUnit {
       EntityType type = _lazyGenerate.remove(0);
 
       try {
-	type.init();
+        type.init();
 
-	getGenerator().generate(type);
+        getGenerator().generate(type);
       } catch (Exception e) {
-	type.setConfigException(e);
-	
-	_amberContainer.addEntityException(type.getBeanClass().getName(), e);
+        type.setConfigException(e);
 
-	throw e;
+        _amberContainer.addEntityException(type.getBeanClass().getName(), e);
+
+        throw e;
       }
     }
 
@@ -603,21 +617,21 @@ public class AmberPersistenceUnit {
       type.init();
 
       if (type instanceof EntityType) {
-	EntityType entityType = (EntityType) type;
+        EntityType entityType = (EntityType) type;
 
-	if (! entityType.isGenerated()) {
-	  if (entityType.getInstanceClassName() == null)
-	    throw new ConfigException(L.l("'{0}' does not have a configured instance class.",
-					  entityType));
+        if (! entityType.isGenerated()) {
+          if (entityType.getInstanceClassName() == null)
+            throw new ConfigException(L.l("'{0}' does not have a configured instance class.",
+                                          entityType));
 
-	  entityType.setGenerated(true);
+          entityType.setGenerated(true);
 
-	  try {
-	    getGenerator().generateJava(javaGen, entityType);
-	  } catch (Throwable e) {
-	    log.log(Level.FINER, e.toString(), e);
-	  }
-	}
+          try {
+            getGenerator().generateJava(javaGen, entityType);
+          } catch (Throwable e) {
+            log.log(Level.FINER, e.toString(), e);
+          }
+        }
       }
 
       configure();
@@ -639,13 +653,13 @@ public class AmberPersistenceUnit {
       EntityType type = _lazyConfigure.remove(0);
 
       if (type.startConfigure()) {
-	// getEnvManager().getGenerator().configure(type);
+        // getEnvManager().getGenerator().configure(type);
       }
 
       _introspector.configure();
 
       if (! _lazyGenerate.contains(type))
-	_lazyGenerate.add(type);
+        _lazyGenerate.add(type);
     }
   }
 
@@ -677,11 +691,11 @@ public class AmberPersistenceUnit {
   {
     if (! _isInit) {
       try {
-	initEntityHomes();
+        initEntityHomes();
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Exception e) {
-	throw new AmberRuntimeException(e);
+        throw new AmberRuntimeException(e);
       }
     }
 
@@ -695,7 +709,7 @@ public class AmberPersistenceUnit {
   {
     for (AmberEntityHome home : _entityHomeMap.values()) {
       if (name.equals(home.getEntityType().getName()))
-	return home;
+        return home;
     }
 
     try {
@@ -768,7 +782,7 @@ public class AmberPersistenceUnit {
     if (_generator != null)
       return _generator;
     /*
-    else if (_enhancer != null)
+      else if (_enhancer != null)
       return _enhancer;
     */
     else {
@@ -801,14 +815,14 @@ public class AmberPersistenceUnit {
       Connection conn = _dataSource.getConnection();
 
       try {
-	DatabaseMetaData metaData = conn.getMetaData();
+        DatabaseMetaData metaData = conn.getMetaData();
 
-	try {
-	  _supportsGetGeneratedKeys = metaData.supportsGetGeneratedKeys();
-	} catch (Throwable e) {
-	}
+        try {
+          _supportsGetGeneratedKeys = metaData.supportsGetGeneratedKeys();
+        } catch (Throwable e) {
+        }
       } finally {
-	conn.close();
+        conn.close();
       }
     } catch (SQLException e) {
       throw new ConfigException(e);
@@ -829,7 +843,7 @@ public class AmberPersistenceUnit {
   {
     synchronized (this) {
       if (_isInit)
-	return;
+        return;
       _isInit = true;
     }
 
@@ -852,13 +866,13 @@ public class AmberPersistenceUnit {
       Table table = _lazyTable.remove(0);
 
       if (getDataSource() == null)
-	throw new ConfigException(L.l("No configured data-source found for <ejb-server>."));
+        throw new ConfigException(L.l("No configured data-source found for <ejb-server>."));
 
       if (getCreateDatabaseTables())
-	table.createDatabaseTable(this);
+        table.createDatabaseTable(this);
 
       if (getValidateDatabaseTables())
-	table.validateDatabaseTable(this);
+        table.validateDatabaseTable(this);
     }
   }
 
@@ -889,7 +903,7 @@ public class AmberPersistenceUnit {
     if (aConn == null) {
       aConn = new AmberConnection(this);
       aConn.initThreadConnection();
-      
+
       _threadConnection.set(aConn);
     }
 
@@ -925,9 +939,9 @@ public class AmberPersistenceUnit {
       ResultSetCacheChunk chunk = ref.get();
 
       if (chunk != null && chunk.isValid())
-	return chunk;
+        return chunk;
       else
-	return null;
+        return null;
     }
   }
 
@@ -972,8 +986,8 @@ public class AmberPersistenceUnit {
    * Sets the entity result.
    */
   public EntityItem putEntity(EntityType rootType,
-			      Object key,
-			      EntityItem entity)
+                              Object key,
+                              EntityItem entity)
   {
     SoftReference<EntityItem> ref = new SoftReference<EntityItem>(entity);
     EntityKey entityKey = new EntityKey(rootType, key);
@@ -1015,24 +1029,24 @@ public class AmberPersistenceUnit {
 
       iter = _entityCache.iterator();
       while (iter.hasNext()) {
-	LruCache.Entry<EntityKey,SoftReference<EntityItem>> entry;
-	entry = iter.next();
+        LruCache.Entry<EntityKey,SoftReference<EntityItem>> entry;
+        entry = iter.next();
 
-	EntityKey key = entry.getKey();
-	SoftReference<EntityItem> valueRef = entry.getValue();
-	EntityItem value = valueRef.get();
+        EntityKey key = entry.getKey();
+        SoftReference<EntityItem> valueRef = entry.getValue();
+        EntityItem value = valueRef.get();
 
-	if (value == null)
-	  continue;
+        if (value == null)
+          continue;
 
-	EntityType entityRoot = key.getEntityType();
-	Object entityKey = key.getKey();
+        EntityType entityRoot = key.getEntityType();
+        Object entityKey = key.getKey();
 
-	for (int i = 0; i < size; i++) {
-	  if (completions.get(i).complete(entityRoot, entityKey, value)) {
-	    // XXX: delete
-	  }
-	}
+        for (int i = 0; i < size; i++) {
+          if (completions.get(i).complete(entityRoot, entityKey, value)) {
+            // XXX: delete
+          }
+        }
       }
     }
 
@@ -1041,17 +1055,17 @@ public class AmberPersistenceUnit {
 
       iter = _queryCache.values();
       while (iter.hasNext()) {
-	SoftReference<ResultSetCacheChunk> ref = iter.next();
+        SoftReference<ResultSetCacheChunk> ref = iter.next();
 
-	ResultSetCacheChunk chunk = ref.get();
+        ResultSetCacheChunk chunk = ref.get();
 
-	if (chunk != null) {
-	  for (int i = 0; i < size; i++) {
-	    if (completions.get(i).complete(chunk)) {
-	      // XXX: delete
-	    }
-	  }
-	}
+        if (chunk != null) {
+          for (int i = 0; i < size; i++) {
+            if (completions.get(i).complete(chunk)) {
+              // XXX: delete
+            }
+          }
+        }
       }
     }
   }

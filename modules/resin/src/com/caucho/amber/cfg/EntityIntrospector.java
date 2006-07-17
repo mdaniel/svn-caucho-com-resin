@@ -105,6 +105,9 @@ public class EntityIntrospector {
   // annotations allowed with a @OneToOne annotation
   private static HashSet<String> _oneToOneAnnotations = new HashSet<String>();
 
+  // annotations allowed with a @Embedded annotation
+  private static HashSet<String> _embeddedAnnotations = new HashSet<String>();
+
   private AmberPersistenceUnit _persistenceUnit;
 
   private HashMap<String,EntityType> _entityMap
@@ -1094,6 +1097,13 @@ public class EntityIntrospector {
       else
         _depCompletions.add(completion);
     }
+    else if (field.isAnnotationPresent(javax.persistence.Embedded.class)) {
+      validateAnnotations(field, _embeddedAnnotations);
+      _depCompletions.add(new EmbeddedCompletion(sourceType,
+                                                 field,
+                                                 fieldName,
+                                                 fieldType));
+    }
     else if (field.isAnnotationPresent(javax.persistence.Transient.class)) {
     }
     else {
@@ -2048,6 +2058,89 @@ public class EntityIntrospector {
     }
   }
 
+  /**
+   * completes for dependent
+   */
+  class EmbeddedCompletion extends Completion {
+    private JAccessibleObject _field;
+    private String _fieldName;
+    private JClass _fieldType;
+
+    EmbeddedCompletion(EntityType type,
+                       JAccessibleObject field,
+                       String fieldName,
+                       JClass fieldType)
+    {
+      super(type);
+
+      _field = field;
+      _fieldName = fieldName;
+      _fieldType = fieldType;
+    }
+
+    void complete()
+      throws ConfigException
+    {
+      JAnnotation attributeOverrideAnn = _field.getAnnotation(AttributeOverride.class);
+      JAnnotation attributeOverridesAnn = _field.getAnnotation(AttributeOverrides.class);
+
+      if (attributeOverrideAnn != null && attributeOverridesAnn != null) {
+        throw error(_field, L.l("{0} may not have both @AttributeOverride and @AttributeOverrides",
+                                _field.getName()));
+      }
+
+      Object attOverridesAnn[];
+
+      if (attributeOverrideAnn != null) {
+        attOverridesAnn = new Object[] { attributeOverrideAnn };
+      }
+      else if (attributeOverridesAnn != null) {
+        attOverridesAnn = (Object []) attributeOverridesAnn.get("value");
+      }
+      else {
+        return;
+      }
+
+      EntityEmbeddedField embeddedField = new EntityEmbeddedField(_entityType, _fieldName);
+
+      AmberPersistenceUnit persistenceUnit = _entityType.getPersistenceUnit();
+
+      EntityType type = persistenceUnit.createEntity(_fieldType.getName(), _fieldType, true);
+
+      embeddedField.setType(type);
+
+      _entityType.addField(embeddedField);
+
+      // XXX: todo ...
+      // validateAttributeOverrides(_field, attributeOverridesAnn, type);
+
+      Table sourceTable = _entityType.getTable();
+
+      HashMap<String, Column> embeddedColumns = new HashMap<String, Column>();
+      HashMap<String, String> fieldNameByColumn = new HashMap<String, String>();
+
+      for (int i=0; i<attOverridesAnn.length; i++) {
+        String embeddedFieldName = ((JAnnotation) attOverridesAnn[i]).getString("name");
+
+        JAnnotation columnAnn = ((JAnnotation) attOverridesAnn[i]).getAnnotation("column");
+        String columnName = columnAnn.getString("name");
+        Type amberType = persistenceUnit.createType("java.lang.String"); // _fieldType);
+        Column column = sourceTable.createColumn(columnName, amberType);
+
+        column.setNotNull(! columnAnn.getBoolean("nullable"));
+        column.setUnique(columnAnn.getBoolean("unique"));
+
+        embeddedColumns.put(columnName, column);
+        fieldNameByColumn.put(columnName, embeddedFieldName);
+      }
+
+      embeddedField.setColumns(embeddedColumns);
+      embeddedField.setFieldNameByColumn(fieldNameByColumn);
+
+      embeddedField.init();
+    }
+  }
+
   static {
     // annotations allowed with a @Basic annotation
     _basicAnnotations.add("javax.persistence.Basic");
@@ -2129,6 +2222,11 @@ public class EntityIntrospector {
     _oneToOneAnnotations.add("javax.persistence.OneToOne");
     _oneToOneAnnotations.add("javax.persistence.JoinColumn");
     _oneToOneAnnotations.add("javax.persistence.JoinColumns");
+
+    // annotations allowed with a @Embedded annotation
+    _embeddedAnnotations.add("javax.persistence.Embedded");
+    _embeddedAnnotations.add("javax.persistence.AttributeOverride");
+    _embeddedAnnotations.add("javax.persistence.AttributeOverrides");
 
     // annotations allowed for a property
     _propertyAnnotations.add("javax.persistence.Basic");

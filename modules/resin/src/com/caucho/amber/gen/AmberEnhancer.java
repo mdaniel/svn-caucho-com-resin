@@ -106,7 +106,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     _prepare.setWorkPath(WorkDir.getLocalWorkDir());
     _prepare.addEnhancer(this);
   }
-  
+
   /**
    * Sets the config directory.
    */
@@ -138,25 +138,25 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
   {
     try {
       Method init = preloadedClass.getMethod("_caucho_init",
-					     new Class[] { Path.class });
+                                             new Class[] { Path.class });
 
 
       if (_configDirectory != null)
-	init.invoke(null, new Object[] { _configDirectory });
+        init.invoke(null, new Object[] { _configDirectory });
       else
-	init.invoke(null, new Object[] { Vfs.lookup() });
-      
+        init.invoke(null, new Object[] { Vfs.lookup() });
+
       Method isModified = preloadedClass.getMethod("_caucho_is_modified",
-						   new Class[0]);
+                                                   new Class[0]);
 
       Object value = isModified.invoke(null, new Object[0]);
 
       if (Boolean.FALSE.equals(value)) {
-	loadEntityType(preloadedClass, preloadedClass.getClassLoader());
-	return false;
+        loadEntityType(preloadedClass, preloadedClass.getClassLoader());
+        return false;
       }
       else
-	return true;
+        return true;
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
 
@@ -173,38 +173,38 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
     if (p > 0)
       className = className.substring(0, p);
-    
+
     p = className.lastIndexOf('$');
 
     if (p > 0)
       className = className.substring(0, p);
-    
+
     EntityType type = _amberContainer.getEntity(className);
 
     if (type != null && type.isEnhanced())
       return true;
 
     return false;
-      /*
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-    try {
+    /*
+      Thread thread = Thread.currentThread();
+      ClassLoader oldLoader = thread.getContextClassLoader();
+      try {
       thread.setContextClassLoader(getRawLoader());
 
       Class baseClass = Class.forName(className, false, getRawLoader());
 
       type = loadEntityType(baseClass, getRawLoader());
-    } catch (ClassNotFoundException e) {
+      } catch (ClassNotFoundException e) {
       return false;
-    } finally {
+      } finally {
       thread.setContextClassLoader(oldLoader);
-    }
+      }
 
-    if (type == null)
+      if (type == null)
       return false;
 
-    return className.equals(type.getName()) || type.isFieldAccess();
-      */
+      return className.equals(type.getName()) || type.isFieldAccess();
+    */
   }
 
   /**
@@ -213,24 +213,24 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
   private EntityType loadEntityType(Class cl, ClassLoader loader)
   {
     EntityType parentType = null;
-    
+
     for (; cl != null; cl = cl.getSuperclass()) {
       java.net.URL url;
 
       String className = cl.getName();
-      
+
       EntityType type = _amberContainer.getEntity(className);
 
       if (parentType == null)
-	parentType = type;
+        parentType = type;
 
       if (type != null && ! type.startConfigure())
-	return type;
+        return type;
 
       type = loadEntityTypeImpl(cl, loader);
 
       if (type != null && ! type.startConfigure())
-	return type;
+        return type;
     }
 
     return parentType;
@@ -256,17 +256,17 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
       baseClass.setSuperClass(parentClass.replace('.', '/'));
     }
   }
-  
+
   /**
    * Enhances the class.
    */
   public void enhance(GenClass genClass,
-		      JClass baseClass,
-		      String extClassName)
+                      JClass baseClass,
+                      String extClassName)
     throws Exception
   {
     String className = baseClass.getName();
-    
+
     EntityType type = _amberContainer.getEntity(className);
 
     // Type can be null for subclasses and inner classes that need fixups
@@ -289,16 +289,16 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
       DependencyComponent dependency = genClass.addDependencyComponent();
       dependency.addDependencyList(type.getDependencies());
-    
+
       //_amberContainerenceUnitenceUnit.generate();
       // generate(type);
 
       // compile();
-    
+
       // XXX: _amberContainerenceUnitenceUnit.initEntityHomes();
     }
   }
-  
+
   /**
    * Generates the type.
    */
@@ -312,12 +312,12 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     String extClassName = type.getBeanClass().getName() + "__ResinExt";
     type.setInstanceClassName(extClassName);
     type.setEnhanced(true);
-    
+
     _pendingClassNames.add(type.getInstanceClassName());
-    
+
     generateJava(javaGen, type);
   }
-  
+
   /**
    * Generates the type.
    */
@@ -330,13 +330,14 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     type.setGenerated(true);
 
     _prepare.renameClass(type.getBeanClass().getName(),
-			 type.getBeanClass().getName());
-    
+                         type.getBeanClass().getName());
+
     GenClass javaClass = new GenClass(type.getInstanceClassName());
 
     javaClass.setSuperClassName(type.getBeanClass().getName());
 
-    javaClass.addInterfaceName("com.caucho.amber.entity.Entity");
+    if (!type.isEmbedded())
+      javaClass.addInterfaceName("com.caucho.amber.entity.Entity");
 
     type.setEnhanced(true);
 
@@ -347,13 +348,13 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
     //String extClassName = gen.getBaseClassName() + "__ResinExt";
     // type.setInstanceClassName(extClassName);
-    
+
     entity.setExtClassName(type.getInstanceClassName());
 
     javaClass.addComponent(entity);
 
     javaGen.generate(javaClass);
-    
+
     // _pendingClassNames.add(extClassName);
   }
 
@@ -368,7 +369,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
     ArrayList<String> classNames = new ArrayList<String>(_pendingClassNames);
     _pendingClassNames.clear();
-    
+
     String []javaFiles = new String[classNames.size()];
 
     for (int i = 0; i < classNames.size(); i++) {
@@ -378,7 +379,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
       javaFiles[i] = name;
     }
-    
+
     EntityGenerator gen = new EntityGenerator();
     gen.setSearchPath(_configDirectory);
     // XXX:
@@ -392,13 +393,13 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     for (int i = 0; i < classNames.size(); i++) {
       String extClassName = classNames.get(i);
       int tail = extClassName.length() - "__ResinExt".length();
-      
+
       String baseClassName = extClassName.substring(0, tail);
 
       // fixup(baseClassName, extClassName);
     }
   }
-  
+
   /**
    * Enhances the class.
    */
@@ -406,7 +407,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     throws Exception
   {
     String className = baseClass.getThisClass();
-    
+
     ArrayList<FieldMap> fieldMaps = new ArrayList<FieldMap>();
 
     JClass thisClass = _amberContainer.getJClassLoader().forName(className.replace('/', '.'));
@@ -415,14 +416,14 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
       EntityType type = _amberContainer.getEntity(thisClass.getName());
 
       if (type == null || ! type.isFieldAccess())
-	continue;
+        continue;
 
       for (AmberField field : type.getId().getKeys()) {
-	fieldMaps.add(new FieldMap(baseClass, field.getName()));
+        fieldMaps.add(new FieldMap(baseClass, field.getName()));
       }
-    
+
       for (AmberField field : type.getFields()) {
-	fieldMaps.add(new FieldMap(baseClass, field.getName()));
+        fieldMaps.add(new FieldMap(baseClass, field.getName()));
       }
     }
 
@@ -437,7 +438,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
       visitor.analyze(analyzer, true);
     }
   }
-      
+
   /**
    * Parses the configuration file.
    */
@@ -452,33 +453,33 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     private int _setterRef;
 
     FieldMap(com.caucho.bytecode.JavaClass baseClass,
-	     String fieldName)
+             String fieldName)
     {
       ConstantPool pool = baseClass.getConstantPool();
 
       FieldRefConstant fieldRef = pool.getFieldRef(fieldName);
 
       if (fieldRef == null)
-	return;
+        return;
 
       _fieldRef = fieldRef.getIndex();
 
       MethodRefConstant methodRef;
-      
+
       String getterName = "__caucho_get_" + fieldName;
 
       methodRef = pool.addMethodRef(baseClass.getThisClass(),
-				    getterName,
-				    "()" + fieldRef.getType());
-      
+                                    getterName,
+                                    "()" + fieldRef.getType());
+
       _getterRef = methodRef.getIndex();
-      
+
       String setterName = "__caucho_set_" + fieldName;
 
       methodRef = pool.addMethodRef(baseClass.getThisClass(),
-				    setterName,
-				    "(" + fieldRef.getType() + ")V");
-      
+                                    setterName,
+                                    "(" + fieldRef.getType() + ")V");
+
       _setterRef = methodRef.getIndex();
     }
 
@@ -509,10 +510,10 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     int getGetter(int fieldRef)
     {
       for (int i = _fieldMap.size() - 1; i >= 0; i--) {
-	FieldMap fieldMap = _fieldMap.get(i);
+        FieldMap fieldMap = _fieldMap.get(i);
 
-	if (fieldMap.getFieldRef() == fieldRef)
-	  return fieldMap.getGetterRef();
+        if (fieldMap.getFieldRef() == fieldRef)
+          return fieldMap.getGetterRef();
       }
 
       return -1;
@@ -522,31 +523,31 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     {
       switch (visitor.getOpcode()) {
       case CodeVisitor.GETFIELD:
-	int getter = getGetter(visitor.getShortArg());
+        int getter = getGetter(visitor.getShortArg());
 
-	if (getter > 0) {
-	  visitor.setByteArg(0, CodeVisitor.INVOKEVIRTUAL);
-	  visitor.setShortArg(1, getter);
-	}
-	break;
+        if (getter > 0) {
+          visitor.setByteArg(0, CodeVisitor.INVOKEVIRTUAL);
+          visitor.setShortArg(1, getter);
+        }
+        break;
       case CodeVisitor.PUTFIELD:
-	int setter = getSetter(visitor.getShortArg());
+        int setter = getSetter(visitor.getShortArg());
 
-	if (setter > 0) {
-	  visitor.setByteArg(0, CodeVisitor.INVOKEVIRTUAL);
-	  visitor.setShortArg(1, setter);
-	}
-	break;
+        if (setter > 0) {
+          visitor.setByteArg(0, CodeVisitor.INVOKEVIRTUAL);
+          visitor.setShortArg(1, setter);
+        }
+        break;
       }
     }
 
     int getSetter(int fieldRef)
     {
       for (int i = _fieldMap.size() - 1; i >= 0; i--) {
-	FieldMap fieldMap = _fieldMap.get(i);
+        FieldMap fieldMap = _fieldMap.get(i);
 
-	if (fieldMap.getFieldRef() == fieldRef)
-	  return fieldMap.getSetterRef();
+        if (fieldMap.getFieldRef() == fieldRef)
+          return fieldMap.getSetterRef();
       }
 
       return -1;
