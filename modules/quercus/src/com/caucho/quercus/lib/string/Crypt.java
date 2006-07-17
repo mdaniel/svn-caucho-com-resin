@@ -226,7 +226,10 @@ public class Crypt {
   {
     StringBuilder sb = new StringBuilder();
 
-    sb.append(salt);
+    if (salt.length() > 2)
+      sb.append(salt.substring(0, 2));
+    else
+      sb.append(salt);
 
     v = (((v & 0x00000000000000ffL) << 56) |
 	 ((v & 0x000000000000ff00L) << 40) |

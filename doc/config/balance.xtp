@@ -122,7 +122,7 @@ requests to backend servers.  Because it is implemented as a servlet,
 this configuration is the most flexible.  A site might use 192.168.0.1 as 
 the frontend load balancer, and send all requests for /foo to the backend host
 192.168.0.10  and all requests to /bar to the backend host 192.168.0.11.  Since
-Resin has an integrated HTTP proxy cache, the front-end machine can cache
+Resin has an integrated HTTP proxy cache, the web-tier machine can cache
 results for the backend servers.</p>
 
 <p>Using Resin as the load balancing web server requires a minimum
@@ -131,33 +131,35 @@ for the backend servers.  The front configuration will dispatch
 to the backend servers, while the backend will actually serve the
 requests.</p>
 
-<section title="The frontend server does the load balancing">
+<section title="The web-tier server does the load balancing">
 
 <p>In the following example, there are three servers and two conf files.  The
-first server (192.168.0.1), which uses front.conf, is the load balancer.  It
+first server (192.168.0.1), which uses web-tier.conf, is the load balancer.  It
 has an &lt;http&gt; listener, it receives requests from browsers, and
 dispatches them to the backend servers (192.168.0.10 and 192.168.0.11).</p>
 
-<example title="front.conf - used on 192.168.0.1">
+<example title="web-tier.conf - used on 192.168.0.1">
 &lt;resin xmlns="http://caucho.com/ns/resin">
 &lt;server>
-  &lt;http server-id="front" port='80'/>
+  &lt;http id="web-a" port="80"/>
 
-  &lt;cluster-definition id="a">
-    &lt;srun server-id='back1' host='192.168.0.10' port='6802' index='1'/>
-    &lt;srun server-id='back2' host='192.168.0.11' port='6802' index='2'/>
-  &lt;/cluster-definition>
+  &lt;cache disk-size="1024M" memory-size="256M"/>
 
-  &lt;host id=''&gt;
-    &lt;web-app id='/'&gt;
+  &lt;cluster id="app-tier">
+    &lt;srun id="app-a" host="192.168.0.10" port="6800"/>
+    &lt;srun id="app-b" host="192.168.0.11" port="6800"/>
+  &lt;/cluster>
+
+  &lt;host id=""&gt;
+    &lt;web-app id="/"&gt;
       &lt;!-- balance all requests to the servers in cluster a --&gt;
       &lt;servlet>
         &lt;servlet-name>balance-a&lt;/servlet-name>
         &lt;servlet-class>com.caucho.servlets.LoadBalanceServlet&lt;/servlet-class>
-        &lt;init cluster='a'/>
+        &lt;init cluster="app-tier"/>
       &lt;/servlet>
 
-      &lt;servlet-mapping url-pattern='/*' servlet-name='balance-a'/>
+      &lt;servlet-mapping url-pattern="/*" servlet-name="balance-a"/>
     &lt;/web-app&gt;
   &lt;/host&gt;
 &lt;/server>
@@ -174,7 +176,7 @@ started along with the &lt;http>.
 in the backend configuration.
 </ul>
 
-<p>The srun entries are included in <code/front.conf/> so that the
+<p>The srun entries are included in <code>web-tier.conf</code> so that the
 LoadBalanceServlet knows where to find the backend servers.  The
 LoadBalanceServlet selects a backend server using a round-robin policy.
 Although the round-robin policy is simple, in practice it is as effective as
@@ -186,17 +188,17 @@ is more robust and faster than adaptive policies.  </p>
 
 <p>A seperate conf file is used to configure all of the backend servers.
 In this case, there are two backend servers, both configured in the conf file
-<code/back.conf/>.</p>
+<code>app-tier.conf</code>.</p>
 
 <p>Sites using sessions will configure <a href="sessions.xtp">distributed
 sessions</a> to make sure the users see the same session values.</p>
 
-<example title='back.conf for all backend servers'>
+<example title="app-tier.conf for all backend servers">
 &lt;resin xmlns="http://caucho.com/ns/resin">
 &lt;server>
-  &lt;cluster>
-    &lt;srun server-id='a' host='192.168.0.10' port='6802'/>
-    &lt;srun server-id='b' host='192.168.0.11' port='6802'/>
+  &lt;cluster id="app-tier">
+    &lt;srun id="app-a" host="192.168.0.10" port="6800"/>
+    &lt;srun id="app-b" host="192.168.0.11" port="6800"/>
   &lt;/cluster>
 
   &lt;persistent-store type="cluster">
@@ -219,19 +221,19 @@ sessions</a> to make sure the users see the same session values.</p>
 <section title="Starting the servers">
 
 <example title="Starting each server on Unix">
-unix-192.168.0.1> bin/httpd.sh -conf conf/front.conf -pid front.pid start
+unix-192.168.0.1> bin/httpd.sh -conf conf/web-tier.conf -server web-a -pid front.pid start
 
-unix-192.168.0.10> bin/httpd.sh -conf conf/back.conf -server a -pid server-a.pid start
-unix-192.168.0.11> bin/httpd.sh -conf conf/back.conf -server b -pid server-b.pid start
+unix-192.168.0.10> bin/httpd.sh -conf conf/app-tier.conf -server app-a -pid server-a.pid start
+unix-192.168.0.11> bin/httpd.sh -conf conf/app-tier.conf -server app-b -pid server-b.pid start
 </example>
 
 <example title="Installing each server on Windows">
 win-192.168.0.1> bin/httpd -install-as resin-front -conf conf/front.conf 
 win-192.168.0.1> net start resin-front
 
-win-192.168.0.10> bin/httpd -install-as resin-a -server a
+win-192.168.0.10> bin/httpd -install-as resin-a -server app-a
 win-192.168.0.10> net start resin-a
-win-192.168.0.11> bin/httpd -install-as resin-b -server b
+win-192.168.0.11> bin/httpd -install-as resin-b -server app-b
 win-192.168.0.11> net start resin-b
 </example>
 </section>
@@ -264,7 +266,7 @@ round-robin policy.
 
 <p>The plugin needs to know which requests should go to Resin, i.e. the
 servlet-mappings and the jsp files.  And it needs to know the TCP host/port
-names of the backend machines, i.e. the &lt;srun> and &lt;srun-backup> tags.
+names of the backend machines, i.e. the &lt;srun>  tags.
 /caucho-status shows all that information in one table.  The plugin obtains
 this information from a running Resin server.</p>
 
@@ -278,66 +280,6 @@ the same JVM can serve as an srun and as an httpd server listening to
 port 8080, for example.  The dual srun/http configuration can be
 useful for debugging.
 </p>
-
-</section>
-
-<section title='Backup JVM'>
-
-<p>Resin provides the ability to run a <var/backup/> JVM.  The backup JVM will
-sit, unused, until the primary server goes down.  Once the primary server goes
-down, the backup is used until the primary restarts.</p>
-
-<p>The cheapest backup strategy just uses a single machine for the web
-server and two JVMs.  One JVM is designated as primary and the other
-is a backup.  If the first fails for some reason, the second will take
-over.  Because the backup is normally not used, it doesn't really take
-up much system resources.</p>
-
-<figure src="backup.gif"/>
-
-<example title="resin.conf">
-&lt;resin xmlns="http://caucho.com/ns/resin">
-&lt;server>
-  &lt;cluster>  
-    &lt;srun id="a" host='localhost' port='6802' index='1'/>
-    &lt;srun backup="true" id="b" host='localhost' port='6803' index='2'/>
-  &lt;/cluster>
-
-  ...
-  
-&lt;/server>
-&lt;/resin>
-</example>
-
-<sidebar>Use <var//caucho-status/> to check your configuration</sidebar>
-
-<p>You will start the two srun processes separately.  Each srun needs to
-know which port to listen to.  The <var/-server/> argument to httpd.sh selects
-a srun block to start.  <var/-server a/> selects the first one, i.e.
-port 6802 and <var/-server b/> selects the second one.</p>
-
-<p>Here's how to start them on unix:</p>
-
-<example>
-unix> httpd.sh -pid srun1.pid -server a start
-unix> httpd.sh -pid srun2.pid -server b start
-</example>
-
-<p>On Unix, the <var/-pid/> is used to keep track of the live srun so
-a later <var/httpd.sh stop/> will work.  It just names a file that will
-contain the process id (pid) of the started process.</p>
-
-<p>Use the -install-as to install them on NT.</p>
-<note>The -install-as must occur before the -server</note>.
-
-<example>
-win> bin/httpd -install-as Resin-A -server a
-win> bin/httpd -install-as Resin-B -server b
-</example>
-
-<p>To make sure that your web server understands the configuration,
-look at <var/http://host/caucho-status/>.  caucho-status will
-show the current state of all the JVMs.</p>
 
 </section>
 
@@ -423,7 +365,7 @@ the machines.</p>
 <p>In this configuration, the site needs to take control of its own
 sessions.  Because the router will distribute the load randomly, any
 persistent session state needs to be handled by a centralized server
-like a database or use Resin's TCP-ring storage.
+like a database or use Resin's cluster storage.
 </p>
 
 <p>Even in this configuration, you can use Resin's load balancing to
@@ -437,8 +379,8 @@ to the preferred host.  The configuration would look like:</p>
 <example>
 &lt;resin xmlns="http://caucho.com/ns/resin">
 &lt;server>
-  &lt;cluster>
-    &lt;srun id="a" host='localhost' port='6802' index='1'/>
+  &lt;cluster id="app-tier">
+    &lt;srun id="app-a" host='localhost' port='6802' index='1'/>
     &lt;srun backup="true" id="b" host='host1' port='6802' index='2'/>
     &lt;srun backup="true" id="c" host='host2' port='6802' index='3'/>
     &lt;srun backup="true" id="d" host='host3' port='6802' index='4'/>

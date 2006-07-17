@@ -545,6 +545,7 @@ v   *
       salt = ("" + Crypt.resultToChar(RandomUtil.nextInt(0x40)) +
               Crypt.resultToChar(RandomUtil.nextInt(0x40)));
     }
+    
     return Crypt.crypt(string, salt);
   }
 

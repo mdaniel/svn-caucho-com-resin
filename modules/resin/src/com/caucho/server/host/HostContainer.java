@@ -332,7 +332,10 @@ public class HostContainer implements DispatchBuilder {
     if (_rewriteInvocation != null) {
       String url;
 
-      url = "http://" + hostName + invocation.getURI();
+      if (invocation.isSecure())
+	url = "https://" + hostName + invocation.getURI();
+      else
+	url = "http://" + hostName + invocation.getURI();
       
       FilterChain chain = _rewriteInvocation.map(url, invocation);
 

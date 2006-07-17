@@ -224,7 +224,9 @@ public class HttpRequest extends AbstractHttpRequest
 	if (ipHost != null)
 	  host = ipHost;
 
-	_invocationKey.init(host, _conn.getLocalPort(), _uri, _uriLength);
+	_invocationKey.init(_isSecure,
+			    host, _conn.getLocalPort(),
+			    _uri, _uriLength);
 
 	Invocation invocation;
 
@@ -232,6 +234,7 @@ public class HttpRequest extends AbstractHttpRequest
 
 	if (invocation == null) {
 	  invocation = _server.createInvocation();
+	  invocation.setSecure(_isSecure);
 
 	  if (host != null) {
 	    String hostName = host.toString().toLowerCase();

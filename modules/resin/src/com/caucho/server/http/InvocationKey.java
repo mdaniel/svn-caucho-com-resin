@@ -44,6 +44,8 @@ import com.caucho.server.*;
  * The invocation key is a <host, port, url> triple
  */
 public class InvocationKey {
+  private boolean _isSecure;
+  
   private CharSequence _host;
   private int _port;
   
@@ -66,14 +68,19 @@ public class InvocationKey {
    * @param urlLength the length of the uri in the byte array
    * @param port the request's port
    */
-  InvocationKey(CharSequence host, int port, byte []uri, int uriLength)
+  InvocationKey(boolean isSecure,
+		CharSequence host, int port,
+		byte []uri, int uriLength)
   {
+    _isSecure = isSecure;
+    
     if (host != null) {
       CharBuffer cb = new CharBuffer();
       cb.append(host);
       _host = cb;
     }
     _port = port;
+    
     _uri = new byte[uriLength];
     System.arraycopy(uri, 0, _uri, 0, uriLength);
     _uriLength = uriLength;
@@ -87,12 +94,22 @@ public class InvocationKey {
    * @param uri the raw byte array containing the uri
    * @param urlLength the length of the uri in the byte array
    */
-  public void init(CharSequence host, int port, byte []uri, int uriLength)
+  public void init(boolean isSecure,
+		   CharSequence host, int port,
+		   byte []uri, int uriLength)
   {
+    _isSecure = isSecure;
+    
     _host = host;
     _port = port;
+    
     _uri = uri;
     _uriLength = uriLength;
+  }
+
+  public boolean isSecure()
+  {
+    return _isSecure;
   }
 
   /**
@@ -148,7 +165,7 @@ public class InvocationKey {
    */
   public int hashCode()
   {
-    int hash = _port + 31;
+    int hash = _port + (_isSecure ? 65521 : 31);
     byte []uri = _uri;
     int length = _uriLength;
 
@@ -170,6 +187,9 @@ public class InvocationKey {
       return false;
     
     InvocationKey test = (InvocationKey) b;
+
+    if (_isSecure != test._isSecure)
+      return false;
 
     if (_port != test._port)
       return false;
@@ -194,7 +214,7 @@ public class InvocationKey {
 
   public Object clone()
   {
-    return new InvocationKey(_host, _port, _uri, _uriLength);
+    return new InvocationKey(_isSecure, _host, _port, _uri, _uriLength);
   }
 
   /**

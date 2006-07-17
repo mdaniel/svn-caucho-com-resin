@@ -336,23 +336,28 @@ public class HessianProxyFactory implements ServiceProxyFactory, ObjectFactory {
   public Object create(Class api, String urlName)
     throws MalformedURLException
   {
+    return create(api, urlName,
+		  Thread.currentThread().getContextClassLoader());
+  }
+
+  /**
+   * Creates a new proxy with the specified URL.  The returned object
+   * is a proxy with the interface specified by api.
+   *
+   * <pre>
+   * String url = "http://localhost:8080/ejb/hello");
+   * HelloHome hello = (HelloHome) factory.create(HelloHome.class, url);
+   * </pre>
+   *
+   * @param api the interface the proxy class needs to implement
+   * @param url the URL where the client object is located.
+   *
+   * @return a proxy to the object with the specified interface.
+   */
+  public Object create(Class api, String urlName, ClassLoader loader)
+    throws MalformedURLException
+  {
     URL url = new URL(urlName);
-
-    /*
-    try {
-      // clear old keepalive connections
-      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-
-      conn.setRequestProperty("Connection", "close");
-
-      InputStream is = conn.getInputStream();
-
-      is.close();
-
-      conn.disconnect();
-    } catch (IOException e) {
-    }
-    */
     
     HessianProxy handler = new HessianProxy(this, url);
 

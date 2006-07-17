@@ -54,6 +54,7 @@ public class Invocation extends ServletInvocation implements Dependency {
   private int _port;
 
   private String _rawURI;
+  private boolean _isSecure;
 
   private String _uri;
   private String _sessionId;
@@ -61,6 +62,26 @@ public class Invocation extends ServletInvocation implements Dependency {
   private Application _application;
 
   private Dependency _dependency;
+
+  public Invocation()
+  {
+  }
+  
+  /**
+   * Returns the secure flag
+   */
+  public final boolean isSecure()
+  {
+    return _isSecure;
+  }
+
+  /**
+   * Sets the secure flag
+   */
+  public final void setSecure(boolean isSecure)
+  {
+    _isSecure = isSecure;
+  }
 
   /**
    * Returns the raw host from the protocol.  This may be different
@@ -278,6 +299,9 @@ public class Invocation extends ServletInvocation implements Dependency {
       return false;
 
     Invocation inv = (Invocation) o;
+
+    if (_isSecure != inv._isSecure)
+      return false;
 
     if (_rawURI != inv._rawURI &&
 	(_rawURI == null || ! _rawURI.equals(inv._rawURI)))

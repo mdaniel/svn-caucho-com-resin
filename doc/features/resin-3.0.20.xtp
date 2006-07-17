@@ -135,6 +135,17 @@ time the load balancer will skip a dead backend server before retrying.</p>
 
 <section title="Hessian">
 
+<section title="Hessian 2.0 Draft">
+
+<p>An early draft of <a href="../protocols/hessian-2.0-spec.xtp">Hessian
+2.0</a> protocol is available.</p>
+
+<p>Hessian 2.0 provides a number of compact bytecodes to reduce the
+size of serialized messages.  Hessian 1.0 clients will continue to
+work with Hessian 2.0 servers without modification.</p>
+
+</section>
+
 <section title="Enum">
 
 <p>Hessian will now read and write JDK 1.5 enums.</p>
@@ -144,6 +155,28 @@ time the load balancer will skip a dead backend server before retrying.</p>
 </section>
 
 <section title="Quercus">
+
+<section title="Distributed Sessions">
+
+<p>Quercus provides
+<a href="http://www.caucho.com/articles/php-sessions.pdf">Distributed Sessions
+for PHP</a>, with the same distributed capabilities as servlets already use.</p>
+
+</section>
+
+<section title="New Libraries">
+
+<p>Quercus now supports
+<ul>
+<li><a href="http://www.php.net/manual/en/ref.apc.php">APC</a></li>
+<li><a href="http://www.php.net/manual/en/ref.pgsql.php">Postgres</a></li>
+<li><a href="http://www.php.net/manual/en/ref.oci8.php">Oracle OCI8</a></li>
+<li><a href="http://www.php.net/manual/en/ref.image.php">Image Library</a></li>
+<li><a href="../php/tutorial/json/index.xtp">JSON</a></li>
+</ul>
+</section>
+
+<section title="server-env">
 
 <p>The QuercusServlet now allows &lt;server-env> to define environment
 variables for $_SERVER.</p>
@@ -156,6 +189,8 @@ variables for $_SERVER.</p>
   &lt;/init>
 &lt;/servlet>
 </example>
+
+</section>
 
 </section>
 
