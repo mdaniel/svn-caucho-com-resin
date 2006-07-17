@@ -29,6 +29,7 @@
 
 package com.caucho.util;
 
+import com.caucho.vfs.Vfs;
 import java.util.*;
 import java.io.*;
 
@@ -171,152 +172,136 @@ public class Base64 {
 
   public static String encode(String value)
   {
-    CharBuffer cb = new CharBuffer();
+    try {
 
-    int i = 0;
-    for (i = 0; i + 2 < value.length(); i += 3) {
-      long chunk = (int) value.charAt(i);
-      chunk = (chunk << 8) + (int) value.charAt(i + 1);
-      chunk = (chunk << 8) + (int) value.charAt(i + 2);
-        
-      cb.append(encode(chunk >> 18));
-      cb.append(encode(chunk >> 12));
-      cb.append(encode(chunk >> 6));
-      cb.append(encode(chunk));
+      CharBuffer cb = new CharBuffer();
+      encode(Vfs.openWrite(cb).getPrintWriter(),
+	     Vfs.openString(value));
+      return cb.toString();
     }
-    
-    if (i + 1 < value.length()) {
-      long chunk = (int) value.charAt(i);
-      chunk = (chunk << 8) + (int) value.charAt(i + 1);
-      chunk <<= 8;
-
-      cb.append(encode(chunk >> 18));
-      cb.append(encode(chunk >> 12));
-      cb.append(encode(chunk >> 6));
-      cb.append('=');
+    catch (IOException e) {
+      throw new RuntimeException("this should not be possible: " + e);
     }
-    else if (i < value.length()) {
-      long chunk = (int) value.charAt(i);
-      chunk <<= 16;
-
-      cb.append(encode(chunk >> 18));
-      cb.append(encode(chunk >> 12));
-      cb.append('=');
-      cb.append('=');
-    }
-
-    return cb.toString();
   }
 
   public static String encodeFromByteArray(byte[] value)
   {
-    CharBuffer cb = new CharBuffer();
+    try {
 
-    int i = 0;
-    for (i = 0; i + 2 < value.length; i += 3) {
-      long chunk = (value[i] & 0xff);
-      chunk = (chunk << 8) + (value[i+1] & 0xff);
-      chunk = (chunk << 8) + (value[i+2] & 0xff);
+      CharBuffer cb = new CharBuffer();
+      encode(Vfs.openWrite(cb).getPrintWriter(),
+	     new ByteArrayInputStream(value));
+      return cb.toString();
+
+    }
+    catch (IOException e) {
+      throw new RuntimeException("this should not be possible " + e);
+    }
+  }
+
+  public static void encode(Writer w, InputStream i)
+    throws IOException
+  {
+    while(true) {
+      int value1 = i.read();
+      int value2 = i.read();
+      int value3 = i.read();
+
+      if (value3 != -1) {
+	long chunk = (value1 & 0xff);
+	chunk = (chunk << 8) + (value2 & 0xff);
+	chunk = (chunk << 8) + (value3 & 0xff);
         
-      cb.append(encode(chunk >> 18));
-      cb.append(encode(chunk >> 12));
-      cb.append(encode(chunk >> 6));
-      cb.append(encode(chunk));
-    }
+	w.write(encode(chunk >> 18));
+	w.write(encode(chunk >> 12));
+	w.write(encode(chunk >> 6));
+	w.write(encode(chunk));
+	continue;
+      }
     
-    if (i + 1 < value.length) {
-      long chunk = (value[i] & 0xff);
-      chunk = (chunk << 8) + (value[i+1] & 0xff);
-      chunk <<= 8;
-
-      cb.append(encode(chunk >> 18));
-      cb.append(encode(chunk >> 12));
-      cb.append(encode(chunk >> 6));
-      cb.append('=');
+      if (value2 != -1) {
+	long chunk = (value1 & 0xff);
+	chunk = (chunk << 8) + (value2 & 0xff);
+	chunk <<= 8;
+	
+	w.write(encode(chunk >> 18));
+	w.write(encode(chunk >> 12));
+	w.write(encode(chunk >> 6));
+	w.write('=');
+      }
+      else if (value1 != -1) {
+	long chunk = (value1 & 0xff);
+	chunk <<= 16;
+	
+	w.write(encode(chunk >> 18));
+	w.write(encode(chunk >> 12));
+	w.write('=');
+	w.write('=');
+      }
+      break;
     }
-    else if (i < value.length) {
-      long chunk = (value[i] & 0xff);
-      chunk <<= 16;
-
-      cb.append(encode(chunk >> 18));
-      cb.append(encode(chunk >> 12));
-      cb.append('=');
-      cb.append('=');
-    }
-
-    return cb.toString();
+    w.flush();
   }
 
   public static String decode(String value)
   {
-    CharBuffer cb = new CharBuffer();
-
-    int length = value.length();
-    for (int i = 0; i + 3 < length; i += 4) {
-      int ch0 = value.charAt(i + 0) & 0xff;
-
-      // skip whitespace
-      if (ch0 == ' ' || ch0 == '\n' || ch0 == '\r') {
-        i -= 3;
-        continue;
-      }
-      
-      int ch1 = value.charAt(i + 1) & 0xff;
-      int ch2 = value.charAt(i + 2) & 0xff;
-      int ch3 = value.charAt(i + 3) & 0xff;
-
-      int chunk = ((decode[ch0] << 18) +
-		   (decode[ch1] << 12) +
-		   (decode[ch2] << 6) +
-		   (decode[ch3]));
-
-      cb.append((char) ((chunk >> 16) & 0xff));
-
-      if (ch2 != '=')
-	cb.append((char) ((chunk >> 8) & 0xff));
-      if (ch3 != '=')
-	cb.append((char) ((chunk & 0xff)));
+    try {
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      decode(new StringReader(value), baos);
+      return new String(baos.toByteArray());
     }
-
-    return cb.toString();
+    catch (IOException e) {
+      throw new RuntimeException("this should not be possible: " + e);
+    }
   }
 
   public static byte[] decodeToByteArray(String value)
   {
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    
-    int length = value.length();
-    for (int i = 0; i + 3 < length; i += 4) {
-      int ch0 = value.charAt(i + 0) & 0xff;
-      
+    try {
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      decode(new StringReader(value), baos);
+      return baos.toByteArray();
+    }
+    catch (IOException e) {
+      throw new RuntimeException("this should not be possible: " + e);
+    }
+  }
+
+  private static int readNonWhitespace(Reader r)
+    throws IOException
+  {
+    while(true) {
+      int ret = r.read();
       // skip whitespace
-      if (ch0 == ' ' || ch0 == '\n' || ch0 == '\r') {
-	i -= 3;
+      if (ret == ' ' || ret == '\n' || ret == '\r')
 	continue;
-      }
-      
-      int ch1 = value.charAt(i + 1) & 0xff;
-      int ch2 = value.charAt(i + 2) & 0xff;
-      int ch3 = value.charAt(i + 3) & 0xff;
+      return ret;
+    }
+  }
+
+  public static void decode(Reader r, OutputStream o)
+    throws IOException
+  {
+    while(true) {
+      int ch0 = readNonWhitespace(r);
+      if (ch0 == -1) break;
+
+      int ch1 = readNonWhitespace(r);
+      int ch2 = readNonWhitespace(r);
+      int ch3 = readNonWhitespace(r);
       
       int chunk = ((decode[ch0] << 18) +
 		   (decode[ch1] << 12) +
 		   (decode[ch2] << 6) +
 		   (decode[ch3]));
       
-      baos.write((byte) ((chunk >> 16) & 0xff));
+      o.write((byte) ((chunk >> 16) & 0xff));
       
-      if (ch2 != '=')
-	baos.write((byte) ((chunk >> 8) & 0xff));
-      if (ch3 != '=')
-	baos.write((byte) ((chunk & 0xff)));
+      if (ch2 != '='  && ch2 != -1)
+	o.write((byte) ((chunk >> 8) & 0xff));
+      if (ch3 != '=' && ch3 != -1)
+	o.write((byte) ((chunk & 0xff)));
     }
-    try {
-      baos.flush();
-      baos.close();
-    } catch (IOException ioe) {
-      throw new RuntimeException("this should not be possible");
-    }
-    return baos.toByteArray();
+    o.flush();
   }
 }
