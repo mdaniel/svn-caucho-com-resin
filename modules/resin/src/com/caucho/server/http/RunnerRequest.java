@@ -328,7 +328,8 @@ public class RunnerRequest extends AbstractHttpRequest
         if (_method.getLength() == 0)
           throw new RuntimeException("HTTP protocol exception");
           
-        _invocationKey.init(getHost(), getServerPort(),
+        _invocationKey.init(_isSecure,
+			    getHost(), getServerPort(),
                             _uri.getBuffer(), _uri.getLength());
 
         Invocation invocation;
