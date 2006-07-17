@@ -30,6 +30,7 @@
 package com.caucho.util;
 
 import java.util.*;
+import java.io.*;
 
 /**
  * Base64 decoding.
@@ -207,6 +208,45 @@ public class Base64 {
     return cb.toString();
   }
 
+  public static String encodeFromByteArray(byte[] value)
+  {
+    CharBuffer cb = new CharBuffer();
+
+    int i = 0;
+    for (i = 0; i + 2 < value.length; i += 3) {
+      long chunk = (value[i] & 0xff);
+      chunk = (chunk << 8) + (value[i+1] & 0xff);
+      chunk = (chunk << 8) + (value[i+2] & 0xff);
+        
+      cb.append(encode(chunk >> 18));
+      cb.append(encode(chunk >> 12));
+      cb.append(encode(chunk >> 6));
+      cb.append(encode(chunk));
+    }
+    
+    if (i + 1 < value.length) {
+      long chunk = (value[i] & 0xff);
+      chunk = (chunk << 8) + (value[i+1] & 0xff);
+      chunk <<= 8;
+
+      cb.append(encode(chunk >> 18));
+      cb.append(encode(chunk >> 12));
+      cb.append(encode(chunk >> 6));
+      cb.append('=');
+    }
+    else if (i < value.length) {
+      long chunk = (value[i] & 0xff);
+      chunk <<= 16;
+
+      cb.append(encode(chunk >> 18));
+      cb.append(encode(chunk >> 12));
+      cb.append('=');
+      cb.append('=');
+    }
+
+    return cb.toString();
+  }
+
   public static String decode(String value)
   {
     CharBuffer cb = new CharBuffer();
@@ -239,5 +279,44 @@ public class Base64 {
     }
 
     return cb.toString();
+  }
+
+  public static byte[] decodeToByteArray(String value)
+  {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    
+    int length = value.length();
+    for (int i = 0; i + 3 < length; i += 4) {
+      int ch0 = value.charAt(i + 0) & 0xff;
+      
+      // skip whitespace
+      if (ch0 == ' ' || ch0 == '\n' || ch0 == '\r') {
+	i -= 3;
+	continue;
+      }
+      
+      int ch1 = value.charAt(i + 1) & 0xff;
+      int ch2 = value.charAt(i + 2) & 0xff;
+      int ch3 = value.charAt(i + 3) & 0xff;
+      
+      int chunk = ((decode[ch0] << 18) +
+		   (decode[ch1] << 12) +
+		   (decode[ch2] << 6) +
+		   (decode[ch3]));
+      
+      baos.write((byte) ((chunk >> 16) & 0xff));
+      
+      if (ch2 != '=')
+	baos.write((byte) ((chunk >> 8) & 0xff));
+      if (ch3 != '=')
+	baos.write((byte) ((chunk & 0xff)));
+    }
+    try {
+      baos.flush();
+      baos.close();
+    } catch (IOException ioe) {
+      throw new RuntimeException("this should not be possible");
+    }
+    return baos.toByteArray();
   }
 }
