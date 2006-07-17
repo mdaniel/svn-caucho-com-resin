@@ -430,6 +430,26 @@ public class Quercus {
   }
 
   /**
+   * Gets all ini values having this prefix.
+   */
+  public HashMap<String,StringValue> getIniAll(String prefix)
+  {
+    if (_iniMap == null)
+      return null;
+
+    HashMap<String, StringValue> iniCopy = new HashMap<String, StringValue>();
+
+    for (Map.Entry<String, StringValue> entry : _iniMap.entrySet()) {
+      String key = entry.getKey();
+      StringValue value = entry.getValue();
+      if (key.startsWith(prefix))
+        iniCopy.put(key, entry.getValue());
+    }
+
+    return iniCopy;
+  }
+
+  /**
    * Returns the relative path.
    */
   public String getClassName(Path path)

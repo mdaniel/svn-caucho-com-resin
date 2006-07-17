@@ -344,6 +344,80 @@ public class OptionsModule extends AbstractQuercusModule {
   }
 
   /**
+   * Returns all initialization values.
+   * XXX: access levels dependent on PHP_INI, PHP_INI_PERDIR, PHP_INI_SYSTEM.
+   *
+   * @param extension assumes ini values are prefixed by extension names.
+   */
+  public static Value ini_get_all(Env env,
+                       @Optional() String extension)
+  {
+    if (extension.length() > 0) {
+      if (! env.isExtensionLoaded(extension)) {
+        env.warning(L.l("extension '" + extension + "' not loaded."));
+        return BooleanValue.FALSE;
+      }
+      extension += ".";
+    }
+
+    ArrayValue directives = new ArrayValueImpl();
+    Value global = new StringValueImpl("global_value");
+    Value local = new StringValueImpl("local_value");
+    Value access = new StringValueImpl("access");
+
+    Value onValue = new StringValueImpl("1");
+    Value level = new LongValue(7);
+
+    HashMap<String, StringValue> iniMap =
+        env.getQuercus().getIniAll(extension);
+
+    for (Map.Entry<String,StringValue> entry : iniMap.entrySet()) {
+      String key = entry.getKey();
+      Value globalVal = entry.getValue();
+      char ch;
+
+      if (globalVal == null)
+        globalVal = NullValue.NULL;
+      else if (((StringValue)globalVal).length() == 2) {
+        if (((ch = ((StringValue)globalVal).charAt(0)) == 'o' || ch == 'O') &&
+            ((ch = ((StringValue)globalVal).charAt(1)) == 'n' || ch == 'N'))
+          globalVal = onValue;
+      }
+      else if (((StringValue)globalVal).length() == 3) {
+        if (((ch = ((StringValue)globalVal).charAt(0)) == 'o' || ch == 'O') &&
+            ((ch = ((StringValue)globalVal).charAt(1)) == 'f' || ch == 'F') &&
+            ((ch = ((StringValue)globalVal).charAt(2)) == 'f' || ch == 'F'))
+          globalVal = StringValue.EMPTY;
+      }
+
+      ArrayValue inner = new ArrayValueImpl();
+      inner.put(global, globalVal);
+
+      Value localVal = env.getIni(key);
+      if (localVal == null)
+        localVal = globalVal;
+      else if (((StringValue)localVal).length() == 2) {
+        if (((ch = ((StringValue)localVal).charAt(0)) == 'o' || ch == 'O') &&
+            ((ch = ((StringValue)localVal).charAt(1)) == 'n' || ch == 'N'))
+          localVal = onValue;
+      }
+      else if (((StringValue)localVal).length() == 3) {
+        if (((ch = ((StringValue)localVal).charAt(0)) == 'o' || ch == 'O') &&
+            ((ch = ((StringValue)localVal).charAt(1)) == 'f' || ch == 'F') &&
+            ((ch = ((StringValue)localVal).charAt(2)) == 'f' || ch == 'F'))
+          localVal = StringValue.EMPTY;
+      }
+
+      inner.put(local, localVal);
+      inner.put(access, level);
+
+      directives.put(new StringValueImpl(key), inner);
+    }
+
+    return directives;
+  }
+
+  /**
    * Restore the initial configuration value
    */
   public static Value ini_restore(Env env, String name)
