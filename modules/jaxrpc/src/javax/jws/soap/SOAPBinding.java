@@ -5,29 +5,25 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 
-/**
- * XXX: temp for compile only, please replace.
- */
-@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD,ElementType.TYPE})
 public @interface SOAPBinding {
-  public enum Style {
-    DOCUMENT,
-    RPC
-  };
-  
-  public enum Use {
-    LITERAL,
-    ENCODED
-  };
 
-  public enum ParameterStyle {
-    BARE,
-    WRAPPED
-  };
+  SOAPBinding.ParameterStyle parameterStyle() default ParameterStyle.WRAPPED;
+  SOAPBinding.Style style() default Style.DOCUMENT;
+  SOAPBinding.Use use() default Use.LITERAL;
 
-  Style style() default Style.DOCUMENT;
-  Use use() default Use.LITERAL;
-  ParameterStyle parameterStyle() default ParameterStyle.WRAPPED;
-};
+  public static enum Use {
+    ENCODED, LITERAL
+  }
+
+  public static enum Style {
+    DOCUMENT, RPC
+  }
+
+  public static enum ParameterStyle {
+    BARE, WRAPPED
+  }
+
+}
 

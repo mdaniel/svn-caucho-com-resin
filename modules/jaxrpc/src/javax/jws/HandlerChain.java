@@ -5,13 +5,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 
-/**
- * XXX: temp for compile only, please replace.
- */
-@Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE,ElementType.METHOD,ElementType.FIELD})
 public @interface HandlerChain {
-  String file();
-  String name() default "";
-};
+    String file();
 
+    @Deprecated
+    String name() default "";
+}
