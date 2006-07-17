@@ -121,8 +121,10 @@ public class EjbConfig {
 
     if (ejbModuleName.startsWith(pwd))
       ejbModuleName = ejbModuleName.substring(pwd.length());
-
-    _ejbManager.addEJBModule(ejbModuleName);
+    
+    // XXX: null when called from EntAppClient(?)
+    if (_ejbManager != null)
+      _ejbManager.addEJBModule(ejbModuleName);
 
     EjbJar ejbJar = new EjbJar(this, ejbModuleName);
 
@@ -468,19 +470,18 @@ public class EjbConfig {
       _ejbManager.getAmberManager().initEntityHomes();
 
       for (EjbBean bean : beanConfig) {
-	thread.setContextClassLoader(_ejbManager.getClassLoader());
-	
 	AbstractServer server = bean.deployServer(_ejbManager, javaGen);
-
-	thread.setContextClassLoader(server.getClassLoader());
 	
+	thread.setContextClassLoader(server.getClassLoader());
+
+	/* XXX: handled by bean.deployServer
 	if (bean.getServerProgram() != null)
 	  bean.getServerProgram().configure(server);
+	*/
 
 	server.init();
-	
-	_ejbManager.addServer(server);
 
+	_ejbManager.addServer(server);
 	/*
 	if (bean.getJndiName() != null)
 	  _ejbManager.getProtocolManager().deployJNDI(bean.getJndiName(),

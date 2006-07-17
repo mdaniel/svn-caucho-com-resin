@@ -120,7 +120,7 @@ public class MarshallObject {
     else if (short.class.equals(cl) || Short.class.equals(cl))
       return MARSHALL_SHORT;
     else if (char.class.equals(cl) || Character.class.equals(cl))
-      return new MarshallObject(CHAR);
+      return MARSHALL_CHAR;
     else if (int.class.equals(cl) || Integer.class.equals(cl))
       return new MarshallObject(INT);
     else if (long.class.equals(cl) || Long.class.equals(cl))
@@ -384,13 +384,31 @@ public class MarshallObject {
       public Object unmarshall(IiopReader reader)
 	throws Exception
       {
-	return new Short(reader.read_short());
+	short v = reader.read_short();
+
+	return new Short(v);
       }
 
       public void marshall(Object obj, IiopWriter writer)
 	throws Exception
       {
 	writer.write_short(((Number) obj).shortValue());
+      }
+    };
+
+  private static final MarshallObject MARSHALL_CHAR = new MarshallObject() {
+      public Object unmarshall(IiopReader reader)
+	throws Exception
+      {
+	char v = reader.read_wchar();
+
+	return new Character(v);
+      }
+
+      public void marshall(Object obj, IiopWriter writer)
+	throws Exception
+      {
+	writer.write_wchar(((Character) obj).charValue());
       }
     };
 

@@ -34,7 +34,7 @@ import javax.enterprise.deploy.spi.TargetModuleID;
 /**
  * Represents a deployed module.
  */
-public class TargetModuleIDImpl implements TargetModuleID {
+public class TargetModuleIDImpl implements TargetModuleID, java.io.Serializable {
   private TargetImpl _target;
   private String _moduleID;
 

@@ -70,6 +70,8 @@ import com.caucho.make.AlwaysModified;
 import com.caucho.make.Dependency;
 import com.caucho.make.DependencyContainer;
 
+import com.caucho.management.server.*;
+
 import com.caucho.server.cache.AbstractCache;
 
 import com.caucho.server.cluster.Cluster;
@@ -621,6 +623,17 @@ public class Application extends ServletContextImpl
   {
     if (_parent != null)
       return _parent.getHostName();
+    else
+      return null;
+  }
+
+  /**
+   * Gets the URL
+   */
+  public HostMXBean getHostAdmin()
+  {
+    if (_parent != null && _parent.getHost() != null)
+      return _parent.getHost().getAdmin();
     else
       return null;
   }
@@ -1374,20 +1387,6 @@ public class Application extends ServletContextImpl
   public Throwable getConfigException()
   {
     return _configException;
-  }
-
-  /**
-   * Adds an ejb-ref
-   */
-  public void addEjbRef(EjbRef ref)
-  {
-  }
-
-  /**
-   * Adds an ejb-local-ref
-   */
-  public void addEjbLocalRef(EjbLocalRef ref)
-  {
   }
 
   /**

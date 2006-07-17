@@ -32,6 +32,7 @@ package com.caucho.iiop;
 import java.io.*;
 import java.net.*;
 import java.util.logging.*;
+import javax.rmi.CORBA.*;
 
 import com.caucho.vfs.*;
 
@@ -228,14 +229,11 @@ public class IiopRequest implements ServerRequest {
 	// ejb/1110
 
 	writer.startReplyUserException(_reader.getRequestId());
-	writer.write_string(e.toString());
-
-	/*
-	  writer.write_value(e);
-
-	  MarshallObject marshall = MarshallObject.create(e.getClass(), false);
-	  marshall.marshall(e, writer);
-	*/
+	String exName = e.getClass().getName().replace('.', '/');
+	if (exName.length() > 20)
+	  exName = exName.substring(0, 20);
+	writer.write_string("IDL:" + exName + ":1.0");
+	writer.write_value(e);
       }
       
       _messageWriter.close();

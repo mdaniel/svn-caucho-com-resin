@@ -647,7 +647,7 @@ public class Hessian2Output
       flush();
       offset = 0;
     }
-    
+
     if (LONG_DIRECT_MIN <= value && value <= LONG_DIRECT_MAX) {
       buffer[offset++] = (byte) (value + LONG_ZERO);
     }
@@ -978,7 +978,7 @@ public class Hessian2Output
       if (SIZE < _offset + 16)
 	flush();
 	
-      if (length < STRING_DIRECT_MAX) {
+      if (length <= STRING_DIRECT_MAX) {
 	_buffer[_offset++] = (byte) (STRING_DIRECT + length);
       }
       else {

@@ -97,6 +97,7 @@ import com.caucho.server.deploy.EnvironmentDeployInstance;
 import com.caucho.server.webapp.ApplicationContainer;
 import com.caucho.server.webapp.WebAppController;
 
+import com.caucho.ejb.EJBServer;
 import com.caucho.ejb.EJBServerInterface;
 
 /**
@@ -374,29 +375,16 @@ public class EnterpriseApplication
     Vfs.setPwd(_rootDir, _loader);
 
     if (_ejbPaths.size() != 0) {
-      Object obj = Jndi.lookup(_ejbServerJndiName);
+      EJBServerInterface ejbServer = EJBServer.getLocal();
 
-      if (! (obj instanceof Context))
-	throw new ConfigException(L.l("Expected <ejb-server> configured at '{0}'",
-				      _ejbServerJndiName));
+      if (ejbServer == null)
+	throw new ConfigException(L.l("Expected configured <ejb-server> in " +
+				      Thread.currentThread().getContextClassLoader()));
 
-      obj = ((Context) obj).lookup("resin-ejb-server");
+      for (Path path : _ejbPaths)
+	ejbServer.addEJBJar(path);
 
-      if (! (obj instanceof EJBServerInterface))
-	throw new ConfigException(L.l("Expected <ejb-server> configured at '{0}'",
-				      _ejbServerJndiName + "/resin-ejb-server"));
-      
-      EJBServerInterface ejbServer = (EJBServerInterface) obj;
-
-      if (ejbServer == null && _ejbPaths.size() != 0)
-	throw new ConfigException(L.l("<ejb> module needs a configured <ejb-server>"));
-
-      if (ejbServer != null) {
-	for (Path path : _ejbPaths)
-	  ejbServer.addEJBJar(path);
-
-	ejbServer.initEJBs();
-      }
+      ejbServer.initEJBs();
     }
 
     // updates the invocation caches

@@ -50,6 +50,7 @@ import com.caucho.log.Log;
 
 import com.caucho.naming.AbstractModel;
 import com.caucho.naming.MemoryModel;
+import com.caucho.naming.Jndi;
 
 import com.caucho.ejb.EnvServerManager;
 import com.caucho.ejb.AbstractServer;
@@ -72,8 +73,11 @@ public class EjbProtocolManager {
 
   private EnvServerManager _ejbServer;
   
-  private AbstractModel _namingRoot;
-  private String _cmpJndiName = "java:comp/env/cmp";
+  private AbstractModel _localRoot;
+  private AbstractModel _remoteRoot;
+  
+  private String _localJndiName = "java:comp/env/cmp";
+  private String _remoteJndiName = "java:comp/env/ejb";
   
   private HashMap<String,AbstractServer> _serverMap
     = new HashMap<String,AbstractServer>();
@@ -90,13 +94,24 @@ public class EjbProtocolManager {
     throws ConfigException
   {
     _ejbServer = ejbServer;
-    
-    _namingRoot = new MemoryModel();
+
+    _localRoot = new MemoryModel();
+    _remoteRoot = new MemoryModel();
 
     ProtocolContainer iiop = IiopProtocolContainer.createProtocolContainer();
 
     if (iiop != null)
       _protocolMap.put("iiop", iiop);
+  }
+
+  public void setRemoteJndiName(String name)
+  {
+    _remoteJndiName = name;
+  }
+
+  public String getRemoteJndiName()
+  {
+    return _remoteJndiName;
   }
 
   /**
@@ -107,12 +122,9 @@ public class EjbProtocolManager {
     return _ejbServer;
   }
 
-  /**
-   * Returns the naming root.
-   */
-  public AbstractModel getNamingRoot()
+  public AbstractModel getLocalNamingModel()
   {
-    return _namingRoot;
+    return _localRoot;
   }
 
   /**
@@ -121,6 +133,8 @@ public class EjbProtocolManager {
   public void init()
     throws NamingException
   {
+    Jndi.rebindDeep(_localJndiName, new NamingProxy(_localRoot));
+    Jndi.rebindDeep(_remoteJndiName, new NamingProxy(_remoteRoot));
   }
 
   /**
@@ -226,30 +240,11 @@ public class EjbProtocolManager {
     throws NamingException
   {
     String ejbName = server.getEJBName();
-    
-    AbstractModel model = _namingRoot;
 
-    while (ejbName.startsWith("/"))
-      ejbName = ejbName.substring(1);
-    
-    while (ejbName.endsWith("/"))
-      ejbName = ejbName.substring(ejbName.length() - 1);
-    
-    String []split = ejbName.split("/+");
-
-    for (int i = 0; i < split.length - 1; i++) {
-      if (model.lookup(split[i]) != null)
-	model = (AbstractModel) model.lookup(split[i]);
-      else
-	model = model.createSubcontext(split[i]);
-    }
-
-    Object home = server.getEJBLocalHome();
-
-    if (home != null)
-      model.bind(split[split.length - 1], home);
+    if (server.getEJBLocalHome() != null)
+      addServer(_localRoot, ejbName, server.getEJBLocalHome());
     else if (server.getClientObject() != null)
-      model.bind(split[split.length - 1], server.getClientObject());
+      addServer(_localRoot, ejbName, server.getClientObject());
   }
 
   /**
@@ -260,6 +255,19 @@ public class EjbProtocolManager {
   {
     for (ProtocolContainer protocol : _protocolMap.values()) {
       protocol.addServer(server);
+    }
+    
+    try {
+      String ejbName = server.getEJBName();
+
+      if (server.getEJBHome() != null)
+	addServer(_remoteRoot, ejbName, server.getEJBHome());
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (NamingException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 
@@ -296,8 +304,36 @@ public class EjbProtocolManager {
   public void deployJNDI(String jndiName, AbstractServer server)
     throws Exception
   {
+    /*
     Context ic = new InitialContext();
     ic.rebind(jndiName, this);
+    */
+  }
+	   
+  /**
+   * Adds a server.
+   */
+  private void addServer(AbstractModel model,
+			 String ejbName,
+			 Object home)
+    throws NamingException
+  {
+    while (ejbName.startsWith("/"))
+      ejbName = ejbName.substring(1);
+    
+    while (ejbName.endsWith("/"))
+      ejbName = ejbName.substring(ejbName.length() - 1);
+    
+    String []split = ejbName.split("/+");
+
+    for (int i = 0; i < split.length - 1; i++) {
+      if (model.lookup(split[i]) != null)
+	model = (AbstractModel) model.lookup(split[i]);
+      else
+	model = model.createSubcontext(split[i]);
+    }
+
+    model.bind(split[split.length - 1], home);
   }
   
   /**

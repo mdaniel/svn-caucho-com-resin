@@ -122,6 +122,7 @@ public class HessianDebugInputStream extends InputStream {
       _dbg.print("  ");
 
     _dbg.println(string);
+    _dbg.flush();
   }
 
   void pushStack(State state)

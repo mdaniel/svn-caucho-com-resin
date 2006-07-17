@@ -236,6 +236,8 @@ public class EntityServer extends AbstractServer {
   public void init()
     throws Exception
   {
+    super.init();
+    
     try {
       // _isCacheable = _config.isCacheable();
       //_cacheTimeout = _config.getCacheTimeout();

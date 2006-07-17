@@ -79,6 +79,9 @@ public class ContextImpl implements Context {
     _model = model;
     _env = env;
     _name = "";
+
+    if (_model == null)
+      throw new NullPointerException();
   }
 
   /**
@@ -93,6 +96,9 @@ public class ContextImpl implements Context {
     _model = model;
     _env = env;
     _name = name;
+
+    if (_model == null)
+      throw new NullPointerException();
   }
 
   /**

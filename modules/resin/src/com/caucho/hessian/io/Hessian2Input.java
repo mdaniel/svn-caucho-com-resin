@@ -524,12 +524,12 @@ public class Hessian2Input
       return true;
 
       // INT_SHORT = 0
-    case 0x5c: 
+    case 0x3c: 
       return (256 * read() + read()) != 0;
       
       // INT_SHORT != 0
-    case 0x58: case 0x59: case 0x5a: case 0x5b:
-    case 0x5d: case 0x5e: case 0x5f:
+    case 0x38: case 0x39: case 0x3a: case 0x3b:
+    case 0x3d: case 0x3e: case 0x3f:
       read();
       read();
       return true;
@@ -671,8 +671,8 @@ public class Hessian2Input
       return ((tag - LONG_BYTE_ZERO) << 8) + read();
       
       /* short long */
-    case 0x58: case 0x59: case 0x5a: case 0x5b:
-    case 0x5c: case 0x5d: case 0x5e: case 0x5f:
+    case 0x38: case 0x39: case 0x3a: case 0x3b:
+    case 0x3c: case 0x3d: case 0x3e: case 0x3f:
       return ((tag - LONG_SHORT_ZERO) << 16) + 256 * read() + read();
 
     case 'L':
@@ -746,19 +746,19 @@ public class Hessian2Input
     case 0xb4: case 0xb5: case 0xb6: case 0xb7:
     case 0xb8: case 0xb9: case 0xba: case 0xbb:
     case 0xbc: case 0xbd: case 0xbe: case 0xbf:
-      
+      return tag - INT_ZERO;
+
+      /* byte int */
     case 0xc0: case 0xc1: case 0xc2: case 0xc3:
     case 0xc4: case 0xc5: case 0xc6: case 0xc7:
     case 0xc8: case 0xc9: case 0xca: case 0xcb:
     case 0xcc: case 0xcd: case 0xce: case 0xcf:
-      return tag - 0x90;
-
-      /* byte int */
+      return ((tag - INT_BYTE_ZERO) << 8) + read();
+      
+      /* short int */
     case 0xd0: case 0xd1: case 0xd2: case 0xd3:
     case 0xd4: case 0xd5: case 0xd6: case 0xd7:
-    case 0xd8: case 0xd9: case 0xda: case 0xdb:
-    case 0xdc: case 0xdd: case 0xde: case 0xdf:
-      return ((tag - 0xd8) << 8) + read();
+      return ((tag - INT_SHORT_ZERO) << 16) + 256 * read() + read();
 
       //case LONG_BYTE:
     case DOUBLE_BYTE:
@@ -775,11 +775,26 @@ public class Hessian2Input
       return parseInt();
 
       // direct long
+    case 0xd8: case 0xd9: case 0xda: case 0xdb:
+    case 0xdc: case 0xdd: case 0xde: case 0xdf:
+      
     case 0xe0: case 0xe1: case 0xe2: case 0xe3:
     case 0xe4: case 0xe5: case 0xe6: case 0xe7:
     case 0xe8: case 0xe9: case 0xea: case 0xeb:
     case 0xec: case 0xed: case 0xee: case 0xef:
-      return tag - 0xe8;
+      return tag - LONG_ZERO;
+
+      /* byte long */
+    case 0xf0: case 0xf1: case 0xf2: case 0xf3:
+    case 0xf4: case 0xf5: case 0xf6: case 0xf7:
+    case 0xf8: case 0xf9: case 0xfa: case 0xfb:
+    case 0xfc: case 0xfd: case 0xfe: case 0xff:
+      return ((tag - LONG_BYTE_ZERO) << 8) + read();
+      
+      /* short long */
+    case 0x38: case 0x39: case 0x3a: case 0x3b:
+    case 0x3c: case 0x3d: case 0x3e: case 0x3f:
+      return ((tag - LONG_SHORT_ZERO) << 16) + 256 * read() + read();
 
     case 'L':
       return parseLong();
@@ -856,22 +871,19 @@ public class Hessian2Input
     case 0xb4: case 0xb5: case 0xb6: case 0xb7:
     case 0xb8: case 0xb9: case 0xba: case 0xbb:
     case 0xbc: case 0xbd: case 0xbe: case 0xbf:
-      
+      return tag - 0x90;
+
+      /* byte int */
     case 0xc0: case 0xc1: case 0xc2: case 0xc3:
     case 0xc4: case 0xc5: case 0xc6: case 0xc7:
     case 0xc8: case 0xc9: case 0xca: case 0xcb:
     case 0xcc: case 0xcd: case 0xce: case 0xcf:
-      return tag - 0x90;
-
-      //case INT_BYTE:
-      //case LONG_BYTE:
-    case DOUBLE_BYTE:
-      return (byte) (_offset < _length ? _buffer[_offset++] : read());
-
-      //case INT_SHORT:
-      //case LONG_SHORT:
-    case DOUBLE_SHORT:
-      return (short) (256 * read() + read());
+      return ((tag - INT_BYTE_ZERO) << 8) + read();
+      
+      /* short int */
+    case 0xd0: case 0xd1: case 0xd2: case 0xd3:
+    case 0xd4: case 0xd5: case 0xd6: case 0xd7:
+      return ((tag - INT_SHORT_ZERO) << 16) + 256 * read() + read();
 
     case 'I':
     case LONG_INT:
@@ -879,11 +891,26 @@ public class Hessian2Input
       return parseInt();
 
       // direct long
+    case 0xd8: case 0xd9: case 0xda: case 0xdb:
+    case 0xdc: case 0xdd: case 0xde: case 0xdf:
+      
     case 0xe0: case 0xe1: case 0xe2: case 0xe3:
     case 0xe4: case 0xe5: case 0xe6: case 0xe7:
     case 0xe8: case 0xe9: case 0xea: case 0xeb:
     case 0xec: case 0xed: case 0xee: case 0xef:
-      return tag - 0xe8;
+      return tag - LONG_ZERO;
+
+      /* byte long */
+    case 0xf0: case 0xf1: case 0xf2: case 0xf3:
+    case 0xf4: case 0xf5: case 0xf6: case 0xf7:
+    case 0xf8: case 0xf9: case 0xfa: case 0xfb:
+    case 0xfc: case 0xfd: case 0xfe: case 0xff:
+      return ((tag - LONG_BYTE_ZERO) << 8) + read();
+      
+      /* short long */
+    case 0x38: case 0x39: case 0x3a: case 0x3b:
+    case 0x3c: case 0x3d: case 0x3e: case 0x3f:
+      return ((tag - LONG_SHORT_ZERO) << 16) + 256 * read() + read();
 
     case 'L':
       return (double) parseLong();
@@ -893,6 +920,12 @@ public class Hessian2Input
 
     case DOUBLE_ONE:
       return 1;
+
+    case DOUBLE_BYTE:
+      return (byte) (_offset < _length ? _buffer[_offset++] : read());
+
+    case DOUBLE_SHORT:
+      return (short) (256 * read() + read());
 
     case DOUBLE_256_SHORT:
       return D_256 * ((short) (256 * read() + read()));
@@ -1518,36 +1551,44 @@ public class Hessian2Input
     case 0xb4: case 0xb5: case 0xb6: case 0xb7:
     case 0xb8: case 0xb9: case 0xba: case 0xbb:
     case 0xbc: case 0xbd: case 0xbe: case 0xbf:
-      
+      return new Integer(tag - INT_ZERO);
+
+      /* byte int */
     case 0xc0: case 0xc1: case 0xc2: case 0xc3:
     case 0xc4: case 0xc5: case 0xc6: case 0xc7:
     case 0xc8: case 0xc9: case 0xca: case 0xcb:
     case 0xcc: case 0xcd: case 0xce: case 0xcf:
-      return new Integer(tag - INT_ZERO);
+      return new Integer(((tag - INT_BYTE_ZERO) << 8) + read());
       
+      /* short int */
     case 0xd0: case 0xd1: case 0xd2: case 0xd3:
     case 0xd4: case 0xd5: case 0xd6: case 0xd7:
-    case 0xd8: case 0xd9: case 0xda: case 0xdb:
-    case 0xdc: case 0xdd: case 0xde: case 0xdf:
-      return new Integer(((tag - 0xd8) << 8) + read());
-
-      //case INT_SHORT:
-      //return new Integer((short) (256 * read() + read()));
+      return new Integer(((tag - INT_SHORT_ZERO) << 16) + 256 * read() + read());
       
     case 'I':
       return new Integer(parseInt());
+
+      // direct long
+    case 0xd8: case 0xd9: case 0xda: case 0xdb:
+    case 0xdc: case 0xdd: case 0xde: case 0xdf:
       
     case 0xe0: case 0xe1: case 0xe2: case 0xe3:
     case 0xe4: case 0xe5: case 0xe6: case 0xe7:
     case 0xe8: case 0xe9: case 0xea: case 0xeb:
     case 0xec: case 0xed: case 0xee: case 0xef:
-      return new Long(tag - 0xe0);
+      return new Long(tag - LONG_ZERO);
 
-      //case LONG_BYTE:
-      //return new Long((byte) read());
-
-      // case LONG_SHORT:
-      //return new Long((short) (256 * read() + read()));
+      /* byte long */
+    case 0xf0: case 0xf1: case 0xf2: case 0xf3:
+    case 0xf4: case 0xf5: case 0xf6: case 0xf7:
+    case 0xf8: case 0xf9: case 0xfa: case 0xfb:
+    case 0xfc: case 0xfd: case 0xfe: case 0xff:
+      return new Long(((tag - LONG_BYTE_ZERO) << 8) + read());
+      
+      /* short long */
+    case 0x38: case 0x39: case 0x3a: case 0x3b:
+    case 0x3c: case 0x3d: case 0x3e: case 0x3f:
+      return new Long(((tag - LONG_SHORT_ZERO) << 16) + 256 * read() + read());
       
     case LONG_INT:
       return new Long(parseInt());
@@ -1697,6 +1738,18 @@ public class Hessian2Input
       return _refs.get(ref);
     }
 
+    case REF_BYTE: {
+      int ref = read();
+
+      return _refs.get(ref);
+    }
+
+    case REF_SHORT: {
+      int ref = 256 * read() + read();
+
+      return _refs.get(ref);
+    }
+      
     case 'r': {
       String type = readType();
       String url = readString();

@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -29,16 +30,21 @@
 package com.caucho.config.types;
 
 import java.util.*;
+import java.rmi.*;
 
+import javax.ejb.*;
 import javax.naming.*;
 
-import com.caucho.util.L10N;
+import com.caucho.util.*;
+import com.caucho.naming.*;
+import com.caucho.ejb.*;
+import com.caucho.ejb.protocol.*;
 
 /**
  * Configuration for the ejb-ref
  */
-public class EjbRef {
-  private static L10N L = new L10N(EjbRef.class);
+public class EjbRef implements ObjectProxy {
+  private static final L10N L = new L10N(EjbRef.class);
 
   private String _name;
   private String _type;
@@ -46,6 +52,10 @@ public class EjbRef {
   private Class _remote;
   private String _link;
 
+  public EjbRef()
+  {
+  }
+  
   public void setEjbRefName(String name)
   {
     _name = name;
@@ -93,6 +103,44 @@ public class EjbRef {
   public void setEjbLink(String link)
   {
     _link = link;
+  }
+
+  public void init()
+    throws Exception
+  {
+    
+    if (_link != null && ! _name.equals(_link))
+      Jndi.bindDeepShort(_name, this);
+  }
+  /**
+   * Creates the object from the proxy.
+   *
+   * @return the object named by the proxy.
+   */
+  public Object createObject(Hashtable env)
+    throws NamingException
+  {
+    EJBServer server = EJBServer.getLocal();
+
+    if (server != null) {
+      try {
+	EJBHome home = server.findRemoteEJB(_link);
+
+	if (home != null)
+	  return home;
+      } catch (RemoteException e) {
+	throw new NamingException(e.toString());
+      }
+    }
+
+    EJBHome home = IiopProtocolContainer.findRemoteEJB(_link);
+
+    if (home != null)
+      return home;
+
+    Context ic = new InitialContext(env);
+
+    return ic.lookup(_link);
   }
 
   public String toString()

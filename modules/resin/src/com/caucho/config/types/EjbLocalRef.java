@@ -33,6 +33,7 @@ import java.util.*;
 import javax.naming.*;
 
 import com.caucho.util.L10N;
+import com.caucho.naming.*;
 
 /**
  * Configuration for the ejb-ref
@@ -69,6 +70,15 @@ public class EjbLocalRef {
   public void setEjbLink(String link)
   {
     _link = link;
+  }
+
+  public void init()
+    throws Exception
+  {
+    if (_link != null) {
+      LinkProxy proxy = new LinkProxy(_link);
+      Jndi.bindDeepShort(_name, proxy);
+    }
   }
 
   public String toString()

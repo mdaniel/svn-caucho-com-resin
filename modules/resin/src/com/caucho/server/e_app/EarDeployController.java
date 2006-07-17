@@ -64,6 +64,7 @@ public class EarDeployController
   private ArrayList<EarConfig> _eAppDefaults = new ArrayList<EarConfig>();
 
   private EarAdmin _admin = new EarAdmin(this);
+  private J2EEApplication _j2eeAdmin;
 
   EarDeployController(String name,
                       ApplicationContainer container, EarConfig config)
@@ -129,7 +130,8 @@ public class EarDeployController
   {
     super.initEnd();
 
-    J2EEManagedObject.register(new J2EEApplication(this));
+    _j2eeAdmin = new J2EEApplication(this);
+    J2EEManagedObject.register(_j2eeAdmin);
   }
 
   /**
@@ -171,6 +173,22 @@ public class EarDeployController
     return rootDir;
   }
 
+  @Override
+  public boolean destroy()
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(getParentClassLoader());
+      J2EEManagedObject.unregister(_j2eeAdmin);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
+    
+    return super.destroy();
+  }
+
   /**
    * Returns equality.
    */
@@ -183,6 +201,7 @@ public class EarDeployController
 
     return getId().equals(entry.getId());
   }
+    
 
   /**
    * Returns a printable view.

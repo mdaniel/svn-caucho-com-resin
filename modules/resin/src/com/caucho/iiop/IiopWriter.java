@@ -31,15 +31,10 @@ package com.caucho.iiop;
 import java.io.Serializable;
 import java.io.IOException;
 
-import javax.rmi.CORBA.ValueHandler;
-import javax.rmi.CORBA.Util;
-import javax.rmi.CORBA.ClassDesc;
+import javax.rmi.CORBA.*;
 
-import org.omg.CORBA.Any;
-import org.omg.CORBA.Context;
-import org.omg.CORBA.ContextList;
-import org.omg.CORBA.ORB;
-import org.omg.CORBA.TypeCode;
+import org.omg.CORBA.*;
+import org.omg.CORBA.Object;
 
 import org.omg.SendingContext.RunTime;
 
@@ -56,6 +51,8 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
   protected MessageWriter _out;
   protected int _type;
 
+  protected SystemException _nullSystemException;
+  
   protected IiopReader _reader;
 
   protected String _host;
@@ -274,7 +271,7 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
   public void write_wchar_array(char []value, int offset, int length)
   {
     for (int i = 0; i < length; i++)
-      _out.writeShort((int) value[i + offset]);
+      write_wchar(value[i + offset]);
   }
 
   /**
@@ -300,6 +297,7 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
    */
   public void write_ushort_array(short []value, int offset, int length)
   {
+    _out.align(2);
     for (int i = 0; i < length; i++)
       _out.writeShort((int) value[i + offset]);
   }
@@ -309,6 +307,7 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
    */
   public void write_long_array(int []value, int offset, int length)
   {
+    _out.align(4);
     for (int i = 0; i < length; i++)
       _out.writeInt(value[i + offset]);
   }
@@ -318,6 +317,7 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
    */
   public void write_ulong_array(int []value, int offset, int length)
   {
+    _out.align(4);
     for (int i = 0; i < length; i++)
       _out.writeInt(value[i + offset]);
   }
@@ -347,6 +347,7 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
    */
   public void write_float_array(float []value, int offset, int length)
   {
+    _out.align(4);
     for (int i = 0; i < length; i++) {
       float v = value[i + offset];
       int bits = Float.floatToIntBits(v);
@@ -421,16 +422,89 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
   /**
    * Writes a CORBA typecode to the output stream.
    */
-  public void write_TypeCode(TypeCode obj)
+  public void write_TypeCode(TypeCode tc)
   {
-    System.out.println("TYPE-CODE:");
-    throw new UnsupportedOperationException();
+    System.out.println("WRITE: " + tc);
+    if (tc == null) {
+      write_long(TCKind._tk_null);
+      return;
+    }
+      
+    try {
+      switch (tc.kind().value()) {
+      case TCKind._tk_null:
+      case TCKind._tk_void:
+      case TCKind._tk_short:
+      case TCKind._tk_ushort:
+      case TCKind._tk_long:
+      case TCKind._tk_ulong:
+      case TCKind._tk_longlong:
+      case TCKind._tk_ulonglong:
+      case TCKind._tk_float:
+      case TCKind._tk_double:
+      case TCKind._tk_longdouble:
+      case TCKind._tk_boolean:
+      case TCKind._tk_char:
+      case TCKind._tk_wchar:
+      case TCKind._tk_octet:
+      case TCKind._tk_any:
+      case TCKind._tk_TypeCode:
+	write_long(tc.kind().value());
+	break;
+	  
+      case TCKind._tk_string:
+	write_long(tc.kind().value());
+	write_long(tc.length());
+	break;
+	  
+      case TCKind._tk_sequence:
+	write_long(tc.kind().value());
+	write_TypeCode(tc.content_type());
+	write_long(tc.length());
+	break;
+	  
+      case TCKind._tk_value:
+	// XXX: need to mark for recursive
+	write_long(tc.kind().value());
+	write_string(tc.id());
+	write_string(tc.name());
+	write_short(tc.type_modifier());
+	write_TypeCode(tc.concrete_base_type());
+	write_ulong(tc.member_count());
+	for (int i = 0; i < tc.member_count(); i++) {
+	  write_string(tc.member_name(i));
+	  write_TypeCode(tc.member_type(i));
+	  write_short(tc.member_visibility(i));
+	}
+	break;
+	  
+      case TCKind._tk_value_box:
+	write_long(tc.kind().value());
+	write_string(tc.id());
+	write_string(tc.name());
+	write_TypeCode(tc.content_type());
+	break;
+	  
+      case TCKind._tk_abstract_interface:
+	// XXX: need to mark for recursive
+	write_long(tc.kind().value());
+	write_string(tc.id());
+	write_string(tc.name());
+	break;
+      
+      default:
+	System.out.println("UNKNOWN TC: " + tc + " " + tc.kind() + " " + tc.kind().value());
+	throw new UnsupportedOperationException(String.valueOf(tc));
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
    * Writes a CORBA abstract interface to the output stream.
    */
-  public void write_abstract_interface(Object obj)
+  public void write_abstract_interface(java.lang.Object obj)
   {
     // XXX: check for remote object
     write_boolean(false);
@@ -440,8 +514,8 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
   
   public void write_any(Any any)
   {
-    System.out.println("TYPE-ANY:");
-    throw new UnsupportedOperationException();
+    write_TypeCode(any.type());
+    any.write_value(this);
   }
   
   public void write_Principal(org.omg.CORBA.Principal principal)

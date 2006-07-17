@@ -236,17 +236,17 @@ public class DeployContainer<C extends DeployController>
 
     synchronized (_controllerList) {
       oldController = findDeployedController(name);
+      
+      if (oldController != null)
+	_controllerList.remove(oldController);
     }
+    
+    if (oldController != null)
+      oldController.destroy();
+
+    // destroy must be before generate because of JMX unregistration
       
     C newController = generateController(name);
-    
-    if (oldController != null) {
-      synchronized (_controllerList) {
-	_controllerList.remove(oldController);
-      }
-      
-      oldController.destroy();
-    }
 
     return newController;
   }
@@ -324,7 +324,7 @@ public class DeployContainer<C extends DeployController>
 
       _controllerList.add(newController);
     }
-
+    
     init(newController);
 
     return newController;

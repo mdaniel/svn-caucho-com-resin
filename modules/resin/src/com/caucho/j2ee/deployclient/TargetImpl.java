@@ -33,7 +33,7 @@ import javax.enterprise.deploy.spi.Target;
 /**
  * Target for a deployment.
  */
-public class TargetImpl implements Target {
+public class TargetImpl implements Target, java.io.Serializable {
   private String _name;
   private String _description;
 

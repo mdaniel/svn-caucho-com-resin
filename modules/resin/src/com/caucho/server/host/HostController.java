@@ -101,6 +101,7 @@ public class HostController extends EnvironmentDeployController<Host,HostConfig>
 		 Map<String,Object> varMap)
   {
     super(id, config);
+    Thread.dumpStack();
 
     setHostName(id);
 

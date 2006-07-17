@@ -177,8 +177,21 @@ public class LinkProxy implements ObjectProxy, java.io.Serializable {
     else
       context = new InitialContext(mergeEnv);
     
-    if (_foreignName != null)
-      return context.lookup(_foreignName);
+    if (_foreignName != null) {
+      System.out.println("LOOKUP: " + _foreignName);
+      try {
+	Object value = context.lookup(_foreignName);
+	System.out.println("LOOKUP: " + value + " " + _foreignName);
+      
+	return value;
+      } catch (RuntimeException e) {
+	e.printStackTrace();
+	throw e;
+      } catch (NamingException e) {
+	e.printStackTrace();
+	throw e;
+      }
+    }
     else
       return context;
   }
@@ -202,6 +215,9 @@ public class LinkProxy implements ObjectProxy, java.io.Serializable {
 
   public String toString()
   {
-    return "LinkProxy[name=" + _name + ",factory=" + _factoryClass.getName() + "]";
+    if (_factoryClass != null)
+      return "LinkProxy[name=" + _name + ",factory=" + _factoryClass.getName() + "]";
+    else
+      return "LinkProxy[name=" + _name + ",foreign=" + _foreignName + "]";
   }
 }

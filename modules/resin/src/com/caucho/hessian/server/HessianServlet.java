@@ -342,15 +342,15 @@ public class HessianServlet extends GenericServlet {
       
       in.setSerializerFactory(serializerFactory);
 
-      int code = is.read();
+      int code = in.read();
 
       if (code != 'c') {
 	// XXX: deflate
-	throw new IOException("expected 'c' in hessian input");
+	throw new IOException("expected 'c' in hessian input at " + code);
       }
 
-      int major = is.read();
-      int minor = is.read();
+      int major = in.read();
+      int minor = in.read();
 
       if (major >= 2)
 	out = new Hessian2Output(os);

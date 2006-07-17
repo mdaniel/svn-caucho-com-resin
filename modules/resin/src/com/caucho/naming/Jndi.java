@@ -88,12 +88,13 @@ public class Jndi {
       } catch (NameNotFoundException e) {
       }
       
-      if (value != null) {
+      if (value == null) {
+	context.rebind(name, obj);
+      }
+      else {
         log.warning(L.l("`{0}' is a conflicting JNDI resource for `{1}'",
                         fullName, obj));
       }
-
-      context.rebind(name, obj);
 
       return;
     }

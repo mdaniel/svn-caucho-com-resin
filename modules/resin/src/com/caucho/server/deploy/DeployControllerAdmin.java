@@ -81,6 +81,11 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
     registerSelf();
   }
 
+  protected void unregister()
+  {
+    unregisterSelf();
+  }
+
   public String getName()
   {
     return _controller.getMBeanId();

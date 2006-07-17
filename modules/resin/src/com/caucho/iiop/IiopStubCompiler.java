@@ -153,10 +153,18 @@ public class IiopStubCompiler extends AbstractGenerator {
     
     popDepth();
     println("} catch (org.omg.CORBA.portable.ApplicationException e) {");
-    println("  throw new RuntimeException((String) ((org.omg.CORBA_2_3.portable.InputStream) e.getInputStream()).read_string());");
+    // XXX: handle types
+    println("  org.omg.CORBA_2_3.portable.InputStream in = (org.omg.CORBA_2_3.portable.InputStream) e.getInputStream();");
+    println("  String name = in.read_string();");
+    println("  Throwable ex = (Throwable) in.read_value();");
+    for (Class ex : method.getExceptionTypes()) {
+      println("  if (ex instanceof " + ex.getName() + ")");
+      println("    throw (" + ex.getName() + ") ex;");
+    }
+    println("  throw new java.rmi.RemoteException(ex.getMessage(), ex);");
     println("} catch (Exception e) {");
     println("  e.printStackTrace();");
-    println("  throw new RuntimeException(e);");
+    println("  throw new java.rmi.RemoteException(e.getMessage(), e);");
     println("}");
 
     popDepth();

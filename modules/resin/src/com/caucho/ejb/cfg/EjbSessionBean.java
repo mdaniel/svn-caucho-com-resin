@@ -256,30 +256,39 @@ public class EjbSessionBean extends EjbBean {
     server.setContextImplClass(contextImplClass);
 
     Class beanClass = javaGen.loadClass(getEJBClass().getName());
-    ArrayList<BuilderProgram> initList;
-    initList = InjectIntrospector.introspect(beanClass);
-
-    BuilderProgramContainer initContainer = getInitProgram();
-
-    if (initList != null && initList.size() > 0) {
-      if (initContainer == null)
-	initContainer = new BuilderProgramContainer();
-
-      for (BuilderProgram init : initList) {
-	initContainer.addProgram(init);
-      }
-    }
     
-    server.setInitProgram(initContainer);
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
 
-    if (getServerProgram() != null) {
+    try {
+      thread.setContextClassLoader(server.getClassLoader());
+
+      ArrayList<BuilderProgram> initList;
+      initList = InjectIntrospector.introspect(beanClass);
+
+      BuilderProgramContainer initContainer = getInitProgram();
+
+      if (initList != null && initList.size() > 0) {
+	if (initContainer == null)
+	  initContainer = new BuilderProgramContainer();
+
+	for (BuilderProgram init : initList) {
+	  initContainer.addProgram(init);
+	}
+      }
+    
+      server.setInitProgram(initContainer);
+
       try {
-	getServerProgram().configure(server);
+	if (getServerProgram() != null)
+	  getServerProgram().configure(server);
       } catch (ConfigException e) {
 	throw e;
       } catch (Throwable e) {
 	throw new ConfigException(e);
       }
+    } finally {
+      thread.setContextClassLoader(oldLoader);
     }
 
     return server;

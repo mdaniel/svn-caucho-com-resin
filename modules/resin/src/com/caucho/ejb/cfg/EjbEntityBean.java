@@ -127,8 +127,10 @@ public class EjbEntityBean extends EjbBean {
 
     EjbServerManager ejbManager = ejbConfig.getEJBManager();
 
-    _cacheTimeout = ejbManager.getCacheTimeout();
-    _loadLazyOnTransaction = ejbManager.isEntityLoadLazyOnTransaction();
+    if (ejbManager != null) {
+      _cacheTimeout = ejbManager.getCacheTimeout();
+      _loadLazyOnTransaction = ejbManager.isEntityLoadLazyOnTransaction();
+    }
   }
 
   /**

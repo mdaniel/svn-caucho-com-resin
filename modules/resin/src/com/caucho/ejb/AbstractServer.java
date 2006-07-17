@@ -55,8 +55,7 @@ import com.caucho.util.Log;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.ConfigException;
+import com.caucho.config.*;
 
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentBean;
@@ -90,6 +89,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   protected String _serverId;
 
   protected EjbServerManager _ejbManager;
+  private BuilderProgram _serverProgram;
 
   protected HashMap<String,HandleEncoder> _protocolEncoderMap;
   protected HandleEncoder _handleEncoder;
@@ -129,14 +129,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   {
     _ejbManager = manager;
     
-    ClassLoader parentLoader = Thread.currentThread().getContextClassLoader();
-
-    EnvironmentClassLoader loader;
-
-    loader = new EnvironmentClassLoader(parentLoader);
-    setClassLoader(loader);
-
-    // _jvmClient = new SameJVMClientContainer(this, getEJBName());
+    _loader = new EnvironmentClassLoader(manager.getClassLoader());
   }
 
   /**
@@ -151,8 +144,6 @@ abstract public class AbstractServer implements EnvironmentBean {
       ejbName = ejbName.substring(0, ejbName.length() - 1);
     
     _ejbName = ejbName;
-
-    getClassLoader().setId("EnvironmentLoader[ejb:" + ejbName + "]");
   }
 
   /**
@@ -330,6 +321,22 @@ abstract public class AbstractServer implements EnvironmentBean {
   public EjbServerManager getServerManager()
   {
     return _ejbManager;
+  }
+
+  /**
+   * Sets the server program.
+   */
+  public void setServerProgram(BuilderProgram serverProgram)
+  {
+    _serverProgram = serverProgram;
+  }
+
+  /**
+   * Sets the server program.
+   */
+  public BuilderProgram getServerProgram()
+  {
+    return _serverProgram;
   }
 
   /**
@@ -621,6 +628,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   public void init()
     throws Exception
   {
+    _loader.setId("EnvironmentLoader[ejb:" + getEJBName() + "]");
   }
 
   public void start()

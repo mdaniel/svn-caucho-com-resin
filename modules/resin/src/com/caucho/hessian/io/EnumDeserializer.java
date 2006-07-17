@@ -112,7 +112,6 @@ public class EnumDeserializer extends AbstractDeserializer {
 
     Object obj = create(name);
 
-    System.out.println("REF: " + obj);
     in.addRef(obj);
 
     return obj;

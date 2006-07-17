@@ -560,10 +560,7 @@ public class ApplicationContainer
   public EarDeployGenerator createEarDeploy()
     throws Exception
   {
-    DeployContainer<EarDeployController> container
-      = new DeployContainer<EarDeployController>();
-
-    return new EarDeployGenerator(container, this);
+    return new EarDeployGenerator(_earDeploy, this);
   }
 
   /**
@@ -572,7 +569,7 @@ public class ApplicationContainer
   public void addEarDeploy(EarDeployGenerator earDeploy)
     throws Exception
   {
-    earDeploy.getDeployContainer().add(earDeploy);
+    _earDeploy.add(earDeploy);
 
     // server/26cc - _appDeploy must be added first, because the
     // _earDeploy addition will automaticall register itself

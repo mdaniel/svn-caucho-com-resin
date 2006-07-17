@@ -77,6 +77,8 @@ public class EarDeployGenerator
       throw new RuntimeException(e);
     }
 
+    Thread.dumpStack();
+
     _parentContainer = parentContainer;
 
     _earDefaultList.addAll(parentContainer.getEarDefaultList());

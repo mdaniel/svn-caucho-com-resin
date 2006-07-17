@@ -95,6 +95,7 @@ public class JavaCompiler {
   {
     return create(Thread.currentThread().getContextClassLoader());
   }
+  
   /**
    * Creates a new compiler.
    *
@@ -531,6 +532,14 @@ public class JavaCompiler {
       batchCount = 1;
 
     IOException exn = null;
+
+    ArrayList<String> uniqueFiles = new ArrayList<String>();
+    for (int i = 0; i < files.length; i++) {
+      if (! uniqueFiles.contains(files[i]))
+	uniqueFiles.add(files[i]);
+    }
+    files = new String[uniqueFiles.size()];
+    uniqueFiles.toArray(files);
 
     synchronized (LOCK) {
       for (int i = 0; i < files.length; i += batchCount) {

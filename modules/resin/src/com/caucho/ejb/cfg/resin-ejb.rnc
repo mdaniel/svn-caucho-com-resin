@@ -163,9 +163,9 @@ r_ejb-jar = element ejb-jar {
   & r_boolean-literal?)
 }
 
-r_ejb-ref = element ejb-ref { string }
+##r_ejb-ref = element ejb-ref { string }
 
-r_ejb-local-ref = element ejb-local-ref { string }
+##r_ejb-local-ref = element ejb-local-ref { string }
 
 r_ejb-name =
   attribute ejb-name { string }

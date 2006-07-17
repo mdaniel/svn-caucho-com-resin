@@ -28,6 +28,7 @@
 
 package com.caucho.iiop;
 
+import java.util.*;
 import java.util.logging.Logger;
 
 import java.io.IOException;
@@ -47,17 +48,22 @@ public class TypeCodeImpl extends TypeCode {
   protected static final L10N L = new L10N(TypeCodeImpl.class);
   protected static final Logger log = Log.open(TypeCodeImpl.class);
 
-  public static final int TK_NULL = 0;
+  public static final TypeCode TK_NULL = new TypeCodeImpl(TCKind.tk_null);
+  
   public static final int TK_VOID = 1;
   public static final int TK_SHORT = 2;
-  public static final int TK_LONG = 3;
+  
+  public static final TypeCode TK_LONG = new TypeCodeImpl(TCKind.tk_long);
+  
   public static final int TK_USHORT = 4;
   public static final int TK_ULONG = 5;
   public static final int TK_FLOAT = 6;
   public static final int TK_DOUBLE = 7;
   public static final int TK_BOOLEAN = 8;
   public static final int TK_CHAR = 9;
-  public static final int TK_OCTET = 10;
+  
+  public static final TypeCode TK_OCTET = new TypeCodeImpl(TCKind.tk_octet);
+
   public static final int TK_ANY = 11;
   public static final int TK_TYPE_CODE = 12;
   public static final int TK_PRINCIPAL = 13;
@@ -82,12 +88,54 @@ public class TypeCodeImpl extends TypeCode {
 
   private TCKind _kind;
 
+  private String _id;
+  
+  private short _typeModifier;
+  private TypeCode _concreteBaseType;
+  private ArrayList<Member> _members = new ArrayList<Member>();
+
+  private TypeCode _contentType;
+  private int _length;
+
   TypeCodeImpl(TCKind kind)
   {
     if (kind == null)
       throw new NullPointerException();
     
     _kind = kind;
+  }
+
+  private TypeCodeImpl(TCKind kind, String repId, short modifier)
+  {
+    _kind = kind;
+    _id = repId;
+    _typeModifier = modifier;
+  }
+
+  private TypeCodeImpl(TCKind kind, String repId)
+  {
+    _kind = kind;
+    _id = repId;
+  }
+
+  static TypeCodeImpl createValue(String repId, String name, short modifier)
+  {
+    return new TypeCodeImpl(TCKind.tk_value, repId, modifier);
+  }
+
+  static TypeCodeImpl createValueBox(String repId, String name)
+  {
+    return new TypeCodeImpl(TCKind.tk_value_box, repId);
+  }
+
+  static TypeCodeImpl createAbstractInterface(String repId, String name)
+  {
+    return new TypeCodeImpl(TCKind.tk_abstract_interface, repId);
+  }
+
+  static TypeCodeImpl createSequence()
+  {
+    return new TypeCodeImpl(TCKind.tk_sequence);
   }
 
   /**
@@ -128,7 +176,7 @@ public class TypeCodeImpl extends TypeCode {
   public String id()
     throws BadKind
   {
-    throw new UnsupportedOperationException();
+    return _id;
   }
 
   /**
@@ -137,16 +185,48 @@ public class TypeCodeImpl extends TypeCode {
   public String name()
     throws BadKind
   {
-    throw new UnsupportedOperationException();
+    return "";
+  }
+  
+  /**
+   * Returns the type modifier.
+   */
+  public short type_modifier()
+    throws BadKind
+  {
+    return _typeModifier;
+  }
+  
+  /**
+   * Set the type code of the concrete base
+   */
+  void setConcreteBaseType(TypeCode baseType)
+  {
+    _concreteBaseType = baseType;
+  }
+  
+  /**
+   * Returns the type code of the concrete base
+   */
+  public TypeCode concrete_base_type()
+    throws BadKind
+  {
+    return _concreteBaseType;
   }
 
+  
   /**
    * Returns the number of fields in the type code
    */
   public int member_count()
     throws BadKind
   {
-    throw new UnsupportedOperationException();
+    return _members.size();
+  }
+
+  void addMember(String name, TypeCode type, short visibility)
+  {
+    _members.add(new Member(name, type, visibility));
   }
 
   /**
@@ -155,13 +235,22 @@ public class TypeCodeImpl extends TypeCode {
   public String member_name(int index)
     throws BadKind, Bounds
   {
-    throw new UnsupportedOperationException();
+    return _members.get(index).getName();
   }
 
   /**
    * Returns the typecode for the member type.
    */
   public TypeCode member_type(int index)
+    throws BadKind, Bounds
+  {
+    return _members.get(index).getType();
+  }
+
+  /**
+   * Returns the visibility status of the given member.
+   */
+  public short member_visibility(int index)
     throws BadKind, Bounds
   {
     throw new UnsupportedOperationException();
@@ -173,7 +262,7 @@ public class TypeCodeImpl extends TypeCode {
   public Any member_label(int index)
     throws BadKind, Bounds
   {
-    throw new UnsupportedOperationException();
+    return null;
   }
 
   /**
@@ -194,13 +283,26 @@ public class TypeCodeImpl extends TypeCode {
     throw new UnsupportedOperationException();
   }
 
+  void setLength(int length)
+  {
+    _length = length;
+  }
+  
   /**
    * Returns the number of elements.
    */
   public int length()
     throws BadKind
   {
-    throw new UnsupportedOperationException();
+    return _length;
+  }
+
+  /**
+   * Returns the typecode for the content type.
+   */
+  void setContentType(TypeCode type)
+  {
+    _contentType = type;
   }
 
   /**
@@ -209,7 +311,7 @@ public class TypeCodeImpl extends TypeCode {
   public TypeCode content_type()
     throws BadKind
   {
-    throw new UnsupportedOperationException();
+    return _contentType;
   }
 
   /**
@@ -225,33 +327,6 @@ public class TypeCodeImpl extends TypeCode {
    * Returns the scale of the fixed type.
    */
   public short fixed_scale()
-    throws BadKind
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Returns the visibility status of the given member.
-   */
-  public short member_visibility(int index)
-    throws BadKind, Bounds
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Returns the type modifier.
-   */
-  public short type_modifier()
-    throws BadKind
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Returns the type code of the concrete base
-   */
-  public TypeCode concrete_base_type()
     throws BadKind
   {
     throw new UnsupportedOperationException();
@@ -322,18 +397,70 @@ public class TypeCodeImpl extends TypeCode {
   public Object readValue(IiopReader reader)
     throws IOException
   {
+    System.out.println("READ: " + this);
+    
     switch (_kind.value()) {
-    case TK_STRING:
+    case TCKind._tk_null:
+    case TCKind._tk_void:
+      return null;
+      
+    case TCKind._tk_long:
+      return new Integer(reader.read_long());
+      
+    case TCKind._tk_ulong:
+      return new Integer(reader.read_ulong());
+      
+    case TCKind._tk_string:
       return reader.read_string();
       
-    case TK_WSTRING:
+    case TCKind._tk_wstring:
       return reader.read_wstring();
       
     case TK_ABSTRACT_INTERFACE:
       return reader.read_abstract_interface();
+
+    case TCKind._tk_value:
+      return reader.read_value();
+
+    case TCKind._tk_value_box:
+      return reader.read_value();
       
     default:
-      throw new UnsupportedOperationException(_kind.toString());
+      throw new UnsupportedOperationException(String.valueOf(this));
     }
   }
+
+  public String toString()
+  {
+    return "TypeCodeImpl[" + _kind.value() + "]";
+  }
+  
+  static class Member {
+    private String _name;
+    private TypeCode _type;
+    private short _visibility;
+
+    Member(String name, TypeCode type, short visibility)
+    {
+      _name = name;
+      _type = type;
+      _visibility = visibility;
+    }
+
+    String getName()
+    {
+      return _name;
+    }
+
+    TypeCode getType()
+    {
+      return _type;
+    }
+
+    short getVisibility()
+    {
+      return _visibility;
+    }
+  }
+
 }

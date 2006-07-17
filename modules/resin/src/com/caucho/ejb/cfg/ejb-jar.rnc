@@ -101,7 +101,7 @@ ejb-jar = element ejb-jar {
 }
 
 ##ejb-ref = element ejb-ref { string }
-ejb-local-ref = element ejb-local-ref { string }
+##ejb-local-ref = element ejb-local-ref { string }
 
 ejb-name = element ejb-name {
   string

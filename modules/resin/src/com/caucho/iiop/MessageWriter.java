@@ -28,7 +28,7 @@
 
 package com.caucho.iiop;
 
-import java.io.IOException;
+import java.io.*;
 
 abstract public class MessageWriter {
   /**
@@ -71,6 +71,15 @@ abstract public class MessageWriter {
    * Writes a short
    */
   public void writeShort(int v)
+  {
+    write(v >> 8);
+    write(v);
+  }
+  
+  /**
+   * Writes a char
+   */
+  public void writeChar(char v)
   {
     write(v >> 8);
     write(v);

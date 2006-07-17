@@ -38,7 +38,7 @@ import javax.enterprise.deploy.spi.exceptions.OperationUnsupportedException;
 /**
  * Status of the progress.
  */
-public class ProgressObjectImpl implements ProgressObject {
+public class ProgressObjectImpl implements ProgressObject, java.io.Serializable {
   private TargetModuleID []_targetModuleIDs;
   private DeploymentStatus _status;
 

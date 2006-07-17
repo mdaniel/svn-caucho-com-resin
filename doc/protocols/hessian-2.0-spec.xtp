@@ -215,17 +215,17 @@ long ::= [xf0-xff] b1
 
 <section title="Compact: three octet longs (short)">
 
-<p>Integers between -262144 and 262143 are encoded in three bytes with
-the leading byte in the range <code>x58</code> to <code>x5f</code>.
-The value of the long is <code>65536 * (b0 - x5c) + 256 * b1 + b0</code>.</p>
+<p>Longs between -262144 and 262143 are encoded in three bytes with
+the leading byte in the range <code>x38</code> to <code>x3f</code>.
+The value of the long is <code>65536 * (b0 - x3c) + 256 * b1 + b0</code>.</p>
 
 <def>
-long ::= [x58-x5f] b1 b2
+long ::= [x38-x3f] b1 b2
 </def>
 
-<p>The integer zero is represented by <code>x5c x00 x00</code>,
--65536 is represented by <code>x5b x00 x00</code> and
-65537 is represented by <code>x5d x00 x01</code></p>
+<p>The long zero is represented by <code>x3c x00 x00</code>,
+-65536 is represented by <code>x3b x00 x00</code> and
+65537 is represented by <code>x3d x00 x01</code></p>
 
 </section>
 
@@ -245,13 +245,13 @@ D x40 x28 x80 x00 x00 x00 x00 x00
 </defun>
 
 <defun title='date'>
-<p>Date represented by a 64-bits long of milliseconds since the epoch.</p>
+<p>Date represented by a 64-bits long of milliseconds since the epoch, GMT.</p>
 
 <def>
 date ::= d b64 b56 b48 b40 b32 b24 b16 b8
 </def>
 
-<example title='2:51:31 May 8, 1998'>
+<example title='2:51:31 May 8, 1998 GMT'>
 d x00 x00 x00 xd0 x4b x92 x84 xb8
 </example>
 
@@ -266,6 +266,8 @@ length value.</p>
 <p>The length is the number of characters, which may be different than
 the number of bytes.</p>
 
+<p>String chunks may not split surrogate pairs.</p>
+
 <def>
 string ::= (s b16 b8 utf-8-data)* S b16 b8 utf-8-data
 </def>
@@ -273,6 +275,22 @@ string ::= (s b16 b8 utf-8-data)* S b16 b8 utf-8-data
 <example title='"Hello" string'>
 S x00 x05 hello
 </example>
+
+<section title="Compact: short strings">
+
+<p>Strings with length less than 15 may be encoded with a single
+length byte [x00-x0f].</p>
+
+<def>
+string ::= [x00-x0f] string-data
+</def>
+
+<example title='"Hello" string'>
+x05 hello
+</example>
+
+</section>
+
 </defun>
 
 <defun title='xml'>
@@ -353,6 +371,24 @@ On the other hand, a Perl server would likely ignore the contents of <var/type/>
 entirely and create a generic array.
 </note>
 
+<section title="Compact: repeated list">
+
+<p>Hessian 2.0 allows a compact form of the list for successive lists of
+the same type where the length is known beforehand.
+The type and length are encoded by integers, where the type is a reference to
+an earlier specified type.</p>
+
+<pre>
+list ::= 'v' <var>int (type)</var> <var>int (length)</var> <var>object</var>*
+</pre>
+
+<example title="int[] {0, 1}">
+V t x00 x04 [int u x02 x90 x91 z
+v x01 x02 x90 x91
+</example>
+
+</section>
+
 </defun>
 
 <defun title='map'>
@@ -414,6 +450,53 @@ M I x00 x00 x00 x01
 
 <note>The <var/type/> is chosen by the service.  Often it may be the
 Java classname describing the service.</note>
+
+<section title="Compact: object definition and instantiation">
+
+<p>Hessian 2.0 has a compact object form where the field names
+are only serialized once.  Following objects only need to serialize
+their values</p>
+
+<p>The object definition includes a manadatory type string, the number of
+fields, the field names, and the values for the first object.
+The first integer is the length of the type string.</p>
+
+<def title="Object definition">
+map ::= 'O' <var>int</var> type-string <var>int</var> <var>string</var>* <var>object</var>*
+</def>
+
+<p>The object instantiation creates a new object based on a previous
+definition.</p>
+
+<p>The integer is a reference to the object definition.</p>
+
+<def title="Object instantiation">
+map ::= 'o' <var>int</var> <var>object</var>*
+</def>
+
+<example title='Object serialization'>
+class Car {
+  String color;
+  String model;
+}
+
+out.writeObject(new Car("red", "corvette"));
+out.writeObject(new Car("green", "civic"));
+</example>
+<results>
+O x9b example.Car   -- type of the object length is int(12)
+  x92               -- number of fields encoded as an int(2)
+  x05 color         -- field names
+  x05 model
+  x03 red           -- data for object
+  x08 corvette
+
+o x91               -- second object x91 = int(1)
+  x05 green
+  x05 civic
+</results>
+
+</section>
 
 </defun>
 
@@ -762,13 +845,13 @@ same class name.</p>
 <section title='Formal Definitions'>
 
 <def>
-<var/top/>     ::= <var/call/>
-        ::= <var/reply/>
+<var>top</var>     ::= <var>call</var>
+        ::= <var>reply</var>
 
-<var/call/>    ::= c x01 x00 <var/header/>* <var/method/> <var/object/>* z
+<var>call</var>    ::= 'c' x02 x00 <var>header</var>* <var>method</var> <var>object</var>* 'z'
 
-<var/reply/>   ::= r x01 x00 <var/header/>* <var/object/> z
-        ::= r x01 x00 <var/header/>* <var/fault/> z
+<var>reply</var>   ::= 'r' x02 x00 <var>header</var>* <var>object</var> 'z'
+        ::= 'r' x01 x00 <var>header</var>* <var>fault</var> 'z'
 
 <var/object/>  ::= <var/null/>
         ::= <var/boolean/>
@@ -784,45 +867,53 @@ same class name.</p>
         ::= <var/list/>
         ::= <var/map/>
 
-<var/header/>  ::= H b16 b8 header-string <var/object/>
-<var/method/>  ::= m b16 b8 method-string
+<var>header</var>  ::= H b16 b8 header-string <var>object</var>
+<var>method</var>  ::= m b16 b8 method-string
 
-<var/fault/>   ::= f (<var/object/> <var/object/>)* z
+<var>fault</var>   ::= f (<var/object/> <var/object/>)* z
 
-<var/list/>    ::= V <var/type/>? <var/length/>? <var/object/>* z
-<var/map/>     ::= M <var/type/>? (<var/object/> <var/object/>)* z
-<var/remote/>  ::= r <var/type/>? <var/string/>
+<var>list</var>    ::= 'V' <var/type/>? <var/length/>? <var/object/>* z
+        ::= 'v' <var>int</var> <var>int</var> <var>object</var>*
 
-<var/type/>    ::= t b16 b8 type-string
-<var/length/>  ::= l b32 b24 b16 b8
+<var>map</var>     ::= 'M' <var>type</var>? (<var>object</var> <var>object</var>)* 'z'
+        ::= 'O' <var>int</var> type-string <var>int</var> <var>string</var>* <var>object</var>*
+        ::= 'o' <var>int</var> <var>object</var>*
 
-<var/null/>    ::= 'N'
+<var>remote</var>  ::= 'r' <var/type/>? <var/string/>
 
-<var/boolean/> ::= 'T'
+<var>type</var>    ::= t b16 b8 type-string
+
+<var>length</var>  ::= 'l' b32 b24 b16 b8
+        ::= 'u' <var>int</var>
+
+<var>null</var>    ::= 'N'
+
+<var>boolean</var> ::= 'T'
         ::= 'F'
 
-<var/int/>     ::= 'I' b32 b24 b16 b8
+<var>int</var>     ::= 'I' b32 b24 b16 b8
         ::= [x80-xaf]
         ::= [xc0-xcf] b8
         ::= [xd0-xd7] b16 b8
 
-<var/long/>    ::= 'L' b64 b56 b48 b40 b32 b24 b16 b8
+<var>long</var>    ::= 'L' b64 b56 b48 b40 b32 b24 b16 b8
         ::= [xd8-xef]
         ::= [xf0-xff] b8
-        ::= [x58-x5f] b16 b8
+        ::= [x38-x3f] b16 b8
         ::= 'a' b32 b24 b16 b8
 
-<var/double/>  ::= 'D' b64 b56 b48 b40 b32 b24 b16 b8
+<var>double</var>  ::= 'D' b64 b56 b48 b40 b32 b24 b16 b8
 
-<var/date/>    ::= 'd' b64 b56 b48 b40 b32 b24 b16 b8
+<var>date</var>    ::= 'd' b64 b56 b48 b40 b32 b24 b16 b8
 
-<var/string/>  ::= ('s' b16 b8 string-data)* 'S' b16 b8 string-data
+<var>string</var>  ::= ('s' b16 b8 string-data)* 'S' b16 b8 string-data
+        ::= [x00-x0f] string-data
 
-<var/xml/>     ::= ('x' b16 b8 xml-data)* 'X' b16 b8 xml-data
+<var>xml</var>     ::= ('x' b16 b8 xml-data)* 'X' b16 b8 xml-data
 
-<var/binary/>  ::= ('b' b16 b8 binary-data)* 'B' b16 b8 binary-data
+<var>binary</var>  ::= ('b' b16 b8 binary-data)* 'B' b16 b8 binary-data
 
-<var/ref/>     ::= 'R' b32 b24 b16 b8
+<var>ref</var>     ::= 'R' b32 b24 b16 b8
 </def>
 
 </section>

@@ -147,8 +147,9 @@ public class JndiLink {
 
     if (_name.startsWith("java:comp"))
       Jndi.bindDeep(_name, proxy);
-    else
+    else {
       Jndi.bindDeep("java:comp/env/" + _name, proxy);
+    }
   }
 
   protected void configure(Object obj)

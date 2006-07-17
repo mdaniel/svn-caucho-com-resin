@@ -55,6 +55,8 @@ import com.caucho.vfs.MergePath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
+import java.rmi.*;
+import javax.ejb.*;
 import javax.jms.ConnectionFactory;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -74,18 +76,18 @@ public class EJBServer
   static final L10N L = new L10N(EJBServer.class);
   protected static final Logger log = Log.open(EJBServer.class);
   
-  protected static EnvironmentLocal<EJBServerInterface> _localServer
-    = new EnvironmentLocal<EJBServerInterface>("caucho.ejb-server");
+  private static EnvironmentLocal<EJBServer> _localServer
+    = new EnvironmentLocal<EJBServer>("caucho.ejb-server");
   
   protected static EnvironmentLocal<String> _localURL =
     new EnvironmentLocal<String>("caucho.url");
 
-  private String _jndiName = "java:comp/env/cmp";
+  private String _localJndiName = "java:comp/env/cmp";
+  private String _remoteJndiName = "java:comp/env/ejb";
   
   private String _entityManagerJndiName = "java:comp/EntityManager";
 
   private EjbServerManager _ejbManager;
-  private AbstractModel _rootModel;
   
   private ArrayList<Path> _descriptors;
   private ArrayList<Path> _ejbJars = new ArrayList<Path>();
@@ -128,11 +130,11 @@ public class EJBServer
     throws ConfigException
   {
     _ejbManager = new EjbServerManager();
-    _rootModel = _ejbManager.getProtocolManager().getNamingRoot();
+    AbstractModel localNamingModel = _ejbManager.getProtocolManager().getLocalNamingModel();
 
     // XXX: somewhat incorrect for multiple servers
     try {
-      _rootModel.bind("resin-ejb-server", _ejbManager);
+      localNamingModel.bind("resin-ejb-server", _ejbManager);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -186,15 +188,39 @@ public class EJBServer
    */
   public void setJndiName(String name)
   {
-    _jndiName = name;
+    setLocalJndiName(name);
   }
 
   /**
    * Gets the JNDI name.
    */
-  public String getJndiName()
+  public void setLocalJndiName(String name)
   {
-    return _jndiName;
+    _localJndiName = name;
+  }
+
+  /**
+   * Gets the JNDI name.
+   */
+  public String getLocalJndiName()
+  {
+    return _localJndiName;
+  }
+
+  /**
+   * Gets the remote JNDI name.
+   */
+  public void setRemoteJndiName(String name)
+  {
+    _remoteJndiName = name;
+  }
+
+  /**
+   * Gets the JNDI name.
+   */
+  public String getRemoteJndiName()
+  {
+    return _remoteJndiName;
   }
 
   /**
@@ -529,21 +555,28 @@ public class EJBServer
     _startupMode = startupMode;
   }
 
+  public static EJBServer getLocal()
+  {
+    return _localServer.get();
+  }
+
   /**
    * Initialize the container.
    */
   public void init()
     throws Exception
   {
+    /*
     try {
-      if (_jndiName != null)
-	Jndi.rebindDeepShort(_jndiName, this);
+      if (_localJndiName != null)
+	Jndi.rebindDeepShort(_localJndiName, this);
     } catch (NamingException e) {
       log.log(Level.FINER, e.toString(), e);
     }
+    */
 
     if (_localServer.getLevel() == null ||
-	_jndiName.equals("java:comp/env/cmp")) {
+	"java:comp/env/cmp".equals(_localJndiName)) {
       _localServer.set(this);
     }
 
@@ -572,7 +605,7 @@ public class EJBServer
     throws Exception
   {
     try {
-      log.fine("Initializing ejb-server : " + _jndiName);
+      log.fine("Initializing ejb-server : " + _localJndiName);
 
       ProtocolContainer protocol = new ProtocolContainer();
       if (_urlPrefix != null)
@@ -581,6 +614,7 @@ public class EJBServer
       protocol.setServerManager(_ejbManager); // .getEnvServerManager());
     
       _ejbManager.getProtocolManager().setProtocolContainer(protocol);
+      _ejbManager.getProtocolManager().setRemoteJndiName(_remoteJndiName);
 
       _ejbManager.setDataSource(_dataSource);
       _ejbManager.setCreateDatabaseSchema(_createDatabaseSchema);
@@ -638,7 +672,7 @@ public class EJBServer
       if (! name.startsWith("java:"))
         name = "java:comp/env/" + name;
 
-      Jndi.bindDeep(name, this);
+	Jndi.bindDeep(name, this);
       */
 
       Environment.addEnvironmentListener(this);
@@ -647,6 +681,17 @@ public class EJBServer
 
       throw e;
     }
+  }
+
+  public EJBHome findRemoteEJB(String name)
+    throws RemoteException
+  {
+    AbstractServer server = _ejbManager.getServerByEJBName(name);
+
+    if (server != null)
+      return server.getEJBHome();
+    else
+      return null;
   }
   
   /**
@@ -694,7 +739,7 @@ public class EJBServer
 
   public Object createObject(Hashtable env)
   {
-    return new ContextImpl(_rootModel, env);
+    throw new IllegalStateException();
   }
   
   /**

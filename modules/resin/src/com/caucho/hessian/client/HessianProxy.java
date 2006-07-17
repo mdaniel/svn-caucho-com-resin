@@ -200,7 +200,6 @@ public class HessianProxy implements InvocationHandler {
     URLConnection conn = null;
     
     conn = _factory.openConnection(_url);
-    conn.setRequestProperty("Content-Type", "text/xml");
 
     // Used chunked mode when available, i.e. JDK 1.5.
     if (_factory.isChunkedPost() && conn instanceof HttpURLConnection) {
@@ -224,8 +223,7 @@ public class HessianProxy implements InvocationHandler {
       AbstractHessianOutput out = _factory.getHessianOutput(os);
 
       out.call(methodName, args);
-    
-      os.flush();
+      out.flush();
 
       return conn;
     } catch (IOException e) {

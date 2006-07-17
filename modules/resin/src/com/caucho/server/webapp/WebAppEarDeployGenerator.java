@@ -61,6 +61,8 @@ public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> 
     throws Exception
   {
     super(deployContainer);
+
+    Thread.dumpStack();
     
     setContainer(container);
 

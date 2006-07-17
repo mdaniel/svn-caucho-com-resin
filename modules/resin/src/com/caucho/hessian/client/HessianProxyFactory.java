@@ -60,15 +60,7 @@ import java.lang.reflect.*;
 import javax.naming.*;
 import javax.naming.spi.*;
 
-import com.caucho.hessian.io.HessianRemoteResolver;
-import com.caucho.hessian.io.HessianInput;
-import com.caucho.hessian.io.HessianOutput;
-import com.caucho.hessian.io.Hessian2Input;
-import com.caucho.hessian.io.Hessian2Output;
-import com.caucho.hessian.io.AbstractHessianInput;
-import com.caucho.hessian.io.AbstractHessianOutput;
-import com.caucho.hessian.io.HessianRemoteObject;
-import com.caucho.hessian.io.SerializerFactory;
+import com.caucho.hessian.io.*;
 
 import com.caucho.services.client.ServiceProxyFactory;
 
@@ -125,7 +117,8 @@ public class HessianProxyFactory implements ServiceProxyFactory, ObjectFactory {
   private boolean _isHessian2Reply = false;
   private boolean _isHessian2Request = false;
 
-  private boolean _isChunkedPost = true;
+  private boolean _isChunkedPost = false;
+  private boolean _isDebug = false;
 
   private long _readTimeout = -1;
 
@@ -153,6 +146,22 @@ public class HessianProxyFactory implements ServiceProxyFactory, ObjectFactory {
   {
     _password = password;
     _basicAuth = null;
+  }
+
+  /**
+   * Sets the debug
+   */
+  public void setDebug(boolean isDebug)
+  {
+    _isDebug = isDebug;
+  }
+
+  /**
+   * Gets the debug
+   */
+  public boolean isDebug()
+  {
+    return _isDebug;
   }
 
   /**
@@ -270,6 +279,8 @@ public class HessianProxyFactory implements ServiceProxyFactory, ObjectFactory {
       }
     }
 
+    conn.setRequestProperty("Content-Type", "x-application/hessian");
+
     if (_basicAuth != null)
       conn.setRequestProperty("Authorization", _basicAuth);
     else if (_user != null && _password != null) {
@@ -327,6 +338,7 @@ public class HessianProxyFactory implements ServiceProxyFactory, ObjectFactory {
   {
     URL url = new URL(urlName);
 
+    /*
     try {
       // clear old keepalive connections
       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -340,6 +352,7 @@ public class HessianProxyFactory implements ServiceProxyFactory, ObjectFactory {
       conn.disconnect();
     } catch (IOException e) {
     }
+    */
     
     HessianProxy handler = new HessianProxy(this, url);
 
@@ -352,6 +365,9 @@ public class HessianProxyFactory implements ServiceProxyFactory, ObjectFactory {
   public AbstractHessianInput getHessianInput(InputStream is)
   {
     AbstractHessianInput in;
+
+    if (_isDebug)
+      is = new HessianDebugInputStream(is, new PrintWriter(System.out));
 
     if (_isHessian2Reply)
       in = new Hessian2Input(is);

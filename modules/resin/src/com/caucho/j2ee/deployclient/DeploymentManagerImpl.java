@@ -77,14 +77,19 @@ public class DeploymentManagerImpl implements DeploymentManager {
     throws DeploymentManagerCreationException
   {
     try {
+      System.out.println("CONNECT:");
+      
       HessianProxyFactory factory = new HessianProxyFactory();
 
       factory.setUser(user);
       factory.setPassword(password);
+      factory.setDebug(true);
 
       _proxy =
 	(DeploymentManagerAPI) factory.create(DeploymentManagerAPI.class, _uri);
     } catch (Exception e) {
+      e.printStackTrace();
+      
       DeploymentManagerCreationException exn;
       
       exn = new DeploymentManagerCreationException(e.getMessage());
@@ -99,6 +104,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
   public Target []getTargets()
     throws IllegalStateException
   {
+    System.out.println("GET-TARGETS");
     if (_proxy == null)
       throw new IllegalStateException("DeploymentManager is disconnected");
 
@@ -109,11 +115,16 @@ public class DeploymentManagerImpl implements DeploymentManager {
 
       Target []targets = _proxy.getTargets();
 
+      System.out.println("TARGETS:" + targets);
       if (targets == null)
 	return new Target[0];
+      System.out.println("TARGETS:" + targets.length);
       
       return targets;
     } catch (Throwable e) {
+      System.out.println("EXCEPTION-TARGETS:");
+      e.printStackTrace();
+      
       return new Target[0];
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -219,6 +230,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
 				   InputStream deploymentPlan)
     throws IllegalStateException
   {
+    System.out.println("DISTRIBUTE:");
     if (_proxy == null)
       throw new IllegalStateException("DeploymentManager is disconnected");
 
@@ -264,6 +276,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
   public ProgressObject undeploy(TargetModuleID []moduleIDList)
     throws IllegalStateException
   {
+    System.out.println("UNDEPLOY:");
     if (_proxy == null)
       throw new IllegalStateException("DeploymentManager is disconnected");
 

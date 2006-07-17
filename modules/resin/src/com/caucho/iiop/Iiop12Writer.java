@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -110,10 +111,11 @@ public class Iiop12Writer extends Iiop10Writer {
   /**
    * Writes a 16-bit char.
    */
-  public void write_wchar(char b)
+  public void write_wchar(char v)
   {
     _out.write(2);
-    _out.writeShort(b);
+    _out.write(v >> 8);
+    _out.write(v);
   }
 
   /**

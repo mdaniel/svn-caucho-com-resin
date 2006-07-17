@@ -77,7 +77,7 @@ public interface Hessian2Constants
 
   public static final int LONG_SHORT_MIN = -0x40000;
   public static final int LONG_SHORT_MAX = 0x3ffff;
-  public static final int LONG_SHORT_ZERO = 0x5c;
+  public static final int LONG_SHORT_ZERO = 0x3c;
   
   public static final int STRING_DIRECT_MAX = 0x0f;
   public static final int STRING_DIRECT = 0x00;
@@ -101,8 +101,8 @@ public interface Hessian2Constants
   public static final int LENGTH_BYTE = 'u';
   public static final int LIST_FIXED = 'v';
   
-  public static final int REF_BYTE = 'w';
-  public static final int REF_SHORT = 'x';
+  public static final int REF_BYTE = 'e';
+  public static final int REF_SHORT = 'f';
 
   public static final int TYPE_REF = 'T';
 }

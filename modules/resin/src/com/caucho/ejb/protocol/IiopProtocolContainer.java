@@ -48,6 +48,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.ejb.*;
 
 import com.caucho.iiop.IiopContext;
+import com.caucho.iiop.IiopRemoteService;
 
 /**
  * Server containing all the EJBs for a given configuration.
@@ -73,6 +74,27 @@ public class IiopProtocolContainer extends ProtocolContainer {
 
     if (context != null)
       return new IiopProtocolContainer(context);
+    else
+      return null;
+  }
+  
+  /**
+   * Creates the IIOP protocol server if IIOP is available.
+   */
+  public static EJBHome findRemoteEJB(String ejbName)
+  {
+    IiopContext context = IiopContext.getLocalContext();
+
+    if (context == null)
+      return null;
+
+    if (! ejbName.startsWith("/"))
+      ejbName = "/" + ejbName;
+    
+    IiopRemoteService service = context.getService(ejbName);
+
+    if (service != null)
+      return (EJBHome) service.getHome();
     else
       return null;
   }

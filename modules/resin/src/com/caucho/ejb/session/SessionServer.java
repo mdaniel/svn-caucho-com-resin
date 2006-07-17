@@ -81,6 +81,8 @@ public class SessionServer extends AbstractServer {
   public void init()
     throws Exception
   {
+    super.init();
+    
     try {
       _localHome = getSessionContext().createLocalHome();
       _remoteHomeView = getSessionContext().createRemoteHomeView();

@@ -67,6 +67,8 @@ import com.caucho.jmx.Jmx;
 
 import com.caucho.xml.XmlPrinter;
 
+import com.caucho.server.webapp.Application;
+
 import com.caucho.management.server.HostMXBean;
 
 import com.caucho.hessian.io.HessianInput;
@@ -122,9 +124,9 @@ public class DeployServlet extends GenericServlet {
 
       _deployPath.mkdirs();
 
-      ObjectName hostName = new ObjectName("resin:type=CurrentHost");
+      Application app = (Application) getServletContext();
 
-      _hostMXBean = (HostMXBean) Jmx.find(hostName);
+      _hostMXBean = app.getHostAdmin();
     } catch (ServletException e) {
       throw e;
     } catch (Exception e) {
@@ -185,9 +187,9 @@ public class DeployServlet extends GenericServlet {
 	  in.completeCall();
 	  out.startReply();
 
-	  System.out.println("STATUS: " + po.getDeploymentStatus().isFailed());
-	  
+	  System.out.println("DIST: " + po);
 	  out.writeObject(po);
+	  System.out.println("DONE ");
 	  out.completeReply();
 	  break;
 	}
@@ -213,6 +215,8 @@ public class DeployServlet extends GenericServlet {
 	break;
       }
     } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      
       out.startReply();
       out.writeFault(e.toString(), e.toString(), e);
       out.completeReply();

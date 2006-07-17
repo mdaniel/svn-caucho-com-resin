@@ -313,16 +313,9 @@ abstract public class
 
     try {
       thread.setContextClassLoader(getParentClassLoader());
-
-      try {
-        ObjectName objectName = _objectName;
-        _objectName = null;
-
-        if (objectName != null)
-          Jmx.unregister(objectName);
-      } catch (Exception e) {
-        log.log(Level.FINER, e.toString(), e);
-      }
+      
+      if (getDeployAdmin() != null)
+	getDeployAdmin().unregister();
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

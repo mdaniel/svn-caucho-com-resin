@@ -109,6 +109,9 @@ public class EjbSessionHomeView extends EjbHomeView {
       return null;
     else if (methodName.startsWith("ejbPassivate"))
       return null;
+    // XXX: check
+    else if (methodName.startsWith("ejbDestroy"))
+      return null;
     else
       throw error(L.l("{0}: '{1}' must not start with 'ejb'. The EJB spec reserves all methods starting with ejb.",
                       method.getDeclaringClass().getName(),
