@@ -29,40 +29,29 @@
 
 package com.caucho.server.host;
 
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-
-import javax.management.JMException;
-
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.PathBuilder;
-
-import com.caucho.util.L10N;
-
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Depend;
-
-import com.caucho.log.Log;
-
-import com.caucho.make.Dependency;
-
-import com.caucho.jmx.IntrospectionMBean;
-
 import com.caucho.el.EL;
-
-import com.caucho.server.webapp.WebAppConfig;
-
-import com.caucho.server.e_app.EarConfig;
-
-import com.caucho.server.deploy.*;
-
+import com.caucho.log.Log;
+import com.caucho.make.Dependency;
 import com.caucho.management.server.HostMXBean;
+import com.caucho.server.deploy.DeployController;
+import com.caucho.server.deploy.DeployControllerAdmin;
+import com.caucho.server.deploy.EnvironmentDeployController;
+import com.caucho.server.e_app.EarConfig;
+import com.caucho.server.webapp.WebAppConfig;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A configuration entry for a host

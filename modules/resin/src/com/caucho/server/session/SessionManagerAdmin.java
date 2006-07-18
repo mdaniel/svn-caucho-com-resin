@@ -30,15 +30,13 @@
 
 package com.caucho.server.session;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.management.ObjectName;
-
+import com.caucho.management.server.AbstractManagedObject;
+import com.caucho.management.server.PersistentStoreMXBean;
+import com.caucho.management.server.SessionManagerMXBean;
+import com.caucho.management.server.WebAppMXBean;
 import com.caucho.server.cluster.Store;
-import com.caucho.management.server.*;
 
-import com.caucho.jmx.Jmx;
+import java.util.logging.Logger;
 
 /**
  * Implementation of the SessionManager's administration mbean.

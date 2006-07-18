@@ -29,9 +29,8 @@
 
 package com.caucho.management.server;
 
-import javax.management.*;
-
-import com.caucho.jmx.*;
+import com.caucho.jmx.Description;
+import com.caucho.jmx.Units;
 
 /**
  * Represents a protocol connection.
@@ -47,31 +46,31 @@ public interface PortMXBean extends ManagedObjectMXBean {
   /**
    * Returns the port's protocol name.
    */
-  @Description("The protocol for the port")
+  @Description("The configured protocol for the port")
   public String getProtocolName();
 
   /**
    * Returns the ip address or used to bind the port.
    */
-  @Description("The ip address or host name used to bind the port")
+  @Description("The configured ip address or host name used to bind the port")
   public String getAddress();
 
   /**
    * Returns the port number used to bind the port.
    */
-  @Description("The port number used to bind the port")
+  @Description("The configured port number used to bind the port")
   public int getPort();
 
   /**
    * Returns the maximum number of active connections allowed for the port.
    */
-  @Description("The maximum number of current connections")
+  @Description("The configured maximum number of current connections")
   public int getConnectionMax();
 
   /**
    * Returns the maximum number of keepalive connections allowed for the port.
    */
-  @Description("The maximum number of keepalive connections")
+  @Description("The configured maximum number of keepalive connections")
   public int getKeepaliveMax();
 
   @Description("True if the port is using SSL encryption")
@@ -84,14 +83,14 @@ public interface PortMXBean extends ManagedObjectMXBean {
    * {@link java.net.Socket#setSoTimeout(int)}, although the actual
    * socket connection may be handled in different ways.
    */
-  @Description("Configured timeout for socket reads when waiting for data from a client")
+  @Description("The configured timeout for socket reads when waiting for data from a client")
   @Units("milliseconds")    
   public long getReadTimeout();
 
   /**
    * Returns the timeout for socket writes when writing data to a client.
    */
-  @Description("Configured timeout for socket writes when sending data to a client")
+  @Description("The configured timeout for socket writes when sending data to a client")
   @Units("milliseconds")    
   public long getWriteTimeout();
 
@@ -102,7 +101,7 @@ public interface PortMXBean extends ManagedObjectMXBean {
   /*
    * Returns the lifecycle state.
    */
-  @Description("The lifecycle state")
+  @Description("The current lifecycle state")
   public String getState();
 
   //
@@ -167,8 +166,8 @@ public interface PortMXBean extends ManagedObjectMXBean {
    * The total number of connections that have terminated with
    * {@link com.caucho.vfs.ClientDisconnectException}.
    */
-  @Description("The total number of connections that have " +
-               " terminated with a client disconnect")
+  @Description("The total number of connections that have"
+               + " terminated with a client disconnect")
   public long getClientDisconnectCountTotal();
 
   /**

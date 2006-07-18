@@ -63,11 +63,13 @@ public interface WebAppMXBean extends DeployControllerMXBean {
   /**
    * Returns the root directory.
    */
+  @Description("The configured filesystem directory for the web-app")
   public String getRootDirectory();
 
   /**
    * Returns the application's context path.
    */
+  @Description("The configured context path that identifies the web-app in a url")
   public String getContextPath();
 
   //
@@ -77,21 +79,21 @@ public interface WebAppMXBean extends DeployControllerMXBean {
   /**
    * Returns the current number of requests being serviced by the web-app.
    */
-  @Description("Current number of requests served by the web-app")
+  @Description("The current number of requests served by the web-app")
   public int getRequestCount();
 
   /**
    * Returns the total number of requests serviced by the web-app
    * since it started.
    */
-  @Description("Total number of requests served by the web-app since starting")
+  @Description("The total number of requests served by the web-app since starting")
   public long getRequestCountTotal();
 
   /**
    * Returns the total duration in milliseconds that connections serviced by
    * this web-app have taken.
    */
-  @Description("Total time taken by requests served by the web-app")
+  @Description("The total real (wall-clock) time in milliseconds taken by requests served by the web-app")
   @Units("milliseconds")
   public long getRequestTimeTotal();
 
@@ -99,7 +101,7 @@ public interface WebAppMXBean extends DeployControllerMXBean {
    * Returns the total number of bytes that requests serviced by
    * this web-app have read.
    */
-  @Description("Total bytes requests served by the web-app have read")
+  @Description("The total number of bytes received in client requests")
   @Units("bytes")
   public long getRequestReadBytesTotal();
 
@@ -107,7 +109,7 @@ public interface WebAppMXBean extends DeployControllerMXBean {
    * Returns the total number of bytes that connections serviced by this
    * web-app have written.
    */
-  @Description("Total bytes requests served by the web-app have written")
+  @Description("The total number of bytes sent to clients")
   @Units("bytes")
   public long getRequestWriteBytesTotal();
 
@@ -115,5 +117,6 @@ public interface WebAppMXBean extends DeployControllerMXBean {
    * Returns the number of connections that have ended with a
    * {@link com.caucho.vfs.ClientDisconnectException} for this web-app in it's lifetime.
    */
+  @Description("The total number of times a client has disconnected before a request completed")
   public long getClientDisconnectCountTotal();
 }

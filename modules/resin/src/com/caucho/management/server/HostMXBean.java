@@ -38,19 +38,19 @@ import com.caucho.jmx.*;
  * resin:type=Host,name=foo.com
  * </pre>
  */
-@Description("The virtual host")
+@Description("")
 public interface HostMXBean extends DeployControllerMXBean
 {
   /**
    * Returns the host name.
    */
-  @Description("The canonical host name")
+  @Description("The configured canonical host name")
   public String getHostName();
 
   /**
    * Returns the URL
    */
-  @Description("The canonical URL")
+  @Description("The configured canonical URL")
   public String getURL();
 
   //
@@ -70,6 +70,7 @@ public interface HostMXBean extends DeployControllerMXBean
   /**
    * Returns the root directory.
    */
+  @Description("The configured root directory for the virtual host")
   public String getRootDirectory();
 
   /**

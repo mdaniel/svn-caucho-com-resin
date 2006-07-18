@@ -29,11 +29,10 @@
 
 package com.caucho.management.server;
 
+import com.caucho.jmx.Description;
+import com.caucho.jmx.Units;
+
 import java.util.Date;
-
-import javax.management.ObjectName;
-
-import com.caucho.jmx.*;
 
 /**
  * Management interface for the deploy controller.
@@ -47,19 +46,19 @@ public interface DeployControllerMXBean extends ManagedObjectMXBean
   /**
    * Returns the startup mode, one of "default", "automatic", "lazy", or "manual".
    */
-  @Description("The startup-mode, one of `default', `automatic', `lazy', or `manual'")
+  @Description("The configured startup-mode, one of `default', `automatic', `lazy', or `manual'")
   public String getStartupMode();
 
   /**
    * Returns the redeploy mode, one of "default", "automatic", "lazy", or "manual".
    */
-  @Description("The redeploy-mode, one of `default', `automatic', `lazy', or `manual'")
+  @Description("The configured redeploy-mode, one of `default', `automatic', `lazy', or `manual'")
   public String getRedeployMode();
 
   /**
    * Returns the interval between redploy checks.
    */
-  @Description("The millisecond interval between checks for the need to redeploy")
+  @Description("The configured millisecond interval between checks for the need to redeploy")
   @Units("milliseconds")
   public long getRedeployCheckInterval();
 
@@ -70,13 +69,13 @@ public interface DeployControllerMXBean extends ManagedObjectMXBean
   /**
    * Returns the controller's state.
    */
-  @Description("The lifecycle state")
+  @Description("The current lifecycle state")
   public String getState();
 
   /**
    * Returns the time the controller was last started.
    */
-  @Description("The time of the last start")
+  @Description("The current time of the last start")
   public Date getStartTime();
 
   //

@@ -503,8 +503,8 @@ public class Cluster implements EnvironmentListener {
     try {
       String name = _id;
 
-      if (name == null || name.equals(""))
-        name = "default";
+      if (name == null)
+        name = "";
 
       ObjectName objectName = Jmx.getObjectName("type=Cluster,name=" + name);
 

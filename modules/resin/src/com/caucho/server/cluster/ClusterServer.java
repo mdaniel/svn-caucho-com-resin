@@ -278,8 +278,9 @@ public class ClusterServer {
 
     try {
       String name = getId();
-      if (name == null || name.equals(""))
-        name = "default";
+
+      if (name == null)
+        name = "";
 
       _objectName = new ObjectName("resin:type=ClusterServer,name=" + name);
 

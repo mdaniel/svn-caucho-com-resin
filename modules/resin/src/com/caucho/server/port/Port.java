@@ -29,36 +29,31 @@
 
 package com.caucho.server.port;
 
-import java.net.*;
-
-import java.util.logging.*;
-
-import javax.management.ObjectName;
-
-import com.caucho.util.L10N;
-import com.caucho.util.FreeList;
-import com.caucho.util.ThreadPool;
-
-import com.caucho.log.Log;
-
-import com.caucho.vfs.*;
-import com.caucho.vfs.SSLFactory;
-import com.caucho.vfs.JsseSSLFactory;
-
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.Period;
+import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
-import com.caucho.loader.EnvironmentBean;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.config.types.Period;
-
+import com.caucho.log.Log;
 import com.caucho.management.server.PortMXBean;
+import com.caucho.util.FreeList;
+import com.caucho.util.L10N;
+import com.caucho.util.ThreadPool;
+import com.caucho.vfs.JsseSSLFactory;
+import com.caucho.vfs.QJniServerSocket;
+import com.caucho.vfs.QServerSocket;
+import com.caucho.vfs.QSocket;
+import com.caucho.vfs.SSLFactory;
 
-import com.caucho.lifecycle.Lifecycle;
-
-import com.caucho.jmx.Jmx;
+import java.net.ConnectException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents a protocol connection.
@@ -116,8 +111,6 @@ public class Port
 
   private boolean _tcpNoDelay = true;
 
-  // The JMX name
-  private ObjectName _objectName;
   private final PortAdmin _admin = new PortAdmin(this);
 
   // the server socket
@@ -203,14 +196,6 @@ public class Port
   public String getServerId()
   {
     return _serverId;
-  }
-
-  /**
-   * Returns the JMX object name.
-   */
-  public ObjectName getObjectName()
-  {
-    return _objectName;
   }
 
   public PortMXBean getAdmin()
@@ -661,19 +646,6 @@ public class Port
       throw new IllegalStateException(L.l("`{0}' must have a configured protocol before starting.", this));
 
 
-    try {
-      String address = _address;
-
-      if (address == null)
-	address = "INADDR_ANY";
-
-      _objectName = new ObjectName("resin:type=Port,port=" + _port + ",address=" + address);
-
-      Jmx.register(_admin, _objectName);
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
-
     if (_serverSocket != null) {
       if (_port == 0) {
       }
@@ -1070,16 +1042,6 @@ public class Port
         selectManager.close();
       } catch (Throwable e) {
       }
-    }
-
-    try {
-      if (_objectName != null) {
-        ObjectName objectName = _objectName;
-        _objectName = null;
-
-        Jmx.unregister(objectName);
-      }
-    } catch (Throwable e) {
     }
 
     /*

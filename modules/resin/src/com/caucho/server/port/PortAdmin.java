@@ -29,9 +29,8 @@
 
 package com.caucho.server.port;
 
-import javax.management.ObjectName;
-
-import com.caucho.management.server.*;
+import com.caucho.management.server.AbstractManagedObject;
+import com.caucho.management.server.PortMXBean;
 
 public class PortAdmin extends AbstractManagedObject
   implements PortMXBean
@@ -48,7 +47,7 @@ public class PortAdmin extends AbstractManagedObject
     String addr = _port.getAddress();
 
     if (addr == null)
-      addr = "any";
+      addr = "INADDR_ANY";
     
     return addr + '-' + _port.getPort();
   }
