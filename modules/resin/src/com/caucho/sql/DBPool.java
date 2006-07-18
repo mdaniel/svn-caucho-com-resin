@@ -174,7 +174,7 @@ public class DBPool implements DataSource {
     else if (getJndiName() != null)
       return getJndiName();
     else {
-      _tmpName = "dbpool-" + _g_id;
+      _tmpName = "dbpool-" + _g_id++;
       return _tmpName;
     }
       

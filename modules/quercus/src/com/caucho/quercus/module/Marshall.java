@@ -38,6 +38,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
 import javax.management.ObjectName;
+import java.util.*;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -149,6 +150,13 @@ abstract public class Marshall {
     }
     else if (void.class.equals(argType)) {
       marshall = MARSHALL_VOID;
+    }
+    else if (Map.class.isAssignableFrom(argType)) {
+      String typeName = argType.getName();
+
+      JavaClassDef javaDef = moduleContext.getJavaClassDefinition(typeName);
+
+      marshall = new JavaMapMarshall(javaDef, isNotNull, isNullAsFalse);
     }
     else {
       String typeName = argType.getName();

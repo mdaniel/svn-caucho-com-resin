@@ -111,7 +111,13 @@ public class MailModule extends AbstractQuercusModule {
       if (addrList.size() == 0)
 	throw new QuercusModuleException(L.l("mail has no recipients"));
 
-      smtp.connect();
+      String username = env.getIniString("smtp_username");
+      String password = env.getIniString("smtp_password");
+
+      if (password != null && ! "".equals(password))
+	smtp.connect(username, password);
+      else
+	smtp.connect();
 
       Address[] addr = new Address[addrList.size()];
       addrList.toArray(addr);

@@ -31,7 +31,7 @@ package com.caucho.quercus.env;
 
 import java.io.*;
 
-import java.util.IdentityHashMap;
+import java.util.*;
 
 import java.util.logging.Logger;
 
@@ -55,7 +55,7 @@ public class JavaValue extends ResourceValue {
 
   private final Object _object;
 
-  private final Env _env;
+  protected final Env _env;
 
   public JavaValue(Env env, Object object, JavaClassDef def)
   {
@@ -373,6 +373,22 @@ public class JavaValue extends ResourceValue {
   {
     if (type.isAssignableFrom(_object.getClass())) {
       return _object;
+    } else {
+      env.warning(L.l("Can't assign {0} to {1}",
+		      _object.getClass().getName(), type.getName()));
+    
+      return null;
+    }
+  }
+
+  /**
+   * Converts to a java object.
+   */
+  @Override
+  public Map toJavaMap(Env env, Class type)
+  {
+    if (type.isAssignableFrom(_object.getClass())) {
+      return (Map) _object;
     } else {
       env.warning(L.l("Can't assign {0} to {1}",
 		      _object.getClass().getName(), type.getName()));

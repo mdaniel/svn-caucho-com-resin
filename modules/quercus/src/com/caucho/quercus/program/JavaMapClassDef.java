@@ -27,60 +27,38 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.gen;
-
-import java.util.logging.Logger;
-
-import com.caucho.java.gen.JavaClassGenerator;
-import com.caucho.java.gen.GenClass;
+package com.caucho.quercus.program;
 
 import com.caucho.quercus.Quercus;
-  
+import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.QuercusRuntimeException;
+import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.expr.LiteralExpr;
+import com.caucho.quercus.env.*;
+import com.caucho.quercus.module.*;
+import com.caucho.util.L10N;
+import com.caucho.vfs.WriteStream;
+
+import java.io.IOException;
+import java.lang.reflect.*;
+import java.util.*;
+import java.util.logging.*;
+
 /**
- * Generator.
+ * Represents an introspected Java class.
  */
-public class PhpGenerator {
-  private static final Logger log
-    = Logger.getLogger(PhpGenerator.class.getName());
-
-  private final Quercus _quercus;
-
-  public PhpGenerator(Quercus quercus)
+public class JavaMapClassDef extends JavaClassDef {
+  JavaMapClassDef(ModuleContext moduleContext, String name, Class type)
   {
-    _quercus = quercus;
+    super(moduleContext, name, type);
   }
 
-  public Class preload(GenClass cl)
-    throws Exception
+  public Value wrap(Env env, Object obj)
   {
-    JavaClassGenerator gen = new JavaClassGenerator();
-    gen.setSearchPath(_quercus.getPwd());
-
-    Class pageClass = gen.preload(cl.getFullClassName());
-
-    return pageClass;
-  }
-
-  public Class generate(GenClass cl)
-    throws Exception
-  {
-    JavaClassGenerator gen = new JavaClassGenerator();
-    gen.setSearchPath(_quercus.getPwd());
-
-    Class pageClass = gen.preload(cl.getFullClassName());
-
-    if (pageClass != null)
-      return pageClass;
-
-    gen.setEncoding("utf8");
+    if (! _isInit)
+      init();
     
-    gen.generate(cl);
-
-    gen.compilePendingJava();
-
-    pageClass = gen.loadClass(cl.getFullClassName());
-
-    return pageClass;
+    return new JavaMapValue(env, (Map) obj, this);
   }
 }
 

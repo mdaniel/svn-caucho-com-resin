@@ -31,8 +31,7 @@ package com.caucho.quercus.env;
 
 import java.io.IOException;
 
-import java.util.Collection;
-import java.util.IdentityHashMap;
+import java.util.*;
 
 import com.caucho.vfs.WriteStream;
 
@@ -227,6 +226,15 @@ public class Var extends Value {
   {
     return _value.toJavaObjectNotNull(env, type);
   }
+
+  /**
+   * Converts to a java map.
+   */
+  public Map toJavaMap(Env env, Class type)
+  {
+    return _value.toJavaMap(env, type);
+  }
+
 
   /**
    * Converts to an array

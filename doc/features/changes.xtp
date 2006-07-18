@@ -2,8 +2,13 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - July 5, 2006'>
+<s2 title='3.0.snap - July 18, 2006'>
 <ul>
+<li>Quercus: isModified pwd needs to be static Quercus to avoid chdir issues (#655)
+<li>Quercus: basic Java Map support (#1109, #1228, rep by koreth, akdeivanaathan)
+<li>Quercus: add smtp_user and smtp_password
+<li>Quercus: dbpool generation for wasn't creating unique name (#1241, rep by koreth)
+<li>Quercus: each after end of array (#1233, rep by koreth)
 <li>Quercus: crypt salt issue with mantis
 <li>Hessian: add HessianProxyFactory.create method with classloader (rep by Eike Stepper)
 <li>rewrite-dispatch needs to handle http vs https (#1251, rep by Jill Wetzler)

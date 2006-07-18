@@ -111,6 +111,7 @@ public class StreamModule extends AbstractQuercusModule {
     return _constMap;
   }
 
+  /*
   public static void stream_bucket_append(Env env, 
                                           @NotNull StreamBucketBrigade brigade,
                                           @NotNull StreamBucket bucket)
@@ -124,7 +125,7 @@ public class StreamModule extends AbstractQuercusModule {
   {
     return brigade.popTop();
   }
-                                           
+  */                                       
 
   /**
    * Creates a stream context.

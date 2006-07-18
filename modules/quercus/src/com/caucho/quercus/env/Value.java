@@ -40,8 +40,7 @@ import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.IdentityHashMap;
+import java.util.*;
 
 /**
  * Represents a PHP expression value.
@@ -402,6 +401,17 @@ abstract public class Value {
   }
 
   /**
+   * Converts to a java object.
+   */
+  public Map toJavaMap(Env env, Class type)
+  {
+    env.warning(L.l("Can't convert {0} to Java {1}",
+		    getClass().getName(), type.getName()));
+    
+    return null;
+  }
+
+  /**
    * Converts to an exception.
    */
   public QuercusException toException(Env env, String file, int line)
@@ -625,7 +635,7 @@ abstract public class Value {
    */
   public Value key()
   {
-    return BooleanValue.FALSE;
+    return NullValue.NULL;
   }
 
   /**
@@ -633,7 +643,7 @@ abstract public class Value {
    */
   public Value current()
   {
-    return BooleanValue.FALSE;
+    return NullValue.NULL;
   }
 
   /**

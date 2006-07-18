@@ -63,7 +63,7 @@ public class JavaClassDef extends ClassDef {
   
   private JavaClassDef _componentDef;
 
-  private volatile boolean _isInit;
+  protected volatile boolean _isInit;
 
   private final HashMap<String, Value> _constMap
     = new HashMap<String, Value>();
@@ -101,7 +101,7 @@ public class JavaClassDef extends ClassDef {
 
   private Marshall _marshall;
 
-  private JavaClassDef(ModuleContext moduleContext, String name, Class type)
+  protected JavaClassDef(ModuleContext moduleContext, String name, Class type)
   {
     super(name, null, new String[0]);
 
@@ -127,6 +127,8 @@ public class JavaClassDef extends ClassDef {
       return new StringClassDef(moduleContext);
     else if (Boolean.class.isAssignableFrom(type))
       return new BooleanClassDef(moduleContext);
+    else if (Map.class.isAssignableFrom(type))
+      return new JavaMapClassDef(moduleContext, name, type);
     else
       return new JavaClassDef(moduleContext, name, type);
   }

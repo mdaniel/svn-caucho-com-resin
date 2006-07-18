@@ -30,7 +30,7 @@
 package com.caucho.quercus.env;
 
 import java.io.IOException;
-import java.util.IdentityHashMap;
+import java.util.*;
 
 import com.caucho.vfs.WriteStream;
 
@@ -136,6 +136,14 @@ public class NullValue extends Value {
     env.warning(L.l("null is an unexpected argument; expected '{0}'",
 		    type.getName()));
     
+    return null;
+  }
+
+  /**
+   * Converts to a java object.
+   */
+  public Map toJavaMap(Env env, Class type)
+  {
     return null;
   }
 

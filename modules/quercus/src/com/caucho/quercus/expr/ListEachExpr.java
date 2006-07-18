@@ -31,10 +31,7 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.quercus.program.AnalyzeInfo;
@@ -81,12 +78,13 @@ public class ListEachExpr extends Expr {
     Value value = _value.eval(env);
 
     if (! (value instanceof ArrayValue))
-      return BooleanValue.FALSE;
+      return NullValue.NULL;
 
     ArrayValue array = (ArrayValue) value;
-
+    /*
     if (! array.hasCurrent())
       return BooleanValue.FALSE;
+    */
 
     if (_keyVar != null)
       _keyVar.evalAssign(env, array.key());
@@ -189,10 +187,15 @@ public class ListEachExpr extends Expr {
   {
     String var = "_quercus_list";
 
+    /*
     out.print("if ((" + var + " = ");
     _value.generate(out);
     out.println(").hasCurrent()) {");
     out.pushDepth();
+    */
+    out.print(var + " = ");
+    _value.generate(out);
+    out.println(";");
 
     if (_keyVar != null) {
       _keyVar.generateAssign(out, new EachKeyExpr(getLocation(), var), true);
@@ -205,9 +208,6 @@ public class ListEachExpr extends Expr {
     }
 
     out.println(var + ".next();");
-
-    out.popDepth();
-    out.println("}");
   }
 
   static class EachKeyExpr extends Expr {

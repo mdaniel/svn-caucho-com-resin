@@ -278,11 +278,12 @@ public class Base64 {
   {
     while(true) {
       int ch0 = readNonWhitespace(r);
-      if (ch0 == -1) break;
-
-      int ch1 = readNonWhitespace(r);
-      int ch2 = readNonWhitespace(r);
-      int ch3 = readNonWhitespace(r);
+      int ch1 = r.read();
+      int ch2 = r.read();
+      int ch3 = r.read();
+      
+      if (ch3 < 0)
+	break;
       
       int chunk = ((decode[ch0] << 18) +
 		   (decode[ch1] << 12) +

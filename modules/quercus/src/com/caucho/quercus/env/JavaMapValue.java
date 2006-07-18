@@ -27,60 +27,49 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.gen;
+package com.caucho.quercus.env;
+
+import java.io.*;
+
+import java.util.*;
 
 import java.util.logging.Logger;
 
-import com.caucho.java.gen.JavaClassGenerator;
-import com.caucho.java.gen.GenClass;
+import com.caucho.quercus.expr.Expr;
 
-import com.caucho.quercus.Quercus;
-  
+import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.program.JavaClassDef;
+
+import java.io.IOException;
+
+import com.caucho.vfs.WriteStream;
+
 /**
- * Generator.
+ * Represents a Quercus java value.
  */
-public class PhpGenerator {
+public class JavaMapValue extends JavaValue {
   private static final Logger log
-    = Logger.getLogger(PhpGenerator.class.getName());
+    = Logger.getLogger(JavaMapValue.class.getName());
+  
+  private final Map _map;
 
-  private final Quercus _quercus;
-
-  public PhpGenerator(Quercus quercus)
+  public JavaMapValue(Env env, Map map, JavaClassDef def)
   {
-    _quercus = quercus;
+    super(env, map, def);
+
+    _map = map;
+  }
+  
+  @Override
+  public Value get(Value name)
+  {
+    return _env.wrapJava(_map.get(name.toJavaObject()));
   }
 
-  public Class preload(GenClass cl)
-    throws Exception
+  @Override
+  public Value put(Value index, Value value)
   {
-    JavaClassGenerator gen = new JavaClassGenerator();
-    gen.setSearchPath(_quercus.getPwd());
-
-    Class pageClass = gen.preload(cl.getFullClassName());
-
-    return pageClass;
-  }
-
-  public Class generate(GenClass cl)
-    throws Exception
-  {
-    JavaClassGenerator gen = new JavaClassGenerator();
-    gen.setSearchPath(_quercus.getPwd());
-
-    Class pageClass = gen.preload(cl.getFullClassName());
-
-    if (pageClass != null)
-      return pageClass;
-
-    gen.setEncoding("utf8");
-    
-    gen.generate(cl);
-
-    gen.compilePendingJava();
-
-    pageClass = gen.loadClass(cl.getFullClassName());
-
-    return pageClass;
+    return _env.wrapJava(_map.put(index.toJavaObject(), value.toJavaObject()));
   }
 }
 

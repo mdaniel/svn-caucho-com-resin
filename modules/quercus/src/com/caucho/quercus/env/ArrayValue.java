@@ -33,7 +33,7 @@ import com.caucho.vfs.WriteStream;
 import com.caucho.quercus.module.Marshall;
 
 import java.util.*;
-import java.util.logging.Logger;
+import java.util.logging.*;
 import java.lang.reflect.Array;
 
 import java.io.IOException;
@@ -132,6 +132,41 @@ abstract public class ArrayValue extends Value {
     }
 
     return obj;
+  }
+
+  /**
+   * Converts to a java object.
+   */
+  @Override
+  public Map toJavaMap(Env env, Class type)
+  {
+    Map map = null;
+    
+    if (type.isAssignableFrom(TreeMap.class)) {
+      map = new TreeMap();
+    }
+    else if (type.isAssignableFrom(LinkedHashMap.class)) {
+      map = new LinkedHashMap();
+    }
+    else {
+      try {
+	map = (Map) type.newInstance();
+      } catch (Throwable e) {
+	log.log(Level.FINE, e.toString(), e);
+	
+	env.warning(L.l("Can't assign array to {0}",
+			type.getName()));
+
+	return null;
+      }
+    }
+
+    for (Entry entry = getHead(); entry != null; entry = entry._next) {
+      map.put(entry.getKey().toJavaObject(),
+	      entry.getValue().toJavaObject());
+    }
+
+    return map;
   }
 
   /**
@@ -502,7 +537,7 @@ abstract public class ArrayValue extends Value {
     if (_current != null)
       return _current.getKey();
     else
-      return BooleanValue.FALSE;
+      return NullValue.NULL;
   }
 
   /**
@@ -541,7 +576,7 @@ abstract public class ArrayValue extends Value {
   public Value each()
   {
     if (_current == null)
-      return BooleanValue.FALSE;
+      return NullValue.NULL;
 
     ArrayValue result = new ArrayValueImpl();
 
