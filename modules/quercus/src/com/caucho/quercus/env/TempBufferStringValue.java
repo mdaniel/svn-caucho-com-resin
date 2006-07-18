@@ -193,5 +193,20 @@ public class TempBufferStringValue extends BinaryValue {
     else
       return super.equals(o);
   }
+
+  public byte[] toBytes()
+  {
+    int len = 0;
+
+    byte []buffer = new byte[length()];
+
+    for (TempBuffer ptr = _head; ptr != null; ptr = ptr.getNext()) {
+      System.arraycopy(ptr.getBuffer(), 0, buffer, len, ptr.getLength());
+
+      len += ptr.getLength();
+    }
+
+    return buffer;
+  }
 }
 

@@ -72,8 +72,7 @@ import com.caucho.vfs.Path;
 /**
  * Information and actions for about files
  */
-public class FileModule extends AbstractQuercusModule
-  implements ModuleStartupListener {
+public class FileModule extends AbstractQuercusModule {
   private static final L10N L = new L10N(FileModule.class);
   private static final Logger log
     = Logger.getLogger(FileModule.class.getName());
@@ -129,15 +128,6 @@ public class FileModule extends AbstractQuercusModule
     return _constMap;
   }
   
-  public void startup(Env env)
-  {
-    StreamModule.stream_wrapper_register(new StringValueImpl("zlib"), 
-                                         new ZlibProtocolWrapper());
-
-    StreamModule.stream_wrapper_register(new StringValueImpl("php"), 
-                                         new PhpProtocolWrapper());
-  }
-    
   /**
    * Returns the base name of a string.
    */
@@ -2598,6 +2588,14 @@ public class FileModule extends AbstractQuercusModule
   }
 
   static {
+    ProtocolWrapper zlibProtocolWrapper = new ZlibProtocolWrapper();
+    StreamModule.stream_wrapper_register(new StringValueImpl("compress.zlib"), 
+                                         zlibProtocolWrapper);
+    StreamModule.stream_wrapper_register(new StringValueImpl("zlib"), 
+                                         zlibProtocolWrapper);
+    StreamModule.stream_wrapper_register(new StringValueImpl("php"), 
+                                         new PhpProtocolWrapper());
+
     _constMap.put("SEEK_SET", LongValue.create(BinaryInput.SEEK_SET));
     _constMap.put("SEEK_CUR", LongValue.create(BinaryInput.SEEK_CUR));
     _constMap.put("SEEK_END", LongValue.create(BinaryInput.SEEK_END));

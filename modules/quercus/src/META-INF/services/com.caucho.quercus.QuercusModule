@@ -32,7 +32,7 @@ com.caucho.quercus.lib.ResinModule
 com.caucho.quercus.lib.session.SessionModule
 com.caucho.quercus.lib.simplexml.SimpleXMLModule
 com.caucho.quercus.lib.file.SocketModule
-com.caucho.quercus.lib.StreamModule
+com.caucho.quercus.lib.file.StreamModule
 com.caucho.quercus.lib.string.StringModule
 com.caucho.quercus.lib.TokenModule
 com.caucho.quercus.lib.UrlModule

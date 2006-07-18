@@ -102,5 +102,7 @@ abstract public class BinaryValue extends StringValue {
 
     out.print("\"");
   }
+
+  abstract public byte[] toBytes();
 }
 

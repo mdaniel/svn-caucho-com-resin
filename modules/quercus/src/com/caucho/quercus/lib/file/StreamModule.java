@@ -168,11 +168,11 @@ public class StreamModule extends AbstractQuercusModule {
   /**
    * Set an options for a stream context.
    */
-  public boolean stream_context_set_option(Env env,
-                                           Value resource,
-                                           String wrapper,
-                                           String option,
-                                           Value value)
+  public static boolean stream_context_set_option(Env env,
+                                                  Value resource,
+                                                  String wrapper,
+                                                  String option,
+                                                  Value value)
   {
     if (resource instanceof StreamContextResource) {
       StreamContextResource context = (StreamContextResource) resource;
@@ -191,9 +191,9 @@ public class StreamModule extends AbstractQuercusModule {
   /**
    * Sets parameters for the context
    */
-  public boolean stream_context_set_params(Env env,
-                                           Value resource,
-                                           ArrayValue value)
+  public static boolean stream_context_set_params(Env env,
+                                                  Value resource,
+                                                  ArrayValue value)
   {
     if (resource instanceof StreamContextResource) {
       StreamContextResource context = (StreamContextResource) resource;
@@ -212,11 +212,11 @@ public class StreamModule extends AbstractQuercusModule {
   /**
    * Copies from an input stream to an output stream
    */
-  public long stream_copy_to_stream(Env env,
-                                    @NotNull StreamResource in,
-                                    @NotNull StreamResource out,
-                                    @Optional("-1") int length,
-                                    @Optional int offset)
+  public static long stream_copy_to_stream(Env env,
+                                           @NotNull StreamResource in,
+                                           @NotNull StreamResource out,
+                                           @Optional("-1") int length,
+                                           @Optional int offset)
   {
     try {
       if (in == null)
@@ -301,8 +301,9 @@ public class StreamModule extends AbstractQuercusModule {
   /**
    * Returns the next line
    */
-  public Value stream_get_line(@NotNull StreamResource file,
-                               @Optional("-1") long length)
+  public static Value stream_get_line(Env env,
+                                      @NotNull StreamResource file,
+                                      @Optional("-1") long length)
   {
     try {
       if (file == null)
@@ -337,7 +338,7 @@ public class StreamModule extends AbstractQuercusModule {
   /**
    * Returns the available transports.
    */
-  public Value stream_get_transports()
+  public static Value stream_get_transports(Env env)
   {
     ArrayValue value = new ArrayValueImpl();
 
@@ -350,7 +351,7 @@ public class StreamModule extends AbstractQuercusModule {
   /**
    * Returns the available wrappers.
    */
-  public Value stream_get_wrappers()
+  public static Value stream_get_wrappers(Env env)
   {
     return _wrapperArray;
   }

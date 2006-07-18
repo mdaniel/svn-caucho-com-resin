@@ -49,7 +49,7 @@ public class PhpProtocolWrapper extends ProtocolWrapper {
   public BinaryStream fopen(Env env, StringValue path, StringValue mode, 
                             LongValue options)
   {
-    if (path.equals("php://output")) {
+    if (path.toString().equals("php://output")) {
       return new PhpBinaryOutput(env);
     } else {
       env.warning(L.l("{0} is an unsupported or unknown path for this protocol",

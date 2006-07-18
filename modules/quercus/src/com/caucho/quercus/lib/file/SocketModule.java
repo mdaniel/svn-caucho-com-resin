@@ -249,6 +249,7 @@ public class SocketModule extends AbstractQuercusModule {
         case SOCK_STREAM:
           return new SocketReadWrite(env, new Socket(), socketDomain);
         case SOCK_DGRAM:
+          env.warning(L.l("Datagrams not supported"));
           return null;
         default:
           return null;
@@ -319,8 +320,8 @@ public class SocketModule extends AbstractQuercusModule {
       if (type == PHP_NORMAL_READ) {
         tempCharBuffer = TempCharBuffer.allocate();
 
-        if (length > tempCharBuffer.getLength())
-          length = tempCharBuffer.getLength();
+        if (length > tempCharBuffer.getCapacity())
+          length = tempCharBuffer.getCapacity();
 
         char []buffer = tempCharBuffer.getBuffer();
 
@@ -334,8 +335,8 @@ public class SocketModule extends AbstractQuercusModule {
       } else {
         tempBuffer = TempBuffer.allocate();
 
-        if (length > tempBuffer.getLength())
-          length = tempBuffer.getLength();
+        if (length > tempBuffer.getCapacity())
+          length = tempBuffer.getCapacity();
 
         byte []buffer = tempBuffer.getBuffer();
 
@@ -348,6 +349,8 @@ public class SocketModule extends AbstractQuercusModule {
           return BooleanValue.FALSE;
       }
     } catch (IOException e) {
+      env.warning(e);
+
       return BooleanValue.FALSE;
     } finally {
       if (tempCharBuffer != null)
@@ -359,13 +362,15 @@ public class SocketModule extends AbstractQuercusModule {
   }
 
   public static Value socket_write(Env env, @NotNull SocketReadWrite socket,
-                                   BinaryBuilderValue buffer, 
-                                   @Optional int length)
+                                   @NotNull BinaryValue buffer, 
+                                   @Optional("-1") int length)
   {
     try {
       byte []bytes = buffer.toBytes();
-      
-      if (bytes.length < length)
+
+      if (length == -1)
+        length = bytes.length;
+      else if (bytes.length < length)
         length = bytes.length;
 
       length = socket.write(bytes, 0, length);

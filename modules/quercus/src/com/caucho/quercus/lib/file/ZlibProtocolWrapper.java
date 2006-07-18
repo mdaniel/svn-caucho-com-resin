@@ -29,7 +29,11 @@
 
 package com.caucho.quercus.lib.file;
 
+import java.util.logging.Logger;
+
 import com.caucho.util.L10N;
+
+import com.caucho.quercus.lib.UrlModule;
 
 import com.caucho.quercus.lib.zlib.ZlibModule;
 
@@ -37,9 +41,14 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.UnsetValue;
+import com.caucho.quercus.env.ArrayValue;
 
 public class ZlibProtocolWrapper extends ProtocolWrapper {
+  private static final Logger log
+    = Logger.getLogger(ZlibProtocolWrapper.class.getName());
   private static final L10N L = new L10N(ZlibProtocolWrapper.class);
 
   public ZlibProtocolWrapper()
@@ -52,7 +61,17 @@ public class ZlibProtocolWrapper extends ProtocolWrapper {
     boolean useIncludePath = 
       (options.toLong() & StreamModule.STREAM_USE_PATH) != 0;
 
-    return ZlibModule.gzopen(env, path.toString(), mode.toString(), 
+    ArrayValue components = 
+      (ArrayValue) UrlModule.parse_url(env, path.toString());
+
+    Value pathComponent = components.get(new StringValueImpl("path"));
+    
+    if (pathComponent == UnsetValue.UNSET) {
+      log.info(L.l("no path component found in '{0}'", path.toString()));
+      return null;
+    }
+
+    return ZlibModule.gzopen(env, pathComponent.toString(), mode.toString(), 
                              useIncludePath);
   }
 
