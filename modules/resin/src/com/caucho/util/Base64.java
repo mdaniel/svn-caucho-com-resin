@@ -29,7 +29,6 @@
 
 package com.caucho.util;
 
-import com.caucho.vfs.Vfs;
 import java.util.*;
 import java.io.*;
 
@@ -173,11 +172,9 @@ public class Base64 {
   public static String encode(String value)
   {
     try {
-
-      CharBuffer cb = new CharBuffer();
-      encode(Vfs.openWrite(cb).getPrintWriter(),
-	     Vfs.openString(value));
-      return cb.toString();
+      StringWriter sw = new StringWriter();
+      encode(sw, new ByteArrayInputStream(value.getBytes()));
+      return sw.toString();
     }
     catch (IOException e) {
       throw new RuntimeException("this should not be possible: " + e);
@@ -187,12 +184,9 @@ public class Base64 {
   public static String encodeFromByteArray(byte[] value)
   {
     try {
-
-      CharBuffer cb = new CharBuffer();
-      encode(Vfs.openWrite(cb).getPrintWriter(),
-	     new ByteArrayInputStream(value));
-      return cb.toString();
-
+      StringWriter sw = new StringWriter();
+      encode(sw, new ByteArrayInputStream(value));
+      return sw.toString();
     }
     catch (IOException e) {
       throw new RuntimeException("this should not be possible " + e);
