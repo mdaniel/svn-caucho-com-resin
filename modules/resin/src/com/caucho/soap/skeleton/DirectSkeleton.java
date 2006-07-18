@@ -35,6 +35,7 @@ import java.util.*;
 import javax.xml.stream.*;
 
 import com.caucho.vfs.*;
+import javax.jws.*;
 
 /**
  * Invokes a SOAP request on a Java POJO
@@ -43,6 +44,66 @@ public class DirectSkeleton extends Skeleton {
 
   private HashMap<String,PojoMethodSkeleton> _actionMap
     = new HashMap<String,PojoMethodSkeleton>();
+
+  private String _namespace;
+  private String _name;
+  private String _typeName;
+  private String _portName;
+  private String _serviceName;
+  private String _wsdlLocation;
+
+  public DirectSkeleton(Class type) {
+
+    WebService webService = (WebService)type.getAnnotation(WebService.class);
+    setNamespace(type);
+    setName(type);
+
+    _typeName    = _name + "PortType";
+
+    _serviceName =
+      webService!=null && !webService.serviceName().equals("")
+      ? webService.serviceName()
+      : _name + "HttpBinding";
+
+    _portName =
+      webService!=null && !webService.portName().equals("")
+      ? webService.portName()
+      : _name + "HttpPort";
+
+    _wsdlLocation =
+      webService!=null && !webService.wsdlLocation().equals("")
+      ? webService.wsdlLocation()
+      : null;
+  }
+
+  private void setNamespace(Class type) {
+    WebService webService = (WebService)type.getAnnotation(WebService.class);
+    if (webService != null && !webService.targetNamespace().equals("")) {
+      _namespace = webService.targetNamespace();
+
+    }
+    else {
+      _namespace = null;
+      String packageName = type.getPackage().getName();
+      StringTokenizer st = new StringTokenizer(packageName, ".");
+      while(st.hasMoreTokens())
+	_namespace = st.nextToken() +
+	  (_namespace==null ? "" : ("."+_namespace));
+
+      _namespace = "http://"+_namespace+"/";
+
+    }
+  }
+
+  private void setName(Class type) {
+    WebService webService = (WebService)type.getAnnotation(WebService.class);
+    if (webService != null && !webService.name().equals("")) {
+      _name = webService.name();
+    }
+    else {
+      _name = type.getClass().getName();
+    }
+  }
 
   public void addAction(String name, PojoMethodSkeleton action)
   {
@@ -105,6 +166,30 @@ public class DirectSkeleton extends Skeleton {
     */
     out.print("\n</env:Body></env:Envelope>");
   }
+
+  public void dumpWSDL(WriteStream w, String address)
+    throws IOException {
+    w.println("<?xml version='1.0'?>");
+    w.println("<definitions name='StockQuote'");
+    w.println("  targetNamespace='"+_namespace+"'");
+    w.println("  xmlns:tns='"+_namespace+"'");
+    w.println("  xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/'");
+    w.println("  xmlns='http://schemas.xmlsoap.org/wsdl/'>");
+    w.println("<wsdl:portType name='"+_typeName+"' />");
+    w.println("<wsdl:binding name='"+_serviceName+
+	      "' type='tns:"+_typeName+"'>");
+    w.println("<wsdlsoap:binding style='document' "+
+	      "transport='http://schemas.xmlsoap.org/soap/http' />");
+    w.println("</wsdl:binding>");
+    w.println("<wsdl:service name='"+_serviceName+"'>");
+    w.println("<wsdl:port name='"+_portName+"' binding='tns:"+
+	      _serviceName+"'>");
+    w.println("<wsdlsoap:address location='"+
+	      (_wsdlLocation == null ? address : _wsdlLocation)+
+	      "' />");
+    w.println("</wsdl:port>");
+    w.println("</wsdl:service>");
+    w.println("</wsdl:definitions>");
+    w.flush();
+  }
 }
-
-

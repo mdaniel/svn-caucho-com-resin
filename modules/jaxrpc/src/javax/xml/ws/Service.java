@@ -35,6 +35,7 @@ import javax.xml.bind.*;
 import java.net.*;
 import java.util.concurrent.*;
 import java.util.*;
+import java.lang.reflect.*;
 
 /**
  * Service objects provide the client view of a Web service. Service acts as a
@@ -51,9 +52,9 @@ import java.util.*;
  * See Also:Provider, HandlerResolver, Executor
  */
 public class Service {
+
   protected Service(URL wsdlDocumentLocation, QName serviceName)
   {
-    throw new UnsupportedOperationException();
   }
 
 
@@ -73,7 +74,13 @@ public class Service {
    */
   public static Service create(QName serviceName)
   {
-    throw new UnsupportedOperationException();
+    try {
+      Class c = Class.forName("com.caucho.soap.service.ServiceImpl");
+      Constructor con = c.getConstructor(new Class[] { QName.class });
+      return (Service)con.newInstance(new Object[] { serviceName });
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
 

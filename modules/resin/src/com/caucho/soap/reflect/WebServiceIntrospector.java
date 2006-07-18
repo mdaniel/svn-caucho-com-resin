@@ -48,7 +48,7 @@ public class WebServiceIntrospector {
   /**
    * Introspects the class
    */
-  public Skeleton introspect(Class type)
+  public DirectSkeleton introspect(Class type)
     throws ConfigException
   {
     if (! type.isAnnotationPresent(WebService.class))
@@ -56,24 +56,34 @@ public class WebServiceIntrospector {
 				    type.getName()));
 
     MarshallFactory marshallFactory = new MarshallFactory();
-    DirectSkeleton skel = new DirectSkeleton();
 
     WebService webService = (WebService)type.getAnnotation(WebService.class);
-    // webService.name() ... => only for WSDL
+
+    DirectSkeleton skel = new DirectSkeleton(type);
 
     Method []methods = type.getMethods();
 
     for (int i = 0; i < methods.length; i++) {
-      if (! methods[i].isAnnotationPresent(WebMethod.class))
+
+      if ((methods[i].getModifiers() & Modifier.PUBLIC) == 0)
 	continue;
 
       WebMethod webMethod = methods[i].getAnnotation(WebMethod.class);
 
+      if (webService == null && webMethod == null)
+	continue;
+
+      if (webMethod == null && methods[i].getDeclaringClass() != type)
+	continue;
+
+      // XXX: needs test
+      if (webMethod != null && webMethod.exclude())
+	continue;
+
       PojoMethodSkeleton methodSkel
 	= new PojoMethodSkeleton(methods[i], marshallFactory);
 
-      String name = webMethod.operationName();
-
+      String name = webMethod==null ? "" : webMethod.operationName();
       if (name.equals(""))
           name = methods[i].getName();
 

@@ -58,12 +58,19 @@ public class WebServiceServlet extends HttpServlet {
     "http://schemas.xmlsoap.org/soap/encoding/";
 
   private Object _object;
-  private Skeleton _skeleton;
+  private DirectSkeleton _skeleton;
 
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
     throws ServletException, IOException
   {
     // XXX: show that nifty debugging screen like Sun does
+    
+    if (req.getParameter("wsdl") != null) {
+      resp.setContentType("text/xml");
+      _skeleton.dumpWSDL(Vfs.openWrite(resp.getOutputStream()),
+			 req.getRequestURL().toString());
+      return;
+    }
   }
            
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
