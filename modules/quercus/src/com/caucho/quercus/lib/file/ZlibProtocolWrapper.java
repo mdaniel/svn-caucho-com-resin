@@ -29,93 +29,76 @@
 
 package com.caucho.quercus.lib.file;
 
-import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.util.L10N;
+
+import com.caucho.quercus.lib.zlib.ZlibModule;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.QuercusClass;
 
-public class ProtocolWrapper {
-  private QuercusClass _qClass;
+public class ZlibProtocolWrapper extends ProtocolWrapper {
+  private static final L10N L = new L10N(ZlibProtocolWrapper.class);
 
-  protected ProtocolWrapper()
+  public ZlibProtocolWrapper()
   {
-  }
-
-  public ProtocolWrapper(QuercusClass qClass)
-  {
-    _qClass = qClass;
   }
 
   public BinaryStream fopen(Env env, StringValue path, StringValue mode, 
                             LongValue options)
   {
-    return new WrappedStream(env, _qClass, path, mode, options);
+    boolean useIncludePath = 
+      (options.toLong() & StreamModule.STREAM_USE_PATH) != 0;
+
+    return ZlibModule.gzopen(env, path.toString(), mode.toString(), 
+                             useIncludePath);
   }
 
   public Value opendir(Env env, StringValue path, LongValue flags)
   {
-    WrappedDirectoryValue value = new WrappedDirectoryValue(env, _qClass);
+    env.warning(L.l("opendir not supported by protocol"));
 
-    if (! value.opendir(path, flags))
-      return BooleanValue.FALSE;
-    else
-      return value;
+    return BooleanValue.FALSE;
   }
 
   public boolean unlink(Env env, StringValue path)
   {
-    AbstractFunction function = _qClass.getStaticFunction("unlink");
+    env.warning(L.l("unlink not supported by protocol"));
 
-    if (function == null)
-      return false;
-
-    return function.call(env, path).toBoolean();
+    return false;
   }
 
   public boolean rename(Env env, StringValue path_from, StringValue path_to)
   {
-    AbstractFunction function = _qClass.getStaticFunction("rename");
+    env.warning(L.l("rename not supported by protocol"));
 
-    if (function == null)
-      return false;
-
-    return function.call(env, path_from, path_to).toBoolean();
+    return false;
   }
 
   public boolean mkdir(Env env, 
                        StringValue path, LongValue mode, LongValue options)
   {
-    AbstractFunction function = _qClass.getStaticFunction("mkdir");
+    env.warning(L.l("mkdir not supported by protocol"));
 
-    if (function == null)
-      return false;
-
-    return function.call(env, path, mode, options).toBoolean();
+    return false;
   }
 
   public boolean rmdir(Env env, StringValue path, LongValue options)
   {
-    AbstractFunction function = _qClass.getStaticFunction("rmdir");
+    env.warning(L.l("rmdir not supported by protocol"));
 
-    if (function == null)
-      return false;
-
-    return function.call(env, path, options).toBoolean();
+    return false;
   }
 
   public Value url_stat(Env env, StringValue path, LongValue flags)
   {
-    AbstractFunction function = _qClass.getStaticFunction("url_stat");
+    env.warning(L.l("stat not supported by protocol"));
 
-    if (function == null)
-      return BooleanValue.FALSE;
-
-    return function.call(env, path, flags);
+    return BooleanValue.FALSE;
   }
 
+
 }
+

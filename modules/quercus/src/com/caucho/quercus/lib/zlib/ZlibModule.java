@@ -92,7 +92,7 @@ public class ZlibModule extends AbstractQuercusModule {
    * @return Zlib
    */
   @ReturnNullAsFalse
-  public static Object gzopen(Env env,
+  public static BinaryStream gzopen(Env env,
 			      String fileName,
 			      String mode,
 			      @Optional("false") boolean useIncludePath)

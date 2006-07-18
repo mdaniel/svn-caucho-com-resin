@@ -29,93 +29,101 @@
 
 package com.caucho.quercus.lib.file;
 
-import com.caucho.quercus.program.AbstractFunction;
+import java.io.IOException;
+
+import com.caucho.util.L10N;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.QuercusClass;
 
-public class ProtocolWrapper {
-  private QuercusClass _qClass;
+public class PhpProtocolWrapper extends ProtocolWrapper {
+  private static final L10N L = new L10N(PhpProtocolWrapper.class);
 
-  protected ProtocolWrapper()
+  public PhpProtocolWrapper()
   {
-  }
-
-  public ProtocolWrapper(QuercusClass qClass)
-  {
-    _qClass = qClass;
   }
 
   public BinaryStream fopen(Env env, StringValue path, StringValue mode, 
                             LongValue options)
   {
-    return new WrappedStream(env, _qClass, path, mode, options);
+    if (path.equals("php://output")) {
+      return new PhpBinaryOutput(env);
+    } else {
+      env.warning(L.l("{0} is an unsupported or unknown path for this protocol",
+                      path.toString()));
+
+      return null;
+    }
   }
 
   public Value opendir(Env env, StringValue path, LongValue flags)
   {
-    WrappedDirectoryValue value = new WrappedDirectoryValue(env, _qClass);
+    env.warning(L.l("opendir not supported by protocol"));
 
-    if (! value.opendir(path, flags))
-      return BooleanValue.FALSE;
-    else
-      return value;
+    return BooleanValue.FALSE;
   }
 
   public boolean unlink(Env env, StringValue path)
   {
-    AbstractFunction function = _qClass.getStaticFunction("unlink");
+    env.warning(L.l("unlink not supported by protocol"));
 
-    if (function == null)
-      return false;
-
-    return function.call(env, path).toBoolean();
+    return false;
   }
 
   public boolean rename(Env env, StringValue path_from, StringValue path_to)
   {
-    AbstractFunction function = _qClass.getStaticFunction("rename");
+    env.warning(L.l("rename not supported by protocol"));
 
-    if (function == null)
-      return false;
-
-    return function.call(env, path_from, path_to).toBoolean();
+    return false;
   }
 
   public boolean mkdir(Env env, 
                        StringValue path, LongValue mode, LongValue options)
   {
-    AbstractFunction function = _qClass.getStaticFunction("mkdir");
+    env.warning(L.l("mkdir not supported by protocol"));
 
-    if (function == null)
-      return false;
-
-    return function.call(env, path, mode, options).toBoolean();
+    return false;
   }
 
   public boolean rmdir(Env env, StringValue path, LongValue options)
   {
-    AbstractFunction function = _qClass.getStaticFunction("rmdir");
+    env.warning(L.l("rmdir not supported by protocol"));
 
-    if (function == null)
-      return false;
-
-    return function.call(env, path, options).toBoolean();
+    return false;
   }
 
   public Value url_stat(Env env, StringValue path, LongValue flags)
   {
-    AbstractFunction function = _qClass.getStaticFunction("url_stat");
+    env.warning(L.l("stat not supported by protocol"));
 
-    if (function == null)
-      return BooleanValue.FALSE;
-
-    return function.call(env, path, flags);
+    return BooleanValue.FALSE;
   }
 
+  private class PhpBinaryOutput extends AbstractBinaryOutput {
+    private Env _env;
+
+    public PhpBinaryOutput(Env env)
+    {
+      _env = env;
+    }
+
+    /**
+     * Writes a buffer.
+     */
+    public void write(byte []buffer, int offset, int length)
+      throws IOException
+    {
+      _env.getOut().write(buffer, offset, length);
+    }
+
+    public void write(int b)
+      throws IOException
+    {
+      _env.getOut().write(b);
+    }
+  }
 }
+

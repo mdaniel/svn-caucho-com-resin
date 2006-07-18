@@ -369,6 +369,14 @@ public class StreamModule extends AbstractQuercusModule {
     return 0;
   }
 
+  static void stream_wrapper_register(StringValue protocol, 
+                                      ProtocolWrapper wrapper)
+  {
+    _wrapperMap.put(protocol.toString(), wrapper);
+    
+    _wrapperArray.append(protocol);
+  }
+
   /**
    * Register a wrapper for a protocol.
    */
@@ -380,10 +388,8 @@ public class StreamModule extends AbstractQuercusModule {
 
     QuercusClass qClass = env.getClass(className);
 
-    _wrapperMap.put(protocol.toString(), new ProtocolWrapper(qClass));
+    stream_wrapper_register(protocol, new ProtocolWrapper(qClass));
     
-    _wrapperArray.append(protocol);
-
     return true;
   }
 
@@ -395,10 +401,10 @@ public class StreamModule extends AbstractQuercusModule {
     if (! _unregisteredWrapperMap.containsKey(protocol.toString()))
       return false;
 
-    _wrapperMap.put(protocol.toString(), 
-                    _unregisteredWrapperMap.remove(protocol.toString()));
+    ProtocolWrapper oldWrapper = 
+      _unregisteredWrapperMap.remove(protocol.toString());
 
-    _wrapperArray.append(protocol);
+    stream_wrapper_register(protocol, oldWrapper);
 
     return true;
   }

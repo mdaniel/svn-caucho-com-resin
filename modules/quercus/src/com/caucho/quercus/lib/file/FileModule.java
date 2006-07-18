@@ -60,6 +60,7 @@ import com.caucho.quercus.lib.UrlModule;
 
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.ReturnNullAsFalse;
+import com.caucho.quercus.module.ModuleStartupListener;
 
 import com.caucho.util.Alarm;
 
@@ -71,7 +72,8 @@ import com.caucho.vfs.Path;
 /**
  * Information and actions for about files
  */
-public class FileModule extends AbstractQuercusModule {
+public class FileModule extends AbstractQuercusModule
+  implements ModuleStartupListener {
   private static final L10N L = new L10N(FileModule.class);
   private static final Logger log
     = Logger.getLogger(FileModule.class.getName());
@@ -127,6 +129,15 @@ public class FileModule extends AbstractQuercusModule {
     return _constMap;
   }
   
+  public void startup(Env env)
+  {
+    StreamModule.stream_wrapper_register(new StringValueImpl("zlib"), 
+                                         new ZlibProtocolWrapper());
+
+    StreamModule.stream_wrapper_register(new StringValueImpl("php"), 
+                                         new PhpProtocolWrapper());
+  }
+    
   /**
    * Returns the base name of a string.
    */
@@ -1274,10 +1285,16 @@ public class FileModule extends AbstractQuercusModule {
     try {
       ProtocolWrapper wrapper = getProtocolWrapper(env, filename);
 
-      if (wrapper != null)
-        // XXX options?
+      if (wrapper != null) {
+        long options = 0;
+
+        if (useIncludePath)
+          options = StreamModule.STREAM_USE_PATH;
+           
         return wrapper.fopen(env, new StringValueImpl(filename), 
-                             new StringValueImpl(mode), LongValue.create(0));
+                                  new StringValueImpl(mode), 
+                                  LongValue.create(options));
+      }
 
       Path path;
 
