@@ -29,13 +29,17 @@
 
 package com.caucho.soap.service;
 
+import com.caucho.soap.reflect.*;
 import java.lang.reflect.*;
 import javax.jws.*;
 import com.caucho.soap.marshall.*;
 import com.caucho.soap.skeleton.*;
 import com.caucho.util.*;
+import java.io.*;
 import javax.xml.namespace.*;
 import javax.xml.ws.*;
+import javax.xml.stream.*;
+import com.caucho.vfs.*;
 
 public class ServiceImpl extends Service {
 
@@ -49,9 +53,14 @@ public class ServiceImpl extends Service {
 
   public <T> T getPort(Class<T> sei)
   {
+    return getPort(sei, null);
+  }
+
+  public <T> T getPort(Class<T> sei, String url)
+  {
     try {
       InvocationHandler ih =
-	new ServiceImplInvocationHandler();
+	new ServiceImplInvocationHandler(sei, url);
       Class proxyClass =
 	Proxy.getProxyClass(sei.getClassLoader(),
 			    new Class[] { sei });
@@ -67,9 +76,28 @@ public class ServiceImpl extends Service {
 
   private class ServiceImplInvocationHandler implements InvocationHandler {
 
-    public Object invoke(Object proxy, Method method, Object[] args)
+    private Class _class;
+    private DirectSkeleton _skeleton;
+    private String _url;
+
+    public ServiceImplInvocationHandler(Class c, String url)
+      throws com.caucho.config.ConfigException
     {
-      return null;
+      this._class = c;
+      this._url = url;
+      this._skeleton = new WebServiceIntrospector().introspect(c);
+    }
+    
+    public Object invoke(Object proxy, Method method, Object[] args)
+      throws IOException, XMLStreamException
+    {
+      Path path = Vfs.lookup(_url);
+      ReadWritePair rwp = path.openReadWrite();
+      XMLStreamReader reader =
+	XMLInputFactory.newInstance()
+	.createXMLStreamReader(rwp.getReadStream());
+
+      return _skeleton.invoke(reader, rwp.getWriteStream(), args);
     }
 
   }

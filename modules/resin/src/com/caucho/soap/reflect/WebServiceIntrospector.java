@@ -49,10 +49,10 @@ public class WebServiceIntrospector {
    * Introspects the class
    */
   public DirectSkeleton introspect(Class type)
-    throws ConfigException
+    //throws ConfigException
   {
     if (! type.isAnnotationPresent(WebService.class))
-      throw new ConfigException(L.l("{0}: needs a @WebService annotation.  WebServices need a @WebService annotation.",
+      throw new RuntimeException(L.l("{0}: needs a @WebService annotation.  WebServices need a @WebService annotation.",
 				    type.getName()));
 
     MarshallFactory marshallFactory = new MarshallFactory();

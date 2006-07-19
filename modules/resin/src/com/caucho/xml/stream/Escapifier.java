@@ -24,45 +24,40 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Adam Megacz
  */
 
-package com.caucho.soap.skeleton;
+package com.caucho.xml.stream;
 
 import java.io.*;
+import java.util.logging.*;
+
+import javax.xml.namespace.*;
 import javax.xml.stream.*;
 
-import com.caucho.vfs.WriteStream;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
 
-/**
- * Invokes a request on a Java POJO
- */
-abstract public class Skeleton {
-  public final static String XMLNS =
-    "http://www.w3.org/2000/xmlns/";
-  public final static String SOAP_ENVELOPE =
-    "http://www.w3.org/2003/05/soap-envelope";
-  public final static String SOAP_ENCODING =
-    "http://schemas.xmlsoap.org/soap/encoding/";
-  public final static String SOAP_RESULT =
-    "http://www.w3.org/2003/05/soap-rpc";
-  public final static String XMLNS_XSD =
-    "http://www.w3.org/2001/XMLSchema";
-  public final static String XMLNS_XSI =
-    "http://www.w3.org/2001/XMLSchema-instance";
+public class Escapifier {
 
-  /**
-   * Invokes the request.
-   */
-  abstract public void invoke(Object service,
-			      XMLStreamReader in,
-			      WriteStream out)
-    throws IOException, XMLStreamException;
+  public static String escape(String s)
+  {
+    // XXX: FIXME!
+    return s;
+  }
 
-  abstract public Object invoke(XMLStreamReader in,
-				WriteStream out,
-				Object[] args)
-    throws IOException, XMLStreamException;
+  public static void escape(String s, WriteStream ws)
+    throws IOException
+  {
+    // XXX: FIXME!
+    ws.print(s);
+  }
+
+  public static void escape(char[] c, int start, int len, WriteStream ws)
+    throws IOException
+  {
+    // XXX: FIXME!
+    ws.print(new String(c, start, len));
+  }
+
 }
-
-

@@ -109,9 +109,29 @@ public class DirectSkeleton extends Skeleton {
   {
     _actionMap.put(name, action);
   }
+
+  /**
+   * Invokes the request on a remote object using an outbound XML stream.
+   */
+  public Object invoke(XMLStreamReader in,
+				WriteStream out,
+				Object[] args)
+    throws IOException, XMLStreamException
+  {
+    /* XXX    
+      <env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-enveloper">
+      <env:Body>
+      <m:test xmlns:m="urn:test">
+      </m:test>
+      </env:Body>
+      </env:Envelope>
+      out.flush();
+    */
+    return null;
+  }
   
   /**
-   * Invokes the request.
+   * Invokes the request on a local object using an inbound XML stream.
    */
   public void invoke(Object service,
 		     XMLStreamReader in,

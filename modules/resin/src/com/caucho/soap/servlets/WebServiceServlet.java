@@ -58,6 +58,7 @@ public class WebServiceServlet extends HttpServlet {
     "http://schemas.xmlsoap.org/soap/encoding/";
 
   private Object _object;
+  private Class _class;
   private DirectSkeleton _skeleton;
 
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -67,7 +68,7 @@ public class WebServiceServlet extends HttpServlet {
     
     if (req.getParameter("wsdl") != null) {
       resp.setContentType("text/xml");
-      _skeleton.dumpWSDL(Vfs.openWrite(resp.getOutputStream()),
+      skeleton().dumpWSDL(Vfs.openWrite(resp.getOutputStream()),
 			 req.getRequestURL().toString());
       return;
     }
@@ -85,7 +86,7 @@ public class WebServiceServlet extends HttpServlet {
 	factory.createXMLStreamReader(req.getInputStream());
       
       WriteStream ws = Vfs.openWrite(resp.getOutputStream());
-      _skeleton.invoke(_object, xmlReader, ws);
+      skeleton().invoke(_object, xmlReader, ws);
       ws.flush();
     }
     catch (XMLStreamException e) {
@@ -97,7 +98,22 @@ public class WebServiceServlet extends HttpServlet {
     throws Exception
   {
     _object = o;
-    _skeleton = new WebServiceIntrospector().introspect(_object.getClass());
+    if (_class==null)
+      _class = o.getClass();
+  }
+
+  public void setInterface(Class c)
+    throws Exception
+  {
+    _class = c;
+  }
+
+  private DirectSkeleton skeleton()
+    //throws ConfigException
+  {
+    if (_skeleton == null)
+      _skeleton = new WebServiceIntrospector().introspect(_class);
+    return _skeleton;
   }
 
 }
