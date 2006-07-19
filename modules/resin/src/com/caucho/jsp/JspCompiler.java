@@ -383,27 +383,7 @@ public class JspCompiler implements EnvironmentBean {
 
     return instance;
   }
-
-  private void compileJava(Path path, String className,
-                           LineMap lineMap, String charEncoding)
-    throws Exception
-  {
-    Path classPath = path.getParent().lookup(className + ".class");
-
-    JavaCompiler compiler = JavaCompiler.create();
-    compiler.setClassDir(getClassDir());
-    compiler.setEncoding(charEncoding);
-    String fileName = className.replace('.', '/') + ".java";
-
-    boolean remove = true;
-
-    try {
-      compiler.compile(fileName, lineMap);
-    } finally {
-      if (remove)
-        Vfs.lookup(fileName).remove();
-    }
-  }
+  
   /**
    * Loads an already-compiled JSP class.
    *

@@ -178,10 +178,8 @@ public class LinkProxy implements ObjectProxy, java.io.Serializable {
       context = new InitialContext(mergeEnv);
     
     if (_foreignName != null) {
-      System.out.println("LOOKUP: " + _foreignName);
       try {
 	Object value = context.lookup(_foreignName);
-	System.out.println("LOOKUP: " + value + " " + _foreignName);
       
 	return value;
       } catch (RuntimeException e) {

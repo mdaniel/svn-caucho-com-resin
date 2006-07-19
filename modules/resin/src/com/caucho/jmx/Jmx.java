@@ -650,10 +650,11 @@ public class Jmx {
 
       Object proxy;
 
-      proxy = MBeanServerInvocationHandler.newProxyInstance(mbeanServer,
-	 						    name,
-							    ifc,
-							    true);
+      proxy = JmxInvocationHandler.newProxyInstance(mbeanServer,
+						    loader,
+						    name,
+						    ifc,
+						    true);
 
       return proxy;
     } catch (InstanceNotFoundException e) {
