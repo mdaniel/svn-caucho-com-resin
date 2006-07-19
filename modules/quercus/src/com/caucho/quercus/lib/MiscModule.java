@@ -37,6 +37,9 @@ import java.util.ArrayList;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
@@ -52,19 +55,25 @@ import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.Reference;
 import com.caucho.quercus.module.UsesSymbolTable;
 
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.DoubleValue;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.BinaryBuilderValue;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.DoubleValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.ObjectValue;
+import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.UnsetValue;
+import com.caucho.quercus.env.Value;
 
+import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.program.QuercusProgram;
+
+import com.caucho.vfs.Path;
 
 /**
  * PHP mysql routines.
@@ -458,6 +467,210 @@ public class MiscModule extends AbstractQuercusModule {
     }
 
     return seconds;
+  }
+
+ /**
+   * Returns an array detailing what the browser is capable of.
+   * A general browscap.ini file can be used as this implementation is not
+   * bugger as PHP's implementation.
+   *
+   * @param env
+   * @param user_agent
+   * @param return_array
+   */
+  public static Value get_browser(
+                       Env env,
+                       @Optional() String user_agent,
+                       @Optional() boolean return_array)
+  {
+    if (user_agent.length() == 0) 
+      user_agent = env.getRequest().getHeader("User-Agent");
+
+    if (user_agent == null) {
+      env.warning(L.l("HTTP_USER_AGENT not set."));
+      return BooleanValue.FALSE;
+    }
+
+    Value browscap = env.getConfigVar("browscap");
+    if (browscap == null) {
+      env.warning(L.l("Browscap path not set in PHP.ini."));
+      return BooleanValue.FALSE;
+    }
+
+    Path path = env.lookup(browscap.toString());
+    if (path == null) {
+      env.warning(L.l("Browscap file not found."));
+      return BooleanValue.FALSE;
+    }
+
+    return getBrowserCapabilities(env, path, user_agent, return_array);
+  }
+
+  private static Value getBrowserCapabilities(
+                       Env env,
+                       Path path,
+                       String user_agent,
+                       boolean return_array)
+  {
+    Value ini = FileModule.parse_ini_file(env, path, true);
+    if (ini == BooleanValue.FALSE)
+      return BooleanValue.FALSE;
+    ArrayValue browsers = ini.toArrayValue(env);
+
+    StringValue patternMatched = StringValue.EMPTY;
+    String regExpMatched = null;
+
+    for (Map.Entry<Value,Value> entry : browsers.entrySet()) {
+      StringValue pattern = entry.getKey().toStringValue();
+      
+      if (pattern.toString().equals(user_agent)) {
+        patternMatched = pattern;
+        regExpMatched = null;
+        break;
+      }
+
+      String regExp = formatBrowscapRegexp(pattern);
+      Matcher m = Pattern.compile(regExp).matcher(user_agent);
+
+      // Want the longest matching pattern.
+      if (m.matches()) {
+        if (pattern.length() > patternMatched.length()) {
+          patternMatched = pattern;
+          regExpMatched = regExp;
+        }
+      }
+    }
+
+    if (patternMatched.length() == 0)
+      return BooleanValue.FALSE;
+
+    ArrayValue capabilities = browsers.get(patternMatched).toArrayValue(env);
+
+    if (regExpMatched == null)
+      capabilities.put(
+          new StringValueImpl("browser_name_regex"), patternMatched);
+    else
+      capabilities.put("browser_name_regex", regExpMatched);
+    capabilities.put(
+        new StringValueImpl("browser_name_pattern"), patternMatched);
+
+    addBrowserCapabilities(env, browsers,
+        capabilities.get(new StringValueImpl("parent")), capabilities);
+
+    if (return_array) {
+      ArrayValue array = new ArrayValueImpl();
+      array.put(new StringValueImpl(user_agent), capabilities);
+      return array;
+    }
+    
+    ObjectValue object = env.createObject();
+    for (Map.Entry<Value,Value> entry : capabilities.entrySet()) {
+      object.putFieldInit(env, entry.getKey().toString(), entry.getValue());
+    }
+    return object;
+  }
+  
+  private static void addBrowserCapabilities(
+                       Env env,
+                       ArrayValue browsers,
+                       Value browser,
+                       ArrayValue cap)
+  {
+    if (browser == UnsetValue.UNSET)
+      return;
+
+    Value field = null;
+    if ((field = browsers.get(browser)) == UnsetValue.UNSET)
+      return;
+
+    ArrayValue browserCapabilities = field.toArrayValue(env);
+    StringValue parentString = new StringValueImpl("parent");
+    
+    for (Map.Entry<Value,Value> entry : browserCapabilities.entrySet()) {
+      Value key = entry.getKey();
+
+      if (key.equals(parentString)) {
+        addBrowserCapabilities(
+            env, browsers, entry.getValue(), cap);
+      }
+      else if (cap.containsKey(key) == null)
+        cap.put(key, entry.getValue());
+    }
+  }
+
+  private static String formatBrowscapRegexp(StringValue key)
+  {
+    int length = key.length();
+  
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < length; i++) {
+      char ch = key.charAt(i);
+      switch (ch) {
+        case '*':
+          sb.append('.');
+          sb.append('*');
+          break;
+        case '?':
+          sb.append('.');
+          break;
+        case '.':
+          sb.append('\\');
+          sb.append('.');
+          break;
+        case '+':
+          sb.append('\\');
+          sb.append('+');
+          break;
+        case '(':
+          sb.append('\\');
+          sb.append('(');
+          break;
+         case ')':
+          sb.append('\\');
+          sb.append(')');
+          break;
+        case '{':
+          sb.append('\\');
+          sb.append('{');
+          break;
+         case '}':
+          sb.append('\\');
+          sb.append('}');
+          break;
+        case ']':
+          sb.append('\\');
+          sb.append(']');
+          break;
+        case '[':
+          sb.append('\\');
+          sb.append('[');
+          break;
+        case '\\':
+          sb.append('\\');
+          sb.append('\\');
+          break;
+        case '^':
+          sb.append('\\');
+          sb.append('^');
+          break;
+        case '$':
+          sb.append('\\');
+          sb.append('$');
+          break;
+        case '&':
+          sb.append('\\');
+          sb.append('&');
+          break;
+        case '|':
+          sb.append('\\');
+          sb.append('|');
+          break;
+        default:
+          sb.append(ch);
+      }
+    }
+    
+    return sb.toString();
   }
 
   /**
