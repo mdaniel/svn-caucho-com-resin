@@ -157,7 +157,7 @@ be used to calculate a digest.</p>
 The realm for JdbcAuthenticator and XmlAuthenticator defaults to "resin";
 the realm can be specified during configuration:
 
-<example title"Specifying a realm">
+<example title="Specifying a realm">
 
 &lt;authenticator type='com.caucho.server.security.JdbcAuthenticator'&gt;
   &lt;init&gt;

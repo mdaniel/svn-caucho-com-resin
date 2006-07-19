@@ -138,7 +138,7 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
   /**
    * Returns the lifecycle state.
    */
-  @Description("The lifecycle state of the client")
+  @Description("The current lifecycle state of the client")
   public String getState();
 
   //
@@ -163,14 +163,14 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
   /**
    * Returns the number of connections that have been made to the target server.
    */
-  @Description("The number of new connections that have been made" +
+  @Description("The total number of new connections that have been made" +
 	       " to the target server")
   public long getConnectionNewCountTotal();
 
   /**
    * Returns the number of connections that have been made to the target server.
    */
-  @Description("The number of keepalive connections that have been made" +
+  @Description("The total number of keepalive connections that have been made" +
 	       " to the target server")
   public long getConnectionKeepaliveCountTotal();
 
@@ -178,28 +178,28 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
    * Returns the number of connections which could not connect
    * to the target server.
    */
-  @Description("The number of failed connections attempts" +
+  @Description("The total number of failed connections attempts" +
 	       " to the target server")
   public long getConnectionFailCountTotal();
 
   /**
    * Returns the time of the last failure.
    */
-  @Description("The last time a connection attempt failed")
+  @Description("The current last time a connection attempt failed")
   public Date getLastFailTime();
 
   /**
    * Returns the number of connections which resulted in a busy
    * response.
    */
-  @Description("The number of busy responses" +
+  @Description("The total number of busy responses" +
 	       " from the target server")
   public long getConnectionBusyCountTotal();
 
   /**
    * Returns the last time of the busy response.
    */
-  @Description("The last time the target server refused a request because it was busy")
+  @Description("The current last time the target server refused a request because it was busy")
   public Date getLastBusyTime();
 
   /**
@@ -211,7 +211,7 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
   /**
    * Enables connections to the target server.
    */
-  @Description("Enable only stick-session requests to the target server")
+  @Description("Enable only sticky-session requests to the target server")
   public void enableSessionOnly();
 
   /**

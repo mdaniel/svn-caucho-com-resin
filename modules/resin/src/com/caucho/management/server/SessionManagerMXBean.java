@@ -53,9 +53,9 @@ public interface SessionManagerMXBean extends ManagedObjectMXBean
   public WebAppMXBean getWebApp();
 
   /**
-   * Returns the ObjectName for the persistent store.
+   * Returns the persistent store.
    */
-  @Description("Returns the persistent store mbean")
+  @Description("The persistent store")
   public PersistentStoreMXBean getPersistentStore();
 
   //
@@ -66,101 +66,101 @@ public interface SessionManagerMXBean extends ManagedObjectMXBean
    * True if the session should be serialized for storage, even if
    * no attributes in the session have been set.
    */
-  @Description("If true, serialize the session on each request, even if no attributes have been set")
+  @Description("The configured value, if true serialize the session on each request, even if no attributes have been set")
   public boolean isAlwaysSaveSession();
 
   /**
    * If true, the server's cluster index is appended to the cookie value.
    */
-  @Description("If true, append the server's cluster index to the cookie value")
+  @Description("The configured value, if true append the server's cluster index to the cookie value")
   public boolean isCookieAppendServerIndex();
 
   /**
    * The host domain used for session cookies
    */
-  @Description("The host domain used for session cookies")
+  @Description("The configured host domain used for session cookies")
   public String getCookieDomain();
 
   /**
    * True if the cookie should only be used for http, not https requests.
    */
-  @Description("True if the cookie should only be used for http, not https requests")
+  @Description("The configured value, if true the cookie should only be used for http, not https requests")
   public boolean isCookieHttpOnly();
 
   /**
    * The length of the generated cookie
    */
-  @Description("The length of the generated cookie")
+  @Description("The configured length of the generated cookie")
   public long getCookieLength();
 
   /**
    * The session cookie max-age sent to the browser.
    */
-  @Description("The session cookie max-age sent to the browser")
+  @Description("The configured session cookie max-age in milliseconds sent to the browser")
   @Units("milliseconds")
   public long getCookieMaxAge();
 
   /**
    * The cookie name used for sessions.
    */
-  @Description("The cookie name for servlet sessions")
+  @Description("The configured cookie name for servlet sessions")
   public String getCookieName();
 
   /**
    * The session cookie port sent to the client browser.
    */
-  @Description("The session cookie port sent to the browser")
+  @Description("The configured session cookie port sent to the browser")
   public String getCookiePort();
 
   /**
    * True if the session cookie should only be sent on a secure connection.
    */
-  @Description("The session cookie should only be sent on a secure connection")
+  @Description("The configured value, if true the session cookie should only be sent on a secure connection")
   public boolean isCookieSecure();
 
   /**
    * The cookie version sent to the browser.
    */
-  @Description("The cookie version sent to the browser")
+  @Description("The configured cookie version sent to the browser")
   public int getCookieVersion();
 
   /**
    * True if the server reads and writes cookies
    */
-  @Description("If session cookies are enabled")
+  @Description("The configured value, if true session cookies are enabled")
   public boolean isEnableCookies();
 
   /**
    * (discouraged).  True if the URL-rewriting is enabled.
    * In general, URL-rewriting should be avoided as a security risk.
    */
-  @Description("(discouraged).  If URL-rewriting is enabled.  URL-rewriting should be avoided as a security risk.")
+  @Description("The configured value, if true (discouraged) URL-rewriting is enabled. URL-rewriting should be avoided as a security risk.")
   public boolean isEnableURLRewriting();
 
   /**
    * True if persistent sessions should ignore serialization errors.
    */
-  @Description("True if persistent sessions should ignore serialization errors.")
+  @Description("The configured value, if true persistent sessions should ignore serialization errors.")
   public boolean isIgnoreSerializationErrors();
 
   /**
    * True if the session should be invalidated only after listeners are
    * called.
    */
-  @Description("True if the session should be invalidated only after listeners are called")
+  @Description("The configured value, if true the session should be invalidated only after listeners are called")
   public boolean isInvalidateAfterListener();
 
   /**
    * True if session-id should be reused if no session exists.  This
    * should generally be true for web-app consistence.
    */
-  @Description("True if the session-id should be reused if no session exists to match the cookie.  This should generally be true to ensure web-app session consistency")
+  @Description("The configured value, if true the session-id should be reused if no session exists to match the cookie. This should generally be true to ensure web-app session consistency")
   public boolean isReuseSessionId();
     
   /**
    * Returns the session save-mode.
    */
-  @Description("Configured session persistence mode.  The session save-mode is one of: " +
+  @Description("The configured session persistence mode. The session save-mode is one of: " +
 	       "before-headers, after-request, on-shutdown")
   public String getSaveMode();
     
@@ -168,14 +168,14 @@ public interface SessionManagerMXBean extends ManagedObjectMXBean
    * The maximum number of sessions in memory.  The number
    * of persistent sessions may be larger.
    */
-  @Description("Configured maximum number of sessions in memory.  The number of persistent sessions may be larger")
+  @Description("The configured maximum number of sessions in memory. The number of persistent sessions may be larger")
   public int getSessionMax();
     
   /**
    * The maximum time an idle session will be saved.  session-timeout affects
    * persistent sessions.
    */
-  @Description("Configured maximum time an idle session will be saved in milliseconds.  SessionTimeout affects persistent sessions")
+  @Description("The configured maximum time in milliseconds before an idle session will be saved. SessionTimeout affects persistent sessions")
   @Units("milliseconds")
   public long getSessionTimeout();
 
@@ -186,20 +186,24 @@ public interface SessionManagerMXBean extends ManagedObjectMXBean
   /**
    * Returns the count of active sessions.
    */
+  @Description("The current number of active sessions")
   public long getSessionActiveCount();
 
   /**
    * Returns the count of sessions created
    */
+  @Description("The total number of sessions that have been created")
   public long getSessionCreateCountTotal();
 
   /**
    * Returns the count of sessions invalidated
    */
+  @Description("The total number of sessions that have been invalidated")
   public long getSessionInvalidateCountTotal();
 
   /**
    * Returns the count of sessions timeout
    */
+  @Description("The total number of times a session has timed out")
   public long getSessionTimeoutCountTotal();
 }

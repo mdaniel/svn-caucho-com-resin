@@ -38,17 +38,18 @@ import com.caucho.jmx.*;
  * resin:type=ThreadPool
  * </pre>
  */
+@Description("ThreadPool manages all threads used by the Resin server")
 public interface ThreadPoolMXBean extends ManagedObjectMXBean {
   /**
    * Returns the maximum number of threads.
    */
-  @Description("configured maximum number of threads")
+  @Description("The configured maximum number of threads")
   public int getThreadMax();
   
   /**
    * Returns the minimum number of spare threads.
    */
-  @Description("configured minimum number of spare threads")
+  @Description("The configured minimum number of spare threads")
   public int getSpareThreadMin();
 
   //
@@ -58,18 +59,18 @@ public interface ThreadPoolMXBean extends ManagedObjectMXBean {
   /**
    * Returns the current number of threads.
    */
-  @Description("current number of managed threads")
+  @Description("The current number of managed threads")
   public int getThreadCount();
   
   /**
    * Returns the current number of active threads.
    */
-  @Description("current number of active threads")
+  @Description("The current number of active threads")
   public int getThreadActiveCount();
   
   /**
    * Returns the current number of idle threads.
    */
-  @Description("current number of idle threads")
+  @Description("The current number of idle threads")
   public int getThreadIdleCount();
 }
