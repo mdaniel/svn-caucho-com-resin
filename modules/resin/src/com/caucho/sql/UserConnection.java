@@ -85,7 +85,7 @@ public class UserConnection implements java.sql.Connection {
   public Connection getConnection()
     throws SQLException
   {
-    Connection conn = getConnection();
+    Connection conn = getDriverConnection();
 
     if (conn instanceof com.caucho.sql.spy.SpyConnection)
       conn = ((com.caucho.sql.spy.SpyConnection)conn).getConnection();
@@ -822,7 +822,7 @@ public class UserConnection implements java.sql.Connection {
 
     if (mConn == null)
       throw new IllegalStateException(L.l("Cannot use closed connection.  Check max-active-time and review application code. "));
-    
+
     Connection conn = mConn.getDriverConnection();
 
     return conn;
