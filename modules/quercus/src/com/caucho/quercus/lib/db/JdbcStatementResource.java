@@ -33,6 +33,7 @@ import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.ResourceValue;
+import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.sql.UserConnection;
@@ -578,6 +579,9 @@ public class JdbcStatementResource {
    */
   protected Value getParam(int i)
   {
+    if (i >= _params.length)
+      return UnsetValue.UNSET;
+
     return _params[i];
   }
 

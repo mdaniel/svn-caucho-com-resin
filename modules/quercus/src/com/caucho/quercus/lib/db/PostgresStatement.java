@@ -31,6 +31,8 @@ package com.caucho.quercus.lib.db;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.UnsetValue;
+import com.caucho.quercus.env.Value;
 
 import com.caucho.util.L10N;
 
@@ -53,8 +55,8 @@ public class PostgresStatement extends JdbcStatementResource {
 
   // Map JDBC ?,?,? to any unsorted or duplicated params.
   // Ex: INSERT INTO test VALUES($2, $1) is mapped as [0]->2, [1]->1
-  //     INSERT INTO test VALUES($1, $1) is mapped as [0]->1, [0]->1
-  private ArrayList<LongValue> preparedMapping = new ArrayList<LongValue>();
+  //     INSERT INTO test VALUES($1, $1) is mapped as [0]->1, [1]->1
+  private ArrayList<LongValue> _preparedMapping = new ArrayList<LongValue>();
 
   /**
    * Constructor for PostgresStatement
@@ -76,17 +78,21 @@ public class PostgresStatement extends JdbcStatementResource {
   {
     try {
 
-      int size = preparedMapping.size();
+      int size = _preparedMapping.size();
 
-      if (size > getParamLength()) {
-        env.warning(L.l("Not all parameters are bound"));
-        return false;
-      }
+      int matches = 0;
 
       for (int i = 0; i < size; i++) {
-        LongValue param = preparedMapping.get(i);
-        Object object = getParam(param.toInt()-1).toJavaObject();
-        setObject(i+1, object);
+        LongValue param = _preparedMapping.get(i);
+
+        Value paramV = getParam(param.toInt()-1);
+
+        if (paramV.equals(UnsetValue.UNSET)) {
+          env.warning(L.l("Not all parameters are bound"));
+          return false;
+        }
+
+        setObject(i+1, paramV.toJavaObject());
       }
 
       return executeStatement();
@@ -108,7 +114,7 @@ public class PostgresStatement extends JdbcStatementResource {
   {
     try {
 
-      preparedMapping.clear();
+      _preparedMapping.clear();
 
       // Map any unsorted or duplicated params.
       // Ex: INSERT INTO test VALUES($2, $1) or
@@ -120,10 +126,10 @@ public class PostgresStatement extends JdbcStatementResource {
         try {
           phpParam = Integer.parseInt(matcher.group(1));
         } catch(Exception ex) {
-          preparedMapping.clear();
+          _preparedMapping.clear();
           return false;
         }
-        preparedMapping.add(LongValue.create(phpParam));
+        _preparedMapping.add(LongValue.create(phpParam));
       }
 
       // Make the PHP query a JDBC like query
@@ -139,5 +145,10 @@ public class PostgresStatement extends JdbcStatementResource {
       log.log(Level.FINE, e.toString(), e);
       return false;
     }
+  }
+
+  protected int getPreparedMappingSize()
+  {
+    return _preparedMapping.size();
   }
 }

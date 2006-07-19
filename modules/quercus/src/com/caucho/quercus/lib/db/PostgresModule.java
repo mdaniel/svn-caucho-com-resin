@@ -391,6 +391,9 @@ public class PostgresModule extends AbstractQuercusModule {
 
       ArrayValueImpl newArray = new ArrayValueImpl();
 
+      // Keep track of column matches: assocArray vs. table columns
+      int matches = 0;
+
       while (rs.next()) {
         // Retrieve the original value to be converted
         String columnName = rs.getString("COLUMN_NAME");
@@ -400,6 +403,8 @@ public class PostgresModule extends AbstractQuercusModule {
         // Check for column not passed in
         if (value == UnsetValue.UNSET)
           continue;
+
+        matches++;
 
         if (value.isNull()) {
           value = StringValue.create("NULL");
@@ -453,6 +458,12 @@ public class PostgresModule extends AbstractQuercusModule {
       }
 
       rs.close();
+
+      // Check if all columns were consumed. Otherwise, there are
+      // wrong column names passed in.
+      if (matches < assocArray.getSize()) {
+        return null;
+      }
 
       return newArray;
 
@@ -2317,6 +2328,13 @@ public class PostgresModule extends AbstractQuercusModule {
 
       PostgresResult result = conn.query(query);
 
+      String error = conn.error();
+
+      if ((error != null) && (! error.equals(""))) {
+        env.warning(L.l("Query failed: {0}", error));
+        return null;
+      }
+
       return result;
 
     } catch (Exception ex) {
@@ -2886,15 +2904,16 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
 
-      ArrayValueImpl arr = (ArrayValueImpl) params;
-      int sz = arr.size();
+      StringBuilder stringBuilder = new StringBuilder();
 
-      char buf[] = new char[sz];
-      for (int i=0; i<sz; i++)
-        buf[i] = 's';
-      String types = new String(buf);
+      int size = params.getSize(); // pstmt.getPreparedMappingSize();
 
-      Value value[] = arr.getValueArray(env);
+      for (int i=0; i<size; i++)
+        stringBuilder.append('s');
+
+      String types = stringBuilder.toString();
+
+      Value value[] = params.getValueArray(env);
       pstmt.bindParams(env, types, value);
 
       if (!pstmt.execute(env))
