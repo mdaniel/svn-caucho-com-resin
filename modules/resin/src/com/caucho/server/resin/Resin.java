@@ -464,8 +464,9 @@ public class Resin implements ResinServerListener {
      * If the server has a parent process watching over us, close
      * gracefully when the parent dies.
      */
-    while (! _isClosed && (_isRestarting ||
-			   (server = _server) != null && ! server.isClosed())) {
+    while (! _isClosed && 
+	   (server = _server) != null &&
+	   (! server.isClosing() || server.isRestartOnClose())) {
       try {
 	Thread.sleep(10);
 

@@ -627,7 +627,8 @@ public class Port
     if (_writeTimeout <= 0)
       _writeTimeout = _timeout;
 
-    _admin.register();
+    if (_serverId.equals(_server.getServerId()))
+      _admin.register();
   }
 
   /**

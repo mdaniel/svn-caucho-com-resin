@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - July 18, 2006'>
 <ul>
+<li>Change close/restart logic to test for closing instead of closed (rep by Nicholas Berry) 
 <li>Quercus: comparison with '.' wasn't converting properly (#1257, rep by koreth)
 <li>Quercus: isModified pwd needs to be static Quercus to avoid chdir issues (#655)
 <li>Quercus: basic Java Map support (#1109, #1228, rep by koreth, akdeivanaathan)
