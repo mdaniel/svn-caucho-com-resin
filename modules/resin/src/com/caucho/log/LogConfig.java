@@ -125,12 +125,13 @@ public class LogConfig extends RotateLog {
   {
     getSubLogger().setLevel(level);
 
-
     if (_isInit && _handlers != null) {
       for (Handler handler : _handlers) {
 	handler.setLevel(getSubLogger().getLevel());
       }
     }
+
+
   }
 
   /**
@@ -309,6 +310,31 @@ public class LogConfig extends RotateLog {
       } catch (Throwable e) {
       }
     }
+  }
+
+  static Level toLevel(String level)
+    throws ConfigException
+  {
+    if (level.equals("off"))
+      return Level.OFF;
+    else if (level.equals("severe"))
+      return Level.SEVERE;
+    else if (level.equals("warning"))
+      return Level.WARNING;
+    else if (level.equals("info"))
+      return Level.INFO;
+    else if (level.equals("config"))
+      return Level.CONFIG;
+    else if (level.equals("fine"))
+      return Level.FINE;
+    else if (level.equals("finer"))
+      return Level.FINER;
+    else if (level.equals("finest"))
+      return Level.FINEST;
+    else if (level.equals("all"))
+      return Level.ALL;
+    else
+      throw new ConfigException(L.l("`{0}' is an unknown log level.  Log levels are:\noff - disable logging\nsevere - severe errors only\nwarning - warnings\ninfo - information\nconfig - configuration\nfine - fine debugging\nfiner - finer debugging\nfinest - finest debugging\nall - all debugging", level));
   }
 
   public static class SubLogger {

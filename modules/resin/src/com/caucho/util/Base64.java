@@ -48,6 +48,8 @@ public class Base64 {
       decode[i] = i - '0' + 52;
     decode['+'] = 62;
     decode['/'] = 63;
+    
+    decode['='] = 0;
   }
 
   public static void encode(CharBuffer cb, long data)
@@ -201,7 +203,7 @@ public class Base64 {
       int value2 = i.read();
       int value3 = i.read();
 
-      if (value3 != -1) {
+      if (value3 >= 0) {
 	long chunk = (value1 & 0xff);
 	chunk = (chunk << 8) + (value2 & 0xff);
 	chunk = (chunk << 8) + (value3 & 0xff);
@@ -213,7 +215,7 @@ public class Base64 {
 	continue;
       }
     
-      if (value2 != -1) {
+      if (value2 >= 0) {
 	long chunk = (value1 & 0xff);
 	chunk = (chunk << 8) + (value2 & 0xff);
 	chunk <<= 8;
@@ -223,7 +225,7 @@ public class Base64 {
 	w.write(encode(chunk >> 6));
 	w.write('=');
       }
-      else if (value1 != -1) {
+      else if (value1 >= 0) {
 	long chunk = (value1 & 0xff);
 	chunk <<= 16;
 	
@@ -273,7 +275,7 @@ public class Base64 {
     }
   }
 
-  public static void decode(Reader r, OutputStream o)
+  public static void decode(Reader r, OutputStream os)
     throws IOException
   {
     while(true) {
@@ -281,22 +283,26 @@ public class Base64 {
       int ch1 = r.read();
       int ch2 = r.read();
       int ch3 = r.read();
-      
-      if (ch3 < 0)
+
+      if (ch0 < 0)
 	break;
+      if (ch2 < 0)
+	ch2 = '=';
+      if (ch3 < 0)
+	ch3 = '=';
       
       int chunk = ((decode[ch0] << 18) +
 		   (decode[ch1] << 12) +
 		   (decode[ch2] << 6) +
 		   (decode[ch3]));
       
-      o.write((byte) ((chunk >> 16) & 0xff));
+      os.write((byte) ((chunk >> 16) & 0xff));
       
       if (ch2 != '='  && ch2 != -1)
-	o.write((byte) ((chunk >> 8) & 0xff));
+	os.write((byte) ((chunk >> 8) & 0xff));
       if (ch3 != '=' && ch3 != -1)
-	o.write((byte) ((chunk & 0xff)));
+	os.write((byte) ((chunk & 0xff)));
     }
-    o.flush();
+    os.flush();
   }
 }

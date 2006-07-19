@@ -821,12 +821,19 @@
         <exclude name="*~"/>
         <exclude name="**/CVS/**"/>
         <exclude name="**/.svn/**"/>
+        <exclude name="com/caucho/hessian/EJBServlet.class"/>
+        <exclude name="com/caucho/hessian/HessianContextFactory.class"/>
+        <exclude name="com/caucho/burlap/EJBServlet.class"/>
+        <exclude name="com/caucho/burlap/BurlapContextFactory.class"/>
         <include name="com/caucho/util/CharBuffer.class"/>
         <include name="com/caucho/util/CharBuffer$CBInputStream.class"/>
         <include name="com/caucho/util/CharSegment.class"/>
         <include name="com/caucho/hessian/**"/>
         <include name="com/caucho/burlap/**/"/>
         <include name="com/caucho/services/**"/>
+      </fileset>
+      <fileset dir="${basedir}">
+        <include name="apache.license"/>
       </fileset>
     </jar>
 
@@ -837,9 +844,16 @@
         <exclude name="*~"/>
         <exclude name="**/CVS/**"/>
         <exclude name="**/.svn/**"/>
+        <exclude name="com/caucho/hessian/EJBServlet.java"/>
+        <exclude name="com/caucho/hessian/HessianContextFactory.java"/>
+        <exclude name="com/caucho/burlap/EJBServlet.java"/>
+        <exclude name="com/caucho/burlap/BurlapContextFactory.java"/>
         <include name="com/caucho/hessian/**"/>
         <include name="com/caucho/burlap/**"/>
         <include name="com/caucho/services/**"/>
+      </fileset>
+      <fileset dir="${basedir}">
+        <include name="apache.license"/>
       </fileset>
     </jar>
 

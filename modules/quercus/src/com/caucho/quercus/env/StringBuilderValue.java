@@ -295,6 +295,9 @@ public class StringBuilderValue extends UnicodeValue {
     if (ch == '.') {
       for (i++; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
       }
+
+      if (i == 1)
+	return 0;
     }
 
     if (ch == 'e' || ch == 'E') {
@@ -313,10 +316,15 @@ public class StringBuilderValue extends UnicodeValue {
 
     if (i == 0)
       return 0;
-    else if (i == len)
-      return Double.parseDouble(toString());
-    else
-      return Double.parseDouble(new String(_buffer, 0, i));
+
+    try {
+      if (i == len)
+	return Double.parseDouble(toString());
+      else
+	return Double.parseDouble(new String(_buffer, 0, i));
+    } catch (NumberFormatException e) {
+      return 0;
+    }
   }
 
   /**
