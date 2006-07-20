@@ -92,7 +92,9 @@ public class PostgresStatement extends JdbcStatementResource {
           return false;
         }
 
-        setObject(i+1, paramV.toJavaObject());
+        Object object = paramV.toJavaObject();
+
+        setObject(i+1, object);
       }
 
       return executeStatement();

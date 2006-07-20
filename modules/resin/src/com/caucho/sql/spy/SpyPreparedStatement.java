@@ -51,9 +51,9 @@ public class SpyPreparedStatement extends SpyStatement
 
   private String _sql;
   protected PreparedStatement _pstmt;
-  
+
   SpyPreparedStatement(String id, Connection conn,
-		       PreparedStatement stmt, String sql)
+                       PreparedStatement stmt, String sql)
   {
     super(id, conn, stmt);
 
@@ -66,13 +66,13 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":executeQuery(" + _sql + ")");
-      
+
       ResultSet rs = _pstmt.executeQuery();
 
       return rs;
     } catch (Throwable e) {
       log.info(_id + ":exn-executeQuery(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -82,13 +82,13 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       int result = _pstmt.executeUpdate();
-      
+
       log.info(_id + ":executeUpdate(" + _sql + ") -> " + result);
 
       return result;
     } catch (Throwable e) {
       log.info(_id + ":exn-executeUpdate(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -98,13 +98,13 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       boolean result = _pstmt.execute();
-      
+
       log.info(_id + ":execute(" + _sql + ") -> " + result);
 
       return result;
     } catch (Throwable e) {
       log.info(_id + ":exn-execute(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -114,11 +114,11 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       _pstmt.addBatch();
-      
+
       log.info(_id + ":addBatch()");
     } catch (Throwable e) {
       log.info(_id + ":exn-addBatch(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -128,11 +128,11 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":clearParameters()");
-      
+
       _pstmt.clearParameters();
     } catch (Throwable e) {
       log.info(_id + ":exn-clearParameters(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -142,13 +142,13 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       ResultSetMetaData result = _pstmt.getMetaData();
-      
+
       log.info(_id + ":getMetaData() -> " + result);
 
       return result;
     } catch (Throwable e) {
       log.info(_id + ":exn-getMetaData(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -156,7 +156,7 @@ public class SpyPreparedStatement extends SpyStatement
   public ParameterMetaData getParameterMetaData()
     throws SQLException
   {
-    throw new UnsupportedOperationException();
+    return _pstmt.getParameterMetaData();
   }
 
   public void setNull(int parameterIndex, int sqlType)
@@ -164,11 +164,11 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":setNull(" + parameterIndex + ",type=" + sqlType + ")");
-      
+
       _pstmt.setNull(parameterIndex, sqlType);
     } catch (Throwable e) {
       log.info(_id + ":exn-setNull(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -179,11 +179,11 @@ public class SpyPreparedStatement extends SpyStatement
     try {
       log.info(_id + ":setNull(" + parameterIndex + ",type=" + sqlType +
               ",typeName=" + typeName + ")");
-      
+
       _pstmt.setNull(parameterIndex, sqlType, typeName);
     } catch (Throwable e) {
       log.info(_id + ":exn-setNull(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -193,11 +193,11 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":setBoolean(" + index + "," + value + ")");
-      
+
       _pstmt.setBoolean(index, value);
     } catch (Throwable e) {
       log.info(_id + ":exn-setBoolean(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -207,11 +207,11 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":setByte(" + index + "," + value + ")");
-      
+
       _pstmt.setByte(index, value);
     } catch (Throwable e) {
       log.info(_id + ":exn-setByte(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -221,11 +221,11 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":setShort(" + index + "," + value + ")");
-      
+
       _pstmt.setShort(index, value);
     } catch (Throwable e) {
       log.info(_id + ":exn-setShort(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -235,11 +235,11 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":setInt(" + index + "," + value + ")");
-      
+
       _pstmt.setInt(index, value);
     } catch (Throwable e) {
       log.info(_id + ":exn-setInt(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -249,11 +249,11 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":setLong(" + index + "," + value + ")");
-      
+
       _pstmt.setLong(index, value);
     } catch (Throwable e) {
       log.info(_id + ":exn-setLong(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -263,11 +263,11 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":setFloat(" + index + "," + value + ")");
-      
+
       _pstmt.setFloat(index, value);
     } catch (Throwable e) {
       log.info(_id + ":exn-setFloat(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -277,11 +277,11 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":setDouble(" + index + "," + value + ")");
-      
+
       _pstmt.setDouble(index, value);
     } catch (Throwable e) {
       log.info(_id + ":exn-setDouble(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -291,11 +291,11 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":setBigDecimal(" + index + "," + value + ")");
-      
+
       _pstmt.setBigDecimal(index, value);
     } catch (Throwable e) {
       log.info(_id + ":exn-setBigDecimal(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -305,11 +305,11 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":setString(" + index + "," + value + ")");
-      
+
       _pstmt.setString(index, value);
     } catch (Throwable e) {
       log.info(_id + ":exn-setString(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -319,14 +319,14 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       if (value != null)
-	log.info(_id + ":setBytes(" + index + ",len=" + value.length + ")");
+        log.info(_id + ":setBytes(" + index + ",len=" + value.length + ")");
       else
-	log.info(_id + ":setBytes(" + index + ",null");
-      
+        log.info(_id + ":setBytes(" + index + ",null");
+
       _pstmt.setBytes(index, value);
     } catch (Throwable e) {
       log.info(_id + ":exn-setBytes(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -336,11 +336,11 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":setDate(" + index + "," + value + ")");
-      
+
       _pstmt.setDate(index, value);
     } catch (Throwable e) {
       log.info(_id + ":exn-setDate(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -350,11 +350,11 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":setDate(" + index + "," + value + ",cal=" + cal + ")");
-      
+
       _pstmt.setDate(index, value, cal);
     } catch (Throwable e) {
       log.info(_id + ":exn-setDate(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -364,11 +364,11 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":setTime(" + index + "," + value + ")");
-      
+
       _pstmt.setTime(index, value);
     } catch (Throwable e) {
       log.info(_id + ":exn-setTime(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -378,11 +378,11 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":setTime(" + index + "," + value + ",cal=" + cal + ")");
-      
+
       _pstmt.setTime(index, value, cal);
     } catch (Throwable e) {
       log.info(_id + ":exn-setTime(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -392,11 +392,11 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":setTimestamp(" + index + "," + value + ")");
-      
+
       _pstmt.setTimestamp(index, value);
     } catch (Throwable e) {
       log.info(_id + ":exn-setTimestamp(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -406,11 +406,11 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":setTimestamp(" + index + "," + value + ",cal=" + cal + ")");
-      
+
       _pstmt.setTimestamp(index, value, cal);
     } catch (Throwable e) {
       log.info(_id + ":exn-setTimestamp(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -420,11 +420,11 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":setAsciiStream(" + index + "," + value + ",len=" + length + ")");
-      
+
       _pstmt.setAsciiStream(index, value, length);
     } catch (Throwable e) {
       log.info(_id + ":exn-setAsciiStream(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -434,11 +434,11 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":setUnicodeStream(" + index + "," + value + ",len=" + length + ")");
-      
+
       _pstmt.setUnicodeStream(index, value, length);
     } catch (Throwable e) {
       log.info(_id + ":exn-setUnicodeStream(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -448,11 +448,11 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":setBinaryStream(" + index + "," + value + ",len=" + length + ")");
-      
+
       _pstmt.setBinaryStream(index, value, length);
     } catch (Throwable e) {
       log.info(_id + ":exn-setBinaryStream(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -462,11 +462,11 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":setCharacterStream(" + index + "," + value + ",len=" + length + ")");
-      
+
       _pstmt.setCharacterStream(index, value, length);
     } catch (Throwable e) {
       log.info(_id + ":exn-setCharacterStream(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -477,11 +477,11 @@ public class SpyPreparedStatement extends SpyStatement
     try {
       log.info(_id + ":setObject(" + index + "," + value +
               ",type=" + type + ",scale=" + scale + ")");
-      
+
       _pstmt.setObject(index, value, type, scale);
     } catch (Throwable e) {
       log.info(_id + ":exn-setObject(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -492,11 +492,11 @@ public class SpyPreparedStatement extends SpyStatement
     try {
       log.info(_id + ":setObject(" + index + "," + value +
               ",type=" + type +  ")");
-      
+
       _pstmt.setObject(index, value, type);
     } catch (Throwable e) {
       log.info(_id + ":exn-setObject(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -506,13 +506,13 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":setObject(" + index + "," + value + ")");
-      
+
       _pstmt.setObject(index, value);
     } catch (Throwable e) {
       e.printStackTrace();
-      
+
       log.info(_id + ":exn-setObject(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -522,11 +522,11 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":setRef(" + index + "," + value + ")");
-      
+
       _pstmt.setRef(index, value);
     } catch (Throwable e) {
       log.info(_id + ":exn-setRef(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -536,11 +536,11 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":setBlob(" + index + "," + value + ")");
-      
+
       _pstmt.setBlob(index, value);
     } catch (Throwable e) {
       log.info(_id + ":exn-setBlob(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -550,11 +550,11 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":setClob(" + index + "," + value + ")");
-      
+
       _pstmt.setClob(index, value);
     } catch (Throwable e) {
       log.info(_id + ":exn-setClob(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }
@@ -564,11 +564,11 @@ public class SpyPreparedStatement extends SpyStatement
   {
     try {
       log.info(_id + ":setArray(" + index + "," + value + ")");
-      
+
       _pstmt.setArray(index, value);
     } catch (Throwable e) {
       log.info(_id + ":exn-setArray(" + e + ")");
-      
+
       throw SQLExceptionWrapper.create(e);
     }
   }

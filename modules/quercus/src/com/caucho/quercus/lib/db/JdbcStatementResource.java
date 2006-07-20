@@ -41,14 +41,19 @@ import com.caucho.sql.UserConnection;
 import com.caucho.util.Log;
 import com.caucho.util.L10N;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 
 /**
  * Represents a JDBC Statement value.
@@ -615,13 +620,87 @@ public class JdbcStatementResource {
    * Known subclasses: see PostgresStatement.execute
    */
   protected void setObject(int i, Object param)
-    throws SQLException
+    throws Exception
   {
     try {
-      _stmt.setObject(i, param);
-    } catch (SQLException e) {
+      // See php/4358, php/43b8, php/43d8, and php/43p8.
+      java.sql.ParameterMetaData pmd = _stmt.getParameterMetaData();
+      int type = pmd.getParameterType(i);
+
+      switch (type) {
+
+      case Types.OTHER:
+        {
+          // See php/43b8
+          String typeName = pmd.getParameterTypeName(i);
+          if (typeName.equals("interval")) {
+            _stmt.setObject(i, param);
+          } else {
+            Class cl = Class.forName("org.postgresql.util.PGobject");
+            Constructor constructor = cl.getDeclaredConstructor(null);
+            Object object = constructor.newInstance();
+
+            Method method = cl.getDeclaredMethod("setType", new Class[] {String.class});
+            method.invoke(object, new Object[] {typeName});
+
+            method = cl.getDeclaredMethod("setValue", new Class[] {String.class});
+            method.invoke(object, new Object[] {param});
+
+            _stmt.setObject(i, object, type);
+          }
+          break;
+        }
+
+      case Types.DOUBLE:
+        {
+          // See php/43p8.
+          String typeName = pmd.getParameterTypeName(i);
+          if (typeName.equals("money")) {
+            String s = param.toString();
+
+            if (s.length() == 0) {
+              throw new IllegalArgumentException(L.l("argument `{0}' cannot be empty", param));
+            } else {
+
+              String money = s;
+
+              if (s.charAt(0) == '$')
+                s = s.substring(1);
+              else
+                money = "$"+money;
+
+              try {
+                // This will throw an exception if not double while
+                // trying to setObject() would not. The error would
+                // come late, otherwise. See php/43p8.
+                Double.parseDouble(s);
+              } catch (Exception ex) {
+                throw new IllegalArgumentException(L.l("cannot convert argument `{0}' to money", param));
+              }
+
+              Class cl = Class.forName("org.postgresql.util.PGmoney");
+              Constructor constructor = cl.getDeclaredConstructor(new Class[] {String.class});
+              Object object = constructor.newInstance(new Object[] {money});
+
+              _stmt.setObject(i, object, Types.OTHER);
+
+              break;
+            }
+          }
+          // else falls to default case
+        }
+
+      default:
+        _stmt.setObject(i, param, type);
+      }
+    }
+    catch (SQLException e) {
       _errorMessage = e.getMessage();
       _errorCode = e.getErrorCode();
+      throw e;
+    }
+    catch (Exception e) {
+      _stmt.clearParameters();
       throw e;
     }
   }
