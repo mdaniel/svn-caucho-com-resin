@@ -175,7 +175,7 @@ public interface SessionManagerMXBean extends ManagedObjectMXBean
    * The maximum time an idle session will be saved.  session-timeout affects
    * persistent sessions.
    */
-  @Description("The configured maximum time in milliseconds before an idle session will be saved. SessionTimeout affects persistent sessions")
+  @Description("The configured time in milliseconds before an idle session is destroyed")
   @Units("milliseconds")
   public long getSessionTimeout();
 

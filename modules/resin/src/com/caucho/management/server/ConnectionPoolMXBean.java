@@ -38,7 +38,7 @@ import com.caucho.jmx.*;
  * resin:type=ConnectionPool,name=jdbc/resin,...
  * </pre>
  */
-@Description("The state of a JDBC connection pool")
+@Description("A pool of reusable connections to a database")
 public interface ConnectionPoolMXBean extends ManagedObjectMXBean {
   //
   // Configuration
@@ -47,37 +47,39 @@ public interface ConnectionPoolMXBean extends ManagedObjectMXBean {
   /**
    * Returns the maximum number of connections.
    */
-  @Description("Configured maximum connections")
+  @Description("The configured maximum number of connections")
   public int getMaxConnections();
   
   /**
    * Returns the number of overflow connections.
    */
-  @Description("Configured maximum number of overflow connections")
+  @Description("The configured maximum number of overflow connections")
   public int getMaxOverflowConnections();
   
   /**
    * Returns the max number of connections trying to connect.
    */
-  @Description("Configured maximum number of simultaneous connection creation")
+  @Description("The configured maximum number of simultaneous connection creation")
   public int getMaxCreateConnections();
   
   /**
    * Returns the pool idle time in milliseconds.
    */
   @Units("milliseconds")
-  @Description("Configured maximum time allowed in the idle pool")
+  @Description("The configured maximum time in milliseconds that a connection remains in the idle pool before it is closed")
   public long getMaxIdleTime();
   
   /**
    * Returns the pool active time in milliseconds.
    */
+  @Description("The configured maximum time in milliseconds that a connection is allowed to be active")
   @Units("milliseconds")
   public long getMaxActiveTime();
   
   /**
    * Returns the pool time in milliseconds.
    */
+  @Description("The configured maximum age in milliseconds of a connection before it is closed regardless of it's usage pattern")
   @Units("milliseconds")
   public long getMaxPoolTime();
   
@@ -85,6 +87,7 @@ public interface ConnectionPoolMXBean extends ManagedObjectMXBean {
    * How long to wait for connections when timed out.
    */
   @Units("milliseconds")
+  @Description("The configured maximum time in milliseconds to wait for a connection before a failure is returned to the client")
   public long getConnectionWaitTime();
   
   /**
@@ -104,18 +107,18 @@ public interface ConnectionPoolMXBean extends ManagedObjectMXBean {
   /**
    * Returns the total number of connections.
    */
-  @Description("Returns the current number of idle and active connections")
+  @Description("The current number of idle and active connections")
   public int getConnectionCount();
 
   /**
    * Returns the number of active connections.
    */
-  @Description("Returns the current number of active connections")
+  @Description("The current number of active connections")
   public int getConnectionActiveCount();
 
   /**
    * Returns the number of idle connections.
    */
-  @Description("Returns the current number of idle connections")
+  @Description("The current number of idle connections")
   public int getConnectionIdleCount();
 }

@@ -29,6 +29,9 @@
 
 package com.caucho.management.server;
 
+import com.caucho.jmx.Description;
+
+@Description("An enterprise application")
 public interface EAppMXBean
   extends DeployControllerMXBean
 {

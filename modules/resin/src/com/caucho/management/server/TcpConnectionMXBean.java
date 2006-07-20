@@ -55,6 +55,7 @@ public interface TcpConnectionMXBean extends ManagedObjectMXBean {
   /**
    * Returns the connection state.
    */
+  @Description("The current lifecycle state")
   public String getState();
 
   //
@@ -65,5 +66,6 @@ public interface TcpConnectionMXBean extends ManagedObjectMXBean {
    * Returns the time this request has spent in the active state.
    */
   @Units("milliseconds")
+  @Description("The current time in milliseconds that the connection has been active for the request it is servicing")
   public long getRequestActiveTime();
 }

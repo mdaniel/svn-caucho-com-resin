@@ -29,20 +29,19 @@
 
 package com.caucho.management.j2ee;
 
-import com.caucho.jmx.Jmx;
 import com.caucho.jmx.IntrospectionMBean;
+import com.caucho.jmx.Jmx;
 import com.caucho.server.host.Host;
 import com.caucho.server.webapp.Application;
 import com.caucho.util.Alarm;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -226,8 +225,7 @@ abstract public class J2EEManagedObject {
    */
   protected String[] queryObjectNames(String ... pattern)
   {
-
-    ArrayList<String> objectNames = new ArrayList<String>();
+    TreeSet<String> objectNames = new TreeSet<String>();
 
     queryObjectNames(objectNames, pattern);
 
@@ -339,6 +337,7 @@ abstract public class J2EEManagedObject {
    */
   public static <T extends J2EEManagedObject> T register(T managedObject)
   {
+
     if (managedObject == null)
       return null;
 
@@ -349,8 +348,11 @@ abstract public class J2EEManagedObject {
 
       Object mbean = new IntrospectionMBean(managedObject, managedObject.getClass(), true);
 
-      if (objectName != null)
-	Jmx.register(mbean, objectName);
+      // XXX: wait for 3.1
+      if (false) {
+        if (objectName != null)
+          Jmx.register(mbean, objectName);
+      }
 
       return managedObject;
     }
@@ -380,7 +382,10 @@ abstract public class J2EEManagedObject {
     try {
       objectName = managedObject.createObjectName();
 
-      Jmx.unregister(objectName);
+      // XXX: wait for 3.1
+      if (false) {
+        Jmx.unregister(objectName);
+      }
     }
     catch (Throwable ex) {
       if (log.isLoggable(Level.FINEST))
