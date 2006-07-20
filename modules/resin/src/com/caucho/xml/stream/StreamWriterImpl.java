@@ -46,6 +46,11 @@ public class StreamWriterImpl implements XMLStreamWriter {
   private WriteStream _ws;
   private NamespaceTracker _tracker = new NamespaceTracker();
 
+  public StreamWriterImpl(WriteStream ws)
+  {
+    _ws = ws;
+  }
+
   public void close() throws XMLStreamException
   {
     try {

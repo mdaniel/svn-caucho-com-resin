@@ -141,13 +141,13 @@ public abstract class XMLInputFactory {
   {
     XMLInputFactory ret =
       newInstance("javax.xml.stream.XMLInputFactory",
-		  Thread.currentThread().getContextClassLoader());
+                  Thread.currentThread().getContextClassLoader());
 
     throw new FactoryConfigurationError("No factory defined");
   }
 
   public static XMLInputFactory newInstance(String factoryId,
-					    ClassLoader classLoader)
+                                            ClassLoader classLoader)
     throws FactoryConfigurationError
   {
     return (XMLInputFactory)FactoryLoader

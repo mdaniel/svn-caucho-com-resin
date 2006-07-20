@@ -50,6 +50,9 @@ public class StreamReaderImpl implements XMLStreamReader {
   
   private ReadStream _is;
 
+  private int _col = 1;
+  private int _row = 1;
+
   private String _version;
   private String _encoding;
 
@@ -345,8 +348,12 @@ public class StreamReaderImpl implements XMLStreamReader {
       case START_DOCUMENT:
       case COMMENT:
 	break;
+
+	// XXX: is this right?  BEA's reader appears to skip anything
+	/*
       default:
-	throw new IllegalStateException();
+	throw new IllegalStateException("in nextTag(), encountered " + tag);
+	*/
       }
     }
 
@@ -505,7 +512,11 @@ public class StreamReaderImpl implements XMLStreamReader {
       if (ch == '\'' || ch == '"') {
 	if (rawName.getPrefix()==null &&
 	    "xmlns".equals(rawName.getLocalName())) {
+	  // XXX
+	  readValue(ch);
 	} else if ("xmlns".equals(rawName.getPrefix())) {
+	  // XXX
+	  readValue(ch);
 	} else {
 	  _attrValues[attrCount] = readValue(ch);
 	}
@@ -674,7 +685,6 @@ public class StreamReaderImpl implements XMLStreamReader {
       
       nameBuffer[length++] = (char) ch;
     }
-
     unread();
 
     name._length = length;
@@ -715,15 +725,15 @@ public class StreamReaderImpl implements XMLStreamReader {
     try {
       int ch;
 
-      ch = _is.read();
+      ch = read();
 
       if (ch == (char)0xFE) {
-	if (_is.read() != (char)0xFF) {
+	if (read() != (char)0xFF) {
 	  throw new XMLStreamException("found unrecognized BOM");
 	}
-	ch = _is.read();
+	ch = read();
       } else if (ch == (char)0xFF) {
-	if (_is.read() != (char)0xFE) {
+	if (read() != (char)0xFE) {
 	  throw new UnsupportedOperationException("found byte-swapped BOM");
 	} else {
 	  throw new XMLStreamException("found unrecognized BOM");
@@ -731,35 +741,35 @@ public class StreamReaderImpl implements XMLStreamReader {
       }
 
       if (ch != '<') {
-	_is.unread();
+	unread();
       }
-      else if ((ch = _is.read()) != '?') {
-	_is.unread();
-	_is.unread();
+      else if ((ch = read()) != '?') {
+	unread();
+	unread();
       }
-      else if ((ch = _is.read()) != 'x') {
-	_is.unread();
-	_is.unread();
-	_is.unread();
+      else if ((ch = read()) != 'x') {
+	unread();
+	unread();
+	unread();
       }
-      else if ((ch = _is.read()) != 'm') {
-	_is.unread();
-	_is.unread();
-	_is.unread();
-	_is.unread();
+      else if ((ch = read()) != 'm') {
+	unread();
+	unread();
+	unread();
+	unread();
       }
-      else if ((ch = _is.read()) != 'l') {
-	_is.unread();
-	_is.unread();
-	_is.unread();
-	_is.unread();
-	_is.unread();
+      else if ((ch = read()) != 'l') {
+	unread();
+	unread();
+	unread();
+	unread();
+	unread();
       }
       else {
-	while ((ch = _is.read()) >= 0 && ch != '?') {
+	while ((ch = read()) >= 0 && ch != '?') {
 	}
 
-	ch = _is.read();
+	ch = read();
 	if (ch != '>')
 	  throw error(L.l("Expected '>' at end of '<?xml' declaration at {0}",
 			  charName(ch)));
@@ -789,7 +799,15 @@ public class StreamReaderImpl implements XMLStreamReader {
   {
     // XXX: need to add buffer
     
-    return _is.readChar();
+    int i = _is.readChar();
+
+    if (i == '\n') {
+      _col = 1;
+      _row++;
+    } else if (i != -1) {
+      _col++;
+    }
+    return i;
   }
 
   /**
@@ -799,6 +817,19 @@ public class StreamReaderImpl implements XMLStreamReader {
     throws IOException
   {
     _is.unread();
+    int i = _is.read();
+    _is.unread();
+
+    if (i == -1)
+      return;
+    
+    if (i == '\n') {
+      _row--;
+      _col = 1; // XXX
+    } else {
+      _col--;
+    }
+      
   }
 
   private String charName(int ch)
@@ -811,7 +842,12 @@ public class StreamReaderImpl implements XMLStreamReader {
 
   private XMLStreamException error(String s)
   {
-    return new XMLStreamException(s);
+    return new XMLStreamException(s + " " + location());
+  }
+
+  private String location()
+  {
+    return "(line " + _row + ", col " + _col +")";
   }
   
   public void close() throws XMLStreamException
@@ -832,6 +868,11 @@ public class StreamReaderImpl implements XMLStreamReader {
     char []_buffer = new char[64];
     int _prefix;
     int _length;
+
+    public String toString()
+    {
+      return new String(_buffer, 0, _length);
+    }
 
     String getLocalName()
     {
