@@ -98,7 +98,7 @@ public final class SessionManager implements ObjectManager, AlarmListener {
   private static final int DECODE[];
   
   private Application _application;
-  private final SessionManagerMXBean _admin;
+  private final SessionManagerAdmin _admin;
 
   // factory for creating sessions
   // private SessionFactory _sessionFactory;
@@ -1628,6 +1628,9 @@ public final class SessionManager implements ObjectManager, AlarmListener {
         isError = true;
       }
     }
+
+    if (_admin != null)
+      _admin.unregister();
 
     /*
     if (_clusterManager != null)

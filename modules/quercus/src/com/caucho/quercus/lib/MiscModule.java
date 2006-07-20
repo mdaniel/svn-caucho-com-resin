@@ -471,8 +471,7 @@ public class MiscModule extends AbstractQuercusModule {
 
   /**
    * Returns an array detailing what the browser is capable of.
-   * A general browscap.ini file can be used as this implementation is not
-   * bugger as PHP's implementation.
+   * A general browscap.ini file can be used.
    *
    * @param env
    * @param user_agent

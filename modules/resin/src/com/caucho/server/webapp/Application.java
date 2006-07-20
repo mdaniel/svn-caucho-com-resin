@@ -2232,10 +2232,17 @@ public class Application extends ServletContextImpl
 	_sessionManager = _parent.getSessionManager();
 
       if (_sessionManager == null) {
+	Thread thread = Thread.currentThread();
+	ClassLoader oldLoader = thread.getContextClassLoader();
+	
 	try {
+	  thread.setContextClassLoader(getClassLoader());
+	  
 	  _sessionManager = new SessionManager(this);
 	} catch (Throwable e) {
 	  log.log(Level.WARNING, e.toString(), e);
+	} finally {
+	  thread.setContextClassLoader(oldLoader);
 	}
       }
     }

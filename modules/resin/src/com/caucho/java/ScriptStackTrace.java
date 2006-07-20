@@ -165,6 +165,10 @@ public class ScriptStackTrace {
       String pathName = cl.getName().replace('.', '/') + ".class";
       
       InputStream is = loader.getResourceAsStream(pathName);
+
+      if (is == null)
+	return null;
+      
       try {
 	JavaClass jClass = new ByteCodeParser().parse(is);
 
@@ -190,7 +194,8 @@ public class ScriptStackTrace {
 	  throw new IllegalStateException(L.l("Expected opaque attribute at '{0}'",
 					      attr));
       } finally {
-	is.close();
+	if (is != null)
+	  is.close();
       }
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);

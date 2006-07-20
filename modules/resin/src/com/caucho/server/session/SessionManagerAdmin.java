@@ -285,6 +285,14 @@ public class SessionManagerAdmin extends AbstractManagedObject
 
     return className.substring(p + 1);
   }
+  
+  /**
+   * Unregisters the object with JMX.
+   */
+  public void unregister()
+  {
+    unregisterSelf();
+  }
 
   public String toString()
   {

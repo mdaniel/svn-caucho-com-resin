@@ -243,7 +243,8 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     _rs.readAll(_buffer, 4, _length - 4);
 
     // debug
-    // writeHexGroup(_buffer, 0, _length);
+    System.out.println("---");
+    writeHexGroup(_buffer, 0, _length);
 
     if (_minor == 0) {
       switch (_type) {
@@ -508,8 +509,9 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 	int start = _offset - _fragmentOffset;
 	int delta = read_long();
 	int target = start + delta;
+	
+	System.out.println("INDIRECT:" + delta);
 
-	System.out.println("INDIRECT: " + target);
 	for (int i = 0; i < _refOffsets.size(); i++) {
 	  int refOffset = _refOffsets.get(i);
 
@@ -517,7 +519,6 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 	    return _refValues.get(i);
 	}
 
-	System.out.println("NO-MATCH: " + target);
 	throw new IndirectionException(target);
       }
       else if ((code & 0x7fffff00) != 0x7fffff00) {
@@ -527,6 +528,8 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 	isChunked = (code & 8) == 8;
 	boolean hasCodeBase = (code & 1) == 1;
 	int repository = (code & 6);
+
+	System.out.println("CHUNKED:");
       
 	if (hasCodeBase) {
 	  readCodeBase();
@@ -603,7 +606,8 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 	  int newChunk = readInt();
 
 	  if (newChunk >= 0)
-	    throw new IllegalStateException("expected end of chunk.");
+	    throw new IllegalStateException(L.l("{0}: expected end of chunk {1}",
+					    getOffset(), newChunk));
 	  
 	  _chunkDepth = - (newChunk + 1);
 

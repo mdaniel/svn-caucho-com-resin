@@ -181,7 +181,9 @@ public class JmxInvocationHandler implements InvocationHandler {
     for (int i = 0; i < sig.length; i++)
       sig[i] = params[i].getName();
 
-    return _server.invoke(_name, methodName, args, sig);
+    Object value = _server.invoke(_name, methodName, args, sig);
+
+    return marshall(value, returnType);
   }
 
   private Object marshall(Object value, Class retType)
@@ -209,6 +211,11 @@ public class JmxInvocationHandler implements InvocationHandler {
       for (int i = 0; i < names.length; i++) {
 	Object proxy = Jmx.find(names[i], _loader, _server);
 
+	if (proxy == null) {
+	  Array.set(proxies, i, null);
+	  continue;
+	}
+	
 	if (! type.isInstance(proxy))
 	  return value;
 
