@@ -69,7 +69,7 @@ public class WebServiceServlet extends HttpServlet {
     if (req.getParameter("wsdl") != null) {
       resp.setContentType("text/xml");
       skeleton().dumpWSDL(Vfs.openWrite(resp.getOutputStream()),
-			 req.getRequestURL().toString());
+                         req.getRequestURL().toString());
       return;
     }
   }
@@ -80,10 +80,10 @@ public class WebServiceServlet extends HttpServlet {
     try {
 
       XMLInputFactory factory =
-	XMLInputFactory.newInstance();
+        XMLInputFactory.newInstance();
 
       XMLStreamReader xmlReader =
-	factory.createXMLStreamReader(req.getInputStream());
+        factory.createXMLStreamReader(req.getInputStream());
       
       WriteStream ws = Vfs.openWrite(resp.getOutputStream());
       skeleton().invoke(_object, xmlReader, ws);

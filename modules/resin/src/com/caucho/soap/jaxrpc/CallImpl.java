@@ -91,8 +91,8 @@ public class CallImpl implements Call {
    * Adds a parameter type and mode for the operation.
    */
   public void addParameter(String paramName,
-			   QName xmlType,
-			   ParameterMode parameterMode)
+                           QName xmlType,
+                           ParameterMode parameterMode)
     throws JAXRPCException
   {
     throw new UnsupportedOperationException();
@@ -102,9 +102,9 @@ public class CallImpl implements Call {
    * Adds a parameter type and mode for the operation.
    */
   public void addParameter(String paramName,
-			   QName xmlType,
-			   Class javaType,
-			   ParameterMode parameterMode)
+                           QName xmlType,
+                           Class javaType,
+                           ParameterMode parameterMode)
     throws JAXRPCException
   {
     throw new UnsupportedOperationException();
@@ -131,7 +131,7 @@ public class CallImpl implements Call {
    * Sets the return type.
    */
   public void setReturnType(QName xmlType,
-			    Class javaType)
+                            Class javaType)
     throws JAXRPCException
   {
     throw new UnsupportedOperationException();
@@ -295,7 +295,7 @@ public class CallImpl implements Call {
       throw new RuntimeException(e);
     } finally {
       try {
-	if (os != null) os.close();
+        if (os != null) os.close();
       } catch (Throwable e) {
       }
     }
@@ -319,12 +319,12 @@ public class CallImpl implements Call {
     writer.attribute(XMLNS, "env", "xmlns:env", SOAP_ENVELOPE);
     writer.attribute(XMLNS, "m", "xmlns:m", opName.getNamespaceURI());
     writer.attribute(SOAP_ENVELOPE, "encodingStyle", "env:encodingStyle",
-		     SOAP_ENCODING);
+                     SOAP_ENCODING);
 
     writer.startElement(SOAP_ENVELOPE, "Header", "env:Header");
     /*
     writer.attribute(SOAP_ENVELOPE, "encodingStyle", "env:encodingStyle",
-		     "ook");
+                     "ook");
     */
 
     writer.endElement(SOAP_ENVELOPE, "Header", "env:Header");
@@ -332,7 +332,7 @@ public class CallImpl implements Call {
     writer.startElement(SOAP_ENVELOPE, "Body", "env:Body");
 
     writer.startElement(opName.getNamespaceURI(), opName.getLocalPart(),
-			"m:" + opName.getLocalPart());
+                        "m:" + opName.getLocalPart());
 
     WSDLMessage input = op.getInput();
 
@@ -341,7 +341,7 @@ public class CallImpl implements Call {
     writeParams(writer, wsdlParams, params);
 
     writer.endElement(opName.getNamespaceURI(), opName.getLocalPart(),
-		      "m:" + opName.getLocalPart());
+                      "m:" + opName.getLocalPart());
 
     writer.endElement(SOAP_ENVELOPE, "Body", "env:Body");
 
@@ -355,8 +355,8 @@ public class CallImpl implements Call {
    * Starts writing an element.
    */
   private void writeParams(XMLWriter writer,
-			   ArrayList<WSDLMessage.Part> msgParts,
-			   Object []params)
+                           ArrayList<WSDLMessage.Part> msgParts,
+                           Object []params)
     throws IOException, SAXException
   {
     for (int i = 0; i < params.length; i++) {
@@ -365,11 +365,11 @@ public class CallImpl implements Call {
       String name = null;
 
       if (i < msgParts.size()) {
-	part = msgParts.get(i);
-	name = part.getName();
+        part = msgParts.get(i);
+        name = part.getName();
       }
       else
-	name = "a" + i;
+        name = "a" + i;
 
       writer.startElement("", name, name);
       writer.text(String.valueOf(param));
@@ -385,13 +385,13 @@ public class CallImpl implements Call {
   {
     if (name.getPrefix().equals("")) {
       writer.startElement(name.getNamespaceURI(),
-			  name.getLocalPart(),
-			  name.getLocalPart());
+                          name.getLocalPart(),
+                          name.getLocalPart());
     }
     else {
       writer.startElement(name.getNamespaceURI(),
-			  name.getLocalPart(),
-			  name.getPrefix() + ":" + name.getLocalPart());
+                          name.getLocalPart(),
+                          name.getPrefix() + ":" + name.getLocalPart());
     }
   }
 
@@ -403,13 +403,13 @@ public class CallImpl implements Call {
   {
     if (name.getPrefix().equals("")) {
       writer.endElement(name.getNamespaceURI(),
-			  name.getLocalPart(),
-			  name.getLocalPart());
+                          name.getLocalPart(),
+                          name.getLocalPart());
     }
     else {
       writer.endElement(name.getNamespaceURI(),
-			name.getLocalPart(),
-			name.getPrefix() + ":" + name.getLocalPart());
+                        name.getLocalPart(),
+                        name.getPrefix() + ":" + name.getLocalPart());
     }
   }
 

@@ -194,7 +194,7 @@ public class StreamReaderDelegate implements XMLStreamReader {
   }
 
   public int getTextCharacters(int sourceStart, char[] target,
-			       int targetStart, int length)
+                               int targetStart, int length)
     throws XMLStreamException
   {
     return _parent.getTextCharacters(sourceStart, target, targetStart, length);

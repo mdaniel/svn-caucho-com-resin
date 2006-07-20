@@ -79,50 +79,50 @@ class FactoryLoader {
     if (className == null) {
       
       String fileName =
-	System.getProperty("java.home") +
-	File.separatorChar +
-	"lib" +
-	File.separatorChar +
-	"stax.properties";
+        System.getProperty("java.home") +
+        File.separatorChar +
+        "lib" +
+        File.separatorChar +
+        "stax.properties";
 
       FileInputStream is = null;
       try {
-	is = new FileInputStream(new File(fileName));
+        is = new FileInputStream(new File(fileName));
 
-	Properties props = new Properties();
-	props.load(is);
+        Properties props = new Properties();
+        props.load(is);
 
-	className = props.getProperty(_factoryId);
+        className = props.getProperty(_factoryId);
 
       }
       catch (IOException e) {
-	log.log(Level.FINER, "ignoring exception", e);
+        log.log(Level.FINER, "ignoring exception", e);
 
       }
       finally {
-	if (is != null)
-	  try {
-	    is.close();
-	  } catch (IOException e) {
-	    log.log(Level.FINER, "ignoring exception", e);
-	  }
+        if (is != null)
+          try {
+            is.close();
+          } catch (IOException e) {
+            log.log(Level.FINER, "ignoring exception", e);
+          }
       }
     }
 
     if (className == null) {
       Object factory = createFactory("META-INF/services/"+_factoryId,
-				     classLoader);
+                                     classLoader);
       if (factory != null)
-	return factory;
+        return factory;
     }
 
     if (className != null) {
-	
+        
       try {
-	return classLoader.loadClass(className).newInstance();
+        return classLoader.loadClass(className).newInstance();
       }
       catch (Exception e) {
-	throw new FactoryConfigurationError(e);
+        throw new FactoryConfigurationError(e);
       }
     }
 
@@ -139,7 +139,7 @@ class FactoryLoader {
       factory = providers[i];
 
       if (factory != null)
-	return factory;
+        return factory;
     }
     
     return null;
@@ -159,12 +159,12 @@ class FactoryLoader {
       Enumeration e = loader.getResources(service);
 
       while (e.hasMoreElements()) {
-	URL url = (URL) e.nextElement();
+        URL url = (URL) e.nextElement();
 
-	Object provider = loadProvider(url, loader);
+        Object provider = loadProvider(url, loader);
 
-	if (provider != null)
-	  list.add(provider);
+        if (provider != null)
+          list.add(provider);
       }
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -186,34 +186,34 @@ class FactoryLoader {
       int ch;
 
       while ((ch = is.read()) >= 0) {
-	if (Character.isWhitespace((char) ch)) {
-	}
-	else if (ch == '#') {
-	  for (; ch >= 0 && ch != '\n' && ch != '\r'; ch = is.read()) {
-	  }
-	}
-	else {
-	  StringBuilder sb = new StringBuilder();
+        if (Character.isWhitespace((char) ch)) {
+        }
+        else if (ch == '#') {
+          for (; ch >= 0 && ch != '\n' && ch != '\r'; ch = is.read()) {
+          }
+        }
+        else {
+          StringBuilder sb = new StringBuilder();
 
-	  for (;
-	       ch >= 0 && ! Character.isWhitespace((char) ch);
-	       ch = is.read()) {
-	    sb.append((char) ch);
-	  }
+          for (;
+               ch >= 0 && ! Character.isWhitespace((char) ch);
+               ch = is.read()) {
+            sb.append((char) ch);
+          }
 
-	  String className = sb.toString();
+          String className = sb.toString();
 
-	  Class cl = Class.forName(className, false, loader);
+          Class cl = Class.forName(className, false, loader);
 
-	  return (Object) cl.newInstance();
-	}
+          return (Object) cl.newInstance();
+        }
       }
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
       try {
-	if (is != null)
-	  is.close();
+        if (is != null)
+          is.close();
       } catch (Throwable e) {
       }
     }

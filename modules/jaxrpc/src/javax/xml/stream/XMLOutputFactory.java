@@ -44,7 +44,7 @@ public abstract class XMLOutputFactory {
     throws XMLStreamException;
 
   public abstract XMLEventWriter createXMLEventWriter(OutputStream stream,
-						      String encoding)
+                                                      String encoding)
     throws XMLStreamException;
 
   public abstract XMLEventWriter createXMLEventWriter(Result result)
@@ -57,7 +57,7 @@ public abstract class XMLOutputFactory {
     throws XMLStreamException;
 
   public abstract XMLStreamWriter createXMLStreamWriter(OutputStream stream,
-							String encoding)
+                                                        String encoding)
     throws XMLStreamException;
 
   public abstract XMLStreamWriter createXMLStreamWriter(Result result)
@@ -74,11 +74,11 @@ public abstract class XMLOutputFactory {
   public static XMLOutputFactory newInstance() throws FactoryConfigurationError
   {
     return newInstance("javax.xml.stream.XMLOutputFactory",
-		       Thread.currentThread().getContextClassLoader());
+                       Thread.currentThread().getContextClassLoader());
   }
 
   public static XMLOutputFactory newInstance(String factoryId,
-					     ClassLoader classLoader)
+                                             ClassLoader classLoader)
     throws FactoryConfigurationError
   {
     return (XMLOutputFactory)FactoryLoader

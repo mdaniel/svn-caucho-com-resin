@@ -61,13 +61,13 @@ public class ServiceImpl extends Service {
     String url = portName.getNamespaceURI();
     try {
       InvocationHandler ih =
-	new ServiceImplInvocationHandler(sei, url);
+        new ServiceImplInvocationHandler(sei, url);
       Class proxyClass =
-	Proxy.getProxyClass(sei.getClassLoader(),
-			    new Class[] { sei });
+        Proxy.getProxyClass(sei.getClassLoader(),
+                            new Class[] { sei });
       T t = (T) proxyClass
-	.getConstructor(new Class[] { InvocationHandler.class })
-	.newInstance(new Object[] { ih });
+        .getConstructor(new Class[] { InvocationHandler.class })
+        .newInstance(new Object[] { ih });
       
       return t;
     } catch (Exception e) {
@@ -96,15 +96,15 @@ public class ServiceImpl extends Service {
       ReadWritePair rwp = path.openReadWrite();
       /*
       XMLStreamReader reader =
-	XMLInputFactory.newInstance()
-	.createXMLStreamReader(rwp.getReadStream());
+        XMLInputFactory.newInstance()
+        .createXMLStreamReader(rwp.getReadStream());
       */
       Object ret = 
-	_skeleton.invoke(method.getName(),
-			 //reader,
-			 null,
-			 rwp.getWriteStream(),
-			 args);
+        _skeleton.invoke(method.getName(),
+                         //reader,
+                         null,
+                         rwp.getWriteStream(),
+                         args);
       return ret==null ? new Integer(12) : null;
     }
 

@@ -103,7 +103,7 @@ public class WSDLBinding {
     if (p < 0) {
       uri = XmlUtil.getNamespace(_node, "");
       if (uri == null)
-	uri = _defs.getTargetNamespace();
+        uri = _defs.getTargetNamespace();
       qName = new QName(uri, type);
     }
     else {
@@ -116,7 +116,7 @@ public class WSDLBinding {
 
     if (_portType == null)
       throw new ConfigException(L.l("{0} is an unknown portType.",
-				    _portType));
+                                    _portType));
   }
 
   /**

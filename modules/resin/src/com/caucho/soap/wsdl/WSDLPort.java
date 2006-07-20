@@ -123,7 +123,7 @@ public class WSDLPort {
 
     if (_binding == null)
       throw new ConfigException(L.l("{0} is an unknown binding.",
-				    bindingName));
+                                    bindingName));
   }
 
   /**
@@ -148,11 +148,11 @@ public class WSDLPort {
 
       WSDLOperation op = _opMap.get(opName);
       if (op != null)
-	continue;
+        continue;
 
       WSDLOperation oldOp = portType.getOperation(opName);
       if (oldOp == null)
-	throw new NullPointerException("eep");
+        throw new NullPointerException("eep");
 
       op = new WSDLOperation(oldOp);
 

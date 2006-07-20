@@ -140,7 +140,7 @@ public class NamespaceTracker {
     {
       String oldUri = getUri(prefix);
       if (uri.equals(oldUri))
-	return;
+        return;
 
       _prefixes.put(prefix, uri);
       _uris.put(uri, prefix);
@@ -154,7 +154,7 @@ public class NamespaceTracker {
     {
       String prefix = getPrefix(uri);
       if (prefix != null)
-	return prefix;
+        return prefix;
 
       prefix = "ns"+(_uniquifier++);
       declare(prefix, uri);
@@ -167,7 +167,7 @@ public class NamespaceTracker {
       String uri = _prefixes.get(prefix);
 
       if (uri==null && _parent != null)
-	uri = _parent.getUri(prefix);
+        uri = _parent.getUri(prefix);
 
       return uri;
     }
@@ -178,7 +178,7 @@ public class NamespaceTracker {
       String prefix = _uris.get(uri);
 
       if (prefix==null && _parent != null)
-	prefix = _parent.getPrefix(prefix);
+        prefix = _parent.getPrefix(prefix);
 
       return prefix;
     }
@@ -187,11 +187,11 @@ public class NamespaceTracker {
       throws IOException
     {
       for(Map.Entry<String,String> e : _prefixes.entrySet()) {
-	ws.print("\n    xmlns:");
-	ws.print(Escapifier.escape(e.getKey()));
-	ws.print("='");
-	ws.print(Escapifier.escape(e.getValue()));
-	ws.print("' ");
+        ws.print("\n    xmlns:");
+        ws.print(Escapifier.escape(e.getKey()));
+        ws.print("='");
+        ws.print(Escapifier.escape(e.getValue()));
+        ws.print("' ");
       }
     }
   }

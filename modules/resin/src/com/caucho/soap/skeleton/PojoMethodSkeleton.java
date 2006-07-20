@@ -80,13 +80,13 @@ public class PojoMethodSkeleton {
     Class clazz = method.getDeclaringClass();
     if (clazz.isAnnotationPresent(SOAPBinding.class))
       _wrapped =
-	((SOAPBinding)clazz.getAnnotation(SOAPBinding.class)).parameterStyle()
-	== SOAPBinding.ParameterStyle.WRAPPED;
+        ((SOAPBinding)clazz.getAnnotation(SOAPBinding.class)).parameterStyle()
+        == SOAPBinding.ParameterStyle.WRAPPED;
     
     if (method.isAnnotationPresent(SOAPBinding.class))
       _wrapped =
-	((SOAPBinding)method.getAnnotation(SOAPBinding.class)).parameterStyle()
-	== SOAPBinding.ParameterStyle.WRAPPED;
+        ((SOAPBinding)method.getAnnotation(SOAPBinding.class)).parameterStyle()
+        == SOAPBinding.ParameterStyle.WRAPPED;
     
     _method = method;
 
@@ -98,20 +98,20 @@ public class PojoMethodSkeleton {
     for (int i = 0; i < param.length; i++) {
 
       _argMarshall[i] =
-	new ParameterMarshall(i, factory.createDeserializer(param[i]));
+        new ParameterMarshall(i, factory.createDeserializer(param[i]));
 
       for(Annotation a : annotations[i]) {
 
-	if (a instanceof WebParam) {
-	  WebParam webParam = (WebParam)a;
+        if (a instanceof WebParam) {
+          WebParam webParam = (WebParam)a;
 
-	  if (!webParam.name().equals("")) {
-	    _argMarshall[i]._name = webParam.name();
-	    argNames.put(webParam.name(), _argMarshall[i]);
-	    //_argMarshall[i] = null;
-	  }
+          if (!webParam.name().equals("")) {
+            _argMarshall[i]._name = webParam.name();
+            argNames.put(webParam.name(), _argMarshall[i]);
+            //_argMarshall[i] = null;
+          }
 
-	}
+        }
       }
     }
 
@@ -120,8 +120,8 @@ public class PojoMethodSkeleton {
 
     if (method.isAnnotationPresent(WebResult.class))
       _resultName =
-	new QName(method.getAnnotation(WebResult.class).targetNamespace(),
-		  method.getAnnotation(WebResult.class).name());
+        new QName(method.getAnnotation(WebResult.class).targetNamespace(),
+                  method.getAnnotation(WebResult.class).name());
     else
       _resultName = new QName("Result");
   }
@@ -130,7 +130,7 @@ public class PojoMethodSkeleton {
    * Invokes the request for a call.
    */
   public Object invoke(String name, XMLStreamReader in, WriteStream out,
-		       Object[] args, String namespace)
+                       Object[] args, String namespace)
     throws IOException, XMLStreamException
   {
     out.println("<env:Envelope");
@@ -139,8 +139,8 @@ public class PojoMethodSkeleton {
     out.println("<"+name+" xmlns='"+namespace+"'>");
     if (args != null)
       for(int i=0; i<args.length; i++) {
-	if (_argMarshall[i] != null)
-	  _argMarshall[i].serialize(args[i], out);
+        if (_argMarshall[i] != null)
+          _argMarshall[i].serialize(args[i], out);
       }
     out.println("</"+name+"'>");
     out.println("</env:Body>");
@@ -161,13 +161,13 @@ public class PojoMethodSkeleton {
     for (int i = 0; i < args.length; i++) {
 
       if (in.nextTag() != in.START_ELEMENT)
-	throw new IOException("expected <argName>");
+        throw new IOException("expected <argName>");
 
       String tagName = in.getLocalName();
 
       ParameterMarshall marshall = argNames.get(tagName);
       if (marshall == null)
-	marshall = _argMarshall[i];
+        marshall = _argMarshall[i];
 
       args[marshall._arg] = marshall._marshall.deserialize(in);
 

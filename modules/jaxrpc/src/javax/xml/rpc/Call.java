@@ -63,17 +63,17 @@ public interface Call {
    * Adds a parameter type and mode for the operation.
    */
   public void addParameter(String paramName,
-			   QName xmlType,
-			   ParameterMode parameterMode)
+                           QName xmlType,
+                           ParameterMode parameterMode)
     throws JAXRPCException;
 
   /**
    * Adds a parameter type and mode for the operation.
    */
   public void addParameter(String paramName,
-			   QName xmlType,
-			   Class javaType,
-			   ParameterMode parameterMode)
+                           QName xmlType,
+                           Class javaType,
+                           ParameterMode parameterMode)
     throws JAXRPCException;
 
   /**
@@ -91,7 +91,7 @@ public interface Call {
    * Sets the return type.
    */
   public void setReturnType(QName xmlType,
-			    Class javaType)
+                            Class javaType)
     throws JAXRPCException;
 
   /**

@@ -53,7 +53,7 @@ public class WebServiceIntrospector {
   {
     if (! type.isAnnotationPresent(WebService.class))
       throw new RuntimeException(L.l("{0}: needs a @WebService annotation.  WebServices need a @WebService annotation.",
-				    type.getName()));
+                                    type.getName()));
 
     MarshallFactory marshallFactory = new MarshallFactory();
 
@@ -66,22 +66,22 @@ public class WebServiceIntrospector {
     for (int i = 0; i < methods.length; i++) {
 
       if ((methods[i].getModifiers() & Modifier.PUBLIC) == 0)
-	continue;
+        continue;
 
       WebMethod webMethod = methods[i].getAnnotation(WebMethod.class);
 
       if (webService == null && webMethod == null)
-	continue;
+        continue;
 
       if (webMethod == null && methods[i].getDeclaringClass() != type)
-	continue;
+        continue;
 
       // XXX: needs test
       if (webMethod != null && webMethod.exclude())
-	continue;
+        continue;
 
       PojoMethodSkeleton methodSkel
-	= new PojoMethodSkeleton(methods[i], marshallFactory);
+        = new PojoMethodSkeleton(methods[i], marshallFactory);
 
       String name = webMethod==null ? "" : webMethod.operationName();
       if (name.equals(""))

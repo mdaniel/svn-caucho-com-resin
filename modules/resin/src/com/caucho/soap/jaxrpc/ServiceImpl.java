@@ -100,7 +100,7 @@ public class ServiceImpl implements Service {
 
     if (op == null)
       throw new ServiceException(L.l("{0} is an unknown operation in {1}",
-				     portName, opName));
+                                     portName, opName));
 
     return new CallImpl(port, op);
   }
@@ -141,7 +141,7 @@ public class ServiceImpl implements Service {
    * Creates a port.
    */
   public java.rmi.Remote getPort(QName portName,
-				 Class serviceEndpointInterface)
+                                 Class serviceEndpointInterface)
   {
     throw new UnsupportedOperationException();
   }
@@ -188,7 +188,7 @@ public class ServiceImpl implements Service {
 
     if (port == null)
       throw new ServiceException(L.l("'{0}' is an unknown port in service '{1}'",
-				     portName, getServiceName()));
+                                     portName, getServiceName()));
 
     return port;
   }

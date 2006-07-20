@@ -48,7 +48,7 @@ public interface Service {
    * Returns an implementation of the generated stub.
    */
   public Remote getPort(QName portName,
-			Class serviceEndpoingInterface)
+                        Class serviceEndpoingInterface)
     throws ServiceException;
   
   /**
@@ -73,14 +73,14 @@ public interface Service {
    * Returns the call for the port.
    */
   public Call createCall(QName portName,
-			 QName operationName)
+                         QName operationName)
     throws ServiceException;
   
   /**
    * Returns the call for the port.
    */
   public Call createCall(QName portName,
-			 String operationName)
+                         String operationName)
     throws ServiceException;
   
   /**

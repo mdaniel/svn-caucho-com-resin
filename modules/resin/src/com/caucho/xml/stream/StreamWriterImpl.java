@@ -122,17 +122,17 @@ public class StreamWriterImpl implements XMLStreamWriter {
   }
 
   public void writeAttribute(String namespaceURI, String localName,
-			     String value)
+                             String value)
     throws XMLStreamException
   {
     writeAttribute(_tracker.declare(namespaceURI),
-		   namespaceURI,
-		   localName,
-		   value);
+                   namespaceURI,
+                   localName,
+                   value);
   }
 
   public void writeAttribute(String prefix, String namespaceURI,
-			     String localName, String value)
+                             String localName, String value)
     throws XMLStreamException
   {
     try {
@@ -229,12 +229,12 @@ public class StreamWriterImpl implements XMLStreamWriter {
     throws XMLStreamException
   {
     writeEmptyElement(_tracker.declare(namespaceURI),
-		      localName,
-		      namespaceURI);
+                      localName,
+                      namespaceURI);
   }
 
   public void writeEmptyElement(String prefix, String localName,
-				String namespaceURI)
+                                String namespaceURI)
     throws XMLStreamException
   {
     try {
@@ -337,12 +337,12 @@ public class StreamWriterImpl implements XMLStreamWriter {
     throws XMLStreamException
   {
     writeStartElement(_tracker.declare(namespaceURI),
-		      localName,
-		      namespaceURI);
+                      localName,
+                      namespaceURI);
   }
 
   public void writeStartElement(String prefix, String localName,
-				String namespaceURI)
+                                String namespaceURI)
     throws XMLStreamException
   {
     try {

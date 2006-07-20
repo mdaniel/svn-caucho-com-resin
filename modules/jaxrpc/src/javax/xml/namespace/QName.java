@@ -124,7 +124,7 @@ public class QName implements java.io.Serializable {
     QName name = (QName) o;
 
     return (this.localPart.equals(name.localPart) &&
-	    this.namespaceURI.equals(name.namespaceURI));
+            this.namespaceURI.equals(name.namespaceURI));
   }
 
   /**

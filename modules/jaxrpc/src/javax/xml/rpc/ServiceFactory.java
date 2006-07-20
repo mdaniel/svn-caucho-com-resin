@@ -147,7 +147,7 @@ abstract public class ServiceFactory {
    * Creates an instance of the factory.
    */
   public abstract Service createService(URL wsdlDocumentLocation,
-					QName serviceName)
+                                        QName serviceName)
     throws ServiceException;
 
   /**
@@ -166,15 +166,15 @@ abstract public class ServiceFactory {
    * Creates an instance of the factory.
    */
   public abstract Service loadService(URL wsdlDocumentLocation,
-				      Class serviceInterface,
-				      Properties properties)
+                                      Class serviceInterface,
+                                      Properties properties)
     throws ServiceException;
 
   /**
    * Loads the service.
    */
   public abstract Service loadService(URL wsdlDocumentLocation,
-				      QName serviceName,
-				      Properties properties)
+                                      QName serviceName,
+                                      Properties properties)
     throws ServiceException;
 }

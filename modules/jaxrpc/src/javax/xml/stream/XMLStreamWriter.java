@@ -57,11 +57,11 @@ public interface XMLStreamWriter {
     throws XMLStreamException;
 
   public void writeAttribute(String namespaceURI, String localName,
-			     String value)
+                             String value)
     throws XMLStreamException;
 
   public void writeAttribute(String prefix, String namespaceURI,
-			     String localName, String value)
+                             String localName, String value)
     throws XMLStreamException;
 
   public void writeCData(String data)
@@ -89,7 +89,7 @@ public interface XMLStreamWriter {
     throws XMLStreamException;
 
   public void writeEmptyElement(String prefix, String localName,
-				String namespaceURI)
+                                String namespaceURI)
     throws XMLStreamException;
 
   public void writeEndDocument()
@@ -126,7 +126,7 @@ public interface XMLStreamWriter {
     throws XMLStreamException;
 
   public void writeStartElement(String prefix, String localName,
-				String namespaceURI)
+                                String namespaceURI)
     throws XMLStreamException;
 }
 

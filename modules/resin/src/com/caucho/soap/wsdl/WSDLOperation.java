@@ -136,7 +136,7 @@ public class WSDLOperation {
       Param param = _params.get(i);
 
       if (param instanceof Input) {
-	return param.getMessage();
+        return param.getMessage();
       }
     }
 
@@ -171,20 +171,20 @@ public class WSDLOperation {
       QName messageName;
 
       if (p < 0) {
-	uri = XmlUtil.getNamespace(_node, "");
-	messageName = new QName(uri, name);
+        uri = XmlUtil.getNamespace(_node, "");
+        messageName = new QName(uri, name);
       }
       else {
-	String prefix = name.substring(0, p);
-	uri = XmlUtil.getNamespace(_node, prefix);
-	messageName = new QName(uri, name.substring(p + 1), prefix);
+        String prefix = name.substring(0, p);
+        uri = XmlUtil.getNamespace(_node, prefix);
+        messageName = new QName(uri, name.substring(p + 1), prefix);
       }
 
       _message = _defs.getMessage(messageName);
 
       if (_message == null)
-	throw new ConfigException(L.l("{0} is an unknown message.",
-				      messageName));
+        throw new ConfigException(L.l("{0} is an unknown message.",
+                                      messageName));
     }
 
     public WSDLMessage getMessage()

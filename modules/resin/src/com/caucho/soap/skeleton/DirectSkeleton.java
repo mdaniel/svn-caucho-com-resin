@@ -87,8 +87,8 @@ public class DirectSkeleton extends Skeleton {
       String packageName = type.getPackage().getName();
       StringTokenizer st = new StringTokenizer(packageName, ".");
       while(st.hasMoreTokens())
-	_namespace = st.nextToken() +
-	  (_namespace==null ? "" : ("."+_namespace));
+        _namespace = st.nextToken() +
+          (_namespace==null ? "" : ("."+_namespace));
 
       _namespace = "http://"+_namespace+"/";
 
@@ -114,9 +114,9 @@ public class DirectSkeleton extends Skeleton {
    * Invokes the request on a remote object using an outbound XML stream.
    */
   public Object invoke(String name,
-		       XMLStreamReader in,
-		       WriteStream out,
-		       Object[] args)
+                       XMLStreamReader in,
+                       WriteStream out,
+                       Object[] args)
     throws IOException, XMLStreamException
   {
     return _actionMap.get(name).invoke(name, in, out, args, _namespace);
@@ -126,8 +126,8 @@ public class DirectSkeleton extends Skeleton {
    * Invokes the request on a local object using an inbound XML stream.
    */
   public void invoke(Object service,
-		     XMLStreamReader in,
-		     WriteStream out)
+                     XMLStreamReader in,
+                     WriteStream out)
     throws IOException, XMLStreamException
   {
     in.nextTag();
@@ -189,16 +189,16 @@ public class DirectSkeleton extends Skeleton {
     w.println("  xmlns='http://schemas.xmlsoap.org/wsdl/'>");
     w.println("<wsdl:portType name='"+_typeName+"' />");
     w.println("<wsdl:binding name='"+_serviceName+
-	      "' type='tns:"+_typeName+"'>");
+              "' type='tns:"+_typeName+"'>");
     w.println("<wsdlsoap:binding style='document' "+
-	      "transport='http://schemas.xmlsoap.org/soap/http' />");
+              "transport='http://schemas.xmlsoap.org/soap/http' />");
     w.println("</wsdl:binding>");
     w.println("<wsdl:service name='"+_serviceName+"'>");
     w.println("<wsdl:port name='"+_portName+"' binding='tns:"+
-	      _serviceName+"'>");
+              _serviceName+"'>");
     w.println("<wsdlsoap:address location='"+
-	      (_wsdlLocation == null ? address : _wsdlLocation)+
-	      "' />");
+              (_wsdlLocation == null ? address : _wsdlLocation)+
+              "' />");
     w.println("</wsdl:port>");
     w.println("</wsdl:service>");
     w.println("</wsdl:definitions>");

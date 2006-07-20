@@ -90,7 +90,7 @@ public interface XMLStreamReader extends XMLStreamConstants {
   public char[] getTextCharacters();
   
   public int getTextCharacters(int sourceStart, char[] target,
-			       int targetStart, int length)
+                               int targetStart, int length)
     throws XMLStreamException;
 
   public int getTextLength();

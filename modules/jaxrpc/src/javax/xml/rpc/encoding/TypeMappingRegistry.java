@@ -36,7 +36,7 @@ public interface TypeMappingRegistry extends java.io.Serializable {
    * Registers a TypeMapping with an encoding style.
    */
   public TypeMapping register(String encodingStyleURI,
-			      TypeMapping mapping);
+                              TypeMapping mapping);
   
   /**
    * Registers the TypeMapping as a default.

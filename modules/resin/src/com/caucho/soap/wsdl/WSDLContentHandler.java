@@ -75,7 +75,7 @@ public class WSDLContentHandler extends DefaultHandler {
    * Starts a WSDL element.
    */
   public void startElement (String uri, String localName,
-			    String qName, Attributes attributes)
+                            String qName, Attributes attributes)
     throws SAXException
   {
     QName qname = new QName(uri, localName);
@@ -84,86 +84,86 @@ public class WSDLContentHandler extends DefaultHandler {
     case TOP:
       switch (getKeyword(qname)) {
       case WSDL_DEFINITIONS:
-	_state = WSDL_DEFINITIONS;
-	break;
+        _state = WSDL_DEFINITIONS;
+        break;
 
       default:
-	throw error(L.l("Expected <wsdl:descriptions> at <{0}>.", qName));
+        throw error(L.l("Expected <wsdl:descriptions> at <{0}>.", qName));
       }
       break;
       
     case WSDL_DEFINITIONS:
       switch (getKeyword(qname)) {
       case WSDL_IMPORT:
-	_state = WSDL_IMPORT;
-	break;
+        _state = WSDL_IMPORT;
+        break;
 
       case WSDL_TYPES:
-	_state = WSDL_TYPES;
-	break;
+        _state = WSDL_TYPES;
+        break;
 
       case WSDL_MESSAGE:
-	_state = WSDL_MESSAGE;
-	break;
+        _state = WSDL_MESSAGE;
+        break;
 
       case WSDL_PORT_TYPE:
-	_state = WSDL_PORT_TYPE;
-	break;
+        _state = WSDL_PORT_TYPE;
+        break;
 
       case WSDL_BINDING:
-	_state = WSDL_BINDING;
-	break;
+        _state = WSDL_BINDING;
+        break;
 
       case WSDL_SERVICE:
-	_state = WSDL_SERVICE;
-	break;
+        _state = WSDL_SERVICE;
+        break;
 
       default:
-	throw error(L.l("<{0}> is an unexpected tag.", qName));
+        throw error(L.l("<{0}> is an unexpected tag.", qName));
       }
       break;
       
     case WSDL_MESSAGE:
       switch (getKeyword(qname)) {
       case WSDL_PART:
-	_state = WSDL_PART;
-	break;
-	
+        _state = WSDL_PART;
+        break;
+        
       default:
-	throw error(L.l("<{0}> is an unexpected tag.", qName));
+        throw error(L.l("<{0}> is an unexpected tag.", qName));
       }
       break;
       
     case WSDL_PORT_TYPE:
       switch (getKeyword(qname)) {
       case WSDL_OPERATION:
-	_state = WSDL_OPERATION;
-	break;
-	
+        _state = WSDL_OPERATION;
+        break;
+        
       default:
-	throw error(L.l("<{0}> is an unexpected tag.", qName));
+        throw error(L.l("<{0}> is an unexpected tag.", qName));
       }
       break;
       
     case WSDL_BINDING:
       switch (getKeyword(qname)) {
       case WSDL_OPERATION:
-	_state = WSDL_BINDING_OPERATION;
-	break;
-	
+        _state = WSDL_BINDING_OPERATION;
+        break;
+        
       default:
-	throw error(L.l("<{0}> is an unexpected tag.", qName));
+        throw error(L.l("<{0}> is an unexpected tag.", qName));
       }
       break;
       
     case WSDL_SERVICE:
       switch (getKeyword(qname)) {
       case WSDL_PORT:
-	_state = WSDL_PORT;
-	break;
-	
+        _state = WSDL_PORT;
+        break;
+        
       default:
-	throw error(L.l("<{0}> is an unexpected tag.", qName));
+        throw error(L.l("<{0}> is an unexpected tag.", qName));
       }
       break;
 
@@ -183,100 +183,100 @@ public class WSDLContentHandler extends DefaultHandler {
     switch (_state) {
     case WSDL_DEFINITIONS:
       if (getKeyword(qname) == WSDL_DEFINITIONS)
-	_state = TOP;
+        _state = TOP;
       else
-	throw error(L.l("</{0}> is an unexpected end tag.", qName));
+        throw error(L.l("</{0}> is an unexpected end tag.", qName));
       break;
       
     case WSDL_IMPORT:
       if (getKeyword(qname) == WSDL_IMPORT)
-	_state = WSDL_DEFINITIONS;
+        _state = WSDL_DEFINITIONS;
       else
-	throw error(L.l("</{0}> is an unexpected end tag.", qName));
+        throw error(L.l("</{0}> is an unexpected end tag.", qName));
       break;
       
     case WSDL_TYPES:
       if (getKeyword(qname) == WSDL_TYPES)
-	_state = WSDL_DEFINITIONS;
+        _state = WSDL_DEFINITIONS;
       else
-	throw error(L.l("</{0}> is an unexpected end tag.", qName));
+        throw error(L.l("</{0}> is an unexpected end tag.", qName));
       break;
       
     case WSDL_MESSAGE:
       if (getKeyword(qname) == WSDL_MESSAGE)
-	_state = WSDL_DEFINITIONS;
+        _state = WSDL_DEFINITIONS;
       else
-	throw error(L.l("</{0}> is an unexpected end tag.", qName));
+        throw error(L.l("</{0}> is an unexpected end tag.", qName));
       break;
       
     case WSDL_PORT_TYPE:
       if (getKeyword(qname) == WSDL_PORT_TYPE)
-	_state = WSDL_DEFINITIONS;
+        _state = WSDL_DEFINITIONS;
       else
-	throw error(L.l("</{0}> is an unexpected end tag.", qName));
+        throw error(L.l("</{0}> is an unexpected end tag.", qName));
       break;
       
     case WSDL_BINDING:
       if (getKeyword(qname) == WSDL_BINDING)
-	_state = WSDL_DEFINITIONS;
+        _state = WSDL_DEFINITIONS;
       else
-	throw error(L.l("</{0}> is an unexpected end tag.", qName));
+        throw error(L.l("</{0}> is an unexpected end tag.", qName));
       break;
       
     case WSDL_SERVICE:
       if (getKeyword(qname) == WSDL_SERVICE)
-	_state = WSDL_DEFINITIONS;
+        _state = WSDL_DEFINITIONS;
       else
-	throw error(L.l("</{0}> is an unexpected end tag.", qName));
+        throw error(L.l("</{0}> is an unexpected end tag.", qName));
       break;
       
     case WSDL_PART:
       if (getKeyword(qname) == WSDL_PART)
-	_state = WSDL_MESSAGE;
+        _state = WSDL_MESSAGE;
       else
-	throw error(L.l("</{0}> is an unexpected end tag.", qName));
+        throw error(L.l("</{0}> is an unexpected end tag.", qName));
       break;
       
     case WSDL_OPERATION:
       if (getKeyword(qname) == WSDL_OPERATION)
-	_state = WSDL_PORT_TYPE;
+        _state = WSDL_PORT_TYPE;
       else
-	throw error(L.l("</{0}> is an unexpected end tag.", qName));
+        throw error(L.l("</{0}> is an unexpected end tag.", qName));
       break;
       
     case WSDL_INPUT:
       if (getKeyword(qname) == WSDL_INPUT)
-	_state = WSDL_OPERATION;
+        _state = WSDL_OPERATION;
       else
-	throw error(L.l("</{0}> is an unexpected end tag.", qName));
+        throw error(L.l("</{0}> is an unexpected end tag.", qName));
       break;
       
     case WSDL_OUTPUT:
       if (getKeyword(qname) == WSDL_OUTPUT)
-	_state = WSDL_OPERATION;
+        _state = WSDL_OPERATION;
       else
-	throw error(L.l("</{0}> is an unexpected end tag.", qName));
+        throw error(L.l("</{0}> is an unexpected end tag.", qName));
       break;
       
     case WSDL_FAULT:
       if (getKeyword(qname) == WSDL_FAULT)
-	_state = WSDL_OPERATION;
+        _state = WSDL_OPERATION;
       else
-	throw error(L.l("</{0}> is an unexpected end tag.", qName));
+        throw error(L.l("</{0}> is an unexpected end tag.", qName));
       break;
       
     case WSDL_PORT:
       if (getKeyword(qname) == WSDL_PORT)
-	_state = WSDL_SERVICE;
+        _state = WSDL_SERVICE;
       else
-	throw error(L.l("</{0}> is an unexpected end tag.", qName));
+        throw error(L.l("</{0}> is an unexpected end tag.", qName));
       break;
       
     case WSDL_BINDING_OPERATION:
       if (getKeyword(qname) == WSDL_OPERATION)
-	_state = WSDL_BINDING;
+        _state = WSDL_BINDING;
       else
-	throw error(L.l("</{0}> is an unexpected end tag.", qName));
+        throw error(L.l("</{0}> is an unexpected end tag.", qName));
       break;
 
     default:

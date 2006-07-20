@@ -45,7 +45,7 @@ public abstract class XMLEventFactory {
   public abstract Attribute createAttribute(String localName, String value);
 
   public abstract Attribute createAttribute(String prefix, String namespaceURI,
-					    String localName, String value);
+                                            String localName, String value);
 
   public abstract Characters createCData(String content);
 
@@ -60,13 +60,13 @@ public abstract class XMLEventFactory {
   public abstract EndElement createEndElement(QName name, Iterator namespaces);
 
   public abstract EndElement createEndElement(String prefix,
-					      String namespaceUri,
-					      String localName);
+                                              String namespaceUri,
+                                              String localName);
 
   public abstract EndElement createEndElement(String prefix,
-					      String namespaceUri,
-					      String localName,
-					      Iterator namespaces);
+                                              String namespaceUri,
+                                              String localName,
+                                              Iterator namespaces);
 
   public abstract EntityReference
     createEntityReference(String name, EntityDeclaration declaration);
@@ -87,41 +87,41 @@ public abstract class XMLEventFactory {
   public abstract StartDocument createStartDocument(String encoding);
 
   public abstract StartDocument createStartDocument(String encoding,
-						    String version);
+                                                    String version);
 
   public abstract StartDocument createStartDocument(String encoding,
-						    String version,
-						    boolean standalone);
+                                                    String version,
+                                                    boolean standalone);
 
   public abstract StartElement createStartElement(QName name,
-						  Iterator attributes,
-						  Iterator namespaces);
+                                                  Iterator attributes,
+                                                  Iterator namespaces);
 
   public abstract StartElement createStartElement(String prefix,
-						  String namespaceUri,
-						  String localName);
+                                                  String namespaceUri,
+                                                  String localName);
 
   public abstract StartElement createStartElement(String prefix,
-						  String namespaceUri,
-						  String localName,
-						  Iterator attributes,
-						  Iterator namespaces);
+                                                  String namespaceUri,
+                                                  String localName,
+                                                  Iterator attributes,
+                                                  Iterator namespaces);
 
   public abstract StartElement createStartElement(String prefix,
-						  String namespaceUri,
-						  String localName,
-						  Iterator attributes,
-						  Iterator namespaces,
-						  NamespaceContext context);
+                                                  String namespaceUri,
+                                                  String localName,
+                                                  Iterator attributes,
+                                                  Iterator namespaces,
+                                                  NamespaceContext context);
 
   public static XMLEventFactory newInstance() throws FactoryConfigurationError
   {
     return newInstance("javax.xml.stream.XMLEventFactory",
-		       Thread.currentThread().getContextClassLoader());
+                       Thread.currentThread().getContextClassLoader());
   }
 
   public static XMLEventFactory newInstance(String factoryId,
-					    ClassLoader classLoader)
+                                            ClassLoader classLoader)
     throws FactoryConfigurationError
   {
     return (XMLEventFactory)FactoryLoader

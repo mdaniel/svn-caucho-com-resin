@@ -78,7 +78,7 @@ public class ServiceFactoryImpl extends ServiceFactory {
 
     if (service == null)
       throw new ServiceException(L.l("'{0}' is an unknown service in {1}.",
-				     serviceName, wsdl));
+                                     serviceName, wsdl));
 
     return new ServiceImpl(service);
   }
@@ -95,8 +95,8 @@ public class ServiceFactoryImpl extends ServiceFactory {
    * Creates a service given an interface.
    */
   public Service loadService(URL wsdl,
-			     Class serviceInterface,
-			     Properties properties)
+                             Class serviceInterface,
+                             Properties properties)
     throws ServiceException
   {
     parseWSDL(wsdl);
@@ -108,8 +108,8 @@ public class ServiceFactoryImpl extends ServiceFactory {
    * Creates a service given an interface.
    */
   public Service loadService(URL wsdl,
-			     QName serviceName,
-			     Properties properties)
+                             QName serviceName,
+                             Properties properties)
     throws ServiceException
   {
     parseWSDL(wsdl);
@@ -126,9 +126,9 @@ public class ServiceFactoryImpl extends ServiceFactory {
     try {
       InputStream is = wsdl.openStream();
       try {
-	return WSDLParser.parse(is, wsdl.toString());
+        return WSDLParser.parse(is, wsdl.toString());
       } finally {
-	is.close();
+        is.close();
       }
     } catch (Exception e) {
       throw new ServiceException(e);

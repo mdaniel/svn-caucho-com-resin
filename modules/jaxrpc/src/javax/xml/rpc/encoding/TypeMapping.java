@@ -53,30 +53,30 @@ public interface TypeMapping {
    * Registers the type.
    */
   public void register(Class javaType, QName xmlType,
-		       SerializerFactory sf,
-		       DeserializerFactory dsf);
+                       SerializerFactory sf,
+                       DeserializerFactory dsf);
 
   /**
    * Returns the serializer for the java type.
    */
   public SerializerFactory getSerializer(Class javaType,
-					 QName xmlType);
+                                         QName xmlType);
 
   /**
    * Returns the deserializer for the java type.
    */
   public DeserializerFactory getDeserializer(Class javaType,
-					     QName xmlType);
+                                             QName xmlType);
 
   /**
    * Removes the serializer for the java type.
    */
   public void removeSerializer(Class javaType,
-			       QName xmlType);
+                               QName xmlType);
 
   /**
    * Removes the deserializer for the java type.
    */
   public void removeDeserializer(Class javaType,
-				 QName xmlType);
+                                 QName xmlType);
 }

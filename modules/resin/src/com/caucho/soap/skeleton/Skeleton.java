@@ -55,14 +55,14 @@ abstract public class Skeleton {
    * Invokes the request.
    */
   abstract public void invoke(Object service,
-			      XMLStreamReader in,
-			      WriteStream out)
+                              XMLStreamReader in,
+                              WriteStream out)
     throws IOException, XMLStreamException;
 
   abstract public Object invoke(String name,
-				XMLStreamReader in,
-				WriteStream out,
-				Object[] args)
+                                XMLStreamReader in,
+                                WriteStream out,
+                                Object[] args)
     throws IOException, XMLStreamException;
 }
 

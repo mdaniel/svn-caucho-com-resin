@@ -92,12 +92,12 @@ public abstract class CDataMarshall extends Marshall {
     for(int i=0; i<len; i++) {
       char c = s.charAt(i);
       if ((c < 32 || c > 127) || c=='\'' || c=='\"' ||
-	  c=='<' || c=='>' || c=='&') {
-	out.print("&#");
-	out.print((int)c);
-	out.print(";");
+          c=='<' || c=='>' || c=='&') {
+        out.print("&#");
+        out.print((int)c);
+        out.print(";");
       } else {
-	out.print(c);
+        out.print(c);
       }
     }
 
