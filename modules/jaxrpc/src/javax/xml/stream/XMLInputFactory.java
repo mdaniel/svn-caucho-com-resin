@@ -142,9 +142,8 @@ public abstract class XMLInputFactory {
     XMLInputFactory ret =
       newInstance("javax.xml.stream.XMLInputFactory",
 		  Thread.currentThread().getContextClassLoader());
-    if (ret==null)
-      ret = new com.caucho.xml.stream.XMLInputFactoryImpl();
-    return ret;
+
+    throw new FactoryConfigurationError("No factory defined");
   }
 
   public static XMLInputFactory newInstance(String factoryId,
