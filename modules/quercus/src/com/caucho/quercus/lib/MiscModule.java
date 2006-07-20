@@ -469,7 +469,7 @@ public class MiscModule extends AbstractQuercusModule {
     return seconds;
   }
 
- /**
+  /**
    * Returns an array detailing what the browser is capable of.
    * A general browscap.ini file can be used as this implementation is not
    * bugger as PHP's implementation.
@@ -503,20 +503,20 @@ public class MiscModule extends AbstractQuercusModule {
       return BooleanValue.FALSE;
     }
 
-    return getBrowserCapabilities(env, path, user_agent, return_array);
-  }
-
-  private static Value getBrowserCapabilities(
-                       Env env,
-                       Path path,
-                       String user_agent,
-                       boolean return_array)
-  {
     Value ini = FileModule.parse_ini_file(env, path, true);
     if (ini == BooleanValue.FALSE)
       return BooleanValue.FALSE;
-    ArrayValue browsers = ini.toArrayValue(env);
 
+    return getBrowserReport(
+        env, ini.toArrayValue(env), user_agent, return_array);
+  }
+
+  private static Value getBrowserReport(
+                       Env env,
+                       ArrayValue browsers,
+                       String user_agent,
+                       boolean return_array)
+  {
     StringValue patternMatched = StringValue.EMPTY;
     String regExpMatched = null;
 
@@ -544,6 +544,18 @@ public class MiscModule extends AbstractQuercusModule {
     if (patternMatched.length() == 0)
       return BooleanValue.FALSE;
 
+    return prepareBrowserReport(env, browsers, patternMatched, regExpMatched,
+        user_agent, return_array);
+  }
+
+  private static Value prepareBrowserReport(
+                       Env env,
+                       ArrayValue browsers,
+                       StringValue patternMatched, 
+                       String regExpMatched,
+                       String user_agent,
+                       boolean return_array)
+  {
     ArrayValue capabilities = browsers.get(patternMatched).toArrayValue(env);
 
     if (regExpMatched == null)
@@ -562,11 +574,12 @@ public class MiscModule extends AbstractQuercusModule {
       array.put(new StringValueImpl(user_agent), capabilities);
       return array;
     }
-    
+
     ObjectValue object = env.createObject();
     for (Map.Entry<Value,Value> entry : capabilities.entrySet()) {
       object.putFieldInit(env, entry.getKey().toString(), entry.getValue());
     }
+    
     return object;
   }
   

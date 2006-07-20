@@ -359,62 +359,58 @@ public class OptionsModule extends AbstractQuercusModule {
       }
       extension += ".";
     }
+  
+    return getAllDirectives(env, extension);
+  }
 
+  private static Value getAllDirectives(Env env, String prefix)
+  {
     ArrayValue directives = new ArrayValueImpl();
+
     Value global = new StringValueImpl("global_value");
     Value local = new StringValueImpl("local_value");
     Value access = new StringValueImpl("access");
 
-    Value onValue = new StringValueImpl("1");
     Value level = new LongValue(7);
 
     HashMap<String, StringValue> iniMap =
-        env.getQuercus().getIniAll(extension);
+        env.getQuercus().getIniAll(prefix);
 
     for (Map.Entry<String,StringValue> entry : iniMap.entrySet()) {
+      ArrayValue inner = new ArrayValueImpl();
+      
       String key = entry.getKey();
       Value globalVal = entry.getValue();
-      char ch;
 
       if (globalVal == null)
-        globalVal = NullValue.NULL;
-      else if (((StringValue)globalVal).length() == 2) {
-        if (((ch = ((StringValue)globalVal).charAt(0)) == 'o' || ch == 'O') &&
-            ((ch = ((StringValue)globalVal).charAt(1)) == 'n' || ch == 'N'))
-          globalVal = onValue;
+        inner.put(NullValue.NULL);
+      else {
+        globalVal = formatIniValue(globalVal);
+        inner.put(global, globalVal);
       }
-      else if (((StringValue)globalVal).length() == 3) {
-        if (((ch = ((StringValue)globalVal).charAt(0)) == 'o' || ch == 'O') &&
-            ((ch = ((StringValue)globalVal).charAt(1)) == 'f' || ch == 'F') &&
-            ((ch = ((StringValue)globalVal).charAt(2)) == 'f' || ch == 'F'))
-          globalVal = StringValue.EMPTY;
-      }
-
-      ArrayValue inner = new ArrayValueImpl();
-      inner.put(global, globalVal);
 
       Value localVal = env.getIni(key);
       if (localVal == null)
-        localVal = globalVal;
-      else if (((StringValue)localVal).length() == 2) {
-        if (((ch = ((StringValue)localVal).charAt(0)) == 'o' || ch == 'O') &&
-            ((ch = ((StringValue)localVal).charAt(1)) == 'n' || ch == 'N'))
-          localVal = onValue;
-      }
-      else if (((StringValue)localVal).length() == 3) {
-        if (((ch = ((StringValue)localVal).charAt(0)) == 'o' || ch == 'O') &&
-            ((ch = ((StringValue)localVal).charAt(1)) == 'f' || ch == 'F') &&
-            ((ch = ((StringValue)localVal).charAt(2)) == 'f' || ch == 'F'))
-          localVal = StringValue.EMPTY;
-      }
+        inner.put(local, globalVal);
+      else
+        inner.put(local, formatIniValue(localVal));
 
-      inner.put(local, localVal);
       inner.put(access, level);
-
       directives.put(new StringValueImpl(key), inner);
     }
 
     return directives;
+  }
+  
+  private static Value formatIniValue(Value val)
+  {
+    String string = val.toString().toLowerCase();
+    if ("on".equals(string))
+      return new StringValueImpl("1");
+    else if ("off".equals(string))
+      return StringValue.EMPTY;
+
+    return val;
   }
 
   /**
