@@ -411,6 +411,8 @@ public class SerializerFactory extends AbstractSerializerFactory {
     _deserializerMap = new HashMap();
     _typeMap = new HashMap();
 
+    addBasic(void.class, "void", BasicSerializer.NULL);
+    
     addBasic(Boolean.class, "boolean", BasicSerializer.BOOLEAN);
     addBasic(Byte.class, "byte", BasicSerializer.BYTE);
     addBasic(Short.class, "short", BasicSerializer.SHORT);

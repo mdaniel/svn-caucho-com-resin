@@ -145,6 +145,11 @@ public class BasicDeserializer extends AbstractDeserializer {
     throws IOException
   {
     switch (_code) {
+    case NULL:
+      in.readObject();
+      
+      return null;
+      
     case BOOLEAN:
       return new Boolean(in.readBoolean());
       

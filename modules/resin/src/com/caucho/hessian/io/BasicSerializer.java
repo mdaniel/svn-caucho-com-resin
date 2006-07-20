@@ -272,6 +272,10 @@ public class BasicSerializer extends AbstractSerializer {
 	out.writeListEnd();
       break;
     }
+    
+    case NULL:
+      out.writeNull();
+      break;
 
     default:
       throw new RuntimeException(code + " " + String.valueOf(obj.getClass()));
