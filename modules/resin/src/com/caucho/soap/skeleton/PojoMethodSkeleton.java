@@ -63,9 +63,15 @@ public class PojoMethodSkeleton {
   private static class ParameterMarshall {
     public int _arg;
     public Marshall _marshall;
+    public String _name = "arg";
     public ParameterMarshall(int arg, Marshall marshall) {
       this._arg = arg;
       this._marshall = marshall;
+    }
+    public void serialize(Object o, WriteStream out)
+      throws IOException, XMLStreamException
+    {
+      _marshall.serialize(out, o, new QName(_name));
     }
   }
 
@@ -100,8 +106,9 @@ public class PojoMethodSkeleton {
 	  WebParam webParam = (WebParam)a;
 
 	  if (!webParam.name().equals("")) {
+	    _argMarshall[i]._name = webParam.name();
 	    argNames.put(webParam.name(), _argMarshall[i]);
-	    _argMarshall[i] = null;
+	    //_argMarshall[i] = null;
 	  }
 
 	}
@@ -120,7 +127,31 @@ public class PojoMethodSkeleton {
   }
   
   /**
-   * Invokes the request.
+   * Invokes the request for a call.
+   */
+  public Object invoke(String name, XMLStreamReader in, WriteStream out,
+		       Object[] args, String namespace)
+    throws IOException, XMLStreamException
+  {
+    out.println("<env:Envelope");
+    out.println("    xmlns:env='http://www.w3.org/2003/05/soap-enveloper'>");
+    out.println("<env:Body>");
+    out.println("<"+name+" xmlns='"+namespace+"'>");
+    if (args != null)
+      for(int i=0; i<args.length; i++) {
+	if (_argMarshall[i] != null)
+	  _argMarshall[i].serialize(args[i], out);
+      }
+    out.println("</"+name+"'>");
+    out.println("</env:Body>");
+    out.println("</env:Envelope>");
+    out.flush();
+    out.close();
+    return null;
+  }
+
+  /**
+   * Invokes the request for a call.
    */
   public void invoke(Object service, XMLStreamReader in, WriteStream out)
     throws IOException, XMLStreamException

@@ -113,21 +113,13 @@ public class DirectSkeleton extends Skeleton {
   /**
    * Invokes the request on a remote object using an outbound XML stream.
    */
-  public Object invoke(XMLStreamReader in,
-				WriteStream out,
-				Object[] args)
+  public Object invoke(String name,
+		       XMLStreamReader in,
+		       WriteStream out,
+		       Object[] args)
     throws IOException, XMLStreamException
   {
-    /* XXX    
-      <env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-enveloper">
-      <env:Body>
-      <m:test xmlns:m="urn:test">
-      </m:test>
-      </env:Body>
-      </env:Envelope>
-      out.flush();
-    */
-    return null;
+    return _actionMap.get(name).invoke(name, in, out, args, _namespace);
   }
   
   /**

@@ -59,7 +59,8 @@ abstract public class Skeleton {
 			      WriteStream out)
     throws IOException, XMLStreamException;
 
-  abstract public Object invoke(XMLStreamReader in,
+  abstract public Object invoke(String name,
+				XMLStreamReader in,
 				WriteStream out,
 				Object[] args)
     throws IOException, XMLStreamException;

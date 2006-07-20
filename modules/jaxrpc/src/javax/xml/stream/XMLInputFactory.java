@@ -139,8 +139,12 @@ public abstract class XMLInputFactory {
 
   public static XMLInputFactory newInstance() throws FactoryConfigurationError
   {
-    return newInstance("javax.xml.stream.XMLInputFactory",
-		       Thread.currentThread().getContextClassLoader());
+    XMLInputFactory ret =
+      newInstance("javax.xml.stream.XMLInputFactory",
+		  Thread.currentThread().getContextClassLoader());
+    if (ret==null)
+      ret = new com.caucho.xml.stream.XMLInputFactoryImpl();
+    return ret;
   }
 
   public static XMLInputFactory newInstance(String factoryId,

@@ -53,11 +53,12 @@ public class ServiceImpl extends Service {
 
   public <T> T getPort(Class<T> sei)
   {
-    return getPort(sei, null);
+    return getPort(_serviceName, sei);
   }
 
-  public <T> T getPort(Class<T> sei, String url)
+  public <T> T getPort(QName portName, Class<T> sei)
   {
+    String url = portName.getNamespaceURI();
     try {
       InvocationHandler ih =
 	new ServiceImplInvocationHandler(sei, url);
@@ -93,11 +94,18 @@ public class ServiceImpl extends Service {
     {
       Path path = Vfs.lookup(_url);
       ReadWritePair rwp = path.openReadWrite();
+      /*
       XMLStreamReader reader =
 	XMLInputFactory.newInstance()
 	.createXMLStreamReader(rwp.getReadStream());
-
-      return _skeleton.invoke(reader, rwp.getWriteStream(), args);
+      */
+      Object ret = 
+	_skeleton.invoke(method.getName(),
+			 //reader,
+			 null,
+			 rwp.getWriteStream(),
+			 args);
+      return ret==null ? new Integer(12) : null;
     }
 
   }
