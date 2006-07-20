@@ -349,7 +349,8 @@ abstract public class J2EEManagedObject {
 
       Object mbean = new IntrospectionMBean(managedObject, managedObject.getClass(), true);
 
-      Jmx.register(mbean, objectName);
+      if (objectName != null)
+	Jmx.register(mbean, objectName);
 
       return managedObject;
     }

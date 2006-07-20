@@ -481,18 +481,13 @@ public final class ClusterClient {
   public ClusterStream open()
   {
     int state = _state;
-    if (! (state <= ST_STARTING && state < ST_CLOSED))
+    if (! (ST_STARTING <= state && state < ST_CLOSED))
       return null;
 
     ClusterStream stream = openRecycle();
 
     if (stream != null)
       return stream;
-
-    long now = Alarm.getCurrentTime();
-
-    if (now < _lastFailTime + _failRecoverTime)
-      return null;
 
     return connect();
   }

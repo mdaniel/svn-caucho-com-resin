@@ -627,8 +627,6 @@ public class Port
     if (_writeTimeout <= 0)
       _writeTimeout = _timeout;
 
-    if (_serverId.equals(_server.getServerId()))
-      _admin.register();
   }
 
   /**
@@ -646,7 +644,8 @@ public class Port
     if (_protocol == null)
       throw new IllegalStateException(L.l("`{0}' must have a configured protocol before starting.", this));
 
-
+    _admin.register();
+    
     if (_serverSocket != null) {
       if (_port == 0) {
       }
