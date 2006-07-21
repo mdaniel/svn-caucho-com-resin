@@ -10,6 +10,7 @@ header("Expires: 01 Dec 1994 16:00:00 GMT");
 header("Cache-Control: max-age=0,private"); 
 header("Pragma: No-Cache"); 
 
+
 function uri($path)
 {
   global $home_uri;
@@ -43,10 +44,16 @@ function uri_nocache($path)
 
 function redirect($relative_url)
 {
-  header("Location: http://"
-         . $_SERVER['HTTP_HOST']
-         . rtrim(dirname($_SERVER['PHP_SELF']), '/\\')
-         . "/" . $relative_url);
+  $uri = uri($relative_url);
+
+  header("Location: http://" . $_SERVER['HTTP_HOST'] . $uri);
+}
+
+function redirect_nocache($relative_url)
+{
+  $uri = uri_nocache($relative_url);
+
+  header("Location: http://" . $_SERVER['HTTP_HOST'] . $uri);
 }
 
 if (is_null($target_uri))
@@ -79,6 +86,7 @@ function decorator_header($script, $title)
   $decorator_header_script = $script;
   $decorator_header_title = $title;
 
+  $logout_uri = uri("logout.php");
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Strict//EN" "http://www.w3.org/TR/html4/strict.dtd">
 
@@ -94,7 +102,6 @@ function decorator_header($script, $title)
 <h1><?= $title ?></h1>
 
 <?php
-
   return true;
 }
 

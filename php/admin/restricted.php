@@ -15,7 +15,7 @@ if (! ($is_read_role || $is_write_role) ) {
 
   decorator_header("restricted.php", "Resin Administration");
 
-  $login_uri = uri_nocache("login.php?target=$target_uri");
+  $login_uri = uri("login.php?target=$target_uri");
 ?>
 <h2>Login</h2>
 <p>
@@ -77,6 +77,8 @@ the following form can be used to establish a new one.
     }
 ?>
 
+<?php
+  /** XXX:
 <p>
 The following can now be added to the file
 <code><b><?= $password_file ?></b></code>
@@ -87,6 +89,27 @@ to enable administration functionality.
 &lt;authenticator>
  &lt;user name='<?= $digest_username ?>' password='<?= $digest ?>' roles='read,write'/>
 &lt;/authenticator>
+</pre>
+  */
+?>
+
+<p>
+The following can now be set in the resin.conf file
+to enable administration functionality. 
+</p>
+
+<pre>
+  &lt;resin:set var="resin.admin.password"  default="<?= $digest ?>"/&gt;
+</pre>
+
+<p>
+By default, access to the administration application is limited
+to the localhost.  The default behaviour can be changed in the 
+resin.conf file.  To enable access to clients other than localhost:
+</p>
+
+<pre>
+  &lt;resin:set var="resin.admin.localhost" default="false"/&gt;
 </pre>
 
 <p>

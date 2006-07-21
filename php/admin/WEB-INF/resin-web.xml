@@ -1,44 +1,74 @@
 <web-app xmlns="http://caucho.com/ns/resin"
          xmlns:resin="http://caucho.com/ns/resin/core">
-      <authenticator jndi-name="caucho/admin/auth">
-        <type>com.caucho.server.security.XmlAuthenticator</type>
-        <init path="WEB-INF/password.xml"/>
-      </authenticator>
 
-      <login-config auth-method="DIGEST"
+  <!--
+     - Configuration for the administration application
+    -->
+
+  <authenticator jndi-name="caucho/admin/auth">
+    <type>com.caucho.server.security.XmlAuthenticator</type>
+
+
+    <init>
+      <password-digest>none</password-digest>
+
+      <resin:if test="${not empty(resin.admin.password)}">
+        <user name='admin' password='${resin.admin.password}' roles='read,write'/>
+      </resin:if>
+    </init>
+  </authenticator>
+
+  <login-config auth-method="DIGEST"
         authenticator="${jndi:lookup('caucho/admin/auth')}"/>
 
-      <servlet servlet-name="resin-php"
-               servlet-class="com.caucho.quercus.servlet.QuercusServlet">
-      </servlet>
+  <servlet servlet-name="resin-php"
+           servlet-class="com.caucho.quercus.servlet.QuercusServlet">
+  </servlet>
 
-      <servlet-mapping url-pattern="*.php" servlet-name="resin-php"/>
+  <servlet-mapping url-pattern="*.php" servlet-name="resin-php"/>
 
+  <resin:choose>
+    <resin:when test="${resin.admin.localhost}">
       <security-constraint>
-        <web-resource-collection>
-          <url-pattern>/login.php</url-pattern>
-        </web-resource-collection>
-    
+        <web-resource-collection url-pattern="/login.php"/>
+      
+        <auth-constraint role-name='*'/>
+  
+        <ip-constraint>
+          <allow>127.0.0.1</allow>
+        </ip-constraint>
+      </security-constraint>
+    </resin:when>
+    <resin:otherwise>
+      <security-constraint>
+        <web-resource-collection url-pattern="/login.php"/>
+      
         <auth-constraint role-name='*'/>
       </security-constraint>
+    </resin:otherwise>
+  </resin:choose>
 
-      <servlet servlet-name='remote'
-               servlet-class='com.caucho.hessian.server.HessianServlet'>
-        <init>
-          <service resin:type="com.caucho.services.jmx.JMXService">
-            <mbean-server>${jndi:lookup("jmx/MBeanServer")}</mbean-server>
-          </service>
-         </init>
-      </servlet>
+  <!--
+     - Provide a remote interface for instances of the administration 
+     - application on other servers.
+    -->
+  <servlet servlet-name='remote'
+           servlet-class='com.caucho.hessian.server.HessianServlet'>
+    <init>
+      <service resin:type="com.caucho.services.jmx.JMXService">
+        <mbean-server>${jndi:lookup("jmx/MBeanServer")}</mbean-server>
+      </service>
+     </init>
+  </servlet>
 
-      <servlet-mapping url-pattern='/remote' servlet-name='remote'/>
+  <servlet-mapping url-pattern='/remote' servlet-name='remote'/>
 
-      <security-constraint>
-        <web-resource-collection>
-          <url-pattern>/remote</url-pattern>
-        </web-resource-collection>
+  <security-constraint>
+    <web-resource-collection>
+      <url-pattern>/remote</url-pattern>
+    </web-resource-collection>
     
-        <auth-constraint role-name='*'/>
-      </security-constraint>
+    <auth-constraint role-name='*'/>
+  </security-constraint>
 
-    </web-app>
+</web-app>
