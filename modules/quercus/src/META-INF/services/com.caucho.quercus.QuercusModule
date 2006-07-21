@@ -41,3 +41,4 @@ com.caucho.quercus.lib.VariableModule
 com.caucho.quercus.lib.xml.XmlModule
 com.caucho.quercus.lib.zip.ZipModule
 com.caucho.quercus.lib.zlib.ZlibModule
+com.caucho.quercus.lib.jms.JMSModule
