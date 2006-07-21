@@ -1,0 +1,10 @@
+<ejb-jar xmlns="http://caucho.com/ns/resin">
+<enterprise-beans>
+  <message-driven>
+    <ejb-name>JMSLogger</ejb-name>
+    <ejb-class>example.JMSLogger</ejb-class>
+    <destination>jms/Queue</destination>
+  </message-driven>
+</enterprise-beans>
+</ejb-jar>
+

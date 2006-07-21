@@ -1,0 +1,91 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>Quercus Messaging</title>
+  <description>
+    <p>
+    <b>JMS</b> (<b>J</b>ava <b>M</b>essaging <b>S</b>ervice) is a popular
+    messaging API with built-in support from Quercus since Resin 3.0.20.
+    </p>
+  </description>
+</header>
+
+<body>
+<summary localtoc="3" />
+<section title="Using JMS in Quercus">
+
+<p>
+Quercus offers a simplified messaging interface built upon JMS.  This 
+functionality makes it possible to send and receive messages using either
+the Resin JMS implementation or any other messaging service with a JMS
+implementation.  Many features of JMS are designed for message-driven
+services which make sense in the Java world, but are not appropriate for
+PHP.  These features have been removed.
+</p>
+
+</section>
+
+<section title="Sending JMS messages from a PHP script">
+
+<p>
+In this example, the script checks a POST variable "message" and if
+it is set, sends the value of that variable to a JMS queue.  A Message
+Driven Bean (MDB) receives these messages and records them.  The record
+is displayed by a servlet.
+</p>
+
+<example>
+if (array_key_exists("message", $_POST)) {
+  $queue = message_get_queue("jms/Queue");
+
+  if (! $queue) {
+    echo "Unable to get message queue!\n";
+  } else {
+    if (message_send($queue, $_POST["message"]) == TRUE) {
+      echo "Successfully sent message '" . $_POST["message"] . "'";
+    } else {
+      echo "Unable to send message '" . $_POST["message"] . "'";
+    }
+  }
+}
+</example>
+
+Click <a href="send-message.php">here</a> to see this example in action. 
+</section>
+
+<section title="Receiving JMS messages from a PHP script">
+<p>
+This example uses two queues: an "ad queue" and a "control queue".
+Whenever the PHP script removes an advertisement from the ad queue,
+it signals the MDB to add another ad by sending an empty message to 
+the control queue.
+</p>
+
+<example>
+$ad_queue = message_get_queue("jms/AdQueue");
+$control_queue = message_get_queue("jms/ControlQueue");
+
+if (! $ad_queue) {
+  echo "Unable to get ad queue!\n";
+} elseif (! $control_queue) {
+  echo "Unable to get control queue!\n";
+} else {
+  $ad = message_receive($ad_queue);
+
+  if ($ad == null) {
+    echo "No ads available on the queue";
+  } else {
+    echo "$ad";
+  }
+
+  if (! message_send($control_queue, "")) {
+    echo "Unable to send message";
+  }
+}
+</example>
+
+Click <a href="display-ad.php">here</a> to see this example in action.
+</section>
+
+</body>
+</document>

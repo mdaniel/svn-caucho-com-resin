@@ -1,0 +1,42 @@
+<web-app xmlns="http://caucho.com/ns/resin">
+  <servlet servlet-name="resin-php"
+           servlet-class="com.caucho.quercus.servlet.QuercusServlet" />
+
+  <servlet-mapping url-pattern="*.php" servlet-name="resin-php" />
+
+  <!--
+     - JMS
+    -->
+  <resource jndi-name="jms/ConnectionFactory"
+    type='com.caucho.jms.ConnectionFactoryImpl' />
+
+  <!--
+     - Example 1
+    -->
+  <resource jndi-name="jms/Queue"
+    type='com.caucho.jms.memory.MemoryQueue' />
+
+  <!--
+     - Example 2
+    -->
+  <resource jndi-name="jms/AdQueue"
+    type='com.caucho.jms.memory.MemoryQueue' />
+
+  <resource jndi-name="jms/ControlQueue"
+    type='com.caucho.jms.memory.MemoryQueue' />
+
+  <!--
+     - EJB SERVER
+     - see also message.ejb
+    -->
+  <ejb-server config-directory="WEB-INF">
+    <jms-connection-factory>jms/ConnectionFactory</jms-connection-factory>
+  </ejb-server>
+
+  <servlet>
+    <servlet-name>JMSLogger</servlet-name>
+    <servlet-class>example.JMSLogger</servlet-class>
+  </servlet>
+
+  <servlet-mapping url-pattern="/view-log" servlet-name="JMSLogger" />
+</web-app>
