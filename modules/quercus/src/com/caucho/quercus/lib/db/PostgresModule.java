@@ -1067,7 +1067,11 @@ public class PostgresModule extends AbstractQuercusModule {
       }
 
       if (rowNumber >= 0) {
-        result.seek(env, rowNumber);
+        if (!result.seek(env, rowNumber)) {
+          env.warning(L.l("Unable to jump to row {0} on PostgreSQL result",
+                          rowNumber));
+          return null;
+        }
       }
 
       int fieldNumber = result.getColumnNumber(fieldNameOrNumber, 0);
@@ -1899,6 +1903,7 @@ public class PostgresModule extends AbstractQuercusModule {
       return largeObject;
 
     } catch (Exception ex) {
+      env.warning(L.l("Unable to open PostgreSQL large object"));
       log.log(Level.FINE, ex.toString(), ex);
       return null;
     }
@@ -2164,7 +2169,6 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Looks up a current parameter setting of the server
    */
-  @ReturnNullAsFalse
   public static Value pg_parameter_status(Env env,
                                           @NotNull Postgres conn,
                                           String paramName)
@@ -2173,7 +2177,12 @@ public class PostgresModule extends AbstractQuercusModule {
 
       PostgresResult result = pg_query(env, conn, "SHOW "+paramName);
 
-      return pg_fetch_result(env, result, LongValue.create(0), LongValue.create(0));
+      Value value = pg_fetch_result(env, result, LongValue.create(0), LongValue.create(0));
+
+      if ((value == null) || value.isNull())
+        return BooleanValue.FALSE;
+
+      return value;
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -2347,69 +2356,96 @@ public class PostgresModule extends AbstractQuercusModule {
   /**
    * Returns an individual field of an error report
    */
-  public static String pg_result_error_field(Env env,
-                                             @NotNull PostgresResult result,
-                                             int fieldCode)
+  public static Value pg_result_error_field(Env env,
+                                            @NotNull PostgresResult result,
+                                            int fieldCode)
   {
     try {
+
+      Object errorField = null;
 
       // Get the postgres specific server error message
       // org.postgresql.util.ServerErrorMessage
       Object serverError = ((Postgres) result.getConnection()).getServerErrorMessage();
 
-      Class cl = Class.forName("org.postgresql.util.ServerErrorMessage");
+      if (serverError != null) {
+        Class cl = Class.forName("org.postgresql.util.ServerErrorMessage");
 
-      String methodName;
+        String methodName;
 
-      switch (fieldCode) {
-      case PGSQL_DIAG_SEVERITY:
-        methodName = "getSeverity";
-        break;
-      case PGSQL_DIAG_SQLSTATE:
-        methodName = "getSQLState";
-        break;
-      case PGSQL_DIAG_MESSAGE_PRIMARY:
-        methodName = "getMessage";
-        break;
-      case PGSQL_DIAG_MESSAGE_DETAIL:
-        methodName = "getDetail";
-        break;
-      case PGSQL_DIAG_MESSAGE_HINT:
-        methodName = "getHint";
-        break;
-      case PGSQL_DIAG_STATEMENT_POSITION:
-        methodName = "getPosition";
-        break;
-      case PGSQL_DIAG_INTERNAL_POSITION:
-        methodName = "getInternalPosition";
-        break;
-      case PGSQL_DIAG_INTERNAL_QUERY:
-        methodName = "getInternalQuery";
-        break;
-      case PGSQL_DIAG_CONTEXT:
-        methodName = "getWhere";
-        break;
-      case PGSQL_DIAG_SOURCE_FILE:
-        methodName = "getFile";
-        break;
-      case PGSQL_DIAG_SOURCE_LINE:
-        methodName = "getLine";
-        break;
-      case PGSQL_DIAG_SOURCE_FUNCTION:
-        methodName = "getRoutine";
-        break;
-      default:
-        return null;
+        switch (fieldCode) {
+        case PGSQL_DIAG_SEVERITY:
+          methodName = "getSeverity";
+          break;
+        case PGSQL_DIAG_SQLSTATE:
+          methodName = "getSQLState";
+          break;
+        case PGSQL_DIAG_MESSAGE_PRIMARY:
+          methodName = "getMessage";
+          break;
+        case PGSQL_DIAG_MESSAGE_DETAIL:
+          methodName = "getDetail";
+          break;
+        case PGSQL_DIAG_MESSAGE_HINT:
+          methodName = "getHint";
+          break;
+        case PGSQL_DIAG_STATEMENT_POSITION:
+          methodName = "getPosition";
+          break;
+        case PGSQL_DIAG_INTERNAL_POSITION:
+          methodName = "getInternalPosition";
+          break;
+        case PGSQL_DIAG_INTERNAL_QUERY:
+          methodName = "getInternalQuery";
+          break;
+        case PGSQL_DIAG_CONTEXT:
+          methodName = "getWhere";
+          break;
+        case PGSQL_DIAG_SOURCE_FILE:
+          methodName = "getFile";
+          break;
+        case PGSQL_DIAG_SOURCE_LINE:
+          methodName = "getLine";
+          break;
+        case PGSQL_DIAG_SOURCE_FUNCTION:
+          methodName = "getRoutine";
+          break;
+        default:
+          return null;
+        }
+
+        Method method = cl.getDeclaredMethod(methodName, null);
+        errorField = method.invoke(serverError, new Object[] {});
       }
 
-      Method method = cl.getDeclaredMethod(methodName, null);
-      Object errorField = method.invoke(serverError, new Object[] {});
+      if (errorField == null) {
+        if (fieldCode == PGSQL_DIAG_INTERNAL_QUERY)
+          return BooleanValue.FALSE;
 
-      return errorField.toString();
+        return NullValue.NULL;
+      }
+
+      if (fieldCode == PGSQL_DIAG_STATEMENT_POSITION) {
+
+        Integer position = (Integer) errorField;
+
+        if (position.intValue() == 0)
+          return NullValue.NULL;
+      }
+
+      if (fieldCode == PGSQL_DIAG_INTERNAL_POSITION) {
+
+        Integer position = (Integer) errorField;
+
+        if (position.intValue() == 0)
+          return BooleanValue.FALSE;
+      }
+
+      return StringValue.create(errorField.toString());
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
-      return null;
+      return NullValue.NULL;
     }
   }
 
