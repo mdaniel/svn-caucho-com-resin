@@ -284,7 +284,7 @@ public class Base64 {
       int ch2 = r.read();
       int ch3 = r.read();
 
-      if (ch0 < 0)
+      if (ch1 < 0)
 	break;
       if (ch2 < 0)
 	ch2 = '=';

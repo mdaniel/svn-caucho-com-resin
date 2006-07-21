@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.ArrayList;
 
 import com.caucho.amber.AmberQuery;
+import com.caucho.amber.manager.AmberConnection;
   
 /**
  * Represents a lazy set.
@@ -41,6 +42,11 @@ import com.caucho.amber.AmberQuery;
 abstract public class CmpSetImpl extends AbstractSet {
   private ArrayList _base = new ArrayList();
   private AmberQuery _query;
+
+  public void __caucho_init(AmberConnection aConn)
+  {
+    _query.init(aConn);
+  }
 
   protected void fill(AmberQuery query)
   {
