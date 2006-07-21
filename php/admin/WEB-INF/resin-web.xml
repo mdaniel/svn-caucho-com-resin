@@ -8,10 +8,7 @@
   <authenticator jndi-name="caucho/admin/auth">
     <type>com.caucho.server.security.XmlAuthenticator</type>
 
-
     <init>
-      <password-digest>none</password-digest>
-
       <resin:if test="${not empty(resin.admin.password)}">
         <user name='admin' password='${resin.admin.password}' roles='read,write'/>
       </resin:if>
