@@ -395,8 +395,11 @@ public class AmberPersistenceUnit {
                                     className));
     }
 
-    if (type.getAnnotation(javax.persistence.Entity.class) == null) {
-      throw new ConfigException(L.l("'{0}' must implement javax.persistence.Entity",
+    boolean isEntity = type.getAnnotation(javax.persistence.Entity.class) != null;
+    boolean isEmbeddable = type.getAnnotation(javax.persistence.Embeddable.class) != null;
+    boolean isMappedSuperclass = type.getAnnotation(javax.persistence.MappedSuperclass.class) != null;
+    if (! (isEntity || isEmbeddable || isMappedSuperclass)) {
+      throw new ConfigException(L.l("'{0}' must implement javax.persistence.Entity, javax.persistence.Embeddable or javax.persistence.MappedSuperclass",
                                     className));
     }
 
@@ -434,7 +437,7 @@ public class AmberPersistenceUnit {
    */
   public EntityType createEntity(String name,
                                  JClass beanClass,
-                                 boolean embedded)
+                                 boolean embeddable)
   {
     EntityType entityType = (EntityType) _typeManager.get(name);
 
@@ -468,9 +471,9 @@ public class AmberPersistenceUnit {
     entityType.setName(name);
     entityType.setBeanClass(beanClass);
 
-    entityType.setEmbedded(embedded);
+    entityType.setEmbeddable(embeddable);
 
-    if (!embedded) {
+    if (!embeddable) {
       _lazyConfigure.add(entityType);
       // getEnvManager().addLazyConfigure(entityType);
 
@@ -580,9 +583,11 @@ public class AmberPersistenceUnit {
       EntityType type = _lazyGenerate.remove(0);
 
       try {
-        type.init();
+        if (!type.isEmbeddable()) {
+          type.init();
 
-        getGenerator().generate(type);
+          getGenerator().generate(type);
+        }
       } catch (Exception e) {
         type.setConfigException(e);
 

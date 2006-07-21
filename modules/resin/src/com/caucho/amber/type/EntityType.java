@@ -160,7 +160,7 @@ public class EntityType extends Type {
 
   private volatile boolean _isConfigured;
   private volatile boolean _isGenerated;
-  private boolean _isEmbedded;
+  private boolean _isEmbeddable;
 
   public EntityType(AmberPersistenceUnit amberPersistenceUnit)
   {
@@ -180,7 +180,7 @@ public class EntityType extends Type {
    */
   public Table getTable()
   {
-    if (_isEmbedded)
+    if (_isEmbeddable)
       return null;
 
     if (_table == null)
@@ -333,19 +333,19 @@ public class EntityType extends Type {
   }
 
   /**
-   * Sets true if the class is embedded.
+   * Sets true if the class is embeddable.
    */
-  public void setEmbedded(boolean isEmbedded)
+  public void setEmbeddable(boolean isEmbeddable)
   {
-    _isEmbedded = isEmbedded;
+    _isEmbeddable = isEmbeddable;
   }
 
   /**
-   * Returns true if the class is embedded.
+   * Returns true if the class is embeddable.
    */
-  public boolean isEmbedded()
+  public boolean isEmbeddable()
   {
-    return _isEmbedded;
+    return _isEmbeddable;
   }
 
   /**
@@ -976,20 +976,21 @@ public class EntityType extends Type {
     if (! _lifecycle.toInit())
       return;
 
-    // forces table lazy load
-    getTable();
+    if (!_isEmbeddable) {
 
-    if (!_isEmbedded) {
+      // forces table lazy load
+      getTable();
+
       assert getId() != null : "null id for " + _name;
 
       getId().init();
-    }
 
-    for (AmberField field : _fields) {
-      if (field.isUpdateable())
-        field.setIndex(nextDirtyIndex());
+      for (AmberField field : _fields) {
+        if (field.isUpdateable())
+          field.setIndex(nextDirtyIndex());
 
-      field.init();
+        field.init();
+      }
     }
 
     /*

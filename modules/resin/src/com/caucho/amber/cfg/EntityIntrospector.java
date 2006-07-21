@@ -131,31 +131,44 @@ public class EntityIntrospector {
     throws ConfigException, SQLException
   {
     JAnnotation entityAnn = type.getAnnotation(Entity.class);
+    JAnnotation embeddableAnn = type.getAnnotation(Embeddable.class);
+    JAnnotation mappedSuperclassAnn = type.getAnnotation(MappedSuperclass.class);
 
-    if (entityAnn == null)
-      throw new ConfigException(L.l("'{0}' is not an @Entity class.",
+    boolean isEntity = entityAnn != null;
+    boolean isEmbeddable = embeddableAnn != null;
+    boolean isMappedSuperclass = mappedSuperclassAnn != null;
+    if (! (isEntity || isEmbeddable || isMappedSuperclass)) {
+      throw new ConfigException(L.l("'{0}' is not an @Entity, @Embeddable or @MappedSuperclass.",
                                     type));
-
-    validateType(type);
-
-    JAnnotation inheritanceAnn = type.getAnnotation(Inheritance.class);
-
-    EntityType parentType = null;
-
-    if (inheritanceAnn != null) {
-      for (JClass parentClass = type.getSuperClass();
-           parentClass != null;
-           parentClass = parentClass.getSuperClass()) {
-        JAnnotation parentEntity = parentClass.getAnnotation(Entity.class);
-
-        if (parentEntity != null) {
-          parentType = introspect(parentClass);
-          break;
-        }
-      }
     }
 
-    String entityName = entityAnn.getString("name");
+    String entityName;
+    EntityType parentType = null;
+    JAnnotation inheritanceAnn = null;
+
+    if (isEntity) {
+      validateType(type);
+
+      inheritanceAnn = type.getAnnotation(Inheritance.class);
+
+      if (inheritanceAnn != null) {
+        for (JClass parentClass = type.getSuperClass();
+             parentClass != null;
+             parentClass = parentClass.getSuperClass()) {
+          JAnnotation parentEntity = parentClass.getAnnotation(Entity.class);
+
+          if (parentEntity != null) {
+            parentType = introspect(parentClass);
+            break;
+          }
+        }
+      }
+
+      entityName = entityAnn.getString("name");
+    }
+    else {
+      entityName = type.getName();
+    }
 
     if (entityName.equals("")) {
       entityName = type.getName();
@@ -170,8 +183,7 @@ public class EntityIntrospector {
       return entityType;
 
     try {
-      ///entityType = _amberContainer.createEntity(entityName, type);
-      entityType = _persistenceUnit.createEntity(entityName, type);
+      entityType = _persistenceUnit.createEntity(entityName, type, isEmbeddable);
       _entityMap.put(entityName, entityType);
 
       boolean isField = isField(type);
@@ -192,12 +204,14 @@ public class EntityIntrospector {
       if (tableName == null || tableName.equals(""))
         tableName = entityName.toUpperCase();
 
-      if (parentType == null)
-        entityType.setTable(_persistenceUnit.createTable(tableName));
-      else if (parentType.isJoinedSubClass())
-        entityType.setTable(_persistenceUnit.createTable(tableName));
-      else
-        entityType.setTable(parentType.getTable());
+      if (isEntity) {
+        if (parentType == null)
+          entityType.setTable(_persistenceUnit.createTable(tableName));
+        else if (parentType.isJoinedSubClass())
+          entityType.setTable(_persistenceUnit.createTable(tableName));
+        else
+          entityType.setTable(parentType.getTable());
+      }
 
       JAnnotation tableCache = type.getAnnotation(AmberTableCache.class);
       if (tableCache != null) {
@@ -240,7 +254,7 @@ public class EntityIntrospector {
         introspectIdMethod(_persistenceUnit, entityType, parentType,
                            type, idClass);
 
-      if (entityType.getId() == null)
+      if (isEntity && (entityType.getId() == null))
         throw new ConfigException(L.l("{0} does not have any primary keys.  Entities must have at least one @Id field.",
                                       entityType.getName()));
 
@@ -249,23 +263,25 @@ public class EntityIntrospector {
       else
         introspectMethods(_persistenceUnit, entityType, parentType, type);
 
-      for (JMethod method : type.getMethods()) {
-        introspectCallbacks(entityType, method);
-      }
-
-      if (secondaryTableAnn != null) {
-        Object []join = (Object []) secondaryTableAnn.get("pkJoinColumns");
-
-        JAnnotation []joinAnn = null;
-
-        if (join != null) {
-          joinAnn = new JAnnotation[join.length];
-          System.arraycopy(join, 0, joinAnn, 0, join.length);
+      if (isEntity) {
+        for (JMethod method : type.getMethods()) {
+          introspectCallbacks(entityType, method);
         }
 
-        linkSecondaryTable(entityType.getTable(),
-                           secondaryTable,
-                           joinAnn);
+        if (secondaryTableAnn != null) {
+          Object []join = (Object []) secondaryTableAnn.get("pkJoinColumns");
+
+          JAnnotation []joinAnn = null;
+
+          if (join != null) {
+            joinAnn = new JAnnotation[join.length];
+            System.arraycopy(join, 0, joinAnn, 0, join.length);
+          }
+
+          linkSecondaryTable(entityType.getTable(),
+                             secondaryTable,
+                             joinAnn);
+        }
       }
     } catch (ConfigException e) {
       entityType.setConfigException(e);
@@ -909,9 +925,6 @@ public class EntityIntrospector {
                                  JClass type)
     throws ConfigException
   {
-    if (entityType.getId() == null)
-      throw new IllegalStateException(L.l("{0} has no key", entityType));
-
     for (JMethod method : type.getMethods()) {
       String methodName = method.getName();
       JClass []paramTypes = method.getParameterTypes();
@@ -1162,7 +1175,7 @@ public class EntityIntrospector {
     else
       name = toSqlName(fieldName);
 
-    Column column;
+    Column column = null;
 
     if (columnAnn != null && ! columnAnn.get("table").equals("")) {
       String tableName = columnAnn.getString("table");
@@ -1177,10 +1190,11 @@ public class EntityIntrospector {
 
       column = table.createColumn(name, amberType);
     }
-    else
+    else if (!entityType.isEmbeddable()) {
       column = entityType.getTable().createColumn(name, amberType);
+    }
 
-    if (columnAnn != null) {
+    if ((column != null) && (columnAnn != null)) {
       // primaryKey = column.primaryKey();
       column.setUnique(columnAnn.getBoolean("unique"));
       column.setNotNull(! columnAnn.getBoolean("nullable"));

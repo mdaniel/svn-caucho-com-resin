@@ -145,7 +145,7 @@ public class EntityComponent extends ClassComponent {
     try {
       generateHeader(out);
 
-      if (!_entityType.isEmbedded()) {
+      if (!_entityType.isEmbeddable()) {
         generateInit(out);
 
         HashSet<Object> completedSet = new HashSet<Object>();
@@ -155,14 +155,14 @@ public class EntityComponent extends ClassComponent {
 
       generateGetEntityType(out);
 
-      if (!_entityType.isEmbedded())
+      if (!_entityType.isEmbeddable())
         generateMatch(out);
 
       generateFields(out);
 
       generateMethods(out);
 
-      if (!_entityType.isEmbedded()) {
+      if (!_entityType.isEmbeddable()) {
         generateDetach(out);
 
         generateLoad(out);
@@ -175,7 +175,7 @@ public class EntityComponent extends ClassComponent {
         for (int i = min; i <= max; i++)
           generateLoadGroup(out, i);
 
-        if (!_entityType.isEmbedded())
+        if (!_entityType.isEmbeddable())
           generateResultSetLoad(out);
 
         generateSetQuery(out);

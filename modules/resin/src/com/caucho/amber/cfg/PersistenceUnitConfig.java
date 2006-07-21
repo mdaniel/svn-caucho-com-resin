@@ -149,13 +149,13 @@ public class PersistenceUnitConfig {
   {
     AmberPersistenceUnit unit = new AmberPersistenceUnit(container, _name);
 
-      unit.init();
+    unit.init();
 
-      for (String cl : _classList) {
-	unit.addEntityClass(cl);
-      }
+    for (String cl : _classList) {
+      unit.addEntityClass(cl);
+    }
 
-      unit.generate();
+    unit.generate();
 
     return unit;
   }
@@ -176,7 +176,7 @@ public class PersistenceUnitConfig {
     public void setName(String name)
     {
     }
-    
+
     public void setValue(String name)
     {
     }

@@ -270,7 +270,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     EntityType type = _amberContainer.getEntity(className);
 
     // Type can be null for subclasses and inner classes that need fixups
-    if (type != null) {
+    if ((type != null) && (! type.isEmbeddable())) {
       log.info("Amber enhancing class " + className);
 
       // XXX: _amberContainerenceUnitenceUnit.configure();
@@ -305,17 +305,19 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
   public void generate(EntityType type)
     throws Exception
   {
-    JavaClassGenerator javaGen = new JavaClassGenerator();
+    if (!type.isEmbeddable()) {
+      JavaClassGenerator javaGen = new JavaClassGenerator();
 
-    javaGen.setWorkDir(getWorkDir());
+      javaGen.setWorkDir(getWorkDir());
 
-    String extClassName = type.getBeanClass().getName() + "__ResinExt";
-    type.setInstanceClassName(extClassName);
-    type.setEnhanced(true);
+      String extClassName = type.getBeanClass().getName() + "__ResinExt";
+      type.setInstanceClassName(extClassName);
+      type.setEnhanced(true);
 
-    _pendingClassNames.add(type.getInstanceClassName());
+      _pendingClassNames.add(type.getInstanceClassName());
 
-    generateJava(javaGen, type);
+      generateJava(javaGen, type);
+    }
   }
 
   /**
@@ -324,7 +326,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
   public void generateJava(JavaClassGenerator javaGen, EntityType type)
     throws Exception
   {
-    if (type.isGenerated())
+    if (type.isGenerated() || type.isEmbeddable())
       return;
 
     type.setGenerated(true);
@@ -336,7 +338,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
     javaClass.setSuperClassName(type.getBeanClass().getName());
 
-    if (!type.isEmbedded())
+    if (!type.isEmbeddable())
       javaClass.addInterfaceName("com.caucho.amber.entity.Entity");
 
     type.setEnhanced(true);

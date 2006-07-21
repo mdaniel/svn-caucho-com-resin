@@ -60,7 +60,7 @@ public class AmberGeneratorImpl implements AmberGenerator {
 
   private ArrayList<String> _pendingClassNames =
     new ArrayList<String>();
-  
+
   public AmberGeneratorImpl(AmberPersistenceUnit manager)
   {
     _amberPersistenceUnit = manager;
@@ -89,7 +89,7 @@ public class AmberGeneratorImpl implements AmberGenerator {
   public void generateJava(JavaClassGenerator javaGen, EntityType type)
     throws Exception
   {
-    if (isPreload(javaGen, type) || type.isGenerated())
+    if (isPreload(javaGen, type) || type.isGenerated() || type.isEmbeddable())
       return;
 
     type.setGenerated(true);
@@ -114,7 +114,7 @@ public class AmberGeneratorImpl implements AmberGenerator {
 
     javaGen.generate(genClass);
   }
-  
+
 
   /**
    * Generates the type.
@@ -123,7 +123,7 @@ public class AmberGeneratorImpl implements AmberGenerator {
     throws Exception
   {
     Class cl;
-    
+
     if (type.isEnhanced())
       cl = javaGen.loadClass(type.getBeanClass().getName());
     else
@@ -140,12 +140,11 @@ public class AmberGeneratorImpl implements AmberGenerator {
   {
     if (_pendingClassNames.size() == 0)
       return;
-    
+
     String []javaFiles = new String[_pendingClassNames.size()];
 
     for (int i = 0; i < _pendingClassNames.size(); i++) {
       String name = _pendingClassNames.get(i);
-
       name = name.replace('.', '/') + ".java";
 
       javaFiles[i] = name;
