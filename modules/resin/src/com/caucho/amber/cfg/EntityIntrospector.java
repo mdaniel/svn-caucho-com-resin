@@ -108,6 +108,9 @@ public class EntityIntrospector {
   // annotations allowed with a @Embedded annotation
   private static HashSet<String> _embeddedAnnotations = new HashSet<String>();
 
+  // annotations allowed with a @EmbeddedId annotation
+  private static HashSet<String> _embeddedIdAnnotations = new HashSet<String>();
+
   private AmberPersistenceUnit _persistenceUnit;
 
   private HashMap<String,EntityType> _entityMap
@@ -244,7 +247,6 @@ public class EntityIntrospector {
       if (idClassAnn != null)
         idClass = idClassAnn.getClass("value");
 
-
       if (entityType.getId() != null) {
       }
       else if (isField)
@@ -255,7 +257,7 @@ public class EntityIntrospector {
                            type, idClass);
 
       if (isEntity && (entityType.getId() == null))
-        throw new ConfigException(L.l("{0} does not have any primary keys.  Entities must have at least one @Id field.",
+        throw new ConfigException(L.l("{0} does not have any primary keys.  Entities must have at least one @Id or exactly one @EmbeddedId field.",
                                       entityType.getName()));
 
       if (isField)
@@ -607,6 +609,8 @@ public class EntityIntrospector {
   {
     ArrayList<IdField> keys = new ArrayList<IdField>();
 
+    IdField idField = null;
+
     for (JMethod method : type.getMethods()) {
       String methodName = method.getName();
       JClass []paramTypes = method.getParameterTypes();
@@ -624,25 +628,46 @@ public class EntityIntrospector {
         continue;
 
       JAnnotation id = method.getAnnotation(javax.persistence.Id.class);
-      if (id == null)
-        continue;
 
-      IdField idField = introspectId(persistenceUnit,
-                                     entityType,
-                                     method,
-                                     fieldName,
-                                     method.getReturnType());
+      if (id != null) {
+        idField = introspectId(persistenceUnit,
+                               entityType,
+                               method,
+                               fieldName,
+                               method.getReturnType());
 
-      if (idField != null)
-        keys.add(idField);
+        if (idField != null)
+          keys.add(idField);
+      }
+      else {
+        JAnnotation embeddedId
+          = method.getAnnotation(javax.persistence.EmbeddedId.class);
+
+        if (embeddedId != null) {
+          idField = introspectEmbeddedId(persistenceUnit,
+                                         entityType,
+                                         method,
+                                         fieldName,
+                                         method.getReturnType());
+          break;
+        }
+        else {
+          continue;
+        }
+      }
     }
 
     if (keys.size() == 0) {
+      if (idField != null) {
+        // @EmbeddedId was used.
+        CompositeId id = new CompositeId(entityType, (EmbeddedIdField) idField);
+        entityType.setId(id);
+      }
     }
     else if (keys.size() == 1)
       entityType.setId(new com.caucho.amber.field.Id(entityType, keys));
     else if (idClass == null) {
-      throw new ConfigException(L.l("{0} has multiple @Id methods, but no @IdClass.  Compound primary keys require an @IdClass.",
+      throw new ConfigException(L.l("{0} has multiple @Id methods, but no @IdClass.  Compound primary keys require either an @IdClass or exactly one @EmbeddedId field or property.",
                                     entityType.getName()));
     }
     else {
@@ -672,8 +697,10 @@ public class EntityIntrospector {
         continue;
 
       JAnnotation id = field.getAnnotation(javax.persistence.Id.class);
+      JAnnotation embeddedId
+        = field.getAnnotation(javax.persistence.EmbeddedId.class);
 
-      if (id == null)
+      if ((id == null) && (embeddedId == null))
         continue;
 
       IdField idField = introspectId(persistenceUnit,
@@ -713,6 +740,11 @@ public class EntityIntrospector {
 
     for (JField field : type.getDeclaredFields()) {
       JAnnotation id = field.getAnnotation(javax.persistence.Id.class);
+
+      if (id != null)
+        return true;
+
+      id = field.getAnnotation(javax.persistence.EmbeddedId.class);
 
       if (id != null)
         return true;
@@ -776,6 +808,20 @@ public class EntityIntrospector {
       else
         addTableIdGenerator(persistenceUnit, idField, id);
     }
+
+    return idField;
+  }
+
+  private IdField introspectEmbeddedId(AmberPersistenceUnit persistenceUnit,
+                                       EntityType entityType,
+                                       JAccessibleObject field,
+                                       String fieldName,
+                                       JClass fieldType)
+    throws ConfigException, SQLException
+  {
+    IdField idField;
+
+    idField = new EmbeddedIdField(entityType, fieldName);
 
     return idField;
   }
@@ -1115,7 +1161,16 @@ public class EntityIntrospector {
       _depCompletions.add(new EmbeddedCompletion(sourceType,
                                                  field,
                                                  fieldName,
-                                                 fieldType));
+                                                 fieldType,
+                                                 false));
+    }
+    else if (field.isAnnotationPresent(javax.persistence.EmbeddedId.class)) {
+      validateAnnotations(field, _embeddedIdAnnotations);
+      _depCompletions.add(new EmbeddedCompletion(sourceType,
+                                                 field,
+                                                 fieldName,
+                                                 fieldType,
+                                                 true));
     }
     else if (field.isAnnotationPresent(javax.persistence.Transient.class)) {
     }
@@ -2079,17 +2134,22 @@ public class EntityIntrospector {
     private JAccessibleObject _field;
     private String _fieldName;
     private JClass _fieldType;
+    // The same completion is used for both:
+    // @Embedded or @EmbeddedId
+    private boolean _embeddedId;
 
     EmbeddedCompletion(EntityType type,
                        JAccessibleObject field,
                        String fieldName,
-                       JClass fieldType)
+                       JClass fieldType,
+                       boolean embeddedId)
     {
       super(type);
 
       _field = field;
       _fieldName = fieldName;
       _fieldType = fieldType;
+      _embeddedId = embeddedId;
     }
 
     void complete()
@@ -2115,7 +2175,15 @@ public class EntityIntrospector {
         return;
       }
 
-      EntityEmbeddedField embeddedField = new EntityEmbeddedField(_entityType, _fieldName);
+      EntityEmbeddedField embeddedField;
+
+      if (_embeddedId) {
+        embeddedField = _entityType.getId().getEmbeddedIdField();
+      } else {
+        embeddedField = new EntityEmbeddedField(_entityType, _fieldName);
+      }
+
+      embeddedField.setEmbeddedId(_embeddedId);
 
       AmberPersistenceUnit persistenceUnit = _entityType.getPersistenceUnit();
 
@@ -2148,7 +2216,7 @@ public class EntityIntrospector {
         fieldNameByColumn.put(columnName, embeddedFieldName);
       }
 
-      embeddedField.setColumns(embeddedColumns);
+      embeddedField.setEmbeddedColumns(embeddedColumns);
       embeddedField.setFieldNameByColumn(fieldNameByColumn);
 
       embeddedField.init();
@@ -2242,6 +2310,11 @@ public class EntityIntrospector {
     _embeddedAnnotations.add("javax.persistence.AttributeOverride");
     _embeddedAnnotations.add("javax.persistence.AttributeOverrides");
 
+    // annotations allowed with a @EmbeddedId annotation
+    _embeddedIdAnnotations.add("javax.persistence.EmbeddedId");
+    _embeddedIdAnnotations.add("javax.persistence.AttributeOverride");
+    _embeddedIdAnnotations.add("javax.persistence.AttributeOverrides");
+
     // annotations allowed for a property
     _propertyAnnotations.add("javax.persistence.Basic");
     _propertyAnnotations.add("javax.persistence.Column");
@@ -2252,5 +2325,7 @@ public class EntityIntrospector {
     _propertyAnnotations.add("javax.persistence.OneToMany");
     _propertyAnnotations.add("javax.persistence.ManyToMany");
     _propertyAnnotations.add("javax.persistence.JoinColumn");
+    _propertyAnnotations.add("javax.persistence.Embedded");
+    _propertyAnnotations.add("javax.persistence.EmbeddedId");
   }
 }

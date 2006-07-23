@@ -64,6 +64,11 @@ public class CompositeId extends Id {
     super(ownerType, keys);
   }
 
+  public CompositeId(EntityType ownerType, EmbeddedIdField embeddedId)
+  {
+    super(ownerType, embeddedId);
+  }
+
   /**
    * Sets the foreign key type.
    */
@@ -81,6 +86,8 @@ public class CompositeId extends Id {
   {
     if (_keyClass != null)
       return _keyClass.getName();
+    else if (isEmbeddedId())
+      return getEmbeddedIdField().getJavaTypeName();
     else
       return getOwnerType().getName();
   }
@@ -90,7 +97,7 @@ public class CompositeId extends Id {
    */
   public String getForeignMakeKeyName()
   {
-    return getOwnerType().getName().replace('.', '_').replace('/', '_');    
+    return getOwnerType().getName().replace('.', '_').replace('/', '_');
   }
 
   /**
@@ -100,7 +107,7 @@ public class CompositeId extends Id {
     throws IOException
   {
     super.generatePrologue(out, completedSet);
-    
+
     generatePrologue(out, completedSet, getForeignMakeKeyName());
   }
 
@@ -108,8 +115,8 @@ public class CompositeId extends Id {
    * Generates any prologue.
    */
   public void generatePrologue(JavaWriter out,
-			       HashSet<Object> completedSet,
-			       String name)
+                               HashSet<Object> completedSet,
+                               String name)
     throws IOException
   {
     generatePrologueMake(out, completedSet);
@@ -120,7 +127,7 @@ public class CompositeId extends Id {
    * Generates any prologue.
    */
   public void generatePrologueMake(JavaWriter out,
-				   HashSet<Object> completedSet)
+                                   HashSet<Object> completedSet)
     throws IOException
   {
     String makeName = "__caucho_make_key_" + getForeignMakeKeyName();
@@ -129,7 +136,7 @@ public class CompositeId extends Id {
       return;
 
     completedSet.add(makeName);
-    
+
     out.println();
     out.print("private static ");
     out.print(getForeignTypeName() + " " + makeName);
@@ -138,10 +145,10 @@ public class CompositeId extends Id {
     ArrayList<IdField> keys = getKeys();
     for (int i = 0; i < keys.size(); i++) {
       if (i != 0)
-	out.print(", ");
+        out.print(", ");
 
       IdField key = keys.get(i);
-      
+
       out.print(key.getJavaTypeName() + " a" + i);
     }
     out.println(")");
@@ -151,21 +158,21 @@ public class CompositeId extends Id {
 
     for (int i = 0; i < keys.size(); i++) {
       IdField key = keys.get(i);
-      
+
       out.println(key.generateSetKeyProperty("key", "a" + i) + ";");
     }
-    
+
     out.println("return key;");
 
     out.popDepth();
     out.println("}");
   }
-  
+
   /**
    * Generates any prologue.
    */
-  public void generatePrologueLoad(JavaWriter out, 
-				   HashSet<Object> completedSet)
+  public void generatePrologueLoad(JavaWriter out,
+                                   HashSet<Object> completedSet)
     throws IOException
   {
     String loadName = "__caucho_load_key_" + getForeignMakeKeyName();
@@ -180,7 +187,7 @@ public class CompositeId extends Id {
     out.print(getForeignTypeName() + " " + loadName);
     out.println("(com.caucho.amber.manager.AmberConnection aConn, java.sql.ResultSet rs, int index)");
     out.println("  throws java.sql.SQLException");
-    
+
     out.println("{");
     out.pushDepth();
 
@@ -197,36 +204,36 @@ public class CompositeId extends Id {
       out.println("if (rs.wasNull())");
       out.println("  return null;");
     }
-    
+
     out.println(getForeignTypeName() + " key = new " + getForeignTypeName() + "();");
 
     for (int i = 0; i < keys.size(); i++) {
       out.println(keys.get(i).generateSetKeyProperty("key", "a" + i) + ";");
     }
-    
+
     out.println("return key;");
 
     out.popDepth();
     out.println("}");
   }
-  
+
   /**
    * Returns the foreign type.
    */
   public int generateLoadForeign(JavaWriter out, String rs,
- 				 String indexVar, int index)
+                                 String indexVar, int index)
     throws IOException
   {
     return generateLoadForeign(out, rs, indexVar, index,
- 			       getForeignTypeName().replace('.', '_'));
+                               getForeignTypeName().replace('.', '_'));
   }
 
   /**
    * Returns the foreign type.
    */
   public int generateLoadForeign(JavaWriter out, String rs,
-				 String indexVar, int index,
-				 String name)
+                                 String indexVar, int index,
+                                 String name)
     throws IOException
   {
     out.print("__caucho_load_key_" + getForeignMakeKeyName());
@@ -235,7 +242,7 @@ public class CompositeId extends Id {
     ArrayList<IdField> keys = getKeys();
 
     index += keys.size();
-    
+
     return index;
   }
 
@@ -247,10 +254,10 @@ public class CompositeId extends Id {
     ArrayList<IdField> keys = getKeys();
 
     CharBuffer cb = CharBuffer.allocate();
-    
+
     for (int i = 0; i < keys.size(); i++) {
       if (i != 0)
-	cb.append(", ");
+        cb.append(", ");
 
       cb.append(keys.get(i).generateSelect(id));
     }
@@ -272,7 +279,7 @@ public class CompositeId extends Id {
   public String generateGetProperty(String value)
   {
     CharBuffer cb = CharBuffer.allocate();
-    
+
     cb.append("__caucho_make_key_" + getForeignMakeKeyName());
     cb.append("(");
 
@@ -280,7 +287,7 @@ public class CompositeId extends Id {
 
     for (int i = 0; i < keys.size(); i++) {
       if (i != 0)
-	cb.append(", ");
+        cb.append(", ");
 
       cb.append(keys.get(i).generateGet(value));
     }
@@ -296,7 +303,7 @@ public class CompositeId extends Id {
   public String generateGetProxyProperty(String value)
   {
     CharBuffer cb = CharBuffer.allocate();
-    
+
     cb.append("__caucho_make_key_" + getForeignMakeKeyName());
     cb.append("(");
 
@@ -304,7 +311,7 @@ public class CompositeId extends Id {
 
     for (int i = 0; i < keys.size(); i++) {
       if (i != 0)
-	cb.append(", ");
+        cb.append(", ");
 
       cb.append(keys.get(i).generateGetProxyProperty(value));
     }
@@ -333,19 +340,24 @@ public class CompositeId extends Id {
   public void generateSet(JavaWriter out, String obj)
     throws IOException
   {
-    ArrayList<IdField> keys = getKeys();
-
     out.println("if (" + obj + " != null) {");
     out.pushDepth();
-    
+
     out.println(getForeignTypeName() + " " + obj + "_key = (" + getForeignTypeName() + ") " + obj + ";");
 
-    for (int i = 0; i < keys.size(); i++) {
-      IdField key = keys.get(i);
-      
-      key.generateSet(out, key.generateGetKeyProperty(obj + "_key"));
+    if (! isEmbeddedId()) {
+      ArrayList<IdField> keys = getKeys();
+
+      for (int i = 0; i < keys.size(); i++) {
+        IdField key = keys.get(i);
+
+        key.generateSet(out, key.generateGetKeyProperty(obj + "_key"));
+      }
     }
-    
+    else {
+      getEmbeddedIdField().generateSet(out, obj+"_key");
+    }
+
     out.popDepth();
     out.println("}");
   }
@@ -374,7 +386,7 @@ public class CompositeId extends Id {
 
     for (int i = 0; i < keys.size(); i++) {
       if (i != 0)
-	cb.append(" and ");
+        cb.append(" and ");
 
       cb.append(keys.get(i).generateWhere(id));
     }
@@ -394,7 +406,7 @@ public class CompositeId extends Id {
    * Generates the set clause.
    */
   public void generateSetKey(JavaWriter out, String pstmt,
-			     String obj, String index)
+                             String obj, String index)
     throws IOException
   {
     generateSet(out, pstmt, obj, index);
@@ -404,13 +416,18 @@ public class CompositeId extends Id {
    * Generates the set clause.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String obj, String index)
+                          String obj, String index)
     throws IOException
   {
-    ArrayList<IdField> keys = getKeys();
+    if (! isEmbeddedId()) {
+      ArrayList<IdField> keys = getKeys();
 
-    for (int i = 0; i < keys.size(); i++) {
-      keys.get(i).generateSet(out, pstmt, obj, index);
+      for (int i = 0; i < keys.size(); i++) {
+        keys.get(i).generateSet(out, pstmt, obj, index);
+      }
+    }
+    else {
+      getEmbeddedIdField().generateSet(out, pstmt, obj, index);
     }
   }
 
@@ -447,7 +464,7 @@ public class CompositeId extends Id {
   {
     return value;
   }
-  
+
   /**
    * Generates code for a match.
    */
@@ -464,20 +481,20 @@ public class CompositeId extends Id {
   {
     return leftBase + ".equals(" + value + ")";
   }
-    /**
-     * Generates the set clause.
-     */
-   public void generateCheckCreateKey(JavaWriter out)
-     throws IOException
-    {
-    }
-  
-    /**
-     * Generates the set clause.
-     */
+  /**
+   * Generates the set clause.
+   */
+  public void generateCheckCreateKey(JavaWriter out)
+    throws IOException
+  {
+  }
+
+  /**
+   * Generates the set clause.
+   */
   /*
-   public void generateSetGeneratedKeys(JavaWriter out, String pstmt)
-      throws IOException
+    public void generateSetGeneratedKeys(JavaWriter out, String pstmt)
+    throws IOException
     {
     }
   */

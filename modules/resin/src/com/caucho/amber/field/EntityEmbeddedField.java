@@ -72,6 +72,8 @@ public class EntityEmbeddedField extends AbstractField {
   private boolean _isInsert = true;
   private boolean _isUpdate = true;
 
+  private boolean _isEmbeddedId = false;
+
   public EntityEmbeddedField(EntityType entityType, String name)
     throws ConfigException
   {
@@ -116,7 +118,7 @@ public class EntityEmbeddedField extends AbstractField {
   /**
    * Sets the columns.
    */
-  public void setColumns(HashMap<String, Column> columns)
+  public void setEmbeddedColumns(HashMap<String, Column> columns)
   {
     _columns = columns;
   }
@@ -124,7 +126,7 @@ public class EntityEmbeddedField extends AbstractField {
   /**
    * Gets the columns.
    */
-  public HashMap<String, Column> getColumns()
+  public HashMap<String, Column> getEmbeddedColumns()
   {
     return _columns;
   }
@@ -143,6 +145,22 @@ public class EntityEmbeddedField extends AbstractField {
   public HashMap<String, String> getFieldNameByColumn()
   {
     return _fieldNameByColumn;
+  }
+
+  /**
+   * Returns true if the property is an @EmbeddedId.
+   */
+  public boolean isEmbeddedId()
+  {
+    return _isEmbeddedId;
+  }
+
+  /**
+   * Set true if the property is an @EmbeddedId.
+   */
+  public void setEmbeddedId(boolean isEmbeddedId)
+  {
+    _isEmbeddedId = isEmbeddedId;
   }
 
   /**
@@ -169,7 +187,7 @@ public class EntityEmbeddedField extends AbstractField {
   {
     super.init();
 
-    if (getColumns() == null)
+    if (getEmbeddedColumns() == null)
       throw new IllegalStateException(L.l("columns must be set before init"));
   }
 

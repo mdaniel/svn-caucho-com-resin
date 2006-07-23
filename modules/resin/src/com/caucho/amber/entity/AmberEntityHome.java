@@ -68,16 +68,16 @@ public class AmberEntityHome {
   private EntityFactory _entityFactory = new EntityFactory();
 
   private Entity _homeBean;
-  
+
   private ArrayList<SoftReference<CacheUpdate>> _cacheUpdates =
     new ArrayList<SoftReference<CacheUpdate>>();
-  
+
   private EntityKey _cacheKey = new EntityKey();
 
   private volatile boolean _isInit;
 
   private ConfigException _configException;
-  
+
   private Method _cauchoGetBeanMethod;
 
   public AmberEntityHome(AmberPersistenceUnit manager, EntityType type)
@@ -99,7 +99,7 @@ public class AmberEntityHome {
   public AmberPersistenceUnit getManager()
   {
     return _manager;
-  }  
+  }
 
   /**
    * Returns the entity type
@@ -148,7 +148,7 @@ public class AmberEntityHome {
   {
     return _entityType.getInstanceClass();
   }
-  
+
   /**
    * Link the classes.
    */
@@ -157,7 +157,7 @@ public class AmberEntityHome {
   {
     // _entityClass.link(_manager);
   }
-  
+
   /**
    * Initialize the home.
    */
@@ -166,7 +166,7 @@ public class AmberEntityHome {
   {
     synchronized (this) {
       if (_isInit)
-	return;
+        return;
       _isInit = true;
     }
 
@@ -176,11 +176,11 @@ public class AmberEntityHome {
       _homeBean = (Entity) _entityType.getInstanceClass().newInstance();
     } catch (Exception e) {
       _entityType.setConfigException(e);
-      
+
       _configException = new ConfigException(e);
       throw _configException;
     }
-    
+
     _entityType.start();
   }
 
@@ -201,7 +201,7 @@ public class AmberEntityHome {
   {
     return _entityType.getId().toObjectKey(key);
   }
-  
+
   /**
    * Finds by the primary key.
    */
@@ -210,7 +210,7 @@ public class AmberEntityHome {
   {
     return find(aConn, key, true);
   }
-  
+
   /**
    * Finds by the primary key.
    */
@@ -219,17 +219,17 @@ public class AmberEntityHome {
   {
     return find(aConn, key, false);
   }
-  
+
   /**
    * Finds by the primary key.
    */
   public EntityItem findItem(AmberConnection aConn,
-			     ResultSet rs, int index)
+                             ResultSet rs, int index)
     throws SQLException
   {
     return _homeBean.__caucho_home_find(aConn, this, rs, index);
   }
-  
+
   /**
    * Finds by the primary key.
    */
@@ -247,29 +247,29 @@ public class AmberEntityHome {
 
     if (aConn.isInTransaction()) {
       if (value instanceof Entity)
-	entity = (Entity) value;
+        entity = (Entity) value;
       else if (_cauchoGetBeanMethod != null) {
-	try {
-	  entity = (Entity) _cauchoGetBeanMethod.invoke(value, new Object[0]);
-	  entity.__caucho_makePersistent(aConn, item);
-	} catch (Throwable e) {
-	  log.log(Level.FINEST, e.toString(), e);
-	}
+        try {
+          entity = (Entity) _cauchoGetBeanMethod.invoke(value, new Object[0]);
+          entity.__caucho_makePersistent(aConn, item);
+        } catch (Throwable e) {
+          log.log(Level.FINEST, e.toString(), e);
+        }
       }
 
       if (entity == null)
-	entity = aConn.getEntity(item);
+        entity = aConn.getEntity(item);
     }
     else
       entity = item.getEntity();
-    
+
     int keyLength = _entityType.getId().getKeyCount();
 
     entity.__caucho_load(aConn, rs, index + keyLength);
 
     return value;
   }
-  
+
   /**
    * Finds by the primary key.
    */
@@ -283,7 +283,7 @@ public class AmberEntityHome {
 
     return _entityFactory.getEntity(aConn, item);
   }
-  
+
   /**
    * Finds an entity based on the primary key.
    *
@@ -298,7 +298,7 @@ public class AmberEntityHome {
 
     return item.copy(aConn);
   }
-  
+
   /**
    * Loads an entity based on the primary key.
    *
@@ -307,8 +307,8 @@ public class AmberEntityHome {
    * @param isLoad if true, try to load the bean
    */
   public EntityItem findEntityItem(AmberConnection aConn,
-				   Object key,
-				   boolean isLoad)
+                                   Object key,
+                                   boolean isLoad)
     throws AmberException
   {
     if (key == null)
@@ -318,20 +318,21 @@ public class AmberEntityHome {
       EntityItem item = _manager.getEntity(getRootType(), key);
 
       if (item == null) {
-	if (_homeBean == null && _configException != null)
-	  throw _configException;
-	
-	Entity cacheEntity;
-	cacheEntity = (Entity) _homeBean.__caucho_home_new(aConn, this, key);
+        if (_homeBean == null && _configException != null)
+          throw _configException;
 
-	if (isLoad)
-	  cacheEntity.__caucho_retrieve(aConn);
+        Entity cacheEntity;
+        cacheEntity = (Entity) _homeBean.__caucho_home_new(aConn, this, key);
 
-	item = new CacheableEntityItem(this, cacheEntity);
-	item = _manager.putEntity(getRootType(), key, item);
+        if (isLoad) {
+          cacheEntity.__caucho_retrieve(aConn);
+        }
+
+        item = new CacheableEntityItem(this, cacheEntity);
+        item = _manager.putEntity(getRootType(), key, item);
       }
       else if (isLoad) {
-	item.loadEntity(0);
+        item.loadEntity(0);
       }
 
       return item;
@@ -339,7 +340,7 @@ public class AmberEntityHome {
       throw AmberException.create(e);
     }
   }
-  
+
   /**
    * Loads an entity based on the primary key.
    *
@@ -355,13 +356,13 @@ public class AmberEntityHome {
 
     try {
       item.getEntity().__caucho_setConnection(_manager.getCacheConnection());
-      
+
       return _manager.putEntity(getRootType(), key, item);
     } catch (Exception e) {
       throw AmberException.create(e);
     }
   }
-  
+
   /**
    * Loads an entity where the type is determined by a discriminator
    *
@@ -370,20 +371,20 @@ public class AmberEntityHome {
    * @param discriminator the object's discriminator
    */
   public EntityItem findDiscriminatorEntityItem(AmberConnection aConn,
-						Object key,
-						String discriminator)
+                                                Object key,
+                                                String discriminator)
     throws SQLException
   {
     EntityItem item = _manager.getEntity(getRootType(), key);
 
     if (item == null) {
       EntityType subEntity = _entityType.getSubClass(discriminator);
-    
+
       Entity cacheEntity = subEntity.createBean();
 
       cacheEntity.__caucho_setPrimaryKey(key);
       cacheEntity.__caucho_makePersistent(_manager.getCacheConnection(),
-					  subEntity);
+                                          subEntity);
 
       item = new CacheableEntityItem(this, cacheEntity);
       item = _manager.putEntity(getRootType(), key, item);
@@ -391,20 +392,20 @@ public class AmberEntityHome {
 
     return item;
   }
-  
+
   /**
    * Finds by the primary key.
    */
   public Entity makePersistent(Entity entity,
-			       AmberConnection aConn,
-			       boolean isLazy)
+                               AmberConnection aConn,
+                               boolean isLazy)
     throws SQLException
   {
     entity.__caucho_makePersistent(aConn, _entityType);
 
     return entity;
   }
-  
+
   /**
    * Saves based on the object.
    */
@@ -417,7 +418,7 @@ public class AmberEntityHome {
       throw AmberException.create(e);
     }
   }
-  
+
   /**
    * Deletes by the primary key.
    */
@@ -427,23 +428,23 @@ public class AmberEntityHome {
     _manager.removeEntity(getRootType(), key);
 
     /*
-    _entityType.childDelete(aConn, key);
+      _entityType.childDelete(aConn, key);
 
-    // XXX: possibly move somewhere else?
-    synchronized (_cacheUpdates) {
+      // XXX: possibly move somewhere else?
+      synchronized (_cacheUpdates) {
       for (int i = _cacheUpdates.size() - 1; i >= 0; i--) {
-	SoftReference<CacheUpdate> ref = _cacheUpdates.get(i);
-	CacheUpdate update = ref.get();
+      SoftReference<CacheUpdate> ref = _cacheUpdates.get(i);
+      CacheUpdate update = ref.get();
 
-	if (update == null)
-	  _cacheUpdates.remove(i);
-	else
-	  update.delete(primaryKey);
+      if (update == null)
+      _cacheUpdates.remove(i);
+      else
+      update.delete(primaryKey);
       }
-    }
+      }
     */
   }
-  
+
   /**
    * Deletes by the primary key.
    */
@@ -451,23 +452,23 @@ public class AmberEntityHome {
     throws SQLException
   {
     /*
-    _entityClass.childDelete(session, primaryKey);
+      _entityClass.childDelete(session, primaryKey);
 
-    // XXX: possibly move somewhere else?
-    synchronized (_cacheUpdates) {
+      // XXX: possibly move somewhere else?
+      synchronized (_cacheUpdates) {
       for (int i = _cacheUpdates.size() - 1; i >= 0; i--) {
-	SoftReference<CacheUpdate> ref = _cacheUpdates.get(i);
-	CacheUpdate update = ref.get();
+      SoftReference<CacheUpdate> ref = _cacheUpdates.get(i);
+      CacheUpdate update = ref.get();
 
-	if (update == null)
-	  _cacheUpdates.remove(i);
-	else
-	  update.delete(primaryKey);
+      if (update == null)
+      _cacheUpdates.remove(i);
+      else
+      update.delete(primaryKey);
       }
-    }
+      }
     */
   }
-  
+
   /**
    * Update for a modification.
    */

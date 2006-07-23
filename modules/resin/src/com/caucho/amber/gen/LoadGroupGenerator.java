@@ -57,8 +57,8 @@ public class LoadGroupGenerator extends ClassComponent {
   private int _index;
 
   public LoadGroupGenerator(String extClassName,
-			    EntityType entityType,
-			    int index)
+                            EntityType entityType,
+                            int index)
   {
     _extClassName = extClassName;
     _entityType = entityType;
@@ -90,13 +90,13 @@ public class LoadGroupGenerator extends ClassComponent {
 
       int loadCount = _entityType.getLoadGroupIndex();
       for (int i = 0; i <= loadCount / 64; i++) {
-	out.println("    __caucho_loadMask_" + i + " = 0;");
+        out.println("    __caucho_loadMask_" + i + " = 0;");
       }
       int dirtyCount = _entityType.getDirtyIndex();
       for (int i = 0; i <= dirtyCount / 64; i++) {
-	out.println("    __caucho_dirtyMask_" + i + " = 0;");
+        out.println("    __caucho_dirtyMask_" + i + " = 0;");
       }
-    
+
       out.println("    aConn.makeTransactional(this);");
       out.println("  }");
       out.println("  else if ((__caucho_loadMask_" + group + " & " + mask + "L) != 0)");
@@ -104,7 +104,7 @@ public class LoadGroupGenerator extends ClassComponent {
       out.println("}");
       out.print("else ");
     }
-    
+
     out.println("if ((__caucho_loadMask_" + group + " & " + mask + "L) != 0)");
     out.println("  return;");
 
@@ -121,14 +121,14 @@ public class LoadGroupGenerator extends ClassComponent {
 
     out.println();
     out.println("return;");
-    
+
     out.popDepth();
     out.println("}");
-    
+
     out.println();
     out.println("try {");
     out.pushDepth();
-    
+
     Table table = _entityType.getTable();
 
     String from = null;
@@ -141,10 +141,10 @@ public class LoadGroupGenerator extends ClassComponent {
 
     if (subSelect != null) {
       select = subSelect;
-      
+
       from = table.getName() + " o";
       where = _entityType.getId().generateMatchArgWhere("o");
-      
+
       mainTable = table;
       tableName = "o";
     }
@@ -157,25 +157,25 @@ public class LoadGroupGenerator extends ClassComponent {
       subSelect = _entityType.generateLoadSelect(subTable, "o" + i, _index);
 
       if (subSelect == null)
-	continue;
-      
+        continue;
+
       if (select != null)
-	select = select + ", " + subSelect;
+        select = select + ", " + subSelect;
       else
-	select = subSelect;
+        select = subSelect;
 
       if (from != null)
-	from = from + ", " + subTable.getName() + " o" + i;
+        from = from + ", " + subTable.getName() + " o" + i;
       else
-	from = subTable.getName() + " o" + i;
+        from = subTable.getName() + " o" + i;
 
       if (where != null) {
-	LinkColumns link = subTable.getDependentIdLink();
-	
-	where = where + " and " + link.generateJoin("o" + i, "o");
+        LinkColumns link = subTable.getDependentIdLink();
+
+        where = where + " and " + link.generateJoin("o" + i, "o");
       }
       else
-	throw new IllegalStateException();
+        throw new IllegalStateException();
     }
 
     if (select == null)
@@ -183,9 +183,10 @@ public class LoadGroupGenerator extends ClassComponent {
 
     if (where == null) {
       from = table.getName() + " o";
+
       where = _entityType.getId().generateMatchArgWhere("o");
     }
-    
+
     String sql = "select " + select + " from " + from + " where " + where;
 
     out.println("String sql = \"" + sql + "\";");
@@ -195,7 +196,7 @@ public class LoadGroupGenerator extends ClassComponent {
 
     out.println("int index = 1;");
     _entityType.getId().generateSet(out, "pstmt", "index", "super");
-    
+
     out.println();
     out.println("java.sql.ResultSet rs = pstmt.executeQuery();");
 
@@ -215,15 +216,15 @@ public class LoadGroupGenerator extends ClassComponent {
 
     if (_entityType.getHasLoadCallback())
       out.println("__caucho_load_callback();");
-    
+
     out.popDepth();
     out.println("}");
     out.println("else {");
     out.println("  rs.close();");
 
     String errorString = ("(\"amber load: no matching object " +
-			  _entityType.getName() + "[\" + __caucho_getPrimaryKey() + \"]\")");
-    
+                          _entityType.getName() + "[\" + __caucho_getPrimaryKey() + \"]\")");
+
     out.println("  throw new com.caucho.amber.AmberObjectNotFoundException(" + errorString + ");");
     out.println("}");
 
@@ -241,7 +242,7 @@ public class LoadGroupGenerator extends ClassComponent {
 
     out.popDepth();
     out.println("}");
-    
+
     if (_index == 0 && _entityType.getHasLoadCallback()) {
       out.println();
       out.println("protected void __caucho_load_callback() {}");

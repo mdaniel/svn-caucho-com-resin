@@ -32,7 +32,9 @@ package com.caucho.amber.field;
 import java.io.IOException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import java.util.logging.Logger;
 
@@ -66,6 +68,8 @@ public class Id {
   private ArrayList<IdField> _keys = new ArrayList<IdField>();
   private ArrayList<Column> _columns = new ArrayList<Column>();
 
+  private EmbeddedIdField _embeddedIdField;
+
   public Id(EntityType ownerType, ArrayList<IdField> keys)
   {
     _ownerType = ownerType;
@@ -79,7 +83,11 @@ public class Id {
   {
     _ownerType = ownerType;
 
-    addKey(key);
+    if (key instanceof EmbeddedIdField) {
+      _embeddedIdField = (EmbeddedIdField) key;
+    }
+
+    // addKey(key);
   }
 
   /**
@@ -166,8 +174,8 @@ public class Id {
    * Generates any prologue.
    */
   public void generatePrologue(JavaWriter out,
-			       HashSet<Object> completedSet,
-			       String name)
+                               HashSet<Object> completedSet,
+                               String name)
     throws IOException
   {
   }
@@ -181,29 +189,29 @@ public class Id {
     for (int i = 0; i < _keys.size(); i++)
       _keys.get(i).generatePrologue(out, completedSet);
   }
-  
+
   /**
    * Returns the foreign type.
    */
   public int generateLoadForeign(JavaWriter out, String rs,
- 				 String indexVar, int index)
+                                 String indexVar, int index)
     throws IOException
   {
     return generateLoadForeign(out, rs, indexVar, index,
- 			       getForeignTypeName().replace('.', '_'));
+                               getForeignTypeName().replace('.', '_'));
   }
 
   /**
    * Returns the foreign type.
    */
   public int generateLoadForeign(JavaWriter out, String rs,
-				 String indexVar, int index,
-				 String name)
+                                 String indexVar, int index,
+                                 String name)
     throws IOException
   {
     if (_keys.size() > 1)
       throw new UnsupportedOperationException();
-    
+
     return _keys.get(0).generateLoadForeign(out, rs, indexVar, index, name);
   }
 
@@ -285,16 +293,31 @@ public class Id {
     CharBuffer cb = new CharBuffer();
 
     boolean isFirst = true;
-    for (IdField field : getKeys()) {
-      for (Column column : field.getColumns()) {
-	if (! isFirst)
-	  cb.append(" and ");
-	isFirst = false;
 
-	cb.append(column.generateMatchArgWhere(id));
+    if (_embeddedIdField == null) {
+      for (IdField field : getKeys()) {
+        for (Column column : field.getColumns()) {
+          if (! isFirst)
+            cb.append(" and ");
+          isFirst = false;
+
+          cb.append(column.generateMatchArgWhere(id));
+        }
+      }
+    } else {
+      HashMap<String, Column> columns
+        = _embeddedIdField.getEmbeddedColumns();
+
+      for (Map.Entry<String, Column> entry : columns.entrySet()) {
+        Column column = entry.getValue();
+        if (isFirst)
+          isFirst = false;
+        else
+          cb.append(" and ");
+        cb.append(column.generateMatchArgWhere(id));
       }
     }
-    
+
     return cb.toString();
   }
 
@@ -309,7 +332,7 @@ public class Id {
 
     for (int i = 0; i < keys.size(); i++) {
       if (i != 0)
-	cb.append(" and ");
+        cb.append(" and ");
 
       cb.append(keys.get(i).generateRawWhere(id));
     }
@@ -334,7 +357,7 @@ public class Id {
    * Generates the set clause.
    */
   public void generateSetKey(JavaWriter out, String pstmt,
-			     String index, String keyObject)
+                             String index, String keyObject)
     throws IOException
   {
     IdField key = getKey();
@@ -346,7 +369,7 @@ public class Id {
    * Generates the set clause.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String value)
+                          String index, String value)
     throws IOException
   {
     ArrayList<IdField> keys = getKeys();
@@ -373,25 +396,25 @@ public class Id {
    * Generates the set clause.
    */
   /*
-  public String generateInsert()
-  {
+    public String generateInsert()
+    {
     String value = null;
-    
+
     ArrayList<IdField> keys = getKeys();
 
     for (int i = 0; i < keys.size(); i++) {
-      String next = keys.get(i).generateInsert();
+    String next = keys.get(i).generateInsert();
 
-      if (value == null)
-	value = next;
-      else if (next == null) {
-      }
-      else
-	value += ", " + next;
+    if (value == null)
+    value = next;
+    else if (next == null) {
+    }
+    else
+    value += ", " + next;
     }
 
     return value;
-  }
+    }
   */
 
   /**
@@ -414,7 +437,7 @@ public class Id {
   {
     return value;
   }
-  
+
   /**
    * Generates code for a match.
    */
@@ -424,7 +447,7 @@ public class Id {
     IdField id = getKeys().get(0);
 
     out.println("return (" + id.generateEquals(id.generateSuperGetter(),
-					       id.toValue(key)) + ");");
+                                               id.toValue(key)) + ");");
   }
 
   /**
@@ -440,14 +463,14 @@ public class Id {
       IdField key = keys.get(i);
 
       if (i != 0)
-	eq += " && ";
+        eq += " && ";
 
       eq += key.generateEquals(leftBase, value);
     }
 
     return eq + ")";
   }
-  
+
   /**
    * Generates the set clause.
    */
@@ -460,7 +483,7 @@ public class Id {
       keys.get(i).generateCheckCreateKey(out);
     }
   }
-  
+
   /**
    * Generates the set clause.
    */
@@ -472,6 +495,22 @@ public class Id {
     for (int i = 0; i < keys.size(); i++) {
       keys.get(i).generateSetGeneratedKeys(out, pstmt);
     }
+  }
+
+  /**
+   * Returns the embedded id field
+   */
+  public EmbeddedIdField getEmbeddedIdField()
+  {
+    return _embeddedIdField;
+  }
+
+  /**
+   * Returns true if this is an @EmbeddedId
+   */
+  public boolean isEmbeddedId()
+  {
+    return _embeddedIdField != null;
   }
 
   /**
