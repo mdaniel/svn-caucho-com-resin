@@ -85,17 +85,17 @@ abstract public class AbstractField implements AmberField {
 
   private int _updateIndex;
   private int _loadGroupIndex = -1;
-  
+
   AbstractField(EntityType sourceType)
   {
     _sourceType = sourceType;
   }
-  
+
   AbstractField(EntityType sourceType, String name)
     throws ConfigException
   {
     this(sourceType);
-    
+
     setName(name);
   }
 
@@ -110,7 +110,7 @@ abstract public class AbstractField implements AmberField {
     if (! getSourceType().isFieldAccess()) {
       char ch = name.charAt(0);
       if (Character.isLowerCase(ch))
-	name = Character.toUpperCase(ch) + name.substring(1);
+        name = Character.toUpperCase(ch) + name.substring(1);
 
       String getter = "get" + name;
       String setter = "set" + name;
@@ -118,32 +118,32 @@ abstract public class AbstractField implements AmberField {
       _getterMethod = EntityType.getGetter(getBeanClass(), getter);
 
       if (_getterMethod == null) {
-	getter = "is" + name;
-	_getterMethod = EntityType.getGetter(getBeanClass(), getter);
+        getter = "is" + name;
+        _getterMethod = EntityType.getGetter(getBeanClass(), getter);
       }
 
       if (_getterMethod == null)
-	throw new ConfigException(L.l("{0}: {1} has no matching getter.",
-				      getBeanClass().getName(), name));
+        throw new ConfigException(L.l("{0}: {1} has no matching getter.",
+                                      getBeanClass().getName(), name));
 
       _javaType = _getterMethod.getGenericReturnType();
-    
+
       _setterMethod = EntityType.getSetter(getBeanClass(), setter);
     }
     else {
       JField field = EntityType.getField(getBeanClass(), name);
 
       if (field == null)
-	throw new ConfigException(L.l("{0}: {1} has no matching field.",
-				      getBeanClass().getName(), name));
+        throw new ConfigException(L.l("{0}: {1} has no matching field.",
+                                      getBeanClass().getName(), name));
 
       _javaType = field.getGenericType();
     }
 
     /*
-    if (_setterMethod == null && ! isAbstract())
+      if (_setterMethod == null && ! isAbstract())
       throw new ConfigException(L.l("{0}: {1} has no matching setter.",
-				    getBeanClass().getName(), name));
+      getBeanClass().getName(), name));
     */
   }
 
@@ -170,7 +170,7 @@ abstract public class AbstractField implements AmberField {
   {
     setJavaType(new JClassWrapper(type, getPersistenceUnit().getJClassLoader()));
   }
-  
+
   /**
    * Returns the owning entity class.
    */
@@ -314,7 +314,7 @@ abstract public class AbstractField implements AmberField {
     else
       return "set" + getGetterName().substring(3);
   }
-  
+
   /**
    * Returns true if values are accessed by the fields.
    */
@@ -405,7 +405,7 @@ abstract public class AbstractField implements AmberField {
    * Generates loading cache
    */
   public void generateUpdate(JavaWriter out, String maskVar, String pstmt,
-			     String index)
+                             String index)
     throws IOException
   {
     int group = getIndex() / 64;
@@ -416,7 +416,7 @@ abstract public class AbstractField implements AmberField {
     out.pushDepth();
 
     generateSet(out, pstmt, index);
-      
+
     out.popDepth();
     out.println("}");
   }
@@ -433,7 +433,7 @@ abstract public class AbstractField implements AmberField {
    * Generates loading code
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index)
+                          String indexVar, int index)
     throws IOException
   {
     return index;
@@ -447,12 +447,12 @@ abstract public class AbstractField implements AmberField {
   {
     if (getGetterMethod() == null || getSetterMethod() == null)
       return;
-    
+
     String getter = getGetterName();
 
     String loadVar = "__caucho_loadMask_" + (getLoadGroupIndex() / 64);
     long loadMask = (1L << getLoadGroupIndex());
-    
+
     out.println("if ((" + loadVar + " & " + loadMask + "L) != 0)");
     out.print("  ");
 
@@ -562,7 +562,7 @@ abstract public class AbstractField implements AmberField {
   public void generateGetProperty(JavaWriter out)
     throws IOException
   {
-    
+
   }
 
   /**
@@ -579,11 +579,11 @@ abstract public class AbstractField implements AmberField {
   public String generateSuperGetter()
   {
     /*
-    if (isAbstract() ||	getGetterMethod() == null)
+      if (isAbstract() || getGetterMethod() == null)
       return getFieldName();
-    else
+      else
     */
-      return("__caucho_super_get_" + getName() + "()");
+    return("__caucho_super_get_" + getName() + "()");
   }
 
   /**
@@ -592,11 +592,11 @@ abstract public class AbstractField implements AmberField {
   public String generateSuperSetter(String value)
   {
     /*
-    if (isAbstract() ||	getGetterMethod() == null)
+      if (isAbstract() || getGetterMethod() == null)
       return(getFieldName() + " = " + value + ";");
-    else
+      else
     */
-      return "__caucho_super_set_" + getName() + "(" + value + ")";
+    return "__caucho_super_set_" + getName() + "(" + value + ")";
   }
 
   /**
@@ -610,11 +610,11 @@ abstract public class AbstractField implements AmberField {
     out.println("{");
     out.pushDepth();
 
-    if (isAbstract() ||	getGetterMethod() == null)
+    if (isAbstract() || getGetterMethod() == null)
       out.println("return " + getFieldName() + ";");
     else
       out.println("return super." + getGetterName() + "();");
-    
+
     out.popDepth();
     out.println("}");
   }
@@ -630,11 +630,11 @@ abstract public class AbstractField implements AmberField {
     out.println("{");
     out.pushDepth();
 
-    if (isAbstract() ||	getGetterMethod() == null)
+    if (isAbstract() || getGetterMethod() == null)
       out.println(getFieldName() + " = v;");
     else if (getSetterMethod() != null)
       out.println("super." + getSetterMethod().getName() + "(v);");
-    
+
     out.popDepth();
     out.println("}");
   }
@@ -660,7 +660,7 @@ abstract public class AbstractField implements AmberField {
    * Generates the set clause for the insert clause.
    */
   public void generateInsertSet(JavaWriter out, String pstmt,
-				String index, String obj)
+                                String index, String obj)
     throws IOException
   {
     generateSet(out, pstmt, index, obj);
@@ -670,7 +670,7 @@ abstract public class AbstractField implements AmberField {
    * Generates the set clause for the insert clause.
    */
   public void generateUpdateSet(JavaWriter out, String pstmt,
-				String index, String obj)
+                                String index, String obj)
     throws IOException
   {
     generateSet(out, pstmt, index, obj);
@@ -680,8 +680,8 @@ abstract public class AbstractField implements AmberField {
    * Updates the cached copy.
    */
   public void generateCopyUpdateObject(JavaWriter out,
-				       String dst, String src,
-				       int updateIndex)
+                                       String dst, String src,
+                                       int updateIndex)
     throws IOException
   {
     if (getIndex() == updateIndex) {
@@ -694,8 +694,8 @@ abstract public class AbstractField implements AmberField {
    * Updates the cached copy.
    */
   public void generateCopyLoadObject(JavaWriter out,
-				       String dst, String src,
-				       int loadIndex)
+                                     String dst, String src,
+                                     int loadIndex)
     throws IOException
   {
     if (getLoadGroupIndex() == loadIndex) {
@@ -708,7 +708,7 @@ abstract public class AbstractField implements AmberField {
    * Generates the set clause.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String obj)
+                          String index, String obj)
     throws IOException
   {
   }
@@ -751,7 +751,7 @@ abstract public class AbstractField implements AmberField {
     throws IOException
   {
   }
-  
+
   /**
    * Generates code for foreign entity create/delete
    */

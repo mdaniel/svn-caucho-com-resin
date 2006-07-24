@@ -81,12 +81,12 @@ public class ShortType extends Type {
    * Generates a string to load the property.
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index)
+                          String indexVar, int index)
     throws IOException
   {
     out.print("com.caucho.amber.type.ShortType.toShort(" +
-	      rs + ".getShort(" + indexVar + " + " + index + "), " +
-	      rs + ".wasNull())");
+              rs + ".getShort(" + indexVar + " + " + index + "), " +
+              rs + ".wasNull())");
 
     return index + 1;
   }
@@ -95,24 +95,49 @@ public class ShortType extends Type {
    * Generates a string to set the property.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String value)
+                          String index, String value)
     throws IOException
   {
     out.println("if (" + value + " == null)");
     out.println("  " + pstmt + ".setNull(" + index + "++, java.sql.Types.SMALLINT);");
     out.println("else");
     out.println("  " + pstmt + ".setShort(" + index + "++, " +
-		value + ".shortValue());");
+                value + ".shortValue());");
   }
 
   /**
    * Generates a string to set the property.
    */
   public void generateSetNull(JavaWriter out, String pstmt,
-			      String index)
+                              String index)
     throws IOException
   {
     out.println(pstmt + ".setNull(" + index + "++, java.sql.Types.SMALLINT);");
+  }
+
+  /**
+   * Generates a string to set the property.
+   */
+  public void generateSetVersion(JavaWriter out,
+                                 String pstmt,
+                                 String index,
+                                 String value)
+    throws IOException
+  {
+    out.println("if (" + value + " == null)");
+    out.println("  " + pstmt + ".setShort(" + index + "++, 1);");
+    out.println("else");
+    out.println("  " + pstmt + ".setShort(" + index + "++, " +
+                value + ".shortValue() + 1);");
+  }
+
+  /**
+   * Generates the increment version.
+   */
+  public String generateIncrementVersion(String value)
+    throws IOException
+  {
+    return value + ".shortValue() + 1";
   }
 
   /**
@@ -153,7 +178,7 @@ public class ShortType extends Type {
     throws SQLException
   {
     short value = rs.getShort(index);
-    
+
     return rs.wasNull() ? null : new Short(value);
   }
 }

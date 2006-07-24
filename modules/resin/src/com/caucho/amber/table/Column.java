@@ -56,7 +56,7 @@ public class Column {
   private static final L10N L = new L10N(Column.class);
 
   private Table _table;
-  
+
   private String _name;
 
   private String _configLocation;
@@ -64,7 +64,7 @@ public class Column {
   private Type _type;
 
   private boolean _isPrimaryKey;
-  
+
   private String _sqlType;
 
   private boolean _isNotNull;
@@ -213,15 +213,15 @@ public class Column {
   }
 
   /**
-  * Set the precision property.
-  */
+   * Set the precision property.
+   */
   public void setPrecision(int precision) {
     _precision = precision;
   }
 
   /**
-  * Gets the precision property.
-  */
+   * Gets the precision property.
+   */
   public int getPrecision() {
     return _precision;
   }
@@ -276,14 +276,14 @@ public class Column {
     } else {
       cb.append(sqlType);
     }
-    
+
     if (isPrimaryKey()) {
       cb.append(" primary key");
     } else if (! "identity".equals(_generatorType)) {
       if (isNotNull())
-	cb.append(" not null");
+        cb.append(" not null");
       if (isUnique())
-	cb.append(" unique");
+        cb.append(" unique");
     }
 
     return cb.toString();
@@ -299,26 +299,26 @@ public class Column {
       DataSource ds = amberPersistenceUnit.getDataSource();
       Connection conn = ds.getConnection();
       try {
-	Statement stmt = conn.createStatement();
+        Statement stmt = conn.createStatement();
 
-	String sql = "select " + getName() + " from " + _table.getName() + " where 1=0";
+        String sql = "select " + getName() + " from " + _table.getName() + " where 1=0";
 
-	try {
-	  // If the table exists, return
-	  
-	  ResultSet rs = stmt.executeQuery(sql);
-	  rs.close();
-	  return;
-	} catch (SQLException e) {
-	  throw error(L.l("'{0}' is not a valid database column in table '{1}'.  Either the table needs to be created or the create-database-tables attribute must be set.\n\n  {2}\n\n{3}",
-			  getName(),
-			  getTable().getName(),
-			  sql,
-			  e.toString()),
-		      e);
-	}
+        try {
+          // If the table exists, return
+
+          ResultSet rs = stmt.executeQuery(sql);
+          rs.close();
+          return;
+        } catch (SQLException e) {
+          throw error(L.l("'{0}' is not a valid database column in table '{1}'.  Either the table needs to be created or the create-database-tables attribute must be set.\n\n  {2}\n\n{3}",
+                          getName(),
+                          getTable().getName(),
+                          sql,
+                          e.toString()),
+                      e);
+        }
       } finally {
-	conn.close();
+        conn.close();
       }
     } catch (ConfigException e) {
       throw e;
@@ -356,7 +356,7 @@ public class Column {
   {
     return _name + "=?";
   }
-  
+
   /**
    * Generates the update clause setting to null.
    */
@@ -380,12 +380,12 @@ public class Column {
   {
     return "__amber_" + getName();
   }
-  
+
   /**
    * Generates a string to load the type as a property.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String value)
+                          String index, String value)
     throws IOException
   {
     if (value != null)
@@ -393,12 +393,24 @@ public class Column {
     else
       _type.generateSetNull(out, pstmt, index);
   }
-  
+
+  /**
+   * Generates a string to load the type as a property.
+   */
+  public void generateSetVersion(JavaWriter out,
+                                 String pstmt,
+                                 String index,
+                                 String value)
+    throws IOException
+  {
+    _type.generateSetVersion(out, pstmt, index, value);
+  }
+
   /**
    * Generates a string to load the type as a property.
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index)
+                          String indexVar, int index)
     throws IOException
   {
     return _type.generateLoad(out, rs, indexVar, index);

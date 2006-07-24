@@ -86,7 +86,7 @@ public class PrimitiveShortType extends PrimitiveType {
    * Generates a string to load the property.
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index)
+                          String indexVar, int index)
     throws IOException
   {
     out.print(rs + ".getShort(" + indexVar + " + " + index + ")");
@@ -98,7 +98,7 @@ public class PrimitiveShortType extends PrimitiveType {
    * Generates a string to set the property.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String value)
+                          String index, String value)
     throws IOException
   {
     out.println(pstmt + ".setShort(" + index + "++, " + value + ");");
@@ -114,13 +114,25 @@ public class PrimitiveShortType extends PrimitiveType {
   }
 
   /**
+   * Generates a string to set the property.
+   */
+  public void generateSetVersion(JavaWriter out,
+                                 String pstmt,
+                                 String index,
+                                 String value)
+    throws IOException
+  {
+    out.println(pstmt + ".setShort(" + index + "++, " + value + " + 1);");
+  }
+
+  /**
    * Converts to an object.
    */
   public String toObject(String value)
   {
     return "new Short(" + value + ")";
   }
-  
+
   /**
    * Converts the value.
    */

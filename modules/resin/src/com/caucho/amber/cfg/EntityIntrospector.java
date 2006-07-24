@@ -111,6 +111,12 @@ public class EntityIntrospector {
   // annotations allowed with a @EmbeddedId annotation
   private static HashSet<String> _embeddedIdAnnotations = new HashSet<String>();
 
+  // annotations allowed with a @Version annotation
+  private static HashSet<String> _versionAnnotations = new HashSet<String>();
+
+  // types allowed with an @Version annotation
+  private static HashSet<String> _versionTypes = new HashSet<String>();
+
   private AmberPersistenceUnit _persistenceUnit;
 
   private HashMap<String,EntityType> _entityMap
@@ -1077,6 +1083,11 @@ public class EntityIntrospector {
 
       addBasic(sourceType, field, fieldName, fieldType);
     }
+    else if (field.isAnnotationPresent(javax.persistence.Version.class)) {
+      validateAnnotations(field, _versionAnnotations);
+
+      addVersion(sourceType, field, fieldName, fieldType);
+    }
     else if (field.isAnnotationPresent(javax.persistence.ManyToOne.class)) {
       JAnnotation ann = field.getAnnotation(javax.persistence.ManyToOne.class);
 
@@ -1215,6 +1226,32 @@ public class EntityIntrospector {
     */
 
     sourceType.addField(property);
+  }
+
+  private void addVersion(EntityType sourceType,
+                          JAccessibleObject field,
+                          String fieldName,
+                          JClass fieldType)
+    throws ConfigException
+  {
+    AmberPersistenceUnit persistenceUnit = sourceType.getPersistenceUnit();
+
+    JAnnotation columnAnn = field.getAnnotation(javax.persistence.Column.class);
+
+    if (! _versionTypes.contains(fieldType.getName())) {
+      throw error(field, L.l("{0} is an invalid @Version type for {1}.",
+                             fieldType.getName(), field.getName()));
+    }
+
+    Type amberType = persistenceUnit.createType(fieldType);
+
+    Column fieldColumn = createColumn(sourceType, field, fieldName,
+                                      columnAnn, amberType);
+
+    VersionField version = new VersionField(sourceType, fieldName);
+    version.setColumn(fieldColumn);
+
+    sourceType.setVersionField(version);
   }
 
   private Column createColumn(EntityType entityType,
@@ -2327,5 +2364,20 @@ public class EntityIntrospector {
     _propertyAnnotations.add("javax.persistence.JoinColumn");
     _propertyAnnotations.add("javax.persistence.Embedded");
     _propertyAnnotations.add("javax.persistence.EmbeddedId");
+    _propertyAnnotations.add("javax.persistence.Version");
+
+    // annotations allowed with a @Version annotation
+    _versionAnnotations.add("javax.persistence.Version");
+    _versionAnnotations.add("javax.persistence.Column");
+    _versionAnnotations.add("javax.persistence.Temporal");
+
+    // types allowed with a @Version annotation
+    _versionTypes.add("short");
+    _versionTypes.add("int");
+    _versionTypes.add("long");
+    _versionTypes.add("java.lang.Short");
+    _versionTypes.add("java.lang.Integer");
+    _versionTypes.add("java.lang.Long");
+    _versionTypes.add("java.sql.Timestamp");
   }
 }

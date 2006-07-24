@@ -83,7 +83,7 @@ public class SqlTimestampType extends Type {
    * Generates a string to load the property.
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index)
+                          String indexVar, int index)
     throws IOException
   {
     out.print(rs + ".getTimestamp(" + indexVar + " + " + index + ")");
@@ -95,13 +95,35 @@ public class SqlTimestampType extends Type {
    * Generates a string to set the property.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String value)
+                          String index, String value)
     throws IOException
   {
     out.println("if (" + value + " == null)");
     out.println("  " + pstmt + ".setNull(" + index + "++, java.sql.Types.TIMESTAMP);");
     out.println("else");
     out.println("  " + pstmt + ".setTimestamp(" + index + "++, " + value + ");");
+  }
+
+  /**
+   * Generates a string to set the property.
+   */
+  public void generateSetVersion(JavaWriter out,
+                                 String pstmt,
+                                 String index,
+                                 String value)
+    throws IOException
+  {
+    value = "new java.sql.Timestamp(new java.util.Date().getTime())";
+    out.println(pstmt + ".setTimestamp(" + index + "++, " + value + ");");
+  }
+
+  /**
+   * Generates the increment version.
+   */
+  public String generateIncrementVersion(String value)
+    throws IOException
+  {
+    return "new java.sql.Timestamp(new java.util.Date().getTime())";
   }
 
   /**

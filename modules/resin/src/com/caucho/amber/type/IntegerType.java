@@ -81,12 +81,12 @@ public class IntegerType extends Type {
    * Generates a string to load the property.
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index)
+                          String indexVar, int index)
     throws IOException
   {
     out.print("com.caucho.amber.type.IntegerType.toInt(" +
-	      rs + ".getInt(" + indexVar + " + " + index + "), " +
-	      rs + ".wasNull())");
+              rs + ".getInt(" + indexVar + " + " + index + "), " +
+              rs + ".wasNull())");
 
     return index + 1;
   }
@@ -95,24 +95,49 @@ public class IntegerType extends Type {
    * Generates a string to set the property.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String value)
+                          String index, String value)
     throws IOException
   {
     out.println("if (" + value + " == null)");
     out.println("  " + pstmt + ".setNull(" + index + "++, java.sql.Types.INTEGER);");
     out.println("else");
     out.println("  " + pstmt + ".setInt(" + index + "++, " +
-		value + ".intValue());");
+                value + ".intValue());");
   }
 
   /**
    * Generates a string to set the property.
    */
   public void generateSetNull(JavaWriter out, String pstmt,
-			      String index)
+                              String index)
     throws IOException
   {
     out.println(pstmt + ".setNull(" + index + "++, java.sql.Types.INTEGER);");
+  }
+
+  /**
+   * Generates a string to set the property.
+   */
+  public void generateSetVersion(JavaWriter out,
+                                 String pstmt,
+                                 String index,
+                                 String value)
+    throws IOException
+  {
+    out.println("if (" + value + " == null)");
+    out.println("  " + pstmt + ".setInt(" + index + "++, 1);");
+    out.println("else");
+    out.println("  " + pstmt + ".setInt(" + index + "++, " +
+                value + ".intValue() + 1);");
+  }
+
+  /**
+   * Generates the increment version.
+   */
+  public String generateIncrementVersion(String value)
+    throws IOException
+  {
+    return value + ".intValue() + 1";
   }
 
   /**
@@ -153,7 +178,7 @@ public class IntegerType extends Type {
     throws SQLException
   {
     int value = rs.getInt(index);
-    
+
     return rs.wasNull() ? null : new Integer(value);
   }
 }

@@ -64,12 +64,13 @@ import com.caucho.amber.entity.EntityItem;
 import com.caucho.amber.entity.AmberEntityHome;
 import com.caucho.amber.entity.AmberCompletion;
 
+import com.caucho.amber.field.AmberField;
+import com.caucho.amber.field.AmberFieldCompare;
+import com.caucho.amber.field.EntityManyToOneField;
 import com.caucho.amber.field.Id;
 import com.caucho.amber.field.IdField;
-import com.caucho.amber.field.AmberField;
 import com.caucho.amber.field.StubMethod;
-import com.caucho.amber.field.EntityManyToOneField;
-import com.caucho.amber.field.AmberFieldCompare;
+import com.caucho.amber.field.VersionField;
 
 import com.caucho.amber.idgen.IdGenerator;
 
@@ -160,7 +161,11 @@ public class EntityType extends Type {
 
   private volatile boolean _isConfigured;
   private volatile boolean _isGenerated;
+
   private boolean _isEmbeddable;
+
+  private VersionField _versionField;
+
 
   public EntityType(AmberPersistenceUnit amberPersistenceUnit)
   {
@@ -197,6 +202,24 @@ public class EntityType extends Type {
     _table = table;
 
     table.setType(this);
+  }
+
+  /**
+   * Returns the version field.
+   */
+  public VersionField getVersionField()
+  {
+    return _versionField;
+  }
+
+  /**
+   * Sets the version field.
+   */
+  public void setVersionField(VersionField versionField)
+  {
+    addField(versionField);
+
+    _versionField = versionField;
   }
 
   /**

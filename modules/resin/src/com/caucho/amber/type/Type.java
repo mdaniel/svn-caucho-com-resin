@@ -90,7 +90,7 @@ abstract public class Type {
     throws ConfigException
   {
   }
-  
+
   /**
    * Returns the type as a foreign key.
    */
@@ -98,7 +98,7 @@ abstract public class Type {
   {
     return this;
   }
-  
+
   /**
    * Returns the java class of the type as a foreign key.
    */
@@ -117,27 +117,27 @@ abstract public class Type {
 
     return manager.getCreateColumnSQL(Types.VARCHAR, length, precision, scale);
   }
-  
+
   /**
    * Generates a string to load the type as a property.
    */
   public int generateLoad(JavaWriter out, String rs,
-				   String indexVar, int index)
+                          String indexVar, int index)
     throws IOException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   /**
    * Generates a string to load the type as a property.
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index,
-			  JClass targetType)
+                          String indexVar, int index,
+                          JClass targetType)
     throws IOException
   {
     String i = indexVar + " + " + index;
-    
+
     if ("java.lang.Byte".equals(targetType.getName()))
       out.print("new Byte((byte) " + rs + ".getInt(" + i + "))");
     else if ("java.lang.Short".equals(targetType.getName()))
@@ -161,12 +161,12 @@ abstract public class Type {
 
     return index + 1;
   }
-  
+
   /**
    * Generates a string to load the type as a property.
    */
   public int generateLoadForeign(JavaWriter out, String rs,
-					  String indexVar, int index)
+                                 String indexVar, int index)
     throws IOException
   {
     return getForeignType().generateLoad(out, rs, indexVar, index);
@@ -176,10 +176,31 @@ abstract public class Type {
    * Generates a string to set the type as a property.
    */
   public void generateSet(JavaWriter out, String pstmt,
-				   String index, String value)
+                          String index, String value)
     throws IOException
   {
     throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Generates a string to set the type as a property.
+   */
+  public void generateSetVersion(JavaWriter out,
+                                 String pstmt,
+                                 String index,
+                                 String value)
+    throws IOException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Generates the increment version.
+   */
+  public String generateIncrementVersion(String value)
+    throws IOException
+  {
+    return value + " + 1";
   }
 
   /**

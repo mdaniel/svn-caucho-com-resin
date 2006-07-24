@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
@@ -87,7 +86,7 @@ public class PrimitiveLongType extends PrimitiveType {
    * Generates a string to load the property.
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index)
+                          String indexVar, int index)
     throws IOException
   {
     out.print(rs + ".getLong(" + indexVar + " + " + index + ")");
@@ -99,12 +98,12 @@ public class PrimitiveLongType extends PrimitiveType {
    * Generates a string to load the property.
    */
   public int generateLoadForeign(JavaWriter out, String rs,
-				 String indexVar, int index)
+                                 String indexVar, int index)
     throws IOException
   {
     out.print("com.caucho.amber.type.PrimitiveLongType.toForeignLong(" +
-	      rs + ".getLong(" + indexVar + " + " + index + "), " +
-	      rs + ".wasNull())");
+              rs + ".getLong(" + indexVar + " + " + index + "), " +
+              rs + ".wasNull())");
 
     return index + 1;
   }
@@ -113,7 +112,7 @@ public class PrimitiveLongType extends PrimitiveType {
    * Generates a string to set the property.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String value)
+                          String index, String value)
     throws IOException
   {
     out.println(pstmt + ".setLong(" + index + "++, " + value + ");");
@@ -129,13 +128,25 @@ public class PrimitiveLongType extends PrimitiveType {
   }
 
   /**
+   * Generates a string to set the property.
+   */
+  public void generateSetVersion(JavaWriter out,
+                                 String pstmt,
+                                 String index,
+                                 String value)
+    throws IOException
+  {
+    out.println(pstmt + ".setLong(" + index + "++, " + value + " + 1);");
+  }
+
+  /**
    * Converts to an object.
    */
   public String toObject(String value)
   {
     return "new Long(" + value + ")";
   }
-  
+
   /**
    * Converts the value.
    */

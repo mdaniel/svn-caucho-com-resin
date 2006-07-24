@@ -50,6 +50,7 @@ import com.caucho.amber.field.AmberField;
 import com.caucho.amber.field.Id;
 import com.caucho.amber.field.IdField;
 import com.caucho.amber.field.StubMethod;
+import com.caucho.amber.field.VersionField;
 
 import com.caucho.amber.table.Table;
 import com.caucho.amber.table.Column;
@@ -240,6 +241,8 @@ public class EntityComponent extends ClassComponent {
         out.println("protected transient long __caucho_dirtyMask_" + i + ";");
         out.println("protected transient long __caucho_updateMask_" + i + ";");
       }
+
+      out.println("protected transient boolean __caucho_inc_version;");
     }
   }
 
@@ -601,6 +604,23 @@ public class EntityComponent extends ClassComponent {
     throws IOException
   {
     out.println();
+    out.println("public void __caucho_increment_version()");
+    out.println("{");
+    out.pushDepth();
+    out.println("if (__caucho_inc_version)");
+    out.println("  return;");
+    out.println();
+    out.println("__caucho_inc_version = true;");
+
+    VersionField version = _entityType.getVersionField();
+
+    if (version != null)
+      version.generateIncrementVersion(out);
+
+    out.popDepth();
+    out.println("}");
+
+    out.println();
     out.println("protected void __caucho_flush_callback()");
     out.println("  throws java.sql.SQLException");
     out.println("{");
@@ -673,6 +693,8 @@ public class EntityComponent extends ClassComponent {
     out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
     out.println("  __caucho_log.fine(\"amber update \" + this);");
 
+    out.println();
+    out.println("__caucho_inc_version = false;");
     out.println();
     out.println("return false;");
     out.popDepth();

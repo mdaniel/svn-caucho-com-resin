@@ -145,21 +145,21 @@ public class PropertyField extends AbstractField {
     throws ConfigException
   {
     super.init();
-    
+
     if (getColumn() == null)
       throw new IllegalStateException(L.l("column must be set before init"));
 
     if (getSourceType().getId() != null) {
       // resolve any alias
       for (AmberField field : getSourceType().getId().getKeys()) {
-	if (field instanceof KeyManyToOneField) {
-	  KeyManyToOneField key = (KeyManyToOneField) field;
+        if (field instanceof KeyManyToOneField) {
+          KeyManyToOneField key = (KeyManyToOneField) field;
 
-	  for (ForeignColumn column : key.getLinkColumns().getColumns()) {
-	    if (getColumn().getName().equals(column.getName()))
-	      _aliasKey = key;
-	  }
-	}
+          for (ForeignColumn column : key.getLinkColumns().getColumns()) {
+            if (getColumn().getName().equals(column.getName()))
+              _aliasKey = key;
+          }
+        }
       }
     }
   }
@@ -188,7 +188,7 @@ public class PropertyField extends AbstractField {
   {
     if (! isFieldAccess() && getGetterMethod() == null)
       return;
-    
+
     out.println();
     out.println("public " + getJavaTypeName() + " " + getGetterName() + "()");
     out.println("{");
@@ -198,7 +198,7 @@ public class PropertyField extends AbstractField {
     out.println("  __caucho_load_" + getLoadGroupIndex() + "(__caucho_session);");
     out.println();
     out.println("return " + generateSuperGetter() + ";");
-    
+
     out.popDepth();
     out.println("}");
   }
@@ -210,9 +210,9 @@ public class PropertyField extends AbstractField {
     throws IOException
   {
     if (! isFieldAccess() && (getGetterMethod() == null ||
-			      getSetterMethod() == null && ! isAbstract()))
+                              getSetterMethod() == null && ! isAbstract()))
       return;
-    
+
     out.println();
     out.println("public void " + getSetterName() + "(" + getJavaTypeName() + " v)");
     out.println("{");
@@ -229,31 +229,33 @@ public class PropertyField extends AbstractField {
       String loadVar = "__caucho_loadMask_" + maskGroup;
 
       long mask = 1L << (getLoadGroupIndex() % 64);
-      
+
       if (getJavaTypeName().equals("java.lang.String")) {
-	out.println("if ((oldValue == v || v != null && v.equals(oldValue)) && (" + loadVar + " & " + mask + "L) != 0L)");
-	out.println("  return;");
+        out.println("if ((oldValue == v || v != null && v.equals(oldValue)) && (" + loadVar + " & " + mask + "L) != 0L)");
+        out.println("  return;");
       }
       else {
-	out.println("if (oldValue == v && (" + loadVar + " & " + mask + "L) != 0)");
-	out.println("  return;");
+        out.println("if (oldValue == v && (" + loadVar + " & " + mask + "L) != 0)");
+        out.println("  return;");
       }
 
       out.println(generateSuperSetter("v") + ";");
-    
+
       int dirtyGroup = getIndex() / 64;
       String dirtyVar = "__caucho_dirtyMask_" + dirtyGroup;
 
       long dirtyMask = 1L << (getIndex() % 64);
-      
+
       out.println();
       out.println("long oldMask = " + dirtyVar + ";");
       out.println(dirtyVar + " |= " + dirtyMask + "L;");
       out.println();
       out.println("if (__caucho_session != null && oldMask == 0)");
       out.println("  __caucho_session.update(this);");
+      out.println();
+      out.println("__caucho_increment_version();");
     }
-    
+
     out.popDepth();
     out.println("}");
   }
@@ -302,16 +304,16 @@ public class PropertyField extends AbstractField {
     if (_isUpdate && _aliasKey == null)
       sql.append(getColumn().generateUpdateSet());
     /*
-    sql.append(getColumn());
-    sql.append("=?");
-   */
+      sql.append(getColumn());
+      sql.append("=?");
+    */
   }
 
   /**
    * Generates the set clause for the insert clause.
    */
   public void generateInsertSet(JavaWriter out, String pstmt,
-				String index, String obj)
+                                String index, String obj)
     throws IOException
   {
     if (_aliasKey != null) {
@@ -330,7 +332,7 @@ public class PropertyField extends AbstractField {
    * Generates the set clause for the insert clause.
    */
   public void generateUpdateSet(JavaWriter out, String pstmt,
-				String index, String obj)
+                                String index, String obj)
     throws IOException
   {
     if (_isUpdate && _aliasKey == null)
@@ -341,12 +343,12 @@ public class PropertyField extends AbstractField {
    * Generates the set clause.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String obj)
+                          String index, String obj)
     throws IOException
   {
     if (! isFieldAccess() && getGetterMethod() == null || _aliasKey != null)
       return;
-    
+
     getColumn().generateSet(out, pstmt, index, generateGet(obj));
   }
 
@@ -354,18 +356,18 @@ public class PropertyField extends AbstractField {
    * Generates loading code
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index)
+                          String indexVar, int index)
     throws IOException
   {
     if (_aliasKey != null)
       return index;
     /*
-    if (getSetterMethod() == null)
+      if (getSetterMethod() == null)
       return index;
     */
 
     String var = "amber_ld" + index;
-    
+
     out.print(getJavaTypeName());
     out.print(" " + var + " = ");
     index = getColumn().generateLoad(out, rs, indexVar, index);
