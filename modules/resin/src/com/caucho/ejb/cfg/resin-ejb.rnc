@@ -257,7 +257,7 @@ r_enterprise-beans = element enterprise-beans {
 
   | r_message-driven
 
-  | r_ejb-bean)+
+  | r_ejb-bean)*
 }
 
 r_entity = element entity {

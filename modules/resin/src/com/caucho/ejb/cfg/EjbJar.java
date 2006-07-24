@@ -183,6 +183,10 @@ public class EjbJar {
     public void setUnchecked(boolean unchecked)
     {
     }
+
+    public void setRoleName(String roleName)
+    {
+    }
     
     public void setMethod(MethodSignature method)
     {

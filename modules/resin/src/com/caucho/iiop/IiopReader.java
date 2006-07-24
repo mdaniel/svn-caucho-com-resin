@@ -243,8 +243,8 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     _rs.readAll(_buffer, 4, _length - 4);
 
     // debug
-    System.out.println("---");
-    writeHexGroup(_buffer, 0, _length);
+    //System.out.println("---");
+    //writeHexGroup(_buffer, 0, _length);
 
     if (_minor == 0) {
       switch (_type) {

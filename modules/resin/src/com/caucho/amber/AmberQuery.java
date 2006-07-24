@@ -82,6 +82,11 @@ public interface AmberQuery {
   public void setDouble(int index, double v);
 
   /**
+   * Sets the argument with a double
+   */
+  public void setFloat(int index, float v);
+
+  /**
    * Sets the argument with a timestamp
    */
   public void setTimestamp(int index, java.sql.Timestamp v);

@@ -51,6 +51,7 @@ import com.caucho.amber.type.ByteType;
 import com.caucho.amber.type.ShortType;
 import com.caucho.amber.type.IntegerType;
 import com.caucho.amber.type.LongType;
+import com.caucho.amber.type.FloatType;
 import com.caucho.amber.type.DoubleType;
 import com.caucho.amber.type.SqlTimestampType;
 import com.caucho.amber.type.SqlDateType;
@@ -216,6 +217,16 @@ public class UserQuery implements AmberQuery {
   {
     _argTypes[index - 1] = DoubleType.create();
     _argValues[index - 1] = new Double(v);
+    _argLength = index;
+  }
+
+  /**
+   * Sets the argument with a double
+   */
+  public void setFloat(int index, float v)
+  {
+    _argTypes[index - 1] = FloatType.create();
+    _argValues[index - 1] = new Float(v);
     _argLength = index;
   }
 

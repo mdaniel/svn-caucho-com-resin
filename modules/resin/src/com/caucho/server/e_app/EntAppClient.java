@@ -347,6 +347,14 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
   }
 
   /**
+   * Adds an EjbLink.
+   */
+  public SecurityRole createSecurityRole()
+  {
+    return new SecurityRole();
+  }
+
+  /**
    * Stub for the xsi:schemaLocation tag.
    */
   public void setSchemaLocation(String s)
@@ -568,6 +576,24 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
 
       System.out.println("VALUE: " + value + " " + value.getClass() + " " + _api);
       Jndi.rebindDeepShort(_ejbName, value);
+    }
+  }
+
+  public class SecurityRole {
+    public void setId(String id)
+    {
+    }
+
+    public void addDescription(String description)
+    {
+    }
+
+    public void setRoleName(String roleName)
+    {
+    }
+
+    public void setRoleLink(String roleLink)
+    {
     }
   }
 
