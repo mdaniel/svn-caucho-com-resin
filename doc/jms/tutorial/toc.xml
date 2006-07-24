@@ -3,5 +3,7 @@
     <item link="ioc-listener/index.xtp" title="Simple Listener"/>
 
     <item link="listener/index.xtp" title="JCA Listener"/>
+    
+    <item link="php/index.xtp" title="JMS in PHP"/>
   </item>
 </navigation>

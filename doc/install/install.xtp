@@ -19,23 +19,23 @@ used for development or evaluation.  The steps are:</p>
 <ol>
 <li>Install JDK 1.4 or later.  On Unix, set the JAVA_HOME variable or
 link /usr/java to the java home.  On Windows, check to make sure the
-JDK installation set JAVA_HOME correctly.
-<li>unzip/untar the Resin download
-<li>On Unix, execute use ./configure; make; make install
-<li>Start <var/resin-3.0.0/bin/httpd.sh/> on Unix or <var/resin-3.0.0/httpd.exe/> on Win32
-<li>Browse <code>http://localhost:8080</code>
+JDK installation set JAVA_HOME correctly.</li>
+<li>unzip/untar the Resin download</li>
+<li>On Unix, execute use ./configure; make; make install</li>
+<li>Start <var/resin-3.0.0/bin/httpd.sh/> on Unix or <var/resin-3.0.0/httpd.exe/> on Win32</li>
+<li>Browse <code>http://localhost:8080</code></li>
 <li>Add JSP files like <var/resin-3.0.0/doc/hello.jsp/>.  The URL in your
-browser will be <code>http://localhost:8080/hello.jsp</code>
-<li>Add servlets like <var/resin-3.0.0/doc/WEB-INF/classes/test/HelloServlet.java/>
+browser will be <code>http://localhost:8080/hello.jsp</code></li>
+<li>Add servlets like <var/resin-3.0.0/doc/WEB-INF/classes/test/HelloServlet.java/></li>
 <li>Add .war files like <var/resin-3.0.0/webapps/hello.war/>, url in your
-browser is <code>http://localhost:8080/hello</code>
+browser is <code>http://localhost:8080/hello</code></li>
 <li>Create web-apps directly like
 <var/resin-3.0.0/webapps/hello/index.jsp/>
 url in your browser is <code>http://localhost:8080/hello</code>.
 Create a file <var/resin-3.0.0/webapps/hello/WEB-INF/web.xml/> to
-configure the 'hello' web application.
-<li>If needed, modify the Resin configuration in <var/resin-3.0.0/conf/resin.conf/>
-<li>.war files will be deployed in resin-3.0.x/webapps.
+configure the 'hello' web application.</li>
+<li>If needed, modify the Resin configuration in <var/resin-3.0.0/conf/resin.conf/></li>
+<li>.war files will be deployed in resin-3.0.x/webapps.</li>
 </ol>
 
 <p>Until you're ready to deploy the server, those are all the
@@ -85,7 +85,7 @@ Resin, for example "c:\resin-3.0.0"</li>
 <ol>
 <li>Install JDK 1.4 or later and link /usr/java to the Java home or define the environment variable JAVA_HOME.</li>
 <li>tar -vzxf resin-3.0.0.tar.gz</li>
-<li>cd resin-3.0.0
+<li>cd resin-3.0.0</li>
 <li>./configure</li>
 <li>make</li>
 <li>make install</li>
