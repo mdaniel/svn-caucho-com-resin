@@ -449,6 +449,7 @@
       <packageset dir="${modules}/jstl/src"/>
       <packageset dir="${modules}/jta/src"/>
       <packageset dir="${modules}/portlet/src"/>
+      <packageset dir="${modules}/quercus/src"/>
       <packageset dir="${modules}/resin/src"/>
       <packageset dir="${modules}/resin-jdk15/src"/>
       <packageset dir="${modules}/saaj/src"/>
