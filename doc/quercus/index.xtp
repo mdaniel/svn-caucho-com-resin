@@ -1,0 +1,16 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Quercus: PHP in Java</title>
+    <level>toplevel-topic</level>
+    <type>contents</type>
+    <description>
+<em>Quercus</em> is Caucho Technology's fast, open-source, 100% Java implementation of the PHP language (requires JDK 1.5).
+    </description>
+  </header>
+
+  <body>
+    <summary/>
+  </body>
+</document>
+

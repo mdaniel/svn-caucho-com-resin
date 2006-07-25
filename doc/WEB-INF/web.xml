@@ -27,8 +27,12 @@
     </web-app-default>
   </web-app-deploy>
 
-  <web-app-deploy url-prefix="/php/tutorial"
-                  path="php/tutorial"
+  <rewrite-dispatch>
+    <redirect regexp='/php' target='${app.contextPath}/quercus'/>
+  </rewrite-dispatch>
+    
+  <web-app-deploy url-prefix="/quercus/tutorial"
+                  path="quercus/tutorial"
                   startup-mode="lazy">
     <web-app-default>
       <servlet servlet-name="viewfile" 

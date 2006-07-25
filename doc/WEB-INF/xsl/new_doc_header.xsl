@@ -491,13 +491,13 @@ html/body
   #>
 
   <table border=0 cellspacing=0 width='100%'>
-  <tr><td><em><small>Copyright &copy; 1998-2005 Caucho Technology, Inc. All rights reserved.<br/>
+  <tr><td><em><small>Copyright &copy; 1998-2006 Caucho Technology, Inc. All rights reserved.<br/>
 Resin<sup><font size='-1'>&#174;</font></sup> is a registered trademark,
 and HardCore<sup>tm</sup> and Quercus<sup>tm</sup> are trademarks of Caucho Technology, Inc.</small></em>
     </td>
     <td align=right><img width=96 height=32>
         <xsl:attribute name='src'>
-          <xsl:value-of select="file-find('images/logo.gif')"/>
+          <xsl:value-of select="file-find('images/resin-powered.gif')"/>
         </xsl:attribute>
     </img></td>
   </tr>

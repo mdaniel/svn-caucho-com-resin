@@ -14,7 +14,7 @@
     <item link="ioc/index.xtp" title="IOC/AOP" atoc-descend="true"/>
     <item link="resource/index.xtp" title="Resources" atoc-descend="true"/>
     <item link="jsp/index.xtp" title="JSP" atoc-descend="true"/>
-    <item link="php/index.xtp" title="PHP" atoc-descend="true"/>
+    <item link="quercus/index.xtp" title="Quercus" atoc-descend="true"/>
     <item link="servlet/index.xtp" title="Servlets and Filters" atoc-descend="true"/>
     <!--
     <item link="portlet/index.xtp" title="Portlets" atoc-descend="true"/>
