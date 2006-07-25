@@ -16,5 +16,6 @@ com.caucho.quercus.lib.db.OracleOciCollection
 com.caucho.quercus.lib.pdf.PDF
 com.caucho.quercus.lib.db.PDO provides pdo
 com.caucho.quercus.lib.xml.Xml
+com.caucho.quercus.lib.xml.XmlReader
 com.caucho.quercus.lib.resin.MBeanServer
 

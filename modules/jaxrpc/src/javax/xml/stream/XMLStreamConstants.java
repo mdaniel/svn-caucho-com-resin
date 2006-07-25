@@ -45,6 +45,8 @@ public interface XMLStreamConstants {
 
   public static final int END_ELEMENT=2;
 
+  public static final int END_ENTITY=15;
+
   public static final int ENTITY_DECLARATION=15;
 
   public static final int ENTITY_REFERENCE=9;
@@ -60,5 +62,7 @@ public interface XMLStreamConstants {
   public static final int START_DOCUMENT=7;
 
   public static final int START_ELEMENT=1;
+
+  public static final int START_ENTITY=14;
 }
 

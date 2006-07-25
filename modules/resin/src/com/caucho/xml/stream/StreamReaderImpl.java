@@ -47,7 +47,7 @@ public class StreamReaderImpl implements XMLStreamReader {
   private static final L10N L = new L10N(StreamReaderImpl.class);
 
   private static final boolean []IS_XML_NAME = new boolean[65536];
-  
+
   private ReadStream _is;
 
   private int _col = 1;
@@ -60,8 +60,9 @@ public class StreamReaderImpl implements XMLStreamReader {
   private int _current;
   private int _state;
   private boolean _isShortTag;
+
   private boolean _eofEncountered = false;
-  
+
   private RawName _rawTagName = new RawName();
   private QName _name;
 
@@ -84,74 +85,74 @@ public class StreamReaderImpl implements XMLStreamReader {
     _token = 0;
     _current = START_DOCUMENT;
   }
-  
+
   public int getAttributeCount()
   {
     return _attrCount;
   }
-  
+
   public String getAttributeLocalName(int index)
   {
     if (_attrCount <= index)
       throw new IllegalArgumentException(L.l("element only has {0} attributes, given index {1}",
-                                             _attrCount, index));
-    
+               															 _attrCount, index));
+
     return _attrNames[index].getLocalPart();
   }
-  
+
   public QName getAttributeName(int index)
   {
     if (_attrCount <= index)
       throw new IllegalArgumentException(L.l("element only has {0} attributes, given index {1}",
                                              _attrCount, index));
-    
+
     return _attrNames[index];
   }
-  
+
   public String getAttributeNamespace(int index)
   {
     if (_attrCount <= index)
       throw new IllegalArgumentException(L.l("element only has {0} attributes, given index {1}",
                                              _attrCount, index));
-    
+
     String ret = _attrNames[index].getNamespaceURI();
 
     // API quirk
     if ("".equals(ret))
       return null;
-    
+
     return ret;
   }
-  
+
   public String getAttributePrefix(int index)
   {
     if (_attrCount <= index)
       throw new IllegalArgumentException(L.l("element only has {0} attributes, given index {1}",
                                              _attrCount, index));
-    
+
     String ret = _attrNames[index].getPrefix();
-    
+
     // API quirk
     if ("".equals(ret))
       return null;
 
     return ret;
   }
-  
+
   public String getAttributeType(int index)
   {
     return "CDATA";
   }
-  
+
   public String getAttributeValue(int index)
   {
     if (_attrCount <= index)
       throw new IllegalArgumentException(L.l("element only has {0} attributes, given index {1}",
                                              _attrCount, index));
-    
+
     return _attrValues[index];
   }
-  
+
   public String getAttributeValue(String namespaceURI, String localName)
   {
     for (int i = _attrCount - 1; i >= 0; i--) {
@@ -161,40 +162,40 @@ public class StreamReaderImpl implements XMLStreamReader {
           name.getNamespaceURI().equals(namespaceURI))
         return _attrValues[i];
     }
-    
+
     return null;
   }
-  
+
   public String getCharacterEncodingScheme()
   {
     return null;
   }
-  
+
   public String getElementText() throws XMLStreamException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   public String getEncoding()
   {
     return null;
   }
-  
+
   public int getEventType()
   {
     return _current;
   }
-  
+
   public String getLocalName()
   {
     return _name.getLocalPart();
   }
-  
+
   public Location getLocation()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   public QName getName()
   {
     if (_name != null)
@@ -205,22 +206,22 @@ public class StreamReaderImpl implements XMLStreamReader {
       */
       return null;
   }
-  
+
   public NamespaceContext getNamespaceContext()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   public int getNamespaceCount()
   {
     return 0;
   }
-  
+
   public String getNamespacePrefix(int index)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   public String getNamespaceURI()
   {
     String uri = _name.getNamespaceURI();
@@ -231,27 +232,27 @@ public class StreamReaderImpl implements XMLStreamReader {
 
     return uri;
   }
-  
+
   public String getNamespaceURI(int index)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   public String getNamespaceURI(String prefix)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   public String getPIData()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   public String getPITarget()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   public String getPrefix()
   {
     String prefix = _name.getPrefix();
@@ -262,22 +263,22 @@ public class StreamReaderImpl implements XMLStreamReader {
 
     return prefix;
   }
-  
+
   public Object getProperty(String name) throws IllegalArgumentException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   public String getText()
   {
     return new String(_cBuf, 0, _cBufLength);
   }
-  
+
   public char[] getTextCharacters()
   {
     return _cBuf;
   }
-  
+
   public int getTextCharacters(int sourceStart, char[] target, int targetStart, int length) throws XMLStreamException
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -287,17 +288,17 @@ public class StreamReaderImpl implements XMLStreamReader {
   {
     return _cBufLength;
   }
-  
+
   public int getTextStart()
   {
     return 0;
   }
-  
+
   public String getVersion()
   {
     return _version;
   }
-  
+
   public boolean hasName()
   {
     return _name != null;
@@ -307,37 +308,37 @@ public class StreamReaderImpl implements XMLStreamReader {
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   public boolean isAttributeSpecified(int index)
   {
-    return true;
+    return index < _attrCount;
   }
-  
+
   public boolean isCharacters()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   public boolean isEndElement()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _current == END_ELEMENT;
   }
-  
+
   public boolean isStandalone()
   {
     return false;
   }
-  
+
   public boolean isStartElement()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _current == START_ELEMENT;
   }
-  
+
   public boolean isWhiteSpace()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   public int nextTag() throws XMLStreamException
   {
     int tag;
@@ -359,18 +360,18 @@ public class StreamReaderImpl implements XMLStreamReader {
 
     return tag;
   }
-  
+
   public void require(int type, String namespaceURI, String localName)
     throws XMLStreamException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   public boolean standaloneSet()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   public boolean hasNext() throws XMLStreamException
   {
     if (_is == null)
@@ -386,7 +387,7 @@ public class StreamReaderImpl implements XMLStreamReader {
 
     return !_eofEncountered || _token > 0;
   }
-  
+
   public int next() throws XMLStreamException
   {
     int token = _token;
@@ -403,6 +404,7 @@ public class StreamReaderImpl implements XMLStreamReader {
     if (token > 0)
       return _current = token;
     else {
+
       if (_eofEncountered)
         return _current = -1;
 
@@ -421,7 +423,7 @@ public class StreamReaderImpl implements XMLStreamReader {
     }
 
     _name = null;
-    
+
     int ch = read();
 
     if (ch == '<') {
@@ -440,7 +442,6 @@ public class StreamReaderImpl implements XMLStreamReader {
         expect('-');
         expect('-');
         return readComment();
-        
       } else {
         unread();
 
@@ -452,7 +453,9 @@ public class StreamReaderImpl implements XMLStreamReader {
     else if (ch < 0)
       return -1;
     else {
+
       unread();
+
       return readData();
     }
   }
@@ -468,7 +471,7 @@ public class StreamReaderImpl implements XMLStreamReader {
     }
     else if (ch == '/') {
       _isShortTag = true;
-      
+
       expect('>');
     }
     else
@@ -494,7 +497,7 @@ public class StreamReaderImpl implements XMLStreamReader {
         extendAttrs();
 
       RawName rawName = _attrRawNames[attrCount];
-      
+
       if (rawName == null) {
         rawName = new RawName();
         _attrRawNames[attrCount] = rawName;
@@ -579,7 +582,6 @@ public class StreamReaderImpl implements XMLStreamReader {
       case '<':
         unread();
         break loop;
-        
       case '&':
         if (index > 0) {
           unread();
@@ -588,14 +590,12 @@ public class StreamReaderImpl implements XMLStreamReader {
         cBuf[index] = (char) ch;
         entity = true;
         break;
-
       case '\r':
         ch = read();
         if (ch != '\n') { ch = '\r'; unread(); }
       case ' ': case '\t': case '\n':
         cBuf[index] = (char) ch;
         break;
-
       case ';':
         if (entity) {
           String resolved = resolveEntity(new String(cBuf, 1, index-1));
@@ -682,7 +682,7 @@ public class StreamReaderImpl implements XMLStreamReader {
 
       if (ch == ':' && prefix < 0)
         prefix = length;
-      
+
       nameBuffer[length++] = (char) ch;
     }
     unread();
@@ -713,7 +713,7 @@ public class StreamReaderImpl implements XMLStreamReader {
 
     return ch;
   }
-  
+
   /**
    * Reads the <?xml ... ?> declaraction
    */
@@ -798,7 +798,7 @@ public class StreamReaderImpl implements XMLStreamReader {
     throws IOException
   {
     // XXX: need to add buffer
-    
+
     int i = _is.readChar();
 
     if (i == '\n') {
@@ -822,14 +822,14 @@ public class StreamReaderImpl implements XMLStreamReader {
 
     if (i == -1)
       return;
-    
+
     if (i == '\n') {
       _row--;
       _col = 1; // XXX
     } else {
       _col--;
     }
-      
+
   }
 
   private String charName(int ch)
@@ -849,7 +849,7 @@ public class StreamReaderImpl implements XMLStreamReader {
   {
     return "(line " + _row + ", col " + _col +")";
   }
-  
+
   public void close() throws XMLStreamException
   {
     ReadStream is = _is;
@@ -884,11 +884,11 @@ public class StreamReaderImpl implements XMLStreamReader {
       if (_prefix==-1) return null;
       return new String(_buffer, 0, _prefix);
     }
-    
+
     void expandCapacity()
     {
       char []newBuffer = new char[_buffer.length + 64];
-      
+
       System.arraycopy(_buffer, 0, newBuffer, 0, _buffer.length);
 
       _buffer = newBuffer;
