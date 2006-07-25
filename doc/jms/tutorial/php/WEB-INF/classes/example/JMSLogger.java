@@ -27,6 +27,9 @@ public class JMSLogger extends HttpServlet
   {
     try {
       synchronized (_messageLog) {
+	if (_messageLog.size() > 10)
+	  _messageLog.remove(0);
+	
         if (message instanceof TextMessage)
           _messageLog.add(((TextMessage) message).getText());
         else

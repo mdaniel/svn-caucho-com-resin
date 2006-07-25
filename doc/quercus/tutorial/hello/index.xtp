@@ -3,15 +3,13 @@
     <title>Quercus: Hello, World installation</title>
         <description>
           <p>The Hello, World tutorial covers the basic steps to
-run a trivial php script in Quercus.</p>
+start Resin and run a trivial php script in Quercus.</p>
         </description>
     <type>tutorial</type>
     <tutorial-startpage>hello.php</tutorial-startpage>
   </header>
 
   <body>
-
-See <a href="http://wiki.caucho.com/PHP_Hello_World">http://wiki.caucho.com/PHP_Hello_World</a> for more details.
 
     <summary/>
 
@@ -22,7 +20,82 @@ See <a href="http://wiki.caucho.com/PHP_Hello_World">http://wiki.caucho.com/PHP_
 <tr><td><viewfile-link file="hello.php"/>
     <td>The PHP Hello, World
 </deftable>
+</section>
+
+<section title="Introduction">
+
+<p>This short article is intended for PHP programers who are
+interested in trying Caucho's PHP implementation.  The download and
+unzipping instructions are intended for windows users.  However, the
+implementation will work just as well in UNIX.</p>
 
 </section>
+
+<section title="Part I: Installing Resin">
+
+<section title="Downloading and unzipping Resin">
+
+<ol>
+<li>Navigate to http://www.caucho.com/download</li>
+<li>Download the latest Resin binary for your operating system.</li>
+<li>For purposes of this demo, I have downloaded the Windows .zip binary.
+The non-pro version is open-source.</li>
+<li>Save the file to your desktop.</li>
+<li>Double click the binary and unzip the file.</li>
+<li>For purposes of this demo, I have unzipped the contents to C:\resin-3.0.14</li>
+</ol>
+
+</section>
+
+<section title="Running Resin for the first time">
+
+<ol>
+<li>Browse to the directory into which you unzipped the resin download (ie: C:\resin-3.0.14)</li>
+<li>Double-click httpd.exe.  At this point the resin web server should start.</li>
+<li>Open your favorite browser and type in the following URL: http://localhost:8080</li>
+<li>You will now see Resin's Default Home Page</li>
+</ol>
+
+</section>
+</section>
+
+<section title="Part II: Configuring Resin to Serve PHP Pages">
+
+<ol>
+<li>Cut and paste the "resin-web.xml" into your favorite text editor.</li>
+<li>Save the file into C:\resin-3.0.14\webapps\ROOT\WEB-INF (NB: if you use
+Notepad, then be careful to either save as "all files" or just put the
+file name in double quotes.  IE: "resin-web.xml").</li>
+<li>Cut and paste the "hello-world.php" into your text editor.</li>
+<li>Save the file into C:\resin-3.0.14\webapps\ROOT</li>
+<li>Open your favorite browser and type in the
+following URL: http://localhost:8080/hello-world.php.</li>
+</ol>
+
+<example title="WEB-INF/resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+   &lt;servlet-mapping url-pattern="*.php"
+                    servlet-class="com.caucho.quercus.servlet.QuercusServlet">
+   &lt;/servlet-mapping>
+&lt;/web-app>
+</example>
+
+<example title="hello-world.php">
+&lt;?php
+   echo "Hello World";
+?>
+</example>
+
+</section>
+
+<section title="Conclusion">
+
+<p>If all went well with the above steps, you have installed
+Resin correctly.  Congratulations!</p>
+
+<p>You can now create your own PHP pages and store them in the same
+directory as the hello-world.php file.</p>
+</section>
+
   </body>
 </document>

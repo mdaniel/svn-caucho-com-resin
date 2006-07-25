@@ -2,7 +2,7 @@
  <head>
  <script type="text/javascript">
   
-  var url = "data.php";
+  var url = "json.php";
   function request() {  
     if (window.XMLHttpRequest)
      http_request = new XMLHttpRequest();
@@ -32,8 +32,8 @@
  </head>
  <body>
   <form name="firstForm">
-   <p>JSON:<br><textarea name="json" cols="50"></textarea></p>
-   <p>Decoded:<br><textarea name="decoded" cols="50"></textarea></p>
+   <p>JSON:<br><textarea name="json" cols="50" rows="3"></textarea></p>
+   <p>Decoded:<br><textarea name="decoded" cols="50" rows="3"></textarea></p>
    <input type="button" onclick="request()" value="AJAX Request">
    <input type="button" onclick="clearForm()" value="Clear">
   </form>

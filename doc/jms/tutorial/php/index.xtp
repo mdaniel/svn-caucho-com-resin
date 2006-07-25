@@ -1,17 +1,33 @@
 <document>
 <header>
   <product>resin</product>
-  <title>Quercus Messaging</title>
+  <title>JMS Messaging in Quercus</title>
   <description>
     <p>
-    <b>JMS</b> (<b>J</b>ava <b>M</b>essaging <b>S</b>ervice) is a popular
+    <b>JMS</b> (Java Messaging Service) is a popular
     messaging API with built-in support from Quercus since Resin 3.0.20.
     </p>
   </description>
+  <type>tutorial</type>
+  <tutorial-startpage>send-message.php</tutorial-startpage>
 </header>
 
 <body>
 <summary localtoc="3" />
+
+<section title="Files in this tutorial">
+<deftable>
+<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
+    <td>resin-web.xml configuration
+<tr><td><viewfile-link file="send-message.php"/>
+    <td>PHP script sending the message.
+<tr><td><viewfile-link file="WEB-INF/classes/example/JMSLogger.java"/>
+    <td>Java listener receiving the message.
+<tr><td><viewfile-link file="WEB-INF/jmslogger.ejb"/>
+    <td>EJB Message bean configuration.
+</deftable>
+</section>
+
 <section title="Using JMS in Quercus">
 
 <p>
