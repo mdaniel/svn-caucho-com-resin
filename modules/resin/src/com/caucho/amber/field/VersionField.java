@@ -80,10 +80,6 @@ public class VersionField extends PropertyField {
   public void generateIncrementVersion(JavaWriter out)
     throws IOException
   {
-    Type type = getColumn().getType();
-    String value = generateGet("super");
-    out.println(generateSuperSetter(type.generateIncrementVersion(value)) + ";");
-
     int dirtyGroup = getIndex() / 64;
     String dirtyVar = "__caucho_dirtyMask_" + dirtyGroup;
 
@@ -95,6 +91,27 @@ public class VersionField extends PropertyField {
     out.println();
     out.println("if (__caucho_session != null && oldMask == 0)");
     out.println("  __caucho_session.update(this);");
+  }
+
+  /**
+   * Returns the where code
+   */
+  public String generateMatchArgWhere(String id)
+  {
+    return getColumn().generateMatchArgWhere(id);
+  }
+
+  /**
+   * Generates the set version clause.
+   */
+  public void generateSetVersion(JavaWriter out,
+                                 String pstmt,
+                                 String index)
+    throws IOException
+  {
+    String value = generateGet("super");
+    Type type = getColumn().getType();
+    getColumn().generateSet(out, pstmt, index, type.generateIncrementVersion(value));
   }
 
   /**
@@ -120,7 +137,7 @@ public class VersionField extends PropertyField {
     out.println("if (" + maskVar + "_" + group + " != 0L) {");
     out.pushDepth();
 
-    generateSet(out, pstmt, index);
+    generateSetVersion(out, pstmt, index);
 
     out.popDepth();
     out.println("}");

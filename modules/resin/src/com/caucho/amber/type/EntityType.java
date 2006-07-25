@@ -1625,6 +1625,12 @@ public class EntityType extends Type {
     sql.append(" where ");
 
     sql.append(getId().generateMatchArgWhere(null));
+
+    // optimistic locking
+    if (_versionField != null) {
+      sql.append(" and ");
+      sql.append(_versionField.generateMatchArgWhere(null));
+    }
   }
 
   /**

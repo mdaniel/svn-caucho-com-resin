@@ -43,6 +43,7 @@ import com.caucho.java.gen.ClassComponent;
 import com.caucho.loader.Environment;
 
 import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.Type;
 
 import com.caucho.amber.field.AmberField;
 //import com.caucho.amber.field.Field;
@@ -684,8 +685,27 @@ public class EntityComponent extends ClassComponent {
     out.println();
     _entityType.getId().generateSet(out, "pstmt", "index");
 
+    if (version != null) {
+      out.println();
+      version.generateSet(out, "pstmt", "index");
+    }
+
     out.println();
-    out.println("pstmt.executeUpdate();");
+    out.println("int updateCount = pstmt.executeUpdate();");
+    out.println();
+
+    if (version != null) {
+      out.println("if (updateCount == 0) {");
+      out.println("  throw new javax.persistence.OptimisticLockException(this);");
+      out.println("} else {");
+      out.pushDepth();
+      String value = version.generateGet("super");
+      Type type = version.getColumn().getType();
+      out.println(version.generateSuperSetter(type.generateIncrementVersion(value)) + ";");
+      out.popDepth();
+      out.println("}");
+      out.println();
+    }
 
     generateCallbacks(out, "this", _entityType.getPostUpdateCallbacks());
 
