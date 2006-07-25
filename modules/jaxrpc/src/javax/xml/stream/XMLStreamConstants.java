@@ -47,6 +47,7 @@ public interface XMLStreamConstants {
 
   public static final int END_ENTITY=15;
 
+  // XXX: online doc has  17 for ENTITY_DECLARATION
   public static final int ENTITY_DECLARATION=15;
 
   public static final int ENTITY_REFERENCE=9;
