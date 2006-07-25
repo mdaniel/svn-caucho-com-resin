@@ -1,6 +1,6 @@
 <document>
   <header>
-    <title>Quercus/PHP Java Module</title>
+    <title>Quercus: Java and PHP integration</title>
         <description>
           <p>Adding PHP functions with a Java module.</p>
         </description>
