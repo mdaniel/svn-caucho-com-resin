@@ -95,34 +95,51 @@ abstract class Order {
   {
     if (length > 3) {
       int head = offset;
-      int tail = offset + length - 1;
+      int right = offset + length - 1;
+      int tail = right;
       int pivot = offset + length / 2;
       int pivotIndex = rows[pivot];
 
-      while (head <= tail) {
-	int headIndex = rows[head];
+      // swap(pivot, right)
+      int temp = rows[right];
+      rows[right] = pivotIndex;
+      rows[pivot] = temp;
 
-	if (compare(result, headIndex, pivotIndex) < 0) {
-	  head++;
-	}
-	else {
-	  int temp = rows[tail];
-	  rows[tail] = headIndex;
-	  rows[head] = temp;
+      --tail;
 
-	  tail--;
-	}
+      for (;;) {
+
+        while (head <= tail && compare(result, rows[head], pivotIndex) < 0) {
+          ++head;
+        }
+
+        while (head <= tail && compare(result, rows[tail], pivotIndex) > 0) {
+          --tail;
+        }
+
+        if (head > tail) {
+          break;
+        }
+
+        // swap(head++, tail--)
+        temp = rows[head];
+        rows[head++] = rows[tail];
+        rows[tail--] = temp;
       }
 
-      if (head == offset) {
-	sort(result, rows, offset + 1, length - 1);
+      if (compare(result, rows[head], pivotIndex) > 0) {
+        // swap(head, right)
+        temp = rows[head];
+        rows[head] = rows[right];
+        rows[right] = temp;
       }
-      else if (head + 1 < offset + length) {
-	sort(result, rows, offset, head - offset);
-	sort(result, rows, head, offset + length - head);
+
+      if (offset < head) {
+        sort(result, rows, offset, head - offset);
       }
-      else {
-	sort(result, rows, offset, length - 1);
+
+      if (right > head) {
+        sort(result, rows, head+1, right - head);
       }
     }
     else if (length == 3) {
@@ -131,9 +148,9 @@ abstract class Order {
       int indexC = rows[offset + 2];
 
       if (compare(result, indexB, indexA) < 0) {
-	int temp = indexA;
-	indexA = indexB;
-	indexB = temp;
+        int temp = indexA;
+        indexA = indexB;
+        indexB = temp;
       }
 
       // A <= B <= C
@@ -141,16 +158,16 @@ abstract class Order {
       }
       // C < A <= B
       else if (compare(result, indexC, indexA) < 0) {
-	int temp = indexC;
-	indexC = indexB;
-	indexB = indexA;
-	indexA = temp;
+        int temp = indexC;
+        indexC = indexB;
+        indexB = indexA;
+        indexA = temp;
       }
       // A <= C < B
       else {
-	int temp = indexC;
-	indexC = indexB;
-	indexB = temp;
+        int temp = indexC;
+        indexC = indexB;
+        indexB = temp;
       }
 
       rows[offset + 0] = indexA;
@@ -162,11 +179,11 @@ abstract class Order {
       int indexB = rows[offset + 1];
 
       if (compare(result, indexB, indexA) < 0) {
-	int temp = indexB;
-	indexB = indexA;
-	indexA = temp;
+        int temp = indexB;
+        indexB = indexA;
+        indexA = temp;
       }
-      
+
       rows[offset + 0] = indexA;
       rows[offset + 1] = indexB;
     }
