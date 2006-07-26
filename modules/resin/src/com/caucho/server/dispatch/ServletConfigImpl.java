@@ -640,13 +640,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
       throw new ServletException(L.l("Null servlet class for `{0}'.",
                                      _servletName));
 
-    InjectIntrospector.configure(servlet);
-
-    // Initialize bean properties
-    InitProgram init = getInit();
-
-    if (init != null)
-      init.getBuilderProgram().configure(servlet);
+    configureServlet(servlet);
 
     try {
       servlet.init(this);
@@ -656,6 +650,22 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     }
 
     return servlet;
+  }
+
+  /**
+   *  Configure the servlet (everything that is done after
+   *  instantiation but before servlet.init()
+   */
+  void configureServlet(Servlet servlet)
+    throws Throwable
+  {
+    InjectIntrospector.configure(servlet);
+
+    // Initialize bean properties
+    InitProgram init = getInit();
+
+    if (init != null)
+      init.getBuilderProgram().configure(servlet);
   }
 
   /**

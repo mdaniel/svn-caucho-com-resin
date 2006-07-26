@@ -60,6 +60,8 @@ public class WebServiceServlet extends HttpServlet {
   private Object _object;
   private Class _class;
   private DirectSkeleton _skeleton;
+  private String _namespace;
+  private boolean _wrapped;
 
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
     throws ServletException, IOException
@@ -110,6 +112,26 @@ public class WebServiceServlet extends HttpServlet {
     setService(classLoader.loadClass(s).newInstance());
   }
 
+  public void setInterfaceClass(String s)
+    throws Exception
+  {
+    ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+    
+    setInterface(classLoader.loadClass(s));
+  }
+
+  public void setNamespace(String namespace)
+  {
+    // only used for WSDL generation
+    _namespace = namespace;
+  }
+
+  public void setWrapped(boolean wrapped)
+  {
+    // XXX: use this
+    _wrapped = wrapped;
+  }
+
   public void setInterface(Class c)
     throws Exception
   {
@@ -117,7 +139,6 @@ public class WebServiceServlet extends HttpServlet {
   }
 
   private DirectSkeleton skeleton()
-    //throws ConfigException
   {
     if (_skeleton == null)
       _skeleton = new WebServiceIntrospector().introspect(_class);

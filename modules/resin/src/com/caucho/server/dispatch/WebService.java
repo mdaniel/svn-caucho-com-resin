@@ -27,7 +27,7 @@
  * @author Adam Megacz
  */
 
-package com.caucho.soap.servlets;
+package com.caucho.server.dispatch;
 
 import com.caucho.soap.servlets.WebServiceServlet;
 import com.caucho.server.dispatch.*;
@@ -38,6 +38,7 @@ import com.caucho.config.types.InitProgram;
 import com.caucho.config.types.RawString;
 
 import javax.servlet.*;
+import javax.servlet.Servlet;
 
 import javax.servlet.jsp.el.ELException;
 
@@ -45,6 +46,12 @@ import javax.servlet.jsp.el.ELException;
  * A Web Service entry in web.xml (Caucho-specific)
  */
 public class WebService extends ServletMapping {
+
+  private String  _implementationClass;
+  private String  _interfaceClass;
+  private String  _namespace = null;
+  private String  _wsdl = null;
+  private boolean _wrapped = true;
 
   /**
    * Creates a new web service object.
@@ -55,11 +62,42 @@ public class WebService extends ServletMapping {
     super.setServletClass(WebServiceServlet.class.getName());
   }
 
-  public void setImplementationClass(String s)
+  public void setImplementationClass(String implementationClass)
     throws ELException
   {
-    System.err.println("implementation class set");
-    setInitParam("implementation-class", s);
+    _implementationClass = implementationClass;
+
+    if (_interfaceClass == null)
+      _interfaceClass = implementationClass;
   }
 
+  public void setInterfaceClass(String interfaceClass)
+    throws ELException
+  {
+    _interfaceClass = interfaceClass;
+  }
+
+  public void setNamespace(String namespace)
+    throws ELException
+  {
+    _namespace = namespace;
+  }
+
+  public void setWrapped(boolean wrapped)
+    throws ELException
+  {
+    _wrapped = wrapped;
+  }
+
+  void configureServlet(Servlet servlet)
+    throws Throwable
+  {
+    super.configureServlet(servlet);
+
+    WebServiceServlet webServiceServlet = (WebServiceServlet)servlet;
+    webServiceServlet.setImplementationClass(_implementationClass);
+    webServiceServlet.setInterfaceClass(_interfaceClass);
+    webServiceServlet.setNamespace(_namespace);
+    webServiceServlet.setWrapped(_wrapped);
+  }
 }

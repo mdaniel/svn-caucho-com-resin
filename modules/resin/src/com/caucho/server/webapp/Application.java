@@ -93,8 +93,6 @@ import com.caucho.server.security.*;
 
 import com.caucho.server.session.SessionManager;
 
-import com.caucho.soap.servlets.WebService;
-
 import com.caucho.transaction.TransactionManagerImpl;
 
 import com.caucho.util.Alarm;
