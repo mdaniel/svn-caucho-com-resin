@@ -383,7 +383,7 @@ public class HttpPath extends FilesystemPath {
         if (_cacheEntry.expires > now)
           return _cacheEntry;
       
-        HttpStream stream = (HttpStream) openReadImpl();
+        HttpStreamWrapper stream = (HttpStreamWrapper) openReadImpl();
         stream.setHead(true);
         stream.setSocketTimeout(120000);
 
