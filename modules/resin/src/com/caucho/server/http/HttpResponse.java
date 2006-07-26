@@ -217,7 +217,7 @@ public class HttpResponse extends AbstractHttpResponse {
       if (debug)
         log.fine(_request.dbgId() + "Cache-Control: private");
     }
-    else {
+    else if (! containsHeader("Cache-Control")) {
       setHeader("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
       os.print("\r\nCache-Control: no-cache");
 
