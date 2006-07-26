@@ -34,7 +34,7 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
-public abstract class FormattedText implements ContentItem {
+public class FormattedText implements ContentItem {
   private ArrayList<ContentItem> _contentItems = new ArrayList<ContentItem>();
 
   protected void addItem(ContentItem item)
@@ -70,6 +70,11 @@ public abstract class FormattedText implements ContentItem {
   public void addCode(Code code)
   {
     _contentItems.add(code);
+  }
+
+  public void addUrl(Url url)
+  {
+    _contentItems.add(url);
   }
 
   public void writeHtml(PrintWriter writer)

@@ -36,6 +36,7 @@ public class Header {
   private String _product;
   private String _version;
   private String _title;
+  private ContentItem _description;
 
   public void setProduct(String product)
   {
@@ -52,8 +53,21 @@ public class Header {
     _title = title;
   }
 
-  public void setResin2_0(String xyz)
+  public void setResin2_0(String resin2_0)
   {
+  }
+
+  public void setType(String type)
+  {
+  }
+
+  public void setTutorialStartPage(String startPage)
+  {
+  }
+
+  public void setDescription(FormattedTextWithAnchors description)
+  {
+    _description = description;
   }
 
   public void writeHtml(PrintWriter writer)
@@ -75,6 +89,14 @@ public class Header {
     writer.println("\\usepackage[margin=1in]{geometry}");
     writer.println("\\usepackage{url}");
     writer.println("\\usepackage{hyperref}");
+    writer.println("\\usepackage{graphicx}");
+    writer.println("\\usepackage{color}");
+    writer.println("\\usepackage{colortbl}");
+    writer.println("\\usepackage{fancyvrb}");
+    writer.println("\\usepackage{listings}");
+    writer.println();
+    writer.println("\\definecolor{example-gray}{gray}{0.8}");
+    writer.println();
     writer.println("\\title{" + _title + "}");
     //XXX: product & version
   }

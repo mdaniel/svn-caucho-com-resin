@@ -32,25 +32,25 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
-import java.util.ArrayList;
-
-public class Text implements ContentItem {
-  private String _text;
-
-  public Text(String text)
-  {
-    _text = text;
-  }
-
+public class Url extends FormattedText {
   public void writeHtml(PrintWriter writer)
     throws IOException
   {
-    writer.println(_text);
+    writer.print("<code>");
+
+    super.writeHtml(writer);
+
+    writer.print("</code>");
   }
 
   public void writeLaTeX(PrintWriter writer)
     throws IOException
   {
-    writer.println(LaTeXUtil.escapeForLaTeX(_text));
+    //XXX
+    writer.print("\\url{");
+
+    super.writeLaTeX(writer);
+
+    writer.print("}");
   }
 }

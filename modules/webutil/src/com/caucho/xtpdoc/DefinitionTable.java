@@ -34,23 +34,40 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
-public class Text implements ContentItem {
-  private String _text;
-
-  public Text(String text)
-  {
-    _text = text;
-  }
+public class DefinitionTable extends Table {
 
   public void writeHtml(PrintWriter writer)
     throws IOException
   {
-    writer.println(_text);
+    writer.print("<table width=\"90%\" cellpadding=\"2\" ");
+    writer.print("cellspacing=\"0\" class=\"deftable\" border=\"\">");
+
+    for (TableRow row : _rows) {
+      row.writeHtml(writer);
+    }
+
+    writer.println("</table>");
   }
 
   public void writeLaTeX(PrintWriter writer)
     throws IOException
   {
-    writer.println(LaTeXUtil.escapeForLaTeX(_text));
+    writer.print("\\begin{table}");
+    writer.print("\\begin{tabular}");
+
+    writer.print("{");
+
+    for (int i = 0; i < _columns; i++)
+      writer.print("c");
+
+    writer.print("}");
+
+    for (TableRow row : _rows) {
+      writer.print("\\rowcolor[gray]{0.9}");
+      row.writeLaTeX(writer);
+    }
+
+    writer.print("\\end{tabular}");
+    writer.print("\\end{table}");
   }
 }

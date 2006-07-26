@@ -46,6 +46,11 @@ public class Section implements ContentItem {
     _depth = depth;
   }
 
+  public void addText(String text)
+  {
+    _contentItems.add(new Text(text));
+  }
+
   public void setName(String name)
   {
     _name = name;
@@ -85,6 +90,11 @@ public class Section implements ContentItem {
   {
     _contentItems.add(table);
   }
+
+  public void addDefTable(DefinitionTable definitionTable)
+  {
+    _contentItems.add(definitionTable);
+  }
   
   public void addSection(Section subsection)
   {
@@ -106,7 +116,25 @@ public class Section implements ContentItem {
   public void writeLaTeX(PrintWriter writer)
     throws IOException
   {
-    writer.println("\\section{" + _title + "}");
+    switch (_depth) {
+      case 0:
+        writer.print("\\section{");
+        break;
+      case 1:
+        writer.print("\\subsection{");
+        break;
+      case 2:
+        writer.print("\\subsubsection{");
+        break;
+      case 3:
+        writer.print("\\paragraph{");
+        break;
+      default:
+        writer.print("\\textbf{");
+        break;
+    }
+        
+    writer.println(LaTeXUtil.escapeForLaTeX(_title) + "}");
 
     for (ContentItem item : _contentItems) {
       item.writeLaTeX(writer);

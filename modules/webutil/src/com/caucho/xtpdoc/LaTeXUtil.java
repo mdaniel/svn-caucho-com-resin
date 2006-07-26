@@ -29,28 +29,19 @@
 
 package com.caucho.xtpdoc;
 
-import java.io.PrintWriter;
-import java.io.IOException;
-
-import java.util.ArrayList;
-
-public class Text implements ContentItem {
-  private String _text;
-
-  public Text(String text)
+public class LaTeXUtil {
+  public static String escapeForLaTeX(String text)
   {
-    _text = text;
-  }
+    String latexText = text;
 
-  public void writeHtml(PrintWriter writer)
-    throws IOException
-  {
-    writer.println(_text);
-  }
+    latexText = latexText.replace("\\", "\\ensuremath{\\backslash}");
+    latexText = latexText.replace("%", "\\%");
+    latexText = latexText.replace("$", "\\$");
+    latexText = latexText.replace("_", "\\_");
+    latexText = latexText.replace("&", "\\&");
+    latexText = latexText.replace(">", "\\ensuremath{>}");
+    latexText = latexText.replace("<", "\\ensuremath{<}");
 
-  public void writeLaTeX(PrintWriter writer)
-    throws IOException
-  {
-    writer.println(LaTeXUtil.escapeForLaTeX(_text));
+    return latexText;
   }
 }

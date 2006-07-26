@@ -35,8 +35,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class Table implements ContentItem {
-  private int _columns = 0;
-  private ArrayList<TableRow> _rows = new ArrayList<TableRow>();
+  protected int _columns = 0;
+  protected ArrayList<TableRow> _rows = new ArrayList<TableRow>();
 
   public void addTR(TableRow row)
   {

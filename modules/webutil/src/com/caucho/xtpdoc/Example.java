@@ -32,13 +32,26 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
-public class Example extends FormattedTextWithAnchors {
+public class Example implements ContentItem {
+  private String _text;
+  private String _language = null;
+
+  public void setLanguage(String language)
+  {
+    _language = language;
+  }
+
+  public void setText(String text)
+  {
+    _text = text;
+  }
+
   public void writeHtml(PrintWriter writer)
     throws IOException
   {
     writer.println("<div class='example'>");
 
-    super.writeHtml(writer);
+    writer.println(_text);
 
     writer.println("</div>");
   }
@@ -46,11 +59,23 @@ public class Example extends FormattedTextWithAnchors {
   public void writeLaTeX(PrintWriter writer)
     throws IOException
   {
-    //XXX
-    writer.print("{");
+    
+    if (_language != null) {
+      writer.println("\\lstset{fancyvrb,language=" + _language + ",");
+      writer.println("         showstringspaces=false,");
+      writer.println("         stringstyle=\\color[gray]{0.6}}");
+    }
 
-    super.writeLaTeX(writer);
+    writer.println("\\begin{center}");
+    writer.println("\\begin{Verbatim}[frame=single,fontfamily=courier,");
+    writer.println("                  fillcolor=\\color{example-gray}]");
 
-    writer.print("}");
+    writer.println(_text);
+
+    writer.println("\\end{Verbatim}");
+    writer.println("\\end{center}");
+
+    if (_language != null)
+      writer.println("\\lstset{fancyvrb=false}");
   }
 }

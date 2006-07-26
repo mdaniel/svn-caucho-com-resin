@@ -29,9 +29,14 @@
 
 package com.caucho.xtpdoc;
 
-public abstract class FormattedTextWithAnchors extends FormattedText {
+public class FormattedTextWithAnchors extends FormattedText {
   public void addA(Anchor anchor)
   {
     addItem(anchor);
+  }
+
+  public void addViewFileLink(ViewFileLink viewFileLink)
+  {
+    addItem(viewFileLink);
   }
 }

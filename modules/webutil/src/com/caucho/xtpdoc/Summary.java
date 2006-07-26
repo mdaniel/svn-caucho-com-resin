@@ -33,8 +33,14 @@ import java.io.PrintWriter;
 import java.io.IOException;
 
 public class Summary {
-  public void setText(String text)
+  public void setObjSummary(String objSummary)
   {
+    // XXX
+  }
+
+  public void setLocalTOC(String localTOC)
+  {
+    // XXX
   }
 
   public void writeHtml(PrintWriter writer)
