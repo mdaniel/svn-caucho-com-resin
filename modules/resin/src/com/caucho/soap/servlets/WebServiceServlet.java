@@ -69,7 +69,7 @@ public class WebServiceServlet extends HttpServlet {
     if (req.getParameter("wsdl") != null) {
       resp.setContentType("text/xml");
       skeleton().dumpWSDL(Vfs.openWrite(resp.getOutputStream()),
-                         req.getRequestURL().toString());
+			  req.getRequestURL().toString());
       return;
     }
   }
@@ -100,6 +100,14 @@ public class WebServiceServlet extends HttpServlet {
     _object = o;
     if (_class==null)
       _class = o.getClass();
+  }
+
+  public void setImplementationClass(String s)
+    throws Exception
+  {
+    ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+    
+    setService(classLoader.loadClass(s).newInstance());
   }
 
   public void setInterface(Class c)

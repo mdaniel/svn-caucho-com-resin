@@ -93,6 +93,8 @@ import com.caucho.server.security.*;
 
 import com.caucho.server.session.SessionManager;
 
+import com.caucho.soap.servlets.WebService;
+
 import com.caucho.transaction.TransactionManagerImpl;
 
 import com.caucho.util.Alarm;
@@ -737,6 +739,27 @@ public class Application extends ServletContextImpl
     }
 
     _servletMapper.addServletMapping(servletMapping);
+  }
+
+  /**
+   * Adds a web service.
+   */
+  public WebService createWebService()
+    throws ServletException
+  {
+    WebService webService = new WebService();
+    webService.setStrictMapping(_isStrictMapping);
+
+    return webService;
+  }
+
+  /**
+   * Adds a web service configuration.
+   */
+  public void addWebService(WebService webService)
+    throws ServletException
+  {
+    addServletMapping(webService);
   }
 
   /**
