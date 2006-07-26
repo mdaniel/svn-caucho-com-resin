@@ -857,7 +857,7 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static boolean file_exists(Path path)
+  public static boolean file_exists(Env env, @NotNull Path path)
   {
     return path.exists();
   }

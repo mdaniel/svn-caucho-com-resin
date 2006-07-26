@@ -213,8 +213,8 @@ public class StreamModule extends AbstractQuercusModule {
    * Copies from an input stream to an output stream
    */
   public static long stream_copy_to_stream(Env env,
-                                           @NotNull StreamResource in,
-                                           @NotNull StreamResource out,
+                                           @NotNull BinaryInput in,
+                                           @NotNull BinaryOutput out,
                                            @Optional("-1") int length,
                                            @Optional int offset)
   {
@@ -268,7 +268,7 @@ public class StreamModule extends AbstractQuercusModule {
    * @param context the resource context
    */
   public static Value stream_get_contents(Env env,
-                                          @NotNull StreamResource in,
+                                          @NotNull BinaryInput in,
                                           @Optional("-1") long maxLen,
                                           @Optional long offset)
   {
@@ -302,7 +302,7 @@ public class StreamModule extends AbstractQuercusModule {
    * Returns the next line
    */
   public static Value stream_get_line(Env env,
-                                      @NotNull StreamResource file,
+                                      @NotNull BinaryInput file,
                                       @Optional("-1") long length)
   {
     try {
@@ -312,7 +312,7 @@ public class StreamModule extends AbstractQuercusModule {
       if (length < 0)
         length = Integer.MAX_VALUE;
 
-      StringValue line = file.readLine();
+      StringValue line = file.readLine(length);
 
 
       if (line == null)

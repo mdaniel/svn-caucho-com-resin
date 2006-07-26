@@ -194,7 +194,7 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
   /**
    * Reads a line from a file, returning null on EOF.
    */
-  public StringValue readLine(int length)
+  public StringValue readLine(long length)
     throws IOException
   {
     if (_is == null)

@@ -211,7 +211,7 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
     /**
    * Reads a line from a file, returning null on EOF.
    */
-  public StringValue readLine(int length)
+  public StringValue readLine(long length)
     throws IOException
   {
     StringBuilderValue sb = new StringBuilderValue();

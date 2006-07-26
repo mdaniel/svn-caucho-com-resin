@@ -267,7 +267,7 @@ public class FileInputOutput extends AbstractBinaryOutput
   /**
    * Reads a line from the buffer.
    */
-  public StringValue readLine(int length)
+  public StringValue readLine(long length)
     throws IOException
   {
     StringBuilderValue sb = new StringBuilderValue();
