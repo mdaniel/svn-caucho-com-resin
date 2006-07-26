@@ -156,6 +156,10 @@ work with Hessian 2.0 servers without modification.</p>
 
 <section title="Quercus">
 
+<p><a href="../quercus">Quercus</a>, Caucho's implementation of
+the PHP language in Java, has continued its rapid development, adding
+advanced features as well as more PHP libraries.</p>
+
 <section title="Distributed Sessions">
 
 <p>Quercus provides
@@ -166,13 +170,14 @@ for PHP</a>, with the same distributed capabilities as servlets already use.</p>
 
 <section title="New Libraries">
 
-<p>Quercus now supports
+<p>Quercus now supports</p>
+
 <ul>
 <li><a href="http://www.php.net/manual/en/ref.apc.php">APC</a></li>
 <li><a href="http://www.php.net/manual/en/ref.pgsql.php">Postgres</a></li>
 <li><a href="http://www.php.net/manual/en/ref.oci8.php">Oracle OCI8</a></li>
 <li><a href="http://www.php.net/manual/en/ref.image.php">Image Library</a></li>
-<li><a href="../php/tutorial/json/index.xtp">JSON</a></li>
+<li><a href="../quercus/tutorial/json/index.xtp">JSON</a></li>
 </ul>
 </section>
 

@@ -87,7 +87,8 @@ public class Id {
       _embeddedIdField = (EmbeddedIdField) key;
     }
 
-    // addKey(key);
+    // ejb/0623
+    addKey(key);
   }
 
   /**

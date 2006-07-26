@@ -190,9 +190,9 @@ public class Cluster implements EnvironmentListener {
     server.setPort(port);
 
     if (port.getIndex() >= 0 &&
-	port.getIndex() != _serverList.size() + 1) {
+	port.getIndex() != _serverList.size()) {
       log.config(L.l("srun index '{0}' for port 'id={1}' does not match expected cluster index '{2}'",
-		     port.getIndex(),
+		     port.getIndex() + 1,
 		     port.getServerId(),
 		     _serverList.size() + 1));
     }
