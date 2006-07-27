@@ -2,24 +2,24 @@
 <tr><td align=center>
 <?php
 
-$ad_queue = message_get_queue("jms/AdQueue");
-$control_queue = message_get_queue("jms/ControlQueue");
+$ad_queue = new JMSQueue("jms/AdQueue");
+$control_queue = new JMSQueue("jms/ControlQueue");
 
 if (! $ad_queue) {
   echo "Unable to get ad queue!\n";
 } elseif (! $control_queue) {
   echo "Unable to get control queue!\n";
 } else {
-  $ad = message_receive($ad_queue);
+  $ad = $ad_queue->receive();
 
   if ($ad == null) {
-    echo "No ads available on the queue";
+    echo "No ads available on the queue\n";
   } else {
     echo "$ad";
   }
 
-  if (! message_send($control_queue, "")) {
-    echo "Unable to send message";
+  if (! $control_queue->send(0)) {
+    echo "Unable to send control message\n";
   }
 }
 

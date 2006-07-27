@@ -2,12 +2,6 @@
 <header>
   <product>resin</product>
   <title>JMS Messaging in Quercus</title>
-  <description>
-    <p>
-    <b>JMS</b> (Java Messaging Service) is a popular
-    messaging API with built-in support from Quercus since Resin 3.0.20.
-    </p>
-  </description>
   <type>tutorial</type>
   <tutorial-startpage>send-message.php</tutorial-startpage>
 </header>
@@ -17,14 +11,18 @@
 
 <section title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
-    <td>resin-web.xml configuration
-<tr><td><viewfile-link file="send-message.php"/>
-    <td>PHP script sending the message.
-<tr><td><viewfile-link file="WEB-INF/classes/example/JMSLogger.java"/>
-    <td>Java listener receiving the message.
-<tr><td><viewfile-link file="WEB-INF/jmslogger.ejb"/>
-    <td>EJB Message bean configuration.
+<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
+    <td>resin-web.xml configuration</td>
+</tr>
+<tr><td><viewfile-link file="send-message.php"/></td>
+    <td>PHP script sending the message.</td>
+</tr>
+<tr><td><viewfile-link file="WEB-INF/classes/example/JMSLogger.java"/></td>
+    <td>Java listener receiving the message.</td>
+</tr>
+<tr><td><viewfile-link file="WEB-INF/jmslogger.ejb"/></td>
+    <td>EJB Message bean configuration.</td>
+</tr>
 </deftable>
 </section>
 
@@ -36,7 +34,8 @@ functionality makes it possible to send and receive messages using either
 the Resin JMS implementation or any other messaging service with a JMS
 implementation.  Many features of JMS are designed for message-driven
 services which make sense in the Java world, but are not appropriate for
-PHP.  These features have been removed.
+PHP.  This tutorial focuses on two functions which are useful in PHP:
+sending messages and receiving messages in a non-blocking way.
 </p>
 
 </section>
@@ -50,14 +49,14 @@ Driven Bean (MDB) receives these messages and records them.  The record
 is displayed by a servlet.
 </p>
 
-<example>
+<example language="php">
 if (array_key_exists("message", $_POST)) {
-  $queue = message_get_queue("jms/Queue");
+  $queue = new JMSQueue("jms/Queue");
 
   if (! $queue) {
     echo "Unable to get message queue!\n";
   } else {
-    if (message_send($queue, $_POST["message"]) == TRUE) {
+    if ($queue->send($_POST["message"]) == TRUE) {
       echo "Successfully sent message '" . $_POST["message"] . "'";
     } else {
       echo "Unable to send message '" . $_POST["message"] . "'";
@@ -66,41 +65,105 @@ if (array_key_exists("message", $_POST)) {
 }
 </example>
 
+<p>
+The programming model of the Quercus JMS interface is first to create
+a connection to a queue by instantiating a <code>JMSQueue</code> object.
+To create a <code>JMSQueue</code> object, pass in the JNDI name of the
+JMS queue to be used.  <code>JMSQueue</code> objects have two methods:
+<code>send()</code> and <code>receive()</code>.  The example above shows
+that using <code>send()</code> is as simple as passing in a PHP value.
+The next example shows how to use <code>receive()</code>.
+</p>
+
+<p>
 Click <a href="send-message.php">here</a> to see this example in action. 
+</p>
 </section>
 
 <section title="Receiving JMS messages from a PHP script">
 <p>
 This example uses two queues: an "ad queue" and a "control queue".
-Whenever the PHP script removes an advertisement from the ad queue,
-it signals the MDB to add another ad by sending an empty message to 
-the control queue.
+The PHP script removes advertisements from the ad queue using the
+<code>receive()</code> method.  This method is <em>non-blocking</em> -
+if there are no advertisements, the method will return <code>FALSE</code>
+instead of waiting for a new advertisement.  Whenever the PHP script
+removes an advertisement from the ad queue, it signals the MDB to add
+another ad by sending an empty message to the control queue.
 </p>
 
-<example>
-$ad_queue = message_get_queue("jms/AdQueue");
-$control_queue = message_get_queue("jms/ControlQueue");
+<example language="php">
+$ad_queue = new JMSQueue("jms/AdQueue");
+$control_queue = new JMSQueue("jms/ControlQueue");
 
 if (! $ad_queue) {
   echo "Unable to get ad queue!\n";
 } elseif (! $control_queue) {
   echo "Unable to get control queue!\n";
 } else {
-  $ad = message_receive($ad_queue);
+  $ad = $ad_queue->receive();
 
   if ($ad == null) {
-    echo "No ads available on the queue";
+    echo "No ads available on the queue\n";
   } else {
     echo "$ad";
   }
 
-  if (! message_send($control_queue, "")) {
-    echo "Unable to send message";
+  if (! $control_queue->send(0)) {
+    echo "Unable to send control message\n";
   }
 }
 </example>
 
+<p>
 Click <a href="display-ad.php">here</a> to see this example in action.
+</p>
+</section>
+
+<section title="Configuring JMS for PHP and Java">
+
+<p>
+JMS requires that two resources be set up: A
+<code>ConnectionFactory</code> and a <code>Queue</code>.  Both are
+configured in <viewfile-link file="WEB-INF/resin-web.xml"/>.
+The <code>ConnectionFactory</code> is used to connect to all the
+<code>Queue</code>s and only one of them needs to be set up.  The default
+JNDI name is <code>jms/ConnectionFactory</code> - Quercus automatically
+uses this connection factory.  Another connection factory may be used by
+setting the PHP ini variable <code>jms.connection_factory</code>.
+</p>
+
+<example>
+  &lt;resource jndi-name="jms/ConnectionFactory"
+    type='com.caucho.jms.ConnectionFactoryImpl' />
+</example>
+
+<p>
+The first example uses the queue <code>jms/Queue</code>.
+</p>
+
+<example>
+  &lt;resource jndi-name="jms/Queue"
+    type='com.caucho.jms.memory.MemoryQueue' />
+</example>
+
+<p>
+The second example uses two queues, <code>jms/AdQueue</code> and 
+<code>jms/ControlQueue</code>.
+</p>
+
+<example>
+  &lt;resource jndi-name="jms/AdQueue"
+    type='com.caucho.jms.memory.MemoryQueue' />
+
+  &lt;resource jndi-name="jms/ControlQueue"
+    type='com.caucho.jms.memory.MemoryQueue' />
+</example>
+
+<p>
+The complete configuration is in 
+<viewfile-link file="WEB-INF/resin-web.xml"/>.
+</p>
+
 </section>
 
 </body>
