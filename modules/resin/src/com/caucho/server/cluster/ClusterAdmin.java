@@ -69,7 +69,7 @@ public class ClusterAdmin extends AbstractManagedObject
     return new HostMXBean[0];
   }
 
-  public ClusterServerMXBean []getServers()
+  public ServerConnectorMXBean []getServers()
   {
     ClusterServer selfServer = _cluster.getSelfServer();
 
@@ -80,7 +80,7 @@ public class ClusterAdmin extends AbstractManagedObject
     if (selfServer != null)
       len--;
 
-    ClusterServerMXBean []serverMBeans = new ClusterServerMXBean[len];
+    ServerConnectorMXBean []serverMBeans = new ServerConnectorMXBean[len];
 
     int j = 0;
 

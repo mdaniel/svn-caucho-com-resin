@@ -42,7 +42,7 @@ import com.caucho.log.Log;
 
 import com.caucho.jmx.Jmx;
 
-import com.caucho.management.server.ClusterServerMXBean;
+import com.caucho.management.server.ServerConnectorMXBean;
 
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Path;
@@ -107,7 +107,7 @@ public class ClusterServer {
   /**
    * Returns the admin.
    */
-  public ClusterServerMXBean getAdmin()
+  public ServerConnectorMXBean getAdmin()
   {
     return _admin;
   }

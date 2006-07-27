@@ -146,6 +146,7 @@ public class BasicDeserializer extends AbstractDeserializer {
   {
     switch (_code) {
     case NULL:
+      // hessian/3490
       in.readObject();
       
       return null;

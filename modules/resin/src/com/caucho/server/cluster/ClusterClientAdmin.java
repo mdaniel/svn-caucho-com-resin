@@ -42,7 +42,7 @@ import com.caucho.management.server.*;
  * Implementation of the ClusterClient's administration mbean.
  */
 public class ClusterClientAdmin extends AbstractManagedObject
-  implements ClusterServerMXBean
+  implements ServerConnectorMXBean
 {
   private final ClusterClient _client;
 

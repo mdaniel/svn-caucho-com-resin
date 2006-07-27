@@ -363,6 +363,8 @@ public class HessianServlet extends GenericServlet {
 	_objectSkeleton.invoke(in, out);
       else
 	_homeSkeleton.invoke(in, out);
+
+      out.close();
     } catch (RuntimeException e) {
       throw e;
     } catch (ServletException e) {

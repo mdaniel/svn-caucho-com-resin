@@ -60,10 +60,10 @@ public interface ClusterMXBean extends ManagedObjectMXBean {
    * are used to create outbound connections to communicate with
    * members of the cluster.
    */
-  @Description("The ClusterServers that are used to create" +
+  @Description("The ServerConnectors that are used to create" +
                " outbound connections to communicate with" +
                " members of the cluster")
-  public ClusterServerMXBean []getServers();
+  public ServerConnectorMXBean []getServers();
   
   /**
    * Returns a list of the ObjectNames for the virtual hosts.

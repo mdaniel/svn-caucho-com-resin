@@ -41,11 +41,11 @@ import java.util.Date;
  *
  * The JMX name looks like:
  * <pre>
- *   resin:type=ClusterServer,name=web-a
+ *   resin:type=ServerConnectorn,name=web-a
  * </pre>
  */
 @Description("Client-view of a cluster's server, i.e. a target server with which this instance can communicate")
-public interface ClusterServerMXBean extends ManagedObjectMXBean {
+public interface ServerConnectorMXBean extends ManagedObjectMXBean {
   /**
    * The containing cluster.
    */

@@ -423,10 +423,10 @@ public class ResinStatusServlet extends GenericServlet {
         out.println("<tr><th>Host");
         out.println("    <th>Active");
 
-        ClusterServerMXBean []servers = cluster.getServers();
+        ServerConnectorMXBean []servers = cluster.getServers();
 
         for (int j = 0; j < servers.length; j++) {
-	  ClusterServerMXBean client = servers[j];
+	  ServerConnectorMXBean client = servers[j];
 	  
           String host = client.getAddress();
           String port = String.valueOf(client.getPort());
