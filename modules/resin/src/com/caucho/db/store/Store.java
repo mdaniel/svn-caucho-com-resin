@@ -841,8 +841,7 @@ public class Store {
       for (int i = 0; i < allocationTable.length; i += 2) {
 	int fragMask =  allocationTable[i + 1];
 
-	if (allocationTable[i] == ALLOC_FRAGMENT &&
-	    fragMask != 0xff) {
+	if (allocationTable[i] == ALLOC_FRAGMENT && fragMask != 0xff) {
 	  for (int j = 0; j < FRAGMENT_PER_BLOCK; j++) {
 	    if ((fragMask & (1 << j)) == 0) {
 	      allocationTable[i + 1] = (byte) (fragMask | (1 << j));
@@ -851,7 +850,7 @@ public class Store {
 
 	      _fragmentUseCount++;
 
-	      return i * BLOCK_SIZE / 2 + j;
+	      return ((long) i) * BLOCK_SIZE / 2 + j;
 	    }
 	  }
 	}
@@ -880,7 +879,7 @@ public class Store {
 
 		_fragmentUseCount++;
 
-		return i * BLOCK_SIZE / 2 + j;
+		return ((long) i) * BLOCK_SIZE / 2 + j;
 	      }
 	    }
 	  }

@@ -254,6 +254,9 @@ public class Base64 {
   public static byte[] decodeToByteArray(String value)
   {
     try {
+      if (value == null)
+	return new byte[0];
+      
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       decode(new StringReader(value), baos);
       return baos.toByteArray();
