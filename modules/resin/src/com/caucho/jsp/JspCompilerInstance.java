@@ -648,14 +648,18 @@ public class JspCompilerInstance {
     // compiler.setEncoding(charEncoding);
     String fileName = className.replace('.', '/') + ".java";
 
-    boolean remove = true;
+    compiler.compile(fileName, lineMap);
 
+    /*
+    boolean remove = true;
     try {
       compiler.compile(fileName, lineMap);
+      remove = false;
     } finally {
       if (remove)
         Vfs.lookup(fileName).remove();
     }
+    */
 
     Path classDir = _jspCompiler.getClassDir();
     Path classPath = classDir.lookup(className.replace('.', '/') + ".class");

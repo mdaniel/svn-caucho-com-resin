@@ -276,12 +276,21 @@ public class JspManager extends PageManager {
       log.finest(e.toString());
 
       return null;
+    } catch (NoClassDefFoundError e) {
+      log.finest(e.toString());
+
+      return null;
+    } catch (OutOfMemoryError e) {
+      throw e;
     } catch (Throwable e) {
       log.log(Level.FINEST, e.toString(), e);
       
       if (_autoCompile) {
         try {
-          classPath.remove();
+	  log.warning("removing generated file " +
+		      classPath + " due to " + e.toString());
+	  
+	  classPath.remove();
         } catch (IOException e1) {
           log.log(Level.FINE, e1.toString(), e1);
         }
