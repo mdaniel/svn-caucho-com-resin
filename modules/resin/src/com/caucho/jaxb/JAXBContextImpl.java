@@ -52,5 +52,11 @@ public class JAXBContextImpl extends JAXBContext {
     return new UnmarshallerImpl();
   }
 
+
+  public Validator createValidator()
+    throws JAXBException
+  {
+    throw new UnsupportedOperationException();
+  }
 }
 
