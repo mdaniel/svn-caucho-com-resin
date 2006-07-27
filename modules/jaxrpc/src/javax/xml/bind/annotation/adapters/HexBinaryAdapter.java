@@ -29,10 +29,7 @@
 
 package javax.xml.bind.annotation.adapters;
 
-/**
- * XmlAdapter for xs:hexBinary. This XmlAdapter binds byte[] to the hexBinary
- * representation in XML. Since: JAXB 2.0 Author: Kohsuke Kawaguchi
- */
+/** XXX */
 public final class HexBinaryAdapter extends XmlAdapter<String,byte[]> {
   public HexBinaryAdapter()
   {
@@ -40,18 +37,14 @@ public final class HexBinaryAdapter extends XmlAdapter<String,byte[]> {
   }
 
 
-  /**
-   * Description copied from class: Convert a bound type to a value type.
-   */
+  /** XXX */
   public String marshal(byte[] bytes)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Description copied from class: Convert a value type to a bound type.
-   */
+  /** XXX */
   public byte[] unmarshal(String s)
   {
     throw new UnsupportedOperationException();

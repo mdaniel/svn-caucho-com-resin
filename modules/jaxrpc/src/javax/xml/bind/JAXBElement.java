@@ -31,67 +31,30 @@ package javax.xml.bind;
 import java.io.*;
 import javax.xml.namespace.*;
 
-/**
- * JAXB representation of an Xml Element. This class represents information
- * about an Xml Element from both the element declaration within a schema and
- * the element instance value within an xml document with the following
- * properties element's xml tag name value represents the element instance's
- * atttribute(s) and content model element declaration's declaredType
- * (xs:element @type attribute) scope of element declaration boolean nil
- * property. (element instance's xsi:nil attribute) The declaredType and scope
- * property are the JAXB class binding for the xml type definition. Scope is
- * either JAXBElement.GlobalScope or the Java class representing the complex
- * type definition containing the schema element declaration. There is a
- * property constraint that if value is null, then nil must be true. The
- * converse is not true to enable representing a nil element with attribute(s).
- * If nil is true, it is possible that value is non-null so it can hold the
- * value of the attributes associated with a nil element. Since: JAXB 2.0
- * Author: Kohsuke Kawaguchi, Joe Fialli See Also:Serialized Form
- */
+/** XXX */
 public class JAXBElement<T> implements Serializable {
 
-  /**
-   * Java datatype binding for xml element declaration's type.
-   */
+  /** XXX */
   protected final Class<T> declaredType=null;
 
 
-  /**
-   * xml element tag name
-   */
+  /** XXX */
   protected final QName name=null;
 
 
-  /**
-   * true iff the xml element instance has xsi:nil="true".
-   */
+  /** XXX */
   protected boolean nil;
 
 
-  /**
-   * Scope of xml element declaration representing this xml element instance.
-   * Can be one of the following values: - for global xml element declaration.
-   * - local element declaration has a scope set to the Java class
-   * representation of complex type defintion containing xml element
-   * declaration.
-   */
+  /** XXX */
   protected final Class scope=null;
 
 
-  /**
-   * xml element value. Represents content model and attributes of an xml
-   * element instance.
-   */
+  /** XXX */
   protected JAXBElement value;
 
 
-  /**
-   * Construct an xml element instance. Parameters:name - Java binding of xml
-   * element tag namedeclaredType - Java binding of xml element declaration's
-   * typescope - Java binding of scope of xml element declaration. Passing null
-   * is the same as passing GlobalScope.classvalue - Java instance representing
-   * xml element's value.See Also:getScope(), isTypeSubstituted()
-   */
+  /** XXX */
   public JAXBElement(QName name, Class<T> declaredType,
                      Class scope, JAXBElement value)
   {
@@ -99,10 +62,7 @@ public class JAXBElement<T> implements Serializable {
   }
 
 
-  /**
-   * Construct an xml element instance. This is just a convenience method for
-   * new JAXBElement(name,declaredType,GlobalScope.class,value)
-   */
+  /** XXX */
   public JAXBElement(QName name,
                      Class<T> declaredType, JAXBElement value)
   {
@@ -110,97 +70,70 @@ public class JAXBElement<T> implements Serializable {
   }
 
 
-  /**
-   * Returns the Java binding of the xml element declaration's type attribute.
-   */
+  /** XXX */
   public Class<T> getDeclaredType()
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Returns the xml element tag name.
-   */
+  /** XXX */
   public QName getName()
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Returns scope of xml element declaration.
-   */
+  /** XXX */
   public Class getScope()
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Return the content model and attribute values for this element. See
-   * isNil() for a description of a property constraint when this value is null
-   */
+  /** XXX */
   public JAXBElement getValue()
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Returns true iff this xml element declaration is global.
-   */
+  /** XXX */
   public boolean isGlobalScope()
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Returns true iff this element instance content model is nil. This property
-   * always returns true when getValue() is null. Note that the converse is not
-   * true, when this property is true, getValue() can contain a non-null value
-   * for attribute(s). It is valid for a nil xml element to have attribute(s).
-   */
+  /** XXX */
   public boolean isNil()
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Returns true iff this xml element instance's value has a different type
-   * than xml element declaration's declared type.
-   */
+  /** XXX */
   public boolean isTypeSubstituted()
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Set whether this element has nil content.
-   */
+  /** XXX */
   public void setNil(boolean value)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Set the content model and attributes of this xml element. When this
-   * property is set to null, isNil() must by true. Details of constraint are
-   * described at isNil().
-   */
+  /** XXX */
   public void setValue(JAXBElement t)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Designates global scope for an xml element.
-   */
+  /** XXX */
   public static final class GlobalScope {
     public GlobalScope()
     {

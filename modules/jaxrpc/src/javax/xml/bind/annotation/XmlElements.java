@@ -29,19 +29,7 @@
 
 package javax.xml.bind.annotation;
 
-/**
- * A container for multiple @XmlElement annotations. Multiple annotations of
- * the same type are not allowed on a program element. This annotation
- * therefore serves as a container annotation for multiple XmlElements as
- * follows: XmlElements({ @XmlElement(...),@XmlElement(...) }) The @XmlElements
- * annnotation can be used with the following program elements: Usage The usage
- * is subject to the following constraints: This annotation can be used with
- * the following annotations: @XmlIDREF, @XmlElementWrapper. If @XmlIDREF is
- * also specified on the JavaBean property, then each XmlElement.type() must
- * contain a JavaBean property annotated with XmlID. See "Package
- * Specification" in javax.xml.bind.package javadoc for additional common
- * information.
- */
+/** XXX */
 public interface XmlElements {
 }
 

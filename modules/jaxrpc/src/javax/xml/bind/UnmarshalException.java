@@ -29,68 +29,38 @@
 
 package javax.xml.bind;
 
-/**
- * This exception indicates that an error has occurred while performing an
- * unmarshal operation that prevents the JAXB Provider from completing the
- * operation. The ValidationEventHandler can cause this exception to be thrown
- * during the unmarshal operations. See
- * ValidationEventHandler.handleEvent(ValidationEvent). Since: JAXB1.0 Version:
- * $Revision: 1.1 $ Author: Ryan Shoemaker, Sun Microsystems, Inc. See
- * Also:JAXBException, Unmarshaller, ValidationEventHandler, Serialized Form
- */
+/** XXX */
 public class UnmarshalException extends JAXBException {
 
-  /**
-   * Construct an UnmarshalException with the specified detail message. The
-   * errorCode and linkedException will default to null. Parameters:message - a
-   * description of the exception
-   */
+  /** XXX */
   public UnmarshalException(String message)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Construct an UnmarshalException with the specified detail message and
-   * vendor specific errorCode. The linkedException will default to null.
-   * Parameters:message - a description of the exceptionerrorCode - a string
-   * specifying the vendor specific error code
-   */
+  /** XXX */
   public UnmarshalException(String message, String errorCode)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Construct an UnmarshalException with the specified detail message, vendor
-   * specific errorCode, and linkedException. Parameters:message - a
-   * description of the exceptionerrorCode - a string specifying the vendor
-   * specific error codeexception - the linked exception
-   */
+  /** XXX */
   public UnmarshalException(String message, String errorCode, Throwable exception)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Construct an UnmarshalException with the specified detail message and
-   * linkedException. The errorCode will default to null. Parameters:message -
-   * a description of the exceptionexception - the linked exception
-   */
+  /** XXX */
   public UnmarshalException(String message, Throwable exception)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Construct an UnmarshalException with a linkedException. The detail message
-   * and vendor specific errorCode will default to null. Parameters:exception -
-   * the linked exception
-   */
+  /** XXX */
   public UnmarshalException(Throwable exception)
   {
     throw new UnsupportedOperationException();

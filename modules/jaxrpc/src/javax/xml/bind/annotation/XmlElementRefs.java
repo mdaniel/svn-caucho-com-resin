@@ -29,17 +29,7 @@
 
 package javax.xml.bind.annotation;
 
-/**
- * Marks a property that refers to classes with XmlElement or JAXBElement.
- * Compared to an element property (property with XmlElement annotation), a
- * reference property has a different substitution semantics. When a sub-class
- * is assigned to a property, an element property produces the same tag name
- * with @xsi:type, whereas a reference property produces a different tag name
- * (the tag name that's on the the sub-class.) This annotation can be used with
- * the following annotations: XmlJavaTypeAdapter, XmlElementWrapper. Since:
- * JAXB2.0 Author: Kohsuke Kawaguchi, Sun Microsystems, Inc.Sekhar Vajjhala,
- * Sun Microsystems, Inc. See Also:XmlElementWrapper, XmlElementRef
- */
+/** XXX */
 public interface XmlElementRefs {
 }
 

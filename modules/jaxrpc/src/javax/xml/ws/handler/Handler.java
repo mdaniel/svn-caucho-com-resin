@@ -29,34 +29,18 @@
 
 package javax.xml.ws.handler;
 
-/**
- * The Handler interface is the base interface for JAX-WS handlers. Since:
- * JAX-WS 2.0
- */
+/** XXX */
 public interface Handler<C extends MessageContext> {
 
-  /**
-   * Called at the conclusion of a message exchange pattern just prior to the
-   * JAX-WS runtime disptaching a message, fault or exception. Refer to the
-   * description of the handler framework in the JAX-WS specification for full
-   * details.
-   */
+  /** XXX */
   abstract void close(MessageContext context);
 
 
-  /**
-   * The handleFault method is invoked for fault message processing. Refer to
-   * the description of the handler framework in the JAX-WS specification for
-   * full details.
-   */
+  /** XXX */
   abstract boolean handleFault(C context);
 
 
-  /**
-   * The handleMessage method is invoked for normal processing of inbound and
-   * outbound messages. Refer to the description of the handler framework in
-   * the JAX-WS specification for full details.
-   */
+  /** XXX */
   abstract boolean handleMessage(C context);
 
 }

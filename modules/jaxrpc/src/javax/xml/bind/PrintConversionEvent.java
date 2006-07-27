@@ -29,13 +29,7 @@
 
 package javax.xml.bind;
 
-/**
- * This event indicates that a problem was encountered while converting data
- * from the Java content tree into its lexical representation. Since: JAXB1.0
- * Version: $Revision: 1.1 $ Author: Ryan Shoemaker, Sun Microsystems,
- * Inc.Kohsuke Kawaguchi, Sun Microsystems, Inc.Joe Fialli, Sun Microsystems,
- * Inc. See Also:ValidationEvent, ValidationEventHandler, Marshaller
- */
+/** XXX */
 public interface PrintConversionEvent extends ValidationEvent {
 }
 

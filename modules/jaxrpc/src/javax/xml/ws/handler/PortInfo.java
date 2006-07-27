@@ -30,30 +30,18 @@
 package javax.xml.ws.handler;
 import javax.xml.namespace.*;
 
-/**
- * The PortInfo interface is used by a HandlerResolver to query information
- * about the port it is being asked to create a handler chain for. This
- * interface is never implemented by an application, only by a JAX-WS
- * implementation. Since: JAX-WS 2.0
- */
+/** XXX */
 public interface PortInfo {
 
-  /**
-   * Gets the URI identifying the binding used by the port being accessed.
-   */
+  /** XXX */
   abstract String getBindingID();
 
 
-  /**
-   * Gets the qualified name of the WSDL port being accessed.
-   */
+  /** XXX */
   abstract QName getPortName();
 
 
-  /**
-   * Gets the qualified name of the WSDL service name containing the port being
-   * accessed.
-   */
+  /** XXX */
   abstract QName getServiceName();
 
 }

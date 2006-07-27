@@ -29,10 +29,7 @@
 
 package javax.xml.ws.handler;
 
-/**
- * The LogicalHandler extends Handler to provide typesafety for the message
- * context parameter. Since: JAX-WS 2.0
- */
+/** XXX */
 public interface LogicalHandler<C extends LogicalMessageContext>
     extends Handler<C> {
 }

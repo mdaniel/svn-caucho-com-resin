@@ -31,53 +31,30 @@ package javax.xml.bind;
 import org.w3c.dom.*;
 import java.net.*;
 
-/**
- * Encapsulate the location of a ValidationEvent. The ValidationEventLocator
- * indicates where the ValidationEvent occurred. Different fields will be set
- * depending on the type of validation that was being performed when the error
- * or warning was detected. For example, on-demand validation would produce
- * locators that contained references to objects in the Java content tree while
- * unmarshal-time validation would produce locators containing information
- * appropriate to the source of the XML data (file, url, Node, etc). Since:
- * JAXB1.0 Version: $Revision: 1.1 $ Author: Ryan Shoemaker, Sun Microsystems,
- * Inc.Kohsuke Kawaguchi, Sun Microsystems, Inc.Joe Fialli, Sun Microsystems,
- * Inc. See Also:Validator, ValidationEvent
- */
+/** XXX */
 public interface ValidationEventLocator {
 
-  /**
-   * Return the column number if available
-   */
+  /** XXX */
   abstract int getColumnNumber();
 
 
-  /**
-   * Return the line number if available
-   */
+  /** XXX */
   abstract int getLineNumber();
 
 
-  /**
-   * Return a reference to the DOM Node if available
-   */
+  /** XXX */
   abstract Node getNode();
 
 
-  /**
-   * Return a reference to the object in the Java content tree if available
-   */
+  /** XXX */
   abstract Object getObject();
 
 
-  /**
-   * Return the byte offset if available
-   */
+  /** XXX */
   abstract int getOffset();
 
 
-  /**
-   * Return the name of the XML source as a URL if available
-   */
+  /** XXX */
   abstract URL getURL();
 
 }

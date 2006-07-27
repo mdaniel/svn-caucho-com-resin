@@ -31,40 +31,20 @@ package javax.xml.ws;
 import javax.xml.transform.*;
 import javax.xml.bind.*;
 
-/**
- * The LogicalMessage interface represents a protocol agnostic XML message and
- * contains methods that provide access to the payload of the message. Since:
- * JAX-WS 2.0
- */
+/** XXX */
 public interface LogicalMessage {
 
-  /**
-   * Gets the message payload as an XML source, may be called multiple times on
-   * the same LogicalMessage instance, always returns a new Source that may be
-   * used to retrieve the entire message payload. If the returned Source is an
-   * instance of DOMSource, then modifications to the encapsulated DOM tree
-   * change the message payload in-place, there is no need to susequently call
-   * setPayload. Other types of Source provide only read access to the message
-   * payload.
-   */
+  /** XXX */
   abstract Source getPayload();
 
 
-  /**
-   * Gets the message payload as a JAXB object. Note that there is no
-   * connection between the returned object and the message payload, changes to
-   * the payload require calling setPayload.
-   */
+  /** XXX */
   abstract Object getPayload(JAXBContext context);
 
-  /**
-   * Sets the message payload
-   */
+  /** XXX */
   abstract void setPayload(Object payload, JAXBContext context);
 
-  /**
-   * Sets the message payload
-   */
+  /** XXX */
   abstract void setPayload(Source payload);
 
 }

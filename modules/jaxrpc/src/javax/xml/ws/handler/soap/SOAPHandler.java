@@ -32,17 +32,11 @@ import javax.xml.namespace.*;
 import javax.xml.ws.handler.*;
 import java.util.*;
 
-/**
- * The SOAPHandler class extends Handler to provide typesafety for the message
- * context parameter and add a method to obtain access to the headers that may
- * be processed by the handler. Since: JAX-WS 2.0
- */
+/** XXX */
 public interface SOAPHandler<T extends SOAPMessageContext>
     extends Handler<T> {
 
-  /**
-   * Gets the header blocks that can be processed by this Handler instance.
-   */
+  /** XXX */
   abstract Set<QName> getHeaders();
 
 }

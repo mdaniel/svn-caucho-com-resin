@@ -29,21 +29,7 @@
 
 package javax.xml.bind.annotation;
 
-/**
- * Enables mapping a class to a XML Schema complex type with a simpleContent or
- * a XML Schema simple type. Usage: The @XmlValue annotation can be used with
- * the following program elements: a JavaBean property. non static, non
- * transient field. See "Package Specification" in javax.xml.bind.package
- * javadoc for additional common information. If the annotated JavaBean
- * property is the sole class member being mapped to XML Schema construct, then
- * the class is mapped to a simple type. If there are additional JavaBean
- * properties (other than the JavaBean property annotated with @XmlValue
- * annotation) that are mapped to XML attributes, then the class is mapped to a
- * complex type with simpleContent. Example 1: Map a class to XML Schema
- * simpleType Example 2: Map a class to XML Schema complexType with with
- * simpleContent. Since: JAXB2.0 Version: $Revision: 1.6 $ Author: Sekhar
- * Vajjhala, Sun Microsystems, Inc. See Also:XmlType
- */
+/** XXX */
 public interface XmlValue {
 }
 

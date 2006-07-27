@@ -29,17 +29,7 @@
 
 package javax.xml.bind.annotation;
 
-/**
- * Maps a JavaBean property to XML ID. To preserve referential integrity of an
- * object graph across XML serialization followed by a XML deserialization,
- * requires an object reference to be marshalled by reference or containment
- * appropriately. Annotations XmlID and XmlIDREF together allow a customized
- * mapping of a JavaBean property's type by containment or reference. Usage See
- * "Package Specification" in javax.xml.bind.package javadoc for additional
- * common information. Example: Map a JavaBean property's type to xs:ID Since:
- * JAXB2.0 Version: $Revision: 1.5 $ Author: Sekhar Vajjhala, Sun Microsystems,
- * Inc. See Also:XmlIDREF
- */
+/** XXX */
 public interface XmlID {
 }
 

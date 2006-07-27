@@ -30,15 +30,7 @@
 package javax.xml.ws;
 import java.lang.annotation.*;
 
-/**
- * Used to annotate methods in the Service Endpoint Interface with the response
- * wrapper bean to be used at runtime. The default value of the localName is
- * the operationName as defined in WebMethod annotation appended with Response
- * and the targetNamespace is the target namespace of the SEI. When starting
- * from Java this annotation is used resolve overloading conflicts in document
- * literal mode. Only the className is required in this case. Since: JAX-WS 2.0
- * See Also:WebMethod
- */
+/** XXX */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented

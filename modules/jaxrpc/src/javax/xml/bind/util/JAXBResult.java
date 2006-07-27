@@ -31,52 +31,24 @@ package javax.xml.bind.util;
 import javax.xml.transform.sax.*;
 import javax.xml.bind.*;
 
-/**
- * JAXP Result implementation that unmarshals a JAXB object. This utility class
- * is useful to combine JAXB with other Java/XML technologies. The following
- * example shows how to use JAXB to unmarshal a document resulting from an XSLT
- * transformation. The fact that JAXBResult derives from SAXResult is an
- * implementation detail. Thus in general applications are strongly discouraged
- * from accessing methods defined on SAXResult. In particular it shall never
- * attempt to call the setHandler, setLexicalHandler, and setSystemId methods.
- * Author: Kohsuke Kawaguchi (kohsuke.kawaguchi@sun.com)
- */
+/** XXX */
 public class JAXBResult extends SAXResult {
 
-  /**
-   * Creates a new instance that uses the specified JAXBContext to unmarshal.
-   * Parameters:context - The JAXBContext that will be used to create the
-   * necessary Unmarshaller. This parameter must not be null. Throws:
-   * JAXBException - if an error is encountered while creating the JAXBResult
-   * or if the context parameter is null.
-   */
+  /** XXX */
   public JAXBResult(JAXBContext context) throws JAXBException
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Creates a new instance that uses the specified Unmarshaller to unmarshal
-   * an object. This JAXBResult object will use the specified Unmarshaller
-   * instance. It is the caller's responsibility not to use the same
-   * Unmarshaller for other purposes while it is being used by this object. The
-   * primary purpose of this method is to allow the client to configure
-   * Unmarshaller. Unless you know what you are doing, it's easier and safer to
-   * pass a JAXBContext. Parameters:_unmarshaller - the unmarshaller. This
-   * parameter must not be null. Throws: JAXBException - if an error is
-   * encountered while creating the JAXBResult or the Unmarshaller parameter is
-   * null.
-   */
+  /** XXX */
   public JAXBResult(Unmarshaller _unmarshaller) throws JAXBException
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Gets the unmarshalled object created by the transformation.
-   */
+  /** XXX */
   public Object getResult() throws JAXBException
   {
     throw new UnsupportedOperationException();

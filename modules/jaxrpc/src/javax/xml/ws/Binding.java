@@ -31,23 +31,14 @@ package javax.xml.ws;
 import javax.xml.ws.handler.*;
 import java.util.*;
 
-/**
- * The Binding interface is the base interface for JAX-WS protocol bindings.
- * Since: JAX-WS 2.0
- */
+/** XXX */
 public interface Binding {
 
-  /**
-   * Gets a copy of the handler chain for a protocol binding instance. If the
-   * returned chain is modified a call to setHandlerChain is required to
-   * configure the binding instance with the new chain.
-   */
+  /** XXX */
   abstract List<Handler> getHandlerChain();
 
 
-  /**
-   * Sets the handler chain for the protocol binding instance.
-   */
+  /** XXX */
   abstract void setHandlerChain(List<Handler> handler);
 
 }

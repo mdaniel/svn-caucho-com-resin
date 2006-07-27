@@ -30,10 +30,7 @@
 package javax.xml.ws;
 import java.lang.annotation.*;
 
-/**
- * Used to annotate a Provider implementation class. Since: JAX-WS 2.0 See
- * Also:Provider
- */
+/** XXX */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented

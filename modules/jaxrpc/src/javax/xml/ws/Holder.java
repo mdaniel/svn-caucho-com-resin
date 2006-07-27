@@ -29,30 +29,21 @@
 
 package javax.xml.ws;
 
-/**
- * Holds a value of type T. Since: JAX-WS 2.0
- */
+/** XXX */
 public final class Holder<T> {
 
-  /**
-   * The value contained in the holder.
-   */
+  /** XXX */
   public T value;
 
 
-  /**
-   * Creates a new holder with a null value.
-   */
+  /** XXX */
   public Holder()
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Create a new holder with the specified value. Parameters:value - The value
-   * to be stored in the holder.
-   */
+  /** XXX */
   public Holder(T value)
   {
     throw new UnsupportedOperationException();

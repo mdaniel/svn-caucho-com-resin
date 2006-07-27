@@ -30,26 +30,17 @@
 package javax.xml.ws.http;
 import javax.xml.ws.*;
 
-/**
- * The HTTPException exception represents a XML/HTTP fault. Since there is no
- * standard format for faults or exceptions in XML/HTTP messaging, only the
- * HTTP status code is captured. Since: JAX-WS 2.0 See Also:Serialized Form
- */
+/** XXX */
 public class HTTPException extends ProtocolException {
 
-  /**
-   * Constructor for the HTTPException Parameters:statusCode - int for the HTTP
-   * status code
-   */
+  /** XXX */
   public HTTPException(int statusCode)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Gets the HTTP status code.
-   */
+  /** XXX */
   public int getStatusCode()
   {
     throw new UnsupportedOperationException();

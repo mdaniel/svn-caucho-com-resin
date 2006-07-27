@@ -30,39 +30,17 @@
 package javax.xml.bind.helpers;
 import javax.xml.bind.*;
 
-/**
- * Default implementation of the NotIdentifiableEvent interface. JAXB providers
- * are allowed to use whatever class that implements the ValidationEvent
- * interface. This class is just provided for a convenience. Since: JAXB1.0
- * Version: $Revision: 1.1 $ Author: Ryan Shoemaker, Sun Microsystems, Inc. See
- * Also:NotIdentifiableEvent, Validator, ValidationEventHandler,
- * ValidationEvent, ValidationEventLocator
- */
+/** XXX */
 public class NotIdentifiableEventImpl extends ValidationEventImpl implements NotIdentifiableEvent {
 
-  /**
-   * Create a new NotIdentifiableEventImpl. Parameters:_severity - The severity
-   * value for this event. Must be one of ValidationEvent.WARNING,
-   * ValidationEvent.ERROR, or ValidationEvent.FATAL_ERROR_message - The text
-   * message for this event - may be null._locator - The locator object for
-   * this event - may be null. Throws: IllegalArgumentException - if an illegal
-   * severity field is supplied
-   */
+  /** XXX */
   public NotIdentifiableEventImpl(int _severity, String _message, ValidationEventLocator _locator)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Create a new NotIdentifiableEventImpl. Parameters:_severity - The severity
-   * value for this event. Must be one of ValidationEvent.WARNING,
-   * ValidationEvent.ERROR, or ValidationEvent.FATAL_ERROR_message - The text
-   * message for this event - may be null._locator - The locator object for
-   * this event - may be null._linkedException - An optional linked exception
-   * that may provide additional information about the event - may be null.
-   * Throws: IllegalArgumentException - if an illegal severity field is supplied
-   */
+  /** XXX */
   public NotIdentifiableEventImpl(int _severity, String _message, ValidationEventLocator _locator, Throwable _linkedException)
   {
     throw new UnsupportedOperationException();

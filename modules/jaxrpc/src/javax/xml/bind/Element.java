@@ -29,16 +29,7 @@
 
 package javax.xml.bind;
 
-/**
- * This is an element marker interface. Under certain circumstances, it is
- * necessary for the binding compiler to generate derived java content classes
- * that implement this interface. In those cases, client applications must
- * supply element instances rather than types of elements. For more detail, see
- * section 5.7 "Element Declaration" and 5.7.1 "Bind to Java Element Interface"
- * of the specification. Since: JAXB1.0 Version: $Revision: 1.1 $ Author: Ryan
- * Shoemaker, Sun Microsystems, Inc.Kohsuke Kawaguchi, Sun Microsystems,
- * Inc.Joe Fialli, Sun Microsystems, Inc.
- */
+/** XXX */
 public interface Element {
 }
 

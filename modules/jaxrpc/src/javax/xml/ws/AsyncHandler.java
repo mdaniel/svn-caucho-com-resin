@@ -29,16 +29,10 @@
 
 package javax.xml.ws;
 
-/**
- * The AsyncHandler interface is implemented by clients that wish to receive
- * callback notification of the completion of service endpoint operations
- * invoked asynchronously. Since: JAX-WS 2.0
- */
+/** XXX */
 public interface AsyncHandler<T> {
 
-  /**
-   * Called when the response to an asynchronous operation is available.
-   */
+  /** XXX */
   abstract void handleResponse(Response<T> res);
 
 }

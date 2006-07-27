@@ -29,13 +29,7 @@
 
 package javax.xml.bind.annotation;
 
-/**
- * Marks a field/property that its XML form is a uri reference to mime content.
- * The mime content is optimally stored out-of-line as an attachment. A
- * field/property must always map to the DataHandler class. The above binding
- * supports WS-I AP 1.0 WS-I Attachments Profile Version 1.0. Since: JAXB2.0
- * Author: Kohsuke Kawaguchi
- */
+/** XXX */
 public interface XmlAttachmentRef {
 }
 

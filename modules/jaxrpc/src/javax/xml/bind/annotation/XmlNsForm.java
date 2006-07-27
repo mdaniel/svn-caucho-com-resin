@@ -29,16 +29,7 @@
 
 package javax.xml.bind.annotation;
 
-/**
- * Enumeration of XML Schema namespace qualifications. See "Package
- * Specification" in javax.xml.bind.package javadoc for additional common
- * information. Usage The namespace qualification values are used in the
- * annotations defined in this packge. The enumeration values are mapped as
- * follows: Enum Value XML Schema Value UNQUALIFIED unqualified QUALIFIED
- * qualified UNSET namespace qualification attribute is absent from the XML
- * Schema fragment Since: JAXB2.0 Version: $Revision: 1.2 $ Author: Sekhar
- * Vajjhala, Sun Microsystems, Inc.
- */
+/** XXX */
 public enum XmlNsForm {
 
     QUALIFIED, UNQUALIFIED, UNSET;

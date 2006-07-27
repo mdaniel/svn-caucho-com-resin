@@ -30,70 +30,44 @@
 package javax.xml.bind;
 import java.io.*;
 
-/**
- * This is the root exception class for all JAXB exceptions. Since: JAXB1.0
- * Version: $Revision: 1.1 $ $Date: 2004/12/14 21:50:39 $ Author: Ryan
- * Shoemaker, Sun Microsystems, Inc. See Also:JAXBContext, Marshaller,
- * Unmarshaller, Serialized Form
- */
+/** XXX */
 public class JAXBException extends Exception {
 
-  /**
-   * Construct a JAXBException with the specified detail message. The errorCode
-   * and linkedException will default to null. Parameters:message - a
-   * description of the exception
-   */
+  /** XXX */
+  public JAXBException()
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /** XXX */
   public JAXBException(String message)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Construct a JAXBException with the specified detail message and vendor
-   * specific errorCode. The linkedException will default to null.
-   * Parameters:message - a description of the exceptionerrorCode - a string
-   * specifying the vendor specific error code
-   */
+  /** XXX */
   public JAXBException(String message, String errorCode)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Construct a JAXBException with the specified detail message, vendor
-   * specific errorCode, and linkedException. Parameters:message - a
-   * description of the exceptionerrorCode - a string specifying the vendor
-   * specific error codeexception - the linked exception
-   */
+  /** XXX */
   public JAXBException(String message, String errorCode, Throwable exception)
   {
     throw new UnsupportedOperationException();
   }
 
 
-    /** XXX: remove this -- only here to help compiles */
-  public JAXBException()
-    {
-    }
-
-  /**
-   * Construct a JAXBException with the specified detail message and
-   * linkedException. The errorCode will default to null. Parameters:message -
-   * a description of the exceptionexception - the linked exception
-   */
+  /** XXX: remove this -- only here to help compiles */
   public JAXBException(String message, Throwable exception)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Construct a JAXBException with a linkedException. The detail message and
-   * vendor specific errorCode will default to null. Parameters:exception - the
-   * linked exception
-   */
+  /** XXX */
   public JAXBException(Throwable exception)
   {
     throw new UnsupportedOperationException();
@@ -105,66 +79,49 @@ public class JAXBException extends Exception {
   }
 
 
-  /**
-   * Get the vendor specific error code
-   */
+  /** XXX */
   public String getErrorCode()
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Get the linked exception
-   */
+  /** XXX */
   public Throwable getLinkedException()
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Prints this JAXBException and its stack trace (including the stack trace
-   * of the linkedException if it is non-null) to System.err.
-   */
+  /** XXX */
   public void printStackTrace()
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Prints this JAXBException and its stack trace (including the stack trace
-   * of the linkedException if it is non-null) to the PrintStream.
-   */
+  /** XXX */
   public void printStackTrace(PrintStream s)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Prints this JAXBException and its stack trace (including the stack trace
-   * of the linkedException if it is non-null) to the PrintWriter.
-   */
+  /** XXX */
   public void printStackTrace(PrintWriter s)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Add a linked Exception.
-   */
+  /** XXX */
   public void setLinkedException(Throwable exception)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Returns a short description of this JAXBException.
-   */
+  /** XXX */
   public String toString()
   {
     throw new UnsupportedOperationException();

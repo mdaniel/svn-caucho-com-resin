@@ -31,36 +31,18 @@ package javax.xml.ws;
 import javax.xml.ws.handler.*;
 import java.security.*;
 
-/**
- * A WebServiceContext makes it possible for a web service endpoint
- * implementation class to access message context and security information
- * relative to a request being served. Typically a WebServiceContext is
- * injected into an endpoint implementation class using the Resource
- * annotation. Since: JAX-WS 2.0 See Also:Resource
- */
+/** XXX */
 public interface WebServiceContext {
 
-  /**
-   * Returns the MessageContext for the request being served at the time this
-   * method is called. Only properties with APPLICATION scope will be visible
-   * to the application.
-   */
+  /** XXX */
   abstract MessageContext getMessageContext();
 
 
-  /**
-   * Returns the Principal that identifies the sender of the request currently
-   * being serviced. If the sender has not been authenticated, the method
-   * returns null.
-   */
+  /** XXX */
   abstract Principal getUserPrincipal();
 
 
-  /**
-   * Returns a boolean indicating whether the authenticated user is included in
-   * the specified logical role. If the user has not been authenticated, the
-   * method returns false.
-   */
+  /** XXX */
   abstract boolean isUserInRole(String role);
 
 }

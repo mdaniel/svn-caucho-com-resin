@@ -29,19 +29,10 @@
 
 package javax.xml.ws;
 
-/**
- * Service endpoints may implement the Provider interface as a dynamic
- * alternative to an SEI. Implementations are required to support
- * ProviderSource and ProviderSOAPMessage. The ServiceMode annotation can be
- * used to control whether the Provider instance will receive entire protocol
- * messages or just message payloads. Since: JAX-WS 2.0 See Also:Source,
- * SOAPMessage, ServiceMode
- */
+/** XXX */
 public interface Provider<T> {
 
-  /**
-   * Invokes an operation occording to the contents of the request message.
-   */
+  /** XXX */
   abstract T invoke(T request);
 
 }

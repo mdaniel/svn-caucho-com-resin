@@ -29,14 +29,7 @@
 
 package javax.xml.bind.annotation;
 
-/**
- * Associates a namespace prefix with a XML namespace URI. Usage @XmlNs
- * annotation is intended for use from other program annotations. See "Package
- * Specification" in javax.xml.bind.package javadoc for additional common
- * information. Example:See XmlSchema annotation type for an example. Since:
- * JAXB2.0 Version: $Revision: 1.3 $ Author: Sekhar Vajjhala, Sun Microsystems,
- * Inc.
- */
+/** XXX */
 public interface XmlNs {
 }
 

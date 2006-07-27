@@ -30,10 +30,7 @@
 package javax.xml.ws;
 import java.lang.annotation.*;
 
-/**
- * The WebServiceRefs annotation allows multiple web service references to be
- * declared at the class level. Since: 2.0 See Also:WebServiceRef
- */
+/** XXX */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

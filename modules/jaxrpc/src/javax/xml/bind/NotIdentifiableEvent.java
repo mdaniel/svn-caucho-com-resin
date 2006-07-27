@@ -29,12 +29,7 @@
 
 package javax.xml.bind;
 
-/**
- * This event indicates that a problem was encountered resolving an ID/IDREF.
- * Since: JAXB1.0 Version: $Revision: 1.1 $ Author: Ryan Shoemaker, Sun
- * Microsystems, Inc.Kohsuke Kawaguchi, Sun Microsystems, Inc.Joe Fialli, Sun
- * Microsystems, Inc. See Also:Validator, ValidationEventHandler
- */
+/** XXX */
 public interface NotIdentifiableEvent extends ValidationEvent {
 }
 

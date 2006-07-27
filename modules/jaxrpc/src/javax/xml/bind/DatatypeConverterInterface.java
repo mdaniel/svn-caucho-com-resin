@@ -32,263 +32,158 @@ import javax.xml.namespace.*;
 import java.math.*;
 import java.util.*;
 
-/**
- * The DatatypeConverterInterface is for JAXB provider use only. A JAXB
- * provider must supply a class that implements this interface. JAXB Providers
- * are required to call the DatatypeConverter.setDatatypeConverter api at some
- * point before the first marshal or unmarshal operation (perhaps during the
- * call to JAXBContext.newInstance). This step is necessary to configure the
- * converter that should be used to perform the print and parse functionality.
- * Calling this api repeatedly will have no effect - the DatatypeConverter
- * instance passed into the first invocation is the one that will be used from
- * then on. This interface defines the parse and print methods. There is one
- * parse and print method for each XML schema datatype specified in the the
- * default binding Table 5-1 in the JAXB specification. The parse and print
- * methods defined here are invoked by the static parse and print methods
- * defined in the DatatypeConverter class. A parse method for a XML schema
- * datatype must be capable of converting any lexical representation of the XML
- * schema datatype ( specified by the XML Schema Part2: Datatypes specification
- * into a value in the value space of the XML schema datatype. If an error is
- * encountered during conversion, then an IllegalArgumentException or a
- * subclass of IllegalArgumentException must be thrown by the method. A print
- * method for a XML schema datatype can output any lexical representation that
- * is valid with respect to the XML schema datatype. If an error is encountered
- * during conversion, then an IllegalArgumentException, or a subclass of
- * IllegalArgumentException must be thrown by the method. Since: JAXB1.0
- * Version: $Revision: 1.5 $ Author: Sekhar Vajjhala, Sun Microsystems, Inc.Joe
- * Fialli, Sun Microsystems Inc.Kohsuke Kawaguchi, Sun Microsystems, Inc.Ryan
- * Shoemaker,Sun Microsystems Inc. See Also:DatatypeConverter,
- * ParseConversionEvent, PrintConversionEvent
- */
+/** XXX */
 public interface DatatypeConverterInterface {
 
-  /**
-   * Return a string containing the lexical representation of the simple type.
-   */
+  /** XXX */
   abstract String parseAnySimpleType(String lexicalXSDAnySimpleType);
 
 
-  /**
-   * Converts the string argument into an array of bytes.
-   */
+  /** XXX */
   abstract byte[] parseBase64Binary(String lexicalXSDBase64Binary);
 
 
-  /**
-   * Converts the string argument into a boolean value.
-   */
+  /** XXX */
   abstract boolean parseBoolean(String lexicalXSDBoolean);
 
 
-  /**
-   * Converts the string argument into a byte value.
-   */
+  /** XXX */
   abstract byte parseByte(String lexicalXSDByte);
 
 
-  /**
-   * Converts the string argument into a Calendar value.
-   */
+  /** XXX */
   abstract Calendar parseDate(String lexicalXSDDate);
 
 
-  /**
-   * Converts the string argument into a Calendar value.
-   */
+  /** XXX */
   abstract Calendar parseDateTime(String lexicalXSDDateTime);
 
 
-  /**
-   * Converts the string argument into a BigDecimal value.
-   */
+  /** XXX */
   abstract BigDecimal parseDecimal(String lexicalXSDDecimal);
 
 
-  /**
-   * Converts the string argument into a double value.
-   */
+  /** XXX */
   abstract double parseDouble(String lexicalXSDDouble);
 
 
-  /**
-   * Converts the string argument into a float value.
-   */
+  /** XXX */
   abstract float parseFloat(String lexicalXSDFloat);
 
 
-  /**
-   * Converts the string argument into an array of bytes.
-   */
+  /** XXX */
   abstract byte[] parseHexBinary(String lexicalXSDHexBinary);
 
 
-  /**
-   * Convert the string argument into an int value.
-   */
+  /** XXX */
   abstract int parseInt(String lexicalXSDInt);
 
 
-  /**
-   * Convert the string argument into a BigInteger value.
-   */
+  /** XXX */
   abstract BigInteger parseInteger(String lexicalXSDInteger);
 
 
-  /**
-   * Converts the string argument into a long value.
-   */
+  /** XXX */
   abstract long parseLong(String lexicalXSDLong);
 
 
-  /**
-   * Converts the string argument into a QName value. String parameter
-   * lexicalXSDQname must conform to lexical value space specifed at XML Schema
-   * Part 2:Datatypes specification:QNames
-   */
+  /** XXX */
   abstract QName parseQName(String lexicalXSDQName, NamespaceContext nsc);
 
 
-  /**
-   * Converts the string argument into a short value.
-   */
+  /** XXX */
   abstract short parseShort(String lexicalXSDShort);
 
 
-  /**
-   * Convert the string argument into a string.
-   */
+  /** XXX */
   abstract String parseString(String lexicalXSDString);
 
 
-  /**
-   * Converts the string argument into a Calendar value.
-   */
+  /** XXX */
   abstract Calendar parseTime(String lexicalXSDTime);
 
 
-  /**
-   * Converts the string argument into a long value.
-   */
+  /** XXX */
   abstract long parseUnsignedInt(String lexicalXSDUnsignedInt);
 
 
-  /**
-   * Converts the string argument into an int value.
-   */
+  /** XXX */
   abstract int parseUnsignedShort(String lexicalXSDUnsignedShort);
 
 
-  /**
-   * Converts a string value into a string.
-   */
+  /** XXX */
   abstract String printAnySimpleType(String val);
 
 
-  /**
-   * Converts an array of bytes into a string.
-   */
+  /** XXX */
   abstract String printBase64Binary(byte[] val);
 
 
-  /**
-   * Converts a boolean value into a string.
-   */
+  /** XXX */
   abstract String printBoolean(boolean val);
 
 
-  /**
-   * Converts a byte value into a string.
-   */
+  /** XXX */
   abstract String printByte(byte val);
 
 
-  /**
-   * Converts a Calendar value into a string.
-   */
+  /** XXX */
   abstract String printDate(Calendar val);
 
 
-  /**
-   * Converts a Calendar value into a string.
-   */
+  /** XXX */
   abstract String printDateTime(Calendar val);
 
 
-  /**
-   * Converts a BigDecimal value into a string.
-   */
+  /** XXX */
   abstract String printDecimal(BigDecimal val);
 
 
-  /**
-   * Converts a double value into a string.
-   */
+  /** XXX */
   abstract String printDouble(double val);
 
 
-  /**
-   * Converts a float value into a string.
-   */
+  /** XXX */
   abstract String printFloat(float val);
 
 
-  /**
-   * Converts an array of bytes into a string.
-   */
+  /** XXX */
   abstract String printHexBinary(byte[] val);
 
 
-  /**
-   * Converts an int value into a string.
-   */
+  /** XXX */
   abstract String printInt(int val);
 
 
-  /**
-   * Converts a BigInteger value into a string.
-   */
+  /** XXX */
   abstract String printInteger(BigInteger val);
 
 
-  /**
-   * Converts a long value into a string.
-   */
+  /** XXX */
   abstract String printLong(long val);
 
 
-  /**
-   * Converts a QName instance into a string.
-   */
+  /** XXX */
   abstract String printQName(QName val, NamespaceContext nsc);
 
 
-  /**
-   * Converts a short value into a string.
-   */
+  /** XXX */
   abstract String printShort(short val);
 
 
-  /**
-   * Converts the string argument into a string.
-   */
+  /** XXX */
   abstract String printString(String val);
 
 
-  /**
-   * Converts a Calendar value into a string.
-   */
+  /** XXX */
   abstract String printTime(Calendar val);
 
 
-  /**
-   * Converts a long value into a string.
-   */
+  /** XXX */
   abstract String printUnsignedInt(long val);
 
 
-  /**
-   * Converts an int value into a string.
-   */
+  /** XXX */
   abstract String printUnsignedShort(int val);
 
 }

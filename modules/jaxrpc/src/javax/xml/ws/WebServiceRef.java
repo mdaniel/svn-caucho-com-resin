@@ -30,11 +30,7 @@
 package javax.xml.ws;
 import java.lang.annotation.*;
 
-/**
- * The WebServiceRef annotation is used to define a reference to a web service
- * and (optionally) an injection target for it. Web service references are
- * resources in the Java EE 5 sense. Since: JAX-WS 2.0 See Also:Resource
- */
+/** XXX */
 @Target({ElementType.TYPE,ElementType.METHOD,ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented

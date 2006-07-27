@@ -29,20 +29,7 @@
 
 package javax.xml.bind.annotation;
 
-/**
- * Maps an enum constant in Enum type to XML representation. Usage The
- * @XmlEnumValue annotation can be used with the following program elements:
- * enum constant See "Package Specification" in javax.xml.bind.package javadoc
- * for additional common information. This annotation, together with XmlEnum
- * provides a mapping of enum type to XML representation. An enum type is
- * mapped to a schema simple type with enumeration facets. The schema type is
- * derived from the Java type specified in @XmlEnum.value(). Each enum constant
- * @XmlEnumValue must have a valid lexical representation for the type
- * @XmlEnum.value() In the absence of this annotation, Enum.name() is used as
- * the XML representation. Example 1: Map enum constant name -> enumeration
- * facet Example 2: Map enum constant name(value) -> enumeration facet Example
- * 3: Map enum constant name -> enumeration facet Since: JAXB 2.0
- */
+/** XXX */
 public interface XmlEnumValue {
 }
 

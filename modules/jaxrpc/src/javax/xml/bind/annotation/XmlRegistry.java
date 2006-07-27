@@ -29,11 +29,7 @@
 
 package javax.xml.bind.annotation;
 
-/**
- * Marks a class that has XmlElementDecls. Since: JAXB 2.0 Author: Kohsuke
- * Kawaguchi, Sun Microsystems, Inc.Sekhar Vajjhala, Sun Microsystems, Inc. See
- * Also:XmlElementDecl
- */
+/** XXX */
 public interface XmlRegistry {
 }
 

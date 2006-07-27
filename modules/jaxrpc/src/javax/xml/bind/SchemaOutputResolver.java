@@ -31,13 +31,7 @@ package javax.xml.bind;
 import java.io.*;
 import javax.xml.transform.*;
 
-/**
- * Controls where a JAXB implementation puts the generates schema files. An
- * implementation of this abstract class has to be provided by the calling
- * application to generate schemas. This is a class, not an interface so as to
- * allow future versions to evolve without breaking the compatibility. Author:
- * Kohsuke Kawaguchi (kohsuke.kawaguchi@sun.com)
- */
+/** XXX */
 public abstract class SchemaOutputResolver {
   public SchemaOutputResolver()
   {
@@ -45,12 +39,7 @@ public abstract class SchemaOutputResolver {
   }
 
 
-  /**
-   * Decides where the schema file (of the given namespace URI) will be
-   * written, and return it as a object. This method is called only once for
-   * any given namespace. IOW, all the components in one namespace is always
-   * written into the same schema document.
-   */
+  /** XXX */
   public abstract Result createOutput(String namespaceUri, String suggestedFileName) throws IOException;
 
 }

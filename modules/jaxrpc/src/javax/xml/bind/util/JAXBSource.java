@@ -31,47 +31,17 @@ package javax.xml.bind.util;
 import javax.xml.transform.sax.*;
 import javax.xml.bind.*;
 
-/**
- * JAXP Source implementation that marshals a JAXB-generated object. This
- * utility class is useful to combine JAXB with other Java/XML technologies.
- * The following example shows how to use JAXB to marshal a document for
- * transformation by XSLT. The fact that JAXBSource derives from SAXSource is
- * an implementation detail. Thus in general applications are strongly
- * discouraged from accessing methods defined on SAXSource. In particular, the
- * setXMLReader and setInputSource methods shall never be called. The XMLReader
- * object obtained by the getXMLReader method shall be used only for parsing
- * the InputSource object returned by the getInputSource method. Similarly the
- * InputSource object obtained by the getInputSource method shall be used only
- * for being parsed by the XMLReader object returned by the getXMLReader.
- * Author: Kohsuke Kawaguchi (kohsuke.kawaguchi@sun.com)
- */
+/** XXX */
 public class JAXBSource extends SAXSource {
 
-  /**
-   * Creates a new for the given content object. Parameters:context -
-   * JAXBContext that was used to create contentObject. This context is used to
-   * create a new instance of marshaller and must not be null.contentObject -
-   * An instance of a JAXB-generated class, which will be used as a Source (by
-   * marshalling it into XML). It must not be null. Throws: JAXBException - if
-   * an error is encountered while creating the JAXBSource or if either of the
-   * parameters are null.
-   */
+  /** XXX */
   public JAXBSource(JAXBContext context, Object contentObject) throws JAXBException
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Creates a new for the given content object. Parameters:marshaller - A
-   * marshaller instance that will be used to marshal contentObject into XML.
-   * This must be created from a JAXBContext that was used to build
-   * contentObject and must not be null.contentObject - An instance of a
-   * JAXB-generated class, which will be used as a Source (by marshalling it
-   * into XML). It must not be null. Throws: JAXBException - if an error is
-   * encountered while creating the JAXBSource or if either of the parameters
-   * are null.
-   */
+  /** XXX */
   public JAXBSource(Marshaller marshaller, Object contentObject) throws JAXBException
   {
     throw new UnsupportedOperationException();

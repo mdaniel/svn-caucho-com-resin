@@ -37,13 +37,7 @@ import java.net.*;
 import java.util.concurrent.*;
 import java.util.*;
 
-/**
- * Service delegates are used internally by Service objects to allow
- * pluggability of JAX-WS implementations. Every Service object has its own
- * delegate, created using the javax.xml.ws.Provider#createServiceDelegate
- * method. A Service object delegates all of its instance methods to its
- * delegate. Since: JAX-WS 2.0 See Also:Service, Provider
- */
+/** XXX */
 public abstract class ServiceDelegate {
   protected ServiceDelegate()
   {
@@ -51,90 +45,50 @@ public abstract class ServiceDelegate {
   }
 
 
-  /**
-   * Creates a new port for the service. Ports created in this way contain no
-   * WSDL port type information and can only be used for creating
-   * Dispatchinstances.
-   */
+  /** XXX */
   public abstract void addPort(QName portName, String bindingId, String endpointAddress);
 
 
-  /**
-   * Creates a Dispatch instance for use with objects of the users choosing.
-   */
+  /** XXX */
   public abstract <T> Dispatch<T> createDispatch(QName portName, Class<T> type, Mode mode);
 
 
-  /**
-   * Creates a Dispatch instance for use with JAXB generated objects.
-   */
+  /** XXX */
   public abstract Dispatch<Object> createDispatch(QName portName, JAXBContext context, Mode mode);
 
-  /**
-   * Returns the executor for this Serviceinstance. The executor is used for
-   * all asynchronous invocations that require callbacks.
-   */
+  /** XXX */
   public abstract Executor getExecutor();
 
 
-  /**
-   * Returns the configured handler resolver.
-   */
+  /** XXX */
   public abstract HandlerResolver getHandlerResolver();
 
 
-  /**
-   * The getPort method returns a stub. The parameter serviceEndpointInterface
-   * specifies the service endpoint interface that is supported by the returned
-   * proxy. In the implementation of this method, the JAX-WS runtime system
-   * takes the responsibility of selecting a protocol binding (and a port) and
-   * configuring the proxy accordingly. The returned proxy should not be
-   * reconfigured by the client.
-   */
+  /** XXX */
   public abstract <T> T getPort(Class<T> serviceEndpointInterface);
 
 
-  /**
-   * The getPort method returns a stub. A service client uses this stub to
-   * invoke operations on the target service endpoint. The
-   * serviceEndpointInterface specifies the service endpoint interface that is
-   * supported by the created dynamic proxy or stub instance.
-   */
+  /** XXX */
   public abstract <T> T getPort(QName portName, Class<T> serviceEndpointInterface);
 
 
-  /**
-   * Returns an Iterator for the list of QNames of service endpoints grouped by
-   * this service
-   */
+  /** XXX */
   public abstract Iterator<QName> getPorts();
 
 
-  /**
-   * Gets the name of this service.
-   */
+  /** XXX */
   public abstract QName getServiceName();
 
 
-  /**
-   * Gets the location of the WSDL document for this Service.
-   */
+  /** XXX */
   public abstract URL getWSDLDocumentLocation();
 
 
-  /**
-   * Sets the executor for this Service instance. The executor is used for all
-   * asynchronous invocations that require callbacks.
-   */
+  /** XXX */
   public abstract void setExecutor(Executor executor);
 
 
-  /**
-   * Sets the HandlerResolver for this Service instance. The handler resolver,
-   * if present, will be called once for each proxy or dispatch instance that
-   * is created, and the handler chain returned by the resolver will be set on
-   * the instance.
-   */
+  /** XXX */
   public abstract void setHandlerResolver(HandlerResolver handlerResolver);
 
 }

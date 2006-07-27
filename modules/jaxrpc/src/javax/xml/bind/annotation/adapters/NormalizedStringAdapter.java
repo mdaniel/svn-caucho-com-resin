@@ -29,11 +29,7 @@
 
 package javax.xml.bind.annotation.adapters;
 
-/**
- * XmlAdapter to handle xs:normalizedString. This adapter removes leading and
- * trailing whitespaces, then replace any tab, CR, and LF by a whitespace
- * character ' '. Since: JAXB 2.0 Author: Kohsuke Kawaguchi
- */
+/** XXX */
 public final class NormalizedStringAdapter extends XmlAdapter<String,String> {
   public NormalizedStringAdapter()
   {
@@ -41,28 +37,21 @@ public final class NormalizedStringAdapter extends XmlAdapter<String,String> {
   }
 
 
-  /**
-   * Returns true if the specified char is a white space character but not 0x20.
-   */
+  /** XXX */
   protected static boolean isWhiteSpaceExceptSpace(char ch)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * No-op. Just return the same string given as the parameter.
-   */
+  /** XXX */
   public String marshal(String s)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Removes leading and trailing whitespaces of the string given as the
-   * parameter, then replace any tab, CR, and LF by a whitespace character ' '.
-   */
+  /** XXX */
   public String unmarshal(String text)
   {
     throw new UnsupportedOperationException();

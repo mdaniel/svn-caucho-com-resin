@@ -30,16 +30,10 @@
 package javax.xml.ws.http;
 import javax.xml.ws.*;
 
-/**
- * The HTTPBinding interface is an abstraction for the XML/HTTP binding. Since:
- * JAX-WS 2.0
- */
+/** XXX */
 public interface HTTPBinding extends Binding {
 
-  /**
-   * A constant representing the identity of the XML/HTTP binding. See
-   * Also:Constant Field Values
-   */
+  /** XXX */
   static final String HTTP_BINDING="http://www.w3.org/2004/08/wsdl/http";
 
 }

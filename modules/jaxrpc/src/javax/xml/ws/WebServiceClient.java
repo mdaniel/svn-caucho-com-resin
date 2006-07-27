@@ -30,13 +30,7 @@
 package javax.xml.ws;
 import java.lang.annotation.*;
 
-/**
- * Used to annotate a generated service interface. The information specified in
- * this annotation is sufficient to uniquely identify a wsdl:service element
- * inside a WSDL document. This wsdl:service element represents the Web service
- * for which the generated service interface provides a client view. Since:
- * JAX-WS 2.0
- */
+/** XXX */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented

@@ -30,21 +30,10 @@
 package javax.xml.ws;
 import java.security.*;
 
-/**
- * This class defines web service permissions. Web service Permissions are
- * identified by name (also referred to as a "target name") alone. There are no
- * actions associated with them. The following permission target name is
- * defined: publishEndpoint The publishEndpoint permission allows publishing a
- * web service endpoint using the publish methods defined by the
- * javax.xml.ws.Endpoint class. See Also:Endpoint, BasicPermission, Permission,
- * Permissions, SecurityManager, Serialized Form
- */
+/** XXX */
 public final class WebServicePermission extends BasicPermission {
 
-  /**
-   * Creates a new permission with the specified name. Parameters:name - the
-   * name of the WebServicePermission
-   */
+  /** XXX */
   public WebServicePermission(String name)
   {
     super(name);
@@ -52,11 +41,7 @@ public final class WebServicePermission extends BasicPermission {
   }
 
 
-  /**
-   * Creates a new permission with the specified name and actions. The actions
-   * parameter is currently unused and it should be null. Parameters:name - the
-   * name of the WebServicePermissionactions - should be null
-   */
+  /** XXX */
   public WebServicePermission(String name, String actions)
   {
     super(name);

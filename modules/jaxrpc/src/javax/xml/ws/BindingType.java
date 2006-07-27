@@ -30,12 +30,7 @@
 package javax.xml.ws;
 import java.lang.annotation.*;
 
-/**
- * The BindingType annotation is used to specify the binding to use for a web
- * service endpoint implementation class. This annotation may be overriden
- * programmatically or via deployment descriptors, depending on the platform in
- * use. Since: JAX-WS 2.0
- */
+/** XXX */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented

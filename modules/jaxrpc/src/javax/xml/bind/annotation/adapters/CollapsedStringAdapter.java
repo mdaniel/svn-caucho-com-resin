@@ -29,12 +29,7 @@
 
 package javax.xml.bind.annotation.adapters;
 
-/**
- * Built-in XmlAdapter to handle xs:token and its derived types. This adapter
- * removes leading and trailing whitespaces, then truncate any sequnce of tab,
- * CR, LF, and SP by a single whitespace character ' '. Since: JAXB 2.0 Author:
- * Kohsuke Kawaguchi
- */
+/** XXX */
 public class CollapsedStringAdapter extends XmlAdapter<String,String> {
   public CollapsedStringAdapter()
   {
@@ -42,29 +37,21 @@ public class CollapsedStringAdapter extends XmlAdapter<String,String> {
   }
 
 
-  /**
-   * returns true if the specified char is a white space character.
-   */
+  /** XXX */
   protected static boolean isWhiteSpace(char ch)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * No-op. Just return the same string given as the parameter.
-   */
+  /** XXX */
   public String marshal(String s)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Removes leading and trailing whitespaces of the string given as the
-   * parameter, then truncate any sequnce of tab, CR, LF, and SP by a single
-   * whitespace character ' '.
-   */
+  /** XXX */
   public String unmarshal(String text)
   {
     throw new UnsupportedOperationException();

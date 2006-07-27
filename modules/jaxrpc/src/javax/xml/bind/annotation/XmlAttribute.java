@@ -29,17 +29,7 @@
 
 package javax.xml.bind.annotation;
 
-/**
- * Maps a JavaBean property to a XML attribute. Usage The @XmlAttribute
- * annotation can be used with the following program elements: JavaBean
- * property field A static final field is mapped to a XML fixed attribute. See
- * "Package Specification" in javax.xml.bind.package javadoc for additional
- * common information. Example 1: Map a JavaBean property to an XML attribute.
- * Example 2: Map a JavaBean property to an XML attribute with anonymous type.
- * Example 3: Map a JavaBean collection property to an XML attribute. Since:
- * JAXB2.0 Version: $Revision: 1.14 $ Author: Sekhar Vajjhala, Sun
- * Microsystems, Inc. See Also:XmlType
- */
+/** XXX */
 public interface XmlAttribute {
 }
 

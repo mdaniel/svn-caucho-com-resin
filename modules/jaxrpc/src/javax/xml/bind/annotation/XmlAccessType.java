@@ -29,11 +29,7 @@
 
 package javax.xml.bind.annotation;
 
-/**
- * Used by XmlAccessorType to control serialization of fields or properties.
- * Since: JAXB2.0 Version: $Revision: 1.1 $ Author: Sekhar Vajjhala, Sun
- * Microsystems, Inc. See Also:XmlAccessorType
- */
+/** XXX */
 public enum XmlAccessType {
 
     FIELD, NONE, PROPERTY, PUBLIC_MEMBER;

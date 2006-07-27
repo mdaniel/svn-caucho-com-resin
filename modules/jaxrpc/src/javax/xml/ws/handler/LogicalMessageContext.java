@@ -31,17 +31,11 @@ package javax.xml.ws.handler;
 import javax.xml.ws.*;
 import java.util.*;
 
-/**
- * The LogicalMessageContext interface extends MessageContext to provide access
- * to a the contained message as a protocol neutral LogicalMessage Since:
- * JAX-WS 2.0
- */
+/** XXX */
 public interface LogicalMessageContext
     extends MessageContext, Map<String,Object> {
 
-  /**
-   * Gets the message from this message context
-   */
+  /** XXX */
   abstract LogicalMessage getMessage();
 
 }

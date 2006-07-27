@@ -29,27 +29,7 @@
 
 package javax.xml.bind.annotation;
 
-/**
- * Controls whether fields or Javabean properties are serialized by default.
- * Usage @XmlAccessorType annotation can be used with the following program
- * elements: See "Package Specification" in javax.xml.bind.package javadoc for
- * additional common information. This annotation provides control over the
- * default serialization of properties and fields in a class. The annotation
- * @XmlAccessorType on a package applies to all classes in the package. The
- * following inheritance semantics apply: If there is a @XmlAccessorType on a
- * class, then it is used. Otherwise, if a @XmlAccessorType exists on one of
- * its super classes, then it is inherited. Otherwise, the @XmlAccessorType on
- * a package is inherited. Defaulting Rules: By default, if @XmlAccessorType on
- * a package is absent, then the following package level annotation is assumed.
- * By default, if @XmlAccessorType on a class is absent, and none of its super
- * classes is annotated with @XmlAccessorType, then the following default on
- * the class is assumed: This annotation can be used with the following
- * annotations: XmlType, XmlRootElement, XmlAccessorOrder, XmlSchema,
- * XmlSchemaType, XmlSchemaTypes, , XmlJavaTypeAdapter. It can also be used
- * with the following annotations at the package level: XmlJavaTypeAdapter.
- * Since: JAXB2.0 Version: $Revision: 1.9 $ Author: Sekhar Vajjhala, Sun
- * Microsystems, Inc. See Also:XmlAccessType
- */
+/** XXX */
 public interface XmlAccessorType {
 }
 

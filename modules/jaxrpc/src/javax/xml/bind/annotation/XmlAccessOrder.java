@@ -29,11 +29,7 @@
 
 package javax.xml.bind.annotation;
 
-/**
- * Used by XmlAccessorOrder to control the ordering of properties and fields in
- * a JAXB bound class. Since: JAXB2.0 Version: $Revision: 1.1 $ Author: Sekhar
- * Vajjhala, Sun Microsystems, Inc. See Also:XmlAccessorOrder
- */
+/** XXX */
 public enum XmlAccessOrder {
 
     ALPHABETICAL, UNIDENTIFIED;

@@ -29,20 +29,7 @@
 
 package javax.xml.bind.annotation;
 
-/**
- * Maps a package name to a XML namespace. Usage The XmlSchema annotation can
- * be used with the following program elements: package This is a package level
- * annotation and follows the recommendations and restrictions contained in JSR
- * 175, section III, "Annotations". Thus the usage is subject to the following
- * constraints and recommendations. There can only be one package declaration
- * as noted in JSR 175, section III, "Annotations". JSR 175 recommends
- * package-info.java for package level annotations. JAXB Providers that follow
- * this recommendation will allow the package level annotations to be defined
- * in package-info.java. Example 1: Customize name of XML namespace to which
- * package is mapped. Example 2: Customize namespace prefix, namespace URI
- * mapping Example 3: Customize elementFormDefault Since: JAXB2.0 Version:
- * $Revision: 1.9 $ Author: Sekhar Vajjhala, Sun Microsystems, Inc.
- */
+/** XXX */
 public interface XmlSchema {
 }
 

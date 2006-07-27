@@ -29,13 +29,7 @@
 
 package javax.xml.bind;
 
-/**
- * This event indicates that a problem was encountered while converting a
- * string from the XML data into a value of the target Java data type. Since:
- * JAXB1.0 Version: $Revision: 1.1 $ Author: Ryan Shoemaker, Sun Microsystems,
- * Inc.Kohsuke Kawaguchi, Sun Microsystems, Inc.Joe Fialli, Sun Microsystems,
- * Inc. See Also:ValidationEvent, ValidationEventHandler, Unmarshaller
- */
+/** XXX */
 public interface ParseConversionEvent extends ValidationEvent {
 }
 

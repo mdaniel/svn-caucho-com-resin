@@ -29,53 +29,31 @@
 
 package javax.xml.ws;
 
-/**
- * The WebServiceException class is the base exception class for all JAX-WS API
- * runtime exceptions. Since: JAX-WS 2.0 See Also:Serialized Form
- */
+/** XXX */
 public class WebServiceException extends RuntimeException {
 
-  /**
-   * Constructs a new exception with null as its detail message. The cause is
-   * not initialized.
-   */
+  /** XXX */
   public WebServiceException()
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Constructs a new exception with the specified detail message. The cause is
-   * not initialized. Parameters:message - The detail message which is later
-   * retrieved using the getMessage method
-   */
+  /** XXX */
   public WebServiceException(String message)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Constructs a new exception with the specified detail message and cause.
-   * Parameters:message - The detail message which is later retrieved using the
-   * getMessage methodcause - The cause which is saved for the later retrieval
-   * throw by the getCause method
-   */
+  /** XXX */
   public WebServiceException(String message, Throwable cause)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Constructs a new WebServiceException with the specified cause and a detail
-   * message of (cause==null ? null : cause.toString()) (which typically
-   * contains the class and detail message of cause). Parameters:cause - The
-   * cause which is saved for the later retrieval throw by the getCause method.
-   * (A null value is permitted, and indicates that the cause is nonexistent or
-   * unknown.)
-   */
+  /** XXX */
   public WebServiceException(Throwable cause)
   {
     throw new UnsupportedOperationException();

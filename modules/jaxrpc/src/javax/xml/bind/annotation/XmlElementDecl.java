@@ -29,42 +29,10 @@
 
 package javax.xml.bind.annotation;
 
-/**
- * Maps a factory method to a XML element. Usage Example 1: Annotation on a
- * factory method // Example: code fragment XmlRegistry class ObjectFactory {
- * XmlElementDecl(name="foo") JAXBElementString> createFoo(String s) { ... } }
- * <!-- XML input --> <foo>string</foo> // Example: code fragment corresponding
- * to XML input JAXBElement<String> o =
- * (JAXBElement<String>)unmarshaller.unmarshal(aboveDocument); // print
- * JAXBElement instance to show values System.out.println(o.getName()); //
- * prints "{}foo" System.out.println(o.getValue()); // prints "string"
- * System.out.println(o.getValue().getClass()); // prints "java.lang.String"
- * <!-- Example: XML schema definition --> <xs:element name="foo"
- * type="xs:string"/> Example 2: Element declaration with non local scope The
- * following example illustrates the use of scope annotation parameter in
- * binding of element declaration in schema derived code. The following example
- * may be replaced in a future revision of this javadoc. <!-- Example: XML
- * schema definition --> <xs:schema> <xs:complexType name="pea"> <xs:choice
- * maxOccurs="unbounded"> <xs:element name="foo" type="xs:string"/> <xs:element
- * name="bar" type="xs:string"/> </xs:choice> </xs:complexType> <xs:element
- * name="foo" type="xs:int"/> </xs:schema> // Example: expected default binding
- * class Pea { XmlElementRefs({
- * XmlElementRef(name="foo",type=JAXBElement.class)
- * XmlElementRef(name="bar",type=JAXBElement.class) }) ListJAXBElementString>>
- * fooOrBar; } XmlRegistry class ObjectFactory {
- * XmlElementDecl(scope=Pea.class,name="foo") JAXBElement createPeaFoo(String
- * s); XmlElementDecl(scope=Pea.class,name="bar") JAXBElement
- * createPeaBar(String s); XmlElementDecl(name="foo") JAXBElement
- * createFoo(Integer i); } Without scope createFoo and createPeaFoo would
- * become ambiguous since both of them map to a XML schema element with the
- * same local name "foo". Since: JAXB 2.0 See Also:XmlRegistry
- */
+/** XXX */
 public interface XmlElementDecl {
 
-  /**
-   * Used in XmlElementDecl.scope() to signal that the declaration is in the
-   * global scope.
-   */
+  /** XXX */
   public static final class GLOBAL {
     public GLOBAL()
     {

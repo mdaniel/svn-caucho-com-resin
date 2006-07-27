@@ -29,78 +29,45 @@
 
 package javax.xml.bind;
 
-/**
- * This exception indicates that an error was encountered while getting or
- * setting a property. Since: JAXB1.0 Version: $Revision: 1.1 $ $Date:
- * 2004/12/14 21:50:40 $ Author: Ryan Shoemaker, Sun Microsystems, Inc.Kohsuke
- * Kawaguchi, Sun Microsystems, Inc.Joe Fialli, Sun Microsystems, Inc. See
- * Also:JAXBContext, Validator, Unmarshaller, Serialized Form
- */
+/** XXX */
 public class PropertyException extends JAXBException {
 
-  /**
-   * Construct a PropertyException with the specified detail message. The
-   * errorCode and linkedException will default to null. Parameters:message - a
-   * description of the exception
-   */
+  /** XXX */
   public PropertyException(String message)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Construct a PropertyException whose message field is set based on the name
-   * of the property and value.toString(). Parameters:name - the name of the
-   * property related to this exceptionvalue - the value of the property
-   * related to this exception
-   */
+  /** XXX */
   public PropertyException(String name, Object value)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Construct a PropertyException with the specified detail message and vendor
-   * specific errorCode. The linkedException will default to null.
-   * Parameters:message - a description of the exceptionerrorCode - a string
-   * specifying the vendor specific error code
-   */
+  /** XXX */
   public PropertyException(String message, String errorCode)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Construct a PropertyException with the specified detail message, vendor
-   * specific errorCode, and linkedException. Parameters:message - a
-   * description of the exceptionerrorCode - a string specifying the vendor
-   * specific error codeexception - the linked exception
-   */
+  /** XXX */
   public PropertyException(String message, String errorCode, Throwable exception)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Construct a PropertyException with the specified detail message and
-   * linkedException. The errorCode will default to null. Parameters:message -
-   * a description of the exceptionexception - the linked exception
-   */
+  /** XXX */
   public PropertyException(String message, Throwable exception)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Construct a PropertyException with a linkedException. The detail message
-   * and vendor specific errorCode will default to null. Parameters:exception -
-   * the linked exception
-   */
+  /** XXX */
   public PropertyException(Throwable exception)
   {
     throw new UnsupportedOperationException();

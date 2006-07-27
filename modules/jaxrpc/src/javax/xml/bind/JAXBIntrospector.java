@@ -30,16 +30,7 @@
 package javax.xml.bind;
 import javax.xml.namespace.*;
 
-/**
- * Provide access to JAXB xml binding data for a JAXB object. Intially, the
- * intent of this class is to just conceptualize how a JAXB application
- * developer can access xml binding information, independent if binding model
- * is java to schema or schema to java. Since accessing the XML element name
- * related to a JAXB element is a highly requested feature, demonstrate access
- * to this binding information. The factory method to get a JAXBIntrospector
- * instance is JAXBContext.createJAXBIntrospector(). Since: JAXB2.0 See
- * Also:JAXBContext.createJAXBIntrospector()
- */
+/** XXX */
 public abstract class JAXBIntrospector {
   public JAXBIntrospector()
   {
@@ -47,29 +38,18 @@ public abstract class JAXBIntrospector {
   }
 
 
-  /**
-   * Get xml element qname for jaxbElement.
-   */
+  /** XXX */
   public abstract QName getElementName(Object jaxbElement);
 
 
-  /**
-   * Get the element value of a JAXB element. Convenience method to abstract
-   * whether working with either a javax.xml.bind.JAXBElement instance or an
-   * instance of &#64XmlRootElement annotated Java class.
-   */
+  /** XXX */
   public static Object getValue(Object jaxbElement)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Return true iff object represents a JAXB element. Parameter object is a
-   * JAXB element for following cases: It is an instance of
-   * javax.xml.bind.JAXBElement. The class of object is annotated with
-   * &#64XmlRootElement.
-   */
+  /** XXX */
   public abstract boolean isElement(Object object);
 
 }

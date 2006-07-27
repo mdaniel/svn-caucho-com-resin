@@ -35,40 +35,24 @@ import javax.xml.parsers.*;
 import javax.xml.bind.*;
 import org.w3c.dom.Element;
 
-/**
- * DomHandler implementation for W3C DOM (org.w3c.dom package.) Since: JAXB2.0
- * Author: Kohsuke Kawaguchi
- */
+/** XXX */
 public class W3CDomHandler implements DomHandler<org.w3c.dom.Element, DOMResult> {
 
-  /**
-   * Default constructor. It is up to a JAXB provider to decide which DOM
-   * implementation to use or how that is configured.
-   */
+  /** XXX */
   public W3CDomHandler()
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Constructor that allows applications to specify which DOM implementation
-   * to be used. Parameters:builder - must not be null. JAXB uses this
-   * DocumentBuilder to create a new element.
-   */
+  /** XXX */
   public W3CDomHandler(DocumentBuilder builder)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Description copied from interface: When a JAXB provider needs to unmarshal
-   * a part of a document into an infoset representation, it first calls this
-   * method to create a object. A JAXB provider will then send a portion of the
-   * XML into the given result. Such a portion always form a subtree of the
-   * whole XML document rooted at an element.
-   */
+  /** XXX */
   public DOMResult createUnmarshaller(ValidationEventHandler errorHandler)
   {
     throw new UnsupportedOperationException();
@@ -80,26 +64,14 @@ public class W3CDomHandler implements DomHandler<org.w3c.dom.Element, DOMResult>
   }
 
 
-  /**
-   * Description copied from interface: Once the portion is sent to the . This
-   * method is called by a JAXB provider to obtain the unmarshalled element
-   * representation. Multiple invocations of this method may return different
-   * objects. This method can be invoked only when the whole sub-tree are fed
-   * to the Result object.
-   */
+  /** XXX */
   public Element getElement(DOMResult r)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Description copied from interface: This method is called when a JAXB
-   * provider needs to marshal an element to XML. If non-null, the returned
-   * Source must contain a whole document rooted at one element, which will
-   * then be weaved into a bigger document that the JAXB provider is
-   * marshalling.
-   */
+  /** XXX */
   public Source marshal(Element element, ValidationEventHandler errorHandler)
   {
     throw new UnsupportedOperationException();

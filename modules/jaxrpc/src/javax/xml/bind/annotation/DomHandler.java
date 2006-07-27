@@ -31,44 +31,18 @@ package javax.xml.bind.annotation;
 import javax.xml.transform.*;
 import javax.xml.bind.*;
 
-/**
- * Converts an element (and its descendants) from/to DOM (or similar)
- * representation. Implementations of this interface will be used in
- * conjunction with XmlAnyElement annotation to map an element of XML into a
- * representation of infoset such as W3C DOM. Implementations hide how a
- * portion of XML is converted into/from such DOM-like representation, allowing
- * JAXB providers to work with arbitrary such library. This interface is
- * intended to be implemented by library writers and consumed by JAXB
- * providers. None of those methods are intended to be called from
- * applications. Since: JAXB2.0 Author: Kohsuke Kawaguchi
- */
+/** XXX */
 public interface DomHandler<ElementT,ResultT extends Result> {
 
-  /**
-   * When a JAXB provider needs to unmarshal a part of a document into an
-   * infoset representation, it first calls this method to create a object. A
-   * JAXB provider will then send a portion of the XML into the given result.
-   * Such a portion always form a subtree of the whole XML document rooted at
-   * an element.
-   */
+  /** XXX */
   abstract ResultT createUnmarshaller(ValidationEventHandler errorHandler);
 
 
-  /**
-   * Once the portion is sent to the . This method is called by a JAXB provider
-   * to obtain the unmarshalled element representation. Multiple invocations of
-   * this method may return different objects. This method can be invoked only
-   * when the whole sub-tree are fed to the Result object.
-   */
+  /** XXX */
   abstract ElementT getElement(ResultT rt);
 
 
-  /**
-   * This method is called when a JAXB provider needs to marshal an element to
-   * XML. If non-null, the returned Source must contain a whole document rooted
-   * at one element, which will then be weaved into a bigger document that the
-   * JAXB provider is marshalling.
-   */
+  /** XXX */
   abstract Source marshal(ElementT n, ValidationEventHandler errorHandler);
 
 }

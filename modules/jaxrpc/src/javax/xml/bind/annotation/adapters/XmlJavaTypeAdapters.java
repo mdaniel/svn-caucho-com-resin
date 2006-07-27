@@ -30,18 +30,7 @@
 package javax.xml.bind.annotation.adapters;
 import java.lang.annotation.*;
 
-/**
- * A container for multiple @XmlJavaTypeAdapter annotations. Multiple
- * annotations of the same type are not allowed on a program element. This
- * annotation therefore serves as a container annotation for multiple
- * XmlJavaTypeAdapter as follows: XmlJavaTypeAdapters ({
- * @XmlJavaTypeAdapter(...),@XmlJavaTypeAdapter(...) }) The
- * @XmlJavaTypeAdapters annnotation is useful for defining XmlJavaTypeAdapter
- * annotations for different types at the package level. See "Package
- * Specification" in javax.xml.bind.package javadoc for additional common
- * information. Since: JAXB2.0 Author: Sekhar Vajjhala, Sun Microsystems, Inc.
- * See Also:XmlJavaTypeAdapter
- */
+/** XXX */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PACKAGE)
 public @interface XmlJavaTypeAdapters {

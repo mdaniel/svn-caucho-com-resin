@@ -30,13 +30,7 @@
 package javax.xml.ws;
 import java.lang.annotation.*;
 
-/**
- * Used to annotate the getPortName() methods of a generated service interface.
- * The information specified in this annotation is sufficient to uniquely
- * identify a wsdl:port element inside a wsdl:service. The latter is determined
- * based on the value of the WebServiceClient annotation on the generated
- * service interface itself. Since: JAX-WS 2.0 See Also:WebServiceClient
- */
+/** XXX */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented

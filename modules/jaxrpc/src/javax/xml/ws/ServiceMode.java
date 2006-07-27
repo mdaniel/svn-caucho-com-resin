@@ -30,11 +30,7 @@
 package javax.xml.ws;
 import java.lang.annotation.*;
 
-/**
- * Used to indicate whether a Provider implementation wishes to work with
- * entire protocol messages or just with protocol message payloads. Since:
- * JAX-WS 2.0
- */
+/** XXX */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited

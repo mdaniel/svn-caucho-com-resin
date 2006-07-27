@@ -30,11 +30,7 @@
 package javax.xml.ws;
 import java.lang.annotation.*;
 
-/**
- * Used to annotate service specific exception classes to customize to the
- * local and namespace name of the fault element and the name of the fault
- * bean. Since: JAX-WS 2.0
- */
+/** XXX */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented

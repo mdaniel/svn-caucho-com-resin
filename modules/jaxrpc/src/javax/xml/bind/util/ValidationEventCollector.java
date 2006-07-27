@@ -30,16 +30,7 @@
 package javax.xml.bind.util;
 import javax.xml.bind.*;
 
-/**
- * ValidationEventHandler implementation that collects all events. To use this
- * class, create a new instance and pass it to the setEventHandler method of
- * the Validator, Unmarshaller, Marshaller class. After the call to validate or
- * unmarshal completes, call the getEvents method to retrieve all the reported
- * errors and warnings. Since: JAXB1.0 Version: $Revision: 1.2 $ Author:
- * Kohsuke Kawaguchi, Sun Microsystems, Inc.Ryan Shoemaker, Sun Microsystems,
- * Inc.Joe Fialli, Sun Microsystems, Inc. See Also:Validator,
- * ValidationEventHandler, ValidationEvent, ValidationEventLocator
- */
+/** XXX */
 public class ValidationEventCollector implements ValidationEventHandler {
   public ValidationEventCollector()
   {
@@ -47,42 +38,28 @@ public class ValidationEventCollector implements ValidationEventHandler {
   }
 
 
-  /**
-   * Return an array of ValidationEvent objects containing a copy of each of
-   * the collected errors and warnings.
-   */
+  /** XXX */
   public ValidationEvent[] getEvents()
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Description copied from interface: Receive notification of a validation
-   * warning or error. The ValidationEvent will have a embedded in it that
-   * indicates where the error or warning occurred. If an unchecked runtime
-   * exception is thrown from this method, the JAXB provider will treat it as
-   * if the method returned false and interrupt the current unmarshal,
-   * validate, or marshal operation.
-   */
+  /** XXX */
   public boolean handleEvent(ValidationEvent event)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Returns true if this event collector contains at least one ValidationEvent.
-   */
+  /** XXX */
   public boolean hasEvents()
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Clear all collected errors and warnings.
-   */
+  /** XXX */
   public void reset()
   {
     throw new UnsupportedOperationException();

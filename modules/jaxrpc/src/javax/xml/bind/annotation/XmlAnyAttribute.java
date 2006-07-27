@@ -29,18 +29,7 @@
 
 package javax.xml.bind.annotation;
 
-/**
- * Maps a JavaBean property to a map of wildcard attributes. Usage The
- * XmlAnyAttribute annotation can be used with the following program elements:
- * JavaBean property non static, non transient field See "Package
- * Specification" in javax.xml.bind.package javadoc for additional common
- * information. While processing attributes to be unmarshalled into a value
- * class, each attribute that is not statically associated with another
- * JavaBean property, via XmlAttribute, is entered into the wildcard attribute
- * map represented by MapQName,Object>. The attribute QName is the map's key.
- * The key's value is the String value of the attribute. Since: JAXB2.0 Author:
- * Kohsuke Kawaguchi, Sun Microsystems, Inc.
- */
+/** XXX */
 public interface XmlAnyAttribute {
 }
 

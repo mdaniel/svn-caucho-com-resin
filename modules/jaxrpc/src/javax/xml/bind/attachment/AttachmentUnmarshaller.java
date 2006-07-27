@@ -30,21 +30,7 @@
 package javax.xml.bind.attachment;
 import javax.activation.*;
 
-/**
- * Enables JAXB unmarshalling of a root document containing optimized binary
- * data formats. This API enables an efficient cooperative processing of
- * optimized binary data formats between a JAXB 2.0 implementation and
- * MIME-based package processor (MTOM/XOP and WS-I AP 1.0). JAXB unmarshals the
- * body of a package, delegating the understanding of the packaging format
- * being used to a MIME-based package processor that implements this abstract
- * class. This abstract class identifies if a package requires XOP processing,
- * isXOPPackage() and provides retrieval of binary content stored as
- * attachments by content-id. Since: JAXB 2.0 Author: Marc Hadley, Kohsuke
- * Kawaguchi, Joseph Fialli See
- * Also:Unmarshaller.setAttachmentUnmarshaller(AttachmentUnmarshaller),
- * XML-binary Optimized Packaging, WS-I Attachments Profile Version 1.0.,
- * Describing Media Content of Binary Data in XML
- */
+/** XXX */
 public abstract class AttachmentUnmarshaller {
   public AttachmentUnmarshaller()
   {
@@ -52,30 +38,15 @@ public abstract class AttachmentUnmarshaller {
   }
 
 
-  /**
-   * Retrieve the attachment identified by content-id, cid, as a byte[] .
-   */
+  /** XXX */
   public abstract byte[] getAttachmentAsByteArray(String cid);
 
 
-  /**
-   * Lookup MIME content by content-id, cid, and return as a DataHandler. The
-   * returned DataHandler instance must be configured to meet the following
-   * required mapping constaint. Required Mappings between MIME and Java Types
-   * MIME Type Java Type DataHandler.getContentType() instanceof
-   * DataHandler.getContent() image/gif java.awt.Image image/jpeg
-   * java.awt.Image text/xml or application/xml javax.xml.transform.Source Note
-   * that it is allowable to support additional mappings.
-   */
+  /** XXX */
   public abstract DataHandler getAttachmentAsDataHandler(String cid);
 
 
-  /**
-   * Read-only property that returns true if JAXB unmarshaller needs to perform
-   * XOP processing. This method returns true when the constraints specified in
-   * Identifying XOP Documents are met. This value must not change during the
-   * unmarshalling process.
-   */
+  /** XXX */
   public boolean isXOPPackage()
   {
     throw new UnsupportedOperationException();

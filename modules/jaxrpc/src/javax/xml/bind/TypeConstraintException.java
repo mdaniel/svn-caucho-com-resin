@@ -30,127 +30,80 @@
 package javax.xml.bind;
 import java.io.*;
 
-/**
- * This exception indicates that a violation of a dynamically checked type
- * constraint was detected. This exception can be thrown by the generated
- * setter methods of the schema derived Java content classes. However, since
- * fail-fast validation is an optional feature for JAXB Providers to support,
- * not all setter methods will throw this exception when a type constraint is
- * violated. If this exception is throw while invoking a fail-fast setter, the
- * value of the property is guaranteed to remain unchanged, as if the setter
- * were never called. Since: JAXB1.0 Version: $Revision: 1.1 $ Author: Ryan
- * Shoemaker, Sun Microsystems, Inc.Joe Fialli, Sun Microsystems, Inc. See
- * Also:ValidationEvent, Serialized Form
- */
+/** XXX */
 public class TypeConstraintException extends RuntimeException {
 
-  /**
-   * Construct a TypeConstraintException with the specified detail message. The
-   * errorCode and linkedException will default to null. Parameters:message - a
-   * description of the exception
-   */
+  /** XXX */
   public TypeConstraintException(String message)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Construct a TypeConstraintException with the specified detail message and
-   * vendor specific errorCode. The linkedException will default to null.
-   * Parameters:message - a description of the exceptionerrorCode - a string
-   * specifying the vendor specific error code
-   */
+  /** XXX */
   public TypeConstraintException(String message, String errorCode)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Construct a TypeConstraintException with the specified detail message,
-   * vendor specific errorCode, and linkedException. Parameters:message - a
-   * description of the exceptionerrorCode - a string specifying the vendor
-   * specific error codeexception - the linked exception
-   */
+  /** XXX */
   public TypeConstraintException(String message, String errorCode, Throwable exception)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Construct a TypeConstraintException with the specified detail message and
-   * linkedException. The errorCode will default to null. Parameters:message -
-   * a description of the exceptionexception - the linked exception
-   */
+  /** XXX */
   public TypeConstraintException(String message, Throwable exception)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Construct a TypeConstraintException with a linkedException. The detail
-   * message and vendor specific errorCode will default to null.
-   * Parameters:exception - the linked exception
-   */
+  /** XXX */
   public TypeConstraintException(Throwable exception)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Get the vendor specific error code
-   */
+  /** XXX */
   public String getErrorCode()
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Get the linked exception
-   */
+  /** XXX */
   public Throwable getLinkedException()
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Prints this TypeConstraintException and its stack trace (including the
-   * stack trace of the linkedException if it is non-null) to System.err.
-   */
+  /** XXX */
   public void printStackTrace()
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Prints this TypeConstraintException and its stack trace (including the
-   * stack trace of the linkedException if it is non-null) to the PrintStream.
-   */
+  /** XXX */
   public void printStackTrace(PrintStream s)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Add a linked Exception.
-   */
+  /** XXX */
   public void setLinkedException(Throwable exception)
   {
     throw new UnsupportedOperationException();
   }
 
 
-  /**
-   * Returns a short description of this TypeConstraintException.
-   */
+  /** XXX */
   public String toString()
   {
     throw new UnsupportedOperationException();

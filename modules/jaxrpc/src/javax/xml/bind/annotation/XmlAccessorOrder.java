@@ -29,26 +29,7 @@
 
 package javax.xml.bind.annotation;
 
-/**
- * Controls the ordering of fields and properties in a class. Usage
- * @XmlAccessorOrder annotation can be used with the following program
- * elements: See "Package Specification" in javax.xml.bind.package javadoc for
- * additional common information. The annotation @XmlAccessorOrder on a package
- * applies to all classes in a package. The following inheritance semantics
- * apply: If there is a @XmlAccessorOrder on a class, then it is used.
- * Otherwise, if a @XmlAccessorOrder exists on one of its super classes, then
- * it is inherited. Otherwise, the @XmlAccessorOrder on a package is inherited.
- * Defaulting Rules: By default, if @XmlAccessorOrder on a package is absent,
- * then the following package level annotation is assumed. By default, if
- * @XmlAccessorOrder on a class is absent and none of super classes is
- * annotated with XmlAccessorOrder , then the following default on the class is
- * assumed: This annotation can be used with the following annotations:
- * XmlType, XmlRootElement, XmlAccessorType, XmlSchema, XmlSchemaType,
- * XmlSchemaTypes, , XmlJavaTypeAdapter. It can also be used with the following
- * annotations at the package level: XmlJavaTypeAdapter. Since: JAXB2.0
- * Version: $Revision: 1.11 $ Author: Sekhar Vajjhala, Sun Microsystems, Inc.
- * See Also:XmlAccessOrder
- */
+/** XXX */
 public interface XmlAccessorOrder {
 }
 
