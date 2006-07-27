@@ -36,7 +36,6 @@ public abstract class JAXBContext {
 
   protected JAXBContext()
   {
-    throw new UnsupportedOperationException();
   }
 
 
@@ -62,7 +61,10 @@ public abstract class JAXBContext {
 
   public abstract Unmarshaller createUnmarshaller() throws JAXBException;
 
-  public abstract Validator createValidator() throws JAXBException;
+  public Validator createValidator() throws JAXBException
+  {
+    throw new UnsupportedOperationException("javax.xml.bind.Validator was removed in JAXB 2.0");
+  }
   
   public void generateSchema(SchemaOutputResolver outputResolver) throws IOException
   {
