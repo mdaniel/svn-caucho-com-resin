@@ -49,6 +49,7 @@ import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BinaryValue;
 import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.DoubleValue;
+import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.BooleanValue;
@@ -56,13 +57,16 @@ import com.caucho.quercus.env.ResourceValue;
 
 import com.caucho.quercus.program.JavaClassDef;
 
+import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.AbstractQuercusModule;
 
 /**
  * JMS functions
  */
-public class JMSQueue extends ResourceValue {
+public class JMSQueue {
+  private static final Logger log = Logger.getLogger(JMSQueue.class.getName());
+
   private Connection _connection;
   private Session _session;
   private MessageConsumer _consumer;
@@ -84,7 +88,15 @@ public class JMSQueue extends ResourceValue {
     _connection.start();
   }
 
-  public boolean send(Value value)
+  public static Value __construct(Env env, String queueName)
+  {
+    JMSQueue queue = JMSModule.message_get_queue(env, queueName, null);
+
+    return new JavaValue(env, queue, 
+                         env.getJavaClassDefinition(JMSQueue.class.getName()));
+  }
+
+  public boolean send(@NotNull Value value)
     throws JMSException
   {
     Message message = null;
@@ -138,7 +150,7 @@ public class JMSQueue extends ResourceValue {
     return true;
   }
 
-  public Value receive(Env env, long timeout)
+  public Value receive(Env env, @Optional("1") long timeout)
     throws JMSException
   {
     Message message = _consumer.receive(timeout);
@@ -186,7 +198,7 @@ public class JMSQueue extends ResourceValue {
     }
   }
 
-  private Value objectToValue(Object object, Env env)
+  private static Value objectToValue(Object object, Env env)
   {
     JavaClassDef def = 
       env.getQuercus().getJavaClassDefinition(object.getClass().getName());

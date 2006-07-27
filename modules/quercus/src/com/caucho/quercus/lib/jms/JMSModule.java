@@ -39,6 +39,8 @@ import javax.naming.*;
 
 import com.caucho.util.L10N;
 
+import com.caucho.config.ConfigException;
+
 import com.caucho.quercus.QuercusModuleException;
 
 import com.caucho.quercus.env.Env;
@@ -55,10 +57,12 @@ import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.ReturnNullAsFalse;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.ModuleStartupListener;
+import com.caucho.quercus.module.ClassImplementation;
 
 /**
  * JMS functions
  */
+@ClassImplementation
 public class JMSModule extends AbstractQuercusModule 
   implements ModuleStartupListener {
 
@@ -96,12 +100,17 @@ public class JMSModule extends AbstractQuercusModule
     } catch (Exception e) {
       log.fine(e.toString());
     }
+
+    try {
+      env.getQuercus().addJavaClass("JMSQueue", 
+                                    com.caucho.quercus.lib.jms.JMSQueue.class);
+    } catch (ConfigException e) {
+      env.warning(L.l("JMSQueue unavailable: {0}", e));
+    }
   }
 
-  @ReturnNullAsFalse
-  public static JMSQueue message_get_queue(Env env, String queueName, 
-                                           @Optional ConnectionFactory 
-                                           connectionFactory)
+  static JMSQueue message_get_queue(Env env, String queueName, 
+                                    ConnectionFactory connectionFactory)
   {
     if (connectionFactory == null)
       connectionFactory = _connectionFactory;
@@ -117,37 +126,6 @@ public class JMSModule extends AbstractQuercusModule
       env.warning(e);
 
       return null;
-    }
-  }
-
-  /**
-   * Send a message to a Queue.
-   */
-  public static boolean message_send(Env env, 
-                                     @NotNull JMSQueue queue, Value message)
-  {
-    try {
-      return queue.send(message);
-    } catch (JMSException e) {
-      env.warning(e);
-
-      return false;
-    }
-  }
-
-  /**
-   * Receive a message from a queue or topic.  Non-blocking.
-   */
-  public static Value message_receive(Env env, 
-                                      @NotNull JMSQueue queue,
-                                      @Optional("1") int timeout)
-  {
-    try {
-      return queue.receive(env, timeout);
-    } catch (JMSException e) {
-      env.warning(e);
-
-      return BooleanValue.FALSE;
     }
   }
 
