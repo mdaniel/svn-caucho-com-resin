@@ -4,6 +4,7 @@
 
     <item link="listener/index.xtp" title="JCA Listener"/>
     
-    <item link="php/index.xtp" title="JMS in PHP"/>
+    <item link="php-queue-send/index.xtp" title="JMS in Quercus - Sending messages"/>
+    <item link="php-queue-receive/index.xtp" title="JMS in Quercus - Receiving messages"/>
   </item>
 </navigation>

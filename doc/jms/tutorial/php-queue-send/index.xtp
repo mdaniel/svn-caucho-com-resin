@@ -1,0 +1,113 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>JMS Messaging in Quercus - Sending messages</title>
+  <type>tutorial</type>
+  <tutorial-startpage>send-message.php</tutorial-startpage>
+</header>
+
+<body>
+<summary localtoc="3" />
+
+<section title="Files in this tutorial">
+<deftable>
+<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
+    <td>resin-web.xml configuration</td>
+</tr>
+<tr><td><viewfile-link file="send-message.php"/></td>
+    <td>PHP script sending the message.</td>
+</tr>
+<tr><td><viewfile-link file="WEB-INF/classes/example/JMSLogger.java"/></td>
+    <td>Java listener receiving the message.</td>
+</tr>
+<tr><td><viewfile-link file="WEB-INF/jmslogger.ejb"/></td>
+    <td>EJB Message bean configuration.</td>
+</tr>
+</deftable>
+</section>
+
+<section title="Using JMS in Quercus">
+
+<p>
+Quercus offers a simplified messaging interface built upon JMS.  This 
+functionality makes it possible to send and receive messages using either
+the Resin JMS implementation or any other messaging service with a JMS
+implementation.  Many features of JMS are designed for message-driven
+services which make sense in the Java world, but are not appropriate for
+PHP.  This tutorial focuses on sending messages.
+</p>
+
+</section>
+
+<section title="Sending JMS messages from a PHP script">
+
+<p>
+In this example, the script checks a POST variable "message" and if
+it is set, sends the value of that variable to a JMS queue.  A Message
+Driven Bean (MDB) receives these messages and records them.  The record
+is displayed by a servlet.
+</p>
+
+<example language="php">
+if (array_key_exists("message", $_POST)) {
+  $queue = new JMSQueue("jms/Queue");
+
+  if (! $queue) {
+    echo "Unable to get message queue!\n";
+  } else {
+    if ($queue->send($_POST["message"]) == TRUE) {
+      echo "Successfully sent message '" . $_POST["message"] . "'";
+    } else {
+      echo "Unable to send message '" . $_POST["message"] . "'";
+    }
+  }
+}
+</example>
+
+<p>
+The programming model of the Quercus JMS interface is first to create
+a connection to a queue by instantiating a <code>JMSQueue</code> object.
+To create a <code>JMSQueue</code> object, pass in the JNDI name of the
+JMS queue to be used.  <code>JMSQueue</code> objects have two methods:
+<code>send()</code> and <code>receive()</code>.  This example shows
+that using <code>send()</code> is as simple as passing in a PHP value.
+</p>
+
+</section>
+
+<section title="Configuring JMS for PHP and Java">
+
+<p>
+JMS requires that two resources be set up: A
+<code>ConnectionFactory</code> and a <code>Queue</code>.  Both are
+configured in <viewfile-link file="WEB-INF/resin-web.xml"/>.
+The <code>ConnectionFactory</code> is used to connect to all the
+<code>Queue</code>s and only one of them needs to be set up.  The default
+JNDI name is <code>jms/ConnectionFactory</code> - Quercus automatically
+uses this connection factory.  Another connection factory may be used by
+setting the PHP ini variable <code>jms.connection_factory</code>.
+</p>
+
+<example>
+  &lt;resource jndi-name="jms/ConnectionFactory"
+    type='com.caucho.jms.ConnectionFactoryImpl' />
+</example>
+
+<p>
+The example above uses the queue <code>jms/Queue</code>.
+</p>
+
+<example>
+  &lt;resource jndi-name="jms/Queue"
+    type='com.caucho.jms.memory.MemoryQueue' />
+</example>
+
+<p>
+The complete configuration is in 
+<viewfile-link file="WEB-INF/resin-web.xml"/>.
+</p>
+
+</section>
+
+</body>
+</document>

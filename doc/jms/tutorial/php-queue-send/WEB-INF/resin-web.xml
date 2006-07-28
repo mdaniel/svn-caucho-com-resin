@@ -7,27 +7,15 @@
   <!--
      - JMS
     -->
-  <resource jndi-name="jms/ConnectionFactory"
+  <resource jndi-name='jms/ConnectionFactory'
     type='com.caucho.jms.ConnectionFactoryImpl' />
 
-  <!--
-     - Example 1
-    -->
-  <resource jndi-name="jms/Queue"
-    type='com.caucho.jms.memory.MemoryQueue' />
-
-  <!--
-     - Example 2
-    -->
-  <resource jndi-name="jms/AdQueue"
-    type='com.caucho.jms.memory.MemoryQueue' />
-
-  <resource jndi-name="jms/ControlQueue"
+  <resource jndi-name='jms/Queue'
     type='com.caucho.jms.memory.MemoryQueue' />
 
   <!--
      - EJB SERVER
-     - see also message.ejb
+     - see also jmslogger.ejb
     -->
   <ejb-server config-directory="WEB-INF">
     <jms-connection-factory>jms/ConnectionFactory</jms-connection-factory>
