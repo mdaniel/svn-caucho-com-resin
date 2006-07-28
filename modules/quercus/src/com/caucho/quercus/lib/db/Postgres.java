@@ -45,6 +45,8 @@ import com.caucho.util.L10N;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringBuilderValue;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
 
 import com.caucho.quercus.module.Optional;
@@ -221,6 +223,60 @@ public class Postgres extends JdbcConnectionResource {
   protected boolean keepStatementOpen()
   {
     return true;
+  }
+
+  /**
+   * Escape the given string for SQL statements.
+   *
+   * @param str a string
+   * @return the string escaped for SQL statements
+   */
+  protected StringBuilderValue realEscapeString(StringValue str)
+  {
+    StringBuilderValue buf = new StringBuilderValue(str.length());
+
+    final int strLength = str.length();
+
+    for (int i = 0; i < strLength; i++) {
+      char c = str.charAt(i);
+
+      switch (c) {
+      case '\u0000':
+        buf.append('\\');
+        buf.append('\u0000');
+        break;
+      case '\n':
+        buf.append('\\');
+        buf.append('n');
+        break;
+      case '\r':
+        buf.append('\\');
+        buf.append('r');
+        break;
+      case '\\':
+        buf.append('\\');
+        buf.append('\\');
+        break;
+      case '\'':
+        buf.append('\'');
+        buf.append('\'');
+        break;
+      case '"':
+        // pg_escape_string does nothing about it.
+        // buf.append('\\');
+        buf.append('\"');
+        break;
+      case '\032':
+        buf.append('\\');
+        buf.append('Z');
+        break;
+      default:
+        buf.append(c);
+        break;
+      }
+    }
+
+    return buf;
   }
 
   /**
