@@ -726,6 +726,48 @@ abstract public class StringValue extends Value implements CharSequence {
   }
 
   /**
+   * Returns the last index of the match string, starting from the tail.
+   */
+  public int lastIndexOf(CharSequence match)
+  {
+    return lastIndexOf(match, Integer.MAX_VALUE);
+  }
+
+  /**
+   * Returns the last index of the match string, starting from the tail.
+   */
+  public int lastIndexOf(CharSequence match, int tail)
+  {
+    int length = length();
+    int matchLength = match.length();
+
+    if (matchLength <= 0)
+      return -1;
+    if (tail < 0)
+      return -1;
+
+    if (length < tail)
+      tail = length - 1;
+
+    char first = match.charAt(0);
+
+    loop:
+    for (; tail >= 0; tail--) {
+      if (charAt(tail) != first)
+        continue;
+
+      for (int i = 1; i < matchLength; i++) {
+        if (charAt(tail + i) != match.charAt(i))
+	      continue loop;
+      }
+
+      return tail;
+    }
+
+    return -1;
+  }
+
+  /**
    * Returns a StringValue substring.
    */
   public StringValue substring(int head)

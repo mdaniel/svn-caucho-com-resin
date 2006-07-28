@@ -29,17 +29,50 @@
 
 package com.caucho.quercus.lib.i18n;
 
+import java.io.InputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.Enumeration;
+
+import javax.mail.internet.MimeUtility;
+import javax.mail.MessagingException;
+import javax.mail.internet.HeaderTokenizer;
+import javax.mail.Header;
+import javax.mail.internet.InternetHeaders;
 
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringBuilderValue;
+import com.caucho.quercus.env.StringInputStream;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.TempBufferStringValue;
+import com.caucho.quercus.env.UnsetValue;
+import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.NotNull;
+
+import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.UnimplementedException;
+
+import com.caucho.util.L10N;
+import com.caucho.util.Base64;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.StreamImpl;
+import com.caucho.vfs.TempCharBuffer;
+import com.caucho.vfs.TempStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Unicode handling.  Also includes iconv, etc.
@@ -48,53 +81,20 @@ public class UnicodeModule extends AbstractQuercusModule {
   private static final HashMap<String,StringValue> _iniMap
     = new HashMap<String,StringValue>();
 
+  private static final Logger log =
+                       Logger.getLogger(UnicodeModule.class.getName());
+  private static final L10N L = new L10N(UnicodeModule.class);
+
   public static final int U_INVALID_STOP = 0;
   public static final int U_INVALID_SKIP = 1;
   public static final int U_INVALID_SUBSTITUTE = 2;
   public static final int U_INVALID_ESCAPE = 3;
 
-  /**
-   * Returns the current encoding.
-   */
-  public static ArrayValue iconv_get_encoding(Env env)
-  {
-    ArrayValueImpl result = new ArrayValueImpl();
-
-    result.put(new StringValueImpl("input_encoding"),
-	       env.getHttpInputEncoding());
-    result.put(new StringValueImpl("output_encoding"),
-	       env.getOutputEncoding());
-    result.put(new StringValueImpl("runtime_encoding"),
-	       env.getRuntimeEncoding());
-
-    return result;
-  }
-
-  /**
-   * Sets the current encoding.
-   */
-  public static boolean iconv_set_encoding(Env env,
-					   String type,
-					   StringValue charset)
-  {
-    if ("input_encoding".equals(type)) {
-      env.setIni("unicode.http_input_encoding", charset);
-      
-      return true;
-    }
-    else if ("output_encoding".equals(type)) {
-      env.setIni("unicode.output_encoding", charset);
-      
-      return true;
-    }
-    else if ("internal_encoding".equals(type)) {
-      env.setIni("unicode.runtimet_encoding", charset);
-      
-      return true;
-    }
-    else
-      return false;
-  }
+  public static final String ICONV_IMPL = "QuercusIconv";
+  public static final String ICONV_VERSION = "1.0";
+  
+  public static final int ICONV_MIME_DECODE_STRICT = 1;
+  public static final int ICONV_MIME_DECODE_CONTINUE_ON_ERROR = 2;
 
   /**
    * Returns the default quercus.ini values.
@@ -102,6 +102,583 @@ public class UnicodeModule extends AbstractQuercusModule {
   public Map<String,StringValue> getDefaultIni()
   {
     return _iniMap;
+  }
+
+  /**
+   * Returns the current encoding.
+   *
+   * @param env
+   * @param type setting to return
+   * @return iconv environment settings
+   */
+  public static Value iconv_get_encoding(Env env,
+                       @Optional("all") String type)
+  {
+    type = type.toLowerCase();
+
+    if ("all".equals(type)) {
+      ArrayValue array = new ArrayValueImpl();
+      array.put("input_encoding",
+          env.getIniString("iconv.input_encoding"));
+      array.put("output_encoding",
+          env.getIniString("iconv.output_encoding"));
+      array.put("internal_encoding",
+          env.getIniString("iconv.internal_encoding"));
+      return array;
+    }
+
+    if ("input_encoding".equals(type))
+      return new StringValueImpl(env.getIniString("iconv.input_encoding"));
+    else if ("output_encoding".equals(type))
+      return new StringValueImpl(env.getIniString("iconv.output_encoding"));
+    else if ("internal_encoding".equals(type))
+      return new StringValueImpl(env.getIniString("iconv.internal_encoding"));
+
+    return BooleanValue.FALSE;
+  }
+
+  /**
+   * Decodes all the headers and place them in an array.
+   * Use iconv.internal_encoding.
+   * XXX: mode, line-length, line-break-chars
+   *
+   * @param env
+   * @param encoded_headers
+   * @param mode controls error recovery
+   * @param charset
+   */
+  public static Value iconv_mime_decode_headers(Env env,
+                       StringValue encoded_headers,
+                       @Optional("1") int mode,
+                       @Optional() String charset)
+  {
+    if (charset.length() == 0)
+      charset = env.getIniString("iconv.internal_encoding");
+
+    ArrayValue headers = new ArrayValueImpl();
+
+    try {
+      Enumeration<Header> enumeration = 
+          new InternetHeaders(encoded_headers.toInputStream()).getAllHeaders();
+
+      while (enumeration.hasMoreElements()) {
+        Header header = enumeration.nextElement();
+        StringValue name = iconvEncode(
+            decodeMime(header.getName()), charset);
+
+        StringValue value = iconvEncode(
+            decodeMime(header.getValue()), charset);
+
+        Value val;
+        if ((val = headers.containsKey(name)) == null) {
+          headers.put(name, value);
+          continue;
+        }
+
+        ArrayValue inner;
+        if (val.isArray())
+          inner = val.toArrayValue(env);
+        else {
+          inner = new ArrayValueImpl();
+          inner.put(val);
+        }
+
+        inner.put(value);
+        headers.put(name, inner);
+      }
+
+      return headers;
+
+    } catch (MessagingException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(L.l(e.getMessage()));
+
+    } catch (UnsupportedEncodingException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(L.l(e.getMessage()));
+    }
+
+    return BooleanValue.FALSE;
+  }
+
+  /**
+   * Uses iconv.internal_encoding.
+   *
+   * XXX: mode ignored
+   *
+   * @param env
+   * @param encoded_header
+   * @param mode controls error recovery
+   * @param charset to encode resultant 
+   */
+  public static Value iconv_mime_decode(Env env,
+                       StringValue encoded_header,
+                       @Optional("1") int mode,
+                       @Optional("") String charset)
+  {
+    if (charset.length() == 0)
+      charset = env.getIniString("iconv.internal_encoding");
+
+    try {
+      Enumeration<String> enumeration = new InternetHeaders(
+          encoded_header.toInputStream()).getAllHeaderLines();
+
+      if (!enumeration.hasMoreElements()) {
+        env.warning(L.l("Error parsing header."));
+        return BooleanValue.FALSE;
+      }
+
+      return iconvEncode(decodeMime(enumeration.nextElement()), charset); 
+
+    } catch (MessagingException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(L.l(e.getMessage()));
+
+    } catch (UnsupportedEncodingException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(L.l(e.getMessage()));
+    }
+
+    return BooleanValue.FALSE;
+  }
+
+  /**
+   * Encodes a MIME header.
+   *
+   * XXX: preferences
+   *
+   * @param field_name header field name
+   * @param field_value header field value
+   * @param preferences
+   */
+  public static Value iconv_mime_encode(Env env,
+                       StringValue field_name,
+                       StringValue field_value,
+                       @Optional() ArrayValue preferences)
+  {
+    try {
+      String scheme = "B";
+      String lineBreakChars = "\r\n";
+      String inputCharset = env.getIniString("iconv.internal_encoding");
+      String outputCharset = inputCharset;
+      int lineLength = 76;
+
+      if (preferences != null) {
+        Value tmp = new StringValueImpl("scheme");
+        if ((tmp = preferences.get(tmp)) != UnsetValue.UNSET)
+          scheme = tmp.toString();
+
+        tmp = new StringValueImpl("line-break-chars");
+        if ((tmp = preferences.get(tmp)) != UnsetValue.UNSET)
+          lineBreakChars = tmp.toString();
+
+        tmp = new StringValueImpl("input-charset");
+        if ((tmp = preferences.get(tmp)) != UnsetValue.UNSET)
+          inputCharset = tmp.toString();
+
+        tmp = new StringValueImpl("output-charset");
+        if ((tmp = preferences.get(tmp)) != UnsetValue.UNSET)
+          outputCharset = tmp.toString();
+
+        tmp = new StringValueImpl("line-length");
+        if ((tmp = preferences.get(tmp)) != UnsetValue.UNSET) {
+        if (tmp.isLongConvertible())
+          lineLength = (int)tmp.toLong();
+        }
+      }
+
+      if (lineLength != 76 || ! "\r\n".equals(lineBreakChars))
+        throw new UnimplementedException("Specific options");
+
+      field_name = iconvDecode(field_name.toInputStream(), inputCharset);
+      field_value = iconvDecode(field_value.toInputStream(), inputCharset);
+
+      return encodeMime(env, field_name, field_value, lineBreakChars,
+          outputCharset, scheme, lineLength);
+
+    } catch (UnsupportedEncodingException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(L.l(e.getMessage()));
+
+      return BooleanValue.FALSE;
+    }
+  }
+
+  /**
+   * Sets the current encoding.
+   * @param env
+   * @param type
+   * @param charset
+   */
+  public static BooleanValue iconv_set_encoding(Env env,
+                       String type,
+                       StringValue charset)
+  {
+    type = type.toLowerCase();
+
+    if ("input_encoding".equals(type)) {
+      env.setIni("iconv.input_encoding", charset);
+      return BooleanValue.TRUE;
+    }
+    else if ("output_encoding".equals(type)) {
+      env.setIni("iconv.output_encoding", charset);
+      return BooleanValue.TRUE;
+    }
+    else if ("internal_encoding".equals(type)) {
+      env.setIni("iconv.internal_encoding", charset);
+      return BooleanValue.TRUE;
+    }
+
+    return BooleanValue.FALSE;
+  }
+
+  /**
+   * Returns the length of the decoded string.
+   * Uses iconv.internal_encoding.
+   *
+   * @param env
+   * @param str
+   * @param charset
+   */
+  public static Value iconv_strlen(Env env,
+                       StringValue str,
+                       @Optional("") String charset)
+  {
+    if (charset.length() == 0 )
+      charset = env.getIniString("iconv.internal_encoding");
+
+    try {
+      return new LongValue(iconvStrLength(str, charset));
+
+    } catch (UnsupportedEncodingException e) {
+      log.log(Level.FINE, "Cannot convert from " + charset, e);
+      env.warning(L.l("Cannot convert from " + charset));
+
+      return BooleanValue.FALSE;
+    }
+  }
+
+  /**
+   * Returns the first occurence of the substring in the haystack.
+   * Uses iconv.internal_encoding.
+   *
+   * @param env
+   * @param haystack
+   * @param needle
+   * @param offset
+   * @param charset
+   * @return first occurence of needle in haystack, FALSE otherwise
+   */
+  public static Value iconv_strpos(Env env,
+                       StringValue haystack,
+                       StringValue needle,
+                       @Optional("0") int offset,
+                       @Optional("") String charset)
+  {
+    if (charset.length() == 0)
+      charset = env.getIniString("iconv.internal_encoding");
+
+    try {
+      needle = iconvDecode(needle.toInputStream(), charset);
+      haystack = iconvDecode(haystack.toInputStream(), charset);
+
+      int index = haystack.indexOf(needle, offset);
+      if (index < 0)
+        return BooleanValue.FALSE;
+
+      return new LongValue(index);
+
+    } catch (UnsupportedEncodingException e) {
+      String error = "Cannot convert from " + charset;
+      log.log(Level.FINE, error, e);
+      env.warning(L.l(error));
+
+      return BooleanValue.FALSE;
+    }
+  }
+
+  /**
+   * Returns the last occurence of the substring in the haystack.
+   * Uses iconv.internal_encoding.
+   *
+   * @param env
+   * @param haystack
+   * @param needle
+   * @param charset encoding of StringValue arguments
+   *
+   * @return last occurence of needle in haystack, FALSE otherwise
+   */
+  public static Value iconv_strrpos(Env env,
+                       StringValue haystack,
+                       StringValue needle,
+                       @Optional("") String charset)
+  {
+    if (charset.length() == 0)
+      charset = env.getIniString("iconv.internal_encoding");
+
+    try {
+      needle = iconvDecode(needle.toInputStream(), charset);
+      haystack = iconvDecode(haystack.toInputStream(), charset);
+
+      int index = haystack.lastIndexOf(needle);
+      if (index < 0)
+        return BooleanValue.FALSE;
+
+      return new LongValue(index);
+
+    } catch (UnsupportedEncodingException e) {
+      String error = "Cannot convert from " + charset;
+      log.log(Level.FINE, error, e);
+      env.warning(L.l(error));
+      
+      return BooleanValue.FALSE;
+    }
+  }
+
+  /**
+   * Uses iconv.internal_encoding.
+   *
+   * @param env
+   * @param str encoded string
+   * @param offset of str after decoding
+   * @param length of str after decoding
+   * @param charset encoding of StringValue argument
+   * @return substring of argument string.
+   *
+   */
+  public static Value iconv_substr(Env env,
+                       StringValue str,
+                       int offset,
+                       @Optional() int length,
+                       @Optional() String charset)
+  {
+    try {
+      if (charset == null)
+        charset = env.getIniString("iconv.internal_encoding");
+
+      int strlen = (int)iconvStrLength(str, charset);
+
+      if (offset < 0)
+        offset = strlen - offset;
+      if (length < 0)
+        length = (strlen - length) - offset;
+
+      if (offset < 0 || length < 0)
+        return StringValue.EMPTY;
+
+      return iconvDecodeEncode(charset, charset,
+          offset, length, str.toInputStream());
+
+    } catch (UnsupportedEncodingException e) {
+      String error = "Cannot convert from " + charset;
+      log.log(Level.FINE, error, e);
+      env.warning(L.l(error));
+
+      return BooleanValue.FALSE;
+    }
+  }
+
+  /**
+   * Returns encoded string from decoded argument string.
+   *
+   * @param env
+   * @param in_charset charset to decode from
+   * @param out_charset charset to decode to
+   * @param str to decode and encode
+   */
+  public static Value iconv(Env env,
+                       String in_charset,
+                       String out_charset,
+                       StringValue str)
+  {
+    try {
+      return iconvDecodeEncode(in_charset, out_charset,
+          0, Integer.MAX_VALUE, str.toInputStream());
+
+    } catch (UnsupportedEncodingException e) {
+      String error = "Cannot convert from " + in_charset + " to " + out_charset;
+      log.log(Level.FINE, error, e);
+      env.warning(L.l(error));
+
+      return BooleanValue.FALSE;
+    }
+  }
+
+  public static StringValue ob_iconv_handler(
+                       StringValue contents,
+                       int status)
+  {
+    throw new UnimplementedException();
+  }
+
+  /**
+   * Returns the length of the string after decoding.
+   */
+  private static int iconvStrLength(StringValue str, String charset)
+    throws UnsupportedEncodingException
+  {
+    try {
+      int length = 0;
+      ReadStream in = getReadEncoding(str.toInputStream(), charset);
+
+      while (in.readChar() >= 0) {
+        length++;
+      }
+
+      return length;
+
+    } catch (IOException e) {
+      throw new QuercusModuleException();
+    }
+  }
+
+  /**
+   * Returns decoded Mime header/field.
+   */
+  private static String decodeMime(String word)
+    throws UnsupportedEncodingException
+  {
+    return MimeUtility.unfold(MimeUtility.decodeText(word));
+  }
+
+  /**
+   * Returns an encoded Mime header.
+   */
+  private static Value encodeMime(Env env,
+                       StringValue name,
+                       StringValue value,
+                       String lineBreakChars,
+                       String charset,
+                       String encoding,
+                       int lineLength)
+    throws UnsupportedEncodingException
+  {
+    StringBuilderValue sb = new StringBuilderValue();
+    sb.append(name);
+    sb.append(':');
+    sb.append(' ');
+
+    String word = MimeUtility.encodeWord(value.toString(), charset, encoding);
+    sb.append(MimeUtility.fold(sb.length(), word));
+
+    return sb;
+  }
+
+  /**
+   * Decodes to specified charset.
+   */
+  private static StringValue iconvDecode(InputStream is, String charset)
+    throws UnsupportedEncodingException
+  {
+    StringBuilderValue sb = new StringBuilderValue();
+
+    TempCharBuffer tb = TempCharBuffer.allocate();
+    char[] charBuf = tb.getBuffer();
+
+    try {
+      ReadStream in = getReadEncoding(is, charset);
+
+      int sublen;
+      while ((sublen = in.read(charBuf, 0, charBuf.length)) >= 0) {
+        sb.append(charBuf, 0, sublen);
+      }
+
+    } catch (IOException e) {
+      throw new QuercusModuleException(e.getMessage());
+
+    } finally {
+      TempCharBuffer.free(tb);
+    }
+
+    return sb;
+  }
+
+  /**
+   * Encodes chars to specified charset.
+   */
+  private static StringValue iconvEncode(CharSequence chars, String charset)
+    throws UnsupportedEncodingException
+  {
+    TempStream ts = new TempStream();
+
+    try {
+      WriteStream out = getWriteEncoding(ts, charset);
+
+      int length = chars.length();
+      for (int i = 0; i < length; i++) {
+        out.print(chars.charAt(i));
+      }
+
+      out.flush();
+      return new TempBufferStringValue(ts.getHead());
+
+    } catch (IOException e) {
+      throw new QuercusModuleException(e.getMessage());
+    }
+  }
+
+  /**
+   * Decodes and encodes to specified charsets at the same time.
+   */
+  private static Value iconvDecodeEncode(String in_charset,
+                       String out_charset,
+                       int offset,
+                       int length,
+                       InputStream is)
+    throws UnsupportedEncodingException
+  {
+    TempCharBuffer tb = TempCharBuffer.allocate();
+    char[] charBuf = tb.getBuffer();
+
+    TempStream ts = new TempStream();
+
+    try {
+      ReadStream in = getReadEncoding(is, in_charset);
+      WriteStream out = getWriteEncoding(ts, out_charset);
+
+      int sublen;
+      
+      while (offset > 0) {
+        if (in.readChar() < 0)
+          break;
+        offset--;
+      }
+
+      while (length > 0 && (sublen = in.read(charBuf, 0, charBuf.length)) >= 0) {
+        sublen = Math.min(length, sublen);
+
+        out.print(charBuf, 0, sublen);
+        length -= sublen;
+      }
+
+      out.flush();
+      return new TempBufferStringValue(ts.getHead());
+
+    } catch (IOException e) {
+      throw new QuercusModuleException(e.getMessage());
+    }
+
+    finally {
+      TempCharBuffer.free(tb);
+    }
+  }
+
+  private static ReadStream getReadEncoding(InputStream is, String charset)
+    throws UnsupportedEncodingException
+  {
+    ReadStream rs = Vfs.openRead(is);
+    rs.setEncoding(charset);
+
+    return rs;
+  }
+
+  private static WriteStream getWriteEncoding(StreamImpl source, String charset)
+    throws UnsupportedEncodingException
+  {
+    WriteStream ws = new WriteStream(source);
+    ws.setEncoding(charset);
+
+    return ws;
   }
 
   static {
@@ -113,6 +690,11 @@ public class UnicodeModule extends AbstractQuercusModule {
     addIni(_iniMap, "unicode.runtime_encoding", null, PHP_INI_ALL);
     addIni(_iniMap, "unicode.script_encoding", null, PHP_INI_ALL);
     addIni(_iniMap, "unicode.semantics", "on", PHP_INI_ALL);
+
+    addIni(_iniMap, "iconv.input_encoding", "ISO-8859-1", PHP_INI_ALL);
+    addIni(_iniMap, "iconv.output_encoding", "ISO-8859-1", PHP_INI_ALL);
+    addIni(_iniMap, "iconv.internal_encoding", "ISO-8859-1", PHP_INI_ALL);
   }
 }
 
+// XXX: "//TRANSLIT" and "//IGNORE" charset suffixes
