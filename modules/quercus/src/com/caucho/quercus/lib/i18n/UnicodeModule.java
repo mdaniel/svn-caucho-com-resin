@@ -449,19 +449,19 @@ public class UnicodeModule extends AbstractQuercusModule {
   public static Value iconv_substr(Env env,
                        StringValue str,
                        int offset,
-                       @Optional() int length,
-                       @Optional() String charset)
+                       @Optional("2147483647") int length,
+                       @Optional("") String charset)
   {
     try {
-      if (charset == null)
+      if (charset.length() == 0)
         charset = env.getIniString("iconv.internal_encoding");
 
       int strlen = (int)iconvStrLength(str, charset);
 
       if (offset < 0)
-        offset = strlen - offset;
+        offset = strlen + offset;
       if (length < 0)
-        length = (strlen - length) - offset;
+        length = (strlen + length) - offset;
 
       if (offset < 0 || length < 0)
         return StringValue.EMPTY;
@@ -528,7 +528,7 @@ public class UnicodeModule extends AbstractQuercusModule {
       return length;
 
     } catch (IOException e) {
-      throw new QuercusModuleException();
+      throw new UnsupportedEncodingException(e.getMessage());
     }
   }
 
