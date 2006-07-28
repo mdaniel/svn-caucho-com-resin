@@ -746,8 +746,8 @@ abstract public class StringValue extends Value implements CharSequence {
     if (tail < 0)
       return -1;
 
-    if (length < tail)
-      tail = length - 1;
+    if (tail > length - matchLength)
+      tail = length - matchLength;
 
     char first = match.charAt(0);
 
