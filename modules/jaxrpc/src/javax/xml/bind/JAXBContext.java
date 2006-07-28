@@ -31,8 +31,12 @@ package javax.xml.bind;
 import java.io.*;
 import org.w3c.dom.*;
 import java.util.*;
+import java.lang.reflect.*;
+
 public abstract class JAXBContext {
-  public static final String JAXB_CONTEXT_FACTORY="javax.xml.bind.context.factory";
+
+  public static final String JAXB_CONTEXT_FACTORY =
+    "javax.xml.bind.context.factory";
 
   protected JAXBContext()
   {
@@ -58,7 +62,6 @@ public abstract class JAXBContext {
 
   public abstract Marshaller createMarshaller() throws JAXBException;
 
-
   public abstract Unmarshaller createUnmarshaller() throws JAXBException;
 
   public Validator createValidator() throws JAXBException
@@ -74,24 +77,43 @@ public abstract class JAXBContext {
   public static JAXBContext newInstance(Class... classesToBeBound)
       throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    return newInstance(classesToBeBound,
+		       null);
   }
 
   public static JAXBContext newInstance(Class[] classesToBeBound,
                                         Map<String,?> properties)
       throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    try {
+      Class c = Class.forName("com.caucho.jaxb.JAXBContextImpl");
+      Constructor con = c.getConstructor(new Class[] {
+	Class[].class,
+	Map.class
+      });
+      return (JAXBContext)
+	con.newInstance(new Object[] {
+	  classesToBeBound,
+	  properties
+	});
+    }
+    catch (Exception e) {
+      throw new JAXBException(e);
+    }
   }
 
   public static JAXBContext newInstance(String contextPath) throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    return newInstance(contextPath,
+		       Thread.currentThread().getContextClassLoader(),
+		       null);
   }
 
-  public static JAXBContext newInstance(String contextPath, ClassLoader classLoader) throws JAXBException
+  public static JAXBContext newInstance(String contextPath,
+					ClassLoader classLoader)
+    throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    return newInstance(contextPath, classLoader, null);
   }
 
   public static JAXBContext newInstance(String contextPath,
@@ -99,7 +121,23 @@ public abstract class JAXBContext {
                                         Map<String,?> properties)
       throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    try {
+      Class c = Class.forName("com.caucho.jaxb.JAXBContextImpl");
+      Constructor con = c.getConstructor(new Class[] {
+	String.class,
+	ClassLoader.class,
+	Map.class
+      });
+      return (JAXBContext)
+	con.newInstance(new Object[] {
+	  contextPath,
+	  classLoader,
+	  properties
+	});
+    }
+    catch (Exception e) {
+      throw new JAXBException(e);
+    }
   }
 
 }

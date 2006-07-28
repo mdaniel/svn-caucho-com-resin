@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,27 +19,49 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
-*
+ *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Adam Megacz
  */
 
-package com.caucho;
+package com.caucho.jaxb.marshall;
 
-final public class Version {
-  public static final String COPYRIGHT =
-    "Copyright(c) 1998-2006 Caucho Technology.  All rights reserved.";
+import java.io.*;
 
-  public static String FULL_VERSION = "Resin-3.0.s060727 (built Thu, 27 Jul 2006 05:10:22 PDT)";
-  public static String VERSION = "3.0.s060727";
-  public static String VERSION_DATE = "20060727T051022";
-
-  public static void main(String []argv)
+/**
+ * Exception while marshalling.
+ */
+public class MarshallException extends IOException {
+  private Throwable _cause;
+  
+  public MarshallException()
   {
-    System.out.println(FULL_VERSION);
-    System.out.println(COPYRIGHT);
+  }
+  
+  public MarshallException(String msg)
+  {
+    super(msg);
+  }
+  
+  public MarshallException(Throwable cause)
+  {
+    _cause = cause;
+  }
+  
+  public MarshallException(String msg, Throwable cause)
+  {
+    super(msg);
+
+    _cause = cause;
+  }
+
+  public Throwable getCause()
+  {
+    return _cause;
   }
 }
+
+

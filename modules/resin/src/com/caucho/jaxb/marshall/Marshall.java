@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,7 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
-*
+ *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -27,19 +27,36 @@
  * @author Scott Ferguson
  */
 
-package com.caucho;
+package com.caucho.jaxb.marshall;
+import javax.xml.namespace.*;
+import javax.xml.stream.*;
+import java.util.*;
 
-final public class Version {
-  public static final String COPYRIGHT =
-    "Copyright(c) 1998-2006 Caucho Technology.  All rights reserved.";
+import java.io.*;
 
-  public static String FULL_VERSION = "Resin-3.0.s060727 (built Thu, 27 Jul 2006 05:10:22 PDT)";
-  public static String VERSION = "3.0.s060727";
-  public static String VERSION_DATE = "20060727T051022";
+import javax.xml.stream.*;
 
-  public static void main(String []argv)
+/**
+ * Marshalls data to and from soap.
+ */
+public class Marshall {
+  /**
+   * Deserializes the data from the input.
+   */
+  public Object deserialize(XMLStreamReader in)
+      throws IOException, XMLStreamException
   {
-    System.out.println(FULL_VERSION);
-    System.out.println(COPYRIGHT);
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Serializes the data to the result
+   */
+  public void serialize(XMLStreamWriter out, Object obj, QName fieldName)
+    throws IOException, XMLStreamException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 }
+
+

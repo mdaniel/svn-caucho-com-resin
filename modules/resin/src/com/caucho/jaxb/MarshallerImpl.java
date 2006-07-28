@@ -32,14 +32,18 @@ import javax.xml.bind.*;
 import java.util.*;
 import javax.xml.stream.*;
 import javax.xml.transform.*;
+import javax.xml.namespace.*;
 import org.w3c.dom.*;
 import java.io.*;
+import java.math.*;
 import org.xml.sax.*;
 import javax.xml.bind.attachment.*;
 import javax.xml.bind.Unmarshaller.*;
 import javax.xml.validation.*;
+import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.*;
 import java.net.*;
+import com.caucho.jaxb.marshall.*;
 import com.caucho.jaxb.adapters.*;
 
 public class MarshallerImpl implements Marshaller {
@@ -49,6 +53,13 @@ public class MarshallerImpl implements Marshaller {
 
   static {
     _adapters.put(HashMap.class, HashMapAdapter.class);
+  }
+
+  private JAXBContext _context;
+
+  MarshallerImpl(JAXBContext context)
+  {
+    this._context = context;
   }
 
   public <A extends XmlAdapter> A getAdapter(Class<A> type)
@@ -181,9 +192,57 @@ public class MarshallerImpl implements Marshaller {
   public void marshal(Object jaxbElement, XMLStreamWriter writer)
     throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    Class c = jaxbElement.getClass();
+    XmlType xmlTypeAnnotation = (XmlType)c.getAnnotation(XmlType.class);
+    String name = xmlTypeAnnotation == null
+      ? c.getName()
+      : xmlTypeAnnotation.name();
+    Marshall marshall = getMarshall(c);
+    try {
+      marshall.serialize(writer, jaxbElement, new QName(name));
+    }
+    catch (Exception e) {
+      throw new JAXBException(e);
+    }
   }
 
+  private Marshall getMarshall(Class type)
+  {
+    if (String.class.equals(type))
+      return StringMarshall.MARSHALL;
+
+    if (Map.class.equals(type))
+      return MapMarshall.MARSHALL;
+
+    if (Double.class.equals(type) || Double.TYPE.equals(type))
+      return DoubleMarshall.MARSHALL;
+
+    if (Float.class.equals(type) || Float.TYPE.equals(type))
+      return FloatMarshall.MARSHALL;
+
+    if (Integer.class.equals(type) || Integer.TYPE.equals(type))
+      return IntMarshall.MARSHALL;
+
+    if (Long.class.equals(type) || Long.TYPE.equals(type))
+      return LongMarshall.MARSHALL;
+
+    if (BigDecimal.class.equals(type))
+      return BigDecimalMarshall.MARSHALL;
+
+    if (List.class.equals(type))
+      return ListMarshall.MARSHALL;
+
+    if (Date.class.equals(type))
+      return DateMarshall.MARSHALL;
+
+    if (byte[].class.equals(type))
+      return ByteArrayMarshall.MARSHALL;
+
+    if (Object[].class.isAssignableFrom(type))
+      return ArrayMarshall.MARSHALL;
+
+    throw new UnsupportedOperationException(type.getName());
+  }
 
   /**
    * Associates a configured instance of with this marshaller. Every marshaller

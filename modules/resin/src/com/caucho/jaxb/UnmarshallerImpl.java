@@ -38,11 +38,19 @@ import org.xml.sax.*;
 import javax.xml.bind.attachment.*;
 import javax.xml.bind.Unmarshaller.*;
 import javax.xml.validation.*;
+import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.*;
 import java.net.*;
 import com.caucho.jaxb.adapters.*;
 
 public class UnmarshallerImpl implements Unmarshaller {
+
+  private JAXBContext _context;
+
+  UnmarshallerImpl(JAXBContext context)
+  {
+    this._context = context;
+  }
 
   /**
    * Gets the adapter associated with the specified type. This is the reverse

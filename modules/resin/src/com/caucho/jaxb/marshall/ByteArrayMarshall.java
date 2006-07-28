@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,27 +19,46 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
-*
+ *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Adam Megacz
  */
 
-package com.caucho;
+package com.caucho.jaxb.marshall;
+import javax.xml.namespace.*;
+import javax.xml.stream.*;
+import java.util.*;
 
-final public class Version {
-  public static final String COPYRIGHT =
-    "Copyright(c) 1998-2006 Caucho Technology.  All rights reserved.";
+import java.lang.reflect.*;
+import java.io.*;
+import com.caucho.util.*;
 
-  public static String FULL_VERSION = "Resin-3.0.s060727 (built Thu, 27 Jul 2006 05:10:22 PDT)";
-  public static String VERSION = "3.0.s060727";
-  public static String VERSION_DATE = "20060727T051022";
+import com.caucho.vfs.WriteStream;
 
-  public static void main(String []argv)
+/**
+ * Marshalls data for a string object
+ */
+public class ByteArrayMarshall extends CDataMarshall {
+  public static final ByteArrayMarshall MARSHALL = new ByteArrayMarshall();
+
+  private ByteArrayMarshall()
   {
-    System.out.println(FULL_VERSION);
-    System.out.println(COPYRIGHT);
+  }
+  
+  protected String serialize(Object in)
+      throws IOException, XMLStreamException
+  {
+    return Base64.encodeFromByteArray((byte[])in);
+  }
+
+  protected Object deserialize(String in)
+    throws IOException, XMLStreamException
+  {
+    return Base64.decodeToByteArray(in);
   }
 }
+
+

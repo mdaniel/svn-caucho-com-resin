@@ -117,7 +117,7 @@ public class NamespaceTracker {
     public Context(Context parent, String tagName)
     {
       this._parent = parent;
-      this._tagName = _tagName;
+      this._tagName = tagName;
     }
 
     public String getTagName()

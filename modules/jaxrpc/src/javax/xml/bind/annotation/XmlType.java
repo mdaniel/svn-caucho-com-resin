@@ -30,7 +30,14 @@
 package javax.xml.bind.annotation;
 
 /** XXX */
-public interface XmlType {
+public @interface XmlType {
+
+  public String name() default "##default";
+  public String[] propOrder() default {""};
+  public String namespace() default "##default";
+  public String factoryMethod() default "";
+  public Class factoryClass()
+    default javax.xml.bind.annotation.XmlType.DEFAULT.class;
 
   /** XXX */
   public static final class DEFAULT {

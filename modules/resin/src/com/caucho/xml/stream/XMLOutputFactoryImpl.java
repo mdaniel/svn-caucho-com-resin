@@ -87,7 +87,7 @@ public class XMLOutputFactoryImpl extends XMLOutputFactory {
   public XMLStreamWriter createXMLStreamWriter(Writer stream)
     throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    return new StreamWriterImpl(Vfs.openWrite(stream));
   }
 
   public Object getProperty(String name)
