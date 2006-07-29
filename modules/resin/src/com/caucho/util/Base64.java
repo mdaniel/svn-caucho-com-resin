@@ -195,6 +195,20 @@ public class Base64 {
     }
   }
 
+  public static String encodeFromByteArray(byte[] value,
+					   int offset,
+					   int length)
+  {
+    try {
+      StringWriter sw = new StringWriter();
+      encode(sw, new ByteArrayInputStream(value, offset, length));
+      return sw.toString();
+    }
+    catch (IOException e) {
+      throw new RuntimeException("this should not be possible " + e);
+    }
+  }
+
   public static void encode(Writer w, InputStream i)
     throws IOException
   {
@@ -305,6 +319,8 @@ public class Base64 {
 	os.write((byte) ((chunk >> 8) & 0xff));
       if (ch3 != '=' && ch3 != -1)
 	os.write((byte) ((chunk & 0xff)));
+      else
+	break;
     }
     os.flush();
   }

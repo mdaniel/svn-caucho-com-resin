@@ -200,7 +200,10 @@ public class Port
 
   public PortMXBean getAdmin()
   {
-    return _admin;
+    if (_server.getServerId().equals(_serverId))
+      return _admin;
+    else
+      return null;
   }
 
   /**

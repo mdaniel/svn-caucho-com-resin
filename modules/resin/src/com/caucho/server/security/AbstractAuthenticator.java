@@ -355,6 +355,9 @@ public class AbstractAuthenticator implements ServletAuthenticator {
   {
     
     try {
+      if (clientDigest == null)
+	return null;
+      
       MessageDigest digest = MessageDigest.getInstance("MD5");
       
       byte []a1 = getDigestSecret(request, response, app,
@@ -375,6 +378,7 @@ public class AbstractAuthenticator implements ServletAuthenticator {
           digest.update((byte) nc.charAt(i));
 
         digest.update((byte) ':');
+
         for (int i = 0; cnonce != null && i < cnonce.length(); i++)
           digest.update((byte) cnonce.charAt(i));
         
@@ -390,7 +394,7 @@ public class AbstractAuthenticator implements ServletAuthenticator {
 
       byte []serverDigest = digest.digest();
 
-      if (clientDigest == null || clientDigest.length != serverDigest.length)
+      if (clientDigest.length != serverDigest.length)
         return null;
 
       for (int i = 0; i < clientDigest.length; i++) {
@@ -421,6 +425,37 @@ public class AbstractAuthenticator implements ServletAuthenticator {
       else
         digest.update((byte) (d2 + 'a' - 10));
     }
+  }
+
+  protected byte []stringToDigest(String digest)
+  {
+    if (digest == null)
+      return null;
+    
+    int len = (digest.length() + 1) / 2;
+    byte []clientDigest = new byte[len];
+
+    for (int i = 0; i + 1 < digest.length(); i += 2) {
+      int ch1 = digest.charAt(i);
+      int ch2 = digest.charAt(i + 1);
+
+      int b = 0;
+      if (ch1 >= '0' && ch1 <= '9')
+        b += ch1 - '0';
+      else if (ch1 >= 'a' && ch1 <= 'f')
+        b += ch1 - 'a' + 10;
+
+      b *= 16;
+      
+      if (ch2 >= '0' && ch2 <= '9')
+        b += ch2 - '0';
+      else if (ch2 >= 'a' && ch2 <= 'f')
+        b += ch2 - 'a' + 10;
+
+      clientDigest[i / 2] = (byte) b;
+    }
+
+    return clientDigest;
   }
 
   private String digestToString(byte []digest)

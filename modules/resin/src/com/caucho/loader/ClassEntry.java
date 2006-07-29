@@ -273,19 +273,16 @@ public class ClassEntry implements Dependency {
    */
   public boolean reloadIsModified()
   {
-    if (_classIsModified)
+    if (_classIsModified) {
       return true;
+    }
 
-    if (! _hasJNIReload || ! _classPath.canRead())
+    if (! _hasJNIReload || ! _classPath.canRead()) {
       return true;
+    }
     
     try {
       long length = _classPath.getLength();
-
-      if (_depend.isModified()) {
-	_classIsModified = true;
-	return true;
-      }
 
       Class cl = _clRef != null ? _clRef.get() : null;
 	
@@ -294,7 +291,7 @@ public class ClassEntry implements Dependency {
       }
 
       if (_hasAnnotations && requireReload(cl))
-	return false;
+	return true;
 	    
       ReadStream is = _classPath.openRead();
 

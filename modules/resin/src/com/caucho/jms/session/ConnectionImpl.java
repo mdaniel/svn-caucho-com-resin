@@ -371,9 +371,13 @@ public class ConnectionImpl implements Connection {
    */
   public void finalize()
   {
+    // possible deadlock with the close, since it triggers
+    // a rollback i.e. it's trying to do too much
+    /*
     try {
       close();
     } catch (Throwable e) {
     }
+    */
   }
 }

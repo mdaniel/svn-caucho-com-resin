@@ -668,6 +668,7 @@
         <include name="conf/**"/>
         <include name="contrib/**"/>
         <include name="doc/**"/>
+        <include name="php/**"/>
         <include name="modules/**/src/**"/>
         <include name="win32/**"/>
         <include name="bin/**"/>

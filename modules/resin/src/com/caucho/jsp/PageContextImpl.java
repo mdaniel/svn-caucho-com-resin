@@ -315,7 +315,7 @@ public class PageContextImpl extends PageContext
   public void removeAttribute(String name)
   {
     if (name == null)
-      throw new NullPointerException(L.l("getAttribute must have a non-null name"));
+      throw new NullPointerException(L.l("removeAttribute must have a non-null name"));
     
     _attributes.remove(name);
     // jsp/162b
@@ -409,7 +409,8 @@ public class PageContextImpl extends PageContext
   {
     switch (scope) {
     case PAGE_SCOPE:
-      removeAttribute(name);
+      if (name != null)
+	_attributes.remove(name);
       break;
 
     case REQUEST_SCOPE:
@@ -1018,32 +1019,31 @@ public class PageContextImpl extends PageContext
     if (e instanceof ClientDisconnectException)
       throw (ClientDisconnectException) e;
 
-    if (e instanceof Error && _servlet instanceof Page) {
-      boolean recompile = true;
+    if (! (_servlet instanceof Page)) {
+    }
+    else if (getApplication() == null
+	     || getApplication().getJsp() == null
+	     || ! getApplication().getJsp().isRecompileOnError()) {
+    }
+    else if (e instanceof OutOfMemoryError) {
+    }
+    else if (e instanceof Error) {
+      try {
+	Path workDir = getApplication().getAppDir().lookup("WEB-INF/work");
+	String className = _servlet.getClass().getName();
+	Path path = workDir.lookup(className.replace('.', '/') + ".class");
+	
+	log.warning("Removing " + path + " due to " + e);
+		    
+	path.remove();
+      } catch (Exception e1) {
+      }
+      Page page = (Page) _servlet;
 
-      /*
-      recompile = Registry.getBoolean("/caucho.com/jsp/recompile-on-error",
-                                      false);
-
-      recompile = _application.getRegistry().getBoolean("jsp/recompile-on-error",
-                                                       recompile);
-      */
-
-      if (recompile) {
-        try {
-          Path workDir = getApplication().getAppDir().lookup("WEB-INF/work");
-          String className = _servlet.getClass().getName();
-          Path path = workDir.lookup(className.replace('.', '/') + ".class");
-          path.remove();
-        } catch (Exception e1) {
-        }
-        Page page = (Page) _servlet;
-
-        page._caucho_unload();
-	if (! page.isDead()) {
-	  page.setDead();
-	  page.destroy();
-	}
+      page._caucho_unload();
+      if (! page.isDead()) {
+	page.setDead();
+	page.destroy();
       }
     }
 

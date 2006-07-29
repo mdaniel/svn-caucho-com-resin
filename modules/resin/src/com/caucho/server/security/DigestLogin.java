@@ -173,6 +173,7 @@ public class DigestLogin extends AbstractLogin {
     throws ServletException
   {
     String value = request.getHeader("authorization");
+
     if (value == null)
       return null;
 
@@ -188,6 +189,7 @@ public class DigestLogin extends AbstractLogin {
     CharCursor cursor = new StringCharCursor(value);
 
     String key = scanKey(cursor);
+
     if (! "Digest".equalsIgnoreCase(key))
       return null;
       

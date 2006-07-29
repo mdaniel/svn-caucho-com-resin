@@ -190,8 +190,8 @@ if ($db_pools) {
 
   <tr>
     <td><?= $pool->Name ?></td>
-    <td><?= $pool->ActiveConnectionCount ?></td>
-    <td><?= $pool->IdleConnectionCount ?></td>
+    <td><?= $pool->ConnectionActiveCount ?></td>
+    <td><?= $pool->ConnectionIdleCount ?></td>
     <td><?= $pool->ConnectionCount ?></td>
     <td><?= $pool->MaxConnections ?></td>
     <td><?= $pool->MaxIdleTime ?></td>
@@ -248,10 +248,11 @@ if ($ports) {
 
 <!-- Cluster -->
 
-<h2>Connections to peers</h2>
-
 <?php
-  $clients = $server->Cluster->Servers;
+  foreach ($resin->Clusters as $cluster) {
+
+echo "<h2>Cluster: $cluster->Name</h2>";
+
 ?>
 
 <table>

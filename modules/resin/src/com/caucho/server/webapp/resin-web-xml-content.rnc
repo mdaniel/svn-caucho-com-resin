@@ -787,6 +787,10 @@ r_web-app-Basis =
 
   & r_path-mapping*
 
+  & r_redeploy-check-interval?
+
+  & r_redeploy-mode?
+
   & r_resource-env-ref*
 
   & r_rewrite-dispatch*
@@ -857,11 +861,7 @@ rc_web-app = element web-app {
       r_web-app-Content
     }?
 
-  & r_startup-mode?
-
-  & r_redeploy-check-interval?
-
-  & r_redeploy-mode?),
+  & r_startup-mode?),
 
   r_web-app-Content
 }

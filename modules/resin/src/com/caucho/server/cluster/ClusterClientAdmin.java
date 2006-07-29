@@ -221,6 +221,11 @@ public class ClusterClientAdmin extends AbstractManagedObject
     return _client.getServer().canConnect();
   }
 
+  protected void register()
+  {
+    registerSelf();
+  }
+
   public String toString()
   {
     return "ClusterClientAdmin[" + getObjectName() + "]";

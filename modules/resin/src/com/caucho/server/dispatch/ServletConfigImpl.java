@@ -586,7 +586,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     try {
       _servlet = createServletImpl();
 
-      J2EEManagedObject.register(new com.caucho.management.j2ee.Servlet(this));
+      //J2EEManagedObject.register(new com.caucho.management.j2ee.Servlet(this));
 
       // If the servlet has an MBean, register it
       try {

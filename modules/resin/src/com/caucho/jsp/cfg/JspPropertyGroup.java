@@ -444,6 +444,14 @@ public class JspPropertyGroup {
   }
 
   /**
+   * Sets the recompile-on-errrkReturns true if JSP logging should be disabled.
+   */
+  public boolean isRecompileOnError()
+  {
+    return _recompileOnError;
+  }
+
+  /**
    * Set true if the taglibs should have the schema validated
    */
   public void setValidateTaglibSchema(boolean isValidate)

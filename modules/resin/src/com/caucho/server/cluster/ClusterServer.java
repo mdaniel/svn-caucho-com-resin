@@ -282,9 +282,12 @@ public class ClusterServer {
       if (name == null)
         name = "";
 
+      _admin.register();
+      /*
       _objectName = new ObjectName("resin:type=ClusterServer,name=" + name);
 
       Jmx.register(_admin, _objectName);
+      */
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
     }

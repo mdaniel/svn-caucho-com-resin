@@ -301,15 +301,7 @@ public class PasswordDigest {
    */
   protected byte[]stringToDigest(String s)
   {
-    String decode = Base64.decode(s);
-
-    byte []digest = new byte[decode.length()];
-
-    for (int i = 0; i < decode.length(); i++) {
-      digest[i] = (byte) decode.charAt(i);
-    }
-
-    return digest;
+    return Base64.decodeToByteArray(s);
   }
   
   /**
