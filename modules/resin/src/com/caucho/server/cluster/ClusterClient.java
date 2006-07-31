@@ -290,8 +290,13 @@ public final class ClusterClient {
       
 	return true;
       }
-      else if (_activeCount + _startingCount < (1 << (warmupCount - 3)))
+      
+      if (_activeCount + _startingCount < (1 << (warmupCount - 3))) {
 	return true;
+      }
+      else if (_activeCount + _startingCount == 0) {
+	return true;
+      }
       else
 	return false;
     }
@@ -321,8 +326,10 @@ public final class ClusterClient {
   private void toWarmup()
   {
     synchronized (this) {
-      if (ST_STARTING <= _state && _state < ST_CLOSED)
+      if (ST_STARTING <= _state && _state < ST_CLOSED) {
 	_state = ST_WARMUP;
+	_firstConnectTime = Alarm.getCurrentTime();
+      }
     }
   }
   

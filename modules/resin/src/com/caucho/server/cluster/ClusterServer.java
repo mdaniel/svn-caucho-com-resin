@@ -300,6 +300,14 @@ public class ClusterServer {
   {
     return ! _client.isActive();
   }
+  
+  /**
+   * Returns true if the server is dead.
+   */
+  public boolean canOpenSoft()
+  {
+    return _client.canOpenSoft();
+  }
 
   /**
    * Returns true if active.
