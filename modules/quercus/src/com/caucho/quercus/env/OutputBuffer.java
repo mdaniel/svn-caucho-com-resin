@@ -237,7 +237,10 @@ public class OutputBuffer {
       clean();
 
       try {
-        _out.print(result.toString(_env).toString());
+        if (result instanceof BinaryValue)
+          _out.write(((BinaryValue) result).toBytes());
+        else
+          _out.print(result.toString(_env).toString());
       } catch (IOException e) {
         _env.error(e.toString(), e);
       }
