@@ -745,6 +745,7 @@
       <include name="${dist.name}/webapps/**"/>
       <include name="${dist.name}/contrib/**"/>
       <include name="${dist.name}/conf/**"/>
+      <include name="${dist.name}/php/**"/>
       <include name="${dist.name}/automake/**"/>
       <include name="${dist.name}/bin/wrapper.pl.in"/>
 
