@@ -57,7 +57,7 @@ if test -d "$APACHE_DIR/conf.d"; then
 
 LoadModule caucho_module $LIBEXECDIR/mod_caucho.so
 
-ResinConfigServer localhost 6800
+ResinConfigServer localhost 6802
 CauchoConfigCacheDirectory $APACHE_DIR
 CauchoStatus yes
 EOF
@@ -73,7 +73,7 @@ else
 
 LoadModule caucho_module $LIBEXECDIR/mod_caucho.so
 
-ResinConfigServer localhost 6800
+ResinConfigServer localhost 6802
 CauchoConfigCacheDirectory $APACHE_DIR
 CauchoStatus yes
 EOF

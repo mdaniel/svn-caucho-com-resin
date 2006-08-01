@@ -8748,7 +8748,7 @@ if test "${enable_64bit+set}" = set; then
   enableval="$enable_64bit"
   case "${enableval}" in
  yes) b64=true ;;
- no)  b64="" ;;
+ no)  b64=""; b64_jni="" ;;
  *) { { echo "$as_me:$LINENO: error: bad value ${enableval} for --enable-64bit" >&5
 echo "$as_me: error: bad value ${enableval} for --enable-64bit" >&2;}
    { (exit 1); exit 1; }; } ;;

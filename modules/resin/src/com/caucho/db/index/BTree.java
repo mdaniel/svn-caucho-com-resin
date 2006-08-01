@@ -73,7 +73,7 @@ import com.caucho.db.store.Transaction;
  * key - the tuple's key
  * </pre>
  */
-public class BTree {
+public final class BTree {
   private final static L10N L = new L10N(BTree.class);
   private final static Logger log = Log.open(BTree.class);
   
@@ -216,7 +216,7 @@ public class BTree {
 	
 	  boolean isLeaf = (flags & LEAF_FLAG) == 0;
 
-	  int length = getInt(buffer, LENGTH_OFFSET);
+	  int length = getLength(buffer);
 
 	  if (length == _n) {
 	    if (index == _indexRoot) {
@@ -272,7 +272,7 @@ public class BTree {
   {
     int offset = HEADER_SIZE;
     int tupleSize = _tupleSize;
-    int length = getInt(block, LENGTH_OFFSET);
+    int length = getLength(block);
 
     for (int i = 0; i < length; i++) {
       int cmp = _keyCompare.compare(keyBuffer, keyOffset,
@@ -355,7 +355,7 @@ public class BTree {
       parentBlock.setDirty(0, Store.BLOCK_SIZE);
     
       byte []parentBuffer = parentBlock.getBuffer();
-      int parentLength = getInt(parentBuffer, LENGTH_OFFSET);
+      int parentLength = getLength(parentBuffer);
     
       rightBlock = _store.readBlockByAddress(index);
       rightBlock.setDirty(0, Store.BLOCK_SIZE);
@@ -370,7 +370,7 @@ public class BTree {
       byte []leftBuffer = leftBlock.getBuffer();
       long leftBlockId = leftBlock.getBlockId();
 
-      int length = getInt(rightBuffer, LENGTH_OFFSET);
+      int length = getLength(rightBuffer);
       int pivot = (length - 1) / 2;
 
       int pivotOffset = HEADER_SIZE + pivot * _tupleSize;
@@ -436,7 +436,7 @@ public class BTree {
       
       long rightBlockId = rightBlock.getBlockId();
 
-      int length = getInt(parentBuffer, LENGTH_OFFSET);
+      int length = getLength(parentBuffer);
 
       int pivot = (length - 1) / 2;
 
@@ -568,7 +568,7 @@ public class BTree {
     if (parentIndex <= 0)
       return false;
       
-    int length = getInt(buffer, LENGTH_OFFSET);
+    int length = getLength(buffer);
 
     if (_minN <= length)
       return false;
@@ -577,7 +577,7 @@ public class BTree {
 
     try {
       byte []parentBuffer = parent.getBuffer();
-      int parentLength = getInt(parentBuffer, LENGTH_OFFSET);
+      int parentLength = getLength(parentBuffer);
 
       long leftIndex = getLeftIndex(parent, index);
       long rightIndex = getRightIndex(parent, index);
@@ -589,7 +589,7 @@ public class BTree {
 	try {
 	  byte []leftBuffer = leftBlock.getBuffer();
 	
-	  int leftLength = getInt(leftBuffer, LENGTH_OFFSET);
+	  int leftLength = getLength(leftBuffer);
 
 	  if (_minN < leftLength) {
 	    parent.setDirty(0, Store.BLOCK_SIZE);
@@ -613,7 +613,7 @@ public class BTree {
 	try {
 	  byte []rightBuffer = rightBlock.getBuffer();
 	
-	  int rightLength = getInt(rightBuffer, LENGTH_OFFSET);
+	  int rightLength = getLength(rightBuffer);
 	  
 	  if (_minN < rightLength) {
 	    parent.setDirty(0, Store.BLOCK_SIZE);
@@ -680,7 +680,7 @@ public class BTree {
   {
     byte []buffer = block.getBuffer();
     
-    int length = getInt(buffer, LENGTH_OFFSET);
+    int length = getLength(buffer);
 
     int offset = HEADER_SIZE;
     int tupleSize = _tupleSize;
@@ -720,15 +720,15 @@ public class BTree {
 			    byte []buffer,
 			    long index)
   {
-    int parentLength = getInt(parentBuffer, LENGTH_OFFSET);
+    int parentLength = getLength(parentBuffer);
 
     int tupleSize = _tupleSize;
     int parentOffset = HEADER_SIZE;
     int parentEnd = parentOffset + parentLength * tupleSize;
 
-    int leftLength = getInt(leftBuffer, LENGTH_OFFSET);
+    int leftLength = getLength(leftBuffer);
 
-    int length = getInt(buffer, LENGTH_OFFSET);
+    int length = getLength(buffer);
 
     // pointer in the parent to the left defaults to the tail - 1
     int parentLeftOffset = -1;
@@ -766,11 +766,11 @@ public class BTree {
 		     tupleSize);
 
     // add the buffer length
-    setInt(buffer, LENGTH_OFFSET, length + 1);
+    setLength(buffer, length + 1);
 
     // subtract from the left length
     leftLength -= 1;
-    setInt(leftBuffer, LENGTH_OFFSET, leftLength);
+    setLength(leftBuffer, leftLength);
 
     // copy the entry from the new left tail to the parent
     System.arraycopy(leftBuffer,
@@ -787,15 +787,15 @@ public class BTree {
 			 byte []buffer,
 			 long index)
   {
-    int parentLength = getInt(parentBuffer, LENGTH_OFFSET);
+    int parentLength = getLength(parentBuffer);
 
     int tupleSize = _tupleSize;
     int parentOffset = HEADER_SIZE;
     int parentEnd = parentOffset + parentLength * tupleSize;
 
-    int leftLength = getInt(leftBuffer, LENGTH_OFFSET);
+    int leftLength = getLength(leftBuffer);
 
-    int length = getInt(buffer, LENGTH_OFFSET);
+    int length = getLength(buffer);
 
     for (parentOffset += tupleSize;
 	 parentOffset < parentEnd;
@@ -820,7 +820,7 @@ public class BTree {
 	System.arraycopy(parentBuffer, parentOffset,
 			 parentBuffer, parentOffset - tupleSize,
 			 parentEnd - parentOffset);
-	setInt(parentBuffer, LENGTH_OFFSET, parentLength - 1);
+	setLength(parentBuffer, parentLength - 1);
 
 	// the key from the parent gets the old left.next value
 	setPointer(leftBuffer, leftOffset,
@@ -835,7 +835,7 @@ public class BTree {
 			 leftBuffer, leftOffset,
 			 length * tupleSize);
 
-	setInt(leftBuffer, LENGTH_OFFSET, leftLength + length);
+	setLength(leftBuffer, leftLength + length);
 
 	return;
       }
@@ -853,7 +853,7 @@ public class BTree {
     long leftPointer = getPointer(parentBuffer, leftOffset);
 
     setPointer(parentBuffer, NEXT_OFFSET, leftPointer);
-    setInt(parentBuffer, LENGTH_OFFSET, parentLength - 1);
+    setLength(parentBuffer, parentLength - 1);
 
     // XXX: leaf vs non-leaf?
     
@@ -866,7 +866,7 @@ public class BTree {
 		     leftBuffer, HEADER_SIZE + leftLength * tupleSize,
 		     length * tupleSize);
 
-    setInt(leftBuffer, LENGTH_OFFSET, leftLength + length);
+    setLength(leftBuffer, leftLength + length);
   }
 
   /**
@@ -876,7 +876,7 @@ public class BTree {
   {
     byte []buffer = block.getBuffer();
     
-    int length = getInt(buffer, LENGTH_OFFSET);
+    int length = getLength(buffer);
 
     int offset = HEADER_SIZE;
     int tupleSize = _tupleSize;
@@ -911,15 +911,15 @@ public class BTree {
 			     byte []buffer,
 			     long index)
   {
-    int parentLength = getInt(parentBuffer, LENGTH_OFFSET);
+    int parentLength = getLength(parentBuffer);
 
     int tupleSize = _tupleSize;
     int parentOffset = HEADER_SIZE;
     int parentEnd = parentOffset + parentLength * tupleSize;
 
-    int rightLength = getInt(rightBuffer, LENGTH_OFFSET);
+    int rightLength = getLength(rightBuffer);
 
-    int length = getInt(buffer, LENGTH_OFFSET);
+    int length = getLength(buffer);
 
     for (;
 	 parentOffset < parentEnd;
@@ -946,10 +946,10 @@ public class BTree {
 		     (rightLength - 1) * tupleSize);
 
     // add the buffer length
-    setInt(buffer, LENGTH_OFFSET, length + 1);
+    setLength(buffer, length + 1);
 
     // subtract from the right length
-    setInt(rightBuffer, LENGTH_OFFSET, rightLength - 1);
+    setLength(rightBuffer, rightLength - 1);
 
     // copy the entry from the new buffer tail to the parent
     System.arraycopy(buffer,
@@ -966,15 +966,15 @@ public class BTree {
 			 byte []buffer,
 			 long index)
   {
-    int parentLength = getInt(parentBuffer, LENGTH_OFFSET);
+    int parentLength = getLength(parentBuffer);
 
     int tupleSize = _tupleSize;
     int parentOffset = HEADER_SIZE;
     int parentEnd = parentOffset + parentLength * tupleSize;
 
-    int rightLength = getInt(rightBuffer, LENGTH_OFFSET);
+    int rightLength = getLength(rightBuffer);
 
-    int length = getInt(buffer, LENGTH_OFFSET);
+    int length = getLength(buffer);
 
     for (;
 	 parentOffset < parentEnd;
@@ -992,14 +992,14 @@ public class BTree {
 			 rightBuffer, HEADER_SIZE,
 			 length * tupleSize);
 
-	setInt(rightBuffer, LENGTH_OFFSET, length + rightLength);
+	setLength(rightBuffer, length + rightLength);
 
 	// remove the buffer's pointer from the parent
 	System.arraycopy(parentBuffer, parentOffset + tupleSize,
 			 parentBuffer, parentOffset,
 			 parentEnd - parentOffset - tupleSize);
 
-	setInt(parentBuffer, LENGTH_OFFSET, parentLength - 1);
+	setLength(parentBuffer, parentLength - 1);
 
 	return;
       }
@@ -1019,7 +1019,7 @@ public class BTree {
 			   boolean isLeaf)
     throws IOException
   {
-    int length = getInt(block, LENGTH_OFFSET);
+    int length = getLength(block);
 
     int offset = HEADER_SIZE;
     int tupleSize = _tupleSize;
@@ -1032,7 +1032,7 @@ public class BTree {
 
       if (newOffset > 65536) {
 	Thread.dumpStack();
-	System.out.println("OVERFLOW: " + (blockId / Store.BLOCK_SIZE) + ":" + (blockId % Store.BLOCK_SIZE)  + " LENGTH:" + length + " STU:" + getInt(block, LENGTH_OFFSET) + " DELTA:" + delta);
+	System.out.println("OVERFLOW: " + (blockId / Store.BLOCK_SIZE) + ":" + (blockId % Store.BLOCK_SIZE)  + " LENGTH:" + length + " STU:" + getLength(block) + " DELTA:" + delta);
 			   
       }
 
@@ -1079,7 +1079,7 @@ public class BTree {
   {
     int offset = HEADER_SIZE;
     int tupleSize = _tupleSize;
-    int length = getInt(block, LENGTH_OFFSET);
+    int length = getLength(block);
 
     for (int i = 0; i < length; i++) {
       int cmp = _keyCompare.compare(keyBuffer, keyOffset,
@@ -1174,10 +1174,23 @@ public class BTree {
    */
   private void setLength(byte []buffer, int value)
   {
-    if (value < 0 || value > 65536)
+    if (value < 0 || BLOCK_SIZE / _tupleSize < value)
       System.out.println("BAD-LENGTH: " + value);
 
     setInt(buffer, LENGTH_OFFSET, value);
+  }
+
+  /**
+   * Sets the length
+   */
+  private int getLength(byte []buffer)
+  {
+    int value = getInt(buffer, LENGTH_OFFSET);
+    
+    if (value < 0 || value > 65536)
+      System.out.println("BAD-LENGTH: " + value);
+
+    return value;
   }
 
   /**
