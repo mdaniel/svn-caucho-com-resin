@@ -856,9 +856,14 @@ caucho_request(request_rec *r, config_t *config, resin_host_t *host,
   else if (r->status == HTTP_SERVICE_UNAVAILABLE)
     return HTTP_SERVICE_UNAVAILABLE;
   else {
+    /*
+     * See pages like jms/index.xtp
     int status = r->status;
     r->status = HTTP_OK;
+
     return status;
+    */
+    return OK;
   }
 }
 
