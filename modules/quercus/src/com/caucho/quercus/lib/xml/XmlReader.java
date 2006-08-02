@@ -591,9 +591,11 @@ public class XmlReader {
   	_constConvertMap.put(
   			new Integer(XMLStreamConstants.END_ELEMENT),
   			new Integer(END_ELEMENT));
+        /*
   	_constConvertMap.put(
   			new Integer(XMLStreamConstants.END_ENTITY),
   			new Integer(END_ENTITY));
+        */
   	// XXX: XMLStreamConstants.ENTITY_DECLARATION is 17 in the Sun Docs
   	// but is 15 in the Resin implementation.
   	_constConvertMap.put(
@@ -614,10 +616,11 @@ public class XmlReader {
   	_constConvertMap.put(
   			new Integer(XMLStreamConstants.START_ELEMENT),
   			new Integer(ELEMENT));
+        /*
   	_constConvertMap.put(
   			new Integer(XMLStreamConstants.START_ENTITY),
   			new Integer(ENTITY));
-
+        */
   	// Following constants did not match
   	_constConvertMap.put(
   			new Integer(XMLStreamConstants.DTD),
