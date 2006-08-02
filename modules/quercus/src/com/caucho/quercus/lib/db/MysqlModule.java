@@ -743,6 +743,9 @@ public class MysqlModule extends AbstractQuercusModule {
   {
     Mysqli mysqli = new Mysqli(env, host, userName, password, "", 3306, "", 0, null, null);
 
+    if (! mysqli.isConnected())
+      return BooleanValue.FALSE;
+
     Value value = env.wrapJava(mysqli);
 
     env.setSpecialValue("caucho.mysql", mysqli);

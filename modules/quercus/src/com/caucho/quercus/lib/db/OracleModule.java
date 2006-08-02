@@ -2239,6 +2239,9 @@ public class OracleModule extends AbstractQuercusModule {
     } else {
       conn = new Oracle(env, host, username, password, db, port, driver, url);
 
+      if (! conn.isConnected())
+        return BooleanValue.FALSE;
+
       connectionInfo = new ConnectionInfo(url, conn);
 
       env.setSpecialValue("caucho.oracle", connectionInfo);

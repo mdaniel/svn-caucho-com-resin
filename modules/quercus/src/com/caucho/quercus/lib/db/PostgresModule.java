@@ -282,6 +282,9 @@ public class PostgresModule extends AbstractQuercusModule {
       Postgres postgres
         = new Postgres(env, host, userName, password, dbName, port, driver, url);
 
+      if (! postgres.isConnected())
+        return null;
+
       env.setSpecialValue("caucho.postgres", postgres);
 
       return postgres;

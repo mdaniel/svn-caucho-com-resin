@@ -203,6 +203,7 @@ public class MysqliModule extends AbstractQuercusModule {
   /**
    * Returns a new connection.
    */
+  @ReturnNullAsFalse
   public static Mysqli mysqli_connect(Env env,
               @Optional("localhost") String host,
               @Optional String userName,
@@ -212,8 +213,13 @@ public class MysqliModule extends AbstractQuercusModule {
               @Optional String socket)
     throws IllegalStateException
   {
-    return new Mysqli(env, host, userName, password, dbname, port, socket, 0,
-          null, null);
+    Mysqli mysqli = new Mysqli(env, host, userName, password, dbname, port,
+          socket, 0, null, null);
+
+    if (! mysqli.isConnected())
+      return null;
+
+    return mysqli;
   }
 
   /**
