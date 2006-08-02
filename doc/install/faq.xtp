@@ -62,11 +62,13 @@ JNI libraries.  Resin uses JNI for:
 <p>So Resin can run without the JNI libraries, it just won't be as
 Resin as Resin.</p>
 
+<p>
 <a config-tag="user-name">user-name</a> and <a config-tag="group-name">group-name</a> support no longer need the resin binary either. The only
 place it won't work is on Linux systems that do not use the newer threading
 model.  For those systems, you can use a technique like the one <a
-href="How-can-I-bind-to-a-port-under-1024-and-still-run-as-a-non-root-user?">described
+href="#How-can-I-bind-to-a-port-under-1024-and-still-run-as-a-non-root-user?">described
 here.</a>
+</p>
 
 </faq>
 
@@ -89,11 +91,13 @@ to port 8080 without needing to start as root.
 
 
 <example title="Linux 2.2.x route port 80 to port 8080">
-/sbin/ipchains -A input -i eth+ -j REDIRECT 8080 -p tcp --destination-port 80
+/sbin/ipchains -A input -i eth+ -j REDIRECT 8080 -p tcp \
+    --destination-port 80
 </example>
 
 <example title="Linux 2.4.x route port 80 to port 8080">
-/sbin/iptables -t nat -A PREROUTING -i eth+ -p tcp --dport 80 -j REDIRECT --to-port 8080
+/sbin/iptables -t nat -A PREROUTING -i eth+ -p tcp \
+    --dport 80 -j REDIRECT --to-port 8080
 </example>
 
 </faq>
@@ -158,14 +162,10 @@ initialization steps take up most of the CPU.
 
 <faq name="exception-type-connection" title="What happened to exception-type='connection'?">
 <description>
-
-<p>
 In Resin 2.1 I used an <code>exception-type='connection'</code>
 with <a config-tag="error-page"/> to specify the page to show when IIS or
 Apache could not reach the backend Resin server, but that does not work any
 more.
-</p>
-
 </description>
 
 <p>
@@ -198,10 +198,8 @@ ErrorDocument 503 /error/serverDownError.shtml
 <faq name="iis-exe" title="IIS 6 will not serve .exe files">
 
 <description>
-<p>
 Everything seems to work, except that for every file with a <code>.exe</code>
 extension I get "HTTP 404 - File not found".
-</p>
 </description>
 
 <p>(thanks to W Hall)</p>

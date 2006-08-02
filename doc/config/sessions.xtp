@@ -15,8 +15,10 @@
   <body>
     <summary/>
 
+<section title="<persistent-store>">
 <p>Configuration for persistent store uses
 the <a href="config|resin.xtp#persistent-store">persistent-store</a> tag.</p>
+</section>
 
 <section title='File Based'>
 
@@ -207,6 +209,7 @@ CREATE TABLE persistent_session (
 </example>
 
 <p>The store is enabled with &lt;use-persistent-store> in the session config.
+</p>
 
 <example>
 &lt;web-app xmlns="http://caucho.com/ns/resin">

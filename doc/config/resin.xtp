@@ -10,6 +10,7 @@
 
   </description>
 </header>
+<body>
 
 <summary objsummary='localtoc'/>
 
@@ -174,9 +175,9 @@ configured explicitly.</p>
 
   &lt;root-directory>/opt/www/www.foo.com&lt;/root-directory>
 
-  <web-app id="/" document-directory="webapps/ROOT">
+  &lt;web-app id="/" document-directory="webapps/ROOT">
     
-  </web-app>
+  &lt;/web-app>
   ...
 &lt;/host>
 </example>
@@ -824,4 +825,5 @@ server is running.</p>
 
 </section> <!-- startup-mode -->
 
+</body>
 </document>

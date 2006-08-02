@@ -8,6 +8,7 @@
   <body>
     <summary/>
 
+<section title="Clustered Distributed Sessions">
 <p>Resin's cluster protocol for distributed sessions can
 is an alternative to JDBC-based distributed sessions.  In some
 configurations, the cluster-stored sessions will be more efficient
@@ -20,6 +21,7 @@ backing database.  With clustered sessions, each additional server
 shares the backup load, so the main scalability issue reduces to network
 bandwidth.  Like the JDBC-based sessions, the cluster store sessions
 uses sticky-session caching to avoid unnecessary network traffic.</p>
+</section>
 
 <section title="Configuration">
 

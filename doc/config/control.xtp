@@ -320,7 +320,7 @@ jndi:lookup can be used to lookup a JNDI value for the configuration.</p>
 <section title="fmt">
 
 <p>The EL Environment contains a <var/fmt/> object, which has a number of
-useful formatting methods</p>.
+useful formatting methods.</p>
 
 <defun title="fmt.timestamp()">
 

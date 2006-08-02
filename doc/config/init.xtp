@@ -33,7 +33,7 @@ an application, even if your application does not use Resin to configure
 itself.  Following the Assembly Line pattern makes application code
 easier to understand, maintain, configure and test.</p>
 
-<p><figure src="assembler-eg1.gif"/></p>
+<figure src="assembler-eg1.gif"/>
 
 </section>
 
@@ -390,10 +390,12 @@ createSubBean()</code> then <var/resin:type/> cannot be used.  A
 is called before the other setters, provides an opportunity for the
 sub-bean instance to know it's enclosing object.</p>
 
+<p>
 The <var/resin:/> in <code/resin:type/> is a namespace prefix automatically
 mapped to <var/http://caucho.com/ns/resin/>. You could use another namespace
 prefix, for example if you defined
 <var/xmlns:foo="http://caucho.com/ns/resin"/>, you could use <code/foo:type/>.
+</p>
 
 <example title="Bean-style configuration for using resin:type">
 &lt;resource jndi-name="env/message"&gt;

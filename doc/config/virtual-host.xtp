@@ -45,7 +45,7 @@ machine can be used to map a virtual host name to an IP address.
 "www.slytherin.com" names to "127.0.0.1", pointing these host names back to
 computer that the client is running on.</p>
 
-<p>Unix user's edit the file <code>/etc/hosts</code>:
+<p>Unix user's edit the file <code>/etc/hosts</code>:</p>
 
 <example title="/etc/hosts">
 127.0.0.1       localhost
@@ -53,7 +53,7 @@ computer that the client is running on.</p>
 127.0.0.1       www.gryffindor.com
 127.0.0.1       www.slytherin.com
 </example>
-<p>Windows user edit the file <code>C:\WINDOWS\SYSTEM32\DRIVERS\ETC\HOSTS</code>:
+<p>Windows user edit the file <code>C:\WINDOWS\SYSTEM32\DRIVERS\ETC\HOSTS</code>:</p>
 
 <example title="C:\WINDOWS\SYSTEM32\DRIVERS\ETC\HOSTS">
 127.0.0.1       localhost

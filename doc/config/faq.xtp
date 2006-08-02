@@ -62,7 +62,9 @@ subdirectory in a <code>hosts</code> directory.
 <description>
 </description>
 
+<p>
 See <a href="doc|jsp|compile">JSP Compilation.</a>
+</p>
 </faq>
 
 <faq title="How can I disable directory listings?">
@@ -100,7 +102,9 @@ as 30% increase in cpu utilization when disttributed sessions are enabled, and
 we are using <a config-tag="always-save-session"/>.
 </description>
 
+<p>
 <a config-tag="always-save-session"/> has a significant impact on performance.
+</p>
 
 <p>
 When using <a config-tag="always-save-session"/>, Resin can't know if an

@@ -6,13 +6,11 @@
 
   <description>
 
-  <p>
   <glossary title="web application" type="inline">
   A web application is a self-contained
   subtree of the web site.  It has a distinct Application object
   (ServletContext), sessions, and servlet mappings.
   </glossary>
-  </p>
 
   <p>Web applications are configured with the <a
   config-tag='web-app'/> tag, which can occur in a number of places.</p>
@@ -37,6 +35,8 @@
 
   </description>
 </header>
+
+<body>
 
 <summary objsummary='localtoc'/>
 
@@ -602,6 +602,7 @@ class name directly like <var/test.HelloWorld/><td>n/a
 </example>
 <p>In Resin, the special <code/servlet-name/> <var/`invoker'/> is used to dispatch
 servlets by class name.
+</p>
 
 <warn>Enabling the <var/invoker/> servlet can
 create a security hole in your application.  Any servlet in the
@@ -919,7 +920,9 @@ INTEGRAL, and CONFIDENTIAL are allowed values.
 <defun title="constraint" localtoc-indent='1' version='Resin'>
 <parents>security-constraint</parents>
 
+<p>
 Defines a custom constraint.
+</p>
 
 <deftable-childtags>
 <tr><td>resin:type<td>A class that extends <a href="javadoc|com.caucho.http.security.AbstractConstraint|"/>
@@ -1025,5 +1028,6 @@ default, the authentication only lasts for a single session.</p>
 <defun title='locale-encoding-mapping-list' version='Servlet'>
 </defun>
 </section>
+</body>
 
 </document>

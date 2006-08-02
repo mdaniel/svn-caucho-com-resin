@@ -53,7 +53,7 @@ which process owns the file.</warn>
     <td>see below
 </deftable-childtags>
 
-<p>The default archive format is
+<p>The default archive format is</p>
 <pre>
   <var/path/> + ".%Y%m%d" or
   <var/path/> + ".%Y%m%d.%H" if rollover-period &lt; 1 day.
@@ -310,6 +310,7 @@ java.util.logging.* API.</p>
 </example>
 
 <p>A useful technique is to enable full debug logging to track down a problem:
+</p>
 
 <example title="debug logging">
 
@@ -559,6 +560,7 @@ warning, notice, info, debug. The default is <i/info/>.</p>
 <code/access-log/>, <code/stdout-log/>, and <code/stderr-log/> are configured
 to go to files, and <code/log/> is configured to go to a file or to
 <var/stderr/> or <var/stdout/> so that they show up on the console screen.
+</p>
 
 <deftable>
 <tr><th>Path<th>Result

@@ -39,7 +39,7 @@ the request from the browser. Resin's <code>mod_caucho</code> plugin integrates
 with Apache, it dispatches requests for JSPs and Servlets to one or more
 backend Resin servers.</p>
 
-<p> <figure src='apache_srun.gif'/> </p>
+<figure src='apache_srun.gif'/>
 
 <p>
 mod_caucho queries the backend server to distinguish the URLs going to Resin

@@ -15,24 +15,24 @@ state, but doesn't remember the client from one request to the next.</p>
 you need to implement:</p>
 
 <ul>
-<li>A remote interface
-<li>A home interface
-<li>The bean implementation
-<li>a deployment descriptor
+<li>A remote interface</li>
+<li>A home interface</li>
+<li>The bean implementation</li>
+<li>a deployment descriptor</li>
 </ul>
 
 <p>To configure Resin to be a server for the EJB you need to:</p>
 
 <ul>
-<li>Configure the ejb-server
-<li>Configure a protocol
+<li>Configure the ejb-server</li>
+<li>Configure a protocol</li>
 </ul>
 
 <p>To use the EJB from a client you need to:</p>
 <ul>
-<li>Create a factory for the correct protocol
-<li>Obtain a Home
-<li>Use the Home to create stubs to the remote object
+<li>Create a factory for the correct protocol</li>
+<li>Obtain a Home</li>
+<li>Use the Home to create stubs to the remote object</li>
 </ul>
 
 <p>In this tutorial, a simple "Hello" EJB is created and deployed within Resin. The use of the Hello EJB from a client is also demonstrated.</p>
@@ -49,7 +49,7 @@ you need to implement:</p>
 It extends <var/EJBObject/> and declares all the business methods.  Our
 only business method is the <code/hello/> method.</p>
 
-<example title="Hello.java" file="WEB-INF/classes/example/Hello.java">
+<example language="java" title="Hello.java" file="WEB-INF/classes/example/Hello.java">
 package example;
 
 import java.rmi.*;

@@ -8,8 +8,10 @@
   <body>
     <summary/>
 
+<section title="Acknowledgements">
 <p><em>Thanks to Guy McArthur and Carlos Hanson for the examples and much
 of the explanation for this tutorial.</em></p>
+</section>
 
 <section title="Modifying httpd.sh">
 

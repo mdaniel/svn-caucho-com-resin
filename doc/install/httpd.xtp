@@ -11,9 +11,7 @@
         performance and because it is easier to configure and maintain than
         using a separate web server.</p>
 
-      <p>
         <figure src='httpd.gif'/>
-      </p>
     </description>
 
   </header>
