@@ -304,8 +304,9 @@ public class Config {
     ConfigLibrary lib = ConfigLibrary.getLocal();
 
     HashMap<String,Method> methodMap = lib.getMethodMap();
-    for (String var : methodMap.keySet()) {
-      builder.putVar(var, methodMap.get(var));
+
+    for (Map.Entry<String,Method> entry : methodMap.entrySet()) {
+      builder.putVar(entry.getKey(), entry.getValue());
     }
 
     return builder;

@@ -34,6 +34,83 @@ r_cache = element cache {
   & (attribute disk-size { r_int } | element disk-size { r_int })?
 }
 
+r_cluster = element cluster {
+  attribute id { string },
+
+  r_root-directory?,
+
+  r_cluster-Content
+}
+
+r_cluster-default = element cluster-default {
+  r_cluster-Content
+}
+
+## <cluster> basic contents
+r_cluster-Basis =
+  r_env-Basis
+
+  & r_cache?
+
+  & (attribute connection-error-page { string }
+     | element connection-error-page { string })?
+
+  & r_ear-default*
+
+  & r_error-page*
+
+  & r_host*
+
+  & r_host-default*
+
+  & r_host-deploy*
+
+  & (attribute invocation-cache-size { r_kbytes-Type }
+     | element invocation-cache-size { r_kbytes-Type })?
+
+  & (attribute invocation-cache-max-url-length { r_int-Type }
+     | element invocation-cache-max-url-length { r_int-Type })?
+
+  & r_ignore-client-disconnect?
+
+  & r_persistent-store?
+
+  & r_ping*
+
+  & r_redeploy-check-interval?
+
+  & r_redeploy-mode?
+
+  & r_rewrite-dispatch?
+
+  & r_server*
+
+  & (attribute server-header { string }
+     | element server-header { string })?
+
+  & r_session-cookie?
+
+  & r_ssl-session-cookie?
+
+  & r_session-url-prefix?
+
+  & r_url-character-encoding?
+
+  & r_web-app-default*
+
+## <cluster> flow control
+r_cluster-Flow =
+  r_cluster-Basis
+
+  & element rcore:if { rcore_if-Args, r_cluster-Flow }*
+
+  & element rcore:choose {
+      element rcore:when { rcore_when-Args, r_cluster-Flow }+,
+      element rcore:otherwise { r_cluster-Flow }?
+    }*
+
+r_cluster-Content = r_cluster-Flow
+
 r_enable =
   attribute enable { r_boolean-Type }
   | element enable { r_boolean-Type }
@@ -236,6 +313,10 @@ r_resin-Basis =
 
   & r_boot?
 
+  & r_cluster*
+
+  & r_cluster-default*
+
   & (attribute environment-system-properties { string }
      | element environment-system-properties { string })?
 
@@ -248,7 +329,7 @@ r_resin-Basis =
 
   & r_security-manager?
 
-  & r_server*
+  & r_server-Compat*
 
   & (attribute shutdown-wait-max { r_period-Type }
      | element shutdown-wait-max { r_period-Type })?
@@ -291,16 +372,21 @@ r_select-manager = element select-manager {
   r_enable?
 }
 
-r_server = element (server|domain) {
+r_server = element server {
+  attribute id { string }
+}
+
+## old-style <server>
+r_server-Compat = element server {
   attribute id { string }?,
 
   r_root-directory?,
 
-  r_server-Content
+  r_server-Content-Compat
 }
 
 ## <server> basic contents
-r_server-Basis =
+r_server-Basis-Compat =
   r_env-Basis
 
   & r_access-log?
@@ -313,7 +399,7 @@ r_server-Basis =
   & (attribute connection-error-page { string }
      | element connection-error-page { string })?
 
-  & r_cluster*
+  & r_cluster-Compat*
 
   & r_cluster-definition*
 
@@ -369,20 +455,20 @@ r_server-Basis =
   & r_web-app-default*
 
 ## <server> flow control
-r_server-Flow =
-  r_server-Basis
+r_server-Flow-Compat =
+  r_server-Basis-Compat
 
-  & element rcore:env { rcore_env-Args, r_server-Flow }*
+  & element rcore:env { rcore_env-Args, r_server-Flow-Compat }*
 
-  & element rcore:if { rcore_if-Args, r_server-Flow }*
+  & element rcore:if { rcore_if-Args, r_server-Flow-Compat }*
 
   & element rcore:choose {
-      element rcore:when { rcore_when-Args, r_server-Flow }+,
-      element rcore:otherwise { r_server-Flow }?
+      element rcore:when { rcore_when-Args, r_server-Flow-Compat }+,
+      element rcore:otherwise { r_server-Flow-Compat }?
     }*
 
 ## complete <server> contents
-r_server-Content = r_server-Flow
+r_server-Content-Compat = r_server-Flow-Compat
 
 r_session-cookie = 
   attribute session-cookie { string }

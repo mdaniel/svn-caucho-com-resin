@@ -315,23 +315,6 @@ public class HttpRequest extends AbstractHttpRequest
    */
   private boolean isForce10()
   {
-    if (getVersion() < HTTP_1_1)
-      return false;
-
-    /*
-    Application app = getApplication();
-    if (app == null || ! app.hasBrowserMap())
-      return false;
-
-    CharSegment agent = getHeaderBuffer(userAgentCb, userAgentCb.length);
-    BrowserConfig browser = null;
-
-    if (agent != null && app != null)
-      browser = app.getBrowser(agent);
-
-    return browser != null && browser.isForce10();
-    */
-
     return false;
   }
 

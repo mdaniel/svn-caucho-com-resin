@@ -88,7 +88,7 @@ public class ClusterAdmin extends AbstractManagedObject
       ClusterServer server = serverList[i];
 
       if (server != selfServer)
-        serverMBeans[j++] = server.getAdmin();
+        serverMBeans[j++] = server.getServerConnector().getAdmin();
     }
 
     return serverMBeans;

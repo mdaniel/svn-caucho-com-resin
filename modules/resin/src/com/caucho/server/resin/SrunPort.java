@@ -39,7 +39,6 @@ import com.caucho.config.ConfigException;
 import com.caucho.server.port.Port;
 import com.caucho.server.port.ProtocolConfig;
 
-import com.caucho.server.http.SrunProtocol;
 import com.caucho.server.hmux.HmuxProtocol;
 
 /**

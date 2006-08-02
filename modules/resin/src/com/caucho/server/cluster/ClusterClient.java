@@ -66,7 +66,7 @@ public final class ClusterClient {
   private static final int ST_ACTIVE = 7;
   private static final int ST_CLOSED = 8;
 
-  private ClusterServer _server;
+  private ServerConnector _server;
 
   private String _debugId;
 
@@ -98,7 +98,7 @@ public final class ClusterClient {
   private volatile long _failCountTotal;
   private volatile long _busyCountTotal;
 
-  ClusterClient(ClusterServer server)
+  ClusterClient(ServerConnector server)
   {
     _server = server;
 
@@ -126,7 +126,7 @@ public final class ClusterClient {
   /**
    * Returns the cluster server.
    */
-  public ClusterServer getServer()
+  public ServerConnector getServer()
   {
     return _server;
   }

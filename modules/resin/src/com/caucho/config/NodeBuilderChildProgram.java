@@ -72,4 +72,9 @@ public class NodeBuilderChildProgram extends BuilderProgram {
     }
   }
   */
+
+  public String toString()
+  {
+    return "NodeBuilderChildProgram[" + _node + "]";
+  }
 }

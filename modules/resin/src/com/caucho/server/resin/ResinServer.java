@@ -29,8 +29,7 @@
 
 package com.caucho.server.resin;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.SchemaBean;
+import com.caucho.config.*;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.InitProgram;
 import com.caucho.config.types.Period;
@@ -89,6 +88,9 @@ public class ResinServer
   private String _serverId;
   private String _configFile;
 
+  private Path _resinHome;
+  private Path _rootDirectory;
+
   private String _userName;
   private String _groupName;
 
@@ -104,16 +106,18 @@ public class ResinServer
 
   private HashMap<String,Object> _variableMap = new HashMap<String,Object>();
 
-  private ArrayList<ServerController> _servers
-    = new ArrayList<ServerController>();
-
   private ArrayList<ResinServerListener> _listeners
     = new ArrayList<ResinServerListener>();
+
+  private ArrayList<InitProgram> _clusterDefaults
+    = new ArrayList<InitProgram>();
 
   private ArrayList<Cluster> _clusters
     = new ArrayList<Cluster>();
 
   private final Lifecycle _lifecycle = new Lifecycle(log, "Resin[]");
+
+  private Server _server;
 
   private long _initialStartTime;
   private long _startTime;
@@ -125,12 +129,20 @@ public class ResinServer
    */
   public ResinServer()
   {
+    this(Thread.currentThread().getContextClassLoader());
+  }
+
+  /**
+   * Creates a new resin server.
+   */
+  public ResinServer(ClassLoader loader)
+  {
     _resinServer = this;
 
-    _classLoader = Thread.currentThread().getContextClassLoader();
+    if (loader == null)
+      loader = ClassLoader.getSystemClassLoader();
 
-    if (_classLoader == null)
-      _classLoader = ClassLoader.getSystemClassLoader();
+    _classLoader = loader;
 
     Environment.init();
 
@@ -139,13 +151,8 @@ public class ResinServer
     _variableMap.put("resin", new Var());
     _variableMap.put("java", new JavaVar());
 
-    _variableMap.put("resinHome", CauchoSystem.getResinHome());
-    _variableMap.put("serverRoot", CauchoSystem.getServerRoot());
-
-    _variableMap.put("resin-home", CauchoSystem.getResinHome());
-    _variableMap.put("server-root", CauchoSystem.getServerRoot());
-
-    Vfs.setPwd(CauchoSystem.getServerRoot());
+    setResinHome(Vfs.getPwd());
+    setRootDirectory(Vfs.getPwd());
 
     VariableResolver varResolver = new SystemPropertiesResolver();
     varResolver = new MapVariableResolver(_variableMap, varResolver);
@@ -227,6 +234,44 @@ public class ResinServer
   }
 
   /**
+   * Sets resin.home
+   */
+  public void setResinHome(Path home)
+  {
+    _resinHome = home;
+
+    _variableMap.put("resinHome", _resinHome);
+    _variableMap.put("resin-home", _resinHome);
+  }
+
+  /**
+   * Returns resin.home.
+   */
+  public Path getResinHome()
+  {
+    return _resinHome;
+  }
+
+  /**
+   * Sets the root directory.
+   */
+  public void setRootDirectory(Path root)
+  {
+    _rootDirectory = root;
+    
+    _variableMap.put("serverRoot", root);
+    _variableMap.put("server-root", root);
+  }
+
+  /**
+   * Gets the root directory.
+   */
+  public Path getRootDirectory()
+  {
+    return _rootDirectory;
+  }
+
+  /**
    * Set true for Resin pro.
    */
   void setResinProfessional(boolean isPro)
@@ -255,9 +300,30 @@ public class ResinServer
     return clusters;
   }
 
-  void addCluster(Cluster cluster)
+  public void addClusterDefault(InitProgram program)
+  {
+    _clusterDefaults.add(program);
+  }
+
+  public Cluster createCluster()
+    throws Throwable
+  {
+    Cluster cluster = new Cluster(this);
+    
+    for (int i = 0; i < _clusterDefaults.size(); i++)
+      _clusterDefaults.get(i).configure(cluster);
+
+    return cluster;
+  }
+
+  public void addCluster(Cluster cluster)
   {
     _clusters.add(cluster);
+  }
+  
+  public ArrayList<Cluster> getClusterList()
+  {
+    return _clusters;
   }
 
   /**
@@ -288,20 +354,12 @@ public class ResinServer
   }
 
   /**
-   * Creates the server.
+   * Creates the compatibility server.
    */
-  public void addServer(ServerConfig config)
-    throws Exception
+  public ServerCompatConfig createServer()
   {
-    addDomain(config);
-  }
-
-  /**
-   * Creates the domain.
-   */
-  public void addDomain(ServerConfig config)
-    throws Exception
-  {
+    return new ServerCompatConfig(this);
+    /*
     if (Alarm.isTest() && _servers.size() == 1) {
       _servers.get(0).addConfigDefault(config);
     }
@@ -325,22 +383,7 @@ public class ResinServer
 
       controller.init();
     }
-  }
-
-  /**
-   * Returns the servers.
-   */
-  public ArrayList<ServerController> getServerList()
-  {
-    return _servers;
-  }
-
-  /**
-   * Returns the server.
-   */
-  public ServerController getServer()
-  {
-    return _servers.get(0);
+    */
   }
 
   /**
@@ -422,15 +465,6 @@ public class ResinServer
   public SecurityManagerConfig createSecurityManager()
   {
     return new SecurityManagerConfig();
-  }
-
-  /**
-   * Adds a new server (backwards compatibility).
-   */
-  public void addHttpServer(ServerConfig config)
-    throws Exception
-  {
-    addServer(config);
   }
 
   /**
@@ -522,6 +556,14 @@ public class ResinServer
   }
 
   /**
+   * Returns the active server.
+   */
+  public Server getServer()
+  {
+    return _server;
+  }
+
+  /**
    * Starts the server.
    */
   public void start()
@@ -538,6 +580,18 @@ public class ResinServer
     // force a GC on start
     System.gc();
 
+    // XXX: get the server
+
+    ClusterServer clusterServer = findClusterServer(_serverId);
+
+    if (clusterServer == null)
+      throw new ConfigException(L.l("server-id '{0}' has no matching <server> definition.",
+				    _serverId));
+    
+
+    _server = clusterServer.startServer();
+    
+    /*
     ArrayList<ServerController> servers = _servers;
 
     for (int i = 0; i < servers.size(); i++) {
@@ -545,30 +599,40 @@ public class ResinServer
 
       server.start();
     }
+    */
 
     Environment.start(getClassLoader());
 
+    /*
     if (! hasListeningPort()) {
       log.warning(L.l("-server \"{0}\" has no matching http or srun ports.  Check the resin.conf and -server values.",
                       _serverId));
     }
+    */
 
     log.info("Resin started in " + (Alarm.getCurrentTime() - start) + "ms");
   }
 
-  /**
-   * Returns true for a listening port.
-   */
-  private boolean hasListeningPort()
+  public ClusterServer findClusterServer(String id)
   {
-    for (int i = 0; i < _servers.size(); i++) {
-      ServerController server = _servers.get(i);
+    for (int i = 0; i < _clusters.size(); i++) {
+      Cluster cluster = _clusters.get(i);
 
-      if (server.hasListeningPort())
-        return true;
+      ClusterServer server = cluster.findServer(id);
+
+      if (server != null)
+	return server;
     }
 
-    return false;
+    return null;
+  }
+
+  /**
+   * Returns true if active.
+   */
+  public boolean isActive()
+  {
+    return _lifecycle.isActive();
   }
 
   /**
@@ -627,17 +691,10 @@ public class ResinServer
     listeners = new ArrayList<ResinServerListener>(_listeners);
     _listeners.clear();
 
-    servers = new ArrayList<ServerController>(_servers);
-    _servers.clear();
-
     J2EEManagedObject.unregister(jvmManagedObject);
     J2EEManagedObject.unregister(j2eeDomainManagedObject);
 
     try {
-      for (ServerController server : servers) {
-        server.destroy();
-      }
-
       for (int i = 0; i < listeners.size(); i++) {
         ResinServerListener listener = listeners.get(i);
 
@@ -667,7 +724,7 @@ public class ResinServer
      */
     public Path getHome()
     {
-      return CauchoSystem.getResinHome();
+      return ResinServer.this.getResinHome();
     }
 
     /**
@@ -677,7 +734,7 @@ public class ResinServer
      */
     public Path getRoot()
     {
-      return CauchoSystem.getServerRoot();
+      return ResinServer.this.getRootDirectory();
     }
 
     /**

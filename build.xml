@@ -578,53 +578,6 @@
     </java>
   </target>
 
-  <target name="jdk14-compat">
-    <java classname="com.caucho.bytecode.compat.Jdk15Compat">
-       <classpath>
-          <fileset dir="lib">
-            <include name="*.jar" />
-          </fileset>
-       </classpath>
-       <arg line="${modules}/resin/classes"/>
-    </java>
-
-    <jar jarfile="${lib}/resin.jar"
-         compress="${jar.compress}" index="${jar.index}"
-         manifest="${modules}/resin/src/manifest">
-      <fileset dir="${modules}/resin/classes">
-        <exclude name=".cvsignore"/>
-        <exclude name=".svnignore"/>
-      </fileset>
-    </jar>
-
-    <jar jarfile="${lib}/resinboot.jar"
-         compress="${jar.compress}" index="${jar.index}"
-         manifest="${modules}/resin/src/boot-manifest">
-      <fileset dir="${modules}/resin/classes">
-        <exclude name=".cvsignore"/>
-        <exclude name=".svnignore"/>
-        <include name="com/caucho/server/boot/*"/>
-      </fileset>
-    </jar>
-
-    <java classname="com.caucho.bytecode.compat.Jdk15Compat" fork="true">
-       <classpath>
-          <fileset dir="lib">
-            <include name="*.jar" />
-          </fileset>
-       </classpath>
-       <arg line="${modules}/webutil/classes"/>
-    </java>
-
-    <jar jarfile="${lib}/webutil.jar"
-         compress="${jar.compress}" index="${jar.index}">
-      <fileset dir="${modules}/webutil/classes">
-        <exclude name=".cvsignore"/>
-        <exclude name=".svnignore"/>
-      </fileset>
-    </jar>
-  </target>
-
   <target name="dist" depends="dist.build, dist.package"/>
   
   <target name="configure">
@@ -632,7 +585,7 @@
   </target>
 
   <target name="dist.build" 
-          depends="compile, webapps, win32, configure, javadoc, jdk14-compat, relaxng">
+          depends="compile, webapps, win32, configure, javadoc, relaxng">
     <property name="dist.name" value="${shortproduct}-${version}"/>
 
     <delete dir="${dist}/${dist.name}"/>
@@ -860,16 +813,16 @@
       </fileset>
     </jar>
 
-    <copy tofile="${dist}/${shortproduct}-3_0-snap.zip"
+    <copy tofile="${dist}/${shortproduct}-3_1-snap.zip"
           file="${dist}/${shortproduct}-${version}.zip"/>
 
-    <copy tofile="${dist}/${shortproduct}-3_0-snap.tar.gz"
+    <copy tofile="${dist}/${shortproduct}-3_1-snap.tar.gz"
           file="${dist}/${shortproduct}-${version}.tar.gz"/>
 
-    <copy tofile="${dist}/${shortproduct}-3_0-snap-src.zip"
+    <copy tofile="${dist}/${shortproduct}-3_1-snap-src.zip"
           file="${dist}/${shortproduct}-${version}-src.zip"/>
 
-    <copy tofile="${dist}/${shortproduct}-3_0-snap-src.tar.gz"
+    <copy tofile="${dist}/${shortproduct}-3_1-snap-src.tar.gz"
           file="${dist}/${shortproduct}-${version}-src.tar.gz"/>
   </target>
 

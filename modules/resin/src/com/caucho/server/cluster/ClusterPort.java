@@ -40,7 +40,6 @@ import com.caucho.config.ConfigException;
 import com.caucho.server.port.Port;
 import com.caucho.server.port.Protocol;
 
-import com.caucho.server.http.SrunProtocol;
 import com.caucho.server.hmux.HmuxProtocol;
 
 /**
@@ -63,8 +62,6 @@ public class ClusterPort extends Port {
     if (! protocol.getClass().equals(Protocol.class)) {
       super.setProtocol(protocol);
     }
-    else if (protocol.getProtocolName().equals("srun"))
-      _protocolName = "srun";
     else if (protocol.getProtocolName().equals("hmux"))
       _protocolName = "hmux";
     else
@@ -133,11 +130,6 @@ public class ClusterPort extends Port {
   {
     if (getProtocol() != null &&
 	! getProtocol().getClass().equals(Protocol.class)) {
-    }
-    else if (getClusterProtocol().equals("srun")) {
-      SrunProtocol protocol = new SrunProtocol();
-      protocol.setParent(this);
-      setProtocol(protocol);
     }
     else if (getClusterProtocol().equals("hmux")) {
       HmuxProtocol protocol = new HmuxProtocol();

@@ -68,11 +68,7 @@ import com.caucho.server.resin.ServletServer;
 
 import com.caucho.server.http.InvocationKey;
 
-import com.caucho.server.cluster.Cluster;
-import com.caucho.server.cluster.ClusterServer;
-import com.caucho.server.cluster.ClusterContainer;
-import com.caucho.server.cluster.BackingManager;
-import com.caucho.server.cluster.ObjectBacking;
+import com.caucho.server.cluster.*;
 
 /**
  * Handles the filter mapping (config) requests from a remote dispatcher.
@@ -394,13 +390,17 @@ public class HmuxDispatchRequest {
     for (int i = 0; i < servers.length; i++) {
       ClusterServer server = servers[i];
 
-      if (server != null) {
-	String srunHost = server.getAddress() + ":" + server.getPort();
+      if (server != null && server.getClusterPort() != null) {
+	ClusterPort port = server.getClusterPort();
+	
+	String srunHost = port.getAddress() + ":" + port.getPort();
 
+	/*
 	if (server.isBackup())
 	  writeString(os, HMUX_SRUN_BACKUP, srunHost);
 	else
-	  writeString(os, HMUX_SRUN, srunHost);
+	*/
+	writeString(os, HMUX_SRUN, srunHost);
       
 	crc64 = Crc64.generate(crc64, srunHost);
       }

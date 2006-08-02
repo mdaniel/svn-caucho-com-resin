@@ -19,45 +19,31 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.server.http;
+package com.caucho.server.resin;
 
-import com.caucho.server.resin.Resin;
+import com.caucho.util.*;
 
 /**
- * The main class for the HTTP server.
- *
- * <p>TcpServer handles the main thread control.  HttpServer just needs
- * to create the right kind of request when a new thread is spawned.
- *
- * <p>If the -deadwait flag is received, the main thread will wait on
- * System.in.  When System.in closes, HttpServer will gracefully shutdown
- * the server.  This will automatically close the server when a parent
- * watchdog process closes.
- *
- * <p>To use the -deadwait feature, the watchdog will need to create a
- * pipe and dup() the Java process's stdin.
- *
- * @see com.caucho.server.TcpServer
+ * Compatiblity configuration for Resin 3.0-style configuration.
  */
-public class ResinServer {
+public class ServerCompatConfig {
+  private static final L10N L = new L10N(ServerCompatConfig.class);
+
+  private final ResinServer _resin;
 
   /**
-   * The main start of the web server.
-   *
-   * <pre>
-   * -conf resin.conf   : alternate configuration file
-   * -port port         : set the server's portt
-   * <pre>
+   * Creates a new resin server.
    */
-  public static void main(String []argv) throws Exception
+  public ServerCompatConfig(ResinServer resin)
   {
-    Resin.main(argv);
+    _resin = resin;
   }
 }

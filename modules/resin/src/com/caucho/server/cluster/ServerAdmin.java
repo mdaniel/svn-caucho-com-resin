@@ -19,37 +19,15 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.server.http;
+package com.caucho.server.cluster;
 
-import java.util.*;
-import java.io.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-class BrowserConfig  {
-  private boolean isForce10;
-
-  BrowserConfig()
-  {
-  }
-
-  BrowserConfig(boolean isForce10)
-  {
-    this.isForce10 = isForce10;
-  }
-
-  boolean isForce10()
-  {
-    return isForce10;
-  }
+public class ServerAdmin {
 }

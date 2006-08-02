@@ -44,7 +44,7 @@ import com.caucho.xml.XmlChar;
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.AbstractHttpResponse;
 
-import com.caucho.server.resin.ServletServer;
+import com.caucho.server.cluster.Server;
 
 public class HttpResponse extends AbstractHttpResponse {
   static final byte []_http10ok = "HTTP/1.0 200 OK".getBytes();
@@ -77,7 +77,7 @@ public class HttpResponse extends AbstractHttpResponse {
 
     _request = request;
 
-    ServletServer server = (ServletServer) request.getDispatchServer();
+    Server server = (Server) request.getDispatchServer();
 
     _resinServerBytes = ("\r\nServer: " + server.getServerHeader()).getBytes();
   }

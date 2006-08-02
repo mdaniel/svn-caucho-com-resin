@@ -61,11 +61,11 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.license.LicenseCheck;
 
-public class Resin implements ResinServerListener {
+public class ResinMain implements ResinServerListener {
   private static L10N _L;
   private static Logger _log;
 
-  private static Resin _resin;
+  private static ResinMain _resinMain;
   
   private String _resinConf = "conf/resin.conf";
   private String _configServer;
@@ -75,7 +75,7 @@ public class Resin implements ResinServerListener {
   private ClassLoader _systemClassLoader;
   private Thread _mainThread;
   
-  private ResinServer _server;
+  private ResinServer _resin;
   private EnvironmentClassLoader _classLoader;
 
   private long _startTime;
@@ -93,7 +93,7 @@ public class Resin implements ResinServerListener {
    * @param argv the command-line to initialize Resin with
    * @param isHttp default to http
    */
-  public Resin(String []argv)
+  public ResinMain(String []argv)
     throws Exception
   {
     _systemClassLoader = Thread.currentThread().getContextClassLoader();
@@ -115,7 +115,7 @@ public class Resin implements ResinServerListener {
    */
   public ResinServer getServer()
   {
-    return _server;
+    return _resin;
   }
 
   private void parseCommandLine(String []argv)
@@ -338,7 +338,7 @@ public class Resin implements ResinServerListener {
 
     config.configure(server, Vfs.lookup(_resinConf), server.getSchema());
     
-    _server = server;
+    _resin = server;
     server.start();
   }
 
@@ -373,12 +373,12 @@ public class Resin implements ResinServerListener {
   /**
    * Called when the server restarts.
    */
-  public void closeEvent(ResinServer server)
+  public void closeEvent(ResinServer resin)
   {
     try {
-      if (_server != null && _server.isRestartOnClose()) {
+      if (_resin != null && _resin.isRestartOnClose()) {
 	_isRestarting = true;
-	_server = null;
+	_resin = null;
 
 	log().info("restarting Resin");
 
@@ -406,7 +406,7 @@ public class Resin implements ResinServerListener {
     int socketExceptionCount = 0;
     Integer memoryTest;
     Runtime runtime = Runtime.getRuntime();
-    ResinServer server;
+    ResinServer resin;
     InputStream pingIn = null;
     OutputStream pingOut = null;
 
@@ -465,15 +465,15 @@ public class Resin implements ResinServerListener {
      * gracefully when the parent dies.
      */
     while (! _isClosed && 
-	   (server = _server) != null &&
-	   (! server.isClosing() || server.isRestartOnClose())) {
+	   (resin = _resin) != null &&
+	   (! resin.isClosing() || resin.isRestartOnClose())) {
       try {
 	Thread.sleep(10);
 
 	if (_isRestarting)
 	  continue;
 	
-	long minFreeMemory = _server.getMinFreeMemory();
+	long minFreeMemory = _resin.getMinFreeMemory();
 
 	if (minFreeMemory <= 0) {
 	  // memory check disabled
@@ -595,13 +595,13 @@ public class Resin implements ResinServerListener {
    */
   public static void shutdown()
   {
-    Resin resin = _resin;
+    ResinMain resinMain = _resinMain;
 
-    if (resin != null) {
-      ResinServer server = resin.getServer();
+    if (resinMain != null) {
+      ResinServer resin = resinMain.getServer();
 
-      if (server != null)
-	server.destroy();
+      if (resin != null)
+	resin.destroy();
     }
   }
 
@@ -618,9 +618,9 @@ public class Resin implements ResinServerListener {
     try {
       validateEnvironment();
 
-      Resin resin = new Resin(argv);
+      ResinMain resin = new ResinMain(argv);
 
-      _resin = resin;
+      _resinMain = resin;
 
       resin.init();
 
@@ -752,7 +752,7 @@ public class Resin implements ResinServerListener {
   private static L10N L()
   {
     if (_L == null)
-      _L = new L10N(Resin.class);
+      _L = new L10N(ResinMain.class);
 
     return _L;
   }
@@ -760,7 +760,7 @@ public class Resin implements ResinServerListener {
   private static Logger log()
   {
     if (_log == null)
-      _log = Logger.getLogger(Resin.class.getName());
+      _log = Logger.getLogger(ResinMain.class.getName());
 
     return _log;
   }

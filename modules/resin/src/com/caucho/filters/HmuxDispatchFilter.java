@@ -216,7 +216,7 @@ public class HmuxDispatchFilter implements Filter {
       return entry;
     
     ClusterStream stream = null;
-    stream = srun.getClient().openIfLive();
+    stream = srun.getServerConnector().getClient().openIfLive();
 
     if (stream == null)
       return entry;

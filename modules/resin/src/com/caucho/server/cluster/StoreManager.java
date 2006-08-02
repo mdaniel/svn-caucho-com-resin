@@ -310,7 +310,7 @@ abstract public class StoreManager
 	if (server == null || server == _selfServer)
 	  continue;
 
-	ClusterClient client = server.getClient();
+	ClusterClient client = server.getServerConnector().getClient();
 
 	try {
 	  if (client != null) {

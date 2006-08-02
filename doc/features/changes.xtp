@@ -2,7 +2,12 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0.snap - July 20, 2006'>
+<s2 title='3.1snap - Aug 1, 2006'>
+<ul>
+</ul>
+</s2>
+
+<s2 title='3.0.20 - Aug 1, 2006'>
 <ul>
 <li>removeAttribute(PAGE_SCOPE) was removing all attributes (#1271, rep by planetpratt)
 <li>redeploy-mode is allowed in web.xml

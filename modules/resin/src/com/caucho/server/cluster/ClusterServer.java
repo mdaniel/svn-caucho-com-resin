@@ -29,20 +29,24 @@
 
 package com.caucho.server.cluster;
 
-import java.util.HashMap;
+import java.util.*;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import java.util.logging.*;
 
 import java.io.IOException;
 
 import javax.management.ObjectName;
+
+import com.caucho.config.ConfigException;
 
 import com.caucho.log.Log;
 
 import com.caucho.jmx.Jmx;
 
 import com.caucho.management.server.ServerConnectorMXBean;
+
+import com.caucho.server.port.*;
+import com.caucho.server.http.*;
 
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Path;
@@ -65,31 +69,38 @@ public class ClusterServer {
   private ObjectName _objectName;
 
   private Cluster _cluster;
-  private ClusterGroup _group;
+  private String _id = "";
 
-  private ClusterPort _port;
+  private int _index;
 
-  private int _srunIndex;
-  private Path _tcpPath;
+  private ClusterPort _clusterPort;
+  private ServerConnector _conn;
 
-  private ClusterClient _client;
+  private ArrayList<Port> _ports = new ArrayList<Port>();
 
-  private ClusterClientAdmin _admin;
-
-  public ClusterServer()
-  {
-  }
-
-  /**
-   * Sets the owning cluster.
-   */
-  public void setCluster(Cluster cluster)
+  public ClusterServer(Cluster cluster)
   {
     _cluster = cluster;
   }
 
   /**
-   * Gets the owning cluster.
+   * Gets the server identifier.
+   */
+  public String getId()
+  {
+    return _id;
+  }
+
+  /**
+   * Sets the server identifier.
+   */
+  public void setId(String id)
+  {
+    _id = id;
+  }
+
+  /**
+   * Returns the cluster.
    */
   public Cluster getCluster()
   {
@@ -97,43 +108,68 @@ public class ClusterServer {
   }
 
   /**
-   * Returns the object name.
+   * Returns the server index.
    */
-  public ObjectName getObjectName()
+  public int getIndex()
   {
-    return _objectName;
+    return _index;
   }
 
   /**
-   * Returns the admin.
+   * Adds a port.
    */
-  public ServerConnectorMXBean getAdmin()
+  public void addPort(Port port)
   {
-    return _admin;
+    _ports.add(port);
   }
 
   /**
-   * Sets the owning group.
+   * Adds a http.
    */
-  public void setGroup(ClusterGroup group)
+  public void addHttp(Port port)
+    throws ConfigException
   {
-    _group = group;
+    // port.setServer(this);
+
+    /*
+    if (_url.equals("") && port.matchesServerId(_serverId)) {
+      if (port.getAddress() == null || port.getAddress().equals("") ||
+          port.getAddress().equals("*"))
+        _url = "http://localhost";
+      else
+        _url = "http://" + port.getAddress();
+
+      if (port.getPort() != 0)
+        _url += ":" + port.getPort();
+
+      if (_hostContainer != null)
+        _hostContainer.setURL(_url);
+    }
+    */
+
+    if (port.getProtocol() == null) {
+      HttpProtocol protocol = new HttpProtocol();
+      protocol.setParent(port);
+      port.setProtocol(protocol);
+    }
+
+    addPort(port);
   }
 
   /**
-   * Gets the owning group.
+   * Returns the ports.
    */
-  public ClusterGroup getGroup()
+  public ArrayList<Port> getPorts()
   {
-    return _group;
+    return _ports;
   }
 
   /**
    * Sets the ClusterPort.
    */
-  public void setPort(ClusterPort port)
+  public void setClusterPort(ClusterPort port)
   {
-    _port = port;
+    _clusterPort = port;
   }
 
   /**
@@ -141,116 +177,15 @@ public class ClusterServer {
    */
   public ClusterPort getClusterPort()
   {
-    return _port;
+    return _clusterPort;
   }
 
   /**
-   * Returns the user-readable id of the target server.
+   * Returns the server connector.
    */
-  public String getId()
+  public ServerConnector getServerConnector()
   {
-    return _port.getServerId();
-  }
-
-  /**
-   * Returns the index of this connection in the connection group.
-   */
-  public int getIndex()
-  {
-    return _port.getIndex();
-  }
-
-  /**
-   * Returns the hostname of the target server.
-   */
-  public String getAddress()
-  {
-    return _port.getAddress();
-  }
-
-  /**
-   * Gets the port of the target server.
-   */
-  public int getPort()
-  {
-    return _port.getPort();
-  }
-
-  /**
-   * Returns true if the target server is a backup.
-   */
-  public boolean isBackup()
-  {
-    return _port.isBackup();
-  }
-
-  /**
-   * Returns the time in milliseconds for the slow start throttling.
-   */
-  public long getWarmupTime()
-  {
-    return _cluster.getClientWarmupTime();
-  }
-
-  /**
-   * Returns the socket timeout when connecting to the
-   * target server.
-   */
-  public long getClientConnectTimeout()
-  {
-    return _cluster.getClientConnectTimeout();
-  }
-
-  /**
-   * Returns the socket timeout when reading from the
-   * target server.
-   */
-  public long getClientReadTimeout()
-  {
-    return _cluster.getClientReadTimeout();
-  }
-
-  /**
-   * Returns the socket timeout when writing to the
-   * target server.
-   */
-  public long getClientWriteTimeout()
-  {
-    return _cluster.getClientWriteTimeout();
-  }
-
-   /**
-   * @deprecated
-   *
-   * Use {@link #getReadTimeout} or {@link #getWriteTimeout}
-   */
-  public long getTimeout()
-  {
-    return getClientReadTimeout();
-  }
-
-  /**
-   * Returns how long the connection can be cached in the free pool.
-   */
-  public long getMaxIdleTime()
-  {
-    return _cluster.getClientMaxIdleTime();
-  }
-
-  /**
-   * Returns how long the connection will be treated as dead.
-   */
-  public long getFailRecoverTime()
-  {
-    return _cluster.getClientFailRecoverTime();
-  }
-
-  /**
-   * Returns the load balance weight.
-   */
-  public int getClientWeight()
-  {
-    return _port.getClientWeight();
+    return _conn;
   }
 
   /**
@@ -259,199 +194,26 @@ public class ClusterServer {
   public void init()
     throws Exception
   {
-    String address = getAddress();
-
-    if (address == null)
-      address = "localhost";
-
-    HashMap<String,Object> attr = new HashMap<String,Object>();
-    attr.put("connect-timeout", new Long(getClientConnectTimeout()));
-
-    if (_port.isSSL())
-      _tcpPath = Vfs.lookup("tcps://" + address + ":" + getPort(), attr);
-    else
-      _tcpPath = Vfs.lookup("tcp://" + address + ":" + getPort(), attr);
-
-    _client = new ClusterClient(this);
-
-    _admin = new ClusterClientAdmin(_client);
-
-    try {
-      String name = getId();
-
-      if (name == null)
-        name = "";
-
-      _admin.register();
-      /*
-      _objectName = new ObjectName("resin:type=ClusterServer,name=" + name);
-
-      Jmx.register(_admin, _objectName);
-      */
-    } catch (Throwable e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
   }
-  
+
   /**
-   * Returns true if the server is dead.
+   * Starts the server.
    */
-  public boolean isDead()
+  public Server startServer()
+    throws Throwable
   {
-    return ! _client.isActive();
-  }
-  
-  /**
-   * Returns true if the server is dead.
-   */
-  public boolean canOpenSoft()
-  {
-    return _client.canOpenSoft();
+    return _cluster.startServer(this);
   }
 
   /**
-   * Returns true if active.
-   */
-  public boolean isActive()
-  {
-    return _client.isEnabled();
-  }
-
-  /**
-   * Enable the client
-   */
-  public void enable()
-  {
-    _client.start();
-  }
-
-  /**
-   * Disable the client
-   */
-  public void disable()
-  {
-    _client.stop();
-  }
-
-  /**
-   * Returns the client.
-   */
-  public ClusterClient getClient()
-  {
-    return _client;
-  }
-
-  /**
-   * Open a read/write pair to the target srun connection.
-   *
-   * @return the socket's read/write pair.
-   */
-  ReadWritePair openTCPPair()
-    throws IOException
-  {
-    return _tcpPath.openReadWrite();
-  }
-
-  /**
-   * We now know that the server is live.
-   */
-  public void wake()
-  {
-    _client.wake();
-  }
-
-  /**
-   * Returns true if can connect to the client.
-   */
-  public boolean canConnect()
-  {
-    try {
-      wake();
-
-      ClusterStream stream = _client.open();
-
-      if (stream != null) {
-        stream.free();
-
-        return true;
-      }
-
-      return false;
-    } catch (Throwable e) {
-      log.log(Level.FINER, e.toString(), e);
-
-      return false;
-    }
-  }
-
-  /**
-   * Generate the primary, secondary, tertiary, returning the value encoded
-   * in a long.
-   */
-  public long generateBackupCode()
-  {
-    ClusterServer []srunList = getCluster().getServerList();
-    int srunLength = srunList.length;
-
-    long index = _port.getIndex();
-    long backupCode = index;
-    
-    long backupLength = srunLength;
-    if (backupLength < 3)
-      backupLength = 3;
-    int backup;
-
-    if (srunLength <= 1) {
-      backup = 0;
-      backupCode |= 1L << 16;
-    }
-    else if (srunLength == 2) {
-      backup = 0;
-      
-      backupCode |= ((index + 1L) % 2) << 16;
-    }
-    else {
-      int sublen = srunLength - 1;
-      if (sublen > 7)
-	sublen = 7;
-	
-      backup = RandomUtil.nextInt(sublen);
-      
-      backupCode |= ((index + backup + 1L) % backupLength) << 16;
-    }
-
-    if (srunLength <= 2)
-      backupCode |= 2L << 32;
-    else {
-      int sublen = srunLength - 2;
-      if (sublen > 6)
-	sublen = 6;
-
-      int third = RandomUtil.nextInt(sublen);
-
-      if (backup <= third)
-	third += 1;
-
-      backupCode |= ((index + third + 1) % backupLength) << 32;
-    }
-
-    return backupCode;
-  }
-
-  /**
-   * Close any clients.
+   * Close any ports.
    */
   public void close()
   {
-    _client.close();
   }
 
   public String toString()
   {
-    return ("ClusterServer[id=" + _port.getServerId() +
-            " index=" + _port.getIndex() +
-            " address=" + _port.getAddress() + ":" + _port.getPort() +
-            " cluster=" + _cluster.getId() + "]");
+    return ("ClusterServer[id=" + getId() + "]");
   }
-
 }

@@ -29,17 +29,14 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.config.ConfigException;
+import com.caucho.config.*;
 import com.caucho.config.types.Period;
 import com.caucho.jmx.Jmx;
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.EnvironmentListener;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.log.Log;
+import com.caucho.loader.*;
 import com.caucho.management.server.ClusterMXBean;
-import com.caucho.util.L10N;
+import com.caucho.server.host.*;
+import com.caucho.server.resin.*;
+import com.caucho.util.*;
 
 import javax.management.ObjectName;
 import java.util.ArrayList;
@@ -49,9 +46,9 @@ import java.util.logging.Logger;
 /**
  * Defines a set of clustered servers.
  */
-public class Cluster implements EnvironmentListener {
-  static protected final L10N L = new L10N(ClusterGroup.class);
-  static protected final Logger log = Log.open(Cluster.class);
+public class Cluster implements EnvironmentListener, EnvironmentBean {
+  private static final L10N L = new L10N(ClusterGroup.class);
+  private static final Logger log = Logger.getLogger(Cluster.class.getName());
 
   static protected final EnvironmentLocal<String> _serverIdLocal
     = new EnvironmentLocal<String>("caucho.server-id");
@@ -62,6 +59,10 @@ public class Cluster implements EnvironmentListener {
   private String _id = "";
 
   private String _serverId = "";
+
+  private EnvironmentClassLoader _classLoader;
+  
+  private ResinServer _resin;
 
   private ClusterAdmin _admin;
   private ObjectName _objectName;
@@ -75,6 +76,7 @@ public class Cluster implements EnvironmentListener {
 
   private StoreManager _clusterStore;
 
+  // XXX: moving to server-default
   private long _clientMaxIdleTime = 30000L;
   private long _clientFailRecoverTime = 15000L;
   private long _clientWarmupTime = 60000L;
@@ -84,16 +86,26 @@ public class Cluster implements EnvironmentListener {
   private long _clientWriteTimeout = 60000L;
   private long _clientConnectTimeout = 5000L;
 
-  private String _ref;
+  private BuilderProgramContainer _serverProgram
+    = new BuilderProgramContainer();
+
+  private Server _server;
 
   private volatile boolean _isClosed;
 
+  public Cluster(ResinServer resin)
+  {
+    this();
+
+    _resin = resin;
+  }
+    
   public Cluster()
   {
+    Thread thread = Thread.currentThread();
+    _classLoader = (EnvironmentClassLoader) thread.getContextClassLoader();
+    
     Environment.addEnvironmentListener(this);
-
-    _group = ClusterGroup.createClusterGroup();
-    _group.addCluster(this);
   }
 
   /**
@@ -133,11 +145,11 @@ public class Cluster implements EnvironmentListener {
   }
 
   /**
-   * Sets the cluster ref.
+   * Returns the environment class loader.
    */
-  public void setClusterRef(String ref)
+  public ClassLoader getClassLoader()
   {
-    _ref = ref;
+    return _classLoader;
   }
 
   /**
@@ -166,7 +178,7 @@ public class Cluster implements EnvironmentListener {
   /**
    * Adds a new server to the cluster.
    */
-  void addServer(ClusterServer server)
+  public void addServer(ClusterServer server)
     throws ConfigException
   {
     ClusterServer oldServer = findServer(server.getId());
@@ -179,39 +191,6 @@ public class Cluster implements EnvironmentListener {
     _serverArray = new ClusterServer[_serverList.size()];
     _serverList.toArray(_serverArray);
   }
-  /**
-   * Adds a srun server.
-   */
-  public void addPort(ClusterPort port)
-    throws Exception
-  {
-    ClusterServer server = new ClusterServer();
-    server.setCluster(this);
-    server.setPort(port);
-
-    if (port.getIndex() >= 0 &&
-	port.getIndex() != _serverList.size()) {
-      log.config(L.l("srun index '{0}' for port 'id={1}' does not match expected cluster index '{2}'",
-		     port.getIndex() + 1,
-		     port.getServerId(),
-		     _serverList.size() + 1));
-    }
-
-    port.setIndex(_serverList.size() + 1);
-    
-    server.init();
-    
-    addServer(server);
-  }
-
-  /**
-   * Adds a srun server.
-   */
-  public void addSrun(ClusterPort port)
-    throws Exception
-  {
-    addPort(port);
-  }
 
   /**
    * Adds a srun server.
@@ -223,8 +202,11 @@ public class Cluster implements EnvironmentListener {
       ClusterPort clusterPort = server.getClusterPort();
 
       if (address.equals(clusterPort.getAddress()) &&
-	  port == clusterPort.getPort())
-	return server.getClient();
+	  port == clusterPort.getPort()) {
+	// XXX:
+	//return server.getClient();
+	return null;
+      }
     }
 
     return null;
@@ -451,13 +433,19 @@ public class Cluster implements EnvironmentListener {
   }
 
   /**
+   * Adds a program.
+   */
+  public void addBuilderProgram(BuilderProgram program)
+  {
+    _serverProgram.addProgram(program);
+  }
+
+  /**
    * Initializes the cluster.
    */
   public void init()
     throws ConfigException
   {
-    ClusterContainer container = ClusterContainer.create();
-
     for (int i = 0; i < _serverList.size(); i++) {
       ClusterServer server = _serverList.get(i);
 
@@ -478,26 +466,13 @@ public class Cluster implements EnvironmentListener {
     if (serverId == null)
       serverId = "";
 
-    if (_ref != null) {
-      Cluster cluster = container.findCluster(_ref);
+    ClusterServer self = findServer(serverId);
 
-      if (cluster == null)
-        throw new ConfigException(L.l("'{0}' is an unknown cluster-ref.",
-                                      _ref));
-
-      _clusterLocal.set(cluster);
-    }
-    else {
-      container.addCluster(this);
-
-      ClusterServer self = findServer(serverId);
-
-      if (self != null)
-        _clusterLocal.set(this);
-      else if (_clusterLocal.get() == null && _serverList.size() == 0) {
-        // if it's the empty cluster, add it
-        _clusterLocal.set(this);
-      }
+    if (self != null)
+      _clusterLocal.set(this);
+    else if (_clusterLocal.get() == null && _serverList.size() == 0) {
+      // if it's the empty cluster, add it
+      _clusterLocal.set(this);
     }
 
     try {
@@ -601,6 +576,28 @@ public class Cluster implements EnvironmentListener {
     }
 
     return ports;
+  }
+
+  /**
+   * Starts the server.
+   */
+  Server startServer(ClusterServer clusterServer)
+    throws Throwable
+  {
+    synchronized (this) {
+      if (_server != null)
+	return _server;
+
+      Server server = new Server(clusterServer);
+
+      _serverProgram.configure(server);
+
+      server.start();
+
+      _server = server;
+
+      return server;
+    }
   }
 
   /**
