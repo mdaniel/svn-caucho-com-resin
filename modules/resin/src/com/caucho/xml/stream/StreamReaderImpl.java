@@ -52,16 +52,26 @@ public class StreamReaderImpl implements XMLStreamReader {
 
   private int _col = 1;
   private int _row = 1;
+  private int _ofs = 1;
+
+  private NamespaceTracker _namespaceTracker = new NamespaceTracker();
 
   private String _version;
   private String _encoding;
+
+  private String _publicId;
+  private String _systemId;
 
   private int _token;
   private int _current;
   private int _state;
   private boolean _isShortTag;
+  private boolean _isWhitespace = false;
 
   private boolean _eofEncountered = false;
+
+  private String _processingInstructionTarget;
+  private String _processingInstructionData;
 
   private RawName _rawTagName = new RawName();
   private QName _name;
@@ -78,7 +88,33 @@ public class StreamReaderImpl implements XMLStreamReader {
   public StreamReaderImpl(InputStream is)
     throws XMLStreamException
   {
-    _is = Vfs.openRead(is);
+    this(Vfs.openRead(is));
+  }
+
+  public StreamReaderImpl(Reader r)
+    throws XMLStreamException
+  {
+    this(Vfs.openRead(r));
+  }
+
+  public StreamReaderImpl(InputStream is, String systemId)
+    throws XMLStreamException
+  {
+    this(Vfs.openRead(is));
+    _systemId = systemId;
+  }
+
+  public StreamReaderImpl(Reader r, String systemId)
+    throws XMLStreamException
+  {
+    this(Vfs.openRead(r));
+    _systemId = systemId;
+  }
+
+  public StreamReaderImpl(ReadStream is)
+    throws XMLStreamException
+  {
+    _is = is;
 
     readHeader();
 
@@ -168,12 +204,12 @@ public class StreamReaderImpl implements XMLStreamReader {
 
   public String getCharacterEncodingScheme()
   {
-    return null;
+    return _encoding;
   }
 
   public String getElementText() throws XMLStreamException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return getText();
   }
 
   public String getEncoding()
@@ -193,7 +229,7 @@ public class StreamReaderImpl implements XMLStreamReader {
 
   public Location getLocation()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return new StreamReaderLocation(_ofs, _row, _col);
   }
 
   public QName getName()
@@ -201,25 +237,22 @@ public class StreamReaderImpl implements XMLStreamReader {
     if (_name != null)
       return _name;
     else
-      /*
-      throw new IllegalStateException(L.l("getName() must be called only on a START_ELEMENT or END_ELEMENT event"));
-      */
       return null;
   }
 
   public NamespaceContext getNamespaceContext()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _namespaceTracker;
   }
 
   public int getNamespaceCount()
   {
-    return 0;
+    return _namespaceTracker.getNumDecls();
   }
 
   public String getNamespacePrefix(int index)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _namespaceTracker.getPrefix(index);
   }
 
   public String getNamespaceURI()
@@ -235,22 +268,26 @@ public class StreamReaderImpl implements XMLStreamReader {
 
   public String getNamespaceURI(int index)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _namespaceTracker.getUri(index);
   }
 
   public String getNamespaceURI(String prefix)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _namespaceTracker.getUri(prefix);
   }
 
   public String getPIData()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    if (_current != PROCESSING_INSTRUCTION)
+      return null;
+    return _processingInstructionData;
   }
 
   public String getPITarget()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    if (_current != PROCESSING_INSTRUCTION)
+      return null;
+    return _processingInstructionTarget;
   }
 
   public String getPrefix()
@@ -266,7 +303,16 @@ public class StreamReaderImpl implements XMLStreamReader {
 
   public Object getProperty(String name) throws IllegalArgumentException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    if ("javax.xml.stream.notations".equals(name)) {
+      throw new UnsupportedOperationException(getClass().getName());
+    }
+    else if ("javax.xml.stream.entities".equals(name)) {
+      throw new UnsupportedOperationException(getClass().getName());
+    }
+    else {
+      throw
+        new IllegalArgumentException("property \""+name+"+\" not supported");
+    }
   }
 
   public String getText()
@@ -279,9 +325,15 @@ public class StreamReaderImpl implements XMLStreamReader {
     return _cBuf;
   }
 
-  public int getTextCharacters(int sourceStart, char[] target, int targetStart, int length) throws XMLStreamException
+  public int getTextCharacters(int sourceStart, char[] target,
+                               int targetStart, int length)
+    throws XMLStreamException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    getText().getChars(sourceStart,
+                       sourceStart + length,
+                       target,
+                       targetStart);
+    return length;
   }
 
   public int getTextLength()
@@ -306,7 +358,16 @@ public class StreamReaderImpl implements XMLStreamReader {
 
   public boolean hasText()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    switch(getEventType()) {
+    case CHARACTERS:
+    case DTD:
+    case ENTITY_REFERENCE:
+    case COMMENT:
+    case SPACE:
+      return true;
+    default:
+      return false;
+    }
   }
 
   public boolean isAttributeSpecified(int index)
@@ -316,7 +377,7 @@ public class StreamReaderImpl implements XMLStreamReader {
 
   public boolean isCharacters()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _current == CHARACTERS;
   }
 
   public boolean isEndElement()
@@ -336,7 +397,9 @@ public class StreamReaderImpl implements XMLStreamReader {
 
   public boolean isWhiteSpace()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return
+      _isWhitespace &&
+      (_current == CHARACTERS || _current == SPACE);
   }
 
   public int nextTag() throws XMLStreamException
@@ -364,12 +427,24 @@ public class StreamReaderImpl implements XMLStreamReader {
   public void require(int type, String namespaceURI, String localName)
     throws XMLStreamException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    if (type != _current)
+      throw new XMLStreamException("expected " + constantToString(type) + ", "+
+                                   "found " + constantToString(_current) +
+                                   " at " + getLocation());
+
+    if (localName != null && !localName.equals(getLocalName()))
+      throw new XMLStreamException("expected <"+localName+">, found " +
+                                   "<"+getLocalName()+"> at " + getLocation());
+
+    if (namespaceURI != null && !namespaceURI.equals(getNamespaceURI()))
+      throw new XMLStreamException("expected xmlns="+namespaceURI+
+                                   ", found xmlns="+getNamespaceURI() +
+                                   " at " + getLocation());
   }
 
   public boolean standaloneSet()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return isStandalone();
   }
 
   public boolean hasNext() throws XMLStreamException
@@ -401,6 +476,11 @@ public class StreamReaderImpl implements XMLStreamReader {
       }
     }
 
+    // we pop the namespace context when the user is finished
+    // working with the END_ELEMENT event
+    if (_current == END_ELEMENT)
+        _namespaceTracker.pop();
+
     if (token > 0)
       return _current = token;
     else {
@@ -418,7 +498,6 @@ public class StreamReaderImpl implements XMLStreamReader {
   {
     if (_isShortTag) {
       _isShortTag = false;
-
       return END_ELEMENT;
     }
 
@@ -434,7 +513,7 @@ public class StreamReaderImpl implements XMLStreamReader {
 
         expect('>');
 
-        _name = new QName(_rawTagName.getLocalName());
+        _name = _rawTagName.resolve(_namespaceTracker);
 
         return END_ELEMENT;
 
@@ -442,6 +521,11 @@ public class StreamReaderImpl implements XMLStreamReader {
         expect('-');
         expect('-');
         return readComment();
+
+      } else if (ch == '?') {
+        readProcessingDirective();
+        return PROCESSING_INSTRUCTION;
+
       } else {
         unread();
 
@@ -464,8 +548,11 @@ public class StreamReaderImpl implements XMLStreamReader {
     throws IOException, XMLStreamException
   {
     readRawName(_rawTagName);
+    _namespaceTracker.push(null);
 
     int ch = readAttributes();
+
+    _namespaceTracker.setTagName(_rawTagName.resolve(_namespaceTracker));
 
     if (ch == '>') {
     }
@@ -477,11 +564,10 @@ public class StreamReaderImpl implements XMLStreamReader {
     else
       throw error(L.l("Expected {0} at {1}", ">", charName(ch)));
 
-    _name = new QName(_rawTagName.getLocalName());
-
     for (int i = _attrCount - 1; i >= 0; i--) {
-      _attrNames[i] = new QName(_attrRawNames[i].getLocalName());
+      _attrNames[i] = _attrRawNames[i].resolve(_namespaceTracker);
     }
+    _name = _rawTagName.resolve(_namespaceTracker);
   }
 
   private int readAttributes()
@@ -515,19 +601,20 @@ public class StreamReaderImpl implements XMLStreamReader {
       if (ch == '\'' || ch == '"') {
         if (rawName.getPrefix()==null &&
             "xmlns".equals(rawName.getLocalName())) {
-          // XXX
-          readValue(ch);
+
+          _namespaceTracker.declare(null, readValue(ch));
+                            
         } else if ("xmlns".equals(rawName.getPrefix())) {
-          // XXX
-          readValue(ch);
+
+          _namespaceTracker.declare(rawName.getLocalName(),
+                                    readValue(ch));
+
         } else {
-          _attrValues[attrCount] = readValue(ch);
+          _attrValues[attrCount++] = readValue(ch);
         }
       }
       else
         throw error(L.l("attribute expects value at {0}", charName(ch)));
-
-      attrCount++;
     }
 
     _attrCount = attrCount;
@@ -570,7 +657,7 @@ public class StreamReaderImpl implements XMLStreamReader {
     throws IOException, XMLStreamException
   {
     int ch = 0;
-    boolean isWhitespace = true;
+    _isWhitespace = true;
 
     int index = 0;
     char []cBuf = _cBuf;
@@ -605,7 +692,7 @@ public class StreamReaderImpl implements XMLStreamReader {
           break;
         }
       default:
-        isWhitespace = false;
+        _isWhitespace = false;
         cBuf[index] = (char) ch;
         break;
       }
@@ -618,7 +705,10 @@ public class StreamReaderImpl implements XMLStreamReader {
 
     // whitespace surrounding the root element is "ignorable" per the XML spec
     boolean isIgnorableWhitespace =
-      isWhitespace && ((ch == -1) || (_current == START_DOCUMENT));
+      _isWhitespace &&
+      ((ch == -1) ||
+       (_current == START_DOCUMENT) ||
+       (_current == PROCESSING_INSTRUCTION));
 
     return isIgnorableWhitespace ? SPACE : CHARACTERS;
   }
@@ -638,6 +728,41 @@ public class StreamReaderImpl implements XMLStreamReader {
 
     throw new XMLStreamException("unknown entity: \"" + s + "\"");
   }
+
+  private void readProcessingDirective()
+    throws IOException
+  {
+    CharBuffer target = new CharBuffer();
+    CharBuffer data   = null;
+
+    while(true) {
+      int ch = read();
+
+      if (ch == -1)
+        return;  /* XXX: error? */
+
+      if (ch == '?') {
+        int next = read();
+        if (next == '>') {
+          _processingInstructionTarget = target.toString();
+          _processingInstructionData = data.toString();
+          return;
+        }
+        unread();
+      }
+
+      if (data == null && (ch == ' ' || ch == '\r' || ch == '\n')) {
+        data = new CharBuffer();
+        continue;
+      }
+
+      if (data != null)
+        data.append((char)ch);
+      else
+        target.append((char)ch);
+    }
+  }
+
 
   private int readComment()
     throws IOException
@@ -766,7 +891,26 @@ public class StreamReaderImpl implements XMLStreamReader {
         unread();
       }
       else {
+
+        CharBuffer directive = new CharBuffer();
         while ((ch = read()) >= 0 && ch != '?') {
+          directive.append((char)ch);
+        }
+
+        String data = directive.toString().trim();
+        if (data.startsWith("version")) {
+          data = data.substring(7).trim();
+          data = data.substring(1).trim();  // remove "="
+          char quot = data.charAt(0);
+          _version = data.substring(1, data.indexOf(quot, 1));
+          data = data.substring(data.indexOf(quot, 1)+1).trim();
+        }
+        if (data.startsWith("encoding")) {
+          data = data.substring(8).trim();
+          data = data.substring(1).trim();  // remove "="
+          char quot = data.charAt(0);
+          _encoding = data.substring(1, data.indexOf(quot, 1));
+          data = data.substring(data.indexOf(quot, 1)+1).trim();
         }
 
         ch = read();
@@ -807,6 +951,7 @@ public class StreamReaderImpl implements XMLStreamReader {
     } else if (i != -1) {
       _col++;
     }
+    _ofs++;
     return i;
   }
 
@@ -829,6 +974,7 @@ public class StreamReaderImpl implements XMLStreamReader {
     } else {
       _col--;
     }
+    _ofs--;
 
   }
 
@@ -868,6 +1014,16 @@ public class StreamReaderImpl implements XMLStreamReader {
     char []_buffer = new char[64];
     int _prefix;
     int _length;
+
+    public QName resolve(NamespaceContext nsc)
+    {
+      if (getPrefix() == null)
+        return new QName(nsc.getNamespaceURI(null),
+                         getLocalName());
+      return new QName(nsc.getNamespaceURI(getPrefix()),
+                       getLocalName(),
+                       getPrefix());
+    }
 
     public String toString()
     {
@@ -909,4 +1065,74 @@ public class StreamReaderImpl implements XMLStreamReader {
     for (int i = 0; i < IS_XML_NAME.length; i++)
       IS_XML_NAME[i] = isXmlName(i);
   }
+
+  private class StreamReaderLocation implements Location {
+
+    private int _ofs;
+    private int _row;
+    private int _col;
+
+    public StreamReaderLocation(int ofs, int row, int col)
+    {
+      this._ofs = ofs;
+      this._row = row;
+      this._col = col;
+    }
+
+    public int getCharacterOffset()
+    {
+      return _ofs;
+    }
+
+    public int getColumnNumber()
+    {
+      return _col;
+    }
+
+    public int getLineNumber()
+    {
+      return _row;
+    }
+
+    public String getPublicId()
+    {
+      return _publicId;
+    }
+
+    public String getSystemId()
+    {
+      return _systemId;
+    }
+
+    public String toString() {
+      return _row+":"+_col;
+    }
+
+  }
+
+  private static String constantToString(int constant) {
+
+    switch(constant) {
+
+    case ATTRIBUTE: return "ATTRIBUTE";
+    case CDATA: return "CDATA";
+    case CHARACTERS: return "CHARACTERS";
+    case COMMENT: return "COMMENT";
+    case DTD: return "DTD";
+    case END_DOCUMENT: return "END_DOCUMENT";
+    case END_ELEMENT: return "END_ELEMENT";
+    case ENTITY_DECLARATION: return "ENTITY_DECLARATION";
+    case ENTITY_REFERENCE: return "ENTITY_REFERENCE";
+    case NAMESPACE: return "NAMESPACE";
+    case NOTATION_DECLARATION: return "NOTATION_DECLARATION";
+    case PROCESSING_INSTRUCTION: return "PROCESSING_INSTRUCTION";
+    case SPACE: return "SPACE";
+    case START_DOCUMENT: return "START_DOCUMENT";
+    case START_ELEMENT: return "START_ELEMENT";
+    default:
+      throw new RuntimeException("constantToString("+constant+") unknown");
+    }
+
+  }
+
 }

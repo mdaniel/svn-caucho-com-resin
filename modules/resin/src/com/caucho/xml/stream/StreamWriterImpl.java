@@ -46,6 +46,45 @@ public class StreamWriterImpl implements XMLStreamWriter {
   private WriteStream _ws;
   private NamespaceTracker _tracker = new NamespaceTracker();
 
+  private QName _pendingTagName = null;
+  private boolean _shortTag = false;
+  private ArrayList<QName> _pendingAttributeNames = new ArrayList<QName>();
+  private ArrayList<String> _pendingAttributeValues = new ArrayList<String>();
+
+  private void flushPending()
+    throws XMLStreamException
+  {
+    try {
+      if (_pendingTagName == null) return;
+      
+      _ws.print("<");
+      _ws.print(printQName(_pendingTagName));
+      
+      for(int i=0; i<_pendingAttributeNames.size(); i++) {
+        _ws.print(" ");
+        _ws.print(printQName(_pendingAttributeNames.get(i)));
+        _ws.print("='");
+        _ws.print(Escapifier.escape(_pendingAttributeValues.get(i)));
+        _ws.print("'");
+      }
+      
+      if (_shortTag) {
+        _ws.print("/>");
+        popContext();
+      } else {
+        _ws.print(">");
+      }
+      
+      _pendingTagName = null;
+      _pendingAttributeNames.clear();
+      _pendingAttributeValues.clear();
+      _shortTag = false;
+    }
+    catch (IOException e) {
+      throw new XMLStreamException(e);
+    }
+  }
+
   public StreamWriterImpl(WriteStream ws)
   {
     _ws = ws;
@@ -54,6 +93,7 @@ public class StreamWriterImpl implements XMLStreamWriter {
   public void close() throws XMLStreamException
   {
     try {
+      flushPending();
       _ws.close();
     }
     catch (IOException e) {
@@ -73,7 +113,7 @@ public class StreamWriterImpl implements XMLStreamWriter {
 
   public NamespaceContext getNamespaceContext()
   {
-    throw new UnsupportedOperationException();
+    return _tracker;
   }
 
   public String getPrefix(String uri)
@@ -85,7 +125,7 @@ public class StreamWriterImpl implements XMLStreamWriter {
   public Object getProperty(String name)
     throws IllegalArgumentException
   {
-    throw new UnsupportedOperationException();
+    throw new PropertyNotSupportedException(name);
   }
 
   public void setDefaultNamespace(String uri)
@@ -97,7 +137,8 @@ public class StreamWriterImpl implements XMLStreamWriter {
   public void setNamespaceContext(NamespaceContext context)
     throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    String message = "please do not set the NamespaceContext";
+    throw new UnsupportedOperationException(message);
   }
 
   public void setPrefix(String prefix, String uri)
@@ -109,16 +150,8 @@ public class StreamWriterImpl implements XMLStreamWriter {
   public void writeAttribute(String localName, String value)
     throws XMLStreamException
   {
-    try {
-      _ws.print(" ");
-      _ws.print(Escapifier.escape(localName));
-      _ws.print("='");
-      _ws.print(Escapifier.escape(value));
-      _ws.print("' ");
-    }
-    catch (IOException e) {
-      throw new XMLStreamException(e);
-    }
+    _pendingAttributeNames.add(new QName(localName));
+    _pendingAttributeValues.add(value);
   }
 
   public void writeAttribute(String namespaceURI, String localName,
@@ -135,24 +168,15 @@ public class StreamWriterImpl implements XMLStreamWriter {
                              String localName, String value)
     throws XMLStreamException
   {
-    try {
-      _tracker.declare(prefix, namespaceURI);
-      _ws.print(" ");
-      _ws.print(prefix);
-      _ws.print(":");
-      _ws.print(Escapifier.escape(localName));
-      _ws.print("='");
-      _ws.print(Escapifier.escape(value));
-      _ws.print("' ");
-    }
-    catch (IOException e) {
-      throw new XMLStreamException(e);
-    }
+    _tracker.declare(prefix, namespaceURI);
+    _pendingAttributeNames.add(new QName(namespaceURI, localName, prefix));
+    _pendingAttributeValues.add(value);
   }
 
   public void writeCData(String data)
     throws XMLStreamException
   {
+    flushPending();
     try {
       _ws.print("<![CDATA[");
       _ws.print(data);
@@ -166,6 +190,7 @@ public class StreamWriterImpl implements XMLStreamWriter {
   public void writeCharacters(char[] text, int start, int len)
     throws XMLStreamException
   {
+    flushPending();
     try {
       Escapifier.escape(text, start, len, _ws);
     }
@@ -177,6 +202,7 @@ public class StreamWriterImpl implements XMLStreamWriter {
   public void writeCharacters(String text)
     throws XMLStreamException
   {
+    flushPending();
     try {
       Escapifier.escape(text, _ws);
     }
@@ -188,6 +214,7 @@ public class StreamWriterImpl implements XMLStreamWriter {
   public void writeComment(String data)
     throws XMLStreamException
   {
+    flushPending();
     try {
       _ws.print("<!--");
       _ws.print(data);
@@ -213,12 +240,12 @@ public class StreamWriterImpl implements XMLStreamWriter {
   public void writeEmptyElement(String localName)
     throws XMLStreamException
   {
+    flushPending();
     try {
-      pushContext(localName);
-      _ws.print("<");
-      _ws.print(Escapifier.escape(localName));
-      popContext();
-      _ws.print("/>");
+      QName qname = new QName(localName);
+      pushContext(qname);
+      _pendingTagName = qname;
+      _shortTag = true;
     }
     catch (IOException e) {
       throw new XMLStreamException(e);
@@ -237,15 +264,12 @@ public class StreamWriterImpl implements XMLStreamWriter {
                                 String namespaceURI)
     throws XMLStreamException
   {
+    flushPending();
     try {
-      pushContext(localName);
-      _ws.print("<");
-      _tracker.declare(prefix, namespaceURI);
-      _ws.print(Escapifier.escape(prefix));
-      _ws.print(":");
-      _ws.print(Escapifier.escape(localName));
-      popContext();
-      _ws.print("/>");
+      QName qname = new QName(namespaceURI, localName, prefix);
+      pushContext(qname);
+      _pendingTagName = qname;
+      _shortTag = true;
     }
     catch (IOException e) {
       throw new XMLStreamException(e);
@@ -260,12 +284,11 @@ public class StreamWriterImpl implements XMLStreamWriter {
   public void writeEndElement()
     throws XMLStreamException
   {
+    flushPending();
     try {
-      flushContext();
-      String name = popContext();
+      QName name = popContext();
       _ws.print("</");
-      // FIXME: do you need the prefix on a close-tag?
-      _ws.print(Escapifier.escape(name));
+      _ws.print(printQName(name));
       _ws.print(">");
     }
     catch (IOException e) {
@@ -273,9 +296,18 @@ public class StreamWriterImpl implements XMLStreamWriter {
     }
   }
 
+  private static String printQName(QName name) {
+
+    if (name.getPrefix() == null || name.getPrefix().equals(""))
+      return name.getLocalPart();
+
+    return name.getPrefix() + ":" + name.getLocalPart();
+  }
+
   public void writeEntityRef(String name)
     throws XMLStreamException
   {
+    flushPending();
     try {
       _ws.print("&");
       _ws.print(name);
@@ -295,23 +327,48 @@ public class StreamWriterImpl implements XMLStreamWriter {
   public void writeProcessingInstruction(String target)
     throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    flushPending();
+    try {
+      _ws.print("<? ");
+      _ws.print(target);
+      _ws.print(" ?>");
+    }
+    catch (IOException e) {
+      throw new XMLStreamException(e);
+    }
   }
 
   public void writeProcessingInstruction(String target, String data)
     throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    flushPending();
+    try {
+      _ws.print("<? ");
+      _ws.print(target);
+      _ws.print(" ");
+      _ws.print(data);
+      _ws.print(" ?>");
+    }
+    catch (IOException e) {
+      throw new XMLStreamException(e);
+    }
   }
 
   public void writeStartDocument()
     throws XMLStreamException
   {
+    writeStartDocument("1.0");
   }
 
   public void writeStartDocument(String version)
     throws XMLStreamException
   {
+    try {
+      _ws.print("<?xml version='"+version+"' encoding='utf-8'?>");
+    }
+    catch (IOException e) {
+      throw new XMLStreamException(e);
+    }
   }
 
   public void writeStartDocument(String encoding, String version)
@@ -322,11 +379,11 @@ public class StreamWriterImpl implements XMLStreamWriter {
   public void writeStartElement(String localName)
     throws XMLStreamException
   {
+    flushPending();
     try {
-      pushContext(localName);
-      _ws.print("<");
-      _ws.print(Escapifier.escape(localName));
-      _ws.print(">");
+      QName qname = new QName(localName);
+      pushContext(qname);
+      _pendingTagName = qname;
     }
     catch (IOException e) {
       throw new XMLStreamException(e);
@@ -345,14 +402,11 @@ public class StreamWriterImpl implements XMLStreamWriter {
                                 String namespaceURI)
     throws XMLStreamException
   {
+    flushPending();
     try {
-      pushContext(localName);
-      _ws.print("<");
-      _tracker.declare(prefix, namespaceURI);
-      _ws.print(Escapifier.escape(prefix));
-      _ws.print(":");
-      _ws.print(Escapifier.escape(localName));
-      _ws.print(">");
+      QName qname = new QName(namespaceURI, localName, prefix);
+      pushContext(qname);
+      _pendingTagName = qname;
     }
     catch (IOException e) {
       throw new XMLStreamException(e);
@@ -363,7 +417,7 @@ public class StreamWriterImpl implements XMLStreamWriter {
 
   private boolean _flushed = true;
 
-  private void pushContext(String elementName)
+  private void pushContext(QName elementName)
     throws IOException
   {
     flushContext();
@@ -371,11 +425,11 @@ public class StreamWriterImpl implements XMLStreamWriter {
     _flushed = false;
   }
 
-  private String popContext()
+  private QName popContext()
     throws IOException
   {
     flushContext();
-    String name = _tracker.getTagName();
+    QName name = _tracker.getTagName();
     _tracker.pop();
     return name;
   }

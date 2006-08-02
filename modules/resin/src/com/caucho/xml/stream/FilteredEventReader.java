@@ -32,54 +32,63 @@ package com.caucho.xml.stream;
 import java.io.*;
 import java.util.logging.*;
 
+import javax.xml.stream.events.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
 
 import com.caucho.util.*;
-import com.caucho.vfs.*;
 
-public class Escapifier {
+public class FilteredEventReader implements XMLEventReader {
 
-  public static String escape(String s)
+  public FilteredEventReader(XMLEventReader reader,
+                             EventFilter filter)
   {
-    CharBuffer cb = null;
-    int len = s.length();
-
-    for(int i=0; i<len; i++) {
-      char c = s.charAt(i);
-      if (c >= 32 && c <= 127 && c!='&' && c!='<' && c!='\'' && c!='\"') {
-        if (cb != null) cb.append(c);
-        continue;
-      }
-      if (cb == null) {
-        cb = new CharBuffer();
-        cb.append(s.substring(0, i));
-      }
-      switch(c) {
-      case '&': cb.append("&amp;"); break;
-      case '<': cb.append("&lt;"); break;
-      case '\'': cb.append("&apos;"); break;
-      case '\"': cb.append("&quot;"); break;
-      default: cb.append("&#"+((int)(c & 0xffff))+";"); break;
-      }
-    }
-
-    if (cb == null)
-      return s;
-
-    return cb.toString();
+    throw new UnsupportedOperationException();
   }
 
-  public static void escape(String s, WriteStream ws)
-    throws IOException
+  public void close() throws XMLStreamException
   {
-    ws.print(escape(s));
+    throw new UnsupportedOperationException();
   }
 
-  public static void escape(char[] c, int start, int len, WriteStream ws)
-    throws IOException
+  public String getElementText() throws XMLStreamException
   {
-    ws.print(escape(new String(c, start, len)));
+    throw new UnsupportedOperationException();
+  }
+
+  public Object getProperty(String name) throws IllegalArgumentException
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  public boolean hasNext()
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  public XMLEvent nextEvent() throws XMLStreamException
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  public XMLEvent nextTag() throws XMLStreamException
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  public XMLEvent peek() throws XMLStreamException
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  public void remove()
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  public XMLEvent next()
+  {
+    throw new UnsupportedOperationException();
   }
 
 }

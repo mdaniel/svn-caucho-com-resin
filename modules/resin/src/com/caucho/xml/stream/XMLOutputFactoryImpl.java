@@ -43,26 +43,35 @@ public class XMLOutputFactoryImpl extends XMLOutputFactory {
   public XMLEventWriter createXMLEventWriter(OutputStream stream)
     throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    return new StreamEventWriter(Vfs.openWrite(stream));
   }
 
   public XMLEventWriter createXMLEventWriter(OutputStream stream,
-                                                      String encoding)
+                                             String encoding)
     throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    try {
+      OutputStreamWriter osw = new OutputStreamWriter(stream, encoding);
+      return new StreamEventWriter(Vfs.openWrite(osw));
+    }
+    catch (IOException e) {
+      throw new XMLStreamException(e);
+    }
   }
 
+  /**
+   *  This method is optional.
+   */
   public XMLEventWriter createXMLEventWriter(Result result)
     throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    throw new JAXPNotSupportedInStAXException();
   }
 
   public XMLEventWriter createXMLEventWriter(Writer stream)
     throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    return new StreamEventWriter(Vfs.openWrite(stream));
   }
 
   public XMLStreamWriter createXMLStreamWriter(OutputStream stream)
@@ -72,16 +81,25 @@ public class XMLOutputFactoryImpl extends XMLOutputFactory {
   }
 
   public XMLStreamWriter createXMLStreamWriter(OutputStream stream,
-                                                        String encoding)
+                                               String encoding)
     throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    try {
+      OutputStreamWriter osw = new OutputStreamWriter(stream, encoding);
+      return new StreamWriterImpl(Vfs.openWrite(osw));
+    }
+    catch (IOException e) {
+      throw new XMLStreamException(e);
+    }
   }
 
+  /**
+   *  This method is optional.
+   */
   public XMLStreamWriter createXMLStreamWriter(Result result)
     throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    throw new JAXPNotSupportedInStAXException();
   }
 
   public XMLStreamWriter createXMLStreamWriter(Writer stream)
@@ -93,18 +111,18 @@ public class XMLOutputFactoryImpl extends XMLOutputFactory {
   public Object getProperty(String name)
     throws IllegalArgumentException
   {
-    throw new UnsupportedOperationException();
+    throw new IllegalArgumentException("property \""+name+"\" not supported");
   }
 
   public boolean isPropertySupported(String name)
   {
-    throw new UnsupportedOperationException();
+    return false;
   }
 
   public void setProperty(String name, Object value)
     throws IllegalArgumentException
   {
-    throw new UnsupportedOperationException();
+    throw new IllegalArgumentException("property \""+name+"\" not supported");
   }
 
 

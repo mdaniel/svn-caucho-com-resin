@@ -35,6 +35,10 @@ import javax.xml.transform.*;
 
 public class XMLInputFactoryImpl extends XMLInputFactory {
 
+  private XMLEventAllocator _allocator = new DefaultXMLEventAllocator();
+  private XMLReporter _reporter;
+  private XMLResolver _resolver;
+
   public XMLInputFactoryImpl()
   {
   }
@@ -43,63 +47,72 @@ public class XMLInputFactoryImpl extends XMLInputFactory {
     createFilteredReader(XMLEventReader reader, EventFilter filter)
     throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    return new FilteredEventReader(reader, filter);
   }
 
   public XMLStreamReader 
     createFilteredReader(XMLStreamReader reader, StreamFilter filter)
     throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    return new FilteredStreamReader(reader, filter);
   }
 
   public XMLEventReader 
     createXMLEventReader(InputStream stream)
     throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    return new StreamEventReader(stream);
   }
 
   public XMLEventReader 
     createXMLEventReader(InputStream stream, String encoding)
     throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    try {
+      InputStreamReader isr = new InputStreamReader(stream, encoding);
+      return new StreamEventReader(isr);
+    }
+    catch (IOException e) {
+      throw new XMLStreamException(e);
+    }
   }
 
   public XMLEventReader 
     createXMLEventReader(Reader reader)
     throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    return new StreamEventReader(reader);
   }
 
+  /**
+   *  "Support of this method is optional."
+   */ 
   public XMLEventReader 
     createXMLEventReader(Source source)
     throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    throw new JAXPNotSupportedInStAXException();
   }
 
   public XMLEventReader 
     createXMLEventReader(String systemId, InputStream stream)
     throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    return new StreamEventReader(stream, systemId);
   }
 
   public XMLEventReader 
     createXMLEventReader(String systemId, Reader reader)
     throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    return new StreamEventReader(reader, systemId);
   }
 
   public XMLEventReader 
     createXMLEventReader(XMLStreamReader reader)
     throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    return new StreamEventReader(reader);
   }
 
   public XMLStreamReader 
@@ -113,82 +126,97 @@ public class XMLInputFactoryImpl extends XMLInputFactory {
     createXMLStreamReader(InputStream stream, String encoding)
     throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    try {
+      InputStreamReader isr = new InputStreamReader(stream, encoding);
+      return new StreamReaderImpl(isr);
+    }
+    catch (IOException e) {
+      throw new XMLStreamException(e);
+    }
   }
 
   public XMLStreamReader 
     createXMLStreamReader(Reader reader)
     throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    return new StreamReaderImpl(reader);
   }
 
+  /**
+   *  "Support of this method is optional."
+   */ 
   public XMLStreamReader 
     createXMLStreamReader(Source source)
     throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    throw new JAXPNotSupportedInStAXException();
   }
 
   public XMLStreamReader 
     createXMLStreamReader(String systemId, InputStream stream)
     throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    return new StreamReaderImpl(stream, systemId);
   }
 
   public XMLStreamReader 
     createXMLStreamReader(String systemId, Reader reader)
     throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    return new StreamReaderImpl(reader, systemId);
   }
 
   public XMLEventAllocator getEventAllocator()
   {
-    throw new UnsupportedOperationException();
+    return _allocator;
   }
 
   public Object getProperty(String name)
     throws IllegalArgumentException
   {
-    throw new UnsupportedOperationException();
+    throw new IllegalArgumentException("property \""+name+"\" not supported");
   }
 
   public XMLReporter getXMLReporter()
   {
-    throw new UnsupportedOperationException();
+    return _reporter;
   }
 
   public XMLResolver getXMLResolver()
   {
-    throw new UnsupportedOperationException();
+    return _resolver;
   }
 
   public boolean isPropertySupported(String name)
   {
-    throw new UnsupportedOperationException();
+    return false;
   }
 
   public void setEventAllocator(XMLEventAllocator allocator)
   {
-    throw new UnsupportedOperationException();
+    _allocator = allocator;
   }
 
   public void setProperty(String name, Object value)
     throws IllegalArgumentException
   {
-    throw new UnsupportedOperationException();
+
+    if ("javax.xml.stream.allocator".equals(name)) {
+      setEventAllocator((XMLEventAllocator)value);
+      return;
+    }
+
+    throw new IllegalArgumentException("property \""+name+"\" not supported");
   }
 
   public void setXMLReporter(XMLReporter reporter)
   {
-    throw new UnsupportedOperationException();
+    _reporter = reporter;
   }
 
   public void setXMLResolver(XMLResolver resolver)
   {
-    throw new UnsupportedOperationException();
+    _resolver = resolver;
   }
 
 }

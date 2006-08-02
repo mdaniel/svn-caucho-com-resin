@@ -42,13 +42,13 @@ import com.caucho.vfs.*;
 /**
  *  Maintains a stack of namespace contexts
  */
-public class NamespaceTracker {
+public class NamespaceTracker implements NamespaceContext {
 
   private Context _context = new Context();
   private int _uniquifier = 0;
 
   /** creates a new subcontext and enters it */
-  public void push(String tagName)
+  public void push(QName tagName)
   {    
     _context = _context.push(tagName);
   }
@@ -59,9 +59,24 @@ public class NamespaceTracker {
     _context = _context.pop();
   }
 
-  public String getTagName()
+  public QName getTagName()
   {
     return _context.getTagName();
+  }
+
+  public QName resolve(String localName)
+  {
+    return resolve(null, localName);
+  }
+
+  public QName resolve(String prefix, String localName)
+  {
+    String uri = getUri(prefix);
+
+    if (uri == null)
+      return new QName(localName);
+
+    return new QName(uri, localName, prefix);
   }
 
   /** declares a new namespace prefix in the current context */
@@ -97,11 +112,41 @@ public class NamespaceTracker {
     _context.emitDeclarations(ws);
   }
 
+  public String getNamespaceURI(String prefix)
+  {
+    return getUri(prefix);
+  }
+
+  public Iterator getPrefixes(String uri)
+  {
+    return _context.getPrefixes(uri);
+  }
+
+  public String getUri(int i)
+  {
+    return _context.getUri(i);
+  }
+  
+  public String getPrefix(int i)
+  {
+    return _context.getPrefix(i);
+  }
+  
+  public int getNumDecls()
+  {
+    return _context.getNumDecls();
+  }
+
+  public void setTagName(QName tagName)
+  {
+    _context.setTagName(tagName);
+  }
+
   // XXX: can be vastly more efficient
   private class Context
   {
     private Context _parent;
-    private String _tagName;
+    private QName _tagName;
 
     private HashMap<String,String> _prefixes
       = new HashMap<String,String>();
@@ -109,18 +154,21 @@ public class NamespaceTracker {
     private HashMap<String,String> _uris
       = new HashMap<String,String>();
 
+    private ArrayList<String> _decls
+      = new ArrayList<String>();
+
     public Context()
     {
       this(null, null);
     }
 
-    public Context(Context parent, String tagName)
+    public Context(Context parent, QName tagName)
     {
       this._parent = parent;
       this._tagName = tagName;
     }
 
-    public String getTagName()
+    public QName getTagName()
     {
       return _tagName;
     }
@@ -130,9 +178,69 @@ public class NamespaceTracker {
       return _parent;
     }
 
-    public Context push(String tagName)
+    public Iterator getPrefixes(final String uri)
+    {
+      return new Iterator() {
+
+          private int i = 0;
+          private Object waiting = null;
+
+          public void remove()
+          {
+            throw new RuntimeException("not supported");
+          }
+
+          public boolean hasNext()
+          {
+            if (waiting != null) return true;
+            waiting = next();
+            return waiting != null;
+          }
+
+          public Object next()
+          {
+            if (waiting != null) {
+              Object ret = waiting;
+              waiting = null;
+              return ret;
+            }
+            while (i < _decls.size())
+              {
+                if (uri.equals(getUri(i))) {
+                  i++;
+                  return getPrefix(i);
+                } else {
+                  i++;
+                }
+              }
+            return null;
+          }
+        };
+    }
+
+    public Context push(QName tagName)
     {
       return new Context(this, tagName);
+    }
+
+    public void setTagName(QName tagName)
+    {
+      _tagName = tagName;
+    }
+
+    public String getUri(int i)
+    {
+      return getUri(_decls.get(i));
+    }
+
+    public String getPrefix(int i)
+    {
+      return _decls.get(i);
+    }
+
+    public int getNumDecls()
+    {
+      return _decls.size();
     }
 
     /** declares a new namespace prefix in the current context */
@@ -144,6 +252,7 @@ public class NamespaceTracker {
 
       _prefixes.put(prefix, uri);
       _uris.put(uri, prefix);
+      _decls.add(prefix);
     }
 
     /**

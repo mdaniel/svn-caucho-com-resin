@@ -24,44 +24,35 @@
 *   59 Temple Place, Suite 330
 *   Boston, MA 02111-1307  USA
 *
-* @author Scott Ferguson
+* @author Adam Megacz
 */
 
-package javax.xml.stream;
+package com.caucho.xml.stream;
+import java.io.*;
+import javax.xml.stream.*;
+import javax.xml.stream.events.*;
+import javax.xml.stream.util.*;
+import javax.xml.transform.*;
 
-public interface XMLStreamConstants {
+public class DefaultXMLEventAllocator implements XMLEventAllocator {
 
-  public static final int ATTRIBUTE=10;
+  public XMLEvent allocate(XMLStreamReader reader)
+    throws XMLStreamException
+  {
+    // XXX
+    throw new UnsupportedOperationException();
+  }
 
-  public static final int CDATA=12;
+  public void allocate(XMLStreamReader reader, XMLEventConsumer consumer)
+    throws XMLStreamException
+  {
+    // XXX
+    throw new UnsupportedOperationException();
+  }
 
-  public static final int CHARACTERS=4;
+  public XMLEventAllocator newInstance()
+  {
+    return new DefaultXMLEventAllocator();
+  }
 
-  public static final int COMMENT=5;
-
-  public static final int DTD=11;
-
-  public static final int END_DOCUMENT=8;
-
-  public static final int END_ELEMENT=2;
-
-  // XXX: online doc has  17 for ENTITY_DECLARATION
-  // XXX: online doc has  15 for ENTITY_DECLARATION here:
-  //      http://java.sun.com/javaee/5/docs/api/constant-values.html
-  public static final int ENTITY_DECLARATION=15;
-
-  public static final int ENTITY_REFERENCE=9;
-
-  public static final int NAMESPACE=13;
-
-  public static final int NOTATION_DECLARATION=14;
-
-  public static final int PROCESSING_INSTRUCTION=3;
-
-  public static final int SPACE=6;
-
-  public static final int START_DOCUMENT=7;
-
-  public static final int START_ELEMENT=1;
 }
-
