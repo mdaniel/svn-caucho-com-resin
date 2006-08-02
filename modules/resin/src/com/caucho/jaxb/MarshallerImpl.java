@@ -56,6 +56,7 @@ public class MarshallerImpl implements Marshaller {
   }
 
   private JAXBContext _context;
+  private Listener _listener = null;
 
   MarshallerImpl(JAXBContext context)
   {
@@ -80,18 +81,20 @@ public class MarshallerImpl implements Marshaller {
 
   public AttachmentMarshaller getAttachmentMarshaller()
   {
-    throw new UnsupportedOperationException();
+    throw
+      new UnsupportedOperationException("binary attachments not yet supported");
   }
 
   public ValidationEventHandler getEventHandler()
     throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    throw
+      new UnsupportedOperationException("schema validation not yet supported");
   }
 
   public Listener getListener()
   {
-    throw new UnsupportedOperationException();
+    return _listener;
   }
 
   /**
@@ -105,27 +108,17 @@ public class MarshallerImpl implements Marshaller {
     throw new UnsupportedOperationException();
   }
 
-  /**
-   * Get the particular property in the underlying implementation of
-   * Marshaller. This method can only be used to get one of the standard JAXB
-   * defined properties above or a provider specific property. Attempting to
-   * get an undefined property will result in a PropertyException being thrown.
-   * See .
-   */
   public Object getProperty(String name)
     throws PropertyException
   {
-    throw new UnsupportedOperationException();
+    // Caucho does not define any properties
+    return null;
   }
 
-  /**
-   * Get the JAXP 1.3 object being used to perform marshal-time validation. If
-   * there is no Schema set on the marshaller, then this method will return
-   * null indicating that marshal-time validation will not be performed.
-   */
   public Schema getSchema()
   {
-    throw new UnsupportedOperationException();
+    throw
+      new UnsupportedOperationException("schema validation not yet supported");
   }
 
   /**
@@ -206,7 +199,7 @@ public class MarshallerImpl implements Marshaller {
     }
   }
 
-  private Marshall getMarshall(Class type)
+  public static Marshall getMarshall(Class type)
   {
     if (String.class.equals(type))
       return StringMarshall.MARSHALL;
@@ -267,71 +260,34 @@ public class MarshallerImpl implements Marshaller {
     throw new UnsupportedOperationException();
   }
 
-  /**
-   * Associate a context that enables binary data within an XML document to be
-   * transmitted as XML-binary optimized attachment. The attachment is
-   * referenced from the XML document content model by content-id URIs(cid)
-   * references stored within the xml document.
-   */
   public void setAttachmentMarshaller(AttachmentMarshaller am)
   {
-    throw new UnsupportedOperationException();
+    throw
+      new UnsupportedOperationException("binary attachments not yet supported");
   }
 
-
-  /**
-   * Allow an application to register a validation event handler. The
-   * validation event handler will be called by the JAXB Provider if any
-   * validation errors are encountered during calls to any of the marshal
-   * API's. If the client application does not register a validation event
-   * handler before invoking one of the marshal methods, then validation events
-   * will be handled by the default event handler which will terminate the
-   * marshal operation after the first error or fatal error is encountered.
-   * Calling this method with a null parameter will cause the Marshaller to
-   * revert back to the default default event handler.
-   */
   public void setEventHandler(ValidationEventHandler handler)
     throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    throw
+      new UnsupportedOperationException("schema validation not yet supported");
   }
 
-
-  /**
-   * Register marshal event callback Marshaller.Listener with this Marshaller.
-   * There is only one Listener per Marshaller. Setting a Listener replaces the
-   * previous set Listener. One can unregister current Listener by setting
-   * listener to null.
-   */
   public void setListener(Listener listener)
   {
-    throw new UnsupportedOperationException();
+    _listener = listener;
   }
 
-
-  /**
-   * Set the particular property in the underlying implementation of
-   * Marshaller. This method can only be used to set one of the standard JAXB
-   * defined properties above or a provider specific property. Attempting to
-   * set an undefined property will result in a PropertyException being thrown.
-   * See .
-   */
   public void setProperty(String name, Object value)
     throws PropertyException
   {
-    throw new UnsupportedOperationException();
+    // Caucho does not define any properties
   }
 
-
-  /**
-   * Specify the JAXP 1.3 object that should be used to validate subsequent
-   * marshal operations against. Passing null into this method will disable
-   * validation. This method allows the caller to validate the marshalled XML
-   * as it's marshalled. Initially this property is set to null.
-   */
   public void setSchema(Schema schema)
   {
-    throw new UnsupportedOperationException();
+    throw
+      new UnsupportedOperationException("schema validation not yet supported");
   }
 
 }

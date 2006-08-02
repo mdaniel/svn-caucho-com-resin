@@ -83,16 +83,10 @@ public class UnmarshallerImpl implements Unmarshaller {
     throw new UnsupportedOperationException();
   }
 
-  /**
-   * Get the particular property in the underlying implementation of
-   * Unmarshaller. This method can only be used to get one of the standard JAXB
-   * defined properties above or a provider specific property. Attempting to
-   * get an undefined property will result in a PropertyException being thrown.
-   * See .
-   */
   public Object getProperty(String name) throws PropertyException
   {
-    throw new UnsupportedOperationException();
+    // Caucho does not define any properties
+    return null;
   }
 
   /**
@@ -194,16 +188,9 @@ public class UnmarshallerImpl implements Unmarshaller {
     throw new UnsupportedOperationException();
   }
 
-  /**
-   * Set the particular property in the underlying implementation of
-   * Unmarshaller. This method can only be used to set one of the standard JAXB
-   * defined properties above or a provider specific property. Attempting to
-   * set an undefined property will result in a PropertyException being thrown.
-   * See .
-   */
   public void setProperty(String name, Object value) throws PropertyException
   {
-    throw new UnsupportedOperationException();
+    // Caucho does not define any properties
   }
 
   /**

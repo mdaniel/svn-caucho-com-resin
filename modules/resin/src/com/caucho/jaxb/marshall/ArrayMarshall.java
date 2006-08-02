@@ -28,6 +28,8 @@
  */
 
 package com.caucho.jaxb.marshall;
+import com.caucho.jaxb.*;
+import javax.xml.bind.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
@@ -59,20 +61,19 @@ public class ArrayMarshall extends Marshall {
   /**
    * Serializes the data to the result
    */
-  public void serialize(WriteStream out, Object obj, QName fieldName)
-    throws IOException
+  public void serialize(XMLStreamWriter out, Object obj, QName fieldName)
+    throws IOException, XMLStreamException
   {
-    out.print('<');
-    out.print(fieldName);
-    out.print('>');
-    
-    //StringMarshall.escapify((String)obj, out);
-    
-    out.print("</");
-    out.print(fieldName);
-    out.print(">");
+    if (obj == null)
+      return;
 
-    throw new UnsupportedOperationException(getClass().getName());
+    int length = Array.getLength(obj);
+    
+    for(int i=0; i<length; i++) {
+      Object o = Array.get(obj, i);
+      Marshall marshall = MarshallerImpl.getMarshall(o.getClass());
+      marshall.serialize(out, o, fieldName);
+    }
   }
 }
 
