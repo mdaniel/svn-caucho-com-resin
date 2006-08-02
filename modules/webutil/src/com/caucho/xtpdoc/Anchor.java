@@ -29,11 +29,46 @@
 
 package com.caucho.xtpdoc;
 
+import java.util.logging.Logger;
+
+import java.net.*;
+
 import java.io.PrintWriter;
 import java.io.IOException;
 
 public class Anchor extends FormattedText {
+  private static final Logger log = Logger.getLogger(Anchor.class.getName());
+
+  private String _documentName;
+  private String _configTag;
   private String _href;
+
+  private String getDocumentName()
+  {
+    if (_documentName != null)
+      return _documentName;
+
+    Object o = getParent();
+
+    while (o != null) {
+      if (o instanceof Section) {
+        _documentName = ((Section) o).getDocumentName();
+
+        return _documentName;
+      } else if (o instanceof ObjectWithParent) {
+        o = ((ObjectWithParent) o).getParent();
+      } else {
+        break;
+      }
+    }
+
+    return _documentName;
+  }
+
+  public void setConfigTag(String configTag)
+  {
+    _configTag = configTag;
+  }
 
   public void setHref(String href)
   {
@@ -53,12 +88,50 @@ public class Anchor extends FormattedText {
   public void writeLaTeX(PrintWriter writer)
     throws IOException
   {
+    try {
+      URI uri = new URI(_href);
+
+      if (uri.getScheme() != null) {
+        writer.print("\\href{" + _href + "}");
+
+        writer.print("{");
+
+        super.writeLaTeX(writer);
+
+        writer.print("}");
+
+        return;
+      } else if (uri.getPath() != null && uri.getPath().length() != 0) {
+        writer.print("\\hyperlink{" + uri.getPath());
+
+        if (uri.getFragment() != null)
+          writer.print(":" + uri.getFragment());
+
+        writer.print("}{");
+        super.writeLaTeX(writer);
+        writer.print("}");
+
+        return;
+      } else if (uri.getFragment() != null && uri.getFragment().length() != 0) {
+        String documentName = getDocumentName();
+
+        if (documentName != null) {
+          writer.print("\\hyperlink{" + documentName + ":" + uri.getFragment());
+          writer.print("}{");
+          super.writeLaTeX(writer);
+          writer.print("}");
+
+          return;
+        }
+      }
+
+    } catch (Exception e) {
+    }
+
     writer.print("\\href{" + _href + "}");
 
     writer.print("{");
-
     super.writeLaTeX(writer);
-
     writer.print("}");
   }
 }

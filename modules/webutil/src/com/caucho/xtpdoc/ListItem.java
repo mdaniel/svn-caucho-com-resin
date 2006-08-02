@@ -33,6 +33,16 @@ import java.io.PrintWriter;
 import java.io.IOException;
 
 public class ListItem extends FormattedTextWithAnchors {
+  public void addOL(OrderedList orderedList)
+  {
+    addItem(orderedList);
+  }
+
+  public void addUL(UnorderedList unorderedList)
+  {
+    addItem(unorderedList);
+  }
+
   public void writeHtml(PrintWriter writer)
     throws IOException
   {
@@ -40,7 +50,7 @@ public class ListItem extends FormattedTextWithAnchors {
 
     super.writeHtml(writer);
 
-    writer.print("</li>");
+    writer.println("</li>");
   }
 
   public void writeLaTeX(PrintWriter writer)
@@ -49,5 +59,7 @@ public class ListItem extends FormattedTextWithAnchors {
     writer.print("\\item ");
 
     super.writeLaTeX(writer);
+
+    writer.println();
   }
 }

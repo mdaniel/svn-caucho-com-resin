@@ -29,42 +29,9 @@
 
 package com.caucho.xtpdoc;
 
-public class LaTeXUtil {
-  public static String escapeForLaTeX(String text)
+public class VerboseFormattedTextWithAnchors extends FormattedText {
+  public void setText(String text)
   {
-    StringBuilder latexText = new StringBuilder();
-
-    for (int i = 0; i < text.length(); i++) {
-      char ch = text.charAt(i);
-
-      switch (ch) {
-        case '\\':
-          latexText.append("\\ensuremath{\\backslash}");
-          break;
-        case '%':
-          latexText.append("\\%");
-          break;
-        case '$':
-        case '_':
-        case '&':
-        case '{':
-        case '}':
-        case '#':
-          latexText.append("\\");
-          latexText.append(ch);
-          break;
-        case '>':
-        case '<':
-          latexText.append("\\ensuremath{");
-          latexText.append(ch);
-          latexText.append("}");
-          break;
-        default:
-          latexText.append(ch);
-          break;
-      }
-    }
-
-    return latexText.toString();
+    addItem(new VerboseText(text));
   }
 }

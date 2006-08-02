@@ -34,16 +34,50 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
-public class Body {
+import com.caucho.vfs.Path;
+
+public class Body implements ObjectWithParent {
+  private Object _parent;
+  private boolean _topLevel;
   private Summary _summary;
   private ArrayList<Section> _sections = new ArrayList<Section>();
+
+  void setDocumentPath(Path documentPath, boolean topLevel)
+  {
+    _topLevel = topLevel;
+
+    if (topLevel && documentPath != null)
+      _summary.setRootPath(documentPath.getParent());
+
+    if (documentPath != null) {
+      String documentName = documentPath.getTail();
+
+      for (Section section : _sections)
+        section.setDocumentName(documentName);
+    }
+  }
+
+  public void setParent(Object parent)
+  {
+    _parent = parent;
+  }
+
+  public Object getParent()
+  {
+    return _parent;
+  }
 
   public void setSummary(Summary summary)
   {
     _summary = summary;
   }
 
-  public void addSection(Section section)
+  public void addFaq(Faq faq)
+  {
+    _sections.add(faq);
+  }
+
+  public void addS1(S1 section)
   {
     _sections.add(section);
   }
@@ -55,9 +89,8 @@ public class Body {
 
     _summary.writeHtml(writer);
 
-    for (Section section : _sections) {
+    for (Section section : _sections)
       section.writeHtml(writer);
-    }
 
     writer.println("</body>");
   }
@@ -65,12 +98,16 @@ public class Body {
   public void writeLaTeX(PrintWriter writer)
     throws IOException
   {
-    writer.println("\\begin{document}");
+    if (_topLevel) {
+      writer.println("\\begin{document}");
 
-    for (Section section : _sections) {
-      section.writeLaTeX(writer);
+      for (Section section : _sections)
+        section.writeLaTeX(writer);
+
+      writer.println("\\end{document}");
+    } else {
+      for (Section section : _sections)
+        section.writeLaTeX(writer);
     }
-
-    writer.println("\\end{document}");
   }
 }

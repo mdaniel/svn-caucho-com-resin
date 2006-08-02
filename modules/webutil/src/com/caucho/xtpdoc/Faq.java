@@ -32,77 +32,41 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
-import com.caucho.vfs.Path;
+public class Faq extends Section {
+  private FormattedTextWithAnchors _description;
 
-public class Document {
-  private Header _header;
-  private Body _body;
-  private Path _documentPath;
-  private String _contextPath;
-  private boolean _topLevel = true;
-  private int _level;
-
-  Document()
+  public void setDescription(FormattedTextWithAnchors description)
   {
-    this(null, null, false);
-  }
-
-  public Document(Path documentPath, String contextPath)
-  {
-    this(documentPath, contextPath, true);
-  }
-
-  public Document(Path documentPath, String contextPath, boolean topLevel)
-  {
-    _documentPath = documentPath;
-    _contextPath = contextPath;
-    _topLevel = topLevel;
-  }
-
-  public Header getHeader()
-  {
-    return _header;
-  }
-
-  public void setHeader(Header header)
-  {
-    _header = header;
-
-    _header.setContextPath(_contextPath);
-    _header.setTopLevel(_topLevel);
-    _header.setDocumentName(_documentPath.getTail());
-  }
-
-  public void setBody(Body body)
-  {
-    _body = body;
-
-    _body.setDocumentPath(_documentPath, _topLevel);
+    _description = description;
   }
 
   public void writeHtml(PrintWriter writer)
     throws IOException
   {
-    writer.println("<html>");
+    writer.println("<b>" + _title + "</b>");
 
-    _header.writeHtml(writer);
-    _body.writeHtml(writer);
+    if (_description != null) {
+      writer.println("<p><i>");
+      _description.writeHtml(writer);
+      writer.println("</i></p>");
+    }
 
-    writer.println("</html>");
+    super.writeHtml(writer);
   }
 
   public void writeLaTeX(PrintWriter writer)
     throws IOException
   {
-    if (_topLevel)
-      writer.println("\\documentclass{article}");
+    writer.println("\\textbf{" + _title + "}\\\\");
+    writer.println();
+    writer.println();
 
-    _header.writeLaTeX(writer);
-    _body.writeLaTeX(writer);
-  }
+    if (_description != null) {
+      writer.print("\\textit{");
+      _description.writeLaTeX(writer);
+      writer.println("}");
+    }
 
-  public String toString()
-  {
-    return "Document[" + _documentPath + "]";
+    super.writeLaTeX(writer);
   }
 }

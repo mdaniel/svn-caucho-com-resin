@@ -32,7 +32,19 @@ import java.io.PrintWriter;
 import java.io.IOException;
 
 public class Figure implements ContentItem {
+  private int _height;
+  private int _width;
   private String _source;
+
+  public void setHeight(int height)
+  {
+    _height = height;
+  }
+
+  public void setWidth(int width)
+  {
+    _width = width;
+  }
 
   public void setSrc(String source)
   {

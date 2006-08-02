@@ -34,8 +34,19 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
-public class OrderedList implements ContentItem {
+public class OrderedList implements ContentItem, ObjectWithParent {
+  private Object _parent;
   private ArrayList<ListItem> _listItems = new ArrayList<ListItem>();
+
+  public void setParent(Object parent)
+  {
+    _parent = parent;
+  }
+
+  public Object getParent()
+  {
+    return _parent;
+  }
 
   public void addLI(ListItem item)
   {

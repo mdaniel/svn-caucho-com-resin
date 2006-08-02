@@ -35,10 +35,20 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class TableHeader extends FormattedTextWithAnchors implements TableCell {
+  private String _width;
+
+  public void setWidth(String width)
+  {
+    _width = width;
+  }
+
   public void writeHtml(PrintWriter writer)
     throws IOException
   {
-    writer.print("<th>");
+    if (_width == null)
+      writer.print("<th>");
+    else
+      writer.print("<th width=\"" + _width + "\">");
 
     super.writeHtml(writer);
 

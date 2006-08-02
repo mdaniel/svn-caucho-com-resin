@@ -32,77 +32,47 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
-import com.caucho.vfs.Path;
+public class Results extends FormattedTextWithAnchors {
+  private String _title;
+  private String _language = null;
 
-public class Document {
-  private Header _header;
-  private Body _body;
-  private Path _documentPath;
-  private String _contextPath;
-  private boolean _topLevel = true;
-  private int _level;
-
-  Document()
+  public void setTitle(String title)
   {
-    this(null, null, false);
+    _title = title;
   }
 
-  public Document(Path documentPath, String contextPath)
+  public void setLanguage(String language)
   {
-    this(documentPath, contextPath, true);
-  }
-
-  public Document(Path documentPath, String contextPath, boolean topLevel)
-  {
-    _documentPath = documentPath;
-    _contextPath = contextPath;
-    _topLevel = topLevel;
-  }
-
-  public Header getHeader()
-  {
-    return _header;
-  }
-
-  public void setHeader(Header header)
-  {
-    _header = header;
-
-    _header.setContextPath(_contextPath);
-    _header.setTopLevel(_topLevel);
-    _header.setDocumentName(_documentPath.getTail());
-  }
-
-  public void setBody(Body body)
-  {
-    _body = body;
-
-    _body.setDocumentPath(_documentPath, _topLevel);
+    _language = language;
   }
 
   public void writeHtml(PrintWriter writer)
     throws IOException
   {
-    writer.println("<html>");
+    writer.println("<div class='example'>");
 
-    _header.writeHtml(writer);
-    _body.writeHtml(writer);
+    super.writeHtml(writer);
 
-    writer.println("</html>");
+    writer.println("</div>");
   }
 
   public void writeLaTeX(PrintWriter writer)
     throws IOException
   {
-    if (_topLevel)
-      writer.println("\\documentclass{article}");
+    writer.println("\\begin{center}");
+    writer.println("\\begin{Verbatim}[frame=single,fontfamily=courier,");
+    writer.println("                  fillcolor=\\color{results-gray},");
+    writer.println("                  fontsize=\\footnotesize,");
+    writer.println("                  samepage=true]");
 
-    _header.writeLaTeX(writer);
-    _body.writeLaTeX(writer);
-  }
+    super.writeLaTeX(writer);
 
-  public String toString()
-  {
-    return "Document[" + _documentPath + "]";
+    writer.println();
+    writer.println("\\end{Verbatim}");
+
+    if (_title != null)
+      writer.println(LaTeXUtil.escapeForLaTeX(_title));
+
+    writer.println("\\end{center}");
   }
 }

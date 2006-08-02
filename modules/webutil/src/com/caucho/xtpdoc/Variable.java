@@ -33,24 +33,28 @@ import java.io.PrintWriter;
 import java.io.IOException;
 
 public class Variable extends FormattedText {
+  public void setType(String type)
+  {
+  }
+
   public void writeHtml(PrintWriter writer)
     throws IOException
   {
-    writer.print("<code>");
+    writer.print("<span class='meta'>");
 
     super.writeHtml(writer);
 
-    writer.print("</code>");
+    writer.print("</span>");
   }
 
   public void writeLaTeX(PrintWriter writer)
     throws IOException
   {
     //XXX
-    writer.print("\\texttt{");
+    writer.print(" \\texttt{");
 
     super.writeLaTeX(writer);
 
-    writer.print("}");
+    writer.print("} ");
   }
 }

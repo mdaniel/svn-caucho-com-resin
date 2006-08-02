@@ -32,10 +32,51 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
+import java.util.logging.Logger;
+
+import com.caucho.vfs.Path;
+
+import com.caucho.config.Config;
+
 public class Summary {
+  private static final Logger log = Logger.getLogger(Summary.class.getName());
+
+  private ATOCControl _atocControl;
+  private Navigation _navigation;
+
+  void setRootPath(Path rootPath)
+  {
+    // We can parse the table of contents now because the rest of the
+    // attributes are just formatting
+    Path toc = rootPath.lookup("toc.xml");
+
+    if (toc.exists()) {
+      Config config = new Config();
+
+      _navigation = new Navigation(rootPath, 0);
+
+      try {
+        config.configure(_navigation, toc);
+      } catch (Exception e) {
+        log.info("failed to configure " + toc + "! " + e);
+        e.getCause().printStackTrace();
+        _navigation = null;
+      }
+    } else {
+      log.info("Couldn't find " + toc);
+    }
+  }
+
+  public void setATOC(String atoc)
+  {
+  }
+
   public void setObjSummary(String objSummary)
   {
-    // XXX
+  }
+
+  public void setObjSummaryInLocalTOC(String objSummary)
+  {
   }
 
   public void setLocalTOC(String localTOC)
@@ -43,9 +84,16 @@ public class Summary {
     // XXX
   }
 
+  public void setATOCControl(ATOCControl atocControl)
+  {
+    _atocControl = atocControl;
+  }
+
   public void writeHtml(PrintWriter writer)
     throws IOException
   {
+    if (_navigation != null)
+      _navigation.writeHtml(writer);
   }
 
   public void writeLaTeX(PrintWriter writer)

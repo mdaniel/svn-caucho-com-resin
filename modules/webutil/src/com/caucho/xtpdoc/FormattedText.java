@@ -34,12 +34,23 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
-public class FormattedText implements ContentItem {
-  private ArrayList<ContentItem> _contentItems = new ArrayList<ContentItem>();
+public class FormattedText implements ContentItem, ObjectWithParent {
+  private Object _parent;
+  protected ArrayList<ContentItem> _contentItems = new ArrayList<ContentItem>();
 
   protected void addItem(ContentItem item)
   {
     _contentItems.add(item);
+  }
+
+  public void setParent(Object parent)
+  {
+    _parent = parent;
+  }
+
+  public Object getParent()
+  {
+    return _parent;
   }
 
   public void addText(String text)
@@ -62,6 +73,11 @@ public class FormattedText implements ContentItem {
     _contentItems.add(text);
   }
 
+  public void addPre(PreFormattedText pretext)
+  {
+    _contentItems.add(pretext);
+  }
+
   public void addVar(Variable variable)
   {
     _contentItems.add(variable);
@@ -77,19 +93,22 @@ public class FormattedText implements ContentItem {
     _contentItems.add(url);
   }
 
+  public void addExample(Example example)
+  {
+    _contentItems.add(example);
+  }
+
   public void writeHtml(PrintWriter writer)
     throws IOException
   {
-    for (ContentItem item : _contentItems) {
+    for (ContentItem item : _contentItems)
       item.writeHtml(writer);
-    }
   }
 
   public void writeLaTeX(PrintWriter writer)
     throws IOException
   {
-    for (ContentItem item : _contentItems) {
+    for (ContentItem item : _contentItems)
       item.writeLaTeX(writer);
-    }
   }
 }

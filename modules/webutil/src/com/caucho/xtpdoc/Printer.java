@@ -46,25 +46,22 @@ public class Printer {
     Config config = new Config();
 
     if (args.length == 0) {
-      System.out.println("usage: " + Printer.class.getName() + " <xtp file>");
+      System.out.println("usage: " + Printer.class.getName() + " <book.xml>");
       System.exit(1);
     }
 
     Path xtpFile = Vfs.lookup(args[0]);
-
-    Document document = new Document();
+    Book book = new Book();
 
     try {
-      config.configure(document, xtpFile);
+      config.configure(book, xtpFile);
 
       OutputStreamWriter osw = new OutputStreamWriter(System.out);
-
       PrintWriter writer = new PrintWriter(osw);
 
-      document.writeLaTeX(writer);
+      book.writeLaTeX(writer);
 
       osw.close();
-
       writer.close();
     } catch (IOException e) {
       System.err.println("Error writing HTML: " + e);

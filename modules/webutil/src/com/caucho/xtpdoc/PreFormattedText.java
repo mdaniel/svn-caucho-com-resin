@@ -29,51 +29,75 @@
 
 package com.caucho.xtpdoc;
 
+import java.io.Writer;
 import java.io.PrintWriter;
+import java.io.FilterWriter;
 import java.io.IOException;
 
 import java.util.ArrayList;
 
-public class UnorderedList implements ContentItem, ObjectWithParent {
-  private Object _parent;
-  private ArrayList<ListItem> _listItems = new ArrayList<ListItem>();
-
-  public void setParent(Object parent)
-  {
-    _parent = parent;
-  }
-
-  public Object getParent()
-  {
-    return _parent;
-  }
-
-  public void addLI(ListItem item)
-  {
-    _listItems.add(item);
-  }
-
+public class PreFormattedText extends FormattedText {
   public void writeHtml(PrintWriter writer)
     throws IOException
   {
-    writer.println("<ul>");
+    writer.println("<pre>");
 
-    for (ListItem item : _listItems) {
+    for (ContentItem item : _contentItems)
       item.writeHtml(writer);
-    }
 
-    writer.println("</ul>");
+    writer.println("</pre>");
   }
 
   public void writeLaTeX(PrintWriter writer)
     throws IOException
   {
-    writer.println("\\begin{itemize}");
+    for (ContentItem item : _contentItems)
+      item.writeLaTeX(new PrintWriter(new PreFormatFilterWriter(writer)));
+  }
 
-    for (ListItem item : _listItems) {
-      item.writeLaTeX(writer);
+  private static class PreFormatFilterWriter extends FilterWriter {
+    public PreFormatFilterWriter(Writer writer)
+    {
+      super(writer);
     }
 
-    writer.println("\\end{itemize}");
+    public void write(char[] cbuf, int off, int len)
+      throws IOException
+    {
+      for (int i = off; i < len; i++)
+        filterChar(cbuf[i]);
+    }
+
+    public void write(int c)
+      throws IOException
+    {
+      filterChar(c);
+    }
+
+    public void write(String str, int off, int len)
+      throws IOException
+    {
+      for (int i = off; i < len; i++)
+        filterChar(str.charAt(i));
+    }
+
+    private void filterChar(int ch)
+      throws IOException
+    {
+      switch (ch) {
+        case ' ':
+        case '\t':
+          super.write('\\');
+          super.write(' ');
+          break;
+        case '\n':
+          super.write('\\');
+          super.write('\\');
+          break;
+        default:
+          super.write(ch);
+          break;
+      }
+    }
   }
 }

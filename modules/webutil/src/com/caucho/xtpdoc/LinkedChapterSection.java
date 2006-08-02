@@ -32,25 +32,56 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
-public class Url extends FormattedText {
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+import java.util.ArrayList;
+
+import java.util.logging.Logger;
+
+import com.caucho.config.Config;
+
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.Path;
+
+public class LinkedChapterSection extends ChapterSection {
+  private static final Logger log = Logger.getLogger(Anchor.class.getName());
+  private String _link;
+
+  public void setLink(String link)
   {
-    writer.print("<code>");
-
-    super.writeHtml(writer);
-
-    writer.print("</code>");
+    _link = link;
   }
 
   public void writeLaTeX(PrintWriter writer)
     throws IOException
   {
-    //XXX Local versus external
-    writer.print(" \\url{");
+    Path xtpFile = Vfs.lookup(_link);
+    Document document = new Document(xtpFile, null, false);
 
-    super.writeLaTeX(writer);
+    try {
+      org.w3c.dom.Node node = LooseToStrictHtml.looseToStrictHtml(xtpFile);
 
-    writer.print("} ");
+      Config config = new Config();
+
+      config.configure(document, node);
+    } catch (Exception e) {
+      System.err.println("Error configuring document (" + xtpFile + "): " + e);
+
+//      e.getCause().printStackTrace();
+      return;
+    }
+
+    try {
+      document.writeLaTeX(writer);
+    } catch (Exception e) {
+      System.err.println("Error configuring document (" + xtpFile + "): " + e);
+
+      /*
+      if (e.getCause() != null)
+        e.getCause().printStackTrace();
+      else 
+        e.printStackTrace();*/
+
+      return;
+    }
+
   }
 }

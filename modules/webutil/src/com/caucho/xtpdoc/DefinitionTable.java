@@ -42,32 +42,18 @@ public class DefinitionTable extends Table {
     writer.print("<table width=\"90%\" cellpadding=\"2\" ");
     writer.print("cellspacing=\"0\" class=\"deftable\" border=\"\">");
 
-    for (TableRow row : _rows) {
+    for (TableRow row : _rows)
       row.writeHtml(writer);
-    }
 
     writer.println("</table>");
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  protected void writeRows(PrintWriter writer)
     throws IOException
   {
-    writer.print("\\begin{table}");
-    writer.print("\\begin{tabular}");
-
-    writer.print("{");
-
-    for (int i = 0; i < _columns; i++)
-      writer.print("c");
-
-    writer.print("}");
-
     for (TableRow row : _rows) {
       writer.print("\\rowcolor[gray]{0.9}");
       row.writeLaTeX(writer);
     }
-
-    writer.print("\\end{tabular}");
-    writer.print("\\end{table}");
   }
 }

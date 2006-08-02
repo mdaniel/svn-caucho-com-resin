@@ -32,18 +32,18 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
-public class Example implements ContentItem {
-  private String _text;
+public class Example extends VerboseFormattedTextWithAnchors {
+  private String _title;
   private String _language = null;
+
+  public void setTitle(String title)
+  {
+    _title = title;
+  }
 
   public void setLanguage(String language)
   {
     _language = language;
-  }
-
-  public void setText(String text)
-  {
-    _text = text;
   }
 
   public void writeHtml(PrintWriter writer)
@@ -51,7 +51,7 @@ public class Example implements ContentItem {
   {
     writer.println("<div class='example'>");
 
-    writer.println(_text);
+    super.writeHtml(writer);
 
     writer.println("</div>");
   }
@@ -59,20 +59,33 @@ public class Example implements ContentItem {
   public void writeLaTeX(PrintWriter writer)
     throws IOException
   {
-    
     if (_language != null) {
       writer.println("\\lstset{fancyvrb,language=" + _language + ",");
-      writer.println("         showstringspaces=false,");
+      writer.println("         showstringspaces=false,basicstyle=\\small,");
       writer.println("         stringstyle=\\color[gray]{0.6}}");
     }
 
     writer.println("\\begin{center}");
     writer.println("\\begin{Verbatim}[frame=single,fontfamily=courier,");
-    writer.println("                  fillcolor=\\color{example-gray}]");
+    writer.println("                  framerule=1pt,");
+    writer.println("                  fontsize=\\footnotesize,");
 
-    writer.println(_text);
+    if (_title != null) {
+      writer.print("                  labelposition=bottomline,label=\\fbox{");
+      writer.println(LaTeXUtil.escapeForLaTeX(_title) + "},");
+    }
 
+    writer.println("                  samepage=true]");
+
+    super.writeLaTeX(writer);
+
+    // make room for the title box
+    if (_title != null)
+      writer.println();
+
+    writer.println();
     writer.println("\\end{Verbatim}");
+
     writer.println("\\end{center}");
 
     if (_language != null)

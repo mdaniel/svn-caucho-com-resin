@@ -29,42 +29,38 @@
 
 package com.caucho.xtpdoc;
 
-public class LaTeXUtil {
-  public static String escapeForLaTeX(String text)
+import java.io.PrintWriter;
+import java.io.IOException;
+
+import java.util.ArrayList;
+
+import com.caucho.vfs.Path;
+
+public class Chapter {
+  private String _title;
+  private ArrayList<ChapterSection> _sections = new ArrayList<ChapterSection>();
+
+  public void setTitle(String title)
   {
-    StringBuilder latexText = new StringBuilder();
+    _title = title;
+  }
 
-    for (int i = 0; i < text.length(); i++) {
-      char ch = text.charAt(i);
+  public void addLinkedSection(LinkedChapterSection section)
+  {
+    _sections.add(section);
+  }
 
-      switch (ch) {
-        case '\\':
-          latexText.append("\\ensuremath{\\backslash}");
-          break;
-        case '%':
-          latexText.append("\\%");
-          break;
-        case '$':
-        case '_':
-        case '&':
-        case '{':
-        case '}':
-        case '#':
-          latexText.append("\\");
-          latexText.append(ch);
-          break;
-        case '>':
-        case '<':
-          latexText.append("\\ensuremath{");
-          latexText.append(ch);
-          latexText.append("}");
-          break;
-        default:
-          latexText.append(ch);
-          break;
-      }
-    }
+  public void addEnclosingSection(EnclosingChapterSection section)
+  {
+    _sections.add(section);
+  }
 
-    return latexText.toString();
+  public void writeLaTeX(PrintWriter writer)
+    throws IOException
+  {
+    writer.println("\\chapter{" + _title + "}");
+
+    for (ChapterSection section : _sections)
+      section.writeLaTeX(writer);
   }
 }

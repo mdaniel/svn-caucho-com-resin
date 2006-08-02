@@ -29,42 +29,16 @@
 
 package com.caucho.xtpdoc;
 
-public class LaTeXUtil {
-  public static String escapeForLaTeX(String text)
+import java.io.PrintWriter;
+import java.io.IOException;
+
+import java.util.ArrayList;
+
+public class ATOCControl {
+  private ArrayList<ATOCControlItem> _items = new ArrayList<ATOCControlItem>();
+
+  public void addItem(ATOCControlItem item)
   {
-    StringBuilder latexText = new StringBuilder();
-
-    for (int i = 0; i < text.length(); i++) {
-      char ch = text.charAt(i);
-
-      switch (ch) {
-        case '\\':
-          latexText.append("\\ensuremath{\\backslash}");
-          break;
-        case '%':
-          latexText.append("\\%");
-          break;
-        case '$':
-        case '_':
-        case '&':
-        case '{':
-        case '}':
-        case '#':
-          latexText.append("\\");
-          latexText.append(ch);
-          break;
-        case '>':
-        case '<':
-          latexText.append("\\ensuremath{");
-          latexText.append(ch);
-          latexText.append("}");
-          break;
-        default:
-          latexText.append(ch);
-          break;
-      }
-    }
-
-    return latexText.toString();
+    _items.add(item);
   }
 }

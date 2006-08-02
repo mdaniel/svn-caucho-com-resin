@@ -29,42 +29,34 @@
 
 package com.caucho.xtpdoc;
 
-public class LaTeXUtil {
-  public static String escapeForLaTeX(String text)
+import java.io.PrintWriter;
+import java.io.IOException;
+
+import java.util.ArrayList;
+
+import com.caucho.vfs.Path;
+
+public class EnclosingChapterSection extends ChapterSection {
+  private String _title;
+  private ArrayList<ChapterSection> _subsections 
+    = new ArrayList<ChapterSection>();
+
+  public void setTitle(String title)
   {
-    StringBuilder latexText = new StringBuilder();
+    _title = title;
+  }
 
-    for (int i = 0; i < text.length(); i++) {
-      char ch = text.charAt(i);
+  public void addLinkedSection(LinkedChapterSection section)
+  {
+    _subsections.add(section);
+  }
 
-      switch (ch) {
-        case '\\':
-          latexText.append("\\ensuremath{\\backslash}");
-          break;
-        case '%':
-          latexText.append("\\%");
-          break;
-        case '$':
-        case '_':
-        case '&':
-        case '{':
-        case '}':
-        case '#':
-          latexText.append("\\");
-          latexText.append(ch);
-          break;
-        case '>':
-        case '<':
-          latexText.append("\\ensuremath{");
-          latexText.append(ch);
-          latexText.append("}");
-          break;
-        default:
-          latexText.append(ch);
-          break;
-      }
-    }
+  public void writeLaTeX(PrintWriter writer)
+    throws IOException
+  {
+    writer.println("\\section{" + _title + "}");
 
-    return latexText.toString();
+    for (ChapterSection section : _subsections)
+      section.writeLaTeX(writer);
   }
 }

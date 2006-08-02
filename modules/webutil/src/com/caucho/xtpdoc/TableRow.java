@@ -52,6 +52,10 @@ public class TableRow {
     _cells.add(header);
   }
 
+  public void setOccur(String occur)
+  {
+  }
+
   public void writeHtml(PrintWriter writer)
     throws IOException
   {
@@ -74,6 +78,8 @@ public class TableRow {
         writer.print("&");
       else
         writer.println("\\\\");
+
+      writer.flush();
     }
   }
 }

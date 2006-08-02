@@ -45,12 +45,12 @@ public class Text implements ContentItem {
   public void writeHtml(PrintWriter writer)
     throws IOException
   {
-    writer.println(_text);
+    writer.print(_text);
   }
 
   public void writeLaTeX(PrintWriter writer)
     throws IOException
   {
-    writer.println(LaTeXUtil.escapeForLaTeX(_text));
+    writer.print(LaTeXUtil.escapeForLaTeX(_text));
   }
 }

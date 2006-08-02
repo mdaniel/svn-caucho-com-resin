@@ -47,10 +47,10 @@ public class Code extends FormattedText {
     throws IOException
   {
     //XXX
-    writer.print("\\texttt{");
+    writer.print(" \\texttt{");
 
     super.writeLaTeX(writer);
 
-    writer.print("}");
+    writer.print("} ");
   }
 }

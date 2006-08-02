@@ -34,27 +34,76 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
-public class Section implements ContentItem {
-  private int _depth = 0;
-  private String _name;
-  private String _title;
+public abstract class Section implements ContentItem, ObjectWithParent {
+  private Object _parent;
+  protected String _documentName;
+  protected String _name;
+  protected String _title;
+  protected String _version;
+  protected boolean _topLevel = true;
 
-  private ArrayList<ContentItem> _contentItems = new ArrayList<ContentItem>();
+  protected ArrayList<ContentItem> _contentItems = new ArrayList<ContentItem>();
 
-  private void setDepth(int depth)
+  void setDocumentName(String documentName)
   {
-    _depth = depth;
+    _documentName = documentName;
+
+    for (ContentItem item : _contentItems) {
+      if (item instanceof Section)
+        ((Section) item).setDocumentName(documentName);
+    }
   }
 
-  public void addText(String text)
+  String getDocumentName()
   {
-    _contentItems.add(new Text(text));
+    return _documentName;
+  }
+
+  void setTopLevel(boolean topLevel)
+  {
+    _topLevel = topLevel;
+
+    for (ContentItem item : _contentItems) {
+      if (item instanceof Section)
+        ((Section) item).setTopLevel(_topLevel);
+    }
+  }
+
+  public void setParent(Object parent)
+  {
+    _parent = parent;
+  }
+
+  public Object getParent()
+  {
+    return _parent;
+  }
+
+  // 
+  // XXX: Stubbed
+  //
+  
+  public void setOccur(String occur)
+  {
+  }
+
+  public void setLocalTOCIndent(String localTOCIndent)
+  {
+  }
+
+  public void setVersion(String version)
+  {
+    _version = version;
   }
 
   public void setName(String name)
   {
     _name = name;
   }
+
+  //
+  // XXX: End stubbed
+  //
 
   public void setTitle(String title)
   {
@@ -64,6 +113,11 @@ public class Section implements ContentItem {
   public void addP(Paragraph paragraph)
   {
     _contentItems.add(paragraph);
+  }
+
+  public void addPre(PreFormattedText pretext)
+  {
+    _contentItems.add(pretext);
   }
 
   public void addOL(OrderedList orderedList)
@@ -95,49 +149,68 @@ public class Section implements ContentItem {
   {
     _contentItems.add(definitionTable);
   }
-  
-  public void addSection(Section subsection)
-  {
-    subsection.setDepth(_depth + 1);
 
-    _contentItems.add(subsection);
+  public void addDefTableChildTags(DefinitionTable definitionTable)
+  {
+    _contentItems.add(definitionTable);
   }
 
+  public void addDefTableParameters(DefinitionTable definitionTable)
+  {
+    _contentItems.add(definitionTable);
+  }
+
+  public void addResults(Example results)
+  {
+    _contentItems.add(results);
+  }
+
+  public void addDef(Def def)
+  {
+    _contentItems.add(def);
+  }
+
+  public void addNote(FormattedTextWithAnchors note)
+  {
+    _contentItems.add(new NamedText("Note", note));
+  }
+
+  public void addWarn(FormattedTextWithAnchors warning)
+  {
+    _contentItems.add(new NamedText("Warning", warning));
+  }
+
+  public void addParents(FormattedText parents)
+  {
+    _contentItems.add(new NamedText("child of", parents));
+  }
+ 
+  public void addDefault(FormattedText def)
+  {
+    _contentItems.add(new NamedText("default", def));
+  }
+
+  public void addGlossary(Glossary glossary)
+  {
+    _contentItems.add(glossary);
+  }
+ 
   public void writeHtml(PrintWriter writer)
     throws IOException
   {
-    writer.println("<div class='section'>" + _title + "</div>");
-
-    for (ContentItem item : _contentItems) {
+    for (ContentItem item : _contentItems)
       item.writeHtml(writer);
-    }
   }
 
   public void writeLaTeX(PrintWriter writer)
     throws IOException
   {
-    switch (_depth) {
-      case 0:
-        writer.print("\\section{");
-        break;
-      case 1:
-        writer.print("\\subsection{");
-        break;
-      case 2:
-        writer.print("\\subsubsection{");
-        break;
-      case 3:
-        writer.print("\\paragraph{");
-        break;
-      default:
-        writer.print("\\textbf{");
-        break;
-    }
-        
-    writer.println(LaTeXUtil.escapeForLaTeX(_title) + "}");
+    String label = (_documentName + ":" + _title).replace(" ", "-");
 
-    for (ContentItem item : _contentItems) {
+    writer.println("\\label{" + label + "}");
+    writer.println("\\hypertarget{" + label + "}{}");
+
+    for (ContentItem item : _contentItems)
       item.writeLaTeX(writer);
-    }
   }
 }

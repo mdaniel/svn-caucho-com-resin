@@ -35,8 +35,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class Table implements ContentItem {
+  private static int _count = 0;
+
+  private int _myCount = _count++;
+  protected String _title;
   protected int _columns = 0;
   protected ArrayList<TableRow> _rows = new ArrayList<TableRow>();
+
+  
+  public void setTitle(String title)
+  {
+    _title = title;
+  }
 
   public void addTR(TableRow row)
   {
@@ -50,31 +60,45 @@ public class Table implements ContentItem {
   {
     writer.println("<table>");
 
-    for (TableRow row : _rows) {
+    for (TableRow row : _rows)
       row.writeHtml(writer);
-    }
 
     writer.println("</table>");
+  }
+
+  protected void writeRows(PrintWriter writer)
+    throws IOException
+  {
+    for (TableRow row : _rows)
+      row.writeLaTeX(writer);
   }
 
   public void writeLaTeX(PrintWriter writer)
     throws IOException
   {
-    writer.print("\\begin{table}");
-    writer.print("\\begin{tabular}");
+    writer.println("\\begin{filecontents}{ltx" + _myCount + ".tex}");
+    writer.print("\\begin{longtable}");
 
     writer.print("{");
 
     for (int i = 0; i < _columns; i++)
-      writer.print("c");
+      writer.print("X");
 
-    writer.print("}");
+    writer.println("}");
 
-    for (TableRow row : _rows) {
-      row.writeLaTeX(writer);
-    }
+    writeRows(writer);
 
-    writer.print("\\end{tabular}");
-    writer.print("\\end{table}");
+    writer.println("\\end{longtable}");
+    writer.println("\\end{filecontents}");
+
+
+    writer.println("\\begin{center}");
+
+    writer.println("\\LTXtable{\\linewidth}{ltx" + _myCount + "}");
+
+    if (_title != null)
+      writer.println("\\textbf{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+
+    writer.println("\\end{center}");
   }
 }

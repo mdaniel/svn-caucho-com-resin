@@ -36,7 +36,25 @@ public class Header {
   private String _product;
   private String _version;
   private String _title;
-  private ContentItem _description;
+  private String _documentName;
+  private Section _description;
+  private String _contextPath;
+  private boolean _topLevel = true;
+
+  void setTopLevel(boolean topLevel)
+  {
+    _topLevel = topLevel;
+  }
+
+  void setContextPath(String contextPath)
+  {
+    _contextPath = contextPath;
+  }
+
+  void setDocumentName(String documentName)
+  {
+    _documentName = documentName;
+  }
 
   public void setProduct(String product)
   {
@@ -65,7 +83,12 @@ public class Header {
   {
   }
 
-  public void setDescription(FormattedTextWithAnchors description)
+  public ContentItem getDescription()
+  {
+    return _description;
+  }
+
+  public void setDescription(S1 description)
   {
     _description = description;
   }
@@ -75,8 +98,17 @@ public class Header {
   {
     writer.println("<head>");
 
-    writer.println("<meta name='product' content='" + _product + "' />");
-    writer.println("<meta name='version' content='" + _version + "' />");
+    writer.print("<meta http-equiv=\"Content-Type\" ");
+    writer.println("content=\"text/html; charset=utf-8\">");
+
+    if (_product != null)
+      writer.println("<meta name='product' content='" + _product + "' />");
+
+    if (_version != null)
+      writer.println("<meta name='version' content='" + _version + "' />");
+
+    writer.print("<link rel=\"STYLESHEET\" type=\"text/css\" ");
+    writer.println("href=\"" + _contextPath + "/css/default.css\">");
 
     writer.println("<title>" + _title + "</title>");
 
@@ -86,18 +118,26 @@ public class Header {
   public void writeLaTeX(PrintWriter writer)
     throws IOException
   {
-    writer.println("\\usepackage[margin=1in]{geometry}");
-    writer.println("\\usepackage{url}");
-    writer.println("\\usepackage{hyperref}");
-    writer.println("\\usepackage{graphicx}");
-    writer.println("\\usepackage{color}");
-    writer.println("\\usepackage{colortbl}");
-    writer.println("\\usepackage{fancyvrb}");
-    writer.println("\\usepackage{listings}");
-    writer.println();
-    writer.println("\\definecolor{example-gray}{gray}{0.8}");
-    writer.println();
-    writer.println("\\title{" + _title + "}");
-    //XXX: product & version
+    if (_topLevel) {
+      writer.println("\\usepackage[margin=1in]{geometry}");
+      writer.println("\\usepackage{url}");
+      writer.println("\\usepackage{hyperref}");
+      writer.println("\\usepackage{graphicx}");
+      writer.println("\\usepackage{color}");
+      writer.println("\\usepackage{colortbl}");
+      writer.println("\\usepackage{fancyvrb}");
+      writer.println("\\usepackage{listings}");
+      writer.println();
+      writer.println("\\definecolor{example-gray}{gray}{0.8}");
+      writer.println("\\definecolor{results-gray}{gray}{0.6}");
+      writer.println();
+      writer.println("\\title{" + _title + "}");
+      //XXX: product & version
+    } else {
+      writer.println("\\section{" + _title + "}");
+
+      writer.println("\\label{" + _documentName + "}");
+      writer.println("\\hypertarget{" + _documentName + "}{}");
+    }
   }
 }

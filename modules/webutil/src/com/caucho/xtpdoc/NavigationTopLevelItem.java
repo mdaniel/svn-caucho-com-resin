@@ -32,77 +32,74 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
+import java.util.ArrayList;
+
+import java.util.logging.Logger;
+
 import com.caucho.vfs.Path;
 
-public class Document {
-  private Header _header;
-  private Body _body;
-  private Path _documentPath;
-  private String _contextPath;
-  private boolean _topLevel = true;
-  private int _level;
+import com.caucho.config.Config;
 
-  Document()
+public class NavigationTopLevelItem {
+  private static final Logger log 
+    = Logger.getLogger(NavigationTopLevelItem.class.getName());
+
+  private int _depth;
+  private Path _rootPath;
+  private String _link;
+  private String _title;
+  private ArrayList<NavigationItem> _items = new ArrayList<NavigationItem>();
+
+  void setDepth(int depth)
   {
-    this(null, null, false);
+    _depth = depth;
+
+    for (NavigationItem item : _items)
+      item.setDepth(_depth);
   }
 
-  public Document(Path documentPath, String contextPath)
+  void setRootPath(Path rootPath)
   {
-    this(documentPath, contextPath, true);
+    _rootPath = rootPath;
+
+    for (NavigationItem item : _items)
+      item.setRootPath(_rootPath);
   }
 
-  public Document(Path documentPath, String contextPath, boolean topLevel)
+  public String getLink()
   {
-    _documentPath = documentPath;
-    _contextPath = contextPath;
-    _topLevel = topLevel;
+    return _link;
   }
 
-  public Header getHeader()
+  public void setLink(String link)
   {
-    return _header;
+    _link = link;
   }
 
-  public void setHeader(Header header)
+  public void setTitle(String title)
   {
-    _header = header;
-
-    _header.setContextPath(_contextPath);
-    _header.setTopLevel(_topLevel);
-    _header.setDocumentName(_documentPath.getTail());
+    _title = title;
   }
 
-  public void setBody(Body body)
+  public void addItem(NavigationItem item)
   {
-    _body = body;
+    _items.add(item);
+  }
 
-    _body.setDocumentPath(_documentPath, _topLevel);
+  public void setCond(String cond)
+  {
+    // XXX
   }
 
   public void writeHtml(PrintWriter writer)
     throws IOException
   {
-    writer.println("<html>");
-
-    _header.writeHtml(writer);
-    _body.writeHtml(writer);
-
-    writer.println("</html>");
+    for (NavigationItem item : _items)
+      item.writeHtml(writer);
   }
 
   public void writeLaTeX(PrintWriter writer)
     throws IOException
   {
-    if (_topLevel)
-      writer.println("\\documentclass{article}");
-
-    _header.writeLaTeX(writer);
-    _body.writeLaTeX(writer);
-  }
-
-  public String toString()
-  {
-    return "Document[" + _documentPath + "]";
   }
 }

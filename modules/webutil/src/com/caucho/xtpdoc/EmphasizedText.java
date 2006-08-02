@@ -46,7 +46,7 @@ public class EmphasizedText extends FormattedText {
   public void writeLaTeX(PrintWriter writer)
     throws IOException
   {
-    writer.print("\\textem{");
+    writer.print("{\\em ");
 
     super.writeLaTeX(writer);
 

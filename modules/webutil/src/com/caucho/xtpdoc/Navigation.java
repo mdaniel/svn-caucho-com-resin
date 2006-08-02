@@ -32,77 +32,65 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
+import java.util.ArrayList;
+
 import com.caucho.vfs.Path;
 
-public class Document {
-  private Header _header;
-  private Body _body;
-  private Path _documentPath;
-  private String _contextPath;
-  private boolean _topLevel = true;
-  private int _level;
+public class Navigation {
+  private int _depth;
+  private Path _rootPath;
+  private String _section;
+  private boolean _threaded;
+  private boolean _comment;
+  private ArrayList<NavigationItem> _items 
+    = new ArrayList<NavigationItem>();
 
-  Document()
+  public Navigation(Path rootPath, int depth)
   {
-    this(null, null, false);
+    _rootPath = rootPath;
+
+    _depth = depth;
   }
 
-  public Document(Path documentPath, String contextPath)
+  public void setSection(String section)
   {
-    this(documentPath, contextPath, true);
+    _section = section;
   }
 
-  public Document(Path documentPath, String contextPath, boolean topLevel)
+  public void setComment(boolean comment)
   {
-    _documentPath = documentPath;
-    _contextPath = contextPath;
-    _topLevel = topLevel;
+    _comment = comment;
   }
 
-  public Header getHeader()
+  public void setThreaded(boolean threaded)
   {
-    return _header;
+    _threaded = threaded;
   }
 
-  public void setHeader(Header header)
+  public void addItem(NavigationItem item)
   {
-    _header = header;
-
-    _header.setContextPath(_contextPath);
-    _header.setTopLevel(_topLevel);
-    _header.setDocumentName(_documentPath.getTail());
-  }
-
-  public void setBody(Body body)
-  {
-    _body = body;
-
-    _body.setDocumentPath(_documentPath, _topLevel);
+    _items.add(item);
+    
+    item.setDepth(_depth);
+    item.setRootPath(_rootPath);
   }
 
   public void writeHtml(PrintWriter writer)
     throws IOException
   {
-    writer.println("<html>");
+    String depthString = (_depth == 0) ? "top" : ("" + _depth);
 
-    _header.writeHtml(writer);
-    _body.writeHtml(writer);
+    writer.println("<dl class='atoc-toplevel atoc-toplevel-" + 
+                 depthString + "'>");
 
-    writer.println("</html>");
+    for (NavigationItem item : _items)
+      item.writeHtml(writer);
+
+    writer.println("</dl>");
   }
 
   public void writeLaTeX(PrintWriter writer)
     throws IOException
   {
-    if (_topLevel)
-      writer.println("\\documentclass{article}");
-
-    _header.writeLaTeX(writer);
-    _body.writeLaTeX(writer);
-  }
-
-  public String toString()
-  {
-    return "Document[" + _documentPath + "]";
   }
 }

@@ -32,25 +32,50 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
-public class Url extends FormattedText {
+public class Def extends VerboseFormattedText {
+  private String _title;
+
+  public void setTitle(String title)
+  {
+    _title = title;
+  }
+
   public void writeHtml(PrintWriter writer)
     throws IOException
   {
-    writer.print("<code>");
+    writer.println("<table class=\"egpad\" cellspacing=\"0\" width=\"90%\">");
+
+    if (_title != null) {
+      writer.println("<caption><font size=\"+1\">" + _title + 
+                     "</font></caption>");
+    }
+
+    writer.println("<tr><td class=\"def\" bgcolor=\"#cccccc\">");
+    writer.println("<pre><div class=\"def\">");
 
     super.writeHtml(writer);
 
-    writer.print("</code>");
+    writer.println("</pre></td></tr></table>");
   }
 
   public void writeLaTeX(PrintWriter writer)
     throws IOException
   {
-    //XXX Local versus external
-    writer.print(" \\url{");
+    writer.println("\\begin{center}");
+    writer.println("\\begin{Verbatim}[fontfamily=courier,");
+    writer.println("                  fontsize=\\footnotesize,");
+
+    if (_title != null) {
+      writer.println("                  label=" + _title + ",");
+      writer.println("                  labelposition=bottomline,");
+    }
+
+    writer.println("                  samepage=true]");
 
     super.writeLaTeX(writer);
 
-    writer.print("} ");
+    writer.println();
+    writer.println("\\end{Verbatim}");
+    writer.println("\\end{center}");
   }
 }

@@ -32,77 +32,25 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
-import com.caucho.vfs.Path;
+import java.util.ArrayList;
 
-public class Document {
-  private Header _header;
-  private Body _body;
-  private Path _documentPath;
-  private String _contextPath;
-  private boolean _topLevel = true;
-  private int _level;
+public class VerboseText implements ContentItem {
+  private String _text;
 
-  Document()
+  public VerboseText(String text)
   {
-    this(null, null, false);
-  }
-
-  public Document(Path documentPath, String contextPath)
-  {
-    this(documentPath, contextPath, true);
-  }
-
-  public Document(Path documentPath, String contextPath, boolean topLevel)
-  {
-    _documentPath = documentPath;
-    _contextPath = contextPath;
-    _topLevel = topLevel;
-  }
-
-  public Header getHeader()
-  {
-    return _header;
-  }
-
-  public void setHeader(Header header)
-  {
-    _header = header;
-
-    _header.setContextPath(_contextPath);
-    _header.setTopLevel(_topLevel);
-    _header.setDocumentName(_documentPath.getTail());
-  }
-
-  public void setBody(Body body)
-  {
-    _body = body;
-
-    _body.setDocumentPath(_documentPath, _topLevel);
+    _text = text;
   }
 
   public void writeHtml(PrintWriter writer)
     throws IOException
   {
-    writer.println("<html>");
-
-    _header.writeHtml(writer);
-    _body.writeHtml(writer);
-
-    writer.println("</html>");
+    writer.print(_text);
   }
 
   public void writeLaTeX(PrintWriter writer)
     throws IOException
   {
-    if (_topLevel)
-      writer.println("\\documentclass{article}");
-
-    _header.writeLaTeX(writer);
-    _body.writeLaTeX(writer);
-  }
-
-  public String toString()
-  {
-    return "Document[" + _documentPath + "]";
+    writer.print(_text);
   }
 }
