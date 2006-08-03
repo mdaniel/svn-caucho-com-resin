@@ -38,7 +38,7 @@ import com.caucho.amber.type.BooleanType;
  */
 class BetweenExpr extends AbstractAmberExpr {
   private AmberExpr _expr;
-  
+
   private AmberExpr _min;
   private AmberExpr _max;
 
@@ -55,7 +55,7 @@ class BetweenExpr extends AbstractAmberExpr {
 
     _isNot = isNot;
   }
-  
+
   /**
    * Returns true for a boolean expression.
    */
@@ -90,10 +90,10 @@ class BetweenExpr extends AbstractAmberExpr {
   public boolean usesFrom(FromItem from, int type, boolean isNot)
   {
     return (_expr.usesFrom(from, type) ||
-	    _min.usesFrom(from, type) ||
-	    _max.usesFrom(from, type));
+            _min.usesFrom(from, type) ||
+            _max.usesFrom(from, type));
   }
-  
+
   /**
    * Generates the where expression.
    */
@@ -112,14 +112,22 @@ class BetweenExpr extends AbstractAmberExpr {
     cb.append(" AND ");
 
     _max.generateWhere(cb);
-    
+
     cb.append(')');
+  }
+
+  /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb)
+  {
+    generateWhere(cb);
   }
 
   public String toString()
   {
     CharBuffer cb = CharBuffer.allocate();
-    
+
     cb.append('(');
     cb.append(_expr);
 
@@ -133,7 +141,7 @@ class BetweenExpr extends AbstractAmberExpr {
     cb.append(" AND ");
 
     cb.append(_max);
-    
+
     cb.append(')');
 
     return cb.close();

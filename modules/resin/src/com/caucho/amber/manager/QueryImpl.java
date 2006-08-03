@@ -37,6 +37,7 @@ import java.util.Calendar;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 import javax.persistence.Query;
@@ -57,10 +58,10 @@ import com.caucho.ejb.EJBExceptionWrapper;
  */
 public class QueryImpl implements Query {
   private static final L10N L = new L10N(QueryImpl.class);
-  
+
   private AbstractQuery _query;
   private UserQuery _userQuery;
-    
+
   private AmberConnection _aConn;
   private int _firstResult;
   private int _maxResults = Integer.MAX_VALUE / 2;
@@ -84,11 +85,44 @@ public class QueryImpl implements Query {
   {
     try {
       ArrayList results = new ArrayList();
-      
+
       ResultSet rs = executeQuery();
 
-      while (rs.next())
-	results.add(rs.getObject(1));
+      int n = 0;
+      Object row[] = null;
+
+      ArrayList columns = new ArrayList();
+
+      while (rs.next()) {
+        Object object = null;
+
+        // XXX: use ResultSetMetaData when it is fixed.
+
+        if (n == 0) {
+          for (int i=1; i<=10000; i++) {
+            try {
+              object = rs.getObject(i);
+              columns.add(object);
+            } catch (Exception ex) {
+              break;
+            }
+          }
+
+          n = columns.size();
+          row = columns.toArray();
+        }
+        else {
+          row = new Object[n];
+          for (int i=1; i<=n; i++) {
+            row[i-1] = rs.getObject(i);
+          }
+        }
+
+        if (n == 1)
+          results.add(row[0]);
+        else
+          results.add(row);
+      }
 
       rs.close();
 
@@ -109,7 +143,7 @@ public class QueryImpl implements Query {
       Object value = null;
 
       if (rs.next())
-	value = rs.getObject(1);
+        value = rs.getObject(1);
 
       rs.close();
 
@@ -197,7 +231,7 @@ public class QueryImpl implements Query {
       _userQuery.setDouble(index, ((Double) value).doubleValue());
     else
       _userQuery.setObject(index, value);
-    
+
     return this;
   }
 
@@ -234,7 +268,7 @@ public class QueryImpl implements Query {
   public Query setDouble(int index, double value)
   {
     _userQuery.setDouble(index, value);
-    
+
     return this;
   }
 }

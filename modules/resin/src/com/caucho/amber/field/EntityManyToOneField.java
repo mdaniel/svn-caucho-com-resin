@@ -74,7 +74,7 @@ public class EntityManyToOneField extends AbstractField {
 
   private DependentEntityOneToOneField _targetField;
   private PropertyField _aliasField;
-  
+
   private boolean _isInsert = true;
   private boolean _isUpdate = true;
 
@@ -99,7 +99,7 @@ public class EntityManyToOneField extends AbstractField {
   {
     if (! (targetType instanceof EntityType))
       throw new AmberRuntimeException(L.l("many-to-one requires an entity target at '{0}'",
-				    targetType));
+                                          targetType));
 
     _targetType = (EntityType) targetType;
   }
@@ -192,7 +192,7 @@ public class EntityManyToOneField extends AbstractField {
     throws ConfigException
   {
     super.init();
-    
+
     Id id = getEntityType().getId();
     ArrayList<Column> keys = id.getColumns();
 
@@ -200,34 +200,34 @@ public class EntityManyToOneField extends AbstractField {
       ArrayList<ForeignColumn> columns = new ArrayList<ForeignColumn>();
 
       for (int i = 0; i < keys.size(); i++) {
-	Column key = keys.get(i);
+        Column key = keys.get(i);
 
-	String name;
-	
-	if (keys.size() == 1)
-	  name = getName();
-	else
-	  name = getName() + "_" + key.getName();
+        String name;
 
-	columns.add(getSourceType().getTable().createForeignColumn(name, key));
+        if (keys.size() == 1)
+          name = getName();
+        else
+          name = getName() + "_" + key.getName();
+
+        columns.add(getSourceType().getTable().createForeignColumn(name, key));
       }
 
       _linkColumns = new LinkColumns(getSourceType().getTable(),
-				     _targetType.getTable(),
-				     columns);
+                                     _targetType.getTable(),
+                                     columns);
     }
 
     if (getSourceType().getId() != null) {
       // resolve any alias
       for (AmberField field : getSourceType().getId().getKeys()) {
-	if (field instanceof PropertyField) {
-	  PropertyField prop = (PropertyField) field;
+        if (field instanceof PropertyField) {
+          PropertyField prop = (PropertyField) field;
 
-	  for (ForeignColumn column : _linkColumns.getColumns()) {
-	    if (prop.getColumn().getName().equals(column.getName()))
-	      _aliasField = prop;
-	  }
-	}
+          for (ForeignColumn column : _linkColumns.getColumns()) {
+            if (prop.getColumn().getName().equals(column.getName()))
+              _aliasField = prop;
+          }
+        }
       }
     }
 
@@ -269,7 +269,7 @@ public class EntityManyToOneField extends AbstractField {
   {
     if (_aliasField != null)
       return null;
-    
+
     if (_linkColumns.getSourceTable() != table)
       return null;
     else
@@ -283,7 +283,7 @@ public class EntityManyToOneField extends AbstractField {
   {
     if (_aliasField != null)
       return null;
-    
+
     return _linkColumns.generateSelectSQL(id);
   }
 
@@ -294,7 +294,7 @@ public class EntityManyToOneField extends AbstractField {
   {
     if (_aliasField != null)
       return;
-    
+
     if (_isUpdate) {
       sql.append(_linkColumns.generateUpdateSQL());
     }
@@ -311,7 +311,7 @@ public class EntityManyToOneField extends AbstractField {
     out.println();
 
     Id id = getEntityType().getId();
-    
+
     out.println("private transient " + id.getForeignTypeName() + " __caucho_" + getName() + ";");
 
     if (_aliasField == null) {
@@ -323,8 +323,8 @@ public class EntityManyToOneField extends AbstractField {
    * Generates the linking for a join
    */
   public void generateJoin(CharBuffer cb,
-			   String sourceTable,
-			   String targetTable)
+                           String sourceTable,
+                           String targetTable)
   {
     cb.append(_linkColumns.generateJoin(sourceTable, targetTable));
   }
@@ -333,17 +333,17 @@ public class EntityManyToOneField extends AbstractField {
    * Generates loading code
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index)
+                          String indexVar, int index)
     throws IOException
   {
     if (_aliasField != null)
       return index;
-    
+
     out.print("__caucho_" + getName() + " = ");
 
     index = getEntityType().getId().generateLoadForeign(out, rs,
-							indexVar, index,
-							getName());
+                                                        indexVar, index,
+                                                        getName());
 
     out.println(";");
 
@@ -359,10 +359,44 @@ public class EntityManyToOneField extends AbstractField {
 
     int group = _targetLoadIndex / 64;
     long mask = (1L << (_targetLoadIndex % 64));
-    
-    out.println("__caucho_loadMask_" + group + " &= ~" + mask + "L;");
+
+    //out.println("__caucho_loadMask_" + group + " &= ~" + mask + "L;");
 
     // return index + 1;
+    return index;
+  }
+
+  /**
+   * Generates loading code
+   */
+  public int generateLoadEager(JavaWriter out, String rs,
+                               String indexVar, int index)
+    throws IOException
+  {
+    if (! isLazy()) {
+
+      int group = _targetLoadIndex / 64;
+      long mask = (1L << (_targetLoadIndex % 64));
+      String loadVar = "__caucho_loadMask_" + group;
+
+      out.println(loadVar + " |= " + mask + "L;");
+
+      String javaType = getJavaTypeName();
+
+      out.println("if ((preloadedProperties == null) || (! preloadedProperties.containsKey(\"" + getName() + "\"))) {");
+      out.pushDepth();
+
+      String indexS = "_" + (_targetLoadIndex / 64);
+      indexS += "_" + (1L << (_targetLoadIndex % 64));
+
+      generateLoadProperty(out, indexS, "aConn");
+
+      out.popDepth();
+      out.println("} else {");
+      out.println("  " + generateSuperSetter("(" + javaType + ") preloadedProperties.get(\"" + getName() + "\")") + ";");
+      out.println("}");
+    }
+
     return index;
   }
 
@@ -373,61 +407,90 @@ public class EntityManyToOneField extends AbstractField {
     throws IOException
   {
     String javaType = getJavaTypeName();
-    
+
+    int group = _targetLoadIndex / 64;
+    long mask = (1L << (_targetLoadIndex % 64));
+    String loadVar = "__caucho_loadMask_" + group;
+
     out.println();
     out.println("public " + javaType + " " + getGetterName() + "()");
     out.println("{");
     out.pushDepth();
 
-    int group = _targetLoadIndex / 64;
-    long mask = (1L << (_targetLoadIndex % 64));
-    String loadVar = "__caucho_loadMask_" + group;
-    
+    out.println();
     out.print("if (__caucho_session != null && ");
     out.println("(" + loadVar + " & " + mask + "L) == 0) {");
     out.pushDepth();
-    
+
+    String index = "_" + (_targetLoadIndex / 64);
+    index += "_" + (1L << (_targetLoadIndex % 64));
+
     if (_aliasField == null) {
       out.println("__caucho_load_" + getLoadGroupIndex() + "(__caucho_session);");
-      out.println(loadVar + " |= " + mask + "L;");
-      out.print(javaType + " v = (" + javaType + ") __caucho_session.loadProxy(\"" + getEntityType().getName() + "\", ");
-    
-      out.println("__caucho_" + getName() + ");");
-      out.println(generateSuperSetter("v") + ";");
-      out.println("return v;");
     }
-    else {
-      out.println(loadVar + " |= " + mask + "L;");
-      out.print(javaType + " v = (" + javaType + ") __caucho_session.loadProxy(\"" + getEntityType().getName() + "\", ");
-    
-      out.println(_aliasField.generateGet("super") + ");");
-      
-      out.println(generateSuperSetter("v") + ";");
-      out.println("return v;");
-    }
-    
+
+    out.println(loadVar + " |= " + mask + "L;");
+
+    generateLoadProperty(out, index, "__caucho_session");
+
+    out.println("return v"+index+";");
+
     out.popDepth();
     out.println("}");
-    
+
     out.println("else");
     out.println("  return " + generateSuperGetter() + ";");
-    
+
     out.popDepth();
     out.println("}");
+  }
+
+  /**
+   * Generates the set property.
+   */
+  public void generateLoadProperty(JavaWriter out,
+                                   String index,
+                                   String session)
+    throws IOException
+  {
+    String javaType = getJavaTypeName();
+
+    if (_targetField != null) {
+      out.println("java.util.Map map_" + index + " = new java.util.HashMap();");
+      out.println("map_" + index + ".put(\"" + _targetField.getName() + "\", this);");
+      out.println();
+    }
+
+    out.print(javaType + " v"+index+" = (" + javaType + ") "+session+".find(" + javaType + ".class, ");
+
+    if (_aliasField == null) {
+      out.print("__caucho_" + getName());
+    }
+    else {
+      out.print(_aliasField.generateGet("super"));
+    }
+
+    if (_targetField == null)
+      out.println(");");
+    else
+      out.println(", map_" + index + ");");
+
+    out.println(generateSuperSetter("v" + index) + ";");
   }
 
   /**
    * Updates the cached copy.
    */
   public void generateCopyUpdateObject(JavaWriter out,
-				       String dst, String src,
-				       int updateIndex)
+                                       String dst, String src,
+                                       int updateIndex)
     throws IOException
   {
     if (getIndex() == updateIndex) {
       // order matters: ejb/06gc
-      out.println(generateAccessor(dst) + " = " + generateAccessor(src) + ";");
-      
+      String var = "__caucho_" + getName();
+      out.println(generateAccessor(dst, var) + " = " + generateAccessor(src, var) + ";");
+
       String value = generateGet(src);
       out.println(generateSet(dst, value) + ";");
     }
@@ -437,14 +500,24 @@ public class EntityManyToOneField extends AbstractField {
    * Updates the cached copy.
    */
   public void generateCopyLoadObject(JavaWriter out,
-				     String dst, String src,
-				     int updateIndex)
+                                     String dst, String src,
+                                     int updateIndex)
     throws IOException
   {
-    if (getLoadGroupIndex() == updateIndex) {
-      // order matters: ejb/06gc
-      out.println(generateAccessor(dst) + " = " + generateAccessor(src) + ";");
+    // jpa/0o05
+    // if (getLoadGroupIndex() == updateIndex) {
+
+    // order matters: ejb/06gc
+    String var = "__caucho_" + getName();
+    out.println(generateAccessor(dst, var) + " = " + generateAccessor(src, var) + ";");
+    // jpa/0o05
+    if (! dst.equals("super")) { // || isLazy())) {
+      out.println("((" + getSourceType().getInstanceClassName() + ") " + dst + ")." +
+                  generateSuperSetter(generateSuperGetter()) + ";");
     }
+
+    // jpa/0o05
+    // }
 
     if (_targetLoadIndex == updateIndex) { // ejb/0h20
       String value = generateGet(src);
@@ -452,18 +525,16 @@ public class EntityManyToOneField extends AbstractField {
     }
 
     /*
-    if (_targetLoadIndex == updateIndex) {
+      if (_targetLoadIndex == updateIndex) {
       // ejb/0a06
       String value = generateGet(src);
       out.println(generateSet(dst, value) + ";");
-    }
+      }
     */
   }
 
-  private String generateAccessor(String src)
+  private String generateAccessor(String src, String var)
   {
-    String var = "__caucho_" + getName();
-
     if (src.equals("super"))
       return var;
     else
@@ -477,12 +548,12 @@ public class EntityManyToOneField extends AbstractField {
     throws IOException
   {
     // ejb/06gc - updates with EJB 2.0
-    
+
     Id id = getEntityType().getId();
     String var = "__caucho_" + getName();
 
     String keyType = getEntityType().getId().getForeignTypeName();
-    
+
     out.println();
     out.println("public void " + getSetterName() + "(" + getJavaTypeName() + " v)");
     out.println("{");
@@ -503,7 +574,7 @@ public class EntityManyToOneField extends AbstractField {
       out.println("    " + generateSuperSetter("null") + ";");
       out.println("    return;");
       out.println("  }");
-    
+
       out.println();
       out.println("  " + var + " = null;");
       out.println("} else {");
@@ -513,15 +584,15 @@ public class EntityManyToOneField extends AbstractField {
       EntityType targetType = getEntityType();
 
       if (targetType.isEJBProxy(getJavaTypeName())) {
-	// To handle EJB local objects.
-	out.print(id.generateGetProxyKey("v"));
+        // To handle EJB local objects.
+        out.print(id.generateGetProxyKey("v"));
       }
       else {
-	String v = "((" + getEntityType().getInstanceClassName()+ ") v)";
-	
-	out.print(id.toObject(id.generateGetProperty(v)));
+        String v = "((" + getEntityType().getInstanceClassName()+ ") v)";
+
+        out.print(id.toObject(id.generateGetProperty(v)));
       }
-    
+
       out.println(";");
 
       out.println();
@@ -535,7 +606,7 @@ public class EntityManyToOneField extends AbstractField {
 
       out.popDepth();
       out.println("}");
-    
+
       out.println();
       out.println(generateSuperSetter("v") + ";");
       out.println();
@@ -544,7 +615,7 @@ public class EntityManyToOneField extends AbstractField {
 
       String dirtyVar = "__caucho_dirtyMask_" + (getIndex() / 64);
       long dirtyMask = (1L << (getIndex() % 64));
-      
+
       out.println(dirtyVar + " |= " + dirtyMask + "L;");
       out.println(loadVar + " |= " + loadMask + "L;");
       out.println("__caucho_session.update(this);");
@@ -552,14 +623,14 @@ public class EntityManyToOneField extends AbstractField {
       out.println("__caucho_session.addCompletion(__caucho_home.createManyToOneCompletion(\"" + getName() + "\", this, v));");
 
       out.println();
-    
+
       out.popDepth();
       out.println("}");
     }
     else {
       out.println("throw new IllegalStateException(\"aliased field cannot be set\");");
     }
-    
+
     out.popDepth();
     out.println("}");
   }
@@ -568,16 +639,16 @@ public class EntityManyToOneField extends AbstractField {
    * Generates the set clause.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String source)
+                          String index, String source)
     throws IOException
   {
     if (_aliasField != null)
       return;
-    
+
     if (source == null) {
       throw new NullPointerException();
     }
-    
+
     String var = "__caucho_" + getName();
 
     if (! source.equals("this") && ! source.equals("super"))
@@ -591,27 +662,27 @@ public class EntityManyToOneField extends AbstractField {
 
     if (keys.size() == 1) {
       IdField key = keys.get(0);
-      
+
       key.getType().generateSet(out, pstmt, index, key.getType().generateCastFromObject(var));
     }
     else {
       for (int i = 0; i < keys.size(); i++) {
-	IdField key = keys.get(i);
-      
-	key.getType().generateSet(out, pstmt, index, key.generateGetKeyProperty(var));
+        IdField key = keys.get(i);
+
+        key.getType().generateSet(out, pstmt, index, key.generateGetKeyProperty(var));
       }
     }
-    
+
     out.popDepth();
     out.println("} else {");
     out.pushDepth();
 
     for (int i = 0; i < keys.size(); i++) {
       IdField key = keys.get(i);
-      
+
       key.getType().generateSetNull(out, pstmt, index);
     }
-    
+
     out.popDepth();
     out.println("}");
   }
@@ -623,10 +694,10 @@ public class EntityManyToOneField extends AbstractField {
     throws IOException
   {
     String var = "__caucho_" + getName();
-    
+
     out.println(var + " = " + obj + "." + var + ";");
   }
-  
+
   /**
    * Generates code for foreign entity create/delete
    */
@@ -637,7 +708,7 @@ public class EntityManyToOneField extends AbstractField {
     out.pushDepth();
 
     String loadVar = "__caucho_loadMask_" + (_targetLoadIndex / 64);
-    
+
     out.println(loadVar + " = 0L;");
     out.popDepth();
     out.println("}");
@@ -653,7 +724,7 @@ public class EntityManyToOneField extends AbstractField {
       return;
 
     String var = "caucho_" + getName();
-    
+
     out.println(getJavaTypeName() + " " + var + " = " + getGetterName() + "();");
   }
 
@@ -667,7 +738,7 @@ public class EntityManyToOneField extends AbstractField {
       return;
 
     String var = "caucho_" + getName();
-    
+
     out.println("if (" + var + " != null) {");
     out.println("  try {");
     // out.println("    __caucho_session.delete(" + var + ");");

@@ -58,7 +58,7 @@ public class EntityManagerProxy implements EntityManager {
   {
     _persistenceUnit = persistenceUnit;
   }
-  
+
   /**
    * Makes the instance managed.
    */
@@ -66,7 +66,7 @@ public class EntityManagerProxy implements EntityManager {
   {
     getCurrent().persist(entity);
   }
-  
+
   /**
    * Merges the state of the entity into the current context.
    */
@@ -74,7 +74,7 @@ public class EntityManagerProxy implements EntityManager {
   {
     return getCurrent().merge(entity);
   }
-  
+
   /**
    * Remove the instance.
    */
@@ -82,17 +82,17 @@ public class EntityManagerProxy implements EntityManager {
   {
     getCurrent().remove(entity);
   }
-  
+
   /**
    * Find by the primary key.
    */
   /*
-  public Object find(String entityName, Object primaryKey)
-  {
+    public Object find(String entityName, Object primaryKey)
+    {
     return getCurrent().find(entityName, primaryKey);
-  }
+    }
   */
-  
+
   /**
    * Find by the primary key.
    */
@@ -100,7 +100,7 @@ public class EntityManagerProxy implements EntityManager {
   {
     return getCurrent().find(entityClass, primaryKey);
   }
-  
+
   /**
    * Find by the primary key.
    */
@@ -240,7 +240,7 @@ public class EntityManagerProxy implements EntityManager {
   public String toString()
   {
     AmberConnection aConn = getCurrent();
-    
+
     if (aConn != null)
       return "EntityManagerProxy[" + aConn.getPersistenceUnit().getName() + "]";
     else

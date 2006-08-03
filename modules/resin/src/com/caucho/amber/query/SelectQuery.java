@@ -47,20 +47,21 @@ public class SelectQuery extends AbstractQuery {
   private AbstractQuery _parentQuery;
 
   private boolean _isDistinct;
-  
+
   private ArrayList<AmberExpr> _resultList;
   private AmberExpr _where;
-  
+  private AmberExpr _having;
+
   private ArrayList<AmberExpr> _orderList;
   private ArrayList<Boolean> _ascList;
-  
+
   private ArrayList<AmberExpr> _groupList;
 
   private String _sql;
 
   private boolean _isTableReadOnly = false;
   private long _cacheTimeout = -1;
-  
+
   SelectQuery(String query)
   {
     super(query);
@@ -125,6 +126,14 @@ public class SelectQuery extends AbstractQuery {
   }
 
   /**
+   * Sets the having expression
+   */
+  void setHaving(AmberExpr expr)
+  {
+    _having = expr;
+  }
+
+  /**
    * Sets the where expression
    */
   void setWhere(AmberExpr expr)
@@ -144,7 +153,7 @@ public class SelectQuery extends AbstractQuery {
    * Sets the order by list.
    */
   void setOrderList(ArrayList<AmberExpr> orderList,
-		    ArrayList<Boolean> ascList)
+                    ArrayList<Boolean> ascList)
   {
     _orderList = orderList;
     _ascList = ascList;
@@ -194,18 +203,38 @@ public class SelectQuery extends AbstractQuery {
       ArrayList<AmberExpr> components = and.getComponents();
 
       for (int i = components.size() - 1; i >= 0; i--) {
-	AmberExpr component = components.get(i);
-	
-	if (component instanceof JoinExpr) {
-	  JoinExpr link = (JoinExpr) component;
+        AmberExpr component = components.get(i);
 
-	  if (link.bindToFromItem()) {
-	    components.remove(i);
-	  }
-	}
+        if (component instanceof JoinExpr) {
+          JoinExpr link = (JoinExpr) component;
+
+          if (link.bindToFromItem()) {
+            components.remove(i);
+          }
+        }
       }
 
       _where = and.getSingle();
+    }
+
+    if (_having instanceof AndExpr) {
+      AndExpr and = (AndExpr) _having;
+
+      ArrayList<AmberExpr> components = and.getComponents();
+
+      for (int i = components.size() - 1; i >= 0; i--) {
+        AmberExpr component = components.get(i);
+
+        if (component instanceof JoinExpr) {
+          JoinExpr link = (JoinExpr) component;
+
+          if (link.bindToFromItem()) {
+            components.remove(i);
+          }
+        }
+      }
+
+      _having = and.getSingle();
     }
 
     // Rolls up unused from items from the left to the right.
@@ -217,7 +246,7 @@ public class SelectQuery extends AbstractQuery {
       JoinExpr join = item.getJoinExpr();
 
       if (join == null)
-	continue;
+        continue;
 
       FromItem joinParent = join.getJoinParent();
       FromItem joinTarget = join.getJoinTarget();
@@ -227,43 +256,43 @@ public class SelectQuery extends AbstractQuery {
       if (joinParent == null) {
       }
       else if (joinParent.getJoinExpr() == null &&
-	       joinParent == joinTarget &&
-	       ! usesFromData(joinParent)) {
-	_fromList.remove(joinParent);
+               joinParent == joinTarget &&
+               ! usesFromData(joinParent)) {
+        _fromList.remove(joinParent);
 
-	replaceJoin(join);
+        replaceJoin(join);
 
-	// XXX:
-	item.setJoinExpr(null);
-	//item.setOuterJoin(false);
-	i = -1;
+        // XXX:
+        item.setJoinExpr(null);
+        //item.setOuterJoin(false);
+        i = -1;
 
-	AmberExpr joinWhere = join.getWhere();
+        AmberExpr joinWhere = join.getWhere();
 
-	if (joinWhere != null)
-	  _where = AndExpr.create(_where, joinWhere);
+        if (joinWhere != null)
+          _where = AndExpr.create(_where, joinWhere);
       }
       else if (! isJoinParent(item) &&
-	       item == joinTarget &&
-	       ! usesFromData(item)) {
-	_fromList.remove(item);
+               item == joinTarget &&
+               ! usesFromData(item)) {
+        _fromList.remove(item);
 
-	replaceJoin(join);
+        replaceJoin(join);
 
-	i = -1;
+        i = -1;
 
-	AmberExpr joinWhere = join.getWhere();
+        AmberExpr joinWhere = join.getWhere();
 
-	if (joinWhere != null)
-	  _where = AndExpr.create(_where, joinWhere);
+        if (joinWhere != null)
+          _where = AndExpr.create(_where, joinWhere);
       }
     }
-    
+
     for (int i = 0; i < _fromList.size(); i++) {
       FromItem item = _fromList.get(i);
 
       if (item.getJoinExpr() == null)
-	continue;
+        continue;
 
       item.setOuterJoin(! isFromInnerJoin(item));
     }
@@ -274,20 +303,20 @@ public class SelectQuery extends AbstractQuery {
       EntityType type = item.getTableType();
 
       if (type != null) {
-	long timeout = type.getCacheTimeout();
-	
-	if (timeout < _cacheTimeout)
-	  _cacheTimeout = timeout;
+        long timeout = type.getCacheTimeout();
 
-	if (! type.isReadOnly())
-	  _isTableReadOnly = false;
+        if (timeout < _cacheTimeout)
+          _cacheTimeout = timeout;
+
+        if (! type.isReadOnly())
+          _isTableReadOnly = false;
       }
       else {
-	// XXX: kills the cache?
-	_isTableReadOnly = false;
+        // XXX: kills the cache?
+        _isTableReadOnly = false;
       }
     }
-    
+
     _sql = generateLoadSQL();
   }
 
@@ -297,8 +326,8 @@ public class SelectQuery extends AbstractQuery {
       FromItem subItem = _fromList.get(i);
 
       if (subItem.getJoinExpr() != null &&
-	  subItem.getJoinExpr().getJoinParent() == item) {
-	return true;
+          subItem.getJoinExpr().getJoinParent() == item) {
+        return true;
       }
     }
 
@@ -324,20 +353,23 @@ public class SelectQuery extends AbstractQuery {
       AmberExpr result = _resultList.get(j);
 
       if (result.usesFrom(item, type)) {
-	return true;
+        return true;
       }
     }
 
     if (_where != null && _where.usesFrom(item, type))
       return true;
 
+    if (_having != null && _having.usesFrom(item, type))
+      return true;
+
     if (_orderList != null) {
       for (int j = 0; j < _orderList.size(); j++) {
-	AmberExpr order = _orderList.get(j);
+        AmberExpr order = _orderList.get(j);
 
-	if (order.usesFrom(item, type)) {
-	  return true;
-	}
+        if (order.usesFrom(item, type)) {
+          return true;
+        }
       }
     }
 
@@ -358,13 +390,13 @@ public class SelectQuery extends AbstractQuery {
 
     if (_orderList != null) {
       for (int i = 0; i < _orderList.size(); i++) {
-	AmberExpr order = _orderList.get(i);
+        AmberExpr order = _orderList.get(i);
 
-	_orderList.set(i, order.replaceJoin(join));
+        _orderList.set(i, order.replaceJoin(join));
       }
     }
   }
-  
+
   String generateLoadSQL()
   {
     CharBuffer cb = CharBuffer.allocate();
@@ -376,8 +408,8 @@ public class SelectQuery extends AbstractQuery {
 
     for (int i = 0; i < _resultList.size(); i++) {
       if (i != 0)
-	cb.append(", ");
-      
+        cb.append(", ");
+
       AmberExpr expr = _resultList.get(i);
 
       expr.generateSelect(cb);
@@ -388,52 +420,52 @@ public class SelectQuery extends AbstractQuery {
     boolean hasJoinExpr = false;
     for (int i = 0; i < _fromList.size(); i++) {
       FromItem item = _fromList.get(i);
-      
+
       if (i != 0) {
-	if (item.isOuterJoin())
-	  cb.append(" left outer join ");
-	else {
-	  cb.append(", ");
-	  
-	  if (item.getJoinExpr() != null)
-	    hasJoinExpr = true;
-	}
+        if (item.isOuterJoin())
+          cb.append(" left outer join ");
+        else {
+          cb.append(", ");
+
+          if (item.getJoinExpr() != null)
+            hasJoinExpr = true;
+        }
       }
-      
+
       cb.append(item.getTable().getName());
       cb.append(" ");
       cb.append(item.getName());
-      
+
       if (item.getJoinExpr() != null && item.isOuterJoin()) {
-	cb.append(" on ");
-	item.getJoinExpr().generateJoin(cb);
+        cb.append(" on ");
+        item.getJoinExpr().generateJoin(cb);
       }
     }
 
     if (hasJoinExpr || _where != null) {
       boolean hasExpr = false;
-      
+
       cb.append(" where ");
 
       for (int i = 0; i < _fromList.size(); i++) {
-	FromItem item = _fromList.get(i);
-	AmberExpr expr = item.getJoinExpr();
+        FromItem item = _fromList.get(i);
+        AmberExpr expr = item.getJoinExpr();
 
-	if (expr != null && ! item.isOuterJoin()) {
-	  if (hasExpr)
-	    cb.append(" and ");
-	  hasExpr = true;
+        if (expr != null && ! item.isOuterJoin()) {
+          if (hasExpr)
+            cb.append(" and ");
+          hasExpr = true;
 
-	  expr.generateJoin(cb);
-	}
+          expr.generateJoin(cb);
+        }
       }
-      
-      if (_where != null) {
-	if (hasExpr)
-	  cb.append(" and ");
-	hasExpr = true;
 
-	_where.generateWhere(cb);
+      if (_where != null) {
+        if (hasExpr)
+          cb.append(" and ");
+        hasExpr = true;
+
+        _where.generateWhere(cb);
       }
     }
 
@@ -441,10 +473,37 @@ public class SelectQuery extends AbstractQuery {
       cb.append(" group by ");
 
       for (int i = 0; i < _groupList.size(); i++) {
-	if (i != 0)
-	  cb.append(", ");
+        if (i != 0)
+          cb.append(", ");
 
-	_groupList.get(i).generateWhere(cb);
+        _groupList.get(i).generateWhere(cb);
+      }
+    }
+
+    if (_having != null) {
+      boolean hasExpr = false;
+
+      cb.append(" having ");
+
+      for (int i = 0; i < _fromList.size(); i++) {
+        FromItem item = _fromList.get(i);
+        AmberExpr expr = item.getJoinExpr();
+
+        if (expr != null && ! item.isOuterJoin()) {
+          if (hasExpr)
+            cb.append(" and ");
+          hasExpr = true;
+
+          expr.generateJoin(cb);
+        }
+      }
+
+      if (_having != null) {
+        if (hasExpr)
+          cb.append(" and ");
+        hasExpr = true;
+
+        _having.generateHaving(cb);
       }
     }
 
@@ -452,13 +511,13 @@ public class SelectQuery extends AbstractQuery {
       cb.append(" order by ");
 
       for (int i = 0; i < _orderList.size(); i++) {
-	if (i != 0)
-	  cb.append(", ");
+        if (i != 0)
+          cb.append(", ");
 
-	_orderList.get(i).generateSelect(cb);
+        _orderList.get(i).generateSelect(cb);
 
-	if (Boolean.FALSE.equals(_ascList.get(i)))
-	  cb.append(" desc");
+        if (Boolean.FALSE.equals(_ascList.get(i)))
+          cb.append(" desc");
       }
     }
 
@@ -490,7 +549,7 @@ public class SelectQuery extends AbstractQuery {
       FromItem from = _fromList.get(i);
 
       if (table.equals(from.getTable().getName()))
-	return true;
+        return true;
     }
 
     return false;

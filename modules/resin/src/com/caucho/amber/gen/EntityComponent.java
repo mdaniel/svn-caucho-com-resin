@@ -490,6 +490,18 @@ public class EntityComponent extends ClassComponent {
 
     out.popDepth();
     out.println("}");
+
+    out.println();
+    out.println("public void __caucho_retrieve(com.caucho.amber.manager.AmberConnection aConn, java.util.Map preloadedProperties)");
+    out.println("  throws java.sql.SQLException");
+    out.println("{");
+    out.pushDepth();
+
+    out.println();
+    out.println("__caucho_load_0(aConn, preloadedProperties);");
+
+    out.popDepth();
+    out.println("}");
   }
 
   /**
@@ -1216,7 +1228,7 @@ public class EntityComponent extends ClassComponent {
 
     out.println("o.__caucho_session = aConn;");
     out.println("o.__caucho_state = com.caucho.amber.entity.Entity.P_NON_TRANSACTIONAL;");
-    out.println("o.__caucho_loadMask_0 = __caucho_loadMask_0 & 1L;");
+    out.println("o.__caucho_loadMask_0 = __caucho_loadMask_0;"); // & 1L;");
 
     generateCallbacks(out, "o", _entityType.getPostLoadCallbacks());
 

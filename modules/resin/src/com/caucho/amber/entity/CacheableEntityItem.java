@@ -31,6 +31,8 @@ package com.caucho.amber.entity;
 
 import java.sql.SQLException;
 
+import java.util.Map;
+
 import com.caucho.util.Alarm;
 
 import com.caucho.amber.manager.AmberConnection;
@@ -70,10 +72,10 @@ public class CacheableEntityItem extends EntityItem {
 
     if (_expireTime < now) {
       _expireTime = now + _home.getCacheTimeout();
-      
+
       _cacheItem.__caucho_expire();
     }
-    
+
     return _cacheItem;
   }
 
@@ -84,6 +86,17 @@ public class CacheableEntityItem extends EntityItem {
    */
   public Entity loadEntity(int loadGroup)
   {
+    return loadEntity(loadGroup, null);
+  }
+
+  /**
+   * Returns the cached entity.
+   *
+   * @return true if the cached value is valid.
+   */
+  public Entity loadEntity(int loadGroup,
+                           Map preloadedProperties)
+  {
     long now = Alarm.getCurrentTime();
 
     if (_expireTime < now) {
@@ -92,17 +105,17 @@ public class CacheableEntityItem extends EntityItem {
     }
 
     AmberConnection aConn = _home.getManager().getCacheConnection();
-      
+
     try {
       _cacheItem.__caucho_setConnection(aConn);
-      _cacheItem.__caucho_retrieve(aConn);
+      _cacheItem.__caucho_retrieve(aConn, preloadedProperties);
     } catch (SQLException e) {
       // XXX: item is dead
       throw new RuntimeException(e);
     } finally {
       aConn.freeConnection();
     }
-    
+
     return _cacheItem;
   }
 
@@ -120,13 +133,13 @@ public class CacheableEntityItem extends EntityItem {
   public void save(Entity item)
   {
     /*
-    long now = Alarm.getCurrentTime();
+      long now = Alarm.getCurrentTime();
 
-    synchronized (_cacheItem) {
+      synchronized (_cacheItem) {
       _expireTime = now + _home.getCacheTimeout();
 
       _cacheItem.__caucho_loadFromObject(item);
-    }
+      }
     */
   }
 
@@ -136,9 +149,9 @@ public class CacheableEntityItem extends EntityItem {
   public void savePart(Entity item)
   {
     /*
-    synchronized (_cacheItem) {
+      synchronized (_cacheItem) {
       _cacheItem.__caucho_loadFromObject(item);
-    }
+      }
     */
   }
 

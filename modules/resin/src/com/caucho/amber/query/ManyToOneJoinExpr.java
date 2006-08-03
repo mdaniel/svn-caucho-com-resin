@@ -44,7 +44,7 @@ import com.caucho.amber.table.ForeignColumn;
  */
 public class ManyToOneJoinExpr extends JoinExpr {
   private LinkColumns _linkColumns;
-  
+
   private FromItem _sourceFromItem;
   private FromItem _targetFromItem;
 
@@ -54,14 +54,14 @@ public class ManyToOneJoinExpr extends JoinExpr {
   ManyToOneJoinExpr(LinkColumns link, FromItem source, FromItem target)
   {
     _linkColumns = link;
-    
+
     _sourceFromItem = source;
     _targetFromItem = target;
 
     if (source == null || target == null)
       throw new NullPointerException();
   }
-  
+
   /**
    * Returns true for a boolean expression.
    */
@@ -84,15 +84,15 @@ public class ManyToOneJoinExpr extends JoinExpr {
   public boolean bindToFromItem()
   {
     if (_targetFromItem.getJoinExpr() == null ||
-	_targetFromItem.getJoinExpr().equals(this)) {
+        _targetFromItem.getJoinExpr().equals(this)) {
       _targetFromItem.setJoinExpr(this);
       return true;
     }
     else if (_sourceFromItem.getJoinExpr() == null) {
       _sourceFromItem.setJoinExpr(new OneToManyJoinExpr(_linkColumns,
-							_sourceFromItem,
-							_targetFromItem));
-    
+                                                        _sourceFromItem,
+                                                        _targetFromItem));
+
       return true;
     }
     else
@@ -148,23 +148,31 @@ public class ManyToOneJoinExpr extends JoinExpr {
   {
     return id;
   }
-  
+
   /**
    * Generates the where expression.
    */
   public void generateWhere(CharBuffer cb)
   {
     cb.append(_linkColumns.generateWhere(_sourceFromItem.getName(),
-					 _targetFromItem.getName()));
+                                         _targetFromItem.getName()));
   }
-  
+
+  /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb)
+  {
+    generateWhere(cb);
+  }
+
   /**
    * Generates the where expression.
    */
   public void generateJoin(CharBuffer cb)
   {
     cb.append(_linkColumns.generateJoin(_sourceFromItem.getName(),
-					_targetFromItem.getName()));
+                                        _targetFromItem.getName()));
   }
 
   /**
@@ -178,14 +186,14 @@ public class ManyToOneJoinExpr extends JoinExpr {
     ManyToOneJoinExpr joinExpr = (ManyToOneJoinExpr) o;
 
     return (_linkColumns.equals(joinExpr._linkColumns) &&
-	    _sourceFromItem.equals(joinExpr._sourceFromItem) &&
-	    _targetFromItem.equals(joinExpr._targetFromItem));
+            _sourceFromItem.equals(joinExpr._sourceFromItem) &&
+            _targetFromItem.equals(joinExpr._targetFromItem));
   }
-  
+
 
   public String toString()
   {
     return ("ManyToOneJoinExpr[" + _linkColumns + "," +
-	    _sourceFromItem + "," + _targetFromItem + "]");
+            _sourceFromItem + "," + _targetFromItem + "]");
   }
 }

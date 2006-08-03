@@ -60,7 +60,7 @@ public class EmptyExpr extends AbstractAmberExpr {
   public AmberExpr bindSelect(QueryParser parser)
   {
     _tableName = parser.createTableName();
-    
+
     return this;
   }
 
@@ -78,10 +78,10 @@ public class EmptyExpr extends AbstractAmberExpr {
   public AmberExpr replaceJoin(JoinExpr join)
   {
     _collectionExpr = _collectionExpr.replaceJoin(join);
-    
+
     return this;
   }
-  
+
   /**
    * Generates the where expression.
    */
@@ -91,7 +91,7 @@ public class EmptyExpr extends AbstractAmberExpr {
       OneToManyExpr oneToMany = (OneToManyExpr) _collectionExpr;
 
       LinkColumns join = oneToMany.getLinkColumns();
-      
+
       cb.append("EXISTS(SELECT *");
       Table table = join.getSourceTable();
       cb.append(" FROM " + table.getName() + " " + _tableName);
@@ -100,10 +100,18 @@ public class EmptyExpr extends AbstractAmberExpr {
       String targetTable = oneToMany.getParent().getChildFromItem().getName();
 
       cb.append(join.generateJoin(_tableName, targetTable));
-				  
+
       cb.append(')');
     }
     else
       throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb)
+  {
+    generateWhere(cb);
   }
 }

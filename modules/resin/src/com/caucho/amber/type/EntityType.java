@@ -1102,6 +1102,27 @@ public class EntityType extends Type {
   }
 
   /**
+   * Generates a string to load the field.
+   */
+  public int generateLoadEager(JavaWriter out, String rs,
+                               String indexVar, int index, int loadGroupIndex)
+    throws IOException
+  {
+    if (loadGroupIndex == 0 && _discriminator != null)
+      index++;
+
+    ArrayList<AmberField> fields = getFields();
+    for (int i = 0; i < fields.size(); i++) {
+      AmberField field = fields.get(i);
+
+      if (field.getLoadGroupIndex() == loadGroupIndex)
+        index = field.generateLoadEager(out, rs, indexVar, index);
+    }
+
+    return index;
+  }
+
+  /**
    * Generates a string to set the field.
    */
   public void generateSet(JavaWriter out, String pstmt,

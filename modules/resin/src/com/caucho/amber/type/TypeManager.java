@@ -36,7 +36,7 @@ import com.caucho.bytecode.JClass;
 import com.caucho.util.L10N;
 
 import com.caucho.config.ConfigException;
-  
+
 /**
  * The manages the types known to the Amber instnce.
  */
@@ -54,7 +54,7 @@ public class TypeManager {
 
     _typeMap.putAll(_builtinTypes);
   }
-  
+
   /**
    * Returns the type.
    */
@@ -62,16 +62,13 @@ public class TypeManager {
     throws ConfigException
   {
     Type type = _typeMap.get(name);
-    //System.out.println("\nXXX TypeManager.create(name)");
-    //System.out.println("type: " + type);
-    //System.out.println("name: " + name);
 
     if (type != null)
       return type;
 
     throw new ConfigException(L.l("'{0}' is an unknown type", name));
   }
-  
+
   /**
    * Returns the type.
    */
@@ -82,12 +79,12 @@ public class TypeManager {
 
     if (type != null)
       return type;
-    
+
     type = _typeMap.get(cl.getName());
 
     return type;
   }
-  
+
   /**
    * Returns the type.
    */
@@ -95,7 +92,7 @@ public class TypeManager {
   {
     return _typeMap.get(name);
   }
-  
+
   /**
    * Returns the type.
    */
@@ -103,10 +100,10 @@ public class TypeManager {
   {
     for (Type type : _typeMap.values()) {
       if (type instanceof EntityType) {
-	EntityType entityType = (EntityType) type;
+        EntityType entityType = (EntityType) type;
 
-	if (name.equals(entityType.getInstanceClassName()))
-	  return entityType;
+        if (name.equals(entityType.getInstanceClassName()))
+          return entityType;
       }
     }
 
@@ -122,8 +119,8 @@ public class TypeManager {
 
     if (oldType != null && oldType != type)
       throw new IllegalStateException(L.l("'{0}' is a duplicate type",
-					  name));
-    
+                                          name));
+
     _typeMap.put(name, type);
   }
 
@@ -137,19 +134,19 @@ public class TypeManager {
 
     _builtinTypes.put("byte", ByteType.create());
     _builtinTypes.put("java.lang.Byte", ByteType.create());
-    
+
     _builtinTypes.put("character", CharacterType.create());
     _builtinTypes.put("java.lang.Character", CharacterType.create());
-    
+
     _builtinTypes.put("short", ShortType.create());
     _builtinTypes.put("java.lang.Short", ShortType.create());
-    
+
     _builtinTypes.put("integer", IntegerType.create());
     _builtinTypes.put("java.lang.Integer", IntegerType.create());
-    
+
     _builtinTypes.put("long", LongType.create());
     _builtinTypes.put("java.lang.Long", LongType.create());
-    
+
     _builtinTypes.put("float", FloatType.create());
     _builtinTypes.put("java.lang.Float", FloatType.create());
 
@@ -158,34 +155,34 @@ public class TypeManager {
 
     _builtinTypes.put("string", StringType.create());
     _builtinTypes.put("java.lang.String", StringType.create());
-    
+
     _builtinTypes.put("date", SqlDateType.create());
     _builtinTypes.put("java.sql.Date", SqlDateType.create());
-    
+
     _builtinTypes.put("time", SqlTimeType.create());
     _builtinTypes.put("java.sql.Time", SqlTimeType.create());
-    
+
     _builtinTypes.put("timestamp", SqlTimestampType.create());
     _builtinTypes.put("java.sql.Timestamp", SqlTimestampType.create());
-    
+
     _builtinTypes.put("java.util.Date", UtilDateType.create());
     _builtinTypes.put("java.util.Calendar", CalendarType.create());
 
     //XXX Need test case for timestamp
     _builtinTypes.put("timestamp", BigDecimalType.create());
     _builtinTypes.put("java.math.BigDecimal", BigDecimalType.create());
-    
+
     _builtinTypes.put("blob", BlobType.create());
     _builtinTypes.put("java.sql.Blob", BlobType.create());
     _builtinTypes.put("clob", BlobType.create());
     _builtinTypes.put("java.sql.Clob", ClobType.create());
-    
+
     _builtinTypes.put("[B", ByteArrayType.create());
     _builtinTypes.put("[byte", ByteArrayType.create());
-    
+
     _builtinTypes.put("class", ClassType.create());
     _builtinTypes.put("java.lang.Class", ClassType.create());
-    
+
     _primitiveTypes = new HashMap<String,Type>();
 
     _primitiveTypes.put("boolean", PrimitiveBooleanType.create());

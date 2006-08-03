@@ -58,6 +58,14 @@ class NullExpr extends AbstractAmberExpr {
     cb.append("NULL");
   }
 
+  /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb)
+  {
+    generateWhere(cb);
+  }
+
   public String toString()
   {
     return "NULL";

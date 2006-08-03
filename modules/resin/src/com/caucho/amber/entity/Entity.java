@@ -33,6 +33,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import java.util.Map;
+
 import com.caucho.amber.manager.AmberConnection;
 
 import com.caucho.amber.type.EntityType;
@@ -52,14 +54,14 @@ public interface Entity {
    * Makes the entity persistent.
    */
   public boolean __caucho_makePersistent(AmberConnection aConn,
-					 EntityType entityType)
+                                         EntityType entityType)
     throws SQLException;
 
   /**
    * Makes the entity persistent.
    */
   public void __caucho_makePersistent(AmberConnection aConn,
-				      EntityItem item)
+                                      EntityItem item)
     throws SQLException;
 
   /**
@@ -71,24 +73,24 @@ public interface Entity {
    * Creates the entity in the database, making it persistent-new.
    */
   public boolean __caucho_create(AmberConnection aConn,
-				 EntityType entityType)
+                                 EntityType entityType)
     throws SQLException;
-  
+
   /**
    * Set the primary key.
    */
   public void __caucho_setPrimaryKey(Object key);
-  
+
   /**
    * Get the primary key.
    */
   public Object __caucho_getPrimaryKey();
-  
+
   /**
    * Get the entity type.
    */
   public EntityType __caucho_getEntityType();
-  
+
   /**
    * Sets the connection.
    */
@@ -103,16 +105,16 @@ public interface Entity {
    * Loads the entity from the database.
    */
   public EntityItem __caucho_home_find(AmberConnection aConn,
-				       AmberEntityHome home,
-				       ResultSet rs, int index)
+                                       AmberEntityHome home,
+                                       ResultSet rs, int index)
     throws SQLException;
 
   /**
    * Returns a new entity.
    */
   public Entity __caucho_home_new(AmberConnection aConn,
-				  AmberEntityHome home,
-				  Object key)
+                                  AmberEntityHome home,
+                                  Object key)
     throws SQLException;
 
   /**
@@ -124,6 +126,12 @@ public interface Entity {
    * Retrieves data from the data store.
    */
   public void __caucho_retrieve(AmberConnection aConn)
+    throws SQLException;
+
+  /**
+   * Retrieves data from the data store.
+   */
+  public void __caucho_retrieve(AmberConnection aConn, Map preloadedProperties)
     throws SQLException;
 
   /**

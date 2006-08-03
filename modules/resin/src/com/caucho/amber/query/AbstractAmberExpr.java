@@ -47,7 +47,7 @@ import com.caucho.amber.manager.AmberConnection;
  */
 abstract public class AbstractAmberExpr implements AmberExpr {
   private static final L10N L = new L10N(AbstractAmberExpr.class);
-  
+
   /**
    * Returns true for a boolean expression.
    */
@@ -74,7 +74,7 @@ abstract public class AbstractAmberExpr implements AmberExpr {
       return this;
     else
       throw new QueryParseException(L.l("'{0}' can't be used as a boolean",
-				   this));
+                                        this));
   }
 
   /**
@@ -113,7 +113,7 @@ abstract public class AbstractAmberExpr implements AmberExpr {
   {
     return 1;
   }
-  
+
   /**
    * Generates the where expression.
    */
@@ -121,7 +121,15 @@ abstract public class AbstractAmberExpr implements AmberExpr {
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
+  /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb)
+  {
+    generateWhere(cb);
+  }
+
   /**
    * Generates the where in a join expression.
    */
@@ -129,7 +137,7 @@ abstract public class AbstractAmberExpr implements AmberExpr {
   {
     generateWhere(cb);
   }
-  
+
   /**
    * Generates the select expression.
    */
@@ -151,7 +159,7 @@ abstract public class AbstractAmberExpr implements AmberExpr {
    * Returns the object for the expr.
    */
   public Object getCacheObject(AmberConnection aConn,
-			       ResultSet rs, int index)
+                               ResultSet rs, int index)
     throws SQLException
   {
     return getObject(aConn, rs, index);

@@ -32,6 +32,7 @@ package com.caucho.amber.manager;
 import java.util.List;
 import java.util.Iterator;
 import java.util.ArrayList;
+import java.util.Map;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -101,19 +102,19 @@ public class AmberConnection
   private static final L10N L = new L10N(AmberConnection.class);
   private static final Logger log
     = Logger.getLogger(AmberConnection.class.getName());
-  
+
   private AmberPersistenceUnit _persistenceUnit;
 
   private boolean _isRegistered;
   private boolean _isThreadConnection;
-  
+
   private ArrayList<Entity> _entities = new ArrayList<Entity>();
-  
+
   private ArrayList<Entity> _txEntities = new ArrayList<Entity>();
-  
+
   private ArrayList<AmberCompletion> _completionList
     = new ArrayList<AmberCompletion>();
-  
+
   private ArrayList<AmberCollection> _queries
     = new ArrayList<AmberCollection>();
 
@@ -123,14 +124,14 @@ public class AmberConnection
 
   private Connection _conn;
   private Connection _readConn;
-  
+
   private boolean _isAutoCommit = true;
 
   private int _depth;
 
   private LruCache<String,PreparedStatement> _preparedStatementMap
     = new LruCache<String,PreparedStatement>(32);
-  
+
   private ArrayList<Statement> _statements = new ArrayList<Statement>();
 
   private QueryCacheKey _queryKey = new QueryCacheKey();
@@ -160,8 +161,8 @@ public class AmberConnection
 
     register();
   }
-  
-  
+
+
   /**
    * Makes the instance managed.
    */
@@ -175,7 +176,7 @@ public class AmberConnection
       throw new EJBExceptionWrapper(e);
     }
   }
-  
+
   /**
    * Merges the state of the entity into the current context.
    */
@@ -183,7 +184,7 @@ public class AmberConnection
   {
     throw new UnsupportedOperationException();
   }
-  
+
   /**
    * Remove the instance.
    */
@@ -197,30 +198,41 @@ public class AmberConnection
       throw new EJBExceptionWrapper(e);
     }
   }
-  
+
   /**
    * Find by the primary key.
    */
   /*
-  public Object find(String entityName, Object primaryKey)
-  {
+    public Object find(String entityName, Object primaryKey)
+    {
     try {
-      return load(entityName, primaryKey);
+    return load(entityName, primaryKey);
     } catch (RuntimeException e) {
-      throw e;
+    throw e;
     } catch (Exception e) {
-      throw new EJBExceptionWrapper(e);
+    throw new EJBExceptionWrapper(e);
     }
-  }
+    }
   */
-  
+
   /**
    * Find by the primary key.
    */
-  public <T> T find(Class<T> entityClass, Object primaryKey)
+  public <T> T find(Class<T> entityClass,
+                    Object primaryKey)
+  {
+    return find(entityClass, primaryKey, null);
+  }
+
+  /**
+   * Find by the primary key.
+   */
+  public <T> T find(Class<T> entityClass,
+                    Object primaryKey,
+                    Map preloadedProperties)
   {
     try {
-      return (T) load(entityClass, primaryKey);
+      return (T) load(entityClass, primaryKey, preloadedProperties);
     } catch (AmberObjectNotFoundException e) {
       // XXX: shouldn't be throwing at all?
       log.log(Level.FINER, e.toString(), e);
@@ -232,7 +244,7 @@ public class AmberConnection
       throw new EJBExceptionWrapper(e);
     }
   }
-  
+
   /**
    * Find by the primary key.
    */
@@ -256,7 +268,7 @@ public class AmberConnection
   {
     try {
       AbstractQuery queryProgram = parseQuery(sql, false);
-      
+
       return new QueryImpl(queryProgram, this);
     } catch (RuntimeException e) {
       throw e;
@@ -351,7 +363,7 @@ public class AmberConnection
       UserTransactionProxy.getInstance().enlistCloseResource(this);
       UserTransactionProxy.getInstance().enlistBeginResource(this);
     }
-    
+
     _isRegistered = true;
   }
 
@@ -365,8 +377,8 @@ public class AmberConnection
 
     try {
       if (_isThreadConnection)
-	_persistenceUnit.removeThreadConnection();
-    
+        _persistenceUnit.removeThreadConnection();
+
       _isRegistered = false;
 
       cleanup();
@@ -419,7 +431,19 @@ public class AmberConnection
   /**
    * Loads the object based on the class and primary key.
    */
-  public Object load(Class cl, Object key)
+  public Object load(Class cl,
+                     Object key)
+    throws AmberException
+  {
+    return load(cl, key, null);
+  }
+
+  /**
+   * Loads the object based on the class and primary key.
+   */
+  public Object load(Class cl,
+                     Object key,
+                     Map preloadedProperties)
     throws AmberException
   {
     Entity entity = getEntity(cl.getName(), key);
@@ -433,12 +457,12 @@ public class AmberConnection
       return null;
     else {
       try {
-	entityHome.init();
+        entityHome.init();
       } catch (ConfigException e) {
-	throw new AmberException(e);
+        throw new AmberException(e);
       }
-      
-      entity = entityHome.load(this, key);
+
+      entity = entityHome.load(this, key, preloadedProperties);
       addEntity(entity);
 
       return entity;
@@ -448,7 +472,8 @@ public class AmberConnection
   /**
    * Loads the object based on the class and primary key.
    */
-  public Object load(String entityName, Object key)
+  public Object load(String entityName,
+                     Object key)
     throws AmberException
   {
     AmberEntityHome entityHome = _persistenceUnit.getEntityHome(entityName);
@@ -466,7 +491,7 @@ public class AmberConnection
     } catch (ConfigException e) {
       throw new AmberException(e);
     }
-      
+
     entity = entityHome.load(this, key);
 
     addEntity(entity);
@@ -479,12 +504,20 @@ public class AmberConnection
    */
   public Entity getEntity(EntityItem item)
   {
+    return getEntity(item, null);
+  }
+
+  /**
+   * Returns the entity for the connection.
+   */
+  public Entity getEntity(EntityItem item, Map preloadedProperties)
+  {
     Entity itemEntity = item.getEntity();
     EntityType entityType = itemEntity.__caucho_getEntityType();
 
     Entity entity = getEntity(entityType.getBeanClass().getName(),
-			      itemEntity.__caucho_getPrimaryKey());
-    
+                              itemEntity.__caucho_getPrimaryKey());
+
     if (entity != null)
       return entity;
     else {
@@ -510,7 +543,7 @@ public class AmberConnection
       throw new NullPointerException();
 
     Class cl = entity.getClass();
-    
+
     // Entity oldEntity = getEntity(cl, entity.__caucho_getPrimaryKey());
 
     AmberEntityHome entityHome;
@@ -518,7 +551,7 @@ public class AmberConnection
 
     if (entityHome == null)
       throw new AmberException(L.l("entity has no matching home"));
-    
+
     entityHome.makePersistent(entity, this, false);
 
     return entity;
@@ -539,14 +572,14 @@ public class AmberConnection
   {
     if (key == null)
       return null;
-    
+
     Entity entity = getEntity(className, key);
-    
+
     try {
       AmberEntityHome home = _persistenceUnit.getEntityHome(name);
-      
+
       if (home == null)
-	throw new RuntimeException(L.l("no matching home for {0}", className));
+        throw new RuntimeException(L.l("no matching home for {0}", className));
 
       home.init();
 
@@ -555,7 +588,7 @@ public class AmberConnection
       entity = (Entity) obj;
 
       addEntity(entity);
-    
+
       return entity;
     } catch (SQLException e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -575,7 +608,7 @@ public class AmberConnection
       AmberEntityHome home = _persistenceUnit.getEntityHome(name);
 
       if (home == null)
-	throw new RuntimeException(L.l("no matching home for {0}", name));
+        throw new RuntimeException(L.l("no matching home for {0}", name));
 
       home.init();
 
@@ -594,9 +627,9 @@ public class AmberConnection
   {
     try {
       AmberEntityHome home = _persistenceUnit.getEntityHome(name);
-      
+
       if (home == null)
-	throw new RuntimeException(L.l("no matching home for {0}", name));
+        throw new RuntimeException(L.l("no matching home for {0}", name));
 
       home.init();
 
@@ -613,36 +646,57 @@ public class AmberConnection
    */
   public Object loadProxy(String name, Object key)
   {
-    if (key == null)
-      return null;
-    
-    AmberEntityHome home = _persistenceUnit.getEntityHome(name);
-      
-    if (home == null)
-      throw new RuntimeException(L.l("no matching home for {0}", name));
-
-    return loadProxy(home.getEntityType(), key);
+    return loadProxy(name, key, null);
   }
 
   /**
    * Loads the object with the given class.
    */
-  public Object loadProxy(EntityType type, Object key)
+  public Object loadProxy(String name,
+                          Object key,
+                          Map preloadedProperties)
   {
     if (key == null)
       return null;
-    
+
+    AmberEntityHome home = _persistenceUnit.getEntityHome(name);
+
+    if (home == null)
+      throw new RuntimeException(L.l("no matching home for {0}", name));
+
+    return loadProxy(home.getEntityType(), key, preloadedProperties);
+  }
+
+  /**
+   * Loads the object with the given class.
+   */
+  public Object loadProxy(EntityType type,
+                          Object key)
+  {
+    return loadProxy(type, key, null);
+  }
+
+  /**
+   * Loads the object with the given class.
+   */
+  public Object loadProxy(EntityType type,
+                          Object key,
+                          Map preloadedProperties)
+  {
+    if (key == null)
+      return null;
+
     try {
       AmberEntityHome home = type.getHome();
 
-      EntityItem item = home.findEntityItem(this, key, false);
+      EntityItem item = home.findEntityItem(this, key, false, preloadedProperties);
 
       if (item == null)
-	return null;
+        return null;
 
       EntityFactory factory = home.getEntityFactory();
 
-      Object entity = factory.getEntity(this, item);
+      Object entity = factory.getEntity(this, item, preloadedProperties);
 
       return entity;
     } catch (SQLException e) {
@@ -676,7 +730,7 @@ public class AmberConnection
     throws AmberException
   {
     AmberEntityHome entityHome = _persistenceUnit.getEntityHome(cl.getName());
-    
+
     if (entityHome == null)
       return null;
 
@@ -693,8 +747,9 @@ public class AmberConnection
     for (int i = _entities.size() - 1; i >= 0; i--) {
       Entity entity = _entities.get(i);
 
-      if (entity.__caucho_match(className, key))
-	return entity;
+      if (entity.__caucho_match(className, key)) {
+        return entity;
+      }
     }
 
     return null;
@@ -709,7 +764,7 @@ public class AmberConnection
       _entities.add(entity);
 
       if (_isInTransaction)
-	_txEntities.add(entity);
+        _txEntities.add(entity);
 
       return true;
     }
@@ -737,11 +792,11 @@ public class AmberConnection
   {
     if (! (obj instanceof Entity))
       return false;
-    
+
     Entity entity = (Entity) obj;
 
     return getEntity(entity.getClass().getName(),
-		     entity.__caucho_getPrimaryKey()) != null;
+                     entity.__caucho_getPrimaryKey()) != null;
   }
 
   /**
@@ -771,7 +826,7 @@ public class AmberConnection
       _isAutoCommit = false;
       _conn.setAutoCommit(false);
     }
-    
+
     // _xid = _factory.getXid();
   }
 
@@ -795,16 +850,16 @@ public class AmberConnection
 
       _xid = 0;
       if (_conn != null) {
-	_conn.commit();
+        _conn.commit();
       }
     } finally {
       if (! _isXA)
-	_isInTransaction = false;
+        _isInTransaction = false;
 
       for (int i = 0; i < _txEntities.size(); i++) {
-	Entity entity = _txEntities.get(i);
+        Entity entity = _txEntities.get(i);
 
-	entity.__caucho_afterCommit();
+        entity.__caucho_afterCommit();
       }
 
       _txEntities.clear();
@@ -832,7 +887,7 @@ public class AmberConnection
     _isXA = false;
     _isInTransaction = false;
   }
-  
+
   /**
    * Commits a transaction.
    */
@@ -856,7 +911,7 @@ public class AmberConnection
 
     if (isCommit) {
       if (_completionList.size() > 0) {
-	_persistenceUnit.complete(_completionList);
+        _persistenceUnit.complete(_completionList);
       }
     }
     _completionList.clear();
@@ -865,15 +920,15 @@ public class AmberConnection
       Entity entity = _txEntities.get(i);
 
       try {
-	if (isCommit)
-	  entity.__caucho_afterCommit();
-	else
-	  entity.__caucho_afterRollback();
+        if (isCommit)
+          entity.__caucho_afterCommit();
+        else
+          entity.__caucho_afterRollback();
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
-      
+
     _txEntities.clear();
   }
 
@@ -885,23 +940,23 @@ public class AmberConnection
   {
     try {
       flush();
-    
+
       _xid = 0;
       if (_conn != null) {
-	_conn.rollback();
+        _conn.rollback();
       }
     } finally {
       if (! _isXA)
-	_isInTransaction = false;
-      
-      _completionList.clear();
-      
-      for (int i = 0; i < _txEntities.size(); i++) {
-	Entity entity = _txEntities.get(i);
+        _isInTransaction = false;
 
-	entity.__caucho_afterRollback();
+      _completionList.clear();
+
+      for (int i = 0; i < _txEntities.size(); i++) {
+        Entity entity = _txEntities.get(i);
+
+        entity.__caucho_afterRollback();
       }
-      
+
       _txEntities.clear();
     }
   }
@@ -913,24 +968,24 @@ public class AmberConnection
   {
     try {
       for (int i = _txEntities.size() - 1; i >= 0; i--) {
-	Entity entity = _txEntities.get(i);
+        Entity entity = _txEntities.get(i);
 
-	entity.__caucho_flush();
+        entity.__caucho_flush();
       }
 
       if (! isInTransaction()) {
-	if (_completionList.size() > 0) {
-	  _persistenceUnit.complete(_completionList);
-	}
-	_completionList.clear();
-	
-	for (int i = 0; i < _txEntities.size(); i++) {
-	  Entity entity = _txEntities.get(i);
+        if (_completionList.size() > 0) {
+          _persistenceUnit.complete(_completionList);
+        }
+        _completionList.clear();
 
-	  entity.__caucho_afterCommit();
-	}
-      
-	_txEntities.clear();
+        for (int i = 0; i < _txEntities.size(); i++) {
+          Entity entity = _txEntities.get(i);
+
+          entity.__caucho_afterCommit();
+        }
+
+        _txEntities.clear();
       }
     } catch (SQLException e) {
       throw new AmberRuntimeException(e);
@@ -960,16 +1015,16 @@ public class AmberConnection
 
     if (! _isXA && ! _isInTransaction && readDataSource != null) {
       if (_readConn == null) {
-	_readConn = readDataSource.getConnection();
+        _readConn = readDataSource.getConnection();
       }
       else if (_readConn.isClosed()) {
-	closeConnectionImpl();
-	_readConn = _persistenceUnit.getDataSource().getConnection();
+        closeConnectionImpl();
+        _readConn = _persistenceUnit.getDataSource().getConnection();
       }
 
       return _readConn;
     }
-    
+
     if (_conn == null) {
       _conn = _persistenceUnit.getDataSource().getConnection();
       _isAutoCommit = true;
@@ -1004,19 +1059,19 @@ public class AmberConnection
       Connection conn = getConnection();
 
       PreparedStatement pstmt = _preparedStatementMap.get(sql);
-    
+
       if (pstmt == null) {
-	pstmt = conn.prepareStatement(sql);
+        pstmt = conn.prepareStatement(sql);
 
-	_statements.add(pstmt);
+        _statements.add(pstmt);
 
-	_preparedStatementMap.put(sql, pstmt);
+        _preparedStatementMap.put(sql, pstmt);
       }
 
       return pstmt;
     } catch (SQLException e) {
       closeConnectionImpl();
-      
+
       throw e;
     }
   }
@@ -1033,9 +1088,9 @@ public class AmberConnection
       Connection conn = getConnection();
 
       if (_persistenceUnit.hasReturnGeneratedKeys())
-	pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
       else
-	pstmt = conn.prepareStatement(sql);
+        pstmt = conn.prepareStatement(sql);
 
       _statements.add(pstmt);
 
@@ -1044,7 +1099,7 @@ public class AmberConnection
 
     return pstmt;
   }
-  
+
   /**
    * Makes the object transactional.
    *
@@ -1055,16 +1110,16 @@ public class AmberConnection
   public void makeTransactional(Entity entity)
   {
     /*
-    if (! isInTransaction())
+      if (! isInTransaction())
       throw new AmberRuntimeException(L.l("makePersistent must be called from within a transaction."));
 
-    if (! (obj instanceof Entity)) {
+      if (! (obj instanceof Entity)) {
       throw new AmberRuntimeException(L.l("`{0}' is not a known entity class.",
-				   obj.getClass().getName()));
-    }
+      obj.getClass().getName()));
+      }
     */
   }
-  
+
   /**
    * Updates the database with the values in object.  If the object does
    * not exist, throws an exception.
@@ -1074,41 +1129,41 @@ public class AmberConnection
   public void update(Object obj)
   {
     /*
-    for (int i = _entities.size() - 1; i >= 0; i--) {
+      for (int i = _entities.size() - 1; i >= 0; i--) {
       Entity entity = _entities.get(i);
 
       if (entity.__caucho_match(obj)) {
-	entity.__caucho_load(obj);
-	
-	return entity;
+      entity.__caucho_load(obj);
+
+      return entity;
       }
-    }
+      }
     */
 
     /*
-    Class cl = obj.getClass();
-    
-    EntityHome home = _factory.getHome(cl);
+      Class cl = obj.getClass();
 
-    if (home == null)
+      EntityHome home = _factory.getHome(cl);
+
+      if (home == null)
       throw new AmberException(L.l("no matching home for {0}", cl.getName()));
 
-    Object key = home.getKeyFromEntity(obj);
+      Object key = home.getKeyFromEntity(obj);
 
-    Entity entity = getEntity(cl, key);
+      Entity entity = getEntity(cl, key);
 
-    if (entity == null) {
+      if (entity == null) {
       entity = home.load(this, key);
 
       addEntity(entity);
-    }
+      }
 
-    entity.__caucho_loadFromObject(obj);
-    
-    return entity;
+      entity.__caucho_loadFromObject(obj);
+
+      return entity;
     */
   }
-  
+
   /**
    * Saves the object.
    *
@@ -1127,11 +1182,11 @@ public class AmberConnection
 
     if (home == null)
       throw new AmberException(L.l("`{0}' is not a known entity class.",
-				   obj.getClass().getName()));
+                                   obj.getClass().getName()));
 
     create(home, obj);
   }
-  
+
   /**
    * Saves the object.
    *
@@ -1144,11 +1199,11 @@ public class AmberConnection
 
     if (home == null)
       throw new AmberException(L.l("`{0}' is not a known entity class.",
-				   obj.getClass().getName()));
+                                   obj.getClass().getName()));
 
     create(home, obj);
   }
-  
+
   /**
    * Saves the object.
    *
@@ -1164,7 +1219,7 @@ public class AmberConnection
     }
 
     Entity entity = (Entity) obj;
-	
+
     home.save(this, entity);
 
     addEntity(entity);
@@ -1179,13 +1234,13 @@ public class AmberConnection
   public void update(Entity entity)
   {
     Table table = entity.__caucho_getEntityType().getTable();
-    
+
     addCompletion(new RowInvalidateCompletion(table.getName(), entity.__caucho_getPrimaryKey()));
 
     if (! _txEntities.contains(entity))
       _txEntities.add(entity);
   }
-  
+
   /**
    * Deletes the object.
    *
@@ -1198,24 +1253,24 @@ public class AmberConnection
       return;
 
     Entity entity = (Entity) obj;
-    
+
     Entity oldEntity = getEntity(entity.getClass().getName(),
-				 entity.__caucho_getPrimaryKey());
+                                 entity.__caucho_getPrimaryKey());
 
     if (oldEntity == null) {
       EntityType entityType = entity.__caucho_getEntityType();
 
       if (entityType == null)
-	throw new AmberException(L.l("entity has no entityType"));
-      
+        throw new AmberException(L.l("entity has no entityType"));
+
       AmberEntityHome entityHome = entityType.getHome();
       //entityHome = _persistenceUnit.getEntityHome(entity.getClass().getName());
 
       if (entityHome == null)
-	throw new AmberException(L.l("entity has no matching home"));
-    
+        throw new AmberException(L.l("entity has no matching home"));
+
       entityHome.makePersistent(entity, this, true);
-      
+
       addEntity(entity);
     }
     else
@@ -1223,7 +1278,7 @@ public class AmberConnection
 
     entity.__caucho_delete();
   }
-  
+
   /**
    * Creates a query object from a query string.
    *
@@ -1234,7 +1289,7 @@ public class AmberConnection
   {
     return prepareQuery(queryString, false);
   }
-  
+
   /**
    * Creates a query object from a query string.
    *
@@ -1245,7 +1300,7 @@ public class AmberConnection
   {
     return prepareQuery(queryString, true);
   }
-  
+
   /**
    * Creates a query object from a query string.
    *
@@ -1256,7 +1311,7 @@ public class AmberConnection
   {
     return prepareQuery(queryString, true);
   }
-  
+
   /**
    * Creates a query object from a query string.
    *
@@ -1266,14 +1321,14 @@ public class AmberConnection
     throws AmberException
   {
     AbstractQuery queryProgram = parseQuery(queryString, isLazy);
-    
+
     UserQuery query = new UserQuery(queryProgram);
-    
+
     query.setSession(this);
 
     return query;
   }
-  
+
   /**
    * Creates a query object from a query string.
    *
@@ -1287,7 +1342,7 @@ public class AmberConnection
     } catch (Exception e) {
       throw AmberRuntimeException.create(e);
     }
-    
+
     QueryParser parser = new QueryParser(queryString);
 
     parser.setAmberManager(_persistenceUnit);
@@ -1319,11 +1374,11 @@ public class AmberConnection
    * @param startRow the starting row for the cache chunk
    */
   public ResultSetCacheChunk getQueryCacheChunk(String sql,
-						Object []args,
-						int startRow)
+                                                Object []args,
+                                                int startRow)
   {
     _queryKey.init(sql, args, startRow);
-    
+
     return _persistenceUnit.getQueryChunk(_queryKey);
   }
 
@@ -1336,9 +1391,9 @@ public class AmberConnection
    * @param cacheChunk the new value of the cache chunk
    */
   public void putQueryCacheChunk(String sql,
-				 Object []args,
-				 int startRow,
-				 ResultSetCacheChunk cacheChunk)
+                                 Object []args,
+                                 int startRow,
+                                 ResultSetCacheChunk cacheChunk)
   {
     QueryCacheKey key = new QueryCacheKey();
     Object []newArgs = new Object[args.length];
@@ -1379,7 +1434,7 @@ public class AmberConnection
 
     return query.list();
   }
-  
+
   /**
    * Cleans up the connection.
    */
@@ -1391,9 +1446,9 @@ public class AmberConnection
       _depth = 0;
 
       for (int i = _entities.size() - 1; i >= 0; i--) {
-	_entities.get(i).__caucho_detach();
+        _entities.get(i).__caucho_detach();
       }
-      
+
       _entities.clear();
       _txEntities.clear();
       _completionList.clear();
@@ -1417,7 +1472,7 @@ public class AmberConnection
   public void popDepth()
   {
   }
-  
+
   /**
    * Frees the connection.
    */
@@ -1425,7 +1480,7 @@ public class AmberConnection
   {
     closeConnectionImpl();
   }
-  
+
   /**
    * Frees the connection.
    */
@@ -1442,19 +1497,19 @@ public class AmberConnection
 
     try {
       if (conn != null && ! isAutoCommit)
-	conn.setAutoCommit(true);
+        conn.setAutoCommit(true);
     } catch (SQLException e) {
     }
-    
+
     try {
       _preparedStatementMap.clear();
       _statements.clear();
-      
+
       if (conn != null)
-	conn.close();
-      
+        conn.close();
+
       if (readConn != null)
-	readConn.close();
+        readConn.close();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }

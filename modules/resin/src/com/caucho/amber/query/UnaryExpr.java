@@ -56,8 +56,8 @@ class UnaryExpr extends AbstractAmberExpr {
   public boolean isBoolean()
   {
     return (_token == QueryParser.NOT ||
-	    _token == QueryParser.NULL ||
-	    _token == QueryParser.NOT_NULL);
+            _token == QueryParser.NULL ||
+            _token == QueryParser.NOT_NULL);
   }
 
   /**
@@ -95,7 +95,7 @@ class UnaryExpr extends AbstractAmberExpr {
     case QueryParser.NULL:
     case QueryParser.NOT_NULL:
       return _expr.usesFrom(from, type);
-      
+
     case QueryParser.NOT:
       return _expr.usesFrom(from, type, ! isNot);
 
@@ -103,7 +103,7 @@ class UnaryExpr extends AbstractAmberExpr {
       return false;
     }
   }
-  
+
   /**
    * Generates the where expression.
    */
@@ -122,31 +122,31 @@ class UnaryExpr extends AbstractAmberExpr {
     case QueryParser.NULL:
     case QueryParser.NOT_NULL:
       if (_expr instanceof ManyToOneExpr) {
-	ManyToOneExpr path = (ManyToOneExpr) _expr;
-	cb.append('(');
+        ManyToOneExpr path = (ManyToOneExpr) _expr;
+        cb.append('(');
 
-	ArrayList<ForeignColumn> keys = path.getLinkColumns().getColumns();
-	for (int i = 0; i < keys.size(); i++) {
-	  if (i != 0)
-	    cb.append(" and ");
+        ArrayList<ForeignColumn> keys = path.getLinkColumns().getColumns();
+        for (int i = 0; i < keys.size(); i++) {
+          if (i != 0)
+            cb.append(" and ");
 
-	  cb.append(path.getFromItem().getName());
-	  cb.append(".");
-	  cb.append(keys.get(i).getName());
-	  
-	  if (_token == QueryParser.NULL)
-	    cb.append(" is null");
-	  else
-	    cb.append(" is not null");
-	}
-	cb.append(')');
+          cb.append(path.getFromItem().getName());
+          cb.append(".");
+          cb.append(keys.get(i).getName());
+
+          if (_token == QueryParser.NULL)
+            cb.append(" is null");
+          else
+            cb.append(" is not null");
+        }
+        cb.append(')');
       }
       else {
-	_expr.generateWhere(cb);
-	if (_token == QueryParser.NULL)
-	  cb.append(" is null");
-	else
-	  cb.append(" is not null");
+        _expr.generateWhere(cb);
+        if (_token == QueryParser.NULL)
+          cb.append(" is null");
+        else
+          cb.append(" is not null");
       }
       return;
     }
@@ -154,10 +154,18 @@ class UnaryExpr extends AbstractAmberExpr {
     _expr.generateWhere(cb);
   }
 
+  /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb)
+  {
+    generateWhere(cb);
+  }
+
   public String toString()
   {
     String str = null;
-    
+
     switch (_token) {
     case '-':
       str = "-";

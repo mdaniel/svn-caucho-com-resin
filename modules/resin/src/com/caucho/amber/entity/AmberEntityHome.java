@@ -33,6 +33,7 @@ import java.lang.reflect.Method;
 import java.lang.ref.SoftReference;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -47,6 +48,7 @@ import com.caucho.log.Log;
 import com.caucho.config.ConfigException;
 
 import com.caucho.amber.AmberException;
+import com.caucho.amber.AmberObjectNotFoundException;
 
 import com.caucho.amber.type.EntityType;
 
@@ -205,10 +207,22 @@ public class AmberEntityHome {
   /**
    * Finds by the primary key.
    */
-  public Entity load(AmberConnection aConn, Object key)
+  public Entity load(AmberConnection aConn,
+                     Object key)
     throws AmberException
   {
-    return find(aConn, key, true);
+    return load(aConn, key, null);
+  }
+
+  /**
+   * Finds by the primary key.
+   */
+  public Entity load(AmberConnection aConn,
+                     Object key,
+                     Map preloadedProperties)
+    throws AmberException
+  {
+    return find(aConn, key, true, preloadedProperties);
   }
 
   /**
@@ -291,10 +305,31 @@ public class AmberEntityHome {
    * @param aConn the Amber connection to associate with the loaded item
    * @param isLoad if true, try to load the bean
    */
-  public Entity find(AmberConnection aConn, Object key, boolean isLoad)
+  public Entity find(AmberConnection aConn,
+                     Object key,
+                     boolean isLoad)
     throws AmberException
   {
-    EntityItem item = findEntityItem(aConn, key, isLoad);
+    return find(aConn, key, isLoad, null);
+  }
+
+  /**
+   * Finds an entity based on the primary key.
+   *
+   * @param key the primary key
+   * @param aConn the Amber connection to associate with the loaded item
+   * @param isLoad if true, try to load the bean
+   */
+  public Entity find(AmberConnection aConn,
+                     Object key,
+                     boolean isLoad,
+                     Map preloadedProperties)
+    throws AmberException
+  {
+    EntityItem item = findEntityItem(aConn, key, isLoad, preloadedProperties);
+
+    if (item == null)
+      throw new AmberObjectNotFoundException(("amber find: no matching object " + _entityType.getBeanClass().getName() + "[" + key + "]"));
 
     return item.copy(aConn);
   }
@@ -311,6 +346,22 @@ public class AmberEntityHome {
                                    boolean isLoad)
     throws AmberException
   {
+    return findEntityItem(aConn, key, isLoad, null);
+  }
+
+  /**
+   * Loads an entity based on the primary key.
+   *
+   * @param aConn the Amber connection to associate with the loaded item
+   * @param key the primary key
+   * @param isLoad if true, try to load the bean
+   */
+  public EntityItem findEntityItem(AmberConnection aConn,
+                                   Object key,
+                                   boolean isLoad,
+                                   Map preloadedProperties)
+    throws AmberException
+  {
     if (key == null)
       return null; // ejb/0a06 throw new NullPointerException("primaryKey");
 
@@ -325,14 +376,14 @@ public class AmberEntityHome {
         cacheEntity = (Entity) _homeBean.__caucho_home_new(aConn, this, key);
 
         if (isLoad) {
-          cacheEntity.__caucho_retrieve(aConn);
+          cacheEntity.__caucho_retrieve(aConn, preloadedProperties);
         }
 
         item = new CacheableEntityItem(this, cacheEntity);
         item = _manager.putEntity(getRootType(), key, item);
       }
       else if (isLoad) {
-        item.loadEntity(0);
+        item.loadEntity(0, preloadedProperties);
       }
 
       return item;

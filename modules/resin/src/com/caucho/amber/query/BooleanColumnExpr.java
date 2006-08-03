@@ -90,13 +90,13 @@ public class BooleanColumnExpr extends AbstractAmberExpr {
 
     if (parentFromItem.getTable() == getColumn().getTable()) {
       _fromItem = parentFromItem;
-      
+
       return this;
     }
 
     LinkColumns link = getColumn().getTable().getDependentIdLink();
     _fromItem = parser.createDependentFromItem(parentFromItem, link);
-    
+
     return this;
   }
 
@@ -119,17 +119,17 @@ public class BooleanColumnExpr extends AbstractAmberExpr {
   public AmberExpr replaceJoin(JoinExpr join)
   {
     _parent = (PathExpr) _parent.replaceJoin(join);
-    
+
     return this;
   }
-  
+
   /**
    * Generates the where expression.
    */
   public void generateWhere(CharBuffer cb)
   {
     CharBuffer term = new CharBuffer();
-    
+
     if (_fromItem != null) {
       term.append(_fromItem.getName());
       term.append('.');
@@ -146,6 +146,14 @@ public class BooleanColumnExpr extends AbstractAmberExpr {
     JdbcMetaData metaData = manager.getMetaData();
 
     cb.append(metaData.generateBoolean(term.toString()));
+  }
+
+  /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb)
+  {
+    generateWhere(cb);
   }
 
   public String toString()

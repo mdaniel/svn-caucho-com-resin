@@ -62,12 +62,12 @@ public class OrExpr extends AbstractAmberExpr {
   {
     for (int i = 0; i < _components.size(); i++) {
       AmberExpr expr = _components.get(i);
-      
+
       expr = expr.bindSelect(parser);
 
       _components.set(i, expr);
     }
-    
+
     return this;
   }
 
@@ -79,22 +79,22 @@ public class OrExpr extends AbstractAmberExpr {
     if (type == IS_INNER_JOIN) {
       // returns true if the from item is used in every term of the disjunction
       for (int i = 0; i < _components.size(); i++) {
-	AmberExpr expr = _components.get(i);
+        AmberExpr expr = _components.get(i);
 
-	if (! isNot && ! expr.usesFrom(from, type, isNot))
-	  return false;
-	else if (isNot && expr.usesFrom(from, type, isNot))
-	  return true;
+        if (! isNot && ! expr.usesFrom(from, type, isNot))
+          return false;
+        else if (isNot && expr.usesFrom(from, type, isNot))
+          return true;
       }
 
       return false;
     }
     else {
       for (int i = 0; i < _components.size(); i++) {
-	AmberExpr expr = _components.get(i);
+        AmberExpr expr = _components.get(i);
 
-	if (expr.usesFrom(from, type))
-	  return true;
+        if (expr.usesFrom(from, type))
+          return true;
       }
 
       return false;
@@ -108,12 +108,12 @@ public class OrExpr extends AbstractAmberExpr {
   {
     for (int i = 0; i < _components.size(); i++) {
       AmberExpr expr = _components.get(i);
-      
+
       expr = expr.replaceJoin(join);
 
       _components.set(i, expr);
     }
-    
+
     return this;
   }
 
@@ -129,7 +129,7 @@ public class OrExpr extends AbstractAmberExpr {
     else
       return this;
   }
-  
+
   /**
    * Generates the where expression.
    */
@@ -139,16 +139,24 @@ public class OrExpr extends AbstractAmberExpr {
 
     for (int i = 0; i < _components.size(); i++) {
       if (i != 0)
-	cb.append(" OR ");
-	
+        cb.append(" OR ");
+
       AmberExpr expr = _components.get(i);
 
       expr.generateWhere(cb);
     }
-      
+
     cb.append(')');
   }
-  
+
+  /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb)
+  {
+    generateWhere(cb);
+  }
+
   /**
    * Generates the join expression.
    */
@@ -158,13 +166,13 @@ public class OrExpr extends AbstractAmberExpr {
 
     for (int i = 0; i < _components.size(); i++) {
       if (i != 0)
-	cb.append(" OR ");
-	
+        cb.append(" OR ");
+
       AmberExpr expr = _components.get(i);
 
       expr.generateJoin(cb);
     }
-      
+
     cb.append(')');
   }
 
@@ -175,18 +183,18 @@ public class OrExpr extends AbstractAmberExpr {
     }
     else {
       CharBuffer cb = new CharBuffer();
-      
+
       cb.append('(');
 
       for (int i = 0; i < _components.size(); i++) {
-	if (i != 0)
-	  cb.append(" OR ");
-	
-	AmberExpr expr = _components.get(i);
+        if (i != 0)
+          cb.append(" OR ");
 
-	cb.append(expr);
+        AmberExpr expr = _components.get(i);
+
+        cb.append(expr);
       }
-      
+
       cb.append(')');
 
       return cb.toString();

@@ -90,13 +90,13 @@ public class ColumnExpr extends AbstractAmberExpr {
 
     if (parentFromItem.getTable() == getColumn().getTable()) {
       _fromItem = parentFromItem;
-      
+
       return this;
     }
 
     LinkColumns link = getColumn().getTable().getDependentIdLink();
     _fromItem = parser.createDependentFromItem(parentFromItem, link);
-    
+
     return this;
   }
 
@@ -119,10 +119,10 @@ public class ColumnExpr extends AbstractAmberExpr {
   public AmberExpr replaceJoin(JoinExpr join)
   {
     _parent = (PathExpr) _parent.replaceJoin(join);
-    
+
     return this;
   }
-  
+
   /**
    * Generates the where expression.
    */
@@ -138,6 +138,14 @@ public class ColumnExpr extends AbstractAmberExpr {
       cb.append('.');
       cb.append(_column.getName());
     }
+  }
+
+  /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb)
+  {
+    generateWhere(cb);
   }
 
   public String toString()

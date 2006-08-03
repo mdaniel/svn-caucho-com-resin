@@ -38,7 +38,7 @@ import com.caucho.amber.type.BooleanType;
  */
 class LikeExpr extends AbstractAmberExpr {
   private AmberExpr _expr;
-  
+
   private AmberExpr _value;
   private String _escape;
   private boolean _isNot;
@@ -53,7 +53,7 @@ class LikeExpr extends AbstractAmberExpr {
     _isNot = isNot;
     _escape = escape;
   }
-  
+
   /**
    * Returns true for a boolean expression.
    */
@@ -96,10 +96,10 @@ class LikeExpr extends AbstractAmberExpr {
   {
     _expr = _expr.replaceJoin(join);
     _value = _value.replaceJoin(join);
-    
+
     return this;
   }
-  
+
   /**
    * Generates the where expression.
    */
@@ -119,14 +119,22 @@ class LikeExpr extends AbstractAmberExpr {
       cb.append(" ESCAPE ");
       cb.append(_escape);
     }
-    
+
     cb.append(')');
+  }
+
+  /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb)
+  {
+    generateWhere(cb);
   }
 
   public String toString()
   {
     CharBuffer cb = CharBuffer.allocate();
-    
+
     cb.append('(');
     cb.append(_expr);
 
@@ -136,7 +144,7 @@ class LikeExpr extends AbstractAmberExpr {
     cb.append(" LIKE ");
 
     cb.append(_value);
-    
+
     cb.append(')');
 
     return cb.close();

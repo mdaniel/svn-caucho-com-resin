@@ -42,33 +42,33 @@ public class MemberExpr extends AbstractAmberExpr {
   private AmberExpr _collectionExpr;
 
   private MemberExpr(PathExpr itemExpr,
-		     AmberExpr collectionExpr, boolean isNot)
+                     AmberExpr collectionExpr, boolean isNot)
   {
     _itemExpr = itemExpr;
     _collectionExpr = collectionExpr;
   }
 
   static AmberExpr create(QueryParser parser,
-			  PathExpr itemExpr,
-			  AmberExpr collectionExpr,
-			  boolean isNot)
+                          PathExpr itemExpr,
+                          AmberExpr collectionExpr,
+                          boolean isNot)
   {
     if (collectionExpr instanceof IdExpr)
       collectionExpr = ((CollectionIdExpr) collectionExpr).getPath();
-    
+
     if (collectionExpr instanceof OneToManyExpr) {
       OneToManyExpr oneToMany = (OneToManyExpr) collectionExpr;
       PathExpr parent = oneToMany.getParent();
 
       AmberExpr expr;
       expr = new ManyToOneJoinExpr(oneToMany.getLinkColumns(),
-				   itemExpr.getChildFromItem(),
-				   parent.getChildFromItem());
+                                   itemExpr.getChildFromItem(),
+                                   parent.getChildFromItem());
 
       if (isNot)
-	return new UnaryExpr(QueryParser.NOT, expr);
+        return new UnaryExpr(QueryParser.NOT, expr);
       else
-	return expr;
+        return expr;
     }
     else
       return new MemberExpr(itemExpr, collectionExpr, isNot);
@@ -88,7 +88,7 @@ public class MemberExpr extends AbstractAmberExpr {
   public boolean usesFrom(FromItem from, int type, boolean isNot)
   {
     return (_collectionExpr.usesFrom(from, type) ||
-	    _itemExpr.usesFrom(from, type));
+            _itemExpr.usesFrom(from, type));
   }
 
   /**
@@ -98,10 +98,10 @@ public class MemberExpr extends AbstractAmberExpr {
   {
     _collectionExpr = _collectionExpr.replaceJoin(join);
     _itemExpr = (PathExpr) _itemExpr.replaceJoin(join);
-    
+
     return this;
   }
-  
+
   /**
    * Generates the where expression.
    */
@@ -111,7 +111,7 @@ public class MemberExpr extends AbstractAmberExpr {
       OneToManyExpr oneToMany = (OneToManyExpr) _collectionExpr;
 
       LinkColumns join = oneToMany.getLinkColumns();
-      
+
       cb.append("EXISTS(SELECT *");
       Table table = join.getSourceTable();
       cb.append(" FROM " + table.getName() + " caucho");
@@ -119,5 +119,13 @@ public class MemberExpr extends AbstractAmberExpr {
     }
     else
       throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb)
+  {
+    generateWhere(cb);
   }
 }

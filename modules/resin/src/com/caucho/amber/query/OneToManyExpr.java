@@ -44,7 +44,7 @@ import com.caucho.amber.table.LinkColumns;
  */
 public class OneToManyExpr extends AbstractPathExpr {
   private PathExpr _parent;
-  
+
   // Link from the target to the parent
   private LinkColumns _linkColumns;
 
@@ -55,11 +55,11 @@ public class OneToManyExpr extends AbstractPathExpr {
    * Creates a new expression to the child objects.
    */
   public OneToManyExpr(QueryParser parser,
-		       PathExpr parent,
-		       LinkColumns linkColumns)
+                       PathExpr parent,
+                       LinkColumns linkColumns)
   {
     _parent = parent;
-    
+
     _linkColumns = linkColumns;
   }
 
@@ -93,7 +93,7 @@ public class OneToManyExpr extends AbstractPathExpr {
   public boolean usesFrom(FromItem from, int type, boolean isNot)
   {
     return (from == _childFromItem ||
-	    type == IS_INNER_JOIN && _parent.usesFrom(from, type));
+            type == IS_INNER_JOIN && _parent.usesFrom(from, type));
   }
 
   /**
@@ -119,7 +119,7 @@ public class OneToManyExpr extends AbstractPathExpr {
   {
     if (_fromItem != null)
       return this;
-      
+
     _fromItem = _parent.bindSubPath(parser);
 
     Table sourceTable = _linkColumns.getSourceTable();
@@ -127,12 +127,12 @@ public class OneToManyExpr extends AbstractPathExpr {
 
     JoinExpr joinExpr;
     joinExpr = new OneToManyJoinExpr(_linkColumns,
-				     _childFromItem,
-				     _fromItem);
-					       
+                                     _childFromItem,
+                                     _fromItem);
+
     _childFromItem.setJoinExpr(joinExpr);
     _childFromItem.setCollectionExpr(this);
-    
+
     return this;
   }
 
@@ -151,7 +151,7 @@ public class OneToManyExpr extends AbstractPathExpr {
   {
     if (_childFromItem == null)
       bindSelect(parser, null);
-    
+
     return _childFromItem;
   }
 
@@ -163,7 +163,7 @@ public class OneToManyExpr extends AbstractPathExpr {
     // return _field.getTable();
     return _fromItem.getTable();
   }
-  
+
   /**
    * Generates the where expression.
    */
@@ -171,7 +171,15 @@ public class OneToManyExpr extends AbstractPathExpr {
   {
     throw new IllegalStateException(getClass().getName());
   }
-  
+
+  /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb)
+  {
+    generateWhere(cb);
+  }
+
   /**
    * Generates the where expression.
    */

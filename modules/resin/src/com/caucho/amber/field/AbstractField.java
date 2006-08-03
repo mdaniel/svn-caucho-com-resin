@@ -241,6 +241,14 @@ abstract public class AbstractField implements AmberField {
   }
 
   /**
+   * Returns true for a lazy field.
+   */
+  public boolean isLazy()
+  {
+    return _isLazy;
+  }
+
+  /**
    * Set true for a lazy field.
    */
   public void setLazy(boolean isLazy)
@@ -434,6 +442,16 @@ abstract public class AbstractField implements AmberField {
    */
   public int generateLoad(JavaWriter out, String rs,
                           String indexVar, int index)
+    throws IOException
+  {
+    return index;
+  }
+
+  /**
+   * Generates loading code
+   */
+  public int generateLoadEager(JavaWriter out, String rs,
+                               String indexVar, int index)
     throws IOException
   {
     return index;

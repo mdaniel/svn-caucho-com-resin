@@ -82,7 +82,7 @@ class IdExpr extends AbstractPathExpr {
   {
     return getFromItem();
   }
-  
+
   /**
    * Returns the entity class.
    */
@@ -122,7 +122,7 @@ class IdExpr extends AbstractPathExpr {
   {
     return join.replace(this);
   }
-  
+
   /**
    * Generates the where expression.
    */
@@ -131,6 +131,14 @@ class IdExpr extends AbstractPathExpr {
     cb.append(_fromItem.getName());
     cb.append('.');
     cb.append(getTargetType().getId().getColumns().get(0).getName());
+  }
+
+  /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb)
+  {
+    generateWhere(cb);
   }
 
   public String toString()

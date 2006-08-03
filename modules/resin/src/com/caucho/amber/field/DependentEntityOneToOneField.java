@@ -69,7 +69,7 @@ public class DependentEntityOneToOneField extends AbstractField {
   private boolean _isCascadeDelete;
 
   public DependentEntityOneToOneField(EntityType entityType,
-				      String name)
+                                      String name)
     throws ConfigException
   {
     super(entityType, name);
@@ -154,7 +154,7 @@ public class DependentEntityOneToOneField extends AbstractField {
   public AmberExpr createExpr(QueryParser parser, PathExpr parent)
   {
     return new DependentEntityOneToOneExpr(parent,
-					   _targetField.getLinkColumns());
+                                           _targetField.getLinkColumns());
   }
 
   /**
@@ -163,17 +163,17 @@ public class DependentEntityOneToOneField extends AbstractField {
   public ForeignColumn getColumn(IdField targetField)
   {
     /*
-    EntityColumn entityColumn = (EntityColumn) getColumn();
+      EntityColumn entityColumn = (EntityColumn) getColumn();
 
-    ArrayList<ForeignColumn> columns = entityColumn.getColumns();
-    
-    Id id = getEntityType().getId();
-    ArrayList<IdField> keys = id.getKeys();
+      ArrayList<ForeignColumn> columns = entityColumn.getColumns();
 
-    for (int i = 0; i < keys.size(); i++ ){
+      Id id = getEntityType().getId();
+      ArrayList<IdField> keys = id.getKeys();
+
+      for (int i = 0; i < keys.size(); i++ ){
       if (keys.get(i) == targetField)
-	return columns.get(i);
-    }
+      return columns.get(i);
+      }
     */
 
     return null;
@@ -186,11 +186,11 @@ public class DependentEntityOneToOneField extends AbstractField {
     throws IOException
   {
     super.generatePrologue(out, completedSet);
-    
+
     out.println();
 
     Id id = getEntityType().getId();
-    
+
     id.generatePrologue(out, completedSet, getName());
   }
 
@@ -198,8 +198,8 @@ public class DependentEntityOneToOneField extends AbstractField {
    * Generates the linking for a join
    */
   public void generateJoin(CharBuffer cb,
-			   String sourceTable,
-			   String targetTable)
+                           String sourceTable,
+                           String targetTable)
   {
     LinkColumns linkColumns = _targetField.getLinkColumns();
 
@@ -210,17 +210,52 @@ public class DependentEntityOneToOneField extends AbstractField {
    * Generates loading code
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index)
+                          String indexVar, int index)
     throws IOException
   {
-    out.println(generateSuperSetter("null") + ";");
+    if (isLazy()) {
+      out.println(generateSuperSetter("null") + ";");
 
-    String loadVar = "__caucho_loadMask_" + (_targetLoadIndex / 64);
-    long loadMask = (1L << _targetLoadIndex);
-    
-    out.println(loadVar + " &= ~" + loadMask + "L;");
+      String loadVar = "__caucho_loadMask_" + (_targetLoadIndex / 64);
+      long loadMask = (1L << _targetLoadIndex);
+
+      out.println(loadVar + " &= ~" + loadMask + "L;");
+    }
 
     // return index + 1;
+    return index;
+  }
+
+  /**
+   * Generates loading code
+   */
+  public int generateLoadEager(JavaWriter out, String rs,
+                               String indexVar, int index)
+    throws IOException
+  {
+    if (! isLazy()) {
+
+      String loadVar = "__caucho_loadMask_" + (_targetLoadIndex / 64);
+      long loadMask = 1L << (_targetLoadIndex % 64);
+
+      out.println(loadVar + " |= " + loadMask + "L;");
+
+      String javaType = getJavaTypeName();
+
+      out.println("if ((preloadedProperties == null) || (! preloadedProperties.containsKey(\"" + getName() + "\"))) {");
+      out.pushDepth();
+
+      String indexS = "_" + (_targetLoadIndex / 64);
+      indexS += "_" + (1L << (_targetLoadIndex % 64));
+
+      generateLoadProperty(out, indexS, "aConn");
+
+      out.popDepth();
+      out.println("} else {");
+      out.println("  " + generateSuperSetter("(" + javaType + ") preloadedProperties.get(\"" + getName() + "\")") + ";");
+      out.println("}");
+    }
+
     return index;
   }
 
@@ -232,76 +267,94 @@ public class DependentEntityOneToOneField extends AbstractField {
   {
     String loadVar = "__caucho_loadMask_" + (_targetLoadIndex / 64);
     long loadMask = 1L << (_targetLoadIndex % 64);
-    
+
+    String index = "_" + (_targetLoadIndex / 64);
+    index += "_" + (1L << (_targetLoadIndex % 64));
+
     String javaType = getJavaTypeName();
-    
+
     out.println();
     out.println("public " + javaType + " " + getGetterName() + "()");
     out.println("{");
     out.pushDepth();
-    
+
     out.print("if (__caucho_session != null && ");
     out.println("(" + loadVar + " & " + loadMask + "L) == 0) {");
     out.pushDepth();
     out.println("__caucho_load_" + getLoadGroupIndex() + "(__caucho_session);");
     out.println(loadVar + " |= " + loadMask + "L;");
 
-    out.println(javaType + " v = null;");
-    
+    generateLoadProperty(out, index, "__caucho_session");
+
+    /*
+      out.print(javaType + " v = (" + javaType + ") __caucho_session.loadProxy(\"" + getEntityType().getName() + "\", ");
+      out.println("__caucho_" + getName() + ", true);");
+    */
+
+    out.println("return v"+index+";");
+    out.popDepth();
+    out.println("}");
+    out.println("else {");
+    out.println("  return " + generateSuperGetter() + ";");
+    out.println("}");
+
+    out.popDepth();
+    out.println("}");
+  }
+
+  /**
+   * Generates the set property.
+   */
+  public void generateLoadProperty(JavaWriter out,
+                                   String index,
+                                   String session)
+    throws IOException
+  {
+    String javaType = getJavaTypeName();
+
+    out.println(javaType + " v"+index+" = null;");
+
     out.println("try {");
     out.pushDepth();
 
-    out.print("String sql = \"");
+    out.print("String sql"+index+" = \"");
     out.print("SELECT o." + getName() +
-	      " FROM " + getSourceType().getName() + " o" +
-	      " WHERE ");
+              " FROM " + getSourceType().getName() + " o" +
+              " WHERE ");
 
     ArrayList<IdField> sourceKeys = getSourceType().getId().getKeys();
     for (int i = 0; i < sourceKeys.size(); i++) {
       if (i != 0)
-	out.print(" and ");
-      
+        out.print(" and ");
+
       IdField key = sourceKeys.get(i);
-      
+
       out.print("o." + key.getName() + "=?");
     }
     out.println("\";");
-    
-    out.println("com.caucho.amber.AmberQuery query = __caucho_session.prepareQuery(sql);");
 
-    out.println("int index = 1;");
+    out.println("com.caucho.amber.AmberQuery query"+index+" = "+session+".prepareQuery(sql"+index+");");
 
-    getSourceType().getId().generateSet(out, "query", "index", "super");
+    out.println("int index"+index+" = 1;");
 
-    out.println("v = (" + javaType + ") query.getSingleResult();");
+    getSourceType().getId().generateSet(out, "query"+index, "index"+index, "super");
+
+    out.println("v"+index+" = (" + javaType + ") query"+index+".getSingleResult();");
 
     out.popDepth();
     out.println("} catch (java.sql.SQLException e) {");
     out.println("  throw new RuntimeException(e);");
     out.println("}");
-    
-    /*
-    out.print(javaType + " v = (" + javaType + ") __caucho_session.loadProxy(\"" + getEntityType().getName() + "\", ");
-    out.println("__caucho_" + getName() + ", true);");
-    */
-    
-    out.println(generateSuperSetter("v") + ";");
-    out.println("return v;");
-    out.popDepth();
-    out.println("}");
-    out.println("else");
-    out.println("  return " + generateSuperGetter() + ";");
-    
-    out.popDepth();
-    out.println("}");
+
+    out.println(generateSuperSetter("v"+index) + ";");
   }
 
   /**
    * Updates the cached copy.
    */
   public void generateCopyUpdateObject(JavaWriter out,
-				       String dst, String src,
-				       int updateIndex)
+                                       String dst, String src,
+                                       int updateIndex)
     throws IOException
   {
     if (getIndex() == updateIndex) {
@@ -314,8 +367,8 @@ public class DependentEntityOneToOneField extends AbstractField {
    * Updates the cached copy.
    */
   public void generateCopyLoadObject(JavaWriter out,
-				     String dst, String src,
-				     int updateIndex)
+                                     String dst, String src,
+                                     int updateIndex)
     throws IOException
   {
     if (getLoadGroupIndex() == updateIndex) {
@@ -333,7 +386,7 @@ public class DependentEntityOneToOneField extends AbstractField {
     Id id = getEntityType().getId();
 
     String keyType = getEntityType().getId().getForeignTypeName();
-    
+
     out.println();
     out.println("public void " + getSetterName() + "(" + getJavaTypeName() + " v)");
     out.println("{");
@@ -345,12 +398,12 @@ public class DependentEntityOneToOneField extends AbstractField {
 
     String updateVar = "__caucho_updateMask_" + (_targetLoadIndex / 64);
     long updateMask = (1L << _targetLoadIndex);
-    
+
     out.println(updateVar + " |= " + updateMask + "L;");
     out.println("__caucho_session.update(this);");
     out.popDepth();
     out.println("}");
-    
+
     out.popDepth();
     out.println("}");
   }
@@ -370,7 +423,7 @@ public class DependentEntityOneToOneField extends AbstractField {
     throws IOException
   {
   }
-  
+
   /**
    * Generates code for foreign entity create/delete
    */

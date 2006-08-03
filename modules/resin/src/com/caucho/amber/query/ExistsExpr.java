@@ -56,7 +56,7 @@ public class ExistsExpr extends AbstractAmberExpr {
   {
     return _query.usesFrom(from, type);
   }
-  
+
   /**
    * Generates the where expression.
    */
@@ -65,5 +65,13 @@ public class ExistsExpr extends AbstractAmberExpr {
     cb.append("EXISTS(");
     cb.append(_query.generateLoadSQL());
     cb.append(')');
+  }
+
+  /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb)
+  {
+    generateWhere(cb);
   }
 }

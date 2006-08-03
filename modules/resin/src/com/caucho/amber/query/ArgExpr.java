@@ -40,10 +40,10 @@ import com.caucho.amber.type.Type;
  */
 class ArgExpr extends AbstractAmberExpr {
   private QueryParser _parser;
-  
+
   // argument index
   private int _index;
-  
+
   private int _sqlIndex;
 
 
@@ -55,7 +55,7 @@ class ArgExpr extends AbstractAmberExpr {
   ArgExpr(QueryParser parser, int index)
   {
     _parser = parser;
-    
+
     _index = index;
   }
 
@@ -73,7 +73,7 @@ class ArgExpr extends AbstractAmberExpr {
   public AmberExpr bindSelect(QueryParser parser)
   {
     parser.addArg(this);
-		  
+
     return this;
   }
 
@@ -83,20 +83,28 @@ class ArgExpr extends AbstractAmberExpr {
   public void generateWhere(CharBuffer cb)
   {
     _sqlIndex = _parser.generateSQLArg();
-    
+
     cb.append("?");
+  }
+
+  /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb)
+  {
+    generateWhere(cb);
   }
 
   /**
    * Sets the parameter.
    */
   public void setParameter(PreparedStatement pstmt, int i,
-			   Type []argTypes, Object []argValues)
+                           Type []argTypes, Object []argValues)
     throws SQLException
   {
     if (argTypes[_index - 1] != null)
       argTypes[_index - 1].setParameter(pstmt, _sqlIndex + 1,
-					argValues[_index - 1]);
+                                        argValues[_index - 1]);
     else
       pstmt.setString(_sqlIndex + 1, null);
   }

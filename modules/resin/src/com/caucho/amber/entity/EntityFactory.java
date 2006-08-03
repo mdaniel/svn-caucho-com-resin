@@ -30,6 +30,8 @@ package com.caucho.amber.entity;
 
 import java.util.logging.Logger;
 
+import java.util.Map;
+
 import java.sql.SQLException;
 
 import com.caucho.util.L10N;
@@ -47,9 +49,20 @@ public class EntityFactory {
   /**
    * Gets the appropriate entity given the EntityItem.
    */
-  public Object getEntity(AmberConnection aConn, EntityItem item)
+  public Object getEntity(AmberConnection aConn,
+                          EntityItem item)
   {
-    return aConn.getEntity(item);
+    return getEntity(aConn, item, null);
+  }
+
+  /**
+   * Gets the appropriate entity given the EntityItem.
+   */
+  public Object getEntity(AmberConnection aConn,
+                          EntityItem item,
+                          Map preloadedProperties)
+  {
+    return aConn.getEntity(item, preloadedProperties);
   }
 
   /**

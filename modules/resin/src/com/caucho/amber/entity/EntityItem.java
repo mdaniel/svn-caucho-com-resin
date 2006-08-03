@@ -29,6 +29,8 @@
 
 package com.caucho.amber.entity;
 
+import java.util.Map;
+
 import com.caucho.amber.manager.AmberConnection;
 
 /**
@@ -36,24 +38,30 @@ import com.caucho.amber.manager.AmberConnection;
  */
 abstract public class EntityItem {
   abstract public Entity getEntity();
-  
+
   public Entity loadEntity(int index)
   {
     return getEntity();
   }
-  
+
+  public Entity loadEntity(int index,
+                           Map preloadedProperties)
+  {
+    return getEntity();
+  }
+
   abstract public void save(Entity item);
-  
+
   abstract public void savePart(Entity item);
-  
+
   abstract public void expire();
-  
+
   abstract public Entity copy(AmberConnection aConn);
-  
+
   public Entity load(AmberConnection aConn)
   {
     return aConn.getEntity(this);
   }
-  
+
   abstract Class getInstanceClass();
 }

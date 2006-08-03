@@ -78,12 +78,12 @@ class FunExpr extends AbstractAmberExpr {
       AmberExpr arg = _args.get(i);
 
       if (arg.usesFrom(from, type))
-	return true;
+        return true;
     }
 
     return false;
   }
-  
+
   /**
    * Generates the where expression.
    */
@@ -94,12 +94,20 @@ class FunExpr extends AbstractAmberExpr {
 
     for (int i = 0; i < _args.size(); i++) {
       if (i != 0)
-	cb.append(',');
-      
+        cb.append(',');
+
       _args.get(i).generateWhere(cb);
     }
 
     cb.append(')');
+  }
+
+  /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb)
+  {
+    generateWhere(cb);
   }
 
   public String toString()
@@ -108,8 +116,8 @@ class FunExpr extends AbstractAmberExpr {
 
     for (int i = 0; i < _args.size(); i++) {
       if (i != 0)
-	str += ',';
-      
+        str += ',';
+
       str += _args.get(i);
     }
 

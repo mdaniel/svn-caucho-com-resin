@@ -40,7 +40,7 @@ import com.caucho.amber.type.BooleanType;
  */
 class InExpr extends AbstractAmberExpr {
   private AmberExpr _expr;
-  
+
   private ArrayList<AmberExpr> _values;
   private boolean _isNot;
 
@@ -53,7 +53,7 @@ class InExpr extends AbstractAmberExpr {
     _values = values;
     _isNot = isNot;
   }
-  
+
   /**
    * Returns true for a boolean expression.
    */
@@ -94,7 +94,7 @@ class InExpr extends AbstractAmberExpr {
 
     for (int i = 0; i < _values.size(); i++) {
       if (_values.get(i).usesFrom(from, type))
-	return true;
+        return true;
     }
 
     return false;
@@ -110,10 +110,10 @@ class InExpr extends AbstractAmberExpr {
     for (int i = 0; i < _values.size(); i++) {
       _values.set(i, _values.get(i).replaceJoin(join));
     }
-    
+
     return this;
   }
-  
+
   /**
    * Generates the where expression.
    */
@@ -129,7 +129,7 @@ class InExpr extends AbstractAmberExpr {
 
     for (int i = 0; i < _values.size(); i++) {
       if (i != 0)
-	cb.append(',');
+        cb.append(',');
 
       _values.get(i).generateWhere(cb);
     }
@@ -137,10 +137,18 @@ class InExpr extends AbstractAmberExpr {
     cb.append("))");
   }
 
+  /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb)
+  {
+    generateWhere(cb);
+  }
+
   public String toString()
   {
     CharBuffer cb = new CharBuffer();
-    
+
     cb.append('(');
     cb.append(_expr);
 
@@ -151,7 +159,7 @@ class InExpr extends AbstractAmberExpr {
 
     for (int i = 0; i < _values.size(); i++) {
       if (i != 0)
-	cb.append(',');
+        cb.append(',');
 
       cb.append(_values.get(i));
     }

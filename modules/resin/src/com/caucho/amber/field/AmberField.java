@@ -130,7 +130,7 @@ public interface AmberField {
    * Returns true for an updateable field.
    */
   public boolean isUpdateable();
-  
+
   /**
    * Links to the target.
    */
@@ -177,12 +177,12 @@ public interface AmberField {
    * Generates the where clause.
    */
   public void generateUpdate(CharBuffer sql);
-  
+
   /**
    * Generates loading cache
    */
   public void generateUpdate(JavaWriter out, String mask, String pstmt,
-			     String index)
+                             String index)
     throws IOException;
 
   /**
@@ -194,7 +194,14 @@ public interface AmberField {
    * Generates loading code
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int loadGroupIndex)
+                          String indexVar, int loadGroupIndex)
+    throws IOException;
+
+  /**
+   * Generates loading code
+   */
+  public int generateLoadEager(JavaWriter out, String rs,
+                               String indexVar, int index)
     throws IOException;
 
   /**
@@ -281,37 +288,37 @@ public interface AmberField {
    * Generates the set clause for the insert clause.
    */
   public void generateInsertSet(JavaWriter out, String pstmt,
-				String index, String obj)
+                                String index, String obj)
     throws IOException;
 
   /**
    * Generates the set clause for the insert clause.
    */
   public void generateUpdateSet(JavaWriter out, String pstmt,
-				String index, String obj)
+                                String index, String obj)
     throws IOException;
 
   /**
    * Updates the cached copy.
    */
   public void generateCopyUpdateObject(JavaWriter out,
-				       String dst, String src,
-				       int updateIndex)
+                                       String dst, String src,
+                                       int updateIndex)
     throws IOException;
 
   /**
    * Updates the cached copy.
    */
   public void generateCopyLoadObject(JavaWriter out,
-				       String dst, String src,
-				       int loadIndex)
+                                     String dst, String src,
+                                     int loadIndex)
     throws IOException;
 
   /**
    * Generates the set clause.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String obj)
+                          String index, String obj)
     throws IOException;
 
   /**
@@ -341,7 +348,7 @@ public interface AmberField {
    */
   public void generateExpire(JavaWriter out)
     throws IOException;
-  
+
   /**
    * Generates code for foreign entity create/delete
    */

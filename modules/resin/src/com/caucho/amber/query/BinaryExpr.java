@@ -36,7 +36,7 @@ import com.caucho.util.CharBuffer;
  */
 class BinaryExpr extends AbstractAmberExpr {
   private static final L10N L = new L10N(BinaryExpr.class);
-  
+
   private AmberExpr _left;
   private AmberExpr _right;
   private int _token;
@@ -113,19 +113,19 @@ class BinaryExpr extends AbstractAmberExpr {
   {
     _left = _left.replaceJoin(join);
     _right = _right.replaceJoin(join);
-    
+
     return this;
   }
-  
+
   /**
    * Generates the where expression.
    */
   public void generateWhere(CharBuffer cb)
   {
     cb.append('(');
-    
+
     _left.generateWhere(cb);
-    
+
     switch (_token) {
     case QueryParser.EQ:
       cb.append(" = ");
@@ -165,8 +165,16 @@ class BinaryExpr extends AbstractAmberExpr {
     }
 
     _right.generateWhere(cb);
-    
+
     cb.append(')');
+  }
+
+  /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb)
+  {
+    generateWhere(cb);
   }
 
   public String toString()
@@ -208,7 +216,7 @@ class BinaryExpr extends AbstractAmberExpr {
       str += " % ";
       break;
     }
-    
+
     return str + _right + ")";
   }
 }

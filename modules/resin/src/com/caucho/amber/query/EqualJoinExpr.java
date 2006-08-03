@@ -39,7 +39,7 @@ import com.caucho.amber.table.Column;
  */
 public class EqualJoinExpr extends JoinExpr {
   private ArrayList<Column> _keyColumns;
-  
+
   private FromItem _fromItemA;
   private FromItem _fromItemB;
 
@@ -47,18 +47,18 @@ public class EqualJoinExpr extends JoinExpr {
    * Creates the expr.
    */
   EqualJoinExpr(ArrayList<Column> keyColumns,
-		FromItem fromItemA,
-		FromItem fromItemB)
+                FromItem fromItemA,
+                FromItem fromItemB)
   {
     _keyColumns = keyColumns;
-    
+
     _fromItemA = fromItemA;
     _fromItemB = fromItemB;
 
     if (fromItemA == null || fromItemB == null)
       throw new NullPointerException();
   }
-  
+
   /**
    * Returns true for a boolean expression.
    */
@@ -81,13 +81,13 @@ public class EqualJoinExpr extends JoinExpr {
   public boolean bindToFromItem()
   {
     if (_fromItemA.getJoinExpr() == null ||
-	_fromItemA.getJoinExpr().equals(this)) {
+        _fromItemA.getJoinExpr().equals(this)) {
       _fromItemA.setJoinExpr(this);
       return true;
     }
     else if (_fromItemB.getJoinExpr() == null) {
       _fromItemB.setJoinExpr(this);
-    
+
       return true;
     }
     else
@@ -124,7 +124,7 @@ public class EqualJoinExpr extends JoinExpr {
   {
     return id;
   }
-  
+
   /**
    * Generates the where expression.
    */
@@ -136,7 +136,7 @@ public class EqualJoinExpr extends JoinExpr {
       Column column = _keyColumns.get(i);
 
       if (i != 0)
-	cb.append(" AND ");
+        cb.append(" AND ");
 
       cb.append(_fromItemA.getName());
       cb.append('.');
@@ -153,6 +153,14 @@ public class EqualJoinExpr extends JoinExpr {
   }
 
   /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb)
+  {
+    generateWhere(cb);
+  }
+
+  /**
    * Test for equality.
    */
   public boolean equals(Object o)
@@ -163,14 +171,14 @@ public class EqualJoinExpr extends JoinExpr {
     EqualJoinExpr equalExpr = (EqualJoinExpr) o;
 
     return (_keyColumns.equals(equalExpr._keyColumns) &&
-	    _fromItemA.equals(equalExpr._fromItemA) &&
-	    _fromItemB.equals(equalExpr._fromItemB));
+            _fromItemA.equals(equalExpr._fromItemA) &&
+            _fromItemB.equals(equalExpr._fromItemB));
   }
-  
+
 
   public String toString()
   {
     return ("EqualJoinExpr[" + _keyColumns + "," +
-	    _fromItemA + "," + _fromItemB + "]");
+            _fromItemA + "," + _fromItemB + "]");
   }
 }

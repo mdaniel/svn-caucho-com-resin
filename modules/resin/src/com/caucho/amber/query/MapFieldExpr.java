@@ -51,8 +51,8 @@ public class MapFieldExpr extends AbstractAmberExpr {
    * Creates a new unbound id expression.
    */
   public MapFieldExpr(PathExpr parent,
-		      MapElementField field,
-		      AmberExpr index)
+                      MapElementField field,
+                      AmberExpr index)
   {
     _parent = parent;
     _field = field;
@@ -71,7 +71,7 @@ public class MapFieldExpr extends AbstractAmberExpr {
     // _childFromItem.setJoinExpr(new MapLinkExpr());
 
     _index = _index.bindSelect(parser);
-    
+
     return this;
   }
 
@@ -81,8 +81,8 @@ public class MapFieldExpr extends AbstractAmberExpr {
   public boolean usesFrom(FromItem from, int type, boolean isNot)
   {
     return (_childFromItem == from ||
-	    _parent.usesFrom(from, type) ||
-	    _index.usesFrom(from, type));
+            _parent.usesFrom(from, type) ||
+            _index.usesFrom(from, type));
   }
 
   /**
@@ -100,7 +100,7 @@ public class MapFieldExpr extends AbstractAmberExpr {
   {
     return (EntityType) getType();
   }
-  
+
   /**
    * Generates the select expression.
    */
@@ -109,15 +109,15 @@ public class MapFieldExpr extends AbstractAmberExpr {
     String table = _childFromItem.getName();
 
     /*
-    if (_fromItem != null)
+      if (_fromItem != null)
       table = _fromItem.getName();
-    else
+      else
       table = _parent.getTable();
     */
-    
+
     cb.append(_field.generateTargetSelect(table));
   }
-  
+
   /**
    * Generates the where expression.
    */
@@ -125,12 +125,20 @@ public class MapFieldExpr extends AbstractAmberExpr {
   {
     cb.append(_field.generateTargetSelect(_childFromItem.getName()));
     /*
-    cb.append(_childFromItem.getName());
-    ArrayList<Column> column = _field.getColumns();
-    
-    cb.append('.');
-    cb.append(column.get(0).getName());
+      cb.append(_childFromItem.getName());
+      ArrayList<Column> column = _field.getColumns();
+
+      cb.append('.');
+      cb.append(column.get(0).getName());
     */
+  }
+
+  /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb)
+  {
+    generateWhere(cb);
   }
 
   public String toString()

@@ -75,17 +75,22 @@ public interface AmberExpr {
    * Returns true if the expression uses the from item.
    */
   AmberExpr replaceJoin(JoinExpr join);
-  
+
   /**
    * Generates the where expression.
    */
   void generateWhere(CharBuffer cb);
-  
+
+  /**
+   * Generates the having expression.
+   */
+  void generateHaving(CharBuffer cb);
+
   /**
    * Generates the where expression.
    */
   void generateJoin(CharBuffer cb);
-  
+
   /**
    * Generates the select expression.
    */
@@ -107,13 +112,13 @@ public interface AmberExpr {
    * Returns the cache object for the expr.
    */
   public Object getCacheObject(AmberConnection aConn,
-			       ResultSet rs, int index)
+                               ResultSet rs, int index)
     throws SQLException;
 
   /**
    * Returns the object for the expr.
    */
   public EntityItem findItem(AmberConnection aConn,
-			     ResultSet rs, int index)
+                             ResultSet rs, int index)
     throws SQLException;
 }

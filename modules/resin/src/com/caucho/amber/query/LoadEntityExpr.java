@@ -60,7 +60,7 @@ public class LoadEntityExpr extends AbstractAmberExpr {
   {
     _expr = expr;
   }
-  
+
   /**
    * Returns the type.
    */
@@ -68,7 +68,7 @@ public class LoadEntityExpr extends AbstractAmberExpr {
   {
     return getEntityType();
   }
-  
+
   /**
    * Returns the entity type.
    */
@@ -76,7 +76,7 @@ public class LoadEntityExpr extends AbstractAmberExpr {
   {
     return (EntityType) _expr.getTargetType();
   }
-  
+
   /**
    * Returns the table.
    */
@@ -99,15 +99,15 @@ public class LoadEntityExpr extends AbstractAmberExpr {
 
     if (type.getSecondaryTables().size() > 0) {
       for (AmberField field : type.getFields()) {
-	Table subTable = field.getTable();
+        Table subTable = field.getTable();
 
-	if (subTable != null && subTable != type.getTable()) {
-	  LinkColumns link = subTable.getDependentIdLink();
+        if (subTable != null && subTable != type.getTable()) {
+          LinkColumns link = subTable.getDependentIdLink();
 
-	  FromItem item = parser.createDependentFromItem(_fromItem, link);
+          FromItem item = parser.createDependentFromItem(_fromItem, link);
 
-	  _subItems.add(item);
-	}
+          _subItems.add(item);
+        }
       }
     }
 
@@ -134,12 +134,12 @@ public class LoadEntityExpr extends AbstractAmberExpr {
       FromItem subItem = _subItems.get(i);
 
       if (from == subItem)
-	return true;
+        return true;
     }
-    
+
     return _expr.usesFrom(from, type, isNot);
   }
-  
+
   /**
    * Returns the from item
    */
@@ -147,7 +147,7 @@ public class LoadEntityExpr extends AbstractAmberExpr {
   {
     return _expr.getChildFromItem();
   }
-  
+
   /**
    * Generates the where expression.
    */
@@ -156,9 +156,9 @@ public class LoadEntityExpr extends AbstractAmberExpr {
     cb.append(getEntityType().getId().generateSelect(getTable()));
 
     EntityType type = getEntityType();
-    
+
     String valueSelect = type.generateLoadSelect(_fromItem.getTable(),
-						 _fromItem.getName());
+                                                 _fromItem.getName());
 
     if (valueSelect != null && ! "".equals(valueSelect)) {
       cb.append(", ");
@@ -167,22 +167,30 @@ public class LoadEntityExpr extends AbstractAmberExpr {
 
     for (int i = 0; i < _subItems.size(); i++) {
       FromItem item = _subItems.get(i);
-      
+
       valueSelect = type.generateLoadSelect(item.getTable(), item.getName());
 
       if (! valueSelect.equals("")) {
-	cb.append(", ");
-	cb.append(valueSelect);
+        cb.append(", ");
+        cb.append(valueSelect);
       }
     }
   }
-  
+
   /**
    * Generates the where expression.
    */
   public void generateWhere(CharBuffer cb, String fieldName)
   {
     throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb, String fieldName)
+  {
+    generateWhere(cb, fieldName);
   }
 
   /**
@@ -198,7 +206,7 @@ public class LoadEntityExpr extends AbstractAmberExpr {
    * Returns the object for the expr.
    */
   public Object getCacheObject(AmberConnection aConn,
-			       ResultSet rs, int index)
+                               ResultSet rs, int index)
     throws SQLException
   {
     return findItem(aConn, rs, index);
@@ -211,12 +219,12 @@ public class LoadEntityExpr extends AbstractAmberExpr {
     throws SQLException
   {
     EntityType entityType = getEntityType();
-    
+
     EntityItem item = entityType.getHome().findItem(aConn, rs, index);
 
     if (item == null)
       return null;
-    
+
     int keyLength = entityType.getId().getKeyCount();
 
     item.getEntity().__caucho_load(aConn, rs, index + keyLength);

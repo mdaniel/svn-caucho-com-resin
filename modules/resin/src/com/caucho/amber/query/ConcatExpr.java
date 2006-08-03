@@ -64,7 +64,7 @@ class ConcatExpr extends AbstractAmberExpr {
 
     return this;
   }
-  
+
   /**
    * Generates the where expression.
    */
@@ -75,6 +75,14 @@ class ConcatExpr extends AbstractAmberExpr {
     cb.append(" || ");
     _right.generateWhere(cb);
     cb.append(')');
+  }
+
+  /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb)
+  {
+    generateWhere(cb);
   }
 
   public String toString()

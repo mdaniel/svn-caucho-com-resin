@@ -72,6 +72,14 @@ class LiteralExpr extends AbstractAmberExpr {
     cb.append(_value);
   }
 
+  /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb)
+  {
+    generateWhere(cb);
+  }
+
   public String toString()
   {
     return _value;

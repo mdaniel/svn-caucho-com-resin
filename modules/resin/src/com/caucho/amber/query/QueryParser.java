@@ -118,6 +118,8 @@ public class QueryParser {
 
   final static int NOT_NULL = THIS + 1;
 
+  final static int HAVING = NOT_NULL + 1;
+
   private static IntMap _reserved;
 
   private AmberPersistenceUnit _amberPersistenceUnit;
@@ -341,6 +343,42 @@ public class QueryParser {
       query.setWhere(parseExpr().createBoolean().bindSelect(this));
     }
 
+    boolean hasGroupBy = false;
+
+    token = peekToken();
+    if (token == GROUP) {
+      scanToken();
+
+      if (peekToken() == BY) {
+        scanToken();
+        hasGroupBy = true;
+      }
+
+      ArrayList<AmberExpr> groupList = new ArrayList<AmberExpr>();
+
+      while (true) {
+        groupList.add(parseExpr());
+
+        if (peekToken() == ',')
+          scanToken();
+        else
+          break;
+      }
+
+      query.setGroupList(groupList);
+    }
+
+    token = peekToken();
+    if (token == HAVING) {
+
+      if (! hasGroupBy)
+        throw error(L.l("Use of HAVING without GROUP BY is not currently supported"));
+
+      scanToken();
+
+      query.setHaving(parseExpr().createBoolean().bindSelect(this));
+    }
+
     token = peekToken();
     if (token == ORDER) {
       scanToken();
@@ -375,27 +413,6 @@ public class QueryParser {
       }
 
       query.setOrderList(orderList, ascList);
-    }
-
-    token = peekToken();
-    if (token == GROUP) {
-      scanToken();
-
-      if (peekToken() == BY)
-        scanToken();
-
-      ArrayList<AmberExpr> groupList = new ArrayList<AmberExpr>();
-
-      while (true) {
-        groupList.add(parseExpr());
-
-        if (peekToken() == ',')
-          scanToken();
-        else
-          break;
-      }
-
-      query.setGroupList(groupList);
     }
 
     token = peekToken();
@@ -1579,6 +1596,7 @@ public class QueryParser {
     _reserved.put("order", ORDER);
     _reserved.put("group", GROUP);
     _reserved.put("by", BY);
+    _reserved.put("having", HAVING);
     _reserved.put("asc", ASC);
     _reserved.put("desc", DESC);
     _reserved.put("limit", LIMIT);

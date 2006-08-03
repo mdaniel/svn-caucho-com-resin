@@ -38,7 +38,7 @@ import com.caucho.amber.table.ForeignColumn;
  */
 public class OneToManyJoinExpr extends JoinExpr {
   private LinkColumns _linkColumns;
-  
+
   private FromItem _sourceFromItem;
   private FromItem _targetFromItem;
 
@@ -46,18 +46,18 @@ public class OneToManyJoinExpr extends JoinExpr {
    * Creates the expr.
    */
   public OneToManyJoinExpr(LinkColumns linkColumns,
-			   FromItem source,
-			   FromItem target)
+                           FromItem source,
+                           FromItem target)
   {
     _linkColumns = linkColumns;
-    
+
     _sourceFromItem = source;
     _targetFromItem = target;
 
     if (source == null || target == null)
       throw new NullPointerException();
   }
-  
+
   /**
    * Returns true for a boolean expression.
    */
@@ -80,19 +80,19 @@ public class OneToManyJoinExpr extends JoinExpr {
   public boolean bindToFromItem()
   {
     if (_sourceFromItem.getJoinExpr() == null ||
-	_sourceFromItem.getJoinExpr().equals(this)) {
+        _sourceFromItem.getJoinExpr().equals(this)) {
       _sourceFromItem.setJoinExpr(this);
       return true;
     }
 
     ManyToOneJoinExpr manyToOne = new ManyToOneJoinExpr(_linkColumns,
-							_sourceFromItem,
-							_targetFromItem);
-    
+                                                        _sourceFromItem,
+                                                        _targetFromItem);
+
     if (_targetFromItem.getJoinExpr() == null ||
-	_targetFromItem.getJoinExpr().equals(manyToOne)) {
+        _targetFromItem.getJoinExpr().equals(manyToOne)) {
       _targetFromItem.setJoinExpr(manyToOne);
-    
+
       return true;
     }
     else
@@ -153,36 +153,44 @@ public class OneToManyJoinExpr extends JoinExpr {
      * The code is partially correct, but the is null test isn't
      * needed in many cases, so should probably test the actual
      * expression
-    AndExpr and = new AndExpr();
-    IdExpr id = new IdExpr(_sourceFromItem);
+     AndExpr and = new AndExpr();
+     IdExpr id = new IdExpr(_sourceFromItem);
 
-    for (ForeignColumn column : _linkColumns.getColumns()) {
-      and.add(new UnaryExpr(QueryParser.NOT_NULL,
-			    new ColumnExpr(id, column)));
-    }
+     for (ForeignColumn column : _linkColumns.getColumns()) {
+     and.add(new UnaryExpr(QueryParser.NOT_NULL,
+     new ColumnExpr(id, column)));
+     }
 
-    return and.getSingle();
+     return and.getSingle();
     */
 
     return null;
   }
-  
+
   /**
    * Generates the where expression.
    */
   public void generateWhere(CharBuffer cb)
   {
     cb.append(_linkColumns.generateWhere(_sourceFromItem.getName(),
-					 _targetFromItem.getName()));
+                                         _targetFromItem.getName()));
   }
-  
+
+  /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb)
+  {
+    generateWhere(cb);
+  }
+
   /**
    * Generates the where expression.
    */
   public void generateJoin(CharBuffer cb)
   {
     cb.append(_linkColumns.generateJoin(_sourceFromItem.getName(),
-					_targetFromItem.getName()));
+                                        _targetFromItem.getName()));
   }
 
   /**
@@ -196,14 +204,14 @@ public class OneToManyJoinExpr extends JoinExpr {
     OneToManyJoinExpr joinExpr = (OneToManyJoinExpr) o;
 
     return (_linkColumns.equals(joinExpr._linkColumns) &&
-	    _targetFromItem.equals(joinExpr._targetFromItem) &&
-	    _sourceFromItem.equals(joinExpr._sourceFromItem));
+            _targetFromItem.equals(joinExpr._targetFromItem) &&
+            _sourceFromItem.equals(joinExpr._sourceFromItem));
   }
-  
+
 
   public String toString()
   {
     return ("OneToManyJoinExpr[" + _linkColumns + "," +
-	    _targetFromItem + "," + _sourceFromItem + "]");
+            _targetFromItem + "," + _sourceFromItem + "]");
   }
 }

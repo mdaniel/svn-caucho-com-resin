@@ -42,7 +42,7 @@ public interface EntityPathExpr extends PathExpr {
    * Returns the entity type.
    */
   public EntityType getTargetType();
-  
+
   /**
    * Returns the table.
    */
@@ -52,14 +52,19 @@ public interface EntityPathExpr extends PathExpr {
    * Binds the expression as a select item.
    */
   public FromItem bindSubPath(QueryParser parser);
-  
+
   /**
    * Returns the from item
    */
   public FromItem getChildFromItem();
-  
+
   /**
    * Generates the where expression for a subfield
    */
   public void generateWhere(CharBuffer cb, IdField field);
+
+  /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb, IdField field);
 }

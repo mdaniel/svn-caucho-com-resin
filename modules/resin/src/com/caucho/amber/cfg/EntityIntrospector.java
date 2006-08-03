@@ -1339,6 +1339,14 @@ public class EntityIntrospector {
       manyToOneAnn = field.getAnnotation(OneToOne.class);
     }
 
+    if (manyToOneAnn.get("fetch") == FetchType.EAGER) {
+      if (sourceType.getBeanClass().getName().equals(fieldType.getName())) {
+        throw error(field, L.l("'{0}': '{1}' is an illegal recursive type for @OneToOne/@ManyToOne with EAGER fetching. You should specify FetchType.LAZY for this relationship.",
+                               field.getName(),
+                               fieldType.getName()));
+      }
+    }
+
     JAnnotation joinColumns = field.getAnnotation(JoinColumns.class);
     Object []joinColumnsAnn = null;
 
@@ -2042,6 +2050,14 @@ public class EntityIntrospector {
     {
       JAnnotation oneToOneAnn = _field.getAnnotation(OneToOne.class);
 
+      if (oneToOneAnn.get("fetch") == FetchType.EAGER) {
+        if (_entityType.getBeanClass().getName().equals(_fieldType.getName())) {
+          throw error(_field, L.l("'{0}': '{1}' is an illegal recursive type for @OneToOne with EAGER fetching. You should specify FetchType.LAZY for this relationship.",
+                                  _field.getName(),
+                                  _fieldType.getName()));
+        }
+      }
+
       AmberPersistenceUnit persistenceUnit = _entityType.getPersistenceUnit();
 
       JClass targetEntity = oneToOneAnn.getClass("targetEntity");
@@ -2104,6 +2120,8 @@ public class EntityIntrospector {
 
         oneToOne = new DependentEntityOneToOneField(_entityType, _fieldName);
         oneToOne.setTargetField(sourceField);
+        sourceField.setTargetField(oneToOne);
+        oneToOne.setLazy(oneToOneAnn.get("fetch") == FetchType.LAZY);
 
         _entityType.addField(oneToOne);
       }

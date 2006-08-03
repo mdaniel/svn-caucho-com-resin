@@ -74,6 +74,12 @@ public class LoadGroupGenerator extends ClassComponent {
     out.println();
     out.println("protected void __caucho_load_" + _index +  "(com.caucho.amber.manager.AmberConnection aConn)");
     out.println("{");
+    out.println("  __caucho_load_" + _index + "(aConn, null);");
+    out.println("}");
+
+    out.println();
+    out.println("protected void __caucho_load_" + _index +  "(com.caucho.amber.manager.AmberConnection aConn, java.util.Map preloadedProperties)");
+    out.println("{");
     out.pushDepth();
 
     int group = _index / 64;
@@ -204,6 +210,7 @@ public class LoadGroupGenerator extends ClassComponent {
     out.pushDepth();
     _entityType.generateLoad(out, "rs", "", 1, _index);
     out.println("__caucho_loadMask_" + group + " |= " + mask + "L;");
+    _entityType.generateLoadEager(out, "rs", "", 1, _index);
 
     ArrayList<JMethod> postLoadCallbacks = _entityType.getPostLoadCallbacks();
     if (postLoadCallbacks.size() > 0 && _index == 0) {
