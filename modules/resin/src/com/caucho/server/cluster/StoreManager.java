@@ -73,8 +73,8 @@ abstract public class StoreManager
   private Cluster _cluster;
   private String _serverId;
   
-  protected ClusterServer _selfServer;
-  private int _selfServerIndex;
+  protected int _selfIndex;
+  private ServerConnector []_serverList;
   
   private Alarm _alarm;
   
@@ -274,16 +274,23 @@ abstract public class StoreManager
     
     if (_cluster != null) {
       _serverId = _cluster.getServerId();
-      _selfServer = _cluster.getSelfServer();
+      ClusterServer selfServer = _cluster.getSelfServer();
 
-      if (_selfServer != null)
-	_selfServerIndex = _selfServer.getIndex();
+      if (selfServer != null)
+	_selfIndex = selfServer.getIndex();
       else if (_cluster.getServerList().length > 1) {
 	// XXX: error?
 	log.warning(L.l("cluster-store for '{0}' needs an <srun> configuration for it.",
 			_serverId));
       }
+
+      ClusterServer []serverList = _cluster.getServerList();
       
+      _serverList = new ServerConnector[serverList.length];
+
+      for (int i = 0; i < serverList.length; i++) {
+	_serverList[i] = serverList[i].getServerConnector();
+      }
     }
     
     Environment.addEnvironmentListener(this);
@@ -301,16 +308,16 @@ abstract public class StoreManager
       return false;
     
     // notify the siblings that we're awake
-    if (_cluster != null) {
-      ClusterServer []serverList = _cluster.getServerList();
+    if (_serverList != null) {
+      ServerConnector []serverList = _serverList;
 
       for (int i = 0; i < serverList.length; i++) {
-	ClusterServer server = serverList[i];
+	ServerConnector server = serverList[i];
 
-	if (server == null || server == _selfServer)
+	if (server == null)
 	  continue;
 
-	ClusterClient client = server.getServerConnector().getClient();
+	ClusterClient client = server.getClient();
 
 	try {
 	  if (client != null) {
@@ -607,35 +614,30 @@ abstract public class StoreManager
   /**
    * Returns the self servers.
    */
-  protected ClusterServer getSelfServer()
+  protected int getSelfIndex()
   {
-    return _selfServer;
+    return _selfIndex;
   }
 
   /**
    * Returns the list of cluster servers.
    */
-  protected ClusterServer []getServerList()
+  protected ServerConnector []getServerList()
   {
-    Cluster cluster = _cluster;
-    
-    if (cluster != null)
-      return cluster.getServerList();
-    else
-      return new ClusterServer[0];
+    return _serverList;
   }
 
   /**
    * Returns the cluster server which owns the object
    */
-  protected ClusterServer getOwningServer(String objectId)
+  protected ServerConnector getOwningServer(String objectId)
   {
     if (_cluster == null)
       return null;
     
     char ch = objectId.charAt(0);
     
-    ClusterServer []serverList = _cluster.getServerList();
+    ServerConnector []serverList = _serverList;
 
     if (serverList.length > 0) {
       int srunIndex = decode(ch) % serverList.length;

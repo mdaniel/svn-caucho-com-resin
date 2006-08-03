@@ -280,6 +280,40 @@ public class Base64 {
     }
   }
 
+  public static String oldDecode(String value)
+  {
+    CharBuffer cb = new CharBuffer();
+
+    int length = value.length();
+    for (int i = 0; i + 3 < length; i += 4) {
+      int ch0 = value.charAt(i + 0) & 0xff;
+
+      // skip whitespace
+      if (ch0 == ' ' || ch0 == '\n' || ch0 == '\r') {
+        i -= 3;
+        continue;
+      }
+      
+      int ch1 = value.charAt(i + 1) & 0xff;
+      int ch2 = value.charAt(i + 2) & 0xff;
+      int ch3 = value.charAt(i + 3) & 0xff;
+
+      int chunk = ((decode[ch0] << 18) +
+		   (decode[ch1] << 12) +
+		   (decode[ch2] << 6) +
+		   (decode[ch3]));
+
+      cb.append((char) ((chunk >> 16) & 0xff));
+
+      if (ch2 != '=')
+	cb.append((char) ((chunk >> 8) & 0xff));
+      if (ch3 != '=')
+	cb.append((char) ((chunk & 0xff)));
+    }
+
+    return cb.toString();
+  }
+
   private static int readNonWhitespace(Reader r)
     throws IOException
   {
