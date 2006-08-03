@@ -38,6 +38,9 @@ import com.caucho.util.LineCompileException;
 public class LineConfigException extends ConfigException
   implements LineCompileException
 {
+  private String _filename;
+  private int _line = -1;
+
   /**
    * Create a null exception
    */
@@ -69,8 +72,29 @@ public class LineConfigException extends ConfigException
     super(cause);
   }
 
+  public LineConfigException(String filename, int line, String message)
+  {
+    super(filename + ":" + line + ": " + message);
+
+    _filename = filename;
+    _line = line;
+  }
+
+  public LineConfigException(String filename, int line, Throwable cause)
+  {
+    super(filename + ":" + line + ": " + cause.getMessage(), cause);
+
+    _filename = filename;
+    _line = line;
+  }
+
+  public String getFilename()
+  {
+    return _filename;
+  }
+
   public int getLineNumber()
   {
-    return -1;
+    return _line;
   }
 }

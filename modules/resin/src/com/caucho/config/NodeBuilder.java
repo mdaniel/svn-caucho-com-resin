@@ -677,7 +677,7 @@ public class NodeBuilder {
     }
 
     if (filename != null)
-      return new LineConfigException(filename + ":" + line + ": " + msg);
+      return new LineConfigException(filename, line, msg);
     else
       return new LineConfigException(msg);
   }
@@ -708,19 +708,15 @@ public class NodeBuilder {
     else if (e instanceof LineConfigRuntimeException)
       throw (LineConfigRuntimeException) e;
     else if (e instanceof ConfigException &&
-	     e.getMessage() != null &&
-	     filename != null) {
-      String msg = filename + ":" + line + ": " + e.getMessage();
-
-      return new LineConfigException(msg, e);
+             e.getMessage() != null &&
+             filename != null) {
+      return new LineConfigException(filename, line, e);
     }
     else if (e instanceof LineCompileException) {
       return new LineConfigException(e.getMessage(), e);
     }
     else if (e instanceof CompileException && e.getMessage() != null) {
-      String msg = filename + ":" + line + ": " + e.getMessage();
-
-      return new LineConfigException(msg, e);
+      return new LineConfigException(filename, line, e);
     }
     else {
       log.log(Level.CONFIG, e.toString(), e);
