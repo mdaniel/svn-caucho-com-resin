@@ -335,20 +335,25 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param path the path to change to
    */
-  public static Value dir(Env env, Path path)
+  @ReturnNullAsFalse
+  public static Directory dir(Env env, Path path)
   {
     try {
       if (! path.isDirectory()) {
-	env.warning(L.l("{0} is not a directory", path.getFullPath()));
+        env.warning(L.l("{0} is not a directory", path.getFullPath()));
 
-	return BooleanValue.FALSE;
+        return null;
       }
 
+      return new Directory(env, path);
+
+/*
       DirectoryValue dir = new DirectoryValue(path);
 
       env.addClose(dir);
 
       return dir;
+*/
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
