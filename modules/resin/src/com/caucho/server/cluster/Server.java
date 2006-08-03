@@ -835,6 +835,8 @@ public class Server extends ProtocolDispatchServer
       ArrayList<Port> ports = _clusterServer.getPorts();
       for (int i = 0; i < ports.size(); i++) {
 	Port port = ports.get(i);
+
+	port.setServer(this);
 	
 	port.bind();
       }
@@ -1165,7 +1167,8 @@ public class Server extends ProtocolDispatchServer
 
   public String toString()
   {
-    return "Server[" + getServerId() + "]";
+    return ("Server[id=" + getServerId() +
+	    ",cluster=" + _clusterServer.getCluster().getId() + "]");
   }
 
   public class SelectManagerConfig {

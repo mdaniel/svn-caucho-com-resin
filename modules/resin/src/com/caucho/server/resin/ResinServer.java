@@ -139,12 +139,15 @@ public class ResinServer
   {
     _resinServer = this;
 
+    Environment.init();
+
     if (loader == null)
       loader = ClassLoader.getSystemClassLoader();
 
-    _classLoader = loader;
-
-    Environment.init();
+    if (loader instanceof EnvironmentClassLoader)
+      _classLoader = (EnvironmentClassLoader) loader;
+    else
+      _classLoader = new EnvironmentClassLoader();
 
     _startTime = Alarm.getCurrentTime();
 

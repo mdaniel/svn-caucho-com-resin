@@ -30,7 +30,7 @@
 package com.caucho.server.cluster;
 
 import com.caucho.config.*;
-import com.caucho.config.types.Period;
+import com.caucho.config.types.*;
 import com.caucho.jmx.Jmx;
 import com.caucho.loader.*;
 import com.caucho.management.server.ClusterMXBean;
@@ -46,7 +46,7 @@ import java.util.logging.Logger;
 /**
  * Defines a set of clustered servers.
  */
-public class Cluster implements EnvironmentListener, EnvironmentBean {
+public class Cluster implements EnvironmentListener {
   private static final L10N L = new L10N(ClusterGroup.class);
   private static final Logger log = Logger.getLogger(Cluster.class.getName());
 
@@ -66,6 +66,9 @@ public class Cluster implements EnvironmentListener, EnvironmentBean {
 
   private ClusterAdmin _admin;
   private ObjectName _objectName;
+
+  private ArrayList<InitProgram> _serverDefaultList
+    = new ArrayList<InitProgram>();
 
   private ArrayList<ClusterServer> _serverList
     = new ArrayList<ClusterServer>();
@@ -178,6 +181,31 @@ public class Cluster implements EnvironmentListener, EnvironmentBean {
   /**
    * Adds a new server to the cluster.
    */
+  public void addServerDefault(InitProgram program)
+    throws Throwable
+  {
+    _serverDefaultList.add(program);
+  }
+
+  /**
+   * Adds a new server to the cluster.
+   */
+  public ClusterServer createServer()
+    throws Throwable
+  {
+    ClusterServer server = new ClusterServer(this);
+
+    server.setIndex(_serverList.size());
+    
+    for (int i = 0; i < _serverDefaultList.size(); i++)
+      _serverDefaultList.get(i).configure(server);
+
+    return server;
+  }
+
+  /**
+   * Adds a new server to the cluster.
+   */
   public void addServer(ClusterServer server)
     throws ConfigException
   {
@@ -186,7 +214,7 @@ public class Cluster implements EnvironmentListener, EnvironmentBean {
     if (oldServer != null)
       log.warning(L.l("duplicate <srun> with server-id='{0}'",
                       server.getId()));
-
+    
     _serverList.add(server);
     _serverArray = new ClusterServer[_serverList.size()];
     _serverList.toArray(_serverArray);

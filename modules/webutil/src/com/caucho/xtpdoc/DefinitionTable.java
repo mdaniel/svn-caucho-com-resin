@@ -35,12 +35,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class DefinitionTable extends Table {
-
   public void writeHtml(PrintWriter writer)
     throws IOException
   {
     writer.print("<table width=\"90%\" cellpadding=\"2\" ");
     writer.print("cellspacing=\"0\" class=\"deftable\" border=\"\">");
+
+    if (_title != null) {
+      writer.print("<caption>");
+      writeHtmlText(writer, _title);
+      writer.print("</caption>");
+    }
 
     for (TableRow row : _rows)
       row.writeHtml(writer);

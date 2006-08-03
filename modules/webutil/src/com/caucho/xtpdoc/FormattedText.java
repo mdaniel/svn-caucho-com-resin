@@ -34,6 +34,8 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
+import com.caucho.config.types.*;
+
 public class FormattedText implements ContentItem, ObjectWithParent {
   private Object _parent;
   protected ArrayList<ContentItem> _contentItems = new ArrayList<ContentItem>();

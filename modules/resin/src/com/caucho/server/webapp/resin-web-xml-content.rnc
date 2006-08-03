@@ -819,6 +819,8 @@ r_web-app-Basis =
 
   & rc_web-app*
 
+  & r_web-app-default*
+
   & r_web-app-deploy*
 
   & r_welcome-file-list?

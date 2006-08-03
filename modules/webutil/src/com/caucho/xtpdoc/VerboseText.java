@@ -34,7 +34,7 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
-public class VerboseText implements ContentItem {
+public class VerboseText extends Node implements ContentItem {
   private String _text;
 
   public VerboseText(String text)
@@ -42,10 +42,10 @@ public class VerboseText implements ContentItem {
     _text = text;
   }
 
-  public void writeHtml(PrintWriter writer)
+  public void writeHtml(PrintWriter out)
     throws IOException
   {
-    writer.print(_text);
+    writeHtmlText(out, _text);
   }
 
   public void writeLaTeX(PrintWriter writer)

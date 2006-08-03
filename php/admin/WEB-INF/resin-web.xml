@@ -17,7 +17,7 @@
   </authenticator>
 
   <login-config auth-method="DIGEST"
-        authenticator="${jndi:lookup('caucho/admin/auth')}"/>
+        authenticator="${jndi('caucho/admin/auth')}"/>
 
   <servlet servlet-name="resin-php"
            servlet-class="com.caucho.quercus.servlet.QuercusServlet">
@@ -55,7 +55,7 @@
            servlet-class='com.caucho.hessian.server.HessianServlet'>
     <init>
       <service resin:type="com.caucho.services.jmx.JMXService">
-        <mbean-server>${jndi:lookup("jmx/MBeanServer")}</mbean-server>
+        <mbean-server>${jndi("jmx/MBeanServer")}</mbean-server>
       </service>
      </init>
   </servlet>

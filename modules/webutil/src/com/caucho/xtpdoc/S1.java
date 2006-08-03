@@ -39,6 +39,23 @@ public class S1 extends Section {
   {
     _contentItems.add(section);
   }
+  
+  public void addDefun(Defun section)
+  {
+    _contentItems.add(section);
+  }
+ 
+  public void writeHtml(PrintWriter out)
+    throws IOException
+  {
+    if (_title != null) {
+      out.println("<table border='0' cellpadding='5' cellspacing='0' width='100%'>");
+      out.println("<tr class='section'><td><font size='+2'>" + _title + "</font></td></tr>");
+      out.println("</table>");
+    }
+    
+    super.writeHtml(out);
+  }
 
   public void writeLaTeX(PrintWriter writer)
     throws IOException

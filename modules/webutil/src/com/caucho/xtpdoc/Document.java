@@ -70,7 +70,8 @@ public class Document {
 
     _header.setContextPath(_contextPath);
     _header.setTopLevel(_topLevel);
-    _header.setDocumentName(_documentPath.getTail());
+    if (_documentPath != null)
+      _header.setDocumentName(_documentPath.getTail());
   }
 
   public void setBody(Body body)

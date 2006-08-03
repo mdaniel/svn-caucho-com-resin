@@ -73,6 +73,8 @@ public class ResinDocServlet extends HttpServlet {
     try {
       _config.configure(document, path);
 
+      System.out.println("DOC: " + document);
+
       document.writeHtml(out);
     } catch (IOException e) {
       throw e;

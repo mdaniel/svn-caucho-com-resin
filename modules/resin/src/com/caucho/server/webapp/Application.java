@@ -156,6 +156,10 @@ public class Application extends ServletContextImpl
   private ArrayList<DeployGenerator> _appGenerators
     = new ArrayList<DeployGenerator>();
 
+  // Any web-app-default for children
+  private ArrayList<WebAppConfig> _webAppDefault
+    = new ArrayList<WebAppConfig>();
+
   // The servlet manager
   private ServletManager _servletManager;
   // The servlet mapper

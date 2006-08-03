@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,58 +19,49 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Emil Ong
  */
 
-package com.caucho.config;
+package com.caucho.xtpdoc;
 
-import java.io.*;
+import java.io.PrintWriter;
+import java.io.IOException;
 
-import com.caucho.util.LineCompileException;
+import java.util.ArrayList;
 
-/**
- * Thrown by the various Builders
- */
-public class LineConfigException extends ConfigException
-  implements LineCompileException
-{
-  /**
-   * Create a null exception
-   */
-  public LineConfigException()
+public class Defun extends Section {
+  public void addS2(S2 section)
   {
+    _contentItems.add(section);
+  }
+ 
+  public void writeHtml(PrintWriter out)
+    throws IOException
+  {
+    out.print("<h4>" + _title + "</h4>");
+
+    out.print("<div class='desc'>");
+    
+    for (ContentItem item : _contentItems)
+      item.writeHtml(out);
+    
+    out.print("</div>");
   }
 
-  /**
-   * Creates an exception with a message
-   */
-  public LineConfigException(String msg)
+  public void writeLaTeX(PrintWriter writer)
+    throws IOException
   {
-    super(msg);
-  }
+    if (_topLevel)
+      writer.println("\\subsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+    else
+      writer.println("\\subsubsection{" + LaTeXUtil.escapeForLaTeX(_title) + 
+                                    "}");
 
-  /**
-   * Creates an exception with a message
-   */
-  public LineConfigException(String msg, Throwable cause)
-  {
-    super(msg, cause);
-  }
-
-  /**
-   * Creates an exception with a message
-   */
-  public LineConfigException(Throwable cause)
-  {
-    super(cause);
-  }
-
-  public int getLineNumber()
-  {
-    return -1;
+    super.writeLaTeX(writer);
   }
 }

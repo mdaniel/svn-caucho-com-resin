@@ -65,6 +65,7 @@ public class WebAppSingleDeployGenerator
   private Path _archivePath;
   private Path _rootDirectory;
 
+  private ArrayList<WebAppConfig> _defaultList = new ArrayList<WebAppConfig>();
   private WebAppConfig _config;
 
   private ClassLoader _parentLoader;

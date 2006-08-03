@@ -32,9 +32,7 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
-import java.util.ArrayList;
-
-public class Text implements ContentItem {
+public class Text extends Node implements ContentItem {
   private String _text;
 
   public Text(String text)
@@ -42,10 +40,10 @@ public class Text implements ContentItem {
     _text = text;
   }
 
-  public void writeHtml(PrintWriter writer)
+  public void writeHtml(PrintWriter out)
     throws IOException
   {
-    writer.print(_text);
+    writeHtmlText(out, _text);
   }
 
   public void writeLaTeX(PrintWriter writer)

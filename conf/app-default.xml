@@ -1,5 +1,6 @@
-<server xmlns="http://caucho.com/ns/resin"
-        xmlns:resin="http://caucho.com/ns/resin/core">
+<resin xmlns="http://caucho.com/ns/resin"
+       xmlns:resin="http://caucho.com/ns/resin/core">
+<cluster-default>
 
 <ear-default>
   <resin:import path="META-INF/application.xml"/>
@@ -39,7 +40,6 @@
 
   <servlet-mapping url-pattern="*.jsp" servlet-name="resin-jsp"/>
   <servlet-mapping url-pattern="*.jspx" servlet-name="resin-jspx"/>
-  <servlet-mapping url-pattern="*.xtp" servlet-name="resin-xtp"/>
 
   <servlet-mapping url-pattern="/" servlet-name="resin-file"/>
 
@@ -53,7 +53,6 @@
 
   <!-- Configures the special index files to check for directory URLs -->
   <welcome-file-list>
-    <welcome-file>index.xtp</welcome-file>
     <welcome-file>index.jsp</welcome-file>
     <welcome-file>index.php</welcome-file>
     <welcome-file>index.html</welcome-file>
@@ -221,5 +220,7 @@
   <resin:import path="WEB-INF/resin-web.xml" optional="true"/>
 </web-app-default>
 
-</server>
+</cluster-default>
+</resin>
+
 

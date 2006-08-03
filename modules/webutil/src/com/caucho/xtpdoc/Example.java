@@ -46,14 +46,18 @@ public class Example extends VerboseFormattedTextWithAnchors {
     _language = language;
   }
 
-  public void writeHtml(PrintWriter writer)
+  public void writeHtml(PrintWriter out)
     throws IOException
   {
-    writer.println("<div class='example'>");
+    if (_title != null) {
+      out.println("<center><b>" + _title + "</b></center>");
+    }
+    
+    out.println("<div class='example'><pre>");
 
-    super.writeHtml(writer);
+    super.writeHtml(out);
 
-    writer.println("</div>");
+    out.println("</pre></div>");
   }
 
   public void writeLaTeX(PrintWriter writer)

@@ -30,7 +30,7 @@
 set environment variable JAVA_HOME.</li>
 <li>tar -vzxf resin-3.0.0.tar.gz</li>
 <li>(Optional) Link /usr/local/resin to the resin-3.0.0 directory.</li>
-<li>./configure; make; make install
+<li>./configure; make; make install</li>
 <li>Execute resin-3.0.0/bin/httpd.sh</li>
 <li>Browse http://localhost:8080</li>
 </ol>
@@ -57,7 +57,7 @@ Starting Resin on Sat, 01 Mar 2003 19:11:52 -0500 (EST)
 <section title="./configure options">
 
 <deftable>
-<tr><td>--enable-64bit<td>Compiles the JNI using 64-bits
+<tr><td>--enable-64bit</td><td>Compiles the JNI using 64-bits</td></tr>
 </deftable>
 
 <p>The 64-bit JNI compilation must match the JDK you're using, i.e.
@@ -205,7 +205,7 @@ C:\> resin-3.0.x\bin\httpd -remove
 </example>
 
 <p>You will either need to reboot the machine or start the service
-from the Control&nbsp;Panel/Services panel to start the server.  On a
+from the Control&#160;Panel/Services panel to start the server.  On a
 machine reboot, Windows will automatically start the web server.</p>
 
 <p>You can also start and stop the service from the command-line:</p>

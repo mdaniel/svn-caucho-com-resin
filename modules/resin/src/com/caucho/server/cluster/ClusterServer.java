@@ -38,6 +38,7 @@ import java.io.IOException;
 import javax.management.ObjectName;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.types.*;
 
 import com.caucho.log.Log;
 
@@ -110,9 +111,31 @@ public class ClusterServer {
   /**
    * Returns the server index.
    */
+  void setIndex(int index)
+  {
+    _index = index;
+  }
+
+  /**
+   * Returns the server index.
+   */
   public int getIndex()
   {
     return _index;
+  }
+
+  /**
+   * Sets the keepalive max.
+   */
+  public void setKeepaliveMax(int max)
+  {
+  }
+
+  /**
+   * Sets the keepalive timeout.
+   */
+  public void setKeepaliveTimeout(Period timeout)
+  {
   }
 
   /**

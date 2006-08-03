@@ -32,27 +32,27 @@ functions.  The EL Environment is inherited, the objects available in
 </example>
 
 <deftable title="Environment variables">
-<tr><th>variable<th>attribute<th>meaning
-<tr><td>Var<td>&nbsp;<td>System properties, e.g. ${'${'}Var["resin.home"]}
+<tr><th>variable</th><th>attribute</th><th>meaning</th>
+<tr><td>Var<td>&#160;<td>System properties, e.g. ${'${'}Var["resin.home"]}
 
-<tr><td>server<td>&nbsp;<td>Server properties
-<tr><td>&nbsp;<td>id<td>The server id, as specified in -server id
-<tr><td>&nbsp;<td>rootDir<td>The server root directory
+<tr><td>server<td>&#160;<td>Server properties
+<tr><td>&#160;<td>id<td>The server id, as specified in -server id
+<tr><td>&#160;<td>rootDir<td>The server root directory
 
-<tr><td>host<td>&nbsp;<td>Virtual host properties
-<tr><td>&nbsp;<td>url<td>The host's canonical URL
-<tr><td>&nbsp;<td>name<td>The host name
-<tr><td>&nbsp;<td>rootDir<td>The host's root directory
-<tr><td>&nbsp;<td>warDir<td>The host's war directory
-<tr><td>&nbsp;<td>warExpandDir<td>The host's war expansion directory
-<tr><td>&nbsp;<td>regexp<td>Regular expression values for host regexp matches
+<tr><td>host<td>&#160;<td>Virtual host properties
+<tr><td>&#160;<td>url<td>The host's canonical URL
+<tr><td>&#160;<td>name<td>The host name
+<tr><td>&#160;<td>rootDir<td>The host's root directory
+<tr><td>&#160;<td>warDir<td>The host's war directory
+<tr><td>&#160;<td>warExpandDir<td>The host's war expansion directory
+<tr><td>&#160;<td>regexp<td>Regular expression values for host regexp matches
 
-<tr><td>app<td>&nbsp;<td>web-app properties
-<tr><td>&nbsp;<td>url<td>The web-app's canonical URL
-<tr><td>&nbsp;<td>name<td>The web-app name
-<tr><td>&nbsp;<td>contextPath<td>The web-app's context path
-<tr><td>&nbsp;<td>docDir<td>The web-app's document directory
-<tr><td>&nbsp;<td>regexp<td>Regular expression values for web-app url-regexp matches
+<tr><td>app<td>&#160;<td>web-app properties
+<tr><td>&#160;<td>url<td>The web-app's canonical URL
+<tr><td>&#160;<td>name<td>The web-app name
+<tr><td>&#160;<td>contextPath<td>The web-app's context path
+<tr><td>&#160;<td>docDir<td>The web-app's document directory
+<tr><td>&#160;<td>regexp<td>Regular expression values for web-app url-regexp matches
 </deftable>
 </section>
 

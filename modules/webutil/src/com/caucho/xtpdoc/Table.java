@@ -34,7 +34,7 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
-public class Table implements ContentItem {
+public class Table extends Node implements ContentItem {
   private static int _count = 0;
 
   private int _myCount = _count++;
