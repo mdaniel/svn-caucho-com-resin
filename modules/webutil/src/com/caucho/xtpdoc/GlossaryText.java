@@ -36,6 +36,9 @@ import java.net.*;
 import java.io.PrintWriter;
 import java.io.IOException;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class GlossaryText implements ContentItem {
   private static final Logger log
     = Logger.getLogger(GlossaryText.class.getName());
@@ -47,14 +50,16 @@ public class GlossaryText implements ContentItem {
     _value = text.trim();
   }
 
-  public void writeHtml(PrintWriter out)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
-    out.print("<a href='http://wiki.caucho.com/" + _value + "'>");
+    out.writeStartElement("a");
+    out.writeAttribute("href", 
+		       "http://wiki.caucho.com/" + _value);
 
-    out.print(_value);
+    out.writeCharacters(_value);
 
-    out.print("</a>");
+    out.writeEndElement();
   }
 
   public void writeLaTeX(PrintWriter writer)
