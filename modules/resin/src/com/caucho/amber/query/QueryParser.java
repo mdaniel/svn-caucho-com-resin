@@ -289,6 +289,7 @@ public class QueryParser {
 
       do {
         AmberExpr expr = parseExpr();
+
         expr = expr.bindSelect(this);
 
         if (_isLazyResult) {
@@ -1217,12 +1218,20 @@ public class QueryParser {
    *
    * <pre>
    * fun ::= IDENTIFIER ( expr* )
+   *     ::= IDENTIFIER ( DISTINCT expr* )
    * </pre>
    */
   private AmberExpr parseFunction(String id)
     throws QueryParseException
   {
     scanToken();
+
+    boolean distinct = false;
+
+    if (peekToken() == DISTINCT) {
+      distinct = true;
+      scanToken();
+    }
 
     ArrayList<AmberExpr> args = new ArrayList<AmberExpr>();
 
@@ -1242,7 +1251,9 @@ public class QueryParser {
 
     scanToken();
 
-    return FunExpr.create(id, args);
+    FunExpr funExpr = FunExpr.create(id, args, distinct);
+
+    return funExpr;
   }
 
   /**

@@ -31,26 +31,36 @@ package com.caucho.amber.query;
 import java.util.ArrayList;
 
 import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+
 
 /**
  * Function expression
  */
 class FunExpr extends AbstractAmberExpr {
+  private static final L10N L = new L10N(FunExpr.class);
+
   private String _id;
   private ArrayList<AmberExpr> _args;
+  private boolean _distinct;
 
   /**
    * Creates a new cmp expression
    */
-  protected FunExpr(String id, ArrayList<AmberExpr> args)
+  protected FunExpr(String id,
+                    ArrayList<AmberExpr> args,
+                    boolean distinct)
   {
     _id = id;
     _args = args;
+    _distinct = distinct;
   }
 
-  static FunExpr create(String id, ArrayList<AmberExpr> args)
+  static FunExpr create(String id,
+                        ArrayList<AmberExpr> args,
+                        boolean distinct)
   {
-    return new FunExpr(id, args);
+    return new FunExpr(id, args, distinct);
   }
 
   /**
@@ -89,17 +99,87 @@ class FunExpr extends AbstractAmberExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
-    cb.append(_id);
-    cb.append('(');
+    if (_id.toLowerCase().equals("locate")) {
 
-    for (int i = 0; i < _args.size(); i++) {
-      if (i != 0)
-        cb.append(',');
+      // Translate to => POSITION('word' in SUBSTRING(data,i,LENGTH(data)))+(i-1)
 
-      _args.get(i).generateWhere(cb);
+      int n = _args.size();
+
+      // XXX: this validation should be moved to QueryParser
+      // if (n < 2)
+      //   throw new QueryParseException(L.l("expected at least 2 string arguments for LOCATE"));
+      //
+      // if (n > 3)
+      //   throw new QueryParseException(L.l("expected at most 3 arguments for LOCATE"));
+
+      CharBuffer charBuffer = new CharBuffer();
+
+      charBuffer.append("position(");
+
+      _args.get(0).generateWhere(charBuffer);
+
+      charBuffer.append(" in substring(");
+
+      _args.get(1).generateWhere(charBuffer);
+
+      charBuffer.append(",");
+
+      int fromIndex = 1;
+
+      AmberExpr expr = null;
+
+      if (n == 2) {
+        charBuffer.append('1');
+      }
+      else {
+        expr = _args.get(2);
+
+        try {
+          fromIndex = Integer.parseInt(expr.toString());
+        } catch (Exception ex) {
+          // XXX: this validation should be moved to QueryParser
+          // throw new QueryParseException(L.l("expected an integer for LOCATE 3rd argument"));
+        }
+
+        expr.generateWhere(charBuffer);
+      }
+
+      charBuffer.append(",length(");
+
+      _args.get(1).generateWhere(charBuffer);
+
+      charBuffer.append(")))");
+
+      cb.append("case when ");
+      cb.append(charBuffer);
+      cb.append(" <= 0 then 0 else ");
+      cb.append(charBuffer);
+
+      if (fromIndex > 1) {
+
+        cb.append('+');
+
+        cb.append(fromIndex-1);
+      }
+
+      cb.append(" end");
     }
+    else {
+      cb.append(_id);
+      cb.append('(');
 
-    cb.append(')');
+      if (_distinct)
+        cb.append("distinct ");
+
+      for (int i = 0; i < _args.size(); i++) {
+        if (i != 0)
+          cb.append(',');
+
+        _args.get(i).generateWhere(cb);
+      }
+
+      cb.append(')');
+    }
   }
 
   /**
@@ -113,6 +193,9 @@ class FunExpr extends AbstractAmberExpr {
   public String toString()
   {
     String str = _id + "(";
+
+    if (_distinct)
+      str += "distinct ";
 
     for (int i = 0; i < _args.size(); i++) {
       if (i != 0)
