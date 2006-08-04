@@ -34,6 +34,9 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 import com.caucho.config.types.*;
 
 public class FormattedText implements ContentItem, ObjectWithParent {
@@ -60,10 +63,11 @@ public class FormattedText implements ContentItem, ObjectWithParent {
     _contentItems.add(new Text(text));
   }
 
+  /*
   public void addG(GlossaryText text)
   {
     _contentItems.add(text);
-  }
+  }*/
 
   public void addI(ItalicizedText text)
   {
@@ -105,17 +109,17 @@ public class FormattedText implements ContentItem, ObjectWithParent {
     _contentItems.add(example);
   }
 
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
     for (ContentItem item : _contentItems)
-      item.writeHtml(writer);
+      item.writeHtml(out);
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
     for (ContentItem item : _contentItems)
-      item.writeLaTeX(writer);
+      item.writeLaTeX(out);
   }
 }

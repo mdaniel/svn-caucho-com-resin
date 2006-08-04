@@ -32,6 +32,9 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class Example extends VerboseFormattedTextWithAnchors {
   private String _title;
   private String _language = null;
@@ -46,53 +49,60 @@ public class Example extends VerboseFormattedTextWithAnchors {
     _language = language;
   }
 
-  public void writeHtml(PrintWriter out)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
     if (_title != null) {
-      out.println("<center><b>" + _title + "</b></center>");
+      out.writeStartElement("center");
+      out.writeStartElement("b");
+      out.writeCharacters(_title);
+      out.writeEndElement();
+      out.writeEndElement();
     }
     
-    out.println("<div class='example'><pre>");
+    out.writeStartElement("div");
+    out.writeAttribute("class", "example");
+    out.writeStartElement("pre");
 
     super.writeHtml(out);
 
-    out.println("</pre></div>");
+    out.writeEndElement();
+    out.writeEndElement();
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
     if (_language != null) {
-      writer.println("\\lstset{fancyvrb,language=" + _language + ",");
-      writer.println("         showstringspaces=false,basicstyle=\\small,");
-      writer.println("         stringstyle=\\color[gray]{0.6}}");
+      out.println("\\lstset{fancyvrb,language=" + _language + ",");
+      out.println("         showstringspaces=false,basicstyle=\\small,");
+      out.println("         stringstyle=\\color[gray]{0.6}}");
     }
 
-    writer.println("\\begin{center}");
-    writer.println("\\begin{Verbatim}[frame=single,fontfamily=courier,");
-    writer.println("                  framerule=1pt,");
-    writer.println("                  fontsize=\\footnotesize,");
+    out.println("\\begin{center}");
+    out.println("\\begin{Verbatim}[frame=single,fontfamily=courier,");
+    out.println("                  framerule=1pt,");
+    out.println("                  fontsize=\\footnotesize,");
 
     if (_title != null) {
-      writer.print("                  labelposition=bottomline,label=\\fbox{");
-      writer.println(LaTeXUtil.escapeForLaTeX(_title) + "},");
+      out.print("                  labelposition=bottomline,label=\\fbox{");
+      out.println(LaTeXUtil.escapeForLaTeX(_title) + "},");
     }
 
-    writer.println("                  samepage=true]");
+    out.println("                  samepage=true]");
 
-    super.writeLaTeX(writer);
+    super.writeLaTeX(out);
 
     // make room for the title box
     if (_title != null)
-      writer.println();
+      out.println();
 
-    writer.println();
-    writer.println("\\end{Verbatim}");
+    out.println();
+    out.println("\\end{Verbatim}");
 
-    writer.println("\\end{center}");
+    out.println("\\end{center}");
 
     if (_language != null)
-      writer.println("\\lstset{fancyvrb=false}");
+      out.println("\\lstset{fancyvrb=false}");
   }
 }

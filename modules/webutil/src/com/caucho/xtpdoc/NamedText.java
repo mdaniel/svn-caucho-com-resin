@@ -34,6 +34,9 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class NamedText implements ContentItem {
   private String _name;
   private ContentItem _text;
@@ -44,19 +47,21 @@ public class NamedText implements ContentItem {
     _text = text;
   }
 
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
-    writer.print("<b>" + _name + ":</b> ");
+    out.writeStartElement("b");
+    out.writeCharacters(_name);
+    out.writeEndElement(); // b
 
-    _text.writeHtml(writer);
+    _text.writeHtml(out);
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    writer.print("\\textbf{" + LaTeXUtil.escapeForLaTeX(_name) + ":} ");
+    out.print("\\textbf{" + LaTeXUtil.escapeForLaTeX(_name) + ":} ");
 
-    _text.writeLaTeX(writer);
+    _text.writeLaTeX(out);
   }
 }

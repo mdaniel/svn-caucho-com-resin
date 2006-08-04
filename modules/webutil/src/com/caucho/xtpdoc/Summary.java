@@ -38,6 +38,9 @@ import com.caucho.vfs.Path;
 
 import com.caucho.config.Config;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class Summary {
   private static final Logger log = Logger.getLogger(Summary.class.getName());
 
@@ -89,14 +92,14 @@ public class Summary {
     _atocControl = atocControl;
   }
 
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
     if (_navigation != null)
-      _navigation.writeHtml(writer);
+      _navigation.writeHtml(out);
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
   }

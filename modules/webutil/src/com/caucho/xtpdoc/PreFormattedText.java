@@ -36,29 +36,32 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class PreFormattedText extends FormattedText {
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
-    writer.println("<pre>");
+    out.writeStartElement("pre");
 
     for (ContentItem item : _contentItems)
-      item.writeHtml(writer);
+      item.writeHtml(out);
 
-    writer.println("</pre>");
+    out.writeEndElement(); // pre
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
     for (ContentItem item : _contentItems)
-      item.writeLaTeX(new PrintWriter(new PreFormatFilterWriter(writer)));
+      item.writeLaTeX(new PrintWriter(new PreFormatFilterWriter(out)));
   }
 
   private static class PreFormatFilterWriter extends FilterWriter {
-    public PreFormatFilterWriter(Writer writer)
+    public PreFormatFilterWriter(Writer out)
     {
-      super(writer);
+      super(out);
     }
 
     public void write(char[] cbuf, int off, int len)

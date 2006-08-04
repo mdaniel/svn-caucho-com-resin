@@ -40,6 +40,9 @@ import com.caucho.vfs.Path;
 
 import com.caucho.config.Config;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class NavigationItem {
   private static final Logger log 
     = Logger.getLogger(NavigationItem.class.getName());
@@ -53,6 +56,7 @@ public class NavigationItem {
   private boolean _atocDescend = false;
   private Navigation _child;
   private ArrayList<NavigationItem> _items = new ArrayList<NavigationItem>();
+  private Path _rootPath;
 
   void setMaxDepth(int maxDepth)
   {
@@ -74,6 +78,8 @@ public class NavigationItem {
   {
     if (_depth > _maxDepth)
       return;
+
+    _rootPath = rootPath;
 
     Path linkPath = rootPath.lookup(_link);
 
@@ -143,8 +149,8 @@ public class NavigationItem {
     _items.add(item);
   }
 
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
     if (_depth > _maxDepth)
       return;
@@ -152,46 +158,57 @@ public class NavigationItem {
     String depthString = (_depth == 0) ? "top" : ("" + _depth);
 
     if (_child != null || _items.size() > 0) {
-      writer.print("<dl class='atoc-toplevel atoc-toplevel-" + 
-                   depthString + "'>");
+      out.writeStartElement("dl");
+      out.writeAttribute("class", "atoc-toplevel atoc-toplevel-" + depthString);
 
-      writer.print("<dt class='atoc-toplevel atoc-toplevel-" + 
-                   (_depth + 1) + "'>");
+      out.writeStartElement("dt");
+      out.writeAttribute("class", "atoc-toplevel atoc-toplevel-" + 
+                                  (_depth + 1));
     } else {
-      writer.print("<dt class='atoc-toplevel atoc-toplevel-" + 
-                   depthString + "'>");
+      out.writeStartElement("dt");
+      out.writeAttribute("class", "atoc-toplevel atoc-toplevel-" + depthString);
     }
 
-    writer.print("<b><a href='" + _link + "'>" + _title + "</a></b>");
+    out.writeStartElement("b");
+    out.writeStartElement("a");
+    out.writeAttribute("href", _link);
+    out.writeCharacters(_title);
+    out.writeEndElement(); // a
+    out.writeEndElement(); // b
 
-    writer.println("</dt>");
+    out.writeEndElement(); // dt
 
-    writer.print("<dd class='atoc-toplevel atoc-toplevel-" + 
-                 depthString + "'>");
+    out.writeStartElement("dd");
+    out.writeAttribute("class", "atoc-toplevel atoc-toplevel-" + depthString);
 
     // XXX: brief/paragraph/none
     if (_description != null) {
-      writer.print("<p>");
-      _description.writeHtml(writer);
-      writer.print("</p>");
+      out.writeStartElement("p");
+      _description.writeHtml(out);
+      out.writeEndElement(); // p
     }
 
     if (_child != null)
-      _child.writeHtml(writer);
+      _child.writeHtml(out);
 
     for (NavigationItem item : _items)
-      item.writeHtml(writer);
+      item.writeHtml(out);
     
-    writer.println("</dd>");
+    out.writeEndElement(); // dd
 
     if (_child != null || _items.size() > 0)
-      writer.println("</dl>");
+      out.writeEndElement(); // dl
   }
 
-  public void writeLeftNav(PrintWriter out)
-    throws IOException
+  public void writeLeftNav(XMLStreamWriter out)
+    throws XMLStreamException
   {
-    out.println("<a href='" + _link + "'>" + _title + "</a><br>");
+    out.writeStartElement("a");
+    out.writeAttribute("href", _link);
+    out.writeCharacters(_title);
+    out.writeEndElement(); // a
+
+    out.writeEmptyElement("br");
   }
 
   public void writeLaTeX(PrintWriter writer)

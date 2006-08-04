@@ -34,7 +34,10 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
-public class VerboseText extends Node implements ContentItem {
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
+public class VerboseText implements ContentItem {
   private String _text;
 
   public VerboseText(String text)
@@ -42,15 +45,15 @@ public class VerboseText extends Node implements ContentItem {
     _text = text;
   }
 
-  public void writeHtml(PrintWriter out)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
-    writeHtmlText(out, _text);
+    out.writeCharacters(_text);
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    writer.print(_text);
+    out.print(_text);
   }
 }

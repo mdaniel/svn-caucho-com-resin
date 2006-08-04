@@ -34,6 +34,9 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class Table extends Node implements ContentItem {
   private static int _count = 0;
 
@@ -42,7 +45,6 @@ public class Table extends Node implements ContentItem {
   protected int _columns = 0;
   protected ArrayList<TableRow> _rows = new ArrayList<TableRow>();
 
-  
   public void setTitle(String title)
   {
     _title = title;
@@ -55,50 +57,50 @@ public class Table extends Node implements ContentItem {
     _rows.add(row);
   }
 
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
-    writer.println("<table>");
+    out.writeStartElement("table");
 
     for (TableRow row : _rows)
-      row.writeHtml(writer);
+      row.writeHtml(out);
 
-    writer.println("</table>");
+    out.writeEndElement();
   }
 
-  protected void writeRows(PrintWriter writer)
+  protected void writeRows(PrintWriter out)
     throws IOException
   {
     for (TableRow row : _rows)
-      row.writeLaTeX(writer);
+      row.writeLaTeX(out);
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    writer.println("\\begin{filecontents}{ltx" + _myCount + ".tex}");
-    writer.print("\\begin{longtable}");
+    out.println("\\begin{filecontents}{ltx" + _myCount + ".tex}");
+    out.print("\\begin{longtable}");
 
-    writer.print("{");
+    out.print("{");
 
     for (int i = 0; i < _columns; i++)
-      writer.print("X");
+      out.print("X");
 
-    writer.println("}");
+    out.println("}");
 
-    writeRows(writer);
+    writeRows(out);
 
-    writer.println("\\end{longtable}");
-    writer.println("\\end{filecontents}");
+    out.println("\\end{longtable}");
+    out.println("\\end{filecontents}");
 
 
-    writer.println("\\begin{center}");
+    out.println("\\begin{center}");
 
-    writer.println("\\LTXtable{\\linewidth}{ltx" + _myCount + "}");
+    out.println("\\LTXtable{\\linewidth}{ltx" + _myCount + "}");
 
     if (_title != null)
-      writer.println("\\textbf{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+      out.println("\\textbf{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
 
-    writer.println("\\end{center}");
+    out.println("\\end{center}");
   }
 }

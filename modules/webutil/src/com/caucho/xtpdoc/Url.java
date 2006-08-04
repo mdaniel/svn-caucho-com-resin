@@ -32,25 +32,28 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class Url extends FormattedText {
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
-    writer.print("<code>");
+    out.writeStartElement("code");
 
-    super.writeHtml(writer);
+    super.writeHtml(out);
 
-    writer.print("</code>");
+    out.writeEndElement(); // code
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
     //XXX Local versus external
-    writer.print(" \\url{");
+    out.print(" \\url{");
 
-    super.writeLaTeX(writer);
+    super.writeLaTeX(out);
 
-    writer.print("} ");
+    out.print("} ");
   }
 }

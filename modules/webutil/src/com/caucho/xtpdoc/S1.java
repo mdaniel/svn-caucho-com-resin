@@ -34,6 +34,9 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class S1 extends Section {
   public void addS2(S2 section)
   {
@@ -45,26 +48,40 @@ public class S1 extends Section {
     _contentItems.add(section);
   }
  
-  public void writeHtml(PrintWriter out)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
     if (_title != null) {
-      out.println("<table border='0' cellpadding='5' cellspacing='0' width='100%'>");
-      out.println("<tr class='section'><td><font size='+2'>" + _title + "</font></td></tr>");
-      out.println("</table>");
+      out.writeStartElement("table");
+      out.writeAttribute("border", "0");
+      out.writeAttribute("cellpadding", "5");
+      out.writeAttribute("cellspacing", "0");
+      out.writeAttribute("width", "100%");
+
+      out.writeStartElement("tr");
+      out.writeAttribute("class", "section");
+      out.writeStartElement("td");
+      out.writeStartElement("font");
+      out.writeAttribute("size", "+2");
+      out.writeCharacters(_title);
+      out.writeEndElement(); // font
+      out.writeEndElement(); // td
+      out.writeEndElement(); // tr
+
+      out.writeEndElement(); // table
     }
     
     super.writeHtml(out);
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
     if (_topLevel)
-      writer.println("\\section{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+      out.println("\\section{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
     else
-      writer.println("\\subsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+      out.println("\\subsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
 
-    super.writeLaTeX(writer);
+    super.writeLaTeX(out);
   }
 }

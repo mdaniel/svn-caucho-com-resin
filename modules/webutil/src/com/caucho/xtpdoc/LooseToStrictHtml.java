@@ -55,7 +55,7 @@ public class LooseToStrictHtml {
           ((QElement) subElement).setName(new QName("s" + level));
 
           thisLevel = level + 1;
-        } 
+        }
       } 
 
       renameSections(child, thisLevel);

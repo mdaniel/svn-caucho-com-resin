@@ -32,7 +32,10 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
-public class Text extends Node implements ContentItem {
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
+public class Text implements ContentItem {
   private String _text;
 
   public Text(String text)
@@ -40,15 +43,15 @@ public class Text extends Node implements ContentItem {
     _text = text;
   }
 
-  public void writeHtml(PrintWriter out)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
-    writeHtmlText(out, _text);
+    out.writeCharacters(_text);
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    writer.print(LaTeXUtil.escapeForLaTeX(_text));
+    out.print(LaTeXUtil.escapeForLaTeX(_text));
   }
 }

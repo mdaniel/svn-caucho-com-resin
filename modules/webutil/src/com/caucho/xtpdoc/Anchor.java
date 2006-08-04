@@ -36,6 +36,9 @@ import java.net.*;
 import java.io.PrintWriter;
 import java.io.IOException;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class Anchor extends FormattedText {
   private static final Logger log = Logger.getLogger(Anchor.class.getName());
 
@@ -52,7 +55,7 @@ public class Anchor extends FormattedText {
 
     while (o != null) {
       if (o instanceof Section) {
-        _documentName = ((Section) o).getDocumentName();
+        _documentName = ((Section) o).getDocumentPath().getUserPath();
 
         return _documentName;
       } else if (o instanceof ObjectWithParent) {
@@ -75,71 +78,84 @@ public class Anchor extends FormattedText {
     _href = href;
   }
 
-  public void writeHtml(PrintWriter out)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
+    out.writeStartElement("a");
+
     if (_href.startsWith("javadoc|")) {
       String name = _href.substring("javadoc|".length());
 
       name = name.replace('.', '/') + ".html";
       
-      out.print("<a href='http://www.caucho.com/resin-javadoc/" + name + "'>");
+      out.writeAttribute("href", "http://www.caucho.com/resin-javadoc/" + name);
     }
     else
-      out.print("<a href='" + _href + "'>");
+      out.writeAttribute("href", _href);
 
     super.writeHtml(out);
 
-    out.print("</a>");
+    out.writeEndElement();
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    try {
-      URI uri = new URI(_href);
+    if (_href == null) {
+      super.writeLaTeX(out);
+    } else if (_href.startsWith("doc|")) {
+      out.print("\\hyperlink{" + _href.substring(4).replace("|", "/") + "}{");
 
-      if (uri.getScheme() != null) {
-        writer.print("\\href{" + _href + "}");
+      super.writeLaTeX(out);
 
-        writer.print("{");
+      out.print("}");
+    } else {
+      try {
+        URI uri = new URI(_href);
 
-        super.writeLaTeX(writer);
+        if (uri.getScheme() != null) {
+          out.print("\\href{" + _href + "}");
 
-        writer.print("}");
+          out.print("{");
 
-        return;
-      } else if (uri.getPath() != null && uri.getPath().length() != 0) {
-        writer.print("\\hyperlink{" + uri.getPath());
+          super.writeLaTeX(out);
 
-        if (uri.getFragment() != null)
-          writer.print(":" + uri.getFragment());
-
-        writer.print("}{");
-        super.writeLaTeX(writer);
-        writer.print("}");
-
-        return;
-      } else if (uri.getFragment() != null && uri.getFragment().length() != 0) {
-        String documentName = getDocumentName();
-
-        if (documentName != null) {
-          writer.print("\\hyperlink{" + documentName + ":" + uri.getFragment());
-          writer.print("}{");
-          super.writeLaTeX(writer);
-          writer.print("}");
+          out.print("}");
 
           return;
+        } else if (uri.getPath() != null && uri.getPath().length() != 0) {
+          out.print("\\hyperlink{" + uri.getPath());
+
+          if (uri.getFragment() != null)
+            out.print(":" + uri.getFragment());
+
+          out.print("}{");
+          super.writeLaTeX(out);
+          out.print("}");
+
+          return;
+        } else if (uri.getFragment() != null && 
+                   uri.getFragment().length() != 0) {
+          String documentName = getDocumentName();
+
+          if (documentName != null) {
+            out.print("\\hyperlink{" + documentName + ":" + uri.getFragment());
+            out.print("}{");
+            super.writeLaTeX(out);
+            out.print("}");
+
+            return;
+          }
         }
+
+      } catch (Exception e) {
       }
 
-    } catch (Exception e) {
+      out.print("\\href{" + _href + "}");
+
+      out.print("{");
+      super.writeLaTeX(out);
+      out.print("}");
     }
-
-    writer.print("\\href{" + _href + "}");
-
-    writer.print("{");
-    super.writeLaTeX(writer);
-    writer.print("}");
   }
 }

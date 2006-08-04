@@ -39,16 +39,25 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.FactoryConfigurationError;
+
 import com.caucho.config.Config;
 import com.caucho.config.LineConfigException;
 
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.WriterStreamImpl;
+
+import com.caucho.xml.stream.XMLStreamWriterImpl;
 
 public class ResinDocServlet extends HttpServlet {
   private Config _config;
   private Path _pwd;
+  private XMLOutputFactory _outputFactory;
 
   public void init(ServletConfig config)
     throws ServletException
@@ -57,6 +66,17 @@ public class ResinDocServlet extends HttpServlet {
     
     _config = new Config();
     _pwd = Vfs.lookup().createRoot();
+
+    /* XXX
+    try {
+      _outputFactory = XMLOutputFactory.newInstance();
+    } catch (FactoryConfigurationError e) {
+      throw new ServletException("Error configuring factory", e);
+    }
+
+    if (_outputFactory == null)
+      throw new ServletException("Error configuring factory");
+      */
   }
 
   public void service(HttpServletRequest request,
@@ -71,9 +91,18 @@ public class ResinDocServlet extends HttpServlet {
     Document document = new Document(path, request.getContextPath());
 
     try {
+      // XXX
+      // XMLStreamWriter xmlOut = _outputFactory.createXMLStreamWriter(out);
+      
+      WriterStreamImpl writerStreamImpl = new WriterStreamImpl();
+      writerStreamImpl.setWriter(out);
+      WriteStream writeStream = new WriteStream(writerStreamImpl);
+
+      XMLStreamWriter xmlOut = new XMLStreamWriterImpl(writeStream);
+
       _config.configure(document, path);
 
-      document.writeHtml(out);
+      document.writeHtml(xmlOut);
     } catch (IOException e) {
       throw e;
     } catch (LineConfigException e) {

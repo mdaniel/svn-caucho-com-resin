@@ -36,6 +36,9 @@ import java.util.ArrayList;
 
 import java.util.logging.Logger;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 import com.caucho.vfs.Path;
 
 import com.caucho.config.Config;
@@ -91,14 +94,14 @@ public class NavigationTopLevelItem {
     // XXX
   }
 
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
     for (NavigationItem item : _items)
-      item.writeHtml(writer);
+      item.writeHtml(out);
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
   }

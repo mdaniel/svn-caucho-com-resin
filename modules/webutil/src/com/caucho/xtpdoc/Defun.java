@@ -34,34 +34,40 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class Defun extends Section {
   public void addS2(S2 section)
   {
     _contentItems.add(section);
   }
  
-  public void writeHtml(PrintWriter out)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
-    out.print("<h4>" + _title + "</h4>");
+    out.writeStartElement("h4");
+    out.writeCharacters(_title);
+    out.writeEndElement(); // h4
 
-    out.print("<div class='desc'>");
+    out.writeStartElement("div");
+    out.writeAttribute("class", "desc");
     
     for (ContentItem item : _contentItems)
       item.writeHtml(out);
     
-    out.print("</div>");
+    out.writeEndElement(); // div
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
     if (_topLevel)
-      writer.println("\\subsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+      out.println("\\subsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
     else
-      writer.println("\\subsubsection{" + LaTeXUtil.escapeForLaTeX(_title) + 
+      out.println("\\subsubsection{" + LaTeXUtil.escapeForLaTeX(_title) + 
                                     "}");
 
-    super.writeLaTeX(writer);
+    super.writeLaTeX(out);
   }
 }

@@ -34,6 +34,9 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class TableHeader extends FormattedTextWithAnchors implements TableCell {
   private String _width;
 
@@ -42,26 +45,26 @@ public class TableHeader extends FormattedTextWithAnchors implements TableCell {
     _width = width;
   }
 
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
+    out.writeStartElement("th");
+
     if (_width == null)
-      writer.print("<th>");
-    else
-      writer.print("<th width=\"" + _width + "\">");
+      out.writeAttribute("width", _width);
 
-    super.writeHtml(writer);
+    super.writeHtml(out);
 
-    writer.print("</th>");
+    out.writeEndElement(); // th
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    writer.print("\\textbf{");
+    out.print("\\textbf{");
 
-    super.writeLaTeX(writer);
+    super.writeLaTeX(out);
 
-    writer.print("}");
+    out.print("}");
   }
 }

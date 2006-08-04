@@ -34,9 +34,14 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
+import com.caucho.vfs.Path;
+
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public abstract class Section implements ContentItem, ObjectWithParent {
   private Object _parent;
-  protected String _documentName;
+  protected Path _documentPath;
   protected String _name;
   protected String _title;
   protected String _version;
@@ -44,19 +49,19 @@ public abstract class Section implements ContentItem, ObjectWithParent {
 
   protected ArrayList<ContentItem> _contentItems = new ArrayList<ContentItem>();
 
-  void setDocumentName(String documentName)
+  void setDocumentPath(Path documentPath)
   {
-    _documentName = documentName;
+    _documentPath = documentPath;
 
     for (ContentItem item : _contentItems) {
       if (item instanceof Section)
-        ((Section) item).setDocumentName(documentName);
+        ((Section) item).setDocumentPath(documentPath);
     }
   }
 
-  String getDocumentName()
+  Path getDocumentPath()
   {
-    return _documentName;
+    return _documentPath;
   }
 
   void setTopLevel(boolean topLevel)
@@ -195,22 +200,23 @@ public abstract class Section implements ContentItem, ObjectWithParent {
     _contentItems.add(glossary);
   }
  
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
     for (ContentItem item : _contentItems)
-      item.writeHtml(writer);
+      item.writeHtml(out);
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    String label = (_documentName + ":" + _title).replace(" ", "-");
+    String label = 
+      (_documentPath.getUserPath() + ":" + _title).replace(" ", "-");
 
-    writer.println("\\label{" + label + "}");
-    writer.println("\\hypertarget{" + label + "}{}");
+    out.println("\\label{" + label + "}");
+    out.println("\\hypertarget{" + label + "}{}");
 
     for (ContentItem item : _contentItems)
-      item.writeLaTeX(writer);
+      item.writeLaTeX(out);
   }
 }

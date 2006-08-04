@@ -34,6 +34,9 @@ import java.io.IOException;
 
 import com.caucho.vfs.Path;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class Document {
   private Header _header;
   private Body _body;
@@ -81,25 +84,26 @@ public class Document {
     _body.setDocumentPath(_documentPath, _topLevel);
   }
 
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
-    writer.println("<html>");
+    out.writeStartDocument("UTF-8", "1.0");
+    out.writeStartElement("html");
 
-    _header.writeHtml(writer);
-    _body.writeHtml(writer);
+    _header.writeHtml(out);
+    _body.writeHtml(out);
 
-    writer.println("</html>");
+    out.writeEndElement();
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
     if (_topLevel)
-      writer.println("\\documentclass{article}");
+      out.println("\\documentclass{article}");
 
-    _header.writeLaTeX(writer);
-    _body.writeLaTeX(writer);
+    _header.writeLaTeX(out);
+    _body.writeLaTeX(out);
   }
 
   public String toString()

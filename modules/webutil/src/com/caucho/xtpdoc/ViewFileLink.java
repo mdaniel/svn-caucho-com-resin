@@ -32,6 +32,9 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class ViewFileLink implements ContentItem {
   private String _file;
 
@@ -40,16 +43,19 @@ public class ViewFileLink implements ContentItem {
     _file = file;
   }
 
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
     // XXX
-    writer.print("<a href='" + _file + "'>" + _file + "</a>");
+    out.writeStartElement("a");
+    out.writeAttribute("href", _file);
+    out.writeCharacters(_file);
+    out.writeEndElement(); // a
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    writer.print("\\href{" + _file + "}{" + _file + "}");
+    out.print("\\href{" + _file + "}{" + _file + "}");
   }
 }

@@ -34,6 +34,9 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class Description implements ContentItem {
   protected ArrayList<ContentItem> _contentItems = new ArrayList<ContentItem>();
 
@@ -52,17 +55,17 @@ public class Description implements ContentItem {
     _contentItems.add(glossary);
   }
   
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
     for (ContentItem item : _contentItems)
-      item.writeHtml(writer);
+      item.writeHtml(out);
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
     for (ContentItem item : _contentItems)
-      item.writeLaTeX(writer);
+      item.writeLaTeX(out);
   }
 }

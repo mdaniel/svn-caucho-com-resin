@@ -50,7 +50,7 @@ public class LinkedChapterSection extends ChapterSection {
     _link = link;
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
     Path xtpFile = Vfs.lookup(_link);
@@ -65,20 +65,19 @@ public class LinkedChapterSection extends ChapterSection {
     } catch (Exception e) {
       System.err.println("Error configuring document (" + xtpFile + "): " + e);
 
-//      e.getCause().printStackTrace();
+      e.getCause().printStackTrace();
       return;
     }
 
     try {
-      document.writeLaTeX(writer);
+      document.writeLaTeX(out);
     } catch (Exception e) {
       System.err.println("Error configuring document (" + xtpFile + "): " + e);
 
-      /*
       if (e.getCause() != null)
         e.getCause().printStackTrace();
       else 
-        e.printStackTrace();*/
+        e.printStackTrace();
 
       return;
     }

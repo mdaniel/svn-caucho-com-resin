@@ -32,10 +32,13 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
-public interface ContentItem {
-  public void writeHtml(PrintWriter writer)
-    throws IOException;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
 
-  public void writeLaTeX(PrintWriter writer)
+public interface ContentItem {
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException;
+
+  public void writeLaTeX(PrintWriter out)
     throws IOException;
 }

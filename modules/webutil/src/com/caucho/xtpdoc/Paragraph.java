@@ -32,23 +32,26 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class Paragraph extends FormattedTextWithAnchors {
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
-    writer.println("<p>");
+    out.writeStartElement("p");
 
-    super.writeHtml(writer);
+    super.writeHtml(out);
 
-    writer.println("</p>");
+    out.writeEndElement();
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    writer.println();
-    writer.println();
+    out.println();
+    out.println();
 
-    super.writeLaTeX(writer);
+    super.writeLaTeX(out);
   }
 }

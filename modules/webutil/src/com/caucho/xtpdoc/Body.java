@@ -34,12 +34,14 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 import com.caucho.config.*;
 import com.caucho.vfs.Path;
 
 public class Body implements ObjectWithParent {
   private Object _parent;
-  private boolean _topLevel;
   private Path _rootPath;
   private Navigation _navigation;
   private Summary _summary;
@@ -47,21 +49,23 @@ public class Body implements ObjectWithParent {
 
   void setDocumentPath(Path documentPath, boolean topLevel)
   {
-    _topLevel = topLevel;
+//    _topLevel = topLevel;
 
     if (topLevel && documentPath != null) {
       if (_summary != null)
-	_summary.setRootPath(documentPath.getParent());
+        _summary.setRootPath(documentPath.getParent());
+
       _rootPath = documentPath.getParent();
 
       parseNavigation(_rootPath);
     }
 
     if (documentPath != null) {
-      String documentName = documentPath.getTail();
+      if (topLevel)
+        _summary.setRootPath(documentPath.getParent());
 
       for (Section section : _sections)
-        section.setDocumentName(documentName);
+        section.setDocumentPath(documentPath);
     }
   }
 
@@ -114,19 +118,30 @@ public class Body implements ObjectWithParent {
     _sections.add(section);
   }
 
-  public void writeHtml(PrintWriter out)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
-    out.println("<body bgcolor='white' leftmargin='0'>");
+    out.writeStartElement("body");
+    out.writeAttribute("bgcolor", "white");
+    out.writeAttribute("leftmargin", "0");
 
-    out.println("<table width='100%' border='0' cellspacing='0'>");
+    out.writeStartElement("table");
+    out.writeAttribute("width", "100%");
+    out.writeAttribute("border", "0");
+    out.writeAttribute("cellspacing", "0");
 
-    out.println("<tr valign='top'><td bgcolor='#b9cef7' class='leftnav'>");
+    out.writeStartElement("tr");
+    out.writeAttribute("valign", "top");
+    out.writeStartElement("td");
+    out.writeAttribute("bgcolor", "#b9cef7");
+    out.writeAttribute("class", "leftnav");
     
-    if (_navigation != null) {
+    if (_navigation != null)
       _navigation.writeLeftNav(out);
-    }
-    out.println("</td><td>");
+
+    out.writeEndElement(); // td
+
+    out.writeStartElement("td");
 
     if (_summary != null)
       _summary.writeHtml(out);
@@ -134,24 +149,28 @@ public class Body implements ObjectWithParent {
     for (Section section : _sections)
       section.writeHtml(out);
     
-    out.println("</td></tr></table>");
+    out.writeEndElement(); // td
+    out.writeEndElement(); // tr
+    out.writeEndElement(); // table
 
-    out.println("</body>");
+    out.writeEndElement(); //body
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeXTop(PrintWriter out)
     throws IOException
   {
-    if (_topLevel) {
-      writer.println("\\begin{document}");
+    out.println("\\begin{document}");
 
-      for (Section section : _sections)
-        section.writeLaTeX(writer);
+    for (Section section : _sections)
+      section.writeLaTeX(out);
 
-      writer.println("\\end{document}");
-    } else {
-      for (Section section : _sections)
-        section.writeLaTeX(writer);
-    }
+    out.println("\\end{document}");
+  }
+
+  public void writeLaTeX(PrintWriter out)
+    throws IOException
+  {
+    for (Section section : _sections)
+      section.writeLaTeX(out);
   }
 }

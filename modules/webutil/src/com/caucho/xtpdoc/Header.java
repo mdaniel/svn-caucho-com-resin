@@ -32,6 +32,9 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class Header {
   private String _product;
   private String _version;
@@ -93,51 +96,62 @@ public class Header {
     _description = description;
   }
 
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
-    writer.println("<head>");
+    out.writeStartElement("head");
 
-    writer.print("<meta http-equiv=\"Content-Type\" ");
-    writer.println("content=\"text/html; charset=utf-8\">");
+    out.writeEmptyElement("meta");
+    out.writeAttribute("http-equiv", "Content-Type");
+    out.writeAttribute("content", "text/html; charset=utf-8");
 
-    if (_product != null)
-      writer.println("<meta name='product' content='" + _product + "' />");
+    if (_product != null) {
+      out.writeEmptyElement("meta");
+      out.writeAttribute("name", "product");
+      out.writeAttribute("content", _product);
+    }
 
-    if (_version != null)
-      writer.println("<meta name='version' content='" + _version + "' />");
+    if (_version != null) {
+      out.writeEmptyElement("meta");
+      out.writeAttribute("name", "version");
+      out.writeAttribute("content", _version);
+    }
 
-    writer.print("<link rel=\"STYLESHEET\" type=\"text/css\" ");
-    writer.println("href=\"" + _contextPath + "/css/default.css\">");
+    out.writeEmptyElement("link");
+    out.writeAttribute("rel", "STYLESHEET");
+    out.writeAttribute("type", "text/css");
+    out.writeAttribute("href", _contextPath + "/css/default.css");
 
-    writer.println("<title>" + _title + "</title>");
+    out.writeStartElement("title");
+    out.writeCharacters(_title);
+    out.writeEndElement(); // title
 
-    writer.println("</head>");
+    out.writeEndElement(); // head
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
     if (_topLevel) {
-      writer.println("\\usepackage[margin=1in]{geometry}");
-      writer.println("\\usepackage{url}");
-      writer.println("\\usepackage{hyperref}");
-      writer.println("\\usepackage{graphicx}");
-      writer.println("\\usepackage{color}");
-      writer.println("\\usepackage{colortbl}");
-      writer.println("\\usepackage{fancyvrb}");
-      writer.println("\\usepackage{listings}");
-      writer.println();
-      writer.println("\\definecolor{example-gray}{gray}{0.8}");
-      writer.println("\\definecolor{results-gray}{gray}{0.6}");
-      writer.println();
-      writer.println("\\title{" + _title + "}");
+      out.println("\\usepackage[margin=1in]{geometry}");
+      out.println("\\usepackage{url}");
+      out.println("\\usepackage{hyperref}");
+      out.println("\\usepackage{graphicx}");
+      out.println("\\usepackage{color}");
+      out.println("\\usepackage{colortbl}");
+      out.println("\\usepackage{fancyvrb}");
+      out.println("\\usepackage{listings}");
+      out.println();
+      out.println("\\definecolor{example-gray}{gray}{0.8}");
+      out.println("\\definecolor{results-gray}{gray}{0.6}");
+      out.println();
+      out.println("\\title{" + _title + "}");
       //XXX: product & version
     } else {
-      writer.println("\\section{" + _title + "}");
+      out.println("\\section{" + _title + "}");
 
-      writer.println("\\label{" + _documentName + "}");
-      writer.println("\\hypertarget{" + _documentName + "}{}");
+      out.println("\\label{" + _documentName + "}");
+      out.println("\\hypertarget{" + _documentName + "}{}");
     }
   }
 }

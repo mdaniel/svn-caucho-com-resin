@@ -34,6 +34,9 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class TableRow {
   private ArrayList<TableCell> _cells = new ArrayList<TableCell>();
 
@@ -56,30 +59,29 @@ public class TableRow {
   {
   }
 
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
-    writer.println("<tr>");
+    out.writeStartElement("tr");
 
-    for (TableCell cell : _cells) {
-      cell.writeHtml(writer);
-    }
+    for (TableCell cell : _cells)
+      cell.writeHtml(out);
 
-    writer.println("</tr>");
+    out.writeEndElement(); // tr
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
     for (int i = 0; i < _cells.size(); i++) {
-      _cells.get(i).writeLaTeX(writer);
+      _cells.get(i).writeLaTeX(out);
 
       if (i < _cells.size() - 1)
-        writer.print("&");
+        out.print("&");
       else
-        writer.println("\\\\");
+        out.println("\\\\");
 
-      writer.flush();
+      out.flush();
     }
   }
 }

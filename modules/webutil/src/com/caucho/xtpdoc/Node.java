@@ -34,34 +34,37 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 abstract public class Node implements ContentItem {
   protected void writeHtmlText(PrintWriter out, String text)
     throws IOException
   {
     int length = text.length();
-    
+
     for (int i = 0; i < length; i++) {
       char ch = text.charAt(i);
 
       switch (ch) {
-      case '<':
-	out.print("&lt;");
-	break;
-      case '>':
-	out.print("&gt;");
-	break;
-      case '\'':
-	out.print("&apos;");
-	break;
-      case '\"':
-	out.print("&quot;");
-	break;
-      case '&':
-	out.print("&amp;");
-	break;
-      default:
-	out.print(ch);
-	break;
+        case '<':
+          out.print("&lt;");
+          break;
+        case '>':
+          out.print("&gt;");
+          break;
+        case '\'':
+          out.print("&apos;");
+          break;
+          case '\"':
+            out.print("&quot;");
+          break;
+        case '&':
+          out.print("&amp;");
+          break;
+        default:
+          out.print(ch);
+          break;
       }
     }
   }

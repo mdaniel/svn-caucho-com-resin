@@ -36,6 +36,9 @@ import java.util.ArrayList;
 
 import com.caucho.vfs.Path;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class Navigation {
   private int _depth;
   private Path _rootPath;
@@ -75,22 +78,22 @@ public class Navigation {
     item.setRootPath(_rootPath);
   }
 
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
     String depthString = (_depth == 0) ? "top" : ("" + _depth);
 
-    writer.println("<dl class='atoc-toplevel atoc-toplevel-" + 
-                 depthString + "'>");
+    out.writeStartElement("dl");
+    out.writeAttribute("class", "atoc-toplevel atoc-toplevel-" + depthString);
 
     for (NavigationItem item : _items)
-      item.writeHtml(writer);
+      item.writeHtml(out);
 
-    writer.println("</dl>");
+    out.writeEndElement(); // dl
   }
 
-  public void writeLeftNav(PrintWriter out)
-    throws IOException
+  public void writeLeftNav(XMLStreamWriter out)
+    throws XMLStreamException
   {
     for (NavigationItem item : _items)
       item.writeLeftNav(out);

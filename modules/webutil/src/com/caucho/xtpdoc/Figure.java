@@ -31,9 +31,12 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class Figure implements ContentItem {
-  private int _height;
-  private int _width;
+  private int _height = -1;
+  private int _width = -1;
   private String _source;
 
   public void setHeight(int height)
@@ -51,19 +54,41 @@ public class Figure implements ContentItem {
     _source = source;
   }
 
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
-    writer.println("<img src='" + _source + "'/>");
+    out.writeEmptyElement("img");
+
+    if (_height >= 0)
+      out.writeAttribute("height", Integer.toString(_height));
+
+    if (_width >= 0)
+      out.writeAttribute("width", Integer.toString(_width));
+
+    out.writeAttribute("src", _source);
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    writer.println("\\begin{figure}[h]");
+    //out.println("\\begin{figure}[h]");
 
-    // XXX
+    int dot = _source.lastIndexOf('.');
 
-    writer.println("\\end{figure}");
+    String basename = _source.substring(0, dot);
+
+    out.println("\\epsfig{file=images/" + basename + ",width=\\linewidth}");
+
+    /*
+    if (_height >= 0)
+      out.print(",height=" + _height);
+
+    if (_width >= 0)
+      out.print(",width=" + _width);
+
+    out.println("}");
+    */
+
+    //out.println("\\end{figure}");
   }
 }

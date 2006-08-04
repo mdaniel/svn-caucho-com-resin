@@ -34,14 +34,17 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class TableData extends FormattedTextWithAnchors implements TableCell {
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
-    writer.print("<td>");
+    out.writeStartElement("td");
 
-    super.writeHtml(writer);
+    super.writeHtml(out);
 
-    writer.print("</td>");
+    out.writeEndElement(); // td
   }
 }

@@ -34,31 +34,38 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class DefinitionTable extends Table {
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
-    writer.print("<table width=\"90%\" cellpadding=\"2\" ");
-    writer.print("cellspacing=\"0\" class=\"deftable\" border=\"\">");
+    out.writeStartElement("table");
+    out.writeAttribute("width", "90%");
+    out.writeAttribute("cellpadding", "2");
+    out.writeAttribute("cellspacing", "0");
+    out.writeAttribute("class", "deftable");
+    out.writeAttribute("border", "");
 
     if (_title != null) {
-      writer.print("<caption>");
-      writeHtmlText(writer, _title);
-      writer.print("</caption>");
+      out.writeStartElement("caption");
+      out.writeCharacters(_title);
+      out.writeEndElement();
     }
 
     for (TableRow row : _rows)
-      row.writeHtml(writer);
+      row.writeHtml(out);
 
-    writer.println("</table>");
+    out.writeEndElement();
   }
 
-  protected void writeRows(PrintWriter writer)
+  protected void writeRows(PrintWriter out)
     throws IOException
   {
     for (TableRow row : _rows) {
-      writer.print("\\rowcolor[gray]{0.9}");
-      row.writeLaTeX(writer);
+      out.print("\\rowcolor[gray]{0.9}");
+      row.writeLaTeX(out);
     }
   }
 }

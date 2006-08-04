@@ -57,12 +57,12 @@ public class Printer {
       config.configure(book, xtpFile);
 
       OutputStreamWriter osw = new OutputStreamWriter(System.out);
-      PrintWriter writer = new PrintWriter(osw);
+      PrintWriter out = new PrintWriter(osw);
 
-      book.writeLaTeX(writer);
+      book.writeLaTeX(out);
 
       osw.close();
-      writer.close();
+      out.close();
     } catch (IOException e) {
       System.err.println("Error writing HTML: " + e);
     } catch (Exception e) {

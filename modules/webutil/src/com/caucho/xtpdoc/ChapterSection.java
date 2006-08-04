@@ -37,6 +37,6 @@ import java.util.ArrayList;
 import com.caucho.vfs.Path;
 
 public abstract class ChapterSection {
-  public abstract void writeLaTeX(PrintWriter writer)
+  public abstract void writeLaTeX(PrintWriter out)
     throws IOException;
 }

@@ -50,35 +50,35 @@ public class Book {
     _chapters.add(chapter);
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    writer.println("\\documentclass{report}");
+    out.println("\\documentclass{report}");
 
-    writer.println("\\usepackage{url}");
-    writer.println("\\usepackage{hyperref}");
-    writer.println("\\usepackage{graphicx}");
-    writer.println("\\usepackage{color}");
-    writer.println("\\usepackage{colortbl}");
-    writer.println("\\usepackage{fancyvrb}");
-    writer.println("\\usepackage{listings}");
-    writer.println("\\usepackage{tabularx}");
-    writer.println("\\usepackage{filecontents}");
-    writer.println("\\usepackage{ltxtable}");
-    writer.println("\\usepackage{placeins}");
-    writer.println();
-    writer.println("\\definecolor{example-gray}{gray}{0.8}");
-    writer.println("\\definecolor{results-gray}{gray}{0.6}");
-    writer.println();
-    writer.println("\\title{" + _title + "}");
+    out.println("\\usepackage{url}");
+    out.println("\\usepackage{hyperref}");
+    out.println("\\usepackage{graphicx}");
+    out.println("\\usepackage{color}");
+    out.println("\\usepackage{colortbl}");
+    out.println("\\usepackage{fancyvrb}");
+    out.println("\\usepackage{listings}");
+    out.println("\\usepackage{tabularx}");
+    out.println("\\usepackage{filecontents}");
+    out.println("\\usepackage{ltxtable}");
+    out.println("\\usepackage{epsfig}");
+    out.println();
+    out.println("\\definecolor{example-gray}{gray}{0.8}");
+    out.println("\\definecolor{results-gray}{gray}{0.6}");
+    out.println();
+    out.println("\\title{" + _title + "}");
 
-    writer.println("\\begin{document}");
-    writer.println("\\tableofcontents");
-    writer.println("\\sloppy");
+    out.println("\\begin{document}");
+    out.println("\\tableofcontents");
+    out.println("\\sloppy");
 
     for (Chapter chapter : _chapters)
-      chapter.writeLaTeX(writer);
+      chapter.writeLaTeX(out);
 
-    writer.println("\\end{document}");
+    out.println("\\end{document}");
   }
 }

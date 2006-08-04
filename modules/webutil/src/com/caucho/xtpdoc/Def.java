@@ -32,6 +32,9 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class Def extends VerboseFormattedText {
   private String _title;
 
@@ -40,42 +43,58 @@ public class Def extends VerboseFormattedText {
     _title = title;
   }
 
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
-    writer.println("<table class=\"egpad\" cellspacing=\"0\" width=\"90%\">");
+    out.writeStartElement("table");
+    out.writeAttribute("class", "egpad");
+    out.writeAttribute("cellspacing", "0");
+    out.writeAttribute("width", "90%");
 
     if (_title != null) {
-      writer.println("<caption><font size=\"+1\">" + _title + 
-                     "</font></caption>");
+      out.writeStartElement("caption");
+      out.writeStartElement("font");
+      out.writeAttribute("size", "+1");
+      out.writeCharacters(_title);
+      out.writeEndElement();
+      out.writeEndElement();
     }
 
-    writer.println("<tr><td class=\"def\" bgcolor=\"#cccccc\">");
-    writer.println("<pre><div class=\"def\">");
+    out.writeStartElement("tr");
+    out.writeStartElement("td");
+    out.writeAttribute("class", "def");
+    out.writeAttribute("bgcolor", "#cccccc");
+    out.writeStartElement("pre");
+    out.writeStartElement("div");
+    out.writeAttribute("class", "def");
 
-    super.writeHtml(writer);
+    super.writeHtml(out);
 
-    writer.println("</pre></td></tr></table>");
+    out.writeEndElement();
+    out.writeEndElement();
+    out.writeEndElement();
+    out.writeEndElement();
+    out.writeEndElement();
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    writer.println("\\begin{center}");
-    writer.println("\\begin{Verbatim}[fontfamily=courier,");
-    writer.println("                  fontsize=\\footnotesize,");
+    out.println("\\begin{center}");
+    out.println("\\begin{Verbatim}[fontfamily=courier,");
+    out.println("                  fontsize=\\footnotesize,");
 
     if (_title != null) {
-      writer.println("                  label=" + _title + ",");
-      writer.println("                  labelposition=bottomline,");
+      out.println("                  label=" + _title + ",");
+      out.println("                  labelposition=bottomline,");
     }
 
-    writer.println("                  samepage=true]");
+    out.println("                  samepage=true]");
 
-    super.writeLaTeX(writer);
+    super.writeLaTeX(out);
 
-    writer.println();
-    writer.println("\\end{Verbatim}");
-    writer.println("\\end{center}");
+    out.println();
+    out.println("\\end{Verbatim}");
+    out.println("\\end{center}");
   }
 }

@@ -40,15 +40,15 @@ public class S2 extends Section {
     _contentItems.add(section);
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
     if (_topLevel)
-      writer.println("\\subsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+      out.println("\\subsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
     else
-      writer.println("\\subsubsection{" + LaTeXUtil.escapeForLaTeX(_title) + 
+      out.println("\\subsubsection{" + LaTeXUtil.escapeForLaTeX(_title) + 
                                     "}");
 
-    super.writeLaTeX(writer);
+    super.writeLaTeX(out);
   }
 }

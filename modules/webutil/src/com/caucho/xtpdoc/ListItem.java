@@ -32,6 +32,9 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class ListItem extends FormattedTextWithAnchors {
   public void addOL(OrderedList orderedList)
   {
@@ -43,23 +46,23 @@ public class ListItem extends FormattedTextWithAnchors {
     addItem(unorderedList);
   }
 
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
-    writer.print("<li>");
+    out.writeStartElement("li");
 
-    super.writeHtml(writer);
+    super.writeHtml(out);
 
-    writer.println("</li>");
+    out.writeEndElement(); // li
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    writer.print("\\item ");
+    out.print("\\item ");
 
-    super.writeLaTeX(writer);
+    super.writeLaTeX(out);
 
-    writer.println();
+    out.println();
   }
 }

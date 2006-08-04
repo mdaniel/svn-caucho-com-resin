@@ -34,6 +34,9 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class UnorderedList implements ContentItem, ObjectWithParent {
   private Object _parent;
   private ArrayList<ListItem> _listItems = new ArrayList<ListItem>();
@@ -53,27 +56,25 @@ public class UnorderedList implements ContentItem, ObjectWithParent {
     _listItems.add(item);
   }
 
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
-    writer.println("<ul>");
+    out.writeStartElement("ul");
 
-    for (ListItem item : _listItems) {
-      item.writeHtml(writer);
-    }
+    for (ListItem item : _listItems)
+      item.writeHtml(out);
 
-    writer.println("</ul>");
+    out.writeEndElement(); // ul
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    writer.println("\\begin{itemize}");
+    out.println("\\begin{itemize}");
 
-    for (ListItem item : _listItems) {
-      item.writeLaTeX(writer);
-    }
+    for (ListItem item : _listItems)
+      item.writeLaTeX(out);
 
-    writer.println("\\end{itemize}");
+    out.println("\\end{itemize}");
   }
 }

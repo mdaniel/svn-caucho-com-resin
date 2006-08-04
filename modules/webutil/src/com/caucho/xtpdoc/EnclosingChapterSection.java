@@ -51,12 +51,12 @@ public class EnclosingChapterSection extends ChapterSection {
     _subsections.add(section);
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    writer.println("\\section{" + _title + "}");
+    out.println("\\section{" + _title + "}");
 
     for (ChapterSection section : _subsections)
-      section.writeLaTeX(writer);
+      section.writeLaTeX(out);
   }
 }

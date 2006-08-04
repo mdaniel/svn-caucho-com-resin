@@ -32,24 +32,27 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class BoldText extends FormattedText {
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
-    writer.print("<b>");
+    out.writeStartElement("b");
 
-    super.writeHtml(writer);
+    super.writeHtml(out);
 
-    writer.print("</b>");
+    out.writeEndElement();
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    writer.print("\\textbf{");
+    out.print("\\textbf{");
 
-    super.writeLaTeX(writer);
+    super.writeLaTeX(out);
 
-    writer.print("}");
+    out.print("}");
   }
 }

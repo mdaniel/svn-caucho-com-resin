@@ -32,6 +32,9 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class Glossary extends FormattedText {
   private String _title;
 
@@ -44,34 +47,47 @@ public class Glossary extends FormattedText {
   {
   }
 
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
-    writer.println("<div class=\"glossary\">");
-    writer.println("<table cellspacing=\"0\" border=\"0\" width=\"100%\">");
-
-    if (_title != null)
-      writer.println("<tr><th>" + _title + "</th></tr>");
-
-    writer.println("<tr><td>");
-
-    super.writeHtml(writer);
-
-    writer.println("</td></tr></table>");
-  }
-
-  public void writeLaTeX(PrintWriter writer)
-    throws IOException
-  {
-    writer.println("\\fbox{");
+    out.writeStartElement("div");
+    out.writeAttribute("class", "glossary");
+    out.writeStartElement("table");
+    out.writeAttribute("cellspacing", "0");
+    out.writeAttribute("border", "0");
+    out.writeAttribute("width", "100%");
 
     if (_title != null) {
-      writer.println("\\begin{center}\\texttt{" + _title + "}\\end{center}");
-      writer.println();
+      out.writeStartElement("tr");
+      out.writeStartElement("th");
+      out.writeCharacters(_title);
+      out.writeEndElement(); // tr
+      out.writeEndElement(); // th
     }
 
-    super.writeLaTeX(writer);
+    out.writeStartElement("tr");
+    out.writeStartElement("td");
 
-    writer.print("} ");
+    super.writeHtml(out);
+
+    out.writeEndElement(); // tr
+    out.writeEndElement(); // td
+    out.writeEndElement(); // table
+    out.writeEndElement(); // div
+  }
+
+  public void writeLaTeX(PrintWriter out)
+    throws IOException
+  {
+    out.println("\\fbox{");
+
+    if (_title != null) {
+      out.println("\\begin{center}\\texttt{" + _title + "}\\end{center}");
+      out.println();
+    }
+
+    super.writeLaTeX(out);
+
+    out.print("} ");
   }
 }

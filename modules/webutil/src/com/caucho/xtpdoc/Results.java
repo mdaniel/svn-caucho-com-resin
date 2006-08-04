@@ -32,6 +32,9 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class Results extends FormattedTextWithAnchors {
   private String _title;
   private String _language = null;
@@ -46,33 +49,34 @@ public class Results extends FormattedTextWithAnchors {
     _language = language;
   }
 
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
-    writer.println("<div class='example'>");
+    out.writeStartElement("div");
+    out.writeAttribute("class", "example");
 
-    super.writeHtml(writer);
+    super.writeHtml(out);
 
-    writer.println("</div>");
+    out.writeEndElement(); // div
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    writer.println("\\begin{center}");
-    writer.println("\\begin{Verbatim}[frame=single,fontfamily=courier,");
-    writer.println("                  fillcolor=\\color{results-gray},");
-    writer.println("                  fontsize=\\footnotesize,");
-    writer.println("                  samepage=true]");
+    out.println("\\begin{center}");
+    out.println("\\begin{Verbatim}[frame=single,fontfamily=courier,");
+    out.println("                  fillcolor=\\color{results-gray},");
+    out.println("                  fontsize=\\footnotesize,");
+    out.println("                  samepage=true]");
 
-    super.writeLaTeX(writer);
+    super.writeLaTeX(out);
 
-    writer.println();
-    writer.println("\\end{Verbatim}");
+    out.println();
+    out.println("\\end{Verbatim}");
 
     if (_title != null)
-      writer.println(LaTeXUtil.escapeForLaTeX(_title));
+      out.println(LaTeXUtil.escapeForLaTeX(_title));
 
-    writer.println("\\end{center}");
+    out.println("\\end{center}");
   }
 }

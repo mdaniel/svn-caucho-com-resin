@@ -32,6 +32,9 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
 public class Faq extends Section {
   private FormattedTextWithAnchors _description;
 
@@ -40,33 +43,39 @@ public class Faq extends Section {
     _description = description;
   }
 
-  public void writeHtml(PrintWriter writer)
-    throws IOException
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
   {
-    writer.println("<b>" + _title + "</b>");
+    out.writeStartElement("b");
+    out.writeCharacters(_title);
+    out.writeEndElement();
 
     if (_description != null) {
-      writer.println("<p><i>");
-      _description.writeHtml(writer);
-      writer.println("</i></p>");
+      out.writeStartElement("p");
+      out.writeStartElement("i");
+
+      _description.writeHtml(out);
+
+      out.writeEndElement();
+      out.writeEndElement();
     }
 
-    super.writeHtml(writer);
+    super.writeHtml(out);
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    writer.println("\\textbf{" + _title + "}\\\\");
-    writer.println();
-    writer.println();
+    out.println("\\textbf{" + _title + "}\\\\");
+    out.println();
+    out.println();
 
     if (_description != null) {
-      writer.print("\\textit{");
-      _description.writeLaTeX(writer);
-      writer.println("}");
+      out.print("\\textit{");
+      _description.writeLaTeX(out);
+      out.println("}");
     }
 
-    super.writeLaTeX(writer);
+    super.writeLaTeX(out);
   }
 }
