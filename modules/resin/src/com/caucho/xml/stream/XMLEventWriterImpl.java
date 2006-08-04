@@ -36,9 +36,9 @@ import javax.xml.transform.*;
 import javax.xml.namespace.*;
 import com.caucho.vfs.*;
 
-public class StreamEventWriter implements XMLEventWriter {
+public class XMLEventWriterImpl implements XMLEventWriter {
 
-  public StreamEventWriter(WriteStream w)
+  public XMLEventWriterImpl(WriteStream w)
   {
     throw new UnsupportedOperationException();
   }
