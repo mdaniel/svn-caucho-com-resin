@@ -41,10 +41,10 @@ import com.caucho.vfs.*;
 /**
  * XML pull-parser interface.
  */
-public class StreamReaderImpl implements XMLStreamReader {
+public class XMLStreamReaderImpl implements XMLStreamReader {
   private static final Logger log
-    = Logger.getLogger(StreamReaderImpl.class.getName());
-  private static final L10N L = new L10N(StreamReaderImpl.class);
+    = Logger.getLogger(XMLStreamReaderImpl.class.getName());
+  private static final L10N L = new L10N(XMLStreamReaderImpl.class);
 
   private static final boolean []IS_XML_NAME = new boolean[65536];
 
@@ -54,7 +54,7 @@ public class StreamReaderImpl implements XMLStreamReader {
   private int _row = 1;
   private int _ofs = 1;
 
-  private NamespaceTracker _namespaceTracker = new NamespaceTracker();
+  private NamespaceContextImpl _namespaceTracker = new NamespaceContextImpl();
 
   private String _version;
   private String _encoding;
@@ -85,33 +85,33 @@ public class StreamReaderImpl implements XMLStreamReader {
   private char []_cBuf = new char[4096];
   private int _cBufLength;
 
-  public StreamReaderImpl(InputStream is)
+  public XMLStreamReaderImpl(InputStream is)
     throws XMLStreamException
   {
     this(Vfs.openRead(is));
   }
 
-  public StreamReaderImpl(Reader r)
+  public XMLStreamReaderImpl(Reader r)
     throws XMLStreamException
   {
     this(Vfs.openRead(r));
   }
 
-  public StreamReaderImpl(InputStream is, String systemId)
+  public XMLStreamReaderImpl(InputStream is, String systemId)
     throws XMLStreamException
   {
     this(Vfs.openRead(is));
     _systemId = systemId;
   }
 
-  public StreamReaderImpl(Reader r, String systemId)
+  public XMLStreamReaderImpl(Reader r, String systemId)
     throws XMLStreamException
   {
     this(Vfs.openRead(r));
     _systemId = systemId;
   }
 
-  public StreamReaderImpl(ReadStream is)
+  public XMLStreamReaderImpl(ReadStream is)
     throws XMLStreamException
   {
     _is = is;

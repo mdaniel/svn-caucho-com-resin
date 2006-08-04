@@ -1,7 +1,7 @@
 package com.caucho.quercus.lib.xml;
 
 import com.caucho.util.L10N;
-import com.caucho.xml.stream.StreamReaderImpl;
+import com.caucho.xml.stream.XMLStreamReaderImpl;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.ReadOnly;
 import com.caucho.quercus.module.NotNull;
@@ -450,7 +450,7 @@ public class XmlReader {
    */
   public BooleanValue open(Env env, Path path) {
     try {
-      _streamReader = new StreamReaderImpl(path.openRead());
+      _streamReader = new XMLStreamReaderImpl(path.openRead());
     }
     catch (XMLStreamException ex) {
       log.log(Level.WARNING, ex.toString(), ex);

@@ -34,7 +34,7 @@ import javax.xml.stream.events.*;
 import javax.xml.stream.util.*;
 import javax.xml.transform.*;
 
-public class DefaultXMLEventAllocator implements XMLEventAllocator {
+public class XMLEventAllocatorImpl implements XMLEventAllocator {
 
   public XMLEvent allocate(XMLStreamReader reader)
     throws XMLStreamException
@@ -52,7 +52,7 @@ public class DefaultXMLEventAllocator implements XMLEventAllocator {
 
   public XMLEventAllocator newInstance()
   {
-    return new DefaultXMLEventAllocator();
+    return new XMLEventAllocatorImpl();
   }
 
 }

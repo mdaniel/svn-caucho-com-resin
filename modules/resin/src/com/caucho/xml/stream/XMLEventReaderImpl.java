@@ -34,29 +34,29 @@ import java.util.*;
 import java.io.*;
 import com.caucho.vfs.*;
 
-public class StreamEventReader implements XMLEventReader {
+public class XMLEventReaderImpl implements XMLEventReader {
 
-  public StreamEventReader(Reader r)
+  public XMLEventReaderImpl(Reader r)
   {
     throw new UnsupportedOperationException();
   }
 
-  public StreamEventReader(InputStream is)
+  public XMLEventReaderImpl(InputStream is)
   {
     throw new UnsupportedOperationException();
   }
 
-  public StreamEventReader(Reader r, String systemId)
+  public XMLEventReaderImpl(Reader r, String systemId)
   {
     throw new UnsupportedOperationException();
   }
 
-  public StreamEventReader(InputStream is, String systemId)
+  public XMLEventReaderImpl(InputStream is, String systemId)
   {
     throw new UnsupportedOperationException();
   }
 
-  public StreamEventReader(XMLStreamReader xsr)
+  public XMLEventReaderImpl(XMLStreamReader xsr)
   {
     throw new UnsupportedOperationException();
   }

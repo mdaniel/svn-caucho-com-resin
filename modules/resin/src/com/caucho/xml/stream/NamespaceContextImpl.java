@@ -42,7 +42,7 @@ import com.caucho.vfs.*;
 /**
  *  Maintains a stack of namespace contexts
  */
-public class NamespaceTracker implements NamespaceContext {
+public class NamespaceContextImpl implements NamespaceContext {
 
   private Context _context = new Context();
   private int _uniquifier = 0;

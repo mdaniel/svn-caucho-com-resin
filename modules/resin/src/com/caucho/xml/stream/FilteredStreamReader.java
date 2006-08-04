@@ -37,7 +37,7 @@ import javax.xml.stream.*;
 
 import com.caucho.util.*;
 
-public class FilteredStreamReader implements XMLStreamReader {
+class FilteredStreamReader implements XMLStreamReader {
 
   public FilteredStreamReader(XMLStreamReader reader,
                               StreamFilter filter)

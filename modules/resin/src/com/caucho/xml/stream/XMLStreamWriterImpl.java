@@ -39,12 +39,12 @@ import javax.xml.stream.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
-public class StreamWriterImpl implements XMLStreamWriter {
+public class XMLStreamWriterImpl implements XMLStreamWriter {
   private static final Logger log
-    = Logger.getLogger(StreamReaderImpl.class.getName());
+    = Logger.getLogger(XMLStreamReaderImpl.class.getName());
 
   private WriteStream _ws;
-  private NamespaceTracker _tracker = new NamespaceTracker();
+  private NamespaceContextImpl _tracker = new NamespaceContextImpl();
 
   private QName _pendingTagName = null;
   private boolean _shortTag = false;
@@ -85,7 +85,7 @@ public class StreamWriterImpl implements XMLStreamWriter {
     }
   }
 
-  public StreamWriterImpl(WriteStream ws)
+  public XMLStreamWriterImpl(WriteStream ws)
   {
     _ws = ws;
   }

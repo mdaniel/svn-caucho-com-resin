@@ -35,7 +35,7 @@ import javax.xml.transform.*;
 
 public class XMLInputFactoryImpl extends XMLInputFactory {
 
-  private XMLEventAllocator _allocator = new DefaultXMLEventAllocator();
+  private XMLEventAllocator _allocator = new XMLEventAllocatorImpl();
   private XMLReporter _reporter;
   private XMLResolver _resolver;
 
@@ -61,7 +61,7 @@ public class XMLInputFactoryImpl extends XMLInputFactory {
     createXMLEventReader(InputStream stream)
     throws XMLStreamException
   {
-    return new StreamEventReader(stream);
+    return new XMLEventReaderImpl(stream);
   }
 
   public XMLEventReader 
@@ -70,7 +70,7 @@ public class XMLInputFactoryImpl extends XMLInputFactory {
   {
     try {
       InputStreamReader isr = new InputStreamReader(stream, encoding);
-      return new StreamEventReader(isr);
+      return new XMLEventReaderImpl(isr);
     }
     catch (IOException e) {
       throw new XMLStreamException(e);
@@ -81,7 +81,7 @@ public class XMLInputFactoryImpl extends XMLInputFactory {
     createXMLEventReader(Reader reader)
     throws XMLStreamException
   {
-    return new StreamEventReader(reader);
+    return new XMLEventReaderImpl(reader);
   }
 
   /**
@@ -98,28 +98,28 @@ public class XMLInputFactoryImpl extends XMLInputFactory {
     createXMLEventReader(String systemId, InputStream stream)
     throws XMLStreamException
   {
-    return new StreamEventReader(stream, systemId);
+    return new XMLEventReaderImpl(stream, systemId);
   }
 
   public XMLEventReader 
     createXMLEventReader(String systemId, Reader reader)
     throws XMLStreamException
   {
-    return new StreamEventReader(reader, systemId);
+    return new XMLEventReaderImpl(reader, systemId);
   }
 
   public XMLEventReader 
     createXMLEventReader(XMLStreamReader reader)
     throws XMLStreamException
   {
-    return new StreamEventReader(reader);
+    return new XMLEventReaderImpl(reader);
   }
 
   public XMLStreamReader 
     createXMLStreamReader(InputStream stream)
     throws XMLStreamException
   {
-    return new StreamReaderImpl(stream);
+    return new XMLStreamReaderImpl(stream);
   }
 
   public XMLStreamReader 
@@ -128,7 +128,7 @@ public class XMLInputFactoryImpl extends XMLInputFactory {
   {
     try {
       InputStreamReader isr = new InputStreamReader(stream, encoding);
-      return new StreamReaderImpl(isr);
+      return new XMLStreamReaderImpl(isr);
     }
     catch (IOException e) {
       throw new XMLStreamException(e);
@@ -139,7 +139,7 @@ public class XMLInputFactoryImpl extends XMLInputFactory {
     createXMLStreamReader(Reader reader)
     throws XMLStreamException
   {
-    return new StreamReaderImpl(reader);
+    return new XMLStreamReaderImpl(reader);
   }
 
   /**
@@ -156,14 +156,14 @@ public class XMLInputFactoryImpl extends XMLInputFactory {
     createXMLStreamReader(String systemId, InputStream stream)
     throws XMLStreamException
   {
-    return new StreamReaderImpl(stream, systemId);
+    return new XMLStreamReaderImpl(stream, systemId);
   }
 
   public XMLStreamReader 
     createXMLStreamReader(String systemId, Reader reader)
     throws XMLStreamException
   {
-    return new StreamReaderImpl(reader, systemId);
+    return new XMLStreamReaderImpl(reader, systemId);
   }
 
   public XMLEventAllocator getEventAllocator()

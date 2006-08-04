@@ -43,7 +43,7 @@ public class XMLOutputFactoryImpl extends XMLOutputFactory {
   public XMLEventWriter createXMLEventWriter(OutputStream stream)
     throws XMLStreamException
   {
-    return new StreamEventWriter(Vfs.openWrite(stream));
+    return new XMLEventWriterImpl(Vfs.openWrite(stream));
   }
 
   public XMLEventWriter createXMLEventWriter(OutputStream stream,
@@ -52,7 +52,7 @@ public class XMLOutputFactoryImpl extends XMLOutputFactory {
   {
     try {
       OutputStreamWriter osw = new OutputStreamWriter(stream, encoding);
-      return new StreamEventWriter(Vfs.openWrite(osw));
+      return new XMLEventWriterImpl(Vfs.openWrite(osw));
     }
     catch (IOException e) {
       throw new XMLStreamException(e);
@@ -71,13 +71,13 @@ public class XMLOutputFactoryImpl extends XMLOutputFactory {
   public XMLEventWriter createXMLEventWriter(Writer stream)
     throws XMLStreamException
   {
-    return new StreamEventWriter(Vfs.openWrite(stream));
+    return new XMLEventWriterImpl(Vfs.openWrite(stream));
   }
 
   public XMLStreamWriter createXMLStreamWriter(OutputStream stream)
     throws XMLStreamException
   {
-    return new StreamWriterImpl(Vfs.openWrite(stream));
+    return new XMLStreamWriterImpl(Vfs.openWrite(stream));
   }
 
   public XMLStreamWriter createXMLStreamWriter(OutputStream stream,
@@ -86,7 +86,7 @@ public class XMLOutputFactoryImpl extends XMLOutputFactory {
   {
     try {
       OutputStreamWriter osw = new OutputStreamWriter(stream, encoding);
-      return new StreamWriterImpl(Vfs.openWrite(osw));
+      return new XMLStreamWriterImpl(Vfs.openWrite(osw));
     }
     catch (IOException e) {
       throw new XMLStreamException(e);
@@ -105,7 +105,7 @@ public class XMLOutputFactoryImpl extends XMLOutputFactory {
   public XMLStreamWriter createXMLStreamWriter(Writer stream)
     throws XMLStreamException
   {
-    return new StreamWriterImpl(Vfs.openWrite(stream));
+    return new XMLStreamWriterImpl(Vfs.openWrite(stream));
   }
 
   public Object getProperty(String name)

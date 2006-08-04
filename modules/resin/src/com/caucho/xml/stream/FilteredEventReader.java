@@ -38,7 +38,7 @@ import javax.xml.stream.*;
 
 import com.caucho.util.*;
 
-public class FilteredEventReader implements XMLEventReader {
+class FilteredEventReader implements XMLEventReader {
 
   public FilteredEventReader(XMLEventReader reader,
                              EventFilter filter)
