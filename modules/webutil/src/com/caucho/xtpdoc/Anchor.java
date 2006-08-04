@@ -75,14 +75,22 @@ public class Anchor extends FormattedText {
     _href = href;
   }
 
-  public void writeHtml(PrintWriter writer)
+  public void writeHtml(PrintWriter out)
     throws IOException
   {
-    writer.print("<a href='" + _href + "'>");
+    if (_href.startsWith("javadoc|")) {
+      String name = _href.substring("javadoc|".length());
 
-    super.writeHtml(writer);
+      name = name.replace('.', '/') + ".html";
+      
+      out.print("<a href='http://www.caucho.com/resin-javadoc/" + name + "'>");
+    }
+    else
+      out.print("<a href='" + _href + "'>");
 
-    writer.print("</a>");
+    super.writeHtml(out);
+
+    out.print("</a>");
   }
 
   public void writeLaTeX(PrintWriter writer)

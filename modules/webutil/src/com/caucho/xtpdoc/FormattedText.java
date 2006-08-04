@@ -60,6 +60,11 @@ public class FormattedText implements ContentItem, ObjectWithParent {
     _contentItems.add(new Text(text));
   }
 
+  public void addG(GlossaryText text)
+  {
+    _contentItems.add(text);
+  }
+
   public void addI(ItalicizedText text)
   {
     _contentItems.add(text);

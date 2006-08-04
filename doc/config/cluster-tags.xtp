@@ -37,8 +37,9 @@ performance and reduce database load by several orders of magnitude.</p>
 <p>The proxy cache uses a combination of a memory cache and a disk-based
 cache to save large amounts of data with little overhead.</p>
 
-<p>Management of the proxy cache uses the ProxyCacheMXBean with
-the ObjectName <var>resin:type=ProxyCache</var>.</p>
+<p>Management of the proxy cache uses the
+<a href="javadoc|com.caucho.management.server.ProxyCacheMXBean">ProxyCacheMXBean</a> with
+the <g>ObjectName</g> <var>resin:type=ProxyCache</var>.</p>
 
 <deftable-childtags>
 <tr><td>path</td>
@@ -338,13 +339,8 @@ tag of the &lt;session-config>.</p>
 <example>
 &lt;resin xmlns="http://caucho.com/ns/resin">
 &lt;cluster>
-  &lt;server id="a">
-    &lt;cluster-port address="192.168.0.1" port="6800"/>
-  &lt;/server>
-
-  &lt;server id="b">
-    &lt;cluster-port address="192.168.0.2" port="6800"/>
-  &lt;/server>
+  &lt;server id="a" address="192.168.0.1" port="6800"/>
+  &lt;server id="b" address="192.168.0.2" port="6800"/>
 
   &lt;persistent-store type="jdbc">
     &lt;init>
@@ -472,7 +468,7 @@ PingThread will catch errors like deadlocks.</p>
 
 <p>
 The class that corresponds to &lt;ping&gt; is 
-<a href="javadoc|com.caucho.server.admin.PingThread|"/>.  
+<a href="javadoc|com.caucho.server.admin.PingThread|">PingThread</a>.  
 </p>
 
 <s2 title="Mail notification when ping fails">
@@ -484,7 +480,7 @@ restarted.</p>
 &lt;resin xmlns="http://caucho.com/ns/resin"
        xmlns:resin="http://caucho.com/ns/resin/core"&gt;
   ...
-  &lt;server&gt;
+  &lt;cluster id="web-tier"&gt;
     &lt;ping resin:type="com.caucho.server.admin.PingMailer"&gt;
       &lt;url&gt;http://localhost:8080/index.jsp&lt;/url&gt;
       &lt;url&gt;http://localhost:8080/webapp/index.jsp&lt;/url&gt;
@@ -502,13 +498,35 @@ restarted.</p>
 
 <defun title="rewrite-dispatch" version="Resin 3.1">
 <parents>cluster</parents>
+
+<p>&lt;rewrite-dispatch> defines a set of rewriting rules for
+dispatching and forwarding URLs.  Applications can use these rules
+to redirect old URLs to their new replacements.</p>
+
+<p>See <a href="rewrite-dispatch.xtp">rewrite-dispatch</a> for more
+details.</p>
+
+<example title="rewrite-dispatch">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+    &lt;cluster id="web-tier"&gt;
+
+        &lt;rewrite-dispatch>
+            &lt;redirect regexp="^http://www.foo.com"
+                      target="http://bar.com/foo"/>
+        &lt;/rewrite-dispatch>
+  
+    &lt;/cluster>
+&lt;/resin>
+</example>
+
 </defun>
 
 <defun title="root-directory" version="Resin 3.1">
 <parents>cluster</parents>
 
-<p>Configures the root directory for files within the cluster.
-All paths in the &lt;cluster> will be relative to the root directory.</p>
+<p>&lt;root-directory> configures the root directory for files
+within the cluster.  All paths in the &lt;cluster> will be relative
+to the root directory.</p>
 
 <default>The root-directory of the &lt;resin> tag.</default>
 
@@ -536,11 +554,39 @@ the -server-id command line argument.</p>
 
 <p>See the full <a href="server-tags.xtp">server configuration</a>.</p>
 
+<p>The current server is managed with a
+<a href="javadoc|com.caucho.management.server.ServerMXBean">ServerMXBean</a>.
+The ObjectName is <var>resin:type=Server</var>.</p>
+
+<p>Peer servers are managed with 
+<a href="javadoc|com.caucho.management.server.ServerConnectorMXBean">ServerConnectorMXBean</a>. The ObjectName is <var>resin:type=ServerConnector,name=server-id</var>.</p>
+
 <deftable-childtags>
 <tr><td>id</td>
     <td>unique server identifier</td>
     <td>required</td></tr>
 </deftable-childtags>
+
+<example title="server">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+    &lt;cluster id="web-tier">
+        &lt;server id="a" address="192.168.0.10" server-port="6800">
+          &lt;http port="8080"/>
+        &lt;/server>
+
+        &lt;server id="b" address="192.168.0.11" server-port="6800">
+          &lt;http port="8080"/>
+        &lt;/server>
+
+        &lt;server id="c" address="192.168.0.12" server-port="6800">
+          &lt;http port="8080"/>
+        &lt;/server>
+
+        &lt;host id="">
+          ...
+    &lt;/cluster>
+&lt;/resin>
+</example>
 
 </defun>
 
@@ -549,6 +595,25 @@ the -server-id command line argument.</p>
 
 <p>Defines default values for all &lt;server> instances. See
 <a href="server-tags.xtp">server configuration</a> for more details.</p>
+
+<example title="server">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+    &lt;cluster id="web-tier">
+        &lt;server-default>
+            &lt;server-port>6800&lt;/server-port>
+
+            &lt;http port="8080"/>
+        &lt;/server-default>
+
+        &lt;server id="a" address="192.168.0.10"/>
+        &lt;server id="b" address="192.168.0.11"/>
+        &lt;server id="c" address="192.168.0.12"/>
+
+        &lt;host id="">
+          ...
+    &lt;/cluster>
+&lt;/resin>
+</example>
 
 </defun>
 
@@ -572,22 +637,79 @@ HTTP client.</p>
 
 <defun title="session-cookie" version="Resin 3.1">
 <parents>cluster</parents>
+
+<p>Configures the cookie used for servlet sessions.</p>
+
+<default>JSESSIONID</default>
+
 </defun>
 
 <defun title="session-url-prefix" version="Resin 3.1">
 <parents>cluster</parents>
+
+<p>Configures the URL prefix used for session rewriting.</p>
+
+<note>Session rewriting is discouraged as a potential security issue.</note>
+
+<default>;jsessionid=</default>
+
 </defun>
 
 <defun title="ssl-session-cookie" version="Resin 3.1">
 <parents>cluster</parents>
+
+<p>Defines an alternative session cookie to be used for a SSL
+connection.  Having two separate cookies increases security.</p>
+
+<default>value of session-cookie</default>
+
+<example>
+&lt;resin xmlns="http://caucho.com/ns/resin">
+    &lt;cluster id="web-tier">
+        &lt;ssl-session-cookie>SSLJSESSIONID&lt;/ssl-session-cookie>
+        ...
+    &lt;/cluster>
+&lt;/resin>
+</example>
+
 </defun>
 
 <defun title="url-character-encoding" version="Resin 3.1">
 <parents>cluster</parents>
+
+<p>Defines the character encoding for decoding URLs.</p>
+
+<p>The HTTP specification does not define the character-encoding for
+URLs, so the server must make assumptions about the encoding.</p>
+
+<default>UTF-8</default>
+
 </defun>
 
 <defun title="web-app-default" version="Resin 3.1">
 <parents>cluster</parents>
+
+<p>&lt;web-app-default> defines default values for any <g>web-app</g> in
+the cluster.</p>
+
+<example title="web-app-default">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+    &lt;cluster id="app-tier">
+
+        &lt;web-app-default>
+            &lt;servlet servlet-name="resin-php"
+                     servlet-class="com.caucho.quercus.servlet.QuercusServlet"/>
+
+            &lt;servlet-mapping url-pattern="*.php"
+                             servlet-name="resin-php"/>
+        &lt;/web-app-default>
+
+        &lt;host id="">
+          ...
+    &lt;/cluster>
+&lt;/resin>
+</example>
+
 </defun>
 
 </s1>
