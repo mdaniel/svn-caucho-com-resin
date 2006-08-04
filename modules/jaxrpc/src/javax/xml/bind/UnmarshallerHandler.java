@@ -30,11 +30,9 @@
 package javax.xml.bind;
 import org.xml.sax.*;
 
-/** XXX */
 public interface UnmarshallerHandler extends ContentHandler {
 
-  /** XXX */
-  abstract Object getResult() throws JAXBException, IllegalStateException;
+  Object getResult() throws JAXBException, IllegalStateException;
 
 }
 

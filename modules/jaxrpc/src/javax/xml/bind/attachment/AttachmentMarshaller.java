@@ -30,30 +30,26 @@
 package javax.xml.bind.attachment;
 import javax.activation.*;
 
-/** XXX */
 public abstract class AttachmentMarshaller {
+
   public AttachmentMarshaller()
   {
-    throw new UnsupportedOperationException();
   }
 
+  public abstract String addMtomAttachment(byte[] data, int offset,
+                                           int length, String mimeType,
+                                           String elementNamespace,
+                                           String elementLocalName);
 
-  /** XXX */
-  public abstract String addMtomAttachment(byte[] data, int offset, int length, String mimeType, String elementNamespace, String elementLocalName);
+  public abstract String addMtomAttachment(DataHandler data,
+                                           String elementNamespace,
+                                           String elementLocalName);
 
-
-  /** XXX */
-  public abstract String addMtomAttachment(DataHandler data, String elementNamespace, String elementLocalName);
-
-
-  /** XXX */
   public abstract String addSwaRefAttachment(DataHandler data);
 
-
-  /** XXX */
   public boolean isXOPPackage()
   {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException("XOP not yet supported");
   }
 
 }

@@ -29,11 +29,9 @@
 
 package javax.xml.bind;
 
-/** XXX */
 public interface ValidationEventHandler {
 
-  /** XXX */
-  abstract boolean handleEvent(ValidationEvent event);
+  boolean handleEvent(ValidationEvent event);
 
 }
 

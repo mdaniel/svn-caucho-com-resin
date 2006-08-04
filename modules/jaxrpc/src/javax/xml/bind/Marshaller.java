@@ -38,130 +38,78 @@ import javax.xml.validation.*;
 import javax.xml.bind.annotation.adapters.*;
 import javax.xml.bind.Marshaller.*;
 
-/** XXX */
 public interface Marshaller {
 
-  /** XXX */
   static final String JAXB_ENCODING="jaxb.encoding";
 
-
-  /** XXX */
   static final String JAXB_FORMATTED_OUTPUT="jaxb.formatted.output";
 
-
-  /** XXX */
   static final String JAXB_FRAGMENT="jaxb.fragment";
 
+  static final String JAXB_NO_NAMESPACE_SCHEMA_LOCATION
+    = "jaxb.noNamespaceSchemaLocation";
 
-  /** XXX */
-  static final String JAXB_NO_NAMESPACE_SCHEMA_LOCATION="jaxb.noNamespaceSchemaLocation";
-
-
-  /** XXX */
   static final String JAXB_SCHEMA_LOCATION="jaxb.schemaLocation";
 
+  <A extends XmlAdapter> A getAdapter(Class<A> type);
 
-  /** XXX */
-  abstract <A extends XmlAdapter> A getAdapter(Class<A> type);
+  AttachmentMarshaller getAttachmentMarshaller();
 
-  abstract AttachmentMarshaller getAttachmentMarshaller();
+  ValidationEventHandler getEventHandler() throws JAXBException;
 
+  Listener getListener();
 
-  /** XXX */
-  abstract ValidationEventHandler getEventHandler() throws JAXBException;
+  Node getNode(Object contentTree) throws JAXBException;
 
+  Object getProperty(String name) throws PropertyException;
 
-  /** XXX */
-  abstract Listener getListener();
+  Schema getSchema();
 
+  void marshal(Object jaxbElement, ContentHandler handler)
+    throws JAXBException;
 
-  /** XXX */
-  abstract Node getNode(Object contentTree) throws JAXBException;
+  void marshal(Object jaxbElement, Node node) throws JAXBException;
 
+  void marshal(Object jaxbElement, OutputStream os)
+    throws JAXBException;
 
-  /** XXX */
-  abstract Object getProperty(String name) throws PropertyException;
+  void marshal(Object jaxbElement, Result result) throws JAXBException;
 
+  void marshal(Object jaxbElement, Writer writer) throws JAXBException;
 
-  /** XXX */
-  abstract Schema getSchema();
+  void marshal(Object jaxbElement, XMLEventWriter writer)
+    throws JAXBException;
 
+  void marshal(Object jaxbElement, XMLStreamWriter writer)
+    throws JAXBException;
 
-  /** XXX */
-  abstract void marshal(Object jaxbElement, ContentHandler handler) throws JAXBException;
+  <A extends XmlAdapter> void setAdapter(Class<A> type, A adapter);
 
+  void setAdapter(XmlAdapter adapter);
 
-  /** XXX */
-  abstract void marshal(Object jaxbElement, Node node) throws JAXBException;
+  void setAttachmentMarshaller(AttachmentMarshaller am);
 
+  void setEventHandler(ValidationEventHandler handler)
+    throws JAXBException;
 
-  /** XXX */
-  abstract void marshal(Object jaxbElement, OutputStream os) throws JAXBException;
+  void setListener(Listener listener);
 
+  void setProperty(String name, Object value) throws PropertyException;
 
-  /** XXX */
-  abstract void marshal(Object jaxbElement, Result result) throws JAXBException;
+  void setSchema(Schema schema);
 
+  public static class Listener {
 
-  /** XXX */
-  abstract void marshal(Object jaxbElement, Writer writer) throws JAXBException;
-
-
-  /** XXX */
-  abstract void marshal(Object jaxbElement, XMLEventWriter writer) throws JAXBException;
-
-
-  /** XXX */
-  abstract void marshal(Object jaxbElement, XMLStreamWriter writer) throws JAXBException;
-
-
-  /** XXX */
-  abstract <A extends XmlAdapter> void setAdapter(Class<A> type, A adapter);
-
-
-  /** XXX */
-  abstract void setAdapter(XmlAdapter adapter);
-
-
-  /** XXX */
-  abstract void setAttachmentMarshaller(AttachmentMarshaller am);
-
-
-  /** XXX */
-  abstract void setEventHandler(ValidationEventHandler handler) throws JAXBException;
-
-
-  /** XXX */
-  abstract void setListener(Listener listener);
-
-
-  /** XXX */
-  abstract void setProperty(String name, Object value) throws PropertyException;
-
-
-  /** XXX */
-  abstract void setSchema(Schema schema);
-
-
-  /** XXX */
-  public static abstract class Listener {
     public Listener()
     {
-      throw new UnsupportedOperationException();
     }
 
-
-    /** XXX */
     public void afterMarshal(Object source)
     {
-      throw new UnsupportedOperationException();
     }
 
-
-    /** XXX */
     public void beforeMarshal(Object source)
     {
-      throw new UnsupportedOperationException();
     }
 
   }

@@ -31,31 +31,19 @@ package javax.xml.bind;
 import org.w3c.dom.*;
 import java.net.*;
 
-/** XXX */
 public interface ValidationEventLocator {
 
-  /** XXX */
-  abstract int getColumnNumber();
+  int getColumnNumber();
 
+  int getLineNumber();
 
-  /** XXX */
-  abstract int getLineNumber();
+  Node getNode();
 
+  Object getObject();
 
-  /** XXX */
-  abstract Node getNode();
+  int getOffset();
 
-
-  /** XXX */
-  abstract Object getObject();
-
-
-  /** XXX */
-  abstract int getOffset();
-
-
-  /** XXX */
-  abstract URL getURL();
+  URL getURL();
 
 }
 

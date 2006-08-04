@@ -29,41 +29,33 @@
 
 package javax.xml.bind;
 
-/** XXX */
+/* indicates that an error has occurred while performing a validate operation */
 public class ValidationException extends JAXBException {
 
-  /** XXX */
   public ValidationException(String message)
   {
-    throw new UnsupportedOperationException();
+    super(message);
   }
 
-
-  /** XXX */
   public ValidationException(String message, String errorCode)
   {
-    throw new UnsupportedOperationException();
+    super(message, errorCode);
   }
 
-
-  /** XXX */
-  public ValidationException(String message, String errorCode, Throwable exception)
+  public ValidationException(String message, String errorCode,
+                             Throwable exception)
   {
-    throw new UnsupportedOperationException();
+    super(message, errorCode, exception);
   }
 
-
-  /** XXX */
   public ValidationException(String message, Throwable exception)
   {
-    throw new UnsupportedOperationException();
+    super(message, exception);
   }
 
-
-  /** XXX */
   public ValidationException(Throwable exception)
   {
-    throw new UnsupportedOperationException();
+    super(exception);
   }
 
 }

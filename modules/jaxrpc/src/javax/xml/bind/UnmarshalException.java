@@ -29,41 +29,32 @@
 
 package javax.xml.bind;
 
-/** XXX */
 public class UnmarshalException extends JAXBException {
 
-  /** XXX */
   public UnmarshalException(String message)
   {
-    throw new UnsupportedOperationException();
+    super(message);
   }
 
-
-  /** XXX */
   public UnmarshalException(String message, String errorCode)
   {
-    throw new UnsupportedOperationException();
+    super(message, errorCode);
   }
 
-
-  /** XXX */
-  public UnmarshalException(String message, String errorCode, Throwable exception)
+  public UnmarshalException(String message, String errorCode,
+                            Throwable exception)
   {
-    throw new UnsupportedOperationException();
+    super(message, errorCode, exception);
   }
 
-
-  /** XXX */
   public UnmarshalException(String message, Throwable exception)
   {
-    throw new UnsupportedOperationException();
+    super(message, exception);
   }
 
-
-  /** XXX */
   public UnmarshalException(Throwable exception)
   {
-    throw new UnsupportedOperationException();
+    super(exception);
   }
 
 }

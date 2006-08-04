@@ -29,48 +29,37 @@
 
 package javax.xml.bind;
 
-/** XXX */
 public class PropertyException extends JAXBException {
 
-  /** XXX */
   public PropertyException(String message)
   {
-    throw new UnsupportedOperationException();
+    super(message);
   }
 
-
-  /** XXX */
   public PropertyException(String name, Object value)
   {
-    throw new UnsupportedOperationException();
+    super("name=\""+name+"\", value=\""+value+"\"");
   }
 
-
-  /** XXX */
   public PropertyException(String message, String errorCode)
   {
-    throw new UnsupportedOperationException();
+    super(message, errorCode);
   }
 
-
-  /** XXX */
-  public PropertyException(String message, String errorCode, Throwable exception)
+  public PropertyException(String message, String errorCode,
+                           Throwable exception)
   {
-    throw new UnsupportedOperationException();
+    super(message, errorCode, exception);
   }
 
-
-  /** XXX */
   public PropertyException(String message, Throwable exception)
   {
-    throw new UnsupportedOperationException();
+    super(message, exception);
   }
 
-
-  /** XXX */
   public PropertyException(Throwable exception)
   {
-    throw new UnsupportedOperationException();
+    super(exception);
   }
 
 }

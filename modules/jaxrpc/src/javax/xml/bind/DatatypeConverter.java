@@ -32,279 +32,203 @@ import javax.xml.namespace.*;
 import java.math.*;
 import java.util.*;
 
-/** XXX */
 public final class DatatypeConverter {
 
-  /** XXX */
+  private static DatatypeConverterInterface _converter = null;
+
   public static String parseAnySimpleType(String lexicalXSDAnySimpleType)
   {
-    throw new UnsupportedOperationException();
+    return _converter.parseAnySimpleType(lexicalXSDAnySimpleType);
   }
 
-
-  /** XXX */
   public static byte[] parseBase64Binary(String lexicalXSDBase64Binary)
   {
-    throw new UnsupportedOperationException();
+    return _converter.parseBase64Binary(lexicalXSDBase64Binary);
   }
 
-
-  /** XXX */
   public static boolean parseBoolean(String lexicalXSDBoolean)
   {
-    throw new UnsupportedOperationException();
+    return _converter.parseBoolean(lexicalXSDBoolean);
   }
 
-
-  /** XXX */
   public static byte parseByte(String lexicalXSDByte)
   {
-    throw new UnsupportedOperationException();
+    return _converter.parseByte(lexicalXSDByte);
   }
 
-
-  /** XXX */
   public static Calendar parseDate(String lexicalXSDDate)
   {
-    throw new UnsupportedOperationException();
+    return _converter.parseDate(lexicalXSDDate);
   }
 
-
-  /** XXX */
   public static Calendar parseDateTime(String lexicalXSDDateTime)
   {
-    throw new UnsupportedOperationException();
+    return _converter.parseDateTime(lexicalXSDDateTime);
   }
 
-
-  /** XXX */
   public static BigDecimal parseDecimal(String lexicalXSDDecimal)
   {
-    throw new UnsupportedOperationException();
+    return _converter.parseDecimal(lexicalXSDDecimal);
   }
 
-
-  /** XXX */
   public static double parseDouble(String lexicalXSDDouble)
   {
-    throw new UnsupportedOperationException();
+    return _converter.parseDouble(lexicalXSDDouble);
   }
 
-
-  /** XXX */
   public static float parseFloat(String lexicalXSDFloat)
   {
-    throw new UnsupportedOperationException();
+    return _converter.parseFloat(lexicalXSDFloat);
   }
 
-
-  /** XXX */
   public static byte[] parseHexBinary(String lexicalXSDHexBinary)
   {
-    throw new UnsupportedOperationException();
+    return _converter.parseHexBinary(lexicalXSDHexBinary);
   }
 
-
-  /** XXX */
   public static int parseInt(String lexicalXSDInt)
   {
-    throw new UnsupportedOperationException();
+    return _converter.parseInt(lexicalXSDInt);
   }
 
-
-  /** XXX */
   public static BigInteger parseInteger(String lexicalXSDInteger)
   {
-    throw new UnsupportedOperationException();
+    return _converter.parseInteger(lexicalXSDInteger);
   }
 
-
-  /** XXX */
   public static long parseLong(String lexicalXSDLong)
   {
-    throw new UnsupportedOperationException();
+    return _converter.parseLong(lexicalXSDLong);
   }
 
-
-  /** XXX */
   public static QName parseQName(String lexicalXSDQName, NamespaceContext nsc)
   {
-    throw new UnsupportedOperationException();
+    return _converter.parseQName(lexicalXSDQName, nsc);
   }
 
-
-  /** XXX */
   public static short parseShort(String lexicalXSDShort)
   {
-    throw new UnsupportedOperationException();
+    return _converter.parseShort(lexicalXSDShort);
   }
 
-
-  /** XXX */
   public static String parseString(String lexicalXSDString)
   {
-    throw new UnsupportedOperationException();
+    return _converter.parseString(lexicalXSDString);
   }
 
-
-  /** XXX */
   public static Calendar parseTime(String lexicalXSDTime)
   {
-    throw new UnsupportedOperationException();
+    return _converter.parseTime(lexicalXSDTime);
   }
 
-
-  /** XXX */
   public static long parseUnsignedInt(String lexicalXSDUnsignedInt)
   {
-    throw new UnsupportedOperationException();
+    return _converter.parseUnsignedInt(lexicalXSDUnsignedInt);
   }
 
-
-  /** XXX */
   public static int parseUnsignedShort(String lexicalXSDUnsignedShort)
   {
-    throw new UnsupportedOperationException();
+    return _converter.parseUnsignedShort(lexicalXSDUnsignedShort);
   }
 
-
-  /** XXX */
   public static String printAnySimpleType(String val)
   {
-    throw new UnsupportedOperationException();
+    return _converter.printAnySimpleType(val);
   }
 
-
-  /** XXX */
   public static String printBase64Binary(byte[] val)
   {
-    throw new UnsupportedOperationException();
+    return _converter.printBase64Binary(val);
   }
 
-
-  /** XXX */
   public static String printBoolean(boolean val)
   {
-    throw new UnsupportedOperationException();
+    return _converter.printBoolean(val);
   }
 
-
-  /** XXX */
   public static String printByte(byte val)
   {
-    throw new UnsupportedOperationException();
+    return _converter.printByte(val);
   }
 
-
-  /** XXX */
   public static String printDate(Calendar val)
   {
-    throw new UnsupportedOperationException();
+    return _converter.printDate(val);
   }
 
-
-  /** XXX */
   public static String printDateTime(Calendar val)
   {
-    throw new UnsupportedOperationException();
+    return _converter.printDateTime(val);
   }
 
-
-  /** XXX */
   public static String printDecimal(BigDecimal val)
   {
-    throw new UnsupportedOperationException();
+    return _converter.printDecimal(val);
   }
 
-
-  /** XXX */
   public static String printDouble(double val)
   {
-    throw new UnsupportedOperationException();
+    return _converter.printDouble(val);
   }
 
-
-  /** XXX */
   public static String printFloat(float val)
   {
-    throw new UnsupportedOperationException();
+    return _converter.printFloat(val);
   }
 
-
-  /** XXX */
   public static String printHexBinary(byte[] val)
   {
-    throw new UnsupportedOperationException();
+    return _converter.printHexBinary(val);
   }
 
-
-  /** XXX */
   public static String printInt(int val)
   {
-    throw new UnsupportedOperationException();
+    return _converter.printInt(val);
   }
 
-
-  /** XXX */
   public static String printInteger(BigInteger val)
   {
-    throw new UnsupportedOperationException();
+    return _converter.printInteger(val);
   }
 
-
-  /** XXX */
   public static String printLong(long val)
   {
-    throw new UnsupportedOperationException();
+    return _converter.printLong(val);
   }
 
-
-  /** XXX */
   public static String printQName(QName val, NamespaceContext nsc)
   {
-    throw new UnsupportedOperationException();
+    return _converter.printQName(val, nsc);
   }
 
-
-  /** XXX */
   public static String printShort(short val)
   {
-    throw new UnsupportedOperationException();
+    return _converter.printShort(val);
   }
 
-
-  /** XXX */
   public static String printString(String val)
   {
-    throw new UnsupportedOperationException();
+    return _converter.printString(val);
   }
 
-
-  /** XXX */
   public static String printTime(Calendar val)
   {
-    throw new UnsupportedOperationException();
+    return _converter.printTime(val);
   }
 
-
-  /** XXX */
   public static String printUnsignedInt(long val)
   {
-    throw new UnsupportedOperationException();
+    return _converter.printUnsignedInt(val);
   }
 
-
-  /** XXX */
   public static String printUnsignedShort(int val)
   {
-    throw new UnsupportedOperationException();
+    return _converter.printUnsignedShort(val);
   }
 
-
-  /** XXX */
   public static void setDatatypeConverter(DatatypeConverterInterface converter)
   {
-    throw new UnsupportedOperationException();
+    _converter = converter;
   }
 
 }

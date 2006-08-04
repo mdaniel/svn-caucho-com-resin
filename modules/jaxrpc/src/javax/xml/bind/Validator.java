@@ -31,16 +31,17 @@ package javax.xml.bind;
 
 public interface Validator {
 
-  abstract ValidationEventHandler getEventHandler() throws JAXBException;
+  ValidationEventHandler getEventHandler() throws JAXBException;
 
-  abstract Object getProperty(String name) throws PropertyException;
+  Object getProperty(String name) throws PropertyException;
 
-  abstract void setEventHandler(ValidationEventHandler handler) throws JAXBException;
-  abstract void setProperty(String name, Object value) throws PropertyException;
+  void setEventHandler(ValidationEventHandler handler) throws JAXBException;
 
-  abstract boolean validate(Object subrootObj) throws JAXBException;
+  void setProperty(String name, Object value) throws PropertyException;
 
-  abstract boolean validateRoot(Object rootObj) throws JAXBException;
+  boolean validate(Object subrootObj) throws JAXBException;
+
+  boolean validateRoot(Object rootObj) throws JAXBException;
 
 }
 

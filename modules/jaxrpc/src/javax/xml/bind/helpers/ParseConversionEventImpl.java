@@ -30,20 +30,23 @@
 package javax.xml.bind.helpers;
 import javax.xml.bind.*;
 
-/** XXX */
-public class ParseConversionEventImpl extends ValidationEventImpl implements ParseConversionEvent {
+public class ParseConversionEventImpl
+  extends ValidationEventImpl
+  implements ParseConversionEvent {
 
-  /** XXX */
-  public ParseConversionEventImpl(int _severity, String _message, ValidationEventLocator _locator)
+  public ParseConversionEventImpl(int severity,
+                                  String message,
+                                  ValidationEventLocator locator)
   {
-    throw new UnsupportedOperationException();
+    super(severity, message, locator, null);
   }
 
-
-  /** XXX */
-  public ParseConversionEventImpl(int _severity, String _message, ValidationEventLocator _locator, Throwable _linkedException)
+  public ParseConversionEventImpl(int severity,
+                                  String message,
+                                  ValidationEventLocator locator,
+                                  Throwable linkedException)
   {
-    throw new UnsupportedOperationException();
+    super(severity, message, locator, linkedException);
   }
 
 }

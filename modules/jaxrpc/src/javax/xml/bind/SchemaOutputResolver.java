@@ -31,16 +31,15 @@ package javax.xml.bind;
 import java.io.*;
 import javax.xml.transform.*;
 
-/** XXX */
 public abstract class SchemaOutputResolver {
+
   public SchemaOutputResolver()
   {
-    throw new UnsupportedOperationException();
   }
 
-
-  /** XXX */
-  public abstract Result createOutput(String namespaceUri, String suggestedFileName) throws IOException;
+  public abstract Result createOutput(String namespaceUri,
+                                      String suggestedFileName)
+    throws IOException;
 
 }
 

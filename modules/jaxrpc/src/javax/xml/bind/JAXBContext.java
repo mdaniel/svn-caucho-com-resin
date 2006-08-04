@@ -42,22 +42,23 @@ public abstract class JAXBContext {
   {
   }
 
-
+  /** subclasses must override */
   public Binder<Node> createBinder()
   {
-    throw new UnsupportedOperationException();
+    return null;
   }
 
-
+  /** subclasses must override */
   public <T> Binder<T> createBinder(Class<T> domType)
   {
-    throw new UnsupportedOperationException();
-  }
+    return null;
 
+  }
   
+  /** subclasses must override */
   public JAXBIntrospector createJAXBIntrospector()
   {
-    throw new UnsupportedOperationException();
+    return null;
   }
 
   public abstract Marshaller createMarshaller() throws JAXBException;
@@ -66,19 +67,20 @@ public abstract class JAXBContext {
 
   public Validator createValidator() throws JAXBException
   {
-    throw new UnsupportedOperationException("javax.xml.bind.Validator was removed in JAXB 2.0");
+    String message = "javax.xml.bind.Validator was removed in JAXB 2.0";
+    throw new UnsupportedOperationException(message);
   }
   
-  public void generateSchema(SchemaOutputResolver outputResolver) throws IOException
+  /** subclasses must override */
+  public void generateSchema(SchemaOutputResolver outputResolver)
+    throws IOException
   {
-    throw new UnsupportedOperationException();
   }
 
   public static JAXBContext newInstance(Class... classesToBeBound)
       throws JAXBException
   {
-    return newInstance(classesToBeBound,
-		       null);
+    return newInstance(classesToBeBound, null);
   }
 
   public static JAXBContext newInstance(Class[] classesToBeBound,

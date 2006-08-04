@@ -30,28 +30,34 @@
 package javax.xml.bind.util;
 import javax.xml.transform.sax.*;
 import javax.xml.bind.*;
+import org.xml.sax.*;
 
-/** XXX */
+/** Turn a SAX source into a JAXB value */
 public class JAXBResult extends SAXResult {
 
-  /** XXX */
+  private Object _result = null;
+
   public JAXBResult(JAXBContext context) throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    this(context.createUnmarshaller());
   }
 
-
-  /** XXX */
-  public JAXBResult(Unmarshaller _unmarshaller) throws JAXBException
+  public JAXBResult(Unmarshaller unmarshaller) throws JAXBException
   {
+    super(createContentHandler(unmarshaller));
+  }
+
+  private static ContentHandler createContentHandler(Unmarshaller unmarshaller)
+    throws JAXBException
+  {
+    // there doesn't seem to be a simple SAX ContentHandler->Writer
+    // adapter the comes with 
     throw new UnsupportedOperationException();
   }
 
-
-  /** XXX */
   public Object getResult() throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    return _result;
   }
 
 }

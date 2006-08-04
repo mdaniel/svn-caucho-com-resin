@@ -30,21 +30,34 @@
 package javax.xml.bind.util;
 import javax.xml.transform.sax.*;
 import javax.xml.bind.*;
+import org.xml.sax.*;
+import java.util.*;
+import java.io.*;
 
-/** XXX */
+/** Make the result of a JAXB marshalling look like a SAX source */
 public class JAXBSource extends SAXSource {
 
-  /** XXX */
-  public JAXBSource(JAXBContext context, Object contentObject) throws JAXBException
+  public JAXBSource(JAXBContext context, Object contentObject)
+    throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    super(createInputSource(context.createMarshaller(), contentObject));
   }
 
-
-  /** XXX */
-  public JAXBSource(Marshaller marshaller, Object contentObject) throws JAXBException
+  public JAXBSource(Marshaller marshaller, Object contentObject)
+    throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    super(createInputSource(marshaller, contentObject));
+  }
+
+  private static InputSource createInputSource(Marshaller marshaller,
+                                               Object contentObject)
+    throws JAXBException
+  {
+    // current implementation is very inefficient, but correct
+
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    marshaller.marshal(contentObject, baos);
+    return new InputSource(new ByteArrayInputStream(baos.toByteArray()));
   }
 
 }

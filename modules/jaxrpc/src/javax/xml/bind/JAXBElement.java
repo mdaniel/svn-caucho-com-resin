@@ -31,115 +31,83 @@ package javax.xml.bind;
 import java.io.*;
 import javax.xml.namespace.*;
 
-/** XXX */
 public class JAXBElement<T> implements Serializable {
 
-  /** XXX */
-  protected final Class<T> declaredType=null;
+  protected Class<T> declaredType;
 
+  protected QName name;
 
-  /** XXX */
-  protected final QName name=null;
-
-
-  /** XXX */
   protected boolean nil;
 
+  protected final Class scope;
 
-  /** XXX */
-  protected final Class scope=null;
-
-
-  /** XXX */
   protected JAXBElement value;
 
-
-  /** XXX */
   public JAXBElement(QName name, Class<T> declaredType,
                      Class scope, JAXBElement value)
   {
-    throw new UnsupportedOperationException();
+    this.name = name;
+    this.declaredType = declaredType;
+    this.scope = scope;
+    this.value = value;
+    this.nil = false;
   }
 
-
-  /** XXX */
   public JAXBElement(QName name,
                      Class<T> declaredType, JAXBElement value)
   {
-    throw new UnsupportedOperationException();
+    this(name, declaredType, JAXBElement.GlobalScope.class, value);
   }
 
-
-  /** XXX */
   public Class<T> getDeclaredType()
   {
-    throw new UnsupportedOperationException();
+    return declaredType;
   }
 
-
-  /** XXX */
   public QName getName()
   {
-    throw new UnsupportedOperationException();
+    return name;
   }
 
-
-  /** XXX */
   public Class getScope()
   {
-    throw new UnsupportedOperationException();
+    return scope;
   }
 
-
-  /** XXX */
   public JAXBElement getValue()
   {
-    throw new UnsupportedOperationException();
+    return value;
   }
 
-
-  /** XXX */
   public boolean isGlobalScope()
   {
-    throw new UnsupportedOperationException();
+    return scope == JAXBElement.GlobalScope.class;
   }
 
-
-  /** XXX */
   public boolean isNil()
   {
-    throw new UnsupportedOperationException();
+    return nil;
   }
 
-
-  /** XXX */
   public boolean isTypeSubstituted()
   {
-    throw new UnsupportedOperationException();
+    return declaredType.isInstance(value);
   }
 
-
-  /** XXX */
   public void setNil(boolean value)
   {
-    throw new UnsupportedOperationException();
+    nil = value;
   }
 
-
-  /** XXX */
   public void setValue(JAXBElement t)
   {
-    throw new UnsupportedOperationException();
+    value = t;
   }
 
-
-  /** XXX */
   public static final class GlobalScope {
     public GlobalScope()
     {
-      throw new UnsupportedOperationException();
     }
-
   }
 }
 

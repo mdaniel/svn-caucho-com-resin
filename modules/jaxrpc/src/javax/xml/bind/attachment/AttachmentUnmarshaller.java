@@ -30,26 +30,19 @@
 package javax.xml.bind.attachment;
 import javax.activation.*;
 
-/** XXX */
 public abstract class AttachmentUnmarshaller {
+
   public AttachmentUnmarshaller()
   {
-    throw new UnsupportedOperationException();
   }
 
-
-  /** XXX */
   public abstract byte[] getAttachmentAsByteArray(String cid);
 
-
-  /** XXX */
   public abstract DataHandler getAttachmentAsDataHandler(String cid);
 
-
-  /** XXX */
   public boolean isXOPPackage()
   {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException("XOP not yet supported");
   }
 
 }

@@ -30,27 +30,25 @@
 package javax.xml.bind;
 import javax.xml.namespace.*;
 
-/** XXX */
 public abstract class JAXBIntrospector {
+
   public JAXBIntrospector()
   {
-    throw new UnsupportedOperationException();
   }
 
-
-  /** XXX */
   public abstract QName getElementName(Object jaxbElement);
 
+  public abstract boolean isElement(Object object);
 
-  /** XXX */
   public static Object getValue(Object jaxbElement)
   {
-    throw new UnsupportedOperationException();
+    if (jaxbElement instanceof JAXBElement) {
+      JAXBElement jaxbe = (JAXBElement)jaxbElement;
+      return jaxbe.getValue();
+    }
+
+    return jaxbElement;
   }
-
-
-  /** XXX */
-  public abstract boolean isElement(Object object);
 
 }
 

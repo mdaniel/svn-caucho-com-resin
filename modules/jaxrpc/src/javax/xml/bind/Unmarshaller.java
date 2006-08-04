@@ -39,145 +39,86 @@ import javax.xml.validation.*;
 import javax.xml.bind.annotation.adapters.*;
 import java.net.*;
 
-/** XXX */
 public interface Unmarshaller {
 
-  /** XXX */
-  abstract <A extends XmlAdapter> A getAdapter(Class<A> type);
+  <A extends XmlAdapter> A getAdapter(Class<A> type);
 
-  abstract AttachmentUnmarshaller getAttachmentUnmarshaller();
+  AttachmentUnmarshaller getAttachmentUnmarshaller();
 
+  ValidationEventHandler getEventHandler() throws JAXBException;
 
-  /** XXX */
-  abstract ValidationEventHandler getEventHandler() throws JAXBException;
+  Listener getListener();
 
+  Object getProperty(String name) throws PropertyException;
 
-  /** XXX */
-  abstract Listener getListener();
+  Schema getSchema();
 
+  UnmarshallerHandler getUnmarshallerHandler();
 
-  /** XXX */
-  abstract Object getProperty(String name) throws PropertyException;
+  boolean isValidating() throws JAXBException;
 
+  <A extends XmlAdapter> void setAdapter(Class<A> type, A adapter);
 
-  /** XXX */
-  abstract Schema getSchema();
+  void setAdapter(XmlAdapter adapter);
 
+  void setAttachmentUnmarshaller(AttachmentUnmarshaller au);
 
-  /** XXX */
-  abstract UnmarshallerHandler getUnmarshallerHandler();
+  void setEventHandler(ValidationEventHandler handler)
+    throws JAXBException;
 
+  void setListener(Listener listener);
 
-  /** XXX */
-  abstract boolean isValidating() throws JAXBException;
+  void setProperty(String name, Object value) throws PropertyException;
 
+  void setSchema(Schema schema);
 
-  /** XXX */
-  abstract <A extends XmlAdapter> void setAdapter(Class<A> type, A adapter);
+  void setValidating(boolean validating) throws JAXBException;
 
-  /** XXX */
-  abstract void setAdapter(XmlAdapter adapter);
+  Object unmarshal(File f) throws JAXBException;
 
+  Object unmarshal(InputSource source) throws JAXBException;
 
-  /** XXX */
-  abstract void setAttachmentUnmarshaller(AttachmentUnmarshaller au);
+  Object unmarshal(InputStream is) throws JAXBException;
 
+  Object unmarshal(Node node) throws JAXBException;
 
-  /** XXX */
-  abstract void setEventHandler(ValidationEventHandler handler) throws JAXBException;
-
-
-  /** XXX */
-  abstract void setListener(Listener listener);
-
-
-  /** XXX */
-  abstract void setProperty(String name, Object value) throws PropertyException;
-
-
-  /** XXX */
-  abstract void setSchema(Schema schema);
-
-
-  /** XXX */
-  abstract void setValidating(boolean validating) throws JAXBException;
-
-
-  /** XXX */
-  abstract Object unmarshal(File f) throws JAXBException;
-
-
-  /** XXX */
-  abstract Object unmarshal(InputSource source) throws JAXBException;
-
-
-  /** XXX */
-  abstract Object unmarshal(InputStream is) throws JAXBException;
-
-
-  /** XXX */
-  abstract Object unmarshal(Node node) throws JAXBException;
-
-
-  /** XXX */
-  abstract <T> JAXBElement<T> unmarshal(Node node, Class<T> declaredType)
+  <T> JAXBElement<T> unmarshal(Node node, Class<T> declaredType)
       throws JAXBException;
 
+  Object unmarshal(Reader reader) throws JAXBException;
 
-  /** XXX */
-  abstract Object unmarshal(Reader reader) throws JAXBException;
+  Object unmarshal(Source source) throws JAXBException;
 
-
-  /** XXX */
-  abstract Object unmarshal(Source source) throws JAXBException;
-
-
-  /** XXX */
-  abstract <T> JAXBElement<T> unmarshal(Source node, Class<T> declaredType)
+  <T> JAXBElement<T> unmarshal(Source node, Class<T> declaredType)
       throws JAXBException;
 
-  /** XXX */
-  abstract Object unmarshal(URL url) throws JAXBException;
+  Object unmarshal(URL url) throws JAXBException;
 
+  Object unmarshal(XMLEventReader reader) throws JAXBException;
 
-  /** XXX */
-  abstract Object unmarshal(XMLEventReader reader) throws JAXBException;
-
-
-  /** XXX */
-  abstract <T> JAXBElement<T> unmarshal(XMLEventReader xmlEventReader,
+  <T> JAXBElement<T> unmarshal(XMLEventReader xmlEventReader,
                                         Class<T> declaredType)
       throws JAXBException;
 
+  Object unmarshal(XMLStreamReader reader) throws JAXBException;
 
-  /** XXX */
-  abstract Object unmarshal(XMLStreamReader reader) throws JAXBException;
-
-
-  /** XXX */
-  abstract <T> JAXBElement<T> unmarshal(XMLStreamReader xmlStreamReader,
+  <T> JAXBElement<T> unmarshal(XMLStreamReader xmlStreamReader,
                                         Class<T> declaredType)
       throws JAXBException;
 
-  /** XXX */
-  public static abstract class Listener {
+  public static class Listener {
+
     public Listener()
     {
-      throw new UnsupportedOperationException();
     }
 
-
-    /** XXX */
     public void afterUnmarshal(Object target, Object parent)
     {
-      throw new UnsupportedOperationException();
     }
 
 
-    /** XXX */
     public void beforeUnmarshal(Object target, Object parent)
     {
-      throw new UnsupportedOperationException();
     }
 
   }

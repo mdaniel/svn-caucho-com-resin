@@ -30,89 +30,62 @@
 package javax.xml.bind.helpers;
 import javax.xml.bind.*;
 
-/** XXX */
 public class ValidationEventImpl implements ValidationEvent {
 
-  /** XXX: remove this -- it is only here to help compiles */
-  public ValidationEventImpl()
+  private int _severity;
+  private String _message;
+  private ValidationEventLocator _locator;
+  private Throwable _linkedException;
+
+  public ValidationEventImpl(int severity,
+                             String message,
+                             ValidationEventLocator locator,
+                             Throwable linkedException)
   {
-    throw new UnsupportedOperationException();
+    this._severity = severity;
+    this._message = message;
+    this._locator = locator;
+    this._linkedException = _linkedException;
   }
 
-  /** XXX: remove this -- it is only here to help compiles */
-  public ValidationEventImpl(int _severity, String _message, ValidationEventLocator _locator)
-  {
-    throw new UnsupportedOperationException();
-  }
-
-
-  /** XXX */
-  public ValidationEventImpl(int _severity, String _message, ValidationEventLocator _locator, Throwable _linkedException)
-  {
-    throw new UnsupportedOperationException();
-  }
-
-
-  /** XXX */
   public Throwable getLinkedException()
   {
-    throw new UnsupportedOperationException();
+    return _linkedException;
   }
 
-
-  /** XXX */
   public ValidationEventLocator getLocator()
   {
-    throw new UnsupportedOperationException();
+    return _locator;
   }
 
-
-  /** XXX */
   public String getMessage()
   {
-    throw new UnsupportedOperationException();
+    return _message;
   }
 
-
-  /** XXX */
   public int getSeverity()
   {
-    throw new UnsupportedOperationException();
+    return _severity;
   }
 
-
-  /** XXX */
-  public void setLinkedException(Throwable _linkedException)
+  public void setLinkedException(Throwable linkedException)
   {
-    throw new UnsupportedOperationException();
+    _linkedException = linkedException;
   }
 
-
-  /** XXX */
-  public void setLocator(ValidationEventLocator _locator)
+  public void setLocator(ValidationEventLocator locator)
   {
-    throw new UnsupportedOperationException();
+    _locator = locator;
   }
 
-
-  /** XXX */
-  public void setMessage(String _message)
+  public void setMessage(String message)
   {
-    throw new UnsupportedOperationException();
+    _message = message;
   }
 
-
-  /** XXX */
-  public void setSeverity(int _severity)
+  public void setSeverity(int severity)
   {
-    throw new UnsupportedOperationException();
-  }
-
-
-  /** XXX */
-  public String toString()
-  {
-    throw new UnsupportedOperationException();
+    _severity = severity;
   }
 
 }

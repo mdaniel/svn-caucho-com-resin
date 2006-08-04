@@ -29,7 +29,6 @@
 
 package javax.xml.bind;
 
-/** XXX */
 public interface PrintConversionEvent extends ValidationEvent {
 }
 

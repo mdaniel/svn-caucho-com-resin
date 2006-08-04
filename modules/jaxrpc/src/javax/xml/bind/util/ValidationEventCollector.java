@@ -29,40 +29,37 @@
 
 package javax.xml.bind.util;
 import javax.xml.bind.*;
+import java.util.*;
 
-/** XXX */
+/** ValidationEventHandler implementation that collects all events */
 public class ValidationEventCollector implements ValidationEventHandler {
+
+  private ArrayList<ValidationEvent> _events = 
+    new ArrayList<ValidationEvent>();
+
   public ValidationEventCollector()
   {
-    throw new UnsupportedOperationException();
   }
 
-
-  /** XXX */
   public ValidationEvent[] getEvents()
   {
-    throw new UnsupportedOperationException();
+    return (ValidationEvent[])_events.toArray(new ValidationEvent[0]);
   }
 
-
-  /** XXX */
   public boolean handleEvent(ValidationEvent event)
   {
-    throw new UnsupportedOperationException();
+    _events.add(event);
+    return true;
   }
 
-
-  /** XXX */
   public boolean hasEvents()
   {
-    throw new UnsupportedOperationException();
+    return _events.size() > 0;
   }
 
-
-  /** XXX */
   public void reset()
   {
-    throw new UnsupportedOperationException();
+    _events.clear();
   }
 
 }

@@ -30,101 +30,63 @@
 package javax.xml.bind;
 import java.io.*;
 
-/** XXX */
 public class JAXBException extends Exception {
 
-  /** XXX */
+  private String _errorCode;
+  private Throwable _exception;
+
   public JAXBException()
   {
-    throw new UnsupportedOperationException();
   }
 
-  /** XXX */
   public JAXBException(String message)
   {
-    throw new UnsupportedOperationException();
+    super(message);
   }
 
-
-  /** XXX */
   public JAXBException(String message, String errorCode)
   {
-    throw new UnsupportedOperationException();
+    super(message);
+    _errorCode = errorCode;
   }
 
+  JAXBException(String message, Throwable exception)
+  {
+    super(message);
+    _exception = exception;
+  }
 
-  /** XXX */
   public JAXBException(String message, String errorCode, Throwable exception)
   {
-    throw new UnsupportedOperationException();
+    super(message);
+    _errorCode = errorCode;
+    _exception = exception;
   }
 
-
-  /** XXX: remove this -- only here to help compiles */
-  public JAXBException(String message, Throwable exception)
-  {
-    throw new UnsupportedOperationException();
-  }
-
-
-  /** XXX */
   public JAXBException(Throwable exception)
   {
-    throw new UnsupportedOperationException();
+    super();
+    _exception = exception;
+  }
+
+  public String getErrorCode()
+  {
+    return _errorCode;
+  }
+
+  public Throwable getLinkedException()
+  {
+    return _exception;
   }
 
   public Throwable getCause()
   {
-    throw new UnsupportedOperationException();
+    return _exception;
   }
 
-
-  /** XXX */
-  public String getErrorCode()
-  {
-    throw new UnsupportedOperationException();
-  }
-
-
-  /** XXX */
-  public Throwable getLinkedException()
-  {
-    throw new UnsupportedOperationException();
-  }
-
-
-  /** XXX */
-  public void printStackTrace()
-  {
-    throw new UnsupportedOperationException();
-  }
-
-
-  /** XXX */
-  public void printStackTrace(PrintStream s)
-  {
-    throw new UnsupportedOperationException();
-  }
-
-
-  /** XXX */
-  public void printStackTrace(PrintWriter s)
-  {
-    throw new UnsupportedOperationException();
-  }
-
-
-  /** XXX */
   public void setLinkedException(Throwable exception)
   {
-    throw new UnsupportedOperationException();
-  }
-
-
-  /** XXX */
-  public String toString()
-  {
-    throw new UnsupportedOperationException();
+    _exception = exception;
   }
 
 }

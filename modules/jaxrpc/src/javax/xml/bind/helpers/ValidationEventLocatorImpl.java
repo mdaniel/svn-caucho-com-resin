@@ -33,132 +33,97 @@ import org.xml.sax.*;
 import javax.xml.bind.*;
 import java.net.*;
 
-/** XXX */
 public class ValidationEventLocatorImpl implements ValidationEventLocator {
 
-  /** XXX */
+  private URL _url;
+  private Locator _loc;
+  private Node _node;
+  private Object _object;
+  private int _offset;
+  private SAXParseException _exception;
+
   public ValidationEventLocatorImpl()
   {
-    throw new UnsupportedOperationException();
   }
 
-
-  /** XXX */
   public ValidationEventLocatorImpl(Locator loc)
   {
-    throw new UnsupportedOperationException();
+    this._loc = loc;
   }
 
-
-  /** XXX */
-  public ValidationEventLocatorImpl(Node _node)
+  public ValidationEventLocatorImpl(Node node)
   {
-    throw new UnsupportedOperationException();
+    this._node = node;
   }
 
-
-  /** XXX */
-  public ValidationEventLocatorImpl(Object _object)
+  public ValidationEventLocatorImpl(Object object)
   {
-    throw new UnsupportedOperationException();
+    this._object = object;
   }
 
-
-  /** XXX */
   public ValidationEventLocatorImpl(SAXParseException e)
   {
-    throw new UnsupportedOperationException();
+    this._exception = e;
   }
 
-
-  /** XXX */
   public int getColumnNumber()
   {
-    throw new UnsupportedOperationException();
+    return _loc.getColumnNumber();
   }
 
-
-  /** XXX */
   public int getLineNumber()
   {
-    throw new UnsupportedOperationException();
+    return _loc.getLineNumber();
   }
 
-
-  /** XXX */
   public Node getNode()
   {
-    throw new UnsupportedOperationException();
+    return _node;
   }
 
-
-  /** XXX */
   public Object getObject()
   {
-    throw new UnsupportedOperationException();
+    return _object;
   }
 
-
-  /** XXX */
   public int getOffset()
   {
-    throw new UnsupportedOperationException();
+    return _offset;
   }
 
-
-  /** XXX */
   public URL getURL()
   {
-    throw new UnsupportedOperationException();
+    return _url;
   }
 
-
-  /** XXX */
-  public void setColumnNumber(int _columnNumber)
+  public void setColumnNumber(int columnNumber)
   {
     throw new UnsupportedOperationException();
   }
 
-
-  /** XXX */
-  public void setLineNumber(int _lineNumber)
+  public void setLineNumber(int lineNumber)
   {
     throw new UnsupportedOperationException();
   }
 
-
-  /** XXX */
-  public void setNode(Node _node)
+  public void setNode(Node node)
   {
-    throw new UnsupportedOperationException();
+    _node = node;
   }
 
-
-  /** XXX */
-  public void setObject(Object _object)
+  public void setObject(Object object)
   {
-    throw new UnsupportedOperationException();
+    object = _object;
   }
 
-
-  /** XXX */
-  public void setOffset(int _offset)
+  public void setOffset(int offset)
   {
-    throw new UnsupportedOperationException();
+    _offset = offset;
   }
 
-
-  /** XXX */
-  public void setURL(URL _url)
+  public void setURL(URL url)
   {
-    throw new UnsupportedOperationException();
-  }
-
-
-  /** XXX */
-  public String toString()
-  {
-    throw new UnsupportedOperationException();
+    _url = url;
   }
 
 }

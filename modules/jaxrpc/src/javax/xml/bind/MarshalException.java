@@ -29,41 +29,31 @@
 
 package javax.xml.bind;
 
-/** XXX */
 public class MarshalException extends JAXBException {
 
-  /** XXX */
   public MarshalException(String message)
   {
-    throw new UnsupportedOperationException();
+    super(message);
   }
 
-
-  /** XXX */
   public MarshalException(String message, String errorCode)
   {
-    throw new UnsupportedOperationException();
+    super(message, errorCode);
   }
 
-
-  /** XXX */
   public MarshalException(String message, String errorCode, Throwable exception)
   {
-    throw new UnsupportedOperationException();
+    super(message, errorCode, exception);
   }
 
-
-  /** XXX */
   public MarshalException(String message, Throwable exception)
   {
-    throw new UnsupportedOperationException();
+    super(message, exception);
   }
 
-
-  /** XXX */
   public MarshalException(Throwable exception)
   {
-    throw new UnsupportedOperationException();
+    super(exception);
   }
 
 }

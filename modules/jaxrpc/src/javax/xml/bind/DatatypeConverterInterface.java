@@ -32,159 +32,83 @@ import javax.xml.namespace.*;
 import java.math.*;
 import java.util.*;
 
-/** XXX */
 public interface DatatypeConverterInterface {
 
-  /** XXX */
-  abstract String parseAnySimpleType(String lexicalXSDAnySimpleType);
+  String parseAnySimpleType(String lexicalXSDAnySimpleType);
 
+  byte[] parseBase64Binary(String lexicalXSDBase64Binary);
 
-  /** XXX */
-  abstract byte[] parseBase64Binary(String lexicalXSDBase64Binary);
+  boolean parseBoolean(String lexicalXSDBoolean);
 
+  byte parseByte(String lexicalXSDByte);
 
-  /** XXX */
-  abstract boolean parseBoolean(String lexicalXSDBoolean);
+  Calendar parseDate(String lexicalXSDDate);
 
+  Calendar parseDateTime(String lexicalXSDDateTime);
 
-  /** XXX */
-  abstract byte parseByte(String lexicalXSDByte);
+  BigDecimal parseDecimal(String lexicalXSDDecimal);
 
+  double parseDouble(String lexicalXSDDouble);
 
-  /** XXX */
-  abstract Calendar parseDate(String lexicalXSDDate);
+  float parseFloat(String lexicalXSDFloat);
 
+  byte[] parseHexBinary(String lexicalXSDHexBinary);
 
-  /** XXX */
-  abstract Calendar parseDateTime(String lexicalXSDDateTime);
+  int parseInt(String lexicalXSDInt);
 
+  BigInteger parseInteger(String lexicalXSDInteger);
 
-  /** XXX */
-  abstract BigDecimal parseDecimal(String lexicalXSDDecimal);
+  long parseLong(String lexicalXSDLong);
 
+  QName parseQName(String lexicalXSDQName, NamespaceContext nsc);
 
-  /** XXX */
-  abstract double parseDouble(String lexicalXSDDouble);
+  short parseShort(String lexicalXSDShort);
 
+  String parseString(String lexicalXSDString);
 
-  /** XXX */
-  abstract float parseFloat(String lexicalXSDFloat);
+  Calendar parseTime(String lexicalXSDTime);
 
+  long parseUnsignedInt(String lexicalXSDUnsignedInt);
 
-  /** XXX */
-  abstract byte[] parseHexBinary(String lexicalXSDHexBinary);
+  int parseUnsignedShort(String lexicalXSDUnsignedShort);
 
+  String printAnySimpleType(String val);
 
-  /** XXX */
-  abstract int parseInt(String lexicalXSDInt);
+  String printBase64Binary(byte[] val);
 
+  String printBoolean(boolean val);
 
-  /** XXX */
-  abstract BigInteger parseInteger(String lexicalXSDInteger);
+  String printByte(byte val);
 
+  String printDate(Calendar val);
 
-  /** XXX */
-  abstract long parseLong(String lexicalXSDLong);
+  String printDateTime(Calendar val);
 
+  String printDecimal(BigDecimal val);
 
-  /** XXX */
-  abstract QName parseQName(String lexicalXSDQName, NamespaceContext nsc);
+  String printDouble(double val);
 
+  String printFloat(float val);
 
-  /** XXX */
-  abstract short parseShort(String lexicalXSDShort);
+  String printHexBinary(byte[] val);
 
+  String printInt(int val);
 
-  /** XXX */
-  abstract String parseString(String lexicalXSDString);
+  String printInteger(BigInteger val);
 
+  String printLong(long val);
 
-  /** XXX */
-  abstract Calendar parseTime(String lexicalXSDTime);
+  String printQName(QName val, NamespaceContext nsc);
 
+  String printShort(short val);
 
-  /** XXX */
-  abstract long parseUnsignedInt(String lexicalXSDUnsignedInt);
+  String printString(String val);
 
+  String printTime(Calendar val);
 
-  /** XXX */
-  abstract int parseUnsignedShort(String lexicalXSDUnsignedShort);
+  String printUnsignedInt(long val);
 
-
-  /** XXX */
-  abstract String printAnySimpleType(String val);
-
-
-  /** XXX */
-  abstract String printBase64Binary(byte[] val);
-
-
-  /** XXX */
-  abstract String printBoolean(boolean val);
-
-
-  /** XXX */
-  abstract String printByte(byte val);
-
-
-  /** XXX */
-  abstract String printDate(Calendar val);
-
-
-  /** XXX */
-  abstract String printDateTime(Calendar val);
-
-
-  /** XXX */
-  abstract String printDecimal(BigDecimal val);
-
-
-  /** XXX */
-  abstract String printDouble(double val);
-
-
-  /** XXX */
-  abstract String printFloat(float val);
-
-
-  /** XXX */
-  abstract String printHexBinary(byte[] val);
-
-
-  /** XXX */
-  abstract String printInt(int val);
-
-
-  /** XXX */
-  abstract String printInteger(BigInteger val);
-
-
-  /** XXX */
-  abstract String printLong(long val);
-
-
-  /** XXX */
-  abstract String printQName(QName val, NamespaceContext nsc);
-
-
-  /** XXX */
-  abstract String printShort(short val);
-
-
-  /** XXX */
-  abstract String printString(String val);
-
-
-  /** XXX */
-  abstract String printTime(Calendar val);
-
-
-  /** XXX */
-  abstract String printUnsignedInt(long val);
-
-
-  /** XXX */
-  abstract String printUnsignedShort(int val);
+  String printUnsignedShort(int val);
 
 }
 

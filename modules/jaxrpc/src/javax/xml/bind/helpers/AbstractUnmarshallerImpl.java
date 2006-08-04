@@ -39,25 +39,28 @@ import javax.xml.validation.*;
 import javax.xml.bind.annotation.adapters.*;
 import javax.xml.bind.*;
 import java.net.*;
+import java.util.*;
 
-/** XXX */
 public abstract class AbstractUnmarshallerImpl implements Unmarshaller {
 
-  /** XXX */
   protected boolean validating;
+
+  private AttachmentUnmarshaller _attachmentUnmarshaller = null;
+  private ValidationEventHandler _validationEventHandler = null;
+  private Listener _listener = null;
+  private HashMap<String,Object> _properties = new HashMap<String,Object>();
+  private Schema _schema = null;
+  private XMLReader _xmlreader = null;
+  private XmlAdapter _adapter = null;
 
   public AbstractUnmarshallerImpl()
   {
-    throw new UnsupportedOperationException();
   }
 
-
-  /** XXX */
   protected UnmarshalException createUnmarshalException(SAXException e)
   {
-    throw new UnsupportedOperationException();
+    return new UnmarshalException(e);
   }
-
 
   /** XXX */
   public <A extends XmlAdapter> A getAdapter(Class<A> type)
@@ -67,107 +70,82 @@ public abstract class AbstractUnmarshallerImpl implements Unmarshaller {
 
   public AttachmentUnmarshaller getAttachmentUnmarshaller()
   {
-    throw new UnsupportedOperationException();
+    return _attachmentUnmarshaller;
   }
 
-
-  /** XXX */
   public ValidationEventHandler getEventHandler() throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    return _validationEventHandler;
   }
 
-
-  /** XXX */
   public Listener getListener()
   {
-    throw new UnsupportedOperationException();
+    return _listener;
   }
 
-
-  /** XXX */
   public Object getProperty(String name) throws PropertyException
   {
-    throw new UnsupportedOperationException();
+    return _properties.get(name);
   }
 
-
-  /** XXX */
   public Schema getSchema()
   {
-    throw new UnsupportedOperationException();
+    return _schema;
   }
 
-
-  /** XXX */
   protected XMLReader getXMLReader() throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    return _xmlreader;
   }
 
-
-  /** XXX */
   public boolean isValidating() throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    return validating;
   }
 
-
-  /** XXX */
   public <A extends XmlAdapter> void setAdapter(Class<A> type, A adapter)
   {
     throw new UnsupportedOperationException();
   }
 
-
-  /** XXX */
   public void setAdapter(XmlAdapter adapter)
   {
-    throw new UnsupportedOperationException();
+    _adapter = adapter;
   }
 
-
-  /** XXX */
   public void setAttachmentUnmarshaller(AttachmentUnmarshaller au)
   {
-    throw new UnsupportedOperationException();
+    _attachmentUnmarshaller = au;
   }
 
-
-  /** XXX */
-  public void setEventHandler(ValidationEventHandler handler) throws JAXBException
+  public void setEventHandler(ValidationEventHandler handler)
+    throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    _validationEventHandler = handler;
   }
 
-
-  /** XXX */
   public void setListener(Listener listener)
   {
-    throw new UnsupportedOperationException();
+    _listener = listener;
   }
 
-
-  /** XXX */
   public void setProperty(String name, Object value) throws PropertyException
   {
-    throw new UnsupportedOperationException();
+    _properties.put(name, value);
   }
 
-
-  /** XXX */
   public void setSchema(Schema schema)
   {
-    throw new UnsupportedOperationException();
+    _schema = schema;
   }
 
-
-  /** XXX */
   public void setValidating(boolean validating) throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    this.validating = validating;
   }
 
+  protected abstract Object unmarshal(XMLReader reader, InputSource source)
+    throws JAXBException;
 
   /** XXX */
   public final Object unmarshal(File f) throws JAXBException
@@ -236,16 +214,11 @@ public abstract class AbstractUnmarshallerImpl implements Unmarshaller {
 
   /** XXX */
   public <T> JAXBElement<T> unmarshal(XMLEventReader xmlEventReader,
-                                        Class<T> declaredType)
+                                      Class<T> declaredType)
       throws JAXBException
   {
     throw new UnsupportedOperationException();
   }
-
-
-  /** XXX */
-  protected abstract Object unmarshal(XMLReader reader, InputSource source) throws JAXBException;
-
 
   /** XXX */
   public Object unmarshal(XMLStreamReader reader) throws JAXBException

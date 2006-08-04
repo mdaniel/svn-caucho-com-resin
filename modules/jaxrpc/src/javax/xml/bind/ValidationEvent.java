@@ -29,35 +29,21 @@
 
 package javax.xml.bind;
 
-/** XXX */
 public interface ValidationEvent {
 
-  /** XXX */
   static final int ERROR=1;
 
-
-  /** XXX */
   static final int FATAL_ERROR=2;
 
-
-  /** XXX */
   static final int WARNING=0;
 
+  Throwable getLinkedException();
 
-  /** XXX */
-  abstract Throwable getLinkedException();
+  ValidationEventLocator getLocator();
 
+  String getMessage();
 
-  /** XXX */
-  abstract ValidationEventLocator getLocator();
-
-
-  /** XXX */
-  abstract String getMessage();
-
-
-  /** XXX */
-  abstract int getSeverity();
+  int getSeverity();
 
 }
 

@@ -30,20 +30,23 @@
 package javax.xml.bind.helpers;
 import javax.xml.bind.*;
 
-/** XXX */
-public class PrintConversionEventImpl extends ValidationEventImpl implements PrintConversionEvent {
+public class PrintConversionEventImpl
+  extends ValidationEventImpl
+  implements PrintConversionEvent {
 
-  /** XXX */
-  public PrintConversionEventImpl(int _severity, String _message, ValidationEventLocator _locator)
+  public PrintConversionEventImpl(int severity,
+                                  String message,
+                                  ValidationEventLocator locator)
   {
-    throw new UnsupportedOperationException();
+    super(severity, message, locator, null);
   }
 
-
-  /** XXX */
-  public PrintConversionEventImpl(int _severity, String _message, ValidationEventLocator _locator, Throwable _linkedException)
+  public PrintConversionEventImpl(int severity,
+                                  String message,
+                                  ValidationEventLocator locator,
+                                  Throwable linkedException)
   {
-    throw new UnsupportedOperationException();
+    super(severity, message, locator, linkedException);
   }
 
 }

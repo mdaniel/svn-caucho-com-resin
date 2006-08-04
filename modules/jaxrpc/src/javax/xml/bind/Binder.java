@@ -30,68 +30,43 @@
 package javax.xml.bind;
 import javax.xml.validation.*;
 
-/** XXX */
 public abstract class Binder<XmlNode> {
+
   public Binder()
   {
-    throw new UnsupportedOperationException();
   }
 
-
-  /** XXX */
   public abstract ValidationEventHandler getEventHandler() throws JAXBException;
 
-
-  /** XXX */
   public abstract Object getJAXBNode(XmlNode xmlNode);
 
-
-  /** XXX */
   public abstract Object getProperty(String name) throws PropertyException;
 
-
-  /** XXX */
   public abstract Schema getSchema();
 
-
-  /** XXX */
   public abstract XmlNode getXMLNode(Object jaxbObject);
 
+  public abstract void marshal(Object jaxbObject, XmlNode xmlNode)
+    throws JAXBException;
 
-  /** XXX */
-  public abstract void marshal(Object jaxbObject, XmlNode xmlNode) throws JAXBException;
+  public abstract void setEventHandler(ValidationEventHandler handler)
+    throws JAXBException;
 
+  public abstract void setProperty(String name, Object value)
+    throws PropertyException;
 
-  /** XXX */
-  public abstract void setEventHandler(ValidationEventHandler handler) throws JAXBException;
-
-
-  /** XXX */
-  public abstract void setProperty(String name, Object value) throws PropertyException;
-
-
-  /** XXX */
   public abstract void setSchema(Schema schema);
 
+  public abstract Object unmarshal(XmlNode xmlNode)
+    throws JAXBException;
 
-  /** XXX */
-  public abstract Object unmarshal(XmlNode xmlNode) throws JAXBException;
-
-
-  /** XXX */
   abstract <T> JAXBElement<T> unmarshal(XmlNode node, Class<T> declaredType)
       throws JAXBException;
 
-
-  /** XXX */
   public abstract Object updateJAXB(XmlNode xmlNode) throws JAXBException;
 
-
-  /** XXX */
   public abstract XmlNode updateXML(Object jaxbObject) throws JAXBException;
 
-
-  /** XXX */
   public abstract XmlNode updateXML(Object jaxbObject, XmlNode xmlNode)
       throws JAXBException;
 

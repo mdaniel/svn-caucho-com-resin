@@ -30,18 +30,15 @@
 package javax.xml.bind.helpers;
 import javax.xml.bind.*;
 
-/** XXX */
 public class DefaultValidationEventHandler implements ValidationEventHandler {
+
   public DefaultValidationEventHandler()
   {
-    throw new UnsupportedOperationException();
   }
 
-
-  /** XXX */
   public boolean handleEvent(ValidationEvent event)
   {
-    throw new UnsupportedOperationException();
+    return true;
   }
 
 }

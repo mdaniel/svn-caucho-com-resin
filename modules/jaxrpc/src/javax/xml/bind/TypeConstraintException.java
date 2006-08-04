@@ -30,83 +30,60 @@
 package javax.xml.bind;
 import java.io.*;
 
-/** XXX */
 public class TypeConstraintException extends RuntimeException {
 
-  /** XXX */
+  private String _errorCode;
+  private Throwable _exception;
+
   public TypeConstraintException(String message)
   {
-    throw new UnsupportedOperationException();
+    super(message);
   }
 
-
-  /** XXX */
   public TypeConstraintException(String message, String errorCode)
   {
-    throw new UnsupportedOperationException();
+    super(message);
+    _errorCode = errorCode;
   }
 
-
-  /** XXX */
-  public TypeConstraintException(String message, String errorCode, Throwable exception)
+  public TypeConstraintException(String message, String errorCode,
+                                 Throwable exception)
   {
-    throw new UnsupportedOperationException();
+    super(message);
+    _errorCode = errorCode;
+    _exception = exception;
   }
 
-
-  /** XXX */
   public TypeConstraintException(String message, Throwable exception)
   {
-    throw new UnsupportedOperationException();
+    super(message);
+    _exception = exception;
   }
 
-
-  /** XXX */
   public TypeConstraintException(Throwable exception)
   {
-    throw new UnsupportedOperationException();
+    super();
+    _exception = exception;
   }
 
-
-  /** XXX */
   public String getErrorCode()
   {
-    throw new UnsupportedOperationException();
+    return _errorCode;
   }
 
-
-  /** XXX */
   public Throwable getLinkedException()
   {
-    throw new UnsupportedOperationException();
+    return _exception;
   }
 
-
-  /** XXX */
-  public void printStackTrace()
+  public Throwable getCause()
   {
-    throw new UnsupportedOperationException();
+    return _exception;
   }
 
-
-  /** XXX */
-  public void printStackTrace(PrintStream s)
-  {
-    throw new UnsupportedOperationException();
-  }
-
-
-  /** XXX */
   public void setLinkedException(Throwable exception)
   {
-    throw new UnsupportedOperationException();
-  }
-
-
-  /** XXX */
-  public String toString()
-  {
-    throw new UnsupportedOperationException();
+    _exception = exception;
   }
 
 }
