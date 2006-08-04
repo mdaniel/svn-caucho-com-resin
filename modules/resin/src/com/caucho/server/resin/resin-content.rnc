@@ -19,6 +19,8 @@ r_boot = element boot {
 r_cache = element cache {
   r_path?
 
+  & (attribute disk-size { r_int } | element disk-size { r_int })?
+
   & (attribute enable { r_boolean-Type }
      | element enable { r_boolean-Type })?
 
@@ -27,12 +29,10 @@ r_cache = element cache {
 
   & (attribute entries { r_int } | element entries { r_int })?
 
-  & (attribute memory-size { r_int } | element memory-size { r_int })?
-
   & (attribute max-entry-size { r_int }
      | element max-entry-size { r_int })?
 
-  & (attribute disk-size { r_int } | element disk-size { r_int })?
+  & (attribute memory-size { r_int } | element memory-size { r_int })?
 }
 
 r_cluster = element cluster {
@@ -66,21 +66,17 @@ r_cluster-Basis =
 
   & r_host-deploy*
 
+  & r_ignore-client-disconnect?
+
   & (attribute invocation-cache-size { r_kbytes-Type }
      | element invocation-cache-size { r_kbytes-Type })?
 
   & (attribute invocation-cache-max-url-length { r_int-Type }
      | element invocation-cache-max-url-length { r_int-Type })?
 
-  & r_ignore-client-disconnect?
-
   & r_persistent-store?
 
   & r_ping*
-
-  & r_redeploy-check-interval?
-
-  & r_redeploy-mode?
 
   & r_rewrite-dispatch?
 

@@ -481,6 +481,26 @@ public class NodeBuilder {
     return value;
   }
 
+  public String configureRawStringNoTrim(Node child)
+    throws Exception
+  {
+    Object resinTypeValue = createResinType(child);
+
+    if (resinTypeValue != null) {
+      TypeStrategy typeStrategy =
+              TypeStrategyFactory.getTypeStrategy(resinTypeValue.getClass());
+
+      return String.valueOf(configureImpl(typeStrategy, resinTypeValue, child));
+    }
+
+    if (hasChildren(child))
+      throw error(L.l("unexpected child nodes"), child); // XXX: qa
+
+    String value = textValueNoTrim(child);
+
+    return value;
+  }
+
   /**
    * Create a custom resin:type value.
    */
@@ -610,6 +630,29 @@ public class NodeBuilder {
       }
 
       return value.trim();
+    }
+  }
+
+  /**
+   * Returns the text value of the node.
+   */
+  static String textValueNoTrim(Node node)
+  {
+    if (node instanceof Attr)
+      return node.getNodeValue();
+    else {
+      String value = XmlUtil.textValue(node);
+
+      if (value == null || value.equals(""))
+	return "";
+      else if (node instanceof Element) {
+	String space = ((Element) node).getAttribute("xml:space");
+
+	if (! space.equals(""))
+	  return value;
+      }
+
+      return value;
     }
   }
 

@@ -188,6 +188,12 @@ public class NavigationItem {
       writer.println("</dl>");
   }
 
+  public void writeLeftNav(PrintWriter out)
+    throws IOException
+  {
+    out.println("<a href='" + _link + "'>" + _title + "</a><br>");
+  }
+
   public void writeLaTeX(PrintWriter writer)
     throws IOException
   {

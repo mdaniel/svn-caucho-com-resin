@@ -34,11 +34,14 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
+import com.caucho.config.*;
 import com.caucho.vfs.Path;
 
 public class Body implements ObjectWithParent {
   private Object _parent;
   private boolean _topLevel;
+  private Path _rootPath;
+  private Navigation _navigation;
   private Summary _summary;
   private ArrayList<Section> _sections = new ArrayList<Section>();
 
@@ -46,14 +49,39 @@ public class Body implements ObjectWithParent {
   {
     _topLevel = topLevel;
 
-    if (topLevel && documentPath != null)
-      _summary.setRootPath(documentPath.getParent());
+    if (topLevel && documentPath != null) {
+      if (_summary != null)
+	_summary.setRootPath(documentPath.getParent());
+      _rootPath = documentPath.getParent();
+
+      parseNavigation(_rootPath);
+    }
 
     if (documentPath != null) {
       String documentName = documentPath.getTail();
 
       for (Section section : _sections)
         section.setDocumentName(documentName);
+    }
+  }
+
+  private void parseNavigation(Path rootPath)
+  {
+    // We can parse the table of contents now because the rest of the
+    // attributes are just formatting
+    Path toc = rootPath.lookup("toc.xml");
+
+    if (toc.exists()) {
+      Config config = new Config();
+
+      _navigation = new Navigation(rootPath, 0);
+
+      try {
+        config.configure(_navigation, toc);
+      } catch (Exception e) {
+        e.getCause().printStackTrace();
+        _navigation = null;
+      }
     }
   }
 
@@ -72,6 +100,10 @@ public class Body implements ObjectWithParent {
     _summary = summary;
   }
 
+  public void setLocaltoc(Localtoc localtoc)
+  {
+  }
+
   public void addFaq(Faq faq)
   {
     _sections.add(faq);
@@ -82,17 +114,29 @@ public class Body implements ObjectWithParent {
     _sections.add(section);
   }
 
-  public void writeHtml(PrintWriter writer)
+  public void writeHtml(PrintWriter out)
     throws IOException
   {
-    writer.println("<body>");
+    out.println("<body bgcolor='white' leftmargin='0'>");
 
-    _summary.writeHtml(writer);
+    out.println("<table width='100%' border='0' cellspacing='0'>");
+
+    out.println("<tr valign='top'><td bgcolor='#b9cef7' class='leftnav'>");
+    
+    if (_navigation != null) {
+      _navigation.writeLeftNav(out);
+    }
+    out.println("</td><td>");
+
+    if (_summary != null)
+      _summary.writeHtml(out);
 
     for (Section section : _sections)
-      section.writeHtml(writer);
+      section.writeHtml(out);
+    
+    out.println("</td></tr></table>");
 
-    writer.println("</body>");
+    out.println("</body>");
   }
 
   public void writeLaTeX(PrintWriter writer)

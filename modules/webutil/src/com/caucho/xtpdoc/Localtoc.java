@@ -32,68 +32,16 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
-import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import com.caucho.vfs.Path;
 
-public class Navigation {
-  private int _depth;
-  private Path _rootPath;
-  private String _section;
-  private boolean _threaded;
-  private boolean _comment;
-  private ArrayList<NavigationItem> _items 
-    = new ArrayList<NavigationItem>();
+import com.caucho.config.Config;
 
-  public Navigation(Path rootPath, int depth)
-  {
-    _rootPath = rootPath;
-
-    _depth = depth;
-  }
-
-  public void setSection(String section)
-  {
-    _section = section;
-  }
-
-  public void setComment(boolean comment)
-  {
-    _comment = comment;
-  }
-
-  public void setThreaded(boolean threaded)
-  {
-    _threaded = threaded;
-  }
-
-  public void addItem(NavigationItem item)
-  {
-    _items.add(item);
-    
-    item.setDepth(_depth);
-    item.setRootPath(_rootPath);
-  }
-
+public class Localtoc {
   public void writeHtml(PrintWriter writer)
     throws IOException
   {
-    String depthString = (_depth == 0) ? "top" : ("" + _depth);
-
-    writer.println("<dl class='atoc-toplevel atoc-toplevel-" + 
-                 depthString + "'>");
-
-    for (NavigationItem item : _items)
-      item.writeHtml(writer);
-
-    writer.println("</dl>");
-  }
-
-  public void writeLeftNav(PrintWriter out)
-    throws IOException
-  {
-    for (NavigationItem item : _items)
-      item.writeLeftNav(out);
   }
 
   public void writeLaTeX(PrintWriter writer)
