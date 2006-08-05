@@ -6,9 +6,9 @@
 
   <body>
     <summary/>
-<section title="Resin with Eclipse">
+<s1 title="Resin with Eclipse">
 
-<section title="Launching Resin">
+<s2 title="Launching Resin">
 (thanks to E Hauser)
 
 <p>
@@ -22,7 +22,7 @@ with the arguments:
 </example>
 
 <p>
-Then in Eclipse, go to Run -> Debug -> Remote Application.  Click new
+Then in Eclipse, go to Run -&gt; Debug -&gt; Remote Application.  Click new
 and make sure the project is set to the application you want to debug.
 Connection type should be "Standard (Socket Attach)", and your
 connection host should be "localhost" with the port "12345".
@@ -34,41 +34,40 @@ class with the correct parameters, but socket attach has always worked
 fine for me.
 </p>
 
-</section>
+</s2>
 
-<section title="Eclipse plugin">
+<s2 title="Eclipse plugin">
         <!-- resinforeclipse@netcourrier.com
              arnaud.peyre@cnedi06.cnafmail.fr -->
 
-        <p>Arnaud Peyre has developed a comprehensive <a
-        href="external|resinforeclipse|index">Resin plugin for
+        <p>Arnaud Peyre has developed a comprehensive <a href="external|resinforeclipse|index">Resin plugin for
         Eclipse.</a></p>
 
 <b>Resin For Eclipse plugin provides tools for developing web projects: </b>
-<UL>
-	<LI><B>Resin management :</B> a graphical user interface for
+<ul>
+	<li><b>Resin management :</b> a graphical user interface for
 	managing Resin servers within Eclipse. The interface allows
 	you to create servers, add web projects, edit classpath and
 	system properties, manage https, launch, debug and stop the
 	server. It should work with web projects created by any other
-	plugin (such as WSAD ones).</LI>
+	plugin (such as WSAD ones).</li>
 
-	<LI><B>Web projects :</B> the plugin allows you to create
+	<li><b>Web projects :</b> the plugin allows you to create
 	generic web projects (you don't need to install Resin) or
 	projects optimized for Resin. Web projects include
 	autodetection of jar files added to the
-	&quot;WEB-INF/lib&quot; directory.</LI>
+	"WEB-INF/lib" directory.</li>
 
-	<LI><B>War exporation :</B> a wizard to export web projects
-	into war files.</LI>
+	<li><b>War exporation :</b> a wizard to export web projects
+	into war files.</li>
 
-</UL>
-<P><BR>
+</ul>
+<p><br/>
 <!--
 <a href="external|resinforeclipse|index">Resin for Eclipse Home page</a>
 -->
 <a href="http://www.improve-technologies.com/alpha/resin/">Resin for Eclipse Home page</a>
-</section>
+</p></s2>
 
-  </section>
-</document>
+  </s1>
+</body></document>

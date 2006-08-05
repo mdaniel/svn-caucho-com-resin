@@ -7,7 +7,7 @@
 </header>
 
 <body>
-<summary objsummary-in-localtoc='1'/>
+<summary objsummary-in-localtoc="1"/>
 <faq title="Can I use different SSL certificates for each virtual host?">
 <description>
 <p>We have two domains on one server.  Is there an example config file showing
@@ -24,8 +24,8 @@ There is no way for Resin to determine which domain name the user has specified
 in the url.</p>
 
 <p>It is possible  if you have separate IP addresses for the hosts.  You would
-start seperate <a config-tag='http'/> servers that only bind on that ip
-address.  Each of these <a config-tag='http'/> servers can have seperate ssl
+start seperate <a config-tag="http"/> servers that only bind on that ip
+address.  Each of these <a config-tag="http"/> servers can have seperate ssl
 configurations.</p>
 
 </faq>
@@ -55,7 +55,7 @@ $ make install
 
 <p>
 The INSTALL document from the OpenSSL package contains more
-information on the <code/threads/> option.
+information on the <code>threads</code> option.
 </p>
 
 </faq>

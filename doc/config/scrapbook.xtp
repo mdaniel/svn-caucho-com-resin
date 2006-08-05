@@ -50,7 +50,7 @@ done
 
 $IPTABLES -t nat -A PREROUTING -p tcp --dport 443 -d 192.168.3.164 -j DNAT --to 192.168.3.164:8443
 	
-$IPTABLES-save > $SCRIPTLOCATION/tablesave
+$IPTABLES-save &gt; $SCRIPTLOCATION/tablesave
 </example>
 
     </faq>

@@ -4,8 +4,7 @@
     <title>Third-party EJB Servers</title>
     <type>contents</type>
     <description>
-      <p>Although Resin Enterprise Edition includes an <a
-      href="ejb|index">EJB server</a> you may need to use EJB's from
+      <p>Although Resin Enterprise Edition includes an <a href="ejb|index">EJB server</a> you may need to use EJB's from
       another server.</p>
     </description>
   </header>

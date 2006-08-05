@@ -20,7 +20,7 @@
     <summary/>
 
 
-<section title="Prerequisites and Environment Variables">
+<s1 title="Prerequisites and Environment Variables">
 
 <p>Resin requires a 1.4 JDK.  You can download one from Sun and install it.</p>
  
@@ -29,9 +29,9 @@
 JAVA_HOME=C:\j2sdk1.4.2
 RESIN_HOME=C:\resin-3.0
 </example>
-</section>
+</s1>
 
-<section title="Configuring IIS/PWS">
+<s1 title="Configuring IIS/PWS">
 
 <p>To configure Resin with IIS, you must follow the following steps:</p>
 <ol>
@@ -41,14 +41,14 @@ RESIN_HOME=C:\resin-3.0
 </li></ol>
 
 
-<section title="ISAPI Filter">
+<s2 title="ISAPI Filter">
 
 <p>You should run <code>RESIN_HOME/bin/setup.exe</code> to setup your
 configuration.  If setup.exe is not used, or it fails, the steps in <a href="#Manual-Configuration">Manual Configuration</a> are necessary.</p>
 
-</section>
+</s2>
 
-<section title="ISAPI Filter Priority">
+<s2 title="ISAPI Filter Priority">
 
 <p>isapi_srun.dll installs itself as the default priority.  Some users may need
 to set the priority to a higher level, e.g. to override IIS's DAV support.
@@ -60,9 +60,9 @@ CauchoStatus yes
 IISPriority high
 </example>
 
-</section>
+</s2>
 
-<section title="Configuring resin.conf">
+<s2 title="Configuring resin.conf">
 
 <p>resin.conf should mirror the configuration of IIS.  In other words, you 
 need to configure the document root and any directory aliases.</p>
@@ -89,9 +89,9 @@ to match.</p>
 &lt;/host&gt;
 </example>
 
-</section>
+</s2>
 
-<section title="Testing the servlet engine">
+<s2 title="Testing the servlet engine">
 
 <p>From a <code>cmd</code> shell run <code>RESIN_HOME/httpd.exe</code> to start the
 servlet runner.</p>
@@ -116,11 +116,11 @@ found' message.</p>
 <results>
 2 + 2 = 4
 </results>
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="Command line arguments">
+<s1 title="Command line arguments">
 
 <p>The following configuration line arguments are recognized by httpd.exe.
 When command line arguments are used along with <code>-install</code> to
@@ -143,7 +143,7 @@ install as a service, the arguments are used each time the service starts.</p>
 </td></tr><tr><td>-remove-as &lt;name&gt;</td><td>Remove as an NT service with the specific name.
 </td></tr></deftable>
 
-<section title="Memory Configuration">
+<s2 title="Memory Configuration">
 
 <p>Memory configuration is part of the JVM's arguments.  For most JVMs,
 you can find the full list by starting "java -X".</p>
@@ -157,11 +157,11 @@ you can find the full list by starting "java -X".</p>
 
 <p>See <a href="performance|jvm-tuning#memory">Performance : JVM Tuning : Memory</a> for more information on JVM memory usage.</p>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="Deploying as an NT Service">
+<s1 title="Deploying as an NT Service">
 
 <p>Once you're comfortable with using Resin with IIS, you can install it
 as an NT service.  As a service, Resin will automatically start when
@@ -192,9 +192,9 @@ JDK is started with -Xrs. </note>
 win&gt; resin-3.0.x/httpd -install -Xrs
 </example>
 
-</section>
+</s1>
 
-<section name="balance" title="Load Balancing">
+<s1 name="balance" title="Load Balancing">
 
 <p>With Resin, you can distribute requests to multiple machines.  All
 requests with the same session will go to the same host.  In addition, if one
@@ -223,9 +223,9 @@ win&gt; resin-3.0.x/httpd -install-as "Resin-A" -server a -Xrs
 win&gt; resin-3.0.x/httpd -install-as "Resin-B" -server b -Xrs
 win&gt; resin-3.0.x/httpd -install-as "Resin-C" -server c -Xrs
 </example>
-</section>
+</s1>
 
-<section title="Manual Configuration">
+<s1 title="Manual Configuration">
 
 <p>Experts may want to configure Resin/IIS by hand instead
 of using the setup program.  The steps involved are:</p>
@@ -283,7 +283,7 @@ you have a resin.ini.</p>
 
 <p>Adding an ISAPI filter is accomplished in the IIS manager.</p>
 
-<section title="IIS and Resin on different machines">
+<s2 title="IIS and Resin on different machines">
 
 <p>When Resin and IIS are on different machines, you'll change
 the ResinConfigServer from "localhost" to the IP address of the
@@ -294,11 +294,11 @@ ResinConfigServer 192.168.0.10 6802
 CauchoStatus yes
 </example>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="Virtual Sites (Virtual Hosts)">
+<s1 title="Virtual Sites (Virtual Hosts)">
 
 <p>If IIS is managing multiple virtual sites (everyone else calls them virtual
 hosts), then you need to configure IIS to use the isapi_srun.dll filter for
@@ -335,9 +335,9 @@ example, a url of <code>http://foo.com/some/path</code> will use host
 <code>id="foo.com"</code> and a url of <code>http://bar.com/some/path</code>
 will use host <code>id="bar.com"</code>.</p>
 
-</section>
+</s1>
 
-<section title="Virtual Sites with different JVM's">
+<s1 title="Virtual Sites with different JVM's">
 
 <p>If a seperate JVM for each virtual site is desired, a seperate
 <code>resin.ini</code> is used for each virtual site.  The resin.ini file is placed
@@ -398,9 +398,9 @@ need to specify the host name because each conf/JVM is only going to
 receive requests from a particular virtual site (because of the unique
 resin.ini files).</p>
 
-</section>
+</s1>
 
-<section title="Troubleshooting">
+<s1 title="Troubleshooting">
 
 <ol>
 <li>Check your configuration with the standalone web server.
@@ -438,7 +438,7 @@ more information.
 is good but the resin.conf probably points to the wrong directories.
 </li></ol>
 
-<section name="iis6" title="Troubleshooting IIS 6">
+<s2 name="iis6" title="Troubleshooting IIS 6">
 <p>
 IIS 6/Windows 2003 users may need to perform additional steps.
 </p>
@@ -470,7 +470,7 @@ that user has read/write permission status is "Enabled".
 
 </li></ul>
 
-</section>
-</section>
+</s2>
+</s1>
 </body>
 </document>

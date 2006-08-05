@@ -11,7 +11,7 @@
   <body>
     <summary/>
 
-<section title='Introduction'>
+<s1 title="Introduction">
 
 <p/>The benchmark measures the overhead of several popular servlet
 and JSP engines.  It consists of a simple "Hello, World" servlet and
@@ -20,39 +20,39 @@ generated page is identical except for the background color.
 
 <p/>The methodology section explains why this benchmark is a valid
 measurement of servlet engines.  The benchmark source is available as
-<a href='benchmark.jar'>benchmark.jar</a>
+<a href="benchmark.jar">benchmark.jar</a>
 
-</section>
+</s1>
 
-<section title='Data'>
+<s1 title="Data">
 
 The following JSP engines were tested:
 <ul>
 <li>Resin 1.0 b8 (own web server)
-<li>Resin 1.0 b8/Apache 1.3.9
-<li>JRun 2.3.3/Apache 1.3.9
-<li>ServletExec 2.2b1/Apache 1.3.9
-<li>JServ 1.0 final/gnujsp 0.9.8/Apache 1.3.9
-<li>JWSDK 1.0 (August release) (own web server)
-</ul>
+</li><li>Resin 1.0 b8/Apache 1.3.9
+</li><li>JRun 2.3.3/Apache 1.3.9
+</li><li>ServletExec 2.2b1/Apache 1.3.9
+</li><li>JServ 1.0 final/gnujsp 0.9.8/Apache 1.3.9
+</li><li>JWSDK 1.0 (August release) (own web server)
+</li></ul>
 
 
-<ct:img src='jsp_perf.gif'/>
-<ct:img src='jsp_log.gif'/>
+<ct:img src="jsp_perf.gif"/>
+<ct:img src="jsp_log.gif"/>
 
 <deftable>
-<tr><th>JSP Engine<th>File<th>Servlet<th>Hello<th>Session<th>Post
-<tr align=right><td align=left>Resin<td>235<td>231<td>253<td>218<td>194
-<tr align=right><td align=left>Resin/Apache<td>493<td>172<td>181<td>150<td>142
-<tr align=right><td align=left>JRun/Apache<td>476<td>51<td>32<td>31<td>30
-<tr align=right><td align=left>ServletExec/Apache<td>498<td>31<td>31<td>30<td>30
-<tr align=right><td align=left>Jserv/Apache<td>498<td>41<td>30<td>30<td>29
-<tr align=right><td align=left>JWSDK<td>42<td>41<td>12<td>11<td>12
-</deftable>
+<tr><th>JSP Engine</th><th>File</th><th>Servlet</th><th>Hello</th><th>Session</th><th>Post
+</th></tr><tr align="right"><td align="left">Resin</td><td>235</td><td>231</td><td>253</td><td>218</td><td>194
+</td></tr><tr align="right"><td align="left">Resin/Apache</td><td>493</td><td>172</td><td>181</td><td>150</td><td>142
+</td></tr><tr align="right"><td align="left">JRun/Apache</td><td>476</td><td>51</td><td>32</td><td>31</td><td>30
+</td></tr><tr align="right"><td align="left">ServletExec/Apache</td><td>498</td><td>31</td><td>31</td><td>30</td><td>30
+</td></tr><tr align="right"><td align="left">Jserv/Apache</td><td>498</td><td>41</td><td>30</td><td>30</td><td>29
+</td></tr><tr align="right"><td align="left">JWSDK</td><td>42</td><td>41</td><td>12</td><td>11</td><td>12
+</td></tr></deftable>
 
-</section>
+</s1>
 
-<section title='Methodology'>
+<s1 title="Methodology">
 
 Skeptical of benchmarks?  Good.  However, this benchmark is indeed
 valid for several reasons.  First, it primarily measures overhead, the
@@ -97,9 +97,9 @@ ran successfully with it.  Internally, I did spot checks with JDK 1.2
 and the numbers were similar.  The full results for JDK 1.2 will be
 available shortly; time pressures limited their inclusion.
 
-</section>
+</s1>
 
-<section title='Conclusion'>
+<s1 title="Conclusion">
 
 This benchmark shows that JSP can approach static page performance.  The
 comparison between different JSP engines is really less important,
@@ -112,5 +112,5 @@ considered JSP or servlets because of performance, can now take
 advantage of the Java platform's reliability and ease of programming
 benefits.
 
-</section>  </body>
+</s1>  </body>
 </document>

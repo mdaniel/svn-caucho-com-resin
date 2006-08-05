@@ -14,20 +14,20 @@
 
   <body>
     <summary/>
-<section title="EJB Implementation">
+<s1 title="EJB Implementation">
 
-<p>This example adds a <var/hello()/> method and an <var/add/> method
+<p>This example adds a <var>hello()</var> method and an <var>add</var> method
 to the home interface.  In this example, there are no entity bean
 instances.  All the work is done by the home interface.  The home
-methods are implemented in the bean by adding <var/ejbHome/> to the
-name.  So <var/hello/> will become <var/ejbHomeHello/>.</p>
+methods are implemented in the bean by adding <var>ejbHome</var> to the
+name.  So <var>hello</var> will become <var>ejbHomeHello</var>.</p>
 
 <p>In essence, the home interface lets you create a simple service,
 like the <a href="protocols|tutorial/burlap-add/index">Burlap hello</a> service, and
 stick to the EJB API.</p>
 
 <p>Even though there are no entity bean instances, the
-<var/findByPrimaryKey/> method is still needed.</p>
+<var>findByPrimaryKey</var> method is still needed.</p>
 
 <example title="Home.java">
 package test;
@@ -55,10 +55,10 @@ public interface HelloObj extends javax.ejb.EJBObject {
 </example>
 
 <p>As usual, the work is done the HelloBean.  The home methods all
-start with <var/ejbHome/>.  <var/ejbHomeHello/> implements the
-<var/hello/> method.  <var/ejbHome/add/> implements the add method.</p>
+start with <var>ejbHome</var>.  <var>ejbHomeHello</var> implements the
+<var>hello</var> method.  <var>ejbHome/add</var> implements the add method.</p>
 
-<p><var/ejbFindByPrimaryKey/> is required, but it's easy to create a
+<p><var>ejbFindByPrimaryKey</var> is required, but it's easy to create a
 stub implementation that just returns an exception.</p>
 
 <example title="HelloBean.java">
@@ -85,9 +85,9 @@ public class HelloBean extends com.caucho.ejb.AbstractEntityBean {
 }
 </example>
 
-</section>
+</s1>
 
-<section title="Servlet Implementation">
+<s1 title="Servlet Implementation">
 
 <p>The client in this example is a servlet.  As with other EJBs,
 the client gets the home interface using JNDI.  Since it's only
@@ -125,10 +125,10 @@ public class HomeServlet extends GenericServlet {
     PrintWriter pw = res.getWriter();
     
     try {
-      pw.println("message: " + home.hello() + "<br>");
+      pw.println("message: " + home.hello() + "<br/>");
       
-      pw.println("1 + 3 = " + home.add(1, 3) + "<br>");
-      pw.println("7 + 1 = " + home.add(7, 1) + "<br>");
+      pw.println("1 + 3 = " + home.add(1, 3) + "<br/>");
+      pw.println("7 + 1 = " + home.add(7, 1) + "<br/>");
     } catch (Exception e) {
       throw new ServletException(e);
     }
@@ -136,9 +136,9 @@ public class HomeServlet extends GenericServlet {
 }
 </example>
 
-</section>
+</s1>
 
-<section title="Burlap protocol for the example">
+<s1 title="Burlap protocol for the example">
 
 <p>The Burlap calls for home methods are particularly simple.  Since
 there's no object, the client can call the home method directly.  The
@@ -148,108 +148,108 @@ hello</a> example, so clients can work with either unchanged.</p>
 <p>Since the example uses the burlap protocol, you can use 'telnet' as a
 simple client.</p>
 
-<section title="hello() call">
+<s2 title="hello() call">
 
 <results>
-unix> <var/telnet localhost 8080/>
+unix&gt; <var>telnet localhost 8080</var>
 Trying 127.0.0.1...
 Connected to localhost (127.0.0.1).
 Escape character is '^]'.
-<var/POST /servlet/test.entity.home.HomeServlet HTTP/1.0/>
-<var/Content-Length: 54/>
+<var>POST /servlet/test.entity.home.HomeServlet HTTP/1.0</var>
+<var>Content-Length: 54</var>
 
-<var/&lt;burlap:call>/>
-<var/&lt;method>hello&lt;/method>/>
-<var/&lt;/burlap:call>/>
+<var>&lt;burlap:call&gt;</var>
+<var>&lt;method&gt;hello&lt;/method&gt;</var>
+<var>&lt;/burlap:call&gt;</var>
 
 HTTP/1.0 200 OK
 Server: Resin/1.3.s010312
 Content-Length: 73
 Date: Tue, 13 Mar 2001 03:15:27 GMT
 
-&lt;burlap:reply>
-&lt;value>
-&lt;string>Hello, world&lt;/string>
-&lt;/value>
-&lt;/burlap:reply>
+&lt;burlap:reply&gt;
+&lt;value&gt;
+&lt;string&gt;Hello, world&lt;/string&gt;
+&lt;/value&gt;
+&lt;/burlap:reply&gt;
 </results>
 
 <p>The results have some added whitespace to make the example more
 readable.  The server doesn't bother trying to pretty-print the results.
 
-</section>
+</p></s2>
 
-<section title="add(2, 3) call">
+<s2 title="add(2, 3) call">
 
 <p>The add call has two integer arguments.  The integers directly
 follow the method.
 
-<p>The example below uses the short method name, <var/add/>.  To
+</p><p>The example below uses the short method name, <var>add</var>.  To
 support method overloading, the Burlap server also accepts the method
-name <var/add_int_int/>.</p>
+name <var>add_int_int</var>.</p>
 
 <results>
-unix> <var/telnet localhost 8080/>
+unix&gt; <var>telnet localhost 8080</var>
 Trying 127.0.0.1...
 Connected to localhost (127.0.0.1).
 Escape character is '^]'.
-<var/POST /ejb/home HTTP/1.0/>
-<var/Content-Length: 77/>
+<var>POST /ejb/home HTTP/1.0</var>
+<var>Content-Length: 77</var>
 
-<var/&lt;burlap:call>/>
-<var/&lt;method>add&lt;/method>/>
-<var/&lt;int>2&lt;/int>/>
-<var/&lt;int>3&lt;/int>/>
-<var/&lt;/burlap:call>/>
+<var>&lt;burlap:call&gt;</var>
+<var>&lt;method&gt;add&lt;/method&gt;</var>
+<var>&lt;int&gt;2&lt;/int&gt;</var>
+<var>&lt;int&gt;3&lt;/int&gt;</var>
+<var>&lt;/burlap:call&gt;</var>
 
 HTTP/1.0 200 OK
 Server: Resin/1.3.s010404
 Content-Length: 56
 Date: Thu, 05 Apr 2001 05:36:42 GMT
 
-&lt;burlap:reply>
-&lt;value>
-&lt;int>5&lt;/int>
-&lt;/value>
-&lt;/burlap:reply>
+&lt;burlap:reply&gt;
+&lt;value&gt;
+&lt;int&gt;5&lt;/int&gt;
+&lt;/value&gt;
+&lt;/burlap:reply&gt;
 </results>
 
-</section>
+</s2>
 
-<section title="metadata call">
+<s2 title="metadata call">
 
 <p>The Java client, in this case HomeServlet, needs to know 
 the Home interface in order to generate stub for the Burlap protocol.
 Since the client doesn't know that information, it needs to ask the
 server for the classname.  Burlap handles that with a reserved
-metadata call <var/_burlap_getAttribute/>.</p>
+metadata call <var>_burlap_getAttribute</var>.</p>
 
 <results>
-unix> <var/telnet localhost 8080/>
+unix&gt; <var>telnet localhost 8080</var>
 Trying 127.0.0.1...
 Connected to localhost (127.0.0.1).
 Escape character is '^]'.
-<var/POST /ejb/home HTTP/1.0/>
-<var/Content-Length: 95/>
+<var>POST /ejb/home HTTP/1.0</var>
+<var>Content-Length: 95</var>
 
-<var/&lt;burlap:call>/>
-<var/&lt;method>_burlap_getAttribute&lt;/method>/>
-<var/&lt;string>home-class&lt;/string>/>
-<var/&lt;/burlap:call>/>
+<var>&lt;burlap:call&gt;</var>
+<var>&lt;method&gt;_burlap_getAttribute&lt;/method&gt;</var>
+<var>&lt;string&gt;home-class&lt;/string&gt;</var>
+<var>&lt;/burlap:call&gt;</var>
 
 HTTP/1.0 200 OK
 Server: Resin/1.3.s010404
 Content-Length: 82
 Date: Thu, 05 Apr 2001 05:39:23 GMT
 
-&lt;burlap:reply>
-&lt;value>
-&lt;string>test.entity.home.Home&lt;/string>
-&lt;/value>
-&lt;/burlap:reply>
+&lt;burlap:reply&gt;
+&lt;value&gt;
+&lt;string&gt;test.entity.home.Home&lt;/string&gt;
+&lt;/value&gt;
+&lt;/burlap:reply&gt;
 </results>
 
-</section>
-</section>
+</s2>
+</s1>
   </body>
 </document>

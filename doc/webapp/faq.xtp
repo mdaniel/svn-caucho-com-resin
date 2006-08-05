@@ -7,7 +7,7 @@
 </header>
 
 <body>
-<summary objsummary='localtoc'/>
+<summary objsummary="localtoc"/>
 
 
 <faq name="forward-path" title="How are path related values of the request object changed after a forward or include?">
@@ -23,54 +23,54 @@ The values of getRequestURI() and other path related method's change for a
 forward(), but remain the same for an include().  
 </p>
 
-<section title="include">
+<s1 title="include">
 <p>
 When a servlet (or jsp) has been invoked by an include, the path related
 methods of the <code>request</code> object correspond to the invoking
-servlet.  Request attributes <code/javax.servlet.include.*/> contain values
+servlet.  Request attributes <code>javax.servlet.include.*</code> contain values
 corresponding to the target.
 </p>
 
 <deftable title="result of invoking calling include(target)">
-<tr><td>getXXXX() methods<td>invoking servlet
-<tr><td>javax.servlet.include.<td>target
-</deftable>
+<tr><td>getXXXX() methods</td><td>invoking servlet
+</td></tr><tr><td>javax.servlet.include.</td><td>target
+</td></tr></deftable>
 
 <example title="/testapp/index.jsp">
 &lt;jsp:include page="target.jsp"/&gt;
 </example>
 
 <deftable title="path related methods in target.jsp after include">
-<tr><td>request.getRequestURI()<td>/testapp/index.jsp
-<tr><td>request.getContextPath()<td>/testapp
-<tr><td>request.getServletPath()<td>/index.jsp
-<tr><td>request.getPathInfo()<td>null
-<tr><td>request.getQueryString()<td>null
-</deftable>
+<tr><td>request.getRequestURI()</td><td>/testapp/index.jsp
+</td></tr><tr><td>request.getContextPath()</td><td>/testapp
+</td></tr><tr><td>request.getServletPath()</td><td>/index.jsp
+</td></tr><tr><td>request.getPathInfo()</td><td>null
+</td></tr><tr><td>request.getQueryString()</td><td>null
+</td></tr></deftable>
 
 <deftable title="request attributes available in target.jsp">
-<tr><td>request.getAttribute("javax.servlet.include.request_uri")<td>/testapp/target.jsp
-<tr><td>request.getAttribute("javax.servlet.include.context_path")<td>/testapp
-<tr><td>request.getAttribute("javax.servlet.include.servlet_path")<td>/target.jsp
-<tr><td>request.getAttribute("javax.servlet.include.path_info")<td>null
-<tr><td>request.getAttribute("javax.servlet.include.query_string")<td>null
-</deftable>
-</section>
+<tr><td>request.getAttribute("javax.servlet.include.request_uri")</td><td>/testapp/target.jsp
+</td></tr><tr><td>request.getAttribute("javax.servlet.include.context_path")</td><td>/testapp
+</td></tr><tr><td>request.getAttribute("javax.servlet.include.servlet_path")</td><td>/target.jsp
+</td></tr><tr><td>request.getAttribute("javax.servlet.include.path_info")</td><td>null
+</td></tr><tr><td>request.getAttribute("javax.servlet.include.query_string")</td><td>null
+</td></tr></deftable>
+</s1>
 
 
-<section title="forward">
+<s1 title="forward">
 
 <p>
 When a servlet (or jsp) has been invoked by a forward, the path related
 methods of the <code>request</code> object return the path of the target
-servlet.  Request attributes <code/javax.servlet.forward.*/> contain values
+servlet.  Request attributes <code>javax.servlet.forward.*</code> contain values
 corresponding to the invoking servlet.
 </p>
 
 <deftable title="result of invoking calling forward(target)">
-<tr><td>getXXXX() methods<td>target
-<tr><td>javax.servlet.forward.<td>invoking servlet
-</deftable>
+<tr><td>getXXXX() methods</td><td>target
+</td></tr><tr><td>javax.servlet.forward.</td><td>invoking servlet
+</td></tr></deftable>
 
 <p>From the discussion of forward() in the Servlet specification:</p>
 
@@ -84,30 +84,30 @@ reflect the path used to obtain the RequestDispatcher.
 </example>
 
 <deftable title="path related methods in target.jsp after forward">
-<tr><td>request.getRequestURI()<td>/testapp/target.jsp
-<tr><td>request.getContextPath()<td>/testapp
-<tr><td>request.getServletPath()<td>/target.jsp
-<tr><td>request.getPathInfo()<td>null
-<tr><td>request.getQueryString()<td>null
-</deftable>
+<tr><td>request.getRequestURI()</td><td>/testapp/target.jsp
+</td></tr><tr><td>request.getContextPath()</td><td>/testapp
+</td></tr><tr><td>request.getServletPath()</td><td>/target.jsp
+</td></tr><tr><td>request.getPathInfo()</td><td>null
+</td></tr><tr><td>request.getQueryString()</td><td>null
+</td></tr></deftable>
 
 <deftable title="request attributes available in target.jsp">
-<tr><td>request.getAttribute("javax.servlet.forward.request_uri")<td>/testapp/index.jsp
-<tr><td>request.getAttribute("javax.servlet.forward.context_path")<td>/testapp
-<tr><td>request.getAttribute("javax.servlet.forward.servlet_path")<td>/index.jsp
-<tr><td>request.getAttribute("javax.servlet.forward.path_info")<td>null
-<tr><td>request.getAttribute("javax.servlet.forward.query_string")<td>null
-<tr><td>caucho.forward<td>true
-</deftable>
-</section>
+<tr><td>request.getAttribute("javax.servlet.forward.request_uri")</td><td>/testapp/index.jsp
+</td></tr><tr><td>request.getAttribute("javax.servlet.forward.context_path")</td><td>/testapp
+</td></tr><tr><td>request.getAttribute("javax.servlet.forward.servlet_path")</td><td>/index.jsp
+</td></tr><tr><td>request.getAttribute("javax.servlet.forward.path_info")</td><td>null
+</td></tr><tr><td>request.getAttribute("javax.servlet.forward.query_string")</td><td>null
+</td></tr><tr><td>caucho.forward</td><td>true
+</td></tr></deftable>
+</s1>
 
-<section title="Exception: getNamedDispatcher()">
+<s1 title="Exception: getNamedDispatcher()">
 <p>
 If getNamedDispatcher() is used to obtain a dispatcher to do the include() or forward(), no attributes are set.
 </p>
-</section>
+</s1>
 
-<section title="Request parameters">
+<s1 title="Request parameters">
 
 <p>A call to forward() or include() can contain parameters in the url.  These
 parameters are returned with a subsequent call to request.getParameter().
@@ -119,38 +119,38 @@ situation where the value of request.getParameter() does not match the value in
 the query string.  </p>
 
 <deftable title="include index.jsp">
-<tr><td>called with url<td>/testapp/index.jsp?foo=original
-<tr><td>index.jsp contains<td>&lt;jsp:include page="target.jsp"/>
-<tr><td>request.getQueryString() in target.jsp returns<td>foo=original
-<tr><td>request.getParameter("foo") in target.jsp returns<td>original
-<tr><td>request.getAttribute("javax.servlet.include.query_string") in target.jsp returns<td>null
-</deftable>
+<tr><td>called with url</td><td>/testapp/index.jsp?foo=original
+</td></tr><tr><td>index.jsp contains</td><td>&lt;jsp:include page="target.jsp"/&gt;
+</td></tr><tr><td>request.getQueryString() in target.jsp returns</td><td>foo=original
+</td></tr><tr><td>request.getParameter("foo") in target.jsp returns</td><td>original
+</td></tr><tr><td>request.getAttribute("javax.servlet.include.query_string") in target.jsp returns</td><td>null
+</td></tr></deftable>
 
 <deftable title="include index.jsp?foo=override">
-<tr><td>called with url<td>/testapp/index.jsp?foo=original
-<tr><td>index.jsp contains<td>&lt;jsp:include page="target.jsp?foo=override"/>
-<tr><td>request.getQueryString() in target.jsp returns<td>foo=original
-<tr><td>request.getParameter("foo") in target.jsp returns<td>override
-<tr><td>request.getAttribute("javax.servlet.include.query_string") in target.jsp returns<td>foo=override
-</deftable>
+<tr><td>called with url</td><td>/testapp/index.jsp?foo=original
+</td></tr><tr><td>index.jsp contains</td><td>&lt;jsp:include page="target.jsp?foo=override"/&gt;
+</td></tr><tr><td>request.getQueryString() in target.jsp returns</td><td>foo=original
+</td></tr><tr><td>request.getParameter("foo") in target.jsp returns</td><td>override
+</td></tr><tr><td>request.getAttribute("javax.servlet.include.query_string") in target.jsp returns</td><td>foo=override
+</td></tr></deftable>
 
 
 <deftable title="forward index.jsp">
-<tr><td>called with url<td>/testapp/index.jsp?foo=original
-<tr><td>index.jsp contains<td>&lt;jsp:foward page="target.jsp"/>
-<tr><td>request.getQueryString() in target.jsp returns<td>null
-<tr><td>request.getParameter("foo") in target.jsp returns<td>original
-<tr><td>request.getAttribute("javax.servlet.forward.query_string") in target.jsp returns<td>foo=original
-</deftable>
+<tr><td>called with url</td><td>/testapp/index.jsp?foo=original
+</td></tr><tr><td>index.jsp contains</td><td>&lt;jsp:foward page="target.jsp"/&gt;
+</td></tr><tr><td>request.getQueryString() in target.jsp returns</td><td>null
+</td></tr><tr><td>request.getParameter("foo") in target.jsp returns</td><td>original
+</td></tr><tr><td>request.getAttribute("javax.servlet.forward.query_string") in target.jsp returns</td><td>foo=original
+</td></tr></deftable>
 
 <deftable title="forward index.jsp?foo=override">
-<tr><td>called with url<td>/testapp/index.jsp?foo=original
-<tr><td>index.jsp contains<td>&lt;jsp:foward page="target.jsp?foo=override"/>
-<tr><td>request.getQueryString() in target.jsp returns<td>foo=override
-<tr><td>request.getParameter("foo") in target.jsp returns<td>override
-<tr><td>request.getAttribute("javax.servlet.forward.query_string") in target.jsp returns<td>foo=original
-</deftable>
-</section>
+<tr><td>called with url</td><td>/testapp/index.jsp?foo=original
+</td></tr><tr><td>index.jsp contains</td><td>&lt;jsp:foward page="target.jsp?foo=override"/&gt;
+</td></tr><tr><td>request.getQueryString() in target.jsp returns</td><td>foo=override
+</td></tr><tr><td>request.getParameter("foo") in target.jsp returns</td><td>override
+</td></tr><tr><td>request.getAttribute("javax.servlet.forward.query_string") in target.jsp returns</td><td>foo=original
+</td></tr></deftable>
+</s1>
 
 </faq>
 
@@ -186,7 +186,7 @@ private Class classForName(String classname)
 
 </faq>
 
-<faq title="package-required" title="Why do I have to put my classes in a package?">
+<faq title="Why do I have to put my classes in a package?">
 <description>
 If I make a class that is not in a package, Resin does not recognize it and 
 does not load it.
@@ -257,4 +257,3 @@ OutputStreamWriter encoding is: ISO8859_1
 
 </body>
 </document>
-

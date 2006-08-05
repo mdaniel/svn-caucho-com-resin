@@ -12,14 +12,14 @@ Resin supports the use of RMI with the resource class
 </header>
 
 <body>
-<summary objsummary='localtoc'/>
+<summary objsummary="localtoc"/>
 
-<section name="concepts" title="RMI concepts">
+<s1 name="concepts" title="RMI concepts">
 
 <p>
-The goal of RMI is to provide <var/services/> to remote clients.  A remote
-client obtains and uses a <var/proxy object/> that implements an
-<var/interface/>.  The interface is the contract for the service, it is the
+The goal of RMI is to provide <var>services</var> to remote clients.  A remote
+client obtains and uses a <var>proxy object</var> that implements an
+<var>interface</var>.  The interface is the contract for the service, it is the
 definition of the methods that the service provides.
 </p>
 
@@ -29,7 +29,7 @@ occurs on the server.  A proxy object is placeholder that the client uses
 to cause execution of code on a server.
 </p>
 
-<section name="concepts/registry" title="Registry">
+<s2 name="concepts/registry" title="Registry">
 
 <p>
 The RMI registry is used to store a list of available services.  A client uses
@@ -52,11 +52,11 @@ can have only one Registry on a particular port.  This has important
 ramifications for the naming of services.
 </p>
 
-</section> <!-- concepts/registry -->
+</s2> <!-- concepts/registry -->
 
-</section> <!-- concepts -->
+</s1> <!-- concepts -->
 
-<section title="The Hessian alternative">
+<s1 title="The Hessian alternative">
 
 <p>If you are considering RMI as a mechanism for publishing services, you may
 want to consider using <a href="doc|protocols|hessian">Hessian</a> instead.  Hessian offers the following
@@ -65,18 +65,18 @@ advantages:</p>
 <ul>
 <li>it does not have a global namespace, separate web-app's can provide
 services with the same name without conflict
-<li>it supports the use of clients written in languages other than Java
-<li>it does not require the manual generation of stubs
-<li>it does not require a security-manager
-</ul>
+</li><li>it supports the use of clients written in languages other than Java
+</li><li>it does not require the manual generation of stubs
+</li><li>it does not require a security-manager
+</li></ul>
 
 
 More information is available in the 
 <a href="doc|protocols|hessian">Hessian</a> section of the documentation.
 
-</section>
+</s1>
 
-<section name="security-manager" title="Requirement: security-manager">
+<s1 name="security-manager" title="Requirement: security-manager">
 
 <p>
 The JDK requires that a security manager be in place for the use of RMI.
@@ -104,8 +104,8 @@ More information is available in the
 section of the documentation.
 </p>
 
-</section>
-<section name="ref" title="com.caucho.resources.rmi.RmiRegistry">
+</s1>
+<s1 name="ref" title="com.caucho.resources.rmi.RmiRegistry">
 <p>
 Resin provides the resource class 
 <a href="javadoc|com.caucho.resources.rmi.RmiRegistry|"/>
@@ -130,13 +130,13 @@ RMI Registry if needed.
 </example>
 
 
-<defun title="com.caucho.resources.rmi.RmiRegistry" version="Resin 3.0.6">
+<s2 title="com.caucho.resources.rmi.RmiRegistry" version="Resin 3.0.6" type="defun">
 
 <deftable-childtags>
-<tr><td occur="?">server<td>the ip address of the server with the Registry<td>localhost
-<tr><td occur="?">port<td>the port of the Registry<td>1099
-<tr><td occur="*">rmi-service<td>an rmi service (see below)<td>&nbsp;
-</deftable-childtags>
+<tr><td occur="?">server</td><td>the ip address of the server with the Registry</td><td>localhost
+</td></tr><tr><td occur="?">port</td><td>the port of the Registry</td><td>1099
+</td></tr><tr><td occur="*">rmi-service</td><td>an rmi service (see below)</td><td>&#160;
+</td></tr></deftable-childtags>
 
 <p>
 <code>RmiRegistry</code> is used to define the location of an RMI Registry to
@@ -148,10 +148,10 @@ on the specified port, if it has not already been started.
 If <code>server</code> is something other than `localhost', then it is assumed
 that the Registry has been started by some other JVM , and is treated as remote Registry to register any services defined with <code>rmi-server</code>.
 </p>
-</defun>
+</s2>
  
 
-<defun title="rmi-service" version="Resin 3.0.6">
+<s2 title="rmi-service" version="Resin 3.0.6" type="defun">
 <parents>com.caucho.resources.rmi.RmiRegistry</parents>
 
 <p>
@@ -161,15 +161,15 @@ defined by the containing <code>RmiRegistry</code>.
 </p>
 
 <deftable-childtags>
-<tr><td occur="1">service-name<td>the name of the service, used for registration in the Registry and also used by clients to locate the service.<td>required
-<tr><td occur="1">server-class<td>the name of the implementation class for the service<td>required
-</deftable-childtags>
-</defun>
-</section> <!-- ref -->
+<tr><td occur="1">service-name</td><td>the name of the service, used for registration in the Registry and also used by clients to locate the service.</td><td>required
+</td></tr><tr><td occur="1">server-class</td><td>the name of the implementation class for the service</td><td>required
+</td></tr></deftable-childtags>
+</s2>
+</s1> <!-- ref -->
 
-<section name="implement" title="Implementing a service">
+<s1 name="implement" title="Implementing a service">
 
-<section title="Interface and Implementaion">
+<s2 title="Interface and Implementaion">
 
 <p>An RMI service requires the developer to create two classes - an interface
 and an implementation.  The interface defines the contract for the service, it
@@ -216,11 +216,11 @@ public class HelloWorldImpl extends UnicastRemoteObject implements HelloWorld
 }
 </example>
 
-</section>
+</s2>
 
-<section title="Making Stubs">
+<s2 title="Making Stubs">
 
-<p>When the client uses a service, it uses a <var/proxy object/>.  The proxy
+<p>When the client uses a service, it uses a <var>proxy object</var>.  The proxy
 object is a placeholder, it implements the interface defined for the service,
 and call's through to the server so that the code is executed on the
 server.</p>
@@ -244,9 +244,9 @@ It is tedious to perform this step manually, an ant build script (as shown
 in a later section) can be used to expediate the process.
 </p>
 
-</section>
+</s2>
 
-<section name="implement/deploy" title="Deploying the service with Resin">
+<s2 name="implement/deploy" title="Deploying the service with Resin">
 <p>
 Once the work of making an interface, an implementation, and generating a stub
 is complete, it is a simple process to deploy the service in Resin.  
@@ -284,7 +284,7 @@ with the use of multiple <code>rmi-service</code> tags:
 &lt;/web-app&gt;
 </example>
 
-<section title="Choosing a name">
+<s3 title="Choosing a name">
 
 <p>By convention, the name chosen for the service often matches the name of the
 interface class.  For example, if the interface name is "example.HelloWorld"
@@ -294,10 +294,10 @@ then service-name is "HelloWorld" or even "example.HelloWorld" to match.
 <p>The RMI Registry has a global namespace.  If two different web-app's try to
 publish the same service, with the same name, there will be conflicts.</p>
 
-</section>
-</section>  <!-- implement/deploy -->
+</s3>
+</s2>  <!-- implement/deploy -->
 
-<section title="An example build file">
+<s2 title="An example build file">
 <p>
 An ant build file is useful for completing the <code>rmic</code> step, and for
 preparing a jar for use by the client.  The client jar contains the interfaces
@@ -367,11 +367,11 @@ the jar file <code>/rmiclient.jar</code>.
 &lt;/project&gt;
 </example>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section name="client" title="Implementing a client">
+<s1 name="client" title="Implementing a client">
 <p>
 The client is usually on a different machine, or at least in a different JVM, than the server.  That is the point of RMI, it enables the execution of code on a remote machine.
 </p>
@@ -394,11 +394,11 @@ Once the jar file is available to the client, using the RMI service id fairly si
   System.out.println(remote.sayHello());
 </example>
 
-</section> <!-- client -->
+</s1> <!-- client -->
 
-<section name="scenarios" title="Scenarios">
+<s1 name="scenarios" title="Scenarios">
 
-<section title="A Resin server that provides the Registry and the service">
+<s2 title="A Resin server that provides the Registry and the service">
 
 <p>In the most common scenario, the Resin server provides both the RMI Registry
 and the RMI services.  When the registry server is defined as `localhost',
@@ -424,9 +424,9 @@ the (somewhat tricky) process of starting the rmi registry yourself.</p>
 <p>
 When the Resin server starts, it will start the rmi registry on port 1099 and register the `HelloWorld' service with it.
 </p>
-</section>
+</s2>
 
-<section title="A Registry on a different server">
+<s2 title="A Registry on a different server">
 
 <p>In this scenario, the rmi registry is located on the machine
 <code>services.hogwarts.com</code>.  The registry is started with a custom (not
@@ -459,10 +459,10 @@ a remote machine, Resin will not create a registry on the local machine.  When
 the REsin server shuts down, or is restarted, the `HelloWorld' service will be
 removed from the remote registry.
 </p>
-</section>
+</s2>
 
 
-<section title="A Registry in a different JVM">
+<s2 title="A Registry in a different JVM">
 
 <p>In this scenario, the rmi registry is located on the same machine
 as the Resin server, but is started  with a custom (not
@@ -498,10 +498,9 @@ the Resin server shuts down, or is restarted, the `HelloWorld' service will be
 removed from the remote registry.
 </p>
 
-</section>
+</s2>
 
-</section> <!-- scenarios -->
+</s1> <!-- scenarios -->
 
 </body>
 </document>
-

@@ -22,8 +22,7 @@ server down somewhat.</p>
 "sandbox" where Java limits the things that can be done from code
 within th web-app.</p>
 
-<p>The security manager is enabled by adding a <a
-config-tag="security-manager"/> tag in the resin.conf.</p>
+<p>The security manager is enabled by adding a <a config-tag="security-manager"/> tag in the resin.conf.</p>
 
 <example title="enabling security-manager in resin.conf">
 &lt;resin xmlns="http://caucho.com/ns/resin"
@@ -34,8 +33,8 @@ config-tag="security-manager"/> tag in the resin.conf.</p>
   ...
 </example>
 
-<section title="java.policy">
-<p>The security manager determines a <var/policy/> that applies to the current
+<s1 title="java.policy">
+<p>The security manager determines a <var>policy</var> that applies to the current
 virtual machine.  The security manager is controlled by policy file's.</p>
 
 The simplest way to change the policy  is to change one of the default 
@@ -47,7 +46,7 @@ ${'${'}user.home}/.java.policy
 </def>
 
 <p>
-An additional policy file can be set using the <code/java.security.policy/>
+An additional policy file can be set using the <code>java.security.policy</code>
 system property at the command line: 
 </p>
 
@@ -61,20 +60,18 @@ The resulting policy for the virtual machine is the union of all granted
 permissions in all policy files. 
 </p>
 
-</section>
+</s1>
 
-<section title="java.policy syntax">
+<s1 title="java.policy syntax">
 
 <p>A useful resource is Sun's <a href="external|sun|security">documentation
-about security</a>, in particular the <a
-href="external|sun|security/permissions">policy permissions</a> and <a
-href="external|sun|security/policyfiles">policy file syntax</a> files are
+about security</a>, in particular the <a href="external|sun|security/permissions">policy permissions</a> and <a href="external|sun|security/policyfiles">policy file syntax</a> files are
 useful.</p>
 
 <p>Each web-app automatically has permissions to read, write and
 delete any file under the web-app's directory, including WEB-INF.  It
-also has read permission for the classpath, including &lt;classpath>
-from the &lt;host> and &lt;server> contexts.</p>
+also has read permission for the classpath, including &lt;classpath&gt;
+from the &lt;host&gt; and &lt;server&gt; contexts.</p>
 
 <example title="sample java.policy">
 #
@@ -109,7 +106,7 @@ grant codeBase "file:/opt/web/webapps/ejb/WEB-INF/-" {
 	permission java.io.FilePermission "/opt/web/doc/*", "read";
 };
 </example>
-</section>
+</s1>
 
 </body>
 </document>

@@ -26,7 +26,7 @@
 
 <s1 title="cluster">
 
-<defun title="cache" version="Resin 3.1">
+<s1 title="cache" version="Resin 3.1" type="defun">
 <parents>cache</parents>
 
 <p>Configures the proxy cache (requires Resin Professional).  The
@@ -66,28 +66,28 @@ the <g>ObjectName</g> <var>resin:type=ProxyCache</var>.</p>
 </deftable-childtags>
 
 <example title="cache">
-&lt;resin xmlns="http://caucho.com/ns/resin">
-    &lt;cluster id="web-tier">
-        &lt;cache entries="16384" disk-size="2G" memory-size="256M"/>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+    &lt;cluster id="web-tier"&gt;
+        &lt;cache entries="16384" disk-size="2G" memory-size="256M"/&gt;
 
-        &lt;server id="a" address="192.168.0.10"/>
+        &lt;server id="a" address="192.168.0.10"/&gt;
 
-        &lt;host host-name="www.foo.com">
-    &lt;/cluster>
-&lt;/resin>
+        &lt;host host-name="www.foo.com"&gt;
+    &lt;/cluster&gt;
+&lt;/resin&gt;
 </example>
 
-</defun>
+</s1>
 
-<defun title="cluster" version="Resin 3.1">
+<s1 title="cluster" version="Resin 3.1" type="defun">
 <parents>resin</parents>
 
 <p>Specifies a cluster of identically-configured servers.
-The cluster typically configures a set of &lt;server>s, each with some
-ports, and a set of virtual &lt;host>s.</p>
+The cluster typically configures a set of &lt;server&gt;s, each with some
+ports, and a set of virtual &lt;host&gt;s.</p>
 
-<p>Only one &lt;cluster> is active in any on server.  At runtime,
-the &lt;cluster> is selected by the &lt;server> with <var>id</var>
+<p>Only one &lt;cluster&gt; is active in any on server.  At runtime,
+the &lt;cluster&gt; is selected by the &lt;server&gt; with <var>id</var>
 matching the -server-id on the command line.</p>
 
 <deftable-childtags>
@@ -97,104 +97,104 @@ matching the -server-id on the command line.</p>
 </deftable-childtags>
 
 <example title="cluster-default">
-&lt;resin xmlns="http://caucho.com/ns/resin">
-    &lt;cluster id="web-tier">
-        &lt;server-default>
-            &lt;http port="8080"/>
-        &lt;/server-default>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+    &lt;cluster id="web-tier"&gt;
+        &lt;server-default&gt;
+            &lt;http port="8080"/&gt;
+        &lt;/server-default&gt;
 
-        &lt;server id="a" address="192.168.0.10"/>
-        &lt;server id="b" address="192.168.0.11"/>
+        &lt;server id="a" address="192.168.0.10"/&gt;
+        &lt;server id="b" address="192.168.0.11"/&gt;
 
-        &lt;host host-name="www.foo.com">
+        &lt;host host-name="www.foo.com"&gt;
           ...
-        &lt;/host>
-    &lt;/cluster>
-&lt;/resin>
+        &lt;/host&gt;
+    &lt;/cluster&gt;
+&lt;/resin&gt;
 </example>
 
-</defun>
+</s1>
 
-<defun title="cluster-default" version="Resin 3.1">
+<s1 title="cluster-default" version="Resin 3.1" type="defun">
 <parents>resin</parents>
 
-<p>Default cluster configuration for all clusters in the &lt;resin> server.</p>
+<p>Default cluster configuration for all clusters in the &lt;resin&gt; server.</p>
 
 <example title="cluster-default">
-&lt;resin xmlns="http://caucho.com/ns/resin">
-    &lt;cluster-default>
-        &lt;cache entries="16384" memory-size="64M"/>
-    &lt;/cluster-default>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+    &lt;cluster-default&gt;
+        &lt;cache entries="16384" memory-size="64M"/&gt;
+    &lt;/cluster-default&gt;
 
-    &lt;cluster id="web-tier">
+    &lt;cluster id="web-tier"&gt;
         ...
-    &lt;/cluster>
+    &lt;/cluster&gt;
 
-    &lt;cluster id="app-tier">
+    &lt;cluster id="app-tier"&gt;
         ...
-    &lt;/cluster>
-&lt;/resin>
+    &lt;/cluster&gt;
+&lt;/resin&gt;
 </example>
 
-</defun>
+</s1>
 
-<defun title="connection-error-page" version="Resin 3.1">
+<s1 title="connection-error-page" version="Resin 3.1" type="defun">
 <parents>cluster</parents>
 
 <p>The connection-error-page specifies an error page to be used
 by IIS when it can't contact an app-tier Resin.  This directive
 only applies to IIS.</p>
 
-</defun>
+</s1>
 
-<defun title="ear-default" version="Resin 3.1">
+<s1 title="ear-default" version="Resin 3.1" type="defun">
 <parents>cluster</parents>
 
 <p>Configures defaults for .ear resource, i.e. enterprise applications.</p>
 
-</defun>
+</s1>
 
-<defun title="error-page" version="Resin 3.1">
+<s1 title="error-page" version="Resin 3.1" type="defun">
 <parents>cluster</parents>
 
 <p>See <a href="webapp.xtp#error-page">webapp: error-page</a>.</p>
 
 <p>Defines an error-page to be displayed when no virtual host or
 web-app is found.  Note, this is not a default error-page, i.e. if
-an error occurs inside a &lt;host> or &lt;web-app>, the error-page for
+an error occurs inside a &lt;host&gt; or &lt;web-app&gt;, the error-page for
 that host or web-app will be used instead.</p>
 
-</defun>
+</s1>
 
-<defun title="Environment" version="Resin 3.1">
+<s1 title="Environment" version="Resin 3.1" type="defun">
 <parents>cluster</parents>
 
 <p>All <a href="env.xtp">Environment tags</a> are
-available to the &lt;cluster>.  For example,
-resources like &lt;database>.</p>
+available to the &lt;cluster&gt;.  For example,
+resources like &lt;database&gt;.</p>
 
 <example title="cluster environment">
-&lt;resin xmlns="http://caucho.com/ns/resin">
-    &lt;cluster id="app-tier">
-        &lt;database jndi-name="jdbc/test">
-            &lt;driver type="org.postgresql.Driver">
-                &lt;url>jdbc:postgresql://localhost/test&lt;/url>
-                &lt;user>caucho&lt;/user>
-            &lt;/driver>
-        &lt;/database>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+    &lt;cluster id="app-tier"&gt;
+        &lt;database jndi-name="jdbc/test"&gt;
+            &lt;driver type="org.postgresql.Driver"&gt;
+                &lt;url&gt;jdbc:postgresql://localhost/test&lt;/url&gt;
+                &lt;user&gt;caucho&lt;/user&gt;
+            &lt;/driver&gt;
+        &lt;/database&gt;
 
-        &lt;server id="a" ...>
+        &lt;server id="a" ...&gt;
           ...
 
-        &lt;host host-name="www.foo.com">
+        &lt;host host-name="www.foo.com"&gt;
           ...
-    &lt;/cluster>
-&lt;/resin>
+    &lt;/cluster&gt;
+&lt;/resin&gt;
 </example>
 
-</defun>
+</s1>
 
-<defun title="host" version="Resin 3.0">
+<s1 title="host" version="Resin 3.0" type="defun">
 <parents>cluster</parents>
 
 <p>Configures a virtual host.  Virtual hosts must be
@@ -225,17 +225,17 @@ configured explicitly.</p>
 </deftable-childtags>
 
 <example title="explicit host">
-&lt;host host-name="www.foo.com">
-  &lt;host-alias>foo.com&lt;/host-alias>
-  &lt;host-alias>web.foo.com&lt;/host-alias>
+&lt;host host-name="www.foo.com"&gt;
+  &lt;host-alias&gt;foo.com&lt;/host-alias&gt;
+  &lt;host-alias&gt;web.foo.com&lt;/host-alias&gt;
 
-  &lt;root-directory>/opt/www/www.foo.com&lt;/root-directory>
+  &lt;root-directory&gt;/opt/www/www.foo.com&lt;/root-directory&gt;
 
-  &lt;web-app id="/" document-directory="webapps/ROOT">
+  &lt;web-app id="/" document-directory="webapps/ROOT"&gt;
     
-  &lt;/web-app>
+  &lt;/web-app&gt;
   ...
-&lt;/host>
+&lt;/host&gt;
 </example>
 
 <example title="regexp host">
@@ -248,12 +248,12 @@ configured explicitly.</p>
 &lt;/host&gt;
 </example>
 
-<p>It is recommended that any &lt;host> using a regexp include
-a &lt;host-name> to set the canonical name for the host.</p>
+<p>It is recommended that any &lt;host&gt; using a regexp include
+a &lt;host-name&gt; to set the canonical name for the host.</p>
 
-</defun>
+</s1>
 
-<defun title="host-default" version="Resin 3.0">
+<s1 title="host-default" version="Resin 3.0" type="defun">
 <parents>cluster</parents>
 
 <p>Defaults for a virtual host.</p>
@@ -261,9 +261,9 @@ a &lt;host-name> to set the canonical name for the host.</p>
 <p>The host-default can contain any of the host configuration tags.
 It will be used as defaults for any virtual host.</p>
 
-</defun>
+</s1>
 
-<defun title="host-deploy" version="Resin 3.0.4">
+<s1 title="host-deploy" version="Resin 3.0.4" type="defun">
 <parents>cluster</parents>
 
 <p>Configures a deploy directory for virtual host.</p>
@@ -285,9 +285,9 @@ the name of the host jar file.</p>
     <td>\${name}</td></tr>
 </deftable-childtags>
 
-</defun>
+</s1>
 
-<defun title="ignore-client-disconnect" version="Resin 3.1">
+<s1 title="ignore-client-disconnect" version="Resin 3.1" type="defun">
 <parents>cluster</parents>
 
 <p>ignore-client-disconnect configures whether Resin should ignore
@@ -297,9 +297,9 @@ exceptions to the application.</p>
 
 <default>true</default>
 
-</defun>
+</s1>
 
-<defun title="invocation-cache-size" version="Resin 3.1">
+<s1 title="invocation-cache-size" version="Resin 3.1" type="defun">
 <parents>cluster</parents>
 
 <p>Configures the number of entries in the invocation cache.
@@ -308,9 +308,9 @@ chains from the URLs.  It's also used as the basis for proxy caching.</p>
 
 <default>8192</default>
 
-</defun>
+</s1>
 
-<defun title="invocation-cache-max-url-length" version="Resin 3.1">
+<s1 title="invocation-cache-max-url-length" version="Resin 3.1" type="defun">
 <parents>cluster</parents>
 
 <p>Configures the longest entry cacheable in the invocation cache.
@@ -318,9 +318,9 @@ It is used to avoid certain types of denial-of-service attacks.</p>
 
 <default>256</default>
 
-</defun>
+</s1>
 
-<defun title="persistent-store" version="Resin 3.0.8">
+<s1 title="persistent-store" version="Resin 3.0.8" type="defun">
 <parents>cluster</parents>
 
 <p>Defines the cluster-aware persistent store used for
@@ -328,33 +328,33 @@ sharing distributed sessions.  The allowed types are "jdbc", "cluster"
 and "file".  The "file" type is only recommended in single-server
 configurations.</p>
 
-<p>The &lt;persistent-store> configuration is in the &lt;server> level
+<p>The &lt;persistent-store&gt; configuration is in the &lt;server&gt; level
 because it needs to share update information across the
-active cluster and the &lt;cluster> definition is at the &lt;server> level.
-Sessions activate the persistent store with the &lt;use-persistent-store>
-tag of the &lt;session-config>.</p>
+active cluster and the &lt;cluster&gt; definition is at the &lt;server&gt; level.
+Sessions activate the persistent store with the &lt;use-persistent-store&gt;
+tag of the &lt;session-config&gt;.</p>
 
 <p>See <a href="config|sessions.xtp">Persistent sessions</a> for more details.</p>
 
 <example>
-&lt;resin xmlns="http://caucho.com/ns/resin">
-&lt;cluster>
-  &lt;server id="a" address="192.168.0.1" port="6800"/>
-  &lt;server id="b" address="192.168.0.2" port="6800"/>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+&lt;cluster&gt;
+  &lt;server id="a" address="192.168.0.1" port="6800"/&gt;
+  &lt;server id="b" address="192.168.0.2" port="6800"/&gt;
 
-  &lt;persistent-store type="jdbc">
-    &lt;init>
-      &lt;data-source>jdbc/session&lt;/data-source>
+  &lt;persistent-store type="jdbc"&gt;
+    &lt;init&gt;
+      &lt;data-source&gt;jdbc/session&lt;/data-source&gt;
 
-      &lt;max-idle-time>24h&lt;/max-idle-time>
-    &lt;/init>
-  &lt;/persistent-store>
+      &lt;max-idle-time&gt;24h&lt;/max-idle-time&gt;
+    &lt;/init&gt;
+  &lt;/persistent-store&gt;
 
-  &lt;web-app-default>
-    &lt;session-config use-persistent-store="true"/>
-  &lt;/web-app-default>
-&lt;/cluster>
-&lt;/resin>
+  &lt;web-app-default&gt;
+    &lt;session-config use-persistent-store="true"/&gt;
+  &lt;/web-app-default&gt;
+&lt;/cluster&gt;
+&lt;/resin&gt;
 </example>
 
 <deftable-childtags title="common tags">
@@ -393,9 +393,9 @@ tag of the &lt;session-config>.</p>
               <td>required</td></tr>
 </deftable-childtags>
 
-</defun>
+</s1>
 
-<defun title="ping" occur='*' version="Resin 3.0">
+<s1 title="ping" occur="*" version="Resin 3.0" type="defun">
 <parents>cluster</parents>
 
 <p>Starts a thread that periodically makes a request to the server, and
@@ -449,19 +449,19 @@ PingThread will catch errors like deadlocks.</p>
 </example>
 
 <deftable-childtags>
-<tr occur='+'><td>url</td>
+<tr occur="+"><td>url</td>
               <td>A url to ping.</td>
               <td>required</td></tr>
-<tr occur='?'><td>sleep-time</td>
+<tr occur="?"><td>sleep-time</td>
               <td>Time to wait between pings.  The first ping is always 15m after the server starts, this is for subsequent pings.</td>
               <td>15m</td></tr>
-<tr occur='?'><td>try-count</td>
+<tr occur="?"><td>try-count</td>
               <td>If a ping fails, number of times to retry before giving up and restarting</td>
               <td>required</td></tr>
-<tr occur='?'><td>retry-time</td>
+<tr occur="?"><td>retry-time</td>
               <td>time between retries</td>
               <td>1s</td></tr>
-<tr occur='?'><td>socket-timeout</td>
+<tr occur="?"><td>socket-timeout</td>
               <td>time to wait for server to start responding to the tcp connection before giving up</td>
               <td>10s</td></tr>
 </deftable-childtags>
@@ -494,12 +494,12 @@ restarted.</p>
 &lt;/resin&gt;
 </example>
 </s2>
-</defun>
+</s1>
 
-<defun title="rewrite-dispatch" version="Resin 3.1">
+<s1 title="rewrite-dispatch" version="Resin 3.1" type="defun">
 <parents>cluster</parents>
 
-<p>&lt;rewrite-dispatch> defines a set of rewriting rules for
+<p>&lt;rewrite-dispatch&gt; defines a set of rewriting rules for
 dispatching and forwarding URLs.  Applications can use these rules
 to redirect old URLs to their new replacements.</p>
 
@@ -507,48 +507,48 @@ to redirect old URLs to their new replacements.</p>
 details.</p>
 
 <example title="rewrite-dispatch">
-&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
     &lt;cluster id="web-tier"&gt;
 
-        &lt;rewrite-dispatch>
+        &lt;rewrite-dispatch&gt;
             &lt;redirect regexp="^http://www.foo.com"
-                      target="http://bar.com/foo"/>
-        &lt;/rewrite-dispatch>
+                      target="http://bar.com/foo"/&gt;
+        &lt;/rewrite-dispatch&gt;
   
-    &lt;/cluster>
-&lt;/resin>
+    &lt;/cluster&gt;
+&lt;/resin&gt;
 </example>
 
-</defun>
+</s1>
 
-<defun title="root-directory" version="Resin 3.1">
+<s1 title="root-directory" version="Resin 3.1" type="defun">
 <parents>cluster</parents>
 
-<p>&lt;root-directory> configures the root directory for files
-within the cluster.  All paths in the &lt;cluster> will be relative
+<p>&lt;root-directory&gt; configures the root directory for files
+within the cluster.  All paths in the &lt;cluster&gt; will be relative
 to the root directory.</p>
 
-<default>The root-directory of the &lt;resin> tag.</default>
+<default>The root-directory of the &lt;resin&gt; tag.</default>
 
 <example title="cluster root-directory">
-&lt;resin xmlns="http://caucho.com/ns/resin">
-    &lt;cluster id="app-tier">
-        &lt;root-directory>/var/www/app-tier&lt;/root-directory>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+    &lt;cluster id="app-tier"&gt;
+        &lt;root-directory&gt;/var/www/app-tier&lt;/root-directory&gt;
 
-        &lt;server id="a" ...>
+        &lt;server id="a" ...&gt;
 
-        &lt;host host-name="www.foo.com">
-    &lt;/cluster>
-&lt;/resin>
+        &lt;host host-name="www.foo.com"&gt;
+    &lt;/cluster&gt;
+&lt;/resin&gt;
 </example>
 
-</defun>
+</s1>
 
-<defun title="server" version="Resin 3.1">
+<s1 title="server" version="Resin 3.1" type="defun">
 <parents>cluster</parents>
 
 <p>Each server is a JVM instance in the cluster and must be configured
-with a &lt;server> tag.  Each &lt;server> is uniquely identified by
+with a &lt;server&gt; tag.  Each &lt;server&gt; is uniquely identified by
 its <var>id</var> attribute.  The <var>id</var> will match
 the -server-id command line argument.</p>
 
@@ -568,83 +568,83 @@ The ObjectName is <var>resin:type=Server</var>.</p>
 </deftable-childtags>
 
 <example title="server">
-&lt;resin xmlns="http://caucho.com/ns/resin">
-    &lt;cluster id="web-tier">
-        &lt;server id="a" address="192.168.0.10" server-port="6800">
-          &lt;http port="8080"/>
-        &lt;/server>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+    &lt;cluster id="web-tier"&gt;
+        &lt;server id="a" address="192.168.0.10" server-port="6800"&gt;
+          &lt;http port="8080"/&gt;
+        &lt;/server&gt;
 
-        &lt;server id="b" address="192.168.0.11" server-port="6800">
-          &lt;http port="8080"/>
-        &lt;/server>
+        &lt;server id="b" address="192.168.0.11" server-port="6800"&gt;
+          &lt;http port="8080"/&gt;
+        &lt;/server&gt;
 
-        &lt;server id="c" address="192.168.0.12" server-port="6800">
-          &lt;http port="8080"/>
-        &lt;/server>
+        &lt;server id="c" address="192.168.0.12" server-port="6800"&gt;
+          &lt;http port="8080"/&gt;
+        &lt;/server&gt;
 
-        &lt;host id="">
+        &lt;host id=""&gt;
           ...
-    &lt;/cluster>
-&lt;/resin>
+    &lt;/cluster&gt;
+&lt;/resin&gt;
 </example>
 
-</defun>
+</s1>
 
-<defun title="server-default" version="Resin 3.1">
+<s1 title="server-default" version="Resin 3.1" type="defun">
 <parents>cluster</parents>
 
-<p>Defines default values for all &lt;server> instances. See
+<p>Defines default values for all &lt;server&gt; instances. See
 <a href="server-tags.xtp">server configuration</a> for more details.</p>
 
 <example title="server">
-&lt;resin xmlns="http://caucho.com/ns/resin">
-    &lt;cluster id="web-tier">
-        &lt;server-default>
-            &lt;server-port>6800&lt;/server-port>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+    &lt;cluster id="web-tier"&gt;
+        &lt;server-default&gt;
+            &lt;server-port&gt;6800&lt;/server-port&gt;
 
-            &lt;http port="8080"/>
-        &lt;/server-default>
+            &lt;http port="8080"/&gt;
+        &lt;/server-default&gt;
 
-        &lt;server id="a" address="192.168.0.10"/>
-        &lt;server id="b" address="192.168.0.11"/>
-        &lt;server id="c" address="192.168.0.12"/>
+        &lt;server id="a" address="192.168.0.10"/&gt;
+        &lt;server id="b" address="192.168.0.11"/&gt;
+        &lt;server id="c" address="192.168.0.12"/&gt;
 
-        &lt;host id="">
+        &lt;host id=""&gt;
           ...
-    &lt;/cluster>
-&lt;/resin>
+    &lt;/cluster&gt;
+&lt;/resin&gt;
 </example>
 
-</defun>
+</s1>
 
-<defun title="server-header" version="Resin 3.1">
+<s1 title="server-header" version="Resin 3.1" type="defun">
 <parents>cluster</parents>
 
 <p>Configures the HTTP Server: header which Resin sends back to any
 HTTP client.</p>
 
 <example title="server-header">
-&lt;resin xmlns="http://caucho.com/ns/resin">
-    &lt;cluster id="web-tier">
-        &lt;server-header>MyServer/1.0&lt;/server-header>
-    &lt;/cluster>
-&lt;/resin>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+    &lt;cluster id="web-tier"&gt;
+        &lt;server-header&gt;MyServer/1.0&lt;/server-header&gt;
+    &lt;/cluster&gt;
+&lt;/resin&gt;
 </example>
 
 <default>Resin/3.1.x</default>
 
-</defun>
+</s1>
 
-<defun title="session-cookie" version="Resin 3.1">
+<s1 title="session-cookie" version="Resin 3.1" type="defun">
 <parents>cluster</parents>
 
 <p>Configures the cookie used for servlet sessions.</p>
 
 <default>JSESSIONID</default>
 
-</defun>
+</s1>
 
-<defun title="session-url-prefix" version="Resin 3.1">
+<s1 title="session-url-prefix" version="Resin 3.1" type="defun">
 <parents>cluster</parents>
 
 <p>Configures the URL prefix used for session rewriting.</p>
@@ -653,9 +653,9 @@ HTTP client.</p>
 
 <default>;jsessionid=</default>
 
-</defun>
+</s1>
 
-<defun title="ssl-session-cookie" version="Resin 3.1">
+<s1 title="ssl-session-cookie" version="Resin 3.1" type="defun">
 <parents>cluster</parents>
 
 <p>Defines an alternative session cookie to be used for a SSL
@@ -664,17 +664,17 @@ connection.  Having two separate cookies increases security.</p>
 <default>value of session-cookie</default>
 
 <example>
-&lt;resin xmlns="http://caucho.com/ns/resin">
-    &lt;cluster id="web-tier">
-        &lt;ssl-session-cookie>SSLJSESSIONID&lt;/ssl-session-cookie>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+    &lt;cluster id="web-tier"&gt;
+        &lt;ssl-session-cookie&gt;SSLJSESSIONID&lt;/ssl-session-cookie&gt;
         ...
-    &lt;/cluster>
-&lt;/resin>
+    &lt;/cluster&gt;
+&lt;/resin&gt;
 </example>
 
-</defun>
+</s1>
 
-<defun title="url-character-encoding" version="Resin 3.1">
+<s1 title="url-character-encoding" version="Resin 3.1" type="defun">
 <parents>cluster</parents>
 
 <p>Defines the character encoding for decoding URLs.</p>
@@ -684,33 +684,33 @@ URLs, so the server must make assumptions about the encoding.</p>
 
 <default>UTF-8</default>
 
-</defun>
+</s1>
 
-<defun title="web-app-default" version="Resin 3.1">
+<s1 title="web-app-default" version="Resin 3.1" type="defun">
 <parents>cluster</parents>
 
-<p>&lt;web-app-default> defines default values for any <g>web-app</g> in
+<p>&lt;web-app-default&gt; defines default values for any <g>web-app</g> in
 the cluster.</p>
 
 <example title="web-app-default">
-&lt;resin xmlns="http://caucho.com/ns/resin">
-    &lt;cluster id="app-tier">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+    &lt;cluster id="app-tier"&gt;
 
-        &lt;web-app-default>
+        &lt;web-app-default&gt;
             &lt;servlet servlet-name="resin-php"
-                     servlet-class="com.caucho.quercus.servlet.QuercusServlet"/>
+                     servlet-class="com.caucho.quercus.servlet.QuercusServlet"/&gt;
 
             &lt;servlet-mapping url-pattern="*.php"
-                             servlet-name="resin-php"/>
-        &lt;/web-app-default>
+                             servlet-name="resin-php"/&gt;
+        &lt;/web-app-default&gt;
 
-        &lt;host id="">
+        &lt;host id=""&gt;
           ...
-    &lt;/cluster>
-&lt;/resin>
+    &lt;/cluster&gt;
+&lt;/resin&gt;
 </example>
 
-</defun>
+</s1>
 
 </s1>
 

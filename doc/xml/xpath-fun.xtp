@@ -8,138 +8,138 @@
   <body>
     <summary/>
 
-<section name='node-set' title='Node Set Functions'>
+<s1 name="node-set" title="Node Set Functions">
 
-<defun name=last title='last()'>
+<s2 name="last" title="last()" type="defun">
 <p>Returns the number of nodes matching the axis.</p>
 
 <deftable>
 <tr><td>chapter/verse[last()]</td>
     <td>The last verse in each chapter.</td>
 
-<tr><td>ancestor::node()[last()]</td>
+</tr><tr><td>ancestor::node()[last()]</td>
     <td>The furthest ancestor from the current node.</td>
-</deftable>
-</defun>
+</tr></deftable>
+</s2>
 
-<defun name=count title='count(node-set)'>
-<p>Returns the number of nodes matching the <var/node-set/> pattern.</p>
-</defun>
+<s2 name="count" title="count(node-set)" type="defun">
+<p>Returns the number of nodes matching the <var>node-set</var> pattern.</p>
+</s2>
 
-<defun name=local-part title='local-part(node)'>
+<s2 name="local-part" title="local-part(node)" type="defun">
 <p>Returns the local part of the node's name.
 In other words, the node name stripped of the namespace prefix.</p>
-</defun>
+</s2>
 
-<defun name=namespace title='namespace(node)'>
+<s2 name="namespace" title="namespace(node)" type="defun">
 <p>Returns the namespace URL the node's name.</p>
-</defun>
+</s2>
 
-<defun name=name title='name(node)'>
+<s2 name="name" title="name(node)" type="defun">
 <p>Returns the node's name.</p>
-</defun>
+</s2>
 
-<defun name=id title='id(idref)'>
+<s2 name="id" title="id(idref)" type="defun">
 <p>Returns the node with the 'ID' attribute equals to idref.
 The ID attribute is assigned in the DTD.  The actual attribute name
 may, of course, vary.</p>
-</defun>
+</s2>
 
-</section>
+</s1>
 
-<section name='string-fun' title='String Functions'>
+<s1 name="string-fun" title="String Functions">
 
-<defun name=string title='string(obj)'>
+<s2 name="string" title="string(obj)" type="defun">
 <p>Converts the object to a string.</p>
-</defun>
+</s2>
 
-<defun name='concat' title='concat(s1, s2, ...)'>
+<s2 name="concat" title="concat(s1, s2, ...)" type="defun">
 <p>Concatenates strings.</p>
-</defun>
+</s2>
 
-<defun name='starts-with' title='starts-with(string, head)'>
-<p>True if <var/string/> starts with <var/head/>.</p>
-</defun>
+<s2 name="starts-with" title="starts-with(string, head)" type="defun">
+<p>True if <var>string</var> starts with <var>head</var>.</p>
+</s2>
 
-<defun name='contains' title='contains(string, substring)'>
-<p>True if <var/string/> contains <var/substring/>.</p>
-</defun>
+<s2 name="contains" title="contains(string, substring)" type="defun">
+<p>True if <var>string</var> contains <var>substring</var>.</p>
+</s2>
 
-<defun name='substring-before' title='substring-before(string, substring)'>
-<p>Returns the substring of <var/string/> before matching
-<var/substring/>.</p>
-</defun>
+<s2 name="substring-before" title="substring-before(string, substring)" type="defun">
+<p>Returns the substring of <var>string</var> before matching
+<var>substring</var>.</p>
+</s2>
 
-<defun name='substring-after' title='substring-after(string, substring)'>
-<p>Returns the substring of <var/string/> after the matching
-<var/substring/>.</p>
-</defun>
+<s2 name="substring-after" title="substring-after(string, substring)" type="defun">
+<p>Returns the substring of <var>string</var> after the matching
+<var>substring</var>.</p>
+</s2>
 
-<defun name='string-length' title='string-length(string)'>
-<p>Returns the string length of <var/string/>.</p>
-</defun>
+<s2 name="string-length" title="string-length(string)" type="defun">
+<p>Returns the string length of <var>string</var>.</p>
+</s2>
 
-<defun name='normalize-space' title='normalize-space(string)'>
+<s2 name="normalize-space" title="normalize-space(string)" type="defun">
 <p>Normalizes whitespace.  Consecutive whitespace is converted
 into a single space.  Leading and trailing whitespace is trimmed.</p>
-</defun>
+</s2>
 
-<defun name='translate' title='translate(string, from, to)'>
+<s2 name="translate" title="translate(string, from, to)" type="defun">
 <p>Converts characters in a string, like the 'tr' command.</p>
-</defun>
-</section>
+</s2>
+</s1>
 
-<section name='boolean-fun' title='Boolean Functions'>
-<defun name='boolean' title='boolean(obj)'>
-<p>Converts <var/obj/> into a boolean.</p>
-</defun>
+<s1 name="boolean-fun" title="Boolean Functions">
+<s2 name="boolean" title="boolean(obj)" type="defun">
+<p>Converts <var>obj</var> into a boolean.</p>
+</s2>
 
-<defun name='true' title='true()'>
+<s2 name="true" title="true()" type="defun">
 <p>Returns true.</p>
-</defun>
+</s2>
 
-<defun name='false' title='false()'>
+<s2 name="false" title="false()" type="defun">
 <p>Returns false.</p>
-</defun>
+</s2>
 
-<defun name='lang' title='lang(language)'>
-<p>Returns true if the context node has an xml:lang of <var/language/>.</p>
-</defun>
+<s2 name="lang" title="lang(language)" type="defun">
+<p>Returns true if the context node has an xml:lang of <var>language</var>.</p>
+</s2>
 
-</section>
+</s1>
 
-<section name='number' title='Number Functions'>
+<s1 name="number" title="Number Functions">
 
-<defun name='number' title='number(obj)'>
-<p>Converts <var/obj/> to a number (Java double).</p>
-</defun>
+<s2 name="number" title="number(obj)" type="defun">
+<p>Converts <var>obj</var> to a number (Java double).</p>
+</s2>
 
-<defun name='sum' title='sum(node-set)'>
-<p>Converts the node values of <var/node-set/> to numbers and adds
+<s2 name="sum" title="sum(node-set)" type="defun">
+<p>Converts the node values of <var>node-set</var> to numbers and adds
 them.</p>
-</defun>
+</s2>
 
-<defun name='floor' title='floor(number)'>
-<p>Returns the closest integer below <var/number/>.</p>
-</defun>
+<s2 name="floor" title="floor(number)" type="defun">
+<p>Returns the closest integer below <var>number</var>.</p>
+</s2>
 
-<defun name='ceil' title='ceiling(number)'>
-<p>Returns the closest integer above <var/number/>.</p>
-</defun>
+<s2 name="ceil" title="ceiling(number)" type="defun">
+<p>Returns the closest integer above <var>number</var>.</p>
+</s2>
 
-<defun name='round' title='round(number)'>
-<p>Rounds <var/number/> to the nearest integer.</p>
-</defun>
+<s2 name="round" title="round(number)" type="defun">
+<p>Rounds <var>number</var> to the nearest integer.</p>
+</s2>
 
-</section>
+</s1>
 
-<section name='extension' title='Resin Extensions'>
+<s1 name="extension" title="Resin Extensions">
 
-<defun name='if' title='if(test,a,b)'>
-<p>Conditionally selects the value of <var/a/> or <var/b/>.
-If <var/test/> evaluates to true, return the value of <var/a/>.
-Otherwise, return the value of <var/b/>.</p>
-</defun>
-</section>
+<s2 name="if" title="if(test,a,b)" type="defun">
+<p>Conditionally selects the value of <var>a</var> or <var>b</var>.
+If <var>test</var> evaluates to true, return the value of <var>a</var>.
+Otherwise, return the value of <var>b</var>.</p>
+</s2>
+</s1>
   </body>
 </document>

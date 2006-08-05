@@ -12,9 +12,9 @@
   </header>
 
   <body>
-    <summary objsummary-in-localtoc='1'/>
+    <summary objsummary-in-localtoc="1"/>
 
-    <section title="Protocols">
+    <s1 title="Protocols">
       <faq title="What is meant by the 'wire protocol' or 'protocol' for remote EJB?">
 
       <p>Unfortunately, there's quite a bit of EJB documentation that
@@ -72,6 +72,6 @@
         <p>Even SOAP is better than CORBA/IIOP and SOAP is also overly-complex and 
           unwieldly.</p>
       </faq>
-    </section>
+    </s1>
   </body>
 </document>

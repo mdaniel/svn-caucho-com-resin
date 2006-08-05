@@ -11,46 +11,45 @@
   <body>
     <summary/>
 
-<section title='Displaying the Guest Book'>
+<s1 title="Displaying the Guest Book">
 
 The first advantage of XTP is that it separates the JSP code from the
 page.  The page design can just use a standard HTML/XML editor.  More
 importantly, since it's easy to create tags, you can create tags
 meaningful for your specific application.
 
-<p/>The XTP templates example is an expansion of the <a 
-href='jsp|templates'>JSP "model 2"</a> example.  You may want to
-refer to <a href='xtp|taglib'>Resin's
+<p/>The XTP templates example is an expansion of the <a href="jsp|templates">JSP "model 2"</a> example.  You may want to
+refer to <a href="xtp|taglib">Resin's
 support of XSLT and JSP</a>.
 
 <p/>The guest book uses three application-specific tags
 
 <deftable>
-<tr><th>Tag<th>Meaning
-<tr><td>ct:guest-book<td>iterates over the guest book entries.
-<tr><td>ct:guest-name<td>writes the guest's name.
-<tr><td>ct:guest-comment<td>writes the guest's comment.
-</deftable>
+<tr><th>Tag</th><th>Meaning
+</th></tr><tr><td>ct:guest-book</td><td>iterates over the guest book entries.
+</td></tr><tr><td>ct:guest-name</td><td>writes the guest's name.
+</td></tr><tr><td>ct:guest-comment</td><td>writes the guest's comment.
+</td></tr></deftable>
 
 <p/>Compare the login.xtp page with the
-<a href='jsp|templates#login_display'>login.jsp</a> in the JSP
+<a href="jsp|templates#login_display">login.jsp</a> in the JSP
 templates example.  
 
-<example title='login.xtp'>
-<eg-em>&lt;?xml-stylesheet href='guestbook.xsl'?></eg-em>
-&lt;title>Hogwarts Comments&lt;/title>
+<example title="login.xtp">
+<eg-em>&lt;?xml-stylesheet href='guestbook.xsl'?&gt;</eg-em>
+&lt;title&gt;Hogwarts Comments&lt;/title&gt;
 
-&lt;table width='100%'>
-&lt;tr>
-  &lt;td width='25%'>&lt;em>Name&lt;/em>&lt;/td>
-  &lt;td width='75%'>&lt;em>Comment&lt;/em>&lt;/td>
-&lt;/tr>
-<eg-em>&lt;ct:guest-book></eg-em>
-  &lt;tr>
-  &lt;td><eg-em>&lt;ct:guest-name/></eg-em>
-  &lt;td><eg-em>&lt;ct:guest-comment/></eg-em>
-<eg-em>&lt;/ct:guest-book></eg-em>
-&lt;/table>
+&lt;table width='100%'&gt;
+&lt;tr&gt;
+  &lt;td width='25%'&gt;&lt;em&gt;Name&lt;/em&gt;&lt;/td&gt;
+  &lt;td width='75%'&gt;&lt;em&gt;Comment&lt;/em&gt;&lt;/td&gt;
+&lt;/tr&gt;
+<eg-em>&lt;ct:guest-book&gt;</eg-em>
+  &lt;tr&gt;
+  &lt;td&gt;<eg-em>&lt;ct:guest-name/&gt;</eg-em>
+  &lt;td&gt;<eg-em>&lt;ct:guest-comment/&gt;</eg-em>
+<eg-em>&lt;/ct:guest-book&gt;</eg-em>
+&lt;/table&gt;
 </example>
 
 <p/>HTML tags should be copied to the generated output.  So we just
@@ -63,71 +62,70 @@ copied.
 streams like JSP.  The xsl:copy of an attribute adds and attribute
 to the containing element.
 
-<example title='defaultcopy.xsl: strict XSLT'>
-&lt;xsl:template match='node()|@*'>
-  &lt;xsl:copy>
-    &lt;xsl:apply-templates select='node()|@*'/>
-  &lt;/xsl:copy>
-&lt;/xsl:template>
+<example title="defaultcopy.xsl: strict XSLT">
+&lt;xsl:template match='node()|@*'&gt;
+  &lt;xsl:copy&gt;
+    &lt;xsl:apply-templates select='node()|@*'/&gt;
+  &lt;/xsl:copy&gt;
+&lt;/xsl:template&gt;
 </example>
 
 Strict XSLT follows the XML syntax.  There are several advantages of
 using XML but readability is not one of them.  To make stylesheets
 more readable we've added some simple syntactic sugar to XSLT,
 called XSLT-lite.  XML purists can stick to the standard XML syntax:
-Resin supports both.  You can look at our <a
-href='xslt|index'>XSLT</a> and <a href='xtp|stylescript'>
+Resin supports both.  You can look at our <a href="xslt|index">XSLT</a> and <a href="xtp|stylescript">
 XSLT-lite</a>
-references and also some <a href='xslt|xslt-lite-eg'>
+references and also some <a href="xslt|xslt-lite-eg">
 XSLT-lite examples.</a>
 
 <p/>XSLT-lite makes scanning templates easier because the template
 pattern is clear, on its own line.  The following is exactly
 equivalent to the defaultcopy.xsl above.
 
-<example title='defaultcopy.xsl: XSLT-lite'>
+<example title="defaultcopy.xsl: XSLT-lite">
 node()|@*
 &lt;&lt;
-&lt;xsl:copy>
-  &lt;xsl:apply-templates select='node()|@*'/>
-&lt;/xsl:copy>
->>
+&lt;xsl:copy&gt;
+  &lt;xsl:apply-templates select='node()|@*'/&gt;
+&lt;/xsl:copy&gt;
+&gt;&gt;
 </example>
 
 <p/>guestbook.xsl contains the custom tags for the guestbook example.
 When Resin looks at a node, it will select the best matching pattern
-and execute it.  The element &lt;ct:guest-book> will generate a loop,
-while &lt;form action='GuestXtp'> will copy the form to the output.
+and execute it.  The element &lt;ct:guest-book&gt; will generate a loop,
+while &lt;form action='GuestXtp'&gt; will copy the form to the output.
 
-<example title='guestbook.xsl'>
-&lt;!-- Use language=javascript for the XSLT -->
-<eg-em>&lt;xtp:directive.page language=javascript/></eg-em>
+<example title="guestbook.xsl">
+&lt;!-- Use language=javascript for the XSLT --&gt;
+<eg-em>&lt;xtp:directive.page language=javascript/&gt;</eg-em>
 
-&lt;xsl:import href='defaultcopy.xsl'/>
+&lt;xsl:import href='defaultcopy.xsl'/&gt;
 
-&lt;!-- Generated JSP uses language=javascript -->
+&lt;!-- Generated JSP uses language=javascript --&gt;
 / 
 &lt;&lt;
-<eg-em>&lt;jsp:directive.page language='javascript'/></eg-em>
-&lt;xsl:apply-templates/>
->>
+<eg-em>&lt;jsp:directive.page language='javascript'/&gt;</eg-em>
+&lt;xsl:apply-templates/&gt;
+&gt;&gt;
 
 ct:guest-book
 &lt;&lt;
-<eg-em>&lt;% for (var _ct_guest in application.attribute.guest_book) { %></eg-em>
-&lt;xsl:apply-templates/>
-<eg-em>&lt;% } %></eg-em>
->>
+<eg-em>&lt;% for (var _ct_guest in application.attribute.guest_book) { %&gt;</eg-em>
+&lt;xsl:apply-templates/&gt;
+<eg-em>&lt;% } %&gt;</eg-em>
+&gt;&gt;
 
 ct:guest-name
 &lt;&lt;
-<eg-em>&lt;%= _ct_guest.name %></eg-em>
->>
+<eg-em>&lt;%= _ct_guest.name %&gt;</eg-em>
+&gt;&gt;
 
 ct:guest-comment
 &lt;&lt;
-<eg-em>&lt;%= _ct_guest.comment %></eg-em>
->>
+<eg-em>&lt;%= _ct_guest.comment %&gt;</eg-em>
+&gt;&gt;
 
 </example>
 
@@ -137,13 +135,13 @@ was fairly simple so the added complexity of creating stylesheets
 doesn't really show how powerful the XTP concept is.  For a taste of
 real power, we'll create a simple form library.
 
-</section>
+</s1>
 
-<section title='Intelligent forms'>
+<s1 title="Intelligent forms">
 
 Adding addition functionality to forms makes HTML and JSP complex.
 GuestXtp just adds simple filling in of default values.  The GuestXtp
-servlet calls <code/request.setAttribute/> to set default values for
+servlet calls <code>request.setAttribute</code> to set default values for
 form element.  For example, once a user has added a comment, she can
 edit the comment.  The default value is the old comment.
 
@@ -155,24 +153,24 @@ gives web sites the more powerful functionality now.
 <p/>There are a few other common form extensions:
 <ul>
 <li>Server defaults
-<li>Server validation
-<li>Client validation
-<li>Client actions
-</ul>
+</li><li>Server validation
+</li><li>Client validation
+</li><li>Client actions
+</li></ul>
 
 <p/>The XTP file itself is simple.  It just looks like any HTML page,
 except form values are called ct:*.
 
-<example title='login.xtp'>
+<example title="login.xtp">
 
-&lt;form action='GuestXtp' method='post'>
-  <eg-em>&lt;ct:hidden name='action' value='login'/></eg-em>
-  &lt;table>
-  &lt;tr>&lt;td>Name&lt;td><eg-em>&lt;ct:input name='Name'/></eg-em>
-  &lt;tr>&lt;td>Password&lt;td><eg-em>&lt;ct:password name='Password'/></eg-em>
-  &lt;tr>&lt;td colspan=2>Hint: the password is quidditch
-  &lt;tr>&lt;td/>&lt;td><eg-em>&lt;ct:submit value='Login'/></eg-em>
-&lt;/form>
+&lt;form action='GuestXtp' method='post'&gt;
+  <eg-em>&lt;ct:hidden name='action' value='login'/&gt;</eg-em>
+  &lt;table&gt;
+  &lt;tr&gt;&lt;td&gt;Name&lt;td&gt;<eg-em>&lt;ct:input name='Name'/&gt;</eg-em>
+  &lt;tr&gt;&lt;td&gt;Password&lt;td&gt;<eg-em>&lt;ct:password name='Password'/&gt;</eg-em>
+  &lt;tr&gt;&lt;td colspan=2&gt;Hint: the password is quidditch
+  &lt;tr&gt;&lt;td/&gt;&lt;td&gt;<eg-em>&lt;ct:submit value='Login'/&gt;</eg-em>
+&lt;/form&gt;
 
 </example>
 
@@ -180,8 +178,8 @@ except form values are called ct:*.
 the output and add a value attribute if the servlet supplied a default value.
 
 <example>
-<example>&lt;ct:input size=40 name='Name'/></example>
-<results>&lt;input name=Name size=40 value='Harry Potter'></results>
+<example>&lt;ct:input size=40 name='Name'/&gt;</example>
+<results>&lt;input name=Name size=40 value='Harry Potter'&gt;</results>
 </example>
 
 <p/>XSLT lets stylesheets pull common formatting code into functions
@@ -192,7 +190,7 @@ nodes.
 
 <p/>Because the generated JSP will add an attribute at run time, the
 form.xsl treats its output as unparsed content.  Unknown elements,
-like &lt;form> or &lt;input> are printed as text.  Unparsed content
+like &lt;form&gt; or &lt;input&gt; are printed as text.  Unparsed content
 works just like JSP.
 
 <p/>fun:copy-attrs is a simple XSLT function which copies the
@@ -203,16 +201,16 @@ it will copy name=Name and size=40.
 it's generated the JSP, it doesn't need to run the XSLT engine again.
 This greatly improves the performance.
 
-<example title='form.xsl'>
-&lt;xsl:stylesheet parsed-content='false'>
+<example title="form.xsl">
+&lt;xsl:stylesheet parsed-content='false'&gt;
 
-&lt;xtp:cache/>
+&lt;xtp:cache/&gt;
 
-&lt;xsl:template name='fun:copy-attrs'>
-  &lt;xsl:for-each select='@*'>
-    &lt;xsl:text> &lt;/xsl:text><eg-em>&lt;{name(.)}></eg-em>="<eg-em>&lt;{.}></eg-em>"&lt;xsl:text/>
-  &lt;/xsl:for-each>
-&lt;/xsl:template>
+&lt;xsl:template name='fun:copy-attrs'&gt;
+  &lt;xsl:for-each select='@*'&gt;
+    &lt;xsl:text&gt; &lt;/xsl:text&gt;<eg-em>&lt;{name(.)}&gt;</eg-em>="<eg-em>&lt;{.}&gt;</eg-em>"&lt;xsl:text/&gt;
+  &lt;/xsl:for-each&gt;
+&lt;/xsl:template&gt;
 
 </example>
 
@@ -222,21 +220,21 @@ JSP to add a value attribute if it's available.
 
 <example>
 
-&lt;xsl:template name='fun:input-attrs'>
-  &lt;xsl:call-template name='fun:copy-attrs'/>
-  &lt;xsl:if test='@value'>
-    value="<{@value}>"
-  &lt;/xsl:if>
-  &lt;xsl:if test='not(@value)'>
+&lt;xsl:template name='fun:input-attrs'&gt;
+  &lt;xsl:call-template name='fun:copy-attrs'/&gt;
+  &lt;xsl:if test='@value'&gt;
+    value="&lt;{@value}&gt;"
+  &lt;/xsl:if&gt;
+  &lt;xsl:if test='not(@value)'&gt;
 <eg-em>    &lt;% { 
-         var _ct_v = request.attribute["&lt;{@name}>"];
+         var _ct_v = request.attribute["&lt;{@name}&gt;"];
          if (_ct_v == null)
          _ct_v = "";
-         out.write(' value="', _ct_v.replace('"', "&quot;"), '"');
+         out.write(' value="', _ct_v.replace('"', """), '"');
        }
-    %></eg-em>
-  &lt;/xsl:if>
-&lt;/xsl:template>
+    %&gt;</eg-em>
+  &lt;/xsl:if&gt;
+&lt;/xsl:template&gt;
 
 </example>
 
@@ -247,22 +245,22 @@ tags is simple.
 
 ct:input
 &lt;&lt;
-&lt;input &lt;xsl:call-template name='fun:input-attrs'/>>
->>
+&lt;input &lt;xsl:call-template name='fun:input-attrs'/&gt;&gt;
+&gt;&gt;
 
 ct:password
 &lt;&lt;
-&lt;input type='password' &lt;xsl:call-template name='fun:input-attrs'/>>
->>
+&lt;input type='password' &lt;xsl:call-template name='fun:input-attrs'/&gt;&gt;
+&gt;&gt;
 
 ct:submit 
 &lt;&lt;
-&lt;input type=submit &lt;xsl:call-template name='fun:input-attrs'/>>
->>
+&lt;input type=submit &lt;xsl:call-template name='fun:input-attrs'/&gt;&gt;
+&gt;&gt;
 </example>
-</section>
+</s1>
 
-<section title='Conclusion'>
+<s1 title="Conclusion">
 
 XTP is a tradeoff.  It takes more work to design custom tags than to
 write standard inline JSP.  However, once you've written the tags,
@@ -276,6 +274,6 @@ forms.  A properly designed form.xsl can implement intelligent forms
 on the server and support all browsers, not just the browsers
 supporting the spec.
 
-</section>
+</s1>
   </body>
 </document>

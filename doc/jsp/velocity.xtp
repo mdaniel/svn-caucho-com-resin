@@ -21,33 +21,33 @@
 
   <summary/>
 
-<p>The syntax is based on expressions like <var/${'${'}foo}/>
-and scriptlets with <var/#{...}#/>.  Because the
+<p>The syntax is based on expressions like <var>${'${'}foo}</var>
+and scriptlets with <var>#{...}#</var>.  Because the
 alternative syntax avoids the brackets which fill JSP pages, it can make
 pages more readable and therefore more maintainable.</p>
 
 <p>Because Resin's Velocity-style syntax is transformed to the JSTL
 tag library, all JSTL expressions are allowed.</p>
 
-<example title='JSP style'>
+<example title="JSP style">
 &lt;%
 int count;
-%>
+%&gt;
 
-&lt;h3>A sample &lt;%= count %>&lt;/h3>
+&lt;h3&gt;A sample &lt;%= count %&gt;&lt;/h3&gt;
 
-&lt;% if ("foo".equals(request.getParameter("a"))) { %>
-  &lt;h3>Foo!&lt;/h3>
-&lt;% } else { %>
-  &lt;h3>Bar!&lt;/h3>
-&lt;% } %>
+&lt;% if ("foo".equals(request.getParameter("a"))) { %&gt;
+  &lt;h3&gt;Foo!&lt;/h3&gt;
+&lt;% } else { %&gt;
+  &lt;h3&gt;Bar!&lt;/h3&gt;
+&lt;% } %&gt;
 </example>
 
 <p>The same JSP file could be written in Velocity-style as follows.  The
 jsp:directive is required because JSP pages use strict JSP syntax
 by default.</p>
 
-<example title='Velocity style'>
+<example title="Velocity style">
 &lt;jsp:directive.page velocity='true'/&gt;
 #{
 int count;
@@ -67,48 +67,48 @@ of the velocity style is that expressions and scriptlets avoid using
 brackets.  In large pages, sorting out the HTML or XML from the JSP syntax
 can become confusing.</p>
 
-<section title="Enabling velocity-style syntax">
+<s1 title="Enabling velocity-style syntax">
 
 <p>Velocity-style syntax can either be enabled on a per-JSP page with
-<var/velocity='true'/> or in the web-app with the &lt;jsp> tag:</p>
+<var>velocity='true'</var> or in the web-app with the &lt;jsp&gt; tag:</p>
 
-<example title='Enabling velocity for a page'>
+<example title="Enabling velocity for a page">
 &lt;jsp:directive.page velocity='true'/&gt;
   ...
 </example>
 
 
-<example title='Enabling velocity for a web-app'>
-&lt;web-app>
-  &lt;jsp velocity='true'/>
+<example title="Enabling velocity for a web-app">
+&lt;web-app&gt;
+  &lt;jsp velocity='true'/&gt;
   ...
-&lt;/web-app>
+&lt;/web-app&gt;
 </example>
 
-</section>
+</s1>
 
-<section title='expressions'>
+<s1 title="expressions">
 
 <p>Expressions are enclosed between "${'${'}" and "}", for example
 '${'${'}count}' and '${'${'}count + 15}'.</p>
 
-<p>The '${'${'}...}' syntax is equivalent to '<var>&lt;c:out value="..."/></var>'.</p>
+<p>The '${'${'}...}' syntax is equivalent to '<var>&lt;c:out value="..."/&gt;</var>'.</p>
 
 <def>
-${'${'}<var/expression/>}
+${'${'}<var>expression</var>}
 </def>
 
-</section>
+</s1>
 
-<section title='scriptlets'>
+<s1 title="scriptlets">
 
 <p>Scriptlets use the '#{ ... }#' syntax.  This is entirely equivalent to
-'&lt;% ... %>'.  (Note, Velocity does not have this syntax because it
+'&lt;% ... %&gt;'.  (Note, Velocity does not have this syntax because it
 creates its own language instead of escaping to Java.)</p>
 
 <def>
 #{
- <var/statements/>
+ <var>statements</var>
 }#
 </def>
 
@@ -123,9 +123,9 @@ if (key.equals("")) {
 ...
 </example>
 
-</section>
+</s1>
 
-<section title='if statements'>
+<s1 title="if statements">
 
 <p>The velocity-style syntax directly supports if statements.  The syntax is</p>
 
@@ -143,10 +143,10 @@ if (key.equals("")) {
 
 <example>
 &lt;c:choose&gt;
-&lt;c:when test="${'${'}<var/expr1/>}"&gt;
+&lt;c:when test="${'${'}<var>expr1</var>}"&gt;
   ...
 &lt;/c:when&gt;
-&lt;c:when test="${'${'}<var/expr2/>}"&gt;
+&lt;c:when test="${'${'}<var>expr2</var>}"&gt;
   ...
 &lt;/c:when&gt;
 &lt;c:otherwise&gt;
@@ -155,9 +155,9 @@ if (key.equals("")) {
 &lt;/c:choose&gt;
 </example>
 
-</section>
+</s1>
 
-<section title='foreach statements'>
+<s1 title="foreach statements">
 
 <p>The velocity-style syntax directly supports iteration with a foreach
 statements.</p>
@@ -171,14 +171,14 @@ statements.</p>
 <p>This style of foreach is transformed into the following:</p>
 
 <example>
-&lt;c:forEach items="${'${'}<var/expr/>}" var="<var/var/>"&gt;
+&lt;c:forEach items="${'${'}<var>expr</var>}" var="<var>var</var>"&gt;
   ...
 &lt;/c:forEach&gt;
 </example>
 
 <p>An example use might be the following:</p>
 
-<example title='foreach in Java'>
+<example title="foreach in Java">
 &lt;jsp:page.directive velocity='true' import='java.lang.*'/&gt;
 #{
   ArrayList list = new ArrayList();
@@ -211,13 +211,13 @@ statements.</p>
 
 <p>An example might be the following:</p>
 
-<example title='foreach in Java'>
-&lt;jsp:page.directive velocity='true'/>
+<example title="foreach in Java">
+&lt;jsp:page.directive velocity='true'/&gt;
 #foreach (value in [3..9])
-  &lt;li>$value
+  &lt;li&gt;$value
 #end
 </example>
 
-</section>
+</s1>
 </body>
 </document>

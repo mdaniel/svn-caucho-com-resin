@@ -29,20 +29,20 @@ itself, but the primary advantage is the increased flexiblity of your
 application code.  Maintenance and code-refactoring can focus on the
 beans instead of changing lots of SQL statements in the program.</p>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
-    <td>resin-web.xml configuration
-<tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>
-    <td>persistence.xml configuration
-<tr><td><viewfile-link file="WEB-INF/classes/example/CourseBean.java"/>
-    <td>The course bean
-<tr><td><viewfile-link file="WEB-INF/classes/example/CourseServlet.java"/>
-    <td>The course servlet
-</deftable>
-</section>
+    </td><td>resin-web.xml configuration
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>
+    </td><td>persistence.xml configuration
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/CourseBean.java"/>
+    </td><td>The course bean
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/CourseServlet.java"/>
+    </td><td>The course servlet
+</td></tr></deftable>
+</s1>
 
-<section title="Database Schema">
+<s1 title="Database Schema">
 
 <example title="course.sql">
 CREATE TABLE basic_courses (
@@ -56,19 +56,19 @@ INSERT INTO basic_courses VALUES('Potions', 'Severus Snape');
 INSERT INTO basic_courses VALUES('Transfiguration', 'Minerva McGonagall');
 </example>
 
-</section>
+</s1>
 
-<section title="Overview">
+<s1 title="Overview">
 
 <p>To find and enhance a persistent Java bean, Amber follows the following
 procedure.
 
-<ol>
-<li>&lt;ejb-server> in the resin-web.xml configures Amber to start looking for persistence.xml in the classpath.
-<li>The persistence.xml in WEB-INF/classes/META-INF tells Amber to create a persistence-unit named "example".
-<li>The "example" persistence-unit contains a class example.CourseBean
-<li>Amber enhances example.CourseBean as a persistent object.
-</ol>
+</p><ol>
+<li>&lt;ejb-server&gt; in the resin-web.xml configures Amber to start looking for persistence.xml in the classpath.
+</li><li>The persistence.xml in WEB-INF/classes/META-INF tells Amber to create a persistence-unit named "example".
+</li><li>The "example" persistence-unit contains a class example.CourseBean
+</li><li>Amber enhances example.CourseBean as a persistent object.
+</li></ol>
 
 <p>By the end of initialization time, Amber has enhanced CourseBean and
 made it available to the application in the persistence-unit "example".</p>
@@ -77,12 +77,12 @@ made it available to the application in the persistence-unit "example".</p>
 
 <ol>
 <li>Obtain an EntityManager for the persistence unit from JNDI either directly as java:comp/env/persistence/PersistenceContext/example, or using the @PersistenceUnit injection annotation.
-<li>Use the EntityManager to find the instance of the bean.
-</ol>
+</li><li>Use the EntityManager to find the instance of the bean.
+</li></ol>
 
-</section>
+</s1>
 
-<section title="Bean Implementation">
+<s1 title="Bean Implementation">
 
 <example title="CourseBean.java">
 package example;
@@ -137,46 +137,46 @@ public class CourseBean {
 Resin will automatically compile any changes and regenerate the persistence
 classes, stubs and skeletons.</p>
 
-</section>
+</s1>
 
-<section title="Resin Configuration">
+<s1 title="Resin Configuration">
 
 <p>Now that we've built the bean, we need to
 attach it to Resin.  The entity bean is deployed using
-the <code/ejb-server/> resource.</p>
+the <code>ejb-server</code> resource.</p>
 
-<example title='WEB-INF/resin-web.xml'>
-&lt;web-app>
-  &lt;!-- server configuration -->
-  &lt;ejb-server data-source="jdbc/resin"/>
+<example title="WEB-INF/resin-web.xml">
+&lt;web-app&gt;
+  &lt;!-- server configuration --&gt;
+  &lt;ejb-server data-source="jdbc/resin"/&gt;
 
-  &lt;servlet servlet-name="basic" servlet-class="example.CourseServlet"/>
+  &lt;servlet servlet-name="basic" servlet-class="example.CourseServlet"/&gt;
 
-  &lt;servlet-mapping url-pattern="/basic" servlet-name="basic"/>
-&lt;/web-app>
+  &lt;servlet-mapping url-pattern="/basic" servlet-name="basic"/&gt;
+&lt;/web-app&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="persistence.xml">
+<s1 title="persistence.xml">
 
 <p>The persistence.xml lives in META-INF/persistence.xml.  Since
 we're developing in WEB-INF/classes, the file will be in
 WEB-INF/classes/persistence.xml.</p>
 
-<example title='WEB-INF/classes/META-INF/persistence.xml'>
-&lt;persistence xmlns="http://java.sun.com/xml/ns/persistence" version="1.0">
-  &lt;persistence-unit name="example">
-    &lt;class>example.CourseBean&lt;/class>
+<example title="WEB-INF/classes/META-INF/persistence.xml">
+&lt;persistence xmlns="http://java.sun.com/xml/ns/persistence" version="1.0"&gt;
+  &lt;persistence-unit name="example"&gt;
+    &lt;class&gt;example.CourseBean&lt;/class&gt;
 
-    &lt;exclude-unlisted-classes/>
-  &lt;/persistence-unit>
-&lt;/persistence>
+    &lt;exclude-unlisted-classes/&gt;
+  &lt;/persistence-unit&gt;
+&lt;/persistence&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="Client Servlet">
+<s1 title="Client Servlet">
 
 <example title="CourseServlet.java">
 import javax.persistence.*;
@@ -197,12 +197,12 @@ public class CourseServlet extends HttpServlet {
     course[0] = _manager.find(CourseBean.class, new Integer(1));
     course[1] = _manager.find(CourseBean.class, new Integer(2));
 
-    out.println("&lt;h3>Course Details&lt;/h3>");
+    out.println("&lt;h3&gt;Course Details&lt;/h3&gt;");
 
-    for (int i = 0; i < course.length; i++) {
-      out.println("course: " + course[i].getCourse() + "&lt;br>");
-      out.println("teacher: " + course[i].getTeacher() + "&lt;br>");
-      out.println("&lt;br>");
+    for (int i = 0; i &lt; course.length; i++) {
+      out.println("course: " + course[i].getCourse() + "&lt;br&gt;");
+      out.println("teacher: " + course[i].getTeacher() + "&lt;br&gt;");
+      out.println("&lt;br&gt;");
     }
   }
 }
@@ -216,9 +216,9 @@ course: Transfiguration
 instructor: Minerva McGonagall
 </results>
 
-</section>
+</s1>
 
-<section title="Conclusion">
+<s1 title="Conclusion">
 
 <p>The core of Amber's persistence management is its management of a
 single table.  Much of the work underlying the database management is
@@ -234,6 +234,6 @@ this example: using queries to <a href="../cmp-find/index.xtp">find all
 courses</a> and <a href="../cmp-create/index.xtp">creating</a> new database rows.
 </p>
 
-</section>
+</s1>
   </body>
 </document>

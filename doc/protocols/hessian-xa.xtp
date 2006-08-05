@@ -9,7 +9,7 @@
   <body>
     <summary/>
 
-<section title="XA">
+<s1 title="XA">
 
 <example>
 public interface TransactionService {
@@ -25,14 +25,14 @@ public interface TransactionService {
 
 </example>
 
-</section>
+</s1>
 
 <example>
-&lt;header>transaction-id&Lt;/header>&lt;string>0239431123&lt;/string>
+&lt;header&gt;transaction-id&Lt;/header&gt;&lt;string&gt;0239431123&lt;/string&gt;
 </example>
 
 <example>
-&lt;header>transaction-endpoint&Lt;/header>&lt;string>http://localhost:8080/hessian/_hessian_xa&lt;/string>
+&lt;header&gt;transaction-endpoint&Lt;/header&gt;&lt;string&gt;http://localhost:8080/hessian/_hessian_xa&lt;/string&gt;
 </example>
 
   </body>

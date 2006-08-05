@@ -11,35 +11,35 @@
   <body>
     <summary/>
 
-<section title="Using a taglib">
+<s1 title="Using a taglib">
 
 <p>Using a taglib in a JSP file has two steps.  First, the JSP needs to
-define the <var/prefix/> and the <var/tld/> (tag library descriptor)
+define the <var>prefix</var> and the <var>tld</var> (tag library descriptor)
 for the tag.</p>
 
 <p>Normally, JSP copies bytes from the .jsp to the browser without
-interpreting it.  The <var/taglib/> directive tells the JSP engine to
+interpreting it.  The <var>taglib</var> directive tells the JSP engine to
 treat elements starting with the prefix as JSP extension tags. </p>
 
 <example title="hello.jsp">
-&lt;%@ taglib prefix="ct" uri="WEB-INF/hello.tld" %>
-Message: &lt;ct:hello/>
+&lt;%@ taglib prefix="ct" uri="WEB-INF/hello.tld" %&gt;
+Message: &lt;ct:hello/&gt;
 </example>
 <results>
 Message: hello, world
 </results>
 
-</section>
+</s1>
 
-<section title="Defining the tag">
+<s1 title="Defining the tag">
 
-<p>Many simple tags can just extend <var/TagSupport/>.  The hello tag
-implements <var/doStartTag/>.  When the hello tag starts, the JSP will
+<p>Many simple tags can just extend <var>TagSupport</var>.  The hello tag
+implements <var>doStartTag</var>.  When the hello tag starts, the JSP will
 execute doStartTag.  In this case, it'll print "hello, world".</p>
 
 <p>Since the content of the hello tag doesn't matter, HelloTag
-returns <var/SKIP_BODY/>.  Empty tags will generally
-return <var/SKIP_BODY/>.</p>
+returns <var>SKIP_BODY</var>.  Empty tags will generally
+return <var>SKIP_BODY</var>.</p>
 
 <example title="HelloTag.java">
 package test;
@@ -61,23 +61,23 @@ public class HelloTag extends TagSupport  {
 }
 </example>
 
-</section>
+</s1>
 
-<section title="Configuring the tag">
+<s1 title="Configuring the tag">
 
 <p>Finally, you need to configure the tag in a .tld (tag library
-descriptor) file.  The .tld matches the tag name <var/hello/> with the tag
-class <var/test.HelloTag/>.</p>
+descriptor) file.  The .tld matches the tag name <var>hello</var> with the tag
+class <var>test.HelloTag</var>.</p>
 
 <example title="WEB-INF/hello.tld">
-&lt;taglib>
-  &lt;tag>
-    &lt;name>hello&lt;/name>
-    &lt;tagclass>test.HelloTag&lt;/tagclass>
-  &lt;/tag>
-&lt;/taglib>
+&lt;taglib&gt;
+  &lt;tag&gt;
+    &lt;name&gt;hello&lt;/name&gt;
+    &lt;tagclass&gt;test.HelloTag&lt;/tagclass&gt;
+  &lt;/tag&gt;
+&lt;/taglib&gt;
 </example>
 
-</section>
+</s1>
   </body>
 </document>

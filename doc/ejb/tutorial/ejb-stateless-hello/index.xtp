@@ -7,7 +7,7 @@
 <title>Stateless Session Hello</title>
 <description>
 
-<p>This example creates a <var/stateless session/> bean.  A stateless session
+<p>This example creates a <var>stateless session</var> bean.  A stateless session
 bean is similar to a servlet without sessions.  The server bean itself can have
 state, but doesn't remember the client from one request to the next.</p>
 
@@ -43,11 +43,11 @@ you need to implement:</p>
 <body>
 <summary/>
 
-<section title="Remote Interface">
+<s1 title="Remote Interface">
 
 <p>The remote interface defines the client view of the bean.
-It extends <var/EJBObject/> and declares all the business methods.  Our
-only business method is the <code/hello/> method.</p>
+It extends <var>EJBObject</var> and declares all the business methods.  Our
+only business method is the <code>hello</code> method.</p>
 
 <example language="java" title="Hello.java" file="WEB-INF/classes/example/Hello.java">
 package example;
@@ -60,9 +60,9 @@ public interface Hello extends EJBObject {
 }
 </example>
 
-</section>
+</s1>
 
-<section title="Home Interface" file="WEB-INF/classes/example/Hello.java">
+<s1 title="Home Interface" file="WEB-INF/classes/example/Hello.java">
 
 <p>The sole responsibility of the Home interface is to create a
 remote object.  The client uses the Home to obtain instances of the bean.</p>
@@ -78,14 +78,14 @@ public interface HelloHome extends EJBHome {
 }
 </example>
 
-</section>
+</s1>
 
-<section title="Bean Implementation">
+<s1 title="Bean Implementation">
 
 <p>The third class for EJB's is the bean implementation class.  It implements
 the functionality provided by the remote interface.</p> 
 
-<p>A stateless session bean needs to have exactly one <var/ejbCreate/>
+<p>A stateless session bean needs to have exactly one <var>ejbCreate</var>
 method with no arguments.  It must also define the business methods.</p>
 
 <p>The bean implementation class for all EJB Session bean's must implement the
@@ -111,21 +111,21 @@ public class HelloBean extends com.caucho.ejb.AbstractSessionBean {
 }
 </example>
 
-</section>
+</s1>
 
-<section title="Deployment descriptor">
+<s1 title="Deployment descriptor">
 
 <p>A deployment descriptor is used to describe and define the EJB bean.  In
-general, configuration of EJB's belongs in an <var/ejb-jar.xml/> file.  In a
-jar, it belongs in <var/META-INF/ejb-jar.xml/>.</p>
+general, configuration of EJB's belongs in an <var>ejb-jar.xml</var> file.  In a
+jar, it belongs in <var>META-INF/ejb-jar.xml</var>.</p>
 
 <p>This name, of course, only makes sense if the EJB is put into a jar.  Jars
 are inconvenient during development, so Resin lets you rename the ejb-jar.xml
-file as *.ejb and put it in WEB-INF.  We'll name it <var/WEB-INF/hello.ejb/>.
+file as *.ejb and put it in WEB-INF.  We'll name it <var>WEB-INF/hello.ejb</var>.
 You can have as many *.ejb files as you want, Resin will use them all (for
 example WEB-INF/hello.ejb, WEB-INF/goodbye.ejb).</p>
 
-<p><var/&lt;ejb-jar&gt;/> is the top element for a deployment descriptor for
+<p><var>&lt;ejb-jar&gt;</var> is the top element for a deployment descriptor for
 the bean.  It's part of the EJB spec.  The configuration for the stateless
 session example looks like the following:</p>
 
@@ -145,21 +145,21 @@ session example looks like the following:</p>
 </example>
 
 <deftable>
-<tr><th>Tag<th>Meaning
-<tr><td>ejb-jar<td>containing XML tag for the whole ejb-jar
-<tr><td>enterprise-beans<td>another container for the beans
-<tr><td>session<td>define a session bean
-<tr><td>ejb-name<td>the bean's name.  <var/hello/> is part of the URL.
-<tr><td>home<td>the home interface class
-<tr><td>remote<td>the remote interface class
-<tr><td>ejb-class<td>the implementation class
-<tr><td>session-type<td>Stateless is like a servlet without sessions
-<tr><td>transaction-type<td>Transactions.  For now, you can ignore this.
-</deftable>
+<tr><th>Tag</th><th>Meaning
+</th></tr><tr><td>ejb-jar</td><td>containing XML tag for the whole ejb-jar
+</td></tr><tr><td>enterprise-beans</td><td>another container for the beans
+</td></tr><tr><td>session</td><td>define a session bean
+</td></tr><tr><td>ejb-name</td><td>the bean's name.  <var>hello</var> is part of the URL.
+</td></tr><tr><td>home</td><td>the home interface class
+</td></tr><tr><td>remote</td><td>the remote interface class
+</td></tr><tr><td>ejb-class</td><td>the implementation class
+</td></tr><tr><td>session-type</td><td>Stateless is like a servlet without sessions
+</td></tr><tr><td>transaction-type</td><td>Transactions.  For now, you can ignore this.
+</td></tr></deftable>
 
-</section>
+</s1>
 
-<section title="Configuring the Resin EJB server">
+<s1 title="Configuring the Resin EJB server">
 
 <p>All of the above steps are needed to define and implement an EJB.  Once the
 bean has bean defined and implemented, it is deployed within the Resin server.
@@ -170,9 +170,7 @@ used.</p>
 The EJB server is responsible for reading the *.ejb descriptor files
 and deploying the beans within the server.</p>
 
-<example title="ejb-server in web.xml"
-         file="WEB-INF/web.xml"
-         re-start="<ejb-server">
+<example title="ejb-server in web.xml" file="WEB-INF/web.xml" re-start="&lt;ejb-server">
 &lt;web-app&gt;
 
   ...
@@ -187,20 +185,18 @@ and deploying the beans within the server.</p>
 <p>The ejb-server automatically searches for all *.ejb files in WEB-INF.  It
 will find the hello.ejb file and deploy the "hello" EJB bean.</p>
 
-</section>
+</s1>
 
-<section title="Configuring the protocol">
+<s1 title="Configuring the protocol">
 
 <p>The server needs to make the EJB's available to remote clients using a
-<var/protocol/>.  The protocol defines the language that is used by the client
+<var>protocol</var>.  The protocol defines the language that is used by the client
 and the server to communicate.</p>
 
 <p>This example uses the Hessian EJB Servlet to make the EJB's available to
-remote clients using the <var/Hessian protocol/>.</p>
+remote clients using the <var>Hessian protocol</var>.</p>
 
-<example title="Configuring hessian in web.xml"
-         file="WEB-INF/web.xml"
-         re-start="='/?hessian" re-end="='/?hessian">
+<example title="Configuring hessian in web.xml" file="WEB-INF/web.xml" re-start="='/?hessian" re-end="='/?hessian">
 &lt;web-app&gt;
 
   ...
@@ -216,13 +212,13 @@ remote clients using the <var/Hessian protocol/>.</p>
 </example>
 
 <p>When the EJB is used by a Hessian client, the client adds the
-<var/ejb-name/> from the hello.ejb file to the url that points to the Hessian
+<var>ejb-name</var> from the hello.ejb file to the url that points to the Hessian
 servlet.  In this example, it is
-<var/http://localhost:8080/hessian/hello/>.</p> 
+<var>http://localhost:8080/hessian/hello</var>.</p> 
 
-</section>
+</s1>
 
-<section title="Client">
+<s1 title="Client">
 
 <p>The whole point of EJB stateless session beans is to provide a means of
 communication between a client and a server.  Typically, the client will be on
@@ -233,19 +229,19 @@ server.</p>
 this.  It needs:</p>
 <ul>
 <li>The Home interface (HelloHome.class)
-<li>The Remote interface (Hello.class)
-<li>A library of the standard ejb classes
-<li>A library of classes that implement the protocol being used
-</ul>
+</li><li>The Remote interface (Hello.class)
+</li><li>A library of the standard ejb classes
+</li><li>A library of classes that implement the protocol being used
+</li></ul>
 
 <p>EJB clients perform the following steps in obtaining and using a remote
 object:</p>
 <ol>
-<li>Create a protocol-specific <var/factory/> that is used to obtain Home objects from the remote server
-<li>Use the factory to obtain a <var/home/> for a particular ejb.
-<li>Use the home to create a <var/remote object stub/>.
-<li>Call business methods on the remote object stub.
-</ol>
+<li>Create a protocol-specific <var>factory</var> that is used to obtain Home objects from the remote server
+</li><li>Use the factory to obtain a <var>home</var> for a particular ejb.
+</li><li>Use the home to create a <var>remote object stub</var>.
+</li><li>Call business methods on the remote object stub.
+</li></ol>
 
 <p>The factory is the link between the client and the server. Once the factory
 is created, it is used to obtain Home's for particular EJB's.  The factory, and
@@ -259,7 +255,7 @@ just like any other object, the actual execution of the methods provided by the
 stub happens on the server.</p>
 
 <p>In this example, the client is a servlet and the Home is obtained in the
-init() method and stored as a member variable.  A <code/HessianProxyFactory/>
+init() method and stored as a member variable.  A <code>HessianProxyFactory</code>
 is created and then used to obtain the HelloHome for the Hello ejb.  </p>
 
 <p>The url of the server is passed as an init-param to the servlet.  This
@@ -267,8 +263,7 @@ allows for easy configuration if the url of the server adress changes.  The
 reulsting url that is passed to the factory will look something like
 <code>http://localhost:8080/hessian/home</code>.</p>
 
-<example file="WEB-INF/classes/example/HelloServlet.java"
-         re-start="(HessianProxyFactory;|private HelloHome|void init)" re-end="(HessianProxyFactory;|private HelloHome|^  })">
+<example file="WEB-INF/classes/example/HelloServlet.java" re-start="(HessianProxyFactory;|private HelloHome|void init)" re-end="(HessianProxyFactory;|private HelloHome|^  })">
   private HelloHome helloHome;
 
   public void init(ServletConfig config)
@@ -293,38 +288,36 @@ reulsting url that is passed to the factory will look something like
   }
 
 </example>
-</section>
+</s1>
     
 
-<section name="jndi-client" title="JNDI client">
+<s1 name="jndi-client" title="JNDI client">
 
 <p>The preceding example used Hessian directly.  This is a good idea for
 applets or other clients that do not have good support for the use of JNDI.</p>
 
-<p>More often, clients will use <var/JNDI/>, the Java Naming and Directory
-Interface, to get the Home.  JNDI is used to configure the <var/factory/>, the
+<p>More often, clients will use <var>JNDI</var>, the Java Naming and Directory
+Interface, to get the Home.  JNDI is used to configure the <var>factory</var>, the
 factory is obtained with a JNDI lookup and is used to obtain Home's for the
 different EJB's.</p>
 
-<p>JNDI is based on naming <var/contexts/>.  Contexts are like
+<p>JNDI is based on naming <var>contexts</var>.  Contexts are like
 paths on a file system, but store objects instead of files.
-By convention, the path <var/java:comp/env/ejb/> is used for EJB.</p>
+By convention, the path <var>java:comp/env/ejb</var> is used for EJB.</p>
 
-<section title="JNDI-based client configuration">
+<s2 title="JNDI-based client configuration">
 
 <p>Typically, the client will be on a different machine, or at least a
 different Java virtual machine, than the server.  Each client environment will
 provide a different means of configuring a JNDI factory.</p>
 
-<p>Resin uses <code/jndi-link/> to configure the JNDI factory.</p>
+<p>Resin uses <code>jndi-link</code> to configure the JNDI factory.</p>
 
 <p>The url of the server is passed as an init-param to the
 HessianContextFactory.  This allows for easy configuration if the url of the
 server address changes.</p>
 
-<example file="WEB-INF/web.xml"
-         title="Resin JNDI client configuration"
-         re-start="<jndi-link" re-end="</jndi-link">
+<example file="WEB-INF/web.xml" title="Resin JNDI client configuration" re-start="&lt;jndi-link" re-end="&lt;/jndi-link">
 &lt;web-app&gt;
 
   ...
@@ -342,9 +335,9 @@ server address changes.</p>
 <p><code>HessianContextFactory</code> can be used in any server or other Java
 environment that supports JNDI.</p>
 
-</section> <!-- jndi client config -->
+</s2> <!-- jndi client config -->
 
-<section title="JNDI-based client code">
+<s2 title="JNDI-based client code">
 
 <p>The client code does a JNDI lookup to get the factory. As in the previous
 client example, the client is a servlet and the Home is obtained in the init()
@@ -353,8 +346,7 @@ method and stored as a member variable.</p>
 <p>Only the init() method is differet in the HelloJndiServlet, the rest of the
 class is identical to the previous HelloServlet.</p>
 
-<example file="WEB-INF/classes/example/HelloJndiServlet.java"
-         re-start="(naming\.|private HelloHome|void init)" re-end="(naming\.|private HelloHome|^  })">
+<example file="WEB-INF/classes/example/HelloJndiServlet.java" re-start="(naming\.|private HelloHome|void init)" re-end="(naming\.|private HelloHome|^  })">
 
   private HelloHome helloHome;
 
@@ -374,10 +366,10 @@ class is identical to the previous HelloServlet.</p>
 
 </example>
 
-</section> <!-- jndi client code -->
+</s2> <!-- jndi client code -->
 
 
-</section>
+</s1>
 
 </body>
 </document>

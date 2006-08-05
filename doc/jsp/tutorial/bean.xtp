@@ -1,4 +1,4 @@
-<section>
+<document>
   <header>
     <product>resin</product>
     <title>Adding a Bean</title>
@@ -7,6 +7,8 @@
     <brief>Using a Java bean to create a simple hit counter</brief>
   </header>
 
+<body>
+<s1>
 <p>This example uses a Java bean to create a simple hit counter.
 There's nothing complicated about Java beans.  Java beans are just
 Java classes that follow some simple naming conventions.  Resin makes
@@ -28,18 +30,18 @@ object.</p>
 application object.  Each request calls <code>getHit()</code> to get
 the next value of the counter.</p>
 
-<example title='counter.jsp'>
+<example title="counter.jsp">
 &lt;%@ page language='java' %&gt;
 &lt;jsp:useBean id='counter'
              scope='application'
-             class='test.Counter'/>
+             class='test.Counter'/&gt;
 Visitor &lt;jsp:getProperty name='counter'
-                         property='hit'/>
+                         property='hit'/&gt;
 </example>
 
 <p>The source of the bean looks like:</p>
 
-<example title='test/Counter.java'>
+<example title="test/Counter.java">
 package test;
 
 public class Counter {
@@ -66,9 +68,9 @@ the error reporting.</p>
 application.getRealPath("/WEB-INF/classes/test/Counter.class")
 </jsp:expression></def></p>
 
-<section title='JSP translation'>
+<s2 title="JSP translation">
 
-<p>The special <var/jsp:useBean/> tag translates into standard JSP.
+<p>The special <var>jsp:useBean</var> tag translates into standard JSP.
 Here's the translation:</p>
 
 <example>
@@ -82,26 +84,28 @@ synchronized (application) {
     application.setAttribute("counter", counter);
   }
 }
-%>
+%&gt;
 
-Visitor &lt;%= counter.getHit() %>
+Visitor &lt;%= counter.getHit() %&gt;
 </example>
-</section>
+</s2>
 
-<section title='Autocompile Configuration'>
+<s2 title="Autocompile Configuration">
 
 <p>In a real development environment, your Java source directory may
 be different from the web server directory.  The resin.conf lets you
 select any directory as the Java source and Java classes.</p>
 
 <example>
-&lt;caucho.com>
-&lt;http-server>
+&lt;caucho.com&gt;
+&lt;http-server&gt;
   &lt;classpath id='WEB-INF/classes'
-             source='/home/ferg/ws/src'/>
-&lt;/http-server>
-&lt;/caucho.com>
+             source='/home/ferg/ws/src'/&gt;
+&lt;/http-server&gt;
+&lt;/caucho.com&gt;
 </example>
 
-</section>
-</section>
+</s2>
+</s1>
+</body>
+</document>

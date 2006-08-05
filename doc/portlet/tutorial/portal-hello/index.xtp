@@ -13,20 +13,20 @@
 <body>
 <summary/>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    <td>web-app configuration
-<tr><td><viewfile-link file="WEB-INF/portlets.xml"/>
-    <td>portlet configuration
-<tr><td><viewfile-link file="WEB-INF/classes/example/HelloWorldPortlet.java"/>
-    <td>Portlet
-<tr><td><viewfile-link file="default.css"/>
-    <td>cascading stylesheet
-</deftable>
-</section>
+    </td><td>web-app configuration
+</td></tr><tr><td><viewfile-link file="WEB-INF/portlets.xml"/>
+    </td><td>portlet configuration
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/HelloWorldPortlet.java"/>
+    </td><td>Portlet
+</td></tr><tr><td><viewfile-link file="default.css"/>
+    </td><td>cascading stylesheet
+</td></tr></deftable>
+</s1>
 
-<section title="TODO">
-</section>
+<s1 title="TODO">
+</s1>
 
-</document>
+</body></document>

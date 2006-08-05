@@ -20,25 +20,25 @@ resource dependencies.</p>
   <body>
     <summary/>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
-    <td>Configures the movie application
-<tr><td><viewfile-link file="WEB-INF/classes/example/Movie.java"/>
-    <td>The movie bean.
-<tr><td><viewfile-link file="WEB-INF/classes/example/MovieFinder.java"/>
-    <td>The MovieFinder interface
-<tr><td><viewfile-link file="WEB-INF/classes/example/MovieFinderImpl.java"/>
-    <td>A MovieFinder implementation
-<tr><td><viewfile-link file="WEB-INF/classes/example/MovieLister.java"/>
-    <td>The MovieLister to be configured with the finder implementation
-<tr><td><viewfile-link file="WEB-INF/classes/example/MovieServlet.java"/>
-    <td>The MovieServlet to be configured with the finder implementation
-</deftable>
+    </td><td>Configures the movie application
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/Movie.java"/>
+    </td><td>The movie bean.
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/MovieFinder.java"/>
+    </td><td>The MovieFinder interface
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/MovieFinderImpl.java"/>
+    </td><td>A MovieFinder implementation
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/MovieLister.java"/>
+    </td><td>The MovieLister to be configured with the finder implementation
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/MovieServlet.java"/>
+    </td><td>The MovieServlet to be configured with the finder implementation
+</td></tr></deftable>
 
-</section>
+</s1>
 
-<section title="Dependency Injection">
+<s1 title="Dependency Injection">
 
 <p>
 <i>Dependency injection</i> is a term used to describe a separation between the
@@ -58,36 +58,35 @@ Martin Fowler's
 <a href="http://www.martinfowler.com/articles/injection.html">Dependency
 Injection</a> article.</p>
 
-<p>More details on Resin's configuration is available at the <a
-href="config|init.xtp">bean-style configuration</a> page.</p>
+<p>More details on Resin's configuration is available at the <a href="config|init.xtp">bean-style configuration</a> page.</p>
 
-<section title="Configuration as Assembly Line">
+<s2 title="Configuration as Assembly Line">
 
 <p><figure src="../../../../images/assembler-eg1.gif"/></p>
 
 <p>The Dependency Injector pattern could also be called
 the Assembly pattern because it resembles an assembly
-line making cars.<p>
+line making cars.</p><p>
 
-<ul>
+</p><ul>
 <li>Parts are interchangable components like wheels.  The parts might
 also be assembled like an engine in a car.
-<li>Parts are attached to the Chassis like a car's frame receiving an
+</li><li>Parts are attached to the Chassis like a car's frame receiving an
 engine.
-<li>The Registry is holds partially-completed parts like a factory
+</li><li>The Registry is holds partially-completed parts like a factory
 conveyor belt.
-<li>The Assembler provides the Registry and assembles the Chassis and
+</li><li>The Assembler provides the Registry and assembles the Chassis and
 Parts into a completed resource.
-</ul>
+</li></ul>
 
 <p>Some important points:</p>
 
 <ul>
 <li>The application code (Chassis and Parts) is independent of the
 Assembler.
-<li>Parts are interchangeable.
-<li>The code needs to select an assembly pattern, e.g. Setter Injection.
-</ul>
+</li><li>Parts are interchangeable.
+</li><li>The code needs to select an assembly pattern, e.g. Setter Injection.
+</li></ul>
 
 <p>Because the Assembler is independent of the code, a project could
 change the Assembler from Spring to Resin with no code changes.
@@ -106,11 +105,11 @@ incapabile of assembling the components.  For example, the
 <code>MovieServlet</code> could create an <code>assemble()</code>
 method that grabbed the <code>MovieLocator</code> from JNDI.</p>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="Code for the Dependency Injection pattern">
+<s1 title="Code for the Dependency Injection pattern">
 
 <p>The only code specific to the setter-based injection pattern
 is the addition of a setter method for the dependent resource.
@@ -136,36 +135,36 @@ public class MovieListener {
 }
 </example>
 
-</section>
+</s1>
 
-<section title="Configuration">
+<s1 title="Configuration">
 
 <example title="Configuring the MovieFinder">
 &lt;resource jndi-name="movie-finder"
-          type="example.MovieFinderImpl">
-  &lt;init>
-    &lt;movie director="Jackson" title="Fellowship of the Ring"/>
-    &lt;movie director="Jackson" title="The Two Towers"/>
+          type="example.MovieFinderImpl"&gt;
+  &lt;init&gt;
+    &lt;movie director="Jackson" title="Fellowship of the Ring"/&gt;
+    &lt;movie director="Jackson" title="The Two Towers"/&gt;
 
-    &lt;movie director="Lucas" title="Star Wars"/>
+    &lt;movie director="Lucas" title="Star Wars"/&gt;
 
-    &lt;movie director="Gilliam" title="Brazil"/>
-  &lt;/init>
-&lt;/resource>
+    &lt;movie director="Gilliam" title="Brazil"/&gt;
+  &lt;/init&gt;
+&lt;/resource&gt;
 </example>
 
 <example title="Configuring the MovieLister">
 &lt;resource jndi-name="movie-lister"
-          type="example.MovieLister">
-  &lt;init>
-    &lt;movie-finder>\${jndi("movie-finder")}&lt;/movie-finder>
-  &lt;/init>
-&lt;/resource>
+          type="example.MovieLister"&gt;
+  &lt;init&gt;
+    &lt;movie-finder&gt;\${jndi("movie-finder")}&lt;/movie-finder&gt;
+  &lt;/init&gt;
+&lt;/resource&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="JMX as a Registry">
+<s1 title="JMX as a Registry">
 
 <p>Resin can use JMX as the registry instead of JNDI. In this example,
 only the configuration needs to be changed.  JMX uses the mbean-name
@@ -175,32 +174,32 @@ instead of the jndi-name, and the jndi uses the "mbean:" schema.
 <example title="Configuring the MovieFinder">
 &lt;resource mbean-name="example:type=MovieFinder"
           mbean-interface="example.MovieFinder"
-          type="example.MovieFinderImpl">
-  &lt;init>
-    &lt;movie director="Jackson" title="Fellowship of the Ring"/>
-    &lt;movie director="Jackson" title="The Two Towers"/>
+          type="example.MovieFinderImpl"&gt;
+  &lt;init&gt;
+    &lt;movie director="Jackson" title="Fellowship of the Ring"/&gt;
+    &lt;movie director="Jackson" title="The Two Towers"/&gt;
 
-    &lt;movie director="Lucas" title="Star Wars"/>
-  &lt;/init>
-&lt;/resource>
+    &lt;movie director="Lucas" title="Star Wars"/&gt;
+  &lt;/init&gt;
+&lt;/resource&gt;
 
 &lt;resource jndi-name="movie-lister"
-          type="example.MovieLister">
-  &lt;init>
-    &lt;movie-finder>\${jndi("mbean:example:type=MovieFinder")}&lt;/movie-finder>
-  &lt;/init>
-&lt;/resource>
+          type="example.MovieLister"&gt;
+  &lt;init&gt;
+    &lt;movie-finder&gt;\${jndi("mbean:example:type=MovieFinder")}&lt;/movie-finder&gt;
+  &lt;/init&gt;
+&lt;/resource&gt;
 </example>
 
 <p>Using JMX as the registry has some restrictions over JNDI.
-JMX requires an interface class. So the servlet's &lt;movie-lister>
+JMX requires an interface class. So the servlet's &lt;movie-lister&gt;
 setting can't be stored in JMX.  JMX also can't support object references.
 All JMX getters and method values are value objects, never references.
 This limits the kinds of structures you can use easily with JMX.</p>
 
-</section>
+</s1>
 
-<section title="Dependency Injection for Servlets">
+<s1 title="Dependency Injection for Servlets">
 
 <p>The Dependency Injection pattern is just as useful for servlet
 configuration as it is for resources.  This example makes the
@@ -212,42 +211,42 @@ the same as for the resource:</p>
 
 <ul>
 <li>The servlet code becomes simpler.
-<li>The servlet is no longer dependent on JNDI.
-<li>The servlet is more easily testable by configuring it with test
+</li><li>The servlet is no longer dependent on JNDI.
+</li><li>The servlet is more easily testable by configuring it with test
 versions of the MovieListener.
-</ul>
+</li></ul>
 
 <example title="Configuring the MovieServlet">
 &lt;servlet servlet-name="movies"
-         type="example.MovieServlet">
-  &lt;init>
-    &lt;movie-lister>\${jndi("movie-lister")}&lt;/movie-lister>
-  &lt;/init>
-&lt;/resource>
+         type="example.MovieServlet"&gt;
+  &lt;init&gt;
+    &lt;movie-lister&gt;\${jndi("movie-lister")}&lt;/movie-lister&gt;
+  &lt;/init&gt;
+&lt;/resource&gt;
 </example>
 
-<section title="Compatibility">
+<s2 title="Compatibility">
 
 <p>For compatibility, Servlets will generally add an
 <code>assemble()</code> method to cover cases where the
 container cannot assemble the Servlet.  The
 <code>assemble()</code> method will call JNDI with appropriate names
-from the &lt;init-param> values to assemble the dependencies.</p>
+from the &lt;init-param&gt; values to assemble the dependencies.</p>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="See also">
+<s1 title="See also">
 
 <ul>
 <li><a href="doc|config|init">Bean-style init</a>
-<li><a href="db|tutorial/jdbc-ioc/index.xtp">Servlet DataSource Configuration</a>
-<li><a href="protocols|tutorial/hessian-ioc/index.xtp">Hessian
+</li><li><a href="db|tutorial/jdbc-ioc/index.xtp">Servlet DataSource Configuration</a>
+</li><li><a href="protocols|tutorial/hessian-ioc/index.xtp">Hessian
 with Dependency Injection</a>
-</ul>
+</li></ul>
 
-</section>
+</s1>
 
   </body>
 </document>

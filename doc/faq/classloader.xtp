@@ -8,14 +8,14 @@
   <body>
     <summary/>
 
-<section title="Where do I put my jars and classes?">
+<s1 title="Where do I put my jars and classes?">
 
-<p>Application classes belong in <var/WEB-INF/classes/>.  Jars belong
-in <var/WEB-INF/lib/>.</p>
+<p>Application classes belong in <var>WEB-INF/classes</var>.  Jars belong
+in <var>WEB-INF/lib</var>.</p>
 
 <p>Look at the standard installation and check the
 HelloWorld example.  The HelloWorld source is in
-<var/resin-2.1/doc/WEB-INF/classses/>.  Resin will automatically compile
+<var>resin-2.1/doc/WEB-INF/classses</var>.  Resin will automatically compile
 that source when running the demo and put the class in the same directory.</p>
 
 <p>If you change the app-dir to /usr/local/apache/htdocs, servlets and beans
@@ -26,19 +26,19 @@ own web-apps.  When you do start working with web-apps, look at the
 guest book examples to see where beans and servlets belong.</p>
 
 <p>You can also change the default location with the
-<var/&lt;classpath>/> directive.</p>
+<var>&lt;classpath&gt;</var> directive.</p>
 
-<p>Application jars belong in <var/WEB-INF/lib/> and standard libraries,
+<p>Application jars belong in <var>WEB-INF/lib</var> and standard libraries,
 like JDBC drivers, belong in the global classpath.  In
 general, you should put standard libraries in the global classpath.
 Resin has several equivalent methods to add a jar to the classpath:</p>
 
 <ol>
 <li>Add the driver to the CLASSPATH environment variable.
-<li>Start Resin with a -classpath argument including the driver.
-<li>Put the jar file in resin1.1/lib.
-<li>Put the classes in resin1.1/classes.
-</ol>
+</li><li>Start Resin with a -classpath argument including the driver.
+</li><li>Put the jar file in resin1.1/lib.
+</li><li>Put the classes in resin1.1/classes.
+</li></ol>
 
 <p>Only the last two will be automatically reloaded when the class or
 jar changes.  For the first two, you'll need to restart Resin.</p>
@@ -47,25 +47,25 @@ jar changes.  For the first two, you'll need to restart Resin.</p>
 -verbose option:</p>
 
 <example>
-unix> httpd.sh -verbose
+unix&gt; httpd.sh -verbose
 </example>
 
 <p>You must restart Resin to pick up the new classpath.
 When using the Win32 Resin, you must quit the Resin application.  Just
 pressing the stop and start buttons will not suffice.</p>
 
-</section>
+</s1>
 
-<section title="Where does Resin generate *.java and *.class files?">
+<s1 title="Where does Resin generate *.java and *.class files?">
 
-<p>The &lt;work-dir>'<var/foo/>'&lt;/work-dir> attribute configures the
+<p>The &lt;work-dir&gt;'<var>foo</var>'&lt;/work-dir&gt; attribute configures the
 directory where generated *.java (for JSP) and *.class files go.  If
-unassigned, they go into <var//tmp/caucho/> on Unix and <var/\temp\caucho/>
+unassigned, they go into <var>/tmp/caucho</var> on Unix and <var>\temp\caucho</var>
 on Windows.</p>
 
-</section>
+</s1>
 
-<section title="Resin doesn't update changed servlets and JSP pages">
+<s1 title="Resin doesn't update changed servlets and JSP pages">
 
 <p>Resin has a delay for testing updated servlets and JSP pages.
 The configuration variable for both is 'class-update-interval' in
@@ -74,23 +74,23 @@ seconds.  So Resin will only check every 15 seconds for an updated
 page.  You can set this value to 0 for development work.</p>
 
 <example>
-&lt;http-config class-update-interval='0'>
+&lt;http-config class-update-interval='0'&gt;
   ...
-&lt;/http-config>
+&lt;/http-config&gt;
 </example>
 
 <p>If you want Resin to check servlets for updates every hour, your
 resin.conf might look like:</p>
 
 <example>
-&lt;http-config class-update-interval='3600'>
+&lt;http-config class-update-interval='3600'&gt;
   ...
-&lt;/http-config>
+&lt;/http-config&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="Servlets don't compile">
+<s1 title="Servlets don't compile">
 
 <example>
 java.lang.NoClassDefFoundError: sun/tools/javac/Main
@@ -100,47 +100,47 @@ java.lang.NoClassDefFoundError: sun/tools/javac/Main
 the JDK or use another compiler.  To configure another compiler use:</p>
 
 <example>
-&lt;caucho.com>
-  &lt;java compiler='/usr/local/bin/jikes'/>
+&lt;caucho.com&gt;
+  &lt;java compiler='/usr/local/bin/jikes'/&gt;
   ...
-&lt;/caucho.com>
+&lt;/caucho.com&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="ClassNotFoundException for servlet or bean">
+<s1 title="ClassNotFoundException for servlet or bean">
 
 <p>First check that the class is in the right location.  In the standard
-configuration, Java classes belong in <var/resin/doc/WEB-INF/classes/>.
+configuration, Java classes belong in <var>resin/doc/WEB-INF/classes</var>.
 If you're using Resin's autocompilation, the Java source file must be in the
 same location.</p>
 
-<p>If you're using the automatic compilation, check that the <var/package/>
+<p>If you're using the automatic compilation, check that the <var>package</var>
 in the *.java file matches its location.</p>
 
-</section>
+</s1>
 
-<section title="How do I get the application class loader?">
+<s1 title="How do I get the application class loader?">
 
 <p>You can get the application classloader from a servlet
-using the standard call <var/Thread.getContextClassLoader()/>.
+using the standard call <var>Thread.getContextClassLoader()</var>.
 
-</section>
+</p></s1>
 
-<section title="The application gets reloaded on each request">
+<s1 title="The application gets reloaded on each request">
 
 <p>Other symptoms are that sessions are killed on each request.
 
-<p>This may occur if your *.java files have a date in the future.
+</p><p>This may occur if your *.java files have a date in the future.
 When the *.class is compiled, it will have an date before the *.java.
 So Resin will think it's old and recompile on the next request.
 
-<p>This may occur, for example, if you work on NT and use Linux as a
+</p><p>This may occur, for example, if you work on NT and use Linux as a
 fileserver and the two clocks aren't properly synchronized.
 
-<p>The only solution is to synchronize the clocks for both machines.
+</p><p>The only solution is to synchronize the clocks for both machines.
 
-</section>
+</p></s1>
 <!--
 <section title="Resin crashes on Windows when recompiling">
 
@@ -157,16 +157,16 @@ jikes:
 </section>
 -->
 
-<section title='What is the classloader order?'>
+<s1 title="What is the classloader order?">
 
 <p>In Resin 2.1 the order is:</p>
 <ol>
 <li>The commandline classpath
-<li>The resin/lib directory
-<li>The envivonmental classpath
-<li>An application's WEB-INF/lib and WEB-INF/classes
-</ol>
+</li><li>The resin/lib directory
+</li><li>The envivonmental classpath
+</li><li>An application's WEB-INF/lib and WEB-INF/classes
+</li></ol>
 
-</section>
+</s1>
   </body>
 </document>

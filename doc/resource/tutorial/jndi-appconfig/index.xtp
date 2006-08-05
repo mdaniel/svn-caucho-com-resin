@@ -25,22 +25,21 @@ files relative to the base directory.</p>
 
 <summary/>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    <td>Configure the AppConfig object as a resource
-<tr><td><viewfile-link file="WEB-INF/classes/example/AppConfig.java"/>
-    <td>The AppConfig object provides input and output streams to configuration files
-<tr><td><viewfile-link file="WEB-INF/classes/example/TestServlet.java"/>
-    <td>A simple example usage of AppConfig that reads and writes a file
-<tr><td><viewfile-link file="index.jsp"/>
-    <td>The starting page for the tutorial
-</deftable>
-</section>
+    </td><td>Configure the AppConfig object as a resource
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/AppConfig.java"/>
+    </td><td>The AppConfig object provides input and output streams to configuration files
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/TestServlet.java"/>
+    </td><td>A simple example usage of AppConfig that reads and writes a file
+</td></tr><tr><td><viewfile-link file="index.jsp"/>
+    </td><td>The starting page for the tutorial
+</td></tr></deftable>
+</s1>
 
-<section title="The java code for a custom JNDI object">
-<p>A custom JNDI object is implemented similar to a java-bean (see <a
-href="doc|config|init">Bean-style initialization</a>).  Setter
+<s1 title="The java code for a custom JNDI object">
+<p>A custom JNDI object is implemented similar to a java-bean (see <a href="doc|config|init">Bean-style initialization</a>).  Setter
 methods like <code>setFoo(String foo)</code> are used to set values
 that are specified in the configuration.</p>
 
@@ -49,8 +48,7 @@ configuration parameter "config-files-location".  The
 <code>init()</code> method is called by Resin after all of the setters
 have been called.</p>
 
-<example file="WEB-INF/classes/example/AppConfig.java"
-         re-start="(void setConfig)|(void init)" re-end="}">
+<example file="WEB-INF/classes/example/AppConfig.java" re-start="(void setConfig)|(void init)" re-end="}">
 public class AppConfig {
   ConfigFilesLocation _cfl = null;
 
@@ -76,9 +74,9 @@ public class AppConfig {
 
   ...
 </example>
-</section>
+</s1>
 
-<section title="Configuring the custom JNDI object">
+<s1 title="Configuring the custom JNDI object">
 
 <p>Configuration of the JNDI object is done with the
 <a config-tag="resource"/> tag.</p>
@@ -89,11 +87,9 @@ sure the directory exists for the example to work).  It is good to
 hide the files somewhere under <code>WEB-INF</code>, because a browser
 will not be able to read the files, just the application.</p>
 
-<p>The <a href="doc|config|el">EL configuration</a> variable <var/app.docDir/> is used.</p>
+<p>The <a href="doc|config|el">EL configuration</a> variable <var>app.docDir</var> is used.</p>
 
-<example title="Configuring the AppConfig JNDI object"
-         file="WEB-INF/web.xml"
-         re-start="make an example.AppConfig" re-end="</resource>">
+<example title="Configuring the AppConfig JNDI object" file="WEB-INF/web.xml" re-start="make an example.AppConfig" re-end="&lt;/resource&gt;">
   &lt;resource name='config/Application'&gt;
     &lt;type&gt;example.AppConfig&lt;/type&gt;
     &lt;init&gt;
@@ -102,9 +98,9 @@ will not be able to read the files, just the application.</p>
   &lt;/resource&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="Obtaining and using the object">
+<s1 title="Obtaining and using the object">
 
 <p>An instance of the object is retrieved in the application using
 JNDI.  Since the configuration will not change, it is best to store the
@@ -113,9 +109,7 @@ results of the lookup.</p>
 <p>In this example servlet, an instance of the object is retrieved in
 the init() method and stored in <code>_appConfig</code>.</p>
 
-<example title="Obtaining the AppConfig JNDI object"
-         file="WEB-INF/classes/example/TestServlet.java"
-         re-start="_appConfig = " re-marker="void init">
+<example title="Obtaining the AppConfig JNDI object" file="WEB-INF/classes/example/TestServlet.java" re-start="_appConfig = " re-marker="void init">
 
   final static String JNDI_NAME = "java:comp/env/config/Application";
 
@@ -136,9 +130,7 @@ the init() method and stored in <code>_appConfig</code>.</p>
 <p><code>_appConfig</code> is used to open the
 configuration files for reading and writing.</p>
 
-<example title="Using the AppConfig JNDI object"
-         file="WEB-INF/classes/example/TestServlet.java"
-         re-start="_appConfig\." re-marker="use the _appConfig">
+<example title="Using the AppConfig JNDI object" file="WEB-INF/classes/example/TestServlet.java" re-start="_appConfig\." re-marker="use the _appConfig">
 ...
 
     InputStream is = _appConfig.openConfigFileRead(inputFile);
@@ -150,9 +142,9 @@ configuration files for reading and writing.</p>
 ...
 </example>
 
-</section>
+</s1>
 
-<section title="Variation - Hiding the configuration file with getters">
+<s1 title="Variation - Hiding the configuration file with getters">
 
 <p>The example in this tutorial is easily modified to allow the hiding of the
 configuration file behind <code>get</code> methods of the bean.  Implementing
@@ -311,9 +303,9 @@ public class TestServlet extends HttpServlet {
 }
 </example>
 
-</section>
+</s1>
 
-<section title="Availability of AppConfig from different web-apps">
+<s1 title="Availability of AppConfig from different web-apps">
 
 <p>
 The availability of AppConfig to different web-apps depends upon the context
@@ -370,19 +362,18 @@ to place a jar with that class in $RESIN_HOME/lib, or you can use an explicit
 <a config-tag="class-loader"/>.
 </p>
 
-</section>
+</s1>
 
-<section title="Compatibility">
+<s1 title="Compatibility">
 
 <p>
 Although the <a config-tag="resource"/> tag is Resin specific the pattern shown
 in this tutorial is good for portability.  If your application needs to work
-in another app-server, you can use a startup facility such as a <a
-config-tag="load-on-startup"/> servlet to manually configure the bean, call the
+in another app-server, you can use a startup facility such as a <a config-tag="load-on-startup"/> servlet to manually configure the bean, call the
 init() method, and stuff the instance into JNDI.  
 </p>
 
-</section>
+</s1>
 
 </body>
 </document>

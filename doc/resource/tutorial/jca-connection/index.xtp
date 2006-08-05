@@ -17,24 +17,24 @@ pooling and transactions for any Connector following the interface.</p>
 
 <summary/>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    <td>Configures the Connector
-<tr><td><viewfile-link file="WEB-INF/classes/example/ConnectionImpl.java"/>
-    <td>User interface for the connection
-<tr><td><viewfile-link file="WEB-INF/classes/example/ConnectionFactoryImpl.java"/>
-    <td>User interface for the connection factory
-<tr><td><viewfile-link file="WEB-INF/classes/example/ManagedConnectionImpl.java"/>
-    <td>Driver (SPI) interface for the connection
-<tr><td><viewfile-link file="WEB-INF/classes/example/ManagedConnectionFactoryImpl.java"/>
-    <td>Driver (SPI) interface for the connection factory
-<tr><td><viewfile-link file="WEB-INF/classes/example/TestServlet.java"/>
-    <td>The demo servlet for the tutorial
-</deftable>
-</section>
+    </td><td>Configures the Connector
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/ConnectionImpl.java"/>
+    </td><td>User interface for the connection
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/ConnectionFactoryImpl.java"/>
+    </td><td>User interface for the connection factory
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/ManagedConnectionImpl.java"/>
+    </td><td>Driver (SPI) interface for the connection
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/ManagedConnectionFactoryImpl.java"/>
+    </td><td>Driver (SPI) interface for the connection factory
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/TestServlet.java"/>
+    </td><td>The demo servlet for the tutorial
+</td></tr></deftable>
+</s1>
 
-<section title="Overview">
+<s1 title="Overview">
 
 <glossary title="Connector">The driver's system of connections and
 factories.</glossary>
@@ -52,12 +52,12 @@ the user connection, the user's view of the connection.</p>
 
 <deftable>
 <tr><td>user connection</td><td>User's view of the connection</td>
-<tr><td>user connection factory</td><td>User's view of the connection factory</td>
-<tr><td>managed connection</td><td>Resin's view of the connection</td>
-<tr><td>managed connection factory</td><td>Resin's view of the connection factory</td>
-</deftable>
+</tr><tr><td>user connection factory</td><td>User's view of the connection factory</td>
+</tr><tr><td>managed connection</td><td>Resin's view of the connection</td>
+</tr><tr><td>managed connection factory</td><td>Resin's view of the connection factory</td>
+</tr></deftable>
 
-<section title="User Connection">
+<s2 title="User Connection">
 
 <p>The user connection is the main application interface.  The
 connector can use any API for the user connection.
@@ -78,9 +78,9 @@ interfaces user code will see.  The user connection factory, like
 JDBC's <code>DataSource</code> is responsible for
 creating user connections.</p>
 
-</section>
+</s2>
 
-<section title="User Connection Factory">
+<s2 title="User Connection Factory">
 
 <p>The user connection factory creates user connections.
 Users will generally get the user connection factory from JNDI during
@@ -102,9 +102,9 @@ To create the new connection, Resin asks the driver's
 controlling class, the managed connection factory, for a new
 managed connection.</p>
 
-</section>
+</s2>
 
-<section title="Managed Connection">
+<s2 title="Managed Connection">
 
 <p>Each user connection uses an underlying managed connection to talk
 to the resource.  When the user is done with the connection, the
@@ -121,9 +121,9 @@ will have the user connection act as a facade to the underlying code
 in the managed connection.  The architecture will depend on the
 driver's needs.</p>
 
-</section>
+</s2>
 
-<section title="Managed Connection Factory">
+<s2 title="Managed Connection Factory">
 
 <p>Resin's main interface to the connector is the managed
 connection factory.  The managed connection factory is configured in
@@ -131,11 +131,11 @@ the web.xml using bean-style initialization.  Resin calls on
 the managed connection factory for both the user connection factory
 and to allocate new managed connections.</p>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="Using the Connector">
+<s1 title="Using the Connector">
 
 <p>Using the JCA connector follows the same pattern as for JDBC.
 The servlet looks up the <code>ConnectionFactory</code> in
@@ -181,38 +181,38 @@ Factory: ConnectionFactoryImpl[ManagedConnectionFactoryImpl[example]]
 Connection: ConnectionImpl[example-12-conn,ManagedConnectionImpl[example-0]]
 </results>
 
-</section>
+</s1>
 
-<section title="Configuration">
+<s1 title="Configuration">
 
 <p>As usual, Resin uses bean-style configuration for the
 connector.  The example <code>ManagedConnectionFactoryImpl</code> has
-a <code>setName</code> configuration method.  The &lt;init> tag in the
+a <code>setName</code> configuration method.  The &lt;init&gt; tag in the
 configuration file sets that value.  If needed, you can use JSP EL
 expressions to assign the name value.</p>
 
-<p>The <var/name/> attribute is the JNDI name for
+<p>The <var>name</var> attribute is the JNDI name for
 the user connection factor, in this case
-"java:comp/env/factory".  The &lt;type> tag is the class name of
-the factory and the &lt;init> section initializes the factory.</p>
+"java:comp/env/factory".  The &lt;type&gt; tag is the class name of
+the factory and the &lt;init&gt; section initializes the factory.</p>
 
 <example file="WEB-INF/web.xml">
-&lt;resource name="factory">
-  &lt;type>example.ManagedConnectionFactoryImpl&lt;/type>
-  &lt;init>
-    &lt;name>example&lt;/name>
-  &lt;/init>
-&lt;/resource>
+&lt;resource name="factory"&gt;
+  &lt;type&gt;example.ManagedConnectionFactoryImpl&lt;/type&gt;
+  &lt;init&gt;
+    &lt;name&gt;example&lt;/name&gt;
+  &lt;/init&gt;
+&lt;/resource&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="Control Flow">
+<s1 title="Control Flow">
 
 <p>Since looking at the implementation methods can be a bit confusing,
 it's best to approach them as a set of method call chains.</p>
 
-<section title="Installing the UserConnectionFactory">
+<s2 title="Installing the UserConnectionFactory">
 
 <p>During configuration, Resin needs to get the
 <code>UserConnectionFactory</code> from the
@@ -221,19 +221,19 @@ it's best to approach them as a set of method call chains.</p>
 <ol>
 <li>Resin instantiates and configures the
 <code>ManagedConnectionFactory</code> from the configuration file.
-<li>Resin calls
+</li><li>Resin calls
 <code>ManagedConnectionFactory.createConnectionFactory</code> for the
 user connection factory.  It passes along a
 <code>ConnectionManager</code> which points back to Resin.
-<li>Resin stores the user connection factory in JNDI.
-</ol>
+</li><li>Resin stores the user connection factory in JNDI.
+</li></ol>
 
 <p>The <code>ConnectionManager</code> will be important in the next
 step to get a connection.</p>
 
-</section>
+</s2>
 
-<section title="Getting a new Connection">
+<s2 title="Getting a new Connection">
 
 <p>From the user's perspective, the main point of the connector is
 getting a connection.  The user asks the user connection factory for
@@ -243,25 +243,25 @@ the request.</p>
 <li>The user calls the user connection factory's
 <code>getConnection</code> method.  This method would be specific to
 the user connection factory's API.
-<li>The user connection factory calls Resin's
+</li><li>The user connection factory calls Resin's
 <code>ConnectionManager.allocateConnection</code> method to ask for a
 new connection.
-<li>Resin checks the pool but it's empty, so needs to get a new
+</li><li>Resin checks the pool but it's empty, so needs to get a new
 connection.
-<li>Resin calls the managed connection factory's
+</li><li>Resin calls the managed connection factory's
 <code>createManagedConnection</code> method to get a new managed
 connection.
-<li>Resin registers itself as a listener for
+</li><li>Resin registers itself as a listener for
 the <code>ManagedConnection</code>, so it will know when the
 connections close or have a fatal error.
-<li>Resin calls the managed connection's <code>getConnection</code>
+</li><li>Resin calls the managed connection's <code>getConnection</code>
 method to get a new user connection.
-<li>Resin finally returns the user connection to the user.
-</ol>
+</li><li>Resin finally returns the user connection to the user.
+</li></ol>
 
-</section>
+</s2>
 
-<section title="Returning a Connection to the pool">
+<s2 title="Returning a Connection to the pool">
 
 <p>After the user is done with the connection, the finally block will
 close the connection.  The connector takes the following steps to put
@@ -271,19 +271,19 @@ the connection into the pool:</p>
 <li>The user calls the connection's <code>close</code> method.  This
 method is specific to each API, but <code>close</code> is a good
 choice.
-<li>The connection notifies the listeners in the managed connection
+</li><li>The connection notifies the listeners in the managed connection
 that the connection has closed.  In the example,
 <code>ConnectionImpl</code> calls the
 <code>ManagedConnectionImpl.close()</code> method.
-<li>Since Resin is registered as a listener, the managed connection
+</li><li>Since Resin is registered as a listener, the managed connection
 calls Resin's <code>connectionClosed</code> method.
-<li>Resin returns the managed connection to the pool and marks it
+</li><li>Resin returns the managed connection to the pool and marks it
 idle, ready for the next request.
-</ol>
+</li></ol>
 
-</section>
+</s2>
 
-<section title="Getting a Connection from the pool">
+<s2 title="Getting a Connection from the pool">
 
 <p>From the user's perspective this looks exactly like getting a new
 connection does.  There's a bit more work for the managed connection
@@ -294,27 +294,27 @@ factory, though.</p>
 <li>The user calls the user connection factory's
 <code>getConnection</code> method.  This method would be specific to
 the user connection factory's API.
-<li>The user connection factory calls Resin's
+</li><li>The user connection factory calls Resin's
 <code>ConnectionManager.allocateConnection</code> method to ask for a
 new connection.
-<li>Resin checks the pool and there are idle connections.  But Resin
+</li><li>Resin checks the pool and there are idle connections.  But Resin
 needs to ask the managed connection factory if any can be used for
 this request.
-<li>Resin calls the managed connection factory's
+</li><li>Resin calls the managed connection factory's
 <code>matchManagedConnections</code> with the idle managed connection
 pool to see if any can be used.
-<li>If there's a valid managed connection in the pool, the managed
+</li><li>If there's a valid managed connection in the pool, the managed
 connection factory return it.
-<li>Resin then takes the managed connection from the pool.
-<li>Resin calls the managed connection's <code>getConnection</code>
+</li><li>Resin then takes the managed connection from the pool.
+</li><li>Resin calls the managed connection's <code>getConnection</code>
 method to get a new user connection.
-<li>Resin returns the user connection to the user.
-</ol>
+</li><li>Resin returns the user connection to the user.
+</li></ol>
 
-</section>
-</section>
+</s2>
+</s1>
 
-<section title="Compatibility">
+<s1 title="Compatibility">
 
 <p>Since this example uses the JCA API, the code is compatible across
 all application servers.  The configuration, of course, will be
@@ -322,7 +322,7 @@ different for each.  Many other applications will require generation
 of a .rar file and some additional XML files, although those should be
 relatively straightforward.</p>
 
-</section>
+</s1>
 
 </body>
 </document>

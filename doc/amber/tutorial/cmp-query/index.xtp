@@ -13,22 +13,22 @@ enhanced SQL and direct support for objects.</p>
   <body>
     <summary/>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
-    <td>resin-web.xml configuration
-<tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>
-    <td>persistence.xml configuration
-<tr><td><viewfile-link file="WEB-INF/classes/example/Student.java"/>
-    <td>The student bean
-<tr><td><viewfile-link file="WEB-INF/classes/example/House.java"/>
-    <td>The house bean
-<tr><td><viewfile-link file="WEB-INF/classes/example/QueryServlet.java"/>
-    <td>The course servlet
-</deftable>
-</section>
+    </td><td>resin-web.xml configuration
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>
+    </td><td>persistence.xml configuration
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/Student.java"/>
+    </td><td>The student bean
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/House.java"/>
+    </td><td>The house bean
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/QueryServlet.java"/>
+    </td><td>The course servlet
+</td></tr></deftable>
+</s1>
 
-<section title="Database Schema">
+<s1 title="Database Schema">
 
 <example title="House.java">
 <a href="amber|amber-table.xtp#@Entity">@Entity</a>
@@ -62,9 +62,9 @@ public class Student {
 }
 </example>
 
-</section>
+</s1>
 
-<section title="Query">
+<s1 title="Query">
 
 <example title="QueryServlet.java">
   private void doService(PrintWriter out)
@@ -82,7 +82,7 @@ public class Student {
     for (int i = 0; i &lt; houses.size(); i++) {
       House house = (House) houses.get(i);
       
-      out.println("&lt;H3>Boys living in " + house.getName() + ":&lt;/H3>");
+      out.println("&lt;H3&gt;Boys living in " + house.getName() + ":&lt;/H3&gt;");
 
       boysInHouse.setParameter(1, new Long(house.getId()));
       List boys = boysInHouse.getResultList();
@@ -93,13 +93,13 @@ public class Student {
       for (int j = 0; j &lt; boys.size(); j++) {
 	Student boy = (Student) boys.get(j);
 
-	out.println(boy.getName() + "&lt;br>");
+	out.println(boy.getName() + "&lt;br&gt;");
       }
     }
   }
 }
 </example>
 
-</section>
+</s1>
   </body>
 </document>

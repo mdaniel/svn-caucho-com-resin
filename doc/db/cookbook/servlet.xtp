@@ -12,7 +12,7 @@ Obtain and use a database connection from a Servlet.
 <body>
 <summary/>
 
-<section name="webxml" title="web.xml">
+<s1 name="webxml" title="web.xml">
 
 <p>
 A <a config-tag="database"/> configuration in <code>WEB-INF/web.xml</code> 
@@ -54,14 +54,13 @@ enable the servlet.
 
 </example>
 
-</section>
+</s1>
 
-<section name="init" title='Servlet initialization'>
+<s1 name="init" title="Servlet initialization">
     
-<p>The <code>DataSource</code> is obtained using the <a
-config-tag="database">jndi-name</a> specified when configuring the database
-resource.  The JNDI lookup of <code/DataSource/> is done only once, the
-<code/DataSource/> is stored in the <code>_dataSource</code> member variable so
+<p>The <code>DataSource</code> is obtained using the <a config-tag="database">jndi-name</a> specified when configuring the database
+resource.  The JNDI lookup of <code>DataSource</code> is done only once, the
+<code>DataSource</code> is stored in the <code>_dataSource</code> member variable so
 that it can be used for each request. If it was not stored, there would be an
 impact on performance
 from having to do the lookup each time.</p>
@@ -121,19 +120,19 @@ public class TestDatabase
 }
 </example>
 
-</section> <!-- init -->
+</s1> <!-- init -->
 
-<section name="use" title='Using the DataSource to get a Connection'>
+<s1 name="use" title="Using the DataSource to get a Connection">
 
 <p>The DataSource is a factory that is used to obtain connections when they are
 needed.  The following is a sample design pattern for getting new database
-connections from within a servlet..  The <var/try ... finally/> block is very
+connections from within a servlet..  The <var>try ... finally</var> block is very
 important.  Without the close in the finally block, Resin's database pool can
 lose connections.
 </p>  
 
-<p>This is so important, it is worth repeating.  The <var/try
-... finally/> block is very important.  Without the close in the finally block,
+<p>This is so important, it is worth repeating.  The <var>try
+... finally</var> block is very important.  Without the close in the finally block,
 Resin's database pool can lose connections.  If you fail to close() a
 connection, Resin cannot know that it is not being used anymore, and cannot
 allocate it for another request.  Eventually, you may run out of connections.
@@ -167,13 +166,13 @@ public class TestDatabase
 
       ResultSet rs = stmt.executeQuery("select NAME, PRICE from BROOMS");
 
-      out.println("Brooms:&lt;br>");
+      out.println("Brooms:&lt;br&gt;");
 
       while (rs.next()) {
         out.print(rs.getString(1));
         out.print(" ");
         out.print(rs.getInt(2));
-        out.println("&lt;br>");
+        out.println("&lt;br&gt;");
       }
 
       rs.close();
@@ -194,9 +193,9 @@ public class TestDatabase
   }
 }
 </example>
-</section> <!-- use -->
+</s1> <!-- use -->
     
-<section name="inject" title='Variation: Dependency Injection'>
+<s1 name="inject" title="Variation: Dependency Injection">
 
 <p>
 The example as it stands is tied to a single data-source name,
@@ -226,12 +225,12 @@ only a small change in web.xml.
 </example>
 
 <p>
-The <var/init/> block causes Resin to call <code>setDataSource</code> before
+The <var>init</var> block causes Resin to call <code>setDataSource</code> before
 the <code>init()</code> method is called on the servlet.  The servlet does
 not do a jndi lookup for the DataSource, because it already has one.
 </p>
 
-</section> <!-- inject -->
+</s1> <!-- inject -->
 
 </body>
 </document>

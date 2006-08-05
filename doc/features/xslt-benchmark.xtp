@@ -8,7 +8,7 @@
   <body>
     <summary/>
 
-<section title='Introduction'>
+<s1 title="Introduction">
 
 As XML and XSLT move from the cutting edge into the mainstream,
 they are used in more real applications, like the rendering of web
@@ -37,17 +37,17 @@ XSLT engines.
 <p/>For this benchmark, Resin's XSLT engine was about three times faster than
 Xalan and about 80% faster than Saxon.
 
-</section>
+</s1>
 
-<section title='Data'>
+<s1 title="Data">
 
 The following Java XSLT engines were tested:
 <ul>
 <li><a href="http://www.caucho.com">Resin 2.0.5</a>
-<li><a href="http://xml.apache.org/xalan-j/index.html">Xalan 2.2 D14</a>
-<li><a href="http://saxon.sourceforge.org">Saxon 6.5</a>
-<li>XT
-</ul>
+</li><li><a href="http://xml.apache.org/xalan-j/index.html">Xalan 2.2 D14</a>
+</li><li><a href="http://saxon.sourceforge.org">Saxon 6.5</a>
+</li><li>XT
+</li></ul>
 
 <p/>The XSLT benchmark drivers was taken from the XSLTMark website and all
 comparisons were done on the same RedHat 7.2 system (dual 800Mhz
@@ -63,25 +63,25 @@ mean treats them both identically.
 <p/>Using the geometric mean, Resin is:
 <ul>
 <li>10% faster than XT
-<li>80% faster than Saxon
-<li>3 times faster than Xalan
-</ul>
+</li><li>80% faster than Saxon
+</li><li>3 times faster than Xalan
+</li></ul>
 
-<p/><table border=2>
-<tr><th>&nbsp;<th colspan=3>Mean
-<tr><th>Engine<th>Arithmetic<th>Geometric<th>Harmonic
-<tr><td>Resin<td align='right'>548.64<td align=right>383.67<td align=right>196.55
-<tr><td>XT<td align=right>465.58<td align=right>323.85<td align=right>162.83
-<tr><td>Saxon<td align=right>331.35<td align=right>209.25<td align=right>94.94
-<tr><td>Xalan<td align=right>204.16<td align=right>121.12<td align=right>53.87
-</table>
+<p/><table border="2">
+<tr><th>&#160;</th><th colspan="3">Mean
+</th></tr><tr><th>Engine</th><th>Arithmetic</th><th>Geometric</th><th>Harmonic
+</th></tr><tr><td>Resin</td><td align="right">548.64</td><td align="right">383.67</td><td align="right">196.55
+</td></tr><tr><td>XT</td><td align="right">465.58</td><td align="right">323.85</td><td align="right">162.83
+</td></tr><tr><td>Saxon</td><td align="right">331.35</td><td align="right">209.25</td><td align="right">94.94
+</td></tr><tr><td>Xalan</td><td align="right">204.16</td><td align="right">121.12</td><td align="right">53.87
+</td></tr></table>
 
 <p/>The following graph shows the performance for each test.  The
 units are KB/s.
 
-<p/><ct:img src='xslt-perf.gif'/>
+<p/><ct:img src="xslt-perf.gif"/>
 
-<section title='Resin 2.0.5'>
+<s2 title="Resin 2.0.5">
 
 <pre>
 XSLTMark 2.0 (Feb 28 2001) running on Linux 2.4.14 x86
@@ -141,9 +141,9 @@ Harmonic Mean                                              196.55
 Conformance Score (OK+NOREF+SKIPPED divided by TOTAL)      35/40 = 87.5% 
 </pre>
 
-</section>
+</s2>
 
-<section title='XT'>
+<s2 title="XT">
 
 <pre>
 XSLTMark 2.0 (Feb 28 2001) running on Linux 2.4.14 x86
@@ -203,9 +203,9 @@ Harmonic Mean                                              162.83
 Conformance Score (OK+NOREF+SKIPPED divided by TOTAL)      37/40 = 92.5% 
 </pre>
 
-</section>
+</s2>
 
-<section title='Saxon 6.5'>
+<s2 title="Saxon 6.5">
 
 <pre>
 XSLTMark 2.0 (Feb 28 2001) running on Linux 2.4.14 x86
@@ -265,9 +265,9 @@ Harmonic Mean                                              94.94
 Conformance Score (OK+NOREF+SKIPPED divided by TOTAL)      40/40 = 100%
 </pre>
 
-</section>
+</s2>
 
-<section title='Xalan 2.2 D14'>
+<s2 title="Xalan 2.2 D14">
 
 <pre>
 XSLTMark 2.0 (Feb 28 2001) running on Linux 2.4.14 x86
@@ -327,11 +327,11 @@ Harmonic Mean                                              53.87
 Conformance Score (OK+NOREF+SKIPPED divided by TOTAL)      39/40 = 97.5% 
 </pre>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="Conclusion">
+<s1 title="Conclusion">
 
 Resin's three times performance gain over Xalan and 80% gain
 over Saxon is a significant advantage for web sites using Resin to
@@ -345,6 +345,6 @@ performance will also become more important.  Resin's fast XML and
 XSLT support strengthens Resin's position as a leading Java XML
 application server.
 
-</section>
+</s1>
   </body>
 </document>

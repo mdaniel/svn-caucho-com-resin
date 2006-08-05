@@ -15,15 +15,15 @@
     <summary/>
 
 
-<section title="Configure the /resin-status servlet">
+<s1 title="Configure the /resin-status servlet">
 
 <example title="resin.conf /resin-status configuration">
 &lt;resin xmlns="http://caucho.com/ns/resin"
-       xmlns:resin="http://caucho.com/ns/resin/core">
+       xmlns:resin="http://caucho.com/ns/resin/core"&gt;
 
 ...
 
-&lt;web-app-default>
+&lt;web-app-default&gt;
 
       &lt;servlet-mapping servlet-class='com.caucho.servlets.ResinStatusServlet'&gt;
         &lt;url-pattern&gt;/resin-status&lt;/url-pattern&gt;
@@ -37,14 +37,14 @@
         &lt;/ip-constraint&gt;
       &lt;/security-constraint&gt;
 
-&lt;/web-app-default>
+&lt;/web-app-default&gt;
 
 ...
 
 </example>
-</section>
+</s1>
 
-<section title="Interpreting the proxy cache hit ratio">
+<s1 title="Interpreting the proxy cache hit ratio">
 
 <p>
 The proxy cache is Resin's internal proxy cache (in Resin Pro).
@@ -64,6 +64,6 @@ If you have a low value, you might want to look at your heavily used
 pages to see if you can cache more.
 </p>
 
-</section>
+</s1>
 </body>
 </document>

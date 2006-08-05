@@ -12,19 +12,19 @@
   <body>
     <summary/>
 
-<section title="Burlap EJB Client">
+<s1 title="Burlap EJB Client">
 
 <example title="Resin-EJB with Burlap">
-&lt;web-app>
-  &lt;jndi-link>
-    &lt;jndi-name>java:comp/env/ejb&lt;/jndi-name>
-    &lt;jndi-factory>com.caucho.burlap.BurlapContextFactory&lt;/jndi-factory>
-    &lt;init-param java.naming.provider.url="http://host.com/burlap"/>
-  &lt;/jndi-link>
-&lt;/web-app>
+&lt;web-app&gt;
+  &lt;jndi-link&gt;
+    &lt;jndi-name&gt;java:comp/env/ejb&lt;/jndi-name&gt;
+    &lt;jndi-factory&gt;com.caucho.burlap.BurlapContextFactory&lt;/jndi-factory&gt;
+    &lt;init-param java.naming.provider.url="http://host.com/burlap"/&gt;
+  &lt;/jndi-link&gt;
+&lt;/web-app&gt;
 </example>
 
-<p>Sample client code follows.  The EJBHome lookup is in the <code/init()/>
+<p>Sample client code follows.  The EJBHome lookup is in the <code>init()</code>
 method for efficiency.</p>
 
 <example title="Client Servlet">
@@ -62,7 +62,7 @@ public class ClientServlet extends GenericServlet {
 }
 </example>
 
-</section>
+</s1>
 
   </body>
 </document>

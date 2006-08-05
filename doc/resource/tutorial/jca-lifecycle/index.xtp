@@ -9,7 +9,7 @@
 
   <body>
 <summary/>
-<section title="ResourceAdapter">
+<s1 title="ResourceAdapter">
 
 <p>Many resources can take advantage of the lifecycle events provided
 by the Java Connector Architecture (JCA).  In Resin, any resource
@@ -32,20 +32,20 @@ e.g. when the web-app is destroyed.</p>
 
 <ol>
 <li>The environment is created (server, host, web-app, etc.)
-<li>The resources are created and configured:
+</li><li>The resources are created and configured:
 <ol>
 <li><code>new test.TestResource()</code> is called from that environment
-<li>The configuration setters configure the resource (see <a href="config|init">Bean-style initialization</a>).
-<li>The <code>init()</code> method is called if available (part of Bean-style initialization)</ol>
-<li>The resources are started
+</li><li>The configuration setters configure the resource (see <a href="config|init">Bean-style initialization</a>).
+</li><li>The <code>init()</code> method is called if available (part of Bean-style initialization)</li></ol>
+</li><li>The resources are started
 <ol>
 <li>The <code>start(ctx)</code> method is called for the ResourceAdapters
-</ol>
-<li>The load-on-startup servlets start (for web-app only)
-<li>Requests are now allowed for the environment.
-<li>The environment starts shutting down (web-app, host, server)
-<li>The <code>stop()</code> method is called for any ResourceAdapters
-</ol>
+</li></ol>
+</li><li>The load-on-startup servlets start (for web-app only)
+</li><li>Requests are now allowed for the environment.
+</li><li>The environment starts shutting down (web-app, host, server)
+</li><li>The <code>stop()</code> method is called for any ResourceAdapters
+</li></ol>
 
 <p>The <code>javax.resource.spi.ResourceAdapter</code> has a few more
 methods which our resource does not need.  To avoid cluttering up
@@ -94,10 +94,10 @@ configuration.  Resin detects that <code>TestResource</code> has
 implemented <code>ResourceAdapter</code> and adds the capabilities.</p>
 
 <example title="web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-  &lt;resource jndi-name="jca/test" type="test.TestResource">
-  &lt;/resource>
-&lt;/web-app>
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;resource jndi-name="jca/test" type="test.TestResource"&gt;
+  &lt;/resource&gt;
+&lt;/web-app&gt;
 </example>
 
 <p>The demonstration page is simple.  It just looks up the resource in
@@ -106,16 +106,16 @@ contains the <code>_status</code> value, we actually
 see something useful.</p>
 
 <example title="demo.jsp">
-&lt;%@ page import='javax.naming.InitialContext' %>
-&lt;%= new InitialContext().lookup("java:comp/env/jca/test") %>
+&lt;%@ page import='javax.naming.InitialContext' %&gt;
+&lt;%= new InitialContext().lookup("java:comp/env/jca/test") %&gt;
 </example>
 <results>
 TestResult[started]
 </results>
 
-</section>
+</s1>
 
-<section title="Compatibility">
+<s1 title="Compatibility">
 
 <p>Because the <code>ResourceAdapter</code> interface is part of the
 JCA spec, you can write ResourceAdapters in a portable manner.  So if
@@ -125,6 +125,6 @@ configuration on the other app server would probably be more
 cumbersome and involve creating rar files and XML configuration, but
 that's why you're using Resin.)
 
-</section>
+</p></s1>
   </body>
 </document>

@@ -16,7 +16,7 @@
   <body>
     <summary/>
 
-<section title="Design Goals">
+<s1 title="Design Goals">
 
 <p>Hessian 2 is a compaction of the Hessian protocol.  All
 Hessian 1 codes are understood by Hessian 2.  The extended codes
@@ -36,62 +36,62 @@ following requirements:</p>
 
 <ul>
 <li>It must support XML as a first class object.
-<li>It must not require external IDL or schema definitions; it should be
+</li><li>It must not require external IDL or schema definitions; it should be
 invisible to application writers.
-<li>It must have sufficient power to serialize Java.
-<li>It must have sufficient power to support EJB.
-<li>It must allow non-Java clients to use web services.
-<li>It must allow web services to deployed as a Servlet.
-<li>It must be simple so it can be effectively tested.
-<li>It must be as fast as possible.
-<li>It should support transaction contexts.
-</ul>
+</li><li>It must have sufficient power to serialize Java.
+</li><li>It must have sufficient power to support EJB.
+</li><li>It must allow non-Java clients to use web services.
+</li><li>It must allow web services to deployed as a Servlet.
+</li><li>It must be simple so it can be effectively tested.
+</li><li>It must be as fast as possible.
+</li><li>It should support transaction contexts.
+</li></ul>
 
-</section>
+</s1>
 
-<section title='Serialization'>
+<s1 title="Serialization">
 
 <p>Hessian's object serialization has 9 primitive types:</p>
 
 <ol>
 <li><a href="#boolean">boolean</a>
-<li>32-bit <a href="#int">int</a>
-<li>64-bit <a href="#long">long</a>
-<li>64-bit <a href="#double">double</a>
-<li>64-bit <a href="#date">date</a>
-<li>UTF8-encoded <a href="#string">string</a>
-<li>UTF8-encoded <a href="#xml">xml</a>
-<li>raw <a href="#binary">binary</a> data
-<li><a href="#remote">remote</a> objects
-</ol>
+</li><li>32-bit <a href="#int">int</a>
+</li><li>64-bit <a href="#long">long</a>
+</li><li>64-bit <a href="#double">double</a>
+</li><li>64-bit <a href="#date">date</a>
+</li><li>UTF8-encoded <a href="#string">string</a>
+</li><li>UTF8-encoded <a href="#xml">xml</a>
+</li><li>raw <a href="#binary">binary</a> data
+</li><li><a href="#remote">remote</a> objects
+</li></ol>
 
 <p>It has 2 combining constructs:</p>
 <ol>
 <li><a href="#list">list</a> for lists and arrays
-<li><a href="#map">map</a> for objects and hash tables.
-</ol>
+</li><li><a href="#map">map</a> for objects and hash tables.
+</li></ol>
 
 <p>Finally, it has 2 special contructs:</p>
 <ol>
 <li><a href="#null">null</a> for null values
-<li><a href="#ref">ref</a> for shared and circular object references.
-</ol>
+</li><li><a href="#ref">ref</a> for shared and circular object references.
+</li></ol>
 
-<defun title='null'>
+<s2 title="null" type="defun">
 <p>Null represents a null pointer.</p>
 
-<p>The byte <var/'N'/> represents the null pointer.</p>
+<p>The byte <var>'N'</var> represents the null pointer.</p>
 
-<p><var/null/> values are allowed in place of any <var/string/>, <var/xml/>,
-<var/binary/>, <var/list/>, <var/map/>, or <var/remote/>.</p>
+<p><var>null</var> values are allowed in place of any <var>string</var>, <var>xml</var>,
+<var>binary</var>, <var>list</var>, <var>map</var>, or <var>remote</var>.</p>
 
-<example title='null'>
+<example title="null">
 null ::= N
 </example>
-</defun>
+</s2>
 
-<defun title='boolean'>
-<p>The byte <var/'F'/> represents false and the byte <var/'T'/>
+<s2 title="boolean" type="defun">
+<p>The byte <var>'F'</var> represents false and the byte <var>'T'</var>
 represents true.</p>
 
 <def>
@@ -99,26 +99,26 @@ boolean ::= T
         ::= F
 </def>
 
-<example title='boolean true'>
+<example title="boolean true">
 T
 </example>
 
-</defun>
+</s2>
 
-<defun title='int'>
+<s2 title="int" type="defun">
 <p>A 32-bit signed integer.  An integer is represented by the
-byte <var/'I'/> followed by the 4-bytes of the integer in big-endian
+byte <var>'I'</var> followed by the 4-bytes of the integer in big-endian
 order</p>
 
 <def>
 int ::= I b32 b24 b16 b8
 </def>
 
-<example title='integer 300'>
+<example title="integer 300">
 I x00 x00 x01 x2c
 </example>
 
-<section title="Compact: single octet integers">
+<s3 title="Compact: single octet integers">
 
 <p>Integers between -16 and 31 are represented by a single byte in the
 range <code>x80</code> to <code>xaf</code>.
@@ -132,9 +132,9 @@ int ::= [x80-xaf]
 -1 is represented by <code>x8f</code> and
 17 is represented by <code>xa1</code></p>
 
-</section>
+</s3>
 
-<section title="Compact: two octet integers (byte)">
+<s3 title="Compact: two octet integers (byte)">
 
 <p>Integers between -2048 and 2047 are encoded in two bytes with
 the leading byte in the range <code>xd0</code> to <code>xdf</code>.
@@ -148,9 +148,9 @@ int ::= [xc0-xcf] b1
 -256 is represented by <code>xd7 x00</code> and
 513 is represented by <code>xda x01</code></p>
 
-</section>
+</s3>
 
-<section title="Compact: three octet integers (short)">
+<s3 title="Compact: three octet integers (short)">
 
 <p>Integers between -262144 and 262143 are encoded in three bytes with
 the leading byte in the range <code>x58</code> to <code>x5f</code>.
@@ -164,24 +164,24 @@ int ::= [xd0-xd7] b1 b2
 -65536 is represented by <code>xd3 x00 x00</code> and
 65537 is represented by <code>xd5 x00 x01</code></p>
 
-</section>
+</s3>
 
-</defun>
+</s2>
 
-<defun title='long'>
+<s2 title="long" type="defun">
 <p>A 64-bit signed integer.  An long is represented by the
-byte <var/'L'/> followed by the 8-bytes of the integer in big-endian order
+byte <var>'L'</var> followed by the 8-bytes of the integer in big-endian order
 </p>
 
 <def>
 long ::= L b64 b56 b48 b40 b32 b24 b16 b8
 </def>
 
-<example title='long 300'>
+<example title="long 300">
 L x00 x00 x00 x00 x00 x00 x01 x2c
 </example>
 
-<section title="Compact: single octet longs">
+<s3 title="Compact: single octet longs">
 
 <p>Longs between -8 and 15 are represented by a single byte in the
 range <code>xd8</code> to <code>xef</code>.
@@ -195,9 +195,9 @@ long ::= [xd8-xef]
 -1 is represented by <code>xdf</code> and
 15 is represented by <code>xef</code></p>
 
-</section>
+</s3>
 
-<section title="Compact: two octet longs (byte)">
+<s3 title="Compact: two octet longs (byte)">
 
 <p>Longs between -2048 and 2047 are encoded in two bytes with
 the leading byte in the range <code>xf0</code> to <code>xff</code>.
@@ -211,9 +211,9 @@ long ::= [xf0-xff] b1
 -256 is represented by <code>xf7 x00</code> and
 513 is represented by <code>xfa x01</code></p>
 
-</section>
+</s3>
 
-<section title="Compact: three octet longs (short)">
+<s3 title="Compact: three octet longs (short)">
 
 <p>Longs between -262144 and 262143 are encoded in three bytes with
 the leading byte in the range <code>x38</code> to <code>x3f</code>.
@@ -227,40 +227,40 @@ long ::= [x38-x3f] b1 b2
 -65536 is represented by <code>x3b x00 x00</code> and
 65537 is represented by <code>x3d x00 x01</code></p>
 
-</section>
+</s3>
 
-</defun>
+</s2>
 
-<defun title='double'>
+<s2 title="double" type="defun">
 <p>A 64-bit IEEE floating pointer number.</p>
 
 <def>
 double ::= D b64 b56 b48 b40 b32 b24 b16 b8
 </def>
 
-<example title='double 12.25'>
+<example title="double 12.25">
 D x40 x28 x80 x00 x00 x00 x00 x00
 </example>
 
-</defun>
+</s2>
 
-<defun title='date'>
+<s2 title="date" type="defun">
 <p>Date represented by a 64-bits long of milliseconds since the epoch, GMT.</p>
 
 <def>
 date ::= d b64 b56 b48 b40 b32 b24 b16 b8
 </def>
 
-<example title='2:51:31 May 8, 1998 GMT'>
+<example title="2:51:31 May 8, 1998 GMT">
 d x00 x00 x00 xd0 x4b x92 x84 xb8
 </example>
 
-</defun>
+</s2>
 
-<defun title='string'>
+<s2 title="string" type="defun">
 <p>A 16-bit unicode character string encoded in UTF-8.
-Strings are encoded in chunks.  <var/'S'/> represents the final chunk
-and <var/'s'/> represents any initial chunk.  Each chunk has a 16-bit
+Strings are encoded in chunks.  <var>'S'</var> represents the final chunk
+and <var>'s'</var> represents any initial chunk.  Each chunk has a 16-bit
 length value.</p>
 
 <p>The length is the number of characters, which may be different than
@@ -272,11 +272,11 @@ the number of bytes.</p>
 string ::= (s b16 b8 utf-8-data)* S b16 b8 utf-8-data
 </def>
 
-<example title='"Hello" string'>
+<example title="&quot;Hello&quot; string">
 S x00 x05 hello
 </example>
 
-<section title="Compact: short strings">
+<s3 title="Compact: short strings">
 
 <p>Strings with length less than 15 may be encoded with a single
 length byte [x00-x0f].</p>
@@ -285,19 +285,19 @@ length byte [x00-x0f].</p>
 string ::= [x00-x0f] string-data
 </def>
 
-<example title='"Hello" string'>
+<example title="&quot;Hello&quot; string">
 x05 hello
 </example>
 
-</section>
+</s3>
 
-</defun>
+</s2>
 
-<defun title='xml'>
+<s2 title="xml" type="defun">
 <p>An XML document encoded as a 16-bit unicode character
 string encoded in UTF-8.
-XML data is encoded in chunks.  <var/'X'/> represents the final chunk
-and <var/'x'/> represents any initial chunk.</p>
+XML data is encoded in chunks.  <var>'X'</var> represents the final chunk
+and <var>'x'</var> represents any initial chunk.</p>
 
 <p>Each chunk has a 16-bit
 length value.  The length is the number of characters, which may
@@ -307,30 +307,30 @@ be different than the number of bytes.</p>
 xml ::= (x b16 b8 utf-8-data)* X b16 b8 utf-8-data
 </def>
 
-<example title='trivial XML document'>
-X x00 x10 &lt;top>hello&lt;/top>
+<example title="trivial XML document">
+X x00 x10 &lt;top&gt;hello&lt;/top&gt;
 </example>
 
 <note>Because this document does not define the language mapping,
-implementations are free to return a string when reading an <var/xml/>
+implementations are free to return a string when reading an <var>xml</var>
 entity.</note>
 
-</defun>
+</s2>
 
-<defun title='binary'>
+<s2 title="binary" type="defun">
 <p>A binary value.</p>
 
-<p>Binary data is encoded in chunks.  <var/'B'/> represents the final chunk
-and <var/'b'/> represents any initial chunk.  Each chunk has a 16-bit
+<p>Binary data is encoded in chunks.  <var>'B'</var> represents the final chunk
+and <var>'b'</var> represents any initial chunk.  Each chunk has a 16-bit
 length value.</p>
 
 <def>
 binary ::= (b b16 b8 binary-data)* B b16 b8 binary-data
 </def>
 
-</defun>
+</s2>
 
-<defun title='list'>
+<s2 title="list" type="defun">
 <p>An ordered list, like an array.  All lists have a type string,
 a length, a list of objects, and a trailing 'z'.
 The type string may be an arbitrary UTF-8 string understood
@@ -339,17 +339,17 @@ The length may be -1 to indicate that the list is variable length.
 </p>
 
 <def>
-list ::= V <var/type/>? <var/length/>? <var/object/>* z
+list ::= V <var>type</var>? <var>length</var>? <var>object</var>* z
 </def>
 
-<p>Each <var/list/> item is added to the reference list to handle
+<p>Each <var>list</var> item is added to the reference list to handle
 shared and circular elements.  See the
-<var/ref/> element.</p>
+<var>ref</var> element.</p>
 
-<p>Any parser expecting a <var/list/> must also accept a <var/null/>
-or a shared <var/ref/>.</p>
+<p>Any parser expecting a <var>list</var> must also accept a <var>null</var>
+or a shared <var>ref</var>.</p>
 
-<results title='serialization of a Java int[] = {0, 1}'>
+<results title="serialization of a Java int[] = {0, 1}">
 V t x00 x04 [int
   l x00 x00 x00 x02
   I x00 x00 x00 x00
@@ -357,21 +357,21 @@ V t x00 x04 [int
   z
 </results>
 
-<results title='anonymous variable-length list = {0, "foobar"}'>
+<results title="anonymous variable-length list = {0, &quot;foobar&quot;}">
 V I x00 x00 x00 x00
   S x00 x06 foobar
   z
 </results>
 
-<note>The valid values of <var/type/> are not specified in this
+<note>The valid values of <var>type</var> are not specified in this
 document and may depend on the specific application.  For example, a
-Java EJB server which exposes an Hessian interface can use the <var/type/>
+Java EJB server which exposes an Hessian interface can use the <var>type</var>
 information to instantiate the specific array type.
-On the other hand, a Perl server would likely ignore the contents of <var/type/>
+On the other hand, a Perl server would likely ignore the contents of <var>type</var>
 entirely and create a generic array.
 </note>
 
-<section title="Compact: repeated list">
+<s3 title="Compact: repeated list">
 
 <p>Hessian 2.0 allows a compact form of the list for successive lists of
 the same type where the length is known beforehand.
@@ -387,29 +387,29 @@ V t x00 x04 [int u x02 x90 x91 z
 v x01 x02 x90 x91
 </example>
 
-</section>
+</s3>
 
-</defun>
+</s2>
 
-<defun title='map'>
-<p>Represents serialized objects and Maps. The <var/type/>
+<s2 title="map" type="defun">
+<p>Represents serialized objects and Maps. The <var>type</var>
 element describes the type of the map.  Objects are represented by a
-map from field names to their values and <var/type/> is the class
+map from field names to their values and <var>type</var> is the class
 of the object itself.</p>
 
 <def>
-map ::= M t b16 b8 type-string (<var/object/>, <var/object/>)* z
+map ::= M t b16 b8 type-string (<var>object</var>, <var>object</var>)* z
 </def>
 
-<p>The <var/type/> may be empty, i.e. a zero length.  The parser is
+<p>The <var>type</var> may be empty, i.e. a zero length.  The parser is
 responsible for choosing a type if one is not specified.
 For objects, unrecognized keys will be ignored.</p>
 
-<p>Each <var/map/> is added to the reference list.  Any time the
-parser expects a <var/map/>, it must also be able to support a
-<var/null/> or a <var/ref/>.</p>
+<p>Each <var>map</var> is added to the reference list.  Any time the
+parser expects a <var>map</var>, it must also be able to support a
+<var>null</var> or a <var>ref</var>.</p>
 
-<example title='Serialization of a Java Object'>
+<example title="Serialization of a Java Object">
 public class Car implements Serializable {
   String model = "Beetle";
   String color = "aquamarine";
@@ -429,7 +429,7 @@ M t x00 x13 com.caucho.test.Car
   z
 </results>
 
-<example title='A sparse array'>
+<example title="A sparse array">
 map = new HashMap();
 map.put(new Integer(1), "fee");
 map.put(new Integer(16), "fie");
@@ -448,10 +448,10 @@ M I x00 x00 x00 x01
   z
 </results>
 
-<note>The <var/type/> is chosen by the service.  Often it may be the
+<note>The <var>type</var> is chosen by the service.  Often it may be the
 Java classname describing the service.</note>
 
-<section title="Compact: object definition and instantiation">
+<s3 title="Compact: object definition and instantiation">
 
 <p>Hessian 2.0 has a compact object form where the field names
 are only serialized once.  Following objects only need to serialize
@@ -474,7 +474,7 @@ definition.</p>
 map ::= 'o' <var>int</var> <var>object</var>*
 </def>
 
-<example title='Object serialization'>
+<example title="Object serialization">
 class Car {
   String color;
   String model;
@@ -496,38 +496,38 @@ o x91               -- second object x91 = int(1)
   x05 civic
 </results>
 
-</section>
+</s3>
 
-</defun>
+</s2>
 
-<defun title='ref'>
-<p>An integer referring to a previous <var/list/> or <var/map/>
-instance.  As each <var/list/> or <var/map/> is read from the
+<s2 title="ref" type="defun">
+<p>An integer referring to a previous <var>list</var> or <var>map</var>
+instance.  As each <var>list</var> or <var>map</var> is read from the
 input stream, it is assigned the integer position in the stream,
-i.e. the first <var/list/> or <var/map/> is '0', the next is '1', etc.
-A later <var/ref/> can then use the previous object.  Writers are not
-required to generate <var/refs/>, but parsers must be able to recognize them.
+i.e. the first <var>list</var> or <var>map</var> is '0', the next is '1', etc.
+A later <var>ref</var> can then use the previous object.  Writers are not
+required to generate <var>refs</var>, but parsers must be able to recognize them.
 </p>
 
 <def>
 ref ::= R b32 b24 b16 b8
 </def>
 
-<p><var/ref/> can refer to incompletely-read items.  For example, a
+<p><var>ref</var> can refer to incompletely-read items.  For example, a
 circular linked-list will refer to the first link before the entire list
 has been read.</p>
 
-<p>A possible implementation would add each <var/map/> and <var/list/> to an
-array as it's read.  The <var/ref/> will return the corresponding
+<p>A possible implementation would add each <var>map</var> and <var>list</var> to an
+array as it's read.  The <var>ref</var> will return the corresponding
 object from the array.  To support circular structures, the
-implementation would store the <var/map/> or <var/list/> immediately,
+implementation would store the <var>map</var> or <var>list</var> immediately,
 before filling in the object's contents.</p>
 
-<p>Each &lt;list> or &lt;array> is stored into an array as it is
-parsed.  &lt;ref> selects one of the stored objects.  The first
+<p>Each &lt;list&gt; or &lt;array&gt; is stored into an array as it is
+parsed.  &lt;ref&gt; selects one of the stored objects.  The first
 object is numbered '0'.</p>
 
-<example title='circular list'>
+<example title="circular list">
 list = new LinkedList();
 list.head = 1;
 list.tail = list;
@@ -541,30 +541,30 @@ M t x00 x0a LinkedList
   z
 </results>
 
-<note><var/ref/> only refers to <var/list/> and <var/map/> elements.
-<var/string/> and <var/binary/>, in particular, will only share
-references if they're wrapped in a <var/list/> or <var/map/>.</note>
+<note><var>ref</var> only refers to <var>list</var> and <var>map</var> elements.
+<var>string</var> and <var>binary</var>, in particular, will only share
+references if they're wrapped in a <var>list</var> or <var>map</var>.</note>
 
-</defun>
+</s2>
 
-<defun title='remote'>
+<s2 title="remote" type="defun">
 <p>A reference to a remote object.  The remote has a
-<var/type/> and a utf-8 string representing the object's URL.</p>
+<var>type</var> and a utf-8 string representing the object's URL.</p>
 
 <def>
 remote ::= r t b16 b8 type-name S b16 b8 url
 </def>
 
-<results title='EJB Session Reference'>
+<results title="EJB Session Reference">
 r t x00 x0c test.TestObj
   S x00 x24 http://slytherin/ejbhome?id=69Xm8-zW
 </results>
 
-</defun>
+</s2>
 
-</section>
+</s1>
 
-<section title='Call'>
+<s1 title="Call">
 
 <p>A Hessian call invokes a method on an object with an argument
 list.  The object is specified by the container, e.g. for a HTTP
@@ -572,7 +572,7 @@ request, it's the HTTP URL.  The arguments are
 specified by Hessian serialization.</p>
 
 <def>
-call ::= c x01 x00 <var/header/>* m b16 b8 method-string (<var/object/>)* z
+call ::= c x01 x00 <var>header</var>* m b16 b8 method-string (<var>object</var>)* z
 </def>
 
 <example title="obj.add2(2,3) call">
@@ -589,7 +589,7 @@ r x01 x00
   z
 </example>
 
-<s3 title='Object Naming (non-normative)'>
+<s3 title="Object Naming (non-normative)">
 
 <p>
 URLs are flexible
@@ -616,22 +616,22 @@ object references through the factory methods.</p>
 <p>As an example, the following format is used for EJB:</p>
 
 <def>
-http://hostname/hessian<var//ejb-name/>?id=<var/object-id/>
+http://hostname/hessian<var>/ejb-name</var>?id=<var>object-id</var>
 </def>
 
-<p><var/http://hostname/hessian/> identifies the EJB container.
+<p><var>http://hostname/hessian</var> identifies the EJB container.
 In Resin-EJB, this will refer to the EJB Servlet. 
 "/hessian" is the servlet prefix (url-pattern.)  HTTP is just used as
 an example; Hessian does not require the use of HTTP.
 </p>
 
-<p><var//ejb-name/>, the path info of the request, identifies the EJB name,
+<p><var>/ejb-name</var>, the path info of the request, identifies the EJB name,
 specifically the home interface.  EJB containers can contain several
-entity and session beans, each with its own EJB home.  The <var/ejb-name/>
+entity and session beans, each with its own EJB home.  The <var>ejb-name</var>
 corresponds to the ejb-name in the deployment descriptor.
 </p>
 
-<p><var/object-id/> identifies the specific object.  For entity beans, the
+<p><var>object-id</var> identifies the specific object.  For entity beans, the
 object-id encodes the primary key.  For session beans, the object-id encodes
 a unique session identifier.  Home interfaces have no ";ejbid=..." portion.
 </p>
@@ -654,7 +654,7 @@ http://localhost/hessian/my-session-bean?ejbid=M9Zs1Zm
 
 </s3>
 
-<s3 title='Methods and Overloading'>
+<s3 title="Methods and Overloading">
 
 <p>Method names must be unique.  Two styles of overloading are
 supported: overloading by number of argumetns and overloading
@@ -662,7 +662,7 @@ by argument types.  Overloading is permitted by
 encoding the argument types in the method names.  The types of
 the actual arguments must not be used to select the methods.</p>
 
-<p>Method names beginning with <var/_hessian_/> are reserved.</p>
+<p>Method names beginning with <var>_hessian_</var> are reserved.</p>
 
 <p>Servers should accept calls with either the mangled method name
 or the unmangled method name.  Clients should send the mangled method name.</p>
@@ -678,7 +678,7 @@ or the unmangled method name.  Clients should send the mangled method name.</p>
 
 </s3>
 
-<s3 title='Arguments'>
+<s3 title="Arguments">
 
 <p>Arguments immediately follow the method in positional order.
 Argument values use Hessian's serialization.</p>
@@ -709,7 +709,7 @@ may take advantage of the expected type to improve performance.</p>
 
 </s3>
 
-<s3 title='Headers'>
+<s3 title="Headers">
 
 <p>Headers are (string, object) pairs that preceed the arguments.</p>
 
@@ -730,43 +730,43 @@ c x01 x00
 
 </s3>
 
-<s3 title='Versioning'>
+<s3 title="Versioning">
 
 <p>The call and response tags include a major and minor byte.  The
 current version is 1.0.</p>
 
 </s3>
 
-</section>
+</s1>
 
-<section title='Reply'>
+<s1 title="Reply">
 
 <def>
-valid-reply ::= r x01 x00 <var/header/>* <var/object/> z
-fault-reply ::= r x01 x00 <var/header/>* <var/fault/> z
+valid-reply ::= r x01 x00 <var>header</var>* <var>object</var> z
+fault-reply ::= r x01 x00 <var>header</var>* <var>fault</var> z
 </def>
 
-<s3 title='Value'>
+<s3 title="Value">
   
 <p>A successful reply returns a single value and possibly
 some header information.  </p>
   
-<example title='integer 5 result'>
+<example title="integer 5 result">
 r x01 x00
   I x00 x00 x00 x05
   z
 </example>
 
 </s3>
-<s3 title='Faults'>
-<p>Failed calls return a <var/fault/>.</p>
+<s3 title="Faults">
+<p>Failed calls return a <var>fault</var>.</p>
 
 <p>Each fault has a number of informative fields, expressed like
-&lt;map> entries.  The defined fields are <var/code/>, <var/message/>,
-and <var/detail/>. <var/code/> is one of a short list of strings
-defined below.  <var/message/> is a user-readable message.
-<var/detail/> is an object representing the exception.  In Java,
-<var/detail/> will be a serialized exception.</p>
+&lt;map&gt; entries.  The defined fields are <var>code</var>, <var>message</var>,
+and <var>detail</var>. <var>code</var> is one of a short list of strings
+defined below.  <var>message</var> is a user-readable message.
+<var>detail</var> is an object representing the exception.  In Java,
+<var>detail</var> will be a serialized exception.</p>
 
 <results title="Remote Call throws FileNotFoundException">
 r x01 x00
@@ -784,34 +784,34 @@ r x01 x00
 </results>
 
 <deftable>
-<tr><td>ProtocolException<td>The Hessian request has some sort of
+<tr><td>ProtocolException</td><td>The Hessian request has some sort of
 syntactic error.
-<tr><td>NoSuchObjectException<td>The requested object does not exist.
-<tr><td>NoSuchMethodException<td>The requested method does not exist.
-<tr><td>RequireHeaderException<td>A required header was not understood
+</td></tr><tr><td>NoSuchObjectException</td><td>The requested object does not exist.
+</td></tr><tr><td>NoSuchMethodException</td><td>The requested method does not exist.
+</td></tr><tr><td>RequireHeaderException</td><td>A required header was not understood
 by the server.
-<tr><td>ServiceException<td>The called method threw an exception.
-</deftable>
+</td></tr><tr><td>ServiceException</td><td>The called method threw an exception.
+</td></tr></deftable>
 
 </s3>
 
-</section>
+</s1>
 
-<section title='Metadata (non-normative)'>
+<s1 title="Metadata (non-normative)">
 
 <p>Metadata is handled by special method calls, methods beginning
-with <var/_hessian_/>.</p>
+with <var>_hessian_</var>.</p>
 
-<p><var/_hessian_getAttribute(String&nbsp;key)/> returns a string.
+<p><var>_hessian_getAttribute(String&#160;key)</var> returns a string.
 The following attributes are predefined by this spec:</p>
 
 <deftable>
-<tr><th>attribute<th>meaning
-<tr><td>java.api.class<td>Java interface for this URL
-<tr><td>java.home.class<td>Java interface for this service
-<tr><td>java.object.class<td>Java interface for a service object
-<tr><td>java.ejb.primary.key.class<td>Java EJB primary key class
-</deftable>
+<tr><th>attribute</th><th>meaning
+</th></tr><tr><td>java.api.class</td><td>Java interface for this URL
+</td></tr><tr><td>java.home.class</td><td>Java interface for this service
+</td></tr><tr><td>java.object.class</td><td>Java interface for a service object
+</td></tr><tr><td>java.ejb.primary.key.class</td><td>Java EJB primary key class
+</td></tr></deftable>
 
 <p>"java.api.class" returns the client proxy's Java API class
 for the current URL.  "java.home.class" returns the API class for the
@@ -822,27 +822,27 @@ returns the API class for object instances.</p>
 non-factory services, all three attributes will return the
 same class name.</p>
 
-<section title="Obsolete meta data properties">
+<s2 title="Obsolete meta data properties">
 
 <deftable>
-<tr><th>attribute<th>meaning
-<tr><td>home-class<td>Java class for the home interface.
-<tr><td>remote-class<td>Java class for the object interface.
-<tr><td>primary-key-class<td>Java class for the primary key.
-</deftable>
+<tr><th>attribute</th><th>meaning
+</th></tr><tr><td>home-class</td><td>Java class for the home interface.
+</td></tr><tr><td>remote-class</td><td>Java class for the object interface.
+</td></tr><tr><td>primary-key-class</td><td>Java class for the primary key.
+</td></tr></deftable>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title='Micro Hessian'>
+<s1 title="Micro Hessian">
 
 <p>A "Micro Hessian" implementation may omit support for the "double" type.
 </p>
 
-</section>
+</s1>
 
-<section title='Formal Definitions'>
+<s1 title="Formal Definitions">
 
 <def>
 <var>top</var>     ::= <var>call</var>
@@ -853,33 +853,33 @@ same class name.</p>
 <var>reply</var>   ::= 'r' x02 x00 <var>header</var>* <var>object</var> 'z'
         ::= 'r' x01 x00 <var>header</var>* <var>fault</var> 'z'
 
-<var/object/>  ::= <var/null/>
-        ::= <var/boolean/>
-        ::= <var/int/>
-        ::= <var/long/>
-        ::= <var/double/>
-        ::= <var/date/>
-        ::= <var/string/>
-        ::= <var/xml/>
-        ::= <var/binary/>
-        ::= <var/remote/>
-        ::= <var/ref/>
-        ::= <var/list/>
-        ::= <var/map/>
+<var>object</var>  ::= <var>null</var>
+        ::= <var>boolean</var>
+        ::= <var>int</var>
+        ::= <var>long</var>
+        ::= <var>double</var>
+        ::= <var>date</var>
+        ::= <var>string</var>
+        ::= <var>xml</var>
+        ::= <var>binary</var>
+        ::= <var>remote</var>
+        ::= <var>ref</var>
+        ::= <var>list</var>
+        ::= <var>map</var>
 
 <var>header</var>  ::= H b16 b8 header-string <var>object</var>
 <var>method</var>  ::= m b16 b8 method-string
 
-<var>fault</var>   ::= f (<var/object/> <var/object/>)* z
+<var>fault</var>   ::= f (<var>object</var> <var>object</var>)* z
 
-<var>list</var>    ::= 'V' <var/type/>? <var/length/>? <var/object/>* z
+<var>list</var>    ::= 'V' <var>type</var>? <var>length</var>? <var>object</var>* z
         ::= 'v' <var>int</var> <var>int</var> <var>object</var>*
 
 <var>map</var>     ::= 'M' <var>type</var>? (<var>object</var> <var>object</var>)* 'z'
         ::= 'O' <var>int</var> type-string <var>int</var> <var>string</var>* <var>object</var>*
         ::= 'o' <var>int</var> <var>object</var>*
 
-<var>remote</var>  ::= 'r' <var/type/>? <var/string/>
+<var>remote</var>  ::= 'r' <var>type</var>? <var>string</var>
 
 <var>type</var>    ::= t b16 b8 type-string
 
@@ -916,11 +916,11 @@ same class name.</p>
 <var>ref</var>     ::= 'R' b32 b24 b16 b8
 </def>
 
-</section>
+</s1>
 
-<section title="Copyright and Licensing">
+<s1 title="Copyright and Licensing">
 
-&copy; Copyright 2000-2004 Caucho Technology, Inc. All Rights Reserved.
+© Copyright 2000-2004 Caucho Technology, Inc. All Rights Reserved.
 
 <p>Any party may implement this protocol for any purpose without royalty
 or license fee, provided that the implementation conforms to this
@@ -943,32 +943,32 @@ OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF
 THE INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED
 WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.</p>
 
-</section>
+</s1>
 
-<section title="Changes">
+<s1 title="Changes">
 
 <s3 title="changes in 1.0.2">
 
 <ul>
 <li>Clarified that length of XML and strings is in characters (Petr Gladkikh)
-</ul>
+</li></ul>
 </s3>
 
 <s3 title="changes in 1.0">
 
 <ul>
 <li>Removed unidirectional messages.
-</ul>
+</li></ul>
 </s3>
 
 <s3 title="changes in V3">
 
 <ul>
 <li>Added unidirectional messages
-<li>Removed 'v' from reply
-<li>changed length code to 'l'
-<li>made <var/type/> and <var/length/> optional
-</ul>
+</li><li>Removed 'v' from reply
+</li><li>changed length code to 'l'
+</li><li>made <var>type</var> and <var>length</var> optional
+</li></ul>
 
 </s3>
 
@@ -976,11 +976,11 @@ WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.</p>
 
 <ul>
 <li>EJB naming: clarified examples especially for session beans (John Mitchell)
-<li>Formal definitions: clarified grammar and added missing object (John Mitchell)
-<li>Formal definitions: initial binary should use 'b' (John Mitchell)
-</ul>
+</li><li>Formal definitions: clarified grammar and added missing object (John Mitchell)
+</li><li>Formal definitions: initial binary should use 'b' (John Mitchell)
+</li></ul>
 
 </s3>
 
-</section>
-</document>
+</s1>
+</body></document>

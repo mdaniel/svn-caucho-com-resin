@@ -22,7 +22,7 @@
   <body>
     <summary/>
 
-    <section title="JSTL support in Resin is enabled by default">
+    <s1 title="JSTL support in Resin is enabled by default">
       <p>Because Resin automatically adds JSTL support, applications can
         start using JSTL by adding the taglib to the JSP without
         additional configuration:</p>
@@ -51,9 +51,9 @@
         when using Resin in combination with another JSTL implementation,
         please report the specific tag and tag usage for JSTL bugs.</p>
 
-    </section>
+    </s1>
 
-    <section title="Velocity syntax maps to JSTL core">
+    <s1 title="Velocity syntax maps to JSTL core">
 
       <p>Resin's experimental 
         <a href="doc|jsp|velocity">Velocity-style syntax</a> now maps
@@ -61,9 +61,9 @@
         Velocity-style syntax.</p>
 
       <p>Velocity-style syntax can either be enabled on a per-JSP page with
-        <var/velocity='true'/> or in the web-app with the &lt;jsp> tag:</p>
+        <var>velocity='true'</var> or in the web-app with the &lt;jsp&gt; tag:</p>
       
-      <example title='Enabling velocity for a web-app'>
+      <example title="Enabling velocity for a web-app">
 &lt;web-app&gt;
   &lt;jsp velocity='true'/&gt;
   ...
@@ -72,7 +72,7 @@
 
       <p>An example use of the Velocity-style syntax would be:</p>
 
-      <example title='Velocity style'>
+      <example title="Velocity style">
 &lt;jsp:directive.page velocity='true'/&gt;
 #{
 int count;
@@ -107,8 +107,7 @@ int count;
 &lt;/c:otherwise&gt;
 &lt;/c:choose&gt;
       </example>
-    </section>
+    </s1>
 
   </body>
 </document>
-  

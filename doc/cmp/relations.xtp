@@ -11,7 +11,7 @@
 <p>This section lists several of the common relation patterns along with
 their configuration.</p>
 
-<section title="n-1 undirectional (Link)">
+<s1 title="n-1 undirectional (Link)">
 
 <p>The easiest relation is the one-way link.  In this example, each
 student has a favorite Quidditch team (a wizard sport.)  The link
@@ -51,45 +51,45 @@ public interface QuidditchTeam extends EJBLocalObject {
 </example>
 
 <example title="n-1 EJB deployment descriptor">
-&lt;relationships>
-  &lt;ejb-relation>
-    &lt;ejb-relationship-role>
-      &lt;relationship-role-source>
-        &lt;ejb-name><var/students/>&lt;/ejb-name>
-      &lt;/relationship-role-source>
+&lt;relationships&gt;
+  &lt;ejb-relation&gt;
+    &lt;ejb-relationship-role&gt;
+      &lt;relationship-role-source&gt;
+        &lt;ejb-name&gt;<var>students</var>&lt;/ejb-name&gt;
+      &lt;/relationship-role-source&gt;
 
-      &lt;cmr-field>
-        &lt;cmr-field-name><var/quidditchTeam/>&lt;/cmr-field-name>
-      &lt;/cmr-field>
+      &lt;cmr-field&gt;
+        &lt;cmr-field-name&gt;<var>quidditchTeam</var>&lt;/cmr-field-name&gt;
+      &lt;/cmr-field&gt;
 
-      &lt;multiplicity>Many&lt;/multiplicity>
-    &lt;/ejb-relationship-role>
+      &lt;multiplicity&gt;Many&lt;/multiplicity&gt;
+    &lt;/ejb-relationship-role&gt;
 
-    &lt;ejb-relationship-role>
-      &lt;relationship-role-source>
-         &lt;ejb-name><var/quidditch_teams/>&lt;/ejb-name>
-      &lt;/relationship-role-source>
+    &lt;ejb-relationship-role&gt;
+      &lt;relationship-role-source&gt;
+         &lt;ejb-name&gt;<var>quidditch_teams</var>&lt;/ejb-name&gt;
+      &lt;/relationship-role-source&gt;
 
-      &lt;multiplicity>One&lt;/multiplicity>
-    &lt;/ejb-relationship-role>
-  &lt;/ejb-relation>
-&lt;/relationships>
+      &lt;multiplicity&gt;One&lt;/multiplicity&gt;
+    &lt;/ejb-relationship-role&gt;
+  &lt;/ejb-relation&gt;
+&lt;/relationships&gt;
 </example>
 
 <example title="n-1 relation (short form)">
-&lt;ejb-relation>
-  &lt;source-ejb><var/students/>&lt;/source-ejb>
-  &lt;source-field><var/quidditchTeam/>&lt;/source-field>
-  &lt;source-multiplicity><var/Many/>&lt;/source-multiplicity>
+&lt;ejb-relation&gt;
+  &lt;source-ejb&gt;<var>students</var>&lt;/source-ejb&gt;
+  &lt;source-field&gt;<var>quidditchTeam</var>&lt;/source-field&gt;
+  &lt;source-multiplicity&gt;<var>Many</var>&lt;/source-multiplicity&gt;
 
-  &lt;target-ejb><var/quidditch_teams/>&lt;/target-ejb>
-  &lt;target-multiplicity><var/One/>&lt;/target-multiplicity>
-&lt;/ejb-relation>
+  &lt;target-ejb&gt;<var>quidditch_teams</var>&lt;/target-ejb&gt;
+  &lt;target-multiplicity&gt;<var>One</var>&lt;/target-multiplicity&gt;
+&lt;/ejb-relation&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="1-1 Bidirectional (Pair)">
+<s1 title="1-1 Bidirectional (Pair)">
 
 <example title="1-1 SQL schema">
 CREATE TABLE courses (
@@ -126,50 +126,50 @@ public interface Teacher extends EJBLocalObject {
 </example>
 
 <example title="1-1 deployment descriptor">
-&lt;relationships>
-  &lt;ejb-relation>
-    &lt;ejb-relationship-role>
-      &lt;relationship-role-source>
-        &lt;ejb-name><var/teachers/>&lt;/ejb-name>
-      &lt;/relationship-role-source>
+&lt;relationships&gt;
+  &lt;ejb-relation&gt;
+    &lt;ejb-relationship-role&gt;
+      &lt;relationship-role-source&gt;
+        &lt;ejb-name&gt;<var>teachers</var>&lt;/ejb-name&gt;
+      &lt;/relationship-role-source&gt;
 
-      &lt;cmr-field>
-        &lt;cmr-field-name><var/course/>&lt;/cmr-field-name>
-      &lt;/cmr-field>
+      &lt;cmr-field&gt;
+        &lt;cmr-field-name&gt;<var>course</var>&lt;/cmr-field-name&gt;
+      &lt;/cmr-field&gt;
 
-      &lt;multiplicity>One&lt;/multiplicity>
-    &lt;/ejb-relationship-role>
+      &lt;multiplicity&gt;One&lt;/multiplicity&gt;
+    &lt;/ejb-relationship-role&gt;
 
-    &lt;ejb-relationship-role>
-      &lt;relationship-role-source>
-         &lt;ejb-name><var/courses/>&lt;/ejb-name>
-      &lt;/relationship-role-source>
+    &lt;ejb-relationship-role&gt;
+      &lt;relationship-role-source&gt;
+         &lt;ejb-name&gt;<var>courses</var>&lt;/ejb-name&gt;
+      &lt;/relationship-role-source&gt;
 
-      &lt;cmr-field>
-        &lt;cmr-field-name><var/teacher/>&lt;/cmr-field-name>
-      &lt;/cmr-field>
+      &lt;cmr-field&gt;
+        &lt;cmr-field-name&gt;<var>teacher</var>&lt;/cmr-field-name&gt;
+      &lt;/cmr-field&gt;
 
-      &lt;multiplicity>One&lt;/multiplicity>
-    &lt;/ejb-relationship-role>
-  &lt;/ejb-relation>
-&lt;/relationships>
+      &lt;multiplicity&gt;One&lt;/multiplicity&gt;
+    &lt;/ejb-relationship-role&gt;
+  &lt;/ejb-relation&gt;
+&lt;/relationships&gt;
 </example>
 
 <example title="1-1 relation (short form)">
-&lt;ejb-relation>
-  &lt;source-ejb><var/teachers/>&lt;/source-ejb>
-  &lt;source-field><var/course/>&lt;/source-field>
-  &lt;source-multiplicity><var/One/>&lt;/source-multiplicity>
+&lt;ejb-relation&gt;
+  &lt;source-ejb&gt;<var>teachers</var>&lt;/source-ejb&gt;
+  &lt;source-field&gt;<var>course</var>&lt;/source-field&gt;
+  &lt;source-multiplicity&gt;<var>One</var>&lt;/source-multiplicity&gt;
 
-  &lt;target-ejb><var/courses/>&lt;/target-ejb>
-  &lt;target-field><var/teacher/>&lt;/target-field>
-  &lt;target-multiplicity><var/One/>&lt;/target-multiplicity>
-&lt;/ejb-relation>
+  &lt;target-ejb&gt;<var>courses</var>&lt;/target-ejb&gt;
+  &lt;target-field&gt;<var>teacher</var>&lt;/target-field&gt;
+  &lt;target-multiplicity&gt;<var>One</var>&lt;/target-multiplicity&gt;
+&lt;/ejb-relation&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="1-n Bidirectional (Container)">
+<s1 title="1-n Bidirectional (Container)">
 
 <p>The container relation is possibly the most common relation.  It's more
 fully described in the <a href="tutorial/cmp-one2many/index.xtp">one to many example</a>.</p>
@@ -215,50 +215,50 @@ public interface Student extends EJBLocalObject {
 </example>
 
 <example title="1-n deployment descriptor">
-&lt;relationships>
-  &lt;ejb-relation>
-    &lt;ejb-relationship-role>
-      &lt;relationship-role-source>
-        &lt;ejb-name><var/dorms/>&lt;/ejb-name>
-      &lt;/relationship-role-source>
+&lt;relationships&gt;
+  &lt;ejb-relation&gt;
+    &lt;ejb-relationship-role&gt;
+      &lt;relationship-role-source&gt;
+        &lt;ejb-name&gt;<var>dorms</var>&lt;/ejb-name&gt;
+      &lt;/relationship-role-source&gt;
 
-      &lt;cmr-field>
-        &lt;cmr-field-name><var/students/>&lt;/cmr-field-name>
-      &lt;/cmr-field>
+      &lt;cmr-field&gt;
+        &lt;cmr-field-name&gt;<var>students</var>&lt;/cmr-field-name&gt;
+      &lt;/cmr-field&gt;
 
-      &lt;multiplicity>One&lt;/multiplicity>
-    &lt;/ejb-relationship-role>
+      &lt;multiplicity&gt;One&lt;/multiplicity&gt;
+    &lt;/ejb-relationship-role&gt;
 
-    &lt;ejb-relationship-role>
-      &lt;relationship-role-source>
-         &lt;ejb-name><var/students/>&lt;/ejb-name>
-      &lt;/relationship-role-source>
+    &lt;ejb-relationship-role&gt;
+      &lt;relationship-role-source&gt;
+         &lt;ejb-name&gt;<var>students</var>&lt;/ejb-name&gt;
+      &lt;/relationship-role-source&gt;
 
-      &lt;cmr-field>
-        &lt;cmr-field-name><var/dorm/>&lt;/cmr-field-name>
-      &lt;/cmr-field>
+      &lt;cmr-field&gt;
+        &lt;cmr-field-name&gt;<var>dorm</var>&lt;/cmr-field-name&gt;
+      &lt;/cmr-field&gt;
 
-      &lt;multiplicity>Many&lt;/multiplicity>
-    &lt;/ejb-relationship-role>
-  &lt;/ejb-relation>
-&lt;/relationships>
+      &lt;multiplicity&gt;Many&lt;/multiplicity&gt;
+    &lt;/ejb-relationship-role&gt;
+  &lt;/ejb-relation&gt;
+&lt;/relationships&gt;
 </example>
 
 <example title="1-n relation (short form)">
-&lt;ejb-relation>
-  &lt;source-ejb><var/dorms/>&lt;/source-ejb>
-  &lt;source-field><var/students/>&lt;/source-field>
-  &lt;source-multiplicity><var/One/>&lt;/source-multiplicity>
+&lt;ejb-relation&gt;
+  &lt;source-ejb&gt;<var>dorms</var>&lt;/source-ejb&gt;
+  &lt;source-field&gt;<var>students</var>&lt;/source-field&gt;
+  &lt;source-multiplicity&gt;<var>One</var>&lt;/source-multiplicity&gt;
 
-  &lt;target-ejb><var/students/>&lt;/target-ejb>
-  &lt;target-field><var/dorm/>&lt;/target-field>
-  &lt;target-multiplicity><var/Many/>&lt;/target-multiplicity>
-&lt;/ejb-relation>
+  &lt;target-ejb&gt;<var>students</var>&lt;/target-ejb&gt;
+  &lt;target-field&gt;<var>dorm</var>&lt;/target-field&gt;
+  &lt;target-multiplicity&gt;<var>Many</var>&lt;/target-multiplicity&gt;
+&lt;/ejb-relation&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="1-n uni-directional (Container)">
+<s1 title="1-n uni-directional (Container)">
 
 <example title="1-n database schema">
 CREATE TABLE dorms (
@@ -294,49 +294,49 @@ public interface Student extends EJBLocalObject {
 </example>
 
 <example title="1-n deployment descriptor">
-&lt;relationships>
-  &lt;ejb-relation>
-    &lt;ejb-relationship-name>student_dorm_map&lt;/ejb-relationship-name>
+&lt;relationships&gt;
+  &lt;ejb-relation&gt;
+    &lt;ejb-relationship-name&gt;student_dorm_map&lt;/ejb-relationship-name&gt;
 
-    &lt;ejb-relationship-role>
-      &lt;relationship-role-source>
-         &lt;ejb-name><var/dorms/>&lt;/ejb-name>
-      &lt;/relationship-role-source>
+    &lt;ejb-relationship-role&gt;
+      &lt;relationship-role-source&gt;
+         &lt;ejb-name&gt;<var>dorms</var>&lt;/ejb-name&gt;
+      &lt;/relationship-role-source&gt;
 
-      &lt;cmr-field>
-        &lt;cmr-field-name><var/students/>&lt;/cmr-field-name>
-      &lt;/cmr-field>
+      &lt;cmr-field&gt;
+        &lt;cmr-field-name&gt;<var>students</var>&lt;/cmr-field-name&gt;
+      &lt;/cmr-field&gt;
 
-      &lt;multiplicity>One&lt;/multiplicity>
-    &lt;/ejb-relationship-role>
+      &lt;multiplicity&gt;One&lt;/multiplicity&gt;
+    &lt;/ejb-relationship-role&gt;
 
-    &lt;ejb-relationship-role>
-      &lt;relationship-role-source>
-        &lt;ejb-name><var/students/>&lt;/ejb-name>
-      &lt;/relationship-role-source>
+    &lt;ejb-relationship-role&gt;
+      &lt;relationship-role-source&gt;
+        &lt;ejb-name&gt;<var>students</var>&lt;/ejb-name&gt;
+      &lt;/relationship-role-source&gt;
 
-      &lt;multiplicity>Many&lt;/multiplicity>
-    &lt;/ejb-relationship-role>
-  &lt;/ejb-relation>
-&lt;/relationships>
+      &lt;multiplicity&gt;Many&lt;/multiplicity&gt;
+    &lt;/ejb-relationship-role&gt;
+  &lt;/ejb-relation&gt;
+&lt;/relationships&gt;
 </example>
 
 <example title="1-n relation (short form)">
-&lt;ejb-relation>
-  &lt;ejb-relationship-name><var/student_dorm_map/>&lt;/ejb-relationship-name>
+&lt;ejb-relation&gt;
+  &lt;ejb-relationship-name&gt;<var>student_dorm_map</var>&lt;/ejb-relationship-name&gt;
 
-  &lt;source-ejb><var/dorms/>&lt;/source-ejb>
-  &lt;source-field><var/students/>&lt;/source-field>
-  &lt;source-multiplicity><var/One/>&lt;/source-multiplicity>
+  &lt;source-ejb&gt;<var>dorms</var>&lt;/source-ejb&gt;
+  &lt;source-field&gt;<var>students</var>&lt;/source-field&gt;
+  &lt;source-multiplicity&gt;<var>One</var>&lt;/source-multiplicity&gt;
 
-  &lt;target-ejb><var/students/>&lt;/target-ejb>
-  &lt;target-multiplicity><var/Many/>&lt;/target-multiplicity>
-&lt;/ejb-relation>
+  &lt;target-ejb&gt;<var>students</var>&lt;/target-ejb&gt;
+  &lt;target-multiplicity&gt;<var>Many</var>&lt;/target-multiplicity&gt;
+&lt;/ejb-relation&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="n-m bi-directional">
+<s1 title="n-m bi-directional">
 
 <example>
 CREATE TABLE courses (
@@ -374,52 +374,52 @@ public interface Student extends EJBLocalObject {
 </example>
 
 <example title="ejb-relation (long form)">
-&lt;ejb-relation>
-  &lt;ejb-relationship-name>student_course_map&lt;/ejb-relationship-name>
+&lt;ejb-relation&gt;
+  &lt;ejb-relationship-name&gt;student_course_map&lt;/ejb-relationship-name&gt;
 
-  &lt;ejb-relationship-role>
-    &lt;relationship-role-source>
-       &lt;ejb-name><var/courses/>&lt;/ejb-name>
-    &lt;/relationship-role-source>
+  &lt;ejb-relationship-role&gt;
+    &lt;relationship-role-source&gt;
+       &lt;ejb-name&gt;<var>courses</var>&lt;/ejb-name&gt;
+    &lt;/relationship-role-source&gt;
 
-    &lt;cmr-field>
-      &lt;cmr-field-name><var/students/>&lt;/cmr-field-name>
-    &lt;/cmr-field>
+    &lt;cmr-field&gt;
+      &lt;cmr-field-name&gt;<var>students</var>&lt;/cmr-field-name&gt;
+    &lt;/cmr-field&gt;
 
-    &lt;multiplicity>Many&lt;/multiplicity>
-  &lt;/ejb-relationship-role>
+    &lt;multiplicity&gt;Many&lt;/multiplicity&gt;
+  &lt;/ejb-relationship-role&gt;
 
-  &lt;ejb-relationship-role>
-    &lt;relationship-role-source>
-      &lt;ejb-name><var/students/>&lt;/ejb-name>
-    &lt;/relationship-role-source>
+  &lt;ejb-relationship-role&gt;
+    &lt;relationship-role-source&gt;
+      &lt;ejb-name&gt;<var>students</var>&lt;/ejb-name&gt;
+    &lt;/relationship-role-source&gt;
 
-    &lt;cmr-field>
-      &lt;cmr-field-name><var/courses/>&lt;/cmr-field-name>
-    &lt;/cmr-field>
+    &lt;cmr-field&gt;
+      &lt;cmr-field-name&gt;<var>courses</var>&lt;/cmr-field-name&gt;
+    &lt;/cmr-field&gt;
 
-    &lt;multiplicity>Many&lt;/multiplicity>
-  &lt;/ejb-relationship-role>
-&lt;/ejb-relation>
+    &lt;multiplicity&gt;Many&lt;/multiplicity&gt;
+  &lt;/ejb-relationship-role&gt;
+&lt;/ejb-relation&gt;
 </example>
 
 <example title="ejb-relation (short form)">
-&lt;ejb-relation>
-  &lt;ejb-relationship-name><var/student_course_map/>&lt;/ejb-relationship-name>
+&lt;ejb-relation&gt;
+  &lt;ejb-relationship-name&gt;<var>student_course_map</var>&lt;/ejb-relationship-name&gt;
 
-  &lt;source-ejb><var/courses/>&lt;/source-ejb>
-  &lt;source-field><var/students/>&lt;/source-field>
-  &lt;source-multiplicity><var/Many/>&lt;/source-multiplicity>
+  &lt;source-ejb&gt;<var>courses</var>&lt;/source-ejb&gt;
+  &lt;source-field&gt;<var>students</var>&lt;/source-field&gt;
+  &lt;source-multiplicity&gt;<var>Many</var>&lt;/source-multiplicity&gt;
 
-  &lt;target-ejb><var/students/>&lt;/target-ejb>
-  &lt;target-field><var/courses/>&lt;/target-field>
-  &lt;target-multiplicity><var/Many/>&lt;/target-multiplicity>
-&lt;/ejb-relation>
+  &lt;target-ejb&gt;<var>students</var>&lt;/target-ejb&gt;
+  &lt;target-field&gt;<var>courses</var>&lt;/target-field&gt;
+  &lt;target-multiplicity&gt;<var>Many</var>&lt;/target-multiplicity&gt;
+&lt;/ejb-relation&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="Identifying: 1-1 Bidirectional (Pair)">
+<s1 title="Identifying: 1-1 Bidirectional (Pair)">
 
 <p>A bean with an identifying relation has a primary key which is a
 reference to another bean.  In this case, a course bean may have a
@@ -459,66 +459,66 @@ public interface Room extends EJBLocalObject {
 </example>
 
 <example title="Room entity definition">
-&lt;entity>
-  &lt;ejb-name>room&lt;/ejb-name>
-  &lt;local-home>qa.RoomLocalHome&lt;/local-home>
-  &lt;local>qa.Room&lt;/local>
-  &lt;ejb-class>qa.RoomBean&lt;/ejb-class>
-  &lt;prim-key-class>qa.Course&lt;/prim-key-class>
-  &lt;primkey-field>course&lt;/primkey-field>
+&lt;entity&gt;
+  &lt;ejb-name&gt;room&lt;/ejb-name&gt;
+  &lt;local-home&gt;qa.RoomLocalHome&lt;/local-home&gt;
+  &lt;local&gt;qa.Room&lt;/local&gt;
+  &lt;ejb-class&gt;qa.RoomBean&lt;/ejb-class&gt;
+  &lt;prim-key-class&gt;qa.Course&lt;/prim-key-class&gt;
+  &lt;primkey-field&gt;course&lt;/primkey-field&gt;
 
-  &lt;persistence-type>Container&lt;/persistence-type>
-  &lt;reentrant>True&lt;/reentrant>
+  &lt;persistence-type&gt;Container&lt;/persistence-type&gt;
+  &lt;reentrant&gt;True&lt;/reentrant&gt;
 
-  &lt;cmp-field>&lt;field-name>name&lt;/field-name>&lt;/cmp-field>
+  &lt;cmp-field&gt;&lt;field-name&gt;name&lt;/field-name&gt;&lt;/cmp-field&gt;
 
-  &lt;sql-table>course_rooms&lt;/sql-table>
-&lt;/entity>
+  &lt;sql-table&gt;course_rooms&lt;/sql-table&gt;
+&lt;/entity&gt;
 </example>
 
 <example title="ejb-relation (long form)">
-&lt;ejb-relation>
-  &lt;ejb-relationship-role>
-    &lt;relationship-role-source>
-      &lt;ejb-name><var/rooms/>&lt;/ejb-name>
-    &lt;/relationship-role-source>
+&lt;ejb-relation&gt;
+  &lt;ejb-relationship-role&gt;
+    &lt;relationship-role-source&gt;
+      &lt;ejb-name&gt;<var>rooms</var>&lt;/ejb-name&gt;
+    &lt;/relationship-role-source&gt;
 
-    &lt;cmr-field>
-      &lt;cmr-field-name><var/course/>&lt;/cmr-field-name>
-    &lt;/cmr-field>
+    &lt;cmr-field&gt;
+      &lt;cmr-field-name&gt;<var>course</var>&lt;/cmr-field-name&gt;
+    &lt;/cmr-field&gt;
 
-    &lt;multiplicity>One&lt;/multiplicity>
-  &lt;/ejb-relationship-role>
+    &lt;multiplicity&gt;One&lt;/multiplicity&gt;
+  &lt;/ejb-relationship-role&gt;
 
-  &lt;ejb-relationship-role>
-    &lt;relationship-role-source>
-       &lt;ejb-name><var/courses/>&lt;/ejb-name>
-    &lt;/relationship-role-source>
+  &lt;ejb-relationship-role&gt;
+    &lt;relationship-role-source&gt;
+       &lt;ejb-name&gt;<var>courses</var>&lt;/ejb-name&gt;
+    &lt;/relationship-role-source&gt;
 
-    &lt;cmr-field>
-      &lt;cmr-field-name><var/room/>&lt;/cmr-field-name>
-    &lt;/cmr-field>
+    &lt;cmr-field&gt;
+      &lt;cmr-field-name&gt;<var>room</var>&lt;/cmr-field-name&gt;
+    &lt;/cmr-field&gt;
 
-    &lt;multiplicity>One&lt;/multiplicity>
-  &lt;/ejb-relationship-role>
-&lt;/ejb-relation>
+    &lt;multiplicity&gt;One&lt;/multiplicity&gt;
+  &lt;/ejb-relationship-role&gt;
+&lt;/ejb-relation&gt;
 </example>
 
 <example title="ejb-relation (short form)">
-&lt;ejb-relation>
-  &lt;source-ejb><var/rooms/>&lt;/source-ejb>
-  &lt;source-field><var/course/>&lt;/source-field>
-  &lt;source-multiplicity><var/One/>&lt;/source-multiplicity>
+&lt;ejb-relation&gt;
+  &lt;source-ejb&gt;<var>rooms</var>&lt;/source-ejb&gt;
+  &lt;source-field&gt;<var>course</var>&lt;/source-field&gt;
+  &lt;source-multiplicity&gt;<var>One</var>&lt;/source-multiplicity&gt;
 
-  &lt;target-ejb><var/courses/>&lt;/target-ejb>
-  &lt;target-field><var/room/>&lt;/target-field>
-  &lt;target-multiplicity><var/One/>&lt;/target-multiplicity>
-&lt;/ejb-relation>
+  &lt;target-ejb&gt;<var>courses</var>&lt;/target-ejb&gt;
+  &lt;target-field&gt;<var>room</var>&lt;/target-field&gt;
+  &lt;target-multiplicity&gt;<var>One</var>&lt;/target-multiplicity&gt;
+&lt;/ejb-relation&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="Identifying: n-1 Container (compound key)">
+<s1 title="Identifying: n-1 Container (compound key)">
 
 <p>For many container relations, the item has a compound primary key
 pointing to the container and including an additional identifier.
@@ -529,7 +529,7 @@ points to the container.</p>
 
 <ul>
 <li><a href="tutorial/cmp-map/index.xtp">n-1 compound key example</a>
-</ul>
+</li></ul>
 
 </website>
 
@@ -581,63 +581,63 @@ public class DemeritKey {
 </example>
 
 <example title="Demerit entity definition">
-&lt;entity>
-  &lt;ejb-name>demerit&lt;/ejb-name>
-  &lt;local-home>qa.DemeritLocalHome&lt;/local-home>
-  &lt;local>qa.Demerit&lt;/local>
-  &lt;ejb-class>qa.DemeritBean&lt;/ejb-class>
-  &lt;prim-key-class>qa.DemeritKey&lt;/prim-key-class>
+&lt;entity&gt;
+  &lt;ejb-name&gt;demerit&lt;/ejb-name&gt;
+  &lt;local-home&gt;qa.DemeritLocalHome&lt;/local-home&gt;
+  &lt;local&gt;qa.Demerit&lt;/local&gt;
+  &lt;ejb-class&gt;qa.DemeritBean&lt;/ejb-class&gt;
+  &lt;prim-key-class&gt;qa.DemeritKey&lt;/prim-key-class&gt;
 
-  &lt;persistence-type>Container&lt;/persistence-type>
-  &lt;reentrant>True&lt;/reentrant>
+  &lt;persistence-type&gt;Container&lt;/persistence-type&gt;
+  &lt;reentrant&gt;True&lt;/reentrant&gt;
 
-  &lt;cmp-field>&lt;field-name>points&lt;/field-name>&lt;/cmp-field>
-  &lt;cmp-field>&lt;field-name>reason&lt;/field-name>&lt;/cmp-field>
+  &lt;cmp-field&gt;&lt;field-name&gt;points&lt;/field-name&gt;&lt;/cmp-field&gt;
+  &lt;cmp-field&gt;&lt;field-name&gt;reason&lt;/field-name&gt;&lt;/cmp-field&gt;
 
-  &lt;sql-table>demerits&lt;/sql-table>
-&lt;/entity>
+  &lt;sql-table&gt;demerits&lt;/sql-table&gt;
+&lt;/entity&gt;
 </example>
 
 <example title="ejb-relation (long form)">
-&lt;ejb-relation>
-  &lt;ejb-relationship-role>
-    &lt;relationship-role-source>
-      &lt;ejb-name><var/demerits/>&lt;/ejb-name>
-    &lt;/relationship-role-source>
+&lt;ejb-relation&gt;
+  &lt;ejb-relationship-role&gt;
+    &lt;relationship-role-source&gt;
+      &lt;ejb-name&gt;<var>demerits</var>&lt;/ejb-name&gt;
+    &lt;/relationship-role-source&gt;
 
-    &lt;cmr-field>
-      &lt;cmr-field-name><var/student/>&lt;/cmr-field-name>
-    &lt;/cmr-field>
+    &lt;cmr-field&gt;
+      &lt;cmr-field-name&gt;<var>student</var>&lt;/cmr-field-name&gt;
+    &lt;/cmr-field&gt;
 
-    &lt;multiplicity>Many&lt;/multiplicity>
-  &lt;/ejb-relationship-role>
+    &lt;multiplicity&gt;Many&lt;/multiplicity&gt;
+  &lt;/ejb-relationship-role&gt;
 
-  &lt;ejb-relationship-role>
-    &lt;relationship-role-source>
-       &lt;ejb-name><var/students/>&lt;/ejb-name>
-    &lt;/relationship-role-source>
+  &lt;ejb-relationship-role&gt;
+    &lt;relationship-role-source&gt;
+       &lt;ejb-name&gt;<var>students</var>&lt;/ejb-name&gt;
+    &lt;/relationship-role-source&gt;
 
-    &lt;cmr-field>
-      &lt;cmr-field-name><var/demerits/>&lt;/cmr-field-name>
-    &lt;/cmr-field>
+    &lt;cmr-field&gt;
+      &lt;cmr-field-name&gt;<var>demerits</var>&lt;/cmr-field-name&gt;
+    &lt;/cmr-field&gt;
 
-    &lt;multiplicity>One&lt;/multiplicity>
-  &lt;/ejb-relationship-role>
-&lt;/ejb-relation>
+    &lt;multiplicity&gt;One&lt;/multiplicity&gt;
+  &lt;/ejb-relationship-role&gt;
+&lt;/ejb-relation&gt;
 </example>
 
 <example title="ejb-relation (short form)">
-&lt;ejb-relation>
-  &lt;source-ejb><var/demerits/>&lt;/source-ejb>
-  &lt;source-field><var/student/>&lt;/source-field>
-  &lt;source-multiplicity><var/Many/>&lt;/source-multiplicity>
+&lt;ejb-relation&gt;
+  &lt;source-ejb&gt;<var>demerits</var>&lt;/source-ejb&gt;
+  &lt;source-field&gt;<var>student</var>&lt;/source-field&gt;
+  &lt;source-multiplicity&gt;<var>Many</var>&lt;/source-multiplicity&gt;
 
-  &lt;target-ejb><var/students/>&lt;/target-ejb>
-  &lt;target-field><var/demerits/>&lt;/target-field>
-  &lt;target-multiplicity><var/One/>&lt;/target-multiplicity>
-&lt;/ejb-relation>
+  &lt;target-ejb&gt;<var>students</var>&lt;/target-ejb&gt;
+  &lt;target-field&gt;<var>demerits</var>&lt;/target-field&gt;
+  &lt;target-multiplicity&gt;<var>One</var>&lt;/target-multiplicity&gt;
+&lt;/ejb-relation&gt;
 </example>
 
-</section>
+</s1>
   </body>
 </document>

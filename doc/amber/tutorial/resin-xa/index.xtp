@@ -10,8 +10,8 @@ the database's locking capabilities for scalability.</p>
           <p>See also:</p>
           <ul>
             <li>The <a href="ejb3|bean-ann.xtp#@TransactionAttribute">@TransactionAttribute</a> reference.
-            <li>The <a href="../cmp-xa/index.xtp">Amber Transaction</a> example for the same example using session beans.
-          </ul>
+            </li><li>The <a href="../cmp-xa/index.xtp">Amber Transaction</a> example for the same example using session beans.
+          </li></ul>
         </description>
     <type>tutorial</type>
     <tutorial-startpage>xa</tutorial-startpage>
@@ -20,20 +20,20 @@ the database's locking capabilities for scalability.</p>
   <body>
     <summary/>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
-    <td>resin-web.xml configuration
-<tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>
-    <td>persistence.xml configuration
-<tr><td><viewfile-link file="WEB-INF/classes/example/Course.java"/>
-    <td>The course bean
-<tr><td><viewfile-link file="WEB-INF/classes/example/SwapServlet.java"/>
-    <td>The swap servlet
-</deftable>
-</section>
+    </td><td>resin-web.xml configuration
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>
+    </td><td>persistence.xml configuration
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/Course.java"/>
+    </td><td>The course bean
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/SwapServlet.java"/>
+    </td><td>The swap servlet
+</td></tr></deftable>
+</s1>
 
-<section title="Transactions">
+<s1 title="Transactions">
 
 <p>Transactions are the common interface to a database's locking
 capability used to ensure consistent database updates.  Because
@@ -56,7 +56,7 @@ Each course has a course name and an assigned teacher.</p>
 <tr><td>Snape</td><td>McGonnagal</td><td>Database unchanged (rollback)</td></tr>
 </table>
 
-<section title="JDBC commit - underlying database support">
+<s2 title="JDBC commit - underlying database support">
 
 <p>The JDBC <code>commit()</code> is the foundation for transactions.  At
 the core, the database provides transactions as part of its locking
@@ -79,9 +79,9 @@ essentially creates the above JDBC transaction pattern around the method.
 Any JDBC calls inside the method are protected by the database's
 transaction support, including entity bean calls.</p>
 
-</section>
+</s2>
 
-<section title="UserTransaction - generalizing from JDBC">
+<s2 title="UserTransaction - generalizing from JDBC">
 
 <p>Although the JDBC commit forms the foundation of transactions,
 a more general solution is needed for transaction
@@ -118,9 +118,9 @@ the <code>commit()</code> method during the <code>uTrans.commit()</code>.</p>
 application server makes transaction control cleaner, and allows for
 method enhancement of transaction boundaries.</p>
 
-</section>
+</s2>
 
-<section title="Method Enhancement - avoiding duplicate code">
+<s2 title="Method Enhancement - avoiding duplicate code">
 
 <p>Because the UserTransaction pattern is the same for each
 transaction boundary, it's important to write it once to avoid bugs
@@ -157,12 +157,12 @@ private void swap(Course a, Course b)
 </example>
 
 
-</section>
+</s2>
 
-</section>
-<section title="Entity Bean">
+</s1>
+<s1 title="Entity Bean">
 
-<section title="Database Schema">
+<s2 title="Database Schema">
 
 <example title="course.sql">
 CREATE TABLE amber_xa_courses (
@@ -176,9 +176,9 @@ INSERT INTO basic_courses VALUES('Potions', 'Severus Snape');
 INSERT INTO basic_courses VALUES('Transfiguration', 'Minerva McGonagall');
 </example>
 
-</section>
+</s2>
 
-<section title="Course Entity Implementation">
+<s2 title="Course Entity Implementation">
 
 <p>The Course is identical to
 the <a href="../cmp-xa">EJB transaction bean</a>.  It uses
@@ -203,10 +203,10 @@ public class Course {
 }
 </example>
 
-</section>
-</section>
+</p></s2>
+</s1>
 
-<section title="Swap Servlet">
+<s1 title="Swap Servlet">
 
 <example title="SwapServlet.java">
 import javax.persistence.*;
@@ -240,7 +240,7 @@ public class CourseServlet extends HttpServlet {
 }
 </example>
 
-<section title="@TransactionAttribute">
+<s2 title="@TransactionAttribute">
 
 <p>The TransactionAttribute marks a method as needing bytecode enhancement
 to support transactions.  The two most common transaction are
@@ -271,9 +271,9 @@ simultaneous threads trying to swap at the same time.</p>
 <p>A SUPPORTS attribute would tell Resin that the method doesn't need a
 transaction, but the method should join any transaction that already exists.</p>
 
-</section>
+</s2>
 
-<section title="swap">
+<s2 title="swap">
 
 <p>The first swap in the tutorial switches the teachers using
 a stateless session bean.</p>
@@ -291,17 +291,17 @@ RuntimeException, Resin will roll the transaction back.</p>
 transaction fails to commit.  For example, the databse might detect a
 deadlock and roll the transaction back.</p>
 
-</section>
+</s2>
 
 <ul>
 <li>REQUIRED automatically rolls back on a RuntimeException
-<li>REQUIRED joins any existing transaction.  In contrast,
+</li><li>REQUIRED joins any existing transaction.  In contrast,
 UserTransaction throws an exception if called in a transaction.
-</ul>
+</li></ul>
 
-</section>
+</s1>
 
-<section title="Differences with Stateless Session beans">
+<s1 title="Differences with Stateless Session beans">
 
 <p>The transaction annotation lets any Java class use the
 same transaction capability previously
@@ -313,9 +313,9 @@ transaction boundaries.</p>
 
 <ul>
 <li>Requires interface and generated stubs.
-<li>Requires JNDI lookup
-<li>Pooled bean instances
-</ul>
+</li><li>Requires JNDI lookup
+</li><li>Pooled bean instances
+</li></ul>
 
 <p>Transaction annotation cuts to the core transaction boundary
 problem, eliminating the often-unneeded complexity of Session beans.
@@ -327,9 +327,9 @@ for any Java class.</p>
 <p>In contrast, Resin-enhanced classes are normal Java classes.
 This example enhances a normal servlet to illustrate the differences.</p>
 
-</section>
+</s1>
 
-<section title="web.xml">
+<s1 title="web.xml">
 
 <p>The Resin enhancement currently needs some configuration in the web.xml.
 The annotation value is configurable.  If you want a different transaction
@@ -338,15 +338,15 @@ a com.caucho.transaction.Transaction attribute for applications
 wishing to avoid confusion with EJB 3.0.</p>
 
 <example>
-&lt;class-loader>
-  &lt;enhancer>
-    &lt;method annotation="javax.ejb.TransactionAttribute">
-	       type="com.caucho.transaction.enhancer.TransactionEnhancer"/>
-  &lt;/enhancer>
-&lt;/class-loader>
+&lt;class-loader&gt;
+  &lt;enhancer&gt;
+    &lt;method annotation="javax.ejb.TransactionAttribute"&gt;
+	       type="com.caucho.transaction.enhancer.TransactionEnhancer"/&gt;
+  &lt;/enhancer&gt;
+&lt;/class-loader&gt;
 </example>
 
-</section>
+</s1>
 
   </body>
 </document>

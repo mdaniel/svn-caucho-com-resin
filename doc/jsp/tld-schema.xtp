@@ -11,28 +11,28 @@
   <body>
     <summary/>
 
-<section title="Example taglib">
+<s1 title="Example taglib">
 
 <example title="test.tld">
-&lt;taglib xmlns="http://java.sun.com/xml/ns/j2ee" version="2.0">
-  &lt;tlib-version>1.0&lt;/tlib-version>
-  &lt;short-name>x&lt;/short-name>
-  &lt;uri>foo/zippee&lt;/uri>
+&lt;taglib xmlns="http://java.sun.com/xml/ns/j2ee" version="2.0"&gt;
+  &lt;tlib-version&gt;1.0&lt;/tlib-version&gt;
+  &lt;short-name&gt;x&lt;/short-name&gt;
+  &lt;uri&gt;foo/zippee&lt;/uri&gt;
 
-  &lt;tag>
-    &lt;name>foo&lt;/name>
-    &lt;tag-class>test.MyTag&lt;/tag-class>
+  &lt;tag&gt;
+    &lt;name&gt;foo&lt;/name&gt;
+    &lt;tag-class&gt;test.MyTag&lt;/tag-class&gt;
 
-    &lt;attribute>
-      &lt;name>var&lt;/name>
-    &lt;/attribute>
-  &lt;/tag>
-&lt;/taglib>
+    &lt;attribute&gt;
+      &lt;name&gt;var&lt;/name&gt;
+    &lt;/attribute&gt;
+  &lt;/tag&gt;
+&lt;/taglib&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="Relax-NG Schema">
+<s1 title="Relax-NG Schema">
 <def>
 default namespace j2ee = "http://java.sun.com/xml/ns/j2ee"
 namespace local = ""
@@ -203,8 +203,7 @@ jsp20_variable = element variable {
   element scope { "AT_BEGIN" | "NESTED" | "AT_END" }?
 }
 </def>
-</section>
+</s1>
 
   </body>
 </document>
-  

@@ -11,7 +11,7 @@
   <body>
     <summary/>
 
-<section title="Relax-NG Schema">
+<s1 title="Relax-NG Schema">
 
 <def title="com/caucho/server/webapp/web-xml.rnc">
 default namespace j2ee = "http://java.sun.com/xml/ns/j2ee"
@@ -244,41 +244,41 @@ j2ee_user-data-constraint = element user-data-constraint {
 j2ee_web-app-Content =
   element context-param { paramType }*
 
-  & j2ee_description-Group
+  &amp; j2ee_description-Group
 
-  & element distributable { empty }?
+  &amp; element distributable { empty }?
 
-  & j2ee_jndi-environment-refs-Group
+  &amp; j2ee_jndi-environment-refs-Group
 
-  & j2ee_error-page*
+  &amp; j2ee_error-page*
 
-  & j2ee_filter*
+  &amp; j2ee_filter*
 
-  & j2ee_filter-mapping*
+  &amp; j2ee_filter-mapping*
 
-  & j2ee_jsp-config?
+  &amp; j2ee_jsp-config?
 
-  & j2ee_listener*
+  &amp; j2ee_listener*
 
-  & j2ee_locale-encoding-mapping-list?
+  &amp; j2ee_locale-encoding-mapping-list?
 
-  & j2ee_login-config?
+  &amp; j2ee_login-config?
 
-  & j2ee_message-destination*
+  &amp; j2ee_message-destination*
 
-  & j2ee_mime-mapping*
+  &amp; j2ee_mime-mapping*
 
-  & j2ee_security-constraint*
+  &amp; j2ee_security-constraint*
 
-  & j2ee_security-role*
+  &amp; j2ee_security-role*
 
-  & j2ee_servlet*
+  &amp; j2ee_servlet*
 
-  & j2ee_servlet-mapping*
+  &amp; j2ee_servlet-mapping*
 
-  & j2ee_session-config?
+  &amp; j2ee_session-config?
 
-  & j2ee_welcome-file-list?
+  &amp; j2ee_welcome-file-list?
 
 j2ee_web-app = element web-app {
   attribute id { string }?,
@@ -315,8 +315,7 @@ j2ee_welcome-file-list = element welcome-file-list {
 }
 </def>
 
-</section>
+</s1>
 
   </body>
 </document>
-  

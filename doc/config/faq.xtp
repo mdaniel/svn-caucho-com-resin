@@ -7,7 +7,7 @@
 </header>
 
 <body>
-<summary objsummary='localtoc'/>
+<summary objsummary="localtoc"/>
 
 <faq title="Where is the configuration GUI, and the GUI for deploying web-apps and new virtual hosts?">
 <description>
@@ -21,21 +21,21 @@ deployment or management.  Or philosophy is:
 <ul>
 <li>a single xml configuration file for the server (<code>resin.conf</code>)
 
-<li>changes to the server configuration file (<code>resin.conf</code>) are automatically
+</li><li>changes to the server configuration file (<code>resin.conf</code>) are automatically
 detected and cause a restart of the server
 
-<li>changes to the <code>WEB-INF/web.xml</code> configuration file for a web
+</li><li>changes to the <code>WEB-INF/web.xml</code> configuration file for a web
 application are automatically detected and cause a restart of the web
 application
 
-<li>new web applications are added either with <code>resin.conf</code> file
+</li><li>new web applications are added either with <code>resin.conf</code> file
 changes, or by adding a <code>.war</code> or subdirectory to a
 <code>webapps/</code> directory
 
-<li>new <a href="doc|config|virtual-host">virtual hosts</a> are added either
+</li><li>new <a href="doc|config|virtual-host">virtual hosts</a> are added either
 with <code>resin.conf</code> file changes, or by adding a <code>.jar</code> or
 subdirectory in a <code>hosts</code> directory.
-</ul>
+</li></ul>
 </faq>
 
 <faq title="Where can I find the .rnc files that Resin uses for validating configuration files?">
@@ -47,15 +47,15 @@ subdirectory in a <code>hosts</code> directory.
 
 <ul>
 <li>com/caucho/server/resin/resin.rnc
-<li>com/caucho/server/webapp/web-xml.rnc
-<li>com/caucho/server/webapp/resin-web-xml.rnc
-<li>com/caucho/server/resin/env.rnc
-<li>com/caucho/jsp/cfg/jsp-tld.rnc
-<li>com/caucho/jsp/cfg/jsp11-tld.rnc
-<li>com/caucho/jsp/cfg/jsp12-tld.rnc
-<li>com/caucho/jsp/cfg/jsp1_2-tld.rnc
-<li>com/caucho/jsp/cfg/jsp20-tld.rnc
-</ul>
+</li><li>com/caucho/server/webapp/web-xml.rnc
+</li><li>com/caucho/server/webapp/resin-web-xml.rnc
+</li><li>com/caucho/server/resin/env.rnc
+</li><li>com/caucho/jsp/cfg/jsp-tld.rnc
+</li><li>com/caucho/jsp/cfg/jsp11-tld.rnc
+</li><li>com/caucho/jsp/cfg/jsp12-tld.rnc
+</li><li>com/caucho/jsp/cfg/jsp1_2-tld.rnc
+</li><li>com/caucho/jsp/cfg/jsp20-tld.rnc
+</li></ul>
 </faq>
 
 <faq title="Can I precompile JSP's?">
@@ -114,15 +114,14 @@ stored in the session.
 </p>
 
 <p>
-It is far more efficient to design the session to avoid the need for <a
-config-tag="always-save-session"/>, so session values are only saved once and
+It is far more efficient to design the session to avoid the need for <a config-tag="always-save-session"/>, so session values are only saved once and
 then are read-only.
 </p>
 
 <p>
 You can avoid <a config-tag="always-save-session"/> if you call setAttribute()
 each time the session state changes.  If your web application calls
-session.setAttribute("key",value) everytime you change the <var/value/> object,
+session.setAttribute("key",value) everytime you change the <var>value</var> object,
 then Resin can intercept that call and realize that the session needs to be
 written to the distributed store again.
 </p>

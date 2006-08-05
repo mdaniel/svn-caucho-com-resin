@@ -7,7 +7,7 @@
 
   <body>
     <summary/>
-<section title="Resin OpenTool">
+<s1 title="Resin OpenTool">
 
 The Caucho projects section now has an OpenTool jar for Resin at
 <a href="download|jbuilder|ver6">resin-jbuilder-6.jar</a> and
@@ -17,9 +17,9 @@ The Caucho projects section now has an OpenTool jar for Resin at
 directory, for example, c:\JBuilder6\lib\ext.  Then you can change the
 server using the Project/Project Properties/Server table.
 
-</section>
+</s1>
 
-<section title="Older instructions">
+<s1 title="Older instructions">
 
 <p/>Kellan Elliott-McCrea writes:
 
@@ -28,21 +28,21 @@ noticed a definite slow down when doing this.
 
 <ol>
 <li>Go To Project Properties - required libraries
-<li>Remove the JSWDK 1.0 stuff from the required libraries, you don't need it
+</li><li>Remove the JSWDK 1.0 stuff from the required libraries, you don't need it
 any more
-<li>Click "Add..." then Click "New..."
-<li>fill out a name for resin, I would naming it Resin 1.2.1 (or whatever
+</li><li>Click "Add..." then Click "New..."
+</li><li>fill out a name for resin, I would naming it Resin 1.2.1 (or whatever
 version you are running)
-<li>Click "Add..."  
-<li>Browse to your resin directory and add all the jar files under the lib
+</li><li>Click "Add..."  
+</li><li>Browse to your resin directory and add all the jar files under the lib
 directory
-<li>Click "OK" to select then "OK" again
-<li>Go to the "Run" tab in properties
-<li>Click "Set"
-<li>Find the class com.caucho.server.http.HttpServer
-<li>Click "OK" to close set window and "OK" to accept properties
-</ol>
+</li><li>Click "OK" to select then "OK" again
+</li><li>Go to the "Run" tab in properties
+</li><li>Click "Set"
+</li><li>Find the class com.caucho.server.http.HttpServer
+</li><li>Click "OK" to close set window and "OK" to accept properties
+</li></ol>
 
-</section>
+</s1>
   </body>
 </document>

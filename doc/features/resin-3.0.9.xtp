@@ -6,49 +6,49 @@
 
 <body>
 
-<summary objsummary='localtoc'/>
+<summary objsummary="localtoc"/>
 
-<section title="Distribution/licensing changes">
+<s1 title="Distribution/licensing changes">
 
 <p>The Resin distribution for 3.0.9 has been refactored into two distributions:
 
-<ul>
+</p><ul>
 <li>Resin Professional - Most companies and organizations will use Resin Professional.  Includes performance, caching, and clustering capabilities.
-<li>Resin Open Source (GPL) - Contains all functional components of Resin,
+</li><li>Resin Open Source (GPL) - Contains all functional components of Resin,
 including EJB, but excludes performance and clustering capabilities.
-</ul>
+</li></ul>
 
-</section>
+</s1>
 
-<section title="EJB 2.1 refactoring">
+<s1 title="EJB 2.1 refactoring">
 
 <p>The EJB implementation has been refactored to use a new underlying
 persistence engine (Amber).  It would be wise for current CMP/EJB users
 to take extra care verifying Resin 3.0.9 before putting it into production.</p>
 
-</section>
+</s1>
 
-<section>
+<s1>
   <title><a href="../ejb3">EJB 3.0 experimental features</a></title>
 
 <p>See the <a href="../ejb3/tutorial">EJB 3.0 tutorials</a> for examples.</p>
 
 <p>Resin 3.0.9 includes an implementation the EJB 3.0 early-draft spec features.
 EJB 3.0 has a number of significant changes over EJB 2.1:
-<ul>
+</p><ul>
 <li>Uses JDK 1.5 annotations (@Entity, @Column, etc.) instead of deployment descriptors.
-<li>Home interfaces are no longer needed
-<li>Entities are beans (i.e. not pooled objects as in EJB 2.1)
-<li>Entities can use JDO-style field-enhancement instead of method enhancement
-</ul>
+</li><li>Home interfaces are no longer needed
+</li><li>Entities are beans (i.e. not pooled objects as in EJB 2.1)
+</li><li>Entities can use JDO-style field-enhancement instead of method enhancement
+</li></ul>
 
-</section>
+</s1>
 
-<section title="JDK 1.5 Transaction Annotations">
+<s1 title="JDK 1.5 Transaction Annotations">
 
 <p>Resin 3.0.9 has an experimental support for annotation-based transactions.
 The annotations use the EJB 3.0 markers.  The enhancement is configured
-as part of the &lt;class-loader> configuration.</p>
+as part of the &lt;class-loader&gt; configuration.</p>
 
 <p>See the <a href="ejb3|tutorial/resin-xa/index.xtp">@ResinEnhanced transaction tutorial</a> for an example.</p>
 
@@ -80,28 +80,28 @@ public class MyBean {
 the transaction enhancer enabled.</p>
 
 <example title="web.xml">
-&lt;web-xml xmlns="http://caucho.com/ns/resin">
-  &lt;class-loader>
+&lt;web-xml xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;class-loader&gt;
 
-    &lt;enhancer resin:type="com.caucho.java.enhancer.ClassEnhancer">
-      &lt;enhancer resin:type="com.caucho.transaction.enhancer.TransactionEnhancer"/>
-    &lt;/enhancer>
-  &lt;/class-loader>
+    &lt;enhancer resin:type="com.caucho.java.enhancer.ClassEnhancer"&gt;
+      &lt;enhancer resin:type="com.caucho.transaction.enhancer.TransactionEnhancer"/&gt;
+    &lt;/enhancer&gt;
+  &lt;/class-loader&gt;
 
   ..
-&lt;/web-xml>
+&lt;/web-xml&gt;
 </example>
    
-</section>
+</s1>
 
-<section title="JDK 1.5 Injection Annotations">
+<s1 title="JDK 1.5 Injection Annotations">
 
 <p>As an experimental feature, servlets can use JDK 1.5
 Injection annotations.</p>
 
-</section>
+</s1>
 
-<section title="Hessian/Burlap server headers">
+<s1 title="Hessian/Burlap server headers">
 
 <p>Hessian and Burlap services can now pick up the protocol headers
 using the <code>ServiceContext.getHeader</code> method.</p>
@@ -119,97 +119,97 @@ public class MyService extends GenericService {
 }
 </example>
 
-</section>
+</s1>
 
-<section title="validate-taglib-schema">
+<s1 title="validate-taglib-schema">
 
 <p>Allows the taglib schema validation to be turned off.
 This should only be used in the case where a .tld file in a
 third-party jar is invalid.</p>
 
-</section>
+</s1>
 
-<section title="Hessian/Burlap servlet options">
+<s1 title="Hessian/Burlap servlet options">
 
 <p>The Hessian servlet can now specify its SerializerFactory.  You can use
 this to avoid sending the collection type with Hessian.</p>
 
 <example title="web.xml">
-&lt;servlet servlet-name="my-service" servlet-class="qa.MyService">
-  &lt;init>
-    &lt;serializer-factory>
-      &lt;send-collection-type>false&lt;send-collection-type>
-    &lt;/serializer-factory>
-  &lt;/init>
-&lt;/servlet>
+&lt;servlet servlet-name="my-service" servlet-class="qa.MyService"&gt;
+  &lt;init&gt;
+    &lt;serializer-factory&gt;
+      &lt;send-collection-type&gt;false&lt;send-collection-type&gt;
+    &lt;/serializer-factory&gt;
+  &lt;/init&gt;
+&lt;/servlet&gt;
 </example>
 
 <example title="web.xml">
-&lt;servlet servlet-name="my-service" servlet-class="qa.MyService">
-  &lt;init>
-    &lt;send-collection-type>false&lt;send-collection-type>
-  &lt;/init>
-&lt;/servlet>
+&lt;servlet servlet-name="my-service" servlet-class="qa.MyService"&gt;
+  &lt;init&gt;
+    &lt;send-collection-type&gt;false&lt;send-collection-type&gt;
+  &lt;/init&gt;
+&lt;/servlet&gt;
 </example>
-</section>
+</s1>
 
-<section title="Filter url-pattern with include/exclude">
+<s1 title="Filter url-pattern with include/exclude">
 
 <p>The filter-mapping can now accept more sophisticated matches,
 allowing filters to exclude URLs.</p>
 
 <example>
-&lt;filter-mapping filter-name="gzip">
-  &lt;url-pattern>
-    &lt;exclude-regexp>\.(pdf,mov)&lt;/exclude-regexp>
-  &lt;/url-pattern>
-&lt;/filter-mapping>
+&lt;filter-mapping filter-name="gzip"&gt;
+  &lt;url-pattern&gt;
+    &lt;exclude-regexp&gt;\.(pdf,mov)&lt;/exclude-regexp&gt;
+  &lt;/url-pattern&gt;
+&lt;/filter-mapping&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="JSSE has alias">
+<s1 title="JSSE has alias">
 
-<p>JSSE now has an &lt;alias> tag to select the alias from the keystore.</p>
+<p>JSSE now has an &lt;alias&gt; tag to select the alias from the keystore.</p>
 
-</section>
+</s1>
 
-<section title="JspCompiler">
+<s1 title="JspCompiler">
 
 <p>com.caucho.jsp.JspCompiler can now accept a -conf argument, which
 points to a web-app configuration.</p>
 
 <example title="compile-app.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-  &lt;document-directory>/opt/www/foo&lt;/document-directory>
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;document-directory&gt;/opt/www/foo&lt;/document-directory&gt;
 
-  &lt;resin:import path="/opt/resin/conf/app-default.xml"/>
-&lt;/web-app>
+  &lt;resin:import path="/opt/resin/conf/app-default.xml"/&gt;
+&lt;/web-app&gt;
 </example>
 
 <example title="command line">
-unix> java com.caucho.jsp.JspCompiler -conf /opt/resin/compile-app.xml" test/foo.jsp
+unix&gt; java com.caucho.jsp.JspCompiler -conf /opt/resin/compile-app.xml" test/foo.jsp
 </example>
 
-</section>
+</s1>
 
-<section title="jsp tld-file-set">
+<s1 title="jsp tld-file-set">
 
-<p>The preloaded tlds can now be configured with the &lt;tld-file-set>
+<p>The preloaded tlds can now be configured with the &lt;tld-file-set&gt;
 tag.  By default all tlds in WEB-INF are loaded.  In some cases where
 the WEB-INF contains many files, this is inappropriate.</p>
 
 <example title="web-xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-  &lt;jsp>
-    &lt;tld-file-set dir="WEB-INF">
-      &lt;include name="tld/**/*.tld"/>
-    &lt;/tld-file-set>
-  &lt;/jsp>
-&lt;/web-app>
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;jsp&gt;
+    &lt;tld-file-set dir="WEB-INF"&gt;
+      &lt;include name="tld/**/*.tld"/&gt;
+    &lt;/tld-file-set&gt;
+  &lt;/jsp&gt;
+&lt;/web-app&gt;
 </example>
 
-</section>
+</s1>
 
 </body>
 </document>

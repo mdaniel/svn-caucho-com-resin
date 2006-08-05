@@ -13,16 +13,16 @@ features found in Python, Ruby, and Smalltalk.
 See also:
 <ul>
 <li><a href="http://groovy.codehaus.org/">Groovy homepage</a>
-<li><a href="http://dist.codehaus.org/groovy/distributions/">Groovy download</a>
-<li><a href="http://www.jcp.org/en/jsr/detail?id=241">JSR 241: The Groovy Programming Language</a>
-</ul>
+</li><li><a href="http://dist.codehaus.org/groovy/distributions/">Groovy download</a>
+</li><li><a href="http://www.jcp.org/en/jsr/detail?id=241">JSR 241: The Groovy Programming Language</a>
+</li></ul>
 </description>
 </header>
 
 <body>
 <summary/>
 
-<section title="Installing Groovy">
+<s1 title="Installing Groovy">
 
 <p>
 Install the groovy*.jar and asm*.jar files from the Groovy distribution in
@@ -62,9 +62,9 @@ directly to <code>*.class</code> files.  With Resin classloader configuration
   &lt;/web-app&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="A Groovy Servlet">
+<s1 title="A Groovy Servlet">
 
 <p>Since Groovy compiles to Java .class files, application can write
 servlets using groovy.</p>
@@ -87,7 +87,7 @@ public class MyServlet extends GenericServlet {
 
 </example>
 
-</section>
+</s1>
 
 </body>
 </document>

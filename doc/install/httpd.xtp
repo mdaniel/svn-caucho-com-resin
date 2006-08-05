@@ -11,7 +11,7 @@
         performance and because it is easier to configure and maintain than
         using a separate web server.</p>
 
-        <figure src='httpd.gif'/>
+        <figure src="httpd.gif"/>
     </description>
 
   </header>
@@ -19,9 +19,9 @@
   <body>
     <summary/>
 
-<section title='Unix (including Linux and MacOS-X)'>
+<s1 title="Unix (including Linux and MacOS-X)">
 
-<section title="Getting Started">
+<s2 title="Getting Started">
 
 <p>The following steps will start Resin for development:</p>
 
@@ -35,8 +35,8 @@ set environment variable JAVA_HOME.</li>
 <li>Browse http://localhost:8080</li>
 </ol>
 
-<example title='Getting Started on Unix'>
-unix> resin-3.0.x/bin/httpd.sh
+<example title="Getting Started on Unix">
+unix&gt; resin-3.0.x/bin/httpd.sh
 Resin 3.0.0-beta (built Thu Feb 13 18:21:13 PST 2003)
 Copyright(c) 1998-2002 Caucho Technology.  All rights reserved.
 
@@ -52,9 +52,9 @@ Starting Resin on Sat, 01 Mar 2003 19:11:52 -0500 (EST)
 [19:12:12.933]hmux listening to *:6802
 </example>
 
-</section>
+</s2>
 
-<section title="./configure options">
+<s2 title="./configure options">
 
 <deftable>
 <tr><td>--enable-64bit</td><td>Compiles the JNI using 64-bits</td></tr>
@@ -64,9 +64,9 @@ Starting Resin on Sat, 01 Mar 2003 19:11:52 -0500 (EST)
 you'll need to use something like "-J-d64" to properly enable 64 bit JDKs.
 </p>
 
-</section>
+</s2>
 
-<section name='deploy' title='Deploying on Unix'>
+<s2 name="deploy" title="Deploying on Unix">
 
 <p>When deploying, it's a good idea to create a bit of structure to
 make Resin and website upgrades easier and more maintainable.</p>
@@ -84,15 +84,15 @@ the resin user.  This is $SERVER_ROOT.</li>
 when the machine reboots.</li>
 </ol>
 
-</section>
+</s2>
 
-<section title="bin/httpd.sh">
+<s2 title="bin/httpd.sh">
 
 <p>bin/httpd.sh uses a perl script, resin-3.0.0/bin/wrapper.pl,
 to control the Java process (bin/httpd.sh is a tiny shell script
 that calls wrapper.pl).  You can modify bin/httpd.sh.</p>
 
-<p>If you need to stop Resin with <var/kill/>, you'll need to kill
+<p>If you need to stop Resin with <var>kill</var>, you'll need to kill
 the wrapper.pl process to make sure it doesn't restart Resin.  ("httpd.sh stop"
 works by killing the wrapper.pl process.)
 or bin/wrapper.pl for your configuration.</p>
@@ -102,13 +102,12 @@ bin/httpd.sh will start and stop Resin as a Unix daemon
 for extra reliability.  If Resin should ever exit,
 it will automatically be restarted.</p>
 
-</section>
+</s2>
 
-<section name="script" title="Starting Script">
+<s2 name="script" title="Starting Script">
 
 <p>You can create your own starting script which will start and stop
-your Resin instance, and will pass any <a
-href="#command-line">command-line arguments</a>.  The script
+your Resin instance, and will pass any <a href="#command-line">command-line arguments</a>.  The script
 will typically do a number of things:</p>
 
 <ol>
@@ -153,13 +152,13 @@ you might use -server and -pid.</p>
 <li><a href="doc|install|linux-boot">Linux boot</a></li>
 </ul>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="Windows">
+<s1 title="Windows">
 
-<section title="Getting Started">
+<s2 title="Getting Started">
 
 <ol>
 <li>Install JDK 1.4 or later.</li>
@@ -169,8 +168,8 @@ you might use -server and -pid.</p>
 <li>Browse http://localhost:8080</li>
 </ol>
 
-<example title='Starting on Win32'>
-C:\win32> resin-3.0.0\bin\httpd
+<example title="Starting on Win32">
+C:\win32&gt; resin-3.0.0\bin\httpd
 Resin 3.0.0-beta (built Thu Feb 13 18:21:13 PST 2003)
 Copyright(c) 1998-2002 Caucho Technology.  All rights reserved.
 
@@ -186,22 +185,22 @@ Starting Resin on Sat, 01 Mar 2003 19:11:52 -0500 (EST)
 [19:12:12.933]hmux listening to *:6802
 </example>
 
-</section>
+</s2>
 
-<section title='Deploying as a Windows Service'>
+<s2 title="Deploying as a Windows Service">
 
 <p>The Resin Web Server can be installed as an Windows service.</p>
 
 <p>To install the service, use</p>
 
 <example>
-C:\> resin-3.0.x\bin\httpd -install -conf conf/myconf.conf
+C:\&gt; resin-3.0.x\bin\httpd -install -conf conf/myconf.conf
 </example>
 
 <p>To remove the service, use</p>
 
 <example>
-C:\> resin-3.0.x\bin\httpd -remove
+C:\&gt; resin-3.0.x\bin\httpd -remove
 </example>
 
 <p>You will either need to reboot the machine or start the service
@@ -211,21 +210,21 @@ machine reboot, Windows will automatically start the web server.</p>
 <p>You can also start and stop the service from the command-line:</p>
 
 <example>
-C:\> net start resin
+C:\&gt; net start resin
 ...
-C:\> net stop resin
+C:\&gt; net stop resin
 </example>
 
 <p>Resin's -install saves the command-line arguments and starts the service
 with those arguments.  You can look at them in the control panel, under
 the executable string.</p>
 
-<p>With multiple servers, you can use -install-as <var/foo/> to specify
+<p>With multiple servers, you can use -install-as <var>foo</var> to specify
 the service name.</p>
 
 <example>
-C:\> resin-3.0.x\bin\httpd -install-as ResinA -conf conf/myconf.conf -server a
-C:\> net start ResinA
+C:\&gt; resin-3.0.x\bin\httpd -install-as ResinA -conf conf/myconf.conf -server a
+C:\&gt; net start ResinA
 </example>
 
 <note>There is a bug in many JDKs which cause the JDK to exit when the
@@ -233,66 +232,66 @@ administrator logs out.  You can avoid that bug if the
 JDK is started with -Xrs. </note>
 
 <example>
-C:\> resin3.0.0/httpd.exe -install -Xrs
+C:\&gt; resin3.0.0/httpd.exe -install -Xrs
 </example>
 
-</section>
-</section>
+</s2>
+</s1>
 
-<section name="command-line" title="Command-line arguments">
+<s1 name="command-line" title="Command-line arguments">
 
 <deftable>
 <tr><th>Argument</th><th>Meaning</th><th>Default</th></tr>
 <tr><td>-verbose</td><td>Show the Java environment before starting Resin.</td><td>off</td></tr>
-<tr><td>-conf <var/xxx/><td>Selects the Resin configuration file<td>conf/resin.conf
-<tr><td>-java_home <var/xxx/><td>Sets the JDK (also recognizes the environment variable JAVA_HOME.)<td>A heuristic search 
-<tr><td>-resin_home <var/xxx/><td>Sets the Resin home directory (also recognizes the environment variable RESIN_HOME.)<td>The parent directory of wrapper.pl
-<tr><td>-classpath <var/xxx/><td>Adds to the system classpath.<td>$CLASSPATH
-<tr><td>-pid <var/xxx/><td>(Unix) With <var/start/> or <var/stop/>, sets the file
-to save the process id.<td>resin.pid
-<tr><td>-stdout <var/xxx/><td>Sets the file to save stdout messages.<td>log/stdout.log.
-<tr><td>-stderr <var/xxx/><td>Sets the file to save stdout messages.<td>log/stderr.log.
-<tr><td>-D<var/my.foo/>=<var/value/><td>Sets a Java system property.<td>n/a
-<tr><td>-X<var/xxx/><td>Passes the -X<var/xxx/> command to the JDK.<td>n/a
-<tr><td>-J<var/xxx/><td>Passes <var/xxx/> as a JDK argument.<td>n/a
-<tr><td>-nojit<td>Disables the Just-In-Time compiler. Useful for debugging.<td>enabled
-<tr><td>start<td>(Unix) Starts Resin as a daemon, saving the pid in the pid file.<td>n/a
-<tr><td>stop<td>(Unix) Stops Resin as a daemon, using the pid in the pid file.<td>n/a
-<tr><td>restart<td>(Unix) Restarts Resin as a daemon, using the pid in the pid file.<td>n/a
-<tr><td>-install<td>(Windows) install Resin as a service (but doesn't automatically start.)<td>n/a
-<tr><td>-install-as <var/xxx/><td>(Windows) install Resin as a named service (but doesn't automatically start.)<td>n/a
-<tr><td>-remove<td>(Windows) install Resin as a service (but doesn't automatically start.)<td>n/a
-<tr><td>-remove-as <var/xxx/><td>(Windows) remove Resin as a named service (but doesn't automatically start.)<td>n/a
-</deftable>
+<tr><td>-conf <var>xxx</var></td><td>Selects the Resin configuration file</td><td>conf/resin.conf
+</td></tr><tr><td>-java_home <var>xxx</var></td><td>Sets the JDK (also recognizes the environment variable JAVA_HOME.)</td><td>A heuristic search 
+</td></tr><tr><td>-resin_home <var>xxx</var></td><td>Sets the Resin home directory (also recognizes the environment variable RESIN_HOME.)</td><td>The parent directory of wrapper.pl
+</td></tr><tr><td>-classpath <var>xxx</var></td><td>Adds to the system classpath.</td><td>$CLASSPATH
+</td></tr><tr><td>-pid <var>xxx</var></td><td>(Unix) With <var>start</var> or <var>stop</var>, sets the file
+to save the process id.</td><td>resin.pid
+</td></tr><tr><td>-stdout <var>xxx</var></td><td>Sets the file to save stdout messages.</td><td>log/stdout.log.
+</td></tr><tr><td>-stderr <var>xxx</var></td><td>Sets the file to save stdout messages.</td><td>log/stderr.log.
+</td></tr><tr><td>-D<var>my.foo</var>=<var>value</var></td><td>Sets a Java system property.</td><td>n/a
+</td></tr><tr><td>-X<var>xxx</var></td><td>Passes the -X<var>xxx</var> command to the JDK.</td><td>n/a
+</td></tr><tr><td>-J<var>xxx</var></td><td>Passes <var>xxx</var> as a JDK argument.</td><td>n/a
+</td></tr><tr><td>-nojit</td><td>Disables the Just-In-Time compiler. Useful for debugging.</td><td>enabled
+</td></tr><tr><td>start</td><td>(Unix) Starts Resin as a daemon, saving the pid in the pid file.</td><td>n/a
+</td></tr><tr><td>stop</td><td>(Unix) Stops Resin as a daemon, using the pid in the pid file.</td><td>n/a
+</td></tr><tr><td>restart</td><td>(Unix) Restarts Resin as a daemon, using the pid in the pid file.</td><td>n/a
+</td></tr><tr><td>-install</td><td>(Windows) install Resin as a service (but doesn't automatically start.)</td><td>n/a
+</td></tr><tr><td>-install-as <var>xxx</var></td><td>(Windows) install Resin as a named service (but doesn't automatically start.)</td><td>n/a
+</td></tr><tr><td>-remove</td><td>(Windows) install Resin as a service (but doesn't automatically start.)</td><td>n/a
+</td></tr><tr><td>-remove-as <var>xxx</var></td><td>(Windows) remove Resin as a named service (but doesn't automatically start.)</td><td>n/a
+</td></tr></deftable>
 
-<section title='Memory Configuration'>
+<s2 title="Memory Configuration">
 
 <p>Memory configuration is part of the JVM's arguments.  For most JVMs,
 you can find the full list by starting "java -X".</p>
 
-<deftable title='Memory Configuration'>
-<tr><td>-Xms&lt;size><td>Initial Java heap size, e.g. -Xms32m
-<tr><td>-Xmx&lt;size><td>Maximum Java heap size, e.g. -Xmx128m
-</deftable>
+<deftable title="Memory Configuration">
+<tr><td>-Xms&lt;size&gt;</td><td>Initial Java heap size, e.g. -Xms32m
+</td></tr><tr><td>-Xmx&lt;size&gt;</td><td>Maximum Java heap size, e.g. -Xmx128m
+</td></tr></deftable>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title='Starting Java directly'>
+<s1 title="Starting Java directly">
 
-<p>You can use the <var/-verbose/> flag to see the arguments the startup
+<p>You can use the <var>-verbose</var> flag to see the arguments the startup
 scripts/executables pass to the JDK.  The main Java executable is
-<var/com.caucho.server.resin.Resin/> and starting Resin looks like
+<var>com.caucho.server.resin.Resin</var> and starting Resin looks like
 the following, once you've properly configured the classpath:</p>
 
 <example>
-unix> java -Dresin.home=/usr/resin \
+unix&gt; java -Dresin.home=/usr/resin \
            -Djava.util.logging.manager=com.caucho.log.LogManagerImpl \
            com.caucho.server.resin.Resin \
            -conf conf/resin.conf 
 </example>
-</section>
+</s1>
 
   </body>
 </document>

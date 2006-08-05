@@ -9,20 +9,20 @@
   </description>
 </header>
 
-<summary objsummary='localtoc'/>
+<summary objsummary="localtoc"/>
 
-<section title="See Also">
+<s1 title="See Also">
 
 <ul>
 <li>See <a href="tutorial/cmp-basic/index.xtp">Basic tutorial</a> for
 a complete single-table example.
-</ul>
+</li></ul>
 
-</section>
+</s1>
 
-<section title="Methods">
+<s1 title="Methods">
 
-<defun title="@Entity">
+<s2 title="@Entity" type="defun">
 
 <p>Annotates the class as an entity bean.</p>
 
@@ -31,15 +31,15 @@ and the <a href="tutorial/cmp-basic-field/index.xtp">basic field tutorial</a>
 for an introduction.</p>
 
 <deftable-childtags>
-<tr><td>name<td>The name of the bean<td>The class name (unqualified)
-<tr><td>entityType<td>container-managed (CMP) or bean-managed (BMP).<td>CMP
-<tr><td>access<td>FIELD or PROPERTY<td>PROPERTY
-<tr><td>version<td>The EJB version<td>3
-</deftable-childtags>
+<tr><td>name</td><td>The name of the bean</td><td>The class name (unqualified)
+</td></tr><tr><td>entityType</td><td>container-managed (CMP) or bean-managed (BMP).</td><td>CMP
+</td></tr><tr><td>access</td><td>FIELD or PROPERTY</td><td>PROPERTY
+</td></tr><tr><td>version</td><td>The EJB version</td><td>3
+</td></tr></deftable-childtags>
 
 <p>An <var>access</var> type of PROPERTY uses bean-style setters and getters
-to implement CMP, i.e. each field <var/Foo/> will have
-a <var/getFoo/> and a <var/setFoo/> method.  The
+to implement CMP, i.e. each field <var>Foo</var> will have
+a <var>getFoo</var> and a <var>setFoo</var> method.  The
 <a href="tutorial/cmp-basic/index.xtp">basic property tutorial</a> describes
 this access type.</p>
 
@@ -60,8 +60,8 @@ public @interface Entity {
 }
 </def>
 
-</defun>
+</s2>
 
-</section>
+</s1>
 
 </document>

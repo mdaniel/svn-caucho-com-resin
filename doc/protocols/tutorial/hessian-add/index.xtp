@@ -39,20 +39,20 @@ like RMI/IIOP, you can develop using Resin's Hessian.</p>
 <p>The <a href="../../hessian-1.0-spec.xtp">Hessian 1.0 spec</a> describes
 the full Hessian protocol.</p>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/classes/example/MathService.java"/>
-    <td>Interface for the math service.
-<tr><td><viewfile-link file="WEB-INF/classes/example/HessianMathService.java"/>
-    <td>The main service implementation.
-<tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    <td>Configures the environment
-<tr><td><viewfile-link file="demo.jsp"/>
-    <td>Client JSP
-</deftable>
-</section>
+    </td><td>Interface for the math service.
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/HessianMathService.java"/>
+    </td><td>The main service implementation.
+</td></tr><tr><td><viewfile-link file="WEB-INF/web.xml"/>
+    </td><td>Configures the environment
+</td></tr><tr><td><viewfile-link file="demo.jsp"/>
+    </td><td>Client JSP
+</td></tr></deftable>
+</s1>
 
-<section title="The Hessian Protocol">
+<s1 title="The Hessian Protocol">
 
 <p>A Hessian call is just an HTTP POST to a URL.  The arguments are
 serialized into the Hessian binary format and passed to the server.</p>
@@ -61,7 +61,7 @@ serialized into the Hessian binary format and passed to the server.</p>
 protocol, but it's simple enough that a basic example can help show
 what's happening underneath the API.</p>
 
-<example title='Hessian call'>
+<example title="Hessian call">
 c x01 x00
   m x00 x03 add
   I x00 x00 x00 x02
@@ -69,7 +69,7 @@ c x01 x00
 z
 </example>
 
-<example title='Hessian reply'>
+<example title="Hessian reply">
 r x01 x00
   I x00 x00 x00 x05
 z
@@ -81,25 +81,25 @@ service is uniquely specified by the URL.</p>
 <p>The following Addition example shows how to create a basic
 server so you can test Hessian.</p>
 
-</section>
+</s1>
 
-<section title="A Hessian Example">
+<s1 title="A Hessian Example">
 <p>Using Hessian generally uses three components:</p>
 <ol>
 <li>A remote interface
-<li>The server implementation
-<li>The client (JSP or servlet)
-</ol>
+</li><li>The server implementation
+</li><li>The client (JSP or servlet)
+</li></ol>
 
 <p>The remote interface is used by the Hessian proxy
 factory to create a proxy stub implementing the service's interface.</p>
 
-</section>
+</s1>
 
-<section title="Service Implementation">
+<s1 title="Service Implementation">
 
 <p>Resin's Hessian provides a simple way of creating a server.  Just extend
-<code/HessianServlet/> with your remote methods.  The Hessian call will just
+<code>HessianServlet</code> with your remote methods.  The Hessian call will just
 be a POST to that servlet.  HessianServlet will introspect the
 service and expose the methods.</p>
 
@@ -116,12 +116,12 @@ public class HessianMathService extends HessianServlet {
 }
 </example>
 
-</section>
+</s1>
 
-<section title="Remote Interface">
+<s1 title="Remote Interface">
 
 <p>The Java interface describes the remote API.  This example has an
-addition method, <var/add()/>.</p>
+addition method, <var>add()</var>.</p>
 
 <p>Resin's proxy client implementation uses the remote interface to
 expose the API to the proxy stub.  Strictly speaking, though,
@@ -136,20 +136,20 @@ public interface MathService {
 }
 </example>
 
-</section>
+</s1>
 
-<section title="Java Client">
+<s1 title="Java Client">
 
 <p>RPC clients follow the following steps in using a remote object:</p>
 <ol>
 <li>Determine the URL of the remote object.
-<li>Obtain a proxy stub from a proxy factory.
-<li>Call methods on the proxy stub.
-</ol>
+</li><li>Obtain a proxy stub from a proxy factory.
+</li><li>Call methods on the proxy stub.
+</li></ol>
 
 <example title="client.jsp">
-&lt;%@ page import="com.caucho.hessian.client.HessianProxyFactory" %>
-&lt;%@ page import="example.MathService" %>
+&lt;%@ page import="com.caucho.hessian.client.HessianProxyFactory" %&gt;
+&lt;%@ page import="example.MathService" %&gt;
 &lt;%
 HessianProxyFactory factory = new HessianProxyFactory();
 
@@ -162,15 +162,15 @@ String url = ("http://" +
 MathService math = (MathService) factory.create(MathService.class, url);
 
 out.println("3 + 2 = " + math.add(3, 2));
-%>
+%&gt;
 </example>
 <results>
 3 + 2 = 5
 </results>
 
-</section>
+</s1>
 
-<section title="Python Client">
+<s1 title="Python Client">
 
 <p>The <a href="http://www.caucho.com/hessian">Hessian site</a> has
 a basic Python library for Hessian.</p>
@@ -189,7 +189,7 @@ print "3 + 2 =", proxy.add(2, 3)
 3 + 2 = 5
 </results>
 
-</section>
+</s1>
 
   </body>
 </document>

@@ -10,16 +10,16 @@ packaged and then deployed.
 </header>
 
 <body>
-<section title="Deploying to a live server without interruption">
+<s1 title="Deploying to a live server without interruption">
 <p>It may be possible to deploy a web application to a live server
 without interruption to service if certain conditions are met.</p>
 
 <ol>
   <li>The session objects for your users are being persisted.
-  <li>The usage of session scoped objects between the old version and the new is compatible.
-  <li>The usage of application scoped objects between the old version and the new is compatible.
-  <li>Database schema changes are not required.
-</ol>
+  </li><li>The usage of session scoped objects between the old version and the new is compatible.
+  </li><li>The usage of application scoped objects between the old version and the new is compatible.
+  </li><li>Database schema changes are not required.
+</li></ol>
 
 <p>Resin allows you to have a backup instance running.  The idea is that
 this backup instance of Resin takes over if your primary Resin
@@ -34,20 +34,20 @@ interruption of service.</p>
 <ol>
 <li>shutdown primary server(s) (backup server(s) takes over)
 
-<li>deploy new war to primary server(s)
+</li><li>deploy new war to primary server(s)
 
-<li>start primary server(s).  As soon as the primary server starts,
+</li><li>start primary server(s).  As soon as the primary server starts,
 the user will be using the new version of the application.
     
-<li>deploy new war to backup server(s)
-</ol>
+</li><li>deploy new war to backup server(s)
+</li></ol>
 
-</section>
+</s1>
 
-<section name="precompile-jsp" title="JSP Precompilation">
+<s1 name="precompile-jsp" title="JSP Precompilation">
 
 See <a href="doc|jsp|compile">JSP/Compilation.</a>
-</section>
+</s1>
 
 </body>
 </document>

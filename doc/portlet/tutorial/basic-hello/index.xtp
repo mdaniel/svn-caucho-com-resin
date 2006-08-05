@@ -31,19 +31,19 @@ library to handle the Portlet API.</p>
 
 <ul>
 <li>The HelloWorldPortlet.java code
-<li>web.xml configuration of the Portlet servlet
-</ul>
+</li><li>web.xml configuration of the Portlet servlet
+</li></ul>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/classes/example/HelloWorldPortlet.java"/>
-    <td>Simple portlet
-<tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    <td>web-app configuration
-</deftable>
-</section>
+    </td><td>Simple portlet
+</td></tr><tr><td><viewfile-link file="WEB-INF/web.xml"/>
+    </td><td>web-app configuration
+</td></tr></deftable>
+</s1>
 
-<section title="Portlet">
+<s1 title="Portlet">
 <p>
 A Portlet is a class that implements <a href="javadoc|javax.portlet.Portlet|"/>.
 It is similar to a servlet.
@@ -81,9 +81,9 @@ public class HelloWorldPortlet extends GenericPortlet {
 }
 </example>
 
-</section>
+</s1>
 
-<section title="PortletServlet">
+<s1 title="PortletServlet">
 
 <p>
 <a href="javadoc|com.caucho.portal.generic.PortletServlet|"/>
@@ -121,9 +121,9 @@ more complete set of features such as sophisticated rendering and management of
 multiple portlets per page that a more complete portal provides.  
 </p>
 
-</section>
+</s1>
 
-<section title="Compatibility">
+<s1 title="Compatibility">
 <p>
 The tutorial takes advantage of Resin's dependency injection features.  The
 PortletServlet also supports the use of init-param's if dependency injection is not available.
@@ -147,9 +147,7 @@ PortletServlet also supports the use of init-param's if dependency injection is 
 &lt;/web-app&gt;
 </example>
 
-</section>
+</s1>
 
 </body>
 </document>
-
-

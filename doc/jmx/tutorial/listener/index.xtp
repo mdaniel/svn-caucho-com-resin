@@ -11,27 +11,27 @@
 
 <summary/>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    <td>Configures the JMX-managed bean
-<tr><td><viewfile-link file="WEB-INF/classes/example/Listener.java"/>
-    <td>The listener bean implementation.
-<tr><td><viewfile-link file="WEB-INF/classes/example/ListenerMBean.java"/>
-    <td>The management interface for the listener.
-<tr><td><viewfile-link file="WEB-INF/classes/example/Emitter.java"/>
-    <td>The emitter bean implementation.
-<tr><td><viewfile-link file="WEB-INF/classes/example/EmitterMBean.java"/>
-    <td>The management interface for the emitter.
-<tr><td><viewfile-link file="WEB-INF/classes/example/ListenerServlet.java"/>
-    <td>Using the managed bean.
-</deftable>
-</section>
+    </td><td>Configures the JMX-managed bean
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/Listener.java"/>
+    </td><td>The listener bean implementation.
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/ListenerMBean.java"/>
+    </td><td>The management interface for the listener.
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/Emitter.java"/>
+    </td><td>The emitter bean implementation.
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/EmitterMBean.java"/>
+    </td><td>The management interface for the emitter.
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/ListenerServlet.java"/>
+    </td><td>Using the managed bean.
+</td></tr></deftable>
+</s1>
 
-<section title="Emitter and Listener">
+<s1 title="Emitter and Listener">
 
 <p>JMX provides a general notification capability where MBean
-<var/emitters/> send data to MBean <var/listeners/>.  Any managed
+<var>emitters</var> send data to MBean <var>listeners</var>.  Any managed
 bean can be an emitter or a listener by implementing the
 proper interfaces.  The listeners are hooked up to the emitters either
 in the configuration file or through MBeanServer calls.</p>
@@ -45,7 +45,7 @@ any notification-specific information.</p>
 
 <p>The listener implements the single <code>handleNotification</code>
 method.  It's parameters are the notification and an opaque
-<var/handback/> object.  The <var/handback/> is specified during
+<var>handback</var> object.  The <var>handback</var> is specified during
 the listener registration and can be any information the listener
 wants.</p>
 
@@ -125,38 +125,38 @@ public class Emitter extends NotificationBroadcasterSupport
 
 </subsection>
 
-<section title="web.xml configuration">
+<s2 title="web.xml configuration">
 
 <p>The web.xml (or resin.conf) configures the resource with the
-&lt;resource> tag just as with
+&lt;resource&gt; tag just as with
 <a href="doc|resource|index">other resources</a>.  The resources is
-registered as an MBean by specifying an <var/mbean-name/>.
+registered as an MBean by specifying an <var>mbean-name</var>.
 
 <example title="web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
   &lt;resource mbean-name="example:name=emitter"
-            type="example.Emitter">
-  &lt;/resource>
+            type="example.Emitter"&gt;
+  &lt;/resource&gt;
 
   &lt;resource mbean-name="example:name=listener"
-            type="example.Listener">
-    &lt;listener mbean-name="example:name=emitter" handback="tutorial"/>
-  &lt;/resource>
-&lt;/web-app>
+            type="example.Listener"&gt;
+    &lt;listener mbean-name="example:name=emitter" handback="tutorial"/&gt;
+  &lt;/resource&gt;
+&lt;/web-app&gt;
 </example>
 
 <deftable>
-<tr><th>tag<th>description
-<tr><td>resource<td>defines the resource
-<tr><td>mbean-name<td>the MBean name of the resource
-<tr><td>type<td>the class name of the resource bean
-<tr><td>listener<td>registers the mbean with a notification emitter mbean
-<tr><td>handback<td>a custom object to be passed back to the listener
-</deftable>
+<tr><th>tag</th><th>description
+</th></tr><tr><td>resource</td><td>defines the resource
+</td></tr><tr><td>mbean-name</td><td>the MBean name of the resource
+</td></tr><tr><td>type</td><td>the class name of the resource bean
+</td></tr><tr><td>listener</td><td>registers the mbean with a notification emitter mbean
+</td></tr><tr><td>handback</td><td>a custom object to be passed back to the listener
+</td></tr></deftable>
 
-</section>
+</p></s2>
 
-<section title="Using the listener">
+<s2 title="Using the listener">
 
 <p>This example provides a <code>send()</code> method to
 trigger a notification, but most notifications occuring when
@@ -203,9 +203,9 @@ count: 15
 [15:37:17.453] notification(type=example.send,handback=tutorial)
 </results>
 
-</section>
+</s2>
 
-<section title="Configuration with Dependency Injection">
+<s2 title="Configuration with Dependency Injection">
 
 <p>The ListenerServlet example follows the
 Dependency Injection pattern.  Resin's web.xml will assemble the
@@ -221,30 +221,30 @@ and <code>setListener</code>.</p>
 
 <example title="web.xml">
 &lt;servlet-mapping url-pattern="/listener"
-                 servlet-class="example.ListenerServlet">
-  &lt;init>
-    &lt;emitter>\${jndi:lookup("mbean:example:name=emitter")}&lt;/emitter>
-    &lt;listener>\${jndi:lookup("mbean:example:name=listener")}&lt;/listener>
-  &lt;/init>
-&lt;/servlet-mapping>
+                 servlet-class="example.ListenerServlet"&gt;
+  &lt;init&gt;
+    &lt;emitter&gt;\${jndi:lookup("mbean:example:name=emitter")}&lt;/emitter&gt;
+    &lt;listener&gt;\${jndi:lookup("mbean:example:name=listener")}&lt;/listener&gt;
+  &lt;/init&gt;
+&lt;/servlet-mapping&gt;
 </example>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="Compatibility">
+<s1 title="Compatibility">
 
 <p>Notifications and listeners are part of the JMX standard.
 Client MBean proxies are standard and can be generated
 with <code>javax.management.MBeanServerInvocationHandler</code>
 </p>
 
-<p>The &lt;resource> configuration is Resin-specific.  The support
+<p>The &lt;resource&gt; configuration is Resin-specific.  The support
 for the Dependency Injection for servlet configuration
 and the "mbean:" JNDI scheme are also Resin-specific.</p>
 
-</section>
+</s1>
 
   </body>
 </document>

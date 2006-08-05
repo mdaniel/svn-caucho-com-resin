@@ -35,7 +35,7 @@ sax.jar, jaxp.jar, and webutil.jar under the resin/lib directory to the
 classpath.
 
 <p/>Set the Compilation output directory to doc\WEB-INF\classes by
-selecting Project/Compiler Options and click on the ">>" to add it. For
+selecting Project/Compiler Options and click on the "&gt;&gt;" to add it. For
 example, if you have installed Resin in your D:\ drive, then check the
 "Compilation output directory" and add the value
 "D:\resin\doc\WEB-INF\classes"

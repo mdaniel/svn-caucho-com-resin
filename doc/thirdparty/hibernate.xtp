@@ -7,22 +7,22 @@
   <body>
     <summary/>
 
-<section title="Hibernate">
+<s1 title="Hibernate">
 
 <p><a href="http://hibernate.bluemars.net">Hibernate</a> now provides
 a JCA interface in its beta release.  To configure it, use the following:</p>
 
 <example title="web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-  &lt;resource jndi-name="java:comp/env/hibernate">
-    &lt;type>net.sf.hibernate.jca.ManagedConnectionFactoryImpl&lt;/type>
-    &lt;init>
-      &lt;dialect>net.sf.hibernate.sql.MySQLDialect&lt;/dialect>
-      &lt;driver-class>org.gjt.mm.mysql.Driver&lt;/driver-class>
-      &lt;connection-url>jdbc:mysql://localhost:3306/test&lt;/connection-url>
-    &lt;/init>
-  &lt;/resource>
-&lt;/web-app>
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;resource jndi-name="java:comp/env/hibernate"&gt;
+    &lt;type&gt;net.sf.hibernate.jca.ManagedConnectionFactoryImpl&lt;/type&gt;
+    &lt;init&gt;
+      &lt;dialect&gt;net.sf.hibernate.sql.MySQLDialect&lt;/dialect&gt;
+      &lt;driver-class&gt;org.gjt.mm.mysql.Driver&lt;/driver-class&gt;
+      &lt;connection-url&gt;jdbc:mysql://localhost:3306/test&lt;/connection-url&gt;
+    &lt;/init&gt;
+  &lt;/resource&gt;
+&lt;/web-app&gt;
 </example>
 
 <p>Unfortunately, Hibernate's JCA interface does not yet allow
@@ -82,6 +82,6 @@ public class TestServlet extends HttpServlet {
 }
 </example>
 
-    </section>
+    </s1>
   </body>
 </document>

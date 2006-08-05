@@ -31,24 +31,24 @@ Student has a many-to-one relationship with House
   <body>
     <summary/>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
-    <td>web.xml configuration
-<tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>
-    <td>persistence.xml configuration
-<tr><td><viewfile-link file="WEB-INF/classes/example/Student.java"/>
-    <td>The student bean
-<tr><td><viewfile-link file="WEB-INF/classes/example/House.java"/>
-    <td>The house bean
-<tr><td><viewfile-link file="WEB-INF/classes/example/OneToManyServlet.java"/>
-    <td>The test servlet
-</deftable>
-</section>
+    </td><td>web.xml configuration
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>
+    </td><td>persistence.xml configuration
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/Student.java"/>
+    </td><td>The student bean
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/House.java"/>
+    </td><td>The house bean
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/OneToManyServlet.java"/>
+    </td><td>The test servlet
+</td></tr></deftable>
+</s1>
 
-<section title="Data Model: Object and Database Models">
+<s1 title="Data Model: Object and Database Models">
 
-<section title="Database Schema">
+<s2 title="Database Schema">
 
 <p>
 The database schema is unchanged from the
@@ -70,23 +70,21 @@ CREATE TABLE student (
   house BIGINT REFERENCES house(id)
 )
 </example>
-</section>
+</s2>
 
-<section title="@OneToMany - the relation's &quot;inverse&quot; side ">
-<p>The <var/House/> bean has a students field that returns the students that belong to the house.  House annotates <code>getStudents</code> with 
+<s2 title="@OneToMany - the relation's &quot;inverse&quot; side ">
+<p>The <var>House</var> bean has a students field that returns the students that belong to the house.  House annotates <code>getStudents</code> with 
 <code>@OneToMany</code> to describe the relationship.  The <code>@JoinColumn</code> is used to specify the <i>foreign key</i>, the field in <var>Student</var> 
 that is the <code>@ManyToOne</code> link.
 </p>
 
-<example title="House.java"
-         file="WEB-INF/classes/example/House.java"
-         re-marker="Get the Student" re-start="Get the Student" re-end="^  }">
+<example title="House.java" file="WEB-INF/classes/example/House.java" re-marker="Get the Student" re-start="Get the Student" re-end="^  }">
   @<a href="amber|amber-table.xtp#@OneToMany">OneToMany</a>(mappedBy="house")
   private Set&lt;Student&gt; _students;
 </example>
-</section>
+</s2>
 
-<section title="@ManyToOne - the relation's &quot;owning&quot; side">
+<s2 title="@ManyToOne - the relation's &quot;owning&quot; side">
 <p>
 A @OneToMany always requires a corresponding @ManyToOne on the target entity.
 The Student has a house field annotated a <code>@ManyToOne</code>,
@@ -94,17 +92,15 @@ unchanged from the
 <a href="ejb3|tutorial/cmp-many2one/index.xtp">Many-To-One tutorial</a>.
 </p>
 
-<example title="Student.java"
-         file="WEB-INF/classes/example/Student.java"
-         re-start="this Student belongs to" re-end="^  }">
+<example title="Student.java" file="WEB-INF/classes/example/Student.java" re-start="this Student belongs to" re-end="^  }">
 
   <a href="amber|amber-table.xtp#@ManyToOne">@ManyToOne</a>
   <a href="amber|amber-table.xtp#@JoinColumn">@JoinColumn</a>(name="house")
   private House _house;
 </example>
 
-</section>
-</section>
+</s2>
+</s1>
 <!--
 <section title="@FetchType">
 <p>
@@ -131,7 +127,7 @@ time.
 
 </section>
 -->
-<section title="java.util.Collection: Using House.getStudents()">
+<s1 title="java.util.Collection: Using House.getStudents()">
 
 <p>
 The one-to-many relation provides a House the ability to get all of its
@@ -142,9 +138,7 @@ database lookup.
 <p>The example queries all houses and prints their
 names and all of their students.</p>
 
-<example title="Using House.getStudents()"
-         file="WEB-INF/classes/example/OneToManyServlet.java"
-         re-start="SELECT h FROM" re-end="^    }">
+<example title="Using House.getStudents()" file="WEB-INF/classes/example/OneToManyServlet.java" re-start="SELECT h FROM" re-end="^    }">
 
 private void doService(PrintWriter out)
   throws java.io.IOException
@@ -175,43 +169,43 @@ private void doService(PrintWriter out)
 }
 </example>
 
-</section>
+</s1>
 
-<section title="Query extensions">
+<s1 title="Query extensions">
 
-<section title="Result Collections: SELECT h.students">
+<s2 title="Result Collections: SELECT h.students">
 
 <example title="h.students">
 SELECT h.students FROM House h WHERE h.name='Gryffindor'
 </example>
 
-</section>
+</s2>
 
-<section title="Joins: FROM House h, IN(h.students) s">
+<s2 title="Joins: FROM House h, IN(h.students) s">
 
 <example title="IN">
 SELECT s FROM House h, IN(h.students) s WHERE h.name='Gryffindor'
 </example>
 
-</section>
+</s2>
 
-<section title="Membership: s MEMBER OF h.students">
+<s2 title="Membership: s MEMBER OF h.students">
 
 <example title="MEMBER OF">
 SELECT s FROM Student s, House h WHERE s MEMBER OF h.students
 </example>
 
-</section>
+</s2>
 
-<section title="Empty: h.students IS EMPTY">
+<s2 title="Empty: h.students IS EMPTY">
 
 <example title="IS EMPTY">
 SELECT h FROM House h WHERE h.students IS EMPTY
 </example>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
   </body>
 </document>

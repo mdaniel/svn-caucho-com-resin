@@ -3,8 +3,8 @@
   <title>Entity Table Configuration</title>
 </header>
 
-<%
+&lt;%
 response.sendRedirect("../amber/amber-table.xtp");
-%>
+%&gt;
 
 </document>

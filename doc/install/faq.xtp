@@ -7,7 +7,7 @@
 </header>
 
 <body>
-<summary objsummary='localtoc'/>
+<summary objsummary="localtoc"/>
 
 <faq title="Where can I put .jar files so that they are available to all of my web applications?">
 <description>
@@ -20,9 +20,9 @@ for every web application that I have?
 
 <li>Make the directory <code>$RESIN_HOME/lib/local/</code>
 
-<li>Place the jars files that will be available to all of your web applications in <code>$RESIN_HOME/lib/local/</code>, for example  <code>$RESIN_HOME/lib/local/hogwarts.jar</code>
+</li><li>Place the jars files that will be available to all of your web applications in <code>$RESIN_HOME/lib/local/</code>, for example  <code>$RESIN_HOME/lib/local/hogwarts.jar</code>
 
-</ol>
+</li></ol>
 
 <p>Any jar file in <code>$RESIN_HOME/lib</code> will be available to all of the
 web applications.</p>
@@ -42,8 +42,7 @@ With Resin 2.1 used to run <code>make; make install</code> and then use the bina
 </description>
 
 <p>Resin 2.1 used the <code>bin/resin</code> binary to enable two features: JNI
-usage (including OpenSSL) and to support <a config-tag="user-name"/> and <a
-config-tag="group-name"/> for switching the effective user id of the process
+usage (including OpenSSL) and to support <a config-tag="user-name"/> and <a config-tag="group-name"/> for switching the effective user id of the process
 after attaching to ports under 1024.</p>
 
 <p>
@@ -55,9 +54,9 @@ JNI libraries.  Resin uses JNI for:
 
 <ul>
 <li>OpenSSL
-<li>low level system calls, for things like socket connections etc.
+</li><li>low level system calls, for things like socket connections etc.
   (for performance reasons).
-</ul>
+</li></ul>
 
 <p>So Resin can run without the JNI libraries, it just won't be as
 Resin as Resin.</p>
@@ -65,8 +64,7 @@ Resin as Resin.</p>
 <p>
 <a config-tag="user-name">user-name</a> and <a config-tag="group-name">group-name</a> support no longer need the resin binary either. The only
 place it won't work is on Linux systems that do not use the newer threading
-model.  For those systems, you can use a technique like the one <a
-href="#How-can-I-bind-to-a-port-under-1024-and-still-run-as-a-non-root-user?">described
+model.  For those systems, you can use a technique like the one <a href="#How-can-I-bind-to-a-port-under-1024-and-still-run-as-a-non-root-user?">described
 here.</a>
 </p>
 
@@ -75,8 +73,8 @@ here.</a>
 <faq title="How can I bind to a port under 1024 and still run as a non-root user?">
 <description>
 I want to bind resin to port 80, but my operating system only allows
-<var/root/> to bind to ports under 1024.  If I run Resin as <var/root/>, it is
-a security risk.  How can I start Resin as <var/root/> but then change the user
+<var>root</var> to bind to ports under 1024.  If I run Resin as <var>root</var>, it is
+a security risk.  How can I start Resin as <var>root</var> but then change the user
 and group id after it is bound to the port?
 </description>
 
@@ -108,7 +106,7 @@ One instance is for production, one for deployment testing.
 </description>
 
 <p>
-Yes, as long as you use different <code/http/> and <code/srun/> port numbers
+Yes, as long as you use different <code>http</code> and <code>srun</code> port numbers
 (so they don't conflict). Also, don't point each instance at the same
 <code>webapps/</code> directory, or the same directory for individual
 web-app's.  The two instances will get confused about which is responsible for

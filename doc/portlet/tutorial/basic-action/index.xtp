@@ -23,16 +23,16 @@ is an <i>action</i>, it is a request to do something.
 <body>
 <summary/>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/classes/example/HelloWorldPortlet.java"/>
-    <td>Portlet
-<tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    <td>web-app configuration
-</deftable>
-</section>
+    </td><td>Portlet
+</td></tr><tr><td><viewfile-link file="WEB-INF/web.xml"/>
+    </td><td>web-app configuration
+</td></tr></deftable>
+</s1>
 
-<section title="The form uses an Action URL">
+<s1 title="The form uses an Action URL">
 
 <p>
 An action URL is created with <code>response.createActionURL()</code>.  The
@@ -45,11 +45,7 @@ resulting url indicates to the portal that it should invoke the
 The portal may encode some special parameters in the url, and the use of the
 GET method would overwrite those parameters.</p>
 
-<example title="Creating an action URL"
-         file="WEB-INF/classes/example/HelloWorldPortlet.java"
-         re-marker="void rende"
-         re-start="createActionURL"
-         re-end="}">
+<example title="Creating an action URL" file="WEB-INF/classes/example/HelloWorldPortlet.java" re-marker="void rende" re-start="createActionURL" re-end="}">
 
     ...
 
@@ -96,19 +92,16 @@ The url that is in the <code>action</code> attribute contains the
 requet as an action request.
 </p>
 
-</section>
+</s1>
 
-<section title="Action parameters come from the browser">
+<s1 title="Action parameters come from the browser">
 
 <p>
 The portlet's implentation of <code>processAction()</code> uses 
 <code>response.getParameter()</code> to get the submitted form parameters.  
 </p>
 
-<example title="Action parameters"
-         file="WEB-INF/classes/example/HelloWorldPortlet.java"
-         re-marker="processAction"
-         re-start="getParameter">
+<example title="Action parameters" file="WEB-INF/classes/example/HelloWorldPortlet.java" re-marker="processAction" re-start="getParameter">
 
   public void processAction(ActionRequest request, ActionResponse response) 
     throws PortletException, IOException
@@ -129,9 +122,9 @@ available.
 </p>
 
 
-</section>
+</s1>
 
-<section title="Render parameters are reset">
+<s1 title="Render parameters are reset">
 
 <p>
 If the portlet is invoked from an action url, all render parameters are reset.
@@ -140,10 +133,7 @@ The implementation of the <code>processAction</code> must use
 susbsequent call to render().  
 </p>
 
-<example title="Action parameters"
-         file="WEB-INF/classes/example/HelloWorldPortlet.java"
-         re-marker="processAction"
-         re-start="setRenderParameter">
+<example title="Action parameters" file="WEB-INF/classes/example/HelloWorldPortlet.java" re-marker="processAction" re-start="setRenderParameter">
 
   public void processAction(ActionRequest request, ActionResponse response) 
     throws PortletException, IOException
@@ -155,6 +145,6 @@ susbsequent call to render().
     response.setRenderParameter("color", color); 
   }
 </example>
-</section>
+</s1>
 
-</document>
+</body></document>

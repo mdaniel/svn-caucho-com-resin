@@ -14,42 +14,42 @@
   <body>
   <summary/>
 
-  <section title="JSP Variables">
+  <s1 title="JSP Variables">
 
-<defun name=request title='request' index='request'>
+<s2 name="request" title="request" index="request" type="defun">
 <p>Contains the request object.</p>
-</defun>
+</s2>
 
-<defun name=response title='response' index='response'>
+<s2 name="response" title="response" index="response" type="defun">
 <p>Contains the response object.</p>
-</defun>
+</s2>
 
-<defun name=pageContext title='pageContext' index='page, variable'>
+<s2 name="pageContext" title="pageContext" index="page, variable" type="defun">
 <p>State for the current page.</p>
-</defun>
+</s2>
 
-<defun name=session title='session' index='session, variable'>
-<p>The current session.  <code/session/> is available only
-when the <a href='jsp|directives#session'>session</a> directive
+<s2 name="session" title="session" index="session, variable" type="defun">
+<p>The current session.  <code>session</code> is available only
+when the <a href="jsp|directives#session">session</a> directive
 is true.</p>
-</defun>
+</s2>
 
-<defun name=application title='application' index='application, variable'>
+<s2 name="application" title="application" index="application, variable" type="defun">
 <p>The current application.</p>
-</defun>
+</s2>
 
-<defun name=out title='out' index='out, variable; JspWriter'>
+<s2 name="out" title="out" index="out, variable; JspWriter" type="defun">
 <p>The buffered stream to the HTTP response.</p>
-</defun>
+</s2>
 
-<defun name=page title='page' index='page, variable'>
+<s2 name="page" title="page" index="page, variable" type="defun">
 <p>The current servlet.</p>
-</defun>
+</s2>
 
-<defun name=exception title='exception' index='exception, variable'>
+<s2 name="exception" title="exception" index="exception, variable" type="defun">
 <p>For error pages, the exception thrown from the broken page.</p>
-</defun>
+</s2>
 
-</section>
+</s1>
     </body>
 </document>

@@ -21,18 +21,18 @@ The Generic Portal package addresses these problems in the following way:
 
 <ul>
 <li>it has an Apache open source license
-<li>it provides the classes necessary to use portlets in any servlet container
-<li>configuration information is represented by a small number of classes with
+</li><li>it provides the classes necessary to use portlets in any servlet container
+</li><li>configuration information is represented by a small number of classes with
 simple implementations.  They can be used on their own, or easily specialized
 to provide an interface to particular portal implementations.
-</ul>
+</li></ul>
 </description>
 </header>
 
 <body>
 <summary/>
 
-<section title="Portlets as Servlets">
+<s1 title="Portlets as Servlets">
 
 <p>
 The generic portal classes, at their simplest, can be used to deploy portlets
@@ -47,16 +47,14 @@ comprehensive portal implementation .
 </p>
 
 <p>
-The generic portal includes <a
-href="javadoc|com.caucho.portal.generic.PortaletServlet|"/>.  A number of <a
-href="doc|portlet|tutorial/basic.xtp">tutorials</a> demonstrate the use of
+The generic portal includes <a href="javadoc|com.caucho.portal.generic.PortaletServlet|"/>.  A number of <a href="doc|portlet|tutorial/basic.xtp">tutorials</a> demonstrate the use of
 PortalServlet.  
 </p>
 
-</section>
+</s1>
 
 
-<section title="Configuration and portlets.xml">
+<s1 title="Configuration and portlets.xml">
 <p>
 The portlet specification indicates the portlets.xml file as the source of
 configuration information.  The generic portal implementation does not read
@@ -69,7 +67,7 @@ Users that wish to use the generic portal package in application servers
 other than Resin will be most interested in this section.
 </p>
 
-<section title="GenericPortletContext">
+<s2 title="GenericPortletContext">
 
 <p>
 The <a href="javadoc|javax.portlet.PortletContext|"/> interface is the
@@ -81,24 +79,24 @@ to a web application.
 
 <p>
 
-<p>
+</p><p>
 <a href="javadoc|com.caucho.portal.GenericPortletContext|"/> is an
 abstract implementation of PortletContext.  It provides an implementation
 of methods for storing and retrieving GenericPortletConfig objects. 
 It corresponds to the &lt;portlet&gt; elements within portlets.xml.
 </p>
 
-<section title="HttpPortletContext">
+<s3 title="HttpPortletContext">
 <p>
 HttpPortletContext extends GenericPortletContext and completes 
 the PortletContext interface requirements by providing a wrapper 
 around a ServletContext.
 </p>
-</section>
+</s3>
 
-</section>
+</s2>
 
-<section title="GenericPortletConfig">
+<s2 title="GenericPortletConfig">
 
 <p>
 The <a href="javadoc|javax.portlet.PortletConfig|"/> interface is the
@@ -108,9 +106,9 @@ and adds methods to handle the full range of configuration that is possible in
 a &lt;portlet&gt; configuration in portlets.xml.
 </p>
 
-</section>
+</s2>
 
-<section name="jndi" title="JNDI">
+<s2 name="jndi" title="JNDI">
 
 <p>
 The Generic Portal implementation uses JNDI to store and retrieve the
@@ -127,10 +125,10 @@ configured programmatically without the use of the xml file.
 </p>
 
 <p>The default JNDI name is "java:comp/env/PortletContext".</p>
-</section>
+</s2>
 
 
-<section title="Example - using the API to configure">
+<s2 title="Example - using the API to configure">
 <p>
 The following example shows how the generic portal API is used to
 create a configuration for a portal.  If this code were placed in
@@ -214,12 +212,12 @@ example of a portlets.xml file that corresponds to the configuration above:
 &lt;/portlet-app&gt;
 </example>
 
-</section>
-</section> <!-- configuration -->
+</s2>
+</s1> <!-- configuration -->
 
-<section name="customization" title="Customizing Portal behaviour">
+<s1 name="customization" title="Customizing Portal behaviour">
 
-<section title="GenericPortalContext">
+<s2 title="GenericPortalContext">
 
 <p>
 The <a href="javadoc|javax.portlet.PortalContext|"/> interface is a means for
@@ -235,7 +233,7 @@ getters defined by PortalContext.  Many portal's can simply instantiate a
 GenericPortalContext.  
 </p>
 
-</section>
+</s2>
 
 
 <!--
@@ -263,9 +261,7 @@ interfaces.
 </section>
 -->
 
-</section> <!-- customization -->
+</s1> <!-- customization -->
 
 </body>
 </document>
-
-

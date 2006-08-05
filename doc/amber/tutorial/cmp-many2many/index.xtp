@@ -12,24 +12,24 @@
   <body>
     <summary/>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
-    <td>resin-web.xml configuration
-<tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>
-    <td>persistence.xml configuration
-<tr><td><viewfile-link file="WEB-INF/classes/example/Student.java"/>
-    <td>The student bean
-<tr><td><viewfile-link file="WEB-INF/classes/example/Course.java"/>
-    <td>The course bean
-<tr><td><viewfile-link file="WEB-INF/classes/example/Grade.java"/>
-    <td>The grade bean
-<tr><td><viewfile-link file="WEB-INF/classes/example/ManyToManyServlet.java"/>
-    <td>The course servlet
-</deftable>
-</section>
+    </td><td>resin-web.xml configuration
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>
+    </td><td>persistence.xml configuration
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/Student.java"/>
+    </td><td>The student bean
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/Course.java"/>
+    </td><td>The course bean
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/Grade.java"/>
+    </td><td>The grade bean
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/ManyToManyServlet.java"/>
+    </td><td>The course servlet
+</td></tr></deftable>
+</s1>
 
-<section title="Entity Beans">
+<s1 title="Entity Beans">
 
 <p>The many-to-many relation connects two tables with an association table.
 In the example, each Student takes several Courses.  A grade_map table
@@ -91,9 +91,9 @@ public class Student {
   public Collection getCourses()
 }
 </example>
-</section>
+</s1>
 
-<section title="@ManyToMany">
+<s1 title="@ManyToMany">
 
 <p>The <a href="amber|amber-table.xtp#@ManyToMany">@ManyToMany</a>
 annotation marks a collection-valued field as a many-to-many relation.
@@ -104,9 +104,9 @@ relation.
 <p>Since the many-to-many relation is a three-table relation, it needs
 to specify the association table as well as the columns.</p>
 
-</section>
+</s1>
 
-<section title="Client">
+<s1 title="Client">
 
 <example title="ManyToManyServlet.java">
   private void doService(PrintWriter out)
@@ -123,23 +123,23 @@ to specify the association table as well as the columns.</p>
     for (int i = 0; i &lt; students.size(); i++) {
       Student student = (Student) students.get(i);
 
-      out.println("&lt;h3>" + student.getName() + "&lt;/h3>");
+      out.println("&lt;h3&gt;" + student.getName() + "&lt;/h3&gt;");
 
       Collection courses = student.getCourses();
 
-      out.println("&lt;ul>");
+      out.println("&lt;ul&gt;");
       Iterator iter = courses.iterator();
       while (iter.hasNext()) {
 	Course course = (Course) iter.next();
 
-	out.println("&lt;li>" + course.getName());
+	out.println("&lt;li&gt;" + course.getName());
       }
-      out.println("&lt;/ul>");
+      out.println("&lt;/ul&gt;");
     }
   }
 }
 </example>
 
-</section>
+</s1>
   </body>
 </document>

@@ -10,8 +10,8 @@
 </header>
 
 <body>
-<summary localtoc="3" />
-<section title="Using JSON in Quercus">
+<summary localtoc="3"/>
+<s1 title="Using JSON in Quercus">
 
 <p>
 Quercus has built-in JSON support and JSON functionality is enabled the moment Quercus is started: no additional downloads are required.  Quercus sports two PHP functions for working with JSON: <i>json_encode</i> and <i>json_decode</i>.
@@ -29,24 +29,24 @@ Quercus has built-in JSON support and JSON functionality is enabled the moment Q
 <ul>
 <li>
 If the text is that of a JSON array<sup><a href="http://www.json.org">[1]</a></sup>,  decoding returns a non-associative PHP array.
-<li>
+</li><li>
 If the text is that of a JSON object and the second argument to <i>json_decode</i> is not specified or is <i>false</i>, decoding returns a standard PHP object.
 </li>
 <li>
 If the text is that of a JSON object and the second argument to <i>json_decode</i> is <i>true</i>, then decoding returns an associative PHP array.
 </li>
 </ul>
-</section>
+</s1>
 
 
-<section title="Examples">
-<section title="json_encode">
+<s1 title="Examples">
+<s2 title="json_encode">
 <p>
 To encode an array into JSON:
 </p>
 <example>
  &lt;?php
-   $array = array("a"=>"Caucho", "b"=>"Resin", "c"=>"Quercus");
+   $array = array("a"=&gt;"Caucho", "b"=&gt;"Resin", "c"=&gt;"Quercus");
    $json = json_encode($array);
  ?&gt;
 </example>
@@ -54,9 +54,9 @@ To encode an array into JSON:
 The value of $json would be: <i>'{"a":"Caucho", "b":"Resin", "c":"Quercus"}'</i>.
 The JSON text may then be sent and used on the user's browser or to any client that can decode JSON.
 </p>
-</section>
+</s2>
 
-<section title="json_decode">
+<s2 title="json_decode">
 <p>
 To decode JSON data into a standard PHP object in Quercus (using the above JSON text <i>$json</i> as an example):
 </p>
@@ -68,9 +68,9 @@ To decode JSON data into a standard PHP object in Quercus (using the above JSON 
 <p>
 <i>$object</i> would be a standard PHP object with three fields "a", "b", and "c" with values "Caucho", "Resin", and "Quercus" respectively.
 </p>
-</section>
+</s2>
 
-<section title="Simple Web Example">
+<s2 title="Simple Web Example">
 <p>
 Below is a simple example using JSON on the web.
 </p>
@@ -78,7 +78,7 @@ Below is a simple example using JSON on the web.
  &lt;script type="text/javascript"&gt;
  
    &lt;?php
-     $array = array("a"=>"Caucho", "b"=>"Resin", "c"=>"Quercus");
+     $array = array("a"=&gt;"Caucho", "b"=&gt;"Resin", "c"=&gt;"Quercus");
      $json = json_encode($array);
      echo "var data = $json;";
    ?&gt;
@@ -89,24 +89,24 @@ Below is a simple example using JSON on the web.
    document.write(decoded.c + " at work.");
  &lt;/script&gt;
 </example>
-</section>
+</s2>
 
-<section title="AJAX Example">
+<s2 title="AJAX Example">
 <p>
 JSON data is more commonly sent to the browser via AJAX requests.  Suppose there are two files defined below.  The PHP script in <i>data.php</i> encodes an array into JSON.  When the user's browser is directed to <i>index.html</i>, an AJAX request receives JSON data from <i>data.php</i>.  Then the browser calls <i>eval()</i> on the JSON data to recover a JavaScript object.
 </p>
 
-<section title="data.php:">
+<s3 title="data.php:">
 <example>
  &lt;?php
-   $array = array("a"=>"Caucho", "b"=>"Resin", "c"=>"Quercus");
+   $array = array("a"=&gt;"Caucho", "b"=&gt;"Resin", "c"=&gt;"Quercus");
    $json = json_encode($array);
    echo $json;
  ?&gt;
 </example>
-</section>
+</s3>
 
-<section title="index.html:">
+<s3 title="index.html:">
 <example>
  &lt;html&gt;
  &lt;head&gt;
@@ -141,7 +141,7 @@ JSON data is more commonly sent to the browser via AJAX requests.  Suppose there
  &lt;/script&gt;
  &lt;/head&gt;
  &lt;body&gt;
-  &lt;form name="firstForm">
+  &lt;form name="firstForm"&gt;
    &lt;p&gt;JSON:&lt;br&gt;&lt;textarea name="json" cols="50"&gt;&lt;/textarea&gt;&lt;/p&gt;
    &lt;p&gt;Decoded:&lt;br&gt;&lt;textarea name="decoded" cols="50"&gt;&lt;/textarea&gt;&lt;/p&gt;
    &lt;input type="button" onclick="request()" value="AJAX Request"&gt;
@@ -150,16 +150,16 @@ JSON data is more commonly sent to the browser via AJAX requests.  Suppose there
  &lt;/body&gt;
  &lt;/html&gt;
 </example>
-</section>
+</s3>
 
-<section title="AJAX example in action">
+<s3 title="AJAX example in action">
 Click <a href="index.html">here</a> to see this example in action.
-</section>
+</s3>
 
-</section>
-</section>
+</s2>
+</s1>
 
-<section title="External Links">
+<s1 title="External Links">
 <ul>
   <li>
   <a href="http://www.json.org">Official JSON Homepage</a>
@@ -176,8 +176,7 @@ Click <a href="index.html">here</a> to see this example in action.
   </a>
   </li>
 </ul>
-</section>
+</s1>
 
 </body>
 </document>
-

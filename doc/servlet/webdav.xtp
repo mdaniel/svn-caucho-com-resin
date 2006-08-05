@@ -12,7 +12,7 @@ WebDAV server directly and several operating systems can provide a
 filesystem to a WebDAV server.</p>
   
 <p>From <a href="external|webdav|index">www.webdav.org</a>:
-<blockquote>
+</p><blockquote>
 <b>What is WebDAV?</b><br/>
 
 Briefly: WebDAV stands for "Web-based Distributed Authoring and Versioning".
@@ -27,7 +27,7 @@ understand WebDAV.</p>
 
 <body>
 <summary/>
-<section name='configure' title="Configuring the WebDAV Servlet">
+<s1 name="configure" title="Configuring the WebDAV Servlet">
 
 <p>The WebDAV servlet must be enabled explicitly.  By default, it also
 requires a logged in user playing the 'webdav' role and requires a
@@ -36,20 +36,20 @@ the defaults require security makes it unlikely that a webmaster will
 enable WebDAV by mistake.</p>
 
 <deftable-parameters>
-<tr><td>enable<td>Enable webdav servlet for read ("read") or read/write ("write")<td>false (disabled)
-<tr><td>role<td>The role required for webdav, '*' means no role required<td>webdav
-<tr><td>user<td>A specific user required for webdav<td>none
-<tr><td>secure<td>If true, only allow updates over a secure connection
-(SSL)<td>true
-<tr><td>root<td>Configures the root directory for webdav<td>The application root
-<tr><td>path-source<td>The jndi name of a custom path backing previously defined as a resource.  This allows a custom path backing, e.g. a database source<td>an instance of  <a href="javadoc|com.caucho.servlets.webdav.ApplicationPath|"></a>
+<tr><td>enable</td><td>Enable webdav servlet for read ("read") or read/write ("write")</td><td>false (disabled)
+</td></tr><tr><td>role</td><td>The role required for webdav, '*' means no role required</td><td>webdav
+</td></tr><tr><td>user</td><td>A specific user required for webdav</td><td>none
+</td></tr><tr><td>secure</td><td>If true, only allow updates over a secure connection
+(SSL)</td><td>true
+</td></tr><tr><td>root</td><td>Configures the root directory for webdav</td><td>The application root
+</td></tr><tr><td>path-source</td><td>The jndi name of a custom path backing previously defined as a resource.  This allows a custom path backing, e.g. a database source</td><td>an instance of  <a href="javadoc|com.caucho.servlets.webdav.ApplicationPath|"/>
 
-</deftable-parameters>
+</td></tr></deftable-parameters>
 
 
 <p>The following example is a typical WebDAV configuration.  The explicit
-servlet-mapping and setting <var/enable/> to 'write' is necessary.  Since
-<var/secure/> is left as the default, it will require an SSL connection.</p>
+servlet-mapping and setting <var>enable</var> to 'write' is necessary.  Since
+<var>secure</var> is left as the default, it will require an SSL connection.</p>
 
 <example title="Enabling WebDAV">
 &lt;servlet&gt;
@@ -64,10 +64,10 @@ servlet-mapping and setting <var/enable/> to 'write' is necessary.  Since
 
 &lt;authenticator&gt;
   &lt;type&gt;com.caucho.server.security.XmlAuthenticator&lt;/type&gt;
-  &lt;init>
-    &lt;user>Harry Potter:quidditch:webdav&lt;/user>
-    &lt;password-digest>none&lt;/password-digest>
-  &lt;/init>
+  &lt;init&gt;
+    &lt;user&gt;Harry Potter:quidditch:webdav&lt;/user&gt;
+    &lt;password-digest&gt;none&lt;/password-digest&gt;
+  &lt;/init&gt;
 &lt;/authenticator&gt;
 
 &lt;login-config&gt;
@@ -95,7 +95,7 @@ update the site:</p>
 </example>
 
 <p>The WebDAV servlet can point to a different directory by
-setting the <var/root/> parameter.  The path is relative to the
+setting the <var>root</var> parameter.  The path is relative to the
 web-app, and allows path variables.  For example, the following would
 read and write files from WEB-INF/webdav:</p>
 
@@ -113,9 +113,9 @@ read and write files from WEB-INF/webdav:</p>
 &lt;servlet-mapping url-pattern='/webdav/*' servlet-name='webdav'/&gt;
 </example>
 
-</section>
+</s1>
 
-<section title='Configuring Windows'>
+<s1 title="Configuring Windows">
 
 <p>Recent versions of Windows and the Windows Office suite directly
 support WebDAV.  WebDAV is configured in "My Network Places".</p>
@@ -133,9 +133,9 @@ complete the dialog.</p>
 Windows programs can load and save to the server.  You can also open an
 IE window to the mapped folder and use it as a normal folder.</p>
 
-</section>
+</s1>
 
-<section name='customize' title='Custom Path Sources'>
+<s1 name="customize" title="Custom Path Sources">
 
 <p>The WebDAV servlet can be customized to use a source other than the
 default path source.  For example, it would be possible to use WebDAV
@@ -145,8 +145,7 @@ with files stored in a database.</p>
 </code> parameter in the WebDavServlet(see <a href="#configure">Configuring the
 WebDAV Servlet</a>).  You configure an object with the JNDI name
 <code>java:comp/env/my-path</code> using <a config-tag="resource"/> to
-configure a custom class that extends <a
-href="javadoc|com.caucho.servlets.webdav.AbstractPath|"/></p>
+configure a custom class that extends <a href="javadoc|com.caucho.servlets.webdav.AbstractPath|"/></p>
 
 <example title="WebDAV with a custom source">
 &lt;resource jndi-name='resin/webdav'&gt;
@@ -171,9 +170,9 @@ href="javadoc|com.caucho.servlets.webdav.AbstractPath|"/></p>
 <p>You can completely customize your WebDav backend, 
 linking it to databases or some EJB-based data source or whatever.</p>
 
-</section>
+</s1>
 
-<section title="FAQ">
+<s1 title="FAQ">
 <faq title="How do I configure the WebDAV servlet to recognize more than one root folder?">
 <description>
 <p>I'm trying to set up the Webdav servlet to recognize more than one 
@@ -181,8 +180,7 @@ root folder because I need to create multiple Webdav shares from
 different drives.</p>
 </description>
  
-<p>There's a "root" parameter for the WebDavServlet (see <a
-href="#configure">Configuring the WebDAV Servlet</a>).  You can
+<p>There's a "root" parameter for the WebDavServlet (see <a href="#configure">Configuring the WebDAV Servlet</a>).  You can
 set that and use several separate webdav instances.</p>
 
 <example>
@@ -223,7 +221,7 @@ can customize the data source by creating your own ApplicationPath.</p>
 getPath method.</p>
 
 </faq>
-</section> <!-- faq -->
+</s1> <!-- faq -->
 
 </body>
 </document>

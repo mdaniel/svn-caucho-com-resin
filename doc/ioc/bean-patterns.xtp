@@ -16,9 +16,9 @@ or <em>Dependency Injection</em> pattern.</p>
 </header>
 <body>
 
-<summary objsummary='none'/>
+<summary objsummary="none"/>
 
-<section title="Overview">
+<s1 title="Overview">
 
 <p>The Assembly Line pattern gives configuration responsibility to the
 container where it belongs, while keeping the application code independent
@@ -34,9 +34,9 @@ easier to understand, maintain, configure and test.</p>
 
 <p><figure src="assembler-eg1.gif"/></p>
 
-</section>
+</s1>
 
-<section title="Property Configuration: setXXX">
+<s1 title="Property Configuration: setXXX">
 
 <p>The bean configuration form the foundation of the Assembly
 Line pattern.  Since most applications already follow the bean patterns,
@@ -72,9 +72,9 @@ public class MyBean {
 }
 </example>
 
-</section>
+</s1>
 
-<section title="Setter Injection: setXXX">
+<s1 title="Setter Injection: setXXX">
 
 <p>Setter injection connects resources following the same
 bean-style setter pattern.  Where bean properties configure simple
@@ -87,9 +87,9 @@ specifies the JNDI resource using the JSP expression language and
 jndi:lookup.</p>
 
 <example title="Configuration for Setter Injection">
-&lt;init>
-  &lt;data-source>\${jndi:lookup("jdbc/test")}&lt;data-source>
-&lt;/init>
+&lt;init&gt;
+  &lt;data-source&gt;\${jndi:lookup("jdbc/test")}&lt;data-source&gt;
+&lt;/init&gt;
 </example>
 
 <example title="Setter Injection for a DataSource">
@@ -103,16 +103,16 @@ public class MyBean {
 }
 </example>
 
-<section title="Compatibility">
+<s2 title="Compatibility">
 
 <p>Setter injection is portable to containers which
 support dependency injection.</p>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="Container Properties: addXXX">
+<s1 title="Container Properties: addXXX">
 
 <p>Resources often act as containers for lists of values and map values.
 The <code>addXXX</code> pattern adds multiple values for a single property.
@@ -140,9 +140,9 @@ public class MyBean {
 }
 </example>
 
-</section>
+</s1>
 
-<section title="Validation and Assembly: init()">
+<s1 title="Validation and Assembly: init()">
 
 <p>Well-written resources will validate their configuration and may
 perform additional assembly tasks.  Resin calls <code>init()</code> method
@@ -171,7 +171,7 @@ public class MyBean {
 }
 </example>
 
-<section title="Validation Exceptions">
+<s2 title="Validation Exceptions">
 <p>If an exception is thrown from any of the methods in the bean,
 Resin will attach a file name and line number that correspond to the
 configuration file.</p>
@@ -215,10 +215,10 @@ public class MyBean {
 
 WEB-INF/web.xml:9: java.lang.Exception: 'country' must be a two-character string
 </results>
-</section>
-</section>
+</s2>
+</s1>
 
-<section title="Nested Beans: createXXX">
+<s1 title="Nested Beans: createXXX">
 
 <p>Beans can be nested, allowing a bean to have setters that have
 other sub-beans as the type.</p>
@@ -297,9 +297,9 @@ public class LogCleaner {
  
 }
 </example>
-</section>
+</s1>
 
-<section title="Setting with the body text">
+<s1 title="Setting with the body text">
 <p>The <code>addText()</code> method will capture the body of the tag
 for a bean setter.</p>
 
@@ -325,23 +325,23 @@ public class MyBean {
 }
 </example>
 
-</section>
+</s1>
 
-<section title="Returning a different object">
+<s1 title="Returning a different object">
 
 <p>There are some unusual cases where the configured bean is just a
 configuration object and you want to return a different bean.  The
 bean can implement a method <code>Object replaceObject()</code> to return a
 different object. Called after the init(). </p>
 
-</section>
+</s1>
 
-<section title="See also">
+<s1 title="See also">
 <ul>
 <li><a href="doc|config|control#resin:import">resin:import</a>
-<li><a href="doc|resource|tutorial/injection/index.xtp">Dependency Injection Tutorial</a>
-</ul>
-</section> <!-- import -->
+</li><li><a href="doc|resource|tutorial/injection/index.xtp">Dependency Injection Tutorial</a>
+</li></ul>
+</s1> <!-- import -->
 
 </body>
 </document>

@@ -1,4 +1,4 @@
-<section>
+<document>
   <header>
     <product>resin</product>
     <title>Forms</title>
@@ -7,7 +7,8 @@
     <brief>Using forms to get information from the user</brief>
   </header>
 
-
+<body>
+<s1>
 <p>Forms are, of course, the most important way of getting information
 from the customer of a web site.  In this section, we'll just create a
 simple color survey and print the results back to the user.</p>
@@ -15,11 +16,11 @@ simple color survey and print the results back to the user.</p>
 <p>First, create the entry form.  Our HTML form will send its answers
 to form.jsp for processing.</p>
 
-<p>For this example, the <code/name="name"/> and <code/name="color"/>
+<p>For this example, the <code>name="name"</code> and <code>name="color"</code>
 are very important.  You will use these keys to extract the user's
 responses.</p>
 
-<example title='form.html'>
+<example title="form.html">
 
 &lt;form action="form.jsp" method="get"&gt;
 
@@ -38,22 +39,22 @@ responses.</p>
 </example>
 
 <p>Resin keeps the browser request information in the
-<code/request/> object.  The <code/request/> object contains the
+<code>request</code> object.  The <code>request</code> object contains the
 environment variables you may be familiar with from CGI programming.
 For example, it has the browser type, any HTTP headers, the server
 name and the browser IP address.</p>
 
-<p>You can get form values using <code/request.getParameter/> object.</p>
+<p>You can get form values using <code>request.getParameter</code> object.</p>
 
 <p>The following JSP script will extract the form values and print them
 right back to the user.</p>
 
-<example title='form.jsp'>
+<example title="form.jsp">
 Name: &lt;%= request.getParameter("name") %&gt; &lt;br&gt;
 Color: &lt;%= request.getParameter("color") %&gt; 
 </example>
 
-</section>
+</s1>
 
-
-
+</body>
+</document>

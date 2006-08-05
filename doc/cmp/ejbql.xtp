@@ -8,48 +8,48 @@
   <body>
     <summary/>
 <def>
-SELECT <var/expr/>
-FROM <var/schema/> AS <var/var/>, IN(<var/path/>) AS <var/var1/>, ...
-[WHERE <var/expr/>]
-[ORDER BY <var/expr/>]
-[OFFSET <var/integer/>]
-[LIMIT <var/integer/>]
+SELECT <var>expr</var>
+FROM <var>schema</var> AS <var>var</var>, IN(<var>path</var>) AS <var>var1</var>, ...
+[WHERE <var>expr</var>]
+[ORDER BY <var>expr</var>]
+[OFFSET <var>integer</var>]
+[LIMIT <var>integer</var>]
 </def>
 
 <p>The WHERE and ORDER BY clauses are optional.</p>
 
 
-<section name='sections' title='Query Sections'>
+<s1 name="sections" title="Query Sections">
 
-<defun title='SELECT'>
+<s2 title="SELECT" type="defun">
 <p>Specifies the query's values.</p>
 
 <def>
-SELECT DISTINCT? <var/expr/>
+SELECT DISTINCT? <var>expr</var>
 </def>
 
-</defun>
+</s2>
 
-<defun title='FROM'>
+<s2 title="FROM" type="defun">
 <p>Specifies the query's schema and variables.</p>  
 
 <def>
-FROM <var/schema/> AS <var/var/>, IN(<var/path/>) AS <var/var1/>, ...
+FROM <var>schema</var> AS <var>var</var>, IN(<var>path</var>) AS <var>var1</var>, ...
 </def>
 
-</defun>
+</s2>
 
-<defun title='WHERE'>
+<s2 title="WHERE" type="defun">
 <p>Restricts the selected values to those matching
 a boolean expression.</p>
 
 <def>
-WHERE <var/boolean-expr/>
+WHERE <var>boolean-expr</var>
 </def>
 
-</defun>
+</s2>
 
-<defun title='ORDER BY' version='Resin-CMP 1.0'>
+<s2 title="ORDER BY" version="Resin-CMP 1.0" type="defun">
 <p>Sorts the returned values.  The sorts the results of a query
 by an expression.  Because the database sorts the results, ORDER BY
 can often be more efficient than sorting in Java in addition to
@@ -59,12 +59,12 @@ being clearer.</p>
 the ORDER BY field to be selected by the argument.</p>
 
 <def>
-ORDER BY? <var/expr/>
+ORDER BY? <var>expr</var>
 </def>
 
-</defun>
+</s2>
 
-<defun title='OFFSET' version='Resin-CMP 2.1.1'>
+<s2 title="OFFSET" version="Resin-CMP 2.1.1" type="defun">
 <p>For a collection-valued query, returns items starting from the
 offset value.  Only integer constants and integer arguments like ?3
 are allowed.</p>
@@ -82,9 +82,9 @@ called with the same query.</p>
 SELECT o FROM items o ORDER BY o.id OFFSET ?1 LIMIT ?2
 </example>
 
-</defun>
+</s2>
 
-<defun title='LIMIT' version='Resin-CMP 2.1.1'>
+<s2 title="LIMIT" version="Resin-CMP 2.1.1" type="defun">
 <p>For a collection-valued query, limits the number of items returned.
 Only integer constants and integer arguments like ?3
 are allowed.</p>
@@ -102,13 +102,13 @@ called with the same query.</p>
 SELECT o FROM items o ORDER BY o.id OFFSET ?1 LIMIT ?2
 </example>
 
-</defun>
+</s2>
 
-</section>
+</s1>
 
-<section title='Expressions'>
+<s1 title="Expressions">
 
-<defun name='cmp-path' title="bean-expr . cmp-field">
+<s2 name="cmp-path" title="bean-expr . cmp-field" type="defun">
 <p>Selects a field value from an entity bean.  The type of the
 expression is the type of the cmp-field.</p>
 
@@ -118,9 +118,9 @@ FROM courses c
 WHERE c.room = 'Leaky Dungeon'
 </example>
 
-</defun>
+</s2>
 
-<defun name='cmr-path' title="bean-expr . cmr-field">
+<s2 name="cmr-path" title="bean-expr . cmr-field" type="defun">
 <p>Selects relation bean from an entity bean.  The type of the
 expression is the bean result.  Because the value of the expression is
 an entity bean, the expression can be used in a further path
@@ -132,12 +132,12 @@ FROM courses c
 WHERE c.teacher.name = 'Severus Snape'
 </example>
 
-</defun>
+</s2>
 
-<defun name='arg' title="?n">
+<s2 name="arg" title="?n" type="defun">
 <p>A find or select method argument.  The value of the
 argument is inserted into the expression.  The count is 1-based, so
-a method with a single argument will use <var/?1/>.  The type of the
+a method with a single argument will use <var>?1</var>.  The type of the
 expression is the type of the method argument.</p>
 
 <example>
@@ -146,38 +146,38 @@ FROM courses c
 WHERE c.room = ?1
 </example>
 
-</defun>
+</s2>
 
-<defun name='add' title="expr + expr">
+<s2 name="add" title="expr + expr" type="defun">
 <p>Arithmetic expressions.  Adds, subtracts, multiplies or
 divides two expressions, returning a numeric expression.  The
 sub-expressions must have numeric values.</p>
 
 <deftable>
-<tr><th>Operator<th>Meaning
-<tr><td>+<td>Add
-<tr><td>-<td>Subtract
-<tr><td>*<td>Multiply
-<tr><td>/<td>Divide
-</deftable>
+<tr><th>Operator</th><th>Meaning
+</th></tr><tr><td>+</td><td>Add
+</td></tr><tr><td>-</td><td>Subtract
+</td></tr><tr><td>*</td><td>Multiply
+</td></tr><tr><td>/</td><td>Divide
+</td></tr></deftable>
 
-</defun>
+</s2>
 
-<defun name='cmp' title="expr = expr">
+<s2 name="cmp" title="expr = expr" type="defun">
 <p>Comparison expressions.  Compares two expressions,
 returning a boolean expression.  The two expressions for an
 equality comparison must have compatible types.
 The expressions for less-than comparison must have numeric values.</p>
 
 <deftable>
-<tr><th>Operator<th>Meaning
-<tr><td>=<td>Equals
-<tr><td>&lt;&gt;<td>Not equals
-<tr><td>&lt;<td>Less-than
-<tr><td>&lt;=<td>Less-than or equal to
-<tr><td>&gt;<td>Greater-than
-<tr><td>&gt;=<td>Greater-than or equal to
-</deftable>
+<tr><th>Operator</th><th>Meaning
+</th></tr><tr><td>=</td><td>Equals
+</td></tr><tr><td>&lt;&gt;</td><td>Not equals
+</td></tr><tr><td>&lt;</td><td>Less-than
+</td></tr><tr><td>&lt;=</td><td>Less-than or equal to
+</td></tr><tr><td>&gt;</td><td>Greater-than
+</td></tr><tr><td>&gt;=</td><td>Greater-than or equal to
+</td></tr></deftable>
 
 <example>
 SELECT c
@@ -185,9 +185,9 @@ FROM courses c
 WHERE c.students &lt; 20
 </example>
 
-</defun>
+</s2>
 
-<defun name='is-null' title="IS [NOT] NULL">
+<s2 name="is-null" title="IS [NOT] NULL" type="defun">
 <p>Tests for a null value.  IS NULL can be used both for
 SQL null values and for null relation values.</p>
 
@@ -200,39 +200,39 @@ FROM courses c
 WHERE c.teacher IS NULL
 </example>
 
-</defun>
+</s2>
 
-<defun name='and' title="expr AND expr">
+<s2 name="and" title="expr AND expr" type="defun">
 <p>Boolean and expression.  Evaluates to true if both
 expressions are true.  Both expressions must be boolean and
 the result is a boolean.</p>
-</defun>
+</s2>
 
-<defun name='or' title="expr OR expr">
+<s2 name="or" title="expr OR expr" type="defun">
 <p>Boolean or expression.  Evaluates to true if either
 expression is true.  Both expressions must be boolean and
 the result is a boolean.</p>
-</defun>
+</s2>
 
-<defun name='not' title="NOT expr">
+<s2 name="not" title="NOT expr" type="defun">
 <p>Boolean not expression.  The expression and the result are
 boolean expressions.</p>
-</defun>
+</s2>
 
-<defun name='fun' title="fun_name(expr, ...)">
+<s2 name="fun" title="fun_name(expr, ...)" type="defun">
 <p>Applies a function to the expression arguments.
 Resin-CMP will allow the functions defined in the JDBC 2.0 spec,
 but the EJB-QL spec only defines the following functions:</p>
 
 <deftable>
-<tr><th>Function<th>Description
-<tr><td>CONCAT(string, string)<td>Contatenates two strings
-<tr><td>SUBSTRING(string, start, len)<td>Selects a substring
-<tr><td>LOCATE(string, start [, start])<td>Finds a substring
-<tr><td>LENGTH(string)<td>Returns the string length
-<tr><td>ABS(number)<td>Returns the absolute value
-<tr><td>SQRT(double)<td>Returns the square root of a number
-</deftable>
+<tr><th>Function</th><th>Description
+</th></tr><tr><td>CONCAT(string, string)</td><td>Contatenates two strings
+</td></tr><tr><td>SUBSTRING(string, start, len)</td><td>Selects a substring
+</td></tr><tr><td>LOCATE(string, start [, start])</td><td>Finds a substring
+</td></tr><tr><td>LENGTH(string)</td><td>Returns the string length
+</td></tr><tr><td>ABS(number)</td><td>Returns the absolute value
+</td></tr><tr><td>SQRT(double)</td><td>Returns the square root of a number
+</td></tr></deftable>
 
 <p>Additional functions can be added using the
 <a href="resin-ejb-config.xtp#query-function">query-function</a> tag in the
@@ -328,8 +328,8 @@ Date timestampadd(Date, Date)
 Date timestampdiff(Date, Date)
 </def>
 
-</defun>
+</s2>
 
-</section>
+</s1>
   </body>
 </document>

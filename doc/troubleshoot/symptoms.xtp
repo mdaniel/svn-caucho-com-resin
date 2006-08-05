@@ -12,61 +12,60 @@
 <body>
 <summary localtoc="1"/>
 
-<section title="Resin stops responding">
+<s1 title="Resin stops responding">
 <ul>
 
-<li>There may be a thread deadlock problem, <a
-href="troubleshoot|technique#thread-dump">obtain a thread dump</a>.
+<li>There may be a thread deadlock problem, <a href="troubleshoot|technique#thread-dump">obtain a thread dump</a>.
 
-<li>Enable <a href="troubleshoot|technique#debug-log">full debug logging</a> and check
+</li><li>Enable <a href="troubleshoot|technique#debug-log">full debug logging</a> and check
 the last log entries for hints about what the last thing to happen was.
 
-</ul>
-</section>
+</li></ul>
+</s1>
 
-<section title="Resin keeps restarting">
+<s1 title="Resin keeps restarting">
 <ul>
 
 <li>Enable <a href="troubleshoot|technique#debug-log">full debug logging</a> and check
 the entries for an explanation of why Resin thinks it should restart.
 
-</ul>
-</section>
+</li></ul>
+</s1>
 
-<section title="No line numbers in exception stack traces">
+<s1 title="No line numbers in exception stack traces">
 
 <ul>
 
-<li>In <var/resin.conf/> specify <code>-g</code> as an option for Resin to pass to the java compiler:
+<li>In <var>resin.conf</var> specify <code>-g</code> as an option for Resin to pass to the java compiler:
 
 <example title="-g compiler option">
 &lt;java compiler='javac' compiler-args='-g'/&gt;
 </example>
 
-<li>Specify <code>-nojit</code> as a command-line option when starting Resin:
+</li><li>Specify <code>-nojit</code> as a command-line option when starting Resin:
 
 <example title="-nojit command-line options">
 win&gt; bin/httpd.exe -nojit
 unix&gt; bin/httpd.sh -nojit
 </example>
 
-</ul>
-</section>
+</li></ul>
+</s1>
 
-<section name="memory-leaks" title="java.lang.OutOfMemoryError exception, application runs out of memory">
+<s1 name="memory-leaks" title="java.lang.OutOfMemoryError exception, application runs out of memory">
 
 <ul>
 
 <li>Use JVM startup arguments to 
 <a href="performance|jvm-tuning#memory">increase heap memory.</a>
 
-<li>Obtain a <a href="troubleshoot|technique#heap-dump">heap dump</a> to
+</li><li>Obtain a <a href="troubleshoot|technique#heap-dump">heap dump</a> to
 determine which objects are not getting garbage collected.
 
-<li>Obtain a <a href="troubleshoot|technique#thread-dump">thread dump</a> and
+</li><li>Obtain a <a href="troubleshoot|technique#thread-dump">thread dump</a> and
 check for unreleased threads that might be holding onto objects.
 
-</ul>
+</li></ul>
 
 <p>An OutOfMemoryError exception is usually an indication that heap memory is
 being used up.  Often this is from application code keeping references to
@@ -96,20 +95,20 @@ application) are the following:
 
 <li>threads and particularly the thread stack takes up virtual memory
 
-<li>any JNI libraries might be calling malloc or mmap (or the windows
+</li><li>any JNI libraries might be calling malloc or mmap (or the windows
 equivalent of mmap) and taking virtual memory.  This includes many database
 drivers, and also some JNI code that Resin uses.
 
-<li>for .jar/.zip files (specifically ZipFile), the JDK allocates virtual
+</li><li>for .jar/.zip files (specifically ZipFile), the JDK allocates virtual
 memory.  If you have a large number of jars open, you can run into problems.
 It's conceivable that a getResourceAsStream for a jar file that wasn't closed
 would use up .jar memory.
 
-</ul>
+</li></ul>
 
-</section>
+</s1>
 
-<section name="server-gets-slow" title="After a while the server starts to go very slow">
+<s1 name="server-gets-slow" title="After a while the server starts to go very slow">
 <ul>
 
 <li>This may be a garbage collection issue.  If you have a memory leak, then an
@@ -123,41 +122,41 @@ slowly halt (and continually GC) until it dies.
   <li>Monitor <a href="troubleshoot|technique#garbage-collection">garbage
       collection</a>.
 
-  <li>Obtain a <a href="troubleshoot|technique#heap-dump">heap dump</a> to
+  </li><li>Obtain a <a href="troubleshoot|technique#heap-dump">heap dump</a> to
       determine if objects are not getting garbage collected.
   
-  <li>See <a href="performance|jvm-tuning#garbage-collection">Garbage
+  </li><li>See <a href="performance|jvm-tuning#garbage-collection">Garbage
       Collection</a> in the JVM Tuning section for more about garbage
       collecting.
 
-  </ul>
+  </li></ul>
 
-<li>This may be a runaway thread or a request that is tying up resources.  If a
+</li><li>This may be a runaway thread or a request that is tying up resources.  If a
 thread does not return from a request, Resin will not be able to reuse the
 thread and will have less threads to service new requests.
 
   <ul>
   <li>Obtain a <a href="troubleshoot|technique#thread-dump">thread dump</a> and
       check for unreleased threads that might be holding onto objects.
-  </ul>
-</ul>
-</section> <!-- server-gets-slow -->
+  </li></ul>
+</li></ul>
+</s1> <!-- server-gets-slow -->
 
-<section name="cpu-spike" title="CPU spikes, excessive CPU usage">
+<s1 name="cpu-spike" title="CPU spikes, excessive CPU usage">
 <ul>
 
 <li>Obtain a <a href="troubleshoot|technique#thread-dump">thread dump</a> and
 check for threads that are caught in tight loops.
 
-<li>Check for <a href="#server-gets-slow">garbage collection</a> issues.
+</li><li>Check for <a href="#server-gets-slow">garbage collection</a> issues.
 
-</ul>
+</li></ul>
 
-</section> <!-- cpu-spike -->
+</s1> <!-- cpu-spike -->
 
-<section title="Sessions become null, losing session">
+<s1 title="Sessions become null, losing session">
 
-<section title="URL rewriting">
+<s2 title="URL rewriting">
 
 <p>If you forget to rewrite a URL, a user who requires rewriting will lose their
 session as soon as they follow that URL.</p>
@@ -201,11 +200,11 @@ String homeUrl = response.encodeURL("home.jsp");
 Time to go &lt;a href="&lt;%= homeUrl %&gt;"&gt;Home&lt;/a&gt;!
 </example>
 
-</section>
+</s2>
 
-<section title="Resin configuration for sessions">
+<s2 title="Resin configuration for sessions">
 
-<p>Another possiblity is that the <a config-tag='session-max'/> setting is too
+<p>Another possiblity is that the <a config-tag="session-max"/> setting is too
 low, and you are getting more users establishing sessions than you have
 configured Resin for.</p>
 
@@ -224,18 +223,18 @@ configured Resin for.</p>
   ...
 &lt;/web-app&gt;
 </example>
-</section>
+</s2>
 
 
-<section title="Application reloading">
+<s2 title="Application reloading">
 
 <p>Whenever a java source file, web.xml, or resin.conf changes then Resin will
 restart the application.  If this happens, your current sessions will be lost
 unless you have configured a persistent session store.</p>
 
-</section>
+</s2>
 
-<section title="Browser cookie limitations">
+<s2 title="Browser cookie limitations">
 
 <p>Some users have reported that if their applciation uses a lot of cookies,
 the browser will start to discard older cookies to make room for the new.  This
@@ -243,7 +242,7 @@ may result in the browser discarding the cookie that Resin is using to keep
 track of the session.</p>
 
 <p>If your application uses a lot of cookies, you may need to configure Resin
-to always use URL rewritting by setting <a config-tag='enable-cookies'/> to
+to always use URL rewritting by setting <a config-tag="enable-cookies"/> to
 false.</p>
 
 <example>
@@ -257,9 +256,9 @@ false.</p>
 &lt;/web-app&gt;
 </example>
 
-</section>
+</s2>
 
-<section title='Problems with cookie domains'>
+<s2 title="Problems with cookie domains">
 
 <p>You may also lose your sessions if your cookie domains are incompatible.
 For example, if you have one server that uses cookie domain "hogwarts.com" and
@@ -270,15 +269,15 @@ is to change the cookie domain "hogwarts.com" to "www.hogwarts.com".</p>
 <p>You set the cookie domain in <a config-tag="session-config"/>.
 (Thanks Laura for providing this)</p>
 
-</section>
+</s2>
 
-<section title='Conflicting cookie names'>
+<s2 title="Conflicting cookie names">
 
 <p>If you are using Resin and another application server (such as Tomcat), you
 may encounter a conflict because both of them are using the same cookie name
 (usually JSESSIONID) for the session tracking cookie.</p>
 
-<p>Resin provides <a config-tag='session-cookie'/> to let you change the name
+<p>Resin provides <a config-tag="session-cookie"/> to let you change the name
 of the cookie that Resin uses.</p>
 
 <example title="Change the name of the cookie used for session tracking">
@@ -288,15 +287,15 @@ of the cookie that Resin uses.</p>
 
     &lt;session-cookie&gt;RJESSESSIONID&lt;/session-cookie&gt;
 </example>
-</section>
+</s2>
 
-</section> <!-- losing sessions -->
+</s1> <!-- losing sessions -->
 
-<section title="Specification version 1.3 of package javax.servlet, J2EE Specification, version 1.3 is not compatible with Resin">
+<s1 title="Specification version 1.3 of package javax.servlet, J2EE Specification, version 1.3 is not compatible with Resin">
 <p>See <a href="doc|troubleshoot|technique#classpath">Clean up the classpath</a></p>
-</section>
+</s1>
 
-<section title="Unsupported major.minor version 48.0">
+<s1 title="Unsupported major.minor version 48.0">
 
 <p>
 This error usually happens when a conflicting jar is found, see 
@@ -327,9 +326,7 @@ JAVA_HOME, for example in C:/WINDOWS/java.exe or anywhere else in
 your PATH.
 </p>
 
-</section>
+</s1>
 </body>
 
 </document>
-
-

@@ -10,15 +10,15 @@
 
 <summary/>
 
-<section title='ErrorStatusServlet'>
+<s1 title="ErrorStatusServlet">
 
 <p>Sends an HTTP error code and optionally an error message back
 to the client.</p>  
 
 <deftable-parameters>
-<tr><td>status-code<td>the HTTP status code to send<td>404
-<tr><td>message<td>the message to send<td>no message
-</deftable-parameters>
+<tr><td>status-code</td><td>the HTTP status code to send</td><td>404
+</td></tr><tr><td>message</td><td>the message to send</td><td>no message
+</td></tr></deftable-parameters>
 
 <p>This servlet is particularily useful for blocking access to portions of your
 web-app that contain files not meant to be accessible to users. In this
@@ -47,11 +47,11 @@ exists.</p>
 &lt;/web-app&gt;
 </example>
 
-See <a href="javadoc|com.caucho.servlets.ErrorStatusServlet|"></a>.
-</section>
+See <a href="javadoc|com.caucho.servlets.ErrorStatusServlet|"/>.
+</s1>
 
 
-<section title='LoadBalanceServlet'>
+<s1 title="LoadBalanceServlet">
 
 <p>Configures a front-end Resin instance to load-balance requests to
 backend Resin instances.  Each LoadBalanceServlet instance will
@@ -68,10 +68,10 @@ equally busy, the selection uses a round-robin to distribute the load.
 
 
 <deftable-parameters>
-<tr><td>cluster-id<td>the cluster that gets the matching requests<td>required
-<tr><td>sticky-sessions<td>whether or not sessions should be sticky<td>true
-<tr><td>strategy<td>the load balancing strategy, `round-robin' or `least-connection'<td>least-connection
-</deftable-parameters>
+<tr><td>cluster-id</td><td>the cluster that gets the matching requests</td><td>required
+</td></tr><tr><td>sticky-sessions</td><td>whether or not sessions should be sticky</td><td>true
+</td></tr><tr><td>strategy</td><td>the load balancing strategy, `round-robin' or `least-connection'</td><td>least-connection
+</td></tr></deftable-parameters>
 
 <p>The usual case balances all requests to backend servers.  The front-end Resin
 instance has a resin.conf similar to the one shown here.  It configures
@@ -118,7 +118,7 @@ instance of Resin used for the server.</p>
 host.</p>
 
 <p>
-The <var/strategy/> determines the strategy to use for choosing a backend
+The <var>strategy</var> determines the strategy to use for choosing a backend
 server for a request that does not have a sticky-session.  The
 `least-connection' strategy chooses the backend server that has the least
 number of connections at the time the decision is made.  This is a good general
@@ -127,10 +127,10 @@ to service connections.  The `round-robin' strategy does a straight round
 robin, choosing the backend server that follows the last backend server chosen.
 </p>
 
-See <a href="javadoc|com.caucho.servlets.LoadBalanceServlet|"></a>.
-</section>
+See <a href="javadoc|com.caucho.servlets.LoadBalanceServlet|"/>.
+</s1>
 
-<section title="CGIServlet">
+<s1 title="CGIServlet">
 
 <p>Implements CGI calls.  The url is assumed to refer to an executable file,
 and the operating system is instructed to execute the program or script.  The
@@ -138,8 +138,8 @@ usual CGI environment variables are set, and the current directory is
 the value of <code>$RESIN_HOME</code></p>
 
 <deftable-parameters>
-<tr><td>executable<td>Path to the script program<td>default exec
-</deftable-parameters>
+<tr><td>executable</td><td>Path to the script program</td><td>default exec
+</td></tr></deftable-parameters>
 
 <example>
 &lt;web-app&gt;
@@ -155,7 +155,7 @@ the value of <code>$RESIN_HOME</code></p>
 &lt;/web-app&gt;
 </example>
 
-<p>See <a href="javadoc|com.caucho.servlets.CGIServlet|"></a></p>.
+<p>See <a href="javadoc|com.caucho.servlets.CGIServlet|"/></p>.
 
 <p>A CGI script must output a blank line between the HTTP header(s) and the
 rest of the response.  If no blank line is encountered, the contents of your
@@ -177,34 +177,34 @@ echo "&lt;/pre&gt;"
 
 </example>
 
-</section>
+</s1>
 
-<section title="DirectoryServlet">
+<s1 title="DirectoryServlet">
 
 <p>The directory servlet provides the basic directory browsing.
 Sites will normally disable it.</p>
 
 <deftable-parameters>
-<tr><td>enable<td>Enable or disable the servlet<td>true
-</deftable-parameters>
+<tr><td>enable</td><td>Enable or disable the servlet</td><td>true
+</td></tr></deftable-parameters>
 
 <example>
 &lt;servlet servlet-name="directory"
-         servlet-class="com.caucho.servlets.DirectoryServlet">
-  &lt;init enable="false"/>
-&lt;/servlet>
+         servlet-class="com.caucho.servlets.DirectoryServlet"&gt;
+  &lt;init enable="false"/&gt;
+&lt;/servlet&gt;
 </example>
 
-</section>
+</s1>
 
-<section title='FastCGIServlet'>
+<s1 title="FastCGIServlet">
 
 <p>Implements the FastCGI protocol.  FastCGI allows some CGI clients
 like PHP to run quicker and more efficiently.</p>
 
 <deftable-parameters>
-<tr><td>server-address<td>the host and port number, in the form host:port<td>required
-</deftable-parameters>
+<tr><td>server-address</td><td>the host and port number, in the form host:port</td><td>required
+</td></tr></deftable-parameters>
 
 <p>
 The FastCGIServlet creates a socket connection from Resin to the backend
@@ -257,16 +257,16 @@ Mapping is enabled for all web-apps with the use of
     &lt;/init&gt;
   &lt;/servlet&gt;
 
-  &lt;servlet-mapping url-pattern="*.php"   servlet-name="php-fastcgi"/>
-  &lt;servlet-mapping url-pattern="*.phtml" servlet-name="php-fastcgi"/>
+  &lt;servlet-mapping url-pattern="*.php"   servlet-name="php-fastcgi"/&gt;
+  &lt;servlet-mapping url-pattern="*.phtml" servlet-name="php-fastcgi"/&gt;
 
 &lt;/web-app&gt;
 </example>
 
-See <a href="javadoc|com.caucho.servlets.FastCGIServlet|"></a>.
-</section>
+See <a href="javadoc|com.caucho.servlets.FastCGIServlet|"/>.
+</s1>
 
-<section title='HttpProxyServlet'>
+<s1 title="HttpProxyServlet">
 
 <p>
 <a href="javadoc|com.caucho.servlets.HttpProxyServlet|"/> is a servlet that
@@ -296,7 +296,7 @@ There is a bit more power using servlet-regexp and regular expressions:
   &lt;init host='localhost:8081'/&gt;
 &lt;/servlet-regexp&gt;
 </example>
-</section>
+</s1>
 
 </body>
 </document>

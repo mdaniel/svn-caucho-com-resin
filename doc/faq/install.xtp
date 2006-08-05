@@ -8,9 +8,9 @@
   <body>
     <summary/>
 
-<section title="All Plugins" name="plugin">
+<s1 title="All Plugins" name="plugin">
 
-<section title="Apache/IIS can't contact servlet runner">
+<s2 title="Apache/IIS can't contact servlet runner">
 
 <p>The particular error message is something like:</p>
 
@@ -24,9 +24,9 @@ the httpd executable will start the servlet runner.</p>
 <p>The httpd executable will start Java and wait for connections from the
 web server.</p>
 
-</section>
+</s2>
 
-<section title='I just get a 404 for JSP or Servlets!'>
+<s2 title="I just get a 404 for JSP or Servlets!">
 
 <p>Make sure you try the following:</p>
 
@@ -34,43 +34,43 @@ web server.</p>
 <li>First, check your configuration with the standalone httpd.
 Both httpd and srun use the same configuration file, so the
 results should be identical.
-<li>Check http://localhost/caucho-status.  That will tell if
+</li><li>Check http://localhost/caucho-status.  That will tell if
 mod_caucho has properly read the resin.conf.
-<li>The srun hosts should be green and the mappings should match your resin.conf.
-<li>If caucho-status fails on Apache, the problem is in the
+</li><li>The srun hosts should be green and the mappings should match your resin.conf.
+</li><li>If caucho-status fails on Apache, the problem is in the
 mod_caucho/iis_srun installation and the Apache httpd.conf.
-<li>If caucho-status fails on IIS, try
+</li><li>If caucho-status fails on IIS, try
 http://localhost/scripts/iis_srun.dll/caucho-status directly.
 If this fails, IIS can't find iis_srun.dll.  
 <ul>
-<li>Check that iis_srun.dll is in <var/c:\inetpub\scripts./>
-<li>Make sure that your IIS host has a mapping from <var//scripts/>
-to <var/c:\inetpub\scripts/>.
-<li>Make sure that the <var//scripts/> has execute permissions.
-</ul>
-<li>If caucho-status shows the wrong mappings, there's something wrong
+<li>Check that iis_srun.dll is in <var>c:\inetpub\scripts.</var>
+</li><li>Make sure that your IIS host has a mapping from <var>/scripts</var>
+to <var>c:\inetpub\scripts</var>.
+</li><li>Make sure that the <var>/scripts</var> has execute permissions.
+</li></ul>
+</li><li>If caucho-status shows the wrong mappings, there's something wrong
 with the resin.conf or the pointer to resin.conf in httpd.conf.
-<li>If caucho-status shows a red servlet runner, then httpd.sh hasn't
+</li><li>If caucho-status shows a red servlet runner, then httpd.sh hasn't
 properly started.
-<li>If you get a "cannot connect to servlet engine", caucho-status
+</li><li>If you get a "cannot connect to servlet engine", caucho-status
 will show red, and httpd hasn't started properly.
-<li>If httpd doesn't start properly, you should look at the logs
-in resin2.0/log.  You should start <var/httpd -verbose/> to get
+</li><li>If httpd doesn't start properly, you should look at the logs
+in resin2.0/log.  You should start <var>httpd -verbose</var> to get
 more information.
-<li>If you get Resin's file not found, the Apache configuration
+</li><li>If you get Resin's file not found, the Apache configuration
 is good but the resin.conf probably points to the wrong directories.
-<li>If the error message is from Resin, your <var/app-dir/> is probably set
-wrong.  Remember servlets belong in <var/"app-dir"/WEB-INF/classes/>.
-</ol>
+</li><li>If the error message is from Resin, your <var>app-dir</var> is probably set
+wrong.  Remember servlets belong in <var>"app-dir"/WEB-INF/classes</var>.
+</li></ol>
 
 <p>Before you ask any questions on the list, you should be able to
 answer the following questions:</p>
 
 <ul>
 <li>Does httpd standalone work?
-<li>What does the /caucho-status show?
-<li>Is the 404 coming from your web server or from Resin?
-</ul>
+</li><li>What does the /caucho-status show?
+</li><li>Is the 404 coming from your web server or from Resin?
+</li></ul>
 
 <p>If you don't answer these questions in your mail, the mail will
 probably be ignored.</p>
@@ -85,18 +85,18 @@ and if it is, make it bypass local accesses or disable proxying altogether
 (If you are using IE, just go to Tool/Options/Connection and at the bottom
 you'll see the proxy stuff!
 
-<li>Make you are running httpd.exe.... A lot of people try to use "srun.exe",
+</li><li>Make you are running httpd.exe.... A lot of people try to use "srun.exe",
 and this is just a servlet runner.... 
 
-<li>Modify your resin.conf file and add this line right after "&lt;caucho.com>" 
-        &lt;log id="/" href="stderr:"/>
-</ol>	
+</li><li>Modify your resin.conf file and add this line right after "&lt;caucho.com&gt;" 
+        &lt;log id="/" href="stderr:"/&gt;
+</li></ol>	
 
 <p>After you do this, execute httpd.exe and see what pops up....</p>
 
-</section>
+</s2>
 
-<section title='browser returns test.jsp source'>
+<s2 title="browser returns test.jsp source">
 
 <p>If you're running Resin with IIS or Apache, the web server might not
 know how to handle *.jsp files.  On Apache, the httpd.conf needs to
@@ -109,9 +109,9 @@ files to srun_iis.dll.</p>
 browse http://localhost/test.jsp, you should get the 'Cannot connect
 to servlet runner' message.</p>
 
-</section>
+</s2>
 
-<section title='java.net.BindException'>
+<s2 title="java.net.BindException">
 
 <p>You'll get this exception if you try to start two Resin
 instances using the same port.  You'll need to stop the first
@@ -121,18 +121,18 @@ one.  Normally, httpd.sh stop or httpd.sh stop wil do the trick.</p>
 script:</p>
 
 <example>
-unix> ps auxw | grep wrapper.pl
+unix&gt; ps auxw | grep wrapper.pl
 ferg     1314   ...  perl resin/bin/wrapper.pl
 ferg     1340   ...  grep wrapper.pl
-unix> kill 1314
+unix&gt; kill 1314
 </example>
 
 <p>Because the 'ps' differs on different flavors of Unix, e.g. ps -ef,
 you may need to consult 'man ps'.</p>
 
-</section>
+</s2>
 
-<section title='File not found'>
+<s2 title="File not found">
 
 <p>The web server (IIS or Apache) and the servlet runner (httpd),
 need to find the
@@ -140,50 +140,49 @@ web pages.  The resin.conf file configures srun.  You need to add a
 'app-dir' property, to tell httpd where to look for the root directory.</p>
 
 <example>
-&lt;caucho.com>
-  &lt;http-server app-dir='d:\InetPub\wwwroot'>
+&lt;caucho.com&gt;
+  &lt;http-server app-dir='d:\InetPub\wwwroot'&gt;
     &lt;servlet-mapping url-pattern='*.jsp'
-      servlet-name='com.caucho.jsp.JspServlet'>
-  &lt;/http-server>
-&lt;/caucho.com>
+      servlet-name='com.caucho.jsp.JspServlet'&gt;
+  &lt;/http-server&gt;
+&lt;/caucho.com&gt;
 </example>
 
-</section>
+</s2>
 
-<section title="Resin uses the wrong JDK version">
+<s2 title="Resin uses the wrong JDK version">
 
 <p>On Win32, Resin tries to find Java in the following
 order:</p>
 
 <ul>
 <li>The command-line argument, -java_home
-<li>The environment variable JAVA_HOME
-<li>The registry, using JavaSoft's CurrentVersion of the JDK.
-<li>Following the PATH of the java executable.
-</ul>
+</li><li>The environment variable JAVA_HOME
+</li><li>The registry, using JavaSoft's CurrentVersion of the JDK.
+</li><li>Following the PATH of the java executable.
+</li></ul>
 
 <p>To find out which Java version Caucho JSP is using, use the
 '-version' argument on the command line:</p>
 
 <def>
-resin-2.1> bin/httpd -version
+resin-2.1&gt; bin/httpd -version
 </def>
 
-</section>
+</s2>
 
-<section title="How do I pass JVM arguments like -ms48m?">
+<s2 title="How do I pass JVM arguments like -ms48m?">
 
-<p>You can pass them on the command line like: <var/-J-ms40m/>.  You don't need
-to escape <var/-Dfoo=bar/>. If you're on Unix, you can also add them to httpd.sh in the <var/args/> variable. You may need to quote the assignment:
+<p>You can pass them on the command line like: <var>-J-ms40m</var>.  You don't need
+to escape <var>-Dfoo=bar</var>. If you're on Unix, you can also add them to httpd.sh in the <var>args</var> variable. You may need to quote the assignment:
 </p>
 <example>
 args="-J-ms40m -Dfoo=bar"
 </example>
 
-</section>
+</s2>
 
-<section title="NoSuchMethodError: org.w3c.dom.Node: method =
-getNamespaceURI()Ljava/lang/String; not found">
+<s2 title="NoSuchMethodError: org.w3c.dom.Node: method =&#10;getNamespaceURI()Ljava/lang/String; not found">
 
 <p>This is caused by an incompatibility in the XML libraries.  Resin's
 XSL needs the XML DOM v2.  The dom.jar in resin1.2/lib implements that
@@ -194,37 +193,37 @@ overriding the newer DOM API.</p>
 <p>You will need to look in your system classpath for the old DOM
 implementation (likely jaxp.jar) and remove it.</p>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="IIS">
+<s1 title="IIS">
 
-<section title="caucho-status fails on IIS">
+<s2 title="caucho-status fails on IIS">
 
-<p>Try looking at <var/http://localhost/scripts/iis_srun.dll/caucho-status/>.
+<p>Try looking at <var>http://localhost/scripts/iis_srun.dll/caucho-status</var>.
 If this fails, IIS can't use the iis_srun.dll plugin.  The problem is
 probably one of the following:</p>
 
 <ul>
-<li>iis_srun.dll isn't in <var/c:\inetpub\scripts/>.
-<li>The IIS host is missing the <var//scripts/> virtual directory.
-<li><var//scripts/> doesn't have proper execute permissions.
-</ul>
+<li>iis_srun.dll isn't in <var>c:\inetpub\scripts</var>.
+</li><li>The IIS host is missing the <var>/scripts</var> virtual directory.
+</li><li><var>/scripts</var> doesn't have proper execute permissions.
+</li></ul>
 
-<p>Resin's IIS module needs the <var//scripts/> virtual directory to contain
+<p>Resin's IIS module needs the <var>/scripts</var> virtual directory to contain
 iis_srun.dll.  If you create a new IIS virtual host, you must create a
-<var//scripts/> virtual directory that points to <var/d:\inetpub\scripts/>.
+<var>/scripts</var> virtual directory that points to <var>d:\inetpub\scripts</var>.
 </p>
 
 <p>When the Resin ISAPI filter detects a JSP page or servlet, it rewrites the
-URL to <var//scripts/iis_srun.dll/test.jsp/>.  IIS will then execute
+URL to <var>/scripts/iis_srun.dll/test.jsp</var>.  IIS will then execute
 iis_srun.dll as an ISAPI extension.  If your virtual site is missing the
-<var//scripts/> directory, IIS can't find the ISAPI extension.</p>
+<var>/scripts</var> directory, IIS can't find the ISAPI extension.</p>
 
-</section>
+</s2>
 
-<section title="How to use index.jsp as default document on IIS?">
+<s2 title="How to use index.jsp as default document on IIS?">
 
 <p>Stefan Wesner writes,</p>
 
@@ -238,30 +237,30 @@ IIS.</p>
 <li>Open the property dialog for the "Default Web Site" (or any other
 Web-Site or VirtualDirectorx).
 
-<li>Go to the "Home Directory" Tab for the Default Web Site" or the "Virtual
+</li><li>Go to the "Home Directory" Tab for the Default Web Site" or the "Virtual
 Directory" Tab for a virtual Directory.
 
-<li>Select "Configuration"
+</li><li>Select "Configuration"
 
-<li>add an application mapping from .xtp and .jsp for your iis_srun.dll (I
+</li><li>add an application mapping from .xtp and .jsp for your iis_srun.dll (I
 use also PUT,DELETE exlusion like it is done for asp mappings but I do not
 know why, just copied it)
 
 Close this sub-dialog
 
-<li>Select the "Documents" tab and add index.jsp and index.xtp to the list of
+</li><li>Select the "Documents" tab and add index.jsp and index.xtp to the list of
 default documents.
 
-<li>Try http://yourhost/
-</ol>
+</li><li>Try http://yourhost/
+</li></ol>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="Apache">
+<s1 title="Apache">
 
-<section title="Apache won't start on Win32">
+<s2 title="Apache won't start on Win32">
 
 <p>The error message might be something like:</p>
 
@@ -279,17 +278,17 @@ Apache 1.3.6 is compatible with Apache 1.3.9.  If you're using a different
 version, send us a message and we'll make sure you get the right
 compiled version.</p>
 
-</section>
+</s2>
 
-<section title="Apache doesn't find my resin.conf">
+<s2 title="Apache doesn't find my resin.conf">
 
-<p>On Windows, the argument to <var/CauchoConfigFile/> should be enclosed in
+<p>On Windows, the argument to <var>CauchoConfigFile</var> should be enclosed in
 quotes.  Also, since Apache treats '\' as an escape, you'll need
 either to use forward slashes or double the backslashes.</p>
 
-</section>
+</s2>
 
-<section title="mod_caucho caucho-status returns no data">
+<s2 title="mod_caucho caucho-status returns no data">
 
 <p>This may be due to an "EAPI" conflict.  If your Apache is compiled with
 EAPI, but Resin is compiled without it, the mod_caucho may crash.</p>
@@ -306,12 +305,12 @@ EAPI, but Resin is compiled without it, the mod_caucho may crash.</p>
 automatically, but if it fails, you can run it as:</p>
 
 <example>
-unix> ./configure --with-apache-eapi
+unix&gt; ./configure --with-apache-eapi
 </example>
 
-</section>
+</s2>
 
-<section title="Can I use mod_rewrite with Resin?">
+<s2 title="Can I use mod_rewrite with Resin?">
 
 <p>Yes, but you need to make sure to use the passthrough flag so Resin can
 get control after mod_rewrite.</p>
@@ -321,33 +320,33 @@ RewriteEngine on
 RewriteRule ^/hello.html$ /hello.jsp [L,PT]
 </example>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="Linux/Unix">
+<s1 title="Linux/Unix">
 
-<section title="libcaucho.so not found">
+<s2 title="libcaucho.so not found">
 
 <p>libcaucho.so contains some small JNI routines for Unix.  It should be
 compiled when you call configure; make.  For some reason, the JVM isn't
 picking the library up.  You'll probably want to check LD_LIBRARY_PATH both
 in your environment and in wrapper.pl.
 
-<p>For many sites, a missing libcaucho.so isn't a big deal.  It just
+</p><p>For many sites, a missing libcaucho.so isn't a big deal.  It just
 grabs some CPU statistics.  However, it also enabled the setuid needed by
 user-name and group-name.  So if you're using user-name to change the
 user from root, you'll need to get libcaucho.so running.
 
-</section>
+</p></s2>
 
-<section title="How do I install Resin as a Linux service?">
+<s2 title="How do I install Resin as a Linux service?">
 
 <p>Stephen Kuo asks:</p>
 
 <p>This should be a very basic question for those Linux guru.
 
-<p>In my Red Hat 6.2, I put the following line in the /etc/rc.d/rc.local file
+</p><p>In my Red Hat 6.2, I put the following line in the /etc/rc.d/rc.local file
 to make Resin as a service:</p>
 <example>
 /usr/local/resin1.1/bin/httpd.sh start
@@ -355,9 +354,9 @@ to make Resin as a service:</p>
 
 <p>But when I reboot the system, Resin does not start up.
 
-<p>Guy Tal reponds:
+</p><p>Guy Tal reponds:
 
-<p>You should also set your environment params in the rc file (when you
+</p><p>You should also set your environment params in the rc file (when you
 execute from the command line, they are ready from your own environment,
 however rc files are run as root so these will not be set).
 Add the following (with the appropriate settings for your own machine):</p>
@@ -384,8 +383,8 @@ export CLASSPATH
 <p>You can also set those environment variables in the httpd.sh itself
 or in the wrapper.pl.</p>
 
-</section>
+</s2>
 
-</section>
+</s1>
   </body>
 </document>

@@ -18,7 +18,7 @@ From Pedro Costa:
 <ol>
 <li>Under JOnAS or Enhydra do nothing
 
-<li>Copy JEREMIE_jonas.jar (RMI_jonas.jar if you are using rmi and not
+</li><li>Copy JEREMIE_jonas.jar (RMI_jonas.jar if you are using rmi and not
 jeremie) into WEB-INF/lib or resin1.2/lib.
 
 <p>If you are using JOnAS on the same machine as Resin you can do the same
@@ -26,58 +26,58 @@ by adding the following line to your app on resin.conf
 (assuming JOnAS is installed on \JONAS)
 
 <example>
-&lt;classpath id='/JONAS/lib/JEREMIE_jonas.jar'/>
+&lt;classpath id='/JONAS/lib/JEREMIE_jonas.jar'/&gt;
 </example>
 
-<li>Copy the EJB jar's file containing your beans to WEB-INF/lib
+</p></li><li>Copy the EJB jar's file containing your beans to WEB-INF/lib
 If you are using JOnAS on the same machine as Resin you can do the same
 by adding the following line to your app on resin.conf 
 (assuming JOnAS is installed on \JONAS and your beans are on a dir called \JONAS\mybeans)
 
 <example>
-&lt;classpath id='/JONAS/mybeans' source='/JONAS/mybeans' compile='false'/>
+&lt;classpath id='/JONAS/mybeans' source='/JONAS/mybeans' compile='false'/&gt;
 </example>
         
-<li>In resin.conf add these lines to your app (assuming you are using jeremie):
+</li><li>In resin.conf add these lines to your app (assuming you are using jeremie):
 
 <example>
-&lt;jndi-link>
-  &lt;jndi-name>java:comp/env/ejb&lt;/jndi-name>
-  &lt;jndi-factory>
+&lt;jndi-link&gt;
+  &lt;jndi-name&gt;java:comp/env/ejb&lt;/jndi-name&gt;
+  &lt;jndi-factory&gt;
     org.objectweb.jeremie.libs.services.registry.jndi.JRMIInitialContextFactory
-  &lt;/jndi-factory>
-  &lt;init-param java.naming.provider.url="jrmi://YOUR_HOST:12340"/>
-  &lt;init-param java.naming.factory.url.pkgs="org.objectweb.jonas.naming"/>
-&lt;/jndi-link>
+  &lt;/jndi-factory&gt;
+  &lt;init-param java.naming.provider.url="jrmi://YOUR_HOST:12340"/&gt;
+  &lt;init-param java.naming.factory.url.pkgs="org.objectweb.jonas.naming"/&gt;
+&lt;/jndi-link&gt;
 </example>
 
-<li>Don't forget to change YOUR_HOST to your hostname...
-</ol>
+</li><li>Don't forget to change YOUR_HOST to your hostname...
+</li></ol>
 
 <example title="Sample JSP showing how to access your beans">
-&lt;!DOCTYPE html public "-//W3C//DTD HTML 4.0 Transitional//EN">
-&lt;%@ page language="java"%>
-&lt;%@ page import="javax.naming.InitialContext" %>
-&lt;%@ page import="javax.naming.Context" %>
-&lt;%@ page import="javax.rmi.PortableRemoteObject" %>
-&lt;%@ page import="YOUR_BEANS_PACKAGE.*" %>
-&lt;html>
-&lt;head>
-&lt;title>Test&lt;/title>
-&lt;/head>
-&lt;body>
+&lt;!DOCTYPE html public "-//W3C//DTD HTML 4.0 Transitional//EN"&gt;
+&lt;%@ page language="java"%&gt;
+&lt;%@ page import="javax.naming.InitialContext" %&gt;
+&lt;%@ page import="javax.naming.Context" %&gt;
+&lt;%@ page import="javax.rmi.PortableRemoteObject" %&gt;
+&lt;%@ page import="YOUR_BEANS_PACKAGE.*" %&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;Test&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
 &lt;%
   Context initialContext = new InitialContext();
   Object ref = initialContext.lookup("java:comp/env/ejb/ExpHome");
   ExpHome home = (ExpHome) PortableRemoteObject.narrow(ref, ExpHome.class);
   Exp t1 = home.create(); 
-%>
-dummy result value = &lt;%=t1.dummyMethod()%>
+%&gt;
+dummy result value = &lt;%=t1.dummyMethod()%&gt;
 &lt;%
   t1.remove();    
-%>
-&lt;/body>
-&lt;/html>
+%&gt;
+&lt;/body&gt;
+&lt;/html&gt;
 </example>
   </body>
 </document>

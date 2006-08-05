@@ -14,20 +14,20 @@ anything useful, but you can use them as a basis for development.</p>
 
 <body>
 <summary/>
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/classes/example/filters/ExampleResponseHeadersFilter.java"/>
-    <td>A filter class that sets response headers
-<tr><td><viewfile-link file="WEB-INF/classes/example/filters/ExampleRequestFilter.java"/>
-    <td>A filter class that wraps the request
-<tr><td><viewfile-link file="WEB-INF/classes/example/filters/ExampleResponseFilter.java"/>
-    <td>A filter class that wraps the response
-<tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    <td>Configuring the use of a filter in web.xml
-<tr><td><viewfile-link file="index.jsp"/>
-    <td>A jsp that show's the result of using <code/example.filters.ExampleResponseHeadersFilter/>
-</deftable>
-</section>
+    </td><td>A filter class that sets response headers
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/filters/ExampleRequestFilter.java"/>
+    </td><td>A filter class that wraps the request
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/filters/ExampleResponseFilter.java"/>
+    </td><td>A filter class that wraps the response
+</td></tr><tr><td><viewfile-link file="WEB-INF/web.xml"/>
+    </td><td>Configuring the use of a filter in web.xml
+</td></tr><tr><td><viewfile-link file="index.jsp"/>
+    </td><td>A jsp that show's the result of using <code>example.filters.ExampleResponseHeadersFilter</code>
+</td></tr></deftable>
+</s1>
 
 </body>
 </document>

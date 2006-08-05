@@ -7,69 +7,69 @@
   </header>
 
   <body>
-    <section title="3.0.0">
+    <s1 title="3.0.0">
       <p>February, 2002</p>
 
       <dl>
         <dt>JSP 2.0
         <dd>full support
 
-        <dt>Servlet 2.4
+        </dd></dt><dt>Servlet 2.4
         <dd>full support
 
-        <dt>Relax-NG validation of config files
+        </dd></dt><dt>Relax-NG validation of config files
         <dd>full support
 
-        <dt>Javascript
+        </dd></dt><dt>Javascript
         <dd>removed
 
-       <dt>non-blocking I/O
+       </dd></dt><dt>non-blocking I/O
        <dd>used for Unix.  (Windows needs to wait.)  It's handled through JNI, since the JDK 1.4 nio is a bunch of junk. (The JDK 1.4 nio is significantly slower than straight io.)
 
-      </dl>
-    </section>
+      </dd></dt></dl>
+    </s1>
 
-    <section title="3.0.1">
+    <s1 title="3.0.1">
       <p>date?</p>
 
       <dl>
         <dt>JMX
         <dd>partial to JMX 1.2 spec
 
-        <dt>persistent sessions
+        </dd></dt><dt>persistent sessions
         <dd>after certain amount of time, the session gets put in a persistent store, and removed from memory, without being lost entirely.
 
-        <dt>JCA
+        </dd></dt><dt>JCA
         <dd>missing XA support.
 
-        <dt>JSP/Servlet updates from later drafts
+        </dd></dt><dt>JSP/Servlet updates from later drafts
         <dd>Draft 3 for JSP.  Draft 2 for Servlet.
-      </dl>
-    </section>
+      </dd></dt></dl>
+    </s1>
 
-    <section title="3.0.2" subtitle="Q?">
+    <s1 title="3.0.2" subtitle="Q?">
       <p>date?</p>
 
       <dl>
         <dt>JMX
         <dd>complete
 
-        <dt>logging
+        </dd></dt><dt>logging
         <dd>final cleanup, format attribute
-      </dl>
-    </section>
+      </dd></dt></dl>
+    </s1>
 
-    <section title="UNSHEDULED">
+    <s1 title="UNSHEDULED">
       <dl>
         <dt>JMS
         <dd>
         
-        <dt>XSLT 2.0
+        </dd></dt><dt>XSLT 2.0
         <dd>
 
-        <dt>JAAS
+        </dd></dt><dt>JAAS
         <dd>
-      </dl>
-    </section>
+      </dd></dt></dl>
+    </s1>
   </body>
 </document>

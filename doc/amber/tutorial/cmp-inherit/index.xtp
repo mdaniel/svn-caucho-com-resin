@@ -18,22 +18,22 @@ select the proper type.</p>
   <body>
     <summary/>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
-    <td>resin-web.xml configuration
-<tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>
-    <td>META-INF/persistence.xml configuration
-<tr><td><viewfile-link file="WEB-INF/classes/example/Student.java"/>
-    <td>The student bean
-<tr><td><viewfile-link file="WEB-INF/classes/example/Prefect.java"/>
-    <td>The prefect bean
-<tr><td><viewfile-link file="WEB-INF/classes/example/QueryServlet.java"/>
-    <td>The course servlet
-</deftable>
-</section>
+    </td><td>resin-web.xml configuration
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>
+    </td><td>META-INF/persistence.xml configuration
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/Student.java"/>
+    </td><td>The student bean
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/Prefect.java"/>
+    </td><td>The prefect bean
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/QueryServlet.java"/>
+    </td><td>The course servlet
+</td></tr></deftable>
+</s1>
 
-<section title="Database Schema">
+<s1 title="Database Schema">
 
 <example title="student.sql">
 CREATE TABLE amber_inherit_student (
@@ -49,9 +49,9 @@ INSERT INTO amber_inherit_student VALUES(2, 'prefect', 'Ron Weasley')
 INSERT INTO amber_inherit_student VALUES(1, 'prefect', 'Hermione Granger')
 </example>
 
-</section>
+</s1>
 
-<section title="Bean Implementation">
+<s1 title="Bean Implementation">
 
 <p>The example has two beans to illustrate inheritance.  The Student
 bean is the base class and represents all students.  Some students are
@@ -99,7 +99,7 @@ public class Student {
 }
 </example>
 
-<section title="@Inheritance">
+<s2 title="@Inheritance">
 
 <p>The <a href="amber|cmp-table.xtp#@Inheritance">@Inheritance</a>
 annotation marks the entity bean as supporting inheritance.</p>
@@ -120,17 +120,16 @@ discriminatorValue annotation.  In the example, the Student
 class has a "student" value
 and the Prefect class has a "prefect" value.</p>
 
-</section>
+</s2>
 
-<section title="@DiscriminatorColumn">
+<s2 title="@DiscriminatorColumn">
 
 <p>Both SINGLE_TABLE and JOINED use a discriminator column to
-distinguish the classes.  The <a
-href="ejb3|cmp-table.xtp#@DiscriminatorColumn">@DiscriminatorColumn</a>
+distinguish the classes.  The <a href="ejb3|cmp-table.xtp#@DiscriminatorColumn">@DiscriminatorColumn</a>
 annotation specifies the column name.  In this example, the column is
 "type".  The default discriminator column is "TYPE".</p>
 
-</section>
+</s2>
 
 <example title="Prefect.java">
 package example;
@@ -162,9 +161,9 @@ loads the objects from the database, it will instantiate the proper
 type.
 </p>
 
-</section>
+</s1>
 
-<section title="Client Servlet">
+<s1 title="Client Servlet">
 
 <p>The client code using inheritance is no different from normal
 queries.  The Query will perform any necessary database joins to
@@ -175,24 +174,24 @@ return Prefect objects and students will return Student objects.</p>
 public void service(PrintWriter out)
   throws IOException
 {
-  out.println("&lt;h3>Students&lt;/h3>");
+  out.println("&lt;h3&gt;Students&lt;/h3&gt;");
 
   Query query = _manager.createQuery("SELECT o FROM Student o");
     
     for (Object student : query.listResults()) {
-      out.println("student: " + student() + "&lt;br>");
+      out.println("student: " + student() + "&lt;br&gt;");
     }
   }
 }
 </example>
 <results>
-&lt;h3>Students&lt;/h3>
+&lt;h3&gt;Students&lt;/h3&gt;
 Student[Harry Potter]
 Prefect[Hermione Granger]
 Prefect[Ron Weasley]
 </results>
 
-</section>
+</s1>
 
   </body>
 </document>

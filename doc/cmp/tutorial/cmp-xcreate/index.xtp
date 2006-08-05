@@ -25,14 +25,14 @@ need to change the database.  With Resin-CMP, you add a create method
 with the following steps:</p>
 
 <ol>
-<li>Add the <code/createXXX/> method to the local home interface (automatically generated).
-<li>Implement a corresponding <code/ejbCreateXXX/> method in the bean class, setting
+<li>Add the <code>createXXX</code> method to the local home interface (automatically generated).
+</li><li>Implement a corresponding <code>ejbCreateXXX</code> method in the bean class, setting
 any database fields.
-<li>Implement a corresponding <code/ejbPostCreateXXX/> method in the bean
+</li><li>Implement a corresponding <code>ejbPostCreateXXX</code> method in the bean
 class, setting any bean relations if necessary.
-</ol>
+</li></ol>
 
-<section title="Database Schema">
+<s1 title="Database Schema">
 
 <p>The example uses the same database table as the previous basic example.</p>
 
@@ -45,16 +45,16 @@ CREATE TABLE create_courses (
 );
 </example>
 
-</section>
+</s1>
 
-<section title="Client Servlet">
+<s1 title="Client Servlet">
 
 <p>Clients simply call the create method from the CourseHome
 interface.  The following servlet fragment creates two new courses,
 prints all the courses, and then removes the new courses.</p>
 
 <p>The <code>remove()</code> method is generated automatically and is
-always part of the <code/EJBLocalObject/> interface.  All we need to do is
+always part of the <code>EJBLocalObject</code> interface.  All we need to do is
 call it.</p>
 
 <example title="Adding and Removing Courses">
@@ -70,7 +70,7 @@ while (iter.hasNext()) {
   Course course = (Course) iter.next();
 
   out.println(course.getCourseId() + " is taught by " +
-              course.getInstructor() + "&lt;br>");
+              course.getInstructor() + "&lt;br&gt;");
 }
 
 divination.remove();
@@ -78,14 +78,14 @@ creatures.remove();
 ...
 </example>
 
-</section>
+</s1>
 
-<section title="Adding Create to CourseHome">
+<s1 title="Adding Create to CourseHome">
 
-<p>The <code/CourseHome/> interface adds the <code/create/> method.
+<p>The <code>CourseHome</code> interface adds the <code>create</code> method.
 Most than one create method is allowed, but all must start with create.
-<code/createWithInstructor/> or <code/createChild/> would be allowed.
-Any create method must throw <code/CreateException/>.</p>
+<code>createWithInstructor</code> or <code>createChild</code> would be allowed.
+Any create method must throw <code>CreateException</code>.</p>
 
 <example title="CourseHome.java">
 /**
@@ -105,23 +105,23 @@ public interface CourseHome extends EJBLocalHome {
 }
 </example>
 
-</section>
+</s1>
 
-<section title="ejbCreate and ejbPostCreate in CourseBean">
+<s1 title="ejbCreate and ejbPostCreate in CourseBean">
 
-<p>Creating a bean needs to methods in the bean class: <code/ejbCreate/> and
-<code/ejbPostCreate/>.  <code/ejbCreate/> saves cmp-fields before inserting
-into the database.  <code/ejbPostCreate/> links persistent relations.  In this
-example, the <code/ejbPostCreate/> method will be empty.  In the example of
-user comments to an article, the <code/ejbPostCreate/> method will link the
+<p>Creating a bean needs to methods in the bean class: <code>ejbCreate</code> and
+<code>ejbPostCreate</code>.  <code>ejbCreate</code> saves cmp-fields before inserting
+into the database.  <code>ejbPostCreate</code> links persistent relations.  In this
+example, the <code>ejbPostCreate</code> method will be empty.  In the example of
+user comments to an article, the <code>ejbPostCreate</code> method will link the
 new comment object to the owning article.</p>
 
 <ul>
-<li><code/ejbCreate/> sets the primary key and cmp-fields
-<li><code/ejbPostCreate/> sets the cmr-fields (relations to other beans)
-</ul>
+<li><code>ejbCreate</code> sets the primary key and cmp-fields
+</li><li><code>ejbPostCreate</code> sets the cmr-fields (relations to other beans)
+</li></ul>
 
-<p>The <code/ejbCreate/> method is the only method that may call the setter
+<p>The <code>ejbCreate</code> method is the only method that may call the setter
 for the primary key.  Database tables which generate their own
 primary key (e.g. autoincrement ids), will have no setter for the
 primary key.</p>
@@ -175,6 +175,6 @@ abstract public class CourseBean
 }
 </example>
 
-</section>
+</s1>
   </body>
 </document>

@@ -55,4 +55,3 @@ Welcome, visitor &lt;jsp:expression&gt; counter.getHit()&lt;/jsp:expression&gt;!
 </example>
 </body>
 </document>
-

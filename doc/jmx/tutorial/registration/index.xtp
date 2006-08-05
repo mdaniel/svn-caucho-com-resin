@@ -11,20 +11,20 @@
 
 <summary/>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    <td>Configures the JMX-managed bean
-<tr><td><viewfile-link file="WEB-INF/classes/example/Test.java"/>
-    <td>The resource bean implementation.
-<tr><td><viewfile-link file="WEB-INF/classes/example/TestMBean.java"/>
-    <td>The management interface for the bean.
-<tr><td><viewfile-link file="index.jsp"/>
-    <td>Using the managed bean.
-</deftable>
-</section>
+    </td><td>Configures the JMX-managed bean
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/Test.java"/>
+    </td><td>The resource bean implementation.
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/TestMBean.java"/>
+    </td><td>The management interface for the bean.
+</td></tr><tr><td><viewfile-link file="index.jsp"/>
+    </td><td>Using the managed bean.
+</td></tr></deftable>
+</s1>
 
-<section title="MBeanRegistration">
+<s1 title="MBeanRegistration">
 
 <p>Frequently, a managed bean will either need
 its <code>ObjectName</code> or its <code>MBeanServer</code>.  When the
@@ -74,32 +74,32 @@ public class Test implements TestMBean, MBeanRegistration {
 }
 </example>
 
-<section title="Client">
+<s2 title="Client">
 
 <p>The client JSP asks for the object's ObjectName to see the ObjectName
 passed in the <code>preRegistration</code> call.</p>
 
 <example title="index.jsp">
-&lt;%@ page import='com.caucho.jmx.Jmx, example.BasicMBean' %>
+&lt;%@ page import='com.caucho.jmx.Jmx, example.BasicMBean' %&gt;
 &lt;%
 BasicMBean basic = (BasicMBean) Jmx.find("example:name=test");
 
 out.println("ObjectName: " + test.getObjectName());
-%>
+%&gt;
 </example>
 <results>
 ObjectName: example:name=test
 </results>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="Compatibility">
+<s1 title="Compatibility">
 
 <p>MBeanRegistration is part of the JMX specification.</p>
 
-</section>
+</s1>
 
   </body>
 </document>

@@ -11,9 +11,9 @@
 </header>
 
 <body>
-<summary objsummary-in-localtoc='1'/>
+<summary objsummary-in-localtoc="1"/>
 
-<section title="XSLT">
+<s1 title="XSLT">
 <faq title="URIResolver">
 <p>With an URIResolver is that you can create a catalog or
 map configuration that matchs an ID with the actual URI. So you use the id
@@ -65,7 +65,7 @@ System.out.println("base: " + base);
 <p>(Thanks to Robert Koberg)</p>
 </faq>
 
-</section>
+</s1>
 
 </body>
 </document>

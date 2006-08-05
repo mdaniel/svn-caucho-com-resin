@@ -26,23 +26,22 @@ beans instead of changing lots of SQL statements in the program.</p>
 Resin-EE to manage its list of courses offered for the term.  Each
 course has a name and a teacher for the course.  The example has been
 simplified as much as possible; following examples show how to
-<a href="cmp|tutorial/cmp-xfind/index">query the database</a> and <a
-href="cmp|tutorial/cmp-xcreate/index">create and remove</a> database entries.</p>
+<a href="cmp|tutorial/cmp-xfind/index">query the database</a> and <a href="cmp|tutorial/cmp-xcreate/index">create and remove</a> database entries.</p>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/classes/example/CourseBean.java"/>
-    <td>The main bean implementation, including the xdoclet tags.
-<tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    <td>Configures the environment
-<tr><td><viewfile-link file="WEB-INF/classes/example/CourseServlet.java"/>
-    <td>The demo servlet
-<tr><td><viewfile-link file="WEB-INF/classes/example/InitServlet.java"/>
-    <td>Servlet initializing the database
-</deftable>
-</section>
+    </td><td>The main bean implementation, including the xdoclet tags.
+</td></tr><tr><td><viewfile-link file="WEB-INF/web.xml"/>
+    </td><td>Configures the environment
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/CourseServlet.java"/>
+    </td><td>The demo servlet
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/InitServlet.java"/>
+    </td><td>Servlet initializing the database
+</td></tr></deftable>
+</s1>
 
-<section title="Database Schema">
+<s1 title="Database Schema">
 
 <p>The database table uses the course name as the primary key.  Each bean
 in Resin-EE needs its own primary key.  It is possible to let the
@@ -51,7 +50,7 @@ Since this example only reads data from
 the table, we'll prepopulate it with the courses.</p>
 
 <p>Each table maps to a single object, using the
-<code/abstract-schema-name/> and <code/sql-table/>
+<code>abstract-schema-name</code> and <code>sql-table</code>
 in the ejb.xml.  If you look at the
 distribution's database schema (in cmp/WEB-INF/sql/default.sql),
 you'll notice that each example has its own table, e.g. basic_courses
@@ -61,9 +60,9 @@ table.  Because it controls the table, the bean can cache data without
 worrying that the database will change without its knowledge.</p>
 
 <p>Database columns map to accessor methods in the bean, using standard
-rules.  The <code/id/> field maps to <code/getId/>.
-The <code/instructor/> column maps to <code/getInstructor/> and
-<code/setInstructor/>.</p>
+rules.  The <code>id</code> field maps to <code>getId</code>.
+The <code>instructor</code> column maps to <code>getInstructor</code> and
+<code>setInstructor</code>.</p>
 
 <example title="course.sql">
 CREATE TABLE basic_courses (
@@ -77,9 +76,9 @@ INSERT INTO basic_courses VALUES('Potions', 'Severus Snape');
 INSERT INTO basic_courses VALUES('Transfiguration', 'Minerva McGonagall');
 </example>
 
-</section>
+</s1>
 
-<section title="Implementation Classes">
+<s1 title="Implementation Classes">
 
 <p>Each database table corresponds to a single "entity bean".  
 Since Resin-EE uses the EJB specification, most of its the jargon
@@ -87,11 +86,11 @@ comes from EJB.  The developer needs to write three classes for each
 entity bean:</p>
 
 <ul>
-<li>The <var/local home/> factory interface for clients to find
+<li>The <var>local home</var> factory interface for clients to find
 and create beans.
-<li>The <var/local/> interface for clients to use.
-<li>The <var/implementation/> bean to write business methods.
-</ul>
+</li><li>The <var>local</var> interface for clients to use.
+</li><li>The <var>implementation</var> bean to write business methods.
+</li></ul>
 
 <p>Why three classes? The interfaces add code clarity for the
 developer and flexibility for Resin-EE.  It's conceptually cleaner
@@ -101,8 +100,8 @@ object interface.  Separating the classes gives Resin-EE the
 flexibility to add its caching and transaction code without
 requiring any client changes.</p>
 
-<p>Resin-EE focuses on <var/local interfaces/>, as
-opposed to the <var/remote interfaces/> of traditional EJB.  Local
+<p>Resin-EE focuses on <var>local interfaces</var>, as
+opposed to the <var>remote interfaces</var> of traditional EJB.  Local
 interfaces are used in a single servlet web-application and avoid the
 complexities of distributed computing.  In addition, local interfaces
 are faster since they can use normal pass-by-reference Java calls.
@@ -112,7 +111,7 @@ Resin-EE provides an object view to relational database, and has
 support for distributed calls for those rare applications which
 really need it.</p>
 
-<section title="Bean Implementation">
+<s2 title="Bean Implementation">
 
 <p>Since Resin-EE provides most of the implementation code, the
 Bean implementation just has a bunch of abstract methods.  More
@@ -167,46 +166,46 @@ public abstract class CourseBean
 of them are cut and pasted from one bean to the next.</p>
 
 <deftable title="XDoclet tags">
-<tr><th>Tag<th>Attribute<th>Meaning
-<tr><td>@ejb.bean<td>&nbsp;<td>configuration applicable to the entire bean
-<tr><td>&nbsp;<td>name<td>The EJB and JNDI name for the bean
-<tr><td>&nbsp;<td>view-type<td>"local" for local CMP beans
-<tr><td>&nbsp;<td>type<td>"CMP" for CMP beans, "BMP" for BMP beans
-<tr><td>&nbsp;<td>schema<td>The abstract schema name for the bean, i.e. the
-<tr><td>&nbsp;<td>primkey-field<td>The primary key field for the bean
-<tr><td>@ejb.persistence<td>&nbsp;<td>persistence (SQL) configuration.  For methods, marks the method as persistent
-<tr><td>&nbsp;<td>table-name<td>The actual database table for the bean
-<tr><td>&nbsp;<td>column-name<td>The actual column for the field
-<tr><td>@ejb.pk<td>&nbsp;<td>configuration for the primary key
-<tr><td>&nbsp;<td>class<td>The class of the primary key
-<tr><td>@ejb.home<td>&nbsp;<td>configuration for the home interface
-<tr><td>&nbsp;<td>generate<td>Which interfaces to generate: "local,remote"
-<tr><td>&nbsp;<td>local-class<td>The class name of the local home interface
-<tr><td>@ejb.interface<td>&nbsp;<td>configuration for the object interface
-<tr><td>&nbsp;<td>generate<td>Which interfaces to generate: "local,remote"
-<tr><td>&nbsp;<td>local-class<td>The class name of the local object interface
-<tr><td>@ejb.interface-method<td>&nbsp;<td>exposes the method as an interface
-<tr><td>@ejb.pk-field<td>&nbsp;<td>marks the method as the primary key
-</deftable>
+<tr><th>Tag</th><th>Attribute</th><th>Meaning
+</th></tr><tr><td>@ejb.bean</td><td>&#160;</td><td>configuration applicable to the entire bean
+</td></tr><tr><td>&#160;</td><td>name</td><td>The EJB and JNDI name for the bean
+</td></tr><tr><td>&#160;</td><td>view-type</td><td>"local" for local CMP beans
+</td></tr><tr><td>&#160;</td><td>type</td><td>"CMP" for CMP beans, "BMP" for BMP beans
+</td></tr><tr><td>&#160;</td><td>schema</td><td>The abstract schema name for the bean, i.e. the
+</td></tr><tr><td>&#160;</td><td>primkey-field</td><td>The primary key field for the bean
+</td></tr><tr><td>@ejb.persistence</td><td>&#160;</td><td>persistence (SQL) configuration.  For methods, marks the method as persistent
+</td></tr><tr><td>&#160;</td><td>table-name</td><td>The actual database table for the bean
+</td></tr><tr><td>&#160;</td><td>column-name</td><td>The actual column for the field
+</td></tr><tr><td>@ejb.pk</td><td>&#160;</td><td>configuration for the primary key
+</td></tr><tr><td>&#160;</td><td>class</td><td>The class of the primary key
+</td></tr><tr><td>@ejb.home</td><td>&#160;</td><td>configuration for the home interface
+</td></tr><tr><td>&#160;</td><td>generate</td><td>Which interfaces to generate: "local,remote"
+</td></tr><tr><td>&#160;</td><td>local-class</td><td>The class name of the local home interface
+</td></tr><tr><td>@ejb.interface</td><td>&#160;</td><td>configuration for the object interface
+</td></tr><tr><td>&#160;</td><td>generate</td><td>Which interfaces to generate: "local,remote"
+</td></tr><tr><td>&#160;</td><td>local-class</td><td>The class name of the local object interface
+</td></tr><tr><td>@ejb.interface-method</td><td>&#160;</td><td>exposes the method as an interface
+</td></tr><tr><td>@ejb.pk-field</td><td>&#160;</td><td>marks the method as the primary key
+</td></tr></deftable>
 
-</section>
+</s2>
 
 <p>With Resin-EJB, all the Java source can be dropped in WEB-INF/classes.
 Resin will automatically compile any changes and regenerate the persistence
 classes, stubs and skeletons.</p>
 
-</section>
+</s1>
 
-<section title="Local Home Interface">
+<s1 title="Local Home Interface">
 
 <p>The home interface is reponsible for factory pattern methods:
 finding existing objects and creating new objects.  At minimum, each
 home interface lets you find an object using its primary key.
-The <code/findByPrimaryKey/> method exists for any entity bean.</p>
+The <code>findByPrimaryKey</code> method exists for any entity bean.</p>
 
 <p>The XDoclet code automatically generates the local home
 interface based on the doclet tags from the CourseBean class.  In
-this example, the only generated method is <code/findByPrimaryKey/>.
+this example, the only generated method is <code>findByPrimaryKey</code>.
 The generated <code>CourseHome</code> looks like the following:</p>
 
 <example title="CourseHome.java">
@@ -227,17 +226,17 @@ collection of local interfaces and always throw the FinderException.</p>
 home interfaces can only be used same web-application as the server.
 This makes it a perfect solution for servlet-based database applications.</p>
 
-</section>
+</s1>
 
-<section title="Local Interface">
+<s1 title="Local Interface">
 
-<p>The local interface, <code/Course/>, is where all the action is.
+<p>The local interface, <code>Course</code>, is where all the action is.
 <code>CourseBean</code> exposed three methods to the local interface
-using the @ejb.interface-method tag: <code/getId/>, <code/getInstructor/>
-and <code/setInstructor/>.  Local interfaces always extend
-<code/EJBLocalObject/>.</p>
+using the @ejb.interface-method tag: <code>getId</code>, <code>getInstructor</code>
+and <code>setInstructor</code>.  Local interfaces always extend
+<code>EJBLocalObject</code>.</p>
 
-<p>The generated <code/Course/> looks like the following:</p>
+<p>The generated <code>Course</code> looks like the following:</p>
 
 <example title="Course.java">
 package example;
@@ -257,9 +256,9 @@ The Resin-EE generated stub (the class implementing the interface)
 will call the underlying implementation bean and SQL, adding
 transaction management as necessary.</p>
 
-</section>
+</s1>
 
-<section title='Deployment Descriptor'>
+<s1 title="Deployment Descriptor">
 
 <p>The deployment descriptor configures the entity bean.  It
 specifies the home, local, and implementation classes.</p>
@@ -268,72 +267,72 @@ specifies the home, local, and implementation classes.</p>
 <a href="cmp|tutorial/cmp-basic/index">basic tutorial</a> gives
 a fuller description.</p>
 
-</section>
+</s1>
 
-<section title="Resin Configuration">
+<s1 title="Resin Configuration">
 
 <p>Now that we've built the bean, we need to
 attach it to Resin.  The entity bean is deployed using
-the <code/EJBServer/> resource.</p>
+the <code>EJBServer</code> resource.</p>
 
-<example title='WEB-INF/web.xml'>
-&lt;web-app>
-  &lt;!-- database configuration -->
-  &lt;database>
-    &lt;name>jdbc/test&lt;/name>
-    &lt;driver-class>oracle.jdbc.pool.OracleConnectionPoolDataSource&lt;/driver-class>
-    &lt;driver-url>jdbc:oracle:thin:@gryffindor:1521:hogwarts&lt;/driver-url>
-    &lt;xa/>
-  &lt;/database>
+<example title="WEB-INF/web.xml">
+&lt;web-app&gt;
+  &lt;!-- database configuration --&gt;
+  &lt;database&gt;
+    &lt;name&gt;jdbc/test&lt;/name&gt;
+    &lt;driver-class&gt;oracle.jdbc.pool.OracleConnectionPoolDataSource&lt;/driver-class&gt;
+    &lt;driver-url&gt;jdbc:oracle:thin:@gryffindor:1521:hogwarts&lt;/driver-url&gt;
+    &lt;xa/&gt;
+  &lt;/database&gt;
 
-  &lt;!-- server configuration -->
-  &lt;ejb-server name="cmp">
-    &lt;config-directory>WEB-INF&lt;/config-directory>
-    &lt;data-source>jdbc/test&lt;/data-source>
-    &lt;create-database-schema/>
-  &lt;/ejb-server>
-&lt;/web-app>
+  &lt;!-- server configuration --&gt;
+  &lt;ejb-server name="cmp"&gt;
+    &lt;config-directory&gt;WEB-INF&lt;/config-directory&gt;
+    &lt;data-source&gt;jdbc/test&lt;/data-source&gt;
+    &lt;create-database-schema/&gt;
+  &lt;/ejb-server&gt;
+&lt;/web-app&gt;
 </example>
 
 <deftable>
-<tr><th>EJBServer configuration<th>meaning
-<tr><td>ejb-server<td>configures the ejb server
-<tr><td>name<td>The JNDI name where the EJBs will be stored
-<tr><td>config-directory<td>Directory of the *.ejb files
-<tr><td>data-source<td>JNDI name of the database
-<tr><td>create-database-schema<td>flag telling Resin-EE to automatically create the schema if missing
-<tr><th>JDBC tag<th>meaning
-<tr><td>database<td>configures the database
-<tr><td>name<td>The JNDI name where the database will be stored
-<tr><td>driver-class<td>The class of the database driver
-<tr><td>driver-url<td>JDBC URL for the driver
-<tr><td>xa<td>flag telling that the database must be transaction-aware
-</deftable>
+<tr><th>EJBServer configuration</th><th>meaning
+</th></tr><tr><td>ejb-server</td><td>configures the ejb server
+</td></tr><tr><td>name</td><td>The JNDI name where the EJBs will be stored
+</td></tr><tr><td>config-directory</td><td>Directory of the *.ejb files
+</td></tr><tr><td>data-source</td><td>JNDI name of the database
+</td></tr><tr><td>create-database-schema</td><td>flag telling Resin-EE to automatically create the schema if missing
+</td></tr><tr><th>JDBC tag</th><th>meaning
+</th></tr><tr><td>database</td><td>configures the database
+</td></tr><tr><td>name</td><td>The JNDI name where the database will be stored
+</td></tr><tr><td>driver-class</td><td>The class of the database driver
+</td></tr><tr><td>driver-url</td><td>JDBC URL for the driver
+</td></tr><tr><td>xa</td><td>flag telling that the database must be transaction-aware
+</td></tr></deftable>
 
-<section title='Transaction DataSource'>
+<s2 title="Transaction DataSource">
 
-<p>The database needs to be configured with &lt;xa/> to enable
+<p>The database needs to be configured with &lt;xa/&gt; to enable
 transactions.  It's important for CMP to be run with transactions enabled
 for consistency.  So if there's a
 conflict or some other need to roll back the transaction, you need
-&lt;xa/> and the database's transaction ability to
+&lt;xa/&gt; and the database's transaction ability to
 protect the database consistency.</p>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="Client Servlet">
+<s1 title="Client Servlet">
 
 <p>Now that we've defined the EJB, we should go ahead and use it.
 Because we haven't defined any method to find all the courses, we
 need to know them beforehand.</p>
 
 <p>Because everything is defined in the web.xml, we just need to know
-that the <code/CourseHome/> is at <code/java:comp/env/cmp/house/>.  So servlet
+that the <code>CourseHome</code> is at <code>java:comp/env/cmp/house</code>.  So servlet
 code can be completely independent of the server deployment.  Because
 the JNDI lookup is relatively slow, applications generally lookup the
-Home interface in the <code/init()/> interface and store it as a
+Home interface in the <code>init()</code> interface and store it as a
 servlet variable.</p>
 
 <example title="CourseServlet.java">
@@ -370,18 +369,18 @@ public class CourseServlet extends HttpServlet {
 
     res.setContentType("text/html");
 
-    out.println("&lt;h3>Course Details&lt;/h3>");
+    out.println("&lt;h3&gt;Course Details&lt;/h3&gt;");
 
     String []courses = new String[] { "Potions", "Transfiguration" };
 
     try {
-      for (int i = 0; i < courses.length; i++) {
+      for (int i = 0; i &lt; courses.length; i++) {
         // Find the course using the home interface
         Course course = home.findByPrimaryKey(courses[i]);
 
-        out.println("course: " + course.getCourseId() + "&lt;br>");
-        out.println("instructor: " + course.getInstructor() + "&lt;br>");
-        out.println("&lt;br>");
+        out.println("course: " + course.getCourseId() + "&lt;br&gt;");
+        out.println("instructor: " + course.getInstructor() + "&lt;br&gt;");
+        out.println("&lt;br&gt;");
       }
     }
     catch (FinderException e) {
@@ -399,9 +398,9 @@ course: Transfiguration
 instructor: Minerva McGonagall
 </results>
 
-</section>
+</s1>
 
-<section title="Conclusion">
+<s1 title="Conclusion">
 
 <p>The core of Resin-EE's database management is its management of a
 single table.  Much of the work underlying the database management is
@@ -417,6 +416,6 @@ this example: using queries to <a href="cmp|tutorial/cmp-find/index">find all
 courses</a> and <a href="cmp|tutorial/cmp-xcreate/index">creating</a> new database rows.
 </p>
 
-</section>
+</s1>
   </body>
 </document>

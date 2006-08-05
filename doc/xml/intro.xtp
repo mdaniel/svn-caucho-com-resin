@@ -8,33 +8,32 @@
   <body>
     <summary/>
 
-<section title="XML Parsing">
-Resin's XML parser uses the JAXP API <a href='xpath|index'>XML path language</a>,
+<s1 title="XML Parsing">
+Resin's XML parser uses the JAXP API <a href="xpath|index">XML path language</a>,
 a pattern matching language for selecting nodes in an XML tree.  
 The most useful subset is covered here.  For the full description, see
 the <a href="external|spec|xpath10">XPath 1.0 spec</a>.
-</section>
+</s1>
 
-<section title="XPath">
-XSLT's power comes from the <a href='xpath|index'>XML path language</a>,
+<s1 title="XPath">
+XSLT's power comes from the <a href="xpath|index">XML path language</a>,
 a pattern matching language for selecting nodes in an XML tree.  
 The most useful subset is covered here.  For the full description, see
 the XPath 1.0 spec.
-</section>
+</s1>
 
-<section title="XSLT">
-Reference guide to the <a href='xslt|fun'>XSLT tags.</a>
+<s1 title="XSLT">
+Reference guide to the <a href="xslt|fun">XSLT tags.</a>
 The most useful subset is covered here.  For the full description, see
 the <a href="external|spec|xslt10">XSLT 1.0 spec</a>.
-</section>
+</s1>
 
-<section title="StyleScript">
-For those put off by XSLT's verbosity, <resin/> offers <a
-href='doc|xtp|stylescript'>StyleScript</a>. StyleScript retains the full
+<s1 title="StyleScript">
+For those put off by XSLT's verbosity, <resin/> offers <a href="doc|xtp|stylescript">StyleScript</a>. StyleScript retains the full
 capabilities of XSLT.  It simplifies HTML generation by focusing on
 uninterpreted text, so '&amp;lt' produces 4 characters. StyleScript also
 provides some syntactic sugar.
-</section>
+</s1>
 
   </body>
 </document>

@@ -1,4 +1,4 @@
-<section>
+<document>
   <header>
     <product>resin</product>
     <title>Runtime Errors</title>
@@ -7,12 +7,14 @@
     <brief>JSP error reporting during runtime</brief>
   </header>
 
+<body>
+<s1>
 
 <p>When the Java code throws an exception, Resin will immediately stop the
 script and report the error to the browser.  For example, we'll force
 a null pointer exception:</p>
 
-<example title='buggy.jsp'>
+<example title="buggy.jsp">
 &lt;%@ page language=java %&gt;
 
 &lt;% String foo = null; %&gt;
@@ -21,7 +23,7 @@ a null pointer exception:</p>
 
 <p>The reported error looks something like the following:
 
-<results border=3>
+<results border="3">
 500 Servlet Exception
 
 java.lang.NullPointerException
@@ -36,12 +38,11 @@ java.lang.NullPointerException
   at java.lang.Thread.run(Thread.java)
 </results>
 
-<p>The most important part of the error message is the location:
+</p><p>The most important part of the error message is the location:
 `<var>/test/buggy.jsp:4</var>'.  Resin translates the line in the
 generated Java code back to the JSP line.</p>
 
-<section title="What if I get 'Compiled Code' instead of
-lines?">
+<s2 title="What if I get 'Compiled Code' instead of&#10;lines?">
 
 <p>You should run Resin with -nojit, turning off the just-in-time
 compiler, when developing so you can see the proper line numbers.
@@ -71,6 +72,8 @@ java.lang.NullPointerException
  at java.lang.Thread.run(Compiled Code)
 </results>
 
-</section>
-</section>
+</s2>
+</s1>
 
+</body>
+</document>

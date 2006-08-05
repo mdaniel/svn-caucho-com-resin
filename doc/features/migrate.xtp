@@ -19,93 +19,90 @@ included below.</p>
 <body>
 <summary/>
 
-<section title="Release Notes">
+<s1 title="Release Notes">
 
-<p>The release notes for <a href="resin-3.0.0.xtp">3.0.0</a>,  <a
-href="resin-3.0.1.xtp">3.0.1</a>, <a href="resin-3.0.2.xtp">3.0.2</a>,  <a
-href="resin-3.0.3.xtp">3.0.3</a>, and <a
-href="resin-3.0.4.xtp">3.0.4</a> contain in-depth explanations of many the
+<p>The release notes for <a href="resin-3.0.0.xtp">3.0.0</a>,  <a href="resin-3.0.1.xtp">3.0.1</a>, <a href="resin-3.0.2.xtp">3.0.2</a>,  <a href="resin-3.0.3.xtp">3.0.3</a>, and <a href="resin-3.0.4.xtp">3.0.4</a> contain in-depth explanations of many the
 changes that occured for Resin 3.</p> 
 
-</section> <!-- Release Notes -->
+</s1> <!-- Release Notes -->
 
-<section title="Validation of configuration files">
+<s1 title="Validation of configuration files">
 
 <p>Resin 3.0 now validates configuration files.
-In particular, attributes like &lt;foo a="bar"> need the quotes.  Resin 2.1
+In particular, attributes like &lt;foo a="bar"&gt; need the quotes.  Resin 2.1
 allowed illegal XML attributes, Resin 3.0 is more strict.</p>
 
 <p>The Resin configuration files now have their own namespace, which is
-necessary for the validation.  The resin.conf looks like:<p>
+necessary for the validation.  The resin.conf looks like:</p><p>
 
 <example>
-&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
   ...
-&lt;/resin>
+&lt;/resin&gt;
 </example>
 
-<p>The web.xml or resin-web.xml looks like:</p>
+</p><p>The web.xml or resin-web.xml looks like:</p>
 
 <example>
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
   ...
-&lt;/web-app>
+&lt;/web-app&gt;
 </example>
 
 <p>Using the Resin namespace lets you use Resin extensions like
-&lt;database> configuration.  If you want to use a strict
+&lt;database&gt; configuration.  If you want to use a strict
 Servlet web.xml, use the J2EE namespace:</p>
 
 <example>
 &lt;web-app xmlns="http://java.sun.com/xml/ns/j2ee" version="2.4"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="...">
+         xsi:schemaLocation="..."&gt;
   ...
-&lt;/web-app>
+&lt;/web-app&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="resin and server">
+<s1 title="resin and server">
 
-<p>The top-level configuration has changed to &lt;resin> and &lt;server>.
+<p>The top-level configuration has changed to &lt;resin&gt; and &lt;server&gt;.
 These changes more closely conform to typical XML usage.</p>
 
 <example>
-&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
   ...
-  &lt;server>
+  &lt;server&gt;
     ...
-  &lt;/server>
-&lt;/resin>
+  &lt;/server&gt;
+&lt;/resin&gt;
 </example>
 
-<section title="srun and cluster">
+<s2 title="srun and cluster">
 
-<p>The &lt;srun> configuration now belongs inside a &lt;cluster>
+<p>The &lt;srun&gt; configuration now belongs inside a &lt;cluster&gt;
 declaration to more clearly convey how the cluster is organized.
-&lt;http> is unchanged.</p>
+&lt;http&gt; is unchanged.</p>
 
 <example>
 ...
-&lt;server>
-  &lt;cluster>
-    &lt;port id="a" port="6810" index="1"/>
-    &lt;port id="b" port="6811" index="2"/>
-  &lt;/cluster>
+&lt;server&gt;
+  &lt;cluster&gt;
+    &lt;port id="a" port="6810" index="1"/&gt;
+    &lt;port id="b" port="6811" index="2"/&gt;
+  &lt;/cluster&gt;
 </example>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="host and web-app">
+<s1 title="host and web-app">
 
 <p>Resin 3.0 makes as much configuration explicit as possible, including
 web-app defaults.</p>
 
 <p>web-apps and hosts must be explicitly configured in the resin.conf,
-either with &lt;web-app> or &lt;web-app-deploy> elements.  This differs
+either with &lt;web-app&gt; or &lt;web-app-deploy&gt; elements.  This differs
 from Resin 2.1, which always included a "default" web-app and host
 even when not configured.</p>
 
@@ -114,50 +111,50 @@ because it does not have a defined root web-app.  Because there's a
 "foo" web-app, /foo/test.jsp would work.</p>
 
 <example title="resin.conf">
-&lt;resin xmlns="http://caucho.com/ns/resin">
-  &lt;server>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;server&gt;
     ...
-    &lt;host id="">
-      &lt;web-app id="/foo"/>
-    &lt;/host>
-  &lt;/server>
-&lt;/resin>
+    &lt;host id=""&gt;
+      &lt;web-app id="/foo"/&gt;
+    &lt;/host&gt;
+  &lt;/server&gt;
+&lt;/resin&gt;
 </example>
 
-<section title="web-app-default and host-default">
+<s2 title="web-app-default and host-default">
 
 <p>As part of Resin 3.0's requirement of explicit defaults, the
-defaults for web-apps and hosts belong in &lt;web-app-default> and
-&lt;host-default> elements.  (Resin 2.1 had a confusing mechanism where
-configuration outside the &lt;web-app> was a default for
-inside the &lt;web-app>.)</p>
+defaults for web-apps and hosts belong in &lt;web-app-default&gt; and
+&lt;host-default&gt; elements.  (Resin 2.1 had a confusing mechanism where
+configuration outside the &lt;web-app&gt; was a default for
+inside the &lt;web-app&gt;.)</p>
 
-<p>The following configures a default &lt;context-param> for all web-apps
+<p>The following configures a default &lt;context-param&gt; for all web-apps
 in the host.</p>
 
 <example>
 ...
-&lt;host id="foo.com">
-  &lt;web-app-default>
+&lt;host id="foo.com"&gt;
+  &lt;web-app-default&gt;
 
-    &lt;context-param host="foo.com"/>
+    &lt;context-param host="foo.com"/&gt;
 
-  &lt;/web-app-default>
-&lt;/host>
+  &lt;/web-app-default&gt;
+&lt;/host&gt;
 ...
 </example>
 
 <p>All of Resin's defaults, like the JSP servlet the the default
-&lt;mime-mapping> configuration are in a &lt;web-app-default> that is
+&lt;mime-mapping&gt; configuration are in a &lt;web-app-default&gt; that is
 included explicitly from the resin.conf.</p>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="General">
+<s1 title="General">
 
-<section title="logging">
+<s2 title="logging">
 <p>Resin now uses the <a href="doc|config|log">JDK 1.4 logging facility</a></p>.
 
 <p>
@@ -171,21 +168,21 @@ file from the wrapper (which catches the stdout and
 stderr from the java process) and in the resin.conf (which
 catches the use of System.out and System.err).
 </p>
-</section>
+</s2>
 
-<section title="thread dumps">
+<s2 title="thread dumps">
 <p>Thread dumps from a Resin process that does not output to a terminal
 will appear in <code>log/jvm.log</code>.</p>
-</section>
+</s2>
 
-<section title="jars no longer included">
+<s2 title="jars no longer included">
 <p>
 The jar files jaxp, dom, sax.jar, jndi.jar, and jdbc2_0-stdext.jar are
 already included in JDK 1.4, so Resin no longer needs to include them.
 </p>
-</section>
+</s2>
 
-<section title="resin:include-directory">
+<s2 title="resin:include-directory">
 
 <example title="Resin 2.1 syntax">
 &lt;resin:include-directory href='mywebapps' extension='.conf'/&gt;
@@ -200,141 +197,140 @@ already included in JDK 1.4, so Resin no longer needs to include them.
 </example>
 
 See <a config-tag="resin:import"/>.
-</section>
+</s2>
 
-</section> <!-- General -->
+</s1> <!-- General -->
 
 
-<section title="Resources">
+<s1 title="Resources">
 
-<section title="resource">
+<s2 title="resource">
 
-<p>Custom resource configuration now uses the &lt;resource> tag.  The old
-&lt;resource-ref> was an inaccurate extension of the Servlet spec's
-&lt;resource-ref>.  The change should avoid confusion.</p>
+<p>Custom resource configuration now uses the &lt;resource&gt; tag.  The old
+&lt;resource-ref&gt; was an inaccurate extension of the Servlet spec's
+&lt;resource-ref&gt;.  The change should avoid confusion.</p>
 
-<p>&lt;resource> configuration has the following components:
-<ul>
+<p>&lt;resource&gt; configuration has the following components:
+</p><ul>
 <li>A jndi-name attribute for the JNDI path name
-<li>A type attribute for the Java class of the resource
-<li>An &lt;init> element for custom configuration of the resource
-<li>An optional mbean-name for registering the resource as an MBean
-</ul>
+</li><li>A type attribute for the Java class of the resource
+</li><li>An &lt;init&gt; element for custom configuration of the resource
+</li><li>An optional mbean-name for registering the resource as an MBean
+</li></ul>
 
 <example title="example Hibernate configuration">
-&lt;resource jndi-name="java:comp/env/hibernate">
-  &lt;type>net.sf.hibernate.jca.ManagedConnectionFactoryImpl&lt;/type>
-  &lt;init>
-    &lt;dialect>net.sf.hibernate.sql.MySQLDialect&lt;/dialect>
-    &lt;driver-class>org.gjt.mm.mysql.Driver&lt;/driver-class>
-    &lt;connection-url>jdbc:mysql://localhost:3306/test&lt;/connection-url>
-  &lt;/init>
-&lt;/resource>
+&lt;resource jndi-name="java:comp/env/hibernate"&gt;
+  &lt;type&gt;net.sf.hibernate.jca.ManagedConnectionFactoryImpl&lt;/type&gt;
+  &lt;init&gt;
+    &lt;dialect&gt;net.sf.hibernate.sql.MySQLDialect&lt;/dialect&gt;
+    &lt;driver-class&gt;org.gjt.mm.mysql.Driver&lt;/driver-class&gt;
+    &lt;connection-url&gt;jdbc:mysql://localhost:3306/test&lt;/connection-url&gt;
+  &lt;/init&gt;
+&lt;/resource&gt;
 </example>
 
-</section>
+</s2>
 
-<section title="Databases">
+<s2 title="Databases">
 
 <ul>
-<li>Configuration of databases has changed significantly.  See <a
-href="doc|db|">Databases</a> for more information.  The usage pattern for
+<li>Configuration of databases has changed significantly.  See <a href="doc|db|">Databases</a> for more information.  The usage pattern for
 databases (the code you use to get a connection and use it) has not changed.
 
-<li>In particular, the &lt;ping-on-xxx> have been replaced by a single &lt;ping> and a &lt;ping-interval>
+</li><li>In particular, the &lt;ping-on-xxx&gt; have been replaced by a single &lt;ping&gt; and a &lt;ping-interval&gt;
 
-<li>Caucho is no longer developing the mysql-jdbc driver. Use the MySQL JDBC
+</li><li>Caucho is no longer developing the mysql-jdbc driver. Use the MySQL JDBC
 driver instead.
 
-</ul>
+</li></ul>
 
 <example>
 &lt;database&gt;
   &lt;jndi-name&gt;jdbc/mysql&lt;/jndi-name&gt;
-  &lt;driver>
+  &lt;driver&gt;
     &lt;type&gt;com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource&lt;/type&gt;
-    &lt;url&gt;jdbc:mysql://localhost:3306/<var/dbname/>&lt;/url&gt;
-    &lt;user&gt;<var/username/>&lt;/user&gt;
-    &lt;password&gt;<var/password/>&lt;/password&gt;
-  &lt;/driver>
+    &lt;url&gt;jdbc:mysql://localhost:3306/<var>dbname</var>&lt;/url&gt;
+    &lt;user&gt;<var>username</var>&lt;/user&gt;
+    &lt;password&gt;<var>password</var>&lt;/password&gt;
+  &lt;/driver&gt;
   ...
 &lt;/database&gt;
 </example>
 
-</section> <!-- Databases -->
+</s2> <!-- Databases -->
 
-<section title="authenticator and custom authentiator">
+<s2 title="authenticator and custom authentiator">
 <p>Authenticators, including custom authenticators are now resources.  
-They belong outside the &lt;login-config> element.</p>
+They belong outside the &lt;login-config&gt; element.</p>
 
 <example title="Authenticator">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
 
-  &lt;authenticator type="com.caucho.server.security.JdbcAuthenticator">
-    &lt;init>
-      &lt;data-source>test&lt;/data-source>
-      &lt;password-query>
+  &lt;authenticator type="com.caucho.server.security.JdbcAuthenticator"&gt;
+    &lt;init&gt;
+      &lt;data-source&gt;test&lt;/data-source&gt;
+      &lt;password-query&gt;
         SELECT password FROM LOGIN WHERE username=?
-      &lt;/password-query>
-      &lt;cookie-auth-query>
+      &lt;/password-query&gt;
+      &lt;cookie-auth-query&gt;
         SELECT username FROM LOGIN WHERE cookie=?
-      &lt;/cookie-auth-query>
-      &lt;cookie-auth-update>
+      &lt;/cookie-auth-query&gt;
+      &lt;cookie-auth-update&gt;
         UPDATE LOGIN SET cookie=? WHERE username=?
-      &lt;/cookie-auth-update>
-      &lt;role-query>
+      &lt;/cookie-auth-update&gt;
+      &lt;role-query&gt;
         SELECT role FROM LOGIN WHERE username=?
-      &lt;/role-query>
-    &lt;/init>
-  &lt;/authenticator>
+      &lt;/role-query&gt;
+    &lt;/init&gt;
+  &lt;/authenticator&gt;
   
-  &lt;login-config>
-    &lt;auth-method>FORM&lt;/auth-method>
-    &lt;realm-name>default&lt;/realm-name>
-    &lt;form-login-config>
-      &lt;form-login-page>/security/login/login.jsp&lt;/form-login-page>
-      &lt;form-error-page>/security/login/error.jsp&lt;/form-error-page>
-    &lt;/form-login-config>
-  &lt;/login-config>
+  &lt;login-config&gt;
+    &lt;auth-method&gt;FORM&lt;/auth-method&gt;
+    &lt;realm-name&gt;default&lt;/realm-name&gt;
+    &lt;form-login-config&gt;
+      &lt;form-login-page&gt;/security/login/login.jsp&lt;/form-login-page&gt;
+      &lt;form-error-page&gt;/security/login/error.jsp&lt;/form-error-page&gt;
+    &lt;/form-login-config&gt;
+  &lt;/login-config&gt;
 
   ...
 
-&lt;/web-app>
+&lt;/web-app&gt;
 </example>
 
 <example title="custom authenticator">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
 
-&lt;authenticator type="com.foo.MyAuthenticator">
- &lt;init>
-   &lt;pool-name>jdbc/dbpkg/pool&lt;/pool-name>
- &lt;/init>
-&lt;/authenticator>
+&lt;authenticator type="com.foo.MyAuthenticator"&gt;
+ &lt;init&gt;
+   &lt;pool-name&gt;jdbc/dbpkg/pool&lt;/pool-name&gt;
+ &lt;/init&gt;
+&lt;/authenticator&gt;
 
-&lt;login-config>
-  &lt;auth-method>FORM&lt;/auth-method>
-  &lt;realm-name>default&lt;/realm-name>
-  &lt;form-login-config>
-    &lt;form-login-page>/security/login/login.jsp&lt;/form-login-page>
-    &lt;form-error-page>/security/login/error.jsp&lt;/form-error-page>
-  &lt;/form-login-config>
-&lt;/login-config>
+&lt;login-config&gt;
+  &lt;auth-method&gt;FORM&lt;/auth-method&gt;
+  &lt;realm-name&gt;default&lt;/realm-name&gt;
+  &lt;form-login-config&gt;
+    &lt;form-login-page&gt;/security/login/login.jsp&lt;/form-login-page&gt;
+    &lt;form-error-page&gt;/security/login/error.jsp&lt;/form-error-page&gt;
+  &lt;/form-login-config&gt;
+&lt;/login-config&gt;
 </example>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="XML/XSL/XTP">
+<s1 title="XML/XSL/XTP">
 <ul>
 
 <li>The XML parser is now strict about attribute values having quotes.  For
 example, &lt;foo bar=baz&gt; must now be written as &lt;foo bar='baz'&gt;
 or &lt;foo bar="baz"&gt;.
 
-</ul>
+</li></ul>
 
-<section title="XSL/XTP search path for .xsl files">
+<s2 title="XSL/XTP search path for .xsl files">
 <p>
 In Resin 3.0.x, much more of the configuration is explicit. Resin 2.x
 had a bunch of built-in defaults.   One of the defaults in Resin 2.x was
@@ -357,8 +353,8 @@ The following will do the trick:
 You can either put that directly in the &lt;web-app&gt; or use a
 &lt;web-app-default&gt; to add WEB-INF/xsl for all your webapps.
 </p>
-</section>
-</section> <!-- XML/XSL -->
+</s2>
+</s1> <!-- XML/XSL -->
 
 </body>
 </document>

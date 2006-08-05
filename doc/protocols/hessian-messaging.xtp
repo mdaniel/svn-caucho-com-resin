@@ -10,7 +10,7 @@
         Hessian RPC call, so Hessian itself has no need to become more
         complicated.</p>
 
-      <p>Each hop the message takes uses a simple <code/send/> method to the
+      <p>Each hop the message takes uses a simple <code>send</code> method to the
         next server in line.  The receiving service might be the final
         destination or it might choose to send the message to another server,
         making another hop.  This architecture is essentially the same as the
@@ -33,14 +33,14 @@
   <body>
     <summary/>
 
-<section title="Messaging Service">
+<s1 title="Messaging Service">
 
 <p>The message service sends a message from the client to the server.
 When you strip away all other complications, that's all messaging does.</p>
 
 <p>The message service method is simple.  It consists of a single
-method <code/send/> with two arguments: <code/headers/> and <code/message/>.
-<code/headers/> contain message routing information.  <code/message/>
+method <code>send</code> with two arguments: <code>headers</code> and <code>message</code>.
+<code>headers</code> contain message routing information.  <code>message</code>
 contains the message itself.</p>
 
 <example title="API">
@@ -52,9 +52,9 @@ public interface MessageSender {
 }
 </example>
 
-</section>
+</s1>
 
-<section title="Point-to-Point Messaging">
+<s1 title="Point-to-Point Messaging">
 
 <p>The simplest messaging service receives text message to
 a URL.  With that messaging service, only the message object is used and
@@ -64,7 +64,7 @@ forwarded and to have many middle servers, the simple use
 case is sufficient.</p>
 
 <p>The message service URL is the message destination.
-This example might use <var/http://foo.com/hessian/message/test-bean/>.
+This example might use <var>http://foo.com/hessian/message/test-bean</var>.
 Since this sample service ignores the headers, there's no forwarding
 of the message.</p>
 
@@ -81,7 +81,7 @@ specified in the containing enveloper.  For example, when using
 Hessian with HTTP, the HTTP request will specify the URL of the
 Hessian service.</p>
 
-<section title="Sending a message from a Java client">
+<s2 title="Sending a message from a Java client">
 
 <p>An application can use any Java client which can send Hessian to the
 message service.  The standard HessianProxyFactory could be used.</p>
@@ -100,9 +100,9 @@ sender = (MessageSender) factory.create(MessageSender.class, url);
 sender.send(null, "Hello");
 </example>
 
-</section>
+</s2>
 
-<section title="Calling from a Python client">
+<s2 title="Calling from a Python client">
 
 <p>Since Hessian is language-independent, any scripting languages with
 a Hessian implementation can send to a messaging service.
@@ -117,9 +117,9 @@ proxy = Hessian("http://foo.com/hessian/message/test-bean")
 proxy.send(None, "hello")
 </example>
 
-</section>
+</s2>
 
-<section title="Implementing the Service as an EJB Message Bean">
+<s2 title="Implementing the Service as an EJB Message Bean">
 
 <p>Resin-Enterprise uses the Hessian MessageSender as a
 JMS (Java Message Service) protocol.  So applications can use
@@ -160,27 +160,27 @@ public class MyMessageBean implements MessageDrivenBean, MessageListener {
 
 <p>The EJB deployment descriptor and the EJB server configuration are
 implemented in the usual way.  In this case, the bean name would be
-<var/test-bean/>.</p>
+<var>test-bean</var>.</p>
 
 <example title="web.xml entries to configure the EJB server">
-&lt;-- configure the EJB server -->
-&lt;resource-ref>
-  &lt;res-ref-name>java:comp/env/cmp&lt;/res-ref-name>
-  &lt;class-name>com.caucho.ejb.EJBService&lt;/class-name>
-&lt;/resource-ref>
+&lt;-- configure the EJB server --&gt;
+&lt;resource-ref&gt;
+  &lt;res-ref-name&gt;java:comp/env/cmp&lt;/res-ref-name&gt;
+  &lt;class-name&gt;com.caucho.ejb.EJBService&lt;/class-name&gt;
+&lt;/resource-ref&gt;
 
-&lt;-- configure the Hessian protocol -->
-&lt;servlet-mapping>
-  &lt;url-pattern>/hessian/*&lt;/url-pattern>
-  &lt;servlet-name>com.caucho.ejb.hessian.HessianServlet&lt;/servlet-name>
-&lt;/servlet-mappin>
+&lt;-- configure the Hessian protocol --&gt;
+&lt;servlet-mapping&gt;
+  &lt;url-pattern&gt;/hessian/*&lt;/url-pattern&gt;
+  &lt;servlet-name&gt;com.caucho.ejb.hessian.HessianServlet&lt;/servlet-name&gt;
+&lt;/servlet-mappin&gt;
 </example>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="Messaging with Routing">
+<s1 title="Messaging with Routing">
 
 <p>Routing parameters are contained in the headers map.
 For example, Java's messaging service (JMS) defines a number
@@ -192,9 +192,9 @@ important point to note is that the routing protocol is built on top
 of the Hessian messaging service which is built on Hessian.
 Hessian itself does not need to be complicated with the routing headers.</p>
 
-</section>
+</s1>
 
-<section title="Conclusion">
+<s1 title="Conclusion">
 
 <p>In some sense, this protocol is too simple.  That's the point.  By
 designing the messaging protocol as a layered system, each layer can
@@ -204,13 +204,13 @@ complicated messaging routing services are still possible.</p>
 <ul>
 <li>Hessian can remain a simple RPC protocol with no complicated
 routing headers.
-<li>The messaging service API can remain trivial so simple scripting
+</li><li>The messaging service API can remain trivial so simple scripting
 language clients can use it.
-<li>Sophisticated routing protocols can be built on top of the
+</li><li>Sophisticated routing protocols can be built on top of the
 messaging by properly defining the headers.
-</ul>
+</li></ul>
 
-</section>
+</s1>
 
   </body>
 </document>

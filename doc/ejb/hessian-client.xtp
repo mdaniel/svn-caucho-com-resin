@@ -6,24 +6,24 @@
       <p>Configuring an EJB client using the Hessian protocol is similar to
         using <a href="burlap-client.xtp">Burlap</a>, only the names change. 
         BurlapContextFactory as a JNDI link.  The client will use
-    </description>
+    </p></description>
   </header>
 
   <body>
     <summary/>
-<section title="Hessian EJB Client">
+<s1 title="Hessian EJB Client">
 
 <example title="Resin-EJB with Hessian">
-&lt;web-app>
-  &lt;jndi-link>
-    &lt;jndi-name>java:comp/env/ejb&lt;/jndi-name>
-    &lt;jndi-factory>com.caucho.hessian.HessianContextFactory&lt;/jndi-factory>
-    &lt;init-param java.naming.provider.url="http://host.com/hessian"/>
-  &lt;/jndi-link>
-&lt;/web-app>
+&lt;web-app&gt;
+  &lt;jndi-link&gt;
+    &lt;jndi-name&gt;java:comp/env/ejb&lt;/jndi-name&gt;
+    &lt;jndi-factory&gt;com.caucho.hessian.HessianContextFactory&lt;/jndi-factory&gt;
+    &lt;init-param java.naming.provider.url="http://host.com/hessian"/&gt;
+  &lt;/jndi-link&gt;
+&lt;/web-app&gt;
 </example>
 
-</section>
+</s1>
 
   </body>
 </document>

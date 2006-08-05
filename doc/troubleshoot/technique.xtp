@@ -16,18 +16,18 @@ troubleshooting your web applications.</p>
 
 
 <!-- section  -->
-<section name="debug-log" title="Enable debug logging">
+<s1 name="debug-log" title="Enable debug logging">
 
 <p>Resin provides a number of diagnostic messages using the JDK logging
 facility.  Full debug logging is enabled with an empty name (meaning match all
 names) and a level of 'all'.  Since this will produce many messages, it is
 useful to put the messages in a a seperate file.</p>
 
-<section title="Full debug logging of the server and all applications">
+<s2 title="Full debug logging of the server and all applications">
 
 <p>The following configuration creates a debug log for each day, and when a
 problem occurs the debug log is used to help find out what the problem is.
-Since the <a config-tag="log"/> entry is in <var/resin.conf/>, the log will
+Since the <a config-tag="log"/> entry is in <var>resin.conf</var>, the log will
 capture messages from the server itself and all applications.  The resulting
 log messages are found in the file <var>$RESIN_HOME/log/debug.log</var>.</p>
 
@@ -46,9 +46,9 @@ log messages are found in the file <var>$RESIN_HOME/log/debug.log</var>.</p>
 <code>name</code>.  The documentation for <a config-tag="log"/> provides a
 table of useful values for <code>name</code>.
 
-</section>
+</p></s2>
 
-<section title="Full debug logging of one web application">
+<s2 title="Full debug logging of one web application">
 
 <p>Often you can narrow down the logging requirements to a single web
 application.  The log entry can be placed in
@@ -69,13 +69,13 @@ web application will go to the log file.</p>
   ...
 &lt;/web-app&gt;
 </example>
-</section>
+</s2>
 
-</section> <!-- debug-log -->
+</s1> <!-- debug-log -->
 
 <!-- section  -->
 
-<section name="thread-dump" title="Thread dump">
+<s1 name="thread-dump" title="Thread dump">
 
 <p>If an application seems stuck, or is running out of resources, a thread dump
 will reveal the state of the server.</p>
@@ -87,9 +87,9 @@ consume resources and cause OutOfMemory exceptions.  That's
 especially true when you start adding third-party software like
 databases, EJB, and Corba ORBs.</p>
 
-<section title="Thread dump using JDK 5 tools">
+<s2 title="Thread dump using JDK 5 tools">
 <p>
-<var/jps/> and <var/jstack/> are useful tools included in JDK 5, providing a
+<var>jps</var> and <var>jstack</var> are useful tools included in JDK 5, providing a
 quick command line method for obtaining stack traces of all current threads.
 </p>
 
@@ -119,9 +119,9 @@ Thread 12689: (state = BLOCKED)
 
 </example>
 
-</section>
+</s2>
 
-<section title="Thread dump by sending a signal">
+<s2 title="Thread dump by sending a signal">
 
 <p>On Windows, ctrl-break may produce a thread dump.</p>
 
@@ -130,7 +130,7 @@ you'll need to signal one of the child processes.  On the Linux Sun JDK, you'll
 need to kill the grandparent process of most of the threads:</p>
 
 <example>
-unix> ps -ef | grep java
+unix&gt; ps -ef | grep java
 ferg     14243 10792  0 Jan13 pts/0    00:00:00 sh -c /usr/java/bin/java
 ferg     14244 14243  0 Jan13 pts/0    00:00:00 java -Dres
 ferg     14253 14244  0 Jan13 pts/0    00:00:01 java -Dres
@@ -139,7 +139,7 @@ ferg     14255 14253  0 Jan13 pts/0    00:00:00 java -Dres
 ferg     14256 14253  0 Jan13 pts/0    00:00:00 java -Dres
 ferg     14257 14253  0 Jan13 pts/0    00:00:00 java -Dres
 ferg     14258 14253  0 Jan13 pts/0    00:00:00 java -Dres
-unix> kill -QUIT 14244
+unix&gt; kill -QUIT 14244
 </example>
 
 <p>The Solaris 1.3 JDK has a single process, so it's easy.</p>
@@ -147,9 +147,9 @@ unix> kill -QUIT 14244
 <p>The Solaris 1.2 JDK has an extra quirk.  You need to run Resin in the
 foreground (i.e. not using "start".)  Then you'll need to answer some
 questions on the console.</p>
-</section>
+</s2>
 
-<section title="Thread dump if signalling doesn't work">
+<s2 title="Thread dump if signalling doesn't work">
 
 <p>You get a thread dump without signalling the process by starting the JVM
 with some extra arguments to allow a debugger to attach.  You can then attach
@@ -165,10 +165,10 @@ technique works on all operating systems.</p>
 $RESIN_HOME/bin/httpd -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5432
 </example>
 
-<li>Wait until you believe the application is in a state of deadlock
+</li><li>Wait until you believe the application is in a state of deadlock
 or has runaway threads.
 
-<li>In another terminal (window), use jdb to connect to the running instance of Resin:
+</li><li>In another terminal (window), use jdb to connect to the running instance of Resin:
 
 <example>
 $JAVA_HOME/bin/jdb -connect com.sun.jdi.SocketAttach:hostname=localhost,port=5432
@@ -180,17 +180,17 @@ jdb will show something like:
 Set uncaught java.lang.Throwable
 Set deferred uncaught java.lang.Throwable
 Initializing jdb ...
->
+&gt;
 </example>
 
-<li>Use the "suspend" command and then the "where all" command to get
+</li><li>Use the "suspend" command and then the "where all" command to get
 a thread dump:
 
 <example>
-> <bold>suspend</bold>
+&gt; <bold>suspend</bold>
 
 All threads suspended.
-> <bold>where all</bold>
+&gt; <bold>where all</bold>
 
 tcpConnection-6862-3:
 
@@ -210,12 +210,12 @@ tcpConnection-543-2:
 
 ..
 </example>
-<li>Use the "resume" command to resume the process
+</li><li>Use the "resume" command to resume the process
 <example>
-> <bold>resume</bold>
+&gt; <bold>resume</bold>
 </example>
 
-</ol>
+</li></ol>
 
 <p>Unix users (and Cygwin users on Windows) will recognize the
 opportunity to make a script:</p>
@@ -228,9 +228,9 @@ echo -e "suspend\nwhere all\nresume\nquit" | $JAVA_HOME/bin/jdb -connect \
 <p>Although no rigorous benchmarking has been done, there appears to
 be little overhead or performance penalties involved in having the JVM
 start with the options that allow a debugger to attach.</p>
-</section>
+</s2>
 
-<section title="Understanding the thread dump">
+<s2 title="Understanding the thread dump">
 
 <p>In any case, you'll eventually get a trace that looks something like the following (each JDK is slightly different):</p>
 
@@ -297,17 +297,17 @@ Full thread dump:
 <p>Each thread is named.  Here are some of the common names:</p>
 
 <deftable>
-<tr><th>Thread Name<th>Description
-<tr><td>tcp-accept-8080<td>Resin thread listening for new connections
+<tr><th>Thread Name</th><th>Description
+</th></tr><tr><td>tcp-accept-8080</td><td>Resin thread listening for new connections
 on port 8080.
-<tr><td>tcpConnection-8080-3<td>Resin servlet thread handling 
+</td></tr><tr><td>tcpConnection-8080-3</td><td>Resin servlet thread handling 
 a connection from port 8080.
-<tr><td>tcp-cron<td>Resin's run-at thread
-<tr><td>tcp-alarm<td>Resin's alarm thread
-</deftable>
+</td></tr><tr><td>tcp-cron</td><td>Resin's run-at thread
+</td></tr><tr><td>tcp-alarm</td><td>Resin's alarm thread
+</td></tr></deftable>
 
-<p>There should be one tcp-accept-xxx thread for each &lt;http> and
-&lt;srun> that Resin's listening for.  The tcp-accept-xxx thread should
+<p>There should be one tcp-accept-xxx thread for each &lt;http&gt; and
+&lt;srun&gt; that Resin's listening for.  The tcp-accept-xxx thread should
 almost always be in socketAccept.</p>
 
 <p>There should be several tcpConnection-xxx-n threads.  Each of these
@@ -318,18 +318,18 @@ httpRequest or runnerRequest (for keepalive threads.)</p>
 
 <p>For deadlocks, you'll want to look at the "waiting on monitor" threads
 and any case where lots of threads are stuck at the same location.</p>
-</section>
+</s2>
 
-</section> <!-- thread-dump -->
+</s1> <!-- thread-dump -->
 
-<section name="out-of-memory" title="Out of Memory and Garbage Collection">
+<s1 name="out-of-memory" title="Out of Memory and Garbage Collection">
 
 <p>Most memory problems are due to memory leaks in the application
 program.  For example, a cache or a vector that fills up with stale
 data, or a singleton or static variable which doesn't properly
 detect a web-app reload.  Some more exotic memory issues
 relate to running out of heap memory or virtual memory when using
-a large number of threads (> 256).</p>
+a large number of threads (&gt; 256).</p>
 
 <p>The steps to track down a memory problem are:</p>
 
@@ -337,43 +337,43 @@ a large number of threads (> 256).</p>
 <li>Enable -J-verbosegc with the httpd.sh start or httpd -install.
 The -verbosegc flag logs the garbage collection of the heap, which will
 let you know if you're running out of heap memory (the most common case).
-<li>Get a heap profiler or use the heap dump in the JVM.  JProfiler is an
+</li><li>Get a heap profiler or use the heap dump in the JVM.  JProfiler is an
 inexpensive commercial heap profiler.  Although the JVM's heap dump is
 not very user friendly, it's always available.  You should be using
 a heap profiler as part of your development process and certainly use one
 before any production launch.
-<li>With the heap profiler, find the 2-3 top memory users and fix those
+</li><li>With the heap profiler, find the 2-3 top memory users and fix those
 memory leaks.
-<li>Common application errors include:
+</li><li>Common application errors include:
 <ul>
 <li>ThreadLocal variables that are not properly cleared at the end of each request.
-<li>Singleton or static hash maps and caches, esp check for clearing web-app restarts.
-<li>Spawned threads which are not stopped on web-app restart.
-<li>web-app variables (like the "application" variable), stored in a static variable.
-</ul>
-<li>If the heap is clean, i.e. -verbosegc shows a steady heap, you'll need to
+</li><li>Singleton or static hash maps and caches, esp check for clearing web-app restarts.
+</li><li>Spawned threads which are not stopped on web-app restart.
+</li><li>web-app variables (like the "application" variable), stored in a static variable.
+</li></ul>
+</li><li>If the heap is clean, i.e. -verbosegc shows a steady heap, you'll need to
 look at non-heap memory:
 <ul>
 <li>Thread stack usage (-Xss1m).  Each thread takes up some non-heap memory.
 The default on some systems is 8 meg.  Because of 32-bit virtual memory limits of about 2G on some systems, even 256 threads with 8 meg stacks can chew up the virtual memory.  You can drop the stack size with the -Xss directive.
-<li>JNI memory.  If you're using JNI libraries or drivers that use JNI,
+</li><li>JNI memory.  If you're using JNI libraries or drivers that use JNI,
 it's possible that the JNI can allocate more memory than is available.
-<li>fork/exec and OS limits.  If the OS does not have enough available
+</li><li>fork/exec and OS limits.  If the OS does not have enough available
 swap space, for example, the OS might refuse a "jikes" compilation.
-<li>NIO, memory mapping, and .jar files.  The JDK memory-maps .jar files.
+</li><li>NIO, memory mapping, and .jar files.  The JDK memory-maps .jar files.
 In some cases with very large numbers of jars, this can result in
 running out of virtual memory.  The same issue can appear for NIO memory mapping.
-</ul>
-<li>If all of these are eliminated, it might be a Resin bug.  However,
+</li></ul>
+</li><li>If all of these are eliminated, it might be a Resin bug.  However,
 you will need to have located the memory leak as Resin-related before
 any memory-related bug report, i.e. it's necessary to go through the
 above steps before reporting a bug.  Bug reports that complain
 about OutOfMemory errors, but have not even gotten a JDK memory
 dump are most likely application errors.  You must provide a
 heap dump when reporting any potential Resin memory problems.
-</ol>
+</li></ol>
 
-<section title="-verbosegc">
+<s2 title="-verbosegc">
 
 <p>-verbosegc is a debugging output from the JVM.  It's very convenient
 for checking basic memory usage and garbage collection time.  
@@ -384,18 +384,18 @@ When starting Resin, you'll use -J-verbosegc.</p>
 the following:</p>
 
 <example title="-verbosegc output">
-[GC 9176K->8647K(9768K), 0.0014790 secs]
-[GC 9287K->8668K(9768K), 0.0011120 secs]
-[GC 9308K->8668K(9768K), 0.0007810 secs]
+[GC 9176K-&gt;8647K(9768K), 0.0014790 secs]
+[GC 9287K-&gt;8668K(9768K), 0.0011120 secs]
+[GC 9308K-&gt;8668K(9768K), 0.0007810 secs]
 </example>
 
 <p>The "(9768K)" is the most important number, showing that the
 maximum allocated heap is about 10 meg.  The other numbers show the
 actual heap used before and after garbage collection.</p>
 
-</section>
+</s2>
 
-<section name="heap-dump" title="Check memory usage with a heap dump">
+<s2 name="heap-dump" title="Check memory usage with a heap dump">
 
 <p>If an application gobbles up memory until it throws an OutOfMemory
 exception, or seems to be spending an excessive amount of time doing garbage
@@ -412,7 +412,7 @@ the <a href="external|sun|jvmstat">jvmstat tools</a>.</p>
 start Resin (unix or windows) as</p>
 
 <example>
-> httpd.sh -J-Xrunhprof:heap=sites,cpu=samples
+&gt; httpd.sh -J-Xrunhprof:heap=sites,cpu=samples
 </example>
 
 <p>(On Unix, Resin's startup script has a -cpuprof-ascii argument that sets it for you automatically.)</p>
@@ -423,7 +423,7 @@ clean exit.</p>
 
 <p>That will dump a java.hprof.txt.  Skip to the bottom to get the trace.</p>
 
-<section title="Understanding java.hprof.txt heap">
+<s3 title="Understanding java.hprof.txt heap">
 
 <p>Assuming you're being cheap, and using the JDK's heap profiling instead of
 buying a profiler, you'll need a bit of help interpreting it.</p>
@@ -440,7 +440,7 @@ SITES BEGIN (ordered by live bytes) Tue Jan  9 17:44:33 2001
  rank   self  accum    bytes objs   bytes objs trace name
     1 11.87% 11.87%   983520  120 1393320  170  2553 [B
     2  9.89% 21.76%   819600  100 1286772  157  4070 [B
-    3  9.09% 30.85%   753756   23 3539376  108  4970 [L&lt;Unknown>;
+    3  9.09% 30.85%   753756   23 3539376  108  4970 [L&lt;Unknown&gt;;
     4  5.83% 36.68%   483564   59  778620   95  7180 [B
     5  5.74% 42.42%   475368   58  745836   91  7178 [B
     6  4.35% 46.77%   360624   44  696660   85  7182 [B
@@ -451,8 +451,8 @@ SITES BEGIN (ordered by live bytes) Tue Jan  9 17:44:33 2001
    11  1.53% 57.30%   126988 1063 16973092 129113  3271 [C
    12  1.34% 58.64%   110684 3953 20362832 727244  1213 sun/io/CharToByteISO8859_1
    13  1.25% 59.88%   103320  738  141820 1013  5942 java/lang/Class
-   14  1.21% 61.10%   100548   49  221616  108  5003 [L&lt;Unknown>;
-   15  1.21% 62.31%   100548   49  221616  108  5005 [L&lt;Unknown>;
+   14  1.21% 61.10%   100548   49  221616  108  5003 [L&lt;Unknown&gt;;
+   15  1.21% 62.31%   100548   49  221616  108  5005 [L&lt;Unknown&gt;;
    16  1.07% 63.38%    89080 1532 18393580 317347  1340 [B
    17  0.79% 64.18%    65568    8   81960   10  8408 [B
    18  0.79% 64.97%    65552    4   65552    4 27630 [C
@@ -474,7 +474,7 @@ trace (3271):</p>
 
 <example>
 TRACE 3271:
-	java/lang/String.&lt;init>(String.java:244)
+	java/lang/String.&lt;init&gt;(String.java:244)
 	com/caucho/util/CharBuffer.close(CharBuffer.java:714)
 	com/caucho/vfs/FilesystemPath.normalizePath(FilesystemPath.java:162)
 	com/caucho/vfs/FilesystemPath.schemeWalk(FilesystemPath.java:127)
@@ -483,13 +483,13 @@ TRACE 3271:
 <p>That's part of Resin's VFS code.  Maybe in the future it'll make sense
 to try to reduce that.
 
-<p>You can get a longer trace using the "-prof-depth 10" argument to Resin.
+</p><p>You can get a longer trace using the "-prof-depth 10" argument to Resin.
 (Or the corresponding depth in -Xrunhprof.)  That will often give more
 information.</p>
 
-</section>
+</s3>
 
-<section title="Understanding java.hprof.txt CPU">
+<s3 title="Understanding java.hprof.txt CPU">
 
 <p>The CPU profiling is a little easier to read.  On some JDK's you'll need to
 run it with the JIT disabled.</p>
@@ -502,28 +502,28 @@ rank   self  accum   count trace method
    3  5.99% 38.19%   25428  1213 java/lang/Class.newInstance0
    4  5.11% 43.31%   21715  7896 com/caucho/util/CharBuffer.toString
    5  4.82% 48.13%   20463  1286 sun/io/CharToByteISO8859_1.convert
-   6  3.54% 51.66%   15018  1242 sun/io/CharToByteConverter.&lt;init>
-   7  2.68% 54.35%   11388  7241 java/io/PrintWriter.&lt;init>
+   6  3.54% 51.66%   15018  1242 sun/io/CharToByteConverter.&lt;init&gt;
+   7  2.68% 54.35%   11388  7241 java/io/PrintWriter.&lt;init&gt;
    8  2.47% 56.82%   10508  7748 com/caucho/server/http/Request.fillCookies
-   9  2.27% 59.09%    9650  1214 sun/io/ByteToCharConverter.&lt;init>
-  10  1.85% 60.94%    7857  5097 java/lang/String.&lt;init>
+   9  2.27% 59.09%    9650  1214 sun/io/ByteToCharConverter.&lt;init&gt;
+  10  1.85% 60.94%    7857  5097 java/lang/String.&lt;init&gt;
   11  1.59% 62.53%    6754  1341 java/lang/String.substring
   12  1.57% 64.10%    6650  1340 java/lang/String.getBytes
-  13  0.92% 65.02%    3907  7897 java/lang/String.&lt;init>
+  13  0.92% 65.02%    3907  7897 java/lang/String.&lt;init&gt;
   14  0.76% 65.78%    3227  3259 com/caucho/vfs/FilePath.fsWalk
   15  0.75% 66.53%    3195  7895 com/caucho/server/http/Request.fillCookie
   16  0.71% 67.25%    3031  7321 java/lang/String.getBytes
   17  0.71% 67.95%    2996  3270 com/caucho/util/CharBuffer.close
-  18  0.68% 68.63%    2892  3271 java/lang/String.&lt;init>
+  18  0.68% 68.63%    2892  3271 java/lang/String.&lt;init&gt;
   19  0.66% 69.29%    2782  7318 com/caucho/vfs/FilePath.openWriteImpl
-  20  0.61% 69.90%    2604  7320 java/io/FileOutputStream.&lt;init>
+  20  0.61% 69.90%    2604  7320 java/io/FileOutputStream.&lt;init&gt;
 </example>
 
 <p>You should only pay attention to the top 20 or so.  You'll
 probably need to ignore a few of the top 10, because they're just waiting
 for a user response.  The SocketInputStream.socketRead is an example.
 
-<p>You can use the trace number to get a call trace:</p>
+</p><p>You can use the trace number to get a call trace:</p>
 
 <example>
 TRACE 7266:
@@ -532,10 +532,10 @@ TRACE 7266:
 	com/caucho/server/http/Response.finish(Response.java:1345)
 	com/caucho/server/http/Request.finish(Request.java:416)
 </example>
-</section>
-</section> <!-- heap-dump -->
+</s3>
+</s2> <!-- heap-dump -->
 
-<section name="garbage-collection" title="Monitor garbage collection">
+<s2 name="garbage-collection" title="Monitor garbage collection">
 
 <p>(thanks to Rob Lockstone for his comments)</p> 
 
@@ -561,16 +561,16 @@ invaluable in diagnosing garbe collection related problems.</p>
 <a href="troubleshoot|technique#increase-memory">inadequate heap memory</a> 
 </p>
 
-</section> <!-- garbage-collection -->
+</s2> <!-- garbage-collection -->
 
-<section name="increase-memory" title="Increase heap memory">
+<s2 name="increase-memory" title="Increase heap memory">
 
 <p>See <a href="performance|jvm-tuning#memory">Performance : JVM Tuning : Memory</a>.</p>
-</section> <!-- increase-memory -->
+</s2> <!-- increase-memory -->
 
-</section>
+</s1>
 
-<section name="classpath" title="Clean up the classpath">
+<s1 name="classpath" title="Clean up the classpath">
 
 <p>Conflicts often arise with older or incompatible versions of classes.</p>
 
@@ -598,9 +598,9 @@ picking up an older version.</p>
 <p>You can start httpd with the -verbose option to see the CLASSPATH that
 is being used when Resin is started.</p>
 
-</section> <!-- classpath  -->
+</s1> <!-- classpath  -->
 
-<section name="tcpmon" title="Monitor the HTTP communication">
+<s1 name="tcpmon" title="Monitor the HTTP communication">
 
 <p>To monitor just the HTTP headers, the following debug logging can be
 enabled in $RESIN_HOME/resin.conf:</p>
@@ -633,9 +633,9 @@ of localhost and a target port of 8080.  Now you will use a url
 to use tcpmon.  tcpmon will log the request, pass it through to Resin (on port
 8080), and log the response before returning it to the browser.</p>
 
-</section>
+</s1>
 
-<section name="external-compiler"  title="Use an external compiler">
+<s1 name="external-compiler" title="Use an external compiler">
 
 <p>Resin's default is to use the `internal' compiler because it is the most
 likely to be available.  Sometimes the internal compiler will start to cause
@@ -648,18 +648,17 @@ solution is to change the compiler to `javac' in resin.conf:</p>
 
 <p>Jikes is another option for the compiler, as discussed in the documentation
 for <a config-tag="javac"/>.</p>
-</section> <!-- external-compiler -->
+</s1> <!-- external-compiler -->
 
-<section name="os-thread"  title="Increase stack size to avoid thread limitations">
+<s1 name="os-thread" title="Increase stack size to avoid thread limitations">
 
 <p>Each thread is allocated a stack, if the size of the stack is too large,
 then you may run out of memory when a higher number of threads is reached.
-Techniques to adress this are discussed in <a
-href="doc|performance|jvm-tuning#stack-size">JVM Tuning</a>.
+Techniques to adress this are discussed in <a href="doc|performance|jvm-tuning#stack-size">JVM Tuning</a>.
 
-</section> <!-- os-thread -->
+</p></s1> <!-- os-thread -->
 
-<section name="netstat" title="Use netstat to obtain an OS level view of current TCP/IP port usage">
+<s1 name="netstat" title="Use netstat to obtain an OS level view of current TCP/IP port usage">
 
 
 The <code>netstat</code> utility is useful for obtaining information from the
@@ -677,7 +676,7 @@ causes the display of the process that is using the socket.  Since the windows
 <code>netstat</code> is different than the Unix one, -p is not used on Windows.
 </p>
 
-<section title="Connection state">
+<s2 title="Connection state">
 
 <p>
 The connection state is probably the most important information.  The man page
@@ -701,10 +700,10 @@ connection.  The idea of TIME_WAIT is that it keeps the socket open long enough
 to catch those stray packets, so that they don't get erronously delivered to a
 new connection opened on the same socket.
 </p>
-</section>
+</s2>
 
 
-<section title="Port usage">
+<s2 title="Port usage">
 <p>
 If Resin is indicating that it cannot bind to a port, it may be an
 indication that another process is using the port.  <code>netstat</code> may
@@ -720,9 +719,9 @@ output to limit it to the port of interest.  The following example is for port
 unix$ netstat -anp | grep ":80" | less
 </example>
 
-</section>
+</s2>
 
-</section> <!-- netstat -->
+</s1> <!-- netstat -->
 
 
 </body>

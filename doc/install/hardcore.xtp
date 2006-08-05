@@ -20,7 +20,7 @@
 <note>Resin HardCore is experimental.</note>
 
 
-<section title="Basic Operation">
+<s1 title="Basic Operation">
 
 <p>Resin HardCore works much like the Apache/mod_caucho combination.  When a
 new browser request appears on port 80, it accepts the request and
@@ -39,34 +39,34 @@ the load-balancing is complete, an Linux box can serve as a low cost
 sticky-session load balancer with much better performance than an
 Apache load balancer.</p>
 
-</section>
+</s1>
 
-<section title="Installation">
+<s1 title="Installation">
 
 <p>The Resin ./configure script will select the Linux sources.  The
-standard make; make install will put a <var/resin.o/> in
-resin-2.0.x/libexec.  <var/resin.o/> is the actual kernel module.</p>
+standard make; make install will put a <var>resin.o</var> in
+resin-2.0.x/libexec.  <var>resin.o</var> is the actual kernel module.</p>
 
 <p>For standard configurations, ./configure will find the source, but
 you can change it with configure arguments (or in the Makefile).</p>
 
 <deftable>
-<tr><td>--with-linux-src=/usr/src/linux<td>Selects the kernel source
-<tr><td>--enable-linux-smp<td>Compiles for an SMP system or not.
-</deftable>
+<tr><td>--with-linux-src=/usr/src/linux</td><td>Selects the kernel source
+</td></tr><tr><td>--enable-linux-smp</td><td>Compiles for an SMP system or not.
+</td></tr></deftable>
 
 <p>Once you've got a resin.o in libexec, you can install it as a
-module.  The Linux command is <var/insmod/>.</p>
+module.  The Linux command is <var>insmod</var>.</p>
 
-<p>HardCore can take an optional argument, <var/port/>, to select the
+<p>HardCore can take an optional argument, <var>port</var>, to select the
 server port.  It defaults to the standard HTTP port 80.</p>
 
 <example>
-unix> ./configure --with-linux-src=/usr/src/linux
+unix&gt; ./configure --with-linux-src=/usr/src/linux
 ...
-unix> make
-unix> make install
-unix> su root
+unix&gt; make
+unix&gt; make install
+unix&gt; su root
 unix# /sbin/insmod libexec/resin.o port=81
 
 ...
@@ -74,22 +74,22 @@ unix# /sbin/insmod libexec/resin.o port=81
 unix# /sbin/rmmod resin
 </example>
 
-</section>
+</s1>
 
-<section title="Configuration in /proc/net/resin">
+<s1 title="Configuration in /proc/net/resin">
 
-<p>Once as a module, HardCore creates the <var//proc/net/resin/>
+<p>Once as a module, HardCore creates the <var>/proc/net/resin</var>
 directory for configuration. It currently contains three files:
-<var/server_port/> to configure the listening port, <var/srun-count/>
+<var>server_port</var> to configure the listening port, <var>srun-count</var>
 to specify the number of load balancing servlet-runners, and
-<var/srun-n/> to configure each servlet runner.</p>
+<var>srun-n</var> to configure each servlet runner.</p>
 
 <deftable>
-<tr><td>server_port<td>Configures the listening port, e.g. 80
+<tr><td>server_port</td><td>Configures the listening port, e.g. 80
 (currently read-only)
-<tr><td>srun-count<td>Configures how many servlet runners to use
-<tr><td>srun-0<td>The IP and port for the first servlet runner
-</deftable>
+</td></tr><tr><td>srun-count</td><td>Configures how many servlet runners to use
+</td></tr><tr><td>srun-0</td><td>The IP and port for the first servlet runner
+</td></tr></deftable>
 
 <p>You can look at those files to see their values:</p>
 
@@ -104,15 +104,15 @@ unix# cat /proc/net/resin/srun-0
 127.0.0.1 6802
 </example>
 
-<p/>You can also configure <var/srun-0/> to change the servlet runner.
+<p/>You can also configure <var>srun-0</var> to change the servlet runner.
 
 <example>
-unix# echo "192.168.0.3 6810" > /proc/net/resin-srun-0
+unix# echo "192.168.0.3 6810" &gt; /proc/net/resin-srun-0
 </example>
 
-</section>
+</s1>
 
-<section title="Caveats and Errata">
+<s1 title="Caveats and Errata">
 
 <p>Any bugs in HardCore will likely crash or freeze your computer.  In
 theory it could also do bad things to the filesystem, although that
@@ -125,16 +125,16 @@ as safe as a C program and nowhere near as safe as running a Java program.
 <p>The current errata:</p>
 <ul>
 <li>POST requests are not handled
-<li>Date routines have not yet been implemented
-<li>Load-balancing is not yet done
-<li>Failure to contact a srun results in a disconnect instead of an
+</li><li>Date routines have not yet been implemented
+</li><li>Load-balancing is not yet done
+</li><li>Failure to contact a srun results in a disconnect instead of an
 error message.
-<li>/caucho-status isn't implemented yet.
-<li>Caching isn't implemented yet.
-<li>Logging isn't implemented yet.
-<li>HTTP/1.1 keepalive isn't implemented.
-</ul>
+</li><li>/caucho-status isn't implemented yet.
+</li><li>Caching isn't implemented yet.
+</li><li>Logging isn't implemented yet.
+</li><li>HTTP/1.1 keepalive isn't implemented.
+</li></ul>
 
-</section>
+</s1>
   </body>
 </document>

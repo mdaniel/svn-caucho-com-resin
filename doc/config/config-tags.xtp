@@ -1,4 +1,5 @@
-<!-- -*- html-mode -*- -->
+<document>
+<body>
 
 <!-- 
   - every identity contains 2 parts
@@ -8,7 +9,7 @@
   -
   - a <section/><header> has one or more <identity/> elements
   -->
-<section>
+<s1>
   <header>
     <title>Configuration tags</title>
     <product>resin</product>
@@ -20,7 +21,7 @@
   <body>
 
 <!-- host -->
-  <section>
+  <s2>
     <header>
       <identity>host/server</identity>
       <title>host</title>
@@ -29,25 +30,24 @@
       <flag>resin-innovation</flag>
       <description>
         <p>Defines a virtual host.  If no hosts are specified, or if a
-         request doesn't match a host, the configuration in <a
-         config-tag='host-default'/> will be used instead.</p>
+         request doesn't match a host, the configuration in <a config-tag="host-default"/> will be used instead.</p>
 
          <p>The <a config-tag="id"/> may contain a list of hosts, seperated by comma's.  Any host
          in the list will match.</p>
 
-        <p>If the <a config-tag='id'/> for a host is null or '*', the
-        <var type='config-tag'>host</var> is a default host that is
+        <p>If the <a config-tag="id"/> for a host is null or '*', the
+        <var type="config-tag">host</var> is a default host that is
         used for any virtual host that doesn't match a more
-        specific <var type='config-tag'>host</var>.</p>
+        specific <var type="config-tag">host</var>.</p>
 
-        <p>Hosts can use <var/regexp/> instead of <var/id/> to dynamically create
+        <p>Hosts can use <var>regexp</var> instead of <var>id</var> to dynamically create
         new hosts.</p>
 
       </description>
     </header>
     <body>
       <summary/>
-      <section title="Examples">
+      <s3 title="Examples">
         <example>
 &lt;resin&gt;
   ...
@@ -76,9 +76,10 @@
       understand the regexps, you may need to do additional work to
       make the web server send the request to Resin.</note>
 
-      </section>
+      </s3>
     </body>
-  </section>
+  </s2>
 
 <!-- web-app -->
-
+</body>
+</s1></body></document>

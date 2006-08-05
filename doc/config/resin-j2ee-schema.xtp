@@ -11,7 +11,7 @@
   <body>
     <summary/>
 
-<section title="Relax-NG Schema">
+<s1 title="Relax-NG Schema">
 
 <def title="com/caucho/server/resin/resin-j2ee.rnc">
 default namespace r = "http://caucho.com/ns/resin"
@@ -309,8 +309,7 @@ r_true-false = "true" | "false"
 r_war-path = string
 </def>
 
-</section>
+</s1>
 
   </body>
 </document>
-  

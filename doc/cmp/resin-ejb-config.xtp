@@ -8,66 +8,66 @@
   <body>
 <summary/>
 
-<section title='Configuration'>
+<s1 title="Configuration">
 
-<defun title='abstract-sql-type'>
+<s2 title="abstract-sql-type" type="defun">
 <p>An abstract SQL type to be used when automatically creating a table for
 the entity bean.  Resin-CMP will use the abstract-sql-type and the
 database driver type to determine the actual type used to create
 the database table.</p>
-</defun>
+</s2>
 
-<defun title='cache-size' version='Resin-CMP 1.0.5'>
+<s2 title="cache-size" version="Resin-CMP 1.0.5" type="defun">
 <p>Defines the size of the entity cache.</p>
 <p>The default cache-size is 8192.</p>
-</defun>
+</s2>
 
-<defun title='cache-timeout' version='Resin-CMP 1.0.5'>
+<s2 title="cache-timeout" version="Resin-CMP 1.0.5" type="defun">
 <p>Defines how long a loaded bean will remain loaded.
 As long as a cached CMP bean is loaded, it doesn't need to query the
 database, saving time and database load.</p>
 
 <p>The default value is 5 seconds.</p>
-</defun>
+</s2>
 
-<defun title='cmp-field'>
+<s2 title="cmp-field" type="defun">
 <p>Defines one of the bean's fields to be managed by Resin-CMP.
 Since Resin-CMP will introspect the cmp-fields from the classes, the
 cmp-field is optional.</p>
 
 <p>cmp-fields are either Java primitives or serializable types, i.e.
 values in a database table.  Relations between beans are configured
-in the <a href='relations.xtp'>relations</a> section.</p>
+in the <a href="relations.xtp">relations</a> section.</p>
 
 <deftable>
-<tr><th>Element<th>Meaning
-<tr><td>field-name<td>the field name
-<tr><td>sql-column<td>the SQL column name
-<tr><td>sql-type<td>the SQL type
-</deftable>
+<tr><th>Element</th><th>Meaning
+</th></tr><tr><td>field-name</td><td>the field name
+</td></tr><tr><td>sql-column</td><td>the SQL column name
+</td></tr><tr><td>sql-type</td><td>the SQL type
+</td></tr></deftable>
 
 <p>The SQL name is generated automatically from the cmp-field (or
-the getter method.)  The getter method <var/getMyField/> corresponds to
-the cmp-field <var/myField/> and the SQL column <var/my_field/>.  An
-EJB-QL query, always uses the cmp-field name, e.g. <var/myField/>.</p>
+the getter method.)  The getter method <var>getMyField</var> corresponds to
+the cmp-field <var>myField</var> and the SQL column <var>my_field</var>.  An
+EJB-QL query, always uses the cmp-field name, e.g. <var>myField</var>.</p>
 
 <p>The cmp-field can specify the SQL column name using sql-column.</p>
 
 <example title="student.ejb">
-  &lt;entity>
-    &lt;abstract-schema-name>students&lt;/abstract-schema-name>
-    &lt;sql-table>student_table&lt;/sql-table>
+  &lt;entity&gt;
+    &lt;abstract-schema-name&gt;students&lt;/abstract-schema-name&gt;
+    &lt;sql-table&gt;student_table&lt;/sql-table&gt;
     ...
-    &lt;cmp-field>
-      &lt;field-name>id&lt;/field-name>
-      &lt;sql-column>student_id&lt;/sql-column>
-    &lt;/cmp-field>
-    &lt;cmp-field>
-      &lt;field-name>name&lt;/field-name>
-      &lt;sql-column>user_name&lt;/sql-column>
-    &lt;/cmp-field>
+    &lt;cmp-field&gt;
+      &lt;field-name&gt;id&lt;/field-name&gt;
+      &lt;sql-column&gt;student_id&lt;/sql-column&gt;
+    &lt;/cmp-field&gt;
+    &lt;cmp-field&gt;
+      &lt;field-name&gt;name&lt;/field-name&gt;
+      &lt;sql-column&gt;user_name&lt;/sql-column&gt;
+    &lt;/cmp-field&gt;
     ...
-  &lt;/entity>
+  &lt;/entity&gt;
 </example>
 
 <p>The above descriptor would expect the following schema:</p>
@@ -81,21 +81,21 @@ CREATE TABLE student_table (
 );
 </example>
 
-</defun>
+</s2>
 
-<defun title='data-source'>
+<s2 title="data-source" type="defun">
 <p>Specifies the database JNDI name for the DataSource.  If unspecified,
 it defaults to the value in EJBServer.</p>
-</defun>
+</s2>
 
-<defun title='field-name'>
+<s2 title="field-name" type="defun">
 <p>Specifies the field name for a cmp-field definition.  The field-name
-is the bean name for the Java getter method.  So the field-name for <code/getFoo/> is <var/foo/>.</p>
-</defun>
+is the bean name for the Java getter method.  So the field-name for <code>getFoo</code> is <var>foo</var>.</p>
+</s2>
 
-<defun title='method'>
+<s2 title="method" type="defun">
 <p>Configuration for a business method.  Each business method is
-specified by a &lt;signature>.  The signature syntax is the
+specified by a &lt;signature&gt;.  The signature syntax is the
 same as Java function syntax without the return type.</p>
 
 <p>The arguments are optional and the method name can be "*".
@@ -104,40 +104,40 @@ method with specified args is better than a method with only a method name.
 And both are better than the default match.</p>
 
 <example title="Configure most methods as read-only">
-&lt;method signature="*">
-  &lt;resin-isolation>read-only&lt;/resin-isolation>
-&lt;/method>
+&lt;method signature="*"&gt;
+  &lt;resin-isolation&gt;read-only&lt;/resin-isolation&gt;
+&lt;/method&gt;
 
-&lt;method signature="writeMethod(String)">
-  &lt;resin-isolation>database&lt;/resin-isolation>
-&lt;/method>
+&lt;method signature="writeMethod(String)"&gt;
+  &lt;resin-isolation&gt;database&lt;/resin-isolation&gt;
+&lt;/method&gt;
 </example>
 
 <def>
 method ::= signature, resin-isolation?
 </def>
 
-</defun>
+</s2>
 
-<defun title='query-function'>
+<s2 title="query-function" type="defun">
 <p>Adds a new function to the EJB-QL language.
 The query-function must specify the function signature in Java syntax.
 The following types are allowed: int, double, boolean, String, Date and
 any.</p>
 
-<p>An optional <var/sql/> attribute lets you provide custom functions.</p>
+<p>An optional <var>sql</var> attribute lets you provide custom functions.</p>
 
 <example title="Adding MD5">
-&lt;query-function>
-  &lt;signature>String MD5(String)&lt;/signature>
-&lt;/query-function>
+&lt;query-function&gt;
+  &lt;signature&gt;String MD5(String)&lt;/signature&gt;
+&lt;/query-function&gt;
 </example>
 
 <example title="Adding an add function">
-&lt;query-function>
-  &lt;signature>int add(int, int)&lt;/signature>
-  &lt;sql>((?1) + (?2))&lt;/signature>
-&lt;/query-function>
+&lt;query-function&gt;
+  &lt;signature&gt;int add(int, int)&lt;/signature&gt;
+  &lt;sql&gt;((?1) + (?2))&lt;/signature&gt;
+&lt;/query-function&gt;
 </example>
 
 <def>
@@ -146,107 +146,107 @@ query-function = element query-function {
 }
 </def>
 
-</defun>
+</s2>
 
-<defun title='query-loads-bean'>
-<p>If true, an <code/ejbSelect/> or <code/find/> query will
+<s2 title="query-loads-bean" type="defun">
+<p>If true, an <code>ejbSelect</code> or <code>find</code> query will
 load the beans in the query's select.  If false, the query will
 only load the primary key and lazily load the bean when it's referenced.</p>
 
 <p>Normally, setting this true will give better performance.</p>
 
 <example title="Default all querys to lazy load">
-&lt;method>
-  &lt;signature>*&lt;/signature>
-  &lt;query-loads-bean>false&lt;/query-loads-bean>
-&lt;/method>
+&lt;method&gt;
+  &lt;signature&gt;*&lt;/signature&gt;
+  &lt;query-loads-bean&gt;false&lt;/query-loads-bean&gt;
+&lt;/method&gt;
 </example>
 
 <p><b>Default:</b> true by default.</p>
-</defun>
+</s2>
 
-<defun title='read-only'>
+<s2 title="read-only" type="defun">
 <p>Configures a bean as read-only.
 Read-only entity bean values can be cached between calls even
 in "update" transactions .  The cache time is configured with cache-time.
 </p>
-</defun>
+</s2>
 
-<defun title='resin-ejb'>
+<s2 title="resin-ejb" type="defun">
 <p>Top-level configuration for the Resin-specific configuration.</p>
 
 <def>
 resin-ejb ::= enterprise-beans
 </def>
-</defun>
+</s2>
 
-<defun title='resin-isolation'>
+<s2 title="resin-isolation" type="defun">
 <p>Configures the isolation level for a method.  Each method is
-classified with either <var/read-only/> or <var/database/> isolation.
-<var/read-only/> methods only read database from the database.
-<var/database/> methods read and write to the database.</p>
+classified with either <var>read-only</var> or <var>database</var> isolation.
+<var>read-only</var> methods only read database from the database.
+<var>database</var> methods read and write to the database.</p>
 
 <p>By telling Resin which methods are read-only, Resin can effectively
 cache read values and reduce the database load.</p>
 
 <p>For methods defined by EJB as write methods, Resin will ignore
-the read-only value.  <code/setXXX/>, <code/create/>, and <code/remove/>
-methods always have <var/database/> or stronger isolation.</p>
+the read-only value.  <code>setXXX</code>, <code>create</code>, and <code>remove</code>
+methods always have <var>database</var> or stronger isolation.</p>
 
 <p>For methods defined by EJB as read methods, Resin
-will use <var/read-only/> as a default.</p>
+will use <var>read-only</var> as a default.</p>
 
-<p><b>Default:</b> the default value is <var/database/></p>
-</defun>
+<p><b>Default:</b> the default value is <var>database</var></p>
+</s2>
 
-<defun title='signature'>
+<s2 title="signature" type="defun">
 <p>Speficies a function signature, i.e. a method declaration, in Java
 syntax.
-In the case of &lt;query-function>, &lt;signature> specifies the
+In the case of &lt;query-function&gt;, &lt;signature&gt; specifies the
 name and types for a new EJB-QL function.
 </p>
-</defun>
+</s2>
 
-<defun title='sql-column'>
+<s2 title="sql-column" type="defun">
 <p>The SQL column name for a field or relation.  If is unspecified,
 it defaults to the field name.  The value of sql-column is
 never used in the EJB queries.  It's just used during SQL generation.</p>
 
 <p>For relations where the target bean has a compound primary key,
-the sql-column can specify a <var/references/> attribute to distinguish
+the sql-column can specify a <var>references</var> attribute to distinguish
 which part of the primary key to configure.</p>
 
 <example title="Specifying a cmp-field">
-&lt;entity>
-  &lt;ejb-name>students&lt;/ejb-name>
+&lt;entity&gt;
+  &lt;ejb-name&gt;students&lt;/ejb-name&gt;
   ...
-  &lt;cmp-field>
-    &lt;field-name>id&lt;/field-name>
-    &lt;sql-column>student_id&lt;/sql-column>
-  &lt;/cmp-field>
-&lt;/entity>
+  &lt;cmp-field&gt;
+    &lt;field-name&gt;id&lt;/field-name&gt;
+    &lt;sql-column&gt;student_id&lt;/sql-column&gt;
+  &lt;/cmp-field&gt;
+&lt;/entity&gt;
 </example>
 
 <example title="A pointer to a compound-key bean">
-&lt;cmr-field>
-  &lt;cmr-field-name>child&lt;/cmr-field-name>
-  &lt;sql-column references='parent'>test_parent&lt;/sql-column>
-  &lt;sql-column references='name'>test_cname&lt;/sql-column>
-&lt;/cmr-field>
+&lt;cmr-field&gt;
+  &lt;cmr-field-name&gt;child&lt;/cmr-field-name&gt;
+  &lt;sql-column references='parent'&gt;test_parent&lt;/sql-column&gt;
+  &lt;sql-column references='name'&gt;test_cname&lt;/sql-column&gt;
+&lt;/cmr-field&gt;
 </example>
 
-</defun>
+</s2>
 
-<defun title='sql-type'>
+<s2 title="sql-type" type="defun">
 <p>The SQL type to be used when automatically creating a table for
 the entity bean.  The sql-type is the string that will be
 used in the CREATE TABLE.</p>
 
-</defun>
+</s2>
 
-</section>
+</s1>
 
-<section title='Formal Definition'>
+<s1 title="Formal Definition">
 
 <def>
 resin-ejb ::= enterprise-beans?, query-function*
@@ -266,8 +266,8 @@ cmp-field ::= (<a href="#field-name">field-name</a>,
                <a href="#abstract-sql-type">abstract-sql-type</a>?,
                <a href="#sql-type">sql-type</a>?)
 
-sql-column ::= (<var/text(column-name)/> |
-                (<var/references/>, <var/id/>))
+sql-column ::= (<var>text(column-name)</var> |
+                (<var>references</var>, <var>id</var>))
 
 query-function ::= <a href="#signature">signature</a>
 
@@ -276,7 +276,6 @@ method ::= <a href="#signature">signature</a>,
            <a href="#query-loads-bean">query-loads-bean</a>?
 </def>
 
-</section>
+</s1>
 
-</document>
-
+</body></document>

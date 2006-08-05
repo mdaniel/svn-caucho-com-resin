@@ -8,37 +8,37 @@
   <body>
     <summary/>
 
-<section title='How to get debugging information'>
+<s1 title="How to get debugging information">
 
 <p>Resin can write debugging information to standard output or to any
-file.  To add debugging information add a <var/log/> directive to the
+file.  To add debugging information add a <var>log</var> directive to the
 resin.conf file.</p>
 
 <example>
-&lt;caucho.com>
-  &lt;log id='/' href='stderr:'/>
-&lt;/caucho.com>
+&lt;caucho.com&gt;
+  &lt;log id='/' href='stderr:'/&gt;
+&lt;/caucho.com&gt;
 </example>
 
-<p><var/href/> can be any path.  stderr: is perhaps the most useful.
-<var/id/> can select which portions of Resin to get logging
+<p><var>href</var> can be any path.  stderr: is perhaps the most useful.
+<var>id</var> can select which portions of Resin to get logging
 information.  Here are some useful patterns:</p>
 
 <deftable>
-<tr><td>/<td>Debug everything
-<tr><td>/caucho.com/jsp<td>Debug jsp
-<tr><td>/caucho.com/jsp/java<td>See the JSP generated Java
-<tr><td>/caucho.com/jsp/js<td>See the JSP generated Java
-<tr><td>/caucho.com/xsl<td>XSL debugging
-<tr><td>/caucho.com/tcp-server
-    <td>See thread creation and deletion
-<tr><td>/caucho.com/http
-    <td>HTTP related information
-</deftable>
+<tr><td>/</td><td>Debug everything
+</td></tr><tr><td>/caucho.com/jsp</td><td>Debug jsp
+</td></tr><tr><td>/caucho.com/jsp/java</td><td>See the JSP generated Java
+</td></tr><tr><td>/caucho.com/jsp/js</td><td>See the JSP generated Java
+</td></tr><tr><td>/caucho.com/xsl</td><td>XSL debugging
+</td></tr><tr><td>/caucho.com/tcp-server
+    </td><td>See thread creation and deletion
+</td></tr><tr><td>/caucho.com/http
+    </td><td>HTTP related information
+</td></tr></deftable>
 
-</section>
+</s1>
 
-<section title="Exceptions don't have line numbers">
+<s1 title="Exceptions don't have line numbers">
 
 <p>For debugging, it is crucial to get proper line numbers.
 Unfortunately, Java JITs (just-in-time compilers) remove the line
@@ -48,20 +48,20 @@ numbers.</p>
 the server with the JIT compiler turned off.  On Unix you can use:</p>
 
 <example>
-unix> httpd.sh -nojit
+unix&gt; httpd.sh -nojit
 </example>
 
-</section>
+</s1>
 
-<section title="How do I keep the generated .java files?">
+<s1 title="How do I keep the generated .java files?">
 
-<p>The generated .java files are put in <var/&lt;work-dir>/>.  By
-default, that's <var//tmp/caucho/> on Unix and <var/\temp\caucho/> on
+<p>The generated .java files are put in <var>&lt;work-dir&gt;</var>.  By
+default, that's <var>/tmp/caucho</var> on Unix and <var>\temp\caucho</var> on
 Windows.</p>
 
-</section>
+</s1>
 
-<section title="How do I run Resin with a debugger?">
+<s1 title="How do I run Resin with a debugger?">
 
 <p>Eric Hansen writes:</p>
 
@@ -87,13 +87,13 @@ C:\resin1.1\lib\jsdk22.jar;C:\resin1.1\lib\resin.jar;
 C:\jdk1.2.2\jre\lib\rt.jar;C:\jdk1.2.2\lib\tools.jar;
 C:\local" com.caucho.server.http.HttpServer -conf
 c:\resin1.1\conf\resin.conf
-> run
+&gt; run
 </example>
 
 <p>You can access the webserver at: http://localhost/ or
 http://localhost:8080/, etc.  depending on the port number you picked.  You
 should be able to issue the usual jdb commands.  Check the list of commands
-by doing: help or ? at the jdb> prompt.</p>
+by doing: help or ? at the jdb&gt; prompt.</p>
 
 <p>I use jdb with JPadPro (http://www.modelworks.com).  It has some built-in
 scripts to work with jdb.  It is tailored to work with the jdb that ships
@@ -112,7 +112,7 @@ function BreakpointResult(data, breakpoint)
    var index = data.indexOf("Breakpoint set");
     var index2 = data.indexOf("Set breakpoint request");
 
-    if ((index == -1) && (index2 == -1))
+    if ((index == -1) &amp;&amp; (index2 == -1))
    {
       breakpoint.active = false;
       gOutput.writeMessage(breakpoint.getPath(),
@@ -133,13 +133,13 @@ their own proprietary debugger.</p>
 <p>Hope that's useful.</p>
 <p>Eric</p>
 
-</section>
+</s1>
 
-<section title="I've got a cryptic ServletException.  How do I get the full trace?">
+<s1 title="I've got a cryptic ServletException.  How do I get the full trace?">
 
 <p>Eric Hansen writes:</p>
 
-<section title="PROBLEM:">
+<s2 title="PROBLEM:">
  
 <p>Have you ever received a cryptic Exception message like this in your error logging due to an error in a JSP page: ???</p>
 
@@ -164,9 +164,9 @@ javax.servlet.ServletException
  at java.lang.Thread.run(Thread.java:479)
 </results>
 
-</section>
+</s2>
 
-<section title="SOLUTION:">
+<s2 title="SOLUTION:">
  
 <p>You need to change your catch routine.  There is a method in ServletException called getRootCause().  This allows the developer of the servlet engine/JSP engine to embed a
 regular Exception inside a ServletException, which gets carried along for the ride.</p>
@@ -179,7 +179,7 @@ catch(Exception e)
   {
     Throwable et;
     et = ((javax.servlet.ServletException)e).getRootCause();
-    if(et!=null&&et instanceof Exception)
+    if(et!=null&amp;&amp;et instanceof Exception)
     {
       logMessage(((Exception)et),"ROOT EXCEPTION",-1);
     }
@@ -194,10 +194,10 @@ above modification (or something similar) exposes it.  I figure other people mig
 <p>Hope that helps,</p>
 <p>Eric</p>
 
-</section>
-</section>
+</s2>
+</s1>
 
-<section title="Thread Dumps">
+<s1 title="Thread Dumps">
 
 <p>Java's thread dumps are a vital tool for server debugging.  Because servlets
 are intrinsically multithreaded, it's very possible to create deadlocks
@@ -212,7 +212,7 @@ you'll need to signal one of the child processes.  On the Linux Sun JDK, you'll
 need to kill the grandparent process of most of the threads:</p>
 
 <example>
-unix> ps -ef | grep java
+unix&gt; ps -ef | grep java
 ferg     14243 10792  0 Jan13 pts/0    00:00:00 sh -c /usr/java/bin/java
 ferg     14244 14243  0 Jan13 pts/0    00:00:00 java -Dres
 ferg     14253 14244  0 Jan13 pts/0    00:00:01 java -Dres
@@ -221,7 +221,7 @@ ferg     14255 14253  0 Jan13 pts/0    00:00:00 java -Dres
 ferg     14256 14253  0 Jan13 pts/0    00:00:00 java -Dres
 ferg     14257 14253  0 Jan13 pts/0    00:00:00 java -Dres
 ferg     14258 14253  0 Jan13 pts/0    00:00:00 java -Dres
-unix> kill -QUIT 14244
+unix&gt; kill -QUIT 14244
 </example>
 
 <p>The Solaris 1.3 JDK has a single process, so it's easy.</p>
@@ -295,17 +295,17 @@ Full thread dump:
 <p>Each thread is named.  Here are some of the common names:</p>
 
 <deftable>
-<tr><th>Thread Name<th>Description
-<tr><td>tcp-accept-8080<td>Resin thread listening for new connections
+<tr><th>Thread Name</th><th>Description
+</th></tr><tr><td>tcp-accept-8080</td><td>Resin thread listening for new connections
 on port 8080.
-<tr><td>tcpConnection-8080-3<td>Resin servlet thread handling 
+</td></tr><tr><td>tcpConnection-8080-3</td><td>Resin servlet thread handling 
 a connection from port 8080.
-<tr><td>tcp-cron<td>Resin's run-at thread
-<tr><td>tcp-alarm<td>Resin's alarm thread
-</deftable>
+</td></tr><tr><td>tcp-cron</td><td>Resin's run-at thread
+</td></tr><tr><td>tcp-alarm</td><td>Resin's alarm thread
+</td></tr></deftable>
 
-<p>There should be one tcp-accept-xxx thread for each &lt;http> and
-&lt;srun> that Resin's listening for.  The tcp-accept-xxx thread should
+<p>There should be one tcp-accept-xxx thread for each &lt;http&gt; and
+&lt;srun&gt; that Resin's listening for.  The tcp-accept-xxx thread should
 almost always be in socketAccept.</p>
 
 <p>There should be several tcpConnection-xxx-n threads.  Each of these
@@ -317,9 +317,9 @@ httpRequest or runnerRequest (for keepalive threads.)</p>
 <p>For deadlocks, you'll want to look at the "waiting on monitor" threads
 and any case where lots of threads are stuck at the same location.</p>
 
-</section>
+</s1>
 
-<section title="Java profiling">
+<s1 title="Java profiling">
 
 <p>What you really need to do is get a good CPU and heap profile.
 The JDK 1.2 has a simple one (but not very 
@@ -329,7 +329,7 @@ user-friendly), so you don't absolutely need to buy a profiler.</p>
 start Resin (unix or windows) as</p>
 
 <example>
-> httpd.sh -J-Xrunhprof:heap=sites,cpu=samples
+&gt; httpd.sh -J-Xrunhprof:heap=sites,cpu=samples
 </example>
 
 <p>(On Unix, Resin's startup script has a -cpuprof-ascii argument that sets it for you automatically.)</p>
@@ -340,7 +340,7 @@ clean exit.</p>
 
 <p>That will dump a java.hprof.txt.  Skip to the bottom to get the trace.</p>
 
-<section title="java.hprof.txt heap">
+<s2 title="java.hprof.txt heap">
 
 <p>Assuming you're being cheap, and using the JDK's heap profiling instead of
 buying a profiler, you'll need a bit of help interpreting it.</p>
@@ -357,7 +357,7 @@ SITES BEGIN (ordered by live bytes) Tue Jan  9 17:44:33 2001
  rank   self  accum    bytes objs   bytes objs trace name
     1 11.87% 11.87%   983520  120 1393320  170  2553 [B
     2  9.89% 21.76%   819600  100 1286772  157  4070 [B
-    3  9.09% 30.85%   753756   23 3539376  108  4970 [L&lt;Unknown>;
+    3  9.09% 30.85%   753756   23 3539376  108  4970 [L&lt;Unknown&gt;;
     4  5.83% 36.68%   483564   59  778620   95  7180 [B
     5  5.74% 42.42%   475368   58  745836   91  7178 [B
     6  4.35% 46.77%   360624   44  696660   85  7182 [B
@@ -368,8 +368,8 @@ SITES BEGIN (ordered by live bytes) Tue Jan  9 17:44:33 2001
    11  1.53% 57.30%   126988 1063 16973092 129113  3271 [C
    12  1.34% 58.64%   110684 3953 20362832 727244  1213 sun/io/CharToByteISO8859_1
    13  1.25% 59.88%   103320  738  141820 1013  5942 java/lang/Class
-   14  1.21% 61.10%   100548   49  221616  108  5003 [L&lt;Unknown>;
-   15  1.21% 62.31%   100548   49  221616  108  5005 [L&lt;Unknown>;
+   14  1.21% 61.10%   100548   49  221616  108  5003 [L&lt;Unknown&gt;;
+   15  1.21% 62.31%   100548   49  221616  108  5005 [L&lt;Unknown&gt;;
    16  1.07% 63.38%    89080 1532 18393580 317347  1340 [B
    17  0.79% 64.18%    65568    8   81960   10  8408 [B
    18  0.79% 64.97%    65552    4   65552    4 27630 [C
@@ -391,7 +391,7 @@ trace (3271):</p>
 
 <example>
 TRACE 3271:
-	java/lang/String.&lt;init>(String.java:244)
+	java/lang/String.&lt;init&gt;(String.java:244)
 	com/caucho/util/CharBuffer.close(CharBuffer.java:714)
 	com/caucho/vfs/FilesystemPath.normalizePath(FilesystemPath.java:162)
 	com/caucho/vfs/FilesystemPath.schemeWalk(FilesystemPath.java:127)
@@ -400,13 +400,13 @@ TRACE 3271:
 <p>That's part of Resin's VFS code.  Maybe in the future it'll make sense
 to try to reduce that.
 
-<p>You can get a longer trace using the "-prof-depth 10" argument to Resin.
+</p><p>You can get a longer trace using the "-prof-depth 10" argument to Resin.
 (Or the corresponding depth in -Xrunhprof.)  That will often give more
 information.</p>
 
-</section>
+</s2>
 
-<section title="java.hprof.txt CPU">
+<s2 title="java.hprof.txt CPU">
 
 <p>The CPU profiling is a little easier to read.  On some JDK's you'll need to
 run it with the JIT disabled.</p>
@@ -419,28 +419,28 @@ rank   self  accum   count trace method
    3  5.99% 38.19%   25428  1213 java/lang/Class.newInstance0
    4  5.11% 43.31%   21715  7896 com/caucho/util/CharBuffer.toString
    5  4.82% 48.13%   20463  1286 sun/io/CharToByteISO8859_1.convert
-   6  3.54% 51.66%   15018  1242 sun/io/CharToByteConverter.&lt;init>
-   7  2.68% 54.35%   11388  7241 java/io/PrintWriter.&lt;init>
+   6  3.54% 51.66%   15018  1242 sun/io/CharToByteConverter.&lt;init&gt;
+   7  2.68% 54.35%   11388  7241 java/io/PrintWriter.&lt;init&gt;
    8  2.47% 56.82%   10508  7748 com/caucho/server/http/Request.fillCookies
-   9  2.27% 59.09%    9650  1214 sun/io/ByteToCharConverter.&lt;init>
-  10  1.85% 60.94%    7857  5097 java/lang/String.&lt;init>
+   9  2.27% 59.09%    9650  1214 sun/io/ByteToCharConverter.&lt;init&gt;
+  10  1.85% 60.94%    7857  5097 java/lang/String.&lt;init&gt;
   11  1.59% 62.53%    6754  1341 java/lang/String.substring
   12  1.57% 64.10%    6650  1340 java/lang/String.getBytes
-  13  0.92% 65.02%    3907  7897 java/lang/String.&lt;init>
+  13  0.92% 65.02%    3907  7897 java/lang/String.&lt;init&gt;
   14  0.76% 65.78%    3227  3259 com/caucho/vfs/FilePath.fsWalk
   15  0.75% 66.53%    3195  7895 com/caucho/server/http/Request.fillCookie
   16  0.71% 67.25%    3031  7321 java/lang/String.getBytes
   17  0.71% 67.95%    2996  3270 com/caucho/util/CharBuffer.close
-  18  0.68% 68.63%    2892  3271 java/lang/String.&lt;init>
+  18  0.68% 68.63%    2892  3271 java/lang/String.&lt;init&gt;
   19  0.66% 69.29%    2782  7318 com/caucho/vfs/FilePath.openWriteImpl
-  20  0.61% 69.90%    2604  7320 java/io/FileOutputStream.&lt;init>
+  20  0.61% 69.90%    2604  7320 java/io/FileOutputStream.&lt;init&gt;
 </example>
 
 <p>You should only pay attention to the top 20 or so.  You'll
 probably need to ignore a few of the top 10, because they're just waiting
 for a user response.  The SocketInputStream.socketRead is an example.
 
-<p>You can use the trace number to get a call trace:</p>
+</p><p>You can use the trace number to get a call trace:</p>
 
 <example>
 TRACE 7266:
@@ -450,8 +450,8 @@ TRACE 7266:
 	com/caucho/server/http/Request.finish(Request.java:416)
 </example>
 
-</section>
+</s2>
 
-</section>
+</s1>
   </body>
 </document>

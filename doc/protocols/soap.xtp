@@ -10,26 +10,26 @@
 <body>
 <summary/>
 
-<section title="Prerequisites">
+<s1 title="Prerequisites">
 
 <p>Resin uses the Apache Axis library to provide support for SOAP.  You can
 download the axis distribution.
 To make the axis libraries available to the application, the necessary jar
 files are installed in the directory <code>WEB-INF/lib</code>:
 
-<ul>
+</p><ul>
 <li>WEB-INF/lib/axis.jar
-<li>WEB-INF/lib/commons-discovery.jar
-<li>WEB-INF/lib/commons-logging.jar
-<li>WEB-INF/lib/jaxrpc.jar
-<li>WEB-INF/lib/log4j-1.2.8.jar
-<li>WEB-INF/lib/saaj.jar
-<li>WEB-INF/lib/wsdl4j.jar
-</ul>
+</li><li>WEB-INF/lib/commons-discovery.jar
+</li><li>WEB-INF/lib/commons-logging.jar
+</li><li>WEB-INF/lib/jaxrpc.jar
+</li><li>WEB-INF/lib/log4j-1.2.8.jar
+</li><li>WEB-INF/lib/saaj.jar
+</li><li>WEB-INF/lib/wsdl4j.jar
+</li></ul>
 
-</section>
+</s1>
 
-<section title="SoapServlet - Provide a SOAP service by implementing a Servlet">
+<s1 title="SoapServlet - Provide a SOAP service by implementing a Servlet">
 
 <p>The simplest way to provide a SOAP service with Resin is to implement a
 Servlet that extends <a href="javadoc|com.caucho.soap.SoapServlet|"/>.</p>
@@ -86,7 +86,7 @@ http://localhost:8080/testsoap/soap/String/1.0?method=reverse&amp;arg0=hello
   ==&gt; elloh
 </example>
 
-<p>SOAP uses a complicated descriptor file format called a <var/WSDL/> to
+<p>SOAP uses a complicated descriptor file format called a <var>WSDL</var> to
 describe services.  Resin will generate a WSDL for a service if the
 <code>?WSDL</code> query parameter is used:</p>
 
@@ -95,12 +95,12 @@ http://localhost:8080/testsoap/soap/String/1.0?WSDL
   ==&gt; the result is too long to show here
 </example>
 
-</section>
+</s1>
 
-<section title="SoapDeployerServlet - Provide SOAP services by implemeting a plain java class">
+<s1 title="SoapDeployerServlet - Provide SOAP services by implemeting a plain java class">
 
 <p>More advanced requirements for providing soap services may require the use
-of the <var/SoapDeployerServlet/>.  The <code/SoapDeployerServlet/> allows the
+of the <var>SoapDeployerServlet</var>.  The <code>SoapDeployerServlet</code> allows the
 usage of any java class to provide the service.</p>
 
 <example title="Provide a SOAP Service using the SoapDeployerService">
@@ -144,11 +144,11 @@ http://localhost:8080/testsoap/soap/Calculator/1.0?method=add&amp;arg0=12&amp;ar
   ==&gt; 26
 </example>
 
-</section>
+</s1>
 
-<section title="WSDL">
+<s1 title="WSDL">
 
-<p>SOAP uses a complicated descriptor file format called a <var/WSDL/> to
+<p>SOAP uses a complicated descriptor file format called a <var>WSDL</var> to
 describe services.  Resin will generate a WSDL for a service if the
 <code>?WSDL</code> query parameter is used:</p>
 
@@ -156,11 +156,11 @@ describe services.  Resin will generate a WSDL for a service if the
 http://localhost:8080/testsoap/soap/String/1.0?WSDL
   ==&gt; the result is too long to show here
 </example>
-</section>
+</s1>
 
-<section title="Configuration">
+<s1 title="Configuration">
 
-<section title="Web Services">
+<s2 title="Web Services">
 
 <p>Global configuration options configure the SOAP engine that Resin is
 using.</p>
@@ -186,22 +186,22 @@ the last ones specified win.</p>
   &lt;/servlet&gt;
 </example>
 
-<defun title="web-services">
+<s3 title="web-services" type="defun">
 <p>Configure web services.</p>
 
 <deftable-childtags>
-<tr><td>attachments-directory<td>the path of a directory to store attachments in<td>WEB-INF/attachments/
-</deftable-childtags>
+<tr><td>attachments-directory</td><td>the path of a directory to store attachments in</td><td>WEB-INF/attachments/
+</td></tr></deftable-childtags>
 
-</defun>
-</section>
+</s3>
+</s2>
 
-<section title="Configure a Web Service">
+<s2 title="Configure a Web Service">
 
 <p>The configuration options for a service are placed in a slightly different
 place depending on whether the service is a <code>SoapServlet</code> or
 specified with the <code>SoapDeployerServlet</code>.  The following examples
-use the <var/soap-style/> configuration option.</p>
+use the <var>soap-style</var> configuration option.</p>
 
 <example title="Configuring SoapServlet services">
   &lt;servlet&gt;
@@ -229,51 +229,49 @@ use the <var/soap-style/> configuration option.</p>
   &lt;/servlet&gt;
 </example>
 
-<section title="Service configuration options">
-<defun title="web-service">
+<s3 title="Service configuration options">
+<s4 title="web-service" type="defun">
 <parents>web-services</parents>
 
 <p>Configure a web service.</p>
 
 <deftable-childtags>
-<tr><td>name<td>the name of the service<td>required for services deployed with SoapDeployerServlet
-<tr><td>class-name<td>the name of the class that implements the service<td>required for services deployed with SoapDeployerServlet
-<tr><td>soap-namespace<td>the namespace to use for the soap service<td>value of the url used to access the service
-<tr><td>soap-style<td>`rpc', `document', `wrapped', or `message'<td>rpc
-</deftable-childtags>
+<tr><td>name</td><td>the name of the service</td><td>required for services deployed with SoapDeployerServlet
+</td></tr><tr><td>class-name</td><td>the name of the class that implements the service</td><td>required for services deployed with SoapDeployerServlet
+</td></tr><tr><td>soap-namespace</td><td>the namespace to use for the soap service</td><td>value of the url used to access the service
+</td></tr><tr><td>soap-style</td><td>`rpc', `document', `wrapped', or `message'</td><td>rpc
+</td></tr></deftable-childtags>
 
-</defun>
+</s4>
     
 
-</section>
+</s3>
 
-</section> <!-- Configuring Services -->
+</s2> <!-- Configuring Services -->
 
 
-</section> <!-- Configuration -->
+</s1> <!-- Configuration -->
 
-<section title="Type Mapping">
+<s1 title="Type Mapping">
 <deftable title="Java/SOAP type mappings">
-<tr><th>Java type<th>SOAP type
-<tr><td>byte[]<td>xsd:base64Binary
-<tr><td>boolean<td>xsd:boolean
-<tr><td>byte<td>xsd:byte
-<tr><td>java.util.Calendar<td>xsd:dateTime
-<tr><td>java.math.BigDecimal<td>xsd:decimal
-<tr><td>double<td>xsd:double
-<tr><td>float<td>xsd:float
-<tr><td>byte[]<td>xsd:hexBinary
-<tr><td>int<td>xsd:int
-<tr><td>java.math.BigInteger<td>xsd:integer
-<tr><td>long<td>xsd:long
-<tr><td>javax.xml.namespace.QName<td>xsd:QName
-<tr><td>short<td>xsd:short
-<tr><td>java.lang.String<td>xsd:string
-</deftable>
+<tr><th>Java type</th><th>SOAP type
+</th></tr><tr><td>byte[]</td><td>xsd:base64Binary
+</td></tr><tr><td>boolean</td><td>xsd:boolean
+</td></tr><tr><td>byte</td><td>xsd:byte
+</td></tr><tr><td>java.util.Calendar</td><td>xsd:dateTime
+</td></tr><tr><td>java.math.BigDecimal</td><td>xsd:decimal
+</td></tr><tr><td>double</td><td>xsd:double
+</td></tr><tr><td>float</td><td>xsd:float
+</td></tr><tr><td>byte[]</td><td>xsd:hexBinary
+</td></tr><tr><td>int</td><td>xsd:int
+</td></tr><tr><td>java.math.BigInteger</td><td>xsd:integer
+</td></tr><tr><td>long</td><td>xsd:long
+</td></tr><tr><td>javax.xml.namespace.QName</td><td>xsd:QName
+</td></tr><tr><td>short</td><td>xsd:short
+</td></tr><tr><td>java.lang.String</td><td>xsd:string
+</td></tr></deftable>
 
-</section>
+</s1>
 
 </body>
 </document>
-
-

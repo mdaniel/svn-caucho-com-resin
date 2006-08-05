@@ -15,30 +15,30 @@ From Luciano Montebove:
 <ol>
 <li>Under Orion do nothing :)
 
-<li>In Resin add orion.jar, ejb.jar, mail.jar (from orion) in your app
+</li><li>In Resin add orion.jar, ejb.jar, mail.jar (from orion) in your app
 WEB-INF/classes dir
 
-<li>In Resin in your app web.xml add these lines:
+</li><li>In Resin in your app web.xml add these lines:
 
 <def>
-&lt;classpath id='WEB-INF/classes/orion.jar'/>
-&lt;classpath id='WEB-INF/classes/mail.jar'/>
-&lt;classpath id='WEB-INF/classes/ejb.jar'/>
-&lt;jndi-link>
-  &lt;jndi-name>java:comp/env/ejb&lt;/jndi-name>
-  &lt;jndi-factory>com.evermind.server.rmi.RMIInitialContextFactory
-  &lt;/jndi-factory>
-  &lt;init-param java.naming.provider.url="ormi://myOrionHost/MyApp"/>
-  &lt;init-param java.naming.security.principal="admin"/>
-  &lt;init-param java.naming.security.credentials="xxx"/>
-&lt;/jndi-link>
+&lt;classpath id='WEB-INF/classes/orion.jar'/&gt;
+&lt;classpath id='WEB-INF/classes/mail.jar'/&gt;
+&lt;classpath id='WEB-INF/classes/ejb.jar'/&gt;
+&lt;jndi-link&gt;
+  &lt;jndi-name&gt;java:comp/env/ejb&lt;/jndi-name&gt;
+  &lt;jndi-factory&gt;com.evermind.server.rmi.RMIInitialContextFactory
+  &lt;/jndi-factory&gt;
+  &lt;init-param java.naming.provider.url="ormi://myOrionHost/MyApp"/&gt;
+  &lt;init-param java.naming.security.principal="admin"/&gt;
+  &lt;init-param java.naming.security.credentials="xxx"/&gt;
+&lt;/jndi-link&gt;
 </def>
 
-<li>Write your servlet/JSP as you would in Orion so for example if you have a
+</li><li>Write your servlet/JSP as you would in Orion so for example if you have a
 SessionBean called MyBean (in your ejb-jar.xml) your lookup should use this
 string ("java:comp/env/ejb/MyBean")
 
-<li>It's all
-</ol>
+</li><li>It's all
+</li></ol>
   </body>
 </document>

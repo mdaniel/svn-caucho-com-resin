@@ -1,4 +1,3 @@
-
 <document>
   <header>
     <product>resin</product>
@@ -12,7 +11,7 @@
   </header>
 
   <body>
-    <summary objsummary='localtoc'/>
+    <summary objsummary="localtoc"/>
       <faq title="How can I load configuration files for a class that might be used outside of a web-app?">
         <description>
           <p>
@@ -23,7 +22,7 @@
           </p>
         </description>
 
-        <p>You can use <var/ClassLoader/> to load your configration file from
+        <p>You can use <var>ClassLoader</var> to load your configration file from
             anywhere in the classpath.  </p>
 
         <p>A file from the classpath is always available to every 
@@ -31,9 +30,9 @@
           need to pass around any servlet context information.</p>
         
         <p>The classpath also gives you a good deal of options of how to package 
-          your files.  You can put them in jars in <var/WEB-INF/lib/> or in the
-          <var/WEB-INF/classes/> directory, or even in a jar file in
-          <var/$RESIN_HOME/lib/>.</p>
+          your files.  You can put them in jars in <var>WEB-INF/lib</var> or in the
+          <var>WEB-INF/classes</var> directory, or even in a jar file in
+          <var>$RESIN_HOME/lib</var>.</p>
 
         <p>The basic call would be:</p>
 
@@ -48,9 +47,9 @@ InputStream is = loader.getResourceAsStream("config/myconfig.xml");
 
         <ol>
           <li>$RESIN_HOME/lib/anyjar.jar!/config/myconfig.xml
-          <li>WEB-INF/classes/config/myconfig.xml
-          <li>WEB-INF/lib/anyjar.jar!/config/myconfig.xml
-        </ol>
+          </li><li>WEB-INF/classes/config/myconfig.xml
+          </li><li>WEB-INF/lib/anyjar.jar!/config/myconfig.xml
+        </li></ol>
           
       </faq>
 

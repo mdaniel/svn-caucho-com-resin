@@ -7,7 +7,7 @@
 </header>
 
 <body>
-<summary objsummary='localtoc'/>
+<summary objsummary="localtoc"/>
 
 
 <faq title="Can I link one JNDI name to another?">
@@ -31,4 +31,3 @@ My application is coded to find a UserTransaction using the name
 
 </body>
 </document>
-

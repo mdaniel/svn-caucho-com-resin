@@ -12,72 +12,68 @@ Servlet security and the use of Resin's XmlAuthenticator.
 <keywords>
 <keyword>XmlAuthenticator</keyword>
 <keyword>com.caucho.http.security.XmlAuthenticator</keyword>
-<keyword rank='-1'>authenticator</keyword>
-<keyword rank='-2'>security</keyword>
-<keyword rank='-2'>basic</keyword>
+<keyword rank="-1">authenticator</keyword>
+<keyword rank="-2">security</keyword>
+<keyword rank="-2">basic</keyword>
 </keywords>
 </header>
 
 <body>
 <summary/>
 
-<section title="Files in this example">
+<s1 title="Files in this example">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/web.xml"/>
-  <td>The main JSP/Servlet configuration file
-<tr><td><viewfile-link file="index.jsp"/>
-    <td>The home page for the website
-<tr><td><viewfile-link file="login.jsp"/>
-    <td>The JSP page containing the login form
-<tr><td><viewfile-link file="logout.jsp"/>
-    <td>A JSP page that causes a logout
-<tr><td><viewfile-link file="home.jsp"/>
-    <td>The home page for authenticated users.
-<tr><td><viewfile-link file="professors/index.jsp"/>
-    <td>The more specific home page for Professor's, available only to users in role 'professor'
-<tr><td><viewfile-link file="students/index.jsp"/>
-    <td>The more specific home page for Student's, available to users in role 'student' or in role 'professor'
-<tr><td><viewfile-link file="staff/index.jsp"/>
-    <td>The more specific home page for Staff, available to users in role 'staff' or in role 'professor'
-<tr><td><viewfile-link file="inc/buttonbar.jspf"/>
-    <td>An include file to render a button bar
-<tr><td><viewfile-link file="inc/footer.jspf"/>
-    <td>An include file to render a footer
-<tr><td><viewfile-link file="inc/nobrowsercache.jspf"/>
-    <td>An include file to stop the browser from caching pages
-</deftable>
-</section>
+  </td><td>The main JSP/Servlet configuration file
+</td></tr><tr><td><viewfile-link file="index.jsp"/>
+    </td><td>The home page for the website
+</td></tr><tr><td><viewfile-link file="login.jsp"/>
+    </td><td>The JSP page containing the login form
+</td></tr><tr><td><viewfile-link file="logout.jsp"/>
+    </td><td>A JSP page that causes a logout
+</td></tr><tr><td><viewfile-link file="home.jsp"/>
+    </td><td>The home page for authenticated users.
+</td></tr><tr><td><viewfile-link file="professors/index.jsp"/>
+    </td><td>The more specific home page for Professor's, available only to users in role 'professor'
+</td></tr><tr><td><viewfile-link file="students/index.jsp"/>
+    </td><td>The more specific home page for Student's, available to users in role 'student' or in role 'professor'
+</td></tr><tr><td><viewfile-link file="staff/index.jsp"/>
+    </td><td>The more specific home page for Staff, available to users in role 'staff' or in role 'professor'
+</td></tr><tr><td><viewfile-link file="inc/buttonbar.jspf"/>
+    </td><td>An include file to render a button bar
+</td></tr><tr><td><viewfile-link file="inc/footer.jspf"/>
+    </td><td>An include file to render a footer
+</td></tr><tr><td><viewfile-link file="inc/nobrowsercache.jspf"/>
+    </td><td>An include file to stop the browser from caching pages
+</td></tr></deftable>
+</s1>
     
-<section title="Specifying roles">
-<p>Each user belongs to one or more <var/roles/>.  These roles are
+<s1 title="Specifying roles">
+<p>Each user belongs to one or more <var>roles</var>.  These roles are
 similar to groups in Unix.  The possible roles are specified
-in <code/web.xml/>.</p>
+in <code>web.xml</code>.</p>
 
-<p>In this example, a user is either a <var/professor/>, a
-<var/student/>, or a <var/staff/>.  They can also optionally
-have an additional role of <var/gryffindor/>,
-<var/slytherin/>, <var/hufflepuf/>, or <var/ravenclaw/>,
+<p>In this example, a user is either a <var>professor</var>, a
+<var>student</var>, or a <var>staff</var>.  They can also optionally
+have an additional role of <var>gryffindor</var>,
+<var>slytherin</var>, <var>hufflepuf</var>, or <var>ravenclaw</var>,
 indicating which house they belong to (or none at all).</p>
       
-<example file="WEB-INF/web.xml" re-start="<security-role>" re-end="</security-role>">
+<example file="WEB-INF/web.xml" re-start="&lt;security-role&gt;" re-end="&lt;/security-role&gt;">
 &lt;security-role&gt;
   &lt;role-name&gt;professor&lt;/role-name&gt;
 &lt;/security-role&gt;
 </example>
     
-</section>
+</s1>
     
-<section title="Specifying secure areas">
+<s1 title="Specifying secure areas">
 <p>You can limit areas of the website to users in a certain
-<var/role/>.  You specify url patterns in <code/web.xml/> and the role
-that is required.  In JSP/Servlet terminology, this is called <var/Declarative Security/>.
+<var>role</var>.  You specify url patterns in <code>web.xml</code> and the role
+that is required.  In JSP/Servlet terminology, this is called <var>Declarative Security</var>.
 </p>
       
-<example title="Declarative Security in web.xml"
-         file="WEB-INF/web.xml"
-         re-marker="<web-app>"
-         re-start="<security-constraint>"
-         re-end="</security-constraint>">
+<example title="Declarative Security in web.xml" file="WEB-INF/web.xml" re-marker="&lt;web-app&gt;" re-start="&lt;security-constraint&gt;" re-end="&lt;/security-constraint&gt;">
 &lt;security-constraint&gt;
   &lt;web-resource-collection&gt;
     &lt;web-resource-name&gt;Professors&lt;/web-resource-name&gt;
@@ -88,22 +84,18 @@ that is required.  In JSP/Servlet terminology, this is called <var/Declarative S
   &lt;/auth-constraint&gt;
 &lt;/security-constraint&gt;
 </example>
-</section>
+</s1>
     
-<section title="Making a login form">
+<s1 title="Making a login form">
 <p>A login form can be used to retrieve the username and password
 from the user.  The same form or a seperate form can be used
-when the login fails.<p>
+when the login fails.</p><p>
 
-<p>In this example the login form and the error form are in the
+</p><p>In this example the login form and the error form are in the
 same JSP file.  If the form is being redisplayed because of an
-error the <code/login_error/> request parameter is set to '1'.</p>
+error the <code>login_error</code> request parameter is set to '1'.</p>
       
-<example title="login-config: Getting Resin to use the login form"
-         file="WEB-INF/web.xml"
-         re-marker="<login-config>"
-         re-start="<auth-method>"
-         re-end="</form-login-config>">
+<example title="login-config: Getting Resin to use the login form" file="WEB-INF/web.xml" re-marker="&lt;login-config&gt;" re-start="&lt;auth-method&gt;" re-end="&lt;/form-login-config&gt;">
 &lt;login-config&gt;
   &lt;auth-method&gt;form&lt;/auth-method&gt;
     &lt;form-login-config&gt;
@@ -114,10 +106,7 @@ error the <code/login_error/> request parameter is set to '1'.</p>
 &lt;/login-config&gt;
 </example>
 
-<example title="An example login form"
-         file="login.jsp"
-         re-start="form-login-page"
-         re-end="</form>">
+<example title="An example login form" file="login.jsp" re-start="form-login-page" re-end="&lt;/form&gt;">
 &lt;form action='j_security_check' method='POST'&gt;
   &lt;table&gt;
     &lt;tr&gt;&lt;td&gt;User:&lt;/td&gt;&lt;td&gt;&lt;input type='text' name='j_username'&gt;&lt;/td&gt;&lt;/tr&gt;
@@ -134,21 +123,18 @@ error the <code/login_error/> request parameter is set to '1'.</p>
   &lt;input type='hidden' name='j_uri' value='/home.jsp'/&gt;
 &lt;/form&gt;
 </example>
-</section>
+</s1>
     
-<section title="Causing a login to occur">
+<s1 title="Causing a login to occur">
 <p>Resin will cause a login to occur when a url that points to
 a secure area is used.  You do not make a url directly to the
 jsp page that contains the login form.</p>
 
-<p>In this example, <code/home.jsp/> is in a secure area, so an
+<p>In this example, <code>home.jsp</code> is in a secure area, so an
 unauthenticated user trying to access it will first be
 presented with the login form.</p>
 
-<example title="Accessing a jsp in a secure area causes the login to occur"
-         file="WEB-INF/web.xml"
-         re-start="'login' link"
-         re-end="</security-constraint>">
+<example title="Accessing a jsp in a secure area causes the login to occur" file="WEB-INF/web.xml" re-start="'login' link" re-end="&lt;/security-constraint&gt;">
 &lt;security-constraint&gt;
   &lt;web-resource-collection&gt;
     &lt;web-resource-name&gt;Home&lt;/web-resource-name&gt;
@@ -165,28 +151,22 @@ presented with the login form.</p>
 &lt;/security-constraint&gt;
 </example>
 
-<example title="Making a link to cause a login"
-         file="index.jsp"
-         re-start=">login<">
+<example title="Making a link to cause a login" file="index.jsp" re-start="&gt;login&lt;">
 &lt;a href="&lt;c:url value='/home.jsp'/&gt;"&gt;login&lt;/a&gt;
 </example>
-</section>
+</s1>
     
-<section title="Determining if the user is authenticated">
+<s1 title="Determining if the user is authenticated">
       
 <p>If the user has done a successfull login, we say that they
-have been <var/authenticated/>.
-<code/request.getUserPrincipal()/> returns <code/null/> if the 
-user has not been authenticated.<p>
+have been <var>authenticated</var>.
+<code>request.getUserPrincipal()</code> returns <code>null</code> if the 
+user has not been authenticated.</p><p>
 
-<p>In this example it is used to determine whether a 'login' or a
+</p><p>In this example it is used to determine whether a 'login' or a
 'logout' link should be presented.</p>
 
-<example title="Determining if the user is authenticated"
-         file="index.jsp"
-         re-marker="<h1"
-         re-start="c:choose"
-         re-end="/c:choose">
+<example title="Determining if the user is authenticated" file="index.jsp" re-marker="&lt;h1" re-start="c:choose" re-end="/c:choose">
 &lt;c:choose&gt;
   &lt;c:when test="${'${'}empty pageContext.request.userPrincipal}"&gt;
     &lt;a href="&lt;c:url value='home.jsp'/&gt;"&gt;login&lt;/a&gt;
@@ -196,31 +176,26 @@ user has not been authenticated.<p>
   &lt;/c:otherwise&gt;
 &lt;/c:choose&gt;
 </example>
-</section>
+</s1>
     
-<section title="Getting the current username">
+<s1 title="Getting the current username">
       
-<example title="Getting the current username"
-         file="home.jsp"
-         re-start="Welcome">
+<example title="Getting the current username" file="home.jsp" re-start="Welcome">
 Welcome &lt;c:out value="${'${'}pageContext.request.remoteUser}"/&gt;.
 </example>
-</section>
+</s1>
     
-<section title="Doing different things for different roles">
+<s1 title="Doing different things for different roles">
 <p>You can also determine if a user is in a certain role in the
-body of the page using <code/request.isUserInRole("role")/>.
+body of the page using <code>request.isUserInRole("role")</code>.
 In JSP/Servlet terminology, this is called
-<var/Programmatic Security/>.</p>
+<var>Programmatic Security</var>.</p>
 
-<p>In this example, the <code/home.jsp/> redirects the user to a
-more specific home page if the user is a <var/professor/>,
-<var/student/>, or <var/staff/>.</p>
+<p>In this example, the <code>home.jsp</code> redirects the user to a
+more specific home page if the user is a <var>professor</var>,
+<var>student</var>, or <var>staff</var>.</p>
 
-<example title="Programmatic Security using Java code"
-         file="home.jsp"
-         re-start="redirect to a more specific"
-         re-end=">">
+<example title="Programmatic Security using Java code" file="home.jsp" re-start="redirect to a more specific" re-end="&gt;">
 &lt;%
   /** redirect to a more specific homepage if one is available */
 
@@ -241,22 +216,21 @@ more specific home page if the user is a <var/professor/>,
   }
 %&gt;
 </example>
-</section>
+</s1>
 
-<section title="Stop the browser from caching pages">
+<s1 title="Stop the browser from caching pages">
       
 <p>Pages with information that changes depending on whether or
 not there is a known user should not be cached by the
 browser.</p>
 
-<p>In this example an include file <code/inc/nobrowsercache.jspf/>
+<p>In this example an include file <code>inc/nobrowsercache.jspf</code>
 is used to send the HTTP headers that stop the browser from
 caching the page.  It is used for each page that shows the
 button bar at the top, because the button bar changes
 depending on whether or not the user is logged in.</p>
       
-<example title="Java code to stop the browser from caching the page"
-         file="inc/nobrowsercache.jspf">
+<example title="Java code to stop the browser from caching the page" file="inc/nobrowsercache.jspf">
 &lt;%-- stop the browser from caching the page --%&gt;
 
 &lt;%
@@ -266,24 +240,18 @@ depending on whether or not the user is logged in.</p>
 %&gt;
 </example>
 
-<example title="Using inc/nobrowsercache.jsp"
-         file="index.jsp"
-         re-marker="taglib"
-         re-start="nobrowsercache.jspf">
+<example title="Using inc/nobrowsercache.jsp" file="index.jsp" re-marker="taglib" re-start="nobrowsercache.jspf">
 &lt;%@ include file="/inc/nobrowsercache.jspf" %&gt;
 </example>
-</section>
+</s1>
     
-<section title="Causing a logout">
+<s1 title="Causing a logout">
 <p>A user can be logged out by invalidating the session.  This
 causes all of the information stored in the session to be
 lost.  It is especially important to make sure that the
 logout page is not cached by the browser.</p>
       
-<example title="Causing a logout with session.invalidate()"
-         file="logout.jsp"
-         re-marker="taglib"
-         re-start="session.invalidate()">
+<example title="Causing a logout with session.invalidate()" file="logout.jsp" re-marker="taglib" re-start="session.invalidate()">
 &lt;%@ include file="/inc/nobrowsercache.jspf" %&gt;
 
 &lt;%-- invalidating the session causes a loss of all session
@@ -292,9 +260,9 @@ logout page is not cached by the browser.</p>
 
 &lt;% session.invalidate(); %&gt;
 </example>
-</section>
+</s1>
 
-<section title="Using XmlAuthenticator">
+<s1 title="Using XmlAuthenticator">
 <p>Resin provides an authenticator
 <a href="javadoc|com.caucho.http.security.XmlAuthenticator|"/> which is
 useful for sites which have minimal security requirements.
@@ -303,11 +271,7 @@ configuration, or in an xml file, or both.</p>
       
 <p>The example below uses digest passwords.  Digest passwords avoid the storage of passwords in cleartext, and are discussed under the security section of the Resin documentation.</p>
 
-<example title="Specifying the XmlAuthenticator as the authenticator to use"
-         file="WEB-INF/web.xml"
-         re-marker="<login-config>"
-         re-start="Resin-specific XmlAuthenticator"
-         re-end="</authenticator>">
+<example title="Specifying the XmlAuthenticator as the authenticator to use" file="WEB-INF/web.xml" re-marker="&lt;login-config&gt;" re-start="Resin-specific XmlAuthenticator" re-end="&lt;/authenticator&gt;">
   &lt;!-- Resin-specific XmlAuthenticator configuration --&gt;
   &lt;authenticator&gt;
     &lt;type&gt;com.caucho.server.security.XmlAuthenticator&lt;/type&gt;
@@ -324,8 +288,7 @@ configuration, or in an xml file, or both.</p>
   
 </example>
 
-<example title="An XML file with usernames, passwords, and roles"
-         file="WEB-INF/password.xml">
+<example title="An XML file with usernames, passwords, and roles" file="WEB-INF/password.xml">
 &lt;!-- password.xml --&gt;
 &lt;authenticator&gt;
   &lt;!-- professors --&gt;
@@ -340,6 +303,6 @@ configuration, or in an xml file, or both.</p>
   &lt;user name='lmalfoy' password='sj/yhtU1h4LZPw7/Uy9IVA==' roles='alumni,gryffindor'/&gt;
 &lt;/authenticator&gt;
 </example>
-</section>
+</s1>
 </body>
 </document>

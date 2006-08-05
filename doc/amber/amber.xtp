@@ -18,16 +18,16 @@ persistence with an application-oriented data model.
 <p>Development complexity dominates application cost.</p>
 -->
 
-<section title="Goals">
+<s1 title="Goals">
 
 <ul>
 <li>Use Java beans for the application model.
-<li>Leverage JDBC APIs.
-<li>Make persistence connections and transactions explicit
-<li>Simplify configuration files
-</ul>
+</li><li>Leverage JDBC APIs.
+</li><li>Make persistence connections and transactions explicit
+</li><li>Simplify configuration files
+</li></ul>
 
-<section title="Java beans as the application model">
+<s2 title="Java beans as the application model">
 
 <p>The application's data model should drive the Java
 classes and architecture.  As much as possible, Amber
@@ -40,9 +40,9 @@ properties (<code>getXXX</code> and <code>setXXX</code>) which correspond
 to columns in the database.  No additional classes or interfaces are
 required for Amber. In this respect, Amber is identical to Hibernate's
 persistence model.  Classes designed for Hibernate can be used for
-Amber without modification.<p>
+Amber without modification.</p><p>
 
-<p>Amber contrasts with J2EE CMP by eliminating the home
+</p><p>Amber contrasts with J2EE CMP by eliminating the home
 and local interfaces and eliminating the special J2EE methods
 like <code>ejbCreate</code> and <code>ejbPostCreate</code>.  Applications
 using J2EE must twist their data model to fit the J2EE CMP rules, and must
@@ -60,9 +60,9 @@ mental model of JDO more complicated.
 By committing to a relational model, Amber gains the power of
 the relational queries and keeps the persistence model concrete.</p>
 
-</section>
+</s2>
 
-<section title="Explicit Persistence">
+<s2 title="Explicit Persistence">
 
 <p>Developers are familiar with obtaining a JDBC <code>Connection</code>
 from a <code>DataSource</code>, doing some work, and closing
@@ -94,9 +94,9 @@ application code easier to debug and maintain.  Because the connection
 is explicit, it's visible in the code.  With an explicit connection a code
 review can follow the persistence just by inspecting the code.</p>
 
-</section>
+</s2>
 
-<section title="JDBC APIs">
+<s2 title="JDBC APIs">
 
 <p>Amber uses JDBC classes like ResultSet both to simplify the interfaces
 and to take advantage of database driver capability.  Since the
@@ -116,15 +116,15 @@ while (rs.next()) {
 }
 </example>
 
-</section>
+</s2>
 
-<section title="Configuration Files">
+<s2 title="Configuration Files">
 
 <p>Amber currently follows the Hibernate configuration file.</p>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
   </body>
 </document>

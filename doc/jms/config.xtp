@@ -8,64 +8,64 @@
   </header>
 
   <body>
-    <summary no-objsummary='1'/>
+    <summary no-objsummary="1"/>
 
-<section title='ConnectionFactory'>
+<s1 title="ConnectionFactory">
 
 <p>The <code>ConnectionFactory</code> resource defines the JMS factory
 for creating JMS connections.</p>
 
 <example title="ConnectionFactory resource">
 &lt;resource jndi-name="jms/factory"
-           type="com.caucho.jms.ConnectionFactoryImpl">
-  &lt;init>
-    &lt;data-source>jdbc/database&lt;/data-source>
-  &lt;/init>
-&lt;/resource>
+           type="com.caucho.jms.ConnectionFactoryImpl"&gt;
+  &lt;init&gt;
+    &lt;data-source&gt;jdbc/database&lt;/data-source&gt;
+  &lt;/init&gt;
+&lt;/resource&gt;
 </example>
 
 <deftable-childtags>
-<tr><td>data-source<td>Optional JDBC DataSource<td>none
-<tr><td>client-id<td>clientID value for durable subscriptions<td>none
-</deftable-childtags>
+<tr><td>data-source</td><td>Optional JDBC DataSource</td><td>none
+</td></tr><tr><td>client-id</td><td>clientID value for durable subscriptions</td><td>none
+</td></tr></deftable-childtags>
 
-</section>
+</s1>
 
-<section title='JDBC Queue/Topic'>
+<s1 title="JDBC Queue/Topic">
 
 <p>The JDBC Queue and Topic store the messages using a JDBC DataSource.
-The data source will be defined in a &lt;database> element.  Resin's
+The data source will be defined in a &lt;database&gt; element.  Resin's
 internal file-based database can be used for single-JVM messaging.</p>
 
 <example title="Queue configuration with Resin's database">
-&lt;database jndi-name="jdbc/resin">
-  &lt;driver type="com.caucho.db.jdbc.ConnectionPoolDataSourceImpl">
-     &lt;path>WEB-INF/db&lt;/path>
-  &lt;/driver>
-&lt;/database>
+&lt;database jndi-name="jdbc/resin"&gt;
+  &lt;driver type="com.caucho.db.jdbc.ConnectionPoolDataSourceImpl"&gt;
+     &lt;path&gt;WEB-INF/db&lt;/path&gt;
+  &lt;/driver&gt;
+&lt;/database&gt;
 
 &lt;resource jndi-name="jms/my-queue"
-           type="com.caucho.jms.jdbc.JdbcQueue">
-  &lt;init>
-    &lt;queue-name>my-queue&lt;/queue-name>
-    &lt;data-source>jdbc/resin&lt;/data-source>
-  &lt;/init>
-&lt;/resource>
+           type="com.caucho.jms.jdbc.JdbcQueue"&gt;
+  &lt;init&gt;
+    &lt;queue-name&gt;my-queue&lt;/queue-name&gt;
+    &lt;data-source&gt;jdbc/resin&lt;/data-source&gt;
+  &lt;/init&gt;
+&lt;/resource&gt;
 </example>
 
 <example title="Topic configuration with Resin's database">
 &lt;resource jndi-name="jms/my-topic"
-           type="com.caucho.jms.jdbc.JdbcTopic">
-  &lt;init>
-    &lt;topic-name>my-topic&lt;/topic-name>
-    &lt;data-source>jdbc/resin&lt;/data-source>
-  &lt;/init>
-&lt;/resource>
+           type="com.caucho.jms.jdbc.JdbcTopic"&gt;
+  &lt;init&gt;
+    &lt;topic-name&gt;my-topic&lt;/topic-name&gt;
+    &lt;data-source&gt;jdbc/resin&lt;/data-source&gt;
+  &lt;/init&gt;
+&lt;/resource&gt;
 </example>
 
-</section>
+</s1>
 
-<section title='Memory Queue/Topic'>
+<s1 title="Memory Queue/Topic">
 
 <p>The Memory Queue and Topic are non-persistent.  If the server restarts
 or even if the Queue's environment restarts, the messaging data will be
@@ -74,22 +74,22 @@ Queues.</p>
 
 <example title="Memory Queue configuration">
 &lt;resource jndi-name="jms/my-queue"
-           type="com.caucho.jms.memory.MemoryQueue">
-  &lt;init>
-    &lt;queue-name>my-queue&lt;/queue-name>
-  &lt;/init>
-&lt;/resource>
+           type="com.caucho.jms.memory.MemoryQueue"&gt;
+  &lt;init&gt;
+    &lt;queue-name&gt;my-queue&lt;/queue-name&gt;
+  &lt;/init&gt;
+&lt;/resource&gt;
 </example>
 
 <example title="Memory Topic configuration">
 &lt;resource jndi-name="jms/my-topic"
-           type="com.caucho.jms.memory.MemoryTopic">
-  &lt;init>
-    &lt;topic-name>my-topic&lt;/topic-name>
-  &lt;/init>
-&lt;/resource>
+           type="com.caucho.jms.memory.MemoryTopic"&gt;
+  &lt;init&gt;
+    &lt;topic-name&gt;my-topic&lt;/topic-name&gt;
+  &lt;/init&gt;
+&lt;/resource&gt;
 </example>
 
-</section>
+</s1>
   </body>
 </document>

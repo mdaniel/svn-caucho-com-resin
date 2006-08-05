@@ -8,7 +8,7 @@
   <body>
     <summary/>
 
-<section title="How do I enable session url rewriting?">
+<s1 title="How do I enable session url rewriting?">
 
 <p>You can disable cookies in the resin.conf with a configuration like</p>
 
@@ -22,59 +22,59 @@
 &lt;/http-server&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="How do I keep the generated .java files?">
+<s1 title="How do I keep the generated .java files?">
 
-<p>The generated .java files are put in <var/&lt;work-dir>/>.  By
-default, that's <var//tmp/caucho/> on Unix and <var/\temp\caucho/> on
+<p>The generated .java files are put in <var>&lt;work-dir&gt;</var>.  By
+default, that's <var>/tmp/caucho</var> on Unix and <var>\temp\caucho</var> on
 Windows.</p>
 
-</section>
+</s1>
 
-<section title="Class work.test.MyBean not found">
+<s1 title="Class work.test.MyBean not found">
 
 <p>Your jsp file must import the proper packages so Java can find the
-bean.  Also, the bean should typically be in <var/resin/doc/WEB-INF/classes/>.</p>
+bean.  Also, the bean should typically be in <var>resin/doc/WEB-INF/classes</var>.</p>
 
 <example>
-&lt;%@ page import='test.*' %>
-&lt;%= MyBean.printData() %>
+&lt;%@ page import='test.*' %&gt;
+&lt;%= MyBean.printData() %&gt;
 </example>
 
 <p>Also, if your bean has no package, you need to import the bean by name:
 </p>
 
 <example>
-&lt;%@ page import='MyBean' %>
-&lt;%= MyBean.printData() %>
+&lt;%@ page import='MyBean' %&gt;
+&lt;%= MyBean.printData() %&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="My character encoding is messed up">
+<s1 title="My character encoding is messed up">
 
-<p>Resin has an optimization, <var/static-encoding/>, which assumes that
+<p>Resin has an optimization, <var>static-encoding</var>, which assumes that
 your page is written in the same encoding as you're printing.  That usually
-works, but some people write a page in one encoding, like <var/Shift-JIS/>
-and print it in <var/UTF-8/>.  To make that work, you need to disable
-<var/static-encoding/>.</p>
+works, but some people write a page in one encoding, like <var>Shift-JIS</var>
+and print it in <var>UTF-8</var>.  To make that work, you need to disable
+<var>static-encoding</var>.</p>
 
 <example>
-&lt;jsp static-encoding='false'/>
+&lt;jsp static-encoding='false'/&gt;
 </example>
 
 <p>Here's an example page that would need to disable static-encoding:</p>
 
 <example>
-&lt;%@ page contentType='text/html; charset=Shift-JIS' %>
-&lt;% response.setContentType("text/html; charset=UTF-8") %>
+&lt;%@ page contentType='text/html; charset=Shift-JIS' %&gt;
+&lt;% response.setContentType("text/html; charset=UTF-8") %&gt;
 ...
 </example>
 
-</section>
+</s1>
 
-<section title="Form character encoding doesn't work">
+<s1 title="Form character encoding doesn't work">
 
 <p>A POST request with application/x-www-form-urlencoded doesn't contain any
 information about the character request.  So Resin needs to use a set of
@@ -82,32 +82,32 @@ heuristics to decode the form.  Here's the order:</p>
 
 <ol>
 <li>request.getAttribute("caucho.form.character.encoding")
-<li>The response.setContentType() encoding of the page.
-<li>The <var/character-encoding/> tag in the resin.conf.
-</ol>
+</li><li>The response.setContentType() encoding of the page.
+</li><li>The <var>character-encoding</var> tag in the resin.conf.
+</li></ol>
 
 <p>Resin uses the default character encoding of your JVM to read form data.  To
 set the encoding to another charset, you'll need to change the resin.conf as
 follows:</p>
 
 <example>
-&lt;http-server character-encoding='Shift_JIS'>
+&lt;http-server character-encoding='Shift_JIS'&gt;
   ...
-&lt;/http-server>
+&lt;/http-server&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="Error 405 resource not found">
+<s1 title="Error 405 resource not found">
 
 <p>Usually, this is a servlet extending HttpServlet and implementing
 doGet but not doPost.  If you send a POST request, like a form, to a
 servlet that only implements doGet, you will get 405 resource not found.
 </p>
 
-</section>
+</s1>
 
-<section title="How do I print an exception stack trace to the JSP out?">
+<s1 title="How do I print an exception stack trace to the JSP out?">
 
 <p>Mattias Nilsson writes:</p>
 
@@ -123,19 +123,19 @@ catch(Exception e) {
 
 <p>also very useful to include in error emails etc.</p>
 
-</section>
+</s1>
 
-<section title="How do I delete cookies?">
+<s1 title="How do I delete cookies?">
 
-<p>Normally, you can just grab the cookie from <var/request.getCookies()/>,
-call <var/cookie.setMaxAge(0)/>, and add the cookie to the Response.
+<p>Normally, you can just grab the cookie from <var>request.getCookies()</var>,
+call <var>cookie.setMaxAge(0)</var>, and add the cookie to the Response.
 </p>
 
-<p>One thing you may need to watch out for is that the <var/Path/> and
-<var/Domain/> of the deleting cookie must match the browser's cookie.  By
-default, Resin does not set <var/Path=//>.</p>
+<p>One thing you may need to watch out for is that the <var>Path</var> and
+<var>Domain</var> of the deleting cookie must match the browser's cookie.  By
+default, Resin does not set <var>Path=/</var>.</p>
 
-<p>If you set a cookie header explicitly, you may want to call <var/setPath("/")/>.
+<p>If you set a cookie header explicitly, you may want to call <var>setPath("/")</var>.
 </p>
 
 <example>
@@ -150,9 +150,9 @@ cookie.setPath(null);
 response.addCookie(cookie);
 </example>
 
-</section>
+</s1>
 
-<section title='What is a web-app?'>
+<s1 title="What is a web-app?">
 
 <p>The vast majority of sites can completely ignore web-apps.  If you're
 starting with Resin, use the default web-app and don't worry about it.
@@ -161,7 +161,7 @@ starting with Resin, use the default web-app and don't worry about it.
 <p>You'll only want to use web-apps when you want separate projects using
 the same web server.  For example, on an ISP site, each user might get her
 own web-app.  She can treat the web-app as if she had control over
-the whole web server starting at a URL prefix like <var/~karen/>.
+the whole web server starting at a URL prefix like <var>~karen</var>.
 </p>
 
 <p>A web-app is a generalization of a virtual host.  With virtual
@@ -173,9 +173,9 @@ extends this by creating virtual applications for a URL prefix.
 <p>Each web-app gets its own sessions, servlets, beans and static
 pages.</p>
 
-</section>
+</s1>
 
-<section title="Why don't my URLs work in my web-app?">
+<s1 title="Why don't my URLs work in my web-app?">
 
 <p>Remember, the browser doesn't know about your web-apps.  It treats the
 web server as a single URL-space.  This may cause you troubles if you
@@ -184,22 +184,22 @@ use a standard directory structure like putting images in '/images/*'.
 
 <p>To see this problem, suppose you have a web-app called
 '/myproject'.  Suppose you have a JSP page in the web-app called
-<var/foo/bar.jsp/>.  The full URL will be
-<var//myproject/foo/bar.jsp/>.  Your image reference should look like
+<var>foo/bar.jsp</var>.  The full URL will be
+<var>/myproject/foo/bar.jsp</var>.  Your image reference should look like
 one of the following:</p>
 
 <example>
-&lt;img src='../images/image1.gif'/><br>
-&lt;img src='&lt;%= request.getContextPath() %>/images/image1.gif'/>
+&lt;img src='../images/image1.gif'/&gt;<br/>
+&lt;img src='&lt;%= request.getContextPath() %&gt;/images/image1.gif'/&gt;
 </example>
 
-<p>Using <var//images/image1.gif/> will fail because the browser will
-look for <var/http://myhost.com/images/image1.gif/> when you really
-want <var/http://myhost.com/myproject/images/image1.gif/>.</p>
+<p>Using <var>/images/image1.gif</var> will fail because the browser will
+look for <var>http://myhost.com/images/image1.gif</var> when you really
+want <var>http://myhost.com/myproject/images/image1.gif</var>.</p>
 
-</section>
+</s1>
 
-<section title="How do I stop the browser from caching my page?">
+<s1 title="How do I stop the browser from caching my page?">
 
 <p>Unfortunately, all the browsers work differently.  The following seems to
 be a consensus on the headers to set:</p>
@@ -210,14 +210,14 @@ response.setHeader("Pragma", "no-cache");
 response.setHeader("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
 </example>
 
-</section>
+</s1>
 
-<section title="How do I precompile *.jsp pages?">
+<s1 title="How do I precompile *.jsp pages?">
 
 <p>You can run Resin on a single page from the shell:</p>
 
 <example>
-unix> httpd.sh -compile /test/myfile.jsp
+unix&gt; httpd.sh -compile /test/myfile.jsp
 </example>
 
 <p>That will compile the JSP.  When you next start Resin, the JSP file will
@@ -226,9 +226,9 @@ already be available.</p>
 <p>You can also use a link checker spider to traverse your website to
 hit all the pages you want to precompile.</p>
 
-</section>
+</s1>
 
-<section title="VerifyError when loading JSP files">
+<s1 title="VerifyError when loading JSP files">
 
 <p>The JVM has a number of limits on a method's code size.
 Most compilers won't tell you that you've exceeded the limit, so you'll
@@ -242,16 +242,16 @@ jsp:include.  That may actually turn out to be an advantage because you can
 then use Resin's caching to improve the performance of those subpages.
 </p>
 
-</section>
+</s1>
 
-<section title="How can I open a data file?">
+<s1 title="How can I open a data file?">
 
 <p>You'll need to translate the URL to a real path using
-<var/getRealPath/>.  Resin's current directory is <var/RESIN_HOME/>
+<var>getRealPath</var>.  Resin's current directory is <var>RESIN_HOME</var>
 which is normally not where you'll be storing data files.  You can
-look up a real path based on the <var/web-app/> using
-<var/ServletContext.getRealPath()/> or relative to the current URL
-using <var/ServletRequest.getRealPath()/>.
+look up a real path based on the <var>web-app</var> using
+<var>ServletContext.getRealPath()</var> or relative to the current URL
+using <var>ServletRequest.getRealPath()</var>.
 </p>
 
 <example>
@@ -261,9 +261,9 @@ InputStream is = new FileInputStream(path);
 ...
 </example>
 
-</section>
+</s1>
 
-<section title="Character encoding problems on Solaris POST">
+<s1 title="Character encoding problems on Solaris POST">
 
 <p>Nicolas Lehuen writes:</p>
 
@@ -285,12 +285,12 @@ characters.</p>
 <p>Two questions, there :</p>
 <ol>
 <li>what am I doing wrong ?
-<li>I have to set a particular character encoding for the request to be
+</li><li>I have to set a particular character encoding for the request to be
 parsed correctly. Given that I build a multi-device, multi-language
 platform, is there any guidelines to guess the character encoding used by
 the POSTing browser ? Why isn't there a "; charset=xxxx" suffix to the
 "Content-Type: application/x-www-form-urlencoded" ?
-</ol>
+</li></ol>
 
 <p>Rogério Saran writes:</p>
 
@@ -332,9 +332,9 @@ at least in my version of Solaris 5.7 :(</p>
 changing the default locale of the VM ! We're serving i-Mode also, don't
 ask me how I'll handle japanese form postings for the moment...</p>
 
-</section>
+</s1>
 
-<section title="How do I logout with the Authenticator?">
+<s1 title="How do I logout with the Authenticator?">
 
 <p>The servlet API doesn't have a good way of handling logout.  (The
 authentication in the spec is really only partially thought-out.)</p>
@@ -363,6 +363,6 @@ remove all information, including login information.</p>
 <p>Until we come up with a way to get the authenticator object from a servlet,
 there's really no other way to deal with this.</p>
 
-</section>
+</s1>
   </body>
 </document>

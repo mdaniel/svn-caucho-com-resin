@@ -10,20 +10,20 @@
   <body>
     <summary/>
 
-<p><code/ejbSelect/> provides a more flexible method to query the database than
+<p><code>ejbSelect</code> provides a more flexible method to query the database than
 find methods.  Find methods belong to a home interface and only return
-the corresponding local object.  A <code/findFoobar/> method
-in <code/StudentHome/> can only return a <code/Student/> or a
-collection of <code/Students/>.  <code/ejbSelect/> methods can
+the corresponding local object.  A <code>findFoobar</code> method
+in <code>StudentHome</code> can only return a <code>Student</code> or a
+collection of <code>Students</code>.  <code>ejbSelect</code> methods can
 return any type in the database or a collection of database objects.  They
 are restricted to the entity bean implementation class; you'll need to write
 a separate business method to expose the results of the query.
 
-<p>Like find methods, <code/ejbSelect/> methods use the deployment descriptor
+</p><p>Like find methods, <code>ejbSelect</code> methods use the deployment descriptor
 to define the EJB-QL query.  Resin-CMP will generate the appropriate SQL
 for the select.</p>
 
-<section title="Database Schema">
+<s1 title="Database Schema">
 
 <example title="select.sql">
 CREATE TABLE select_student (
@@ -41,15 +41,15 @@ CREATE TABLE select_house (
 );
 </example>
 
-</section>
+</s1>
 
-<section title="ejbSelectBoys">
+<s1 title="ejbSelectBoys">
 
-<p>The <code/ejbSelect/> method for the example is in
-the <code/HouseBean/> class.  There are no real limitations on which
-bean implemenation has the <code/ejbSelect/>
+<p>The <code>ejbSelect</code> method for the example is in
+the <code>HouseBean</code> class.  There are no real limitations on which
+bean implemenation has the <code>ejbSelect</code>
 method.  All the entity beans in the database are accessible.
-However, <code/ejbSelect/> methods are not visible in either the home or the
+However, <code>ejbSelect</code> methods are not visible in either the home or the
 local interfaces.  If the bean needs to make the results visible,
 you'll need to create a business method to collect and return the
 selected results.</p>
@@ -67,7 +67,7 @@ public abstract Collection ejbSelectAllBoys(House house)
 <p>The select query is defined in the deployment descriptor
 like the find query.  The following is the query for the example.</p>
 
-<example title='Select boys query'>
+<example title="Select boys query">
 SELECT student.name
 FROM select_house house, IN(house.studentList) student
 WHERE student.gender='Boy' AND house=?1
@@ -77,16 +77,16 @@ ORDER BY student.name
 <p>The required SELECT clause may return any cmp-field or cmr-field or any
 collection of either.  In this case we'll return a collection of
 strings.  This return value would be illegal in a find method because
-a find method could only return <code/Student/> (and <code/HouseHome/>
-couldn't return the <code/Student/> interface from a <code/find/> method.)</p>
+a find method could only return <code>Student</code> (and <code>HouseHome</code>
+couldn't return the <code>Student</code> interface from a <code>find</code> method.)</p>
 
 <p>The required FROM clause defines the abstract tables, traversing relations
-as necessary.  In this case, we define the variable <var/student/> to
+as necessary.  In this case, we define the variable <var>student</var> to
 range over all the students in the house.  All collection-valued
 relations will use IN expressions to define a query variables.</p>
 
 <p>The optional WHERE clause can use normal expressions like '=' or
-boolean expressions.  WHERE can use <code/ejbSelect/> arguments with the '?1'
+boolean expressions.  WHERE can use <code>ejbSelect</code> arguments with the '?1'
 expression.</p>
 
 <p>The optional ORDER BY clause is a Resin-CMP extension to EJB-QL.
@@ -94,6 +94,6 @@ It orders the select so the boys will be listed alphabetically.
 Because the ORDER BY clause is so useful, a future version of the EJB
 2.0 spec will certainly include it.</p>
 
-</section>
+</s1>
   </body>
 </document>

@@ -16,24 +16,24 @@ Many-to-One adds two capabilities: SQL extensions for links and direct lookup of
   <body>
     <summary/>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
-    <td>resin-web.xml configuration
-<tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>
-    <td>persistence.xml configuration
-<tr><td><viewfile-link file="WEB-INF/classes/example/Student.java"/>
-    <td>The student bean
-<tr><td><viewfile-link file="WEB-INF/classes/example/House.java"/>
-    <td>The house bean
-<tr><td><viewfile-link file="WEB-INF/classes/example/ManyToOneServlet.java"/>
-    <td>The test servlet
-</deftable>
-</section>
+    </td><td>resin-web.xml configuration
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>
+    </td><td>persistence.xml configuration
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/Student.java"/>
+    </td><td>The student bean
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/House.java"/>
+    </td><td>The house bean
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/ManyToOneServlet.java"/>
+    </td><td>The test servlet
+</td></tr></deftable>
+</s1>
 
-<section title="Model: Database and Annotated Classes">
+<s1 title="Model: Database and Annotated Classes">
 
-<section title="Database Schema">
+<s2 title="Database Schema">
 
 <p>A many-to-one relation links one table to another.  In this example,
 each student entry links to the student's house.  The database schema
@@ -55,7 +55,7 @@ CREATE TABLE student (
 )
 </example>
 
-</section>
+</s2>
 
 <p>The House bean has two fields, <var>id</var> and <var>name</var>,
 to model the house columns.  House annotates <code>getId</code> with <code>@Id</code> to mark it as a primary key.  It annotates <code>getName</code>
@@ -93,16 +93,16 @@ public class Student {
 }
 </example>
 
-<section title="@ManyToOne">
+<s2 title="@ManyToOne">
 
 <p><a href="amber|amber-table.xtp#@ManyToOne">@ManyToOne</a> marks the
 field as a many-to-one field.  The <code>@ManyToOne</code> annotation
 can also specify the target bean.  By default, the field's type determines
 the target bean.</p>
 
-</section>
+</s2>
 
-<section title="@JoinColumn">
+<s2 title="@JoinColumn">
 
 <p><a href="amber|amber-table.xtp#@JoinColumn">@JoinColumn</a> specifies
 the SQL column name and the target column for a many-to-one field.</p>
@@ -111,19 +111,19 @@ the SQL column name and the target column for a many-to-one field.</p>
 
 <p>The default target column is the primary key of the target table.</p>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="Client Servlet">
+<s1 title="Client Servlet">
 
 <p>The many-to-one relation provides two capabilities to the client:</p>
 <ol>
 <li>Extended SQL relation capabilities
-<li>A direct lookup to a persistent bean through the field.
-</ol>
+</li><li>A direct lookup to a persistent bean through the field.
+</li></ol>
 
-<section title="Query Extensions">
+<s2 title="Query Extensions">
 
 <p>The first relation capability extends SQL with relation paths
 using the '.' operator like Java's field reference.
@@ -147,19 +147,19 @@ private void doService(PrintWriter out)
 
   students = houseStudent.getResultList();
 
-  out.println("&lt;h3>Gryffindor Students&lt;/h3>");
+  out.println("&lt;h3&gt;Gryffindor Students&lt;/h3&gt;");
 
   for (int i = 0; i &lt; students.size(); i++) {
     Student student = (Student) students.get(i);
 
-    out.println(student.getName() + "&lt;br>");
+    out.println(student.getName() + "&lt;br&gt;");
   }
 }
 </example>
 
-</section>
+</s2>
 
-<section title="Java References">
+<s2 title="Java References">
 
 <p>The second relation capability returns a live, persistent bean through
 the <code>getHouse()</code> method.  Amber will perform any necessary
@@ -180,14 +180,14 @@ private void doService(PrintWriter out)
     Student student = (Student) students.get(i);
 
     out.println(student.getName() + " lives in " +
-                student.getHouse().getName() + "&lt;br>");
+                student.getHouse().getName() + "&lt;br&gt;");
   }
 }
 </example>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
   </body>
 </document>

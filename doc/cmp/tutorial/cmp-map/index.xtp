@@ -24,11 +24,11 @@ child bean's identifying relation implicitly selects the parent bean and
 the other key is used as the Map relation's key field.</p>
 
 <p>An identifying relation with a two-field compound primary key
-can support a map relation.  In this example, each <code/Student/> has
-a <code/Grade/> for each <code/Course/> he takes.  The <code/Grade/> bean
-has two primary keys: the <code/Student/> and the <code/Course/>.
+can support a map relation.  In this example, each <code>Student</code> has
+a <code>Grade</code> for each <code>Course</code> he takes.  The <code>Grade</code> bean
+has two primary keys: the <code>Student</code> and the <code>Course</code>.
 The two keys are identifying relations since they refer directly
-to the <code/Student/> and <code/Grade/> objects, not
+to the <code>Student</code> and <code>Grade</code> objects, not
 indirectly through their keys.</p>
 
 <p>Part of the the primary key class looks like:</p>
@@ -40,14 +40,14 @@ public class GradeKey {
   ...
 </example>
 
-<p>The read-only <code/getGrades/> map relation belongs to the <code/Student/>
-bean.  The map's key is the <code/Course/> object (not the key for
-the <code/Course/>.)  Resin-CMP will use the <code/Student/> object
-as the <var/student/> field of the composite key, and it will
-use a <code/Course/> argument to the <code/Map.get(course)/> call as
-the other key.  Since a <code/Student/> and a <code/Course/>
-uniquely identify a <code/Grade/>, Resin-CMP can use the combined
-key to look up the <code/Grade/> object.</p>
+<p>The read-only <code>getGrades</code> map relation belongs to the <code>Student</code>
+bean.  The map's key is the <code>Course</code> object (not the key for
+the <code>Course</code>.)  Resin-CMP will use the <code>Student</code> object
+as the <var>student</var> field of the composite key, and it will
+use a <code>Course</code> argument to the <code>Map.get(course)</code> call as
+the other key.  Since a <code>Student</code> and a <code>Course</code>
+uniquely identify a <code>Grade</code>, Resin-CMP can use the combined
+key to look up the <code>Grade</code> object.</p>
 
 <example>
 public interface Student extends EJBLocalObject {
@@ -57,21 +57,21 @@ public interface Student extends EJBLocalObject {
 }
 </example>
 
-<p>The map relation is read-only since its data comes from the <code/Grade/>
-table.  In other words, it makes no sense to call <code/getGrades().put(...)/>.
-Since <code/Grades/> beans are created with <code/ejbCreate/> and destroyed
-with <code/ejbRemove/>, it doesn't make sense for the <code/Map/> to be writable.</p>
+<p>The map relation is read-only since its data comes from the <code>Grade</code>
+table.  In other words, it makes no sense to call <code>getGrades().put(...)</code>.
+Since <code>Grades</code> beans are created with <code>ejbCreate</code> and destroyed
+with <code>ejbRemove</code>, it doesn't make sense for the <code>Map</code> to be writable.</p>
 
-<p>The <code/Map/> is a live object.  In other words, when a new <code/Grade/> is
-created or an old one is destroyed, the <code/Map/> object is automatically
-updated.  Of course, the <code/Map/> needs to be used in the same transaction
-as the <code/getGrades()/> call.</p>
+<p>The <code>Map</code> is a live object.  In other words, when a new <code>Grade</code> is
+created or an old one is destroyed, the <code>Map</code> object is automatically
+updated.  Of course, the <code>Map</code> needs to be used in the same transaction
+as the <code>getGrades()</code> call.</p>
 
-<section title="Database Schema">
+<s1 title="Database Schema">
 
-<p>The database has tables for <code/Students/>, <code/Courses/>,
-and <code/Grades/>.  The <code/Grade/> table is dependent on
-both the <code/Students/> and the <code/Courses/>.
+<p>The database has tables for <code>Students</code>, <code>Courses</code>,
+and <code>Grades</code>.  The <code>Grade</code> table is dependent on
+both the <code>Students</code> and the <code>Courses</code>.
 Because of this dependency, Resin-CMP will automatically delete a student's
 grades when the student is removed.</p>
 
@@ -98,27 +98,27 @@ CREATE TABLE map_grades (
 );
 </example>
 
-<p>The <code/Student/>'s map relation is implemented with one main SELECT query
-for the <code/keySet()/>.  The <code/get()/> method is implemented by calling 
-<code/GuestHome/>'s <code/findByPrimaryKey/> method.  The <code/keySet()/>
-returns a set of <code/Course/> beans and the query looks like:</p>
+<p>The <code>Student</code>'s map relation is implemented with one main SELECT query
+for the <code>keySet()</code>.  The <code>get()</code> method is implemented by calling 
+<code>GuestHome</code>'s <code>findByPrimaryKey</code> method.  The <code>keySet()</code>
+returns a set of <code>Course</code> beans and the query looks like:</p>
 
-<p>The <code/get(Object)/> method takes a <code/Course/> argument
-and returns a <code/Grade/> object.  The query looks like:</p>
+<p>The <code>get(Object)</code> method takes a <code>Course</code> argument
+and returns a <code>Grade</code> object.  The query looks like:</p>
 
-<example title='getGrades.get(Course) query'>
+<example title="getGrades.get(Course) query">
 SELECT g.course FROM map_grades AS g WHERE g.student=?
 </example>
 
-</section>
+</s1>
 
-<section title="Client Servlet using Map">
+<s1 title="Client Servlet using Map">
 
-<p>The example client servlet uses the <code/Map/> like any other
-<code/java.util.Map/>.  The servlet iterates over all the students
-and displays their grades.  The <code/Courses/> are found using
-the <code/getGrades().keySet()/> iterator and then the <code/Grade/>
-itself is found using the <code/getGrades().get(Object)/> map.</p>
+<p>The example client servlet uses the <code>Map</code> like any other
+<code>java.util.Map</code>.  The servlet iterates over all the students
+and displays their grades.  The <code>Courses</code> are found using
+the <code>getGrades().keySet()</code> iterator and then the <code>Grade</code>
+itself is found using the <code>getGrades().get(Object)</code> map.</p>
 
 <example>
 public void service(HttpServletRequest req, HttpServletResponse res)
@@ -136,19 +136,19 @@ public void service(HttpServletRequest req, HttpServletResponse res)
     throw new ServletException(e);
   }
 
-  out.println("&lt;title>Student Grades&lt;/title>");
-  out.println("&lt;h1>Student Grades&lt;/h1>");
+  out.println("&lt;title&gt;Student Grades&lt;/title&gt;");
+  out.println("&lt;h1&gt;Student Grades&lt;/h1&gt;");
 
   Iterator iter = students.iterator();
   while (iter.hasNext()) {
     Student student = (Student) iter.next();
 
-    out.println("&lt;h3>" + student.getName() + "&lt;/h3>");
+    out.println("&lt;h3&gt;" + student.getName() + "&lt;/h3&gt;");
 
     Map grades = student.getGrades();
       
-    out.println("&lt;table>");
-    out.println("&lt;tr>&lt;th>Course&lt;th>Grade");
+    out.println("&lt;table&gt;");
+    out.println("&lt;tr&gt;&lt;th&gt;Course&lt;th&gt;Grade");
 
     Iterator courseIter = grades.keySet().iterator();
     while (courseIter.hasNext()) {
@@ -156,48 +156,48 @@ public void service(HttpServletRequest req, HttpServletResponse res)
 
       Grade grade = (Grade) grades.get(course);
 
-      out.print("&lt;tr>&lt;td>" + course.getName() + "&lt;td>" + grade.getGrade());
+      out.print("&lt;tr&gt;&lt;td&gt;" + course.getName() + "&lt;td&gt;" + grade.getGrade());
     }
-    out.println("&lt;/table>");
+    out.println("&lt;/table&gt;");
   }
 }
 </example>
 <results>
-&lt;h3>Harry Potter&lt;/h3>
-&lt;tr>&lt;td>Course         &lt;td>Grade
-&lt;tr>&lt;td>Potions        &lt;td>C-
-&lt;tr>&lt;td>Transfiguration&lt;td>B+
-&lt;h3>Hermione Granger&lt;/h3>
-&lt;tr>&lt;td>Course         &lt;td>Grade
-&lt;tr>&lt;td>Potions        &lt;td>A
-&lt;tr>&lt;td>Transfiguration&lt;td>A+
-&lt;h3>Ron Weasley&lt;/h3>
-&lt;tr>&lt;td>Course         &lt;td>Grade
-&lt;tr>&lt;td>Potions        &lt;td>C+
-&lt;tr>&lt;td>Transfiguration&lt;td>B
+&lt;h3&gt;Harry Potter&lt;/h3&gt;
+&lt;tr&gt;&lt;td&gt;Course         &lt;td&gt;Grade
+&lt;tr&gt;&lt;td&gt;Potions        &lt;td&gt;C-
+&lt;tr&gt;&lt;td&gt;Transfiguration&lt;td&gt;B+
+&lt;h3&gt;Hermione Granger&lt;/h3&gt;
+&lt;tr&gt;&lt;td&gt;Course         &lt;td&gt;Grade
+&lt;tr&gt;&lt;td&gt;Potions        &lt;td&gt;A
+&lt;tr&gt;&lt;td&gt;Transfiguration&lt;td&gt;A+
+&lt;h3&gt;Ron Weasley&lt;/h3&gt;
+&lt;tr&gt;&lt;td&gt;Course         &lt;td&gt;Grade
+&lt;tr&gt;&lt;td&gt;Potions        &lt;td&gt;C+
+&lt;tr&gt;&lt;td&gt;Transfiguration&lt;td&gt;B
 </results>
 
-</section>
+</s1>
 
-<section title='Compound Primary Keys'>
+<s1 title="Compound Primary Keys">
 
 <p>A compound primary key is made up of a combination of
 persistent fields or identifying relations.  This example uses two
-identifying relations: <code/Student/> and <code/Course/>.
+identifying relations: <code>Student</code> and <code>Course</code>.
 Only the home interface
 is different for a compound primary key bean.  The local interface and
 the bean implementation are just like single key beans.</p>
 
 <p>Compound primary keys may have any number of fields.  The special
 case of two fields with at least on being an identifying relation
-allows for <code/java.util.Map/> collections in the parent map, like the
-<code/getGrades()/> method in the <code/Student/> bean.
-The identifying key corresponding to the bean, e.g. <code/Student/>,
+allows for <code>java.util.Map</code> collections in the parent map, like the
+<code>getGrades()</code> method in the <code>Student</code> bean.
+The identifying key corresponding to the bean, e.g. <code>Student</code>,
 is used to select the grades.  The second key, in this case
-<code/Course/>, is used as the <code/keySet()/>.  The bean itself is
+<code>Course</code>, is used as the <code>keySet()</code>.  The bean itself is
 the value.</p>
 
-<example title='Grade.java'>
+<example title="Grade.java">
 package example.cmp.map;
 
 public interface Grade extends javax.ejb.EJBLocalObject {
@@ -209,16 +209,16 @@ public interface Grade extends javax.ejb.EJBLocalObject {
 </example>
 
 <p>The bean key is a public class with public fields for each
-key component.  In this case, the <code/GradeKey/> class has
-both a public field for the student and the <code/Course/>.</p>
+key component.  In this case, the <code>GradeKey</code> class has
+both a public field for the student and the <code>Course</code>.</p>
 
-<p>The compound key class must override the <code/equals/> and the
-<code/hashCode/> methods.  If all the component keys are identical, the
+<p>The compound key class must override the <code>equals</code> and the
+<code>hashCode</code> methods.  If all the component keys are identical, the
 keys must be identical, even if they are separate Java objects.
-Resin-CMP needs both <code/hashCode/> and <code/equals/> for
+Resin-CMP needs both <code>hashCode</code> and <code>equals</code> for
 the bean's caching.</p>
 
-<example title='GradeKey.java'>
+<example title="GradeKey.java">
 package example.cmp.map;
 
 public class GradeKey {
@@ -242,7 +242,7 @@ public class GradeKey {
 
     GradeKey key = (GradeKey) obj;
 
-    return student.equals(key.student) && course.equals(key.course);
+    return student.equals(key.student) &amp;&amp; course.equals(key.course);
   }
 
   public int hashCode()
@@ -252,18 +252,18 @@ public class GradeKey {
 }
 </example>
 
-</section>
+</s1>
 
-<section title='Conclusion'>
+<s1 title="Conclusion">
 
 <p>Many database entities need to store named attributes, e.g. a
-<code/Student/>
-needs to store her <code/Grades/>, indexed by the <code/Course/> she took.  By
-implementing this common pattern directly with the standard <code/Map/> API,
+<code>Student</code>
+needs to store her <code>Grades</code>, indexed by the <code>Course</code> she took.  By
+implementing this common pattern directly with the standard <code>Map</code> API,
 and avoiding working directly with JDBC, applications using Resin-CMP
 can create cleaner Java code, avoid common maintenance issues
 during development, and take automatic advantage of database caching.</p>
 
-</section>
+</s1>
   </body>
 </document>

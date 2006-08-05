@@ -12,25 +12,25 @@ Start and stop web-apps when called by an admin servlet.
 <body>
 <summary/>
 
-<section title="resin.conf">
+<s1 title="resin.conf">
 
 <p>Starts any .war files in the webapps directory automatically, but only
 restarts on a JMX call.</p>
 
 <example title="resin.conf">
 ...
-&lt;host id="">
-  &lt;web-app-deploy path="webapps">
-    &lt;startup-mode>automatic&lt;startup-mode>
-    &lt;redeploy-mode>manual&lt;redeploy-mode>
+&lt;host id=""&gt;
+  &lt;web-app-deploy path="webapps"&gt;
+    &lt;startup-mode&gt;automatic&lt;startup-mode&gt;
+    &lt;redeploy-mode&gt;manual&lt;redeploy-mode&gt;
 
     ...
-  &lt;/web-app-deploy>
+  &lt;/web-app-deploy&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="Admin web.xml">
+<s1 title="Admin web.xml">
 
 <p>The /admin web-app configures the restart servlet and
 protects itself with basic authentication, using the XmlAuthenticator.</p>
@@ -39,28 +39,28 @@ protects itself with basic authentication, using the XmlAuthenticator.</p>
 information on generating the password.</p>
 
 <example title="web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
   &lt;servlet servlet-name="restart"
-           servlet-class="example.RestartServlet">
-  &lt;/servlet>
+           servlet-class="example.RestartServlet"&gt;
+  &lt;/servlet&gt;
 
-  &lt;servlet-mapping url-pattern="/restart"  servlet-name="restart"/>
+  &lt;servlet-mapping url-pattern="/restart"  servlet-name="restart"/&gt;
 
-  &lt;!-- protect with basic auth. -->
-  &lt;authenticator>
-    &lt;type>com.caucho.server.security.XmlAuthenticator&lt;/type>
-    &lt;init user="aladdin:Xmasdf80N3m:user"/>
-  &lt;/authenticator>
+  &lt;!-- protect with basic auth. --&gt;
+  &lt;authenticator&gt;
+    &lt;type&gt;com.caucho.server.security.XmlAuthenticator&lt;/type&gt;
+    &lt;init user="aladdin:Xmasdf80N3m:user"/&gt;
+  &lt;/authenticator&gt;
 
-  &lt;security-constraint url-pattern="/*" role-name="user"/>
+  &lt;security-constraint url-pattern="/*" role-name="user"/&gt;
 
-  &lt;login-config auth-method='basic'/>
-&lt;/web-app>
+  &lt;login-config auth-method='basic'/&gt;
+&lt;/web-app&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="Restart Servlet">
+<s1 title="Restart Servlet">
 
 <example title="example/RestartServlet.java">
 package example;
@@ -185,7 +185,7 @@ public class RestartServlet extends HttpServlet {
 }
 </example>
 
-</section>
+</s1>
 
   </body>
 </document>

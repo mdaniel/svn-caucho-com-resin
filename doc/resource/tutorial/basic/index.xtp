@@ -10,7 +10,7 @@
 
   <body>
 <summary/>
-<section title="Resources">
+<s1 title="Resources">
 
 <p>A resource in Resin is any bean configured in the
 resin.conf or web.xml.  Resources are generally stored in JNDI.  Because
@@ -20,15 +20,15 @@ patterns, resources provide a flexible configuration.</p>
 <p>Some typical resources include:</p>
 <ul>
 <li>Databases
-<li>JMS connections
-<li>The EJB server
-<li>JCA resources
-</ul>
+</li><li>JMS connections
+</li><li>The EJB server
+</li><li>JCA resources
+</li></ul>
 
 <p>Because resources are configured in the resin.conf/web.xml and are
 created before any servlets start, they are very convenient for globally
 available beans, even allowing for more complex configuration beans extending
-the idea of &lt;env-entry> (which stored simple Strings or
+the idea of &lt;env-entry&gt; (which stored simple Strings or
 Integers in JNDI.)</p>
 
 <subsection title="The TestResource bean">
@@ -60,37 +60,37 @@ as resources.</p>
 
 </subsection>
 
-<section title="web.xml configuration">
+<s2 title="web.xml configuration">
 
 <p>The web.xml (or resin.conf) configures the resource with the
-&lt;resource> tag.  The resource is created and stored in the
+&lt;resource&gt; tag.  The resource is created and stored in the
 environment where it is defined.  So a resource configured in the
-&lt;host> will be available for all web-apps in that host and a
-resource configured in a &lt;web-app> will only be available for that
-&lt;web-app>.</p>
+&lt;host&gt; will be available for all web-apps in that host and a
+resource configured in a &lt;web-app&gt; will only be available for that
+&lt;web-app&gt;.</p>
 
 <example title="web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-  &lt;resource jndi-name="test/basic" type="test.TestResource">
-    &lt;init>
-      &lt;value>An Example Resource&lt;/value>
-    &lt;/init>
-  &lt;/resource>
-&lt;/web-app>
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;resource jndi-name="test/basic" type="test.TestResource"&gt;
+    &lt;init&gt;
+      &lt;value&gt;An Example Resource&lt;/value&gt;
+    &lt;/init&gt;
+  &lt;/resource&gt;
+&lt;/web-app&gt;
 </example>
 
 <deftable>
-<tr><th>tag<th>description
-<tr><td>resource<td>defines the resource
-<tr><td>name<td>the JNDI name of the resource (in java:comp/env)
-<tr><td>type<td>the class name of the resource bean
-<tr><td>init<td>Any bean-style configuration goes here
-<tr><td>value<td>The example bean's <code>setValue</code> parameter.
-</deftable>
+<tr><th>tag</th><th>description
+</th></tr><tr><td>resource</td><td>defines the resource
+</td></tr><tr><td>name</td><td>the JNDI name of the resource (in java:comp/env)
+</td></tr><tr><td>type</td><td>the class name of the resource bean
+</td></tr><tr><td>init</td><td>Any bean-style configuration goes here
+</td></tr><tr><td>value</td><td>The example bean's <code>setValue</code> parameter.
+</td></tr></deftable>
 
-</section>
+</s2>
 
-<section title="Using the resource">
+<s2 title="Using the resource">
 
 <p>The example uses a servlet to demonstrate the resource, but any
 class could use JNDI to look up and use the resource.  Because resources
@@ -151,11 +151,11 @@ public class TestServlet extends HttpServlet {
 Resource: TestResource[An example resource]
 </results>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="Compatibility">
+<s1 title="Compatibility">
 
 <p>Because the resource beans are just Java classes, the resources
 themselves are independent of Resin.  The configuration, of course,
@@ -168,7 +168,7 @@ configuration, it will work with other servlet engines.  So you can
 start creating and using resources without worrying excessively about
 compatibility issues.</p>
 
-</section>
+</s1>
 
   </body>
 </document>

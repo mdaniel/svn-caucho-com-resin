@@ -11,7 +11,7 @@
   <body>
     <summary/>
 
-<section title="Relax-NG Schema">
+<s1 title="Relax-NG Schema">
 
 <def title="com/caucho/server/resin/j2ee.rnc">
 default namespace j2ee = "http://java.sun.com/xml/ns/j2ee"
@@ -330,8 +330,7 @@ j2ee_url-pattern = string
 j2ee_war-path = string
 </def>
 
-</section>
+</s1>
 
   </body>
 </document>
-  

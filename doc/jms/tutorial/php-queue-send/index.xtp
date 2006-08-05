@@ -7,9 +7,9 @@
 </header>
 
 <body>
-<summary localtoc="3" />
+<summary localtoc="3"/>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
     <td>resin-web.xml configuration</td>
@@ -24,9 +24,9 @@
     <td>EJB Message bean configuration.</td>
 </tr>
 </deftable>
-</section>
+</s1>
 
-<section title="Using JMS in Quercus">
+<s1 title="Using JMS in Quercus">
 
 <p>
 Quercus offers a simplified messaging interface built upon JMS.  This 
@@ -37,9 +37,9 @@ services which make sense in the Java world, but are not appropriate for
 PHP.  This tutorial focuses on sending messages.
 </p>
 
-</section>
+</s1>
 
-<section title="Sending JMS messages from a PHP script">
+<s1 title="Sending JMS messages from a PHP script">
 
 <p>
 In this example, the script checks a POST variable "message" and if
@@ -55,7 +55,7 @@ if (array_key_exists("message", $_POST)) {
   if (! $queue) {
     echo "Unable to get message queue!\n";
   } else {
-    if ($queue->send($_POST["message"]) == TRUE) {
+    if ($queue-&gt;send($_POST["message"]) == TRUE) {
       echo "Successfully sent message '" . $_POST["message"] . "'";
     } else {
       echo "Unable to send message '" . $_POST["message"] . "'";
@@ -73,9 +73,9 @@ JMS queue to be used.  <code>JMSQueue</code> objects have two methods:
 that using <code>send()</code> is as simple as passing in a PHP value.
 </p>
 
-</section>
+</s1>
 
-<section title="Configuring JMS for PHP and Java">
+<s1 title="Configuring JMS for PHP and Java">
 
 <p>
 JMS requires that two resources be set up: A
@@ -90,7 +90,7 @@ setting the PHP ini variable <code>jms.connection_factory</code>.
 
 <example>
   &lt;resource jndi-name="jms/ConnectionFactory"
-    type='com.caucho.jms.ConnectionFactoryImpl' />
+    type='com.caucho.jms.ConnectionFactoryImpl' /&gt;
 </example>
 
 <p>
@@ -99,7 +99,7 @@ The example above uses the queue <code>jms/Queue</code>.
 
 <example>
   &lt;resource jndi-name="jms/Queue"
-    type='com.caucho.jms.memory.MemoryQueue' />
+    type='com.caucho.jms.memory.MemoryQueue' /&gt;
 </example>
 
 <p>
@@ -107,7 +107,7 @@ The complete configuration is in
 <viewfile-link file="WEB-INF/resin-web.xml"/>.
 </p>
 
-</section>
+</s1>
 
 </body>
 </document>

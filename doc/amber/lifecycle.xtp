@@ -13,35 +13,35 @@ and non-transactional lifecycles.
 
     <summary/>
 
-<section title="Example configuration">
+<s1 title="Example configuration">
 
 <p>The lifecycle description uses a single running example, Test, which
 has two properties: <code>getData()</code> which returns a string, and
 <code>getParent()</code> which is a pointer to another Test object.</p>
 
 <example title="Test.hbm.xml">
-&lt;hibernate-mapping>
-  &lt;class name="qa.Test">
-    &lt;id name="id"/>
+&lt;hibernate-mapping&gt;
+  &lt;class name="qa.Test"&gt;
+    &lt;id name="id"/&gt;
 
-    &lt;property name="data"/>
+    &lt;property name="data"/&gt;
 
-    &lt;many-to-one name="parent"/>
-  &lt;/class>
-&lt;/hibernate-mapping>
+    &lt;many-to-one name="parent"/&gt;
+  &lt;/class&gt;
+&lt;/hibernate-mapping&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="Non-Transactional Lifecycle">
+<s1 title="Non-Transactional Lifecycle">
 
 <p>Amber's non-transactional lifecycle has three important states:</p>
 
 <ul>
 <li><b>clean:</b> the bean is loaded from the database
-<li><b>dirty:</b> the bean has unwritten changes
-<li><b>hollow:</b> the bean is unloaded (lazily-loaded)
-</ul>
+</li><li><b>dirty:</b> the bean has unwritten changes
+</li><li><b>hollow:</b> the bean is unloaded (lazily-loaded)
+</li></ul>
 
 <p>In the diagram below, the red methods (<code>load()</code>,
 <code>getXXX()</code>, and <code>flush()</code>) query and
@@ -50,23 +50,23 @@ update the database.</p>
 <figure src="amber-non-xa.gif" width="356" height="140"/>
 
 <p>The <code>aConn.load("1")</code> method loads the bean from the
-database and transitions to the <var/clean/> state.</p>
+database and transitions to the <var>clean</var> state.</p>
 
 <p>Calling <code>test.setData("foo")</code> will change to
-the <var/dirty/> state.</p>
+the <var>dirty</var> state.</p>
 
 <p>Calling <code>aConn.flush()</code> writes the changes to
-the database and changes to the <var/clean/> state.  Amber may
+the database and changes to the <var>clean</var> state.  Amber may
 also flush the changes and change to the clean state
 at any time.  <code>flush()</code> merely guarantees that the changes
 will be flushed to the database.</p>
 
-<p>The <var/hollow/> state represents lazily-loaded entities.  many-to-one
+<p>The <var>hollow</var> state represents lazily-loaded entities.  many-to-one
 relations and some queries will return the unloaded bean instead of
 a loaded bean.  When the application calls a <code>getXXX()</code> method,
-the bean will load from the database and change to the <var/clean/> state.
+the bean will load from the database and change to the <var>clean</var> state.
 When the application calls a <code>setXXX()</code> method, the bean
-will change to the <var/dirty/> state.</p>
+will change to the <var>dirty</var> state.</p>
 
 <example title="sample code">
 // load() queries the database and puts test in the clean state
@@ -91,9 +91,9 @@ aConn.flush();
 aConn.close();
 </example>
 
-</section>
+</s1>
 
-<section title="Transactional Lifecycle">
+<s1 title="Transactional Lifecycle">
 
 <p>In a transaction, Amber loads the bean from the
 database, even if it was loaded outside of the transaction.
@@ -101,19 +101,19 @@ database, even if it was loaded outside of the transaction.
 bean in the transaction, Amber lets the database handle the
 transactional locking and state consistency.</p>
 
-<p>Just like the non-transactional <var/clean/> and <var/dirty/>
-states, Amber has transactional <var/clean/> and <var/dirty/> states
-called <var/Persistent-clean/> and <var/Persistent-dirty/>.  As in
-the non-transactional case, the <var/hollow/> state represents
+<p>Just like the non-transactional <var>clean</var> and <var>dirty</var>
+states, Amber has transactional <var>clean</var> and <var>dirty</var> states
+called <var>Persistent-clean</var> and <var>Persistent-dirty</var>.  As in
+the non-transactional case, the <var>hollow</var> state represents
 lazily-loaded beans.</p>
 <ul>
 <li><b>persistent-clean:</b> the bean is loaded from the database
 within the transaction
-<li><b>persistent-dirty:</b> the bean has been changed
-<li><b>hollow:</b> the bean is unloaded (lazily-loaded or rolled-back)
-<li><b>persistent-nonXA:</b> the bean was loaded outside of the
+</li><li><b>persistent-dirty:</b> the bean has been changed
+</li><li><b>hollow:</b> the bean is unloaded (lazily-loaded or rolled-back)
+</li><li><b>persistent-nonXA:</b> the bean was loaded outside of the
 transaction (and would need reloading if used in the transaction)
-</ul>
+</li></ul>
 
 <figure src="amber-lifecycle.gif" width="511" height="285"/>
 
@@ -122,12 +122,12 @@ are:</p>
 <ul>
 <li>Transactions need a load from inside the transaction.  Loads
 before the transaction cannot be reused.
-<li>Updates occur during the commit() call and change to the
+</li><li>Updates occur during the commit() call and change to the
 nonXA-clean state
-<li>Rollbacks change to the hollow state.
-</ul>
+</li><li>Rollbacks change to the hollow state.
+</li></ul>
 
-</section>
+</s1>
 
   </body>
 </document>

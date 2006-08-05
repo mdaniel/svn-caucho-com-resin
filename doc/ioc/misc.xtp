@@ -18,9 +18,9 @@ or <em>Dependency Injection</em> pattern.</p>
 </header>
 <body>
 
-<summary objsummary='none'/>
+<summary objsummary="none"/>
 
-<section title="Overview">
+<s1 title="Overview">
 
 <p>The Assembly Line pattern gives configuration responsibility to the
 container where it belongs, while keeping the application code independent
@@ -36,9 +36,9 @@ easier to understand, maintain, configure and test.</p>
 
 <p><figure src="assembler-eg1.gif"/></p>
 
-</section>
+</s1>
 
-<section title="Property Configuration: setXXX">
+<s1 title="Property Configuration: setXXX">
 
 <p>The bean configuration form the foundation of the Assembly
 Line pattern.  Since most applications already follow the bean patterns,
@@ -74,7 +74,7 @@ public class MyBean {
 }
 </example>
 
-<section title="Type conversion">
+<s2 title="Type conversion">
 
 <p>A setter can have a parameter that has a type other than
 <code>String</code>. Resin will perform any type conversion
@@ -104,18 +104,18 @@ public class MyBean {
 }
 </example>
 
-</section>
+</s2>
 
-<section title="Compatibility">
+<s2 title="Compatibility">
 
 <p>Property configuration is very portable.  Any serious configuration system
 will configure bean-style properties.</p>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="Setter Injection: setXXX">
+<s1 title="Setter Injection: setXXX">
 
 <p>Setter injection connects resources following the same
 bean-style setter pattern.  Where bean properties configure simple
@@ -128,9 +128,9 @@ specifies the JNDI resource using the JSP expression language and
 jndi:lookup.</p>
 
 <example title="Configuration for Setter Injection">
-&lt;init>
-  &lt;data-source>\${jndi:lookup("jdbc/test")}&lt;data-source>
-&lt;/init>
+&lt;init&gt;
+  &lt;data-source&gt;\${jndi:lookup("jdbc/test")}&lt;data-source&gt;
+&lt;/init&gt;
 </example>
 
 <example title="Setter Injection for a DataSource">
@@ -144,16 +144,16 @@ public class MyBean {
 }
 </example>
 
-<section title="Compatibility">
+<s2 title="Compatibility">
 
 <p>Setter injection is portable to containers which
 support dependency injection.</p>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="Container Properties: addXXX">
+<s1 title="Container Properties: addXXX">
 
 <p>Resources often act as containers for lists of values and map values.
 The <code>addXXX</code> pattern adds multiple values for a single property.
@@ -181,9 +181,9 @@ public class MyBean {
 }
 </example>
 
-</section>
+</s1>
 
-<section title="Validation and Assembly: init()">
+<s1 title="Validation and Assembly: init()">
 
 <p>Well-written resources will validate their configuration and may
 perform additional assembly tasks.  Resin calls <code>init()</code> method
@@ -212,7 +212,7 @@ public class MyBean {
 }
 </example>
 
-<section title="Validation Exceptions">
+<s2 title="Validation Exceptions">
 <p>If an exception is thrown from any of the methods in the bean,
 Resin will attach a file name and line number that correspond to the
 configuration file.</p>
@@ -256,10 +256,10 @@ public class MyBean {
 
 WEB-INF/web.xml:9: java.lang.Exception: 'country' must be a two-character string
 </results>
-</section>
-</section>
+</s2>
+</s1>
 
-<section title="Nested Beans: createXXX">
+<s1 title="Nested Beans: createXXX">
 
 <p>Beans can be nested, allowing a bean to have setters that have
 other sub-beans as the type.</p>
@@ -338,9 +338,9 @@ public class LogCleaner {
  
 }
 </example>
-</section>
+</s1>
 
-<section title="Setting with the body text">
+<s1 title="Setting with the body text">
 <p>The <code>addText()</code> method will capture the body of the tag
 for a bean setter.</p>
 
@@ -366,35 +366,35 @@ public class MyBean {
 }
 </example>
 
-</section>
+</s1>
 
-<section title="Returning a different object">
+<s1 title="Returning a different object">
 
 <p>There are some unusual cases where the configured bean is just a
 configuration object and you want to return a different bean.  The
 bean can implement a method <code>Object replaceObject()</code> to return a
 different object. Called after the init(). </p>
 
-</section>
+</s1>
 
-<section title="resin:type">
+<s1 title="resin:type">
 
-<defun title="resin:type">
+<s2 title="resin:type" type="defun">
 
 <p>This special attribute can be used with all sub-beans to
 instantiate a different bean class than the one defined in the parent
 bean.</p>
 
 <p>If a sub-bean is returned from method like <code>SubBean
-createSubBean()</code> then <var/resin:type/> cannot be used.  A
+createSubBean()</code> then <var>resin:type</var> cannot be used.  A
 <code>void setParent(Object obj)</code> method in the sub-bean, which
 is called before the other setters, provides an opportunity for the
 sub-bean instance to know it's enclosing object.</p>
 
-The <var/resin:/> in <code/resin:type/> is a namespace prefix automatically
-mapped to <var/http://caucho.com/ns/resin/>. You could use another namespace
+The <var>resin:</var> in <code>resin:type</code> is a namespace prefix automatically
+mapped to <var>http://caucho.com/ns/resin</var>. You could use another namespace
 prefix, for example if you defined
-<var/xmlns:foo="http://caucho.com/ns/resin"/>, you could use <code/foo:type/>.
+<var>xmlns:foo="http://caucho.com/ns/resin"</var>, you could use <code>foo:type</code>.
 
 <example title="Bean-style configuration for using resin:type">
 &lt;resource jndi-name="env/message"&gt;
@@ -488,11 +488,11 @@ not possible to use a resin:type with createSubBean.  So the setParent is
 useful when the init() needs the parent, and you need to use
 resin:type.</p>
 
-</defun>
+</s2>
 
-</section>
+</s1>
 
-<section name="xml" title="Configuring beans from XML files">
+<s1 name="xml" title="Configuring beans from XML files">
 <p>
 The facilities provided by Resin make it very easy to 
 read XML files.  Java classes that follow the java bean pattern 
@@ -730,7 +730,7 @@ public class Item {
 }
 </example>
 
-<section title="NodeBuilder">
+<s2 title="NodeBuilder">
 
 <p>
 <a href="javadoc|com.caucho.config.NodeBuilder|"/> is used to configure 
@@ -750,9 +750,9 @@ beans from an xml file.
 
   builder.configure(rss,rssPath);
 </example>
-</section>
+</s2>
 
-<section title="RNC validation">
+<s2 title="RNC validation">
 
 <example title="RNC validation">
   import com.caucho.config.NodeBuilder;
@@ -771,9 +771,9 @@ beans from an xml file.
   builder.configure(rss,rssPath);
 </example>
 
-</section>
+</s2>
 
-<section name="import" title="resin:import">
+<s2 name="import" title="resin:import">
 <p>
 resin:import is used to read configuration information from another file.
 </p>
@@ -816,15 +816,15 @@ resin:import is used to read configuration information from another file.
 &lt;/channel&gt;
 </example>
 
-<section title="See also">
+<s3 title="See also">
 <ul>
 <li><a href="doc|config|control#resin:import">resin:import</a>
-<li><a href="doc|resource|tutorial/injection/index.xtp">Dependency Injection Tutorial</a>
-</ul>
-</section>
-</section> <!-- import -->
+</li><li><a href="doc|resource|tutorial/injection/index.xtp">Dependency Injection Tutorial</a>
+</li></ul>
+</s3>
+</s2> <!-- import -->
 
-</section> <!-- xml -->
+</s1> <!-- xml -->
 
 </body>
 </document>

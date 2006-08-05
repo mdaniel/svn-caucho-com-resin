@@ -9,15 +9,14 @@ solution.</p>
 </header>
 
 <body>
-<summary objsummary='localtoc'/>
+<summary objsummary="localtoc"/>
 
 <faq title="Specification version 1.3 of package javax.servlet, J2EE Specification, version 1.3 is not compatible with Resin Resin-3.0.x. Resin-3.0.x requires version 2.4.">
 <description>
 </description>
 
 <p>This error occurs when you have an old or conflicting jar containing the
-servlet api in your CLASSPATH.  The solution is to <a
-href="troubleshoot|technique#classpath">clean up your classpath</a>.</p>
+servlet api in your CLASSPATH.  The solution is to <a href="troubleshoot|technique#classpath">clean up your classpath</a>.</p>
 
 </faq>
 

@@ -1,4 +1,4 @@
-<section>
+<document>
   <header>
     <product>resin</product>
     <title>Simple JSP page</title>
@@ -13,10 +13,12 @@
     </description>
   </header>
 
-<p>The sample page you'll be creating adds 2&nbsp;+&nbsp;2 and displays the
+<body>
+<s1>
+<p>The sample page you'll be creating adds 2&#160;+&#160;2 and displays the
 result in the browser.</p>
 
-<p>JSP pages are created by putting a <var/add.jsp/> file in the
+<p>JSP pages are created by putting a <var>add.jsp</var> file in the
 document directory.  The JSP page is a mixture of HTML and Java
 code.  Resin's JSP engine compiles the .jsp file into a Java
 servlet and then runs the servlet to produce the output.</p>
@@ -34,7 +36,7 @@ this machine it's
 or whatever.
 It should contain the following text:</p>
 
-<example title='add.jsp'>
+<example title="add.jsp">
 2 + 2 = &lt;%= 2 + 2 %&gt;
 </example>
 
@@ -50,7 +52,7 @@ request.getServerName() + ":" + request.getServerPort()
 2 + 2 = 4
 </results>
 
-<section title='An explanation'>
+<s2 title="An explanation">
 
 <p>The web server uses the '.jsp' extension to make 'add.jsp' an active
 page.  For HTML pages and GIF files, the web server just copies the
@@ -69,19 +71,20 @@ active, something script related.   You will only need to learn a few
 of these special tags:</p>
 
 <deftable>
-<tr><th>Tag<th>Meaning
-<tr><td>&lt;%@ ... %&gt;<td>Directive
-<tr><td>&lt;%= ... %&gt;<td>Java expression
-<tr><td>&lt;% ... %&gt;<td>Java function
-<tr><td>&lt;%! ... %&gt;<td>Java declaration
-</deftable>
+<tr><th>Tag</th><th>Meaning
+</th></tr><tr><td>&lt;%@ ... %&gt;</td><td>Directive
+</td></tr><tr><td>&lt;%= ... %&gt;</td><td>Java expression
+</td></tr><tr><td>&lt;% ... %&gt;</td><td>Java function
+</td></tr><tr><td>&lt;%! ... %&gt;</td><td>Java declaration
+</td></tr></deftable>
 
 <p>In the add.jsp example, 
 the expression tags, e.g. <code>&lt;%= 2 + 2 %&gt;</code>, tell Resin
 to evaluate the text as a Java expression and print the result
 to the browser.  In this case, 4.</p>
 
-</section>
-</section>
+</s2>
+</s1>
 
-
+</body>
+</document>

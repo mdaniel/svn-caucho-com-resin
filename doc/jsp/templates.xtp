@@ -1,4 +1,4 @@
-<document xmlns:ct="ct">
+<document>
   <header>
     <product>resin</product>
     <resin-2.0>$www/articles/jsp_templates.xtp</resin-2.0>
@@ -17,7 +17,7 @@
 
 <summary/>
 
-<section title='Introduction'>
+<s1 title="Introduction">
 
 A powerful advantage of JSP is the ability to separate an application's
 business logic from its presentation.  Using Smalltalk object-oriented
@@ -29,15 +29,15 @@ the controller.
 comments.  
 
 <deftable>
-<tr><th>Role<th>Implementation
-<tr><td>Model<td>A <code/GuestBook/> of <code/Guests/>.
-<tr><td>View<td>login.jsp for new users<br>add.jsp for logged-in users.
-<tr><td>Controller<td><code/GuestJsp/>, a servlet to manage the state.
-</deftable>
+<tr><th>Role</th><th>Implementation
+</th></tr><tr><td>Model</td><td>A <code>GuestBook</code> of <code>Guests</code>.
+</td></tr><tr><td>View</td><td>login.jsp for new users<br/>add.jsp for logged-in users.
+</td></tr><tr><td>Controller</td><td><code>GuestJsp</code>, a servlet to manage the state.
+</td></tr></deftable>
 
-</section>
+</s1>
 
-<section title='Template Skeleton: Hello, World'>
+<s1 title="Template Skeleton: Hello, World">
 
 The GuestJsp skeleton forwards a "Hello, World" string to a login.jsp
 page.  The skeleton establishes the architecture for the guest book.
@@ -62,7 +62,7 @@ GuestJsp will use dispatcher.forward() to pass control to the JSP page
 for formatting.
 
 <p/>
-<example title='GuestJsp.java: Skeleton'>
+<example title="GuestJsp.java: Skeleton">
 package jsp.GuestJsp;
 
 import java.io.*;
@@ -104,22 +104,22 @@ HttpRequest object.  The skeleton stores "Hello, World" in the "message"
 attribute.  When login.jsp starts, it will grab the string and print it.
 
 <p/>Since Resin's JavaScript understands extended Bean patterns, it
-translates the <code/request.getAttribute("message")/> into the
-JavaScript equivalent <code/request.attribute.message/>.
+translates the <code>request.getAttribute("message")</code> into the
+JavaScript equivalent <code>request.attribute.message</code>.
 
-<example title='login.jsp: Skeleton'>
-<eg-em>&lt;%@ page language=javascript %></eg-em>
+<example title="login.jsp: Skeleton">
+<eg-em>&lt;%@ page language=javascript %&gt;</eg-em>
 
-&lt;head>
-&lt;title><eg-em>&lt%= request.attribute.message %></eg-em>&lt;/title>
-&lt;/head>
+&lt;head&gt;
+&lt;title&gt;<eg-em>&amp;lt%= request.attribute.message %&gt;</eg-em>&lt;/title&gt;
+&lt;/head&gt;
 
-&lt;body bgcolor='white'>
-&lt;h1><eg-em>&lt%= request.attribute.message %></eg-em>&lt;/h1>
-&lt;/body>
+&lt;body bgcolor='white'&gt;
+&lt;h1&gt;<eg-em>&amp;lt%= request.attribute.message %&gt;</eg-em>&lt;/h1&gt;
+&lt;/body&gt;
 </example>
 
-<subsection title='Servlet Review'>
+<subsection title="Servlet Review">
 
 For those coming to JSP from an ASP or CGI background, Servlets replace
 CGI scripts taking advantage of Java's strength in dynamic class
@@ -127,45 +127,45 @@ loading.  A servlet is just a Java class which extends Servlet or
 HttpServlet and placed in the proper directory. Resin will
 automatically load the servlet and execute it.
 
-<ul class=none>
-<li><ct:img src='folder.gif'/>&nbsp;doc
-<ul class=none>
-  <li><ct:img src='file.gif'/>&nbsp;index.html
-  <li><ct:img src='jsp.gif'/>&nbsp;login.jsp
-  <li><ct:img src='jsp.gif'/>&nbsp;add.jsp
-  <li><ct:img src='folder.gif'/>&nbsp;WEB-INF
-  <ul class=none>
-    <li><ct:img src='folder.gif'/>&nbsp;classes
-    <ul class=none>
-    <li><ct:img src='folder.gif'/>&nbsp;jsp
-      <ul class=none>
-      <li><ct:img src='bean.gif'/>&nbsp;GuestJsp.class
-      <li><ct:img src='bean.gif'/>&nbsp;GuestBook.class
-      <li><ct:img src='bean.gif'/>&nbsp;Guest.class
-      </ul>
-    </ul>
-  </ul>
-</ul>
-</ul>
+<ul class="none">
+<li><ct:img src="folder.gif"/>&#160;doc
+<ul class="none">
+  <li><ct:img src="file.gif"/>&#160;index.html
+  </li><li><ct:img src="jsp.gif"/>&#160;login.jsp
+  </li><li><ct:img src="jsp.gif"/>&#160;add.jsp
+  </li><li><ct:img src="folder.gif"/>&#160;WEB-INF
+  <ul class="none">
+    <li><ct:img src="folder.gif"/>&#160;classes
+    <ul class="none">
+    <li><ct:img src="folder.gif"/>&#160;jsp
+      <ul class="none">
+      <li><ct:img src="bean.gif"/>&#160;GuestJsp.class
+      </li><li><ct:img src="bean.gif"/>&#160;GuestBook.class
+      </li><li><ct:img src="bean.gif"/>&#160;Guest.class
+      </li></ul>
+    </li></ul>
+  </li></ul>
+</li></ul>
+</li></ul>
 
 <p/>The url /servlet/<var>classname</var> forwards the request to the
 Servlet <em>Invoker</em>. The Invoker will dynamically load the Java class
 <var>classname</var> from doc/WEB-INF/classes and try to execute the
-Servlet's <code/service/> method.
+Servlet's <code>service</code> method.
 
 <p/>Resin checks the class file periodically to see if the class has
 changed.  If so, it will replace the old servlet with the new servlet.
 
 </subsection>
 
-</section>
+</s1>
 
-<section title='Displaying the Guest Book'>
+<s1 title="Displaying the Guest Book">
 
 The next step, after getting the basic framework running, is to create
 the model.
 
-<subsection title='The GuestBook model'>
+<subsection title="The GuestBook model">
 
 The guest book is straightforward so I've just included the API here.
 It conforms to Bean patterns to simplify the JavaScript.  The same API
@@ -175,7 +175,7 @@ will work for HashMap, file-based, and database implementations.
 cannot create a new GuestBook and it can't add a new guest.  That's
 the responsibility of the GuestJsp servlet.
 
-<example title='jsp.Guest.java API'>
+<example title="jsp.Guest.java API">
 package jsp;
 
 public class Guest {
@@ -186,11 +186,11 @@ public class Guest {
 </example>
 
 <p/>Resin's JavaScript recognizes Bean patterns.  So JSP pages using
-JavaScript can access <code/getName()/> and <code/getComment()/> as
-properties.  For example, you can simply use <code/guest.name/> and
-<code/guest.comment/>
+JavaScript can access <code>getName()</code> and <code>getComment()</code> as
+properties.  For example, you can simply use <code>guest.name</code> and
+<code>guest.comment</code>
 
-<example title='jsp.GuestBook.java API'>
+<example title="jsp.GuestBook.java API">
 package jsp;
 
 public class GuestBook {
@@ -201,7 +201,7 @@ public class GuestBook {
 </example>
 
 <p/>Resin's JavaScript also recognizes the iterator() call, so you can
-use a JavaScript <code/for ... each/> to get the guests:
+use a JavaScript <code>for ... each</code> to get the guests:
 
 <example>
 for (var guest in guestBook) {
@@ -211,14 +211,14 @@ for (var guest in guestBook) {
 
 </subsection>
 
-<subsection title='GuestBook as application attribute'>
+<subsection title="GuestBook as application attribute">
 
 To keep the example simple, GuestJsp stores the GuestBook in the
 application (ServletContext).  As an example, storing data in the
 application is acceptable but for full-fledged applications, it's
 better just to use the application to cache data stored elsewhere.
 
-<example title='jsp.GuestJsp.java'>
+<example title="jsp.GuestJsp.java">
 <eg-em>// get the application object</eg-em>
 ServletContext app = getServletContext();
 
@@ -253,45 +253,45 @@ application objects need to be synchronized because several clients
 may simultaneously browse the same page.  GuestJsp has taken care of
 synchronization before the JSP file gets called.
 
-<example name='login_display' title='login.jsp: Display Guest Book'>
-<eg-em>&lt;%@ page language=javascript %></eg-em>
+<example name="login_display" title="login.jsp: Display Guest Book">
+<eg-em>&lt;%@ page language=javascript %&gt;</eg-em>
 
-&lt;head>
-&lt;title>Hogwarts Guest Book&lt;/title>
-&lt;/head>
+&lt;head&gt;
+&lt;title&gt;Hogwarts Guest Book&lt;/title&gt;
+&lt;/head&gt;
 
-&lt;body bgcolor='white'>
+&lt;body bgcolor='white'&gt;
 
-&lt;h1>Hogwarts Guest Book&lt;/h1>
-&lt;table>
-&lt;tr>&lt;td width='25%'>&lt;em>Name&lt;/em>&lt;td>&lt;em>Comment&lt;/em>
+&lt;h1&gt;Hogwarts Guest Book&lt;/h1&gt;
+&lt;table&gt;
+&lt;tr&gt;&lt;td width='25%'&gt;&lt;em&gt;Name&lt;/em&gt;&lt;td&gt;&lt;em&gt;Comment&lt;/em&gt;
 <eg-em>&lt;%
 var guestBook = application.attribute.guest_book
 
 for (var guest in guestBook) {
-  out.writeln("&lt;tr>&lt;td>" + guest.name + "&lt;td>" + guest.comment);
+  out.writeln("&lt;tr&gt;&lt;td&gt;" + guest.name + "&lt;td&gt;" + guest.comment);
 }
-%></eg-em>
-&lt;/table>
+%&gt;</eg-em>
+&lt;/table&gt;
 
-&lt;/body>
+&lt;/body&gt;
 </example>
 
 <border-box>
 <h1>Hogwarts Guest Book</h1>
 
 <table>
-<tr><td><em>Name</em><td><em>Comment</em>
-<tr><td>Harry Potter<td>Griffindor Rules
-<tr><td>Draco Malfoy<td>Slytherin Rules
-</table>
+<tr><td><em>Name</em></td><td><em>Comment</em>
+</td></tr><tr><td>Harry Potter</td><td>Griffindor Rules
+</td></tr><tr><td>Draco Malfoy</td><td>Slytherin Rules
+</td></tr></table>
 </border-box>
 
 </subsection>
 
-</section>
+</s1>
 
-<section title='Guest book logic'>
+<s1 title="Guest book logic">
 
 The guest book logic is simple.  If the user has not logged in, she
 sees comments and a form to log in.   After login, she'll see the
@@ -301,14 +301,14 @@ page and add.jsp formats the add comment page.
 <p/>GuestJsp stores login information in the session variable.
 
 <deftable>
-<tr><th>Form Variable<th>Meaning
-<tr><td>action<td>'login' to login or 'add' to add a comment
-<tr><td>name<td>user name
-<tr><td>password<td>user password
-<tr><td>comment<td>comment for the guest book
-</deftable>
+<tr><th>Form Variable</th><th>Meaning
+</th></tr><tr><td>action</td><td>'login' to login or 'add' to add a comment
+</td></tr><tr><td>name</td><td>user name
+</td></tr><tr><td>password</td><td>user password
+</td></tr><tr><td>comment</td><td>comment for the guest book
+</td></tr></deftable>
 
-<example title='Guest book logic'>
+<example title="Guest book logic">
 ...
 
 <eg-em>// name from the session</eg-em>
@@ -327,15 +327,15 @@ String password = request.getParameter("password");
 String comment = request.getParameter("comment");
 
 <eg-em>// login stores the user in the session</eg-em>
-if (action != null && action.equals("login") &&
-    userName != null &&
-    password != null && password.equals("quidditch")) {
+if (action != null &amp;&amp; action.equals("login") &amp;&amp;
+    userName != null &amp;&amp;
+    password != null &amp;&amp; password.equals("quidditch")) {
   session.putValue("name", userName);
 }
 
 <eg-em>// adds a new guest</eg-em>
-if (action != null && action.equals("add") &&
-    sessionName != null &&
+if (action != null &amp;&amp; action.equals("add") &amp;&amp;
+    sessionName != null &amp;&amp;
     comment != null) {
   guestBook.addGuest(sessionName, comment);
 }
@@ -357,45 +357,45 @@ disp = app.getRequestDispatcher(template);
 <p/>login.jsp and add.jsp just append different forms to the display
 code in the previous section.
 
-<example title='login.jsp'>
-&lt;%@ page language=javascript %>
-&lt;head>
-&lt;title>Hogwarts Guest Book: Login&lt;/title>
-&lt;/head>
-&lt;body bgcolor='white'>
+<example title="login.jsp">
+&lt;%@ page language=javascript %&gt;
+&lt;head&gt;
+&lt;title&gt;Hogwarts Guest Book: Login&lt;/title&gt;
+&lt;/head&gt;
+&lt;body bgcolor='white'&gt;
 
-&lt;h1>Hogwarts Guest Book&lt;/h1>
-&lt;table>
-&lt;tr>&lt;td width='25%'>&lt;em>Name&lt;/em>&lt;td>&lt;em>Comment&lt;/em>
+&lt;h1&gt;Hogwarts Guest Book&lt;/h1&gt;
+&lt;table&gt;
+&lt;tr&gt;&lt;td width='25%'&gt;&lt;em&gt;Name&lt;/em&gt;&lt;td&gt;&lt;em&gt;Comment&lt;/em&gt;
 <eg-em>&lt;%
 var guestBook = application.attribute.guest_book
 
 for (var guest in guestBook) {
-  out.writeln("&lt;tr>&lt;td>" + guest.name + "&lt;td>" + guest.comment);
+  out.writeln("&lt;tr&gt;&lt;td&gt;" + guest.name + "&lt;td&gt;" + guest.comment);
 }
-%></eg-em>
-&lt;/table>
-&lt;hr>
+%&gt;</eg-em>
+&lt;/table&gt;
+&lt;hr&gt;
 
-&lt;form action='GuestJsp' method='post'>
-&lt;input type=hidden name='action' value='login'>
-&lt;table>
-&lt;tr>&lt;td>Name:&lt;td>&lt;input name='Name'>
-&lt;tr>&lt;td>Password:&lt;td>&lt;input name='Password' type='password'>
-&lt;tr>&lt;td>&lt;input type=submit value='Login'>
-&lt;/table>
-&lt;/form>
-&lt;/body>
+&lt;form action='GuestJsp' method='post'&gt;
+&lt;input type=hidden name='action' value='login'&gt;
+&lt;table&gt;
+&lt;tr&gt;&lt;td&gt;Name:&lt;td&gt;&lt;input name='Name'&gt;
+&lt;tr&gt;&lt;td&gt;Password:&lt;td&gt;&lt;input name='Password' type='password'&gt;
+&lt;tr&gt;&lt;td&gt;&lt;input type=submit value='Login'&gt;
+&lt;/table&gt;
+&lt;/form&gt;
+&lt;/body&gt;
 </example>
 
-</section>
+</s1>
 
-<section title='Conclusion'>
+<s1 title="Conclusion">
 The Resin demo shows a few ways to extend the guest book, including
 adding some intelligence to the form processing.  However, as forms
 get more intelligent, even JSP templates become complicated.  There is
-a solution: <a href='xtp|templates'>XTP templates</a>.
-</section>
+a solution: <a href="xtp|templates">XTP templates</a>.
+</s1>
 
     </body>
 </document>

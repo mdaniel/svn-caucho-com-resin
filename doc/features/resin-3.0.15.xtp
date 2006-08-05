@@ -6,86 +6,86 @@
 
 <body>
 
-<summary objsummary='localtoc'/>
+<summary objsummary="localtoc"/>
 
-<section title="EL field expression">
+<s1 title="EL field expression">
 
 <p>In configuration files, EL field expressions like \${smtp.mail.host}
 now directly refer to the system property.</p>
 
-</section>
+</s1>
 
-<section title="cluster changes">
+<s1 title="cluster changes">
 
 <p>The active cluster is now selected implicitly with a matching
 server-id.  This will allow some configurations with multiple
-&lt;cluster> items to avoid multiple resin.conf file..</p>
+&lt;cluster&gt; items to avoid multiple resin.conf file..</p>
 
 <example>
 ...
-&lt;server>
-  &lt;cluster>
-    &lt;srun server-id="a" host="192.168.0.10" port="6802"/>
-    &lt;srun server-id="b" host="192.168.0.11" port="6802"/>
-  &lt;/cluster>
+&lt;server&gt;
+  &lt;cluster&gt;
+    &lt;srun server-id="a" host="192.168.0.10" port="6802"/&gt;
+    &lt;srun server-id="b" host="192.168.0.11" port="6802"/&gt;
+  &lt;/cluster&gt;
 
-  &lt;cluster>
-    &lt;srun server-id="c" host="192.168.0.20" port="6802"/>
-    &lt;srun server-id="d" host="192.168.0.21" port="6802"/>
-  &lt;/cluster>
-&lt;/server>
+  &lt;cluster&gt;
+    &lt;srun server-id="c" host="192.168.0.20" port="6802"/&gt;
+    &lt;srun server-id="d" host="192.168.0.21" port="6802"/&gt;
+  &lt;/cluster&gt;
+&lt;/server&gt;
 ...
 </example>
 
-</section>
+</s1>
 
-<section title="xa">
+<s1 title="xa">
 
-<p>The &lt;xa> tag now defaults to true.  If true, connections automatically
+<p>The &lt;xa&gt; tag now defaults to true.  If true, connections automatically
 participate in distributed transactions.  If false, the database connections
 do not participate in distributed transactions.</p>
 
-</section>
+</s1>
 
-<section title="xa-forbid-same-rm">
+<s1 title="xa-forbid-same-rm">
 
-<p>New attribute to the &lt;database> to workaround issues with Oracle
+<p>New attribute to the &lt;database&gt; to workaround issues with Oracle
 drivers and distributed transactions.</p>
 
-</section>
+</s1>
 
-<section title="JSP with older web.xml">
+<s1 title="JSP with older web.xml">
 
 <p>When a pre-servlet 2.4 web.xml is used, JSP files will not
 use EL expressions by default.</p>
 
-</section>
+</s1>
 
-<section title="Custom AccessLog">
+<s1 title="Custom AccessLog">
 
 <p>Custom access logs can now extend AbstractAccessLog.</p>
 
-</section>
+</s1>
 
-<section title="FileServlet">
+<s1 title="FileServlet">
 
 <p>Added character-encoding init-param for a default character encoding.</p>
 
-</section>
+</s1>
 
-<section title="pid file">
+<s1 title="pid file">
 
 <p>The default name of the pid file now uses the -server argument.</p>
 
-</section>
+</s1>
 
-<section title="server.root">
+<s1 title="server.root">
 
 <p>server.root is now the preferred variable name for the server root.</p>
 
-</section>
+</s1>
 
-<section title="ejb-server">
+<s1 title="ejb-server">
 
 <p>ejb-server has been changed to allow multiple ejb-server instances.
 In the case of Amber/EJB3, the EntityManager name is assignable with
@@ -94,39 +94,39 @@ entity-manager-jndi-name.</p>
 <p>See <a href="http://caucho.com/wiki/display/RESIN/ejb-server">ejb-server</a> on
 the wiki.</p>
 
-<p>The &lt;ear-default> tag and the resin-application.xml now
-supports a &lt;ejb-server-jndi-name> to specify an
-alternate &lt;ejb-server> for the .ear file.</p>
+<p>The &lt;ear-default&gt; tag and the resin-application.xml now
+supports a &lt;ejb-server-jndi-name&gt; to specify an
+alternate &lt;ejb-server&gt; for the .ear file.</p>
 
-</section>
+</s1>
 
-<section title="access-log time in microseconds">
+<s1 title="access-log time in microseconds">
 
 <p>The access log format string now supports '%D' to measure the time
 taken in microseconds (actual accuracy is milliseconds).</p>
 
-</section>
+</s1>
 
-<section title="Eclipse compiler">
+<s1 title="Eclipse compiler">
 
-<p>&lt;javac compiler="eclipse"/> is now supported.</p>
+<p>&lt;javac compiler="eclipse"/&gt; is now supported.</p>
 
-</section>
+</s1>
 
-<section title="EnvironmentLogger.removeHandle">
+<s1 title="EnvironmentLogger.removeHandle">
 
 <p>Environment-specific logging handles can now be removed.</p>
 
-</section>
+</s1>
 
-<section title="AmberTableCache">
+<s1 title="AmberTableCache">
 
 <p>An amber bean now allows an @AmberTableCache annotation to specify
 the read-only and cache timeout attributes.</p>
 
-</section>
+</s1>
 
-<section title="Special Thanks">
+<s1 title="Special Thanks">
 
 <p>Special thanks to Fiaz Hossain for suggesting a fix for the
 EnvironmentLogger.removeHandle functionality.</p>
@@ -134,7 +134,7 @@ EnvironmentLogger.removeHandle functionality.</p>
 <p>Special thanks to Branko Granar for significant enhancements to
 the mod_caucho debugging.</p>
 
-</section>
+</s1>
 
 </body>
 </document>

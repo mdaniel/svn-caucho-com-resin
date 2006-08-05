@@ -7,7 +7,7 @@
   <body>
     <summary/>
 
-<section title="OpenJMS">
+<s1 title="OpenJMS">
 
 <p>The <a href="http://www.openjms.com">OpenJMS</a> client is configured
 by adding a <a href="config-index|jndi-link">jndi-link</a> to the web.xml
@@ -16,12 +16,12 @@ or resin.conf.</p>
 <subsection title="Configured with OpenJMS tcp connectory">
 
 <example title="web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
   &lt;jndi-link jndi-name="jms"
-             factory="org.exolab.jms.jndi.InitialContextFactory">
-    &lt;init-param java.naming.provider.url="tcp://localhost:3035"/>
-  &lt;/jndi-link>
-&lt;/web-app>
+             factory="org.exolab.jms.jndi.InitialContextFactory"&gt;
+    &lt;init-param java.naming.provider.url="tcp://localhost:3035"/&gt;
+  &lt;/jndi-link&gt;
+&lt;/web-app&gt;
 </example>
 
 <p>The OpenSSL server will need to be started as a separate process.</p>
@@ -35,20 +35,20 @@ yet support JCA, it does not understand server restarts.  Therefore,
 it needs to be placed in the resin.conf, not the web.xml.</p>
 
 <example title="resin.conf">
-&lt;resin xmlns="http://caucho.com/ns/resin">
-  &lt;server>
-    &lt;system-property openjms.home="/usr/local/src/openjms-0.7.6-rc3"/>
-    &lt;resource type="org.exolab.jms.server.EmbeddedJmsServer">
-      &lt;arg>${server.rootDir}/jms/openjms.xml&lt;/arg>
-    &lt;/resource>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;server&gt;
+    &lt;system-property openjms.home="/usr/local/src/openjms-0.7.6-rc3"/&gt;
+    &lt;resource type="org.exolab.jms.server.EmbeddedJmsServer"&gt;
+      &lt;arg&gt;${server.rootDir}/jms/openjms.xml&lt;/arg&gt;
+    &lt;/resource&gt;
 
     &lt;jndi-link jndi-name="jms"
-               factory="org.exolab.jms.jndi.InitialContextFactory">
-      &lt;init-param java.naming.provider.url="embedded"/>
-    &lt;/jndi-link>
+               factory="org.exolab.jms.jndi.InitialContextFactory"&gt;
+      &lt;init-param java.naming.provider.url="embedded"/&gt;
+    &lt;/jndi-link&gt;
 
     ...
-&lt;/resin>
+&lt;/resin&gt;
 </example>
 
 </subsection>
@@ -116,6 +116,6 @@ public class SendServlet extends HttpServlet {
 }
 </example>
 
-    </section>
+    </s1>
   </body>
 </document>

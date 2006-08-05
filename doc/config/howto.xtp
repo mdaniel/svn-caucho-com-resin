@@ -18,7 +18,7 @@
 the <a href="db|config">database configuration page</a> for the full
 configuration documentation.
 
-<p>See the <a href="db|thirdparty">thirdparty driver configuration page</a> for
+</p><p>See the <a href="db|thirdparty">thirdparty driver configuration page</a> for
 sample configurations for several database drivers.</p>
 
 <p>See the
@@ -49,14 +49,14 @@ configuration can use setuid to change Resin's user after binding ports.
 redirects to an internal IP address, the application often needs
 the external address, not the server's view.</p>
 
-<p>Use <a href="resin.xtp#server-name">host-name</a> in the &lt;host>
+<p>Use <a href="resin.xtp#server-name">host-name</a> in the &lt;host&gt;
 to set the canonical host and port name to the external address.</p>
 
 <example>
-&lt;host host-name="http://foo.com:80">
-  &lt;host-alias>foo.com&lt;/host-alias>
+&lt;host host-name="http://foo.com:80"&gt;
+  &lt;host-alias&gt;foo.com&lt;/host-alias&gt;
   ...
-&lt;/host>
+&lt;/host&gt;
 </example>
 
 </faq>

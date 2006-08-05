@@ -12,10 +12,10 @@
         other words, it's an XML transformation.  So each XTP page has four parts:</p>
       <ol>
         <li>The input XML (the XTP file)
-        <li>The transformation stylesheet (the XSL file)
-        <li>The generated JSP
-        <li>The generated output (the result of executing the JSP)
-      </ol>
+        </li><li>The transformation stylesheet (the XSL file)
+        </li><li>The generated JSP
+        </li><li>The generated output (the result of executing the JSP)
+      </li></ol>
 
       <p>The easiest transformation is the identity transformation.
       The following stylesheet copies the input into the output.</p>
@@ -28,46 +28,46 @@
 
 <example title="default.xsl">
 &lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-                version="1.0">
+                version="1.0"&gt;
 
-  &lt;!-- make sure '&lt;' is not printed as '&amp;lt;' -->
-  &lt;xsl:output disable-output-escaping='true'/>
+  &lt;!-- make sure '&lt;' is not printed as '&amp;lt;' --&gt;
+  &lt;xsl:output disable-output-escaping='true'/&gt;
 
-  &lt;!-- copy input to output -->
-  &lt;xsl:template match='*|@*'>
-    &lt;xsl:copy>
-      &lt;xsl:apply-templates select='node()|@*'/>
-    &lt;/xsl:copy>
-  &lt;/xsl:template>
+  &lt;!-- copy input to output --&gt;
+  &lt;xsl:template match='*|@*'&gt;
+    &lt;xsl:copy&gt;
+      &lt;xsl:apply-templates select='node()|@*'/&gt;
+    &lt;/xsl:copy&gt;
+  &lt;/xsl:template&gt;
 
-&lt;/xsl:stylesheet>
+&lt;/xsl:stylesheet&gt;
 </example>
 
-<p>Each <var/template/> contains a <var/match/> pattern and a
-<var/replacement tree/>.  The match pattern is an <var/XPath/> expression.
-In the above example, the match pattern <var/*|@*/> matches any element
-and any attribute.  The replacement <var/xsl:copy/> copies the current
-node and calls <var/xsl:apply-templates/> to recursively evaluate
+<p>Each <var>template</var> contains a <var>match</var> pattern and a
+<var>replacement tree</var>.  The match pattern is an <var>XPath</var> expression.
+In the above example, the match pattern <var>*|@*</var> matches any element
+and any attribute.  The replacement <var>xsl:copy</var> copies the current
+node and calls <var>xsl:apply-templates</var> to recursively evaluate
 any children of the current node.</p>
 
-<p>You can put <var/default.xsl/> in the same directory as the xtp
+<p>You can put <var>default.xsl</var> in the same directory as the xtp
 file, or you can put in WEB-INF/xsl, or you can put it in the
 classpath like WEB-INF/classes.  The last option is useful if you want
 to create a jar of useful stylesheets and beans. </p>
 
 <p>Your XTP page may look something like:</p>
 
-<example title='test.xtp'>
-&lt;h1>My test&lt;/h1>
+<example title="test.xtp">
+&lt;h1&gt;My test&lt;/h1&gt;
 
-Adding: 2 + 2 = &lt;%= 2 + 2 %>
+Adding: 2 + 2 = &lt;%= 2 + 2 %&gt;
 </example>
 
 <p>The generated JSP is identical to the input, and the generated HTML
 just executes the JSP.</p>
 
 <results>
-&lt;h1>My test&lt;/h1>
+&lt;h1&gt;My test&lt;/h1&gt;
 
 Adding: 2 + 2 = 4
 </results>

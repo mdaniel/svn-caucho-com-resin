@@ -16,20 +16,20 @@ the service, protocol, and client.</p>
   <body>
     <summary/>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/classes/example/GreetingAPI.java"/>
-    <td>Interface for the greeting service.
-<tr><td><viewfile-link file="WEB-INF/classes/example/GreetingImpl.java"/>
-    <td>The service implementation as a Java object
-<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
-    <td>Configures the environment
-<tr><td><viewfile-link file="WEB-INF/classes/example/GreetingClientServlet.java"/>
-    <td>Client Servlet
-</deftable>
-</section>
+    </td><td>Interface for the greeting service.
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/GreetingImpl.java"/>
+    </td><td>The service implementation as a Java object
+</td></tr><tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
+    </td><td>Configures the environment
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/GreetingClientServlet.java"/>
+    </td><td>Client Servlet
+</td></tr></deftable>
+</s1>
 
-<section title="Service Implementation">
+<s1 title="Service Implementation">
 
 <example title="GreetingAPI.java">
 package example;
@@ -39,16 +39,16 @@ public interface GreetingAPI {
 }
 </example>
 
-<section title="Service Implementation">
+<s2 title="Service Implementation">
 
 <p>The Greeting implementation is a plain Java class that implements
 the MatchService API.  Making the service a plain class offers a number of advantages:</p>
 
 <ul>
 <li><b>Simplicity:</b> It can concentrate on its business logic because it doesn't need to implement any protocol-dependent code.
-<li><b>Independence:</b> It can be reused more easily because it isn't tied to a distributed framework (e.g. in contrast to EJB).
-<li><b>Testability:</b> It is more easily tested since the test harness doesn't need to implement the protocol or its stubs.  The harness can just test the service as a plain old Java object.
-</ul>
+</li><li><b>Independence:</b> It can be reused more easily because it isn't tied to a distributed framework (e.g. in contrast to EJB).
+</li><li><b>Testability:</b> It is more easily tested since the test harness doesn't need to implement the protocol or its stubs.  The harness can just test the service as a plain old Java object.
+</li></ul>
 
 <example title="GreetingImpl.java">
 package example;
@@ -68,32 +68,32 @@ public class GreetingImpl implements GreetingAPI {
 }
 </example>
 
-</section>
+</s2>
 
-<section title="Configuration using Dependency Injection">
+<s2 title="Configuration using Dependency Injection">
 
 <example title="resin-web.xml">
 &lt;resource jndi-name="service/greeting"
-          type="example.GreetingImpl">
-  &lt;init>
-    &lt;greeting>Hello, web.xml&lt;/greeting>
-  &lt;/init>
-&lt;/resource>
+          type="example.GreetingImpl"&gt;
+  &lt;init&gt;
+    &lt;greeting&gt;Hello, web.xml&lt;/greeting&gt;
+  &lt;/init&gt;
+&lt;/resource&gt;
 
 &lt;servlet url-pattern="/hessian/greeting"
-         servlet-class="com.caucho.hessian.server.HessianServlet">
-  &lt;init>
-    &lt;home>\${jndi("service/greeting")}&lt;/home>
-    &lt;home-api>example.GreetingAPI&lt;/home-api>
-  &lt;/init>
-&lt;/servlet>
+         servlet-class="com.caucho.hessian.server.HessianServlet"&gt;
+  &lt;init&gt;
+    &lt;home&gt;\${jndi("service/greeting")}&lt;/home&gt;
+    &lt;home-api&gt;example.GreetingAPI&lt;/home-api&gt;
+  &lt;/init&gt;
+&lt;/servlet&gt;
 </example>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="Client">
+<s1 title="Client">
 
 <p>Configuring the client servlet with Dependency Injection
 allows for a simpler and more general client.  The following client
@@ -102,11 +102,11 @@ for example:</p>
 
 <ul>
 <li>Hessian proxy
-<li>Burlap proxy
-<li>EJB local object stub
-<li>JMX proxy
-<li>Java bean instance
-</ul>
+</li><li>Burlap proxy
+</li><li>EJB local object stub
+</li><li>JMX proxy
+</li><li>Java bean instance
+</li></ul>
 
 <p>Using the Dependency Injection patter, the servlet doesn't care
 how the proxy is implemented, or how the greeting service is
@@ -137,31 +137,31 @@ public class GreetingClientServlet extends GenericServlet {
 }
 </example>
 
-<section title="Hessian Client using Dependency Injection">
+<s2 title="Hessian Client using Dependency Injection">
 
-<p>The following example stores a &lt;reference>
+<p>The following example stores a &lt;reference&gt;
 to the Hessian proxy in JNDI for the service.  The servlet configuration
 looks up the Hessian proxy in JNDI.</p> 
 
 <example title="resin-web.xml">
 &lt;reference jndi-name="client/greeting"
-           factory="com.caucho.hessian.client.HessianProxyFactory">
-  &lt;init-param url="\${app.getURL()}/hessian/greeting"/>
-  &lt;init-param type="example.GreetingAPI"/>
-&lt;/reference>
+           factory="com.caucho.hessian.client.HessianProxyFactory"&gt;
+  &lt;init-param url="\${app.getURL()}/hessian/greeting"/&gt;
+  &lt;init-param type="example.GreetingAPI"/&gt;
+&lt;/reference&gt;
 
 &lt;servlet-mapping url-pattern="/client/greeting"
-                 servlet-class="example.GreetingClientServlet">
-  &lt;init>
-    &lt;name>Hessian Client&lt;/name>
-    &lt;greeting>\${jndi("client/greeting")}&lt;/greeting>
-  &lt;/init>
-&lt;/servlet-mapping>
+                 servlet-class="example.GreetingClientServlet"&gt;
+  &lt;init&gt;
+    &lt;name&gt;Hessian Client&lt;/name&gt;
+    &lt;greeting&gt;\${jndi("client/greeting")}&lt;/greeting&gt;
+  &lt;/init&gt;
+&lt;/servlet-mapping&gt;
 </example>
 
-</section>
+</s2>
 
-<section title="JMX Configuration">
+<s2 title="JMX Configuration">
 
 <p>The following JMX configuration shows the flexibility of
 the Dependency Injection pattern.  With no changes to either the
@@ -171,24 +171,24 @@ a JMX bean used by and the client to use a JMX proxy.</p>
 <example title="resin-web.xml">
 &lt;resource mbean-name="type=Greeting"
           mbean-interface="example.GreetingAPI"
-          type="example.GreetingImpl">
-  &lt;init>
-    &lt;greeting>Hello, web.xml&lt;/greeting>
-  &lt;/init>
-&lt;/resource>
+          type="example.GreetingImpl"&gt;
+  &lt;init&gt;
+    &lt;greeting&gt;Hello, web.xml&lt;/greeting&gt;
+  &lt;/init&gt;
+&lt;/resource&gt;
 
 &lt;servlet-mapping url-pattern="/client/greeting"
-                 servlet-class="example.GreetingClientServlet">
-  &lt;init>
-    &lt;name>JMX Client&lt;/name>
-    &lt;greeting>\${jndi("mbean:type=Greeting")}&lt;/greeting>
-  &lt;/init>
-&lt;/servlet-mapping>
+                 servlet-class="example.GreetingClientServlet"&gt;
+  &lt;init&gt;
+    &lt;name&gt;JMX Client&lt;/name&gt;
+    &lt;greeting&gt;\${jndi("mbean:type=Greeting")}&lt;/greeting&gt;
+  &lt;/init&gt;
+&lt;/servlet-mapping&gt;
 </example>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
   </body>
 </document>

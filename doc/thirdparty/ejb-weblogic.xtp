@@ -9,24 +9,24 @@
     <summary/>
 
 <example>
-&lt;web-app>
-  &lt;classpath id='/usr/local/weblogic/myserver/clientclasses'/>
-  &lt;classpath id='/usr/local/weblogic/lib/weblogicaux.jar'/>
-  &lt;classpath id='/usr/local/weblogic/classes'/>
+&lt;web-app&gt;
+  &lt;classpath id='/usr/local/weblogic/myserver/clientclasses'/&gt;
+  &lt;classpath id='/usr/local/weblogic/lib/weblogicaux.jar'/&gt;
+  &lt;classpath id='/usr/local/weblogic/classes'/&gt;
 
-  &lt;jndi-link>
-    &lt;jndi-name>java:comp/env/ejb/traderHome&lt;/jndi-name>
-    &lt;jndi-factory>weblogic.jndi.WLInitialContextFactory&lt;/jndi-factory>
-    &lt;init-param java.naming.provider.url="t3://localhost:7001"/>
-    &lt;jndi-lookup>statelessSession.TraderHome&lt;/jndi-lookup>
-  &lt;/jndi-link>
-&lt;/web-app>
+  &lt;jndi-link&gt;
+    &lt;jndi-name&gt;java:comp/env/ejb/traderHome&lt;/jndi-name&gt;
+    &lt;jndi-factory&gt;weblogic.jndi.WLInitialContextFactory&lt;/jndi-factory&gt;
+    &lt;init-param java.naming.provider.url="t3://localhost:7001"/&gt;
+    &lt;jndi-lookup&gt;statelessSession.TraderHome&lt;/jndi-lookup&gt;
+  &lt;/jndi-link&gt;
+&lt;/web-app&gt;
 </example>
 
 <example>
-&lt;%@ page import='javax.naming.*' %>
-&lt;%@ page import='examples.ejb.basic.statelessSession.*' %>
-&lt;%@ page import='javax.rmi.*' %>
+&lt;%@ page import='javax.naming.*' %&gt;
+&lt;%@ page import='examples.ejb.basic.statelessSession.*' %&gt;
+&lt;%@ page import='javax.rmi.*' %&gt;
 &lt;%
 Context ic = new InitialContext();
 
@@ -41,12 +41,12 @@ String stock = request.getParameter("stock");
 int shares = Integer.parseInt(request.getParameter("shares"));
 
 TradeResult result = trader.buy(stock, shares);
-%>
-Bought &lt;%= result.getNumberTraded() %>
-       &lt;%= result.getStockSymbol() %>&lt;br>
+%&gt;
+Bought &lt;%= result.getNumberTraded() %&gt;
+       &lt;%= result.getStockSymbol() %&gt;&lt;br&gt;
 &lt;%
 trader.remove();
-%>
+%&gt;
 </example>
   </body>
 </document>

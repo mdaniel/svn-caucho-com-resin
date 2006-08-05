@@ -22,13 +22,13 @@ itself is a short and interesting description.</p>
     <summary/>
 
 
-<section title="Hessian Client">
+<s1 title="Hessian Client">
 
 Using a Hessian service from a Java client is like calling a method.
 The HessianProxyFactory creates proxies which act like normal Java
 objects, with possibility that the method might throw a protocol exception
 if the remote connection fails.  Using HessianProxyFactory requires
-JDK&nbsp;1.3.
+JDK&#160;1.3.
 
 <p/>Each service will have a normal Java interface describing the
 service.  The trivial hello, world example just returns a string.
@@ -70,9 +70,9 @@ public class BasicClient {
 That's it!  There are no more complications to using the client.  The
 service can add methods and use any Java type for parameters and results.
 
-</section>
+</s1>
 
-<section title="Hessian Service">
+<s1 title="Hessian Service">
 
 While most Hessian services will use Resin-CMP or Resin-EJB, to take
 advantage of the benefits of EJB, the Hessian library makes it possible
@@ -103,67 +103,67 @@ public class BasicService implements Basic {
 }
 </example>
 
-<section title="Configuration with Dependency Injection in Resin 3.0">
+<s2 title="Configuration with Dependency Injection in Resin 3.0">
 
 <example title="resin-web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
   &lt;servlet servlet-name="hello"
-           servlet-class="com.caucho.hessian.server.HessianServlet">
-    &lt;init>
-      &lt;home resin:type="example.BasicService">
-        &lt;greeting>Hello, world&lt;/greeting>
-      &lt;/home>
+           servlet-class="com.caucho.hessian.server.HessianServlet"&gt;
+    &lt;init&gt;
+      &lt;home resin:type="example.BasicService"&gt;
+        &lt;greeting&gt;Hello, world&lt;/greeting&gt;
+      &lt;/home&gt;
 
-      &lt;home-api>example.Basic&lt;/home-api>
-    &lt;/init>
-  &lt;/servlet>
+      &lt;home-api&gt;example.Basic&lt;/home-api&gt;
+    &lt;/init&gt;
+  &lt;/servlet&gt;
 
   &lt;servlet-mapping url-pattern="/hello"
-                   servlet-name="hello"/>
-&lt;/web-app>
+                   servlet-name="hello"/&gt;
+&lt;/web-app&gt;
 </example>
 
-</section>
+</s2>
 
-<section title="Configuration for standard web.xml">
+<s2 title="Configuration for standard web.xml">
 
 <p>Since the HessianServlet is a standard servlet, it can also be
 configured in the standard servlet configuration.</p>
 
 <example title="web.xml">
-&lt;web-app>
-  &lt;servlet>
-   &lt;servlet-name>hello&lt;/servlet-name>
-   &lt;servlet-class>com.caucho.hessian.server.HessianServlet&lt;/servlet-class>
-    &lt;init-param>
-      &lt;param-name>home-class&lt;/param-name>
-      &lt;param-value>example.BasicService&lt;/param-value>
-    &lt;/init-param>
-    &lt;init-param>
-      &lt;param-name>home-api&lt;/param-name>
-      &lt;param-value>example.Basic&lt;/param-value>
-    &lt;/init-param>
-  &lt;/servlet>
+&lt;web-app&gt;
+  &lt;servlet&gt;
+   &lt;servlet-name&gt;hello&lt;/servlet-name&gt;
+   &lt;servlet-class&gt;com.caucho.hessian.server.HessianServlet&lt;/servlet-class&gt;
+    &lt;init-param&gt;
+      &lt;param-name&gt;home-class&lt;/param-name&gt;
+      &lt;param-value&gt;example.BasicService&lt;/param-value&gt;
+    &lt;/init-param&gt;
+    &lt;init-param&gt;
+      &lt;param-name&gt;home-api&lt;/param-name&gt;
+      &lt;param-value&gt;example.Basic&lt;/param-value&gt;
+    &lt;/init-param&gt;
+  &lt;/servlet&gt;
 
-  &lt;servlet-mapping>
-    &lt;url-pattern>/hello&lt;/url-pattern>
-    &lt;servlet-name>hello&lt;/servlet-name>
-  &lt;/servlet-mapping>
-&lt;/web-app>
+  &lt;servlet-mapping&gt;
+    &lt;url-pattern&gt;/hello&lt;/url-pattern&gt;
+    &lt;servlet-name&gt;hello&lt;/servlet-name&gt;
+  &lt;/servlet-mapping&gt;
+&lt;/web-app&gt;
 </example>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="Hessian Serialization">
+<s1 title="Hessian Serialization">
 
 <p>The Hessian classes can be used for serialization and deserialization.
 Hessian's serialization forms the basis for the protocol and taking
 control of the serialization lets application use Hessian more efficiently
 than the proxy interface for specialized application protocols.</p>
 
-<example title='Serialization'>
+<example title="Serialization">
 Object obj = ...;
 
 OutputStream os = new FileOutputStream("test.xml");
@@ -173,7 +173,7 @@ out.writeObject(obj);
 os.close();
 </example>
 
-<example title='Deserialization'>
+<example title="Deserialization">
 InputStream is = new FileInputStream("test.xml");
 HessianInput in = new HessianInput(is);
 
@@ -181,9 +181,9 @@ Object obj = in.readObject(null);
 is.close();
 </example>
 
-</section>
+</s1>
 
-<section title="Hessian with large binary data">
+<s1 title="Hessian with large binary data">
 
 <p>When a distributed application needs to send large amounts of
 binary data, it can be more efficient to
@@ -220,27 +220,27 @@ in.completeReply();
 to avoid buffering the data argument.  Like the client, the implementation
 is straightforward, although more complicated than the basic service.</p>
 
-</section>
+</s1>
 
-<section title="Hessian Client for a cell-phone">
+<s1 title="Hessian Client for a cell-phone">
 
 Hessian can be used for even small Java devices.  The following classes
 from com.caucho.hessian.client can be extracted into a J2ME jar:
 
 <ul>
 <li>MicroHessianInput
-<li>MicroHessianOutput
-<li>HessianRemote
-<li>HessianServiceException
-<li>HessianProtocolException
-</ul>
+</li><li>MicroHessianOutput
+</li><li>HessianRemote
+</li><li>HessianServiceException
+</li><li>HessianProtocolException
+</li></ul>
 
 The following example shows the code for using a cell phone as a
 client.  It's a bit more complicated than using the proxy, since the
 client is responsible for creating the connection and writing the
 data.
 
-<example title='Hello, world'>
+<example title="Hello, world">
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 
@@ -267,7 +267,7 @@ MicroHessianInput in = new MicroHessianInput(is);
 Object value = in.readReply(null);
 </example>
 
-</section>
+</s1>
 
   </body>
 </document>

@@ -12,9 +12,9 @@
   </header>
 
   <body>
-    <summary objsummary='localtoc'/>
+    <summary objsummary="localtoc"/>
 
-    <section title="...">
-    </section>
+    <s1 title="...">
+    </s1>
   </body>
 </document>

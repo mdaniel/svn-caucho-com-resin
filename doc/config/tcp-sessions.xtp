@@ -8,7 +8,7 @@
   <body>
     <summary/>
 
-<section title="Clustered Distributed Sessions">
+<s1 title="Clustered Distributed Sessions">
 <p>Resin's cluster protocol for distributed sessions can
 is an alternative to JDBC-based distributed sessions.  In some
 configurations, the cluster-stored sessions will be more efficient
@@ -21,71 +21,71 @@ backing database.  With clustered sessions, each additional server
 shares the backup load, so the main scalability issue reduces to network
 bandwidth.  Like the JDBC-based sessions, the cluster store sessions
 uses sticky-session caching to avoid unnecessary network traffic.</p>
-</section>
+</s1>
 
-<section title="Configuration">
+<s1 title="Configuration">
 
 <p>The cluster configuration must tell each host the servers in the
 cluster
 and it must enable the persistent in the session configuration
 with <a href="config|webapp.xtp#session-config">use-persistent-store</a>.
 Because session configuration is specific to a virtual host and a
-web-application, each web-app needs <var/use-persistent-store/> enabled
+web-application, each web-app needs <var>use-persistent-store</var> enabled
 individually.  The <a href="webapp.xtp#web-app-default">web-app-default</a>
 tag can be used to enable distributed sessions across an entire site.
 </p>
 
 <p>Most sites using Resin's load balancing will already have the cluster
-<var/&lt;srun>/> configured.  Each <var/&lt;srun>/> block corresponds to a
+<var>&lt;srun&gt;</var> configured.  Each <var>&lt;srun&gt;</var> block corresponds to a
 host, including the current host.  Since cluster sessions uses
 Resin's srun protocol, each host must listen for srun requests.</p>
 
-<example title='resin.conf fragment'>
+<example title="resin.conf fragment">
 ...
-&lt;server>
-  &lt;cluster>
-    &lt;srun id="a" host="192.168.0.1" index="1"/>
-    &lt;srun id="b" host="192.168.0.2" index="2"/>
-    &lt;srun id="c" host="192.168.0.3" index="3"/>
-    &lt;srun id="d" host="192.168.0.4" index="4"/>
-  &lt;/cluster>
+&lt;server&gt;
+  &lt;cluster&gt;
+    &lt;srun id="a" host="192.168.0.1" index="1"/&gt;
+    &lt;srun id="b" host="192.168.0.2" index="2"/&gt;
+    &lt;srun id="c" host="192.168.0.3" index="3"/&gt;
+    &lt;srun id="d" host="192.168.0.4" index="4"/&gt;
+  &lt;/cluster&gt;
 
-  &lt;persistent-store type="cluster">
-    &lt;init path="cluster"/>
-  &lt;/persistent-store>
+  &lt;persistent-store type="cluster"&gt;
+    &lt;init path="cluster"/&gt;
+  &lt;/persistent-store&gt;
 
   ...
-  &lt;host id="">
-  &lt;web-app id='myapp'>
+  &lt;host id=""&gt;
+  &lt;web-app id='myapp'&gt;
     ...
-    &lt;session-config>
-      &lt;use-persistent-store/>
-    &lt;/session-config>
-  &lt;/web-app>
-  &lt;/host>
-&lt;/server>
+    &lt;session-config&gt;
+      &lt;use-persistent-store/&gt;
+    &lt;/session-config&gt;
+  &lt;/web-app&gt;
+  &lt;/host&gt;
+&lt;/server&gt;
 ...
 </example>
 
 <p>Usually, hosts will share the same resin.conf.  Each host will be
-started with a different <var/-server xx/> to select the correct
+started with a different <var>-server xx</var> to select the correct
 block.  On Unix, startup will look like:</p>
 
-<example title="Starting Host&nbsp;C on Unix">
-resin-3.0.x> bin/httpd.sh -conf conf/resin.conf -server c start
+<example title="Starting Host&#160;C on Unix">
+resin-3.0.x&gt; bin/httpd.sh -conf conf/resin.conf -server c start
 </example>
 
 <p>On Windows, Resin will generally be configured as a service:</p>
 
-<example title="Starting Host&nbsp;C on Windows">
-resin-3.0.x> bin/httpd -conf conf/resin.conf -server c -install-as ResinC
+<example title="Starting Host&#160;C on Windows">
+resin-3.0.x&gt; bin/httpd -conf conf/resin.conf -server c -install-as ResinC
 </example>
 
-<section title="always-save-session">
+<s2 title="always-save-session">
 
 <p>Resin's distributed sessions needs to know when a session has
 changed in order to save the new session value.  Although Resin can
-detect when an application calls <var/HttpSession.setAttribute/>, it
+detect when an application calls <var>HttpSession.setAttribute</var>, it
 can't tell if an internal session value has changed.  The following
 Counter class shows the issue:</p>
 
@@ -100,94 +100,94 @@ public class Counter implements java.io.Serializable {
 </example>
 
 <p>Assuming a copy of the Counter is saved as a session attribute,
-Resin doesn't know if the application has called <var/nextCount/>.  If it
+Resin doesn't know if the application has called <var>nextCount</var>.  If it
 can't detect a change, Resin will not backup the new session, unless
-<var/always-save-session/> is set.  When <var/always-save-session/> is
+<var>always-save-session</var> is set.  When <var>always-save-session</var> is
 true, Resin will back up the session on every request.</p>
 
 <example>
 ...
-&lt;web-app id='/foo'>
+&lt;web-app id='/foo'&gt;
 ...
-&lt;session-config>
-  &lt;use-persistent-store/>
-  &lt;always-save-session/>
-&lt;/session-config>
+&lt;session-config&gt;
+  &lt;use-persistent-store/&gt;
+  &lt;always-save-session/&gt;
+&lt;/session-config&gt;
 ...
-&lt;/web-app>
+&lt;/web-app&gt;
 </example>
 
 <p>Like the JDBC-based sessions, Resin will ignore the
-<var/always-load-session/> flag for cluster sessions.  Because the
-cluster protocol notifies servers of changes, <var/always-load-session/> is
+<var>always-load-session</var> flag for cluster sessions.  Because the
+cluster protocol notifies servers of changes, <var>always-load-session</var> is
 not needed.</p>
 
-</section>
+</s2>
 
-<section title="Serialization">
+<s2 title="Serialization">
 
 <p>Resin's distributed sessions relies on Java serialization to save and
-restore sessions.  Application object must <var/implement
-java.io.Serializable/> for distributed sessions to work.</p>
+restore sessions.  Application object must <var>implement
+java.io.Serializable</var> for distributed sessions to work.</p>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="Protocol Examples">
+<s1 title="Protocol Examples">
 
-<section title="Session Request">
+<s2 title="Session Request">
 
 <p>To see how cluster sessions work, consider a case where
-the load balancer sends the request to a random host.  Host&nbsp;C owns the
-session but the load balancer gives the request to Host&nbsp;A.  In the
+the load balancer sends the request to a random host.  Host&#160;C owns the
+session but the load balancer gives the request to Host&#160;A.  In the
 following figure, the request modifies the session so it must be saved
 as well as loaded.</p>
 
-<figure src='srunc.gif'/>
+<figure src="srunc.gif"/>
 
 <p>The session id encodes the owning host.  The example session
-id, <var/ca8MbyA/>, decodes to an srun-index of 3, mapping
-to Host&nbsp;C.  Resin determines the backup host from the cookie
+id, <var>ca8MbyA</var>, decodes to an srun-index of 3, mapping
+to Host&#160;C.  Resin determines the backup host from the cookie
 as well.
-Host&nbsp;A must know the owning host
+Host&#160;A must know the owning host
 for every cookie so it can communicate with the owning srun.
-The example configuration defines all the sruns Host&nbsp;A needs to
-know about.  If Host&nbsp;C is unavailable, Host&nbsp;A can use its
-configuration knowledge to use Host&nbsp;D as a backup
-for <var/ca8MbyA/> instead..</p>
+The example configuration defines all the sruns Host&#160;A needs to
+know about.  If Host&#160;C is unavailable, Host&#160;A can use its
+configuration knowledge to use Host&#160;D as a backup
+for <var>ca8MbyA</var> instead..</p>
 
-<p>When the request first accesses the session, Host&nbsp;A asks
-Host&nbsp;C for the serialized session data (<var/2:load/>).
-Since Host&nbsp;A doesn't cache the session data, it must
-ask Host&nbsp;C for an update on each request.  For requests that
+<p>When the request first accesses the session, Host&#160;A asks
+Host&#160;C for the serialized session data (<var>2:load</var>).
+Since Host&#160;A doesn't cache the session data, it must
+ask Host&#160;C for an update on each request.  For requests that
 only read the session, this TCP load is the only extra overhead,
-i.e. they can skip <var/3-5/>.  The <var/always-save-session/>
+i.e. they can skip <var>3-5</var>.  The <var>always-save-session</var>
 flag, in contrast, will always force a write.</p>
 
-<p>At the end of the request, Host&nbsp;A writes any session
-updates to Host&nbsp;C (<var/3:store/>). If always-save-session
+<p>At the end of the request, Host&#160;A writes any session
+updates to Host&#160;C (<var>3:store</var>). If always-save-session
 is false and the session doesn't change, this step can be skipped.
-Host&nbsp;A sends
-the new serialized session contents to Host&nbsp;C.  Host&nbsp;C saves
-the session on its local disk (<var/4:save/>) and saves a backup
-to Host&nbsp;D (<var/5:backup/>).</p>
+Host&#160;A sends
+the new serialized session contents to Host&#160;C.  Host&#160;C saves
+the session on its local disk (<var>4:save</var>) and saves a backup
+to Host&#160;D (<var>5:backup</var>).</p>
 
-</section>
+</s2>
 
-<section title="Sticky Session Request">
+<s2 title="Sticky Session Request">
 
 <p>Smart load balancers that implement sticky sessions can improve
 cluster performance.  In the previous request, Resin's cluster
 sessions maintain consistency for dumb load balancers or twisted
 clients like the AOL browsers.  The cost is the additional network
-traffic for <var/2:load/> and <var/3:store/>.  Smart load-balancers
-can avoid the network traffic of <var/2/> and <var/3/>.</p>
+traffic for <var>2:load</var> and <var>3:store</var>.  Smart load-balancers
+can avoid the network traffic of <var>2</var> and <var>3</var>.</p>
 
-<figure src='same_srun.gif'/>
+<figure src="same_srun.gif"/>
 
-<p>Host&nbsp;C decodes the session id, <var/caaMbyA/>.  Since it owns
-the session, Host&nbsp;C gives the session to the servlet with no work
+<p>Host&#160;C decodes the session id, <var>caaMbyA</var>.  Since it owns
+the session, Host&#160;C gives the session to the servlet with no work
 and no network traffic.  For a read-only request, there's zero
 overhead for cluster sessions.  So even a semi-intelligent load
 balancer will gain a performance advantage.  Normal browsers will have
@@ -195,13 +195,13 @@ zero overhead, and bogus AOL browsers will have the non-sticky
 session overhead.</p>
 
 <p>A session write saves the new serialized session to disk
-(<var/2:save/>) and to Host&nbsp;D (<var/3:backup/>).
-<var/always-save-session/> will determine if Resin can take advantage
+(<var>2:save</var>) and to Host&#160;D (<var>3:backup</var>).
+<var>always-save-session</var> will determine if Resin can take advantage
 of read-only sessions or must save the session on each request.</p>
 
-</section>
+</s2>
 
-<section title="Failover">
+<s2 title="Failover">
 
 <p>Since the session always has a current copy on two servers, the load
 balancer can direct requests to the next server in the ring.  The
@@ -210,26 +210,26 @@ succeed even for dumb load balancers, as in the non-sticky-session
 case, because the srun hosts will use the backup as the new owning
 server.</p>
 
-<p>In the example, either Host&nbsp;C or Host&nbsp;D can stop and
+<p>In the example, either Host&#160;C or Host&#160;D can stop and
 the sessions will use the backup.  Of course, the failover will work
 for scheduled downtime as well as server crashes.  A site could
 upgrade one server at a time with no observable downtime.</p>
 
-</section>
+</s2>
 
-<section title="Recovery">
+<s2 title="Recovery">
 
-<p>When Host&nbsp;C restarts, possibly with an upgraded version of Resin,
+<p>When Host&#160;C restarts, possibly with an upgraded version of Resin,
 it needs to use the most up-to-date version of the session; its
 file-saved session will probably be obsolete.  When a "new" session
-arrives, Host&nbsp;C loads the saved session from both the file and
-from Host&nbsp;D.  It will use the newest session as the current
+arrives, Host&#160;C loads the saved session from both the file and
+from Host&#160;D.  It will use the newest session as the current
 value.  Once it's loaded the "new" session, it will remain consistent
 as if the server had never stopped.</p>
 
-</section>
+</s2>
 
-<section title="No Distributed Locking">
+<s2 title="No Distributed Locking">
 
 <p>Resin's cluster sessions does not lock sessions.  For browser-based
 sessions, only one request will execute at a time.  Since browser
@@ -237,11 +237,11 @@ sessions have no concurrently, there's no need for distributed
 locking.  However, it's a good idea to be aware of the lack of
 distributed locking.</p>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="Conclusion">
+<s1 title="Conclusion">
 
 <p>Although reliability generally will end up costing some performance,
 the trick for a good implementation is to increase reliability with a
@@ -251,6 +251,6 @@ robustness with low-enough cost.  Because of its scalability, it's
 more likely that Resin's cluster distributed sessions will be a
 better choice for most deployment configurations.</p>
 
-</section>
+</s1>
   </body>
 </document>

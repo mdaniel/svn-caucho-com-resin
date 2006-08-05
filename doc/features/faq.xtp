@@ -16,21 +16,21 @@
 
 <p>Some customers of Resin are listed on <a href="external|caucho|sales/customers">our website.</a>
 
-<p>The <a href="http://www.netcraft.co.uk/survey/Reports/0301/">January 2003
+</p><p>The <a href="http://www.netcraft.co.uk/survey/Reports/0301/">January 2003
 Netcraft report</a> shows Resin ahead of the other J2EE/Servlet web
 servers.</p>
 
 <deftable>
-<tr><td>Resin<td>24,224
-<tr><td>JRun<td>10,900
-<tr><td>Oracle<td>6,629
-<tr><td>Orion<td>5,680
-<tr><td>WebLogic<td>5,344
-<tr><td>Oracle9iAS<td>2,955
-<tr><td>Jetty<td>1,150
-<tr><td>SilverStream<td>982
-<tr><td>Tomcat<td>377
-</deftable>
+<tr><td>Resin</td><td>24,224
+</td></tr><tr><td>JRun</td><td>10,900
+</td></tr><tr><td>Oracle</td><td>6,629
+</td></tr><tr><td>Orion</td><td>5,680
+</td></tr><tr><td>WebLogic</td><td>5,344
+</td></tr><tr><td>Oracle9iAS</td><td>2,955
+</td></tr><tr><td>Jetty</td><td>1,150
+</td></tr><tr><td>SilverStream</td><td>982
+</td></tr><tr><td>Tomcat</td><td>377
+</td></tr></deftable>
 
 <p>The numbers should be taken with a shaker of salt.  Many/most of those 
 addresses are virtual hosts for a single physical server.  The numbers 

@@ -11,9 +11,9 @@
   </header>
 
   <body>
-    <summary objsummary-in-localtoc='1'/>
+    <summary objsummary-in-localtoc="1"/>
 
-      <faq title='What is the class I get as a DataSource?'>
+      <faq title="What is the class I get as a DataSource?">
 
         <p>The DataSource you get is really a com.caucho.sql.DBPool item.  You can 
         look at the getActiveConnections() and getTotalConnections() to get the 
@@ -63,12 +63,12 @@ a good idea even without database considerations.  You configure your firewall
 to let port 80 and 443 through to your frontend load balancing machine.  You
 might also open up a ssh port to the frontend machine for maintenance access.
 
-<li>use the database features to secure the communication.  MySQL,  for
+</li><li>use the database features to secure the communication.  MySQL,  for
 example, can be configured to only accept connections from certain ip
 addresses, or only from certain username/ip address combinations.  So you
 configure it to only allow connections  from the machines in your cluster.
 
-<li>tunneling tricks, for example you configure your database server to not
+</li><li>tunneling tricks, for example you configure your database server to not
 accept connections from anything but localhost, and then you use ssh to tunnel
 a port on each machine in the cluster to the port on the database server.  This
 becomes a more attractive option if you wish to strongly secure all
@@ -76,19 +76,19 @@ communication between machines in the cluster, secure even from local network
 access.  You might, for example, use ssh to tunnel both your database access
 and your srun communication.
 
-</ol>
+</li></ol>
 </faq>
 
 
-      <faq title='Will the pool be automocatically set to queue if number of connections requested is more than max connections?'>
+      <faq title="Will the pool be automocatically set to queue if number of connections requested is more than max connections?">
 
         <p>You mean block the waiting thread.  Yes.  "queue" doesn't make sense in 
           this context.
 
-        <p>If you're using the PooledDataSource instead of the Driver SPI, you'll 
+        </p><p>If you're using the PooledDataSource instead of the Driver SPI, you'll 
           get the Oracle connection directly.
 
-        <p>Otherwise, you need to case the Connection to
+        </p><p>Otherwise, you need to case the Connection to
         com.caucho.sql.UserConnectionAdapter and call getConnection()
         to get the underlying Oracle connection.</p>
       </faq>
@@ -97,7 +97,7 @@ and your srun communication.
       <faq title="What are the Driver/XADataSource/ConnectionPoolDataSource driver interfaces?">
         <p>Driver is the old JDBC 1.0 interface.  You should use
         XADataSource whenever it's available and you are using
-        transactions. Replace the &lt;driver-name> with that class
+        transactions. Replace the &lt;driver-name&gt; with that class
         name</p>
 
         <p>It appears you can't just use an XADataSource
@@ -132,7 +132,7 @@ and your srun communication.
         interfaces provided by the database vendor, not application
         interfaces.)
 
-        <p>The DataSource you get is really a com.caucho.sql.DBPool
+        </p><p>The DataSource you get is really a com.caucho.sql.DBPool
         item.  You can look at the getActiveConnections() and
         getTotalConnections() to get the state of the pool.</p>
       </faq>
@@ -149,8 +149,8 @@ and your srun communication.
 
       <faq title="What does Resin  do if it is given a JDBC Driver that does not support XAResource in a definition of an XA-capable resource?">
         <description>
-          <p>E.g., the JDBC/ODBC bridge in a Resin &lt;resource-ref> with
-          &lt;res-type> javax.sql.XADataSource. First of all, how does
+          <p>E.g., the JDBC/ODBC bridge in a Resin &lt;resource-ref&gt; with
+          &lt;res-type&gt; javax.sql.XADataSource. First of all, how does
           the container detect if a java.sql.Driver is XA-capable?
           Does it at all?</p>
         </description>
@@ -158,7 +158,7 @@ and your srun communication.
         <p>java.sql.Drivers never support XAResource. XADataSource is the database 
         vendor's interface for XA-capable resources.
 
-        <p>Any time you're using the javax.sql.Driver interface
+        </p><p>Any time you're using the javax.sql.Driver interface
         directly, you're getting an XA adapter, not the JDBC vendor's
         XA interface.</p>
 
@@ -167,7 +167,7 @@ and your srun communication.
 
         <p>With Resin's DBPool you can specify that class in the
         "driver" parameter, but you can also configure the
-        XADataSource separately with a &lt;resource-ref> and then
+        XADataSource separately with a &lt;resource-ref&gt; and then
         refer to it using "data-source" for Resin's pool.</p>
       </faq>
 

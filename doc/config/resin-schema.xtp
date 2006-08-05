@@ -11,7 +11,7 @@
   <body>
     <summary/>
 
-<section title="Relax-NG Schema">
+<s1 title="Relax-NG Schema">
 
 <def title="com/caucho/server/resin/resin.rnc">
 default namespace r = "http://caucho.com/ns/resin"
@@ -50,26 +50,26 @@ l_resin = element l:caucho.com {
 r_access-log = element access-log {
   r_resin-type?
 
-  & r_log-Content
+  &amp; r_log-Content
 
-  & (attribute format { string } | element format { string })?
+  &amp; (attribute format { string } | element format { string })?
 
-  & (attribute archive-format { string } | element archive-format { string })?
+  &amp; (attribute archive-format { string } | element archive-format { string })?
 
-  & r_init?
+  &amp; r_init?
 }
 
 r_cache = element cache {
   r_path?
 
-  & (attribute enable { r_boolean-Type }
+  &amp; (attribute enable { r_boolean-Type }
      | element enable { r_boolean-Type })?
 
-  & (attribute entries { r_int } | element entries { r_int })?
+  &amp; (attribute entries { r_int } | element entries { r_int })?
 
-  & (attribute memory-size { r_int } | element memory-size { r_int })?
+  &amp; (attribute memory-size { r_int } | element memory-size { r_int })?
 
-  & (attribute disk-size { r_int } | element disk-size { r_int })?
+  &amp; (attribute disk-size { r_int } | element disk-size { r_int })?
 }
 
 r_document-directory =
@@ -82,52 +82,52 @@ r_host = element host {
    | attribute regexp { string }
    | element regexp { string })?
 
-  & (attribute host-name { string } | element host-name { string })?
+  &amp; (attribute host-name { string } | element host-name { string })?
 
-  & (attribute secure-host-name { string }
+  &amp; (attribute secure-host-name { string }
     | element secure-host-name { string })?
 
-  & (attribute host-alias { string } | element host-alias { string })*
+  &amp; (attribute host-alias { string } | element host-alias { string })*
 
-  & r_lazy-init?
+  &amp; r_lazy-init?
 
-  & r_startup-mode?
+  &amp; r_startup-mode?
 
-  & r_root-directory?
+  &amp; r_root-directory?
 
-  & r_host-Group
+  &amp; r_host-Group
 }
 
 r_host-Content =
   r_env-Content
 
-  & r_access-log?
+  &amp; r_access-log?
 
-  & r_class-loader-Group
+  &amp; r_class-loader-Group
 
-  & r_document-directory?
+  &amp; r_document-directory?
 
-  & r_ear-default*
+  &amp; r_ear-default*
 
-  & r_ear-deploy*
+  &amp; r_ear-deploy*
 
-  & r_error-page*
+  &amp; r_error-page*
 
-  & r_web-app-deploy*
+  &amp; r_web-app-deploy*
 
-  & r_web-app-default*
+  &amp; r_web-app-default*
 
-  & rc_web-app*
+  &amp; rc_web-app*
 
-## &lt;host> flow control
+## &lt;host&gt; flow control
 r_host-Flow =
   r_host-Content
 
-  & element rcore:env { rcore_env-Args, r_host-Flow }*
+  &amp; element rcore:env { rcore_env-Args, r_host-Flow }*
 
-  & element rcore:if { rcore_if-Args, r_host-Flow }*
+  &amp; element rcore:if { rcore_if-Args, r_host-Flow }*
 
-  & element rcore:choose {
+  &amp; element rcore:choose {
       element rcore:when { rcore_when-Args, r_host-Flow }+,
       element rcore:otherwise { r_host-Flow }?
     }*
@@ -142,19 +142,19 @@ r_host-default = element host-default {
 r_host-deploy = element host-deploy {
   r_path
 
-  & (attribute archive-directory { r_path-Type }
+  &amp; (attribute archive-directory { r_path-Type }
      | element archive-directory { r_path-Type })?
 
-  & (attribute expand-directory { r_path-Type }
+  &amp; (attribute expand-directory { r_path-Type }
      | element expand-directory { r_path-Type })?
 
-  & (attribute host-name { string }
+  &amp; (attribute host-name { string }
      | element host-name { string })?
 
-  & (attribute lazy-init { r_boolean-Type }
+  &amp; (attribute lazy-init { r_boolean-Type }
      | element lazy-init { r_boolean-Type })?
 
-  & r_host-default?
+  &amp; r_host-default?
 }
 
 r_http = element http {
@@ -162,9 +162,9 @@ r_http = element http {
    | attribute server-id { string }
    | element server-id { string })?
 
-  & r_port-Content
+  &amp; r_port-Content
 
-  & (attribute virtual-host { string } | element virtual-host { string })?
+  &amp; (attribute virtual-host { string } | element virtual-host { string })?
 }
 
 r_ignore-client-disconnect =
@@ -186,11 +186,11 @@ r_min-free-memory =
 r_persistent-store = element persistent-store {
   r_jndi-name?
 
-  & (attribute type { string } | element type { string })
+  &amp; (attribute type { string } | element type { string })
 
-  & r_init?
+  &amp; r_init?
 
-  & (attribute max-idle-time { r_period }
+  &amp; (attribute max-idle-time { r_period }
      | element max-idle-time { r_period })?
 }
 
@@ -203,34 +203,34 @@ r_port = element port {
    | attribute server-id { string }
    | element server-id { string })?
 
-  & r_port-Content
+  &amp; r_port-Content
 
-  & (attribute index { string } | element index { string })?
+  &amp; (attribute index { string } | element index { string })?
 
-  & (attribute group { string } | element group { string })?
+  &amp; (attribute group { string } | element group { string })?
 
-  & (attribute backup { string } | element backup { string })?
+  &amp; (attribute backup { string } | element backup { string })?
 
-  & r_protocol
+  &amp; r_protocol
 }
 
 r_port-Content =
   ((attribute port { string } | element port { string })
 
-   & (attribute host { string } | element host { string })?
+   &amp; (attribute host { string } | element host { string })?
 
-   & (attribute read-timeout { r_period-Type }
+   &amp; (attribute read-timeout { r_period-Type }
       | element read-timeout { r_period-Type })?
 
-   & (attribute write-timeout { r_period-Type }
+   &amp; (attribute write-timeout { r_period-Type }
       | element write-timeout { r_period-Type })?
 
-   & (attribute socket-listen-backlog { r_int-Type }
+   &amp; (attribute socket-listen-backlog { r_int-Type }
       | element socket-listen-backlog { r_int-Type })?
 
-   & (attribute tcp-no-delay { string } | element tcp-no-delay { string })?
+   &amp; (attribute tcp-no-delay { string } | element tcp-no-delay { string })?
 
-   & (r_openssl | r_jsse-ssl)?
+   &amp; (r_openssl | r_jsse-ssl)?
    )
 
 r_protocol =
@@ -244,37 +244,37 @@ r_resin = element resin {
   r_resin-Content
 }
 
-## &lt;resin> basic contents
+## &lt;resin&gt; basic contents
 r_resin-Basis = 
   r_env-Basis
 
-  & (attribute user-name { string } | element user-name { string })?
+  &amp; (attribute user-name { string } | element user-name { string })?
 
-  & (attribute group-name { string } | element group-name { string })?
+  &amp; (attribute group-name { string } | element group-name { string })?
 
-  & r_min-free-memory?
+  &amp; r_min-free-memory?
 
-  & (attribute security-provider { string }
+  &amp; (attribute security-provider { string }
     | element security-provider { string })*
 
-  & (attribute security-manager { string }
+  &amp; (attribute security-manager { string }
     | element security-manager { string })*
 
-  & r_server*
+  &amp; r_server*
 
-  & r_thread-pool?
+  &amp; r_thread-pool?
 
-  & r_transaction-manager?
+  &amp; r_transaction-manager?
 
-## &lt;resin> flow control
+## &lt;resin&gt; flow control
 r_resin-Flow =
   r_resin-Basis
 
-  & element rcore:env { rcore_env-Args, r_resin-Flow }*
+  &amp; element rcore:env { rcore_env-Args, r_resin-Flow }*
 
-  & element rcore:if { rcore_if-Args, r_resin-Flow }*
+  &amp; element rcore:if { rcore_if-Args, r_resin-Flow }*
 
-  & element rcore:choose {
+  &amp; element rcore:choose {
       element rcore:when { rcore_when-Args, r_resin-Flow }+,
       element rcore:otherwise { r_resin-Flow }?
     }*
@@ -291,58 +291,58 @@ r_server = element server {
   r_server-Content
 }
 
-## &lt;server> basic contents
+## &lt;server&gt; basic contents
 r_server-Basis = 
   r_env-Basis
 
-  & r_access-log?
+  &amp; r_access-log?
 
-  & r_cache?
+  &amp; r_cache?
 
-  & r_ear-default*
+  &amp; r_ear-default*
 
-  & r_http*
+  &amp; r_http*
 
-  & r_host*
+  &amp; r_host*
 
-  & r_host-default*
+  &amp; r_host-default*
 
-  & r_host-deploy*
+  &amp; r_host-deploy*
 
-  & r_ignore-client-disconnect?
+  &amp; r_ignore-client-disconnect?
 
-  & r_keepalive-max?
+  &amp; r_keepalive-max?
 
-  & r_keepalive-timeout?
+  &amp; r_keepalive-timeout?
 
-  & r_persistent-store?
+  &amp; r_persistent-store?
 
-  & r_ping*
+  &amp; r_ping*
 
-  & r_port*
+  &amp; r_port*
 
-  & r_session-cookie?
+  &amp; r_session-cookie?
 
-  & r_session-url-prefix?
+  &amp; r_session-url-prefix?
 
-  & r_url-character-encoding?
+  &amp; r_url-character-encoding?
 
-  & r_web-app-default*
+  &amp; r_web-app-default*
 
-## &lt;server> flow control
+## &lt;server&gt; flow control
 r_server-Flow =
   (r_class-loader-Group?, r_server-Basis)
 
-  & element rcore:env { rcore_env-Args, r_server-Flow }*
+  &amp; element rcore:env { rcore_env-Args, r_server-Flow }*
 
-  & element rcore:if { rcore_if-Args, r_server-Flow }*
+  &amp; element rcore:if { rcore_if-Args, r_server-Flow }*
 
-  & element rcore:choose {
+  &amp; element rcore:choose {
       element rcore:when { rcore_when-Args, r_server-Flow }+,
       element rcore:otherwise { r_server-Flow }?
     }*
 
-## complete &lt;server> contents
+## complete &lt;server&gt; contents
 r_server-Content = r_server-Flow
 
 r_session-cookie = 
@@ -366,7 +366,7 @@ r_spare-thread-min =
 r_thread-pool = element thread-pool {
   r_thread-max?
 
-  & r_spare-thread-min?
+  &amp; r_spare-thread-min?
 }
 
 r_thread-max =
@@ -386,9 +386,7 @@ r_url-character-encoding =
   | element url-character-encoding { string }
 </def>
 
-</section>
+</s1>
 
   </body>
 </document>
-
-  

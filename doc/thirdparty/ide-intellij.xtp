@@ -6,13 +6,12 @@
 
   <body>
     <summary/>
-<section title="Resin with IntelliJ">
+<s1 title="Resin with IntelliJ">
 
-From <a
-href='http://www.intellij.org/twiki/bin/view/Main/ResinIntegration'>www.intellij.org</a>
+From <a href="http://www.intellij.org/twiki/bin/view/Main/ResinIntegration">www.intellij.org</a>
 : "The Resin integration plugin provides support for using Resin to
 run and debug web applications thru Idea."
 
-</section>
+</s1>
   </body>
 </document>

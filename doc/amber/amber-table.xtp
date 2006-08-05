@@ -9,23 +9,23 @@
   </description>
 </header>
 
-<summary objsummary='localtoc'/>
+<summary objsummary="localtoc"/>
 
-<section title="See Also">
+<s1 title="See Also">
 
 <ul>
 <li>See <a href="http://wiki.caucho.com/Amber">http://wiki.caucho.com/Amber</a> the Amber wiki.
-<li>See <a href="tutorial/cmp-basic/index.xtp">Basic tutorial</a> for
+</li><li>See <a href="tutorial/cmp-basic/index.xtp">Basic tutorial</a> for
 a complete single-table example.
-<li>See <a href="tutorial/cmp-many2one/index.xtp">Many-to-one tutorial</a> for
+</li><li>See <a href="tutorial/cmp-many2one/index.xtp">Many-to-one tutorial</a> for
 basic relations.
-</ul>
+</li></ul>
 
-</section>
+</s1>
 
-<section title="Table annotations">
+<s1 title="Table annotations">
 
-<defun title="@Entity">
+<s2 title="@Entity" type="defun">
 
 <p>Annotates the class as an entity bean.</p>
 
@@ -34,8 +34,8 @@ and the <a href="tutorial/cmp-basic-field/index.xtp">basic field tutorial</a>
 for an introduction.</p>
 
 <deftable-childtags>
-<tr><td>name<td>The name of the bean<td>The class name (unqualified)
-</deftable-childtags>
+<tr><td>name</td><td>The name of the bean</td><td>The class name (unqualified)
+</td></tr></deftable-childtags>
 
 <p>The fields or properties will be annotated by @Id, @Basic, etc.
 Amber will detect either field or property annotation by the
@@ -53,21 +53,21 @@ public @interface Entity {
 }
 </def>
 
-</defun>
+</s2>
 
-<defun title="@SecondaryTable">
+<s2 title="@SecondaryTable" type="defun">
 
 <p>Specifies a secondary database table for an entity bean.
 The secondary table will contain the fields with a secondaryTable
 in the @Column.</p>
 
 <deftable-childtags>
-<tr><td>name<td>The name of the table<td>The unqualified class name.
-<tr><td>catalog<td>the table's catalog<td>none
-<tr><td>schema<td>the table's schema<td>none
-<tr><td>pkJoinColumns<td>join column to the primary table<td>joins the primary key
-<tr><td>uniqueConstraint<td>unique constraints during generation<td>none
-</deftable-childtags>
+<tr><td>name</td><td>The name of the table</td><td>The unqualified class name.
+</td></tr><tr><td>catalog</td><td>the table's catalog</td><td>none
+</td></tr><tr><td>schema</td><td>the table's schema</td><td>none
+</td></tr><tr><td>pkJoinColumns</td><td>join column to the primary table</td><td>joins the primary key
+</td></tr><tr><td>uniqueConstraint</td><td>unique constraints during generation</td><td>none
+</td></tr></deftable-childtags>
 
 <def>
 package javax.persistence;
@@ -83,19 +83,19 @@ public @interface SecondaryTable {
 }
 </def>
 
-</defun>
+</s2>
 
-<defun title="@Table">
+<s2 title="@Table" type="defun">
 
 <p>Specifies the database table for an entity bean.  The
 default table name is the class name.</p>
 
 <deftable-childtags>
-<tr><td>name<td>The name of the table<td>The unqualified class name.
-<tr><td>catalog<td>the table's catalog<td>none
-<tr><td>schema<td>the table's schema<td>none
-<tr><td>uniqueConstraint<td>unique constraints during generation<td>none
-</deftable-childtags>
+<tr><td>name</td><td>The name of the table</td><td>The unqualified class name.
+</td></tr><tr><td>catalog</td><td>the table's catalog</td><td>none
+</td></tr><tr><td>schema</td><td>the table's schema</td><td>none
+</td></tr><tr><td>uniqueConstraint</td><td>unique constraints during generation</td><td>none
+</td></tr></deftable-childtags>
 
 <def>
 package javax.persistence;
@@ -110,26 +110,26 @@ public @interface Table {
 }
 </def>
 
-</defun>
+</s2>
 
-</section>
+</s1>
 
-<section title="Property Annotations">
+<s1 title="Property Annotations">
 
-<defun title="@Basic">
+<s2 title="@Basic" type="defun">
 
 <p>Marks a field as a persistent field.</p>
 
 <deftable-childtags>
-<tr><td>fetch<td>EAGER or LAZY fetching<td>FetchType.EAGER
-<tr><td>optional<td>if true, the column may be null<td>true
-</deftable-childtags>
+<tr><td>fetch</td><td>EAGER or LAZY fetching</td><td>FetchType.EAGER
+</td></tr><tr><td>optional</td><td>if true, the column may be null</td><td>true
+</td></tr></deftable-childtags>
 
 <p>The fetch types are:
-<ul>
+</p><ul>
 <li>EAGER - fetch the field when the bean is loaded
-<li>LAZY - fetch the field only when the field is used
-</ul>
+</li><li>LAZY - fetch the field only when the field is used
+</li></ul>
 
 <example title="String property ">
 @Entity
@@ -162,25 +162,25 @@ public @interface Basic {
 }
 </def>
 
-</defun>
+</s2>
 
-<defun title="@Column">
+<s2 title="@Column" type="defun">
 
 <p>Specifies the field's SQL column name as well as any CREATE TABLE
 properties for auto generation.</p>
 
 <deftable-childtags>
-<tr><td>name<td>The SQL name of the column<td>the field name
-<tr><td>unique<td>True for UNIQUE columns<td>false
-<tr><td>nullable<td>False for IS NOT NULL columns<td>true
-<tr><td>insertable<td>True if column is inserted on a <code>create</code> call<td>true
-<tr><td>updatable<td>True if column is updated when the field is modified<td>false
-<tr><td>columnDefinition<td>SQL to create the column in a CREATE TABLE<td>none
-<tr><td>table<td>specified if column is stored in a secondary table<td>none
-<tr><td>length<td>the default length for a VARCHAR for a CREATE TABLE<td>255
-<tr><td>precision<td>the default length for a number definition for a CREATE TABLE<td>0
-<tr><td>scale<td>the default length for a number definition for a CREATE TABLE<td>0
-</deftable-childtags>
+<tr><td>name</td><td>The SQL name of the column</td><td>the field name
+</td></tr><tr><td>unique</td><td>True for UNIQUE columns</td><td>false
+</td></tr><tr><td>nullable</td><td>False for IS NOT NULL columns</td><td>true
+</td></tr><tr><td>insertable</td><td>True if column is inserted on a <code>create</code> call</td><td>true
+</td></tr><tr><td>updatable</td><td>True if column is updated when the field is modified</td><td>false
+</td></tr><tr><td>columnDefinition</td><td>SQL to create the column in a CREATE TABLE</td><td>none
+</td></tr><tr><td>table</td><td>specified if column is stored in a secondary table</td><td>none
+</td></tr><tr><td>length</td><td>the default length for a VARCHAR for a CREATE TABLE</td><td>255
+</td></tr><tr><td>precision</td><td>the default length for a number definition for a CREATE TABLE</td><td>0
+</td></tr><tr><td>scale</td><td>the default length for a number definition for a CREATE TABLE</td><td>0
+</td></tr></deftable-childtags>
 
 <example title="String property ">
 @Entity
@@ -213,13 +213,13 @@ public @interface Column {
 }
 </def>
 
-</defun>
+</s2>
 
-</section>
+</s1>
 
-<section title="Primary Key Annotations">
+<s1 title="Primary Key Annotations">
 
-<defun title="@Id">
+<s2 title="@Id" type="defun">
 
 <p>Marks a field as a primary key.  The <code>@Id</code>
 may be used in combination with <code>@GeneratedValue</code> to specify a generator for automatic key generation when new
@@ -248,31 +248,31 @@ public @interface Id {
 }
 </def>
 
-</defun>
+</s2>
 
-<defun title="@GeneratedValue">
+<s2 title="@GeneratedValue" type="defun">
 
 <p>Used with @Id to specify a generator for automatic key generation when new
 objects are created.</p>
 
 <deftable-childtags>
-<tr><td>strategy<td>The auto-generation type<td>AUTO
-<tr><td>generator<td>The sequence or table generator name<td>\${table}_cseq
-</deftable-childtags>
+<tr><td>strategy</td><td>The auto-generation type</td><td>AUTO
+</td></tr><tr><td>generator</td><td>The sequence or table generator name</td><td>\${table}_cseq
+</td></tr></deftable-childtags>
 
 <p>The generator types are:
-<ul>
+</p><ul>
 <li>IDENTITY - the database supplies the new key, e.g. auto_increment, SERIAL, or IDENTITY
-<li>SEQUENCE - use a SEQUENCE type to generate the key
-<li>TABLE - use a @TableGenerator for the key
-<li>AUTO - choose the generator based on the database
+</li><li>SEQUENCE - use a SEQUENCE type to generate the key
+</li><li>TABLE - use a @TableGenerator for the key
+</li><li>AUTO - choose the generator based on the database
 <ul>
 <li>MySQL - IDENTITY using auto_increment
-<li>Resin - IDENTITY using auto_increment
-<li>Postgres - SEQUENCE
-<li>Oracle - SEQUENCE
-</ul>
-</ul>
+</li><li>Resin - IDENTITY using auto_increment
+</li><li>Postgres - SEQUENCE
+</li><li>Oracle - SEQUENCE
+</li></ul>
+</li></ul>
 
 <p>For SEQUENCE and TABLE, Resin will create the sequence
 name as "\${table}_cseq".</p>
@@ -313,23 +313,23 @@ public @interface GeneratedValue {
 }
 </def>
 
-</defun>
+</s2>
 
-</section>
+</s1>
 
-<section title="Relation annotations">
+<s1 title="Relation annotations">
 
-<defun title="@JoinTable">
+<s2 title="@JoinTable" type="defun">
 
 <p>Defines an association table for a many-to-many relation.</p>
 
 <deftable-childtags>
-<tr><td>name<td>Table definition for the association table<td>concatening the source and target table names
-<tr><td>catalog<td>Database catalog<td>""
-<tr><td>schema<td>Database schema<td>""
-<tr><td>joinColumns<td>Columns from from the association table to the source table<td>Uses the source table primary key
-<tr><td>inverseJoinColumns<td>Columns from from the association table to the target table<td>Uses the target table primary key
-</deftable-childtags>
+<tr><td>name</td><td>Table definition for the association table</td><td>concatening the source and target table names
+</td></tr><tr><td>catalog</td><td>Database catalog</td><td>""
+</td></tr><tr><td>schema</td><td>Database schema</td><td>""
+</td></tr><tr><td>joinColumns</td><td>Columns from from the association table to the source table</td><td>Uses the source table primary key
+</td></tr><tr><td>inverseJoinColumns</td><td>Columns from from the association table to the target table</td><td>Uses the target table primary key
+</td></tr></deftable-childtags>
 
 <def title="javax.persistence.JoinTable">
 @Target({METHOD, FIELD})
@@ -344,9 +344,9 @@ public @interface JoinTable {
 }
 </def>
 
-</defun>
+</s2>
 
-<defun title="@JoinColumn">
+<s2 title="@JoinColumn" type="defun">
 
 <p>Defines a join (foreign) columns.  Used for <a href="#@ManyToOne">@ManyToOne</a>.</p>
 
@@ -357,15 +357,15 @@ corresponding definition for <a href="#@Basic">@Basic</a> columns.</p>
 tutorial</a> for a full example.</p>
 
 <deftable-childtags>
-<tr><td>name<td>The column name of the source table<td>the column name of the target key
-<tr><td>referencedColumnName<td>The target column for composite keys<td>the single primary key
-<tr><td>unique<td>True if unique<td>false
-<tr><td>nullable<td>False if IS NOT NULL<td>true
-<tr><td>insertable<td>True if the column is inserted on a <code>create</code><td>true
-<tr><td>updateable<td>True if the column is updated on field changes<td>true
-<tr><td>columnDefinition<td>SQL column definition<td>false
-<tr><td>table<td>specifies a secondary table if not in the primary<td>none
-</deftable-childtags>
+<tr><td>name</td><td>The column name of the source table</td><td>the column name of the target key
+</td></tr><tr><td>referencedColumnName</td><td>The target column for composite keys</td><td>the single primary key
+</td></tr><tr><td>unique</td><td>True if unique</td><td>false
+</td></tr><tr><td>nullable</td><td>False if IS NOT NULL</td><td>true
+</td></tr><tr><td>insertable</td><td>True if the column is inserted on a <code>create</code></td><td>true
+</td></tr><tr><td>updateable</td><td>True if the column is updated on field changes</td><td>true
+</td></tr><tr><td>columnDefinition</td><td>SQL column definition</td><td>false
+</td></tr><tr><td>table</td><td>specifies a secondary table if not in the primary</td><td>none
+</td></tr></deftable-childtags>
 
 <example title="Student to House link">
 public class Student {
@@ -402,9 +402,9 @@ public @interface JoinColumn {
 }
 </def>
 
-</defun>
+</s2>
 
-<defun title="@JoinColumns">
+<s2 title="@JoinColumns" type="defun">
 
 <p>Defines a set of join (foreign) columns for composite keys.</p>
 
@@ -416,9 +416,9 @@ public @interface JoinColumns {
 }
 </def>
 
-</defun>
+</s2>
 
-<defun title="@ManyToMany">
+<s2 title="@ManyToMany" type="defun">
 
 <p>Marks a field as a many-to-many (association) relation.</p>
 
@@ -427,11 +427,11 @@ public @interface JoinColumns {
 <p>See the <a href="tutorial/cmp-many2many/index.xtp">many-to-many tutorial</a> for an example.</p>
 
 <deftable-childtags>
-<tr><td>targetEntity<td>The class of the target entity<td>the property's type
-<tr><td>cascade<td>Operations which cascade to the target<td>none
-<tr><td>fetch<td>EAGER or LAZY fetching<td>FetchType.EAGER
-<tr><td>mappedBy<td>Specifies the source relation if a target<td>
-</deftable-childtags>
+<tr><td>targetEntity</td><td>The class of the target entity</td><td>the property's type
+</td></tr><tr><td>cascade</td><td>Operations which cascade to the target</td><td>none
+</td></tr><tr><td>fetch</td><td>EAGER or LAZY fetching</td><td>FetchType.EAGER
+</td></tr><tr><td>mappedBy</td><td>Specifies the source relation if a target</td><td>
+</td></tr></deftable-childtags>
 
 <example title="Simple link ">
 @Entity
@@ -459,9 +459,9 @@ public @interface ManyToMany {
 }
 </def>
 
-</defun>
+</s2>
 
-<defun title="@ManyToOne">
+<s2 title="@ManyToOne" type="defun">
 
 <p>Marks a field as a many-to-one (link) relation.</p>
 
@@ -470,11 +470,11 @@ public @interface ManyToMany {
 <p>See the <a href="tutorial/cmp-many2one/index.xtp">many-to-one tutorial</a> for an example.</p>
 
 <deftable-childtags>
-<tr><td>targetEntity<td>The class of the target entity<td>the property's type
-<tr><td>cascade<td>Operations which cascade to the target<td>none
-<tr><td>fetch<td>EAGER or LAZY fetching<td>FetchType.EAGER
-<tr><td>optional<td>If false, the relation must always have a value<td>true
-</deftable-childtags>
+<tr><td>targetEntity</td><td>The class of the target entity</td><td>the property's type
+</td></tr><tr><td>cascade</td><td>Operations which cascade to the target</td><td>none
+</td></tr><tr><td>fetch</td><td>EAGER or LAZY fetching</td><td>FetchType.EAGER
+</td></tr><tr><td>optional</td><td>If false, the relation must always have a value</td><td>true
+</td></tr></deftable-childtags>
 
 <example title="Simple link ">
 @Entity
@@ -498,20 +498,20 @@ public @interface ManyToOne {
 }
 </def>
 
-</defun>
+</s2>
 
-<defun title="@OneToMany">
+<s2 title="@OneToMany" type="defun">
 
 <p>Marks a field as a one-to-many (collection) relation.
 Because a one-to-many field is dependent, it
 needs a @ManyToOne relation on the source table which defines the column.</p>
 
 <deftable-childtags>
-<tr><td>targetEntity<td>The class of the target entity<td>the property's type
-<tr><td>cascade<td>Operations which cascade to the target<td>none
-<tr><td>fetch<td>EAGER or LAZY fetching<td>FetchType.EAGER
-<tr><td>mappedBy<td>Specifies the owning @ManyToOne property<td>
-</deftable-childtags>
+<tr><td>targetEntity</td><td>The class of the target entity</td><td>the property's type
+</td></tr><tr><td>cascade</td><td>Operations which cascade to the target</td><td>none
+</td></tr><tr><td>fetch</td><td>EAGER or LAZY fetching</td><td>FetchType.EAGER
+</td></tr><tr><td>mappedBy</td><td>Specifies the owning @ManyToOne property</td><td>
+</td></tr></deftable-childtags>
 
 <example title="Collection java">
 @Entity
@@ -554,20 +554,20 @@ public @interface OneToMany {
 }
 </def>
 
-</defun>
+</s2>
 
-<defun title="@OneToOne">
+<s2 title="@OneToOne" type="defun">
 
 <p>Marks a field as a one-to-one (dependent link) relation.
 Because a one-to-one field is dependent, it
 needs a @ManyToOne relation on the source table which defines the column.</p>
 
 <deftable-childtags>
-<tr><td>targetEntity<td>The class of the target entity<td>the property's type
-<tr><td>cascade<td>Operations which cascade to the target<td>none
-<tr><td>fetch<td>EAGER or LAZY fetching<td>FetchType.EAGER
-<tr><td>mappedBy<td>Specifies the owning relation<td>
-</deftable-childtags>
+<tr><td>targetEntity</td><td>The class of the target entity</td><td>the property's type
+</td></tr><tr><td>cascade</td><td>Operations which cascade to the target</td><td>none
+</td></tr><tr><td>fetch</td><td>EAGER or LAZY fetching</td><td>FetchType.EAGER
+</td></tr><tr><td>mappedBy</td><td>Specifies the owning relation</td><td>
+</td></tr></deftable-childtags>
 
 <def title="javax.persistence.OneToOne">
 @Target({METHOD, FIELD})
@@ -581,13 +581,13 @@ public @interface OneToOne {
 }
 </def>
 
-</defun>
+</s2>
 
-</section>
+</s1>
 
-<section title="Inheritance annotations">
+<s1 title="Inheritance annotations">
 
-<defun title="@DiscriminatorColumn">
+<s2 title="@DiscriminatorColumn" type="defun">
 
 <p>Configures the discriminator column.</p>
 
@@ -602,9 +602,9 @@ public @interface DiscriminatorColumn {
 }
 </def>
 
-</defun>
+</s2>
 
-<defun title="@Inheritance">
+<s2 title="@Inheritance" type="defun">
 
 <p>@Inheritance marks the entity bean as supporting inheritance,
 i.e. the database maps to different Java classes depending on
@@ -618,9 +618,9 @@ public @interface Inheritance {
 }
 </def>
 
-</defun>
+</s2>
 
-<defun title="InheritanceType">
+<s2 title="InheritanceType" type="defun">
 
 <def title="javax.persistence.InheritanceType">
 public enum InheritanceType {
@@ -630,8 +630,8 @@ public enum InheritanceType {
 }
 </def>
 
-</defun>
+</s2>
 
-</section>
+</s1>
 
 </document>

@@ -9,7 +9,7 @@
 <body>
 
 <summary/>
-<section title='GzipFilter'>
+<s1 title="GzipFilter">
 
 <p>The GzipFilter compresses the output of pages for browsers which understand
 compression, and leaves the output unchanged if the browser does not support
@@ -19,46 +19,46 @@ compression by including "gzip" in the "Accept-Encoding" request header.</p>
 <p>GzipFilter is available in Resin-Professional.</p>
 
 <deftable-parameters>
-<tr><td>use-vary<td>Set the standard HTTP "Vary" response header to "Accept-Encoding". This indicates to the browser and any intervening cache that the response from this url might be different depending on the Accept-Encoding provided by the browser.<td>true
-<tr><td>no-cache<td>Forbid the browser and any intervening cache from caching the results of this request. Sets the "Cache-Control" response header to "no-cache".  If use-vary is false then this is always true.<td>false
-<tr><td>embed-error-in-output<td>Embed the stack trace of any exception into the output stream that is being sent to the browser.<td>false
-</deftable-parameters>
+<tr><td>use-vary</td><td>Set the standard HTTP "Vary" response header to "Accept-Encoding". This indicates to the browser and any intervening cache that the response from this url might be different depending on the Accept-Encoding provided by the browser.</td><td>true
+</td></tr><tr><td>no-cache</td><td>Forbid the browser and any intervening cache from caching the results of this request. Sets the "Cache-Control" response header to "no-cache".  If use-vary is false then this is always true.</td><td>false
+</td></tr><tr><td>embed-error-in-output</td><td>Embed the stack trace of any exception into the output stream that is being sent to the browser.</td><td>false
+</td></tr></deftable-parameters>
 
 <example>
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
   &lt;filter filter-name="gzip"
-          filter-class="com.caucho.filters.GzipFilter"/>
+          filter-class="com.caucho.filters.GzipFilter"/&gt;
 
-  &lt;filter-mapping url-pattern="/*" filter-name="gzip"/>
-&lt;/web-app>
+  &lt;filter-mapping url-pattern="/*" filter-name="gzip"/&gt;
+&lt;/web-app&gt;
 </example>
 
-See <a href="javadoc|com.caucho.filters.GzipFilter|"></a>.
-</section>
+See <a href="javadoc|com.caucho.filters.GzipFilter|"/>.
+</s1>
 
-<section title='XsltFilter'>
+<s1 title="XsltFilter">
 
 <p>The XsltFilter transforms the response using xslt.  A Servlet or a JSP can
 produce XML results which are transformed using xslt.</p>
 
 <example>
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
   &lt;filter filter-name="xslt"
-          filter-class="com.caucho.filters.XsltFilter"/>
+          filter-class="com.caucho.filters.XsltFilter"/&gt;
 
-  &lt;filter-mapping url-pattern="/*.jsp" filter-name="xslt"/>
-&lt;/web-app>
+  &lt;filter-mapping url-pattern="/*.jsp" filter-name="xslt"/&gt;
+&lt;/web-app&gt;
 </example>
 
 <deftable-parameters>
-<tr><td>unconditional<td>always do a transformation, regardless of the content type.<td>false
-</deftable-parameters>
+<tr><td>unconditional</td><td>always do a transformation, regardless of the content type.</td><td>false
+</td></tr></deftable-parameters>
 
 <p>
-See <a href="javadoc|com.caucho.servlets.XsltFilter|"></a>.
+See <a href="javadoc|com.caucho.servlets.XsltFilter|"/>.
 </p>
 
-<section name="specify-stylesheet" title="A request attribute or xml processing directive specifies the stylesheet">
+<s2 name="specify-stylesheet" title="A request attribute or xml processing directive specifies the stylesheet">
 
 <p>
 Resin's XsltFilter determines the stylesheet (*.xsl file) to apply from the
@@ -67,9 +67,9 @@ first of:
 
 <ol>
 <li>The value of <code>request.getAttribute("caucho.xsl.stylesheet")</code>
-<li>A stylesheet specified in the source document with <code>&lt;?xml-stylesheet href='...'?&gt;</code>
-<li><code>default.xsl</code>
-</ol>
+</li><li>A stylesheet specified in the source document with <code>&lt;?xml-stylesheet href='...'?&gt;</code>
+</li><li><code>default.xsl</code>
+</li></ol>
 
 <p>
 The classpath is used to find the stylesheet.  A stylesheet can be placed in
@@ -102,17 +102,17 @@ WEB-INF/xsl/default.xsl
 &lt;?xml-stylesheet type="text/xsl" href="transform.xsl"?&gt;
 </example>
 
-</section>
+</s2>
 
-<section name="content-type" title="The stylesheet is applied only for certain content types">
+<s2 name="content-type" title="The stylesheet is applied only for certain content types">
 
 <p>The filter by default will only transform responses that have a content type
 of one of the following:</p> 
 <ul>
 <li>x-application/xslt
-<li>x-application/xsl
-<li>x-application/stylescript
-</ul>
+</li><li>x-application/xsl
+</li><li>x-application/stylescript
+</li></ul>
 
 <p>The filter can also be configured to unconditionally do a transformation
 regardless of the content type:</p> 
@@ -129,11 +129,11 @@ regardless of the content type:</p>
 &lt;/web-app&gt;
 </example>
 
-</section> <!-- content-type -->
+</s2> <!-- content-type -->
 
-</section>  <!-- XsltFilter -->
+</s1>  <!-- XsltFilter -->
 
-<section title='TransactionFilter'>
+<s1 title="TransactionFilter">
 
 <p>The TransactionFilter wraps the request in a UserTransaction and
 commits the transaction when the servlet completes. All database calls for
@@ -143,30 +143,29 @@ the request will either succeed together or fail.  The UserTransaction is obtain
 request by doing a rollback on the transaction.</p>
 
 <example>
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
   &lt;filter filter-name='transaction-filter'
-          filter-class='com.caucho.filters.TransactionFilter'/>
+          filter-class='com.caucho.filters.TransactionFilter'/&gt;
 
   &lt;filter-mapping url-pattern='/DatabaseServlet/*'
-                  filter-name='transaction-filter'/>
-&lt;/web-app>
+                  filter-name='transaction-filter'/&gt;
+&lt;/web-app&gt;
 </example>
 
-See <a href="javadoc|com.caucho.servlets.TransactionFilter|"></a>.
-</section>
+See <a href="javadoc|com.caucho.servlets.TransactionFilter|"/>.
+</s1>
 
-<section title='ExpiresFilter'>
+<s1 title="ExpiresFilter">
 
 <p>The ExpiresFilter sets the Expires cache control header, allowing
 servlet output and jsp results to be cached for a short time.</p>
 
 <p>This is useful for indicating an Expires time to the browser, and it is even
-more useful when used in conjunction with <a
-href="doc|performance|caching">Resin's HTTP proxy cache</a>.  If Resin's HTTP proxy cache is in use, even a short Expires time (like 2s) can result in performance gains.</p>
+more useful when used in conjunction with <a href="doc|performance|caching">Resin's HTTP proxy cache</a>.  If Resin's HTTP proxy cache is in use, even a short Expires time (like 2s) can result in performance gains.</p>
 
 <deftable-parameters>
-<tr><td>cache-time<td>The amount of time before the servlet output will be requested again. In seconds (2s), minutes (2m), hours (2h), or days (2D).<td>2s
-</deftable-parameters>
+<tr><td>cache-time</td><td>The amount of time before the servlet output will be requested again. In seconds (2s), minutes (2m), hours (2h), or days (2D).</td><td>2s
+</td></tr></deftable-parameters>
 
 <example title="Caching stock quotes for 60 seconds">
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
@@ -189,10 +188,10 @@ used, the first request from any browser will cause execution of the
 StockQuoteServlet, any requests from any browser for the next 60 seconds will
 be served from the proxy cache (the servlet will not be called). </p>
 
-See <a href="javadoc|com.caucho.servlets.ExpiresFilter|"></a>.
-</section>
+See <a href="javadoc|com.caucho.servlets.ExpiresFilter|"/>.
+</s1>
 
-<section title='AnonymousExpiresFilter'>
+<s1 title="AnonymousExpiresFilter">
 
 <p>The AnonymousExpiresFilter caches the response for anonymous users.  A user
 is anonymous if the do not have a session.   When a page has custom formatting
@@ -202,8 +201,8 @@ users saving time and database access.</p>
 <p>The benefits of using this filter are similar to those described in <a href="#ExpiresFilter">ExpiresFilter</a>.</p>
 
 <deftable-parameters>
-<tr><td>cache-time<td>The amount of time before the servlet output will be requested again. In seconds (2s), minutes (2m), hours (2h), or days (2D).<td>2s
-</deftable-parameters>
+<tr><td>cache-time</td><td>The amount of time before the servlet output will be requested again. In seconds (2s), minutes (2m), hours (2h), or days (2D).</td><td>2s
+</td></tr></deftable-parameters>
 
 <p>Servlets should call <code>request.getSession(false)</code> to get their
 sessions, because once a session is created the response will no longer be
@@ -225,10 +224,10 @@ session='false'/&gt;</code> for all pages that do not need a session.</p>
 &lt;/web-app&gt;
 </example>
 
-See <a href="javadoc|com.caucho.servlets.AnonymousExpiresFilter|"></a>.
-</section>
+See <a href="javadoc|com.caucho.servlets.AnonymousExpiresFilter|"/>.
+</s1>
 
-<section title='RewriteFilter'>
+<s1 title="RewriteFilter">
 
 <p>The RewriteFilter rewrites and forwards URLs matching a
 regular expression.  It is useful either when URLs change during a site
@@ -236,7 +235,7 @@ redesign or when a site might want to hide its JSP structure.  The
 functionality is similar to mod_rewrite in the Apache web server.</p>
 
 <p>The RewriteFilter is configured with a list of &lt;rewrite&gt; tags.  Each
-tag has a <var/pattern/> which matches against the URL and a <var/target/>
+tag has a <var>pattern</var> which matches against the URL and a <var>target</var>
 which specifies the new URL to be forwarded to.  Multiple &lt;rewrite&gt; tags are allowed.</p>
 
 <example title="RewriteFilter example">
@@ -251,8 +250,8 @@ which specifies the new URL to be forwarded to.  Multiple &lt;rewrite&gt; tags a
 &lt;filter-mapping url-pattern='/*' filter-name='rewrite'/&gt;
 </example>
 
-See <a href="javadoc|com.caucho.servlets.RewriteFilter|"></a>.
-</section>
+See <a href="javadoc|com.caucho.servlets.RewriteFilter|"/>.
+</s1>
 <!--
 <section title='PasswordFilter'>
 
@@ -279,7 +278,7 @@ See <a href="javadoc|com.caucho.servlets.PasswordFilter|"></a>.
 </section>
 -->
 
-<section title="ThrottleFilter">
+<s1 title="ThrottleFilter">
 
 <p>
 The ThrottleFilter filter implemented with 
@@ -291,16 +290,16 @@ that can use more threads than they should.
 
 <example>
 &lt;filter filter-name="throttle"
-        filter-class="com.caucho.filters.ThrottleFilter">
-  &lt;init>
-    &lt;max-concurrent-requests>2&lt;/max-concurrent-requests>
-  &lt;/init>
-&lt;/filter>
+        filter-class="com.caucho.filters.ThrottleFilter"&gt;
+  &lt;init&gt;
+    &lt;max-concurrent-requests&gt;2&lt;/max-concurrent-requests&gt;
+  &lt;/init&gt;
+&lt;/filter&gt;
 
-&lt;filter-mapping url-pattern="/*" filter-name="throttle"/>
+&lt;filter-mapping url-pattern="/*" filter-name="throttle"/&gt;
 </example>
 
 
-</section>
+</s1>
 </body>
 </document>

@@ -13,41 +13,41 @@
 <note>These annotations will likely change package names to something
 other than javax.ejb as J2EE 1.5 drafts progress.</note>
 
-<summary objsummary='localtoc'/>
+<summary objsummary="localtoc"/>
 
-<section title="See Also">
+<s1 title="See Also">
 
 <ul>
 <li>See <a href="tutorial/session/index.xtp">session tutorial
 </a> for an example.
-</ul>
+</li></ul>
 
-</section>
+</s1>
 
-<section title="Bean Annotations">
+<s1 title="Bean Annotations">
 
-<defun title="@Entity">
+<s2 title="@Entity" type="defun">
 
 <p>Marks the class as an entity bean.  Each entity bean corresponds to
 a database row. Entity bean persistence is configured with
 the <a href="cmp-table.xtp">CMP annotations</a>.
 
-<p>In EJB 3.0, the application uses entity bean instances directly.  Unlike
+</p><p>In EJB 3.0, the application uses entity bean instances directly.  Unlike
 EJB 2.1, there is no pooling, local stub, or home interface for an entity.</p>
 
 <deftable-childtags>
-<tr><td>name<td>The bean's name<td>The bean's class name
-<tr><td>entityType<td>container-managed (CMP) or bean-managed (BMP)<td>CMP
-<tr><td>access<td>field-based (FIELD) or method-getter based (PROPERTY)<td>PROPERTY
-<tr><td>version<td>EJB version<td>3
-</deftable-childtags>
+<tr><td>name</td><td>The bean's name</td><td>The bean's class name
+</td></tr><tr><td>entityType</td><td>container-managed (CMP) or bean-managed (BMP)</td><td>CMP
+</td></tr><tr><td>access</td><td>field-based (FIELD) or method-getter based (PROPERTY)</td><td>PROPERTY
+</td></tr><tr><td>version</td><td>EJB version</td><td>3
+</td></tr></deftable-childtags>
 
 <ul>
 <li>See the <a href="tutorial/cmp-basic/index.xtp">basic tutorial</a>
 for PROPERTY-based entity beans.
-<li>See the <a href="tutorial/cmp-basic-field/index.xtp">basic field
+</li><li>See the <a href="tutorial/cmp-basic-field/index.xtp">basic field
 tutorial</a> for FIELD-based entity beans.
-</ul>
+</li></ul>
 
 <def>
 @Target(TYPE)
@@ -61,9 +61,9 @@ public @interface Entity {
 }
 </def>
 
-</defun>
+</s2>
 
-<defun title="@TransactionAttribute">
+<s2 title="@TransactionAttribute" type="defun">
 
 <p>Defines the transaction boundary for session business methods.  The
 default value is REQUIRED.  If 
@@ -71,21 +71,21 @@ default value is REQUIRED.  If
 value. </p>
 
 <deftable>
-<tr><th>TransactionAttribute<th>meaning
-<tr><td>REQUIRED<td>Start a new transaction if necessary
-<tr><td>SUPPORTS<td>Don't start a new transaction, but use one if it
+<tr><th>TransactionAttribute</th><th>meaning
+</th></tr><tr><td>REQUIRED</td><td>Start a new transaction if necessary
+</td></tr><tr><td>SUPPORTS</td><td>Don't start a new transaction, but use one if it
 exists
-<tr><td>MANDATORY<td>Require the caller to have started a transaction
-<tr><td>NEVER<td>Forbid the caller to have started a transaction
-<tr><td>REQUIRESNEW<td>Always start a new transaction, suspending the
+</td></tr><tr><td>MANDATORY</td><td>Require the caller to have started a transaction
+</td></tr><tr><td>NEVER</td><td>Forbid the caller to have started a transaction
+</td></tr><tr><td>REQUIRESNEW</td><td>Always start a new transaction, suspending the
 old one
-<tr><td>NOTSUPPORTED<td>Suspend any active transaction
-</deftable>
+</td></tr><tr><td>NOTSUPPORTED</td><td>Suspend any active transaction
+</td></tr></deftable>
 
 <ul>
 <li>SUPPORTS is typically used for read-only methods
-<li>REQUIRED is typically used for updating (read/write) methods
-</ul>
+</li><li>REQUIRED is typically used for updating (read/write) methods
+</li></ul>
 
 <def>
 @Target({TYPE,METHOD})
@@ -95,13 +95,13 @@ public @interface TransactionAttribute {
 }
 </def>
 
-</defun>
+</s2>
 
-</section>
+</s1>
 
-<section title="Dependency Injection Annotations">
+<s1 title="Dependency Injection Annotations">
 
-<defun title="@EJB">
+<s2 title="@EJB" type="defun">
 
 <p>Configures an EJB values for a field or method.</p>
 
@@ -109,8 +109,8 @@ public @interface TransactionAttribute {
 result is an EJB interface.</p>
 
 <deftable-childtags>
-<tr><td>jndiName<td>The jndi name of the resource<td>The field name
-</deftable-childtags>
+<tr><td>jndiName</td><td>The jndi name of the resource</td><td>The field name
+</td></tr></deftable-childtags>
 
 <p>In the following exaple, Resin will call <code>setFoo</code>
 method with the bean in "java:comp/env/ejb/foo" before the
@@ -134,9 +134,9 @@ public @interface EJB {
 }
 </def>
 
-</defun>
+</s2>
 
-<defun title="@Inject">
+<s2 title="@Inject" type="defun">
 
 <p>Configures a JNDI values for a field or method.</p>
 
@@ -144,10 +144,10 @@ public @interface EJB {
 and type.  If more information is required, use @Resource, @EJB, or @EJBHome.
 
 <deftable-childtags>
-<tr><td>jndiName<td>The jndi name of the resource<td>The field name
-</deftable-childtags>
+<tr><td>jndiName</td><td>The jndi name of the resource</td><td>The field name
+</td></tr></deftable-childtags>
 
-<p>In the following exaple, Resin will call <code>setDataSource</code>
+</p><p>In the following exaple, Resin will call <code>setDataSource</code>
 method with the data source in "java:comp/env/jdbc/test" before the
 session is started.</p>
 
@@ -167,9 +167,9 @@ public @interface Inject {
 }
 </def>
 
-</defun>
+</s2>
 
-<defun title="@Resource">
+<s2 title="@Resource" type="defun">
 
 <p>Configures a JNDI values for a field or method.  @Resource
 is essentially the same as @Inject but provides more configurable
@@ -178,12 +178,12 @@ declare a dependency in cases where the session bean loads the
 JNDI value by itself.</p>
 
 <deftable-childtags>
-<tr><td>name<td>The name of the resource<td>The field name
-<tr><td>resourceType<td>The resource typed<td>The field type
-<tr><td>authenticationType<td>Whether the container or the application is responsible for authentication<td>CONTAINER
-<tr><td>shareable<td>True if the bean follows JCA shareability requirements.<td>true
-<tr><td>jndiName<td>The jndi name of the resource<td>The field name
-</deftable-childtags>
+<tr><td>name</td><td>The name of the resource</td><td>The field name
+</td></tr><tr><td>resourceType</td><td>The resource typed</td><td>The field type
+</td></tr><tr><td>authenticationType</td><td>Whether the container or the application is responsible for authentication</td><td>CONTAINER
+</td></tr><tr><td>shareable</td><td>True if the bean follows JCA shareability requirements.</td><td>true
+</td></tr><tr><td>jndiName</td><td>The jndi name of the resource</td><td>The field name
+</td></tr></deftable-childtags>
 
 <p>In the following exaple, Resin will call <code>setDataSource</code>
 method with the data source in "java:comp/env/jdbc/test" before the
@@ -191,13 +191,13 @@ session is started.  The "java:comp/env/jdbc" full name
 is inferred from the DataSource type.</p>
 
 <deftable title="default JNDI names">
-<tr><td>javax.sql.DataSource<td>java:comp/env/jdbc
-<tr><td>javax.mail.*<td>java:comp/env/mail
-<tr><td>javax.ejb.EntityManager<td>java:comp/EntityManager
-<tr><td>javax.transaction.UserTransaction<td>java:comp/UserTransaction
-<tr><td>javax.ejb.EJBHome<td>java:comp/env/ejb
-<tr><td>javax.jms.*<td>java:comp/env/jms
-</deftable>
+<tr><td>javax.sql.DataSource</td><td>java:comp/env/jdbc
+</td></tr><tr><td>javax.mail.*</td><td>java:comp/env/mail
+</td></tr><tr><td>javax.ejb.EntityManager</td><td>java:comp/EntityManager
+</td></tr><tr><td>javax.transaction.UserTransaction</td><td>java:comp/UserTransaction
+</td></tr><tr><td>javax.ejb.EJBHome</td><td>java:comp/env/ejb
+</td></tr><tr><td>javax.jms.*</td><td>java:comp/env/jms
+</td></tr></deftable>
 
 <example>
 @Resource(name="test")
@@ -219,8 +219,8 @@ public @interface Resource {
 }
 </def>
 
-</defun>
+</s2>
 
-</section>
+</s1>
 
 </document>

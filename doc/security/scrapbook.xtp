@@ -11,7 +11,7 @@
   </header>
 
   <body>
-    <summary objsummary-in-localtoc='1'/>
+    <summary objsummary-in-localtoc="1"/>
 
 <faq name="port80" title="How do I handle port 80 and root issues on Linux?">
 
@@ -39,13 +39,13 @@ iptables -t nat -A PREROUTING -d your hostname -p tcp --dport 80 -j REDIRECT --t
 <faq name="sslresources" title="Where can I learn more about SSL?">
 <ul>
 <li><a href="http://httpd.apache.org/docs-2.0/ssl/ssl_intro.html">Apache documentation</a>
-</ul>
+</li></ul>
 </faq>
 
 <faq name="convertjsse" title="Converting a JSSE Keystore to OpenSSL">
 <ul>
 <li><a href="http://www.thauvin.net/blog/stories.jsp?id=42">Erik's Weblog - Converting a JSSE Keystore to OpenSSL</a>
-</ul>
+</li></ul>
 </faq>
 
 <faq name="ssl-vhosts" title="How can I handle SSL for virtual hosts if I have a separate IP for each host?">

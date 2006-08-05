@@ -12,9 +12,9 @@ verified.</p>
 </header>
 
 <body>
-<summary objsummary='localtoc'/>
+<summary objsummary="localtoc"/>
 
-<section title="General">
+<s1 title="General">
 
 <faq title="What are the best things to tune for better performance?">
 <description>
@@ -23,14 +23,14 @@ verified.</p>
 for Windows.  For deployment, you should set it something high like 60s
 or larger.</p>
 
-<p>You can also change the <a config-tag='cache-mapping'/> values, especially for stuff
+<p>You can also change the <a config-tag="cache-mapping"/> values, especially for stuff
 like *.gif files that don't change.  Higher values mean that the
 browsers won't need to go back to the server.</p>
 
 <p>Other than that, most of the default configuration values are pretty
 good, so you normally won't need to touch them.
 
-<p>The most important performance tweak you can make is to set Expires or
+</p><p>The most important performance tweak you can make is to set Expires or
 better Last-Modified and/or ETag values on your servlet/JSP output.  If
 the servlet/JSP output only changes every 15 minutes, as for a news
 page, then caching it can be a big performance win.</p>
@@ -70,9 +70,9 @@ there is a performance decrease with JSP and Servlet files,
 which comes from the overhead needed for the communication
 between the other web server and Resin.</p>
 </faq>
-</section>
+</s1>
 
-<section title="Caching">
+<s1 title="Caching">
 <faq title="what get's cached when a servlet does a forward?">
 <description>
 <p>
@@ -107,9 +107,9 @@ will set it for you.  </p>
 <ol>
 <li>either ETag or Last-Modified must be set in the response (ETag is 
 better).  The servlet will normally set that value.
-<li>no cache-control is set in the response headers
-<li>no Vary tag is set (Resin doesn't completely implement Vary.)
-</ol>
+</li><li>no cache-control is set in the response headers
+</li><li>no Vary tag is set (Resin doesn't completely implement Vary.)
+</li></ol>
 
 <p>So your servlet still needs to do some work.  &lt;cache-mapping&gt; isn't all 
 that you need.  The reason that &lt;cache-mapping&gt; works with  normal files 
@@ -141,10 +141,9 @@ time invalidates it, and while it is being filled the other
 requests pass through to the resource being cached.</p>
 
 <p>This behaviour may be changed in Resin 3.0, updates are available
-<a
-href="http://www.caucho.com/quercus/bugtrack/view.xtp?bugreport_id=1135">here</a>.</p>
+<a href="http://www.caucho.com/quercus/bugtrack/view.xtp?bugreport_id=1135">here</a>.</p>
 
 </faq>
-</section>
+</s1>
 </body>
 </document>

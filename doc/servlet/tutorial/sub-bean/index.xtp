@@ -11,9 +11,9 @@
   <body>
     <summary/>
 
-<section title="BeanServlet">
+<s1 title="BeanServlet">
 
-<example title='WEB-INF/classes/test/Bean.java'>
+<example title="WEB-INF/classes/test/Bean.java">
 package test;
 
 public class Bean {
@@ -31,7 +31,7 @@ public class Bean {
 }
 </example>
 
-<example title='WEB-INF/classes/test/BeanServlet.java'>
+<example title="WEB-INF/classes/test/BeanServlet.java">
 package test;
 
 import java.io.*;
@@ -60,7 +60,7 @@ public class BeanServlet extends HttpServlet {
     for (int i = 0; i &lt; _beans.size(); i++) {
       Bean bean = (Bean) _beans.get(i);
 
-      out.println(bean.getValue() + "&lt;br>");
+      out.println(bean.getValue() + "&lt;br&gt;");
     }
 
     out.close();
@@ -68,27 +68,27 @@ public class BeanServlet extends HttpServlet {
 }
 </example>
 
-</section>
+</s1>
 
-<section title="Configuration">
+<s1 title="Configuration">
 
 <example title="WEB-INF/web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
   &lt;servlet servlet-name="bean"
-            servlet-class="test.BeanServlet">
-    &lt;init>
-      &lt;bean value="bean-a"/>
-      &lt;bean value="bean-b"/>
-      &lt;bean value="bean-c"/>
-    &lt;/init>
-  &lt;/servlet>
+            servlet-class="test.BeanServlet"&gt;
+    &lt;init&gt;
+      &lt;bean value="bean-a"/&gt;
+      &lt;bean value="bean-b"/&gt;
+      &lt;bean value="bean-c"/&gt;
+    &lt;/init&gt;
+  &lt;/servlet&gt;
 
   &lt;servlet-mapping url-pattern="/bean"
-            servlet-name="bean"/>
-&lt;/web-app>
+            servlet-name="bean"/&gt;
+&lt;/web-app&gt;
 </example>
 
-</section>
+</s1>
 
   </body>
 </document>

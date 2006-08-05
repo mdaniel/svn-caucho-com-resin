@@ -6,9 +6,9 @@
 
 <body>
 
-<summary objsummary='localtoc'/>
+<summary objsummary="localtoc"/>
 
-<section title="Overview">
+<s1 title="Overview">
 
 <p>Resin 3.0.0 is a significant internal redesign of Resin.  As features
 have accumulated and Java and XML design have progressed, the old code
@@ -27,10 +27,10 @@ releases.  For many users, the stability of 3.0.x will be sufficient
 for deployment, but we wanted to give an extra warning to make sure
 that people stress tested their applications before deploying on 3.0.x.</p>
 
-</section>
+</s1>
 
-<section title="Configuration Changes">
-  <section title="Backward Compatibility">
+<s1 title="Configuration Changes">
+  <s2 title="Backward Compatibility">
 
 <p>As much as possible, Resin 3.0.0 configuration is expected to
 provide backward compatibility.  In most cases, the Resin 2.1.x
@@ -41,19 +41,19 @@ specifies the xmlns="http://caucho.com/ns/resin" namespace, only the
 new configuration will be accepted.</p>
 
 <p>The primary exceptions are handling of web-app and host defaults.
-Resin 3.0.0 has a &lt;web-app-default> and a &lt;host-default>
+Resin 3.0.0 has a &lt;web-app-default&gt; and a &lt;host-default&gt;
 elements.  It is now no longer legal to put web-app configuration in
-the &lt;host> or the &lt;server> sections.</p>
+the &lt;host&gt; or the &lt;server&gt; sections.</p>
 
 <p>In addition, there is no longer any default web-app or host.  In
-other words, if the resin.conf has no &lt;host id=''> or &lt;web-app
-id='/'>,
+other words, if the resin.conf has no &lt;host id=''&gt; or &lt;web-app
+id='/'&gt;,
 then requests to an unknown host will fail with a 404 file
 not found exception.</p>
 
-  </section>
+  </s2>
 
-  <section title="Top-level and validation">
+  <s2 title="Top-level and validation">
 
 <p>Resin now uses Relax-NG to validate configuration files.  This
 should help find configuration errors faster.  The Resin configuration
@@ -69,152 +69,151 @@ resin-ee.jar.</p>
   <dt>com/caucho/server/resin/env.rnc
   <dd>environment/resource configuration
 
-  <dt>com/caucho/server/resin/resin.rnc
+  </dd></dt><dt>com/caucho/server/resin/resin.rnc
   <dd>resin.conf definition
  
-  <dt>com/caucho/server/webapp/web-xml.rnc
+  </dd></dt><dt>com/caucho/server/webapp/web-xml.rnc
   <dd>J2EE web.xml definition
 
-  <dt>com/caucho/server/webapp/resin-web-xml.rnc
+  </dd></dt><dt>com/caucho/server/webapp/resin-web-xml.rnc
   <dd>Resin web.xml definition
 
-  <dt>com/caucho/server/ejb/ejb-jar.rnc
+  </dd></dt><dt>com/caucho/server/ejb/ejb-jar.rnc
   <dd>J2EE ejb-jar definition
 
-  <dt>com/caucho/jsp/cfg/jsp-tld.rnc
+  </dd></dt><dt>com/caucho/jsp/cfg/jsp-tld.rnc
   <dd>J2EE JSP .tld file definition
 
-  <dt>com/caucho/server/ejb/resin-ejb.rnc
+  </dd></dt><dt>com/caucho/server/ejb/resin-ejb.rnc
   <dd>Resin ejb definition
-</dl>
+</dd></dt></dl>
  
 <example title="resin.conf">
-&lt;resin xmlns="http://caucho.com/ns/resin">
-  &lt;server>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;server&gt;
     ...
-    &lt;host>
-    &lt;/host>
-  &lt;/server>
-&lt;/resin>
+    &lt;host&gt;
+    &lt;/host&gt;
+  &lt;/server&gt;
+&lt;/resin&gt;
 </example>
 
 <example title="web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
    ...
-&lt;/web-app>
+&lt;/web-app&gt;
 </example>
 
 <example title="foo.ejb">
-&lt;ejb-jar xmlns="http://caucho.com/ns/resin">
+&lt;ejb-jar xmlns="http://caucho.com/ns/resin"&gt;
    ...
-&lt;/ejb-jar>
+&lt;/ejb-jar&gt;
 </example>
 
-  </section>
+  </s2>
 
-  <section title="tag name changes">
+  <s2 title="tag name changes">
 
 <p>Some tags have had some name changes to more accurately reflect
 their meanings.  If the xmlns="http://caucho.com/ns/resin" is
 specified, the old names are no longer allowed.  If the old
-&lt;caucho.com> is used, they will be allowed.</p>
+&lt;caucho.com&gt; is used, they will be allowed.</p>
 
 <deftable>
-<tr><th>new<th>old<th>explanation
+<tr><th>new</th><th>old</th><th>explanation
 
-<tr><td>resin<td>caucho.com<td>the internal logic of the configuration
+</th></tr><tr><td>resin</td><td>caucho.com</td><td>the internal logic of the configuration
 file has changed.  The "caucho.com" name reflected a registry-style
 configuration.  "resin" more accurately reflects a schema-based
 configuration.
 
-<tr><td>server<td>http-server<td>Since the server is not actually
+</td></tr><tr><td>server</td><td>http-server</td><td>Since the server is not actually
 dependent on the protocol (HTTP), it doesn't make sense to call it
 http-server.
 
-<tr><td>resource<td>resource-ref<td>resource-ref is intended as a hint
-to GUI tools.  &lt;resource> configures the resource itself.
+</td></tr><tr><td>resource</td><td>resource-ref</td><td>resource-ref is intended as a hint
+to GUI tools.  &lt;resource&gt; configures the resource itself.
 
-<tr><td>database<td>resource-ref<td>database-specific configuration
-uses the &lt;database> tag to make configuration files cleaner.
+</td></tr><tr><td>database</td><td>resource-ref</td><td>database-specific configuration
+uses the &lt;database&gt; tag to make configuration files cleaner.
 
-<tr><td>ejb-server<td>resource-ref<td>EJB server configuration
-uses the &lt;ejb-server> tag to make configuration files cleaner.
+</td></tr><tr><td>ejb-server</td><td>resource-ref</td><td>EJB server configuration
+uses the &lt;ejb-server&gt; tag to make configuration files cleaner.
 
-<tr><td>log<td>error-log<td>The error logging has been integrated into
+</td></tr><tr><td>log</td><td>error-log</td><td>The error logging has been integrated into
 the JDK 1.4 logging system, so there is no longer need for a separate
 configuration.
 
-<tr><td>class-loader<td>classpath<td>The class loader configuration
-has been extensively upgraded.  The old &lt;classpath> tag was
+</td></tr><tr><td>class-loader</td><td>classpath</td><td>The class loader configuration
+has been extensively upgraded.  The old &lt;classpath&gt; tag was
 insufficiently powerful to handle the new class loading configuration.
 
-<tr><td>javac<td>java<td>Since javac configures the compiler, not the
+</td></tr><tr><td>javac</td><td>java</td><td>Since javac configures the compiler, not the
 JDK itself, it make more sense to call it "javac".
 
-<tr><td>dependency-check-interval<td>class-update-interval<td>Because
+</td></tr><tr><td>dependency-check-interval</td><td>class-update-interval</td><td>Because
 the dependency checking tests more than just class updates, including
 configuration file changes, a more general name was appropriate.
 
-<tr><td>cluster-store<td>tcp-store<td>Cluster store is a more
+</td></tr><tr><td>cluster-store</td><td>tcp-store</td><td>Cluster store is a more
 appropriate name.
 
-<tr><td>web-app-deploy<td>war-dir<td>More general definition of .war expansion.
-</deftable>
+</td></tr><tr><td>web-app-deploy</td><td>war-dir</td><td>More general definition of .war expansion.
+</td></tr></deftable>
 
-  </section>
+  </s2>
 
-  <section title="&quot;Environment&quot; configuration">
+  <s2 title="&quot;Environment&quot; configuration">
 
 <p>Resin's configuration is now organized into "Environments".  Each
 environment has its own classloader, JNDI space, resources, logs,
 system properties, etc.  The Environment is just a generalization of
-Resin 2.1's class-loader context for &lt;http-server>, &lt;host>,
-and &lt;web-app>.  Now, any context could have its own environment:
-EJB servers, the outer &lt;resin> declaration, even individual
+Resin 2.1's class-loader context for &lt;http-server&gt;, &lt;host&gt;,
+and &lt;web-app&gt;.  Now, any context could have its own environment:
+EJB servers, the outer &lt;resin&gt; declaration, even individual
 session beans.</p>
 
 <p>Any of the class loader and resource configuration is allowed in
 any environment.  See the <a href="doc|config|env">environment
 configuration</a> for the list.</p>
 
-  </section>
+  </s2>
 
-  <section title="class loader configuration">
+  <s2 title="class loader configuration">
 
 <p>Class loading configuration has been split from the old classpath
 into a new set of class loading implementations: compiling-loader,
 simple-loader, library-loader, and make-loader.  These are primarily
 intended to make class loader configuration more clear.</p>
-  </section>
+  </s2>
 
-  <section title="reference configuration">
+  <s2 title="reference configuration">
 
 <p><a href="doc|config|env#reference">reference</a> configures
-JNDI ObjectFactories, while <a
-href="doc|config|env#resource">resource</a> configures bean objects
+JNDI ObjectFactories, while <a href="doc|config|env#resource">resource</a> configures bean objects
 directly.  Several third-party components expect to be configured as
 ObjectFactory references instead of configured as beans.</p>
-  </section>
+  </s2>
 
-  <section title="database configuration">
+  <s2 title="database configuration">
 
-<p>With the exception of replacing &lt;reference-ref> with the
-new &lt;database>, database configuration is similar to the old
-style.  &lt;driver-class> and &lt;driver-url> are the new primary
-subtags of the &lt;database> configuration.</p>
+<p>With the exception of replacing &lt;reference-ref&gt; with the
+new &lt;database&gt;, database configuration is similar to the old
+style.  &lt;driver-class&gt; and &lt;driver-url&gt; are the new primary
+subtags of the &lt;database&gt; configuration.</p>
 
-<p>For transactions, &lt;xa>true&lt;/xa> configures the DataSource as
+<p>For transactions, &lt;xa&gt;true&lt;/xa&gt; configures the DataSource as
 transactional.</p>
-  </section>
+  </s2>
 
-  <section title="ejb-server configuration">
+  <s2 title="ejb-server configuration">
 
-<p>&lt;ejb-server> now replaces the resource configuration
+<p>&lt;ejb-server&gt; now replaces the resource configuration
 for com.caucho.ejb.EJBServer.</p>
 
-  </section>
+  </s2>
 
-  <section title="web-app-default and host-default">
+  <s2 title="web-app-default and host-default">
 
 <p>Resin's support for web-app defaults and host defaults is now more
 consistent and robust.  All the defaults, including *.jsp and the
@@ -226,9 +225,9 @@ in $RESIN-HOME/conf/app-default.xml.</p>
 web-app at initialization time.  Since web-app-default items are
 applied first, the later web.xml definitions will override them.</p>
 
-  </section>
+  </s2>
 
-  <section title="web-app-deploy">
+  <s2 title="web-app-deploy">
 
 <p>.war deployment has been generalized from the simple war-dir
 in Resin 2.1. "webapps" directories can now be subdirectories
@@ -236,29 +235,29 @@ of a web-app.  For example, doc/servlet/tutorial is an expansion
 directory.  All the tutorial examples are separate
 web-apps added automatically.</p>
 
-  </section>
+  </s2>
 
-  <section title="root-directory and document-directory">
+  <s2 title="root-directory and document-directory">
 
 <p>The configuration of directories for server, host, and web-app
 has been cleaned up to remove some confusion.</p>
 
-<p>The &lt;server> has only a root-directory.  The server's
+<p>The &lt;server&gt; has only a root-directory.  The server's
 root-directory specifies the top-level location for log files,
 caching, etc.</p>
 
-<p>The &lt;host> has a root-directory and a document-directory.  The
+<p>The &lt;host&gt; has a root-directory and a document-directory.  The
 root-directory defaults to the server's root-directory if none is
 specified.  The document-directory is the location for the host's
 documents.</p>
 
-<p>The &lt;web-app> has only a document-directory.  It replaces the
+<p>The &lt;web-app&gt; has only a document-directory.  It replaces the
 app-dir configuration.</p>
 
-  </section>
-</section>
+  </s2>
+</s1>
 
-<section title="JSP-EL and Bean-Style Configuration">
+<s1 title="JSP-EL and Bean-Style Configuration">
 
 <p>All configuration in Resin is now based on bean-style configuration
 using XML to configure beans.  Each tag in all the configuration files
@@ -268,22 +267,22 @@ corresponds to a setXXX or addXXX or createXXX method in a bean.</p>
 primitive values are allowed.  So any string or path can be configured
 with JSP-EL using variables like ${'${'}serverId}.</p>
 
-<p>Servlets and Filters can be configured with &lt;init> blocks that
+<p>Servlets and Filters can be configured with &lt;init&gt; blocks that
 use the full power of Resin's configuration.  So the following
 configuration would be possible:</p>
 
 <example>
-&lt;servlet servlet-name='test'>
-  &lt;servlet-class>test.TestServlet&lt;/servlet-class>
-  &lt;init>
-    &lt;greeting>Hello, World&lt;/greeting>
-  &lt;/init>
-&lt;/servlet>
+&lt;servlet servlet-name='test'&gt;
+  &lt;servlet-class&gt;test.TestServlet&lt;/servlet-class&gt;
+  &lt;init&gt;
+    &lt;greeting&gt;Hello, World&lt;/greeting&gt;
+  &lt;/init&gt;
+&lt;/servlet&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="JDK 1.4 logging">
+<s1 title="JDK 1.4 logging">
 
 <p>Resin's logging is now integrated with the JDK 1.4
 java.util.logging classes.  The <a href="doc|config|log">log</a>
@@ -291,12 +290,12 @@ configuration configures the Logger classes.  So applications which
 use JDK 1.4 will automatically get integration with Resin's
 log configuration.</p>
 
-</section>
+</s1>
 
-<section title="threads, TCP, and &quot;nonblocking&quot; I/O">
+<s1 title="threads, TCP, and &quot;nonblocking&quot; I/O">
 
 <p>Resin's threading and TCP accept implementation
-has been rewritten.  All ports for a &lt;server> now share the same pool
+has been rewritten.  All ports for a &lt;server&gt; now share the same pool
 of worker threads.</p>
 
 <p>For the most part, this change should be invisible to most
@@ -315,19 +314,19 @@ threads to process that response.</p>
 ./configure, make, and make install the libexec/libresin.so to get the
 new keepalive support.</p>
 
-</section>
+</s1>
 
-<section title="bin/resin has been removed">
+<s1 title="bin/resin has been removed">
 
 <p>Most of the capabilities of bin/resin are now handled by JNI.  The
-&lt;user-name> and &lt;group-name> support have not yet been added to
+&lt;user-name&gt; and &lt;group-name&gt; support have not yet been added to
 Resin 3.0.x.  Older versions of Linux will need to use an alternative
 method of changing the user.  Newer Linux versions will be able to use
-the JNI-based &lt;user-name> once that's reintroduced.</p>
+the JNI-based &lt;user-name&gt; once that's reintroduced.</p>
 
-</section>
+</s1>
 
-<section title="JavaScript for JSP support has been dropped">
+<s1 title="JavaScript for JSP support has been dropped">
 
 <p>Since the JavaScript for JSP was used by too few users, it no
 longer makes sense to continue support.</p>
@@ -335,9 +334,9 @@ longer makes sense to continue support.</p>
 <p>In addition, the JSP-EL and JSTL tag libraries make the need for a
 separate dynamically-typed language less important.</p>
 
-</section>
+</s1>
 
-<section title="Significant plugin changes">
+<s1 title="Significant plugin changes">
 
 <p>The plugins, mod_caucho and isapi_srun.dll, have
 been changed significantly.  The plugin configurations are truly
@@ -355,27 +354,27 @@ the Resin backend.</p>
 They no longer read the resin.conf independendly.  (This is the part
 that's very new.)</p>
 
-</section>
+</s1>
 
-<section title="Cluster support">
+<s1 title="Cluster support">
 
 <p>Resin's load balancing and session backup has been cleaned up and
-generalized somewhat.  &lt;srun> ports now belong in a &lt;cluster>
+generalized somewhat.  &lt;srun&gt; ports now belong in a &lt;cluster&gt;
 definition.  This should make the configuration a bit clearer.</p>
 
 <example>
-&lt;cluster>
-  &lt;srun id='' host='127.0.0.1' port='6802'/>
-&lt;/cluster>
+&lt;cluster&gt;
+  &lt;srun id='' host='127.0.0.1' port='6802'/&gt;
+&lt;/cluster&gt;
 </example>
 
 <p>The appropriate load balance servlet is now
 com.caucho.servlets.LoadBalanceServlet.  It uses the HMUX protocol as
 the plugins do.</p>
 
-</section>
+</s1>
 
-<section title="package changes">
+<s1 title="package changes">
 
 <p>The Caucho servlets are now in com.caucho.servlets.  The filters
 are in com.caucho.filters.</p>
@@ -385,15 +384,15 @@ are in com.caucho.filters.</p>
 <p>We do plan to implement backward compatibility classes for those
 who have used custom authenticators, but this has not yet been
 done.</p>
-</section>
+</s1>
 
-<section title="JSP 2.0 and Servlet 2.4 drafts">
+<s1 title="JSP 2.0 and Servlet 2.4 drafts">
 
 <p>The next versions of the JSP and Servlet specs are currently in the
 draft stage.  Resin 3.0 does implement the new specs, but may not yet
 be fully up to date on the latest drafts.</p>
 
-</section>
+</s1>
 
 </body>
 </document>

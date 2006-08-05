@@ -12,8 +12,8 @@
   </header>
 
   <body>
-    <summary objsummary='localtoc'/>
-    <section title="General">
+    <summary objsummary="localtoc"/>
+    <s1 title="General">
       <faq title="Is CMP capable enough for my project?">
 
         <p>CMP/EJB is a good solution in many cases, but it's not always an ideal 
@@ -32,19 +32,19 @@
         <ul>
           <li> No sub-selects yet.  
 
-          <li> Support for stored procedures is pretty minimal (although
+          </li><li> Support for stored procedures is pretty minimal (although
           Resin does have an extension to add more known functions.)
 
-          <li> selects/collections with very large result sets is not
+          </li><li> selects/collections with very large result sets is not
           always handled efficiently (Resin does have an OFFSET/LIMIT
           extension which can help here.)
 
-          <li> Dynamic queries aren't in the spec, i.e. you can't make
+          </li><li> Dynamic queries aren't in the spec, i.e. you can't make
           up a query on the fly.  This can be important if you want lots
           of flexibility with sorting.  Currently, you must create a
           separate method for each sort.
 
-        </ul>
+        </li></ul>
 
         <p>For most of these, you can typically use separate JDBC with CMP. 
          Although it's conceivable you might run into caching issues within a 
@@ -131,9 +131,9 @@
           serialize and deserialize it.</p>
       </faq>
 
-    </section> <!-- general -->
+    </s1> <!-- general -->
 
-    <section title="CMP keys"> 
+    <s1 title="CMP keys"> 
 
       <faq title="Does Resin CMP support autogen keys for anything other than ints or longs?">
         <description>
@@ -172,9 +172,9 @@
           call the Statement.getGeneratedKeys call.</p>
       </faq>
 
-    </section>
+    </s1>
 
-    <section title="CMP and Transactions">
+    <s1 title="CMP and Transactions">
 
       <faq title="Any dangers in running my own DB calls in a CMP bean?">
         <description>
@@ -233,9 +233,9 @@ try {
         will fill in the key field or use JDBC directly to get the key
         value.</p>
       </faq>
-    </section>
+    </s1>
 
-    <section title="CMP caching">
+    <s1 title="CMP caching">
       <faq title="In a distributes environemnt, should I change the cache-timeouts?">
 
         <p>A distributed environment works automatically without messing with the 
@@ -364,12 +364,12 @@ setB()
 
       <faq title="Does reentrant tag allow simulataneous transactions to use the same instance?">
         <description>
-          <p>Hmm. I thought that &lt;reentrant> tag was designed just to
+          <p>Hmm. I thought that &lt;reentrant&gt; tag was designed just to
           control such behavior. E.g. for reentrant beans simultanious
           transactions could use the same instance.</p>
         </description>
         
-        <p>No, &lt;reentrant> is a bit different.  If reentrant is false, then an 
+        <p>No, &lt;reentrant&gt; is a bit different.  If reentrant is false, then an 
           entity bean cannot call itself through its local
           interface.</p>
 
@@ -389,7 +389,7 @@ setB()
           instead of "thread", since a thread could have several sequential 
           transactions.  The basic unit is a transaction.)</p>
 
-        <section title="(I) No read-only beans">
+        <s2 title="(I) No read-only beans">
 
           <p>Resin-CMP has two kinds of transaction: read-only and update. 
             UserTransaction transactions are always update
@@ -422,7 +422,7 @@ getter.
      return getFoo();
   }
 
-<br><b>Client code (outside of any transaction)</b><br>
+<br/><b>Client code (outside of any transaction)</b><br/>
 
   myBean.myUpdate();
           </example>
@@ -441,9 +441,9 @@ getter.
               in the first getXXX.  (It's probably better not to call this a cached 
               value.)</li>
           </ol>
-        </section>
+        </s2>
           
-        <section title="(II) read-only beans">
+        <s2 title="(II) read-only beans">
 
           <p>Everything is identical to case (I), except for (I.1), the first getXXX 
             of a read-only bean.</p>
@@ -454,8 +454,8 @@ getter.
               available</li>
           </ol>
           
-        </section>
+        </s2>
       </faq>
-    </section>
+    </s1>
   </body>
 </document>

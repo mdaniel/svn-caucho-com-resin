@@ -15,30 +15,30 @@
   <body>
     <summary/>
 
-<section title="<persistent-store>">
+<s1 title="&lt;persistent-store&gt;">
 <p>Configuration for persistent store uses
 the <a href="config|resin.xtp#persistent-store">persistent-store</a> tag.</p>
-</section>
+</s1>
 
-<section title='File Based'>
+<s1 title="File Based">
 
 <ul>
 <li>For single-server configurations
-<li>Useful in development when classes change often
-</ul>
+</li><li>Useful in development when classes change often
+</li></ul>
 
-<p>Persistent sessions are configured in the <var/web-app/>.
-File-based sessions use <var/file-store/>.</p>
+<p>Persistent sessions are configured in the <var>web-app</var>.
+File-based sessions use <var>file-store</var>.</p>
 
 <example>
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-  &lt;session-config>
-    &lt;file-store>WEB-INF/sessions&lt;/file-store>
-  &lt;/session-config>
-&lt;/web-app>
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;session-config&gt;
+    &lt;file-store&gt;WEB-INF/sessions&lt;/file-store&gt;
+  &lt;/session-config&gt;
+&lt;/web-app&gt;
 </example>
 
-<p>Sessions are stored as files in the <var/file-store/>
+<p>Sessions are stored as files in the <var>file-store</var>
 directory.  When the session changes, the updates will be written to
 the file.  After Resin loads an Application, it will load the stored
 sessions.</p>
@@ -50,17 +50,17 @@ fine-grained access.  For example, NFS will cache pages.  So if one
 server modifies the page, e.g. a session value, the other servers may not see
 the change for several seconds.</p>
 
-</section>
+</s1>
 
-<section title="Distributed Sessions">
+<s1 title="Distributed Sessions">
 
 <p>Distributed sessions are intrinsically more complicated than single-server
 sessions.  Single-server session can be implemented as a simple memory-based
 Hashtable.  Distributed sessions must communicate between machines to ensure
 the session state remains consistent.</p>
 
-<p>Load balancing with multiple machines either uses <var/sticky sessions/> or
-<var/symmetrical sessions/>.  Sticky sessions put more intelligence on the
+<p>Load balancing with multiple machines either uses <var>sticky sessions</var> or
+<var>symmetrical sessions</var>.  Sticky sessions put more intelligence on the
 load balancer, and symmetrical sessions puts more intelligence on the JVMs.
 The choice of which to use depends on what kind of hardware you have,
 how many machines you're using and how you use sessions.</p>
@@ -68,12 +68,12 @@ how many machines you're using and how you use sessions.</p>
 <p>Distributed sessions can use a database as a backing store, or they can
 distribute the backup among all the servers using TCP.</p>
 
-<section title="Symmetrical Sessions">
+<s2 title="Symmetrical Sessions">
 
 <p>Symmetrical sessions happen with dumb load balancers like DNS
 round-robin.  A single session may bounce from machine A
 to machine B and back to machine B.  For JDBC sessions, the symmetrical
-session case needs the <var/always-load-session/> attribute described below.
+session case needs the <var>always-load-session</var> attribute described below.
 Each request must load the most up-to-date version of the session.</p>
 
 <p>Distributed sessions in a symmetrical environment are required to make
@@ -81,8 +81,8 @@ sessions work at all.  Otherwise the state will end up spread across the JVMs.
 However, because each request must update its session information, it is
 less efficient than sticky sessions.</p>
 
-</section>
-<section title="Sticky Sessions">
+</s2>
+<s2 title="Sticky Sessions">
 
 <p>Sticky sessions require more intelligence on the load-balancer, but
 are easier for the JVM.  Once a session starts, the load-balancer will
@@ -97,9 +97,9 @@ efficient.  The distributor only needs to update sessions when they change.
 So if you update the session once when the user logs in, the distributed
 sessions can be very efficient.</p>
 
-</section>
+</s2>
 
-<section title='always-load-session'>
+<s2 title="always-load-session">
 
 <p>Symmetrical sessions must use the 'always-load-session' flag to
 update each session data on each request.  always-load-session is only
@@ -107,31 +107,31 @@ needed for jdbc-store sessions.  tcp-store sessions use a more-sophisticated
 protocol that eliminates the need for always-load-session, so tcp-store
 ignores the always-load-session flag.</p>
 
-<p>The <var/always-load-session/> attribute forces sessions to check the store for
+<p>The <var>always-load-session</var> attribute forces sessions to check the store for
 each request.  By default, sessions are only loaded from persistent
 store when they are created.  In a configuration with multiple symmetric
 web servers, sessions can be loaded on each request to ensure consistency.</p>
 
-</section>
+</s2>
 
-<section title='always-save-session'>
+<s2 title="always-save-session">
 
 <p>By default, Resin only saves session data when you add new values
-to the session object, i.e. if the request calls <var/setAttribute/>.
+to the session object, i.e. if the request calls <var>setAttribute</var>.
 This may be insufficient when storing large objects.  For example, if you
 change an internal field of a large object, Resin will not automatically
 detect that change and will not save the session object.</p>
 
-<p>With <var/always-save-session/> Resin will always write the session
+<p>With <var>always-save-session</var> Resin will always write the session
 to the store at the end of each request.  Although this is less efficient,
 it guarantees that updates will get stored in the backup after each
 request.</p>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="Database Based">
+<s1 title="Database Based">
 
 <p>Database backed sessions are the easiest to understand.  Session data
 gets serialized and stored in a database.  The data is loaded on the
@@ -149,42 +149,42 @@ system, you may harm performance.  One way around that bottleneck is to use
 a small, quick database like MySQL for your session store and save the "Big
 Iron" database like Oracle for your core database needs.</p>
 
-<p>The database must be specified using a <var/&lt;database>/>.
-The database store will automatically create a <var/session/> table.</p>
+<p>The database must be specified using a <var>&lt;database&gt;</var>.
+The database store will automatically create a <var>session</var> table.</p>
 
 <p>The JDBC store needs to know about the other servers in the cluster
 in order to efficiently update them when changes occur to the server.</p>
 
 <example title="JDBC store">
-&lt;resin xmlns="http://caucho.com/ns/resin">
-&lt;server>
-  &lt;http id='a' port='80'/>
-  &lt;http id='b' port='80'/>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+&lt;server&gt;
+  &lt;http id='a' port='80'/&gt;
+  &lt;http id='b' port='80'/&gt;
 
-  &lt;database jndi-name="jdbc/session">
+  &lt;database jndi-name="jdbc/session"&gt;
     ...
-  &lt;/database>
+  &lt;/database&gt;
 
-  &lt;cluster>
-    &lt;srun id='a' host='host-a' port='6802'/>
-    &lt;srun id='b' host='host-b' port='6802'/>
-  &lt;/cluster>
+  &lt;cluster&gt;
+    &lt;srun id='a' host='host-a' port='6802'/&gt;
+    &lt;srun id='b' host='host-b' port='6802'/&gt;
+  &lt;/cluster&gt;
 
-  &lt;persistent-store type="jdbc">
-    &lt;init>
-      &lt;data-source>jdbc/session&lt;data-source>
-    &lt;/init>
-  &lt;/persistent-store>
+  &lt;persistent-store type="jdbc"&gt;
+    &lt;init&gt;
+      &lt;data-source&gt;jdbc/session&lt;data-source&gt;
+    &lt;/init&gt;
+  &lt;/persistent-store&gt;
   ...
 
-  &lt;web-app-default>
-    &lt;session-config>
-      &lt;use-persistent-store/>
-    &lt;/session-config>
-  &lt;/web-app-default>
+  &lt;web-app-default&gt;
+    &lt;session-config&gt;
+      &lt;use-persistent-store/&gt;
+    &lt;/session-config&gt;
+  &lt;/web-app-default&gt;
 </example>
 
-<p>The persistent store is configured in the &lt;server> with
+<p>The persistent store is configured in the &lt;server&gt; with
 <a href="config|resin.xtp#persistent-store">persistent-store</a>.
 Each web-app which needs distributed sessions must enable
 the persistent store with a
@@ -192,11 +192,11 @@ the persistent store with a
 tag in the session-config.</p>
 
 <deftable>
-<tr><td>data-source<td>data source name for the table
-<tr><td>table-name<td>database table for the session data
-<tr><td>blob-type<td>database type for a blob
-<tr><td>max-idle-time<td>cleanup time
-</deftable>
+<tr><td>data-source</td><td>data source name for the table
+</td></tr><tr><td>table-name</td><td>database table for the session data
+</td></tr><tr><td>blob-type</td><td>database type for a blob
+</td></tr><tr><td>max-idle-time</td><td>cleanup time
+</td></tr></deftable>
 
 <example>
 CREATE TABLE persistent_session (
@@ -208,21 +208,21 @@ CREATE TABLE persistent_session (
 )
 </example>
 
-<p>The store is enabled with &lt;use-persistent-store> in the session config.
+<p>The store is enabled with &lt;use-persistent-store&gt; in the session config.
 </p>
 
 <example>
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-  &lt;session-config>
-    &lt;use-persistent-store/>
-    &lt;always-save-session/>
-  &lt;/session-config>
-&lt;/web-app>
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;session-config&gt;
+    &lt;use-persistent-store/&gt;
+    &lt;always-save-session/&gt;
+  &lt;/session-config&gt;
+&lt;/web-app&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="Cluster Sessions">
+<s1 title="Cluster Sessions">
 
 <p>The distributed cluster stores the sessions across the
 cluster servers.  In some configurations, the cluster store
@@ -232,38 +232,38 @@ store will be more efficient.</p>
 <p>With cluster sessions, each session has an owning JVM and a backup JVM.
 The session is always stored in both the owning JVM and the backup JVM.</p>
 
-<p>The cluster store is configured in the in the &lt;server>.
-It uses the &lt;srun> hosts in the server's &lt;cluster> to distribute
-the sessions.  The session store is enabled in the &lt;session-config>
-with the &lt;use-persistent-store>.</p>
+<p>The cluster store is configured in the in the &lt;server&gt;.
+It uses the &lt;srun&gt; hosts in the server's &lt;cluster&gt; to distribute
+the sessions.  The session store is enabled in the &lt;session-config&gt;
+with the &lt;use-persistent-store&gt;.</p>
 
 <example>
-&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
   ...
 
-&lt;server>
-  &lt;cluster>
-    &lt;srun id="a" host="192.168.0.1" port="6802" index="1"/>
-    &lt;srun id="b" host="192.168.0.2" port="6802" index="2"/>
-  &lt;/cluster>
+&lt;server&gt;
+  &lt;cluster&gt;
+    &lt;srun id="a" host="192.168.0.1" port="6802" index="1"/&gt;
+    &lt;srun id="b" host="192.168.0.2" port="6802" index="2"/&gt;
+  &lt;/cluster&gt;
 
-  &lt;persistent-store type="cluster">
-    &lt;init path="cluster"/>
-  &lt;/persistent-store>
+  &lt;persistent-store type="cluster"&gt;
+    &lt;init path="cluster"/&gt;
+  &lt;/persistent-store&gt;
   ...
 </example>
 
-<p>The configuration is enabled in the <var/web-app/>.</p>
+<p>The configuration is enabled in the <var>web-app</var>.</p>
 
 <example>
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-  &lt;session-config>
-    &lt;use-persistent-store="true"/>
-  &lt;/session-config>
-&lt;/web-app>
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;session-config&gt;
+    &lt;use-persistent-store="true"/&gt;
+  &lt;/session-config&gt;
+&lt;/web-app&gt;
 </example>
 
-<p>The &lt;srun> and &lt;srun-backup> hosts are treated as a cluster
+<p>The &lt;srun&gt; and &lt;srun-backup&gt; hosts are treated as a cluster
 of hosts.  Each host uses the other hosts as a backup.  When the session
 changes, the updates will be sent to the backup host.  When the host starts, it
 looks up old sessions in the other hosts to update its own version of the
@@ -271,40 +271,40 @@ persistent store.
 </p>
 
 <example title="Symmetric load-balanced servers">
-&lt;resin xmlns="http://caucho.com/ns/resin">
-&lt;server>
-  &lt;http id='a' port='80'/>
-  &lt;http id='b' port='80'/>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+&lt;server&gt;
+  &lt;http id='a' port='80'/&gt;
+  &lt;http id='b' port='80'/&gt;
 
-  &lt;cluster>
-    &lt;srun id='a' host='host-a' port='6802'/>
-    &lt;srun id='b' host='host-b' port='6802'/>
-  &lt;/cluster>
+  &lt;cluster&gt;
+    &lt;srun id='a' host='host-a' port='6802'/&gt;
+    &lt;srun id='b' host='host-b' port='6802'/&gt;
+  &lt;/cluster&gt;
 
-  &lt;persistent-store type="cluster">
-    &lt;init path="cluster"/>
-  &lt;/persistent-store>
+  &lt;persistent-store type="cluster"&gt;
+    &lt;init path="cluster"/&gt;
+  &lt;/persistent-store&gt;
 
-  &lt;host id=''>
-  &lt;web-app id=''>
+  &lt;host id=''&gt;
+  &lt;web-app id=''&gt;
 
-  &lt;session-config>
-    &lt;use-persistent-store="true"/>
-  &lt;/session-config>
+  &lt;session-config&gt;
+    &lt;use-persistent-store="true"/&gt;
+  &lt;/session-config&gt;
 
-  &lt;/web-app>
-  &lt;/host>
-&lt;/server>
-&lt;/resin>
+  &lt;/web-app&gt;
+  &lt;/host&gt;
+&lt;/server&gt;
+&lt;/resin&gt;
 </example>
-</section>
+</s1>
 
-<section title="See also">
+<s1 title="See also">
 
 <p>More details on the tcp-based sessions are
 in the <a href="tcp-sessions.xtp">TCP-sessions</a> page.</p>
 
-</section>
+</s1>
 
   </body>
 </document>

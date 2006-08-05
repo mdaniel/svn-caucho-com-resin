@@ -16,7 +16,7 @@
 
 <summary localtoc="1"/>
 
-<section title="Cross-site scripting">
+<s1 title="Cross-site scripting">
 <p>Cross-site scripting occurs when a web-site inadvertantly
 includes HTML tags or scripting code that has come from an untrusted
 source (such as a form submit)</p>
@@ -33,7 +33,7 @@ the possibilty of cross-site scripting.</p>
 <a href="http://www.cert.org/advisories/CA-2000-02.html">CERT
 advisory</a> on the topic is a useful resource.</p>
 
-<section title="Protecting your site from cross-site scripting">
+<s2 title="Protecting your site from cross-site scripting">
 <p>The main source of vulnerability is from malicious posting of
 request parameters by users.  The following steps are a good start
 to protecting your site.</p>
@@ -47,29 +47,29 @@ entities like &amp;lt; and &amp;gt;.  The Quercus example
 application that comes with Resin contains code that you can use as
 a basis.
 
-<dt>Beware of values used in JDBC calls
+</dd></dt><dt>Beware of values used in JDBC calls
 <dd>As you are forming SQL statements to use in JDBC, take care that
 a request parameter value does not end up becoming part of an
 SQL statement in such a way that it could change the intended
 function of the SQL statement.
 
-<dt>Allow for unexpected submission of parameters
+</dd></dt><dt>Allow for unexpected submission of parameters
 <dd>When devloping the code to handle a form submission, or handle
 request parameters in general, do not assume that the parameters are
 valid.  It is quite easy for a malicious user to make their own
 form, or their own URL, and specify whatever form parameters they
 want.
 
-<dt>Do not assume the value of hidden form fields are valid
+</dd></dt><dt>Do not assume the value of hidden form fields are valid
 <dd>A common practice is to use hidden form fields to hold values
 that your application needs on subsequent requests.  It is very easy
 for a user to change these values and make a submission.
 
-</dl>
-</section>
-</section>
+</dd></dt></dl>
+</s2>
+</s1>
 
-<section title="Serving of raw JSP files">
+<s1 title="Serving of raw JSP files">
 <p>A potentially dangerous security problem is the inadvertant
 serving of .jsp files in raw form, exposing information about the
 underlying system.</p>
@@ -88,18 +88,18 @@ filesystem, for example a jsp name being passed in such a way that it
 does not match the pattern for jsp files but is recognized by the
 OS/filesystem as a valid filename.  We have covered all of these areas
 that have come to our attention.</p>
-</section>
+</s1>
 
-<section title="Session stealing">
+<s1 title="Session stealing">
 <p>Resin establishes a session with the user by assigning an id, which
 is then included in subsequent requests as either a cookie or as part
 of the URL.  It is conceivable that someone could use a packet sniffer
 to find the session id of a user and then make a fake request to Resin
 thus gaining access to the session.  This can be avoided by using
 HTTPS.</p>
-</section>
+</s1>
 
-<section title="Denial of Service (DoS) attacks">
+<s1 title="Denial of Service (DoS) attacks">
 
 <p>
 The most common method used in DoS attacks on a server is to flood the server
@@ -132,7 +132,7 @@ of those servers should be used.
 &lt;filter-mapping url-pattern="/*" filter-name="throttle"/&gt;
 </example>
 
-</section>
+</s1>
 
 </body>
 </document>

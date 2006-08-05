@@ -15,7 +15,7 @@ makes CORBA/IIOP available.
   <body>
     <summary/>
 
-<section title='Server Configuration'>
+<s1 title="Server Configuration">
 
 <p>The Resin CORBA server configuration is almost identical to the Burlap
 or Hessian configuration.  The difference is that CORBA uses a dedicated 
@@ -23,7 +23,7 @@ port instead of a servlet to listen for CORBA requests.
 Everything else is identical, including the <a config-tag="ejb-server"/>, so
 beans do not need to be aware which wire protocol is used.</p>
 
-<example title='resin.conf'>
+<example title="resin.conf">
 &lt;server&gt;
 
  ...
@@ -50,9 +50,9 @@ beans do not need to be aware which wire protocol is used.</p>
 
 </example>
 
-</section>
+</s1>
 
-<section title='Client Example'>
+<s1 title="Client Example">
 
 <p>Clients will use JNDI to look up beans in the server.  The JNDI name
 uses the same name as the bean's Burlap URL.  If the EJBServlet is at
@@ -92,6 +92,6 @@ HelloHome helloHome =
   (HelloHome) PortableRemoteObject.narrow(helloHomeObj, HelloHome.class);
 </example>
 
-</section>
+</s1>
 </body>
 </document>

@@ -19,7 +19,7 @@
   <body>
     <summary/>
 
-<section title="Beans">
+<s1 title="Beans">
 
 <example title="CourseBean.java">
 package example;
@@ -44,7 +44,7 @@ abstract public class TeacherBean
   abstract public Course getCourse();
 }
 </example>
-</section>
+</s1>
 
   </body>
 </document>

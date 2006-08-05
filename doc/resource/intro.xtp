@@ -8,7 +8,7 @@
   <body>
     <summary/>
 
-<section title="web-apps and JNDI Contexts">
+<s1 title="web-apps and JNDI Contexts">
 
 <p>Resin organizes its resources into a tree, rooted in the
 system classloader.  Each Resin context is associated with a classloader,
@@ -40,32 +40,32 @@ JNDI tree.  So the web-app can't affect the host's JNDI, but it can
 share the host's pools.</p>
 
 <p>In Resin's configuration, the context determines where the JNDI
-will be shared.  If the JNDI configuration is in the &lt;host>, it will
-be shared across the entire host.  If it's in the &lt;web-app>, it
+will be shared.  If the JNDI configuration is in the &lt;host&gt;, it will
+be shared across the entire host.  If it's in the &lt;web-app&gt;, it
 will only be used in the web-app.</p>
 
 <deftable>
-<tr><th>context<th>scope
-<tr><td>http-server<td>shared across all applications
-<tr><td>host<td>shared across the virtual host
-<tr><td>web-app<td>specific to the servlet application (.war)
-</deftable>
+<tr><th>context</th><th>scope
+</th></tr><tr><td>http-server</td><td>shared across all applications
+</td></tr><tr><td>host</td><td>shared across the virtual host
+</td></tr><tr><td>web-app</td><td>specific to the servlet application (.war)
+</td></tr></deftable>
 
-<example title='host and web-app specific configuration'>
+<example title="host and web-app specific configuration">
 ...
-&lt;host id='foo.com'>
-  &lt;database name='jdbc/foo'>
-    &lt;driver-class id="org.gjt.mm.mysql.Driver"/>
-    &lt;driver-url id="jdbc:mysql://localhost:3306/foo"/>
-  &lt;/database>
+&lt;host id='foo.com'&gt;
+  &lt;database name='jdbc/foo'&gt;
+    &lt;driver-class id="org.gjt.mm.mysql.Driver"/&gt;
+    &lt;driver-url id="jdbc:mysql://localhost:3306/foo"/&gt;
+  &lt;/database&gt;
 
-  &lt;web-app id='/quercus'>
+  &lt;web-app id='/quercus'&gt;
     &lt;database name='jdbc/quercus'.
-      &lt;driver-class id="org.gjt.mm.mysql.Driver"/>
-      &lt;driver-url id="jdbc:mysql://localhost:3306/quercus"/>
-    &lt;/database>
-  &lt;/web-app>
-&lt;/host>
+      &lt;driver-class id="org.gjt.mm.mysql.Driver"/&gt;
+      &lt;driver-url id="jdbc:mysql://localhost:3306/quercus"/&gt;
+    &lt;/database&gt;
+  &lt;/web-app&gt;
+&lt;/host&gt;
 ...
 </example>
 
@@ -73,7 +73,7 @@ will only be used in the web-app.</p>
 across all web-apps in foo.com, but the java:comp/env/jdbc/quercus
 pool is only available in the /quercus web-app.</p>
 
-</section>
+</s1>
 
   </body>
 </document>

@@ -9,41 +9,41 @@
 </header>
 
 <body>
-<summary description='none'/>
+<summary description="none"/>
 
-<section title="MySQL Connector/J">
+<s1 title="MySQL Connector/J">
 <ul>
 <li><a href="http://www.mysql.com/products/connector-j/index.html">mysql.com Connector/J</a>
-</ul>
+</li></ul>
 <example title="MySQL Connector/J JDBC configuration">
 &lt;database&gt;
   &lt;jndi-name&gt;jdbc/mysql&lt;/jndi-name&gt;
-  &lt;driver>
+  &lt;driver&gt;
     &lt;type&gt;com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource&lt;/type&gt;
-    &lt;url&gt;jdbc:mysql://localhost:3306/<var/dbname/>&lt;/url&gt;
-    &lt;user&gt;<var/username/>&lt;/user&gt;
-    &lt;password&gt;<var/password/>&lt;/password&gt;
-  &lt;/driver>
+    &lt;url&gt;jdbc:mysql://localhost:3306/<var>dbname</var>&lt;/url&gt;
+    &lt;user&gt;<var>username</var>&lt;/user&gt;
+    &lt;password&gt;<var>password</var>&lt;/password&gt;
+  &lt;/driver&gt;
   ...
 &lt;/database&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="Oracle">
+<s1 title="Oracle">
 <ul>
 <li><a href="http://otn.oracle.com/tech/java/sqlj_jdbc/htdocs/jdbc_faq.htm">Oracle JDBC Frequently Asked Questions</a>
-</ul>
+</li></ul>
 
 <example title="Oracle JDBC configuration">
 &lt;database&gt;
   &lt;jndi-name&gt;jdbc/oracle&lt;/jndi-name&gt;
-  &lt;driver>
+  &lt;driver&gt;
     &lt;type&gt;oracle.jdbc.pool.OracleConnectionPoolDataSource&lt;/type&gt;
-    &lt;url&gt;jdbc:oracle:thin:@localhost:1521:<var/dbname/>&lt;/url&gt;
-    &lt;user&gt;<var/username/>&lt;/user&gt;
-    &lt;password&gt;<var/password/>&lt;/password&gt;
-  &lt;/driver>
+    &lt;url&gt;jdbc:oracle:thin:@localhost:1521:<var>dbname</var>&lt;/url&gt;
+    &lt;user&gt;<var>username</var>&lt;/user&gt;
+    &lt;password&gt;<var>password</var>&lt;/password&gt;
+  &lt;/driver&gt;
   ...
 &lt;/database&gt;
 </example>
@@ -56,34 +56,34 @@ OracleConnectionPoolDataSource will be more efficient.</p>
 &lt;database&gt;
   &lt;jndi-name&gt;jdbc/oracle-xa&lt;/jndi-name&gt;
   &lt;xa&gt;true&lt;/xa&gt;
-  &lt;driver>
+  &lt;driver&gt;
     &lt;type&gt;oracle.jdbc.xa.client.OracleXADataSource&lt;/type&gt;
-    &lt;url&gt;jdbc:oracle:thin:@localhost:1521:<var/dbname/>&lt;/url&gt;
-    &lt;user&gt;<var/username/>&lt;/user&gt;
-    &lt;password&gt;<var/password/>&lt;/password&gt;
-  &lt;/driver>
+    &lt;url&gt;jdbc:oracle:thin:@localhost:1521:<var>dbname</var>&lt;/url&gt;
+    &lt;user&gt;<var>username</var>&lt;/user&gt;
+    &lt;password&gt;<var>password</var>&lt;/password&gt;
+  &lt;/driver&gt;
   ...
 &lt;/database&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="Informix">
+<s1 title="Informix">
 
 <ul>
 <li><a href="http://www-3.ibm.com/software/data/informix/tools/jdbc/">IBM Informix drivers</a>
-</ul>
+</li></ul>
 
 <example title="Informix JDBC configuration">
 &lt;database&gt;
   &lt;jndi-name&gt;jdbc/informix&lt;/jndi-name&gt;
-  &lt;driver>
+  &lt;driver&gt;
     &lt;type&gt;com.informix.jdbcx.IfxConnectionPoolDataSource&lt;/type&gt;
-    &lt;url&gt;jdbc:informix-sqli://123.45.67.89:1533/<var/dbname/>&lt;/url&gt;
+    &lt;url&gt;jdbc:informix-sqli://123.45.67.89:1533/<var>dbname</var>&lt;/url&gt;
     &lt;init-param param-name="INFORMIXSERVER" param-value="myserver"/&gt;
-    &lt;user&gt;<var/username/>&lt;/user&gt;
-    &lt;password&gt;<var/password/>&lt;/password&gt;
-  &lt;/driver>
+    &lt;user&gt;<var>username</var>&lt;/user&gt;
+    &lt;password&gt;<var>password</var>&lt;/password&gt;
+  &lt;/driver&gt;
   ...
 &lt;/database&gt;
 </example>
@@ -92,19 +92,19 @@ OracleConnectionPoolDataSource will be more efficient.</p>
 &lt;database&gt;
   &lt;jndi-name&gt;jdbc/informix-xa&lt;/jndi-name&gt;
   &lt;xa&gt;true&lt;/xa&gt;
-  &lt;driver type="com.informix.jdbcx.IfxXADataSource">
-    &lt;url&gt;jdbc:informix-sqli://123.45.67.89:1533/<var/dbname/>&lt;/url&gt;
+  &lt;driver type="com.informix.jdbcx.IfxXADataSource"&gt;
+    &lt;url&gt;jdbc:informix-sqli://123.45.67.89:1533/<var>dbname</var>&lt;/url&gt;
     &lt;init-param param-name="INFORMIXSERVER" param-value="myserver"/&gt;
-    &lt;user&gt;<var/username/>&lt;/user&gt;
-    &lt;password&gt;<var/password/>&lt;/password&gt;
-  &lt;/driver>
+    &lt;user&gt;<var>username</var>&lt;/user&gt;
+    &lt;password&gt;<var>password</var>&lt;/password&gt;
+  &lt;/driver&gt;
   ...
 &lt;/database&gt;
 </example>
 
-</section> <!-- Informix -->
+</s1> <!-- Informix -->
 
-<section title="SQL Server">
+<s1 title="SQL Server">
 <example>
 &lt;database&gt;
   &lt;jndi-name&gt;jdbc/sqlserver&lt;/jndi-name&gt;
@@ -118,48 +118,48 @@ OracleConnectionPoolDataSource will be more efficient.</p>
   &lt;xa&gt;true&lt;/xa&gt;
 &lt;/database&gt;
 </example>
-</section>
+</s1>
 
-<section title="DB2">
+<s1 title="DB2">
 <p>Contributions welcome!</p>
-</section>
+</s1>
 
-<section title="Interbase">
+<s1 title="Interbase">
 <p>Contributions welcome!</p>
-</section>
+</s1>
 
 
-<section title="PostgreSQL">
+<s1 title="PostgreSQL">
 <ul>
 <li><a href="http://jdbc.postgresql.org/">PostgreSQL JDBC Drivers</a>
-</ul>
+</li></ul>
 
 <example>
 &lt;database&gt;
-  &lt;jndi-name&gt;jdbc/<var/name/>&lt;/jndi-name&gt;
-  &lt;driver>
+  &lt;jndi-name&gt;jdbc/<var>name</var>&lt;/jndi-name&gt;
+  &lt;driver&gt;
     &lt;type&gt;org.postgresql.Driver&lt;/type&gt;
-    &lt;url&gt;jdbc:postgresql://127.0.0.1:5432/<var/dbname/>&lt;/url&gt;
-    &lt;user&gt;<var/username/>&lt;/user&gt;
-    &lt;password&gt;<var/password/>&lt;/password&gt;
-  &lt;/driver>
+    &lt;url&gt;jdbc:postgresql://127.0.0.1:5432/<var>dbname</var>&lt;/url&gt;
+    &lt;user&gt;<var>username</var>&lt;/user&gt;
+    &lt;password&gt;<var>password</var>&lt;/password&gt;
+  &lt;/driver&gt;
   ...
 &lt;/database&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="hsqldb">
+<s1 title="hsqldb">
 <p>"hsqldb is a relational database engine written in Java.   It
 offers a small (less than 160k), fast database engine which
 offers both in memory and disk based tables."</p>
 
 <ul>
 <li><a href="http://hsqldb.sourceforge.net/">hsqldb homepage</a>
-</ul>
+</li></ul>
 
 <p>Contributions welcome!</p>
-</section>
+</s1>
 
 
 </body>

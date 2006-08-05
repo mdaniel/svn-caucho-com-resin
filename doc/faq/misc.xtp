@@ -8,7 +8,7 @@
   <body>
     <summary/>
 
-<section title='Resin Freezes'>
+<s1 title="Resin Freezes">
 
 <p>Normally, this is not actually a Resin problem, but a deadlock in
 the application code.</p>
@@ -20,23 +20,23 @@ produce a thread dump.</p>
 use "httpd.sh" instead or "httpd.sh start".  When you use "kill -QUIT", the
 JDK will ask you questions to get more detailed information.
 
-<p>On Windows, you need to start Resin from a command line, not from
+</p><p>On Windows, you need to start Resin from a command line, not from
 http.exe.  ctrl-\ will then give you the dump.
 
-<p>By looking at the thread dump you should be able to see what
+</p><p>By looking at the thread dump you should be able to see what
 lock is getting stuck.
 
-</section>
+</p></s1>
 
-<section title="Why so many processes on Linux?">
+<s1 title="Why so many processes on Linux?">
 
 <p>On Linux, each native thread is displayed as a separate process
 by 'ps -auxw'.  Don't worry, those processes are extremely
 lightweight.</p>
 
-</section>
+</s1>
 
-<section title="Can you recommend any JDBC drivers?">
+<s1 title="Can you recommend any JDBC drivers?">
 
 <p>Arun Jamwal writes:</p>
 
@@ -46,25 +46,25 @@ a big query...and type 2 couldn't be used with M$ VM. Weblogic bundles
 these
 drivers with Tengah but you can ask them just for the JDBC drivers....
 
-<p>I had used Openlink's type 3 JDBC drivers too (about 2.5+ years ago) but I
+</p><p>I had used Openlink's type 3 JDBC drivers too (about 2.5+ years ago) but I
 didn't
 like them much.
 
-<p>PS: Check out these links for more info:
+</p><p>PS: Check out these links for more info:
 
-<p><a href="http://www.beasys.com/products/weblogic/drivers.html">http://www.beasys.com/products/weblogic/drivers.html</a><br>
+</p><p><a href="http://www.beasys.com/products/weblogic/drivers.html">http://www.beasys.com/products/weblogic/drivers.html</a><br/>
 <a href="http://www.javasoft.com/products/jdbc/drivers.html">
 http://www.javasoft.com/products/jdbc/drivers.html</a>
 </p>
 
-</section>
+</s1>
 
-<section title="What value does caching add when I'm already using Apache?">
+<s1 title="What value does caching add when I'm already using Apache?">
 
 <def>
-> What value does caching provide when Resin is behind another web server like
-> IIS.  Do I want caching on?  Presumably, most jsp pages and all servlets are
-> dynamic.
+&gt; What value does caching provide when Resin is behind another web server like
+&gt; IIS.  Do I want caching on?  Presumably, most jsp pages and all servlets are
+&gt; dynamic.
 </def>
 
 <p>True, but many pages are only quasi-dynamic.  For example, cnn.com's
@@ -79,28 +79,28 @@ that very easily by adding:</p>
 &lt;%
 long now = System.currentTimeMillis();
 response.setDateHeader("Expires", now + 15 * 60000);
-%>
+%&gt;
 </example>
 
 <p>Also, sophisticated sites have top pages that change for logged in users, but
 dynamic sub-pages that are common.  Because a include() page is treated as a
 separate request, you can cache just the subpage.
 
-<p>The database is often the bottleneck for latency and also for database licenses
+</p><p>The database is often the bottleneck for latency and also for database licenses
 and hardware.  If you can avoid 75% of your Oracle calls by setting a simple
 header, you can delay buying Sun's high-end enterprise servers for a couple of
 months.
 
 
-</section>
+</p></s1>
 
-<section title="How do I prevent cached pages from the back button?">
+<s1 title="How do I prevent cached pages from the back button?">
 
 <p>This isn't actually a Resin question, but it's a common issue.
 
-<p>Jean-Francois Lamy replies:
+</p><p>Jean-Francois Lamy replies:
 
-<p>We use the following, which does seem to force reload in case of a Back as
+</p><p>We use the following, which does seem to force reload in case of a Back as
 well.</p>
 
 <example>
@@ -109,6 +109,6 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0
 response.setDateHeader ("Expires", 0); //prevents caching at the proxy server
 </example>
 
-</section>
+</s1>
   </body>
 </document>

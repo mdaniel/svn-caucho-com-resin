@@ -1,4 +1,4 @@
-<section>
+<document>
   <header>
     <product>resin</product>
     <title>Headers</title>
@@ -8,24 +8,26 @@
       Browser headers contain information about the browser.
     </brief>
     <description>
-      Each browser request sends <var/headers/> along with the URL.
+      Each browser request sends <var>headers</var> along with the URL.
       Sophisticated servlets can use browser headers to tailor the
       returned page to the browser.
     </description>
   </header>
 
+<body>
+<s1>
 <p>Sophisticated servlets can use browser headers to tailor the returned page
 to the browser.  For example, a high-quality site can detect a Palm Pilot
 browser and simplify its site design to match the browser capabilities.
 </p>
 
-<p>Each browser request sends <var/headers/> along with the URL.  The
-headers include the browser type (<var/User-Agent/>) and
-language preferences (<var/Accept-Language/> and <var/Accept-Charset/>).  The
+<p>Each browser request sends <var>headers</var> along with the URL.  The
+headers include the browser type (<var>User-Agent</var>) and
+language preferences (<var>Accept-Language</var> and <var>Accept-Charset</var>).  The
 full list is in the official HTTP/1.1 spec, but those three are the most
 important.</p>
 
-<p>Servlet and JSPs grab headers with <var/request.getHeader/>.</p>
+<p>Servlet and JSPs grab headers with <var>request.getHeader</var>.</p>
 
 <p>The following, like env.jsp in the examples, gets all the headers
 and prints them.  Little "snoop" servlets like this are useful to see what
@@ -46,17 +48,17 @@ public class HeaderServlet extends HttpServlet {
   {
     PrintWriter out = response.getWriter();
 
-    out.println("&lt;table>");
+    out.println("&lt;table&gt;");
 
     Enumeration e = request.getHeaderNames();
     while (e.hasMoreElements()) {
       String name = (String) e.nextElement();
 
-      out.println("&lt;tr>&lt;td>" + name);
-      out.println("&lt;td>" + request.getHeader(name));
+      out.println("&lt;tr&gt;&lt;td&gt;" + name);
+      out.println("&lt;td&gt;" + request.getHeader(name));
     }
 
-    out.println("&lt;/table>");
+    out.println("&lt;/table&gt;");
   }
 }
 </example>
@@ -71,4 +73,6 @@ Accept-Charset   iso-8859-1,*,utf-8
 Cookie           JSESSIONID=7tXlVCaALedCHHkdXy 
 </results>
 
-</section>
+</s1>
+</body>
+</document>

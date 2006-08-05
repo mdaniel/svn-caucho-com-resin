@@ -12,12 +12,12 @@
 
 <body>
 <summary/>
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="env.jsp"/>
-    <td>The environment jsp page.
-</deftable>
-</section>
+    </td><td>The environment jsp page.
+</td></tr></deftable>
+</s1>
 
 </body>
 </document>

@@ -25,7 +25,7 @@
     <summary/>
 
 
-<section title='Cache-Control: max-age'>
+<s1 title="Cache-Control: max-age">
 
 <p>Setting the <var>max-age</var> header will cache the results
 for a specified time.  For heavily loaded pages, even setting short
@@ -37,22 +37,22 @@ sophisticated headers like "Cache-Control: private" can specify caching only for
 <p>The following example sets expiration for 15 seconds.  So the
 counter should update slowly.</p>
 
-<example title='Expires'>
-&lt;%@ page session="false" %>
-&lt;%! int counter; %>
+<example title="Expires">
+&lt;%@ page session="false" %&gt;
+&lt;%! int counter; %&gt;
 &lt;%
 response.addHeader("Cache-Control", "max-age=15");
-%>
-Count: &lt;%= counter++ %>
+%&gt;
+Count: &lt;%= counter++ %&gt;
 </example>
 
-<p><var/max-age/> is useful for database generated pages which are
+<p><var>max-age</var> is useful for database generated pages which are
 continuously, but slowly updated.  To cache based on something with a known
-modified date, like a file, you can use <var/If-Modified/>.</p>
+modified date, like a file, you can use <var>If-Modified</var>.</p>
 
-</section>
+</s1>
 
-<section title='Debugging caching'>
+<s1 title="Debugging caching">
 
 <p>When designing and testing your cached page, it's important to see
 how Resin is caching the page.  To turn on logging for caching, you'll
@@ -61,7 +61,7 @@ add the following to your resin.conf:</p>
 <example title="adding caching log">
 &lt;log name="com.caucho.server.cache"
      path="log/cache.log"
-     level="fine"/>
+     level="fine"/&gt;
 </example>
 
 <p>The output will look something like the following:</p>
@@ -80,9 +80,9 @@ add the following to your resin.conf:</p>
 [2003/09/12 10:18:49.362] using cache: /images/logo.gif
 </results>
 
-</section>
+</s1>
 
-<section title='Expires'>
+<s1 title="Expires">
 
 <p>An application can also set the <var>Expires</var> header to enable caching, when the expiration date is a specific time instead of an interval.
 For heavily loaded pages, even setting short
@@ -92,23 +92,23 @@ be disabled for caching.</p>
 <p>The following example sets expiration for 15 seconds.  So the
 counter should update slowly.</p>
 
-<example title='Expires'>
-&lt;%@ page session="false" %>
-&lt;%! int counter; %>
+<example title="Expires">
+&lt;%@ page session="false" %&gt;
+&lt;%! int counter; %&gt;
 &lt;%
 long now = System.currentTimeMillis();
 response.setDateHeader("Expires", now + 15000);
-%>
-Count: &lt;%= counter++ %>
+%&gt;
+Count: &lt;%= counter++ %&gt;
 </example>
 
-<p><var/Expires/> is useful for database generated pages which are
+<p><var>Expires</var> is useful for database generated pages which are
 continuously, but slowly updated.  To cache based on something with a known
-modified date, like a file, you can use <var/If-Modified/>.</p>
+modified date, like a file, you can use <var>If-Modified</var>.</p>
 
-</section>
+</s1>
 
-<section title='If-Modified'>
+<s1 title="If-Modified">
 
 <p>The <var>If-Modified</var> headers let you cache based on an
 underlying change date.  For example, the page may only change when an
@@ -120,7 +120,7 @@ in a JSP page.</p>
 page changes.</p>
 
 <example>
-&lt;%@ page session="false" %>
+&lt;%@ page session="false" %&gt;
 &lt;%!
 int counter;
 
@@ -129,16 +129,16 @@ public long getLastModified(HttpServletRequest req)
   String path = req.getRealPath("test.xml");
   return new File(path).lastModified();
 }
-%>
-Count: &lt;%= counter++ %>
+%&gt;
+Count: &lt;%= counter++ %&gt;
 </example>
 
-<p><var/If-Modified/> pages are useful in combination with the
-<var/cache-mapping/> configuration.</p>
+<p><var>If-Modified</var> pages are useful in combination with the
+<var>cache-mapping</var> configuration.</p>
 
-</section>
+</s1>
 
-<section title='Servlets'>
+<s1 title="Servlets">
 
 <p>Caching servlets is exactly like caching JSP pages (or XTP or
 static files.)  Resin's caching mechanism works like a proxy cache: it
@@ -172,61 +172,61 @@ public class TestServlet extends HttpServlet {
 }
 </example>
 
-</section>
+</s1>
 
-<section title='Sessions and Cookies'>
+<s1 title="Sessions and Cookies">
 
 <p>Because Resin follows the HTTP caching spec, setting caching on a
 page which relies on sessions will make the page cacheable.
 You can test this by hitting the following page with separate browsers.</p>
 
 <example title="caching session information">
-&lt;% response.addHeader("Cache-Control", "max-age=3600"); %>
+&lt;% response.addHeader("Cache-Control", "max-age=3600"); %&gt;
 
-session id &lt;%= session.getId() %>
+session id &lt;%= session.getId() %&gt;
 </example>
 
 <p>Normally, this behavior is not what you want.  Instead, you may want
 the browser to cache the page, but not let other browsers
 see the same page.  To do that, you'll set
-the "Cache-Control: private" header.  You'll need to use <code/addHeader/>,
-not <code/setHeader/>, so the browser will get both "Cache-Control"
+the "Cache-Control: private" header.  You'll need to use <code>addHeader</code>,
+not <code>setHeader</code>, so the browser will get both "Cache-Control"
 directives.</p>
 
 <example title="private(browser) caching">
 &lt;%
   response.addHeader("Cache-Control", "max-age=3600");
   response.addHeader("Cache-Control", "private");
-%>
+%&gt;
 
-session id &lt;%= session.getId() %>
+session id &lt;%= session.getId() %&gt;
 </example>
 
-</section>
+</s1>
 
-<section title='Included Pages'>
+<s1 title="Included Pages">
 
 <p>Resin can cache subpages even when the top page can't be cached.
 Sites allowing user personalization will often design pages with
-<var/jsp:include/> subpages.  Some subpages are user-specific and can't
+<var>jsp:include</var> subpages.  Some subpages are user-specific and can't
 be cached.  Others are common to everybody and can be cached.</p>
 
 <p>Resin treats subpages as independent requests, so they can be
 cached independent of the top-level page.  Try the following, use the
-first <var/expires/> counter example as the included page.  Create a
+first <var>expires</var> counter example as the included page.  Create a
 top-level page that looks like:</p>
 
 <example>
-&lt;% if (! session.isNew()) { %>
-&lt;h1>Welcome back!&lt;/h1>
-&lt;% } %>
+&lt;% if (! session.isNew()) { %&gt;
+&lt;h1&gt;Welcome back!&lt;/h1&gt;
+&lt;% } %&gt;
 
-&lt;jsp:include page="expires.jsp"/>
+&lt;jsp:include page="expires.jsp"/&gt;
 </example>
 
-</section>
+</s1>
 
-<section title='Vary'>
+<s1 title="Vary">
 
 <p>In some cases, you'll want to have separate cached pages for the same URL
 depending on the capabilities of the browser.  Using gzip compression is
@@ -239,58 +239,58 @@ cache different versions of that page.</p>
 &lt;%
   response.addHeader("Cache-Control", "max-age=3600");
   response.addHeader("Vary", "Accept-Encoding");
-%>
+%&gt;
 
-Accept-Encoding: &lt;%= request.getHeader("Accept-Encoding") %>
+Accept-Encoding: &lt;%= request.getHeader("Accept-Encoding") %&gt;
 </example>
 
-</section>
+</s1>
 
-<section title='Caching Anonymous Users'>
+<s1 title="Caching Anonymous Users">
 
 <p>In many cases, logged in users get specialized pages, but
 anonymous users all see the same page.  In this case, you can still
 take advantage of Resin's caching, but you'll need to do a little work
 in your design.</p>
 
-<p>First, you'll need to create an <var/include()/> subpage that contains
+<p>First, you'll need to create an <var>include()</var> subpage that contains
 the common page.  The top page can't be cached because it depends on
 whether a user is logged in or not.</p>
 
-<p>You must use <var/include()/> because <var/forward()/> is cached just
+<p>You must use <var>include()</var> because <var>forward()</var> is cached just
 like the top page.  The top page isn't cacheable because of the user login,
 so the forwarded page isn't cacheable either.</p>
 
 <p>Here's what a sample subpage might look like:</p>
 
 <example>
-&lt;%@ page session=false %>
-&lt;%! int counter; %>
+&lt;%@ page session=false %&gt;
+&lt;%! int counter; %&gt;
 &lt;%
 long now = System.currentTimeMillis();
 response.setDateHeader("Expires", now + 15000);
 
 String user = request.getParameter("user");
-%>
-User: &lt;%= user %> &lt;%= counter++ %>
+%&gt;
+User: &lt;%= user %&gt; &lt;%= counter++ %&gt;
 </example>
 
 <p>The top page slightly trickier because it needs to pass the user
 to the subpage.  You need to pass a unique id.  If you pass a boolean
-<var/logged-in/> parameter, all logged in users will see the same page.</p>
+<var>logged-in</var> parameter, all logged in users will see the same page.</p>
 
 <example>
-&lt;%@ page session=true %>
+&lt;%@ page session=true %&gt;
 &lt;%
 String user = getSomeSortOfUniqueUserId();
 if (user == null)
   user = "Anonymous";
-%>
+%&gt;
 
 ... 
-&lt;jsp:include page='cachedpage.jsp'/>
-  &lt;jsp:page name='user' value='&lt;%= user %>'/>
-&lt;/jsp:include>
+&lt;jsp:include page='cachedpage.jsp'/&gt;
+  &lt;jsp:page name='user' value='&lt;%= user %&gt;'/&gt;
+&lt;/jsp:include&gt;
 </example>
 
 <p>Of course, the top-level page could also be a servlet:</p>
@@ -308,33 +308,33 @@ disp = request.getRequestDispatcher("/cachedpage.jsp?user=" + user);
 disp.include(request, response);
 </example>
 
-</section>
+</s1>
 
-<section title='Experimental Anonymous Caching'>
+<s1 title="Experimental Anonymous Caching">
 
 <p>Resin includes an anonymous user caching feature.  If a user
 is not logged in, she will get a cached page.  If she's logged in, she'll
 get her own page.  This feature will not work if anonymous users are
 assigned cookies for tracking purposes.</p>
 
-<p>To make anonymous caching work, you must set the <var/Cache-Control:
-x-anonymous/> header.  If you omit the x-anonymous header, Resin will use
-the <var/Expires/> to cache the same page for every user.</p>
+<p>To make anonymous caching work, you must set the <var>Cache-Control:
+x-anonymous</var> header.  If you omit the x-anonymous header, Resin will use
+the <var>Expires</var> to cache the same page for every user.</p>
 
 <example>
-&lt;%@ page session="false" %>
-&lt;%! int counter; %>
+&lt;%@ page session="false" %&gt;
+&lt;%! int counter; %&gt;
 &lt;%
 response.addHeader("Cache-Control", "max-age=15");
 response.addHeader("Cache-Control", "x-anonymous");
 
 String user = request.getParameter("user");
-%>
-User: &lt;%= user %> &lt;%= counter++ %>
+%&gt;
+User: &lt;%= user %&gt; &lt;%= counter++ %&gt;
 </example>
 
-<p>The top page must still set the <var/Expires/> or
-<var/If-Modified/> header, but Resin will take care of deciding if the
+<p>The top page must still set the <var>Expires</var> or
+<var>If-Modified</var> header, but Resin will take care of deciding if the
 page is cacheable or not.  If the request has any cookies, Resin will
 not cache it or use the cached page.  If it has no cookies, Resin will
 use the cached page.</p>
@@ -344,14 +344,14 @@ page uncacheable even if the page is the same for all users.
 Resin chooses to cache or not based on the existence of any cookies
 in the request, whether they're used or not.</p>
 
-</section>
+</s1>
 
-<section title='cache-mapping'>
+<s1 title="cache-mapping">
 
-<p><var/cache-mapping/> assigns a <var/max-age/> and <var/Expires/> to an
-If-Modified cacheable page.  It does not affect <var/max-age/> or
-<var/Expires/> cached pages.  The FileServlet takes
-advantage of <var/cache-mapping/> because it's an If-Modified servlet.</p>
+<p><var>cache-mapping</var> assigns a <var>max-age</var> and <var>Expires</var> to an
+If-Modified cacheable page.  It does not affect <var>max-age</var> or
+<var>Expires</var> cached pages.  The FileServlet takes
+advantage of <var>cache-mapping</var> because it's an If-Modified servlet.</p>
 
 <p>Often, you want a long Expires time for a page to a browser.  For
 example, any gif will not change for 24 hours.  That keeps browsers
@@ -364,18 +364,18 @@ browser or to a browser using reload.</p>
 on the default FileServlet.</p>
 
 <example>
-&lt;web-app id='/'>
+&lt;web-app id='/'&gt;
   &lt;cache-mapping url-pattern='*.gif'
-                 expires='24h'/>
-&lt;/web-app>
+                 expires='24h'/&gt;
+&lt;/web-app&gt;
 </example>
 
-<p>The <var/cache-mapping/> automatically generates the Expires
+<p>The <var>cache-mapping</var> automatically generates the Expires
 header.  It only works for cacheable pages setting If-Modified or
 ETag.  It will not affect pages explicily setting Expires or
 non-cacheable pages.  So it's safe to create a cache-mapping
-for <var/*.jsp/> even if only some are cacheable.</p>
+for <var>*.jsp</var> even if only some are cacheable.</p>
 
-</section>
+</s1>
   </body>
 </document>

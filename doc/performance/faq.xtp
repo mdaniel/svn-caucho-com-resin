@@ -7,7 +7,7 @@
 </header>
 
 <body>
-<summary objsummary-in-localtoc='1'/>
+<summary objsummary-in-localtoc="1"/>
 
 <faq title="How many concurrent users can a Resin server handle?">
 <description>

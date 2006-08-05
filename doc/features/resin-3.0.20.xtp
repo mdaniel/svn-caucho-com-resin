@@ -6,45 +6,45 @@
 
 <body>
 
-<summary objsummary='localtoc'/>
+<summary objsummary="localtoc"/>
 
-<section title="session enhancements">
+<s1 title="session enhancements">
 
-<section title="save-mode">
+<s2 title="save-mode">
 
 <p>The session-config now has a save-mode attribute, specifying when
 Resin should save changes.  The possible values are:</p>
 
 <ul>
 <li>before-headers
-<li>after-request
-<li>on-shutdown.
-</ul>
+</li><li>after-request
+</li><li>on-shutdown.
+</li></ul>
 
 <p>The default is "after-request", which is the current Resin behavior.
 Sites which have distribted sessions, but do not have a sticky-session
 load balancer may need to use "before-headers".  "before-headers" does
 add a latency penalty.</p>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="java.util.logging fixes">
+<s1 title="java.util.logging fixes">
 
 <p>The operation of the java.util.logging has changed to properly
 implement/configure the java.util.logging API.</p>
 
-<p>For clarification, the &lt;log> tag's "level" attribute sets
+<p>For clarification, the &lt;log&gt; tag's "level" attribute sets
 the level of the logging Handler.  It does not set the level of
 the Logger.</p>
 
-<section title="&lt;logging>">
+<s2 title="&lt;logging&gt;">
 
-<p>The new &lt;logging> tag configures the Logger, e.g.</p>
+<p>The new &lt;logging&gt; tag configures the Logger, e.g.</p>
 
 <example>
-&lt;logger name="com.caucho" level="fine"/>
+&lt;logger name="com.caucho" level="fine"/&gt;
 </example>
 
 Is equivalent to:
@@ -53,89 +53,89 @@ Is equivalent to:
 Logger.getLogger("com.caucho").setLevel(Level.FINE);
 </example>
 
-<p>If no &lt;logger> is supplied, the level default to the parent.
-If no parent has a &lt;logger>, the level defaults to INFO.</p>
+<p>If no &lt;logger&gt; is supplied, the level default to the parent.
+If no parent has a &lt;logger&gt;, the level defaults to INFO.</p>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="Admin enhancements">
+<s1 title="Admin enhancements">
 
 <p>Some MBeans have been reworked and extended:</p>
 <ul>
 <li>ClusterClientMBean (resin:type=ClusterClient,name=app-a)
-</ul>
+</li></ul>
 
-</section>
+</s1>
 
-<section title="Load Balancing enhancements">
+<s1 title="Load Balancing enhancements">
 
-<section title="client-connect-timeout">
+<s2 title="client-connect-timeout">
 
 <p>Sets the time a client should wait for a connection to a backend server.
 Defaults to 5s.</p>
 
-</section>
+</s2>
 
-<section title="client-weight">
+<s2 title="client-weight">
 
-<p>The backend &lt;srun> servers can now have a client-weight, so
+<p>The backend &lt;srun&gt; servers can now have a client-weight, so
 the load balancer can distribute more or less load to more or
 less powerful servers.</p>
 
 <p>The default value is 100.</p>
 
 <example>
-&lt;cluster id="app-tier">
-  &lt;srun id="app-a" client-weight="200" host="192.168.0.10"/>
-  &lt;srun id="app-b" host="192.168.0.10"/>
+&lt;cluster id="app-tier"&gt;
+  &lt;srun id="app-a" client-weight="200" host="192.168.0.10"/&gt;
+  &lt;srun id="app-b" host="192.168.0.10"/&gt;
 
-  &lt;srun id="app-test" client-weight="1" host="192.168.0.200"/>
-&lt;/cluster>
+  &lt;srun id="app-test" client-weight="1" host="192.168.0.200"/&gt;
+&lt;/cluster&gt;
 </example>
 
-</section>
+</s2>
 
-<section title="client-warmup-time">
+<s2 title="client-warmup-time">
 
-<p>The backend &lt;srun> servers can now have a warmup-time.
+<p>The backend &lt;srun&gt; servers can now have a warmup-time.
 The client-warmup-time will throttle requests to the backend
 server while the client "warms up".</p>
 
 <p>The default value is 60s.</p>
 
 <example>
-&lt;cluster id="app-tier">
-  &lt;client-warmup-time>60s&lt;/client-warmup-time>
+&lt;cluster id="app-tier"&gt;
+  &lt;client-warmup-time&gt;60s&lt;/client-warmup-time&gt;
 
-  &lt;srun id="app-a" host="192.168.0.10"/>
-  &lt;srun id="app-b" host="192.168.0.11"/>
-&lt;/cluster>
+  &lt;srun id="app-a" host="192.168.0.10"/&gt;
+  &lt;srun id="app-b" host="192.168.0.11"/&gt;
+&lt;/cluster&gt;
 </example>
 
-</section>
+</s2>
 
-<section title="client-max-idle-time">
+<s2 title="client-max-idle-time">
 
 <p>client-max-idle-time is a renaming of live-time.  It's the
 maximum time the socket will stay in the idle pool for a load balancer
 before it's removed.</p>
 
-</section>
+</s2>
 
-<section title="client-fail-recover-time">
+<s2 title="client-fail-recover-time">
 
 <p>client-max-idle-time is a renaming of dead-time.  It's the
 time the load balancer will skip a dead backend server before retrying.</p>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="Hessian">
+<s1 title="Hessian">
 
-<section title="Hessian 2.0 Draft">
+<s2 title="Hessian 2.0 Draft">
 
 <p>An early draft of <a href="../protocols/hessian-2.0-spec.xtp">Hessian
 2.0</a> protocol is available.</p>
@@ -144,31 +144,31 @@ time the load balancer will skip a dead backend server before retrying.</p>
 size of serialized messages.  Hessian 1.0 clients will continue to
 work with Hessian 2.0 servers without modification.</p>
 
-</section>
+</s2>
 
-<section title="Enum">
+<s2 title="Enum">
 
 <p>Hessian will now read and write JDK 1.5 enums.</p>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title="Quercus">
+<s1 title="Quercus">
 
 <p><a href="../quercus">Quercus</a>, Caucho's implementation of
 the PHP language in Java, has continued its rapid development, adding
 advanced features as well as more PHP libraries.</p>
 
-<section title="Distributed Sessions">
+<s2 title="Distributed Sessions">
 
 <p>Quercus provides
 <a href="http://www.caucho.com/articles/php-sessions.pdf">Distributed Sessions
 for PHP</a>, with the same distributed capabilities as servlets already use.</p>
 
-</section>
+</s2>
 
-<section title="New Libraries">
+<s2 title="New Libraries">
 
 <p>Quercus now supports</p>
 
@@ -179,25 +179,25 @@ for PHP</a>, with the same distributed capabilities as servlets already use.</p>
 <li><a href="http://www.php.net/manual/en/ref.image.php">Image Library</a></li>
 <li><a href="../quercus/tutorial/json/index.xtp">JSON</a></li>
 </ul>
-</section>
+</s2>
 
-<section title="server-env">
+<s2 title="server-env">
 
-<p>The QuercusServlet now allows &lt;server-env> to define environment
+<p>The QuercusServlet now allows &lt;server-env&gt; to define environment
 variables for $_SERVER.</p>
 
 <example>
 &lt;servlet servlet-name="php"
-            servlet-class="com.caucho.quercus.servlet.QuercusServlet">
-  &lt;init>
-    &lt;servlet-env foo="bar"/>
-  &lt;/init>
-&lt;/servlet>
+            servlet-class="com.caucho.quercus.servlet.QuercusServlet"&gt;
+  &lt;init&gt;
+    &lt;servlet-env foo="bar"/&gt;
+  &lt;/init&gt;
+&lt;/servlet&gt;
 </example>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
 </body>
 </document>

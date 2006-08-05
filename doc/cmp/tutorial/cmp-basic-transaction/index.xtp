@@ -35,39 +35,39 @@ following is a possible sequence of two clients, resulting in a
 non-sensical database configuration:</p>
 
 <deftable>
-<tr><th>Thread 1<th>Thread 2
-<tr><td width='50%'>temp = 'McGonagall'<td>&nbsp;
-<tr><td>c1.setInstructor('Snape')<td>&nbsp;
-<tr><td>&nbsp;<td>temp = 'Snape'
-<tr><td>&nbsp;<td>c1.setInstructor('Snape')
-<tr><td>c2.setInstructor('McGonagall')<td>&nbsp;
-<tr><td>&nbsp;<td>c2.setInstructor('Snape')
-</deftable>
+<tr><th>Thread 1</th><th>Thread 2
+</th></tr><tr><td width="50%">temp = 'McGonagall'</td><td>&#160;
+</td></tr><tr><td>c1.setInstructor('Snape')</td><td>&#160;
+</td></tr><tr><td>&#160;</td><td>temp = 'Snape'
+</td></tr><tr><td>&#160;</td><td>c1.setInstructor('Snape')
+</td></tr><tr><td>c2.setInstructor('McGonagall')</td><td>&#160;
+</td></tr><tr><td>&#160;</td><td>c2.setInstructor('Snape')
+</td></tr></deftable>
 
 <p>If the above sequence ever happened, Snape would be teaching
 both classes.  Transactions can avoid that inconsistency.</p>
 
-<section title="Demo">
+<s1 title="Demo">
   <a href="register">Demo</a>
-</section>
+</s1>
 
-<section title='User Transactions'>
+<s1 title="User Transactions">
 
 <p>The consistency problem can be solved with user transactions or
 by encapsulating the swap in a bean's business methods.  Although
 encapsulation is a better choice in general, we'll introduce
-<code/UserTransaction/> first because it better shows what's going on.</p>
+<code>UserTransaction</code> first because it better shows what's going on.</p>
 
-<p>The <code/UserTransaction/> interface (in <code/javax.transaction/>)
+<p>The <code>UserTransaction</code> interface (in <code>javax.transaction</code>)
 lets you
 control transactions from the client code.  You can get access to the
 UserTransaction object through the JNDI path
-<code/java:comp/UserTransaction/>.</p>
+<code>java:comp/UserTransaction</code>.</p>
 
-<p><code/UserTransaction/> works like a synchronized lock.  You start the
-transaction with <code/begin()/> and complete the transaction
-with <code/commit()/>.  You must always either commit or
-<code/rollback()/> the transaction.  So put it in a finally block.</p>
+<p><code>UserTransaction</code> works like a synchronized lock.  You start the
+transaction with <code>begin()</code> and complete the transaction
+with <code>commit()</code>.  You must always either commit or
+<code>rollback()</code> the transaction.  So put it in a finally block.</p>
 
 <example title="UserTransaction Swap">
 Context ic = new InitialContext();
@@ -100,9 +100,9 @@ try to get write locks at the same time.  One of the threads will win
 and the other will lose.  The loser will get a thrown exception.
 </p>
 
-</section>
+</s1>
 
-<section title='Entity Business Methods'>
+<s1 title="Entity Business Methods">
 
 <p>The better solution is to encapsulate all state changes in entity
 business methods.  Resin-CMP will automatically generate the
@@ -144,10 +144,10 @@ public abstract class CourseBean
 }
 </example>
 
-<p>Every call to <code/Course.swap/> will automatically be wrapped
+<p>Every call to <code>Course.swap</code> will automatically be wrapped
 in a transaction.  So the database will be updated cleanly and
-consistently and the client code can avoid using <code/UserTransaction/>.</p>
+consistently and the client code can avoid using <code>UserTransaction</code>.</p>
 
-</section>
+</s1>
   </body>
 </document>

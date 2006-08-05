@@ -12,30 +12,30 @@ Creating and using a filter has three steps:</p>
 
 <ol>
 <li>Create a filter class which extends javax.servlet.Filter
-<li>Use <a href="#filter">&lt;filter></a> in the web.xml to configure the filter.
-<li>Use <a href="#filter-mapping">&lt;filter-mapping></a> to select URLs and servlets for the filter.
-</ol>
+</li><li>Use <a href="#filter">&lt;filter&gt;</a> in the web.xml to configure the filter.
+</li><li>Use <a href="#filter-mapping">&lt;filter-mapping&gt;</a> to select URLs and servlets for the filter.
+</li></ol>
 
 <website>
 <p>Some other pages which discuss filters include:</p>
 
 <ul>
 <li>Resin's <a href="filter-library.xtp">filter library</a>
-</ul>
+</li></ul>
 </website>
 
 
-<section title="Filter Configuration">
+<s1 title="Filter Configuration">
 
-<defun title='filter' version="Servlet 2.3">
+<s2 title="filter" version="Servlet 2.3" type="defun">
 <p>Defines a filter alias for later mapping.</p>
 
 <deftable>
-<tr><th>Tag<th>Meaning
-<tr><td>filter-name<td>The filter's name (alias)
-<tr><td>filter-class<td>The filter's class (defaults to servlet-name)
-<tr><td>init-param<td>Initialization parameters
-</deftable>
+<tr><th>Tag</th><th>Meaning
+</th></tr><tr><td>filter-name</td><td>The filter's name (alias)
+</td></tr><tr><td>filter-class</td><td>The filter's class (defaults to servlet-name)
+</td></tr><tr><td>init-param</td><td>Initialization parameters
+</td></tr></deftable>
 
 <p>The following example defines a filter alias 'image'</p>
 <example>
@@ -51,21 +51,21 @@ Creating and using a filter has three steps:</p>
 
 &lt;/web-app&gt;
 </example>
-</defun>
+</s2>
 
-<defun title='filter-name' version="Servlet 2.3">
+<s2 title="filter-name" version="Servlet 2.3" type="defun">
 <p>Alias of the filter.</p>
-</defun>
+</s2>
 
-<defun title='filter-class' version="Servlet 2.3">
+<s2 title="filter-class" version="Servlet 2.3" type="defun">
 <p>Class of the filter.  The CLASSPATH for filters includes
 the WEB-INF/classes directory and all jars in the WEB-INF/lib directory.
 </p>
-</defun>
+</s2>
 
-<defun title='init-param' version="Servlet 2.3">
-<p>Initializes filter variables.  <code/filter-param/>
-defines initial values for <code/getFilterConfig().getInitParameter("foo")/>.
+<s2 title="init-param" version="Servlet 2.3" type="defun">
+<p>Initializes filter variables.  <code>filter-param</code>
+defines initial values for <code>getFilterConfig().getInitParameter("foo")</code>.
 </p>
 
 <p>The full Servlet 2.3 syntax for init-param is supported and
@@ -82,30 +82,30 @@ allows a simple shortcut</p>
   &lt;/init-param&gt;
 &lt;/filter&gt;
 
-&lt;/web-app>
+&lt;/web-app&gt;
 </example>
-</defun>
+</s2>
 
-<defun title="filter-mapping" version="Servlet 2.3">
-<p>Maps url patterns to filters.  <var/filter-mapping/> has two
-children, <var/url-pattern/> and <var/filter-name/>.
-<var/url-pattern/> selects the urls which should execute the filter.
+<s2 title="filter-mapping" version="Servlet 2.3" type="defun">
+<p>Maps url patterns to filters.  <var>filter-mapping</var> has two
+children, <var>url-pattern</var> and <var>filter-name</var>.
+<var>url-pattern</var> selects the urls which should execute the filter.
 </p>
 
-<p><code/filter-name/> can either specify a servlet class directly or it
-can specify a servlet alias defined by <code/filter/>.
+<p><code>filter-name</code> can either specify a servlet class directly or it
+can specify a servlet alias defined by <code>filter</code>.
 </p>
 
 <deftable>
-<tr><th>Configuration<th>Description
-<tr><td>url-pattern<td>A pattern matching the url:
-<var//foo/*/>, <var//foo/>, or <var/*.foo/>
-<tr><td>url-regexp<td>A regular expression matching the url
-<tr><td>servlet-name<td>A servlet name to match.
-<tr><td>filter-name<td>The filter name
-<tr><td>filter-class<td>The filter class
-<tr><td>init-param<td>Initialization parameters
-</deftable>
+<tr><th>Configuration</th><th>Description
+</th></tr><tr><td>url-pattern</td><td>A pattern matching the url:
+<var>/foo/*</var>, <var>/foo</var>, or <var>*.foo</var>
+</td></tr><tr><td>url-regexp</td><td>A regular expression matching the url
+</td></tr><tr><td>servlet-name</td><td>A servlet name to match.
+</td></tr><tr><td>filter-name</td><td>The filter name
+</td></tr><tr><td>filter-class</td><td>The filter class
+</td></tr><tr><td>init-param</td><td>Initialization parameters
+</td></tr></deftable>
 
 <example>
 &lt;caucho.com&gt;
@@ -118,7 +118,7 @@ can specify a servlet alias defined by <code/filter/>.
                  servlet-name='hello'/&gt;
 
 &lt;filter filter-name='test-filter'
-        filter-class='test.MyFilter'/>
+        filter-class='test.MyFilter'/&gt;
 
 &lt;filter-mapping url-pattern='/hello/*'
                  filter-name='test-filter'/&gt;
@@ -126,10 +126,10 @@ can specify a servlet alias defined by <code/filter/>.
 &lt;filter-mapping servlet-name='hello'
                  filter-name='test.SecondFilter'/&gt;
 
-&lt;/web-app>
+&lt;/web-app&gt;
 </example>
-</defun>
+</s2>
 
-</section>
+</s1>
   </body>
 </document>

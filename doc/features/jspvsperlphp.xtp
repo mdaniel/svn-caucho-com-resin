@@ -29,118 +29,118 @@
   <body>
     <summary/>
 
-<section title='New Benchmark Comparison'>
+<s1 title="New Benchmark Comparison">
 
 All results are in operations per second.  The results are sorted by
-<var/Hello/> performance.
+<var>Hello</var> performance.
 
-<deftable title='Single Client'>
-<tr><th>Engine<th>File<th>Servlet<th>Hello<th>Loop<th>Big<th>DB<th>Cache
-<tr align=right>
-  <td align=left>Resin/IBM
-  <td>571<td>550<td>558<td>36<td>83<td>131/268<td>603
+<deftable title="Single Client">
+<tr><th>Engine</th><th>File</th><th>Servlet</th><th>Hello</th><th>Loop</th><th>Big</th><th>DB</th><th>Cache
+</th></tr><tr align="right">
+  <td align="left">Resin/IBM
+  </td><td>571</td><td>550</td><td>558</td><td>36</td><td>83</td><td>131/268</td><td>603
   
-<tr align=right>
-  <td align=left>Resin/Apache/IBM
-  <td>505<td>373<td>386<td>36<td>65<td>122/202<td>382
+</td></tr><tr align="right">
+  <td align="left">Resin/Apache/IBM
+  </td><td>505</td><td>373</td><td>386</td><td>36</td><td>65</td><td>122/202</td><td>382
   
-<tr align=right>
-  <td align=left>Resin/IIS
-  <td>730<td>348<td>364<td>32<td>46<td>--<td>--
+</td></tr><tr align="right">
+  <td align="left">Resin/IIS
+  </td><td>730</td><td>348</td><td>364</td><td>32</td><td>46</td><td>--</td><td>--
   
-<tr align=right>
-  <td align=left>mod_perl/Apache
-  <td>497<td>n/a<td>322<td>11<td>74<td>98<td>--
+</td></tr><tr align="right">
+  <td align="left">mod_perl/Apache
+  </td><td>497</td><td>n/a</td><td>322</td><td>11</td><td>74</td><td>98</td><td>--
   
-<tr align=right>
-  <td align=left>ASP/IIS
-  <td>727<td>n/a<td>317<td>1.5<td>31<td>--<td>--
+</td></tr><tr align="right">
+  <td align="left">ASP/IIS
+  </td><td>727</td><td>n/a</td><td>317</td><td>1.5</td><td>31</td><td>--</td><td>--
   
-<tr align=right>
-  <td align=left>mod_php/Apache
-  <td>504<td>n/a<td>308<td>13<td>36<td>130<td>--
+</td></tr><tr align="right">
+  <td align="left">mod_php/Apache
+  </td><td>504</td><td>n/a</td><td>308</td><td>13</td><td>36</td><td>130</td><td>--
   
-<tr align=right>
-  <td align=left>Resin JS/Apache/IBM
-  <td>484<td>n/a<td>254<td>16<td>61<td>33/118<td>376
-</deftable>
+</td></tr><tr align="right">
+  <td align="left">Resin JS/Apache/IBM
+  </td><td>484</td><td>n/a</td><td>254</td><td>16</td><td>61</td><td>33/118</td><td>376
+</td></tr></deftable>
 
 <p/>The following table shows four HTTP clients and HTTP/1.1 keepalive.
 The fourth keepalive request closes the connection.
 
-<deftable title='Four Clients with Four Keepalive'>
-<tr><th>Engine<th>File<th>Servlet<th>Hello<th>Loop<th>Big<th>DB<th>Cache
-<tr align=right>
-  <td align=left>Resin/IBM
-  <td>1455<td>1187<td>1553<td>46<td>96<td>176/367<td>1561
+<deftable title="Four Clients with Four Keepalive">
+<tr><th>Engine</th><th>File</th><th>Servlet</th><th>Hello</th><th>Loop</th><th>Big</th><th>DB</th><th>Cache
+</th></tr><tr align="right">
+  <td align="left">Resin/IBM
+  </td><td>1455</td><td>1187</td><td>1553</td><td>46</td><td>96</td><td>176/367</td><td>1561
   
-<tr align=right>
-  <td align=left>Resin/Apache/IBM
-  <td>880<td>564<td>575<td>38<td>91<td>135/237<td>586
+</td></tr><tr align="right">
+  <td align="left">Resin/Apache/IBM
+  </td><td>880</td><td>564</td><td>575</td><td>38</td><td>91</td><td>135/237</td><td>586
   
-<tr align=right>
-  <td align=left>Resin/IIS
-  <td>1619<td>417<td>422<td>35<td>48<td>--<td>--
+</td></tr><tr align="right">
+  <td align="left">Resin/IIS
+  </td><td>1619</td><td>417</td><td>422</td><td>35</td><td>48</td><td>--</td><td>--
   
-<tr align=right>
-  <td align=left>mod_perl/Apache
-  <td>801<td>n/a<td>385<td>11<td>97<td>93<td>--
+</td></tr><tr align="right">
+  <td align="left">mod_perl/Apache
+  </td><td>801</td><td>n/a</td><td>385</td><td>11</td><td>97</td><td>93</td><td>--
   
-<tr align=right>
-  <td align=left>ASP/IIS
-  <td>1654<td>n/a<td>385<td>1.4<td>80<td>--<td>--
+</td></tr><tr align="right">
+  <td align="left">ASP/IIS
+  </td><td>1654</td><td>n/a</td><td>385</td><td>1.4</td><td>80</td><td>--</td><td>--
   
-<tr align=right>
-  <td align=left>mod_php/Apache
-  <td>869<td>n/a<td>342<td>13<td>44<td>141<td>--
-</deftable>
+</td></tr><tr align="right">
+  <td align="left">mod_php/Apache
+  </td><td>869</td><td>n/a</td><td>342</td><td>13</td><td>44</td><td>141</td><td>--
+</td></tr></deftable>
 
-</section>
+</s1>
 
-<section title='Benchmark Description'>
+<s1 title="Benchmark Description">
 
 Each engine was tested against seven benchmarks.
 
-<section title='File'>
+<s2 title="File">
 
 The file benchmark is just a small (311 byte) static file.  It tests
 the web server's maximum static page rate.  
 
-</section>
+</s2>
 
-<section title='Servlet'>
+<s2 title="Servlet">
 
 The servlet benchmark is a trivial "Hello, World" servlet.  It measures the
 servlet engine overhead.  In other words, no matter how efficient you make your
 servlet code, you will never get better performance than this number.
 
-</section>
+</s2>
 
-<section title='Hello'>
+<s2 title="Hello">
 
 A trivial "Hello, World" page.  It measures the JSP (or Perl or PHP) overhead.
 No matter how efficient you make your servlet code, you will never get
 better performance than this number.
 
-</section>
+</s2>
 
-<section title='Loop'>
+<s2 title="Loop">
 
 Just prints lots of "Hello, World" in a loop.  The resulting output is
 about 64k.  The results, especially in comparison with "Big", give a very
 rough comparison of the execution performance.
 
-</section>
+</s2>
 
-<section title='Big'>
+<s2 title="Big">
 
 Somewhat misnamed, this is just a large almost-static page.  It's about 64k.
 The page doesn't do much processing, so this just tests the ability to
 push bytes back to the client.
 
-</section>
+</s2>
 
-<section title='DB'>
+<s2 title="DB">
 
 A simple database query.  The page prints the results from two small
 SQL selects.  It gives an indication of database performance.
@@ -150,90 +150,90 @@ driver.  The second number uses an experimental Caucho driver, available on
 request.  So the two numbers gives a good idea of how important JDBC drivers
 are to the performance.
 
-</section>
+</s2>
 
-<section title='Cache'>
+<s2 title="Cache">
 
-Same as DB, but the page sets the <var/Expires/> header 15 seconds in
+Same as DB, but the page sets the <var>Expires</var> header 15 seconds in
 the future.
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title='Old Data'>
+<s1 title="Old Data">
 
 <p/>The new version of the benchmark is incomplete.  It leaves out
 several servlet engines.  FYI, here's the old data.
 
 All results are in operations per second.  The results are sorted by
-<var/Hello/> performance.
+<var>Hello</var> performance.
 
-<deftable title='Benchmark comparison'>
-<tr><th>Engine<th>File<th>Servlet<th>Hello<th>Big<th>DB<th>Cache
-<tr align=right>
-  <td align=left>Resin/IBM
-  <td>615<td>557<td>510<td>96<td>143<td>572
+<deftable title="Benchmark comparison">
+<tr><th>Engine</th><th>File</th><th>Servlet</th><th>Hello</th><th>Big</th><th>DB</th><th>Cache
+</th></tr><tr align="right">
+  <td align="left">Resin/IBM
+  </td><td>615</td><td>557</td><td>510</td><td>96</td><td>143</td><td>572
 
-<tr align=right>
-  <td align=left>Resin/JDK1.2
-  <td>451<td>400<td>426<td>66<td>75<td>420
+</td></tr><tr align="right">
+  <td align="left">Resin/JDK1.2
+  </td><td>451</td><td>400</td><td>426</td><td>66</td><td>75</td><td>420
   
-<tr align=right>
-  <td align=left>Resin/Apache/IBM
-  <td>488<td>346<td>370<td>49<td>92<td>388
+</td></tr><tr align="right">
+  <td align="left">Resin/Apache/IBM
+  </td><td>488</td><td>346</td><td>370</td><td>49</td><td>92</td><td>388
 
-<tr align=right>
-  <td align=left>Orion/JDK1.2
-  <td>433<td>165<td>319<td>61<td>78<td>64
+</td></tr><tr align="right">
+  <td align="left">Orion/JDK1.2
+  </td><td>433</td><td>165</td><td>319</td><td>61</td><td>78</td><td>64
   
-<tr align=right>
-  <td align=left>mod_php/Apache
-  <td>497<td>n/a<td>258<td>46<td>104<td>104
+</td></tr><tr align="right">
+  <td align="left">mod_php/Apache
+  </td><td>497</td><td>n/a</td><td>258</td><td>46</td><td>104</td><td>104
   
-<tr align=right>
-  <td align=left>mod_perl/Apache
-  <td>488<td>n/a<td>324<td>82<td>98<td>98
+</td></tr><tr align="right">
+  <td align="left">mod_perl/Apache
+  </td><td>488</td><td>n/a</td><td>324</td><td>82</td><td>98</td><td>98
   
-<tr align=right>
-  <td align=left>ServletExec/Apache/IBM
-  <td>475<td>87<td>91<td>--<td>52<td>52
+</td></tr><tr align="right">
+  <td align="left">ServletExec/Apache/IBM
+  </td><td>475</td><td>87</td><td>91</td><td>--</td><td>52</td><td>52
   
-<tr align=right>
-  <td align=left>Tomcat/IBM
-  <td>114<td>89<td>83<td>18<td>44<td>44
+</td></tr><tr align="right">
+  <td align="left">Tomcat/IBM
+  </td><td>114</td><td>89</td><td>83</td><td>18</td><td>44</td><td>44
   
-<tr align=right>
-  <td align=left>CGI perl/Apache
-  <td>488<td>n/a<td>59<td>25<td>6<td>6
+</td></tr><tr align="right">
+  <td align="left">CGI perl/Apache
+  </td><td>488</td><td>n/a</td><td>59</td><td>25</td><td>6</td><td>6
   
-<tr align=right>
-  <td align=left>JRun/Apache/JDK1.2
-  <td>471<td>61<td>33<td>--<td>22<td>22
+</td></tr><tr align="right">
+  <td align="left">JRun/Apache/JDK1.2
+  </td><td>471</td><td>61</td><td>33</td><td>--</td><td>22</td><td>22
   
-<tr align=right>
-  <td align=left>Tomcat/JDK1.2
-  <td>33<td>55<td>33<td>11<td>21<td>21
-</deftable>
-</section>
+</td></tr><tr align="right">
+  <td align="left">Tomcat/JDK1.2
+  </td><td>33</td><td>55</td><td>33</td><td>11</td><td>21</td><td>21
+</td></tr></deftable>
+</s1>
 
-<section title='Web Content Engines'>
+<s1 title="Web Content Engines">
 
 <ul>
 <li>Resin 1.1 b2 (internal web server)
-<li>Orion 0.7.6b (internal web server)
-<li>Tomcat (internal web server)
-<li>Resin 1.1 b2/Apache 1.3.9
-<li>mod_php 4.0b2
-<li>mod_perl 1.21
-<li>JRun 2.3.3/Apache 1.3.9
-<li>ServletExec 2.2/Apache 1.3.9
-<li>CGI using Perl
-</ul>
+</li><li>Orion 0.7.6b (internal web server)
+</li><li>Tomcat (internal web server)
+</li><li>Resin 1.1 b2/Apache 1.3.9
+</li><li>mod_php 4.0b2
+</li><li>mod_perl 1.21
+</li><li>JRun 2.3.3/Apache 1.3.9
+</li><li>ServletExec 2.2/Apache 1.3.9
+</li><li>CGI using Perl
+</li></ul>
 
-</section>
+</s1>
 
-<section title='Configuration'>
+<s1 title="Configuration">
 
 <p/>The server is a 266 Mhz Pentium II running RedHat 6.0 with 64 meg of
 ram.  The client is a 300 Mhz Celeron also running RedHat 6.0 with 32 meg.
@@ -263,9 +263,9 @@ instead.  For example, Orion needs JDK 1.2 and JRun spun using the IBM JDK.
 
 <p/>Database benchmarks used Mysql using the mm.mysql JDBC driver.
 
-</section>
+</s1>
 
-<section title='Discussion'>
+<s1 title="Discussion">
 
 First, these benchmarks are 'toy' benchmarks.  To fully compare Resin to
 other servlet engines or Perl or PHP, you need to write your full application
@@ -309,9 +309,9 @@ servlet engines were much slower than PHP or Perl.  With Resin, servlet
 performance is now about the same.   Projects should use other considerations,
 like maintainability or ease of implementation to decide between the languages.
 
-</section>
+</s1>
 
-<section title='Conclusion'>
+<s1 title="Conclusion">
 
 JSP can approach static page performance.  A perception still exists that
 Java is a great programming environment but hobbled by performance.  The
@@ -322,6 +322,6 @@ considered JSP or servlets because of performance, can now take
 advantage of the Java platform's reliability and ease of programming
 benefits.
 
-</section>
+</s1>
   </body>
 </document>

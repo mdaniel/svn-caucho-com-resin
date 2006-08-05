@@ -4,7 +4,7 @@
   <title>Authorization with Resin</title>
   <description>
     <p>Authorization is used to mark sections and resources of a web site
-    that have limited access.  <var/Constraints/> are used to indicate
+    that have limited access.  <var>Constraints</var> are used to indicate
     the criteria for access, typically the constraint is based on a
     user login, but it can also include such things as limiting access
     to clients from a certain ip address and requiring that a secure
@@ -14,11 +14,11 @@
 
 <body>
 
-<summary objsummary='localtoc'/>
+<summary objsummary="localtoc"/>
 
-<section title="Security Constraints">
+<s1 title="Security Constraints">
 
-<defun title='security-constraint'>
+<s2 title="security-constraint" type="defun">
 <parents>web-app</parents>
 
 <p>Selects protected areas of the web site.  Sites using
@@ -29,32 +29,32 @@ security constraints.</p>
 
 <p>Security constraints can also be custom classes.</p>
 
-<example title='Protecting all pages for logged-in users'>
+<example title="Protecting all pages for logged-in users">
 &lt;web-app&gt;
   ...
-&lt;security-constraint>
-  &lt;web-resource-collection>
-    &lt;url-pattern>/*&lt;/url-pattern>
-  &lt;/web-resource-collection>
-  &lt;auth-constraint role-name='user'/>
-&lt;/security-constraint>
+&lt;security-constraint&gt;
+  &lt;web-resource-collection&gt;
+    &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+  &lt;/web-resource-collection&gt;
+  &lt;auth-constraint role-name='user'/&gt;
+&lt;/security-constraint&gt;
   ...
 &lt;/web-app&gt;
 </example>
-</defun>
+</s2>
 
-<defun title='web-resource-collection'>
+<s2 title="web-resource-collection" type="defun">
 <parents>security-constraint</parents>
 
 <p>Specifies a collection of areas of the web site.</p>
 
 <deftable-childtags>
-<tr><td>url-pattern<td>url patterns describing the resource
-<tr><td>http-method<td>HTTP methods to be restricted.
-</deftable-childtags>
-</defun>
+<tr><td>url-pattern</td><td>url patterns describing the resource
+</td></tr><tr><td>http-method</td><td>HTTP methods to be restricted.
+</td></tr></deftable-childtags>
+</s2>
 
-<defun title='auth-constraint'>
+<s2 title="auth-constraint" type="defun">
 <parents>security-constraint</parents>
 
 <p>Requires that authenticated users fill the specified role.
@@ -62,22 +62,22 @@ In Resin's JdbcAuthenticator, normal users are in the "user" role.
 Think of a role as a group of users.</p>
 
 <deftable-childtags>
-<tr><td>role-name<td>Roles which are allowed to access the resource.
-</deftable-childtags>
+<tr><td>role-name</td><td>Roles which are allowed to access the resource.
+</td></tr></deftable-childtags>
 
-<example title='Protecting webdav for webdav users'>
-&lt;security-constraint>
-  &lt;auth-constraint role-name='webdav'/>
+<example title="Protecting webdav for webdav users">
+&lt;security-constraint&gt;
+  &lt;auth-constraint role-name='webdav'/&gt;
 
-  &lt;web-resource-collection>
-    &lt;url-pattern>/webdav/*&lt;/url-pattern>
-  &lt;/web-resource-collection>
-&lt;/security-constraint>
+  &lt;web-resource-collection&gt;
+    &lt;url-pattern&gt;/webdav/*&lt;/url-pattern&gt;
+  &lt;/web-resource-collection&gt;
+&lt;/security-constraint&gt;
 </example>
 
-</defun>
+</s2>
 
-<defun title="ip-constraint" version="Resin 2.0.6">
+<s2 title="ip-constraint" version="Resin 2.0.6" type="defun">
 <parents>security-constraint</parents>
 
 <p>Allow or deny requests based on the ip address of the client.
@@ -85,7 +85,7 @@ ip-constraint is very useful for protecting administration resources
 to an internal network.  It can also be useful for denying service to known
 problem ip's.</p>
 
-<example title='Admin pages allowed from 192.168.17.0/24'>
+<example title="Admin pages allowed from 192.168.17.0/24">
 &lt;security-constraint&gt;
   &lt;web-resource-collection&gt;
     &lt;url-pattern&gt;/admin/*&lt;/url-pattern&gt;
@@ -102,7 +102,7 @@ first 24 bits of the ip are matched - any ip address that begins with
 <code>192.168.17.</code> will match.  The usage of <var>/bits</var> is
 optional.</p> 
 
-<example title='Block out known trouble makers'>
+<example title="Block out known trouble makers">
 &lt;security-constraint&gt;
   &lt;ip-constraint&gt;
     &lt;deny&gt;205.11.12.3&lt;/deny&gt;
@@ -122,74 +122,74 @@ optional.</p>
 different users may appear to be the same ip to your server.</p>
 
 <deftable-childtags>
-<tr><td>allow<td>add an ip address to allow<td>default is to allow all ip addresses
-<tr><td>deny<td>add an ip address to deny<td>default is to deny no ip addresses
-<tr><td>error-code<td>error code to send if request is denied<td>403
-<tr><td>error-message<td>error message to send if request is denied<td>Forbidden IP Address
-<tr><td>cache-size<td>cache size, the result of applying rules for an ip is cached for subsequent requests<td>256
-</deftable-childtags>
+<tr><td>allow</td><td>add an ip address to allow</td><td>default is to allow all ip addresses
+</td></tr><tr><td>deny</td><td>add an ip address to deny</td><td>default is to deny no ip addresses
+</td></tr><tr><td>error-code</td><td>error code to send if request is denied</td><td>403
+</td></tr><tr><td>error-message</td><td>error message to send if request is denied</td><td>Forbidden IP Address
+</td></tr><tr><td>cache-size</td><td>cache size, the result of applying rules for an ip is cached for subsequent requests</td><td>256
+</td></tr></deftable-childtags>
 
-<p>If only <var/deny/> is used, then all ip's are allowed if they do not match
-a <code/deny/>.  If only <var/allow/> is used, then an ip is denied unless it
-matches an <code/allow/>. If both are used, then the ip must match both an
+<p>If only <var>deny</var> is used, then all ip's are allowed if they do not match
+a <code>deny</code>.  If only <var>allow</var> is used, then an ip is denied unless it
+matches an <code>allow</code>. If both are used, then the ip must match both an
 <code>allow</code> and a <code>deny</code></p>
 
-</defun>
+</s2>
 
-<defun title='user-data-constraint'>
+<s2 title="user-data-constraint" type="defun">
 <parents>security-constraint</parents>
 
 <p>Restricts access to secure transports, i.e. SSL.</p>
 
 <deftable-childtags>
-<tr><td>transport-guarantee<td>Required transport properties.  NONE,
+<tr><td>transport-guarantee</td><td>Required transport properties.  NONE,
 INTEGRAL, and CONFIDENTIAL are allowed values.
-</deftable-childtags>
+</td></tr></deftable-childtags>
 
 <example>
-&lt;security-constraint>
-  &lt;user-data-constraint>
-    &lt;transport-guarantee>CONFIDENTIAL&lt;/transport-guarantee>
-  &lt;/user-data-constraint>
+&lt;security-constraint&gt;
+  &lt;user-data-constraint&gt;
+    &lt;transport-guarantee&gt;CONFIDENTIAL&lt;/transport-guarantee&gt;
+  &lt;/user-data-constraint&gt;
 
-  &lt;web-resource-collection>
-    &lt;url-pattern>/*&lt;/url-pattern>
-  &lt;/web-resource-collection>
-&lt;/security-constraint>
+  &lt;web-resource-collection&gt;
+    &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+  &lt;/web-resource-collection&gt;
+&lt;/security-constraint&gt;
 </example>
 
-</defun>
+</s2>
 
-<defun title='transport-guarantee'>
+<s2 title="transport-guarantee" type="defun">
 <p>Restricts access to secure transports, i.e. SSL.</p>
-</defun>
+</s2>
 
-<defun title='constraint' version='Resin 2.0.1'>
+<s2 title="constraint" version="Resin 2.0.1" type="defun">
 <parents>security-constraint</parents>
 
-<p>Defines a custom constraint.  The custom constraint specifies a <var/resin:type/> which extends <a href="javadoc|com.caucho.server.security.AbstractConstraint|"/>.  
+<p>Defines a custom constraint.  The custom constraint specifies a <var>resin:type</var> which extends <a href="javadoc|com.caucho.server.security.AbstractConstraint|"/>.  
 <a href="doc|config|init">Bean-style initialization</a> is used to
 initialize the constraint.</p>
 
 <example>
 ...
-&lt;security-constraint>
+&lt;security-constraint&gt;
   &lt;constraint resin:type="example.CustomConstraint&gt;
     &lt;init&gt;
       &lt;policy&gt;strict&lt;/policy&gt;
     &lt;/init&gt;
   &lt;/constraint&gt;
-  &lt;web-resource-collection url-pattern='/*'/>
-&lt;/security-constraint>
+  &lt;web-resource-collection url-pattern='/*'/&gt;
+&lt;/security-constraint&gt;
 ...
 </example>
 
-</defun>
+</s2>
 
-</section> <!-- Security-Constraints -->
+</s1> <!-- Security-Constraints -->
 
 
-<section title='Custom Security Constraints'>
+<s1 title="Custom Security Constraints">
 
 <p>Any custom security constraint is checked after any authentication (login)
 but before any filters or servlets are applied.  The security constraint will
@@ -231,33 +231,33 @@ public class CustomSecurity extends AbstractConstraint {
 }
 </example>
 
-<p>The <code/needsAuthentication/> method tells Resin that it needs to
+<p>The <code>needsAuthentication</code> method tells Resin that it needs to
 log in the user before checking the authorization.  This would allow
 the custom authorizer to check user roles or the user principle for
 the proper permissions.</p>
 
 <example>
-&lt;constraint resin:type="example.CustomSecurity">
+&lt;constraint resin:type="example.CustomSecurity"&gt;
   &lt;foo&gt;test-value&lt;/foo&gt;
 &lt;/constraint&gt;
 </example>
 
-</section>
+</s1>
 
-<section name='protectall' title='Protecting static files from viewing by anyone'>
+<s1 name="protectall" title="Protecting static files from viewing by anyone">
 
 <p>Sometimes it is necessary to protect files from being viewed by
 anyone, such as configuration files used in your code but not meant to
 be served to a browser.</p>
 
-<section title="Place files in WEB-INF">
-<p>Place files in <var/WEB-INF/> or a subdirectory of <var/WEB-INF/>.  Any files in
-<var/WEB-INF/> or it's subdirectories will automatically be protected
+<s2 title="Place files in WEB-INF">
+<p>Place files in <var>WEB-INF</var> or a subdirectory of <var>WEB-INF</var>.  Any files in
+<var>WEB-INF</var> or it's subdirectories will automatically be protected
 from viewing.</p>
-</section>
+</s2>
 
-<section title="Security constraint requiring role nobody">
-<p>Use a security constraint that requires a <var/role/> that nobody
+<s2 title="Security constraint requiring role nobody">
+<p>Use a security constraint that requires a <var>role</var> that nobody
 will ever have.</p>
 
 <example title="security-constraint to protect static files">
@@ -281,12 +281,11 @@ will ever have.</p>
   ...
 &lt;/web-app&gt;
 </example>
-</section>
+</s2>
 
-<section title="A servlet that returns a 403 error">
+<s2 title="A servlet that returns a 403 error">
 <p>Use a simple servlet that returns a 403 error, which means
-"Forbidden".  Resin provides the servlet <a
-href="javadoc|com.caucho.servlets.ErrorStatusServlet|"/> which is useful for
+"Forbidden".  Resin provides the servlet <a href="javadoc|com.caucho.servlets.ErrorStatusServlet|"/> which is useful for
 this:</p>
 
 <example title="Using ErrorStatusServlet to protect static files">
@@ -328,9 +327,9 @@ public class Forbidden extends GenericServlet {
   }
 }
 </example>
-</section>
+</s2>
 
-</section>
+</s1>
 
 </body>
 </document>

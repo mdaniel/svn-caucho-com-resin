@@ -12,20 +12,20 @@
 
     <summary/>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="hello.php"/>
-    <td>The PHP Hello, World
-<tr><td><viewfile-link file="WEB-INF/classes/example/HelloModule.java"/>
-    <td>The Java module definition
-<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
-    <td>web.xml configuration
-<tr><td><viewfile-link file="WEB-INF/classes/META-INF/services/com.caucho.quercus.QuercusModule"/>
-    <td>Adding the module
-</deftable>
-</section>
+    </td><td>The PHP Hello, World
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/HelloModule.java"/>
+    </td><td>The Java module definition
+</td></tr><tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
+    </td><td>web.xml configuration
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/META-INF/services/com.caucho.quercus.QuercusModule"/>
+    </td><td>Adding the module
+</td></tr></deftable>
+</s1>
 
-<section title="Introduction">
+<s1 title="Introduction">
 This article shows how to use Quercus, Resin's PHP implementation, to create a module in java callable from a PHP page.
 
 <!--
@@ -37,22 +37,22 @@ Resin 3.0.17 and that the directory housing httpd.exe is
 /var/www/webapps/ROOT. I will call this directory $webApp.
 </p>
 
-</section>
+</s1>
 
-<section title="Step 1: Create resin-web.xml and place it in $webApp/WEB-INF">
+<s1 title="Step 1: Create resin-web.xml and place it in $webApp/WEB-INF">
 
 <example title="resin-web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
    &lt;servlet servlet-name="resin-php"
-               servlet-class="com.caucho.quercus.servlet.QuercusServlet"/>
+               servlet-class="com.caucho.quercus.servlet.QuercusServlet"/&gt;
  
-   &lt;servlet-mapping url-pattern="*.php" servlet-name="resin-php"/>	   
-&lt;/web-app>
+   &lt;servlet-mapping url-pattern="*.php" servlet-name="resin-php"/&gt;	   
+&lt;/web-app&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="Step 2: Create HelloModule.java and place it in $webApp/WEB-INF/classes/example">
+<s1 title="Step 2: Create HelloModule.java and place it in $webApp/WEB-INF/classes/example">
 
 <example title="HelloModule.java">
 package example;
@@ -72,19 +72,19 @@ public class HelloModule extends AbstractQuercusModule {
    }
 }
 </example>
-</section>
+</s1>
 
-<section title="Step 3: Create com.caucho.quercus.QuercusModule and place it in $webApp/WEB-INF/classes/META-INF/services">
+<s1 title="Step 3: Create com.caucho.quercus.QuercusModule and place it in $webApp/WEB-INF/classes/META-INF/services">
 
 <example title="com.caucho.quercus.QuercusModule">
 example.HelloModule
 </example>
-</section>
+</s1>
 
-<section title="Step 4: Create hello.php and place it in webapps/ROOT">
+<s1 title="Step 4: Create hello.php and place it in webapps/ROOT">
 
 <example title="hello.php">
-&lt;?php echo hello_test("World") ?>
+&lt;?php echo hello_test("World") ?&gt;
 </example>
 
 In your favorite browser, type:
@@ -98,9 +98,9 @@ You should see:
  Hello, World
 </results>
 
-</section>
+</s1>
 
-<section title="Conclusion">
+<s1 title="Conclusion">
 
 <p>It is fairly straight forward to create your own modules callable from
 within a Quercus/PHP page.  The above tutorial takes through the steps
@@ -112,7 +112,7 @@ resave the ".java" file in the classes\example directory, and Resin
 will recompile it for you.</p>
 
 <p>You do not need to restart your web app or Resin.  It's just that simple.</p>
-</section>
+</s1>
 
   </body>
 </document>

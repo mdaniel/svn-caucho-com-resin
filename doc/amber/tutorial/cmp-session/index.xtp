@@ -12,18 +12,18 @@ of persistent sessions.
   <body>
     <summary/>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
-    <td>resin-web.xml configuration
-<tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>
-    <td>persistence.xml configuration
-<tr><td><viewfile-link file="WEB-INF/classes/example/User.java"/>
-    <td>The user bean
-<tr><td><viewfile-link file="WEB-INF/classes/example/SessionServlet.java"/>
-    <td>The session servlet
-</deftable>
-</section>
+    </td><td>resin-web.xml configuration
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>
+    </td><td>persistence.xml configuration
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/User.java"/>
+    </td><td>The user bean
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/SessionServlet.java"/>
+    </td><td>The session servlet
+</td></tr></deftable>
+</s1>
 
   </body>
 </document>

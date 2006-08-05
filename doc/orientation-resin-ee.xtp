@@ -7,16 +7,16 @@
 <body>
 
 <default-homepage-only>
-<section title="Sample Home Page">
+<s1 title="Sample Home Page">
 
 <p>This is the default home page for the Resin-Enterprise web server.
 If you see this page while browsing, it's because the site owner
 hasn't bothered creating a custom home page yet.</p>
 
-</section>
+</s1>
 </default-homepage-only>
 
-<section title="Developer Source Licensing">
+<s1 title="Developer Source Licensing">
 
 <p>Resin-Enterprise is commercial software released under the
 Caucho Developer Source License.  Commercial and other paid users
@@ -30,29 +30,29 @@ to meet that goal.  Developer Source is a
 commercial license that ensures everyone has access to Resin.</p>
 
 <p>For information on deployment licenses, see our
-<a href='http://www.caucho.com/sales/'>sales page</a>.</p>
+<a href="http://www.caucho.com/sales/">sales page</a>.</p>
 
 <ul>
 <li>You may use Resin for development, evaluation, and demos.
-<li>You must contact us to purchase a deployment license if either:
+</li><li>You must contact us to purchase a deployment license if either:
 <ul>
 <li>You are paid to use Resin.
-<li>You are paying someone else to use Resin.
-</ul>
-<li>If no one is paid to use Resin, you may use Resin for deployment:
+</li><li>You are paying someone else to use Resin.
+</li></ul>
+</li><li>If no one is paid to use Resin, you may use Resin for deployment:
 <ul>
 <li>students
-<li>private use
-<li>tiny startups with neither funding nor income.
-</ul>
-<li>Anyone falling in between should contact us for a waiver.
-<li>Distributors must contact us.
-<li>If you are allowed to use Resin, you may modify the source for that use.
-</ul>
+</li><li>private use
+</li><li>tiny startups with neither funding nor income.
+</li></ul>
+</li><li>Anyone falling in between should contact us for a waiver.
+</li><li>Distributors must contact us.
+</li><li>If you are allowed to use Resin, you may modify the source for that use.
+</li></ul>
 
-</section>
+</s1>
 
-<section title='Congratulations! Resin is working.'>
+<s1 title="Congratulations! Resin is working.">
 
 <p>The <a href="cmp/tutorial">CMP</a> tutorial introduces most of the important features of Resin Enterprise.</p>
 
@@ -105,7 +105,7 @@ including an AutoFaq, a bug tracking database, and a sample weblog.</p>
 </ul>
 -->
 
-<section title='Questions and Support'>
+<s2 title="Questions and Support">
 
 <p>A good place to ask questions is the Caucho
 <a href="http://www.caucho.com/quercus/faq/">AutoFAQ</a>.</p>
@@ -114,34 +114,31 @@ including an AutoFaq, a bug tracking database, and a sample weblog.</p>
 every question is answered, but many are and you can learn about clever ways
 of using Resin by reading it.</p>
 
-<p>To subscribe, send a mail to <a 
-href='mailto:subscribe-resin-interest@caucho.com'>subscribe-resin-interest@caucho.com</a>
+<p>To subscribe, send a mail to <a href="mailto:subscribe-resin-interest@caucho.com">subscribe-resin-interest@caucho.com</a>
 with the body "subscribe".</p>
 
 <p>You can also subscribe to the resin-interest digest.  A new digest
-is sent every 2 days or so.  To subscribe, send a mail to <a 
-href='mailto:subscribe-resin-interest-digest@caucho.com'>subscribe-resin-interest-digest@caucho.com</a>
+is sent every 2 days or so.  To subscribe, send a mail to <a href="mailto:subscribe-resin-interest-digest@caucho.com">subscribe-resin-interest-digest@caucho.com</a>
 with the body "subscribe".</p>
 
-<p>You can also send bug reports directly <a
-href='mailto:bugs@caucho.com'>bugs@caucho.com</a>:</p>
+<p>You can also send bug reports directly <a href="mailto:bugs@caucho.com">bugs@caucho.com</a>:</p>
 
 <ul>
 <li>Resin Platinum users will receive the highest support, including
   an email response in one business day and any needed bug fixes
   within in two weeks.
-<li>Registered Resin users will receive a priority in email responses
+</li><li>Registered Resin users will receive a priority in email responses
   and bug reports over questions from non-registered users.
-<li>Bug reports from non-registered users are always welcome, but
+</li><li>Bug reports from non-registered users are always welcome, but
   support questions will generally be ignored.
-</ul>
+</li></ul>
 
-<p>See <a href='http://www.caucho.com/support/faq.xtp'>caucho.com</a>
-or contact <a href='mailto:sales@caucho.com'>sales@caucho.com</a> for
+<p>See <a href="http://www.caucho.com/support/faq.xtp">caucho.com</a>
+or contact <a href="mailto:sales@caucho.com">sales@caucho.com</a> for
 more information.</p>
 
-</section>
+</s2>
 
-</section>
+</s1>
 </body>
 </document>

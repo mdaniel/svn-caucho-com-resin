@@ -12,45 +12,45 @@
   <body>
     <summary/>
 
-    <section title="JSP EL variables">
+    <s1 title="JSP EL variables">
       <p>EL Variables come from one of two places:</p>
 
       <ol>
         <li>implicit variable
           <deftable>
           <tr><td>pageContext
-              <td>
-          <tr><td>pageScope
-              <td>
-          <tr><td>requestScope
-              <td>
-          <tr><td>sessionScope
-              <td>
-          <tr><td>applicationScope
-              <td>
-          <tr><td>param
-              <td>
-          <tr><td>paramValues
-              <td>
-          <tr><td>header
-              <td>
-          <tr><td>headerValues
-              <td>
-          <tr><td>cookie
-              <td>
-          <tr><td>initParam
-              <td>
-          </deftable>
+              </td><td>
+          </td></tr><tr><td>pageScope
+              </td><td>
+          </td></tr><tr><td>requestScope
+              </td><td>
+          </td></tr><tr><td>sessionScope
+              </td><td>
+          </td></tr><tr><td>applicationScope
+              </td><td>
+          </td></tr><tr><td>param
+              </td><td>
+          </td></tr><tr><td>paramValues
+              </td><td>
+          </td></tr><tr><td>header
+              </td><td>
+          </td></tr><tr><td>headerValues
+              </td><td>
+          </td></tr><tr><td>cookie
+              </td><td>
+          </td></tr><tr><td>initParam
+              </td><td>
+          </td></tr></deftable>
 
-        <li>pageContext.findAttribute(varname)
+        </li><li>pageContext.findAttribute(varname)
           <p>which is like getting the first of:</p>
           <ul>
           <li>page.getAttribute(varname)
-          <li>request.getAttribute(varname)
-          <li>session.getAttribute(varname)
-          <li>application.getAttribute(varname)
-          </ul>
-      </ol>
+          </li><li>request.getAttribute(varname)
+          </li><li>session.getAttribute(varname)
+          </li><li>application.getAttribute(varname)
+          </li></ul>
+      </li></ol>
 
       <p>So if you have a variable like:</p>
 
@@ -122,7 +122,6 @@ param is TRUE
 b is TRUE
       </results>
 
-    </section>
+    </s1>
   </body>
 </document>
-  

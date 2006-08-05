@@ -14,18 +14,18 @@ See <a href="http://wiki.caucho.com/PHP_Hello_World_Module">http://wiki.caucho.c
 
     <summary/>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="hello.php"/>
-    <td>The PHP Hello, World
-<tr><td><viewfile-link file="WEB-INF/classes/example/HelloModule.java"/>
-    <td>The Java module definition
-<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
-    <td>web.xml configuration
-<tr><td><viewfile-link file="WEB-INF/classes/META-INF/services/com.caucho.quercus.QuercusModule"/>
-    <td>Adding the module
-</deftable>
+    </td><td>The PHP Hello, World
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/HelloModule.java"/>
+    </td><td>The Java module definition
+</td></tr><tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
+    </td><td>web.xml configuration
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/META-INF/services/com.caucho.quercus.QuercusModule"/>
+    </td><td>Adding the module
+</td></tr></deftable>
 
-</section>
+</s1>
   </body>
 </document>

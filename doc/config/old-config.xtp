@@ -1,3 +1,5 @@
+<document>
+<body>
 <s1 title="Web Application Configuration">
 
 <p>HTTP configuration follows the Servlet 2.2 deployment descriptors.
@@ -4082,4 +4084,5 @@ log ::= <a href="#log">href</a>,
 
 </s2>
 </s1>
-
+</body>
+</document>

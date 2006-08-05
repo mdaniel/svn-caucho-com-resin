@@ -20,22 +20,22 @@ combination with the JCA work management API.</p>
 
 <summary/>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    <td>Configures the TimerResource
-<tr><td><viewfile-link file="WEB-INF/classes/example/TimerResource.java"/>
-    <td>The resource implementation registers a launching task with the Timer and provides common state.
-<tr><td><viewfile-link file="WEB-INF/classes/example/WorkScheduleTimerTask.java"/>
-    <td>The timer task which launches the work task.
-<tr><td><viewfile-link file="WEB-INF/classes/example/WorkTask.java"/>
-    <td>The work task executes the long task.
-<tr><td><viewfile-link file="index.jsp"/>
-    <td>The starting page for the tutorial
-</deftable>
-</section>
+    </td><td>Configures the TimerResource
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/TimerResource.java"/>
+    </td><td>The resource implementation registers a launching task with the Timer and provides common state.
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/WorkScheduleTimerTask.java"/>
+    </td><td>The timer task which launches the work task.
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/WorkTask.java"/>
+    </td><td>The work task executes the long task.
+</td></tr><tr><td><viewfile-link file="index.jsp"/>
+    </td><td>The starting page for the tutorial
+</td></tr></deftable>
+</s1>
 
-<section title="The Timer task">
+<s1 title="The Timer task">
 
 <p>The <code>java.util.Timer</code> provides an API to launch periodic
 tasks.  Because the timer tasks are expected to be short, the timer
@@ -79,9 +79,9 @@ public class WorkScheduleTimerTask extends java.util.TimerTask {
 }
 </example>
 
-</section>
+</s1>
 
-<section title="The work task">
+<s1 title="The work task">
 
 <p>For this example, the work task is trivial.  It just increments a
 counter in the <code>TimerResource</code>.</p>
@@ -107,9 +107,9 @@ public class WorkTask implements Work {
 
 </example>
 
-</section>
+</s1>
 
-<section title="The Resource">
+<s1 title="The Resource">
 
 <p>The <code>TimerResource</code> in this example just registers the
 timer tasks and exits.  As before, the resource extends
@@ -157,26 +157,26 @@ public class TimerResource extends AbstractResourceAdapter {
 }
 </example>
 
-</section>
+</s1>
 
-<section title="Configuration and JSP">
+<s1 title="Configuration and JSP">
 
 <p>The configuration for this resource is trivial since it has no
 attributes.</p>
 
 <example title="web.xml">
-&lt;resource name="jca/timer" type="example.TimerResource"/>
+&lt;resource name="jca/timer" type="example.TimerResource"/&gt;
 </example>
 
 <p>The demo JSP is also trivial.  It looks up the resource through
 JNDI and prints it to the page.</p>
 
 <example title="index.jsp">
-&lt;%@ page import="javax.naming.*" %>
-&lt;%= new InitialContext().lookup("java:comp/env/jca/timer") %>
+&lt;%@ page import="javax.naming.*" %&gt;
+&lt;%= new InitialContext().lookup("java:comp/env/jca/timer") %&gt;
 </example>
 
-</section>
+</s1>
 
 </body>
 </document>

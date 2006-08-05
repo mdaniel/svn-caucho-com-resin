@@ -15,33 +15,33 @@ making development simpler.</p>
 
 <body>
 <summary/>
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="test.jsp"/>
-    <td>The jsp page that uses the tags
-<tr><td><viewfile-link file="WEB-INF/tags/test.tagx"/>
-    <td>The basic tag.
-</deftable>
-</section>
+    </td><td>The jsp page that uses the tags
+</td></tr><tr><td><viewfile-link file="WEB-INF/tags/test.tagx"/>
+    </td><td>The basic tag.
+</td></tr></deftable>
+</s1>
 
-<section title="The tag file">
+<s1 title="The tag file">
 
 <p>Tag files in JSP 2.0 look and run like normal JSP files with some extra
 directives.  This example definine a tag attribute "a" which
 takes a <code>String</code> value.  It prints a simple message.</p>
 
 <example file="WEB-INF/tags/test.tagx">
-&lt;jsp:root xmlns:jsp="http://java.sun.com/JSP/Page">
+&lt;jsp:root xmlns:jsp="http://java.sun.com/JSP/Page"&gt;
   &lt;jsp:directive.attribute name="a"
                            type="java.lang.String"
-                           required="true"/>
+                           required="true"/&gt;
 
-  &lt;jsp:text>A sample tag: ${'${'}a}&lt;/jsp:text>
-&lt;/jsp:root>
+  &lt;jsp:text&gt;A sample tag: ${'${'}a}&lt;/jsp:text&gt;
+&lt;/jsp:root&gt;
 </example>
 
-<p>The <var/.tagx/> extension identifies the tag as a JSP tag file
-using XML syntax.  The example could also have used <var/test.tag/> for
+<p>The <var>.tagx</var> extension identifies the tag as a JSP tag file
+using XML syntax.  The example could also have used <var>test.tag</var> for
 a tag file in JSP syntax.  Tag files normally belong in WEB-INF/tags,
 although the location is configurable.</p>
 
@@ -51,29 +51,29 @@ tells the tag to look in the <code>pageContext</code> for a local
 variable <code>a</code>.  The value of <code>a</code> is assigned by
 the tag attribute as defined in the attribute directive.</p>
 
-</section>
+</s1>
 
-<section title="Using the tag file">
+<s1 title="Using the tag file">
 
 <p>Using tag files is similar to using normal JSP tags.  This example
 uses the XML syntax, although normal JSP syntax would work, too.
-The namespace prefix <var/urn:tagfiledir:/> tells JSP where to look
+The namespace prefix <var>urn:tagfiledir:</var> tells JSP where to look
 for the tag.  In  this case it will look in WEB-INF/tags.</p>
 
 <example file="test.jsp">
 &lt;jsp:root xmlns:jsp="http://java.sun.com/JSP/Page"
-          xmlns:tags="urn:jsptagdir:/WEB-INF/tags">
-  &lt;tags:test a="Test 1"/>&lt;br/>
-  &lt;tags:test a="Test 2"/>
-&lt;/jsp:root>
+          xmlns:tags="urn:jsptagdir:/WEB-INF/tags"&gt;
+  &lt;tags:test a="Test 1"/&gt;&lt;br/&gt;
+  &lt;tags:test a="Test 2"/&gt;
+&lt;/jsp:root&gt;
 </example>
 
 <results>
-A sample tag: Test 1&lt;br>
+A sample tag: Test 1&lt;br&gt;
 A sample tag: Test 2
 </results>
 
-</section>
+</s1>
 
 </body>
 </document>

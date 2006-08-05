@@ -14,7 +14,7 @@
   <body>
     <summary/>
 
-<section name=mixing title="Creating JSP from XTP">
+<s1 name="mixing" title="Creating JSP from XTP">
 
 <p>Resin creates a JSP file from an XTP file.  XTP pages can
 separate the content (in XML) from the scripting (in XSL).  The XSL
@@ -23,29 +23,29 @@ adding tags.</p>
 
 <ol>
 <li>Parse XTP file as HTML
-<li>Find and parse XSL stylesheet
-<li>Applying the stylesheet to the XTP, creating a JSP file
-<li>Execute the JSP file
-</ol>
+</li><li>Find and parse XSL stylesheet
+</li><li>Applying the stylesheet to the XTP, creating a JSP file
+</li><li>Execute the JSP file
+</li></ol>
 
 <p>A trivial example is a named counter.  If the counter has an 'id'
 attribute, we'll use it at the value of the application variable.</p>
 
 <p>XTP pages can use the counter just by adding the tag:</p>
 
-<example title='counter.xtp'>
+<example title="counter.xtp">
 <var>A counter example: </var>&lt;ct:counter id='test'/&gt;
 </example>
 
-<example title='default.xsl'>
+<example title="default.xsl">
 &lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-                version="1.0">
+                version="1.0"&gt;
 
 &lt;xsl:template match='counter[@id]'&gt;
   <var>&lt;jsp:expression&gt;</var>
-     &lt;xsl:text&gt;<var>application.attribute["</var>&lt;/xsl:text>
-     &lt;xsl:value-of select='@id'/>
-     &lt;xsl:text><var>"]</var>&lt;/xsl:text>
+     &lt;xsl:text&gt;<var>application.attribute["</var>&lt;/xsl:text&gt;
+     &lt;xsl:value-of select='@id'/&gt;
+     &lt;xsl:text&gt;<var>"]</var>&lt;/xsl:text&gt;
   <var>&lt;/jsp:expression&gt;</var>
 &lt;/xsl:template&gt;
 
@@ -55,21 +55,21 @@ attribute, we'll use it at the value of the application variable.</p>
   <var>&lt;/jsp:expression&gt;</var>
 &lt;/xsl:template&gt;
 
-&lt;/xsl:stylesheet>
+&lt;/xsl:stylesheet&gt;
 </example>
 
 <p>The following JSP file is the result.  Resin will
 execute the generated JSP file to process HTTP requests.
 
-<results title='gen438.jsp'>
+<results title="gen438.jsp">
 A counter example: &lt;jsp:expression&gt;
   application.attribute["test"]++ 
 &lt;jsp:expression&gt;
 </results>
 
-</section>
+</p></s1>
 
-<section name=flow title="Creating JSP flow control">
+<s1 name="flow" title="Creating JSP flow control">
 
 <p>XTP can also generate JSP control.  Many programmers like using tags
 for programming, like Cold Fusion.  Here's how to create a basic set
@@ -77,9 +77,9 @@ of programming tags.</p>
 
 <ul>
 <li>ct:get prints the value of a variable
-<li>ct:if generates an if statement
-<li>ct:iter loops
-</ul>
+</li><li>ct:if generates an if statement
+</li><li>ct:iter loops
+</li></ul>
 
 <p>An example use might print the HTTP headers.</p>
 
@@ -97,32 +97,32 @@ Host : www.caucho.com
 
 <p>Here is the stylesheet:</p>
 
-<example title='definition of ct:get'>
-&lt;xsl:template match='ct:get'>
-  <var>&lt;jsp:expression></var>&lt;xsl:value-of select='@expr'/><var>&lt;/jsp:expression></var>
-&lt;/xsl:template>
+<example title="definition of ct:get">
+&lt;xsl:template match='ct:get'&gt;
+  <var>&lt;jsp:expression&gt;</var>&lt;xsl:value-of select='@expr'/&gt;<var>&lt;/jsp:expression&gt;</var>
+&lt;/xsl:template&gt;
 </example>
 
-<example title='definition of ct:if'>
-&lt;xsl:template match='ct:if'>
-  <var>&lt;jsp:scriptlet>
-    if (</var>&lt;xsl:value-of select='@expr'/><var>) {
-  &lt;/jsp:scriptlet></var>
-    &lt;xsl:apply-templates/>
-  <var>&lt;jsp:scriptlet>}&lt;/jsp:scriptlet></var>
-&lt;/xsl:template>
+<example title="definition of ct:if">
+&lt;xsl:template match='ct:if'&gt;
+  <var>&lt;jsp:scriptlet&gt;
+    if (</var>&lt;xsl:value-of select='@expr'/&gt;<var>) {
+  &lt;/jsp:scriptlet&gt;</var>
+    &lt;xsl:apply-templates/&gt;
+  <var>&lt;jsp:scriptlet&gt;}&lt;/jsp:scriptlet&gt;</var>
+&lt;/xsl:template&gt;
 </example>
 
-<example title='definition of ct:iter'>
-&lt;xsl:template match='ct:iter'>
-  <var>&lt;jsp:scriptlet>
-    for (var i in </var>&lt;xsl:value-of select='@expr'/><var>) {
-  &lt;/jsp:scriptlet></var>
-    &lt;xsl:apply-templates/>
-  <var>&lt;jsp:scriptlet>}&lt;/jsp:scriptlet></var>
-&lt;/xsl:template>
+<example title="definition of ct:iter">
+&lt;xsl:template match='ct:iter'&gt;
+  <var>&lt;jsp:scriptlet&gt;
+    for (var i in </var>&lt;xsl:value-of select='@expr'/&gt;<var>) {
+  &lt;/jsp:scriptlet&gt;</var>
+    &lt;xsl:apply-templates/&gt;
+  <var>&lt;jsp:scriptlet&gt;}&lt;/jsp:scriptlet&gt;</var>
+&lt;/xsl:template&gt;
 </example>
 
-</section>
+</s1>
   </body>
 </document>

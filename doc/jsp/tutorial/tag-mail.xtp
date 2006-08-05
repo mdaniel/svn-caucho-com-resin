@@ -6,54 +6,54 @@
     <description>
       <p>Body tags can grab JSP results and send them to an entirely different
         location.  It's easy to create a custom tag that sends part of a JSP to
-        a survey account.  The required attribute <var/to/> will specify the
-        mail address for the mail and <var/subject/> specifies the subject.  The
+        a survey account.  The required attribute <var>to</var> will specify the
+        mail address for the mail and <var>subject</var> specifies the subject.  The
         enclosed JSP contains the body of the mail.</p>
 
       <p>The contents of the tag can be any JSP code.  You can still use arbitrary
-        scriptlets writing to <var/out/>.</p>
+        scriptlets writing to <var>out</var>.</p>
     </description>
   </header>
 
   <body>
     <summary/>
-<section title="Using the mail tag">
+<s1 title="Using the mail tag">
 
 <p>This example use of the mail tag writes a simple message with the
 results of a form.  The user and the vote are mailed to john.doe.</p>
 
 <example title="mail.jsp">
-&lt;%@ taglib prefix="ct" uri="/WEB-INF/tags.tld" %>
-&lt;h1>Testing Mail&lt;/h1>
+&lt;%@ taglib prefix="ct" uri="/WEB-INF/tags.tld" %&gt;
+&lt;h1&gt;Testing Mail&lt;/h1&gt;
 
-&lt;ct:mail to="john.doe@localhost" subject="survey response">
-&lt;item>
-  &lt;user>&lt;%= request.getParameter("user") %>&lt;/user>
-  &lt;vote>&lt;%= request.getParameter("vote") %>&lt;/vote>
-&lt;/item>
-&lt;/ct:mail>
+&lt;ct:mail to="john.doe@localhost" subject="survey response"&gt;
+&lt;item&gt;
+  &lt;user&gt;&lt;%= request.getParameter("user") %&gt;&lt;/user&gt;
+  &lt;vote&gt;&lt;%= request.getParameter("vote") %&gt;&lt;/vote&gt;
+&lt;/item&gt;
+&lt;/ct:mail&gt;
 </example>
 <results>
 Subject: survey
    Date: Mon, 11 Sep 2000 18:06:52 -0700
-   From: Resin Account &lt;resin@localhost>
+   From: Resin Account &lt;resin@localhost&gt;
      To: john.doe@localhost
 
-&lt;item>
-  &lt;user>Fred Smith&lt;/user>
-  &lt;vote>Gryffindor&lt;/vote>
-&lt;/item>
+&lt;item&gt;
+  &lt;user&gt;Fred Smith&lt;/user&gt;
+  &lt;vote&gt;Gryffindor&lt;/vote&gt;
+&lt;/item&gt;
 </results>
 
-</section>
+</s1>
 
-<section title="Implementation of the Mail Tag">
+<s1 title="Implementation of the Mail Tag">
 
-<p>The MailTag has two required attributes, <var/subject/> and <var/to/>.
-As usual, they are set using the <var/bean/> design patterns
-<var/setSubject()/> and <var/setTo()/>.</p>
+<p>The MailTag has two required attributes, <var>subject</var> and <var>to</var>.
+As usual, they are set using the <var>bean</var> design patterns
+<var>setSubject()</var> and <var>setTo()</var>.</p>
 
-<p>Mailing uses Resin's VFS.  The <var/mailto:/> scheme sends mail
+<p>Mailing uses Resin's VFS.  The <var>mailto:</var> scheme sends mail
 to any user account.</p>
 
 <example title="test/MailTag.java">
@@ -101,39 +101,39 @@ public class MailTag extends BodyTagSupport {
 }
 </example>
 
-</section>
+</s1>
 
-<section title="Attribute Configuration">
+<s1 title="Attribute Configuration">
 
 <p>Each expected attribute needs an entry in the .tld.  In this case,
-both <var/to/> and <var/subject/> are required.</p>
+both <var>to</var> and <var>subject</var> are required.</p>
 
 <example title="WEB-INF/tag.tld">
-&lt;taglib>
-  &lt;tag>
-    &lt;name>mail&lt;/name>
-    &lt;tagclass>test.MailTag&lt;/tagclass>
-    &lt;attribute>
-      &lt;name>to&lt;/name>
-      &lt;required>true&lt;/required>
-    &lt;/attribute>
-    &lt;attribute>
-      &lt;name>subject&lt;/name>
-      &lt;required>true&lt;/required>
-    &lt;/attribute>
-  &lt;/tag>
-&lt;/taglib>
+&lt;taglib&gt;
+  &lt;tag&gt;
+    &lt;name&gt;mail&lt;/name&gt;
+    &lt;tagclass&gt;test.MailTag&lt;/tagclass&gt;
+    &lt;attribute&gt;
+      &lt;name&gt;to&lt;/name&gt;
+      &lt;required&gt;true&lt;/required&gt;
+    &lt;/attribute&gt;
+    &lt;attribute&gt;
+      &lt;name&gt;subject&lt;/name&gt;
+      &lt;required&gt;true&lt;/required&gt;
+    &lt;/attribute&gt;
+  &lt;/tag&gt;
+&lt;/taglib&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="Summary">
+<s1 title="Summary">
 <ul>
-<li><var/BodyTags/> can capture arbitrary JSP output.
-<li>After the contents complete, JSP calls <var/doAfterBody/>.
-<li><var/getBodyContent()/> contains the JSP body.
-<li>VFS <var/mailto:/> sends mail.
-</ul>
-</section>
+<li><var>BodyTags</var> can capture arbitrary JSP output.
+</li><li>After the contents complete, JSP calls <var>doAfterBody</var>.
+</li><li><var>getBodyContent()</var> contains the JSP body.
+</li><li>VFS <var>mailto:</var> sends mail.
+</li></ul>
+</s1>
   </body>
 </document>

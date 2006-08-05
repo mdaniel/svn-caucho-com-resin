@@ -14,7 +14,7 @@ java code to provide a response to a client that makes an HTTP request.
 
 <summary localtoc="3"/>
 
-<section title="Web applications">
+<s1 title="Web applications">
 
 <p>
 Each web application is part of the web server.  It has a unique name or
@@ -43,7 +43,7 @@ A web application has "web components", such as Servlets, Filters, JSP's,
 supporting Java source files, and supporting java libraries.
 </p>
 
-<section title="Try it!">
+<s2 title="Try it!">
 
 <p>
 You can make your own web application in a local install of Resin.  Make a
@@ -68,9 +68,9 @@ to show for a directory.  So you can use the url
 <code>http://localhost:8080/test</code>.  
 </p>
 
-</section>
+</s2>
 
-<section title="Example web application">
+<s2 title="Example web application">
 
 <p>
 For example, <code>www.hogwarts.com</code> has two web
@@ -79,27 +79,27 @@ named "intranet".
 </p>
 
 <p>
-<b>Server:</b> www.hogwarts.com<br>
-<b>Server URL:</b> http://www.hogwarts.com<br>
-<br>
-<b>webapp:</b> default webapp<br>
-<b>webapp URL:</b> http://www.hogwarts.com/<br>
-<b>filesystem directory:</b> $RESIN_HOME/webapps/ROOT<br>
-<b>default jsp page:</b> $RESIN_HOME/webapps/ROOT/index.jsp<br>
-<br>
-<b>webapp:</b> intranet<br>
-<b>webapp URL:</b> http://www.hogwarts.com/intranet<br>
-<b>filesystem directory:</b> $RESIN_HOME/webapps/intranet<br>
-<b>default jsp page:</b> $RESIN_HOME/webapps/intranet/index.jsp<br>
+<b>Server:</b> www.hogwarts.com<br/>
+<b>Server URL:</b> http://www.hogwarts.com<br/>
+<br/>
+<b>webapp:</b> default webapp<br/>
+<b>webapp URL:</b> http://www.hogwarts.com/<br/>
+<b>filesystem directory:</b> $RESIN_HOME/webapps/ROOT<br/>
+<b>default jsp page:</b> $RESIN_HOME/webapps/ROOT/index.jsp<br/>
+<br/>
+<b>webapp:</b> intranet<br/>
+<b>webapp URL:</b> http://www.hogwarts.com/intranet<br/>
+<b>filesystem directory:</b> $RESIN_HOME/webapps/intranet<br/>
+<b>default jsp page:</b> $RESIN_HOME/webapps/intranet/index.jsp<br/>
 </p>
 
-</section> <!-- Example web application -->
+</s2> <!-- Example web application -->
 
-</section>
+</s1>
 
-<section name="components" title="Components of a web application">
+<s1 name="components" title="Components of a web application">
 
-<section name="servlet" title="Servlet">
+<s2 name="servlet" title="Servlet">
 
 <p>
 From the Servlet Specification 2.2:
@@ -119,8 +119,7 @@ Hypertext Transfer Protocol (HTTP).
 A Servlet is a Java class that has a method that gets called with
 information about a client request and is expected to produce some
 kind of result to be sent back to the client. It is just like any
-other class in Java, it happens to inherit from <a
-href="javadoc|javax.servlet.http.HttpServlet|"/>, so Resin can call certain
+other class in Java, it happens to inherit from <a href="javadoc|javax.servlet.http.HttpServlet|"/>, so Resin can call certain
 methods on it when a request is made.  
 </p>
 
@@ -197,12 +196,11 @@ In a web-app named "foo" on a server named "localhost" listening on port
 <code>http://localhost:8080/foo/hello</code>.
 </p>
 
-<p>More information on the usage of Servlets is available in the <a
-href="doc|servlet|">Servlet</a> section of the Resin documenation.</p>
+<p>More information on the usage of Servlets is available in the <a href="doc|servlet|">Servlet</a> section of the Resin documenation.</p>
 
-</section> <!-- servlet -->
+</s2> <!-- servlet -->
 
-<section name="jsp" title="JSP">
+<s2 name="jsp" title="JSP">
 
 <p>
 Java Server Pages are text files that contain text to be output (usually
@@ -229,13 +227,13 @@ expressions, or specially marked scripting code (Java code).   The special xml
 tags, EL expressions and Java code are used to generate dynamic ouput.
 </p>
 
-<section name="jsp-translation" title="JSP's are translated into Servlets">
+<s3 name="jsp-translation" title="JSP's are translated into Servlets">
 <p>
 It is helpful to understand what it is that Resin does with a
 JSP page.  Basically, it takes the JSP page and turns it into the Java
-code for a Servlet, a process of <var/translation/>.  
+code for a Servlet, a process of <var>translation</var>.  
 
-<p>From the JSP specification: </p>
+</p><p>From the JSP specification: </p>
 
 <quote>
 JSP pages are textual components.  They go through two
@@ -272,43 +270,42 @@ needs to do is make the JSP page and Resin will look at it and
 turn it into a Servlet.
 </p>
 
-</section> <!-- jsp-translation -->
+</s3> <!-- jsp-translation -->
 
-<section name="jsp-syntax" title="The syntax of a JSP file">
+<s3 name="jsp-syntax" title="The syntax of a JSP file">
 
 <p>JSP has it's own <a href="doc|jsp|">section</a> in the Resin documentation,
 the following is an introductory guide.</p>
 
 
-<section title="template data - The text to be output">
+<s4 title="template data - The text to be output">
 
 <p>
 Unless specially marked, the text in the JSP file will be sent exactly
 as it is in the text file as part of the response. This is called
-<var/template data/> in the JSP specification.
+<var>template data</var> in the JSP specification.
 </p>
 
-</section>
+</s4>
 
-<section title="JSP EL and JSTL">
+<s4 title="JSP EL and JSTL">
 
 <p>
-JSP EL is the JSP <var/Expression Language/>.  It is used to evaluate
+JSP EL is the JSP <var>Expression Language</var>.  It is used to evaluate
 expressions that do not have side-effects (side-effects are changes to
 Objects). The use of EL is recognizable by it's syntax: 
 <code>${'${'} <var>expr</var> }</code>.
 </p>
 
 <p>
-JSTL is the JavaServer Pages Standard Tag Libray, a set of <var/tags/> that are
+JSTL is the JavaServer Pages Standard Tag Libray, a set of <var>tags</var> that are
 used to create dynamic output from JSP.  These tags look like regular XML tags,
 and are interpreted by Resin at translation time to generate java code that
 performs the desired action.
 </p>
 
 <p>
-EL and JSTL are used throughout this discussion, the <a
-href="doc|jsp|">Resin JSP documentation</a>, the <a href="spec|jsp|">JSP
+EL and JSTL are used throughout this discussion, the <a href="doc|jsp|">Resin JSP documentation</a>, the <a href="spec|jsp|">JSP
 Specification</a>, and the <a href="spec|jstl|">JSTL Specification</a> provide
 more information.
 </p>
@@ -368,9 +365,9 @@ of Java code to accomplish the same thing.  The use of JSTL and EL is much
 cleaner and more maintable.
 </p>
 
-</section>
+</s4>
 
-<section title="Including other files">
+<s4 title="Including other files">
 
 <p>
 Often it is desirable to include the contents of another file into a
@@ -389,9 +386,9 @@ text was in the original file.  The text is included at translation
 time - when the JSP is turned into a servlet.
 </p>
 
-</section>
+</s4>
 
-<section title="Specifying content type">
+<s4 title="Specifying content type">
 
 <p>
 A JSP page can use the <var>contentType</var> attribute of the
@@ -407,9 +404,9 @@ indicate the content type using the <code>response</code> object, which is
 discussed later.
 </p>
 
-</section>
+</s4>
 
-<section title="Comments">
+<s4 title="Comments">
 
 <p>
 A JSP comment is of the form:
@@ -435,21 +432,20 @@ client, the HTML and XML comment syntax is used, as follows:
 &lt;!-- comments ... --&gt;
 </example>
 
-</section>
+</s4>
 
-<section title="Java code in the JSP file">
+<s4 title="Java code in the JSP file">
 
 <p>
 Java code in the JSP is marked by the special characters <code>&lt;%</code>
 and <code>%&gt;</code>.  To insert the value of a variable or an expression in
-the output it is marked with <code>>&lt;%= <var>expr</var> &&gt;</code>.
+the output it is marked with <code>&gt;&lt;%= <var>expr</var> &amp;&gt;</code>.
 </p>
 
 <p>
 Be careful not to depend on the ability of JSP to include Java code too much.
-JSP is best used to present a <var/view/> of data that has already been
-prepared in Servlets or other code, as discussed in <a
-href="#architecture">Architecture</a>.
+JSP is best used to present a <var>view</var> of data that has already been
+prepared in Servlets or other code, as discussed in <a href="#architecture">Architecture</a>.
 </p>
 
 <p>
@@ -500,10 +496,10 @@ with a value of 5.
 &lt;/body&gt;
 </results>
 
-</section>
+</s4>
 
 
-<section title="Importing Java packages">
+<s4 title="Importing Java packages">
 
 <p>
 Usually when making a JSP the developer draws on classes from various
@@ -529,11 +525,11 @@ Date d = new Date();
 %&gt;
 </example>
 
-</section>
+</s4>
 
 
 
-<section title="Custom tag libraries">
+<s4 title="Custom tag libraries">
 
 <p>
 Custom tag libraries are a mechanism that allows developers to make
@@ -565,18 +561,17 @@ functionality of the library.
 </p>
 
 <p>
-More information on implementing custom tag libraries is in the <a
-href="doc|jsp|">JSP section</a> of the Resin documentation.
+More information on implementing custom tag libraries is in the <a href="doc|jsp|">JSP section</a> of the Resin documentation.
 </p>
 
-</section>
+</s4>
 
-</section> <!-- jsp-syntax -->
+</s3> <!-- jsp-syntax -->
 
 
-</section> <!-- jsp -->
+</s2> <!-- jsp -->
 
-<section name="filter" title="Filter">
+<s2 name="filter" title="Filter">
 
 <p>
 From the Servlet Specification 2.4:
@@ -590,7 +585,7 @@ the requests for a resource, and modify or adapt responses from a resource.
 </quote>
 
 <p>
-A Filter is a Java class that is used to <var/intercept/> the request and the
+A Filter is a Java class that is used to <var>intercept</var> the request and the
 response ("<a href="#requestresponse">request</a>" and 
 "<a href="#responseresponse">response</a>" are discussed later).  A filter can
 intercept the request before it get's to other web components, such as a JSP or
@@ -599,13 +594,12 @@ response that is generated by web components, such as a JSP or Servlet, and
 change (transform) the reponse before it is sent to the client.  
 </p>
 
-<p>More information on the usage of Filters is available in the <a
-href="doc|servlet|">Servlets and Filters</a> section of the Resin documenation.</p>
+<p>More information on the usage of Filters is available in the <a href="doc|servlet|">Servlets and Filters</a> section of the Resin documenation.</p>
 
-</section> <!-- filter -->
+</s2> <!-- filter -->
 
 
-<section name="classes" title="Custom java code">
+<s2 name="classes" title="Custom java code">
 
 <p>A developer can, and usually does, use the general facilities of Java to
 create custom Java classes that are used by the Servlets, JSP, Filters, and
@@ -614,9 +608,9 @@ other components of the web applications.  Java source files are placed in the
 <code>WEB-INF/classes/com/hogwarts/Util.java</code>, and are automatically
 compiled by Resin.</p>
 
-</section> <!-- classes -->
+</s2> <!-- classes -->
 
-<section name="lib" title="Java code libraries">
+<s2 name="lib" title="Java code libraries">
 
 <p>A web application can take advantage of java code libraries.  These
 libraries are usually packaged in a <code>.jar</code> file, and placed in the
@@ -629,31 +623,31 @@ application.</p>
 application, for example a library that provides a database driver, or a
 library that is used to generate images.</p>
 
-</section> <!-- classes -->
+</s2> <!-- classes -->
 
-</section> <!-- components -->
+</s1> <!-- components -->
 
 
-<section title="The structure of web applications">
+<s1 title="The structure of web applications">
 
 <p>
 The componets of a web application are placed in appropriate files and
 configured using the <code>WEB-INF/web.xml</code> file.  
 </p>
 
-<section title="Directory structure">
+<s2 title="Directory structure">
 
 <deftable title="Web application directory structure">
-<tr><th>File<th>Description
-<tr><td>/index.jsp<td>A jsp file that is usually the default file that is accesed 
-<tr><td>/WEB-INF/web.xml<td>The file that configures the Web Application
-<tr><td>/WEB-INF/classes<td>A directory containing classes specific to this
+<tr><th>File</th><th>Description
+</th></tr><tr><td>/index.jsp</td><td>A jsp file that is usually the default file that is accesed 
+</td></tr><tr><td>/WEB-INF/web.xml</td><td>The file that configures the Web Application
+</td></tr><tr><td>/WEB-INF/classes</td><td>A directory containing classes specific to this
 application
-<tr><td>/WEB-INF/classes/com/hogwarts/foo/Util.java<td>&nbsp;
-<tr><td>/WEB-INF/classes/com/hogwarts/foo/Util.class<td>&nbsp;
-<tr><td>/WEB-INF/lib<td>A directory containing jar files 
-<tr><td>/WEB-INF/lib/mysql-connector-java-3.0.9-stable-bin.jar<td>An example usage of the lib directory, the MySQL driver
-</deftable>
+</td></tr><tr><td>/WEB-INF/classes/com/hogwarts/foo/Util.java</td><td>&#160;
+</td></tr><tr><td>/WEB-INF/classes/com/hogwarts/foo/Util.class</td><td>&#160;
+</td></tr><tr><td>/WEB-INF/lib</td><td>A directory containing jar files 
+</td></tr><tr><td>/WEB-INF/lib/mysql-connector-java-3.0.9-stable-bin.jar</td><td>An example usage of the lib directory, the MySQL driver
+</td></tr></deftable>
 
 <p>
 For the most part, the directory structure of a web application
@@ -683,9 +677,9 @@ Finally, the file <code>WEB-INF/web.xml</code> is used to
 configure your web application.
 </p>
 
-</section>
+</s2>
 
-<section title="web.xml">
+<s2 title="web.xml">
 
 <p>
 A Web Application is configured with a deployment descriptor that
@@ -697,7 +691,7 @@ and other resources used in the Web Application.
 A full description of it can be found in the JSP specification.
 </p>
 
-<section title="A note about path seperators">
+<s3 title="A note about path seperators">
 
 <p>
 In the web.xml file (and in Java programming in general), always use
@@ -705,12 +699,12 @@ In the web.xml file (and in Java programming in general), always use
 path seperator.
 </p>
 
-</section>
+</s3>
 
-</section> <!-- web.xml -->
+</s2> <!-- web.xml -->
 
 
-<section title="Automatic compilation">
+<s2 title="Automatic compilation">
 
 <p>
 A convenience that is provided by Resin is the automatic
@@ -730,12 +724,12 @@ changes to <code>Util.java</code> will result in the automatic recompilation of
 the java file into a class file.
 </p>
 
-</section>
+</s2>
 
-</section> 
+</s1> 
 
 
-<section name="lifecycle" title="Lifecycle: ServletContexts, Sessions, Requests, Responses">
+<s1 name="lifecycle" title="Lifecycle: ServletContexts, Sessions, Requests, Responses">
 
 <p>
 ServletContexts, Sessions, Requests, and Responses have corresponding
@@ -755,7 +749,7 @@ These objects are created by Resin, they are always available
 to a Servlet, Filter, or JSP page.
 </p>
 
-<section name="servletContext" title="ServletContext">
+<s2 name="servletContext" title="ServletContext">
 
 <p>
 A ServletContext provides a view of the application that the Servlet, Filter,
@@ -769,7 +763,7 @@ A ServletContext is represented by a
 <a href="javadoc|javax.servlet.ServletContext|"/> object.  
 </p>
 
-<section title="Scope of the ServletContext">
+<s3 title="Scope of the ServletContext">
 
 <p>
 Resin creates a ServletContext as soon as the Web Application
@@ -778,10 +772,10 @@ is one ServletContext made for each web application, and any usage of
 the ServletContext will always use the same one.
 </p>
 
-</section>
-</section> <!-- servletContext -->
+</s3>
+</s2> <!-- servletContext -->
 
-<section name="requestresponse" title="Request and Response">
+<s2 name="requestresponse" title="Request and Response">
 
 <p>
 Every time a user follows a URL that points to a Servlet or JSP within
@@ -798,7 +792,7 @@ A response is represented by a
 <a href="javadoc|javax.servlet.http.HttpServletResponse|"/> object.  
 </p>
 
-<section title="Scope of the Request and Response">
+<s3 title="Scope of the Request and Response">
 
 <p>
 A new Request and Response are created each time the user follows a
@@ -806,12 +800,12 @@ link into the Web Application. These objects last until the response
 is sent back to the client. 
 </p>
 
-</section>
+</s3>
 
-</section> <!-- requestresponse -->
+</s2> <!-- requestresponse -->
 
 
-<section name="session" title="Session">
+<s2 name="session" title="Session">
 
 <p>
 A Session is established for each user of the web application. The
@@ -826,9 +820,9 @@ A session is represented by a
 <a href="javadoc|javax.servlet.http.HttpSession|"/> object.  
 </p>
 
-</section>
+</s2>
 
-<section title="Scope of the Session">
+<s2 title="Scope of the Session">
 
 <p>
 The Session is created the first time a user access a component in the 
@@ -854,7 +848,7 @@ A developer can also explicitly destroy the Session object, and that
 is discussed later.
 </p>
 
-<section title="How Resin keeps track of the Session">
+<s3 title="How Resin keeps track of the Session">
 
 <p>
 Resin establishes a session by giving the user's browser a
@@ -863,9 +857,9 @@ request. This is accomplished in one of two ways: using cookies or URL
 rewriting.
 </p>
 
-</section>
+</s3>
 
-<section title="Cookies">
+<s3 title="Cookies">
 
 <p>
 Resin attempts to track the session of a user by sending the
@@ -873,15 +867,15 @@ user's browser a cookie. This cookie contains a long string that
 Resin creates that becomes the id of the session.
 </p>
 
-</section>
+</s3>
 
-<section title="URL rewriting">
+<s3 title="URL rewriting">
 
 <p>
 Sometimes Resin cannot establish a cookie, either because the
 user has disabled cookies in their browser or because the browser does
 not support them (as is the case with some HDML and WML browsers). If the
-cookie cannot be established then something called <var/URL rewriting/> is
+cookie cannot be established then something called <var>URL rewriting</var> is
 used. 
 </p>
 
@@ -898,17 +892,17 @@ URL rewriting requires some assistance from the developer, which is
 discussed later.
 </p>
 
-</section>
+</s3>
 
-</section> <!-- session -->
-
-
-</section> <!-- lifecycle -->
+</s2> <!-- session -->
 
 
-<section name="obtain" title="Obtaining the ServletContext, Session, Request, and Response objects">
+</s1> <!-- lifecycle -->
 
-<section name="obtain-servlet" title="Servlet">
+
+<s1 name="obtain" title="Obtaining the ServletContext, Session, Request, and Response objects">
+
+<s2 name="obtain-servlet" title="Servlet">
 
 <p>
 The Servlet implementation class usually obtains the ServletContext in the
@@ -917,9 +911,9 @@ The Servlet implementation class usually obtains the ServletContext in the
 <a href="#session">Session</a>.
 </p>
 
-</section>
+</s2>
 
-<section name="obtain-jsp" title="JSP">
+<s2 name="obtain-jsp" title="JSP">
 
 <p>
 When translation of a JSP to a Servlet occurs, there are some variables that
@@ -928,43 +922,43 @@ that is inserted in the page.
 </p>
 
 <deftable title="Implicit Variables in JSP">
-<tr><th>Variable<th>Class<th>Description
+<tr><th>Variable</th><th>Class</th><th>Description
 
-<tr><td>response<td><a href="javadoc|javax.servlet.HttpServletResponse|"/><td>
+</th></tr><tr><td>response</td><td><a href="javadoc|javax.servlet.HttpServletResponse|"/></td><td>
 Assists in sending a response to the client. Includes the ability to
 set the HTTP response headers.
 
-<tr><td>request<td><a href="javadoc|javax.servlet.HttpServletRequest|"/><td>
+</td></tr><tr><td>request</td><td><a href="javadoc|javax.servlet.HttpServletRequest|"/></td><td>
 Provides client request information including parameter name and
 values from forms and the HTTP headers that the client sends.
 
-<tr><td>session<td><a href="javadoc|javax.servlet.HttpSession|"/><td>
+</td></tr><tr><td>session</td><td><a href="javadoc|javax.servlet.HttpSession|"/></td><td>
 Provides a way to identify a user across more than one request 
 and allows the developer to store information about that user (but see below).
 
-<tr><td>application<td><a href="javadoc|javax.servlet.ServletContext|"/><td>
+</td></tr><tr><td>application</td><td><a href="javadoc|javax.servlet.ServletContext|"/></td><td>
 Every Web Application gets a ServletContext when it is started. It
 contains information and attributes that apply to the whole
 application.
 
-<tr><td>config<td><a href="javadoc|javax.servlet.ServletConfig|"/><td>
+</td></tr><tr><td>config</td><td><a href="javadoc|javax.servlet.ServletConfig|"/></td><td>
 The ServletConfig for this JSP page
 
-<tr><td>pageContext<td><a href="javadoc|javax.servlet.jsp.PageContext|"/><td>
+</td></tr><tr><td>pageContext</td><td><a href="javadoc|javax.servlet.jsp.PageContext|"/></td><td>
 A variable specific to JSP (not available to servlets). It contains a
 number of convenience functions for use in a JSP page.
 
-<tr><td>out<td><a href="javadoc|javax.servlet.jsp.JspWriter|"/><td>
+</td></tr><tr><td>out</td><td><a href="javadoc|javax.servlet.jsp.JspWriter|"/></td><td>
 An Object that is used to write into the output stream
 
-</deftable>
+</td></tr></deftable>
 
-<section title="Obtaining the session in JSP">
+<s3 title="Obtaining the session in JSP">
 
-<p>With JSP, the <code/page/> directive is used to indicate that the JSP needs
+<p>With JSP, the <code>page</code> directive is used to indicate that the JSP needs
 the session object.  When the page is executed, and has indicated that the
 session is needed, a session will be created for the user if it has not already
-and the <var/session/> variable will be made available.</p>
+and the <var>session</var> variable will be made available.</p>
 
 <example>
 &lt;%@page session="true"&gt;
@@ -982,15 +976,15 @@ session.
 &lt;%@page session="false"&gt;
 </example>
 
-</section>
+</s3>
 
 
-</section> <!-- obtain-jsp -->
+</s2> <!-- obtain-jsp -->
 
-</section> <!-- obtain -->
+</s1> <!-- obtain -->
 
 
-<section name="attributes" title="Attributes">
+<s1 name="attributes" title="Attributes">
 
 <p>
 Each of the objects <code>application</code>, <code>session</code>, and
@@ -1003,11 +997,11 @@ Using attributes the developer can store a value for later retrieval.
 </p>
 
 <p>
-The <var/name/> is a String that uniquely identifies the attribute, and the
-<var/value/> is a Java object.
+The <var>name</var> is a String that uniquely identifies the attribute, and the
+<var>value</var> is a Java object.
 </p>
 
-<section title="The API for setting and getting attributes">
+<s2 title="The API for setting and getting attributes">
 
 <p>
 The following methods are available for the <code>application</code>,
@@ -1015,25 +1009,25 @@ The following methods are available for the <code>application</code>,
 </p>
 
 <deftable title="API for attributes">
-<tr><th>Method<th>Description
+<tr><th>Method</th><th>Description
 
-<tr><td>getAttribute(String name)<td>
+</th></tr><tr><td>getAttribute(String name)</td><td>
 Return the <code>Object</code> that is associated with the passed
 <var>name</var>.  Usually you will need to cast the Object to whatever
 class you know it to be.  If there is no attribute with the given name,
 <code>null</code> is returned.
 
-<tr><td>setAttribute(String name, Object value)<td>
+</td></tr><tr><td>setAttribute(String name, Object value)</td><td>
 Associates the given <var>name</var> with the <var>value</var>. If an
 attribute <code>name</code> already exists, it is replaced.
 
-<tr><td>removeAttribute(String name)<td>
+</td></tr><tr><td>removeAttribute(String name)</td><td>
 Removes the attribute with the given <var>name</var> if it exists.
-</deftable>
+</td></tr></deftable>
 
-</section>
+</s2>
 
-<section title="Choosing where to put attributes">
+<s2 title="Choosing where to put attributes">
 
 <p>
 As a developer you have a choice of which object to store attributes
@@ -1055,13 +1049,13 @@ until they are explicitly removed or the web application is stopped or
 restarted.
 </p>
 
-</section>
+</s2>
 
-</section> <!-- attributes -->
+</s1> <!-- attributes -->
 
-<section name="use-response" title="Using the Response object">
+<s1 name="use-response" title="Using the Response object">
 
-<section title="Encoding the URL">
+<s2 title="Encoding the URL">
 
 <p>
 Probably the most important and most frequent usage of the response
@@ -1097,9 +1091,9 @@ This has the added benefit of placing all of your URL's in
 one place, allowing you to change them more easily.
 </p>
 
-</section>
+</s2>
 
-<section name="redirect" title="Redirecting the users browser">
+<s2 name="redirect" title="Redirecting the users browser">
 
 <p>
 Sometimes it is desirable to send a redirect to the client. This is a
@@ -1125,7 +1119,7 @@ is needed for a redirect:
 %&gt;
 </example>
 
-<section title="A note on redirecting wireless devices">
+<s3 title="A note on redirecting wireless devices">
 
 <p>
 Redirects often do not work with wireless devices like cell phones and WML
@@ -1134,11 +1128,11 @@ connection compounds the speed problem of using redirects.  Redirects should
 probably be avoided with wireless devices.
 </p>
 
-</section>
-</section> <!-- redirect -->
+</s3>
+</s2> <!-- redirect -->
 
 
-<section title="Setting the content type dynamically">
+<s2 title="Setting the content type dynamically">
 
 <p>
 As mentioned eariler, the <code>&lt;%@ page contentType="..." %&gt;</code>
@@ -1152,9 +1146,9 @@ dynamically. You can instead use: <code>response.setContentType("...")</code>
 to set the content type.
 </p>
 
-</section>
+</s2>
 
-<section title="Telling the browser not to cache the page">
+<s2 title="Telling the browser not to cache the page">
 
 <p>
 Often it is necessary to inform the browser that a page should not be
@@ -1177,9 +1171,9 @@ response.setHeader("Expires","Thu,01Dec199416:00:00GMT");
 %&gt;
 </example>
 
-</section>
+</s2>
 
-<section title="Telling the browser that the page is private">
+<s2 title="Telling the browser that the page is private">
 
 <p>
 A little known fact is that it is necessary to inform the browser with
@@ -1204,13 +1198,13 @@ response.addHeader("Cache-Control","private");
 %&gt;
 </example>
 
-</section>
+</s2>
 
-</section> <!-- use-response -->
+</s1> <!-- use-response -->
 
-<section name="use-request" title="Using the Request object">
+<s1 name="use-request" title="Using the Request object">
 
-<section title="Retrieving the values set in form fields">
+<s2 title="Retrieving the values set in form fields">
 
 <p>
 The main use of the request object is to get the values that a user
@@ -1263,11 +1257,11 @@ We do not have &lt;%= faveggs %&gt; eggs.
 &lt;% } %&gt;
 </example>
 
-</section>
+</s2>
 
-</section> <!-- use-request -->
+</s1> <!-- use-request -->
 
-<section name="use-session" title="Using the Session object">
+<s1 name="use-session" title="Using the Session object">
 
 <p>
 The Session object is used primarily to store two types of
@@ -1282,7 +1276,7 @@ It is important to try to limit the amount of information that is
 stored in the session object.
 </p>
 
-<section title="Explicitly causing the session to end">
+<s2 title="Explicitly causing the session to end">
 
 <p>
 The session object will go away if the user is inactive for a certain
@@ -1294,9 +1288,9 @@ which you may want to do for example if the user chooses to logout.
 This is accomplished with: <code>session.invalidate();</code>
 </p>
 
-</section>
+</s2>
 
-<section title="Doing something when the Session goes away">
+<s2 title="Doing something when the Session goes away">
 
 <p>
 It is possible to add a hook so that something can be done when
@@ -1322,9 +1316,9 @@ the attributes. The Session will notify all of it's attributes that implement
 %&gt;
 </example>
 
-</section>
+</s2>
 
-<section title="Warning! One session does not mean one browser window!">
+<s2 title="Warning! One session does not mean one browser window!">
 
 <p>
 It is important to realize that the user can have multiple
@@ -1352,7 +1346,7 @@ finishes the first window they end up buying nothing!
 </p>
 
 <p>
-A possible solution for this is to keep a <var/version counter/> in your
+A possible solution for this is to keep a <var>version counter</var> in your
 cart.  Every time the cart is changed, the version counter is updated.
 Then, when your application shows the "confirm purchase" page (the next action
 will cause the purchase to occur), it sends the version counter to the "confirm
@@ -1363,13 +1357,13 @@ cart has been modified in some other way, and a message is returned that the
 purchase did not occur because the cart had been modified elsewhere.
 </p>
 
-</section>
-</section> <!-- use-session -->
+</s2>
+</s1> <!-- use-session -->
 
 
-<section name="errors" title="Error Handling">
+<s1 name="errors" title="Error Handling">
 
-<section title="JSP Translation Time Processing Errors">
+<s2 title="JSP Translation Time Processing Errors">
 
 <p>
 Some errors may occur at JSP translation time.  This could be, for
@@ -1396,9 +1390,9 @@ failed with the appropriate error; for HTTP protocols, error status
 code 500 (Server Error).
 </quote>
 
-</section>
+</s2>
 
-<section title="Coompilation Time Processing Errors">
+<s2 title="Coompilation Time Processing Errors">
 
 <p>
 Some errors may occur at the time a Servlet or other source file is being
@@ -1408,9 +1402,9 @@ You will usually see this error in your browser the first time you try
 to access the page.  Resin might also put the error in log files.
 </p>
 
-</section>
+</s2>
 
-<section title="Client Request Time Processing Errors">
+<s2 title="Client Request Time Processing Errors">
 
 <p>
 Java handles runtime errors with exceptions.  If an exception is not
@@ -1461,18 +1455,18 @@ page is initialized to the offending Throwable reference.
 
 </quote>
 
-</section>
-</section> <!-- errors -->
+</s2>
+</s1> <!-- errors -->
 
 
-<section name="architecture" title="Architecture">
+<s1 name="architecture" title="Architecture">
 
 <p>
 There are many ways to use the capabilities that are offered by
 JSP --  different models apply to different applications.
 </p>
 
-<section title="Simple JSP">
+<s2 title="Simple JSP">
 
 <p>
 The simplest model is to use JSP as an add-on to existing web
@@ -1532,9 +1526,9 @@ inability to change without exponentially increasing the complexity,
 should be avoided.
 </p>
 
-</section>
+</s2>
 
-<section title="Seperating the logic into another JSP">
+<s2 title="Seperating the logic into another JSP">
 
 <p>
 To address some of the disadvantages of the Simple JSP method, it is
@@ -1615,9 +1609,9 @@ you $&lt;%= cost %&gt;
 Here we have introduced a new thing: <code>pageContext.forward</code>.
 </p>
 
-</section>
+</s2>
 
-<section title="pageContext.forward">
+<s2 title="pageContext.forward">
 
 <p>
 The <code>pageContext.forward(String url)</code> forwards the processing to a
@@ -1627,9 +1621,9 @@ response objects. It is important that this is the last thing
 that a JSP page does.
 </p>
 
-</section>
+</s2>
 
-<section title="Seperating the business logic into beans">
+<s2 title="Seperating the business logic into beans">
 
 <p>
 Even the seperation of all logic into a different JSP can get a bit muddled.
@@ -1655,9 +1649,9 @@ business logic in Java classes (beans) which hide the
 complexities. You then use these classes in the logic.jsp.
 </p>
 
-</section>
+</s2>
 
-<section title="Model 2 (preferred)">
+<s2 title="Model 2 (preferred)">
 
 <p>
 The final approach discussed here is called the `Model 2' approach. This
@@ -1678,7 +1672,7 @@ dispatches to the appropriate place.
 The flow of a request moves through these `business logic' pieces, finally
 ending up at a `view'.  The logic pieces are responsible for examing the
 submitted information (such as parameters from forms), managing logical flow,
-and preparing objects for the <var/view/>.  The objects for the view are stored
+and preparing objects for the <var>view</var>.  The objects for the view are stored
 as attributes of the request (or sometimes, the session).
 </p>
 
@@ -1699,12 +1693,12 @@ This approach is by far the cleanest approach to using Servlets and JSP.  Most
 applications of any significant complexity use a Model 2 architecture.  
 </p>
 
-</section>
-</section> <!-- architecture -->
+</s2>
+</s1> <!-- architecture -->
 
 
 
-<section name="security" title="Security">
+<s1 name="security" title="Security">
 
 <p>
 JSP inherits the Servlet security mechanism. Using the two fundamental
@@ -1718,7 +1712,7 @@ login that establish a Principal and it's Roles based on a user login
 and password.
 </p>
 
-<section title="Principals">
+<s2 title="Principals">
 
 <p>
 A Principal is established in association with a Session. There is a
@@ -1733,9 +1727,9 @@ a successful login will establish a Principal, which will have a
 certain set of Roles.
 </p>
 
-</section>
+</s2>
 
-<section title="Roles">
+<s2 title="Roles">
 
 Servlet 2.2 Specification states:
 <quote>
@@ -1756,9 +1750,9 @@ Principals can have more than one role -- a user might be both a
 "member" and an "admin".
 </p>
 
-</section>
+</s2>
 
-<section title="Declarative Security">
+<s2 title="Declarative Security">
 
 <p>
 Servlet 2.2 Specification states:
@@ -1779,9 +1773,9 @@ can say that to access any page in the "/accountsetup/" subdirectory,
 the user must have a role of "admin".
 </p>
 
-</section>
+</s2>
 
-<section title="Programmatic Security">
+<s2 title="Programmatic Security">
 
 <p>
 Servlet 2.2 Specification states:
@@ -1800,22 +1794,22 @@ certain button appear in the button bar only for an "admin" user.
 </p>
 
 <deftable title="Programmatic Security API">
-<tr><th>Method<th>Description
+<tr><th>Method</th><th>Description
 
-<tr><td><a href="javadoc|javax.servlet.http.HttpServletRequest|getRemoteUser()">request.getRemoteUser()</a>
+</th></tr><tr><td><a href="javadoc|javax.servlet.http.HttpServletRequest|getRemoteUser()">request.getRemoteUser()</a>
 return the name of an authenticated user.
 
-<tr><td><a href="javadoc|javax.servlet.http.HttpServletRequest|isUserInRole(String)">request.isUserInRole(String role)</a>
-<td>return true if the current user is in a given security role.
+</td></tr><tr><td><a href="javadoc|javax.servlet.http.HttpServletRequest|isUserInRole(String)">request.isUserInRole(String role)</a>
+</td><td>return true if the current user is in a given security role.
 
-<tr><td><a href="javadoc|javax.servlet.http.HttpServletRequest|getUserPrincipal()">request.getUserPrincipal()</a>
-<td>return the <a href="javadoc|java.security.Principal|"/> associated with the
+</td></tr><tr><td><a href="javadoc|javax.servlet.http.HttpServletRequest|getUserPrincipal()">request.getUserPrincipal()</a>
+</td><td>return the <a href="javadoc|java.security.Principal|"/> associated with the
 current user.
-</deftable>
+</td></tr></deftable>
 
-</section>
+</s2>
 
-<section title="When does Resin require a login?">
+<s2 title="When does Resin require a login?">
 
 <p>
 The resources in an Application are by default open to the public, and
@@ -1835,9 +1829,9 @@ has not logged in, Resin inserts a login procedure and then
 checks the roles.
 </p>
 
-</section>
+</s2>
 
-<section title="The login procedure">
+<s2 title="The login procedure">
 
 <p>
 The Servlet Specification details numerous methods for getting user
@@ -1862,13 +1856,12 @@ Resin recognizes the special url <code>j_security_check</code> and
 authenticates the username and password.
 </p>
 
-</section>
+</s2>
 
-<section title="Lifecycle of a Principal">
+<s2 title="Lifecycle of a Principal">
 
 <p>
-The Servlet authentication associates a <var/principal/> with a <a
-href="#session">session</a>.  The principal will only last as long as the
+The Servlet authentication associates a <var>principal</var> with a <a href="#session">session</a>.  The principal will only last as long as the
 Session; as soon as the Session is gone then the user will no longer be logged
 in.
 </p>
@@ -1887,10 +1880,10 @@ null:</p>
 session.logout();
 </example>
 
-</section>
+</s2>
 
 
-<section title="Authenticating the User">
+<s2 title="Authenticating the User">
 
 <p>
 Once the user information is collected, the password must be verified
@@ -1904,9 +1897,9 @@ differently, and you will have to refer to Container specific
 documentation and examples.
 </p>
 
-</section>
+</s2>
 
-<section title="Example usage of Security">
+<s2 title="Example usage of Security">
 
 <p>
 The Resin documentation on <a href="doc|security|">Security</a> includes a
@@ -1914,8 +1907,8 @@ comprehensive discussion, and the <a href="doc|security|tutorial/security-basic/
 Security Tutorial</a> is a good starting point as well.
 </p>
 
-</section>
-</section> <!-- security -->
+</s2>
+</s1> <!-- security -->
 
 
 </body>

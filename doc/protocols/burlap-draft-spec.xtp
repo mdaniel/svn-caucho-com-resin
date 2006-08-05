@@ -10,7 +10,7 @@
     <summary/>
 
 
-<section title="Design Goals">
+<s1 title="Design Goals">
 
 <p>The Burlap protocol was created to solve a specific problem:</p>
 <blockquote>Allow
@@ -21,31 +21,31 @@ servers and clients using an XML-based protocol.
 <p>The <a href="http://www.caucho.com/burlap">Burlap home page</a>
 contains the latest information about Burlap.
 
-<p>The name "Burlap" was chosed for a simple reason: it's boring.
+</p><p>The name "Burlap" was chosed for a simple reason: it's boring.
 The wire protocol for web services should be invisible
 to application writers.  Wire protocols should not require
 external schema or IDL.
 
-<p>Given the EJB environment, the Burlap protocol has the
+</p><p>Given the EJB environment, the Burlap protocol has the
 following requirements:</p>
 
 <ul>
 <li>It must use the simplest possible subset of XML.
-<li>It must not require external IDL or schema definitions; it should be
+</li><li>It must not require external IDL or schema definitions; it should be
 invisible to application writers.
-<li>It must have sufficient power to serialize Java.
-<li>It must have sufficient power to support EJB.
-<li>It must allow non-Java clients to use web services.
-<li>It must allow web services to deployed as a Servlet.
-<li>It must be simple so it can be effectively tested.
-<li>It must be as fast as possible.
-<li>It should support transaction contexts.
-</ul>
+</li><li>It must have sufficient power to serialize Java.
+</li><li>It must have sufficient power to support EJB.
+</li><li>It must allow non-Java clients to use web services.
+</li><li>It must allow web services to deployed as a Servlet.
+</li><li>It must be simple so it can be effectively tested.
+</li><li>It must be as fast as possible.
+</li><li>It should support transaction contexts.
+</li></ul>
 
 <p>The <a href="burlap-notes.xtp">design notes</a> explain some
 of the design decision in creating the Burlap protocol.
 
-<p>The leading XML-based RPC protocols do not meet these
+</p><p>The leading XML-based RPC protocols do not meet these
 requirements.  UserLand's <a href="http://www.xmlrpc.com">XML-RPC</a>
 is insufficiently powerful to
 support Java serialization or EJB.  Microsoft's
@@ -54,24 +54,24 @@ complicated and underdefined.  In particular, it requires XML
 namespaces, attributes, overly complicated typing, and 
 external schema.
 
-</section>
+</p></s1>
 
-<section title='SML'>
+<s1 title="SML">
 
 <p>Burlap uses SML (Simple Markup Language), a restricted subset of XML:</p>
 
 <ul>
 <li>Only elements and character data are allowed.
-<li>No namespaces, no attributes, no processing instructions, no
+</li><li>No namespaces, no attributes, no processing instructions, no
 comments, no DTDs, no CDATA sections.
-<li>No mixed content: an element may contain either
+</li><li>No mixed content: an element may contain either
 elements or character data, but not both.
-<li>Only UTF-8 encoding is allowed.
-<li>Only numbered character entities, e.g. &amp;#60;, and the standard
+</li><li>Only UTF-8 encoding is allowed.
+</li><li>Only numbered character entities, e.g. &amp;#60;, and the standard
 XML entities (&amp;lt;, &amp;gt;, and &amp;amp;) are allowed as
 escapes.
-<li>All whitespace in character data is significant.
-</ul>
+</li><li>All whitespace in character data is significant.
+</li></ul>
 
 <p>The smallness of SML allows less room for bugs, simplifies
 testing, and makes reasonably-fast implementations feasible.
@@ -80,217 +80,217 @@ It forces conformance by eliminating ambiguities.</p>
 <p>The SML grammar needs only six productions:</p>
 
 <def>
-<var/tag-list/> ::= (<var/S/> <var/tag/>)* <var/S/>
+<var>tag-list</var> ::= (<var>S</var> <var>tag</var>)* <var>S</var>
 
-<var/tag/>      ::= &lt;<var/name/>> <var/tag-list/> &lt;/<var/name/>>
-         ::= &lt;<var/name/>> <var/cdata/> &lt;/<var/name/>>
+<var>tag</var>      ::= &lt;<var>name</var>&gt; <var>tag-list</var> &lt;/<var>name</var>&gt;
+         ::= &lt;<var>name</var>&gt; <var>cdata</var> &lt;/<var>name</var>&gt;
 
-<var/S/>        ::= (' ' | '\t' | '\r' | '\n')*
+<var>S</var>        ::= (' ' | '\t' | '\r' | '\n')*
 
-<var/cdata/>    ::= ([^&lt;&] | &amp;# [0-9]+ ; | &amp;lt; | &amp;gt; | &amp;amp;)*
-<var/name/>     ::= [a-zA-Z:_] [a-zA-Z0-9.-_:]*
+<var>cdata</var>    ::= ([^&lt;&amp;] | &amp;# [0-9]+ ; | &amp;lt; | &amp;gt; | &amp;amp;)*
+<var>name</var>     ::= [a-zA-Z:_] [a-zA-Z0-9.-_:]*
 </def>
 
-<note>SML explicitly forbids XML short tags, e.g. &lt;tag/>,
-and the XML header, e.g. &lt;?xml version='1.0'?></note>
-</section>
+<note>SML explicitly forbids XML short tags, e.g. &lt;tag/&gt;,
+and the XML header, e.g. &lt;?xml version='1.0'?&gt;</note>
+</s1>
 
-<section title='Serialization'>
+<s1 title="Serialization">
 
 <p>Burlap's object serialization has 9 primitive types:</p>
 <ol>
-<li><var/boolean/>
-<li>32-bit <var/int/>
-<li>64-bit <var/long/>
-<li>64-bit <var/double/>
-<li>ISO-8609 <var/date/>
-<li>16-bit UTF8-encoded <var/string/>
-<li>16-bit UTF8-encoded <var/xml/>
-<li><var/base64/> binary data
-<li><var/remote/> objects
-</ol>
+<li><var>boolean</var>
+</li><li>32-bit <var>int</var>
+</li><li>64-bit <var>long</var>
+</li><li>64-bit <var>double</var>
+</li><li>ISO-8609 <var>date</var>
+</li><li>16-bit UTF8-encoded <var>string</var>
+</li><li>16-bit UTF8-encoded <var>xml</var>
+</li><li><var>base64</var> binary data
+</li><li><var>remote</var> objects
+</li></ol>
 
 <p>It has 2 combining constructs:</p>
 <ol>
-<li><var/list/> for lists and arrays
-<li><var/map/> for objects and hash tables.
-</ol>
+<li><var>list</var> for lists and arrays
+</li><li><var>map</var> for objects and hash tables.
+</li></ol>
 
 <p>Finally, it has 2 special contructs:</p>
 <ol>
-<li><var/null/> for null values
-<li><var/ref/> for shared and circular object references.
-</ol>
+<li><var>null</var> for null values
+</li><li><var>ref</var> for shared and circular object references.
+</li></ol>
 
-<defun title='null'>
+<s2 title="null" type="defun">
 <p>Null represents a null pointer.
-The XML short form is forbidden, i.e. &lt;null> must have
+The XML short form is forbidden, i.e. &lt;null&gt; must have
 separate open and close tags.</p>
 
-<p>&lt;null> values are allowed in place of any &lt;string>, &lt;xml>,
-&lt;base64>, &lt;list>, &lt;map>, or &lt;remote>.</p>
+<p>&lt;null&gt; values are allowed in place of any &lt;string&gt;, &lt;xml&gt;,
+&lt;base64&gt;, &lt;list&gt;, &lt;map&gt;, or &lt;remote&gt;.</p>
 
 <results>
- &lt;null>&lt;/null>
+ &lt;null&gt;&lt;/null&gt;
 </results>
-</defun>
+</s2>
 
-<defun title='boolean'>
+<s2 title="boolean" type="defun">
 <p>A boolean value expressed as an integer, 0 or 1.</p>
 
 <results>
- &lt;boolean>0&lt;/boolean>
+ &lt;boolean&gt;0&lt;/boolean&gt;
 </results>
 
-</defun>
+</s2>
 
-<defun title='int'>
+<s2 title="int" type="defun">
 <p>A 32-bit signed integer.</p>
 
 <results>
-&lt;int>-32132&lt;/int>
+&lt;int&gt;-32132&lt;/int&gt;
 </results>
 
-</defun>
+</s2>
 
-<defun title='long'>
+<s2 title="long" type="defun">
 <p>A 64-bit signed integer.</p>
 
 <results>
-&lt;long>1000000000&lt;/long>
+&lt;long&gt;1000000000&lt;/long&gt;
 </results>
 
-</defun>
+</s2>
 
-<defun title='double'>
+<s2 title="double" type="defun">
 <p>A 64-bit IEEE floating pointer number.</p>
 
 <results>
-&lt;double>1234.9431e12&lt;/double>
+&lt;double&gt;1234.9431e12&lt;/double&gt;
 </results>
 
-</defun>
+</s2>
 
-<defun title='string'>
+<s2 title="string" type="defun">
 <p>A 16-bit unicode character string encoded in UTF-8.  The
 UTF-8 encoding follows from the SML rules.  Similarly, the only
 escapes allowed are &amp;#xx;, &amp;lt;, &amp;gt;, and &amp;amp;.
 All whitespace is significant.</p>
 
 <results>
-&lt;string>Escape the less than symbol as &amp;lt; or
-using the numeric escape &amp;#38;&lt;/string>
+&lt;string&gt;Escape the less than symbol as &amp;lt; or
+using the numeric escape &amp;#38;&lt;/string&gt;
 </results>
-</defun>
+</s2>
 
-<defun title='xml'>
+<s2 title="xml" type="defun">
 <p>An XML document encoded as a 16-bit unicode character
-string encoded in UTF-8, following the rules for &lt;string>.
+string encoded in UTF-8, following the rules for &lt;string&gt;.
 Special characters, like `&lt;' must be escaped.  The only escapes allowed
 are &amp;#xx;, &amp;lt;, &amp;gt;, and &amp;amp;. All whitespace is
 significant.</p>
 
 <results>
-&lt;xml>
+&lt;xml&gt;
 &amp;lt;top&amp;gt;
   &amp;lt;body test='foo'/&amp;gt;
 &amp;lt;/top&amp;gt;
-&lt;/xml>
+&lt;/xml&gt;
 </results>
 
 <note>Because this document does not define the language mapping,
-implementations are free to return a string when reading an &lt;xml>
+implementations are free to return a string when reading an &lt;xml&gt;
 entity.</note>
 
-</defun>
+</s2>
 
-<defun title='date'>
+<s2 title="date" type="defun">
 <p>An ISO8609-encoded date.</p>
 
 <results>
-&lt;date>19880508T095231Z&lt;/date>
+&lt;date&gt;19880508T095231Z&lt;/date&gt;
 </results>
 
-</defun>
+</s2>
 
-<defun title='base64'>
+<s2 title="base64" type="defun">
 <p>A base64-encoded binary stream.  The base64 string may have
 whitespace after any triplet, but not within a triplet.</p>
 
 <results>
- &lt;base64>
+ &lt;base64&gt;
 zxc9Z9
 m2z8==
-&lt;/base64>
+&lt;/base64&gt;
 </results>
 
-</defun>
+</s2>
 
-<defun title='list'>
-<p>An ordered list, like an array.  The &lt;type>
-element describes the type of the list and the &lt;length> element
-specifies the number of values in the list.  Both &lt;type> and
-&lt;length> tags are required, but both may be empty.  If the &lt;length>
+<s2 title="list" type="defun">
+<p>An ordered list, like an array.  The &lt;type&gt;
+element describes the type of the list and the &lt;length&gt; element
+specifies the number of values in the list.  Both &lt;type&gt; and
+&lt;length&gt; tags are required, but both may be empty.  If the &lt;length&gt;
 is empty, the receiver will determine the list length from the
-actual number of elements before the &lt;/list>.</p>
+actual number of elements before the &lt;/list&gt;.</p>
 
 <def>
 list = (type, length, (%object;)*)
 </def>
 
-<p>Each &lt;list> item is added to the reference list.  See the
-&lt;ref> element.
+<p>Each &lt;list&gt; item is added to the reference list.  See the
+&lt;ref&gt; element.
 
-<p>A &lt;list> might also be represented by a &lt;null> or &lt;ref>.
+</p><p>A &lt;list&gt; might also be represented by a &lt;null&gt; or &lt;ref&gt;.
 Parsers must be prepared to recognize any of those three.</p>
 
-<results title='serialization of a Java int[]'>
-&lt;list>
-  &lt;type>[int&lt;/type>
-  &lt;length>3&lt;/length>
-  &lt;int>0&lt;/int>
-  &lt;int>1&lt;/int>
-  &lt;int>2&lt;/int>
-&lt;/list>
+<results title="serialization of a Java int[]">
+&lt;list&gt;
+  &lt;type&gt;[int&lt;/type&gt;
+  &lt;length&gt;3&lt;/length&gt;
+  &lt;int&gt;0&lt;/int&gt;
+  &lt;int&gt;1&lt;/int&gt;
+  &lt;int&gt;2&lt;/int&gt;
+&lt;/list&gt;
 </results>
 
-<results title='serialization of a Java ArrayList'>
-&lt;list>
-  &lt;type>&lt;/type>
-  &lt;length>3&lt;/length>
-  &lt;int>0&lt;/int>
-  &lt;double>1.3&lt;/double>
-  &lt;string>foobar&lt;/string>
-&lt;/list>
+<results title="serialization of a Java ArrayList">
+&lt;list&gt;
+  &lt;type&gt;&lt;/type&gt;
+  &lt;length&gt;3&lt;/length&gt;
+  &lt;int&gt;0&lt;/int&gt;
+  &lt;double&gt;1.3&lt;/double&gt;
+  &lt;string&gt;foobar&lt;/string&gt;
+&lt;/list&gt;
 </results>
 
-<note>The valid values of &lt;type> are not specified in this
+<note>The valid values of &lt;type&gt; are not specified in this
 document and may depend on the specific application.  For example, a
-Java EJB server which exposes an Burlap interface can use the &lt;type>
+Java EJB server which exposes an Burlap interface can use the &lt;type&gt;
 information to instantiate the specific array type.
-On the other hand, a Perl server would likely ignore the contents of &lt;type>
+On the other hand, a Perl server would likely ignore the contents of &lt;type&gt;
 entirely and create a generic array.
 </note>
 
-</defun>
+</s2>
 
-<defun title='map'>
-<p>Represents serialized objects and Hashtables.  The &lt;type>
+<s2 title="map" type="defun">
+<p>Represents serialized objects and Hashtables.  The &lt;type&gt;
 element describes the type of the map.  Objects are represented by a
-map from field names to their values and &lt;type> is the class
+map from field names to their values and &lt;type&gt; is the class
 of the object itself.</p>
 
 <def>
 map ::= (type, ((%object;), (%object;))*)
 </def>
 
-<p>The &lt;type> element is mandatory, although its value may be
+<p>The &lt;type&gt; element is mandatory, although its value may be
 empty.  For objects, unrecognized keys must be ignored.
 
-<p>Each &lt;map> is added to the reference list.  A &lt;map> might
-also be represented as &lt;null> or &lt;ref>.</p>
+</p><p>Each &lt;map&gt; is added to the reference list.  A &lt;map&gt; might
+also be represented as &lt;null&gt; or &lt;ref&gt;.</p>
 
-<example title='Serialization of a Java Object'>
+<example title="Serialization of a Java Object">
 public class Car implements Serializable {
   String model = "Beetle";
   String color = "aquamarine";
@@ -298,86 +298,86 @@ public class Car implements Serializable {
 }
 </example>
 <results>
-&lt;map>
-  &lt;type>com.caucho.test.Car&lt;/type>
+&lt;map&gt;
+  &lt;type&gt;com.caucho.test.Car&lt;/type&gt;
 
-  &lt;string>model&lt;string>
-  &lt;string>Beetle&lt;/string>
+  &lt;string&gt;model&lt;string&gt;
+  &lt;string&gt;Beetle&lt;/string&gt;
 
-  &lt;string>color&lt;string>
-  &lt;string>aquamarine&lt;/string>
+  &lt;string&gt;color&lt;string&gt;
+  &lt;string&gt;aquamarine&lt;/string&gt;
 
-  &lt;string>mileage&lt;string>
-  &lt;int>230431&lt;/int>
-&lt;/map>
+  &lt;string&gt;mileage&lt;string&gt;
+  &lt;int&gt;230431&lt;/int&gt;
+&lt;/map&gt;
 </results>
 
-<example title='A sparse array'>
+<example title="A sparse array">
 map = new HashMap();
 map.put(new Integer(1), "fee");
 map.put(new Integer(75), "fie");
 map.put(new Integer(932), "foe");
 </example>
 <results>
-&lt;map>
-  &lt;type>java.util.HashMap&lt;/type>
+&lt;map&gt;
+  &lt;type&gt;java.util.HashMap&lt;/type&gt;
 
-  &lt;int>1&lt;int>&lt;string>fee&lt;/string>
-  &lt;int>75&lt;int>&lt;string>fie&lt;/string>
-  &lt;int>932&lt;int>&lt;string>foe&lt;/string>
-&lt;/map>
+  &lt;int&gt;1&lt;int&gt;&lt;string&gt;fee&lt;/string&gt;
+  &lt;int&gt;75&lt;int&gt;&lt;string&gt;fie&lt;/string&gt;
+  &lt;int&gt;932&lt;int&gt;&lt;string&gt;foe&lt;/string&gt;
+&lt;/map&gt;
 </results>
 
-<note>The &lt;type> will depend on the specific protocol. EJB-based
+<note>The &lt;type&gt; will depend on the specific protocol. EJB-based
 protocols will use Java classes.</note>
 
-</defun>
+</s2>
 
-<defun title='ref'>
-<p>An integer referring to a previous &lt;list> or &lt;map>
-instance.  As each &lt;list> or &lt;map> is read from the
-input stream, it is assigned an integer.  A later &lt;ref> can then use
+<s2 title="ref" type="defun">
+<p>An integer referring to a previous &lt;list&gt; or &lt;map&gt;
+instance.  As each &lt;list&gt; or &lt;map&gt; is read from the
+input stream, it is assigned an integer.  A later &lt;ref&gt; can then use
 the previous object.</p>
 
 <def>
 ref ::= #CDATA
 </def>
 
-<p>&lt;ref> can refer to incompletely-read items.  For example, a
+<p>&lt;ref&gt; can refer to incompletely-read items.  For example, a
 circular linked-list will refer to the first link before the entire list
 has been read.</p>
 
-<p>A possible implementation would add each &lt;map> and &lt;list> to an
-array as its read.  The &lt;ref> will return the corresponding object from the
+<p>A possible implementation would add each &lt;map&gt; and &lt;list&gt; to an
+array as its read.  The &lt;ref&gt; will return the corresponding object from the
 array.  To support circular structures, the implementation would store
-the &lt;map> or &lt;list> immediately, before filling in the object's
+the &lt;map&gt; or &lt;list&gt; immediately, before filling in the object's
 contents.</p>
 
-<p>Each &lt;list> or &lt;array> is stored into an array as it is
-parsed.  &lt;ref> selects one of the stored objects.  The first
+<p>Each &lt;list&gt; or &lt;array&gt; is stored into an array as it is
+parsed.  &lt;ref&gt; selects one of the stored objects.  The first
 object is numbered '0'.</p>
 
-<example title='circular list'>
+<example title="circular list">
 list = new LinkedList();
 listhead = 1;
 list.tail = list;
 </example>
 <results>
-&lt;map>
-  &lt;type>LinkedList&lt;/type>
-  &lt;string>head&lt;/string>&lt;int>1&lt;/int>
-  &lt;string>tail&lt;/string>&lt;ref>0&lt;/ref>
-&lt;/map>
+&lt;map&gt;
+  &lt;type&gt;LinkedList&lt;/type&gt;
+  &lt;string&gt;head&lt;/string&gt;&lt;int&gt;1&lt;/int&gt;
+  &lt;string&gt;tail&lt;/string&gt;&lt;ref&gt;0&lt;/ref&gt;
+&lt;/map&gt;
 </results>
 
-<note>&lt;ref> only to &lt;list> and &lt;map> elements.  &lt;string>
-and &lt;base64>, in particular, can't share references.</note>
+<note>&lt;ref&gt; only to &lt;list&gt; and &lt;map&gt; elements.  &lt;string&gt;
+and &lt;base64&gt;, in particular, can't share references.</note>
 
-</defun>
+</s2>
 
-<defun title='remote'>
-<p>A reference to a remote object.  The &lt;type> element
-specifies the object type and the &lt;string> element specifies the remote
+<s2 title="remote" type="defun">
+<p>A reference to a remote object.  The &lt;type&gt; element
+specifies the object type and the &lt;string&gt; element specifies the remote
 object's URL.</p>
 
 <def>
@@ -385,21 +385,21 @@ remote ::= (type, string)
 </def>
 
 <p>Remote support is optional.  Clients and servers don't need
-to support &lt;remote> if the service doesn't need it.</p>
+to support &lt;remote&gt; if the service doesn't need it.</p>
 
-<results title='EJB Session Reference'>
-&lt;remote>
-  &lt;type>test.TestObj&lt;/type>
-  &lt;string>http://localhost/ejbhome;ejbid=69Xm8-zW&lt;/string>
-&lt;/remote>
+<results title="EJB Session Reference">
+&lt;remote&gt;
+  &lt;type&gt;test.TestObj&lt;/type&gt;
+  &lt;string&gt;http://localhost/ejbhome;ejbid=69Xm8-zW&lt;/string&gt;
+&lt;/remote&gt;
 </results>
 
 <note>Needed to support EJB in a reasonably portable way.</note>
-</defun>
+</s2>
 
-</section>
+</s1>
 
-<section title='burlap:call'>
+<s1 title="burlap:call">
 
 <p>A Burlap call invokes a method on an object with an argument
 list.  The object is uniquely named by its URL.  The arguments are
@@ -410,44 +410,44 @@ burlap:call ::= (%header;), method, (%object;)*
 </def>
 
 <results title="obj.add2(2,3)">
-&lt;burlap:call>
-  &lt;method>add2&lt;/method>
-  &lt;int>2&lt;/int>
-  &lt;int>3&lt;/int>
-&lt;/burlap:call>
+&lt;burlap:call&gt;
+  &lt;method&gt;add2&lt;/method&gt;
+  &lt;int&gt;2&lt;/int&gt;
+  &lt;int&gt;3&lt;/int&gt;
+&lt;/burlap:call&gt;
 
-&lt;burlap:reply>
-  &lt;value>
-    &lt;int>5&lt;/int>
-  &lt;/value>
-&lt;/burlap:reply>
+&lt;burlap:reply&gt;
+  &lt;value&gt;
+    &lt;int&gt;5&lt;/int&gt;
+  &lt;/value&gt;
+&lt;/burlap:reply&gt;
 </results>
 
-<section title='Object Naming'>
+<s2 title="Object Naming">
 
 <p>The URL uniquely identifies the Burlap object.  This spec does
 not mandate any particular URL naming convention.</p>
 
-</section>
+</s2>
 
-<section title="EJB naming (non-normative)">
+<s2 title="EJB naming (non-normative)">
 
 <p>As an example, the following format is used for EJB:</p>
 
 <def>
-http://hostname/ejb<var//ejb-name/>;ejbid=<var/object-id/>
+http://hostname/ejb<var>/ejb-name</var>;ejbid=<var>object-id</var>
 </def>
 
-<p><var/http://hostname/ejb/> identifies the EJB container.  In
+<p><var>http://hostname/ejb</var> identifies the EJB container.  In
 Resin-EJB, this will refer to the EJB Servlet.  HTTP is used as an
 example; Burlap does not require the use of HTTP.</p>
 
-<p><var//ejb-name/>, the path info of the request, identifies the EJB home.
+<p><var>/ejb-name</var>, the path info of the request, identifies the EJB home.
 EJB containers can contain several entity and session beans, each with its
-own EJB home.  The <var/ejb-name/> corresponds to the ejb-name in the
+own EJB home.  The <var>ejb-name</var> corresponds to the ejb-name in the
 deployment descriptor.
 
-<p><var/object-id/> identifies the specific object.  For entity beans, the
+</p><p><var>object-id</var> identifies the specific object.  For entity beans, the
 object-id encodes the primary key.  For session beans, the object-id encodes
 a unique session identifier.  Home interfaces have no ";ejbid=..." portion.</p>
 
@@ -459,15 +459,15 @@ http://localhost/ejb/houses
 http://localhost/ejb/session;ejbid=M9Zs1Zm
 </example>
 
-</section>
+</s2>
 
-<section title='Methods and Overloading'>
+<s2 title="Methods and Overloading">
 
 <p>Method names must be unique.  Overloading is permitted by
 encoding the argument types in the method names.  The types of
 the actual arguments must not be used to select the methods.</p>
 
-<p>Method names beginning with <var/_burlap_/> are reserved.</p>
+<p>Method names beginning with <var>_burlap_</var> are reserved.</p>
 
 <p>Servers should accept calls with either the mangled method name
 or the unmangled method name.  Clients should send the mangled method name.</p>
@@ -481,19 +481,19 @@ or the unmangled method name.  Clients should send the mangled method name.</p>
 <example>add(shopping.Cart cart, shopping.Item item)</example>
 <results>add_shopping.Cart_shopping.Item</results>
 
-</section>
+</s2>
 
-<section title='Arguments'>
+<s2 title="Arguments">
 
 <p>Arguments immediately follow the method in positional order.  Argument
 values use Burlap's serialization.</p>
 
 <results title="remote.add(2, 3)">
-&lt;burlap:call>
-  &lt;method>add&lt;method>
-  &lt;int>2&lt;/int>
-  &lt;int>3&lt;/int>
-&lt;/burlap:call>
+&lt;burlap:call&gt;
+  &lt;method&gt;add&lt;method&gt;
+  &lt;int&gt;2&lt;/int&gt;
+  &lt;int&gt;3&lt;/int&gt;
+&lt;/burlap:call&gt;
 </results>
 
 <p>All arguments share references, i.e. the reference list
@@ -506,48 +506,48 @@ bean = new Bean("foo", 13);
 System.out.println(remote.eq(bean, bean));
 </example>
 <results>
-&lt;burlap:call>
-  &lt;method>eq&lt;method>
-  &lt;map>
-    &lt;type>Bean&lt;/type>
-    &lt;string>foo&lt;/string>
-    &lt;int>13&lt;/int>
-  &lt;/map>
-  &lt;ref>0&lt;/ref>
-&lt;/burlap:call>
+&lt;burlap:call&gt;
+  &lt;method&gt;eq&lt;method&gt;
+  &lt;map&gt;
+    &lt;type&gt;Bean&lt;/type&gt;
+    &lt;string&gt;foo&lt;/string&gt;
+    &lt;int&gt;13&lt;/int&gt;
+  &lt;/map&gt;
+  &lt;ref&gt;0&lt;/ref&gt;
+&lt;/burlap:call&gt;
 </results>
 
 <p>The number and type of arguments are fixed by the remote method.
 Variable length arguments are forbidden.  In other words, implementations
 may take advantage of the expected type to improve performance.</p>
 
-</section>
+</s2>
 
-<section title='Headers'>
+<s2 title="Headers">
 
-<p>Headers are key, value pairs introduced by a &lt;header> tag.</p>
+<p>Headers are key, value pairs introduced by a &lt;header&gt; tag.</p>
 
 <p>The value of the header can be any serialized object.  The reference
 array is reset for each header.  So a header can't point to an object
 in another header.
 
-<p>For example, a request might include a transaction context in a
+</p><p>For example, a request might include a transaction context in a
 header.  The client could require that the server understand the
 transaction context or fail.</p>
 
 <results title="Call with Distributed Transaction Context">
-&lt;burlap:call>
-  &lt;header>transaction&lt;header>
-  &lt;remote>http://hostname/xa;ejbid=01b8e19a77&lt;/remote>
+&lt;burlap:call&gt;
+  &lt;header&gt;transaction&lt;header&gt;
+  &lt;remote&gt;http://hostname/xa;ejbid=01b8e19a77&lt;/remote&gt;
 
-  &lt;method>debit&lt;method>
-  &lt;int>12300&lt;/int>
-&lt;/burlap:call>
+  &lt;method&gt;debit&lt;method&gt;
+  &lt;int&gt;12300&lt;/int&gt;
+&lt;/burlap:call&gt;
 </results>
 
-</section>
+</s2>
 
-<section title='Versioning'>
+<s2 title="Versioning">
 
 <p>Burlap requests and responses have no explicit version id.  This
 is deliberate.  There are several different changes that get
@@ -556,200 +556,200 @@ case, appropriate mechanisms already exist without adding a version.</p>
 
 <ol>
 <li>If the Burlap meta-protocol itself changes, the new protocol will
-use a new top-level tag &lt;burlap-2:call>.  In other words the
+use a new top-level tag &lt;burlap-2:call&gt;.  In other words the
 top element, burlap:call, signifies version 1.0.
-<li>If clients can take advantage of a new server capabilities, it
-should use &lt;header> version.
-</ol>
+</li><li>If clients can take advantage of a new server capabilities, it
+should use &lt;header&gt; version.
+</li></ol>
 
 <results title="Requiring Version 2 of a Protocol">
-&lt;burlap:call>
-  &lt;method>debit&lt;method>
-  &lt;int>12300&lt;/int>
-&lt;/burlap:call>
+&lt;burlap:call&gt;
+  &lt;method&gt;debit&lt;method&gt;
+  &lt;int&gt;12300&lt;/int&gt;
+&lt;/burlap:call&gt;
 </results>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title='burlap:reply'>
+<s1 title="burlap:reply">
 
-<p>Burlap calls return either a &lt;fault> or an object.</p>
+<p>Burlap calls return either a &lt;fault&gt; or an object.</p>
 
-<section title='Value'>
+<s2 title="Value">
   
-<p>A successful reply returns a single &lt;value> and possibly
+<p>A successful reply returns a single &lt;value&gt; and possibly
 some header information.  </p>
   
 <results>
-&lt;burlap:reply>
-  &lt;value>
-    &lt;int>5&lt;/int>
-  &lt;/value>
-&lt;/burlap:reply>
+&lt;burlap:reply&gt;
+  &lt;value&gt;
+    &lt;int&gt;5&lt;/int&gt;
+  &lt;/value&gt;
+&lt;/burlap:reply&gt;
 </results>
 
-</section>
+</s2>
 
-<section title='Faults'>
-<p>Failed calls return a &lt;fault>.
+<s2 title="Faults">
+<p>Failed calls return a &lt;fault&gt;.
 
-<p>Each fault has a number of informative fields, expressed like
-&lt;map> entries.  The defined fields are <var/code/>, <var/message/>,
-and <var/detail/>. <var/code/> is one of a short list of strings
-defined below.  <var/message/> is a user-readable message.
-<var/detail/> is an object representing the exception.  In Java,
-<var/detail/> will be a serialized exception.</p>
+</p><p>Each fault has a number of informative fields, expressed like
+&lt;map&gt; entries.  The defined fields are <var>code</var>, <var>message</var>,
+and <var>detail</var>. <var>code</var> is one of a short list of strings
+defined below.  <var>message</var> is a user-readable message.
+<var>detail</var> is an object representing the exception.  In Java,
+<var>detail</var> will be a serialized exception.</p>
 
 <results title="Remote Call throws FileNotFoundException">
-&lt;burlap:reply>
-  &lt;fault>
-    &lt;string>code&lt;/string>
-    &lt;string>ServiceException&lt;/string>
+&lt;burlap:reply&gt;
+  &lt;fault&gt;
+    &lt;string&gt;code&lt;/string&gt;
+    &lt;string&gt;ServiceException&lt;/string&gt;
 
-    &lt;string>message&lt;/string>
-    &lt;string>File Not Found&lt;/string>
+    &lt;string&gt;message&lt;/string&gt;
+    &lt;string&gt;File Not Found&lt;/string&gt;
 
-    &lt;string>detail&lt;/string>
-    &lt;map>
-      &lt;type>java.io.FileNotFoundException&lt;/type>
-    &lt;/map>
+    &lt;string&gt;detail&lt;/string&gt;
+    &lt;map&gt;
+      &lt;type&gt;java.io.FileNotFoundException&lt;/type&gt;
+    &lt;/map&gt;
 
-  &lt;/value>
-&lt;/burlap:reply>
+  &lt;/value&gt;
+&lt;/burlap:reply&gt;
 </results>
 
 <deftable>
-<tr><td>ProtocolException<td>The Burlap request has some sort of
+<tr><td>ProtocolException</td><td>The Burlap request has some sort of
 syntactic error.
-<tr><td>NoSuchObjectException<td>The requested object does not exist.
-<tr><td>NoSuchMethodException<td>The requested method does not exist.
-<tr><td>ServiceException<td>The called method threw an exception.
-</deftable>
+</td></tr><tr><td>NoSuchObjectException</td><td>The requested object does not exist.
+</td></tr><tr><td>NoSuchMethodException</td><td>The requested method does not exist.
+</td></tr><tr><td>ServiceException</td><td>The called method threw an exception.
+</td></tr></deftable>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
-<section title='Metadata (non-normative)'>
+<s1 title="Metadata (non-normative)">
 
 <p>Metadata is handled by special method calls, methods beginning
-with <var/_burlap_/>.</p>
+with <var>_burlap_</var>.</p>
 
-<p><var/_burlap_getAttribute(String&nbsp;key)/> returns a string.
+<p><var>_burlap_getAttribute(String&#160;key)</var> returns a string.
 The following attributes are predefined by this spec:</p>
 
 <deftable>
-<tr><th>attribute<th>meaning
-<tr><td>home-class<td>Java class for the home interface.
-<tr><td>remote-class<td>Java class for the object interface.
-<tr><td>primary-key-class<td>Java class for the primary key.
-</deftable>
+<tr><th>attribute</th><th>meaning
+</th></tr><tr><td>home-class</td><td>Java class for the home interface.
+</td></tr><tr><td>remote-class</td><td>Java class for the object interface.
+</td></tr><tr><td>primary-key-class</td><td>Java class for the primary key.
+</td></tr></deftable>
 
-</section>
+</s1>
 
-<section title='Micro Burlap'>
+<s1 title="Micro Burlap">
 
 <p>A "Micro Burlap" implementation may omit support for the "double" type.
 </p>
 
-</section>
+</s1>
 
-<section title='Formal Definitions'>
+<s1 title="Formal Definitions">
 
-<section title='SML grammar'>
+<s2 title="SML grammar">
 <def>
-<var/tag-list/> ::= (<var/S/> <var/tag/>)* <var/S/>
+<var>tag-list</var> ::= (<var>S</var> <var>tag</var>)* <var>S</var>
 
-<var/tag/>      ::= &lt;<var/name/>> <var/tag-list/> &lt;/<var/name/>>
-         ::= &lt;<var/name/>> <var/cdata/> &lt;/<var/name/>>
+<var>tag</var>      ::= &lt;<var>name</var>&gt; <var>tag-list</var> &lt;/<var>name</var>&gt;
+         ::= &lt;<var>name</var>&gt; <var>cdata</var> &lt;/<var>name</var>&gt;
 
-<var/S/>        ::= (' ' | '\t' | '\r' | '\n')*
+<var>S</var>        ::= (' ' | '\t' | '\r' | '\n')*
 
-<var/cdata/>    ::= ([^&lt;&] | &amp;# [0-9]+ ; | &amp;lt; | &amp;gt; | &amp;amp;)*
-<var/name/>     ::= [a-zA-Z:_] [a-zA-Z0-9.-_:]*
+<var>cdata</var>    ::= ([^&lt;&amp;] | &amp;# [0-9]+ ; | &amp;lt; | &amp;gt; | &amp;amp;)*
+<var>name</var>     ::= [a-zA-Z:_] [a-zA-Z0-9.-_:]*
 </def>
 
-</section>
+</s2>
 
-<section title='burlap:call'>
+<s2 title="burlap:call">
 
 <def>	
-&lt;!DOCTYPE burlap:call>
+&lt;!DOCTYPE burlap:call&gt;
 
 &lt;!ENTITY % object "null | boolean | int | double | string | xml |
-                 base64 | date | ref | map | list | remote">
+                 base64 | date | ref | map | list | remote"&gt;
 		      
-&lt;!ENTITY % header "(header, (%object;))*">
+&lt;!ENTITY % header "(header, (%object;))*"&gt;
 
-&lt;!ELEMENT burlap:call - - ((%header;), method, (%object;)*)>
+&lt;!ELEMENT burlap:call - - ((%header;), method, (%object;)*)&gt;
 
-&lt;!ELEMENT header - - #CDATA>
+&lt;!ELEMENT header - - #CDATA&gt;
 
-&lt;!ELEMENT method - - #CDATA>
+&lt;!ELEMENT method - - #CDATA&gt;
 
-&lt;!ELEMENT null - - EMPTY>
-&lt;!ELEMENT boolean - - #CDATA>
-&lt;!ELEMENT int - - #CDATA>
-&lt;!ELEMENT double - - #CDATA>
-&lt;!ELEMENT string - - #CDATA>
-&lt;!ELEMENT xml - - #CDATA>
-&lt;!ELEMENT base64 - - #CDATA>
-&lt;!ELEMENT date - - #CDATA>
+&lt;!ELEMENT null - - EMPTY&gt;
+&lt;!ELEMENT boolean - - #CDATA&gt;
+&lt;!ELEMENT int - - #CDATA&gt;
+&lt;!ELEMENT double - - #CDATA&gt;
+&lt;!ELEMENT string - - #CDATA&gt;
+&lt;!ELEMENT xml - - #CDATA&gt;
+&lt;!ELEMENT base64 - - #CDATA&gt;
+&lt;!ELEMENT date - - #CDATA&gt;
 
-&lt;!ELEMENT ref - - #CDATA>
-&lt;!ELEMENT map - - (type, ((%object;), (%object;))*)>
-&lt;!ELEMENT list - - (type, length, (%object;)*)>
-&lt;!ELEMENT type - - #CDATA>
+&lt;!ELEMENT ref - - #CDATA&gt;
+&lt;!ELEMENT map - - (type, ((%object;), (%object;))*)&gt;
+&lt;!ELEMENT list - - (type, length, (%object;)*)&gt;
+&lt;!ELEMENT type - - #CDATA&gt;
 
-&lt;!ELEMENT remote - - (type, string)>
+&lt;!ELEMENT remote - - (type, string)&gt;
 </def>
 
-</section>
+</s2>
 
-<section title='burlap:reply'>
+<s2 title="burlap:reply">
 
 <def>	
-&lt;!DOCTYPE burlap:reply>
+&lt;!DOCTYPE burlap:reply&gt;
 
 &lt;!ENTITY % object "(null | boolean | int | double | string | xml |
-                 base64 | date | ref | map | list | remote)">
+                 base64 | date | ref | map | list | remote)"&gt;
 		      
-&lt;!ENTITY % header "(header, (%object;))*">
+&lt;!ENTITY % header "(header, (%object;))*"&gt;
 
-&lt;!ELEMENT burlap:reply - - ((%header;), (value | fault))>
+&lt;!ELEMENT burlap:reply - - ((%header;), (value | fault))&gt;
 
-&lt;!ELEMENT header - - #CDATA>
+&lt;!ELEMENT header - - #CDATA&gt;
 
-&lt;!ELEMENT value - - (%object;)>
-&lt;!ELEMENT fault - - (string, (%object;))*>
+&lt;!ELEMENT value - - (%object;)&gt;
+&lt;!ELEMENT fault - - (string, (%object;))*&gt;
 
-&lt;!ELEMENT null - - EMPTY>
-&lt;!ELEMENT boolean - - #CDATA>
-&lt;!ELEMENT int - - #CDATA>
-&lt;!ELEMENT double - - #CDATA>
-&lt;!ELEMENT string - - #CDATA>
-&lt;!ELEMENT xml - - #CDATA>
-&lt;!ELEMENT base64 - - #CDATA>
-&lt;!ELEMENT date - - #CDATA>
+&lt;!ELEMENT null - - EMPTY&gt;
+&lt;!ELEMENT boolean - - #CDATA&gt;
+&lt;!ELEMENT int - - #CDATA&gt;
+&lt;!ELEMENT double - - #CDATA&gt;
+&lt;!ELEMENT string - - #CDATA&gt;
+&lt;!ELEMENT xml - - #CDATA&gt;
+&lt;!ELEMENT base64 - - #CDATA&gt;
+&lt;!ELEMENT date - - #CDATA&gt;
 
-&lt;!ELEMENT ref - - #CDATA>
-&lt;!ELEMENT map - - (type, ((%object;), (%object;))*)>
-&lt;!ELEMENT list - - (type, length, (%object;)*)>
-&lt;!ELEMENT type - - #CDATA>
+&lt;!ELEMENT ref - - #CDATA&gt;
+&lt;!ELEMENT map - - (type, ((%object;), (%object;))*)&gt;
+&lt;!ELEMENT list - - (type, length, (%object;)*)&gt;
+&lt;!ELEMENT type - - #CDATA&gt;
 
-&lt;!ELEMENT remote - - (type, string)>
+&lt;!ELEMENT remote - - (type, string)&gt;
 </def>
 
-</section>
-</section>
+</s2>
+</s1>
 
-<section title="Copyright and Licensing">
+<s1 title="Copyright and Licensing">
 
-<p>&copy; Copyright 2000-2002 Caucho Technology, Inc. All Rights Reserved.
+<p>© Copyright 2000-2002 Caucho Technology, Inc. All Rights Reserved.
 
-<p>Any party may implement this protocol for any purpose without royalty
+</p><p>Any party may implement this protocol for any purpose without royalty
 or license fee, provided that the implementation conforms to this
 specification.   Caucho Technology reserves the right to create a
 test suite, freely available without royalty or license fee, to
@@ -757,91 +757,91 @@ validate implementation conformance.  The limited permissions granted
 herein are perpetual and may not be revoked by Caucho Technology or
 its successors or assigns.
 
-<p>This document and translations of it may be copied and furnished to
+</p><p>This document and translations of it may be copied and furnished to
 others, and derivative works that comment on or otherwise explain it
 or assist in its implementation may be prepared, copied, published and
 distributed, in whole or in part, without restriction of any kind,
 provided that the above copyright notice and these paragraphs are
 included on all such copies and derivative works.
 
-<p>This document and the information contained herein is provided on an
+</p><p>This document and the information contained herein is provided on an
 "AS IS" basis and CAUCHO TECHNOLOGY DISCLAIMS ALL WARRANTIES, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF
 THE INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED
 WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
 
-</section>
+</p></s1>
 
-<section title="Changes">
+<s1 title="Changes">
 
-<section title="Since draft v8">
-
-<ul>
-<li>Removed &lt;burlap:envelope> and &lt;burlap:message>.
-</ul>
-
-</section>
-
-<section title="Since draft v7">
+<s2 title="Since draft v8">
 
 <ul>
-<li>Removed &lt;require> header.
-</ul>
+<li>Removed &lt;burlap:envelope&gt; and &lt;burlap:message&gt;.
+</li></ul>
 
-</section>
+</s2>
 
-<section title="Since draft v6">
-
-<ul>
-<li>Added &lt;burlap:envelope> and &lt;burlap:message>
-</ul>
-
-</section>
-
-<section title="Since draft v5">
+<s2 title="Since draft v7">
 
 <ul>
-<li>Added &lt;xml>
-<li>Clarified license.
-<li>Allowed variable length arrays.
-</ul>
+<li>Removed &lt;require&gt; header.
+</li></ul>
 
-</section>
+</s2>
 
-<section title="Since draft v4">
+<s2 title="Since draft v6">
 
 <ul>
-<li>&lt;require> must preceed &lt;header> in headers.
-<li>&lt;remote> requires a &lt;type> and &lt;string> value.
-</ul>
+<li>Added &lt;burlap:envelope&gt; and &lt;burlap:message&gt;
+</li></ul>
 
-</section>
+</s2>
 
-<section title="Since draft v3">
+<s2 title="Since draft v5">
+
+<ul>
+<li>Added &lt;xml&gt;
+</li><li>Clarified license.
+</li><li>Allowed variable length arrays.
+</li></ul>
+
+</s2>
+
+<s2 title="Since draft v4">
+
+<ul>
+<li>&lt;require&gt; must preceed &lt;header&gt; in headers.
+</li><li>&lt;remote&gt; requires a &lt;type&gt; and &lt;string&gt; value.
+</li></ul>
+
+</s2>
+
+<s2 title="Since draft v3">
 
 <ul>
 <li>Changed name of protocol from SML-RPC to "Burlap"
-<li>Added and rewrote verbiage.
-<li>base64 may have whitespace between triplets.
-</ul>
+</li><li>Added and rewrote verbiage.
+</li><li>base64 may have whitespace between triplets.
+</li></ul>
 
-</section>
+</s2>
 
-<section title="Since draft v2">
+<s2 title="Since draft v2">
 
 <ul>
 <li>Added Standard XML entities ('&amp;lt;', '&amp;gt;', '&amp;amp;').
-</ul>
+</li></ul>
 
-</section>
+</s2>
 
-<section title="Since draft v1">
+<s2 title="Since draft v1">
 
 <ul>
-<li>&lt;remote> now takes a single string content, the url.
-</ul>
+<li>&lt;remote&gt; now takes a single string content, the url.
+</li></ul>
 
-</section>
-</section>
+</s2>
+</s1>
   </body>
 </document>

@@ -8,58 +8,58 @@
   <body>
     <summary/>
 
-<section title="How do I change the work directory?">
+<s1 title="How do I change the work directory?">
 
-<p><var/&lt;work-dir>/>.
+<p><var>&lt;work-dir&gt;</var>.
 
-<p>By default, that's <var//tmp/caucho/> on Unix and <var/\temp\caucho/> on
+</p><p>By default, that's <var>/tmp/caucho</var> on Unix and <var>\temp\caucho</var> on
 Windows.
 
-</section>
+</p></s1>
 
-<section title="How do I use multiple resin.conf files?">
+<s1 title="How do I use multiple resin.conf files?">
 
 <p>This is especially important if you want to use a different
 workspace for development than deployment.  Just call the
-<code/httpd/> executable with the -conf flag.
+<code>httpd</code> executable with the -conf flag.
 
 <example>
-unix> httpd.sh start -conf devel.conf -verbose
+unix&gt; httpd.sh start -conf devel.conf -verbose
 </example>
 
 <example>
-d:\> httpd.exe -conf devel.conf -verbose
+d:\&gt; httpd.exe -conf devel.conf -verbose
 </example>
 
-</section>
+</p></s1>
 
-<section title="How do I configure a default servlet?">
+<s1 title="How do I configure a default servlet?">
 
 <p>The following will a servlet to handle all unmatched URLs, just like
 the FileServlet does by default.</p>
 
 <example>
-&lt;servlet-mapping url-pattern='/' servlet-name='MyServlet'/>
+&lt;servlet-mapping url-pattern='/' servlet-name='MyServlet'/&gt;
 </example>
 
-<p>This has a different effect from <var/url-pattern='/*'/>.   <var//*/> will
-have priority over extension mappings like <var/*.jsp/>, while <var///> has
+<p>This has a different effect from <var>url-pattern='/*'</var>.   <var>/*</var> will
+have priority over extension mappings like <var>*.jsp</var>, while <var>/</var> has
 the lowest priority.</p>
 
-</section>
+</s1>
 
-<section title='How do I set a virtual directory?'>
+<s1 title="How do I set a virtual directory?">
 
-<p>Use the <var/&lt;path-mapping>/> directive.  For example, to grab images
+<p>Use the <var>&lt;path-mapping&gt;</var> directive.  For example, to grab images
 from /home/images/*, use:</p>
 
 <example>
-&lt;path-mapping url-pattern='/images/*' real-path='/home/images'/>
+&lt;path-mapping url-pattern='/images/*' real-path='/home/images'/&gt;
 </example>
 
-</section>
+</s1>
 
-<section title='What is a web-app?'>
+<s1 title="What is a web-app?">
 
 <p>The vast majority of sites can completely ignore web-apps.  If you're
 starting with Resin, use the default web-app and don't worry about it.
@@ -68,7 +68,7 @@ starting with Resin, use the default web-app and don't worry about it.
 <p>You'll only want to use web-apps when you want separate projects using
 the same web server.  For example, on an ISP site, each user might get her
 own web-app.  She can treat the web-app as if she had control over
-the whole web server starting at a URL prefix like <var/~karen/>.
+the whole web server starting at a URL prefix like <var>~karen</var>.
 </p>
 
 <p>A web-app is a generalization of a virtual host.  With virtual
@@ -80,9 +80,9 @@ extends this by creating virtual applications for a URL prefix.
 <p>Each web-app gets its own sessions, servlets, beans and static
 pages.</p>
 
-</section>
+</s1>
 
-<section title="Why don't my URLs work in my web-app?">
+<s1 title="Why don't my URLs work in my web-app?">
 
 <p>Remember, the browser doesn't know about your web-apps.  It treats the
 web server as a single URL-space.  This may cause you troubles if you
@@ -91,83 +91,83 @@ use a standard directory structure like putting images in '/images/*'.
 
 <p>To see this problem, suppose you have a web-app called
 '/myproject'.  Suppose you have a JSP page in the web-app called
-<var/foo/bar.jsp/>.  The full URL will be
-<var//myproject/foo/bar.jsp/>.  Your image reference should look like
+<var>foo/bar.jsp</var>.  The full URL will be
+<var>/myproject/foo/bar.jsp</var>.  Your image reference should look like
 one of the following:</p>
 
 <example>
-&lt;img src='../images/image1.gif'/><br>
-&lt;img src='&lt;%= application.getContextPath() %>/images/image1.gif'/>
+&lt;img src='../images/image1.gif'/&gt;<br/>
+&lt;img src='&lt;%= application.getContextPath() %&gt;/images/image1.gif'/&gt;
 </example>
 
-<p>Using <var//images/image1.gif/> will fail because the browser will
-look for <var/http://myhost.com/images/image1.gif/> when you really
-want <var/http://myhost.com/myproject/images/image1.gif/>.
+<p>Using <var>/images/image1.gif</var> will fail because the browser will
+look for <var>http://myhost.com/images/image1.gif</var> when you really
+want <var>http://myhost.com/myproject/images/image1.gif</var>.
 </p>
 
-</section>
+</s1>
 
-<section title="How do I use virtual hosts with IIS?">
+<s1 title="How do I use virtual hosts with IIS?">
 
 <p>Jan Venema replies,</p>
 
 <p>This is my working config under IIS 4.0 end Resin1.1b6</p>
 
 <example>
-&lt;caucho.com>
-  &lt;http-server>
-    &lt;error-log id='log/default-error.log'/>
+&lt;caucho.com&gt;
+  &lt;http-server&gt;
+    &lt;error-log id='log/default-error.log'/&gt;
 
     &lt;!--
       -- Each virtual host has its own applications, sessions,
       -- and servlets.  You must duplicate the configuration for
       -- each host.  Each host ignores the configuration in
       -- the outer block.
-      -->
+      --&gt;
 
-    &lt;host id='192.168.0.2'>
-      &lt;app-dir>d:\inetpub\wwwroot\inverko&lt;/app-dir>
-      &lt;error-log id='d:\inetpub\wwwroot\inverko\error.log'/>
+    &lt;host id='192.168.0.2'&gt;
+      &lt;app-dir&gt;d:\inetpub\wwwroot\inverko&lt;/app-dir&gt;
+      &lt;error-log id='d:\inetpub\wwwroot\inverko\error.log'/&gt;
       &lt;servlet-mapping url-pattern='/servlet/*'
-                       servlet-name='invoker'/>
+                       servlet-name='invoker'/&gt;
       &lt;servlet-mapping url-pattern='*.jsp'
-                       servlet-name='com.caucho.jsp.JspServlet'/>
-    &lt;/host>
+                       servlet-name='com.caucho.jsp.JspServlet'/&gt;
+    &lt;/host&gt;
 
-    &lt;host id='192.168.0.3'>
-      &lt;app-dir>d:\inetpub\wwwroot\dmd&lt;/app-dir>
-      &lt;error-log id='d:\inetpub\wwwroot\dmd\error.log'/>
+    &lt;host id='192.168.0.3'&gt;
+      &lt;app-dir&gt;d:\inetpub\wwwroot\dmd&lt;/app-dir&gt;
+      &lt;error-log id='d:\inetpub\wwwroot\dmd\error.log'/&gt;
       &lt;servlet-mapping url-pattern='/servlet/*'
-                       servlet-name='invoker'/>
+                       servlet-name='invoker'/&gt;
       &lt;servlet-mapping url-pattern='*.jsp'
-                       servlet-name='com.caucho.jsp.JspServlet'/>
-    &lt;/host>
-  &lt;/http-server>
-&lt;/caucho.com>
+                       servlet-name='com.caucho.jsp.JspServlet'/&gt;
+    &lt;/host&gt;
+  &lt;/http-server&gt;
+&lt;/caucho.com&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="How do I configure error pages in resin.conf?">
+<s1 title="How do I configure error pages in resin.conf?">
 
-<p>The basic command is <a href='../ref/app-config.xtp#error-page'>error-page</a>.
+<p>The basic command is <a href="../ref/app-config.xtp#error-page">error-page</a>.
 There are three kinds of error pages</p>
 
 <ul>
 <li>Error code pages, e.g. 404
-<li>Exception, e.g. java.lang.NullPointerException
-<li>connection failures, "can't connect to srun"
-</ul>
+</li><li>Exception, e.g. java.lang.NullPointerException
+</li><li>connection failures, "can't connect to srun"
+</li></ul>
 
-</section>
+</s1>
 
-<section title="Where do all the files go?">
+<s1 title="Where do all the files go?">
 <p>The document root is set in resin.conf using the app-dir:</p>
 
 <example>
-&lt;http-server app-dir='/www/htdocs'>
+&lt;http-server app-dir='/www/htdocs'&gt;
   ...
-&lt;/http-server>
+&lt;/http-server&gt;
 </example>
 
 <p>Each virtual host and each web-app will have its own app-dir.
@@ -175,17 +175,17 @@ The app-dir configuration must be in resin.conf,
 not the web.xml (otherwise Resin couldn't find web.xml):</p>
 
 <example>
-&lt;web-app id='myapp' app-dir='/www/myapp'>
+&lt;web-app id='myapp' app-dir='/www/myapp'&gt;
    ...
-&lt;/web-app>
+&lt;/web-app&gt;
 </example>
 
-<p>If you don't specify an app-dir, Resin will use <var/id/>
+<p>If you don't specify an app-dir, Resin will use <var>id</var>
 looking in /www/htdocs/myapp in the above example.</p>
 
 <p>Optionally, you can put a web.xml in [app-dir]/WEB-INF/web.xml
 (again, following JSDK 2.2).  The web.xml can contain anything the
-<var/web-app/> in resin.conf can.</p>
+<var>web-app</var> in resin.conf can.</p>
 
 <p>Auto-reloaded classes belong in [app-dir]/WEB-INF by default,
 following JSDK 2.2:</p>
@@ -198,57 +198,56 @@ lib -- auto-loaded *.jar files
 <p>In the web-app, you can add to the auto-reload classpath using:</p>
 
 <example>
-&lt;classpath id='myclasses' source='/home/work/proj/src' compile='true'/>
+&lt;classpath id='myclasses' source='/home/work/proj/src' compile='true'/&gt;
 </example>
 
 <p>The JSP/Java work directory is /tmp/caucho (or \temp\caucho).  You can
 change that with:</p>
 
 <example>
-&lt;java compiler='javac' work-dir='/path/to/my/work/dir'/>
+&lt;java compiler='javac' work-dir='/path/to/my/work/dir'/&gt;
 </example>
 
 <p>Finally, the startup scripts will look for jars in resin1.1/lib to add
 to the classpath before starting resin.</p>
 
-</section>
+</s1>
 
-<section title="How do I disable directory browsing?">
+<s1 title="How do I disable directory browsing?">
 
-<p>Setting <a
-href='../ref/app-config.xtp#directory-servlet'>directory-servlet</a> to
+<p>Setting <a href="../ref/app-config.xtp#directory-servlet">directory-servlet</a> to
 "none" will disable directory browsing.</p>
 
 <example>
-&lt;web-app id='/'>
-  &lt;directory-servlet id='false'/>
-&lt;/web-app>
+&lt;web-app id='/'&gt;
+  &lt;directory-servlet id='false'/&gt;
+&lt;/web-app&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="Why do both virtual hosts use the same index.jsp file?">
+<s1 title="Why do both virtual hosts use the same index.jsp file?">
 
-<p>As described in the <a href='../ref/virtual-host.xtp'>virtual host</a>
-reference, you must use &lt;host> and &lt;app-dir> in your resin.conf
+<p>As described in the <a href="../ref/virtual-host.xtp">virtual host</a>
+reference, you must use &lt;host&gt; and &lt;app-dir&gt; in your resin.conf
 to configure virtual hosts.</p>
 
-<p>If you omit the &lt;host>, Resin will generate the same class name
+<p>If you omit the &lt;host&gt;, Resin will generate the same class name
 for both hosts.  So one host will see the JSP from the second host.
-By adding the &lt;host>, Resin will make the class names unique.</p>
+By adding the &lt;host&gt;, Resin will make the class names unique.</p>
 
-</section>
+</s1>
 
-<section title="How do I use a servlet as the welcome page?">
+<s1 title="How do I use a servlet as the welcome page?">
 
-<p>There's no <var/url-pattern/> that will only match '/'.  url-pattern='/'
+<p>There's no <var>url-pattern</var> that will only match '/'.  url-pattern='/'
 will set the servlet as the default servlet, replacing the file servlet.
 </p>
 
-<p>You'll need to use Resin's <var/url-regexp/>.  <var/url-regexp='^/$'/>
+<p>You'll need to use Resin's <var>url-regexp</var>.  <var>url-regexp='^/$'</var>
 will do the trick.
 </p>
 
-</section>
+</s1>
   </body>
 </document>

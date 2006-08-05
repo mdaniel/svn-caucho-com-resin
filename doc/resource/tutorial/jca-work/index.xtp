@@ -19,20 +19,20 @@ implementation.</p>
 
 <summary/>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    <td>Configures the WorkResource
-<tr><td><viewfile-link file="WEB-INF/classes/example/WorkResource.java"/>
-    <td>The resource implementation launches the Work task and provides common state.
-<tr><td><viewfile-link file="WEB-INF/classes/example/WorkTask.java"/>
-    <td>The work task sleeps and counts.
-<tr><td><viewfile-link file="index.jsp"/>
-    <td>The starting page for the tutorial
-</deftable>
-</section>
+    </td><td>Configures the WorkResource
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/WorkResource.java"/>
+    </td><td>The resource implementation launches the Work task and provides common state.
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/WorkTask.java"/>
+    </td><td>The work task sleeps and counts.
+</td></tr><tr><td><viewfile-link file="index.jsp"/>
+    </td><td>The starting page for the tutorial
+</td></tr></deftable>
+</s1>
 
-<section title="The Work task">
+<s1 title="The Work task">
 
 <p>A <code>Work</code> task implements the
 <code>javax.resource.work.Work</code> interface.  Like the familiar
@@ -98,9 +98,9 @@ public class WorkTask implements Work {
   }
 </example>
 
-</section>
+</s1>
 
-<section title="The Resource">
+<s1 title="The Resource">
 
 <p>The <code>WorkResource</code> in this example is simple since it only
 needs to launch the work task.  As with the previous examples, the
@@ -135,7 +135,7 @@ public class WorkResource extends AbstractResourceAdapter {
 }
 </example>
 
-</section>
+</s1>
 
 </body>
 </document>

@@ -6,21 +6,21 @@
 
   <body>
     <summary/>
-<section title="CORBA (J2EE Reference Implementation)">
+<s1 title="CORBA (J2EE Reference Implementation)">
 
 <ul>
 <li>Copy the client class jar and the j2ee.jar file to the
 WEB-INF/classes directory of your web application.
 
-<li>Add the following to your web application configuration in the
+</li><li>Add the following to your web application configuration in the
 resin.conf file:
 
 <example>
-&lt;classpath id='WEB-INF/classes/j2ee.jar'/>
-&lt;classpath id='WEB-INF/classes/{your client class jar}'/>
+&lt;classpath id='WEB-INF/classes/j2ee.jar'/&gt;
+&lt;classpath id='WEB-INF/classes/{your client class jar}'/&gt;
 </example>
 
-<li>In your class, explicitly create the environment for the
+</li><li>In your class, explicitly create the environment for the
 InitialContext:
 
 <example>
@@ -36,23 +36,23 @@ vEnv.put("java.naming.factory.initial",
 Or create a <a href="config|env#jndi-link">jndi-link</a>:
 
 <example>
-&lt;jndi-link>
-  &lt;jndi-name>java:comp/env/ejb&lt;/jndi-name>
-  &lt;jndi-factory>com.sun.enterprise.naming.SerialInitContextFactory&lt;/jndi-factory>
-  &lt;init-param org.omg.CORBA.ORBInitialHost="{your server host}"/>
-  &lt;init-param org.omg.CORBA.ORBInitialPort="{your server port}"/>
-&lt;/jndi-link>
+&lt;jndi-link&gt;
+  &lt;jndi-name&gt;java:comp/env/ejb&lt;/jndi-name&gt;
+  &lt;jndi-factory&gt;com.sun.enterprise.naming.SerialInitContextFactory&lt;/jndi-factory&gt;
+  &lt;init-param org.omg.CORBA.ORBInitialHost="{your server host}"/&gt;
+  &lt;init-param org.omg.CORBA.ORBInitialPort="{your server port}"/&gt;
+&lt;/jndi-link&gt;
 </example> 
 
-<li>Make sure the InitialContext is initialised using the environment
+</li><li>Make sure the InitialContext is initialised using the environment
 set above. Then access the bean as usual:
 
 <example>
 InitialContext vContext = new InitialContext(vEnv);
 Object vObjRef = vContext.lookup("{your bean jndi name}");
 </example>
-</ul>
+</li></ul>
 
-</section>
+</s1>
   </body>
 </document>

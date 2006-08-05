@@ -11,9 +11,9 @@ verified.</p>
 </header>
 
 <body>
-<summary objsummary-in-localtoc='1'/>
+<summary objsummary-in-localtoc="1"/>
 
-<faq title='Mac OS X startup script'>
+<faq title="Mac OS X startup script">
 <description>
 </description>
 
@@ -77,7 +77,7 @@ RunService "$1"
 }
 </example>
 
-<note>The <code/StartupParameters.plist/> file example above requires that the
+<note>The <code>StartupParameters.plist</code> file example above requires that the
 service named "Web Server", which is Apache, is started before Resin starts. If
 you run Resin standalone, remove that dependency.</note>
 

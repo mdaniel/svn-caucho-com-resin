@@ -17,24 +17,24 @@ experiences to save someone else some time.
 
 <ol>
 <li>Copy vbjorb.jar and vbejb.jar from AppServer/lib into resin/lib. Just adding
-these into the &lt;classpath .../> in resin.conf doesn't work.
+these into the &lt;classpath .../&gt; in resin.conf doesn't work.
 
-<li>Add the path to your beans into resin.conf:
-
-<example>
-  &lt;classpath id='c:/development/classes'/>
-</example>
-
-<li>Add the JNDI link from resin to the app server in resin.conf:
+</li><li>Add the path to your beans into resin.conf:
 
 <example>
-&lt;jndi-link>
-  &lt;jndi-name>java:comp/env/ejb&lt;/jndi-name>
-   &lt;jndi-factory>com.inprise.j2ee.jndi.CtxFactory&lt;/jndi-factory>
-&lt;/jndi-link>
+  &lt;classpath id='c:/development/classes'/&gt;
 </example>
 
-<li>Then connect to your beans in servlets/JSP, simply add "java:comp/env/ejb/"
+</li><li>Add the JNDI link from resin to the app server in resin.conf:
+
+<example>
+&lt;jndi-link&gt;
+  &lt;jndi-name&gt;java:comp/env/ejb&lt;/jndi-name&gt;
+   &lt;jndi-factory&gt;com.inprise.j2ee.jndi.CtxFactory&lt;/jndi-factory&gt;
+&lt;/jndi-link&gt;
+</example>
+
+</li><li>Then connect to your beans in servlets/JSP, simply add "java:comp/env/ejb/"
 onto any JNDI paths you use to find your beans. Eg. if I have a bean at the app
 server JNDI path of "TestSession" then in my servlet I use:
 
@@ -44,6 +44,6 @@ Object ref = context.lookup("java:comp/env/ejb/TestSession");
 home = (TestSessionHome) javax.rmi.PortableRemoteObject.narrow(ref,
                            TestSessionHome.class);
 </example>
-</ol>
+</li></ol>
   </body>
 </document>

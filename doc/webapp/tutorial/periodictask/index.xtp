@@ -26,29 +26,29 @@ intervals.
 <body>
 <summary localtoc="2"/>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/classes/example/PeriodicTask.java"/>
-    <td>The implementation of the class that performs the task
-<tr><td><viewfile-link file="WEB-INF/classes/example/PeriodicTaskMBean.java"/>
-    <td>The Jmx MBean interface to the class that performs the task
-<tr><td><viewfile-link file="WEB-INF/classes/example/PeriodicTaskServlet.java"/>
-    <td>An administrators view of the PeriodicTask.
-<tr><td><viewfile-link file="WEB-INF/classes/example/PeriodicTaskFilter.java"/>
-    <td>A filter that responds with a "temporarily unavailable" page when the
+    </td><td>The implementation of the class that performs the task
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/PeriodicTaskMBean.java"/>
+    </td><td>The Jmx MBean interface to the class that performs the task
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/PeriodicTaskServlet.java"/>
+    </td><td>An administrators view of the PeriodicTask.
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/PeriodicTaskFilter.java"/>
+    </td><td>A filter that responds with a "temporarily unavailable" page when the
         task is running.
-<tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    <td>web-app configuration
-<tr><td><viewfile-link file="index.jsp"/>
-    <td>A page representative of any page in the application.
-<tr><td><viewfile-link file="unavailable.jsp"/>
-    <td>A page to show when the web application is unavailable because 
+</td></tr><tr><td><viewfile-link file="WEB-INF/web.xml"/>
+    </td><td>web-app configuration
+</td></tr><tr><td><viewfile-link file="index.jsp"/>
+    </td><td>A page representative of any page in the application.
+</td></tr><tr><td><viewfile-link file="unavailable.jsp"/>
+    </td><td>A page to show when the web application is unavailable because 
         the task is active.
-</deftable>
-</section>
+</td></tr></deftable>
+</s1>
 
 
-<section title="Resource Configuration">
+<s1 title="Resource Configuration">
 
 <p>
 The <a config-tag="resource"/> tag is used to configure an instance of
@@ -62,7 +62,7 @@ occurs in the web.xml, using Resin's <a href="doc|config|init.xtp">Bean-style
 initialization</a>.  
 </p>
 
-<example file="WEB-INF/web.xml" re-start="example.PeriodicTask" re-end="</resource">
+<example file="WEB-INF/web.xml" re-start="example.PeriodicTask" re-end="&lt;/resource">
   &lt;resource type="example.PeriodicTask" jndi-name="PeriodicTask"&gt;
     &lt;init&gt;
       &lt;estimated-average-time&gt;5&lt;/estimated-average-time&gt;
@@ -76,9 +76,9 @@ performing no function.  The rest of this tutorial details various ways that
 the PeriodicTask can be utilized.  
 </p>
 
-</section>
+</s1>
 
-<section title="Using PeriodicTask for real work">
+<s1 title="Using PeriodicTask for real work">
 <p>
 This tutorial performs no real work in it's task, it sleeps for 10 seconds to
 imitate a task that takes ten seconds.  The code can be used without
@@ -87,7 +87,7 @@ statistics gathering and other functionality is available for the derived
 class.
 </p>
 
-<section title="Extend PeriodicTask">
+<s2 title="Extend PeriodicTask">
 
 <p>
 The following example extends PeriodicTask to create a task that
@@ -153,8 +153,7 @@ task at the url <code>/admin/example/vacuum</code>.
 
 <p>
 A <a config-tag="security-constraint"/> is used to limit access to the
-<code>/admin/</code> portion of the website.  An <a
-config-tag="authenticator"/> is used to specify the user names and passwords.
+<code>/admin/</code> portion of the website.  An <a config-tag="authenticator"/> is used to specify the user names and passwords.
 </p>
 
 
@@ -210,10 +209,10 @@ config-tag="authenticator"/> is used to specify the user names and passwords.
   &lt;/authenticator&gt;
 &lt;/web-app&gt;
 </example>
-</section>
-</section>
+</s2>
+</s1>
 
-<section title="Jmx: a management interface for the resource">
+<s1 title="Jmx: a management interface for the resource">
 <p>
 <a href="doc|jmx|index">Jmx</a> provides a mechanism for management of objects
 on servers.  The PeriodicTask implements the PeriodicTaskMBean interface, the 
@@ -222,11 +221,11 @@ PeriodicTaskMBean interface is the Jmx agent's view of the resource.
 
 <p>
 Jmx uses a naming scheme to store objects for later retrieval.  The Jmx name
-to store the object under is specified with the <a config-tag='mbean-name'/>
+to store the object under is specified with the <a config-tag="mbean-name"/>
 child of <a config-tag="resource"/>.  
 </p>
 
-<example file="WEB-INF/web.xml" re-start="example.PeriodicTask" re-end="</resource">
+<example file="WEB-INF/web.xml" re-start="example.PeriodicTask" re-end="&lt;/resource">
   &lt;resource type="example.PeriodicTask" jndi-name="PeriodicTask"
             mbean-interface="example.PeriodicTaskMBean"
             <b>mbean-name="type=PeriodicTask,name=PeriodicTask"&gt;</b>
@@ -253,10 +252,10 @@ done in admin/mbean.jmx:
   ...
 </example>
 
-</section>
+</s1>
 
 
-<section title="CronResource: timed execution of the PeriodicTask">
+<s1 title="CronResource: timed execution of the PeriodicTask">
 <p>
 Depending on the nature of the PeriodicTask, it may be appropriate to configure
 the task to automatically run at a specified time, or at a specified interval.
@@ -267,8 +266,7 @@ The <a href="doc|resource|cron">CronResource</a> is used to configure
 the timed execution of the PeriodicTask.
 </p>
 
-<example file="WEB-INF/web.xml"
-         re-start="CronResource" re-marker="&lt;/resource>">
+<example file="WEB-INF/web.xml" re-start="CronResource" re-marker="&lt;/resource&gt;">
   &lt;resource type="com.caucho.resources.CronResource"&gt;
     &lt;init&gt;
       &lt;cron&gt;*&lt;/cron&gt;
@@ -277,9 +275,9 @@ the timed execution of the PeriodicTask.
   &lt;/resource&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="Filter: redirecting users when the task is running">
+<s1 title="Filter: redirecting users when the task is running">
 
 <p>
 Again depending on the nature of the PeriodicTask, it may be appropriate for
@@ -289,8 +287,7 @@ requests and if the task is active, redirects to a page giving a "temporarily
 unavailable" message.
 </p>
 
-<example file="WEB-INF/web.xml"
-         re-start="filter>" re-end="</filter>">
+<example file="WEB-INF/web.xml" re-start="filter&gt;" re-end="&lt;/filter&gt;">
   &lt;filter&gt;
     &lt;filter-name&gt;PeriodicTaskFilter&lt;/filter-name&gt;
     &lt;filter-class&gt;example.PeriodicTaskFilter&lt;/filter-class&gt;
@@ -308,16 +305,14 @@ unavailable" message.
   &lt;/filter-mapping&gt;
 </example>
 
-<example file="WEB-INF/classes/example/PeriodicTaskFilter.java"
-         re-start="setPeriodicTask" re-end="}">
+<example file="WEB-INF/classes/example/PeriodicTaskFilter.java" re-start="setPeriodicTask" re-end="}">
   public void setPeriodicTask(PeriodicTask periodicTask)
   {
     _periodicTask = periodicTask;
   }
 </example>
 
-<example file="WEB-INF/classes/example/PeriodicTaskFilter.java"
-         re-start="doFilter\(" re-end="^  }">
+<example file="WEB-INF/classes/example/PeriodicTaskFilter.java" re-start="doFilter\(" re-end="^  }">
   public void doFilter(ServletRequest request,
       ServletResponse response,
       FilterChain chain)
@@ -331,9 +326,9 @@ unavailable" message.
     }
   }
 </example>
-</section>
+</s1>
 
-<section title="PeriodicTaskServlet: an administration interface">
+<s1 title="PeriodicTaskServlet: an administration interface">
 <p>
 The PeriodicTaskServlet provides an html interface to the PeriodicTask.  It
 shows the current status of the task, and provides a button to "Run" the task.
@@ -344,8 +339,7 @@ The PeriodicTaskServlet needs an instance of PeriodicTask to operate on.
 The Servlet provides a setter:
 </p>
 
-<example file="WEB-INF/classes/example/PeriodicTaskServlet.java"
-         re-start="setPeriodicTask" re-end="}">
+<example file="WEB-INF/classes/example/PeriodicTaskServlet.java" re-start="setPeriodicTask" re-end="}">
   public void setPeriodicTask(PeriodicTask periodicTask)
   {
     _periodicTask = periodicTask;
@@ -358,8 +352,7 @@ function to get a reference to the PeriodicTask resource previously stored in
 jndi with the <a config-tag="resource"/> configuration.  
 </p>
 
-<example file="WEB-INF/web.xml"
-         re-start="<periodic-task" re-marker="<servlet>">
+<example file="WEB-INF/web.xml" re-start="&lt;periodic-task" re-marker="&lt;servlet&gt;">
   &lt;servlet&gt;
     &lt;servlet-name&gt;PeriodicTaskServlet&lt;/servlet-name&gt;
     &lt;servlet-class&gt;example.PeriodicTaskServlet&lt;/servlet-class&gt;
@@ -375,10 +368,10 @@ jndi with the <a config-tag="resource"/> configuration.
 
 </example>
  
-</section>
+</s1>
 
 
-<section name="dependency-injection" title="Dependency Injection/Inversion of Control">
+<s1 name="dependency-injection" title="Dependency Injection/Inversion of Control">
 
 <p>
 <i>Dependency injection</i> is a term used to describe a separation between the
@@ -414,7 +407,7 @@ The simplicity of the code shows immediate benefits.  There is no dependency
 on the environment (needing an <i>application</i> object for example), and no
 need for cumbersome or error prone code in each component.
 
-<p>
+</p><p>
 There are other benefits as well.   Since the container instantiates and sets
 the object, there is more flexibility in the configuration.  The following
 example shows the use of two distinct periodic tasks.
@@ -511,13 +504,13 @@ public class PeriodicTaskBar extends PeriodicTask {
   &lt;/resource&gt;
 </example>
 
-</section> <!-- dependency-injection -->
+</s1> <!-- dependency-injection -->
 
-<section title="See Also">
+<s1 title="See Also">
 <dl>
 <dt><a href="doc|resource|cron.xtp">CronResource</a>
 <dd>Documentation for the usage of CronResource
-</dl>
-</section>
+</dd></dt></dl>
+</s1>
 
-</document>
+</body></document>

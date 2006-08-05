@@ -6,27 +6,27 @@
 
 <body>
 
-<summary objsummary='localtoc'/>
+<summary objsummary="localtoc"/>
 
-<section title="java configuration variable">
+<s1 title="java configuration variable">
 
 <p>Added java configuration variable to test for JDK capabilities.</p>
 
 <p>Added $\{java.isJava5()} to test for JDK 5 capabilities.</p>
 
-</section>
+</s1>
 
-<section title="Quercus">
+<s1 title="Quercus">
 
-<section title="Module Apache">
+<s2 title="Module Apache">
 
 <p>Added: apache_note, apache_request_headers, virtual, getallheaders</p>
 
 <p>Stubbed: apache_child_terminate, apache_reset_timeout</p>
 
-</section>
+</s2>
 
-</section>
+</s1>
 
 </body>
 </document>

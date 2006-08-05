@@ -22,17 +22,17 @@ form for entering the identity and color.
 <body>
 <summary/>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/classes/example/HelloWorldPortlet.java"/>
-    <td>Portlet
-<tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    <td>web-app configuration
-</deftable>
-</section>
+    </td><td>Portlet
+</td></tr><tr><td><viewfile-link file="WEB-INF/web.xml"/>
+    </td><td>web-app configuration
+</td></tr></deftable>
+</s1>
 
 
-<section title="Rendering">
+<s1 title="Rendering">
 
 <p>
 The portlet implements the rendering for each mode with a
@@ -42,9 +42,7 @@ stores them as request attributes, and then calls the appropriate
 <code>do</code> method.
 </p>
 
-<example title="render()"
-         file="WEB-INF/classes/example/HelloWorldPortlet.java"
-         re-marker="void render">
+<example title="render()" file="WEB-INF/classes/example/HelloWorldPortlet.java" re-marker="void render">
   public void render(RenderRequest request, RenderResponse response)
     throws PortletException, IOException
   {
@@ -80,9 +78,7 @@ database; objects containing that data are prepared in prepareObjects() and
 available for display by the view.
 </p>
 
-<example title="prepareObjects()"
-         file="WEB-INF/classes/example/HelloWorldPortlet.java"
-         re-marker="void prepareObjects">
+<example title="prepareObjects()" file="WEB-INF/classes/example/HelloWorldPortlet.java" re-marker="void prepareObjects">
   protected void prepareObjects(RenderRequest request, RenderResponse response)
   {
     String identity = request.getParameter("identity");
@@ -98,9 +94,9 @@ available for display by the view.
   }
 </example>
 
-</section>
+</s1>
 
-<section title="A url link to a different mode">
+<s1 title="A url link to a different mode">
 <p>
 The <code>mode</code> is maintained from request
 to request.  A url link can cause the mode of the portlet to switch.  </p>
@@ -110,19 +106,16 @@ In this tutorial, the <code>doView</code> presents a url that switches to the
 "edit" mode.
 </p>
 
-<example title="prepareObjects()"
-         file="WEB-INF/classes/example/HelloWorldPortlet.java"
-         re-marker="void doView"
-         re-start="editUrl">
+<example title="prepareObjects()" file="WEB-INF/classes/example/HelloWorldPortlet.java" re-marker="void doView" re-start="editUrl">
 
   PortletURL editUrl = response.createRenderURL();
   editUrl.setPortletMode(PortletMode.EDIT);
     
   out.println("&lt;a href='" + editUrl + "'&gt;Edit&lt;/a&gt;");
 </example>
-</section>
+</s1>
 
-<section title="Switching modes in processAction()">
+<s1 title="Switching modes in processAction()">
 
 <p>
 The action handles the form submit.  In this case, only the "edit"
@@ -136,10 +129,7 @@ processAction() switches to the "view" mode using
 <code>response.setPortletMode()</code>.
 </p>
 
-<example title="processAction()"
-         file="WEB-INF/classes/example/HelloWorldPortlet.java"
-         re-marker="void processAction"
-         re-start="setPortletMode">
+<example title="processAction()" file="WEB-INF/classes/example/HelloWorldPortlet.java" re-marker="void processAction" re-start="setPortletMode">
 
   public void processAction(ActionRequest request, ActionResponse response) 
     throws PortletException, IOException
@@ -173,9 +163,9 @@ call was omitted, then the render() that followed the processAction() would
 still have a mode of "edit".
 </p>
 
-</section>
+</s1>
 
-<section title="Custom Modes">
+<s1 title="Custom Modes">
 <p>
 PortletMode.VIEW, PortletMode.EDIT, PortletMode.HELP are constants 
 for the three standard modes specified by the portlet specification.
@@ -192,6 +182,6 @@ public class MyPortlet implements Portlet {
   final private static PortletMode SECURITY = new PortletMode("security");
 </example>
 
-</section>
+</s1>
 
-</document>
+</body></document>

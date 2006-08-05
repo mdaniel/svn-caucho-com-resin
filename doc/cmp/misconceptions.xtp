@@ -20,9 +20,9 @@
 
   <body>
     <summary/>
-<section title="Some Preconceptions about EJB">
+<s1 title="Some Preconceptions about EJB">
 
-<section title="CMP is about Database Management">
+<s2 title="CMP is about Database Management">
 
 <p>The preconception is that EJB is about distributed objects.  This
 preconception has an element of truth, but is no longer complete
@@ -36,9 +36,9 @@ reasonable to think of EJB as a JDBC replacement with the option to
 provide remote interfaces if the site grows large enough.
 </p>
 
-</section>
+</s2>
 
-<section title="CMP method calls are faster than EJB">
+<s2 title="CMP method calls are faster than EJB">
 
 <p>Calls through the new local interfaces are now fast.  Method arguments
 are passed by reference and the request never goes across a slow
@@ -47,11 +47,11 @@ slower than regular message calls because EJB method calls
 support database transactions.  Because the EJB transaction support
 enables aggressive database caching, the performance of an
 application will likely be better than one using raw JDBC calls.
-<p/>
+</p><p/>
 
-</section>
+</s2>
 
-<section title="CMP is for small database applications, too">
+<s2 title="CMP is for small database applications, too">
 
 <p>With the addition of local interfaces, EJB is now suitable for all web
 applications from simple weblogs to huge financial applications.  The
@@ -75,8 +75,8 @@ complexity just because journalist writes a breathless article
 describing a huge distributed object solution.
 </p>
 
-</section>
+</s2>
 
-</section>
+</s1>
   </body>
 </document>

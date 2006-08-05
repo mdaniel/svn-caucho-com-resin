@@ -5,7 +5,7 @@
     <type>contents</type>
     <description>
       <p>We suggest you use the
-        <a href='install|httpd'>Resin standalone web server</a> option first.
+        <a href="install|httpd">Resin standalone web server</a> option first.
         If you need a specific feature of another web server,
         you can later configure Resin to work with that web server.</p>
     </description>

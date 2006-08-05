@@ -26,7 +26,7 @@ creates the digest and submits the digest password to the web server.
 <body>
 <summary/>
 
-<section title="Digest protects passwords">
+<s1 title="Digest protects passwords">
 
 <p>Storing digest passwords is so important for security purposes that the
 Resin <a href="security|authentication">authenticators</a> default to assuming
@@ -37,26 +37,26 @@ compromised. Since the password they use (the "cleartext" password) is not
 stored a malicious user cannot determine the password by gaining access to the
 database or other backend storage for the passwords.</p>
 
-</section>
+</s1>
 
-<section title="MD5 digest">
+<s1 title="MD5 digest">
 <p>Resin's authenticators use "MD5-base64" and a realm "resin" to digest
-passwords by default. <var/MD5/> indicates that the MD5 algorithm is used. <var/base64/> is an encoding format to apply to the binary result of MD5.</p>
+passwords by default. <var>MD5</var> indicates that the MD5 algorithm is used. <var>base64</var> is an encoding format to apply to the binary result of MD5.</p>
 
 
 <p>Some examples are:</p>
 <deftable>
-<tr><th>Username<th>Realm<th>Password<th>digest
-<tr><td>root<td>resin<td>changeme<td>j/qGVP4C0T7UixSpKJpTdw==
-<tr><td>harry<td>resin<td>quidditch<td>uTOZTGaB6pooMDvqvl2Lbg==
-<tr><td>hpotter<td>resin<td>quidditch<td>x8i6aM+zOwDqqKPRO/vkxg==
-<tr><td>filch<td>resin<td>mrsnorris<td>KmZIq2RKXAHV4BaoNHfupQ==
-<tr><td>pince<td>resin<td>quietplease<td>Txpd1jQc/xwhISIqodEjfw==
-<tr><td>snape<td>resin<td>potion<td>I7HdZr7CTM6hZLlSd2o+CA==
-<tr><td>mcgonagall<td>resin<td>quidditch<td>4slsTREVeTo0sv5hGkZWag==
-<tr><td>dmalfoy<td>resin<td>pureblood<td>yI2uN1l97Rv5E6mdRnDFwQ==
-<tr><td>lmalfoy<td>resin<td>myself<td>sj/yhtU1h4LZPw7/Uy9IVA==
-</deftable>
+<tr><th>Username</th><th>Realm</th><th>Password</th><th>digest
+</th></tr><tr><td>root</td><td>resin</td><td>changeme</td><td>j/qGVP4C0T7UixSpKJpTdw==
+</td></tr><tr><td>harry</td><td>resin</td><td>quidditch</td><td>uTOZTGaB6pooMDvqvl2Lbg==
+</td></tr><tr><td>hpotter</td><td>resin</td><td>quidditch</td><td>x8i6aM+zOwDqqKPRO/vkxg==
+</td></tr><tr><td>filch</td><td>resin</td><td>mrsnorris</td><td>KmZIq2RKXAHV4BaoNHfupQ==
+</td></tr><tr><td>pince</td><td>resin</td><td>quietplease</td><td>Txpd1jQc/xwhISIqodEjfw==
+</td></tr><tr><td>snape</td><td>resin</td><td>potion</td><td>I7HdZr7CTM6hZLlSd2o+CA==
+</td></tr><tr><td>mcgonagall</td><td>resin</td><td>quidditch</td><td>4slsTREVeTo0sv5hGkZWag==
+</td></tr><tr><td>dmalfoy</td><td>resin</td><td>pureblood</td><td>yI2uN1l97Rv5E6mdRnDFwQ==
+</td></tr><tr><td>lmalfoy</td><td>resin</td><td>myself</td><td>sj/yhtU1h4LZPw7/Uy9IVA==
+</td></tr></deftable>
 
 <p>In the above example the digest of "harry/quidditch" is different than the
 digest of "hpotter/quidditch" because even though the password is the same, the
@@ -64,9 +64,9 @@ username has changed. The digest is calculated with
 <code>digest(username + ":" + realm + ":" + password)</code>, so if the username
 changes the resulting digest is different.</p>
 
-</section>
+</s1>
 
-<section title="Calculating a digest">
+<s1 title="Calculating a digest">
 
 <p>Of course, storing the digest password is a bit more work.  When
 the user registers, the application needs to compute the
@@ -75,7 +75,7 @@ digest to store it.</p>
 
 <!-- a form for calculating an MD5 digest -->
 <jsp:scriptlet>
-<![CDATA[
+
 String digest_user = request.getParameter("digest_user");
 String digest_realm = request.getParameter("digest_realm");
 String digest_password = request.getParameter("digest_password");
@@ -85,7 +85,7 @@ if (digest_realm == null || digest_realm.length() == 0)
   digest_realm = "resin";
 pageContext.setAttribute("digest_realm",digest_realm);
 
-if (digest_user != null && digest_password != null)
+if (digest_user != null &amp;&amp; digest_password != null)
 {
   String digest_concat = digest_user + ":" + digest_realm + ":" + digest_password;
 
@@ -104,7 +104,7 @@ String digest_requestURI = request.getRequestURI();
 digest_requestURI = digest_requestURI + "#Calculating-a-digest";
 
 pageContext.setAttribute("digest_requestURI",digest_requestURI);
-]]>
+
 </jsp:scriptlet>
 
 <form action="${digest_requestURI}">
@@ -116,15 +116,15 @@ pageContext.setAttribute("digest_requestURI",digest_requestURI);
 
   <table>
   <tr><td><b>user id:</b>
-  <td><input name="digest_user" size="50" value="${digest_user}">
+  </td><td><input name="digest_user" size="50" value="${digest_user}"/>
 
-  <tr><td><b>password:</b>
-  <td><input name="digest_password" size="50" value="${digest_password}">
+  </td></tr><tr><td><b>password:</b>
+  </td><td><input name="digest_password" size="50" value="${digest_password}"/>
 
-  <tr><td><b>realm:</b>
-  <td><input name="digest_realm" size="50" value="${digest_realm}">
-  <tr><td><input type="submit">
-  </table>
+  </td></tr><tr><td><b>realm:</b>
+  </td><td><input name="digest_realm" size="50" value="${digest_realm}"/>
+  </td></tr><tr><td><input type="submit"/>
+  </td></tr></table>
 </form>
 
 <p>The class <a href="javadoc|com.caucho.http.security.PasswordDigest|"/> can
@@ -151,7 +151,7 @@ be used to calculate a digest.</p>
 
   $passwordDigest = new Java("com.caucho.server.security.PasswordDigest");
 
-  $digest = $passwordDigest->getPasswordDigest($username, $password, $realm);
+  $digest = $passwordDigest-&gt;getPasswordDigest($username, $password, $realm);
 </example>
 
 The realm for JdbcAuthenticator and XmlAuthenticator defaults to "resin";
@@ -166,22 +166,21 @@ the realm can be specified during configuration:
     ...
 </example>
 
-</section>
+</s1>
 
-<section title="Using Digest with basic authentication or a form login">
+<s1 title="Using Digest with basic authentication or a form login">
 
 <p>When using the form login method or the HTTP basic authentication login
 method, the password submitted is in cleartext.  The Resin authenticator will
 digest the password before comparing it to the value retrieved from storage.
 The message is transmitted in cleartext but is stored as a digest. This method
 provides only half of the protection - the password is not protected in
-transmission (although if the form submit is being done over an <a
-href="security|ssl">SSL</a> connection it will be secure).</p>
+transmission (although if the form submit is being done over an <a href="security|ssl">SSL</a> connection it will be secure).</p>
 
-</section>
+</s1>
 
 
-<section title="Using HTTP digest authentication">
+<s1 title="Using HTTP digest authentication">
 
 <p>The HTTP protocol includes a method to indicate to the client that it should
 make a digest using the password.  The client submits a digest to Resin instead
@@ -191,11 +190,11 @@ of submitting a cleartext password. HTTP digest authentication protects the pass
 calculcate a digest. The steps involved are:</p>
 <ul>
 <li>Resin provides the client a realm and some other information 
-<li>The client obtains a username and password (usually a dialog box with a web browser)
-<li>The client calculates a digest using the username, realm, pasword, and other information supplied by Resin
-<li>The client submits the digest to Resin
-<li>Resin does the same digest calculation as the client did
-<li>Resin compares the submitted digest and the digest it calculated.  If they match, the user has been authenticated
+</li><li>The client obtains a username and password (usually a dialog box with a web browser)
+</li><li>The client calculates a digest using the username, realm, pasword, and other information supplied by Resin
+</li><li>The client submits the digest to Resin
+</li><li>Resin does the same digest calculation as the client did
+</li><li>Resin compares the submitted digest and the digest it calculated.  If they match, the user has been authenticated
 </li>
 </ul>
 
@@ -211,26 +210,26 @@ client to the server.</p>
 &lt;/login-config&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="Disabling the use of password-digest">
+<s1 title="Disabling the use of password-digest">
 
 <p>Although it is not advised, Resin's authenticators can be configured to use
 passwords that are not in digest form.</p>
 
-<example title='Disabling the use of password-digest'>
-&lt;authenticator>
-  &lt;type>com.caucho.server.security.XmlAuthenticator&lt;/type>
-  &lt;init>
-     &lt;password-digest>none&lt;/password-digest>
-     &lt;user>harry:quidditch:user&lt;/user>
-  &lt;/init>
-&lt;/authenticator>
+<example title="Disabling the use of password-digest">
+&lt;authenticator&gt;
+  &lt;type&gt;com.caucho.server.security.XmlAuthenticator&lt;/type&gt;
+  &lt;init&gt;
+     &lt;password-digest&gt;none&lt;/password-digest&gt;
+     &lt;user&gt;harry:quidditch:user&lt;/user&gt;
+  &lt;/init&gt;
+&lt;/authenticator&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="Compatibility">
+<s1 title="Compatibility">
 
 <p>Authenticators are not defined by the 
 <a href="external|spec|servlet">Servlet Specification</a>, 
@@ -244,8 +243,7 @@ authentication</a>.</p>
 defined in the <a href="external|spec|servlet">Servlet Specification</a> 
 and implemented in most application servers.</p>
 
-</section>
+</s1>
 
 </body>
 </document>
-

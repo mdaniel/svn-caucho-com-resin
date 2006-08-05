@@ -19,16 +19,16 @@ method.  Because Resin can find the bean-style setters from looking at the
 class, it can configure those setters in a configuration file
 like the web.xml.</p>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    <td>Configures the Servlet with bean-style init
-<tr><td><viewfile-link file="WEB-INF/classes/test/HelloServlet.java"/>
-    <td>The servlet implementation.
-</deftable>
-</section>
+    </td><td>Configures the Servlet with bean-style init
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/test/HelloServlet.java"/>
+    </td><td>The servlet implementation.
+</td></tr></deftable>
+</s1>
 
-<section title="HelloServlet">
+<s1 title="HelloServlet">
 
 <p>The following <code>HelloServlet</code> servlet is a trivial bean-style
 servlet.  Instead of hardcoding the "Hello, world" string, it lets the
@@ -36,7 +36,7 @@ web.xml configure the string as <var>greeting</var>.  To make that work,
 <code>HelloWorld</code> adds a bean-style <code>setGreeting(String)</code>
 jmethod.
 
-<example title='WEB-INF/classes/test/HelloServlet.java'>
+<example title="WEB-INF/classes/test/HelloServlet.java">
 package test;
 
 import java.io.*;
@@ -64,15 +64,15 @@ public class HelloServlet extends HttpServlet {
 }
 </example>
 
-</section>
+</p></s1>
 
-<section title="Configuration">
+<s1 title="Configuration">
 
 <p>The <a config-tag="servlet"/> configuration sets the <var>greeting</var> property
 inside an <a config-tag="init/servlet"/> tag.  After Resin instantiates the servlet object,
-it looks at the configuration file for any &lt;init> section.  Resin then
-calls a <code>setXXX</code> method for each <var>&lt;xxx></var> tag in
-&lt;init>.  In this case, Resin will call <code>setGreeting</code></p>
+it looks at the configuration file for any &lt;init&gt; section.  Resin then
+calls a <code>setXXX</code> method for each <var>&lt;xxx&gt;</var> tag in
+&lt;init&gt;.  In this case, Resin will call <code>setGreeting</code></p>
 
 
 <p>Resin will perform any type conversion necessary, so you can use
@@ -83,25 +83,25 @@ the following calls:</p>
 
 <ol>
 <li><code>servlet = new test.HelloServlet();</code>
-<li><code>servlet.setGreeting("Hello, World!");</code>
-<li><code>servlet.init(servletConfig);</code>
-</ol>
+</li><li><code>servlet.setGreeting("Hello, World!");</code>
+</li><li><code>servlet.init(servletConfig);</code>
+</li></ol>
 
 <example title="WEB-INF/web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
   &lt;servlet servlet-name="hello"
-            servlet-class="test.HelloServlet">
-    &lt;init>
-      &lt;greeting>Hello, World!&lt;/greeting>
-    &lt;/init>
-  &lt;/servlet>
+            servlet-class="test.HelloServlet"&gt;
+    &lt;init&gt;
+      &lt;greeting&gt;Hello, World!&lt;/greeting&gt;
+    &lt;/init&gt;
+  &lt;/servlet&gt;
 
   &lt;servlet-mapping url-pattern="/hello"
-            servlet-name="hello"/>
-&lt;/web-app>
+            servlet-name="hello"/&gt;
+&lt;/web-app&gt;
 </example>
 
-</section>
+</s1>
 
   </body>
 </document>

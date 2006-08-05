@@ -5,34 +5,34 @@
     <title>Tag Attributes</title>
     <description>
       <p>Tags become more useful once you add attributes.  This example creates
-      a <var/ct:href/> tag.</p>
+      a <var>ct:href</var> tag.</p>
 
       <p>With session rewriting, even browsers without
-      cookies can support sessions.  However, every <var/&lt;a href>/> needs a
-      call to <var/response.encodeURL()/>, which is annoying.  With the
-      <var/ct:href/> tag, you get that for free.</p>
+      cookies can support sessions.  However, every <var>&lt;a href&gt;</var> needs a
+      call to <var>response.encodeURL()</var>, which is annoying.  With the
+      <var>ct:href</var> tag, you get that for free.</p>
     </description>
   </header>
 
   <body>
     <summary/>
-<section title="Using an attribute taglib">
+<s1 title="Using an attribute taglib">
 
 <example title="href.jsp">
-&lt;%@ taglib prefix="ct" uri="WEB-INF/tags.tld" %>
-Message: &lt;ct:href href="test.jsp">test link&lt;/ct:href>
+&lt;%@ taglib prefix="ct" uri="WEB-INF/tags.tld" %&gt;
+Message: &lt;ct:href href="test.jsp"&gt;test link&lt;/ct:href&gt;
 </example>
 <results>
-Message: &lt;a href="test.jsp;jsessionid=1234">test link&lt;/a>
+Message: &lt;a href="test.jsp;jsessionid=1234"&gt;test link&lt;/a&gt;
 </results>
 
-</section>
+</s1>
 
-<section title="Defining the tag">
+<s1 title="Defining the tag">
 
-<p>The href tag has a single attribute <var/href/>.  Corresponding to the
-attribute <var/href/>, the HrefTag class
-implements <var/getHref()/> and <var/setHref()/> methods.</p>
+<p>The href tag has a single attribute <var>href</var>.  Corresponding to the
+attribute <var>href</var>, the HrefTag class
+implements <var>getHref()</var> and <var>setHref()</var> methods.</p>
 
 <example title="HrefTag.java">
 package test;
@@ -63,7 +63,7 @@ public class HrefTag extends TagSupport  {
 
       out.print("&lt;a href=\"");
       out.print(response.encodeURL(href));
-      out.print("\">");
+      out.print("\"&gt;");
     } catch (IOException e) {
     }
     
@@ -73,7 +73,7 @@ public class HrefTag extends TagSupport  {
   public int doEndTag() throws JspException
   {
     try {
-      pageContext.getOut().print("&lt;/a>");
+      pageContext.getOut().print("&lt;/a&gt;");
     } catch (IOException e) {
     }
     
@@ -82,29 +82,29 @@ public class HrefTag extends TagSupport  {
 }
 </example>
 
-</section>
+</s1>
 
-<section title="Attribute Configuration">
+<s1 title="Attribute Configuration">
 
 <p>Each expected attribute needs an entry in the .tld.  In this case,
-<var/href/> is a required attribute, so the configuration needs to
-set <var/required/>.  By setting <var/required/>, the JSP parser can
+<var>href</var> is a required attribute, so the configuration needs to
+set <var>required</var>.  By setting <var>required</var>, the JSP parser can
 detect errors at parse-time, making it easier to develop JSP pages with
 the tag library.</p>
 
 <example title="WEB-INF/tag.tld">
-&lt;taglib>
-  &lt;tag>
-    &lt;name>href&lt;/name>
-    &lt;tagclass>test.HrefTag&lt;/tagclass>
-    &lt;attribute>
-      &lt;name>href&lt;/name>
-      &lt;required>true&lt;/required>
-    &lt;/attribute>
-  &lt;/tag>
-&lt;/taglib>
+&lt;taglib&gt;
+  &lt;tag&gt;
+    &lt;name&gt;href&lt;/name&gt;
+    &lt;tagclass&gt;test.HrefTag&lt;/tagclass&gt;
+    &lt;attribute&gt;
+      &lt;name&gt;href&lt;/name&gt;
+      &lt;required&gt;true&lt;/required&gt;
+    &lt;/attribute&gt;
+  &lt;/tag&gt;
+&lt;/taglib&gt;
 </example>
 
-</section>
+</s1>
   </body>
 </document>

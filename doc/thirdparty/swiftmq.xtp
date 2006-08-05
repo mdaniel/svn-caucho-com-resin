@@ -7,22 +7,22 @@
   <body>
     <summary/>
 
-<section title="SwiftMQ">
+<s1 title="SwiftMQ">
 
 <p>The <a href="http://www.swiftmq.com">SwiftMQ</a> client is configured
 by adding a <a href="config-index|jndi-link">jndi-link</a> to the web.xml
 or resin.conf.</p>
 
-<p>Resin needs the <var/swiftmq.jar/> from the SwiftMQ distribution in the
+<p>Resin needs the <var>swiftmq.jar</var> from the SwiftMQ distribution in the
 classpath, either in resin/lib/swiftmq.jar or in WEB-INF/lib.</p>
 
 <example title="web.xml">
-&lt;web-app>
-  &lt;jndi-link>
-    &lt;jndi-name>java:comp/env/jms&lt;/jndi-name>
-    &lt;jndi-factory>com.swiftmq.jndi.InitialContextFactoryImpl&lt;/jndi-factory>
-    &lt;init-param java.naming.provider.url="smqp://localhost:4001/timeout=10000"/>
-  &lt;/jndi-link>
+&lt;web-app&gt;
+  &lt;jndi-link&gt;
+    &lt;jndi-name&gt;java:comp/env/jms&lt;/jndi-name&gt;
+    &lt;jndi-factory&gt;com.swiftmq.jndi.InitialContextFactoryImpl&lt;/jndi-factory&gt;
+    &lt;init-param java.naming.provider.url="smqp://localhost:4001/timeout=10000"/&gt;
+  &lt;/jndi-link&gt;
 </example>
 
 <p>The SwiftMQ router will need to be started as a separate process.</p>
@@ -90,6 +90,6 @@ public class SendServlet extends HttpServlet {
 }
 </example>
 
-    </section>
+    </s1>
   </body>
 </document>

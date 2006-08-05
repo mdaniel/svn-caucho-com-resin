@@ -34,8 +34,8 @@ right bean in the first place requires a query language.</p>
 <p>Adding a find method has two steps:</p>
 <ol>
 <li>Add a find method to the home interface.
-<li>Add the EJB-QL query to the deployment descriptor.
-</ol>
+</li><li>Add the EJB-QL query to the deployment descriptor.
+</li></ol>
 
 <p>Resin-CMP uses the EJB-QL query language from the EJB 2.0 specification.
 EJB-QL resembles SQL with a few restrictions and extensions appropriate to
@@ -46,7 +46,7 @@ for relations and for method arguments.</p>
 courses are being taught and needs to find the course taught by a named
 teacher.</p>
 
-<section title="Database Schema">
+<s1 title="Database Schema">
 
 <p>The example uses the same database table as the previous basic example.</p>
 
@@ -59,18 +59,18 @@ CREATE TABLE find_courses (
 );
 </example>
 
-</section>
+</s1>
 
-<section title="EJB-QL">
+<s1 title="EJB-QL">
 
-<p>The <code/findAll/> and <code/findByInstructor/> methods use
+<p>The <code>findAll</code> and <code>findByInstructor</code> methods use
 the EJB Query Language (EJB-QL) to select a teacher from the
 database.  EJB-QL resembles a restricted SQL, but adds direct support
 for relations and function arguments.</p>
 
 <p>The findAll method finds all the courses in the database.  The
-schema name <var/courses/> is from the abstract-schema-name.  The field
-<var/courseId/> is the cmp-field name.  These names are not necessarily
+schema name <var>courses</var> is from the abstract-schema-name.  The field
+<var>courseId</var> is the cmp-field name.  These names are not necessarily
 the same as the SQL table and columns.  If the deployment changes the
 SQL table and columns, the EJB-QL still refers to the same abstract names.</p>
 
@@ -81,20 +81,20 @@ SELECT o FROM courses o
 <p>findByInstructor uses the method's argument to select the course
 by the instructor.  Since the instructor is an argument, it needs to
 be specified in the query.  The EJB-QL syntax for a function argument
-is <var/?n/>,
-where <var/n/> is the argument number, starting at 1.
+is <var>?n</var>,
+where <var>n</var> is the argument number, starting at 1.
 </p>
 
 <example>
 SELECT o FROM courses o WHERE o.instructor = ?1
 </example>
 
-</section>
-<section title="Client Servlet">
+</s1>
+<s1 title="Client Servlet">
 
-<p>The example servlet uses three finders: the usual <code/findByPrimaryKey/>,
-the collection-valued <code/findAll/>, and the
-single-argument <code/findByInstructor/>.  Find methods always return the
+<p>The example servlet uses three finders: the usual <code>findByPrimaryKey</code>,
+the collection-valued <code>findAll</code>, and the
+single-argument <code>findByInstructor</code>.  Find methods always return the
 local interface, either as a single value or a collection.  The pairing of
 the local object and its home interface matches the home interfaces's role
 as a factory pattern. (Remote home
@@ -103,7 +103,7 @@ remote interface.) If applications need to return other values,
 including other local beans, they need to use ejbSelect methods.
 </p>
 
-<p>The <code/findAll/> method returns all the courses in the database as a
+<p>The <code>findAll</code> method returns all the courses in the database as a
 collection.  The client code just iterates through the courses.</p>
 
 <example title="Finding all Courses">
@@ -116,7 +116,7 @@ while (iter.hasNext()) {
   Course course = (Course) iter.next();
 
   out.println(course.getCourseId() + " is taught by " +
-              course.getInstructor() + "&lt;br>");
+              course.getInstructor() + "&lt;br&gt;");
 }
 
 ...
@@ -127,11 +127,11 @@ Transfiguration is taught by Minerva McGonagall
 Defense Against the Dark Arts is taught by Remus Lupin
 </results>
 
-<p><code/findByInstructor/> returns the course taught by an
+<p><code>findByInstructor</code> returns the course taught by an
 instructor.  Single-valued finder methods expect to return exactly
-one bean.  If there are no matching courses, <code/findByInstructor/> throws
-an <code/ObjectNotFoundException/>.  If more than one courses are taught
-by the instructor, it will throw a <code/FinderException/>.</p>
+one bean.  If there are no matching courses, <code>findByInstructor</code> throws
+an <code>ObjectNotFoundException</code>.  If more than one courses are taught
+by the instructor, it will throw a <code>FinderException</code>.</p>
 
 <example title="Finding a Course by its Instructor">
 ...
@@ -139,7 +139,7 @@ by the instructor, it will throw a <code/FinderException/>.</p>
 Course course = home.findByInstructor(teacher);
 
 out.println(course.getCourseId() + " is taught by " +
-            course.getInstructor() + "&lt;br>");
+            course.getInstructor() + "&lt;br&gt;");
 
 ...
 </example>
@@ -147,12 +147,12 @@ out.println(course.getCourseId() + " is taught by " +
 Potions is taught by Severus Snape
 </results>
 
-</section>
+</s1>
 
-<section title="Entity Bean Classes">
+<s1 title="Entity Bean Classes">
 
-<p>The <code/CourseHome/> interface defines the <code/findAll/> and
-<code/findByInstructor/> methods.  As with <code/findByPrimaryKey/>, the
+<p>The <code>CourseHome</code> interface defines the <code>findAll</code> and
+<code>findByInstructor</code> methods.  As with <code>findByPrimaryKey</code>, the
 implementation bean does not implement the method.  Resin-CMP will
 generate that code automatically.</p>
 
@@ -213,6 +213,6 @@ abstract public class CourseBean
 }
 </example>
 
-</section>
+</s1>
   </body>
 </document>

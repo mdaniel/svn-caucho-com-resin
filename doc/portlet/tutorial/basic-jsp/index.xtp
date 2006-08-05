@@ -13,18 +13,18 @@
 <body>
 <summary/>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/classes/example/HelloWorldPortlet.java"/>
-    <td>Portlet
-<tr><td><viewfile-link file="hello.jsp"/>
-    <td>JSP that renders the view for HelloWorldPortlet
-<tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    <td>web-app configuration
-</deftable>
-</section>
+    </td><td>Portlet
+</td></tr><tr><td><viewfile-link file="hello.jsp"/>
+    </td><td>JSP that renders the view for HelloWorldPortlet
+</td></tr><tr><td><viewfile-link file="WEB-INF/web.xml"/>
+    </td><td>web-app configuration
+</td></tr></deftable>
+</s1>
 
-<section title="Dispatching to a JSP for the view">
+<s1 title="Dispatching to a JSP for the view">
 
 <p>
 JSP is often the most convenient way to construct the view for a portlet.  A
@@ -36,8 +36,7 @@ a servlet or a classic model-2 architecture like Struts.
 The <code>dispatch()</code> method of the HelloWorldPortlet use the Portlet API to dispatch to a view, and the <code>render()</code> method does the dispatch.
 </p>
 
-<example title="dispatch() and render()" 
-         file="WEB-INF/classes/example/HelloWorldPortlet.java">
+<example title="dispatch() and render()" file="WEB-INF/classes/example/HelloWorldPortlet.java">
   /**
    * Dispatch to a jsp or servlet.
    */
@@ -60,10 +59,10 @@ The <code>dispatch()</code> method of the HelloWorldPortlet use the Portlet API 
   }
 </example>
 
-</section>
+</s1>
 
 
-<section title="Functionality available in Portlet JSP's">
+<s1 title="Functionality available in Portlet JSP's">
 
 <p>
 The standard JSP functionality, including JSTL and EL are
@@ -83,8 +82,7 @@ of portlet specific tags.
 The most useful of the portlet tags are those that are provided for creating render and action urls.
 </p>
 
-<example title="portlet JSP taglibrary" 
-         file="hello.jsp">
+<example title="portlet JSP taglibrary" file="hello.jsp">
 
 &lt;%@ taglib uri="http://java.sun.com/portlet" prefix="portlet" %&gt;
 
@@ -98,13 +96,13 @@ The most useful of the portlet tags are those that are provided for creating ren
 
 </example>
 
-</section>
+</s1>
 
-<section title="Flexible configuration">
+<s1 title="Flexible configuration">
 
 <p>
 The HelloWorldPortlet is written so that it provides a default path for the jsp
-that can be overriden by an <var/init-param/>.  This is a flexible
+that can be overriden by an <var>init-param</var>.  This is a flexible
 architecture, if a different jsp page is desired for the view it can be
 specified without modifying the source code.
 </p>
@@ -121,7 +119,7 @@ specified without modifying the source code.
   &lt;/servlet&gt;
 </example>
 
-</section>
+</s1>
 
 
-</document>
+</body></document>

@@ -8,11 +8,11 @@
   <body>
     <summary/>
 
-    <section title="See Also">
+    <s1 title="See Also">
       <ul>
       <li>For the persistence implementation, see <a href="../amber">Amber</a>.
-      <li><a href="http://wiki.caucho.com/Amber">Amber wiki</a>
-      </ul>
-    </section>
+      </li><li><a href="http://wiki.caucho.com/Amber">Amber wiki</a>
+      </li></ul>
+    </s1>
   </body>
 </document>

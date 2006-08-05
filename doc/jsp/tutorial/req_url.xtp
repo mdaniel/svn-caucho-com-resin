@@ -1,83 +1,85 @@
-<section>
+<document>
   <header>
     <product>resin</product>
     <title>URLs</title>
     <type>example</type>
     <resin-2.0>$resin/java_tut/req_url.xtp</resin-2.0>
     <brief>
-      The <var/request/> object breaks down the request URL into
+      The <var>request</var> object breaks down the request URL into
       components.
     </brief>
     <description>
-      The <var/request/> object breaks down the request URL into
+      The <var>request</var> object breaks down the request URL into
       components.  Servlets and JSP pages can use those components to
       vary the response while using the same servlet or JSP page.
     </description>
   </header>
 
+<body>
+<s1>
 
 <p><pull.description/></p>
 
 <p>Some reasons you may need to look at the URL information:</p>
 <ul>
 <li>form submission
-<li>selecting sections of a manual
-<li>displaying different stories on a news site
-<li>displaying comments on a discussion group
-<li>sort preferences for the discussion site
-<li>search results
-</ul>
+</li><li>selecting sections of a manual
+</li><li>displaying different stories on a news site
+</li><li>displaying comments on a discussion group
+</li><li>sort preferences for the discussion site
+</li><li>search results
+</li></ul>
 
-<section title="RequestURI">
+<s2 title="RequestURI">
 
-<p><var/getRequestURI()/> returns the full path, excluding any query string.
+<p><var>getRequestURI()</var> returns the full path, excluding any query string.
 </p>
 
-</section>
+</s2>
 
-<section title="ServletPath">
+<s2 title="ServletPath">
 
-<p><var/getServletPath()/> returns the URI prefix that matches the
+<p><var>getServletPath()</var> returns the URI prefix that matches the
 servlet.  In the case of a JSP, it will return everything up to the
 *.jsp.</p>
 
 <p>The servlet path is useful for servlets like JSP, XTP, or SSI that
 read and transform files.</p>
 
-</section>
+</s2>
 
-<section title="PathInfo">
+<s2 title="PathInfo">
 
-<p><var/getPathInfo()/> returns everything after the ServletPath.</p>
+<p><var>getPathInfo()</var> returns everything after the ServletPath.</p>
 
 <p>A discussion board servlet could use PathInfo to select stories
 and comments.</p>
 
-</section>
+</s2>
 
-<section title="QueryString">
+<s2 title="QueryString">
 
-<p><var/getQueryString()/> returns the query string, everything after
+<p><var>getQueryString()</var> returns the query string, everything after
 the '?'</p>
 
 <p>Often, query strings are the result of form submissions but it's
 also useful for database-driven sites.  For example, you might encode
-"story 15, comment 7" of a discussion as <var//comment.xtp?story=15&comment=7/>.</p>
+"story 15, comment 7" of a discussion as <var>/comment.xtp?story=15&amp;comment=7</var>.</p>
 
-</section>
+</s2>
 
 <example>
 http://localhost:8080/test/env.jsp/tail?a=b
 </example>
 
-<example title='env.jsp'>
-&lt;table>
-&lt;tr>&lt;td>URI         &lt;td>&lt;%= request.getRequestURI() %>
-&lt;tr>&lt;td>ServletPath &lt;td>&lt;%= request.getServletPath() %>
-&lt;tr>&lt;td>PathInfo    &lt;td>&lt;%= request.getPathInfo() %>
-&lt;tr>&lt;td>QueryString &lt;td>&lt;%= request.getQueryString() %>
-&lt;tr>&lt;td>a           &lt;td>&lt;%= request.getParameter("a") %>
-&lt;/table>
+<example title="env.jsp">
+&lt;table&gt;
+&lt;tr&gt;&lt;td&gt;URI         &lt;td&gt;&lt;%= request.getRequestURI() %&gt;
+&lt;tr&gt;&lt;td&gt;ServletPath &lt;td&gt;&lt;%= request.getServletPath() %&gt;
+&lt;tr&gt;&lt;td&gt;PathInfo    &lt;td&gt;&lt;%= request.getPathInfo() %&gt;
+&lt;tr&gt;&lt;td&gt;QueryString &lt;td&gt;&lt;%= request.getQueryString() %&gt;
+&lt;tr&gt;&lt;td&gt;a           &lt;td&gt;&lt;%= request.getParameter("a") %&gt;
+&lt;/table&gt;
 </example>
 <results>
 URI          /test/env.jsp/tail
@@ -87,4 +89,6 @@ QueryString  a=b
 a            b
 </results>
 
-</section>
+</s1>
+</body>
+</document>

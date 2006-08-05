@@ -8,70 +8,70 @@
   <body>
     <summary/>
 
-<section name=counter title="Counter">
+<s1 name="counter" title="Counter">
 
 <p>XTP pages can use the counter just by adding the tag:</p>
 
-<example title='counter.xtp'>
+<example title="counter.xtp">
 <eg-em>A counter example: </eg-em>&lt;ct:counter id='test'/&gt;
 </example>
 
 <p>Here the patterns to do it.  For efficiency, we've added the 
-<code/cache/> directive.  The cache directive tells XTP to execute the
+<code>cache</code> directive.  The cache directive tells XTP to execute the
 stylesheet only once and cache the generated JSP file.
 
-<example title='default.xsl'>
+<example title="default.xsl">
 &lt;#@ cache #&gt;
 
 counter[@id] &lt;&lt;
 <eg-em>&lt;%=
-application.attribute["</eg-em><{@id}><eg-em>"]</eg-em>
+application.attribute["</eg-em>&lt;{@id}&gt;<eg-em>"]</eg-em>
 <eg-em>%&gt;</eg-em>
->>
+&gt;&gt;
 
 counter &lt;&lt;
-<eg-em>&lt;%= application.attribute.counter++ %></eg-em>
->>
+<eg-em>&lt;%= application.attribute.counter++ %&gt;</eg-em>
+&gt;&gt;
 
 </example>
 
-</section>
-<section name=flow title="JSP flow control">
+</p></s1>
+<s1 name="flow" title="JSP flow control">
 
 <ul>
 <li>ct:get prints the value of a variable
-<li>ct:if generates an if statement
-<li>ct:iter loops
-</ul>
+</li><li>ct:if generates an if statement
+</li><li>ct:iter loops
+</li></ul>
 
-<example title='definition of ct:get'>
+<example title="definition of ct:get">
 
 ct:get &lt;&lt;
-<eg-em>&lt;%=</eg-em> &lt;{@expr}><eg-em> %></eg-em>
->>
+<eg-em>&lt;%=</eg-em> &lt;{@expr}&gt;<eg-em> %&gt;</eg-em>
+&gt;&gt;
 </example>
 
-<example title='definition of ct:if'>
+<example title="definition of ct:if">
 ct:if &lt;&lt;
-<eg-em>&lt;% if (</eg-em>&lt;{@expr}><eg-em>) { %></eg-em>
-  &lt;xsl:apply-templates/>
-<eg-em>&lt;% } %></eg-em>
->>
+<eg-em>&lt;% if (</eg-em>&lt;{@expr}&gt;<eg-em>) { %&gt;</eg-em>
+  &lt;xsl:apply-templates/&gt;
+<eg-em>&lt;% } %&gt;</eg-em>
+&gt;&gt;
 </example>
 
-<example title='definition of ct:iter'>
+<example title="definition of ct:iter">
 ct:iter[@index] &lt;&lt;
-<eg-em>&lt;% for (var </eg-em>&lt{@index}> <eg-em>in</eg-em> &lt;{@expr}><eg-em>) { %></eg-em>
-  &lt;xsl:apply-templates/>
-<eg-em>&lt;% } %></eg-em>
->>
+<eg-em>&lt;% for (var </eg-em>&amp;lt{@index}&gt; <eg-em>in</eg-em> &lt;{@expr}&gt;<eg-em>) { %&gt;</eg-em>
+  &lt;xsl:apply-templates/&gt;
+<eg-em>&lt;% } %&gt;</eg-em>
+&gt;&gt;
 
 ct:iter &lt;&lt;
-<eg-em>&lt;% for (var i in </eg-em>&lt;{@expr}><eg-em>) { %></eg-em>
-  &lt;xsl:apply-templates/>
-<eg-em>&lt;% } %></eg-em>
->>
+<eg-em>&lt;% for (var i in </eg-em>&lt;{@expr}&gt;<eg-em>) { %&gt;</eg-em>
+  &lt;xsl:apply-templates/&gt;
+<eg-em>&lt;% } %&gt;</eg-em>
+&gt;&gt;
 </example>
 
-</section>  </body>
+</s1>  </body>
 </document>

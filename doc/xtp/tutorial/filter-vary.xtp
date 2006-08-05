@@ -14,9 +14,9 @@
         response before and after passing the request to the servlet.</p>
 
       <p>The filter itself just looks at the "style" parameter.  If it's
-        "plain", then the filter will set the <var/caucho.xsl.stylesheet/>
-        parameter to <var/plain.xsl/>.  XTP uses
-        <var/caucho.xsl.stylesheet/> when it transforms the page.</p>
+        "plain", then the filter will set the <var>caucho.xsl.stylesheet</var>
+        parameter to <var>plain.xsl</var>.  XTP uses
+        <var>caucho.xsl.stylesheet</var> when it transforms the page.</p>
     </description>
   </header>
 
@@ -62,10 +62,10 @@ public class VaryFilter implements Filter {
 </example>
 
 <example title="web.xml">
-&lt;web-app>
+&lt;web-app&gt;
   &lt;filter-mapping url-pattern='*.xtp'
-                  filter-name='test.VaryFilter'/>
-&lt;/web-app>
+                  filter-name='test.VaryFilter'/&gt;
+&lt;/web-app&gt;
 </example>
 
 <p>The sample Serif page has a small section and some content.  It's
@@ -74,13 +74,13 @@ will color the section header red.  The plain stylesheet leaves it as
 black.</p>
 
 <example title="test.xtp">
-&lt;title>A Sample Title&lt;/title>
+&lt;title&gt;A Sample Title&lt;/title&gt;
 
-&lt;s1 title="A Sample Section">
+&lt;s1 title="A Sample Section"&gt;
 
 Some content in the sample section.
 
-&lt;/s1>
+&lt;/s1&gt;
 </example>
 
 <p>Unknown tags are copied from the Serif page to the generated HTML
@@ -90,29 +90,29 @@ formats a section with an H3 header colored red.</p>
 
 <example title="default.xsl">
 &lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-                version="1.0">
+                version="1.0"&gt;
 
-  &lt;!-- make sure '&lt;' is not printed as '&amp;lt;' -->
-  &lt;xsl:output disable-output-escaping='true'/>
+  &lt;!-- make sure '&lt;' is not printed as '&amp;lt;' --&gt;
+  &lt;xsl:output disable-output-escaping='true'/&gt;
 
-  &lt;!-- copy input to output -->
-  &lt;xsl:template match='*|@*'>
-    &lt;xsl:copy>
-      &lt;xsl:apply-templates select='node()|@*'/>
-    &lt;/xsl:copy>
-  &lt;/xsl:template>
+  &lt;!-- copy input to output --&gt;
+  &lt;xsl:template match='*|@*'&gt;
+    &lt;xsl:copy&gt;
+      &lt;xsl:apply-templates select='node()|@*'/&gt;
+    &lt;/xsl:copy&gt;
+  &lt;/xsl:template&gt;
 
-  &lt;xsl:template match="body">
-    &lt;body bgcolor=white>
-      &lt;xsl:apply-templates/>
-    &lt;/body>
-  &lt;/xsl:template>
+  &lt;xsl:template match="body"&gt;
+    &lt;body bgcolor=white&gt;
+      &lt;xsl:apply-templates/&gt;
+    &lt;/body&gt;
+  &lt;/xsl:template&gt;
 
-  &lt;xsl:template match="s1">
-    &lt;h3>&lt;font color=red>&lt;xsl:value-of select="@title"/>&lt;/font>&lt;/h3>
-    &lt;xsl:apply-templates/>
-  &lt;/xsl:template>
-&lt;/xsl:stylesheet>
+  &lt;xsl:template match="s1"&gt;
+    &lt;h3&gt;&lt;font color=red&gt;&lt;xsl:value-of select="@title"/&gt;&lt;/font&gt;&lt;/h3&gt;
+    &lt;xsl:apply-templates/&gt;
+  &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;
 </example>
 
 <p>The plain stylesheet leaves the Serif page untouched except for
@@ -120,23 +120,23 @@ converting the section title to use plain H3.</p>
 
 <example title="plain.xsl">
 &lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-                version="1.0">
+                version="1.0"&gt;
 
-  &lt;!-- make sure '&lt;' is not printed as '&amp;lt;' -->
-  &lt;xsl:output disable-output-escaping='true'/>
+  &lt;!-- make sure '&lt;' is not printed as '&amp;lt;' --&gt;
+  &lt;xsl:output disable-output-escaping='true'/&gt;
 
-  &lt;!-- copy input to output -->
-  &lt;xsl:template match='*|@*'>
-    &lt;xsl:copy>
-      &lt;xsl:apply-templates select='node()|@*'/>
-    &lt;/xsl:copy>
-  &lt;/xsl:template>
+  &lt;!-- copy input to output --&gt;
+  &lt;xsl:template match='*|@*'&gt;
+    &lt;xsl:copy&gt;
+      &lt;xsl:apply-templates select='node()|@*'/&gt;
+    &lt;/xsl:copy&gt;
+  &lt;/xsl:template&gt;
 
-  &lt;xsl:template match="s1">
-    &lt;h3>&lt;xsl:value-of select="@title"/>&lt;/h3>
-    &lt;xsl:apply-templates/>
-  &lt;/xsl:template>
-&lt;/xsl:stylesheet>
+  &lt;xsl:template match="s1"&gt;
+    &lt;h3&gt;&lt;xsl:value-of select="@title"/&gt;&lt;/h3&gt;
+    &lt;xsl:apply-templates/&gt;
+  &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;
 </example>
   </body>
 </document>

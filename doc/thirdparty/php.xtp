@@ -14,43 +14,43 @@ how to configure Resin and PHP.
 <body>
 <summary/>
 
-<section title="Overview">
+<s1 title="Overview">
 
 <p>Resin works with PHP using the FastCGI protocol through the
 FastCGIServlet.  PHP runs as a separate process waiting for Resin requests.
 </p>
 
 <p>Configuring Resin with PHP requires the following:
-<ul>
+</p><ul>
 <li>Configure Resin's FastCGIServlet to dispatch php requests.
-<li>Configure/build PHP to enable FastCGI
-<li>Start PHP as a separate process to listen for Resin's requests.
-</ul>
+</li><li>Configure/build PHP to enable FastCGI
+</li><li>Start PHP as a separate process to listen for Resin's requests.
+</li></ul>
 
-</section>
+</s1>
 
-<section title="Configuring FastCGIServlet">
+<s1 title="Configuring FastCGIServlet">
 
 <p>The FastCGI servlet requires a single parameter: "server-address"
 which specifies the FastCGI host and port for PHP.  This address
 must match the port PHP is listening to.</p>
 
 <example title="web.xml">
-&lt;web-xml>
+&lt;web-xml&gt;
   &lt;servlet servlet-name="php"
-           servlet-class="com.caucho.servlets.FastCGIServlet">
-    &lt;init>
-      &lt;server-address>localhost:8002&lt;/server-address>
-    &lt;/init>
-  &lt;/servlet>
+           servlet-class="com.caucho.servlets.FastCGIServlet"&gt;
+    &lt;init&gt;
+      &lt;server-address&gt;localhost:8002&lt;/server-address&gt;
+    &lt;/init&gt;
+  &lt;/servlet&gt;
 
-  &lt;servlet-mapping url-pattern="*.php" servlet-name="php"/>
-&lt;/web-xml>
+  &lt;servlet-mapping url-pattern="*.php" servlet-name="php"/&gt;
+&lt;/web-xml&gt;
 </example>
 
-</section>
+</s1>
 
-<section title="Configure/build PHP for FastCGI">
+<s1 title="Configure/build PHP for FastCGI">
 
 <p>PHP must be compiled with FastCGI support.  To check whether your
 PHP has FastCGI, use "php -v".  If you see "(cgi-fcgi)", then
@@ -58,63 +58,63 @@ your PHP already has FastCGI built in.  If you only see "(cgi)", you'll
 need to rebuild PHP.</p>
 
 <example>
-resin> php -v
+resin&gt; php -v
 PHP 4.3.6 (cgi-fcgi) (built: May  5 2004 12:10:24) (DEBUG)
 Copyright (c) 1997-2004 The PHP Group
 Zend Engine v1.3.0, Copyright (c) 1998-2004 Zend Technologies
 </example>
 
-<section title="Compiling PHP with FastCGI">
+<s2 title="Compiling PHP with FastCGI">
 
 <p>To compile PHP with FastCGI, you'll add the --enable-fastcgi argument
 to the PHP ./configure script.</p>
 
 <example>
-php> ./configure --enable-fastcgi
+php&gt; ./configure --enable-fastcgi
 ...
-php> make
-php> make install
-php> php -v
+php&gt; make
+php&gt; make install
+php&gt; php -v
 PHP 4.3.6 (cgi-fcgi) (built: May  5 2004 12:10:24) (DEBUG)
 Copyright (c) 1997-2004 The PHP Group
 Zend Engine v1.3.0, Copyright (c) 1998-2004 Zend Technologies
 </example>
 
-</section>
-</section>
+</s2>
+</s1>
 
-<section title="Starting PHP with FastCGI">
+<s1 title="Starting PHP with FastCGI">
 
 <p>To start PHP listening for FastCGI requests, add a "-b 8002" argument.</p>
 
 <example>
-php> php -b 8002
+php&gt; php -b 8002
 </example>
 
 <p>PHP will start, listening for the next request.</p>
 
-</section>
+</s1>
 
-<section title="A Test Page">
+<s1 title="A Test Page">
 
 <p>Now, add a test.php to your document tree, and browse the location.
 You should see the result of the PHP page.</p>
 
 <example title="test.php">
-Hello: &lt;?= 1 + 1 ?>
+Hello: &lt;?= 1 + 1 ?&gt;
 </example>
 
 <p>If you have trouble, enable Resin's logging to see what's going on.</p>
 
 <example>
-&lt;web-app>
-  &lt;log name="com.caucho.servlets.FastCGIServlet" level="finer"/>
+&lt;web-app&gt;
+  &lt;log name="com.caucho.servlets.FastCGIServlet" level="finer"/&gt;
 
   ...
-&lt;/web-app>
+&lt;/web-app&gt;
 </example>
 
-</section>
+</s1>
 
 </body>
 </document>
