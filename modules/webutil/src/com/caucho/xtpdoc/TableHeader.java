@@ -40,6 +40,11 @@ import javax.xml.stream.XMLStreamException;
 public class TableHeader extends FormattedTextWithAnchors implements TableCell {
   private String _width;
 
+  public TableHeader(Document document)
+  {
+    super(document);
+  }
+
   public void setWidth(String width)
   {
     _width = width;

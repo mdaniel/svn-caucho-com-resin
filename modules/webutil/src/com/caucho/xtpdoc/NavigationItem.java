@@ -52,11 +52,17 @@ public class NavigationItem {
   private String _link;
   private String _title;
   private String _product;
+  private Document _document;
   private ContentItem _description;
   private boolean _atocDescend = false;
   private Navigation _child;
   private ArrayList<NavigationItem> _items = new ArrayList<NavigationItem>();
   private Path _rootPath;
+
+  public NavigationItem(Document document)
+  {
+    _document = document;
+  }
 
   void setMaxDepth(int maxDepth)
   {
@@ -76,47 +82,13 @@ public class NavigationItem {
 
   void setRootPath(Path rootPath)
   {
-    if (_depth > _maxDepth)
-      return;
-
     _rootPath = rootPath;
+  }
 
-    Path linkPath = rootPath.lookup(_link);
-
-    if (linkPath.exists()) {
-      Config config = new Config();
-
-      Document document = new Document();
-
-      try {
-        config.configure(document, linkPath);
-
-        _description = document.getHeader().getDescription();
-      } catch (Exception e) {
-      }
-
-      if (_atocDescend) {
-        Path linkRoot = linkPath.getParent();
-        Path subToc = linkPath.getParent().lookup("toc.xml");
-
-        if (subToc.exists()) {
-          _child = new Navigation(linkRoot, _depth + 1);
-
-          try {
-            config.configure(_child, subToc);
-          } catch (Exception e) {
-            log.info("Failed to configure " + subToc);
-
-            _child = null;
-          }
-        } else {
-          log.info(subToc + " does not exist!");
-        }
-      }
-    }
-
-    for (NavigationItem item : _items)
-      item.setRootPath(rootPath);
+  public ContentItem createDescription()
+  {
+    _description = new FormattedText(_document);
+    return _description;
   }
 
   public void setCond(String cond)
@@ -132,6 +104,44 @@ public class NavigationItem {
   public void setLink(String link)
   {
     _link = link;
+
+    if (_depth > _maxDepth)
+      return;
+
+    Path linkPath = _rootPath.lookup(_link);
+
+    if (linkPath.exists()) {
+      Config config = new Config();
+
+      Document document = new Document(linkPath, _document.getContextPath());
+
+      try {
+        config.configure(document, linkPath);
+
+        _description = document.getHeader().getDescription();
+      } catch (Exception e) {
+        log.info("error configuring " + linkPath + ": " + e);
+      }
+
+      if (_atocDescend) {
+        Path linkRoot = linkPath.getParent();
+        Path subToc = linkPath.getParent().lookup("toc.xml");
+
+        if (subToc.exists()) {
+          _child = new Navigation(document, _depth + 1);
+
+          try {
+            config.configure(_child, subToc);
+          } catch (Exception e) {
+            log.info("Failed to configure " + subToc + ": " + e);
+
+            _child = null;
+          }
+        } else {
+          log.info(subToc + " does not exist!");
+        }
+      }
+    }
   }
 
   public void setTitle(String title)
@@ -144,9 +154,15 @@ public class NavigationItem {
     _product = product;
   }
 
-  public void addItem(NavigationItem item)
+  public NavigationItem createItem()
   {
+    NavigationItem item = new NavigationItem(_document);
+
     _items.add(item);
+
+    item.setRootPath(_rootPath);
+
+    return item;
   }
 
   public void writeHtml(XMLStreamWriter out)

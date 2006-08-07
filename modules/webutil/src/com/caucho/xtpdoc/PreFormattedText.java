@@ -40,6 +40,11 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
 public class PreFormattedText extends FormattedText {
+  public PreFormattedText(Document document)
+  {
+    super(document);
+  }
+
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {

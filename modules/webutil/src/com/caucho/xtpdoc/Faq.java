@@ -38,9 +38,15 @@ import javax.xml.stream.XMLStreamException;
 public class Faq extends Section {
   private FormattedTextWithAnchors _description;
 
-  public void setDescription(FormattedTextWithAnchors description)
+  public Faq(Document document)
   {
-    _description = description;
+    super(document);
+  }
+
+  public FormattedTextWithAnchors createDescription()
+  {
+    _description = new FormattedTextWithAnchors(_document);
+    return _description;
   }
 
   public void writeHtml(XMLStreamWriter out)

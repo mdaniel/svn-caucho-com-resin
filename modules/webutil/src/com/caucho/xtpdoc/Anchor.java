@@ -42,30 +42,12 @@ import javax.xml.stream.XMLStreamException;
 public class Anchor extends FormattedText {
   private static final Logger log = Logger.getLogger(Anchor.class.getName());
 
-  private String _documentName;
   private String _configTag;
   private String _href = "";
 
-  private String getDocumentName()
+  public Anchor(Document document)
   {
-    if (_documentName != null)
-      return _documentName;
-
-    Object o = getParent();
-
-    while (o != null) {
-      if (o instanceof Section) {
-        _documentName = ((Section) o).getDocumentPath().getUserPath();
-
-        return _documentName;
-      } else if (o instanceof ObjectWithParent) {
-        o = ((ObjectWithParent) o).getParent();
-      } else {
-        break;
-      }
-    }
-
-    return _documentName;
+    super(document);
   }
 
   public void setConfigTag(String configTag)
@@ -104,7 +86,10 @@ public class Anchor extends FormattedText {
     if (_href == null) {
       super.writeLaTeX(out);
     } else if (_href.startsWith("doc|")) {
-      out.print("\\hyperlink{" + _href.substring(4).replace("|", "/") + "}{");
+      String link = _href.substring("doc|".length()).replace("|", "/");
+      link = link.replace("#", ":");
+
+      out.print("\\hyperlink{" + link + "}{");
 
       super.writeLaTeX(out);
 
@@ -136,7 +121,8 @@ public class Anchor extends FormattedText {
           return;
         } else if (uri.getFragment() != null && 
                    uri.getFragment().length() != 0) {
-          String documentName = getDocumentName();
+          // XXX
+          String documentName = getDocument().getDocumentPath().getTail();
 
           if (documentName != null) {
             out.print("\\hyperlink{" + documentName + ":" + uri.getFragment());

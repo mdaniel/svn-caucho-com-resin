@@ -37,6 +37,12 @@ import javax.xml.stream.XMLStreamException;
 
 public class ViewFileLink implements ContentItem {
   private String _file;
+  private Document _document;
+
+  public ViewFileLink(Document document)
+  {
+    _document = document;
+  }
 
   public void setFile(String file)
   {

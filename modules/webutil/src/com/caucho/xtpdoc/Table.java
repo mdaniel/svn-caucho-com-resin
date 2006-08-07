@@ -41,20 +41,26 @@ public class Table extends Node implements ContentItem {
   private static int _count = 0;
 
   private int _myCount = _count++;
+  private Document _document;
   protected String _title;
   protected int _columns = 0;
   protected ArrayList<TableRow> _rows = new ArrayList<TableRow>();
+
+  public Table(Document document)
+  {
+    _document = document;
+  }
 
   public void setTitle(String title)
   {
     _title = title;
   }
 
-  public void addTR(TableRow row)
+  public TableRow createTr()
   {
-    _columns = Math.max(_columns, row.getNumberOfColumns());
-
+    TableRow row = new TableRow(_document);
     _rows.add(row);
+    return row;
   }
 
   public void writeHtml(XMLStreamWriter out)
@@ -78,6 +84,9 @@ public class Table extends Node implements ContentItem {
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
+    for (TableRow row : _rows)
+      _columns = Math.max(_columns, row.getNumberOfColumns());
+
     out.println("\\begin{filecontents}{ltx" + _myCount + ".tex}");
     out.print("\\begin{longtable}");
 

@@ -30,8 +30,13 @@
 package com.caucho.xtpdoc;
 
 public class VerboseFormattedText extends FormattedText {
+  public VerboseFormattedText(Document document)
+  {
+    super(document);
+  }
+
   public void addText(String text)
   {
-    addItem(new VerboseText(text));
+    addItem(new VerboseText(text, getDocument()));
   }
 }

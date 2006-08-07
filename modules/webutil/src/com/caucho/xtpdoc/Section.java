@@ -34,54 +34,26 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
-import com.caucho.vfs.Path;
-
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
-public abstract class Section implements ContentItem, ObjectWithParent {
-  private Object _parent;
-  protected Path _documentPath;
+public abstract class Section implements ContentItem {
+  protected Document _document;
   protected String _name;
   protected String _title;
   protected String _version;
-  protected boolean _topLevel = true;
+  protected String _type;
 
   protected ArrayList<ContentItem> _contentItems = new ArrayList<ContentItem>();
 
-  void setDocumentPath(Path documentPath)
+  public Section(Document document)
   {
-    _documentPath = documentPath;
-
-    for (ContentItem item : _contentItems) {
-      if (item instanceof Section)
-        ((Section) item).setDocumentPath(documentPath);
-    }
+    _document = document;
   }
 
-  Path getDocumentPath()
+  public Document getDocument()
   {
-    return _documentPath;
-  }
-
-  void setTopLevel(boolean topLevel)
-  {
-    _topLevel = topLevel;
-
-    for (ContentItem item : _contentItems) {
-      if (item instanceof Section)
-        ((Section) item).setTopLevel(_topLevel);
-    }
-  }
-
-  public void setParent(Object parent)
-  {
-    _parent = parent;
-  }
-
-  public Object getParent()
-  {
-    return _parent;
+    return _document;
   }
 
   // 
@@ -106,6 +78,11 @@ public abstract class Section implements ContentItem, ObjectWithParent {
     _name = name;
   }
 
+  public void setType(String type)
+  {
+    _type = type;
+  }
+
   //
   // XXX: End stubbed
   //
@@ -115,89 +92,123 @@ public abstract class Section implements ContentItem, ObjectWithParent {
     _title = title;
   }
 
-  public void addP(Paragraph paragraph)
+  public Paragraph createP()
   {
+    Paragraph paragraph = new Paragraph(_document);
     _contentItems.add(paragraph);
+    return paragraph;
   }
 
-  public void addPre(PreFormattedText pretext)
+  public PreFormattedText createPre()
   {
+    PreFormattedText pretext = new PreFormattedText(_document);
     _contentItems.add(pretext);
+    return pretext;
   }
 
-  public void addOL(OrderedList orderedList)
+  public OrderedList createOl()
   {
+    OrderedList orderedList = new OrderedList(_document);
     _contentItems.add(orderedList);
+    return orderedList;
   }
 
-  public void addUL(UnorderedList unorderedList)
+  public UnorderedList createUl()
   {
+    UnorderedList unorderedList = new UnorderedList(_document);
     _contentItems.add(unorderedList);
+    return unorderedList;
   }
 
-  public void addFigure(Figure figure)
+  public Figure createFigure()
   {
+    Figure figure = new Figure(_document);
     _contentItems.add(figure);
+    return figure;
   }
 
-  public void addExample(Example example)
+  public Example createExample()
   {
+    Example example = new Example(_document);
     _contentItems.add(example);
+    return example;
   }
 
-  public void addTable(Table table)
+  public Table createTable()
   {
+    Table table = new Table(_document);
     _contentItems.add(table);
+    return table;
   }
 
-  public void addDefTable(DefinitionTable definitionTable)
+  public DefinitionTable createDeftable()
   {
+    DefinitionTable definitionTable = new DefinitionTable(_document);
     _contentItems.add(definitionTable);
+    return definitionTable;
   }
 
-  public void addDefTableChildTags(DefinitionTable definitionTable)
+  public DefinitionTable createDeftableChildtags()
   {
+    DefinitionTable definitionTable = new DefinitionTable(_document);
     _contentItems.add(definitionTable);
+    return definitionTable;
   }
 
-  public void addDefTableParameters(DefinitionTable definitionTable)
+  public DefinitionTable createDeftableParameters()
   {
+    DefinitionTable definitionTable = new DefinitionTable(_document);
     _contentItems.add(definitionTable);
+    return definitionTable;
   }
 
-  public void addResults(Example results)
+  public Example createResults()
   {
+    Example results = new Example(_document);
     _contentItems.add(results);
+    return results;
   }
 
-  public void addDef(Def def)
+  public Def createDef()
   {
+    Def def = new Def(_document);
     _contentItems.add(def);
+    return def;
   }
 
-  public void addNote(FormattedTextWithAnchors note)
+  public FormattedTextWithAnchors createNote()
   {
+    FormattedTextWithAnchors note = new FormattedTextWithAnchors(_document);
     _contentItems.add(new NamedText("Note", note));
+    return note;
   }
 
-  public void addWarn(FormattedTextWithAnchors warning)
+  public FormattedTextWithAnchors createWarn()
   {
+    FormattedTextWithAnchors warning = new FormattedTextWithAnchors(_document);
     _contentItems.add(new NamedText("Warning", warning));
+    return warning;
   }
 
-  public void addParents(FormattedText parents)
+  public FormattedText createParents()
   {
+    FormattedText parents = new FormattedText(_document);
     _contentItems.add(new NamedText("child of", parents));
+    return parents;
   }
  
-  public void addDefault(FormattedText def)
+  public FormattedText createDefault()
   {
+    FormattedText def = new FormattedText(_document);
     _contentItems.add(new NamedText("default", def));
+    return def;
   }
 
-  public void addGlossary(Glossary glossary)
+  public Glossary createGlossary()
   {
+    Glossary glossary = new Glossary(_document);
     _contentItems.add(glossary);
+    return glossary;
   }
  
   public void writeHtml(XMLStreamWriter out)
@@ -207,11 +218,18 @@ public abstract class Section implements ContentItem, ObjectWithParent {
       item.writeHtml(out);
   }
 
+  public void writeLaTeXTop(PrintWriter out)
+    throws IOException
+  {
+    writeLaTeX(out);
+  }
+
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    String label = 
-      (_documentPath.getUserPath() + ":" + _title).replace(" ", "-");
+    String label = _document.getDocumentPath().getUserPath() + ":" + _title;
+
+    label = label.replace(" ", "-");
 
     out.println("\\label{" + label + "}");
     out.println("\\hypertarget{" + label + "}{}");

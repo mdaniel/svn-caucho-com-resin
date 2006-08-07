@@ -36,6 +36,11 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
 public class Variable extends FormattedText {
+  public Variable(Document document)
+  {
+    super(document);
+  }
+
   public void setType(String type)
   {
   }

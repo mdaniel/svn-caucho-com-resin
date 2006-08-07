@@ -34,75 +34,22 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
-import java.util.logging.Logger;
-
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
-import com.caucho.vfs.Path;
+public class Keywords {
+  private StringBuilder _keywords = new StringBuilder();
 
-import com.caucho.config.Config;
-
-public class NavigationTopLevelItem {
-  private static final Logger log 
-    = Logger.getLogger(NavigationTopLevelItem.class.getName());
-
-  private int _depth;
-  private Path _rootPath;
-  private String _link;
-  private String _title;
-  private ArrayList<NavigationItem> _items = new ArrayList<NavigationItem>();
-
-  void setDepth(int depth)
+  public void addKeyword(String keyword)
   {
-    _depth = depth;
+    if (_keywords.length() > 0)
+      _keywords.append(",");
 
-    for (NavigationItem item : _items)
-      item.setDepth(_depth);
+    _keywords.append(keyword);
   }
 
-  void setRootPath(Path rootPath)
+  public String toString()
   {
-    _rootPath = rootPath;
-
-    for (NavigationItem item : _items)
-      item.setRootPath(_rootPath);
-  }
-
-  public String getLink()
-  {
-    return _link;
-  }
-
-  public void setLink(String link)
-  {
-    _link = link;
-  }
-
-  public void setTitle(String title)
-  {
-    _title = title;
-  }
-
-  public void addItem(NavigationItem item)
-  {
-    _items.add(item);
-  }
-
-  public void setCond(String cond)
-  {
-    // XXX
-  }
-
-  public void writeHtml(XMLStreamWriter out)
-    throws XMLStreamException
-  {
-    for (NavigationItem item : _items)
-      item.writeHtml(out);
-  }
-
-  public void writeLaTeX(PrintWriter out)
-    throws IOException
-  {
+    return _keywords.toString();
   }
 }

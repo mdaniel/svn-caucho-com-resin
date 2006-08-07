@@ -36,27 +36,17 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
 public class Header {
+  private Document _document;
   private String _product;
   private String _version;
   private String _title;
-  private String _documentName;
   private Section _description;
   private String _contextPath;
-  private boolean _topLevel = true;
+  private Keywords _keywords;
 
-  void setTopLevel(boolean topLevel)
+  public Header(Document document)
   {
-    _topLevel = topLevel;
-  }
-
-  void setContextPath(String contextPath)
-  {
-    _contextPath = contextPath;
-  }
-
-  void setDocumentName(String documentName)
-  {
-    _documentName = documentName;
+    _document = document;
   }
 
   public void setProduct(String product)
@@ -86,14 +76,24 @@ public class Header {
   {
   }
 
+  public void setLevel(String level)
+  {
+  }
+
+  public void setKeywords(Keywords keywords)
+  {
+    _keywords = keywords;
+  }
+
   public ContentItem getDescription()
   {
     return _description;
   }
 
-  public void setDescription(S1 description)
+  public Section createDescription()
   {
-    _description = description;
+    _description = new S1(_document);
+    return _description;
   }
 
   public void writeHtml(XMLStreamWriter out)
@@ -117,6 +117,12 @@ public class Header {
       out.writeAttribute("content", _version);
     }
 
+    if (_keywords != null) {
+      out.writeEmptyElement("meta");
+      out.writeAttribute("name", "keywords");
+      out.writeAttribute("content", _keywords.toString());
+    }
+
     out.writeEmptyElement("link");
     out.writeAttribute("rel", "STYLESHEET");
     out.writeAttribute("type", "text/css");
@@ -129,29 +135,31 @@ public class Header {
     out.writeEndElement(); // head
   }
 
+  public void writeLaTeXTop(PrintWriter out)
+    throws IOException
+  {
+    out.println("\\usepackage[margin=1in]{geometry}");
+    out.println("\\usepackage{url}");
+    out.println("\\usepackage{hyperref}");
+    out.println("\\usepackage{graphicx}");
+    out.println("\\usepackage{color}");
+    out.println("\\usepackage{colortbl}");
+    out.println("\\usepackage{fancyvrb}");
+    out.println("\\usepackage{listings}");
+    out.println();
+    out.println("\\definecolor{example-gray}{gray}{0.8}");
+    out.println("\\definecolor{results-gray}{gray}{0.6}");
+    out.println();
+    out.println("\\title{" + _title + "}");
+    //XXX: product & version
+  }
+
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    if (_topLevel) {
-      out.println("\\usepackage[margin=1in]{geometry}");
-      out.println("\\usepackage{url}");
-      out.println("\\usepackage{hyperref}");
-      out.println("\\usepackage{graphicx}");
-      out.println("\\usepackage{color}");
-      out.println("\\usepackage{colortbl}");
-      out.println("\\usepackage{fancyvrb}");
-      out.println("\\usepackage{listings}");
-      out.println();
-      out.println("\\definecolor{example-gray}{gray}{0.8}");
-      out.println("\\definecolor{results-gray}{gray}{0.6}");
-      out.println();
-      out.println("\\title{" + _title + "}");
-      //XXX: product & version
-    } else {
-      out.println("\\section{" + _title + "}");
+    out.println("\\section{" + _title + "}");
 
-      out.println("\\label{" + _documentName + "}");
-      out.println("\\hypertarget{" + _documentName + "}{}");
-    }
+    out.println("\\label{" + _document.getName() + "}");
+    out.println("\\hypertarget{" + _document.getName() + "}{}");
   }
 }

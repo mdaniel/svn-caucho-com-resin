@@ -38,6 +38,17 @@ public class Figure implements ContentItem {
   private int _height = -1;
   private int _width = -1;
   private String _source;
+  private Document _document;
+
+  public Figure(Document document)
+  {
+    _document = document;
+  }
+
+  public Document getDocument()
+  {
+    return _document;
+  }
 
   public void setHeight(int height)
   {
@@ -77,7 +88,12 @@ public class Figure implements ContentItem {
 
     String basename = _source.substring(0, dot);
 
-    out.println("\\epsfig{file=images/" + basename + ",width=\\linewidth}");
+    out.println();
+    out.println();
+    out.println("\\noindent");
+    out.println("\\epsfig{file=../images/" + basename + ",width=\\linewidth}");
+    out.println();
+    out.println();
 
     /*
     if (_height >= 0)

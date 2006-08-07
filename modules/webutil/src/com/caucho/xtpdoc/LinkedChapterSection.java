@@ -54,7 +54,7 @@ public class LinkedChapterSection extends ChapterSection {
     throws IOException
   {
     Path xtpFile = Vfs.lookup(_link);
-    Document document = new Document(xtpFile, null, false);
+    Document document = new Document(xtpFile, null);
 
     try {
       org.w3c.dom.Node node = LooseToStrictHtml.looseToStrictHtml(xtpFile);
@@ -65,7 +65,11 @@ public class LinkedChapterSection extends ChapterSection {
     } catch (Exception e) {
       System.err.println("Error configuring document (" + xtpFile + "): " + e);
 
-      e.getCause().printStackTrace();
+      if (e.getCause() != null)
+        e.getCause().printStackTrace();
+      else 
+        e.printStackTrace();
+
       return;
     }
 

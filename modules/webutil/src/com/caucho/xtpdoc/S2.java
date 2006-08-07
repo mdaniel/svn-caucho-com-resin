@@ -35,19 +35,30 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class S2 extends Section {
-  public void addS3(S3 section)
+  public S2(Document document)
   {
-    _contentItems.add(section);
+    super(document);
+  }
+
+  public S3 createS3()
+  {
+    S3 s3 = new S3(getDocument());
+    _contentItems.add(s3);
+    return s3;
+  }
+
+  public void writeLaTeXTop(PrintWriter out)
+    throws IOException
+  {
+    out.println("\\subsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+
+    super.writeLaTeX(out);
   }
 
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    if (_topLevel)
-      out.println("\\subsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
-    else
-      out.println("\\subsubsection{" + LaTeXUtil.escapeForLaTeX(_title) + 
-                                    "}");
+    out.println("\\subsubsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
 
     super.writeLaTeX(out);
   }

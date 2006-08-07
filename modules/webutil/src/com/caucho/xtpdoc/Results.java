@@ -39,6 +39,11 @@ public class Results extends FormattedTextWithAnchors {
   private String _title;
   private String _language = null;
 
+  public Results(Document document)
+  {
+    super(document);
+  }
+
   public void setTitle(String title)
   {
     _title = title;

@@ -37,23 +37,20 @@ import java.util.ArrayList;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
-public class OrderedList implements ContentItem, ObjectWithParent {
-  private Object _parent;
+public class OrderedList implements ContentItem {
+  private Document _document;
   private ArrayList<ListItem> _listItems = new ArrayList<ListItem>();
 
-  public void setParent(Object parent)
+  public OrderedList(Document document)
   {
-    _parent = parent;
+    document = _document;
   }
 
-  public Object getParent()
+  public ListItem createLi()
   {
-    return _parent;
-  }
-
-  public void addLI(ListItem item)
-  {
+    ListItem item = new ListItem(_document);
     _listItems.add(item);
+    return item;
   }
 
   public void writeHtml(XMLStreamWriter out)

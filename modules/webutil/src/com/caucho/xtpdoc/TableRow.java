@@ -38,21 +38,31 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
 public class TableRow {
+  private Document _document;
   private ArrayList<TableCell> _cells = new ArrayList<TableCell>();
+
+  public TableRow(Document document)
+  {
+    _document = document;
+  }
 
   public int getNumberOfColumns()
   {
     return _cells.size();
   }
 
-  public void addTD(TableData data)
+  public TableData createTd()
   {
+    TableData data = new TableData(_document);
     _cells.add(data);
+    return data;
   }
 
-  public void addTH(TableHeader header)
+  public TableHeader createTh()
   {
+    TableHeader header = new TableHeader(_document);
     _cells.add(header);
+    return header;
   }
 
   public void setOccur(String occur)

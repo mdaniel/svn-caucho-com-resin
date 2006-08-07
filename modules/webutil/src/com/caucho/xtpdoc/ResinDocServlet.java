@@ -32,6 +32,8 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
+import java.util.logging.Logger;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
@@ -55,6 +57,8 @@ import com.caucho.vfs.WriterStreamImpl;
 import com.caucho.xml.stream.XMLStreamWriterImpl;
 
 public class ResinDocServlet extends HttpServlet {
+  private static Logger log = Logger.getLogger(ResinDocServlet.class.getName());
+
   private Config _config;
   private Path _pwd;
   private XMLOutputFactory _outputFactory;

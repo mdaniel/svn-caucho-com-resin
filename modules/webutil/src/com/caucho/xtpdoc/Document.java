@@ -32,34 +32,41 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
+import java.util.logging.Logger;
+
 import com.caucho.vfs.Path;
 
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
 public class Document {
+  private static Logger log = Logger.getLogger(ResinDocServlet.class.getName());
+
   private Header _header;
   private Body _body;
   private Path _documentPath;
   private String _contextPath;
-  private boolean _topLevel = true;
   private int _level;
 
   Document()
   {
-    this(null, null, false);
+    this(null, null);
   }
 
   public Document(Path documentPath, String contextPath)
   {
-    this(documentPath, contextPath, true);
-  }
-
-  public Document(Path documentPath, String contextPath, boolean topLevel)
-  {
     _documentPath = documentPath;
     _contextPath = contextPath;
-    _topLevel = topLevel;
+  }
+
+  public Path getDocumentPath()
+  {
+    return _documentPath;
+  }
+
+  public String getContextPath()
+  {
+    return _contextPath;
   }
 
   public Header getHeader()
@@ -67,21 +74,22 @@ public class Document {
     return _header;
   }
 
-  public void setHeader(Header header)
+  public String getName()
   {
-    _header = header;
-
-    _header.setContextPath(_contextPath);
-    _header.setTopLevel(_topLevel);
-    if (_documentPath != null)
-      _header.setDocumentName(_documentPath.getTail());
+    // XXX
+    return "";
   }
 
-  public void setBody(Body body)
+  public Header createHeader()
   {
-    _body = body;
+    _header = new Header(this);
+    return _header;
+  }
 
-    _body.setDocumentPath(_documentPath, _topLevel);
+  public Body createBody()
+  {
+    _body = new Body(this);
+    return _body;
   }
 
   public void writeHtml(XMLStreamWriter out)
@@ -96,12 +104,18 @@ public class Document {
     out.writeEndElement();
   }
 
+  public void writeLaTeXTop(PrintWriter out)
+    throws IOException
+  {
+    out.println("\\documentclass{article}");
+
+    _header.writeLaTeXTop(out);
+    _body.writeLaTeXTop(out);
+  }
+
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    if (_topLevel)
-      out.println("\\documentclass{article}");
-
     _header.writeLaTeX(out);
     _body.writeLaTeX(out);
   }

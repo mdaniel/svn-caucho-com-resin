@@ -31,18 +31,25 @@ package com.caucho.xtpdoc;
 
 import java.io.PrintWriter;
 import java.io.IOException;
+import java.io.StringReader;
+import java.io.LineNumberReader;
 
 import java.util.ArrayList;
+
+import java.util.logging.Logger;
 
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
 public class VerboseText implements ContentItem {
+  private Logger log = Logger.getLogger(VerboseText.class.getName());
   private String _text;
+  private Document _document;
 
-  public VerboseText(String text)
+  public VerboseText(String text, Document document)
   {
     _text = text;
+    _document = document;
   }
 
   public void writeHtml(XMLStreamWriter out)
@@ -54,6 +61,19 @@ public class VerboseText implements ContentItem {
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
+    StringReader stringReader = new StringReader(_text);
+    LineNumberReader lineReader = new LineNumberReader(stringReader);
+
+    for (String line = lineReader.readLine(); 
+         line != null; 
+         line = lineReader.readLine()) {
+      if (line.length() > 70) {
+        log.warning("lines longer than 70 characters will not work in LaTeX");
+        log.warning(line);
+        log.warning("document: " + _document.getDocumentPath());
+      }
+    }
+
     out.print(_text);
   }
 }

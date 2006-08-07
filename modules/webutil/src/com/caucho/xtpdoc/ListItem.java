@@ -36,14 +36,23 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
 public class ListItem extends FormattedTextWithAnchors {
-  public void addOL(OrderedList orderedList)
+  public ListItem(Document document)
   {
-    addItem(orderedList);
+    super(document);
   }
 
-  public void addUL(UnorderedList unorderedList)
+  public OrderedList createOl()
   {
+    OrderedList orderedList = new OrderedList(getDocument());
+    addItem(orderedList);
+    return orderedList;
+  }
+
+  public UnorderedList createUl()
+  {
+    UnorderedList unorderedList = new UnorderedList(getDocument());
     addItem(unorderedList);
+    return unorderedList;
   }
 
   public void writeHtml(XMLStreamWriter out)

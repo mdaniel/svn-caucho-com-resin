@@ -38,6 +38,11 @@ import javax.xml.stream.XMLStreamException;
 public class Def extends VerboseFormattedText {
   private String _title;
 
+  public Def(Document document)
+  {
+    super(document);
+  }
+
   public void setTitle(String title)
   {
     _title = title;

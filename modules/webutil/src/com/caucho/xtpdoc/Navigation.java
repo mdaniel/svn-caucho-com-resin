@@ -34,24 +34,30 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
+import java.util.logging.Logger;
+
 import com.caucho.vfs.Path;
 
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
 public class Navigation {
+  private static final Logger log 
+    = Logger.getLogger(Navigation.class.getName());
+
   private int _depth;
   private Path _rootPath;
   private String _section;
+  private Document _document;
   private boolean _threaded;
   private boolean _comment;
   private ArrayList<NavigationItem> _items 
     = new ArrayList<NavigationItem>();
 
-  public Navigation(Path rootPath, int depth)
+  public Navigation(Document document, int depth)
   {
-    _rootPath = rootPath;
-
+    _document = document;
+    _rootPath = _document.getDocumentPath().getParent();
     _depth = depth;
   }
 
@@ -70,12 +76,16 @@ public class Navigation {
     _threaded = threaded;
   }
 
-  public void addItem(NavigationItem item)
+  public NavigationItem createItem()
   {
+    NavigationItem item = new NavigationItem(_document);
+
     _items.add(item);
     
     item.setDepth(_depth);
     item.setRootPath(_rootPath);
+    
+    return item;
   }
 
   public void writeHtml(XMLStreamWriter out)

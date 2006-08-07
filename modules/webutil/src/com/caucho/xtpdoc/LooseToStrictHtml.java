@@ -50,9 +50,14 @@ public class LooseToStrictHtml {
       if (child.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
         org.w3c.dom.Element subElement = (org.w3c.dom.Element) child;
 
-        if (subElement.getTagName().equals("section") || 
-            subElement.getTagName().equals("defun")) {
+        if (subElement.getTagName().equals("section")) {
           ((QElement) subElement).setName(new QName("s" + level));
+
+          thisLevel = level + 1;
+        } 
+        else if (subElement.getTagName().equals("defun")) {
+          ((QElement) subElement).setName(new QName("s" + level));
+          subElement.setAttribute("type", "defun");
 
           thisLevel = level + 1;
         }
@@ -112,8 +117,12 @@ public class LooseToStrictHtml {
 
     org.w3c.dom.Element xtpDocument = looseToStrictHtml(path);
     
-    XmlPrinter printer = new XmlPrinter(System.out);
+    OutputStream fileOut = path.openWrite();
+
+    XmlPrinter printer = new XmlPrinter(fileOut);
 
     printer.printXml(xtpDocument);
+
+    fileOut.close();
   }
 }

@@ -38,21 +38,33 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
 public class Description implements ContentItem {
+  private Document _document;
   protected ArrayList<ContentItem> _contentItems = new ArrayList<ContentItem>();
 
-  public void addP(Paragraph paragraph)
+  public Description(Document document)
   {
+    _document = document;
+  }
+
+  public Paragraph createP()
+  {
+    Paragraph paragraph = new Paragraph(_document);
     _contentItems.add(paragraph);
+    return paragraph;
   }
 
-  public void addFigure(Figure figure)
+  public Figure createFigure()
   {
+    Figure figure = new Figure(_document);
     _contentItems.add(figure);
+    return figure;
   }
 
-  public void addGlossary(Glossary glossary)
+  public Glossary createGlossary()
   {
+    Glossary glossary = new Glossary(_document);
     _contentItems.add(glossary);
+    return glossary;
   }
   
   public void writeHtml(XMLStreamWriter out)

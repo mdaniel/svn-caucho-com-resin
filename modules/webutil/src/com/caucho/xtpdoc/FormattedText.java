@@ -39,23 +39,23 @@ import javax.xml.stream.XMLStreamException;
 
 import com.caucho.config.types.*;
 
-public class FormattedText implements ContentItem, ObjectWithParent {
-  private Object _parent;
+public class FormattedText implements ContentItem {
+  private Document _document;
   protected ArrayList<ContentItem> _contentItems = new ArrayList<ContentItem>();
+
+  public FormattedText(Document document)
+  {
+    _document = document;
+  }
+
+  protected Document getDocument()
+  {
+    return _document;
+  }
 
   protected void addItem(ContentItem item)
   {
     _contentItems.add(item);
-  }
-
-  public void setParent(Object parent)
-  {
-    _parent = parent;
-  }
-
-  public Object getParent()
-  {
-    return _parent;
   }
 
   public void addText(String text)
@@ -68,44 +68,60 @@ public class FormattedText implements ContentItem, ObjectWithParent {
     _contentItems.add(text);
   }
 
-  public void addI(ItalicizedText text)
+  public ItalicizedText createI()
   {
+    ItalicizedText text = new ItalicizedText(_document);
     _contentItems.add(text);
+    return text;
   }
 
-  public void addB(BoldText text)
+  public BoldText createB()
   {
+    BoldText text = new BoldText(_document);
     _contentItems.add(text);
+    return text;
   }
 
-  public void addEM(EmphasizedText text)
+  public EmphasizedText createEm()
   {
+    EmphasizedText text = new EmphasizedText(_document);
     _contentItems.add(text);
+    return text;
   }
 
-  public void addPre(PreFormattedText pretext)
+  public PreFormattedText createPre()
   {
+    PreFormattedText pretext = new PreFormattedText(_document);
     _contentItems.add(pretext);
+    return pretext;
   }
 
-  public void addVar(Variable variable)
+  public Variable createVar()
   {
+    Variable variable = new Variable(_document);
     _contentItems.add(variable);
+    return variable;
   }
 
-  public void addCode(Code code)
+  public Code createCode()
   {
+    Code code = new Code(_document);
     _contentItems.add(code);
+    return code;
   }
 
-  public void addUrl(Url url)
+  public Url createUrl()
   {
+    Url url = new Url(_document);
     _contentItems.add(url);
+    return url;
   }
 
-  public void addExample(Example example)
+  public Example createExample()
   {
+    Example example = new Example(_document);
     _contentItems.add(example);
+    return example;
   }
 
   public void writeHtml(XMLStreamWriter out)

@@ -38,6 +38,11 @@ import javax.xml.stream.XMLStreamException;
 public class Glossary extends FormattedText {
   private String _title;
 
+  public Glossary(Document document)
+  {
+    super(document);
+  }
+
   public void setTitle(String title)
   {
     _title = title;

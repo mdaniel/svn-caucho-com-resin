@@ -38,6 +38,11 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
 public class Defun extends S2 {
+  public Defun(Document document)
+  {
+    super(document);
+  }
+
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
@@ -54,14 +59,18 @@ public class Defun extends S2 {
     out.writeEndElement(); // div
   }
 
+  public void writeLaTeXTop(PrintWriter out)
+    throws IOException
+  {
+    out.println("\\subsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+
+    super.writeLaTeX(out);
+  }
+
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    if (_topLevel)
-      out.println("\\subsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
-    else
-      out.println("\\subsubsection{" + LaTeXUtil.escapeForLaTeX(_title) + 
-                                    "}");
+    out.println("\\subsubsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
 
     super.writeLaTeX(out);
   }

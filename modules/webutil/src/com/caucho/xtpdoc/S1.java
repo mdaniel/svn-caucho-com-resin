@@ -38,9 +38,16 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
 public class S1 extends Section {
-  public void addS2(S2 section)
+  public S1(Document document)
   {
-    _contentItems.add(section);
+    super(document);
+  }
+
+  public S2 createS2()
+  {
+    S2 s2 = new S2(getDocument());
+    _contentItems.add(s2);
+    return s2;
   }
   
   public void addDefun(Defun section)
@@ -74,13 +81,18 @@ public class S1 extends Section {
     super.writeHtml(out);
   }
 
+  public void writeLaTeXTop(PrintWriter out)
+    throws IOException
+  {
+    out.println("\\section{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+
+    super.writeLaTeX(out);
+  }
+
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    if (_topLevel)
-      out.println("\\section{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
-    else
-      out.println("\\subsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+    out.println("\\subsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
 
     super.writeLaTeX(out);
   }

@@ -36,6 +36,11 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
 public class BoldText extends FormattedText {
+  public BoldText(Document document)
+  {
+    super(document);
+  }
+
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {

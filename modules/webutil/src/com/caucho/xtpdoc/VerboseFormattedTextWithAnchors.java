@@ -29,9 +29,14 @@
 
 package com.caucho.xtpdoc;
 
-public class VerboseFormattedTextWithAnchors extends FormattedText {
+public class VerboseFormattedTextWithAnchors extends FormattedTextWithAnchors {
+  public VerboseFormattedTextWithAnchors(Document document)
+  {
+    super(document);
+  }
+
   public void setText(String text)
   {
-    addItem(new VerboseText(text));
+    addItem(new VerboseText(text, getDocument()));
   }
 }

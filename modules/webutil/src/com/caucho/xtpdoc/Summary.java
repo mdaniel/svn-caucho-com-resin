@@ -44,30 +44,18 @@ import javax.xml.stream.XMLStreamException;
 public class Summary {
   private static final Logger log = Logger.getLogger(Summary.class.getName());
 
+  private Document _document;
   private ATOCControl _atocControl;
   private Navigation _navigation;
 
-  void setRootPath(Path rootPath)
+  public Summary(Document document)
   {
-    // We can parse the table of contents now because the rest of the
-    // attributes are just formatting
-    Path toc = rootPath.lookup("toc.xml");
+    _document = document;
+  }
 
-    if (toc.exists()) {
-      Config config = new Config();
-
-      _navigation = new Navigation(rootPath, 0);
-
-      try {
-        config.configure(_navigation, toc);
-      } catch (Exception e) {
-        log.info("failed to configure " + toc + "! " + e);
-        e.getCause().printStackTrace();
-        _navigation = null;
-      }
-    } else {
-      log.info("Couldn't find " + toc);
-    }
+  void setNavigation(Navigation navigation)
+  {
+    _navigation = navigation;
   }
 
   public void setATOC(String atoc)

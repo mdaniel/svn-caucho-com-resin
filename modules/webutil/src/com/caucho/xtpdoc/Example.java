@@ -39,6 +39,11 @@ public class Example extends VerboseFormattedTextWithAnchors {
   private String _title;
   private String _language = null;
 
+  public Example(Document document)
+  {
+    super(document);
+  }
+
   public void setTitle(String title)
   {
     _title = title;

@@ -34,51 +34,37 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
+import java.util.logging.Logger;
+
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
 import com.caucho.config.*;
 import com.caucho.vfs.Path;
 
-public class Body implements ObjectWithParent {
-  private Object _parent;
+public class Body {
+  private static Logger log = Logger.getLogger(ResinDocServlet.class.getName());
+
+  private Document _document;
   private Path _rootPath;
   private Navigation _navigation;
   private Summary _summary;
   private ArrayList<Section> _sections = new ArrayList<Section>();
 
-  void setDocumentPath(Path documentPath, boolean topLevel)
+  public Body(Document document)
   {
-//    _topLevel = topLevel;
-
-    if (topLevel && documentPath != null) {
-      if (_summary != null)
-        _summary.setRootPath(documentPath.getParent());
-
-      _rootPath = documentPath.getParent();
-
-      parseNavigation(_rootPath);
-    }
-
-    if (documentPath != null) {
-      if (topLevel && _summary != null)
-        _summary.setRootPath(documentPath.getParent());
-
-      for (Section section : _sections)
-        section.setDocumentPath(documentPath);
-    }
+    _document = document;
   }
 
-  private void parseNavigation(Path rootPath)
+  private void parseNavigation()
   {
-    // We can parse the table of contents now because the rest of the
-    // attributes are just formatting
+    Path rootPath = _document.getDocumentPath().getParent();
     Path toc = rootPath.lookup("toc.xml");
 
     if (toc.exists()) {
       Config config = new Config();
 
-      _navigation = new Navigation(rootPath, 0);
+      _navigation = new Navigation(_document, 0);
 
       try {
         config.configure(_navigation, toc);
@@ -89,33 +75,32 @@ public class Body implements ObjectWithParent {
     }
   }
 
-  public void setParent(Object parent)
+  public void setLocalTOC(String text)
   {
-    _parent = parent;
   }
 
-  public Object getParent()
+  public Summary createSummary()
   {
-    return _parent;
-  }
-
-  public void setSummary(Summary summary)
-  {
-    _summary = summary;
+    _summary = new Summary(_document);
+    return _summary;
   }
 
   public void setLocaltoc(Localtoc localtoc)
   {
   }
 
-  public void addFaq(Faq faq)
+  public Faq createFaq()
   {
+    Faq faq = new Faq(_document);
     _sections.add(faq);
+    return faq;
   }
 
-  public void addS1(S1 section)
+  public S1 createS1()
   {
-    _sections.add(section);
+    S1 s1 = new S1(_document);
+    _sections.add(s1);
+    return s1;
   }
 
   public void writeHtml(XMLStreamWriter out)
@@ -136,6 +121,8 @@ public class Body implements ObjectWithParent {
     out.writeAttribute("bgcolor", "#b9cef7");
     out.writeAttribute("class", "leftnav");
     
+    parseNavigation();
+
     if (_navigation != null)
       _navigation.writeLeftNav(out);
 
@@ -143,8 +130,10 @@ public class Body implements ObjectWithParent {
 
     out.writeStartElement("td");
 
-    if (_summary != null)
+    if (_summary != null) {
+      _summary.setNavigation(_navigation);
       _summary.writeHtml(out);
+    }
 
     for (Section section : _sections)
       section.writeHtml(out);
@@ -162,7 +151,7 @@ public class Body implements ObjectWithParent {
     out.println("\\begin{document}");
 
     for (Section section : _sections)
-      section.writeLaTeX(out);
+      section.writeLaTeXTop(out);
 
     out.println("\\end{document}");
   }
