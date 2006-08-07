@@ -53,7 +53,7 @@ public class ClusterPort extends Port {
   
   private int _clientWeight = 100;
 
-  ClusterPort(ClusterServer server)
+  public ClusterPort(ClusterServer server)
   {
     _server = server;
     _conn = new ServerConnector(this);
