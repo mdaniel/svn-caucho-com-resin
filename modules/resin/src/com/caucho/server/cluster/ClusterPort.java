@@ -46,43 +46,42 @@ import com.caucho.server.hmux.HmuxProtocol;
  * Represents a protocol connection.
  */
 public class ClusterPort extends Port {
-  private static L10N L = new L10N(ClusterPort.class);
+  private static final L10N L = new L10N(ClusterPort.class);
 
-  private int _index = -1;
-  private boolean _isBackup;
-  private String _protocolName = "hmux";
+  private ClusterServer _server;
+  private ServerConnector _conn;
+  
   private int _clientWeight = 100;
 
-  /**
-   * Sets the srun protocol (srun or hmux)
-   */
-  public void setProtocol(Protocol protocol)
-    throws ConfigException
+  ClusterPort(ClusterServer server)
   {
-    if (! protocol.getClass().equals(Protocol.class)) {
-      super.setProtocol(protocol);
+    _server = server;
+    _conn = new ServerConnector(this);
+    
+    try {
+      setAddress("127.0.0.1");
+      setPort(6800);
+      
+      setProtocol(new HmuxProtocol());
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
-    else if (protocol.getProtocolName().equals("hmux"))
-      _protocolName = "hmux";
-    else
-      throw new ConfigException(L.l("`{0}' is an unknown cluster protocol.  The protocol must be:\n hmux - new Resin P2P cluster protocol\n srun - old Resin protocol",
-                                    protocol.getProtocolName()));
   }
 
   /**
-   * Returns the protocol class.
+   * Returns the cluster server.
    */
-  public String getClusterProtocol()
+  public ClusterServer getClusterServer()
   {
-    return _protocolName;
+    return _server;
   }
 
   /**
-   * Sets the session index for the srun.
+   * Returns the server connector.
    */
-  public void setIndex(int index)
+  public ServerConnector getServerConnector()
   {
-    _index = index - 1;
+    return _conn;
   }
 
   /**
@@ -90,23 +89,7 @@ public class ClusterPort extends Port {
    */
   public int getIndex()
   {
-    return _index;
-  }
-
-  /**
-   * Set true for a backup.
-   */
-  public void setBackup(boolean isBackup)
-  {
-    _isBackup = isBackup;
-  }
-
-  /**
-   * Return true for a backup.
-   */
-  public boolean isBackup()
-  {
-    return _isBackup;
+    return _server.getIndex();
   }
 
   /**
@@ -126,21 +109,12 @@ public class ClusterPort extends Port {
   }
 
   public void init()
-    throws ConfigException
   {
-    if (getProtocol() != null &&
-	! getProtocol().getClass().equals(Protocol.class)) {
+    try {
+      _conn.init();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
-    else if (getClusterProtocol().equals("hmux")) {
-      HmuxProtocol protocol = new HmuxProtocol();
-      protocol.setParent(this);
-      setProtocol(protocol);
-    }
-    else
-      throw new ConfigException(L.l("`{0}' is an unknown protocol.",
-                                    getClusterProtocol()));
-
-    super.init();
   }
 
   public String toString()

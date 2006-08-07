@@ -42,6 +42,9 @@ public class Escapifier {
 
   public static String escape(String s)
   {
+    if (s == null)
+      return "";
+    
     CharBuffer cb = null;
     int len = s.length();
 

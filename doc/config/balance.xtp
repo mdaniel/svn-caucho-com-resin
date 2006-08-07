@@ -31,7 +31,8 @@ medium sites.</p>
 </header>
 
 <body>
-<summary/>
+
+<localtoc/>
 
 
 <s1 title="Hardware Load Balancing">
@@ -58,31 +59,28 @@ servers and use the -server flag to start the correct one on each machine:</p>
 
 <example title="resin.conf for all servers">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-&lt;server&gt;
-  &lt;cluster&gt;
-    &lt;srun id='a' host='192.168.0.1' port='6802'/&gt;
-    &lt;srun id='b' host='192.168.0.2' port='6802'/&gt;
-    &lt;srun id='c' host='192.168.0.3' port='6802'/&gt;
-    &lt;srun id='d' host='192.168.0.4' port='6802'/&gt;
+  &lt;cluster id="web-tier"&gt;
+    &lt;server-default>
+      &lt;http port="80"/>
+    &lt;/server-default>
+
+    &lt;server id='a' address='192.168.0.11' port='6800'/&gt;
+    &lt;server id='b' address='192.168.0.12' port='6800'/&gt;
+    &lt;server id='c' address='192.168.0.13' port='6800'/&gt;
+    &lt;server id='d' address='192.168.0.14' port='6800'/&gt;
+
+    &lt;persistent-store type="cluster"&gt;
+      &lt;init path="cluster"/&gt;
+    &lt;/persistent-store&gt;
+
+    &lt;web-app-default&gt;
+      &lt;session-config&gt;
+        &lt;use-persistent-store/&gt;
+      &lt;/session-config&gt;
+    &lt;/web-app-default&gt;
+
+    ...
   &lt;/cluster&gt;
-
-  &lt;persistent-store type="cluster"&gt;
-    &lt;init path="cluster"/&gt;
-  &lt;/persistent-store&gt;
-
-  &lt;http id='a' host='192.168.0.1' port='80'/&gt;
-  &lt;http id='b' host='192.168.0.2' port='80'/&gt;
-  &lt;http id='c' host='192.168.0.3' port='80'/&gt;
-  &lt;http id='d' host='192.168.0.4' port='80'/&gt;
-
-  &lt;web-app-default&gt;
-    &lt;session-config&gt;
-      &lt;use-persistent-store/&gt;
-    &lt;/session-config&gt;
-  &lt;/web-app-default&gt;
-
-  ...
-&lt;/server&gt;
 &lt;/resin&gt;
 </example>
 
@@ -91,10 +89,10 @@ servers and use the -server flag to start the correct one on each machine:</p>
 a different value for -server and for -pid.</p>
 
 <example title="Starting each server on Unix">
-unix-192.168.0.1&gt; bin/httpd.sh -server a -pid server-a.pid start
-unix-192.168.0.2&gt; bin/httpd.sh -server b -pid server-b.pid start
-unix-192.168.0.3&gt; bin/httpd.sh -server c -pid server-c.pid start
-unix-192.168.0.4&gt; bin/httpd.sh -server d -pid server-d.pid start
+unix-192.168.0.1&gt; java -jar lib/resin.jar -server a start
+unix-192.168.0.2&gt; java -jar lib/resin.jar -server b start
+unix-192.168.0.3&gt; java -jar lib/resin.jar -server c start
+unix-192.168.0.4&gt; java -jar lib/resin.jar -server d start
 </example>
 
 <p>On Windows, each server is installed as a service.</p>

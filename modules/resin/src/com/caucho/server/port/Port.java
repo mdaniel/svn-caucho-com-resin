@@ -89,12 +89,12 @@ public class Port
 
   private InetAddress _socketAddress;
 
+  // default timeout
+  private long _timeout = 65000L;
+
   // time in milliseconds to wait on a socket read/write before giving up
   private long _readTimeout;
   private long _writeTimeout;
-
-  // default timeout
-  private long _timeout = 65000L;
 
   private int _connectionMax = 512;
   private int _minSpareConnection = 16;
@@ -456,7 +456,10 @@ public class Port
    */
   public long getReadTimeout()
   {
-    return _readTimeout;
+    if (_readTimeout != 0)
+      return _readTimeout;
+    else
+      return _timeout;
   }
 
   /**
@@ -472,7 +475,10 @@ public class Port
    */
   public long getWriteTimeout()
   {
-    return _writeTimeout;
+    if (_writeTimeout != 0)
+      return _writeTimeout;
+    else
+      return _timeout;
   }
 
   /**

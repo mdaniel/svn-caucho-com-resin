@@ -48,7 +48,6 @@ import com.caucho.loader.EnvironmentProperties;
 import com.caucho.management.j2ee.*;
 import com.caucho.management.server.*;
 import com.caucho.server.dispatch.DispatchServer;
-import com.caucho.server.dispatch.ServerListener;
 import com.caucho.server.cluster.*;
 import com.caucho.transaction.cfg.TransactionManagerConfig;
 import com.caucho.util.Alarm;
@@ -69,12 +68,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ResinServer
-  implements EnvironmentBean, SchemaBean,
-             ServerListener {
+  implements EnvironmentBean, SchemaBean {
   private static final Logger log = Log.open(ResinServer.class);
   private static final L10N L = new L10N(ResinServer.class);
 
   private static final String OBJECT_NAME= "resin:type=Resin";
+
+  private static final EnvironmentLocal<ResinServer> _resinLocal =
+    new EnvironmentLocal<ResinServer>();
 
   private static ResinServer _resinServer;
 
@@ -149,6 +150,8 @@ public class ResinServer
     else
       _classLoader = new EnvironmentClassLoader();
 
+    _resinLocal.set(this, _classLoader);
+
     _startTime = Alarm.getCurrentTime();
 
     _variableMap.put("resin", new Var());
@@ -172,6 +175,14 @@ public class ResinServer
   public static ResinServer getResinServer()
   {
     return _resinServer;
+  }
+
+  /**
+   * Returns the resin server.
+   */
+  public static ResinServer getLocal()
+  {
+    return _resinLocal.get();
   }
 
   /**
@@ -616,6 +627,18 @@ public class ResinServer
     log.info("Resin started in " + (Alarm.getCurrentTime() - start) + "ms");
   }
 
+  public Cluster findCluster(String id)
+  {
+    for (int i = 0; i < _clusters.size(); i++) {
+      Cluster cluster = _clusters.get(i);
+
+      if (cluster.getId().equals(id))
+	return cluster;
+    }
+
+    return null;
+  }
+
   public ClusterServer findClusterServer(String id)
   {
     for (int i = 0; i < _clusters.size(); i++) {
@@ -649,9 +672,8 @@ public class ResinServer
   /**
    * When one ServletServer closes, close everything.
    */
-  public void closeEvent(DispatchServer server)
+  public void close()
   {
-    // XXX:
     log.info("Received close event");
     destroy();
   }

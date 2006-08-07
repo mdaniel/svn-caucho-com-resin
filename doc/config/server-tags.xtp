@@ -1,0 +1,111 @@
+<document>
+<header>
+  <title>server: Server tag configuration</title>
+  <version>Resin 3.1</version>
+
+  <description>
+
+  <p>Describes the server configuration tags.</p>
+
+  </description>
+</header>
+<body>
+
+<localtoc/>
+
+<s1 title="See Also">
+
+<ul>
+<li>See the <a href="index-tags.xtp">index</a> for a list of all the tags.</li>
+<li>See <a href="cluster-tags.xtp">Cluster tag</a> configuration</li>
+</ul>
+
+</s1>
+
+<s1 title="server">
+
+<defun title="server" version="Resin 3.1">
+<parents>cluster</parents>
+
+<p>Each server is a JVM instance in the cluster and must be configured
+with a &lt;server&gt; tag.  Each &lt;server&gt; is uniquely identified by
+its <var>id</var> attribute.  The <var>id</var> will match
+the -server-id command line argument.</p>
+
+<p>The server listens to an internal network address,
+e.g. 192.168.0.10:6800 for clustering, load balancing,
+and administration.</p>
+
+<p>The current server is managed with a
+<a href="javadoc|com.caucho.management.server.ServerMXBean">ServerMXBean</a>.
+The <g>ObjectName</g> is <var>resin:type=Server</var>.</p>
+
+<p>Peer servers are managed with 
+<a href="javadoc|com.caucho.management.server.ServerConnectorMXBean">ServerConnectorMXBean</a>. The ObjectName is <var>resin:type=ServerConnector,name=server-id</var>.</p>
+
+<deftable-childtags>
+<tr><td>id</td>
+    <td>unique server identifier</td>
+    <td>required</td></tr>
+<tr><td>address</td>
+    <td>IP address of the cluster port</td></tr>
+    <td>127.0.0.1</td></tr>
+<tr><td>port</td>
+    <td>The cluster port</td></tr>
+    <td>6800</td></tr>
+</deftable-childtags>
+
+<example title="server">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+    &lt;cluster id="web-tier"&gt;
+        &lt;server id="a" address="192.168.0.10" port="6800"&gt;
+          &lt;http port="8080"/&gt;
+        &lt;/server&gt;
+
+        &lt;server id="b" address="192.168.0.11" server-port="6800"&gt;
+          &lt;http port="8080"/&gt;
+        &lt;/server&gt;
+
+        &lt;server id="c" address="192.168.0.12" server-port="6800"&gt;
+          &lt;http port="8080"/&gt;
+        &lt;/server&gt;
+
+        &lt;host id=""&gt;
+          ...
+    &lt;/cluster&gt;
+&lt;/resin&gt;
+</example>
+
+</defun>
+
+<defun title="server-default" version="Resin 3.1">
+<parents>cluster</parents>
+
+<p>Defines default values for all &lt;server&gt; instances. See
+<a href="server-tags.xtp">server configuration</a> for more details.</p>
+
+<example title="server">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+    &lt;cluster id="web-tier"&gt;
+        &lt;server-default&gt;
+            &lt;server-port&gt;6800&lt;/server-port&gt;
+
+            &lt;http port="8080"/&gt;
+        &lt;/server-default&gt;
+
+        &lt;server id="a" address="192.168.0.10"/&gt;
+        &lt;server id="b" address="192.168.0.11"/&gt;
+        &lt;server id="c" address="192.168.0.12"/&gt;
+
+        &lt;host id=""&gt;
+          ...
+    &lt;/cluster&gt;
+&lt;/resin&gt;
+</example>
+
+</defun>
+
+</s1>
+
+</body>
+</document>

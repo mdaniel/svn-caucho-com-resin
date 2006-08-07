@@ -29,6 +29,7 @@
 
 package com.caucho.server.cluster;
 
+import java.net.*;
 import java.util.*;
 
 import java.util.logging.*;
@@ -75,13 +76,15 @@ public class ClusterServer {
   private int _index;
 
   private ClusterPort _clusterPort;
-  private ServerConnector _conn;
 
   private ArrayList<Port> _ports = new ArrayList<Port>();
 
   public ClusterServer(Cluster cluster)
   {
     _cluster = cluster;
+
+    _clusterPort = new ClusterPort(this);
+    _ports.add(_clusterPort);
   }
 
   /**
@@ -139,11 +142,20 @@ public class ClusterServer {
   }
 
   /**
-   * Adds a port.
+   * Sets the address
    */
-  public void addPort(Port port)
+  public void setAddress(String address)
+    throws UnknownHostException
   {
-    _ports.add(port);
+    _clusterPort.setAddress(address);
+  }
+
+  /**
+   * Sets a port.
+   */
+  public void setPort(int port)
+  {
+    _clusterPort.setPort(port);
   }
 
   /**
@@ -176,7 +188,22 @@ public class ClusterServer {
       port.setProtocol(protocol);
     }
 
-    addPort(port);
+    _ports.add(port);
+  }
+
+  /**
+   * Adds a custom-protocol port.
+   */
+  public void addProtocol(Port port)
+    throws ConfigException
+  {
+    if (port.getProtocol() == null) {
+      HttpProtocol protocol = new HttpProtocol();
+      protocol.setParent(port);
+      port.setProtocol(protocol);
+    }
+
+    _ports.add(port);
   }
 
   /**
@@ -190,13 +217,13 @@ public class ClusterServer {
   /**
    * Sets the ClusterPort.
    */
-  public void setClusterPort(ClusterPort port)
+  public ClusterPort createClusterPort()
   {
-    _clusterPort = port;
+    return _clusterPort;
   }
 
   /**
-   * Gets the cluster port.
+   * Sets the ClusterPort.
    */
   public ClusterPort getClusterPort()
   {
@@ -208,7 +235,7 @@ public class ClusterServer {
    */
   public ServerConnector getServerConnector()
   {
-    return _conn;
+    return _clusterPort.getServerConnector();
   }
 
   /**
@@ -217,6 +244,7 @@ public class ClusterServer {
   public void init()
     throws Exception
   {
+    _clusterPort.init();
   }
 
   /**

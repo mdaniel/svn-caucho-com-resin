@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -24,45 +24,49 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Emil Ong
+ * @author Scott Ferguson
  */
 
-package com.caucho.xtpdoc;
+package com.caucho.boot;
 
-import java.io.PrintWriter;
-import java.io.IOException;
+import java.util.*;
 
-import java.util.ArrayList;
+import com.caucho.config.*;
 
-import javax.xml.stream.XMLStreamWriter;
-import javax.xml.stream.XMLStreamException;
+public class ResinConfig {
+  private ArrayList<ClusterConfig> _clusterList
+    = new ArrayList<ClusterConfig>();
 
-public class NamedText implements ContentItem {
-  private String _name;
-  private ContentItem _text;
-
-  public NamedText(String name, ContentItem text)
+  public ClusterConfig createCluster()
   {
-    _name = name;
-    _text = text;
+    ClusterConfig cluster = new ClusterConfig(this);
+    
+    _clusterList.add(cluster);
+
+    return cluster;
+  }
+  
+  /**
+   * Ignore items we can't understand.
+   */
+  public void addBuilderProgram(BuilderProgram program)
+  {
   }
 
-  public void writeHtml(XMLStreamWriter out)
-    throws XMLStreamException
+  /**
+   * Finds a server.
+   */
+  public ServerConfig findServer(String id)
   {
-    out.writeStartElement("b");
-    out.writeCharacters(_name);
-    out.writeEndElement(); // b
+    for (int i = 0; i < _clusterList.size(); i++) {
+      ClusterConfig cluster = _clusterList.get(i);
 
-    out.writeCharacters(" ");
-    _text.writeHtml(out);
-  }
+      ServerConfig server = cluster.findServer(id);
 
-  public void writeLaTeX(PrintWriter out)
-    throws IOException
-  {
-    out.print("\\textbf{" + LaTeXUtil.escapeForLaTeX(_name) + ":} ");
+      if (server != null)
+	return server;
+    }
 
-    _text.writeLaTeX(out);
+    return null;
   }
 }

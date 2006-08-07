@@ -1,0 +1,203 @@
+<document>
+<header>
+<title>Resin Load Balancing</title>
+<description>
+<p>As traffic increases, web sites need to add additional web
+servers and servlet engines.  Distributing the traffic across the
+servers and coping when a server restarts is the challenge of
+load balancing.</p>
+
+</description>
+</header>
+
+<body>
+
+<localtoc/>
+
+<s1 name="resin" title="Using Resin as the Load Balancer">
+
+<p>Resin Professional includes a
+<a href="javadoc|com.caucho.servlets.LoadBalanceServlet">LoadBalanceServlet</a> that can balance
+requests to backend servers.
+Because it is implemented as a servlet,
+this configuration is the most flexible.  A site might use 192.168.0.1 as 
+the frontend load balancer, and send all requests for /foo to the backend host
+192.168.0.10  and all requests to /bar to the backend host 192.168.0.11.  Since
+Resin has an integrated HTTP proxy cache, the web-tier machine can cache
+results for the backend servers.</p>
+
+<p>Using Resin as the load balancing web server requires a minimum
+of two configuration files: one for the load balancing server, and one
+for the backend servers.  The front configuration will dispatch
+to the backend servers, while the backend will actually serve the
+requests.</p>
+
+<s2 title="The web-tier server does the load balancing">
+
+<p>In the following example, there are three servers and two conf files.  The
+first server (192.168.0.1), which uses web-tier.conf, is the load balancer.  It
+has an &lt;http&gt; listener, it receives requests from browsers, and
+dispatches them to the backend servers (192.168.0.10 and 192.168.0.11).</p>
+
+<example title="resin.conf">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+
+&lt;cluster id="web-tier"&gt;
+  &lt;server id="web-a" address="192.168.0.1">
+    &lt;http port="80"/&gt;
+  &lt;/server>
+
+  &lt;cache disk-size="1024M" memory-size="256M"/&gt;
+
+  &lt;host id=""&gt;
+    &lt;web-app id="/"&gt;
+      &lt;!-- balance all requests to cluster app-tier --&gt;
+      &lt;servlet servlet-name="balance"
+               servlet-class="com.caucho.servlets.LoadBalanceServlet">
+        &lt;init cluster="app-tier"/&gt;
+      &lt;/servlet&gt;
+
+      &lt;servlet-mapping url-pattern="/*" servlet-name="balance"/&gt;
+    &lt;/web-app&gt;
+  &lt;/host&gt;
+&lt;/cluster&gt;
+
+&lt;cluster id="app-tier"&gt;
+  &lt;server id="app-a" address="192.168.0.10" port="6800"/&gt;
+  &lt;server id="app-b" address="192.168.0.11" port="6800"/&gt;
+
+  &lt;persistent-store type="cluster"&gt;
+    &lt;init path="cluster"/&gt;
+  &lt;/persistent-store&gt;
+
+  &lt;web-app-default&gt;
+    &lt;session-config&gt;
+      &lt;use-persistent-store/&gt;
+    &lt;/session-config&gt;
+  &lt;/web-app-default&gt;
+
+  &lt;host id="www.foo.com">
+    ...
+  &lt;/host>
+&lt;/cluster&gt;
+
+&lt;/resin&gt;
+</example>
+
+<p>The
+LoadBalanceServlet selects a backend server using a round-robin policy.
+Although the round-robin policy is simple, in practice it is as effective as
+complicated balancing policies.  In addition, because it's simple, round-robin
+is more robust and faster than adaptive policies.  </p>
+</s2>
+
+<s2 title="The backend server respond to the requests">
+
+<p>A seperate conf file is used to configure all of the backend servers.
+In this case, there are two backend servers, both configured in the conf file
+<code>app-tier.conf</code>.</p>
+
+<p>Sites using sessions will configure <a href="sessions.xtp">distributed
+sessions</a> to make sure the users see the same session values.</p>
+
+</s2>
+
+
+<s2 title="Starting the servers">
+
+<example title="Starting each server">
+192.168.0.1&gt; java lib/resin.jar -server web-a start
+
+192.168.0.10&gt; java lib/resin.jar -server app-a start
+192.168.0.11&gt; java lib/resin.jar -server app-b start
+</example>
+
+</s2>
+
+</s1> <!-- resin -->
+
+<s1 title="What about sessions?">
+
+<p>A session needs to stay on the same JVM that started it.
+Otherwise, each JVM would only see every second or third request and
+get confused.</p>
+
+<p>To make sure that sessions stay on the same JVM, Resin encodes the
+cookie with the host number.  In the previous example, the hosts would
+generate cookies like:</p>
+
+<deftable>
+<tr><th>index</th><th>cookie prefix
+</th></tr><tr><td>1</td><td><var>a</var>xxx
+</td></tr><tr><td>2</td><td><var>b</var>xxx
+</td></tr><tr><td>3</td><td><var>c</var>xxx
+</td></tr></deftable>
+
+<p>On the web server, mod_caucho will decode the cookie and send it
+to the appropriate host.  So <var>bX8ZwooOz</var> would go to host2.</p>
+
+<p>In the infrequent case that host2 fails, Resin will send the
+request to host3.  The user might lose the session but that's a minor
+problem compared to showing a connection failure error.  To save sessions,
+you'll need to use <a href="sessions.xtp">distributed sessions</a>.
+Also take a look at
+<a href="tcp-sessions.xtp">tcp sessions</a>.</p>
+
+<p>The following example is a typical configuration for a distributed
+server using an external hardware load-balancer, i.e. where each Resin is
+acting as the HTTP server.  Each server will be started
+as <var>-server a</var> or <var>-server b</var> to grab its specific configuration.</p>
+
+<p>In this example, sessions will only be stored when the server shuts down,
+either for maintenance or with a new version of the server.  This is the most
+lightweight configuration, and doesn't affect performance significantly.
+If the hardware or the JVM crashes, however, the sessions will be lost.
+(If you want to save sessions for hardware or JVM crashes,
+remove the &lt;save-only-on-shutdown/&gt; flag.)</p>
+
+<example title="resin.conf">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+&lt;server&gt;
+  &lt;http id='a' port='80'/&gt;
+
+  &lt;http id='b' port='80'/&gt;
+
+  &lt;http id='c' port='80'/&gt;
+
+  &lt;cluster&gt;
+    &lt;srun id='a' port='6802' host='192.168.0.1'/&gt;
+    &lt;srun id='b' port='6802' host='192.168.0.2'/&gt;
+    &lt;srun id='c' port='6802' host='192.168.0.3'/&gt;
+  &lt;/cluster&gt;
+
+  &lt;persistent-store type="cluster"&gt;
+    &lt;init path="cluster"/&gt;
+  &lt;/persistent-store&gt;
+
+  &lt;web-app-default&gt;
+    &lt;!-- enable tcp-store for all hosts/web-apps --&gt;
+    &lt;session-config&gt;
+      &lt;use-persistent-store/&gt;
+      &lt;save-only-on-shutdown/&gt;
+    &lt;/session-config&gt;
+  &lt;/web-app-default&gt;
+
+  ...
+&lt;/server&gt;
+&lt;/resin&gt;
+</example>
+
+</s1>
+
+<s1 title="See Also">
+
+<ul>
+<li><a href="config|sessions.xtp">Distributed Sessions</a>
+</li><li><a href="config|tcp-sessions.xtp">Distributed Sessions with Cluster Store</a>
+</li><li><a href="config|resin.xtp#persistent-store">&lt;persistent-store&gt;</a>
+</li></ul>
+
+</s1>
+
+  </body>
+</document>

@@ -44,7 +44,7 @@ public class Anchor extends FormattedText {
 
   private String _documentName;
   private String _configTag;
-  private String _href;
+  private String _href = "";
 
   private String getDocumentName()
   {

@@ -447,9 +447,15 @@ r_select-manager = element select-manager {
 }
 
 r_server = element server {
-  attribute id { string },
+  attribute id { string }
 
-  r_server-Content
+  & (attribute address { string }
+     | element address { string })?
+
+  & (attribute port { string }
+     | element port { string })?
+
+  & r_server-Content
 }
 
 r_server-default = element server-default {
@@ -457,7 +463,7 @@ r_server-default = element server-default {
 }
 
 r_server-Basis =
-  r_cluster-port*
+  r_protocol*
 
   & r_http*
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -24,45 +24,42 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Emil Ong
+ * @author Scott Ferguson
  */
 
-package com.caucho.xtpdoc;
+package com.caucho.boot;
 
-import java.io.PrintWriter;
-import java.io.IOException;
+import com.caucho.config.*;
 
-import java.util.ArrayList;
+public class ServerConfig {
+  private ClusterConfig _cluster;
+  
+  private String _id = "";
 
-import javax.xml.stream.XMLStreamWriter;
-import javax.xml.stream.XMLStreamException;
-
-public class NamedText implements ContentItem {
-  private String _name;
-  private ContentItem _text;
-
-  public NamedText(String name, ContentItem text)
+  ServerConfig(ClusterConfig cluster)
   {
-    _name = name;
-    _text = text;
+    _cluster = cluster;
   }
 
-  public void writeHtml(XMLStreamWriter out)
-    throws XMLStreamException
+  public void setId(String id)
   {
-    out.writeStartElement("b");
-    out.writeCharacters(_name);
-    out.writeEndElement(); // b
-
-    out.writeCharacters(" ");
-    _text.writeHtml(out);
+    _id = id;
   }
 
-  public void writeLaTeX(PrintWriter out)
-    throws IOException
+  public String getId()
   {
-    out.print("\\textbf{" + LaTeXUtil.escapeForLaTeX(_name) + ":} ");
+    return _id;
+  }
+  
+  /**
+   * Ignore items we can't understand.
+   */
+  public void addBuilderProgram(BuilderProgram program)
+  {
+  }
 
-    _text.writeLaTeX(out);
+  public String toString()
+  {
+    return "ServerConfig[" + _id + "]";
   }
 }

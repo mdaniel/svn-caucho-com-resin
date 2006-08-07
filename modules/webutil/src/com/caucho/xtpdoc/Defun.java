@@ -37,12 +37,7 @@ import java.util.ArrayList;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
-public class Defun extends Section {
-  public void addS2(S2 section)
-  {
-    _contentItems.add(section);
-  }
- 
+public class Defun extends S2 {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {

@@ -93,7 +93,7 @@ public class HmuxDispatchRequest {
   private CharBuffer _cb = new CharBuffer();
 
   private HmuxRequest _request;
-  private ServletServer _server;
+  private Server _server;
 
   private int _srunIndex;
 
@@ -101,7 +101,7 @@ public class HmuxDispatchRequest {
   {
     _request = request;
 
-    _server = (ServletServer) request.getDispatchServer();
+    _server = (Server) request.getDispatchServer();
   }
 
   /**

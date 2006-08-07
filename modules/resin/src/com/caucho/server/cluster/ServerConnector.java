@@ -77,16 +77,10 @@ public class ServerConnector {
 
   private ClusterClientAdmin _admin;
 
-  public ServerConnector()
+  public ServerConnector(ClusterPort port)
   {
-  }
-
-  /**
-   * Sets the owning cluster.
-   */
-  public void setCluster(Cluster cluster)
-  {
-    _cluster = cluster;
+    _port = port;
+    _cluster = _port.getClusterServer().getCluster();
   }
 
   /**
@@ -175,14 +169,6 @@ public class ServerConnector {
   public int getPort()
   {
     return _port.getPort();
-  }
-
-  /**
-   * Returns true if the target server is a backup.
-   */
-  public boolean isBackup()
-  {
-    return _port.isBackup();
   }
 
   /**

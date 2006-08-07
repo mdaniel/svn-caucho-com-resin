@@ -61,7 +61,7 @@ public class Body implements ObjectWithParent {
     }
 
     if (documentPath != null) {
-      if (topLevel)
+      if (topLevel && _summary != null)
         _summary.setRootPath(documentPath.getParent());
 
       for (Section section : _sections)

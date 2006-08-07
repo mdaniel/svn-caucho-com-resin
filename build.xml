@@ -23,11 +23,13 @@
   <property name="javac.nowarn" value="on"/>
   <property name="javac.memoryMaximumSize" value="256m"/>
 
-  <property name="javac.source" value="1.4"/>
+  <property name="javac.source" value="1.5"/>
 
   <property name="jar.compress" value="false"/>
+  <!--
   <property name="jar.index" value="true"/>
-  <property name="jar.update" value="false"/>
+  -->
+  <property name="jar.update" value="true"/>
 
   <property name="fop.home" location="${env.FOP_HOME}"/>
 

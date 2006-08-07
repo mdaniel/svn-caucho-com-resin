@@ -882,8 +882,7 @@ public class Server extends ProtocolDispatchServer
         // XXX: message slightly wrong
         log.info("Resin restarting due to configuration change");
 
-        //destroy();
-        //_controller.restart();
+        _clusterServer.getCluster().getResin().close();
         return;
       }
 

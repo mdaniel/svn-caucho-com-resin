@@ -103,6 +103,8 @@ public class ResinDocServlet extends HttpServlet {
       _config.configure(document, path);
 
       document.writeHtml(xmlOut);
+
+      xmlOut.flush();
     } catch (IOException e) {
       throw e;
     } catch (LineConfigException e) {

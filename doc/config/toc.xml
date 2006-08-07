@@ -13,6 +13,7 @@
     <item title="Common Tasks" link="commontasks.xtp">
       <item link="virtual-host.xtp" title="Virtual Hosting"/>
       <item link="balance.xtp" title="Load Balancing"/>
+      <item link="resin-load-balance.xtp" title="Load Balancing"/>
       <item link="sessions.xtp" title="Sessions"/>
       <item link="tcp-sessions.xtp" title="Clustered Sessions"/>
       <item link="tuning.xtp" title="Tuning"/>

@@ -105,10 +105,11 @@ public class Cluster implements EnvironmentListener {
     
   public Cluster()
   {
-    Thread thread = Thread.currentThread();
-    _classLoader = (EnvironmentClassLoader) thread.getContextClassLoader();
-    
-    Environment.addEnvironmentListener(this);
+    _classLoader = new EnvironmentClassLoader();
+
+    _clusterLocal.set(this, _classLoader);
+  
+    Environment.addEnvironmentListener(this, _classLoader);
   }
 
   /**
@@ -145,6 +146,14 @@ public class Cluster implements EnvironmentListener {
   public String getId()
   {
     return _id;
+  }
+
+  /**
+   * Returns the owning resin server.
+   */
+  public ResinServer getResin()
+  {
+    return _resin;
   }
 
   /**
