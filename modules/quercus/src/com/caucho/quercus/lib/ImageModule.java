@@ -175,31 +175,31 @@ public class ImageModule extends AbstractQuercusModule {
     if (ch == 137) {
       // PNG - http://www.libpng.org/pub/png/spec/iso/index-object.html
       if (is.read() != 'P' ||
-	  is.read() != 'N' ||
-	  is.read() != 'G' ||
-	  is.read() != '\r' ||
-	  is.read() != '\n' ||
-	  is.read() != 26 ||
-	  is.read() != '\n')
-	return false;
+          is.read() != 'N' ||
+          is.read() != 'G' ||
+          is.read() != '\r' ||
+          is.read() != '\n' ||
+          is.read() != 26 ||
+          is.read() != '\n')
+        return false;
 
       return parsePNGImageSize(is, info);
     }
     else if (ch == 'G') {
       // GIF
       if (is.read() != 'I' ||
-	  is.read() != 'F' ||
-	  is.read() != '8' ||
-	  is.read() != '7' ||
-	  is.read() != 'a')
-	return false;
+          is.read() != 'F' ||
+          is.read() != '8' ||
+          ((ch = is.read()) != '7' && ch != '9') ||
+          is.read() != 'a')
+        return false;
 
       return parseGIFImageSize(is, info);
     }
     else if (ch == 0xff) {
       // JPEG
       if (is.read() != 0xd8)
-	return false;
+        return false;
 
       return parseJPEGImageSize(is, info);
     }

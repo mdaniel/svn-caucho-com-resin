@@ -132,10 +132,16 @@ public class StringBuilderValue extends UnicodeValue {
     int len = _length;
 
     if (len == 0)
-      return false;
+      return true;
 
-    for (int i = 0; i < len; i++) {
-      char ch = _buffer[i];
+    int i = 0;
+    char ch = _buffer[0];
+
+    if (ch == '-' || ch == '+')
+      i++;
+
+    for (; i < len; i++) {
+      ch = _buffer[i];
 
       if (! ('0' <= ch && ch <= '9'))
         return false;
@@ -177,7 +183,7 @@ public class StringBuilderValue extends UnicodeValue {
     int len = _length;
 
     if (len == 0)
-      return IS_STRING;
+      return IS_LONG;
 
     int i = 0;
     int ch = 0;
@@ -258,13 +264,16 @@ public class StringBuilderValue extends UnicodeValue {
     int i = 0;
     int end = offset + len;
 
-    if (buffer[offset] == '-') {
+    char ch = buffer[offset];
+    if (ch == '-') {
       sign = -1;
       offset++;
     }
+    else if (ch == '+')
+      offset++;
 
     while (offset < end) {
-      char ch = buffer[offset++];
+      ch = buffer[offset++];
 
       if ('0' <= ch && ch <= '9')
         value = 10 * value + ch - '0';
@@ -272,7 +281,7 @@ public class StringBuilderValue extends UnicodeValue {
         return sign * value;
     }
 
-    return value;
+    return sign * value;
   }
 
   /**

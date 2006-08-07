@@ -103,10 +103,16 @@ abstract public class StringValue extends Value implements CharSequence {
     int len = length();
 
     if (len == 0)
-      return false;
+      return true;
 
-    for (int i = 0; i < len; i++) {
-      char ch = charAt(i);
+    int i = 0;
+    char ch = charAt(0);
+
+    if (ch == '-' || ch == '+')
+      i++;
+
+    for (; i < len; i++) {
+      ch = charAt(i);
 
       if (! ('0' <= ch && ch <= '9'))
         return false;
@@ -296,14 +302,17 @@ abstract public class StringValue extends Value implements CharSequence {
     long sign = 1;
 
     int i = 0;
+    char ch = string.charAt(0);
 
-    if (string.charAt(0) == '-') {
+    if (ch == '-') {
       sign = -1;
       i = 1;
     }
+    else if (ch == '+')
+      i = 1;
 
     for (; i < len; i++) {
-      char ch = string.charAt(i);
+      ch = string.charAt(i);
 
       if ('0' <= ch && ch <= '9')
         value = 10 * value + ch - '0';
@@ -487,6 +496,10 @@ abstract public class StringValue extends Value implements CharSequence {
    */
   public Value postincr(int incr)
   {
+    // php/03i6
+    if (length() == 0)
+      return LongValue.create(incr);
+
     if (incr > 0) {
       StringBuilder tail = new StringBuilder();
 
