@@ -31,8 +31,6 @@
   -->
   <property name="jar.update" value="true"/>
 
-  <property name="fop.home" location="${env.FOP_HOME}"/>
-
   <property name="promodules" location="${basedir}/../pro/modules"/>
   <property name="jdkapi.href" value="http://java.sun.com/j2se/1.5.0/docs/api"/>
 
@@ -490,70 +488,55 @@
 
     <sequential>
 
-    <java classname="com.caucho.xsl.Xsl" fork="true">
-      <arg value="-lite"/>
-      <arg value="-xsl"/>
-      <arg file="${doc}/pdf/xml2pdf.xsl"/>
-      <arg value="-o"/>
-      <arg file="${build}/pdf/@{name}.fo.tmpl"/>
-      <arg file="${doc}/pdf/@{name}.xml"/>
-      <classpath>
-        <pathelement location="${java.home}/../lib/tools.jar"/>
-        <dirset dir="${modules}">
-          <include name="*/classes"/>
-        </dirset>
-        <fileset dir="${modules}/ext">
-          <include name="**/*.jar"/>
-        </fileset>
-      </classpath>
-    </java>
+      <mkdir dir="${build}/pdf/@{name}"/>
 
-    <copy file="${build}/pdf/@{name}.fo.tmpl"
-          tofile="${build}/pdf/@{name}.fo"
-          preservelastmodified="true"
-          overwrite="true">
-      <filterset>
-        <filter token="VERSION" value="${version}"/>
-        <filter token="DATE" value="${date}"/>
-        <filter token="VERSION_DATE" value="${vdate}"/>
-      </filterset>
-    </copy>
+      <java classname="com.caucho.xtpdoc.Printer" fork="true" 
+            output="${build}/pdf/@{name}/@{name}.tex" logError="true"
+            dir="${doc}">
+        <arg file="${doc}/pdf/@{name}.xml"/>
+        <classpath>
+          <pathelement location="${java.home}/../lib/tools.jar"/>
+          <dirset dir="${modules}">
+            <include name="*/classes"/>
+          </dirset>
+          <fileset dir="${modules}/ext">
+            <include name="**/*.jar"/>
+          </fileset>
+        </classpath>
+      </java>
 
-    <fop format="application/pdf" 
-         fofile="${build}/pdf/@{name}.fo"
-         outfile="${dist}/@{name}-${version}.pdf"
-         basedir="${doc}"
-         messagelevel="warn"/>
+      <exec dir="${build}/pdf/@{name}" executable="pdflatex">
+        <arg file="${build}/pdf/@{name}/@{name}.tex" />
+      </exec>
+
+      <!-- One more time for the reference setting... -->
+      <exec dir="${build}/pdf/@{name}" executable="pdflatex">
+        <arg file="${build}/pdf/@{name}/@{name}.tex" />
+      </exec>
 
     </sequential>
   </macrodef>
 
 
   <target name="pdf" depends="init">
-    <!-- jimi is needed by fop to handle png:
+    <mkdir dir="${build}/pdf/images"/>
 
-         url: http://java.sun.com/products/jimi/
+    <apply executable="convert" dir="${build}/pdf/images">
+      <fileset dir="${doc}/images">
+        <include name="*.gif" />
+        <include name="*.jpg" />
+        <include name="*.png" />
+      </fileset>
+      <srcfile/>
+      <targetfile/>
+      <mapper>
+        <globmapper from="*.gif" to="${build}/pdf/images/*.pdf"/>
+        <globmapper from="*.jpg" to="${build}/pdf/images/*.pdf"/>
+        <globmapper from="*.png" to="${build}/pdf/images/*.pdf"/>
+      </mapper>
+    </apply>
 
-         $ unzip jimi1_0.zip
-         $ cd Jimi
-         $ cp JimiProClasses.zip $FOP_HOME/lib/JimiProClasses.jar
-      -->
-    <mkdir dir="${build}/pdf"/>
-
-    <taskdef name="fop" classname="org.apache.fop.tools.anttasks.Fop">
-      <classpath>
-        <fileset dir="${fop.home}/build">
-          <include name="**/*.jar"/>
-        </fileset>
-        <fileset dir="${fop.home}/lib">
-          <include name="**/*.jar"/>
-        </fileset>
-      </classpath>
-    </taskdef>
-
-    <generate-pdf name="resin-install"/>
-    <generate-pdf name="resin-reference"/>
-
+    <generate-pdf name="book"/>
   </target>
 
   <target name="relaxng">
