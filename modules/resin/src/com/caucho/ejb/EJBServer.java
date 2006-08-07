@@ -614,6 +614,7 @@ public class EJBServer
       protocol.setServerManager(_ejbManager); // .getEnvServerManager());
     
       _ejbManager.getProtocolManager().setProtocolContainer(protocol);
+      _ejbManager.getProtocolManager().setLocalJndiName(_localJndiName);
       _ejbManager.getProtocolManager().setRemoteJndiName(_remoteJndiName);
 
       _ejbManager.setDataSource(_dataSource);

@@ -105,7 +105,7 @@ parseResinIni(FILE *file, config_t *config)
 			port = port * 10 + ch - '0';
 
 		  if (port == 0)
-		    port = 6800;
+		    port = 6802;
 
 		  /*
 		  cse_add_host(&config->config_cluster, host, port);
