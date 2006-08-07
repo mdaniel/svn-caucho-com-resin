@@ -151,6 +151,46 @@ public class EntityIntrospector {
                                     type));
     }
 
+    // Adds named queries, if any.
+
+    JAnnotation namedQueryAnn = null;
+    JAnnotation namedQueriesAnn = null;
+
+    namedQueryAnn = type.getAnnotation(NamedQuery.class);
+    namedQueriesAnn = type.getAnnotation(NamedQueries.class);
+
+    if (! ((namedQueryAnn == null) && (namedQueriesAnn == null))) {
+
+      if (isEntity || isMappedSuperclass) {
+
+        Object namedQueryArray[];
+
+        if ((namedQueryAnn != null) && (namedQueriesAnn != null)) {
+          throw new ConfigException(L.l("{0} may not have both @NamedQuery and @NamedQueries",
+                                        isEntity ? entityAnn.getString("name") :
+                                        mappedSuperclassAnn.getString("name")));
+        }
+        else if (namedQueriesAnn != null) {
+          namedQueryArray = (Object []) namedQueriesAnn.get("value");
+        }
+        else {
+          namedQueryArray = new Object[] { namedQueryAnn };
+        }
+
+        for (int i=0; i < namedQueryArray.length; i++) {
+          namedQueryAnn = (JAnnotation) namedQueryArray[i];
+          _persistenceUnit.addNamedQuery(namedQueryAnn.getString("name"),
+                                         namedQueryAnn.getString("query"));
+        }
+      }
+      else {
+        throw new ConfigException(L.l("'{0}' is not an @Entity or @MappedSuperclass.",
+                                      type));
+      }
+    }
+
+    // Validates the type
+
     String entityName;
     EntityType parentType = null;
     JAnnotation inheritanceAnn = null;

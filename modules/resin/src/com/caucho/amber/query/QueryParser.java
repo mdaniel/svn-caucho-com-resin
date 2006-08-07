@@ -114,7 +114,9 @@ public class QueryParser {
   final static int EXTERNAL_DOT = NOT + 1;
 
   final static int ARG = EXTERNAL_DOT + 1;
-  final static int THIS = ARG + 1;
+  final static int NAMED_ARG = ARG + 1;
+
+  final static int THIS = NAMED_ARG + 1;
 
   final static int NOT_NULL = THIS + 1;
 
@@ -420,7 +422,8 @@ public class QueryParser {
     if (token > 0)
       throw error(L.l("expected end of query at {0}", tokenName(token)));
 
-    query.setArgList(_argList.toArray(new ArgExpr[_argList.size()]));
+    if (! query.setArgList(_argList.toArray(new ArgExpr[_argList.size()])))
+      throw error(L.l("Unable to parse all query parameters. Make sure named parameters are not mixed with positional parameters."));
 
     try {
       query.init();
@@ -1133,6 +1136,12 @@ public class QueryParser {
         return arg;
       }
 
+    case NAMED_ARG:
+      {
+        ArgExpr arg = new ArgExpr(this, _lexeme, _parameterCount);
+        return arg;
+      }
+
       /*
         case THIS:
         {
@@ -1398,6 +1407,25 @@ public class QueryParser {
                         "?" + _lexeme));
 
       return ARG;
+
+    case ':':
+      if (Character.isJavaIdentifierStart((char) (ch = read()))) {
+        cb = CharBuffer.allocate();
+
+        for (; ch > 0 && Character.isJavaIdentifierPart((char) ch); ch = read())
+          cb.append((char) ch);
+
+        unread(ch);
+
+        _lexeme = cb.close();
+
+        _parameterCount++;
+      }
+      else
+        throw error(L.l("`{0}' must be a valid parameter identifier",
+                        ":" + ((char) ch)));
+
+      return NAMED_ARG;
 
     case '|':
       if ((ch = read()) == '|')

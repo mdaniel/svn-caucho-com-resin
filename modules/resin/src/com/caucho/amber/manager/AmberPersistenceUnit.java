@@ -153,6 +153,9 @@ public class AmberPersistenceUnit {
     new ArrayList<AmberEntityHome>();
   private ArrayList<Table> _lazyTable = new ArrayList<Table>();
 
+  private HashMap<String,String> _namedQueryMap =
+    new HashMap<String,String>();
+
   private EntityIntrospector _introspector;
   private AmberGenerator _generator;
 
@@ -414,6 +417,29 @@ public class AmberPersistenceUnit {
     EntityType entity = createEntity(type);
 
     _amberContainer.addEntity(className, entity);
+  }
+
+  /**
+   * Adds a named query.
+   */
+  public void addNamedQuery(String name,
+                            String query)
+    throws ConfigException
+  {
+    if (_namedQueryMap.containsKey(name)) {
+      throw new ConfigException(L.l("Named query '{0}': '{1}' is already defined.",
+                                    name, query));
+    }
+
+    _namedQueryMap.put(name, query);
+  }
+
+  /**
+   * Returns the named query statement.
+   */
+  public String getNamedQuery(String name)
+  {
+    return (String) _namedQueryMap.get(name);
   }
 
   /**

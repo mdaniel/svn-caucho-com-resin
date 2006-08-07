@@ -46,6 +46,8 @@ class ArgExpr extends AbstractAmberExpr {
 
   private int _sqlIndex;
 
+  private String _name;
+
 
   /**
    * Creates a new argument expression.
@@ -55,6 +57,20 @@ class ArgExpr extends AbstractAmberExpr {
   ArgExpr(QueryParser parser, int index)
   {
     _parser = parser;
+
+    _index = index;
+  }
+
+  /**
+   * Creates a new named argument expression.
+   *
+   * @param String the argument name
+   */
+  ArgExpr(QueryParser parser, String name, int index)
+  {
+    _parser = parser;
+
+    _name = name;
 
     _index = index;
   }
@@ -96,6 +112,15 @@ class ArgExpr extends AbstractAmberExpr {
   }
 
   /**
+   * Returns the argument name, or null
+   * if it is a positional parameter.
+   */
+  public String getName()
+  {
+    return _name;
+  }
+
+  /**
    * Sets the parameter.
    */
   public void setParameter(PreparedStatement pstmt, int i,
@@ -111,6 +136,9 @@ class ArgExpr extends AbstractAmberExpr {
 
   public String toString()
   {
-    return "?" + _index;
+    if (_name == null)
+      return "?" + _index;
+    else
+      return ":" + _name;
   }
 }

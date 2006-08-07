@@ -280,9 +280,11 @@ public class AmberConnection
   /**
    * Creates an instance of the named query
    */
-  public Query createNamedQuery(String sql)
+  public Query createNamedQuery(String name)
   {
-    throw new UnsupportedOperationException();
+    String sql = _persistenceUnit.getNamedQuery(name);
+
+    return createQuery(sql);
   }
 
   /**

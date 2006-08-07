@@ -43,16 +43,24 @@ import com.caucho.amber.table.LinkColumns;
  */
 abstract public class AbstractQuery {
   private String _sql;
-  
+
   protected ArrayList<FromItem> _fromList = new ArrayList<FromItem>();
-  
+
   private ArgExpr []_argList;
+
+  // Map named parameters to JDBC ?,?,?.
+  // Ex: INSERT INTO test VALUES(:testId, :testName) is mapped as [0]->"testId", [1]->"testName"
+  //     INSERT INTO test VALUES(:testName, :testName) is mapped as [0]->"testName", [1]->"testName"
+  // XXX: HashMap<String, ArrayList<Long>> would probably be an overkill.
+  //
+  private ArrayList<String> _preparedMapping = new ArrayList<String>();
+
 
   AbstractQuery(String sql)
   {
     _sql = sql;
   }
-  
+
   /**
    * Returns the query string.
    */
@@ -79,14 +87,14 @@ abstract public class AbstractQuery {
    * Creates a dependent from item
    */
   FromItem createDependentFromItem(FromItem parent,
-				   LinkColumns link,
-				   String name)
+                                   LinkColumns link,
+                                   String name)
   {
     for (int i = 0; i < _fromList.size(); i++) {
       JoinExpr join = _fromList.get(i).getJoinExpr();
 
       if (join != null && join.isDependent(parent, link))
-	return _fromList.get(i);
+        return _fromList.get(i);
     }
 
     FromItem item = createFromItem(link.getSourceTable(), name);
@@ -115,6 +123,14 @@ abstract public class AbstractQuery {
   }
 
   /**
+   * Returns the prepared mapping.
+   */
+  public ArrayList<String> getPreparedMapping()
+  {
+    return _preparedMapping;
+  }
+
+  /**
    * Returns the SQL.
    */
   public abstract String getSQL();
@@ -122,9 +138,31 @@ abstract public class AbstractQuery {
   /**
    * Sets the arg list.
    */
-  void setArgList(ArgExpr []argList)
+  boolean setArgList(ArgExpr []argList)
   {
     _argList = argList;
+
+    int n = argList.length;
+
+    if (n > 0) {
+
+      if (argList[0].getName() != null) {
+
+        for (int i=0; i < n; i++) {
+
+          String name = argList[i].getName();
+
+          if (name == null) {
+            _preparedMapping = null;
+            return false;
+          }
+
+          _preparedMapping.add(name);
+        }
+      }
+    }
+
+    return true;
   }
 
   /**

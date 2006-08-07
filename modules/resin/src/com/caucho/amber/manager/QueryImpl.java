@@ -88,7 +88,27 @@ public class QueryImpl implements Query {
 
       ResultSet rs = executeQuery();
 
+      ResultSetMetaData metaData = null;
+      int columnCount = -1;
+
+      try {
+
+        metaData = rs.getMetaData();
+
+        if (metaData != null)
+          columnCount = metaData.getColumnCount();
+
+      } catch (Exception ex) {
+        // Below, we work around if DB is not able
+        // to retrieve result set meta data. jpa/0t00
+        metaData = null;
+      }
+
+      if (columnCount < 0)
+        columnCount = 10000;
+
       int n = 0;
+
       Object row[] = null;
 
       ArrayList columns = new ArrayList();
@@ -96,14 +116,24 @@ public class QueryImpl implements Query {
       while (rs.next()) {
         Object object = null;
 
-        // XXX: use ResultSetMetaData when it is fixed.
-
         if (n == 0) {
-          for (int i=1; i<=10000; i++) {
+          for (int i=1; i<=columnCount; i++) {
             try {
+
               object = rs.getObject(i);
               columns.add(object);
+
             } catch (Exception ex) {
+
+              // XXX: add this check when meta data
+              // is working properly.
+              //
+              // if (metaData != null) {
+              //   throw ex;
+              // }
+
+              // this will only happen when DB does
+              // not support result set meta data (above).
               break;
             }
           }
@@ -203,6 +233,16 @@ public class QueryImpl implements Query {
    */
   public Query setParameter(String name, Object value)
   {
+    ArrayList<String> mapping =_query.getPreparedMapping();
+
+    int n = mapping.size();
+
+    for (int i=0; i < n; i++) {
+      if (mapping.get(i).equals(name)) {
+        setParameter(i+1, value);
+      }
+    }
+
     return this;
   }
 
