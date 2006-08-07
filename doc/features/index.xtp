@@ -3,7 +3,11 @@
     <product>resin</product>
     <title>Features</title>
     <type>contents</type>
-    <description>Release notes, change logs and some general feature-related information.</description>
+    <description>
+      <p>
+      Release notes, change logs and some general feature-related information.
+      </p>
+    </description>
   </header>
 
   <body>

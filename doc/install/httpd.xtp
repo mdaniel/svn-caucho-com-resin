@@ -223,7 +223,8 @@ the executable string.</p>
 the service name.</p>
 
 <example>
-C:\&gt; resin-3.0.x\bin\httpd -install-as ResinA -conf conf/myconf.conf -server a
+C:\&gt; resin-3.0.x\bin\httpd -install-as ResinA \
+    -conf conf/myconf.conf -server a
 C:\&gt; net start ResinA
 </example>
 

@@ -6,10 +6,12 @@
     <type>contents</type>
     <resin-2.0>$resin/ref/jsp.xtp</resin-2.0>
     <description>
+      <p>
       JSP creates output (such as HTML) from <em>template</em>
       text and scripting <em>actions</em>.  Template text is returned
       verbatim to the requesting client, and actions are used to fill
       in dynamic values and do things conditionallly.
+      </p>
     </description>
   </header>
 

@@ -4,9 +4,12 @@
     <title>Amber</title>
     <type>contents</type>
 
-    <description>Amber is Resin's implementation of the
-EJB 3.0 persistence specification, using plain Java beans as
-the application model.
+    <description>
+      <p>
+      Amber is Resin's implementation of the
+      EJB 3.0 persistence specification, using plain Java beans as
+      the application model.
+      </p>
     </description>
   </header>
 

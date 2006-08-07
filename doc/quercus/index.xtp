@@ -5,7 +5,10 @@
     <level>toplevel-topic</level>
     <type>contents</type>
     <description>
-<em>Quercus</em> is Caucho Technology's fast, open-source, 100% Java implementation of the PHP language (requires JDK 1.5).
+      <p>
+      <em>Quercus</em> is Caucho Technology's fast, open-source, 100%
+      Java implementation of the PHP language (requires JDK 1.5).
+      </p>
     </description>
   </header>
 

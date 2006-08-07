@@ -609,7 +609,10 @@ could be invoked.</warn>
 <example title="servlet invoker">
 &lt;web-app id='/'&gt;
 
-  &lt;!-- used with url like http://localhost:8080/servlets/test.HelloServlet --&gt;
+  &lt;!-- 
+    used with urls like 
+    http://localhost:8080/servlets/test.HelloServlet 
+  --&gt;
   &lt;servlet-mapping url-pattern="/servlet/*" servlet-name="invoker"/&gt;
 
 &lt;/web-app&gt;
@@ -772,7 +775,9 @@ element.</p>
 
 <example>
 &lt;web-app id='/'&gt;
-  &lt;welcome-file-list&gt;index.jsp, index.xtp, home.xtp&lt;/welcome-file-list&gt;
+  &lt;welcome-file-list&gt;
+    index.jsp, index.xtp, home.xtp
+  &lt;/welcome-file-list&gt;
 &lt;/web-app&gt;
 </example>
 

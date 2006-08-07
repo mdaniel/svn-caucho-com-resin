@@ -201,7 +201,8 @@ The httpd.conf file is also easily modified manually:
 </p>
 
 <example title="httpd.conf">
-LoadModule caucho_module &lt;installdir&gt;/resin-3.0.x/win32/apache-2.0/mod_caucho.dll
+LoadModule caucho_module \
+    &lt;installdir&gt;/resin-3.0.x/win32/apache-2.0/mod_caucho.dll
 
 ResinConfigServer localhost 6802
 &lt;Location /caucho-status&gt;
@@ -375,7 +376,8 @@ ResinConfigServer localhost 6802
 </example>
 
 <example title="Windows - httpd.conf">
-LoadModule caucho_module &lt;installdir&gt;/resin-3.0.x/libexec/apache-2.0/mod_caucho.dll
+LoadModule caucho_module \
+    &lt;installdir&gt;/resin-3.0.x/libexec/apache-2.0/mod_caucho.dll
 
 ResinConfigServer localhost 6802
 &lt;Location /caucho-status&gt;
@@ -565,9 +567,11 @@ down.</p>
 &lt;server&gt;
   &lt;cluster&gt;
     &lt;srun id="a" host="192.168.0.11" port="6802" index="1"/&gt;
-    &lt;srun id="b" host="192.168.0.11" port="6803" index="2" backup="true"/&gt;
+    &lt;srun id="b" host="192.168.0.11" port="6803" index="2" 
+             backup="true"/&gt;
     &lt;srun id="c" host="192.168.0.12" port="6802" index="3"/&gt;
-    &lt;srun id="d" host="192.168.0.12" port="6803" index="4" backup="true"/&gt;
+    &lt;srun id="d" host="192.168.0.12" port="6803" index="4" 
+             backup="true"/&gt;
   &lt;/cluster&gt;
   ...
 &lt;/server&gt;

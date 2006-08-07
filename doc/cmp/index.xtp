@@ -3,12 +3,15 @@
     <product>resin-ee</product>
     <title>CMP</title>
     <type>contents</type>
+    <description>
+      <p>
+      Developers evaluating CMP should also look at 
+      <a href="../amber">Amber</a> as an alternative persistence framework.
+      </p>
+    </description>
   </header>
 
   <body>
-
-<p>Developers evaluating CMP should also look
-at <a href="../amber">Amber</a> as an alternative persistence framework.</p>
 
     <summary/>
   </body>
