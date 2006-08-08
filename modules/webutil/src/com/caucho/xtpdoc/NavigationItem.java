@@ -59,52 +59,15 @@ public class NavigationItem {
   private ArrayList<NavigationItem> _items = new ArrayList<NavigationItem>();
   private Path _rootPath;
 
-  public NavigationItem(Document document)
+  public NavigationItem(Document document, int depth)
   {
     _document = document;
-  }
-
-  void setMaxDepth(int maxDepth)
-  {
-    _maxDepth = maxDepth;
-
-    for (NavigationItem item : _items)
-      item.setMaxDepth(_maxDepth);
-  }
-
-  void setDepth(int depth)
-  {
     _depth = depth;
-
-    for (NavigationItem item : _items)
-      item.setDepth(_depth + 1);
+    _rootPath = document.getDocumentPath().getParent();
   }
 
-  void setRootPath(Path rootPath)
+  public void init()
   {
-    _rootPath = rootPath;
-  }
-
-  public ContentItem createDescription()
-  {
-    _description = new FormattedText(_document);
-    return _description;
-  }
-
-  public void setCond(String cond)
-  {
-    // XXX
-  }
-
-  public void setATOCDescend(boolean atocDescend)
-  {
-    _atocDescend = atocDescend;
-  }
-
-  public void setLink(String link)
-  {
-    _link = link;
-
     if (_depth > _maxDepth)
       return;
 
@@ -144,6 +107,27 @@ public class NavigationItem {
     }
   }
 
+  public ContentItem createDescription()
+  {
+    _description = new FormattedText(_document);
+    return _description;
+  }
+
+  public void setCond(String cond)
+  {
+    // XXX
+  }
+
+  public void setATOCDescend(boolean atocDescend)
+  {
+    _atocDescend = atocDescend;
+  }
+
+  public void setLink(String link)
+  {
+    _link = link;
+  }
+
   public void setTitle(String title)
   {
     _title = title;
@@ -156,12 +140,8 @@ public class NavigationItem {
 
   public NavigationItem createItem()
   {
-    NavigationItem item = new NavigationItem(_document);
-
+    NavigationItem item = new NavigationItem(_document, _depth + 1);
     _items.add(item);
-
-    item.setRootPath(_rootPath);
-
     return item;
   }
 

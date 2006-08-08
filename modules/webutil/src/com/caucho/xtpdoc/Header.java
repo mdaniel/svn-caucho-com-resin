@@ -41,7 +41,6 @@ public class Header {
   private String _version;
   private String _title;
   private Section _description;
-  private String _contextPath;
   private Keywords _keywords;
 
   public Header(Document document)
@@ -126,7 +125,7 @@ public class Header {
     out.writeEmptyElement("link");
     out.writeAttribute("rel", "STYLESHEET");
     out.writeAttribute("type", "text/css");
-    out.writeAttribute("href", _contextPath + "/css/default.css");
+    out.writeAttribute("href", _document.getContextPath() + "/css/default.css");
 
     out.writeStartElement("title");
     out.writeCharacters(_title);

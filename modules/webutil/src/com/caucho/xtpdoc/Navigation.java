@@ -78,13 +78,8 @@ public class Navigation {
 
   public NavigationItem createItem()
   {
-    NavigationItem item = new NavigationItem(_document);
-
+    NavigationItem item = new NavigationItem(_document, _depth);
     _items.add(item);
-    
-    item.setDepth(_depth);
-    item.setRootPath(_rootPath);
-    
     return item;
   }
 
