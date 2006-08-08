@@ -104,6 +104,16 @@ public class EjbProtocolManager {
       _protocolMap.put("iiop", iiop);
   }
 
+  public void setLocalJndiName(String name)
+  {
+    _localJndiName = name;
+  }
+
+  public String getLocalJndiName()
+  {
+    return _localJndiName;
+  }
+
   public void setRemoteJndiName(String name)
   {
     _remoteJndiName = name;

@@ -1,7 +1,0 @@
-<widget xmlns="http://caucho.com/ns/widget">
-  <!-- this is a comment -->
-  <label value="hello, world">
-  <!-- this is a comment -->
-  </label>
-  <!-- this is a comment -->
-</widget>

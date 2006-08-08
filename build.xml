@@ -52,7 +52,7 @@
   <target name="init" depends="tstamp">
     <property name="product" value="Resin"/>
     <property name="shortproduct" value="resin"/>
-    <property name="version" value="3.0.s${snapshotdate}"/>
+    <property name="version" value="3.1.s${snapshotdate}"/>
     <property name="dist.name" value="${shortproduct}-${version}"/>
 
     <mkdir dir="${build}"/>

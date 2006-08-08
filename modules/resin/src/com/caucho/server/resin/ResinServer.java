@@ -720,6 +720,12 @@ public class ResinServer
     J2EEManagedObject.unregister(j2eeDomainManagedObject);
 
     try {
+      _server.destroy();
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+    
+    try {
       for (int i = 0; i < listeners.size(); i++) {
         ResinServerListener listener = listeners.get(i);
 

@@ -80,6 +80,8 @@ r_cluster-Basis =
 
   & r_rewrite-dispatch?
 
+  & r_root-directory?
+
   & r_server*
 
   & r_server-default*
