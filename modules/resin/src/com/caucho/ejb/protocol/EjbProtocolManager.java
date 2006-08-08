@@ -144,7 +144,11 @@ public class EjbProtocolManager {
     throws NamingException
   {
     Jndi.rebindDeep(_localJndiName, new NamingProxy(_localRoot));
-    Jndi.rebindDeep(_remoteJndiName, new NamingProxy(_remoteRoot));
+
+    if (_localJndiName.equals(_remoteJndiName))
+      _remoteRoot = _localRoot;
+    else
+      Jndi.rebindDeep(_remoteJndiName, new NamingProxy(_remoteRoot));
   }
 
   /**

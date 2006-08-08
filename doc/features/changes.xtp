@@ -4,7 +4,7 @@
 
 <s2 title='3.0snap - Aug 1, 2006'>
 <ul>
-<li>ejb-server jndi-name for local name wasn't handled properly (#1276, rep by Andrew Barson and Matt Pangaro)
+<li>(2006-08-07) ejb-server jndi-name for local name wasn't handled properly (#1276, rep by Andrew Barson and Matt Pangaro)
 <li>isapi_srun.dll changed to default 6802 (#1274, rep by mindlink)
 <li>license signature fixes (rep by Matt Pangaro)
 </ul>
