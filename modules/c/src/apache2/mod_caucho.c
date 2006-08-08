@@ -1038,7 +1038,7 @@ cse_strip(request_rec *r)
   if (config == NULL || ! uri)
     return DECLINED;
 
-  if (config->session_url_prefix) {
+  if (config->session_url_prefix && *config->session_url_prefix) {
     char *new_uri;
     
     new_uri = strstr(uri, config->session_url_prefix);
@@ -1113,7 +1113,7 @@ cse_dispatch(request_rec *r)
     return caucho_status(r);
   }
   
-  if (config->session_url_prefix) {
+  if (*config->session_url_prefix) {
     return cse_strip(r);
   }
 
