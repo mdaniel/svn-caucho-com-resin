@@ -35,78 +35,46 @@ import java.io.IOException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
-public class ListItem extends FormattedTextWithAnchors {
-  public ListItem(Document document)
+public class BlockQuote extends FormattedTextWithAnchors {
+  private boolean longQuote = false;
+
+  public BlockQuote(Document document)
   {
     super(document);
   }
 
   public Paragraph createP()
   {
+    longQuote = true;
+
     Paragraph paragraph = new Paragraph(getDocument());
     addItem(paragraph);
     return paragraph;
   }
 
-  public DefinitionTable createDeftable()
-  {
-    DefinitionTable deftable = new DefinitionTable(getDocument());
-    addItem(deftable);
-    return deftable;
-  }
-
-  public Def createDef()
-  {
-    Def def = new Def(getDocument());
-    addItem(def);
-    return def;
-  }
-
-  public Example createExample()
-  {
-    Example example = new Example(getDocument());
-    addItem(example);
-    return example;
-  }
-
-  public OrderedList createOl()
-  {
-    OrderedList orderedList = new OrderedList(getDocument());
-    addItem(orderedList);
-    return orderedList;
-  }
-
-  public UnorderedList createUl()
-  {
-    UnorderedList unorderedList = new UnorderedList(getDocument());
-    addItem(unorderedList);
-    return unorderedList;
-  }
-
-  public Image createImg()
-  {
-    Image image = new Image(getDocument());
-    addItem(image);
-    return image;
-  }
-
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    out.writeStartElement("li");
+    out.writeStartElement("blockquote");
 
     super.writeHtml(out);
 
-    out.writeEndElement(); // li
+    out.writeEndElement(); // blockquote
   }
 
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    out.print("\\item ");
+    if (longQuote)
+      out.println("\\begin{quotation}");
+    else
+      out.println("\\begin{quote}");
 
     super.writeLaTeX(out);
 
-    out.println();
+    if (longQuote)
+      out.println("\\end{quotation}");
+    else
+      out.println("\\end{quote}");
   }
 }

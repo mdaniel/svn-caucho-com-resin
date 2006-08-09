@@ -35,7 +35,7 @@ import java.io.IOException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
-public class Def extends VerboseFormattedText {
+public class Def extends VerboseFormattedTextWithAnchors {
   private String _title;
 
   public Def(Document document)

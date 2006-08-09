@@ -88,13 +88,15 @@ public class Navigation {
   {
     String depthString = (_depth == 0) ? "top" : ("" + _depth);
 
+    /*
     out.writeStartElement("dl");
     out.writeAttribute("class", "atoc-toplevel atoc-toplevel-" + depthString);
+    */
 
     for (NavigationItem item : _items)
       item.writeHtml(out);
 
-    out.writeEndElement(); // dl
+    //out.writeEndElement(); // dl
   }
 
   public void writeLeftNav(XMLStreamWriter out)

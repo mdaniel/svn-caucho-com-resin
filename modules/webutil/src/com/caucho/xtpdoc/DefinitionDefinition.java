@@ -35,78 +35,25 @@ import java.io.IOException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
-public class ListItem extends FormattedTextWithAnchors {
-  public ListItem(Document document)
+public class DefinitionDefinition extends FormattedTextWithAnchors 
+  implements DefinitionItem 
+{
+  public DefinitionDefinition(Document document)
   {
     super(document);
-  }
-
-  public Paragraph createP()
-  {
-    Paragraph paragraph = new Paragraph(getDocument());
-    addItem(paragraph);
-    return paragraph;
-  }
-
-  public DefinitionTable createDeftable()
-  {
-    DefinitionTable deftable = new DefinitionTable(getDocument());
-    addItem(deftable);
-    return deftable;
-  }
-
-  public Def createDef()
-  {
-    Def def = new Def(getDocument());
-    addItem(def);
-    return def;
-  }
-
-  public Example createExample()
-  {
-    Example example = new Example(getDocument());
-    addItem(example);
-    return example;
-  }
-
-  public OrderedList createOl()
-  {
-    OrderedList orderedList = new OrderedList(getDocument());
-    addItem(orderedList);
-    return orderedList;
-  }
-
-  public UnorderedList createUl()
-  {
-    UnorderedList unorderedList = new UnorderedList(getDocument());
-    addItem(unorderedList);
-    return unorderedList;
-  }
-
-  public Image createImg()
-  {
-    Image image = new Image(getDocument());
-    addItem(image);
-    return image;
   }
 
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    out.writeStartElement("li");
-
+    out.writeStartElement("dd");
     super.writeHtml(out);
-
-    out.writeEndElement(); // li
+    out.writeEndElement(); // dd
   }
 
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    out.print("\\item ");
-
-    super.writeLaTeX(out);
-
-    out.println();
+    // XXX
   }
 }

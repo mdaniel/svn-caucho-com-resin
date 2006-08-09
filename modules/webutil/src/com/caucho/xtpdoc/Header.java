@@ -40,6 +40,8 @@ public class Header {
   private String _product;
   private String _version;
   private String _title;
+  private String _author;
+  private String _date;
   private Section _description;
   private Keywords _keywords;
 
@@ -61,6 +63,16 @@ public class Header {
   public void setTitle(String title)
   {
     _title = title;
+  }
+
+  public void setDate(String date)
+  {
+    _date = date;
+  }
+
+  public void setAuthor(String author)
+  {
+    _author = author;
   }
 
   public void setResin2_0(String resin2_0)

@@ -32,81 +32,55 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
+import java.util.ArrayList;
+
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
-public class ListItem extends FormattedTextWithAnchors {
-  public ListItem(Document document)
+public class DefinitionList implements ContentItem {
+  private Document _document;
+  private ArrayList<DefinitionItem> _listItems = 
+    new ArrayList<DefinitionItem>();
+
+  public DefinitionList(Document document)
   {
-    super(document);
+    document = _document;
   }
 
-  public Paragraph createP()
+  public DefinitionTerm createDt()
   {
-    Paragraph paragraph = new Paragraph(getDocument());
-    addItem(paragraph);
-    return paragraph;
+    DefinitionTerm term = new DefinitionTerm(_document);
+    _listItems.add(term);
+    return term;
   }
 
-  public DefinitionTable createDeftable()
+  public DefinitionDefinition createDd()
   {
-    DefinitionTable deftable = new DefinitionTable(getDocument());
-    addItem(deftable);
-    return deftable;
-  }
-
-  public Def createDef()
-  {
-    Def def = new Def(getDocument());
-    addItem(def);
-    return def;
-  }
-
-  public Example createExample()
-  {
-    Example example = new Example(getDocument());
-    addItem(example);
-    return example;
-  }
-
-  public OrderedList createOl()
-  {
-    OrderedList orderedList = new OrderedList(getDocument());
-    addItem(orderedList);
-    return orderedList;
-  }
-
-  public UnorderedList createUl()
-  {
-    UnorderedList unorderedList = new UnorderedList(getDocument());
-    addItem(unorderedList);
-    return unorderedList;
-  }
-
-  public Image createImg()
-  {
-    Image image = new Image(getDocument());
-    addItem(image);
-    return image;
+    DefinitionDefinition definition = new DefinitionDefinition(_document);
+    _listItems.add(definition);
+    return definition;
   }
 
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    out.writeStartElement("li");
+    out.writeStartElement("dl");
 
-    super.writeHtml(out);
+    for (DefinitionItem item : _listItems)
+      item.writeHtml(out);
 
-    out.writeEndElement(); // li
+    out.writeEndElement(); // dl
   }
 
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    out.print("\\item ");
+    // XXX
+    out.println("\\begin{enumerate}");
 
-    super.writeLaTeX(out);
+    for (DefinitionItem item : _listItems)
+      item.writeLaTeX(out);
 
-    out.println();
+    out.println("\\end{enumerate}");
   }
 }

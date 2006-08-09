@@ -35,7 +35,7 @@ import java.io.IOException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
-public class EmphasizedText extends FormattedText {
+public class EmphasizedText extends FormattedTextWithAnchors {
   public EmphasizedText(Document document)
   {
     super(document);

@@ -34,23 +34,16 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
-public class S3 extends Section {
-  public S3(Document document)
+public class S4 extends Section {
+  public S4(Document document)
   {
     super(document);
-  }
-
-  public S4 createS4()
-  {
-    S4 s4 = new S4(_document);
-    _contentItems.add(s4);
-    return s4;
   }
 
   public void writeLaTeXTop(PrintWriter out)
     throws IOException
   {
-    out.println("\\subsubsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+    out.println("\\paragraph{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
 
     super.writeLaTeX(out);
   }

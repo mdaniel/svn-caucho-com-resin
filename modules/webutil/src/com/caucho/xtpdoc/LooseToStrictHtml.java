@@ -61,6 +61,12 @@ public class LooseToStrictHtml {
 
           thisLevel = level + 1;
         }
+        else if (subElement.getTagName().equals("faq")) {
+          ((QElement) subElement).setName(new QName("s" + level));
+          subElement.setAttribute("type", "faq");
+
+          thisLevel = level + 1;
+        }
       } 
 
       renameSections(child, thisLevel);

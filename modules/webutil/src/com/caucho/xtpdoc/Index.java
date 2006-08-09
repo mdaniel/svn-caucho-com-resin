@@ -32,81 +32,43 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
+import java.util.ArrayList;
+
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
-public class ListItem extends FormattedTextWithAnchors {
-  public ListItem(Document document)
+public class Index implements ContentItem {
+  private Document _document;
+  private ArrayList<IndexItem> _indexItems = new ArrayList<IndexItem>();
+
+  public Index(Document document)
   {
-    super(document);
+    _document = document;
   }
 
-  public Paragraph createP()
+  public IndexItem createIx()
   {
-    Paragraph paragraph = new Paragraph(getDocument());
-    addItem(paragraph);
-    return paragraph;
-  }
-
-  public DefinitionTable createDeftable()
-  {
-    DefinitionTable deftable = new DefinitionTable(getDocument());
-    addItem(deftable);
-    return deftable;
-  }
-
-  public Def createDef()
-  {
-    Def def = new Def(getDocument());
-    addItem(def);
-    return def;
-  }
-
-  public Example createExample()
-  {
-    Example example = new Example(getDocument());
-    addItem(example);
-    return example;
-  }
-
-  public OrderedList createOl()
-  {
-    OrderedList orderedList = new OrderedList(getDocument());
-    addItem(orderedList);
-    return orderedList;
-  }
-
-  public UnorderedList createUl()
-  {
-    UnorderedList unorderedList = new UnorderedList(getDocument());
-    addItem(unorderedList);
-    return unorderedList;
-  }
-
-  public Image createImg()
-  {
-    Image image = new Image(getDocument());
-    addItem(image);
-    return image;
+    IndexItem item = new IndexItem(_document);
+    _indexItems.add(item);
+    return item;
   }
 
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    out.writeStartElement("li");
+    out.writeStartElement("dl");
+    out.writeAttribute("class", "index");
+    out.writeAttribute("compact", "COMPACT");
 
-    super.writeHtml(out);
+    for (IndexItem item : _indexItems)
+      item.writeHtml(out);
 
-    out.writeEndElement(); // li
+    out.writeEndElement(); // dl
   }
 
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    out.print("\\item ");
-
-    super.writeLaTeX(out);
-
-    out.println();
+    // XXX
   }
 }

@@ -32,34 +32,8 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
-import java.util.ArrayList;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
 
-public class S3 extends Section {
-  public S3(Document document)
-  {
-    super(document);
-  }
-
-  public S4 createS4()
-  {
-    S4 s4 = new S4(_document);
-    _contentItems.add(s4);
-    return s4;
-  }
-
-  public void writeLaTeXTop(PrintWriter out)
-    throws IOException
-  {
-    out.println("\\subsubsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
-
-    super.writeLaTeX(out);
-  }
-
-  public void writeLaTeX(PrintWriter out)
-    throws IOException
-  {
-    out.println("\\paragraph{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
-
-    super.writeLaTeX(out);
-  }
+public interface DefinitionItem extends ContentItem {
 }

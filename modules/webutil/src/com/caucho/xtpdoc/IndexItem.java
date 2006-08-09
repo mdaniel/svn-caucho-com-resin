@@ -32,81 +32,56 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
+import java.util.ArrayList;
+
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
-public class ListItem extends FormattedTextWithAnchors {
-  public ListItem(Document document)
+public class IndexItem implements ContentItem {
+  private String _id;
+  private String _link;
+  private FormattedTextWithAnchors _text;
+  private Document _document;
+
+  public IndexItem(Document document)
   {
-    super(document);
+    _document = document;
   }
 
-  public Paragraph createP()
+  public void setId(String id)
   {
-    Paragraph paragraph = new Paragraph(getDocument());
-    addItem(paragraph);
-    return paragraph;
+    _id = id;
   }
 
-  public DefinitionTable createDeftable()
+  public void setH(String link)
   {
-    DefinitionTable deftable = new DefinitionTable(getDocument());
-    addItem(deftable);
-    return deftable;
+    _link = link;
   }
 
-  public Def createDef()
+  public FormattedTextWithAnchors createD()
   {
-    Def def = new Def(getDocument());
-    addItem(def);
-    return def;
-  }
-
-  public Example createExample()
-  {
-    Example example = new Example(getDocument());
-    addItem(example);
-    return example;
-  }
-
-  public OrderedList createOl()
-  {
-    OrderedList orderedList = new OrderedList(getDocument());
-    addItem(orderedList);
-    return orderedList;
-  }
-
-  public UnorderedList createUl()
-  {
-    UnorderedList unorderedList = new UnorderedList(getDocument());
-    addItem(unorderedList);
-    return unorderedList;
-  }
-
-  public Image createImg()
-  {
-    Image image = new Image(getDocument());
-    addItem(image);
-    return image;
+    _text = new FormattedTextWithAnchors(_document);
+    return _text;
   }
 
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    out.writeStartElement("li");
+    out.writeStartElement("dt");
+    out.writeStartElement("a");
+    out.writeAttribute("name", _link);
+    out.writeCharacters(_id);
+    out.writeEndElement(); // a
+    out.writeEndElement(); // dt
 
-    super.writeHtml(out);
-
-    out.writeEndElement(); // li
+    out.writeStartElement("dd");
+    _text.writeHtml(out);
+    out.writeEndElement(); // dd
   }
 
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    out.print("\\item ");
-
-    super.writeLaTeX(out);
-
-    out.println();
+    // XXX
   }
 }

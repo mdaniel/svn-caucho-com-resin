@@ -37,7 +37,8 @@ import javax.xml.stream.XMLStreamException;
 
 public class Example extends VerboseFormattedTextWithAnchors {
   private String _title;
-  private String _language = null;
+  private String _file;
+  private String _language;
 
   public Example(Document document)
   {
@@ -54,6 +55,11 @@ public class Example extends VerboseFormattedTextWithAnchors {
     _language = language;
   }
 
+  public void setFile(String file)
+  {
+    _file = file;
+  }
+
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
@@ -62,6 +68,15 @@ public class Example extends VerboseFormattedTextWithAnchors {
       out.writeStartElement("b");
       out.writeCharacters(_title);
       out.writeEndElement();
+      out.writeEndElement();
+    }
+
+    if (_file != null) {
+      out.writeEmptyElement("br");
+      out.writeCharacters("See it in: ");
+      out.writeStartElement("a");
+      out.writeAttribute("href", _file);
+      out.writeCharacters(_file);
       out.writeEndElement();
     }
     

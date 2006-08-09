@@ -39,6 +39,7 @@ import javax.xml.stream.XMLStreamException;
 
 public abstract class Section implements ContentItem {
   protected Document _document;
+  protected FormattedTextWithAnchors _description;
   protected String _name;
   protected String _title;
   protected String _version;
@@ -83,13 +84,41 @@ public abstract class Section implements ContentItem {
     _type = type;
   }
 
+  public void setProduct(String product)
+  {
+  }
+
+  public void setIndex(String index)
+  {
+  }
+
   //
   // XXX: End stubbed
   //
-
+  
   public void setTitle(String title)
   {
     _title = title;
+  }
+
+  public DefinitionList createDl()
+  {
+    DefinitionList list = new DefinitionList(_document);
+    _contentItems.add(list);
+    return list;
+  }
+
+  public FormattedTextWithAnchors createDescription()
+  {
+    _description = new FormattedTextWithAnchors(_document);
+    return _description;
+  }
+
+  public BlockQuote createBlockquote()
+  {
+    BlockQuote blockQuote = new BlockQuote(_document);
+    _contentItems.add(blockQuote);
+    return blockQuote;
   }
 
   public Paragraph createP()

@@ -66,7 +66,15 @@ public class Summary {
   {
   }
 
+  public void setNoObjSummary(String noObjSummary)
+  {
+  }
+
   public void setObjSummaryInLocalTOC(String objSummary)
+  {
+  }
+
+  public void setDescription(String description)
   {
   }
 

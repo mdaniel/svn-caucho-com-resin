@@ -49,6 +49,7 @@ public class Body {
   private Path _rootPath;
   private Navigation _navigation;
   private Summary _summary;
+  private Index _index;
   private ArrayList<Section> _sections = new ArrayList<Section>();
 
   public Body(Document document)
@@ -103,6 +104,12 @@ public class Body {
     return s1;
   }
 
+  public Index createIxx()
+  {
+    _index = new Index(_document);
+    return _index;
+  }
+
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
@@ -134,6 +141,9 @@ public class Body {
       _summary.setNavigation(_navigation);
       _summary.writeHtml(out);
     }
+
+    if (_index != null)
+      _index.writeHtml(out);
 
     for (Section section : _sections)
       section.writeHtml(out);

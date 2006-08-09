@@ -58,6 +58,10 @@ public class FormattedText implements ContentItem {
     _contentItems.add(item);
   }
 
+  public void setOccur(String occur)
+  {
+  }
+
   public void addText(String text)
   {
     _contentItems.add(new Text(text));
@@ -66,6 +70,13 @@ public class FormattedText implements ContentItem {
   public void addG(GlossaryText text)
   {
     _contentItems.add(text);
+  }
+
+  public LineBreak createBr()
+  {
+    LineBreak lineBreak = new LineBreak(_document);
+    _contentItems.add(lineBreak);
+    return lineBreak;
   }
 
   public ItalicizedText createI()
@@ -85,6 +96,13 @@ public class FormattedText implements ContentItem {
   public EmphasizedText createEm()
   {
     EmphasizedText text = new EmphasizedText(_document);
+    _contentItems.add(text);
+    return text;
+  }
+
+  public SuperText createSup()
+  {
+    SuperText text = new SuperText(_document);
     _contentItems.add(text);
     return text;
   }

@@ -71,37 +71,43 @@ public class NavigationItem {
     if (_depth > _maxDepth)
       return;
 
-    Path linkPath = _rootPath.lookup(_link);
+    if (_rootPath != null && _link != null) {
+      Path linkPath = _rootPath.lookup(_link);
 
-    if (linkPath.exists()) {
-      Config config = new Config();
+      if (linkPath.exists()) {
+        Config config = new Config();
 
-      Document document = new Document(linkPath, _document.getContextPath());
+        Document document = new Document(linkPath, _document.getContextPath());
 
-      try {
-        config.configure(document, linkPath);
+        try {
+          config.configure(document, linkPath);
 
-        _description = document.getHeader().getDescription();
-      } catch (Exception e) {
-        log.info("error configuring " + linkPath + ": " + e);
-      }
+          if (document.getHeader() != null)
+            _description = document.getHeader().getDescription();
+        } catch (NullPointerException e) {
+          log.info("error configuring " + linkPath + ": " + e);
+          e.printStackTrace();
+        } catch (Exception e) {
+          log.info("error configuring " + linkPath + ": " + e);
+        }
 
-      if (_atocDescend) {
-        Path linkRoot = linkPath.getParent();
-        Path subToc = linkPath.getParent().lookup("toc.xml");
+        if (_atocDescend) {
+          Path linkRoot = linkPath.getParent();
+          Path subToc = linkPath.getParent().lookup("toc.xml");
 
-        if (subToc.exists()) {
-          _child = new Navigation(document, _depth + 1);
+          if (subToc.exists()) {
+            _child = new Navigation(document, _depth + 1);
 
-          try {
-            config.configure(_child, subToc);
-          } catch (Exception e) {
-            log.info("Failed to configure " + subToc + ": " + e);
+            try {
+              config.configure(_child, subToc);
+            } catch (Exception e) {
+              log.info("Failed to configure " + subToc + ": " + e);
 
-            _child = null;
+              _child = null;
+            }
+          } else {
+            log.info(subToc + " does not exist!");
           }
-        } else {
-          log.info(subToc + " does not exist!");
         }
       }
     }
@@ -111,11 +117,6 @@ public class NavigationItem {
   {
     _description = new FormattedText(_document);
     return _description;
-  }
-
-  public void setCond(String cond)
-  {
-    // XXX
   }
 
   public void setATOCDescend(boolean atocDescend)

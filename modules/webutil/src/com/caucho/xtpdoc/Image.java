@@ -28,85 +28,78 @@
  */
 
 package com.caucho.xtpdoc;
-
 import java.io.PrintWriter;
 import java.io.IOException;
 
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
-public class ListItem extends FormattedTextWithAnchors {
-  public ListItem(Document document)
+public class Image implements ContentItem {
+  private int _height = -1;
+  private int _width = -1;
+  private String _source;
+  private Document _document;
+
+  public Image(Document document)
   {
-    super(document);
+    _document = document;
   }
 
-  public Paragraph createP()
+  public Document getDocument()
   {
-    Paragraph paragraph = new Paragraph(getDocument());
-    addItem(paragraph);
-    return paragraph;
+    return _document;
   }
 
-  public DefinitionTable createDeftable()
+  public void setHeight(int height)
   {
-    DefinitionTable deftable = new DefinitionTable(getDocument());
-    addItem(deftable);
-    return deftable;
+    _height = height;
   }
 
-  public Def createDef()
+  public void setWidth(int width)
   {
-    Def def = new Def(getDocument());
-    addItem(def);
-    return def;
+    _width = width;
   }
 
-  public Example createExample()
+  public void setSrc(String source)
   {
-    Example example = new Example(getDocument());
-    addItem(example);
-    return example;
-  }
-
-  public OrderedList createOl()
-  {
-    OrderedList orderedList = new OrderedList(getDocument());
-    addItem(orderedList);
-    return orderedList;
-  }
-
-  public UnorderedList createUl()
-  {
-    UnorderedList unorderedList = new UnorderedList(getDocument());
-    addItem(unorderedList);
-    return unorderedList;
-  }
-
-  public Image createImg()
-  {
-    Image image = new Image(getDocument());
-    addItem(image);
-    return image;
+    _source = source;
   }
 
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    out.writeStartElement("li");
+    out.writeEmptyElement("img");
 
-    super.writeHtml(out);
+    if (_height >= 0)
+      out.writeAttribute("height", Integer.toString(_height));
 
-    out.writeEndElement(); // li
+    if (_width >= 0)
+      out.writeAttribute("width", Integer.toString(_width));
+
+    out.writeAttribute("src", _source);
   }
 
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    out.print("\\item ");
+    //out.println("\\begin{figure}[h]");
 
-    super.writeLaTeX(out);
+    int dot = _source.lastIndexOf('.');
 
-    out.println();
+    String basename = _source.substring(0, dot);
+
+    out.println("\\epsfig{file=../images/" + basename + ",width=\\linewidth}");
+
+    /*
+    if (_height >= 0)
+      out.print(",height=" + _height);
+
+    if (_width >= 0)
+      out.print(",width=" + _width);
+
+    out.println("}");
+    */
+
+    //out.println("\\end{figure}");
   }
 }

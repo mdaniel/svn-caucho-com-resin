@@ -43,6 +43,13 @@ public class Faq extends Section {
     super(document);
   }
 
+  public S1 createS1()
+  {
+    S1 s1 = new S1(_document);
+    _contentItems.add(s1);
+    return s1;
+  }
+
   public FormattedTextWithAnchors createDescription()
   {
     _description = new FormattedTextWithAnchors(_document);

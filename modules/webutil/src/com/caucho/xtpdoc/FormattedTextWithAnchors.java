@@ -42,7 +42,7 @@ public class FormattedTextWithAnchors extends FormattedText {
     return anchor;
   }
 
-  public ViewFileLink createViewFileLink()
+  public ViewFileLink createViewfileLink()
   {
     ViewFileLink viewFileLink = new ViewFileLink(getDocument());
     addItem(viewFileLink);
