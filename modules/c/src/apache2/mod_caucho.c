@@ -690,8 +690,15 @@ send_data(stream_t *s, request_rec *r)
       for (i = 0; buf[i] && buf[i] != ' '; i++) {
       }
       i++;
+      
+      if (r->expecting_100) {
+	r->status = 100;
+	ap_rflush(r);
+      }
+      
       r->status = atoi(buf);
       r->status_line = apr_pstrdup(r->pool, buf);
+
       break;
 
     case HMUX_HEADER:
