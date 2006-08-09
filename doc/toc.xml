@@ -25,7 +25,6 @@
     <item link="ejb3/index.xtp" title="EJB 3.0" product="resin-ee" atoc-descend="true"/>
     <item link='security/index.xtp' title='Security' atoc-descend="true"/>
     <item link='xml/index.xtp' title='XML and XSLT' atoc-descend="true"/>
-    <item link='xtp/index.xtp' title='XTP' atoc-descend="true"/>
     <item link='jms/index.xtp' title='JMS' product="resin-ee" atoc-descend="true"/>
     <item link='performance/index.xtp' title='Performance' atoc-descend="true"/>
     <item link='protocols/index.xtp' title='Protocols' atoc-descend="true"/>
