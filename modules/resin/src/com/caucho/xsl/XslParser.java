@@ -39,7 +39,6 @@ import com.caucho.log.Log;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.xml.*;
-import com.caucho.es.*;
 
 /**
  * Parses a 'StyleScript' file.  StyleScript is compatible with XSLT, adding

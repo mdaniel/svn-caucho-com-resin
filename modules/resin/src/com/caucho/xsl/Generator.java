@@ -40,7 +40,6 @@ import com.caucho.log.Log;
 
 import com.caucho.util.*;
 import com.caucho.vfs.*;
-import com.caucho.es.*;
 import com.caucho.java.*;
 import com.caucho.xml.*;
 import com.caucho.xpath.*;
