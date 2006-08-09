@@ -1161,11 +1161,13 @@ normalize_uri(config_t *config, const char *raw_uri,
   int i, k;
   int ch;
   int test_ch = config->session_url_prefix[0];
+  int prefix_len = strlen(config->session_url_prefix);
   
   k = 0;
   for (i = 0; (ch = raw_uri[i]) && i + 1 < len; i++) {
     /* strip the session_url_prefix */
-    if (ch == test_ch && ! strcmp(raw_uri + i, config->session_url_prefix)) {
+    if (ch == test_ch &&
+	! strncmp(raw_uri + i, config->session_url_prefix, prefix_len)) {
       break;
     }
     
@@ -1238,7 +1240,7 @@ cse_is_match(config_t *config,
   int is_match = 0;
 
   normalize_uri(config, raw_uri, uri, len, unescape);
-
+  
   for (i = 0; raw_host && (ch = raw_host[i]) && i + 1 < host_len; i++) {
     if (isupper(ch))
       host_name[i] = tolower(ch);

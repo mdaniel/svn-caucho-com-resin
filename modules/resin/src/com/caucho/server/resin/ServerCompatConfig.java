@@ -29,6 +29,8 @@
 
 package com.caucho.server.resin;
 
+import com.caucho.config.*;
+import com.caucho.server.cluster.*;
 import com.caucho.util.*;
 
 /**
@@ -39,11 +41,40 @@ public class ServerCompatConfig {
 
   private final ResinServer _resin;
 
+  private BuilderProgramContainer _program
+    = new BuilderProgramContainer();
+
   /**
    * Creates a new resin server.
    */
   public ServerCompatConfig(ResinServer resin)
   {
     _resin = resin;
+  }
+
+  public void addBuilderProgram(BuilderProgram program)
+  {
+    _program.addProgram(program);
+  }
+
+  /**
+   * Creates a cluster compat.
+   */
+  public ClusterCompatConfig createCluster()
+  {
+    return new ClusterCompatConfig(_resin);
+  }
+
+  public void init()
+  {
+    try {
+      String serverId = _resin.getServerId();
+    
+      ClusterServer clusterServer = _resin.findClusterServer(serverId);
+
+      _program.configure(clusterServer.getCluster());
+    } catch (Throwable e) {
+      throw new RuntimeException(e);
+    }
   }
 }

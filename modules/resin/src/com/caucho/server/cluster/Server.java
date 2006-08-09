@@ -115,7 +115,6 @@ public class Server extends ProtocolDispatchServer
 
   private boolean _enableSelectManager;
   private int _keepaliveMax = 256;
-  private ArrayList<Port> _ports = new ArrayList<Port>();
 
   private String _connectionErrorPage;
 
@@ -1083,8 +1082,9 @@ public class Server extends ProtocolDispatchServer
       if (getSelectManager() != null)
         getSelectManager().stop();
 
-      for (int i = 0; i < _ports.size(); i++) {
-        Port port = _ports.get(i);
+      ArrayList<Port> ports = _clusterServer.getPorts();
+      for (int i = 0; i < ports.size(); i++) {
+        Port port = ports.get(i);
 
         try {
           port.close();
@@ -1151,7 +1151,6 @@ public class Server extends ProtocolDispatchServer
       _classLoader.destroy();
 
       _hostContainer = null;
-      _ports = null;
       _accessLog = null;
       _cache = null;
     } finally {

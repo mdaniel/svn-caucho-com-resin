@@ -66,20 +66,21 @@
   </target>
 
   <target name="compile" 
-          depends="init, ejb, ejb30, j2ee-deploy, j2ee-management, jaxrpc, jca, jms, jmx, jsdk, jstl, jta, portlet, script, resin-jdk15, resin, quercus, webutil, deploy, conf, ext">
+          depends="init, ejb, jpa, j2ee-deploy, j2ee-management, jaxrpc, jca, jms, jsdk, jstl, jta, portlet, script, resin, quercus, webutil, deploy, conf, ext">
   </target>
 
   <target name="ejb" depends="init, jta">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="ejb"/>
-      <param name="module.jar" value="ejb-20.jar"/>
+      <param name="module.jar" value="ejb-15.jar"/>
+      <param name="javac.source" value="1.5"/>
     </antcall>
   </target>
 
-  <target name="ejb30" depends="init, ejb">
+  <target name="jpa" depends="init, ejb">
     <antcall target="module" inheritRefs="true">
-      <param name="module.name" value="ejb30"/>
-      <param name="module.jar" value="ejb-30.jar"/>
+      <param name="module.name" value="jpa"/>
+      <param name="module.jar" value="jpa-15.jar"/>
       <param name="javac.source" value="1.5"/>
     </antcall>
   </target>
@@ -91,7 +92,7 @@
     </antcall>
   </target>
 
-  <target name="j2ee-management" depends="init,ejb,jmx">
+  <target name="j2ee-management" depends="init,ejb">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="j2ee-management"/>
       <param name="module.jar" value="j2ee-management-10.jar"/>
@@ -101,7 +102,7 @@
   <target name="jaxrpc" depends="init,saaj,jsdk">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="jaxrpc"/>
-      <param name="module.jar" value="jaxrpc.jar"/>
+      <param name="module.jar" value="jaxrpc-15.jar"/>
       <param name="javac.source" value="1.5"/>
     </antcall>
   </target>
@@ -110,13 +111,6 @@
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="jca"/>
       <param name="module.jar" value="jca-15.jar"/>
-    </antcall>
-  </target>
-
-  <target name="resin-jdk15" depends="init">
-    <antcall target="module" inheritRefs="true">
-      <param name="module.name" value="resin-jdk15"/>
-      <param name="javac.source" value="1.5"/>
     </antcall>
   </target>
 
@@ -131,13 +125,6 @@
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="jms"/>
       <param name="module.jar" value="jms-11.jar"/>
-    </antcall>
-  </target>
-
-  <target name="jmx" depends="init">
-    <antcall target="module" inheritRefs="true">
-      <param name="module.name" value="jmx"/>
-      <param name="module.jar" value="jmx-12.jar"/>
     </antcall>
   </target>
 
@@ -187,7 +174,7 @@
     </antcall>
   </target>
 
-  <target name="resin-dev" depends="init, ejb, ejb30, jca, jcr, jms, jmx, jsdk, jstl, jta, j2ee-deploy, j2ee-management, saaj, jaxrpc, portlet, script, resin-jdk15">
+  <target name="resin-dev" depends="init, ejb, jca, jcr, jms, jsdk, jstl, jta, j2ee-deploy, j2ee-management, saaj, jaxrpc, portlet, script">
 
     <!-- filter to insert version -->
 
@@ -436,7 +423,7 @@
 
       <packageset dir="${modules}/jsdk/src"/>
       <packageset dir="${modules}/ejb/src"/>
-      <packageset dir="${modules}/ejb30/src"/>
+      <packageset dir="${modules}/jpa/src"/>
       <packageset dir="${modules}/j2ee-deploy/src"/>
       <packageset dir="${modules}/j2ee-management/src"/>
       <!--
@@ -445,13 +432,11 @@
       <packageset dir="${modules}/jaxrpc/src"/>
       <packageset dir="${modules}/jca/src"/>
       <packageset dir="${modules}/jms/src"/>
-      <packageset dir="${modules}/jmx/src"/>
       <packageset dir="${modules}/jstl/src"/>
       <packageset dir="${modules}/jta/src"/>
       <packageset dir="${modules}/portlet/src"/>
       <packageset dir="${modules}/quercus/src"/>
       <packageset dir="${modules}/resin/src"/>
-      <packageset dir="${modules}/resin-jdk15/src"/>
       <packageset dir="${modules}/saaj/src"/>
       <packageset dir="${modules}/script/src"/>
       <packageset dir="${modules}/unix/src"/>
@@ -616,22 +601,20 @@
         <include name="lib/aopalliance.jar"/>
         <include name="lib/activation.jar"/>
         <include name="lib/javamail-14.jar"/>
-        <include name="lib/ejb-20.jar"/>
-        <include name="lib/ejb-30.jar"/>
+        <include name="lib/ejb-15.jar"/>
+        <include name="lib/jpa-15.jar"/>
         <include name="lib/j2ee-deploy-10.jar"/>
         <include name="lib/j2ee-management-10.jar"/>
         <include name="lib/jca-15.jar"/>
         <include name="lib/jms-11.jar"/>
-        <include name="lib/jmx-12.jar"/>
         <include name="lib/jsdk-24.jar"/>
         <include name="lib/jstl-11.jar"/>
         <include name="lib/jta-101.jar"/>
         <include name="lib/portlet-10.jar"/>
         <include name="lib/quercus.jar"/>
-        <include name="lib/resin-jdk15.jar"/>
         <include name="lib/resin.jar"/>
-        <include name="lib/resinboot.jar"/>
 	<!--
+        <include name="lib/resinboot.jar"/>
         <include name="lib/saaj.jar"/>
 	-->
         <include name="lib/script-10.jar"/>

@@ -17,6 +17,8 @@ r_cluster-Compat = element cluster {
 r_cluster-port-Compat =
   r_port
 
+  | r_srun-Compat
+
 ## old-style <server>
 r_server-Compat = element server {
   attribute id { string }?,
@@ -108,3 +110,11 @@ r_server-Flow-Compat =
 
 ## complete <server> contents
 r_server-Content-Compat = r_server-Flow-Compat
+
+r_srun-Compat = element srun {
+  (attribute id { string }
+   | attribute server-id { string }
+   | element server-id { string })?
+
+  & r_port-Content
+}
