@@ -63,12 +63,12 @@ public class ServerConnector {
     = Logger.getLogger(ServerConnector.class.getName());
   private static final L10N L = new L10N(ServerConnector.class);
 
+  private ClusterServer _server;
+  private ClusterPort _port;
+
   private ObjectName _objectName;
 
   private Cluster _cluster;
-  private ClusterGroup _group;
-
-  private ClusterPort _port;
 
   private int _srunIndex;
   private Path _tcpPath;
@@ -77,10 +77,11 @@ public class ServerConnector {
 
   private ClusterClientAdmin _admin;
 
-  public ServerConnector(ClusterPort port)
+  public ServerConnector(ClusterServer server)
   {
-    _port = port;
-    _cluster = _port.getClusterServer().getCluster();
+    _server = server;
+    _cluster = _server.getCluster();
+    _port = server.getClusterPort();
   }
 
   /**
@@ -108,30 +109,6 @@ public class ServerConnector {
   }
 
   /**
-   * Sets the owning group.
-   */
-  public void setGroup(ClusterGroup group)
-  {
-    _group = group;
-  }
-
-  /**
-   * Gets the owning group.
-   */
-  public ClusterGroup getGroup()
-  {
-    return _group;
-  }
-
-  /**
-   * Sets the ClusterPort.
-   */
-  public void setPort(ClusterPort port)
-  {
-    _port = port;
-  }
-
-  /**
    * Gets the cluster port.
    */
   public ClusterPort getClusterPort()
@@ -144,7 +121,7 @@ public class ServerConnector {
    */
   public String getId()
   {
-    return _port.getServerId();
+    return _server.getId();
   }
 
   /**
@@ -152,7 +129,7 @@ public class ServerConnector {
    */
   public int getIndex()
   {
-    return _port.getIndex();
+    return _server.getIndex();
   }
 
   /**
@@ -174,9 +151,9 @@ public class ServerConnector {
   /**
    * Returns the time in milliseconds for the slow start throttling.
    */
-  public long getWarmupTime()
+  public long getClientWarmupTime()
   {
-    return _cluster.getClientWarmupTime();
+    return _server.getClientWarmupTime();
   }
 
   /**
@@ -185,7 +162,7 @@ public class ServerConnector {
    */
   public long getClientConnectTimeout()
   {
-    return _cluster.getClientConnectTimeout();
+    return _server.getClientConnectTimeout();
   }
 
   /**
@@ -194,7 +171,7 @@ public class ServerConnector {
    */
   public long getClientReadTimeout()
   {
-    return _cluster.getClientReadTimeout();
+    return _server.getClientReadTimeout();
   }
 
   /**
@@ -203,33 +180,23 @@ public class ServerConnector {
    */
   public long getClientWriteTimeout()
   {
-    return _cluster.getClientWriteTimeout();
-  }
-
-   /**
-   * @deprecated
-   *
-   * Use {@link #getReadTimeout} or {@link #getWriteTimeout}
-   */
-  public long getTimeout()
-  {
-    return getClientReadTimeout();
+    return _server.getClientWriteTimeout();
   }
 
   /**
    * Returns how long the connection can be cached in the free pool.
    */
-  public long getMaxIdleTime()
+  public long getClientMaxIdleTime()
   {
-    return _cluster.getClientMaxIdleTime();
+    return _server.getClientMaxIdleTime();
   }
 
   /**
    * Returns how long the connection will be treated as dead.
    */
-  public long getFailRecoverTime()
+  public long getClientFailRecoverTime()
   {
-    return _cluster.getClientFailRecoverTime();
+    return _server.getClientFailRecoverTime();
   }
 
   /**
@@ -237,7 +204,7 @@ public class ServerConnector {
    */
   public int getClientWeight()
   {
-    return _port.getClientWeight();
+    return _server.getClientWeight();
   }
 
   /**
@@ -270,11 +237,6 @@ public class ServerConnector {
         name = "";
 
       _admin.register();
-      /*
-      _objectName = new ObjectName("resin:type=ClusterServer,name=" + name);
-
-      Jmx.register(_admin, _objectName);
-      */
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
     }

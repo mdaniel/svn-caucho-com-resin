@@ -24,6 +24,333 @@
 
 <s1 title="server">
 
+<defun title="client-connect-timeout" version="Resin 3.1">
+<parents>server</parents>
+
+<p>Configures the maximum time a client connection to a cluster-port should
+take.  The <a href="resin-load-balance.xtp">load balance</a> and
+<a href="sessions.xtp">persistent sessions</a> use client-connect-timeout
+to connect to backend or peer servers in the cluster.</p>
+
+<p>Lower values detect failed servers more quickly, but a too-low value
+can timeout too quickly for a live server with some network congestion.</p>
+
+<default>5s</default>
+
+<example title="client-connect-timeout">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+    &lt;cluster id="app-tier"&gt;
+        &lt;server-default>
+          &lt;client-connect-timeout>2s&lt;/client-connect-timeout>
+        &lt;/server-default>
+
+        &lt;server id="a" address="192.168.0.10" port="6800"/&gt;
+        &lt;server id="b" address="192.168.0.11" port="6800"/&gt;
+
+        &lt;host id=""&gt;
+          ...
+    &lt;/cluster&gt;
+&lt;/resin&gt;
+</example>
+
+</defun>
+
+<defun title="client-fail-recover-time" version="Resin 3.1">
+<parents>server</parents>
+
+<p>The maximum time the <a href="resin-load-balance.xtp">load balancer</a>
+will consider the server dead after a failure before retrying
+the connection.</p>
+
+<p>Resin uses the client-fail-recover-time to avoid wasting time trying to
+connect to an unavailable app-tier server.</p>
+
+<p>Lower values let the load balancer use a restarted <g>app-tier</g> server
+faster, but lower values also increase the overhead of trying to
+contact unavailable servers.</p>
+
+<default>15s</default>
+
+<example title="client-fail-recover-time">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+    &lt;cluster id="app-tier"&gt;
+        &lt;server-default>
+          &lt;client-fail-recover-time>10s&lt;/client-fail-recover-time>
+        &lt;/server-default>
+
+        &lt;server id="a" address="192.168.0.10" port="6800"/&gt;
+        &lt;server id="b" address="192.168.0.11" port="6800"/&gt;
+
+        &lt;host id=""&gt;
+          ...
+    &lt;/cluster&gt;
+&lt;/resin&gt;
+</example>
+
+</defun>
+
+<defun title="client-max-idle-time" version="Resin 3.1">
+<parents>server</parents>
+
+<p>The maximum time the <a href="resin-load-balance.xtp">load balancer</a>
+and <a href="sessions.xtp">distributed sessions</a> will leave an
+idle socket before closing it.</p>
+
+<p>client-max-idle-time must be less than the <var>timeout</var> value of
+the target <a href="port-tags.xtp#cluster-port">cluster-port</a>.</p>
+
+<p>The load balancer and distributed sessions reuse sockets to the
+cluster peer and <g>app-tier</g> servers to improve TCP performance.
+The client-max-idle-time limits the amount of time those sockets can
+remain idle.</p>
+
+<p>Higher values may improve the socket pooling, but may also increase
+the chance of connecting to a closed server.</p>
+
+<default>30s</default>
+
+<example title="client-max-idle-time">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+    &lt;cluster id="app-tier"&gt;
+        &lt;server-default>
+          &lt;client-max-idle-time>20s&lt;/client-max-idle-time>
+        &lt;/server-default>
+
+        &lt;server id="a" address="192.168.0.10" port="6800"/&gt;
+        &lt;server id="b" address="192.168.0.11" port="6800"/&gt;
+
+        &lt;host id=""&gt;
+          ...
+    &lt;/cluster&gt;
+&lt;/resin&gt;
+</example>
+
+</defun>
+
+<defun title="client-timeout" version="Resin 3.1">
+<parents>server</parents>
+
+<p>The maximum time the <a href="resin-load-balance.xtp">load balancer</a>
+and <a href="sessions.xtp">distributed sessions</a> will wait for
+a read or write to a cluster socket.</p>
+
+<p>Crashed servers may never respond to a read request or accept a write.
+The client-timeout lets Resin recover from these kinds of crashes.</p>
+
+<p>Lower values can detect crashes more quickly, but too-low values may
+report bogus failures when the server machine is just a little slow.</p>
+
+<default>60s</default>
+
+<example title="client-timeout">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+    &lt;cluster id="app-tier"&gt;
+        &lt;server-default>
+          &lt;client-timeout>60s&lt;/client-timeout>
+        &lt;/server-default>
+
+        &lt;server id="a" address="192.168.0.10" port="6800"/&gt;
+        &lt;server id="b" address="192.168.0.11" port="6800"/&gt;
+
+        &lt;host id=""&gt;
+          ...
+    &lt;/cluster&gt;
+&lt;/resin&gt;
+</example>
+
+</defun>
+
+<defun title="client-warmup-time" version="Resin 3.1">
+<parents>server</parents>
+
+<p>The time the <a href="resin-load-balance.xtp">load balancer</a>
+uses to throttle connections to an <g>app-tier</g> server that's just
+starting up.</p>
+
+<p>Java web-applications often start slowly while they initialize caches.
+So a newly-started application will often be slower and consume more
+resources than a long-running application.  The warmup-time increases
+Resin's reliability by limiting the number of requests to a new
+app-tier server until the server has warmed up.</p>
+
+<p>Larger values give the application a longer time to warm up.</p>
+
+<default>60s</default>
+
+<example title="client-warmup-time">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+    &lt;cluster id="app-tier"&gt;
+        &lt;server-default>
+          &lt;client-warmup-time>60s&lt;/client-warmup-time>
+        &lt;/server-default>
+
+        &lt;server id="a" address="192.168.0.10" port="6800"/&gt;
+        &lt;server id="b" address="192.168.0.11" port="6800"/&gt;
+
+        &lt;host id=""&gt;
+          ...
+    &lt;/cluster&gt;
+&lt;/resin&gt;
+</example>
+
+</defun>
+
+<defun title="client-weight" version="Resin 3.1">
+<parents>server</parents>
+
+<p>client-weight assigns a load-balance weight to a backend server.
+Servers with higher values get more requests.  Servers with lower
+values get fewer requests.</p>
+
+<p>In some cases, some <g>app-tier</g> servers may be more powerful than
+others.  client-weight lets the load-balancer assign more connections
+to the more powerful machines.</p>
+
+<p>Test and profiling servers can also use client-weight to receive a
+small number of connections for profiling purposes.</p>
+
+<p>Larger values tell the load-balancer to assign more requests to
+the app-tier server.</p>
+
+<default>100</default>
+
+<example title="client-weight">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+    &lt;cluster id="app-tier"&gt;
+        &lt;server id="a" address="192.168.0.10" port="6800"/&gt;
+        &lt;server id="b" address="192.168.0.10" port="6800"/&gt;
+
+        &lt;server id="test" address="192.168.0.100" port="6800"&gt;
+            &lt;client-weight>1&lt;/client-weight>
+        &lt;/server>
+
+        &lt;host id=""&gt;
+          ...
+    &lt;/cluster&gt;
+&lt;/resin&gt;
+</example>
+
+</defun>
+
+<defun title="cluster-port" version="Resin 3.0">
+<parents>server</parents>
+
+<p>Configures a clustered HMUX listener.</p>
+
+<p>When configuring Resin in a load-balanced cluster, each Resin instance
+will have its own &lt;srun&gt; configuration, which Resin uses for distributed
+session management and for the load balancing itself.</p>
+
+<p>When configuring multiple JVMs, each &lt;srun&gt; will have a
+unique &lt;server-id&gt; which allows the -server command-line to select
+which ports the server should listen to.</p>
+
+<deftable-childtags>
+<tr><td>address</td>
+    <td>hostname of the interface to listen to</td>
+    <td>*</td></tr>
+<tr><td>jsse-ssl</td>
+    <td>configures the port to use JSSE for SSL</td>
+    <td>none</td></tr>
+<tr><td>openssl</td>
+    <td>configures the port to use OpenSSL</td>
+    <td>none</td></tr>
+<tr><td>port</td>
+    <td>port to listen to</td>
+    <td>required</td></tr>
+<tr><td>read-timeout</td>
+    <td>timeout waiting to read from idle client</td>
+    <td>65s</td></tr>
+<tr><td>write-timeout</td>
+     <td>timeout waiting to write to idle client</td>
+     <td>65s</td></tr>
+<tr><td>socket-listen-backlog</td>
+    <td>The socket factory's listen backlog for receiving sockets</td>
+    <td>100</td></tr>
+<tr><td>tcp-no-delay</td>
+    <td>sets the NO_DELAY socket parameter</td>
+    <td>true</td></tr>
+</deftable-childtags>
+
+<p>The class that corresponds to &lt;srun&gt; is <a href="javadoc|com.caucho.server.cluster.ClusterPort|"/></p>
+
+</defun>
+
+<defun title="http" version="Resin 3.0">
+<parents>server</parents>
+
+<p>Configures a HTTP port listening for HTTP requests.</p>
+
+<p>When configuring multiple JVMs, each &lt;http&gt; will have a
+unique &lt;server-id&gt; which allows the -server command-line to select
+which ports the server should listen to.</p>
+
+<deftable-childtags>
+<tr><td>server-id</td>
+    <td>server id matching the -server command line</td>
+    <td>none</td></tr>
+<tr><td>host</td>
+    <td>hostname of the interface to listen to</td>
+    <td>*</td></tr>
+<tr><td>port</td>
+    <td>port to listen to</td>
+    <td>required</td></tr>
+<tr><td>tcp-no-delay</td>
+    <td>sets the NO_DELAY socket parameter</td>
+    <td>true</td></tr>
+<tr><td>read-timeout</td>
+    <td>timeout waiting to read from idle client</td>
+    <td>65s</td></tr>
+<tr><td>write-timeout</td>
+    <td>timeout waiting to write to idle client</td>
+    <td>65s</td></tr>
+<tr><td>socket-listen-backlog</td>
+    <td>The socket factory's listen backlog for receiving sockets</td>
+    <td>100</td></tr>
+<tr><td>virtual-host</td>
+    <td>forces all requests to this &lt;http&gt; to use the named virtual host</td>
+    <td>none</td></tr>
+<tr><td>openssl</td>
+    <td>configures the port to use OpenSSL</td>
+    <td>none</td></tr>
+<tr><td>jsse-ssl</td>
+    <td>configures the port to use JSSE for SSL</td>
+    <td>none</td></tr>
+</deftable-childtags>
+
+<p>The @virtual-host attribute overrides the browser's Host directive,
+specifying the explicit host and port for
+<code>request.getServerName()</code> and <code>getServerPort()</code>.
+It is not used in most virtual host configurations.
+Only IP-based virtual hosts which wish to ignore the browser's Host
+will use @virtual-host.</p>
+
+</defun>
+
+<defun title="protocol" version="Resin 3.1">
+<parents>server</parents>
+
+<p>The port tag allows for custom protocols using Resin's thread
+and connection management.</p>
+
+<p>The custom protocol will extend from com.caucho.server.port.Protocol.</p>
+
+<example>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+&lt;cluster id="web-tier"&gt;
+
+  &lt;server id="a"&gt;
+    &lt;protocol address="localhost" port="8888"&gt;
+      &lt;type>example.Magic8BallProtocol&lt;/type>
+    &lt;/port&gt;
+  &lt;/server&gt;
+
+&lt;/cluster&gt;
+&lt;/resin&gt;
+</example>
+
+</defun>
+
 <defun title="server" version="Resin 3.1">
 <parents>cluster</parents>
 
@@ -48,10 +375,10 @@ The <g>ObjectName</g> is <var>resin:type=Server</var>.</p>
     <td>unique server identifier</td>
     <td>required</td></tr>
 <tr><td>address</td>
-    <td>IP address of the cluster port</td></tr>
+    <td>IP address of the cluster port</td>
     <td>127.0.0.1</td></tr>
 <tr><td>port</td>
-    <td>The cluster port</td></tr>
+    <td>The cluster port</td>
     <td>6800</td></tr>
 </deftable-childtags>
 

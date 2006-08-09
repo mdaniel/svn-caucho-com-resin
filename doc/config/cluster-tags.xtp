@@ -471,7 +471,7 @@ The class that corresponds to &lt;ping&gt; is
 <a href="javadoc|com.caucho.server.admin.PingThread|">PingThread</a>.  
 </p>
 
-<s2 title="Mail notification when ping fails">
+<s3 title="Mail notification when ping fails">
 
 <p>A refinement of the ping facility sends an email when the server is
 restarted.</p>
@@ -493,7 +493,7 @@ restarted.</p>
   &lt;/server&gt;
 &lt;/resin&gt;
 </example>
-</s2>
+</s3>
 </defun>
 
 <defun title="rewrite-dispatch" version="Resin 3.1">
@@ -566,10 +566,10 @@ The <g>ObjectName</g> is <var>resin:type=Server</var>.</p>
     <td>unique server identifier</td>
     <td>required</td></tr>
 <tr><td>address</td>
-    <td>IP address of the cluster port</td></tr>
+    <td>IP address of the cluster port</td>
     <td>127.0.0.1</td></tr>
 <tr><td>port</td>
-    <td>The cluster port</td></tr>
+    <td>The cluster port</td>
     <td>6800</td></tr>
 </deftable-childtags>
 

@@ -117,8 +117,8 @@ public final class ClusterClient {
 
     _debugId = selfId + "->" + targetId;
 
-    _failRecoverTime = server.getFailRecoverTime();
-    _warmupTime = server.getWarmupTime();
+    _failRecoverTime = server.getClientFailRecoverTime();
+    _warmupTime = server.getClientWarmupTime();
 
     _state = ST_STARTING;
   }
@@ -520,7 +520,7 @@ public final class ClusterClient {
         _free[_freeHead] = null;
         _freeHead = (_freeHead + _free.length - 1) % _free.length;
 
-        if (now < freeTime + _server.getMaxIdleTime()) {
+        if (now < freeTime + _server.getClientMaxIdleTime()) {
           _activeCount++;
 	  _keepaliveCountTotal++;
 	  

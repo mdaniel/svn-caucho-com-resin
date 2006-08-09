@@ -4,6 +4,7 @@
     <item link="howto.xtp" title="howto"/>
     <item link="resin.xtp" title="resin.conf"/>
     <item link="cluster-tags.xtp" title="cluster"/>
+    <item link="server-tags.xtp" title="server"/>
     <item link="env.xtp" title="env"/>
     <item link="webapp.xtp" title="web-app"/>
     <item link="log.xtp" title="log"/>

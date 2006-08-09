@@ -76,6 +76,17 @@ public class ClusterServer {
   private int _index;
 
   private ClusterPort _clusterPort;
+  private ServerConnector _serverConnector;
+
+  private long _clientMaxIdleTime = 30000L;
+  private long _clientFailRecoverTime = 15000L;
+  private long _clientWarmupTime = 60000L;
+  
+  private long _clientReadTimeout = 60000L;
+  private long _clientWriteTimeout = 60000L;
+  private long _clientConnectTimeout = 5000L;
+  
+  private int _clientWeight = 100;
 
   private ArrayList<Port> _ports = new ArrayList<Port>();
 
@@ -85,6 +96,8 @@ public class ClusterServer {
 
     _clusterPort = new ClusterPort(this);
     _ports.add(_clusterPort);
+    
+    _serverConnector = new ServerConnector(this);
   }
 
   /**
@@ -148,6 +161,113 @@ public class ClusterServer {
     throws UnknownHostException
   {
     _clusterPort.setAddress(address);
+  }
+
+  /**
+   * Sets the client connection time.
+   */
+  public void setClientConnectTimeout(Period period)
+  {
+    _clientConnectTimeout = period.getPeriod();
+  }
+
+  /**
+   * Gets the client connection time.
+   */
+  public long getClientConnectTimeout()
+  {
+    return _clientConnectTimeout;
+  }
+
+  /**
+   * Sets the client max-idle-time.
+   */
+  public void setClientMaxIdleTime(Period period)
+  {
+    _clientMaxIdleTime = period.getPeriod();
+  }
+
+  /**
+   * Sets the client max-idle-time.
+   */
+  public long getClientMaxIdleTime()
+  {
+    return _clientMaxIdleTime;
+  }
+
+  /**
+   * Sets the client fail-recover-time.
+   */
+  public void setClientFailRecoverTime(Period period)
+  {
+    _clientFailRecoverTime = period.getPeriod();
+  }
+
+  /**
+   * Gets the client fail-recover-time.
+   */
+  public long getClientFailRecoverTime()
+  {
+    return _clientFailRecoverTime;
+  }
+
+  /**
+   * Sets the client read/write timeout
+   */
+  public void setClientTimeout(Period period)
+  {
+    long timeout = period.getPeriod();
+    
+    _clientReadTimeout = timeout;
+    _clientWriteTimeout = timeout;
+  }
+
+  /**
+   * Gets the client read/write timeout
+   */
+  public long getClientReadTimeout()
+  {
+    return _clientReadTimeout;
+  }
+
+  /**
+   * Gets the client read/write timeout
+   */
+  public long getClientWriteTimeout()
+  {
+    return _clientWriteTimeout;
+  }
+
+  /**
+   * Sets the client warmup time
+   */
+  public void setClientWarmupTime(Period period)
+  {
+    _clientWarmupTime = period.getPeriod();
+  }
+
+  /**
+   * Gets the client warmup time
+   */
+  public long getClientWarmupTime()
+  {
+    return _clientWarmupTime;
+  }
+
+  /**
+   * Sets the client weight
+   */
+  public void setClientWeight(int weight)
+  {
+    _clientWeight = weight;
+  }
+
+  /**
+   * Gets the client weight
+   */
+  public int getClientWeight()
+  {
+    return _clientWeight;
   }
 
   /**
@@ -235,7 +355,7 @@ public class ClusterServer {
    */
   public ServerConnector getServerConnector()
   {
-    return _clusterPort.getServerConnector();
+    return _serverConnector;
   }
 
   /**
@@ -245,6 +365,8 @@ public class ClusterServer {
     throws Exception
   {
     _clusterPort.init();
+
+    _serverConnector.init();
   }
 
   /**

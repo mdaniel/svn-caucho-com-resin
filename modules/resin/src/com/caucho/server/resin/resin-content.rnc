@@ -113,7 +113,6 @@ r_cluster-Flow =
 r_cluster-Content = r_cluster-Flow
 
 r_cluster-client-Group =
- (
   (attribute client-connect-timeout { r_period-Type }
    | element client-connect-timeout { r_period-Type })?
 
@@ -123,21 +122,14 @@ r_cluster-client-Group =
   & (attribute client-max-idle-time { r_period-Type }
      | element client-max-idle-time { r_period-Type })?
 
-  & (attribute client-read-timeout { r_period-Type }
-     | element client-read-timeout { r_period-Type })?
+  & (attribute client-timeout { r_period-Type }
+     | element client-timeout { r_period-Type })?
 
   & (attribute client-warmup-time { r_period-Type }
      | element client-warmup-time { r_period-Type })?
 
-  & (attribute client-write-timeout { r_period-Type }
-     | element client-write-timeout { r_period-Type })?
-
-  & (attribute client-live-time { r_period-Type }
-     | element client-live-time { r_period-Type })?
-
-  & (attribute client-dead-time { r_period-Type }
-     | element client-dead-time { r_period-Type })?)
-
+  & (attribute client-weight { r_int-Type }
+     | element client-weight { r_int-Type })?
 
 r_cluster-port-Content =
   (attribute id { string }
@@ -465,7 +457,9 @@ r_server-default = element server-default {
 }
 
 r_server-Basis =
-  r_protocol*
+  r_cluster-client-Group*
+
+  & r_protocol*
 
   & r_http*
 

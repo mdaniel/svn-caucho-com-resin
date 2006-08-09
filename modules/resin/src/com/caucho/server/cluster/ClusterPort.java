@@ -49,14 +49,12 @@ public class ClusterPort extends Port {
   private static final L10N L = new L10N(ClusterPort.class);
 
   private ClusterServer _server;
-  private ServerConnector _conn;
   
   private int _clientWeight = 100;
 
   public ClusterPort(ClusterServer server)
   {
     _server = server;
-    _conn = new ServerConnector(this);
     
     try {
       setAddress("127.0.0.1");
@@ -74,14 +72,6 @@ public class ClusterPort extends Port {
   public ClusterServer getClusterServer()
   {
     return _server;
-  }
-
-  /**
-   * Returns the server connector.
-   */
-  public ServerConnector getServerConnector()
-  {
-    return _conn;
   }
 
   /**
@@ -110,11 +100,6 @@ public class ClusterPort extends Port {
 
   public void init()
   {
-    try {
-      _conn.init();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
   }
 
   public String toString()

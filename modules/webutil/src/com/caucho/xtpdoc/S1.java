@@ -50,9 +50,11 @@ public class S1 extends Section {
     return s2;
   }
   
-  public void addDefun(Defun section)
+  public Defun createDefun()
   {
-    _contentItems.add(section);
+    Defun defun = new Defun(getDocument());
+    _contentItems.add(defun);
+    return defun;
   }
  
   public void writeHtml(XMLStreamWriter out)

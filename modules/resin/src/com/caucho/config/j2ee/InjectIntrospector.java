@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -64,21 +65,12 @@ public class InjectIntrospector {
   private static final L10N L = new L10N(InjectIntrospector.class);
   private static final Logger log = Log.open(InjectIntrospector.class);
 
-  private static final Class _injectClass;
-  private static final Class _resourceClass;
-  private static final Class _ejbClass;
-  private static final Class _persistenceUnitClass;
-  private static final Class _persistenceContextClass;
-  
   /**
    * Analyzes a bean for @Inject tags, building an init program for them.
    */
   public static void configure(Object obj)
     throws Throwable
   {
-    if (_injectClass == null)
-      return;
-    
     if (obj != null) {
       for (BuilderProgram program : introspect(obj.getClass())) {
 	program.configure(obj);
@@ -94,9 +86,6 @@ public class InjectIntrospector {
   {
     ArrayList<BuilderProgram> initList = new ArrayList<BuilderProgram>();
     
-    if (_injectClass == null)
-      return null;
-    
     try {
       introspectImpl(initList, type);
     } catch (ClassNotFoundException e) {
@@ -110,9 +99,6 @@ public class InjectIntrospector {
 				     Class type)
     throws ConfigException, ClassNotFoundException
   {
-    if (_injectClass == null)
-      return;
-
     if (type == null || type.equals(Object.class))
       return;
 
@@ -151,15 +137,15 @@ public class InjectIntrospector {
 				Class fieldType)
     throws ConfigException
   {
-    if (field.isAnnotationPresent(_injectClass))
+    if (field.isAnnotationPresent(Inject.class))
       configureInject(initList, field, fieldName, fieldType);
-    else if (field.isAnnotationPresent(_resourceClass))
+    else if (field.isAnnotationPresent(Resource.class))
       configureResource(initList, field, fieldName, fieldType);
-    else if (field.isAnnotationPresent(_ejbClass))
+    else if (field.isAnnotationPresent(EJB.class))
       configureEJB(initList, field, fieldName, fieldType);
-    else if (field.isAnnotationPresent(_persistenceUnitClass))
+    else if (field.isAnnotationPresent(PersistenceUnit.class))
       configurePersistenceUnit(initList, field, fieldName, fieldType);
-    else if (field.isAnnotationPresent(_persistenceContextClass))
+    else if (field.isAnnotationPresent(PersistenceContext.class))
       configurePersistenceContext(initList, field, fieldName, fieldType);
   }
   
@@ -169,7 +155,7 @@ public class InjectIntrospector {
 					Class fieldType)
     throws ConfigException
   {
-    Resource resource = (Resource) field.getAnnotation(_resourceClass);
+    Resource resource = field.getAnnotation(Resource.class);
 
     configureResource(initList, field, fieldName, fieldType,
 		      resource.name(),
@@ -183,7 +169,7 @@ public class InjectIntrospector {
 				      Class fieldType)
     throws ConfigException
   {
-    Inject inject = (Inject) field.getAnnotation(_injectClass);
+    Inject inject = field.getAnnotation(Inject.class);
 
     configureResource(initList, field, fieldName, fieldType,
 		      "", "", inject.jndiName());
@@ -195,7 +181,7 @@ public class InjectIntrospector {
 				      Class fieldType)
     throws ConfigException
   {
-    EJB ejb = (EJB) field.getAnnotation(_ejbClass);
+    EJB ejb = (EJB) field.getAnnotation(javax.ejb.EJB.class);
 
     configureResource(initList, field, fieldName, fieldType,
 		      ejb.name(), "javax.ejb.EJBLocalObject", ejb.jndiName());
@@ -207,7 +193,7 @@ public class InjectIntrospector {
 					       Class fieldType)
     throws ConfigException
   {
-    PersistenceUnit pUnit = (PersistenceUnit) field.getAnnotation(_persistenceUnitClass);
+    PersistenceUnit pUnit = field.getAnnotation(PersistenceUnit.class);
 
     String jndiPrefix = "java:comp/env/persistence/PersistenceUnit";
 
@@ -257,7 +243,7 @@ public class InjectIntrospector {
 					       Class fieldType)
     throws ConfigException
   {
-    PersistenceContext pContext = (PersistenceContext) field.getAnnotation(_persistenceContextClass);
+    PersistenceContext pContext = field.getAnnotation(PersistenceContext.class);
 
     String jndiPrefix = "java:comp/env/persistence/PersistenceContext";
 
@@ -348,29 +334,6 @@ public class InjectIntrospector {
       initList.add(new JndiInjectProgram(jndiName, (Method) field));
     else
       initList.add(new JndiFieldInjectProgram(jndiName, (Field) field));
-  }
-
-  static {
-    Class injectClass = null;
-    Class resourceClass = null;
-    Class ejbClass = null;
-    Class persistenceUnitClass = null;
-    Class persistenceContextClass = null;
-    
-    try {
-      injectClass = Class.forName("javax.ejb.Inject");
-      resourceClass = Class.forName("javax.ejb.Resource");
-      ejbClass = Class.forName("javax.ejb.EJB");
-      persistenceUnitClass = Class.forName("javax.persistence.PersistenceUnit");
-      persistenceContextClass = Class.forName("javax.persistence.PersistenceContext");
-    } catch (Throwable e) {
-    }
-
-    _injectClass = injectClass;
-    _resourceClass = resourceClass;
-    _ejbClass = ejbClass;
-    _persistenceUnitClass = persistenceUnitClass;
-    _persistenceContextClass = persistenceContextClass;
   }
 }
 

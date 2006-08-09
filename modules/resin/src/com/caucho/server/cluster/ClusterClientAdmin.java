@@ -101,7 +101,7 @@ public class ClusterClientAdmin extends AbstractManagedObject
    */
   public long getFailRecoverTime()
   {
-    return _client.getServer().getFailRecoverTime();
+    return _client.getServer().getClientFailRecoverTime();
   }
 
   /**
@@ -109,7 +109,7 @@ public class ClusterClientAdmin extends AbstractManagedObject
    */
   public long getMaxIdleTime()
   {
-    return _client.getServer().getMaxIdleTime();
+    return _client.getServer().getClientMaxIdleTime();
   }
 
   /**
@@ -141,7 +141,7 @@ public class ClusterClientAdmin extends AbstractManagedObject
    */
   public long getWarmupTime()
   {
-    return _client.getServer().getWarmupTime();
+    return _client.getServer().getClientWarmupTime();
   }
 
   /**
