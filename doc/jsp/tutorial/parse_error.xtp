@@ -4,7 +4,6 @@
     <title>Parse Errors</title>
     <type>example</type>
     <resin-2.0>$resin/java_tut/parse_error.xtp</resin-2.0>
-    <brief>JSP error reporting during parsing</brief>
   </header>
 
 <body>
@@ -30,7 +29,7 @@ the second `2'.</p>
 briefly describes what's wrong.    It'll report the error directly to
 the browser, saving the pain of hunting for an error log.</p>
 
-<results width="80%" border="3">
+<results>
 500 Servlet Exception
 
 /test/buggy.jsp:3: Missing term.

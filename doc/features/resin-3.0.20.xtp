@@ -47,7 +47,9 @@ the Logger.</p>
 &lt;logger name="com.caucho" level="fine"/&gt;
 </example>
 
+<p>
 Is equivalent to:
+</p>
 
 <example>
 Logger.getLogger("com.caucho").setLevel(Level.FINE);

@@ -4,12 +4,11 @@
     <title>Simple JSP page</title>
     <type>example</type>
     <resin-2.0>$resin/java_tut/add_page.xtp</resin-2.0>
-    <brief>
-      A simple JSP page
-    </brief>
     <description>
+      <p>
       A simple JSP page that adds 2+2 and displays the result in the
       browser.
+      </p>
     </description>
   </header>
 

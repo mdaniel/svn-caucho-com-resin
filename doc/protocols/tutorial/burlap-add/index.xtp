@@ -13,6 +13,7 @@ JSP client.</p>
 
   <body>
     <summary/>
+<s1>
 
 <p>Burlap is a lightweight XML RPC protocol. Burlap is designed to be
 self-describing, eliminating the requirement for external IDLs or WSDL files.
@@ -35,6 +36,7 @@ like RMI/IIOP, you can develop using Resin's Burlap.</p>
 
 <p>The <a href="../../burlap-1.0-spec.xtp">Burlap 1.0 spec</a> describes
 the full Burlap protocol.</p>
+</s1>
 
 <s1 title="Files in this tutorial">
 <deftable>

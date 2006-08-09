@@ -14,7 +14,7 @@
   <body>
     <summary objsummary="localtoc"/>
     <s1 title="General">
-      <faq title="Is CMP capable enough for my project?">
+      <s2 title="Is CMP capable enough for my project?" type="faq">
 
         <p>CMP/EJB is a good solution in many cases, but it's not always an ideal 
           situation.  There are a number of limitations.  I'd suggest, as an 
@@ -54,9 +54,9 @@
         somewhat awkward.  (We'll be fixing that in the 3.0.x tree, but that's 
         off in the future.)  For an identifying relation, you currently need to 
         use the local interface as the primary key.</p>
-      </faq>
+      </s2>
 
-      <faq title="How's the performance overall?">
+      <s2 title="How's the performance overall?" type="faq">
 
         <p>Depends on what you're doing and how well the cache is
         working.  It's really hard to say, because many things are
@@ -76,17 +76,17 @@
         read the data again from the database as part of the
         transaction.</p>
 
-      </faq>
+      </s2>
 
-      <faq title="Any issues with using Inheritence on the XYZBean classes in this CMP world?">
+      <s2 title="Any issues with using Inheritence on the XYZBean classes in this CMP world?" type="faq">
 
         <description>
-          <p>We have a Member, which is the parent of a
-            Subscriber. Members know how to register; Subscribers know
-            how to subcribe but also need to register. It would be
-            easier if we could continue to split these classes when
-            using CMP. Will the container allow us to configure
-            this?</p>
+          We have a Member, which is the parent of a
+          Subscriber. Members know how to register; Subscribers know
+          how to subcribe but also need to register. It would be
+          easier if we could continue to split these classes when
+          using CMP. Will the container allow us to configure
+          this?
         </description>
 
         <p>That depends.  I don't think there's an exact match with what
@@ -97,18 +97,18 @@
           "member" and have them properly relate isn't really part of the
           spec.  (It was something we were hoping for EJB 2.1, but I guess
           they punted.)</p>
-      </faq>
+      </s2>
 
-      <faq title="Does Resin CMP support BLOB and CLOB fields?">
+      <s2 title="Does Resin CMP support BLOB and CLOB fields?" type="faq">
         <description>
-          <p>Oracle provides its own way (as usual) to manipulate
+          Oracle provides its own way (as usual) to manipulate
           BLOB/CLOB columns, where casting to oracle types is
           required, it's a three phase insert, where first statement
           inserts simple data types and dummy data for LOBs and 2nd
           statement selects and locks the row and only then LOBs are
           editable. We're wondering whether Resin-EE CMP takes care of
           this or we will have to use BMP and still do the row
-          locking, type casting, etc?</p>
+          locking, type casting, etc?
         </description>
 
         <p>Currently, Resin's BLOB/CLOB support is pretty minimal.
@@ -119,9 +119,9 @@
 
         <p>In some cases, this minimal support will be sufficient.  In
         most cases, though, it would just be better to use BMP.</p>
-      </faq>
+      </s2>
 
-      <faq title="Can I store the home interface in a Servlet init()?">
+      <s2 title="Can I store the home interface in a Servlet init()?" type="faq">
         <p>Yes.  That's our recommended solution.</p>
 
         <p>The EJB server has a lifetime of the context where you put the 
@@ -129,39 +129,38 @@
           the &lt;web-app&gt;.  The Home interface is actually always valid, even across 
           server restarts (as long as you don't modify the classes.)  You can even 
           serialize and deserialize it.</p>
-      </faq>
+      </s2>
 
     </s1> <!-- general -->
 
     <s1 title="CMP keys"> 
 
-      <faq title="Does Resin CMP support autogen keys for anything other than ints or longs?">
+      <s2 title="Does Resin CMP support autogen keys for anything other than ints or longs?" type="faq">
         <description>
-          <p>SQL Server auto keys are not ints, it uses some funky
-            looking random string that includes alphanumeric
-            characters.</p>
+          SQL Server auto keys are not ints, it uses some funky
+          looking random string that includes alphanumeric
+          characters.
         </description>
 
         <p>Resin CMP currently only supports integer keys.  It is
           currently a feature request for Resin 3.0.</p>
 
-      </faq>
-      <faq title="Is it possible to change a primary key of a CMP object?">
+      </s2>
+      <s2 title="Is it possible to change a primary key of a CMP object?" type="faq">
 
         <p>No.  That's explicitly forbidden by the EJB spec.  A
           delete/recreate is the only solution.</p>
 
-      </faq>
+      </s2>
 
-      <faq title="I see that CMP uses 'select max(ID) ...' to get the next id, ~nyway to disable it?">
+      <s2 title="I see that CMP uses 'select max(ID) ...' to get the next id, ~nyway to disable it?" type="faq">
         <description>
-          <p>We already have sequences in place and the table is huge,
+          We already have sequences in place and the table is huge,
           so we really don't want to run this type of id-gen
           query. Also, we're going to be inserting in batches of 5-10
           at a time, so it will be even worse! Perhaps, I can hide the
           real PK from CMP and use a compound key on a couple of the
-          fields (pairs that need to be unique anyway).</p>
-
+          fields (pairs that need to be unique anyway).
         </description>
 
         <p>You can also use a separate key generator bean.</p>
@@ -170,18 +169,18 @@
           the generated code should use that first before falling back to
           the select max.  The PersistentUtils.getGeneratedKey tries to
           call the Statement.getGeneratedKeys call.</p>
-      </faq>
+      </s2>
 
     </s1>
 
     <s1 title="CMP and Transactions">
 
-      <faq title="Any dangers in running my own DB calls in a CMP bean?">
+      <s2 title="Any dangers in running my own DB calls in a CMP bean?" type="faq">
         <description>
-          <p>Should I make a separate bean-managed EJB for this
-            purpose? In doing so, I assume I would be pulling the
-            connection from the same pool in use by the rest of the
-            container, right?</p>
+          Should I make a separate bean-managed EJB for this
+          purpose? In doing so, I assume I would be pulling the
+          connection from the same pool in use by the rest of the
+          container, right?
         </description>
 
         <p>It's up to you.  If you need it to be in a transaction, you
@@ -203,11 +202,11 @@ try {
           you don't close the connection, Resin can't reuse it and may be
           forced to open a second connection.</p>
 
-      </faq>
-      <faq title="If I use Transaction type 'REQUIRED' on an CMP Entity Bean and I call several of its methods within a Session Bean that also has that type of transaction-level, will the actual db commit be deferred to the end of the Session method?">
+      </s2>
+      <s2 title="If I use Transaction type 'REQUIRED' on an CMP Entity Bean and I call several of its methods within a Session Bean that also has that type of transaction-level, will the actual db commit be deferred to the end of the Session method?" type="faq">
 
         <description>
-          <p>I was unsure because I saw con.close() in the CMP gen-ed code.</p>
+          I was unsure because I saw con.close() in the CMP gen-ed code.
         </description>
 
         <p>Yes.</p>
@@ -217,13 +216,13 @@ try {
           connection inside the same transaction.  If you enable the
           /caucho.com/sql/pool/new log, you should see that work (you
           might also want to look at the "spy" configuration).</p>
-      </faq>
+      </s2>
 
-      <faq title="Support for Oracle sequence object?">
+      <s2 title="Support for Oracle sequence object?" type="faq">
         <description>
-          <p>Do you have some kind of primary key generator which uses Oracle sequence
-            object? e.g. Specify oracle sequence name against primary key field of an
-            entity bean in the bean descriptor.</p>
+          Do you have some kind of primary key generator which uses Oracle 
+          sequence object? e.g. Specify oracle sequence name against primary 
+          key field of an entity bean in the bean descriptor.
         </description>
 
         <p>Resin doesn't yet directly support Oracle's sequence.  (We're hoping on 
@@ -232,11 +231,11 @@ try {
         <p>For now, you would need to either create a trigger that
         will fill in the key field or use JDBC directly to get the key
         value.</p>
-      </faq>
+      </s2>
     </s1>
 
     <s1 title="CMP caching">
-      <faq title="In a distributes environemnt, should I change the cache-timeouts?">
+      <s2 title="In a distributes environemnt, should I change the cache-timeouts?" type="faq">
 
         <p>A distributed environment works automatically without messing with the 
           cache timeouts.</p>
@@ -262,8 +261,8 @@ try {
         <p>In other words, this should be already handled for you and
           you should never need to disable the caching entirely.</p> 
 
-      </faq>
-      <faq title="Is the CMP cache (in Resin) shared among threads, such as for obtaining write locks?">
+      </s2>
+      <s2 title="Is the CMP cache (in Resin) shared among threads, such as for obtaining write locks?" type="faq">
         <p>No.</p>
 
         <p>The cache doesn't work that way, so there isn't really a write lock.</p>
@@ -272,9 +271,9 @@ try {
           then it's always read from the database within the context of that 
           transaction.  So the database will be handling any locking.</p>
         
-      </faq>
+      </s2>
 
-      <faq title="Can a CMP loaded in one thread/session be used by another, by receiving it from the cache?">
+      <s2 title="Can a CMP loaded in one thread/session be used by another, by receiving it from the cache?" type="faq">
 
         <p>Yes and no.  Once the transaction is done, the next request can use the 
           cached value (assuming it's a read-only request.)</p>
@@ -285,16 +284,16 @@ try {
           cached value.  Until it's checked back in, the other threads need to go 
           to the database.</p>
 
-      </faq>
+      </s2>
 
-      <faq title="So if all requests are in a transaction, such as if using the com.caucho.http.filter.TransactionFilter, the cached beans would never be used by more than one request?">
+      <s2 title="So if all requests are in a transaction, such as if using the com.caucho.http.filter.TransactionFilter, the cached beans would never be used by more than one request?" type="faq">
 
         <p>It's more accurate to say that the cached values are never used and 
           Resin always goes to the database.</p>
 
-      </faq>
+      </s2>
 
-      <faq title="Can two session have two different copies of the same record, assuming a normal DataSource?">
+      <s2 title="Can two session have two different copies of the same record, assuming a normal DataSource?" type="faq">
 
         <p>Well, it's probably important to separate the session issues from the 
           thread/transaction issues.</p>
@@ -316,21 +315,21 @@ try {
           for one of the transactions to do a decent amount of work before 
           realizing that it needs to roll back.</p>
 
-      </faq>
-      <faq title="How do I disable the cache?">
+      </s2>
+      <s2 title="How do I disable the cache?" type="faq">
 
         <p>cache-timeout=0s or -1 would be better.  It's still useful to
           have a cache-size, because the entity bean instances can be
           cached, even if the database values can't be cached in your
           care.</p>
 
-      </faq>
+      </s2>
 
-      <faq title="With cache disabled: What if a thread, inside a transaction, requests the same record twice?">
+      <s2 title="With cache disabled: What if a thread, inside a transaction, requests the same record twice?" type="faq">
         <description>
-          <p>Will it get two instances of the record, or two
+          Will it get two instances of the record, or two
           references to the same instance? (These multiple copies are
-          a problem with our current solution).</p>
+          a problem with our current solution).
         </description>
 
         <p>It will get two references to the same instance.</p>
@@ -339,34 +338,33 @@ try {
           of the entity bean is part of the EJB spec.  In the Aug draft,
           it's in the transaction section, 17.7, in the discussion of
           transaction "diamonds."</p>
-      </faq>
+      </s2>
 
-      <faq title="Concurrent transactions and cached beans">
+      <s2 title="Concurrent transactions and cached beans" type="faq">
         <description>
-          <p>So if there is an update transaction that has:</p>
-          <example>
+          So if there is an update transaction that has:
+          <pre>
 setA()
 getX() // where getX() is a read-only transaction, 
        // and X is a collection of read-only beans
 setB()
-          </example>
-
-          <p>and then after this transaction, there are two
+          </pre>
+          and then after this transaction, there are two
           simultaneous transactions calling <code>getX()</code>.  Does
           one thread hit the cache and one hit the DB or do they both
-          utilize the cache since they are read-only beans.</p>
+          utilize the cache since they are read-only beans.
         </description>
 
         <p>The second concurrent transaction hits the DB.  That's just an 
           implementation limitation.  Resin could add more instances to the pool, 
           but for now it seems better to use the simpler implementation.</p>
-      </faq>
+      </s2>
 
-      <faq title="Does reentrant tag allow simulataneous transactions to use the same instance?">
+      <s2 title="Does reentrant tag allow simulataneous transactions to use the same instance?" type="faq">
         <description>
-          <p>Hmm. I thought that &lt;reentrant&gt; tag was designed just to
+          Hmm. I thought that &lt;reentrant&gt; tag was designed just to
           control such behavior. E.g. for reentrant beans simultanious
-          transactions could use the same instance.</p>
+          transactions could use the same instance.
         </description>
         
         <p>No, &lt;reentrant&gt; is a bit different.  If reentrant is false, then an 
@@ -375,21 +373,21 @@ setB()
 
           <p>To be honest, I've never understood why you would set
             reentrant to false.</p>
-      </faq>
+      </s2>
 
-      <faq title="Transaction types, cache, and read-only">
+      <s2 title="Transaction types, cache, and read-only" type="faq">
         <description>
-          <p>As long as a transaction does not have setXXX, create,
+          As long as a transaction does not have setXXX, create,
           and remove for a particular bean it will use its cache.
           Cache will only be used if it did not timeout and its not
-          the second request in a thread.</p>
+          the second request in a thread.
         </description>
 
         <p>Not quite.  (For terminology, you should probably use "transaction" 
           instead of "thread", since a thread could have several sequential 
           transactions.  The basic unit is a transaction.)</p>
 
-        <s2 title="(I) No read-only beans">
+        <s3 title="(I) No read-only beans">
 
           <p>Resin-CMP has two kinds of transaction: read-only and update. 
             UserTransaction transactions are always update
@@ -441,9 +439,9 @@ getter.
               in the first getXXX.  (It's probably better not to call this a cached 
               value.)</li>
           </ol>
-        </s2>
+        </s3>
           
-        <s2 title="(II) read-only beans">
+        <s3 title="(II) read-only beans">
 
           <p>Everything is identical to case (I), except for (I.1), the first getXXX 
             of a read-only bean.</p>
@@ -454,8 +452,8 @@ getter.
               available</li>
           </ol>
           
-        </s2>
-      </faq>
+        </s3>
+      </s2>
     </s1>
   </body>
 </document>

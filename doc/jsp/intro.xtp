@@ -3,15 +3,18 @@
     <product>resin</product>
     <title>Overview</title>
     <description>
+      <p>
       JSP creates a document (such as HTML) from <em>template</em>
       text and scripting <em>actions</em>.  Template text is returned
       verbatim to the requesting client, and actions are used to fill
       in dynamic values and do things conditionallly.
+      </p>
     </description>
   </header>
 
-  <body>
+<body>
 
+<s1 title="JSP">
 <p>Resin supports Sun's JSP 2.0 specification.  JSP creates an HTML
 page from HTML <em>template</em> text, <em>tag libraries</em> and
 scripting <em>actions</em>.  Resin supports the JSTL standard tag
@@ -53,5 +56,6 @@ Welcome, visitor &lt;jsp:expression&gt; counter.getHit()&lt;/jsp:expression&gt;!
 &lt;/html&gt;
 
 </example>
+</s1>
 </body>
 </document>

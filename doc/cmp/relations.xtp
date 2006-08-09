@@ -3,13 +3,14 @@
     <product>resin-ee</product>
     <resin-2.0>$ee/ejb-tut/cmp-relations.xtp</resin-2.0>
     <title>CMP Relations Catalog</title>
+    <description>
+    <p>This section lists several of the common relation patterns along 
+    with their configuration.</p>
+    </description>
   </header>
 
   <body>
     <summary/>
-
-<p>This section lists several of the common relation patterns along with
-their configuration.</p>
 
 <s1 title="n-1 undirectional (Link)">
 
@@ -525,13 +526,9 @@ pointing to the container and including an additional identifier.
 The item bean will have a compound key class where one of the keys
 points to the container.</p>
 
-<website>
-
 <ul>
 <li><a href="tutorial/cmp-map/index.xtp">n-1 compound key example</a>
 </li></ul>
-
-</website>
 
 <example>
 CREATE TABLE students (

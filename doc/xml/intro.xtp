@@ -9,30 +9,38 @@
     <summary/>
 
 <s1 title="XML Parsing">
+<p>
 Resin's XML parser uses the JAXP API <a href="xpath|index">XML path language</a>,
 a pattern matching language for selecting nodes in an XML tree.  
 The most useful subset is covered here.  For the full description, see
 the <a href="external|spec|xpath10">XPath 1.0 spec</a>.
+</p>
 </s1>
 
 <s1 title="XPath">
+<p>
 XSLT's power comes from the <a href="xpath|index">XML path language</a>,
 a pattern matching language for selecting nodes in an XML tree.  
 The most useful subset is covered here.  For the full description, see
 the XPath 1.0 spec.
+</p>
 </s1>
 
 <s1 title="XSLT">
+<p>
 Reference guide to the <a href="xslt|fun">XSLT tags.</a>
 The most useful subset is covered here.  For the full description, see
 the <a href="external|spec|xslt10">XSLT 1.0 spec</a>.
+</p>
 </s1>
 
 <s1 title="StyleScript">
-For those put off by XSLT's verbosity, <resin/> offers <a href="doc|xtp|stylescript">StyleScript</a>. StyleScript retains the full
+<p>
+For those put off by XSLT's verbosity, Resin offers <a href="doc|xtp|stylescript">StyleScript</a>. StyleScript retains the full
 capabilities of XSLT.  It simplifies HTML generation by focusing on
 uninterpreted text, so '&amp;lt' produces 4 characters. StyleScript also
 provides some syntactic sugar.
+</p>
 </s1>
 
   </body>

@@ -18,6 +18,7 @@ server down somewhat.</p>
 <body>
 <summary/>
 
+<s1>
 <p>Adding a Java security manager puts each web-app into a
 "sandbox" where Java limits the things that can be done from code
 within th web-app.</p>
@@ -32,13 +33,16 @@ within th web-app.</p>
 
   ...
 </example>
+</s1>
 
 <s1 title="java.policy">
 <p>The security manager determines a <var>policy</var> that applies to the current
 virtual machine.  The security manager is controlled by policy file's.</p>
 
+<p>
 The simplest way to change the policy  is to change one of the default 
 policy file's.  There are two default policy files that are used by the JDK:
+</p>
 
 <def>
 ${'${'}java.home}/lib/security/java.policy

@@ -7,6 +7,8 @@
 
   <body>
     <summary/>
+
+<s1 title="Filter Configuration">
 <p>Filter configuration follows the Servlet 2.3 deployment descriptors.
 Creating and using a filter has three steps:</p>
 
@@ -16,16 +18,11 @@ Creating and using a filter has three steps:</p>
 </li><li>Use <a href="#filter-mapping">&lt;filter-mapping&gt;</a> to select URLs and servlets for the filter.
 </li></ol>
 
-<website>
 <p>Some other pages which discuss filters include:</p>
 
 <ul>
 <li>Resin's <a href="filter-library.xtp">filter library</a>
 </li></ul>
-</website>
-
-
-<s1 title="Filter Configuration">
 
 <s2 title="filter" version="Servlet 2.3" type="defun">
 <p>Defines a filter alias for later mapping.</p>

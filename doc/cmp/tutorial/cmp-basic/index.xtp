@@ -21,7 +21,7 @@
 
   <body>
     <summary/>
-
+<s1>
 <note>The <a href="ejb3|tutorial/cmp-basic/index.xtp">EJB 3.0 Basic</a>
 tutorial describes the same example for EJB 3.0.
 You can compare the two tutorials to help evaluate which
@@ -42,6 +42,7 @@ Resin-CMP to manage its list of courses offered for the term.  Each
 course has a name and a teacher for the course.  The example has been
 simplified as much as possible; following examples show how to
 <a href="../cmp-find/index.xtp">query the database</a> and <a href="../cmp-create/index.xtp">create and remove</a> database entries.</p>
+</s1>
 
 <s1 title="Database Schema">
 
@@ -426,7 +427,7 @@ public class CourseServlet extends HttpServlet {
 }
 </example>
 <results>
-<h3>Course Details</h3>
+&lt;h3>Course Details&lt;/h3>
 course: Potions
 instructor: Severus Snape
 

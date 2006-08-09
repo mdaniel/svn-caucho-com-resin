@@ -46,7 +46,9 @@ the user will be using the new version of the application.
 
 <s1 name="precompile-jsp" title="JSP Precompilation">
 
+<p>
 See <a href="doc|jsp|compile">JSP/Compilation.</a>
+</p>
 </s1>
 
 </body>

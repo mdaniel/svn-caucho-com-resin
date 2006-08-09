@@ -14,6 +14,7 @@ JSP client and a Python client.</p>
   <body>
     <summary/>
 
+    <s1>
 <p>Hessian is a lightweight binary RPC protocol.  Transferring binary objects
 like files, images, or mp3s can avoid the protocol overhead
 that XML-based protocols require.  Since it's simple, its performance
@@ -38,6 +39,7 @@ like RMI/IIOP, you can develop using Resin's Hessian.</p>
 
 <p>The <a href="../../hessian-1.0-spec.xtp">Hessian 1.0 spec</a> describes
 the full Hessian protocol.</p>
+</s1>
 
 <s1 title="Files in this tutorial">
 <deftable>

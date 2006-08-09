@@ -8,10 +8,10 @@
 
 <body>
 <summary objsummary-in-localtoc="1"/>
-<faq title="Can I use different SSL certificates for each virtual host?">
+<s1 title="Can I use different SSL certificates for each virtual host?" type="faq">
 <description>
-<p>We have two domains on one server.  Is there an example config file showing
-how to have multiple ssl certificates, one for each virtual host?</p>
+We have two domains on one server.  Is there an example config file showing
+how to have multiple ssl certificates, one for each virtual host?
 </description>
 
 <p>This is not possible if you are using Resin's virtual hosting capability to
@@ -28,12 +28,10 @@ start seperate <a config-tag="http"/> servers that only bind on that ip
 address.  Each of these <a config-tag="http"/> servers can have seperate ssl
 configurations.</p>
 
-</faq>
-<faq title="Why does Resin say I need OPENSSL_THREADS when I try to use OpenSSL?">
+</s1>
+<s1 title="Why does Resin say I need OPENSSL_THREADS when I try to use OpenSSL?" type="faq">
 <description>
-<p>
 Resin dies with an error on startup  "Resin requires a threaded version of OpenSSL.  OpenSSL must be compiled with OPENSSL_THREADS for Resin to use it."
-</p>
 </description>
 
 <p>
@@ -58,9 +56,9 @@ The INSTALL document from the OpenSSL package contains more
 information on the <code>threads</code> option.
 </p>
 
-</faq>
+</s1>
 
-<faq title="What is the sequence of handshakes for an SSL connection?">
+<s1 title="What is the sequence of handshakes for an SSL connection?" type="faq">
 <description>
 </description>
 <example>
@@ -74,7 +72,7 @@ Finished-&gt;
 &lt;-ChangeCipherSpec
 &lt;-Finished
 </example>
-</faq>
+</s1>
 
 
 </body>

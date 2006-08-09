@@ -9,7 +9,7 @@
 <body>
 <summary objsummary="localtoc"/>
 
-<faq title="Where is the configuration GUI, and the GUI for deploying web-apps and new virtual hosts?">
+<s1 title="Where is the configuration GUI, and the GUI for deploying web-apps and new virtual hosts?" type="faq">
 <description>
 </description>
 
@@ -36,9 +36,9 @@ changes, or by adding a <code>.war</code> or subdirectory to a
 with <code>resin.conf</code> file changes, or by adding a <code>.jar</code> or
 subdirectory in a <code>hosts</code> directory.
 </li></ul>
-</faq>
+</s1>
 
-<faq title="Where can I find the .rnc files that Resin uses for validating configuration files?">
+<s1 title="Where can I find the .rnc files that Resin uses for validating configuration files?" type="faq">
 <description>
 </description>
 
@@ -56,18 +56,18 @@ subdirectory in a <code>hosts</code> directory.
 </li><li>com/caucho/jsp/cfg/jsp1_2-tld.rnc
 </li><li>com/caucho/jsp/cfg/jsp20-tld.rnc
 </li></ul>
-</faq>
+</s1>
 
-<faq title="Can I precompile JSP's?">
+<s1 title="Can I precompile JSP's?" type="faq">
 <description>
 </description>
 
 <p>
 See <a href="doc|jsp|compile">JSP Compilation.</a>
 </p>
-</faq>
+</s1>
 
-<faq title="How can I disable directory listings?">
+<s1 title="How can I disable directory listings?" type="faq">
 <p>
 Directory listing is performed by a servlet named `directory'.
 The standard resin.conf contains a definition of that servlet:
@@ -91,9 +91,9 @@ Directory listing is disabled by removing or commenting out this definition.
            servlet-class="com.caucho.servlets.DirectoryServlet"/&gt;
   --&gt;
 </example>
-</faq>
+</s1>
 
-<faq title="What impact does always-save-session have on performance?">
+<s1 title="What impact does always-save-session have on performance?" type="faq">
 
 <description>
 We've seen significant performance issues when distributed sessions are
@@ -132,7 +132,7 @@ crc sum of the serialization; it compares the crc value of the serialization of
 current session objects with the objects in the backing store, and if there is
 no change the session is not written.
 </p>
-</faq>
+</s1>
 
 </body>
 </document>

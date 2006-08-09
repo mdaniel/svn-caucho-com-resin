@@ -2,12 +2,13 @@
   <header>
     <product>resin-ee</product>
     <title>XDoclet tags</title>
-    <description>XDoclet tags</description>
+    <description><p>XDoclet tags</p></description>
   </header>
 
   <body>
     <summary/>
 
+<s1>
 <deftable title="XDoclet tags">
 <tr><th>Tag</th><th>Attribute</th><th>Meaning
 </th></tr><tr><td>@ejb.bean</td><td>&#160;</td><td>configuration applicable to the entire bean
@@ -34,6 +35,7 @@
 </td></tr><tr><td>&#160;</td><td>cache-size</td><td>Specifies the entity cache size
 </td></tr><tr><td>&#160;</td><td>cache-timeout</td><td>Specifies the entity cache timeout
 </td></tr></deftable>
+</s1>
 
   </body>
 </document>

@@ -3,7 +3,13 @@
     <product>resin</product>
     <title>A Simple Resource Bean</title>
     <type>tutorial</type>
-    <description>Resources are beans configured in the resin.conf or web.xml and stored in JNDI.  The tutorial shows the configuration of a trivial bean as a resource and looking it up using JNDI.</description>
+    <description>
+      <p>
+      Resources are beans configured in the resin.conf or web.xml and
+      stored in JNDI.  The tutorial shows the configuration of a trivial
+      bean as a resource and looking it up using JNDI.
+      </p>
+      </description>
  <tutorial-startpage>index.jsp</tutorial-startpage>
 
 </header>
@@ -31,7 +37,7 @@ available beans, even allowing for more complex configuration beans extending
 the idea of &lt;env-entry&gt; (which stored simple Strings or
 Integers in JNDI.)</p>
 
-<subsection title="The TestResource bean">
+<s2 title="The TestResource bean">
 
 <p>The <code>TestResource</code> bean is almost as simple as possible.
 It has a single String configuration parameter and does nothing but
@@ -58,7 +64,7 @@ public class TestResource {
 <p>In other words, you have lots of flexibility of things to configure
 as resources.</p>
 
-</subsection>
+</s2>
 
 <s2 title="web.xml configuration">
 

@@ -3,9 +3,12 @@
     <product>resin</product>
     <title>Amber Lifecycle</title>
 
-    <description>The Amber bean lifecycle
-follows the JDO 1.0 model.  Amber supports both transactional
-and non-transactional lifecycles.
+    <description>
+    <p>
+    The Amber bean lifecycle
+    follows the JDO 1.0 model.  Amber supports both transactional
+    and non-transactional lifecycles.
+    </p>
     </description>
   </header>
 

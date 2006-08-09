@@ -4,10 +4,12 @@
     <resin-2.0>$resin/ref/jsp-variables.xtp</resin-2.0>
     <title>Variables</title>
     <description>
+      <p>
       JSP makes implicit variables available to the script.  These
       variables are used to gain information about the request, and to
       help form a response.  They also expose some useful
       functionality.
+      </p>
     </description>
   </header>
 

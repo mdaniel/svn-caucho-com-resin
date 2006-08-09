@@ -7,10 +7,13 @@
 
   <body>
     <summary/>
+<s1 title="Orion EJB">
 
+<p>
 From Luciano Montebove:
+</p>
 
-<p/>To use Resin as an EJB client with Orion follow these steps:
+<p>To use Resin as an EJB client with Orion follow these steps:</p>
 
 <ol>
 <li>Under Orion do nothing :)
@@ -40,5 +43,6 @@ string ("java:comp/env/ejb/MyBean")
 
 </li><li>It's all
 </li></ol>
+</s1>
   </body>
 </document>

@@ -3,10 +3,12 @@
     <product>resin</product>
     <resin-2.0>$resin/ref/jsp-actions.xtp</resin-2.0>
     <title>Actions</title>
-    <brief>
+    <description type="brief">
+      <p>
       Actions are the core of JSP.  Actions range from printing a
       script expression, to creating and storing a Java Bean.
-    </brief>
+      </p>
+    </description>
   </header>
 
   <body>

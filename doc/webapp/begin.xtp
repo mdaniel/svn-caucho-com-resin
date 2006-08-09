@@ -105,7 +105,7 @@ named "intranet".
 From the Servlet Specification 2.2:
 </p>
 
-<quote>
+<blockquote>
 A servlet is a web component, managed by a container, that generates
 dynamic content. Servlets are small, platform independent Java classes
 compiled to an architecture neutral bytecode that can be loaded
@@ -113,7 +113,7 @@ dynamically into and run by a web server. Servlets interact with web
 clients via a request response paradigm implemented by the servlet
 container. This request-response model is based on the behavior of the
 Hypertext Transfer Protocol (HTTP).
-</quote>
+</blockquote>
 
 <p>
 A Servlet is a Java class that has a method that gets called with
@@ -212,12 +212,12 @@ expressionsthat are used to generate results dynamically.
 From the JSP 2.0 specification:
 </p>
 
-<quote>
+<blockquote>
 JavaServer Pages technology supports scripting elements as well as actions.
 Actions encapsulate useful functionality in a convenient form that can be
 manipulated by tools. Expressions are used to access data. Scripts can be used
 to glue together this functionality in a per-page manner.
-</quote>
+</blockquote>
 
 <p>
 With JSP the developer specifies the content mostly as the kind of thing they
@@ -235,11 +235,11 @@ code for a Servlet, a process of <var>translation</var>.
 
 </p><p>From the JSP specification: </p>
 
-<quote>
+<blockquote>
 JSP pages are textual components.  They go through two
 phases: a translation phase, and a request phase. Translation is done
 once per page. The request phase is done once per request.
-</quote>
+</blockquote>
 
 <p>
 The translation phase occurs when Resin takes a look at the
@@ -577,12 +577,12 @@ More information on implementing custom tag libraries is in the <a href="doc|jsp
 From the Servlet Specification 2.4:
 </p>
 
-<quote>
+<blockquote>
 A filter is a reusable piece of code that can transform the content of HTTP
 requests, responses, and header information. Filters do not generally create a
 response or respond to a request as servlets do, rather they modify or adapt
 the requests for a resource, and modify or adapt responses from a resource.
-</quote>
+</blockquote>
 
 <p>
 A Filter is a Java class that is used to <var>intercept</var> the request and the
@@ -1376,7 +1376,7 @@ to access the page.  Resin can also put the error in log files.
 From the JSP specification:
 </p>
 
-<quote>
+<blockquote>
 The translation of a JSP page source into a corresponding JSP page
 implementation class using the Java technology by a JSP container can
 occur at any time between initial deployment of the JSP page into the
@@ -1388,7 +1388,7 @@ implementation dependent. Fatal translation failures shall result in
 subsequent client requests for the translation target to also be
 failed with the appropriate error; for HTTP protocols, error status
 code 500 (Server Error).
-</quote>
+</blockquote>
 
 </s2>
 
@@ -1417,7 +1417,7 @@ page unless you explicitly provide an error page yourself.
 From the JSP specification:
 </p>
 
-<quote>
+<blockquote>
 
 <p>
 During the processing of client requests, arbitrary runtime errors can
@@ -1453,7 +1453,7 @@ true) then the exception implicit scripting language variable of that
 page is initialized to the offending Throwable reference.
 </p>
 
-</quote>
+</blockquote>
 
 </s2>
 </s1> <!-- errors -->
@@ -1731,13 +1731,16 @@ certain set of Roles.
 
 <s2 title="Roles">
 
+<p>
 Servlet 2.2 Specification states:
-<quote>
+</p>
+
+<blockquote>
 A role is an abstract logical grouping of users that is defined by the
 Application Developer or Assembler.  When the application is deployed,
 these roles are mapped by a Deployer to security identities, such as
 principals or groups, in the runtime environment.
-</quote>
+</blockquote>
 
 <p>
 Roles are similar to groups in Unix security.  As an example, you
@@ -1758,13 +1761,13 @@ Principals can have more than one role -- a user might be both a
 Servlet 2.2 Specification states:
 </p>
 
-<quote>
+<blockquote>
 Declarative security refers to the means of expressing an
 application's security structure, including roles, access control, and
 authentication requirements in a form external to the application. The
 deployment descriptor is the primary vehicle for declarative security
 in web applications.
-</quote>
+</blockquote>
 
 <p>
 Basically what this means in real terms is that you can specify
@@ -1781,11 +1784,11 @@ the user must have a role of "admin".
 Servlet 2.2 Specification states:
 </p>
 
-<quote>
+<blockquote>
 Programmatic security is used by security aware applications when
 declarative security alone is not sufficient to express the security
 model of the application. 
-</quote>
+</blockquote>
 
 <p>
 Programmatic security lets you decide in some Java code what to do,

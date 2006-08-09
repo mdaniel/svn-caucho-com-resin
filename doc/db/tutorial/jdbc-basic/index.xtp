@@ -13,6 +13,7 @@ for using a database in Resin.</p>
   <body>
     <summary/>
 
+<s1>
 <p>Using a JDBC database is a three step process:</p>
 
 <ul>
@@ -30,6 +31,7 @@ The &lt;database&gt; configures the <code>DataSource</code> and stores it
 in the JNDI resource map.  The servlet will retrieve the
 <code>DataSource</code> and use it as a factory to obtain
 <code>Connection</code> objects, the main workhorse for using databases.</p>
+</s1>
 
 <s1 title="Files in this tutorial">
 <deftable>

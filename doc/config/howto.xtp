@@ -12,7 +12,7 @@
 
 <summary/>
 
-<faq title="Configure and use a database connection">
+<s1 title="Configure and use a database connection" type="faq">
 
 <p>See
 the <a href="db|config">database configuration page</a> for the full
@@ -26,9 +26,9 @@ sample configurations for several database drivers.</p>
 and the <a href="db|tutorial/jdbc-ioc/index">DataSource
 inversion-of-control tutorial</a> for sample JDBC usage patterns.</p>
 
-</faq>
+</s1>
 
-<faq title="Bind to port 80/443 without running as root">
+<s1 title="Bind to port 80/443 without running as root" type="faq">
 
 <p>Unix needs root privileges to bind to port 80 and 443, but Resin should
 avoid running as root for security.  It's best to use a port mapper
@@ -41,9 +41,9 @@ like 8080 to avoid running as root entirely.</p>
 configuration can use setuid to change Resin's user after binding ports.
 </p>
 
-</faq>
+</s1>
 
-<faq title="Set a proxy port when mapping port 80 to port 8080">
+<s1 title="Set a proxy port when mapping port 80 to port 8080" type="faq">
 
 <p>When the HTTP port is mapped from 80 to port 8080 or when a load balancer
 redirects to an internal IP address, the application often needs
@@ -59,13 +59,13 @@ to set the canonical host and port name to the external address.</p>
 &lt;/host&gt;
 </example>
 
-</faq>
+</s1>
 
-<faq title="Reload .war files manually">
+<s1 title="Reload .war files manually" type="faq">
 
 <p>See the <a href="jmx|cookbook/restart.xtp">JMX restart</a> example.</p>
 
-</faq>
+</s1>
 
   </body>
 </document>

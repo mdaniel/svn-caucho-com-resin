@@ -10,7 +10,7 @@
 <summary objsummary="localtoc"/>
 
 
-<faq name="forward-path" title="How are path related values of the request object changed after a forward or include?">
+<s1 name="forward-path" title="How are path related values of the request object changed after a forward or include?" type="faq">
 
 <description>
 When I have a jsp "index.jsp" and it does a forward to "target.jsp",
@@ -23,7 +23,7 @@ The values of getRequestURI() and other path related method's change for a
 forward(), but remain the same for an include().  
 </p>
 
-<s1 title="include">
+<s2 title="include">
 <p>
 When a servlet (or jsp) has been invoked by an include, the path related
 methods of the <code>request</code> object correspond to the invoking
@@ -55,10 +55,10 @@ corresponding to the target.
 </td></tr><tr><td>request.getAttribute("javax.servlet.include.path_info")</td><td>null
 </td></tr><tr><td>request.getAttribute("javax.servlet.include.query_string")</td><td>null
 </td></tr></deftable>
-</s1>
+</s2>
 
 
-<s1 title="forward">
+<s2 title="forward">
 
 <p>
 When a servlet (or jsp) has been invoked by a forward, the path related
@@ -74,10 +74,10 @@ corresponding to the invoking servlet.
 
 <p>From the discussion of forward() in the Servlet specification:</p>
 
-<quote>
+<blockquote>
 The path elements of the request object exposed to the target servlet must
 reflect the path used to obtain the RequestDispatcher.
-</quote>
+</blockquote>
 
 <example title="/testapp/index.jsp?foo=bar">
 &lt;jsp:forward page="target.jsp"/&gt;
@@ -99,15 +99,15 @@ reflect the path used to obtain the RequestDispatcher.
 </td></tr><tr><td>request.getAttribute("javax.servlet.forward.query_string")</td><td>null
 </td></tr><tr><td>caucho.forward</td><td>true
 </td></tr></deftable>
-</s1>
+</s2>
 
-<s1 title="Exception: getNamedDispatcher()">
+<s2 title="Exception: getNamedDispatcher()">
 <p>
 If getNamedDispatcher() is used to obtain a dispatcher to do the include() or forward(), no attributes are set.
 </p>
-</s1>
+</s2>
 
-<s1 title="Request parameters">
+<s2 title="Request parameters">
 
 <p>A call to forward() or include() can contain parameters in the url.  These
 parameters are returned with a subsequent call to request.getParameter().
@@ -150,11 +150,11 @@ the query string.  </p>
 </td></tr><tr><td>request.getParameter("foo") in target.jsp returns</td><td>override
 </td></tr><tr><td>request.getAttribute("javax.servlet.forward.query_string") in target.jsp returns</td><td>foo=original
 </td></tr></deftable>
+</s2>
+
 </s1>
 
-</faq>
-
-<faq title="Class.forName() doesn't seem to work right">
+<s1 title="Class.forName() doesn't seem to work right" type="faq">
 <description>
 When I do Class.forName(classname).getInstance() I do not seem to a newly
 loaded Class Object. It seems that I always just get the cached old version
@@ -184,9 +184,9 @@ private Class classForName(String classname)
 }
 </example>
 
-</faq>
+</s1>
 
-<faq title="Why do I have to put my classes in a package?">
+<s1 title="Why do I have to put my classes in a package?" type="faq">
 <description>
 If I make a class that is not in a package, Resin does not recognize it and 
 does not load it.
@@ -209,9 +209,9 @@ See
 point #8, second bullet point.
 </p>
 
-</faq>
+</s1>
 
-<faq title="How do I specify the default file encoding?">
+<s1 title="How do I specify the default file encoding?" type="faq">
 
 <description>
 I want to specify the default file encoding for InputStreamReader and
@@ -252,7 +252,7 @@ OutputStreamWriter encoding is: ISO8859_1
 </results>
 
 
-</faq>
+</s1>
 
 
 </body>

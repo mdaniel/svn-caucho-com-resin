@@ -2,7 +2,6 @@
 <header>
 <product>resin</product>
 <title>Migrating from Resin 2.x</title>
-</header>
 <description>
 
 <p>Migration from Resin 2.1.x will require some changes, mostly to your
@@ -15,6 +14,7 @@ contain valuable information for migrating from 2.1.  Additional notes are
 included below.</p>
 
 </description>
+</header>
 
 <body>
 <summary/>
@@ -155,7 +155,7 @@ included explicitly from the resin.conf.</p>
 <s1 title="General">
 
 <s2 title="logging">
-<p>Resin now uses the <a href="doc|config|log">JDK 1.4 logging facility</a></p>.
+<p>Resin now uses the <a href="doc|config|log">JDK 1.4 logging facility</a>.</p>
 
 <p>
 The wrapper now redirects output from the java process to 
@@ -196,7 +196,9 @@ already included in JDK 1.4, so Resin no longer needs to include them.
 &lt;/resin:import&gt;
 </example>
 
+<p>
 See <a config-tag="resin:import"/>.
+</p>
 </s2>
 
 </s1> <!-- General -->

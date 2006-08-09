@@ -292,7 +292,7 @@ the POSTing browser ? Why isn't there a "; charset=xxxx" suffix to the
 "Content-Type: application/x-www-form-urlencoded" ?
 </li></ol>
 
-<p>Rogério Saran writes:</p>
+<p>RogÃ©rio Saran writes:</p>
 
 <p>Nicolas, Solaris JVMs follows the default system locale for character
 output. A bug on some Solaris installers can damage the system default
@@ -320,7 +320,7 @@ environment variables before calling RESIN_HOME/bin/httpd.sh.</p>
 
 <p>Nicolas Leheun writes:</p>
 
-<p>Thanks to Rogério Saran, the solution of correctly defining the Solaris
+<p>Thanks to RogÃ©rio Saran, the solution of correctly defining the Solaris
 5.7 locale thanks to the /etc/default/init file works fine. I just had to
 find out the fact that 'su -' was corrupting the locale configuration,
 whereas a simple 'su' does not. The '-' is meant to pass along the current

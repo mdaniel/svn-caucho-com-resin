@@ -330,7 +330,7 @@ public class CourseServlet extends HttpServlet {
 }
 </example>
 <results>
-<h3>Course Details</h3>
+&lt;h3>Course Details&lt;/h3>
 course: Potions
 instructor: Severus Snape
 

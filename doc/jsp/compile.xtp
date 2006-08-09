@@ -2,7 +2,11 @@
 <header>
 <product>resin</product>
 <title>JSP Compilation</title>
-<keywords>jsp, compile, precompile</keywords>
+<keywords>
+  <keyword>jsp</keyword>
+  <keyword>compile</keyword>
+  <keyword>precompile</keyword>
+</keywords>
 <description>
 <p>JSP compilation causes the compilation of JSP files before they are first
 accessed on a live server.</p> 
@@ -13,6 +17,7 @@ accessed on a live server.</p>
 
 <summary/>
 
+<s1 name="precompile" title="JspPrecompileListener">
 <p>Unless explicitly compiled ahead of time, JSP files are compiled the first
 time they are accessed.  On large production sites, or in situations involving
 complicated JSP files, compilation may cause unacceptable delays to users first
@@ -24,7 +29,6 @@ As an alternative, Resin also provides a <code>JspCompiler</code> that is used
 to explicitly compile jsp files before they are accessed for the first time.
 </p>
 
-<s1 name="precompile" title="JspPrecompileListener">
 
 <p><a href="javadoc|com.caucho.jsp.JspPrecompileListener|"/> is a <a href="javadoc|javax.servlet.ServletContextListener|">ServletContextListener</a>
 that compiles jsp files when the web-app starts.  It is activated using the 
@@ -77,8 +81,10 @@ that have an extension of .jsp or .jspx when the application first starts.</p>
 &lt;/web-app&gt;
 </example>
 
+<p>
 The first line includes all jsp's,  it's the same as specifying
-<extension>jsp</extension>. The following lines exclude specific jsp.
+<code>jsp</code>. The following lines exclude specific jsp.
+</p>
 
 </s1>
 <s1 title="JspCompiler">

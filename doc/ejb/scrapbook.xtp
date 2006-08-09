@@ -15,7 +15,7 @@
     <summary objsummary-in-localtoc="1"/>
 
     <s1 title="Protocols">
-      <faq title="What is meant by the 'wire protocol' or 'protocol' for remote EJB?">
+      <s2 title="What is meant by the 'wire protocol' or 'protocol' for remote EJB?" type="faq">
 
       <p>Unfortunately, there's quite a bit of EJB documentation that
       seems to hide the fact the remote method calls need to use some
@@ -34,9 +34,9 @@
           far as I can tell, it's all Sun politics, where the CORBA and RMI groups 
           think that by forcing the app servers to use their lame protocols, 
           they'll finally get somewhere in the marketplace.)</p>
-      </faq>
+      </s2>
 
-      <faq title="Should I use Burlap or Hessian?">
+      <s2 title="Should I use Burlap or Hessian?" type="faq">
 
         <p>Burlap and Hessian are almost identical.  Most of the files
         just globally replace Burlap with Hessian.</p>
@@ -55,9 +55,9 @@
 
         <p>Also, for something like Flash, it might be easier to parse
           XML rather than a binary protocol.</p>
-      </faq>
+      </s2>
 
-      <faq title="Should I use Corba/IIOP?">
+      <s2 title="Should I use Corba/IIOP?" type="faq">
         <p>You don't want to use IIOP unless you really need to.</p>
 
         <p>Unless you are forced by some external requirement to use IIOP, use 
@@ -71,7 +71,7 @@
 
         <p>Even SOAP is better than CORBA/IIOP and SOAP is also overly-complex and 
           unwieldly.</p>
-      </faq>
+      </s2>
     </s1>
   </body>
 </document>

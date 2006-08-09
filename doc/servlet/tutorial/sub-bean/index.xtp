@@ -2,7 +2,11 @@
   <header>
     <product>resin</product>
     <title>Sub-bean servlet init</title>
-    <description>Servlet initializers using the bean-style initialization can set sub-beans.</description>
+    <description>
+      <p>
+      Servlet initializers using the bean-style initialization can set sub-beans.
+      </p>
+    </description>
     <type>tutorial</type>
  <tutorial-startpage>bean</tutorial-startpage>
 

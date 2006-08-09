@@ -42,8 +42,8 @@
               </td><td>
           </td></tr></deftable>
 
-        </li><li>pageContext.findAttribute(varname)
-          <p>which is like getting the first of:</p>
+        </li><li>pageContext.findAttribute(varname)<br/>
+          which is like getting the first of:
           <ul>
           <li>page.getAttribute(varname)
           </li><li>request.getAttribute(varname)

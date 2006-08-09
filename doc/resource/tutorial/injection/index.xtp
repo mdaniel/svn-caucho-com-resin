@@ -62,7 +62,7 @@ Injection</a> article.</p>
 
 <s2 title="Configuration as Assembly Line">
 
-<p><figure src="../../../../images/assembler-eg1.gif"/></p>
+<figure src="../../../../images/assembler-eg1.gif"/>
 
 <p>The Dependency Injector pattern could also be called
 the Assembly pattern because it resembles an assembly

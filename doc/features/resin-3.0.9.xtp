@@ -28,8 +28,7 @@ to take extra care verifying Resin 3.0.9 before putting it into production.</p>
 
 </s1>
 
-<s1>
-  <title><a href="../ejb3">EJB 3.0 experimental features</a></title>
+<s1 title="EJB 3.0 experimental features">
 
 <p>See the <a href="../ejb3/tutorial">EJB 3.0 tutorials</a> for examples.</p>
 

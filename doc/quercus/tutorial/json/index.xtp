@@ -46,7 +46,8 @@ Quercus has built-in JSON support and JSON functionality is enabled the moment Q
 </p>
 <ul>
 <li>
-If the text is that of a JSON array<sup><a href="http://www.json.org">[1]</a></sup>,  decoding returns a non-associative PHP array.
+If the text is that of a JSON <a href="http://www.json.org">array</a>,
+decoding returns a non-associative PHP array.
 </li><li>
 If the text is that of a JSON object and the second argument to <i>json_decode</i> is not specified or is <i>false</i>, decoding returns a standard PHP object.
 </li>

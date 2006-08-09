@@ -1,5 +1,0 @@
-<navigation threaded="true" section="Resin : XTP : Tutorials" comment="true">
-  <item title="Tutorials" link="index.xtp">
-      <item link="filter-vary.xtp" title="Varying the XSL"/>
-  </item>
-</navigation>

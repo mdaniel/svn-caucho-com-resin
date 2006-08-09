@@ -4,12 +4,11 @@
     <title>Multipart Forms and File Uploading</title>
     <type>example</type>
     <resin-2.0>$resin/java_tut/multipart.xtp</resin-2.0>
-    <brief>
-      Multipart forms let browsers upload files to the website 
-    </brief>
     <description>
+      <p>
       Multipart forms let browsers upload files to the website.  They
       also have better handling for internationalization.
+      </p>
     </description>
   </header>
 

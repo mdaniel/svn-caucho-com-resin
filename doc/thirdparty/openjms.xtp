@@ -13,7 +13,7 @@
 by adding a <a href="config-index|jndi-link">jndi-link</a> to the web.xml
 or resin.conf.</p>
 
-<subsection title="Configured with OpenJMS tcp connectory">
+<s2 title="Configured with OpenJMS tcp connectory">
 
 <example title="web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
@@ -26,9 +26,9 @@ or resin.conf.</p>
 
 <p>The OpenSSL server will need to be started as a separate process.</p>
 
-</subsection>
+</s2>
 
-<subsection title="Configured with OpenJMS embedded">
+<s2 title="Configured with OpenJMS embedded">
 
 <p>OpenJMS can also be embedded in Resin.  Because OpenJMS does not
 yet support JCA, it does not understand server restarts.  Therefore,
@@ -51,7 +51,7 @@ it needs to be placed in the resin.conf, not the web.xml.</p>
 &lt;/resin&gt;
 </example>
 
-</subsection>
+</s2>
 
 <p>A sample servlet using the above OpenSSL configuration sends a
 text message to the queue.</p>

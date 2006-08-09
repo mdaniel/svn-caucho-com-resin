@@ -10,7 +10,7 @@
 <summary objsummary="localtoc"/>
 
 
-<faq title="Can I link one JNDI name to another?">
+<s1 title="Can I link one JNDI name to another?" type="faq">
 <description>
 My application is coded to find a UserTransaction using the name
 "java:comp/env/UserTransaction", is there some way that I can link that name to
@@ -26,7 +26,7 @@ My application is coded to find a UserTransaction using the name
 &lt;/jndi-link&gt;
 </example>
 
-</faq>
+</s1>
 
 
 </body>

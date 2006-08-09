@@ -4,10 +4,12 @@
     <resin-2.0>$resin/ref/jsp-directives.xtp</resin-2.0>
     <title>Directives</title>
     <description>
+      <p>
       JSP Directives control the processing of an entire
       page.  Directive examples include setting a scripting language,
       setting an error page, including other sections, and setting a
       character encoding.
+      </p>
     </description>
   </header>
 

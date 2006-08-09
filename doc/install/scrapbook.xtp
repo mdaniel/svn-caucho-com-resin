@@ -13,7 +13,7 @@ verified.</p>
 <body>
 <summary objsummary-in-localtoc="1"/>
 
-<faq title="Mac OS X startup script">
+<s1 title="Mac OS X startup script" type="faq">
 <description>
 </description>
 
@@ -112,7 +112,7 @@ For more info than you probably want to know about Mac OS X's boot
 process and startup items, see <a href="http://developer.apple.com/documentation/macosx/Conceptual/BPSystemStartup/Concepts/BootProcess.html">Apple's documentation</a>.
 </p>
 
-</faq>
+</s1>
 
 
 </body>

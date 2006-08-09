@@ -79,7 +79,7 @@ that is the <code>@ManyToOne</code> link.
 </p>
 
 <example title="House.java" file="WEB-INF/classes/example/House.java" re-marker="Get the Student" re-start="Get the Student" re-end="^  }">
-  @<a href="amber|amber-table.xtp#@OneToMany">OneToMany</a>(mappedBy="house")
+  @OneToMany(mappedBy="house")
   private Set&lt;Student&gt; _students;
 </example>
 </s2>
@@ -94,8 +94,8 @@ unchanged from the
 
 <example title="Student.java" file="WEB-INF/classes/example/Student.java" re-start="this Student belongs to" re-end="^  }">
 
-  <a href="amber|amber-table.xtp#@ManyToOne">@ManyToOne</a>
-  <a href="amber|amber-table.xtp#@JoinColumn">@JoinColumn</a>(name="house")
+  @ManyToOne
+  @JoinColumn(name="house")
   private House _house;
 </example>
 

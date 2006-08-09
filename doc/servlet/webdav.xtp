@@ -173,11 +173,11 @@ linking it to databases or some EJB-based data source or whatever.</p>
 </s1>
 
 <s1 title="FAQ">
-<faq title="How do I configure the WebDAV servlet to recognize more than one root folder?">
+<s2 title="How do I configure the WebDAV servlet to recognize more than one root folder?" type="faq">
 <description>
-<p>I'm trying to set up the Webdav servlet to recognize more than one 
+I'm trying to set up the Webdav servlet to recognize more than one 
 root folder because I need to create multiple Webdav shares from 
-different drives.</p>
+different drives.
 </description>
  
 <p>There's a "root" parameter for the WebDavServlet (see <a href="#configure">Configuring the WebDAV Servlet</a>).  You can
@@ -203,12 +203,13 @@ set that and use several separate webdav instances.</p>
 &lt;servlet-mapping url-pattern='/root1' servlet-name='webdav1'/&gt;
 &lt;servlet-mapping url-pattern='/root2' servlet-name='webdav2'/&gt;
 </example>
-</faq>
+</s2>
 
-<faq title="Can I make the root path match a user name?">
+<s2 title="Can I make the root path match a user name?" type="faq">
 <description>
-  <p>What if one wants to make the root user-dependant? i.e. have user "ferg" have the root in "/somefolder/ferg" and user "jeff" have the root in "/somefolder/jeff"
-  </p>
+What if one wants to make the root user-dependant? i.e. have user "ferg"
+have the root in "/somefolder/ferg" and user "jeff" have the root in
+"/somefolder/jeff"
 </description>
 
 <p>It's possible, but you need to write a bit of code.</p>
@@ -220,7 +221,7 @@ can customize the data source by creating your own ApplicationPath.</p>
 <a href="javadoc|com.caucho.servlets.webdav.FilePath|"/> and override the 
 getPath method.</p>
 
-</faq>
+</s2>
 </s1> <!-- faq -->
 
 </body>

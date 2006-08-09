@@ -56,7 +56,7 @@ implementation of that code. </p>
 <p>Applications take advantage of Resin's highly tested and configurable server
 architecture and only need to implement some simple objects.  Two classes are
 required, one which extends the abstract class <a href="javadoc|com.caucho.server.port.Protocol|"/> and one which implements the
-interface <a href="javadoc|com.caucho.server.port.ServerRequest|"/></p>.
+interface <a href="javadoc|com.caucho.server.port.ServerRequest|"/>.</p>
 </s1>
 
 <s1 title="com.caucho.server.port.Protocol">

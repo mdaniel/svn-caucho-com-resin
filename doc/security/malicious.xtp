@@ -40,32 +40,33 @@ to protecting your site.</p>
 
 <dl>
 
-<dt>'Escape' incoming request parameters to remove HTML code.
+<dt>'Escape' incoming request parameters to remove HTML code.</dt>
 <dd>This is usually accomplished by changing all instances of the
 '&lt;' and '&gt;' characters in form parameters to corresponding
 entities like &amp;lt; and &amp;gt;.  The Quercus example
 application that comes with Resin contains code that you can use as
-a basis.
+a basis.</dd>
 
-</dd></dt><dt>Beware of values used in JDBC calls
+<dt>Beware of values used in JDBC calls</dt>
 <dd>As you are forming SQL statements to use in JDBC, take care that
 a request parameter value does not end up becoming part of an
 SQL statement in such a way that it could change the intended
-function of the SQL statement.
+function of the SQL statement.</dd>
 
-</dd></dt><dt>Allow for unexpected submission of parameters
+<dt>Allow for unexpected submission of parameters</dt>
 <dd>When devloping the code to handle a form submission, or handle
 request parameters in general, do not assume that the parameters are
 valid.  It is quite easy for a malicious user to make their own
 form, or their own URL, and specify whatever form parameters they
 want.
+</dd>
 
-</dd></dt><dt>Do not assume the value of hidden form fields are valid
+<dt>Do not assume the value of hidden form fields are valid</dt>
 <dd>A common practice is to use hidden form fields to hold values
 that your application needs on subsequent requests.  It is very easy
-for a user to change these values and make a submission.
+for a user to change these values and make a submission.</dd>
 
-</dd></dt></dl>
+</dl>
 </s2>
 </s1>
 

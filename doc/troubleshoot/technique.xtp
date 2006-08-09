@@ -187,10 +187,10 @@ Initializing jdb ...
 a thread dump:
 
 <example>
-&gt; <bold>suspend</bold>
+&gt; suspend
 
 All threads suspended.
-&gt; <bold>where all</bold>
+&gt; where all
 
 tcpConnection-6862-3:
 
@@ -212,7 +212,7 @@ tcpConnection-543-2:
 </example>
 </li><li>Use the "resume" command to resume the process
 <example>
-&gt; <bold>resume</bold>
+&gt; resume
 </example>
 
 </li></ol>
@@ -660,9 +660,11 @@ Techniques to adress this are discussed in <a href="doc|performance|jvm-tuning#s
 
 <s1 name="netstat" title="Use netstat to obtain an OS level view of current TCP/IP port usage">
 
-
+<p>
 The <code>netstat</code> utility is useful for obtaining information from the
 operating system about the current state of network usage.
+</p>
+
 <example>
 unix$ netstat -anp
 win&gt; netstat -an

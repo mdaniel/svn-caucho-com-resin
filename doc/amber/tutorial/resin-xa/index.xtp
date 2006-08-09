@@ -47,7 +47,7 @@ must complete or the database must remain unchanged.  Transactions avoid
 the inconsistent state.  The example's database has a single entity, Course.
 Each course has a course name and an assigned teacher.</p>
 
-<table border="1">
+<table>
 <caption>Potential Results of Swap (multithreaded)</caption>
 <tr><td><b>Potions</b></td><td><b>Transfiguration</b></td><td><b>Description</b></td></tr>
 <tr><td>McGonnagal</td><td>Snape</td><td>Database successfully updated </td></tr>

@@ -410,7 +410,7 @@ r x01 x00
   z
 </example>
 
-<s3 title="Object Naming (non-normative)">
+<s2 title="Object Naming (non-normative)">
 
 <p>
 URLs are flexible
@@ -430,9 +430,9 @@ factory interface like http://foo.com/stock and object instances
 like http://foo.com?id=PEET.  The factory interface would return valid
 object references through the factory methods.</p>
 
-</s3>
+</s2>
 
-<s3 title="Object naming (non-normative)">
+<s2 title="Object naming (non-normative)">
 
 <p>As an example, the following format is used for EJB:</p>
 
@@ -473,9 +473,9 @@ http://localhost/hessian/my-session-bean
 http://localhost/hessian/my-session-bean?ejbid=M9Zs1Zm
 </example>
 
-</s3>
+</s2>
 
-<s3 title="Methods and Overloading">
+<s2 title="Methods and Overloading">
 
 <p>Method names must be unique.  Two styles of overloading are
 supported: overloading by number of argumetns and overloading
@@ -497,9 +497,9 @@ or the unmangled method name.  Clients should send the mangled method name.</p>
 <example>add(shopping.Cart cart, shopping.Item item)</example>
 <results>add_shopping.Cart_shopping.Item</results>
 
-</s3>
+</s2>
 
-<s3 title="Arguments">
+<s2 title="Arguments">
 
 <p>Arguments immediately follow the method in positional order.
 Argument values use Hessian's serialization.</p>
@@ -528,9 +528,9 @@ c x01 x00
 Variable length arguments are forbidden.  Implementations
 may take advantage of the expected type to improve performance.</p>
 
-</s3>
+</s2>
 
-<s3 title="Headers">
+<s2 title="Headers">
 
 <p>Headers are (string, object) pairs that preceed the arguments.</p>
 
@@ -549,14 +549,14 @@ c x01 x00
   z
 </results>
 
-</s3>
+</s2>
 
-<s3 title="Versioning">
+<s2 title="Versioning">
 
 <p>The call and response tags include a major and minor byte.  The
 current version is 1.0.</p>
 
-</s3>
+</s2>
 
 </s1>
 
@@ -567,7 +567,7 @@ valid-reply ::= r x01 x00 <var>header</var>* <var>object</var> z
 fault-reply ::= r x01 x00 <var>header</var>* <var>fault</var> z
 </def>
 
-<s3 title="Value">
+<s2 title="Value">
   
 <p>A successful reply returns a single value and possibly
 some header information.  </p>
@@ -578,8 +578,8 @@ r x01 x00
   z
 </example>
 
-</s3>
-<s3 title="Faults">
+</s2>
+<s2 title="Faults">
 <p>Failed calls return a <var>fault</var>.</p>
 
 <p>Each fault has a number of informative fields, expressed like
@@ -614,7 +614,7 @@ by the server.
 </td></tr><tr><td>ServiceException</td><td>The called method threw an exception.
 </td></tr></deftable>
 
-</s3>
+</s2>
 
 </s1>
 
@@ -717,7 +717,9 @@ same class name.</p>
 
 <s1 title="Copyright and Licensing">
 
-© Copyright 2000-2004 Caucho Technology, Inc. All Rights Reserved.
+<p>
+Â© Copyright 2000-2004 Caucho Technology, Inc. All Rights Reserved.
+</p>
 
 <p>Any party may implement this protocol for any purpose without royalty
 or license fee, provided that the implementation conforms to this
@@ -744,21 +746,21 @@ WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.</p>
 
 <s1 title="Changes">
 
-<s3 title="changes in 1.0.2">
+<s2 title="changes in 1.0.2">
 
 <ul>
 <li>Clarified that length of XML and strings is in characters (Petr Gladkikh)
 </li></ul>
-</s3>
+</s2>
 
-<s3 title="changes in 1.0">
+<s2 title="changes in 1.0">
 
 <ul>
 <li>Removed unidirectional messages.
 </li></ul>
-</s3>
+</s2>
 
-<s3 title="changes in V3">
+<s2 title="changes in V3">
 
 <ul>
 <li>Added unidirectional messages
@@ -767,9 +769,9 @@ WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.</p>
 </li><li>made <var>type</var> and <var>length</var> optional
 </li></ul>
 
-</s3>
+</s2>
 
-<s3 title="changes in V2">
+<s2 title="changes in V2">
 
 <ul>
 <li>EJB naming: clarified examples especially for session beans (John Mitchell)
@@ -777,7 +779,7 @@ WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.</p>
 </li><li>Formal definitions: initial binary should use 'b' (John Mitchell)
 </li></ul>
 
-</s3>
+</s2>
 
 </s1>
 </body></document>

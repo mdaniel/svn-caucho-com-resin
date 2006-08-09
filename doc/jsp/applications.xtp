@@ -3,15 +3,13 @@
     <product>resin</product>
     <resin-2.0>$resin/ref/jsp-applications.xtp</resin-2.0>
     <title>Applications</title>
-    <brief>
-      Applications join JSP pages, script libraries and Java beans
-      into a self-contained web application.
-    </brief>
     <description>
+      <p>
       An application collects servlets, JSP pages, scripts and Java
       Beans into a self-contained web application.  Applications are
       just generalized virtual hosts, only based on the URL instead of
       the host name.
+      </p>
     </description>
   </header>
   <body>
@@ -53,34 +51,34 @@ the site.
 <tr><td>WEB-INF/work</td><td>Generated java for JSP and XSLT</td></tr>
 </deftable>
 
-<ul class="none">
-<li><ct:img src="folder.gif"/>&#160;example
-<ul class="none">
-  <li><ct:img src="file.gif"/>&#160;index.html
-  </li><li><ct:img src="file.gif"/>&#160;folder.gif
-  </li><li><ct:img src="file.gif"/>&#160;article.gif
-  </li><li><ct:img src="jsp.gif"/>&#160;post-article.xtp
-  </li><li><ct:img src="folder.gif"/>&#160;jsp-interest
-  <ul class="none">
-    <li><ct:img src="jsp.gif"/>&#160;index.jsp
-    </li><li><ct:img src="jsp.gif"/>&#160;article1.jsp
-    </li><li><ct:img src="jsp.gif"/>&#160;article2.jsp
+<ul>
+<li><img src="/images/folder.gif"/>&#160;example
+<ul>
+  <li><img src="/images/file.gif"/>&#160;index.html
+  </li><li><img src="/images/file.gif"/>&#160;folder.gif
+  </li><li><img src="/images/file.gif"/>&#160;article.gif
+  </li><li><img src="/images/jsp.gif"/>&#160;post-article.xtp
+  </li><li><img src="/images/folder.gif"/>&#160;jsp-interest
+  <ul>
+    <li><img src="/images/jsp.gif"/>&#160;index.jsp
+    </li><li><img src="/images/jsp.gif"/>&#160;article1.jsp
+    </li><li><img src="/images/jsp.gif"/>&#160;article2.jsp
   </li></ul>
-  </li><li><ct:img src="folder.gif"/>&#160;WEB-INF
-  <ul class="none">
-    <li><ct:img src="folder.gif"/>&#160;lib
-    <ul class="none">
-      <li><ct:img src="bean.gif"/>&#160;bulletin-board.jar
+  </li><li><img src="/images/folder.gif"/>&#160;WEB-INF
+  <ul>
+    <li><img src="/images/folder.gif"/>&#160;lib
+    <ul>
+      <li><img src="/images/bean.gif"/>&#160;bulletin-board.jar
     </li></ul>
-    </li><li><ct:img src="folder.gif"/>&#160;classes
-    <ul class="none">
-      <li><ct:img src="bean.gif"/>&#160;Navigation.class
-      </li><li><ct:img src="bean.gif"/>&#160;HelloWorld.class
+    </li><li><img src="/images/folder.gif"/>&#160;classes
+    <ul>
+      <li><img src="/images/bean.gif"/>&#160;Navigation.class
+      </li><li><img src="/images/bean.gif"/>&#160;HelloWorld.class
     </li></ul>
-    </li><li><ct:img src="folder.gif"/>&#160;xsl
-    <ul class="none">
-      <li><ct:img src="style.gif"/>&#160;default.xsl
-      </li><li><ct:img src="style.gif"/>&#160;article.xsl
+    </li><li><img src="/images/folder.gif"/>&#160;xsl
+    <ul>
+      <li><img src="/images/style.gif"/>&#160;default.xsl
+      </li><li><img src="/images/style.gif"/>&#160;article.xsl
     </li></ul>
   </li></ul>
 </li></ul>

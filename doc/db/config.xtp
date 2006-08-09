@@ -13,6 +13,7 @@ obtain connections to databases.
   </description>
 </header>
 
+<body>
 <summary objsummary="localtoc"/>
 
 <s1 title="Basic Configuration">
@@ -53,10 +54,10 @@ applications.</p>
 
 <s2 title="Connection">
 <glossary title="connection" type="inline">
-<p>An established channel of communication between a client and a server. The
+An established channel of communication between a client and a server. The
 client and the server may be on separate machines, on the same machine, or even
 running in the same JVM.  Often the connection is established using TCP/IP as
-the transport of communication.</p>
+the transport of communication.
 </glossary>
 
 <p>A database connection is used to allow the Java program, running in a JVM,
@@ -65,8 +66,8 @@ to communicate with a database server.</p>
 
 <s2 title="Connection Pool">
 <glossary title="connection pool" type="inline">
-<p>A set of connections maintained so that the connections can be reused when
-there is a future need for the conneciton. </p>
+A set of connections maintained so that the connections can be reused when
+there is a future need for the conneciton.
 </glossary>
 
 <p>
@@ -84,7 +85,7 @@ reused for many requests.</p>
 
 <s2 title="DataSource">
 <glossary title="DataSource" type="inline">
-<p>A JDBC term (and interface name) used for a factory that is used to obtain connections.</p>
+A JDBC term (and interface name) used for a factory that is used to obtain connections.
 </glossary>
 
 <p>
@@ -96,8 +97,8 @@ implementation  of <code>DataSource</code> is a connection pool.
 <s2 title="Driver">
 
 <glossary title="driver" type="inline">
-<p>An implemetation of a defined interface that hides the details of
-communication with a device or other resource, such as a database.</p>
+An implemetation of a defined interface that hides the details of
+communication with a device or other resource, such as a database.
 </glossary>
 
 <p>A Driver provides an interface and is responsible for the communication
@@ -111,9 +112,9 @@ hides the details of that communication.  </p>
 <s2 title="Transaction">
 
 <glossary title="transaction" type="inline">
-<p>A transaction is used to mark a group of operations and provide a guarantee
+A transaction is used to mark a group of operations and provide a guarantee
 that all of the operations happen, or none of them happen.  Transactions
-protect the integrity of the database.</p>
+protect the integrity of the database.
 </glossary>
 
 <p>Transactions are especially important in server applications where many
@@ -170,8 +171,8 @@ update     A=2
 <s2 title="Distributed Transaction">
 
 <glossary title="distributed transaction" type="inline">
-<p>A distributed transaction is a transaction that involves more than one
-connection.</p>
+A distributed transaction is a transaction that involves more than one
+connection.
 </glossary>
 
 <p>If the guarantees that transactions apply need to apply to operations that
@@ -495,7 +496,7 @@ can loose connections.  If you fail to close() a connection, Resin does not know
 that it is available for reuse, and cannot allocate it for another request.
 Eventually, Resin may run out of connections.  </p>
 
-<p class="warn">Always put a <code>close()</code> in a finally block, to guarantee that it is called.</p>
+<warn>Always put a <code>close()</code> in a finally block, to guarantee that it is called.</warn>
 
 <p>The following example shows the use of a <code>finally</code> block that contains
 the <code>close()</code>.  Because the <code>close()</code> is in a finally block, it
@@ -541,4 +542,5 @@ will happen even if the code using the connection throws an exception.</p>
 
 </s1>
 
+</body>
 </document>

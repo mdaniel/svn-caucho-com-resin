@@ -4,8 +4,10 @@
     <title>Amber</title>
 
     <description>
-Amber aims at relational database
-persistence with an application-oriented data model.
+    <p>
+    Amber aims at relational database
+    persistence with an application-oriented data model.
+    </p>
     </description>
   </header>
 

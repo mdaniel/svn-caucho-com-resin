@@ -4,7 +4,7 @@
 <title>Portlet</title> 
 <type>contents</type>
 <description>
-BETA
+<p>BETA</p>
 
 <p>Portlets form a design pattern where a <em>Portal</em> servlet combines one
 or more component <em>Portlets</em> into a web page.  Because the portlets

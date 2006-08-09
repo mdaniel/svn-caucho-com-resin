@@ -9,15 +9,11 @@
 <body>
 <summary objsummary-in-localtoc="1"/>
 
-<faq title="Can I put a filter in resin.conf that get's executed before the filters in web.xml?">
+<s1 title="Can I put a filter in resin.conf that get's executed before the filters in web.xml?" type="faq">
 <description>
-
-<p>
 I would like to have a filter in resin.conf that always gets executed first in
 the filter chain to provide stats about the URL's that are called and the
 response time.
-</p>
-
 </description>
 
 <p>
@@ -50,7 +46,7 @@ app-default.xml to add a filter before the web.xml.
 </p>
 
 
-</faq>
+</s1>
 
 
 </body>

@@ -187,7 +187,7 @@ for custom annotations.</p>
 </example>
 
 
-<file file="example.MyMethodInterceptor">
+<example title="example.MyMethodInterceptor" language="java">
 package example;
 
 import org.aopalliance.intercept.MethodInterceptor;
@@ -196,15 +196,15 @@ import org.aopalliance.intercept.MethodInvocation;
 public class MyMethodInterceptor implements MethodInterceptor {
   public Object invoke(MethodInvocation inv) throws Throwable
   {
-    System.out.println("<method>");
+    System.out.println("&lt;method>");
     try {
       return inv.proceed();
     } finally {
-      System.out.println("</method>");
+      System.out.println("&lt;/method>");
     }
   }
 }
-</file>
+</example>
 
 </s1>
 

@@ -60,9 +60,9 @@ servers and use the -server flag to start the correct one on each machine:</p>
 <example title="resin.conf for all servers">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
   &lt;cluster id="web-tier"&gt;
-    &lt;server-default>
-      &lt;http port="80"/>
-    &lt;/server-default>
+    &lt;server-default&gt;
+      &lt;http port="80"/&gt;
+    &lt;/server-default&gt;
 
     &lt;server id='a' address='192.168.0.11' port='6800'/&gt;
     &lt;server id='b' address='192.168.0.12' port='6800'/&gt;

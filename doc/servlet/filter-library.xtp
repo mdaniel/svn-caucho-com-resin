@@ -3,7 +3,11 @@
 <product>resin</product>
 <resin-2.0>$resin/ref/filter-library.xtp</resin-2.0>
 <title>Filter Library</title>
-<description>Resin provides a set of convenient filters in the com.caucho.filters.* package.</description>
+<description>
+<p>
+Resin provides a set of convenient filters in the com.caucho.filters.* package.
+</p>
+</description>
 </header>
 
 <body>
@@ -33,7 +37,7 @@ compression by including "gzip" in the "Accept-Encoding" request header.</p>
 &lt;/web-app&gt;
 </example>
 
-See <a href="javadoc|com.caucho.filters.GzipFilter|"/>.
+<p>See <a href="javadoc|com.caucho.filters.GzipFilter|"/>.</p>
 </s1>
 
 <s1 title="XsltFilter">
@@ -152,7 +156,9 @@ request by doing a rollback on the transaction.</p>
 &lt;/web-app&gt;
 </example>
 
+<p>
 See <a href="javadoc|com.caucho.servlets.TransactionFilter|"/>.
+</p>
 </s1>
 
 <s1 title="ExpiresFilter">
@@ -188,7 +194,9 @@ used, the first request from any browser will cause execution of the
 StockQuoteServlet, any requests from any browser for the next 60 seconds will
 be served from the proxy cache (the servlet will not be called). </p>
 
+<p>
 See <a href="javadoc|com.caucho.servlets.ExpiresFilter|"/>.
+</p>
 </s1>
 
 <s1 title="AnonymousExpiresFilter">
@@ -224,7 +232,9 @@ session='false'/&gt;</code> for all pages that do not need a session.</p>
 &lt;/web-app&gt;
 </example>
 
+<p>
 See <a href="javadoc|com.caucho.servlets.AnonymousExpiresFilter|"/>.
+</p>
 </s1>
 
 <s1 title="RewriteFilter">
@@ -250,7 +260,9 @@ which specifies the new URL to be forwarded to.  Multiple &lt;rewrite&gt; tags a
 &lt;filter-mapping url-pattern='/*' filter-name='rewrite'/&gt;
 </example>
 
+<p>
 See <a href="javadoc|com.caucho.servlets.RewriteFilter|"/>.
+</p>
 </s1>
 <!--
 <section title='PasswordFilter'>

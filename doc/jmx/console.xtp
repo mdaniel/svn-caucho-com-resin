@@ -3,9 +3,11 @@
 <product>resin</product>
 <title>JMX Consoles</title>
 <description>
+<p>
 JMX Consoles provide access to both the MBean's that Resin publishes for
 information about and control of the Resin server and Application specific
 MBeans.
+</p>
 </description>
 </header>
 
@@ -49,7 +51,7 @@ port is not protected by password or by SSL, and if not protected by a firewall
 is accessible by anyone who can guess the port number.
 </p>
 
-<example title="Start Resin and remote JMX - disable password checking and SSL" size="small">
+<example title="Start Resin and remote JMX - disable password checking and SSL">
 
 win&gt; ./httpd.exe -Dcom.sun.management.jmxremote.port=9999
                  -Dcom.sun.management.jmxremote.ssl=false
@@ -79,7 +81,7 @@ monitorRole 12monitor
 controlRole 55control
 </example>
 
-<example title="Start Resin and remote JMX - disable SSL" size="small">
+<example title="Start Resin and remote JMX - disable SSL">
 
 win&gt; ./httpd.exe -Dcom.sun.management.jmxremote.port=9999
                  -Dcom.sun.management.jmxremote.ssl=false
@@ -94,8 +96,10 @@ win&gt; jconsole.exe
 unix&gt; jconsole
 </example>
 
+<p>
 <i>Enter the host name and port number (9999) on the "Remote" tab</i>
 <i>Enter the username and password on the "Remote" tab</i>
+</p>
 </s1>
 
 </body>

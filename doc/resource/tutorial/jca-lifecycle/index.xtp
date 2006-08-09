@@ -3,7 +3,12 @@
     <product>resin</product>
     <title>A Resource with JCA Lifecycle</title>
     <type>tutorial</type>
-    <description>Resources can receive lifecycle events by implementing javax.resource.spi.ResourceAdapter.</description>
+    <description>
+      <p>
+      Resources can receive lifecycle events by implementing 
+      javax.resource.spi.ResourceAdapter.
+      </p>
+    </description>
  <tutorial-startpage>demo.jsp</tutorial-startpage>
   </header>
 

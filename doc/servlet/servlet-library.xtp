@@ -3,7 +3,12 @@
   <product>resin</product>
   <resin-2.0>$resin/ref/servlet-library.xtp</resin-2.0>
   <title>Servlet Library</title>
-  <description>Resin provides a set of convenient servlets in the com.caucho.servlets.* package.</description>
+  <description>
+    <p>
+    Resin provides a set of convenient servlets in the com.caucho.servlets.* 
+    package.
+    </p>
+  </description>
 </header>
 
 <body>
@@ -47,7 +52,7 @@ exists.</p>
 &lt;/web-app&gt;
 </example>
 
-See <a href="javadoc|com.caucho.servlets.ErrorStatusServlet|"/>.
+<p>See <a href="javadoc|com.caucho.servlets.ErrorStatusServlet|"/>.</p>
 </s1>
 
 
@@ -127,7 +132,9 @@ to service connections.  The `round-robin' strategy does a straight round
 robin, choosing the backend server that follows the last backend server chosen.
 </p>
 
+<p>
 See <a href="javadoc|com.caucho.servlets.LoadBalanceServlet|"/>.
+</p>
 </s1>
 
 <s1 title="CGIServlet">
@@ -155,7 +162,7 @@ the value of <code>$RESIN_HOME</code></p>
 &lt;/web-app&gt;
 </example>
 
-<p>See <a href="javadoc|com.caucho.servlets.CGIServlet|"/></p>.
+<p>See <a href="javadoc|com.caucho.servlets.CGIServlet|"/>.</p>
 
 <p>A CGI script must output a blank line between the HTTP header(s) and the
 rest of the response.  If no blank line is encountered, the contents of your
@@ -263,7 +270,7 @@ Mapping is enabled for all web-apps with the use of
 &lt;/web-app&gt;
 </example>
 
-See <a href="javadoc|com.caucho.servlets.FastCGIServlet|"/>.
+<p>See <a href="javadoc|com.caucho.servlets.FastCGIServlet|"/>.</p>
 </s1>
 
 <s1 title="HttpProxyServlet">

@@ -5,14 +5,17 @@
 <type>tutorial</type>
 <tutorial-startpage>hello</tutorial-startpage>
 <description>
+<p>
 The Hello, World tutorial shows the most basic portlet and
 its configuration in a simple browser page.
+</p>
 </description>
 </header>
 
 <body>
 <summary/>
 
+<s1>
 <p>Portlets form a design pattern where a <em>Portal</em>
 servlet combines one
 or more component <em>Portlets</em> into a web page.  Because the portlets
@@ -33,6 +36,7 @@ library to handle the Portlet API.</p>
 <li>The HelloWorldPortlet.java code
 </li><li>web.xml configuration of the Portlet servlet
 </li></ul>
+</s1>
 
 <s1 title="Files in this tutorial">
 <deftable>

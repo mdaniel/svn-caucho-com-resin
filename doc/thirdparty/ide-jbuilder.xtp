@@ -9,22 +9,26 @@
     <summary/>
 <s1 title="Resin OpenTool">
 
+<p>
 The Caucho projects section now has an OpenTool jar for Resin at
 <a href="download|jbuilder|ver6">resin-jbuilder-6.jar</a> and
 <a href="download|jbuilder|ver7">resin-jbuilder-7.jar</a>.
+</p>
 
-<p/>To install the tool, put the resin-jbuilder.jar in the JBuilder lib/ext
+<p>To install the tool, put the resin-jbuilder.jar in the JBuilder lib/ext
 directory, for example, c:\JBuilder6\lib\ext.  Then you can change the
 server using the Project/Project Properties/Server table.
+</p>
 
 </s1>
 
 <s1 title="Older instructions">
 
-<p/>Kellan Elliott-McCrea writes:
+<p>Kellan Elliott-McCrea writes:</p>
 
-<p/>This works w/ JBuilder 3.5, I assume it will work with 4.  FYI:  I've
+<p>This works w/ JBuilder 3.5, I assume it will work with 4.  FYI:  I've
 noticed a definite slow down when doing this.
+</p>
 
 <ol>
 <li>Go To Project Properties - required libraries

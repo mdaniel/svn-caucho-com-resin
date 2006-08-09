@@ -1,9 +1,5 @@
 <navigation threaded='true'>
   <item link='index.xtp' title='Resin 3.0'>
-    <item link="orientation.xtp" title="Orientation" 
-          cond="file-exists('orientation.xtp')">
-      <title>Orientation</title>
-    </item>
 <!--
     <item link='reorg/index.xtp' title='Reorg Notes' product="caucho-dev"/>
 -->

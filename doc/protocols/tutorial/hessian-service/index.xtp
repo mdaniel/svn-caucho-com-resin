@@ -14,9 +14,11 @@ eliminates protocol dependencies and simplifies service testing.
   <body>
     <summary/>
 
+    <s1>
 <p>The <a href="../hessian-add/">addition example</a> built the Hessian
 service as an extension of HessianService for simplicity.  Most services
 will want to be independent of the Hessian protocol itself.</p>
+</s1>
 
 <s1 title="Files in this tutorial">
 <deftable>

@@ -10,7 +10,10 @@
 
   <body>
     <summary/>
+    <s1 title="Scottit">
+    <p>
     From the <a href="external|scottit|index">Scottit</a> home page:
+    </p>
 
     <p>UsToBe is committed to the development of fast, reliable and
     flexible web applications. This is why we have chosen Resin as a
@@ -24,5 +27,6 @@
     <p>This is where Scottit saw the light of day, a Resin management
     and monitoring console for both developers and
     administrators.</p>
+    </s1>
   </body>
 </document>

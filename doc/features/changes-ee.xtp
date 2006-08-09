@@ -12,12 +12,12 @@
 </li></ul>
 </s2>
 
-<s1 title="2.1.snap - Aug 19, 2004">
+<s2 title="2.1.snap - Aug 19, 2004">
 <ul>
 <li>Clear dead objects from EJB (rep by Kirk Rasmussen)
 </li><li>Clear caching of dependent relation (rep by Scott Croco)
 </li></ul>
-</s1>
+</s2>
 
 <s2 title="3.0.8 - Jun 8, 2004">
 <ul>
@@ -42,11 +42,11 @@
 </li></ul>
 </s2>
 
-<s1 title="2.1.12 - Dec 11, 2003">
+<s2 title="2.1.12 - Dec 11, 2003">
 <ul>
 <li>Support top for sql-server (rep by Kirk Rasmussen)
 </li></ul>
-</s1>
+</s2>
 
 <s2 title="3.0.4 - Nov 3, 2003">
 <ul>
@@ -55,14 +55,14 @@
 </li></ul>
 </s2>
 
-<s1 title="2.1.11 - Sep 8, 2003">
+<s2 title="2.1.11 - Sep 8, 2003">
 <ul>
 <li>(2003-08-21) Errors with EJB-QL disjunctions (rep by Mike Wynholds)
 </li><li>Exception thrown in ejbCreate does not force rollback (rep by Kirk Rasmussen)
 </li><li>EJB validation problem with merged relations (rep by Max Kutny)
 </li><li>hessian handling of remote user (rep by Charbel El-Achkar)
 </li></ul>
-</s1>
+</s2>
 
 <s2 title="3.0.2-beta - Aug 8, 2003">
 <ul>

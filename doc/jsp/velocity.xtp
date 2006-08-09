@@ -20,6 +20,7 @@
   <body>
 
   <summary/>
+<s1 title="Velocity-Style Syntax">
 
 <p>The syntax is based on expressions like <var>${'${'}foo}</var>
 and scriptlets with <var>#{...}#</var>.  Because the
@@ -66,6 +67,7 @@ int count;
 of the velocity style is that expressions and scriptlets avoid using
 brackets.  In large pages, sorting out the HTML or XML from the JSP syntax
 can become confusing.</p>
+</s1>
 
 <s1 title="Enabling velocity-style syntax">
 

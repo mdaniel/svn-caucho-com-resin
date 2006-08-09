@@ -3,7 +3,7 @@
     <product>resin</product>
     <resin-2.0>$resin/java_tut/servlets.xtp</resin-2.0>
     <title>A Hello, World Servlet</title>
-    <description>A trivial "hello, world" servlet</description>
+    <description><p>A trivial "hello, world" servlet</p></description>
     <type>tutorial</type>
  <tutorial-startpage>hello</tutorial-startpage>
   </header>
@@ -20,6 +20,7 @@
 </td></tr></deftable>
 </s1>
 
+<s1>
 <p>Servlets are the pure Java solution to handle web requests.  Many
 application will use servlets instead of JSP and others will use servlets
 in conjunction with JSP.  Experienced JSP programmers use servlets
@@ -70,6 +71,7 @@ request.getContextPath() + "/hello"
 Browsing servlets differs from page browsing because
 you're executing a servlet class, not looking at a page.
 The <var>/hello</var> URL is configured for the hello, world servlet below.</p>
+</s1>
 
 <s1 title="Configuration">
 

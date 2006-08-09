@@ -7,13 +7,18 @@
 
   <body>
     <summary/>
+    <s1 title="Inprise Application Server EJB">
 
+<p>
 From Damon Maria:
+</p>
 
-<p/>Got 1.2 talking to IAS 4.1 the other day and just thought I'd share my
+<p>Got 1.2 talking to IAS 4.1 the other day and just thought I'd share my
 experiences to save someone else some time. 
+</p>
 
-<p/>Here's what to do:
+<p>Here's what to do:
+</p>
 
 <ol>
 <li>Copy vbjorb.jar and vbejb.jar from AppServer/lib into resin/lib. Just adding
@@ -45,5 +50,6 @@ home = (TestSessionHome) javax.rmi.PortableRemoteObject.narrow(ref,
                            TestSessionHome.class);
 </example>
 </li></ol>
+</s1>
   </body>
 </document>

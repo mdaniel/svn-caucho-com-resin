@@ -4,14 +4,12 @@
     <title>URLs</title>
     <type>example</type>
     <resin-2.0>$resin/java_tut/req_url.xtp</resin-2.0>
-    <brief>
-      The <var>request</var> object breaks down the request URL into
-      components.
-    </brief>
     <description>
+      <p>
       The <var>request</var> object breaks down the request URL into
       components.  Servlets and JSP pages can use those components to
       vary the response while using the same servlet or JSP page.
+      </p>
     </description>
   </header>
 

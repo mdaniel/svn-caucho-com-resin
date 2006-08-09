@@ -4,7 +4,6 @@
     <title>Forms</title>
     <type>example</type>
     <resin-2.0>$resin/java_tut/form.xtp</resin-2.0>
-    <brief>Using forms to get information from the user</brief>
   </header>
 
 <body>

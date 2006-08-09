@@ -9,10 +9,10 @@
 <body>
 <summary objsummary-in-localtoc="1"/>
 
-<faq title="Why I am getting extra whitespace in the output of my JSP?">
+<s1 title="Why I am getting extra whitespace in the output of my JSP?" type="faq">
 <description>
-<p>I'm getting a lot of whitespace in my JSP that I don't intend to be there.
-Why is it appearing and how can I get rid of it?</p>
+I'm getting a lot of whitespace in my JSP that I don't intend to be there.
+Why is it appearing and how can I get rid of it?
 </description>
 
 <p>The extra whitespace is coming from newlines, often at the end of
@@ -76,7 +76,7 @@ a Resin specific feature):</p>
 &lt;%@ page import='java.io.*' %&gt;\
 Hello world
 </example>
-</faq>
+</s1>
 
 </body>
 </document>

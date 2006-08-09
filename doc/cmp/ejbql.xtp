@@ -7,6 +7,8 @@
 
   <body>
     <summary/>
+
+<s1 title="Syntax">
 <def>
 SELECT <var>expr</var>
 FROM <var>schema</var> AS <var>var</var>, IN(<var>path</var>) AS <var>var1</var>, ...
@@ -17,6 +19,7 @@ FROM <var>schema</var> AS <var>var</var>, IN(<var>path</var>) AS <var>var1</var>
 </def>
 
 <p>The WHERE and ORDER BY clauses are optional.</p>
+</s1>
 
 
 <s1 name="sections" title="Query Sections">

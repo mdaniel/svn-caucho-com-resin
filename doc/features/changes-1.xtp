@@ -67,7 +67,7 @@
 </li><li>&lt;embed&gt; cannot have pretty-print spaces added (rep by Stefan Scholl)
 </li><li>AT_BEGIN tags need to be updated in loops (rep by Bindu Mohan)
 </li><li>check war-expand-dir for modifications
-</li><li>expose Response.getContentLength() as public (rep by Carl-Henrik Tj‰rnlund)
+</li><li>expose Response.getContentLength() as public (rep by Carl-Henrik Tj√§rnlund)
 </li><li>If no cookies in Request.getCookies() should return null (rep by Pierre-Yves Saumont)
 </li><li>response.setContentType was ignoring parameters like ";boundary" (fixed! by Joe Zimmerlin)
 </li><li>isapi_srun needs better error-handling for bad resin.ini (rep by Frank Nestel)
@@ -511,7 +511,7 @@ put back into the pool (fixed! by Chris Donnelly)
 </li><li>Short runtime attributes "%= 2 + 2 %" weren't detected (rep by Michal Mosiewicz)
 </li><li>Env.clear() has array overflow problems on clear (rep by John Shen)
 </li><li>JDBC persistent store changes to remove time dependency (rep by Henry Buckley)
-</li><li>JSP backslash not at end of line shouldn't escape (rep by Philippe GuÈdez)
+</li><li>JSP backslash not at end of line shouldn't escape (rep by Philippe Gu√©dez)
 </li><li>C-based launcher "resin" now available for Linux
 </li><li>jar change detection was broken for WEB-INF/lib (rep by Frank Nestel)
 </li><li>war-dir should be picked up by plugins (rep by Andrew Boyko)

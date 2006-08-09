@@ -4,14 +4,12 @@
     <title>Mailing Forms</title>
     <type>example</type>
     <resin-2.0>$resin/java_tut/mail_form.xtp</resin-2.0>
-    <brief>
-      A convenient way of gathering form data is simply to mail the
-      form results to a mailbox
-    </brief>
     <description>
+      <p>
       A convenient way of gathering form data is simply to mail the
       form results to a mailbox.  Resin supports sending mail with
       it's Virtual File System.
+      </p>
     </description>
   </header>
 

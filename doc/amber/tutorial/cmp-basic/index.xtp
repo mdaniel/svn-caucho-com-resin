@@ -20,6 +20,7 @@
   <body>
     <summary/>
 
+<s1>
 <p>Amber's persistence manages tables in a relational database using a Java
 bean interface.  Each database table corresponds to a single "entity bean".  
 By creating an entity bean with container managed
@@ -28,6 +29,7 @@ cache entity beans from the database.  Avoiding SQL is an advantage in
 itself, but the primary advantage is the increased flexiblity of your
 application code.  Maintenance and code-refactoring can focus on the
 beans instead of changing lots of SQL statements in the program.</p>
+</s1>
 
 <s1 title="Files in this tutorial">
 <deftable>
@@ -208,7 +210,7 @@ public class CourseServlet extends HttpServlet {
 }
 </example>
 <results>
-<h3>Course Details</h3>
+&lt;h3>Course Details&lt;/h3>
 course: Potions
 instructor: Severus Snape
 

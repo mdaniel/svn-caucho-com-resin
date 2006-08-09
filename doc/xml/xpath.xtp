@@ -116,6 +116,7 @@ declarations have been made.</p>
 
 <p>The current node is primarily useful for descendant patterns.
 for some filter patterns.
+</p>
 
 <deftable>
 <tr><td>.//image</td>
@@ -125,7 +126,7 @@ for some filter patterns.
     <td>Any image descendant.</td>
 </tr></deftable>
 
-</p></s2>
+</s2>
 
 <s2 name="parent" title=".." type="defun">
 <p>Selects the parent of current node.</p>
@@ -143,7 +144,7 @@ for some filter patterns.
 <s2 name="root" title="/" type="defun">
 <p>Selects the document node.</p>
 
-<p>Useful for finding constants in a document.
+<p>Useful for finding constants in a document.</p>
 
 <deftable>
 <tr><td>/html</td>
@@ -153,7 +154,7 @@ for some filter patterns.
 </tr><tr><td>/html/head/var</td>
     <td>All var tags.</td>
 </tr></deftable>
-</p></s2>
+</s2>
 
 <s2 name="filter" title="a[expr]" type="defun">
 <p>Select only those nodes matching <var>a</var> which also satisfy the
@@ -163,6 +164,7 @@ expression <var>expr</var>.</p>
 <code>or</code>, <code>not</code>, comparisons and XPath patterns.  An XPath
 expression, e.g. <code>chapter/verse</code>, is true if at least one node
 matches the pattern.
+</p>
 
 <deftable>
 <tr><td>chapter[verse]</td>
@@ -180,7 +182,7 @@ matches the pattern.
 </tr><tr><td>*[@color='blue'][position()=last() - 1]</td>
     <td>second to last blue child</td>
 </tr></deftable>
-</p></s2>
+</s2>
 
 <s2 name="nth-filter" title="a[n]" type="defun">
 <p>Selects the <var>n</var>th matching node matching <var>a</var>
@@ -259,7 +261,7 @@ matching <var>b</var>.</p>
 <s2 name="root-descendant" title="//b" type="defun">
 <p>Returns elements in the entire document matching <var>b</var>.</p>
 
-<p>This is equivalent to /.//<var>b</var>, but less weird.
+<p>This is equivalent to /.//<var>b</var>, but less weird.</p>
 
 <deftable>
 <tr><td>//image</td>
@@ -268,7 +270,7 @@ matching <var>b</var>.</p>
     <td>All links to caucho</td>
 </tr></deftable>
 
-</p></s2>
+</s2>
 
 <s2 name="union" title="a|b" type="defun">
 <p>All nodes matching <var>a</var> or <var>b</var>.</p>

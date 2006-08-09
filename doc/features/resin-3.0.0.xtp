@@ -66,27 +66,27 @@ namespace must conform exactly to the j2ee specification.</p>
 <p>The Relax-NG schema are contained in the resin.jar and
 resin-ee.jar.</p>
 <dl>
-  <dt>com/caucho/server/resin/env.rnc
-  <dd>environment/resource configuration
+  <dt>com/caucho/server/resin/env.rnc</dt>
+  <dd>environment/resource configuration</dd>
 
-  </dd></dt><dt>com/caucho/server/resin/resin.rnc
-  <dd>resin.conf definition
+  <dt>com/caucho/server/resin/resin.rnc</dt>
+  <dd>resin.conf definition</dd>
  
-  </dd></dt><dt>com/caucho/server/webapp/web-xml.rnc
-  <dd>J2EE web.xml definition
+  <dt>com/caucho/server/webapp/web-xml.rnc</dt>
+  <dd>J2EE web.xml definition</dd>
 
-  </dd></dt><dt>com/caucho/server/webapp/resin-web-xml.rnc
-  <dd>Resin web.xml definition
+  <dt>com/caucho/server/webapp/resin-web-xml.rnc</dt>
+  <dd>Resin web.xml definition</dd>
 
-  </dd></dt><dt>com/caucho/server/ejb/ejb-jar.rnc
-  <dd>J2EE ejb-jar definition
+  <dt>com/caucho/server/ejb/ejb-jar.rnc</dt>
+  <dd>J2EE ejb-jar definition</dd>
 
-  </dd></dt><dt>com/caucho/jsp/cfg/jsp-tld.rnc
-  <dd>J2EE JSP .tld file definition
+  <dt>com/caucho/jsp/cfg/jsp-tld.rnc</dt>
+  <dd>J2EE JSP .tld file definition</dd>
 
-  </dd></dt><dt>com/caucho/server/ejb/resin-ejb.rnc
-  <dd>Resin ejb definition
-</dd></dt></dl>
+  <dt>com/caucho/server/ejb/resin-ejb.rnc</dt>
+  <dd>Resin ejb definition</dd>
+</dl>
  
 <example title="resin.conf">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;

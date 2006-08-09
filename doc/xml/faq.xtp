@@ -9,20 +9,18 @@
 <body>
 <summary objsummary="localtoc"/>
 
-<faq title="How do I configure Resin 3 to apply a server-side XSLT transformation?">
+<s1 title="How do I configure Resin 3 to apply a server-side XSLT transformation?" type="faq">
 <description>
-In 2.1.x I added a processing instruction and everything worked. In 2.1.x I did the following:
-<ol>
-<li>Set the content-type to application/xsl
-</li><li>Add a PI <code>&lt;?xml-stylesheet type="text/xsl" href="transform.xsl"?&gt;</code>
-</li></ol>
+In 2.1.x I added a processing instruction and everything worked. 
+I set the content-type to application/xsl, then added a PI 
+<code>&lt;?xml-stylesheet type="text/xsl" href="transform.xsl"?&gt;</code>
 </description>
 
 <p>You must now explicitly enable this functionality with the use of <a href="|filter|library#XsltFilter">XsltFilter</a>.
 
-</p></faq>
+</p></s1>
 
-<faq title="How do I indicate the stylesheet to use for the transformation?">
+<s1 title="How do I indicate the stylesheet to use for the transformation?" type="faq">
 
 <p>Resin's XsltFilter determines the stylesheet to apply from the first of:</p>
 <ol>
@@ -33,7 +31,7 @@ In 2.1.x I added a processing instruction and everything worked. In 2.1.x I did 
 
 <p>More information is provided in the documentation for <a href="|filter|library#XsltFilter">XsltFilter</a>.</p>
 
-</faq>
+</s1>
 
 </body>
 </document>

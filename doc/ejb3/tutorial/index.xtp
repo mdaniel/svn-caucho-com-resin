@@ -3,7 +3,11 @@
     <product>resin-ee</product>
     <title>EJB 3.0 Tutorials</title>
     <type>contents</type>
-    <description>The EJB 3.0 tutorials require JDK 1.5</description>
+    <description>
+    <p>
+    The EJB 3.0 tutorials require JDK 1.5
+    </p>
+    </description>
   </header>
 
   <body>

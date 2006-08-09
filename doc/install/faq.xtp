@@ -9,7 +9,7 @@
 <body>
 <summary objsummary="localtoc"/>
 
-<faq title="Where can I put .jar files so that they are available to all of my web applications?">
+<s1 title="Where can I put .jar files so that they are available to all of my web applications?" type="faq">
 <description>
 I have some jar files that are used by all of my web applications.  Where
 can I put them so that I do not have to put them in <code>WEB-INF/lib</code>
@@ -33,9 +33,9 @@ for example <code>$RESIN_HOME/lib/local/hogwarts.jar</code>.  If you use the
 you can just copy the local subdirectory over to the new
 <code>$RESIN_HOME/lib</code>.</p>
 
-</faq>
+</s1>
 
-<faq title="What happened to bin/resin?">
+<s1 title="What happened to bin/resin?" type="faq">
 
 <description>
 With Resin 2.1 used to run <code>make; make install</code> and then use the binary <code>bin/resin</code> to start Resin, but in Resin 3.0 I can't find the binary.  What happened to it?
@@ -68,9 +68,9 @@ model.  For those systems, you can use a technique like the one <a href="#How-ca
 here.</a>
 </p>
 
-</faq>
+</s1>
 
-<faq title="How can I bind to a port under 1024 and still run as a non-root user?">
+<s1 title="How can I bind to a port under 1024 and still run as a non-root user?" type="faq">
 <description>
 I want to bind resin to port 80, but my operating system only allows
 <var>root</var> to bind to ports under 1024.  If I run Resin as <var>root</var>, it is
@@ -98,9 +98,9 @@ to port 8080 without needing to start as root.
     --dport 80 -j REDIRECT --to-port 8080
 </example>
 
-</faq>
+</s1>
 
-<faq name="multipleinstances" title="Can I run multiple instances of Resin on the same machine? ">
+<s1 name="multipleinstances" title="Can I run multiple instances of Resin on the same machine? " type="faq">
 <description>
 One instance is for production, one for deployment testing.
 </description>
@@ -112,9 +112,9 @@ Yes, as long as you use different <code>http</code> and <code>srun</code> port n
 web-app's.  The two instances will get confused about which is responsible for
 things like JSP compilation etc.
 </p>
-</faq>
+</s1>
 
-<faq name="cantconnecttoparent" title="Why do I get `can't connect to parent' after installing Resin?">
+<s1 name="cantconnecttoparent" title="Why do I get `can't connect to parent' after installing Resin?" type="faq">
 <description>
 </description>
 
@@ -156,9 +156,9 @@ If Resin is being started in an init script on *nix, you can put a sleep after
 the call the httpd.sh to let Resin have a chance to startup before the next
 initialization steps take up most of the CPU.
 </p>
-</faq>
+</s1>
 
-<faq name="exception-type-connection" title="What happened to exception-type='connection'?">
+<s1 name="exception-type-connection" title="What happened to exception-type='connection'?" type="faq">
 <description>
 In Resin 2.1 I used an <code>exception-type='connection'</code>
 with <a config-tag="error-page"/> to specify the page to show when IIS or
@@ -191,9 +191,9 @@ custom error pages for the case where the backend server is down.
 <example title="Specifying a 503 page with Apache - httpd.conf">
 ErrorDocument 503 /error/serverDownError.shtml
 </example>
-</faq>
+</s1>
 
-<faq name="iis-exe" title="IIS 6 will not serve .exe files">
+<s1 name="iis-exe" title="IIS 6 will not serve .exe files" type="faq">
 
 <description>
 Everything seems to work, except that for every file with a <code>.exe</code>
@@ -218,7 +218,7 @@ Permissions (drop down) |
 Change from "Scripts and Executables" to "Scripts Only"
 </p>
 
-</faq>
+</s1>
 
 </body>
 </document>

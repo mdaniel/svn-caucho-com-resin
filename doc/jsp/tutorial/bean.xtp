@@ -4,7 +4,6 @@
     <title>Adding a Bean</title>
     <type>example</type>
     <resin-2.0>$resin/java_tut/bean.xtp</resin-2.0>
-    <brief>Using a Java bean to create a simple hit counter</brief>
   </header>
 
 <body>

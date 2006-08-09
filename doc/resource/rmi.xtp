@@ -70,9 +70,10 @@ services with the same name without conflict
 </li><li>it does not require a security-manager
 </li></ul>
 
-
+<p>
 More information is available in the 
 <a href="doc|protocols|hessian">Hessian</a> section of the documentation.
+</p>
 
 </s1>
 

@@ -8,6 +8,7 @@
   <body>
     <summary/>
 
+<s1 title="Improving Performance with CMP">
 <note>This tutorial requires Resin-CMP 2.1.1 or later.</note>
 
 <p>Improving performance generally means eliminating unnecessary
@@ -16,7 +17,7 @@ improving performance.  As with all performance work, it's
 best to use a profiler with a representative load to find out where
 most of the time is being taken.</p>
 
-<s1 title="Caching Pages and Subpages">
+<s2 title="Caching Pages and Subpages">
 
 <p>A very effective technique for improving performance is to use
 Resin's proxy caching to cache entire pages.  Caching a heavily used
@@ -45,9 +46,9 @@ public void service(HttpServletRequest request,
 }
 </example>
 
-</s1>
+</s2>
 
-<s1 title="read-only methods">
+<s2 title="read-only methods">
 
 <p>Most database queries read data from the database; updating the database
 is more rare.  Because reads can be cached, it's important to tell Resin
@@ -113,9 +114,9 @@ are read-only, so it can ignore the resin-isolation value.
 So applications only need to supply values for the
 business methods.</p>
 
-</s1>
+</s2>
 
-<s1 title="read-only beans">
+<s2 title="read-only beans">
 
 <p>Some database tables never change, or are only changed by infrequent
 external maintenance so the CMP read-only.  Beans for read-only tables
@@ -127,9 +128,9 @@ can always cache the bean values even inside an "update" transaction.
 <p>Even when a read-only bean is in an updating transaction, i.e. other
 beans are changing, the read-only bean can use the cached value.</p>
 
-</s1>
+</s2>
 
-<s1 title="Bean cache-timeout">
+<s2 title="Bean cache-timeout">
 
 <p>The <var>cache-timeout</var> configures how long Resin can
 cache a loaded bean.  The default is only 5 seconds.  Although that's short,
@@ -145,9 +146,9 @@ category example, a longer value like an hour may be more appropriate.</p>
 &lt;/entity&gt;
 </example>
 
-</s1>
+</s2>
 
-<s1 title="Caching JNDI lookup of EJBLocalHome values">
+<s2 title="Caching JNDI lookup of EJBLocalHome values">
 
 <p>Because the <code>EJBLocalHome</code> object is a constant object,
 servlets should load it in the <code>init()</code> method and use that
@@ -181,9 +182,9 @@ public class MyServlet extends HttpServlet {
 }
 </example>
 
-</s1>
+</s2>
 
-<s1 title="Using OFFSET and LIMIT for large queries">
+<s2 title="Using OFFSET and LIMIT for large queries">
 
 <p>Some databases can limit queries to a short subsequence of the
 entire query.  For example, a search engine list will normally have
@@ -194,9 +195,9 @@ use ORDER BY to make sure the results returned are consistent.</p>
 SELECT o FROM test o ORDER BY o.id OFFSET ?1 LIMIT ?2
 </example>
 
-</s1>
+</s2>
 
-<s1 title="Loading beans in queries">
+<s2 title="Loading beans in queries">
 
 <p>By default, Resin-CMP will load the bean values when it runs
 the query.  For example, a <code>findAll</code> method will load all the
@@ -217,9 +218,9 @@ database for the primary key, not the entire bean's state.</p>
 &lt;/method&gt;
 </example>
 
-</s1>
+</s2>
 
-<s1 title="Conclusion">
+<s2 title="Conclusion">
 
 <p>The performance techniques described above give the application
 developer great flexibility for improving CMP performance.  As with
@@ -227,6 +228,7 @@ all performance work, it's always important to use a profiler to find
 the bottlenecks in the application.  Very often, the real bottleneck
 will be a surprise.</p>
 
+</s2>
 </s1>
 
   </body>

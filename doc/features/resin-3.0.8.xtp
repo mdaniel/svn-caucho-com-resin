@@ -16,7 +16,7 @@ been upgraded to use the snazzier "dependency injection" buzzword.
 Since Resin's configuration is based on setters, the proper buzzword
 is "setter based dependency injection."</p>
 
-<p><figure src="assembler-eg1.gif"/></p>
+<figure src="assembler-eg1.gif"/>
 
 <p>The upgraded, buzzword-compliant documentation includes:</p>
 
@@ -248,7 +248,7 @@ design pattern.</p>
 <s1 title="Groovy Support">
 
 <p>Resin can use <a href="thirdparty|groovy.xtp">Groovy
-scripts as Java classes</a> or even as servlets</p>.
+scripts as Java classes</a> or even as servlets.</p>
 
 <p>Full Groovy support is waiting for an important bug fixes from Groovy.
 See the <a href="http://jira.codehaus.org/secure/ViewIssue.jspa?key=GROOVY-375">Groovy Bug Report 375</a> and vote on it.</p>

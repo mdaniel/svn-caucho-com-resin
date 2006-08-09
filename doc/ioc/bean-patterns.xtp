@@ -32,7 +32,7 @@ an application, even if your application does not use Resin to configure
 itself.  Following the Assembly Line pattern makes application code
 easier to understand, maintain, configure and test.</p>
 
-<p><figure src="assembler-eg1.gif"/></p>
+<figure src="assembler-eg1.gif"/>
 
 </s1>
 

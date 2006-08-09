@@ -9,9 +9,7 @@
 <body>
 <summary objsummary-in-localtoc="1"/>
 
-<faq title="How many concurrent users can a Resin server handle?">
-<description>
-</description>
+<s1 title="How many concurrent users can a Resin server handle?" type="faq">
 
 <p>
 This is not a question that can be answered in a general way.  It
@@ -65,24 +63,18 @@ If anticipated load overruns a Resin server, either with CPU
 usage or with encountering OS thread limitations, clustering can
 be used to add another server to share the load.
 </p>
-</faq>
+</s1>
 
-<faq title="Does Resin use NIO for improved performance?">
-<description>
-</description>
+<s1 title="Does Resin use NIO for improved performance?" type="faq">
 
 <p>
 Resin does not use NIO - it uses JNI to handle low-level I/O calls with native
 code.  The performance using this method was found to be much better than nio.
 </p>
 
-</faq>
+</s1>
 
-<faq title="How does Resin use JNI?">
-<description>
-<p>
-</p>
-</description>
+<s1 title="How does Resin use JNI?" type="faq">
 
 <p>
 The JNI code is compiled on the various
@@ -120,7 +112,7 @@ If JNI is not available, the log message is:
 
 
 <example>Socket JNI library is not available.</example>
-</faq>
+</s1>
 
 
 </body>

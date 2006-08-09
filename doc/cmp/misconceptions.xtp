@@ -4,11 +4,6 @@
     <resin-2.0>$ee/ejb-tut/cmp-intro.xtp</resin-2.0>
     <title>EJB Misconceptions</title>
 
-    <brief>
-      Since EJB 2.0 is a dramatic change from previous EJB
-      specifications, there are a number of preconceptions about EJB
-      that no longer apply.
-    </brief>
     <description>
       <p>Since EJB 2.0 is a dramatic change from previous EJB specifications,
         there are a number of preconceptions about EJB that no longer apply.

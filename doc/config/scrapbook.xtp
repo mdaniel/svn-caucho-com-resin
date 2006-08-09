@@ -12,7 +12,7 @@
   </header>
 
   <body>
-    <faq title="alternative to making resin executable for binding to port 80 on Linux?">
+    <s1 title="alternative to making resin executable for binding to port 80 on Linux?" type="faq">
       <description>
       </description>
 
@@ -53,6 +53,6 @@ $IPTABLES -t nat -A PREROUTING -p tcp --dport 443 -d 192.168.3.164 -j DNAT --to 
 $IPTABLES-save &gt; $SCRIPTLOCATION/tablesave
 </example>
 
-    </faq>
+    </s1>
   </body>
 </document>

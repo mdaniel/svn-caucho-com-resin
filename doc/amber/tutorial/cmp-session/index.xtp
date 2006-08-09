@@ -2,8 +2,10 @@
   <header>
     <title>Persistent Sessions with Amber</title>
         <description>
-HttpSessions combined with Amber improve the flexibility and performance
-of persistent sessions.
+          <p>
+          HttpSessions combined with Amber improve the flexibility and 
+          performance of persistent sessions.
+          </p>
         </description>
     <type>tutorial</type>
     <tutorial-startpage>session</tutorial-startpage>

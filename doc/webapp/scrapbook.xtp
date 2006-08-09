@@ -12,14 +12,12 @@
 
   <body>
     <summary objsummary="localtoc"/>
-      <faq title="How can I load configuration files for a class that might be used outside of a web-app?">
+      <s1 title="How can I load configuration files for a class that might be used outside of a web-app?" type="faq">
         <description>
-          <p>
           I have a class needs to load a configuration file.  This class is
           independent of the ServletApplication, it could be deployed in a web
           application or someplace else.  What is the best way to allow my
           class to access the configuration file?
-          </p>
         </description>
 
         <p>You can use <var>ClassLoader</var> to load your configration file from
@@ -51,7 +49,7 @@ InputStream is = loader.getResourceAsStream("config/myconfig.xml");
           </li><li>WEB-INF/lib/anyjar.jar!/config/myconfig.xml
         </li></ol>
           
-      </faq>
+      </s1>
 
   </body>
 </document>

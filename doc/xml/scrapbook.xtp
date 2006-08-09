@@ -14,7 +14,7 @@
 <summary objsummary-in-localtoc="1"/>
 
 <s1 title="XSLT">
-<faq title="URIResolver">
+<s2 title="URIResolver" type="faq">
 <p>With an URIResolver is that you can create a catalog or
 map configuration that matchs an ID with the actual URI. So you use the id
 xml:hoo in you document("xml:hoo") and you set the URIResolver to return the
@@ -27,14 +27,18 @@ are coming from a place that you specify.</p>
 &lt;/catalog&gt;
 </example>
 
+<p>
 you set the URIResolver like:
+</p>
 
 <example>
 TransformerFactory factory = TransformerFactory.newInstance();
 factory.setURIResolver(new MyURIResolver(args));
 </example>
 
+<p>
 here is a simple URIResolver:
+</p>
 
 <example>
 import java.io.*;
@@ -63,7 +67,7 @@ System.out.println("base: " + base);
 </example>
 
 <p>(Thanks to Robert Koberg)</p>
-</faq>
+</s2>
 
 </s1>
 

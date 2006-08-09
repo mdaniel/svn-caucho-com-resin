@@ -13,7 +13,7 @@
   <body>
     <summary objsummary-in-localtoc="1"/>
 
-<faq name="port80" title="How do I handle port 80 and root issues on Linux?">
+<s1 name="port80" title="How do I handle port 80 and root issues on Linux?" type="faq">
 
 <p>When using the 2.6 Linux kernel or RedHat 9.0, you can use
 the standard user-name configuration.  On older Linux versions,
@@ -34,29 +34,27 @@ iptables -t nat -A PREROUTING -d your hostname -p tcp --dport 80 -j REDIRECT --t
 </pre>
 
 <p>ipchains (for Linux 2.2. kernels) should work similar - it might also be possible to map the port directly inside your firewall.</p>
-</faq>
+</s1>
 
-<faq name="sslresources" title="Where can I learn more about SSL?">
+<s1 name="sslresources" title="Where can I learn more about SSL?" type="faq">
 <ul>
 <li><a href="http://httpd.apache.org/docs-2.0/ssl/ssl_intro.html">Apache documentation</a>
 </li></ul>
-</faq>
+</s1>
 
-<faq name="convertjsse" title="Converting a JSSE Keystore to OpenSSL">
+<s1 name="convertjsse" title="Converting a JSSE Keystore to OpenSSL" type="faq">
 <ul>
 <li><a href="http://www.thauvin.net/blog/stories.jsp?id=42">Erik's Weblog - Converting a JSSE Keystore to OpenSSL</a>
 </li></ul>
-</faq>
+</s1>
 
-<faq name="ssl-vhosts" title="How can I handle SSL for virtual hosts if I have a separate IP for each host?">
+<s1 name="ssl-vhosts" title="How can I handle SSL for virtual hosts if I have a separate IP for each host?" type="faq">
 <description>
-<p>
 I have different IP's, but am trying to avoid using them in the config
 files as we have a
 develepment, staging and production environment each of which would have
 different IP's.  Is it possible to specify multiple IP's for it to try binding
 to?
-</p>
 </description>
 
 <p>
@@ -165,7 +163,9 @@ you can use the configuration
 &lt;/resin:choose&gt;
 </example>
 
+<p>
 Then start Resin with a -Dsslmode={production|staging|development}.
+</p>
 
 <example>
 unix&gt; bin/httpd.sh -Dsslmode=production ...
@@ -178,7 +178,7 @@ unix&gt; bin/httpd.sh -Dsslmode=development ...
 win&gt;$ httpd.exe -Dsslmode=development ...
 </example>
 
-</faq>
+</s1>
 
 </body>
 </document>

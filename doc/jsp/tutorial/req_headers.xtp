@@ -4,13 +4,12 @@
     <title>Headers</title>
     <type>example</type>
     <resin-2.0>$resin/java_tut/req_headers.xtp</resin-2.0>
-    <brief>
-      Browser headers contain information about the browser.
-    </brief>
     <description>
+      <p>
       Each browser request sends <var>headers</var> along with the URL.
       Sophisticated servlets can use browser headers to tailor the
       returned page to the browser.
+      </p>
     </description>
   </header>
 

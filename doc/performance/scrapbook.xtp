@@ -16,7 +16,7 @@ verified.</p>
 
 <s1 title="General">
 
-<faq title="What are the best things to tune for better performance?">
+<s2 title="What are the best things to tune for better performance?" type="faq">
 <description>
 </description>
 <p>The main configuration item is the <a config-tag="dependency-check-interval"/> especially
@@ -38,10 +38,10 @@ page, then caching it can be a big performance win.</p>
 <p>Of course, for stuff like shopping carts and stuff that's personalized,
 that won't help.  But for many sites, the most heavily hit pages can be
 cached.</p>
-</faq>
+</s2>
 
 
-<faq title="Is Apache faster than Resin Standalone?">
+<s2 title="Is Apache faster than Resin Standalone?" type="faq">
 <description>
 </description>
 <p>For small files, Resin is about 10-20% faster.  For large files 
@@ -56,9 +56,9 @@ Resin standalone.</p>
 <p>It's only static files where Apache could be faster.  Well, there's an 
 exception for SSL.  It's conceivable that Apache/Resin with SSL would be 
 faster that Resin with SSL.</p>
-</faq>
+</s2>
 
-<faq title="What is the performance loss with a Servlet or JSP comparted to a static file?">
+<s2 title="What is the performance loss with a Servlet or JSP comparted to a static file?" type="faq">
 <description>
 </description>
 <p>With Resin standalone, JSP files are essentially as fast as
@@ -69,19 +69,17 @@ processing. :-)</p>
 there is a performance decrease with JSP and Servlet files,
 which comes from the overhead needed for the communication
 between the other web server and Resin.</p>
-</faq>
+</s2>
 </s1>
 
 <s1 title="Caching">
-<faq title="what get's cached when a servlet does a forward?">
+<s2 title="what get's cached when a servlet does a forward?" type="faq">
 <description>
-<p>
 I'm a bit unclear as to how to ensure that a servlet that forward to a JSP
 page caches its output. Of course at the top of my JSP page (and any of its
 &lt;jsp:include&gt;s) I put &lt;%@ page session=false %&gt;. Now, what do I need to do
 about cache-mapping? Do I need to explicitly map the servlet, or will
 resin.conf's suggested &lt;cache-mapping url-pattern='/' expires='15m'/&gt; work?
-</p>
 </description>
 
 <p>The only thing that matters is the HTTP headers.  So if you telnet to 
@@ -116,10 +114,11 @@ that you need.  The reason that &lt;cache-mapping&gt; works with  normal files
 is that Resin's FileServlet sets the Last-Modified and ETag headers, but 
 does not set the Expires header.
 </p>
-</faq>
-<faq title="What if while the cache is being filled, another request comes?">
+</s2>
+<s2 title="What if while the cache is being filled, another request comes?" type="faq">
 
-<description><p>I've tried several other server-side caching mechanisms, and
+<description>
+I've tried several other server-side caching mechanisms, and
 I've found that all of them are somewhat deficient when it comes
 to refreshing expired caches.  The problem that usually arises is
 that when the cache expires, every request then tries to take
@@ -127,7 +126,8 @@ responsibility for refreshing that cache - until one of them
 finally completes and subsequent requests see the cache is up to
 date.  If the page takes a long time to finish execution on a
 busy site, this results in hundreds of requests piling up, all
-executing the original page to refresh the cache.</p></description>
+executing the original page to refresh the cache.
+</description>
 
 <p>Resin 'fills a cache' the first time a request comes in.  If
 another request comes in and Resin has not finished filling the cache,
@@ -143,7 +143,7 @@ requests pass through to the resource being cached.</p>
 <p>This behaviour may be changed in Resin 3.0, updates are available
 <a href="http://www.caucho.com/quercus/bugtrack/view.xtp?bugreport_id=1135">here</a>.</p>
 
-</faq>
+</s2>
 </s1>
 </body>
 </document>

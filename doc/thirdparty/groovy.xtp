@@ -10,7 +10,9 @@ directly to java bytecode.  Groovy has a syntax similar to Java and includes
 features found in Python, Ruby, and Smalltalk.  
 </p>
 
+<p>
 See also:
+</p>
 <ul>
 <li><a href="http://groovy.codehaus.org/">Groovy homepage</a>
 </li><li><a href="http://dist.codehaus.org/groovy/distributions/">Groovy download</a>

@@ -4,7 +4,6 @@
     <title>Runtime Errors</title>
     <type>example</type>
     <resin-2.0>$resin/java_tut/run_error.xtp</resin-2.0>
-    <brief>JSP error reporting during runtime</brief>
   </header>
 
 <body>
@@ -21,9 +20,9 @@ a null pointer exception:</p>
 &lt;%= foo.length() %&gt;
 </example>
 
-<p>The reported error looks something like the following:
+<p>The reported error looks something like the following:</p>
 
-<results border="3">
+<results>
 500 Servlet Exception
 
 java.lang.NullPointerException
@@ -38,7 +37,7 @@ java.lang.NullPointerException
   at java.lang.Thread.run(Thread.java)
 </results>
 
-</p><p>The most important part of the error message is the location:
+<p>The most important part of the error message is the location:
 `<var>/test/buggy.jsp:4</var>'.  Resin translates the line in the
 generated Java code back to the JSP line.</p>
 

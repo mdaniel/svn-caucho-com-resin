@@ -54,7 +54,7 @@ to keep their configuration files as simple as possible.</p>
 
 <s2 title="resin:if">
 
-<p>resin:if executes part of the configuration file conditionally.</p><p>
+<p>resin:if executes part of the configuration file conditionally.</p>
 
 <def>
 &lt;resin:if test="${expr}"&gt;
@@ -62,7 +62,7 @@ to keep their configuration files as simple as possible.</p>
 &lt;resin:if&gt;
 </def>
 
-</p></s2>
+</s2>
 
 <s2 title="resin:choose">
 

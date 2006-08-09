@@ -26,8 +26,10 @@
 </s1>
 
 <s1 title="Introduction">
-This article shows how to use Quercus, Resin's PHP implementation, to create a module in java callable from a PHP page.
-
+<p>
+This article shows how to use Quercus, Resin's PHP implementation,
+to create a module in Java callable from a PHP page.
+</p>
 <!--
 [[PHP Hello World Module (jar version)]] explains how a module is meant to be used within your PHP code, so I won't repeat that information here.  Instead, this article will focus on the steps necessary to create and use a module without having to "jar up" your files.
 -->

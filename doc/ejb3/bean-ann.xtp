@@ -10,8 +10,12 @@
   </description>
 </header>
 
+<body>
+
+<s1>
 <note>These annotations will likely change package names to something
 other than javax.ejb as J2EE 1.5 drafts progress.</note>
+</s1>
 
 <summary objsummary="localtoc"/>
 
@@ -142,12 +146,13 @@ public @interface EJB {
 
 <p>Inject relies heavily on defaults from the field or method name
 and type.  If more information is required, use @Resource, @EJB, or @EJBHome.
+</p>
 
 <deftable-childtags>
 <tr><td>jndiName</td><td>The jndi name of the resource</td><td>The field name
 </td></tr></deftable-childtags>
 
-</p><p>In the following exaple, Resin will call <code>setDataSource</code>
+<p>In the following exaple, Resin will call <code>setDataSource</code>
 method with the data source in "java:comp/env/jdbc/test" before the
 session is started.</p>
 
@@ -223,4 +228,5 @@ public @interface Resource {
 
 </s1>
 
+</body>
 </document>
