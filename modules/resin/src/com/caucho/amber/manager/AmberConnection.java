@@ -252,7 +252,7 @@ public class AmberConnection
   /**
    * Creates a query.
    */
-  public Query createQuery(String sql)
+  public QueryImpl createQuery(String sql)
   {
     try {
       AbstractQuery queryProgram = parseQuery(sql, false);
@@ -268,7 +268,7 @@ public class AmberConnection
   /**
    * Creates an instance of the named query
    */
-  public Query createNamedQuery(String sql)
+  public QueryImpl createNamedQuery(String sql)
   {
     throw new UnsupportedOperationException();
   }
@@ -276,7 +276,7 @@ public class AmberConnection
   /**
    * Creates an instance of the named query
    */
-  public Query createNativeQuery(String sql)
+  public QueryImpl createNativeQuery(String sql)
   {
     throw new UnsupportedOperationException();
   }
@@ -284,7 +284,7 @@ public class AmberConnection
   /**
    * Creates an instance of the named query
    */
-  public Query createNativeQuery(String sql, String map)
+  public QueryImpl createNativeQuery(String sql, String map)
   {
     throw new UnsupportedOperationException();
   }
@@ -292,7 +292,7 @@ public class AmberConnection
   /**
    * Creates an instance of the named query
    */
-  public Query createNativeQuery(String sql, Class type)
+  public QueryImpl createNativeQuery(String sql, Class type)
   {
     throw new UnsupportedOperationException();
   }
