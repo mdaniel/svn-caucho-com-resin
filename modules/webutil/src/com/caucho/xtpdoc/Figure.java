@@ -88,6 +88,11 @@ public class Figure implements ContentItem {
 
     String basename = _source.substring(0, dot);
 
+    int lastSlash = basename.lastIndexOf('/');
+
+    if (lastSlash >= 0)
+      basename = basename.substring(lastSlash + 1);
+
     out.println();
     out.println();
     out.println("\\noindent");

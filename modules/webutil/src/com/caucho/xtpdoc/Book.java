@@ -66,6 +66,7 @@ public class Book {
     out.println("\\usepackage{filecontents}");
     out.println("\\usepackage{ltxtable}");
     out.println("\\usepackage{epsfig}");
+    out.println("\\usepackage{boxedminipage}");
     out.println();
     out.println("\\definecolor{example-gray}{gray}{0.8}");
     out.println("\\definecolor{results-gray}{gray}{0.6}");

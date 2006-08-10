@@ -52,6 +52,6 @@ public class LineBreak implements ContentItem {
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    out.println("\\");
+    out.println("\\\\");
   }
 }

@@ -38,8 +38,8 @@ import com.caucho.vfs.Path;
 
 public class EnclosingChapterSection extends ChapterSection {
   private String _title;
-  private ArrayList<ChapterSection> _subsections 
-    = new ArrayList<ChapterSection>();
+  private ArrayList<LinkedChapterSection> _subsections 
+    = new ArrayList<LinkedChapterSection>();
 
   public void setTitle(String title)
   {
@@ -56,7 +56,7 @@ public class EnclosingChapterSection extends ChapterSection {
   {
     out.println("\\section{" + _title + "}");
 
-    for (ChapterSection section : _subsections)
-      section.writeLaTeX(out);
+    for (LinkedChapterSection section : _subsections)
+      section.writeLaTeXEnclosed(out);
   }
 }

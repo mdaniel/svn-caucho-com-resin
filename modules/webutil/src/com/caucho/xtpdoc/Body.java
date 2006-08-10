@@ -179,4 +179,11 @@ public class Body {
     for (Section section : _sections)
       section.writeLaTeX(out);
   }
+
+  public void writeLaTeXEnclosed(PrintWriter out)
+    throws IOException
+  {
+    for (Section section : _sections)
+      section.writeLaTeXEnclosed(out);
+  }
 }

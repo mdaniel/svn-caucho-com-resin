@@ -173,4 +173,13 @@ public class Header {
     out.println("\\label{" + _document.getName() + "}");
     out.println("\\hypertarget{" + _document.getName() + "}{}");
   }
+
+  public void writeLaTeXEnclosed(PrintWriter out)
+    throws IOException
+  {
+    out.println("\\subsection{" + _title + "}");
+
+    out.println("\\label{" + _document.getName() + "}");
+    out.println("\\hypertarget{" + _document.getName() + "}{}");
+  }
 }

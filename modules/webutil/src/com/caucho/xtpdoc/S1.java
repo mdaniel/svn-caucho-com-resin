@@ -79,15 +79,23 @@ public class S1 extends Section {
   public void writeLaTeXTop(PrintWriter out)
     throws IOException
   {
-    out.println("\\section{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+    if (_type != null && _type.equals("defun"))
+      out.println("\\newpage");
+
+    if (_title != null)
+      out.println("\\section{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
 
     super.writeLaTeX(out);
   }
 
-  public void writeLaTeX(PrintWriter out)
+  public void writeLaTeXEnclosed(PrintWriter out)
     throws IOException
   {
-    out.println("\\subsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+    if (_type != null && _type.equals("defun"))
+      out.println("\\newpage");
+
+    if (_title != null)
+      out.println("\\subsubsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
 
     super.writeLaTeX(out);
   }

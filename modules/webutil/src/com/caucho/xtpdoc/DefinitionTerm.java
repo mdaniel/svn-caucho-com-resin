@@ -54,6 +54,8 @@ public class DefinitionTerm extends FormattedTextWithAnchors
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    // XXX
+    out.print("\\item[");
+    super.writeLaTeX(out);
+    out.print("] ");
   }
 }

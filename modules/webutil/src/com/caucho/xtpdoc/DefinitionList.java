@@ -75,12 +75,11 @@ public class DefinitionList implements ContentItem {
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    // XXX
-    out.println("\\begin{enumerate}");
+    out.println("\\begin{description}");
 
     for (DefinitionItem item : _listItems)
       item.writeLaTeX(out);
 
-    out.println("\\end{enumerate}");
+    out.println("\\end{description}");
   }
 }

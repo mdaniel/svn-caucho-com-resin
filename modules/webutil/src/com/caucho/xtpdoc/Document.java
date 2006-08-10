@@ -120,6 +120,13 @@ public class Document {
     _body.writeLaTeX(out);
   }
 
+  public void writeLaTeXEnclosed(PrintWriter out)
+    throws IOException
+  {
+    _header.writeLaTeXEnclosed(out);
+    _body.writeLaTeXEnclosed(out);
+  }
+
   public String toString()
   {
     return "Document[" + _documentPath + "]";

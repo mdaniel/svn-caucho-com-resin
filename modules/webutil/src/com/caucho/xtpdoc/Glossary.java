@@ -84,7 +84,7 @@ public class Glossary extends FormattedText {
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    out.println("\\fbox{");
+    out.println("\\begin{boxedminipage}{\\linewidth}");
 
     if (_title != null) {
       out.println("\\begin{center}\\texttt{" + _title + "}\\end{center}");
@@ -93,6 +93,6 @@ public class Glossary extends FormattedText {
 
     super.writeLaTeX(out);
 
-    out.print("} ");
+    out.println("\\end{boxedminipage} ");
   }
 }

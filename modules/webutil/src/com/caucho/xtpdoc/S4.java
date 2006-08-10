@@ -43,7 +43,11 @@ public class S4 extends Section {
   public void writeLaTeXTop(PrintWriter out)
     throws IOException
   {
-    out.println("\\paragraph{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+    if (_type != null && _type.equals("defun"))
+      out.println("\\newpage");
+
+    if (_title != null) 
+      out.println("\\paragraph{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
 
     super.writeLaTeX(out);
   }
@@ -51,7 +55,23 @@ public class S4 extends Section {
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    out.println("\\paragraph{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+    if (_type != null && _type.equals("defun"))
+      out.println("\\newpage");
+
+    if (_title != null) 
+      out.println("\\textbf{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+
+    super.writeLaTeX(out);
+  }
+
+  public void writeLaTeXEnclosed(PrintWriter out)
+    throws IOException
+  {
+    if (_type != null && _type.equals("defun"))
+      out.println("\\newpage");
+
+    if (_title != null) 
+      out.println("{" + LaTeXUtil.escapeForLaTeX(_title) + ": }");
 
     super.writeLaTeX(out);
   }

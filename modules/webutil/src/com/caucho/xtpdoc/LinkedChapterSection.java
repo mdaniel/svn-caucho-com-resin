@@ -50,10 +50,8 @@ public class LinkedChapterSection extends ChapterSection {
     _link = link;
   }
 
-  public void writeLaTeX(PrintWriter out)
-    throws IOException
+  private Document configureDocument(Path xtpFile)
   {
-    Path xtpFile = Vfs.lookup(_link);
     Document document = new Document(xtpFile, null);
 
     try {
@@ -62,6 +60,8 @@ public class LinkedChapterSection extends ChapterSection {
       Config config = new Config();
 
       config.configure(document, xtpFile);
+
+      return document;
     } catch (Exception e) {
       System.err.println("Error configuring document (" + xtpFile + "): " + e);
 
@@ -70,11 +70,19 @@ public class LinkedChapterSection extends ChapterSection {
       else 
         e.printStackTrace();
 
-      return;
+      return null;
     }
+  }
+
+  public void writeLaTeX(PrintWriter out)
+    throws IOException
+  {
+    Path xtpFile = Vfs.lookup(_link);
+    Document document = configureDocument(xtpFile);
 
     try {
-      document.writeLaTeX(out);
+      if (document != null)
+        document.writeLaTeX(out);
     } catch (Exception e) {
       System.err.println("Error configuring document (" + xtpFile + "): " + e);
 
@@ -85,6 +93,26 @@ public class LinkedChapterSection extends ChapterSection {
 
       return;
     }
+  }
 
+  public void writeLaTeXEnclosed(PrintWriter out)
+    throws IOException
+  {
+    Path xtpFile = Vfs.lookup(_link);
+    Document document = configureDocument(xtpFile);
+
+    try {
+      if (document != null)
+        document.writeLaTeXEnclosed(out);
+    } catch (Exception e) {
+      System.err.println("Error configuring document (" + xtpFile + "): " + e);
+
+      if (e.getCause() != null)
+        e.getCause().printStackTrace();
+      else 
+        e.printStackTrace();
+
+      return;
+    }
   }
 }

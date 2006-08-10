@@ -79,11 +79,6 @@ public abstract class Section implements ContentItem {
     _name = name;
   }
 
-  public void setType(String type)
-  {
-    _type = type;
-  }
-
   public void setProduct(String product)
   {
   }
@@ -96,6 +91,11 @@ public abstract class Section implements ContentItem {
   // XXX: End stubbed
   //
   
+  public void setType(String type)
+  {
+    _type = type;
+  }
+
   public void setTitle(String title)
   {
     _title = title;
@@ -265,5 +265,11 @@ public abstract class Section implements ContentItem {
 
     for (ContentItem item : _contentItems)
       item.writeLaTeX(out);
+
+    if (_type != null && _type.equals("defun"))
+      out.println("\\newpage");
   }
+
+  abstract public void writeLaTeXEnclosed(PrintWriter out)
+    throws IOException;
 }

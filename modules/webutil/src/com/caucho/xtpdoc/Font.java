@@ -35,58 +35,39 @@ import java.io.IOException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
-public class BlockQuote extends FormattedTextWithAnchors {
-  private String _title;
-  private boolean longQuote = false;
+public class Font extends FormattedTextWithAnchors {
+  private String _color;
 
-  public BlockQuote(Document document)
+  public Font(Document document)
   {
     super(document);
   }
 
-  public void setTitle(String title)
+  public void setColor(String color)
   {
-    _title = title;
-  }
-
-  public Paragraph createP()
-  {
-    longQuote = true;
-
-    Paragraph paragraph = new Paragraph(getDocument());
-    addItem(paragraph);
-    return paragraph;
+    _color = color;
   }
 
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    out.writeStartElement("blockquote");
+    out.writeStartElement("font");
 
-    if (_title != null)
-      out.writeCharacters(_title + ": ");
+    if (_color != null)
+      out.writeAttribute("color", _color);
 
     super.writeHtml(out);
 
-    out.writeEndElement(); // blockquote
+    out.writeEndElement();
   }
 
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    if (longQuote)
-      out.println("\\begin{quotation}");
-    else
-      out.println("\\begin{quote}");
-
-    if (_title != null)
-      out.print(_title + ": ");
+    out.print("\\textcolor{" + _color + "}{");
 
     super.writeLaTeX(out);
 
-    if (longQuote)
-      out.println("\\end{quotation}");
-    else
-      out.println("\\end{quote}");
+    out.print("} ");
   }
 }

@@ -50,7 +50,11 @@ public class S2 extends Section {
   public void writeLaTeXTop(PrintWriter out)
     throws IOException
   {
-    out.println("\\subsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+    if (_type != null && _type.equals("defun"))
+      out.println("\\newpage");
+
+    if (_title != null) 
+      out.println("\\subsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
 
     super.writeLaTeX(out);
   }
@@ -58,7 +62,23 @@ public class S2 extends Section {
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    out.println("\\subsubsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+    if (_type != null && _type.equals("defun"))
+      out.println("\\newpage");
+
+    if (_title != null) 
+      out.println("\\subsubsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+
+    super.writeLaTeX(out);
+  }
+
+  public void writeLaTeXEnclosed(PrintWriter out)
+    throws IOException
+  {
+    if (_type != null && _type.equals("defun"))
+      out.println("\\newpage");
+
+    if (_title != null) 
+      out.println("\\paragraph{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
 
     super.writeLaTeX(out);
   }

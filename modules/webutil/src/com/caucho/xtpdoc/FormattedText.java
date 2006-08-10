@@ -128,6 +128,13 @@ public class FormattedText implements ContentItem {
     return code;
   }
 
+  public Font createFont()
+  {
+    Font font = new Font(_document);
+    _contentItems.add(font);
+    return font;
+  }
+
   public Url createUrl()
   {
     Url url = new Url(_document);
