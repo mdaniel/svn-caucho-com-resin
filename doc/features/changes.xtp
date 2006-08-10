@@ -2,8 +2,9 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title='3.0snap - Aug 1, 2006'>
+<s2 title='3.0.21 - Aug 8, 2006'>
 <ul>
+<li>javax.persistence.Query issue for JDK 1.4 (rep by Andrew Barton)
 <li>mod_caucho and session-cookie value
 <li>mod_caucho stripping of ;jsessionid= wasn't working
 <li>(2006-08-07) ejb-server jndi-name for local name wasn't handled properly (#1276, rep by Andrew Barson and Matt Pangaro)

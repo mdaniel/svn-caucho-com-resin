@@ -1,0 +1,20 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 3.0.21 Release Notes</title>
+  </header>
+
+<body>
+
+<summary objsummary='localtoc'/>
+
+<section title="misc bugs">
+
+<p>Fixed several smaller, but important bugs in the 3.0.20 release
+including issues with Pro licensing and isapi_srun.dll not using port 6802
+as the default.</p>
+
+</section>
+
+</body>
+</document>
