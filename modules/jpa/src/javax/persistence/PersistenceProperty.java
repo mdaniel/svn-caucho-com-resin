@@ -32,15 +32,12 @@ package javax.persistence;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import static java.lang.annotation.ElementType.*;
 
 /**
- * The @PersistenceContext annotation.
+ * The @PersistenceProperty annotation.
  */
-@Target({TYPE, METHOD, FIELD}) @Retention(RetentionPolicy.RUNTIME)
-public @interface PersistenceContext {
-  String name() default "";
-  String unitName() default "";
-  PersistenceContextType type() default PersistenceContextType.TRANSACTION;
-  PersistenceProperty[] properties() default {};
+@Target({}) @Retention(RetentionPolicy.RUNTIME)
+public @interface PersistenceProperty {
+  String name();
+  String value();
 }

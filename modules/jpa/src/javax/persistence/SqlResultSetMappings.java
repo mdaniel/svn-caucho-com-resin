@@ -32,15 +32,13 @@ package javax.persistence;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import static java.lang.annotation.ElementType.*;
+import java.lang.annotation.ElementType;
 
 /**
- * The @PersistenceContext annotation.
+ * The @SqlResultSetMappings annotation.
  */
-@Target({TYPE, METHOD, FIELD}) @Retention(RetentionPolicy.RUNTIME)
-public @interface PersistenceContext {
-  String name() default "";
-  String unitName() default "";
-  PersistenceContextType type() default PersistenceContextType.TRANSACTION;
-  PersistenceProperty[] properties() default {};
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface SqlResultSetMappings {
+  SqlResultSetMapping[] value();
 }
