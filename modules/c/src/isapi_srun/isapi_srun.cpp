@@ -177,7 +177,7 @@ findResinIni(char *pwd, config_t *config)
 	else
 	  config->enable_caucho_status = 1;
 
-	cse_add_host(&config->config_cluster, "localhost", 6800);
+	cse_add_host(&config->config_cluster, "localhost", 6802);
 }
 
 BOOL WINAPI GetExtensionVersion(HSE_VERSION_INFO* pVer)
