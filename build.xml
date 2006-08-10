@@ -511,6 +511,7 @@
 
 
   <target name="pdf" depends="init">
+    <delete dir="${build}/pdf" />
     <mkdir dir="${build}/pdf/images"/>
 
     <apply executable="convert" dir="." dest="${build}/pdf/images">
