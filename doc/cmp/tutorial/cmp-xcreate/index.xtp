@@ -18,7 +18,7 @@
 
   <body>
     <summary/>
-
+<s1>
 <p>Almost all applications need to add and remove entities from the
 database.  Although most database accesses are reads, eventually we
 need to change the database.  With Resin-CMP, you add a create method
@@ -31,6 +31,7 @@ any database fields.
 </li><li>Implement a corresponding <code>ejbPostCreateXXX</code> method in the bean
 class, setting any bean relations if necessary.
 </li></ol>
+</s1>
 
 <s1 title="Database Schema">
 

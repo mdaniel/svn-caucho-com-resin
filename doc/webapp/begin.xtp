@@ -638,8 +638,7 @@ configured using the <code>WEB-INF/web.xml</code> file.
 <s2 title="Directory structure">
 
 <deftable title="Web application directory structure">
-<tr><th>File</th><th>Description
-</th></tr><tr><td>/index.jsp</td><td>A jsp file that is usually the default file that is accesed 
+<tr><th>File</th><th>Description</th></tr><tr><td>/index.jsp</td><td>A jsp file that is usually the default file that is accesed 
 </td></tr><tr><td>/WEB-INF/web.xml</td><td>The file that configures the Web Application
 </td></tr><tr><td>/WEB-INF/classes</td><td>A directory containing classes specific to this
 application
@@ -922,9 +921,7 @@ that is inserted in the page.
 </p>
 
 <deftable title="Implicit Variables in JSP">
-<tr><th>Variable</th><th>Class</th><th>Description
-
-</th></tr><tr><td>response</td><td><a href="javadoc|javax.servlet.HttpServletResponse|"/></td><td>
+<tr><th>Variable</th><th>Class</th><th>Description</th></tr><tr><td>response</td><td><a href="javadoc|javax.servlet.HttpServletResponse|"/></td><td>
 Assists in sending a response to the client. Includes the ability to
 set the HTTP response headers.
 
@@ -1009,9 +1006,7 @@ The following methods are available for the <code>application</code>,
 </p>
 
 <deftable title="API for attributes">
-<tr><th>Method</th><th>Description
-
-</th></tr><tr><td>getAttribute(String name)</td><td>
+<tr><th>Method</th><th>Description</th></tr><tr><td>getAttribute(String name)</td><td>
 Return the <code>Object</code> that is associated with the passed
 <var>name</var>.  Usually you will need to cast the Object to whatever
 class you know it to be.  If there is no attribute with the given name,
@@ -1797,9 +1792,7 @@ certain button appear in the button bar only for an "admin" user.
 </p>
 
 <deftable title="Programmatic Security API">
-<tr><th>Method</th><th>Description
-
-</th></tr><tr><td><a href="javadoc|javax.servlet.http.HttpServletRequest|getRemoteUser()">request.getRemoteUser()</a>
+<tr><th>Method</th><th>Description</th></tr><tr><td><a href="javadoc|javax.servlet.http.HttpServletRequest|getRemoteUser()">request.getRemoteUser()</a>
 return the name of an authenticated user.
 
 </td></tr><tr><td><a href="javadoc|javax.servlet.http.HttpServletRequest|isUserInRole(String)">request.isUserInRole(String role)</a>

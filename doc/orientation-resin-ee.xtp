@@ -80,8 +80,8 @@ including an AutoFaq, a bug tracking database, and a sample weblog.</p>
 <li><a href='doc/install/starting.xtp'>Installation</a> configurations
 <ul>
 <li>Standalone <a href='ref/httpd.xtp'>Resin Web Server</a>
-<li><a href='ref/cse-apache-unix.xtp'>Resin with Unix Apache</a>
-<li><a href='ref/cse-apache-win.xtp'>Resin with Win32 Apache</a>
+<li><a href='ref/cse-apache.xtp'>Resin with Unix Apache</a>
+<li><a href='ref/cse-apache.xtp'>Resin with Win32 Apache</a>
 <li><a href='ref/cse-iis.xtp'>Resin with IIS</a>
 <li><a href='ref/cse-oreilly-website.xtp'>Resin with O'Reilly WebSite</a>
 <li><a href='ref/cse-netscape.xtp'>Resin with Netscape</a>

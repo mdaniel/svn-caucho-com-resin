@@ -9,7 +9,7 @@
 
   <body>
     <summary/>
-
+<s1>
 <p>Transactions are a concept simple to use and hard to implement.
 Fortunately, Resin-CMP has done the implementation for you.  Transactions
 work like a sophisticated lock or synchronize block.  Either everything in
@@ -46,6 +46,7 @@ non-sensical database configuration:</p>
 
 <p>If the above sequence ever happened, Snape would be teaching
 both classes.  Transactions can avoid that inconsistency.</p>
+</s1>
 
 <s1 title="Demo">
   <a href="register">Demo</a>

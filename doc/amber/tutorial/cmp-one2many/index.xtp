@@ -78,7 +78,8 @@ CREATE TABLE student (
 that is the <code>@ManyToOne</code> link.
 </p>
 
-<example title="House.java" file="WEB-INF/classes/example/House.java" re-marker="Get the Student" re-start="Get the Student" re-end="^  }">
+<example title="House.java" file="WEB-INF/classes/example/House.java" 
+         language="java">
   @OneToMany(mappedBy="house")
   private Set&lt;Student&gt; _students;
 </example>
@@ -92,7 +93,8 @@ unchanged from the
 <a href="ejb3|tutorial/cmp-many2one/index.xtp">Many-To-One tutorial</a>.
 </p>
 
-<example title="Student.java" file="WEB-INF/classes/example/Student.java" re-start="this Student belongs to" re-end="^  }">
+<example title="Student.java" file="WEB-INF/classes/example/Student.java" 
+         language="java">
 
   @ManyToOne
   @JoinColumn(name="house")
@@ -120,7 +122,7 @@ time.
 
 <example title="House.java"
          file="WEB-INF/classes/example/House.java"
-         re-start="FetchType">
+         language="java">
   @OneToMany(targetEntity=Student.class, mappedBy="house")
   public Set&lt;Student&gt; getStudents()
 </example>
@@ -138,7 +140,9 @@ database lookup.
 <p>The example queries all houses and prints their
 names and all of their students.</p>
 
-<example title="Using House.getStudents()" file="WEB-INF/classes/example/OneToManyServlet.java" re-start="SELECT h FROM" re-end="^    }">
+<example title="Using House.getStudents()" 
+         file="WEB-INF/classes/example/OneToManyServlet.java" 
+         language="java">
 
 private void doService(PrintWriter out)
   throws java.io.IOException

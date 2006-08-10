@@ -151,7 +151,7 @@ corresponding to tag attributes must be read-only.  Only
 Resin may call the attribute setters; the tag's code must never
 modify the corresponding fields.</p>
 
-<example file="WEB-INF/classes/example/taglib/MessageTag.java" re-start="\* tag attributes" re-end="}" re-marker="public class">
+<example file="WEB-INF/classes/example/taglib/MessageTag.java" language="java">
   /* tag attributes
    *
    * member variables to store the value of tag attributes are treated
@@ -194,7 +194,7 @@ initialization of these internal member variables, and a call to
 <code>init()</code> is the first thing done in
 <code>doStartTag()</code>.
 
-<example file="WEB-INF/classes/example/taglib/MessageTag.java" re-start="\* internal member" re-end="}" re-marker="public class">
+<example file="WEB-INF/classes/example/taglib/MessageTag.java" language="java">
   String _title;
   <b>StringBuffer _msg;</b>
 
@@ -244,7 +244,7 @@ the best way to set a default value for a missing attribute is the
 same way the internal member variables are set in the previous
 example.</p>
 
-<example file="WEB-INF/classes/example/taglib/MessageTag.java" re-start="\* internal member" re-end="}" re-marker="public class">
+<example file="WEB-INF/classes/example/taglib/MessageTag.java" language="java">
   // read-only attribute field
   private String _attrTitle;
 

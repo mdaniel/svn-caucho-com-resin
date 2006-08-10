@@ -9,7 +9,7 @@
 
   <body>
     <summary/>
-
+<s1>
 <p><code>ejbSelect</code> provides a more flexible method to query the database than
 find methods.  Find methods belong to a home interface and only return
 the corresponding local object.  A <code>findFoobar</code> method
@@ -22,7 +22,7 @@ a separate business method to expose the results of the query.
 </p><p>Like find methods, <code>ejbSelect</code> methods use the deployment descriptor
 to define the EJB-QL query.  Resin-CMP will generate the appropriate SQL
 for the select.</p>
-
+</s1>
 <s1 title="Database Schema">
 
 <example title="select.sql">

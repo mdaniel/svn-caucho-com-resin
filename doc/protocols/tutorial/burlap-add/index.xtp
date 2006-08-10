@@ -61,17 +61,17 @@ protocol, but it's simple enough that a basic example can help show
 what's happening underneath the API.</p>
 
 <example title="Burlap call">
-<burlap:call>
-  <method>add</method>
-  <int>2</int>
-  <int>3</int>
-</burlap:call>
+&lt;burlap:call>
+  &lt;method>add&lt;/method>
+  &lt;int>2&lt;/int>
+  &lt;int>3&lt;/int>
+&lt;/burlap:call>
 </example>
 
 <example title="Burlap reply">
-<burlap:reply>
-  <int>5</int>
-</burlap:reply>
+&lt;burlap:reply>
+  &lt;int>5&lt;/int>
+&lt;/burlap:reply>
 </example>
 
 <p>The call does not need to specify the service name because the

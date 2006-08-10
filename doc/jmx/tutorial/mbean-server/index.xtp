@@ -3,7 +3,11 @@
     <product>resin</product>
     <title>Using the JMX MBeanServer API</title>
     <type>tutorial</type>
-    <description>Example showing JMX-managed resources using the MBeanServer API.</description>
+    <description>
+      <p>
+      Example showing JMX-managed resources using the MBeanServer API.
+      </p>
+    </description>
  <tutorial-startpage>index.jsp</tutorial-startpage>
   </header>
 
@@ -30,7 +34,7 @@
 an MBean interface and by specifying an MBean name.  The interface
 exposes the resource's methods to be managed.</p>
 
-<subsection title="The Test resource">
+<s2 title="The Test resource">
 
 <p>The test resource is identical to the
 <a href="../basic/index.xtp">basic example</a> but implements
@@ -56,7 +60,7 @@ public class Test implements TestMBean {
 }
 </example>
 
-</subsection>
+</s2>
 
 <s2 title="web.xml configuration">
 
@@ -64,6 +68,7 @@ public class Test implements TestMBean {
 &lt;resource&gt; tag just as with
 <a href="doc|resource|index">other resources</a>.  The resources is
 registered as an MBean by specifying an <var>mbean-name</var>.
+</p>
 
 <example title="web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
@@ -87,7 +92,7 @@ registered as an MBean by specifying an <var>mbean-name</var>.
 </td></tr><tr><td>data</td><td>The example bean's <code>setData</code> parameter.
 </td></tr></deftable>
 
-</p></s2>
+</s2>
 
 <s2 title="Using MBeanServer">
 

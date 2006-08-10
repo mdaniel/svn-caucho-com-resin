@@ -20,6 +20,7 @@
   <body>
     <summary/>
 
+<s1>
 <p>Most applications need to query the database to find entities with
 special properties.  With the query language EJB-QL, entity beans can
 define find methods in the home interface to look up beans with arbitrary
@@ -44,10 +45,13 @@ for relations and for method arguments.</p>
 <p>In the following example, the school's headmaster needs to know which
 courses are being taught and needs to find the course taught by a named
 teacher.</p>
+</s1>
 
 <s1 title="Demo">
 
+<p>
 <a href="find">Demo</a>
+</p>
 
 </s1>
 

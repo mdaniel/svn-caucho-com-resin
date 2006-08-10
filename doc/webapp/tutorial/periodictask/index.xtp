@@ -62,7 +62,7 @@ occurs in the web.xml, using Resin's <a href="doc|config|init.xtp">Bean-style
 initialization</a>.  
 </p>
 
-<example file="WEB-INF/web.xml" re-start="example.PeriodicTask" re-end="&lt;/resource">
+<example file="WEB-INF/web.xml" language="java">
   &lt;resource type="example.PeriodicTask" jndi-name="PeriodicTask"&gt;
     &lt;init&gt;
       &lt;estimated-average-time&gt;5&lt;/estimated-average-time&gt;
@@ -225,7 +225,7 @@ to store the object under is specified with the <a config-tag="mbean-name"/>
 child of <a config-tag="resource"/>.  
 </p>
 
-<example file="WEB-INF/web.xml" re-start="example.PeriodicTask" re-end="&lt;/resource">
+<example file="WEB-INF/web.xml" language="java">
   &lt;resource type="example.PeriodicTask" jndi-name="PeriodicTask"
             mbean-interface="example.PeriodicTaskMBean"
             <b>mbean-name="type=PeriodicTask,name=PeriodicTask"&gt;</b>
@@ -266,7 +266,7 @@ The <a href="doc|resource|cron">CronResource</a> is used to configure
 the timed execution of the PeriodicTask.
 </p>
 
-<example file="WEB-INF/web.xml" re-start="CronResource" re-marker="&lt;/resource&gt;">
+<example file="WEB-INF/web.xml" language="java">
   &lt;resource type="com.caucho.resources.CronResource"&gt;
     &lt;init&gt;
       &lt;cron&gt;*&lt;/cron&gt;
@@ -287,7 +287,7 @@ requests and if the task is active, redirects to a page giving a "temporarily
 unavailable" message.
 </p>
 
-<example file="WEB-INF/web.xml" re-start="filter&gt;" re-end="&lt;/filter&gt;">
+<example file="WEB-INF/web.xml" language="java">
   &lt;filter&gt;
     &lt;filter-name&gt;PeriodicTaskFilter&lt;/filter-name&gt;
     &lt;filter-class&gt;example.PeriodicTaskFilter&lt;/filter-class&gt;
@@ -305,14 +305,14 @@ unavailable" message.
   &lt;/filter-mapping&gt;
 </example>
 
-<example file="WEB-INF/classes/example/PeriodicTaskFilter.java" re-start="setPeriodicTask" re-end="}">
+<example file="WEB-INF/classes/example/PeriodicTaskFilter.java" language="java">
   public void setPeriodicTask(PeriodicTask periodicTask)
   {
     _periodicTask = periodicTask;
   }
 </example>
 
-<example file="WEB-INF/classes/example/PeriodicTaskFilter.java" re-start="doFilter\(" re-end="^  }">
+<example file="WEB-INF/classes/example/PeriodicTaskFilter.java" language="java">
   public void doFilter(ServletRequest request,
       ServletResponse response,
       FilterChain chain)
@@ -339,7 +339,8 @@ The PeriodicTaskServlet needs an instance of PeriodicTask to operate on.
 The Servlet provides a setter:
 </p>
 
-<example file="WEB-INF/classes/example/PeriodicTaskServlet.java" re-start="setPeriodicTask" re-end="}">
+<example file="WEB-INF/classes/example/PeriodicTaskServlet.java" 
+         language="java">
   public void setPeriodicTask(PeriodicTask periodicTask)
   {
     _periodicTask = periodicTask;
@@ -352,7 +353,7 @@ function to get a reference to the PeriodicTask resource previously stored in
 jndi with the <a config-tag="resource"/> configuration.  
 </p>
 
-<example file="WEB-INF/web.xml" re-start="&lt;periodic-task" re-marker="&lt;servlet&gt;">
+<example file="WEB-INF/web.xml" language="java">
   &lt;servlet&gt;
     &lt;servlet-name&gt;PeriodicTaskServlet&lt;/servlet-name&gt;
     &lt;servlet-class&gt;example.PeriodicTaskServlet&lt;/servlet-class&gt;
@@ -508,9 +509,9 @@ public class PeriodicTaskBar extends PeriodicTask {
 
 <s1 title="See Also">
 <dl>
-<dt><a href="doc|resource|cron.xtp">CronResource</a>
+<dt><a href="doc|resource|cron.xtp">CronResource</a></dt>
 <dd>Documentation for the usage of CronResource
-</dd></dt></dl>
+</dd></dl>
 </s1>
 
 </body></document>

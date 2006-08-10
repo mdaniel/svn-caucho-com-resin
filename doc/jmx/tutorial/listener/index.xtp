@@ -3,7 +3,11 @@
     <product>resin</product>
     <title>MBean listeners</title>
     <type>tutorial</type>
-    <description>Example showing configuration of MBean event listeners.</description>
+    <description>
+      <p>
+      Example showing configuration of MBean event listeners.
+      </p>
+    </description>
  <tutorial-startpage>listener</tutorial-startpage>
   </header>
 
@@ -36,7 +40,7 @@ bean can be an emitter or a listener by implementing the
 proper interfaces.  The listeners are hooked up to the emitters either
 in the configuration file or through MBeanServer calls.</p>
 
-<subsection title="Listener">
+<s2 title="Listener">
 
 <p>A listener implements <code>NotificationListener</code> to receive
 <code>Notification</code> events.  The notification contains information
@@ -72,9 +76,9 @@ public class Listener
 }
 </example>
 
-</subsection>
+</s2>
 
-<subsection title="Emitter">
+<s2 title="Emitter">
 
 <p>The Emitter sends notifications.  Any managed bean which implements
 the <code>NotificationEmitter</code> interface can be an emitter.  Many
@@ -123,7 +127,7 @@ public class Emitter extends NotificationBroadcasterSupport
 }
 </example>
 
-</subsection>
+</s2>
 
 <s2 title="web.xml configuration">
 
@@ -131,6 +135,7 @@ public class Emitter extends NotificationBroadcasterSupport
 &lt;resource&gt; tag just as with
 <a href="doc|resource|index">other resources</a>.  The resources is
 registered as an MBean by specifying an <var>mbean-name</var>.
+</p>
 
 <example title="web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
@@ -154,7 +159,7 @@ registered as an MBean by specifying an <var>mbean-name</var>.
 </td></tr><tr><td>handback</td><td>a custom object to be passed back to the listener
 </td></tr></deftable>
 
-</p></s2>
+</s2>
 
 <s2 title="Using the listener">
 

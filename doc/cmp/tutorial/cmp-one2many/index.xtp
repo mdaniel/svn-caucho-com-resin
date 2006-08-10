@@ -7,7 +7,7 @@
 
   <body>
     <summary/>
-
+<s1>
 <p>EJB 2.0 containers can manage relationships between entity beans.
 In this example, each boarding school house has a number of students.
 Each house and student has its own entity bean and each student belongs
@@ -26,7 +26,7 @@ fast calls within the same JVM.</p>
 <p>The tutorial focuses on the classes and configuration for a simple
 bean/bean relationship.  Additional details, like changing houses or
 creating and deleting students are deferred to another tutorial.</p>
-
+</s1>
 <s1 title="Database Schema">
 
 <p>The example has two tables: houses and students.  Each student belongs to
@@ -268,7 +268,9 @@ classes, stubs and skeletons.</p>
 
 <s1 title="Deployment Descriptor">
 
+<p>
 The deployment descriptor has three sections:
+</p>
 <ul>
 <li>House definition
 </li><li>Student definition

@@ -60,7 +60,7 @@ creates the JMS resources specifically for the web-app.  The JMS objecs could
 just as easily be created at the host or server level, and thus shared in
 common with many web applications.</p>
 
-<example file="WEB-INF/web.xml" re-start="JMS" re-end="!--">
+<example file="WEB-INF/web.xml" language="xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
 
   ...
@@ -173,7 +173,7 @@ extension as an ejb deployment descriptor.</p>
 <p>In this case, the file <code>WEB-INF/message.ejb</code> is used to configure
 the message-driven bean <var>SimpleMessageBean</var>.</p>
 
-<example file="WEB-INF/message.ejb" re-start="&lt;message" re-end="&lt;/message">
+<example file="WEB-INF/message.ejb" language="xml">
 &lt;ejb-jar xmlns="http://caucho.com/ns/resin"&gt;
 &lt;enterprise-beans&gt;
   &lt;message-driven&gt;
@@ -193,7 +193,7 @@ the message-driven bean <var>SimpleMessageBean</var>.</p>
 <p>The Resin-EE ejb server is responsible for recognizing the
 <code>message.ejb</code> file and deploying the bean.</p>
 
-<example file="WEB-INF/web.xml" re-start="EJB" re-end="&lt;/ejb">
+<example file="WEB-INF/web.xml" language="xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
 
   ...
@@ -224,7 +224,8 @@ sending 5 messages.</p>
 <p>The JNDI lookup is done in the <code>init()</code> method, and the resulting
 objects are stored as member variables:</p>
 
-<example file="WEB-INF/classes/example/MessageSenderServlet.java" re-start="_queue;" re-end="^  }">
+<example file="WEB-INF/classes/example/MessageSenderServlet.java" 
+         language="xml">
   ...
 
   Queue _queue;
@@ -256,7 +257,8 @@ objects are stored as member variables:</p>
 
 <p>The 5 messages are sent in the <code>service()</code> method:</p>
 
-<example file="WEB-INF/classes/example/MessageSenderServlet.java" re-start="init)" re-end="^  }">
+<example file="WEB-INF/classes/example/MessageSenderServlet.java" 
+         language="xml">
   ...
 
   public void service(ServletRequest request, ServletResponse response)
@@ -305,7 +307,8 @@ case, logging is used in both the message-driven bean and the sender. </p>
 <p>The log configuration in <code>web.xml</code> is used to log both the class
 name and the message in the file <var>WEB-INF/debug.log</var>.</p>
 
-<example file="WEB-INF/web.xml" re-start="&lt;log" re-end="/&gt;">
+<example file="WEB-INF/web.xml" 
+         language="xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
 
   &lt;log name="example" level="fine" path="WEB-INF/debug.log" timestamp="[%M:%S.%s] "
@@ -318,7 +321,8 @@ name and the message in the file <var>WEB-INF/debug.log</var>.</p>
 <p>The use of the JDK logging API is quite straightforward, here is an example
 from SimpleMessageBean:</p>
 
-<example file="WEB-INF/classes/example/SimpleMessageBean.java" re-start="(log\.|Logger)" re-end="(log\.|Logger)">
+<example file="WEB-INF/classes/example/SimpleMessageBean.java" 
+         language="java">
 public class SimpleMessageBean implements MessageDrivenBean, MessageListener {
   static protected final Logger log = 
     Logger.getLogger(SimpleMessageBean.class.getName());

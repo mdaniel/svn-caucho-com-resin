@@ -45,7 +45,9 @@ resulting url indicates to the portal that it should invoke the
 The portal may encode some special parameters in the url, and the use of the
 GET method would overwrite those parameters.</p>
 
-<example title="Creating an action URL" file="WEB-INF/classes/example/HelloWorldPortlet.java" re-marker="void rende" re-start="createActionURL" re-end="}">
+<example title="Creating an action URL" 
+         file="WEB-INF/classes/example/HelloWorldPortlet.java" 
+         language="java">
 
     ...
 
@@ -101,7 +103,9 @@ The portlet's implentation of <code>processAction()</code> uses
 <code>response.getParameter()</code> to get the submitted form parameters.  
 </p>
 
-<example title="Action parameters" file="WEB-INF/classes/example/HelloWorldPortlet.java" re-marker="processAction" re-start="getParameter">
+<example title="Action parameters" 
+         file="WEB-INF/classes/example/HelloWorldPortlet.java" 
+         language="java">
 
   public void processAction(ActionRequest request, ActionResponse response) 
     throws PortletException, IOException
@@ -133,7 +137,9 @@ The implementation of the <code>processAction</code> must use
 susbsequent call to render().  
 </p>
 
-<example title="Action parameters" file="WEB-INF/classes/example/HelloWorldPortlet.java" re-marker="processAction" re-start="setRenderParameter">
+<example title="Action parameters" 
+         file="WEB-INF/classes/example/HelloWorldPortlet.java" 
+         language="java">
 
   public void processAction(ActionRequest request, ActionResponse response) 
     throws PortletException, IOException

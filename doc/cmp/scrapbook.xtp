@@ -153,7 +153,7 @@
 
       </s2>
 
-      <s2 title="I see that CMP uses 'select max(ID) ...' to get the next id, ~nyway to disable it?" type="faq">
+      <s2 title="I see that CMP uses 'select max(ID) ...' to get the next id, anyway to disable it?" type="faq">
         <description>
           We already have sequences in place and the table is huge,
           so we really don't want to run this type of id-gen

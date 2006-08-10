@@ -3,7 +3,12 @@
     <product>resin</product>
     <title>Using MBeanRegistration</title>
     <type>tutorial</type>
-    <description>MBeans can implement the MBeanRegistration interface to find the ObjectName and MBeanServer they're registered with.</description>
+    <description>
+      <p>
+      MBeans can implement the MBeanRegistration interface to find the
+      ObjectName and MBeanServer they're registered with.
+      </p>
+    </description>
  <tutorial-startpage>index.jsp</tutorial-startpage>
   </header>
 

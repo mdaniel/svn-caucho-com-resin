@@ -62,7 +62,7 @@ public interface Hello extends EJBObject {
 
 </s1>
 
-<s1 title="Home Interface" file="WEB-INF/classes/example/Hello.java">
+<s1 title="Home Interface">
 
 <p>The sole responsibility of the Home interface is to create a
 remote object.  The client uses the Home to obtain instances of the bean.</p>
@@ -170,7 +170,8 @@ used.</p>
 The EJB server is responsible for reading the *.ejb descriptor files
 and deploying the beans within the server.</p>
 
-<example title="ejb-server in web.xml" file="WEB-INF/web.xml" re-start="&lt;ejb-server">
+<example title="ejb-server in web.xml" file="WEB-INF/web.xml"
+         language="java">
 &lt;web-app&gt;
 
   ...
@@ -196,7 +197,8 @@ and the server to communicate.</p>
 <p>This example uses the Hessian EJB Servlet to make the EJB's available to
 remote clients using the <var>Hessian protocol</var>.</p>
 
-<example title="Configuring hessian in web.xml" file="WEB-INF/web.xml" re-start="='/?hessian" re-end="='/?hessian">
+<example title="Configuring hessian in web.xml" file="WEB-INF/web.xml" 
+         language="xml">
 &lt;web-app&gt;
 
   ...
@@ -263,7 +265,8 @@ allows for easy configuration if the url of the server adress changes.  The
 reulsting url that is passed to the factory will look something like
 <code>http://localhost:8080/hessian/home</code>.</p>
 
-<example file="WEB-INF/classes/example/HelloServlet.java" re-start="(HessianProxyFactory;|private HelloHome|void init)" re-end="(HessianProxyFactory;|private HelloHome|^  })">
+<example file="WEB-INF/classes/example/HelloServlet.java" 
+         language="java">
   private HelloHome helloHome;
 
   public void init(ServletConfig config)
@@ -317,7 +320,8 @@ provide a different means of configuring a JNDI factory.</p>
 HessianContextFactory.  This allows for easy configuration if the url of the
 server address changes.</p>
 
-<example file="WEB-INF/web.xml" title="Resin JNDI client configuration" re-start="&lt;jndi-link" re-end="&lt;/jndi-link">
+<example file="WEB-INF/web.xml" title="Resin JNDI client configuration" 
+         language="xml">
 &lt;web-app&gt;
 
   ...
@@ -346,7 +350,8 @@ method and stored as a member variable.</p>
 <p>Only the init() method is differet in the HelloJndiServlet, the rest of the
 class is identical to the previous HelloServlet.</p>
 
-<example file="WEB-INF/classes/example/HelloJndiServlet.java" re-start="(naming\.|private HelloHome|void init)" re-end="(naming\.|private HelloHome|^  })">
+<example file="WEB-INF/classes/example/HelloJndiServlet.java" 
+         language="java">
 
   private HelloHome helloHome;
 

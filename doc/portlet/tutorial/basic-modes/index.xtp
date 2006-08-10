@@ -42,7 +42,8 @@ stores them as request attributes, and then calls the appropriate
 <code>do</code> method.
 </p>
 
-<example title="render()" file="WEB-INF/classes/example/HelloWorldPortlet.java" re-marker="void render">
+<example title="render()" file="WEB-INF/classes/example/HelloWorldPortlet.java" 
+         language="java">
   public void render(RenderRequest request, RenderResponse response)
     throws PortletException, IOException
   {
@@ -78,7 +79,9 @@ database; objects containing that data are prepared in prepareObjects() and
 available for display by the view.
 </p>
 
-<example title="prepareObjects()" file="WEB-INF/classes/example/HelloWorldPortlet.java" re-marker="void prepareObjects">
+<example title="prepareObjects()" 
+         file="WEB-INF/classes/example/HelloWorldPortlet.java" 
+         language="java">
   protected void prepareObjects(RenderRequest request, RenderResponse response)
   {
     String identity = request.getParameter("identity");
@@ -106,7 +109,9 @@ In this tutorial, the <code>doView</code> presents a url that switches to the
 "edit" mode.
 </p>
 
-<example title="prepareObjects()" file="WEB-INF/classes/example/HelloWorldPortlet.java" re-marker="void doView" re-start="editUrl">
+<example title="prepareObjects()" 
+         file="WEB-INF/classes/example/HelloWorldPortlet.java" 
+         language="java">
 
   PortletURL editUrl = response.createRenderURL();
   editUrl.setPortletMode(PortletMode.EDIT);
@@ -129,7 +134,9 @@ processAction() switches to the "view" mode using
 <code>response.setPortletMode()</code>.
 </p>
 
-<example title="processAction()" file="WEB-INF/classes/example/HelloWorldPortlet.java" re-marker="void processAction" re-start="setPortletMode">
+<example title="processAction()" 
+         file="WEB-INF/classes/example/HelloWorldPortlet.java" 
+         language="java">
 
   public void processAction(ActionRequest request, ActionResponse response) 
     throws PortletException, IOException

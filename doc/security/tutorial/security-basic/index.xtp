@@ -5,16 +5,18 @@
 <type>tutorial</type>
 <title>Basic Security and Resin's XmlAuthenticator</title>
 <description>
+<p>
 This tutorial covers the basics of JSP and
 Servlet security and the use of Resin's XmlAuthenticator.
+</p>
 </description>
 <tutorial-startpage>index.jsp</tutorial-startpage>
 <keywords>
 <keyword>XmlAuthenticator</keyword>
 <keyword>com.caucho.http.security.XmlAuthenticator</keyword>
-<keyword rank="-1">authenticator</keyword>
-<keyword rank="-2">security</keyword>
-<keyword rank="-2">basic</keyword>
+<keyword>authenticator</keyword>
+<keyword>security</keyword>
+<keyword>basic</keyword>
 </keywords>
 </header>
 
@@ -59,7 +61,7 @@ have an additional role of <var>gryffindor</var>,
 <var>slytherin</var>, <var>hufflepuf</var>, or <var>ravenclaw</var>,
 indicating which house they belong to (or none at all).</p>
       
-<example file="WEB-INF/web.xml" re-start="&lt;security-role&gt;" re-end="&lt;/security-role&gt;">
+<example file="WEB-INF/web.xml" language="xml">
 &lt;security-role&gt;
   &lt;role-name&gt;professor&lt;/role-name&gt;
 &lt;/security-role&gt;
@@ -73,7 +75,8 @@ indicating which house they belong to (or none at all).</p>
 that is required.  In JSP/Servlet terminology, this is called <var>Declarative Security</var>.
 </p>
       
-<example title="Declarative Security in web.xml" file="WEB-INF/web.xml" re-marker="&lt;web-app&gt;" re-start="&lt;security-constraint&gt;" re-end="&lt;/security-constraint&gt;">
+<example title="Declarative Security in web.xml" file="WEB-INF/web.xml" 
+         language="xml">
 &lt;security-constraint&gt;
   &lt;web-resource-collection&gt;
     &lt;web-resource-name&gt;Professors&lt;/web-resource-name&gt;
@@ -95,7 +98,8 @@ when the login fails.</p><p>
 same JSP file.  If the form is being redisplayed because of an
 error the <code>login_error</code> request parameter is set to '1'.</p>
       
-<example title="login-config: Getting Resin to use the login form" file="WEB-INF/web.xml" re-marker="&lt;login-config&gt;" re-start="&lt;auth-method&gt;" re-end="&lt;/form-login-config&gt;">
+<example title="login-config: Getting Resin to use the login form" 
+         file="WEB-INF/web.xml" language="xml">
 &lt;login-config&gt;
   &lt;auth-method&gt;form&lt;/auth-method&gt;
     &lt;form-login-config&gt;
@@ -106,7 +110,7 @@ error the <code>login_error</code> request parameter is set to '1'.</p>
 &lt;/login-config&gt;
 </example>
 
-<example title="An example login form" file="login.jsp" re-start="form-login-page" re-end="&lt;/form&gt;">
+<example title="An example login form" file="login.jsp" language="html">
 &lt;form action='j_security_check' method='POST'&gt;
   &lt;table&gt;
     &lt;tr&gt;&lt;td&gt;User:&lt;/td&gt;&lt;td&gt;&lt;input type='text' name='j_username'&gt;&lt;/td&gt;&lt;/tr&gt;
@@ -134,7 +138,8 @@ jsp page that contains the login form.</p>
 unauthenticated user trying to access it will first be
 presented with the login form.</p>
 
-<example title="Accessing a jsp in a secure area causes the login to occur" file="WEB-INF/web.xml" re-start="'login' link" re-end="&lt;/security-constraint&gt;">
+<example title="Accessing a jsp in a secure area causes the login to occur" 
+         file="WEB-INF/web.xml" language="xml">
 &lt;security-constraint&gt;
   &lt;web-resource-collection&gt;
     &lt;web-resource-name&gt;Home&lt;/web-resource-name&gt;
@@ -151,7 +156,8 @@ presented with the login form.</p>
 &lt;/security-constraint&gt;
 </example>
 
-<example title="Making a link to cause a login" file="index.jsp" re-start="&gt;login&lt;">
+<example title="Making a link to cause a login" file="index.jsp" 
+         language="html">
 &lt;a href="&lt;c:url value='/home.jsp'/&gt;"&gt;login&lt;/a&gt;
 </example>
 </s1>
@@ -166,7 +172,8 @@ user has not been authenticated.</p><p>
 </p><p>In this example it is used to determine whether a 'login' or a
 'logout' link should be presented.</p>
 
-<example title="Determining if the user is authenticated" file="index.jsp" re-marker="&lt;h1" re-start="c:choose" re-end="/c:choose">
+<example title="Determining if the user is authenticated" file="index.jsp"
+         language="html">
 &lt;c:choose&gt;
   &lt;c:when test="${'${'}empty pageContext.request.userPrincipal}"&gt;
     &lt;a href="&lt;c:url value='home.jsp'/&gt;"&gt;login&lt;/a&gt;
@@ -180,7 +187,8 @@ user has not been authenticated.</p><p>
     
 <s1 title="Getting the current username">
       
-<example title="Getting the current username" file="home.jsp" re-start="Welcome">
+<example title="Getting the current username" file="home.jsp"
+         language="html">
 Welcome &lt;c:out value="${'${'}pageContext.request.remoteUser}"/&gt;.
 </example>
 </s1>
@@ -195,7 +203,8 @@ In JSP/Servlet terminology, this is called
 more specific home page if the user is a <var>professor</var>,
 <var>student</var>, or <var>staff</var>.</p>
 
-<example title="Programmatic Security using Java code" file="home.jsp" re-start="redirect to a more specific" re-end="&gt;">
+<example title="Programmatic Security using Java code" file="home.jsp"
+         language="html">
 &lt;%
   /** redirect to a more specific homepage if one is available */
 
@@ -240,7 +249,8 @@ depending on whether or not the user is logged in.</p>
 %&gt;
 </example>
 
-<example title="Using inc/nobrowsercache.jsp" file="index.jsp" re-marker="taglib" re-start="nobrowsercache.jspf">
+<example title="Using inc/nobrowsercache.jsp" file="index.jsp"
+         language="html">
 &lt;%@ include file="/inc/nobrowsercache.jspf" %&gt;
 </example>
 </s1>
@@ -251,7 +261,8 @@ causes all of the information stored in the session to be
 lost.  It is especially important to make sure that the
 logout page is not cached by the browser.</p>
       
-<example title="Causing a logout with session.invalidate()" file="logout.jsp" re-marker="taglib" re-start="session.invalidate()">
+<example title="Causing a logout with session.invalidate()" file="logout.jsp"
+         language="html">
 &lt;%@ include file="/inc/nobrowsercache.jspf" %&gt;
 
 &lt;%-- invalidating the session causes a loss of all session
@@ -271,7 +282,8 @@ configuration, or in an xml file, or both.</p>
       
 <p>The example below uses digest passwords.  Digest passwords avoid the storage of passwords in cleartext, and are discussed under the security section of the Resin documentation.</p>
 
-<example title="Specifying the XmlAuthenticator as the authenticator to use" file="WEB-INF/web.xml" re-marker="&lt;login-config&gt;" re-start="Resin-specific XmlAuthenticator" re-end="&lt;/authenticator&gt;">
+<example title="Specifying the XmlAuthenticator as the authenticator to use" 
+         file="WEB-INF/web.xml" language="xml">
   &lt;!-- Resin-specific XmlAuthenticator configuration --&gt;
   &lt;authenticator&gt;
     &lt;type&gt;com.caucho.server.security.XmlAuthenticator&lt;/type&gt;

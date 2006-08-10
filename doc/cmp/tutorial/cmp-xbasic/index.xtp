@@ -11,7 +11,7 @@
 
   <body>
     <summary/>
-
+<s1>
 <p>Resin-EE manages tables in a relational database using a Java
 bean interface.  Each database table corresponds to a single "entity bean".  
 (Since Resin-EE uses the EJB specification, most of its jargon
@@ -27,7 +27,7 @@ Resin-EE to manage its list of courses offered for the term.  Each
 course has a name and a teacher for the course.  The example has been
 simplified as much as possible; following examples show how to
 <a href="cmp|tutorial/cmp-xfind/index">query the database</a> and <a href="cmp|tutorial/cmp-xcreate/index">create and remove</a> database entries.</p>
-
+</s1>
 <s1 title="Files in this tutorial">
 <deftable>
 <tr><td><viewfile-link file="WEB-INF/classes/example/CourseBean.java"/>

@@ -3,7 +3,12 @@
     <product>resin</product>
     <title>Simple JMX-managed Resource</title>
     <type>tutorial</type>
-    <description>Resources can be JMX managed by exposing a management interface and registering as an MBean.</description>
+    <description>
+      <p>
+      Resources can be JMX managed by exposing a management interface
+      and registering as an MBean.
+      </p>
+    </description>
  <tutorial-startpage>index.jsp</tutorial-startpage>
   </header>
 
@@ -30,7 +35,7 @@
 an MBean interface and by specifying an MBean name.  The interface
 exposes the resource's methods to be managed.</p>
 
-<subsection title="The Basic resource">
+<s2 title="The Basic resource">
 
 <p>The <code>Basic</code> bean is the example resource implementation.
 It exposes its managed interface by implementing a <code>BasicMBean</code>
@@ -72,7 +77,7 @@ public interface BasicMBean {
 }
 </example>
 
-</subsection>
+</s2>
 
 <s2 title="MBean names">
 
@@ -99,6 +104,7 @@ a "type" property, but this example is using a name as simple as possible.</p>
 &lt;resource&gt; tag just as with
 <a href="doc|resource|index">other resources</a>.  The resources is
 registered as an MBean by specifying an <var>mbean-name</var>.
+</p>
 
 <example title="web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
@@ -119,7 +125,7 @@ registered as an MBean by specifying an <var>mbean-name</var>.
 </td></tr><tr><td>data</td><td>The example bean's <code>setData</code> parameter.
 </td></tr></deftable>
 
-</p></s2>
+</s2>
 
 <s2 title="Using the resource proxy">
 

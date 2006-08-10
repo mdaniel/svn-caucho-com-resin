@@ -89,12 +89,17 @@ example.HelloModule
 &lt;?php echo hello_test("World") ?&gt;
 </example>
 
+<p>
 In your favorite browser, type:
+</p>
+
 <example>
  http://localhost:8080/hello.php
 </example>
 
+<p>
 You should see:
+</p>
 
 <results>
  Hello, World

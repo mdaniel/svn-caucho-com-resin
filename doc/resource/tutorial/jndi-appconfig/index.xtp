@@ -48,7 +48,7 @@ configuration parameter "config-files-location".  The
 <code>init()</code> method is called by Resin after all of the setters
 have been called.</p>
 
-<example file="WEB-INF/classes/example/AppConfig.java" re-start="(void setConfig)|(void init)" re-end="}">
+<example file="WEB-INF/classes/example/AppConfig.java" language="java">
 public class AppConfig {
   ConfigFilesLocation _cfl = null;
 
@@ -89,7 +89,8 @@ will not be able to read the files, just the application.</p>
 
 <p>The <a href="doc|config|el">EL configuration</a> variable <var>app.docDir</var> is used.</p>
 
-<example title="Configuring the AppConfig JNDI object" file="WEB-INF/web.xml" re-start="make an example.AppConfig" re-end="&lt;/resource&gt;">
+<example title="Configuring the AppConfig JNDI object" file="WEB-INF/web.xml" 
+         language="java">
   &lt;resource name='config/Application'&gt;
     &lt;type&gt;example.AppConfig&lt;/type&gt;
     &lt;init&gt;
@@ -109,7 +110,8 @@ results of the lookup.</p>
 <p>In this example servlet, an instance of the object is retrieved in
 the init() method and stored in <code>_appConfig</code>.</p>
 
-<example title="Obtaining the AppConfig JNDI object" file="WEB-INF/classes/example/TestServlet.java" re-start="_appConfig = " re-marker="void init">
+<example title="Obtaining the AppConfig JNDI object" 
+         file="WEB-INF/classes/example/TestServlet.java" language="java">
 
   final static String JNDI_NAME = "java:comp/env/config/Application";
 
@@ -130,7 +132,8 @@ the init() method and stored in <code>_appConfig</code>.</p>
 <p><code>_appConfig</code> is used to open the
 configuration files for reading and writing.</p>
 
-<example title="Using the AppConfig JNDI object" file="WEB-INF/classes/example/TestServlet.java" re-start="_appConfig\." re-marker="use the _appConfig">
+<example title="Using the AppConfig JNDI object" 
+         file="WEB-INF/classes/example/TestServlet.java" language="java">
 ...
 
     InputStream is = _appConfig.openConfigFileRead(inputFile);
