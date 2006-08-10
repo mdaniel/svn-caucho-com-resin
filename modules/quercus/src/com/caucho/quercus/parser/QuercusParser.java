@@ -3898,6 +3898,12 @@ public class QuercusParser {
     _sb.setLength(0);
 
     int ch;
+
+    // eat whitespace
+    while ((ch = read()) >= 0 && (ch == ' ' || ch == '\t')) {
+    }
+    _peek = ch;
+
     while ((ch = read()) >= 0 && ch != '\r' && ch != '\n') {
       _sb.append((char) ch);
     }
@@ -4039,11 +4045,11 @@ public class QuercusParser {
       tail = new ArrayGetExpr(getLocation(), tail, constExpr);
     }
     else
-      throw error(L.l("Unexpected character at {0}.",
+      throw error(L.l("Unexpected character at {0}",
 		      String.valueOf((char) ch)));
 
     if (ch != ']')
-      throw error(L.l("Expected ']' at {0}.",
+      throw error(L.l("Expected ']' at {0}",
 		      String.valueOf((char) ch)));
 
     return tail;
