@@ -37,18 +37,45 @@ import java.util.ArrayList;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
-public class Defun extends S2 {
+public class Defun extends Section {
   public Defun(Document document)
   {
     super(document);
   }
 
+  public S2 createS2()
+  {
+    S2 s2 = new S2(getDocument());
+    _contentItems.add(s2);
+    return s2;
+  }
+
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
+    out.writeStartElement("table");
+    out.writeAttribute("border", "0");
+    out.writeAttribute("cellpadding", "5");
+    out.writeAttribute("cellspacing", "0");
+    out.writeAttribute("width", "100%");
+
+    out.writeStartElement("tr");
+    out.writeAttribute("class", "section");
+    out.writeStartElement("td");
+    out.writeStartElement("font");
+    out.writeAttribute("size", "+2");
+    out.writeCharacters(_title);
+    out.writeEndElement(); // font
+    out.writeEndElement(); // td
+    out.writeEndElement(); // tr
+
+    out.writeEndElement(); // table
+    
+    /*
     out.writeStartElement("h4");
     out.writeCharacters(_title);
     out.writeEndElement(); // h4
+    */
 
     out.writeStartElement("div");
     out.writeAttribute("class", "desc");
@@ -70,7 +97,7 @@ public class Defun extends S2 {
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    out.println("\\subsubsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+    out.println("\\subsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
 
     super.writeLaTeX(out);
   }

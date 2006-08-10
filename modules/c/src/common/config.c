@@ -549,7 +549,7 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	  if (config->update_interval < 5)
 	    config->update_interval = 5;
 	}
-	else if (! strcmp(buffer, "session-cookie")) {
+	else if (! strcmp(buffer, "cookie")) {
 	  int len = sizeof(host->config->session_cookie);
 	
 	  strncpy(host->config->session_cookie, value, len);

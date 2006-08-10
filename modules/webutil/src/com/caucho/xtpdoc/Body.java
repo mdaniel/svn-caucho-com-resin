@@ -103,6 +103,13 @@ public class Body {
     _sections.add(s1);
     return s1;
   }
+  
+  public Defun createDefun()
+  {
+    Defun defun = new Defun(_document);
+    _sections.add(defun);
+    return defun;
+  }
 
   public Index createIxx()
   {

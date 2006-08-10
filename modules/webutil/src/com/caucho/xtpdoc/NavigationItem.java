@@ -146,10 +146,10 @@ public class NavigationItem {
     return item;
   }
 
-  public void writeHtml(XMLStreamWriter out)
+  public void writeHtml(XMLStreamWriter out, String path)
     throws XMLStreamException
   {
-    if (_depth > _maxDepth)
+    if (_maxDepth < _depth)
       return;
 
     String depthString = (_depth == 0) ? "top" : ("" + _depth);
@@ -168,7 +168,7 @@ public class NavigationItem {
 
     out.writeStartElement("b");
     out.writeStartElement("a");
-    out.writeAttribute("href", _link);
+    out.writeAttribute("href", path + _link);
     out.writeCharacters(_title);
     out.writeEndElement(); // a
     out.writeEndElement(); // b
@@ -185,11 +185,18 @@ public class NavigationItem {
       out.writeEndElement(); // p
     }
 
-    if (_child != null)
-      _child.writeHtml(out);
+    int p = _link.lastIndexOf('/');
+    String tail;
+    if (p >= 0)
+      tail = path + _link.substring(0, p + 1);
+    else
+      tail = path;
 
+    if (_child != null)
+      _child.writeHtml(out, tail);
+      
     for (NavigationItem item : _items)
-      item.writeHtml(out);
+      item.writeHtml(out, tail);
     
     out.writeEndElement(); // dd
 

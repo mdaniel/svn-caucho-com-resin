@@ -49,13 +49,6 @@ public class S1 extends Section {
     _contentItems.add(s2);
     return s2;
   }
-  
-  public Defun createDefun()
-  {
-    Defun defun = new Defun(getDocument());
-    _contentItems.add(defun);
-    return defun;
-  }
  
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException

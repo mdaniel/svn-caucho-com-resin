@@ -513,7 +513,7 @@
   <target name="pdf" depends="init">
     <mkdir dir="${build}/pdf/images"/>
 
-    <apply executable="convert" dir="${build}/pdf/images">
+    <apply executable="convert" dir="." dest="${build}/pdf/images">
       <fileset dir="${doc}/images">
         <include name="*.gif" />
         <include name="*.jpg" />
@@ -522,9 +522,9 @@
       <srcfile/>
       <targetfile/>
       <mapper>
-        <globmapper from="*.gif" to="${build}/pdf/images/*.pdf"/>
-        <globmapper from="*.jpg" to="${build}/pdf/images/*.pdf"/>
-        <globmapper from="*.png" to="${build}/pdf/images/*.pdf"/>
+        <globmapper from="*.gif" to="*.pdf"/>
+        <globmapper from="*.jpg" to="*.pdf"/>
+        <globmapper from="*.png" to="*.pdf"/>
       </mapper>
     </apply>
 

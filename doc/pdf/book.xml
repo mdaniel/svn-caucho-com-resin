@@ -12,32 +12,39 @@
     <linked-section link="install/scrapbook.xtp" />
   </chapter>
   <chapter title="Configuration">
+    <!--
     <linked-section link="config/howto.xtp" />
+      -->
     <linked-section link="config/resin.xtp" />
+    <linked-section link="config/cluster-tags.xtp" />
+    <linked-section link="config/server-tags.xtp" />
     <linked-section link="config/env.xtp" />
     <linked-section link="config/webapp.xtp" />
     <!-- <linked-section link="config/log.xtp" /> -->
     <linked-section link="config/control.xtp" />
     <linked-section link="config/init.xtp" />
-    <enclosing-section title="Common Configuration Tasks">
+ </chapter>
+  <chapter title="Common Configuration Tasks">
       <linked-section link="config/virtual-host.xtp" />
       <linked-section link="config/balance.xtp" />
       <linked-section link="config/sessions.xtp" />
       <linked-section link="config/tcp-sessions.xtp" />
       <linked-section link="config/tuning.xtp" />
       <linked-section link="config/isp.xtp" />
-    </enclosing-section>
-    <enclosing-section title="Relax-NG Schema">
+  </chapter>
+    <!--
+  <chapter title="Relax-NG Schema">
       <linked-section link="config/env-schema.xtp" />
       <linked-section link="config/resin-j2ee-schema.xtp" />
       <linked-section link="config/resin-web-xml-schema.xtp" />
       <linked-section link="config/resin-schema.xtp" />
       <linked-section link="config/j2ee-schema.xtp" />
       <linked-section link="config/j2ee-web-xml-schema.xtp" />
-    </enclosing-section>
+    </chapter>
     <linked-section link="config/faq.xtp" />
     <linked-section link="config/scrapbook.xtp" />
-
-    <!-- <linked-section link="index-tags.xtp" /> -->
+    <linked-section link="index-tags.xtp" />
   </chapter>
+      -->
+
 </book>

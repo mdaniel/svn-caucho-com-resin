@@ -8,6 +8,10 @@
 
 <s2 title="3.1snap - Aug 1, 2006">
 <ul>
+<li>mod_caucho and session-cookie value</li>
+<li>mod_caucho stripping of ;jsessionid= wasn't working</li>
+<li>(2006-08-07) ejb-server jndi-name for local name wasn't handled properly (#1276, rep by Andrew Barson and Matt Pangaro)</li>
+<li>isapi_srun.dll changed to default 6802 (#1274, rep by mindlink)</li>
 <li>license signature fixes (rep by Matt Pangaro)</li>
 </ul>
 

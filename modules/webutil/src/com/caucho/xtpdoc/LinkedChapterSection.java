@@ -57,11 +57,11 @@ public class LinkedChapterSection extends ChapterSection {
     Document document = new Document(xtpFile, null);
 
     try {
-      org.w3c.dom.Node node = LooseToStrictHtml.looseToStrictHtml(xtpFile);
+      //org.w3c.dom.Node node = LooseToStrictHtml.looseToStrictHtml(xtpFile);
 
       Config config = new Config();
 
-      config.configure(document, node);
+      config.configure(document, xtpFile);
     } catch (Exception e) {
       System.err.println("Error configuring document (" + xtpFile + "): " + e);
 

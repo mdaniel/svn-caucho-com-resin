@@ -86,6 +86,12 @@ public class Navigation {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
+    writeHtml(out, "");
+  }
+  
+  public void writeHtml(XMLStreamWriter out, String path)
+    throws XMLStreamException
+  {
     String depthString = (_depth == 0) ? "top" : ("" + _depth);
 
     /*
@@ -94,7 +100,7 @@ public class Navigation {
     */
 
     for (NavigationItem item : _items)
-      item.writeHtml(out);
+      item.writeHtml(out, path);
 
     //out.writeEndElement(); // dl
   }

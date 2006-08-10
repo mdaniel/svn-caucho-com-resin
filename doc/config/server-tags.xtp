@@ -22,12 +22,11 @@
 
 </s1>
 
-<s1 title="server">
-
-<defun title="client-connect-timeout" version="Resin 3.1">
+<defun title="&lt;client-connect-timeout>" version="Resin 3.1">
 <parents>server</parents>
 
-<p>Configures the maximum time a client connection to a cluster-port should
+<p>&lt;client-connect-timeout> configures the maximum time
+a client connection to a cluster-port should
 take.  The <a href="resin-load-balance.xtp">load balance</a> and
 <a href="sessions.xtp">persistent sessions</a> use client-connect-timeout
 to connect to backend or peer servers in the cluster.</p>
@@ -55,10 +54,11 @@ can timeout too quickly for a live server with some network congestion.</p>
 
 </defun>
 
-<defun title="client-fail-recover-time" version="Resin 3.1">
+<defun title="&lt;client-fail-recover-time>" version="Resin 3.1">
 <parents>server</parents>
 
-<p>The maximum time the <a href="resin-load-balance.xtp">load balancer</a>
+<p>&lt;client-fail-recover-time> is the maximum time
+the <a href="resin-load-balance.xtp">load balancer</a>
 will consider the server dead after a failure before retrying
 the connection.</p>
 
@@ -89,10 +89,11 @@ contact unavailable servers.</p>
 
 </defun>
 
-<defun title="client-max-idle-time" version="Resin 3.1">
+<defun title="&lt;client-max-idle-time>" version="Resin 3.1">
 <parents>server</parents>
 
-<p>The maximum time the <a href="resin-load-balance.xtp">load balancer</a>
+<p>&lt;client-max-idle-time> is the maximum time
+the <a href="resin-load-balance.xtp">load balancer</a>
 and <a href="sessions.xtp">distributed sessions</a> will leave an
 idle socket before closing it.</p>
 
@@ -127,10 +128,11 @@ the chance of connecting to a closed server.</p>
 
 </defun>
 
-<defun title="client-timeout" version="Resin 3.1">
+<defun title="&lt;client-timeout>" version="Resin 3.1">
 <parents>server</parents>
 
-<p>The maximum time the <a href="resin-load-balance.xtp">load balancer</a>
+<p>&lt;client-timeout> is the maximum time
+the <a href="resin-load-balance.xtp">load balancer</a>
 and <a href="sessions.xtp">distributed sessions</a> will wait for
 a read or write to a cluster socket.</p>
 
@@ -431,8 +433,6 @@ The <g>ObjectName</g> is <var>resin:type=Server</var>.</p>
 </example>
 
 </defun>
-
-</s1>
 
 </body>
 </document>
