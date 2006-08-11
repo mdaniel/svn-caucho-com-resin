@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2006 Caucho Technology.  All rights reserved.
+ * Copyright (c) 1999-2004 Caucho Technology.  All rights reserved.
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,7 +29,7 @@
 #define CSE_VERSION_H
 
 #define VERSION "Resin/3.0.21"
-#define FULL_VERSION "Resin-3.0.21 (built Tue, 16 May 2006 12:27:11 PDT)"
+#define FULL_VERSION "Resin-3.0.21 (built Thu, 10 Aug 2006 12:03:19 PDT)"
 
 #endif /* CSE_VERSION_H */
 
