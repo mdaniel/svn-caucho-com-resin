@@ -608,10 +608,15 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	  else
 	    srun = cse_add_host(&cluster, host, port);
 
-	  if (srun->srun && live_time > 0)
-	    srun->srun->live_time = live_time;
-	  if (srun->srun && dead_time > 0)
-	    srun->srun->dead_time = dead_time;
+	  if (! srun || ! srun->srun) {
+	    ERR(("srun value for host %s cannot be resolved"));
+	  }
+	  else {
+	    if (live_time > 0)
+	      srun->srun->live_time = live_time;
+	    if (dead_time > 0)
+	      srun->srun->dead_time = dead_time;
+	  }
 	}
       }
       break;

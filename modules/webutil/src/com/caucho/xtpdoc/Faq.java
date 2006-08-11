@@ -91,4 +91,16 @@ public class Faq extends Section {
 
     super.writeLaTeX(out);
   }
+
+  public void writeLaTeXEnclosed(PrintWriter out)
+    throws IOException
+  {
+    if (_type != null && _type.equals("defun"))
+      out.println("\\newpage");
+
+    if (_title != null)
+      out.println("\\subsubsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+
+    super.writeLaTeX(out);
+  }
 }

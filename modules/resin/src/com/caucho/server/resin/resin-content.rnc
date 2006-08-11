@@ -287,6 +287,29 @@ r_ignore-client-disconnect =
   attribute ignore-client-disconnect { string }
   | element ignore-client-disconnect { string }
 
+r_jsse-ssl = element jsse-ssl {
+  (attribute alias { string }
+   | element alias { r_string-Group })?
+
+  & (attribute key-store-file { string }
+   | element key-store-file { r_string-Group })
+
+  & (attribute password { string }
+     | element password { r_string-Group })
+
+  & (attribute key-store-type { string }
+     | element key-store-type { r_string-Group })?
+
+  & (attribute key-manager-factory { string }
+     | element key-manager-factory { r_string-Group })?
+
+  & (attribute ssl-context { string }
+     | element ssl-context { r_string-Group })?
+
+  & (attribute verify-client { string }
+     | element verify-client { r_string-Group })?
+}
+
 r_keepalive-max =
   attribute keepalive-max { string }
   | element keepalive-max { string }
@@ -298,6 +321,52 @@ r_keepalive-timeout =
 r_min-free-memory =
   attribute min-free-memory { string }
   | element min-free-memory { string }
+
+r_openssl = element openssl {
+  (attribute certificate-file { string }
+   | element certificate-file { r_string-Group })
+
+  & (attribute password { string }
+     | element password { r_string-Group })
+
+  & (attribute ca-certificate-file { string }
+     | element ca-certificate-file { r_string-Group })?
+
+  & (attribute ca-certificate-path { string }
+     | element ca-certificate-path { r_string-Group })?
+
+  & (attribute ca-revocation-file { string }
+     | element ca-revocation-file { r_string-Group })?
+
+  & (attribute ca-revocation-path { string }
+     | element ca-revocation-path { r_string-Group })?
+
+  & (attribute certificate-chain-file { string }
+     | element certificate-chain-file { r_string-Group })?
+
+  & (attribute certificate-key-file { string }
+     | element certificate-key-file { r_string-Group })?
+
+  & (attribute cipher-suite { string }
+     | element cipher-suite { r_string-Group })?
+
+  & (attribute protocol { string }
+     | element protocol { r_string-Group })?
+
+  & (attribute session-cache { r_boolean-Type }
+     | element session-cache { r_boolean-Type })?
+
+  & (attribute session-cache-timeout { r_period }
+     | element session-cache-timeout { r_period } )?
+
+  & (attribute unclean-shutdown { r_boolean-Type }
+     | element unclean-shutdown { r_boolean-Type } )?
+
+  & r_verify-client?
+
+  & (attribute verify-depth { r_int }
+     | element verify-depth { r_int })?
+}
 
 r_persistent-store = element persistent-store {
   r_jndi-name?

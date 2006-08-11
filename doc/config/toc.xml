@@ -2,10 +2,11 @@
   <item title="Configuration" link="index.xtp">
     <item link="index-tags.xtp" title="index"/>
     <item link="howto.xtp" title="howto"/>
-    <item link="resin.xtp" title="resin.conf"/>
+    <item link="env-tags.xtp" title="env"/>
+    <item link="resin-tags.xtp" title="resin"/>
     <item link="cluster-tags.xtp" title="cluster"/>
     <item link="server-tags.xtp" title="server"/>
-    <item link="env.xtp" title="env"/>
+    <item link="host-tags.xtp" title="host"/>
     <item link="webapp.xtp" title="web-app"/>
     <item link="log.xtp" title="log"/>
     <item link="control.xtp" title="el & control"/>
