@@ -300,6 +300,7 @@ public class QueryParser {
           PathExpr pathExpr = (PathExpr) expr;
 
           expr = new LoadEntityExpr(pathExpr);
+
           expr = expr.bindSelect(this);
         }
 
@@ -936,12 +937,17 @@ public class QueryParser {
     }
 
     if (token == NULL) {
+
+      if (expr instanceof KeyColumnExpr)
+        expr = ((KeyColumnExpr) expr).getParent();
+
       if (isNot)
         return new UnaryExpr(NOT_NULL, expr);
       else
         return new UnaryExpr(NULL, expr);
     }
     else if (token == EMPTY) {
+
       expr = new EmptyExpr(expr);
 
       if (! isNot)
@@ -1246,6 +1252,23 @@ public class QueryParser {
 
     while (peekToken() != ')') {
       AmberExpr arg = parseExpr();
+
+      if (id.toLowerCase().equals("object")) {
+        if (arg instanceof PathExpr) {
+          PathExpr pathExpr = (PathExpr) arg;
+
+          arg = new LoadEntityExpr(pathExpr);
+
+          arg = arg.bindSelect(this);
+
+          int token = scanToken();
+
+          if (token != ')')
+            throw error(L.l("expected ')' at '{0}'", tokenName(token)));
+
+          return arg;
+        }
+      }
 
       args.add(arg);
 

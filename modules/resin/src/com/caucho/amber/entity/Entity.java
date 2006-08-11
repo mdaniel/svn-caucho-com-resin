@@ -135,9 +135,11 @@ public interface Entity {
     throws SQLException;
 
   /**
-   * Loads the entity from the database.
+   * Loads the entity from the database and
+   * returns the number of columns consumed
+   * from the result set.
    */
-  public void __caucho_load(AmberConnection aConn, ResultSet rs, int index)
+  public int __caucho_load(AmberConnection aConn, ResultSet rs, int index)
     throws SQLException;
 
   /**

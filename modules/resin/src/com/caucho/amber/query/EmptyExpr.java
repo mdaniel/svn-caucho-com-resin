@@ -87,24 +87,33 @@ public class EmptyExpr extends AbstractAmberExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
-    if (_collectionExpr instanceof OneToManyExpr) {
-      OneToManyExpr oneToMany = (OneToManyExpr) _collectionExpr;
+    OneToManyExpr oneToMany = null;
 
-      LinkColumns join = oneToMany.getLinkColumns();
+    // ManyToMany is implemented as a
+    // ManyToOne[embeddeding OneToMany]
+    if (_collectionExpr instanceof ManyToOneExpr) {
+      PathExpr expr = ((ManyToOneExpr) _collectionExpr).getParent();
+      if (expr instanceof OneToManyExpr)
+        oneToMany = (OneToManyExpr) expr;
 
-      cb.append("EXISTS(SELECT *");
-      Table table = join.getSourceTable();
-      cb.append(" FROM " + table.getName() + " " + _tableName);
-      cb.append(" WHERE ");
-
-      String targetTable = oneToMany.getParent().getChildFromItem().getName();
-
-      cb.append(join.generateJoin(_tableName, targetTable));
-
-      cb.append(')');
+    } else if (_collectionExpr instanceof OneToManyExpr) {
+      oneToMany = (OneToManyExpr) _collectionExpr;
     }
     else
       throw new UnsupportedOperationException();
+
+    LinkColumns join = oneToMany.getLinkColumns();
+
+    cb.append("EXISTS(SELECT *");
+    Table table = join.getSourceTable();
+    cb.append(" FROM " + table.getName() + " " + _tableName);
+    cb.append(" WHERE ");
+
+    String targetTable = oneToMany.getParent().getChildFromItem().getName();
+
+    cb.append(join.generateJoin(_tableName, targetTable));
+
+    cb.append(')');
   }
 
   /**

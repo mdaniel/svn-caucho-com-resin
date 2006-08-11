@@ -548,12 +548,12 @@ public class EntityComponent extends ClassComponent {
       return;
 
     out.println();
-    out.println("public void __caucho_load(com.caucho.amber.manager.AmberConnection aConn, java.sql.ResultSet rs, int index)");
+    out.println("public int __caucho_load(com.caucho.amber.manager.AmberConnection aConn, java.sql.ResultSet rs, int index)");
     out.println("  throws java.sql.SQLException");
     out.println("{");
     out.pushDepth();
 
-    _entityType.generateLoad(out, "rs", "index", 0, 0);
+    int index = _entityType.generateLoad(out, "rs", "index", 0, 0);
 
     out.println("__caucho_loadMask_0 |= 1L;");
 
@@ -585,6 +585,7 @@ public class EntityComponent extends ClassComponent {
       out.println("__caucho_load_callback();");
     }
 
+    out.println("return " + index + ";");
     out.popDepth();
     out.println("}");
   }

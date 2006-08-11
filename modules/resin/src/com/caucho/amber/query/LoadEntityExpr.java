@@ -53,6 +53,7 @@ import com.caucho.util.CharBuffer;
 public class LoadEntityExpr extends AbstractAmberExpr {
   private PathExpr _expr;
   private FromItem _fromItem;
+  private int _index;
 
   private ArrayList<FromItem> _subItems = new ArrayList<FromItem>();
 
@@ -75,6 +76,15 @@ public class LoadEntityExpr extends AbstractAmberExpr {
   public EntityType getEntityType()
   {
     return (EntityType) _expr.getTargetType();
+  }
+
+  /**
+   * Returns the number of columns consumed from
+   * a result set after loading the entity.
+   */
+  public int getIndex()
+  {
+    return _index;
   }
 
   /**
@@ -227,7 +237,7 @@ public class LoadEntityExpr extends AbstractAmberExpr {
 
     int keyLength = entityType.getId().getKeyCount();
 
-    item.getEntity().__caucho_load(aConn, rs, index + keyLength);
+    _index = item.getEntity().__caucho_load(aConn, rs, index + keyLength);
 
     return item;
   }

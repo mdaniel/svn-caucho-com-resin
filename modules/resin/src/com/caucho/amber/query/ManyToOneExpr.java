@@ -41,7 +41,7 @@ import com.caucho.amber.table.LinkColumns;
  */
 public class ManyToOneExpr extends AbstractPathExpr {
   private PathExpr _parent;
-  
+
   private LinkColumns _linkColumns;
 
   private FromItem _fromItem;
@@ -127,7 +127,7 @@ public class ManyToOneExpr extends AbstractPathExpr {
     _parent = _parent.bindSelect(parser, null);
 
     bindSelect(parser, parser.createTableName());
-    
+
     return _childFromItem;
   }
 
@@ -138,7 +138,7 @@ public class ManyToOneExpr extends AbstractPathExpr {
   {
     if (_childFromItem != null)
       return this;
-    
+
     if (_fromItem == null)
       _fromItem = _parent.bindSubPath(parser);
 
@@ -147,11 +147,11 @@ public class ManyToOneExpr extends AbstractPathExpr {
 
     JoinExpr joinExpr;
     joinExpr = new ManyToOneJoinExpr(_linkColumns,
-				     _fromItem,
-				     _childFromItem);
-					       
+                                     _fromItem,
+                                     _childFromItem);
+
     _childFromItem.setJoinExpr(joinExpr);
-    
+
     return this;
   }
 
@@ -161,25 +161,25 @@ public class ManyToOneExpr extends AbstractPathExpr {
   public boolean usesFrom(FromItem from, int type, boolean isNot)
   {
     return (_childFromItem == from && type == IS_INNER_JOIN ||
-	    _fromItem == from ||
-	    _parent.usesFrom(from, type));
+            _fromItem == from ||
+            _parent.usesFrom(from, type));
   }
 
   /**
    * Returns the table.
    */
   /*
-  public Table getTable()
-  {
+    public Table getTable()
+    {
     if (_childFromItem != null)
-      return _childFromItem.getTable();
+    return _childFromItem.getTable();
     else if (_fromItem != null)
-      return _fromItem.getTable();
+    return _fromItem.getTable();
     else
-      return _parent.getTable();
-  }
+    return _parent.getTable();
+    }
   */
-  
+
   /**
    * Generates the where expression.
    */
@@ -192,7 +192,7 @@ public class ManyToOneExpr extends AbstractPathExpr {
       cb.append(_linkColumns.generateMatchArgSQL(_parent.getChildFromItem().getName()));
     }
   }
-  
+
   /**
    * Generates the select expression.
    */
@@ -200,13 +200,21 @@ public class ManyToOneExpr extends AbstractPathExpr {
   public void generateSelect(CharBuffer cb)
   {
     String tableName;
-    
+
     if (_fromItem != null)
       tableName = _fromItem.getName();
     else
       tableName = _parent.getChildFromItem().getName();
 
     cb.append(_linkColumns.generateSelectSQL(tableName));
+  }
+
+  /**
+   * Returns the parent.
+   */
+  PathExpr getParent()
+  {
+    return _parent;
   }
 
   public int hashCode()
@@ -222,7 +230,7 @@ public class ManyToOneExpr extends AbstractPathExpr {
     ManyToOneExpr manyToOne = (ManyToOneExpr) o;
 
     return (_parent.equals(manyToOne._parent) &&
-	    _linkColumns.equals(manyToOne._linkColumns));
+            _linkColumns.equals(manyToOne._linkColumns));
   }
 
   public String toString()

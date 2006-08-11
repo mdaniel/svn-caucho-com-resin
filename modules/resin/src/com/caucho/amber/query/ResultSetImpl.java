@@ -65,7 +65,7 @@ public class ResultSetImpl implements ResultSet {
 
   public static final int CACHE_CHUNK_SIZE = 64;
 
-  private UserQuery _userQuery; 
+  private UserQuery _userQuery;
   private ResultSet _rs;
   private ArrayList<FromItem> _fromList;
   private ArrayList<AmberExpr> _resultList;
@@ -159,35 +159,41 @@ public class ResultSetImpl implements ResultSet {
     // max length of the cached value
     for (; maxSize-- > 0; i++) {
       if (_rs.next()) {
-	if (size <= i) {
-	  i = 0;
-	  
-	  ResultSetCacheChunk next = new ResultSetCacheChunk(tail);
-	  tail.setNext(next);
-	  tail = next;
-	}
+        if (size <= i) {
+          i = 0;
 
-	tail.newRow();
+          ResultSetCacheChunk next = new ResultSetCacheChunk(tail);
+          tail.setNext(next);
+          tail = next;
+        }
 
-	int len = _resultList.size();
-	for (int j = 0; j < len; j++) {
-	  int index = getColumn(j + 1);
-	  
-	  AmberExpr expr = _resultList.get(j);
-	  
-	  tail.setValue(i, j, expr.getCacheObject(_session, _rs, index));
-	}
+        tail.newRow();
+
+        int len = _resultList.size();
+        int offset = 0;
+
+        for (int j = 0; j < len; j++) {
+          int index = getColumn(j + 1);
+
+          AmberExpr expr = _resultList.get(j);
+
+          tail.setValue(i, j, expr.getCacheObject(_session, _rs, index + offset));
+
+          // jpa/0t71
+          if (expr instanceof LoadEntityExpr)
+            offset += ((LoadEntityExpr) expr).getIndex();
+        }
       }
       else {
-	tail.setLast(true);
-	return;
+        tail.setLast(true);
+        return;
       }
     }
 
     /*
-    if (! _rs.next()) {
+      if (! _rs.next()) {
       tail.setLast(true);
-    }
+      }
     */
   }
 
@@ -348,7 +354,7 @@ public class ResultSetImpl implements ResultSet {
 
     int row = _row++;
     ResultSetCacheChunk cacheChunk = _cacheChunk;
-    
+
     if (cacheChunk == null)
       return _rs.next();
     else if (row < cacheChunk.getRowCount()) {
@@ -358,26 +364,26 @@ public class ResultSetImpl implements ResultSet {
       ResultSetCacheChunk next = cacheChunk.getNext();
 
       if (next != null) {
-	_cacheChunk = next;
-	return true;
+        _cacheChunk = next;
+        return true;
       }
-      
+
       _isCache = false;
       _cacheChunk = null;
-      
+
       if (cacheChunk.isLast()) {
-	_maxResults = 0;
-	return false;
+        _maxResults = 0;
+        return false;
       }
       else if (_rs != null)
-	return true;
+        return true;
       else if (_userQuery != null) {
-	_rs = _userQuery.executeQuery(row, -1);
+        _rs = _userQuery.executeQuery(row, -1);
 
-	return _rs.next();
+        return _rs.next();
       }
       else {
-	return false;
+        return false;
       }
     }
   }
@@ -392,7 +398,7 @@ public class ResultSetImpl implements ResultSet {
       return false;
 
     _row--;
-    
+
     return _rs.previous();
   }
 
@@ -420,7 +426,7 @@ public class ResultSetImpl implements ResultSet {
   public void beforeFirst()
     throws SQLException
   {
-     _rs.beforeFirst();
+    _rs.beforeFirst();
   }
 
   /**
@@ -447,7 +453,7 @@ public class ResultSetImpl implements ResultSet {
   public void afterLast()
     throws SQLException
   {
-     _rs.afterLast();
+    _rs.afterLast();
   }
 
   /**
@@ -538,7 +544,7 @@ public class ResultSetImpl implements ResultSet {
     throws SQLException
   {
     int column = getColumn(columnName);
-      
+
     if (_cacheChunk != null)
       return _cacheChunk.getInt(_row - 1, column - 1);
     else
@@ -564,7 +570,7 @@ public class ResultSetImpl implements ResultSet {
     throws SQLException
   {
     int column = getColumn(columnName);
-    
+
     if (_cacheChunk != null)
       return _cacheChunk.getLong(_row - 1, column - 1);
     else
@@ -637,7 +643,7 @@ public class ResultSetImpl implements ResultSet {
   {
     return _rs.getString(getColumn(column));
   }
-  
+
   /**
    * Returns the bytes value for the column.
    */
@@ -974,16 +980,16 @@ public class ResultSetImpl implements ResultSet {
       Object obj = cacheChunk.getObject(_row - 1, column - 1);
 
       if (obj instanceof EntityItem) {
-	EntityItem entityItem = (EntityItem) obj;
-	Entity entity = entityItem.getEntity();
+        EntityItem entityItem = (EntityItem) obj;
+        Entity entity = entityItem.getEntity();
 
-	Object value = _session.loadProxy(entity.__caucho_getEntityType(),
-					  entity.__caucho_getPrimaryKey());
-	
-	return value;
+        Object value = _session.loadProxy(entity.__caucho_getEntityType(),
+                                          entity.__caucho_getPrimaryKey());
+
+        return value;
       }
       else
-	return obj;
+        return obj;
     }
     else {
       int index = getColumn(column);
@@ -1008,11 +1014,11 @@ public class ResultSetImpl implements ResultSet {
       Object obj = cacheChunk.getObject(_row - 1, column - 1);
 
       if (obj instanceof EntityItem) {
-	return (EntityItem) obj;
+        return (EntityItem) obj;
       }
       else
-	throw new SQLException(L.l("'{0}' is an unexpected type.",
-				   obj));
+        throw new SQLException(L.l("'{0}' is an unexpected type.",
+                                   obj));
     }
     else {
       int index = getColumn(column);
@@ -1024,10 +1030,10 @@ public class ResultSetImpl implements ResultSet {
       return item;
     }
     /*
-    FromItem item = _fromList.get(column - 1);
-    AmberEntityHome home = item.getEntityHome();
+      FromItem item = _fromList.get(column - 1);
+      AmberEntityHome home = item.getEntityHome();
 
-    return home.load(_session, _rs, index);
+      return home.load(_session, _rs, index);
     */
   }
 
@@ -1047,7 +1053,7 @@ public class ResultSetImpl implements ResultSet {
     throws SQLException
   {
     int index = getColumn(column);
-    
+
     FromItem item = _fromList.get(column - 1);
     AmberEntityHome home = item.getEntityHome();
 
