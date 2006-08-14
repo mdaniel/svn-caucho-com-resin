@@ -67,7 +67,8 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
 	Escapifier.escape(_pendingAttributeValues.get(i), _ws);
         _ws.print("'");
       }
-      
+      flushContext();
+
       if (_shortTag) {
         _ws.print("/>");
         popContext();
@@ -363,17 +364,18 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   public void writeStartDocument(String version)
     throws XMLStreamException
   {
+    writeStartDocument(version, "utf-8");
+  }
+
+  public void writeStartDocument(String version, String encoding)
+    throws XMLStreamException
+  {
     try {
-      _ws.print("<?xml version='"+version+"' encoding='utf-8'?>");
+      _ws.print("<?xml version='"+version+"' encoding='"+encoding+"'?>");
     }
     catch (IOException e) {
       throw new XMLStreamException(e);
     }
-  }
-
-  public void writeStartDocument(String encoding, String version)
-    throws XMLStreamException
-  {
   }
 
   public void writeStartElement(String localName)

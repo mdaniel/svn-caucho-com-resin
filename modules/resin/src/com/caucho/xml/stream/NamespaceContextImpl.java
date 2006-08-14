@@ -296,11 +296,11 @@ public class NamespaceContextImpl implements NamespaceContext {
       throws IOException
     {
       for(Map.Entry<String,String> e : _prefixes.entrySet()) {
-        ws.print("\n    xmlns:");
+        ws.print(" xmlns:");
         ws.print(Escapifier.escape(e.getKey()));
         ws.print("='");
         ws.print(Escapifier.escape(e.getValue()));
-        ws.print("' ");
+        ws.print("'");
       }
     }
   }
