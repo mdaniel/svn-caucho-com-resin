@@ -51,7 +51,7 @@ import com.caucho.vfs.WriteStream;
 public class ServicesListener implements MessageListener 
 {
   private static final Logger log =
-    Logger.getLogger(JMSToSoapMDB.class.getName());
+    Logger.getLogger(ServicesListener.class.getName());
 
   private String _outboundQueueName = "jms/OutboundQueue";
   private String _connectionFactoryName;
