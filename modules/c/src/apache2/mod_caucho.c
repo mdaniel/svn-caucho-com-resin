@@ -564,6 +564,9 @@ write_headers(stream_t *s, request_rec *r)
       cse_write_string(s, CSE_CONTENT_TYPE, headers[i].val);
     else if (! strcasecmp(headers[i].key, "Content-length"))
       cse_write_string(s, CSE_CONTENT_LENGTH, headers[i].val);
+    else if (! strcasecmp(headers[i].key, "Expect")) {
+      /* expect=continue-100 shouldn't be passed to backend */
+    }
     else {
       cse_write_string(s, HMUX_HEADER, headers[i].key);
       cse_write_string(s, HMUX_STRING, headers[i].val);
@@ -691,11 +694,6 @@ send_data(stream_t *s, request_rec *r)
       }
       i++;
       
-      if (r->expecting_100) {
-	r->status = 100;
-	ap_rflush(r);
-      }
-      
       r->status = atoi(buf);
       r->status_line = apr_pstrdup(r->pool, buf);
 
@@ -705,8 +703,10 @@ send_data(stream_t *s, request_rec *r)
       len = hmux_read_len(s);
       cse_read_limit(s, key, sizeof(key), len);
       cse_read_string(s, value, sizeof(value));
-      if (! strcasecmp(key, "content-type"))
+      if (! strcasecmp(key, "content-type")) {
 	r->content_type = apr_pstrdup(r->pool, value);
+	apr_table_set(r->headers_out, key, value);
+      }
       else
 	apr_table_add(r->headers_out, key, value);
       break;

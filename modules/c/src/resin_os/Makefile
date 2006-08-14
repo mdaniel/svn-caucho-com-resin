@@ -10,10 +10,10 @@ PROXY_LIBS=
 APACHE_INC=-I/usr/local/apache2/include  -I/usr/local/apache2/include 
 resin_conf=/usr/local/apache2/conf/httpd.conf
 resin_libexec=/usr/local/apache2/modules
-resin_home=/Users/ferg/ws30/test-resin
+resin_home=/Users/ferg/ws30/resin
 JNI_INCLUDE=-I/Library/Java/Home/include
 INCLUDES =  -I/usr/include $(JNI_INCLUDE) -I../common
-CFLAGS = -g -O2 -DPOLL -DHAS_JVMTI -DHAS_JVMDI -DDEBUG -Wall  -DRESIN_HOME=\"$(resin_home)\" $(INCLUDES) -DCPU=\"$(CPU)\" -DOS=$(OS)
+CFLAGS = -g -O2 -DPOLL -DHAS_JVMTI -DHAS_JVMDI  -DRESIN_HOME=\"$(resin_home)\" $(INCLUDES) -DCPU=\"$(CPU)\" -DOS=$(OS)
 OBJ= jni_os.o jni_jvmti.o jni_jvmdi.o
 
 all	: libresin_os.$(SO)
