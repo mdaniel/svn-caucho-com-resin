@@ -186,7 +186,10 @@ public class Gettext
     if (translation != null)
       return translation;
 
-    translation = MOFileParser.translate(env, path, message);
+    translation = MOFileParser.search(env, path, message);
+
+    if (translation == null)
+      translation = message;
 
     cache.put(id, translation);
     return translation;
@@ -203,7 +206,7 @@ public class Gettext
 
     if (path == null) {
       env.notice(L.l("Translation MO file was not found."));
-      return MOFileParser.errorReturn(msgid1, msgid2, n);
+      return errorReturn(msgid1, msgid2, n);
     }
 
     String id = getCacheId(path, msgid1, msgid2, n);
@@ -212,7 +215,10 @@ public class Gettext
     if (translation != null)
       return translation;
 
-    translation = MOFileParser.translate(env, path, msgid1, msgid2, n);
+    translation = MOFileParser.search(env, path, msgid1, msgid2, n);
+
+    if (translation == null)
+      translation = errorReturn(msgid1, msgid2, n);
 
     cache.put(id, translation);
     return translation;
@@ -235,7 +241,7 @@ public class Gettext
     else
       path = env.lookup(sb.toString());
 
-    if (path.exists())
+    if (path != null && path.exists())
       return path;
     else
       return null;
@@ -294,6 +300,16 @@ public class Gettext
     sb.append(n);
 
     return sb.toString();
+  }
+
+  private static StringValue errorReturn(StringValue msgid1,
+                          StringValue msgid2,
+                          int n)
+  {
+    if (n == 1)
+      return msgid1;
+    else
+      return msgid2;
   }
 
 }

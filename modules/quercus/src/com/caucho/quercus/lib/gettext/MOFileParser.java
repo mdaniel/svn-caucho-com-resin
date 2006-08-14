@@ -144,7 +144,7 @@ class MOFileParser
    *
    * @return translated string, or original message if translation not found.
    */
-  public static StringValue translate(Env env,
+  public static StringValue search(Env env,
                        Path path,
                        StringValue message)
   {
@@ -156,17 +156,12 @@ class MOFileParser
         return null;
       }
 
-      StringValue translation = parser.binarySearch(
+      return parser.binarySearch(
                   env,
                   message.toString(),
                   0,
                   parser._numberOfStrings,
                   0);
-
-      if (translation != null)
-        return translation;
-
-      return message;
 
     } catch (IOException e) {
       env.warning(L.l(e.getMessage()));
@@ -188,7 +183,7 @@ class MOFileParser
    *
    * @return translated string, or original message if translation not found.
    */
-  public static StringValue translate(Env env,
+  public static StringValue search(Env env,
                           Path path,
                           StringValue msgid1,
                           StringValue msgid2,
@@ -202,17 +197,12 @@ class MOFileParser
         return null;
       }
 
-      StringValue translation = parser.binarySearch(
+      return parser.binarySearch(
                   env,
                   msgid1.toString(),
                   0,
                   parser._numberOfStrings,
                   parser._pluralExpr.eval(n));
-
-      if (translation != null)
-        return translation;
-
-      return errorReturn(msgid1, msgid2, n);
 
     } catch (IOException e) {
       env.warning(L.l(e.getMessage()));
@@ -386,16 +376,6 @@ class MOFileParser
     }
 
     return new String(buffer, 0, i);
-  }
-
-  protected static StringValue errorReturn(StringValue msgid1,
-                          StringValue msgid2,
-                          int n)
-  {
-    if (n == 1)
-      return msgid1;
-    else
-      return msgid2;
   }
 
   public void close()
