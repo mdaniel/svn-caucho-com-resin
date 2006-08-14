@@ -1,0 +1,36 @@
+<web-app xmlns="http://caucho.com/ns/resin">
+  <servlet servlet-name="resin-php"
+           servlet-class="com.caucho.quercus.servlet.QuercusServlet" />
+
+  <servlet-mapping url-pattern="*.php" servlet-name="resin-php" />
+
+  <system-property javax.xml.stream.XMLInputFactory="com.caucho.xml.stream.XMLInputFactoryImpl"/>
+  <!--
+     - JMS
+    -->
+  <resource var="inboundQueue" 
+            jndi-name="jms/InboundQueue"
+            type="com.caucho.jms.memory.MemoryQueue"/>
+  
+  <resource var="outboundQueue" 
+            jndi-name="jms/OutboundQueue"
+            type="com.caucho.jms.memory.MemoryQueue"/>
+  
+  <resource var="jmsFactory" type="com.caucho.jms.ConnectionFactoryImpl"
+            jndi-name="jms/ConnectionFactory"/>
+
+  <resource type="com.caucho.jms.resource.ListenerResource">
+    <init>
+      <connection-factory>${jmsFactory}</connection-factory>
+
+      <destination>${inboundQueue}</destination>
+
+      <listener type="com.caucho.jms.services.ServicesListener">
+        <init>
+          <outbound-queue>jms/OutboundQueue</outbound-queue>
+          <service resin:type="example.HelloService" />
+        </init>
+      </listener>
+    </init>
+  </resource>
+</web-app>

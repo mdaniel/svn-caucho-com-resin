@@ -1,0 +1,155 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>JMS services</title>
+  <type>tutorial</type>
+  <tutorial-startpage>services.php</tutorial-startpage>
+</header>
+
+<body>
+<summary localtoc="3"/>
+
+<s1 title="Files in this tutorial">
+<deftable>
+<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
+    <td>resin-web.xml configuration</td>
+</tr>
+<tr><td><viewfile-link file="services.php"/></td>
+    <td>PHP script displaying the advertisement.</td>
+</tr>
+<tr><td><viewfile-link file="WEB-INF/classes/example/HelloService.java"/></td>
+    <td>Hello World service implementation</td>
+</tr>
+</deftable>
+</s1>
+
+<s1 title="Using JMS for WebServices">
+
+<p>
+Using JMS for WebServices is as easy as sending the body of a SOAP message
+as a JMS message. (TODO: Actually remove SOAP envelope.)  Below is a PHP
+script using the Quercus JMS module that acts as the service client.
+</p>
+
+</s1>
+
+<example language="php">
+&lt;?php
+
+$result_queue = new JMSQueue("jms/OutboundQueue");
+$request_queue = new JMSQueue("jms/InboundQueue");
+
+if (! $result_queue) {
+  echo "Unable to get result queue!\n";
+} elseif (! $request_queue) {
+  echo "Unable to get request queue!\n";
+} else {
+  $result = $result_queue->receive();
+
+  if ($result == null) {
+    echo "No results available on the queue\n";
+  } else {
+    echo "received result: &lt;pre>\n";
+    echo htmlspecialchars($result) . "\n";
+    echo "&lt;/pre>\n";
+  }
+
+  $request = 
+    "&lt;env:Envelope xmlns:env=\"http://www.w3.org/2003/05/soap-enveloper\">" .
+    "&lt;env:Body>" .
+    "&lt;m:hello xmlns:m=\"urn:hello\">" .
+    "&lt;/m:hello>" .
+    "&lt;/env:Body>" .
+    "&lt;/env:Envelope>";
+
+  if (! $request_queue->send($request)) {
+    echo "Unable to send request\n";
+  }
+}
+
+?>
+</example>
+
+</s1>
+
+<s1 title="Configuring JMS for WebServices">
+
+<p>
+In the configuration below, we create two JMS queues, one for service
+requests and one for service responses.  The service provider is a JMS
+MessageListener (implemented by 
+<code>com.caucho.jms.services.ServicesListener</code>) which services
+all requests sent as JMS <code>TextMessage</code>s on the 
+<var>inboundQueue</var>.  The result is placed in a message on the
+<var>outboundQueue</var>.  The service is our <code>HelloService</code>
+with a listing below.
+</p>
+
+<example language="xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+  &lt;servlet servlet-name="resin-php"
+           servlet-class="com.caucho.quercus.servlet.QuercusServlet" />
+
+  &lt;servlet-mapping url-pattern="*.php" servlet-name="resin-php" />
+
+  &lt;system-property javax.xml.stream.XMLInputFactory="com.caucho.xml.stream.XMLInputFactoryImpl"/>
+  &lt;!--
+     - JMS
+    -->
+  &lt;resource var="inboundQueue" 
+            jndi-name="jms/InboundQueue"
+            type="com.caucho.jms.memory.MemoryQueue"/>
+  
+  &lt;resource var="outboundQueue" 
+            jndi-name="jms/OutboundQueue"
+            type="com.caucho.jms.memory.MemoryQueue"/>
+  
+  &lt;resource var="jmsFactory" type="com.caucho.jms.ConnectionFactoryImpl"
+            jndi-name="jms/ConnectionFactory"/>
+
+  &lt;resource type="com.caucho.jms.resource.ListenerResource">
+    &lt;init>
+      &lt;connection-factory>${jmsFactory}&lt;/connection-factory>
+
+      &lt;destination>${inboundQueue}&lt;/destination>
+
+      &lt;listener type="com.caucho.jms.services.ServicesListener">
+        &lt;init>
+          &lt;outbound-queue>jms/OutboundQueue&lt;/outbound-queue>
+          &lt;service resin:type="example.HelloService" />
+        &lt;/init>
+      &lt;/listener>
+    &lt;/init>
+  &lt;/resource>
+&lt;/web-app>
+</example>
+
+</s1>
+
+<s1 title="The HelloService">
+
+<p>
+The actual service provided here is a simple "Hello, World" method.  Note
+the @WebService and @WebMethod annotations.
+</p>
+
+<example language="java">
+package example;
+
+import javax.jws.WebService;
+import javax.jws.WebMethod;
+
+@WebService
+public class HelloService {
+  @WebMethod
+  public String hello()
+  {
+     return "hello, world!";
+  }
+}
+</example>
+
+</s1>
+
+</body>
+</document>
