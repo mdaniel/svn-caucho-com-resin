@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -44,8 +45,10 @@ public class ErrorData {
   /**
    * Create a new errorData object.
    */
-  public ErrorData(Throwable throwable, int statusCode,
-                   String uri, String servletName)
+  public ErrorData(Throwable throwable,
+		   int statusCode,
+                   String uri,
+		   String servletName)
   {
     _throwable = throwable;
     _statusCode = statusCode;

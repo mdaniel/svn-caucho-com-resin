@@ -29,21 +29,24 @@
 
 package javax.servlet.jsp;
 
-import java.io.*;
-import java.util.*;
-import javax.servlet.http.*;
-import javax.servlet.*;
+import javax.el.*;
 
 /**
- * JspPage is the base interface for any JSP page.
+ * EL information for JSP containers.
  */
-public interface JspPage extends Servlet {
+public interface JspApplicationContext {
   /**
-   * Called before the first request for a JSP page.
+   * Adds an ELContextListener.
    */
-  public void jspInit();
+  public void addELContextListener(ELContextListener listener);
+  
   /**
-   * Called when closing the JSP page, after all requests.
+   * Adds an ELResolver
    */
-  public void jspDestroy();
+  public void addELResolver(ELResolver resolver);
+  
+  /**
+   * Gets the expression factory
+   */
+  public ExpressionFactory getExpressionFactory();
 }

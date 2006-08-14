@@ -19,13 +19,12 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
- *
- * $Id: JspFactory.java,v 1.2 2004/09/29 00:12:48 cvs Exp $
  */
 
 package javax.servlet.jsp;
@@ -39,16 +38,16 @@ import javax.servlet.*;
  * JspFactory objects should not be used by JSP authors.
  */
 public abstract class JspFactory {
-  private static JspFactory factory;
+  private static JspFactory _factory;
 
   public static JspFactory getDefaultFactory()
   {
-    return factory;
+    return _factory;
   }
 
   public static void setDefaultFactory(JspFactory deflt)
   {
-    factory = deflt;
+    _factory = deflt;
   }
 
   public abstract PageContext getPageContext(Servlet servlet,
@@ -62,4 +61,7 @@ public abstract class JspFactory {
   public abstract void releasePageContext(PageContext pc);
 
   public abstract JspEngineInfo getEngineInfo();
+
+  public abstract JspApplicationContext
+    getJspApplicationContext(ServletContext context);
 }

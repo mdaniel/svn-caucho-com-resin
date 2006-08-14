@@ -1186,7 +1186,6 @@ fi
 
 AC_OUTPUT([
 Makefile
-bin/wrapper.pl
 modules/c/src/Makefile
 modules/c/src/common/Makefile
 modules/c/src/apache1/Makefile
@@ -1201,5 +1200,3 @@ if test -n "${resin_pro_plugin}"; then
     modules/c/src/resinssl/Makefile
   ])
 fi
-	
-chmod +x bin/wrapper.pl

@@ -9474,7 +9474,7 @@ if test "$debug" = true; then
   HARDCORE_CFLAGS="$HARDCORE_CFLAGS -DDEBUG"
 fi
 
-                                                                                ac_config_files="$ac_config_files Makefile bin/wrapper.pl modules/c/src/Makefile modules/c/src/common/Makefile modules/c/src/apache1/Makefile modules/c/src/apache2/Makefile modules/c/src/resin_os/Makefile contrib/init.resin"
+                                                                      ac_config_files="$ac_config_files Makefile modules/c/src/Makefile modules/c/src/common/Makefile modules/c/src/apache1/Makefile modules/c/src/apache2/Makefile modules/c/src/resin_os/Makefile contrib/init.resin"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -10044,7 +10044,6 @@ do
   case "$ac_config_target" in
   # Handling of arguments.
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
-  "bin/wrapper.pl" ) CONFIG_FILES="$CONFIG_FILES bin/wrapper.pl" ;;
   "modules/c/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES modules/c/src/Makefile" ;;
   "modules/c/src/common/Makefile" ) CONFIG_FILES="$CONFIG_FILES modules/c/src/common/Makefile" ;;
   "modules/c/src/apache1/Makefile" ) CONFIG_FILES="$CONFIG_FILES modules/c/src/apache1/Makefile" ;;
@@ -11268,7 +11267,6 @@ do
   case "$ac_config_target" in
   # Handling of arguments.
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
-  "bin/wrapper.pl" ) CONFIG_FILES="$CONFIG_FILES bin/wrapper.pl" ;;
   "modules/c/src/Makefile" ) CONFIG_FILES="$CONFIG_FILES modules/c/src/Makefile" ;;
   "modules/c/src/common/Makefile" ) CONFIG_FILES="$CONFIG_FILES modules/c/src/common/Makefile" ;;
   "modules/c/src/apache1/Makefile" ) CONFIG_FILES="$CONFIG_FILES modules/c/src/apache1/Makefile" ;;
@@ -11923,5 +11921,3 @@ if test "$no_create" != yes; then
 fi
 
 fi
-
-chmod +x bin/wrapper.pl

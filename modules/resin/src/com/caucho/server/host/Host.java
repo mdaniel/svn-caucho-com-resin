@@ -58,8 +58,7 @@ import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.ExceptionFilterChain;
 
-import com.caucho.server.cluster.Cluster;
-import com.caucho.server.resin.ServletServer;
+import com.caucho.server.cluster.*;
 
 import com.caucho.server.webapp.ApplicationContainer;
 
@@ -345,13 +344,13 @@ public class Host extends ApplicationContainer
   /**
    * Returns the owning server.
    */
-  public ServletServer getServer()
+  public Server getServer()
   {
     if (_parent != null) {
       DispatchServer server = _parent.getDispatchServer();
 
-      if (server instanceof ServletServer)
-	return (ServletServer) server;
+      if (server instanceof Server)
+	return (Server) server;
     }
 
     return null;
@@ -362,7 +361,7 @@ public class Host extends ApplicationContainer
    */
   public Cluster getCluster()
   {
-    ServletServer server = getServer();
+    Server server = getServer();
 
     if (server != null)
       return server.getCluster();

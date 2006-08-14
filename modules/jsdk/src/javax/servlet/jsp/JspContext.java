@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -30,6 +31,8 @@ package javax.servlet.jsp;
 
 import java.io.*;
 import java.util.*;
+
+import javax.el.*;
 
 import javax.servlet.http.*;
 import javax.servlet.*;
@@ -107,16 +110,6 @@ public abstract class JspContext {
    * Finds an attribute in all scopes.
    */
   public abstract Object findAttribute(String name);
-
-  /**
-   * Returns an expression evaluator for creating JSP EL expressions.
-   */
-  public abstract ExpressionEvaluator getExpressionEvaluator();
-
-  /**
-   * Returns a variable resolver for evaluating JSP EL expressions.
-   */
-  public abstract VariableResolver getVariableResolver();
   
   /**
    * Internal routine to support BodyTags.
@@ -133,4 +126,21 @@ public abstract class JspContext {
   {
     return null;
   }
+
+  /**
+   * Returns an expression evaluator for creating JSP EL expressions.
+   * @Deprecated
+   */
+  public abstract ExpressionEvaluator getExpressionEvaluator();
+
+  /**
+   * Returns a variable resolver for evaluating JSP EL expressions.
+   * @Deprecated
+   */
+  public abstract VariableResolver getVariableResolver();
+  
+  /**
+   * Returns the EL context with the JspContext
+   */
+  public abstract ELContext getELContext();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2001 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -57,7 +58,16 @@ public class TagAttributeInfo {
   private boolean _reqTime;
   private boolean _required;
   private String _type;
+  
   private boolean _fragment;
+
+  private String _description;
+  
+  private boolean _isDeferredValue;
+  private boolean _isDeferredMethod;
+
+  private String _expectedTypeName;
+  private String _methodSignature;
 
   /**
    * Creates a new TagAttributeInfo object.  Only the JSP engine will
@@ -100,6 +110,35 @@ public class TagAttributeInfo {
   }
 
   /**
+   * Creates a new TagAttributeInfo object.  Only the JSP engine will
+   * call this.  It's not intended to be a public constructor.
+   *
+   * @param name the name of the attribute
+   * @param required true if the attribute must be present in the tag
+   * @param reqTime true if the attribute can be a request time attribute
+   * @param type the Java type of the attribute
+   */
+  public TagAttributeInfo(String name,
+			  boolean required,
+                          String type,
+			  boolean reqTime,
+                          boolean fragment,
+			  String description,
+			  boolean deferredValue,
+			  boolean deferredMethod,
+			  String expectedTypeName,
+			  String methodSignature)
+  {
+    this(name, required, type, reqTime, fragment);
+
+    _description = description;
+    _isDeferredValue = deferredValue;
+    _isDeferredMethod = deferredMethod;
+    _expectedTypeName = expectedTypeName;
+    _methodSignature = methodSignature;
+  }
+
+  /**
    * Returns the attribute name
    */
   public String getName()
@@ -137,6 +176,56 @@ public class TagAttributeInfo {
   public boolean isFragment()
   {
     return _fragment;
+  }
+
+  /**
+   * Returns the tag's description.
+   *
+   * @since JSP 2.1
+   */
+  public String getDescription()
+  {
+    return _description;
+  }
+
+  /**
+   * Returns the expected type of the attribute.
+   *
+   * @since JSP 2.1
+   */
+  public String getExpectedTypeName()
+  {
+    return _expectedTypeName;
+  }
+
+  /**
+   * Returns the expected method signature.
+   *
+   * @since JSP 2.1
+   */
+  public String getMethodSignature()
+  {
+    return _methodSignature;
+  }
+
+  /**
+   * Returns true if the attribute is deferred.
+   *
+   * @since JSP 2.1
+   */
+  public boolean isDeferredMethod()
+  {
+    return _isDeferredMethod;
+  }
+
+  /**
+   * Returns true if the attribute is deferred.
+   *
+   * @since JSP 2.1
+   */
+  public boolean isDeferredValue()
+  {
+    return _isDeferredValue;
   }
 
   /**

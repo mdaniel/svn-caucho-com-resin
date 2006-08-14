@@ -34,6 +34,8 @@ import java.util.*;
 import java.util.logging.*;
 import java.text.*;
 
+import javax.el.*;
+
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.jsp.*;
@@ -1150,6 +1152,14 @@ public class PageContextImpl extends PageContext
       _expressionEvaluator = new ExpressionEvaluatorImpl();
     
     return _expressionEvaluator;
+  }
+
+  /**
+   * Returns the expression evaluator
+   */
+  public ELContext getELContext()
+  {
+    throw new UnsupportedOperationException();
   }
 
   /**

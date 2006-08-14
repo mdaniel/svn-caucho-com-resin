@@ -69,7 +69,7 @@ public class ResinBoot {
 
     ResinConfig conf = new ResinConfig();
 
-      config.configure(conf, _resinConf, "com/caucho/server/resin/resin.rnc");
+    config.configure(conf, _resinConf, "com/caucho/server/resin/resin.rnc");
 
     System.out.println("CONF: " + conf);
 
@@ -148,7 +148,7 @@ public class ResinBoot {
       String arg = argv[i];
 
       if ("-conf".equals(arg)) {
-	_resinConf = Vfs.lookup(argv[i + 1]);
+	_resinConf = _resinHome.lookup(argv[i + 1]);
 	i++;
       }
       else if ("-resin-home".equals(arg)) {
@@ -175,7 +175,7 @@ public class ResinBoot {
     
     ProcessBuilder builder = new ProcessBuilder();
 
-    builder.directory(new File(_serverRoot.getNativePath()));
+    builder.directory(new File(_resinHome.getNativePath()));
 
     Map<String,String> env = builder.environment();
 

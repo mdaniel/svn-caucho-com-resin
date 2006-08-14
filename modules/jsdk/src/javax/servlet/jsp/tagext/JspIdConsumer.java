@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2001 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,23 +27,11 @@
  * @author Scott Ferguson
  */
 
-package javax.servlet.jsp;
-
-import java.io.*;
-import java.util.*;
-import javax.servlet.http.*;
-import javax.servlet.*;
+package javax.servlet.jsp.tagext;
 
 /**
- * JspPage is the base interface for any JSP page.
+ * Handles the id attribute for tags.
  */
-public interface JspPage extends Servlet {
-  /**
-   * Called before the first request for a JSP page.
-   */
-  public void jspInit();
-  /**
-   * Called when closing the JSP page, after all requests.
-   */
-  public void jspDestroy();
+public interface JspIdConsumer {
+  public void setJspId(String id);
 }

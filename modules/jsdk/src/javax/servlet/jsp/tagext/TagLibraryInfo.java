@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2003 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -202,6 +202,11 @@ abstract public class TagLibraryInfo {
   {
     return this.tagFiles;
   }
+
+  /**
+   * Returns the information from the tag file.
+   */ 
+  public abstract TagLibraryInfo []getTagLibraryInfos();
 
   /**
    * Returns the tag from the tag file.

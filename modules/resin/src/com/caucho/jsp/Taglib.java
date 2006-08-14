@@ -222,6 +222,12 @@ public class Taglib extends TagLibraryInfo {
     return null;
   }
 
+  @Override
+  public TagLibraryInfo []getTagLibraryInfos()
+  {
+    throw new UnsupportedOperationException();
+  }
+
   public String toString()
   {
     return "Taglib[prefix=" + prefix + ",uri=" + uri + "]";

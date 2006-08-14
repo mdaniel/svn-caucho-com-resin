@@ -564,6 +564,9 @@ write_headers(stream_t *s, request_rec *r)
       cse_write_string(s, CSE_CONTENT_TYPE, headers[i].val);
     else if (! strcasecmp(headers[i].key, "Content-length"))
       cse_write_string(s, CSE_CONTENT_LENGTH, headers[i].val);
+    else if (! strcasecmp(headers[i].key, "Expect")) {
+      /* expect=continue-100 shouldn't be passed to backend */
+    }
     else {
       cse_write_string(s, HMUX_HEADER, headers[i].key);
       cse_write_string(s, HMUX_STRING, headers[i].val);
@@ -774,7 +777,6 @@ write_request(stream_t *s, request_rec *r, config_t *config,
   }
 
   cse_write_byte(s, HMUX_QUIT);
-
   code = send_data(s, r);
 
   LOG(("%s:%d:write_request(): return code %c\n", __FILE__, __LINE__, code));

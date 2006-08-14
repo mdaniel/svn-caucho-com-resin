@@ -19,46 +19,72 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.jsp.java;
+package javax.servlet.jsp.el;
 
-import java.io.*;
+import java.beans.FeatureDescriptor;
 import java.util.*;
-import java.util.logging.*;
-import java.beans.*;
 
-import javax.servlet.*;
-import javax.servlet.jsp.tagext.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.log.Log;
-import com.caucho.server.http.*;
-import com.caucho.jsp.cfg.*;
+import javax.el.*;
 
 /**
- * Stores the entire information for a tag library.
+ * Variable resolution for JSP variables
  */
-public class TagTaglib extends TagLibraryInfo {
-  public TagTaglib(String prefix, String uri)
+public class ScopedAttributeELResolver extends ELResolver {
+  @Override
+  public Class<String> getCommonPropertyType(ELContext context,
+					     Object base)
   {
-    super(prefix, uri);
+    if (base == null)
+      return String.class;
+    else
+      return null;
   }
 
   @Override
-  public TagLibraryInfo []getTagLibraryInfos()
+  public Iterator<FeatureDescriptor>
+    getFeatureDescriptors(ELContext context, Object base)
   {
     throw new UnsupportedOperationException();
   }
 
-  public String toString()
+  @Override
+    public Class getType(ELContext context,
+			 Object base,
+			 Object property)
   {
-    return "TagTaglib[prefix=" + this.prefix + ",uri=" + this.uri + "]";
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+    public Object getValue(ELContext context,
+			 Object base,
+			 Object property)
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+    public boolean isReadOnly(ELContext context,
+			 Object base,
+			 Object property)
+  {
+    return true;
+  }
+
+  @Override
+    public void setValue(ELContext context,
+			 Object base,
+			 Object property,
+			 Object value)
+  {
+    throw new UnsupportedOperationException();
   }
 }

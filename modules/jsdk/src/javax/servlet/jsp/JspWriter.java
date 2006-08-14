@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -33,11 +34,12 @@ import javax.servlet.http.*;
 import javax.servlet.*;
 
 abstract public class JspWriter extends Writer {
-  protected int bufferSize;
-  protected boolean autoFlush;
   public static final int DEFAULT_BUFFER = -1;
   public static final int NO_BUFFER = 0;
   public static final int UNBOUNDED_BUFFER = -2;
+  
+  protected int bufferSize;
+  protected boolean autoFlush;
 
   protected JspWriter(int bufferSize, boolean autoFlush)
   {
