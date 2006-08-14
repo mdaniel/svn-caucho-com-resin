@@ -176,7 +176,7 @@ public class Gettext
     Path path = getPath(env, category, domain);
 
     if (path == null) {
-      env.warning(L.l("Translation MO file was not found."));
+      env.notice(L.l("Translation MO file was not found."));
       return message;
     }
 
@@ -202,7 +202,7 @@ public class Gettext
     Path path = getPath(env, category, domain);
 
     if (path == null) {
-      env.warning(L.l("Translation MO file was not found."));
+      env.notice(L.l("Translation MO file was not found."));
       return MOFileParser.errorReturn(msgid1, msgid2, n);
     }
 
@@ -231,9 +231,14 @@ public class Gettext
     sb.append(".mo");
 
     if (path != null)
-      return path.lookup(sb.toString());
+      path = path.lookup(sb.toString());
     else
-      return env.lookup(sb.toString());
+      path = env.lookup(sb.toString());
+
+    if (path.exists())
+      return path;
+    else
+      return null;
   }
 
   private String getCategory(Env env, int category)
