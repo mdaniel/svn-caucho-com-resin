@@ -171,6 +171,7 @@ public class TypeManager {
     //XXX Need test case for timestamp
     _builtinTypes.put("timestamp", BigDecimalType.create());
     _builtinTypes.put("java.math.BigDecimal", BigDecimalType.create());
+    _builtinTypes.put("java.math.BigInteger", BigIntegerType.create());
 
     _builtinTypes.put("blob", BlobType.create());
     _builtinTypes.put("java.sql.Blob", BlobType.create());
