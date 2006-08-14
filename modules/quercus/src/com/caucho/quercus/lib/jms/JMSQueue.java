@@ -175,6 +175,7 @@ public class JMSQueue {
         new BinaryBuilderValue((int) bytesMessage.getBodyLength());
 
       bytesMessage.readBytes(bb.getBuffer());
+      bb.setOffset((int) bytesMessage.getBodyLength());
 
       return bb;
     } else if (message instanceof MapMessage) {

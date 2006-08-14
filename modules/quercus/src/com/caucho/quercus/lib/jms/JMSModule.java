@@ -97,6 +97,9 @@ public class JMSModule extends AbstractQuercusModule
 
       _connectionFactory = 
         (ConnectionFactory) _context.lookup(factoryName.toString());
+
+      if (_connectionFactory == null)
+        log.warning("Couldn't find factory " + factoryName.toString());
     } catch (Exception e) {
       log.fine(e.toString());
     }
