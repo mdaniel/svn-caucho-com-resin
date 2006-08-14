@@ -9,6 +9,7 @@ com.caucho.quercus.lib.ErrorModule
 com.caucho.quercus.lib.ExifModule
 com.caucho.quercus.lib.file.FileModule
 com.caucho.quercus.lib.FunctionModule
+com.caucho.quercus.lib.gettext.GettextModule
 com.caucho.quercus.lib.HtmlModule
 com.caucho.quercus.lib.HttpModule
 com.caucho.quercus.lib.ImageModule
