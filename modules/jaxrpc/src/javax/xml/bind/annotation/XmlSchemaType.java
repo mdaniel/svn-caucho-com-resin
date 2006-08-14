@@ -28,11 +28,21 @@
 */
 
 package javax.xml.bind.annotation;
+import java.lang.annotation.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import static java.lang.annotation.ElementType.*;
 
-/** XXX */
-public interface XmlSchemaType {
+@Retention(value=RUNTIME)
+@Target(value={FIELD,METHOD,PACKAGE})
+public @interface XmlSchemaType {
 
-  /** XXX */
+  public String name();
+
+  public String namespace() default "http://www.w3.org/2001/XMLSchema";
+
+  public Class type()
+    default javax.xml.bind.annotation.XmlSchemaType.DEFAULT.class;
+
   public static final class DEFAULT {
     public DEFAULT()
     {

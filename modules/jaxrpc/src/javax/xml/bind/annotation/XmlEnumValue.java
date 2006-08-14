@@ -28,8 +28,13 @@
 */
 
 package javax.xml.bind.annotation;
+import java.lang.annotation.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import static java.lang.annotation.ElementType.*;
 
-/** XXX */
-public interface XmlEnumValue {
+@Retention(value=RUNTIME)
+@Target(value=FIELD)
+public @interface XmlEnumValue {
+  public String value();
 }
 

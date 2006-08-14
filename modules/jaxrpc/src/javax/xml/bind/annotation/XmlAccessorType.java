@@ -28,8 +28,16 @@
 */
 
 package javax.xml.bind.annotation;
+import java.lang.annotation.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import static java.lang.annotation.ElementType.*;
 
-/** XXX */
-public interface XmlAccessorType {
+@Inherited
+@Retention(value=RUNTIME)
+@Target(value={PACKAGE,TYPE})
+public @interface XmlAccessorType {
+
+  public XmlAccessType value() default XmlAccessType.PUBLIC_MEMBER;
+
 }
 

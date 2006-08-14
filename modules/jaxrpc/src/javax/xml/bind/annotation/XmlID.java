@@ -28,8 +28,12 @@
 */
 
 package javax.xml.bind.annotation;
+import java.lang.annotation.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import static java.lang.annotation.ElementType.*;
 
-/** XXX */
-public interface XmlID {
+@Retention(value=RUNTIME)
+@Target(value={FIELD,METHOD})
+public @interface XmlID {
 }
 

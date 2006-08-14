@@ -52,9 +52,22 @@ public abstract class AbstractUnmarshallerImpl implements Unmarshaller {
   private Schema _schema = null;
   private XMLReader _xmlreader = null;
   private XmlAdapter _adapter = null;
+  private UnmarshallerHandler _unmarshallerHandler = null;
+  private HashMap<Class,XmlAdapter> _adapters =
+    new HashMap<Class,XmlAdapter>();
 
   public AbstractUnmarshallerImpl()
   {
+  }
+
+  public UnmarshallerHandler getUnmarshallerHandler()
+  {
+    return _unmarshallerHandler;
+  }
+
+  public void setUnmarshallerHandler(UnmarshallerHandler u)
+  {
+    _unmarshallerHandler = u;
   }
 
   protected UnmarshalException createUnmarshalException(SAXException e)
@@ -62,10 +75,9 @@ public abstract class AbstractUnmarshallerImpl implements Unmarshaller {
     return new UnmarshalException(e);
   }
 
-  /** XXX */
   public <A extends XmlAdapter> A getAdapter(Class<A> type)
   {
-    throw new UnsupportedOperationException();
+    return (A)_adapters.get(type);
   }
 
   public AttachmentUnmarshaller getAttachmentUnmarshaller()
@@ -105,12 +117,12 @@ public abstract class AbstractUnmarshallerImpl implements Unmarshaller {
 
   public <A extends XmlAdapter> void setAdapter(Class<A> type, A adapter)
   {
-    throw new UnsupportedOperationException();
+    _adapters.put(type, adapter);
   }
 
   public void setAdapter(XmlAdapter adapter)
   {
-    _adapter = adapter;
+    setAdapter((Class)adapter.getClass(), adapter);
   }
 
   public void setAttachmentUnmarshaller(AttachmentUnmarshaller au)
@@ -144,96 +156,118 @@ public abstract class AbstractUnmarshallerImpl implements Unmarshaller {
     this.validating = validating;
   }
 
-  protected abstract Object unmarshal(XMLReader reader, InputSource source)
-    throws JAXBException;
-
-  /** XXX */
   public final Object unmarshal(File f) throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    FileInputStream fis = null;
+    try {
+      fis = new FileInputStream(f);
+      return unmarshal(fis);
+    }
+    catch (IOException e) {
+      throw new JAXBException(e);
+    }
+    finally {
+      try {
+        if (fis != null)
+          fis.close();
+      }
+      catch (IOException e) {
+        throw new JAXBException(e);
+      }
+    }
   }
 
-
-  /** XXX */
   public final Object unmarshal(InputSource source) throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException("subclasses must override this");
   }
-
-
-  /** XXX */
+  
   public final Object unmarshal(InputStream is) throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    try {
+      XMLInputFactory factory = XMLInputFactory.newInstance();
+      return unmarshal(factory.createXMLStreamReader(is));
+    }
+    catch (XMLStreamException e) {
+      throw new JAXBException(e);
+    }
   }
 
+  public final Object unmarshal(Reader reader) throws JAXBException
+  {
+    try {
+      XMLInputFactory factory = XMLInputFactory.newInstance();
+      return unmarshal(factory.createXMLStreamReader(reader));
+    }
+    catch (XMLStreamException e) {
+      throw new JAXBException(e);
+    }
+  }
 
-  /** XXX */
+  public Object unmarshal(Source source) throws JAXBException
+  {
+    try {
+      XMLInputFactory factory = XMLInputFactory.newInstance();
+      return unmarshal(factory.createXMLStreamReader(source));
+    }
+    catch (XMLStreamException e) {
+      throw new JAXBException(e);
+    }
+  }
+
   public <T> JAXBElement<T> unmarshal(Node node, Class<T> declaredType)
       throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException("subclasses must override this");
   }
 
-
-  /** XXX */
-  public final Object unmarshal(Reader reader) throws JAXBException
-  {
-    throw new UnsupportedOperationException();
-  }
-
-
-  /** XXX */
-  public Object unmarshal(Source source) throws JAXBException
-  {
-    throw new UnsupportedOperationException();
-  }
-
-
-  /** XXX */
   public <T> JAXBElement<T> unmarshal(Source node, Class<T> declaredType)
       throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    try {
+      XMLInputFactory factory = XMLInputFactory.newInstance();
+      return unmarshal(factory.createXMLStreamReader(node), declaredType);
+    }
+    catch (XMLStreamException e) {
+      throw new JAXBException(e);
+    }
   }
 
-
-  /** XXX */
   public final Object unmarshal(URL url) throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    try {
+      return unmarshal(url.openStream());
+    }
+    catch (IOException e) {
+      throw new JAXBException(e);
+    }
   }
 
-
-  /** XXX */
   public Object unmarshal(XMLEventReader reader) throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException("subclasses must override this");
   }
 
-
-  /** XXX */
   public <T> JAXBElement<T> unmarshal(XMLEventReader xmlEventReader,
+                                      Class<T> declaredType)
+    throws JAXBException
+  {
+    throw new UnsupportedOperationException("subclasses must override this");
+  }
+
+  public <T> JAXBElement<T> unmarshal(XMLStreamReader xmlStreamReader,
                                       Class<T> declaredType)
       throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException("subclasses must override this");
   }
 
-  /** XXX */
   public Object unmarshal(XMLStreamReader reader) throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException("subclasses must override this");
   }
 
-
-  /** XXX */
-  public <T> JAXBElement<T> unmarshal(XMLStreamReader xmlStreamReader,
-                                        Class<T> declaredType)
-      throws JAXBException
-  {
-    throw new UnsupportedOperationException();
-  }
-
+  protected abstract Object unmarshal(XMLReader reader, InputSource source)
+    throws JAXBException;
 }
 

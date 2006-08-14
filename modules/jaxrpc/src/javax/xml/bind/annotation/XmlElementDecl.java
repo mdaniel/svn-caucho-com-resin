@@ -28,11 +28,31 @@
 */
 
 package javax.xml.bind.annotation;
+import java.lang.annotation.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import static java.lang.annotation.ElementType.*;
 
-/** XXX */
-public interface XmlElementDecl {
+@Retention(value=RUNTIME)
+@Target(value=METHOD)
+public @interface XmlElementDecl {
 
-  /** XXX */
+  public String name();
+
+  public Class scope()
+    default javax.xml.bind.annotation.XmlElementDecl.GLOBAL.class;
+
+  public String namespace()
+    default "##default";
+
+  public String substitutionHeadNamespace()
+    default "##default";
+
+  public String substitutionHeadName()
+    default "";
+
+  public String defaultValue()
+    default "\u0000";
+
   public static final class GLOBAL {
     public GLOBAL()
     {

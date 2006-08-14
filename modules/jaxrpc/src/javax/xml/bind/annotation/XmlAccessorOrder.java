@@ -28,8 +28,16 @@
 */
 
 package javax.xml.bind.annotation;
+import java.lang.annotation.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import static java.lang.annotation.ElementType.*;
 
-/** XXX */
-public interface XmlAccessorOrder {
+@Inherited
+@Retention(value=RUNTIME)
+@Target(value={PACKAGE,TYPE})
+public @interface XmlAccessorOrder {
+
+  public XmlAccessOrder value() default XmlAccessOrder.UNDEFINED;
+
 }
 

@@ -28,8 +28,12 @@
 */
 
 package javax.xml.bind.annotation;
+import java.lang.annotation.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import static java.lang.annotation.ElementType.*;
 
-/** XXX */
+@Retention(value=RUNTIME)
+@Target(value=TYPE)
 public @interface XmlType {
 
   public String name() default "##default";
@@ -39,13 +43,10 @@ public @interface XmlType {
   public Class factoryClass()
     default javax.xml.bind.annotation.XmlType.DEFAULT.class;
 
-  /** XXX */
   public static final class DEFAULT {
     public DEFAULT()
     {
-      throw new UnsupportedOperationException();
     }
-
   }
 }
 

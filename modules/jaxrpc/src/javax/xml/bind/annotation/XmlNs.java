@@ -28,8 +28,17 @@
 */
 
 package javax.xml.bind.annotation;
+import java.lang.annotation.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import static java.lang.annotation.ElementType.*;
 
-/** XXX */
-public interface XmlNs {
+@Retention(value=RUNTIME)
+@Target(value=TYPE)
+public @interface XmlNs {
+
+  public String prefix();
+
+  public String namespaceURI();
+
 }
 

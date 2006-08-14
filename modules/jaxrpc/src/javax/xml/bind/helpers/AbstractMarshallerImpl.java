@@ -32,233 +32,203 @@ import javax.xml.stream.*;
 import org.w3c.dom.*;
 import java.io.*;
 import org.xml.sax.*;
+import java.util.*;
 import javax.xml.bind.attachment.*;
 import javax.xml.validation.*;
 import javax.xml.bind.annotation.adapters.*;
 import javax.xml.bind.*;
 import javax.xml.bind.Marshaller.*;
 
-/** XXX */
 public abstract class AbstractMarshallerImpl implements Marshaller {
+
+  private AttachmentMarshaller _attachmentMarshaller;
+  private String _encoding;
+  private ValidationEventHandler _validationEventHandler;
+  private Listener _listener;
+  private boolean _formattedOutput = false;
+  private boolean _fragment = false;
+  private String _noNSSchemaLocation;
+  private Schema _schema;
+  private String _schemaLocation;
+  private HashMap<String,Object> _properties =
+    new HashMap<String,Object>();
+  private HashMap<Class,XmlAdapter> _adapters =
+    new HashMap<Class,XmlAdapter>();
+
   public AbstractMarshallerImpl()
   {
-    throw new UnsupportedOperationException();
   }
 
-
-  /** XXX */
   public <A extends XmlAdapter> A getAdapter(Class<A> type)
   {
-    throw new UnsupportedOperationException();
+    return (A)_adapters.get(type);
   }
 
   public AttachmentMarshaller getAttachmentMarshaller()
   {
-    throw new UnsupportedOperationException();
+    return _attachmentMarshaller;
   }
 
-
-  /** XXX */
   protected String getEncoding()
   {
-    throw new UnsupportedOperationException();
+    return _encoding;
   }
 
-
-  /** XXX */
   public ValidationEventHandler getEventHandler() throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    return _validationEventHandler;
   }
 
-
-  /** XXX */
-  protected String getJavaEncoding(String encoding) throws UnsupportedEncodingException
+  protected String getJavaEncoding(String encoding)
+    throws UnsupportedEncodingException
   {
-    throw new UnsupportedOperationException();
+    return encoding;
   }
 
-
-  /** XXX */
   public Listener getListener()
   {
-    throw new UnsupportedOperationException();
+    return _listener;
   }
 
-
-  /** XXX */
   public Node getNode(Object obj) throws JAXBException
   {
     throw new UnsupportedOperationException();
   }
 
-
-  /** XXX */
   protected String getNoNSSchemaLocation()
   {
-    throw new UnsupportedOperationException();
+    return _noNSSchemaLocation;
   }
 
-
-  /** XXX */
-  public Object getProperty(String name) throws PropertyException
+  public Object getProperty(String name)
+    throws PropertyException
   {
-    throw new UnsupportedOperationException();
+    return _properties.get(name);
   }
 
-
-  /** XXX */
   public Schema getSchema()
   {
-    throw new UnsupportedOperationException();
+    return _schema;
   }
 
-
-  /** XXX */
   protected String getSchemaLocation()
   {
-    throw new UnsupportedOperationException();
+    return _schemaLocation;
   }
 
-
-  /** XXX */
   protected boolean isFormattedOutput()
   {
-    throw new UnsupportedOperationException();
+    return _formattedOutput;
   }
 
-
-  /** XXX */
   protected boolean isFragment()
   {
-    throw new UnsupportedOperationException();
+    return _fragment;
   }
 
-
-  /** XXX */
-  public final void marshal(Object obj, ContentHandler handler) throws JAXBException
+  public final void marshal(Object obj, ContentHandler handler)
+    throws JAXBException
   {
     throw new UnsupportedOperationException();
   }
 
-
-  /** XXX */
   public final void marshal(Object obj, Node node) throws JAXBException
   {
     throw new UnsupportedOperationException();
   }
 
-
-  /** XXX */
   public final void marshal(Object obj, OutputStream os) throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    try {
+      XMLOutputFactory factory = XMLOutputFactory.newInstance();
+      marshal(obj, factory.createXMLStreamWriter(os));
+    }
+    catch (XMLStreamException e) {
+      throw new JAXBException(e);
+    }
   }
 
-
-  /** XXX */
   public final void marshal(Object obj, Writer w) throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    try {
+      XMLOutputFactory factory = XMLOutputFactory.newInstance();
+      marshal(obj, factory.createXMLStreamWriter(w));
+    }
+    catch (XMLStreamException e) {
+      throw new JAXBException(e);
+    }
   }
 
-
-  /** XXX */
-  public void marshal(Object obj, XMLEventWriter writer) throws JAXBException
-  {
-    throw new UnsupportedOperationException();
-  }
-
-
-  /** XXX */
-  public void marshal(Object obj, XMLStreamWriter writer) throws JAXBException
-  {
-    throw new UnsupportedOperationException();
-  }
-
-
-  /** XXX */
   public <A extends XmlAdapter> void setAdapter(Class<A> type, A adapter)
   {
-    throw new UnsupportedOperationException();
+    _adapters.put(type, adapter);
   }
 
-
-  /** XXX */
   public void setAdapter(XmlAdapter adapter)
   {
-    throw new UnsupportedOperationException();
+    _adapters.put((Class)adapter.getClass(), adapter);
   }
 
-
-  /** XXX */
   public void setAttachmentMarshaller(AttachmentMarshaller am)
   {
-    throw new UnsupportedOperationException();
+    _attachmentMarshaller = am;
   }
 
-
-  /** XXX */
   protected void setEncoding(String encoding)
   {
-    throw new UnsupportedOperationException();
+    _encoding = encoding;
   }
 
-
-  /** XXX */
-  public void setEventHandler(ValidationEventHandler handler) throws JAXBException
+  public void setEventHandler(ValidationEventHandler handler)
+    throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    _validationEventHandler = handler;
   }
 
-
-  /** XXX */
   protected void setFormattedOutput(boolean v)
   {
-    throw new UnsupportedOperationException();
+    _formattedOutput = v;
   }
 
-
-  /** XXX */
   protected void setFragment(boolean v)
   {
-    throw new UnsupportedOperationException();
+    _fragment = v;
   }
 
-
-  /** XXX */
   public void setListener(Listener listener)
   {
-    throw new UnsupportedOperationException();
+    _listener = listener;
   }
 
-
-  /** XXX */
   protected void setNoNSSchemaLocation(String location)
   {
-    throw new UnsupportedOperationException();
+    _noNSSchemaLocation = location;
   }
 
-
-  /** XXX */
-  public void setProperty(String name, Object value) throws PropertyException
+  public void setProperty(String name, Object value)
+    throws PropertyException
   {
-    throw new UnsupportedOperationException();
+    _properties.put(name, value);
   }
 
-
-  /** XXX */
   public void setSchema(Schema schema)
   {
-    throw new UnsupportedOperationException();
+    _schema = schema;
   }
 
-
-  /** XXX */
   protected void setSchemaLocation(String location)
   {
-    throw new UnsupportedOperationException();
+    _schemaLocation = location;
   }
 
+  public void marshal(Object obj, XMLEventWriter writer) throws JAXBException
+  {
+    throw new UnsupportedOperationException("subclasses must override this");
+  }
+
+  public void marshal(Object obj, XMLStreamWriter writer) throws JAXBException
+  {
+    throw new UnsupportedOperationException("subclasses must override this");
+  }
 }
 

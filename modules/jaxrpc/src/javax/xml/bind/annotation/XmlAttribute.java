@@ -28,8 +28,15 @@
 */
 
 package javax.xml.bind.annotation;
+import java.lang.annotation.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import static java.lang.annotation.ElementType.*;
 
-/** XXX */
-public interface XmlAttribute {
+@Retention(value=RUNTIME)
+@Target(value={FIELD,METHOD})
+public @interface XmlAttribute {
+  public String name() default "##default";
+  public boolean required() default false;
+  public String namespace() default "##default";
 }
 

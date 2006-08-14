@@ -28,8 +28,10 @@
 */
 
 package javax.xml.bind.annotation;
+import java.lang.annotation.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import static java.lang.annotation.ElementType.*;
 
-/** XXX */
 public enum XmlNsForm {
 
     QUALIFIED, UNQUALIFIED, UNSET;

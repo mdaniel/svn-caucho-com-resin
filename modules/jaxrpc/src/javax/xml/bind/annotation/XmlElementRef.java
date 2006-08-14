@@ -28,11 +28,21 @@
 */
 
 package javax.xml.bind.annotation;
+import java.lang.annotation.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import static java.lang.annotation.ElementType.*;
 
-/** XXX */
-public interface XmlElementRef {
+@Retention(value=RUNTIME)
+@Target(value={FIELD,METHOD})
+public @interface XmlElementRef {
 
-  /** XXX */
+  public Class type()
+    default javax.xml.bind.annotation.XmlElementRef.DEFAULT.class;
+
+  public String namespace() default "";
+  
+  public String name() default "##default";
+
   public static final class DEFAULT {
     public DEFAULT()
     {

@@ -28,8 +28,21 @@
 */
 
 package javax.xml.bind.annotation;
+import java.lang.annotation.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import static java.lang.annotation.ElementType.*;
 
-/** XXX */
-public interface XmlSchema {
+@Retention(value=RUNTIME)
+@Target(value=PACKAGE)
+public @interface XmlSchema {
+
+  public XmlNs[] xmlns() default { };
+
+  public String namespace() default "";
+
+  public XmlNsForm elementFormDefault() default XmlNsForm.UNSET;
+
+  public XmlNsForm attributeFormDefault() default XmlNsForm.UNSET;
+
 }
 

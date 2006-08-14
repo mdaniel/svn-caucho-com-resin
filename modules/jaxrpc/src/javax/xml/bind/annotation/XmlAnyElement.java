@@ -28,8 +28,18 @@
 */
 
 package javax.xml.bind.annotation;
+import java.lang.annotation.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import static java.lang.annotation.ElementType.*;
 
-/** XXX */
-public interface XmlAnyElement {
+@Retention(value=RUNTIME)
+@Target(value={FIELD,METHOD})
+public @interface XmlAnyElement {
+
+  public boolean lax() default false;
+
+  public Class<? extends DomHandler> value()
+    default javax.xml.bind.annotation.W3CDomHandler.class;
+
 }
 
