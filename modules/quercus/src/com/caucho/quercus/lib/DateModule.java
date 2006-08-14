@@ -29,23 +29,17 @@
 
 package com.caucho.quercus.lib;
 
-import java.util.TimeZone;
-import java.util.Date;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
-import com.caucho.util.QDate;
-import com.caucho.util.CharBuffer;
-
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
+import com.caucho.util.Alarm;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.util.QDate;
 
-import com.caucho.quercus.env.*;
+import java.util.TimeZone;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Date functions.
@@ -230,7 +224,7 @@ public class DateModule extends AbstractQuercusModule {
   /**
    * Returns the formatted date.
    */
-  public long gmmktime(int hour,
+  public long gmmktime(@Optional("-1") int hour,
 		       @Optional("-1") int minute,
 		       @Optional("-1") int second,
 		       @Optional("-1") int month,

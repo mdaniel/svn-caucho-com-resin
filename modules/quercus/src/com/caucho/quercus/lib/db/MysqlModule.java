@@ -29,19 +29,18 @@
 
 package com.caucho.quercus.lib.db;
 
-import java.sql.Statement;
-import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import com.caucho.quercus.env.*;
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.module.NotNull;
+import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.ReturnNullAsFalse;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.quercus.env.*;
-import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.NotNull;
-import com.caucho.quercus.module.ReturnNullAsFalse;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 /**
@@ -716,6 +715,14 @@ public class MysqlModule extends AbstractQuercusModule {
       return BooleanValue.FALSE;
 
     return result.num_rows();
+  }
+
+  /**
+   * Undocumented alias for {#link #mysql_num_rows}.
+   */
+  public Value mysql_numrows(Env env, @NotNull MysqliResult result)
+  {
+    return mysql_num_rows(env, result);
   }
 
   /**

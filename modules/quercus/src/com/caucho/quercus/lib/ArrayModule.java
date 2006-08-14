@@ -439,6 +439,16 @@ public class ArrayModule
   }
 
   /**
+   * Undocumented alias for {@link #array_key_exists}.
+   */
+  public static boolean key_exists(Env env,
+                                   @ReadOnly Value key,
+                                   @ReadOnly Value searchArray)
+  {
+    return array_key_exists(env, key, searchArray);
+  }
+
+  /**
    * Returns an array of the keys in the given array
    *
    * @param array the array to obtain the keys for

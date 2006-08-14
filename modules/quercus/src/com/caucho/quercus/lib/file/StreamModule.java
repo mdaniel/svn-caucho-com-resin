@@ -362,6 +362,19 @@ public class StreamModule extends AbstractQuercusModule {
     return stream_wrapper_register(env, protocol, className);
   }
 
+  public static boolean stream_set_timeout(Env env,
+                                           @NotNull Value stream,
+                                           int seconds,
+                                           @Optional("-1") int milliseconds)
+  {
+    if (stream == null)
+      return false;
+
+    env.stub("stream_set_timeout");
+
+    return true;
+  }
+
   /**
    * Sets the write buffer.
    */

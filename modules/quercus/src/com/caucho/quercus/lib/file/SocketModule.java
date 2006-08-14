@@ -29,41 +29,23 @@
 
 package com.caucho.quercus.lib.file;
 
-import java.io.IOException;
-
-import java.net.*;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Arrays;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.util.L10N;
-
-import com.caucho.quercus.QuercusModuleException;
-
-import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.Optional;
-
 import com.caucho.quercus.env.*;
-
-import com.caucho.quercus.resources.StreamResource;
-import com.caucho.quercus.lib.file.DirectoryValue;
-import com.caucho.quercus.lib.string.StringModule;
-import com.caucho.quercus.lib.file.StreamModule;
-
+import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.NotNull;
+import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.ReturnNullAsFalse;
-
-import com.caucho.util.Alarm;
-
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.ReadStream;
+import com.caucho.quercus.resources.StreamResource;
+import com.caucho.util.L10N;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.TempCharBuffer;
-import com.caucho.vfs.Path;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Information and actions for about sockets
@@ -359,6 +341,14 @@ public class SocketModule extends AbstractQuercusModule {
       if (tempBuffer != null)
         TempBuffer.free(tempBuffer);
     }
+  }
+
+  public static boolean socket_set_timeout(Env env,
+                                           @NotNull Value stream,
+                                           int seconds,
+                                           @Optional("-1") int milliseconds)
+  {
+    return StreamModule.stream_set_timeout(env, stream, seconds, milliseconds);
   }
 
   public static Value socket_write(Env env, @NotNull SocketReadWrite socket,
