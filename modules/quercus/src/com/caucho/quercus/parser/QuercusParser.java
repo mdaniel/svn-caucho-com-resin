@@ -2742,8 +2742,19 @@ public class QuercusParser {
 	token = parseToken();
 
 	if (token == '=') {
-	  return new NotExpr(getLocation(), expr.createAssign(this,
-                                                              parseConditionalExpr()));
+      token = parseToken();
+
+      // php/03i6
+      if (token == '&')
+        return new NotExpr(getLocation(),
+            expr.createAssignRef(this, parseBitOrExpr()));
+
+      else {
+        _peekToken = token;
+	    return new NotExpr(getLocation(),
+            expr.createAssign(this, parseConditionalExpr()));
+      }
+
 	}
 	else {
 	  _peekToken = token;
