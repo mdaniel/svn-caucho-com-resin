@@ -245,10 +245,10 @@ public class QueryParser {
       return parseDelete();
 
     _token = token;
-    return parseSelect();
+    return parseSelect(false);
   }
 
-  private SelectQuery parseSelect()
+  private SelectQuery parseSelect(boolean innerSelect)
     throws QueryParseException
   {
     int oldParseIndex = _parseIndex;
@@ -420,7 +420,7 @@ public class QueryParser {
     }
 
     token = peekToken();
-    if (token > 0)
+    if ((! innerSelect) && (token > 0))
       throw error(L.l("expected end of query at {0}", tokenName(token)));
 
     if (! query.setArgList(_argList.toArray(new ArgExpr[_argList.size()])))
@@ -724,7 +724,7 @@ public class QueryParser {
     throws QueryParseException
   {
     if (peekToken() == SELECT) {
-      SelectQuery select = parseSelect();
+      SelectQuery select = parseSelect(true);
 
       return new SubSelectExpr(select);
     }
@@ -823,7 +823,10 @@ public class QueryParser {
       isNot = true;
       token = peekToken();
 
-      if (token != BETWEEN && token != LIKE && token != IN)
+      if (token != BETWEEN &&
+          token != LIKE &&
+          token != MEMBER &&
+          token != IN)
         throw error(L.l("'NOT' is not expected here."));
     }
 
@@ -900,7 +903,12 @@ public class QueryParser {
       if (! (expr instanceof PathExpr))
         throw error(L.l("MEMBER OF requires an entity-valued item."));
 
-      if (collection instanceof OneToManyExpr) {
+      // ManyToMany is implemented as a
+      // ManyToOne[embeddeding OneToMany]
+      if ((collection instanceof ManyToOneExpr) &&
+          (((ManyToOneExpr) collection).getParent() instanceof OneToManyExpr)) {
+      }
+      else if (collection instanceof OneToManyExpr) {
       }
       else if (collection instanceof CollectionIdExpr) {
       }
@@ -1093,23 +1101,38 @@ public class QueryParser {
 
         throw error(L.l("'{0}' is an unknown table or column", name));
       }
-      else if (name.equalsIgnoreCase("exists")) {
-        scanToken();
+      else {
 
-        if (peekToken() != SELECT && peekToken() != FROM)
-          throw error(L.l("EXISTS requires '(SELECT'"));
+        name = name.toLowerCase();
 
-        SelectQuery select = parseSelect();
+        // EXISTS | ALL | ANY | SOME
+        if (name.equals("exists") ||
+            name.equals("all") ||
+            name.equals("any") ||
+            name.equals("some")) {
 
-        if (peekToken() != ')')
-          throw error(L.l("EXISTS requires ')'"));
+          scanToken();
 
-        scanToken();
+          if (peekToken() != SELECT && peekToken() != FROM)
+            throw error(L.l(name.toUpperCase() + " requires '(SELECT'"));
 
-        return new ExistsExpr(select);
+          SelectQuery select = parseSelect(true);
+
+          if (peekToken() != ')')
+            throw error(L.l(name.toUpperCase() + " requires ')'"));
+
+          scanToken();
+
+          if (name.equals("exists"))
+            return new ExistsExpr(select);
+          else if (name.equals("all"))
+            return new AllExpr(select);
+          else // SOME is a synonymous with ANY
+            return new AnyExpr(select);
+        }
+        else
+          return parseFunction(name);
       }
-      else
-        return parseFunction(name);
 
     case FALSE:
       return new LiteralExpr(_lexeme, boolean.class);
@@ -1253,7 +1276,7 @@ public class QueryParser {
     while (peekToken() != ')') {
       AmberExpr arg = parseExpr();
 
-      if (id.toLowerCase().equals("object")) {
+      if (id.equalsIgnoreCase("object")) {
         if (arg instanceof PathExpr) {
           PathExpr pathExpr = (PathExpr) arg;
 

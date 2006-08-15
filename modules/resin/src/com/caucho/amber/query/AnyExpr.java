@@ -31,12 +31,12 @@ package com.caucho.amber.query;
 import com.caucho.util.CharBuffer;
 
 /**
- * Represents an exists query expression
+ * Represents an ANY or SOME (synonymous) query expression
  */
-public class ExistsExpr extends AbstractAmberExpr {
+public class AnyExpr extends AbstractAmberExpr {
   private SelectQuery _query;
 
-  ExistsExpr(SelectQuery query)
+  AnyExpr(SelectQuery query)
   {
     _query = query;
   }
@@ -70,7 +70,7 @@ public class ExistsExpr extends AbstractAmberExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
-    cb.append("EXISTS(");
+    cb.append("ANY(");
     cb.append(_query.generateLoadSQL());
     cb.append(')');
   }

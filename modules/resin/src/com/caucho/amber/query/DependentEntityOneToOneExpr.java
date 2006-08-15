@@ -49,7 +49,7 @@ public class DependentEntityOneToOneExpr extends AbstractPathExpr {
    * Creates a new unbound id expression.
    */
   public DependentEntityOneToOneExpr(PathExpr parent,
-				     LinkColumns linkColumns)
+                                     LinkColumns linkColumns)
   {
     _parent = parent;
     _linkColumns = linkColumns;
@@ -99,22 +99,28 @@ public class DependentEntityOneToOneExpr extends AbstractPathExpr {
 
       return _childFromItem;
     }
-    
+
     _fromItem = _parent.bindSubPath(parser);
 
-    if (_fromItem != null)
-      _childFromItem = _fromItem.getQuery().createFromItem(_linkColumns.getSourceTable(),
-							   parser.createTableName());
-    else
-      _childFromItem = parser.getSelectQuery().createFromItem(_linkColumns.getSourceTable(),
-							      parser.createTableName());
+    // added: jpa/0ti0
+    _childFromItem = parser.getSelectQuery().createFromItem(_linkColumns.getSourceTable(),
+                                                            parser.createTableName());
+
+    // commented out: jpa/0ti0
+    // if (_fromItem != null) {
+    //   _childFromItem = _fromItem.getQuery().createFromItem(_linkColumns.getSourceTable(),
+    //                                                         parser.createTableName());
+    // } else {
+    //   _childFromItem = parser.getSelectQuery().createFromItem(_linkColumns.getSourceTable(),
+    //                                                           parser.createTableName());
+    // }
 
     JoinExpr join = new ManyToOneJoinExpr(_linkColumns,
-					  _childFromItem,
-					  _fromItem);
+                                          _childFromItem,
+                                          _fromItem);
 
     _childFromItem.setJoinExpr(join);
-    
+
     return _childFromItem;
   }
 
@@ -124,25 +130,25 @@ public class DependentEntityOneToOneExpr extends AbstractPathExpr {
   public boolean usesFrom(FromItem from, int type, boolean isNot)
   {
     return (_childFromItem == from && type == IS_INNER_JOIN ||
-	    _fromItem == from ||
-	    _parent.usesFrom(from, type));
+            _fromItem == from ||
+            _parent.usesFrom(from, type));
   }
 
   /**
    * Returns the table.
    */
   /*
-  public Table getTable()
-  {
+    public Table getTable()
+    {
     if (_childFromItem != null)
-      return _childFromItem.getTable();
+    return _childFromItem.getTable();
     else if (_fromItem != null)
-      return _fromItem.getTable();
+    return _fromItem.getTable();
     else
-      return _parent.getTable();
-  }
+    return _parent.getTable();
+    }
   */
-  
+
   /**
    * Generates the where expression.
    */
@@ -174,6 +180,6 @@ public class DependentEntityOneToOneExpr extends AbstractPathExpr {
     DependentEntityOneToOneExpr oneToOne = (DependentEntityOneToOneExpr) o;
 
     return (_parent.equals(oneToOne._parent) &&
-	    _linkColumns.equals(oneToOne._linkColumns));
+            _linkColumns.equals(oneToOne._linkColumns));
   }
 }

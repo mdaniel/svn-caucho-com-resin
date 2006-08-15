@@ -99,7 +99,7 @@ class FunExpr extends AbstractAmberExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
-    if (_id.toLowerCase().equals("locate")) {
+    if (_id.equalsIgnoreCase("locate")) {
 
       // Translate to => POSITION('word' in SUBSTRING(data,i,LENGTH(data)))+(i-1)
 

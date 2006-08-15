@@ -46,6 +46,7 @@ public class MemberExpr extends AbstractAmberExpr {
   {
     _itemExpr = itemExpr;
     _collectionExpr = collectionExpr;
+    _isNot = isNot;
   }
 
   static AmberExpr create(QueryParser parser,
@@ -83,6 +84,14 @@ public class MemberExpr extends AbstractAmberExpr {
   }
 
   /**
+   * Returns true for a boolean expression.
+   */
+  public boolean isBoolean()
+  {
+    return true;
+  }
+
+  /**
    * Returns true if the expression uses the from item.
    */
   public boolean usesFrom(FromItem from, int type, boolean isNot)
@@ -107,18 +116,44 @@ public class MemberExpr extends AbstractAmberExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
-    if (_collectionExpr instanceof OneToManyExpr) {
-      OneToManyExpr oneToMany = (OneToManyExpr) _collectionExpr;
+    OneToManyExpr oneToMany = null;
 
-      LinkColumns join = oneToMany.getLinkColumns();
+    // ManyToMany is implemented as a
+    // ManyToOne[embeddeding OneToMany]
+    if (_collectionExpr instanceof ManyToOneExpr) {
+      PathExpr expr = ((ManyToOneExpr) _collectionExpr).getParent();
+      if (expr instanceof OneToManyExpr)
+        oneToMany = (OneToManyExpr) expr;
 
-      cb.append("EXISTS(SELECT *");
-      Table table = join.getSourceTable();
-      cb.append(" FROM " + table.getName() + " caucho");
-      cb.append(')');
+    } else if (_collectionExpr instanceof OneToManyExpr) {
+      oneToMany = (OneToManyExpr) _collectionExpr;
     }
     else
       throw new UnsupportedOperationException();
+
+    LinkColumns join = oneToMany.getLinkColumns();
+
+    if (_isNot)
+      cb.append("NOT ");
+
+    cb.append("EXISTS (SELECT *");
+    Table table = join.getSourceTable();
+    cb.append(" FROM " + table.getName() + " caucho");
+    cb.append(" WHERE ");
+
+    String targetTable = oneToMany.getParent().getChildFromItem().getName();
+
+    cb.append(join.generateJoin("caucho", targetTable));
+
+    if (_collectionExpr instanceof ManyToOneExpr) {
+      join = ((ManyToOneExpr) _collectionExpr).getLinkColumns();
+
+      String where = join.generateJoin("caucho", _itemExpr.getChildFromItem().getName());
+
+      cb.append(" AND " + where);
+    }
+
+    cb.append(')');
   }
 
   /**
