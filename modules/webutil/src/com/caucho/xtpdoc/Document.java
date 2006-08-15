@@ -95,13 +95,19 @@ public class Document {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    out.writeStartDocument("UTF-8", "1.0");
+    out.writeStartDocument("1.0", "UTF-8");
+    /*
+    out.writeDTD("html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" " +
+                 "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"");*/
+
     out.writeStartElement("html");
+    // XXX: workaround until writeNamespace gets fixed
+    out.writeAttribute("xmlns", "http://www.w3.org/1999/xhtml");
 
     _header.writeHtml(out);
     _body.writeHtml(out);
 
-    out.writeEndElement();
+    out.writeEndElement(); // html
   }
 
   public void writeLaTeXTop(PrintWriter out)

@@ -167,10 +167,14 @@ public class NavigationItem {
     }
 
     out.writeStartElement("b");
-    out.writeStartElement("a");
-    out.writeAttribute("href", path + _link);
-    out.writeCharacters(_title);
-    out.writeEndElement(); // a
+
+    if (_link != null) {
+      out.writeStartElement("a");
+      out.writeAttribute("href", path + _link);
+      out.writeCharacters(_title);
+      out.writeEndElement(); // a
+    }
+
     out.writeEndElement(); // b
 
     out.writeEndElement(); // dt
@@ -185,19 +189,21 @@ public class NavigationItem {
       out.writeEndElement(); // p
     }
 
-    int p = _link.lastIndexOf('/');
-    String tail;
-    if (p >= 0)
-      tail = path + _link.substring(0, p + 1);
-    else
-      tail = path;
+    if (_link != null) {
+      int p = _link.lastIndexOf('/');
+      String tail;
+      if (p >= 0)
+        tail = path + _link.substring(0, p + 1);
+      else
+        tail = path;
 
-    if (_child != null)
-      _child.writeHtml(out, tail);
-      
-    for (NavigationItem item : _items)
-      item.writeHtml(out, tail);
-    
+      if (_child != null)
+        _child.writeHtml(out, tail);
+
+      for (NavigationItem item : _items)
+        item.writeHtml(out, tail);
+    }
+
     out.writeEndElement(); // dd
 
     if (_child != null || _items.size() > 0)
