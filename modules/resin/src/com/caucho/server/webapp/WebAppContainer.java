@@ -53,7 +53,7 @@ import com.caucho.server.e_app.EarSingleDeployGenerator;
 import com.caucho.server.host.Host;
 import com.caucho.server.log.AbstractAccessLog;
 import com.caucho.server.log.AccessLog;
-import com.caucho.server.resin.ServletServer;
+import com.caucho.server.cluster.Server;
 import com.caucho.server.session.SessionManager;
 import com.caucho.util.CauchoSystem;
 import com.caucho.util.L10N;
@@ -72,13 +72,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Resin's application implementation.
+ * Resin's webApp implementation.
  */
-public class ApplicationContainer
+public class WebAppContainer
   implements DispatchBuilder, ClassLoaderListener, EnvironmentListener
 {
-  static final L10N L = new L10N(Application.class);
-  static final Logger log = Log.open(ApplicationContainer.class);
+  static final L10N L = new L10N(WebApp.class);
+  static final Logger log = Log.open(WebAppContainer.class);
 
   // The owning dispatch server
   private DispatchServer _dispatchServer;
@@ -95,7 +95,7 @@ public class ApplicationContainer
   // dispatch mapping
   private RewriteInvocation _rewriteInvocation;
 
-  // List of default ear application configurations
+  // List of default ear webApp configurations
   private ArrayList<EarConfig> _earDefaultList
     = new ArrayList<EarConfig>();
 
@@ -108,7 +108,7 @@ public class ApplicationContainer
 
   private boolean _hasWarGenerator;
 
-  // LRU cache for the application lookup
+  // LRU cache for the webApp lookup
   private LruCache<String,WebAppController> _uriToAppCache
     = new LruCache<String,WebAppController>(8192);
 
@@ -118,7 +118,7 @@ public class ApplicationContainer
     = new LruCache<String,Invocation>(4096);
   */
 
-  // List of default application configurations
+  // List of default webApp configurations
   private ArrayList<WebAppConfig> _webAppDefaultList
     = new ArrayList<WebAppConfig>();
 
@@ -142,24 +142,24 @@ public class ApplicationContainer
   private final Lifecycle _lifecycle = new Lifecycle();
 
   /**
-   * Creates the application with its environment loader.
+   * Creates the webApp with its environment loader.
    */
-  public ApplicationContainer()
+  public WebAppContainer()
   {
     this((EnvironmentClassLoader) Thread.currentThread().getContextClassLoader());
   }
 
   /**
-   * Creates the application with its environment loader.
+   * Creates the webApp with its environment loader.
    */
-  public ApplicationContainer(EnvironmentClassLoader loader)
+  public WebAppContainer(EnvironmentClassLoader loader)
   {
     _rootDir = Vfs.lookup();
     _docDir = Vfs.lookup();
 
     _classLoader = loader;
     _errorPageManager = new ErrorPageManager();
-    _errorPageManager.setApplicationContainer(this);
+    _errorPageManager.setWebAppContainer(this);
 
     /*
     Environment.addEnvironmentListener(this, loader);
@@ -309,9 +309,9 @@ public class ApplicationContainer
   }
 
   /**
-   * Returns the application generator
+   * Returns the webApp generator
    */
-  public DeployContainer<WebAppController> getApplicationGenerator()
+  public DeployContainer<WebAppController> getWebAppGenerator()
   {
     return _appDeploy;
   }
@@ -345,7 +345,7 @@ public class ApplicationContainer
   }
 
   /**
-   * Adds an application.
+   * Adds an webApp.
    */
   public void addWebApp(WebAppConfig config)
     throws Exception
@@ -372,7 +372,7 @@ public class ApplicationContainer
   }
 
   /**
-   * Removes an application.
+   * Removes an webApp.
    */
   void removeWebApp(WebAppController entry)
   {
@@ -425,11 +425,9 @@ public class ApplicationContainer
   /**
    * Sets the war-expansion
    */
-  public void addWarDeploy(WebAppExpandDeployGenerator deploy)
+  public void addWarDeploy(WebAppExpandDeployGenerator webAppDeploy)
     throws ConfigException
   {
-    WebAppExpandDeployGenerator webAppDeploy = (WebAppExpandDeployGenerator) deploy;
-
     webAppDeploy.setContainer(this);
 
     if (! _hasWarGenerator) {
@@ -437,7 +435,7 @@ public class ApplicationContainer
       _warGenerator = webAppDeploy;
     }
 
-    _appDeploy.add(deploy);
+    _appDeploy.add(webAppDeploy);
   }
 
   /**
@@ -480,7 +478,7 @@ public class ApplicationContainer
   }
 
   /**
-   * Adds an enterprise application.
+   * Adds an enterprise webApp.
    */
   public void addApplication(EarConfig config)
   {
@@ -701,9 +699,9 @@ public class ApplicationContainer
       FilterChain chain = new ErrorFilterChain(code);
       invocation.setFilterChain(chain);
 
-      if (_dispatchServer instanceof ServletServer) {
-	ServletServer servletServer = (ServletServer) _dispatchServer;
-	invocation.setApplication(servletServer.getErrorApplication());
+      if (_dispatchServer instanceof Server) {
+	Server server = (Server) _dispatchServer;
+	invocation.setWebApp(server.getErrorWebApp());
       }
 
       invocation.setDependency(AlwaysModified.create());
@@ -715,14 +713,14 @@ public class ApplicationContainer
 						 invocation);
 
       if (chain != null) {
-	ServletServer servletServer = (ServletServer) _dispatchServer;
-	invocation.setApplication(servletServer.getErrorApplication());
+	Server server = (Server) _dispatchServer;
+	invocation.setWebApp(server.getErrorWebApp());
 	invocation.setFilterChain(chain);
 	return;
       }
     }
 
-    Application app = getApplication(invocation, true);
+    WebApp app = getWebApp(invocation, true);
 
     if (app != null)
       app.buildInvocation(invocation);
@@ -767,7 +765,7 @@ public class ApplicationContainer
       RequestDispatcher disp = new RequestDispatcherImpl(includeInvocation,
 							 forwardInvocation,
 							 errorInvocation,
-							 getApplication(includeInvocation, false));
+							 getWebApp(includeInvocation, false));
 
       return disp;
     } catch (Exception e) {
@@ -783,7 +781,7 @@ public class ApplicationContainer
   public void buildIncludeInvocation(Invocation invocation)
     throws ServletException
   {
-    Application app = buildSubInvocation(invocation);
+    WebApp app = buildSubInvocation(invocation);
 
     if (app != null)
       app.buildIncludeInvocation(invocation);
@@ -795,7 +793,7 @@ public class ApplicationContainer
   public void buildForwardInvocation(Invocation invocation)
     throws ServletException
   {
-    Application app = buildSubInvocation(invocation);
+    WebApp app = buildSubInvocation(invocation);
 
     if (app != null)
       app.buildForwardInvocation(invocation);
@@ -807,7 +805,7 @@ public class ApplicationContainer
   public void buildErrorInvocation(Invocation invocation)
     throws ServletException
   {
-    Application app = buildSubInvocation(invocation);
+    WebApp app = buildSubInvocation(invocation);
 
     if (app != null)
       app.buildErrorInvocation(invocation);
@@ -819,16 +817,16 @@ public class ApplicationContainer
   public void buildLoginInvocation(Invocation invocation)
     throws ServletException
   {
-   Application app = buildSubInvocation(invocation);
+   WebApp app = buildSubInvocation(invocation);
 
     if (app != null)
       app.buildErrorInvocation(invocation);
   }
 
   /**
-   * Creates a sub invocation, handing unmapped URLs and stopped applications.
+   * Creates a sub invocation, handing unmapped URLs and stopped webApps.
    */
-  private Application buildSubInvocation(Invocation invocation)
+  private WebApp buildSubInvocation(Invocation invocation)
   {
     if (! _lifecycle.waitForActive(_startWaitTime)) {
       UnavailableException e;
@@ -853,7 +851,7 @@ public class ApplicationContainer
       return null;
     }
 
-    Application app = appController.subrequest();
+    WebApp app = appController.subrequest();
 
     if (app == null) {
       UnavailableException e;
@@ -869,9 +867,9 @@ public class ApplicationContainer
   }
 
   /**
-   * Returns the application for the current request.
+   * Returns the webApp for the current request.
    */
-  private Application getApplication(Invocation invocation,
+  private WebApp getWebApp(Invocation invocation,
 				     boolean enableRedeploy)
     throws ServletException
   {
@@ -879,7 +877,7 @@ public class ApplicationContainer
       WebAppController controller = getWebAppController(invocation);
 
       if (controller != null) {
-        Application app;
+        WebApp app;
 
         if (enableRedeploy)
           app = controller.request();
@@ -890,7 +888,7 @@ public class ApplicationContainer
 	  return null;
 	}
 
-        invocation.setApplication(app);
+        invocation.setWebApp(app);
 
         return app;
       }
@@ -903,7 +901,7 @@ public class ApplicationContainer
   }
 
   /**
-   * Returns the application controller for the current request.  Side effect
+   * Returns the webApp controller for the current request.  Side effect
    * of filling in the invocation's context path and context uri.
    *
    * @param invocation the request's invocation
@@ -932,7 +930,7 @@ public class ApplicationContainer
   /**
    * Creates the invocation.
    */
-  public Application findApplicationByURI(String uri)
+  public WebApp findWebAppByURI(String uri)
     throws Exception
   {
     WebAppController controller = findByURI(uri);
@@ -946,7 +944,7 @@ public class ApplicationContainer
   /**
    * Creates the invocation.
    */
-  public Application findSubApplicationByURI(String uri)
+  public WebApp findSubWebAppByURI(String uri)
     throws Exception
   {
     WebAppController controller = findByURI(uri);
@@ -1003,15 +1001,15 @@ public class ApplicationContainer
   }
 
   /**
-   * Returns a list of the applications.
+   * Returns a list of the webApps.
    */
-  public ArrayList<WebAppController> getApplicationList()
+  public ArrayList<WebAppController> getWebAppList()
   {
     return _appDeploy.getControllers();
   }
 
   /**
-   * Returns a list of the applications.
+   * Returns a list of the webApps.
    */
   public ArrayList<EarDeployController> getEntAppList()
   {
@@ -1019,7 +1017,7 @@ public class ApplicationContainer
   }
 
   /**
-   * Returns true if the application container has been closed.
+   * Returns true if the webApp container has been closed.
    */
   public final boolean isDestroyed()
   {
@@ -1027,7 +1025,7 @@ public class ApplicationContainer
   }
 
   /**
-   * Returns true if the application container is active
+   * Returns true if the webApp container is active
    */
   public final boolean isActive()
   {

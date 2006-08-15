@@ -55,7 +55,7 @@ import com.caucho.loader.DynamicClassLoader;
 
 import com.caucho.make.PersistentDependency;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;
@@ -111,7 +111,7 @@ public class JspManager extends PageManager {
   {
     if (_isLoadTldOnInit) {
       try {
-	Application app = getApplication();
+	WebApp app = getWebApp();
 	
 	TldManager tld = TldManager.create(new AppResourceManager(app), app);
 
@@ -197,10 +197,10 @@ public class JspManager extends PageManager {
 	       boolean isGenerated)
     throws Exception
   {
-    Application app = getApplication();
+    WebApp app = getWebApp();
     JspCompiler compiler = new JspCompiler();
 
-    compiler.setApplication(_application);
+    compiler.setWebApp(_webApp);
     compiler.setXml(_isXml);
 
     Page page = null;
@@ -379,7 +379,7 @@ public class JspManager extends PageManager {
   private Page loadPage(Page page, LineMap lineMap)
     throws Exception
   {
-    page.init(_application.getAppDir());
+    page.init(_webApp.getAppDir());
 
     /*
     ServletConfig config = null;
@@ -388,11 +388,11 @@ public class JspManager extends PageManager {
       config = (ServletConfig) req.getAttribute("caucho.jsp.servlet-config");
 
     if (config == null)
-      config = new JspServletConfig(_application, null,
+      config = new JspServletConfig(_webApp, null,
                                     RequestAdapter.getPageServletPath(req));
 
     if (config == null)
-      config = new JspServletConfig(_application, null, "/foo");
+      config = new JspServletConfig(_webApp, null, "/foo");
     */
 
     page._caucho_setJspManager(this);

@@ -34,7 +34,7 @@ import com.caucho.management.server.HostMXBean;
 import com.caucho.management.server.PortMXBean;
 import com.caucho.management.server.ServerMXBean;
 import com.caucho.management.server.ThreadPoolMXBean;
-import com.caucho.server.cluster.Cluster;
+import com.caucho.server.cluster.*;
 import com.caucho.server.deploy.DeployControllerAdmin;
 import com.caucho.server.host.HostController;
 import com.caucho.server.port.AbstractSelectManager;
@@ -46,14 +46,15 @@ import com.caucho.vfs.Path;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class ServerAdmin extends DeployControllerAdmin<ServerController>
-  implements ServerMXBean
+public class ServerAdmin implements ServerMXBean
 {
   private static final L10N L = new L10N(ServerAdmin.class);
 
-  ServerAdmin(ServerController controller)
+  private final Server _server;
+
+  ServerAdmin(Server server)
   {
-    super(controller);
+    _server = server;
   }
 
   public String getName()
@@ -61,10 +62,9 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
     return null;
   }
 
-  @Override
   public String getRootDirectory()
   {
-    Path path = getController().getRootDirectory();
+    Path path = _server.getRootDirectory();
 
     if (path != null)
       return path.getNativePath();
@@ -74,7 +74,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
 
   public boolean isSelectManagerEnabled()
   {
-    AbstractSelectManager manager = getDeployInstance().getSelectManager();
+    AbstractSelectManager manager = _server.getSelectManager();
 
     return manager != null;
   }
@@ -84,17 +84,18 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
    */
   public String getId()
   {
-    return getController().getServerId();
+    return _server.getServerId();
   }
   
   public ThreadPoolMXBean getThreadPool()
   {
-    return getController().getThreadPool();
+    //return _server.getThreadPool();
+    throw new UnsupportedOperationException();
   }
 
   public PortMXBean []getPorts()
   {
-    ServletServer server = getDeployInstance();
+    Server server = _server;
 
     if (server == null)
       return new PortMXBean[0];
@@ -118,12 +119,10 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
 
   public ClusterMXBean getCluster()
   {
-    ServletServer server = getDeployInstance();
-
-    if (server == null)
+    if (_server == null)
       return null;
     else {
-      Cluster cluster = server.getCluster();
+      Cluster cluster = _server.getCluster();
 
       if (cluster != null)
 	return cluster.getAdmin();
@@ -144,14 +143,12 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
 
   public HostMXBean []getHosts()
   {
-    ServletServer server = getDeployInstance();
-
-    if (server == null)
+    if (_server == null)
       return new HostMXBean[0];
 
     ArrayList<HostMXBean> hostList = new ArrayList<HostMXBean>();
 
-    for (HostController host : server.getHostControllers()) {
+    for (HostController host : _server.getHostControllers()) {
       HostMXBean admin = host.getAdmin();
 
       if (admin != null)
@@ -165,22 +162,25 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
 
   public String getState()
   {
-    return getController().getState();
+    // return _server.getState();
+    throw new UnsupportedOperationException();
   }
 
   public Date getInitialStartTime()
   {
-    return new Date(getController().getStartTime());
+    // return new Date(_server.getStartTime());
+    throw new UnsupportedOperationException();
   }
 
   public Date getStartTime()
   {
-    return new Date(getController().getStartTime());
+    // return new Date(_server.getStartTime());
+    throw new UnsupportedOperationException();
   }
 
   public int getThreadActiveCount()
   {
-    ServletServer server = getDeployInstance();
+    Server server = _server;
 
     if (server == null)
       return -1;
@@ -201,7 +201,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
 
   public int getThreadKeepaliveCount()
   {
-    ServletServer server = getDeployInstance();
+    Server server = _server;
 
     if (server == null)
       return -1;
@@ -222,7 +222,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
 
   public int getSelectKeepaliveCount()
   {
-    ServletServer server = getDeployInstance();
+    Server server = _server;
 
     if (server == null)
       return -1;
@@ -243,7 +243,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
 
   public long getRequestCountTotal()
   {
-    ServletServer server = getDeployInstance();
+    Server server = _server;
 
     if (server == null)
       return -1;
@@ -258,7 +258,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
 
   public long getRequestTimeTotal()
   {
-    ServletServer server = getDeployInstance();
+    Server server = _server;
 
     if (server == null)
       return -1;
@@ -273,7 +273,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
 
   public long getRequestReadBytesTotal()
   {
-    ServletServer server = getDeployInstance();
+    Server server = _server;
 
     if (server == null)
       return -1;
@@ -288,7 +288,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
 
   public long getRequestWriteBytesTotal()
   {
-    ServletServer server = getDeployInstance();
+    Server server = _server;
 
     if (server == null)
       return -1;
@@ -303,7 +303,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
 
   public long getClientDisconnectCountTotal()
   {
-    ServletServer server = getDeployInstance();
+    Server server = _server;
 
     if (server == null)
       return -1;
@@ -318,7 +318,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
 
   public long getKeepaliveCountTotal()
   {
-    ServletServer server = getDeployInstance();
+    Server server = _server;
 
     if (server == null)
       return -1;
@@ -343,12 +343,12 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
 
   public void restart()
   {
-    getController().restart();
+    _server.restart();
   }
 
   public void clearCache()
   {
-    ServletServer server = getDeployInstance();
+    Server server = _server;
 
     if (server != null)
       server.clearCache();
@@ -356,7 +356,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
 
   public void clearCacheByPattern(String hostRegexp, String urlRegexp)
   {
-    ServletServer server = getDeployInstance();
+    Server server = _server;
 
     if (server != null)
       server.clearCacheByPattern(hostRegexp, urlRegexp);
@@ -364,7 +364,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
 
   public long getInvocationCacheHitCountTotal()
   {
-    ServletServer server = getDeployInstance();
+    Server server = _server;
 
     if (server != null)
       return server.getInvocationCacheHitCount();
@@ -374,7 +374,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
 
   public long getInvocationCacheMissCountTotal()
   {
-    ServletServer server = getDeployInstance();
+    Server server = _server;
 
     if (server != null)
       return server.getInvocationCacheMissCount();
@@ -384,7 +384,7 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
 
   public long getProxyCacheHitCount()
   {
-    ServletServer server = getDeployInstance();
+    Server server = _server;
 
     if (server != null)
       return server.getProxyCacheHitCount();
@@ -394,16 +394,11 @@ public class ServerAdmin extends DeployControllerAdmin<ServerController>
 
   public long getProxyCacheMissCount()
   {
-    ServletServer server = getDeployInstance();
+    Server server = _server;
 
     if (server != null)
       return server.getProxyCacheMissCount();
     else
       return -1;
-  }
-
-  protected ServletServer getDeployInstance()
-  {
-    return getController().getDeployInstance();
   }
 }

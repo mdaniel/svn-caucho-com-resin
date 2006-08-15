@@ -45,16 +45,16 @@ import com.caucho.server.connection.AbstractHttpResponse;
 import com.caucho.server.connection.IncludeResponseStream;
 
 class NamedDispatcherImpl implements RequestDispatcher {
-  private Application _application;
+  private WebApp _webApp;
   private FilterChain _filterChain;
   private String _queryString;
 
   NamedDispatcherImpl(FilterChain filterChain, String queryString,
-                      Application application)
+                      WebApp webApp)
   {
     _filterChain = filterChain;
     _queryString = queryString;
-    _application = application;
+    _webApp = webApp;
   }
 
   public void include(ServletRequest request, ServletResponse response)
@@ -65,7 +65,7 @@ class NamedDispatcherImpl implements RequestDispatcher {
     RequestAdapter reqAdapt = null;
     if (! (request instanceof CauchoRequest)) {
       reqAdapt = RequestAdapter.create();
-      reqAdapt.init((HttpServletRequest) request, res, _application);
+      reqAdapt.init((HttpServletRequest) request, res, _webApp);
       request = reqAdapt;
     }
     CauchoRequest req = (CauchoRequest) request;

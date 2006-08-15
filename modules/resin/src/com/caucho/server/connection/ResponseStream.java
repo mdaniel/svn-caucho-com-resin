@@ -44,7 +44,7 @@ import com.caucho.vfs.ClientDisconnectException;
 
 import com.caucho.log.Log;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 class ResponseStream extends ToByteResponseStream {
   static final Logger log = Log.open(ResponseStream.class);
@@ -519,7 +519,7 @@ class ResponseStream extends ToByteResponseStream {
     }
     else if (contentLengthHeader < _contentLength) {
       CauchoRequest request = _response.getRequest();
-      ServletContext app = request.getApplication();
+      ServletContext app = request.getWebApp();
       
       Exception exn =
 	  new IllegalStateException(L.l("{0}: tried to write {1} bytes with content-length {2}.",
@@ -542,7 +542,7 @@ class ResponseStream extends ToByteResponseStream {
 
       if (ch != '\r' && ch != '\n' && ch != ' ' && ch != '\t') {
 	CauchoRequest request = _response.getRequest();
-	ServletContext app = request.getApplication();
+	ServletContext app = request.getWebApp();
 	String graph = "";
 	    
 	if (Character.isLetterOrDigit((char) ch))
@@ -764,7 +764,7 @@ class ResponseStream extends ToByteResponseStream {
       return;
     
     CauchoRequest req = _response.getRequest();
-    Application app = req.getApplication();
+    WebApp app = req.getWebApp();
     if (app != null &&
 	app.getCacheMaxLength() < _contentLength) {
       _cacheStream = null;

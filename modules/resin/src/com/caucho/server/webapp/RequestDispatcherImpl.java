@@ -72,8 +72,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
   private static final String FWD_QUERY_STRING =
     "javax.servlet.forward.query_string";
 
-  // Application the request dispatcher was called from
-  private Application _application;
+  // WebApp the request dispatcher was called from
+  private WebApp _webApp;
   private Invocation _includeInvocation;
   private Invocation _forwardInvocation;
   private Invocation _errorInvocation;
@@ -82,12 +82,12 @@ public class RequestDispatcherImpl implements RequestDispatcher {
   RequestDispatcherImpl(Invocation includeInvocation,
                         Invocation forwardInvocation,
                         Invocation errorInvocation,
-                        Application application)
+                        WebApp webApp)
   {
     _includeInvocation = includeInvocation;
     _forwardInvocation = forwardInvocation;
     _errorInvocation = errorInvocation;
-    _application = application;
+    _webApp = webApp;
   }
 
   public void setLogin(boolean isLogin)
@@ -144,7 +144,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
         throw exn;
       }
       
-      _application.log(exn.getMessage(), exn);
+      _webApp.log(exn.getMessage(), exn);
     }
 
     if (res instanceof AbstractHttpResponse)
@@ -192,14 +192,14 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     else
       queryString = newQueryString;
 
-    Application oldApplication;
+    WebApp oldWebApp;
 
     if (req instanceof CauchoRequest)
-      oldApplication = ((CauchoRequest) req).getApplication();
+      oldWebApp = ((CauchoRequest) req).getWebApp();
     else
-      oldApplication = (Application) _application.getContext(req.getContextPath());
+      oldWebApp = (WebApp) _webApp.getContext(req.getContextPath());
 
-    subRequest.init(invocation.getApplication(), oldApplication,
+    subRequest.init(invocation.getWebApp(), oldWebApp,
                     parentRequest, res, method,
 		    invocation.getURI(),
 		    invocation.getServletPath(),
@@ -364,7 +364,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     DispatchResponse subResponse;
 
     Invocation invocation = _includeInvocation;
-    Application application = invocation.getApplication();
+    WebApp webApp = invocation.getWebApp();
     String queryString = invocation.getQueryString();
 
     if (method == null)
@@ -379,7 +379,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     HttpServletResponse parentResponse = res;
     HttpServletResponseWrapper resWrapper = null;
 
-    if (! _application.getDispatchWrapsFilters()) {
+    if (! _webApp.getDispatchWrapsFilters()) {
       if (req instanceof HttpServletRequestWrapper &&
 	  ! (req instanceof CauchoRequest)) {
 	reqWrapper = (HttpServletRequestWrapper) req;
@@ -395,14 +395,14 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
     subRequest = IncludeDispatchRequest.createDispatch();
 
-    Application oldApplication;
+    WebApp oldWebApp;
 
     if (req instanceof CauchoRequest)
-      oldApplication = ((CauchoRequest) req).getApplication();
+      oldWebApp = ((CauchoRequest) req).getWebApp();
     else
-      oldApplication = (Application) application.getContext(req.getContextPath());
+      oldWebApp = (WebApp) webApp.getContext(req.getContextPath());
 
-    subRequest.init(application, oldApplication,
+    subRequest.init(webApp, oldWebApp,
 		    parentRequest, parentResponse,
 		    method,
                     req.getRequestURI(), req.getServletPath(),
@@ -427,14 +427,14 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     subResponse.start();
     subResponse.setCharacterEncoding(res.getCharacterEncoding());
 
-    if (_application.getDispatchWrapsFilters())
+    if (_webApp.getDispatchWrapsFilters())
       subResponse.setCauchoResponseStream(true);
 
     CauchoResponse cauchoRes = null;
     if (res instanceof CauchoResponse) {
       cauchoRes = (CauchoResponse) res;
     }
-    else if (! _application.getDispatchWrapsFilters()) {
+    else if (! _webApp.getDispatchWrapsFilters()) {
       subResponse.killCache();
     }
 
@@ -462,8 +462,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     subRequest.setPageURI(invocation.getURI());
     subRequest.setAttribute(REQUEST_URI, invocation.getURI());
     String contextPath;
-    if (application != null)
-      contextPath = application.getContextPath();
+    if (webApp != null)
+      contextPath = webApp.getContextPath();
     else
       contextPath = null;
     

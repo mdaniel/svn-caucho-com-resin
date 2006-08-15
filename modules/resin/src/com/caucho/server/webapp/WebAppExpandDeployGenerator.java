@@ -66,7 +66,7 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
   implements EnvironmentListener {
   private static final Logger log = Log.open(WebAppExpandDeployGenerator.class);
 
-  private ApplicationContainer _container;
+  private WebAppContainer _container;
   
   private WebAppController _parent;
 
@@ -101,17 +101,17 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
   }
 
   /**
-   * Gets the application container.
+   * Gets the webApp container.
    */
-  public ApplicationContainer getContainer()
+  public WebAppContainer getContainer()
   {
     return _container;
   }
 
   /**
-   * Sets the application container.
+   * Sets the webApp container.
    */
-  public void setContainer(ApplicationContainer container)
+  public void setContainer(WebAppContainer container)
   {
     _container = container;
 
@@ -119,7 +119,7 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
       _parentLoader = container.getClassLoader();
   }
   /**
-   * Sets the parent application.
+   * Sets the parent webApp.
    */
   public void setParent(WebAppController parent)
   {
@@ -225,7 +225,7 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
   }
   
   /**
-   * Returns the current array of application entries.
+   * Returns the current array of webApp entries.
    */
   protected WebAppController createController(String name)
   {
@@ -293,7 +293,7 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
 
   
   /**
-   * Returns the current array of application entries.
+   * Returns the current array of webApp entries.
    */
   protected WebAppController mergeController(WebAppController controller,
 					     String key)

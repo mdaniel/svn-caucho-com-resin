@@ -65,9 +65,9 @@ import com.caucho.server.security.AbstractAuthenticator;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.DispatchServer;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
-import com.caucho.server.resin.ServletServer;
+import com.caucho.server.cluster.Server;
 
 /**
  * Abstract request implementing methods common to the different
@@ -296,7 +296,7 @@ public abstract class AbstractHttpRequest
     if (_invocation == null)
       return true;
     else
-      return _invocation.getApplication().isIgnoreClientDisconnect();
+      return _invocation.getWebApp().isIgnoreClientDisconnect();
   }
 
   /**
@@ -499,7 +499,7 @@ public abstract class AbstractHttpRequest
 
   /**
    * Returns the context part of the uri.  The context part is the part
-   * that maps to an application.
+   * that maps to an webApp.
    */
   public String getContextPath() 
   {
@@ -584,7 +584,7 @@ public abstract class AbstractHttpRequest
     if (path == null)
       return null;
     if (path.length() > 0 && path.charAt(0) == '/')
-      return _invocation.getApplication().getRealPath(path);
+      return _invocation.getWebApp().getRealPath(path);
 
     String uri = getPageURI();
     String context = getPageContextPath();
@@ -595,7 +595,7 @@ public abstract class AbstractHttpRequest
     if (p >= 0)
       path = uri.substring(0, p + 1) + path;
 
-    return _invocation.getApplication().getRealPath(path);
+    return _invocation.getWebApp().getRealPath(path);
   }
 
   /**
@@ -1146,7 +1146,7 @@ public abstract class AbstractHttpRequest
 
       if (! isSpecial) {
         if (cbName.length() == 0)
-          getApplication().log("bad cookie: " + rawCookie);
+          getWebApp().log("bad cookie: " + rawCookie);
         else {
           cookie = new Cookie(cbName.toString(), cbValue.toString());
           cookie.setVersion(version);
@@ -1318,7 +1318,7 @@ public abstract class AbstractHttpRequest
 
   /**
    * Returns the session id in the HTTP request.  The cookie has
-   * priority over the URL.  Because the application might be using
+   * priority over the URL.  Because the webApp might be using
    * the cookie to change the page contents, the caching sets
    * vary: JSESSIONID.
    */
@@ -1341,7 +1341,7 @@ public abstract class AbstractHttpRequest
 
   /**
    * Returns the session id in the HTTP request.  The cookie has
-   * priority over the URL.  Because the application might be using
+   * priority over the URL.  Because the webApp might be using
    * the cookie to change the page contents, the caching sets
    * vary: JSESSIONID.
    */
@@ -1381,7 +1381,7 @@ public abstract class AbstractHttpRequest
 
   /**
    * Returns the session id in the HTTP request cookies.
-   * Because the application might use the cookie to change
+   * Because the webApp might use the cookie to change
    * the page contents, the caching sets vary: JSESSIONID.
    */
   private String findSessionIdFromCookie()
@@ -1463,7 +1463,7 @@ public abstract class AbstractHttpRequest
     if (! create)
       return null;
 
-    // Must accept old ids because different applications in the same
+    // Must accept old ids because different webApps in the same
     // server must share the same cookie
     //
     // But, if the session group doesn't match, then create a new
@@ -1488,7 +1488,7 @@ public abstract class AbstractHttpRequest
    */
   protected final SessionManager getSessionManager()
   {
-    Application app = getApplication();
+    WebApp app = getWebApp();
 
     if (app != null)
       return app.getSessionManager();
@@ -1517,7 +1517,7 @@ public abstract class AbstractHttpRequest
     if (login instanceof X509Certificate)
       return CLIENT_CERT_AUTH;
     
-    Application app = getApplication();
+    WebApp app = getWebApp();
 
     if (app != null && app.getLogin() != null && getUserPrincipal() != null)
       return app.getLogin().getAuthType();
@@ -1567,7 +1567,7 @@ public abstract class AbstractHttpRequest
         return true;
     }
 
-    Application app = getApplication();
+    WebApp app = getWebApp();
     if (app == null) {
       _response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return false;
@@ -1630,7 +1630,7 @@ public abstract class AbstractHttpRequest
           return user;
       }
 
-      Application app = getApplication();
+      WebApp app = getWebApp();
       if (app == null)
         return null;
     
@@ -1707,7 +1707,7 @@ public abstract class AbstractHttpRequest
 	role = mapRole;
     }
     
-    Application app = getApplication();
+    WebApp app = getWebApp();
     AbstractLogin login = app == null ? null : app.getLogin();
 
     if (login == null)
@@ -1904,7 +1904,7 @@ public abstract class AbstractHttpRequest
    * getCharacterEncoding().
    *
    * <p/>If the request doesn't provide the encoding, use the 
-   * character-encoding parameter from the application.
+   * character-encoding parameter from the webApp.
    *
    * <p/>Otherwise use the default system encoding.
    */
@@ -1944,7 +1944,7 @@ public abstract class AbstractHttpRequest
  	_formParser.parsePostData(_form, getInputStream(), javaEncoding);
       }
 
-      else if (getApplication().doMultipartForm() &&
+      else if (getWebApp().doMultipartForm() &&
                contentType.startsWith("multipart/form-data")) {
         int length = contentType.length();
         int i = contentType.indexOf("boundary=");
@@ -1952,7 +1952,7 @@ public abstract class AbstractHttpRequest
         if (i < 0)
           return _form;
 
-        long formUploadMax = getApplication().getFormUploadMax();
+        long formUploadMax = getWebApp().getFormUploadMax();
 
 	Object uploadMax = getAttribute("caucho.multipart.form.upload-max");
 	if (uploadMax instanceof Number)
@@ -2044,13 +2044,13 @@ public abstract class AbstractHttpRequest
 	ServletRequestAttributeEvent event;
 
 	if (oldValue != null) {
-	  event = new ServletRequestAttributeEvent(getApplication(), this,
+	  event = new ServletRequestAttributeEvent(getWebApp(), this,
 						   name, oldValue);
 
 	  _attributeListeners[i].attributeReplaced(event);
 	}
 	else {
-	  event = new ServletRequestAttributeEvent(getApplication(), this,
+	  event = new ServletRequestAttributeEvent(getWebApp(), this,
 						   name, value);
 
 	  _attributeListeners[i].attributeAdded(event);
@@ -2073,7 +2073,7 @@ public abstract class AbstractHttpRequest
     for (int i = 0; i < _attributeListeners.length; i++) {
       ServletRequestAttributeEvent event;
 
-      event = new ServletRequestAttributeEvent(getApplication(), this,
+      event = new ServletRequestAttributeEvent(getWebApp(), this,
 					       name, oldValue);
 
       _attributeListeners[i].attributeRemoved(event);
@@ -2090,11 +2090,11 @@ public abstract class AbstractHttpRequest
     if (path == null || path.length() == 0)
       return null;
     else if (path.charAt(0) == '/')
-      return getApplication().getRequestDispatcher(path);
+      return getWebApp().getRequestDispatcher(path);
     else {
       CharBuffer cb = new CharBuffer();
       
-      ServletContext app = getApplication();
+      ServletContext app = getWebApp();
 
       String servletPath = getPageServletPath();
       if (servletPath != null)
@@ -2223,7 +2223,7 @@ public abstract class AbstractHttpRequest
   {
     _invocation = invocation;
 
-    Application app = invocation.getApplication();
+    WebApp app = invocation.getWebApp();
     if (app != null)
       _attributeListeners = app.getRequestAttributeListeners();
   }
@@ -2253,12 +2253,12 @@ public abstract class AbstractHttpRequest
   }
 
   /**
-   * Returns the invocation's application.
+   * Returns the invocation's webApp.
    */
-  public final Application getApplication()
+  public final WebApp getWebApp()
   {
     if (_invocation != null)
-      return _invocation.getApplication();
+      return _invocation.getWebApp();
     else
       return null;
   }

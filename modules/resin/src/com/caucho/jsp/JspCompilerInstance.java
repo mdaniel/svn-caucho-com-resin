@@ -38,7 +38,7 @@ import com.caucho.jsp.java.JspTagSupport;
 import com.caucho.jsp.java.TagTaglib;
 import com.caucho.log.Log;
 import com.caucho.make.PersistentDependency;
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.xml.Xml;
@@ -235,7 +235,7 @@ public class JspCompilerInstance {
     if (_className == null)
       _className = JavaCompiler.mangleName("jsp/" + _uri);
 
-    Application app = _jspCompiler.getApplication();
+    WebApp app = _jspCompiler.getWebApp();
     Path appDir = _jspCompiler.getAppDir();
     if (appDir == null && app != null)
       appDir = app.getAppDir();
@@ -275,7 +275,7 @@ public class JspCompilerInstance {
 
     if (taglibManager == null) {
       taglibManager = new TaglibManager(resourceManager, app);
-      taglibManager.setApplication(app);
+      taglibManager.setWebApp(app);
 
       if (jspConfig != null) {
         ArrayList<JspTaglib> tldMapList = jspConfig.getTaglibList();
@@ -456,7 +456,7 @@ public class JspCompilerInstance {
 	xml.parse(_jspPath);
       }
       else {
-	Application app = _jspCompiler.getApplication();
+	WebApp app = _jspCompiler.getWebApp();
 
 	/*
 	if (_jspPropertyGroup == null && app != null && app.isJsp1())

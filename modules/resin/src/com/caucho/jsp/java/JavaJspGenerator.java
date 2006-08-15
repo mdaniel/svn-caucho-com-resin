@@ -35,6 +35,8 @@ import java.util.logging.*;
 import java.lang.reflect.*;
 import java.beans.*;
 
+import javax.el.*;
+
 import javax.servlet.http.*;
 import javax.servlet.*;
 import javax.servlet.jsp.tagext.*;
@@ -131,6 +133,9 @@ public class JavaJspGenerator extends JspGenerator {
   protected IntMap _strings = new IntMap();
   
   private ArrayList<com.caucho.el.Expr> _exprList =
+  new ArrayList<com.caucho.el.Expr>();
+  
+  private ArrayList<com.caucho.el.Expr> _valueExprList =
   new ArrayList<com.caucho.el.Expr>();
   
   private ArrayList<com.caucho.xpath.Expr> _xpathExprList =
@@ -805,7 +810,7 @@ public class JavaJspGenerator extends JspGenerator {
     if (isSession) {
       out.println("javax.servlet.http.HttpSession session = request.getSession(true);");
     }
-    out.println("com.caucho.server.webapp.Application _jsp_application = _caucho_getApplication();");
+    out.println("com.caucho.server.webapp.WebApp _jsp_application = _caucho_getApplication();");
     out.println("javax.servlet.ServletContext application = _jsp_application;");
 
     out.print("com.caucho.jsp.PageContextImpl pageContext = com.caucho.jsp.QJspFactory.allocatePageContext(");
@@ -1129,6 +1134,28 @@ public class JavaJspGenerator extends JspGenerator {
 
     return index;
   }
+  
+  /**
+   * Adds an expression to the expression list.
+   */
+  public int addValueExpr(String value)
+    throws JspParseException, ELException
+  {
+    JspELParser parser = new JspELParser(value);
+
+    parser.setStaticFunctionMap(_elFunctionMap);
+    
+    com.caucho.el.Expr expr = parser.parse();
+
+    int index = _valueExprList.indexOf(expr);
+    if (index >= 0)
+      return index;
+
+    index = _valueExprList.size();
+    _valueExprList.add(expr);
+
+    return index;
+  }
 
   /**
    * out.Prints the expressions
@@ -1142,6 +1169,15 @@ public class JavaJspGenerator extends JspGenerator {
       out.print("  ");
       expr.printCreate(out.getWriteStream());
       out.println(";");
+    }
+    
+    for (int i = 0; i < _valueExprList.size(); i++) {
+      com.caucho.el.Expr expr = _valueExprList.get(i);
+      
+      out.println("private final static javax.el.ValueExpression _caucho_value_expr_" + i + " = new com.caucho.el.ObjectValueExpression(");
+      out.print("  ");
+      expr.printCreate(out.getWriteStream());
+      out.println(");");
     }
   }
 
@@ -1434,10 +1470,10 @@ public class JavaJspGenerator extends JspGenerator {
 
     if (_parseState.getExtends() != null && ! _parseState.isTag()) {
       out.println();
-      out.println("public com.caucho.server.webapp.Application _caucho_getApplication()");
+      out.println("public com.caucho.server.webapp.WebApp _caucho_getApplication()");
       out.println("{");
       out.pushDepth();
-      out.println(" return (com.caucho.server.webapp.Application) getServletConfig().getServletContext();");
+      out.println(" return (com.caucho.server.webapp.WebApp) getServletConfig().getServletContext();");
       out.popDepth();
       out.println("}");
     }

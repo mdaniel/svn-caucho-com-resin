@@ -54,11 +54,11 @@ import java.util.regex.Pattern;
  * A configuration entry for a web-app.
  */
 public class WebAppController
-  extends EnvironmentDeployController<Application,WebAppConfig> {
+  extends EnvironmentDeployController<WebApp,WebAppConfig> {
   private static final L10N L = new L10N(WebAppController.class);
   private static final Logger log = Log.open(WebAppController.class);
 
-  private ApplicationContainer _container;
+  private WebAppContainer _container;
 
   private WebAppController _parent;
 
@@ -94,7 +94,7 @@ public class WebAppController
 
   public WebAppController(String contextPath,
 			  Path rootDirectory,
-			  ApplicationContainer container)
+			  WebAppContainer container)
   {
     super(contextPath, rootDirectory);
 
@@ -106,7 +106,7 @@ public class WebAppController
   }
 
   /**
-   * Returns the application's context path
+   * Returns the webApp's context path
    */
   public String getContextPath()
   {
@@ -114,7 +114,7 @@ public class WebAppController
   }
 
   /**
-   * Sets the application's context path
+   * Sets the webApp's context path
    */
   public void setContextPath(String contextPath)
   {
@@ -128,7 +128,7 @@ public class WebAppController
   }
 
   /**
-   * Returns the application's context path
+   * Returns the webApp's context path
    */
   public String getContextPath(String uri)
   {
@@ -197,7 +197,7 @@ public class WebAppController
   /**
    * Returns the web-app container.
    */
-  public ApplicationContainer getContainer()
+  public WebAppContainer getContainer()
   {
     return _container;
   }
@@ -246,7 +246,7 @@ public class WebAppController
   }
 
   /**
-   * True for inherit-session applications.
+   * True for inherit-session webApps.
    */
   public boolean isInheritSession()
   {
@@ -262,15 +262,15 @@ public class WebAppController
   }
 
   /**
-   * Returns the application object.
+   * Returns the webApp object.
    */
-  public Application getApplication()
+  public WebApp getWebApp()
   {
     return getDeployInstance();
   }
 
   /**
-   * Set true for a dynamically deployed application.
+   * Set true for a dynamically deployed webApp.
    */
   public void setDynamicDeploy(boolean isDynamicDeploy)
   {
@@ -278,7 +278,7 @@ public class WebAppController
   }
 
   /**
-   * Returns true for a dynamically deployed application.
+   * Returns true for a dynamically deployed webApp.
    */
   public boolean isDynamicDeploy()
   {
@@ -371,7 +371,7 @@ public class WebAppController
   }
 
   /**
-   * Returns the application object.
+   * Returns the webApp object.
    */
   public boolean destroy()
   {
@@ -385,7 +385,7 @@ public class WebAppController
   }
 
   /**
-   * Any extra steps needed to deploy the application.
+   * Any extra steps needed to deploy the webApp.
    */
   protected void protectedWebApp()
     throws Exception
@@ -433,17 +433,17 @@ public class WebAppController
   }
 
   /**
-   * Instantiate the application.
+   * Instantiate the webApp.
    */
-  protected Application instantiateDeployInstance()
+  protected WebApp instantiateDeployInstance()
   {
     return new Application(this);
   }
 
   /**
-   * Creates the application.
+   * Creates the webApp.
    */
-  protected void configureInstanceVariables(Application app)
+  protected void configureInstanceVariables(WebApp app)
     throws Throwable
   {
     app.setRegexp(_regexpValues);

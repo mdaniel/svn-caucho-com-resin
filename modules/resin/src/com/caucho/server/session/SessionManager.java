@@ -59,7 +59,7 @@ import com.caucho.server.cluster.StoreManager;
 import com.caucho.server.cluster.ObjectManager;
 import com.caucho.server.cluster.ClusterObject;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 import com.caucho.server.security.ServletAuthenticator;
 
@@ -78,9 +78,11 @@ import com.caucho.config.types.JndiBuilder;
 /**
  * Manages sessions in a web-app.
  */
-public final class SessionManager implements ObjectManager, AlarmListener {
+public final class SessionManager implements ObjectManager, AlarmListener
+{
   static protected final L10N L = new L10N(SessionManager.class);
-  static protected final Logger log = Log.open(SessionManager.class);
+  static protected final Logger log
+    = Logger.getLogger(SessionManager.class.getName());
 
   private static final int FALSE = 0;
   private static final int COOKIE = 1;
@@ -97,7 +99,7 @@ public final class SessionManager implements ObjectManager, AlarmListener {
   
   private static final int DECODE[];
   
-  private Application _application;
+  private WebApp _webApp;
   private final SessionManagerAdmin _admin;
 
   // factory for creating sessions
@@ -198,13 +200,13 @@ public final class SessionManager implements ObjectManager, AlarmListener {
   /**
    * Creates and initializes a new session manager
    *
-   * @param app the web-app application
+   * @param app the web-app webApp
    * @param registry the web-app configuration node
    */
-  public SessionManager(Application app)
+  public SessionManager(WebApp app)
     throws Exception
   {
-    _application = app;
+    _webApp = app;
 
     DispatchServer server = app.getDispatchServer();
     if (server != null) {
@@ -325,11 +327,11 @@ public final class SessionManager implements ObjectManager, AlarmListener {
   }
 
   /**
-   * Returns the SessionManager's application
+   * Returns the SessionManager's webApp
    */
-  Application getApplication()
+  WebApp getWebApp()
   {
-    return _application;
+    return _webApp;
   }
 
   /**
@@ -337,7 +339,7 @@ public final class SessionManager implements ObjectManager, AlarmListener {
    */
   ServletAuthenticator getAuthenticator()
   {
-    return _application.getAuthenticator();
+    return _webApp.getAuthenticator();
   }
 
   /**
@@ -991,7 +993,7 @@ public final class SessionManager implements ObjectManager, AlarmListener {
     else if (_isCookieHttpOnly == SET_FALSE)
       return true;
     else
-      return getApplication().getCookieHttpOnly();
+      return getWebApp().getCookieHttpOnly();
   }
 
   /**
@@ -1128,7 +1130,7 @@ public final class SessionManager implements ObjectManager, AlarmListener {
 
   /**
    * Creates a pseudo-random session id.  If there's an old id and the
-   * group matches, then use it because different applications on the
+   * group matches, then use it because different webApps on the
    * same matchine should use the same cookie.
    *
    * @param sessionGroup possibly assigned by the web server
@@ -1140,7 +1142,7 @@ public final class SessionManager implements ObjectManager, AlarmListener {
 
   /**
    * Creates a pseudo-random session id.  If there's an old id and the
-   * group matches, then use it because different applications on the
+   * group matches, then use it because different webApps on the
    * same matchine should use the same cookie.
    *
    * @param sessionGroup possibly assigned by the web server
@@ -1572,7 +1574,7 @@ public final class SessionManager implements ObjectManager, AlarmListener {
   }
 
   /**
-   * Cleans up the sessions when the Application shuts down gracefully.
+   * Cleans up the sessions when the WebApp shuts down gracefully.
    */
   public void close()
   {

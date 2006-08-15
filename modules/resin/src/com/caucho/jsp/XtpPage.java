@@ -60,7 +60,7 @@ import com.caucho.xpath.*;
 import com.caucho.make.Dependency;
 import com.caucho.make.PersistentDependency;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 import com.caucho.server.dispatch.ServletConfigImpl;
 
@@ -87,7 +87,7 @@ class XtpPage extends Page {
   private String _className;
   private String _errorPage;
 
-  private Application _application;
+  private WebApp _webApp;
 
   private XslManager _xslManager;
 
@@ -112,7 +112,7 @@ class XtpPage extends Page {
    * @param strictXml if true, use strict XML, now HTML
    */
   XtpPage(Path path, String uri, String className,
-          Application app,
+          WebApp app,
           XslManager xslManager, boolean strictXml)
     throws ServletException, RegistryException
   {
@@ -120,13 +120,13 @@ class XtpPage extends Page {
     _sourcePath.setUserPath(uri);
     _pwd = _sourcePath.getParent();
     _className = className;
-    _application = app;
+    _webApp = app;
     _strictXml = strictXml;
     _xslManager = xslManager;
     _uri = uri;
 
     ServletConfigImpl config = new ServletConfigImpl();
-    config.setServletContext(_application);
+    config.setServletContext(_webApp);
     
     init(config);
   }
@@ -177,7 +177,7 @@ class XtpPage extends Page {
     if (request instanceof CauchoRequest)
       req = (CauchoRequest) request;
     else
-      req = RequestAdapter.create((HttpServletRequest) request, _application);
+      req = RequestAdapter.create((HttpServletRequest) request, _webApp);
     
     CauchoResponse res;
     ResponseAdapter resAdapt = null;
@@ -286,7 +286,7 @@ class XtpPage extends Page {
 
 	if (page != null) {
 	  ServletConfigImpl config = new ServletConfigImpl();
-	  config.setServletContext(_application);
+	  config.setServletContext(_webApp);
 
 	  page.init(config);
 
@@ -335,8 +335,8 @@ class XtpPage extends Page {
     
     try {
       page = _jspManager.preload(className,
-				 _application.getClassLoader(),
-				 _application.getAppDir());
+				 _webApp.getClassLoader(),
+				 _webApp.getAppDir());
 
       if (page != null) {
 	if (log.isLoggable(Level.FINE))

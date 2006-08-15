@@ -35,7 +35,7 @@ import com.caucho.java.LineMap;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.loader.*;
 import com.caucho.log.Log;
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppController;
 
 import com.caucho.util.CauchoSystem;
@@ -63,7 +63,7 @@ public class JspCompiler implements EnvironmentBean {
 
   private ClassLoader _loader;
 
-  private Application _app;
+  private WebApp _app;
 
   private Path _classDir;
   private Path _appDir;
@@ -125,7 +125,7 @@ public class JspCompiler implements EnvironmentBean {
   }
 
   /**
-   * Sets the source application directory.
+   * Sets the source webApp directory.
    */
   public void setAppDir(Path path)
   {
@@ -133,7 +133,7 @@ public class JspCompiler implements EnvironmentBean {
   }
 
   /**
-   * Gets the source application directory.
+   * Gets the source webApp directory.
    */
   public Path getAppDir()
   {
@@ -249,7 +249,7 @@ public class JspCompiler implements EnvironmentBean {
    * Initialize values based on the ServletContext.  When the calling code
    * has the ServletContext available, it can take advantage of it.
    */
-  public Application createApplication()
+  public WebApp createWebApp()
   {
     if (_app == null) {
       WebAppController controller =
@@ -265,7 +265,7 @@ public class JspCompiler implements EnvironmentBean {
    * Initialize values based on the ServletContext.  When the calling code
    * has the ServletContext available, it can take advantage of it.
    */
-  public void setApplication(Application app)
+  public void setWebApp(WebApp app)
   {
     _app = app;
 
@@ -276,7 +276,7 @@ public class JspCompiler implements EnvironmentBean {
   /**
    * Returns the app.
    */
-  public Application getApplication()
+  public WebApp getWebApp()
   {
     return _app;
   }
@@ -511,10 +511,10 @@ public class JspCompiler implements EnvironmentBean {
 	if (args[i].equals("-app-dir")) {
 	  Path appDir = Vfs.lookup(args[i + 1]);
 
-	  Application app = compiler.createApplication();
+	  WebApp app = compiler.createWebApp();
 	  app.setDocumentDirectory(appDir);
 
-	  compiler.setApplication(app);
+	  compiler.setWebApp(app);
 	  compiler.setAppDir(appDir);
 
 	  i += 2;
@@ -535,7 +535,7 @@ public class JspCompiler implements EnvironmentBean {
 	  break;
       }
 
-      Application app = compiler.getApplication();
+      WebApp app = compiler.getWebApp();
       if (app != null && ! hasConf) {
 	Path appDir = app.getAppDir();
 
@@ -557,23 +557,23 @@ public class JspCompiler implements EnvironmentBean {
       Path appDir = null;
 
       if (app == null && compiler.getAppDir() != null) {
-	app = compiler.createApplication();
+	app = compiler.createWebApp();
 
 	app.setDocumentDirectory(compiler.getAppDir());
-	compiler.setApplication(app);
+	compiler.setWebApp(app);
       }
 
       if (app != null) {
 	app.init();
 
-	appDir = compiler.getApplication().getAppDir();
-	loader = compiler.getApplication().getClassLoader();
+	appDir = compiler.getWebApp().getAppDir();
+	loader = compiler.getWebApp().getClassLoader();
       }
 
       if (appDir == null) {
 	appDir = Vfs.lookup();
 
-	if (compiler.getAppDir() == null && compiler.getApplication() == null) {
+	if (compiler.getAppDir() == null && compiler.getWebApp() == null) {
 	  System.err.println(L.l("-app-dir must be specified for JspCompiler"));
 	  return;
 	}

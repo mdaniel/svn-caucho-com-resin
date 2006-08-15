@@ -60,12 +60,12 @@ import com.caucho.server.dispatch.ExceptionFilterChain;
 
 import com.caucho.server.cluster.*;
 
-import com.caucho.server.webapp.ApplicationContainer;
+import com.caucho.server.webapp.WebAppContainer;
 
 /**
  * Resin's virtual host implementation.
  */
-public class Host extends ApplicationContainer
+public class Host extends WebAppContainer
   implements EnvironmentBean, Dependency, SchemaBean,
 	     EnvironmentDeployInstance {
   static final Logger log = Log.open(Host.class);
@@ -105,7 +105,7 @@ public class Host extends ApplicationContainer
   private String _configETag = null;
   
   /**
-   * Creates the application with its environment loader.
+   * Creates the webApp with its environment loader.
    */
   public Host(HostContainer parent, HostController controller, String hostName)
   {
@@ -195,7 +195,7 @@ public class Host extends ApplicationContainer
   }
 
   /**
-   * Returns the host (as an application container)
+   * Returns the host (as an webApp container)
    */
   public Host getHost()
   {

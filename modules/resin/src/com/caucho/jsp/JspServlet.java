@@ -38,7 +38,7 @@ import javax.servlet.http.*;
 
 import com.caucho.util.*;
 import com.caucho.vfs.*;
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 /**
  * Handles JSP pages.  Most of the work is done in the JspManager and QServlet.
@@ -92,7 +92,7 @@ public class JspServlet extends QServlet {
     manager.setLoadTldOnInit(_loadTldOnInit);
     manager.setPageCacheMax(_pageCacheMax);
 
-    manager.initApplication((Application) getServletContext());
+    manager.initWebApp((WebApp) getServletContext());
       
     setManager(manager);
 

@@ -31,7 +31,8 @@ package com.caucho.management.j2ee;
 
 import com.caucho.Version;
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.server.resin.ServerController;
+
+import com.caucho.server.cluster.Server;
 
 /**
  * Management interface for a J2EE server.
@@ -41,23 +42,23 @@ public class J2EEServer extends J2EEManagedObject {
   private static EnvironmentLocal<J2EEServer> _j2eeServerLocal
     = new EnvironmentLocal<J2EEServer>("caucho.jmx.j2ee.J2EEServer");
 
-  private final ServerController _serverController;
+  private final Server _server;
 
   static J2EEServer getLocal()
   {
     return _j2eeServerLocal.get();
   }
 
-  public J2EEServer(ServerController serverController)
+  public J2EEServer(Server server)
   {
-    _serverController = serverController;
+    _server = server;
 
     _j2eeServerLocal.set(this);
   }
 
   protected String getName()
   {
-    return _serverController.getId();
+    return _server.getServerId();
   }
 
   protected boolean isJ2EEServer()

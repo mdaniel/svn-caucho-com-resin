@@ -199,14 +199,6 @@ public class JspParser {
   }
 
   /**
-   * Returns true if Velocity-style statements are enabled.
-   */
-  private boolean isVelocity()
-  {
-    return _parseState.isVelocityEnabled();
-  }
-
-  /**
    * Adds a prelude.
    */
   public void addPrelude(String prelude)
@@ -517,70 +509,11 @@ public class JspParser {
 
       case '#':
         ch = read();
-        if (! isVelocity())
-          addText('#');
-        else if (ch == '{') {
-          ch = parseVelocityScriptlet();
-        }
-        else if (ch >= 'a' && ch <= 'z') {
-          ch = readName(ch);
-          String name = _tag.toString();
 
-          if (name.equals("if")) {
-            ch = parseVelocityIf("if");
-          }
-          else if (name.equals("elseif")) {
-            addText();
-            setLocation();
-
-            JspNode node = _jspBuilder.getCurrentNode();
-            if (! "resin-c:when".equals(node.getTagName()))
-              throw error(L.l("#elseif is missing a corresponding #if.  Velocity-style #if syntax needs matching #if ... #elseif ... #else ... #end.  The #if statements must also nest properly with any tags."));
-              
-            _jspBuilder.endElement("resin-c:when");
-            ch = parseVelocityIf("elseif");
-          }
-          else if (name.equals("else")) {
-            addText();
-            setLocation();
-            _jspBuilder.endElement("resin-c:when");
-
-            setLocation(_filename, _lineStart);
-            _lineStart = _line;
-            _jspBuilder.startElement(JSTL_CORE_OTHERWISE);
-            _jspBuilder.endAttributes();
-
-            ch = skipWhitespaceToEndOfLine(ch);
-          }
-          else if (name.equals("foreach")) {
-            ch = parseVelocityForeach("resin-c:forEach");
-          }
-          else if (name.equals("end")) {
-            addText();
-
-            JspNode node = _jspBuilder.getCurrentNode();
-            String nodeName = null;
-            if (node != null)
-              nodeName = node.getTagName();
-
-            if (nodeName.equals("resin-c:when") ||
-                nodeName.equals("resin-c:otherwise")) {
-              _jspBuilder.endElement(nodeName);
-              _jspBuilder.endElement(JSTL_CORE_CHOOSE.getName());
-            }
-            else if (nodeName.equals("resin-c:forEach"))
-              _jspBuilder.endElement(nodeName);
-            else {
-              throw error(L.l("#end is missing a corresponding #if or #foreach.  Velocity-style #if syntax needs matching #if ... #elseif ... #else ... #end. The #if statements must also nest properly with any tags."));
-            }
-
-            ch = skipWhitespaceToEndOfLine(ch);
-          }
-          else {
-            addText('#');
-            addText(name);
-          }
-        }
+        if (ch == '{' && ! isELIgnored()) {
+	  // XXX: error
+          ch = parseJspExpression();
+	}
         else
           addText('#');
         break;
@@ -595,11 +528,18 @@ public class JspParser {
           else
             addText('\\');
           break;
+	  
+        case '#':
+          if (! isELIgnored()) {
+            addText('#');
+            ch = read();
+          }
+          else
+            addText('\\');
+          break;
 
         case '\\':
           addText('\\');
-          if (isVelocity())
-            ch = read();
           break;
 
         default:
@@ -657,260 +597,6 @@ public class JspParser {
     _jspBuilder.endAttributes();
     _jspBuilder.endElement(JSTL_CORE_OUT.getName());
 
-    return ch;
-  }
-
-  /**
-   * This syntax isn't part of velocity.
-   *
-   * <code><pre>
-   * #{ int foo = 3; }#
-   * </pre></code>
-   */
-  private int parseVelocityScriptlet()
-    throws IOException, JspParseException
-  {
-    addText();
-
-    setLocation(_filename, _line);
-    _lineStart = _line;
-    _jspBuilder.startElement(JSP_SCRIPTLET);
-    _jspBuilder.endAttributes();
-
-    int ch = read();
-    while (ch >= 0) {
-      if (ch == '}') {
-        ch = read();
-        if (ch == '#')
-          break;
-        else
-          addText('}');
-      }
-      else {
-        addText((char) ch);
-        ch = read();
-      }
-    }
-
-    createText();
-
-    _jspBuilder.endElement(JSP_SCRIPTLET.getName());
-    
-    ch = read();
-
-    if (ch == '\r') {
-      ch = read();
-      if (ch == '\n')
-        return read();
-      else
-        return ch;
-    }
-    else if (ch == '\n')
-      return read();
-    else
-      return ch;
-  }
-
-  /**
-   * parses a #foreach statement
-   *
-   * <pre>
-   * #foreach ([Type] var in expr)
-   * ...
-   * #end
-   * </pre>
-   *
-   * <pre>
-   * #foreach ([Type] var in [min .. max])
-   * ...
-   * #end
-   * </pre>
-   */
-  private int parseVelocityForeach(String eltName)
-    throws IOException, JspParseException
-  {
-    int ch;
-    
-    for (ch = read(); XmlChar.isWhitespace(ch); ch = read()) {
-    }
-
-    if (ch != '(')
-      throw error(L.l("Expected `(' after #foreach at `{0}'.  The velocity-style #foreach syntax needs parentheses: #foreach ($a in expr)",
-                      badChar(ch)));
-
-    addText();
-
-    processTaglib("resin-c", JSTL_CORE_URI);
-
-    setLocation(_filename, _lineStart);
-    _lineStart = _line;
-    _jspBuilder.startElement(JSTL_CORE_FOREACH);
-
-    CharBuffer cb = CharBuffer.allocate();
-    parseVelocityName(cb);
-
-    if (cb.length() == 0) {
-      throw error(L.l("Expected iteration variable for #foreach at `{0}'.  The velocity-style #foreach syntax is: #foreach ($a in expr)",
-                      badChar(ch)));
-    }
-
-    String name = cb.toString();
-    
-    cb.clear();
-    parseVelocityName(cb);
-    
-    if (cb.length() == 0) {
-      throw error(L.l("Expected 'in' for #foreach at `{0}'.  The velocity-style #foreach syntax is: #foreach ($a in expr)",
-                      badChar(ch)));
-    }
-
-    String value = cb.toString();
-    if (! value.equals("in")) {
-      throw error(L.l("Expected 'in' for #foreach at `{0}'.  The velocity-style #foreach syntax is: #foreach ($a in expr)",
-                      badChar(ch)));
-    }
-
-    if (name.startsWith("$"))
-      name = name.substring(1);
-
-    _jspBuilder.attribute(new QName("var"), name);
-
-    cb.clear();
-    parseVelocityExpr(cb, ')');
-    String expr = cb.close();
-
-    if (expr.indexOf("..") > 0) {
-      int h = 0;
-      for (; Character.isWhitespace(expr.charAt(h)); h++) {
-      }
-
-      if (expr.charAt(h) != '[')
-        throw error(L.l("Expected '[' for #foreach `{0}'.  The velocity-style #foreach syntax is: #foreach ([Type] $a in [min .. max])",
-                        badChar(expr.charAt(h))));
-      
-      int t = expr.length() - 1;
-      for (; Character.isWhitespace(expr.charAt(t)); t--) {
-      }
-
-      if (expr.charAt(t) != ']')
-        throw error(L.l("Expected ']' for #foreach `{0}'.  The velocity-style #foreach syntax is: #foreach ($a in [min .. max])",
-                        badChar(expr.charAt(t))));
-      
-      int p = expr.indexOf("..");
-      
-      String min = expr.substring(h + 1, p);
-      String max = expr.substring(p + 2, t);
-      
-      _jspBuilder.attribute(new QName("begin"), "${" + min + "}");
-      _jspBuilder.attribute(new QName("end"), "${" + max + "}");
-    }
-    else {
-      _jspBuilder.attribute(new QName("items"), "${" + expr + "}");
-    }
-    _jspBuilder.endAttributes();
-
-    return skipWhitespaceToEndOfLine(read());
-  }
-
-  /**
-   * parses an #if statement
-   */
-  private int parseVelocityIf(String eltName)
-    throws IOException, JspParseException
-  {
-    int ch;
-    
-    for (ch = read(); XmlChar.isWhitespace(ch); ch = read()) {
-    }
-
-    if (ch != '(')
-      throw error(L.l("Expected `(' after #if at `{0}'.  The velocity-style #if syntax needs parentheses: #if (...)",
-                      badChar(ch)));
-
-    addText();
-
-    processTaglib("resin-c", JSTL_CORE_URI);
-    
-    setLocation(_filename, _line);
-    if (eltName.equals("if")) {
-      _jspBuilder.startElement(JSTL_CORE_CHOOSE);
-      _jspBuilder.endAttributes();
-    }
-    _jspBuilder.startElement(JSTL_CORE_WHEN);
-    _lineStart = _line;
-
-    CharBuffer cb = CharBuffer.allocate();
-    parseVelocityExpr(cb, ')');
-    _jspBuilder.attribute(new QName("test"), "${" + cb.close() + "}");
-    _jspBuilder.endAttributes();
-
-    return skipWhitespaceToEndOfLine(read());
-  }
-
-  private int parseVelocityName(CharBuffer cb)
-    throws IOException, JspParseException
-  {
-    int ch;
-    
-    for (ch = read(); XmlChar.isWhitespace(ch); ch = read()) {
-    }
-
-    for (; Character.isJavaIdentifierPart((char) ch); ch = read())
-      cb.append((char) ch);
-
-    return ch;
-  }
-
-  private int parseVelocityMin(CharBuffer cb)
-    throws IOException, JspParseException
-  {
-    int ch;
-    
-    for (ch = read(); ch >= 0; ch = read()) {
-      if (ch != '$')
-        cb.append((char) ch);
-
-      if (ch == '(') {
-        ch = parseVelocityExpr(cb, ')');
-        cb.append((char) ch);
-      }
-      else if (ch == '[') {
-        ch = parseVelocityExpr(cb, ']');
-        cb.append((char) ch);
-      }
-      else if (ch == '.') {
-        ch = read();
-        if (ch == '.')
-          return ch;
-        else {
-          cb.append('.');
-          _peek = ch;
-        }
-      }
-    }
-
-    return ch;
-  }
-
-  private int parseVelocityExpr(CharBuffer cb, int end)
-    throws IOException, JspParseException
-  {
-    int ch;
-
-    for (ch = read(); ch >= 0 && ch != end; ch = read()) {
-      if (ch != '$')
-        cb.append((char) ch);
-
-      if (ch == '(') {
-        ch = parseVelocityExpr(cb, ')');
-        cb.append((char) ch);
-      }
-      else if (ch == '[') {
-        ch = parseVelocityExpr(cb, ']');
-        cb.append((char) ch);
-      }
-    }
-    
     return ch;
   }
 
@@ -975,11 +661,7 @@ public class JspParser {
   private void parsePageDirective(String name, String value)
     throws IOException, JspParseException
   {
-    if ("velocity".equals(name)) {
-      if ("true".equals(value))
-        _parseState.setVelocityEnabled(true);
-    }
-    else if ("isELIgnored".equals(name)) {
+    if ("isELIgnored".equals(name)) {
       if ("true".equals(value))
         _parseState.setELIgnored(true);
     }

@@ -76,8 +76,8 @@ class IncludeDispatchRequest extends DispatchRequest {
     return req;
   }
 
-  void init(Application application,
-            Application oldApplication,
+  void init(WebApp webApp,
+            WebApp oldWebApp,
             HttpServletRequest request,
             HttpServletResponse response,
 	    String method, String uri,
@@ -85,7 +85,7 @@ class IncludeDispatchRequest extends DispatchRequest {
 	    String queryString, String addedQuery)
     throws ServletException
   {
-    super.init(application, oldApplication, request, response,
+    super.init(webApp, oldWebApp, request, response,
 	       method, uri, servletPath, pathInfo, queryString, addedQuery);
     
     _headers = null;

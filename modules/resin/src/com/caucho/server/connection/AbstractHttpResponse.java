@@ -55,7 +55,7 @@ import com.caucho.server.cache.AbstractCacheEntry;
 
 import com.caucho.server.dispatch.InvocationDecoder;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.ErrorPageManager;
 
 import com.caucho.server.session.CookieImpl;
@@ -470,7 +470,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       throw new IllegalStateException("response can't sendError() after commit");
     */
 
-    Application app = getRequest().getApplication();
+    WebApp app = getRequest().getWebApp();
 
     ErrorPageManager errorManager = null;
     if (app != null)
@@ -628,7 +628,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
         break;
     }
 
-    Application app = getRequest().getApplication();
+    WebApp app = getRequest().getWebApp();
 
     String hostPrefix = null;
     String host = _request.getHeader("Host");
@@ -1206,7 +1206,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   {
     CauchoRequest request = getRequest();
     
-    Application app = request.getApplication();
+    WebApp app = request.getWebApp();
 
     if (app == null)
       return string;
@@ -1411,7 +1411,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     _locale = locale;
     
     if (_charEncoding == null) {
-      _charEncoding = getRequest().getApplication().getLocaleEncoding(locale);
+      _charEncoding = getRequest().getWebApp().getLocaleEncoding(locale);
 
       try {
         if (_charEncoding != null) {
@@ -1559,7 +1559,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     if (_sessionId != null && ! _hasSessionCookie) {
       _hasSessionCookie = true;
       
-      SessionManager manager = _request.getApplication().getSessionManager();
+      SessionManager manager = _request.getWebApp().getSessionManager();
 
       String cookieName;
 
@@ -1712,7 +1712,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     // server/13dh
     else if (_cacheInvocation != null) {
       CauchoRequest req = (CauchoRequest) _originalRequest;
-      Application app = req.getApplication();
+      WebApp app = req.getWebApp();
       
       long maxAge = app.getMaxAge(req.getRequestURI());
 
@@ -1741,7 +1741,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    */
   public void setPrivateCache(boolean isPrivate)
   {
-    // XXX: let the application override this?
+    // XXX: let the webApp override this?
     _isPrivateCache = isPrivate;
 
     // server/12dm
@@ -1754,7 +1754,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    */
   public void setPrivateOrResinCache(boolean isPrivate)
   {
-    // XXX: let the application override this?
+    // XXX: let the webApp override this?
 
     _isPrivateCache = isPrivate;
   }
@@ -1909,7 +1909,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       cb.append(_calendar.format("%a, %d-%b-%Y %H:%M:%S GMT"));
     }
 
-    Application app = _request.getApplication();
+    WebApp app = _request.getWebApp();
     if (app.getCookieHttpOnly()) {
       cb.append("; HttpOnly");
     }

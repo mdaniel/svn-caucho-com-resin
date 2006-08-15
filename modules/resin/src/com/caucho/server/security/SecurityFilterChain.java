@@ -46,7 +46,7 @@ import com.caucho.server.connection.CauchoResponse;
 public class SecurityFilterChain implements FilterChain {
   private FilterChain _next;
   
-  private ServletContext _application;
+  private ServletContext _webApp;
 
   private AbstractConstraint []_constraints;
   private HashMap<String,AbstractConstraint[]> _methodMap;
@@ -56,9 +56,9 @@ public class SecurityFilterChain implements FilterChain {
     _next = next;
   }
 
-  public void setApplication(ServletContext app)
+  public void setWebApp(ServletContext app)
   {
-    _application = app;
+    _webApp = app;
   }
 
   public void setConstraints(ArrayList<AbstractConstraint> constraints)
@@ -101,7 +101,7 @@ public class SecurityFilterChain implements FilterChain {
 	if (constraint.needsAuthentication())
 	  continue;
 
-        if (! constraint.isAuthorized(req, res, _application))
+        if (! constraint.isAuthorized(req, res, _webApp))
           return;
 	
 	if (constraint.isPrivateCache())
@@ -121,7 +121,7 @@ public class SecurityFilterChain implements FilterChain {
             return;
         }
         
-        if (! constraint.isAuthorized(req, res, _application))
+        if (! constraint.isAuthorized(req, res, _webApp))
           return;
 	
 	if (constraint.isPrivateCache())

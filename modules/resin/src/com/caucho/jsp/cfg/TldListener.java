@@ -31,7 +31,7 @@ package com.caucho.jsp.cfg;
 
 import java.util.ArrayList;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 /**
  * Configuration for the taglib listener in the .tld
@@ -58,7 +58,7 @@ public class TldListener {
   /**
    * Registers with the web-app.
    */
-  public void register(Application app)
+  public void register(WebApp app)
     throws InstantiationException, IllegalAccessException
   {
     if (app == null)

@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -50,7 +51,8 @@ import com.caucho.config.types.Period;
  * Abstract implementation class for an expression.
  */
 public abstract class Expr {
-  protected static final Logger log = Log.open(Expr.class);
+  protected static final Logger log
+    = Logger.getLogger(Expr.class.getName());
   protected static final L10N L = new L10N(Expr.class);
 
   private static final Character NULL_CHAR =

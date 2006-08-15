@@ -69,7 +69,7 @@ import com.caucho.server.log.AccessLog;
 import com.caucho.server.port.AbstractSelectManager;
 import com.caucho.server.port.Port;
 import com.caucho.server.port.ProtocolDispatchServer;
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.ErrorPage;
 import com.caucho.server.webapp.RewriteInvocation;
 import com.caucho.server.webapp.WebAppConfig;
@@ -549,7 +549,7 @@ public class Server extends ProtocolDispatchServer
    */
   public void addErrorPage(ErrorPage errorPage)
   {
-    getErrorApplication().addErrorPage(errorPage);
+    getErrorWebApp().addErrorPage(errorPage);
   }
 
   /**
@@ -560,7 +560,7 @@ public class Server extends ProtocolDispatchServer
   {
     if (_configException != null) {
       invocation.setFilterChain(new ExceptionFilterChain(_configException));
-      invocation.setApplication(getErrorApplication());
+      invocation.setWebApp(getErrorWebApp());
       invocation.setDependency(AlwaysModified.create());
       return;
     }
@@ -571,7 +571,7 @@ public class Server extends ProtocolDispatchServer
       int code = HttpServletResponse.SC_SERVICE_UNAVAILABLE;
 
       invocation.setFilterChain(new ErrorFilterChain(code));
-      invocation.setApplication(getErrorApplication());
+      invocation.setWebApp(getErrorWebApp());
       invocation.setDependency(AlwaysModified.create());
     }
   }
@@ -587,7 +587,7 @@ public class Server extends ProtocolDispatchServer
       if (host == null)
         return null;
 
-      Application app = host.findApplicationByURI(url);
+      WebApp app = host.findWebAppByURI(url);
 
       if (app == null)
         return null;
@@ -613,7 +613,7 @@ public class Server extends ProtocolDispatchServer
   /**
    * Returns the matching servlet pattern for a URL.
    */
-  public Application getApplication(String hostName, int port, String url)
+  public WebApp getWebApp(String hostName, int port, String url)
   {
     try {
       HostContainer hostContainer = _hostContainer;
@@ -626,7 +626,7 @@ public class Server extends ProtocolDispatchServer
       if (host == null)
         return null;
 
-      return host.findApplicationByURI(url);
+      return host.findWebAppByURI(url);
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
 
@@ -635,14 +635,14 @@ public class Server extends ProtocolDispatchServer
   }
 
   /**
-   * Returns the error application during startup.
+   * Returns the error webApp during startup.
    */
-  public Application getErrorApplication()
+  public WebApp getErrorWebApp()
   {
     HostContainer hostContainer = _hostContainer;
 
     if (hostContainer != null)
-      return hostContainer.getErrorApplication();
+      return hostContainer.getErrorWebApp();
     else
       return null;
   }

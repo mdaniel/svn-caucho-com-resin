@@ -73,7 +73,7 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
 
   public SessionManagerMXBean getSessionManager()
   {
-    Application app = getApplication();
+    WebApp app = getWebApp();
 
     if (app == null)
       return null;
@@ -95,7 +95,7 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
 
   public int getRequestCount()
   {
-    return getApplication().getRequestCount();
+    return getWebApp().getRequestCount();
   }
 
   public long getRequestCountTotal()
@@ -124,11 +124,11 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
   }
 
   /**
-   * Returns the active application.
+   * Returns the active webApp.
    */
-  protected Application getApplication()
+  protected WebApp getWebApp()
   {
-    return getController().getApplication();
+    return getController().getWebApp();
   }
 
 }

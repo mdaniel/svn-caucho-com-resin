@@ -53,7 +53,7 @@ public class WebAppRegexpDeployGenerator
   extends DeployGenerator<WebAppController> {
   private static final Logger log = Log.open(WebAppSingleDeployGenerator.class);
 
-  private ApplicationContainer _container;
+  private WebAppContainer _container;
   
   private WebAppController _parent;
 
@@ -77,7 +77,7 @@ public class WebAppRegexpDeployGenerator
    * Creates the new host deploy.
    */
   public WebAppRegexpDeployGenerator(DeployContainer<WebAppController> deployContainer,
-			    ApplicationContainer container,
+			    WebAppContainer container,
 			    WebAppConfig config)
   {
     super(deployContainer);
@@ -88,22 +88,22 @@ public class WebAppRegexpDeployGenerator
   }
 
   /**
-   * Gets the application container.
+   * Gets the webApp container.
    */
-  public ApplicationContainer getContainer()
+  public WebAppContainer getContainer()
   {
     return _container;
   }
 
   /**
-   * Sets the application container.
+   * Sets the webApp container.
    */
-  public void setContainer(ApplicationContainer container)
+  public void setContainer(WebAppContainer container)
   {
     _container = container;
   }
   /**
-   * Sets the parent application.
+   * Sets the parent webApp.
    */
   public void setParent(WebAppController parent)
   {
@@ -111,7 +111,7 @@ public class WebAppRegexpDeployGenerator
   }
   
   /**
-   * Returns the current array of application entries.
+   * Returns the current array of webApp entries.
    */
   public WebAppController generateController(String name)
   {

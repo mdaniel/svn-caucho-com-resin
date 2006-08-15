@@ -67,7 +67,7 @@ public class WebAppFilterChain implements FilterChain {
   private FilterChain _next;
 
   // app
-  private Application _app;
+  private WebApp _app;
   // transaction manager
   private TransactionManagerImpl _tm;
   // transaction proxy
@@ -91,7 +91,7 @@ public class WebAppFilterChain implements FilterChain {
    * @param next the next filterChain
    * @param filter the user's filter
    */
-  public WebAppFilterChain(FilterChain next, Application app)
+  public WebAppFilterChain(FilterChain next, WebApp app)
   {
     this(next, app, true);
   }
@@ -102,7 +102,7 @@ public class WebAppFilterChain implements FilterChain {
    * @param next the next filterChain
    * @param filter the user's filter
    */
-  public WebAppFilterChain(FilterChain next, Application app, boolean isTop)
+  public WebAppFilterChain(FilterChain next, WebApp app, boolean isTop)
   {
     _next = next;
     _app = app;
@@ -146,7 +146,7 @@ public class WebAppFilterChain implements FilterChain {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
-    Application app = _app;
+    WebApp app = _app;
     
     try {
       thread.setContextClassLoader(app.getClassLoader());

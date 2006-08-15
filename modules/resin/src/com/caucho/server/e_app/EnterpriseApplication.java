@@ -94,7 +94,7 @@ import com.caucho.lifecycle.Lifecycle;
 
 import com.caucho.server.deploy.EnvironmentDeployInstance;
 
-import com.caucho.server.webapp.ApplicationContainer;
+import com.caucho.server.webapp.WebAppContainer;
 import com.caucho.server.webapp.WebAppController;
 
 import com.caucho.ejb.EJBServer;
@@ -104,7 +104,8 @@ import com.caucho.ejb.EJBServerInterface;
  * An enterprise application (ear)
  */
 public class EnterpriseApplication
-  implements EnvironmentBean, EnvironmentDeployInstance {
+  implements EnvironmentBean, EnvironmentDeployInstance
+{
   static final L10N L = new L10N(EnterpriseApplication.class);
   static final Logger log = Log.open(EnterpriseApplication.class);
 
@@ -131,7 +132,7 @@ public class EnterpriseApplication
 
   private ApplicationConfig _config;
 
-  private ApplicationContainer _container;
+  private WebAppContainer _container;
 
   // private WarDirApplicationGenerator _warDeploy;
 
@@ -148,7 +149,7 @@ public class EnterpriseApplication
   /**
    * Creates the application.
    */
-  EnterpriseApplication(ApplicationContainer container,
+  EnterpriseApplication(WebAppContainer container,
 			EarDeployController controller, String name)
   {
     _container = container;
@@ -421,7 +422,7 @@ public class EnterpriseApplication
       */
 
       for (WebAppController webApp : _webApps) {
-	_container.getApplicationGenerator().update(webApp.getContextPath());
+	_container.getWebAppGenerator().update(webApp.getContextPath());
       }
     } finally {
       _lifecycle.toActive();
@@ -507,7 +508,7 @@ public class EnterpriseApplication
 
       if (webApps != null) {
 	for (WebAppController webApp : webApps) {
-	  _container.getApplicationGenerator().update(webApp.getContextPath());
+	  _container.getWebAppGenerator().update(webApp.getContextPath());
 	}
       }
     } finally {

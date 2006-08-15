@@ -37,7 +37,7 @@ import javax.servlet.http.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 public interface CauchoRequest extends HttpServletRequest {
   public String getPageURI();
@@ -46,7 +46,7 @@ public interface CauchoRequest extends HttpServletRequest {
   public String getPagePathInfo();
   public String getPageQueryString();
 
-  public Application getApplication();
+  public WebApp getWebApp();
   
   public ReadStream getStream() throws IOException;
   public int getRequestDepth(int depth);

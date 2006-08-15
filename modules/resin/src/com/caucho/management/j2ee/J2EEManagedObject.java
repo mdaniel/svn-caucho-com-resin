@@ -32,7 +32,7 @@ package com.caucho.management.j2ee;
 import com.caucho.jmx.IntrospectionMBean;
 import com.caucho.jmx.Jmx;
 import com.caucho.server.host.Host;
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 
 import javax.management.MalformedObjectNameException;
@@ -165,10 +165,10 @@ abstract public class J2EEManagedObject {
   protected ObjectName createObjectName(Hashtable<String,String> properties)
     throws MalformedObjectNameException
   {
-    Application application = Application.getLocal();
+    WebApp webApp = WebApp.getLocal();
 
-    if (application != null) {
-      String contextPath = application.getContextPath();
+    if (webApp != null) {
+      String contextPath = webApp.getContextPath();
 
       if (contextPath == null || contextPath.length() == 0)
         contextPath = "/";

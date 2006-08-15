@@ -47,7 +47,7 @@ import com.caucho.config.j2ee.InjectIntrospector;
 
 import com.caucho.log.Log;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
@@ -69,7 +69,7 @@ abstract public class PageManager {
   
   static final long ACCESS_INTERVAL = 60000L;
 
-  protected Application _application;
+  protected WebApp _webApp;
   private Path _classDir;
   private long _updateInterval = 1000;
   private boolean _isAdapter;
@@ -83,21 +83,21 @@ abstract public class PageManager {
   /**
    * Create a new PageManager
    *
-   * @param context the servlet application.
+   * @param context the servlet webApp.
    */
   PageManager()
   {
   }
 
-  void initApplication(Application application)
+  void initWebApp(WebApp webApp)
   {
-    _application = application;
+    _webApp = webApp;
 
     _classDir = CauchoSystem.getWorkPath();
 
     long interval = Environment.getDependencyCheckInterval();
   
-    JspPropertyGroup jspPropertyGroup = _application.getJsp();
+    JspPropertyGroup jspPropertyGroup = _webApp.getJsp();
 
     if (jspPropertyGroup != null) {
       _autoCompile = jspPropertyGroup.isAutoCompile();
@@ -125,10 +125,10 @@ abstract public class PageManager {
     if (_classDir != null)
       return _classDir;
     else {
-      Path appDir = _application.getAppDir();
+      Path appDir = _webApp.getAppDir();
 
       if (appDir instanceof MemoryPath) {
-        String workPathName = ("./" + _application.getURL());
+        String workPathName = ("./" + _webApp.getURL());
         Path path = CauchoSystem.getWorkPath().lookup(workPathName);
 
         return path;
@@ -140,15 +140,15 @@ abstract public class PageManager {
 
   public Path getAppDir()
   {
-    return _application.getAppDir();
+    return _webApp.getAppDir();
   }
 
   /**
-   * Returns the CauchoApplication for the manager.
+   * Returns the CauchoWebApp for the manager.
    */
-  Application getApplication()
+  WebApp getWebApp()
   {
-    return _application;
+    return _webApp;
   }
   
    /**
@@ -231,12 +231,12 @@ abstract public class PageManager {
 
       if (log.isLoggable(Level.FINE)) {
         log.fine("uri:" + uri +
-                 "(cp:" + getApplication().getContextPath() + 
-                 ",app:" + getApplication().getAppDir() +
+                 "(cp:" + getWebApp().getContextPath() + 
+                 ",app:" + getWebApp().getAppDir() +
                  ") -> " + path);
       }
      
-      Path appDir = getApplication().getAppDir();
+      Path appDir = getWebApp().getAppDir();
 
       String rawClassName = pageURI;
 

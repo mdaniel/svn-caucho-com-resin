@@ -47,7 +47,7 @@ import com.caucho.util.CharBuffer;
 import com.caucho.vfs.*;
 import com.caucho.jsp.*;
 
-import com.caucho.server.resin.ServletServer;
+import com.caucho.server.cluster.Server;
 
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.InvocationDecoder;
@@ -58,13 +58,11 @@ import com.caucho.server.connection.AbstractHttpRequest;
 
 import com.caucho.server.port.ServerRequest;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppController;
 import com.caucho.server.webapp.ErrorPageManager;
 
 import com.caucho.server.host.Host;
-
-import com.caucho.server.resin.ServletServer;
 
 import com.caucho.server.http.InvocationKey;
 
@@ -289,7 +287,7 @@ public class HmuxDispatchRequest {
 	}
       }
 
-      ArrayList<WebAppController> appList = host.getApplicationList();
+      ArrayList<WebAppController> appList = host.getWebAppList();
 
       for (int i = 0; i < appList.size(); i++) {
 	WebAppController appEntry = appList.get(i);
@@ -305,7 +303,7 @@ public class HmuxDispatchRequest {
 
 	crc64 = Crc64.generate(crc64, appEntry.getContextPath());
 
-	Application app = appEntry.getApplication();
+	WebApp app = appEntry.getWebApp();
 
 	if (appEntry.isDynamicDeploy()) {
 	  writeString(os, HMUX_MATCH, "/*");

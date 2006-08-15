@@ -32,15 +32,15 @@ package com.caucho.jsp;
 import java.io.*;
 
 import com.caucho.vfs.*;
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 /**
  * Resolves resources and looks up *.tld
  */
 public class AppResourceManager extends JspResourceManager {
-  private Application _app;
+  private WebApp _app;
 
-  public AppResourceManager(Application app)
+  public AppResourceManager(WebApp app)
   {
     _app = app;
   }

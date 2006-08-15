@@ -54,7 +54,7 @@ import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.connection.ResponseAdapter;
 import com.caucho.server.connection.ToCharResponseAdapter;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 /**
  * Represents a compiled JSP page.
@@ -63,7 +63,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
   protected static final Logger _caucho_log = Log.open(Page.class);
 
   private ServletConfig _config;
-  private Application _application;
+  private WebApp _webApp;
   
   private ArrayList<PersistentDependency> _depends;
   private ArrayList<Depend> _cacheDepends;
@@ -361,7 +361,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
     _config = config;
     _isDead = false;
     
-    _application = (Application) config.getServletContext();
+    _webApp = (WebApp) config.getServletContext();
 
     cauchoIsModified();
 
@@ -378,16 +378,16 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
   }
 
   /**
-   * Returns the Resin application.
+   * Returns the Resin webApp.
    */
-  public Application _caucho_getApplication()
+  public WebApp _caucho_getApplication()
   {
-    return _application;
+    return _webApp;
   }
 
   public ServletContext getServletContext()
   {
-    return _application;
+    return _webApp;
   }
 
   public String getServletName()
@@ -407,12 +407,12 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
 
   public void log(String msg)
   {
-    _application.log(getClass().getName() + ": " + msg);
+    _webApp.log(getClass().getName() + ": " + msg);
   }
 
   public void log(String msg, Throwable cause)
   {
-    _application.log(getClass().getName() + ": " + msg, cause);
+    _webApp.log(getClass().getName() + ": " + msg, cause);
   }
 
   public String getServletInfo()
@@ -422,7 +422,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
 
   boolean disableLog()
   {
-    JspPropertyGroup jsp = _application.getJsp();
+    JspPropertyGroup jsp = _webApp.getJsp();
 
     if (jsp != null)
       return jsp.isDisableLog();

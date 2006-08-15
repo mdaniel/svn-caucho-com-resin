@@ -50,7 +50,7 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.config.types.FileSetType;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 /**
  * Stores the parsed tlds.
@@ -67,7 +67,7 @@ public class TldManager {
     = new EnvironmentLocal<TldManager>();
   
   private JspResourceManager _resourceManager;
-  private Application _application;
+  private WebApp _webApp;
   
   private HashMap<Path,SoftReference<TldTaglib>> _tldMap
     = new HashMap<Path,SoftReference<TldTaglib>>();
@@ -82,11 +82,11 @@ public class TldManager {
   private ArrayList<TldPreload> _preloadTaglibs;
 
   private TldManager(JspResourceManager resourceManager,
-		     Application app)
+		     WebApp app)
     throws JspParseException, IOException
   {
     _resourceManager = resourceManager;
-    _application = app;
+    _webApp = app;
 
     if (app != null) {
       JspPropertyGroup jsp = app.getJsp();
@@ -100,7 +100,7 @@ public class TldManager {
   }
 
   static TldManager create(JspResourceManager resourceManager,
-			   Application app)
+			   WebApp app)
     throws JspParseException, IOException
   {
     
@@ -120,11 +120,11 @@ public class TldManager {
   }
 
   /**
-   * Sets the application.
+   * Sets the webApp.
    */
-  void setApplication(Application application)
+  void setWebApp(WebApp webApp)
   {
-    _application = application;
+    _webApp = webApp;
   }
 
   public String getSchema()
@@ -217,7 +217,7 @@ public class TldManager {
 
     for (int i = 0; i < taglibs.size(); i++) {
       try {
-	taglibs.get(i).initListeners(_application);
+	taglibs.get(i).initListeners(_webApp);
       } catch (Exception e) {
 	throw new JspParseException(e);
       }
@@ -460,7 +460,7 @@ public class TldManager {
     /* XXX: jsp/18n0 handled on init
     if (tld != null) {
       try {
-	tld.init(_application);
+	tld.init(_webApp);
       } catch (Exception e) {
 	throw new JspParseException(e);
       }
@@ -526,7 +526,7 @@ public class TldManager {
     if (_loadAllTldException != null)
       throw _loadAllTldException;
     else
-      throw new JspParseException(L.l("Can't find taglib-location `{0}'.  The taglib-location must match a tag library either:\n1) by pointing to a .tld directly, relative to the application's root directory\n2) specified in the web.xml\n3) defined in a jar's .tld in META-INF\n4) defined in a .tld in WEB-INF\n5) predefined by Resin",
+      throw new JspParseException(L.l("Can't find taglib-location `{0}'.  The taglib-location must match a tag library either:\n1) by pointing to a .tld directly, relative to the webApp's root directory\n2) specified in the web.xml\n3) defined in a jar's .tld in META-INF\n4) defined in a .tld in WEB-INF\n5) predefined by Resin",
                                       location));
   }
 
@@ -582,8 +582,8 @@ public class TldManager {
       
     String schema = null;
 
-    if (_application.getJsp() == null ||
-	_application.getJsp().isValidateTaglibSchema()) {
+    if (_webApp.getJsp() == null ||
+	_webApp.getJsp().isValidateTaglibSchema()) {
       schema = getSchema();
     }
 
@@ -607,7 +607,7 @@ public class TldManager {
 
     /* XXX: jsp/18n0 handled on init
     try {
-      taglib.init(_application);
+      taglib.init(_webApp);
     } catch (Exception e) {
       throw new JspParseException(e);
     }
@@ -630,7 +630,7 @@ public class TldManager {
       TldPreload taglib = parseTldPreload(is);
 
       taglib.setPath(path);
-      String appDir = _application.getAppDir().getPath();
+      String appDir = _webApp.getAppDir().getPath();
       String tagPath = path.getPath();
 
       if (tagPath.startsWith(appDir))
@@ -658,8 +658,8 @@ public class TldManager {
       
     String schema = null;
 
-    if (_application.getJsp() == null ||
-	_application.getJsp().isValidateTaglibSchema()) {
+    if (_webApp.getJsp() == null ||
+	_webApp.getJsp().isValidateTaglibSchema()) {
       schema = getSchema();
     }
 

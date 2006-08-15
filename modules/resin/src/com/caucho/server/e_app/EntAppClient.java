@@ -99,7 +99,6 @@ import com.caucho.lifecycle.Lifecycle;
 
 import com.caucho.server.deploy.DeployInstance;
 
-import com.caucho.server.webapp.ApplicationContainer;
 import com.caucho.server.webapp.WebAppController;
 
 import com.caucho.ejb.EJBClientInterface;

@@ -56,7 +56,7 @@ public class WebAppSingleDeployGenerator
   implements EnvironmentListener {
   private static final Logger log = Log.open(WebAppSingleDeployGenerator.class);
 
-  private ApplicationContainer _container;
+  private WebAppContainer _container;
   
   private WebAppController _parentWebApp;
 
@@ -81,11 +81,11 @@ public class WebAppSingleDeployGenerator
   }
 
   /**
-   * Creates the new host deploy.
+   * Creates the new web-app deploy.
    */
   public WebAppSingleDeployGenerator(DeployContainer<WebAppController> deployContainer,
-			    ApplicationContainer container,
-			    WebAppConfig config)
+				     WebAppContainer container,
+				     WebAppConfig config)
     throws Exception
   {
     super(deployContainer);
@@ -103,17 +103,17 @@ public class WebAppSingleDeployGenerator
   }
 
   /**
-   * Gets the application container.
+   * Gets the webApp container.
    */
-  public ApplicationContainer getContainer()
+  public WebAppContainer getContainer()
   {
     return _container;
   }
 
   /**
-   * Sets the application container.
+   * Sets the webApp container.
    */
-  public void setContainer(ApplicationContainer container)
+  public void setContainer(WebAppContainer container)
   {
     _container = container;
 
@@ -121,7 +121,7 @@ public class WebAppSingleDeployGenerator
       _parentLoader = container.getClassLoader();
   }
   /**
-   * Sets the parent application.
+   * Sets the parent webApp.
    */
   public void setParentWebApp(WebAppController parent)
   {
@@ -230,7 +230,7 @@ public class WebAppSingleDeployGenerator
   }
   
   /**
-   * Returns the current array of application entries.
+   * Returns the current array of webApp entries.
    */
   public WebAppController generateController(String name)
   {

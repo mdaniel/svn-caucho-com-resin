@@ -34,7 +34,7 @@ import com.caucho.log.Log;
 import com.caucho.make.Dependency;
 import com.caucho.make.DependencyContainer;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 import com.caucho.util.L10N;
 
@@ -59,7 +59,7 @@ public class Invocation extends ServletInvocation implements Dependency {
   private String _uri;
   private String _sessionId;
 
-  private Application _application;
+  private WebApp _webApp;
 
   private Dependency _dependency;
 
@@ -198,19 +198,19 @@ public class Invocation extends ServletInvocation implements Dependency {
   }
 
   /**
-   * Returns the mapped application.
+   * Returns the mapped webApp.
    */
-  public final Application getApplication()
+  public final WebApp getWebApp()
   {
-    return _application;
+    return _webApp;
   }
 
   /**
-   * Sets the mapped application.
+   * Sets the mapped webApp.
    */
-  public void setApplication(Application app)
+  public void setWebApp(WebApp app)
   {
-    _application = app;
+    _webApp = app;
   }
 
   /**
@@ -231,7 +231,7 @@ public class Invocation extends ServletInvocation implements Dependency {
 
   /**
    * Returns true if the invocation has been modified.  Generally only
-   * true if the application has been modified.
+   * true if the webApp has been modified.
    */
   public boolean isModified()
   {
@@ -240,7 +240,7 @@ public class Invocation extends ServletInvocation implements Dependency {
     if (depend != null && depend.isModified())
       return true;
 
-    Application app = _application;
+    WebApp app = _webApp;
 
     if (app != null) {
       depend = app.getInvocationDependency();
@@ -266,7 +266,7 @@ public class Invocation extends ServletInvocation implements Dependency {
     _port = invocation._port;
     _uri = invocation._uri;
 
-    _application = invocation._application;
+    _webApp = invocation._webApp;
     _dependency = invocation._dependency;
   }
 
@@ -326,6 +326,6 @@ public class Invocation extends ServletInvocation implements Dependency {
 
   void close()
   {
-    _application = null;
+    _webApp = null;
   }
 }

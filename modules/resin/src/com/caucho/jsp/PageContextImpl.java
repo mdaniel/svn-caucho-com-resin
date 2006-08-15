@@ -73,7 +73,7 @@ import com.caucho.log.Log;
 
 import com.caucho.xpath.VarEnv;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.ResponseWriter;
@@ -108,7 +108,7 @@ public class PageContextImpl extends PageContext
   private CauchoResponse _response;
   private ToCharResponseAdapter _responseAdapter;
   
-  private Application _application;
+  private WebApp _webApp;
   private HttpSession _session;
   private JspWriter _topOut;
   private JspWriter _out;
@@ -132,6 +132,7 @@ public class PageContextImpl extends PageContext
   private final CharBuffer _cb = new CharBuffer();
 
   private VariableResolver _varResolver;
+  private ELContext _elContext;
   private boolean _hasException;
 
   private ExpressionEvaluatorImpl _expressionEvaluator;
@@ -160,7 +161,7 @@ public class PageContextImpl extends PageContext
       session = ((HttpServletRequest) request).getSession(true);
 
     ServletConfig config = servlet.getServletConfig();
-    Application app = (Application) config.getServletContext();
+    WebApp app = (WebApp) config.getServletContext();
 
     initialize(servlet, app, request, response,
 	       errorPage, session, bufferSize, autoFlush,
@@ -168,7 +169,7 @@ public class PageContextImpl extends PageContext
   }
 
   public void initialize(Servlet servlet,
-			 Application app,
+			 WebApp app,
 			 ServletRequest request,
 			 ServletResponse response,
 			 String errorPage,
@@ -213,7 +214,7 @@ public class PageContextImpl extends PageContext
     _out = _topOut;
     
     _errorPage = errorPage;
-    _application = app;
+    _webApp = app;
 
     //_topOut.init(this, bufferSize, autoFlush);
 
@@ -225,6 +226,7 @@ public class PageContextImpl extends PageContext
     //  _writerStreamImpl.setWriter(_topOut);
     // _response.setPrintWriter(body.getWriter());
 
+    _elContext = null;
 
     _hasException = false;
     //if (_attributes.size() > 0)
@@ -333,8 +335,8 @@ public class PageContextImpl extends PageContext
       }
     }
     
-    if (_application != null)
-      _application.removeAttribute(name);
+    if (_webApp != null)
+      _webApp.removeAttribute(name);
   }
 
   public Enumeration<String> getAttributeNames()
@@ -462,7 +464,7 @@ public class PageContextImpl extends PageContext
   }
 
   /**
-   * Finds an attribute in any of the scopes from page to application.
+   * Finds an attribute in any of the scopes from page to webApp.
    *
    * @param name the attribute name.
    *
@@ -813,15 +815,15 @@ public class PageContextImpl extends PageContext
    */
   public ServletContext getServletContext()
   {
-    return _application;
+    return _webApp;
   }
 
   /**
-   * Returns the page's application.
+   * Returns the page's webApp.
    */
-  public Application getApplication()
+  public WebApp getApplication()
   {
-    return _application;
+    return _webApp;
   }
 
   /**
@@ -1159,7 +1161,7 @@ public class PageContextImpl extends PageContext
    */
   public ELContext getELContext()
   {
-    throw new UnsupportedOperationException();
+    return _elContext;
   }
 
   /**
@@ -1205,7 +1207,7 @@ public class PageContextImpl extends PageContext
       getCauchoResponse().setFlushBuffer(null);
 
       _request = null;
-      _application = null;
+      _webApp = null;
       _session = null;
       while (_out instanceof AbstractJspWriter) {
 	if (_out instanceof AbstractJspWriter)
@@ -1603,9 +1605,9 @@ public class PageContextImpl extends PageContext
   }
 
   /**
-   * Set/Remove an application attribute.
+   * Set/Remove an webApp attribute.
    */
-  public void applicationSetOrRemove(String var, Object value)
+  public void webAppSetOrRemove(String var, Object value)
   {
     if (value != null)
       getApplication().setAttribute(var, value);
@@ -1651,7 +1653,7 @@ public class PageContextImpl extends PageContext
   }
   
   /**
-   * Finds an attribute in any of the scopes from page to application.
+   * Finds an attribute in any of the scopes from page to webApp.
    *
    * @param name the attribute name.
    *
@@ -1754,6 +1756,23 @@ public class PageContextImpl extends PageContext
     public Object nextElement()
     {
       return _values[_index++];
+    }
+  }
+
+  class PageELContext extends ELContext {
+    public ELResolver getELResolver()
+    {
+      throw new UnsupportedOperationException();
+    }
+
+    public FunctionMapper getFunctionMapper()
+    {
+      throw new UnsupportedOperationException();
+    }
+
+    public VariableMapper getVariableMapper()
+    {
+      throw new UnsupportedOperationException();
     }
   }
 }

@@ -92,8 +92,8 @@ public class ErrorPageManager {
   
   public static String SHUTDOWN = "com.caucho.shutdown";
   
-  private Application _app;
-  private ApplicationContainer _appContainer;
+  private WebApp _app;
+  private WebAppContainer _appContainer;
   private HashMap<Object,String> _errorPageMap = new HashMap<Object,String>();
   private String _defaultLocation;
 
@@ -140,17 +140,17 @@ public class ErrorPageManager {
   }
 
   /**
-   * Sets the application.
+   * Sets the webApp.
    */
-  public void setApplication(Application app)
+  public void setWebApp(WebApp app)
   {
     _app = app;
   }
 
   /**
-   * Sets the application container.
+   * Sets the webApp container.
    */
-  public void setApplicationContainer(ApplicationContainer appContainer)
+  public void setWebAppContainer(WebAppContainer appContainer)
   {
     _appContainer = appContainer;
   }

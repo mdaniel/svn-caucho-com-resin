@@ -50,14 +50,13 @@ import com.caucho.log.Log;
 
 import com.caucho.xpath.VarEnv;
 
-import com.caucho.server.webapp.Application;
-
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.connection.ResponseAdapter;
 import com.caucho.server.connection.RequestAdapter;
 
 import com.caucho.server.webapp.RequestDispatcherImpl;
+import com.caucho.server.webapp.WebApp;
 
 public class PageContextWrapper extends PageContextImpl {
   private static final Logger log = Log.open(PageContextWrapper.class);
@@ -148,7 +147,7 @@ public class PageContextWrapper extends PageContextImpl {
   /**
    * Returns the page's application.
    */
-  public Application getApplication()
+  public WebApp getApplication()
   {
     return _parent.getApplication();
   }

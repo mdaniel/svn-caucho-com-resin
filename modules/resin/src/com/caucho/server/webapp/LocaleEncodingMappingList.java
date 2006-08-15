@@ -41,12 +41,12 @@ public class LocaleEncodingMappingList {
   static final L10N L = new L10N(LocaleEncodingMappingList.class);
   static final Logger log = Log.open(LocaleEncodingMappingList.class);
 
-  private Application _app;
+  private WebApp _app;
 
   /**
-   * Creates the application with its environment loader.
+   * Creates the webApp with its environment loader.
    */
-  LocaleEncodingMappingList(Application app)
+  LocaleEncodingMappingList(WebApp app)
   {
     _app = app;
   }

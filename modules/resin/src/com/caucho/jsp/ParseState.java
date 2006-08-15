@@ -95,6 +95,7 @@ public class ParseState {
 
   private boolean _recycleTags = true;
   private boolean _isTrimWhitespace;
+  private boolean _isDeferredSyntaxAllowedAsLiteral;
 
   private JspResourceManager _resourceManager;
 
@@ -489,6 +490,22 @@ public class ParseState {
   public void setTrimWhitespace(boolean trim)
   {
     _isTrimWhitespace = trim;
+  }
+
+  /**
+   * Returns true if JSP whitespace is trimmed.
+   */
+  public boolean isDeferredSyntaxAllowedAsLiteral()
+  {
+    return _isDeferredSyntaxAllowedAsLiteral;
+  }
+
+  /**
+   * Set true if JSP whitespace is trimmed.
+   */
+  public void setDeferredSyntaxAllowedAsLiteral(boolean trim)
+  {
+    _isDeferredSyntaxAllowedAsLiteral = trim;
   }
   
   /**

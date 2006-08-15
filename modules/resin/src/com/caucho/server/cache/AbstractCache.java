@@ -34,7 +34,7 @@ import com.caucho.vfs.Path;
 
 import com.caucho.config.types.Bytes;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 /**
  * Cached response.
@@ -84,7 +84,7 @@ abstract public class AbstractCache {
    * Creates the filter.
    */
   abstract public FilterChain createFilterChain(FilterChain next,
-						Application app);
+						WebApp app);
 
   /**
    * Clears the cache.

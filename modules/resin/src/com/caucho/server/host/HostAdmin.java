@@ -215,7 +215,7 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
     if (host == null)
       return new WebAppMXBean[0];
 
-    ArrayList<WebAppController> webappList = host.getApplicationList();
+    ArrayList<WebAppController> webappList = host.getWebAppList();
 
     WebAppMXBean []webapps = new WebAppMXBean[webappList.size()];
 

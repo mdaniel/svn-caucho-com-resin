@@ -37,7 +37,7 @@ import javax.servlet.http.*;
 
 import com.caucho.util.*;
 import com.caucho.vfs.*;
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 /**
  * Handles XTP pages.  Most of the work is done in the JspManager and QServlet.
@@ -68,7 +68,7 @@ public class XtpServlet extends QServlet {
     super.init(conf);
 
     XtpManager manager = new XtpManager();
-    manager.initApplication((Application) getServletContext());
+    manager.initWebApp((WebApp) getServletContext());
       
     setManager(manager);
 

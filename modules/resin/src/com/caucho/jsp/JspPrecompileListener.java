@@ -48,7 +48,7 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.config.types.PathPatternType;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 import com.caucho.server.connection.StubServletRequest;
 import com.caucho.server.connection.StubServletResponse;
@@ -76,7 +76,7 @@ public class JspPrecompileListener extends JspPrecompileResource
   public void contextInitialized(ServletContextEvent event)
   {
     try {
-      setApplication((Application) event.getServletContext());
+      setWebApp((WebApp) event.getServletContext());
       
       init();
     

@@ -95,16 +95,16 @@ public class XtpManager extends PageManager {
   {
   }
 
-  void initApplication(Application context)
+  void initWebApp(WebApp context)
   {
-    super.initApplication(context);
+    super.initWebApp(context);
     
     if (JspFactory.getDefaultFactory() == null)
       JspFactory.setDefaultFactory(new QJspFactory());
     
     _xslManager = new XslManager(context);
     _jspManager = new JspManager();
-    _jspManager.initApplication(context);
+    _jspManager.initWebApp(context);
   }
 
   /**
@@ -180,7 +180,7 @@ public class XtpManager extends PageManager {
 
     XtpPage xtpPage = new XtpPage(path, uri,
                                   className,
-                                  _application, _xslManager, _strictXml);
+                                  _webApp, _xslManager, _strictXml);
     xtpPage.setManager(_jspManager);
     xtpPage.setHtmlToLower(_toLower);
 

@@ -29,7 +29,7 @@
 package com.caucho.doc;
 
 import com.caucho.log.Log;
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppController;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
@@ -72,11 +72,11 @@ public class JavadocRedirectServlet extends HttpServlet {
     query = URLUtil.encodeURL(query);
 
     // see if the resin-javadoc web-app is available
-    Application app = (Application) getServletContext();
+    WebApp app = (WebApp) getServletContext();
 
-    Application japp = null;
+    WebApp japp = null;
 
-    ArrayList appControllers = app.getParent().getApplicationList();
+    ArrayList appControllers = app.getParent().getWebAppList();
 
     for (int i = 0; i < appControllers.size(); i++)
     {
@@ -85,7 +85,7 @@ public class JavadocRedirectServlet extends HttpServlet {
       String contextPath = appController.getContextPath();
 
       if (contextPath.startsWith("/resin-javadoc")) {
-        japp = appController.getApplication();
+        japp = appController.getWebApp();
         break;
       }
     }

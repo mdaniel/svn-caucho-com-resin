@@ -63,8 +63,8 @@ class DispatchRequest extends RequestAdapter {
   private static final FreeList<DispatchRequest> _freeList =
     new FreeList<DispatchRequest>(32);
 
-  private Application _application;
-  private Application _oldApplication;
+  private WebApp _webApp;
+  private WebApp _oldWebApp;
   private Form _formParser;
   private HashMapImpl<String,String[]> _form;
   protected ReadStream _readStream;
@@ -101,8 +101,8 @@ class DispatchRequest extends RequestAdapter {
     return req;
   }
 
-  void init(Application application,
-            Application oldApplication,
+  void init(WebApp webApp,
+            WebApp oldWebApp,
             HttpServletRequest request,
             HttpServletResponse response,
 	    String method, String uri,
@@ -110,10 +110,10 @@ class DispatchRequest extends RequestAdapter {
 	    String queryString, String addedQuery)
     throws ServletException
   {
-    super.init(request, response, application);
+    super.init(request, response, webApp);
 
-    _application = application;
-    _oldApplication = oldApplication;
+    _webApp = webApp;
+    _oldWebApp = oldWebApp;
 
     _form = null;
 
@@ -143,9 +143,9 @@ class DispatchRequest extends RequestAdapter {
     _readStream = readStream;
   }
 
-  public Application getApplication()
+  public WebApp getWebApp()
   {
-    return _application;
+    return _webApp;
   }
 
   public String getMethod()
@@ -190,12 +190,12 @@ class DispatchRequest extends RequestAdapter {
   }
 
   /**
-   * Returns the servlet context prefix of the application.
+   * Returns the servlet context prefix of the webApp.
    */
   public String getContextPath()
   {
-    if (_application != null)
-      return _application.getContextPath();
+    if (_webApp != null)
+      return _webApp.getContextPath();
     else
       return "/";
   }
@@ -337,7 +337,7 @@ class DispatchRequest extends RequestAdapter {
 
   public String getRealPath(String path)
   {
-    return _application.getRealPath(path);
+    return _webApp.getRealPath(path);
   }
 
   public String getPathTranslated()
@@ -351,9 +351,9 @@ class DispatchRequest extends RequestAdapter {
   public RequestDispatcher getRequestDispatcher(String path)
   {
     if (path.startsWith("/"))
-      return _application.getRequestDispatcher(path);
+      return _webApp.getRequestDispatcher(path);
     else
-      return _application.getRequestDispatcher(getPwd() + path);
+      return _webApp.getRequestDispatcher(getPwd() + path);
   }
 
   public String getPwd()
@@ -421,7 +421,7 @@ class DispatchRequest extends RequestAdapter {
    */
   public HttpSession getSession(boolean create)
   {
-    SessionManager manager = _application.getSessionManager();
+    SessionManager manager = _webApp.getSessionManager();
 
     setVaryCookie(manager.getCookieName());
 
@@ -431,7 +431,7 @@ class DispatchRequest extends RequestAdapter {
       return _session;
     }
 
-    if (_application == _oldApplication) {
+    if (_webApp == _oldWebApp) {
       HttpSession hSession = super.getSession(create);
       if (hSession != null)
         setHasCookie();
@@ -495,7 +495,7 @@ class DispatchRequest extends RequestAdapter {
     if (! create)
       return null;
 
-    // Must accept old ids because different applications in the same
+    // Must accept old ids because different webApps in the same
     // server must share the same cookie
     //
     // But, if the session group doesn't match, then create a new
@@ -560,8 +560,8 @@ class DispatchRequest extends RequestAdapter {
     super.free();
 
     _session = null;
-    _application = null;
-    _oldApplication = null;
+    _webApp = null;
+    _oldWebApp = null;
     _readStream = null;
 
     if (_is != null)

@@ -35,7 +35,7 @@ import com.caucho.vfs.Path;
 
 import com.caucho.config.BuilderProgram;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 /**
  * Configuration for the taglib in the .tld
@@ -134,7 +134,7 @@ public class TldPreload {
   /**
    * Applies the listeners.
    */
-  public void initListeners(Application app)
+  public void initListeners(WebApp app)
     throws InstantiationException, IllegalAccessException
   {
     if (app == null)

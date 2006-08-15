@@ -62,6 +62,7 @@ public class JspDirectivePage extends JspNode {
   private static final QName IS_THREAD_SAFE = new QName("isThreadSafe");
   private static final QName EXTENDS = new QName("extends");
   private static final QName TRIM_WS = new QName("trimDirectiveWhitespaces");
+  private static final QName DEFER = new QName("deferredSyntaxAllowedAsLiteral");
 
   private Boolean _isElIgnored;
   
@@ -245,6 +246,15 @@ public class JspDirectivePage extends JspNode {
         _parseState.setTrimWhitespace(false);
       else
         throw error(L.l("trimDirectiveWhitespaces expects `true' or `false' at `{0}'",
+                        value));
+    }
+    else if (DEFER.equals(name)) {
+      if (value.equals("true"))
+        _parseState.setDeferredSyntaxAllowedAsLiteral(true);
+      else if (value.equals("false"))
+        _parseState.setDeferredSyntaxAllowedAsLiteral(false);
+      else
+        throw error(L.l("deferredSyntaxAllowedAsLiteral expects `true' or `false' at `{0}'",
                         value));
     }
     else {

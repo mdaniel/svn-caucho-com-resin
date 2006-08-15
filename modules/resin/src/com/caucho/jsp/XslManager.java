@@ -50,7 +50,7 @@ import com.caucho.xsl.*;
 
 import com.caucho.loader.DynamicClassLoader;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;
@@ -59,7 +59,7 @@ class XslManager {
   private static final Logger log = Log.open(XslManager.class);
   static final L10N L = new L10N(XslManager.class);
 
-  private Application _application;
+  private WebApp _webApp;
   private Path _workPath;
   private LruCache<String,SoftReference<Templates>> _xslCache =
     new LruCache<String,SoftReference<Templates>>(256);
@@ -68,7 +68,7 @@ class XslManager {
 
   public XslManager(ServletContext context)
   {
-    _application = (Application) context;
+    _webApp = (WebApp) context;
 
     _workPath = CauchoSystem.getWorkPath();
   }
@@ -88,10 +88,10 @@ class XslManager {
   {
     String servletPath = req.getPageServletPath();
 
-    Application application = req.getApplication();
+    WebApp webApp = req.getWebApp();
 
-    Path appDir = application.getAppDir();
-    Path pwd = appDir.lookupNative(application.getRealPath(servletPath));
+    Path appDir = webApp.getAppDir();
+    Path pwd = appDir.lookupNative(webApp.getRealPath(servletPath));
     pwd = pwd.getParent();
     
     String fullStyleSheet = pwd.toString() + "/" + href;
@@ -128,13 +128,13 @@ class XslManager {
   {
     String servletPath = req.getPageServletPath();
 
-    Application application = req.getApplication();
-    Path appDir = application.getAppDir();
-    Path pwd = appDir.lookupNative(application.getRealPath(servletPath));
+    WebApp webApp = req.getWebApp();
+    Path appDir = webApp.getAppDir();
+    Path pwd = appDir.lookupNative(webApp.getRealPath(servletPath));
     pwd = pwd.getParent();
 
     DynamicClassLoader loader;
-    loader = (DynamicClassLoader) application.getClassLoader();
+    loader = (DynamicClassLoader) webApp.getClassLoader();
     
     MergePath stylePath = new MergePath();
     stylePath.addMergePath(pwd);

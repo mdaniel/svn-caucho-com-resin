@@ -40,6 +40,7 @@ import java.lang.reflect.Method;
 import java.beans.*;
 import java.math.*;
 
+import javax.el.*;
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
@@ -1022,6 +1023,16 @@ public abstract class JspNode {
         return String.valueOf(Double.valueOf(value));
       else if (type.equals(Double.class))
         return ("new java.lang.Double(" + Double.valueOf(value) + ")");
+      else if (ValueExpression.class.isAssignableFrom(type)) {
+        int exprIndex;
+
+        if (isEmpty)
+          exprIndex = _gen.addValueExpr("");
+        else
+          exprIndex = _gen.addValueExpr(value);
+      
+        return ("_caucho_value_expr_" + exprIndex);
+      }
       else if (com.caucho.el.Expr.class.isAssignableFrom(type)) {
         int exprIndex;
 
@@ -1066,6 +1077,13 @@ public abstract class JspNode {
       exprIndex = _gen.addExpr(value);
       
       return ("_caucho_expr_" + exprIndex);
+    }
+    else if (ValueExpression.class.isAssignableFrom(type)) {
+      int exprIndex;
+
+      exprIndex = _gen.addValueExpr(value);
+      
+      return ("_caucho_value_expr_" + exprIndex);
     }
     else if (com.caucho.xpath.Expr.class.isAssignableFrom(type)) {
       com.caucho.xpath.Expr expr;

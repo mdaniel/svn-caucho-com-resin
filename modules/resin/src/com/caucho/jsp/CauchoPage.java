@@ -35,13 +35,13 @@ import com.caucho.vfs.Path;
 
 import com.caucho.java.LineMap;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 public interface CauchoPage {
   public void init(Path path)
     throws ServletException;
     
-  public Application _caucho_getApplication();
+  public WebApp _caucho_getApplication();
     
   public boolean _caucho_isModified();
   

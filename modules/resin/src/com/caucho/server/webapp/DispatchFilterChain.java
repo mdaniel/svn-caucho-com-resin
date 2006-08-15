@@ -68,7 +68,7 @@ public class DispatchFilterChain implements FilterChain {
   private FilterChain _next;
 
   // app
-  private Application _app;
+  private WebApp _app;
   // class loader
   private ClassLoader _classLoader;
 
@@ -78,9 +78,9 @@ public class DispatchFilterChain implements FilterChain {
    * Creates a new FilterChainFilter.
    *
    * @param next the next filterChain
-   * @param app the application
+   * @param app the webApp
    */
-  public DispatchFilterChain(FilterChain next, Application app)
+  public DispatchFilterChain(FilterChain next, WebApp app)
   {
     _next = next;
     _app = app;

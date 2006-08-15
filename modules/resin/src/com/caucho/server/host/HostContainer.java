@@ -68,12 +68,12 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.server.resin.ServletServer;
+import com.caucho.server.cluster.Server;
 
 import com.caucho.server.e_app.EarConfig;
 
 import com.caucho.server.webapp.WebAppConfig;
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.RewriteInvocation;
 
 /**
@@ -88,7 +88,7 @@ public class HostContainer implements DispatchBuilder {
 
   private DispatchServer _dispatchServer;
 
-  private Application _errorApplication;
+  private WebApp _errorWebApp;
 
   private String _url = "";
   
@@ -112,7 +112,7 @@ public class HostContainer implements DispatchBuilder {
   // Regexp host
   private ArrayList<HostConfig> _hostRegexpList = new ArrayList<HostConfig>();
 
-  // List of default application configurations
+  // List of default webApp configurations
   private ArrayList<WebAppConfig> _webAppDefaultList
     = new ArrayList<WebAppConfig>();
   
@@ -127,7 +127,7 @@ public class HostContainer implements DispatchBuilder {
   private final Lifecycle _lifecycle = new Lifecycle();
 
   /**
-   * Creates the application with its environment loader.
+   * Creates the webApp with its environment loader.
    */
   public HostContainer()
   {
@@ -340,8 +340,8 @@ public class HostContainer implements DispatchBuilder {
       FilterChain chain = _rewriteInvocation.map(url, invocation);
 
       if (chain != null) {
-	ServletServer servletServer = (ServletServer) _dispatchServer;
-	invocation.setApplication(servletServer.getErrorApplication());
+	Server server = (Server) _dispatchServer;
+	invocation.setWebApp(server.getErrorWebApp());
 	invocation.setFilterChain(chain);
 	return;
       }
@@ -355,7 +355,7 @@ public class HostContainer implements DispatchBuilder {
     else {
       FilterChain chain = new ErrorFilterChain(404);
       invocation.setFilterChain(chain);
-      invocation.setApplication(getErrorApplication());
+      invocation.setWebApp(getErrorWebApp());
       invocation.setDependency(AlwaysModified.create());
     }
   }
@@ -449,36 +449,36 @@ public class HostContainer implements DispatchBuilder {
   }
 
   /**
-   * Returns the error application during startup.
+   * Returns the error webApp during startup.
    */
-  public Application getErrorApplication()
+  public WebApp getErrorWebApp()
   {
-    if (_errorApplication == null) {
+    if (_errorWebApp == null) {
       Thread thread = Thread.currentThread();
       ClassLoader loader = thread.getContextClassLoader();
       try {
 	thread.setContextClassLoader(_classLoader);
 
-	_errorApplication = new Application();
-	_errorApplication.setAppDir(getRootDirectory());
+	_errorWebApp = new WebApp();
+	_errorWebApp.setAppDir(getRootDirectory());
 	com.caucho.server.dispatch.ServletMapping file;
-	file = _errorApplication.createServletMapping();
+	file = _errorWebApp.createServletMapping();
 	file.setURLPattern("/");
 	file.setServletName("resin-file");
 	file.setServletClass("com.caucho.servlets.FileServlet");
 	file.init();
-	_errorApplication.addServletMapping(file);
+	_errorWebApp.addServletMapping(file);
 	
 	for (WebAppConfig config : _webAppDefaultList) {
 	  try {
-	    config.getBuilderProgram().configure(_errorApplication);
+	    config.getBuilderProgram().configure(_errorWebApp);
 	  } catch (Throwable e) {
 	    log.log(Level.WARNING, e.toString(), e);
 	  }
 	}
 	
-	_errorApplication.init();
-	_errorApplication.start();
+	_errorWebApp.init();
+	_errorWebApp.start();
       } catch (Throwable e) {
 	log.log(Level.WARNING, e.toString(), e);
       } finally {
@@ -486,7 +486,7 @@ public class HostContainer implements DispatchBuilder {
       }
     }
 
-    return _errorApplication;
+    return _errorWebApp;
   }
 
   /**

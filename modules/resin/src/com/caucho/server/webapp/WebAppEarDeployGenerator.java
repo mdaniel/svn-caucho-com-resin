@@ -42,7 +42,7 @@ import java.util.logging.Logger;
 public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> {
   private static final Logger log = Log.open(WebAppEarDeployGenerator.class);
 
-  private ApplicationContainer _container;
+  private WebAppContainer _container;
   
   private String _urlPrefix = "";
 
@@ -56,7 +56,7 @@ public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> 
    * Creates the new host deploy.
    */
   public WebAppEarDeployGenerator(DeployContainer<WebAppController> deployContainer,
-				  ApplicationContainer container,
+				  WebAppContainer container,
 				  EarDeployGenerator earDeploy)
     throws Exception
   {
@@ -69,17 +69,17 @@ public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> 
   }
 
   /**
-   * Gets the application container.
+   * Gets the webApp container.
    */
-  public ApplicationContainer getContainer()
+  public WebAppContainer getContainer()
   {
     return _container;
   }
 
   /**
-   * Sets the application container.
+   * Sets the webApp container.
    */
-  public void setContainer(ApplicationContainer container)
+  public void setContainer(WebAppContainer container)
   {
     _container = container;
 
@@ -150,7 +150,7 @@ public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> 
   }
   
   /**
-   * Returns the current array of application entries.
+   * Returns the current array of webApp entries.
    */
   public WebAppController generateController(String name)
   {

@@ -46,7 +46,7 @@ import com.caucho.config.types.InitProgram;
 import com.caucho.el.EL;
 import com.caucho.el.MapVariableResolver;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 /**
  * Configuration for a servlet.
@@ -132,7 +132,7 @@ public class ServletMapping extends ServletConfigImpl {
   /**
    * Initialize for a regexp.
    */
-  String initRegexp(ServletContext application,
+  String initRegexp(ServletContext webApp,
 		    ServletManager manager,
 		    ArrayList<String> vars)
     throws ServletException
@@ -160,7 +160,7 @@ public class ServletMapping extends ServletConfigImpl {
       String className = EL.evalString(rawClassName, mapEnv);
 
       try {
-	Application app = (Application) getServletContext();
+	WebApp app = (WebApp) getServletContext();
 
 	Class cl = Class.forName(className, false, app.getClassLoader());
       } catch (ClassNotFoundException e) {
@@ -173,7 +173,7 @@ public class ServletMapping extends ServletConfigImpl {
 
       config.setServletName(servletName);
       config.setServletClass(className);
-      config.setServletContext(application);
+      config.setServletContext(webApp);
 
       InitProgram program = getInit();
       if (program != null)

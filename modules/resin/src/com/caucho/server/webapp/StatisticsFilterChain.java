@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -32,7 +33,7 @@ package com.caucho.server.webapp;
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.Connection;
 import com.caucho.server.port.TcpConnection;
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppAdmin;
 import com.caucho.server.host.HostAdmin;
 import com.caucho.util.Alarm;
@@ -48,12 +49,12 @@ public class StatisticsFilterChain
   implements FilterChain
 {
   private final FilterChain _next;
-  private Application _application;
+  private WebApp _webApp;
 
-  public StatisticsFilterChain(FilterChain next, Application application)
+  public StatisticsFilterChain(FilterChain next, WebApp webApp)
   {
     _next = next;
-    _application = application;
+    _webApp = webApp;
   }
 
   public void doFilter(ServletRequest request, ServletResponse response)
@@ -89,7 +90,7 @@ public class StatisticsFilterChain
         readBytes = tcpConnection.getSocket().getTotalReadBytes() - readBytes;
         writeBytes = tcpConnection.getSocket().getTotalReadBytes() - writeBytes;
 
-        _application.updateStatistics(time, (int) readBytes, (int) writeBytes, clientDisconnectException != null);
+        _webApp.updateStatistics(time, (int) readBytes, (int) writeBytes, clientDisconnectException != null);
 
         if (clientDisconnectException != null)
           throw clientDisconnectException;

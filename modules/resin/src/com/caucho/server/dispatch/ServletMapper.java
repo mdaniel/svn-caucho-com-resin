@@ -50,7 +50,7 @@ import com.caucho.log.Log;
 
 import com.caucho.jsp.QServlet;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 /**
  * Manages dispatching: servlets and filters.
@@ -351,7 +351,7 @@ public class ServletMapper {
 
     DependencyContainer dependencyList = new DependencyContainer();
 
-    Application app = (Application) _servletContext;
+    WebApp app = (WebApp) _servletContext;
     
     for (int i = 0; i < _welcomeFileList.size(); i++) {
       String file = _welcomeFileList.get(i);

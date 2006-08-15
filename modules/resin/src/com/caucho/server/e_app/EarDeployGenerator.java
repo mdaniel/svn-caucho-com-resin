@@ -48,7 +48,7 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.server.deploy.ExpandDeployGenerator;
 import com.caucho.server.deploy.DeployContainer;
 
-import com.caucho.server.webapp.ApplicationContainer;
+import com.caucho.server.webapp.WebAppContainer;
 import com.caucho.server.webapp.WebAppController;
 
 /**
@@ -58,7 +58,7 @@ public class EarDeployGenerator
   extends ExpandDeployGenerator<EarDeployController> {
   private String _urlPrefix = "";
 
-  private ApplicationContainer _parentContainer;
+  private WebAppContainer _parentContainer;
   
   private EarConfig _earDefault;
 
@@ -66,7 +66,7 @@ public class EarDeployGenerator
     = new ArrayList<EarConfig>();
 
   public EarDeployGenerator(DeployContainer<EarDeployController> deployContainer,
-			    ApplicationContainer parentContainer)
+			    WebAppContainer parentContainer)
   {
     super(deployContainer);
 
@@ -85,7 +85,7 @@ public class EarDeployGenerator
   /**
    * Returns the parent container;
    */
-  ApplicationContainer getContainer()
+  WebAppContainer getContainer()
   {
     return _parentContainer;
   }

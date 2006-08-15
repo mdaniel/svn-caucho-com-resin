@@ -69,7 +69,7 @@ public class SessionManagerAdmin extends AbstractManagedObject
    */
   public WebAppMXBean getWebApp()
   {
-    return _manager.getApplication().getAdmin();
+    return _manager.getWebApp().getAdmin();
   }
 
   //

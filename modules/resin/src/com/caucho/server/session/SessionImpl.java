@@ -215,7 +215,7 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   public ServletContext getServletContext()
   {
-    return _manager.getApplication();
+    return _manager.getWebApp();
   }
 
   /**
@@ -231,7 +231,7 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   public ServletAuthenticator getAuthenticator()
   {
-    return _manager.getApplication().getAuthenticator();
+    return _manager.getWebApp().getAuthenticator();
   }
 
   /**
@@ -581,7 +581,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 	ServletAuthenticator auth = getAuthenticator();
 
 	if (auth != null)
-	  auth.logout(_manager.getApplication(), timeoutSession, _id, user);
+	  auth.logout(_manager.getWebApp(), timeoutSession, _id, user);
       } catch (Exception e) {
         log.log(Level.WARNING, e.toString(), e);
       }

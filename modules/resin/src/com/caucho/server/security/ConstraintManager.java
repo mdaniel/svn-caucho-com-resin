@@ -42,7 +42,7 @@ import com.caucho.server.dispatch.ErrorFilterChain;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.FilterConfigImpl;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 /**
  * Manages security constraint.
@@ -79,7 +79,7 @@ public class ConstraintManager extends FilterChainBuilder {
   {
     String uri = invocation.getContextURI();
 
-    Application app = invocation.getApplication();
+    WebApp app = invocation.getWebApp();
     if (app == null)
       return next;
 
@@ -143,7 +143,7 @@ public class ConstraintManager extends FilterChainBuilder {
 
     if (constraints.size() != 0 || methodMap.size() > 0) {
       SecurityFilterChain filterChain = new SecurityFilterChain(next);
-      filterChain.setApplication(invocation.getApplication());
+      filterChain.setWebApp(invocation.getWebApp());
       if (methodMap.size() > 0)
         filterChain.setMethodMap(methodMap);
       filterChain.setConstraints(constraints);

@@ -53,7 +53,7 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.config.types.FileSetType;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 /**
  * Stores the entire information for a tag library.
@@ -63,7 +63,7 @@ public class TaglibManager {
   private static final Logger log = Log.open(TaglibManager.class);
 
   private JspResourceManager _resourceManager;
-  private Application _application;
+  private WebApp _webApp;
 
   private TldManager _tldManager;
 
@@ -81,21 +81,21 @@ public class TaglibManager {
   private volatile boolean _isInit;
 
   public TaglibManager(JspResourceManager resourceManager,
-		       Application application)
+		       WebApp webApp)
     throws JspParseException, IOException
   {
     _resourceManager = resourceManager;
-    _application = application;
+    _webApp = webApp;
 
-    _tldManager = TldManager.create(resourceManager, application);
+    _tldManager = TldManager.create(resourceManager, webApp);
   }
 
   /**
-   * Sets the application.
+   * Sets the webApp.
    */
-  void setApplication(Application application)
+  void setWebApp(WebApp webApp)
   {
-    _application = application;
+    _webApp = webApp;
   }
 
   public void setTldDir(String tldDir)
@@ -245,7 +245,7 @@ public class TaglibManager {
   /**
    * Finds the path to the jar specified by the location.
    *
-   * @param appDir the application directory
+   * @param appDir the webApp directory
    * @param location the tag-location specified in the web.xml
    *
    * @return the found jar or null

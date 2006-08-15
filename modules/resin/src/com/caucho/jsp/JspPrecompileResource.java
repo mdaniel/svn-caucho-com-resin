@@ -56,7 +56,7 @@ import com.caucho.loader.Environment;
 
 import com.caucho.lifecycle.Lifecycle;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 /**
  * Resource for precompiling all the *.jsp files on startup.
@@ -67,16 +67,16 @@ public class JspPrecompileResource {
 
   private FileSetType _fileSet;
   
-  private Application _application;
+  private WebApp _webApp;
 
   private final Lifecycle _lifecycle = new Lifecycle();
 
   /**
-   * Sets the application.
+   * Sets the webApp.
    */
-  public void setApplication(Application app)
+  public void setWebApp(WebApp app)
   {
-    _application = app;
+    _webApp = app;
   }
 
   /**
@@ -112,11 +112,11 @@ public class JspPrecompileResource {
       createFileset().addInclude(new PathPatternType("**/*.jsp"));
     }
 
-    if (_application == null) {
-      _application = Application.getLocal();
+    if (_webApp == null) {
+      _webApp = WebApp.getLocal();
     }
 
-    if (_application == null)
+    if (_webApp == null)
       throw new ConfigException(L.l("JspPrecompileResource must be used in a web-app context."));
 
     start();
@@ -130,18 +130,18 @@ public class JspPrecompileResource {
     if (! _lifecycle.toActive())
       return;
     
-    // JspManager manager = new JspManager(_application);
+    // JspManager manager = new JspManager(_webApp);
 
     if (JspFactory.getDefaultFactory() == null)
       JspFactory.setDefaultFactory(new QJspFactory());
     
     JspCompiler compiler = new JspCompiler();
-    compiler.setApplication(_application);
+    compiler.setWebApp(_webApp);
 
     ArrayList<Path> paths = _fileSet.getPaths();
     ArrayList<String> classes = new ArrayList<String>();
 
-    String contextPath = _application.getContextPath();
+    String contextPath = _webApp.getContextPath();
     if (! contextPath.endsWith("/"))
       contextPath = contextPath + "/";
     
@@ -152,7 +152,7 @@ public class JspPrecompileResource {
 
       String uri = path.getPath().substring(pwd.getPath().length());
 
-      if (_application.getContext(contextPath + uri) != _application)
+      if (_webApp.getContext(contextPath + uri) != _webApp)
 	continue;
 
       String className = JspCompiler.urlToClassName(uri);

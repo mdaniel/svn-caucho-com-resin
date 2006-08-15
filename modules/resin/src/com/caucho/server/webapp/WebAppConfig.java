@@ -54,6 +54,10 @@ public class WebAppConfig extends DeployConfig {
 
   private WebAppConfig _prologue;
 
+  public WebAppConfig()
+  {
+  }
+
   /**
    * Gets the context path
    */

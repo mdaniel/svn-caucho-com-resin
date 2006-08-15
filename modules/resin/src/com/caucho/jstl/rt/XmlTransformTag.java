@@ -49,7 +49,7 @@ import com.caucho.jsp.PageContextImpl;
 import com.caucho.el.*;
 import com.caucho.xsl.*;
 import com.caucho.jstl.NameValueTag;
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 public class XmlTransformTag extends BodyTagSupport implements NameValueTag {
   private static final Logger log = Log.open(XmlTransformTag.class);
@@ -265,7 +265,7 @@ public class XmlTransformTag extends BodyTagSupport implements NameValueTag {
 
   private String getCanonicalURL(PageContextImpl pageContext, String url)
   {
-    Application app = pageContext.getApplication();
+    WebApp app = pageContext.getApplication();
     Path appDir = pageContext.getApplication().getAppDir();
       
     if (url != null) {

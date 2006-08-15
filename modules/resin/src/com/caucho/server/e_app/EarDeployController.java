@@ -35,7 +35,7 @@ import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.management.j2ee.J2EEApplication;
 import com.caucho.management.server.*;
 import com.caucho.server.deploy.*;
-import com.caucho.server.webapp.ApplicationContainer;
+import com.caucho.server.webapp.WebAppContainer;
 import com.caucho.server.webapp.WebAppController;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -47,14 +47,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * A configuration entry for an Enterprise Application
+ * A configuration entry for an Enterprise WebApp
  */
 public class EarDeployController
   extends EnvironmentDeployController<EnterpriseApplication,EarConfig> {
   private static final Logger log = Log.open(EarDeployController.class);
   private static final L10N L = new L10N(EarDeployController.class);
 
-  private ApplicationContainer _container;
+  private WebAppContainer _container;
 
   // private Var _hostVar = new Var();
 
@@ -67,7 +67,7 @@ public class EarDeployController
   private J2EEApplication _j2eeAdmin;
 
   EarDeployController(String name,
-                      ApplicationContainer container, EarConfig config)
+                      WebAppContainer container, EarConfig config)
   {
     super(config);
 
@@ -79,7 +79,7 @@ public class EarDeployController
   }
 
   EarDeployController(String name, Path rootDirectory,
-                      ApplicationContainer container)
+                      WebAppContainer container)
   {
     super(name, rootDirectory);
 

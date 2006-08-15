@@ -703,7 +703,6 @@ public class ResinServer
       return;
 
     ArrayList<ResinServerListener> listeners;
-    ArrayList<ServerController> servers;
     J2EEManagedObject jvmManagedObject;
     J2EEManagedObject j2eeDomainManagedObject;
 

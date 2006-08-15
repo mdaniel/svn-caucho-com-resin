@@ -37,7 +37,7 @@ import javax.servlet.http.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 import com.caucho.server.connection.AbstractHttpRequest;
 
@@ -74,7 +74,7 @@ public class RequestAdapter extends RequestWrapper
     new FreeList<RequestAdapter>(16);
   
   // for real adapters
-  private Application _application;
+  private WebApp _webApp;
   private HttpServletResponse _response;
 
   private HashMap<String,String> _roleMap;
@@ -84,18 +84,18 @@ public class RequestAdapter extends RequestWrapper
     super(null);
   }
   
-  protected RequestAdapter(HttpServletRequest request, Application app)
+  protected RequestAdapter(HttpServletRequest request, WebApp app)
   {
     super(request);
     
-    _application = app;
+    _webApp = app;
   }
 
   /**
    * Creates a new RequestAdapter.
    */
   public static RequestAdapter create(HttpServletRequest request,
-				      Application app)
+				      WebApp app)
   {
     RequestAdapter reqAdapt = _freeList.allocate();
 
@@ -103,7 +103,7 @@ public class RequestAdapter extends RequestWrapper
       return new RequestAdapter(request, app);
     else {
       reqAdapt.setRequest(request);
-      reqAdapt._application = app;
+      reqAdapt._webApp = app;
 
       return reqAdapt;
     }
@@ -124,13 +124,13 @@ public class RequestAdapter extends RequestWrapper
 
   public void init(HttpServletRequest request,
                    HttpServletResponse response,
-                   Application app)
+                   WebApp app)
     throws ServletException
   {
     setRequest(request);
     
     _response = response;
-    _application = app;
+    _webApp = app;
 
     if (request == this ||
 	request instanceof CauchoRequest &&
@@ -145,9 +145,9 @@ public class RequestAdapter extends RequestWrapper
     return false;
   }
   
-  public void setApplication(Application app)
+  public void setWebApp(WebApp app)
   {
-    _application = app;
+    _webApp = app;
   }
 
   protected HttpServletResponse getResponse()
@@ -323,9 +323,9 @@ public class RequestAdapter extends RequestWrapper
   {
   }
   
-  public Application getApplication()
+  public WebApp getWebApp()
   {
-    return _application;
+    return _webApp;
   }
 
   public void setVaryCookie(String cookie)
@@ -445,7 +445,7 @@ public class RequestAdapter extends RequestWrapper
 
   protected final SessionManager getSessionManager()
   {
-    Application app = getApplication();
+    WebApp app = getWebApp();
     if (app != null)
       return app.getSessionManager();
     else
@@ -549,7 +549,7 @@ public class RequestAdapter extends RequestWrapper
   {
     super.free();
     
-    _application = null;
+    _webApp = null;
     _response = null;
   }
 }

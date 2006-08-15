@@ -37,7 +37,7 @@ import javax.servlet.jsp.*;
 
 import com.caucho.util.FreeList;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 public class QJspFactory extends JspFactory {
   private static JspEngineInfo _engineInfo = new EngineInfo();
@@ -80,7 +80,7 @@ public class QJspFactory extends JspFactory {
    * The jsp page context initialization.
    */
   public static PageContextImpl allocatePageContext(Servlet servlet,
-						    Application app,
+						    WebApp app,
 						    ServletRequest request,
 						    ServletResponse response,
 						    String errorPageURL,
@@ -150,7 +150,7 @@ public class QJspFactory extends JspFactory {
   
   public JspApplicationContext getJspApplicationContext(ServletContext context)
   {
-    throw new UnsupportedOperationException();
+    return ((WebApp) context).getJspApplicationContext();
   }
 
   static class EngineInfo extends JspEngineInfo {

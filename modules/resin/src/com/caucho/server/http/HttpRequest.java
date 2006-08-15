@@ -54,10 +54,9 @@ import com.caucho.server.dispatch.InvocationDecoder;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.BadRequestException;
 
-import com.caucho.server.webapp.Application;
 import com.caucho.server.webapp.ErrorPageManager;
 
-import com.caucho.server.resin.ServletServer;
+import com.caucho.server.cluster.Server;
 
 import com.caucho.server.connection.Connection;
 import com.caucho.server.connection.AbstractHttpRequest;
@@ -259,8 +258,8 @@ public class HttpRequest extends AbstractHttpRequest
 	    log.info("<server> is modified");
 
 	    _invocation = invocation;
-	    if (_server instanceof ServletServer)
-	      _invocation.setApplication(((ServletServer) _server).getErrorApplication());
+	    if (_server instanceof Server)
+	      _invocation.setWebApp(((Server) _server).getErrorWebApp());
 
 	    restartServer();
 	    return false;
