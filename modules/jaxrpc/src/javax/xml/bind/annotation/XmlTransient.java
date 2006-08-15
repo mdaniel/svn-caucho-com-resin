@@ -33,7 +33,7 @@ import static java.lang.annotation.RetentionPolicy.*;
 import static java.lang.annotation.ElementType.*;
 
 @Retention(value=RUNTIME)
-@Target(value=TYPE)
+@Target(value={FIELD,METHOD})
 public @interface XmlTransient {
 }
 

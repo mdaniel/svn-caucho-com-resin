@@ -35,24 +35,17 @@ import javax.xml.parsers.*;
 import javax.xml.bind.*;
 import org.w3c.dom.Element;
 
-/** XXX */
 public class W3CDomHandler implements DomHandler<org.w3c.dom.Element, DOMResult> {
 
-  /** XXX */
   public W3CDomHandler()
   {
-    throw new UnsupportedOperationException();
   }
 
 
-  /** XXX */
   public W3CDomHandler(DocumentBuilder builder)
   {
-    throw new UnsupportedOperationException();
   }
 
-
-  /** XXX */
   public DOMResult createUnmarshaller(ValidationEventHandler errorHandler)
   {
     throw new UnsupportedOperationException();
@@ -63,15 +56,11 @@ public class W3CDomHandler implements DomHandler<org.w3c.dom.Element, DOMResult>
     throw new UnsupportedOperationException();
   }
 
-
-  /** XXX */
   public Element getElement(DOMResult r)
   {
     throw new UnsupportedOperationException();
   }
 
-
-  /** XXX */
   public Source marshal(Element element, ValidationEventHandler errorHandler)
   {
     throw new UnsupportedOperationException();

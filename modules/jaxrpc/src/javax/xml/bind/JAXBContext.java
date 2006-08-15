@@ -88,6 +88,18 @@ public abstract class JAXBContext {
       throws JAXBException
   {
     try {
+        ClassLoader classLoader =
+            Thread.currentThread().getContextClassLoader();
+        FactoryLoader factoryLoader =
+            FactoryLoader.getFactoryLoader("javax.xml.bind.JAXBContext");
+        Object obj = factoryLoader.newInstance(classLoader);
+        Class c = obj.getClass();
+        Method m = c.getMethod("createContext",
+                               Class[].class,
+                               Map.class);
+        return (JAXBContext)m.invoke(null, classesToBeBound, properties);
+    }
+      /*
       Class c = Class.forName("com.caucho.jaxb.JAXBContextImpl");
       Constructor con = c.getConstructor(new Class[] {
 	Class[].class,
@@ -99,6 +111,7 @@ public abstract class JAXBContext {
 	  properties
 	});
     }
+      */
     catch (Exception e) {
       throw new JAXBException(e);
     }

@@ -27,20 +27,56 @@
 * @author Scott Ferguson
 */
 
-package javax.xml.bind.annotation;
-import java.lang.annotation.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import static java.lang.annotation.ElementType.*;
+package javax.xml.bind;
 
-@Retention(value=RUNTIME)
-@Target(value={FIELD,METHOD})
-public @interface XmlElementWrapper {
+public class FactoryConfigurationError extends Error {
 
-  public String name() default "##default";
+  private Exception _exception;
+  private String _message;
 
-  public String namespace() default "##default";
+  public FactoryConfigurationError()
+  {
+    _exception = null;
+    _message = null;
+  }
 
-  public boolean nillable() default false;
+
+  public FactoryConfigurationError(Exception e)
+  {
+    _exception = e;
+    _message = null;
+  }
+
+
+  public FactoryConfigurationError(Exception e, String msg)
+  {
+    _exception = e;
+    _message = msg;
+  }
+
+
+  public FactoryConfigurationError(String msg)
+  {
+    _exception = null;
+    _message = msg;
+  }
+
+
+  public FactoryConfigurationError(String msg, Exception e)
+  {
+    _exception = e;
+    _message = msg;
+  }
+
+  public Exception getException()
+  {
+    return _exception;
+  }
+
+  public String getMessage()
+  {
+    return _message;
+  }
 
 }
 

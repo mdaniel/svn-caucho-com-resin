@@ -103,7 +103,19 @@ public abstract class AbstractMarshallerImpl implements Marshaller {
   public Object getProperty(String name)
     throws PropertyException
   {
-    return _properties.get(name);
+    if (name.equals("jaxb.encoding")) {
+      return getEncoding();
+    } else if (name.equals("jaxb.formatted.output")) {
+      return _formattedOutput;
+    } else if (name.equals("jaxb.schemaLocation")) {
+      return getSchemaLocation();
+    } else if (name.equals("jaxb.noNamespaceSchemaLocation")) {
+      return getNoNSSchemaLocation();
+    } else if (name.equals("jaxb.fragment")) {
+      return _fragment;
+    } else {
+      return _properties.get(name);
+    }
   }
 
   public Schema getSchema()
@@ -208,7 +220,19 @@ public abstract class AbstractMarshallerImpl implements Marshaller {
   public void setProperty(String name, Object value)
     throws PropertyException
   {
-    _properties.put(name, value);
+    if (name.equals("jaxb.encoding")) {
+      setEncoding((String)value);
+    } else if (name.equals("jaxb.formatted.output")) {
+      setFormattedOutput(((Boolean)value).booleanValue());
+    } else if (name.equals("jaxb.schemaLocation")) {
+      setSchemaLocation((String)value);
+    } else if (name.equals("jaxb.noNamespaceSchemaLocation")) {
+      setNoNSSchemaLocation((String)value);
+    } else if (name.equals("jaxb.fragment")) {
+      setFragment(((Boolean)value).booleanValue());
+    } else {
+      _properties.put(name, value);
+    }
   }
 
   public void setSchema(Schema schema)

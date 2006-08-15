@@ -41,10 +41,10 @@ public class JAXBElement<T> implements Serializable {
 
   protected final Class scope;
 
-  protected JAXBElement value;
+  protected T value;
 
   public JAXBElement(QName name, Class<T> declaredType,
-                     Class scope, JAXBElement value)
+                     Class scope, T value)
   {
     this.name = name;
     this.declaredType = declaredType;
@@ -54,7 +54,7 @@ public class JAXBElement<T> implements Serializable {
   }
 
   public JAXBElement(QName name,
-                     Class<T> declaredType, JAXBElement value)
+                     Class<T> declaredType, T value)
   {
     this(name, declaredType, JAXBElement.GlobalScope.class, value);
   }
@@ -74,7 +74,7 @@ public class JAXBElement<T> implements Serializable {
     return scope;
   }
 
-  public JAXBElement getValue()
+  public T getValue()
   {
     return value;
   }
@@ -91,7 +91,7 @@ public class JAXBElement<T> implements Serializable {
 
   public boolean isTypeSubstituted()
   {
-    return declaredType.isInstance(value);
+    return !declaredType.isInstance(value);
   }
 
   public void setNil(boolean value)
@@ -99,7 +99,7 @@ public class JAXBElement<T> implements Serializable {
     nil = value;
   }
 
-  public void setValue(JAXBElement t)
+  public void setValue(T t)
   {
     value = t;
   }
