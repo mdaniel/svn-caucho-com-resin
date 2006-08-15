@@ -41,7 +41,7 @@ import com.caucho.config.Config;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
-public class Summary {
+public class Summary implements ContentItem {
   private static final Logger log = Logger.getLogger(Summary.class.getName());
 
   private Document _document;
@@ -95,7 +95,17 @@ public class Summary {
       _navigation.writeHtml(out);
   }
 
+  public void writeLaTeXTop(PrintWriter out)
+    throws IOException
+  {
+  }
+
   public void writeLaTeX(PrintWriter out)
+    throws IOException
+  {
+  }
+
+  public void writeLaTeXEnclosed(PrintWriter out)
     throws IOException
   {
   }

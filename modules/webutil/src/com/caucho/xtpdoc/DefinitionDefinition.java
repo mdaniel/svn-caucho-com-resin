@@ -50,10 +50,4 @@ public class DefinitionDefinition extends FormattedTextWithAnchors
     super.writeHtml(out);
     out.writeEndElement(); // dd
   }
-
-  public void writeLaTeX(PrintWriter out)
-    throws IOException
-  {
-    super.writeLaTeX(out);
-  }
 }

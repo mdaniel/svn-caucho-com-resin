@@ -71,4 +71,16 @@ public class Index implements ContentItem {
   {
     // XXX
   }
+
+  public void writeLaTeXEnclosed(PrintWriter out)
+    throws IOException
+  {
+    writeLaTeX(out);
+  }
+
+  public void writeLaTeXTop(PrintWriter out)
+    throws IOException
+  {
+    writeLaTeX(out);
+  }
 }

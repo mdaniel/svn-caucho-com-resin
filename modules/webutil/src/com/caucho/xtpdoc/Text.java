@@ -54,4 +54,16 @@ public class Text implements ContentItem {
   {
     out.print(LaTeXUtil.escapeForLaTeX(_text));
   }
+
+  public void writeLaTeXEnclosed(PrintWriter out)
+    throws IOException
+  {
+    writeLaTeX(out);
+  }
+
+  public void writeLaTeXTop(PrintWriter out)
+    throws IOException
+  {
+    writeLaTeX(out);
+  }
 }

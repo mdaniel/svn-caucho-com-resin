@@ -45,14 +45,14 @@ public class Faq extends Section {
 
   public S1 createS1()
   {
-    S1 s1 = new S1(_document);
-    _contentItems.add(s1);
+    S1 s1 = new S1(getDocument());
+    addItem(s1);
     return s1;
   }
 
   public FormattedTextWithAnchors createDescription()
   {
-    _description = new FormattedTextWithAnchors(_document);
+    _description = new FormattedTextWithAnchors(getDocument());
     return _description;
   }
 

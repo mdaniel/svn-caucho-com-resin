@@ -71,7 +71,6 @@ public class ResinDocServlet extends HttpServlet {
     _config = new Config();
     _pwd = Vfs.lookup().createRoot();
 
-    /* XXX
     try {
       _outputFactory = XMLOutputFactory.newInstance();
     } catch (FactoryConfigurationError e) {
@@ -80,7 +79,6 @@ public class ResinDocServlet extends HttpServlet {
 
     if (_outputFactory == null)
       throw new ServletException("Error configuring factory");
-      */
   }
 
   public void service(HttpServletRequest request,
@@ -95,15 +93,8 @@ public class ResinDocServlet extends HttpServlet {
     Document document = new Document(path, request.getContextPath());
 
     try {
-      // XXX
-      // XMLStreamWriter xmlOut = _outputFactory.createXMLStreamWriter(out);
+      XMLStreamWriter xmlOut = _outputFactory.createXMLStreamWriter(out);
       
-      WriterStreamImpl writerStreamImpl = new WriterStreamImpl();
-      writerStreamImpl.setWriter(out);
-      WriteStream writeStream = new WriteStream(writerStreamImpl);
-
-      XMLStreamWriter xmlOut = new XMLStreamWriterImpl(writeStream);
-
       _config.configure(document, path);
 
       document.writeHtml(xmlOut);
@@ -153,4 +144,3 @@ public class ResinDocServlet extends HttpServlet {
     }
   }
 }
-

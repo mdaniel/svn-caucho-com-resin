@@ -32,19 +32,62 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
+import java.util.ArrayList;
+
+import java.util.logging.Logger;
+
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
-public interface ContentItem {
+import com.caucho.config.*;
+import com.caucho.vfs.Path;
+
+public abstract class ContainerNode implements ContentItem {
+  private static Logger log = Logger.getLogger(ContainerNode.class.getName());
+
+  private Document _document;
+  private ArrayList<ContentItem> _items = new ArrayList<ContentItem>();
+
+  public ContainerNode(Document document)
+  {
+    _document = document;
+  }
+
+  public Document getDocument()
+  {
+    return _document;
+  }
+
+  protected void addItem(ContentItem item)
+  {
+    _items.add(item);
+  }
+
   public void writeHtml(XMLStreamWriter out)
-    throws XMLStreamException;
+    throws XMLStreamException
+  {
+    for (ContentItem item : _items)
+      item.writeHtml(out);
+  }
 
   public void writeLaTeXTop(PrintWriter out)
-    throws IOException;
+    throws IOException
+  {
+    for (ContentItem item : _items)
+      item.writeLaTeXTop(out);
+  }
 
   public void writeLaTeX(PrintWriter out)
-    throws IOException;
+    throws IOException
+  {
+    for (ContentItem item : _items)
+      item.writeLaTeX(out);
+  }
 
   public void writeLaTeXEnclosed(PrintWriter out)
-    throws IOException;
+    throws IOException
+  {
+    for (ContentItem item : _items)
+      item.writeLaTeXEnclosed(out);
+  }
 }

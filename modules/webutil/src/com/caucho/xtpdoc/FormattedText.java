@@ -39,23 +39,10 @@ import javax.xml.stream.XMLStreamException;
 
 import com.caucho.config.types.*;
 
-public class FormattedText implements ContentItem {
-  private Document _document;
-  protected ArrayList<ContentItem> _contentItems = new ArrayList<ContentItem>();
-
+public class FormattedText extends ContainerNode {
   public FormattedText(Document document)
   {
-    _document = document;
-  }
-
-  protected Document getDocument()
-  {
-    return _document;
-  }
-
-  protected void addItem(ContentItem item)
-  {
-    _contentItems.add(item);
+    super(document);
   }
 
   public void setOccur(String occur)
@@ -64,102 +51,88 @@ public class FormattedText implements ContentItem {
 
   public void addText(String text)
   {
-    _contentItems.add(new Text(text));
+    addItem(new Text(text));
   }
 
   public void addG(GlossaryText text)
   {
-    _contentItems.add(text);
+    addItem(text);
   }
 
   public LineBreak createBr()
   {
-    LineBreak lineBreak = new LineBreak(_document);
-    _contentItems.add(lineBreak);
+    LineBreak lineBreak = new LineBreak(getDocument());
+    addItem(lineBreak);
     return lineBreak;
   }
 
   public ItalicizedText createI()
   {
-    ItalicizedText text = new ItalicizedText(_document);
-    _contentItems.add(text);
+    ItalicizedText text = new ItalicizedText(getDocument());
+    addItem(text);
     return text;
   }
 
   public BoldText createB()
   {
-    BoldText text = new BoldText(_document);
-    _contentItems.add(text);
+    BoldText text = new BoldText(getDocument());
+    addItem(text);
     return text;
   }
 
   public EmphasizedText createEm()
   {
-    EmphasizedText text = new EmphasizedText(_document);
-    _contentItems.add(text);
+    EmphasizedText text = new EmphasizedText(getDocument());
+    addItem(text);
     return text;
   }
 
   public SuperText createSup()
   {
-    SuperText text = new SuperText(_document);
-    _contentItems.add(text);
+    SuperText text = new SuperText(getDocument());
+    addItem(text);
     return text;
   }
 
   public PreFormattedText createPre()
   {
-    PreFormattedText pretext = new PreFormattedText(_document);
-    _contentItems.add(pretext);
+    PreFormattedText pretext = new PreFormattedText(getDocument());
+    addItem(pretext);
     return pretext;
   }
 
   public Variable createVar()
   {
-    Variable variable = new Variable(_document);
-    _contentItems.add(variable);
+    Variable variable = new Variable(getDocument());
+    addItem(variable);
     return variable;
   }
 
   public Code createCode()
   {
-    Code code = new Code(_document);
-    _contentItems.add(code);
+    Code code = new Code(getDocument());
+    addItem(code);
     return code;
   }
 
   public Font createFont()
   {
-    Font font = new Font(_document);
-    _contentItems.add(font);
+    Font font = new Font(getDocument());
+    addItem(font);
     return font;
   }
 
   public Url createUrl()
   {
-    Url url = new Url(_document);
-    _contentItems.add(url);
+    Url url = new Url(getDocument());
+    addItem(url);
     return url;
   }
 
   public Example createExample()
   {
-    Example example = new Example(_document);
-    _contentItems.add(example);
+    Example example = new Example(getDocument());
+    addItem(example);
     return example;
-  }
-
-  public void writeHtml(XMLStreamWriter out)
-    throws XMLStreamException
-  {
-    for (ContentItem item : _contentItems)
-      item.writeHtml(out);
-  }
-
-  public void writeLaTeX(PrintWriter out)
-    throws IOException
-  {
-    for (ContentItem item : _contentItems)
-      item.writeLaTeX(out);
   }
 }

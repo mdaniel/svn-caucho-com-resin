@@ -37,27 +37,23 @@ import java.util.ArrayList;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
-public class DefinitionList implements ContentItem {
-  private Document _document;
-  private ArrayList<DefinitionItem> _listItems = 
-    new ArrayList<DefinitionItem>();
-
+public class DefinitionList extends ContainerNode {
   public DefinitionList(Document document)
   {
-    document = _document;
+    super(document);
   }
 
   public DefinitionTerm createDt()
   {
-    DefinitionTerm term = new DefinitionTerm(_document);
-    _listItems.add(term);
+    DefinitionTerm term = new DefinitionTerm(getDocument());
+    addItem(term);
     return term;
   }
 
   public DefinitionDefinition createDd()
   {
-    DefinitionDefinition definition = new DefinitionDefinition(_document);
-    _listItems.add(definition);
+    DefinitionDefinition definition = new DefinitionDefinition(getDocument());
+    addItem(definition);
     return definition;
   }
 
@@ -66,8 +62,7 @@ public class DefinitionList implements ContentItem {
   {
     out.writeStartElement("dl");
 
-    for (DefinitionItem item : _listItems)
-      item.writeHtml(out);
+    super.writeHtml(out);
 
     out.writeEndElement(); // dl
   }
@@ -77,9 +72,20 @@ public class DefinitionList implements ContentItem {
   {
     out.println("\\begin{description}");
 
-    for (DefinitionItem item : _listItems)
-      item.writeLaTeX(out);
+    super.writeLaTeX(out);
 
     out.println("\\end{description}");
+  }
+
+  public void writeLaTeXEnclosed(PrintWriter out)
+    throws IOException
+  {
+    writeLaTeX(out);
+  }
+
+  public void writeLaTeXTop(PrintWriter out)
+    throws IOException
+  {
+    writeLaTeX(out);
   }
 }

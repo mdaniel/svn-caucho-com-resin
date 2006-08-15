@@ -43,7 +43,7 @@ public class S2 extends Section {
   public S3 createS3()
   {
     S3 s3 = new S3(getDocument());
-    _contentItems.add(s3);
+    addItem(s3);
     return s3;
   }
 

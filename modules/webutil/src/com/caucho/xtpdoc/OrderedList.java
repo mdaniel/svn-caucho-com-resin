@@ -37,19 +37,16 @@ import java.util.ArrayList;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
-public class OrderedList implements ContentItem {
-  private Document _document;
-  private ArrayList<ListItem> _listItems = new ArrayList<ListItem>();
-
+public class OrderedList extends ContainerNode {
   public OrderedList(Document document)
   {
-    document = _document;
+    super(document);
   }
 
   public ListItem createLi()
   {
-    ListItem item = new ListItem(_document);
-    _listItems.add(item);
+    ListItem item = new ListItem(getDocument());
+    addItem(item);
     return item;
   }
 
@@ -58,8 +55,7 @@ public class OrderedList implements ContentItem {
   {
     out.writeStartElement("ol");
 
-    for (ListItem item : _listItems)
-      item.writeHtml(out);
+    super.writeHtml(out);
 
     out.writeEndElement(); // ol
   }
@@ -69,8 +65,7 @@ public class OrderedList implements ContentItem {
   {
     out.println("\\begin{enumerate}");
 
-    for (ListItem item : _listItems)
-      item.writeLaTeX(out);
+    super.writeLaTeX(out);
 
     out.println("\\end{enumerate}");
   }

@@ -42,8 +42,8 @@ public class S3 extends Section {
 
   public S4 createS4()
   {
-    S4 s4 = new S4(_document);
-    _contentItems.add(s4);
+    S4 s4 = new S4(getDocument());
+    addItem(s4);
     return s4;
   }
 

@@ -50,8 +50,7 @@ public class PreFormattedText extends FormattedText {
   {
     out.writeStartElement("pre");
 
-    for (ContentItem item : _contentItems)
-      item.writeHtml(out);
+    super.writeHtml(out);
 
     out.writeEndElement(); // pre
   }
@@ -59,8 +58,19 @@ public class PreFormattedText extends FormattedText {
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    for (ContentItem item : _contentItems)
-      item.writeLaTeX(new PrintWriter(new PreFormatFilterWriter(out)));
+    super.writeLaTeX(new PrintWriter(new PreFormatFilterWriter(out)));
+  }
+
+  public void writeLaTeXEnclosed(PrintWriter out)
+    throws IOException
+  {
+    writeLaTeX(out);
+  }
+
+  public void writeLaTeXTop(PrintWriter out)
+    throws IOException
+  {
+    writeLaTeX(out);
   }
 
   private static class PreFormatFilterWriter extends FilterWriter {

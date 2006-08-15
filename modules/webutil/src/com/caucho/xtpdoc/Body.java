@@ -42,30 +42,27 @@ import javax.xml.stream.XMLStreamException;
 import com.caucho.config.*;
 import com.caucho.vfs.Path;
 
-public class Body {
-  private static Logger log = Logger.getLogger(ResinDocServlet.class.getName());
+public class Body extends ContainerNode {
+  private static Logger log = Logger.getLogger(Body.class.getName());
 
-  private Document _document;
-  private Path _rootPath;
-  private Navigation _navigation;
   private Summary _summary;
+  private Navigation _navigation;
   private Index _index;
-  private ArrayList<Section> _sections = new ArrayList<Section>();
 
   public Body(Document document)
   {
-    _document = document;
+    super(document);
   }
 
   private void parseNavigation()
   {
-    Path rootPath = _document.getDocumentPath().getParent();
+    Path rootPath = getDocument().getDocumentPath().getParent();
     Path toc = rootPath.lookup("toc.xml");
 
     if (toc.exists()) {
       Config config = new Config();
 
-      _navigation = new Navigation(_document, 0);
+      _navigation = new Navigation(getDocument(), 0);
 
       try {
         config.configure(_navigation, toc);
@@ -82,7 +79,7 @@ public class Body {
 
   public Summary createSummary()
   {
-    _summary = new Summary(_document);
+    _summary = new Summary(getDocument());
     return _summary;
   }
 
@@ -92,28 +89,28 @@ public class Body {
 
   public Faq createFaq()
   {
-    Faq faq = new Faq(_document);
-    _sections.add(faq);
+    Faq faq = new Faq(getDocument());
+    addItem(faq);
     return faq;
   }
 
   public S1 createS1()
   {
-    S1 s1 = new S1(_document);
-    _sections.add(s1);
+    S1 s1 = new S1(getDocument());
+    addItem(s1);
     return s1;
   }
   
   public Defun createDefun()
   {
-    Defun defun = new Defun(_document);
-    _sections.add(defun);
+    Defun defun = new Defun(getDocument());
+    addItem(defun);
     return defun;
   }
 
   public Index createIxx()
   {
-    _index = new Index(_document);
+    _index = new Index(getDocument());
     return _index;
   }
 
@@ -152,8 +149,7 @@ public class Body {
     if (_index != null)
       _index.writeHtml(out);
 
-    for (Section section : _sections)
-      section.writeHtml(out);
+    super.writeHtml(out);
     
     out.writeEndElement(); // td
     out.writeEndElement(); // tr
@@ -167,23 +163,8 @@ public class Body {
   {
     out.println("\\begin{document}");
 
-    for (Section section : _sections)
-      section.writeLaTeXTop(out);
+    super.writeLaTeXTop(out);
 
     out.println("\\end{document}");
-  }
-
-  public void writeLaTeX(PrintWriter out)
-    throws IOException
-  {
-    for (Section section : _sections)
-      section.writeLaTeX(out);
-  }
-
-  public void writeLaTeXEnclosed(PrintWriter out)
-    throws IOException
-  {
-    for (Section section : _sections)
-      section.writeLaTeXEnclosed(out);
   }
 }

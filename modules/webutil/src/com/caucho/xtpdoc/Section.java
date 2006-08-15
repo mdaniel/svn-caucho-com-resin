@@ -37,24 +37,16 @@ import java.util.ArrayList;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
-public abstract class Section implements ContentItem {
-  protected Document _document;
+public abstract class Section extends ContainerNode {
   protected FormattedTextWithAnchors _description;
   protected String _name;
   protected String _title;
   protected String _version;
   protected String _type;
 
-  protected ArrayList<ContentItem> _contentItems = new ArrayList<ContentItem>();
-
   public Section(Document document)
   {
-    _document = document;
-  }
-
-  public Document getDocument()
-  {
-    return _document;
+    super(document);
   }
 
   // 
@@ -103,150 +95,144 @@ public abstract class Section implements ContentItem {
 
   public DefinitionList createDl()
   {
-    DefinitionList list = new DefinitionList(_document);
-    _contentItems.add(list);
+    DefinitionList list = new DefinitionList(getDocument());
+    addItem(list);
     return list;
   }
 
   public FormattedTextWithAnchors createDescription()
   {
-    _description = new FormattedTextWithAnchors(_document);
+    _description = new FormattedTextWithAnchors(getDocument());
     return _description;
   }
 
   public BlockQuote createBlockquote()
   {
-    BlockQuote blockQuote = new BlockQuote(_document);
-    _contentItems.add(blockQuote);
+    BlockQuote blockQuote = new BlockQuote(getDocument());
+    addItem(blockQuote);
     return blockQuote;
   }
 
   public Paragraph createP()
   {
-    Paragraph paragraph = new Paragraph(_document);
-    _contentItems.add(paragraph);
+    Paragraph paragraph = new Paragraph(getDocument());
+    addItem(paragraph);
     return paragraph;
   }
 
   public PreFormattedText createPre()
   {
-    PreFormattedText pretext = new PreFormattedText(_document);
-    _contentItems.add(pretext);
+    PreFormattedText pretext = new PreFormattedText(getDocument());
+    addItem(pretext);
     return pretext;
   }
 
   public OrderedList createOl()
   {
-    OrderedList orderedList = new OrderedList(_document);
-    _contentItems.add(orderedList);
+    OrderedList orderedList = new OrderedList(getDocument());
+    addItem(orderedList);
     return orderedList;
   }
 
   public UnorderedList createUl()
   {
-    UnorderedList unorderedList = new UnorderedList(_document);
-    _contentItems.add(unorderedList);
+    UnorderedList unorderedList = new UnorderedList(getDocument());
+    addItem(unorderedList);
     return unorderedList;
   }
 
   public Figure createFigure()
   {
-    Figure figure = new Figure(_document);
-    _contentItems.add(figure);
+    Figure figure = new Figure(getDocument());
+    addItem(figure);
     return figure;
   }
 
   public Example createExample()
   {
-    Example example = new Example(_document);
-    _contentItems.add(example);
+    Example example = new Example(getDocument());
+    addItem(example);
     return example;
   }
 
   public Table createTable()
   {
-    Table table = new Table(_document);
-    _contentItems.add(table);
+    Table table = new Table(getDocument());
+    addItem(table);
     return table;
   }
 
   public DefinitionTable createDeftable()
   {
-    DefinitionTable definitionTable = new DefinitionTable(_document);
-    _contentItems.add(definitionTable);
+    DefinitionTable definitionTable = new DefinitionTable(getDocument());
+    addItem(definitionTable);
     return definitionTable;
   }
 
   public DefinitionTable createDeftableChildtags()
   {
-    DefinitionTable definitionTable = new DefinitionTable(_document);
-    _contentItems.add(definitionTable);
+    DefinitionTable definitionTable = new DefinitionTable(getDocument());
+    addItem(definitionTable);
     return definitionTable;
   }
 
   public DefinitionTable createDeftableParameters()
   {
-    DefinitionTable definitionTable = new DefinitionTable(_document);
-    _contentItems.add(definitionTable);
+    DefinitionTable definitionTable = new DefinitionTable(getDocument());
+    addItem(definitionTable);
     return definitionTable;
   }
 
   public Example createResults()
   {
-    Example results = new Example(_document);
-    _contentItems.add(results);
+    Example results = new Example(getDocument());
+    addItem(results);
     return results;
   }
 
   public Def createDef()
   {
-    Def def = new Def(_document);
-    _contentItems.add(def);
+    Def def = new Def(getDocument());
+    addItem(def);
     return def;
   }
 
   public FormattedTextWithAnchors createNote()
   {
-    FormattedTextWithAnchors note = new FormattedTextWithAnchors(_document);
-    _contentItems.add(new NamedText("Note", note));
+    FormattedTextWithAnchors note = new FormattedTextWithAnchors(getDocument());
+    addItem(new NamedText("Note", note));
     return note;
   }
 
   public FormattedTextWithAnchors createWarn()
   {
-    FormattedTextWithAnchors warning = new FormattedTextWithAnchors(_document);
-    _contentItems.add(new NamedText("Warning", warning));
+    FormattedTextWithAnchors warning = 
+      new FormattedTextWithAnchors(getDocument());
+    addItem(new NamedText("Warning", warning));
     return warning;
   }
 
   public FormattedText createParents()
   {
-    FormattedText parents = new FormattedText(_document);
-    _contentItems.add(new NamedText("child of", parents));
+    FormattedText parents = new FormattedText(getDocument());
+    addItem(new NamedText("child of", parents));
     return parents;
   }
  
   public FormattedText createDefault()
   {
-    FormattedText def = new FormattedText(_document);
-    _contentItems.add(new NamedText("default", def));
+    FormattedText def = new FormattedText(getDocument());
+    addItem(new NamedText("default", def));
     return def;
   }
 
   public Glossary createGlossary()
   {
-    Glossary glossary = new Glossary(_document);
-    _contentItems.add(glossary);
+    Glossary glossary = new Glossary(getDocument());
+    addItem(glossary);
     return glossary;
   }
  
-  public void writeHtml(XMLStreamWriter out)
-    throws XMLStreamException
-  {
-    for (ContentItem item : _contentItems)
-      item.writeHtml(out);
-  }
-
   public void writeLaTeXTop(PrintWriter out)
     throws IOException
   {
@@ -256,15 +242,14 @@ public abstract class Section implements ContentItem {
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    String label = _document.getDocumentPath().getUserPath() + ":" + _title;
+    String label = getDocument().getDocumentPath().getUserPath() + ":" + _title;
 
     label = label.replace(" ", "-");
 
     out.println("\\label{" + label + "}");
     out.println("\\hypertarget{" + label + "}{}");
 
-    for (ContentItem item : _contentItems)
-      item.writeLaTeX(out);
+    super.writeLaTeX(out);
 
     if (_type != null && _type.equals("defun"))
       out.println("\\newpage");

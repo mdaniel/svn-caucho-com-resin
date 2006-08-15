@@ -64,4 +64,16 @@ public class ViewFileLink implements ContentItem {
   {
     out.print("\\href{" + _file + "}{" + _file + "}");
   }
+
+  public void writeLaTeXEnclosed(PrintWriter out)
+    throws IOException
+  {
+    writeLaTeX(out);
+  }
+
+  public void writeLaTeXTop(PrintWriter out)
+    throws IOException
+  {
+    writeLaTeX(out);
+  }
 }

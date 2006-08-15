@@ -46,7 +46,7 @@ public class Defun extends Section {
   public S2 createS2()
   {
     S2 s2 = new S2(getDocument());
-    _contentItems.add(s2);
+    addItem(s2);
     return s2;
   }
 
@@ -71,17 +71,10 @@ public class Defun extends Section {
 
     out.writeEndElement(); // table
     
-    /*
-    out.writeStartElement("h4");
-    out.writeCharacters(_title);
-    out.writeEndElement(); // h4
-    */
-
     out.writeStartElement("div");
     out.writeAttribute("class", "desc");
     
-    for (ContentItem item : _contentItems)
-      item.writeHtml(out);
+    super.writeHtml(out);
     
     out.writeEndElement(); // div
   }

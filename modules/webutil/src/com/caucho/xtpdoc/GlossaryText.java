@@ -62,9 +62,21 @@ public class GlossaryText implements ContentItem {
     out.writeEndElement();
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    writer.print(LaTeXUtil.escapeForLaTeX(_value));
+    out.print(LaTeXUtil.escapeForLaTeX(_value));
+  }
+
+  public void writeLaTeXEnclosed(PrintWriter out)
+    throws IOException
+  {
+    writeLaTeX(out);
+  }
+
+  public void writeLaTeXTop(PrintWriter out)
+    throws IOException
+  {
+    writeLaTeX(out);
   }
 }

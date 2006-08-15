@@ -66,4 +66,16 @@ public class GlossaryItem implements ContentItem {
   {
     writer.print(LaTeXUtil.escapeForLaTeX(_value));
   }
+
+  public void writeLaTeXEnclosed(PrintWriter out)
+    throws IOException
+  {
+    writeLaTeX(out);
+  }
+
+  public void writeLaTeXTop(PrintWriter out)
+    throws IOException
+  {
+    writeLaTeX(out);
+  }
 }

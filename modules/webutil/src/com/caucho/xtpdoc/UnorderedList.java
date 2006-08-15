@@ -37,19 +37,16 @@ import java.util.ArrayList;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
-public class UnorderedList implements ContentItem {
-  private Document _document;
-  private ArrayList<ListItem> _listItems = new ArrayList<ListItem>();
-
+public class UnorderedList extends ContainerNode {
   public UnorderedList(Document document)
   {
-    _document = document;
+    super(document);
   }
 
   public ListItem createLi()
   {
-    ListItem item = new ListItem(_document);
-    _listItems.add(item);
+    ListItem item = new ListItem(getDocument());
+    addItem(item);
     return item;
   }
 
@@ -58,8 +55,7 @@ public class UnorderedList implements ContentItem {
   {
     out.writeStartElement("ul");
 
-    for (ListItem item : _listItems)
-      item.writeHtml(out);
+    super.writeHtml(out);
 
     out.writeEndElement(); // ul
   }
@@ -69,8 +65,7 @@ public class UnorderedList implements ContentItem {
   {
     out.println("\\begin{itemize}");
 
-    for (ListItem item : _listItems)
-      item.writeLaTeX(out);
+    super.writeLaTeX(out);
 
     out.println("\\end{itemize}");
   }
