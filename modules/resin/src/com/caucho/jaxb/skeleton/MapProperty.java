@@ -27,7 +27,9 @@
  * @author Adam Megacz
  */
 
-package com.caucho.jaxb.marshall;
+package com.caucho.jaxb.skeleton;
+import com.caucho.jaxb.*;
+import javax.xml.bind.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
@@ -38,56 +40,37 @@ import java.io.*;
 import com.caucho.vfs.WriteStream;
 
 /**
- * Marshalls data for a string object
+ * a Map property
  */
-public abstract class CDataMarshall extends Marshall {
+public class MapProperty extends Property {
 
-  protected CDataMarshall()
+  public MapProperty(Accessor a)
   {
+    super(a);
   }
   
-  protected abstract Object deserialize(String in)
-    throws IOException, XMLStreamException;
-
-  public Object deserialize(XMLStreamReader in)
-      throws IOException, XMLStreamException
+  public Object read(Unmarshaller u, XMLStreamReader in)
+    throws IOException, XMLStreamException, JAXBException
   {
-      if (in.next() != in.CHARACTERS)
-          throw new IOException("expected element to have CDATA");
-
-      return deserialize(in.getText());
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
-  protected abstract String serialize(Object in)
-    throws IOException, XMLStreamException;
-
-  public void serialize(XMLStreamWriter out, Object obj, QName fieldName)
-    throws IOException, XMLStreamException
+  public void write(Marshaller m, XMLStreamWriter out, Object obj)
+    throws IOException, XMLStreamException, JAXBException
   {
-    out.writeStartElement(fieldName.getLocalPart());
-    out.writeCharacters(serialize(obj));
-    out.writeEndElement();
+    /*
+    out.print('<');
+    out.print(fieldName);
+    out.print('>');
+    
+    //StringProperty.escapify((String)obj, out);
+    
+    out.print("</");
+    out.print(fieldName);
+    out.print(">");
+    */
+    throw new UnsupportedOperationException(getClass().getName());
   }
-
-  public static void escapify(String s, WriteStream out)
-    throws IOException
-  {
-    int len = s.length();
-
-    for(int i=0; i<len; i++) {
-      char c = s.charAt(i);
-      if ((c < 32 || c > 127) || c=='\'' || c=='\"' ||
-          c=='<' || c=='>' || c=='&') {
-        out.print("&#");
-        out.print((int)c);
-        out.print(";");
-      } else {
-        out.print(c);
-      }
-    }
-
-  }
-
 }
 
 

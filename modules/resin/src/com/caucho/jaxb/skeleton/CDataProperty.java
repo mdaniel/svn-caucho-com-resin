@@ -27,11 +27,11 @@
  * @author Adam Megacz
  */
 
-package com.caucho.jaxb.marshall;
+package com.caucho.jaxb.skeleton;
 import com.caucho.jaxb.*;
-import javax.xml.bind.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
+import javax.xml.bind.*;
 import java.util.*;
 
 import java.lang.reflect.*;
@@ -40,41 +40,49 @@ import java.io.*;
 import com.caucho.vfs.WriteStream;
 
 /**
- * Marshalls data for a string object
+ * helper class for properties that are represented as a "flat" CDATA block
  */
-public class ArrayMarshall extends Marshall {
-  public static final ArrayMarshall MARSHALL = new ArrayMarshall();
+public abstract class CDataProperty extends Property {
 
-  private ArrayMarshall()
-  {
-  }
-  
-  /**
-   * Deserializes the data from the input.
-   */
-  public Object deserialize(XMLStreamReader in)
-    throws IOException
-  {
-    throw new UnsupportedOperationException(getClass().getName());
+  public CDataProperty(Accessor a) {
+    super(a);
   }
 
-  /**
-   * Serializes the data to the result
-   */
-  public void serialize(XMLStreamWriter out, Object obj, QName fieldName)
-    throws IOException, XMLStreamException
+  protected abstract Object read(String in)
+    throws IOException, XMLStreamException;
+
+  public Object read(Unmarshaller u, XMLStreamReader in)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    while(in.getEventType() != in.END_ELEMENT &&
+          in.getEventType() != in.CHARACTERS)
+      in.next();
+    
+    Object ret = null;
+
+    if (in.getEventType() == in.CHARACTERS)
+      ret = read(in.getText());
+
+    while(in.getEventType() != in.END_ELEMENT)
+      in.next();
+
+    return ret;
+  }
+
+  protected abstract String write(Object in)
+    throws IOException, XMLStreamException;
+
+  public void write(Marshaller m, XMLStreamWriter out, Object obj)
+    throws IOException, XMLStreamException, JAXBException
   {
     if (obj == null)
       return;
 
-    int length = Array.getLength(obj);
-    
-    for(int i=0; i<length; i++) {
-      Object o = Array.get(obj, i);
-      Marshall marshall = MarshallerImpl.getMarshall(o.getClass());
-      marshall.serialize(out, o, fieldName);
-    }
+    out.writeStartElement(getQName().getLocalPart());
+    out.writeCharacters(write(obj));
+    out.writeEndElement();
   }
+
 }
 
 

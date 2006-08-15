@@ -27,7 +27,8 @@
  * @author Adam Megacz
  */
 
-package com.caucho.jaxb.marshall;
+package com.caucho.jaxb.skeleton;
+import com.caucho.jaxb.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
@@ -38,22 +39,21 @@ import java.io.*;
 import com.caucho.vfs.WriteStream;
 
 /**
- * Marshalls data for a string object
+ * a Float Property
  */
-public class FloatMarshall extends CDataMarshall {
-  public static final FloatMarshall MARSHALL = new FloatMarshall();
+public class FloatProperty extends CDataProperty {
 
-  private FloatMarshall()
-  {
+  public FloatProperty(Accessor a) {
+    super(a);
   }
-  
-  protected String serialize(Object in)
+
+  protected String write(Object in)
       throws IOException, XMLStreamException
   {
     return ((Number)in).floatValue()+"";
   }
 
-  protected Object deserialize(String in)
+  protected Object read(String in)
     throws IOException, XMLStreamException
   {
     return new Float(in);

@@ -27,37 +27,53 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jaxb.marshall;
+package com.caucho.jaxb.skeleton;
+import com.caucho.jaxb.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
+import javax.xml.bind.*;
 
 import java.io.*;
 
 import javax.xml.stream.*;
 
 /**
- * Marshalls data to and from soap.
+ * represents a property in a skeleton; requires an Accessor to access it
  */
-public class Marshall {
-  /**
-   * Deserializes the data from the input.
-   */
-  public Object deserialize(XMLStreamReader in)
-      throws IOException, XMLStreamException
-  {
-    throw new UnsupportedOperationException(getClass().getName());
+public abstract class Property {
+
+  protected Accessor _accessor;
+
+  public Property(Accessor accessor) {
+    this._accessor = accessor;
   }
+
+  public abstract Object read(Unmarshaller u, XMLStreamReader in)
+    throws IOException, XMLStreamException, JAXBException;
   
-  /**
-   * Serializes the data to the result
-   */
-  public void serialize(XMLStreamWriter out, Object obj, QName fieldName)
-    throws IOException, XMLStreamException
+  public abstract void write(Marshaller m, XMLStreamWriter out, Object obj)
+    throws IOException, XMLStreamException, JAXBException;
+
+  public QName getQName()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _accessor.getQName();
   }
 
+  public Object get(Object target)
+    throws JAXBException
+  {
+    return _accessor.get(target);
+  }
+
+  public void set(Object target, Object value)
+    throws JAXBException
+  {
+    _accessor.set(target, value);
+  }
+
+  public String getName()
+  {
+    return _accessor.getName();
+  }
 }
-
-

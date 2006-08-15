@@ -27,7 +27,9 @@
  * @author Adam Megacz
  */
 
-package com.caucho.jaxb.marshall;
+package com.caucho.jaxb.skeleton;
+import com.caucho.jaxb.*;
+import javax.xml.bind.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
@@ -38,39 +40,34 @@ import java.io.*;
 import com.caucho.vfs.WriteStream;
 
 /**
- * Marshalls data for a string object
+ * a List Property
  */
-public class MapMarshall extends Marshall {
-  public static final MapMarshall MARSHALL = new MapMarshall();
+public class ListProperty extends Property {
 
-  private MapMarshall()
+  public ListProperty(Accessor a) {
+    super(a);
+  }
+
+  public Object read(Unmarshaller u, XMLStreamReader in)
+    throws IOException, XMLStreamException, JAXBException
   {
+    return null;
   }
   
-  /**
-   * Deserializes the data from the input.
-   */
-  public Object deserialize(XMLStreamReader in)
-    throws IOException
+  public void write(Marshaller m, XMLStreamWriter out, Object obj)
+    throws IOException, XMLStreamException, JAXBException
   {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * Serializes the data to the result
-   */
-  public void serialize(WriteStream out, Object obj, QName fieldName)
-    throws IOException
-  {
+    /*
     out.print('<');
     out.print(fieldName);
     out.print('>');
     
-    //StringMarshall.escapify((String)obj, out);
+    //StringProperty.escapify((String)obj, out);
     
     out.print("</");
     out.print(fieldName);
     out.print(">");
+    */
 
     throw new UnsupportedOperationException(getClass().getName());
   }

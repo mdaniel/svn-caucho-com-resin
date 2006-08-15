@@ -27,11 +27,12 @@
  * @author Adam Megacz
  */
 
-package com.caucho.jaxb.marshall;
+package com.caucho.jaxb.skeleton;
+import com.caucho.jaxb.*;
+import javax.xml.bind.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
-import java.math.*;
 
 import java.lang.reflect.*;
 import java.io.*;
@@ -39,26 +40,29 @@ import java.io.*;
 import com.caucho.vfs.WriteStream;
 
 /**
- * Marshalls data for a string object
+ * a property referencing some other Skeleton
  */
-public class BigDecimalMarshall extends CDataMarshall {
-  public static final BigDecimalMarshall MARSHALL = new BigDecimalMarshall();
+public class SkeletonProperty extends Property {
 
-  private BigDecimalMarshall()
-  {
+  private Skeleton _skeleton;
+
+  public SkeletonProperty(Skeleton skeleton, Accessor a) {
+    super(a);
+    this._skeleton = skeleton;
   }
 
-  protected String serialize(Object in)
-      throws IOException, XMLStreamException
+  public Object read(Unmarshaller u, XMLStreamReader in)
+    throws IOException, XMLStreamException, JAXBException
   {
-    return ((BigDecimal)in).toString();
+    return _skeleton.read(u, in);
+  }
+  
+  public void write(Marshaller m, XMLStreamWriter out, Object obj)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    _skeleton.write(m, out, obj, _accessor.getQName());
   }
 
-  protected Object deserialize(String in)
-    throws IOException, XMLStreamException
-  {
-    return new BigDecimal(in);
-  }
 }
 
 

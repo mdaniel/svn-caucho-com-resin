@@ -27,41 +27,38 @@
  * @author Adam Megacz
  */
 
-package com.caucho.jaxb.marshall;
-
+package com.caucho.jaxb.skeleton;
+import com.caucho.jaxb.*;
+import javax.xml.namespace.*;
+import javax.xml.stream.*;
 import java.io.*;
 
+import java.lang.reflect.*;
+import java.io.*;
+
+import com.caucho.vfs.WriteStream;
+
 /**
- * Exception while marshalling.
+ * a string property
  */
-public class MarshallException extends IOException {
-  private Throwable _cause;
-  
-  public MarshallException()
-  {
-  }
-  
-  public MarshallException(String msg)
-  {
-    super(msg);
-  }
-  
-  public MarshallException(Throwable cause)
-  {
-    _cause = cause;
-  }
-  
-  public MarshallException(String msg, Throwable cause)
-  {
-    super(msg);
+public class StringProperty extends CDataProperty {
 
-    _cause = cause;
+  public StringProperty(Accessor a) {
+    super(a);
+  }
+  
+  protected String write(Object in)
+      throws IOException, XMLStreamException
+  {
+    return in==null ? null : in.toString();
   }
 
-  public Throwable getCause()
+  protected Object read(String in)
+    throws IOException, XMLStreamException
   {
-    return _cause;
+    return in;
   }
+
 }
 
 

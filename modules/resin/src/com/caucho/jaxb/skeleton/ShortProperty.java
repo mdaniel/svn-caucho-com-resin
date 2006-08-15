@@ -18,7 +18,7 @@
  * details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Resin Open Source; if not, write to the
+ * ashort with Resin Open Source; if not, write to the
  *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
@@ -27,7 +27,8 @@
  * @author Adam Megacz
  */
 
-package com.caucho.jaxb.marshall;
+package com.caucho.jaxb.skeleton;
+import com.caucho.jaxb.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
@@ -38,25 +39,24 @@ import java.io.*;
 import com.caucho.vfs.WriteStream;
 
 /**
- * Marshalls data for a string object
+ * a short property
  */
-public class IntMarshall extends CDataMarshall {
-  public static final IntMarshall MARSHALL = new IntMarshall();
+public class ShortProperty extends CDataProperty {
 
-  private IntMarshall()
-  {
+  public ShortProperty(Accessor accessor) {
+    super(accessor);
   }
   
-  protected String serialize(Object in)
+  protected String write(Object in)
       throws IOException, XMLStreamException
   {
-    return ((Integer)in).intValue()+"";
+    return ((Short)in).shortValue()+"";
   }
 
-  protected Object deserialize(String in)
+  protected Object read(String in)
     throws IOException, XMLStreamException
   {
-    return new Integer(in);
+    return new Short(in);
   }
 }
 

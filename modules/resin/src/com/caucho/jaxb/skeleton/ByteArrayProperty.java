@@ -27,38 +27,38 @@
  * @author Adam Megacz
  */
 
-package com.caucho.jaxb.marshall;
+package com.caucho.jaxb.skeleton;
+import com.caucho.jaxb.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
-import java.io.*;
+import java.util.*;
 
 import java.lang.reflect.*;
 import java.io.*;
+import com.caucho.util.*;
 
 import com.caucho.vfs.WriteStream;
 
 /**
- * Marshalls data for a string object
+ * a ByteArray Property
  */
-public class StringMarshall extends CDataMarshall {
-  public static final StringMarshall MARSHALL = new StringMarshall();
+public class ByteArrayProperty extends CDataProperty {
 
-  private StringMarshall()
-  {
+  public ByteArrayProperty(Accessor a) {
+    super(a);
   }
-  
-  protected String serialize(Object in)
+
+  protected String write(Object in)
       throws IOException, XMLStreamException
   {
-    return in.toString();
+    return Base64.encodeFromByteArray((byte[])in);
   }
 
-  protected Object deserialize(String in)
+  protected Object read(String in)
     throws IOException, XMLStreamException
   {
-    return in;
+    return Base64.decodeToByteArray(in);
   }
-
 }
 
 

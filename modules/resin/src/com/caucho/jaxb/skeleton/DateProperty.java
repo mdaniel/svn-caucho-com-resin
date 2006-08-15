@@ -27,7 +27,8 @@
  * @author Adam Megacz
  */
 
-package com.caucho.jaxb.marshall;
+package com.caucho.jaxb.skeleton;
+import com.caucho.jaxb.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
@@ -39,22 +40,21 @@ import java.io.*;
 import com.caucho.vfs.WriteStream;
 
 /**
- * Marshalls data for a string object
+ * a Date Property
  */
-public class DateMarshall extends CDataMarshall {
-  public static final DateMarshall MARSHALL = new DateMarshall();
+public class DateProperty extends CDataProperty {
 
-  private DateMarshall()
-  {
+  public DateProperty(Accessor a) {
+    super(a);
   }
-  
-  protected String serialize(Object in)
+
+  protected String write(Object in)
       throws IOException, XMLStreamException
   {
     return DateFormat.getDateInstance().format((Date)in);
   }
 
-  protected Object deserialize(String in)
+  protected Object read(String in)
     throws IOException, XMLStreamException
   {
     try {

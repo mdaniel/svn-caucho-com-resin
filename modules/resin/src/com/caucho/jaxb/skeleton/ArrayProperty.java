@@ -27,7 +27,10 @@
  * @author Adam Megacz
  */
 
-package com.caucho.jaxb.marshall;
+package com.caucho.jaxb.skeleton;
+import com.caucho.jaxb.*;
+import com.caucho.jaxb.*;
+import javax.xml.bind.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
@@ -38,24 +41,37 @@ import java.io.*;
 import com.caucho.vfs.WriteStream;
 
 /**
- * Marshalls data for a string object
+ * Propertys data for a string object
  */
-public class DoubleMarshall extends CDataMarshall {
-  public static final DoubleMarshall MARSHALL = new DoubleMarshall();
+public class ArrayProperty extends Property {
 
-  private DoubleMarshall()
+  // XXX: cache these in the JAXBContext
+  public ArrayProperty(Accessor a)
   {
+    super(a);
   }
   
-  protected String serialize(Object in)
-      throws IOException, XMLStreamException
+  public Object read(Unmarshaller u, XMLStreamReader in)
+    throws IOException, XMLStreamException, JAXBException
   {
-    return ((Number)in).doubleValue()+"";
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
-  protected Object deserialize(String in)
-    throws IOException, XMLStreamException
+  public void write(Marshaller m, XMLStreamWriter out, Object obj)
+    throws IOException, XMLStreamException, JAXBException
   {
-    return new Double(in);
+    if (obj == null)
+      return;
+    /*
+    int length = Array.getLength(obj);
+    
+    for(int i=0; i<length; i++) {
+      Object o = Array.get(obj, i);
+      _marshall.write(out, o, fieldName, marshaller);
+    }
+    */
+    // XXX
   }
 }
+
+
