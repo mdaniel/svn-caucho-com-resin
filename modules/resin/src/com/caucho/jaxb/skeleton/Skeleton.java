@@ -204,7 +204,7 @@ public class Skeleton<C> {
       if (u.getListener() != null)
         u.getListener().beforeUnmarshal(ret, null);
       
-      while(true) {
+      while(in.getEventType() != -1) {
         if (in.getEventType() == in.START_ELEMENT) {
           Property prop = getProperty(in.getName());
           Object val = prop.read(u, in);
