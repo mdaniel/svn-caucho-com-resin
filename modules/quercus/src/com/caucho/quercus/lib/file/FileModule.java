@@ -2050,10 +2050,10 @@ public class FileModule extends AbstractQuercusModule {
 	  top.put(new StringValueImpl(name), section);
 	}
       }
-      else if (Character.isJavaIdentifierStart((char) ch)) {
+      else if (isValidIniKeyChar((char) ch)) {
 	StringBuilder sb = new StringBuilder();
 
-	for (; Character.isJavaIdentifierPart((char) ch); ch = is.read()) {
+	for (; isValidIniKeyChar((char) ch); ch = is.read()) {
 	  sb.append((char) ch);
 	}
 
@@ -2126,6 +2126,27 @@ public class FileModule extends AbstractQuercusModule {
 	return new StringValueImpl(value);
     }
   }
+
+  private static boolean isValidIniKeyChar(char ch)
+  {
+    if (ch <= 0 ||
+        ch == '=' ||
+        ch == ';' ||
+        ch == '{' ||
+        ch == '}' ||
+        ch == '|' ||
+        ch == '&' ||
+        ch == '~' ||
+        ch == '!' ||
+        ch == '[' ||
+        ch == '(' ||
+        ch == ')' ||
+        ch == '"')
+      return false;
+    else
+      return true;
+  }
+
   
   private static void skipToEndOfLine(int ch, ReadStream is)
     throws IOException
