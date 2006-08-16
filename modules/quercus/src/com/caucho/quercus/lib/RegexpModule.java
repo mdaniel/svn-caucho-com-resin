@@ -138,7 +138,15 @@ public class RegexpModule
       int count = matcher.groupCount();
 
       for (int i = 1; i <= count; i++) {
-        regs.put(new LongValue(i), new StringValueImpl(matcher.group(i)));
+        String group = matcher.group(i);
+
+        Value value;
+        if (group == null)
+          value = BooleanValue.FALSE;
+        else
+          value = new StringValueImpl(group);
+
+        regs.put(new LongValue(i), value);
       }
 
       int len = matcher.end() - matcher.start();
@@ -155,6 +163,12 @@ public class RegexpModule
 
   /**
    * Returns the index of the first match.
+   *
+   * php/151u
+   * The array that preg_match (PHP 5) returns does not have trailing unmatched
+   * groups. Therefore, an unmatched group should not be added to the array
+   * unless a matched group appears after it.
+   * (Only preg_match exhibits this odd behavior).
    *
    * @param env the calling environment
    */
@@ -201,21 +215,38 @@ public class RegexpModule
       int count = matcher.groupCount();
 
       for (int i = 1; i <= count; i++) {
-        Value value;
-        if (matcher.group(i) != null)
-          value = new StringValueImpl(matcher.group(i));
-        else
-          value = NullValue.NULL;
+        String group = matcher.group(i);
+
+        if (group == null)
+          continue;
 
         if (isOffsetCapture) {
+          // php/151u
+          // add unmatched groups first
+          for (int j = regs.getSize(); j < i; j++) {
+            ArrayValue part = new ArrayValueImpl();
+
+            part.append(StringValue.EMPTY);
+            part.append(LongValue.MINUS_ONE);
+
+            regs.put(new LongValue(j), part);
+          }
+
           ArrayValueImpl part = new ArrayValueImpl();
-          part.append(value);
+          part.append(new StringValueImpl(group));
           part.append(new LongValue(matcher.start(i)));
 
           regs.put(new LongValue(i), part);
         }
-        else
-          regs.put(new LongValue(i), value);
+        else {
+          // php/151u
+          // add unmatched groups first
+          for (int j = regs.getSize(); j < i; j++) {
+            regs.put(new LongValue(j), StringValue.EMPTY);
+          }
+
+          regs.put(new LongValue(i), new StringValueImpl(group));
+        }
       }
 
       matchRef.set(regs);
