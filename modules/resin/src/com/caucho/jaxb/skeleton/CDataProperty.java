@@ -75,12 +75,9 @@ public abstract class CDataProperty extends Property {
   public void write(Marshaller m, XMLStreamWriter out, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
-    if (obj == null)
-      return;
-
-    out.writeStartElement(getQName().getLocalPart());
+    writeStartElement(out, obj);
     out.writeCharacters(write(obj));
-    out.writeEndElement();
+    writeEndElement(out, obj);
   }
 
 }

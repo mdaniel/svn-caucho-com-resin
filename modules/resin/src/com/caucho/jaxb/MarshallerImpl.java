@@ -85,7 +85,8 @@ public class MarshallerImpl extends AbstractMarshallerImpl {
       encoding = "utf-8";
 
     try {
-      writer.writeStartDocument("1.0", encoding);
+      if (!isFragment())
+        writer.writeStartDocument("1.0", encoding);
 
       // XXX this needs to happen after the startElement is written
       // jaxb/5003

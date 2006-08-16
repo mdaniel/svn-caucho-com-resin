@@ -136,7 +136,7 @@ public class Skeleton<C> {
               !f.isAnnotationPresent(XmlType.class))
             continue;
 
-        Accessor a = new Accessor.FieldAccessor(f);
+        Accessor a = new Accessor.FieldAccessor(f, _context);
         Property p = _context.createProperty(a);
         _properties.put(p.getName(), p);
       }

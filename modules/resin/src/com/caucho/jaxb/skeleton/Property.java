@@ -33,6 +33,7 @@ import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
 import javax.xml.bind.*;
+import javax.xml.bind.annotation.*;
 
 import java.io.*;
 
@@ -55,8 +56,92 @@ public abstract class Property {
   public abstract void write(Marshaller m, XMLStreamWriter out, Object obj)
     throws IOException, XMLStreamException, JAXBException;
 
+  public void writeStartElement(XMLStreamWriter out, Object obj)
+    throws IOException, XMLStreamException, JAXBException
+  {
+
+    XmlElementWrapper wrapper =
+      (XmlElementWrapper)_accessor.getAnnotation(XmlElementWrapper.class);
+    XmlElement element =
+      (XmlElement)_accessor.getAnnotation(XmlElement.class);
+
+    if (wrapper != null) {
+      if (obj == null && !wrapper.nillable())
+        return;
+      if (wrapper.name().equals("##default"))
+        out.writeStartElement(getName());
+      else if (wrapper.namespace().equals("##default"))
+        out.writeStartElement(wrapper.name());
+      else
+        out.writeStartElement(wrapper.namespace(), wrapper.name());
+      if (obj == null)
+        out.writeAttribute("xsi", "http://www.w3.org/2001/XMLSchema-instance",
+                           "nil", "true");
+    }
+    else if (element != null) {
+      if (obj == null && !element.nillable())
+        return;
+      if (element.name().equals("##default"))
+        out.writeStartElement(getName());
+      else if (element.namespace().equals("##default"))
+        out.writeStartElement(element.name());
+      else
+        out.writeStartElement(element.namespace(), element.name());
+      if (obj == null)
+        out.writeAttribute("xsi", "http://www.w3.org/2001/XMLSchema-instance",
+                           "nil", "true");
+    }
+    else {
+      if (obj == null) return;
+      out.writeStartElement(getQName().getLocalPart());
+    }
+  }
+
+  public void writeEndElement(XMLStreamWriter out, Object obj)
+    throws IOException, XMLStreamException, JAXBException
+  {
+
+    XmlElementWrapper wrapper =
+      (XmlElementWrapper)_accessor.getAnnotation(XmlElementWrapper.class);
+    XmlElement element =
+      (XmlElement)_accessor.getAnnotation(XmlElement.class);
+
+    if (wrapper != null) {
+      if (obj == null && !wrapper.nillable())
+        return;
+    } else if (element != null) {
+      if (obj == null && !element.nillable())
+        return;
+    } else {
+      if (obj == null) return;
+    }
+    out.writeEndElement();
+  }
+
   public QName getQName()
   {
+    XmlElementWrapper wrapper =
+      (XmlElementWrapper)_accessor.getAnnotation(XmlElementWrapper.class);
+    XmlElement element =
+      (XmlElement)_accessor.getAnnotation(XmlElement.class);
+
+    if (wrapper != null) {
+      if (wrapper.name().equals("##default"))
+        return _accessor.getQName();
+      else if (wrapper.namespace().equals("##default"))
+        return new QName(wrapper.name());
+      else
+        return new QName(wrapper.namespace(), wrapper.name());
+    }
+    else if (element != null) {
+      if (element.name().equals("##default"))
+        return _accessor.getQName();
+      else if (element.namespace().equals("##default"))
+        return new QName(element.name());
+      else
+        return new QName(element.namespace(), element.name());
+    }
+
     return _accessor.getQName();
   }
 

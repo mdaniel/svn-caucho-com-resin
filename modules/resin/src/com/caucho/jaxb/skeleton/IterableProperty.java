@@ -30,36 +30,64 @@
 package com.caucho.jaxb.skeleton;
 import com.caucho.jaxb.*;
 import javax.xml.bind.*;
+import javax.xml.bind.annotation.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
 
 import java.lang.reflect.*;
 import java.io.*;
-import java.util.*;
 
 import com.caucho.vfs.WriteStream;
 
 /**
- * a Collection Property
+ * common superclass for arrays and collections
  */
-public class CollectionProperty extends IterableProperty {
+public abstract class IterableProperty extends Property {
 
-  public CollectionProperty(Accessor a)
+  private Accessor.ArrayComponentAccessor _componentAccessor;
+  private Property _componentProperty;
+  private XmlElementWrapper _wrap;
+
+  protected abstract int      size(Object o);
+  protected abstract Iterator getIterator(Object o);
+
+  public IterableProperty(Accessor a, Property cp)
     throws JAXBException
   {
-    super(a, a.getContext()
-          .createProperty(new Accessor.CollectionComponentAccessor(a)));
+    super(a);
+    _componentProperty = cp;
+    _wrap = (XmlElementWrapper)a.getAnnotation(XmlElementWrapper.class);
+  }
+  
+  public Object read(Unmarshaller u, XMLStreamReader in)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
-  public int size(Object o)
+  public void write(Marshaller m, XMLStreamWriter out, Object obj)
+    throws IOException, XMLStreamException, JAXBException
   {
-    return ((Collection)o).size();
-  }
+    if (obj == null) {
+      if (_wrap == null || !_wrap.nillable()) return;
+    }
 
-  public Iterator getIterator(Object o)
-  {
-    return ((Collection)o).iterator();
+    writeStartElement(out, obj);
+
+    if (obj == null) {
+      out.writeAttribute("xsi", "http://www.w3.org/2001/XMLSchema-instance",
+                         "nil", "true");
+
+    } else {
+
+      for(Iterator it = getIterator(obj);
+          it.hasNext();)
+        _componentProperty.write(m, out, it.next());
+
+    }
+
+    writeEndElement(out, obj);
   }
 
 }

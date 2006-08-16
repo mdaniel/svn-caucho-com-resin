@@ -43,15 +43,26 @@ import java.io.*;
 
 /** an Accessor is either a getter/setter pair or a field */
 public abstract class Accessor {
-  public abstract Object     get(Object o)
-    throws JAXBException;
-  public abstract void       set(Object o, Object value)
-    throws JAXBException;
+
+  private JAXBContextImpl _context;
+
+  protected Accessor(JAXBContextImpl context)
+  {
+    _context = context;
+  }
+
+  public JAXBContextImpl getContext()
+  {
+    return _context;
+  }
+
+  public abstract Object     get(Object o) throws JAXBException;
+  public abstract void       set(Object o, Object value) throws JAXBException;
   public abstract String     getName();
   public abstract Class      getType();
   public abstract Annotation getAnnotation(Class c);
 
-  public XmlType    getXmlType()
+  public XmlType getXmlType()
   {
     return (XmlType)getAnnotation(XmlType.class);
   }
@@ -74,8 +85,9 @@ public abstract class Accessor {
     private Field _field;
     private Class _type;
 
-    public FieldAccessor(Field f)
+    public FieldAccessor(Field f, JAXBContextImpl context)
     {
+      super(context);
       _field = f;
       _type = _field.getType();
     }
@@ -124,9 +136,10 @@ public abstract class Accessor {
     private Class _type;
     private String _name;
 
-    public GetterSetterAccessor(Class c, String name)
+    public GetterSetterAccessor(Class c, String name, JAXBContextImpl context)
       throws JAXBException
     {
+      super(context);
       try {
         String getName =
           "get" +
@@ -195,4 +208,60 @@ public abstract class Accessor {
     }
   }
 
+  public static class ArrayComponentAccessor extends Accessor {
+    private Accessor _accessor;
+    public ArrayComponentAccessor(Accessor a) {
+      super(a.getContext());
+      _accessor = a;
+    }
+    public Object     get(Object o) throws JAXBException
+    {
+      throw new JAXBException("cannot invoke ArrayComponentAccessor.get()");
+    }
+    public void       set(Object o, Object value) throws JAXBException
+    {
+      throw new JAXBException("cannot invoke ArrayComponentAccessor.set()");
+    }
+    public String     getName()
+    {
+      return _accessor.getName();
+    }
+    public Class      getType()
+    {
+      return _accessor.getType().getComponentType();
+    }
+    public Annotation getAnnotation(Class c)
+    {
+      return null;
+    }
+  }
+
+  public static class CollectionComponentAccessor extends Accessor {
+    private Accessor _accessor;
+    public CollectionComponentAccessor(Accessor a) {
+      super(a.getContext());
+      _accessor = a;
+    }
+    public Object     get(Object o) throws JAXBException
+    {
+      throw new JAXBException("can't invoke CollectionComponentAccessor.get()");
+    }
+    public void       set(Object o, Object value) throws JAXBException
+    {
+      throw new JAXBException("can't invoke CollectionComponentAccessor.set()");
+    }
+    public String     getName()
+    {
+      return _accessor.getName();
+    }
+    public Class      getType()
+    {
+      // XXX
+      return Object.class;
+    }
+    public Annotation getAnnotation(Class c)
+    {
+      return null;
+    }
+  }
 }

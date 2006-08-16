@@ -29,8 +29,8 @@
 
 package com.caucho.jaxb.skeleton;
 import com.caucho.jaxb.*;
-import com.caucho.jaxb.*;
 import javax.xml.bind.*;
+import javax.xml.bind.annotation.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
@@ -41,14 +41,19 @@ import java.io.*;
 import com.caucho.vfs.WriteStream;
 
 /**
- * Propertys data for a string object
+ * a property for serializing/deserializing arrays
  */
-public class ArrayProperty extends Property {
+public class ArrayProperty extends IterableProperty {
 
-  // XXX: cache these in the JAXBContext
+  private Accessor.ArrayComponentAccessor _componentAccessor;
+  private Property _componentProperty;
+  private XmlElementWrapper _wrap;
+
   public ArrayProperty(Accessor a)
+    throws JAXBException
   {
-    super(a);
+    super(a, a.getContext()
+          .createProperty(new Accessor.ArrayComponentAccessor(a)));
   }
   
   public Object read(Unmarshaller u, XMLStreamReader in)
@@ -57,20 +62,35 @@ public class ArrayProperty extends Property {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  public void write(Marshaller m, XMLStreamWriter out, Object obj)
-    throws IOException, XMLStreamException, JAXBException
+  public int size(Object o)
   {
-    if (obj == null)
-      return;
-    /*
-    int length = Array.getLength(obj);
-    
-    for(int i=0; i<length; i++) {
-      Object o = Array.get(obj, i);
-      _marshall.write(out, o, fieldName, marshaller);
+    return Array.getLength(o);
+  }
+
+  public Iterator getIterator(Object o)
+  {
+    return new ArrayIterator(o);
+  }
+
+  private static class ArrayIterator implements Iterator {
+    private int i = 0;
+    private Object _array;
+
+    public ArrayIterator(Object o) {
+      _array = o;
     }
-    */
-    // XXX
+
+    public Object next() {
+      return Array.get(_array, i++);
+    }
+    
+    public boolean hasNext() {
+      return i < Array.getLength(_array);
+    }
+
+    public void remove() {
+    }
+
   }
 }
 
