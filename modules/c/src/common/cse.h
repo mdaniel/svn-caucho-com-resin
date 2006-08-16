@@ -189,8 +189,10 @@ typedef struct config_t {
 
   char *path;
   char *resin_home;
-  char *work_dir;
-  char *config_path;
+  
+  char work_dir[1024];
+  char config_path[1024];
+  char config_file[1024];
   
   char error_page[1024];
   char session_url_prefix[256];

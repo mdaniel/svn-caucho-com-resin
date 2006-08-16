@@ -413,6 +413,39 @@ cse_create_host(config_t *config, const char *host_name, int port)
 }
 
 static int
+handle_config_header(config_t *config, char *header, char *value)
+{
+  if (! strcmp(header, "check-interval")) {
+    config->update_interval = resin_atoi(value);
+    if (config->update_interval < 5)
+      config->update_interval = 5;
+  }
+  else if (! strcmp(header, "session-cookie")) {
+    int len = sizeof(config->session_cookie);
+	
+    strncpy(config->session_cookie, value, len);
+		  
+    config->session_cookie[len - 1] = 0;
+  }
+  else if (! strcmp(header, "session-url-prefix")) {
+    int len = sizeof(config->session_url_prefix);
+	
+    strncpy(config->session_url_prefix, value, len);
+
+    config->session_url_prefix[len - 1] = 0;
+  }
+  else if (! strcmp(header, "alt-session-url-prefix")) {
+    int len = sizeof(config->alt_session_url_prefix);
+	  
+    strncpy(config->alt_session_url_prefix, value, len);
+	  
+    config->alt_session_url_prefix[len - 1] = 0;
+  }
+
+  return 1;
+}
+
+static int
 read_config(stream_t *s, config_t *config, resin_host_t *host,
 	    time_t now, int *p_is_change)
 {
@@ -544,32 +577,8 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	  live_time = resin_atoi(value);
 	else if (! strcmp(buffer, "dead-time"))
 	  dead_time = resin_atoi(value);
-	else if (! strcmp(buffer, "check-interval")) {
-	  config->update_interval = resin_atoi(value);
-	  if (config->update_interval < 5)
-	    config->update_interval = 5;
-	}
-	else if (! strcmp(buffer, "session-cookie")) {
-	  int len = sizeof(host->config->session_cookie);
-	
-	  strncpy(host->config->session_cookie, value, len);
-		  
-	  host->config->session_cookie[len - 1] = 0;
-	}
-	else if (! strcmp(buffer, "session-url-prefix")) {
-	  int len = sizeof(host->config->session_url_prefix);
-	
-	  strncpy(host->config->session_url_prefix, value, len);
-	  
-	  host->config->session_url_prefix[len - 1] = 0;
-	}
-	else if (! strcmp(buffer, "alt-session-url-prefix")) {
-	  int len = sizeof(host->config->alt_session_url_prefix);
-	  
-	  strncpy(host->config->alt_session_url_prefix, value, len);
-	  
-	  host->config->alt_session_url_prefix[len - 1] = 0;
-	}
+	else
+	  handle_config_header(config, buffer, value);
       }
       break;
 	
@@ -675,7 +684,7 @@ write_config(config_t *config)
   char buffer[1024];
   char *tail;
 
-  if (! config->config_path)
+  if (! *config->config_path)
     return;
 
   strncpy(temp, config->config_path, sizeof(temp));
@@ -820,7 +829,7 @@ read_all_config_impl(config_t *config)
   int  ch;
   int is_change = 1;
 
-  if (! config->config_path)
+  if (! *config->config_path)
     return 0;
   
   fd = open(config->config_path, O_RDONLY);
@@ -864,6 +873,8 @@ read_all_config_impl(config_t *config)
       if (ch == HMUX_STRING) {
 	LOG(("%s:%d:read_all_config_impl(): hmux header %s: %s\n",
 	     __FILE__, __LINE__, buffer, value));
+
+	handle_config_header(config, buffer, value);
       }
       break;
 
@@ -892,6 +903,12 @@ read_all_config(config_t *config)
     
     host = cse_match_host_impl(config, "", 0, now);
   }
+}
+
+void
+reread_config(config_t *config)
+{
+  read_all_config(config);
 }
 
 static int
@@ -982,10 +999,10 @@ cse_init_config(config_t *config)
   config->config_cluster.config = config;
   
 #ifdef WIN32  
-  config->work_dir = "/temp";
+  strcpy(config->work_dir, "/temp");
   mkdir("/temp");
 #else
-  config->work_dir = "/tmp";
+  strcpy(config->work_dir, "/tmp");
 #endif
 
   /*
@@ -1001,7 +1018,9 @@ cse_init_config(config_t *config)
     config->config_lock = cse_create_lock(config);
   }
 
+  /*
   read_all_config(config);
+  */
 }
 
 void
@@ -1011,10 +1030,13 @@ cse_add_config_server(config_t *config, const char *host, int port)
   
   cse_add_host(&config->config_cluster, host, port);
 
-  if (! config->config_path && config->work_dir) {
-    sprintf(buffer, "%s/%s_%d", config->work_dir, host, port);
-    
-    config->config_path = strdup(buffer);
+  if (! *config->config_file) {
+    sprintf(config->config_file, "%s_%d", host, port);
+  }
+
+  if (*config->work_dir) {
+    sprintf(config->config_path, "%s/%s", config->work_dir,
+	    config->config_file);
 
     read_all_config(config);
   }
@@ -1162,7 +1184,7 @@ normalize_uri(config_t *config, const char *raw_uri,
   int ch;
   int test_ch = config->session_url_prefix[0];
   int prefix_len = strlen(config->session_url_prefix);
-  
+
   k = 0;
   for (i = 0; (ch = raw_uri[i]) && i + 1 < len; i++) {
     /* strip the session_url_prefix */
@@ -1239,8 +1261,6 @@ cse_is_match(config_t *config,
   resin_host_t *host;
   int is_match = 0;
 
-  normalize_uri(config, raw_uri, uri, len, unescape);
-
   for (i = 0; raw_host && (ch = raw_host[i]) && i + 1 < host_len; i++) {
     if (isupper(ch))
       host_name[i] = tolower(ch);
@@ -1256,6 +1276,8 @@ cse_is_match(config_t *config,
     return 0;
 
   host = host->canonical;
+
+  normalize_uri(config, raw_uri, uri, len, unescape);
 
   has_host = 0;
   best_len = 0;

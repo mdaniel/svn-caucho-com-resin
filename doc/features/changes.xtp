@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - Aug 14, 2006'>
 <ul>
+<li>mod_caucho reading cached localhost_6800 with headers
 <li>mod_caucho and 1--continue
 </ul>
 </s2>

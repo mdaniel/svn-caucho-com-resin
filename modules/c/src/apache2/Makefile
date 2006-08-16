@@ -2,7 +2,7 @@
 
 CC=gcc
 CP=/bin/cp
-CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI -DHAS_JVMDI   -DDARWIN -DSIGPROCMASK_SETS_THREAD_MASK -no-cpp-precomp  -g -O2
+CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI -DHAS_JVMDI -DDEBUG -Wall   -DDARWIN -DSIGPROCMASK_SETS_THREAD_MASK -no-cpp-precomp  -g -O2
 CFLAGS_SHLIB=-DSHARED_MODULE
 EGREP=grep -E
 LIBTOOL=EGREP="grep -E" /Users/ferg/ws30/resin/libtool --silent

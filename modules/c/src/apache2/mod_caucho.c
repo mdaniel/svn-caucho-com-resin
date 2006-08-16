@@ -140,8 +140,6 @@ cse_error(config_t *config, char *format, ...)
   vsprintf(buf, format, args);
   va_end(args);
 
-  LOG(("ERROR: %s\n", buf));
-
   config->error = cse_strdup(config->p, buf);
 }
 
@@ -201,7 +199,7 @@ cse_merge_server_config(apr_pool_t *p, void *basev, void *overridesv)
 {
   config_t *base = (config_t *) basev;
   config_t *overrides = (config_t *) overridesv;
-
+  
   if (! overrides || ! overrides->has_config)
     return base;
   else
@@ -217,7 +215,7 @@ cse_create_dir_config(apr_pool_t *p, char *path)
 
   config->web_pool = p;
   cse_init_config(config);
-
+  
   return (void *) config;
 }
 
@@ -252,7 +250,6 @@ cse_get_module_config(request_rec *r)
   if (r->server->module_config)
     config = (config_t *) ap_get_module_config(r->server->module_config,
                                                &caucho_module);
-
   return config;
 }
 
@@ -284,7 +281,7 @@ resin_config_server_command(cmd_parms *cmd, void *pconfig,
     return 0;
 
   config->has_config = 1;
-
+  
   /*
   cse_add_host(&config->config_cluster, host_arg, port);
   */
@@ -334,7 +331,15 @@ resin_config_cache_command(cmd_parms *cmd, void *pconfig, char *cache_dir)
 
   config->has_config = 1;
   
-  config->work_dir = strdup(cache_dir);
+  strcpy(config->work_dir, cache_dir);
+
+  if (*config->config_file) {
+    sprintf(config->config_path, "%s/%s",
+	    config->work_dir,
+	    config->config_file);
+  }
+  
+  reread_config(config);
 
   return 0;
 }
@@ -1119,7 +1124,7 @@ cse_dispatch(request_rec *r)
   else if (r->handler && ! strcmp(r->handler, "caucho-status")) {
     return caucho_status(r);
   }
-  
+
   if (*config->session_url_prefix) {
     return cse_strip(r);
   }
