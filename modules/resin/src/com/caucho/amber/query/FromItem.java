@@ -42,7 +42,7 @@ class FromItem {
   private AbstractQuery _query;
 
   private PathExpr _collectionExpr;
-    
+
   private IdExpr _idExpr;
 
   private int _index;
@@ -50,8 +50,11 @@ class FromItem {
   private JoinExpr _joinExpr;
 
   private boolean _isUsed;
-  
-  private boolean _isOuterJoin;
+
+  private enum JoinSemantics { UNKNOWN, INNER, OUTER }
+
+  private JoinSemantics _joinSemantics
+    = JoinSemantics.UNKNOWN;
 
   FromItem(Table table, String name, int index)
   {
@@ -80,7 +83,7 @@ class FromItem {
     }
     else
       _idExpr = new IdExpr(this);
-    
+
     return _idExpr;
   }
 
@@ -181,11 +184,19 @@ class FromItem {
   }
 
   /**
+   * Returns true if the from has no outer join.
+   */
+  boolean isInnerJoin()
+  {
+    return _joinSemantics == JoinSemantics.INNER;
+  }
+
+  /**
    * Returns true if the from needs an outer join.
    */
   boolean isOuterJoin()
   {
-    return _isOuterJoin;
+    return _joinSemantics == JoinSemantics.OUTER;
   }
 
   /**
@@ -193,7 +204,8 @@ class FromItem {
    */
   void setOuterJoin(boolean isOuterJoin)
   {
-    _isOuterJoin = isOuterJoin;
+    _joinSemantics = isOuterJoin ?
+      JoinSemantics.OUTER : JoinSemantics.INNER;
   }
 
   /**

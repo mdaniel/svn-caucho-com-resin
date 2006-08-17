@@ -93,7 +93,13 @@ public class QueryParser {
   final static int LIMIT = DESC + 1;
   final static int OFFSET = LIMIT + 1;
 
-  final static int BETWEEN = OFFSET + 1;
+  final static int JOIN = OFFSET + 1;
+  final static int INNER = JOIN + 1;
+  final static int LEFT = INNER + 1;
+  final static int OUTER = LEFT + 1;
+  final static int FETCH = OUTER + 1;
+
+  final static int BETWEEN = FETCH + 1;
   final static int LIKE = BETWEEN + 1;
   final static int ESCAPE = LIKE + 1;
   final static int IS = ESCAPE + 1;
@@ -161,7 +167,13 @@ public class QueryParser {
 
   private ArrayList<ArgExpr> _argList = new ArrayList<ArgExpr>();
 
+  private HashMap<AmberExpr, String> _joinFetchMap;
+
   private int _sqlArgCount;
+
+  private boolean _isOuterJoin = true;
+
+  private boolean _isJoinFetch = false;
 
   /**
    * Creates the query parser.
@@ -211,6 +223,7 @@ public class QueryParser {
     _parseIndex = 0;
     _unique = 0;
     _token = -1;
+    _joinFetchMap = new HashMap<AmberExpr, String>();
   }
 
   /**
@@ -253,6 +266,8 @@ public class QueryParser {
   {
     int oldParseIndex = _parseIndex;
     int oldToken = _token;
+    boolean oldIsOuterJoin = _isOuterJoin;
+    boolean oldIsJoinFetch = _isJoinFetch;
 
     SelectQuery query = new SelectQuery(_sql);
     query.setParentQuery(_query);
@@ -268,10 +283,55 @@ public class QueryParser {
     _token = token;
 
     do {
+
       scanToken();
 
+      _isJoinFetch = false;
+
+      if (token == JOIN) {
+        if (token == FETCH) {
+          scanToken();
+          _isJoinFetch = true;
+        }
+      }
+
       FromItem from = parseFrom();
-    } while ((token = peekToken()) == ',');
+
+      token = peekToken();
+
+      _isOuterJoin = true;
+
+      if (token == INNER) {
+        scanToken();
+
+        token = peekToken();
+
+        if (token != JOIN) {
+          throw error(L.l("expected FROM at {0}", tokenName(token)));
+        }
+
+        _isOuterJoin = false;
+      }
+      else if (token == LEFT) {
+        scanToken();
+
+        token = peekToken();
+
+        if (token == OUTER) {
+          scanToken();
+
+          token = peekToken();
+        }
+
+        if (token != JOIN)
+          throw error(L.l("expected JOIN at {0}", tokenName(token)));
+      }
+      else if (token == JOIN) {
+        _isOuterJoin = false;
+      }
+
+    } while ((token == ',') ||
+             (token == JOIN));
 
     int fromParseIndex = _parseIndex;
     int fromToken = _token;
@@ -314,6 +374,10 @@ public class QueryParser {
       throw error(L.l("expected FROM at {0}", tokenName(token)));
 
     if (resultList.size() == 0) {
+
+      if (_joinFetchMap.size() > 0)
+        throw error(L.l("All associations referenced by JOIN FETCH must belong to an entity that is returned as a result of the query"));
+
       ArrayList<FromItem> fromList = _query.getFromList();
 
       if (fromList.size() > 0) {
@@ -332,6 +396,30 @@ public class QueryParser {
 
         resultList.add(expr);
       }
+    }
+    else {
+
+      int size = resultList.size();
+
+      int matches = 0;
+
+      for (int i = 0; i < size; i++) {
+
+        AmberExpr expr = resultList.get(i);
+
+        if (expr instanceof LoadEntityExpr) {
+
+          expr = ((LoadEntityExpr) expr).getExpr();
+
+          if (_joinFetchMap.get(expr) != null) {
+            matches++;
+          }
+        }
+      }
+
+      if (matches < _joinFetchMap.size())
+        throw error(L.l("All associations referenced by JOIN FETCH must belong to an entity that is returned as a result of the query"));
+
     }
 
     query.setResultList(resultList);
@@ -420,17 +508,26 @@ public class QueryParser {
     }
 
     token = peekToken();
-    if ((! innerSelect) && (token > 0))
-      throw error(L.l("expected end of query at {0}", tokenName(token)));
+
+    if (! innerSelect) {
+
+      query.setJoinFetchMap(_joinFetchMap);
+
+      if (token > 0)
+        throw error(L.l("expected end of query at {0}", tokenName(token)));
+    }
 
     if (! query.setArgList(_argList.toArray(new ArgExpr[_argList.size()])))
-      throw error(L.l("Unable to parse all query parameters. Make sure named parameters are not mixed with positional parameters."));
+      throw error(L.l("Unable to parse all query parameters. Make sure named parameters are not mixed with positional parameters"));
 
     try {
       query.init();
     } catch (SQLException e) {
       throw new QueryParseException(e);
     }
+
+    _isOuterJoin = oldIsOuterJoin;
+    _isJoinFetch = oldIsJoinFetch;
 
     return query;
   }
@@ -601,7 +698,11 @@ public class QueryParser {
     if (id == null)
       id = createTableName();
 
-    return _query.createFromItem(table, id);
+    FromItem item = _query.createFromItem(table, id);
+
+    item.setOuterJoin(_isOuterJoin);
+
+    return item;
   }
 
   /**
@@ -609,7 +710,11 @@ public class QueryParser {
    */
   FromItem createDependentFromItem(FromItem item, LinkColumns link)
   {
-    return _query.createDependentFromItem(item, link, createTableName());
+    item = _query.createDependentFromItem(item, link, createTableName());
+
+    item.setOuterJoin(_isOuterJoin);
+
+    return item;
   }
 
   /**
@@ -654,7 +759,11 @@ public class QueryParser {
     boolean isIn = token == IN;
 
     if (isIn) {
+
       scanToken();
+
+      _isOuterJoin = false;
+
       if ((token = scanToken()) != '(')
         throw error(L.l("expected '(' at '{0}'", tokenName(token)));
     }
@@ -674,8 +783,10 @@ public class QueryParser {
       }
     }
 
+    IdExpr id = null;
+
     if (schema == null) {
-      IdExpr id = getIdentifier(name);
+      id = getIdentifier(name);
 
       if (id != null)
         schema = new FromIdSchemaExpr(id);
@@ -702,11 +813,25 @@ public class QueryParser {
                       name));
     }
 
+    name = "";
+    boolean isFirst = true;
+
     while (peekToken() == '.') {
       scanToken();
       String segment = parseIdentifier();
 
+      if (isFirst) {
+        name += segment;
+        isFirst = false;
+      }
+      else
+        name += "." + segment;
+
       schema = schema.createField(this, segment);
+    }
+
+    if (_isJoinFetch && (! name.equals(""))) {
+      _joinFetchMap.put(id, name);
     }
 
     if (isIn) {
@@ -1686,6 +1811,12 @@ public class QueryParser {
     _reserved.put("desc", DESC);
     _reserved.put("limit", LIMIT);
     _reserved.put("offset", OFFSET);
+
+    _reserved.put("join", JOIN);
+    _reserved.put("inner", INNER);
+    _reserved.put("left", LEFT);
+    _reserved.put("outer", OUTER);
+    _reserved.put("fetch", FETCH);
 
     _reserved.put("or", OR);
     _reserved.put("and", AND);

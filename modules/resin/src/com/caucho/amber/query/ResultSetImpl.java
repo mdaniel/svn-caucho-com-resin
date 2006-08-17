@@ -69,6 +69,7 @@ public class ResultSetImpl implements ResultSet {
   private ResultSet _rs;
   private ArrayList<FromItem> _fromList;
   private ArrayList<AmberExpr> _resultList;
+  private Map<AmberExpr, String> _joinFetchMap;
   private AmberConnection _session;
 
   private QueryCacheKey _cacheKey;
@@ -106,6 +107,7 @@ public class ResultSetImpl implements ResultSet {
   {
     _fromList = query.getFromList();
     _resultList = query.getResultList();
+    _joinFetchMap = query.getJoinFetchMap();
   }
 
   /**
@@ -177,11 +179,24 @@ public class ResultSetImpl implements ResultSet {
 
           AmberExpr expr = _resultList.get(j);
 
-          tail.setValue(i, j, expr.getCacheObject(_session, _rs, index + offset));
+          if (expr instanceof LoadEntityExpr) {
+            LoadEntityExpr entityExpr = (LoadEntityExpr) expr;
 
-          // jpa/0t71
-          if (expr instanceof LoadEntityExpr)
-            offset += ((LoadEntityExpr) expr).getIndex();
+            tail.setValue(i, j,
+                          entityExpr.getCacheObject(_session,
+                                                    _rs,
+                                                    index + offset,
+                                                    _joinFetchMap));
+
+            // jpa/0t71
+            offset += entityExpr.getIndex();
+          }
+          else {
+            tail.setValue(i, j,
+                          expr.getCacheObject(_session,
+                                              _rs,
+                                              index + offset));
+          }
         }
       }
       else {

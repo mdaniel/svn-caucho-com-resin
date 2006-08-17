@@ -28,11 +28,15 @@
 
 package com.caucho.amber.query;
 
+import java.lang.reflect.Method;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import java.util.ArrayList;
+import java.util.Map;
 
+import com.caucho.amber.entity.Entity;
 import com.caucho.amber.entity.EntityItem;
 
 import com.caucho.amber.field.AmberField;
@@ -76,6 +80,14 @@ public class LoadEntityExpr extends AbstractAmberExpr {
   public EntityType getEntityType()
   {
     return (EntityType) _expr.getTargetType();
+  }
+
+  /**
+   * Returns the underlying expression
+   */
+  PathExpr getExpr()
+  {
+    return _expr;
   }
 
   /**
@@ -216,16 +228,43 @@ public class LoadEntityExpr extends AbstractAmberExpr {
    * Returns the object for the expr.
    */
   public Object getCacheObject(AmberConnection aConn,
-                               ResultSet rs, int index)
+                               ResultSet rs,
+                               int index)
     throws SQLException
   {
-    return findItem(aConn, rs, index);
+    return getCacheObject(aConn, rs, index, null);
   }
 
   /**
    * Returns the object for the expr.
    */
-  public EntityItem findItem(AmberConnection aConn, ResultSet rs, int index)
+  public Object getCacheObject(AmberConnection aConn,
+                               ResultSet rs,
+                               int index,
+                               Map<AmberExpr, String> joinFetchMap)
+    throws SQLException
+  {
+    return findItem(aConn, rs, index, joinFetchMap);
+  }
+
+  /**
+   * Returns the object for the expr.
+   */
+  public EntityItem findItem(AmberConnection aConn,
+                             ResultSet rs,
+                             int index)
+    throws SQLException
+  {
+    return findItem(aConn, rs, index, null);
+  }
+
+  /**
+   * Returns the object for the expr.
+   */
+  public EntityItem findItem(AmberConnection aConn,
+                             ResultSet rs,
+                             int index,
+                             Map<AmberExpr, String> joinFetchMap)
     throws SQLException
   {
     EntityType entityType = getEntityType();
@@ -237,7 +276,48 @@ public class LoadEntityExpr extends AbstractAmberExpr {
 
     int keyLength = entityType.getId().getKeyCount();
 
-    _index = item.getEntity().__caucho_load(aConn, rs, index + keyLength);
+    Entity entity = item.getEntity();
+
+    _index = entity.__caucho_load(aConn, rs, index + keyLength);
+
+    String property = joinFetchMap.get(this._expr);
+
+    if (property != null) {
+
+      try {
+
+        // XXX: Review if this entity can be attached.
+        entity.__caucho_setConnection(aConn);
+
+        Class cl = entityType.getInstanceClass();
+
+        Method method
+          = cl.getDeclaredMethod("get" +
+                                 Character.toUpperCase(property.charAt(0)) +
+                                 property.substring(1),
+                                 null);
+
+        Object collection = method.invoke(entity, null);
+
+        // XXX: for now, invoke the toString() method on
+        // the collection to fetch all the objects (join fetch).
+
+        cl = collection.getClass();
+
+        method = cl.getMethod("toString", null);
+
+        method.invoke(collection, null);
+
+      } catch (NoSuchMethodException e1) {
+        // XXX: this exception must never happen if the
+        // query parser does a proper validation.
+      } catch (IllegalAccessException e2) {
+        // XXX: this exception must never happen if the
+        // query parser does a proper validation.
+      } catch (java.lang.reflect.InvocationTargetException e3) {
+        // XXX: this needs to be handled
+      }
+    }
 
     return item;
   }

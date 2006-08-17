@@ -29,6 +29,7 @@
 package com.caucho.amber.query;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import java.sql.SQLException;
 
@@ -57,6 +58,8 @@ public class SelectQuery extends AbstractQuery {
 
   private ArrayList<AmberExpr> _groupList;
 
+  private Map<AmberExpr, String> _joinFetchMap;
+
   private String _sql;
 
   private boolean _isTableReadOnly = false;
@@ -65,6 +68,14 @@ public class SelectQuery extends AbstractQuery {
   SelectQuery(String query)
   {
     super(query);
+  }
+
+  /**
+   * Gets the (join) fetch map.
+   */
+  Map<AmberExpr, String> getJoinFetchMap()
+  {
+    return _joinFetchMap;
   }
 
   /**
@@ -147,6 +158,14 @@ public class SelectQuery extends AbstractQuery {
   void setGroupList(ArrayList<AmberExpr> groupList)
   {
     _groupList = groupList;
+  }
+
+  /**
+   * Sets the (join) fetch map.
+   */
+  void setJoinFetchMap(Map<AmberExpr, String> joinFetchMap)
+  {
+    _joinFetchMap = joinFetchMap;
   }
 
   /**
@@ -290,6 +309,9 @@ public class SelectQuery extends AbstractQuery {
 
     for (int i = 0; i < _fromList.size(); i++) {
       FromItem item = _fromList.get(i);
+
+      if (item.isInnerJoin())
+        continue;
 
       if (item.getJoinExpr() == null)
         continue;
