@@ -307,7 +307,7 @@ public class QueryParser {
         token = peekToken();
 
         if (token != JOIN) {
-          throw error(L.l("expected FROM at {0}", tokenName(token)));
+          throw error(L.l("expected JOIN at {0}", tokenName(token)));
         }
 
         _isOuterJoin = false;
