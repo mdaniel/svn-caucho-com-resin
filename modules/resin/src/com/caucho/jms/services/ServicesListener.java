@@ -119,6 +119,11 @@ public class ServicesListener {
     _jmsConnection.start();
   }
 
+  public void stop() throws JMSException
+  {
+    _jmsConnection.stop();
+  }
+
   private class ServicesListenerMDB implements MessageListener {
     private MessageDrivenContext _messageDrivenContext = null;
 
