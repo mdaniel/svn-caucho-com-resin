@@ -1,0 +1,27 @@
+<!--
+   - web.xml configuration file for the Hessian JMS example.
+  -->
+<web-app xmlns="http://caucho.com/ns/resin">
+  <resource var="serviceQueue" 
+            jndi-name="jms/ServiceQueue"
+            type="com.caucho.jms.memory.MemoryQueue"/>
+  
+  <resource var="resultQueue"
+            jndi-name="jms/ResultQueue"
+            type="com.caucho.jms.memory.MemoryQueue"/>
+  
+  <resource var="jmsFactory"
+            jndi-name="jms/ConnectionFactory"
+            type="com.caucho.jms.ConnectionFactoryImpl"/>
+
+  <resource type="com.caucho.hessian.server.HessianListener">
+    <init>
+      <connection-factory>${jmsFactory}</connection-factory>
+      <destination>${serviceQueue}</destination>
+      <service resin:type="example.HelloServiceImpl">
+        <connection-factory>${jmsFactory}</connection-factory>
+        <result-queue>${resultQueue}</result-queue>
+      </service>
+    </init>
+  </resource>
+</web-app>
