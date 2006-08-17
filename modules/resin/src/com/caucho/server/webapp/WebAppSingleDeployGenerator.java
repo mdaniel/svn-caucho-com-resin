@@ -168,6 +168,14 @@ public class WebAppSingleDeployGenerator
   }
 
   /**
+   * Adds a default.
+   */
+  public void addWebAppDefault(WebAppConfig config)
+  {
+    _defaultList.add(config);
+  }
+
+  /**
    * Returns the log.
    */
   protected Logger getLog()
@@ -209,6 +217,9 @@ public class WebAppSingleDeployGenerator
       _controller.addDepend(_archivePath);
     
     _controller.setParentWebApp(_parentWebApp);
+
+    for (WebAppConfig config : _defaultList)
+      _controller.addConfigDefault(config);
     
     // _controller.setConfig(_config);
     // server/1h13

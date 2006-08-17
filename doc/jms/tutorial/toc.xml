@@ -6,5 +6,6 @@
     
     <item link="php-queue-send/index.xtp" title="JMS in Quercus - Sending messages"/>
     <item link="php-queue-receive/index.xtp" title="JMS in Quercus - Receiving messages"/>
+    <item link="services/index.xtp" title="JMS web services"/>
   </item>
 </navigation>

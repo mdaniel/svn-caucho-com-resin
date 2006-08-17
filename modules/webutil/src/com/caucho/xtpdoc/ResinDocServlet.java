@@ -59,9 +59,15 @@ import com.caucho.xml.stream.XMLStreamWriterImpl;
 public class ResinDocServlet extends HttpServlet {
   private static Logger log = Logger.getLogger(ResinDocServlet.class.getName());
 
+  private String _contextPath;
   private Config _config;
   private Path _pwd;
   private XMLOutputFactory _outputFactory;
+
+  public void setDocContextPath(String contextPath)
+  {
+    _contextPath = contextPath;
+  }
 
   public void init(ServletConfig config)
     throws ServletException
@@ -70,6 +76,9 @@ public class ResinDocServlet extends HttpServlet {
     
     _config = new Config();
     _pwd = Vfs.lookup().createRoot();
+
+    if (_contextPath == null)
+      _contextPath = config.getServletContext().getServletContextName();
 
     try {
       _outputFactory = XMLOutputFactory.newInstance();
@@ -90,9 +99,12 @@ public class ResinDocServlet extends HttpServlet {
 
     Path path = _pwd.lookup(servletPath);
 
-    Document document = new Document(path, request.getContextPath());
+    System.out.println("SERVICE: " + _contextPath);
+    Document document = new Document(path, _contextPath);
 
     try {
+      response.setContentType("text/html");
+      
       XMLStreamWriter xmlOut = _outputFactory.createXMLStreamWriter(out);
       
       _config.configure(document, path);

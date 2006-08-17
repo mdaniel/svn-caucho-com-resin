@@ -66,9 +66,9 @@ public class NavigationItem {
     _rootPath = document.getDocumentPath().getParent();
   }
 
-  public void init()
+  private void initSummary()
   {
-    if (_depth > _maxDepth)
+    if (_maxDepth < _depth || _child != null)
       return;
 
     if (_rootPath != null && _link != null) {
@@ -151,6 +151,8 @@ public class NavigationItem {
   {
     if (_maxDepth < _depth)
       return;
+
+    initSummary();
 
     String depthString = (_depth == 0) ? "top" : ("" + _depth);
 

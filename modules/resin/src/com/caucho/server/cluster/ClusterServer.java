@@ -100,6 +100,15 @@ public class ClusterServer {
     _serverConnector = new ServerConnector(this);
   }
 
+  public ClusterServer(Cluster cluster, boolean isTest)
+  {
+    _cluster = cluster;
+
+    _clusterPort = new ClusterPort(this);
+    
+    _serverConnector = new ServerConnector(this);
+  }
+
   /**
    * Gets the server identifier.
    */

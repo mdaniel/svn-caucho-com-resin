@@ -159,7 +159,7 @@ public class WebApp extends ServletContextImpl
     = new ArrayList<DeployGenerator>();
 
   // Any web-app-default for children
-  private ArrayList<WebAppConfig> _webAppDefault
+  private ArrayList<WebAppConfig> _webAppDefaultList
     = new ArrayList<WebAppConfig>();
 
   // The servlet manager
@@ -1345,10 +1345,29 @@ public class WebApp extends ServletContextImpl
     // XXX: The parent is added in the init()
     // server/10t3
     // _parent.addWebAppDeploy(deploy);
+    
+    for (WebAppConfig configDefault : _webAppDefaultList)
+      deploy.addWebAppDefault(configDefault);
 
     Environment.addEnvironmentListener(deploy, getClassLoader());
 
     _appGenerators.add(deploy);
+  }
+
+  /**
+   * Adds a web-app default
+   */
+  public void addWebAppDefault(WebAppConfig config)
+  {
+    _webAppDefaultList.add(config);
+  }
+
+  /**
+   * Adds a web-app default
+   */
+  public ArrayList<WebAppConfig> getWebAppDefaultList()
+  {
+    return _webAppDefaultList;
   }
 
   /**
@@ -1368,8 +1387,9 @@ public class WebApp extends ServletContextImpl
     DeployContainer<WebAppController> appGenerator;
     appGenerator = _parent.getWebAppGenerator();
 
-    WebAppSingleDeployGenerator deploy = new WebAppSingleDeployGenerator(appGenerator,
-						       container, config);
+    WebAppSingleDeployGenerator deploy;
+    deploy = new WebAppSingleDeployGenerator(appGenerator,
+					     container, config);
 
     deploy.setURLPrefix(contextPath + prefix);
     // deploy.setParent(_controller);
@@ -1380,6 +1400,9 @@ public class WebApp extends ServletContextImpl
     deploy.setParentWebApp(_controller);
     deploy.setParentClassLoader(getClassLoader());
     deploy.setContainer(container);
+
+    for (WebAppConfig configDefault : _webAppDefaultList)
+      deploy.addWebAppDefault(configDefault);
 
     String appDir = config.getDocumentDirectory();
 

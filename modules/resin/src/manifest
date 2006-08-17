@@ -1,4 +1,4 @@
-Class-Path: jsdk-24.jar jta-101.jar ejb-15.jar jca-15.jar jms-11.jar
+Class-Path: jsdk-15.jar jta-101.jar ejb-15.jar jca-15.jar jms-11.jar
 Main-Class: com.caucho.boot.ResinBoot
 Implementation-Vendor: Caucho Technology, Inc.
 Implementation-Version: 3.1.1

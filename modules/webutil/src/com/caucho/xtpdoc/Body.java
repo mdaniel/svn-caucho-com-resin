@@ -126,9 +126,75 @@ public class Body extends ContainerNode {
     out.writeAttribute("border", "0");
     out.writeAttribute("cellspacing", "0");
 
+    // logo block
+    out.writeStartElement("tr");
+
+    // spacer
+    out.writeStartElement("td");
+    out.writeAttribute("width", "2");
+    out.writeStartElement("img");
+    out.writeAttribute("alt", "");
+    out.writeAttribute("width", "2");
+    out.writeAttribute("height", "1");
+    out.writeAttribute("src", getDocument().getContextPath() + "/images/pixel.gif");
+    out.writeEndElement(); // </img>
+    out.writeEndElement(); // </td>
+
+    // logo
+    out.writeStartElement("td");
+    out.writeAttribute("width", "150");
+    out.writeStartElement("img");
+    out.writeAttribute("alt", "");
+    out.writeAttribute("width", "150");
+    out.writeAttribute("height", "63");
+    out.writeAttribute("src", getDocument().getContextPath() + "/images/caucho-white.jpg");
+    out.writeEndElement(); // </img>
+    out.writeEndElement(); // </td>
+
+    // spacer
+    out.writeStartElement("td");
+    out.writeAttribute("width", "10");
+    out.writeStartElement("img");
+    out.writeAttribute("alt", "");
+    out.writeAttribute("width", "10");
+    out.writeAttribute("height", "1");
+    out.writeAttribute("src", getDocument().getContextPath() + "/images/pixel.gif");
+    out.writeEndElement(); // </img>
+    out.writeEndElement(); // </td>
+
+    // top label
+    out.writeStartElement("td");
+    out.writeStartElement("table");
+    out.writeAttribute("width", "100%");
+    out.writeAttribute("cellspacing", "0");
+    out.writeAttribute("cellpadding", "0");
+    out.writeAttribute("border", "0");
+    out.writeStartElement("tr");
+    out.writeAttribute("class", "toptitle");
+    out.writeStartElement("td");
+    //out.writeAttribute("rowspan", "2");
+    out.writeAttribute("width", "90%");
+    out.writeAttribute("background", getDocument().getContextPath() + "/images/hbleed.gif");
+    out.writeStartElement("font");
+    out.writeAttribute("class", "toptitle");
+    out.writeAttribute("size", "+3");
+    out.writeEntityRef("nbsp");
+    out.writeCharacters(getDocument().getHeader().getTitle());
+    out.writeEndElement(); // </font>
+    out.writeEndElement(); // </td>
+    out.writeEndElement(); // </tr>
+    out.writeEndElement(); // </table>
+    out.writeEndElement(); // </td>
+    
+    out.writeEndElement(); // </tr>
+
+    // XXX: space
+
+    // navigation
     out.writeStartElement("tr");
     out.writeAttribute("valign", "top");
     out.writeStartElement("td");
+    out.writeAttribute("colspan", "2");
     out.writeAttribute("bgcolor", "#b9cef7");
     out.writeAttribute("class", "leftnav");
     
@@ -139,6 +205,9 @@ public class Body extends ContainerNode {
 
     out.writeEndElement(); // td
 
+    out.writeStartElement("td"); //spacer
+    out.writeEndElement();
+    
     out.writeStartElement("td");
 
     if (_summary != null) {
@@ -150,6 +219,31 @@ public class Body extends ContainerNode {
       _index.writeHtml(out);
 
     super.writeHtml(out);
+
+    out.writeStartElement("hr");
+    out.writeEndElement();
+
+    // nav
+
+    out.writeStartElement("table");
+    out.writeAttribute("border", "0");
+    out.writeAttribute("cellspacing", "0");
+    out.writeAttribute("width", "100%");
+    out.writeStartElement("tr");
+    out.writeStartElement("td");
+    out.writeStartElement("em");
+    out.writeStartElement("small");
+    out.writeCharacters("Copyright ");
+    out.writeEntityRef("copy");
+    out.writeCharacters(" 1998-2006 Caucho Technology, Inc. All rights reserved.");
+    out.writeStartElement("br");
+    out.writeEndElement();
+    out.writeCharacters("Resin is a registered trademark");
+    out.writeEndElement(); // small
+    out.writeEndElement(); // em
+    out.writeEndElement(); // td
+    out.writeEndElement(); // tr
+    out.writeEndElement(); // table
     
     out.writeEndElement(); // td
     out.writeEndElement(); // tr

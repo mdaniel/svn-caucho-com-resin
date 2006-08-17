@@ -31,8 +31,6 @@ as a JMS message. (TODO: Actually remove SOAP envelope.)  Below is a PHP
 script using the Quercus JMS module that acts as the service client.
 </p>
 
-</s1>
-
 <example language="php">
 &lt;?php
 

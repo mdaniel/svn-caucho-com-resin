@@ -103,6 +103,7 @@ public class WebAppController
     setContextPath(contextPath);
 
     getVariableMap().put("app", new Var());
+    getVariableMap().put("webApp", new Var());
   }
 
   /**

@@ -413,6 +413,39 @@ cse_create_host(config_t *config, const char *host_name, int port)
 }
 
 static int
+handle_config_header(config_t *config, char *header, char *value)
+{
+  if (! strcmp(header, "check-interval")) {
+    config->update_interval = resin_atoi(value);
+    if (config->update_interval < 5)
+      config->update_interval = 5;
+  }
+  else if (! strcmp(header, "session-cookie")) {
+    int len = sizeof(config->session_cookie);
+	
+    strncpy(config->session_cookie, value, len);
+		  
+    config->session_cookie[len - 1] = 0;
+  }
+  else if (! strcmp(header, "session-url-prefix")) {
+    int len = sizeof(config->session_url_prefix);
+	
+    strncpy(config->session_url_prefix, value, len);
+
+    config->session_url_prefix[len - 1] = 0;
+  }
+  else if (! strcmp(header, "alt-session-url-prefix")) {
+    int len = sizeof(config->alt_session_url_prefix);
+	  
+    strncpy(config->alt_session_url_prefix, value, len);
+	  
+    config->alt_session_url_prefix[len - 1] = 0;
+  }
+
+  return 1;
+}
+
+static int
 read_config(stream_t *s, config_t *config, resin_host_t *host,
 	    time_t now, int *p_is_change)
 {
@@ -544,32 +577,8 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	  live_time = resin_atoi(value);
 	else if (! strcmp(buffer, "dead-time"))
 	  dead_time = resin_atoi(value);
-	else if (! strcmp(buffer, "check-interval")) {
-	  config->update_interval = resin_atoi(value);
-	  if (config->update_interval < 5)
-	    config->update_interval = 5;
-	}
-	else if (! strcmp(buffer, "cookie")) {
-	  int len = sizeof(host->config->session_cookie);
-	
-	  strncpy(host->config->session_cookie, value, len);
-		  
-	  host->config->session_cookie[len - 1] = 0;
-	}
-	else if (! strcmp(buffer, "session-url-prefix")) {
-	  int len = sizeof(host->config->session_url_prefix);
-	
-	  strncpy(host->config->session_url_prefix, value, len);
-	  
-	  host->config->session_url_prefix[len - 1] = 0;
-	}
-	else if (! strcmp(buffer, "alt-session-url-prefix")) {
-	  int len = sizeof(host->config->alt_session_url_prefix);
-	  
-	  strncpy(host->config->alt_session_url_prefix, value, len);
-	  
-	  host->config->alt_session_url_prefix[len - 1] = 0;
-	}
+	else {
+	  handle_config_header(config, buffer, value);
       }
       break;
 	
@@ -869,6 +878,8 @@ read_all_config_impl(config_t *config)
       if (ch == HMUX_STRING) {
 	LOG(("%s:%d:read_all_config_impl(): hmux header %s: %s\n",
 	     __FILE__, __LINE__, buffer, value));
+
+	handle_config_header(config, buffer, value);
       }
       break;
 

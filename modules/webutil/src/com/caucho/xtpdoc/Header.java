@@ -65,6 +65,11 @@ public class Header {
     _title = title;
   }
 
+  public String getTitle()
+  {
+    return _title;
+  }
+
   public void setDate(String date)
   {
     _date = date;

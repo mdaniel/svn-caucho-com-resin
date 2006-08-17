@@ -37,6 +37,7 @@ import com.caucho.quercus.*;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.lib.VariableModule;
 import com.caucho.quercus.lib.session.SessionModule;
+import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.module.Marshall;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.ModuleStartupListener;
@@ -1495,7 +1496,31 @@ public final class Env {
       if (! getIniBoolean("register_long_arrays"))
 	return null;
       
-    case _GET:
+    case _GET: {
+      var = new Var();
+
+      ArrayValue array = new ArrayValueImpl();
+
+      var.set(array);
+
+      _globalMap.put(name, var);
+
+      try {
+	_request.setCharacterEncoding(getHttpInputEncoding().toString());
+      } catch (Exception e) {
+	log.log(Level.FINE, e.toString(), e);
+      }
+
+      String queryString = _request.getQueryString();
+
+      if (queryString == null)
+	return var;
+
+      StringModule.parse_str(this, queryString, var);
+
+      return var;
+    }
+      
     case _REQUEST: {
       var = new Var();
 

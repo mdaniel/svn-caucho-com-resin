@@ -8,6 +8,7 @@
 
 <s2 title="3.1snap - Aug 1, 2006">
 <ul>
+<li>mod_caucho reading cached localhost_6800 with headers</li>
 <li>mod_caucho and 100-continue</li>
 <li>mod_caucho and session-cookie value</li>
 <li>mod_caucho stripping of ;jsessionid= wasn't working</li>

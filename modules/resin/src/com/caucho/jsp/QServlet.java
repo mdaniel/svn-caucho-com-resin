@@ -34,7 +34,7 @@ import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.connection.RequestAdapter;
 import com.caucho.server.connection.ResponseAdapter;
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ClientDisconnectException;
 import com.caucho.vfs.JarPath;
@@ -67,20 +67,20 @@ abstract public class QServlet implements Servlet {
   private static final Logger log = Log.open(QServlet.class);
   private static final L10N L = new L10N(QServlet.class);
 
-  protected Application _application;
+  protected WebApp _webApp;
   private PageManager _manager;
 
   private ServletConfig _config;
 
   /**
    * Initialize the servlet.  If necessary, convert the ServletContext
-   * to a CauchoApplication.  Also, read the configuration Registry
+   * to a CauchoWebApp.  Also, read the configuration Registry
    * it it hasn't been read yet.
    */
   public void init(ServletConfig config) throws ServletException
   {
     ServletContext cxt = config.getServletContext();
-    _application = (Application) cxt;
+    _webApp = (WebApp) cxt;
 
     _config = config;
 
@@ -105,7 +105,7 @@ abstract public class QServlet implements Servlet {
    */
   public ServletContext getServletContext()
   {
-    return _application;
+    return _webApp;
   }
 
   /**
@@ -140,7 +140,7 @@ abstract public class QServlet implements Servlet {
     if (req instanceof CauchoRequest)
       request = (CauchoRequest) req;
     else
-      request = RequestAdapter.create((HttpServletRequest) req, _application);
+      request = RequestAdapter.create((HttpServletRequest) req, _webApp);
 
     if (res instanceof CauchoResponse)
       response = (CauchoResponse) res;
@@ -239,7 +239,7 @@ abstract public class QServlet implements Servlet {
     CauchoRequest cauchoRequest = null;
 
     /*
-    if (! _application.isActive())
+    if (! _webApp.isActive())
       throw new UnavailableException("JSP compilation unavailable during restart", 10);
     */
 
@@ -264,7 +264,7 @@ abstract public class QServlet implements Servlet {
     else
       uri = RequestAdapter.getPageURI(req);
 
-    Path appDir = _application.getAppDir();
+    Path appDir = _webApp.getAppDir();
 
     String realPath;
     Path subcontext;
@@ -292,7 +292,7 @@ abstract public class QServlet implements Servlet {
       return _manager.getPage(servletPath, subcontext);
 
     if (pathInfo == null) {
-      realPath = _application.getRealPath(servletPath);
+      realPath = _webApp.getRealPath(servletPath);
       subcontext = appDir.lookupNative(realPath);
 
       return _manager.getPage(servletPath, subcontext);
@@ -339,17 +339,17 @@ abstract public class QServlet implements Servlet {
    */
   private Path getPagePath(String pathName)
   {
-    Path appDir = _application.getAppDir();
-    String realPath = _application.getRealPath(pathName);
+    Path appDir = _webApp.getAppDir();
+    String realPath = _webApp.getRealPath(pathName);
     Path path = appDir.lookupNative(realPath);
 
     if (path.isFile() && path.canRead())
       return path;
 
     java.net.URL url;
-    ClassLoader loader = _application.getClassLoader();
+    ClassLoader loader = _webApp.getClassLoader();
     if (loader != null) {
-      url = _application.getClassLoader().getResource(pathName);
+      url = _webApp.getClassLoader().getResource(pathName);
 
       String name = url != null ? url.toString() : null;
 
