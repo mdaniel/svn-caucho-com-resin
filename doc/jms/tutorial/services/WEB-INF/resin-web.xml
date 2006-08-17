@@ -8,29 +8,27 @@
   <!--
      - JMS
     -->
-  <resource var="inboundQueue" 
-            jndi-name="jms/InboundQueue"
+  <resource var="serviceQueue" 
+            jndi-name="jms/ServiceQueue"
             type="com.caucho.jms.memory.MemoryQueue"/>
   
-  <resource var="outboundQueue" 
-            jndi-name="jms/OutboundQueue"
+  <resource var="resultQueue" 
+            jndi-name="jms/ResultQueue"
             type="com.caucho.jms.memory.MemoryQueue"/>
   
   <resource var="jmsFactory" type="com.caucho.jms.ConnectionFactoryImpl"
             jndi-name="jms/ConnectionFactory"/>
 
-  <resource type="com.caucho.jms.resource.ListenerResource">
+  <resource type="com.caucho.jms.services.ServicesListener">
     <init>
       <connection-factory>${jmsFactory}</connection-factory>
 
-      <destination>${inboundQueue}</destination>
+      <destination>${serviceQueue}</destination>
 
-      <listener type="com.caucho.jms.services.ServicesListener">
-        <init>
-          <outbound-queue>jms/OutboundQueue</outbound-queue>
-          <service resin:type="example.HelloService" />
-        </init>
-      </listener>
+      <service resin:type="example.HelloService">
+        <connection-factory>${jmsFactory}</connection-factory>
+        <result-queue>${resultQueue}</result-queue>
+      </service>
     </init>
   </resource>
 </web-app>

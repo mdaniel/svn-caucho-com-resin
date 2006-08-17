@@ -1,7 +1,7 @@
 <?php
 
-$result_queue = new JMSQueue("jms/OutboundQueue");
-$request_queue = new JMSQueue("jms/InboundQueue");
+$request_queue = new JMSQueue("jms/ServiceQueue");
+$result_queue = new JMSQueue("jms/ResultQueue");
 
 if (! $result_queue) {
   echo "Unable to get result queue!\n";
