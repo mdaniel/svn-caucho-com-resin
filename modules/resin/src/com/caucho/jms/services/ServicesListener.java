@@ -29,55 +29,59 @@
 
 package com.caucho.jms.services;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+
 import java.util.logging.Logger;
-import javax.jms.*;
-import javax.ejb.*;
-import javax.xml.soap.*;
-import javax.xml.stream.*;
+
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageListener;
+import javax.jms.Session;
+import javax.jms.TextMessage;
+import javax.jms.Topic;
+
+import javax.ejb.EJBException;
+import javax.ejb.MessageDrivenContext;
+
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamException;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
 import com.caucho.soap.reflect.WebServiceIntrospector;
-
 import com.caucho.soap.skeleton.DirectSkeleton;
 
 import com.caucho.vfs.StringStream;
-import com.caucho.vfs.TempBuffer;
-import com.caucho.vfs.TempStream;
-import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.NullWriteStream;
 
-public class ServicesListener implements MessageListener 
-{
+public class ServicesListener {
   private static final Logger log =
     Logger.getLogger(ServicesListener.class.getName());
 
-  private String _outboundQueueName = "jms/OutboundQueue";
-  private String _connectionFactoryName;
-  private MessageProducer _producer;
+  private Destination _destination;
+  private ConnectionFactory _connectionFactory;
   private Session _jmsSession;
   private Connection _jmsConnection;
+
+  private int _listenerMax = 5;
   private Object _object;
   private Class _class;
   private DirectSkeleton _skeleton;
-  private boolean _initialized = false;
-  private transient MessageDrivenContext _messageDrivenContext = null;
 
-  public void setMessageDrivenContext(MessageDrivenContext messageDrivenContext)
-    throws EJBException
+  public void setDestination(Destination destination)
   {
-    _messageDrivenContext = messageDrivenContext;
+    _destination = destination;
   }
 
-  public void setOutboundQueue(String outboundQueueName)
+  public void setConnectionFactory(ConnectionFactory connectionFactory)
   {
-    _outboundQueueName = outboundQueueName;
-  }
-
-  public void setConnectionFactory(String connectionFactoryName)
-  {
-    _connectionFactoryName = connectionFactoryName;
+    _connectionFactory = connectionFactory;
   }
 
   public void setService(Object o)
@@ -91,86 +95,74 @@ public class ServicesListener implements MessageListener
 
   public void init()
   {
-    _initialized = true;
-
-    if (_outboundQueueName == null) {
-      log.fine("OutboundQueue not set, aborting.");
-      return;
-    }
-
-    if (_connectionFactoryName == null) {
-      log.fine("ConnectionFactory not set, assuming jms/ConnectionFactory.");
-      _connectionFactoryName = "jms/ConnectionFactory";
-    }
-
     try {
-      Context context = (Context) new InitialContext().lookup("java:comp/env");
-
-      ConnectionFactory connectionFactory = 
-        (ConnectionFactory) context.lookup(_connectionFactoryName);
-
-      Destination destination = 
-        (Destination) context.lookup(_outboundQueueName);
-
-      _jmsConnection = connectionFactory.createConnection();
-      _jmsSession = 
-        _jmsConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      _producer = _jmsSession.createProducer(destination);
+      _jmsConnection = _connectionFactory.createConnection();
     } catch (Exception e) {
       log.fine(e.toString());
     }
-  }
-
-  public void onMessage(Message message)
-  {
-    if (!_initialized)
-      init();
-
-    if (_producer == null)
-      return;
-
-    try {
-      if (message instanceof TextMessage) {
-        String text = ((TextMessage) message).getText();
-        TempStream tempStream = new TempStream();
-        WriteStream ws = new WriteStream(tempStream);
-
-        try {
-          XMLInputFactory factory = XMLInputFactory.newInstance();
-
-          XMLStreamReader xmlReader =
-            factory.createXMLStreamReader(StringStream.open(text));
-
-          getSkeleton().invoke(_object, xmlReader, ws);
-          ws.flush();
-          tempStream.flush();
-        } catch (XMLStreamException e) {
-          log.info(e.toString());
-        } catch (IOException e) {
-          log.info(e.toString());
-        }
-
-        BytesMessage bytesMessage = _jmsSession.createBytesMessage();
-
-        for (TempBuffer buffer = tempStream.getHead(); 
-             buffer != null; 
-             buffer = buffer.getNext())
-          bytesMessage.writeBytes(buffer.getBuffer(), 0, buffer.getLength());
-
-        _producer.send(bytesMessage);
-
-      }    
-    } catch (JMSException e) {
-      log.info("jms exception: " + e);
-      _messageDrivenContext.setRollbackOnly();
-    }
-  }
-
-  private DirectSkeleton getSkeleton()
-  {
-    if (_skeleton == null)
-      _skeleton = new WebServiceIntrospector().introspect(_class);
     
-    return _skeleton;
+    if (_destination instanceof Topic)
+      _listenerMax = 1;
+  }
+
+  public void start() throws Throwable
+  {
+    for (int i = 0; i < _listenerMax; i++) {
+      Session session = 
+        _jmsConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
+      MessageConsumer consumer = session.createConsumer(_destination);
+
+      consumer.setMessageListener(new ServicesListenerMDB());
+    }
+
+    _jmsConnection.start();
+  }
+
+  private class ServicesListenerMDB implements MessageListener {
+    private MessageDrivenContext _messageDrivenContext = null;
+
+    public 
+    void setMessageDrivenContext(MessageDrivenContext messageDrivenContext)
+      throws EJBException
+    {
+      _messageDrivenContext = messageDrivenContext;
+    }
+
+    public void onMessage(Message message)
+    {
+      try {
+        if (message instanceof TextMessage) {
+          String text = ((TextMessage) message).getText();
+          
+          // ignore return value
+          NullWriteStream ws = new NullWriteStream();
+
+          try {
+            XMLInputFactory factory = XMLInputFactory.newInstance();
+
+            XMLStreamReader xmlReader =
+              factory.createXMLStreamReader(StringStream.open(text));
+
+            getSkeleton().invoke(_object, xmlReader, ws);
+          } catch (XMLStreamException e) {
+            log.info(e.toString());
+          } catch (IOException e) {
+            log.info(e.toString());
+          }
+        }    
+      } catch (JMSException e) {
+        log.info("JMS exception: " + e);
+        _messageDrivenContext.setRollbackOnly();
+      }
+    }
+
+    private DirectSkeleton getSkeleton()
+    {
+      if (_skeleton == null)
+        _skeleton = new WebServiceIntrospector().introspect(_class);
+
+      return _skeleton;
+    }
   }
 }
