@@ -50,6 +50,7 @@ package com.caucho.hessian.client;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.*;
 
 import java.net.URL;
 import java.net.HttpURLConnection;
@@ -105,6 +106,9 @@ import com.caucho.services.client.ServiceProxyFactory;
  * password are set.
  */
 public class HessianProxyFactory implements ServiceProxyFactory, ObjectFactory {
+  protected static Logger log
+    = Logger.getLogger(HessianProxyFactory.class.getName());
+
   private SerializerFactory _serializerFactory;
   private HessianRemoteResolver _resolver;
   
@@ -121,6 +125,8 @@ public class HessianProxyFactory implements ServiceProxyFactory, ObjectFactory {
   private boolean _isDebug = false;
 
   private long _readTimeout = -1;
+
+  private String _connectionFactoryName = "jms/ConnectionFactory";
 
   /**
    * Creates the new proxy factory.
@@ -146,6 +152,15 @@ public class HessianProxyFactory implements ServiceProxyFactory, ObjectFactory {
   {
     _password = password;
     _basicAuth = null;
+  }
+
+  /**
+   * Sets the name of the connection factory to use when connecting
+   * to JMS Hessian services.
+   */
+  public void setConnectionFactoryName(String connectionFactoryName)
+  {
+    _connectionFactoryName = connectionFactoryName;
   }
 
   /**
@@ -357,12 +372,25 @@ public class HessianProxyFactory implements ServiceProxyFactory, ObjectFactory {
   public Object create(Class api, String urlName, ClassLoader loader)
     throws MalformedURLException
   {
-    URL url = new URL(urlName);
-    
-    HessianProxy handler = new HessianProxy(this, url);
+    InvocationHandler handler = null;
+
+    if (urlName.startsWith("jms:")) {
+      String jndiName = urlName.substring("jms:".length());
+
+      try {
+        handler = new HessianJMSProxy(this, jndiName, _connectionFactoryName);
+      } catch (Exception e) {
+        log.info("Unable to create JMS proxy: " + e);
+        return null;
+      }
+    } 
+    else {
+      URL url = new URL(urlName); 
+      handler = new HessianProxy(this, url);
+    }
 
     return Proxy.newProxyInstance(api.getClassLoader(),
-				  new Class[] { api,
+                                  new Class[] { api,
                                                 HessianRemoteObject.class },
                                   handler);
   }
@@ -397,7 +425,7 @@ public class HessianProxyFactory implements ServiceProxyFactory, ObjectFactory {
       out = out1;
 
       if (_isHessian2Reply)
-	out1.setVersion(2);
+        out1.setVersion(2);
     }
       
     out.setSerializerFactory(getSerializerFactory());
