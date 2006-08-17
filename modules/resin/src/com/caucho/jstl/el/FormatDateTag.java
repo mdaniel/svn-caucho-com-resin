@@ -32,11 +32,12 @@ import java.io.*;
 import java.util.*;
 import java.text.*;
 
+import javax.el.*;
+
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
 import javax.servlet.jsp.jstl.core.*;
 import javax.servlet.jsp.jstl.fmt.*;
-import javax.servlet.jsp.el.ELException;
 
 import com.caucho.vfs.*;
 import com.caucho.util.*;
@@ -154,7 +155,7 @@ public class FormatDateTag extends BodyTagSupport {
       
       JspWriter out = pageContext.getOut();
 
-      Object value = _valueExpr.evalObject(pageContext);
+      Object value = _valueExpr.evalObject(pageContext.getELContext());
 
       if (value == null) {
 	if (_var != null)
@@ -176,16 +177,18 @@ public class FormatDateTag extends BodyTagSupport {
 
       String type = null;
 
+      ELContext env = pageContext.getELContext();
+
       if (_typeExpr != null)
-        type = _typeExpr.evalString(pageContext);
+        type = _typeExpr.evalString(env);
 
       int dateStyle = DateFormat.DEFAULT;
       if (_dateStyleExpr != null)
-        dateStyle = getDateStyle(_dateStyleExpr.evalString(pageContext));
+        dateStyle = getDateStyle(_dateStyleExpr.evalString(env));
 
       int timeStyle = DateFormat.DEFAULT;
       if (_timeStyleExpr != null)
-        timeStyle = getDateStyle(_timeStyleExpr.evalString(pageContext));
+        timeStyle = getDateStyle(_timeStyleExpr.evalString(env));
 
       if (locale != null) {
         if (type == null || type.equals("date"))
@@ -211,7 +214,7 @@ public class FormatDateTag extends BodyTagSupport {
       }
 
       if (format != null && _patternExpr != null) {
-        String pattern = _patternExpr.evalString(pageContext);
+        String pattern = _patternExpr.evalString(env);
         try {
           ((SimpleDateFormat) format).applyPattern(pattern);
         } catch (ClassCastException e) {
@@ -244,7 +247,7 @@ public class FormatDateTag extends BodyTagSupport {
   {
     if (_timeZoneExpr != null) {
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
-      Object timeZoneObj = _timeZoneExpr.evalObject(pageContext);
+      Object timeZoneObj = _timeZoneExpr.evalObject(pageContext.getELContext());
 
       TimeZone zone = getTimeZone(timeZoneObj);
       if (zone != null)

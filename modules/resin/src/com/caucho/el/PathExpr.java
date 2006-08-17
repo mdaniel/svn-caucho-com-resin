@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -34,8 +35,7 @@ import java.util.logging.*;
 import java.beans.*;
 import java.lang.reflect.*;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import javax.el.*;
 
 import com.caucho.vfs.*;
 import com.caucho.util.*;
@@ -67,6 +67,7 @@ public class PathExpr extends Expr {
    *
    * @param field the string reference for the field.
    */
+  @Override
   public Expr createField(String field)
   {
     Expr arrayExpr = _expr.createField(new StringLiteral(field));
@@ -80,6 +81,7 @@ public class PathExpr extends Expr {
    *
    * @param args the arguments for the method
    */
+  @Override
   public Expr createMethod(Expr []args)
   {
     if (_expr instanceof ArrayExpr) {
@@ -106,7 +108,8 @@ public class PathExpr extends Expr {
    *
    * @return the evaluated object
    */
-  public Object evalObject(VariableResolver env)
+  @Override
+  public Object evalObject(ELContext env)
     throws ELException
   {
     Object value = _expr.evalObject(env);
@@ -114,7 +117,7 @@ public class PathExpr extends Expr {
     if (value != null)
       return value;
 
-    return env.resolveVariable(_path);
+    return env.getELResolver().getValue(env, _path, null);
   }
 
   /**
@@ -122,6 +125,7 @@ public class PathExpr extends Expr {
    *
    * @param os stream to the generated *.java code
    */
+  @Override
   public void printCreate(WriteStream os)
     throws IOException
   {

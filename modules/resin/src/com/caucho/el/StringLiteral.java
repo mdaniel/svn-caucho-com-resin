@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -30,8 +31,7 @@ package com.caucho.el;
 
 import java.io.*;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import javax.el.*;
 
 import com.caucho.vfs.*;
 
@@ -49,6 +49,7 @@ public class StringLiteral extends Expr {
   /**
    * Returns true if the expression is constant.
    */
+  @Override
   public boolean isConstant()
   {
     return true;
@@ -67,7 +68,8 @@ public class StringLiteral extends Expr {
    *
    * @param env the variable environment
    */
-  public Object evalObject(VariableResolver env)
+  @Override
+  public Object evalObject(ELContext env)
     throws ELException
   {
     return _value;
@@ -78,7 +80,8 @@ public class StringLiteral extends Expr {
    *
    * @param env the variable environment
    */
-  public String evalString(VariableResolver env)
+  @Override
+  public String evalString(ELContext env)
     throws ELException
   {
     return _value;
@@ -87,24 +90,24 @@ public class StringLiteral extends Expr {
   /**
    * Evalutes directly to the output.
    */
-  public void print(WriteStream out, VariableResolver env)
+  @Override
+  public boolean print(WriteStream out,
+		       ELContext env,
+		       boolean isEscape)
     throws IOException, ELException
   {
-    out.print(_value);
-  }
-
-  /**
-   * Evaluates directly to the output.
-   */
-  public void printEscaped(WriteStream out, VariableResolver env)
-    throws IOException, ELException
-  {
-    toStreamEscaped(out, _value);
+    if (isEscape)
+      toStreamEscaped(out, _value);
+    else
+      out.print(_value);
+    
+    return false;
   }
 
   /**
    * Prints the code to create an LongLiteral.
    */
+  @Override
   public void printCreate(WriteStream os)
     throws IOException
   {

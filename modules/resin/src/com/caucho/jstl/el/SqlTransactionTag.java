@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -36,12 +37,13 @@ import java.util.logging.*;
 import javax.sql.*;
 import javax.naming.*;
 
+import javax.el.*;
+
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
 import javax.servlet.jsp.jstl.core.*;
 import javax.servlet.jsp.jstl.sql.Result;
 import javax.servlet.jsp.jstl.sql.SQLExecutionTag;
-import javax.servlet.jsp.el.VariableResolver;
 
 import com.caucho.log.Log;
 import com.caucho.util.*;
@@ -81,7 +83,7 @@ public class SqlTransactionTag extends TagSupport implements TryCatchFinally  {
     if (pageContext.getAttribute("caucho.jstl.sql.conn") != null)
       throw new JspTagException(L.l("nexted sql:transaction are forbidden"));
 
-    VariableResolver env = (VariableResolver) pageContext;
+    ELContext env = pageContext.getELContext();
     
     try {
       DataSource ds;

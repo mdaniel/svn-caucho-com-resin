@@ -72,15 +72,13 @@ public class RequestEncodingTag extends TagSupport {
     try {
       String value = null;
       if (_valueExpr != null)
-        value = _valueExpr.evalString(pageContext);
+        value = _valueExpr.evalString(pageContext.getELContext());
       else
         value = (String) Config.find(pageContext, "javax.servlet.jsp.jstl.fmt.request.charset");
 
       if (value != null && ! value.equals(""))
         request.setCharacterEncoding(value);
     } catch (UnsupportedEncodingException e) {
-      throw new JspException(e);
-    } catch (ELException e) {
       throw new JspException(e);
     }
 

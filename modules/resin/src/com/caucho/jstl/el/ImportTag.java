@@ -31,11 +31,12 @@ package com.caucho.jstl.el;
 import java.io.*;
 import java.net.*;
 
+import javax.el.*;
+
 import javax.servlet.jsp.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.jsp.tagext.*;
-import javax.servlet.jsp.el.ELException;
 
 import com.caucho.vfs.*;
 import com.caucho.util.*;
@@ -236,8 +237,9 @@ public class ImportTag extends BodyTagSupport implements NameValueTag {
     throws JspException, ServletException, IOException, ELException
   {
     PageContextImpl pageContext = (PageContextImpl) this.pageContext;
+    ELContext env = pageContext.getELContext();
     
-    String url = _urlExpr.evalString(pageContext);
+    String url = _urlExpr.evalString(env);
 
     if (url == null || url.equals(""))
       throw new JspTagException(L.l("URL may not be null for `{0}'",
@@ -257,7 +259,7 @@ public class ImportTag extends BodyTagSupport implements NameValueTag {
       out.flush();
 
     if (_contextExpr != null) {
-      String context = _contextExpr.evalString(pageContext);
+      String context = _contextExpr.evalString(env);
 
       if (! url.startsWith("/"))
 	throw new JspException(L.l("URL `{0}' must start with `/' with context `{0}'", url, context));
@@ -316,6 +318,7 @@ public class ImportTag extends BodyTagSupport implements NameValueTag {
     throws JspException, ServletException, IOException, ELException
   {
     PageContextImpl pageContext = (PageContextImpl) this.pageContext;
+    ELContext env = pageContext.getELContext();
     
     URL netURL = new URL(url);
 
@@ -331,7 +334,7 @@ public class ImportTag extends BodyTagSupport implements NameValueTag {
       String contentType = conn.getContentType();
 
       if (_charEncodingExpr != null) {
-        encoding = _charEncodingExpr.evalString(pageContext);
+        encoding = _charEncodingExpr.evalString(env);
         if (encoding != null && ! encoding.equals(""))
           in.setEncoding(encoding);
       }

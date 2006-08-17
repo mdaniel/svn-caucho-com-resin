@@ -31,9 +31,10 @@ package com.caucho.jstl.el;
 import java.io.*;
 import java.util.*;
 
+import javax.el.*;
+
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
-import javax.servlet.jsp.el.ELException;
 
 import javax.servlet.jsp.jstl.core.*;
 import javax.servlet.jsp.jstl.fmt.*;
@@ -84,9 +85,10 @@ public class XmlParamTag extends BodyTagSupport {
 	return EVAL_BODY_BUFFERED;
 
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
+      ELContext env = pageContext.getELContext();
     
-      String name = _nameExpr.evalString(pageContext);
-      String value = _valueExpr.evalString(pageContext);
+      String name = _nameExpr.evalString(env);
+      String value = _valueExpr.evalString(env);
 
       Object parent = getParent();
       if (! (parent instanceof NameValueTag))
@@ -121,7 +123,7 @@ public class XmlParamTag extends BodyTagSupport {
     
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
     
-      String name = _nameExpr.evalString(pageContext);
+      String name = _nameExpr.evalString(pageContext.getELContext());
 
       Object parent = getParent();
       if (! (parent instanceof NameValueTag))

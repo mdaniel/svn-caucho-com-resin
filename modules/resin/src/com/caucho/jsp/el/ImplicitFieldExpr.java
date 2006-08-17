@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -31,11 +32,10 @@ package com.caucho.jsp.el;
 import java.io.*;
 import java.util.*;
 
+import javax.el.*;
+
 import javax.servlet.http.*;
 import javax.servlet.jsp.*;
-
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
 
 import com.caucho.vfs.*;
 import com.caucho.jsp.*;
@@ -57,9 +57,12 @@ public class ImplicitFieldExpr extends Expr {
    *
    * @param env the page context
    */
-  public Object evalObject(VariableResolver env)
+  @Override
+  public Object evalObject(ELContext env)
     throws ELException
   {
+    throw new UnsupportedOperationException();
+    /*
     Object fieldValue = _field.evalObject(env);
     
     if (fieldValue == null)
@@ -134,11 +137,13 @@ public class ImplicitFieldExpr extends Expr {
     }
       
     throw new UnsupportedOperationException();
+    */
   }
 
   /**
    * Prints the code to create an IdExpr.
    */
+  @Override
   public void printCreate(WriteStream os)
     throws IOException
   {

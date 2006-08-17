@@ -29,6 +29,8 @@
 
 package com.caucho.config.types;
 
+import javax.el.*;
+
 import com.caucho.config.Config;
 import com.caucho.config.NodeBuilder;
 import com.caucho.config.TypeStrategy;
@@ -38,9 +40,6 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import org.w3c.dom.Node;
-
-import javax.servlet.jsp.el.ELException;
-import javax.servlet.jsp.el.VariableResolver;
 
 public class PathTypeStrategy extends TypeStrategy {
   protected static final L10N L = new L10N(PathTypeStrategy.class);
@@ -68,13 +67,13 @@ public class PathTypeStrategy extends TypeStrategy {
 		      Vfs.lookup());
   }
 
-  public static Path lookupPath(String string, VariableResolver env)
+  public static Path lookupPath(String string, ELContext env)
     throws ELException
   {
     return lookupPath(string, env, Vfs.lookup());
   }
 
-  public static Path lookupPath(String string, VariableResolver env, Path pwd)
+  public static Path lookupPath(String string, ELContext env, Path pwd)
     throws ELException
   {
     if (env == null)

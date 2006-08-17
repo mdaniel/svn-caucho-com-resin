@@ -82,18 +82,14 @@ public class SetBundleTag extends TagSupport {
   public int doStartTag()
     throws JspException
   {
-    try {
-      PageContextImpl pageContext = (PageContextImpl) this.pageContext;
+    PageContextImpl pageContext = (PageContextImpl) this.pageContext;
 
-      String basename = _basenameExpr.evalString(pageContext);
+    String basename = _basenameExpr.evalString(pageContext.getELContext());
       
-      LocalizationContext bundle = pageContext.getBundle(basename);
+    LocalizationContext bundle = pageContext.getBundle(basename);
 
-      CoreSetTag.setValue(pageContext, _var, _scope, bundle);
+    CoreSetTag.setValue(pageContext, _var, _scope, bundle);
 
-      return SKIP_BODY;
-    } catch (ELException e) {
-      throw new JspException(e);
-    }
+    return SKIP_BODY;
   }
 }

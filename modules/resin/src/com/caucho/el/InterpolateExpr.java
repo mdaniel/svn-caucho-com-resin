@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -30,8 +31,7 @@ package com.caucho.el;
 
 import java.io.*;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import javax.el.*;
 
 import com.caucho.vfs.*;
 import com.caucho.util.*;
@@ -58,6 +58,7 @@ public class InterpolateExpr extends Expr {
   /**
    * Returns true if this is a constant expression.
    */
+  @Override
   public boolean isConstant()
   {
     return _left.isConstant() && _right.isConstant();
@@ -70,7 +71,8 @@ public class InterpolateExpr extends Expr {
    *
    * @return the string value
    */
-  public Object evalObject(VariableResolver env)
+  @Override
+  public Object evalObject(ELContext env)
     throws ELException
   {
     return evalString(env);
@@ -79,10 +81,11 @@ public class InterpolateExpr extends Expr {
   /**
    * Evaluate the expression as an object.
    */
-  public String evalString(VariableResolver env)
+  @Override
+  public String evalString(ELContext env)
     throws ELException
   {
-    CharBuffer cb = CharBuffer.allocate();
+    CharBuffer cb = new CharBuffer();
 
     Expr expr = this;
 
@@ -113,8 +116,9 @@ public class InterpolateExpr extends Expr {
    *
    * @return false, since the interpolated value is never null
    */
+  @Override
   public boolean print(WriteStream out,
-                       VariableResolver env,
+                       ELContext env,
                        boolean escapeXml)
     throws IOException, ELException
   {
@@ -127,6 +131,7 @@ public class InterpolateExpr extends Expr {
   /**
    * Prints the code to create an LongLiteral.
    */
+  @Override
   public void printCreate(WriteStream os)
     throws IOException
   {

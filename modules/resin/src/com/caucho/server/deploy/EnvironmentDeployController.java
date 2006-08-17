@@ -29,25 +29,28 @@
 
 package com.caucho.server.deploy;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.ConfigException;
+import com.caucho.config.*;
+
 import com.caucho.config.types.PathBuilder;
-import com.caucho.el.EL;
-import com.caucho.el.MapVariableResolver;
+
+import com.caucho.el.*;
+
 import com.caucho.jmx.Jmx;
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.EnvironmentListener;
+
+import com.caucho.loader.*;
+
 import com.caucho.log.Log;
+
 import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+
+import com.caucho.vfs.*;
+
+import javax.el.*;
 
 import javax.management.JMException;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import javax.servlet.jsp.el.ELException;
-import javax.servlet.jsp.el.VariableResolver;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -62,8 +65,8 @@ abstract public class
   EnvironmentDeployController<I extends EnvironmentDeployInstance,
                                         C extends DeployConfig>
   extends ExpandDeployController<I>
-  implements EnvironmentListener {
-
+  implements EnvironmentListener
+{
   private static final L10N L = new L10N(EnvironmentDeployController.class);
   private static final Logger log
     = Log.open(EnvironmentDeployController.class);
@@ -83,7 +86,7 @@ abstract public class
   private DeployConfig _prologue;
 
   // The configuration variable resolver
-  private VariableResolver _parentVariableResolver;
+  private ELResolver _parentELResolver;
 
   // The variable mapping
   private HashMap<String,Object> _variableMap = new HashMap<String,Object>();
@@ -114,7 +117,10 @@ abstract public class
   {
     super(id, null, rootDirectory);
 
-    _parentVariableResolver = EL.getEnvironment(getParentClassLoader());
+    ELContext elContext = EL.getEnvironment(getParentClassLoader());
+
+    if (elContext != null)
+      _parentELResolver = elContext.getELResolver();
 
     _jmxContext = Jmx.copyContextProperties(getParentClassLoader());
   }
@@ -345,11 +351,11 @@ abstract public class
       HashMap<String,Object> varMap = new HashMap<String,Object>();
       varMap.putAll(_variableMap);
 
-      VariableResolver variableResolver
-        = new MapVariableResolver(varMap, _parentVariableResolver);
-
+      ELResolver variableResolver
+        = new MapVariableResolver(varMap, _parentELResolver);
+      
       EL.setVariableMap(varMap, classLoader);
-      EL.setEnvironment(variableResolver, classLoader);
+      EL.setEnvironment(new ConfigELContext(variableResolver), classLoader);
 
       configureInstanceVariables(instance);
 

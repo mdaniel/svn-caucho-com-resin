@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -30,8 +31,7 @@ package com.caucho.el;
 
 import java.io.*;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import javax.el.*;
 
 import javax.servlet.jsp.JspWriter;
 
@@ -68,7 +68,8 @@ public class DoubleLiteral extends Expr {
    *
    * @return the Double constant
    */
-  public Object evalObject(VariableResolver env)
+  @Override
+  public Object evalObject(ELContext env)
     throws ELException
   {
     return _objValue;
@@ -81,7 +82,8 @@ public class DoubleLiteral extends Expr {
    *
    * @return the double value casted to a long
    */
-  public long evalLong(VariableResolver env)
+  @Override
+  public long evalLong(ELContext env)
     throws ELException
   {
     return (long) _value;
@@ -94,34 +96,11 @@ public class DoubleLiteral extends Expr {
    *
    * @return the double value
    */
-  public double evalDouble(VariableResolver env)
+  @Override
+  public double evalDouble(ELContext env)
     throws ELException
   {
     return _value;
-  }
-
-  /**
-   * Prints the value to the output
-   *
-   * @param out the output writer
-   * @param env the variable environment
-   */
-  public void print(WriteStream out, VariableResolver env)
-    throws IOException, ELException
-  {
-    out.print(_value);
-  }
-
-  /**
-   * Prints the value to the output
-   *
-   * @param out the output writer
-   * @param env the variable environment
-   */
-  public void printEscaped(WriteStream out, VariableResolver env)
-    throws IOException, ELException
-  {
-    out.print(_value);
   }
 
   /**
@@ -134,8 +113,9 @@ public class DoubleLiteral extends Expr {
    *
    * @return true if the object is null, otherwise false
    */
+  @Override
   public boolean print(JspWriter out,
-                       VariableResolver env,
+                       ELContext env,
                        boolean escapeXml)
     throws IOException, ELException
   {
@@ -149,6 +129,7 @@ public class DoubleLiteral extends Expr {
    *
    * @param os the stream to the generated *.java
    */
+  @Override
   public void printCreate(WriteStream os)
     throws IOException
   {

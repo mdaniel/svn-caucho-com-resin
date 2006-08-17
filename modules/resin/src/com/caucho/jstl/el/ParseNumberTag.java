@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -32,11 +33,12 @@ import java.io.*;
 import java.util.*;
 import java.text.*;
 
+import javax.el.*;
+
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
 import javax.servlet.jsp.jstl.core.*;
 import javax.servlet.jsp.jstl.fmt.*;
-import javax.servlet.jsp.el.ELException;
 
 import com.caucho.vfs.*;
 import com.caucho.util.*;
@@ -148,7 +150,7 @@ public class ParseNumberTag extends BodyTagSupport {
       String string;
 
       if (_valueExpr != null)
-        string = _valueExpr.evalString(pageContext);
+        string = _valueExpr.evalString(pageContext.getELContext());
       else
         string = bodyContent.getString().trim();
 
@@ -172,13 +174,14 @@ public class ParseNumberTag extends BodyTagSupport {
     throws JspException, ELException
   {
     PageContextImpl pageContext = (PageContextImpl) this.pageContext;
+    ELContext env = pageContext.getELContext();
       
     NumberFormat format = null;
 
     Locale locale = null;
 
     if (_parseLocaleExpr != null) {
-      Object localeObj = _parseLocaleExpr.evalObject(pageContext);
+      Object localeObj = _parseLocaleExpr.evalObject(env);
 
       if (localeObj instanceof Locale)
         locale = (Locale) localeObj;
@@ -191,7 +194,7 @@ public class ParseNumberTag extends BodyTagSupport {
 
     String type = null;
     if (_typeExpr != null)
-      type = _typeExpr.evalString(pageContext);
+      type = _typeExpr.evalString(env);
 
     if (type == null || type.equals("") || type.equals("number")) {
       if (locale != null)
@@ -202,7 +205,7 @@ public class ParseNumberTag extends BodyTagSupport {
       DecimalFormat decimalFormat = (DecimalFormat) format;
 
       if (_patternExpr != null)
-        decimalFormat.applyPattern(_patternExpr.evalString(pageContext));
+        decimalFormat.applyPattern(_patternExpr.evalString(env));
     }
     else if (type.equals("percent")) {
       if (locale != null)
@@ -221,7 +224,7 @@ public class ParseNumberTag extends BodyTagSupport {
                                  type));
 
     if (_integerOnlyExpr != null)
-      format.setParseIntegerOnly(_integerOnlyExpr.evalBoolean(pageContext));
+      format.setParseIntegerOnly(_integerOnlyExpr.evalBoolean(env));
 
     return format;
   }

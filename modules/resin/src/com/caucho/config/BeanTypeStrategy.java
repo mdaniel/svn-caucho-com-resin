@@ -37,7 +37,7 @@ import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import javax.servlet.jsp.el.VariableResolver;
+import javax.el.*;
 
 import org.w3c.dom.Node;
 
@@ -650,7 +650,7 @@ public class BeanTypeStrategy extends TypeStrategy {
     }
   }
 
-  protected VariableResolver getEnvironment()
+  protected ELContext getEnvironment()
   {
     return Config.getEnvironment();
   }

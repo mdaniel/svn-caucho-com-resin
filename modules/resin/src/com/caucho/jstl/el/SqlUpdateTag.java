@@ -36,6 +36,8 @@ import java.util.logging.*;
 import javax.sql.*;
 import javax.naming.*;
 
+import javax.el.*;
+
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
 import javax.servlet.jsp.jstl.core.*;
@@ -108,12 +110,13 @@ public class SqlUpdateTag extends BodyTagSupport implements SQLExecutionTag {
     Connection conn = null;
     boolean isTransaction = false;
     PageContextImpl pageContext = (PageContextImpl) this.pageContext;
+    ELContext env = pageContext.getELContext();
     
     try {
       String sql;
 
       if (_sql != null)
-        sql = _sql.evalString(pageContext);
+        sql = _sql.evalString(env);
       else
         sql = bodyContent.getString();
 
@@ -126,7 +129,7 @@ public class SqlUpdateTag extends BodyTagSupport implements SQLExecutionTag {
 
         if (_dataSource != null)
           ds = SqlQueryTag.getDataSource(pageContext,
-                                         _dataSource.evalObject(pageContext));
+                                         _dataSource.evalObject(env));
         else
           ds = SqlQueryTag.getDataSource(pageContext, null);
 

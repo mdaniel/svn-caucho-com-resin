@@ -36,8 +36,7 @@ import java.util.logging.Level;
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import javax.el.*;
 
 import com.caucho.vfs.*;
 
@@ -87,7 +86,7 @@ public class CoreOutTag extends BodyTagSupport {
   {
     try {
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
-      VariableResolver env = pageContext;
+      ELContext env = pageContext.getELContext();
       
       JspWriter out = pageContext.getOut();
 
@@ -110,7 +109,7 @@ public class CoreOutTag extends BodyTagSupport {
   {
     try {
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
-      VariableResolver env = pageContext;
+      ELContext env = pageContext.getELContext();
       
       JspWriter out = pageContext.getOut();
       

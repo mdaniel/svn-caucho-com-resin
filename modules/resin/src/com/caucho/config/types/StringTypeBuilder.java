@@ -33,8 +33,7 @@ import com.caucho.el.ELParser;
 import com.caucho.el.Expr;
 import com.caucho.util.L10N;
 
-import javax.servlet.jsp.el.ELException;
-import javax.servlet.jsp.el.VariableResolver;
+import javax.el.*;
 
 /**
  * Class-loading TypeBuilder
@@ -48,7 +47,7 @@ public class StringTypeBuilder {
     return evalString(string, EL.getEnvironment());
   }
 
-  public static String evalString(String string, VariableResolver env)
+  public static String evalString(String string, ELContext env)
     throws ELException
   {
     Expr expr = new ELParser(string).parse();

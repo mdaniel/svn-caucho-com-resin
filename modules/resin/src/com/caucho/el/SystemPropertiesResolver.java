@@ -28,7 +28,7 @@
 
 package com.caucho.el;
 
-import javax.servlet.jsp.el.VariableResolver;
+import javax.el.*;
 
 /**
  * Variable resolver using the system properties
@@ -44,7 +44,7 @@ public class SystemPropertiesResolver extends AbstractVariableResolver {
   /**
    * Creates the resolver
    */
-  public SystemPropertiesResolver(VariableResolver next)
+  public SystemPropertiesResolver(ELResolver next)
   {
     super(next);
   }
@@ -52,14 +52,19 @@ public class SystemPropertiesResolver extends AbstractVariableResolver {
   /**
    * Returns the named variable value.
    */
-  public Object resolveVariable(String var)
+  @Override
+  public Object getValue(ELContext env,
+			 Object base,
+			 Object property)
   {
-    Object value = System.getProperty((String) var);
+    String var = (String) base;
+    
+    Object value = System.getProperty(var);
 
     if (value != null)
       return value;
 
-    return super.resolveVariable(var);
+    return super.getValue(env, base, property);
   }
 
   /**

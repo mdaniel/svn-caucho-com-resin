@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -32,8 +33,7 @@ import java.util.HashMap;
 
 import java.util.logging.*;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import javax.el.*;
 
 import com.caucho.util.L10N;
 
@@ -47,44 +47,47 @@ import com.caucho.loader.EnvironmentLocal;
  * Abstract implementation class for an expression.
  */
 public class EL {
-  private static final Logger log = Log.open(EL.class);
+  private static final Logger log = Logger.getLogger(EL.class.getName());
   private static final L10N L = new L10N(EL.class);
   
-  private static EnvironmentLocal<VariableResolver> _elEnvironment =
-    new EnvironmentLocal<VariableResolver>();
+  private static EnvironmentLocal<ELContext> _elEnvironment
+    = new EnvironmentLocal<ELContext>();
   
-  private static EnvironmentLocal<HashMap<String,Object>> _envVar =
-    new EnvironmentLocal<HashMap<String,Object>>();
+  private static EnvironmentLocal<HashMap<String,Object>> _envVar
+    = new EnvironmentLocal<HashMap<String,Object>>();
 
   public final static Object NULL = new Object();
 
-  public static VariableResolver getEnvironment()
+  public static ELContext getEnvironment()
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
     return getEnvironment(loader);
   }
 
-  public static VariableResolver getEnvironment(ClassLoader loader)
+  public static ELContext getEnvironment(ClassLoader loader)
   {
-    VariableResolver resolver = _elEnvironment.get(loader);
+    ELContext context = _elEnvironment.get(loader);
 
-    if (resolver == null) {
-      VariableResolver parent = new SystemPropertiesResolver();
+    if (context == null) {
+      ELResolver parent = new SystemPropertiesResolver();
       
-      resolver = new EnvironmentResolver(loader, parent);
-      _elEnvironment.set(resolver, loader);
+      ELResolver resolver = new EnvironmentResolver(loader, parent);
+
+      context = new EnvironmentContext(resolver);
+      
+      _elEnvironment.set(context, loader);
     }
 
-    return resolver;
+    return context;
   }
   
-  public static void setEnvironment(VariableResolver env)
+  public static void setEnvironment(ELContext env)
   {
     _elEnvironment.set(env);
   }
   
-  public static void setEnvironment(VariableResolver env,
+  public static void setEnvironment(ELContext env,
                                     ClassLoader loader)
   {
     _elEnvironment.set(env, loader);
@@ -145,7 +148,7 @@ public class EL {
     return expr.evalObject(getEnvironment());
   }
 
-  public static Object evalObject(String value, VariableResolver env)
+  public static Object evalObject(String value, ELContext env)
     throws ELParseException, ELException
   {
     ELParser parser = new ELParser(value);
@@ -155,7 +158,7 @@ public class EL {
     return expr.evalObject(env);
   }
 
-  public static String evalString(String value, VariableResolver env)
+  public static String evalString(String value, ELContext env)
     throws ELParseException, ELException
   {
     ELParser parser = new ELParser(value);

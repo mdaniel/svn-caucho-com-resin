@@ -37,10 +37,10 @@ import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import javax.servlet.jsp.JspWriter;
+import javax.el.ELContext;
+import javax.el.ELException;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import javax.servlet.jsp.JspWriter;
 
 import com.caucho.vfs.*;
 import com.caucho.util.*;
@@ -150,7 +150,7 @@ public abstract class Expr {
    *
    * @return the value of the expression as an object
    */
-  abstract public Object evalObject(VariableResolver env)
+  abstract public Object evalObject(ELContext env)
     throws ELException;
 
   /**
@@ -160,7 +160,7 @@ public abstract class Expr {
    *
    * @return the value of the expression as a boolean
    */
-  public boolean evalBoolean(VariableResolver env)
+  public boolean evalBoolean(ELContext env)
     throws ELException
   {
     return toBoolean(evalObject(env), env);
@@ -173,7 +173,7 @@ public abstract class Expr {
    *
    * @return the value of the expression as a double
    */
-  public double evalDouble(VariableResolver env)
+  public double evalDouble(ELContext env)
     throws ELException
   {
     return toDouble(evalObject(env), env);
@@ -186,7 +186,7 @@ public abstract class Expr {
    *
    * @return the value of the expression as a double
    */
-  public long evalLong(VariableResolver env)
+  public long evalLong(ELContext env)
     throws ELException
   {
     return toLong(evalObject(env), env);
@@ -199,7 +199,7 @@ public abstract class Expr {
    *
    * @return the value of the expression as a string
    */
-  public String evalString(VariableResolver env)
+  public String evalString(ELContext env)
     throws ELException
   {
     return toString(evalObject(env), env);
@@ -212,7 +212,7 @@ public abstract class Expr {
    *
    * @return the value of the expression as a string
    */
-  public String evalStringNonNull(VariableResolver env)
+  public String evalStringNonNull(ELContext env)
     throws ELException
   {
     return toStringNonNull(evalObject(env), env);
@@ -225,7 +225,7 @@ public abstract class Expr {
    *
    * @return the value of the expression as a string
    */
-  public char evalCharacter(VariableResolver env)
+  public char evalCharacter(ELContext env)
     throws ELException
   {
     return toCharacter(evalObject(env), env);
@@ -238,7 +238,7 @@ public abstract class Expr {
    *
    * @return the value of the expression as a period
    */
-  public long evalPeriod(VariableResolver env)
+  public long evalPeriod(ELContext env)
     throws ELException
   {
     try {
@@ -261,7 +261,7 @@ public abstract class Expr {
    *
    * @return the value of the expression as a BigInteger
    */
-  public BigInteger evalBigInteger(VariableResolver env)
+  public BigInteger evalBigInteger(ELContext env)
     throws ELException
   {
     return toBigInteger(evalObject(env), env);
@@ -274,7 +274,7 @@ public abstract class Expr {
    *
    * @return the value of the expression as a BigDecimal
    */
-  public BigDecimal evalBigDecimal(VariableResolver env)
+  public BigDecimal evalBigDecimal(ELContext env)
     throws ELException
   {
     return toBigDecimal(evalObject(env), env);
@@ -291,7 +291,7 @@ public abstract class Expr {
    * @return true if the object is null, otherwise false
    */
   public boolean print(WriteStream out,
-                       VariableResolver env,
+                       ELContext env,
                        boolean escapeXml)
     throws IOException, ELException
   {
@@ -320,7 +320,7 @@ public abstract class Expr {
    * @return true if the object is null, otherwise false
    */
   public boolean print(JspWriter out,
-                       VariableResolver env,
+                       ELContext env,
                        boolean escapeXml)
     throws IOException, ELException
   {
@@ -382,7 +382,7 @@ public abstract class Expr {
    *
    * @return the string-converted value.
    */
-  public static String toString(Object value, VariableResolver env)
+  public static String toString(Object value, ELContext env)
   {
     if (value == null || value instanceof String)
       return (String) value;
@@ -397,7 +397,7 @@ public abstract class Expr {
    *
    * @return the string-converted value.
    */
-  public static String toStringNonNull(Object value, VariableResolver env)
+  public static String toStringNonNull(Object value, ELContext env)
   {
     if (value == null)
       return "";
@@ -414,7 +414,7 @@ public abstract class Expr {
    *
    * @return the string-converted value.
    */
-  public static String toStringNonNull(long value, VariableResolver env)
+  public static String toStringNonNull(long value, ELContext env)
   {
     return String.valueOf(value);
   }
@@ -426,7 +426,7 @@ public abstract class Expr {
    *
    * @return the string-converted value.
    */
-  public static String toStringNonNull(double value, VariableResolver env)
+  public static String toStringNonNull(double value, ELContext env)
   {
     return String.valueOf(value);
   }
@@ -438,7 +438,7 @@ public abstract class Expr {
    *
    * @return the string-converted value.
    */
-  public static String toStringNonNull(boolean value, VariableResolver env)
+  public static String toStringNonNull(boolean value, ELContext env)
   {
     return String.valueOf(value);
   }
@@ -450,7 +450,7 @@ public abstract class Expr {
    *
    * @return the string-converted value.
    */
-  public static String toStringNonNull(char value, VariableResolver env)
+  public static String toStringNonNull(char value, ELContext env)
   {
     return String.valueOf(value);
   }
@@ -462,7 +462,7 @@ public abstract class Expr {
    *
    * @return the string-converted value.
    */
-  public static char toCharacter(Object value, VariableResolver env)
+  public static char toCharacter(Object value, ELContext env)
     throws ELException
   {
     if (value == null)
@@ -503,7 +503,7 @@ public abstract class Expr {
    *
    * @return the boolean-converted value.
    */
-  public static boolean toBoolean(Object value, VariableResolver env)
+  public static boolean toBoolean(Object value, ELContext env)
     throws ELException
   {
     if (value == null || value.equals(""))
@@ -533,7 +533,7 @@ public abstract class Expr {
    *
    * @return the double-converted value.
    */
-  public static double toDouble(Object value, VariableResolver env)
+  public static double toDouble(Object value, ELContext env)
     throws ELException
   {
     if (value == null)
@@ -579,7 +579,7 @@ public abstract class Expr {
    *
    * @return the BigDecimal-converted value.
    */
-  public static BigDecimal toBigDecimal(Object value, VariableResolver env)
+  public static BigDecimal toBigDecimal(Object value, ELContext env)
     throws ELException
   {
     if (value == null)
@@ -616,7 +616,7 @@ public abstract class Expr {
    *
    * @return the BigInteger-converted value.
    */
-  public static BigInteger toBigInteger(Object value, VariableResolver env)
+  public static BigInteger toBigInteger(Object value, ELContext env)
     throws ELException
   {
     if (value == null)
@@ -652,7 +652,7 @@ public abstract class Expr {
    *
    * @return the long-converted value.
    */
-  public static long toLong(Object value, VariableResolver env)
+  public static long toLong(Object value, ELContext env)
     throws ELException
   {
     if (value == null)
@@ -729,7 +729,9 @@ public abstract class Expr {
    *
    * @return true for null
    */
-  public static boolean toStream(JspWriter out, Object value, boolean isEscaped)
+  public static boolean toStream(JspWriter out,
+				 Object value,
+				 boolean isEscaped)
     throws IOException
   {
     if (value == null)
@@ -1088,15 +1090,15 @@ public abstract class Expr {
   /**
    * Returns an error object
    */
-  public static Object error(Throwable e, VariableResolver env)
+  public static Object error(Throwable e, ELContext env)
     throws ELException
   {
     if (env == null) {
       // jsp/1b56
-      throw ELExceptionImpl.create(e);
+      throw new ELException(e);
     }
     else if (env instanceof ExprEnv && ! ((ExprEnv) env).isIgnoreException()) {
-      throw ELExceptionImpl.create(e);
+      throw new ELException(e);
     }
     else {
       log.log(Level.FINE, e.toString(), e);
@@ -1112,9 +1114,14 @@ public abstract class Expr {
     throws ELException
   {
     if (e instanceof InvocationTargetException && e.getCause() != null)
-      throw ELExceptionImpl.create(e.getCause());
+      e = e.getCause();
+
+    if (e instanceof RuntimeException)
+      throw (RuntimeException) e;
+    else if (e instanceof Error)
+      throw (Error) e;
     else
-      throw ELExceptionImpl.create(e);
+      throw new ELException(e);
   }
 
   static {

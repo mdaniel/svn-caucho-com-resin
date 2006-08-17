@@ -36,8 +36,7 @@ import java.lang.reflect.Modifier;
 
 import java.util.HashMap;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import javax.el.*;
 
 import com.caucho.vfs.WriteStream;
 
@@ -58,11 +57,11 @@ abstract public class Marshall {
       return OBJECT;
   }
   
-  abstract public Object marshall(Expr expr, VariableResolver env)
+  abstract public Object marshall(Expr expr, ELContext env)
     throws ELException;
 
   public static final Marshall BOOLEAN = new Marshall() {
-      public Object marshall(Expr expr, VariableResolver env)
+      public Object marshall(Expr expr, ELContext env)
 	throws ELException
       {
 	return new Boolean((boolean) expr.evalBoolean(env));
@@ -70,7 +69,7 @@ abstract public class Marshall {
     };
 
   public static final Marshall BYTE = new Marshall() {
-      public Object marshall(Expr expr, VariableResolver env)
+      public Object marshall(Expr expr, ELContext env)
 	throws ELException
       {
 	return new Byte((byte) expr.evalLong(env));
@@ -78,7 +77,7 @@ abstract public class Marshall {
     };
 
   public static final Marshall SHORT = new Marshall() {
-      public Object marshall(Expr expr, VariableResolver env)
+      public Object marshall(Expr expr, ELContext env)
 	throws ELException
       {
 	return new Short((short) expr.evalLong(env));
@@ -86,7 +85,7 @@ abstract public class Marshall {
     };
 
   public static final Marshall INTEGER = new Marshall() {
-      public Object marshall(Expr expr, VariableResolver env)
+      public Object marshall(Expr expr, ELContext env)
 	throws ELException
       {
 	return new Integer((int) expr.evalLong(env));
@@ -94,7 +93,7 @@ abstract public class Marshall {
     };
 
   public static final Marshall LONG = new Marshall() {
-      public Object marshall(Expr expr, VariableResolver env)
+      public Object marshall(Expr expr, ELContext env)
 	throws ELException
       {
 	return new Long(expr.evalLong(env));
@@ -102,7 +101,7 @@ abstract public class Marshall {
     };
 
   public static final Marshall FLOAT = new Marshall() {
-      public Object marshall(Expr expr, VariableResolver env)
+      public Object marshall(Expr expr, ELContext env)
 	throws ELException
       {
 	return new Float((float) expr.evalDouble(env));
@@ -110,7 +109,7 @@ abstract public class Marshall {
     };
 
   public static final Marshall DOUBLE = new Marshall() {
-      public Object marshall(Expr expr, VariableResolver env)
+      public Object marshall(Expr expr, ELContext env)
 	throws ELException
       {
 	return new Double(expr.evalDouble(env));
@@ -118,7 +117,7 @@ abstract public class Marshall {
     };
 
   public static final Marshall STRING = new Marshall() {
-      public Object marshall(Expr expr, VariableResolver env)
+      public Object marshall(Expr expr, ELContext env)
 	throws ELException
       {
 	return expr.evalString(env);
@@ -126,7 +125,7 @@ abstract public class Marshall {
     };
 
   public static final Marshall CHARACTER = new Marshall() {
-      public Object marshall(Expr expr, VariableResolver env)
+      public Object marshall(Expr expr, ELContext env)
 	throws ELException
       {
 	String s = expr.evalString(env);
@@ -139,7 +138,7 @@ abstract public class Marshall {
     };
 
   public static final Marshall OBJECT = new Marshall() {
-      public Object marshall(Expr expr, VariableResolver env)
+      public Object marshall(Expr expr, ELContext env)
 	throws ELException
       {
 	return expr.evalObject(env);

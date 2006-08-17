@@ -32,7 +32,7 @@ package com.caucho.config;
 import java.util.*;
 import java.lang.reflect.*;
 
-import javax.servlet.jsp.el.ELException;
+import javax.el.ELException;
 
 import org.w3c.dom.Node;
 

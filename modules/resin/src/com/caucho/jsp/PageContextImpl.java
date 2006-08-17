@@ -1667,10 +1667,10 @@ public class PageContextImpl extends PageContext
     if (value != null)
       return value;
 
-    if (_varResolver == null)
-      _varResolver = EL.getEnvironment();
+    if (_elContext == null)
+      _elContext = EL.getEnvironment();
 
-    return _varResolver.resolveVariable(name);
+    return _elContext.getELResolver().getValue(_elContext, name, null);
   }
 
   /**

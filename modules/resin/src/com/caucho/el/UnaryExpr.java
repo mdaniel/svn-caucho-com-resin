@@ -32,8 +32,7 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.*;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import javax.el.*;
 
 import com.caucho.vfs.*;
 
@@ -71,7 +70,7 @@ public class UnaryExpr extends Expr {
    *
    * @return the value as an object
    */
-  public Object evalObject(VariableResolver env)
+  public Object evalObject(ELContext env)
     throws ELException
   {
     switch (_op) {
@@ -117,7 +116,8 @@ public class UnaryExpr extends Expr {
    *
    * @return the value as a boolean
    */
-  public boolean evalBoolean(VariableResolver env)
+  @Override
+  public boolean evalBoolean(ELContext env)
     throws ELException
   {
     switch (_op) {
@@ -157,7 +157,8 @@ public class UnaryExpr extends Expr {
    *
    * @return the value as a long
    */
-  public long evalLong(VariableResolver env)
+  @Override
+  public long evalLong(ELContext env)
     throws ELException
   {
     if (_op != MINUS) {
@@ -174,7 +175,8 @@ public class UnaryExpr extends Expr {
   /**
    * Evaluate the expression as a double
    */
-  public double evalDouble(VariableResolver env)
+  @Override
+  public double evalDouble(ELContext env)
     throws ELException
   {
     if (_op != MINUS) {

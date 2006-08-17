@@ -32,11 +32,12 @@ import java.io.*;
 import java.util.*;
 import java.text.*;
 
+import javax.el.*;
+
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
 import javax.servlet.jsp.jstl.core.*;
 import javax.servlet.jsp.jstl.fmt.*;
-import javax.servlet.jsp.el.ELException;
 
 import com.caucho.vfs.*;
 import com.caucho.util.*;
@@ -198,6 +199,7 @@ public class FormatNumberTag extends BodyTagSupport {
   {
     try {
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
+      ELContext env = pageContext.getELContext();
       
       JspWriter out = pageContext.getOut();
 
@@ -206,7 +208,7 @@ public class FormatNumberTag extends BodyTagSupport {
       BodyContentImpl body = (BodyContentImpl) getBodyContent();
 
       if (_valueExpr != null)
-        number = _valueExpr.evalDouble(pageContext);
+        number = _valueExpr.evalDouble(env);
       else if (body != null) {
 	String value = body.getTrimString();
 
@@ -245,6 +247,7 @@ public class FormatNumberTag extends BodyTagSupport {
   {
     try {
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
+      ELContext env = pageContext.getELContext();
       
       NumberFormat format = null;
 
@@ -252,7 +255,7 @@ public class FormatNumberTag extends BodyTagSupport {
 
       String type = null;
       if (_typeExpr != null)
-	type = _typeExpr.evalString(pageContext);
+	type = _typeExpr.evalString(env);
 
       if (type == null || type.equals("") || type.equals("number")) {
 	if (locale != null)
@@ -263,7 +266,7 @@ public class FormatNumberTag extends BodyTagSupport {
 	DecimalFormat decimalFormat = (DecimalFormat) format;
 
 	if (_patternExpr != null)
-	  decimalFormat.applyPattern(_patternExpr.evalString(pageContext));
+	  decimalFormat.applyPattern(_patternExpr.evalString(env));
       }
       else if (type.equals("percent")) {
 	if (locale != null)
@@ -285,10 +288,10 @@ public class FormatNumberTag extends BodyTagSupport {
 	  dSymbols = dFormat.getDecimalFormatSymbols();
 
 	  if (_currencyCodeExpr != null && dSymbols != null)
-	    dSymbols.setInternationalCurrencySymbol(_currencyCodeExpr.evalString(pageContext));
+	    dSymbols.setInternationalCurrencySymbol(_currencyCodeExpr.evalString(env));
 
 	  if (_currencySymbolExpr != null && dSymbols != null)
-	    dSymbols.setCurrencySymbol(_currencySymbolExpr.evalString(pageContext));
+	    dSymbols.setCurrencySymbol(_currencySymbolExpr.evalString(env));
 
 	  dFormat.setDecimalFormatSymbols(dSymbols);
 	}
@@ -298,19 +301,19 @@ public class FormatNumberTag extends BodyTagSupport {
 				   type));
 
       if (_groupingUsedExpr != null)
-	format.setGroupingUsed(_groupingUsedExpr.evalBoolean(pageContext));
+	format.setGroupingUsed(_groupingUsedExpr.evalBoolean(env));
 
       if (_minIntegerDigitsExpr != null)
-	format.setMinimumIntegerDigits((int) _minIntegerDigitsExpr.evalLong(pageContext));
+	format.setMinimumIntegerDigits((int) _minIntegerDigitsExpr.evalLong(env));
       
       if (_maxIntegerDigitsExpr != null)
-	format.setMaximumIntegerDigits((int) _maxIntegerDigitsExpr.evalLong(pageContext));
+	format.setMaximumIntegerDigits((int) _maxIntegerDigitsExpr.evalLong(env));
 
       if (_minFractionDigitsExpr != null)
-	format.setMinimumFractionDigits((int) _minFractionDigitsExpr.evalLong(pageContext));
+	format.setMinimumFractionDigits((int) _minFractionDigitsExpr.evalLong(env));
       
       if (_maxFractionDigitsExpr != null)
-	format.setMaximumFractionDigits((int) _maxFractionDigitsExpr.evalLong(pageContext));
+	format.setMaximumFractionDigits((int) _maxFractionDigitsExpr.evalLong(env));
 
       return format;
     } catch (Exception e) {

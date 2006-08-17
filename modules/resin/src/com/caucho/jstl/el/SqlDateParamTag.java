@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -37,8 +38,7 @@ import javax.servlet.jsp.jstl.core.*;
 import javax.servlet.jsp.jstl.fmt.*;
 import javax.servlet.jsp.jstl.sql.SQLExecutionTag;
 
-import javax.servlet.jsp.el.ELException;
-import javax.servlet.jsp.el.VariableResolver;
+import javax.el.*;
 
 import com.caucho.vfs.*;
 import com.caucho.util.*;
@@ -81,57 +81,53 @@ public class SqlDateParamTag extends TagSupport {
   public int doStartTag()
     throws JspException
   {
-    try {
-      VariableResolver env = (VariableResolver) pageContext;
+    ELContext env = pageContext.getELContext();
     
-      Object value = _valueExpr.evalObject(env);
+    Object value = _valueExpr.evalObject(env);
 
-      long time = 0;
+    long time = 0;
 
-      Object result = null;
+    Object result = null;
 
-      if (value == null) {
-      }
-      else if (value instanceof Number)
-	time = ((Number) value).longValue();
-      else if (value instanceof java.util.Date)
-	time = ((java.util.Date) value).getTime();
-      else if (value instanceof java.sql.Date)
-	time = ((java.sql.Date) value).getTime();
-      else
-	throw new JspException(L.l("sql:dateParam requires at date at `{0}'", value));
-
-      if (value == null)
-	result = null;
-      else if (_typeExpr == null)
-	result = new java.sql.Timestamp(time);
-      else {
-	String type = _typeExpr.evalString(env);
-
-	if (type.equals("time"))
-	  result = new java.sql.Time(time);
-	else if (type.equals("date"))
-	  result = new java.sql.Date(time);
-	else
-	  result = new java.sql.Timestamp(time);
-      }
-
-      Tag parent = getParent();
-      for (;
-	   parent != null && ! (parent instanceof SQLExecutionTag);
-	   parent = parent.getParent()) {
-      }
-
-      if (parent == null)
-	throw new JspException(L.l("sql:dateParam requires sql:query parent.")); 
-
-      SQLExecutionTag tag = (SQLExecutionTag) parent;
-
-      tag.addSQLParameter(result);
-    
-      return SKIP_BODY;
-    } catch (ELException e) {
-      throw new JspException(e);
+    if (value == null) {
     }
+    else if (value instanceof Number)
+      time = ((Number) value).longValue();
+    else if (value instanceof java.util.Date)
+      time = ((java.util.Date) value).getTime();
+    else if (value instanceof java.sql.Date)
+      time = ((java.sql.Date) value).getTime();
+    else
+      throw new JspException(L.l("sql:dateParam requires at date at `{0}'", value));
+
+    if (value == null)
+      result = null;
+    else if (_typeExpr == null)
+      result = new java.sql.Timestamp(time);
+    else {
+      String type = _typeExpr.evalString(env);
+
+      if (type.equals("time"))
+	result = new java.sql.Time(time);
+      else if (type.equals("date"))
+	result = new java.sql.Date(time);
+      else
+	result = new java.sql.Timestamp(time);
+    }
+
+    Tag parent = getParent();
+    for (;
+	 parent != null && ! (parent instanceof SQLExecutionTag);
+	 parent = parent.getParent()) {
+    }
+
+    if (parent == null)
+      throw new JspException(L.l("sql:dateParam requires sql:query parent.")); 
+
+    SQLExecutionTag tag = (SQLExecutionTag) parent;
+
+    tag.addSQLParameter(result);
+    
+    return SKIP_BODY;
   }
 }

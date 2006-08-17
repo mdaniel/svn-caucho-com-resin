@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -28,7 +29,7 @@
 
 package com.caucho.el;
 
-import javax.servlet.jsp.el.VariableResolver;
+import javax.el.*;
 
 import com.caucho.loader.EnvironmentMap;
 
@@ -48,28 +49,33 @@ public class EnvironmentVariableResolver extends AbstractVariableResolver {
   /**
    * Creates the resolver
    */
-  public EnvironmentVariableResolver(VariableResolver next)
+  public EnvironmentVariableResolver(ELResolver next)
   {
   }
   
   /**
    * Returns the named variable value.
    */
-  public Object resolveVariable(String var)
+  public Object getValue(ELContext context, Object base, Object property)
   {
+    String var = (String) base;
+    
     Object value = _map.get(var);
     
     if (value != null)
       return value;
     else
-      return super.resolveVariable(var);
+      return super.getValue(context, base, property);
   }
   
   /**
    * Sets the value for the named variable.
    */
-  public Object put(String var, Object value)
+  public void setValue(ELContext context,
+		       Object base,
+		       Object property,
+		       Object value)
   {
-    return _map.put(var, value);
+    _map.put((String) base, value);
   }
 }

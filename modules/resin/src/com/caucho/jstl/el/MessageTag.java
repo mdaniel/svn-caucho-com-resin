@@ -31,6 +31,8 @@ package com.caucho.jstl.el;
 import java.io.*;
 import java.util.*;
 
+import javax.el.*;
+
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
 import javax.servlet.jsp.jstl.core.*;
@@ -121,20 +123,21 @@ public class MessageTag extends BodyTagSupport implements ParamContainerTag {
     
     try {
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
+      ELContext env = pageContext.getELContext();
       
       JspWriter out = pageContext.getOut();
 
       String key;
 
       if (_keyExpr != null)
-        key = _keyExpr.evalString(pageContext);
+        key = _keyExpr.evalString(env);
       else
         key = getBodyContent().getString().trim();
 
       String msg;
       
       if (_bundleExpr != null) {
-        Object bundleObject = _bundleExpr.evalObject(pageContext);
+        Object bundleObject = _bundleExpr.evalObject(env);
 
         msg = pageContext.getLocalizedMessage(bundleObject, key, args, null);
       }

@@ -28,11 +28,9 @@
 
 package com.caucho.log;
 
-import com.caucho.config.ConfigException;
+import com.caucho.config.*;
 import com.caucho.config.types.RawString;
-import com.caucho.el.EL;
-import com.caucho.el.ELParser;
-import com.caucho.el.Expr;
+import com.caucho.el.*;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -42,8 +40,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import javax.servlet.jsp.el.ELException;
-import javax.servlet.jsp.el.VariableResolver;
+import javax.el.*;
 
 /**
  * A Formatter that accepts an EL format string, and.
@@ -91,7 +88,7 @@ public class ELFormatter extends MessageFormatter {
         ELFormatterVariableResolver vr = new ELFormatterVariableResolver();
         vr.setLogRecord(logRecord);
 
-        ret =  _expr.evalString(vr);
+        ret =  _expr.evalString(new ConfigELContext(vr));
       } 
       catch (Exception ex) {
         throw new RuntimeException(ex);
@@ -101,7 +98,8 @@ public class ELFormatter extends MessageFormatter {
     return ret;
   }
 
-  class ELFormatterVariableResolver implements VariableResolver {
+  class ELFormatterVariableResolver extends AbstractVariableResolver
+  {
     ELFormatterLogRecord _logRecord;
 
     public void setLogRecord(LogRecord logRecord)
@@ -109,15 +107,13 @@ public class ELFormatter extends MessageFormatter {
       _logRecord = new ELFormatterLogRecord(logRecord);
     }
 
-    public Object resolveVariable(String name) 
+    public Object getValue(ELContext env, Object base, Object property)
       throws ELException 
     {
-      if (name.equals("log")) {
+      if ("log".equals(base))
         return _logRecord;
-      }
-      else {
-        return EL.getEnvironment().resolveVariable(name);
-      }
+      else
+        return env.getELResolver().getValue(env, base, null);
     }
   }
 
@@ -125,8 +121,8 @@ public class ELFormatter extends MessageFormatter {
    * An api similar to java.util.logging.LogRecord that provides more complete
    * information for logging purposes.
    */
-  public class ELFormatterLogRecord {
-
+  public class ELFormatterLogRecord
+  {
     LogRecord _logRecord;
 
     ELFormatterLogRecord(LogRecord logRecord)
@@ -164,7 +160,9 @@ public class ELFormatter extends MessageFormatter {
      * @return source logger name, which may be null
      */ 
     public String getName()
-    { return _logRecord.getLoggerName(); }
+    {
+      return _logRecord.getLoggerName();
+    }
    
     /** 
      * The source Logger's name.
@@ -172,7 +170,9 @@ public class ELFormatter extends MessageFormatter {
      * @return source logger name, which may be null
      */ 
     public String getLoggerName()
-    { return _logRecord.getLoggerName(); }
+    {
+      return _logRecord.getLoggerName();
+    }
    
     /** 
      * The last component of the source Logger's name.  The last component
@@ -202,31 +202,41 @@ public class ELFormatter extends MessageFormatter {
      * @see java.util.logging.Level
      */
     public Level getLevel()
-    { return _logRecord.getLevel(); }
+    {
+      return _logRecord.getLevel();
+    }
 
     /** 
      * The time of the logging event, in milliseconds since 1970.
      */ 
     public long getMillis()
-    { return _logRecord.getMillis(); }
+    {
+      return _logRecord.getMillis();
+    }
 
     /** 
      * An identifier for the thread where the message originated.
      */ 
     public int getThreadID()
-    { return _logRecord.getThreadID(); }
+    {
+      return _logRecord.getThreadID();
+    }
 
     /** 
      * The throwable associated with the log record, if one was associated.
      */ 
     public Throwable getThrown()
-    { return _logRecord.getThrown(); }
+    {
+      return _logRecord.getThrown();
+    }
 
     /** 
      * The sequence number, normally assigned in the constructor of LogRecord.
      */ 
     public long getSequenceNumber()
-    { return _logRecord.getSequenceNumber(); }
+    {
+      return _logRecord.getSequenceNumber();
+    }
 
     /** 
      * The name of the class that issued the logging request.  
@@ -234,7 +244,9 @@ public class ELFormatter extends MessageFormatter {
      * issued the logging message.
      */
     public String getSourceClassName()
-    { return _logRecord.getSourceClassName(); }
+    {
+      return _logRecord.getSourceClassName();
+    }
 
     /** 
      * The last component of the name (everthing after the last `.') of the
@@ -264,7 +276,9 @@ public class ELFormatter extends MessageFormatter {
      * the logging message.
      */
     public String getSourceMethodName()
-    { return _logRecord.getSourceMethodName(); }
+    {
+      return _logRecord.getSourceMethodName();
+    }
 
     /**
      * The "raw" log message, before localization or substitution 
@@ -277,23 +291,30 @@ public class ELFormatter extends MessageFormatter {
      * @see java.text.MessageFormat 
      */ 
     public String getRawMessage()
-    { return _logRecord.getMessage(); }
+    {
+      return _logRecord.getMessage();
+    }
 
     /** 
      * The resource bundle for localization.
      */ 
     public ResourceBundle getResourceBundle()
-    { return _logRecord.getResourceBundle(); }
+    {
+      return _logRecord.getResourceBundle();
+    }
    
     /** 
      * The name of resource bundle for localization.
      */ 
     public String getResourceBundleName()
-    { return _logRecord.getResourceBundleName(); }
+    {
+      return _logRecord.getResourceBundleName();
+    }
    
     public Object[] getParameters()
-    { return _logRecord.getParameters(); }
-
+    {
+      return _logRecord.getParameters();
+    }
   }
 }
 

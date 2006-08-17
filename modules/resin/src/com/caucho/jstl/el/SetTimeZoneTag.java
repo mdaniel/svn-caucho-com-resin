@@ -31,11 +31,12 @@ package com.caucho.jstl.el;
 import java.io.*;
 import java.util.*;
 
+import javax.el.*;
+
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
 import javax.servlet.jsp.jstl.core.*;
 import javax.servlet.jsp.jstl.fmt.*;
-import javax.servlet.jsp.el.ELException;
 
 import com.caucho.vfs.*;
 import com.caucho.util.*;
@@ -87,7 +88,7 @@ public class SetTimeZoneTag extends TagSupport {
     try {
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
 
-      Object valueObj = _valueExpr.evalString(pageContext);
+      Object valueObj = _valueExpr.evalString(pageContext.getELContext());
       TimeZone timeZone = null;
 
       if (valueObj instanceof TimeZone) {

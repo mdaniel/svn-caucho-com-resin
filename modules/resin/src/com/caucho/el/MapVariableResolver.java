@@ -30,7 +30,7 @@ package com.caucho.el;
 
 import java.util.Map;
 
-import javax.servlet.jsp.el.VariableResolver;
+import javax.el.*;
 
 /**
  * Variable resolver using an underlying Map.
@@ -52,7 +52,7 @@ public class MapVariableResolver extends AbstractVariableResolver {
   /**
    * Creates the resolver
    */
-  public MapVariableResolver(Map<String,Object> map, VariableResolver next)
+  public MapVariableResolver(Map<String,Object> map, ELResolver next)
   {
     super(next);
     
@@ -65,14 +65,16 @@ public class MapVariableResolver extends AbstractVariableResolver {
   /**
    * Returns the named variable value.
    */
-  public Object resolveVariable(String var)
+  public Object getValue(ELContext context, Object base, Object property)
   {
+    String var = (String) base;
+    
     Object value = _map.get(var);
 
     if (value != null)
       return value;
     else
-      return super.resolveVariable(var);
+      return super.getValue(context, base, property);
   }
   
   /**

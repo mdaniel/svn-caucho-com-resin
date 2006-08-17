@@ -30,38 +30,32 @@ package com.caucho.el;
 
 import java.io.*;
 
-import javax.servlet.jsp.el.ELException;
+import javax.el.ELException;
 
 import com.caucho.util.*;
 
 /**
  * An expression language exception.
  */
-public class ELParseException extends javax.servlet.jsp.el.ELParseException
-  implements ExceptionWrapper, CompileException {
-  private Throwable _cause;
+public class ELParseException extends javax.el.ELException
+  implements CompileException {
+  
+  public ELParseException()
+  {
+  }
   
   public ELParseException(String message)
   {
     super(message);
   }
   
-  public ELParseException(String message, Throwable e)
+  public ELParseException(String message, Throwable cause)
   {
-    super(message);
-
-    _cause = e;
+    super(message, cause);
   }
   
-  public ELParseException(Throwable e)
+  public ELParseException(Throwable cause)
   {
-    super(e.getMessage());
-
-    _cause = e;
-  }
-
-  public Throwable getRootCause()
-  {
-    return _cause;
+    super(cause);
   }
 }

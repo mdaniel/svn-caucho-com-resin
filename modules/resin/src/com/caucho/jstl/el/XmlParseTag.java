@@ -130,7 +130,7 @@ public class XmlParseTag extends BodyTagSupport {
       Reader reader;
 
       if (_xml != null) {
-        Object obj = _xml.evalObject(pageContext);
+        Object obj = _xml.evalObject(pageContext.getELContext());
 
         if (obj instanceof Reader)
           reader = (Reader) obj;

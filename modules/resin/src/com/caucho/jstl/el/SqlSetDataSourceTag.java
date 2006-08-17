@@ -36,11 +36,11 @@ import java.util.logging.*;
 import javax.sql.*;
 import javax.naming.*;
 
+import javax.el.*;
+
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
 import javax.servlet.jsp.jstl.core.*;
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
 
 import com.caucho.log.Log;
 import com.caucho.util.*;
@@ -126,7 +126,7 @@ public class SqlSetDataSourceTag extends TagSupport {
       if (var == null)
 	var = Config.SQL_DATA_SOURCE;
 
-      VariableResolver env = (VariableResolver) pageContext;
+      ELContext env = pageContext.getELContext();
 
       DataSource dataSource = null;
 

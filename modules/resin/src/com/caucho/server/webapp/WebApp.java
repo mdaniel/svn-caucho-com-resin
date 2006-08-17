@@ -56,9 +56,8 @@ import com.caucho.config.types.*;
 import com.caucho.java.WorkDir;
 
 import com.caucho.jsp.JspServlet;
-import com.caucho.jsp.cfg.JspConfig;
-import com.caucho.jsp.cfg.JspPropertyGroup;
-import com.caucho.jsp.cfg.JspTaglib;
+import com.caucho.jsp.cfg.*;
+import com.caucho.jsp.el.*;
 
 import com.caucho.lifecycle.Lifecycle;
 
@@ -272,7 +271,9 @@ public class WebApp extends ServletContextImpl
   private int _jspState;
   private JspPropertyGroup _jsp;
   private ArrayList<JspTaglib> _taglibList;
+  private JspApplicationContext _jspApplicationContext;
   private HashMap<String,Object> _extensions = new HashMap<String,Object>();
+  
   private MultipartForm _multipartForm;
 
   private ArrayList<String> _regexp;
@@ -357,6 +358,8 @@ public class WebApp extends ServletContextImpl
 
       _invocationDependency = new DependencyContainer();
       _invocationDependency.add(this);
+
+      _jspApplicationContext = new JspApplicationContextImpl(this);
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
       setConfigException(e);
@@ -1270,7 +1273,7 @@ public class WebApp extends ServletContextImpl
    */
   public JspApplicationContext getJspApplicationContext()
   {
-    return null;
+    return _jspApplicationContext;
   }
 
   /**

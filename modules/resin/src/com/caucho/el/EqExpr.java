@@ -32,8 +32,7 @@ package com.caucho.el;
 import java.io.*;
 import java.util.logging.*;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import javax.el.*;
 
 import com.caucho.vfs.*;
 
@@ -62,6 +61,7 @@ public class EqExpr extends AbstractBooleanExpr {
   /**
    * Returns true if this is a constant expression.
    */
+  @Override
   public boolean isConstant()
   {
     return _left.isConstant() && _right.isConstant();
@@ -72,7 +72,8 @@ public class EqExpr extends AbstractBooleanExpr {
    *
    * @param env the variable environment
    */
-  public boolean evalBoolean(VariableResolver env)
+  @Override
+  public boolean evalBoolean(ELContext env)
     throws ELException
   {
     Object aObj = _left.evalObject(env);
@@ -157,6 +158,7 @@ public class EqExpr extends AbstractBooleanExpr {
    *
    * @param os the stream to the generated *.java
    */
+  @Override
   public void printCreate(WriteStream os)
     throws IOException
   {

@@ -28,8 +28,7 @@
 
 package com.caucho.el;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import javax.el.*;
 
 import com.caucho.loader.EnvironmentClassLoader;
 
@@ -45,7 +44,7 @@ public class EnvironmentResolver extends AbstractVariableResolver {
   /**
    * Creates the resolver
    */
-  public EnvironmentResolver(ClassLoader loader, VariableResolver parent)
+  public EnvironmentResolver(ClassLoader loader, ELResolver parent)
   {
     super(parent);
     
@@ -55,8 +54,12 @@ public class EnvironmentResolver extends AbstractVariableResolver {
   /**
    * Returns the named variable value.
    */
-  public Object resolveVariable(String var)
+  public Object getValue(ELContext context,
+			 Object base,
+			 Object property)
   {
+    String var = (String) base;
+    
     for (ClassLoader loader = _loader;
 	 loader != null;
 	 loader = loader.getParent()) {
@@ -77,6 +80,6 @@ public class EnvironmentResolver extends AbstractVariableResolver {
     else if (value != null)
       return value;
     else
-      return super.resolveVariable(var);
+      return super.getValue(context, var, property);
   }
 }

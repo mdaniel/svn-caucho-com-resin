@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -31,11 +32,12 @@ package com.caucho.jstl.el;
 import java.io.*;
 import java.net.*;
 
+import javax.el.*;
+
 import javax.servlet.jsp.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.jsp.tagext.*;
-import javax.servlet.jsp.el.ELException;
 
 import com.caucho.vfs.*;
 import com.caucho.util.*;
@@ -83,11 +85,11 @@ public class RedirectTag extends TagSupport implements NameValueTag {
     try {
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
     
-      String value = _valueExpr.evalString(pageContext);
+      String value = _valueExpr.evalString(pageContext.getELContext());
       String context = null;
 
       if (_contextExpr != null)
-	context = _contextExpr.evalString(pageContext);
+	context = _contextExpr.evalString(pageContext.getELContext());
     
       _url = UrlTag.normalizeURL(pageContext, value, context);
 

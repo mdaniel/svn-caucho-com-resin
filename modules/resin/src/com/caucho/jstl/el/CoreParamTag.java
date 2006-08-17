@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -30,6 +31,8 @@ package com.caucho.jstl.el;
 
 import java.io.*;
 import java.util.*;
+
+import javax.el.*;
 
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
@@ -50,8 +53,8 @@ import com.caucho.jstl.NameValueTag;
 public class CoreParamTag extends BodyTagSupport {
   private static L10N L = new L10N(CoreParamTag.class);
   
-  private Expr nameExpr;
-  private Expr valueExpr;
+  private Expr _nameExpr;
+  private Expr _valueExpr;
 
   /**
    * Sets the name
@@ -60,7 +63,7 @@ public class CoreParamTag extends BodyTagSupport {
    */
   public void setName(Expr name)
   {
-    this.nameExpr = name;
+    _nameExpr = name;
   }
 
   /**
@@ -70,7 +73,7 @@ public class CoreParamTag extends BodyTagSupport {
    */
   public void setValue(Expr value)
   {
-    this.valueExpr = value;
+    _valueExpr = value;
   }
 
   /**
@@ -80,17 +83,18 @@ public class CoreParamTag extends BodyTagSupport {
     throws JspException
   {
     try {
-      if (valueExpr == null)
+      if (_valueExpr == null)
 	return EVAL_BODY_BUFFERED;
 
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
+      ELContext env = pageContext.getELContext();
     
-      String name = nameExpr.evalString(pageContext);
+      String name = _nameExpr.evalString(env);
 
       if (name == null)
 	return SKIP_BODY;
       
-      String value = valueExpr.evalString(pageContext);
+      String value = _valueExpr.evalString(env);
     
       Tag parent = getParent();
       for (; parent != null; parent = parent.getParent()) {
@@ -121,7 +125,7 @@ public class CoreParamTag extends BodyTagSupport {
     throws JspException
   {
     try {
-      if (valueExpr != null)
+      if (_valueExpr != null)
 	return EVAL_PAGE;
       
       String value;
@@ -132,8 +136,9 @@ public class CoreParamTag extends BodyTagSupport {
 	value = "";
     
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
+      ELContext env = pageContext.getELContext();
     
-      String name = nameExpr.evalString(pageContext);
+      String name = _nameExpr.evalString(env);
 
       Object parent = getParent();
       if (! (parent instanceof NameValueTag))

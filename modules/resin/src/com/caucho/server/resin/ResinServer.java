@@ -57,8 +57,8 @@ import com.caucho.util.Log;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
+import javax.el.*;
 import javax.management.ObjectName;
-import javax.servlet.jsp.el.VariableResolver;
 import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
@@ -160,9 +160,9 @@ public class ResinServer
     setResinHome(Vfs.getPwd());
     setRootDirectory(Vfs.getPwd());
 
-    VariableResolver varResolver = new SystemPropertiesResolver();
+    ELResolver varResolver = new SystemPropertiesResolver();
     varResolver = new MapVariableResolver(_variableMap, varResolver);
-    EL.setEnvironment(varResolver);
+    EL.setEnvironment(new ConfigELContext(varResolver));
     EL.setVariableMap(_variableMap, _classLoader);
     _variableMap.put("fmt", new com.caucho.config.functions.FmtFunctions());
 

@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -31,8 +32,7 @@ package com.caucho.el;
 import java.io.*;
 import java.util.logging.*;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import javax.el.*;
 
 import com.caucho.vfs.*;
 
@@ -61,6 +61,7 @@ public class BooleanExpr extends AbstractBooleanExpr {
   /**
    * Returns true if this is a constant expression.
    */
+  @Override
   public boolean isConstant()
   {
     return _left.isConstant() && _right.isConstant();
@@ -73,7 +74,8 @@ public class BooleanExpr extends AbstractBooleanExpr {
    *
    * @return the result as a boolean
    */
-  public boolean evalBoolean(VariableResolver env)
+  @Override
+  public boolean evalBoolean(ELContext env)
     throws ELException
   {
     if (_op == AND)
@@ -90,6 +92,7 @@ public class BooleanExpr extends AbstractBooleanExpr {
   /**
    * Prints the Java code to recreate a BooleanExpr
    */
+  @Override
   public void printCreate(WriteStream os)
     throws IOException
   {

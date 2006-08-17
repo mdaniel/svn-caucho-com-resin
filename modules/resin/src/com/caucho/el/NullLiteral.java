@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -30,8 +31,7 @@ package com.caucho.el;
 
 import java.io.*;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import javax.el.*;
 
 import com.caucho.vfs.*;
 
@@ -49,6 +49,7 @@ public class NullLiteral extends Expr {
   /**
    * Returns true if the expression is constant.
    */
+  @Override
   public boolean isConstant()
   {
     return true;
@@ -61,7 +62,8 @@ public class NullLiteral extends Expr {
    *
    * @return null
    */
-  public Object evalObject(VariableResolver env)
+  @Override
+  public Object evalObject(ELContext env)
     throws ELException
   {
     return null;
@@ -70,22 +72,17 @@ public class NullLiteral extends Expr {
   /**
    * Evalutes directly to the output.
    */
-  public void print(WriteStream out, VariableResolver env)
+  @Override
+  public boolean print(WriteStream out, ELContext env, boolean isEscaped)
     throws IOException, ELException
   {
+    return false;
   }
-
-  /**
-   * Evaluates directly to the output.
-   */
-  public void printEscaped(WriteStream out, VariableResolver env)
-    throws IOException, ELException
-  {
-  }
-
+  
   /**
    * Prints the code to create an LongLiteral.
    */
+  @Override
   public void printCreate(WriteStream os)
     throws IOException
   {

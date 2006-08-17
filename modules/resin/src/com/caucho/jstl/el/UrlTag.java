@@ -99,21 +99,17 @@ public class UrlTag extends TagSupport implements NameValueTag {
 
   public int doStartTag() throws JspException
   {
-    try {
-      PageContextImpl pageContext = (PageContextImpl) this.pageContext;
+    PageContextImpl pageContext = (PageContextImpl) this.pageContext;
   
-      String value = _valueExpr.evalString(pageContext);
-      String context = null;
+    String value = _valueExpr.evalString(pageContext.getELContext());
+    String context = null;
 
-      if (_contextExpr != null)
-	context = _contextExpr.evalString(pageContext);
+    if (_contextExpr != null)
+      context = _contextExpr.evalString(pageContext.getELContext());
     
-      _url = normalizeURL(pageContext, value, context);
+    _url = normalizeURL(pageContext, value, context);
 
-      return EVAL_BODY_INCLUDE;
-    } catch (ELException e) {
-      throw new JspException(e);
-    }
+    return EVAL_BODY_INCLUDE;
   }
       
   public int doEndTag() throws JspException

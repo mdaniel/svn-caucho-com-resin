@@ -33,12 +33,11 @@ import java.io.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-import javax.servlet.jsp.el.VariableResolver;
+import javax.el.*;
 
 import com.caucho.util.*;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.*;
 import com.caucho.config.types.RawString;
 
 import com.caucho.el.EL;
@@ -137,10 +136,14 @@ public class ServletRegexp {
 		    ArrayList<String> vars)
     throws ServletException
   {
-    VariableResolver env = EL.getEnvironment();
+    ELContext env = EL.getEnvironment();
+    
     HashMap<String,Object> map = new HashMap<String,Object>();
     map.put("regexp", vars);
-    MapVariableResolver mapEnv = new MapVariableResolver(map, env);
+    MapVariableResolver mapResolver;
+    mapResolver = new MapVariableResolver(map, env.getELResolver());
+
+    ELContext mapEnv = new ConfigELContext(mapResolver);
 
     String rawName = _servletName;
     String rawClassName = _servletClassName;

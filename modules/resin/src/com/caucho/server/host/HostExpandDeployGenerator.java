@@ -37,7 +37,7 @@ import java.util.Iterator;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-import javax.servlet.jsp.el.VariableResolver;
+import javax.el.*;
 
 import com.caucho.log.Log;
 
@@ -46,8 +46,7 @@ import com.caucho.vfs.Path;
 import com.caucho.el.EL;
 import com.caucho.el.MapVariableResolver;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Config;
+import com.caucho.config.*;
 
 import com.caucho.config.types.RawString;
 
@@ -164,11 +163,14 @@ public class HostExpandDeployGenerator extends ExpandDeployGenerator<HostControl
       String hostName = getHostName();
 
       if (hostName != null) {
-	VariableResolver parent = Config.getEnvironment();
-	VariableResolver resolver
-	  = new MapVariableResolver(controller.getVariableMap(), parent);
+	ELContext parentEnv = Config.getEnvironment();
+	ELResolver resolver
+	  = new MapVariableResolver(controller.getVariableMap(),
+				    parentEnv.getELResolver());
+
+	ELContext env = new ConfigELContext(resolver);
 	
-	controller.setHostName(EL.evalString(hostName, resolver));
+	controller.setHostName(EL.evalString(hostName, env));
       }
       else
 	controller.setHostName(name);

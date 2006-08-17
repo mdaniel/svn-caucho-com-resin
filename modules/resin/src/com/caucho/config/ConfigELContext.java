@@ -19,48 +19,65 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.jsp.el;
+package com.caucho.config;
 
-import java.io.*;
-import java.util.*;
+import java.util.HashMap;
 
-import javax.servlet.http.*;
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.el.*;
+import javax.el.*;
 
-import com.caucho.vfs.*;
-import com.caucho.jsp.*;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentClassLoader;
 
-import com.caucho.el.Expr;
+import com.caucho.el.EL;
+import com.caucho.el.AbstractVariableResolver;
 
 /**
- * Implementation of the expression evaluator.
+ * Creates a variable resolver based on the classloader.
  */
-public class ExpressionImpl extends Expression {
-  private Expr _expr;
-
+public class ConfigELContext extends ELContext {
+  private ELResolver _elResolver;
+  
   /**
-   * Implements the expression.
+   * Creates the resolver
    */
-  ExpressionImpl(Expr expr)
+  public ConfigELContext()
   {
-    _expr = expr;
+    this(new ConfigVariableResolver());
   }
   
   /**
-   * Evaluates an expression.
+   * Creates the resolver
    */
-  public Object evaluate(VariableResolver resolver)
-    throws ELException
+  public ConfigELContext(ELResolver elResolver)
   {
-    throw new UnsupportedOperationException();
-    //return _expr.evalObject(resolver);
+    _elResolver = elResolver;
+  }
+
+  public ELResolver getELResolver()
+  {
+    return _elResolver;
+  }
+
+  public FunctionMapper getFunctionMapper()
+  {
+    return null;
+  }
+
+  public VariableMapper getVariableMapper()
+  {
+    return null;
+  }
+
+  public String toString()
+  {
+    return "ConfigELResolver[]";
   }
 }

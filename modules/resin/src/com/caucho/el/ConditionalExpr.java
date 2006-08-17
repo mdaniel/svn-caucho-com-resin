@@ -31,8 +31,7 @@ package com.caucho.el;
 import java.io.*;
 import java.util.logging.*;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import javax.el.*;
 
 import com.caucho.vfs.*;
 
@@ -61,6 +60,7 @@ public class ConditionalExpr extends Expr {
   /**
    * Returns true if this is a constant expression.
    */
+  @Override
   public boolean isConstant()
   {
     return (_test.isConstant() &&
@@ -75,7 +75,8 @@ public class ConditionalExpr extends Expr {
    *
    * @return the result as an object
    */
-  public Object evalObject(VariableResolver env)
+  @Override
+  public Object evalObject(ELContext env)
     throws ELException
   {
     if (_test.evalBoolean(env))
@@ -91,7 +92,8 @@ public class ConditionalExpr extends Expr {
    *
    * @return the result as an long
    */
-  public long evalLong(VariableResolver env)
+  @Override
+  public long evalLong(ELContext env)
     throws ELException
   {
     if (_test.evalBoolean(env))
@@ -107,7 +109,8 @@ public class ConditionalExpr extends Expr {
    *
    * @return the result as an double
    */
-  public double evalDouble(VariableResolver env)
+  @Override
+  public double evalDouble(ELContext env)
     throws ELException
   {
     if (_test.evalBoolean(env))
@@ -123,7 +126,8 @@ public class ConditionalExpr extends Expr {
    *
    * @return the result as a string
    */
-  public String evalString(VariableResolver env)
+  @Override
+  public String evalString(ELContext env)
     throws ELException
   {
     if (_test.evalBoolean(env))
@@ -139,7 +143,8 @@ public class ConditionalExpr extends Expr {
    *
    * @return the result as a boolean
    */
-  public boolean evalBoolean(VariableResolver env)
+  @Override
+  public boolean evalBoolean(ELContext env)
     throws ELException
   {
     if (_test.evalBoolean(env))

@@ -28,6 +28,8 @@
 
 package com.caucho.el;
 
+import java.beans.FeatureDescriptor;
+
 import java.util.AbstractMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -35,7 +37,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-import javax.servlet.jsp.el.VariableResolver;
+import javax.el.*;
 
 import com.caucho.util.NullIterator;
 
@@ -45,11 +47,12 @@ import com.caucho.log.Log;
  * Abstract variable resolver.  Supports chaining and the "Var"
  * special variable.
  */
-public class AbstractVariableResolver extends AbstractMap<String,Object>
-  implements VariableResolver {
-  private static final Logger log = Log.open(AbstractVariableResolver.class);
+public class AbstractVariableResolver extends ELResolver
+{
+  private static final Logger log
+    = Logger.getLogger(AbstractVariableResolver.class.getName());
   
-  private VariableResolver _next;
+  private ELResolver _next;
   
   /**
    * Creates the resolver
@@ -61,7 +64,7 @@ public class AbstractVariableResolver extends AbstractMap<String,Object>
   /**
    * Creates the resolver
    */
-  public AbstractVariableResolver(VariableResolver next)
+  public AbstractVariableResolver(ELResolver next)
   {
     _next = next;
   }
@@ -69,7 +72,7 @@ public class AbstractVariableResolver extends AbstractMap<String,Object>
   /**
    * Returns the next resolver.
    */
-  public VariableResolver getNext()
+  public ELResolver getNext()
   {
     return _next;
   }
@@ -77,64 +80,74 @@ public class AbstractVariableResolver extends AbstractMap<String,Object>
   /**
    * Returns the named variable value.
    */
-  public Object resolveVariable(String var)
+  public Object getValue(ELContext context,
+			 Object base,
+			 Object property)
   {
     Object value = null;
 
     if (_next != null) {
-      try {
-	value = _next.resolveVariable(var);
-      } catch (javax.servlet.jsp.el.ELException e) {
-	log.log(Level.WARNING, e.toString(), e);
-      }
-    
+      value = _next.getValue(context, base, property);
+      
       if (value == _next)
         return this;
       else if (value != null)
         return value;
     }
 
-    if (var.equals("Var"))
+    if ("Var".equals(base))
       return this;
     else
       return null;
   }
 
-  // Map API
+  //
+  // ELResolver stubs
+  //
 
-  /**
-   * Returns the named specified value
-   */
-  public Object get(String var)
+
+  public Class<?> getCommonPropertyType(ELContext context,
+					Object base)
   {
-    return resolveVariable(var);
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
-  /**
-   * Returns the named specified value
-   */
-  public Object get(Object var)
+  public Iterator<FeatureDescriptor>
+    getFeatureDescriptors(ELContext context, Object base)
   {
-    return resolveVariable((String) var);
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
-  /**
-   * Return dummy 0 for the size.
-   */
-  public int size()
+  public Class<?> getType(ELContext context,
+			  Object base,
+			  Object property)
   {
-    return 0;
+    Object value = getValue(context, base, property);
+
+    if (value == null)
+      return null;
+    else
+      return value.getClass();
   }
 
-  /**
-   * Return dummy null iterator for the entries
-   */
-  public Set<Entry<String,Object>> entrySet()
+  public boolean isReadOnly(ELContext context,
+			    Object base,
+			    Object property)
+    throws PropertyNotFoundException,
+	   ELException
   {
-    java.util.HashSet<Entry<String,Object>> set;
-    set = new java.util.HashSet<Entry<String,Object>>();
-    
-    return set;
+    return true;
+  }
+
+  public void setValue(ELContext context,
+		       Object base,
+		       Object property,
+		       Object value)
+    throws PropertyNotFoundException,
+	   PropertyNotWritableException,
+	   ELException
+  {
+    throw new PropertyNotWritableException(getClass().getName());
   }
 
   public String toString()

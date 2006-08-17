@@ -26,41 +26,41 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jsp.el;
+package com.caucho.el;
 
-import java.io.*;
-import java.util.*;
+import javax.el.*;
 
-import javax.servlet.http.*;
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.el.*;
+import com.caucho.loader.EnvironmentClassLoader;
 
-import com.caucho.vfs.*;
-import com.caucho.jsp.*;
-
-import com.caucho.el.Expr;
+import com.caucho.el.EL;
+import com.caucho.el.AbstractVariableResolver;
 
 /**
- * Implementation of the expression evaluator.
+ * Creates a variable resolver based on the classloader.
  */
-public class ExpressionImpl extends Expression {
-  private Expr _expr;
-
-  /**
-   * Implements the expression.
-   */
-  ExpressionImpl(Expr expr)
-  {
-    _expr = expr;
-  }
+public class EnvironmentContext extends ELContext {
+  private ELResolver _elResolver;
   
   /**
-   * Evaluates an expression.
+   * Creates the resolver
    */
-  public Object evaluate(VariableResolver resolver)
-    throws ELException
+  public EnvironmentContext(ELResolver elResolver)
   {
-    throw new UnsupportedOperationException();
-    //return _expr.evalObject(resolver);
+    _elResolver = elResolver;
+  }
+
+  public ELResolver getELResolver()
+  {
+    return _elResolver;
+  }
+
+  public FunctionMapper getFunctionMapper()
+  {
+    return null;
+  }
+
+  public VariableMapper getVariableMapper()
+  {
+    return null;
   }
 }

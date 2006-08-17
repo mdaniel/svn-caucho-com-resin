@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -32,11 +33,12 @@ import java.io.*;
 import java.util.*;
 import java.text.*;
 
+import javax.el.*;
+
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
 import javax.servlet.jsp.jstl.core.*;
 import javax.servlet.jsp.jstl.fmt.*;
-import javax.servlet.jsp.el.ELException;
 
 import com.caucho.vfs.*;
 import com.caucho.util.*;
@@ -169,7 +171,7 @@ public class ParseDateTag extends BodyTagSupport {
       String string;
 
       if (_valueExpr != null)
-        string = _valueExpr.evalString(pageContext);
+        string = _valueExpr.evalString(pageContext.getELContext());
       else
         string = bodyContent.getString().trim();
       
@@ -195,12 +197,13 @@ public class ParseDateTag extends BodyTagSupport {
     throws JspException, ELException
   {
     PageContextImpl pageContext = (PageContextImpl) this.pageContext;
+    ELContext env = pageContext.getELContext();
     
     DateFormat format = null;
     Locale locale = null;
 
     if (_parseLocaleExpr != null) {
-      Object localeObj = _parseLocaleExpr.evalObject(pageContext);
+      Object localeObj = _parseLocaleExpr.evalObject(env);
 
       if (localeObj instanceof Locale)
         locale = (Locale) localeObj;
@@ -214,15 +217,15 @@ public class ParseDateTag extends BodyTagSupport {
     String type = null;
 
     if (_typeExpr != null)
-      type = _typeExpr.evalString(pageContext);
+      type = _typeExpr.evalString(env);
 
     int dateStyle = DateFormat.DEFAULT;
     if (_dateStyleExpr != null)
-      dateStyle = getDateStyle(_dateStyleExpr.evalString(pageContext));
+      dateStyle = getDateStyle(_dateStyleExpr.evalString(env));
 
     int timeStyle = DateFormat.DEFAULT;
     if (_timeStyleExpr != null)
-      timeStyle = getDateStyle(_timeStyleExpr.evalString(pageContext));
+      timeStyle = getDateStyle(_timeStyleExpr.evalString(env));
 
     if (locale != null) {
       if (type == null || type.equals("date"))
@@ -251,7 +254,7 @@ public class ParseDateTag extends BodyTagSupport {
       return null;
     
     if (_patternExpr != null) {
-      String pattern = _patternExpr.evalString(pageContext);
+      String pattern = _patternExpr.evalString(env);
       try {
         ((SimpleDateFormat) format).applyPattern(pattern);
       } catch (ClassCastException e) {
@@ -271,7 +274,7 @@ public class ParseDateTag extends BodyTagSupport {
   {
     if (_timeZoneExpr != null) {
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
-      Object timeZoneObj = _timeZoneExpr.evalObject(pageContext);
+      Object timeZoneObj = _timeZoneExpr.evalObject(pageContext.getELContext());
 
       TimeZone zone = getTimeZone(timeZoneObj);
       if (zone != null)

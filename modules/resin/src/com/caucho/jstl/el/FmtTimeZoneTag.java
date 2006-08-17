@@ -72,7 +72,7 @@ public class FmtTimeZoneTag extends TagSupport implements TryCatchFinally {
 
       _oldTimeZone = pc.getAttribute("com.caucho.time-zone");
 
-      Object valueObj = _valueExpr.evalObject(pc);
+      Object valueObj = _valueExpr.evalObject(pc.getELContext());
       TimeZone timeZone = null;
 
       if (valueObj instanceof TimeZone) {

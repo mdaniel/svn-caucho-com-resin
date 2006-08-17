@@ -135,11 +135,7 @@ public class CoreSetTag extends BodyTagSupport {
   private void doSetProperty(Object value)
     throws JspException
   {
-    try {
-      Expr.setProperty(_target, _property, value);
-    } catch (ELException e) {
-      throw new JspException(e);
-    }
+    Expr.setProperty(_target, _property, value);
   }
 
   public static void setValue(PageContext pageContext,

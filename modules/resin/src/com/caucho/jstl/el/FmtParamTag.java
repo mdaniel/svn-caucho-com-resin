@@ -74,7 +74,7 @@ public class FmtParamTag extends BodyTagSupport {
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
     
       if (_valueExpr != null)
-	value = _valueExpr.evalObject(pageContext);
+	value = _valueExpr.evalObject(pageContext.getELContext());
       else
 	value = bodyContent.getString().trim();
 

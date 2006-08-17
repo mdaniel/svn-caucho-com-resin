@@ -68,31 +68,27 @@ public class SqlParamTag extends BodyTagSupport {
   public int doStartTag()
     throws JspException
   {
-    try {
-      if (_valueExpr == null)
-	return EVAL_BODY_BUFFERED;
+    if (_valueExpr == null)
+      return EVAL_BODY_BUFFERED;
 
-      PageContextImpl pageContext = (PageContextImpl) this.pageContext;
+    PageContextImpl pageContext = (PageContextImpl) this.pageContext;
     
-      Object value = _valueExpr.evalObject(pageContext);
+    Object value = _valueExpr.evalObject(pageContext.getELContext());
 
-      Tag parent = getParent();
-      for (;
-	   parent != null && ! (parent instanceof SQLExecutionTag);
-	   parent = parent.getParent()) {
-      }
-
-      if (parent == null)
-	throw new JspException(L.l("sql:param requires sql:query parent.")); 
-
-      SQLExecutionTag tag = (SQLExecutionTag) parent;
-
-      tag.addSQLParameter(value);
-    
-      return SKIP_BODY;
-    } catch (ELException e) {
-      throw new JspException(e);
+    Tag parent = getParent();
+    for (;
+	 parent != null && ! (parent instanceof SQLExecutionTag);
+	 parent = parent.getParent()) {
     }
+
+    if (parent == null)
+      throw new JspException(L.l("sql:param requires sql:query parent.")); 
+
+    SQLExecutionTag tag = (SQLExecutionTag) parent;
+
+    tag.addSQLParameter(value);
+    
+    return SKIP_BODY;
   }
 
   /**

@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -30,8 +31,7 @@ package com.caucho.config;
 
 import java.util.HashMap;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import javax.el.*;
 
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
@@ -60,7 +60,7 @@ public class ConfigVariableResolver extends AbstractVariableResolver {
    */
   public ConfigVariableResolver(ClassLoader loader)
   {
-    super(EL.getEnvironment(loader));
+    super(EL.getEnvironment(loader).getELResolver());
 
     _originalLoader = loader;
   }
@@ -86,8 +86,12 @@ public class ConfigVariableResolver extends AbstractVariableResolver {
   /**
    * Returns the named variable value.
    */
-  public Object resolveVariable(String var)
+  public Object getValue(ELContext context,
+			 Object base,
+			 Object property)
   {
+    String var = (String) base;
+    
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
     for (;
@@ -125,31 +129,39 @@ public class ConfigVariableResolver extends AbstractVariableResolver {
       return null;
     else if (value != null)
       return value;
-    else {
-      return super.resolveVariable(var);
-    }
+    else
+      return super.getValue(context, base, property);
   }
   
   /**
    * Sets the value for the named variable.
    */
-  public Object put(String name, Object value)
+  public void setValue(ELContext context,
+		       Object base,
+		       Object property,
+		       Object value)
   {
+    String name = (String) base;
+    
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
     for (;
 	 loader != _originalLoader && loader != null;
 	 loader = loader.getParent()) {
       if (loader instanceof EnvironmentClassLoader) {
-	return EL.putVar(name, value, loader);
+	EL.putVar(name, value, loader);
+
+	return;
       }
     }
 
     if (loader == _configureClassLoader) {
-      return EL.putVar(name, value, loader);
+      EL.putVar(name, value, loader);
+
+      return;
     }
     
-    return _varMap.put(name, value);
+    _varMap.put(name, value);
   }
 
   public String toString()

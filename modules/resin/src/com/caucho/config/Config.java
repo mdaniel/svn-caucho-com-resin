@@ -43,19 +43,16 @@ import java.lang.reflect.Constructor;
 
 import java.lang.ref.SoftReference;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import javax.el.*;
 
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 
 import org.w3c.dom.Node;
 
-import com.caucho.relaxng.CompactVerifierFactoryImpl;
-import com.caucho.relaxng.VerifierFactory;
-import com.caucho.relaxng.Schema;
-import com.caucho.relaxng.Verifier;
-import com.caucho.relaxng.VerifierFilter;
+import com.caucho.el.*;
+
+import com.caucho.relaxng.*;
 
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
@@ -521,12 +518,12 @@ public class Config {
   /**
    * Returns the variable resolver.
    */
-  public static VariableResolver getEnvironment()
+  public static ELContext getEnvironment()
   {
     NodeBuilder builder = NodeBuilder.getCurrentBuilder();
 
     if (builder != null) {
-      return builder.getConfigVariableResolver();
+      return builder.getELContext();
     }
     else
       return EL.getEnvironment();
@@ -535,15 +532,27 @@ public class Config {
   /**
    * Returns the variable resolver.
    */
-  public static VariableResolver getVariableResolver()
+  public static ConfigELContext getELContext()
   {
     NodeBuilder builder = NodeBuilder.getCurrentBuilder();
 
     if (builder != null) {
-      return builder.getConfigVariableResolver();
+      return builder.getELContext();
     }
     else
       return null;
+  }
+
+  /**
+   * Returns the variable resolver.
+   */
+  public static void setELContext(ConfigELContext context)
+  {
+    NodeBuilder builder = NodeBuilder.getCurrentBuilder();
+
+    if (builder != null) {
+      builder.setELContext(context);
+    }
   }
 
   /**
@@ -573,7 +582,8 @@ public class Config {
    */
   public static Object getVar(String var) throws ELException
   {
-    return getEnvironment().resolveVariable(var);
+    return getEnvironment().getELResolver().getValue(getEnvironment(),
+						     var, null);
   }
 
   /**
@@ -603,14 +613,19 @@ public class Config {
     return AttributeStrategy.evalBoolean(str);
   }
 
-  public static VariableResolver getEnvironment(HashMap<String,Object> varMap)
+  public static ELContext getEnvironment(HashMap<String,Object> varMap)
   {
-    VariableResolver parent = Config.getEnvironment();
+    ELContext context = Config.getEnvironment();
+
+    ELResolver parent = null;
+
+    if (context != null)
+      parent = context.getELResolver();
 
     if (varMap != null)
-      return new MapVariableResolver(varMap, parent);
+      return new EnvironmentContext(new MapVariableResolver(varMap, parent));
     else
-      return parent;
+      return new EnvironmentContext(parent);
   }
 }
 

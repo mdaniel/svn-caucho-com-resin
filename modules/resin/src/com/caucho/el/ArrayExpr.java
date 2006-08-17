@@ -34,8 +34,7 @@ import java.util.logging.*;
 import java.beans.*;
 import java.lang.reflect.*;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import javax.el.*;
 
 import com.caucho.vfs.*;
 import com.caucho.util.*;
@@ -87,6 +86,7 @@ public class ArrayExpr extends Expr {
   /**
    * Creates a method for constant arrays.
    */
+  @Override
   public Expr createMethod(Expr []args)
   {
     if (! (_right instanceof StringLiteral))
@@ -104,7 +104,8 @@ public class ArrayExpr extends Expr {
    *
    * @return the evaluated object
    */
-  public Object evalObject(VariableResolver env)
+  @Override
+  public Object evalObject(ELContext env)
     throws ELException
   {
     Object aObj = _left.evalObject(env);
@@ -205,6 +206,7 @@ public class ArrayExpr extends Expr {
    *
    * @param os stream to the generated *.java code
    */
+  @Override
   public void printCreate(WriteStream os)
     throws IOException
   {

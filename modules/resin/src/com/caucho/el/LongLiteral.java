@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -30,8 +31,7 @@ package com.caucho.el;
 
 import java.io.*;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import javax.el.*;
 
 import com.caucho.vfs.*;
 
@@ -54,6 +54,7 @@ public class LongLiteral extends Expr {
   /**
    * Returns true if the expression is constant.
    */
+  @Override
   public boolean isConstant()
   {
     return true;
@@ -66,7 +67,8 @@ public class LongLiteral extends Expr {
    *
    * @return the long value as a Long
    */
-  public Object evalObject(VariableResolver env)
+  @Override
+  public Object evalObject(ELContext env)
     throws ELException
   {
     return _objValue;
@@ -79,7 +81,8 @@ public class LongLiteral extends Expr {
    *
    * @return the long value
    */
-  public long evalLong(VariableResolver env)
+  @Override
+  public long evalLong(ELContext env)
     throws ELException
   {
     return _value;
@@ -92,7 +95,8 @@ public class LongLiteral extends Expr {
    *
    * @return the double value
    */
-  public double evalDouble(VariableResolver env)
+  @Override
+  public double evalDouble(ELContext env)
     throws ELException
   {
     return (double) _value;
@@ -104,22 +108,13 @@ public class LongLiteral extends Expr {
    * @param out the output stream
    * @param env the variable environment
    */
-  public void print(WriteStream out, VariableResolver env)
+  @Override
+  public boolean print(WriteStream out, ELContext env, boolean isEscaped)
     throws IOException, ELException
   {
     out.print(_value);
-  }
 
-  /**
-   * Evaluates directly to the output.
-   *
-   * @param out the output stream
-   * @param env the variable environment
-   */
-  public void printEscaped(WriteStream out, VariableResolver env)
-    throws IOException, ELException
-  {
-    out.print(_value);
+    return false;
   }
 
   /**

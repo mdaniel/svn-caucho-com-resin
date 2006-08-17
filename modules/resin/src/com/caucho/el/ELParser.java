@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -43,8 +44,9 @@ import com.caucho.log.Log;
 /**
  * Parses the expression.
  */
-public class ELParser {
-  private static final Logger log = Log.open(ELParser.class);
+public class ELParser
+{
+  private static final Logger log = Logger.getLogger(ELParser.class.getName());
   private static final L10N L = new L10N(ELParser.class);
 
   // The expression string
@@ -56,7 +58,7 @@ public class ELParser {
   // The current lexeme
   private String _lexeme;
   // Temporary buffer
-  private CharBuffer _cb = CharBuffer.allocate();
+  private CharBuffer _cb = new CharBuffer();
   // Static function map
   private Map<String,Method> _staticFunctionMap;
 

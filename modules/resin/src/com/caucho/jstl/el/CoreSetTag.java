@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -31,10 +32,9 @@ package com.caucho.jstl.el;
 import java.io.*;
 import java.util.*;
 
+import javax.el.*;
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
 
 import com.caucho.vfs.*;
 import com.caucho.util.*;
@@ -100,7 +100,7 @@ public class CoreSetTag extends BodyTagSupport {
       if (valueExpr == null)
 	return EVAL_BODY_BUFFERED;
 
-      VariableResolver env = (VariableResolver) pageContext;
+      ELContext env = pageContext.getELContext();
 
       Object value = valueExpr.evalObject(env);
       if (var != null)
@@ -169,7 +169,7 @@ public class CoreSetTag extends BodyTagSupport {
     throws JspException
   {
     try {
-      VariableResolver env = (VariableResolver) pageContext;
+      ELContext env = pageContext.getELContext();
 
       Object target = targetExpr.evalObject(env);
       String property = propertyExpr.evalString(env);

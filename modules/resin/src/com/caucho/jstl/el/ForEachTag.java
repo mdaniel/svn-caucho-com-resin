@@ -32,6 +32,8 @@ import java.io.*;
 import java.util.*;
 import java.lang.reflect.*;
 
+import javax.el.*;
+
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
 import javax.servlet.jsp.jstl.core.*;
@@ -128,26 +130,27 @@ public class ForEachTag extends TagSupport
       _count = 0;
 
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
+      ELContext env = pageContext.getELContext();
 
       if (_beginExpr != null)
-	_begin = (int) _beginExpr.evalLong(pageContext);
+	_begin = (int) _beginExpr.evalLong(env);
       else
 	_begin = -1;
 
       if (_endExpr != null)
-	_end = (int) _endExpr.evalLong(pageContext);
+	_end = (int) _endExpr.evalLong(env);
       else
 	_end = Integer.MAX_VALUE;
 
       if (_stepExpr != null)
-	_step = (int) _stepExpr.evalLong(pageContext);
+	_step = (int) _stepExpr.evalLong(env);
       else
 	_step = 0;
     
       Object items = null;
 
       if (_itemsExpr != null) {
-	items = _itemsExpr.evalObject(pageContext);
+	items = _itemsExpr.evalObject(env);
 
 	_iterator = getIterator(items);
 

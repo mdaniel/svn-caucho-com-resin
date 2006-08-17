@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -28,39 +29,61 @@
 
 package com.caucho.jsp.el;
 
-import java.io.*;
-import java.util.*;
-
-import javax.servlet.http.*;
+import javax.el.*;
 import javax.servlet.jsp.*;
-import javax.servlet.jsp.el.*;
 
-import com.caucho.vfs.*;
-import com.caucho.jsp.*;
+import com.caucho.server.webapp.*;
 
-import com.caucho.el.Expr;
+public class JspApplicationContextImpl implements JspApplicationContext
+{
+  private final WebApp _webApp;
+  
+  private final ExpressionFactory _expressionFactory;
 
-/**
- * Implementation of the expression evaluator.
- */
-public class ExpressionImpl extends Expression {
-  private Expr _expr;
-
-  /**
-   * Implements the expression.
-   */
-  ExpressionImpl(Expr expr)
+  public JspApplicationContextImpl(WebApp webApp)
   {
-    _expr = expr;
+    _webApp = webApp;
+
+    _expressionFactory = new JspExpressionFactoryImpl(this);
+  }
+
+  //
+  // properties
+  //
+  
+  WebApp getWebApp()
+  {
+    return _webApp;
+  }
+
+  //
+  // JspApplicationContext API methods
+  //
+  
+  /**
+   * Adds an ELContextListener.
+   */
+  public void addELContextListener(ELContextListener listener)
+  {
   }
   
   /**
-   * Evaluates an expression.
+   * Adds an ELResolver
    */
-  public Object evaluate(VariableResolver resolver)
-    throws ELException
+  public void addELResolver(ELResolver resolver)
   {
-    throw new UnsupportedOperationException();
-    //return _expr.evalObject(resolver);
+  }
+  
+  /**
+   * Gets the expression factory
+   */
+  public ExpressionFactory getExpressionFactory()
+  {
+    return _expressionFactory;
+  }
+
+  public String toString()
+  {
+    return "JspApplicationContextImpl[" + _webApp + "]";
   }
 }

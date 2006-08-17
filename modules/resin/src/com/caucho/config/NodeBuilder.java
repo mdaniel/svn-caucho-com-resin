@@ -36,8 +36,8 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-import javax.servlet.jsp.el.ELException;
-import javax.servlet.jsp.el.VariableResolver;
+import javax.el.*;
+
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 import org.w3c.dom.Attr;
@@ -47,10 +47,9 @@ import org.w3c.dom.DocumentType;
 import org.w3c.dom.Comment;
 import org.w3c.dom.ProcessingInstruction;
 
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.CompileException;
-import com.caucho.util.LineCompileException;
+import com.caucho.el.*;
+
+import com.caucho.util.*;
 
 import com.caucho.log.Log;
 
@@ -93,7 +92,8 @@ import com.caucho.el.EL;
  */
 public class NodeBuilder {
   private final static L10N L = new L10N(NodeBuilder.class);
-  private final static Logger log = Log.open(NodeBuilder.class);
+  private final static Logger log
+    = Logger.getLogger(NodeBuilder.class.getName());
 
   private final static QName RESIN_TYPE = new QName("resin:type");
   private final static QName RESIN_TYPE_NS
@@ -107,20 +107,24 @@ public class NodeBuilder {
   private ArrayList<ValidatorEntry> _validators
     = new ArrayList<ValidatorEntry>();
 
-  private ConfigVariableResolver _varResolver;
+  private ConfigELContext _elContext;
+  private AbstractVariableResolver _varResolver;
 
   NodeBuilder()
   {
-    _varResolver = new ConfigVariableResolver();
+    _elContext = new ConfigELContext();
+    _varResolver = (AbstractVariableResolver) _elContext.getELResolver();
   }
   
   NodeBuilder(Config config)
   {
     _config = config;
-    _varResolver = config.getConfigVariableResolver();
+    _elContext = config.getELContext();
 
-    if (_varResolver == null)
-      _varResolver = new ConfigVariableResolver();
+    if (_elContext == null)
+      _elContext = new ConfigELContext();
+    
+    _varResolver = (AbstractVariableResolver) _elContext.getELResolver();
   }
 
   public static NodeBuilder getCurrentBuilder()
@@ -159,7 +163,8 @@ public class NodeBuilder {
       _currentBuilder.set(this);
 
       if (top instanceof QNode) {
-	_varResolver.put("__FILE__", ((QNode) top).getBaseURI());
+	_varResolver.setValue(_elContext, "__FILE__", null,
+			    ((QNode) top).getBaseURI());
       }
 
       TypeStrategy typeStrategy;
@@ -188,8 +193,10 @@ public class NodeBuilder {
     try {
       _currentBuilder.set(this);
 
-      if (top instanceof QNode)
-	_varResolver.put("__FILE__", ((QNode) top).getBaseURI());
+      if (top instanceof QNode) {
+	_varResolver.setValue(_elContext, "__FILE__", null,
+			    ((QNode) top).getBaseURI());
+      }
 
       TypeStrategy typeStrategy;
       typeStrategy = TypeStrategyFactory.getTypeStrategy(bean.getClass());
@@ -542,9 +549,17 @@ public class NodeBuilder {
   /**
    * Returns the variable resolver.
    */
-  public ConfigVariableResolver getConfigVariableResolver()
+  public ConfigELContext getELContext()
   {
-    return _varResolver;
+    return _elContext;
+  }
+
+  /**
+   * Returns the variable resolver.
+   */
+  public void setELContext(ConfigELContext elContext)
+  {
+    _elContext = elContext;
   }
 
   /**
@@ -552,7 +567,12 @@ public class NodeBuilder {
    */
   public Object putVar(String name, Object value)
   {
-    return _varResolver.put(name, value);
+    ELResolver resolver = _elContext.getELResolver();
+    Object oldValue = resolver.getValue(_elContext, name, null);
+
+    resolver.setValue(_elContext, name, null, value);
+    
+    return oldValue;
   }
 
   /**
@@ -560,7 +580,7 @@ public class NodeBuilder {
    */
   public Object getVar(String name)
   {
-    return _varResolver.get(name);
+    return _elContext.getELResolver().getValue(_elContext, name, null);
   }
 
   void addValidator(Validator validator)
@@ -667,7 +687,7 @@ public class NodeBuilder {
       parser.setCheckEscape(true);
       Expr expr = parser.parse();
 
-      return expr.evalString(getConfigVariableResolver());
+      return expr.evalString(getELContext());
     }
     else
       return exprString;
@@ -684,7 +704,7 @@ public class NodeBuilder {
       parser.setCheckEscape(true);
       Expr expr = parser.parse();
       
-      return expr.evalBoolean(getConfigVariableResolver());
+      return expr.evalBoolean(getELContext());
     }
     else
       return Expr.toBoolean(exprString, null);
@@ -701,7 +721,7 @@ public class NodeBuilder {
       parser.setCheckEscape(true);
       Expr expr = parser.parse();
 
-      return expr.evalObject(getConfigVariableResolver());
+      return expr.evalObject(getELContext());
     }
     else
       return exprString;

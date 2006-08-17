@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -34,8 +35,7 @@ import java.util.logging.*;
 import java.beans.*;
 import java.lang.reflect.*;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import javax.el.*;
 
 import com.caucho.vfs.*;
 import com.caucho.util.*;
@@ -100,7 +100,8 @@ public class StaticMethodExpr extends Expr {
    *
    * @param env the variable environment
    */
-  public Object evalObject(VariableResolver env)
+  @Override
+  public Object evalObject(ELContext env)
     throws ELException
   {
     return _method;
@@ -112,7 +113,7 @@ public class StaticMethodExpr extends Expr {
    * @param env the variable environment
    */
   public Object evalMethod(Expr []args,
-			   VariableResolver env)
+			   ELContext env)
     throws ELException
   {
     if (_marshall.length != args.length) {

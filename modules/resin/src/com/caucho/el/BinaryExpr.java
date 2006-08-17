@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -34,8 +35,7 @@ import java.util.logging.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import javax.el.*;
 
 import com.caucho.vfs.*;
 
@@ -64,6 +64,7 @@ public class BinaryExpr extends Expr {
   /**
    * Returns true if this is a constant expression.
    */
+  @Override
   public boolean isConstant()
   {
     return _left.isConstant() && _right.isConstant();
@@ -76,7 +77,8 @@ public class BinaryExpr extends Expr {
    *
    * @return the result as an object
    */
-  public Object evalObject(VariableResolver env)
+  @Override
+  public Object evalObject(ELContext env)
     throws ELException
   {
     Object aObj = _left.evalObject(env);
@@ -292,7 +294,8 @@ public class BinaryExpr extends Expr {
    *
    * @return the result as an long
    */
-  public long evalLong(VariableResolver env)
+  @Override
+  public long evalLong(ELContext env)
     throws ELException
   {
     long a = _left.evalLong(env);
@@ -322,7 +325,8 @@ public class BinaryExpr extends Expr {
    *
    * @return the result as an double
    */
-  public double evalDouble(VariableResolver env)
+  @Override
+  public double evalDouble(ELContext env)
     throws ELException
   {
     double a = _left.evalDouble(env);
@@ -350,6 +354,7 @@ public class BinaryExpr extends Expr {
    *
    * @param os the output stream to the *.java file
    */
+  @Override
   public void printCreate(WriteStream os)
     throws IOException
   {

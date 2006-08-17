@@ -420,7 +420,7 @@ handle_config_header(config_t *config, char *header, char *value)
     if (config->update_interval < 5)
       config->update_interval = 5;
   }
-  else if (! strcmp(header, "session-cookie")) {
+  else if (! strcmp(header, "cookie")) {
     int len = sizeof(config->session_cookie);
 	
     strncpy(config->session_cookie, value, len);

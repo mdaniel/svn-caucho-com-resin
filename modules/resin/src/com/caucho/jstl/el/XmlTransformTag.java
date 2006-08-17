@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -32,10 +33,11 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.*;
 
+import javax.el.*;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
-import javax.servlet.jsp.el.ELException;
 
 import javax.xml.transform.*;
 import javax.xml.transform.stream.*;
@@ -170,6 +172,7 @@ public class XmlTransformTag extends BodyTagSupport implements NameValueTag {
   {
     try {
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
+      ELContext env = pageContext.getELContext();
       
       JspWriter out = pageContext.getOut();
 
@@ -199,7 +202,7 @@ public class XmlTransformTag extends BodyTagSupport implements NameValueTag {
       Node top = null;
 
       if (_result != null) {
-        result = (Result) _result.evalObject(pageContext);
+        result = (Result) _result.evalObject(env);
       }
       else if (_var != null) {
         top = new com.caucho.xml.QDocument();
@@ -226,12 +229,12 @@ public class XmlTransformTag extends BodyTagSupport implements NameValueTag {
     try {
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
       
-      Object xmlObj = xmlExpr.evalObject(pageContext);
+      Object xmlObj = xmlExpr.evalObject(pageContext.getELContext());
       String systemId = null;
       Source source = null;
 
       if (systemIdExpr != null)
-	systemId = systemIdExpr.evalString(pageContext);
+	systemId = systemIdExpr.evalString(pageContext.getELContext());
       
       source = convertToSource(xmlObj, systemId);
 

@@ -32,6 +32,8 @@ import java.io.*;
 import java.util.*;
 import java.lang.reflect.*;
 
+import javax.el.*;
+
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
 import javax.servlet.jsp.jstl.core.*;
@@ -68,24 +70,25 @@ public class ForTokensTag extends ForEachTag {
       _count = 0;
 
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
+      ELContext env = pageContext.getELContext();
 
       if (_beginExpr != null)
-	_begin = (int) _beginExpr.evalLong(pageContext);
+	_begin = (int) _beginExpr.evalLong(env);
       else
 	_begin = -1;
 
       if (_endExpr != null)
-	_end = (int) _endExpr.evalLong(pageContext);
+	_end = (int) _endExpr.evalLong(env);
       else
 	_end = Integer.MAX_VALUE;
 
       if (_stepExpr != null)
-	_step = (int) _stepExpr.evalLong(pageContext);
+	_step = (int) _stepExpr.evalLong(env);
       else
 	_step = 0;
     
-      String items = _itemsExpr.evalString(pageContext);
-      String delims = _delimsExpr.evalString(pageContext);
+      String items = _itemsExpr.evalString(env);
+      String delims = _delimsExpr.evalString(env);
 
       _iterator = new TokenIterator(items, delims);
 

@@ -33,8 +33,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import javax.el.*;
 
 import com.caucho.vfs.WriteStream;
 
@@ -67,7 +66,8 @@ public class MethodExpr extends Expr {
    *
    * @param env the variable environment
    */
-  public Object evalObject(VariableResolver env)
+  @Override
+  public Object evalObject(ELContext env)
     throws ELException
   {
     Object aObj = _expr.evalObject(env);
@@ -134,7 +134,7 @@ public class MethodExpr extends Expr {
     return findMethod(type.getSuperclass());
   }
   
-  static Object evalArg(Class cl, Expr expr, VariableResolver env)
+  static Object evalArg(Class cl, Expr expr, ELContext env)
     throws ELException
   {
     Marshall marshall = Marshall.create(cl);

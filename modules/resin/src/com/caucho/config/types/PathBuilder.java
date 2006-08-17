@@ -31,8 +31,7 @@ package com.caucho.config.types;
 
 import java.util.*;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import javax.el.*;
 
 import com.caucho.util.CauchoSystem;
 import com.caucho.util.L10N;
@@ -46,8 +45,7 @@ import com.caucho.el.ELParser;
 import com.caucho.el.Expr;
 import com.caucho.el.EL;
 
-import com.caucho.config.BeanBuilderException;
-import com.caucho.config.Config;
+import com.caucho.config.*;
 
 /**
  * Special builder for path variables.
@@ -92,24 +90,25 @@ public class PathBuilder {
   public static Path lookupPath(String string, Map<String,Object> map)
     throws ELException
   {
-    VariableResolver parent = Config.getEnvironment();
-    VariableResolver resolver;
+    ELContext context = Config.getEnvironment();
+    ELResolver parent = context != null ? context.getELResolver() : null;
+    ELResolver resolver;
 
     if (map != null)
       resolver = new MapVariableResolver(map, parent);
     else
       resolver = parent;
     
-    return lookupPath(string, resolver);
+    return lookupPath(string, new ConfigELContext(resolver));
   }
 
-  public static Path lookupPath(String string, VariableResolver env)
+  public static Path lookupPath(String string, ELContext env)
     throws ELException
   {
     return lookupPath(string, env, Vfs.lookup());
   }
 
-  public static Path lookupPath(String string, VariableResolver env, Path pwd)
+  public static Path lookupPath(String string, ELContext env, Path pwd)
     throws ELException
   {
     if (env == null)

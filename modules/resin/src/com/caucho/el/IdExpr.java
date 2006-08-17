@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -30,8 +31,7 @@ package com.caucho.el;
 
 import java.io.*;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import javax.el.*;
 
 import com.caucho.vfs.*;
 
@@ -55,6 +55,7 @@ public class IdExpr extends Expr {
    *
    * @param field the string reference for the field.
    */
+  @Override
   public Expr createField(String field)
   {
     Expr arrayExpr = createField(new StringLiteral(field));
@@ -69,15 +70,17 @@ public class IdExpr extends Expr {
    *
    * @return the value as an object
    */
-  public Object evalObject(VariableResolver env)
+  @Override
+  public Object evalObject(ELContext env)
     throws ELException
   {
-    return env.resolveVariable(_id);
+    return env.getELResolver().getValue(env, _id, null);
   }
 
   /**
    * Prints the code to create an IdExpr.
    */
+  @Override
   public void printCreate(WriteStream os)
     throws IOException
   {

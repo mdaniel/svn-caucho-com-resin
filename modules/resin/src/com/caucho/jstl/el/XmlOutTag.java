@@ -74,7 +74,7 @@ public class XmlOutTag extends TagSupport {
       JspWriter out = pageContext.getOut();
 
       boolean doEscape = (_escapeXml == null ||
-                          _escapeXml.evalBoolean(pageContext));
+                          _escapeXml.evalBoolean(pageContext.getELContext()));
 
       toStream(out, pageContext, _select, doEscape);
     } catch (Exception e) {

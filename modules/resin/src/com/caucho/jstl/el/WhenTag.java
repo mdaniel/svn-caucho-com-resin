@@ -30,9 +30,10 @@ package com.caucho.jstl.el;
 
 import java.io.*;
 
+import javax.el.*;
+
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
-import javax.servlet.jsp.el.ELException;
 
 import com.caucho.util.*;
 import com.caucho.vfs.*;
@@ -76,7 +77,7 @@ public class WhenTag extends TagSupport {
 	return SKIP_BODY;
 
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
-      boolean test = _testExpr.evalBoolean(pageContext);
+      boolean test = _testExpr.evalBoolean(pageContext.getELContext());
 
       if (test) {
 	chooseTag.setMatch();

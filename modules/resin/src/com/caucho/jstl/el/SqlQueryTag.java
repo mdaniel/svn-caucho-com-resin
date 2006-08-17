@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -41,7 +42,8 @@ import javax.servlet.jsp.tagext.*;
 import javax.servlet.jsp.jstl.core.*;
 import javax.servlet.jsp.jstl.sql.Result;
 import javax.servlet.jsp.jstl.sql.SQLExecutionTag;
-import javax.servlet.jsp.el.VariableResolver;
+
+import javax.el.*;
 
 import com.caucho.log.Log;
 
@@ -127,7 +129,7 @@ public class SqlQueryTag extends BodyTagSupport implements SQLExecutionTag {
   {
     Connection conn = null;
     boolean isTransaction = false;
-    VariableResolver env = (VariableResolver) pageContext;
+    ELContext env = pageContext.getELContext();
     
     try {
       String sql;

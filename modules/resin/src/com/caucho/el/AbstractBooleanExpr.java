@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -31,8 +32,7 @@ package com.caucho.el;
 import java.io.*;
 import java.util.logging.*;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import javax.el.*;
 
 import com.caucho.vfs.*;
 
@@ -47,7 +47,8 @@ public class AbstractBooleanExpr extends Expr {
    *
    * @return the value as an object
    */
-  public Object evalObject(VariableResolver env)
+  @Override
+  public Object evalObject(ELContext env)
     throws ELException
   {
     return evalBoolean(env) ? Boolean.TRUE : Boolean.FALSE;
@@ -60,7 +61,8 @@ public class AbstractBooleanExpr extends Expr {
    *
    * @return the value as a string
    */
-  public String evalString(VariableResolver env)
+  @Override
+  public String evalString(ELContext env)
     throws ELException
   {
     return evalBoolean(env) ? "true" : "false";
@@ -73,7 +75,8 @@ public class AbstractBooleanExpr extends Expr {
    *
    * @return the value as a long
    */
-  public long evalLong(VariableResolver env)
+  @Override
+  public long evalLong(ELContext env)
     throws ELException
   {
     ELException e = new ELException(L.l("`{0}': boolean expressions can not be converted to long values.", this));
@@ -86,7 +89,8 @@ public class AbstractBooleanExpr extends Expr {
   /**
    * Evaluate the expression as a double
    */
-  public double evalDouble(VariableResolver env)
+  @Override
+  public double evalDouble(ELContext env)
     throws ELException
   {
     ELException e = new ELException(L.l("`{0}': boolean expressions can not be converted to double values.", this));
@@ -102,27 +106,15 @@ public class AbstractBooleanExpr extends Expr {
    * @param out the output stream
    * @param env the variable environment
    */
-  public void print(WriteStream out, VariableResolver env)
+  @Override
+  public boolean print(WriteStream out, ELContext env, boolean isEscaped)
     throws IOException, ELException
   {
     if (evalBoolean(env))
       out.print("true");
     else
       out.print("false");
-  }
 
-  /**
-   * Evaluates directly to the output.
-   *
-   * @param out the output stream
-   * @param env the variable environment
-   */
-  public void printEscaped(WriteStream out, VariableResolver env)
-    throws IOException, ELException
-  {
-    if (evalBoolean(env))
-      out.print("true");
-    else
-      out.print("false");
+    return false;
   }
 }

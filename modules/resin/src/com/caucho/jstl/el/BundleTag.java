@@ -79,30 +79,26 @@ public class BundleTag extends TagSupport implements TryCatchFinally {
   public int doStartTag()
     throws JspException
   {
-    try {
-      PageContextImpl pc = (PageContextImpl) pageContext;
+    PageContextImpl pc = (PageContextImpl) pageContext;
 
-      String basename = _basenameExpr.evalString(pc);
+    String basename = _basenameExpr.evalString(pc.getELContext());
 
-      _oldBundle = pc.getAttribute("caucho.bundle");
-      _oldPrefix = pc.getAttribute("caucho.bundle.prefix");
+    _oldBundle = pc.getAttribute("caucho.bundle");
+    _oldPrefix = pc.getAttribute("caucho.bundle.prefix");
     
-      LocalizationContext bundle = pc.getBundle(basename);
+    LocalizationContext bundle = pc.getBundle(basename);
 
-      pc.setAttribute("caucho.bundle", bundle);
+    pc.setAttribute("caucho.bundle", bundle);
 
-      if (_prefixExpr != null) {
-	String prefix = _prefixExpr.evalString(pc);
+    if (_prefixExpr != null) {
+      String prefix = _prefixExpr.evalString(pc.getELContext());
 
-	pc.setAttribute("caucho.bundle.prefix", prefix);
-      }
-      else if (_oldPrefix != null)
-	pc.removeAttribute("caucho.bundle.prefix");
-
-      return EVAL_BODY_INCLUDE;
-    } catch (ELException e) {
-      throw new JspException(e);
+      pc.setAttribute("caucho.bundle.prefix", prefix);
     }
+    else if (_oldPrefix != null)
+      pc.removeAttribute("caucho.bundle.prefix");
+
+    return EVAL_BODY_INCLUDE;
   }
 
   /**

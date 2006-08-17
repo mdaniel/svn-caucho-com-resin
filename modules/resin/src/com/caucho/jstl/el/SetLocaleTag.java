@@ -31,11 +31,12 @@ package com.caucho.jstl.el;
 import java.io.*;
 import java.util.*;
 
+import javax.el.*;
+
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
 import javax.servlet.jsp.jstl.core.*;
 import javax.servlet.jsp.jstl.fmt.*;
-import javax.servlet.jsp.el.ELException;
 
 import com.caucho.vfs.*;
 import com.caucho.util.*;
@@ -84,8 +85,9 @@ public class SetLocaleTag extends TagSupport {
   {
     try {
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
+      ELContext env = pageContext.getELContext();
 
-      Object valueObj = _valueExpr.evalObject(pageContext);
+      Object valueObj = _valueExpr.evalObject(env);
       Locale locale = null;
 
       if (valueObj instanceof Locale) {
@@ -95,7 +97,7 @@ public class SetLocaleTag extends TagSupport {
 	String variant = null;
 
 	if (_variantExpr != null)
-	  variant = _variantExpr.evalString(pageContext);
+	  variant = _variantExpr.evalString(env);
 
 	locale = pageContext.getLocale((String) valueObj, variant);
       }

@@ -32,7 +32,7 @@ import java.util.ArrayList;
 
 import java.util.logging.Logger;
 
-import javax.servlet.jsp.el.VariableResolver;
+import javax.el.*;
 
 import com.caucho.util.L10N;
 
@@ -43,18 +43,15 @@ import com.caucho.vfs.Depend;
 
 import com.caucho.loader.Environment;
 
-import com.caucho.config.Config;
-import com.caucho.config.NodeBuilder;
-import com.caucho.config.SchemaBean;
-import com.caucho.config.ConfigVariableResolver;
-import com.caucho.config.ConfigException;
+import com.caucho.config.*;
 
 import com.caucho.config.types.FileSetType;
 
 /**
  * Imports values from a separate file.
  */
-public class ResinImport extends ResinControl {
+public class ResinImport extends ResinControl
+{
   private static final L10N L = new L10N(ResinImport.class);
   private static final Logger log = Log.open(ResinImport.class);
 
@@ -134,9 +131,9 @@ public class ResinImport extends ResinControl {
       // server/10hc
       // config.setResinInclude(true);
 
-      VariableResolver varResolver = Config.getEnvironment();
-      if (varResolver instanceof ConfigVariableResolver) {
-	config.setConfigVariableResolver((ConfigVariableResolver) varResolver);
+      ELContext elContext = Config.getEnvironment();
+      if (elContext instanceof ConfigELContext) {
+	config.setELContext((ConfigELContext) elContext);
       }
 
       config.configureBean(object, path, schema);
