@@ -861,49 +861,131 @@ public class RegexpModule
                                  @Optional("-1") long limit,
                                  @Optional int flags)
   {
-    if (limit < 0)
+    if (limit <= 0)
       limit = Long.MAX_VALUE;
 
     Pattern pattern = compileRegexp(patternString);
+    Matcher matcher = pattern.matcher(string);
 
     ArrayValue result = new ArrayValueImpl();
+
     int head = 0;
-    Matcher matcher = pattern.matcher(string);
     long count = 0;
     
-    boolean isAllowEmpty = (flags & PREG_SPLIT_NO_EMPTY) == 0;
+    boolean allowEmpty = (flags & PREG_SPLIT_NO_EMPTY) == 0;
+    boolean isCaptureOffset = (flags & PREG_SPLIT_OFFSET_CAPTURE) != 0; 
+    boolean isCaptureDelim = (flags & PREG_SPLIT_DELIM_CAPTURE) != 0;
 
-    while ((matcher.find()) && (count < limit)) {
-      // If empty and we are to skip empty strings, then skip
-      if (! isAllowEmpty && head == matcher.start()) {
-	head = matcher.end();
-	continue;
+    while (matcher.find()) {
+      int startPosition = head;
+      StringValue unmatched;
+
+      // Get non-matching sequence
+      if (count == limit - 1) {
+        unmatched = string.substring(head);
+        head = string.length();
       }
+      else {
+        unmatched = string.substring(head, matcher.start());
+        head = matcher.end();
+      }
+
+      // Append non-matching sequence
+      if (unmatched.length() != 0 || allowEmpty) {
+        if (isCaptureOffset) {
+          ArrayValue part = new ArrayValueImpl();
+
+          part.put(unmatched);
+          part.put(LongValue.create(startPosition));
+
+          result.put(part);
+        }
+        else {
+          result.put(unmatched);
+        }
+
+        count++;
+      }
+ 
+      if (count == limit)
+        break;
+
+      // Append parameterized delimiters
+      if (isCaptureDelim) {
+        for (int i = 1; i <= matcher.groupCount(); i++) {
+          int start = matcher.start(i);
+          int end = matcher.end(i);
+
+          if ((start != -1 && end - start > 0) || allowEmpty) {
+
+            StringValue groupValue;
+            if (start < 0)
+              groupValue = StringValue.EMPTY;
+            else
+              groupValue = string.substring(start, end);
+
+            if (isCaptureOffset) {
+              ArrayValue part = new ArrayValueImpl();
+
+              part.put(groupValue);
+              part.put(LongValue.create(startPosition));
+
+              result.put(part);
+            }
+            else
+              result.put(groupValue);
+          }
+        }
+      }
+    }
+
+    // Append non-matching sequence at the end
+    if (count < limit && (head < string.length() || allowEmpty)) {
+      if (isCaptureOffset) {
+        ArrayValue part = new ArrayValueImpl();
+
+        part.put(string.substring(head));
+        part.put(LongValue.create(head));
+
+        result.put(part);
+      }
+      else
+        result.put(string.substring(head));
+    }
+
+    return result;
+
+/*
+    while ((matcher.find()) && (count < limit)) {
 
       StringValue value;
 
       int startPosition = head;
 
-      // If at limit, then just output the rest of string
-      if (count == limit - 1) {
-        value = string.substring(head);
-        head = string.length();
-      } else {
-        value = string.substring(head, matcher.start());
+      if (head != matcher.start() || isAllowEmpty) {
+        // If at limit, then just output the rest of string
+        if (count == limit - 1) {
+
+          value = string.substring(head);
+          head = string.length();
+        } else {
+          value = string.substring(head, matcher.start());
+          head = matcher.end();
+        }
+
+        if ((flags & PREG_SPLIT_OFFSET_CAPTURE) != 0) {
+          ArrayValue part = new ArrayValueImpl();
+          part.put(value);
+          part.put(LongValue.create(startPosition));
+
+          result.put(part);
+        } else {
+          result.put(value);
+        }
+
+        count++;
+      } else
         head = matcher.end();
-      }
-
-      if ((flags & PREG_SPLIT_OFFSET_CAPTURE) != 0) {
-        ArrayValue part = new ArrayValueImpl();
-        part.put(value);
-        part.put(LongValue.create(startPosition));
-
-        result.put(part);
-      } else {
-        result.put(value);
-      }
-
-      count++;
 
       if ((flags & PREG_SPLIT_DELIM_CAPTURE) != 0) {
 	for (int i = 1; i <= matcher.groupCount(); i++) {
@@ -913,7 +995,7 @@ public class RegexpModule
 	  if (group != null)
 	    groupValue = new StringValueImpl(group);
 	  else
-	    groupValue = NullValue.NULL;
+	    groupValue = StringValue.EMPTY;
 
           if ((flags & PREG_SPLIT_OFFSET_CAPTURE) != 0) {
             ArrayValue part = new ArrayValueImpl();
@@ -943,6 +1025,7 @@ public class RegexpModule
     }
 
     return result;
+*/
   }
 
   /**
