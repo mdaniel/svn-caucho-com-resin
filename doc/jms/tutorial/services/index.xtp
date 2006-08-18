@@ -15,10 +15,10 @@
     <td>resin-web.xml configuration</td>
 </tr>
 <tr><td><viewfile-link file="services.php"/></td>
-    <td>PHP script displaying the advertisement.</td>
+    <td>PHP script acting as the web client</td>
 </tr>
-<tr><td><viewfile-link file="WEB-INF/classes/example/HelloService.java"/></td>
-    <td>Hello World service implementation</td>
+<tr><td><viewfile-link file="WEB-INF/classes/example/LogService.java"/></td>
+    <td>Log service implementation</td>
 </tr>
 </deftable>
 </s1>
@@ -34,35 +34,31 @@ script using the Quercus JMS module that acts as the service client.
 <example language="php">
 &lt;?php
 
-$result_queue = new JMSQueue("jms/OutboundQueue");
-$request_queue = new JMSQueue("jms/InboundQueue");
+$service_queue = new JMSQueue("jms/ServiceQueue");
 
-if (! $result_queue) {
-  echo "Unable to get result queue!\n";
-} elseif (! $request_queue) {
-  echo "Unable to get request queue!\n";
-} else {
-  $result = $result_queue->receive();
+if (! $service_queue) {
+  exit("Unable to get service queue!");
+} 
 
-  if ($result == null) {
-    echo "No results available on the queue\n";
-  } else {
-    echo "received result: &lt;pre>\n";
-    echo htmlspecialchars($result) . "\n";
-    echo "&lt;/pre>\n";
-  }
+$log_service = jndi_lookup("example/LogService");
 
-  $request = 
-    "&lt;env:Envelope xmlns:env=\"http://www.w3.org/2003/05/soap-enveloper\">" .
-    "&lt;env:Body>" .
-    "&lt;m:hello xmlns:m=\"urn:hello\">" .
-    "&lt;/m:hello>" .
-    "&lt;/env:Body>" .
-    "&lt;/env:Envelope>";
+echo "&lt;a href=\"\">Refresh&lt;/a>&lt;br/>\n";
+echo "Logged messages:&lt;br/>\n";
+echo "&lt;pre>\n";
+echo $log_service->getLog();
+echo "&lt;/pre>\n";
 
-  if (! $request_queue->send($request)) {
-    echo "Unable to send request\n";
-  }
+$request = 
+  "&lt;env:Envelope xmlns:env=\"http://www.w3.org/2003/05/soap-enveloper\">" .
+  "&lt;env:Body>" .
+  "&lt;m:log xmlns:m=\"urn:log\">" .
+  "  &lt;s>Hello, World&lt;/s>" .
+  "&lt;/m:log>" .
+  "&lt;/env:Body>" .
+  "&lt;/env:Envelope>";
+
+if (! $service_queue->send($request)) {
+  echo "Unable to send request\n";
 }
 
 ?>
@@ -73,14 +69,12 @@ if (! $result_queue) {
 <s1 title="Configuring JMS for WebServices">
 
 <p>
-In the configuration below, we create two JMS queues, one for service
-requests and one for service responses.  The service provider is a JMS
-MessageListener (implemented by 
+In the configuration below, we create a JMS queue for service requests.
+The service provider is a JMS MessageListener (implemented by 
 <code>com.caucho.jms.services.ServicesListener</code>) which services
 all requests sent as JMS <code>TextMessage</code>s on the 
-<var>inboundQueue</var>.  The result is placed in a message on the
-<var>outboundQueue</var>.  The service is our <code>HelloService</code>
-with a listing below.
+<var>serviceQueue</var>.  In this example, the actual service implementation
+is a logging service, shown below.
 </p>
 
 <example language="xml">
@@ -91,32 +85,23 @@ with a listing below.
   &lt;servlet-mapping url-pattern="*.php" servlet-name="resin-php" />
 
   &lt;system-property javax.xml.stream.XMLInputFactory="com.caucho.xml.stream.XMLInputFactoryImpl"/>
-  &lt;!--
-     - JMS
-    -->
-  &lt;resource var="inboundQueue" 
-            jndi-name="jms/InboundQueue"
-            type="com.caucho.jms.memory.MemoryQueue"/>
-  
-  &lt;resource var="outboundQueue" 
-            jndi-name="jms/OutboundQueue"
+
+  &lt;resource var="logService"
+            jndi-name="example/LogService"
+            type="example.LogService" />
+
+  &lt;resource var="serviceQueue" 
+            jndi-name="jms/ServiceQueue"
             type="com.caucho.jms.memory.MemoryQueue"/>
   
   &lt;resource var="jmsFactory" type="com.caucho.jms.ConnectionFactoryImpl"
             jndi-name="jms/ConnectionFactory"/>
 
-  &lt;resource type="com.caucho.jms.resource.ListenerResource">
+  &lt;resource type="com.caucho.jms.services.ServicesListener">
     &lt;init>
       &lt;connection-factory>${jmsFactory}&lt;/connection-factory>
-
-      &lt;destination>${inboundQueue}&lt;/destination>
-
-      &lt;listener type="com.caucho.jms.services.ServicesListener">
-        &lt;init>
-          &lt;outbound-queue>jms/OutboundQueue&lt;/outbound-queue>
-          &lt;service resin:type="example.HelloService" />
-        &lt;/init>
-      &lt;/listener>
+      &lt;destination>${serviceQueue}&lt;/destination>
+      &lt;service>${logService}&lt;/service>
     &lt;/init>
   &lt;/resource>
 &lt;/web-app>
@@ -124,25 +109,35 @@ with a listing below.
 
 </s1>
 
-<s1 title="The HelloService">
+<s1 title="The LogService">
 
 <p>
-The actual service provided here is a simple "Hello, World" method.  Note
+The actual service provided here is a logging service.  Note
 the @WebService and @WebMethod annotations.
 </p>
 
 <example language="java">
 package example;
 
-import javax.jws.WebService;
 import javax.jws.WebMethod;
+import javax.jws.WebService;
 
 @WebService
-public class HelloService {
+public class LogService {
+  private int _sequenceNumber = 1;
+  private StringBuilder _log = new StringBuilder();
+
   @WebMethod
-  public String hello()
+  public int log(String message)
   {
-     return "hello, world!";
+    _log.append(_sequenceNumber + ": " + message + "\n");
+    return _sequenceNumber++;
+  }
+
+  @WebMethod(exclude=true)
+  public String getLog()
+  {
+    return _log.toString();
   }
 }
 </example>

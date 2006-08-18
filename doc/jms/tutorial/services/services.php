@@ -1,34 +1,30 @@
 <?php
 
-$request_queue = new JMSQueue("jms/ServiceQueue");
-$result_queue = new JMSQueue("jms/ResultQueue");
+$service_queue = new JMSQueue("jms/ServiceQueue");
 
-if (! $result_queue) {
-  echo "Unable to get result queue!\n";
-} elseif (! $request_queue) {
-  echo "Unable to get request queue!\n";
-} else {
-  $result = $result_queue->receive();
+if (! $service_queue) {
+  exit("Unable to get service queue!");
+} 
 
-  if ($result == null) {
-    echo "No results available on the queue\n";
-  } else {
-    echo "received result: <pre>\n";
-    echo htmlspecialchars($result) . "\n";
-    echo "</pre>\n";
-  }
+$log_service = jndi_lookup("example/LogService");
 
-  $request = 
-    "<env:Envelope xmlns:env=\"http://www.w3.org/2003/05/soap-enveloper\">" .
-    "<env:Body>" .
-    "<m:hello xmlns:m=\"urn:hello\">" .
-    "</m:hello>" .
-    "</env:Body>" .
-    "</env:Envelope>";
+echo "<a href=\"\">Refresh</a><br/>\n";
+echo "Logged messages:<br/>\n";
+echo "<pre>\n";
+echo $log_service->getLog();
+echo "</pre>\n";
 
-  if (! $request_queue->send($request)) {
-    echo "Unable to send request\n";
-  }
+$request = 
+  "<env:Envelope xmlns:env=\"http://www.w3.org/2003/05/soap-enveloper\">" .
+  "<env:Body>" .
+  "<m:log xmlns:m=\"urn:log\">" .
+  "  <s>Hello, World</s>" .
+  "</m:log>" .
+  "</env:Body>" .
+  "</env:Envelope>";
+
+if (! $service_queue->send($request)) {
+  echo "Unable to send request\n";
 }
 
 ?>
