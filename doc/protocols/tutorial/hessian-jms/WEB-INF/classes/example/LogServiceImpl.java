@@ -1,7 +1,5 @@
 package example;
 
-import java.util.logging.Logger;
-
 public class LogServiceImpl implements LogService {
   private int _sequenceNumber = 1;
   private StringBuilder _log = new StringBuilder();
