@@ -16,9 +16,9 @@ eliminates protocol dependencies and simplifies service testing.
 
 <s1 title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="WEB-INF/classes/example/HelloService.java"/>
-    </td><td>Interface for the hello service.
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/HelloServiceImpl.java"/>
+<tr><td><viewfile-link file="WEB-INF/classes/example/LogService.java"/>
+    </td><td>Interface for the logging service.
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/LogServiceImpl.java"/>
     </td><td>The main service implementation.
 </td></tr><tr><td><viewfile-link file="WEB-INF/web.xml"/>
     </td><td>Configures the environment
@@ -33,62 +33,33 @@ eliminates protocol dependencies and simplifies service testing.
 the HelloService API.  This service responds by placing the results of
 the request on a JMS queue.</p>
 
-<example title="HelloServiceImpl.java" language="java">
+<example title="LogService.java" language="java">
+package example;
+
+public interface LogService {
+  public void log(String message);
+  public String getLog();
+}
+</example>
+
+<example title="LogServiceImpl.java" language="java">
 package example;
 
 import java.util.logging.Logger;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
-import javax.jms.TextMessage;
+public class LogServiceImpl implements LogService {
+  private int _sequenceNumber = 1;
+  private StringBuilder _log = new StringBuilder();
 
-public class HelloServiceImpl implements HelloService {
-  private static final Logger log =
-    Logger.getLogger(HelloService.class.getName());
-
-  private ConnectionFactory _connectionFactory;
-  private Destination _destination;
-  private MessageProducer _producer;
-  private Session _jmsSession;
-
-  public void setConnectionFactory(ConnectionFactory connectionFactory)
+  public void log(String message)
   {
-    _connectionFactory = connectionFactory;
+    _log.append(_sequenceNumber + ": " + message + "\n");
+    _sequenceNumber++;
   }
 
-  public void setResultQueue(Destination destination)
+  public String getLog()
   {
-    _destination = destination;
-  }
-
-  public void init()
-  {
-    try {
-      Connection connection = _connectionFactory.createConnection();
-      _jmsSession = 
-        connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-
-      _producer = _jmsSession.createProducer(_destination);
-    } catch (JMSException e) {
-      log.warning(e.toString());
-    }
-  }
-  
-  public void hello()
-  {
-    try {
-      TextMessage textMessage = _jmsSession.createTextMessage();
-
-      textMessage.setText("hello, world");
-
-      _producer.send(textMessage);
-    } catch (JMSException e) {
-      log.warning(e.toString());
-    }
+    return _log.toString();
   }
 }
 </example>
@@ -99,26 +70,23 @@ The configuration for this example is the following:
 
 <example title="web.xml" language="xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
+  &lt;resource var="logService"
+            jndi-name="example/LogService"
+            type="example.LogServiceImpl" />
+
   &lt;resource var="serviceQueue" 
             jndi-name="jms/ServiceQueue"
-            type="com.caucho.jms.memory.MemoryQueue"/>
-  
-  &lt;resource var="resultQueue"
-            jndi-name="jms/ResultQueue"
-            type="com.caucho.jms.memory.MemoryQueue"/>
+            type="com.caucho.jms.memory.MemoryQueue" />
   
   &lt;resource var="jmsFactory"
             jndi-name="jms/ConnectionFactory"
-            type="com.caucho.jms.ConnectionFactoryImpl"/>
+            type="com.caucho.jms.ConnectionFactoryImpl" />
 
   &lt;resource type="com.caucho.hessian.server.HessianListener">
     &lt;init>
       &lt;connection-factory>${jmsFactory}&lt;/connection-factory>
       &lt;destination>${serviceQueue}&lt;/destination>
-      &lt;service resin:type="example.HelloServiceImpl">
-        &lt;connection-factory>${jmsFactory}&lt;/connection-factory>
-        &lt;result-queue>${resultQueue}&lt;/result-queue>
-      &lt;/service>
+      &lt;service>${logService}&lt;/service>
     &lt;/init>
   &lt;/resource>
 &lt;/web-app>
@@ -129,44 +97,24 @@ Finally, the service is called from a JSP page:
 </p>
 
 <example title="demo.jsp">
-&lt;%@ page import="example.HelloService" %>
-
-&lt;%@ page import="com.caucho.hessian.client.HessianProxyFactory" %>
-
 &lt;%@ page import="javax.naming.Context" %>
 &lt;%@ page import="javax.naming.InitialContext" %>
 
-&lt;%@ page import="javax.jms.Connection" %>
-&lt;%@ page import="javax.jms.ConnectionFactory" %>
-&lt;%@ page import="javax.jms.Destination" %>
-&lt;%@ page import="javax.jms.MessageConsumer" %>
-&lt;%@ page import="javax.jms.Message" %>
-&lt;%@ page import="javax.jms.Session" %>
-&lt;%@ page import="javax.jms.TextMessage" %>
+&lt;%@ page import="com.caucho.hessian.client.HessianProxyFactory" %>
+
+&lt;%@ page import="example.LogService" %>
+
 &lt;%
-// Check for results
+// Check the log
 
 Context context = (Context) new InitialContext().lookup("java:comp/env");
+LogService logService = (LogService) context.lookup("example/LogService");
 
-ConnectionFactory connectionFactory = 
-  (ConnectionFactory) context.lookup("jms/ConnectionFactory");
-
-Destination resultQueue = (Destination) context.lookup("jms/ResultQueue");
-
-Connection connection = connectionFactory.createConnection();
-Session jmsSession = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-
-MessageConsumer consumer = jmsSession.createConsumer(resultQueue);
-
-connection.start();
-
-Message message = consumer.receive(1);
-
-if (message == null) {
-  out.println("No results available");
-} else if (message instanceof TextMessage) {
-  out.println(((TextMessage) message).getText());
-}
+out.println("<a href=\"\">Refresh</a><br/>");
+out.println("Logged messages:&lt;br/>");
+out.println("&lt;pre>");
+out.println(logService.getLog());
+out.println("&lt;/pre>");
 
 // Make a request
 
@@ -174,9 +122,9 @@ HessianProxyFactory factory = new HessianProxyFactory();
 
 String url = "jms:jms/ServiceQueue";
 
-HelloService hello = (HelloService) factory.create(HelloService.class, url);
+LogService log = (LogService) factory.create(LogService.class, url);
 
-hello.hello();
+log.log("Hello, World");
 %>
 </example>
 
