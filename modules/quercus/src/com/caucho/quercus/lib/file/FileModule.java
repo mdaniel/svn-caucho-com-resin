@@ -1485,7 +1485,7 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * Reads content from a file.
    *
-   * @param fileValue the file
+   * @param is the file
    */
   public static Value fread(Env env,
 			    @NotNull BinaryInput is,
@@ -1503,12 +1503,11 @@ public class FileModule extends AbstractQuercusModule {
       TempBuffer tempBuf = TempBuffer.allocate();
       byte []buffer = tempBuf.getBuffer();
 
-      if (buffer.length < length)
-	length = buffer.length;
+      if (buffer.length < length) {
+        buffer = new byte[length];
+      }
 
       length = is.read(buffer, 0, length);
-
-      Value s;
 
       if (length > 0) {
 	BinaryBuilderValue bb = new BinaryBuilderValue(buffer, 0, length);

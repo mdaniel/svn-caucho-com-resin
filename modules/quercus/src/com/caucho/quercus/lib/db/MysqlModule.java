@@ -39,6 +39,8 @@ import com.caucho.util.Log;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.ResultSetMetaData;
+import java.sql.Types;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -291,21 +293,12 @@ public class MysqlModule extends AbstractQuercusModule {
    * On success, this method increments the field offset
    * (see {@link #mysql_field_seek}).
    *
-   * The properties are:
+   * <h3>ERRATA</h3>
    * <ul>
-   * <li> blob
-   * <li> def
-   * <li> max_length
-   * <li> multiple_key
-   * <li> name
-   * <li> not_null
-   * <li> numeric
-   * <li> primary_key
-   * <li> table
-   * <li> type
-   * <li> unique key.
-   * <li> unsigned
-   * <li> zerofill.
+   *   <li>quercus returns "string" for BIT type, php returns "unknown"
+   *   <li>quercus always returns int(0) for unique_key
+   *   <li>quercus always returns int(0) for zerofill
+   *   <li>quercus always returns int(0) for multiple_key
    * </ul>
    *
    */
@@ -313,65 +306,94 @@ public class MysqlModule extends AbstractQuercusModule {
                                  @NotNull MysqliResult result,
                                  @Optional("-1") int fieldOffset)
   {
+    /**
+     * ERRATA is also documented in php/142s.qa
+     * There is probably a mysql specific query or API that would be better
+     * for getting this information
+     */
+
     if (result == null)
       return BooleanValue.FALSE;
 
-    // XXX: move implementation
+    // php/142v.qa - call must succeed even if some info not available
+
     try {
-      if (fieldOffset == -1)
+      if (fieldOffset == -1) {
         fieldOffset = result.field_tell(env);
+        result.setFieldOffset(fieldOffset + 1);
+      }
 
-      Value fieldTable = result.getFieldTable(env, fieldOffset);
-      Value fieldName = result.getFieldName(env, fieldOffset);
-      Value fieldType = result.getFieldType(env, fieldOffset);
-      Value fieldLength = result.getFieldLength(env, fieldOffset);
-      Value fieldCatalog = result.getFieldCatalog(fieldOffset);
+      ResultSetMetaData md = result.getMetaData();
 
-      if ((fieldTable == BooleanValue.FALSE)
-          || (fieldName == BooleanValue.FALSE)
-          || (fieldType == BooleanValue.FALSE)
-          || (fieldLength == BooleanValue.FALSE)
-          || (fieldCatalog == BooleanValue.FALSE)) {
+      if (md.getColumnCount() <= fieldOffset || fieldOffset < 0) {
+        env.invalidArgument("field", fieldOffset);
         return BooleanValue.FALSE;
       }
 
-      result.field_seek(env, fieldOffset + 1);
+      int jdbcField = fieldOffset + 1;
+      int jdbcColumnType = md.getColumnType(jdbcField);
+
+      String catalogName = md.getCatalogName(jdbcField);
+      String tableName = md.getTableName(jdbcField);
+      String columnName = md.getColumnName(jdbcField);
+
+      // some information is not available from the ResultSetMetaData
+      JdbcColumnMetaData columnMd = null;
 
       JdbcConnectionResource conn = getConnection(env).validateConnection();
 
-      JdbcTableMetaData tableMd = conn.getTableMetaData(fieldCatalog.toString(),
-                                                        null,
-                                                        fieldTable.toString());
+      JdbcTableMetaData tableMd
+        = conn.getTableMetaData(catalogName, null, tableName);
 
-      if (tableMd == null)
-        return BooleanValue.FALSE;
+      if (tableMd != null)
+        columnMd = tableMd.getColumn(columnName);
 
-      JdbcColumnMetaData columnMd = tableMd.getColumn(fieldName.toString());
+      // XXX: maxlen note from PHP comments:
+      // the length of the longest value for that field in the returned dataset,
+      // NOT the maximum length of data that column is designed to hold.
 
-      if (columnMd == null)
-        return BooleanValue.FALSE;
+      int maxLength = 0;
+      int notNull = md.isNullable(jdbcField) == ResultSetMetaData.columnNullable ? 0 : 1;
+      int numeric = JdbcColumnMetaData.isNumeric(jdbcColumnType) ? 1 : 0;
+      int blob = JdbcColumnMetaData.isBlob(jdbcColumnType) ? 1 : 0;
+      String type = JdbcResultResource.getColumnPHPName(jdbcColumnType);
+      int unsigned = md.isSigned(jdbcField) ? 0 : numeric;
 
-      // XXX: remove cast when value cleaned up
-      ObjectValue fieldResult = (ObjectValue) env.createObject();
+      if (jdbcColumnType == Types.BOOLEAN || jdbcColumnType == Types.BIT)
+        unsigned = 0;
+      else if (jdbcColumnType == Types.DECIMAL)
+        numeric = 1;
 
-      fieldResult.putField("name", columnMd.getName());
-      fieldResult.putField("table", tableMd.getName());
+      int zerofill = 0;
+      int primaryKey = 0;
+      int multipleKey = 0;
+      int uniqueKey = 0;
+
+      if (columnMd != null) {
+        zerofill = columnMd.isZeroFill() ? 1 : 0;
+        primaryKey = columnMd.isPrimaryKey() ? 1 : 0;
+        // XXX: not sure what multipleKey is supposed to be
+        // multipleKey = columnMd.isIndex() && !columnMd.isPrimaryKey() ? 1 : 0;
+        uniqueKey = columnMd.isUnique() ? 1 : 0;
+      }
+      else
+        notNull = 1;
+
+      ObjectValue fieldResult = env.createObject();
+
+      fieldResult.putField("name", columnName);
+      fieldResult.putField("table", tableName);
       fieldResult.putField("def", "");
-      fieldResult.putField("max_length", fieldLength.toInt());
-
-      fieldResult.putField("not_null", columnMd.isNotNull() ? 1 : 0);
-
-      fieldResult.putField("primary_key", columnMd.isPrimaryKey() ? 1 : 0);
-      fieldResult.putField("multiple_key", columnMd.isIndex() && ! columnMd.isPrimaryKey() ? 1 : 0);
-      fieldResult.putField("unique_key", columnMd.isUnique() ? 1 : 0);
-
-      fieldResult.putField("numeric", columnMd.isNumeric() ? 1 : 0);
-      fieldResult.putField("blob", columnMd.isBlob() ? 1 : 0);
-
-      fieldResult.putField("type", fieldType.toString());
-
-      fieldResult.putField("unsigned", columnMd.isUnsigned() ? 1 : 0);
-      fieldResult.putField("zerofill", columnMd.isZeroFill() ? 1 : 0);
+      fieldResult.putField("max_length", maxLength);
+      fieldResult.putField("not_null", notNull);
+      fieldResult.putField("primary_key", primaryKey);
+      fieldResult.putField("multiple_key", multipleKey);
+      fieldResult.putField("unique_key", uniqueKey);
+      fieldResult.putField("numeric", numeric);
+      fieldResult.putField("blob", blob);
+      fieldResult.putField("type", type);
+      fieldResult.putField("unsigned", unsigned);
+      fieldResult.putField("zerofill", zerofill);
 
       return fieldResult;
     } catch (SQLException e) {

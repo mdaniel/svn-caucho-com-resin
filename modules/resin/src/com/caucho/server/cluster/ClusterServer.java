@@ -29,38 +29,22 @@
 
 package com.caucho.server.cluster;
 
-import java.net.*;
-import java.util.*;
-
-import java.util.logging.*;
-
-import java.io.IOException;
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.Period;
+import com.caucho.log.Log;
+import com.caucho.server.http.HttpProtocol;
+import com.caucho.server.port.Port;
+import com.caucho.util.L10N;
 
 import javax.management.ObjectName;
-
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.jmx.Jmx;
-
-import com.caucho.management.server.ServerConnectorMXBean;
-
-import com.caucho.server.port.*;
-import com.caucho.server.http.*;
-
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadWritePair;
-
-import com.caucho.util.L10N;
-import com.caucho.util.RandomUtil;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Defines a member of the cluster.
  *
- * A {@link ClusterClient} obtained with {@link #getClient} is used to actually
+ * A {@link ServerConnector} obtained with {@link #getServerConnector} is used to actually
  * communicate with this ClusterServer when it is active in another instance of
  * Resin .
  */

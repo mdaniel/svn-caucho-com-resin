@@ -29,36 +29,20 @@
 
 package com.caucho.quercus.lib.db;
 
-import java.io.InputStream;
-import java.io.IOException;
+import com.caucho.quercus.env.*;
+import com.caucho.sql.UserStatement;
+import com.caucho.util.L10N;
+import com.caucho.util.Log;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.BinaryBuilderValue;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.DoubleValue;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.ObjectValue;
-import com.caucho.quercus.env.StringBuilderValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.Value;
-
-import com.caucho.sql.UserStatement;
-
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
 
 /**
  * Represents a JDBC Result value.
@@ -71,12 +55,13 @@ public class JdbcResultResource {
   public static final int FETCH_NUM = 0x2;
   public static final int FETCH_BOTH = FETCH_ASSOC | FETCH_NUM;
 
-  public static final StringValue INTEGER = new StringValueImpl("int");
-  public static final StringValue BLOB = new StringValueImpl("blob");
-  public static final StringValue STRING = new StringValueImpl("string");
-  public static final StringValue DATE = new StringValueImpl("date");
-  public static final StringValue DATETIME = new StringValueImpl("datetime");
-  public static final StringValue REAL = new StringValueImpl("real");
+  public static final String INTEGER = "int";
+  public static final String BLOB = "blob";
+  public static final String STRING = "string";
+  public static final String DATE = "date";
+  public static final String DATETIME = "datetime";
+  public static final String REAL = "real";
+  public static final String UNKNOWN = "unknown";
 
   private Statement _stmt;
   private ResultSet _rs;
@@ -490,44 +475,36 @@ public class JdbcResultResource {
    * @param dataType the column data type
    * @return the column PHP name
    */
-  private Value getColumnPHPName(int dataType)
+  public static String getColumnPHPName(int dataType)
   {
     switch (dataType) {
     case Types.BIGINT:
     case Types.BIT:
     case Types.INTEGER:
     case Types.SMALLINT:
-      {
         return INTEGER;
-      }
+
     case Types.LONGVARBINARY:
     case Types.LONGVARCHAR:
-      {
         return BLOB;
-      }
+
     case Types.CHAR:
     case Types.VARCHAR:
-      {
         return STRING;
-      }
+
     case Types.DATE:
-      {
         return DATE;
-      }
+
     case Types.TIMESTAMP:
-      {
         return DATETIME;
-      }
+
     case Types.DECIMAL:
     case Types.DOUBLE:
     case Types.REAL:
-      {
         return REAL;
-      }
+
     default:
-      {
-        return NullValue.NULL;
-      }
+        return UNKNOWN;
     }
   }
 
@@ -918,7 +895,7 @@ public class JdbcResultResource {
    * Returns the column name.
    *
    * @param env the PHP executing environment
-   * @param fieldOffset need to add 1 because java is 1 based index and quercus is 0 based
+   * @param fieldOffset 0-based field offset
    *
    * @return a StringValue containing the column name
    */
@@ -944,7 +921,7 @@ public class JdbcResultResource {
   /**
    * Returns a StringValue containing the column Alias.
    *
-   * @param fieldOffset need to add 1 because java is 1 based index and quercus is 0 based
+   * @param fieldOffset 0-based field offset
    *
    * @return the column alias
    */
@@ -968,13 +945,42 @@ public class JdbcResultResource {
   }
 
   /**
+   * Returns the column name.
+   *
+   * @param env the PHP executing environment
+   * @param fieldOffset 0-based field offset
+   *
+   * @return int(1) if the column is nullable, int(1) if it is not
+   */
+  public Value getFieldNotNull(Env env, int fieldOffset)
+  {
+    try {
+      if (_metaData == null)
+        _metaData = _rs.getMetaData();
+
+      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0) {
+        env.invalidArgument("field", fieldOffset);
+        return BooleanValue.FALSE;
+      }
+      else
+        if  (_metaData.isNullable(fieldOffset + 1) == ResultSetMetaData.columnNoNulls)
+          return LongValue.ONE;
+        else
+          return LongValue.ZERO;
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      return BooleanValue.FALSE;
+    }
+  }
+
+  /**
    * Get field offset.
    *
    * @return the current field offset
    */
   public int getFieldOffset()
   {
-    return this._fieldOffset;
+    return _fieldOffset;
   }
 
   /**
@@ -1051,7 +1057,7 @@ public class JdbcResultResource {
         return BooleanValue.FALSE;
       }
       else
-        return getColumnPHPName(_metaData.getColumnType(fieldOffset + 1));
+        return new StringValueImpl(getColumnPHPName(_metaData.getColumnType(fieldOffset + 1)));
 
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
@@ -1302,7 +1308,7 @@ public class JdbcResultResource {
    */
   public void setFieldOffset(int fieldOffset)
   {
-    this._fieldOffset = fieldOffset;
+    _fieldOffset = fieldOffset;
   }
 
   /**

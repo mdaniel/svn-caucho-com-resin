@@ -167,21 +167,29 @@ public class JdbcColumnMetaData {
   /**
    * Returns true for numeric data types.
    */
+  public static boolean isNumeric(int jdbcType)
+  {
+    switch (jdbcType) {
+      case Types.BIT:
+      case Types.TINYINT:
+      case Types.SMALLINT:
+      case Types.INTEGER:
+      case Types.BIGINT:
+      case Types.DOUBLE:
+      case Types.FLOAT:
+      case Types.REAL:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  /**
+   * Returns true for numeric data types.
+   */
   public boolean isNumeric()
   {
-    switch (_jdbcType) {
-    case Types.BIT:
-    case Types.TINYINT:
-    case Types.SMALLINT:
-    case Types.INTEGER:
-    case Types.BIGINT:
-    case Types.DOUBLE:
-    case Types.FLOAT:
-    case Types.REAL:
-      return true;
-    default:
-      return false;
-    }
+    return isNumeric(_jdbcType);
   }
 
   /**
@@ -218,17 +226,27 @@ public class JdbcColumnMetaData {
   /**
    * Returns true for blob data types.
    */
+  public static boolean isBlob(int jdbcType)
+  {
+    switch (jdbcType) {
+      // php/142s
+      // php/142v
+      case Types.LONGVARBINARY:
+      case Types.LONGVARCHAR:
+      case Types.BLOB:
+      case Types.CLOB:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  /**
+   * Returns true for blob data types.
+   */
   public boolean isBlob()
   {
-    switch (_jdbcType) {
-      // php/142z
-    case Types.LONGVARBINARY:
-    case Types.BLOB:
-    case Types.CLOB:
-      return true;
-    default:
-      return false;
-    }
+    return isBlob(_jdbcType);
   }
 
   public String toString()
