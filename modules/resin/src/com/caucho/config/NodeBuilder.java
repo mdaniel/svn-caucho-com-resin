@@ -683,7 +683,7 @@ public class NodeBuilder {
     throws ELException
   {
     if (exprString.indexOf("${") >= 0 && isEL()) {
-      ELParser parser = new ELParser(exprString);
+      ELParser parser = new ELParser(getELContext(), exprString);
       parser.setCheckEscape(true);
       Expr expr = parser.parse();
 
@@ -700,7 +700,7 @@ public class NodeBuilder {
     throws ELException
   {
     if (exprString.indexOf("${") >= 0 && isEL()) {
-      ELParser parser = new ELParser(exprString);
+      ELParser parser = new ELParser(getELContext(), exprString);
       parser.setCheckEscape(true);
       Expr expr = parser.parse();
       
@@ -717,7 +717,7 @@ public class NodeBuilder {
     throws ELException
   {
     if (exprString.indexOf("${") >= 0 && isEL()) {
-      ELParser parser = new ELParser(exprString);
+      ELParser parser = new ELParser(getELContext(), exprString);
       parser.setCheckEscape(true);
       Expr expr = parser.parse();
 

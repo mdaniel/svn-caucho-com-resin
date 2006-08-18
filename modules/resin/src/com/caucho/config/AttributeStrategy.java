@@ -32,7 +32,7 @@ package com.caucho.config;
 import java.util.*;
 import java.lang.reflect.*;
 
-import javax.el.ELException;
+import javax.el.*;
 
 import org.w3c.dom.Node;
 
@@ -89,11 +89,13 @@ public abstract class AttributeStrategy {
     throws ELException
   {
     if (exprString.indexOf("${") >= 0) {
-      ELParser parser = new ELParser(exprString);
+      ELContext env = Config.getEnvironment();
+      
+      ELParser parser = new ELParser(env, exprString);
       parser.setCheckEscape(true);
       Expr expr = parser.parse();
 
-      return expr.evalString(Config.getEnvironment());
+      return expr.evalString(env);
     }
     else
       return exprString;
@@ -106,11 +108,13 @@ public abstract class AttributeStrategy {
     throws ELException
   {
     if (exprString.indexOf("${") >= 0) {
-      ELParser parser = new ELParser(exprString);
+      ELContext env = Config.getEnvironment();
+      
+      ELParser parser = new ELParser(env, exprString);
       parser.setCheckEscape(true);
       Expr expr = parser.parse();
 
-      return expr.evalBoolean(Config.getEnvironment());
+      return expr.evalBoolean(env);
     }
     else
       return Expr.toBoolean(exprString, null);
@@ -123,11 +127,13 @@ public abstract class AttributeStrategy {
     throws ELException
   {
     if (exprString.indexOf("${") >= 0) {
-      ELParser parser = new ELParser(exprString);
+      ELContext env = Config.getEnvironment();
+      
+      ELParser parser = new ELParser(env, exprString);
       parser.setCheckEscape(true);
       Expr expr = parser.parse();
 
-      return expr.evalLong(Config.getEnvironment());
+      return expr.evalLong(env);
     }
     else
       return Expr.toLong(exprString, null);
@@ -140,11 +146,13 @@ public abstract class AttributeStrategy {
     throws ELException
   {
     if (exprString.indexOf("${") >= 0) {
-      ELParser parser = new ELParser(exprString);
+      ELContext env = Config.getEnvironment();
+      
+      ELParser parser = new ELParser(env, exprString);
       parser.setCheckEscape(true);
       Expr expr = parser.parse();
 
-      return expr.evalDouble(Config.getEnvironment());
+      return expr.evalDouble(env);
     }
     else
       return Expr.toDouble(exprString, null);
@@ -157,12 +165,14 @@ public abstract class AttributeStrategy {
     throws ELException
   {
     if (exprString.indexOf("${") >= 0) {
-      ELParser parser = new ELParser(exprString);
+      ELContext env = Config.getEnvironment();
+      
+      ELParser parser = new ELParser(env, exprString);
       parser.setCheckEscape(true);
       Expr expr = parser.parse();
 
       if (expr != null)
-	return expr.evalObject(Config.getEnvironment());
+	return expr.evalObject(env);
       else
 	return exprString;
     }

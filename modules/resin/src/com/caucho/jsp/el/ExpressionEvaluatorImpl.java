@@ -74,7 +74,7 @@ public class ExpressionEvaluatorImpl extends ExpressionEvaluator {
   {
     JspELParser parser = new JspELParser(expression);
 
-    parser.setFunctionMapper(funMapper);
+    // parser.setFunctionMapper(funMapper);
 
     try {
       Expr expr = parser.parse();

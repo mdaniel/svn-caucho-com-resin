@@ -50,7 +50,7 @@ public class StringTypeBuilder {
   public static String evalString(String string, ELContext env)
     throws ELException
   {
-    Expr expr = new ELParser(string).parse();
+    Expr expr = new ELParser(env, string).parse();
 
     return expr.evalString(env);
   }

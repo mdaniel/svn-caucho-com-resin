@@ -35,7 +35,7 @@ import java.util.*;
 import java.util.logging.*;
 import java.lang.reflect.*;
 
-import javax.servlet.jsp.el.FunctionMapper;
+import javax.el.*;
 
 import com.caucho.vfs.*;
 import com.caucho.util.*;
@@ -62,18 +62,23 @@ public class ELParser
   // Static function map
   private Map<String,Method> _staticFunctionMap;
 
+  protected final ELContext _elContext;
   private FunctionMapper _functionMapper;
 
   private boolean _checkEscape;
 
-  public ELParser(String string)
+  public ELParser(ELContext elContext, String string)
   {
+    if (elContext == null)
+      throw new NullPointerException();
+    
+    _elContext = elContext;
     _string = string;
   }
 
   protected ELParser create(String string)
   {
-    ELParser parser = new ELParser(string);
+    ELParser parser = new ELParser(_elContext, string);
 
     copyTo(parser);
 
@@ -380,7 +385,7 @@ public class ELParser
       int token = scanToken();
       switch (token) {
       case Expr.ADD: case Expr.SUB:
-	left = new BinaryExpr(code, left, right);
+	left = BinaryExpr.create(code, left, right);
 	code = token;
 	right = parseTerm();
 	break;
@@ -391,7 +396,7 @@ public class ELParser
 
       default:
 	_peek = token;
-	return new BinaryExpr(code, left, right);
+	return BinaryExpr.create(code, left, right);
       }
     }
   }
@@ -627,6 +632,16 @@ public class ELParser
       else if (name.equals("empty"))
         return new UnaryExpr(Expr.EMPTY, parseTerm());
       else {
+	VariableMapper varMapper = _elContext.getVariableMapper();
+	
+	ValueExpression valueExpr = null;
+
+	if (varMapper != null)
+	  valueExpr = varMapper.resolveVariable(name);
+
+	if (valueExpr != null)
+	  return new ValueExpr(name, valueExpr);
+	
         Expr expr = createImplicitObjectExpr(name);
 
         if (expr != null)

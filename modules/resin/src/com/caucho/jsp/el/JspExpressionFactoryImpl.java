@@ -68,7 +68,7 @@ public class JspExpressionFactoryImpl extends  ExpressionFactory {
 			  Class<?> expectedType)
     throws ELException
   {
-    JspELParser parser = new JspELParser(expression);
+    JspELParser parser = new JspELParser(context, expression);
 
     Expr expr = parser.parse();
     

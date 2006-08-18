@@ -81,7 +81,7 @@ public class PathTypeStrategy extends TypeStrategy {
 
     string = rewritePathString(string);
 
-    Expr expr = new ELParser(string).parse();
+    Expr expr = new ELParser(env, string).parse();
 
     Object obj = expr.evalObject(env);
 

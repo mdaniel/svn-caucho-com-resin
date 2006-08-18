@@ -141,7 +141,7 @@ public class EL {
   public static Object evalObject(String value)
     throws ELParseException, ELException
   {
-    ELParser parser = new ELParser(value);
+    ELParser parser = new ELParser(getEnvironment(), value);
 
     Expr expr = parser.parse();
 
@@ -151,7 +151,7 @@ public class EL {
   public static Object evalObject(String value, ELContext env)
     throws ELParseException, ELException
   {
-    ELParser parser = new ELParser(value);
+    ELParser parser = new ELParser(getEnvironment(), value);
 
     Expr expr = parser.parse();
 
@@ -161,7 +161,7 @@ public class EL {
   public static String evalString(String value, ELContext env)
     throws ELParseException, ELException
   {
-    ELParser parser = new ELParser(value);
+    ELParser parser = new ELParser(getEnvironment(), value);
 
     Expr expr = parser.parse();
 

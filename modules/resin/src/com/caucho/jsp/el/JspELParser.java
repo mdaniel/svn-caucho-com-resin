@@ -32,6 +32,8 @@ import java.io.*;
 
 import java.util.*;
 
+import javax.el.*;
+
 import com.caucho.vfs.*;
 import com.caucho.util.*;
 import com.caucho.el.*;
@@ -45,12 +47,20 @@ public class JspELParser extends ELParser {
    */
   public JspELParser(String string)
   {
-    super(string);
+    super(null, string);
+  }
+  
+  /**
+   * Creates a new JspELParser
+   */
+  public JspELParser(ELContext env, String string)
+  {
+    super(env, string);
   }
 
   protected ELParser create(String string)
   {
-    ELParser parser = new JspELParser(string);
+    ELParser parser = new JspELParser(_elContext, string);
 
     copyTo(parser);
 

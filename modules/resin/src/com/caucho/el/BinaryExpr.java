@@ -61,6 +61,17 @@ public class BinaryExpr extends Expr {
     this._right = right;
   }
 
+  public static Expr create(int op, Expr left, Expr right)
+  {
+    switch (op) {
+    case ADD:
+      return new AddExpr(left, right);
+
+    default:
+      return new BinaryExpr(op, left, right);
+    }
+  }
+
   /**
    * Returns true if this is a constant expression.
    */
@@ -269,24 +280,6 @@ public class BinaryExpr extends Expr {
     return null;
   }
 
-  private static boolean isDoubleString(Object obj)
-  {
-    if (! (obj instanceof String))
-      return false;
-
-    String s = (String) obj;
-
-    int len = s.length();
-    for (int i = 0; i < len; i++) {
-      char ch = s.charAt(i);
-
-      if (ch == '.' || ch == 'e' || ch == 'E')
-        return true;
-    }
-
-    return false;
-  }
-  
   /**
    * Evaluate the expression as a long
    *

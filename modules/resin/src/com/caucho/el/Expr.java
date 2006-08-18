@@ -1087,6 +1087,24 @@ public abstract class Expr {
     }
   }
 
+  protected static boolean isDoubleString(Object obj)
+  {
+    if (! (obj instanceof String))
+      return false;
+
+    String s = (String) obj;
+
+    int len = s.length();
+    for (int i = 0; i < len; i++) {
+      char ch = s.charAt(i);
+
+      if (ch == '.' || ch == 'e' || ch == 'E')
+        return true;
+    }
+
+    return false;
+  }
+
   /**
    * Returns an error object
    */
