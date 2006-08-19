@@ -103,7 +103,7 @@ public final class NeqExpr extends BinaryExpr {
       _right.generateLong(out);
       out.print(")");
     }
-    else if (_left.isNumber() || _right.isNumber()) {
+    else if (_left.isNumber() && _right.isNumber()) {
       out.print("(");
       _left.generateDouble(out);
       out.print(" != ");

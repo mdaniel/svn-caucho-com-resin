@@ -164,7 +164,9 @@ abstract public class Value {
    */
   public boolean eq(Value rValue)
   {
-    if (isLongConvertible() && rValue.isLongConvertible())
+    if (rValue instanceof BooleanValue)
+      return toBoolean() == rValue.toBoolean();
+    else if (isLongConvertible() && rValue.isLongConvertible())
       return toLong() == rValue.toLong();
     else if (isNumberConvertible() || rValue.isNumberConvertible())
       return toDouble() == rValue.toDouble();

@@ -1058,7 +1058,8 @@ abstract public class ArrayValue extends Value {
       out.print("    [");
       out.print(_key);
       out.print("] => ");
-      _value.printR(env, out, depth + 1, valueSet);
+      if (_value != null)
+        _value.printR(env, out, depth + 1, valueSet);
       out.println();
     }
 

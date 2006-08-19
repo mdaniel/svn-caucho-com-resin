@@ -176,6 +176,9 @@ public class BooleanValue extends Value {
    */
   public boolean eq(Value rValue)
   {
+    return _value == rValue.toBoolean();
+
+/*
     if (rValue instanceof StringValue) {
       String v = rValue.toString();
 
@@ -188,6 +191,7 @@ public class BooleanValue extends Value {
       return toDouble() == rValue.toDouble();
     else
       return toString().equals(rValue.toString());
+*/
   }
   
   /**
