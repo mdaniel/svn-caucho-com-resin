@@ -136,7 +136,14 @@ public class DoStatement extends Statement {
     _block.generate(out);
     out.popDepth();
     out.print("} while (");
-    _test.generateBoolean(out);
+
+    if (_test.isTrue())
+      out.print("BooleanValue.TRUE.toBoolean()");
+    else if (_test.isFalse())
+      out.print("BooleanValue.FALSE.toBoolean()");
+    else
+      _test.generateBoolean(out);
+
     out.println(");");
   }
 
