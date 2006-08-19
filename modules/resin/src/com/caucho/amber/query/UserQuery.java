@@ -457,8 +457,6 @@ public class UserQuery implements AmberQuery {
 
       return null;
     } catch (SQLException e) {
-      e.printStackTrace();
-
       throw e;
     } finally {
       _aConn.popDepth();

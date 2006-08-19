@@ -76,7 +76,7 @@ public class StringType extends Type {
   {
     if (length == 0)
       length = 255;
-    
+
     return "varchar(" + length + ")";
     // return manager.getCreateColumnSQL(Types.VARCHAR, length);
   }
@@ -85,7 +85,7 @@ public class StringType extends Type {
    * Generates a string to load the property.
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index)
+                          String indexVar, int index)
     throws IOException
   {
     out.print(rs + ".getString(" + indexVar + " + " + index + ")");
@@ -97,7 +97,7 @@ public class StringType extends Type {
    * Generates a string to set the property.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String value)
+                          String index, String value)
     throws IOException
   {
     out.println(pstmt + ".setString(" + index + "++, " + value + ");");
@@ -109,7 +109,11 @@ public class StringType extends Type {
   public void setParameter(PreparedStatement pstmt, int index, Object value)
     throws SQLException
   {
-    pstmt.setString(index, (String) value);
+    // XXX: keep it generic until all Type classes
+    // are set in the query parser.
+    // pstmt.setString(index, (String) value);
+
+    pstmt.setObject(index, value);
   }
 
   /**
@@ -118,6 +122,10 @@ public class StringType extends Type {
   public Object getObject(ResultSet rs, int index)
     throws SQLException
   {
-    return rs.getString(index);
+    // XXX: keep it generic until all Type classes
+    // are set in the query parser.
+    // return rs.getString(index);
+
+    return rs.getObject(index);
   }
 }

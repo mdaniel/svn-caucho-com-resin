@@ -62,6 +62,9 @@ public class SelectQuery extends AbstractQuery {
 
   private String _sql;
 
+  // SELECT NEW
+  private Class _constructorClass;
+
   private boolean _isTableReadOnly = false;
   private long _cacheTimeout = -1;
 
@@ -76,6 +79,22 @@ public class SelectQuery extends AbstractQuery {
   Map<AmberExpr, String> getJoinFetchMap()
   {
     return _joinFetchMap;
+  }
+
+  /**
+   * Sets the constructor class for SELECT NEW.
+   */
+  void setConstructorClass(Class cl)
+  {
+    _constructorClass = cl;
+  }
+
+  /**
+   * Gets the constructor class for SELECT NEW.
+   */
+  public Class getConstructorClass()
+  {
+    return _constructorClass;
   }
 
   /**

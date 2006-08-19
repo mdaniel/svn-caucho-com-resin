@@ -59,6 +59,8 @@ class ArgExpr extends AbstractAmberExpr {
     _parser = parser;
 
     _index = index;
+
+    _sqlIndex = -1;
   }
 
   /**
@@ -73,6 +75,8 @@ class ArgExpr extends AbstractAmberExpr {
     _name = name;
 
     _index = index;
+
+    _sqlIndex = -1;
   }
 
   /**
@@ -98,7 +102,8 @@ class ArgExpr extends AbstractAmberExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
-    _sqlIndex = _parser.generateSQLArg();
+    if (_sqlIndex < 0)
+      _sqlIndex = _parser.generateSQLArg();
 
     cb.append("?");
   }

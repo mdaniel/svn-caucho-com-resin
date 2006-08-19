@@ -122,7 +122,9 @@ public class QueryParser {
   final static int ARG = EXTERNAL_DOT + 1;
   final static int NAMED_ARG = ARG + 1;
 
-  final static int THIS = NAMED_ARG + 1;
+  final static int NEW = NAMED_ARG + 1;
+
+  final static int THIS = NEW + 1;
 
   final static int NOT_NULL = THIS + 1;
 
@@ -171,7 +173,8 @@ public class QueryParser {
 
   private int _sqlArgCount;
 
-  private boolean _isOuterJoin = true;
+  private FromItem.JoinSemantics _joinSemantics
+    = FromItem.JoinSemantics.UNKNOWN;
 
   private boolean _isJoinFetch = false;
 
@@ -266,7 +269,7 @@ public class QueryParser {
   {
     int oldParseIndex = _parseIndex;
     int oldToken = _token;
-    boolean oldIsOuterJoin = _isOuterJoin;
+    FromItem.JoinSemantics oldJoinSemantics = _joinSemantics;
     boolean oldIsJoinFetch = _isJoinFetch;
 
     SelectQuery query = new SelectQuery(_sql);
@@ -299,7 +302,7 @@ public class QueryParser {
 
       token = peekToken();
 
-      _isOuterJoin = true;
+      _joinSemantics = FromItem.JoinSemantics.UNKNOWN;
 
       if (token == INNER) {
         scanToken();
@@ -310,7 +313,7 @@ public class QueryParser {
           throw error(L.l("expected JOIN at {0}", tokenName(token)));
         }
 
-        _isOuterJoin = false;
+        _joinSemantics = FromItem.JoinSemantics.INNER;
       }
       else if (token == LEFT) {
         scanToken();
@@ -325,9 +328,11 @@ public class QueryParser {
 
         if (token != JOIN)
           throw error(L.l("expected JOIN at {0}", tokenName(token)));
+
+        _joinSemantics = FromItem.JoinSemantics.OUTER;
       }
       else if (token == JOIN) {
-        _isOuterJoin = false;
+        _joinSemantics = FromItem.JoinSemantics.INNER;
       }
 
     } while ((token == ',') ||
@@ -349,7 +354,37 @@ public class QueryParser {
         query.setDistinct(true);
       }
 
+      String constructorName = null;
+
+      if (peekToken() == NEW) {
+
+        scanToken();
+
+        // Scans the fully qualified constructor
+
+        String s = "";
+
+        boolean isDot = false;
+
+        while ((token = scanToken()) != '(') {
+
+          if (! isDot) {
+            s += _lexeme;
+            isDot = true;
+          }
+          else if (token == '.') {
+            s += '.';
+            isDot = false;
+          }
+          else
+            throw error(L.l("Constructor with SELECT NEW must be fully qualified. Expected '.' at {0}", tokenName(token)));
+        }
+
+        constructorName = s;
+      }
+
       do {
+
         AmberExpr expr = parseExpr();
 
         expr = expr.bindSelect(this);
@@ -366,6 +401,26 @@ public class QueryParser {
 
         resultList.add(expr);
       } while ((token = scanToken()) == ',');
+
+      if (constructorName != null) {
+
+        if (token != ')')
+          throw error(L.l("Expected ')' at {0} when calling constructor with SELECT NEW", tokenName(token)));
+
+        token = scanToken();
+
+        try {
+
+          ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+          Class cl = Class.forName(constructorName, false, loader);
+
+          query.setConstructorClass(cl);
+
+        } catch (ClassNotFoundException ex) {
+          throw error(L.l("Unable to find class {0}. Make sure the class is fully qualified.", constructorName));
+        }
+      }
 
       _token = token;
     }
@@ -515,10 +570,11 @@ public class QueryParser {
 
       if (token > 0)
         throw error(L.l("expected end of query at {0}", tokenName(token)));
-    }
 
-    if (! query.setArgList(_argList.toArray(new ArgExpr[_argList.size()])))
-      throw error(L.l("Unable to parse all query parameters. Make sure named parameters are not mixed with positional parameters"));
+      if (! query.setArgList(_argList.toArray(new ArgExpr[_argList.size()])))
+        throw error(L.l("Unable to parse all query parameters. Make sure named parameters are not mixed with positional parameters"));
+
+    }
 
     try {
       query.init();
@@ -526,7 +582,7 @@ public class QueryParser {
       throw new QueryParseException(e);
     }
 
-    _isOuterJoin = oldIsOuterJoin;
+    _joinSemantics = oldJoinSemantics;
     _isJoinFetch = oldIsJoinFetch;
 
     return query;
@@ -700,7 +756,7 @@ public class QueryParser {
 
     FromItem item = _query.createFromItem(table, id);
 
-    item.setOuterJoin(_isOuterJoin);
+    item.setJoinSemantics(_joinSemantics);
 
     return item;
   }
@@ -712,7 +768,7 @@ public class QueryParser {
   {
     item = _query.createDependentFromItem(item, link, createTableName());
 
-    item.setOuterJoin(_isOuterJoin);
+    item.setJoinSemantics(_joinSemantics);
 
     return item;
   }
@@ -762,7 +818,7 @@ public class QueryParser {
 
       scanToken();
 
-      _isOuterJoin = false;
+      _joinSemantics = FromItem.JoinSemantics.INNER;
 
       if ((token = scanToken()) != '(')
         throw error(L.l("expected '(' at '{0}'", tokenName(token)));
@@ -1826,6 +1882,8 @@ public class QueryParser {
     _reserved.put("like", LIKE);
     _reserved.put("escape", ESCAPE);
     _reserved.put("is", IS);
+
+    _reserved.put("new", NEW);
 
     _reserved.put("this", THIS);
     _reserved.put("true", TRUE);

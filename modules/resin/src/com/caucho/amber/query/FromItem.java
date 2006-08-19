@@ -51,7 +51,7 @@ class FromItem {
 
   private boolean _isUsed;
 
-  private enum JoinSemantics { UNKNOWN, INNER, OUTER }
+  enum JoinSemantics { UNKNOWN, INNER, OUTER }
 
   private JoinSemantics _joinSemantics
     = JoinSemantics.UNKNOWN;
@@ -200,7 +200,16 @@ class FromItem {
   }
 
   /**
-   * Returns true if the from needs an outer join.
+   * Sets the join semantics.
+   */
+  void setJoinSemantics(JoinSemantics joinSemantics)
+  {
+    _joinSemantics = joinSemantics;
+  }
+
+  /**
+   * Sets the join semantics to OUTER (true) or
+   * INNER (false).
    */
   void setOuterJoin(boolean isOuterJoin)
   {

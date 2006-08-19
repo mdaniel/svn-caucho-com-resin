@@ -29,10 +29,7 @@
 
 package com.caucho.amber.manager;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Calendar;
+import java.lang.reflect.Constructor;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -40,13 +37,21 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Calendar;
+
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
 import javax.persistence.FlushModeType;
 
+import com.caucho.amber.AmberException;
+
 import com.caucho.amber.manager.AmberConnection;
 
 import com.caucho.amber.query.AbstractQuery;
+import com.caucho.amber.query.SelectQuery;
 import com.caucho.amber.query.UserQuery;
 
 import com.caucho.util.L10N;
@@ -113,6 +118,14 @@ public class QueryImpl implements Query {
 
       ArrayList columns = new ArrayList();
 
+      Class constructorClass = null;
+
+      if (_query instanceof SelectQuery) {
+        constructorClass = ((SelectQuery) _query).getConstructorClass();
+      }
+
+      Constructor constructor = null;
+
       while (rs.next()) {
         Object object = null;
 
@@ -140,6 +153,22 @@ public class QueryImpl implements Query {
 
           n = columns.size();
           row = columns.toArray();
+
+          if (constructorClass != null) {
+
+            try {
+
+              Class paramTypes[] = new Class[n];
+
+              for (int i=0; i < n; i++)
+                paramTypes[i] = row[i].getClass();
+
+              constructor = constructorClass.getConstructor(paramTypes);
+
+            } catch (Exception ex) {
+              throw error(L.l("Unable to find constructor {0}. Make sure there is a public constructor for the given arguments", constructorClass.getName()));
+            }
+          }
         }
         else {
           row = new Object[n];
@@ -148,10 +177,15 @@ public class QueryImpl implements Query {
           }
         }
 
-        if (n == 1)
-          results.add(row[0]);
-        else
-          results.add(row);
+        if (constructor == null) {
+          if (n == 1)
+            results.add(row[0]);
+          else
+            results.add(row);
+        }
+        else {
+          results.add(constructor.newInstance(row));
+        }
       }
 
       rs.close();
@@ -310,5 +344,15 @@ public class QueryImpl implements Query {
     _userQuery.setDouble(index, value);
 
     return this;
+  }
+
+  /**
+   * Creates an error.
+   */
+  private AmberException error(String msg)
+  {
+    msg += "\nin \"" + _query.getQueryString() + "\"";
+
+    return new AmberException(msg);
   }
 }
