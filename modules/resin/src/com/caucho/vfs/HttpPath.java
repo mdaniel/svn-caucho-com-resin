@@ -53,6 +53,8 @@ public class HttpPath extends FilesystemPath {
   protected int _port;
   protected String _query;
 
+  protected String _virtualHost;
+
   protected CacheEntry _cacheEntry;
 
   /**
@@ -88,6 +90,10 @@ public class HttpPath extends FilesystemPath {
     _host = ((HttpPath) root)._host;
     _port = ((HttpPath) root)._port;
     _query = query;
+
+    if (newAttributes != null) {
+      _virtualHost = (String) newAttributes.get("host");
+    }
   }
 
   /**
@@ -267,6 +273,14 @@ public class HttpPath extends FilesystemPath {
   public String getUserPath()
   {
     return _userPath;
+  }
+
+  /**
+   * Returns the virtual host, if any.
+   */
+  public String getVirtualHost()
+  {
+    return _virtualHost;
   }
 
   /**

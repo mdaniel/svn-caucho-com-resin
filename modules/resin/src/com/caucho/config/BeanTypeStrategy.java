@@ -59,6 +59,9 @@ import com.caucho.xml.QAbstractNode;
 public class BeanTypeStrategy extends TypeStrategy {
   protected static final L10N L = new L10N(BeanTypeStrategy.class);
 
+  private static final QName TEXT = new QName("text");
+  private static final QName VALUE = new QName("value");
+
   private SoftReference<Method []> _methodsRef;
   private HashMap<QName,AttributeStrategy> _nsAttributeMap
     = new HashMap<QName,AttributeStrategy>();
@@ -172,10 +175,10 @@ public class BeanTypeStrategy extends TypeStrategy {
       strategy = getAttributeStrategyImpl(attrName);
 
       if (strategy == null && attrName.getName().equals("#text")) {
-        strategy = getAttributeStrategyImpl(new QName("text"));
+        strategy = getAttributeStrategyImpl(TEXT);
 
         if (strategy == null)
-          strategy = getAttributeStrategyImpl(new QName("value"));
+          strategy = getAttributeStrategyImpl(VALUE);
       }
 
       if (strategy == null)

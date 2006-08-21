@@ -46,22 +46,34 @@ public class ObjectValueExpression extends ValueExpression
 
   private final Expr _expr;
   private final String _expressionString;
+  private final Class _expectedType;
+
+  public ObjectValueExpression(Expr expr,
+			       String expressionString,
+			       Class<?> expectedType)
+  {
+    _expr = expr;
+    _expressionString = expressionString;
+    _expectedType = expectedType;
+  }
 
   public ObjectValueExpression(Expr expr, String expressionString)
   {
     _expr = expr;
     _expressionString = expressionString;
+    _expectedType = Object.class;
   }
 
   public ObjectValueExpression(Expr expr)
   {
     _expr = expr;
     _expressionString = _expr.toString();
+    _expectedType = Object.class;
   }
 
   public boolean isLiteralText()
   {
-    return false;
+    return _expr.isLiteralText();
   }
 
   public String getExpressionString()
@@ -71,7 +83,7 @@ public class ObjectValueExpression extends ValueExpression
 
   public Class<?> getExpectedType()
   {
-    return Object.class;
+    return _expectedType;
   }
 
   public Class<?> getType(ELContext context)
@@ -97,7 +109,7 @@ public class ObjectValueExpression extends ValueExpression
     throws PropertyNotFoundException,
 	   ELException
   {
-    return true;
+    return _expr.isReadOnly(context);
   }
 
   public void setValue(ELContext context, Object value)
@@ -105,7 +117,7 @@ public class ObjectValueExpression extends ValueExpression
 	   PropertyNotWritableException,
 	   ELException
   {
-    throw new PropertyNotWritableException();
+    _expr.evalSetValue(context, value);
   }
 
   public int hashCode()

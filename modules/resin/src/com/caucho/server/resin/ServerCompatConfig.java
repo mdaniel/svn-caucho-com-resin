@@ -49,6 +49,9 @@ public class ServerCompatConfig {
    */
   public ServerCompatConfig(ResinServer resin)
   {
+    if (resin == null)
+      throw new NullPointerException();
+    
     _resin = resin;
   }
 
@@ -72,7 +75,26 @@ public class ServerCompatConfig {
     
       ClusterServer clusterServer = _resin.findClusterServer(serverId);
 
+      if (clusterServer != null) {
+      }
+      else if (_resin.getClusterList().size() > 0 || ! "".equals(serverId)) {
+	throw new ConfigException(L.l("-server '{0}' does not match any defined servers",
+				      serverId));
+      }
+      else {
+	Cluster cluster = _resin.createCluster();
+	_resin.addCluster(cluster);
+
+	clusterServer = cluster.createServer();
+	
+	clusterServer.setPort(0);
+
+	cluster.addServer(clusterServer);
+      }
+
       _program.configure(clusterServer.getCluster());
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Throwable e) {
       throw new RuntimeException(e);
     }

@@ -49,10 +49,8 @@ import javax.servlet.jsp.el.ELException;
 
 import org.w3c.dom.Node;
 
-import com.caucho.util.L10N;
-import com.caucho.util.NullEnumeration;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.HashMapImpl;
+import com.caucho.el.*;
+import com.caucho.util.*;
 
 import com.caucho.vfs.Path;
 import com.caucho.vfs.WriteStream;
@@ -133,6 +131,7 @@ public class PageContextImpl extends PageContext
 
   private VariableResolver _varResolver;
   private ELContext _elContext;
+  private ELResolver _elResolver;
   private boolean _hasException;
 
   private ExpressionEvaluatorImpl _expressionEvaluator;
@@ -226,7 +225,10 @@ public class PageContextImpl extends PageContext
     //  _writerStreamImpl.setWriter(_topOut);
     // _response.setPrintWriter(body.getWriter());
 
+    /*
     _elContext = null;
+    _elResolver = null;
+    */
 
     _hasException = false;
     //if (_attributes.size() > 0)
@@ -1161,6 +1163,11 @@ public class PageContextImpl extends PageContext
    */
   public ELContext getELContext()
   {
+    if (_elContext == null) {
+      _elContext = new PageELContext();
+      _elResolver = new PageELResolver();
+    }
+    
     return _elContext;
   }
 
@@ -1762,7 +1769,7 @@ public class PageContextImpl extends PageContext
   class PageELContext extends ELContext {
     public ELResolver getELResolver()
     {
-      throw new UnsupportedOperationException();
+      return _elResolver;
     }
 
     public FunctionMapper getFunctionMapper()
@@ -1772,7 +1779,30 @@ public class PageContextImpl extends PageContext
 
     public VariableMapper getVariableMapper()
     {
-      throw new UnsupportedOperationException();
+      return null;
+    }
+  }
+
+  class PageELResolver extends AbstractVariableResolver {
+    public Object getValue(ELContext env, Object base, Object property)
+    {
+      if (property != null)
+	return null;
+      else if (base instanceof String)
+	return getAttribute(base.toString());
+      else
+	return null;
+    }
+    
+    public void setValue(ELContext env,
+			 Object base,
+			 Object property,
+			 Object value)
+    {
+      if (property != null) {
+      }
+      else if (base instanceof String)
+	setAttribute(base.toString(), value);
     }
   }
 }

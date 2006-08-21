@@ -51,6 +51,15 @@ public class IdExpr extends Expr {
   }
 
   /**
+   * Returns true if the expression is read-only.
+   */
+  @Override
+  public boolean isReadOnly(ELContext env)
+  {
+    return false;
+  }
+
+  /**
    * Creates a field reference using this expression as the base object.
    *
    * @param field the string reference for the field.
@@ -75,6 +84,19 @@ public class IdExpr extends Expr {
     throws ELException
   {
     return env.getELResolver().getValue(env, _id, null);
+  }
+
+  /**
+   * Evaluates the expression, setting an object.
+   *
+   * @param env the variable environment
+   *
+   * @return the value of the expression as an object
+   */
+  public void evalSetValue(ELContext env, Object value)
+    throws ELException
+  {
+    env.getELResolver().setValue(env, _id, null, value);
   }
 
   /**

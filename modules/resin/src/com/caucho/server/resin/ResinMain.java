@@ -200,6 +200,10 @@ public class ResinMain implements ResinServerListener {
         
 	i += 2;
       }
+      else if ("start".equals(argv[i])
+	       || "restart".equals(argv[i])) {
+	i++;
+      }
       /*
       else if (compileURLs != null) {
         for (; i < len; i++)

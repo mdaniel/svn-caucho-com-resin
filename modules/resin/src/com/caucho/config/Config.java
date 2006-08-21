@@ -430,7 +430,7 @@ public class Config {
   /**
    * Configures a bean with a configuration map.
    */
-  public Object configure(Object obj, Map<String,Object> map)
+  public Object configureMap(Object obj, Map<String,Object> map)
     throws Exception
   {
     return new MapBuilder().configure(obj, map);

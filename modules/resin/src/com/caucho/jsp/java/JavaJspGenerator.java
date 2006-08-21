@@ -125,6 +125,8 @@ public class JavaJspGenerator extends JspGenerator {
 
   private String _filename;
 
+  private JspGenELContext _elContext = new JspGenELContext();
+  
   private HashMap<String,Method> _elFunctionMap = new HashMap<String,Method>();
   private ArrayList<Taglib> _tagLibraryList =
     new ArrayList<Taglib>();
@@ -441,6 +443,11 @@ public class JavaJspGenerator extends JspGenerator {
     _pageData = new QPageData(ts);
 
     return _pageData;
+  }
+
+  public ELContext getELContext()
+  {
+    return _elContext;
   }
   
   /**
@@ -833,6 +840,7 @@ public class JavaJspGenerator extends JspGenerator {
     out.print(_parseState.isPrintNullAsBlank());
     out.println(");");
     out.println("javax.servlet.jsp.JspWriter out = pageContext.getOut();");
+    out.println("final javax.el.ELContext _jsp_env = pageContext.getELContext();");
     out.println("javax.servlet.ServletConfig config = getServletConfig();");
     out.println("javax.servlet.Servlet page = this;");
     if (_parseState.isErrorPage()) {
@@ -1112,7 +1120,7 @@ public class JavaJspGenerator extends JspGenerator {
   public com.caucho.el.Expr genExpr(String value)
     throws JspParseException, ELException
   {
-    JspELParser parser = new JspELParser(value);
+    JspELParser parser = new JspELParser(_elContext, value);
 
     parser.setStaticFunctionMap(_elFunctionMap);
 
@@ -1141,7 +1149,7 @@ public class JavaJspGenerator extends JspGenerator {
   public int addValueExpr(String value)
     throws JspParseException, ELException
   {
-    JspELParser parser = new JspELParser(value);
+    JspELParser parser = new JspELParser(_elContext, value);
 
     parser.setStaticFunctionMap(_elFunctionMap);
     

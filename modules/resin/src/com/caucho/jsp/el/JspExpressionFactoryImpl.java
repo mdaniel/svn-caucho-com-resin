@@ -72,7 +72,7 @@ public class JspExpressionFactoryImpl extends  ExpressionFactory {
 
     Expr expr = parser.parse();
     
-    return new ObjectValueExpression(expr);
+    return new ObjectValueExpression(expr, expression);
   }
 
   public ValueExpression

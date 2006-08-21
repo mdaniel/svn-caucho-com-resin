@@ -45,14 +45,6 @@ public class JspELParser extends ELParser {
   /**
    * Creates a new JspELParser
    */
-  public JspELParser(String string)
-  {
-    super(null, string);
-  }
-  
-  /**
-   * Creates a new JspELParser
-   */
   public JspELParser(ELContext env, String string)
   {
     super(env, string);

@@ -1206,51 +1206,51 @@ public abstract class JspNode {
     String var = "_caucho_expr_" + exprIndex;
 
     if (boolean.class.equals(type))
-      return var + ".evalBoolean(pageContext)";
+      return var + ".evalBoolean(_jsp_env)";
     else if (Boolean.class.equals(type))
-      return var + ".evalBoolean(pageContext) ? java.lang.Boolean.TRUE : java.lang.Boolean.FALSE";
+      return var + ".evalBoolean(_jsp_env) ? java.lang.Boolean.TRUE : java.lang.Boolean.FALSE";
     else if (byte.class.equals(type))
-      return "(byte) " + var + ".evalLong(pageContext)";
+      return "(byte) " + var + ".evalLong(_jsp_env)";
     else if (Byte.class.equals(type))
-      return "new java.lang.Byte((byte) " + var + ".evalLong(pageContext))";
+      return "new java.lang.Byte((byte) " + var + ".evalLong(_jsp_env))";
     else if (short.class.equals(type))
-      return "(short) " + var + ".evalLong(pageContext)";
+      return "(short) " + var + ".evalLong(_jsp_env)";
     else if (Short.class.equals(type))
-      return "new java.lang.Short((short) " + var + ".evalLong(pageContext))";
+      return "new java.lang.Short((short) " + var + ".evalLong(_jsp_env))";
     else if (int.class.equals(type))
-      return "(int) " + var + ".evalLong(pageContext)";
+      return "(int) " + var + ".evalLong(_jsp_env)";
     else if (Integer.class.equals(type))
-      return "new java.lang.Integer((int) " + var + ".evalLong(pageContext))";
+      return "new java.lang.Integer((int) " + var + ".evalLong(_jsp_env))";
     else if (long.class.equals(type))
-      return var + ".evalLong(pageContext)";
+      return var + ".evalLong(_jsp_env)";
     else if (Long.class.equals(type))
-      return "new java.lang.Long(" + var + ".evalLong(pageContext))";
+      return "new java.lang.Long(" + var + ".evalLong(_jsp_env))";
     else if (float.class.equals(type))
-      return "(float) " + var + ".evalDouble(pageContext)";
+      return "(float) " + var + ".evalDouble(_jsp_env)";
     else if (Float.class.equals(type))
-      return "new java.lang.Float((float) " + var + ".evalDouble(pageContext))";
+      return "new java.lang.Float((float) " + var + ".evalDouble(_jsp_env))";
     else if (double.class.equals(type))
-      return var + ".evalDouble(pageContext)";
+      return var + ".evalDouble(_jsp_env)";
     else if (Double.class.equals(type))
-      return "new java.lang.Double(" + var + ".evalDouble(pageContext))";
+      return "new java.lang.Double(" + var + ".evalDouble(_jsp_env))";
     else if (java.math.BigDecimal.class.equals(type))
-      return "" + var + ".evalBigDecimal(pageContext)";
+      return "" + var + ".evalBigDecimal(_jsp_env)";
     else if (java.math.BigInteger.class.equals(type))
-      return "" + var + ".evalBigInteger(pageContext)";
+      return "" + var + ".evalBigInteger(_jsp_env)";
     else if (char.class.equals(type))
-      return var + ".evalCharacter(pageContext)";
+      return var + ".evalCharacter(_jsp_env)";
     else if (Character.class.equals(type))
-      return "new Character(" + var + ".evalCharacter(pageContext))";
+      return "new Character(" + var + ".evalCharacter(_jsp_env))";
     else if (String.class.equals(type))
-      return var + ".evalStringNonNull(pageContext)";
+      return var + ".evalStringNonNull(_jsp_env)";
     else if (BigInteger.class.equals(type))
-      return var + ".evalBigInteger(pageContext)";
+      return var + ".evalBigInteger(_jsp_env)";
     else if (BigDecimal.class.equals(type))
-      return var + ".evalBigDecimal(pageContext)";
+      return var + ".evalBigDecimal(_jsp_env)";
     else if (Object.class.equals(type))
-      return var + ".evalObject(pageContext)";
+      return var + ".evalObject(_jsp_env)";
     else {
-      return "(" + classToString(type) + ") " + var + ".evalObject(pageContext)";
+      return "(" + classToString(type) + ") " + var + ".evalObject(_jsp_env)";
     }
   }
 

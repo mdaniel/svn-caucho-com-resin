@@ -19,54 +19,54 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.config;
+package com.caucho.boot;
 
 import java.io.*;
+import java.util.logging.*;
 
-import com.caucho.util.CompileException;
+import javax.servlet.*;
+
+import com.caucho.hessian.server.HessianServlet;
 
 /**
- * Thrown by the various Builders
+ * Process responsible for watching a backend server.
  */
-public class ConfigException
-  extends RuntimeException
-  implements CompileException
-{
-  /**
-   * Create a null exception
-   */
-  public ConfigException()
-  {
-  }
+public class WatchdogServlet extends HessianServlet implements WatchdogAPI {
+  private static final Logger log
+    = Logger.getLogger(WatchdogServlet.class.getName());
 
-  /**
-   * Creates an exception with a message
-   */
-  public ConfigException(String msg)
+  private WatchdogManager _watchdog;
+  
+  public void init()
   {
-    super(msg);
+    _watchdog = WatchdogManager.getWatchdog();
   }
-
-  /**
-   * Creates an exception with a message and throwable
-   */
-  public ConfigException(String msg, Throwable e)
+  public boolean start(String serverId, String []argv)
   {
-    super(msg, e);
+    log.info("Watchdog start: " + serverId);
+
+    return _watchdog.startServer(serverId);
   }
-
-  /**
-   * Creates an exception with a throwable
-   */
-  public ConfigException(Throwable e)
+  
+  public boolean restart(String serverId, String []argv)
   {
-    super(e);
+    log.info("Watchdog restart: " + serverId);
+    
+    return true;
+  }
+  
+  public boolean stop(String serverId)
+  {
+    log.info("Watchdog stop: " + serverId);
+    
+    return _watchdog.stopServer(serverId);
   }
 }

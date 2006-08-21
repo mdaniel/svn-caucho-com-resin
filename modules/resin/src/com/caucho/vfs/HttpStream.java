@@ -73,6 +73,8 @@ class HttpStream extends StreamImpl {
   // The server's port
   private int _port;
 
+  private String _virtualHost;
+
   // the method
   private String _method;
   // true for a HEAD stream
@@ -254,6 +256,9 @@ class HttpStream extends StreamImpl {
     _attributes.clear();
     
     setPath(path);
+
+    if (path instanceof HttpPath)
+      _virtualHost = ((HttpPath) path).getVirtualHost();
   }
 
   /**
@@ -549,10 +554,14 @@ class HttpStream extends StreamImpl {
     }
     _ws.print(" HTTP/1.1\r\n");
     _ws.print("Host: ");
-    _ws.print(_path.getHost());
-    if (_path.getPort() != 80) {
-      _ws.print(":");
-      _ws.print(String.valueOf(_path.getPort()));
+    if (_virtualHost != null)
+      _ws.print(_virtualHost);
+    else {
+      _ws.print(_path.getHost());
+      if (_path.getPort() != 80) {
+	_ws.print(":");
+	_ws.print(String.valueOf(_path.getPort()));
+      }
     }
     _ws.print("\r\n");
     

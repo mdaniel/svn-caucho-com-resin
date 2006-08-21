@@ -35,11 +35,14 @@ import java.net.URL;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.xml.bind.annotation.*;
+
 import com.caucho.util.Log;
 import com.caucho.util.L10N;
 import com.caucho.el.Expr;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.EnvironmentBean;
+import com.caucho.config.jaxb.*;
 import com.caucho.config.types.InitProgram;
 import com.caucho.config.types.RawString;
 import com.caucho.config.types.ClassTypeStrategy;
@@ -53,20 +56,20 @@ public class TypeStrategyFactory {
   private static final Logger log = Log.open(TypeStrategyFactory.class);
   private static L10N L = new L10N(TypeStrategyFactory.class);
   
-  private static final HashMap<String,TypeStrategy> _primitiveTypes =
-    new HashMap<String,TypeStrategy>();
+  private static final HashMap<String,TypeStrategy> _primitiveTypes
+    = new HashMap<String,TypeStrategy>();
   
-  private static final EnvironmentLocal<TypeStrategyFactory> _localFactory =
-          new EnvironmentLocal<TypeStrategyFactory>();
+  private static final EnvironmentLocal<TypeStrategyFactory> _localFactory
+    = new EnvironmentLocal<TypeStrategyFactory>();
   
-  private final HashMap<String,TypeStrategy> _typeMap =
-          new HashMap<String,TypeStrategy>();
+  private final HashMap<String,TypeStrategy> _typeMap
+    = new HashMap<String,TypeStrategy>();
 
-  private final HashMap<QName,AttributeStrategy> _flowMap =
-          new HashMap<QName,AttributeStrategy>();
+  private final HashMap<QName,AttributeStrategy> _flowMap
+    = new HashMap<QName,AttributeStrategy>();
 
-  private final HashMap<QName,AttributeStrategy> _envMap =
-          new HashMap<QName,AttributeStrategy>();
+  private final HashMap<QName,AttributeStrategy> _envMap
+    = new HashMap<QName,AttributeStrategy>();
   
   private TypeStrategyFactory()
   {
@@ -191,6 +194,8 @@ public class TypeStrategyFactory {
       }
       else if (EnvironmentBean.class.isAssignableFrom(type))
         strategy = new EnvironmentTypeStrategy(type);
+      else if (type.isAnnotationPresent(XmlRootElement.class))
+        strategy = new JaxbBeanType(type);
       else
         strategy = new BeanTypeStrategy(type);
 

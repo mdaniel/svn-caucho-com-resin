@@ -142,14 +142,16 @@ public class ELParser
       if (_checkEscape && ch == '\\') {
 	ch = read();
 
-	if (ch == '$' || ch == '\\')
+	if (ch == '$' || ch == '#' || ch == '\\')
 	  text.append((char) ch);
 	else {
 	  text.append('\\');
 	  unread();
 	}
       }
-      else if (ch == '$') {
+      else if (ch == '$' || ch == '#') {
+	int origChar = ch;
+	
         ch = read();
         
         if (ch == '{') {
@@ -181,7 +183,7 @@ public class ELParser
             expr = new InterpolateExpr(expr, right);
         }
         else {
-          text.append('$');
+          text.append((char) origChar);
           unread();
         }
       }

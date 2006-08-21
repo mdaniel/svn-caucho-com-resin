@@ -32,10 +32,23 @@ package com.caucho.boot;
 import java.util.*;
 
 import com.caucho.config.*;
+import com.caucho.vfs.*;
 
 public class ResinConfig {
   private ArrayList<ClusterConfig> _clusterList
     = new ArrayList<ClusterConfig>();
+
+  private Path _resinHome;
+
+  ResinConfig(Path resinHome)
+  {
+    _resinHome = resinHome;
+  }
+
+  public Path getResinHome()
+  {
+    return _resinHome;
+  }
 
   public ClusterConfig createCluster()
   {
@@ -56,12 +69,12 @@ public class ResinConfig {
   /**
    * Finds a server.
    */
-  public ServerConfig findServer(String id)
+  public ServerWatchdog findServer(String id)
   {
     for (int i = 0; i < _clusterList.size(); i++) {
       ClusterConfig cluster = _clusterList.get(i);
 
-      ServerConfig server = cluster.findServer(id);
+      ServerWatchdog server = cluster.findServer(id);
 
       if (server != null)
 	return server;

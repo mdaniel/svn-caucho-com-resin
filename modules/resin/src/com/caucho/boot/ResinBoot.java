@@ -50,6 +50,10 @@ public class ResinBoot {
   private Path _resinConf;
   private String _serverId = "";
 
+  private ServerWatchdog _server;
+
+  private StartMode _startMode = StartMode.DIRECT;
+
   ResinBoot(String []argv)
     throws Exception
   {
@@ -62,22 +66,15 @@ public class ResinBoot {
 
     parseCommandLine(argv);
 
-    System.out.println(System.getProperty("java.class.path"));
-    System.out.println(System.getProperty("boot.class.path"));
-
     Config config = new Config();
 
-    ResinConfig conf = new ResinConfig();
+    ResinConfig conf = new ResinConfig(_resinHome);
 
     config.configure(conf, _resinConf, "com/caucho/server/resin/resin.rnc");
 
-    System.out.println("CONF: " + conf);
+    _server = conf.findServer(_serverId);
 
-    ServerConfig server = conf.findServer(_serverId);
-    
-    System.out.println("SERVER: " + server);
-
-    if (server == null)
+    if (_server == null)
       throw new ConfigException(L().l("-server '{0}' does not match any defined <server id> in {1}.",
 				    _serverId, _resinConf));
   }
@@ -163,70 +160,43 @@ public class ResinBoot {
 	_serverId = argv[i + 1];
 	i++;
       }
+      else if ("start".equals(arg)) {
+	_startMode = StartMode.START;
+      }
+      else if ("stop".equals(arg)) {
+	_startMode = StartMode.STOP;
+      }
+      else if ("restart".equals(arg)) {
+	_startMode = StartMode.RESTART;
+      }
     }
   }
 
-  int start()
+  boolean start()
     throws IOException, InterruptedException
   {
-    ServerSocket ss = new ServerSocket(0, 5,
-				       InetAddress.getByName("127.0.0.1"));
-    int port = ss.getLocalPort();
+    System.out.println("SM: " + _startMode);
     
-    ProcessBuilder builder = new ProcessBuilder();
-
-    builder.directory(new File(_resinHome.getNativePath()));
-
-    Map<String,String> env = builder.environment();
-
-    String classPath = calculateClassPath();
-
-    env.put("CLASSPATH", classPath);
-    env.put("LD_LIBRARY_PATH", _resinHome.lookup("libexec").getNativePath());
-    env.put("DYLD_LIBRARY_PATH", _resinHome.lookup("libexec").getNativePath());
-
-    ArrayList<String> list = new ArrayList<String>();
-
-    list.add("java");
-    list.add("-Djava.util.logging.manager=com.caucho.log.LogManagerImpl");
-    list.add("-Djava.system.class.loader=com.caucho.loader.SystemClassLoader");
-    list.add("-Djava.awt.headless=true");
-    list.add("-Dresin.home=" + _resinHome.getPath());
-    list.add("-Dserver.root=" + _serverRoot.getPath());
-    list.add("-Xrs");
-    list.add("-Xss1m");
-    list.add("com.caucho.server.resin.ResinMain");
-    list.add("-socketwait");
-    list.add(String.valueOf(port));
-
-    for (int i = 0; i < _argv.length; i++)
-      list.add(_argv[i]);
-
-    builder = builder.command(list);
-
-    builder.redirectErrorStream(true);
-
-    Process process = builder.start();
-
-    ss.setSoTimeout(10000);
-    Socket s = null;
-    try {
-      s = ss.accept();
-    } catch (Exception e) {
-    } finally {
-      ss.close();
+    if (_startMode == StartMode.START) {
+      if (_server.startWatchdog(_argv)) {
+	System.out.println(L().l("Started server '{0}'", _server.getId()));
+      }
+      else
+	System.out.println(L().l("Can't start server '{0}'", _server.getId()));
+      
+      return false;
     }
-
-    InputStream is = process.getInputStream();
-
-    byte []data = new byte[1024];
-    int len;
-
-    while ((len = is.read(data, 0, data.length)) >= 0) {
-      System.out.print(new String(data, 0, len));
+    else if (_startMode == StartMode.STOP) {
+      if (_server.stopWatchdog())
+	System.out.println("Stopped server '" + _server.getId() + "'");
+      else
+	System.out.println("Can't stop server " + _server.getId());
+      
+      return false;
     }
-    
-    return process.waitFor();
+    else {
+      return _server.startSingle(_argv, _serverRoot) != 0;
+    }
   }
 
   private String calculateClassPath()
@@ -279,16 +249,12 @@ public class ResinBoot {
     try {
       ResinBoot boot = new ResinBoot(argv);
 
-      while (true) {
-	int status = boot.start();
-
-	if (status != 0) {
-	  try {
-	    synchronized (boot) {
-	      boot.wait(5000);
-	    }
-	  } catch (Throwable e) {
+      while (boot.start()) {
+	try {
+	  synchronized (boot) {
+	    boot.wait(5000);
 	  }
+	} catch (Throwable e) {
 	}
       }
     } catch (ConfigException e) {
@@ -313,4 +279,11 @@ public class ResinBoot {
 
     return _log;
   }
+
+  enum StartMode {
+    DIRECT,
+    START,
+    STOP,
+    RESTART
+  };
 }

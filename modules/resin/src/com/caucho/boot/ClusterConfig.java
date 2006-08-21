@@ -39,8 +39,8 @@ public class ClusterConfig {
   
   private ResinConfig _resin;
 
-  private ArrayList<ServerConfig> _serverList
-    = new ArrayList<ServerConfig>();
+  private ArrayList<ServerWatchdog> _serverList
+    = new ArrayList<ServerWatchdog>();
   
   private String _id = "";
 
@@ -59,12 +59,17 @@ public class ClusterConfig {
     return _id;
   }
 
-  public ServerConfig createServer()
+  public ResinConfig getResin()
   {
-    return new ServerConfig(this);
+    return _resin;
   }
 
-  public void addServer(ServerConfig server)
+  public ServerWatchdog createServer()
+  {
+    return new ServerWatchdog(this);
+  }
+
+  public void addServer(ServerWatchdog server)
     throws ConfigException
   {
     if (_resin.findServer(server.getId()) != null)
@@ -84,10 +89,10 @@ public class ClusterConfig {
   /**
    * Finds a server.
    */
-  public ServerConfig findServer(String id)
+  public ServerWatchdog findServer(String id)
   {
     for (int i = 0; i < _serverList.size(); i++) {
-      ServerConfig server = _serverList.get(i);
+      ServerWatchdog server = _serverList.get(i);
 
       if (id.equals(server.getId()))
 	return server;

@@ -37,8 +37,7 @@ import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import javax.el.ELContext;
-import javax.el.ELException;
+import javax.el.*;
 
 import javax.servlet.jsp.JspWriter;
 
@@ -108,6 +107,22 @@ public abstract class Expr {
    * Returns true if the expression is constant.
    */
   public boolean isConstant()
+  {
+    return false;
+  }
+
+  /**
+   * Returns true if the expression is read-only.
+   */
+  public boolean isReadOnly(ELContext env)
+  {
+    return true;
+  }
+
+  /**
+   * Returns true if the expression is literal text
+   */
+  public boolean isLiteralText()
   {
     return false;
   }
@@ -278,6 +293,19 @@ public abstract class Expr {
     throws ELException
   {
     return toBigDecimal(evalObject(env), env);
+  }
+
+  /**
+   * Evaluates the expression, setting an object.
+   *
+   * @param env the variable environment
+   *
+   * @return the value of the expression as an object
+   */
+  public void evalSetValue(ELContext env, Object value)
+    throws ELException
+  {
+    throw new PropertyNotWritableException(toString());
   }
 
   /**

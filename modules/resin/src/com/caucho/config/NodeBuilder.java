@@ -385,6 +385,9 @@ public class NodeBuilder {
 
       AttributeStrategy attrStrategy = typeStrategy.getAttributeStrategy(qName);
 
+      if (attrStrategy == null)
+	throw error(L.l("{0} is an unknown property.", qName), node);
+
       attrStrategy.configure(this, bean, qName, node);
     } catch (LineConfigException e) {
       throw e;
@@ -711,6 +714,40 @@ public class NodeBuilder {
   }
 
   /**
+   * Evaluate as a long.
+   */
+  public long evalLong(String exprString)
+    throws ELException
+  {
+    if (exprString.indexOf("${") >= 0 && isEL()) {
+      ELParser parser = new ELParser(getELContext(), exprString);
+      parser.setCheckEscape(true);
+      Expr expr = parser.parse();
+      
+      return expr.evalLong(getELContext());
+    }
+    else
+      return Expr.toLong(exprString, null);
+  }
+
+  /**
+   * Evaluate as a double.
+   */
+  public double evalDouble(String exprString)
+    throws ELException
+  {
+    if (exprString.indexOf("${") >= 0 && isEL()) {
+      ELParser parser = new ELParser(getELContext(), exprString);
+      parser.setCheckEscape(true);
+      Expr expr = parser.parse();
+      
+      return expr.evalDouble(getELContext());
+    }
+    else
+      return Expr.toDouble(exprString, null);
+  }
+
+  /**
    * Evaluate as an object
    */
   public Object evalObject(String exprString)
@@ -727,7 +764,7 @@ public class NodeBuilder {
       return exprString;
   }
 
-  static LineConfigException error(String msg, Node node)
+  public static LineConfigException error(String msg, Node node)
   {
     String filename = null;
     int line = 0;
@@ -745,7 +782,7 @@ public class NodeBuilder {
       return new LineConfigException(msg);
   }
   
-  private static LineConfigException error(Throwable e, Node node)
+  public static LineConfigException error(Throwable e, Node node)
   {
     String filename = null;
     int line = 0;

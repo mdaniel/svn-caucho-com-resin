@@ -19,16 +19,26 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.server.port;
+package com.caucho.boot;
 
-import com.caucho.server.dispatch.DispatchBuilder;
+import java.io.*;
+import javax.servlet.*;
 
-public interface Server extends DispatchBuilder {
+/**
+ * Process responsible for watching a backend server.
+ */
+public interface WatchdogAPI {
+  public boolean start(String serverId, String []argv);
+  
+  public boolean restart(String serverId, String []argv);
+  
+  public boolean stop(String serverId);
 }

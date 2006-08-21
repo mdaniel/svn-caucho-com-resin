@@ -54,6 +54,15 @@ public class StringLiteral extends Expr {
   {
     return true;
   }
+
+  /**
+   * Returns true if the expression is literal text
+   */
+  @Override
+  public boolean isLiteralText()
+  {
+    return true;
+  }
   
   /**
    * Returns the value of the literal.

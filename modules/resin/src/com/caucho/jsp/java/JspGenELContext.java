@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2003 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,54 +19,41 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.config;
+package com.caucho.jsp.java;
 
-import java.io.*;
+import javax.el.*;
 
-import com.caucho.util.CompileException;
+import java.beans.FeatureDescriptor;
+import java.util.*;
 
 /**
- * Thrown by the various Builders
+ * ELContext a context for EL parsing.
  */
-public class ConfigException
-  extends RuntimeException
-  implements CompileException
-{
-  /**
-   * Create a null exception
-   */
-  public ConfigException()
+public class JspGenELContext extends ELContext {
+  public JspGenELContext()
   {
   }
 
-  /**
-   * Creates an exception with a message
-   */
-  public ConfigException(String msg)
+  public ELResolver getELResolver()
   {
-    super(msg);
+    return null;
   }
 
-  /**
-   * Creates an exception with a message and throwable
-   */
-  public ConfigException(String msg, Throwable e)
+  public FunctionMapper getFunctionMapper()
   {
-    super(msg, e);
+    return null;
   }
 
-  /**
-   * Creates an exception with a throwable
-   */
-  public ConfigException(Throwable e)
+  public VariableMapper getVariableMapper()
   {
-    super(e);
+    return null;
   }
 }

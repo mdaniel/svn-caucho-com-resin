@@ -150,7 +150,7 @@ public class JstlCoreOut extends JstlNode {
       int index = _gen.addExpr(_value);
     
       out.print("_caucho_expr_" + index +
-		".print(out, pageContext, " + escapeXml + ")");
+		".print(out, pageContext.getELContext(), " + escapeXml + ")");
     }
     
     if (_default != null || _defaultAttr != null) {
@@ -168,7 +168,8 @@ public class JstlCoreOut extends JstlNode {
 	out.println(", " + escapeXml + ");");
       }
       else {
-	Expr defaultExpr = new JspELParser(_default).parse();
+	Expr defaultExpr = new JspELParser(_gen.getELContext(),
+					   _default).parse();
 
 	if (defaultExpr.isConstant() && escapeXml.equals("true")) {
 	  String string = defaultExpr.evalString(null);
@@ -189,7 +190,7 @@ public class JstlCoreOut extends JstlNode {
 	else {
 	  int defaultIndex = _gen.addExpr(defaultExpr);
 	  out.println("_caucho_expr_" + defaultIndex +
-		      ".print(out, pageContext, " + escapeXml + ");");
+		      ".print(out, pageContext.getELContext(), " + escapeXml + ");");
 	}
       }
       
