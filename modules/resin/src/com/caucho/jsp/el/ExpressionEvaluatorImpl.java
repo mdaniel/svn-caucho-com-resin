@@ -72,7 +72,7 @@ public class ExpressionEvaluatorImpl extends ExpressionEvaluator {
 				    FunctionMapper funMapper)
     throws javax.servlet.jsp.el.ELException
   {
-    JspELParser parser = new JspELParser(expression);
+    JspELParser parser = new JspELParser(null, expression);
 
     // parser.setFunctionMapper(funMapper);
 

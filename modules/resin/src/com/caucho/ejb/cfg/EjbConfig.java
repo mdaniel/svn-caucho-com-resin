@@ -405,8 +405,6 @@ public class EjbConfig {
       javaGen.compilePendingJava();
     } catch (RuntimeException e) {
       throw e;
-    } catch (ConfigException e) {
-      throw e;
     } catch (Exception e) {
       throw new ConfigException(e);
     }
@@ -446,8 +444,6 @@ public class EjbConfig {
       
       deployBeans(_deployingBeans, javaGen);
     } catch (RuntimeException e) {
-      throw e;
-    } catch (ConfigException e) {
       throw e;
     } catch (Throwable e) {
       throw new ConfigException(e);

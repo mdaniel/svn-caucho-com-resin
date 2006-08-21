@@ -33,7 +33,7 @@ import java.util.*;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentBean;
 
-abstract public class AbstractServer implements EnvironmentBean, Server {
+abstract public class AbstractServer implements EnvironmentBean {
   // The environment class loader
   private EnvironmentClassLoader _classLoader;
   

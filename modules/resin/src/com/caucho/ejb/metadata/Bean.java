@@ -139,8 +139,6 @@ public class Bean {
 	throw new ConfigException(L.l("only stateless beans are currently supported."));
     } catch (RuntimeException e) {
       throw e;
-    } catch (ConfigException e) {
-      throw e;
     } catch (Exception e) {
       throw new ConfigException(e);
     }
