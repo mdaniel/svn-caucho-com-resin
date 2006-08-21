@@ -292,7 +292,7 @@ public class QueryParser {
       _isJoinFetch = false;
 
       if (token == JOIN) {
-        if (token == FETCH) {
+        if ((token = peekToken()) == FETCH) {
           scanToken();
           _isJoinFetch = true;
         }
