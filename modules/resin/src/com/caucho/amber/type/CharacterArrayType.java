@@ -23,13 +23,10 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Rodrigo Westrupp
  */
 
 package com.caucho.amber.type;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
 
 import java.io.IOException;
 
@@ -37,29 +34,26 @@ import com.caucho.util.L10N;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.amber.manager.AmberPersistenceUnit;
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 
 /**
  * The type of a property.
  */
-public class BigIntegerType extends Type {
-  private static final L10N L = new L10N(BigIntegerType.class);
+public class CharacterArrayType extends ArrayType {
+  private static final L10N L = new L10N(CharacterArrayType.class);
 
-  private BigIntegerType()
+  private CharacterArrayType()
   {
   }
 
   /**
-   * Returns the singleton BigInteger type.
+   * Returns the singleton CharacterArray type.
    */
-  public static BigIntegerType create()
+  public static CharacterArrayType create()
   {
-    return new BigIntegerType();
+    return new CharacterArrayType();
   }
 
   /**
@@ -67,7 +61,32 @@ public class BigIntegerType extends Type {
    */
   public String getName()
   {
-    return "java.math.BigInteger";
+    return "java.lang.Character[]";
+  }
+
+  /**
+   * Returns the java type.
+   */
+  public String getJavaTypeName()
+  {
+    return "java.lang.Character[]";
+  }
+
+  /**
+   * Returns the java type for a single entry.
+   */
+  public String getJavaObjectTypeName()
+  {
+    return "java.lang.Character";
+  }
+
+  /**
+   * Returns the corresponding primitive array
+   * type name.
+   */
+  public String getPrimitiveArrayTypeName()
+  {
+    return "char[]";
   }
 
   /**
@@ -77,9 +96,9 @@ public class BigIntegerType extends Type {
                           String indexVar, int index)
     throws IOException
   {
-    out.print(rs + ".getBigDecimal(" + indexVar + " + " + index + ")");
+    out.print(rs + ".getString(" + indexVar + " + " + index + ")");
     out.print(" == null || " + rs + ".wasNull() ? null : ");
-    out.print(rs + ".getBigDecimal(" + indexVar + " + " + index + ").toBigInteger()");
+    out.print(rs + ".getString(" + indexVar + " + " + index + ").toCharArray()");
 
     return index + 1;
   }
@@ -92,9 +111,14 @@ public class BigIntegerType extends Type {
     throws IOException
   {
     out.println("if (" + value + " == null)");
-    out.println("  " + pstmt + ".setNull(" + index + "++, java.sql.Types.DECIMAL);");
-    out.println("else");
-    out.println("  " + pstmt + ".setBigDecimal(" + index + "++, new java.math.BigDecimal(" + value + "));");
+    out.println("  " + pstmt + ".setNull(" + index + "++, java.sql.Types.CHAR);");
+    out.println("else {");
+    out.println("  java.lang.Character[] super_temp_" + index + " = " + value + ";");
+    out.println("  char[] temp_" + index + " = new char[super_temp_" + index + ".length];");
+    out.println("  for (int i=0; i < temp_" + index + ".length; i++)");
+    out.println("    temp_" + index + "[i] = super_temp_" + index + "[i].charValue();");
+    out.println("  " + pstmt + ".setString(" + index + "++, new String(temp_" + index + "));");
+    out.println("}");
   }
 
   /**
@@ -103,10 +127,13 @@ public class BigIntegerType extends Type {
   public void setParameter(PreparedStatement pstmt, int index, Object value)
     throws SQLException
   {
-    if (value == null)
-      pstmt.setNull(index, java.sql.Types.DECIMAL);
-    else
-      pstmt.setBigDecimal(index, new BigDecimal((BigInteger) value));
+    Character[] wrapperCharacter = (Character []) value;
+
+    char[] primitiveCharacter = new char[wrapperCharacter.length];
+    for (int i=0; i<wrapperCharacter.length; i++)
+      primitiveCharacter[i] = wrapperCharacter[i].charValue();
+
+    pstmt.setString(index, new String(primitiveCharacter));
   }
 
   /**
@@ -115,19 +142,15 @@ public class BigIntegerType extends Type {
   public Object getObject(ResultSet rs, int index)
     throws SQLException
   {
-    BigDecimal v = rs.getBigDecimal(index);
+    char[] primitiveCharacter = rs.getString(index).toCharArray();
 
     if (rs.wasNull())
       return null;
 
-    return v.toBigInteger();
-  }
+    Character[] wrapperCharacter = new Character[primitiveCharacter.length];
+    for (int i=0; i < primitiveCharacter.length; i++)
+      wrapperCharacter[i] = new Character(primitiveCharacter[i]);
 
-  public String generateCreateColumnSQL(AmberPersistenceUnit manager,
-                                        int length,
-                                        int precision,
-                                        int scale)
-  {
-    return manager.getCreateColumnSQL(Types.NUMERIC, length, precision, scale);
+    return wrapperCharacter;
   }
 }

@@ -30,6 +30,8 @@ package com.caucho.amber.type;
 
 import java.io.IOException;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Types;
 
 import com.caucho.util.L10N;
@@ -153,6 +155,17 @@ public class PrimitiveLongType extends PrimitiveType {
   public String generateCastFromObject(String value)
   {
     return "((Number) " + value + ").longValue()";
+  }
+
+  /**
+   * Gets the value.
+   */
+  public Object getObject(ResultSet rs, int index)
+    throws SQLException
+  {
+    long v = rs.getLong(index);
+
+    return rs.wasNull() ? null : new Long(v);
   }
 
   /**

@@ -44,8 +44,9 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.amber.type.Type;
+import com.caucho.amber.type.ArrayType;
 import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.Type;
 
 import com.caucho.amber.table.Table;
 import com.caucho.amber.table.Column;
@@ -368,12 +369,31 @@ public class PropertyField extends AbstractField {
 
     String var = "amber_ld" + index;
 
-    out.print(getJavaTypeName());
+    Type columnType = getColumn().getType();
+    if (columnType instanceof ArrayType)
+      out.print(((ArrayType) columnType).getPrimitiveArrayTypeName());
+    else
+      out.print(getJavaTypeName());
     out.print(" " + var + " = ");
     index = getColumn().generateLoad(out, rs, indexVar, index);
     out.println(";");
 
-    out.println(generateSuperSetter(var) + ";");
+    // jpa/0t17
+    if (columnType instanceof ArrayType) {
+      ArrayType arrayType = (ArrayType) columnType;
+      String primitiveType = arrayType.getPrimitiveArrayTypeName();
+      out.print(getJavaTypeName());
+      out.print(" " + var + "_temp = new ");
+      String instanceJavaType = arrayType.getJavaObjectTypeName();
+      out.println(instanceJavaType + "[" + var + ".length];");
+      out.println("for (int i=0; i < " + var + ".length; i++)");
+      out.print("  " + var + "_temp[i] = new ");
+      out.print(instanceJavaType);
+      out.println("(" + var + "[i]);");
+      out.println(generateSuperSetter(var + "_temp") + ";");
+    }
+    else
+      out.println(generateSuperSetter(var) + ";");
 
     // out.println("__caucho_loadMask |= " + (1L << getIndex()) + "L;");
 

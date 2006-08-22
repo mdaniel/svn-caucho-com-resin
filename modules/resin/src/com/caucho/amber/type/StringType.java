@@ -109,11 +109,7 @@ public class StringType extends Type {
   public void setParameter(PreparedStatement pstmt, int index, Object value)
     throws SQLException
   {
-    // XXX: keep it generic until all Type classes
-    // are set in the query parser.
-    // pstmt.setString(index, (String) value);
-
-    pstmt.setObject(index, value);
+    pstmt.setString(index, (String) value);
   }
 
   /**
@@ -122,10 +118,6 @@ public class StringType extends Type {
   public Object getObject(ResultSet rs, int index)
     throws SQLException
   {
-    // XXX: keep it generic until all Type classes
-    // are set in the query parser.
-    // return rs.getString(index);
-
-    return rs.getObject(index);
+    return rs.getString(index);
   }
 }

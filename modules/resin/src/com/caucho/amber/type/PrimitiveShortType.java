@@ -30,6 +30,8 @@ package com.caucho.amber.type;
 
 import java.io.IOException;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Types;
 
 import com.caucho.util.L10N;
@@ -139,6 +141,17 @@ public class PrimitiveShortType extends PrimitiveType {
   public String generateCastFromObject(String value)
   {
     return "((Number) " + value + ").shortValue()";
+  }
+
+  /**
+   * Gets the value.
+   */
+  public Object getObject(ResultSet rs, int index)
+    throws SQLException
+  {
+    short v = rs.getShort(index);
+
+    return rs.wasNull() ? null : new Short(v);
   }
 
   /**

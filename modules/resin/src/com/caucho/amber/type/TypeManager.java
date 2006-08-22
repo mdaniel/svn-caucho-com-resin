@@ -179,7 +179,11 @@ public class TypeManager {
     _builtinTypes.put("java.sql.Clob", ClobType.create());
 
     _builtinTypes.put("[B", ByteArrayType.create());
-    _builtinTypes.put("[byte", ByteArrayType.create());
+    _builtinTypes.put("[byte", PrimitiveByteArrayType.create());
+    _builtinTypes.put("[java.lang.Byte", ByteArrayType.create());
+
+    _builtinTypes.put("[char", PrimitiveCharArrayType.create());
+    _builtinTypes.put("[java.lang.Character", CharacterArrayType.create());
 
     _builtinTypes.put("class", ClassType.create());
     _builtinTypes.put("java.lang.Class", ClassType.create());

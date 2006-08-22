@@ -41,7 +41,7 @@ import java.sql.SQLException;
 /**
  * The type of a property.
  */
-public class ByteArrayType extends Type {
+public class ByteArrayType extends ArrayType {
   private static final L10N L = new L10N(ByteArrayType.class);
 
   private ByteArrayType()
@@ -61,13 +61,30 @@ public class ByteArrayType extends Type {
    */
   public String getName()
   {
-    return "byte[]";
+    return "java.lang.Byte[]";
   }
 
   /**
    * Returns the java type.
    */
   public String getJavaTypeName()
+  {
+    return "java.lang.Byte[]";
+  }
+
+  /**
+   * Returns the java type for a single entry.
+   */
+  public String getJavaObjectTypeName()
+  {
+    return "java.lang.Byte";
+  }
+
+  /**
+   * Returns the corresponding primitive array
+   * type name.
+   */
+  public String getPrimitiveArrayTypeName()
   {
     return "byte[]";
   }
@@ -76,7 +93,7 @@ public class ByteArrayType extends Type {
    * Generates a string to load the property.
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index)
+                          String indexVar, int index)
     throws IOException
   {
     out.print(rs + ".getBytes(" + indexVar + " + " + index + ")");
@@ -88,13 +105,18 @@ public class ByteArrayType extends Type {
    * Generates a string to set the property.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String value)
+                          String index, String value)
     throws IOException
   {
     out.println("if (" + value + " == null)");
     out.println("  " + pstmt + ".setNull(" + index + "++, java.sql.Types.LONGVARBINARY);");
-    out.println("else");
-    out.println("  " + pstmt + ".setBytes(" + index + "++, " + value + ");");
+    out.println("else {");
+    out.println("  java.lang.Byte[] super_temp_" + index + " = " + value + ";");
+    out.println("  byte[] temp_" + index + " = new byte[super_temp_" + index + ".length];");
+    out.println("  for (int i=0; i < temp_" + index + ".length; i++)");
+    out.println("    temp_" + index + "[i] = super_temp_" + index + "[i].byteValue();");
+    out.println("  " + pstmt + ".setBytes(" + index + "++, temp_" + index + ");");
+    out.println("}");
   }
 
   /**
@@ -103,7 +125,13 @@ public class ByteArrayType extends Type {
   public void setParameter(PreparedStatement pstmt, int index, Object value)
     throws SQLException
   {
-    pstmt.setBytes(index, (byte []) value);
+    Byte[] wrapperByte = (Byte []) value;
+
+    byte[] primitiveByte = new byte[wrapperByte.length];
+    for (int i=0; i<wrapperByte.length; i++)
+      primitiveByte[i] = wrapperByte[i].byteValue();
+
+    pstmt.setBytes(index, primitiveByte);
   }
 
   /**
@@ -112,6 +140,15 @@ public class ByteArrayType extends Type {
   public Object getObject(ResultSet rs, int index)
     throws SQLException
   {
-    return rs.getBytes(index);
+    byte[] primitiveByte = rs.getBytes(index);
+
+    if (rs.wasNull())
+      return null;
+
+    Byte[] wrapperByte = new Byte[primitiveByte.length];
+    for (int i=0; i < primitiveByte.length; i++)
+      wrapperByte[i] = new Byte(primitiveByte[i]);
+
+    return wrapperByte;
   }
 }

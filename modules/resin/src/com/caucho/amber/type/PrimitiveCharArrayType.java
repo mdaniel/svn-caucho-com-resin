@@ -23,13 +23,10 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Rodrigo Westrupp
  */
 
 package com.caucho.amber.type;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
 
 import java.io.IOException;
 
@@ -37,29 +34,26 @@ import com.caucho.util.L10N;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.amber.manager.AmberPersistenceUnit;
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 
 /**
  * The type of a property.
  */
-public class BigIntegerType extends Type {
-  private static final L10N L = new L10N(BigIntegerType.class);
+public class PrimitiveCharArrayType extends Type {
+  private static final L10N L = new L10N(PrimitiveCharArrayType.class);
 
-  private BigIntegerType()
+  private PrimitiveCharArrayType()
   {
   }
 
   /**
-   * Returns the singleton BigInteger type.
+   * Returns the singleton PrimitiveCharArray type.
    */
-  public static BigIntegerType create()
+  public static PrimitiveCharArrayType create()
   {
-    return new BigIntegerType();
+    return new PrimitiveCharArrayType();
   }
 
   /**
@@ -67,7 +61,15 @@ public class BigIntegerType extends Type {
    */
   public String getName()
   {
-    return "java.math.BigInteger";
+    return "char[]";
+  }
+
+  /**
+   * Returns the java type.
+   */
+  public String getJavaTypeName()
+  {
+    return "char[]";
   }
 
   /**
@@ -77,9 +79,9 @@ public class BigIntegerType extends Type {
                           String indexVar, int index)
     throws IOException
   {
-    out.print(rs + ".getBigDecimal(" + indexVar + " + " + index + ")");
+    out.print(rs + ".getString(" + indexVar + " + " + index + ")");
     out.print(" == null || " + rs + ".wasNull() ? null : ");
-    out.print(rs + ".getBigDecimal(" + indexVar + " + " + index + ").toBigInteger()");
+    out.print(rs + ".getString(" + indexVar + " + " + index + ").toCharArray()");
 
     return index + 1;
   }
@@ -92,9 +94,9 @@ public class BigIntegerType extends Type {
     throws IOException
   {
     out.println("if (" + value + " == null)");
-    out.println("  " + pstmt + ".setNull(" + index + "++, java.sql.Types.DECIMAL);");
+    out.println("  " + pstmt + ".setNull(" + index + "++, java.sql.Types.CHAR);");
     out.println("else");
-    out.println("  " + pstmt + ".setBigDecimal(" + index + "++, new java.math.BigDecimal(" + value + "));");
+    out.println("  " + pstmt + ".setString(" + index + "++, new String(" + value + "));");
   }
 
   /**
@@ -104,9 +106,9 @@ public class BigIntegerType extends Type {
     throws SQLException
   {
     if (value == null)
-      pstmt.setNull(index, java.sql.Types.DECIMAL);
+      pstmt.setNull(index, java.sql.Types.CHAR);
     else
-      pstmt.setBigDecimal(index, new BigDecimal((BigInteger) value));
+      pstmt.setString(index, new String((char []) value));
   }
 
   /**
@@ -115,19 +117,11 @@ public class BigIntegerType extends Type {
   public Object getObject(ResultSet rs, int index)
     throws SQLException
   {
-    BigDecimal v = rs.getBigDecimal(index);
+    String s = rs.getString(index);
 
     if (rs.wasNull())
       return null;
 
-    return v.toBigInteger();
-  }
-
-  public String generateCreateColumnSQL(AmberPersistenceUnit manager,
-                                        int length,
-                                        int precision,
-                                        int scale)
-  {
-    return manager.getCreateColumnSQL(Types.NUMERIC, length, precision, scale);
+    return s.toCharArray();
   }
 }

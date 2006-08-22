@@ -87,12 +87,12 @@ public class BooleanType extends Type {
    * Generates a string to load the property.
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index)
+                          String indexVar, int index)
     throws IOException
   {
     out.print("com.caucho.amber.type.BooleanType.toBoolean(" +
-	      rs + ".getBoolean(" + indexVar + " + " + index + "), " +
-	      rs + ".wasNull())");
+              rs + ".getBoolean(" + indexVar + " + " + index + "), " +
+              rs + ".wasNull())");
 
     return index + 1;
   }
@@ -101,21 +101,21 @@ public class BooleanType extends Type {
    * Generates a string to set the property.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String value)
+                          String index, String value)
     throws IOException
   {
     out.println("if (" + value + " == null)");
     out.println("  " + pstmt + ".setNull(" + index + "++, java.sql.Types.BIT);");
     out.println("else");
     out.println("  " + pstmt + ".setBoolean(" + index + "++, " +
-		value + ".booleanValue());");
+                value + ".booleanValue());");
   }
 
   /**
    * Generates a string to set the property.
    */
   public void generateSetNull(JavaWriter out, String pstmt,
-			      String index)
+                              String index)
     throws IOException
   {
     out.println(pstmt + ".setNull(" + index + "++, java.sql.Types.BIT);");

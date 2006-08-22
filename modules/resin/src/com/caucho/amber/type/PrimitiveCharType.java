@@ -30,6 +30,8 @@ package com.caucho.amber.type;
 
 import java.io.IOException;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Types;
 
 import com.caucho.amber.manager.AmberPersistenceUnit;
@@ -86,7 +88,7 @@ public class PrimitiveCharType extends PrimitiveType {
    * Generates a string to load the property.
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index)
+                          String indexVar, int index)
     throws IOException
   {
     out.print("com.caucho.amber.type.PrimitiveCharType.toChar(" + rs + ".getString(" + indexVar + " + " + index + "))");
@@ -98,7 +100,7 @@ public class PrimitiveCharType extends PrimitiveType {
    * Generates a string to set the property.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String value)
+                          String index, String value)
     throws IOException
   {
     out.println(pstmt + ".setString(" + index + "++, String.valueOf(" + value + "));");
@@ -120,13 +122,24 @@ public class PrimitiveCharType extends PrimitiveType {
   {
     return "new Character(" + value + ")";
   }
-  
+
   /**
    * Converts the value.
    */
   public String generateCastFromObject(String value)
   {
     return "((Character) " + value + ").charValue()";
+  }
+
+  /**
+   * Gets the value.
+   */
+  public Object getObject(ResultSet rs, int index)
+    throws SQLException
+  {
+    String v = rs.getString(index);
+
+    return rs.wasNull() ? null : new Character(v.charAt(0));
   }
 
   /**
