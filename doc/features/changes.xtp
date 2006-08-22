@@ -8,9 +8,15 @@
 
 <s2 title="3.1snap - Aug 1, 2006">
 <ul>
+<li>JNDI now throws NameNotFoundException instead of returning null (#1134, rep by Jan Heise)</li>
+<li>Get certificates for code signing from jar files (#1008, solved by Andrew)</li>
+<li>Hessian null float constructor was using Double instead (#1306, rep by Rick Mann)</li>
+<li>Hessian constructor cost could overflow with too many args (#1305, rep by Rick Mann)</li>
+<li>&lt;log level="finer"> should also set the logger level (#1290, rep by brantd95)</li>
+<li>JSP EL function returning void was generating junk for output (#1281, rep by slonopatamus)</li>
 <li>mod_caucho reading cached localhost_6800 with headers</li>
 <li>mod_caucho and 100-continue</li>
-<li>mod_caucho and session-cookie value</li>
+<li>mod_caucho and session-cookie value (#1279)</li>
 <li>mod_caucho stripping of ;jsessionid= wasn't working</li>
 <li>(2006-08-07) ejb-server jndi-name for local name wasn't handled properly (#1276, rep by Andrew Barson and Matt Pangaro)</li>
 <li>isapi_srun.dll changed to default 6802 (#1274, rep by mindlink)</li>

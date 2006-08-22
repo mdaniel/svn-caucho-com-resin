@@ -156,31 +156,13 @@ public class ContextImpl implements Context {
   public Object lookup(String name)
     throws NamingException
   {
-    if (dbg.isLoggable(Level.FINEST)) {
-      try {
-        Object value = lookupImpl(name);
-
-        dbg.finest(L.l("JNDI lookup `{0}' -> {1}",
-		       name, value));
-
-        return value;
-      } catch (NamingException e) {
-        dbg.finest(L.l("JNDI lookup `{0}' exception {1}", name, e));
-
-        throw e;
-      }
-    }
-
     Object value = lookupImpl(name);
 
-    // RSN-229
-    /* XXX: temporarily backed out
-    if (value == null) {
+    // server/1509
+    if (value != null)
+      return value;
+    else
       throw new NameNotFoundException(getFullPath(name));
-    }
-    */
-
-    return value;
   }
 
   /**

@@ -29,19 +29,17 @@
 
 package com.caucho.vfs;
 
+import java.security.cert.Certificate;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Enumeration;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import java.util.logging.*;
 
-import java.util.zip.ZipFile;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.zip.*;
 
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
+import java.util.jar.*;
 
 import java.io.InputStream;
 import java.io.IOException;
@@ -218,11 +216,49 @@ public class Jar implements CacheListener {
   }
 
   /**
+   * Returns any certificates.
+   */
+  public Certificate []getCertificates(String path)
+  {
+    if (path.length() > 0 && path.charAt(0) == '/')
+      path = path.substring(1);
+
+    try {
+      JarFile jarFile = new JarFile(_backing.getNativePath());
+      JarEntry entry;
+      InputStream is = null;
+
+      try {
+	entry = (JarEntry) jarFile.getEntry(path);
+      
+	if (entry != null) {
+	  is = jarFile.getInputStream(entry);
+
+	  while (is.skip(65536) > 0) {
+	  }
+
+	  is.close();
+
+	  return entry.getCertificates();
+	}
+      } finally {
+	jarFile.close();
+      }
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return null;
+    }
+
+    return null;
+  }
+
+  /**
    * Returns true if the entry exists in the jar.
    *
    * @param path the path name inside the jar.
    */
-  public synchronized boolean exists(String path)
+  public boolean exists(String path)
   {
     boolean exists;
 

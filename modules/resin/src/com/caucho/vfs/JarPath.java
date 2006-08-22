@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -32,6 +33,8 @@ import java.util.Map;
 import java.util.jar.Manifest;
 
 import java.io.IOException;
+
+import java.security.cert.Certificate;
 
 import com.caucho.util.LruCache;
 
@@ -116,6 +119,15 @@ public class JarPath extends FilesystemPath {
   public Path getContainer()
   {
     return getJar().getBacking();
+  }
+
+  /**
+   * Returns any signing certificates.
+   */
+  @Override
+  public Certificate []getCertificates()
+  {
+    return getJar().getCertificates(getPath());
   }
 
   /**

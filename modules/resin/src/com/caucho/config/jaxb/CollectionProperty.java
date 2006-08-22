@@ -18,7 +18,7 @@
  * details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Resin Open Source; if not, write to the
+ * afloat with Resin Open Source; if not, write to the
  *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
@@ -34,7 +34,7 @@ import java.lang.reflect.*;
 
 import javax.el.*;
 
-import org.w3c.dom.*;
+import org.w3c.dom.Node;
 
 import com.caucho.util.*;
 
@@ -43,7 +43,18 @@ import com.caucho.el.*;
 import com.caucho.config.*;
 import com.caucho.xml.*;
 
-public class JaxbProperty extends AttributeStrategy {
+public class CollectionProperty extends JaxbProperty {
+  private final TypeStrategy _typeMarshal;
+  private final Method _getter;
+  
+  public CollectionProperty(TypeStrategy typeMarshal,
+			    Method getter)
+  {
+    _typeMarshal = typeMarshal;
+    
+    _getter = getter;
+  }
+ 
   /**
    * Configures the parent object with the given node.
    *
@@ -52,23 +63,6 @@ public class JaxbProperty extends AttributeStrategy {
    * @param name the name of the property
    * @param node the configuration node for the value
    */
-  public void configure(NodeBuilder builder,
-                        Object bean,
-                        QName name,
-                        Node node)
-    throws ConfigException
-  {
-    configureElement(builder, bean, name, node);
-  }
-  
-  /**
-   * Configures the parent object with the given node.
-   *
-   * @param builder the calling node builder (context)
-   * @param bean the bean to be configured
-   * @param name the name of the property
-   * @param value the attribute value
-   */
   public void configureAttribute(NodeBuilder builder,
 				 Object bean,
 				 QName name,
@@ -76,38 +70,34 @@ public class JaxbProperty extends AttributeStrategy {
     throws ConfigException
   {
   }
-  
+ 
   /**
    * Configures the parent object with the given node.
    *
    * @param builder the calling node builder (context)
    * @param bean the bean to be configured
    * @param name the name of the property
-   * @param value the attribute value
+   * @param node the configuration node for the value
    */
   public void configureElement(NodeBuilder builder,
 			       Object bean,
 			       QName name,
-			       Node value)
+			       Node node)
     throws ConfigException
   {
-  }
+    try {
+      Object value = _typeMarshal.configure(builder, node, bean);
 
-  protected static boolean evalBoolean(NodeBuilder builder, String textValue)
-  {
-    if (textValue.indexOf("${") >= 0)
-      return builder.evalBoolean(textValue);
-    else if (textValue.equals("true") || textValue.equals("1"))
-      return true;
-    else
-      return false;
-  }
+      Collection list = (Collection) _getter.invoke(bean);
 
-  protected static long evalLong(NodeBuilder builder, String textValue)
-  {
-    if (textValue.indexOf("${") >= 0)
-      return builder.evalLong(textValue);
-    else
-      return Expr.toLong(textValue, null);
+      if (list != null)
+	list.add(value);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (InvocationTargetException e) {
+      throw builder.error(e.getCause(), node);
+    } catch (Exception e) {
+      throw builder.error(e, node);
+    }
   }
 }

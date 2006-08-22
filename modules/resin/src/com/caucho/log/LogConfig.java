@@ -139,7 +139,12 @@ public class LogConfig extends RotateLog {
    */
   public String getLevel()
   {
-    return getSubLogger().getLevel().getName();
+    Level level = getSubLogger().getLevel();
+
+    if (level != null)
+      return level.getName();
+    else
+      return Level.INFO.getName();
   }
 
   /**
@@ -282,6 +287,9 @@ public class LogConfig extends RotateLog {
       SubLogger subLogger = _subLoggers.get(i);
       Logger logger = subLogger.getLogger();
 
+      if (subLogger.getLevel() != null)
+	logger.setLevel(subLogger.getLevel());
+
       if (_handlers == null) {
 	StreamHandler handler = new StreamHandler(os);
 	handler.setFormatter(_formatter);
@@ -292,7 +300,9 @@ public class LogConfig extends RotateLog {
 
       for (int j = 0; j < _handlers.size(); j++) {
 	SubHandler subHandler = new SubHandler(_handlers.get(j));
-	subHandler.setLevel(subLogger.getLevel());
+
+	if (subLogger.getLevel() != null)
+	  subHandler.setLevel(subLogger.getLevel());
 
 	if (! (logger instanceof EnvironmentLogger)) {
 	  CloseListener listener = new CloseListener(subHandler);
@@ -340,7 +350,7 @@ public class LogConfig extends RotateLog {
   public static class SubLogger {
     private Logger _logger;
     private String _name = "";
-    private Level _level = Level.INFO;
+    private Level _level;
     private boolean _useParentHandlers = true;
 
     // for mbean management

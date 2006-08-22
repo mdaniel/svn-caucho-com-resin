@@ -97,4 +97,9 @@ public class LineConfigException extends ConfigException
   {
     return _line;
   }
+
+  public String toString()
+  {
+    return getMessage();
+  }
 }

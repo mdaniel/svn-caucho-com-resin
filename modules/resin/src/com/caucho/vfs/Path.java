@@ -32,6 +32,8 @@ package com.caucho.vfs;
 import java.io.*;
 import java.util.*;
 
+import java.security.cert.Certificate;
+
 import com.caucho.util.*;
 
 /**
@@ -391,6 +393,14 @@ public abstract class Path {
   public String getRelativePath()
   {
     return getPath();
+  }
+
+  /**
+   * Returns any signing certificates, e.g. for jar signing.
+   */
+  public Certificate []getCertificates()
+  {
+    return null;
   }
 
   /**

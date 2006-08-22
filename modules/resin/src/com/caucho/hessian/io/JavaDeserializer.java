@@ -74,14 +74,14 @@ public class JavaDeserializer extends AbstractMapDeserializer {
     }
 
     Constructor []constructors = cl.getDeclaredConstructors();
-    int bestCost = Integer.MAX_VALUE;
+    long bestCost = Long.MAX_VALUE;
 
     for (int i = 0; i < constructors.length; i++) {
       Class []param = constructors[i].getParameterTypes();
-      int cost = 0;
+      long cost = 0;
 
       for (int j = 0; j < param.length; j++) {
-	cost = 10 * cost;
+	cost = 4 * cost;
 
 	if (Object.class.equals(param[j]))
 	  cost += 1;
@@ -94,8 +94,13 @@ public class JavaDeserializer extends AbstractMapDeserializer {
 	else if (param[j].isPrimitive())
 	  cost += 5;
 	else
-	  cost += 9;
+	  cost += 6;
       }
+
+      if (cost < 0 || cost > (1 << 48))
+	cost = 1 << 48;
+
+      cost += param.length << 48;
 
       if (cost < bestCost) {
         _constructor = constructors[i];
@@ -340,7 +345,7 @@ public class JavaDeserializer extends AbstractMapDeserializer {
     else if (long.class.equals(cl))
       return new Long(0);
     else if (float.class.equals(cl))
-      return new Double(0);
+      return new Float(0);
     else if (double.class.equals(cl))
       return new Double(0);
     else

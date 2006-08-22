@@ -47,6 +47,7 @@ import com.caucho.config.types.Signature;
 public class StaticMethodExpr extends Expr {
   private Method _method;
   private Marshall []_marshall;
+  private boolean _isVoid;
 
   /**
    * Creates a new method expression.
@@ -93,6 +94,8 @@ public class StaticMethodExpr extends Expr {
     for (int i = 0; i < _marshall.length; i++) {
       _marshall[i] = Marshall.create(param[i]);
     }
+
+    _isVoid = void.class.equals(_method.getReturnType());
   }
   
   /**
@@ -127,7 +130,13 @@ public class StaticMethodExpr extends Expr {
       for (int i = 0; i < _marshall.length; i++)
         objs[i] = _marshall[i].marshall(args[i], env);
 
-      return _method.invoke(null, objs);
+      if (! _isVoid)
+	return _method.invoke(null, objs);
+      else {
+	_method.invoke(null, objs);
+
+	return null;
+      }
     } catch (ELException e) {
       throw e;
     } catch (Exception e) {
