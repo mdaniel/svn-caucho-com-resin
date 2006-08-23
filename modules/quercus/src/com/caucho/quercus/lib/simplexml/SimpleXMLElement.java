@@ -30,7 +30,6 @@
 package com.caucho.quercus.lib.simplexml;
 
 import com.caucho.quercus.env.*;
-import com.caucho.quercus.lib.dom.DOMNodeUtil;
 import com.caucho.vfs.WriteStream;
 
 import org.w3c.dom.Document;

@@ -28,17 +28,26 @@
 
 package com.caucho.xml;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.Logger;
+import com.caucho.java.LineMap;
+import com.caucho.log.Log;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.IntMap;
+import com.caucho.util.L10N;
+import com.caucho.vfs.EnclosedWriteStream;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
 import org.w3c.dom.*;
 import org.xml.sax.Locator;
 
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.java.LineMap;
-import com.caucho.log.Log;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 /**
  * Controls printing of XML documents.
@@ -714,7 +723,7 @@ public class XmlPrinter implements XMLWriter {
    *
    * @param top name of the top element
    */
-  void printHeader(String top)
+  public void printHeader(String top)
     throws IOException
   {
     if (! _isTop)

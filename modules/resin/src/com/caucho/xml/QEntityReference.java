@@ -28,15 +28,15 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
-import com.caucho.vfs.*;
+import org.w3c.dom.EntityReference;
+import org.w3c.dom.Node;
 
-class QEntityReference extends QNode implements EntityReference {
+import java.io.IOException;
+
+public class QEntityReference extends QNode implements EntityReference {
   String _name;
 
-  QEntityReference(String name)
+  public QEntityReference(String name)
   {
     _name = name;
   }

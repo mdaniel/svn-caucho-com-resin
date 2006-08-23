@@ -27,46 +27,14 @@
  * @author Charles Reich
  */
 
-package com.caucho.quercus.lib.dom;
+package com.caucho.quercus.lib.simplexml;
 
-import com.caucho.quercus.env.Env;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
-import org.w3c.dom.*;
-
+// XXX: replace with use of XmlPrinter as done in DOMDocument
 public class DOMNodeUtil {
-
-  public static DOMNode createDOMNode(Env env, Node node)
-  {
-    if (node == null)
-      return null;
-
-    switch (node.getNodeType()) {
-      case Node.ATTRIBUTE_NODE:
-        return new DOMAttr(env, (Attr) node);
-      case Node.ELEMENT_NODE:
-        return new DOMElement(env, (Element) node);
-      case Node.COMMENT_NODE:
-        return new DOMComment(env, (Comment) node);
-      case Node.TEXT_NODE:
-        return new DOMText(env, (Text) node);
-      case Node.DOCUMENT_NODE:
-        return new DOMDocument(env, (Document) node);
-      case Node.DOCUMENT_TYPE_NODE:
-        return new DOMDocumentType(env, (DocumentType) node);
-      case Node.DOCUMENT_FRAGMENT_NODE:
-        return new DOMDocumentFragment(env, (DocumentFragment) node);
-      case Node.ENTITY_NODE:
-        return new DOMEntity(env, (Entity) node);
-      case Node.ENTITY_REFERENCE_NODE:
-        return new DOMEntityReference(env, (EntityReference) node);
-      case Node.NOTATION_NODE:
-        return new DOMNotation(env, (Notation) node);
-      case Node.PROCESSING_INSTRUCTION_NODE:
-        return new DOMProcessingInstruction(env, (ProcessingInstruction) node);
-      default:
-        return null;
-    }
-  }
 
   public static StringBuilder asXML(Node node)
   {

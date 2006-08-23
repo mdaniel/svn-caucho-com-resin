@@ -881,11 +881,19 @@ abstract public class AbstractParser implements XMLReader, Parser {
     init();
 
     QDocument doc = new QDocument();
+    parseDocument(doc, is, systemId);
+
+    return doc;
+  }
+
+  public void parseDocument(QDocument doc, InputStream is, String systemId)
+    throws IOException, SAXException
+  {
     _owner = doc;
 
     if (_builder == null)
       _builder = new DOMBuilder();
-    
+
     _builder.init(_owner);
     _builder.setSystemId(systemId);
     _builder.setCoalescing(_isCoalescing);
@@ -893,8 +901,6 @@ abstract public class AbstractParser implements XMLReader, Parser {
     _contentHandler = _builder;
 
     parseImpl(is, systemId);
-
-    return doc;
   }
 
   /**

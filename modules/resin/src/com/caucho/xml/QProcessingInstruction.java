@@ -28,17 +28,17 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
-import com.caucho.vfs.*;
+import org.w3c.dom.Node;
+import org.w3c.dom.ProcessingInstruction;
 
-class QProcessingInstruction extends QNode
+import java.io.IOException;
+
+public class QProcessingInstruction extends QNode
   implements ProcessingInstruction {
   String _name;
   String _data;
 
-  QProcessingInstruction(String name, String data)
+  public QProcessingInstruction(String name, String data)
   {
     _name = name.intern();
     _data = data;

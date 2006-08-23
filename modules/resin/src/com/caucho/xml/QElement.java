@@ -28,13 +28,12 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.io.*;
+import com.caucho.util.CharBuffer;
 
 import org.w3c.dom.*;
 
-import com.caucho.vfs.*;
-import com.caucho.util.*;
+import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * Resin's implementation of the DOM element.
@@ -54,7 +53,7 @@ public class QElement extends QAttributedNode implements CauchoElement {
    *
    * @param name the element's name.
    */
-  QElement(QName name)
+  public QElement(QName name)
   { 
     _name = name; 
   }

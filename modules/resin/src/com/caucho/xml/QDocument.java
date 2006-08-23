@@ -28,11 +28,15 @@
 
 package com.caucho.xml;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.Path;
+
 import org.w3c.dom.*;
-import com.caucho.vfs.*;
-import com.caucho.make.*;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Implements the top-level document for the XML tree.
@@ -999,7 +1003,10 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
           os.attribute(null, prefix, "xmlns:" + prefix, url);
       }
     }
-    
+
+    if (getFirstChild() == null)
+      os.printHeader(null);
+
     for (Node node = getFirstChild();
          node != null;
          node = node.getNextSibling()) {

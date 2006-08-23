@@ -30,9 +30,11 @@
 package com.caucho.quercus.lib.dom;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.UnimplementedException;
 
-public class QuercusDOMModule extends AbstractQuercusModule {
-
+public class QuercusDOMModule
+  extends AbstractQuercusModule
+{
   public static final int XML_ELEMENT_NODE = 1;
   public static final int XML_ATTRIBUTE_NODE = 2;
   public static final int XML_TEXT_NODE = 3;
@@ -78,4 +80,9 @@ public class QuercusDOMModule extends AbstractQuercusModule {
   public static final int DOM_NAMESPACE_ERR = 14;
   public static final int DOM_INVALID_ACCESS_ERR = 15;
   public static final int DOM_VALIDATION_ERR = 16;
+
+  public static void  dom_import_simplexml()
+  {
+    throw new UnimplementedException();
+  }
 }

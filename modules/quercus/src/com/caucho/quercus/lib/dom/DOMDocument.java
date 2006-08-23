@@ -24,143 +24,55 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Charles Reich
+ * @author Sam
  */
 
 package com.caucho.quercus.lib.dom;
 
-import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.StringInputStream;
-import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.TempBufferStringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.Construct;
 import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.lib.dom.DOMAttr;
-import com.caucho.quercus.lib.dom.DOMCDATASection;
-import com.caucho.quercus.lib.dom.DOMComment;
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
+import com.caucho.quercus.module.ReturnNullAsFalse;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.TempStream;
+import com.caucho.vfs.WriteStream;
+import com.caucho.xml.QDocument;
+import com.caucho.xml.Xml;
+import com.caucho.xml.XmlPrinter;
 
 import org.w3c.dom.DOMConfiguration;
-import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.ProcessingInstruction;
+import org.xml.sax.SAXException;
 
-import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Source;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
-import java.io.*;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class DOMDocument extends DOMNode {
+public class DOMDocument
+  extends QDocument
+{
+  private final static Logger log = Logger.getLogger(DOMDocument.class.getName());
 
-  private static final Logger log = Log.open(DOMDocument.class);
-  private static final L10N L = new L10N(DOMDocument.class);
-
-  private String _encoding = "";
-  private boolean _formatOutput;
-  private DOMImplementationClass _domImplementation;
-  private boolean _recover;
-  private boolean _resolveExternals;
-  private boolean _substituteEntities;
-
-  private InputStream _is;
-  private DocumentBuilderFactory _documentBuilderFactory;
-
-  private Env _env;
-  private Document _document;
-
-  //XXX: replace this once setXmlVersion works
-  // 1.0 is default value;
-  private String _version = "1.0";
+  private String _version;
+  private String _encoding;
 
   @Construct
-  public DOMDocument(Env env,
-                     @Optional String version,
-                     @Optional String encoding)
+  public DOMDocument(@Optional("'1.0'") String version, @Optional String encoding)
   {
-    _env = env;
-    _document = createDocument();
-    // XXX: uncomment this line when setXmlVersion works
-    //_document.setXmlVersion(version);
-    if (!"".equals(version))
-      _version = version;
+    _version = version;
 
-    if (!"".equals(encoding))
-      _encoding = encoding; //Used when writing XML to a file
+    if (encoding != null && encoding.length() > 0)
+      setEncoding(encoding);
   }
 
-  public DOMDocument(Env env,
-                     Document document)
-  {
-    _env = env;
-    _document = document;
-  }
-
-  public Document getNode()
-  {
-    return _document;
-  }
-
-  public Env getEnv()
-  {
-    return _env;
-  }
-
-  //helper for constructor
-  public static Document createDocument()
-  {
-    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    try {
-      DocumentBuilder builder = factory.newDocumentBuilder();
-      return builder.newDocument();
-    } catch (ParserConfigurationException ex) {
-      log.log(Level.FINE, L.l(ex.toString()), ex);
-      return null;
-    }
-  }
-
-  public String getActualEncoding()
-  {
-    return _document.getXmlEncoding();
-  }
-
-  public DOMConfiguration getConfig()
-  {
-    return _document.getDomConfig();
-  }
-
-  public DOMNode getDoctype()
-  {
-    return DOMNodeUtil.createDOMNode(_env, _document.getDoctype());
-  }
-
-  public DOMNode getDocumentElement()
-  {
-    return DOMNodeUtil.createDOMNode(_env, _document.getDocumentElement());
-  }
-
-  public String getDocumentURI()
-  {
-    return _document.getDocumentURI();
-  }
-
-  public void setDocumentURI(String documentURI)
-  {
-    _document.setDocumentURI(documentURI);
-  }
-
-  // XXX: encoding vs. xmlEncoding ???
   public String getEncoding()
   {
     return _encoding;
@@ -171,461 +83,247 @@ public class DOMDocument extends DOMNode {
     _encoding = encoding;
   }
 
-  // XXX: figure out what formatOutput does
+  public String getVersion()
+  {
+    return _version;
+  }
+
+  public void setVersion(String version)
+  {
+    _version = version;
+  }
+
+  public DOMConfiguration getConfig()
+  {
+    throw new UnimplementedException();
+  }
+
   public boolean getFormatOutput()
   {
-    return _formatOutput;
+    throw new UnimplementedException();
   }
 
-  public void setFormatOutput(boolean value)
+  public void setFormatOutput(boolean formatOutput)
   {
-    _formatOutput = value;
+    throw new UnimplementedException();
   }
 
-  public DOMImplementationClass getImplementation()
-  {
-    if (_domImplementation == null) {
-      _domImplementation = new DOMImplementationClass(_env);
-      _domImplementation.setDomImplementation(_document.getImplementation());
-    }
-
-    return _domImplementation;
-  }
-
-  /**
-   *  java isIgnoringElementContentWhitespace is the opposite of
-   *  php preserveWhiteSpace
-   */
   public boolean getPreserveWhiteSpace()
   {
-    //isIgnoringElementContentWhitespace is the opposite of
-    //php preserveWhiteSpace
-    if (_documentBuilderFactory == null)
-      return false;
-
-    return !_documentBuilderFactory.isIgnoringElementContentWhitespace();
+    throw new UnimplementedException();
   }
 
-  public void setPreserveWhiteSpace(boolean value)
+  public void setPreserveWhiteSpace(boolean preserveWhiteSpace)
   {
-    if (_documentBuilderFactory == null)
-      _documentBuilderFactory = DocumentBuilderFactory.newInstance();
-
-    if (!value) {
-      _documentBuilderFactory.setValidating(true);
-      _documentBuilderFactory.setIgnoringElementContentWhitespace(true);
-    }
+    throw new UnimplementedException();
   }
 
-  // XXX: what is recover ???
   public boolean getRecover()
   {
-    return _recover;
+    throw new UnimplementedException();
   }
 
-  public void setRecover(boolean value)
+  public void setRecover(boolean recover)
   {
-    _recover = value;
+    throw new UnimplementedException();
   }
 
-  // XXX: implement resolveExternals properly
   public boolean getResolveExternals()
   {
-    return _resolveExternals;
+    throw new UnimplementedException();
   }
 
-  public void setResolveExternals(boolean value)
+  public void setResolveExternals(boolean resolveExternals)
   {
-    _resolveExternals = value;
+    throw new UnimplementedException();
   }
 
-  public boolean getStandalone()
-  {
-    return _document.getXmlStandalone();
-  }
-
-  public void setStandalone(boolean xmlStandalone)
-  {
-    _document.setXmlStandalone(xmlStandalone);
-  }
-
-  public boolean getStrictErrorChecking()
-  {
-    return _document.getStrictErrorChecking();
-  }
-
-  public void setStrictErrorChecking(boolean strictErrorChecking)
-  {
-    _document.setStrictErrorChecking(strictErrorChecking);
-  }
-
-  // XXX: what is substituteEntities ???
   public boolean getSubstituteEntities()
   {
-    return _substituteEntities;
+    throw new UnimplementedException();
   }
 
-  public void setSubstituteEntities(boolean value)
+  public void setSubstituteEntities(boolean substituteEntities)
   {
-    _substituteEntities = value;
+    throw new UnimplementedException();
   }
 
   public boolean getValidateOnParse()
   {
-    if (_documentBuilderFactory == null)
-      return false;
-
-    return _documentBuilderFactory.isValidating();
+    throw new UnimplementedException();
   }
 
-  public void setValidateOnParse(boolean validating)
+  public void setValidateOnParse(boolean validateOnParse)
   {
-    if (_documentBuilderFactory == null)
-      _documentBuilderFactory = DocumentBuilderFactory.newInstance();
-
-    _documentBuilderFactory.setValidating(validating);
+    throw new UnimplementedException();
   }
 
-  public String getVersion()
+  public Element createElement(String name, String textContent)
   {
-    return _document.getXmlVersion();
+    Element element = super.createElement(name);
+
+    element.setTextContent(textContent);
+
+    return element;
   }
 
-  public void setVersion(String xmlVersion)
+  public Element createElementNS(String namespaceURI, String qualifiedName, String textContent)
   {
-    _document.setXmlVersion(xmlVersion);
+    Element element = super.createElementNS(namespaceURI, qualifiedName);
+
+    element.setTextContent(textContent);
+
+    return element;
   }
 
-  public String getXmlEncoding()
+  public ProcessingInstruction createProcessingInstruction(String target)
   {
-    return _document.getXmlEncoding();
+    throw new UnimplementedException();
   }
 
-  public boolean getXmlStandalone()
+  public Node importNode(Node node)
   {
-    return _document.getXmlStandalone();
+    throw new UnimplementedException();
   }
 
-  public void setXmlStandalone(boolean xmlStandalone)
+  // XXX: also can be called statically, returns a DOMDocument in that case
+  public boolean load(Env env, Path path, @Optional Value options)
   {
-    _document.setXmlStandalone(xmlStandalone);
-  }
-
-  public String getXmlVersion()
-  {
-    return _document.getXmlVersion();
-  }
-
-  public void setXmlVersion(String xmlVersion)
-  {
-    _document.setXmlVersion(xmlVersion);
-  }
-
-  public DOMAttr createAttribute(String name)
-  {
-    return new DOMAttr(_env, _document.createAttribute(name));
-  }
-
-  public DOMAttr createAttributeNS(String namespaceURI,
-                                   String qualifiedName)
-  {
-    return new DOMAttr(_env, _document.createAttributeNS(namespaceURI, qualifiedName));
-  }
-
-  public DOMNode createCDATASection(String data)
-  {
-    return new DOMCDATASection(_env, _document.createCDATASection(data));
-  }
-
-  public DOMComment createComment(String data)
-  {
-    return new DOMComment(_env, _document.createComment(data));
-  }
-
- public DOMDocumentFragment createDocumentFragment()
- {
-   return new DOMDocumentFragment(_env, _document.createDocumentFragment());
- }
-
- public DOMElement createElement(String tagName,
-                                 @Optional String value)
-  {
-    DOMElement result = new DOMElement(_env, _document.createElement(tagName));
-
-    if (value != null)
-      result.setNodeValue(value);
-
-    return result;
-  }
-
-  public DOMElement createElementNS(String namespaceURI,
-                                    String qualifiedName,
-                                    @Optional String value)
-  {
-    return new DOMElement(_env, qualifiedName, value, namespaceURI);
-  }
-
-  public DOMEntityReference createEntityReference(String name)
-  {
-    return new DOMEntityReference(_env, _document.createEntityReference(name));
-  }
-
-  public DOMProcessingInstruction createProcessingInstruction(String target,
-                                                              @Optional String data)
-  {
-    return new DOMProcessingInstruction(_env, _document.createProcessingInstruction(target, data));
-  }
-
-  public DOMText createTextNode(String data)
-  {
-    return new DOMText(_env, _document.createTextNode(data));
-  }
-
-  public DOMNode getElementById(String elementId)
-  {
-    return DOMNodeUtil.createDOMNode(_env, _document.getElementById(elementId));
-  }
-
-  public DOMNodeListValue getElementsByTagName(String tagname)
-  {
-    NodeList elements = _document.getElementsByTagName(tagname);
-    DOMNodeListValue result = new DOMNodeListValue(_env, elements);
-    int length = elements.getLength();
-
-    for (int i=0; i < length; i++) {
-      result.put(_env.wrapJava(DOMNodeUtil.createDOMNode(_env, elements.item(i))));
-    }
-
-    return result;
-  }
-
-  public DOMNodeListValue getElementsByTagNameNS(String namespaceURI,
-                                                 String localName)
-  {
-    NodeList elements = _document.getElementsByTagNameNS(namespaceURI, localName);
-    DOMNodeListValue result = new DOMNodeListValue(_env, elements);
-    int length = elements.getLength();
-
-    for (int i=0; i < length; i++) {
-      result.put(_env.wrapJava(DOMNodeUtil.createDOMNode(_env, elements.item(i))));
-    }
-
-    return result;
-  }
-
-  public DOMNode importNode(DOMNode node,
-                            @Optional("false") boolean deep)
-  {
-    return DOMNodeUtil.createDOMNode(_env, _document.importNode(node.getNode(), deep));
-  }
-
-  //XXX: need to implement static version which returns a DOMDocument
-  public DOMDocument load(String filename,
-                          @Optional Value options)
-  {
-    if (_documentBuilderFactory == null)
-      _documentBuilderFactory = DocumentBuilderFactory.newInstance();
+    ReadStream is = null;
 
     try {
-      DocumentBuilder builder = _documentBuilderFactory.newDocumentBuilder();
-      _is = new BufferedInputStream(new FileInputStream(new File(filename)));
-      _document = builder.parse(_is);
-      return this;
-    } catch (Exception e) {
-      log.log(Level.FINE, L.l(e.getMessage()), e);
-      return null;
+      is = path.openRead();
+
+      Xml xml = new Xml();
+
+      xml.parseDocument(this, is, path.getPath());
     }
-  }
-
-  public DOMDocument loadXML(String source,
-                             @Optional Value options)
-  {
-    if (_documentBuilderFactory == null)
-      _documentBuilderFactory = DocumentBuilderFactory.newInstance();
-
-    try {
-      DocumentBuilder builder = _documentBuilderFactory.newDocumentBuilder();
-      _is = new StringInputStream(source);
-      _document = builder.parse(_is);
-      return this;
-    } catch (Exception e) {
-      log.log(Level.FINE, L.l(e.getMessage()), e);
-      return null;
+    catch (SAXException ex) {
+      env.warning(ex);
     }
-  }
-
-  public void normalize()
-  {
-      _document.normalizeDocument();
-  }
-
-  public boolean relaxNGValidate(String fileName)
-  {
-    try {
-      InputStream is = new FileInputStream(new File(fileName));
-      return validateInputStream(is, XMLConstants.RELAXNG_NS_URI);
-    } catch (IOException e) {
-      log.log(Level.FINE, L.l(e.getMessage()), e);
-      return false;
+    catch (IOException ex) {
+      throw new QuercusModuleException(ex);
     }
-  }
-
-  public boolean relaxNGValidateSource(String source)
-  {
-    return validateInputStream(new StringInputStream(source), XMLConstants.RELAXNG_NS_URI);
-  }
-
-  public boolean schemaValidate(String fileName)
-  {
-    try {
-      InputStream is = new FileInputStream(new File(fileName));
-      return validateInputStream(is, XMLConstants.W3C_XML_SCHEMA_NS_URI);
-    } catch (IOException e) {
-      log.log(Level.FINE, L.l(e.getMessage()), e);
-      return false;
-    }
-  }
-
-  private boolean validateInputStream(InputStream is,
-                                      String xmlConstant)
-  {
-    SchemaFactory factory = SchemaFactory.newInstance(xmlConstant);
-
-    try {
-      Source schemaFile = new StreamSource(is);
-      Schema schema = factory.newSchema(schemaFile);
-
-      Validator validator = schema.newValidator();
-
-      try {
-        validator.validate(new DOMSource(_document));
-        return true;
-      } catch (Exception e) {
-        log.log(Level.FINE, L.l(e.getMessage()), e);
-        return false;
+    finally {
+      if (is != null) {
+        try {
+          is.close();
+        }
+        catch (IOException ex) {
+          log.log(Level.FINE, ex.toString(), ex);
+        }
       }
-
-    } catch (Exception e) {
-      log.log(Level.FINE, L.l(e.getMessage()), e);
-      return false;
     }
+
+    return true;
   }
 
-  public boolean schemaValidateSource(InputStream source)
+  /**
+   * @param source A string containing the XML
+   */
+  // XXX: also can be called statically, returns a DOMDocument in that case
+  public boolean loadHTML(String source)
   {
-    return validateInputStream(source, XMLConstants.W3C_XML_SCHEMA_NS_URI);
+    throw new UnimplementedException();
+  }
+
+  // XXX: also can be called statically, returns a DOMDocument in that case
+  public boolean loadHTMLFile(String filename)
+  {
+    throw new UnimplementedException();
+  }
+
+  // XXX: also can be called statically, returns a DOMDocument in that case
+  public boolean loadXML(String source, @Optional Value options)
+  {
+    throw new UnimplementedException();
+  }
+
+  public boolean relaxNGValidate(String rngFilename)
+  {
+    throw new UnimplementedException();
+  }
+
+  public boolean relaxNGValidateSource(String rngSource)
+  {
+    throw new UnimplementedException();
+  }
+
+  /**
+   * @return the number of bytes written, or FALSE for an error
+   */
+  public Value save(String filename, @Optional Value options)
+  {
+    throw new UnimplementedException();
+  }
+
+  @ReturnNullAsFalse
+  public void saveHTML()
+  {
+    throw new UnimplementedException();
+  }
+
+  /**
+   * @return the number of bytes written, or FALSE for an error
+   */
+
+  @ReturnNullAsFalse
+  public String saveHTMLFile(String filename)
+  {
+    throw new UnimplementedException();
+  }
+
+  @ReturnNullAsFalse
+  public StringValue saveXML()
+  {
+    TempStream tempStream = new TempStream();
+
+    try {
+      tempStream.openWrite();
+      WriteStream os = new WriteStream(tempStream);
+
+      XmlPrinter printer = new XmlPrinter(os);
+
+      printer.setVersion(_version);
+      printer.setEncoding(_encoding);
+
+      printer.setPrintDeclaration(true);
+
+      printer.printXml(this);
+
+      os.println();
+      
+      os.close();
+    }
+    catch (IOException ex) {
+      tempStream.discard();
+      throw new QuercusModuleException(ex);
+    }
+
+    TempBufferStringValue result = new TempBufferStringValue(tempStream.getHead());
+
+    tempStream.discard();
+
+    return result;
+  }
+
+  public boolean schemaValidate(String schemaFilename)
+  {
+    throw new UnimplementedException();
+  }
+
+  public boolean schemaValidateSource(String schemaSource)
+  {
+    throw new UnimplementedException();
   }
 
   public boolean validate()
   {
-    if ((_document != null) && (_documentBuilderFactory != null) && (_documentBuilderFactory.isValidating()))
-      return true;
-
-    //Need to re-parse with a validating parser
-    if (_is == null)
-      return false;
-
-    if (_documentBuilderFactory == null)
-      _documentBuilderFactory = DocumentBuilderFactory.newInstance();
-
-    _documentBuilderFactory.setValidating(true);
-
-    try {
-      DocumentBuilder builder = _documentBuilderFactory.newDocumentBuilder();
-      _document = builder.parse(_is);
-      return true;
-    } catch (Exception e) {
-      log.log(Level.FINE, L.l(e.getMessage()), e);
-      return false;
-    }
+    throw new UnimplementedException();
   }
 
-  //XXX: does not yet support options (ie: LIBXML_NOEMPTYTAG)
-  public Value save(Env env,
-                    String fileName,
-                    @Optional int options)
+  public int xinclude(@Optional int options)
   {
-    Value result = BooleanValue.FALSE;
-
-    BufferedWriter bw = null;
-
-    try {
-
-      bw = new BufferedWriter (new FileWriter(new File(fileName)));
-      //SimpleXMLElement simpleXML = new SimpleXMLElement(env, _document, _document.getDocumentElement());
-      //String asXML = simpleXML.asXML().toString();
-      String asXML = DOMNodeUtil.asXML(_document.getDocumentElement()).toString();
-      bw.write(asXML);
-      result = new LongValue(asXML.length());
-
-    } catch (IOException e) {
-      log.log(Level.FINE, L.l(e.getMessage()), e);
-    } finally {
-      try {
-        if (bw != null)
-          bw.close();
-      } catch (IOException e) {
-        log.log(Level.FINE,  L.l(e.getMessage()), e);
-      }
-    }
-
-    return result;
-  }
-
-  /**
-   *
-   * @param domNode
-   * @param options Not yet supported LIBXML_NOEMPTYTAG
-   * @return XML as string or FALSE
-   */
-  public Value saveXML(@Optional DOMNode domNode,
-                       @Optional int options)
-  {
-    //SimpleXMLElement simpleXML;
-    Node node = null;
-
-    if (domNode != null)
-      node = domNode.getNode();
-
-    if (node == null) {
-      //simpleXML = new SimpleXMLElement(_env, _document, _document.getDocumentElement());
-      return new StringValueImpl(DOMNodeUtil.asXMLVersionEncoding(_document.getDocumentElement(),_version, _encoding).toString());
-      //return new StringValueImpl(simpleXML.asXMLVersionEncoding(_version, _encoding).toString());
-
-    } else {
-      //StringBuilder sb = new StringBuilder();
-      return new StringValueImpl(DOMNodeUtil.generateXML(node, new StringBuilder()).toString());
-      //simpleXML = new SimpleXMLElement(_env, _document, ((Element) node));
-      //return new StringValueImpl(simpleXML.generateXML().toString());
-    }
-  }
-
-  public Value saveHTML()
-  {
-    return saveXML(null, 0);
-  }
-
-  public Value saveHTMLFile(Env env,
-                            String filename)
-  {
-    return save(env, filename, 0);
-  }
-
-  //@todo loadHTML
-  public Value loadHTML(Value source)
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  //@todo loadHTMLFile()
-  public Value loadHTMLFile(Value fileName)
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  //@todo xinclude([int options])
-  public Value xinclude(@Optional Value options)
-  {
-    throw new UnsupportedOperationException();
+    throw new UnimplementedException();
   }
 }

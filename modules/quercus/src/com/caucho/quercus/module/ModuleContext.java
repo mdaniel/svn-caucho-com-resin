@@ -29,38 +29,21 @@
 
 package com.caucho.quercus.module;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-
-import java.io.InputStream;
-import java.io.IOException;
-
-import java.net.URL;
-
-import java.util.Map;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Enumeration;
-
-import java.util.logging.*;
-
 import com.caucho.config.ConfigException;
-
 import com.caucho.loader.EnvironmentLocal;
-
 import com.caucho.quercus.QuercusRuntimeException;
-
 import com.caucho.quercus.env.*;
-
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.quercus.program.JavaImplClassDef;
-
 import com.caucho.util.L10N;
 
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Vfs;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Class-loader specific context for loaded PHP.
@@ -74,10 +57,10 @@ public class ModuleContext {
     = new  EnvironmentLocal<ModuleContext>();
 
   private ClassLoader _loader;
-  
+
   private HashMap<String, QuercusModule> _modules
     = new HashMap<String, QuercusModule>();
-  
+
   private HashMap<String, ModuleInfo> _moduleInfoMap
     = new HashMap<String, ModuleInfo>();
 
@@ -120,7 +103,7 @@ public class ModuleContext {
   {
     _loader = loader;
   }
-  
+
   public static ModuleContext getLocalContext(ClassLoader loader)
   {
     ModuleContext context = _localModuleContext.getLevel(loader);
@@ -132,7 +115,7 @@ public class ModuleContext {
 
     return context;
   }
-  
+
   /**
    * Adds a module
    */
@@ -145,20 +128,27 @@ public class ModuleContext {
 
     return context.addModuleInfo(name, module);
   }
-  
+
   /**
    * Adds a class
    */
-  public static JavaClassDef addClass(String name, Class type, String ext)
-    throws ConfigException, IllegalAccessException, InstantiationException
+  public static JavaClassDef addClass(String name,
+                                      Class type,
+                                      String ext,
+                                      Class javaClassDefClass)
+    throws ConfigException,
+           IllegalAccessException,
+           InstantiationException,
+           NoSuchMethodException,
+           InvocationTargetException
   {
     ClassLoader loader = type.getClassLoader();
 
     ModuleContext context = getLocalContext(loader);
 
-    return context.addClassInfo(name, type, ext);
+    return context.addClassInfo(name, type, ext, javaClassDefClass);
   }
-  
+
   /**
    * Adds a class
    */
@@ -187,22 +177,53 @@ public class ModuleContext {
 
     return info;
   }
-  
+
   private JavaClassDef addClassInfo(String name, Class type,
-				    String extension)
-    throws IllegalAccessException, InstantiationException
+                                    String extension, Class javaClassDefClass)
+    throws
+    NoSuchMethodException,
+    InvocationTargetException,
+    IllegalAccessException,
+    InstantiationException
   {
     JavaClassDef def = _javaClassWrappers.get(name);
 
     if (def == null) {
-      def = addJavaClass(name, type, extension);
+      if (log.isLoggable(Level.FINEST)) {
+        if (extension == null)
+          log.finest(L.l("PHP loading class {0} with type {1}", name, type.getName()));
+        else
+          log.finest(L.l("PHP loading class {0} with type {1} providing extension {2}", name, type.getName(), extension));
+      }
+
+      if (javaClassDefClass != null) {
+        Constructor constructor
+          =  javaClassDefClass.getConstructor(ModuleContext.class,
+                                              String.class,
+                                              Class.class);
+
+        def = (JavaClassDef) constructor.newInstance(this, name, type);
+      }
+      else
+        def = JavaClassDef.create(this, name, type);
+
+      _javaClassWrappers.put(name, def);
+      _lowerJavaClassWrappers.put(name.toLowerCase(), def);
+
+      _staticClasses.put(name, def);
+      _lowerStaticClasses.put(name.toLowerCase(), def);
+
+      // def.introspect();
+
+      if (extension != null)
+        _extensionSet.add(extension);
     }
 
     return def;
   }
-  
+
   private JavaImplClassDef addClassImplInfo(String name, Class type,
-					    String extension)
+                                            String extension)
     throws IllegalAccessException, InstantiationException
   {
     JavaImplClassDef def = (JavaImplClassDef) _staticClasses.get(name);
@@ -361,42 +382,9 @@ public class ModuleContext {
    * @param type the class to introspect.
    * @param extension the extension provided by the class, or null
    */
-  private JavaClassDef addJavaClass(String name, Class type, String extension)
-    throws IllegalAccessException, InstantiationException
-  {
-    if (log.isLoggable(Level.FINEST)) {
-      if (extension == null)
-        log.finest(L.l("PHP loading class {0} with type {1}", name, type.getName()));
-      else
-        log.finest(L.l("PHP loading class {0} with type {1} providing extension {2}", name, type.getName(), extension));
-    }
-
-    JavaClassDef def = JavaClassDef.create(this, name, type);
-
-    _javaClassWrappers.put(name, def);
-    _lowerJavaClassWrappers.put(name.toLowerCase(), def);
-
-    _staticClasses.put(name, def);
-    _lowerStaticClasses.put(name.toLowerCase(), def);
-
-    // def.introspect();
-
-    if (extension != null)
-      _extensionSet.add(extension);
-
-    return def;
-  }
-
-  /**
-   * Introspects the module class for functions.
-   *
-   * @param name the php class name
-   * @param type the class to introspect.
-   * @param extension the extension provided by the class, or null
-   */
   private JavaImplClassDef addJavaImplClass(String name,
-					    Class type,
-					    String extension)
+                                            Class type,
+                                            String extension)
     throws IllegalAccessException, InstantiationException
   {
     if (log.isLoggable(Level.FINEST)) {

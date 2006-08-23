@@ -28,9 +28,10 @@
 
 package com.caucho.xml;
 
-import java.io.*;
-import org.w3c.dom.*;
-import com.caucho.vfs.*;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * QNode represents any node that can have children.
@@ -46,8 +47,8 @@ public abstract class QNode extends QAbstractNode {
   /**
    * Returns a node list of the children.
    */
-  public NodeList getChildNodes() 
-  { 
+  public NodeList getChildNodes()
+  {
     return new ChildNodeList();
   }
 
@@ -75,13 +76,13 @@ public abstract class QNode extends QAbstractNode {
 
   public Node insertBefore(Node newChild, Node refChild)
     throws DOMException
-  { 
+  {
     QAbstractNode qNewChild = (QAbstractNode) newChild;
     QAbstractNode qRefChild = (QAbstractNode) refChild;
 
     if (qNewChild._owner != _owner && qNewChild._owner != this)
-      throw new QDOMException(DOMException.WRONG_DOCUMENT_ERR, 
-			      "insertBefore new child from wrong document");
+      throw new QDOMException(DOMException.WRONG_DOCUMENT_ERR,
+                              "insertBefore new child from wrong document");
 
     qNewChild.remove();
 
@@ -93,8 +94,8 @@ public abstract class QNode extends QAbstractNode {
       QAbstractNode first = frag._firstChild;
       QAbstractNode next = null;
       for (QAbstractNode ptr = first; ptr != null; ptr = next) {
-	next = ptr._next;
-	insertBefore(ptr, refChild);
+        next = ptr._next;
+        insertBefore(ptr, refChild);
       }
 
       return first;
@@ -104,14 +105,14 @@ public abstract class QNode extends QAbstractNode {
 
     if (refChild == null) {
       if (_firstChild == null) {
-	qNewChild._previous = null;
-	qNewChild._next = null;
-	_firstChild = _lastChild = qNewChild;
+        qNewChild._previous = null;
+        qNewChild._next = null;
+        _firstChild = _lastChild = qNewChild;
       } else {
-	_lastChild._next = qNewChild;
-	qNewChild._previous = _lastChild;
-	_lastChild = qNewChild;
-	qNewChild._next = null;
+        _lastChild._next = qNewChild;
+        qNewChild._previous = _lastChild;
+        _lastChild = qNewChild;
+        qNewChild._next = null;
       }
 
       return qNewChild;
@@ -130,7 +131,7 @@ public abstract class QNode extends QAbstractNode {
 
   public Node replaceChild(Node newChild, Node refChild)
     throws DOMException
-  { 
+  {
     QAbstractNode qNewChild = (QAbstractNode) newChild;
     QAbstractNode qRefChild = (QAbstractNode) refChild;
 
@@ -138,12 +139,12 @@ public abstract class QNode extends QAbstractNode {
       throw new QDOMException(DOMException.NOT_FOUND_ERR, "ref is not child");
 
     if (qNewChild == null || qNewChild._owner != _owner)
-      throw new QDOMException(DOMException.WRONG_DOCUMENT_ERR, 
-			      "wrong document");
+      throw new QDOMException(DOMException.WRONG_DOCUMENT_ERR,
+                              "wrong document");
 
     if (_owner != null)
       _owner._changeCount++;
-    
+
     qNewChild._previous = qRefChild._previous;
     qNewChild._next = qRefChild._next;
     qNewChild._parent = this;
@@ -166,17 +167,17 @@ public abstract class QNode extends QAbstractNode {
   }
 
   public Node removeChild(Node oldChild) throws DOMException
-  { 
+  {
     QAbstractNode qOldChild = (QAbstractNode) oldChild;
 
     if (qOldChild != null && qOldChild._parent != this) {
-      throw new QDOMException(DOMException.NOT_FOUND_ERR, 
-			      "removeChild has no such child");
+      throw new QDOMException(DOMException.NOT_FOUND_ERR,
+                              "removeChild has no such child");
     }
 
     if (_owner != null)
       _owner._changeCount++;
-    
+
     if (qOldChild._previous == null)
       _firstChild = qOldChild._next;
     else
@@ -194,9 +195,30 @@ public abstract class QNode extends QAbstractNode {
     return qOldChild;
   }
 
+  private static void setOwner(QAbstractNode node, QDocument owner)
+  {
+    if (node._owner == null) {
+      node._owner = owner;
+
+      String namespace = node.getNamespaceURI();
+
+      if (namespace != "")
+        owner.addNamespace(node.getPrefix(), namespace);
+
+      for (QAbstractNode child = (QAbstractNode) node.getFirstChild();
+           child != null;
+           child = (QAbstractNode) child.getNextSibling())
+      {
+        setOwner(child, owner);
+      }
+    }
+  }
+
   public Node appendChild(Node newNode) throws DOMException
   {
     QAbstractNode qNewNode = (QAbstractNode) newNode;
+
+    setOwner(qNewNode, _owner);
 
     if (qNewNode._owner != _owner && qNewNode._owner != this) {
       throw new QDOMException(DOMException.WRONG_DOCUMENT_ERR,
@@ -210,8 +232,8 @@ public abstract class QNode extends QAbstractNode {
       QAbstractNode first = frag._firstChild;
       QAbstractNode next = null;
       for (QAbstractNode ptr = first; ptr != null; ptr = next) {
-	next = ptr._next;
-	appendChild(ptr);
+        next = ptr._next;
+        appendChild(ptr);
       }
 
       return first;
@@ -264,22 +286,22 @@ public abstract class QNode extends QAbstractNode {
     QAbstractNode ptr = _firstChild;
     for (; ptr != null; ptr = ptr._next) {
       if (ptr._parent != this)
-	throw new Exception("child parent bad:" + this + " " + ptr);
+        throw new Exception("child parent bad:" + this + " " + ptr);
       if (ptr._owner != _owner && ptr._owner != this)
-	throw new Exception("child owner bad:" + this + " " + ptr + " " +
-			    ptr._owner + " " + _owner);
+        throw new Exception("child owner bad:" + this + " " + ptr + " " +
+                            ptr._owner + " " + _owner);
       if (ptr._next != null && ptr._next._previous != ptr)
-	throw new Exception("child links bad:" + this + " " + ptr);
+        throw new Exception("child links bad:" + this + " " + ptr);
     }
 
     ptr = _lastChild;
     for (; ptr != null; ptr = ptr._previous) {
       if (ptr._parent != this)
-	throw new Exception("child parent bad:" + this + " " + ptr);
+        throw new Exception("child parent bad:" + this + " " + ptr);
       if (ptr._owner != _owner && ptr._owner != this)
-	throw new Exception("child owner bad:" + this + " " + ptr);
+        throw new Exception("child owner bad:" + this + " " + ptr);
       if (ptr._previous != null && ptr._previous._next != ptr)
-	throw new Exception("child links bad:" + this + " " + ptr);
+        throw new Exception("child links bad:" + this + " " + ptr);
     }
 
     return true;
@@ -294,11 +316,11 @@ public abstract class QNode extends QAbstractNode {
 
     for (QNode ptr = _parent; ptr != null; ptr = ptr._parent) {
       if (ptr._next != null)
-	return ptr._next;
+        return ptr._next;
     }
 
     return null;
-  } 
+  }
 
   public boolean equals(Object arg)
   {
@@ -320,7 +342,7 @@ public abstract class QNode extends QAbstractNode {
     {
       QAbstractNode ptr = _firstChild;
       for (; ptr != null && index > 0; index--) {
-	ptr = ptr._next;
+        ptr = ptr._next;
       }
 
       return ptr;
@@ -333,7 +355,7 @@ public abstract class QNode extends QAbstractNode {
     {
       int index = 0;
       for (QAbstractNode ptr = _firstChild; ptr != null; ptr = ptr._next)
-	index++;
+        index++;
 
       return index;
     }

@@ -31,10 +31,9 @@ package com.caucho.quercus.program;
 
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusException;
-import com.caucho.quercus.QuercusRuntimeException;
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.LiteralExpr;
-import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.Construct;
 import com.caucho.quercus.module.JavaMarshall;
 import com.caucho.quercus.module.Marshall;
@@ -43,9 +42,17 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.logging.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents an introspected Java class.
@@ -681,6 +688,11 @@ public class JavaClassDef extends ClassDef {
     }
 
     return null;
+  }
+
+  protected void setCons(Method method)
+  {
+    _cons = new JavaMethod(_moduleContext, method);
   }
 
   /**

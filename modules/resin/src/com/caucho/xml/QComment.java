@@ -28,13 +28,13 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
-import com.caucho.vfs.*;
+import org.w3c.dom.Comment;
+import org.w3c.dom.Node;
 
-class QComment extends QCharacterData implements Comment {
-  QComment(String data)
+import java.io.IOException;
+
+public class QComment extends QCharacterData implements Comment {
+  public QComment(String data)
   {
     super(data);
   }

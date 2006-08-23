@@ -28,18 +28,18 @@
 
 package com.caucho.xml;
 
-import java.io.*;
-import org.w3c.dom.*;
-import com.caucho.vfs.*;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 
 /**
  * Represents a text node.
  */
-class QText extends QCharacterData implements Text {
+public class QText extends QCharacterData implements Text {
   /**
    * Creates a new text node with initial data.
    */
-  QText(String data)
+  public QText(String data)
   {
     super(data);
   }

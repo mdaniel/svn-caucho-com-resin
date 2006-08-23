@@ -28,17 +28,19 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
-import com.caucho.vfs.*;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.TypeInfo;
+
+import java.io.IOException;
 
 public class QAttr extends QNode implements Attr {
   QName _name;
   private String _value;
   private boolean _specified = true;
 
-  QAttr(QName name, String value)
+  public QAttr(QName name, String value)
   { 
     _name = name; 
     _value = value;

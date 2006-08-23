@@ -32,7 +32,7 @@ package com.caucho.quercus;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.*;
-import java.lang.reflect.*;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.*;
 import java.util.logging.*;
@@ -77,8 +77,6 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Depend;
-
-import com.caucho.server.session.SessionManager;
 
 /**
  * Facade for the PHP language.
@@ -159,7 +157,7 @@ public class Quercus {
   private String _scriptEncoding = "utf-8";
 
   private boolean _isStrict;
-  
+
   private DataSource _database;
 
   private long _staticId;
@@ -287,7 +285,7 @@ public class Quercus {
       if (type.isAnnotationPresent(ClassImplementation.class))
         introspectJavaImplClass(name, type, null);
       else
-        introspectJavaClass(name, type, null);
+        introspectJavaClass(name, type, null, null);
     } catch (Exception e) {
       throw new ConfigException(e);
     }
@@ -362,18 +360,18 @@ public class Quercus {
   public void setIniFile(Path path)
   {
     Environment.addDependency(new Depend(path));
-    
+
     if (path.canRead()) {
       Env env = new Env(this);
 
       Value result = FileModule.parse_ini_file(env, path, false);
 
       if (result instanceof ArrayValue) {
-	ArrayValue array = (ArrayValue) result;
+        ArrayValue array = (ArrayValue) result;
 
-	for (Map.Entry<Value,Value> entry : array.entrySet()) {
-	  setIni(entry.getKey().toString(), entry.getValue().toString());
-	}
+        for (Map.Entry<Value,Value> entry : array.entrySet()) {
+          setIni(entry.getKey().toString(), entry.getValue().toString());
+        }
       }
     }
   }
@@ -399,7 +397,7 @@ public class Quercus {
   public void setServerEnv(String name, String value)
   {
     _serverEnvMap.put(new StringValueImpl(name),
-		      new StringValueImpl(value));
+                      new StringValueImpl(value));
   }
 
   /**
@@ -461,12 +459,12 @@ public class Quercus {
    * Returns an include path.
    */
   public Path getIncludeCache(String include,
-			      String includePath,
-			      Path pwd,
-			      Path scriptPwd)
+                              String includePath,
+                              Path pwd,
+                              Path scriptPwd)
   {
     IncludeKey key = new IncludeKey(include, includePath, pwd, scriptPwd);
-    
+
     Path path = _includeCache.get(key);
 
     return path;
@@ -476,13 +474,13 @@ public class Quercus {
    * Adds an include path.
    */
   public void putIncludeCache(String include,
-			      String includePath,
-			      Path pwd,
-			      Path scriptPwd,
-			      Path path)
+                              String includePath,
+                              Path pwd,
+                              Path scriptPwd,
+                              Path path)
   {
     IncludeKey key = new IncludeKey(include, includePath, pwd, scriptPwd);
-    
+
     _includeCache.put(key, path);
   }
 
@@ -513,14 +511,14 @@ public class Quercus {
       DefinitionState defState = defStateRef.get();
 
       if (defState != null) {
-	_defCacheHitCount++;
-	
-	return defState.copyLazy();
+        _defCacheHitCount++;
+
+        return defState.copyLazy();
       }
     }
 
     _defCacheMissCount++;
-    
+
     return null;
   }
 
@@ -528,11 +526,11 @@ public class Quercus {
    * Returns the definition state for an include.
    */
   public void putDefinitionCache(DefinitionKey key,
-				 DefinitionState defState)
+                                 DefinitionState defState)
   {
     _defCache.put(key, new SoftReference<DefinitionState>(defState.copy()));
   }
-  
+
   /**
    * Parses a quercus program.
    *
@@ -750,16 +748,16 @@ public class Quercus {
   public Value getExtensionFuncs(String name)
   {
     ArrayValue value = null;
-    
+
     for (QuercusModule module : _modules.values()) {
       String []ext = module.getLoadedExtensions();
       boolean hasExt = false;
 
       for (int i = 0; i < ext.length; i++) {
-	if (name.equals(ext[i]))
-	  hasExt = true;
+        if (name.equals(ext[i]))
+          hasExt = true;
       }
-      
+
       if (hasExt) {
         value = new ArrayValueImpl();
       }
@@ -814,11 +812,11 @@ public class Quercus {
   public SessionArrayValue loadSession(Env env, String sessionId)
   {
     long now = Alarm.getCurrentTime();
-    
-    SessionArrayValue session = 
+
+    SessionArrayValue session =
       _sessionManager.getSession(env, sessionId, now);
-    
-    if (session == null) 
+
+    if (session == null)
       session = _sessionManager.createSession(env, sessionId, now);
 
     return session;
@@ -946,7 +944,7 @@ public class Quercus {
     QuercusModule module = (QuercusModule) cl.newInstance();
 
     ModuleInfo info = ModuleContext.addModule(module.getClass().getName(),
-					      module);
+                                              module);
 
     _modules.put(info.getName(), info.getModule());
 
@@ -960,7 +958,7 @@ public class Quercus {
 
     if (map != null)
       _constMap.putAll(map);
-    
+
     Map<String, StringValue> iniMap = info.getDefaultIni();
     _iniMap.putAll(iniMap);
 
@@ -1035,7 +1033,7 @@ public class Quercus {
   private void parseClassServicesModule(ReadStream in)
     throws IOException, ClassNotFoundException,
            IllegalAccessException, InstantiationException,
-	   ConfigException
+           ConfigException, NoSuchMethodException, InvocationTargetException
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     String line;
@@ -1059,37 +1057,55 @@ public class Quercus {
 
       try {
         cl = Class.forName(className, false, loader);
-      }
-      catch (ClassNotFoundException e) {
-        throw new ClassNotFoundException(L.l("`{0}' not valid {1}", className, e.toString()));
-      }
 
-      String phpClassName = null;
-      String extension = null;
+        String phpClassName = null;
+        String extension = null;
+        String definedBy = null;
 
-      for (int i = 1; i < args.length; i++) {
-        if ("as".equals(args[i])) {
-          i++;
-          if (i >= args.length)
-            throw new IOException(L.l("expecting Quercus class name after `{0}' in definition for class {1}", "as", className));
+        for (int i = 1; i < args.length; i++) {
+          if ("as".equals(args[i])) {
+            i++;
+            if (i >= args.length)
+              throw new IOException(L.l("expecting Quercus class name after `{0}' in definition for class {1}", "as", className));
 
-          phpClassName = args[i];
+            phpClassName = args[i];
+          }
+          else if ("provides".equals(args[i])) {
+            i++;
+            if (i >= args.length)
+              throw new IOException(L.l("expecting name of extension after `{0}' in definition for class {1}", "extension", className));
+
+            extension = args[i];
+          }
+          else if ("definedBy".equals(args[i])) {
+            i++;
+            if (i >= args.length)
+              throw new IOException(L.l("expecting name of class implementing JavaClassDef after `{0}' in definition for class {1}", "definedBy", className));
+
+            definedBy = args[i];
+          }
+          else {
+            throw new IOException(L.l("unknown token `{0}' in definition for class {1} ", args[i], className));
+          }
         }
-        else if ("provides".equals(args[i])) {
-          i++;
-          if (i >= args.length)
-            throw new IOException(L.l("expecting name of extension after `{0}' in definition for class {1}", "extension", className));
 
-          extension = args[i];
+        if (phpClassName == null)
+          phpClassName = className.substring(className.lastIndexOf('.') + 1);
+
+
+        Class javaClassDefClass;
+
+        if (definedBy != null) {
+          javaClassDefClass = Class.forName(definedBy, false, loader);
         }
-        else {
-          throw new IOException(L.l("unknown token `{0}' in definition for class {1} ", args[i], className));
-        }
+        else
+          javaClassDefClass = null;
+
+        introspectJavaClass(phpClassName, cl, extension, javaClassDefClass);
+      } catch (Throwable e) {
+        log.info("Failed loading " + className + "\n" + e.toString());
+        log.log(Level.FINE, e.toString(), e);
       }
-      if (phpClassName == null)
-        phpClassName = className.substring(className.lastIndexOf('.') + 1);
-
-      introspectJavaClass(phpClassName, cl, extension);
     }
   }
 
@@ -1099,25 +1115,27 @@ public class Quercus {
    * @param name the php class name
    * @param type the class to introspect.
    * @param extension the extension provided by the class, or null
+   * @param javaClassDefClass
    */
-  private void introspectJavaClass(String name, Class type, String extension)
-    throws IllegalAccessException, InstantiationException, ConfigException
+  private void introspectJavaClass(String name, Class type, String extension,
+                                   Class javaClassDefClass)
+    throws IllegalAccessException, InstantiationException, ConfigException,
+           NoSuchMethodException, InvocationTargetException
   {
-    if (log.isLoggable(Level.FINEST)) {
-      if (extension == null)
-        log.finest(L.l("Quercus loading class {0} with type {1}", name, type.getName()));
-      else
-        log.finest(L.l("Quercus loading class {0} with type {1} providing extension {2}", name, type.getName(), extension));
-    }
-    
+    if (log.isLoggable(Level.FINE))
+      log.fine(L.l("Quercus loading class {0}", name));
+
     if (type.isAnnotationPresent(ClassImplementation.class)) {
+      if (javaClassDefClass != null)
+        throw new UnimplementedException();
+
       ClassDef def = ModuleContext.addClassImpl(name, type, extension);
 
       _staticClasses.put(name, def);
       _lowerStaticClasses.put(name.toLowerCase(), def);
     }
     else {
-      JavaClassDef def = ModuleContext.addClass(name, type, extension);
+      JavaClassDef def = ModuleContext.addClass(name, type, extension, javaClassDefClass);
 
       _javaClassWrappers.put(name, def);
       _lowerJavaClassWrappers.put(name.toLowerCase(), def);
@@ -1138,8 +1156,8 @@ public class Quercus {
    * @param extension the extension provided by the class, or null
    */
   private void introspectJavaImplClass(String name,
-				       Class type,
-				       String extension)
+                                       Class type,
+                                       String extension)
     throws IllegalAccessException, InstantiationException, ConfigException
   {
     if (log.isLoggable(Level.FINEST)) {
@@ -1196,9 +1214,9 @@ public class Quercus {
     if (obj != null) {
       obj.putField(env, "message", new StringValueImpl(msg));
     }
-    
+
     return NullValue.NULL;
-    
+
   }
 
   static class IncludeKey {
@@ -1230,14 +1248,14 @@ public class Quercus {
     public boolean equals(Object o)
     {
       if (! (o instanceof IncludeKey))
-	return false;
+        return false;
 
       IncludeKey key = (IncludeKey) o;
 
       return (_include.equals(key._include) &&
-	      _includePath.equals(key._includePath) &&
-	      _pwd.equals(key._pwd) &&
-	      _scriptPwd.equals(key._scriptPwd));
+              _includePath.equals(key._includePath) &&
+              _pwd.equals(key._pwd) &&
+              _scriptPwd.equals(key._scriptPwd));
     }
   }
 
