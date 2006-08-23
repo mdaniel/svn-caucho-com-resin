@@ -59,11 +59,8 @@ public class ELParser
   private String _lexeme;
   // Temporary buffer
   private CharBuffer _cb = new CharBuffer();
-  // Static function map
-  private Map<String,Method> _staticFunctionMap;
 
   protected final ELContext _elContext;
-  private FunctionMapper _functionMapper;
 
   private boolean _checkEscape;
 
@@ -90,24 +87,6 @@ public class ELParser
    */
   protected void copyTo(ELParser parser)
   {
-    parser._staticFunctionMap = _staticFunctionMap;
-    parser._functionMapper = _functionMapper;
-  }
-
-  /**
-   * Sets the static function map.
-   */
-  public void setStaticFunctionMap(Map<String,Method> map)
-  {
-    _staticFunctionMap = map;
-  }
-
-  /**
-   * Sets the function mapper
-   */
-  public void setFunctionMapper(FunctionMapper mapper)
-  {
-    _functionMapper = mapper;
   }
 
   /**
@@ -674,11 +653,10 @@ public class ELParser
     throws ELParseException
   {
     Method method = null;
-    
-    if (_staticFunctionMap != null)
-      method = _staticFunctionMap.get(name);
 
-    if (method == null && _functionMapper != null) {
+    FunctionMapper funMapper = _elContext.getFunctionMapper();
+
+    if (funMapper != null) {
       String prefix = "";
       String localName = name;
 
@@ -688,7 +666,7 @@ public class ELParser
 	localName = name.substring(p + 1);
       }
       
-      method = _functionMapper.resolveFunction(prefix, localName);
+      method = funMapper.resolveFunction(prefix, localName);
     }
     
     return method;

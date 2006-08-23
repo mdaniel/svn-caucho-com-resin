@@ -61,16 +61,18 @@ public class ImplicitFieldExpr extends Expr {
   public Object evalObject(ELContext env)
     throws ELException
   {
-    throw new UnsupportedOperationException();
-    /*
+    if (! (env instanceof PageContextImpl.PageELContext))
+      return null;
+    
+    PageContextImpl page
+      = ((PageContextImpl.PageELContext) env).getPageContext();
+
     Object fieldValue = _field.evalObject(env);
     
     if (fieldValue == null)
       return null;
 
     String fieldString = toString(fieldValue, env);
-
-    PageContext page = (PageContext) env;
 
     switch (_index) {
     case ImplicitObjectExpr.APPLICATION_SCOPE:
@@ -137,7 +139,6 @@ public class ImplicitFieldExpr extends Expr {
     }
       
     throw new UnsupportedOperationException();
-    */
   }
 
   /**

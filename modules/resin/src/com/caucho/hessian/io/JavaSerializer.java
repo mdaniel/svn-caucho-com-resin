@@ -50,12 +50,16 @@ package com.caucho.hessian.io;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.*;
 import java.lang.reflect.*;
 
 /**
  * Serializing an object for known object types.
  */
 public class JavaSerializer extends AbstractSerializer {
+  private static final Logger log
+    = Logger.getLogger(JavaSerializer.class.getName());
+  
   private Field []_fields;
   private FieldSerializer []_fieldSerializers;
   private Method _writeReplace;
@@ -131,8 +135,9 @@ public class JavaSerializer extends AbstractSerializer {
   public void writeObject(Object obj, AbstractHessianOutput out)
     throws IOException
   {
-    if (out.addRef(obj))
+    if (out.addRef(obj)) {
       return;
+    }
     
     Class cl = obj.getClass();
     
@@ -149,6 +154,7 @@ public class JavaSerializer extends AbstractSerializer {
 	return;
       }
     } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
     }
 
     int ref = out.writeObjectBegin(cl.getName());
@@ -236,7 +242,7 @@ public class JavaSerializer extends AbstractSerializer {
       try {
 	value = field.get(obj);
       } catch (IllegalAccessException e) {
-	// XXX: log when available
+	log.log(Level.FINE, e.toString(), e);
       }
 
       out.writeObject(value);
@@ -254,7 +260,7 @@ public class JavaSerializer extends AbstractSerializer {
       try {
 	value = field.getBoolean(obj);
       } catch (IllegalAccessException e) {
-	// XXX: log when available
+	log.log(Level.FINE, e.toString(), e);
       }
 
       out.writeBoolean(value);
@@ -272,7 +278,7 @@ public class JavaSerializer extends AbstractSerializer {
       try {
 	value = field.getInt(obj);
       } catch (IllegalAccessException e) {
-	// XXX: log when available
+	log.log(Level.FINE, e.toString(), e);
       }
 
       out.writeInt(value);
@@ -290,7 +296,7 @@ public class JavaSerializer extends AbstractSerializer {
       try {
 	value = field.getLong(obj);
       } catch (IllegalAccessException e) {
-	// XXX: log when available
+	log.log(Level.FINE, e.toString(), e);
       }
 
       out.writeLong(value);
@@ -308,7 +314,7 @@ public class JavaSerializer extends AbstractSerializer {
       try {
 	value = field.getDouble(obj);
       } catch (IllegalAccessException e) {
-	// XXX: log when available
+	log.log(Level.FINE, e.toString(), e);
       }
 
       out.writeDouble(value);
@@ -326,7 +332,7 @@ public class JavaSerializer extends AbstractSerializer {
       try {
 	value = (String) field.get(obj);
       } catch (IllegalAccessException e) {
-	// XXX: log when available
+	log.log(Level.FINE, e.toString(), e);
       }
 
       out.writeString(value);

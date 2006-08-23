@@ -125,7 +125,7 @@ public class JavaJspGenerator extends JspGenerator {
 
   private String _filename;
 
-  private JspGenELContext _elContext = new JspGenELContext();
+  private final JspGenELContext _elContext;
   
   private HashMap<String,Method> _elFunctionMap = new HashMap<String,Method>();
   private ArrayList<Taglib> _tagLibraryList =
@@ -170,6 +170,8 @@ public class JavaJspGenerator extends JspGenerator {
 
   public JavaJspGenerator(ParseTagManager tagManager)
   {
+    _elContext = new JspGenELContext(this);
+    
     _tagManager = tagManager;
     
     _topTag = new TagInstance(tagManager);
@@ -392,6 +394,14 @@ public class JavaJspGenerator extends JspGenerator {
 
       _elFunctionMap.put(name, function.getMethod());
     }
+  }
+
+  Method resolveFunction(String prefix, String localName)
+  {
+    if (prefix.equals(""))
+      return _elFunctionMap.get(localName);
+    else
+      return _elFunctionMap.get(prefix + ':' + localName);
   }
 
   /**
@@ -1122,8 +1132,6 @@ public class JavaJspGenerator extends JspGenerator {
   {
     JspELParser parser = new JspELParser(_elContext, value);
 
-    parser.setStaticFunctionMap(_elFunctionMap);
-
     return parser.parse();
   }
 
@@ -1151,8 +1159,6 @@ public class JavaJspGenerator extends JspGenerator {
   {
     JspELParser parser = new JspELParser(_elContext, value);
 
-    parser.setStaticFunctionMap(_elFunctionMap);
-    
     com.caucho.el.Expr expr = parser.parse();
 
     int index = _valueExprList.indexOf(expr);

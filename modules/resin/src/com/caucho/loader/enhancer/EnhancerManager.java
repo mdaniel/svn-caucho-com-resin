@@ -40,10 +40,6 @@ import java.util.HashMap;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-import org.aopalliance.intercept.MethodInterceptor;
-
-import com.caucho.aop.AopMethodEnhancer;
-
 import com.caucho.bytecode.ByteCodeParser;
 import com.caucho.bytecode.ByteCodeClassScanner;
 import com.caucho.bytecode.ByteCodeClassMatcher;
@@ -100,9 +96,6 @@ public class EnhancerManager implements ByteCodeEnhancer, ByteCodeClassMatcher {
   private ArrayList<ClassEnhancer> _classEnhancerList =
     new ArrayList<ClassEnhancer>();
   
-  private HashMap<CharBuffer,MethodEnhancer> _methodEnhancerMap =
-    new HashMap<CharBuffer,MethodEnhancer>();
-  
   private EnhancerManager(ClassLoader loader)
   {
     for (;
@@ -117,7 +110,6 @@ public class EnhancerManager implements ByteCodeEnhancer, ByteCodeClassMatcher {
 
     if (_parent != null) {
       _classEnhancerList.addAll(_parent._classEnhancerList);
-      _methodEnhancerMap.putAll(_parent._methodEnhancerMap);
     }
   }
 
@@ -199,18 +191,6 @@ public class EnhancerManager implements ByteCodeEnhancer, ByteCodeClassMatcher {
   public void addClassEnhancer(ClassEnhancer classEnhancer)
   {
     _classEnhancerList.add(classEnhancer);
-  }
-
-  /**
-   * Adds a method annotation.
-   */
-  public void addMethod(MethodEnhancerConfig config)
-  {
-    config.setEnhancerManager(this);
-    
-    CharBuffer name = new CharBuffer(config.getAnnotation().getName());
-
-    _methodEnhancerMap.put(name, config);
   }
 
   /**
@@ -299,24 +279,6 @@ public class EnhancerManager implements ByteCodeEnhancer, ByteCodeClassMatcher {
     }
     // XXX: class-wide enhancements need to go first
 
-    // method enhancements, currently based on annotations
-    for (JMethod jMethod : jClass.getDeclaredMethods()) {
-      for (JAnnotation jAnn : jMethod.getDeclaredAnnotations()) {
-	String type = jAnn.getType();
-	
-	type = type.replace('/', '.');
-
-	CharBuffer cb = new CharBuffer(type);
-	
-	MethodEnhancer enhancer = _methodEnhancerMap.get(cb);
-
-	if (enhancer != null) {
-	  hasEnhancer = true;
-	  enhancer.enhance(genClass, jMethod, jAnn);
-	}
-      }
-    }
-
     try {
       if (hasEnhancer) {
 	_javaGen.setWorkDir(getPreWorkPath());
@@ -389,10 +351,6 @@ public class EnhancerManager implements ByteCodeEnhancer, ByteCodeClassMatcher {
    */
   public boolean isMatch(CharBuffer cb)
   {
-    if (_methodEnhancerMap.get(cb) != null) {
-      return true;
-    }
-    else
-      return false;
+    return false;
   }
 }

@@ -58,9 +58,9 @@ public class JaxbBeanType extends TypeStrategy {
   private HashMap<String,AttributeStrategy> _attributeMap
     = new HashMap<String,AttributeStrategy>();
   
-  private final Class _type;
+  private final Class<?> _type;
 
-  public JaxbBeanType(Class type)
+  public JaxbBeanType(Class<?> type)
   {
     _type = type;
 
@@ -121,7 +121,10 @@ public class JaxbBeanType extends TypeStrategy {
   private void introspect()
   {
     XmlAccessorType accessorType
-      = (XmlAccessorType) _type.getAnnotation(XmlAccessorType.class);
+      = _type.getPackage().getAnnotation(XmlAccessorType.class);
+
+    if (_type.isAnnotationPresent(XmlAccessorType.class))
+      accessorType = _type.getAnnotation(XmlAccessorType.class);
 
     XmlAccessType accessType;
 
@@ -170,17 +173,27 @@ public class JaxbBeanType extends TypeStrategy {
       if (hasAnnotation(XmlTransient.class, getter, setter))
 	continue;
 
+      XmlElements xmlElements
+	= getAnnotation(XmlElements.class, getter, setter);
+
       XmlElement xmlElement
 	= getAnnotation(XmlElement.class, getter, setter);
+
+      XmlElementWrapper eltWrapper
+	= getAnnotation(XmlElementWrapper.class, getter, setter);
       
       XmlAttribute xmlAttribute
 	= getAnnotation(XmlAttribute.class, getter, setter);
 
       name = Introspector.decapitalize(name.substring(3));
 
-      if (xmlElement != null) {
+      if (xmlElements != null) {
+      }
+      else if (xmlElement != null) {
 	if (! "##default".equals(xmlElement.name()))
 	  name = xmlElement.name();
+      }
+      else if (eltWrapper != null) {
       }
       else if (xmlAttribute != null) {
 	if (! "##default".equals(xmlAttribute.name()))
@@ -194,12 +207,82 @@ public class JaxbBeanType extends TypeStrategy {
       else
 	continue;
 
-      AttributeStrategy attr = createPropertyAttribute(getter,
-						       setter,
-						       paramTypes[0]);
+      Class type = paramTypes[0];
 
-      if (attr != null)
-	_attributeMap.put(name, attr);
+      if (Collection.class.isAssignableFrom(type)) {
+	Class componentType = getCollectionComponent(type);
+
+	HashMap<String,AttributeStrategy> attrMap = _attributeMap;
+
+	if (eltWrapper != null) {
+	  String wrapperName = name + "s";
+
+	  if (! "##default".equals(eltWrapper.name()))
+	    wrapperName = eltWrapper.name();
+
+	  CollectionWrapperProperty wrapperAttr
+	    = new CollectionWrapperProperty();
+
+	  _attributeMap.put(wrapperName, wrapperAttr);
+
+	  attrMap = wrapperAttr.getAttributeMap();
+	}
+
+	if (xmlElements != null) {
+	  for (XmlElement elt : xmlElements.value()) {
+	    String eltName = name;
+	    Class<?> eltType = componentType;
+	  
+	    if (! "##default".equals(elt.name()))
+	      eltName = elt.name();
+
+	    if (elt.type() != XmlElement.DEFAULT.class)
+	      eltType = elt.type();
+	    
+	    TypeStrategy typeMarshal = createTypeMarshal(eltType);
+
+	    AttributeStrategy attr;
+	    attr = new CollectionProperty(typeMarshal, getter);
+
+	    attrMap.put(eltName, attr);
+	  }
+	}
+	else {
+	  TypeStrategy typeMarshal = createTypeMarshal(componentType);
+
+	  AttributeStrategy attr;
+	  attr = new CollectionProperty(typeMarshal, getter);
+
+	  attrMap.put(name, attr);
+	}
+      }
+      else if (xmlElements != null) {
+	for (XmlElement elt : xmlElements.value()) {
+	  String eltName = name;
+	  Class<?> eltType = paramTypes[0];
+	  
+	  if (! "##default".equals(elt.name()))
+	    eltName = elt.name();
+
+	  if (elt.type() != XmlElement.DEFAULT.class)
+	    eltType = elt.type();
+	  
+	  AttributeStrategy attr = createPropertyAttribute(getter,
+							   setter,
+							   eltType);
+
+	  if (attr != null)
+	    _attributeMap.put(eltName, attr);
+	}
+      }
+      else {
+	AttributeStrategy attr = createPropertyAttribute(getter,
+							 setter,
+							 paramTypes[0]);
+
+	if (attr != null)
+	  _attributeMap.put(name, attr);
+      }
     }
   }
 
@@ -243,12 +326,19 @@ public class JaxbBeanType extends TypeStrategy {
       if (Modifier.isTransient(field.getModifiers()))
 	continue;
 
+      XmlElements xmlElements = field.getAnnotation(XmlElements.class);
       XmlElement xmlElement = field.getAnnotation(XmlElement.class);
       XmlAttribute xmlAttribute = field.getAnnotation(XmlAttribute.class);
+      XmlElementWrapper eltWrapper
+	= field.getAnnotation(XmlElementWrapper.class);
 
-      if (xmlElement != null) {
+      if (xmlElements != null) {
+      }
+      else if (xmlElement != null) {
 	if (! "##default".equals(xmlElement.name()))
 	  name = xmlElement.name();
+      }
+      else if (eltWrapper != null) {
       }
       else if (xmlAttribute != null) {
 	if (! "##default".equals(xmlAttribute.name()))
@@ -264,10 +354,77 @@ public class JaxbBeanType extends TypeStrategy {
 
       Class fieldType = field.getType();
 
-      AttributeStrategy attr = createFieldAttribute(field, fieldType);
+      if (Collection.class.isAssignableFrom(fieldType)) {
+	Class componentType = getCollectionComponent(fieldType);
 
-      if (attr != null)
-	_attributeMap.put(name, attr);
+	HashMap<String,AttributeStrategy> attrMap = _attributeMap;
+
+	if (eltWrapper != null) {
+	  String wrapperName = name + "s";
+
+	  if (! "##default".equals(eltWrapper.name()))
+	    wrapperName = eltWrapper.name();
+
+	  CollectionWrapperProperty wrapperAttr
+	    = new CollectionWrapperProperty();
+
+	  _attributeMap.put(wrapperName, wrapperAttr);
+
+	  attrMap = wrapperAttr.getAttributeMap();
+	}
+
+	if (xmlElements != null) {
+	  for (XmlElement elt : xmlElements.value()) {
+	    String eltName = name;
+	    Class<?> eltType = componentType;
+	  
+	    if (! "##default".equals(elt.name()))
+	      eltName = elt.name();
+
+	    if (elt.type() != XmlElement.DEFAULT.class)
+	      eltType = elt.type();
+	    
+	    TypeStrategy typeMarshal = createTypeMarshal(eltType);
+
+	    AttributeStrategy attr;
+	    attr = new CollectionField(typeMarshal, field);
+
+	    attrMap.put(eltName, attr);
+	  }
+	}
+	else {
+	  TypeStrategy typeMarshal = createTypeMarshal(componentType);
+
+	  AttributeStrategy attr;
+	  attr = new CollectionField(typeMarshal, field);
+
+	  attrMap.put(name, attr);
+	}
+      }
+      else if (xmlElements == null) {
+	AttributeStrategy attr = createFieldAttribute(field, fieldType);
+
+	if (attr != null)
+	  _attributeMap.put(name, attr);
+      }
+      else {
+	for (XmlElement elt : xmlElements.value()) {
+	  String eltName = name;
+	  Class<?> eltType = fieldType;
+	  
+	  if (! "##default".equals(elt.name()))
+	    eltName = elt.name();
+
+	  if (elt.type() != XmlElement.DEFAULT.class)
+	    eltType = elt.type();
+	  
+	  AttributeStrategy attr = createFieldAttribute(field,
+							eltType);
+
+	  if (attr != null)
+	    _attributeMap.put(eltName, attr);
+	}
+      }
     }
   }
 
@@ -319,19 +476,7 @@ public class JaxbBeanType extends TypeStrategy {
 
     if (Collection.class.isAssignableFrom(type)) {
       Type retType = getter.getGenericReturnType();
-      Class componentType = Object.class;
-
-      if (retType instanceof ParameterizedType) {
-	ParameterizedType pType = (ParameterizedType) retType;
-	Type []typeArgs = pType.getActualTypeArguments();
-
-	if (typeArgs.length > 0) {
-	  if (typeArgs[0] instanceof Class)
-	    componentType = (Class) typeArgs[0];
-	  else if (typeArgs[0] instanceof ParameterizedType)
-	    componentType = (Class) ((ParameterizedType) typeArgs[0]).getRawType();
-	}
-      }
+      Class componentType = getCollectionComponent(retType);
       
       TypeStrategy typeMarshal = createTypeMarshal(componentType);
 
@@ -339,6 +484,25 @@ public class JaxbBeanType extends TypeStrategy {
     }
 
     return new BeanProperty(setter, type);
+  }
+
+  private static Class getCollectionComponent(Type type)
+  {
+    Class componentType = Object.class;
+
+    if (type instanceof ParameterizedType) {
+      ParameterizedType pType = (ParameterizedType) type;
+      Type []typeArgs = pType.getActualTypeArguments();
+
+      if (typeArgs.length > 0) {
+	if (typeArgs[0] instanceof Class)
+	  componentType = (Class) typeArgs[0];
+	else if (typeArgs[0] instanceof ParameterizedType)
+	  componentType = (Class) ((ParameterizedType) typeArgs[0]).getRawType();
+      }
+    }
+    
+    return componentType;
   }
 
   private TypeStrategy createTypeMarshal(Class type)

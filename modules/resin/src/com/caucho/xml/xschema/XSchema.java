@@ -27,34 +27,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.aop;
-
-import java.lang.reflect.Method;
-
-import org.aopalliance.intercept.MethodInterceptor;
-
-import com.caucho.util.L10N;
+package com.caucho.xml.xschema;
 
 /**
- * Builds the method interception chain.
+ * XSchema top node.
  */
-public class MethodInterceptorBuilder {
-  private static final L10N L = new L10N(MethodInterceptorBuilder.class);
-
-  private MethodInterceptor _interceptor;
-
-  public MethodInterceptorBuilder(MethodInterceptor interceptor)
-  {
-    _interceptor = interceptor;
-  }
-  
-  public static MethodInterceptor create(Method method)
-  {
-    return AopEnhancer.getBuilder(method).build();
-  }
-
-  MethodInterceptor build()
-  {
-    return _interceptor;
-  }
+public class XSchema {
 }

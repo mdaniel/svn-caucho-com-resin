@@ -97,6 +97,17 @@ public class PathExpr extends Expr {
 	return new MethodExpr(array.getExpr(), string.getValue(), args);
       }
     }
+    else if (_expr instanceof ArrayResolverExpr) {
+      ArrayResolverExpr array = (ArrayResolverExpr) _expr;
+
+      Expr index = array.getIndex();
+      
+      if (index instanceof StringLiteral) {
+	StringLiteral string = (StringLiteral) index;
+
+	return new MethodExpr(array.getExpr(), string.getValue(), args);
+      }
+    }
       
     return new FunctionExpr(this, args);
   }

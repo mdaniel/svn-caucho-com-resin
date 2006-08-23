@@ -8,6 +8,7 @@
 
 <s2 title="3.1snap - Aug 1, 2006">
 <ul>
+<li>&lt;database> prepared statement caching shouldn't cache with resultType (#1310, rep by gzhu)</li>
 <li>JNDI now throws NameNotFoundException instead of returning null (#1134, rep by Jan Heise)</li>
 <li>Get certificates for code signing from jar files (#1008, solved by Andrew)</li>
 <li>Hessian null float constructor was using Double instead (#1306, rep by Rick Mann)</li>

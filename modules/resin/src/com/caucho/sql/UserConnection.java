@@ -209,7 +209,7 @@ public class UserConnection implements java.sql.Connection {
     }
 
     try {
-      stmt = getMConn().prepareStatement(this, sql, -1);
+      stmt = getMConn().prepareStatement(this, sql);
     } catch (SQLException e) {
       getMConn().fatalEvent(e);
       throw e;

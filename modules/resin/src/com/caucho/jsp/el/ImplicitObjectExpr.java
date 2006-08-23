@@ -123,12 +123,15 @@ public class ImplicitObjectExpr extends Expr {
   public Object evalObject(ELContext env)
     throws ELException
   {
-    /*
-    PageContextImpl page = (PageContextImpl) env;
+    if (! (env instanceof PageContextImpl.PageELContext))
+      return null;
+    
+    PageContextImpl page
+      = ((PageContextImpl.PageELContext) env).getPageContext();
     
     switch (_index) {
     case PAGE_CONTEXT:
-      return env;
+      return page;
 
     case APPLICATION_SCOPE:
       return new AttributeMap(page, PageContext.APPLICATION_SCOPE);
@@ -224,8 +227,7 @@ public class ImplicitObjectExpr extends Expr {
       return map;
     }
     }
-    */
-      
+
     throw new UnsupportedOperationException();
   }
 

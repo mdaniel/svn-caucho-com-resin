@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -122,15 +123,18 @@ public class HessianModel extends AbstractModel {
     throws NamingException
   {
     try {
-      Object obj = _root._cache.get(getURLPrefix() + _namePrefix + name);
+      String urlPrefix = getURLPrefix();
+      String cacheName = urlPrefix + _namePrefix + name;
+      
+      Object obj = _root._cache.get(cacheName);
       if (obj != null)
         return obj;
 
       if (_root._remoteRoot == null) {
         if (_root._client == null)
-          _root._client = HessianClientContainer.find(getURLPrefix());
+          _root._client = HessianClientContainer.find(urlPrefix);
 
-        Object stub = _client.createObjectStub(getURLPrefix());
+        Object stub = _client.createObjectStub(urlPrefix);
 
         _root._remoteRoot = (NameServerRemote) stub;
       }
@@ -138,13 +142,13 @@ public class HessianModel extends AbstractModel {
       obj = _root._remoteRoot.lookup(_namePrefix + name);
 
       if (obj instanceof EJBHome)
-        _root._cache.put(name, obj);
+        _root._cache.put(cacheName, obj);
       else if (obj instanceof NameServerRemote) {
         HessianModel model = new HessianModel(_namePrefix + name, _root);
-        _remote = (NameServerRemote) obj;
-        model.setRemote(_remote);
+        NameServerRemote remote = (NameServerRemote) obj;
+        model.setRemote(remote);
         obj = model;
-        _root._cache.put(name, obj);
+        _root._cache.put(cacheName, obj);
       }
 
       return obj;

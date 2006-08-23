@@ -1766,7 +1766,12 @@ public class PageContextImpl extends PageContext
     }
   }
 
-  class PageELContext extends ELContext {
+  public class PageELContext extends ELContext {
+    public PageContextImpl getPageContext()
+    {
+      return PageContextImpl.this;
+    }
+    
     public ELResolver getELResolver()
     {
       return _elResolver;

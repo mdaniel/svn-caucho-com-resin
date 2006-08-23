@@ -32,14 +32,18 @@ package com.caucho.jsp.java;
 import javax.el.*;
 
 import java.beans.FeatureDescriptor;
+import java.lang.reflect.*;
 import java.util.*;
 
 /**
  * ELContext a context for EL parsing.
  */
 public class JspGenELContext extends ELContext {
-  public JspGenELContext()
+  private final JavaJspGenerator _gen;
+  
+  public JspGenELContext(JavaJspGenerator gen)
   {
+    _gen = gen;
   }
 
   public ELResolver getELResolver()
@@ -49,11 +53,19 @@ public class JspGenELContext extends ELContext {
 
   public FunctionMapper getFunctionMapper()
   {
-    return null;
+    return _funMapper;
   }
 
   public VariableMapper getVariableMapper()
   {
     return null;
   }
+
+  private final FunctionMapper _funMapper = new FunctionMapper()
+    {
+      public Method resolveFunction(String prefix, String localName)
+      {
+	return _gen.resolveFunction(prefix, localName);
+      }
+    };
 }

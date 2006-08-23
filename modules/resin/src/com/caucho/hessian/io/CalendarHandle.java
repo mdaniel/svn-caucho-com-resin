@@ -80,6 +80,8 @@ public class CalendarHandle implements java.io.Serializable {
       cal.setTimeInMillis(this.date.getTime());
 
       return cal;
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

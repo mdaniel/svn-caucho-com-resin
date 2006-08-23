@@ -134,7 +134,7 @@ public abstract class Expr {
    */
   public Expr createField(Expr field)
   {
-    return new ArrayExpr(this, field);
+    return new ArrayResolverExpr(this, field);
   }
 
   /**

@@ -46,7 +46,7 @@ import com.caucho.vfs.*;
 import com.caucho.java.*;
 import com.caucho.util.*;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.*;
 
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.AbstractHttpResponse;
@@ -99,6 +99,11 @@ public class EJBServlet extends GenericServlet {
   public void setDebug(boolean debug)
   {
     _isDebug = debug;
+  }
+
+  public void setURLPrefix(String prefix)
+  {
+    _urlPrefix = prefix;
   }
 
   /**
@@ -269,26 +274,30 @@ public class EJBServlet extends GenericServlet {
     if (_urlPrefix != null)
       return;
     
-    Application app = (Application) getServletContext();
+    WebApp app = (WebApp) getServletContext();
 
     // calculate the URL prefix
     _servletId = req.getServletPath();
 
     CharBuffer cb = CharBuffer.allocate();
-    if (req.getServerName().equals(""))
-      cb.append(app.getURL());
+
+    if (! "default".equals(app.getAdmin().getHost().getName())
+	&& ! "".equals(app.getAdmin().getHost().getName())) {
+      String hostName = app.getAdmin().getHost().getURL();
+
+      cb.append(hostName);
+      cb.append(app.getContextPath());
+      cb.append(_servletId);
+    }
     else {
       cb.append(req.getScheme());
       cb.append("://");
       cb.append(req.getServerName());
-      int port = req.getServerPort();
-      if (port != 80) {
-        cb.append(":");
-        cb.append(port);
-      }
+      cb.append(":");
+      cb.append(req.getServerPort());
       cb.append(app.getContextPath());
+      cb.append(_servletId);
     }
-    cb.append(_servletId);
   
     _urlPrefix = cb.close();
 
