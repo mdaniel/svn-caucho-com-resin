@@ -97,7 +97,6 @@ public class WebServiceServlet extends HttpServlet {
   }
 
   public void setService(Object o)
-    throws Exception
   {
     _object = o;
     if (_class==null)
@@ -133,7 +132,6 @@ public class WebServiceServlet extends HttpServlet {
   }
 
   public void setInterface(Class c)
-    throws Exception
   {
     _class = c;
   }

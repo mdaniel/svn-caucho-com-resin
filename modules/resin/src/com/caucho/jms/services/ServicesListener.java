@@ -84,13 +84,17 @@ public class ServicesListener {
     _connectionFactory = connectionFactory;
   }
 
-  public void setService(Object o)
-    throws Exception
+  public void setService(Object service)
   {
-    _object = o;
+    _object = service;
 
     if (_class == null)
-      _class = o.getClass();
+      _class = service.getClass();
+  }
+
+  public void setInterface(Class cl)
+  {
+    _class = cl;
   }
 
   public void init()

@@ -712,6 +712,14 @@ public class WebApp extends ServletContextImpl
   }
 
   /**
+   * Get the strict mapping setting.
+   */
+  public boolean getStrictMapping()
+  {
+    return _isStrictMapping;
+  }
+
+  /**
    * Lazy servlet validation.
    */
   public void setLazyServletValidate(boolean isLazy)
@@ -752,21 +760,10 @@ public class WebApp extends ServletContextImpl
    * Adds a web service.
    */
   public WebService createWebService()
-    throws ServletException
   {
-    WebService webService = new WebService();
-    webService.setStrictMapping(_isStrictMapping);
+    WebService webService = new WebService(this);
 
     return webService;
-  }
-
-  /**
-   * Adds a web service configuration.
-   */
-  public void addWebService(WebService webService)
-    throws ServletException
-  {
-    addServletMapping(webService);
   }
 
   /**

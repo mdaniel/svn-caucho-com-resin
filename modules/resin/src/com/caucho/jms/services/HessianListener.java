@@ -46,7 +46,7 @@
  * @author Emil Ong
  */
 
-package com.caucho.hessian.server;
+package com.caucho.jms.services;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -77,6 +77,8 @@ import com.caucho.hessian.io.HessianOutput;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.hessian.io.SerializerFactory;
+
+import com.caucho.hessian.server.HessianSkeleton;
 
 import com.caucho.jms.util.BytesMessageInputStream;
 import com.caucho.jms.util.BytesMessageOutputStream;

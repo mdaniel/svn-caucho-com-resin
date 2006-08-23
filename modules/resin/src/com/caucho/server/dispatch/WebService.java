@@ -24,80 +24,104 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Adam Megacz
+ * @author Adam Megacz, Emil Ong
  */
 
 package com.caucho.server.dispatch;
 
-import com.caucho.soap.servlets.WebServiceServlet;
-import com.caucho.server.dispatch.*;
-import com.caucho.server.webapp.*;
+import java.util.ArrayList;
 
-import com.caucho.config.types.InitParam;
 import com.caucho.config.types.InitProgram;
-import com.caucho.config.types.RawString;
-
-import javax.servlet.*;
-import javax.servlet.Servlet;
-
-import javax.servlet.jsp.el.ELException;
+import com.caucho.server.webapp.WebApp;
 
 /**
  * A Web Service entry in web.xml (Caucho-specific)
  */
-public class WebService extends ServletMapping {
-
-  private String  _implementationClass;
-  private String  _interfaceClass;
-  private String  _namespace = null;
-  private String  _wsdl = null;
-  private boolean _wrapped = true;
+public class WebService {
+  private WebApp _webApp;
+  private String _serviceClass;
+  private ArrayList<ServiceInterface> _interfaces 
+    = new ArrayList<ServiceInterface>();
+  private InitProgram _init;
+  private Object _service;
 
   /**
    * Creates a new web service object.
    */
-  public WebService()
-    throws ServletException
+  public WebService(WebApp webApp)
   {
-    super.setServletClass(WebServiceServlet.class.getName());
+    _webApp = webApp;
   }
 
-  public void setImplementationClass(String implementationClass)
-    throws ELException
+  WebApp getWebApp()
   {
-    _implementationClass = implementationClass;
-
-    if (_interfaceClass == null)
-      _interfaceClass = implementationClass;
+    return _webApp;
   }
 
-  public void setInterfaceClass(String interfaceClass)
-    throws ELException
+  public void setClass(String serviceClass)
   {
-    _interfaceClass = interfaceClass;
+    _serviceClass = serviceClass;
   }
 
-  public void setNamespace(String namespace)
-    throws ELException
+  public void setInit(InitProgram init)
   {
-    _namespace = namespace;
+    _init = init;
   }
 
-  public void setWrapped(boolean wrapped)
-    throws ELException
+  public HessianInterface createHessian()
   {
-    _wrapped = wrapped;
+    HessianInterface hessianInterface = new HessianInterface(this);
+    _interfaces.add(hessianInterface);
+
+    return hessianInterface;
   }
 
-  void configureServlet(Servlet servlet)
-    throws Throwable
+  public SoapInterface createSoap()
   {
-    super.configureServlet(servlet);
+    SoapInterface soapInterface = new SoapInterface(this);
+    _interfaces.add(soapInterface);
 
-    WebServiceServlet webServiceServlet = (WebServiceServlet)servlet;
-    webServiceServlet.setImplementationClass(_implementationClass);
-    webServiceServlet.setInterfaceClass(_interfaceClass);
-    webServiceServlet.setNamespace(_namespace);
-    webServiceServlet.setWrapped(_wrapped);
+    return soapInterface;
+  }
+
+  public RestInterface createRest()
+  {
+    RestInterface restInterface = new RestInterface(this);
+    _interfaces.add(restInterface);
+
+    return restInterface;
+  }
+
+  Object getServiceInstance()
+  {
+    if (_service != null)
+      return _service;
+
+    if (_serviceClass == null)
+      return null;
+
+    try {
+      Class cl = loadClass(_serviceClass);
+
+      if (_init != null)
+        _service = _init.create(cl);
+      else
+        _service = cl.newInstance();
+
+      return _service;
+    } catch (Throwable e) {
+      return null;
+    }
+  }
+
+  Class loadClass(String className)
+    throws ClassNotFoundException
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+    if (loader != null)
+      return Class.forName(className, false, loader);
+    else
+      return Class.forName(className);
   }
 }
