@@ -41,19 +41,24 @@ class PreparedStatementKey {
 
   PreparedStatementKey(String sql)
   {
-    _sql = sql;
+    init(sql);
   }
 
   PreparedStatementKey(String sql, int resultType)
   {
-    _sql = sql;
-    _resultType = resultType;
+    init(sql, resultType);
   }
 
   void init(String sql, int resultType)
   {
     _sql = sql;
     _resultType = resultType;
+  }
+
+  void init(String sql)
+  {
+    _sql = sql;
+    _resultType = -1;
   }
 
   PreparedStatementKey copy()

@@ -31,6 +31,8 @@ package com.caucho.vfs;
 import java.util.Map;
 import java.util.jar.Manifest;
 
+import java.security.cert.Certificate;
+
 import java.io.IOException;
 
 import com.caucho.util.LruCache;
@@ -116,6 +118,14 @@ public class JarPath extends FilesystemPath {
   public Path getContainer()
   {
     return getJar().getBacking();
+  }
+
+  /**
+   * Returns any signing certificates.
+   */
+  public Certificate []getCertificates()
+  {
+    return getJar().getCertificates(getPath());
   }
 
   /**

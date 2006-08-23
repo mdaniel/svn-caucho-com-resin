@@ -4,6 +4,12 @@
 
 <s2 title='3.0.snap - Aug 14, 2006'>
 <ul>
+<li>&lt;database> prepared statement caching shouldn't cache with resultType (#1310, rep by gzhu)</li>
+<li>Get certificates for code signing from jar files (#1008, solved by Andrew)</li>
+<li>Hessian constructor cost could overflow with too many args (#1305, rep by Rick Mann)</li>
+<li>&lt;log level="finer"> should also set the logger level (#1290, rep by brantd95)
+<li>JSP EL function returning void was generating junk for output (#1281, rep by slonopatamus)
+<li>mod_caucho and session-cookie value (#1279)</li>
 <li>mod_caucho reading cached localhost_6800 with headers
 <li>mod_caucho and 1--continue
 </ul>

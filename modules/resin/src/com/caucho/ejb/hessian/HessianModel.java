@@ -141,8 +141,8 @@ public class HessianModel extends AbstractModel {
         _root._cache.put(name, obj);
       else if (obj instanceof NameServerRemote) {
         HessianModel model = new HessianModel(_namePrefix + name, _root);
-        _remote = (NameServerRemote) obj;
-        model.setRemote(_remote);
+        NameServerRemote remote = (NameServerRemote) obj;
+        model.setRemote(remote);
         obj = model;
         _root._cache.put(name, obj);
       }

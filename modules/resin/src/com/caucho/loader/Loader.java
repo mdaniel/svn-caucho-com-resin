@@ -187,7 +187,8 @@ abstract public class Loader {
   protected CodeSource getCodeSource(Path path)
   {
     try {
-      return new CodeSource(new URL(path.getURL()), (Certificate []) null);
+      return new CodeSource(new URL(path.getURL()),
+			    (Certificate []) path.getCertificates());
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
 

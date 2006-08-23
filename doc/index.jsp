@@ -47,7 +47,7 @@ New users can start <a href="/resin-doc/orientation.xtp?xtpflag=default-homepage
 
 <p>Documentation is available <a href="/resin-doc">here</a>.
 
-<p>Administration is available <a href="/resin-admin">here</a>.
+<p>Administration is available <a href="/resin-admin">here</a> (requires JDK 1.5).
 
 <% } else { %>
 <p>

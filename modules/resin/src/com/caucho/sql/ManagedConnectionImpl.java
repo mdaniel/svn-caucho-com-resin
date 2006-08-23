@@ -375,6 +375,21 @@ public class ManagedConnectionImpl
 				     String sql, int resultType)
     throws SQLException
   {
+    Connection conn = getDriverConnection();
+
+    if (conn == null)
+      throw new IllegalStateException(L.l("can't prepare statement from closed connection"));
+
+    return conn.prepareStatement(sql, resultType);
+  }
+
+  /**
+   * Returns a new or cached prepared statement.
+   */
+  PreparedStatement prepareStatement(UserConnection uConn,
+				     String sql)
+    throws SQLException
+  {
     PreparedStatementKey key = _key;
 
     Connection conn = getDriverConnection();
@@ -383,16 +398,13 @@ public class ManagedConnectionImpl
       throw new IllegalStateException(L.l("can't prepare statement from closed connection"));
 
     if (key == null) {
-      if (resultType > 0)
-	return conn.prepareStatement(sql, resultType);
-      else
-	return conn.prepareStatement(sql);
+      return conn.prepareStatement(sql);
     }
 
     boolean hasItem = false;
 
     synchronized (key) {
-      key.init(sql, resultType);
+      key.init(sql);
 
       PreparedStatementCacheItem item = _preparedStatementCache.get(key);
 
@@ -407,15 +419,12 @@ public class ManagedConnectionImpl
     }
 
     PreparedStatement pStmt;
-    if (resultType > 0)
-      pStmt = conn.prepareStatement(sql, resultType);
-    else
-      pStmt = conn.prepareStatement(sql);
+    pStmt = conn.prepareStatement(sql);
 
     if (hasItem)
       return pStmt;
 
-    key = new PreparedStatementKey(sql, resultType);
+    key = new PreparedStatementKey(sql);
 
     PreparedStatementCacheItem item;
     item = new PreparedStatementCacheItem(key, pStmt, this);
