@@ -35,20 +35,20 @@ import java.util.*;
 import java.util.logging.*;
 
 /**
- * Resolves properties based on arrays.
+ * Resolves properties based on lists.
  */
-public class ArrayELResolver extends ELResolver {
+public class ListELResolver extends ELResolver {
   private final static Logger log
-    = Logger.getLogger(ArrayELResolver.class.getName());
+    = Logger.getLogger(ListELResolver.class.getName());
   
   private final boolean _isReadOnly;
   
-  public ArrayELResolver()
+  public ListELResolver()
   {
     _isReadOnly = false;
   }
   
-  public ArrayELResolver(boolean isReadOnly)
+  public ListELResolver(boolean isReadOnly)
   {
     _isReadOnly = true;
   }
@@ -58,8 +58,8 @@ public class ArrayELResolver extends ELResolver {
   {
     if (base == null)
       return null;
-    else if (base.getClass().isArray())
-      return base.getClass().getComponentType();
+    else if (base instanceof List)
+      return Object.class;
     else
       return null;
   }
@@ -78,10 +78,13 @@ public class ArrayELResolver extends ELResolver {
   {
     if (base == null)
       return null;
-    else if (base.getClass().isArray()) {
-      context.setPropertyResolved(true);
+    else if (base instanceof List) {
+      Object value = getValue(context, base, property);
 
-      return base.getClass().getComponentType();
+      if (value != null)
+	return value.getClass();
+      else
+	return null;
     }
     else
       return null;
@@ -94,7 +97,9 @@ public class ArrayELResolver extends ELResolver {
   {
     if (base == null)
       return null;
-    else if (base.getClass().isArray()) {
+    else if (base instanceof List) {
+      List list = (List) base;
+      
       context.setPropertyResolved(true);
 
       int index = 0;
@@ -109,7 +114,7 @@ public class ArrayELResolver extends ELResolver {
 	}
       }
 
-      return Array.get(base, index);
+      return list.get(index);
     }
     else {
       return null;
@@ -132,7 +137,9 @@ public class ArrayELResolver extends ELResolver {
   {
     if (base == null) {
     }
-    else if (base.getClass().isArray()) {
+    else if (base instanceof List) {
+      List list = (List) base;
+      
       context.setPropertyResolved(true);
 
       int index = 0;
@@ -147,7 +154,7 @@ public class ArrayELResolver extends ELResolver {
 	}
       }
 
-      Array.set(base, index, value);
+      list.set(index, value);
     }
   }
 }

@@ -49,7 +49,7 @@ import com.caucho.config.types.Period;
 /**
  * Abstract implementation class for an expression.
  */
-public abstract class Expr {
+public abstract class Expr extends ValueExpression {
   protected static final Logger log
     = Logger.getLogger(Expr.class.getName());
   protected static final L10N L = new L10N(Expr.class);
@@ -302,10 +302,13 @@ public abstract class Expr {
    *
    * @return the value of the expression as an object
    */
-  public void evalSetValue(ELContext env, Object value)
-    throws ELException
+  @Override
+  public void setValue(ELContext env, Object value)
+    throws PropertyNotFoundException,
+	   PropertyNotWritableException,
+	   ELException
   {
-    throw new PropertyNotWritableException(toString());
+    throw new PropertyNotWritableException(getClass().getName() + ": " + toString());
   }
 
   /**
@@ -376,6 +379,47 @@ public abstract class Expr {
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
+
+  //
+  // EL methods
+  //
+
+  @Override
+  public String getExpressionString()
+  {
+    return toString();
+  }
+
+  @Override
+  public Class<?> getExpectedType()
+  {
+    return Object.class;
+  }
+
+  @Override
+  public Class<?> getType(ELContext context)
+    throws PropertyNotFoundException,
+	   ELException
+  {
+    Object value = getValue(context);
+
+    if (value == null)
+      return null;
+    else
+      return value.getClass();
+  }
+
+  @Override
+  public Object getValue(ELContext context)
+    throws PropertyNotFoundException,
+	   ELException
+  {
+    return evalObject(context);
+  }
+
+  //
+  // Static convenience methods
+  //
 
   /**
    * Returns true for a double or double-equivalent.
@@ -1151,6 +1195,21 @@ public abstract class Expr {
 
       return null;
     }
+  }
+
+  public int hashCode()
+  {
+    return toString().hashCode();
+  }
+  
+  public boolean equals(Object o)
+  {
+    if (this == o)
+      return true;
+    else if (! (o instanceof Expr))
+      return false;
+
+    return toString().equals(o.toString());
   }
 
   /**

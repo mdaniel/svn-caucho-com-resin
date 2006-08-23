@@ -35,20 +35,20 @@ import java.util.*;
 import java.util.logging.*;
 
 /**
- * Resolves properties based on arrays.
+ * Resolves properties based on maps.
  */
-public class ArrayELResolver extends ELResolver {
+public class MapELResolver extends ELResolver {
   private final static Logger log
-    = Logger.getLogger(ArrayELResolver.class.getName());
+    = Logger.getLogger(MapELResolver.class.getName());
   
   private final boolean _isReadOnly;
   
-  public ArrayELResolver()
+  public MapELResolver()
   {
     _isReadOnly = false;
   }
   
-  public ArrayELResolver(boolean isReadOnly)
+  public MapELResolver(boolean isReadOnly)
   {
     _isReadOnly = true;
   }
@@ -58,8 +58,8 @@ public class ArrayELResolver extends ELResolver {
   {
     if (base == null)
       return null;
-    else if (base.getClass().isArray())
-      return base.getClass().getComponentType();
+    else if (base instanceof Map)
+      return Object.class;
     else
       return null;
   }
@@ -78,10 +78,13 @@ public class ArrayELResolver extends ELResolver {
   {
     if (base == null)
       return null;
-    else if (base.getClass().isArray()) {
-      context.setPropertyResolved(true);
+    else if (base instanceof Map) {
+      Object value = getValue(context, base, property);
 
-      return base.getClass().getComponentType();
+      if (value != null)
+	return value.getClass();
+      else
+	return null;
     }
     else
       return null;
@@ -94,22 +97,12 @@ public class ArrayELResolver extends ELResolver {
   {
     if (base == null)
       return null;
-    else if (base.getClass().isArray()) {
+    else if (base instanceof Map && property != null) {
+      Map map = (Map) base;
+      
       context.setPropertyResolved(true);
 
-      int index = 0;
-
-      if (property instanceof Number)
-	index = ((Number) property).intValue();
-      else if (property instanceof String) {
-	try {
-	  index = Integer.parseInt((String) property);
-	} catch (Exception e) {
-	  log.log(Level.FINE, e.toString(), e);
-	}
-      }
-
-      return Array.get(base, index);
+      return map.get(property);
     }
     else {
       return null;
@@ -132,22 +125,12 @@ public class ArrayELResolver extends ELResolver {
   {
     if (base == null) {
     }
-    else if (base.getClass().isArray()) {
+    else if (base instanceof Map && property != null) {
+      Map map = (Map) base;
+      
       context.setPropertyResolved(true);
 
-      int index = 0;
-
-      if (property instanceof Number)
-	index = ((Number) property).intValue();
-      else if (property instanceof String) {
-	try {
-	  index = Integer.parseInt((String) property);
-	} catch (Exception e) {
-	  log.log(Level.FINE, e.toString(), e);
-	}
-      }
-
-      Array.set(base, index, value);
+      map.put(property, value);
     }
   }
 }

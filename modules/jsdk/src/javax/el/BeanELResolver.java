@@ -30,25 +30,25 @@
 package javax.el;
 
 import java.beans.FeatureDescriptor;
-import java.lang.reflect.Array;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.logging.*;
 
 /**
- * Resolves properties based on arrays.
+ * Resolves properties based on beans.
  */
-public class ArrayELResolver extends ELResolver {
+public class BeanELResolver extends ELResolver {
   private final static Logger log
-    = Logger.getLogger(ArrayELResolver.class.getName());
+    = Logger.getLogger(MapELResolver.class.getName());
   
   private final boolean _isReadOnly;
   
-  public ArrayELResolver()
+  public BeanELResolver()
   {
     _isReadOnly = false;
   }
   
-  public ArrayELResolver(boolean isReadOnly)
+  public BeanELResolver(boolean isReadOnly)
   {
     _isReadOnly = true;
   }
@@ -56,12 +56,7 @@ public class ArrayELResolver extends ELResolver {
   @Override
   public Class<?> getCommonPropertyType(ELContext context, Object base)
   {
-    if (base == null)
-      return null;
-    else if (base.getClass().isArray())
-      return base.getClass().getComponentType();
-    else
-      return null;
+    return null;
   }
 
   @Override
@@ -76,13 +71,10 @@ public class ArrayELResolver extends ELResolver {
 			  Object base,
 			  Object property)
   {
-    if (base == null)
-      return null;
-    else if (base.getClass().isArray()) {
-      context.setPropertyResolved(true);
+    Object value = getValue(context, base, property);
 
-      return base.getClass().getComponentType();
-    }
+    if (value != null)
+      return value.getClass();
     else
       return null;
   }
@@ -92,27 +84,40 @@ public class ArrayELResolver extends ELResolver {
 			 Object base,
 			 Object property)
   {
-    if (base == null)
+    if (base == null || ! (property instanceof String))
       return null;
-    else if (base.getClass().isArray()) {
-      context.setPropertyResolved(true);
 
-      int index = 0;
+    String fieldName = (String) property;
 
-      if (property instanceof Number)
-	index = ((Number) property).intValue();
-      else if (property instanceof String) {
-	try {
-	  index = Integer.parseInt((String) property);
-	} catch (Exception e) {
-	  log.log(Level.FINE, e.toString(), e);
-	}
-      }
+    if (fieldName.length() == 0)
+      return null;
 
-      return Array.get(base, index);
+    String getName = "get" + Character.toUpperCase(fieldName.charAt(0)) +
+      fieldName.substring(1);
+      
+    Method method = null;
+
+    try {
+      method = base.getClass().getMethod(getName, new Class[0]);
+    } catch (NoSuchMethodException e) {
+      return null;
     }
-    else {
+
+    if (method == null)
       return null;
+
+    Class []paramTypes = method.getParameterTypes();
+    if (paramTypes.length != 0)
+      return null;
+      
+    context.setPropertyResolved(true);
+
+    try {
+      return method.invoke(base);
+    } catch (IllegalAccessException e) {
+      throw new ELException(e);
+    } catch (InvocationTargetException e) {
+      throw new ELException(e.getCause());
     }
   }
 
@@ -130,24 +135,5 @@ public class ArrayELResolver extends ELResolver {
 		       Object property,
 		       Object value)
   {
-    if (base == null) {
-    }
-    else if (base.getClass().isArray()) {
-      context.setPropertyResolved(true);
-
-      int index = 0;
-
-      if (property instanceof Number)
-	index = ((Number) property).intValue();
-      else if (property instanceof String) {
-	try {
-	  index = Integer.parseInt((String) property);
-	} catch (Exception e) {
-	  log.log(Level.FINE, e.toString(), e);
-	}
-      }
-
-      Array.set(base, index, value);
-    }
   }
 }

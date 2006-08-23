@@ -52,7 +52,7 @@ public @interface Resource {
   /**
    * Java type of the resource.
    */
-  String type() default Object.class;
+  Class<?> type() default Object.class;
   
   AuthenticationType authenticationType()
     default AuthenticationType.CONTAINER;

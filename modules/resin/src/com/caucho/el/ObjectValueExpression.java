@@ -117,7 +117,7 @@ public class ObjectValueExpression extends ValueExpression
 	   PropertyNotWritableException,
 	   ELException
   {
-    _expr.evalSetValue(context, value);
+    _expr.setValue(context, value);
   }
 
   public int hashCode()

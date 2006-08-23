@@ -124,7 +124,6 @@ public class CompositeELResolver extends ELResolver {
   {
     context.setPropertyResolved(false);
 
-    System.out.println("GET: " + _resolvers);
     int size = _resolvers.size();
     for (int i = 0; i < size; i++) {
       ELResolver resolver = _resolvers.get(i);

@@ -49,7 +49,7 @@ import com.caucho.util.*;
 public class ArrayResolverExpr extends Expr {
   private Expr _left;
   private Expr _right;
-
+  
   // cached getter method
   private Class _lastClass;
   private String _lastField;
@@ -118,6 +118,29 @@ public class ArrayResolverExpr extends Expr {
       return null;
 
     return env.getELResolver().getValue(env, aObj, fieldObj);
+  }
+  
+  /**
+   * Evaluate the expression as an object.
+   *
+   * @param env the variable environment
+   *
+   * @return the evaluated object
+   */
+  @Override
+  public void setValue(ELContext env, Object value)
+    throws ELException
+  {
+    Object aObj = _left.evalObject(env);
+
+    if (aObj == null)
+      return;
+
+    Object fieldObj = _right.evalObject(env);
+    if (fieldObj == null)
+      return;
+
+    env.getELResolver().setValue(env, aObj, fieldObj, value);
   }
 
   /**

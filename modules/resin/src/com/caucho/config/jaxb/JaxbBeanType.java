@@ -215,7 +215,7 @@ public class JaxbBeanType extends TypeStrategy {
 	HashMap<String,AttributeStrategy> attrMap = _attributeMap;
 
 	if (eltWrapper != null) {
-	  String wrapperName = name + "s";
+	  String wrapperName = name;
 
 	  if (! "##default".equals(eltWrapper.name()))
 	    wrapperName = eltWrapper.name();
@@ -360,7 +360,7 @@ public class JaxbBeanType extends TypeStrategy {
 	HashMap<String,AttributeStrategy> attrMap = _attributeMap;
 
 	if (eltWrapper != null) {
-	  String wrapperName = name + "s";
+	  String wrapperName = name;
 
 	  if (! "##default".equals(eltWrapper.name()))
 	    wrapperName = eltWrapper.name();
