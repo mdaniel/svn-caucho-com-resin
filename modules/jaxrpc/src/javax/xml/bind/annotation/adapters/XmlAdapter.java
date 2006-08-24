@@ -29,22 +29,14 @@
 
 package javax.xml.bind.annotation.adapters;
 
-/** XXX */
 public abstract class XmlAdapter<ValueType, BoundType> {
-
-  /** XXX */
   protected XmlAdapter()
   {
-    throw new UnsupportedOperationException();
   }
 
-
-  /** XXX */
   public abstract ValueType marshal(BoundType v) throws Exception;
 
 
-  /** XXX */
   public abstract BoundType unmarshal(ValueType v) throws Exception;
-
 }
 

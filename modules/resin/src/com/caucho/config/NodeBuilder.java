@@ -318,7 +318,9 @@ public class NodeBuilder {
    * @param top top-level XML top
    * @throws Exception
    */
-  void configureBeanImpl(TypeStrategy typeStrategy, Object bean, Node top)
+  public void configureBeanImpl(TypeStrategy typeStrategy,
+				Object bean,
+				Node top)
     throws Exception
   {
     // XXX: need test for the CharacterData (<dependency-check-interval>)
@@ -332,6 +334,20 @@ public class NodeBuilder {
       return;
     }
 
+    configureBeanAttributesImpl(typeStrategy, bean, top);
+
+    Node child = top.getFirstChild();
+
+    for (; child != null; child = child.getNextSibling()) {
+      configureAttributeImpl(typeStrategy, bean, child);
+    }
+  }
+
+  public void configureBeanAttributesImpl(TypeStrategy typeStrategy,
+				   Object bean,
+				   Node top)
+    throws Exception
+  {
     NamedNodeMap attrList = top.getAttributes();
     if (attrList != null) {
       int length = attrList.getLength();
@@ -340,12 +356,6 @@ public class NodeBuilder {
 
 	configureAttributeImpl(typeStrategy, bean, child);
       }
-    }
-
-    Node child = top.getFirstChild();
-
-    for (; child != null; child = child.getNextSibling()) {
-      configureAttributeImpl(typeStrategy, bean, child);
     }
   }
 

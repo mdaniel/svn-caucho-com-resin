@@ -30,7 +30,6 @@
 package javax.xml.bind.annotation.adapters;
 import java.lang.annotation.*;
 
-/** XXX */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PACKAGE,
            ElementType.FIELD,
@@ -38,9 +37,10 @@ import java.lang.annotation.*;
            ElementType.TYPE,
            ElementType.PARAMETER})
 public @interface XmlJavaTypeAdapter {
+  Class<? extends XmlAdapter> value();
+  Class type() default DEFAULT.class;
 
-    Class<? extends XmlAdapter> value();
-    Class type();
+  static final class DEFAULT {}
 
 }
 

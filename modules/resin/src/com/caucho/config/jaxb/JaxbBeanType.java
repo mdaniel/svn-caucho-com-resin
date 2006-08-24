@@ -40,6 +40,7 @@ import java.util.*;
 
 import javax.el.*;
 import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.*;
 
 import org.w3c.dom.Node;
 
@@ -57,6 +58,8 @@ public class JaxbBeanType extends TypeStrategy {
 
   private HashMap<String,AttributeStrategy> _attributeMap
     = new HashMap<String,AttributeStrategy>();
+
+  private AttributeStrategy _valueAttr;
   
   private final Class<?> _type;
 
@@ -101,6 +104,25 @@ public class JaxbBeanType extends TypeStrategy {
   }
 
   /**
+   * Configures the bean
+   *
+   * @param builder the context builder
+   * @param bean the bean to be configured
+   * @param top the configuration node
+   */
+  public void configureBean(NodeBuilder builder, Object bean, Node top)
+    throws Exception
+  {
+    if (_valueAttr != null) {
+      _valueAttr.configure(builder, bean, ((QNode) top).getQName(), top);
+
+      builder.configureBeanAttributesImpl(this, bean, top);
+    }
+    else
+      builder.configureBeanImpl(this, bean, top);
+  }
+
+  /**
    * Returns the appropriate strategy for the bean.
    *
    * @param attrName
@@ -139,7 +161,7 @@ public class JaxbBeanType extends TypeStrategy {
 
   private void introspectMethods(XmlAccessType accessType)
   {
-    Method []methods = _type.getMethods();
+    Method []methods = _type.getDeclaredMethods();
 
     for (int i = 0; i < methods.length; i++) {
       Method setter = methods[i];
@@ -173,6 +195,17 @@ public class JaxbBeanType extends TypeStrategy {
       if (hasAnnotation(XmlTransient.class, getter, setter))
 	continue;
 
+      XmlJavaTypeAdapter xmlAdapt
+	= getAnnotation(XmlJavaTypeAdapter.class, getter, setter);
+
+      Adapter adapter = null;
+
+      if (xmlAdapt != null)
+	adapter = new Adapter(xmlAdapt.value());
+
+      XmlValue xmlValue
+	= getAnnotation(XmlValue.class, getter, setter);
+
       XmlElements xmlElements
 	= getAnnotation(XmlElements.class, getter, setter);
 
@@ -193,11 +226,13 @@ public class JaxbBeanType extends TypeStrategy {
 	if (! "##default".equals(xmlElement.name()))
 	  name = xmlElement.name();
       }
-      else if (eltWrapper != null) {
-      }
       else if (xmlAttribute != null) {
 	if (! "##default".equals(xmlAttribute.name()))
 	  name = xmlAttribute.name();
+      }
+      else if (eltWrapper != null
+	       || xmlValue != null
+	       || xmlAdapt != null) {
       }
       else if (accessType == XmlAccessType.PROPERTY) {
       }
@@ -207,10 +242,11 @@ public class JaxbBeanType extends TypeStrategy {
       else
 	continue;
 
-      Class type = paramTypes[0];
+      Class<?> propType = paramTypes[0];
+      Class<?> valueType = null;
 
-      if (Collection.class.isAssignableFrom(type)) {
-	Class componentType = getCollectionComponent(type);
+      if (Collection.class.isAssignableFrom(propType)) {
+	Class componentType = getCollectionComponent(propType);
 
 	HashMap<String,AttributeStrategy> attrMap = _attributeMap;
 
@@ -239,7 +275,8 @@ public class JaxbBeanType extends TypeStrategy {
 	    if (elt.type() != XmlElement.DEFAULT.class)
 	      eltType = elt.type();
 	    
-	    TypeStrategy typeMarshal = createTypeMarshal(eltType);
+	    TypeStrategy typeMarshal = createTypeMarshal(eltType,
+							 adapter);
 
 	    AttributeStrategy attr;
 	    attr = new CollectionProperty(typeMarshal, getter);
@@ -248,7 +285,8 @@ public class JaxbBeanType extends TypeStrategy {
 	  }
 	}
 	else {
-	  TypeStrategy typeMarshal = createTypeMarshal(componentType);
+	  TypeStrategy typeMarshal = createTypeMarshal(componentType,
+						       adapter);
 
 	  AttributeStrategy attr;
 	  attr = new CollectionProperty(typeMarshal, getter);
@@ -256,10 +294,14 @@ public class JaxbBeanType extends TypeStrategy {
 	  attrMap.put(name, attr);
 	}
       }
+      else if (xmlValue != null) {
+	_valueAttr = createPropertyAttribute(getter, setter,
+					     valueType, adapter);
+      }
       else if (xmlElements != null) {
 	for (XmlElement elt : xmlElements.value()) {
 	  String eltName = name;
-	  Class<?> eltType = paramTypes[0];
+	  Class<?> eltType = valueType;
 	  
 	  if (! "##default".equals(elt.name()))
 	    eltName = elt.name();
@@ -269,7 +311,8 @@ public class JaxbBeanType extends TypeStrategy {
 	  
 	  AttributeStrategy attr = createPropertyAttribute(getter,
 							   setter,
-							   eltType);
+							   eltType,
+							   adapter);
 
 	  if (attr != null)
 	    _attributeMap.put(eltName, attr);
@@ -278,7 +321,8 @@ public class JaxbBeanType extends TypeStrategy {
       else {
 	AttributeStrategy attr = createPropertyAttribute(getter,
 							 setter,
-							 paramTypes[0]);
+							 valueType,
+							 adapter);
 
 	if (attr != null)
 	  _attributeMap.put(name, attr);
@@ -326,6 +370,15 @@ public class JaxbBeanType extends TypeStrategy {
       if (Modifier.isTransient(field.getModifiers()))
 	continue;
 
+      XmlJavaTypeAdapter xmlAdapt
+	= field.getAnnotation(XmlJavaTypeAdapter.class);
+
+      Adapter adapter = null;
+
+      if (xmlAdapt != null)
+	adapter = new Adapter(xmlAdapt.value());
+      
+      XmlValue xmlValue = field.getAnnotation(XmlValue.class);
       XmlElements xmlElements = field.getAnnotation(XmlElements.class);
       XmlElement xmlElement = field.getAnnotation(XmlElement.class);
       XmlAttribute xmlAttribute = field.getAnnotation(XmlAttribute.class);
@@ -338,11 +391,13 @@ public class JaxbBeanType extends TypeStrategy {
 	if (! "##default".equals(xmlElement.name()))
 	  name = xmlElement.name();
       }
-      else if (eltWrapper != null) {
-      }
       else if (xmlAttribute != null) {
 	if (! "##default".equals(xmlAttribute.name()))
 	  name = xmlAttribute.name();
+      }
+      else if (eltWrapper != null
+	       || xmlValue != null
+	       || xmlAdapt != null) {
       }
       else if (accessType == XmlAccessType.FIELD) {
       }
@@ -352,7 +407,8 @@ public class JaxbBeanType extends TypeStrategy {
       else
 	continue;
 
-      Class fieldType = field.getType();
+      Class<?> fieldType = field.getType();
+      Class<?> valueType = null;
 
       if (Collection.class.isAssignableFrom(fieldType)) {
 	Class componentType = getCollectionComponent(fieldType);
@@ -376,15 +432,18 @@ public class JaxbBeanType extends TypeStrategy {
 	if (xmlElements != null) {
 	  for (XmlElement elt : xmlElements.value()) {
 	    String eltName = name;
-	    Class<?> eltType = componentType;
+	    Class<?> eltType;
 	  
 	    if (! "##default".equals(elt.name()))
 	      eltName = elt.name();
 
 	    if (elt.type() != XmlElement.DEFAULT.class)
 	      eltType = elt.type();
+	    else
+	      eltType = componentType;
 	    
-	    TypeStrategy typeMarshal = createTypeMarshal(eltType);
+	    TypeStrategy typeMarshal = createTypeMarshal(eltType,
+							 adapter);
 
 	    AttributeStrategy attr;
 	    attr = new CollectionField(typeMarshal, field);
@@ -393,7 +452,8 @@ public class JaxbBeanType extends TypeStrategy {
 	  }
 	}
 	else {
-	  TypeStrategy typeMarshal = createTypeMarshal(componentType);
+	  TypeStrategy typeMarshal = createTypeMarshal(componentType,
+						       adapter);
 
 	  AttributeStrategy attr;
 	  attr = new CollectionField(typeMarshal, field);
@@ -401,16 +461,13 @@ public class JaxbBeanType extends TypeStrategy {
 	  attrMap.put(name, attr);
 	}
       }
-      else if (xmlElements == null) {
-	AttributeStrategy attr = createFieldAttribute(field, fieldType);
-
-	if (attr != null)
-	  _attributeMap.put(name, attr);
+      else if (xmlValue != null) {
+	_valueAttr = createFieldAttribute(field, valueType, adapter);
       }
-      else {
+      else if (xmlElements != null) {
 	for (XmlElement elt : xmlElements.value()) {
 	  String eltName = name;
-	  Class<?> eltType = fieldType;
+	  Class<?> eltType = valueType;
 	  
 	  if (! "##default".equals(elt.name()))
 	    eltName = elt.name();
@@ -419,20 +476,53 @@ public class JaxbBeanType extends TypeStrategy {
 	    eltType = elt.type();
 	  
 	  AttributeStrategy attr = createFieldAttribute(field,
-							eltType);
+							eltType,
+							adapter);
 
 	  if (attr != null)
 	    _attributeMap.put(eltName, attr);
 	}
+      }
+      else {
+	AttributeStrategy attr = createFieldAttribute(field,
+						      valueType,
+						      adapter);
+
+	if (attr != null)
+	  _attributeMap.put(name, attr);
       }
     }
   }
 
   private AttributeStrategy createPropertyAttribute(Method getter,
 						    Method setter,
-						    Class type)
+						    Class valueType,
+						    Adapter adapter)
   {
     setter.setAccessible(true);
+
+    Class type = getter.getReturnType();
+    
+    if (adapter != null) {
+      if (! type.isAssignableFrom(adapter.getBoundClass())) {
+	throw new ConfigException(L.l("Can't assign XmlAdapter {0} to property {1}",
+				      adapter.getBoundClass(),
+				      type));
+      }
+      
+      TypeStrategy typeMarshal;
+
+      if (valueType != null)
+	typeMarshal = createTypeMarshal(valueType, null);
+      else
+	typeMarshal = createTypeMarshal(adapter.getValueClass(), null);
+
+      AttributeStrategy attr = new AdapterProperty(setter,
+						   typeMarshal,
+						   adapter.getAdapter());
+
+      return attr;
+    }
     
     PrimType primType = _primTypes.get(type);
 
@@ -478,7 +568,7 @@ public class JaxbBeanType extends TypeStrategy {
       Type retType = getter.getGenericReturnType();
       Class componentType = getCollectionComponent(retType);
       
-      TypeStrategy typeMarshal = createTypeMarshal(componentType);
+      TypeStrategy typeMarshal = createTypeMarshal(componentType, null);
 
       return new CollectionProperty(typeMarshal, getter);
     }
@@ -505,9 +595,15 @@ public class JaxbBeanType extends TypeStrategy {
     return componentType;
   }
 
-  private TypeStrategy createTypeMarshal(Class type)
+  private TypeStrategy createTypeMarshal(Class valueType, Adapter adapter)
   {
-    PrimType primType = _primTypes.get(type);
+    if (adapter != null) {
+      TypeStrategy valueStrategy = createTypeMarshal(valueType, null);
+
+      return new AdapterType(valueStrategy, adapter.getAdapter());
+    }
+    
+    PrimType primType = _primTypes.get(valueType);
 
     if (primType != null) {
       switch (primType) {
@@ -545,7 +641,7 @@ public class JaxbBeanType extends TypeStrategy {
     }
 
     try {
-      return TypeStrategyFactory.getTypeStrategy(type);
+      return TypeStrategyFactory.getTypeStrategy(valueType);
     } catch (Exception e) {
       throw new ConfigException(e);
     }
@@ -571,11 +667,37 @@ public class JaxbBeanType extends TypeStrategy {
 	    || setter.isAnnotationPresent(annType));
   }
 
-  private AttributeStrategy createFieldAttribute(Field field, Class type)
+  private AttributeStrategy createFieldAttribute(Field field,
+						 Class valueType,
+						 Adapter adapter)
   {
     field.setAccessible(true);
     
-    PrimType primType = _primTypes.get(type);
+    if (adapter != null) {
+      if (! field.getType().isAssignableFrom(adapter.getBoundClass())) {
+	throw new ConfigException(L.l("Can't assign XmlAdapter {0} to field {1}",
+				      adapter.getBoundClass(),
+				      field.getType()));
+      }
+      
+      TypeStrategy typeMarshal;
+
+      if (valueType != null)
+	typeMarshal = createTypeMarshal(valueType, null);
+      else
+	typeMarshal = createTypeMarshal(adapter.getValueClass(), null);
+
+      AttributeStrategy attr = new AdapterField(field,
+						typeMarshal,
+						adapter.getAdapter());
+
+      return attr;
+    }
+
+    if (valueType != null)
+      valueType = field.getType();
+    
+    PrimType primType = _primTypes.get(valueType);
 
     if (primType != null) {
       switch (primType) {
@@ -615,7 +737,66 @@ public class JaxbBeanType extends TypeStrategy {
       }
     }
 
-    return new BeanField(field, type);
+    return new BeanField(field, valueType);
+  }
+
+  static class Adapter {
+    private final Class<? extends XmlAdapter> _adapterClass;
+    private Class<?> _boundClass;
+    private Class<?> _valueClass;
+    
+    private XmlAdapter _adapter;
+
+    Adapter(Class<? extends XmlAdapter> adapterClass)
+    {
+      _adapterClass = adapterClass;
+
+      introspect(adapterClass.getGenericSuperclass());
+
+      try {
+	_adapter = _adapterClass.newInstance();
+      } catch (Exception e) {
+	throw new ConfigException(e);
+      }
+    }
+
+    Class<?> getValueClass()
+    {
+      return _valueClass;
+    }
+
+    Class<?> getBoundClass()
+    {
+      return _boundClass;
+    }
+
+    XmlAdapter getAdapter()
+    {
+      return _adapter;
+    }
+
+    private void introspect(Type type)
+    {
+      if (type == null)
+	throw new NullPointerException();
+
+      if (type instanceof ParameterizedType) {
+	ParameterizedType pType = (ParameterizedType) type;
+
+	if (XmlAdapter.class.equals(pType.getRawType())) {
+	  Type []args = pType.getActualTypeArguments();
+	  
+	  _valueClass = (Class<?>) args[0];
+	  _boundClass = (Class<?>) args[1];
+
+	  return;
+	}
+	else
+	  introspect(((Class) pType.getRawType()).getGenericSuperclass());
+      }
+      else if (type instanceof Class)
+	introspect(((Class) type).getGenericSuperclass());
+    }
   }
 
   enum PrimType {
