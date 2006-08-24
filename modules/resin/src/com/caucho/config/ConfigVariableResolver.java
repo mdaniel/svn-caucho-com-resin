@@ -90,6 +90,13 @@ public class ConfigVariableResolver extends AbstractVariableResolver {
 			 Object base,
 			 Object property)
   {
+    if (property != null)
+      return null;
+    else if (! (base instanceof String))
+      return null;
+
+    context.setPropertyResolved(true);
+
     String var = (String) base;
     
     ClassLoader loader = Thread.currentThread().getContextClassLoader();

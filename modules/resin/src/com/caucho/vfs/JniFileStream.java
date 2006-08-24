@@ -47,7 +47,7 @@ public class JniFileStream extends StreamImpl {
   /**
    * Create a new JniStream based on the java.io.* stream.
    */
-  JniFileStream(int fd, boolean canRead, boolean canWrite)
+  public JniFileStream(int fd, boolean canRead, boolean canWrite)
   {
     init(fd, canRead, canWrite);
   }
@@ -106,13 +106,16 @@ public class JniFileStream extends StreamImpl {
   // XXX: needs update
   public int getAvailable() throws IOException
   {
-    if (_fd >= 0) {
+    if (_fd < 0) {
+      return -1;
+    }
+    else if (getPath() instanceof FilesystemPath) {
       long length = getPath().getLength();
       
       return (int) (length - _pos);
     }
     else
-      return -1;
+      return nativeAvailable(_fd);
   }
 
   /**
@@ -183,6 +186,12 @@ public class JniFileStream extends StreamImpl {
    * Native interface to read bytes from the input.
    */
   native int nativeRead(int fd, byte []buf, int offset, int length)
+    throws IOException;
+
+  /**
+   * Native interface to read bytes from the input.
+   */
+  native int nativeAvailable(int fd)
     throws IOException;
 
   /**

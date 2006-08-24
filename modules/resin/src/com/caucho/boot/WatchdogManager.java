@@ -262,7 +262,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
       LogConfig log = new LogConfig();
       log.setName("");
-      log.setLevel("finer");
+      log.setLevel("fine");
       log.setPath(logPath);
       log.init();
 

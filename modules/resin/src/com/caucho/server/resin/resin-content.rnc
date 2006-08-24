@@ -180,6 +180,10 @@ r_enable =
   attribute enable { r_boolean-Type }
   | element enable { r_boolean-Type }
 
+r_group-name =
+  attribute group-name { string }
+  | element group-name { string }
+
 r_host = element host {
   (attribute id { string }
    | attribute regexp { string }
@@ -528,7 +532,7 @@ r_server-default = element server-default {
 r_server-Basis =
   r_cluster-client-Group*
 
-  & r_protocol*
+  & r_group-name?
 
   & r_http*
 
@@ -538,7 +542,11 @@ r_server-Basis =
 
   & r_port*
 
+  & r_protocol*
+
   & r_select-manager?
+
+  & r_user-name?
 
 r_server-Flow =
   r_server-Basis
@@ -595,3 +603,7 @@ r_transaction-manager = element transaction-manager {
 r_url-character-encoding =
   attribute url-character-encoding { string }
   | element url-character-encoding { string }
+
+r_user-name =
+  attribute user-name { string }
+  | element user-name { string }

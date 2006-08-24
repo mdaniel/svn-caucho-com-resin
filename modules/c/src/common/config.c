@@ -579,6 +579,7 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	  dead_time = resin_atoi(value);
 	else {
 	  handle_config_header(config, buffer, value);
+	}
       }
       break;
 	

@@ -56,6 +56,10 @@ public class ServerWatchdog implements Runnable {
 
   private Path _serverRoot;
 
+  private Boot _jniBoot;
+  private String _userName;
+  private String _groupName;
+
   private InetAddress _address;
   private int _watchdogPort;
 
@@ -76,7 +80,16 @@ public class ServerWatchdog implements Runnable {
     } catch (Exception e) {
       throw new ConfigException(e);
     }
+    
     _watchdogPort = 6600;
+
+    try {
+      Class cl = Class.forName("com.caucho.boot.JniBoot");
+      
+      _jniBoot = (Boot) cl.newInstance();
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
   }
 
   public void setId(String id)
@@ -108,6 +121,16 @@ public class ServerWatchdog implements Runnable {
   public int getWatchdogPort()
   {
     return _watchdogPort;
+  }
+
+  public void setUserName(String user)
+  {
+    _userName = user;
+  }
+
+  public void setGroupName(String group)
+  {
+    _groupName = group;
   }
   
   /**
@@ -144,7 +167,6 @@ public class ServerWatchdog implements Runnable {
       log.log(Level.FINE, e.toString(), e);
     }
 
-    System.out.println("LAUNCHING:");
     launchManager();
 
     return true;
@@ -166,6 +188,22 @@ public class ServerWatchdog implements Runnable {
     }
   }
 
+  public boolean shutdown()
+    throws IOException
+  {
+    WatchdogAPI watchdog = getProxy();
+
+    try {
+      return watchdog.shutdown();
+    } catch (Exception e) {
+      e.printStackTrace();
+      
+      log.log(Level.FINE, e.toString(), e);
+
+      return false;
+    }
+  }
+
   private WatchdogAPI getProxy()
   {
     String url = ("hmux://" + getAddress().getHostAddress()
@@ -176,7 +214,6 @@ public class ServerWatchdog implements Runnable {
     attr.put("host", "resin-admin");
     
     Path path = Vfs.lookup(url, attr);
-    System.out.println("PATH: " + path);
 
     return HessianHmuxProxy.create(path, WatchdogAPI.class);
   }
@@ -298,43 +335,11 @@ public class ServerWatchdog implements Runnable {
 	int port = ss.getLocalPort();
 
 	Path resinHome = _cluster.getResin().getResinHome();
-    
-	ProcessBuilder builder = new ProcessBuilder();
 
-	builder.directory(new File(resinHome.getNativePath()));
-
-	Map<String,String> env = builder.environment();
-
-	String classPath = WatchdogManager.calculateClassPath(resinHome);
-
-	env.put("CLASSPATH", classPath);
-	env.put("LD_LIBRARY_PATH", resinHome.lookup("libexec").getNativePath());
-	env.put("DYLD_LIBRARY_PATH", resinHome.lookup("libexec").getNativePath());
-
-	ArrayList<String> list = new ArrayList<String>();
-
-	list.add("java");
-	list.add("-Djava.util.logging.manager=com.caucho.log.LogManagerImpl");
-	list.add("-Djava.system.class.loader=com.caucho.loader.SystemClassLoader");
-	list.add("-Djava.awt.headless=true");
-	list.add("-Dresin.home=" + resinHome.getPath());
-	list.add("-Dserver.root=" + _serverRoot.getPath());
-	list.add("-Xrs");
-	list.add("-Xss1m");
-	list.add("com.caucho.server.resin.ResinMain");
-	list.add("-socketwait");
-	list.add(String.valueOf(port));
-
-	for (int i = 0; i < _argv.length; i++)
-	  list.add(_argv[i]);
-    
-	builder = builder.command(list);
-
-	builder.redirectErrorStream(true);
-
-	Process process = builder.start();
+	Process process = createProcess(resinHome, port);
 
 	ss.setSoTimeout(60000);
+
 	Socket s = null;
 	try {
 	  s = ss.accept();
@@ -447,6 +452,61 @@ public class ServerWatchdog implements Runnable {
     }
   }
 
+  private Process createProcess(Path resinHome, int socketPort)
+    throws IOException
+  {
+    String classPath = WatchdogManager.calculateClassPath(resinHome);
+
+    HashMap<String,String> env = new HashMap<String,String>();
+
+    env.put("CLASSPATH", classPath);
+    env.put("LD_LIBRARY_PATH", resinHome.lookup("libexec").getNativePath());
+    env.put("DYLD_LIBRARY_PATH", resinHome.lookup("libexec").getNativePath());
+
+    ArrayList<String> list = new ArrayList<String>();
+
+    list.add("java");
+    list.add("-Djava.util.logging.manager=com.caucho.log.LogManagerImpl");
+    list.add("-Djava.system.class.loader=com.caucho.loader.SystemClassLoader");
+    list.add("-Djava.awt.headless=true");
+    list.add("-Dresin.home=" + resinHome.getPath());
+    list.add("-Dserver.root=" + _serverRoot.getPath());
+    list.add("-Xrs");
+    list.add("-Xss1m");
+    list.add("com.caucho.server.resin.ResinMain");
+    list.add("-socketwait");
+    list.add(String.valueOf(socketPort));
+
+    for (int i = 0; i < _argv.length; i++)
+      list.add(_argv[i]);
+
+    if (_jniBoot != null) {
+      try {
+	Process process = _jniBoot.exec(list, env,
+					resinHome.getNativePath(),
+					_userName, _groupName);
+
+	if (process != null)
+	  return process;
+      } catch (Throwable e) {
+	e.printStackTrace();
+	log.log(Level.WARNING, e.toString(), e);
+      }
+    }
+
+    ProcessBuilder builder = new ProcessBuilder();
+
+    builder.directory(new File(resinHome.getNativePath()));
+
+    builder.environment().putAll(env);
+    
+    builder = builder.command(list);
+
+    builder.redirectErrorStream(true);
+
+    return builder.start();
+  }
+  
   /**
    * The main start of the web server.
    *
@@ -474,11 +534,4 @@ public class ServerWatchdog implements Runnable {
       e.printStackTrace();
     }
   }
-
-  enum StartMode {
-    DIRECT,
-    START,
-    STOP,
-    RESTART
-  };
 }

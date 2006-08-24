@@ -36,9 +36,15 @@ import javax.servlet.*;
  * Process responsible for watching a backend server.
  */
 public interface WatchdogAPI {
-  public boolean start(String serverId, String []argv);
+  public boolean start(String serverId, String []argv)
+    throws IOException;
   
-  public boolean restart(String serverId, String []argv);
+  public boolean restart(String serverId, String []argv)
+    throws IOException;
   
-  public boolean stop(String serverId);
+  public boolean stop(String serverId)
+    throws IOException;
+  
+  public boolean shutdown()
+    throws IOException;
 }

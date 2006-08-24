@@ -826,6 +826,9 @@ public class NodeBuilder {
       if (e instanceof RuntimeException) {
 	throw new LineConfigRuntimeException(msg, e);
       }
+      else if (e instanceof Error) {
+	throw (Error) e;
+      }
       else
 	return new LineConfigException(msg, e);
     }

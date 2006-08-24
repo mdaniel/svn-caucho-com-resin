@@ -29,53 +29,12 @@
 
 package com.caucho.boot;
 
-import java.io.*;
-import java.util.logging.*;
+import java.util.*;
 
-import javax.servlet.*;
-
-import com.caucho.hessian.server.HessianServlet;
-
-/**
- * Process responsible for watching a backend server.
- */
-public class WatchdogServlet extends HessianServlet implements WatchdogAPI {
-  private static final Logger log
-    = Logger.getLogger(WatchdogServlet.class.getName());
-
-  private WatchdogManager _watchdog;
-  
-  public void init()
-  {
-    _watchdog = WatchdogManager.getWatchdog();
-  }
-  public boolean start(String serverId, String []argv)
-  {
-    log.info("Watchdog start: " + serverId);
-
-    return _watchdog.startServer(serverId);
-  }
-  
-  public boolean restart(String serverId, String []argv)
-  {
-    log.info("Watchdog restart: " + serverId);
-    
-    return true;
-  }
-  
-  public boolean stop(String serverId)
-  {
-    log.info("Watchdog stop: " + serverId);
-    
-    return _watchdog.stopServer(serverId);
-  }
-  
-  public boolean shutdown()
-  {
-    log.info("Watchdog shutdown");
-
-    System.exit(0);
-
-    return true;
-  }
+public interface Boot {
+  public Process exec(ArrayList<String> args,
+		      HashMap<String,String> env,
+		      String pwd,
+		      String user,
+		      String group);
 }

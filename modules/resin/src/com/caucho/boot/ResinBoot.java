@@ -169,14 +169,15 @@ public class ResinBoot {
       else if ("restart".equals(arg)) {
 	_startMode = StartMode.RESTART;
       }
+      else if ("shutdown".equals(arg)) {
+	_startMode = StartMode.SHUTDOWN;
+      }
     }
   }
 
   boolean start()
     throws IOException, InterruptedException
   {
-    System.out.println("SM: " + _startMode);
-    
     if (_startMode == StartMode.START) {
       if (_server.startWatchdog(_argv)) {
 	System.out.println(L().l("Started server '{0}'", _server.getId()));
@@ -192,6 +193,14 @@ public class ResinBoot {
       else
 	System.out.println("Can't stop server " + _server.getId());
       
+      return false;
+    }
+    else if (_startMode == StartMode.SHUTDOWN) {
+      _server.shutdown();
+
+
+      System.out.println("Shutdown watchdog");
+
       return false;
     }
     else {
@@ -284,6 +293,7 @@ public class ResinBoot {
     DIRECT,
     START,
     STOP,
-    RESTART
+    RESTART,
+    SHUTDOWN
   };
 }

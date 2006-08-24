@@ -320,6 +320,20 @@ public class ClusterServer {
   }
 
   /**
+   * Sets the user name.
+   */
+  public void setUserName(String userName)
+  {
+  }
+
+  /**
+   * Sets the group name.
+   */
+  public void setGroupName(String groupName)
+  {
+  }
+
+  /**
    * Returns the ports.
    */
   public ArrayList<Port> getPorts()
