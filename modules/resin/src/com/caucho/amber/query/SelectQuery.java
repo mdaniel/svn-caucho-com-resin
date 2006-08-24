@@ -68,6 +68,8 @@ public class SelectQuery extends AbstractQuery {
   private boolean _isTableReadOnly = false;
   private long _cacheTimeout = -1;
 
+  private boolean _hasFrom = true;
+
   SelectQuery(String query)
   {
     super(query);
@@ -95,6 +97,17 @@ public class SelectQuery extends AbstractQuery {
   public Class getConstructorClass()
   {
     return _constructorClass;
+  }
+
+  /**
+   * Sets whether the query has a FROM clause or not.
+   */
+  void setHasFrom(boolean hasFrom)
+  {
+    // The spec. is not clear about the FROM clause for
+    // Current_Date/Time/Timestamp functions.
+
+    _hasFrom = hasFrom;
   }
 
   /**
@@ -456,7 +469,8 @@ public class SelectQuery extends AbstractQuery {
       expr.generateSelect(cb);
     }
 
-    cb.append(" from ");
+    if (_hasFrom)
+      cb.append(" from ");
 
     boolean hasJoinExpr = false;
     for (int i = 0; i < _fromList.size(); i++) {

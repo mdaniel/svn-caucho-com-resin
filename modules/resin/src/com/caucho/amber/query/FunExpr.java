@@ -99,87 +99,20 @@ class FunExpr extends AbstractAmberExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
-    if (_id.equalsIgnoreCase("locate")) {
+    cb.append(_id);
+    cb.append('(');
 
-      // Translate to => POSITION('word' in SUBSTRING(data,i,LENGTH(data)))+(i-1)
+    if (_distinct)
+      cb.append("distinct ");
 
-      int n = _args.size();
+    for (int i = 0; i < _args.size(); i++) {
+      if (i != 0)
+        cb.append(',');
 
-      // XXX: this validation should be moved to QueryParser
-      // if (n < 2)
-      //   throw new QueryParseException(L.l("expected at least 2 string arguments for LOCATE"));
-      //
-      // if (n > 3)
-      //   throw new QueryParseException(L.l("expected at most 3 arguments for LOCATE"));
-
-      CharBuffer charBuffer = new CharBuffer();
-
-      charBuffer.append("position(");
-
-      _args.get(0).generateWhere(charBuffer);
-
-      charBuffer.append(" in substring(");
-
-      _args.get(1).generateWhere(charBuffer);
-
-      charBuffer.append(",");
-
-      int fromIndex = 1;
-
-      AmberExpr expr = null;
-
-      if (n == 2) {
-        charBuffer.append('1');
-      }
-      else {
-        expr = _args.get(2);
-
-        try {
-          fromIndex = Integer.parseInt(expr.toString());
-        } catch (Exception ex) {
-          // XXX: this validation should be moved to QueryParser
-          // throw new QueryParseException(L.l("expected an integer for LOCATE 3rd argument"));
-        }
-
-        expr.generateWhere(charBuffer);
-      }
-
-      charBuffer.append(",length(");
-
-      _args.get(1).generateWhere(charBuffer);
-
-      charBuffer.append(")))");
-
-      cb.append("case when ");
-      cb.append(charBuffer);
-      cb.append(" <= 0 then 0 else ");
-      cb.append(charBuffer);
-
-      if (fromIndex > 1) {
-
-        cb.append('+');
-
-        cb.append(fromIndex-1);
-      }
-
-      cb.append(" end");
+      _args.get(i).generateWhere(cb);
     }
-    else {
-      cb.append(_id);
-      cb.append('(');
 
-      if (_distinct)
-        cb.append("distinct ");
-
-      for (int i = 0; i < _args.size(); i++) {
-        if (i != 0)
-          cb.append(',');
-
-        _args.get(i).generateWhere(cb);
-      }
-
-      cb.append(')');
-    }
+    cb.append(')');
   }
 
   /**
@@ -188,6 +121,14 @@ class FunExpr extends AbstractAmberExpr {
   public void generateHaving(CharBuffer cb)
   {
     generateWhere(cb);
+  }
+
+  /**
+   * Returns the args.
+   */
+  protected ArrayList<AmberExpr> getArgs()
+  {
+    return _args;
   }
 
   public String toString()

@@ -104,9 +104,9 @@ public class QueryParser {
   final static int ESCAPE = LIKE + 1;
   final static int IS = ESCAPE + 1;
 
-  final static int CONCAT = IS + 1;
+  final static int CONCAT_OP = IS + 1;
 
-  final static int EQ = CONCAT + 1;
+  final static int EQ = CONCAT_OP + 1;
   final static int NE = EQ + 1;
   final static int LT = NE + 1;
   final static int LE = LT + 1;
@@ -117,7 +117,25 @@ public class QueryParser {
   final static int OR = AND + 1;
   final static int NOT = OR + 1;
 
-  final static int EXTERNAL_DOT = NOT + 1;
+  final static int LENGTH = NOT + 1;
+  final static int LOCATE = LENGTH + 1;
+
+  final static int ABS = LOCATE + 1;
+  final static int SQRT = ABS + 1;
+  final static int MOD = SQRT + 1;
+  final static int SIZE = MOD + 1;
+
+  final static int CONCAT = SIZE + 1;
+  final static int LOWER = CONCAT + 1;
+  final static int UPPER = LOWER + 1;
+  final static int SUBSTRING = UPPER + 1;
+  final static int TRIM = SUBSTRING + 1;
+
+  final static int CURRENT_DATE = TRIM + 1;
+  final static int CURRENT_TIME = CURRENT_DATE + 1;
+  final static int CURRENT_TIMESTAMP = CURRENT_TIME + 1;
+
+  final static int EXTERNAL_DOT = CURRENT_TIMESTAMP + 1;
 
   final static int ARG = EXTERNAL_DOT + 1;
   final static int NAMED_ARG = ARG + 1;
@@ -280,63 +298,65 @@ public class QueryParser {
     while ((token = scanToken()) >= 0 && token != FROM) {
     }
 
-    if (token != FROM)
-      throw error(L.l("expected FROM at {0}", tokenName(token)));
+    boolean hasFrom = (token == FROM) ? true : false;
 
     _token = token;
 
-    do {
+    if (hasFrom) {
 
-      scanToken();
+      do {
 
-      _isJoinFetch = false;
-
-      if (token == JOIN) {
-        if ((token = peekToken()) == FETCH) {
-          scanToken();
-          _isJoinFetch = true;
-        }
-      }
-
-      FromItem from = parseFrom();
-
-      token = peekToken();
-
-      _joinSemantics = FromItem.JoinSemantics.UNKNOWN;
-
-      if (token == INNER) {
         scanToken();
+
+        _isJoinFetch = false;
+
+        if (token == JOIN) {
+          if ((token = peekToken()) == FETCH) {
+            scanToken();
+            _isJoinFetch = true;
+          }
+        }
+
+        FromItem from = parseFrom();
 
         token = peekToken();
 
-        if (token != JOIN) {
-          throw error(L.l("expected JOIN at {0}", tokenName(token)));
-        }
+        _joinSemantics = FromItem.JoinSemantics.UNKNOWN;
 
-        _joinSemantics = FromItem.JoinSemantics.INNER;
-      }
-      else if (token == LEFT) {
-        scanToken();
-
-        token = peekToken();
-
-        if (token == OUTER) {
+        if (token == INNER) {
           scanToken();
 
           token = peekToken();
+
+          if (token != JOIN) {
+            throw error(L.l("expected JOIN at {0}", tokenName(token)));
+          }
+
+          _joinSemantics = FromItem.JoinSemantics.INNER;
+        }
+        else if (token == LEFT) {
+          scanToken();
+
+          token = peekToken();
+
+          if (token == OUTER) {
+            scanToken();
+
+            token = peekToken();
+          }
+
+          if (token != JOIN)
+            throw error(L.l("expected JOIN at {0}", tokenName(token)));
+
+          _joinSemantics = FromItem.JoinSemantics.OUTER;
+        }
+        else if (token == JOIN) {
+          _joinSemantics = FromItem.JoinSemantics.INNER;
         }
 
-        if (token != JOIN)
-          throw error(L.l("expected JOIN at {0}", tokenName(token)));
-
-        _joinSemantics = FromItem.JoinSemantics.OUTER;
-      }
-      else if (token == JOIN) {
-        _joinSemantics = FromItem.JoinSemantics.INNER;
-      }
-
-    } while ((token == ',') ||
-             (token == JOIN));
+      } while ((token == ',') ||
+               (token == JOIN));
+    }
 
     int fromParseIndex = _parseIndex;
     int fromToken = _token;
@@ -387,22 +407,31 @@ public class QueryParser {
 
         AmberExpr expr = parseExpr();
 
-        expr = expr.bindSelect(this);
-
-        if (_isLazyResult) {
+        if (! hasFrom) {
+          if (! (expr instanceof DateTimeFunExpr))
+            throw error(L.l("expected FROM clause when the select clause has not date/time functions only"));
         }
-        else if (expr instanceof PathExpr) {
-          PathExpr pathExpr = (PathExpr) expr;
-
-          expr = new LoadEntityExpr(pathExpr);
+        else {
 
           expr = expr.bindSelect(this);
+
+          if (_isLazyResult) {
+          }
+          else if (expr instanceof PathExpr) {
+            PathExpr pathExpr = (PathExpr) expr;
+
+            expr = new LoadEntityExpr(pathExpr);
+
+            expr = expr.bindSelect(this);
+          }
         }
 
         resultList.add(expr);
       } while ((token = scanToken()) == ',');
 
-      if (constructorName != null) {
+      query.setHasFrom(hasFrom);
+
+      if (hasFrom && (constructorName != null)) {
 
         if (token != ')')
           throw error(L.l("Expected ')' at {0} when calling constructor with SELECT NEW", tokenName(token)));
@@ -425,7 +454,7 @@ public class QueryParser {
       _token = token;
     }
 
-    if (peekToken() != FROM)
+    if (hasFrom && (peekToken() != FROM))
       throw error(L.l("expected FROM at {0}", tokenName(token)));
 
     if (resultList.size() == 0) {
@@ -452,7 +481,7 @@ public class QueryParser {
         resultList.add(expr);
       }
     }
-    else {
+    else if (hasFrom) {
 
       int size = resultList.size();
 
@@ -1160,7 +1189,7 @@ public class QueryParser {
       int token = peekToken();
 
       switch (token) {
-      case CONCAT:
+      case CONCAT_OP:
         scanToken();
         expr = new ConcatExpr(expr, parseAddExpr());
         break;
@@ -1261,58 +1290,80 @@ public class QueryParser {
 
     switch (token) {
     case IDENTIFIER:
-      String name = _lexeme.toString();
+    case LOCATE:
+    case LENGTH:
+    case ABS:
+    case SQRT:
+    case MOD:
+    case SIZE:
+    case CONCAT:
+    case LOWER:
+    case UPPER:
+    case SUBSTRING:
+    case TRIM:
+      {
+        String name = _lexeme.toString();
 
-      if (peekToken() != '(') {
-        IdExpr tableExpr = getIdentifier(name);
+        if (peekToken() != '(') {
+          IdExpr tableExpr = getIdentifier(name);
 
-        if (tableExpr != null)
-          return parsePath(tableExpr);
+          if (tableExpr != null)
+            return parsePath(tableExpr);
 
-        FromItem fromItem = _query.getFromList().get(0);
+          FromItem fromItem = _query.getFromList().get(0);
 
-        tableExpr = fromItem.getIdExpr();
+          tableExpr = fromItem.getIdExpr();
 
-        AmberExpr next = tableExpr.createField(this, name);
+          AmberExpr next = tableExpr.createField(this, name);
 
-        if (next instanceof PathExpr)
-          return addPath((PathExpr) next);
-        else if (next != null)
-          return next;
+          if (next instanceof PathExpr)
+            return addPath((PathExpr) next);
+          else if (next != null)
+            return next;
 
-        throw error(L.l("'{0}' is an unknown table or column", name));
-      }
-      else {
-
-        name = name.toLowerCase();
-
-        // EXISTS | ALL | ANY | SOME
-        if (name.equals("exists") ||
-            name.equals("all") ||
-            name.equals("any") ||
-            name.equals("some")) {
-
-          scanToken();
-
-          if (peekToken() != SELECT && peekToken() != FROM)
-            throw error(L.l(name.toUpperCase() + " requires '(SELECT'"));
-
-          SelectQuery select = parseSelect(true);
-
-          if (peekToken() != ')')
-            throw error(L.l(name.toUpperCase() + " requires ')'"));
-
-          scanToken();
-
-          if (name.equals("exists"))
-            return new ExistsExpr(select);
-          else if (name.equals("all"))
-            return new AllExpr(select);
-          else // SOME is a synonymous with ANY
-            return new AnyExpr(select);
+          throw error(L.l("'{0}' is an unknown table or column", name));
         }
-        else
-          return parseFunction(name);
+        else {
+
+          name = name.toLowerCase();
+
+          // EXISTS | ALL | ANY | SOME
+          if (name.equals("exists") ||
+              name.equals("all") ||
+              name.equals("any") ||
+              name.equals("some")) {
+
+            scanToken();
+
+            if (peekToken() != SELECT && peekToken() != FROM)
+              throw error(L.l(name.toUpperCase() + " requires '(SELECT'"));
+
+            SelectQuery select = parseSelect(true);
+
+            if (peekToken() != ')')
+              throw error(L.l(name.toUpperCase() + " requires ')'"));
+
+            scanToken();
+
+            if (name.equals("exists"))
+              return new ExistsExpr(select);
+            else if (name.equals("all"))
+              return new AllExpr(select);
+            else // SOME is a synonymous with ANY
+              return new AnyExpr(select);
+          }
+          else
+            return parseFunction(name, token);
+        }
+      }
+
+    case CURRENT_DATE:
+    case CURRENT_TIME:
+    case CURRENT_TIMESTAMP:
+      {
+        String name = _lexeme.toString();
+
+        return parseFunction(name, token);
       }
 
     case FALSE:
@@ -1440,9 +1491,25 @@ public class QueryParser {
    *     ::= IDENTIFIER ( DISTINCT expr* )
    * </pre>
    */
-  private AmberExpr parseFunction(String id)
+  private AmberExpr parseFunction(String id,
+                                  int functionToken)
     throws QueryParseException
   {
+    // Function with no arguments.
+    switch (functionToken) {
+
+    case CURRENT_DATE:
+      return CurrentDateFunExpr.create();
+
+    case CURRENT_TIME:
+      return CurrentTimeFunExpr.create();
+
+    case CURRENT_TIMESTAMP:
+      return CurrentTimestampFunExpr.create();
+    }
+
+    // Function with arguments.
+
     scanToken();
 
     boolean distinct = false;
@@ -1487,7 +1554,57 @@ public class QueryParser {
 
     scanToken();
 
-    FunExpr funExpr = FunExpr.create(id, args, distinct);
+    FunExpr funExpr;
+
+    switch (functionToken) {
+
+    case LOCATE:
+      funExpr = LocateFunExpr.create(args);
+      break;
+
+    case LENGTH:
+      funExpr = LengthFunExpr.create(args);
+      break;
+
+    case ABS:
+      funExpr = AbsFunExpr.create(args);
+      break;
+
+    case SQRT:
+      funExpr = SqrtFunExpr.create(args);
+      break;
+
+    case MOD:
+      funExpr = ModFunExpr.create(args);
+      break;
+
+    case SIZE:
+      funExpr = SizeFunExpr.create(args);
+      break;
+
+    case CONCAT:
+      funExpr = ConcatFunExpr.create(args);
+      break;
+
+    case LOWER:
+      funExpr = LowerFunExpr.create(args);
+      break;
+
+    case UPPER:
+      funExpr = UpperFunExpr.create(args);
+      break;
+
+    case SUBSTRING:
+      funExpr = SubstringFunExpr.create(args);
+      break;
+
+    case TRIM:
+      funExpr = TrimFunExpr.create(args);
+      break;
+
+    default:
+      funExpr = FunExpr.create(id, args, distinct);
+    }
 
     return funExpr;
   }
@@ -1524,8 +1641,9 @@ public class QueryParser {
   {
     int token = scanToken();
 
-    if (token != IDENTIFIER)
+    if (token != IDENTIFIER) {
       throw error(L.l("expected identifier at `{0}'", tokenName(token)));
+    }
 
     return _lexeme;
   }
@@ -1656,7 +1774,7 @@ public class QueryParser {
 
     case '|':
       if ((ch = read()) == '|')
-        return CONCAT;
+        return CONCAT_OP;
       else
         throw error(L.l("unexpected char at {0}", String.valueOf((char) ch)));
 
@@ -1877,6 +1995,24 @@ public class QueryParser {
     _reserved.put("or", OR);
     _reserved.put("and", AND);
     _reserved.put("not", NOT);
+
+    _reserved.put("length", LENGTH);
+    _reserved.put("locate", LOCATE);
+
+    _reserved.put("abs", ABS);
+    _reserved.put("sqrt", SQRT);
+    _reserved.put("mod", MOD);
+    _reserved.put("size", SIZE);
+
+    _reserved.put("concat", CONCAT);
+    _reserved.put("lower", LOWER);
+    _reserved.put("upper", UPPER);
+    _reserved.put("substring", SUBSTRING);
+    _reserved.put("trim", TRIM);
+
+    _reserved.put("current_date", CURRENT_DATE);
+    _reserved.put("current_time", CURRENT_TIME);
+    _reserved.put("current_timestamp", CURRENT_TIMESTAMP);
 
     _reserved.put("between", BETWEEN);
     _reserved.put("like", LIKE);
