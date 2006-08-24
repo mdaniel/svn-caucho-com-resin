@@ -31,6 +31,7 @@ package com.caucho.esb.encoding;
 
 import java.io.InputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import java.util.logging.Logger;
 
@@ -44,8 +45,6 @@ import com.caucho.hessian.io.SerializerFactory;
 import com.caucho.hessian.server.HessianSkeleton;
 
 import com.caucho.services.server.GenericService;
-
-import com.caucho.util.NullOutputStream;
 
 /**
  * Invokes a service based on a Hessian-encoded request.
@@ -147,11 +146,9 @@ public class HessianEncoding implements ServiceEncoding {
     return findRemoteAPI(implClass.getSuperclass());
   }
 
-  public void invoke(InputStream is)
+  public void invoke(InputStream is, OutputStream os)
   {
     try {
-      NullOutputStream os = new NullOutputStream();
-
       Hessian2Input in = new Hessian2Input(is);
       AbstractHessianOutput out;
 

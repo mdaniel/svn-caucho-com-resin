@@ -31,6 +31,7 @@ package com.caucho.esb.encoding;
 
 import java.io.InputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import java.util.logging.Logger;
 
@@ -43,7 +44,8 @@ import com.caucho.esb.WebService;
 import com.caucho.soap.reflect.WebServiceIntrospector;
 import com.caucho.soap.skeleton.DirectSkeleton;
 
-import com.caucho.vfs.NullWriteStream;
+import com.caucho.vfs.VfsStream;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Invokes a service based on a Hessian-encoded request.
@@ -75,10 +77,9 @@ public class SoapEncoding implements ServiceEncoding {
     _class = cl;
   }
 
-  public void invoke(InputStream is)
+  public void invoke(InputStream is, OutputStream os)
   {
-    // ignore return value
-    NullWriteStream ws = new NullWriteStream();
+    WriteStream ws = new WriteStream(new VfsStream(null, os));
 
     try {
       XMLInputFactory factory = XMLInputFactory.newInstance();
@@ -86,6 +87,8 @@ public class SoapEncoding implements ServiceEncoding {
       XMLStreamReader xmlReader = factory.createXMLStreamReader(is);
 
       getSkeleton().invoke(_object, xmlReader, ws);
+
+      ws.flush();
     } catch (XMLStreamException e) {
       log.info(e.toString());
     } catch (IOException e) {

@@ -36,6 +36,8 @@ import com.caucho.esb.encoding.ServiceEncoding;
  * An transport for a (web) service.
  */
 public interface ServiceTransport {
+  public void setSendResponse(boolean sendResponse);
+
   public void setEncoding(ServiceEncoding encoding);
 
   public void setWebService(WebService webService);

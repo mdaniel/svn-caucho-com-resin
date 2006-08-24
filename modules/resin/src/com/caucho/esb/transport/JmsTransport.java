@@ -29,6 +29,8 @@
 
 package com.caucho.esb.transport;
 
+import java.io.OutputStream;
+
 import java.util.logging.Logger;
 
 import javax.ejb.MessageDrivenContext;
@@ -41,6 +43,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
+import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.Topic;
 
@@ -48,16 +51,20 @@ import com.caucho.esb.WebService;
 import com.caucho.esb.encoding.ServiceEncoding;
 
 import com.caucho.jms.util.BytesMessageInputStream;
+import com.caucho.jms.util.BytesMessageOutputStream;
 
 import com.caucho.loader.CloseListener;
 import com.caucho.loader.Environment;
 import com.caucho.loader.StartListener;
+
+import com.caucho.util.NullOutputStream;
 
 public class JmsTransport implements ServiceTransport {
   private static final Logger log =
     Logger.getLogger(JmsTransport.class.getName());
 
   private ServiceEncoding _encoding;
+  private boolean _sendResponse = true;
 
   private Destination _destination;
   private ConnectionFactory _connectionFactory;
@@ -73,6 +80,11 @@ public class JmsTransport implements ServiceTransport {
   public void setWebService(WebService webService)
   {
     _webService = webService;
+  }
+
+  public void setSendResponse(boolean sendResponse)
+  {
+    _sendResponse = sendResponse;
   }
 
   public void setEncoding(ServiceEncoding encoding)
@@ -118,7 +130,7 @@ public class JmsTransport implements ServiceTransport {
 
       MessageConsumer consumer = session.createConsumer(_destination);
 
-      consumer.setMessageListener(new ServicesListenerMDB());
+      consumer.setMessageListener(new ServicesListenerMDB(session));
     }
 
     _jmsConnection.start();
@@ -130,7 +142,13 @@ public class JmsTransport implements ServiceTransport {
   }
 
   private class ServicesListenerMDB implements MessageListener {
+    private Session _jmsSession;
     private MessageDrivenContext _messageDrivenContext = null;
+
+    public ServicesListenerMDB(Session jmsSession)
+    {
+      _jmsSession = jmsSession;
+    }
 
     public 
     void setMessageDrivenContext(MessageDrivenContext messageDrivenContext)
@@ -140,12 +158,33 @@ public class JmsTransport implements ServiceTransport {
 
     public void onMessage(Message message)
     {
-      if (message instanceof BytesMessage) {
-        BytesMessageInputStream is = 
-          new BytesMessageInputStream((BytesMessage) message);
+      try {
+        if (message instanceof BytesMessage) {
+          BytesMessageInputStream is = 
+            new BytesMessageInputStream((BytesMessage) message);
 
-        _encoding.invoke(is);
-      }    
+          BytesMessage outMessage = null;
+          MessageProducer producer = null;
+          OutputStream os = null;
+
+          if (_sendResponse && message.getJMSReplyTo() != null) {
+            producer = _jmsSession.createProducer(message.getJMSReplyTo());
+
+            outMessage = _jmsSession.createBytesMessage();
+
+            os = new BytesMessageOutputStream(outMessage);
+          } 
+          else 
+            os = new NullOutputStream();
+
+          _encoding.invoke(is, os);
+
+          if (_sendResponse && message.getJMSReplyTo() != null)
+            producer.send(outMessage);
+        }    
+      } catch (JMSException e) {
+        log.fine("JMS exception: " + e);
+      }
     }
   }
 

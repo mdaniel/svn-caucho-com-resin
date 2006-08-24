@@ -30,6 +30,7 @@
 package com.caucho.esb.encoding;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import com.caucho.esb.WebService;
 
@@ -37,7 +38,7 @@ import com.caucho.esb.WebService;
  * An encoding for a (web) service.
  */
 public interface ServiceEncoding {
-  public void invoke(InputStream is);
+  public void invoke(InputStream is, OutputStream os);
 
   public void setService(Object service);
 
