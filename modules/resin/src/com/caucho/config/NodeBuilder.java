@@ -108,12 +108,12 @@ public class NodeBuilder {
     = new ArrayList<ValidatorEntry>();
 
   private ConfigELContext _elContext;
-  private AbstractVariableResolver _varResolver;
+  private ELResolver _varResolver;
 
   NodeBuilder()
   {
     _elContext = new ConfigELContext();
-    _varResolver = (AbstractVariableResolver) _elContext.getELResolver();
+    _varResolver = _elContext.getVariableResolver();
   }
   
   NodeBuilder(Config config)
@@ -124,7 +124,7 @@ public class NodeBuilder {
     if (_elContext == null)
       _elContext = new ConfigELContext();
     
-    _varResolver = (AbstractVariableResolver) _elContext.getELResolver();
+    _varResolver = _elContext.getVariableResolver();
   }
 
   public static NodeBuilder getCurrentBuilder()
@@ -136,6 +136,11 @@ public class NodeBuilder {
   static void setCurrentBuilder(NodeBuilder builder)
   {
     _currentBuilder.set(builder);
+  }
+
+  public Config getConfig()
+  {
+    return _config;
   }
 
   /**
@@ -164,7 +169,7 @@ public class NodeBuilder {
 
       if (top instanceof QNode) {
 	_varResolver.setValue(_elContext, "__FILE__", null,
-			    ((QNode) top).getBaseURI());
+			      ((QNode) top).getBaseURI());
       }
 
       TypeStrategy typeStrategy;
@@ -768,7 +773,7 @@ public class NodeBuilder {
       parser.setCheckEscape(true);
       Expr expr = parser.parse();
 
-      return expr.evalObject(getELContext());
+      return expr.getValue(getELContext());
     }
     else
       return exprString;

@@ -98,13 +98,15 @@ public class ObjectValueExpression extends ValueExpression
       return value.getClass();
   }
 
+  @Override
   public Object getValue(ELContext context)
     throws PropertyNotFoundException,
 	   ELException
   {
-    return _expr.evalObject(context);
+    return _expr.getValue(context);
   }
 
+  @Override
   public boolean isReadOnly(ELContext context)
     throws PropertyNotFoundException,
 	   ELException

@@ -35,7 +35,9 @@ import javax.servlet.jsp.el.VariableResolver;
  * A saved program for configuring an object.
  */
 public abstract class BuilderProgram {
+  //private NodeBuilder _nodeBuilder;
   private NodeBuilder _nodeBuilder;
+  private ClassLoader _loader;
 
   protected BuilderProgram()
   {
@@ -45,10 +47,14 @@ public abstract class BuilderProgram {
   protected BuilderProgram(NodeBuilder builder)
   {
     // server/13co
+    /*
     _nodeBuilder = builder;
 
     if (builder == null)
       _nodeBuilder = new NodeBuilder(); // XXX:
+    */
+
+    _loader = Thread.currentThread().getContextClassLoader();
   }
   
   /**
@@ -57,13 +63,13 @@ public abstract class BuilderProgram {
   public void configure(Object bean)
     throws Throwable
   {
-    configureImpl(_nodeBuilder, bean);
+    configureImpl(new NodeBuilder(), bean);
   }
 
   public Object configure(Class type)
     throws Throwable
   {
-    return configureImpl(_nodeBuilder, type);
+    return configureImpl(new NodeBuilder(), type);
   }
   
   /**

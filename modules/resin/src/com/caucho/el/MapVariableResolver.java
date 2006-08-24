@@ -28,14 +28,15 @@
 
 package com.caucho.el;
 
-import java.util.Map;
+import java.beans.*;
+import java.util.*;
 
 import javax.el.*;
 
 /**
  * Variable resolver using an underlying Map.
  */
-public class MapVariableResolver extends AbstractVariableResolver {
+public class MapVariableResolver extends ELResolver {
   private Map<String,Object> _map;
   
   /**
@@ -52,29 +53,50 @@ public class MapVariableResolver extends AbstractVariableResolver {
   /**
    * Creates the resolver
    */
-  public MapVariableResolver(Map<String,Object> map, ELResolver next)
+  public MapVariableResolver()
   {
-    super(next);
-    
-    if (map == null)
-      throw new IllegalArgumentException("map can't be null");
-
-    _map = map;
+    this(new HashMap<String,Object>());
   }
   
   /**
    * Returns the named variable value.
    */
+  @Override
   public Object getValue(ELContext context, Object base, Object property)
   {
+    if (property == null || ! (base instanceof String))
+      return null;
+
     String var = (String) base;
     
     Object value = _map.get(var);
 
-    if (value != null)
+    if (value != null) {
+      context.setPropertyResolved(true);
+      
       return value;
-    else
-      return super.getValue(context, base, property);
+    }
+
+    return null;
+  }
+  
+  /**
+   * Returns the named variable value.
+   */
+  @Override
+  public void setValue(ELContext context,
+		       Object base,
+		       Object property,
+		       Object value)
+  {
+    if (property == null || ! (base instanceof String))
+      return;
+    
+    String var = (String) base;
+
+    context.setPropertyResolved(true);
+    
+    _map.put(var, value);
   }
   
   /**
@@ -83,6 +105,48 @@ public class MapVariableResolver extends AbstractVariableResolver {
   public Object put(String var, Object value)
   {
     return _map.put(var, value);
+  }
+
+  /**
+   * Returns true for read-only.
+   */
+  @Override
+  public boolean isReadOnly(ELContext context, Object base, Object property)
+  {
+    if (property != null || ! (base instanceof String))
+      return true;
+
+    context.setPropertyResolved(true);
+
+    return false;
+  }
+  
+  /**
+   * Returns the named variable value.
+   */
+  @Override
+  public Class<?> getType(ELContext context,
+			Object base,
+			Object property)
+  {
+    Object value = getValue(context, base, property);
+
+    if (value != null)
+      return value.getClass();
+    else
+      return null;
+  }
+
+  public Class<?> getCommonPropertyType(ELContext context,
+					Object base)
+  {
+    return null;
+  }
+
+  public Iterator<FeatureDescriptor>
+    getFeatureDescriptors(ELContext context, Object base)
+  {
+    return null;
   }
 
   /**

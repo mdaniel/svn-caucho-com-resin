@@ -57,14 +57,27 @@ public class SystemPropertiesResolver extends AbstractVariableResolver {
 			 Object base,
 			 Object property)
   {
-    String var = (String) base;
+    String var;
+    
+    if (property != null && base instanceof String)
+      var = (String) base;
+    else if (base == this && property instanceof String)
+      var = (String) property;
+    else
+      return null;
     
     Object value = System.getProperty(var);
 
-    if (value != null)
+    if (value != null) {
+      env.setPropertyResolved(true);
       return value;
+    }
+    else if ("Var".equals(var)) {
+      env.setPropertyResolved(true);
+      return this;
+    }
 
-    return super.getValue(env, base, property);
+    return null;
   }
 
   /**

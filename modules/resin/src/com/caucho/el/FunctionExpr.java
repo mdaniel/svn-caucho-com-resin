@@ -65,13 +65,13 @@ public class FunctionExpr extends Expr {
    * @param env the variable environment
    */
   @Override
-  public Object evalObject(ELContext env)
+  public Object getValue(ELContext env)
     throws ELException
   {
     if (_expr instanceof StaticMethodExpr)
       return ((StaticMethodExpr) _expr).evalMethod(_args, env);
     
-    Object aObj = _expr.evalObject(env);
+    Object aObj = _expr.getValue(env);
 
     Method method = null;
     

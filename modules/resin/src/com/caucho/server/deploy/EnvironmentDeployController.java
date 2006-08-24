@@ -351,11 +351,8 @@ abstract public class
       HashMap<String,Object> varMap = new HashMap<String,Object>();
       varMap.putAll(_variableMap);
 
-      ELResolver variableResolver
-        = new MapVariableResolver(varMap, _parentELResolver);
-      
       EL.setVariableMap(varMap, classLoader);
-      EL.setEnvironment(new ConfigELContext(variableResolver), classLoader);
+      EL.setEnvironment(new ConfigELContext(varMap), classLoader);
 
       configureInstanceVariables(instance);
 

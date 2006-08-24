@@ -80,7 +80,7 @@ public class IdExpr extends Expr {
    * @return the value as an object
    */
   @Override
-  public Object evalObject(ELContext env)
+  public Object getValue(ELContext env)
     throws ELException
   {
     return env.getELResolver().getValue(env, _id, null);
@@ -93,7 +93,8 @@ public class IdExpr extends Expr {
    *
    * @return the value of the expression as an object
    */
-  public void evalSetValue(ELContext env, Object value)
+  @Override
+  public void setValue(ELContext env, Object value)
     throws ELException
   {
     env.getELResolver().setValue(env, _id, null, value);

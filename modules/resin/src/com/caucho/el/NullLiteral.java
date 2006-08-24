@@ -63,7 +63,7 @@ public class NullLiteral extends Expr {
    * @return null
    */
   @Override
-  public Object evalObject(ELContext env)
+  public Object getValue(ELContext env)
     throws ELException
   {
     return null;

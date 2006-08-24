@@ -76,8 +76,8 @@ public class EqExpr extends AbstractBooleanExpr {
   public boolean evalBoolean(ELContext env)
     throws ELException
   {
-    Object aObj = _left.evalObject(env);
-    Object bObj = _right.evalObject(env);
+    Object aObj = _left.getValue(env);
+    Object bObj = _right.getValue(env);
 
     if (aObj == bObj)
       return _op == EQ;

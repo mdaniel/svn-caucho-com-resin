@@ -67,14 +67,10 @@ public class EL {
 
   public static ELContext getEnvironment(ClassLoader loader)
   {
-    ELContext context = _elEnvironment.get(loader);
+    ELContext context = _elEnvironment.getLevel(loader);
 
     if (context == null) {
-      ELResolver parent = new SystemPropertiesResolver();
-      
-      ELResolver resolver = new EnvironmentResolver(loader, parent);
-
-      context = new EnvironmentContext(resolver);
+      context = new EnvironmentContext(loader);
       
       _elEnvironment.set(context, loader);
     }
@@ -145,7 +141,7 @@ public class EL {
 
     Expr expr = parser.parse();
 
-    return expr.evalObject(getEnvironment());
+    return expr.getValue(getEnvironment());
   }
 
   public static Object evalObject(String value, ELContext env)
@@ -155,7 +151,7 @@ public class EL {
 
     Expr expr = parser.parse();
 
-    return expr.evalObject(env);
+    return expr.getValue(env);
   }
 
   public static String evalString(String value, ELContext env)

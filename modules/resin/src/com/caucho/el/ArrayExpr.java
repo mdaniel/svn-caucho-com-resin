@@ -105,15 +105,15 @@ public class ArrayExpr extends Expr {
    * @return the evaluated object
    */
   @Override
-  public Object evalObject(ELContext env)
+  public Object getValue(ELContext env)
     throws ELException
   {
-    Object aObj = _left.evalObject(env);
+    Object aObj = _left.getValue(env);
 
     if (aObj == null)
       return null;
 
-    Object fieldObj = _right.evalObject(env);
+    Object fieldObj = _right.getValue(env);
     if (fieldObj == null)
       return null;
 

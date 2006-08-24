@@ -89,11 +89,11 @@ public class BinaryExpr extends Expr {
    * @return the result as an object
    */
   @Override
-  public Object evalObject(ELContext env)
+  public Object getValue(ELContext env)
     throws ELException
   {
-    Object aObj = _left.evalObject(env);
-    Object bObj = _right.evalObject(env);
+    Object aObj = _left.getValue(env);
+    Object bObj = _right.getValue(env);
 
     if (aObj instanceof BigDecimal || bObj instanceof BigDecimal) {
       BigDecimal a = toBigDecimal(aObj, env);

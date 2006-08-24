@@ -36,41 +36,76 @@ import javax.el.*;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 
-import com.caucho.el.EL;
-import com.caucho.el.AbstractVariableResolver;
+import com.caucho.el.*;
 
 /**
  * Creates a variable resolver based on the classloader.
  */
 public class ConfigELContext extends ELContext {
-  private ELResolver _elResolver;
+  private final StackELResolver _stackResolver = new StackELResolver();
+  private final ELResolver _varResolver;
   
   /**
    * Creates the resolver
    */
   public ConfigELContext()
   {
-    this(new ConfigVariableResolver());
+    this(new MapVariableResolver());
   }
   
   /**
    * Creates the resolver
    */
-  public ConfigELContext(ELResolver elResolver)
+  public ConfigELContext(HashMap<String,Object> map)
   {
-    _elResolver = elResolver;
+    this(new MapVariableResolver(map));
+  }
+  
+  /**
+   * Creates the resolver
+   */
+  public ConfigELContext(ELResolver varResolver)
+  {
+    _varResolver = varResolver;
+
+    _stackResolver.push(new BeanELResolver());
+    _stackResolver.push(new ArrayELResolver());
+    _stackResolver.push(new MapELResolver());
+    _stackResolver.push(new ListELResolver());
+    
+    _stackResolver.push(new SystemPropertiesResolver());
+    _stackResolver.push(EnvironmentELResolver.create());
+    _stackResolver.push(varResolver);
   }
 
+  public void push(ELResolver elResolver)
+  {
+    _stackResolver.push(elResolver);
+  }
+
+  public ELResolver pop()
+  {
+    return _stackResolver.pop();
+  }
+
+  public ELResolver getVariableResolver()
+  {
+    return _varResolver;
+  }
+
+  @Override
   public ELResolver getELResolver()
   {
-    return _elResolver;
+    return _stackResolver;
   }
 
+  @Override
   public FunctionMapper getFunctionMapper()
   {
     return null;
   }
 
+  @Override
   public VariableMapper getVariableMapper()
   {
     return null;
@@ -78,6 +113,6 @@ public class ConfigELContext extends ELContext {
 
   public String toString()
   {
-    return "ConfigELResolver[]";
+    return "ConfigELContext[]";
   }
 }

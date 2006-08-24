@@ -37,14 +37,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.servlet.jsp.el.VariableResolver;
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.NotImplementedException;
+
+import org.w3c.dom.Node;
+
+import com.caucho.el.*;
+import com.caucho.util.*;
 import com.caucho.xml.QName;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.Environment;
 import com.caucho.make.Dependency;
-import org.w3c.dom.Node;
 
 public class EnvironmentTypeStrategy extends BeanTypeStrategy {
   EnvironmentTypeStrategy(Class type)
@@ -53,7 +54,7 @@ public class EnvironmentTypeStrategy extends BeanTypeStrategy {
   }
 
   public void configureBean(NodeBuilder builder, Object bean, Node node)
-         throws Exception
+    throws Exception
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -63,12 +64,16 @@ public class EnvironmentTypeStrategy extends BeanTypeStrategy {
       ClassLoader loader = envBean.getClassLoader();
 
       thread.setContextClassLoader(loader);
+
+      builder.getELContext().push(EnvironmentLevelELResolver.create(loader));
       // XXX: builder.setClassLoader?
 
       addDependencies(builder, node);
 
       super.configureBean(builder, bean, node);
     } finally {
+      builder.getELContext().pop();
+      
       thread.setContextClassLoader(oldLoader);
     }
   }

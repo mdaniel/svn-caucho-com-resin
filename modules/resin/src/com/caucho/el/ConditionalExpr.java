@@ -19,6 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -76,13 +77,13 @@ public class ConditionalExpr extends Expr {
    * @return the result as an object
    */
   @Override
-  public Object evalObject(ELContext env)
+  public Object getValue(ELContext env)
     throws ELException
   {
     if (_test.evalBoolean(env))
-      return _trueExpr.evalObject(env);
+      return _trueExpr.getValue(env);
     else
-      return _falseExpr.evalObject(env);
+      return _falseExpr.getValue(env);
   }
   
   /**
@@ -158,6 +159,7 @@ public class ConditionalExpr extends Expr {
    *
    * @param os the output stream to the *.java file
    */
+  @Override
   public void printCreate(WriteStream os)
     throws IOException
   {

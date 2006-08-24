@@ -69,7 +69,7 @@ public class DoubleLiteral extends Expr {
    * @return the Double constant
    */
   @Override
-  public Object evalObject(ELContext env)
+  public Object getValue(ELContext env)
     throws ELException
   {
     return _objValue;

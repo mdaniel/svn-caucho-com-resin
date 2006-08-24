@@ -58,6 +58,7 @@ public class UnaryExpr extends Expr {
   /**
    * Returns true if this is a constant expression.
    */
+  @Override
   public boolean isConstant()
   {
     return _expr.isConstant();
@@ -70,7 +71,8 @@ public class UnaryExpr extends Expr {
    *
    * @return the value as an object
    */
-  public Object evalObject(ELContext env)
+  @Override
+  public Object getValue(ELContext env)
     throws ELException
   {
     switch (_op) {
@@ -79,7 +81,7 @@ public class UnaryExpr extends Expr {
 
     case MINUS:
     {
-      Object obj = _expr.evalObject(env);
+      Object obj = _expr.getValue(env);
 
       if (obj == null)
         return new Long(0);
@@ -126,7 +128,7 @@ public class UnaryExpr extends Expr {
 
     case EMPTY:
     {
-      Object obj = _expr.evalObject(env);
+      Object obj = _expr.getValue(env);
 
       if (obj == null)
         return true;

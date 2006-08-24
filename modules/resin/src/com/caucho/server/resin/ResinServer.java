@@ -161,8 +161,10 @@ public class ResinServer
     setRootDirectory(Vfs.getPwd());
 
     ELResolver varResolver = new SystemPropertiesResolver();
-    varResolver = new MapVariableResolver(_variableMap, varResolver);
-    EL.setEnvironment(new ConfigELContext(varResolver));
+    ConfigELContext elContext = new ConfigELContext(varResolver);
+    elContext.push(new MapVariableResolver(_variableMap));
+    
+    EL.setEnvironment(elContext);
     EL.setVariableMap(_variableMap, _classLoader);
     _variableMap.put("fmt", new com.caucho.config.functions.FmtFunctions());
 

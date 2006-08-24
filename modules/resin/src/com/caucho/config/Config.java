@@ -572,9 +572,8 @@ public class Config {
   {
     NodeBuilder builder = NodeBuilder.getCurrentBuilder();
 
-    if (builder != null) {
+    if (builder != null)
       builder.putVar(var, value);
-    }
   }
 
   /**
@@ -623,7 +622,7 @@ public class Config {
       parent = context.getELResolver();
 
     if (varMap != null)
-      return new EnvironmentContext(new MapVariableResolver(varMap, parent));
+      return new EnvironmentContext(new MapVariableResolver(varMap));
     else
       return new EnvironmentContext(parent);
   }

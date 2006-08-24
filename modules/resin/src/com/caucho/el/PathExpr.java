@@ -120,10 +120,10 @@ public class PathExpr extends Expr {
    * @return the evaluated object
    */
   @Override
-  public Object evalObject(ELContext env)
+  public Object getValue(ELContext env)
     throws ELException
   {
-    Object value = _expr.evalObject(env);
+    Object value = _expr.getValue(env);
 
     if (value != null)
       return value;

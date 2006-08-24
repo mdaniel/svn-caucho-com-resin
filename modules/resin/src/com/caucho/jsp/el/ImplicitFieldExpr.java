@@ -58,7 +58,7 @@ public class ImplicitFieldExpr extends Expr {
    * @param env the page context
    */
   @Override
-  public Object evalObject(ELContext env)
+  public Object getValue(ELContext env)
     throws ELException
   {
     if (! (env instanceof PageContextImpl.PageELContext))

@@ -68,7 +68,7 @@ public class LongLiteral extends Expr {
    * @return the long value as a Long
    */
   @Override
-  public Object evalObject(ELContext env)
+  public Object getValue(ELContext env)
     throws ELException
   {
     return _objValue;

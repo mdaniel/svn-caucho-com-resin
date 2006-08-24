@@ -72,7 +72,7 @@ public class InterpolateExpr extends Expr {
    * @return the string value
    */
   @Override
-  public Object evalObject(ELContext env)
+  public Object getValue(ELContext env)
     throws ELException
   {
     return evalString(env);

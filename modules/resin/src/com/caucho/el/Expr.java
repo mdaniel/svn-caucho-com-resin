@@ -165,8 +165,21 @@ public abstract class Expr extends ValueExpression {
    *
    * @return the value of the expression as an object
    */
-  abstract public Object evalObject(ELContext env)
+  abstract public Object getValue(ELContext env)
     throws ELException;
+
+  /**
+   * Evaluates the expression, returning an object.
+   *
+   * @param env the variable environment
+   *
+   * @return the value of the expression as an object
+   */
+  public final Object evalObject(ELContext env)
+    throws ELException
+  {
+    return getValue(env);
+  }
 
   /**
    * Evaluate the expression, knowing the value should be a boolean.
@@ -178,7 +191,7 @@ public abstract class Expr extends ValueExpression {
   public boolean evalBoolean(ELContext env)
     throws ELException
   {
-    return toBoolean(evalObject(env), env);
+    return toBoolean(getValue(env), env);
   }
 
   /**
@@ -191,7 +204,7 @@ public abstract class Expr extends ValueExpression {
   public double evalDouble(ELContext env)
     throws ELException
   {
-    return toDouble(evalObject(env), env);
+    return toDouble(getValue(env), env);
   }
 
   /**
@@ -204,7 +217,7 @@ public abstract class Expr extends ValueExpression {
   public long evalLong(ELContext env)
     throws ELException
   {
-    return toLong(evalObject(env), env);
+    return toLong(getValue(env), env);
   }
 
   /**
@@ -217,7 +230,7 @@ public abstract class Expr extends ValueExpression {
   public String evalString(ELContext env)
     throws ELException
   {
-    return toString(evalObject(env), env);
+    return toString(getValue(env), env);
   }
 
   /**
@@ -230,7 +243,7 @@ public abstract class Expr extends ValueExpression {
   public String evalStringNonNull(ELContext env)
     throws ELException
   {
-    return toStringNonNull(evalObject(env), env);
+    return toStringNonNull(getValue(env), env);
   }
 
   /**
@@ -243,7 +256,7 @@ public abstract class Expr extends ValueExpression {
   public char evalCharacter(ELContext env)
     throws ELException
   {
-    return toCharacter(evalObject(env), env);
+    return toCharacter(getValue(env), env);
   }
 
   /**
@@ -257,7 +270,7 @@ public abstract class Expr extends ValueExpression {
     throws ELException
   {
     try {
-      Object obj = evalObject(env);
+      Object obj = getValue(env);
 
       if (obj instanceof Number)
         return 1000L * ((Number) obj).longValue();
@@ -279,7 +292,7 @@ public abstract class Expr extends ValueExpression {
   public BigInteger evalBigInteger(ELContext env)
     throws ELException
   {
-    return toBigInteger(evalObject(env), env);
+    return toBigInteger(getValue(env), env);
   }
 
   /**
@@ -292,7 +305,7 @@ public abstract class Expr extends ValueExpression {
   public BigDecimal evalBigDecimal(ELContext env)
     throws ELException
   {
-    return toBigDecimal(evalObject(env), env);
+    return toBigDecimal(getValue(env), env);
   }
 
   /**
@@ -326,7 +339,7 @@ public abstract class Expr extends ValueExpression {
                        boolean escapeXml)
     throws IOException, ELException
   {
-    Object obj = evalObject(env);
+    Object obj = getValue(env);
 
     if (obj == null)
       return true;
@@ -355,7 +368,7 @@ public abstract class Expr extends ValueExpression {
                        boolean escapeXml)
     throws IOException, ELException
   {
-    Object obj = evalObject(env);
+    Object obj = getValue(env);
 
     if (obj == null)
       return true;
@@ -407,14 +420,6 @@ public abstract class Expr extends ValueExpression {
       return null;
     else
       return value.getClass();
-  }
-
-  @Override
-  public Object getValue(ELContext context)
-    throws PropertyNotFoundException,
-	   ELException
-  {
-    return evalObject(context);
   }
 
   //

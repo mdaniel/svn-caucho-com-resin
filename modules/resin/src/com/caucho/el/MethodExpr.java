@@ -67,10 +67,10 @@ public class MethodExpr extends Expr {
    * @param env the variable environment
    */
   @Override
-  public Object evalObject(ELContext env)
+  public Object getValue(ELContext env)
     throws ELException
   {
-    Object aObj = _expr.evalObject(env);
+    Object aObj = _expr.getValue(env);
 
     if (aObj == null)
       return null;
@@ -145,6 +145,7 @@ public class MethodExpr extends Expr {
   /**
    * Prints the code to create an LongLiteral.
    */
+  @Override
   public void printCreate(WriteStream os)
     throws IOException
   {

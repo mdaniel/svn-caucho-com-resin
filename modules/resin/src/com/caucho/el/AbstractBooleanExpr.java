@@ -39,7 +39,19 @@ import com.caucho.vfs.*;
 /**
  * Base implementation for a boolean-valued expression.
  */
-public class AbstractBooleanExpr extends Expr {
+abstract public class AbstractBooleanExpr extends Expr {
+  
+  /**
+   * Evaluate the expression as a boolean
+   *
+   * @param env the variable environment
+   *
+   * @return the value as a booleanstring
+   */
+  @Override
+  abstract public boolean evalBoolean(ELContext env)
+    throws ELException;
+  
   /**
    * Evaluate the expression as an object.
    *
@@ -48,7 +60,7 @@ public class AbstractBooleanExpr extends Expr {
    * @return the value as an object
    */
   @Override
-  public Object evalObject(ELContext env)
+  public Object getValue(ELContext env)
     throws ELException
   {
     return evalBoolean(env) ? Boolean.TRUE : Boolean.FALSE;

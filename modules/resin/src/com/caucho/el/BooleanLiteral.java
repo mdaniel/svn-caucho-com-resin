@@ -30,8 +30,7 @@ package com.caucho.el;
 
 import java.io.*;
 
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import javax.el.*;
 
 import com.caucho.vfs.*;
 
@@ -66,7 +65,8 @@ public class BooleanLiteral extends AbstractBooleanExpr {
    *
    * @return the value as a boolean
    */
-  public boolean evalBoolean(VariableResolver env)
+  @Override
+  public boolean evalBoolean(ELContext env)
     throws ELException
   {
     return _value;

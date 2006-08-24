@@ -141,7 +141,7 @@ abstract public class Marshall {
       public Object marshall(Expr expr, ELContext env)
 	throws ELException
       {
-	return expr.evalObject(env);
+	return expr.getValue(env);
       }
     };
 

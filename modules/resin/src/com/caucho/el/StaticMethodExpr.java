@@ -104,7 +104,7 @@ public class StaticMethodExpr extends Expr {
    * @param env the variable environment
    */
   @Override
-  public Object evalObject(ELContext env)
+  public Object getValue(ELContext env)
     throws ELException
   {
     return _method;

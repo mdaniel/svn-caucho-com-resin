@@ -19,6 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -39,14 +40,28 @@ import com.caucho.el.AbstractVariableResolver;
  * Creates a variable resolver based on the classloader.
  */
 public class EnvironmentContext extends ELContext {
-  private ELResolver _elResolver;
+  private final StackELResolver _elResolver = new StackELResolver();
   
   /**
    * Creates the resolver
    */
-  public EnvironmentContext(ELResolver elResolver)
+  public EnvironmentContext()
   {
-    _elResolver = elResolver;
+    this(Thread.currentThread().getContextClassLoader());
+  }
+  
+  /**
+   * Creates the resolver
+   */
+  public EnvironmentContext(ClassLoader loader)
+  {
+    _elResolver.push(new ArrayELResolver());
+    _elResolver.push(new MapELResolver());
+    _elResolver.push(new ListELResolver());
+    _elResolver.push(new BeanELResolver());
+    _elResolver.push(new SystemPropertiesResolver());
+
+    _elResolver.push(EnvironmentELResolver.create(loader));
   }
 
   public ELResolver getELResolver()

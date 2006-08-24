@@ -86,6 +86,7 @@ public class ConfigVariableResolver extends AbstractVariableResolver {
   /**
    * Returns the named variable value.
    */
+  @Override
   public Object getValue(ELContext context,
 			 Object base,
 			 Object property)
@@ -143,11 +144,17 @@ public class ConfigVariableResolver extends AbstractVariableResolver {
   /**
    * Sets the value for the named variable.
    */
+  @Override
   public void setValue(ELContext context,
 		       Object base,
 		       Object property,
 		       Object value)
   {
+    if (property != null || ! (base instanceof String))
+      return;
+
+    context.setPropertyResolved(true);
+
     String name = (String) base;
     
     ClassLoader loader = Thread.currentThread().getContextClassLoader();

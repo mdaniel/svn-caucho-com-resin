@@ -74,7 +74,7 @@ public class ValueExpr extends Expr {
    * @return the value as an object
    */
   @Override
-  public Object evalObject(ELContext env)
+  public Object getValue(ELContext env)
     throws ELException
   {
     return _valExpr.getValue(env);

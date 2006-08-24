@@ -80,6 +80,7 @@ public class AbstractVariableResolver extends ELResolver
   /**
    * Returns the named variable value.
    */
+  @Override
   public Object getValue(ELContext context,
 			 Object base,
 			 Object property)
