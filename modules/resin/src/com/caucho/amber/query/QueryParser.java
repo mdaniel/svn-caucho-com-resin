@@ -46,6 +46,9 @@ import com.caucho.amber.AmberException;
 
 import com.caucho.amber.entity.AmberEntityHome;
 
+import com.caucho.amber.expr.*;
+import com.caucho.amber.expr.fun.*;
+
 import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.amber.table.Table;
@@ -63,90 +66,90 @@ public class QueryParser {
   static final Logger log = Log.open(QueryParser.class);
   static final L10N L = new L10N(QueryParser.class);
 
-  final static int IDENTIFIER = 128;
-  final static int INTEGER = IDENTIFIER + 1;
-  final static int LONG = INTEGER + 1;
-  final static int DOUBLE = LONG + 1;
-  final static int STRING = DOUBLE + 1;
-  final static int TRUE = STRING + 1;
-  final static int FALSE = TRUE + 1;
-  final static int UNKNOWN = FALSE + 1;
-  final static int MEMBER = UNKNOWN + 1;
-  final static int OF = MEMBER + 1;
-  final static int EMPTY = OF + 1;
-  final static int NULL = EMPTY + 1;
+  public final static int IDENTIFIER = 128;
+  public final static int INTEGER = IDENTIFIER + 1;
+  public final static int LONG = INTEGER + 1;
+  public final static int DOUBLE = LONG + 1;
+  public final static int STRING = DOUBLE + 1;
+  public final static int TRUE = STRING + 1;
+  public final static int FALSE = TRUE + 1;
+  public final static int UNKNOWN = FALSE + 1;
+  public final static int MEMBER = UNKNOWN + 1;
+  public final static int OF = MEMBER + 1;
+  public final static int EMPTY = OF + 1;
+  public final static int NULL = EMPTY + 1;
 
-  final static int FROM = NULL + 1;
-  final static int IN = FROM + 1;
-  final static int SELECT = IN + 1;
-  final static int UPDATE = SELECT + 1;
-  final static int DELETE = UPDATE + 1;
-  final static int DISTINCT = DELETE + 1;
-  final static int WHERE = DISTINCT + 1;
-  final static int AS = WHERE + 1;
-  final static int SET = AS + 1;
-  final static int ORDER = SET + 1;
-  final static int GROUP = ORDER + 1;
-  final static int BY = GROUP + 1;
-  final static int ASC = BY + 1;
-  final static int DESC = ASC + 1;
-  final static int LIMIT = DESC + 1;
-  final static int OFFSET = LIMIT + 1;
+  public final static int FROM = NULL + 1;
+  public final static int IN = FROM + 1;
+  public final static int SELECT = IN + 1;
+  public final static int UPDATE = SELECT + 1;
+  public final static int DELETE = UPDATE + 1;
+  public final static int DISTINCT = DELETE + 1;
+  public final static int WHERE = DISTINCT + 1;
+  public final static int AS = WHERE + 1;
+  public final static int SET = AS + 1;
+  public final static int ORDER = SET + 1;
+  public final static int GROUP = ORDER + 1;
+  public final static int BY = GROUP + 1;
+  public final static int ASC = BY + 1;
+  public final static int DESC = ASC + 1;
+  public final static int LIMIT = DESC + 1;
+  public final static int OFFSET = LIMIT + 1;
 
-  final static int JOIN = OFFSET + 1;
-  final static int INNER = JOIN + 1;
-  final static int LEFT = INNER + 1;
-  final static int OUTER = LEFT + 1;
-  final static int FETCH = OUTER + 1;
+  public final static int JOIN = OFFSET + 1;
+  public final static int INNER = JOIN + 1;
+  public final static int LEFT = INNER + 1;
+  public final static int OUTER = LEFT + 1;
+  public final static int FETCH = OUTER + 1;
 
-  final static int BETWEEN = FETCH + 1;
-  final static int LIKE = BETWEEN + 1;
-  final static int ESCAPE = LIKE + 1;
-  final static int IS = ESCAPE + 1;
+  public final static int BETWEEN = FETCH + 1;
+  public final static int LIKE = BETWEEN + 1;
+  public final static int ESCAPE = LIKE + 1;
+  public final static int IS = ESCAPE + 1;
 
-  final static int CONCAT_OP = IS + 1;
+  public final static int CONCAT_OP = IS + 1;
 
-  final static int EQ = CONCAT_OP + 1;
-  final static int NE = EQ + 1;
-  final static int LT = NE + 1;
-  final static int LE = LT + 1;
-  final static int GT = LE + 1;
-  final static int GE = GT + 1;
+  public final static int EQ = CONCAT_OP + 1;
+  public final static int NE = EQ + 1;
+  public final static int LT = NE + 1;
+  public final static int LE = LT + 1;
+  public final static int GT = LE + 1;
+  public final static int GE = GT + 1;
 
-  final static int AND = GE + 1;
-  final static int OR = AND + 1;
-  final static int NOT = OR + 1;
+  public final static int AND = GE + 1;
+  public final static int OR = AND + 1;
+  public final static int NOT = OR + 1;
 
-  final static int LENGTH = NOT + 1;
-  final static int LOCATE = LENGTH + 1;
+  public final static int LENGTH = NOT + 1;
+  public final static int LOCATE = LENGTH + 1;
 
-  final static int ABS = LOCATE + 1;
-  final static int SQRT = ABS + 1;
-  final static int MOD = SQRT + 1;
-  final static int SIZE = MOD + 1;
+  public final static int ABS = LOCATE + 1;
+  public final static int SQRT = ABS + 1;
+  public final static int MOD = SQRT + 1;
+  public final static int SIZE = MOD + 1;
 
-  final static int CONCAT = SIZE + 1;
-  final static int LOWER = CONCAT + 1;
-  final static int UPPER = LOWER + 1;
-  final static int SUBSTRING = UPPER + 1;
-  final static int TRIM = SUBSTRING + 1;
+  public final static int CONCAT = SIZE + 1;
+  public final static int LOWER = CONCAT + 1;
+  public final static int UPPER = LOWER + 1;
+  public final static int SUBSTRING = UPPER + 1;
+  public final static int TRIM = SUBSTRING + 1;
 
-  final static int CURRENT_DATE = TRIM + 1;
-  final static int CURRENT_TIME = CURRENT_DATE + 1;
-  final static int CURRENT_TIMESTAMP = CURRENT_TIME + 1;
+  public final static int CURRENT_DATE = TRIM + 1;
+  public final static int CURRENT_TIME = CURRENT_DATE + 1;
+  public final static int CURRENT_TIMESTAMP = CURRENT_TIME + 1;
 
-  final static int EXTERNAL_DOT = CURRENT_TIMESTAMP + 1;
+  public final static int EXTERNAL_DOT = CURRENT_TIMESTAMP + 1;
 
-  final static int ARG = EXTERNAL_DOT + 1;
-  final static int NAMED_ARG = ARG + 1;
+  public final static int ARG = EXTERNAL_DOT + 1;
+  public final static int NAMED_ARG = ARG + 1;
 
-  final static int NEW = NAMED_ARG + 1;
+  public final static int NEW = NAMED_ARG + 1;
 
-  final static int THIS = NEW + 1;
+  public final static int THIS = NEW + 1;
 
-  final static int NOT_NULL = THIS + 1;
+  public final static int NOT_NULL = THIS + 1;
 
-  final static int HAVING = NOT_NULL + 1;
+  public final static int HAVING = NOT_NULL + 1;
 
   private static IntMap _reserved;
 
@@ -250,7 +253,7 @@ public class QueryParser {
   /**
    * Generates a new arg.
    */
-  int generateSQLArg()
+  public int generateSQLArg()
   {
     return _sqlArgCount++;
   }
@@ -762,7 +765,7 @@ public class QueryParser {
   /**
    * Adds a new FromItem.
    */
-  FromItem addFromItem(Table table)
+  public FromItem addFromItem(Table table)
   {
     return addFromItem(table, createTableName());
   }
@@ -770,7 +773,7 @@ public class QueryParser {
   /**
    * Returns a unique table name
    */
-  String createTableName()
+  public String createTableName()
   {
     return "caucho" + _unique++;
   }
@@ -778,7 +781,7 @@ public class QueryParser {
   /**
    * Adds a new FromItem.
    */
-  FromItem addFromItem(Table table, String id)
+  public FromItem addFromItem(Table table, String id)
   {
     if (id == null)
       id = createTableName();
@@ -793,7 +796,8 @@ public class QueryParser {
   /**
    * Adds a new FromItem.
    */
-  FromItem createDependentFromItem(FromItem item, LinkColumns link)
+  public FromItem createDependentFromItem(FromItem item,
+                                          LinkColumns link)
   {
     item = _query.createDependentFromItem(item, link, createTableName());
 
@@ -814,7 +818,7 @@ public class QueryParser {
   /**
    * Adds an entity path
    */
-  PathExpr addPath(PathExpr path)
+  public PathExpr addPath(PathExpr path)
   {
     PathExpr oldPath = _pathMap.get(path);
 
@@ -829,7 +833,7 @@ public class QueryParser {
   /**
    * Adds a new argument
    */
-  void addArg(ArgExpr arg)
+  public void addArg(ArgExpr arg)
   {
     _argList.add(arg);
   }

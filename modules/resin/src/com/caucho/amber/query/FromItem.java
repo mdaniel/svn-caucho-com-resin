@@ -30,11 +30,13 @@ package com.caucho.amber.query;
 
 import com.caucho.amber.entity.AmberEntityHome;
 
+import com.caucho.amber.expr.*;
+
 import com.caucho.amber.type.EntityType;
 
 import com.caucho.amber.table.Table;
 
-class FromItem {
+public class FromItem {
   private String _name;
 
   private Table _table;
@@ -106,7 +108,7 @@ class FromItem {
   /**
    * Returns the owning query.
    */
-  AbstractQuery getQuery()
+  public AbstractQuery getQuery()
   {
     return _query;
   }
@@ -114,7 +116,7 @@ class FromItem {
   /**
    * Sets the owning query.
    */
-  void setQuery(AbstractQuery query)
+  public void setQuery(AbstractQuery query)
   {
     _query = query;
   }
@@ -162,7 +164,7 @@ class FromItem {
   /**
    * Sets the join expr.
    */
-  void setJoinExpr(JoinExpr joinExpr)
+  public void setJoinExpr(JoinExpr joinExpr)
   {
     _joinExpr = joinExpr;
   }
@@ -170,7 +172,7 @@ class FromItem {
   /**
    * Returns true if the from is used.
    */
-  boolean isUsed()
+  public boolean isUsed()
   {
     return _isUsed;
   }
@@ -178,7 +180,7 @@ class FromItem {
   /**
    * Returns true if the from is used.
    */
-  void setUsed(boolean isUsed)
+  public void setUsed(boolean isUsed)
   {
     _isUsed = isUsed;
   }
@@ -186,7 +188,7 @@ class FromItem {
   /**
    * Returns true if the from has no outer join.
    */
-  boolean isInnerJoin()
+  public boolean isInnerJoin()
   {
     return _joinSemantics == JoinSemantics.INNER;
   }
@@ -194,7 +196,7 @@ class FromItem {
   /**
    * Returns true if the from needs an outer join.
    */
-  boolean isOuterJoin()
+  public boolean isOuterJoin()
   {
     return _joinSemantics == JoinSemantics.OUTER;
   }
@@ -202,7 +204,7 @@ class FromItem {
   /**
    * Sets the join semantics.
    */
-  void setJoinSemantics(JoinSemantics joinSemantics)
+  public void setJoinSemantics(JoinSemantics joinSemantics)
   {
     _joinSemantics = joinSemantics;
   }
@@ -211,7 +213,7 @@ class FromItem {
    * Sets the join semantics to OUTER (true) or
    * INNER (false).
    */
-  void setOuterJoin(boolean isOuterJoin)
+  public void setOuterJoin(boolean isOuterJoin)
   {
     _joinSemantics = isOuterJoin ?
       JoinSemantics.OUTER : JoinSemantics.INNER;
@@ -220,7 +222,7 @@ class FromItem {
   /**
    * Gets the join expr.
    */
-  JoinExpr getJoinExpr()
+  public JoinExpr getJoinExpr()
   {
     return _joinExpr;
   }

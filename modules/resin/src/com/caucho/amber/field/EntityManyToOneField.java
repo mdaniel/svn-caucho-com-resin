@@ -54,9 +54,9 @@ import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.Table;
 import com.caucho.amber.table.Column;
 
-import com.caucho.amber.query.AmberExpr;
-import com.caucho.amber.query.PathExpr;
-import com.caucho.amber.query.ManyToOneExpr;
+import com.caucho.amber.expr.AmberExpr;
+import com.caucho.amber.expr.PathExpr;
+import com.caucho.amber.expr.ManyToOneExpr;
 import com.caucho.amber.query.QueryParser;
 
 /**

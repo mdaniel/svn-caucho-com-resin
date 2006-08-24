@@ -48,8 +48,8 @@ import com.caucho.amber.table.Column;
 import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.LinkColumns;
 
-import com.caucho.amber.query.AmberExpr;
-import com.caucho.amber.query.PathExpr;
+import com.caucho.amber.expr.AmberExpr;
+import com.caucho.amber.expr.PathExpr;
 import com.caucho.amber.query.QueryParser;
 
 /**

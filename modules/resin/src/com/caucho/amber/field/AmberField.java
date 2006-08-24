@@ -49,8 +49,8 @@ import com.caucho.java.JavaWriter;
 import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 
-import com.caucho.amber.query.AmberExpr;
-import com.caucho.amber.query.PathExpr;
+import com.caucho.amber.expr.AmberExpr;
+import com.caucho.amber.expr.PathExpr;
 import com.caucho.amber.query.QueryParser;
 
 import com.caucho.amber.table.Table;

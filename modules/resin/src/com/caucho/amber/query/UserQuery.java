@@ -44,6 +44,8 @@ import com.caucho.jdbc.JdbcMetaData;
 
 import com.caucho.amber.AmberQuery;
 
+import com.caucho.amber.expr.*;
+
 import com.caucho.amber.type.Type;
 import com.caucho.amber.type.StringType;
 import com.caucho.amber.type.ObjectType;

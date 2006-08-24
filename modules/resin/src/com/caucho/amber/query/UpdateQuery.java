@@ -38,6 +38,8 @@ import com.caucho.util.CharBuffer;
 import com.caucho.amber.entity.AmberEntityHome;
 import com.caucho.amber.entity.TableInvalidateCompletion;
 
+import com.caucho.amber.expr.*;
+
 import com.caucho.amber.field.AmberField;
 
 import com.caucho.amber.manager.AmberConnection;
@@ -52,7 +54,7 @@ public class UpdateQuery extends AbstractQuery {
   private AmberExpr _where;
 
   private String _sql;
-  
+
   UpdateQuery(String query)
   {
     super(query);
@@ -123,7 +125,7 @@ public class UpdateQuery extends AbstractQuery {
 
     for (int i = 0; i < _fieldList.size(); i++) {
       if (i != 0)
-	cb.append(", ");
+  cb.append(", ");
 
       cb.append(_fieldList.get(i).generateSelect(null));
       cb.append("=");
@@ -135,7 +137,7 @@ public class UpdateQuery extends AbstractQuery {
       cb.append(" where ");
       _where.generateWhere(cb);
     }
-    
+
     _sql = cb.close();
   }
 
@@ -171,7 +173,7 @@ public class UpdateQuery extends AbstractQuery {
     throws SQLException
   {
     aConn.expire();
-      
+
     FromItem item = _fromList.get(0);
 
     aConn.addCompletion(new TableInvalidateCompletion(item.getEntityType().getTable().getName()));

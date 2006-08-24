@@ -35,6 +35,8 @@ import com.caucho.util.CharBuffer;
 import com.caucho.amber.entity.AmberEntityHome;
 import com.caucho.amber.entity.TableInvalidateCompletion;
 
+import com.caucho.amber.expr.*;
+
 import com.caucho.amber.manager.AmberConnection;
 
 
@@ -45,7 +47,7 @@ public class DeleteQuery extends AbstractQuery {
   private AmberExpr _where;
 
   private String _sql;
-  
+
   DeleteQuery(String query)
   {
     super(query);
@@ -84,7 +86,7 @@ public class DeleteQuery extends AbstractQuery {
       cb.append(" WHERE ");
       _where.generateWhere(cb);
     }
-    
+
     _sql = cb.close();
   }
 
@@ -120,7 +122,7 @@ public class DeleteQuery extends AbstractQuery {
     throws SQLException
   {
     aConn.expire();
-      
+
     FromItem item = _fromList.get(0);
 
     aConn.addCompletion(new TableInvalidateCompletion(item.getEntityType().getTable().getName()));

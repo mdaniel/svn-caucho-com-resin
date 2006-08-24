@@ -53,9 +53,9 @@ import com.caucho.amber.type.EntityType;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.Table;
 
-import com.caucho.amber.query.AmberExpr;
-import com.caucho.amber.query.PathExpr;
-import com.caucho.amber.query.KeyColumnExpr;
+import com.caucho.amber.expr.AmberExpr;
+import com.caucho.amber.expr.PathExpr;
+import com.caucho.amber.expr.KeyColumnExpr;
 import com.caucho.amber.query.QueryParser;
 
 /**

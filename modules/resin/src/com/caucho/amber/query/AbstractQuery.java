@@ -33,6 +33,8 @@ import java.util.ArrayList;
 
 import java.sql.SQLException;
 
+import com.caucho.amber.expr.*;
+
 import com.caucho.amber.manager.AmberConnection;
 
 import com.caucho.amber.table.Table;
@@ -72,7 +74,7 @@ abstract public class AbstractQuery {
   /**
    * Sets the from list.
    */
-  FromItem createFromItem(Table table, String name)
+  public FromItem createFromItem(Table table, String name)
   {
     FromItem item = new FromItem(table, name, _fromList.size());
 
@@ -86,9 +88,9 @@ abstract public class AbstractQuery {
   /**
    * Creates a dependent from item
    */
-  FromItem createDependentFromItem(FromItem parent,
-                                   LinkColumns link,
-                                   String name)
+  public FromItem createDependentFromItem(FromItem parent,
+                                          LinkColumns link,
+                                          String name)
   {
     for (int i = 0; i < _fromList.size(); i++) {
       JoinExpr join = _fromList.get(i).getJoinExpr();
@@ -109,7 +111,7 @@ abstract public class AbstractQuery {
   /**
    * Returns the from list.
    */
-  ArrayList<FromItem> getFromList()
+  public ArrayList<FromItem> getFromList()
   {
     return _fromList;
   }
@@ -117,7 +119,7 @@ abstract public class AbstractQuery {
   /**
    * Gets the parent query.
    */
-  AbstractQuery getParentQuery()
+  public AbstractQuery getParentQuery()
   {
     return null;
   }

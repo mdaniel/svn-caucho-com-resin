@@ -35,6 +35,8 @@ import java.sql.SQLException;
 
 import com.caucho.util.CharBuffer;
 
+import com.caucho.amber.expr.*;
+
 import com.caucho.amber.type.Type;
 import com.caucho.amber.type.EntityType;
 
@@ -121,7 +123,7 @@ public class SelectQuery extends AbstractQuery {
   /**
    * Gets the parent query.
    */
-  AbstractQuery getParentQuery()
+  public AbstractQuery getParentQuery()
   {
     return _parentQuery;
   }
@@ -401,7 +403,7 @@ public class SelectQuery extends AbstractQuery {
   /**
    * Returns true if the from item is used by the query.
    */
-  boolean usesFrom(FromItem item, int type)
+  public boolean usesFrom(FromItem item, int type)
   {
     for (int j = 0; j < _resultList.size(); j++) {
       AmberExpr result = _resultList.get(j);
@@ -451,7 +453,7 @@ public class SelectQuery extends AbstractQuery {
     }
   }
 
-  String generateLoadSQL()
+  public String generateLoadSQL()
   {
     CharBuffer cb = CharBuffer.allocate();
 

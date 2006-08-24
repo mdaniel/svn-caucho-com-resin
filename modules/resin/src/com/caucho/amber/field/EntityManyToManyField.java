@@ -52,11 +52,11 @@ import com.caucho.amber.type.EntityType;
 import com.caucho.amber.table.Table;
 import com.caucho.amber.table.LinkColumns;
 
-import com.caucho.amber.query.AmberExpr;
-import com.caucho.amber.query.PathExpr;
+import com.caucho.amber.expr.AmberExpr;
+import com.caucho.amber.expr.PathExpr;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.query.ManyToOneExpr;
-import com.caucho.amber.query.OneToManyExpr;
+import com.caucho.amber.expr.ManyToOneExpr;
+import com.caucho.amber.expr.OneToManyExpr;
 
 import com.caucho.bytecode.JMethod;
 import com.caucho.bytecode.JType;

@@ -55,6 +55,8 @@ import com.caucho.amber.entity.AmberEntityHome;
 import com.caucho.amber.entity.EntityItem;
 import com.caucho.amber.entity.Entity;
 
+import com.caucho.amber.expr.*;
+
 import com.caucho.amber.manager.AmberConnection;
 
 /**

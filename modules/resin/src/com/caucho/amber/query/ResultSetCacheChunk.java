@@ -34,6 +34,8 @@ import java.lang.ref.SoftReference;
 
 import java.sql.SQLException;
 
+import com.caucho.amber.expr.*;
+
 import com.caucho.util.Alarm;
 
 /**
@@ -41,9 +43,9 @@ import com.caucho.util.Alarm;
  */
 public class ResultSetCacheChunk {
   public static final int CACHE_CHUNK_SIZE = 64;
-  
+
   private SelectQuery _query;
-  
+
   private ArrayList<FromItem> _fromList;
   private ArrayList<AmberExpr> _resultList;
 
@@ -76,7 +78,7 @@ public class ResultSetCacheChunk {
   public void setQuery(SelectQuery query)
   {
     _query = query;
-    
+
     _fromList = query.getFromList();
     _resultList = query.getResultList();
 
@@ -213,7 +215,7 @@ public class ResultSetCacheChunk {
       return ((Number) object).intValue() != 0;
     else if (object instanceof String) {
       String s = (String) object;
-      
+
       return s.startsWith("t") || s.startsWith("y");
     }
     else
