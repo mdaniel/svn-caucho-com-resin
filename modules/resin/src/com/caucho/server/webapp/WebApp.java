@@ -49,6 +49,8 @@ import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionListener;
 import javax.servlet.jsp.JspApplicationContext;
 
+import com.caucho.esb.WebService;
+
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.types.*;
@@ -753,6 +755,7 @@ public class WebApp extends ServletContextImpl
       addServlet(servletMapping);
     }
 
+    log.info("adding servlet mapping: " + servletMapping);
     _servletMapper.addServletMapping(servletMapping);
   }
 

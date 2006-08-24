@@ -27,11 +27,18 @@
  * @author Emil Ong
  */
 
-package com.caucho.server.dispatch;
+package com.caucho.esb.transport;
+
+import com.caucho.esb.WebService;
+import com.caucho.esb.encoding.ServiceEncoding;
 
 /**
- * A child of &lt;web-service&gt; that describes a published interface to
- * the service.
+ * An transport for a (web) service.
  */
-public interface ServiceInterface {
+public interface ServiceTransport {
+  public void setEncoding(ServiceEncoding encoding);
+
+  public void setWebService(WebService webService);
+
+  public void init() throws Throwable;
 }

@@ -27,17 +27,11 @@
  * @author Emil Ong
  */
 
-package com.caucho.server.dispatch;
+package com.caucho.esb.transport;
 
-/**
- * A child of &lt;web-service&gt; that describes a published interface to
- * the service.
- */
-public class RestInterface implements ServiceInterface {
-  private WebService _webService;
-
-  public RestInterface(WebService webService)
+public class UnknownServiceTransportException extends Exception {
+  public UnknownServiceTransportException(String transport)
   {
-    _webService = webService;
+    super(transport);
   }
 }

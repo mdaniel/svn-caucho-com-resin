@@ -27,21 +27,28 @@
  * @author Adam Megacz, Emil Ong
  */
 
-package com.caucho.server.dispatch;
+package com.caucho.esb;
 
 import java.util.ArrayList;
 
+import java.util.logging.Logger;
+
 import com.caucho.config.types.InitProgram;
+import com.caucho.esb.encoding.ServiceEncoding;
+import com.caucho.esb.encoding.ServiceEncodingConfig;
 import com.caucho.server.webapp.WebApp;
 
 /**
  * A Web Service entry in web.xml (Caucho-specific)
  */
 public class WebService {
+  private static final Logger log 
+    = Logger.getLogger(WebService.class.getName());
+
   private WebApp _webApp;
   private String _serviceClass;
-  private ArrayList<ServiceInterface> _interfaces 
-    = new ArrayList<ServiceInterface>();
+  private ArrayList<ServiceEncoding> _encodings
+    = new ArrayList<ServiceEncoding>();
   private InitProgram _init;
   private Object _service;
 
@@ -53,7 +60,7 @@ public class WebService {
     _webApp = webApp;
   }
 
-  WebApp getWebApp()
+  public WebApp getWebApp()
   {
     return _webApp;
   }
@@ -68,31 +75,26 @@ public class WebService {
     _init = init;
   }
 
-  public HessianInterface createHessian()
+  public ServiceEncodingConfig createEncoding()
   {
-    HessianInterface hessianInterface = new HessianInterface(this);
-    _interfaces.add(hessianInterface);
-
-    return hessianInterface;
+    return new ServiceEncodingConfig(this);
   }
 
-  public SoapInterface createSoap()
+  public void addEncoding(ServiceEncoding encoding)
   {
-    SoapInterface soapInterface = new SoapInterface(this);
-    _interfaces.add(soapInterface);
-
-    return soapInterface;
+    log.info("added encoding " + encoding);
+    _encodings.add(encoding);
   }
 
-  public RestInterface createRest()
+  public void init()
+    throws Throwable
   {
-    RestInterface restInterface = new RestInterface(this);
-    _interfaces.add(restInterface);
-
-    return restInterface;
+    for (ServiceEncoding encoding : _encodings)
+      encoding.setService(getServiceInstance());
   }
 
   Object getServiceInstance()
+    throws Throwable
   {
     if (_service != null)
       return _service;
@@ -100,18 +102,14 @@ public class WebService {
     if (_serviceClass == null)
       return null;
 
-    try {
-      Class cl = loadClass(_serviceClass);
+    Class cl = loadClass(_serviceClass);
 
-      if (_init != null)
-        _service = _init.create(cl);
-      else
-        _service = cl.newInstance();
+    if (_init != null)
+      _service = _init.create(cl);
+    else
+      _service = cl.newInstance();
 
-      return _service;
-    } catch (Throwable e) {
-      return null;
-    }
+    return _service;
   }
 
   Class loadClass(String className)
