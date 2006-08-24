@@ -95,11 +95,11 @@ public class PathBuilder {
     ELResolver resolver;
 
     if (map != null)
-      resolver = new MapVariableResolver(map, parent);
+      resolver = new MapVariableResolver(map);
     else
       resolver = parent;
     
-    return lookupPath(string, new ConfigELContext(resolver));
+    return lookupPath(string, new ConfigELContext(map));
   }
 
   public static Path lookupPath(String string, ELContext env)

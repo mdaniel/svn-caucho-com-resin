@@ -29,6 +29,7 @@
 
 package com.caucho.el;
 
+import java.util.*;
 import javax.el.*;
 
 import com.caucho.loader.EnvironmentClassLoader;
@@ -62,6 +63,16 @@ public class EnvironmentContext extends ELContext {
     _elResolver.push(new SystemPropertiesResolver());
 
     _elResolver.push(EnvironmentELResolver.create(loader));
+  }
+  
+  /**
+   * Creates the resolver
+   */
+  public EnvironmentContext(Map<String,Object> map)
+  {
+    this();
+
+    _elResolver.push(new MapVariableResolver(map));
   }
 
   public ELResolver getELResolver()

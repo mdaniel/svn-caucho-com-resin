@@ -29,7 +29,7 @@
 
 package com.caucho.config;
 
-import java.util.HashMap;
+import java.util.*;
 
 import javax.el.*;
 
@@ -56,7 +56,7 @@ public class ConfigELContext extends ELContext {
   /**
    * Creates the resolver
    */
-  public ConfigELContext(HashMap<String,Object> map)
+  public ConfigELContext(Map<String,Object> map)
   {
     this(new MapVariableResolver(map));
   }

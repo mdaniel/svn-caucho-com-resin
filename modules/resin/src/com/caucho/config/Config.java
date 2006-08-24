@@ -622,9 +622,9 @@ public class Config {
       parent = context.getELResolver();
 
     if (varMap != null)
-      return new EnvironmentContext(new MapVariableResolver(varMap));
+      return new EnvironmentContext(varMap);
     else
-      return new EnvironmentContext(parent);
+      return new EnvironmentContext();
   }
 }
 

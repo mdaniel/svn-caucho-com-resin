@@ -141,10 +141,8 @@ public class ServletMapping extends ServletConfigImpl {
     ELContext env = EL.getEnvironment();
     HashMap<String,Object> map = new HashMap<String,Object>();
     map.put("regexp", vars);
-    MapVariableResolver mapResolver;
-    mapResolver = new MapVariableResolver(map, env.getELResolver());
 
-    ELContext mapEnv = new ConfigELContext(mapResolver);
+    ELContext mapEnv = new ConfigELContext(map);
 
     String rawName = getServletName();
     String rawClassName = getServletClassName();

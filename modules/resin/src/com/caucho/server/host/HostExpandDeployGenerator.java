@@ -165,8 +165,7 @@ public class HostExpandDeployGenerator extends ExpandDeployGenerator<HostControl
       if (hostName != null) {
 	ELContext parentEnv = Config.getEnvironment();
 	ELResolver resolver
-	  = new MapVariableResolver(controller.getVariableMap(),
-				    parentEnv.getELResolver());
+	  = new MapVariableResolver(controller.getVariableMap());
 
 	ELContext env = new ConfigELContext(resolver);
 	
