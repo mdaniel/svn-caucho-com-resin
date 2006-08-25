@@ -820,7 +820,7 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
   {
     return ('a' <= ch && ch <= 'z'
             || 'A' <= ch && ch <= 'Z'
-            || 'A' <= ch && ch <= '9'
+            || '0' <= ch && ch <= '9'
             || ch == ':'
             || ch == '+'
             || ch == '_'
