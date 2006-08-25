@@ -47,9 +47,16 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.Topic;
 
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.InitProgram;
+
 import com.caucho.esb.WebService;
 import com.caucho.esb.encoding.ServiceEncoding;
 
+import com.caucho.jms.jdbc.JdbcQueue;
+import com.caucho.jms.jdbc.JdbcTopic;
+import com.caucho.jms.memory.MemoryQueue;
+import com.caucho.jms.memory.MemoryTopic;
 import com.caucho.jms.util.BytesMessageInputStream;
 import com.caucho.jms.util.BytesMessageOutputStream;
 
@@ -57,11 +64,15 @@ import com.caucho.loader.CloseListener;
 import com.caucho.loader.Environment;
 import com.caucho.loader.StartListener;
 
+import com.caucho.naming.Jndi;
+
 import com.caucho.util.NullOutputStream;
 
 public class JmsTransport implements ServiceTransport {
   private static final Logger log =
     Logger.getLogger(JmsTransport.class.getName());
+  private static final String _defaultConnectionFactoryName 
+    = "jms/ConnectionFactory";
 
   private ServiceEncoding _encoding;
   private boolean _sendResponse = true;
@@ -92,14 +103,14 @@ public class JmsTransport implements ServiceTransport {
     _encoding = encoding;
   }
 
-  public void setQueue(Destination queue)
+  public void setQueue(QueueConfig queueConfig)
   {
-    _destination = queue;
+    _destination = queueConfig.getDestination();
   }
 
-  public void setTopic(Destination topic)
+  public void setTopic(TopicConfig topicConfig)
   {
-    _destination = topic;
+    _destination = topicConfig.getDestination();
   }
 
   public void setConnectionFactory(ConnectionFactory connectionFactory)
@@ -110,9 +121,14 @@ public class JmsTransport implements ServiceTransport {
   public void init()
   {
     try {
+      if (_connectionFactory == null) {
+        _connectionFactory = 
+          (ConnectionFactory) Jndi.lookup(_defaultConnectionFactoryName);
+      }
+
       _jmsConnection = _connectionFactory.createConnection();
     } catch (Exception e) {
-      log.fine(e.toString());
+      log.warning(e.toString());
     }
     
     if (_destination instanceof Topic)
@@ -188,4 +204,79 @@ public class JmsTransport implements ServiceTransport {
     }
   }
 
+  public static class DestinationConfig {
+    protected String _jndiName;
+    protected String _type = "memory";
+    protected Destination _destination;
+    protected InitProgram _init;
+
+    public void setJndiName(String jndiName) 
+    {
+      _jndiName = jndiName;
+      _destination = (Destination) Jndi.lookup(_jndiName);
+    }
+
+    public void setType(String type)
+    {
+      _type = type;
+    }
+
+    public void setValue(Destination destination)
+    {
+      _destination = destination;
+    }
+
+    public void setInit(InitProgram init)
+    {
+      _init = init;
+    }
+
+    public Destination getDestination()
+    {
+      return _destination;
+    }
+  }
+
+  public static class QueueConfig extends DestinationConfig {
+    public void init()
+      throws Throwable
+    {
+      // make a new queue with the given name
+      if (_destination == null && _jndiName != null) {
+        if (_type.equals("memory")) {
+          _destination = new MemoryQueue();
+          ((MemoryQueue) _destination).setQueueName(_jndiName);
+        } else if (_type.equals("jdbc"))
+          _destination = new JdbcQueue();
+        else 
+          throw new ConfigException("Unknown queue type: " + _type);
+
+        if (_init != null)
+          _init.configure(_destination);
+
+        Jndi.bindDeepShort(_jndiName, _destination);
+      }
+    }
+  }
+  
+  public static class TopicConfig extends DestinationConfig {
+    public void init()
+      throws Throwable
+    {
+      // make a new topic with the given name
+      if (_destination == null && _jndiName != null) {
+        if (_type.equals("memory"))
+          _destination = new MemoryTopic();
+        else if (_type.equals("jdbc"))
+          _destination = new JdbcTopic();
+        else 
+          throw new ConfigException("Unknown topic type: " + _type);
+
+        if (_init != null)
+          _init.configure(_destination);
+
+        Jndi.bindDeepShort(_jndiName, _destination);
+      }
+    }
+  }
 }
