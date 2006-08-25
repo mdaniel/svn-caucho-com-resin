@@ -39,6 +39,7 @@ import com.caucho.config.types.*;
 import com.caucho.lifecycle.*;
 import com.caucho.util.*;
 import com.caucho.server.admin.*;
+import com.caucho.server.port.*;
 import com.caucho.vfs.*;
 
 /**
@@ -63,6 +64,8 @@ public class ServerWatchdog implements Runnable {
   private InetAddress _address;
   private int _watchdogPort;
 
+  private ArrayList<Port> _ports = new ArrayList<Port>();
+  
   private final Lifecycle _lifecycle = new Lifecycle();
 
   private long _shutdownWaitTime = 60000L;
@@ -87,7 +90,7 @@ public class ServerWatchdog implements Runnable {
       Class cl = Class.forName("com.caucho.boot.JniBoot");
       
       _jniBoot = (Boot) cl.newInstance();
-    } catch (Exception e) {
+    } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
     }
   }
@@ -121,6 +124,24 @@ public class ServerWatchdog implements Runnable {
   public int getWatchdogPort()
   {
     return _watchdogPort;
+  }
+
+  /**
+   * Adds a http.
+   */
+  public void addHttp(Port port)
+    throws ConfigException
+  {
+    _ports.add(port);
+  }
+
+  /**
+   * Adds a custom-protocol port.
+   */
+  public void addProtocol(Port port)
+    throws ConfigException
+  {
+    _ports.add(port);
   }
 
   public void setUserName(String user)
@@ -162,12 +183,10 @@ public class ServerWatchdog implements Runnable {
     try {
       return watchdog.start(getId(), argv);
     } catch (Exception e) {
-      e.printStackTrace();
-      
       log.log(Level.FINE, e.toString(), e);
     }
 
-    launchManager();
+    launchManager(argv);
 
     return true;
   }
@@ -218,7 +237,7 @@ public class ServerWatchdog implements Runnable {
     return HessianHmuxProxy.create(path, WatchdogAPI.class);
   }
   
-  public void launchManager()
+  public void launchManager(String []argv)
     throws IOException
   {
     Path resinHome = _cluster.getResin().getResinHome();
@@ -245,7 +264,10 @@ public class ServerWatchdog implements Runnable {
     list.add("-Xrs");
     list.add("-Xss1m");
     list.add("com.caucho.boot.WatchdogManager");
-    
+
+    for (int i = 0; i < argv.length; i++)
+      list.add(argv[i]);
+
     builder = builder.command(list);
 
     builder.redirectErrorStream(true);
@@ -287,7 +309,6 @@ public class ServerWatchdog implements Runnable {
 	try {
 	  _lifecycle.wait(60000);
 	} catch (Exception e) {
-	  e.printStackTrace();
 	  log.log(Level.FINER, e.toString(), e);
 	}
       }
@@ -364,10 +385,11 @@ public class ServerWatchdog implements Runnable {
 	  while ((available = stdIs.available()) > 0) {
 	    len = stdIs.read(data, 0, data.length);
 
-	    if (len > 0) {
-	      stdoutTimeout = stdoutTimeoutMax;
-	      System.out.print(new String(data, 0, len));
-	    }
+	    if (len <= 0)
+	      break;
+	    
+	    stdoutTimeout = stdoutTimeoutMax;
+	    System.out.print(new String(data, 0, len));
 	  }
 
 	  try {
@@ -479,9 +501,28 @@ public class ServerWatchdog implements Runnable {
 
     for (int i = 0; i < _argv.length; i++)
       list.add(_argv[i]);
-
+    
     if (_jniBoot != null) {
+      ArrayList<QServerSocket> boundSockets = new ArrayList<QServerSocket>();
+
       try {
+	if (_userName != null) {
+	  for (int j = 0; j < _ports.size(); j++) {
+	    Port port = _ports.get(j);
+
+	    QServerSocket ss = port.bindForWatchdog();
+
+	    boundSockets.add(ss);
+	    
+	    if (ss.setSaveOnExec()) {
+	      list.add("-port");
+	      list.add(String.valueOf(ss.getSystemFD()));
+	      list.add(String.valueOf(port.getAddress()));
+	      list.add(String.valueOf(port.getPort()));
+	    }
+	  }
+	}
+
 	Process process = _jniBoot.exec(list, env,
 					resinHome.getNativePath(),
 					_userName, _groupName);
@@ -489,8 +530,14 @@ public class ServerWatchdog implements Runnable {
 	if (process != null)
 	  return process;
       } catch (Throwable e) {
-	e.printStackTrace();
 	log.log(Level.WARNING, e.toString(), e);
+      } finally {
+	for (int i = 0; i < boundSockets.size(); i++) {
+	  try {
+	    boundSockets.get(i).close();
+	  } catch (Throwable e) {
+	  }
+	}
       }
     }
 

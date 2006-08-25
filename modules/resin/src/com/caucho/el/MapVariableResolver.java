@@ -45,7 +45,7 @@ public class MapVariableResolver extends ELResolver {
   public MapVariableResolver(Map<String,Object> map)
   {
     if (map == null)
-      throw new IllegalArgumentException("map can't be null");
+      map = new HashMap<String,Object>();
 
     _map = map;
   }

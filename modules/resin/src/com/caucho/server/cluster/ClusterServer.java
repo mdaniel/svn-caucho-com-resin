@@ -35,6 +35,7 @@ import com.caucho.log.Log;
 import com.caucho.server.http.HttpProtocol;
 import com.caucho.server.port.Port;
 import com.caucho.util.L10N;
+import com.caucho.vfs.*;
 
 import javax.management.ObjectName;
 import java.net.UnknownHostException;
@@ -277,24 +278,6 @@ public class ClusterServer {
   public void addHttp(Port port)
     throws ConfigException
   {
-    // port.setServer(this);
-
-    /*
-    if (_url.equals("") && port.matchesServerId(_serverId)) {
-      if (port.getAddress() == null || port.getAddress().equals("") ||
-          port.getAddress().equals("*"))
-        _url = "http://localhost";
-      else
-        _url = "http://" + port.getAddress();
-
-      if (port.getPort() != 0)
-        _url += ":" + port.getPort();
-
-      if (_hostContainer != null)
-        _hostContainer.setURL(_url);
-    }
-    */
-
     if (port.getProtocol() == null) {
       HttpProtocol protocol = new HttpProtocol();
       protocol.setParent(port);
@@ -317,6 +300,31 @@ public class ClusterServer {
     }
 
     _ports.add(port);
+  }
+
+  /**
+   * Pre-binding of ports.
+   */
+  public void bind(String address, int port, QServerSocket ss)
+    throws Exception
+  {
+    for (int i = 0; i < _ports.size(); i++) {
+      Port serverPort = _ports.get(i);
+
+      if (port != serverPort.getPort())
+	continue;
+
+      if ((address == null) != (serverPort.getAddress() == null))
+	continue;
+      else if (address == null || address.equals(serverPort.getAddress())) {
+	serverPort.bind(ss);
+
+	return;
+      }
+    }
+
+    throw new IllegalStateException(L.l("No matching port for {0}:{1}",
+					address, port));
   }
 
   /**

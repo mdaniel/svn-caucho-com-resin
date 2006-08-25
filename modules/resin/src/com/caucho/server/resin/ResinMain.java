@@ -61,6 +61,8 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.license.LicenseCheck;
 
+import com.caucho.server.cluster.*;
+
 public class ResinMain implements ResinServerListener {
   private static L10N _L;
   private static Logger _log;
@@ -77,6 +79,9 @@ public class ResinMain implements ResinServerListener {
   
   private ResinServer _resin;
   private EnvironmentClassLoader _classLoader;
+
+  private ArrayList<BoundPort> _boundPortList
+    = new ArrayList<BoundPort>();
 
   private long _startTime;
   
@@ -199,6 +204,19 @@ public class ResinMain implements ResinServerListener {
         socket.setSoTimeout(60000);
         
 	i += 2;
+      }
+      else if ("-port".equals(argv[i])) {
+	int fd = Integer.parseInt(argv[i + 1]);
+	String addr = argv[i + 2];
+	if ("null".equals(addr))
+	  addr = null;
+	int port = Integer.parseInt(argv[i + 3]);
+
+	_boundPortList.add(new BoundPort(QJniServerSocket.openJNI(fd, port),
+					 addr,
+					 port));
+
+	i += 4;
       }
       else if ("start".equals(argv[i])
 	       || "restart".equals(argv[i])) {
@@ -343,6 +361,16 @@ public class ResinMain implements ResinServerListener {
     config.configure(server, Vfs.lookup(_resinConf), server.getSchema());
     
     _resin = server;
+
+    ClusterServer clusterServer = server.findClusterServer(_serverId);
+    for (int i = 0; i < _boundPortList.size(); i++) {
+      BoundPort port = _boundPortList.get(i);
+
+      clusterServer.bind(port.getAddress(),
+			 port.getPort(),
+			 port.getServerSocket());
+    }
+    
     server.start();
   }
 
@@ -785,6 +813,37 @@ public class ResinMain implements ResinServerListener {
     public ResinServer createCauchoCom()
     {
       return _resin;
+    }
+  }
+
+  static class BoundPort {
+    private QServerSocket _ss;
+    private String _address;
+    private int _port;
+
+    BoundPort(QServerSocket ss, String address, int port)
+    {
+      if (ss == null)
+	throw new NullPointerException();
+      
+      _ss = ss;
+      _address = address;
+      _port = port;
+    }
+
+    public QServerSocket getServerSocket()
+    {
+      return _ss;
+    }
+
+    public int getPort()
+    {
+      return _port;
+    }
+
+    public String getAddress()
+    {
+      return _address;
     }
   }
 }

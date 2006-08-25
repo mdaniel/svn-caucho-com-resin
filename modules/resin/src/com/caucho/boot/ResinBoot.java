@@ -196,8 +196,11 @@ public class ResinBoot {
       return false;
     }
     else if (_startMode == StartMode.SHUTDOWN) {
-      _server.shutdown();
-
+      try {
+	_server.shutdown();
+      } catch (Exception e) {
+	log().log(Level.FINE, e.toString(), e);
+      }
 
       System.out.println("Shutdown watchdog");
 

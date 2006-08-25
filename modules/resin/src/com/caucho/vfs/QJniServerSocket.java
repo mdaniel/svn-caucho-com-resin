@@ -112,7 +112,8 @@ public class QJniServerSocket {
   /**
    * Creates the SSL ServerSocket.
    */
-  public static QServerSocket createJNI(InetAddress host, int port,
+  public static QServerSocket createJNI(InetAddress host,
+					int port,
 					int listenBacklog)
     throws IOException
   {
@@ -134,6 +135,36 @@ public class QJniServerSocket {
       try {
 	return (QServerSocket) method.invoke(null,
 					     hostAddress, port, listenBacklog);
+      } catch (InvocationTargetException e) {
+	throw e.getTargetException();
+      }
+    } catch (IOException e) {
+      throw e;
+    } catch (ClassNotFoundException e) {
+      log.fine(e.toString());
+      
+      throw new IOException(L.l("JNI Socket support requires Resin Professional."));
+    } catch (Throwable e) {
+      log.log(Level.FINE, e.toString(), e);
+      
+      throw new IOException(L.l("JNI Socket support requires Resin Professional."));
+    }
+  }
+
+  /**
+   * Creates the SSL ServerSocket.
+   */
+  public static QServerSocket openJNI(int fd, int port)
+    throws IOException
+  {
+    try {
+      Class cl = Class.forName("com.caucho.vfs.JniServerSocketImpl");
+
+      Method method = cl.getMethod("open", new Class[] { int.class,
+							 int.class});
+
+      try {
+	return (QServerSocket) method.invoke(null, fd, port);
       } catch (InvocationTargetException e) {
 	throw e.getTargetException();
       }

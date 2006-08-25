@@ -54,6 +54,16 @@ abstract public class QServerSocket {
     return false;
   }
 
+  public boolean setSaveOnExec()
+  {
+    return false;
+  }
+
+  public int getSystemFD()
+  {
+    return -1;
+  }
+
   /**
    * Sets the socket's listen backlog.
    */

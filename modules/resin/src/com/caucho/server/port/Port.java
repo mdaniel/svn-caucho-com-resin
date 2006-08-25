@@ -703,6 +703,83 @@ public class Port
   /**
    * Starts the port listening.
    */
+  public void bind(QServerSocket ss)
+    throws Exception
+  {
+    if (ss == null)
+      throw new NullPointerException();
+
+    _isBound = true;
+
+    if (_protocol == null)
+      throw new IllegalStateException(L.l("`{0}' must have a configured protocol before starting.", this));
+
+    _admin.register();
+
+    _serverSocket = ss;
+
+    String scheme = _protocol.getProtocolName();
+    
+    if (_address != null)
+      log.info(scheme + " listening to " + _address + ":" + _port);
+    else
+      log.info(scheme + " listening to *:" + _port);
+
+    if (_sslFactory != null) {
+      throw new UnsupportedOperationException();
+    }
+
+    if (_tcpNoDelay)
+      _serverSocket.setTcpNoDelay(_tcpNoDelay);
+
+    _serverSocket.setConnectionReadTimeout((int) _readTimeout);
+    _serverSocket.setConnectionWriteTimeout((int) _writeTimeout);
+  }
+
+  /**
+   * binds for the watchdog.
+   */
+  public QServerSocket bindForWatchdog()
+    throws java.io.IOException
+  {
+    QServerSocket ss;
+    
+    if (_socketAddress != null) {
+      ss = QJniServerSocket.createJNI(_socketAddress, _port,
+				      _listenBacklog);
+
+      if (ss == null)
+	return null;
+
+      log.fine("watchdog binding to " + _socketAddress.getHostName() + ":" + _port);
+    }
+    else {
+      ss = QJniServerSocket.createJNI(null, _port, _listenBacklog);
+
+      if (ss == null)
+	return null;
+
+      log.fine("watchdog binding to *:" + _port);
+    }
+
+    if (! ss.isJNI()) {
+      ss.close();
+
+      return ss;
+    }
+
+    if (_tcpNoDelay)
+      ss.setTcpNoDelay(_tcpNoDelay);
+
+    ss.setConnectionReadTimeout((int) _readTimeout);
+    ss.setConnectionWriteTimeout((int) _writeTimeout);
+
+    return ss;
+  }  
+
+  /**
+   * Starts the port listening.
+   */
   public void start()
     throws Throwable
   {

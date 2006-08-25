@@ -215,19 +215,23 @@ public class WatchdogManager extends ProtocolDispatchServer {
     for (int i = 0; i < argv.length; i++) {
       String arg = argv[i];
 
-      if ("-conf".equals(arg)) {
+      if ("-conf".equals(arg)
+	  || "--conf".equals(arg)) {
 	_resinConf = _resinHome.lookup(argv[i + 1]);
 	i++;
       }
-      else if ("-resin-home".equals(arg)) {
+      else if ("-resin-home".equals(arg)
+	       || "--resin-home".equals(arg)) {
 	_resinHome = Vfs.lookup(argv[i + 1]);
 	i++;
       }
-      else if ("-server-root".equals(arg)) {
+      else if ("-server-root".equals(arg)
+	       || "--server-root".equals(arg)) {
 	_serverRoot = Vfs.lookup(argv[i + 1]);
 	i++;
       }
-      else if ("-server".equals(arg)) {
+      else if ("-server".equals(arg)
+	       || "--server".equals(arg)) {
 	_initialServerId = argv[i + 1];
 	i++;
       }
@@ -262,11 +266,11 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
       LogConfig log = new LogConfig();
       log.setName("");
-      log.setLevel("fine");
+      //log.setLevel("finer");
       log.setPath(logPath);
       log.init();
 
-      Logger.getLogger("").setLevel(Level.FINER);
+      //Logger.getLogger("").setLevel(Level.FINER);
 
       WatchdogManager manager = new WatchdogManager(argv);
 

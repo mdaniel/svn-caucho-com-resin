@@ -755,7 +755,8 @@ public class WebApp extends ServletContextImpl
       addServlet(servletMapping);
     }
 
-    log.info("adding servlet mapping: " + servletMapping);
+    log.fine("adding servlet mapping: " + servletMapping);
+    
     _servletMapper.addServletMapping(servletMapping);
   }
 
