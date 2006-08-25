@@ -164,11 +164,6 @@ public class JMSQueue {
   public Value receive(Env env, @Optional("1") long timeout)
     throws JMSException
   {
-    try {
-      java.io.FileWriter out = new java.io.FileWriter("/tmp/x.log", true);
-      out.write("timeout = " + timeout + "\n");
-      out.close();
-    } catch (java.io.IOException e) {}
     Message message = _consumer.receive(timeout);
 
     if (message == null)
