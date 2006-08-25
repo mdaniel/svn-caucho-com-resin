@@ -71,24 +71,31 @@ public class JMSQueue {
   private Session _session;
   private MessageConsumer _consumer;
   private MessageProducer _producer;
+  private Destination _destination;
 
+  /**
+   * Connects to a named queue.
+   */
   public JMSQueue(Context context, ConnectionFactory connectionFactory,
                   String queueName)
     throws Exception
   {
-    Destination destination = (Destination) context.lookup(queueName);
-
     _connection = connectionFactory.createConnection();
 
     _session = _connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
-    _consumer = _session.createConsumer(destination);
-    _producer = _session.createProducer(destination);
+    if (queueName == null || queueName.length() == 0)
+      _destination = _session.createTemporaryQueue();
+    else
+      _destination = (Destination) context.lookup(queueName);
+
+    _consumer = _session.createConsumer(_destination);
+    _producer = _session.createProducer(_destination);
 
     _connection.start();
   }
 
-  public static Value __construct(Env env, String queueName)
+  public static Value __construct(Env env, @Optional String queueName)
   {
     JMSQueue queue = JMSModule.message_get_queue(env, queueName, null);
 
@@ -96,7 +103,7 @@ public class JMSQueue {
                          env.getJavaClassDefinition(JMSQueue.class.getName()));
   }
 
-  public boolean send(@NotNull Value value)
+  public boolean send(@NotNull Value value, @Optional JMSQueue replyTo)
     throws JMSException
   {
     Message message = null;
@@ -122,6 +129,7 @@ public class JMSQueue {
     } else if (value instanceof BinaryValue) {
       message = _session.createBytesMessage();
 
+
       byte []bytes = ((BinaryValue) value).toBytes();
 
       ((BytesMessage) message).writeBytes(bytes);
@@ -145,6 +153,9 @@ public class JMSQueue {
       return false;
     }
 
+    if (replyTo != null)
+      message.setJMSReplyTo(replyTo._destination);
+
     _producer.send(message);
 
     return true;
@@ -153,6 +164,11 @@ public class JMSQueue {
   public Value receive(Env env, @Optional("1") long timeout)
     throws JMSException
   {
+    try {
+      java.io.FileWriter out = new java.io.FileWriter("/tmp/x.log", true);
+      out.write("timeout = " + timeout + "\n");
+      out.close();
+    } catch (java.io.IOException e) {}
     Message message = _consumer.receive(timeout);
 
     if (message == null)
@@ -197,6 +213,13 @@ public class JMSQueue {
     } else {
       return BooleanValue.FALSE;
     }
+  }
+
+  protected void finalize()
+  {
+    try {
+      _connection.close();
+    } catch (JMSException e) {}
   }
 
   private static Value objectToValue(Object object, Env env)

@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.lib;
 
+import java.io.UnsupportedEncodingException;
+
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -57,10 +59,13 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.BinaryBuilderValue;
+import com.caucho.quercus.env.BooleanValue;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.ReadOnly;
 import com.caucho.quercus.module.NotNull;
+import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.module.ReadOnly;
 
 import com.caucho.util.L10N;
 
@@ -80,6 +85,28 @@ public class ResinModule
   public final static int XA_STATUS_PREPARING = 7;
   public final static int XA_STATUS_COMMITTING = 8;
   public final static int XA_STATUS_ROLLING_BACK = 9;
+
+  /**
+   * Converts a string into its binary representation, according to the
+   * given encoding, if given, or the script encoding if not given.
+   */
+  public static Value string_to_binary(Env env, String string, 
+                                                @Optional String encoding)
+  {
+    if (encoding == null || encoding.length() == 0)
+      encoding = env.getScriptEncoding();
+
+    try {
+      byte[] bytes = string.getBytes(encoding);
+
+      return new BinaryBuilderValue(bytes);
+    } catch (UnsupportedEncodingException e) {
+
+      env.error(e);
+
+      return BooleanValue.FALSE;
+    }
+  }
 
   /**
    * Perform a jndi lookup to retrieve an object.
