@@ -115,6 +115,10 @@ public class QuercusParser {
   private final static int ARRAY_RIGHT = 294;
   private final static int SIMPLE_STRING_ESCAPE = 295;
   private final static int COMPLEX_STRING_ESCAPE = 296;
+
+  private final static int BINARY = 297;
+  private final static int SIMPLE_BINARY_ESCAPE = 298;
+  private final static int COMPLEX_BINARY_ESCAPE = 299;
   
   private final static int FIRST_IDENTIFIER_LEXEME = 512;
   private final static int ECHO = 512;
@@ -2691,7 +2695,14 @@ public class QuercusParser {
     case SIMPLE_STRING_ESCAPE:
     case COMPLEX_STRING_ESCAPE:
       return parseEscapedString(_lexeme, token, false);
-      
+
+    case BINARY:
+      return new BinaryLiteralExpr(getLocation(), _lexeme.getBytes());
+
+    case SIMPLE_BINARY_ESCAPE:
+    case COMPLEX_BINARY_ESCAPE:
+      return parseEscapedString(_lexeme, token, false);
+
     case LONG:
       return new LiteralExpr(getLocation(), LongValue.create(Long.parseLong(_lexeme)));
       
@@ -2875,6 +2886,10 @@ public class QuercusParser {
 	    return new ToDoubleExpr(getLocation(), parseTerm());
 	  else if ("string".equals(type))
 	    return new ToStringExpr(getLocation(), parseTerm());
+	  else if ("binary".equals(type))
+	    return new ToBinaryExpr(getLocation(), parseTerm());
+	  else if ("unicode".equals(type))
+	    return new ToUnicodeExpr(getLocation(), parseTerm());
 	  else if ("object".equals(type))
 	    return new ToObjectExpr(getLocation(), parseTerm());
 	  else if ("array".equalsIgnoreCase(type))
@@ -3650,6 +3665,32 @@ public class QuercusParser {
 	return parseNumberToken(ch);
 	
       default:
+
+        if (ch == 'b') {
+          int ch2 = read();
+
+          if (ch2 == '\'') {
+            parseStringToken('\'', false);
+            return BINARY;
+          }
+          else if (ch2 == '"') {
+
+            int token = parseEscapedString('"', false);
+            switch (token) {
+              case STRING:
+                return BINARY;
+              case SIMPLE_STRING_ESCAPE:
+                return SIMPLE_BINARY_ESCAPE;
+              case COMPLEX_STRING_ESCAPE:
+                return COMPLEX_BINARY_ESCAPE;
+              default:
+                return token;
+            }
+          }
+          else
+            _peek = ch2;
+        }
+
 	if ('a' <= ch && ch <= 'z' ||
 	    'A' <= ch && ch <= 'Z' ||
 	    ch == '_') {
@@ -3860,11 +3901,20 @@ public class QuercusParser {
 
     _peek = ch;
   }
-  
+
+  /**
+   * XXX: parse as Unicode if and only if uncode.semantics is on.
+   */
+  private void parseStringToken(int end)
+    throws IOException
+  {
+    parseStringToken(end, true);
+  }
+
   /**
    * Parses the next string token.
    */
-  private void parseStringToken(int end)
+  private void parseStringToken(int end, boolean isUnicode)
     throws IOException
   {
     _sb.setLength(0);
@@ -3874,6 +3924,17 @@ public class QuercusParser {
     for (ch = read(); ch >= 0 && ch != end; ch = read()) {
       if (ch == '\\') {
         ch = read();
+
+        if (isUnicode) {
+          if (ch == 'u') {
+            _sb.append(Character.toChars(parseUnicodeEscape(false)));
+            continue;
+          }
+          else if (ch == 'U') {
+            _sb.append(Character.toChars(parseUnicodeEscape(true)));
+            continue;
+          }
+        }
 
 	if (end == '"') {
 	  _sb.append('\\');
@@ -3936,11 +3997,29 @@ public class QuercusParser {
 
   /**
    * Parses the next string
+   * XXX: parse as Unicode if and only if unicode.semantics is on.
    */
   private Expr parseEscapedString(String prefix, int token, boolean isSystem)
     throws IOException
   {
-    Expr expr = new StringLiteralExpr(getLocation(), prefix);
+    return parseEscapedString(prefix, token, isSystem, true);
+  }
+
+  /**
+   * Parses the next string
+   */
+  private Expr parseEscapedString(String prefix,
+                                   int token,
+                                   boolean isSystem,
+                                   boolean isUnicode)
+    throws IOException
+  {
+    Expr expr;
+
+    if (isUnicode)
+      expr = new StringLiteralExpr(getLocation(), prefix);
+    else
+      expr = new BinaryLiteralExpr(getLocation(), prefix.getBytes());
 
     while (true) {
       Expr tail;
@@ -4067,9 +4146,18 @@ public class QuercusParser {
   }
 
   /**
-   * Parses the next string
+   * XXX: parse as Unicode if and only if unicode.semantics is on.
    */
   private int parseEscapedString(char end)
+    throws IOException
+  {
+    return parseEscapedString(end, true);
+  }
+
+  /**
+   * Parses the next string
+   */
+  private int parseEscapedString(char end, boolean isUnicode)
     throws IOException
   {
     _sb.setLength(0);
@@ -4105,6 +4193,18 @@ public class QuercusParser {
           break;
         case 'x':
           _sb.append((char) parseHexEscape());
+          break;
+        case 'u':
+          if (isUnicode)
+            _sb.append(Character.toChars(parseUnicodeEscape(false)));
+          else
+            _sb.append((char) ch);
+          break;
+        case 'U':
+          if (isUnicode)
+            _sb.append(Character.toChars(parseUnicodeEscape(true)));
+          else
+            _sb.append((char) ch);
           break;
 	case '{':
 	  ch = read();
@@ -4226,23 +4326,44 @@ public class QuercusParser {
   {
     int value = 0;
 
-    while (true) {
-      int ch = read();
+    int ch = read();
       
-      if ('0' <= ch && ch <= '9') {
-	value = 16 * value + ch - '0';
-      }
-      else if ('a' <= ch && ch <= 'f') {
-	value = 16 * value + 10 + ch - 'a';
-      }
-      else if ('A' <= ch && ch <= 'F') {
-	value = 16 * value + 10 + ch - 'A';
-      }
-      else {
-	_peek = ch;
-	return value;
-      }
+    if ('0' <= ch && ch <= '9')
+      value = 16 * value + ch - '0';
+    else if ('a' <= ch && ch <= 'f')
+      value = 16 * value + 10 + ch - 'a';
+    else if ('A' <= ch && ch <= 'F')
+      value = 16 * value + 10 + ch - 'A';
+    else {
+      _peek = ch;
+      return value;
     }
+
+    ch = read();
+      
+    if ('0' <= ch && ch <= '9')
+      value = 16 * value + ch - '0';
+    else if ('a' <= ch && ch <= 'f')
+      value = 16 * value + 10 + ch - 'a';
+    else if ('A' <= ch && ch <= 'F')
+      value = 16 * value + 10 + ch - 'A';
+    else {
+      _peek = ch;
+      return value;
+    }
+
+    return value;
+  }
+
+  private int parseUnicodeEscape(boolean isLongForm)
+    throws IOException
+  {
+    int codePoint = parseHexEscape() * 256 + parseHexEscape();
+
+    if (isLongForm)
+      codePoint = codePoint * 256 + parseHexEscape();
+
+    return codePoint;
   }
 
   /**

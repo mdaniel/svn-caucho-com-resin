@@ -45,7 +45,7 @@ import com.caucho.quercus.Location;
  * Represents a PHP string literal expression.
  */
 public class StringLiteralExpr extends Expr {
-  private final StringValue _value;
+  protected final StringValue _value;
 
   public StringLiteralExpr(Location location, String value)
   {
