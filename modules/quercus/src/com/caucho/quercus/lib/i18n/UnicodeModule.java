@@ -51,10 +51,8 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringBuilderValue;
-import com.caucho.quercus.env.StringInputStream;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.TempBufferStringValue;
 import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
 
@@ -66,14 +64,6 @@ import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.UnimplementedException;
 
 import com.caucho.util.L10N;
-import com.caucho.util.Base64;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.StreamImpl;
-import com.caucho.vfs.TempCharBuffer;
-import com.caucho.vfs.TempStream;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
-
 /**
  * Unicode handling.  Also includes iconv, etc.
  */
@@ -163,11 +153,12 @@ public class UnicodeModule extends AbstractQuercusModule {
 
       while (enumeration.hasMoreElements()) {
         Header header = enumeration.nextElement();
-        StringValue name = iconvEncode(
-            decodeMime(header.getName()), charset);
 
-        StringValue value = iconvEncode(
-            decodeMime(header.getValue()), charset);
+        StringValue name = new StringValueImpl(decodeMime(header.getName()));
+        name = IconvUtility.encode(name, charset);
+
+        StringValue value = new StringValueImpl(decodeMime(header.getValue()));
+        value = IconvUtility.encode(value, charset);
 
         Value val;
         if ((val = headers.containsKey(name)) == null) {
@@ -223,12 +214,15 @@ public class UnicodeModule extends AbstractQuercusModule {
       Enumeration<String> enumeration = new InternetHeaders(
           encoded_header.toInputStream()).getAllHeaderLines();
 
-      if (!enumeration.hasMoreElements()) {
+      if (! enumeration.hasMoreElements()) {
         env.warning(L.l("Error parsing header."));
         return BooleanValue.FALSE;
       }
 
-      return iconvEncode(decodeMime(enumeration.nextElement()), charset); 
+      StringValue header =
+          new StringValueImpl(decodeMime(enumeration.nextElement()));
+
+      return IconvUtility.encode(header, charset); 
 
     } catch (MessagingException e) {
       log.log(Level.FINE, e.getMessage(), e);
@@ -290,8 +284,8 @@ public class UnicodeModule extends AbstractQuercusModule {
       if (lineLength != 76 || ! "\r\n".equals(lineBreakChars))
         throw new UnimplementedException("Specific options");
 
-      field_name = iconvDecode(field_name.toInputStream(), inputCharset);
-      field_value = iconvDecode(field_value.toInputStream(), inputCharset);
+      field_name = IconvUtility.decode(field_name, inputCharset);
+      field_value = IconvUtility.decode(field_value, inputCharset);
 
       return encodeMime(env, field_name, field_value, lineBreakChars,
           outputCharset, scheme, lineLength);
@@ -348,7 +342,7 @@ public class UnicodeModule extends AbstractQuercusModule {
       charset = env.getIniString("iconv.internal_encoding");
 
     try {
-      return new LongValue(iconvStrLength(str, charset));
+      return new LongValue(IconvUtility.stringLength(str, charset));
 
     } catch (UnsupportedEncodingException e) {
       log.log(Level.FINE, "Cannot convert from " + charset, e);
@@ -379,10 +373,8 @@ public class UnicodeModule extends AbstractQuercusModule {
       charset = env.getIniString("iconv.internal_encoding");
 
     try {
-      needle = iconvDecode(needle.toInputStream(), charset);
-      haystack = iconvDecode(haystack.toInputStream(), charset);
+      int index = IconvUtility.indexOf(haystack, needle, offset, charset);
 
-      int index = haystack.indexOf(needle, offset);
       if (index < 0)
         return BooleanValue.FALSE;
 
@@ -417,10 +409,8 @@ public class UnicodeModule extends AbstractQuercusModule {
       charset = env.getIniString("iconv.internal_encoding");
 
     try {
-      needle = iconvDecode(needle.toInputStream(), charset);
-      haystack = iconvDecode(haystack.toInputStream(), charset);
+      int index = IconvUtility.lastIndexOf(haystack, needle, charset);
 
-      int index = haystack.lastIndexOf(needle);
       if (index < 0)
         return BooleanValue.FALSE;
 
@@ -456,7 +446,7 @@ public class UnicodeModule extends AbstractQuercusModule {
       if (charset.length() == 0)
         charset = env.getIniString("iconv.internal_encoding");
 
-      int strlen = (int)iconvStrLength(str, charset);
+      int strlen = IconvUtility.stringLength(str, charset);
 
       if (offset < 0)
         offset = strlen + offset;
@@ -466,8 +456,7 @@ public class UnicodeModule extends AbstractQuercusModule {
       if (offset < 0 || length < 0)
         return StringValue.EMPTY;
 
-      return iconvDecodeEncode(charset, charset,
-          offset, length, str.toInputStream());
+      return IconvUtility.decodeEncode(charset, charset, offset, length, str);
 
     } catch (UnsupportedEncodingException e) {
       String error = "Cannot convert from " + charset;
@@ -492,8 +481,8 @@ public class UnicodeModule extends AbstractQuercusModule {
                        StringValue str)
   {
     try {
-      return iconvDecodeEncode(in_charset, out_charset,
-          0, Integer.MAX_VALUE, str.toInputStream());
+      return IconvUtility.decodeEncode(in_charset, out_charset,
+          0, Integer.MAX_VALUE, str);
 
     } catch (UnsupportedEncodingException e) {
       String error = "Cannot convert from " + in_charset + " to " + out_charset;
@@ -511,26 +500,7 @@ public class UnicodeModule extends AbstractQuercusModule {
     throw new UnimplementedException();
   }
 
-  /**
-   * Returns the length of the string after decoding.
-   */
-  private static int iconvStrLength(StringValue str, String charset)
-    throws UnsupportedEncodingException
-  {
-    try {
-      int length = 0;
-      ReadStream in = getReadEncoding(str.toInputStream(), charset);
 
-      while (in.readChar() >= 0) {
-        length++;
-      }
-
-      return length;
-
-    } catch (IOException e) {
-      throw new UnsupportedEncodingException(e.getMessage());
-    }
-  }
 
   /**
    * Returns decoded Mime header/field.
@@ -562,123 +532,6 @@ public class UnicodeModule extends AbstractQuercusModule {
     sb.append(MimeUtility.fold(sb.length(), word));
 
     return sb;
-  }
-
-  /**
-   * Decodes to specified charset.
-   */
-  private static StringValue iconvDecode(InputStream is, String charset)
-    throws UnsupportedEncodingException
-  {
-    StringBuilderValue sb = new StringBuilderValue();
-
-    TempCharBuffer tb = TempCharBuffer.allocate();
-    char[] charBuf = tb.getBuffer();
-
-    try {
-      ReadStream in = getReadEncoding(is, charset);
-
-      int sublen;
-      while ((sublen = in.read(charBuf, 0, charBuf.length)) >= 0) {
-        sb.append(charBuf, 0, sublen);
-      }
-
-    } catch (IOException e) {
-      throw new QuercusModuleException(e.getMessage());
-
-    } finally {
-      TempCharBuffer.free(tb);
-    }
-
-    return sb;
-  }
-
-  /**
-   * Encodes chars to specified charset.
-   */
-  private static StringValue iconvEncode(CharSequence chars, String charset)
-    throws UnsupportedEncodingException
-  {
-    TempStream ts = new TempStream();
-
-    try {
-      WriteStream out = getWriteEncoding(ts, charset);
-
-      int length = chars.length();
-      for (int i = 0; i < length; i++) {
-        out.print(chars.charAt(i));
-      }
-
-      out.flush();
-      return new TempBufferStringValue(ts.getHead());
-
-    } catch (IOException e) {
-      throw new QuercusModuleException(e.getMessage());
-    }
-  }
-
-  /**
-   * Decodes and encodes to specified charsets at the same time.
-   */
-  private static Value iconvDecodeEncode(String in_charset,
-                       String out_charset,
-                       int offset,
-                       int length,
-                       InputStream is)
-    throws UnsupportedEncodingException
-  {
-    TempCharBuffer tb = TempCharBuffer.allocate();
-    char[] charBuf = tb.getBuffer();
-
-    TempStream ts = new TempStream();
-
-    try {
-      ReadStream in = getReadEncoding(is, in_charset);
-      WriteStream out = getWriteEncoding(ts, out_charset);
-
-      int sublen;
-      
-      while (offset > 0) {
-        if (in.readChar() < 0)
-          break;
-        offset--;
-      }
-
-      while (length > 0 && (sublen = in.read(charBuf, 0, charBuf.length)) >= 0) {
-        sublen = Math.min(length, sublen);
-
-        out.print(charBuf, 0, sublen);
-        length -= sublen;
-      }
-
-      out.flush();
-      return new TempBufferStringValue(ts.getHead());
-
-    } catch (IOException e) {
-      throw new QuercusModuleException(e.getMessage());
-    }
-
-    finally {
-      TempCharBuffer.free(tb);
-    }
-  }
-
-  private static ReadStream getReadEncoding(InputStream is, String charset)
-    throws UnsupportedEncodingException
-  {
-    ReadStream rs = Vfs.openRead(is);
-    rs.setEncoding(charset);
-
-    return rs;
-  }
-
-  private static WriteStream getWriteEncoding(StreamImpl source, String charset)
-    throws UnsupportedEncodingException
-  {
-    WriteStream ws = new WriteStream(source);
-    ws.setEncoding(charset);
-
-    return ws;
   }
 
   static {

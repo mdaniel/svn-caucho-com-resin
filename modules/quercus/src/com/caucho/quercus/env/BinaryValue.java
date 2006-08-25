@@ -29,7 +29,12 @@
 
 package com.caucho.quercus.env;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 
 import java.util.IdentityHashMap;
 
@@ -101,6 +106,26 @@ abstract public class BinaryValue extends StringValue {
     }
 
     out.print("\"");
+  }
+
+  /**
+   * Returns a byte stream.
+   * @param charset ignored since BinaryValue has no set encoding
+   */
+  public InputStream toInputStream(String charset)
+    throws UnsupportedEncodingException
+  {
+    return toInputStream();
+  }
+
+  /**
+   * Returns a Unicode char stream.
+   * @param charset encoding of the StringValue 
+   */
+  public Reader toReader(String charset)
+    throws UnsupportedEncodingException
+  {
+    return new InputStreamReader(toInputStream(), charset);
   }
 
   abstract public byte[] toBytes();

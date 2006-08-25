@@ -33,6 +33,8 @@ import java.util.IdentityHashMap;
 
 import java.io.InputStream;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 
 import com.caucho.vfs.WriteStream;
 
@@ -857,6 +859,20 @@ abstract public class StringValue extends Value implements CharSequence {
   {
     return new StringValueInputStream();
   }
+
+  /**
+   * Returns a byte stream of chars.
+   * @param charset to encode chars to
+   */
+  abstract public InputStream toInputStream(String charset)
+    throws UnsupportedEncodingException;
+
+  /**
+   * Returns a Unicode char stream.
+   * @param charset encoding of the StringValue
+   */
+  abstract public Reader toReader(String charset)
+    throws UnsupportedEncodingException;
 
   //
   // java.lang.Object methods

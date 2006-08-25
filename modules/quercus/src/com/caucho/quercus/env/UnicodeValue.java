@@ -29,6 +29,13 @@
 
 package com.caucho.quercus.env;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+
 /**
  * Represents a 16-bit unicode string value.
  */
@@ -41,6 +48,32 @@ abstract public class UnicodeValue extends StringValue {
   {
     return this;
   }
+
+  /**
+   * Returns a byte stream of chars.
+   * @param charset to encode chars to
+   */
+  public InputStream toInputStream(String charset)
+    throws UnsupportedEncodingException
+  {
+    return new ByteArrayInputStream(toString().getBytes(charset));
+  }
+
+  /**
+   * Returns a char stream.
+   * XXX: when decoding fails
+   *
+   * @param charset to decode bytes by
+   */
+  public Reader toReader(String charset)
+    throws UnsupportedEncodingException
+  {
+//    return new StringReader(toString());
+
+    return new InputStreamReader(
+        new ByteArrayInputStream(toString().getBytes()), charset);
+  }
+
 
 }
 
