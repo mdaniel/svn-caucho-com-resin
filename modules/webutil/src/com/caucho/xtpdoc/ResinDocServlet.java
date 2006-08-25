@@ -99,8 +99,9 @@ public class ResinDocServlet extends HttpServlet {
 
     Path path = _pwd.lookup(servletPath);
 
-    System.out.println("SERVICE: " + _contextPath);
-    Document document = new Document(path, _contextPath);
+    Document document = new Document(getServletContext(),
+				     path, _contextPath,
+				     _contextPath + servletPath);
 
     try {
       response.setContentType("text/html");

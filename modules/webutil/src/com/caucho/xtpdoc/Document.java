@@ -32,31 +32,113 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
-import java.util.logging.Logger;
+import java.util.*;
+import java.util.logging.*;
 
-import com.caucho.vfs.Path;
+import javax.servlet.*;
 
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
+import com.caucho.config.*;
+import com.caucho.vfs.*;
+
 public class Document {
   private static Logger log = Logger.getLogger(ResinDocServlet.class.getName());
 
+  private ServletContext _webApp;
   private Header _header;
   private Body _body;
   private Path _documentPath;
   private String _contextPath;
+  private String _uri;
   private int _level;
+  private Navigation _navigation;
+  private NavigationItem _navItem;
 
   Document()
   {
-    this(null, null);
+    this(null, null, null, null);
   }
 
-  public Document(Path documentPath, String contextPath)
+  public Document(Path documentPath,
+		  String contextPath)
   {
+    this(null, documentPath, contextPath, null);
+  }
+
+  public Document(ServletContext webApp,
+		  Path documentPath,
+		  String contextPath,
+		  String uri)
+  {
+    _webApp = webApp;
     _documentPath = documentPath;
     _contextPath = contextPath;
+    _uri = uri;
+  }
+
+  NavigationItem getNavigation()
+  {
+    if (_navItem != null)
+      return _navItem;
+    
+    ArrayList<Navigation> navList = new ArrayList();
+
+    String uri = _uri;
+
+    int p = uri.lastIndexOf('/');
+    if (p > 0)
+      uri = uri.substring(0, p + 1);
+
+    ServletContext rootWebApp = _webApp.getContext("/");
+
+    NavigationItem child = null;
+
+    while (! uri.equals("")) {
+      String realPath = rootWebApp.getRealPath(uri);
+      
+      Path path = Vfs.lookup(realPath);
+      
+      Path toc = path.lookup("toc.xml");
+
+      if (! toc.canRead())
+	break;
+
+      Config config = new Config();
+
+      Navigation navigation = new Navigation(this, uri, path, 0);
+      navigation.setChild(child);
+
+      try {
+        config.configure(navigation, toc);
+
+	navList.add(navigation);
+      } catch (Exception e) {
+	log.log(Level.FINE, e.toString(), e);
+	
+        navigation = null;
+      }
+
+      if (navigation != null)
+	child = navigation.getRootItem();
+      else
+	child = null;
+
+      p = uri.lastIndexOf('/', uri.length() - 2);
+      if (p >= 0)
+	uri = uri.substring(0, p + 1);
+      else
+	break;
+    }
+
+    if (navList.size() > 0) {
+      Navigation nav = navList.get(0);
+      
+      _navItem = nav.getItem(_uri);
+    }
+
+    return _navItem;
   }
 
   public Path getDocumentPath()
@@ -67,6 +149,11 @@ public class Document {
   public String getContextPath()
   {
     return _contextPath;
+  }
+
+  public String getURI()
+  {
+    return _uri;
   }
 
   public Header getHeader()
@@ -108,6 +195,16 @@ public class Document {
     _body.writeHtml(out);
 
     out.writeEndElement(); // html
+  }
+
+  public void writeLeftNav(XMLStreamWriter out)
+    throws XMLStreamException
+  {
+    NavigationItem item = getNavigation();
+
+    if (item != null) {
+      item.writeLeftNav(out);
+    }
   }
 
   public void writeLaTeXTop(PrintWriter out)

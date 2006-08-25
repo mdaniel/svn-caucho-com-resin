@@ -40,12 +40,19 @@ import com.caucho.vfs.Path;
 
 import com.caucho.config.Config;
 
+import javax.annotation.PostConstruct;
+
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
 public class NavigationItem {
   private static final Logger log 
     = Logger.getLogger(NavigationItem.class.getName());
+
+  private Navigation _navigation;
+  private NavigationItem _parent;
+
+  private String _uri;
 
   private int _maxDepth = 4;
   private int _depth;
@@ -59,11 +66,36 @@ public class NavigationItem {
   private ArrayList<NavigationItem> _items = new ArrayList<NavigationItem>();
   private Path _rootPath;
 
-  public NavigationItem(Document document, int depth)
+  public NavigationItem(Navigation navigation,
+			NavigationItem parent,
+			int depth)
   {
-    _document = document;
+    _navigation = navigation;
+    _parent = parent;
+    
+    _document = navigation.getDocument();;
     _depth = depth;
-    _rootPath = document.getDocumentPath().getParent();
+    _rootPath = _document.getDocumentPath().getParent();
+  }
+
+  public Navigation getNavigation()
+  {
+    return _navigation;
+  }
+
+  NavigationItem getParent()
+  {
+    return _parent;
+  }
+
+  void setParent(NavigationItem parent)
+  {
+    _parent = parent;
+  }
+
+  String getUri()
+  {
+    return _uri;
   }
 
   private void initSummary()
@@ -91,6 +123,7 @@ public class NavigationItem {
           log.info("error configuring " + linkPath + ": " + e);
         }
 
+	/*
         if (_atocDescend) {
           Path linkRoot = linkPath.getParent();
           Path subToc = linkPath.getParent().lookup("toc.xml");
@@ -109,6 +142,7 @@ public class NavigationItem {
             log.info(subToc + " does not exist!");
           }
         }
+	*/
       }
     }
   }
@@ -127,6 +161,7 @@ public class NavigationItem {
   public void setLink(String link)
   {
     _link = link;
+    _uri = _navigation.getUri() + link;
   }
 
   public void setTitle(String title)
@@ -141,9 +176,15 @@ public class NavigationItem {
 
   public NavigationItem createItem()
   {
-    NavigationItem item = new NavigationItem(_document, _depth + 1);
+    NavigationItem item = new NavigationItem(_navigation, this, _depth + 1);
     _items.add(item);
     return item;
+  }
+
+  @PostConstruct
+  public void init()
+  {
+    _navigation.putItem(_navigation.getUri() + _link, this);
   }
 
   public void writeHtml(XMLStreamWriter out, String path)
@@ -215,8 +256,28 @@ public class NavigationItem {
   public void writeLeftNav(XMLStreamWriter out)
     throws XMLStreamException
   {
+    if (_parent != null) {
+      _parent.writeLeftNav(out);
+    }
+    else {
+      writeLeftNavItem(out);
+    }
+      
+    if (_items.size() > 0) {
+      out.writeEmptyElement("hr");
+
+      for (NavigationItem item : _items) {
+	item.writeLeftNavItem(out);
+      }
+    }
+  }
+
+  public void writeLeftNavItem(XMLStreamWriter out)
+    throws XMLStreamException
+  {
     out.writeStartElement("a");
-    out.writeAttribute("href", _link);
+    out.writeAttribute("href", _uri);
+    out.writeAttribute("class", "leftnav");
     out.writeCharacters(_title);
     out.writeEndElement(); // a
 

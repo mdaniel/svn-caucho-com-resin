@@ -32,7 +32,7 @@ package com.caucho.xtpdoc;
 import java.io.PrintWriter;
 import java.io.IOException;
 
-import java.util.ArrayList;
+import java.util.*;
 
 import java.util.logging.Logger;
 
@@ -47,6 +47,7 @@ public class Navigation {
 
   private int _depth;
   private Path _rootPath;
+  private String _uri;
   private String _section;
   private Document _document;
   private boolean _threaded;
@@ -54,11 +55,33 @@ public class Navigation {
   private ArrayList<NavigationItem> _items 
     = new ArrayList<NavigationItem>();
 
-  public Navigation(Document document, int depth)
+  private NavigationItem _docItem;
+  private NavigationItem _child;
+
+  private HashMap<String,NavigationItem> _itemMap
+    = new HashMap<String,NavigationItem>();
+
+  public Navigation(Document document, String uri, Path path, int depth)
   {
     _document = document;
-    _rootPath = _document.getDocumentPath().getParent();
+    _rootPath = path;
+    _uri = uri;
     _depth = depth;
+  }
+
+  public void setChild(NavigationItem child)
+  {
+    _child = child;
+  }
+
+  public String getUri()
+  {
+    return _uri;
+  }
+
+  public Document getDocument()
+  {
+    return _document;
   }
 
   public void setSection(String section)
@@ -76,11 +99,46 @@ public class Navigation {
     _threaded = threaded;
   }
 
+  public NavigationItem getRoot()
+  {
+    if (_items.size() > 0)
+      return _items.get(0);
+    else
+      return null;
+  }
+
   public NavigationItem createItem()
   {
-    NavigationItem item = new NavigationItem(_document, _depth);
+    return new NavigationItem(this, null, _depth);
+  }
+
+  public void addItem(NavigationItem item)
+  {
     _items.add(item);
-    return item;
+  }
+
+  public void putItem(String uri, NavigationItem item)
+  {
+    if (_child != null && _child.getUri().equals(uri)) {
+      _child.setParent(item.getParent());
+      _itemMap.put(uri, _child);
+    }
+    else {
+      _itemMap.put(uri, item);
+    }
+  }
+
+  public NavigationItem getItem(String uri)
+  {
+    return _itemMap.get(uri);
+  }
+
+  public NavigationItem getRootItem()
+  {
+    if (_items.size() > 0)
+      return _items.get(0);
+    else
+      return null;
   }
 
   public void writeHtml(XMLStreamWriter out)
@@ -108,6 +166,12 @@ public class Navigation {
   public void writeLeftNav(XMLStreamWriter out)
     throws XMLStreamException
   {
+    if (_items.size() > 0) {
+      NavigationItem topItem = _items.get(0);
+
+      System.out.println("PATH: " + _document.getURI());
+    }
+    
     for (NavigationItem item : _items)
       item.writeLeftNav(out);
   }

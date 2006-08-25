@@ -56,21 +56,10 @@ public class Body extends ContainerNode {
 
   private void parseNavigation()
   {
-    Path rootPath = getDocument().getDocumentPath().getParent();
-    Path toc = rootPath.lookup("toc.xml");
+    NavigationItem item = getDocument().getNavigation();
 
-    if (toc.exists()) {
-      Config config = new Config();
-
-      _navigation = new Navigation(getDocument(), 0);
-
-      try {
-        config.configure(_navigation, toc);
-      } catch (Exception e) {
-        e.getCause().printStackTrace();
-        _navigation = null;
-      }
-    }
+    if (item != null)
+      _navigation = item.getNavigation();
   }
 
   public void setLocalTOC(String text)
@@ -200,8 +189,7 @@ public class Body extends ContainerNode {
     
     parseNavigation();
 
-    if (_navigation != null)
-      _navigation.writeLeftNav(out);
+    getDocument().writeLeftNav(out);
 
     out.writeEndElement(); // td
 
