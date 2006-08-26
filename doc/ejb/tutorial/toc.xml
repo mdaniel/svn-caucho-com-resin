@@ -1,8 +1,0 @@
-<navigation threaded="true" section="Resin : EJB : Tutorials" comment="true">
-  <item title="Tutorials" link="index.xtp">
-    <item link="ejb-stateless-hello/index.xtp" title="Stateless Session Hello"/>
-    <item link="ejb-entity-home/index.xtp" title="Entity Bean Home methods"/>
-    <item link="ejb-session-local/index.xtp" title="Local Session Counter"/>
-    <item link="ejb-messaging-queue/index.xtp" title="Message Bean"/>
-  </item>
-</navigation>
