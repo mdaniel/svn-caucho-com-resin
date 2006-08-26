@@ -129,6 +129,14 @@ public class PersistenceUnitConfig {
   }
 
   /**
+   * Adds a configured class.
+   */
+  public void addAllClasses(ArrayList<String> classList)
+  {
+    _classList.addAll(classList);
+  }
+
+  /**
    * Sets true if only listed classes should be used.
    */
   public void setExcludeUnlistedClasses(boolean isExclude)

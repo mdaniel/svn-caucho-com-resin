@@ -33,7 +33,9 @@ import java.io.InputStream;
 
 import java.net.URL;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -70,7 +72,7 @@ import com.caucho.vfs.Path;
 public class AmberContainer {
   private static final Logger log
     = Logger.getLogger(AmberContainer.class.getName());
-  
+
   private static final EnvironmentLocal<AmberContainer> _localContainer
     = new EnvironmentLocal<AmberContainer>();
 
@@ -84,7 +86,7 @@ public class AmberContainer {
   private DataSource _dataSource;
   private DataSource _readDataSource;
   private DataSource _xaDataSource;
-  
+
   private boolean _createDatabaseTables;
 
   private HashMap<String,AmberPersistenceUnit> _unitMap
@@ -94,7 +96,7 @@ public class AmberContainer {
     = new HashMap<String,EntityType>();
 
   private Throwable _exception;
-  
+
   private HashMap<String,Throwable> _entityExceptionMap
     = new HashMap<String,Throwable>();
 
@@ -109,7 +111,7 @@ public class AmberContainer {
 
     try {
       if (_parentLoader instanceof DynamicClassLoader)
-	((DynamicClassLoader) _parentLoader).make();
+        ((DynamicClassLoader) _parentLoader).make();
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -126,9 +128,9 @@ public class AmberContainer {
       AmberContainer container = _localContainer.getLevel();
 
       if (container == null) {
-	container = new AmberContainer();
+        container = new AmberContainer();
 
-	_localContainer.set(container);
+        _localContainer.set(container);
       }
 
       return container;
@@ -259,7 +261,7 @@ public class AmberContainer {
     else if (_exception != null) {
       throw new AmberRuntimeException(_exception);
     }
-    
+
     return _entityMap.get(className);
   }
 
@@ -317,10 +319,10 @@ public class AmberContainer {
   {
     if (_exception != null)
       throw new AmberRuntimeException(_exception);
-    
+
     return _unitMap.get(name);
   }
-  
+
   /**
    * Adds a persistence root.
    */
@@ -330,41 +332,81 @@ public class AmberContainer {
     InputStream is = null;
 
     try {
+
+      ArrayList<String> classList = new ArrayList<String>();
+
+      // XXX: This is not necessary when <exclude-unlisted-classes/>
+      lookupClasses(root.getPath().length(), root, classList);
+
       is = persistenceXml.openRead();
 
       PersistenceConfig persistence = new PersistenceConfig();
       persistence.setRoot(root);
 
       new Config().configure(persistence, is,
-			     "com/caucho/amber/cfg/persistence-30.rnc");
+                             "com/caucho/amber/cfg/persistence-30.rnc");
 
       for (PersistenceUnitConfig unitConfig : persistence.getUnitList()) {
-	try {
-	  AmberPersistenceUnit unit = unitConfig.init(this);
+        try {
+          unitConfig.addAllClasses(classList);
 
-	  _unitMap.put(unit.getName(), unit);
-	} catch (Throwable e) {
-	  addException(e);
-      
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+          AmberPersistenceUnit unit = unitConfig.init(this);
+
+          _unitMap.put(unit.getName(), unit);
+        } catch (Throwable e) {
+          addException(e);
+
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
+
     } catch (ConfigException e) {
       addException(e);
-      
+
       log.warning(e.getMessage());
     } catch (Throwable e) {
       addException(e);
-      
+
       log.log(Level.WARNING, e.toString(), e);
     } finally {
       try {
-	if (is != null)
-	  is.close();
+        if (is != null)
+          is.close();
       } catch (Throwable e) {
       }
     }
   }
+
+  /**
+   * Lookup *.class files and add the corresponding
+   * fully qualified class names to the list.
+   */
+  public void lookupClasses(int rootNameLength,
+                            Path curr,
+                            ArrayList<String> list)
+    throws Exception
+  {
+    Iterator<String> it = curr.iterator();
+
+    while (it.hasNext()) {
+
+      String s = it.next();
+
+      Path path = curr.lookup(s);
+
+      if (path.isDirectory()) {
+        lookupClasses(rootNameLength, path, list);
+      }
+      else if (s.endsWith(".class")) {
+        String packageName = curr.getPath().substring(rootNameLength);
+
+        packageName = packageName.replace('/', '.');
+
+        if (packageName.length() > 0)
+          packageName = packageName + '.';
+
+        list.add(packageName + s.substring(0, s.length() - 6));
+      }
+    }
+  }
 }
-
-
