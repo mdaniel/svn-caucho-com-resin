@@ -1,5 +1,0 @@
-<navigation threaded="true" section="Resin : EJB 3.0 : Tutorials" comment="true">
-  <item title="Tutorials" link="index.xtp">
-    <item link="stateless/index.xtp" title="Stateless Session"/>
-  </item>
-</navigation>
