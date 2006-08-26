@@ -345,6 +345,13 @@ public class WatchdogManager extends ProtocolDispatchServer {
   {
     ArrayList<String> classPath = new ArrayList<String>();
 
+    Path javaHome = Vfs.lookup(System.getProperty("java.home"));
+
+    if (javaHome.lookup("lib/tools.jar").canRead())
+      classPath.add(javaHome.lookup("lib/tools.jar").getNativePath());
+    if (javaHome.lookup("../lib/tools.jar").canRead())
+      classPath.add(javaHome.lookup("../lib/tools.jar").getNativePath());
+
     Path resinLib = resinHome.lookup("lib");
 
     if (resinLib.lookup("pro.jar").canRead())

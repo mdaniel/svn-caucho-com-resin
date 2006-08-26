@@ -256,7 +256,7 @@ public class ServerWatchdog implements Runnable {
 
     ArrayList<String> list = new ArrayList<String>();
 
-    list.add("java");
+    list.add(getJavaExe());
     list.add("-Djava.util.logging.manager=com.caucho.log.LogManagerImpl");
     list.add("-Djava.system.class.loader=com.caucho.loader.SystemClassLoader");
     list.add("-Djava.awt.headless=true");
@@ -369,7 +369,11 @@ public class ServerWatchdog implements Runnable {
 	  ss.close();
 	}
 
-	InputStream watchdogIs = s.getInputStream();
+	InputStream watchdogIs = null;
+
+	if (s != null)
+	  s.getInputStream();
+	
 	InputStream stdIs = process.getInputStream();
 	OutputStream stdOs = process.getOutputStream();
 
@@ -487,7 +491,7 @@ public class ServerWatchdog implements Runnable {
 
     ArrayList<String> list = new ArrayList<String>();
 
-    list.add("java");
+    list.add(getJavaExe());
     list.add("-Djava.util.logging.manager=com.caucho.log.LogManagerImpl");
     list.add("-Djava.system.class.loader=com.caucho.loader.SystemClassLoader");
     list.add("-Djava.awt.headless=true");
@@ -501,7 +505,7 @@ public class ServerWatchdog implements Runnable {
 
     for (int i = 0; i < _argv.length; i++)
       list.add(_argv[i]);
-    
+
     if (_jniBoot != null) {
       ArrayList<QServerSocket> boundSockets = new ArrayList<QServerSocket>();
 
@@ -552,6 +556,32 @@ public class ServerWatchdog implements Runnable {
     builder.redirectErrorStream(true);
 
     return builder.start();
+  }
+
+  private String getJavaExe()
+  {
+    Path javaHome = Vfs.lookup(System.getProperty("java.home"));
+
+    if (javaHome.getTail().equals("jre"))
+      javaHome = javaHome.getParent();
+
+    if (javaHome.lookup("bin/javaw.exe").canRead())
+      return javaHome.lookup("bin/javaw").getNativePath();
+    else if (javaHome.lookup("bin/java.exe").canRead())
+      return javaHome.lookup("bin/java").getNativePath();
+    else if (javaHome.lookup("bin/java").canRead())
+      return javaHome.lookup("bin/java").getNativePath();
+
+    javaHome = Vfs.lookup(System.getProperty("java.home"));
+
+    if (javaHome.lookup("bin/javaw.exe").canRead())
+      return javaHome.lookup("bin/javaw").getNativePath();
+    else if (javaHome.lookup("bin/java.exe").canRead())
+      return javaHome.lookup("bin/java").getNativePath();
+    else if (javaHome.lookup("bin/java").canRead())
+      return javaHome.lookup("bin/java").getNativePath();
+
+    return "java";
   }
   
   /**

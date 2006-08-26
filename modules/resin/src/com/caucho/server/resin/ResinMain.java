@@ -184,8 +184,11 @@ public class ResinMain implements ResinServerListener {
         for (int k = 0; k < 15 && socket == null; k++) {
           try {
             socket = new Socket("127.0.0.1", socketport);
-          } catch (Exception e) {
+          } catch (Throwable e) {
+	    System.out.println(new Date());
+	    e.printStackTrace();
           }
+	  
           if (socket == null)
             Thread.sleep(1000);
         }

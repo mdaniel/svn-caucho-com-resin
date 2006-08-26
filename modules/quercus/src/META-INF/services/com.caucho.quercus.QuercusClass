@@ -1,11 +1,11 @@
-com.caucho.quercus.lib.dom.DOMDocument provides dom
-com.caucho.quercus.lib.dom.DOMImplementation
-com.caucho.xml.QAttr as DOMAttr definedBy com.caucho.quercus.lib.dom.DOMAttrDef
-com.caucho.xml.QComment as DOMComment definedBy com.caucho.quercus.lib.dom.DOMCommentDef
-com.caucho.xml.QElement as DOMElement definedBy com.caucho.quercus.lib.dom.DOMElementDef
-com.caucho.xml.QEntityReference as DOMEntityReference definedBy com.caucho.quercus.lib.dom.DOMEntityReferenceDef
-com.caucho.xml.QProcessingInstruction as DOMProcessingInstruction definedBy com.caucho.quercus.lib.dom.DOMProcessingInstructionDef
-com.caucho.xml.QText as DOMText definedBy com.caucho.quercus.lib.dom.DOMTextDef
+#com.caucho.quercus.lib.dom.DOMDocument provides dom
+#com.caucho.quercus.lib.dom.DOMImplementation
+#com.caucho.xml.QAttr as DOMAttr definedBy com.caucho.quercus.lib.dom.DOMAttrDef
+#com.caucho.xml.QComment as DOMComment definedBy com.caucho.quercus.lib.dom.DOMCommentDef
+#com.caucho.xml.QElement as DOMElement definedBy com.caucho.quercus.lib.dom.DOMElementDef
+#com.caucho.xml.QEntityReference as DOMEntityReference definedBy com.caucho.quercus.lib.dom.DOMEntityReferenceDef
+#com.caucho.xml.QProcessingInstruction as DOMProcessingInstruction definedBy com.caucho.quercus.lib.dom.DOMProcessingInstructionDef
+#com.caucho.xml.QText as DOMText definedBy com.caucho.quercus.lib.dom.DOMTextDef
 # com.caucho.xpath.XPath as DOMXPath definedBy com.caucho.quercus.lib.dom.DOMXPathDef
 
 com.caucho.quercus.lib.ExceptionClass as Exception

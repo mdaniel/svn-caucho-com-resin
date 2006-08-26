@@ -211,43 +211,6 @@ public class ResinBoot {
     }
   }
 
-  private String calculateClassPath()
-    throws IOException
-  {
-    ArrayList<String> classPath = new ArrayList<String>();
-
-    Path resinLib = _resinHome.lookup("lib");
-
-    if (resinLib.lookup("pro.jar").canRead())
-      classPath.add(resinLib.lookup("pro.jar").getNativePath());
-    classPath.add(resinLib.lookup("resin.jar").getNativePath());
-		  
-    String []list = resinLib.list();
-
-    for (int i = 0; i < list.length; i++) {
-      if (! list[i].endsWith(".jar"))
-	continue;
-      
-      Path item = resinLib.lookup(list[i]);
-
-      String pathName = item.getNativePath();
-
-      if (! classPath.contains(pathName))
-	classPath.add(pathName);
-    }
-
-    String cp = "";
-
-    for (int i = 0; i < classPath.size(); i++) {
-      if (! "".equals(cp))
-	cp += File.pathSeparatorChar;
-
-      cp += classPath.get(i);
-    }
-
-    return cp;
-  }
-
   /**
    * The main start of the web server.
    *
