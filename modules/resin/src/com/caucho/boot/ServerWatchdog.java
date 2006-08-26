@@ -350,7 +350,11 @@ public class ServerWatchdog implements Runnable {
   public void run()
   {
     while (_lifecycle.isActive()) {
+      InputStream watchdogIs = null;
+
       try {
+	watchdogIs = null;
+	
 	ServerSocket ss = new ServerSocket(0, 5,
 					   InetAddress.getByName("127.0.0.1"));
 	int port = ss.getLocalPort();
@@ -369,10 +373,8 @@ public class ServerWatchdog implements Runnable {
 	  ss.close();
 	}
 
-	InputStream watchdogIs = null;
-
 	if (s != null)
-	  s.getInputStream();
+	  watchdogIs = s.getInputStream();
 	
 	InputStream stdIs = process.getInputStream();
 	OutputStream stdOs = process.getOutputStream();
@@ -415,6 +417,11 @@ public class ServerWatchdog implements Runnable {
 	}
 
 	try {
+	  watchdogIs.close();
+	} catch (Exception e) {
+	}
+
+	try {
 	  stdOs.close();
 	} catch (Exception e) {
 	}
@@ -427,7 +434,7 @@ public class ServerWatchdog implements Runnable {
 	    while (stdIs.available() > 0) {
 	      len = stdIs.read(data, 0, data.length);
 
-	      if (len <= 0) {
+ 	      if (len <= 0) {
 		isLive = false;
 		break;
 	      }
@@ -466,6 +473,13 @@ public class ServerWatchdog implements Runnable {
 	}
       } catch (Exception e) {
 	log.log(Level.INFO, e.toString(), e);
+      } finally {
+	if (watchdogIs != null) {
+	  try {
+	    watchdogIs.close();
+	  } catch (IOException e) {
+	  }
+	}
       }
 
       if (_isSingle) {

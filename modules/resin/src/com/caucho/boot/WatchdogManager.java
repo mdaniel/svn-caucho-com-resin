@@ -163,7 +163,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
     while (_lifecycle.isActive()) {
       synchronized (_lifecycle) {
 	try {
-	  _activeServerList.wait(10000);
+	  _lifecycle.wait(10000);
 	} catch (Exception e) {
 	}
       }
