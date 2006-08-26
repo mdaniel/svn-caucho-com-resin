@@ -93,6 +93,49 @@ public class NavigationItem {
     _parent = parent;
   }
 
+  NavigationItem getPrevious()
+  {
+    NavigationItem parent = getParent();
+
+    if (parent != null) {
+      int p = parent._items.indexOf(this);
+
+      if (p > 0) {
+	NavigationItem ptr = _parent._items.get(p - 1);
+
+	while (ptr != null && ptr._items.size() > 0) {
+	  ptr = ptr._items.get(ptr._items.size() - 1);
+	}
+
+	return ptr;
+      }
+      else
+	return parent;
+    }
+
+    return null;
+  }
+
+  NavigationItem getNext()
+  {
+    NavigationItem ptr = this;
+    NavigationItem child = null;
+
+    while (ptr != null) {
+      int p = ptr._items.indexOf(child);
+
+      if (p < 0 && ptr._items.size() > 0)
+	return ptr._items.get(0);
+      else if (p + 1 < ptr._items.size())
+	return ptr._items.get(p + 1);
+
+      child = ptr;
+      ptr = ptr.getParent();
+    }
+
+    return null;
+  }
+
   String getUri()
   {
     return _uri;
@@ -282,6 +325,15 @@ public class NavigationItem {
     out.writeEndElement(); // a
 
     out.writeEmptyElement("br");
+  }
+
+  public void writeLink(XMLStreamWriter out)
+    throws XMLStreamException
+  {
+    out.writeStartElement("a");
+    out.writeAttribute("href", _uri);
+    out.writeCharacters(_title);
+    out.writeEndElement(); // a
   }
 
   public void writeLaTeX(PrintWriter writer)

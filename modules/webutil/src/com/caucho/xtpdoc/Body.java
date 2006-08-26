@@ -114,6 +114,8 @@ public class Body extends ContainerNode {
     out.writeAttribute("width", "100%");
     out.writeAttribute("border", "0");
     out.writeAttribute("cellspacing", "0");
+    out.writeAttribute("cellpadding", "0");
+    out.writeAttribute("summary", "");
 
     // logo block
     out.writeStartElement("tr");
@@ -168,7 +170,8 @@ public class Body extends ContainerNode {
     out.writeAttribute("class", "toptitle");
     out.writeAttribute("size", "+3");
     out.writeEntityRef("nbsp");
-    out.writeCharacters(getDocument().getHeader().getTitle());
+    if (getDocument().getHeader() != null)
+      out.writeCharacters(getDocument().getHeader().getTitle());
     out.writeEndElement(); // </font>
     out.writeEndElement(); // </td>
     out.writeEndElement(); // </tr>
@@ -177,14 +180,60 @@ public class Body extends ContainerNode {
     
     out.writeEndElement(); // </tr>
 
-    // XXX: space
+    // space
+    out.writeStartElement("tr");
+    out.writeStartElement("td");
+    out.writeAttribute("colspan", "4");
+    
+    out.writeStartElement("img");
+    out.writeAttribute("alt", "");
+    out.writeAttribute("width", "1");
+    out.writeAttribute("height", "5");
+    out.writeAttribute("src", getDocument().getContextPath() + "/images/pixel.jpg");
+    out.writeEndElement(); // </img>
+    
+    out.writeEndElement(); // </td>
+    out.writeEndElement(); // </tr>
+
+    String cp = getDocument().getContextPath();
+
+    // left
+    out.writeStartElement("tr");
+    out.writeStartElement("td");
+    //out.writeAttribute("bgcolor", "#b9cef7");
+    //out.writeAttribute("class", "section");
+    out.writeAttribute("colspan", "2");
+    out.writeAttribute("background", cp + "/images/left_background.gif");
+    
+    out.writeStartElement("img");
+    out.writeAttribute("alt", "");
+    out.writeAttribute("width", "1");
+    out.writeAttribute("height", "20");
+    out.writeAttribute("src", cp + "/images/pixel.jpg");
+    out.writeEndElement(); // </img>
+    
+    out.writeEndElement(); // </td>
+    
+    out.writeStartElement("td");
+    out.writeAttribute("colspan", "2");
+    out.writeStartElement("img");
+    out.writeAttribute("alt", "");
+    out.writeAttribute("width", "1");
+    out.writeAttribute("height", "20");
+    out.writeAttribute("src", cp + "/images/pixel.jpg");
+    out.writeEndElement(); // </td>
+    out.writeEndElement(); // </tr>
 
     // navigation
     out.writeStartElement("tr");
     out.writeAttribute("valign", "top");
     out.writeStartElement("td");
-    out.writeAttribute("colspan", "2");
-    out.writeAttribute("bgcolor", "#b9cef7");
+    //out.writeAttribute("bgcolor", "#b9cef7");
+    out.writeAttribute("class", "leftnav");
+    out.writeEndElement();
+    
+    out.writeStartElement("td");
+    // out.writeAttribute("bgcolor", "#b9cef7");
     out.writeAttribute("class", "leftnav");
     
     parseNavigation();
@@ -197,6 +246,19 @@ public class Body extends ContainerNode {
     out.writeEndElement();
     
     out.writeStartElement("td");
+    // actual body
+
+    NavigationItem item = getDocument().getNavigation();
+
+    if (item != null) {
+      writeThreadNavigation(out, item);
+      out.writeEmptyElement("hr");
+    }
+
+    if (getDocument().getHeader() != null
+	&& getDocument().getHeader().getDescription() != null) {
+      getDocument().getHeader().getDescription().writeHtml(out);
+    }
 
     if (_summary != null) {
       _summary.setNavigation(_navigation);
@@ -211,6 +273,10 @@ public class Body extends ContainerNode {
     out.writeStartElement("hr");
     out.writeEndElement();
 
+    if (item != null) {
+      writeThreadNavigation(out, item);
+    }
+    
     // nav
 
     out.writeStartElement("table");
@@ -224,9 +290,27 @@ public class Body extends ContainerNode {
     out.writeCharacters("Copyright ");
     out.writeEntityRef("copy");
     out.writeCharacters(" 1998-2006 Caucho Technology, Inc. All rights reserved.");
-    out.writeStartElement("br");
+    out.writeEmptyElement("br");
+    out.writeCharacters("Resin ");
+    out.writeStartElement("sup");
+    out.writeStartElement("font");
+    out.writeAttribute("size", "-1");
+    out.writeEntityRef("#174");
     out.writeEndElement();
-    out.writeCharacters("Resin is a registered trademark");
+    out.writeEndElement();
+    out.writeCharacters(" is a registered trademark, and Quercus");
+    out.writeStartElement("sup");
+    out.writeCharacters("tm");
+    out.writeEndElement();
+    out.writeCharacters(", Amber");
+    out.writeStartElement("sup");
+    out.writeCharacters("tm");
+    out.writeEndElement();
+    out.writeCharacters(", and Hessian");
+    out.writeStartElement("sup");
+    out.writeCharacters("tm");
+    out.writeEndElement();
+    out.writeCharacters(" are trademarks of Caucho Technology.");
     out.writeEndElement(); // small
     out.writeEndElement(); // em
     out.writeEndElement(); // td
@@ -239,6 +323,45 @@ public class Body extends ContainerNode {
 
     out.writeEndElement(); //body
   }
+  
+  public void writeThreadNavigation(XMLStreamWriter out, NavigationItem item)
+    throws XMLStreamException
+  {
+    out.writeStartElement("table");
+    out.writeAttribute("border", "0");
+    out.writeAttribute("cellspacing", "0");
+    out.writeAttribute("width", "100%");
+    out.writeStartElement("tr");
+      
+    out.writeStartElement("td");
+    out.writeAttribute("width", "30%");
+    out.writeAttribute("align", "left");
+    if (item.getPrevious() != null) {
+      item.getPrevious().writeLink(out);
+    }
+    out.writeEndElement();
+      
+    out.writeStartElement("td");
+    out.writeAttribute("width", "40%");
+    out.writeStartElement("center");
+    if (item.getParent() != null) {
+      item.getParent().writeLink(out);
+    }
+    out.writeEndElement();
+    out.writeEndElement();
+      
+    out.writeStartElement("td");
+    out.writeAttribute("width", "30%");
+    out.writeAttribute("align", "right");
+    if (item.getNext() != null) {
+      item.getNext().writeLink(out);
+    }
+    out.writeEndElement();
+      
+    out.writeEndElement();
+    out.writeEndElement();
+  }
+      
 
   public void writeLaTeXTop(PrintWriter out)
     throws IOException

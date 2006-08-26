@@ -1,6 +1,5 @@
-<resin xmlns="http://caucho.com/ns/resin"
-       xmlns:resin="http://caucho.com/ns/resin/core">
-<cluster-default>
+<cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="http://caucho.com/ns/resin/core">
 
 <ear-default>
   <resin:import path="META-INF/application.xml"/>
@@ -220,7 +219,6 @@
   <resin:import path="WEB-INF/resin-web.xml" optional="true"/>
 </web-app-default>
 
-</cluster-default>
-</resin>
+</cluster>
 
 

@@ -66,9 +66,11 @@ public class ResinBoot {
 
     parseCommandLine(argv);
 
+    Vfs.setPwd(_serverRoot);
+
     Config config = new Config();
 
-    ResinConfig conf = new ResinConfig(_resinHome);
+    ResinConfig conf = new ResinConfig(_resinHome, _serverRoot);
 
     config.configure(conf, _resinConf, "com/caucho/server/resin/resin.rnc");
 
@@ -152,7 +154,8 @@ public class ResinBoot {
 	_resinHome = Vfs.lookup(argv[i + 1]);
 	i++;
       }
-      else if ("-server-root".equals(arg)) {
+      else if ("-server-root".equals(arg)
+	       || "-server-root".equals(arg)) {
 	_serverRoot = Vfs.lookup(argv[i + 1]);
 	i++;
       }

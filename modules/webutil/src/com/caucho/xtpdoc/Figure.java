@@ -76,7 +76,8 @@ public class Figure implements ContentItem {
     if (_width >= 0)
       out.writeAttribute("width", Integer.toString(_width));
 
-    out.writeAttribute("src", _source);
+
+    out.writeAttribute("src", _document.getContextPath() + "/images/" + _source);
   }
 
   public void writeLaTeX(PrintWriter out)

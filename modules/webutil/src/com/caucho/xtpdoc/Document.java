@@ -191,7 +191,8 @@ public class Document {
     // XXX: workaround until writeNamespace gets fixed
     out.writeAttribute("xmlns", "http://www.w3.org/1999/xhtml");
 
-    _header.writeHtml(out);
+    if (_header != null)
+      _header.writeHtml(out);
     _body.writeHtml(out);
 
     out.writeEndElement(); // html

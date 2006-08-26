@@ -72,6 +72,9 @@ public class ResinMain implements ResinServerListener {
   private String _resinConf = "conf/resin.conf";
   private String _configServer;
 
+  private Path _resinHome;
+  private Path _serverRoot;
+
   private String _serverId = "";
 
   private ClassLoader _systemClassLoader;
@@ -103,6 +106,9 @@ public class ResinMain implements ResinServerListener {
   {
     _systemClassLoader = Thread.currentThread().getContextClassLoader();
     _startTime = Alarm.getCurrentTime();
+
+    _resinHome = CauchoSystem.getResinHome();
+    _serverRoot = _resinHome;
     
     parseCommandLine(argv);
   }
@@ -171,6 +177,18 @@ public class ResinMain implements ResinServerListener {
       else if (argv[i].equals("-version")) {
 	System.out.println(com.caucho.Version.FULL_VERSION);
 	System.exit(66);
+      }
+      else if (argv[i].equals("-resin-home")
+	       || argv[i].equals("--resin-home")) {
+	_resinHome = Vfs.lookup(argv[i + 1]);
+
+	i += 2;
+      }
+      else if (argv[i].equals("-server-root")
+	       || argv[i].equals("--server-root")) {
+	_serverRoot = _resinHome.lookup(argv[i + 1]);
+
+	i += 2;
       }
       else if (argv[i].equals("-config-server")) {
 	_configServer = argv[i + 1];
@@ -346,7 +364,12 @@ public class ResinMain implements ResinServerListener {
 
     ResinServer server = new ResinServer();
 
-    Path resinConf = Vfs.lookup(_resinConf);
+    Path resinConf = _resinHome.lookup(_resinConf);
+
+    server.setResinHome(_resinHome);
+
+    Vfs.setPwd(_serverRoot);
+    // server.setServerRoot(_serverRoot);
 
     server.setInitialStartTime(_startTime);
     server.setConfigFile(resinConf.getNativePath());

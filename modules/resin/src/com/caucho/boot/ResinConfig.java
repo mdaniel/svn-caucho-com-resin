@@ -39,15 +39,27 @@ public class ResinConfig {
     = new ArrayList<ClusterConfig>();
 
   private Path _resinHome;
+  private Path _rootDirectory;
 
-  ResinConfig(Path resinHome)
+  ResinConfig(Path resinHome, Path serverRoot)
   {
     _resinHome = resinHome;
+    _rootDirectory = serverRoot;
   }
 
   public Path getResinHome()
   {
     return _resinHome;
+  }
+
+  public Path getRootDirectory()
+  {
+    return _rootDirectory;
+  }
+
+  public void setRootDirector(Path rootDirectory)
+  {
+    _rootDirectory = rootDirectory;
   }
 
   public ClusterConfig createCluster()

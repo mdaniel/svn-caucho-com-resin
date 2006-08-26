@@ -241,10 +241,11 @@ public class ServerWatchdog implements Runnable {
     throws IOException
   {
     Path resinHome = _cluster.getResin().getResinHome();
+    Path serverRoot = _cluster.getResin().getRootDirectory();
     
     ProcessBuilder builder = new ProcessBuilder();
 
-    builder.directory(new File(resinHome.getNativePath()));
+    builder.directory(new File(serverRoot.getNativePath()));
 
     Map<String,String> env = builder.environment();
 
@@ -360,8 +361,9 @@ public class ServerWatchdog implements Runnable {
 	int port = ss.getLocalPort();
 
 	Path resinHome = _cluster.getResin().getResinHome();
+	Path serverRoot = _cluster.getResin().getRootDirectory();
 
-	Process process = createProcess(resinHome, port);
+	Process process = createProcess(resinHome, serverRoot, port);
 
 	ss.setSoTimeout(60000);
 
@@ -492,7 +494,9 @@ public class ServerWatchdog implements Runnable {
     }
   }
 
-  private Process createProcess(Path resinHome, int socketPort)
+  private Process createProcess(Path resinHome,
+				Path serverRoot,
+				int socketPort)
     throws IOException
   {
     String classPath = WatchdogManager.calculateClassPath(resinHome);
@@ -561,7 +565,7 @@ public class ServerWatchdog implements Runnable {
 
     ProcessBuilder builder = new ProcessBuilder();
 
-    builder.directory(new File(resinHome.getNativePath()));
+    builder.directory(new File(serverRoot.getNativePath()));
 
     builder.environment().putAll(env);
     

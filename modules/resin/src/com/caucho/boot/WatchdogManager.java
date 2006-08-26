@@ -90,6 +90,8 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
     parseCommandLine(argv);
 
+    Vfs.setPwd(_serverRoot);
+
     _resin = readConfig();
 
     Cluster cluster = new Cluster();
@@ -243,7 +245,8 @@ public class WatchdogManager extends ProtocolDispatchServer {
   {
     Config config = new Config();
 
-    ResinConfig resin = new ResinConfig(_resinHome);
+    Vfs.setPwd(_serverRoot);
+    ResinConfig resin = new ResinConfig(_resinHome, _serverRoot);
 
     config.configure(resin, _resinConf, "com/caucho/server/resin/resin.rnc");
 
