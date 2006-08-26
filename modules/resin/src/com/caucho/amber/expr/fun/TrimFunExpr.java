@@ -45,13 +45,11 @@ import com.caucho.util.L10N;
 public class TrimFunExpr extends FunExpr {
   private static final L10N L = new L10N(TrimFunExpr.class);
 
-  enum TrimSemantics { LEADING, TRAILING, BOTH }
+  public enum TrimSemantics { LEADING, TRAILING, BOTH }
 
   private TrimSemantics _trimSemantics = TrimSemantics.BOTH;
 
-  private boolean _hasTrimChar;
-
-  private char _trimChar;
+  private AmberExpr _trimChar;
 
   /**
    * Creates a new expression
@@ -61,7 +59,7 @@ public class TrimFunExpr extends FunExpr {
     super("trim", args, false);
   }
 
-  public static FunExpr create(ArrayList<AmberExpr> args)
+  public static TrimFunExpr create(ArrayList<AmberExpr> args)
   {
     return new TrimFunExpr(args);
   }
@@ -69,7 +67,7 @@ public class TrimFunExpr extends FunExpr {
   /**
    * Sets the trim character.
    */
-  public void setTrimChar(char trimChar)
+  public void setTrimChar(AmberExpr trimChar)
   {
     _trimChar = trimChar;
   }
@@ -111,14 +109,13 @@ public class TrimFunExpr extends FunExpr {
       cb.append("both ");
     }
 
-    if (_hasTrimChar) {
-      cb.append("'");
-      cb.append(_trimChar);
-      cb.append("' ");
-    }
+    if (_trimChar != null)
+      _trimChar.generateWhere(cb);
 
-    cb.append("from ");
+    cb.append(" from ");
 
     args.get(0).generateWhere(cb);
+
+    cb.append(")");
   }
 }

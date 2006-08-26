@@ -134,7 +134,11 @@ public class QueryParser {
   public final static int SUBSTRING = UPPER + 1;
   public final static int TRIM = SUBSTRING + 1;
 
-  public final static int CURRENT_DATE = TRIM + 1;
+  public final static int BOTH = TRIM + 1;
+  public final static int LEADING = BOTH + 1;
+  public final static int TRAILING = LEADING + 1;
+
+  public final static int CURRENT_DATE = TRAILING + 1;
   public final static int CURRENT_TIME = CURRENT_DATE + 1;
   public final static int CURRENT_TIMESTAMP = CURRENT_TIME + 1;
 
@@ -199,6 +203,10 @@ public class QueryParser {
 
   private boolean _isJoinFetch = false;
 
+  // Parsing control variable, jpa/0tt4 (TRIM FROM)
+  // SELECT .._depth=0.. TRIM(.._depth=1.. 'a' FROM o.d1) .._depth=0 FROM ...
+  private int _depth = 0;
+
   /**
    * Creates the query parser.
    */
@@ -247,6 +255,7 @@ public class QueryParser {
     _parseIndex = 0;
     _unique = 0;
     _token = -1;
+    _depth = 0;
     _joinFetchMap = new HashMap<AmberExpr, String>();
   }
 
@@ -298,7 +307,8 @@ public class QueryParser {
     _query = query;
 
     int token;
-    while ((token = scanToken()) >= 0 && token != FROM) {
+    while ((token = scanToken()) >= 0 &&
+           ((token != FROM) || (_depth > 0))) {
     }
 
     boolean hasFrom = (token == FROM) ? true : false;
@@ -1356,8 +1366,9 @@ public class QueryParser {
             else // SOME is a synonymous with ANY
               return new AnyExpr(select);
           }
-          else
+          else {
             return parseFunction(name, token);
+          }
         }
       }
 
@@ -1516,41 +1527,95 @@ public class QueryParser {
 
     scanToken();
 
+    // Example: "'c'"
+    AmberExpr trimChar = null;
+    TrimFunExpr.TrimSemantics trimSemantics
+      = TrimFunExpr.TrimSemantics.BOTH;
     boolean distinct = false;
-
-    if (peekToken() == DISTINCT) {
-      distinct = true;
-      scanToken();
-    }
 
     ArrayList<AmberExpr> args = new ArrayList<AmberExpr>();
 
-    while (peekToken() != ')') {
-      AmberExpr arg = parseExpr();
+    if (functionToken == TRIM) {
 
-      if (id.equalsIgnoreCase("object")) {
-        if (arg instanceof PathExpr) {
-          PathExpr pathExpr = (PathExpr) arg;
+      switch (peekToken()) {
 
-          arg = new LoadEntityExpr(pathExpr);
+      case LEADING:
+        trimSemantics = TrimFunExpr.TrimSemantics.LEADING;
+        scanToken();
+        break;
 
-          arg = arg.bindSelect(this);
+      case TRAILING:
+        trimSemantics = TrimFunExpr.TrimSemantics.TRAILING;
+        scanToken();
+        break;
 
-          int token = scanToken();
+      case BOTH:
+        scanToken();
+        break;
 
-          if (token != ')')
-            throw error(L.l("expected ')' at '{0}'", tokenName(token)));
+      // default: [BOTH], but no scanToken().
+      }
 
-          return arg;
+      AmberExpr arg = null;
+
+      if (peekToken() != FROM) {
+
+        arg = parseExpr();
+
+        if (arg instanceof LiteralExpr) {
+
+          String v = ((LiteralExpr) arg).getValue();
+
+          if (v.length() != 3) // "'c'"
+            throw error(L.l("expected a single char expression for TRIM at {0}", v));
         }
       }
 
+      if (peekToken() == FROM) {
+        scanToken();
+
+        trimChar = arg;
+
+        arg = parseExpr();
+      }
+
       args.add(arg);
+    }
+    else {
 
-      if (peekToken() != ',')
-        break;
+      if (peekToken() == DISTINCT) {
+        distinct = true;
+        scanToken();
+      }
 
-      scanToken();
+      while ((peekToken() >= 0) && (peekToken() != ')')) {
+
+        AmberExpr arg = parseExpr();
+
+        if (id.equalsIgnoreCase("object")) {
+          if (arg instanceof PathExpr) {
+            PathExpr pathExpr = (PathExpr) arg;
+
+            arg = new LoadEntityExpr(pathExpr);
+
+            arg = arg.bindSelect(this);
+
+            int token = scanToken();
+
+            if (token != ')')
+              throw error(L.l("expected ')' at '{0}'", tokenName(token)));
+
+            return arg;
+          }
+        }
+
+        args.add(arg);
+
+        if (peekToken() != ',')
+          break;
+
+        scanToken();
+      }
     }
 
     if (peekToken() != ')')
@@ -1603,8 +1668,13 @@ public class QueryParser {
       break;
 
     case TRIM:
-      funExpr = TrimFunExpr.create(args);
-      break;
+      {
+        TrimFunExpr trimFunExpr = TrimFunExpr.create(args);
+        trimFunExpr.setTrimChar(trimChar);
+        trimFunExpr.setTrimSemantics(trimSemantics);
+        funExpr = trimFunExpr;
+        break;
+      }
 
     default:
       funExpr = FunExpr.create(id, args, distinct);
@@ -1691,8 +1761,6 @@ public class QueryParser {
 
     switch (ch) {
     case -1:
-    case '(':
-    case ')':
     case '.':
     case '*':
     case '/':
@@ -1701,6 +1769,14 @@ public class QueryParser {
     case '-':
     case '[':
     case ']':
+      return ch;
+
+    case '(':
+      _depth++;
+      return ch;
+
+    case ')':
+      _depth--;
       return ch;
 
     case '=':
@@ -2013,6 +2089,9 @@ public class QueryParser {
     _reserved.put("upper", UPPER);
     _reserved.put("substring", SUBSTRING);
     _reserved.put("trim", TRIM);
+    _reserved.put("both", BOTH);
+    _reserved.put("leading", LEADING);
+    _reserved.put("trailing", TRAILING);
 
     _reserved.put("current_date", CURRENT_DATE);
     _reserved.put("current_time", CURRENT_TIME);

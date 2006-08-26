@@ -54,7 +54,7 @@ public class LiteralExpr extends AbstractAmberExpr {
   /**
    * Returns the literal value
    */
-  String getValue()
+  public String getValue()
   {
     return _value;
   }
