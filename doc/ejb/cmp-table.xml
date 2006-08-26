@@ -1,0 +1,78 @@
+<document>
+<header>
+  <product>resin-ee</product>
+  <title>EJB 3.0 Basic Table Configuration</title>
+  <version>Resin 3.0</version>
+
+  <description>
+  <p>Describes the basic annotation for a single-table entity bean.</p>
+
+  </description>
+</header>
+
+<summary objsummary='localtoc'/>
+
+<section title="See Also">
+
+<ul>
+<li>See <a href="tutorial/cmp-basic/index.xtp">Basic tutorial</a> for
+a complete example.
+</ul>
+
+</section>
+
+<section title="Entity annotations">
+
+<defun title="@Entity">
+
+<p>Annotates the class as an entity bean.</p>
+
+<deftable-childtags>
+<tr><td>name<td>The name of the bean<td>The class name (unqualified)
+<tr><td>entityType<td>container-managed (CMP) or bean-managed (BMP).<td>CMP
+<tr><td>access<td>FIELD or PROPERTY<td>PROPERTY
+<tr><td>version<td>The EJB version<td>3
+</deftable-childtags>
+
+<def>
+@Target(TYPE)
+@Retention(RUNTIME)
+public @interface Entity {
+  String name() default "";
+
+  EntityType entityType() default CMP;
+  AccessType access() default PROPERTY;
+  int version() default 3;
+}
+</def>
+
+</defun>
+
+<defun title="@Table">
+
+<p>Specifies the database table for an entity bean.  The
+default table name is the class name.</p>
+
+<deftable-childtags>
+<tr><td>name<td>The name of the table<td>The unqualified class name.
+<tr><td>catalog<td>the table's catalog<td>none
+<tr><td>schema<td>the table's schema<td>none
+<tr><td>uniqueConstraint<td>unique constraints during generation<td>none
+</deftable-childtags>
+
+<def>
+@Target(TYPE)
+@Retention(RUNTIME)
+public @interface Table {
+  String name() default "";
+  String catalog() default "";
+  String schema() default "";
+  UniqueConstraint []uniqueConstraints() default {};
+}
+</def>
+
+</defun>
+
+</section>
+
+</document>
