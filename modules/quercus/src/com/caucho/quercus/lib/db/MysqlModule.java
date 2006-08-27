@@ -770,15 +770,13 @@ public class MysqlModule extends AbstractQuercusModule {
                              @Optional Value newLinkV,
                              @Optional Value flagsV)
   {
-    int port = 0;
+    int port = 3306;
     int length = host.length();
 
     if (length == 0) {
       host = env.getIniString("mysql.default_host");
-      if (host == null) {
+      if (host == null)
         host = "localhost";
-        port = 3306;
-      }
     }
 
     int portIndex = host.lastIndexOf(':');
@@ -786,6 +784,8 @@ public class MysqlModule extends AbstractQuercusModule {
     // Split host name and port from each other.
     // Use > 0 because sockets have a ':' at index 0.
     if (portIndex > 0) {
+      port = 0;
+
       for (int j = portIndex + 1; j < length; j++) {
         char ch = host.charAt(j);
 
@@ -797,8 +797,6 @@ public class MysqlModule extends AbstractQuercusModule {
 
       host = host.substring(0, portIndex);
     }
-    else
-      port = 3306;
 
     Mysqli mysqli = new Mysqli(env, host, userName, password, "", port, "", 0, null, null);
 
