@@ -534,17 +534,20 @@ abstract public class Value {
 
       BinaryBuilderValue bb = new BinaryBuilderValue();
 
+      int length = 0;
       while (true) {
-	bb.prepareReadBuffer();
-      
-	int len = is.read(bb.getBuffer(),
-			  bb.getOffset(),
-			  bb.getLength() - bb.getOffset());
+        bb.prepareReadBuffer();
 
-	if (len <= 0)
-	  return bb;
-	else
-	  bb.setOffset(len);
+        int sublen = is.read(bb.getBuffer(),
+                             bb.getOffset(),
+                             bb.getLength() - bb.getOffset());
+
+        if (sublen <= 0)
+          return bb;
+        else {
+          length += sublen;
+          bb.setOffset(length);
+        }
       }
     } catch (IOException e) {
       throw new QuercusException(e);

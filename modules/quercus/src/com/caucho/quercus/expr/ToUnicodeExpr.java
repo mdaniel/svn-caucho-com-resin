@@ -83,7 +83,7 @@ public class ToUnicodeExpr extends ToStringExpr {
   {
     _expr.generate(out);
 
-    out.print(".toUnicodeValue()");
+    out.print(".toUnicodeValue(env)");
   }
 
   /**

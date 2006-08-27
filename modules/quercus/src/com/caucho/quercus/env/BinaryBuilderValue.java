@@ -74,6 +74,11 @@ public class BinaryBuilderValue extends BinaryValue {
     this(buffer, 0, buffer.length);
   }
 
+  public BinaryBuilderValue(String value)
+  {
+    this(value.getBytes());
+  }
+
   /**
    * Returns the value.
    */
@@ -633,6 +638,23 @@ public class BinaryBuilderValue extends BinaryValue {
     }
     else
       return false;
+  }
+
+  //
+  // Java generator code
+  //
+
+  /**
+   * Generates code to recreate the expression.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generate(PhpWriter out)
+    throws IOException
+  {
+    out.print("new BinaryBuilderValue(\"");
+    out.printJavaString(toString());
+    out.print("\")");
   }
 
   class BinaryInputStream extends InputStream {

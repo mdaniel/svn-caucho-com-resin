@@ -82,7 +82,7 @@ public class ToBinaryExpr extends ToStringExpr {
   {
     _expr.generate(out);
 
-    out.print(".toBinaryValue()");
+    out.print(".toBinaryValue(env)");
   }
 
   /**
