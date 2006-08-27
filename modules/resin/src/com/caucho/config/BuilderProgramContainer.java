@@ -53,7 +53,7 @@ public class BuilderProgramContainer extends BuilderProgram {
     _programList.add(program);
   }
   
-  protected void configureImpl(NodeBuilder builder, Object bean)
+  public void configureImpl(NodeBuilder builder, Object bean)
     throws Throwable
   {
     for (int i = 0; i < _programList.size(); i++) {

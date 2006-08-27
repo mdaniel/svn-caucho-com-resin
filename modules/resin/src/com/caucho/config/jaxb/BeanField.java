@@ -50,6 +50,9 @@ public class BeanField extends JaxbProperty {
   
   public BeanField(Field field, Class type)
   {
+    if (type == null)
+      throw new NullPointerException();
+    
     _type = type;
     _field = field;
   }

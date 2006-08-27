@@ -101,7 +101,7 @@ public class ResinDocServlet extends HttpServlet {
 
     Document document = new Document(getServletContext(),
 				     path, _contextPath,
-				     _contextPath + servletPath);
+				     request.getContextPath() + servletPath);
 
     try {
       response.setContentType("text/html");

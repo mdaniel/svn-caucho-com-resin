@@ -143,7 +143,7 @@ public class NavigationItem {
 
   private void initSummary()
   {
-    if (_maxDepth < _depth || _child != null)
+    if (_child != null || _description != null)
       return;
 
     if (_rootPath != null && _link != null) {
@@ -159,6 +159,8 @@ public class NavigationItem {
 
           if (document.getHeader() != null)
             _description = document.getHeader().getDescription();
+	  else
+	    _description = new Description(document);
         } catch (NullPointerException e) {
           log.info("error configuring " + linkPath + ": " + e);
           e.printStackTrace();
@@ -166,26 +168,25 @@ public class NavigationItem {
           log.info("error configuring " + linkPath + ": " + e);
         }
 
-	/*
         if (_atocDescend) {
           Path linkRoot = linkPath.getParent();
           Path subToc = linkPath.getParent().lookup("toc.xml");
 
           if (subToc.exists()) {
-            _child = new Navigation(document, _depth + 1);
+            _child = new Navigation(document,
+				    _uri,
+				    linkRoot,
+				    _depth + 1);
 
             try {
               config.configure(_child, subToc);
             } catch (Exception e) {
               log.info("Failed to configure " + subToc + ": " + e);
-
-              _child = null;
             }
           } else {
             log.info(subToc + " does not exist!");
           }
         }
-	*/
       }
     }
   }
@@ -230,15 +231,15 @@ public class NavigationItem {
     _navigation.putItem(_navigation.getUri() + _link, this);
   }
 
-  public void writeHtml(XMLStreamWriter out, String path)
+  public void writeHtml(XMLStreamWriter out, String path, int depth)
     throws XMLStreamException
   {
-    if (_maxDepth < _depth)
+    if (_maxDepth < depth)
       return;
 
     initSummary();
 
-    String depthString = (_depth == 0) ? "top" : ("" + _depth);
+    String depthString = (depth == 0) ? "top" : ("" + depth);
 
     if (_child != null || _items.size() > 0) {
       out.writeStartElement("dl");
@@ -269,7 +270,7 @@ public class NavigationItem {
     out.writeAttribute("class", "atoc-toplevel atoc-toplevel-" + depthString);
 
     // XXX: brief/paragraph/none
-    if (_description != null) {
+    if (_description != null && depth <= 1) {
       out.writeStartElement("p");
       _description.writeHtml(out);
       out.writeEndElement(); // p
@@ -284,10 +285,10 @@ public class NavigationItem {
         tail = path;
 
       if (_child != null)
-        _child.writeHtml(out, tail);
+        _child.writeHtml(out, tail, depth + 1);
 
       for (NavigationItem item : _items)
-        item.writeHtml(out, tail);
+        item.writeHtml(out, tail, depth + 1);
     }
 
     out.writeEndElement(); // dd

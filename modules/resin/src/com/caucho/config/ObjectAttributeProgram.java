@@ -45,7 +45,7 @@ public class ObjectAttributeProgram extends BuilderProgram {
   /**
    * Configures the object.
    */
-  protected void configureImpl(NodeBuilder builder, Object bean)
+  public void configureImpl(NodeBuilder builder, Object bean)
     throws Throwable
   {
     if (bean == null)

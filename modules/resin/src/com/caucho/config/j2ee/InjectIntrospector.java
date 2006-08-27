@@ -44,8 +44,8 @@ import javax.naming.*;
 
 import javax.transaction.UserTransaction;
 
-import javax.ejb.Inject;
-import javax.ejb.Resource;
+import javax.annotation.Resource;
+
 import javax.ejb.EJB;
 import javax.ejb.EJBHome;
 
@@ -131,15 +131,13 @@ public class InjectIntrospector {
     }
   }
   
-  private static void configure(ArrayList<BuilderProgram> initList,
-				AccessibleObject field,
-				String fieldName,
-				Class fieldType)
+  public static void configure(ArrayList<BuilderProgram> initList,
+			       AccessibleObject field,
+			       String fieldName,
+			       Class fieldType)
     throws ConfigException
   {
-    if (field.isAnnotationPresent(Inject.class))
-      configureInject(initList, field, fieldName, fieldType);
-    else if (field.isAnnotationPresent(Resource.class))
+    if (field.isAnnotationPresent(Resource.class))
       configureResource(initList, field, fieldName, fieldType);
     else if (field.isAnnotationPresent(EJB.class))
       configureEJB(initList, field, fieldName, fieldType);
@@ -157,22 +155,29 @@ public class InjectIntrospector {
   {
     Resource resource = field.getAnnotation(Resource.class);
 
-    configureResource(initList, field, fieldName, fieldType,
-		      resource.name(),
-		      resource.resourceType(),
-		      resource.jndiName());
+    initList.add(configureResource(field,
+				   fieldName, fieldType,
+				   resource.name(),
+				   resource.type().getName(),
+				   resource.name()));
   }
   
-  private static void configureInject(ArrayList<BuilderProgram> initList,
-				      AccessibleObject field,
-				      String fieldName,
-				      Class fieldType)
+  public static BuilderProgram
+    introspectResource(AccessibleObject field,
+		       String fieldName,
+		       Class fieldType)
     throws ConfigException
   {
-    Inject inject = field.getAnnotation(Inject.class);
+    Resource resource = field.getAnnotation(Resource.class);
 
-    configureResource(initList, field, fieldName, fieldType,
-		      "", "", inject.jndiName());
+    if (resource != null)
+      return configureResource(field,
+			       fieldName, fieldType,
+			       resource.name(),
+			       resource.type().getName(),
+			       resource.name());
+    else
+      return null;
   }
   
   private static void configureEJB(ArrayList<BuilderProgram> initList,
@@ -183,8 +188,10 @@ public class InjectIntrospector {
   {
     EJB ejb = (EJB) field.getAnnotation(javax.ejb.EJB.class);
 
-    configureResource(initList, field, fieldName, fieldType,
-		      ejb.name(), "javax.ejb.EJBLocalObject", ejb.jndiName());
+    initList.add(configureResource(field, fieldName, fieldType,
+				   ejb.name(),
+				   "javax.ejb.EJBLocalObject",
+				   ejb.jndiName()));
   }
   
   private static void configurePersistenceUnit(ArrayList<BuilderProgram> initList,
@@ -229,9 +236,10 @@ public class InjectIntrospector {
 	  jndiName = ejbJndiName;
       }
 
-      configureResource(initList, field, fieldName, fieldType,
-			unitName, "javax.persistence.EntityManagerFactory",
-			jndiName);
+      initList.add(configureResource(field, fieldName, fieldType,
+				     unitName,
+				     "javax.persistence.EntityManagerFactory",
+				     jndiName));
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -279,21 +287,22 @@ public class InjectIntrospector {
 	  jndiName = ejbJndiName;
       }
 
-      configureResource(initList, field, fieldName, fieldType,
-			unitName, "javax.persistence.EntityManager",
-			jndiName);
+      initList.add(configureResource(field, fieldName, fieldType,
+				     unitName,
+				     "javax.persistence.EntityManager",
+				     jndiName));
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     }
   }
   
-  private static void configureResource(ArrayList<BuilderProgram> initList,
-					AccessibleObject field,
-					String fieldName,
-					Class fieldType,
-					String name,
-					String resourceType,
-					String jndiName)
+  private static
+    BuilderProgram configureResource(AccessibleObject field,
+				     String fieldName,
+				     Class fieldType,
+				     String name,
+				     String resourceType,
+				     String jndiName)
     throws ConfigException
   {
     String prefix = "";
@@ -331,9 +340,9 @@ public class InjectIntrospector {
       jndiName = "java:comp/env/" + prefix + jndiName;
 
     if (field instanceof Method)
-      initList.add(new JndiInjectProgram(jndiName, (Method) field));
+      return new JndiInjectProgram(jndiName, (Method) field);
     else
-      initList.add(new JndiFieldInjectProgram(jndiName, (Field) field));
+      return  new JndiFieldInjectProgram(jndiName, (Field) field);
   }
 }
 

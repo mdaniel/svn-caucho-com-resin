@@ -1,5 +1,5 @@
-<navigation threaded="true" section="Resin : IoC/AOP : Tutorials" comment="true">
+<navigation threaded="true" section="Resin : IoC/JAXB : Tutorials" comment="true">
   <item title="Tutorials" link="index.xtp">
-    <item link="aop-connection/index.xtp" title="AOP Conn"/>
+    <item link="jaxb-bean-config/index.xtp" title="JAXB Config"/>
   </item>
 </navigation>

@@ -401,7 +401,9 @@ public class NodeBuilder {
       AttributeStrategy attrStrategy = typeStrategy.getAttributeStrategy(qName);
 
       if (attrStrategy == null)
-	throw error(L.l("{0} is an unknown property.", qName), node);
+	throw error(L.l("{0} is an unknown property of {1}.",
+			qName, typeStrategy),
+		    node);
 
       attrStrategy.configure(this, bean, qName, node);
     } catch (LineConfigException e) {
@@ -777,6 +779,30 @@ public class NodeBuilder {
     }
     else
       return exprString;
+  }
+
+  /**
+   * Evaluate as an object
+   */
+  public Object evalELObject(Node node)
+    throws ELException
+  {
+    if (hasChildren(node))
+      return null;
+
+    String value = textValue(node);
+
+    if (value == null)
+      return null;
+    else if (isEL() && value.indexOf("${") >= 0) {
+      ELParser parser = new ELParser(getELContext(), value);
+      parser.setCheckEscape(true);
+      Expr expr = parser.parse();
+
+      return expr.getValue(getELContext());
+    }
+    else
+      return null;
   }
 
   public static LineConfigException error(String msg, Node node)

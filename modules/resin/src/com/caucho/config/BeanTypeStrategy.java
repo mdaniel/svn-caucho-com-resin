@@ -46,6 +46,7 @@ import com.caucho.util.CharBuffer;
 import com.caucho.util.NotImplementedException;
 
 import com.caucho.config.types.Validator;
+import com.caucho.config.j2ee.*;
 
 import com.caucho.make.PersistentDependency;
 
@@ -67,6 +68,9 @@ public class BeanTypeStrategy extends TypeStrategy {
     = new HashMap<QName,AttributeStrategy>();
   private final Class _type;
 
+  private ArrayList<BuilderProgram> _injectList
+    = new ArrayList<BuilderProgram>();
+
   private final Method _setParent;
   private final Method _setLocation;
   private final Method _addDependency;
@@ -80,6 +84,8 @@ public class BeanTypeStrategy extends TypeStrategy {
     _type = type;
 
     Method setParent = null;
+
+    _injectList = InjectIntrospector.introspect(type);
 
     setParent = findMethod("setParent", new Class[] { null });
 

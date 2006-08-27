@@ -75,7 +75,7 @@ public abstract class BuilderProgram {
   /**
    * Configures the object.
    */
-  protected void configureImpl(NodeBuilder builder, Object bean)
+  public void configureImpl(NodeBuilder builder, Object bean)
     throws Throwable
   {
     throw new UnsupportedOperationException(getClass().getName());

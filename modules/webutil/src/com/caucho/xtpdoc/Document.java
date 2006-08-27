@@ -99,31 +99,31 @@ public class Document {
       String realPath = rootWebApp.getRealPath(uri);
       
       Path path = Vfs.lookup(realPath);
-      
+
       Path toc = path.lookup("toc.xml");
 
-      if (! toc.canRead())
-	break;
+      if (toc.canRead()) {
+	Config config = new Config();
 
-      Config config = new Config();
+	Navigation navigation = new Navigation(this, uri, path, 0);
+      
+	navigation.setChild(child);
 
-      Navigation navigation = new Navigation(this, uri, path, 0);
-      navigation.setChild(child);
+	try {
+	  config.configure(navigation, toc);
 
-      try {
-        config.configure(navigation, toc);
-
-	navList.add(navigation);
-      } catch (Exception e) {
-	log.log(Level.FINE, e.toString(), e);
+	  navList.add(navigation);
+	} catch (Exception e) {
+	  log.log(Level.FINE, e.toString(), e);
 	
-        navigation = null;
-      }
+	  navigation = null;
+	}
 
-      if (navigation != null)
-	child = navigation.getRootItem();
-      else
-	child = null;
+	if (navigation != null)
+	  child = navigation.getRootItem();
+	else
+	  child = null;
+      }
 
       p = uri.lastIndexOf('/', uri.length() - 2);
       if (p >= 0)

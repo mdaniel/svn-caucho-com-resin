@@ -48,7 +48,7 @@ public class NodeBuilderChildProgram extends BuilderProgram {
     _node = node;
   }
 
-  protected void configureImpl(NodeBuilder builder, Object bean)
+  public void configureImpl(NodeBuilder builder, Object bean)
     throws Exception
   {
     builder.configureAttribute(bean, _node);

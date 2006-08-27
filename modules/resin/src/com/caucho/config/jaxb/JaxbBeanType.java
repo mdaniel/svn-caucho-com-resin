@@ -47,6 +47,7 @@ import org.w3c.dom.Node;
 import com.caucho.util.*;
 
 import com.caucho.config.*;
+import com.caucho.config.j2ee.*;
 
 import com.caucho.xml.*;
 
@@ -55,6 +56,9 @@ public class JaxbBeanType extends TypeStrategy {
 
   private static final HashMap<Class,PrimType> _primTypes
     = new HashMap<Class,PrimType>();
+
+  private ArrayList<BuilderProgram> _injectList
+    = new ArrayList<BuilderProgram>();
 
   private HashMap<String,AttributeStrategy> _attributeMap
     = new HashMap<String,AttributeStrategy>();
@@ -96,7 +100,12 @@ public class JaxbBeanType extends TypeStrategy {
   public Object configure(NodeBuilder builder, Node node, Object parent)
     throws Exception
   {
-    Object bean = _type.newInstance();
+    Object bean = builder.evalELObject(node);
+
+    if (bean != null)
+      return bean;
+      
+    bean = _type.newInstance();
     
     configureBean(builder, bean, node);
 
@@ -113,6 +122,14 @@ public class JaxbBeanType extends TypeStrategy {
   public void configureBean(NodeBuilder builder, Object bean, Node top)
     throws Exception
   {
+    for (int i = 0; i < _injectList.size(); i++) {
+      try {
+	_injectList.get(i).configureImpl(builder, bean);
+      } catch (Throwable e) {
+	throw builder.error(e, top);
+      }
+    }
+    
     if (_valueAttr != null) {
       _valueAttr.configure(builder, bean, ((QNode) top).getQName(), top);
 
@@ -178,6 +195,11 @@ public class JaxbBeanType extends TypeStrategy {
 
       if (paramTypes.length != 1)
 	continue;
+      
+      InjectIntrospector.configure(_injectList,
+				   setter,
+				   name.substring(3),
+				   paramTypes[0]);
 
       String getName = "get" + name.substring(3);
       String isName = "";
@@ -364,6 +386,11 @@ public class JaxbBeanType extends TypeStrategy {
     for (int i = 0; i < fields.length; i++) {
       Field field = fields[i];
       String name = field.getName();
+      
+      InjectIntrospector.configure(_injectList,
+				   field,
+				   name,
+				   field.getType());
 
       if (field.isAnnotationPresent(XmlTransient.class))
 	continue;
@@ -411,7 +438,8 @@ public class JaxbBeanType extends TypeStrategy {
       Class<?> valueType = null;
 
       if (Collection.class.isAssignableFrom(fieldType)) {
-	Class componentType = getCollectionComponent(fieldType);
+	Class componentType
+	  = getCollectionComponent(field.getGenericType());
 
 	HashMap<String,AttributeStrategy> attrMap = _attributeMap;
 
@@ -694,7 +722,7 @@ public class JaxbBeanType extends TypeStrategy {
       return attr;
     }
 
-    if (valueType != null)
+    if (valueType == null)
       valueType = field.getType();
     
     PrimType primType = _primTypes.get(valueType);
@@ -738,6 +766,11 @@ public class JaxbBeanType extends TypeStrategy {
     }
 
     return new BeanField(field, valueType);
+  }
+
+  public String toString()
+  {
+    return "JaxbBeanType[" + _type + "]";
   }
 
   static class Adapter {

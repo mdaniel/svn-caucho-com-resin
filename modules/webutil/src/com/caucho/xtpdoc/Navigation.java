@@ -144,13 +144,13 @@ public class Navigation {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    writeHtml(out, "");
+    writeHtml(out, "", 0);
   }
   
-  public void writeHtml(XMLStreamWriter out, String path)
+  public void writeHtml(XMLStreamWriter out, String path, int depth)
     throws XMLStreamException
   {
-    String depthString = (_depth == 0) ? "top" : ("" + _depth);
+    String depthString = (depth == 0) ? "top" : ("" + depth);
 
     /*
     out.writeStartElement("dl");
@@ -158,7 +158,7 @@ public class Navigation {
     */
 
     for (NavigationItem item : _items)
-      item.writeHtml(out, path);
+      item.writeHtml(out, path, depth);
 
     //out.writeEndElement(); // dl
   }
@@ -168,8 +168,6 @@ public class Navigation {
   {
     if (_items.size() > 0) {
       NavigationItem topItem = _items.get(0);
-
-      System.out.println("PATH: " + _document.getURI());
     }
     
     for (NavigationItem item : _items)
