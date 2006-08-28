@@ -128,6 +128,23 @@ public class InterpolateExpr extends Expr {
     return false;
   }
 
+  public String toString()
+  {
+    StringBuilder sb = new StringBuilder();
+
+    if (_left instanceof StringLiteral)
+      sb.append(_left);
+    else
+      sb.append("${" + _left + "}");
+
+    if (_right instanceof StringLiteral)
+      sb.append(_right);
+    else
+      sb.append("${" + _right + "}");
+
+    return sb.toString();
+  }
+
   /**
    * Prints the code to create an LongLiteral.
    */

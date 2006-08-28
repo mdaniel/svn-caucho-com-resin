@@ -114,7 +114,10 @@ public class ListELResolver extends ELResolver {
 	}
       }
 
-      return list.get(index);
+      if (0 <= index && index < list.size())
+	return list.get(index);
+      else
+	return null;
     }
     else {
       return null;

@@ -152,7 +152,7 @@ public class ArrayResolverExpr extends Expr {
   public void printCreate(WriteStream os)
     throws IOException
   {
-    os.print("new com.caucho.el.ArrayExpr(");
+    os.print("new com.caucho.el.ArrayResolverExpr(");
     _left.printCreate(os);
     os.print(", ");
     _right.printCreate(os);

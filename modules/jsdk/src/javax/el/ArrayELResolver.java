@@ -109,7 +109,10 @@ public class ArrayELResolver extends ELResolver {
 	}
       }
 
-      return Array.get(base, index);
+      if (0 <= index && index < Array.getLength(base))
+	return Array.get(base, index);
+      else
+	return null;
     }
     else {
       return null;

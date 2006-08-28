@@ -97,7 +97,7 @@ public class AddExpr extends Expr {
     else if (isDouble(aObj) || isDouble(bObj)) {
       double a = toDouble(aObj, env);
       double b = toDouble(bObj, env);
-      double dValue = 0;
+      double dValue = a + b;
 
       return Double.isNaN(dValue) ? new Double(0) : new Double(dValue);
     }
@@ -108,7 +108,7 @@ public class AddExpr extends Expr {
     if (bObj instanceof Double || bObj instanceof Float) {
       double a = toDouble(aObj, env);
       double b = ((Number) bObj).doubleValue();
-      double dValue = 0;
+      double dValue = a + b;
 
       return Double.isNaN(dValue) ? new Double(0) : new Double(dValue);
     }

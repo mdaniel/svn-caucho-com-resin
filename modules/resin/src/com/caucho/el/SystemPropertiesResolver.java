@@ -59,8 +59,8 @@ public class SystemPropertiesResolver extends AbstractVariableResolver {
   {
     String var;
     
-    if (property != null && base instanceof String)
-      var = (String) base;
+    if (base == null && property instanceof String)
+      var = (String) property;
     else if (base == this && property instanceof String)
       var = (String) property;
     else

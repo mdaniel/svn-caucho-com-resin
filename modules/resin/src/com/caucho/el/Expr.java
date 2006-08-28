@@ -1217,6 +1217,8 @@ public abstract class Expr extends ValueExpression {
     return toString().equals(o.toString());
   }
 
+  abstract public String toString();
+
   /**
    * Returns an error object
    */

@@ -52,7 +52,7 @@ public class ImplicitObjectELResolver extends ELResolver {
   public Iterator<FeatureDescriptor>
     getFeatureDescriptors(ELContext context, Object base)
   {
-    throw new UnsupportedOperationException();
+    return null;
   }
 
   @Override
@@ -60,7 +60,12 @@ public class ImplicitObjectELResolver extends ELResolver {
 			 Object base,
 			 Object property)
   {
-    throw new UnsupportedOperationException();
+    Object value = getValue(context, base, property);
+
+    if (value != null)
+      return value.getClass();
+    else
+      return null;
   }
 
   @Override
@@ -85,6 +90,5 @@ public class ImplicitObjectELResolver extends ELResolver {
 			 Object property,
 			 Object value)
   {
-    throw new UnsupportedOperationException();
   }
 }

@@ -155,4 +155,21 @@ public class FunctionExpr extends Expr {
 
     return true;
   }
+
+  public String toString()
+  {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(_expr);
+    sb.append('(');
+    for (int i = 0; i < _args.length; i++) {
+      if (i != 0)
+	sb.append(", ");
+
+      sb.append(_args[i]);
+    }
+    sb.append(')');
+
+    return sb.toString();
+  }
 }

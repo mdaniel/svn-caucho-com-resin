@@ -1165,7 +1165,15 @@ public class PageContextImpl extends PageContext
   {
     if (_elContext == null) {
       _elContext = new PageELContext();
-      _elResolver = new PageELResolver();
+
+      CompositeELResolver elResolver = new CompositeELResolver();
+      elResolver.add(new ArrayELResolver());
+      elResolver.add(new MapELResolver());
+      elResolver.add(new BeanELResolver());
+      elResolver.add(new ListELResolver());
+      elResolver.add(new PageELResolver());
+      
+      _elResolver = elResolver;
     }
     
     return _elContext;
@@ -1791,10 +1799,13 @@ public class PageContextImpl extends PageContext
   class PageELResolver extends AbstractVariableResolver {
     public Object getValue(ELContext env, Object base, Object property)
     {
-      if (property != null)
+      if (base != null)
 	return null;
-      else if (base instanceof String)
-	return getAttribute(base.toString());
+      else if (property instanceof String) {
+	env.setPropertyResolved(true);
+	
+	return getAttribute(property.toString());
+      }
       else
 	return null;
     }
@@ -1804,7 +1815,7 @@ public class PageContextImpl extends PageContext
 			 Object property,
 			 Object value)
     {
-      if (property != null) {
+      if (base != null) {
       }
       else if (base instanceof String)
 	setAttribute(base.toString(), value);

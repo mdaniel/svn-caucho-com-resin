@@ -138,12 +138,12 @@ public class EnvironmentLevelELResolver extends ELResolver {
 			 Object base,
 			 Object property)
   {
-    if (property != null)
+    if (base != null)
       return null;
-    else if (! (base instanceof String))
+    else if (! (property instanceof String))
       return null;
 
-    String var = (String) base;
+    String var = (String) property;
 
     Object value = EL.getLevelVar(var, _loader);
 
@@ -167,12 +167,12 @@ public class EnvironmentLevelELResolver extends ELResolver {
 		       Object property,
 		       Object value)
   {
-    if (property != null || ! (base instanceof String))
+    if (base != null || ! (property instanceof String))
       return;
 
     env.setPropertyResolved(true);
 
-    String name = (String) base;
+    String name = (String) property;
 
     EL.putVar(name, value, _loader);
   }

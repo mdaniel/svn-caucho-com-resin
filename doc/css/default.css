@@ -191,12 +191,16 @@ ul.none {
   list-style : none
 }
 
-dl.atoc-toplevel {
+dl.atoc-top {
   margin : 0;
 }
 
+dl.atoc-1 {
+    padding : 5px;
+    margin : 0.5em;
+}
 
-dt.atoc-toplevel-1 {
+dl.atoc-top > dt {
     font-size : large;
     font-style : bold;
     background : #ccddff;

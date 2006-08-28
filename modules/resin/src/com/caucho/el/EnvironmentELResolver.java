@@ -144,9 +144,9 @@ public class EnvironmentELResolver extends ELResolver {
 			 Object base,
 			 Object property)
   {
-    if (property != null)
+    if (base != null)
       return null;
-    else if (! (base instanceof String))
+    else if (! (property instanceof String))
       return null;
 
     context.setPropertyResolved(false);
@@ -169,7 +169,7 @@ public class EnvironmentELResolver extends ELResolver {
 		       Object property,
 		       Object value)
   {
-    if (property != null || ! (base instanceof String))
+    if (base != null || ! (property instanceof String))
       return;
 
     context.setPropertyResolved(false);

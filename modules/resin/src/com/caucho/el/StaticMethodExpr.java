@@ -191,4 +191,9 @@ public class StaticMethodExpr extends Expr {
 
     return _method.equals(expr._method);
   }
+
+  public String toString()
+  {
+    return _method.getName();
+  }
 }

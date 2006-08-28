@@ -1,0 +1,52 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>URL rewrite tags</title>
+  <version>Resin 3.0</version>
+
+  <description>
+<p>Resin's &lt;rewrite-dispatch> tag allows configuration for
+URL aliasing, rewriting, dispatching, and redirection.</p>
+
+  </description>
+</header>
+
+<body>
+
+<localtoc/>
+
+<defun title="&lt;rewrite-dispatch>">
+<parents>web-app, host</parents>
+
+<p>Contains children tags which rewrite and dispatch based on regexp
+patterns.</p>
+
+<example title="Mediawiki dispatch in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+ &lt;rewrite-dispatch>
+   &lt;dispatch regexp="\.(php|gif|css|jpg|png)"/>
+   &lt;forward regexp="^" target="/index.php"/>
+ &lt;/rewrite-dispatch>
+
+&lt;/web-app>
+</example>
+
+<def title="rewrite-dispatch schema">
+element rewrite-dispatch {
+  (dispatch { regexp }
+  | forward { regexp &amp; target }
+  | forbidden { regexp }
+  | gone { regexp }
+  | moved-permanently { regexp &amp; target }
+  | not-found { regexp }
+  | redirect { regexp &amp; target }
+  | rewrite { regexp &amp; replacement })*
+}
+</def>
+
+</defun>
+
+</body>
+
+</document>

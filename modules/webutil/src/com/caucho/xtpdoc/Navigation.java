@@ -69,6 +69,11 @@ public class Navigation {
     _depth = depth;
   }
 
+  public Path getRootPath()
+  {
+    return _rootPath;
+  }
+
   public void setChild(NavigationItem child)
   {
     _child = child;
@@ -144,15 +149,14 @@ public class Navigation {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    writeHtml(out, "", 0);
+    writeHtml(out, "", 1);
   }
   
   public void writeHtml(XMLStreamWriter out, String path, int depth)
     throws XMLStreamException
   {
-    String depthString = (depth == 0) ? "top" : ("" + depth);
-
     /*
+    String depthString = (depth == 0) ? "top" : ("" + depth);
     out.writeStartElement("dl");
     out.writeAttribute("class", "atoc-toplevel atoc-toplevel-" + depthString);
     */
@@ -161,6 +165,12 @@ public class Navigation {
       item.writeHtml(out, path, depth);
 
     //out.writeEndElement(); // dl
+  }
+
+  protected void initSummary()
+  {
+    for (NavigationItem item : _items)
+      item.initSummary();
   }
 
   public void writeLeftNav(XMLStreamWriter out)

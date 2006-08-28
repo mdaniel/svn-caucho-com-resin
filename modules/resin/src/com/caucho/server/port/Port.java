@@ -629,13 +629,6 @@ public class Port
 
     if (_server instanceof EnvironmentBean)
       Environment.addEnvironmentListener(this, ((EnvironmentBean) _server).getClassLoader());
-
-    if (_readTimeout <= 0)
-      _readTimeout = _timeout;
-
-    if (_writeTimeout <= 0)
-      _writeTimeout = _timeout;
-
   }
 
   /**
@@ -696,8 +689,8 @@ public class Port
     if (_tcpNoDelay)
       _serverSocket.setTcpNoDelay(_tcpNoDelay);
 
-    _serverSocket.setConnectionReadTimeout((int) _readTimeout);
-    _serverSocket.setConnectionWriteTimeout((int) _writeTimeout);
+    _serverSocket.setConnectionReadTimeout((int) getReadTimeout());
+    _serverSocket.setConnectionWriteTimeout((int) getWriteTimeout());
   }
 
   /**
@@ -732,8 +725,8 @@ public class Port
     if (_tcpNoDelay)
       _serverSocket.setTcpNoDelay(_tcpNoDelay);
 
-    _serverSocket.setConnectionReadTimeout((int) _readTimeout);
-    _serverSocket.setConnectionWriteTimeout((int) _writeTimeout);
+    _serverSocket.setConnectionReadTimeout((int) getReadTimeout());
+    _serverSocket.setConnectionWriteTimeout((int) getWriteTimeout());
   }
 
   /**
@@ -771,8 +764,8 @@ public class Port
     if (_tcpNoDelay)
       ss.setTcpNoDelay(_tcpNoDelay);
 
-    ss.setConnectionReadTimeout((int) _readTimeout);
-    ss.setConnectionWriteTimeout((int) _writeTimeout);
+    ss.setConnectionReadTimeout((int) getReadTimeout());
+    ss.setConnectionWriteTimeout((int) getWriteTimeout());
 
     return ss;
   }  

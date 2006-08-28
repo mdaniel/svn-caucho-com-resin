@@ -8,6 +8,7 @@
     <item link="server-tags.xtp" title="server"/>
     <item link="host-tags.xtp" title="host"/>
     <item link="webapp-tags.xtp" title="web-app"/>
+    <item link="rewrite-tags.xtp" title="rewrite"/>
     <item link="log.xtp" title="log"/>
     <item link="control.xtp" title="el & control"/>
     <item link="init.xtp" title="Bean Config"/>

@@ -168,7 +168,7 @@ public class NodeBuilder {
       _currentBuilder.set(this);
 
       if (top instanceof QNode) {
-	_varResolver.setValue(_elContext, "__FILE__", null,
+	_varResolver.setValue(_elContext, null, "__FILE__",
 			      ((QNode) top).getBaseURI());
       }
 
@@ -199,7 +199,7 @@ public class NodeBuilder {
       _currentBuilder.set(this);
 
       if (top instanceof QNode) {
-	_varResolver.setValue(_elContext, "__FILE__", null,
+	_varResolver.setValue(_elContext, null, "__FILE__",
 			    ((QNode) top).getBaseURI());
       }
 
@@ -590,7 +590,7 @@ public class NodeBuilder {
     ELResolver resolver = _elContext.getELResolver();
     Object oldValue = resolver.getValue(_elContext, name, null);
 
-    resolver.setValue(_elContext, name, null, value);
+    resolver.setValue(_elContext, null, name, value);
     
     return oldValue;
   }
@@ -600,7 +600,7 @@ public class NodeBuilder {
    */
   public Object getVar(String name)
   {
-    return _elContext.getELResolver().getValue(_elContext, name, null);
+    return _elContext.getELResolver().getValue(_elContext, null, name);
   }
 
   void addValidator(Validator validator)

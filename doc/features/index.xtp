@@ -5,8 +5,18 @@
     <type>contents</type>
     <description>
       <p>
-      Release notes, change logs and some general feature-related information.
-      </p>
+The Resin 3.1 Application Server offers:      </p>
+
+<ul>
+<li>A <a href="quercus|index.xtp">100% Java PHP 5 implementation</a></li>
+<li>A fast <a href="install|httpd.xtp">HTTP Web Server</a></li>
+<li>Built-in <a href="performance|caching.xtp">HTTP Proxy Cache</a></li>
+<li>New <a href="config|cluster-tags.xtp">clustering</a> configuration</li>
+<li>Flexible <a href="config|host-tags.xtp">virtual host</a> configuration</li>
+<li>New <a href="ioc|tutorial/jaxb-bean-config/index.xtp">JAXB-based IoC configuration</a></li>
+<li><a href="ioc|hessian/index.xtp">Hessian</a> compact binary webservices protocol</li>
+</ul>
+
     </description>
   </header>
 

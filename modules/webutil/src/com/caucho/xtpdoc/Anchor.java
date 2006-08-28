@@ -72,6 +72,11 @@ public class Anchor extends FormattedText {
       
       out.writeAttribute("href", "http://www.caucho.com/resin-javadoc/" + name);
     }
+    else if (_href.indexOf('|') >= 0) {
+      String href = getDocument().getContextPath() + '/' + _href.replace('|', '/');
+      
+      out.writeAttribute("href", href);
+    }
     else
       out.writeAttribute("href", _href);
 

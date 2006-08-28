@@ -141,6 +141,11 @@ public class ImplicitFieldExpr extends Expr {
     throw new UnsupportedOperationException();
   }
 
+  public String toString()
+  {
+    return "implicit_" + _index + "[" + _field + "]";
+  }
+  
   /**
    * Prints the code to create an IdExpr.
    */

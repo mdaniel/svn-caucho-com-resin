@@ -231,6 +231,11 @@ public class ImplicitObjectExpr extends Expr {
     throw new UnsupportedOperationException();
   }
 
+  public String toString()
+  {
+    return _id;
+  }
+
   /**
    * Prints the code to create an IdExpr.
    */

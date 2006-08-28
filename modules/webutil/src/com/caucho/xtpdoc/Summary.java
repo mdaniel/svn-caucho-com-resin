@@ -94,7 +94,7 @@ public class Summary implements ContentItem {
     if (_document.getURI().endsWith("/")
 	|| _document.getURI().endsWith("index.xtp")) {
       if (_document.getNavigation() != null)
-	_document.getNavigation().writeHtml(out, "", 0);
+	_document.getNavigation().writeHtml(out, "");
     }
   }
 

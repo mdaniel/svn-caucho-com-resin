@@ -85,21 +85,7 @@ public class AbstractVariableResolver extends ELResolver
 			 Object base,
 			 Object property)
   {
-    Object value = null;
-
-    if (_next != null) {
-      value = _next.getValue(context, base, property);
-      
-      if (value == _next)
-        return this;
-      else if (value != null)
-        return value;
-    }
-
-    if ("Var".equals(base))
-      return this;
-    else
-      return null;
+    return null;
   }
 
   //
@@ -148,7 +134,6 @@ public class AbstractVariableResolver extends ELResolver
 	   PropertyNotWritableException,
 	   ELException
   {
-    throw new PropertyNotWritableException(getClass().getName());
   }
 
   public String toString()

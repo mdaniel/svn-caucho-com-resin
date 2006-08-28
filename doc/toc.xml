@@ -6,11 +6,11 @@
     <item link="features/index.xtp" title="Features" atoc-descend="true"/>
     <item link="install/index.xtp" title="Installation" atoc-descend="true"/>
     <item link="config/index.xtp" title="Configuration" atoc-descend="true"/>
-    <item link="webapp/index.xtp" title="Web Applications" atoc-descend="true"/>
+    <item link="quercus/index.xtp" title="Quercus" atoc-descend="true"/>
     <item link="ioc/index.xtp" title="IoC/JAXB" atoc-descend="true"/>
+    <item link="webapp/index.xtp" title="Web Applications" atoc-descend="true"/>
     <item link="resource/index.xtp" title="Resources" atoc-descend="true"/>
     <item link="jsp/index.xtp" title="JSP" atoc-descend="true"/>
-    <item link="quercus/index.xtp" title="Quercus" atoc-descend="true"/>
     <item link="servlet/index.xtp" title="Servlets and Filters" atoc-descend="true"/>
     <!--
     <item link="portlet/index.xtp" title="Portlets" atoc-descend="true"/>

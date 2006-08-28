@@ -141,7 +141,7 @@ public class NavigationItem {
     return _uri;
   }
 
-  private void initSummary()
+  protected void initSummary()
   {
     if (_child != null || _description != null)
       return;
@@ -170,13 +170,17 @@ public class NavigationItem {
 
         if (_atocDescend) {
           Path linkRoot = linkPath.getParent();
+	  
+	  if (linkRoot.equals(_navigation.getRootPath().getParent()))
+	    return;
+
           Path subToc = linkPath.getParent().lookup("toc.xml");
 
           if (subToc.exists()) {
-            _child = new Navigation(document,
-				    _uri,
-				    linkRoot,
-				    _depth + 1);
+            _child = new Navigation(_document,
+					      _uri,
+					      linkRoot,
+					      _depth + 1);
 
             try {
               config.configure(_child, subToc);
@@ -231,27 +235,41 @@ public class NavigationItem {
     _navigation.putItem(_navigation.getUri() + _link, this);
   }
 
+  public void writeHtml(XMLStreamWriter out, String path)
+    throws XMLStreamException
+  {
+    initSummary();
+
+    out.writeStartElement("dl");
+    out.writeAttribute("class", "atoc-top");
+    
+    for (NavigationItem item : _items)
+      item.writeHtmlImpl(out, path, 0);
+    
+    out.writeEndElement();
+  }
+
   public void writeHtml(XMLStreamWriter out, String path, int depth)
     throws XMLStreamException
   {
-    if (_maxDepth < depth)
+    initSummary();
+
+    for (NavigationItem item : _items)
+      item.writeHtmlImpl(out, path, depth);
+  }
+
+  protected void writeHtmlImpl(XMLStreamWriter out, String path, int depth)
+    throws XMLStreamException
+  {
+    if (depth >= _maxDepth)
       return;
 
     initSummary();
 
-    String depthString = (depth == 0) ? "top" : ("" + depth);
+    if (_child != null && depth + 1 < _maxDepth)
+      _child.initSummary();
 
-    if (_child != null || _items.size() > 0) {
-      out.writeStartElement("dl");
-      out.writeAttribute("class", "atoc-toplevel atoc-toplevel-" + depthString);
-
-      out.writeStartElement("dt");
-      out.writeAttribute("class", "atoc-toplevel atoc-toplevel-" + 
-                                  (_depth + 1));
-    } else {
-      out.writeStartElement("dt");
-      out.writeAttribute("class", "atoc-toplevel atoc-toplevel-" + depthString);
-    }
+    out.writeStartElement("dt");
 
     out.writeStartElement("b");
 
@@ -267,7 +285,6 @@ public class NavigationItem {
     out.writeEndElement(); // dt
 
     out.writeStartElement("dd");
-    out.writeAttribute("class", "atoc-toplevel atoc-toplevel-" + depthString);
 
     // XXX: brief/paragraph/none
     if (_description != null && depth <= 1) {
@@ -283,18 +300,25 @@ public class NavigationItem {
         tail = path + _link.substring(0, p + 1);
       else
         tail = path;
+      
+      String depthString = (depth == 0) ? "top" : ("" + depth);
+      boolean hasDL = false;
+    
+      if (_child != null || _items.size() > 0) {
+	out.writeStartElement("dl");
+	out.writeAttribute("class", "atoc-" + (depth + 1));
 
-      if (_child != null)
-        _child.writeHtml(out, tail, depth + 1);
-
-      for (NavigationItem item : _items)
-        item.writeHtml(out, tail, depth + 1);
+	if (_child != null)
+	  _child.writeHtml(out, tail, depth + 1);
+	else {
+	  for (NavigationItem item : _items)
+	    item.writeHtmlImpl(out, tail, depth + 1);
+	}
+	out.writeEndElement();
+      }
     }
 
     out.writeEndElement(); // dd
-
-    if (_child != null || _items.size() > 0)
-      out.writeEndElement(); // dl
   }
 
   public void writeLeftNav(XMLStreamWriter out)

@@ -71,6 +71,9 @@ public class Body extends ContainerNode {
   public Summary createSummary()
   {
     _summary = new Summary(getDocument());
+
+    addItem(_summary);
+    
     return _summary;
   }
 
@@ -265,11 +268,6 @@ public class Body extends ContainerNode {
     if (getDocument().getHeader() != null
 	&& getDocument().getHeader().getDescription() != null) {
       getDocument().getHeader().getDescription().writeHtml(out);
-    }
-
-    if (_summary != null) {
-      _summary.setNavigation(_navigation);
-      _summary.writeHtml(out);
     }
 
     if (_index != null)

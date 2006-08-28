@@ -83,7 +83,7 @@ public class IdExpr extends Expr {
   public Object getValue(ELContext env)
     throws ELException
   {
-    return env.getELResolver().getValue(env, _id, null);
+    return env.getELResolver().getValue(env, null, _id);
   }
 
   /**
@@ -97,7 +97,7 @@ public class IdExpr extends Expr {
   public void setValue(ELContext env, Object value)
     throws ELException
   {
-    env.getELResolver().setValue(env, _id, null, value);
+    env.getELResolver().setValue(env, null, _id, value);
   }
 
   /**

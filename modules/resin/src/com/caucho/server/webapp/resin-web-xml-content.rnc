@@ -388,13 +388,10 @@ r_rewrite-dispatch = element rewrite-dispatch {
       | element regexp { string })
    }*
 
-  & element rewrite {
-     (attribute regexp { string }
-      | element regexp { string })
-
-     & (attribute replacement { string }
-        | element replacement { string })
-   }*
+   & element forbidden {
+       (attribute regexp { string }
+        | element regexp { string })
+     }*
 
    & element forward {
        (attribute regexp { string }
@@ -402,11 +399,6 @@ r_rewrite-dispatch = element rewrite-dispatch {
 
        & (attribute target { string }
           | element target { string })
-     }*
-
-   & element forbidden {
-       (attribute regexp { string }
-        | element regexp { string })
      }*
 
    & element gone {
@@ -434,6 +426,14 @@ r_rewrite-dispatch = element rewrite-dispatch {
        & (attribute target { string }
           | element target { string })
      }*
+
+  & element rewrite {
+     (attribute regexp { string }
+      | element regexp { string })
+
+     & (attribute replacement { string }
+        | element replacement { string })
+   }*
 }
 
 r_rewrite-real-path = element rewrite-real-path {
