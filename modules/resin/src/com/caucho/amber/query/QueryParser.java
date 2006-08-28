@@ -301,6 +301,11 @@ public class QueryParser {
     int oldToken = _token;
     FromItem.JoinSemantics oldJoinSemantics = _joinSemantics;
     boolean oldIsJoinFetch = _isJoinFetch;
+    AbstractQuery oldQuery = _query;
+    int oldDepth = _depth;
+
+    // Reset depth: subselect
+    _depth = 0;
 
     SelectQuery query = new SelectQuery(_sql);
     query.setParentQuery(_query);
@@ -626,6 +631,8 @@ public class QueryParser {
 
     _joinSemantics = oldJoinSemantics;
     _isJoinFetch = oldIsJoinFetch;
+    _query = oldQuery;
+    _depth = oldDepth;
 
     return query;
   }
