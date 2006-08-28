@@ -35,9 +35,20 @@ a.leftnav:visited {
   background : #ccddff;
 }
 
+div.toc {
+  margin : 0em 3em;
+}
+
 .section {
 /*  background : #ccddff; */
   background : #b9cef7;
+}
+
+div.section-title {
+  font-size : 150%;
+  background : #b9cef7;
+  margin : 1.0em 0em;
+  padding : 0.2em;
 }
 
 .leftnav {

@@ -104,24 +104,19 @@ sub-beans.</p>
 &lt;/web-app>
 </example>
 
-<def title="schema">
+<def title="&lt;bean> schema">
 r_bean = element bean {
   (jndi-name?
-
   &amp; mbean-name?
+  &amp; mbean-interface?
+  &amp; var?),
 
-  &amp; mbean-interface?),
+  (type, arg*)?,
 
-  (type,
-
-  arg*)?,
-
-  (init*
-
-  &amp; listener*)
+  (init | listener)*
 }
 
-listener {
+element listener {
   mbean-name,
 
   handback*

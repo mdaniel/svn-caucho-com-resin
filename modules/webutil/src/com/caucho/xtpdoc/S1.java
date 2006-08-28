@@ -53,6 +53,10 @@ public class S1 extends Section {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
+    out.writeStartElement("a");
+    out.writeAttribute("name", getHref());
+    out.writeEndElement();
+    
     if (_title != null) {
       out.writeStartElement("table");
       out.writeAttribute("border", "0");

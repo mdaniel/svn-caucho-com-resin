@@ -179,6 +179,11 @@ public class Document {
     return _body;
   }
 
+  public Body getBody()
+  {
+    return _body;
+  }
+
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {

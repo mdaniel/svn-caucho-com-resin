@@ -62,9 +62,11 @@ public class Body extends ContainerNode {
       _navigation = item.getNavigation();
   }
 
+  /*
   public void setLocalTOC(String text)
   {
   }
+  */
 
   public Summary createSummary()
   {
@@ -72,8 +74,13 @@ public class Body extends ContainerNode {
     return _summary;
   }
 
-  public void setLocaltoc(Localtoc localtoc)
+  public Localtoc createLocaltoc()
   {
+    Localtoc toc = new Localtoc(getDocument());
+
+    addItem(toc);
+
+    return toc;
   }
 
   public Faq createFaq()

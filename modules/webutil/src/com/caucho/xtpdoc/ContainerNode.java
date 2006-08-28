@@ -63,6 +63,11 @@ public abstract class ContainerNode implements ContentItem {
     _items.add(item);
   }
 
+  protected ArrayList<ContentItem> getItems()
+  {
+    return _items;
+  }
+
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {

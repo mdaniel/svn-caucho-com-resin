@@ -11,10 +11,8 @@
 
     <item link="groovy.xtp" title="Groovy"/>
 
-    <item link="php.xtp" title="PHP"/>
-
     <item link="codelibraries.xtp" title="Code Libraries" atoc-descend="true"/>
-
+<!--
     <item link="ejb.xtp" title="EJB Servers" >
       <item link="ejb-jboss.xtp" title="jBoss"/>
       <item link="ejb-ias.xtp" title="Inprise"/>
@@ -22,6 +20,7 @@
       <item link="ejb-weblogic.xtp" title="Weblogic"/>
       <item link="ejb-orion.xtp" title="Orion"/>
     </item>
+    -->
 
     <item link="jms.xtp" title="JMS" >
       <item link="swiftmq.xtp" title="SwiftMQ" />

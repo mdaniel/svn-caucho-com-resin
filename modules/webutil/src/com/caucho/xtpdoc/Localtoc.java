@@ -34,17 +34,67 @@ import java.io.IOException;
 
 import java.util.logging.Logger;
 
+import javax.xml.stream.*;
+
 import com.caucho.vfs.Path;
 
 import com.caucho.config.Config;
 
-public class Localtoc {
-  public void writeHtml(PrintWriter writer)
+public class Localtoc implements ContentItem {
+  Document _document;
+  
+  Localtoc(Document doc)
+  {
+    _document = doc;
+  }
+  
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
+  {
+    ContainerNode container = _document.getBody();
+
+    writeContainer(out, container);
+  }
+  
+  private void writeContainer(XMLStreamWriter out, ContainerNode container)
+    throws XMLStreamException
+  {
+    if (container == null)
+      return;
+    
+    out.writeStartElement("div");
+    out.writeAttribute("class", "toc");
+    out.writeStartElement("ol");
+
+    for (ContentItem item : container.getItems()) {
+      if (item instanceof Section) {
+	Section section = (Section) item;
+
+	out.writeStartElement("li");
+	out.writeStartElement("a");
+	out.writeAttribute("href", "#" + section.getHref());
+	out.writeCharacters(section.getTitle());
+	out.writeEndElement();
+	out.writeEndElement();
+	
+	writeContainer(out, section);
+      }
+    }
+    out.writeEndElement(); // </ul>
+    out.writeEndElement(); //
+  }
+
+  public void writeLaTeX(PrintWriter writer)
     throws IOException
   {
   }
 
-  public void writeLaTeX(PrintWriter writer)
+  public void writeLaTeXTop(PrintWriter out)
+    throws IOException
+  {
+  }
+
+  public void writeLaTeXEnclosed(PrintWriter out)
     throws IOException
   {
   }

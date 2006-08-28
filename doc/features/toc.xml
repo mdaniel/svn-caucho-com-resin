@@ -4,13 +4,14 @@
     <item link="overview.xtp" title="Feature Overview"/>
 
     <item link="release-notes.xtp" title="Release Notes">
-      <item link="resin-3.0.20.xtp" title="Resin 3.0.20"/>
-      <item link="resin-3.0.19.xtp" title="Resin 3.0.19"/>
-      <item link="resin-3.0.18.xtp" title="Resin 3.0.18"/>
-      <item link="resin-3.0.17.xtp" title="Resin 3.0.17"/>
-      <item link="resin-3.0.16.xtp" title="Resin 3.0.16"/>
-      <item link="resin-3.0.15.xtp" title="Resin 3.0.15"/>
+      <item link="resin-3.1.0.xtp" title="Resin 3.1.0"/>
       <item link="release-notes-archive.xtp" title="Archive">
+        <item link="resin-3.0.20.xtp" title="Resin 3.0.20"/>
+        <item link="resin-3.0.19.xtp" title="Resin 3.0.19"/>
+        <item link="resin-3.0.18.xtp" title="Resin 3.0.18"/>
+        <item link="resin-3.0.17.xtp" title="Resin 3.0.17"/>
+        <item link="resin-3.0.16.xtp" title="Resin 3.0.16"/>
+        <item link="resin-3.0.15.xtp" title="Resin 3.0.15"/>
         <item link="resin-3.0.14.xtp" title="Resin 3.0.14"/>
         <item link="resin-3.0.13.xtp" title="Resin 3.0.13"/>
         <item link="resin-3.0.12.xtp" title="Resin 3.0.12"/>
@@ -36,17 +37,16 @@
       <item link="changes-1.xtp" title="Old Changes"/>
     </item>
 
+    <!--
     <item link="migrate.xtp" title="Migrate from 2.1"/>
 
-    <!--
     <item link="benchmarks.xtp" title="Benchmarks">
       <item link="jsp-benchmark.xtp" title="JSP Benchmark"/>
       <item link="xslt-benchmark.xtp" title="XSLT Benchmark"/>
       <item link="jspvsperlphp.xtp" title="JSP vs mod_php and mod_perl"/>
     </item>
-    -->
 
     <item link="faq.xtp" title="Features FAQ" atoc-descend='1'/>
-
+    -->
   </item>
 </navigation>

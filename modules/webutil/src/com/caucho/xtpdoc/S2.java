@@ -34,6 +34,8 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
+import javax.xml.stream.*;
+
 public class S2 extends Section {
   public S2(Document document)
   {
@@ -45,6 +47,23 @@ public class S2 extends Section {
     S3 s3 = new S3(getDocument());
     addItem(s3);
     return s3;
+  }
+
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
+  {
+    out.writeStartElement("a");
+    out.writeAttribute("name", getHref());
+    out.writeEndElement();
+
+    if (_title != null) {
+      out.writeStartElement("h3");
+      out.writeCharacters(_title);
+      out.writeEndElement();
+    }
+    
+    for (ContentItem item : getItems())
+      item.writeHtml(out);
   }
 
   public void writeLaTeXTop(PrintWriter out)

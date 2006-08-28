@@ -53,7 +53,15 @@ public class Defun extends Section {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    out.writeStartElement("table");
+    out.writeStartElement("a");
+    out.writeAttribute("name", getHref());
+    out.writeEndElement();
+    
+    out.writeStartElement("div");
+    out.writeAttribute("class", "section-title");
+    out.writeCharacters(_title);
+    out.writeEndElement();
+    /*
     out.writeAttribute("border", "0");
     out.writeAttribute("cellpadding", "5");
     out.writeAttribute("cellspacing", "0");
@@ -70,6 +78,7 @@ public class Defun extends Section {
     out.writeEndElement(); // tr
 
     out.writeEndElement(); // table
+    */
     
     out.writeStartElement("div");
     out.writeAttribute("class", "desc");

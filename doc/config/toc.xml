@@ -7,7 +7,7 @@
     <item link="cluster-tags.xtp" title="cluster"/>
     <item link="server-tags.xtp" title="server"/>
     <item link="host-tags.xtp" title="host"/>
-    <item link="webapp.xtp" title="web-app"/>
+    <item link="webapp-tags.xtp" title="web-app"/>
     <item link="log.xtp" title="log"/>
     <item link="control.xtp" title="el & control"/>
     <item link="init.xtp" title="Bean Config"/>

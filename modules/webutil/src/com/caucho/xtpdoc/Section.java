@@ -93,6 +93,24 @@ public abstract class Section extends ContainerNode {
     _title = title;
   }
 
+  public String getName()
+  {
+    return _name;
+  }
+
+  public String getTitle()
+  {
+    return _title;
+  }
+
+  public String getHref()
+  {
+    if (_name != null)
+      return _name;
+    else
+      return _title;
+  }
+
   public DefinitionList createDl()
   {
     DefinitionList list = new DefinitionList(getDocument());
