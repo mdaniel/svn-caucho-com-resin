@@ -10,6 +10,54 @@
 
 <s1 title="server changes">
 
+<p>&lt;<a href="../config/cluster-tags.xtp">cluster</a>&gt; tag
+for the new cluster tags.</p>
+
+<p>&lt;<a href="../config/server-tags.xtp">server</a>&gt; tag
+for the new server tags.</p>
+
+<example title="resin.conf">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  &lt;cluster id="web-tier">
+    &lt;server-default>
+       &lt;user-name>resin&lt;/user-name>
+
+       &lt;http port="80"/>
+    &lt;/server-default>
+
+    &lt;server id="web-a" address="192.168.2.10">
+    &lt;server id="web-b" address="192.168.2.11">
+
+    &lt;host id="">
+      &lt;web-app id="/">
+        ...
+      &lt;/web-app>
+    &lt;/host>
+  &lt;/cluster>
+
+  &lt;cluster id="app-tier">
+    &lt;root-directory>/var/www&lt;/root-directory>
+
+    &lt;server id="app-a" address="192.168.2.20">
+    &lt;server id="app-b" address="192.168.2.21">
+    &lt;server id="app-c" address="192.168.2.21">
+
+    &lt;host-default>
+      &lt;web-app-deploy path="webapps"/>
+    &lt;/host-default>
+
+    &lt;host-deploy path="hosts"/>
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+</s1>
+
+<s1 title="JAXB for Config IoC">
+
+<p>See <a href="../ioc/tutorial/jaxb-bean-config/index.xtp">JAXB Bean
+Configuration tutorial</a></p>
+
 </s1>
 
 </body>
