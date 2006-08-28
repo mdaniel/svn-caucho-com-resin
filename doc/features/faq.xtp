@@ -10,6 +10,7 @@
 
 <summary/>
 
+<!--
 <faq title="Who uses Resin?">
 <description>
 </description>
@@ -41,6 +42,7 @@ sites.</p>
 
 <p>In other words, the Netcraft numbers are mostly bogus.</p>
 </faq>
+-->
 
 <faq title="What operating systems are supported with Resin?">
 <description>

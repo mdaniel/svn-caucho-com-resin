@@ -1,0 +1,2 @@
+<jsp:scriptlet>response.redirect("/resin-3.1/quercus/"); </jsp:scriptlet>
+
