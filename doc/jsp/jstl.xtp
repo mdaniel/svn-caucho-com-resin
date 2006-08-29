@@ -74,10 +74,10 @@
 
       <example title='Velocity style'>
 &lt;jsp:directive.page velocity='true'/&gt;
-#{
+\#{
 int count;
 }#
-
+\#{
 &lt;h3&gt;A sample ${'${'}count}&lt;/h3&gt;
 
 #if ("foo" == params.a)

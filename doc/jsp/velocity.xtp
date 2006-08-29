@@ -22,7 +22,7 @@
   <summary/>
 
 <p>The syntax is based on expressions like <var/${'${'}foo}/>
-and scriptlets with <var/#{...}#/>.  Because the
+and scriptlets with <var/#\{...}#/>.  Because the
 alternative syntax avoids the brackets which fill JSP pages, it can make
 pages more readable and therefore more maintainable.</p>
 
@@ -49,7 +49,7 @@ by default.</p>
 
 <example title='Velocity style'>
 &lt;jsp:directive.page velocity='true'/&gt;
-#{
+\#{
 int count;
 }#
 
@@ -94,7 +94,7 @@ can become confusing.</p>
 
 <p>The '${'${'}...}' syntax is equivalent to '<var>&lt;c:out value="..."/></var>'.</p>
 
-<def>
+\#{<def>
 ${'${'}<var/expression/>}
 </def>
 
@@ -102,18 +102,18 @@ ${'${'}<var/expression/>}
 
 <section title='scriptlets'>
 
-<p>Scriptlets use the '#{ ... }#' syntax.  This is entirely equivalent to
+<p>Scriptlets use the '\#{ ... }#' syntax.  This is entirely equivalent to
 '&lt;% ... %>'.  (Note, Velocity does not have this syntax because it
 creates its own language instead of escaping to Java.)</p>
 
 <def>
-#{
+\#{
  <var/statements/>
 }#
 </def>
 
 <example>
-#{
+\#{
 String key = request.getParameter("key");
 if (key.equals("")) {
   response.sendError(500, "Bad key");
@@ -180,7 +180,7 @@ statements.</p>
 
 <example title='foreach in Java'>
 &lt;jsp:page.directive velocity='true' import='java.lang.*'/&gt;
-#{
+\#{
   ArrayList list = new ArrayList();
   list.add("foo");
   list.add("foobar");
