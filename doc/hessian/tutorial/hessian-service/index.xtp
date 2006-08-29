@@ -26,7 +26,7 @@ will want to be independent of the Hessian protocol itself.</p>
     </td><td>Interface for the math service.
 </td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/MathServiceImpl.java"/>
     </td><td>The main service implementation.
-</td></tr><tr><td><viewfile-link file="WEB-INF/web.xml"/>
+</td></tr><tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
     </td><td>Configures the environment
 </td></tr><tr><td><viewfile-link file="demo.jsp"/>
     </td><td>Client JSP
@@ -73,12 +73,20 @@ public interface MathService {
 
 <s1 title="Service configuration">
 
-<example title="web.xml">
-&lt;servlet servlet-name="hessian"
-         servlet-class="com.caucho.hessian.server.HessianServlet"&gt;
-  &lt;init-param service-class="example.MathServiceImpl"/&gt;
-  &lt;init-param api-class="example.MathService"/&gt;
-&lt;/servlet&gt;
+<example title="resin-web.xml">
+  &lt;web-service class="example.MathServiceImpl">
+    &lt;encoding type="hessian">
+      &lt;api-class>example.MathService&lt;/api-class>
+      &lt;transport type="http">
+        &lt;url-pattern>/math/&lt;/url-pattern>
+      &lt;/transport>
+    &lt;/encoding>
+  &lt;/web-service>
+
+  &lt;web-service-client jndi-name="hessian/MathService">
+    &lt;url>hessian:http://localhost:8080/resin-doc/hessian/tutorial/hessian-service/math/&lt;/url>
+    &lt;interface>example.MathService&lt;/interface>
+  &lt;/web-service-client>
 </example>
 
 </s1>
@@ -87,25 +95,24 @@ public interface MathService {
 
 <p>The client is identical to the basic example.</p>
 
-<example title="client.jsp">
-&lt;%@ page import="com.caucho.hessian.client.HessianProxyFactory" %&gt;
-&lt;%@ page import="example.MathService" %&gt;
+<example title="demo.jsp">
+&lt;%@ page import="com.caucho.naming.Jndi" %>
+&lt;%@ page import="example.MathService" %>
 &lt;%
-HessianProxyFactory factory = new HessianProxyFactory();
-
-// http://localhost:8080/resin-doc/protocols/tutorial/hessian-service/hessian/math
-
-String url = ("http://" +
-              request.getServerName() + ":" + request.getServerPort() +
-              request.getContextPath() + "/hessian/math");
-
-MathService math = (MathService) factory.create(MathService.class, url);
-
-out.println("3 + 2 = " + math.add(3, 2));
-%&gt;
+MathService math = (MathService) Jndi.lookup("hessian/MathService");
+%>
+&lt;pre>
+3 + 2 = &lt;%= math.add(3, 2) %>
+3 - 2 = &lt;%= math.sub(3, 2) %>
+3 * 2 = &lt;%= math.mul(3, 2) %>
+3 / 2 = &lt;%= math.div(3, 2) %>
+&lt;/pre>
 </example>
 <results>
 3 + 2 = 5
+3 - 2 = 1
+3 * 2 = 6
+3 / 2 = 1
 </results>
 
 </s1>

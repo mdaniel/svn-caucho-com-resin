@@ -1,15 +1,7 @@
-<%@ page import="com.caucho.hessian.client.HessianProxyFactory" %>
+<%@ page import="com.caucho.naming.Jndi" %>
 <%@ page import="example.MathService" %>
 <%
-HessianProxyFactory factory = new HessianProxyFactory();
-
-// http://localhost:8080/resin-doc/protocols/tutorial/hessian-add/hessian/math
-
-String url = ("http://" +
-              request.getServerName() + ":" + request.getServerPort() +
-              request.getContextPath() + "/hessian/math");
-
-MathService math = (MathService) factory.create(MathService.class, url);
+MathService math = (MathService) Jndi.lookup("hessian/MathService");
 %>
 <pre>
 3 + 2 = <%= math.add(3, 2) %>

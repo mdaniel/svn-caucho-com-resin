@@ -1,0 +1,18 @@
+<!--
+   - web.xml configuration file for the Hessian addition example.
+  -->
+<web-app> <!-- xmlns="http://caucho.com/ns/resin"> -->
+  <web-service class="example.MathServiceImpl">
+    <encoding type="hessian">
+      <api-class>example.MathService</api-class>
+      <transport type="http">
+        <url-pattern>/math/</url-pattern>
+      </transport>
+    </encoding>
+  </web-service>
+
+  <web-service-client jndi-name="hessian/MathService">
+    <url>hessian:http://localhost:8080/resin-doc/hessian/tutorial/hessian-service/math/</url>
+    <interface>example.MathService</interface>
+  </web-service-client>
+</web-app>
