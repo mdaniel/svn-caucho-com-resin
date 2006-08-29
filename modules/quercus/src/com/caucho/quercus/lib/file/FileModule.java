@@ -655,7 +655,7 @@ public class FileModule extends AbstractQuercusModule {
   }
 
   /**
-   * Parses the file, returning it in an array.
+   * Parses the file, returning it in an array.  Binary-safe.
    *
    * @param filename the file's name
    * @param useIncludePath if 1, use the include path
@@ -666,24 +666,50 @@ public class FileModule extends AbstractQuercusModule {
                            @Optional boolean useIncludePath,
                            @Optional Value context)
   {
+    
+
     try {
       BinaryStream stream = fopen(env, filename, "r", useIncludePath, context);
 
       if (stream == null)
-	return BooleanValue.FALSE;
+        return BooleanValue.FALSE;
 
       BinaryInput is = (BinaryInput) stream;
 
+      ArrayValue result = new ArrayValueImpl();
+
       try {
-	ArrayValue result = new ArrayValueImpl();
-	StringValue line;
+        while (true) {
+          BinaryBuilderValue bb = new BinaryBuilderValue();
 
-	while ((line = is.readLine(Integer.MAX_VALUE)) != null)
-	  result.append(line);
+          for (int ch = is.read(); ch >= 0; ch = is.read()) {
+            if (ch == '\n') {
+              bb.append((char) ch);
+              break;
+            }
+            else if (ch == '\r') {
+              bb.append('\r');
 
-	return result;
+              int ch2 = is.read();
+
+              if (ch == '\n')
+                bb.append('\n');
+              else
+                is.unread();
+
+              break;
+            }
+            else
+              bb.append(ch);
+          }
+
+          if (bb.length() > 0)
+            result.append(bb);
+          else
+            return result;
+        }
       } finally {
-	is.close();
+        is.close();
       }
     } catch (IOException e) {
       throw new QuercusModuleException(e);
