@@ -14,7 +14,9 @@ The Resin 3.1 Application Server offers:      </p>
 <li>New <a href="config|cluster-tags.xtp">clustering</a> configuration</li>
 <li>Flexible <a href="config|host-tags.xtp">virtual host</a> configuration</li>
 <li>New <a href="ioc|tutorial/jaxb-bean-config/index.xtp">JAXB-based IoC configuration</a></li>
-<li><a href="ioc|hessian/index.xtp">Hessian</a> compact binary webservices protocol</li>
+<li>URL <a href="config|rewrite-tags.xtp">rewrite tags</a> for easy
+redirection, aliasing, and smart *.php URLs.</li>
+<li><a href="hessian|index.xtp">Hessian</a> compact binary webservices protocol</li>
 </ul>
 
     </description>

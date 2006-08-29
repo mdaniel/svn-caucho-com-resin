@@ -15,11 +15,251 @@ URL aliasing, rewriting, dispatching, and redirection.</p>
 
 <localtoc/>
 
+<defun title="&lt;dispatch>">
+<parents>rewrite-dispatch</parents>
+
+<p>&lt;dispatch> matches the current URL, passing the request to the
+normal servlet evaluation.  &lt;dispatch> is often used to specify URLs
+which should be handled normally before a more general pattern which
+modifies the URL.</p>
+
+<p>For example, the following pattern uses &lt;dispatch> to handle
+images and *.php files normally, but forward all other requests to
+/index.php.</p>
+
+<example title="Mediawiki dispatch in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+ &lt;rewrite-dispatch>
+   &lt;dispatch regexp="\.(php|gif|css|jpg|png)"/>
+   &lt;forward regexp="^" target="/index.php"/>
+ &lt;/rewrite-dispatch>
+
+&lt;/web-app>
+</example>
+
+<def title="dispatch grammar">
+element dispatch {
+  regexp
+}
+</def>
+</defun>
+
+<defun title="&lt;forbidden>">
+<parents>rewrite-dispatch</parents>
+
+<p>&lt;forbidden> sents a 403 forbidden message to the browser
+for a matching URL.</p>
+
+<example title="Forbidding a directory">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+ &lt;rewrite-dispatch>
+   &lt;forbidden regexp="^/protected"/>
+ &lt;/rewrite-dispatch>
+
+&lt;/web-app>
+</example>
+
+<def title="forbidden grammar">
+element forward {
+  regexp
+}
+</def>
+</defun>
+
+<defun title="&lt;forward>">
+<parents>rewrite-dispatch</parents>
+
+<p>&lt;forward> rewrites the current URL, forwarding it to the target
+using the servlet forward() call.  Because &lt;forward> is internal,
+it will have better performance than a &lt;redirect> when the target
+URL is on the same server, the browser will not know that the
+underlying resource has moved.</p>
+
+<example title="Forwarding to a new URL">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+ &lt;rewrite-dispatch>
+   &lt;forward regexp="^/old" target="/new"/>
+ &lt;/rewrite-dispatch>
+
+&lt;/web-app>
+</example>
+
+<def title="forward grammar">
+element forward {
+  regexp &amp; target
+}
+</def>
+</defun>
+
+<defun title="&lt;gone>">
+<parents>rewrite-dispatch</parents>
+
+<p>&lt;gone> sents a 410 gone response to the browser
+for a matching URL.</p>
+
+<example title="Hiding a directory">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+ &lt;rewrite-dispatch>
+   &lt;gone regexp="^/protected"/>
+ &lt;/rewrite-dispatch>
+
+&lt;/web-app>
+</example>
+
+<def title="gone grammar">
+element gone {
+  regexp
+}
+</def>
+</defun>
+
+<defun title="&lt;moved-permanently>">
+<parents>rewrite-dispatch</parents>
+
+<p>&lt;moved-permanently> sends a HTTP 301 moved permanently
+response to the browser,
+indicating that the resource has moved.</p>
+
+<example title="Forwarding to a new virtual host">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;rewrite-dispatch>
+    &lt;moved-permanently regexp="^/(foo)" target="http://$1.bar.com"/>
+  &lt;/rewrite-dispatch>
+
+&lt;/web-app>
+</example>
+
+<def title="moved-permanently grammar">
+element forward {
+  regexp &amp; target
+}
+</def>
+</defun>
+
+<defun title="&lt;not-found>">
+<parents>rewrite-dispatch</parents>
+
+<p>&lt;not-found> sents a 404 not found to the browser
+for a matching URL.</p>
+
+<example title="Hiding a directory">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+ &lt;rewrite-dispatch>
+   &lt;not-found regexp="^/protected"/>
+ &lt;/rewrite-dispatch>
+
+&lt;/web-app>
+</example>
+
+<def title="not-found grammar">
+element not-found {
+  regexp
+}
+</def>
+</defun>
+
+<defun title="&lt;real-path>">
+<parents>rewrite-real-path</parents>
+
+<p>&lt;real-path> maps a URL to a filesystem path inside a
+&lt;rewrite-real-path tag.</p>
+
+<p>The source path is a URL, the target path is a real filesystem path.</p>
+
+<example title="/images located outside of /var/www">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;rewrite-real-path>
+    &lt;real-path regexp="^/images" real-path="/usr/local/share/images"/>
+  &lt;/rewrite-real-path>
+</example>
+
+<def title="real-path grammar">
+element real-path {
+  regexp &amp; target
+}
+</def>
+
+</defun>
+
+<defun title="&lt;redirect>">
+<parents>rewrite-dispatch</parents>
+
+<p>&lt;redirect> sends a HTTP 302 redirect response to the browser,
+indicating that the resource has moved.</p>
+
+<example title="Forwarding to a new virtual host">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;rewrite-dispatch>
+    &lt;redirect regexp="^/(foo)" target="http://$1.bar.com"/>
+  &lt;/rewrite-dispatch>
+
+&lt;/web-app>
+</example>
+
+<def title="redirect grammar">
+element forward {
+  regexp &amp; target
+}
+</def>
+</defun>
+
+<defun title="&lt;rewrite>">
+<parents>rewrite-dispatch</parents>
+
+<p>&lt;rewrite> rewrites the current URL, continuing processing of
+the &lt;rewrite-dispatch> tags.  &lt;rewrite> can be used as an
+intermediate rewriting stage for more complicated patterns.</p>
+
+<def title="rewrite grammar">
+element rewrite {
+  regexp &amp; replacement
+}
+</def>
+</defun>
+
+<defun title="&lt;rewrite-real-path>">
+<parents>web-app</parents>
+
+<p>&lt;rewrite-real-path> configures an alias for the getRealPath() call, i.e. an enhancement
+to the &lt;path-mapping> tag.</p>
+
+<p>The source path is a URL, the target path is a real filesystem path.</p>
+
+<example title="/images located outside of /var/www">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;rewrite-real-path>
+    &lt;real-path regexp="^/images" real-path="/usr/local/share/images"/>
+  &lt;/rewrite-real-path>
+</example>
+
+<def title="rewrite-real-path grammar">
+element rewrite-real-path {
+  (real-path { regexp &amp; target }
+  | rewrite { regexp &amp; replacement })*
+}
+</def>
+
+</defun>
+
+
 <defun title="&lt;rewrite-dispatch>">
 <parents>web-app, host</parents>
 
-<p>Contains children tags which rewrite and dispatch based on regexp
-patterns.</p>
+<p>&lt;rewrite-dispatch> evaluates the child tags in order.  The first
+matching tag dispatches the request.  If no children match, the request
+uses the standard servlet handling.</p>
+
+<p>The child tags rewrite and
+dispatch based on regexp patterns.</p>
 
 <example title="Mediawiki dispatch in resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">

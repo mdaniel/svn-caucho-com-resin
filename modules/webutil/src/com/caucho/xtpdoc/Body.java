@@ -265,15 +265,34 @@ public class Body extends ContainerNode {
       out.writeEmptyElement("hr");
     }
 
-    if (getDocument().getHeader() != null
-	&& getDocument().getHeader().getDescription() != null) {
-      getDocument().getHeader().getDescription().writeHtml(out);
+    Header header = getDocument().getHeader();
+      
+    if (header != null && header.getDescription() != null) {
+      header.getDescription().writeHtml(out);
+    }
+
+    if (header != null && header.getTutorialStartPage() != null) {
+      out.writeStartElement("p");
+      out.writeStartElement("a");
+      out.writeAttribute("href", header.getTutorialStartPage());
+      out.writeCharacters("Demo");
+      out.writeEndElement();
+      out.writeEndElement();
     }
 
     if (_index != null)
       _index.writeHtml(out);
 
     super.writeHtml(out);
+
+    if (header != null && header.getTutorialStartPage() != null) {
+      out.writeStartElement("p");
+      out.writeStartElement("a");
+      out.writeAttribute("href", header.getTutorialStartPage());
+      out.writeCharacters("Demo");
+      out.writeEndElement();
+      out.writeEndElement();
+    }
 
     out.writeStartElement("hr");
     out.writeEndElement();

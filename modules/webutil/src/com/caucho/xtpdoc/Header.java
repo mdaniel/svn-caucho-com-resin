@@ -44,6 +44,7 @@ public class Header {
   private String _date;
   private Section _description;
   private Keywords _keywords;
+  private String _tutorial;
 
   public Header(Document document)
   {
@@ -90,6 +91,12 @@ public class Header {
 
   public void setTutorialStartPage(String startPage)
   {
+    _tutorial = startPage;
+  }
+
+  public String getTutorialStartPage()
+  {
+    return _tutorial;
   }
 
   public void setLevel(String level)

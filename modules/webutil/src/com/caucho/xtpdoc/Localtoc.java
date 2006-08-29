@@ -70,14 +70,17 @@ public class Localtoc implements ContentItem {
       if (item instanceof Section) {
 	Section section = (Section) item;
 
-	out.writeStartElement("li");
-	out.writeStartElement("a");
-	out.writeAttribute("href", "#" + section.getHref());
-	out.writeCharacters(section.getTitle());
-	out.writeEndElement();
-	out.writeEndElement();
+	if (section.getTitle() != null
+	    && ! "".equals(section.getTitle())) {
+	  out.writeStartElement("li");
+	  out.writeStartElement("a");
+	  out.writeAttribute("href", "#" + section.getHref());
+	  out.writeCharacters(section.getTitle());
+	  out.writeEndElement();
+	  out.writeEndElement();
 	
-	writeContainer(out, section);
+	  writeContainer(out, section);
+	}
       }
     }
     out.writeEndElement(); // </ul>

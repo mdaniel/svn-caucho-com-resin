@@ -37,6 +37,43 @@
 
 <localtoc/>
 
+<defun title="&lt;access-log>">
+<parents>web-app</parents>
+
+<p>&lt;access-log> configures a HTTP access log for an indivitual
+web-app.  See <a href="host-tags.xtp#%3caccess-log%3d">access-log</a>
+in the &lt;host> tag for more information.</p>
+
+</defun>
+
+<defun title="&lt;active-wait-time>">
+<parents>web-app</parents>
+
+<p>&lt;active-wait-time> sets a 503 busy timeout for requests
+trying to access a restarting web-app.  If the timeout expires
+before the web-app complete initialization, the request will return
+a 503 Busy HTTP response.</p>
+
+</defun>
+
+<defun title="&lt;allow-servlet-el>">
+<parents>web-app</parents>
+
+<p>The &lt;allow-servlet-el> flag configures whether &lt;servlet>
+tags allow EL expressions in the init-param.</p>
+
+</defun>
+
+<defun title="&lt;archive-path>">
+<parents>web-app</parents>
+
+<p>&lt;archive-path> configures the location of the web-app's .war file.
+In some configurations, the .war expansion might not
+use the <var>webapps/</var> directory, but will still want automatic
+war expantion.</p>
+
+</defun>
+
 <defun title="&lt;auth-constraint>" localtoc-indent="1" version="Servlet">
 <parents>security-constraint</parents>
 
@@ -148,6 +185,16 @@ defines initial values for <code>application.getInitParameter("foo")</code>.  Se
 
 &lt;/web-app&gt;
 </example>
+</defun>
+
+<defun title="&lt;cookie-http-only>">
+<parents>web-app</parents>
+
+<p>The &lt;cookie-http-only> flag configures the Http-Only attribute
+for all Cookies generated from the web-app.  The Http-Only attribute
+can add security to a website by not forwarding HTTP cookies to
+SSL HTTPS requests.</p>
+
 </defun>
 
 <defun title="&lt;description>" version="Servlet">
@@ -510,8 +557,20 @@ default, the authentication only lasts for a single session.</p>
 
 </defun>
     
+<defun title="&lt;idle-time>">
+<parents>web-app</parents>
+
+<p>The &lt;idle-time> specifies the timeout for lazy-idle web-apps.
+In some configurations, web-apps are created only on demand and are
+closed when no requests access the web-app.  The idle-time configures
+when those web-apps should be freed.</p>
+
+<p>The resin-doc web-app uses idle-time for its child web-apps because
+there are a large number of sub-web-apps for the individual tutorials..</p>
+</defun>
+
 <defun title="&lt;jsp>" type="defun">
-<parents>web-app-default, web-app</parents>
+<parents>web-app</parents>
 
 <p>Configures JSP behavior.</p>
 
@@ -707,10 +766,74 @@ IIS, you may need to match the server's path aliases.</p>
 </example>
 </defun>
 
+<defun title="&lt;redeploy-check-interval>">
+<parents>web-app</parents>
+
+<p>&lt;redeploy-check-interval> specifies how often Resin should
+check if a .war file has been updated or added to a
+&lt;web-app-deploy> directory.</p>
+
+<default>60s</default>
+</defun>
+
+<defun title="&lt;redeploy-mode>">
+<parents>web-app</parents>
+
+<p>&lt;redeploy-mode> specifies how Resin handles updates to
+web-apps and .war files.  By default, Resin restarts web-apps when
+classes or configuration files change.</p>
+
+<deftable>
+<tr>
+  <th>mode</th>
+  <th>description</th>
+</tr>
+<tr>
+  <th>automatic</th>
+  <td>checks for redeployment and auto-redeploy if modified </td>
+</tr>
+<tr>
+  <th>manual</th>
+  <td>does not check for redeployment.  Only checks if manual (JMX) </td>
+</tr>
+</deftable>
+
+</defun>
+
 <defun title="&lt;resource-env-ref>" version="Servlet">
 </defun>
 
 <defun title="&lt;resource-ref>" version="Servlet">
+</defun>
+
+<defun title="&lt;rewrite-dispatch>" version="Resin 3.1">
+<parents>cluster, host, web-app</parents>
+
+<p>&lt;rewrite-dispatch&gt; defines a set of rewriting rules for
+dispatching and forwarding URLs.  Applications can use these rules
+to redirect old URLs to their new replacements.</p>
+
+<p>See <a href="rewrite-tags.xtp">rewrite-dispatch</a> for more
+details.</p>
+
+<example title="Mediawiki dispatch in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+ &lt;rewrite-dispatch>
+   &lt;dispatch regexp="\.(php|gif|css|jpg|png)"/>
+   &lt;forward regexp="^" target="/index.php"/>
+ &lt;/rewrite-dispatch>
+
+&lt;/web-app>
+</example>
+
+</defun>
+
+<defun title="&lt;secure>">
+<parents>web-app</parents>
+
+<p>The &lt;secure> flag requires that the web-app only be accessed
+in a secure/SSL mode.  Equivalent to a &lt;security-constraint>.</p>
 </defun>
 
 <defun title="&lt;security-constraint>" version="Servlet">

@@ -293,13 +293,13 @@ serve the URL <var>http://www.foo.com/bar/test.jsp</var>.</p>
 </defun>
 
 <defun title="&lt;rewrite-dispatch>" version="Resin 3.1">
-<parents>cluster, host</parents>
+<parents>cluster, host, web-app</parents>
 
 <p>&lt;rewrite-dispatch&gt; defines a set of rewriting rules for
 dispatching and forwarding URLs.  Applications can use these rules
 to redirect old URLs to their new replacements.</p>
 
-<p>See <a href="rewrite-dispatch.xtp">rewrite-dispatch</a> for more
+<p>See <a href="rewrite-tags.xtp">rewrite-dispatch</a> for more
 details.</p>
 
 <example title="rewrite-dispatch">

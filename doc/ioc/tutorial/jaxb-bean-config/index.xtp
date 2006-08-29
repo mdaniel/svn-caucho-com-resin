@@ -8,7 +8,7 @@
 Resin's configuration integrates JAXB-style bean configuration.
       </p>
     </description>
-    <tutorial-startpage>/test</tutorial-startpage>
+    <tutorial-startpage>test</tutorial-startpage>
   </header>
 
   <body>
@@ -31,7 +31,9 @@ like the resin-web.xml.</p>
 <tr><td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
     <td>Configures the bean with JAXB init</td></tr>
 <tr><td><viewfile-link file="WEB-INF/classes/example/Theater.java"/></td>
-   <td>Sample resource</td></tr>
+   <td>Theater model</td></tr>
+<tr><td><viewfile-link file="WEB-INF/classes/example/Movie.java"/></td>
+   <td>Movie model</td></tr>
 <tr><td><viewfile-link file="WEB-INF/classes/example/TestServlet.java"/></td>
     <td>The servlet implementation.</td></tr>
 </deftable>
@@ -39,7 +41,7 @@ like the resin-web.xml.</p>
 
 <s1 title="Configuration">
 
-<p>The <a href="config|env-tags.xtp#bean">&lt;bean&gt;</a> configuration
+<p>The <a href="config|env-tags.xtp#%3Cbean%3E">&lt;bean&gt;</a> configuration
 sets the movies and theater name.</p>
 
 <example title="WEB-INF/resin-web.xml">
@@ -93,16 +95,28 @@ public class Theater
 
   @XmlElement(name="movie")
   private ArrayList&lt;Movie> _movieList = new ArrayList&lt;Movie>();
+}
+</example>
 
-  @XmlRootElement
-  public static class Movie
-  {
-    @XmlElement(name="title")
-    private String _title;
+</s1>
+
+<s1 title="Movie">
+
+<example title="WEB-INF/classes/example/Movie.java">
+package example;
+
+import java.util.*;
+
+import javax.xml.bind.annotation.*;
+
+@XmlRootElement
+public class Movie
+{
+  @XmlElement(name="title")
+  private String _title;
     
-    @XmlElement(name="star")
-    private ArrayList&lt;String> _starList = new ArrayList&lt;String>();
-  }
+  @XmlElement(name="star")
+  private ArrayList&lt;String> _starList = new ArrayList&lt;String>();
 }
 </example>
 
