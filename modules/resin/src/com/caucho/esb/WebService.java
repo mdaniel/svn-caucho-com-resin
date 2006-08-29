@@ -36,7 +36,9 @@ import java.util.logging.Logger;
 import com.caucho.config.types.InitProgram;
 import com.caucho.esb.encoding.ServiceEncoding;
 import com.caucho.esb.encoding.ServiceEncodingConfig;
+import com.caucho.naming.Jndi;
 import com.caucho.server.webapp.WebApp;
+import com.caucho.util.CauchoSystem;
 
 /**
  * A Web Service entry in web.xml (Caucho-specific)
@@ -45,12 +47,13 @@ public class WebService {
   private static final Logger log 
     = Logger.getLogger(WebService.class.getName());
 
-  private WebApp _webApp;
-  private String _serviceClass;
   private ArrayList<ServiceEncoding> _encodings
     = new ArrayList<ServiceEncoding>();
   private InitProgram _init;
   private Object _service;
+  private String _serviceClass;
+  private String _jndiName;
+  private WebApp _webApp;
 
   /**
    * Creates a new web service object.
@@ -63,6 +66,11 @@ public class WebService {
   public WebApp getWebApp()
   {
     return _webApp;
+  }
+
+  public void setJndiName(String jndiName)
+  {
+    _jndiName = jndiName;
   }
 
   public void setClass(String serviceClass)
@@ -82,15 +90,16 @@ public class WebService {
 
   public void addEncoding(ServiceEncoding encoding)
   {
-    log.info("added encoding " + encoding);
     _encodings.add(encoding);
   }
 
   public void init()
     throws Throwable
   {
-    for (ServiceEncoding encoding : _encodings)
+    for (ServiceEncoding encoding : _encodings) {
       encoding.setService(getServiceInstance());
+      encoding.init();
+    }
   }
 
   Object getServiceInstance()
@@ -102,24 +111,16 @@ public class WebService {
     if (_serviceClass == null)
       return null;
 
-    Class cl = loadClass(_serviceClass);
+    Class cl = CauchoSystem.loadClass(_serviceClass, false, null);
 
     if (_init != null)
       _service = _init.create(cl);
     else
       _service = cl.newInstance();
 
+    if (_jndiName != null)
+      Jndi.bindDeepShort(_jndiName, _service);
+
     return _service;
-  }
-
-  Class loadClass(String className)
-    throws ClassNotFoundException
-  {
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
-    if (loader != null)
-      return Class.forName(className, false, loader);
-    else
-      return Class.forName(className);
   }
 }

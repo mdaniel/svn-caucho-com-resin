@@ -77,6 +77,11 @@ public class SoapEncoding implements ServiceEncoding {
     _class = cl;
   }
 
+  public void init()
+    throws Throwable
+  {
+  }
+
   public void invoke(InputStream is, OutputStream os)
   {
     WriteStream ws = new WriteStream(new VfsStream(null, os));

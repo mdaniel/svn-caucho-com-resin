@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import com.caucho.esb.WebService;
 
@@ -173,13 +174,16 @@ public class HessianEncoding implements ServiceEncoding {
 
       out.setSerializerFactory(serializerFactory);
 
+      if (_skeleton == null)
+        throw new Exception("skeleton is null!");
+
       _skeleton.invoke(in, out);
 
       out.close();
     } catch (IOException e) {
-      log.warning("Unable to process request: " + e);
+      log.log(Level.INFO, "Unable to process request: ", e);
     } catch (Throwable e) {
-      log.warning("Unable to process request: " + e);
+      log.log(Level.INFO, "Unable to process request: ", e);
     }
   }
 }

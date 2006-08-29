@@ -50,6 +50,7 @@ import javax.servlet.http.HttpSessionListener;
 import javax.servlet.jsp.JspApplicationContext;
 
 import com.caucho.esb.WebService;
+import com.caucho.esb.client.WebServiceClient;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
@@ -768,6 +769,14 @@ public class WebApp extends ServletContextImpl
     WebService webService = new WebService(this);
 
     return webService;
+  }
+
+  /**
+   * Adds a web service client.
+   */
+  public WebServiceClient createWebServiceClient()
+  {
+    return new WebServiceClient();
   }
 
   /**

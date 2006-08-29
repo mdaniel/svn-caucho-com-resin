@@ -43,4 +43,6 @@ public interface ServiceEncoding {
   public void setService(Object service);
 
   public void setWebService(WebService webService);
+
+  public void init() throws Throwable;
 }

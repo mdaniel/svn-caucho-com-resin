@@ -47,11 +47,9 @@ import com.caucho.server.webapp.ServletContextImpl;
 import com.caucho.util.NullOutputStream;
 
 public class HttpTransport extends ServletMapping implements ServiceTransport {
-  private static final String SEND_RESPONSE = "send-response";
   private static final String SERVICE_ENCODING = "service-encoding";
   private ServiceEncoding _encoding;
   private WebService _webService;
-  private boolean _sendResponse = true;
 
   public HttpTransport()
     throws ServletException
@@ -69,11 +67,6 @@ public class HttpTransport extends ServletMapping implements ServiceTransport {
     _encoding = encoding;
   }
 
-  public void setSendResponse(boolean sendResponse)
-  {
-    _sendResponse = sendResponse;
-  }
-
   public ServletContext getServletContext()
   {
     ServletContext context = super.getServletContext();
@@ -82,7 +75,6 @@ public class HttpTransport extends ServletMapping implements ServiceTransport {
       context = new ServletContextImpl();
 
     context.setAttribute(SERVICE_ENCODING, _encoding);
-    context.setAttribute(SEND_RESPONSE, _sendResponse);
 
     return context;
   }
@@ -100,21 +92,8 @@ public class HttpTransport extends ServletMapping implements ServiceTransport {
       ServiceEncoding encoding = 
         (ServiceEncoding) getServletContext().getAttribute(SERVICE_ENCODING);
 
-      boolean sendResponse = 
-        (Boolean) getServletContext().getAttribute(SEND_RESPONSE);
-
-      if (encoding != null) {
-        OutputStream out;
-
-        if (sendResponse) 
-          out = response.getOutputStream();
-        else
-          out = new NullOutputStream();
-
-        encoding.invoke(request.getInputStream(), out);
-
-        out.flush();
-      }
+      if (encoding != null)
+        encoding.invoke(request.getInputStream(), response.getOutputStream());
     }
   }
 }

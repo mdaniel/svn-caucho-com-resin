@@ -27,18 +27,49 @@
  * @author Emil Ong
  */
 
-package com.caucho.esb.transport;
+package com.caucho.esb.client;
 
-import com.caucho.esb.WebService;
-import com.caucho.esb.encoding.ServiceEncoding;
+import java.util.ArrayList;
+
+import java.util.logging.Logger;
+
+import com.caucho.config.ConfigException;
+import com.caucho.naming.Jndi;
 
 /**
- * An transport for a (web) service.
  */
-public interface ServiceTransport {
-  public void setEncoding(ServiceEncoding encoding);
+public class WebServiceClient {
+  private static final Logger log 
+    = Logger.getLogger(WebServiceClient.class.getName());
 
-  public void setWebService(WebService webService);
+  private Class _serviceClass;
+  private String _jndiName;
+  private String _url;
 
-  public void init() throws Throwable;
+  public void setJndiName(String jndiName)
+  {
+    _jndiName = jndiName;
+  }
+
+  public void setInterface(Class serviceClass)
+  {
+    _serviceClass = serviceClass;
+  }
+
+  public void setUrl(String url)
+  {
+    _url = url;
+  }
+
+  public void init()
+    throws Throwable
+  {
+    if (_jndiName == null)
+      throw new ConfigException("jndi-name not set for <web-service-client>");
+
+    Object proxy = ProxyManager.getWebServiceProxy(_serviceClass, _url);
+
+    Jndi.bindDeepShort(_jndiName, proxy);
+  }
 }
+

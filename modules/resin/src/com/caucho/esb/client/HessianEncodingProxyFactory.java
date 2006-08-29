@@ -27,18 +27,29 @@
  * @author Emil Ong
  */
 
-package com.caucho.esb.transport;
+package com.caucho.esb.client;
 
-import com.caucho.esb.WebService;
-import com.caucho.esb.encoding.ServiceEncoding;
+import java.net.MalformedURLException;
 
-/**
- * An transport for a (web) service.
- */
-public interface ServiceTransport {
-  public void setEncoding(ServiceEncoding encoding);
+import com.caucho.hessian.client.HessianProxyFactory;
 
-  public void setWebService(WebService webService);
+public class HessianEncodingProxyFactory implements EncodingProxyFactory {
+  private static HessianProxyFactory _proxyFactory;
 
-  public void init() throws Throwable;
+  public Object getProxy(Class serviceInterface, String url)
+    throws MalformedURLException
+  {
+    // XXX Go through com.caucho.esb.transport.TransportFactory?
+    HessianProxyFactory proxyFactory = getProxyFactory();
+
+    return proxyFactory.create(serviceInterface, url);
+  }
+
+  private static HessianProxyFactory getProxyFactory()
+  {
+    if (_proxyFactory == null)
+      _proxyFactory = new HessianProxyFactory();
+
+    return _proxyFactory;
+  }
 }

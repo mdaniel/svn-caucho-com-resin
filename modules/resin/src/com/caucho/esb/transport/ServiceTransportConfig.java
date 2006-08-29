@@ -62,11 +62,6 @@ public class ServiceTransportConfig {
     _transport.setWebService(_webService);
   }
 
-  public void setSendResponse(boolean sendResponse)
-  {
-    _transport.setSendResponse(sendResponse);
-  }
-
   public void addBuilderProgram(BuilderProgram program)
     throws Throwable
   {

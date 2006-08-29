@@ -27,18 +27,16 @@
  * @author Emil Ong
  */
 
-package com.caucho.esb.transport;
+package com.caucho.esb.client;
 
-import com.caucho.esb.WebService;
-import com.caucho.esb.encoding.ServiceEncoding;
+import java.net.MalformedURLException;
 
-/**
- * An transport for a (web) service.
- */
-public interface ServiceTransport {
-  public void setEncoding(ServiceEncoding encoding);
+import com.caucho.naming.Jndi;
 
-  public void setWebService(WebService webService);
-
-  public void init() throws Throwable;
+public class VMEncodingProxyFactory implements EncodingProxyFactory {
+  public Object getProxy(Class serviceInterface, String url)
+    throws MalformedURLException
+  {
+    return serviceInterface.cast(Jndi.lookup(url));
+  }
 }
