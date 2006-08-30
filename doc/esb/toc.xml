@@ -1,0 +1,5 @@
+<navigation threaded="true" section="Resin : ESB : " comment="true">
+  <item title="Enterprise Service Bus" link="index.xtp">
+    <item title='Tutorials' link="tutorial/index.xtp" atoc-descend='1'/>
+  </item>
+</navigation>

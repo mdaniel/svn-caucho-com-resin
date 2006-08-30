@@ -1,0 +1,16 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Enterprise Service Bus</title>
+    <type>contents</type>
+    <description>
+        <p>Resin's Enterprise Service Bus (ESB) makes services available
+        through many different protocols such as SOAP and Hessian.
+        </p>
+    </description>
+  </header>
+
+  <body>
+    <summary/>
+  </body>
+</document>
