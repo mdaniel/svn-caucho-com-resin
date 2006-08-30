@@ -11,6 +11,74 @@
 
   <body>
     <summary/>
+
+<section title="Overview">
+
+<p>Implementing PHP in Java brings benefits to both PHP users and pure
+Java users.  And developers who are clever enough to use PHP in combination
+with Java will gain the most.</p>
+
+<section title="PHP Users">
+
+<p>PHP developers will gain from using Quercus, even if they have no
+intention of writing Java code.  Because Quercus is written for Resin,
+a Java application server, it gains all the advantages of Java applications
+including:</p>
+
+<ul>
+<li>Security: since Quercus and its modules are entirely in Java, C
+pointer overruns and segmentation violations are no longer possible.</li>
+<li>Scalability: PHP programs can take advantage of
+<a href="http://caucho.com/articles/php-sessions.pdf">distributed
+sessions in PHP</a> and <a href="../config/balance.xtp">load balancing</a>.</li>
+<li>Performance: Quercus outperforms a straight mod_php implementation
+by about 4x (for Mediawiki and Drupal).  Quercus roughly matches
+PHP performance with accelerators like APC.</li>
+<li>Caching: PHP applications using Quercus can immediately take
+advantage of Resin's <a href="../performance/caching.xtp">proxy caching</a>.
+They can also use the PHP APC caching API since the APC functions are
+included with Quercus.</li>
+<li>Connection pooling, transactions, JMS: PHP programs using Quercus
+automatically take advantage of Resin's connection pooling, and can
+use the full distributation transactions, and Java capabilities like JMS.</li>
+<li>Java tools: PHP developers can use Java tools like profilers to
+get in-depth information about the PHP program performance.</li>
+</ul>
+
+</section>
+
+<section title="Java Users">
+
+<ul>
+<li>Java developers can use Quercus immediately to deploy PHP applications
+such as MediaWiki, Drupal, Wordpress, Gallery2 and DocuWiki.</li>
+<li>Since Resin's administration uses PHP to script JMX beans, Resin
+users can customize the administration views of the JMX management.</li>
+</ul>
+
+</section>
+
+<section title="New Java/PHP Architecture">
+
+<p>Although PHP users and Java users can take advantage of Quercus
+immediately without modifying their application, the real benefits
+come from developing mixed Java/PHP applications:</p>
+
+<ul>
+<li>PHP libraries written in Java are fast, safe, and relatively
+easy to develop, compared with C libraries.  Since Java is the library
+language, developers won't need to be paranoid about third-party libraries
+having C-memory problems or segvs.</li>
+<li>PHP applications can take advantage of Java libraries and capabilities
+like JMS, SOA frameworks, Hibernate, or Spring.  (Or EJB if you really wanted.)</li>
+<li>Java application can move presentation code to PHP, leaving behind
+templating systems, or languages with small libraries, and taking advantage
+of PHP flexibility and capability.</li>
+</ul>
+
+</section>
+
+</section>
   </body>
 </document>
 
