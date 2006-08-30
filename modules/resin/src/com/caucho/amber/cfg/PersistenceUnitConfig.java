@@ -30,6 +30,7 @@
 package com.caucho.amber.cfg;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import javax.sql.DataSource;
 
@@ -129,11 +130,21 @@ public class PersistenceUnitConfig {
   }
 
   /**
-   * Adds a configured class.
+   * Adds a list of configured classes.
    */
   public void addAllClasses(ArrayList<String> classList)
   {
-    _classList.addAll(classList);
+    Iterator it = classList.iterator();
+
+    String className;
+
+    while(it.hasNext()) {
+
+      className = (String) it.next();
+
+      if (! _classList.contains(className))
+        _classList.add(className);
+    }
   }
 
   /**
