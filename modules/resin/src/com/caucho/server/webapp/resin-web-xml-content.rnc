@@ -182,27 +182,13 @@ r_form-login-config = element form-login-config {
    | element form-uri-priority { r_boolean-Type })?
 }
 
-r_hessian-encoding = element encoding {
-  attribute type { "hessian" }
-  & r_service-transport*
-  & element api { r_string-Group }?
+r_hessian-encoding = element hessian {
+  r_service-transport*
+  & element api-class { r_string-Group }?
 }
 
-r_http-transport = element transport {
-  attribute type { "http" }
-
-  & attribute id { string }?
-
-  & (r_servlet-name 
-
-    | (r_servlet-name?
-
-       & (attribute servlet-class { string }
-          | element servlet-class { string }
-          | attribute jsp-file { string }
-          | element jsp-file { string })
-
-       & r_servlet-Content))
+r_http-transport = element http {
+  attribute id { string }?
 
   & (r_url-pattern | r_url-regexp)
 }
@@ -221,9 +207,8 @@ r_jdbc-store = element jdbc-store {
      | element max-idle-time { r_period })?
 }
 
-r_jms-transport = element transport {
-  attribute type { "jms" }
-  & attribute connection-factory { r_object-Type }?
+r_jms-transport = element jms {
+  attribute connection-factory { r_object-Type }?
   & (element queue { r_string-Group }
      | element topic { r_string-Group })
 }
@@ -658,8 +643,7 @@ r_shutdown-wait-max =
   | element shutdown-wait-max { r_period }
 
 r_soap-encoding = element soap {
-  attribute type { "soap" }
-  & r_service-transport*
+  r_service-transport*
   & element interface { r_string-Group }?
 }
 
@@ -867,6 +851,8 @@ r_web-app-Basis =
 
   & r_web-service*
 
+  & r_web-service-client*
+
   & r_welcome-file-list?
 
 ## web-app allowed tags, including flow control
@@ -921,6 +907,12 @@ r_web-resource-collection = element web-resource-collection {
   r_url-pattern*,
 
   r_http-method*
+}
+
+r_web-service-client = element web-service-client {
+  attribute jndi-name { string }
+  & element url { string }
+  & element interface { string }
 }
 
 r_web-service = element web-service {

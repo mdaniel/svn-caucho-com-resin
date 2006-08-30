@@ -69,12 +69,28 @@ public class ServiceEncodingConfig {
     _encoding.setWebService(_webService);
   }
 
-  public ServiceTransportConfig createTransport()
+  public ServiceTransportConfig createHttp()
+    throws Throwable
   {
-    return new ServiceTransportConfig(_webService);
+    ServiceTransportConfig config = new ServiceTransportConfig(_webService);
+    config.setType("http");
+    return config;
   }
 
-  public void addTransport(ServiceTransport transport)
+  public void addHttp(ServiceTransport transport)
+  {
+    transport.setEncoding(_encoding);
+  }
+
+  public ServiceTransportConfig createJms()
+    throws Throwable
+  {
+    ServiceTransportConfig config = new ServiceTransportConfig(_webService);
+    config.setType("jms");
+    return config;
+  }
+
+  public void addJms(ServiceTransport transport)
   {
     transport.setEncoding(_encoding);
   }

@@ -79,7 +79,7 @@ public class HessianEncoding implements ServiceEncoding {
   /**
    * Sets the api-class.
    */
-  public void setAPIClass(Class serviceAPI)
+  public void setApiClass(Class serviceAPI)
   {
     _serviceAPI = serviceAPI;
   }
@@ -87,7 +87,7 @@ public class HessianEncoding implements ServiceEncoding {
   /**
    * Gets the api-class.
    */
-  public Class getAPIClass()
+  public Class getApiClass()
   {
     return _serviceAPI;
   }

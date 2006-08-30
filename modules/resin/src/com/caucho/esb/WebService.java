@@ -83,12 +83,28 @@ public class WebService {
     _init = init;
   }
 
-  public ServiceEncodingConfig createEncoding()
+  public ServiceEncodingConfig createSoap()
+    throws Throwable
   {
-    return new ServiceEncodingConfig(this);
+    ServiceEncodingConfig config = new ServiceEncodingConfig(this);
+    config.setType("soap");
+    return config;
   }
 
-  public void addEncoding(ServiceEncoding encoding)
+  public void addSoap(ServiceEncoding encoding)
+  {
+    _encodings.add(encoding);
+  }
+
+  public ServiceEncodingConfig createHessian()
+    throws Throwable
+  {
+    ServiceEncodingConfig config = new ServiceEncodingConfig(this);
+    config.setType("hessian");
+    return config;
+  }
+
+  public void addHessian(ServiceEncoding encoding)
   {
     _encodings.add(encoding);
   }
