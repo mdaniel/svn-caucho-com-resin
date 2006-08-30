@@ -71,8 +71,11 @@ public class DependentEntityOneToOneExpr extends AbstractPathExpr {
    */
   public AmberExpr bindSelect(QueryParser parser)
   {
-    if (_fromItem == null)
-      _fromItem = _parent.bindSubPath(parser);
+    // commented out: jpa/10b1
+    // if (_fromItem == null)
+    //   _fromItem = _parent.bindSubPath(parser);
+
+    _fromItem = bindSubPath(parser);
 
     return this;
   }
@@ -105,14 +108,14 @@ public class DependentEntityOneToOneExpr extends AbstractPathExpr {
 
     _fromItem = _parent.bindSubPath(parser);
 
-    // added: jpa/0ti0
+    // added: jpa/10b0
     _childFromItem = parser.getSelectQuery().createFromItem(_linkColumns.getSourceTable(),
                                                             parser.createTableName());
 
-    // commented out: jpa/0ti0
+    // commented out: jpa/10b0
     // if (_fromItem != null) {
-    //   _childFromItem = _fromItem.getQuery().createFromItem(_linkColumns.getSourceTable(),
-    //                                                         parser.createTableName());
+    //  _childFromItem = _fromItem.getQuery().createFromItem(_linkColumns.getSourceTable(),
+    //                                                       parser.createTableName());
     // } else {
     //   _childFromItem = parser.getSelectQuery().createFromItem(_linkColumns.getSourceTable(),
     //                                                           parser.createTableName());
@@ -162,6 +165,21 @@ public class DependentEntityOneToOneExpr extends AbstractPathExpr {
     }
     else {
       cb.append(_linkColumns.generateMatchArgSQL(_parent.getChildFromItem().getName()));
+    }
+  }
+
+  /**
+   * Generates the where expression.
+   */
+  public void generateWhere(CharBuffer cb)
+  {
+    if (_fromItem != null) {
+      cb.append(_fromItem.getName());
+      cb.append('.');
+      cb.append(_linkColumns.getColumns().get(0).getName());
+    }
+    else {
+      super.generateWhere(cb);
     }
   }
 

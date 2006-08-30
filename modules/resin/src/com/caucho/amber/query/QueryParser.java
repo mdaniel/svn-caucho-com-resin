@@ -203,7 +203,7 @@ public class QueryParser {
 
   private boolean _isJoinFetch = false;
 
-  // Parsing control variable, jpa/0tt4 (TRIM FROM)
+  // Parsing control variable, jpa/0tp4 (TRIM FROM)
   // SELECT .._depth=0.. TRIM(.._depth=1.. 'a' FROM o.d1) .._depth=0 FROM ...
   private int _depth = 0;
 
@@ -534,7 +534,9 @@ public class QueryParser {
     if (token == WHERE) {
       scanToken();
 
-      query.setWhere(parseExpr().createBoolean().bindSelect(this));
+      AmberExpr expr = parseExpr().createBoolean();
+
+      query.setWhere(expr.bindSelect(this));
     }
 
     boolean hasGroupBy = false;

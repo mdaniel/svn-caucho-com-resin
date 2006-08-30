@@ -197,6 +197,21 @@ public class ManyToOneExpr extends AbstractPathExpr {
   }
 
   /**
+   * Generates the where expression.
+   */
+  public void generateWhere(CharBuffer cb)
+  {
+    if (_fromItem != null) {
+      cb.append(_fromItem.getName());
+      cb.append('.');
+      cb.append(_linkColumns.getColumns().get(0).getName());
+    }
+    else {
+      super.generateWhere(cb);
+    }
+  }
+
+  /**
    * Generates the select expression.
    */
   // ejb/06q4
