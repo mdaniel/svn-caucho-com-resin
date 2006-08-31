@@ -1527,6 +1527,17 @@ public class QuercusParser {
       int token = parseToken();
       boolean isReference = false;
 
+      // php/076b
+      // XXX: save arg type for type checking upon function call
+      String expectedClass = null;
+      if (token != ')' &&
+          token != '&' &&
+          token != '$') {
+        _peekToken = token;
+        expectedClass = parseIdentifier();
+        token = parseToken();
+      }
+
       if (token == '&') {
 	isReference = true;
 	token = parseToken();
@@ -4024,12 +4035,14 @@ public class QuercusParser {
     while (true) {
       Expr tail;
 
-      if (token == COMPLEX_STRING_ESCAPE) {
+      if (token == COMPLEX_STRING_ESCAPE ||
+          token == COMPLEX_BINARY_ESCAPE) {
 	tail = parseExpr();
 
 	expect('}');
       }
-      else if (token == SIMPLE_STRING_ESCAPE) {
+      else if (token == SIMPLE_STRING_ESCAPE ||
+                token == COMPLEX_BINARY_ESCAPE) {
 	int ch = read();
 	
 	_sb.setLength(0);
