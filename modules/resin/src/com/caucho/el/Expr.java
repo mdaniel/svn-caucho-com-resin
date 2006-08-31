@@ -240,10 +240,10 @@ public abstract class Expr extends ValueExpression {
    *
    * @return the value of the expression as a string
    */
-  public String evalStringNonNull(ELContext env)
+  public String evalStringWithNull(ELContext env)
     throws ELException
   {
-    return toStringNonNull(getValue(env), env);
+    return toStringWithNull(getValue(env), env);
   }
 
   /**
@@ -459,7 +459,7 @@ public abstract class Expr extends ValueExpression {
    *
    * @return the string-converted value.
    */
-  public static String toString(Object value, ELContext env)
+  public static String toStringWithNull(Object value, ELContext env)
   {
     if (value == null || value instanceof String)
       return (String) value;
@@ -474,7 +474,7 @@ public abstract class Expr extends ValueExpression {
    *
    * @return the string-converted value.
    */
-  public static String toStringNonNull(Object value, ELContext env)
+  public static String toString(Object value, ELContext env)
   {
     if (value == null)
       return "";
@@ -491,7 +491,7 @@ public abstract class Expr extends ValueExpression {
    *
    * @return the string-converted value.
    */
-  public static String toStringNonNull(long value, ELContext env)
+  public static String toString(long value, ELContext env)
   {
     return String.valueOf(value);
   }
@@ -503,7 +503,7 @@ public abstract class Expr extends ValueExpression {
    *
    * @return the string-converted value.
    */
-  public static String toStringNonNull(double value, ELContext env)
+  public static String toString(double value, ELContext env)
   {
     return String.valueOf(value);
   }
@@ -515,7 +515,7 @@ public abstract class Expr extends ValueExpression {
    *
    * @return the string-converted value.
    */
-  public static String toStringNonNull(boolean value, ELContext env)
+  public static String toString(boolean value, ELContext env)
   {
     return String.valueOf(value);
   }
@@ -527,7 +527,7 @@ public abstract class Expr extends ValueExpression {
    *
    * @return the string-converted value.
    */
-  public static String toStringNonNull(char value, ELContext env)
+  public static String toString(char value, ELContext env)
   {
     return String.valueOf(value);
   }
@@ -544,23 +544,23 @@ public abstract class Expr extends ValueExpression {
   {
     if (value == null)
       return (char) 0;
-    else if (value instanceof Number) {
-      Number number = (Number) value;
-
-      return (char) number.intValue();
-    }
     else if (value instanceof Character) {
       return ((Character) value).charValue();
     }
     else if (value instanceof String) {
-      String s = toString(value, env);
+      String s = (String) value;
 
       if (s == null || s.length() == 0)
 	return (char) 0;
       else
 	return s.charAt(0);
     }
-    else {
+    else if (value instanceof Number) {
+      Number number = (Number) value;
+
+      return (char) number.intValue();
+    }
+    else if (value instanceof Boolean) {
       ELException e = new ELException(L.l("can't convert {0} to character.",
                                           value.getClass().getName()));
 
@@ -571,6 +571,8 @@ public abstract class Expr extends ValueExpression {
       return (char) 0;
       */
     }
+    else
+      return (char) toLong(value, env);
   }
 
   /**
@@ -739,48 +741,11 @@ public abstract class Expr extends ValueExpression {
     else if (value.equals(""))
       return 0;
     else if (value instanceof String) {
-      int sign = 1;
-      String string = (String) value;
-      int length = string.length();
-      long intValue = 0;
-
-      int i = 0;
-      for (; i < length && Character.isWhitespace(string.charAt(i)); i++) {
+      try {
+	return (long) Double.parseDouble((String) value);
+      } catch (Exception e) {
+	throw new ELException(e);
       }
-      
-      if (length <= i)
-        return 0;
-
-      int ch = string.charAt(i);
-      if (ch == '-') {
-        sign = -1;
-        i++;
-      }
-      else if (ch == '+')
-        i++;
-
-      for (; i < length; i++) {
-        ch = string.charAt(i);
-
-        if (ch >= '0' && ch <= '9')
-          intValue = 10 * intValue + ch - '0';
-        else
-          break;
-      }
-
-      for (; i < length && Character.isWhitespace(string.charAt(i)); i++) {
-      }
-      
-      if (i < length) {
-        ELException e = new ELException(L.l("can't convert '{0}' to long.",
-					    string));
-      
-        // error(e, env);
-
-	throw e;
-      }
-      
-      return sign * intValue;
     }
     else if (value instanceof Character) {
       // jsp/18s6
@@ -1192,14 +1157,15 @@ public abstract class Expr extends ValueExpression {
       // jsp/1b56
       throw new ELException(e);
     }
-    else if (env instanceof ExprEnv && ! ((ExprEnv) env).isIgnoreException()) {
-      throw new ELException(e);
-    }
-    else {
+    else if (env instanceof ExprEnv && ((ExprEnv) env).isIgnoreException()) {
       log.log(Level.FINE, e.toString(), e);
 
       return null;
     }
+    else if (e instanceof RuntimeException)
+      throw (RuntimeException) e;
+    else
+      throw new ELException(e);
   }
 
   public int hashCode()

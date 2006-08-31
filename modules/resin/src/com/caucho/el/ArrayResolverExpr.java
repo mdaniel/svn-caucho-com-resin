@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -134,11 +135,14 @@ public class ArrayResolverExpr extends Expr {
     Object aObj = _left.getValue(env);
 
     if (aObj == null)
-      return;
+      throw new PropertyNotFoundException(L.l("'{0}' is null in '{1}'",
+					      _left.toString(), toString()));
+					      
 
     Object fieldObj = _right.getValue(env);
     if (fieldObj == null)
-      return;
+      throw new PropertyNotFoundException(L.l("'{0}' is null in '{1}'",
+					      _right.toString(), toString()));
 
     env.getELResolver().setValue(env, aObj, fieldObj, value);
   }

@@ -29,6 +29,7 @@
 
 package com.caucho.jsp.el;
 
+import java.math.*;
 import java.util.*;
 
 import javax.el.*;
@@ -71,8 +72,38 @@ public class JspExpressionFactoryImpl extends  ExpressionFactory {
     JspELParser parser = new JspELParser(context, expression);
 
     Expr expr = parser.parse();
-    
-    return new ObjectValueExpression(expr, expression);
+
+    return createValueExpression(expr, expression, expectedType);
+  }
+
+  public static ValueExpression createValueExpression(Expr expr,
+						      String expression,
+						      Class<?> expectedType)
+  {
+    if (String.class == expectedType)
+      return new StringValueExpression(expr, expression);
+    else if (Integer.class == expectedType || int.class == expectedType)
+      return new IntegerValueExpression(expr, expression);
+    else if (Double.class == expectedType || double.class == expectedType)
+      return new DoubleValueExpression(expr, expression);
+    else if (Long.class == expectedType || long.class == expectedType)
+      return new LongValueExpression(expr, expression);
+    else if (Float.class == expectedType || float.class == expectedType)
+      return new FloatValueExpression(expr, expression);
+    else if (Short.class == expectedType || short.class == expectedType)
+      return new ShortValueExpression(expr, expression);
+    else if (Byte.class == expectedType || byte.class == expectedType)
+      return new ByteValueExpression(expr, expression);
+    else if (BigDecimal.class == expectedType)
+      return new BigDecimalValueExpression(expr, expression);
+    else if (BigInteger.class == expectedType)
+      return new BigIntegerValueExpression(expr, expression);
+    else if (Boolean.class == expectedType)
+      return new BooleanValueExpression(expr, expression);
+    else if (Character.class == expectedType || char.class == expectedType)
+      return new CharacterValueExpression(expr, expression);
+    else
+      return new ObjectValueExpression(expr, expression);
   }
 
   public ValueExpression

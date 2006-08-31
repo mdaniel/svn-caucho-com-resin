@@ -423,6 +423,14 @@ r_rewrite-dispatch = element rewrite-dispatch {
         | element regexp { string })
      }*
 
+   & element load-balance {
+       (attribute regexp { string }
+        | element regexp { string })
+
+       & (attribute cluster { string }
+          | element cluster { string })
+     }*
+
    & element moved-permanently {
        (attribute regexp { string }
         | element regexp { string })

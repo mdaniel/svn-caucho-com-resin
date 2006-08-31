@@ -54,7 +54,7 @@ public class BinaryExpr extends Expr {
    * @param left the left subexpression
    * @param right the right subexpression
    */
-  public BinaryExpr(int op, Expr left, Expr right)
+  private BinaryExpr(int op, Expr left, Expr right)
   {
     this._op = op;
     this._left = left;
@@ -66,9 +66,17 @@ public class BinaryExpr extends Expr {
     switch (op) {
     case ADD:
       return new AddExpr(left, right);
+    case SUB:
+      return new SubExpr(left, right);
+    case MUL:
+      return new MulExpr(left, right);
+    case DIV:
+      return new DivExpr(left, right);
+    case MOD:
+      return new ModExpr(left, right);
 
     default:
-      return new BinaryExpr(op, left, right);
+      throw new UnsupportedOperationException();
     }
   }
 

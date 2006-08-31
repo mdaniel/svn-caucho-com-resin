@@ -472,6 +472,10 @@ public class ThreadPool implements Runnable {
 	  isIdle = true;
 	  
 	  synchronized (_idleLock) {
+	    if (_minSpareThreads + SPARE_GAP < _idleCount) {
+	      return;
+	    }
+	      
 	    _next = _idleHead;
 	    _prev = null;
 	    _isIdle = true;

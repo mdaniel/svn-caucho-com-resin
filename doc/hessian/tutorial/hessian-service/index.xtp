@@ -22,15 +22,23 @@ will want to be independent of the Hessian protocol itself.</p>
 
 <s1 title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="WEB-INF/classes/example/MathService.java"/>
-    </td><td>Interface for the math service.
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/MathServiceImpl.java"/>
-    </td><td>The main service implementation.
-</td></tr><tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
-    </td><td>Configures the environment
-</td></tr><tr><td><viewfile-link file="demo.jsp"/>
-    </td><td>Client JSP
-</td></tr></deftable>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/MathService.java"/></td>
+  <td>Interface for the math service.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/MathServiceImpl.java"/></td>
+  <td>The main service implementation.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
+  <td>Configures the environment</td>
+</tr>
+<tr>
+  <td><viewfile-link file="demo.jsp"/></td>
+  <td>Client JSP</td>
+</tr>
+</deftable>
 </s1>
 
 <s1 title="Service Implementation">
@@ -74,6 +82,8 @@ public interface MathService {
 <s1 title="Service configuration">
 
 <example title="resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
   &lt;web-service class="example.MathServiceImpl">
     &lt;encoding type="hessian">
       &lt;api-class>example.MathService&lt;/api-class>
@@ -87,6 +97,8 @@ public interface MathService {
     &lt;url>hessian:http://localhost:8080/resin-doc/hessian/tutorial/hessian-service/math/&lt;/url>
     &lt;interface>example.MathService&lt;/interface>
   &lt;/web-service-client>
+
+&lt;/web-app>
 </example>
 
 </s1>

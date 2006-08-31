@@ -40,19 +40,19 @@ import javax.el.*;
 import com.caucho.vfs.*;
 
 /**
- * Represents a binary addition numeric operation
+ * Represents a binary multiplication numeric operation
  */
-public class AddExpr extends Expr {
+public class MulExpr extends Expr {
   private final Expr _left;
   private final Expr _right;
   
   /**
-   * Creates the addition expression.
+   * Creates the multiplication expression.
    *
-   * @param left the left subexpression
-   * @param right the right subexpression
+   * @param left the left sub-expression
+   * @param right the right sub-expression
    */
-  public AddExpr(Expr left, Expr right)
+  public MulExpr(Expr left, Expr right)
   {
     _left = left;
     _right = right;
@@ -85,19 +85,19 @@ public class AddExpr extends Expr {
       BigDecimal a = toBigDecimal(aObj, env);
       BigDecimal b = toBigDecimal(bObj, env);
       
-      return a.add(b);
+      return a.multiply(b);
     }
     else if (isDouble(aObj)) {
       if (bObj instanceof BigInteger) {
 	BigDecimal a = toBigDecimal(aObj, env);
 	BigDecimal b = toBigDecimal(bObj, env);
 
-	return a.add(b);
+	return a.multiply(b);
       }
       else {
 	double a = toDouble(aObj, env);
 	double b = toDouble(bObj, env);
-	double dValue = a + b;
+	double dValue = a * b;
 
 	return Double.isNaN(dValue) ? new Double(0) : new Double(dValue);
       }
@@ -107,12 +107,12 @@ public class AddExpr extends Expr {
 	BigDecimal a = toBigDecimal(aObj, env);
 	BigDecimal b = toBigDecimal(bObj, env);
 
-	return a.add(b);
+	return a.multiply(b);
       }
       else {
 	double a = toDouble(aObj, env);
 	double b = toDouble(bObj, env);
-	double dValue = a + b;
+	double dValue = a * b;
 
 	return Double.isNaN(dValue) ? new Double(0) : new Double(dValue);
       }
@@ -121,7 +121,7 @@ public class AddExpr extends Expr {
       BigInteger a = toBigInteger(aObj, env);
       BigInteger b = toBigInteger(bObj, env);
       
-      return a.add(b);
+      return a.multiply(b);
     }
 
     /*
@@ -132,7 +132,7 @@ public class AddExpr extends Expr {
     if (bObj instanceof Double || bObj instanceof Float) {
       double a = toDouble(aObj, env);
       double b = ((Number) bObj).doubleValue();
-      double dValue = a + b;
+      double dValue = a * b;
 
       return Double.isNaN(dValue) ? new Double(0) : new Double(dValue);
     }
@@ -140,26 +140,26 @@ public class AddExpr extends Expr {
       long a = ((Number) aObj).longValue();
       long b = toLong(bObj, env);
       
-      return new Long(a + b);
+      return new Long(a * b);
     }
     else if (bObj instanceof Number) {
       long a = toLong(aObj, env);
       long b = ((Number) bObj).longValue();
 
-      return new Long(a + b);
+      return new Long(a * b);
     }
 
     if (isDoubleString(aObj) || isDoubleString(bObj)) {
       double a = toDouble(aObj, env);
       double b = toDouble(bObj, env);
     
-      return new Double(a + b);
+      return new Double(a * b);
     }
     else {
       long a = toLong(aObj, env);
       long b = toLong(bObj, env);
 
-      return new Long(a + b);
+      return new Long(a * b);
     }
   }
   
@@ -177,7 +177,7 @@ public class AddExpr extends Expr {
     long a = _left.evalLong(env);
     long b = _right.evalLong(env);
 
-    return a + b;
+    return a * b;
   }
   
   /**
@@ -194,7 +194,7 @@ public class AddExpr extends Expr {
     double a = _left.evalDouble(env);
     double b = _right.evalDouble(env);
 
-    return a + b;
+    return a * b;
   }
 
   /**
@@ -206,7 +206,7 @@ public class AddExpr extends Expr {
   public void printCreate(WriteStream os)
     throws IOException
   {
-    os.print("new com.caucho.el.AddExpr(");
+    os.print("new com.caucho.el.MulExpr(");
     _left.printCreate(os);
     os.print(", ");
     _right.printCreate(os);
@@ -218,10 +218,10 @@ public class AddExpr extends Expr {
    */
   public boolean equals(Object o)
   {
-    if (! (o instanceof AddExpr))
+    if (! (o instanceof MulExpr))
       return false;
 
-    AddExpr expr = (AddExpr) o;
+    MulExpr expr = (MulExpr) o;
 
     return (_left.equals(expr._left) &&
             _right.equals(expr._right));

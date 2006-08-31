@@ -1039,7 +1039,7 @@ public class WebApp extends ServletContextImpl
   public RewriteInvocation createRewriteDispatch()
   {
     if (_rewriteInvocation == null)
-      _rewriteInvocation = new RewriteInvocation();
+      _rewriteInvocation = new RewriteInvocation(this);
 
     return _rewriteInvocation;
   }

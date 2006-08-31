@@ -38,9 +38,9 @@ import javax.el.*;
 import com.caucho.vfs.*;
 
 /**
- * Represents the numeric comparison operation: eq
+ * Represents the numeric comparison operation: ne
  */
-public class EqExpr extends AbstractBooleanExpr {
+public class NeExpr extends AbstractBooleanExpr {
   private final Expr _left;
   private final Expr _right;
 
@@ -51,7 +51,7 @@ public class EqExpr extends AbstractBooleanExpr {
    * @param left the left subexpression
    * @param right the right subexpression
    */
-  public EqExpr(Expr left, Expr right)
+  public NeExpr(Expr left, Expr right)
   {
     _left = left;
     _right = right;
@@ -79,10 +79,10 @@ public class EqExpr extends AbstractBooleanExpr {
     Object bObj = _right.getValue(env);
 
     if (aObj == bObj)
-      return true;
+      return false;
 
     if (aObj == null || bObj == null)
-      return false;
+      return true;
 
     Class aType = aObj.getClass();
     Class bType = bObj.getClass();
@@ -91,7 +91,7 @@ public class EqExpr extends AbstractBooleanExpr {
       BigDecimal a = toBigDecimal(aObj, env);
       BigDecimal b = toBigDecimal(bObj, env);
 
-      return a.equals(b);
+      return ! a.equals(b);
     }
 	
     if (aType == Double.class || aType == Float.class ||
@@ -99,28 +99,28 @@ public class EqExpr extends AbstractBooleanExpr {
       double a = toDouble(aObj, env);
       double b = toDouble(bObj, env);
 
-      return a == b;
+      return a != b;
     }
     
     if (aType == BigInteger.class || bType == BigInteger.class) {
       BigInteger a = toBigInteger(aObj, env);
       BigInteger b = toBigInteger(bObj, env);
 
-      return a.equals(b);
+      return ! a.equals(b);
     }
     
     if (aObj instanceof Number || bObj instanceof Number) {
       long a = toLong(aObj, env);
       long b = toLong(bObj, env);
 
-      return a == b;
+      return a != b;
     }
 
     if (aType == Boolean.class || bType == Boolean.class) {
       boolean a = toBoolean(aObj, env);
       boolean b = toBoolean(bObj, env);
 
-      return a == b;
+      return a != b;
     }
 
     // XXX: enum
@@ -129,10 +129,10 @@ public class EqExpr extends AbstractBooleanExpr {
       String a = toString(aObj, env);
       String b = toString(bObj, env);
 
-      return a.equals(b);
+      return ! a.equals(b);
     }
 
-    return aObj.equals(bObj);
+    return ! aObj.equals(bObj);
   }
 
   /**
@@ -142,7 +142,7 @@ public class EqExpr extends AbstractBooleanExpr {
   public void printCreate(WriteStream os)
     throws IOException
   {
-    os.print("new com.caucho.el.EqExpr(");
+    os.print("new com.caucho.el.NeExpr(");
     _left.printCreate(os);
     os.print(", ");
     _right.printCreate(os);
@@ -154,10 +154,10 @@ public class EqExpr extends AbstractBooleanExpr {
    */
   public boolean equals(Object o)
   {
-    if (! (o instanceof EqExpr))
+    if (! (o instanceof NeExpr))
       return false;
 
-    EqExpr expr = (EqExpr) o;
+    NeExpr expr = (NeExpr) o;
 
     return (_left.equals(expr._left) &&
             _right.equals(expr._right));
@@ -168,6 +168,6 @@ public class EqExpr extends AbstractBooleanExpr {
    */
   public String toString()
   {
-    return "(" + _left + " eq " + _right + ")";
+    return "(" + _left + " ne " + _right + ")";
   }
 }

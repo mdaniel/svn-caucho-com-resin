@@ -38,9 +38,9 @@ import javax.el.*;
 import com.caucho.vfs.*;
 
 /**
- * Represents the numeric comparison operation: eq
+ * Represents the numeric comparison operation: lt
  */
-public class EqExpr extends AbstractBooleanExpr {
+public class LtExpr extends AbstractBooleanExpr {
   private final Expr _left;
   private final Expr _right;
 
@@ -51,7 +51,7 @@ public class EqExpr extends AbstractBooleanExpr {
    * @param left the left subexpression
    * @param right the right subexpression
    */
-  public EqExpr(Expr left, Expr right)
+  public LtExpr(Expr left, Expr right)
   {
     _left = left;
     _right = right;
@@ -78,9 +78,6 @@ public class EqExpr extends AbstractBooleanExpr {
     Object aObj = _left.getValue(env);
     Object bObj = _right.getValue(env);
 
-    if (aObj == bObj)
-      return true;
-
     if (aObj == null || bObj == null)
       return false;
 
@@ -91,7 +88,7 @@ public class EqExpr extends AbstractBooleanExpr {
       BigDecimal a = toBigDecimal(aObj, env);
       BigDecimal b = toBigDecimal(bObj, env);
 
-      return a.equals(b);
+      return a.compareTo(b) < 0;
     }
 	
     if (aType == Double.class || aType == Float.class ||
@@ -99,40 +96,48 @@ public class EqExpr extends AbstractBooleanExpr {
       double a = toDouble(aObj, env);
       double b = toDouble(bObj, env);
 
-      return a == b;
+      return a < b;
     }
     
     if (aType == BigInteger.class || bType == BigInteger.class) {
       BigInteger a = toBigInteger(aObj, env);
       BigInteger b = toBigInteger(bObj, env);
 
-      return a.equals(b);
+      return a.compareTo(b) < 0;
     }
     
     if (aObj instanceof Number || bObj instanceof Number) {
       long a = toLong(aObj, env);
       long b = toLong(bObj, env);
 
-      return a == b;
+      return a < b;
     }
-
-    if (aType == Boolean.class || bType == Boolean.class) {
-      boolean a = toBoolean(aObj, env);
-      boolean b = toBoolean(bObj, env);
-
-      return a == b;
-    }
-
-    // XXX: enum
 
     if (aObj instanceof String || bObj instanceof String) {
       String a = toString(aObj, env);
       String b = toString(bObj, env);
 
-      return a.equals(b);
+      return a.compareTo(b) < 0;
     }
 
-    return aObj.equals(bObj);
+    if (aObj instanceof Comparable) {
+      int cmp = ((Comparable) aObj).compareTo(bObj);
+
+      return cmp < 0;
+    }
+
+    if (bObj instanceof Comparable) {
+      int cmp = ((Comparable) bObj).compareTo(aObj);
+
+      return cmp > 0;
+    }
+
+    ELException e = new ELException(L.l("can't compare {0} and {1}.",
+                                        aObj, bObj));
+
+    error(e, env);
+
+    return false;
   }
 
   /**
@@ -142,7 +147,7 @@ public class EqExpr extends AbstractBooleanExpr {
   public void printCreate(WriteStream os)
     throws IOException
   {
-    os.print("new com.caucho.el.EqExpr(");
+    os.print("new com.caucho.el.LtExpr(");
     _left.printCreate(os);
     os.print(", ");
     _right.printCreate(os);
@@ -154,10 +159,10 @@ public class EqExpr extends AbstractBooleanExpr {
    */
   public boolean equals(Object o)
   {
-    if (! (o instanceof EqExpr))
+    if (! (o instanceof LtExpr))
       return false;
 
-    EqExpr expr = (EqExpr) o;
+    LtExpr expr = (LtExpr) o;
 
     return (_left.equals(expr._left) &&
             _right.equals(expr._right));
@@ -168,6 +173,6 @@ public class EqExpr extends AbstractBooleanExpr {
    */
   public String toString()
   {
-    return "(" + _left + " eq " + _right + ")";
+    return "(" + _left + " lt " + _right + ")";
   }
 }

@@ -1159,7 +1159,7 @@ public abstract class JspNode {
 	  return "new Character((char) " + (int) expr.evalCharacter(null) + ")";
 	}
 	else if (String.class.equals(type))
-	  return "\"" + escapeJavaString(expr.evalStringNonNull(null)) + "\"";
+	  return "\"" + escapeJavaString(expr.evalString(null)) + "\"";
 	else if (BigInteger.class.equals(type)) {
 	  String v = expr.evalBigInteger(null).toString();
 

@@ -62,7 +62,7 @@ public class ELParser
 
   protected final ELContext _elContext;
 
-  private boolean _checkEscape;
+  private boolean _checkEscape = true;
 
   public ELParser(ELContext elContext, String string)
   {
@@ -326,12 +326,9 @@ public class ELParser
       int token = scanToken();
       switch (token) {
       case Expr.EQ: case Expr.NE:
-      case Expr.LT: case Expr.GT:
+      case Expr.GT: case Expr.LT:
       case Expr.LE: case Expr.GE:
-        if (code == Expr.EQ || code == Expr.NE)
-          left = new EqExpr(code, left, right);
-        else
-          left = new CmpExpr(code, left, right);
+	left = CmpExpr.create(code, left, right);
           
 	code = token;
 	right = parseTerm();
@@ -347,10 +344,7 @@ public class ELParser
 
       default:
 	_peek = token;
-        if (code == Expr.EQ || code == Expr.NE)
-          return new EqExpr(code, left, right);
-        else
-          return new CmpExpr(code, left, right);
+	return CmpExpr.create(code, left, right);
       }
     }
   }
@@ -393,14 +387,14 @@ public class ELParser
       int token = scanToken();
       switch (token) {
       case Expr.MUL: case Expr.DIV: case Expr.MOD:
-	left = new BinaryExpr(code, left, right);
+	left = BinaryExpr.create(code, left, right);
 	right = parseTerm();
 	code = token;
 	break;
 
       default:
 	_peek = token;
-	return new BinaryExpr(code, left, right);
+	return BinaryExpr.create(code, left, right);
       }
     }
   }
@@ -551,10 +545,10 @@ public class ELParser
       }
 
     case '-':
-      return new UnaryExpr(Expr.MINUS, parseTerm());
+      return new MinusExpr(parseTerm());
 
     case '!':
-      return new UnaryExpr(Expr.NOT, parseTerm());
+      return UnaryExpr.create(Expr.NOT, parseTerm());
 
     case '+':
       return parseTerm();
@@ -609,9 +603,9 @@ public class ELParser
       else if (name.equals("false"))
         return new BooleanLiteral(false);
       else if (name.equals("not"))
-        return new UnaryExpr(Expr.NOT, parseTerm());
+        return UnaryExpr.create(Expr.NOT, parseTerm());
       else if (name.equals("empty"))
-        return new UnaryExpr(Expr.EMPTY, parseTerm());
+        return UnaryExpr.create(Expr.EMPTY, parseTerm());
       else {
 	VariableMapper varMapper = _elContext.getVariableMapper();
 	

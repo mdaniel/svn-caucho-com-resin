@@ -49,10 +49,20 @@ public class UnaryExpr extends Expr {
    * @param op the lexical code for the operation
    * @param expr the base expression
    */
-  public UnaryExpr(int op, Expr expr)
+  private UnaryExpr(int op, Expr expr)
   {
     _op = op;
     _expr = expr;
+  }
+
+  public static Expr create(int op, Expr expr)
+  {
+    switch (op) {
+    case MINUS:
+      return new MinusExpr(expr);
+    }
+
+    return new UnaryExpr(op, expr);
   }
 
   /**

@@ -91,7 +91,7 @@ abstract public class AbstractBooleanExpr extends Expr {
   public long evalLong(ELContext env)
     throws ELException
   {
-    ELException e = new ELException(L.l("`{0}': boolean expressions can not be converted to long values.", this));
+    ELException e = new ELException(L.l("'{0}': boolean expressions can not be converted to long values.", this));
     
     error(e, env);
 

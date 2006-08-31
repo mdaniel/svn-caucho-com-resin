@@ -506,7 +506,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     }
   }
 
-  FilterChain createServletChain()
+  public FilterChain createServletChain()
     throws ServletException
   {
     synchronized (this) {

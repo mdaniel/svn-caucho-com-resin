@@ -37,20 +37,13 @@ import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-import javax.servlet.FilterChain;
+import javax.servlet.*;
+import javax.servlet.http.*;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import com.caucho.config.*;
+import com.caucho.config.types.*;
 
-import javax.servlet.http.HttpServletResponse;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.server.dispatch.Invocation;
-import com.caucho.server.dispatch.RedirectFilterChain;
-import com.caucho.server.dispatch.ForwardFilterChain;
-import com.caucho.server.dispatch.MovedFilterChain;
-import com.caucho.server.dispatch.ErrorFilterChain;
+import com.caucho.server.dispatch.*;
 
 import com.caucho.util.L10N;
 
@@ -58,13 +51,26 @@ import com.caucho.util.L10N;
  * Configuration for a rewrite-url
  */
 public class RewriteInvocation {
-  static final L10N L = new L10N(RewriteInvocation.class);
-  static final Logger log = Logger.getLogger(RewriteInvocation.class.getName());
+  private static final L10N L = new L10N(RewriteInvocation.class);
+  private static final Logger log
+    = Logger.getLogger(RewriteInvocation.class.getName());
 
   private final static FilterChain ACCEPT_CHAIN;
 
+  private final WebApp _webApp;
+
   private final ArrayList<Program> _programList = new ArrayList<Program>();
 
+  public RewriteInvocation()
+  {
+    _webApp = null;
+  }
+
+  public RewriteInvocation(WebApp webApp)
+  {
+    _webApp = webApp;
+  }
+  
   /**
    * Adds an accept
    */
@@ -74,19 +80,18 @@ public class RewriteInvocation {
   }
 
   /**
-   * Adds a rewrite
+   * Adds a load-balance
    */
-  public void addRewrite(Rewrite rewrite)
+  public LoadBalance createLoadBalance()
   {
-    _programList.add(rewrite);
-  }
+    if (_webApp == null)
+      throw new ConfigException(L.l("<load-balance> requires a web-app.  Host-based <rewrite-dispatch> can not use <load-balance>."));
 
-  /**
-   * Adds a redirect.
-   */
-  public void addRedirect(Redirect redirect)
-  {
-    _programList.add(redirect);
+    LoadBalance loadBalance = new LoadBalance(_webApp);
+    
+    _programList.add(loadBalance);
+
+    return loadBalance;
   }
 
   /**
@@ -143,7 +148,24 @@ public class RewriteInvocation {
     return error;
   }
 
+  /**
+   * Adds a rewrite
+   */
+  public void addRewrite(Rewrite rewrite)
+  {
+    _programList.add(rewrite);
+  }
+
+  /**
+   * Adds a redirect.
+   */
+  public void addRedirect(Redirect redirect)
+  {
+    _programList.add(redirect);
+  }
+
   public FilterChain map(String uri, Invocation invocation)
+    throws ServletException
   {
     for (int i = 0; i < _programList.size(); i++) {
       Program program = _programList.get(i);
@@ -168,6 +190,7 @@ public class RewriteInvocation {
     }
     
     public FilterChain dispatch(String uri)
+      throws ServletException
     {
       return null;
     }
@@ -352,6 +375,77 @@ public class RewriteInvocation {
 	throw new ConfigException(L.l("moved needs 'regexp' attribute."));
       if (_target == null)
 	throw new ConfigException(L.l("moved needs 'target' attribute."));
+    }
+  }
+
+  public static class LoadBalance extends Program {
+    private final WebApp _webApp;
+    private String _cluster;
+    
+    private Pattern _regexp;
+    private ServletConfigImpl _servlet;
+
+    LoadBalance(WebApp webApp)
+    {
+      _webApp = webApp;
+    }
+
+    /**
+     * Sets the regular expression.
+     */
+    public void setRegexp(String regexp)
+    {
+      _regexp = Pattern.compile(regexp);
+    }
+
+    public void setCluster(String cluster)
+    {
+      _cluster = cluster;
+    }
+
+    public String getCluster()
+    {
+      return _cluster;
+    }
+
+    public FilterChain dispatch(String uri)
+      throws ServletException
+    {
+      Matcher matcher = _regexp.matcher(uri);
+
+      if (matcher.find()) {
+	return _servlet.createServletChain();
+      }
+      else
+	return null;
+    }
+
+    public void init()
+      throws ConfigException, ServletException
+    {
+      if (_regexp == null)
+	throw new ConfigException(L.l("load-balance needs 'regexp' attribute."));
+      if (_cluster == null)
+	throw new ConfigException(L.l("load-balance needs 'cluster' attribute."));
+
+      try {
+	_servlet = new ServletConfigImpl();
+
+	_servlet.setServletName("resin-dispatch-lb-" + _cluster);
+	Class cl = Class.forName("com.caucho.servlets.LoadBalanceServlet");
+	_servlet.setServletClass("com.caucho.servlets.LoadBalanceServlet");
+
+	BuilderProgram program
+	  = new ObjectAttributeProgram("cluster", _cluster);
+
+	_servlet.setInit(new InitProgram(program));
+
+	_webApp.addServlet(_servlet);
+      } catch (ClassNotFoundException e) {
+	log.log(Level.FINER, e.toString(), e);
+	
+	throw new ConfigException(L.l("load-balance requires Resin Professional"));
+      }
     }
   }
 

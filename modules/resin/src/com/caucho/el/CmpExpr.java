@@ -51,11 +51,38 @@ public class CmpExpr extends AbstractBooleanExpr {
    * @param left the left subexpression
    * @param right the right subexpression
    */
-  public CmpExpr(int op, Expr left, Expr right)
+  private CmpExpr(int op, Expr left, Expr right)
   {
     _op = op;
     _left = left;
     _right = right;
+  }
+
+  /**
+   * Creates a comparison expression
+   *
+   * @param op the lexical code for the operation
+   * @param left the left subexpression
+   * @param right the right subexpression
+   */
+  static Expr create(int op, Expr left, Expr right)
+  {
+    switch (op) {
+    case LT:
+      return new LtExpr(left, right);
+    case LE:
+      return new LeExpr(left, right);
+    case GT:
+      return new GtExpr(left, right);
+    case GE:
+      return new GeExpr(left, right);
+    case EQ:
+      return new EqExpr(left, right);
+    case NE:
+      return new NeExpr(left, right);
+    }
+
+    return new CmpExpr(op, left, right);
   }
 
   /**

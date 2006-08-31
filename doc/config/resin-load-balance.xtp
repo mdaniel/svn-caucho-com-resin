@@ -2,10 +2,9 @@
 <header>
 <title>Resin Load Balancing</title>
 <description>
-<p>As traffic increases, web sites need to add additional web
-servers and servlet engines.  Distributing the traffic across the
-servers and coping when a server restarts is the challenge of
-load balancing.</p>
+<p>Resin's HTTP Web Server includes load balancing for scalability
+and reliability.
+</p>
 
 </description>
 </header>
@@ -43,21 +42,21 @@ dispatches them to the backend servers (192.168.0.10 and 192.168.0.11).</p>
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
 
 &lt;cluster id="web-tier"&gt;
-  &lt;server id="web-a" address="192.168.0.1"&gt;
+  &lt;server-default>
     &lt;http port="80"/&gt;
-  &lt;/server&gt;
+  &lt;/serve-default&gt;
+
+  &lt;server id="web-a" address="192.168.0.1"/&gt;
+  &lt;server id="web-b" address="192.168.0.1"/&gt;
 
   &lt;cache disk-size="1024M" memory-size="256M"/&gt;
 
   &lt;host id=""&gt;
     &lt;web-app id="/"&gt;
       &lt;!-- balance all requests to cluster app-tier --&gt;
-      &lt;servlet servlet-name="balance"
-               servlet-class="com.caucho.servlets.LoadBalanceServlet"&gt;
-        &lt;init cluster="app-tier"/&gt;
-      &lt;/servlet&gt;
-
-      &lt;servlet-mapping url-pattern="/*" servlet-name="balance"/&gt;
+      &lt;rewrite-dispatch>
+        &lt;load-balance regexp="" cluster="app-tier"/>
+      &lt;/rewrite-dispatch>
     &lt;/web-app&gt;
   &lt;/host&gt;
 &lt;/cluster&gt;
@@ -107,6 +106,7 @@ sessions</a> to make sure the users see the same session values.</p>
 
 <example title="Starting each server">
 192.168.0.1&gt; java lib/resin.jar -server web-a start
+192.168.0.2&gt; java lib/resin.jar -server web-b start
 
 192.168.0.10&gt; java lib/resin.jar -server app-a start
 192.168.0.11&gt; java lib/resin.jar -server app-b start
@@ -116,7 +116,60 @@ sessions</a> to make sure the users see the same session values.</p>
 
 </s1> <!-- resin -->
 
-<s1 title="What about sessions?">
+<s1 title="Dispatching">
+
+<p>In most cases, the web-tier will dispatch
+everything to the app-tier servers.  Because of Resin's
+<a href="../performance/caching.xtp">proxy cache</a>, the web-tier servers
+will serve static pages as fast as if they were local pages.</p>
+
+<p>In some cases, though, it may be important to send different
+requests to different backend clusters.  The
+&lt;<a href="rewrite-tags.xtp%3Cload-balance%3E">load-balance</a>&gt; tag can
+choose clusters based on URL patterns.</p>
+
+<p>The following &lt;<a href="rewrite-tags.xtp">rewrite-dispatch</a>&gt;
+keeps all *.png, *.gif, and *.jpg files on the web-tier, sends
+everything in /foo/* to the foo-tier cluster, everything in /bar/* to
+the bar-tier cluster, and keeps anything else on the web-tier.</p>
+
+<example title="split dispatching">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  &lt;cluster id="web-tier">
+    &lt;server id="web-a">
+      &lt;http port="80"/>
+    &lt;/server>
+
+    &lt;cache memory-size="64m"/>
+
+    &lt;host id="">
+      &lt;web-app id="/">
+
+        &lt;rewrite-dispatch>
+          &lt;dispatch regexp="(\.png|\.gif|\.jpg)"/>
+
+          &lt;load-balance regexp="^/foo" cluster="foo-tier"/>
+
+          &lt;load-balance regexp="^/bar" cluster="bar-tier"/>
+        &lt;/rewrite-dispatch>
+
+      &lt;/web-app>
+    &lt;/host>
+  &lt;/cluster>
+
+  &lt;cluster id="foo-tier">
+    ...
+  &lt;/cluster>
+
+  &lt;cluster id="bar-tier">
+    ...
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+</s1>
+
+<s1 title="Distributed Sessions">
 
 <p>A session needs to stay on the same JVM that started it.
 Otherwise, each JVM would only see every second or third request and
@@ -127,21 +180,32 @@ cookie with the host number.  In the previous example, the hosts would
 generate cookies like:</p>
 
 <deftable>
-<tr><th>index</th><th>cookie prefix
-</th></tr><tr><td>1</td><td><var>a</var>xxx
-</td></tr><tr><td>2</td><td><var>b</var>xxx
-</td></tr><tr><td>3</td><td><var>c</var>xxx
-</td></tr></deftable>
+<tr>
+  <th>index</th>
+  <th>cookie prefix</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><var>a</var>xxx</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><var>b</var>xxx</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><var>c</var>xxx</td>
+</tr>
+</deftable>
 
-<p>On the web server, mod_caucho will decode the cookie and send it
-to the appropriate host.  So <var>bX8ZwooOz</var> would go to host2.</p>
+<p>On the web-tier, Resin will decode the cookie and send it
+to the appropriate host.  So <var>bacX8ZwooOz</var> would go to app-b.</p>
 
-<p>In the infrequent case that host2 fails, Resin will send the
-request to host3.  The user might lose the session but that's a minor
+<p>In the infrequent case that app-b fails, Resin will send the
+request to app-a.  The user might lose the session but that's a minor
 problem compared to showing a connection failure error.  To save sessions,
 you'll need to use <a href="sessions.xtp">distributed sessions</a>.
-Also take a look at
-<a href="tcp-sessions.xtp">tcp sessions</a>.</p>
+Also take a look at <a href="tcp-sessions.xtp">tcp sessions</a>.</p>
 
 <p>The following example is a typical configuration for a distributed
 server using an external hardware load-balancer, i.e. where each Resin is

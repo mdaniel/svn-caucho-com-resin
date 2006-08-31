@@ -30,28 +30,29 @@
 package com.caucho.el;
 
 import java.io.*;
-import java.math.*;
 import java.util.logging.*;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import javax.el.*;
 
 import com.caucho.vfs.*;
 
 /**
- * Represents the numeric comparison operation: eq
+ * Represents a binary divtiplication numeric operation
  */
-public class EqExpr extends AbstractBooleanExpr {
+public class DivExpr extends Expr {
   private final Expr _left;
   private final Expr _right;
-
+  
   /**
-   * Creates a comparison expression
+   * Creates the multiplication expression.
    *
-   * @param op the lexical code for the operation
-   * @param left the left subexpression
-   * @param right the right subexpression
+   * @param left the left sub-expression
+   * @param right the right sub-expression
    */
-  public EqExpr(Expr left, Expr right)
+  public DivExpr(Expr left, Expr right)
   {
     _left = left;
     _right = right;
@@ -67,82 +68,83 @@ public class EqExpr extends AbstractBooleanExpr {
   }
   
   /**
-   * Evaluate the expression as a boolean.
+   * Evaluate the expression as an object.
    *
    * @param env the variable environment
+   *
+   * @return the result as an object
    */
   @Override
-  public boolean evalBoolean(ELContext env)
+  public Object getValue(ELContext env)
     throws ELException
   {
     Object aObj = _left.getValue(env);
     Object bObj = _right.getValue(env);
 
-    if (aObj == bObj)
-      return true;
-
-    if (aObj == null || bObj == null)
-      return false;
-
-    Class aType = aObj.getClass();
-    Class bType = bObj.getClass();
-    
-    if (aObj instanceof BigDecimal || bObj instanceof BigDecimal) {
+    if (aObj instanceof BigDecimal
+	|| bObj instanceof BigDecimal
+	|| aObj instanceof BigInteger
+	|| bObj instanceof BigInteger) {
       BigDecimal a = toBigDecimal(aObj, env);
       BigDecimal b = toBigDecimal(bObj, env);
-
-      return a.equals(b);
+      
+      return a.divide(b, BigDecimal.ROUND_HALF_UP);
     }
-	
-    if (aType == Double.class || aType == Float.class ||
-        bType == Double.class || bType == Float.class) {
+    else if (aObj == null && bObj == null)
+      return new Long(0);
+    else {
       double a = toDouble(aObj, env);
       double b = toDouble(bObj, env);
+      double dValue = a / b;
 
-      return a == b;
+      return new Double(dValue);
     }
-    
-    if (aType == BigInteger.class || bType == BigInteger.class) {
-      BigInteger a = toBigInteger(aObj, env);
-      BigInteger b = toBigInteger(bObj, env);
+  }
+  
+  /**
+   * Evaluate the expression as a long
+   *
+   * @param env the variable environment
+   *
+   * @return the result as an long
+   */
+  @Override
+  public long evalLong(ELContext env)
+    throws ELException
+  {
+    double a = _left.evalDouble(env);
+    double b = _right.evalDouble(env);
 
-      return a.equals(b);
-    }
-    
-    if (aObj instanceof Number || bObj instanceof Number) {
-      long a = toLong(aObj, env);
-      long b = toLong(bObj, env);
+    return (long) (a / b + 0.5);
+  }
+  
+  /**
+   * Evaluate the expression as a double
+   *
+   * @param env the variable environment
+   *
+   * @return the result as an double
+   */
+  @Override
+  public double evalDouble(ELContext env)
+    throws ELException
+  {
+    double a = _left.evalDouble(env);
+    double b = _right.evalDouble(env);
 
-      return a == b;
-    }
-
-    if (aType == Boolean.class || bType == Boolean.class) {
-      boolean a = toBoolean(aObj, env);
-      boolean b = toBoolean(bObj, env);
-
-      return a == b;
-    }
-
-    // XXX: enum
-
-    if (aObj instanceof String || bObj instanceof String) {
-      String a = toString(aObj, env);
-      String b = toString(bObj, env);
-
-      return a.equals(b);
-    }
-
-    return aObj.equals(bObj);
+    return a / b;
   }
 
   /**
-   * Prints the code to create an LongLiteral.
+   * Prints the Java code to recreate an LongLiteral.
+   *
+   * @param os the output stream to the *.java file
    */
   @Override
   public void printCreate(WriteStream os)
     throws IOException
   {
-    os.print("new com.caucho.el.EqExpr(");
+    os.print("new com.caucho.el.DivExpr(");
     _left.printCreate(os);
     os.print(", ");
     _right.printCreate(os);
@@ -154,10 +156,10 @@ public class EqExpr extends AbstractBooleanExpr {
    */
   public boolean equals(Object o)
   {
-    if (! (o instanceof EqExpr))
+    if (! (o instanceof DivExpr))
       return false;
 
-    EqExpr expr = (EqExpr) o;
+    DivExpr expr = (DivExpr) o;
 
     return (_left.equals(expr._left) &&
             _right.equals(expr._right));
@@ -168,6 +170,6 @@ public class EqExpr extends AbstractBooleanExpr {
    */
   public String toString()
   {
-    return "(" + _left + " eq " + _right + ")";
+    return "(" + _left + " + " + _right + ")";
   }
 }
