@@ -10,15 +10,12 @@
     </init>
 
     <hessian>
-      <api-class>example.HelloService</api-class>
-      <http>
-        <url-pattern>/hello/</url-pattern>
-      </http>
+      <url-pattern>/hello/</url-pattern>
     </hessian>
   </web-service>
 
   <web-service-client jndi-name="hessian/HelloService">
-    <url>hessian:http://localhost:8080/resin-doc/esb/tutorial/hello-jaxb/hello/</url>
+    <url>hessian:${webApp.url}/hello/</url>
     <interface>example.HelloService</interface>
   </web-service-client>
 </web-app>

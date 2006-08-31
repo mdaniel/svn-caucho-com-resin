@@ -36,15 +36,21 @@ plain-old Java objects (POJOs) and made available to many different protocols.
 <s1 title="Service Implementation">
 
 <p>The HelloService implementation is just a Java class that implements
-the HelloService API.</p>
+the HelloService API.  For Java Web Service compatibility, the class also
+has @WebService and @WebMethod annotations.</p>
 
 <example title="HelloServiceImpl.java">
 package example;
 
+import javax.jws.WebMethod;
+import javax.jws.WebService;
+
+@WebService(endpointInterface="example.HelloService")
 public class HelloServiceImpl implements HelloService {
   /**
    * Returns "hello, world".
    */
+  @WebMethod
   public String hello()
   {
     return "hello, world";
@@ -86,10 +92,9 @@ SOAP and REST are also available. <!-- TODO: add these to this example -->
 </p>
 
 <p>
-Each service encoding must also have a <em>transport</em>.  The most common
-transport is HTTP, which is specified by the &lt;http> tag as a child of
-the encoding.  The &lt;http> tag requires a &lt;url-pattern> or &lt;url-regex>
-tag to specify the path of the service.
+Each service encoding must also have a <em>transport</em>.  By default, 
+services use HTTP as a transport and thus must specify a &lt;url-pattern>     
+to indicate the location of the service.
 </p>
 
 <example title="<web-service>">
@@ -97,10 +102,7 @@ tag to specify the path of the service.
   &lt;jndi-name>service/HelloService&lt;/jndi-name>
 
   &lt;hessian>
-    &lt;api-class>example.HelloService&lt;/api-class>
-    &lt;http>
-      &lt;url-pattern>/hello/&lt;/url-pattern>
-    &lt;/http>
+    &lt;url-pattern>/hello/&lt;/url-pattern>
   &lt;/hessian>
 &lt;/web-service>
 </example>
@@ -109,14 +111,14 @@ tag to specify the path of the service.
 Resin's ESB also makes it easy to access services using the 
 &lt;web-service-client> tag.  This tag connects to a service
 using a URL of the form <i>&lt;encoding>:&lt;protocol>:&lt;location></i>.
-The example below shows just such a URL.  The interface to service
+The example below shows just such a URL.  The interface of the service
 and a JNDI name must also be given.  The &lt;web-service-client> tag
 creates a proxy client instance for the service and registers the
 proxy with the given JNDI name.</p>
 
 <example title="<web-service-client>">
 &lt;web-service-client jndi-name="hessian/HelloService">
-  &lt;url>hessian:http://localhost:8080/resin-doc/esb/tutorial/hello-world/hello/&lt;/url>
+  &lt;url>hessian:${webApp.url}/hello/&lt;/url>
   &lt;interface>example.HelloService&lt;/interface>
 &lt;/web-service-client>
 </example>

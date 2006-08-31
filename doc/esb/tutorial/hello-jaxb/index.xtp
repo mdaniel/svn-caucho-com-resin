@@ -43,8 +43,13 @@ configuration.
 <example title="HelloServiceImpl.java">
 package example;
 
-import javax.xml.bind.annotation.*;
+import javax.jws.WebMethod;
+import javax.jws.WebService;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@WebService(endpointInterface="example.HelloService")
 @XmlRootElement
 public class HelloServiceImpl implements HelloService {
   @XmlElement(name="hello")
@@ -53,6 +58,7 @@ public class HelloServiceImpl implements HelloService {
   /**
    * Returns "hello, world".
    */
+  @WebMethod
   public String hello()
   {
     return _hello;
@@ -99,10 +105,7 @@ field is initialized from the &lt;init> child tag of &lt;web-service>.
   &lt;/init>
 
   &lt;hessian>
-    &lt;api-class>example.HelloService&lt;/api-class>
-    &lt;http>
-      &lt;url-pattern>/hello/&lt;/url-pattern>
-    &lt;/http>
+    &lt;url-pattern>/hello/&lt;/url-pattern>
   &lt;/hessian>
 &lt;/web-service>
 </example>
@@ -115,7 +118,7 @@ and its contents remain unchanged from the
 
 <example title="<web-service-client>">
 &lt;web-service-client jndi-name="hessian/HelloService">
-  &lt;url>hessian:http://localhost:8080/resin-doc/esb/tutorial/hello-world/hello/&lt;/url>
+  &lt;url>hessian:${webApp.url}/hello/&lt;/url>
   &lt;interface>example.HelloService&lt;/interface>
 &lt;/web-service-client>
 </example>

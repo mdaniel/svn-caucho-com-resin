@@ -6,10 +6,7 @@
     <jndi-name>service/HelloService</jndi-name>
 
     <hessian>
-      <api-class>example.HelloService</api-class>
-      <http>
-        <url-pattern>/hello/</url-pattern>
-      </http>
+      <url-pattern>/hello/</url-pattern>
     </hessian>
   </web-service>
 

@@ -1,7 +1,12 @@
 package example;
 
-import javax.xml.bind.annotation.*;
+import javax.jws.WebMethod;
+import javax.jws.WebService;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@WebService(endpointInterface="example.HelloService")
 @XmlRootElement
 public class HelloServiceImpl implements HelloService {
   @XmlElement(name="hello")
@@ -10,6 +15,7 @@ public class HelloServiceImpl implements HelloService {
   /**
    * Returns "hello, world".
    */
+  @WebMethod
   public String hello()
   {
     return _hello;
