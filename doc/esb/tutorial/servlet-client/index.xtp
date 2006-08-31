@@ -3,7 +3,9 @@
     <product>resin</product>
     <title>A frontend client for a service on the Resin ESB</title>
     <description>
-      <p>
+      <p>This tutorial shows how to access services on the Resin Enterprise 
+      Service Bus (ESB) using J2EE injection.  A servlet does frontend 
+      presentation for the results of an ESB service.
       </p>
     </description>
     <type>tutorial</type>
@@ -12,13 +14,6 @@
 
   <body>
     <summary/>
-
-  <s1>
-<p>This tutorial shows how to access services on the Resin Enterprise 
-Service Bus (ESB) using J2EE injection.  A servlet does frontend presentation
-for the results of an ESB service.
-</p>
-</s1>
 
 <s1 title="Files in this tutorial">
 <deftable>
