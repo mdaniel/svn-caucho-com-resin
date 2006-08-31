@@ -127,7 +127,7 @@ public class WebService {
     if (_serviceClass == null)
       return null;
 
-    Class cl = CauchoSystem.loadClass(_serviceClass, false, null);
+    Class cl = CauchoSystem.loadClass(_serviceClass);
 
     if (_init != null)
       _service = _init.create(cl);

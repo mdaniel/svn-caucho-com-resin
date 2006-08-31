@@ -183,8 +183,7 @@ r_form-login-config = element form-login-config {
 }
 
 r_hessian-encoding = element hessian {
-  r_service-transport*
-  & element api-class { r_string-Group }?
+  r_url-pattern
 }
 
 r_http-transport = element http {

@@ -34,6 +34,7 @@ import java.util.HashMap;
 import com.caucho.config.BuilderProgram;
 
 import com.caucho.esb.WebService;
+import com.caucho.esb.transport.HttpTransport;
 import com.caucho.esb.transport.ServiceTransport;
 import com.caucho.esb.transport.ServiceTransportConfig;
 
@@ -69,6 +70,8 @@ public class ServiceEncodingConfig {
     _encoding.setWebService(_webService);
   }
 
+  /// XXX Transports are on hold for now...
+  /* 
   public ServiceTransportConfig createHttp()
     throws Throwable
   {
@@ -93,6 +96,16 @@ public class ServiceEncodingConfig {
   public void addJms(ServiceTransport transport)
   {
     transport.setEncoding(_encoding);
+  }*/
+
+  public void setUrlPattern(String pattern)
+    throws Throwable
+  {
+    HttpTransport transport = new HttpTransport();
+    transport.setWebService(_webService);
+    transport.setEncoding(_encoding);
+    transport.setURLPattern(pattern);
+    transport.init();
   }
 
   public void addBuilderProgram(BuilderProgram program)

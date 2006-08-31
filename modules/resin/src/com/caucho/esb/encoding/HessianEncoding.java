@@ -36,6 +36,8 @@ import java.io.OutputStream;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import javax.jws.*;
+
 import com.caucho.esb.WebService;
 
 import com.caucho.hessian.io.AbstractHessianOutput;
@@ -47,6 +49,8 @@ import com.caucho.hessian.server.HessianSkeleton;
 
 import com.caucho.services.server.GenericService;
 
+import com.caucho.util.CauchoSystem;
+
 /**
  * Invokes a service based on a Hessian-encoded request.
  */
@@ -54,7 +58,6 @@ public class HessianEncoding implements ServiceEncoding {
   protected static Logger log
     = Logger.getLogger(HessianEncoding.class.getName());
 
-  private Class _serviceAPI;
   private Object _serviceImpl;
   
   private HessianSkeleton _skeleton;
@@ -74,22 +77,6 @@ public class HessianEncoding implements ServiceEncoding {
   public void setService(Object serviceImpl)
   {
     _serviceImpl = serviceImpl;
-  }
-
-  /**
-   * Sets the api-class.
-   */
-  public void setApiClass(Class serviceAPI)
-  {
-    _serviceAPI = serviceAPI;
-  }
-
-  /**
-   * Gets the api-class.
-   */
-  public Class getApiClass()
-  {
-    return _serviceAPI;
   }
 
   /**
@@ -120,20 +107,41 @@ public class HessianEncoding implements ServiceEncoding {
   }
 
   public void init()
+    throws Throwable
   {
     if (_serviceImpl == null)
       _serviceImpl = this;
 
-    if (_serviceImpl != null) {
-      _serviceAPI = findRemoteAPI(_serviceImpl.getClass());
+    Class api = null;
 
-      if (_serviceAPI == null)
-        _serviceAPI = _serviceImpl.getClass();
+    if (_serviceImpl != null) {
+      api = findWebServiceEndpointInterface(_serviceImpl.getClass());
+
+      if (api == null)
+        api = findRemoteAPI(_serviceImpl.getClass());
+
+      if (api == null)
+        api = _serviceImpl.getClass();
     }
 
-    _skeleton = new HessianSkeleton(_serviceImpl, _serviceAPI);
+    _skeleton = new HessianSkeleton(_serviceImpl, api);
   }
   
+  private Class findWebServiceEndpointInterface(Class implClass)
+    throws ClassNotFoundException
+  {
+    if (implClass.isAnnotationPresent(javax.jws.WebService.class)) {
+      javax.jws.WebService webServiceAnnotation = 
+        (javax.jws.WebService)
+        implClass.getAnnotation(javax.jws.WebService.class);
+
+      if (webServiceAnnotation.endpointInterface() != null)
+        return CauchoSystem.loadClass(webServiceAnnotation.endpointInterface());
+    }
+
+    return null;
+  }
+
   private Class findRemoteAPI(Class implClass)
   {
     if (implClass == null || implClass.equals(GenericService.class))
