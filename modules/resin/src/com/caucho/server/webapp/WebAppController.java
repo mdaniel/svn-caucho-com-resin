@@ -560,7 +560,7 @@ public class WebAppController
    * EL variables for the app.
    */
   public class Var {
-    public String getURL()
+    public String getUrl()
     {
       return WebAppController.this.getURL();
     }

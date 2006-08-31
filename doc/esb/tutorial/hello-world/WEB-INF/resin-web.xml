@@ -1,7 +1,7 @@
 <!--
    - web.xml configuration file for the Hessian addition example.
   -->
-<web-app> <!-- xmlns="http://caucho.com/ns/resin"> -->
+<web-app xmlns="http://caucho.com/ns/resin">
   <web-service class="example.HelloServiceImpl">
     <jndi-name>service/HelloService</jndi-name>
 
@@ -14,7 +14,7 @@
   </web-service>
 
   <web-service-client jndi-name="hessian/HelloService">
-    <url>hessian:http://localhost:8080/resin-doc/esb/tutorial/hello-world/hello/</url>
+    <url>hessian:${webApp.url}/hello/</url>
     <interface>example.HelloService</interface>
   </web-service-client>
 </web-app>

@@ -80,8 +80,8 @@
                   startup-mode="lazy">
   </web-app-deploy>
 
-  <web-app-deploy url-prefix="/ejb3/tutorial"
-                  path="ejb3/tutorial"
+  <web-app-deploy url-prefix="/esb/tutorial"
+                  path="esb/tutorial"
                   startup-mode="lazy">
   </web-app-deploy>
 
@@ -92,11 +92,6 @@
 
   <web-app-deploy url-prefix="/jms/tutorial"
                   path="jms/tutorial"
-                  startup-mode="lazy">
-  </web-app-deploy>
-
-  <web-app-deploy url-prefix="/cmp/tutorial"
-                  path="cmp/tutorial"
                   startup-mode="lazy">
   </web-app-deploy>
 

@@ -16,6 +16,8 @@ scalability and reliability</li>
 <li>Built-in <a href="performance|caching.xtp">HTTP Proxy Cache</a></li>
 <li>New <a href="config|cluster-tags.xtp">clustering</a> configuration
 to simplify load balancing and distributed sessions.</li>
+<li>New <a href="esb|index.xtp">web services</a> capabilities
+with JAXB, SOAP, and Hessian.</li>
 <li>Flexible <a href="config|host-tags.xtp">virtual host</a> configuration</li>
 <li>New <a href="ioc|tutorial/jaxb-bean-config/index.xtp">JAXB-based IoC configuration</a></li>
 <li>URL <a href="config|rewrite-tags.xtp">rewrite tags</a> for easy

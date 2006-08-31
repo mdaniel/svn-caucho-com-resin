@@ -8,7 +8,7 @@
 
 <summary objsummary="localtoc"/>
 
-<s1 title="server changes">
+<s1 title="resin.conf changes to cluster and server">
 
 <p>&lt;<a href="../config/cluster-tags.xtp">cluster</a>&gt; tag
 for the new cluster tags.</p>
@@ -50,6 +50,59 @@ for the new server tags.</p>
   &lt;/cluster>
 &lt;/resin>
 </example>
+
+</s1>
+
+<s1 title="WebServices capabilities and configuration">
+
+<p>Documentation for the new web services capabilities is
+in the <a href="esb|index.xtp">web services</a> section.</p>
+
+<p>Resin has updated its configuration for web services like
+Hessian, and has extended the web service capabilities to include
+SOAP and VM-local requests.</p>
+
+<p>Applications can write to standard @WebService APIs, using JAXB
+annotations for marshalled XML (or marshalled Hessian), and export
+the services as Hessian, SOAP or Rest.</p>
+
+<p>Configuration has been simplified:</p>
+
+<example title="&lt;web-service> configuration">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;web-service class="example.HelloServiceImpl">
+    &lt;jndi-name>service/HelloService&lt;/jndi-name>
+
+    &lt;init>
+      &lt;hello>hello, world&lt;/hello>
+    &lt;/init>
+
+    &lt;hessian>
+      &lt;api-class>example.HelloService&lt;/api-class>
+      &lt;http>
+        &lt;url-pattern>/hello/&lt;/url-pattern>
+      &lt;/http>
+    &lt;/hessian>
+  &lt;/web-service>
+
+&lt;/web-app>
+</example>
+
+<p>The client proxy can now be configured as well.  Applications
+can now write to the client APIs without worrying about proxy generation.</p>
+
+<example title="&lt;web-service-client>">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+&lt;web-service-client jndi-name="hessian/HelloService">
+  &lt;url>hessian:http://localhost:8080/hello-world/hello/&lt;/url>
+  &lt;interface>example.HelloService&lt;/interface>
+&lt;/web-service-client>
+
+&lt;/web-app>
+</example>
+
 
 </s1>
 
