@@ -55,6 +55,7 @@ import com.caucho.amber.query.AbstractQuery;
 import com.caucho.amber.query.SelectQuery;
 import com.caucho.amber.query.UserQuery;
 
+import com.caucho.amber.type.CalendarType;
 import com.caucho.amber.type.UtilDateType;
 
 import com.caucho.util.L10N;
@@ -425,23 +426,22 @@ public class QueryImpl implements Query {
    */
   public Query setParameter(int index, Calendar value, TemporalType type)
   {
-    /*
     if (value == null)
       _userQuery.setNull(index, Types.JAVA_OBJECT);
     else {
       switch (type) {
       case TIME:
-        _userQuery.setObject(index, value, UtilCalendar.TEMPORAL_TIME_TYPE);
+        _userQuery.setObject(index, value, CalendarType.TEMPORAL_TIME_TYPE);
         break;
 
       case DATE:
-        _userQuery.setObject(index, value, UtilCalendar.TEMPORAL_DATE_TYPE);
+        _userQuery.setObject(index, value, CalendarType.TEMPORAL_DATE_TYPE);
         break;
 
       default:
-        _userQuery.setObject(index, value, UtilCalendar.TEMPORAL_TIMESTAMP_TYPE);
+        _userQuery.setObject(index, value, CalendarType.TEMPORAL_TIMESTAMP_TYPE);
       }
-    }*/
+    }
 
     return this;
   }

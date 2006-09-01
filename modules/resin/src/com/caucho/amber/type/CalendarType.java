@@ -31,7 +31,13 @@ package com.caucho.amber.type;
 import java.util.Calendar;
 
 import java.sql.ResultSet;
+import java.sql.PreparedStatement;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.sql.SQLException;
+
+import javax.persistence.TemporalType;
+
 
 import java.io.IOException;
 
@@ -45,10 +51,18 @@ import com.caucho.java.JavaWriter;
 public class CalendarType extends Type {
   private static final L10N L = new L10N(CalendarType.class);
 
-  private static final CalendarType CALENDAR_TYPE = new CalendarType();
+  public static final CalendarType
+    TEMPORAL_DATE_TYPE = new CalendarType(TemporalType.DATE);
+  public static final CalendarType
+    TEMPORAL_TIME_TYPE = new CalendarType(TemporalType.TIME);
+  public static final CalendarType
+    TEMPORAL_TIMESTAMP_TYPE = new CalendarType(TemporalType.TIMESTAMP);
 
-  private CalendarType()
+  private TemporalType _temporalType;
+
+  private CalendarType(TemporalType temporalType)
   {
+    _temporalType = temporalType;
   }
 
   /**
@@ -56,7 +70,7 @@ public class CalendarType extends Type {
    */
   public static CalendarType create()
   {
-    return CALENDAR_TYPE;
+    return TEMPORAL_TIMESTAMP_TYPE;
   }
 
   /**
@@ -71,7 +85,7 @@ public class CalendarType extends Type {
    * Generates a string to load the property.
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index)
+        String indexVar, int index)
     throws IOException
   {
     out.print("com.caucho.amber.type.CalendarType.toCalendar(" + rs + ".getTimestamp(" + indexVar + " + " + index + "))");
@@ -83,7 +97,7 @@ public class CalendarType extends Type {
    * Generates a string to set the property.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String value)
+        String index, String value)
     throws IOException
   {
     out.println("if (" + value + " == null)");
@@ -103,7 +117,7 @@ public class CalendarType extends Type {
     else {
       Calendar cal = Calendar.getInstance();
       cal.setTime(time);
-      
+
       return cal;
     }
   }
@@ -121,8 +135,34 @@ public class CalendarType extends Type {
     else {
       Calendar cal = Calendar.getInstance();
       cal.setTime(time);
-      
+
       return cal;
+    }
+  }
+
+  /**
+   * Sets the value.
+   */
+  public void setParameter(PreparedStatement pstmt,
+                           int index,
+                           Object value)
+    throws SQLException
+  {
+    Timestamp timestamp
+      = new Timestamp(((Calendar) value).getTimeInMillis());
+
+    switch (_temporalType) {
+    case DATE:
+      pstmt.setObject(index, timestamp, Types.DATE);
+      break;
+
+    case TIME:
+      pstmt.setObject(index, timestamp, Types.TIME);
+      break;
+
+    default:
+      pstmt.setObject(index, timestamp, Types.TIMESTAMP);
+      break;
     }
   }
 }
