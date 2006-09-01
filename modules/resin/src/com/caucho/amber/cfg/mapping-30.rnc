@@ -4,12 +4,12 @@ namespace local = ""
 
 namespace xsi = "http://www.w3.org/2001/XMLSchema-instance"
 
-start = orm30_entity-mappings;
+start = orm30_entity-mappings
 
-t_boolean = string;
-t_class = string;
+t_boolean = string
+t_class = string
 
-# gen-type "TABLE", "SEQUENCE", "IDENTITY", "AUTO"
+## gen-type "TABLE", "SEQUENCE", "IDENTITY", "AUTO"
 
 orm30_attribute = element attribute {
   attribute name { string },
@@ -42,9 +42,9 @@ orm30_attribute = element attribute {
 
   | orm30_map-key
 
-  | orm30_order-by)?
+  | orm30_order-by)?,
 
-  orm30_attribute_override*
+  orm30_attribute-override*
 }
 
 orm30_attribute-override = element attribute-override {
@@ -138,7 +138,7 @@ orm30_embedded-id = element embedded-id {
 orm30_entity = element entity {
   attribute name { string }?,
 
-  attribute class { string }
+  attribute class { string },
 
   attribute access { "PROPERTY" | "FIELD" }?,
 
@@ -218,18 +218,6 @@ orm30_entity-listeners = element entity-listeners {
 orm30_entity-mappings = element entity-mappings {
   attribute version { "1.0" },
 
-  attribute xsi:schemaLocation { string }?,
-
-  attribute package { string }?,
-
-  attribute catalog { string }?,
-
-  attribute schema { string }?,
-
-  attribute access { string }?,
-
-  attribute flush-mode { "COMMIT" | "AUTO" }?,
-
   orm30_entity*,
 
   orm30_embeddable*,
@@ -244,11 +232,7 @@ orm30_entity-mappings = element entity-mappings {
 
   orm30_sequence-generator*,
 
-  orm30_table-generator*,
-
-  orm30_default-entity-listeners?,
-
-  orm30_cascade*
+  orm30_table-generator*
 }
 
 orm30_entity-result = element entity-result {
@@ -291,7 +275,7 @@ orm30_id = element id {
   orm30_temporal?
 }
 
-orm30_id-class = id-class {
+orm30_id-class = element id-class {
   string
 }
 
@@ -317,7 +301,9 @@ orm30_join-column = element join-column {
   attribute table { string }?
 }
 
-orm30_lob = element lob { }
+orm30_lob = element lob {
+  string
+}
 
 orm30_many-to-many = element many-to-many {
   attribute target-entity { string }?,
@@ -375,7 +361,7 @@ orm30_mapped-superclass = element mapped-superclass {
   orm30_attribute*
 }
 
-orm30_named-native-query {
+orm30_named-native-query = element named-native-query {
   attribute name { string },
 
   attribute query { string },

@@ -29,10 +29,12 @@
 
 package com.caucho.amber.cfg;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.sql.DataSource;
+
+import com.caucho.bytecode.JClass;
 
 import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.manager.AmberPersistenceUnit;
@@ -51,7 +53,9 @@ public class PersistenceUnitConfig {
   private DataSource _nonJtaDataSource;
   private boolean _isExcludeUnlistedClasses;
 
-  private ArrayList<String> _classList = new ArrayList<String>();
+  // className -> type
+  private HashMap<String, JClass> _classMap
+    = new HashMap<String, JClass>();
 
   /**
    * Returns the unit name.
@@ -126,24 +130,23 @@ public class PersistenceUnitConfig {
    */
   public void addClass(String cl)
   {
-    _classList.add(cl);
+    // null means the class is not yet verified as:
+    // Entity | Embeddable | MappedSuperclass
+
+    _classMap.put(cl, null);
   }
 
   /**
-   * Adds a list of configured classes.
+   * Adds a map of configured classes.
    */
-  public void addAllClasses(ArrayList<String> classList)
+  public void addAllClasses(Map<String, JClass> classMap)
   {
-    Iterator it = classList.iterator();
+    for (Map.Entry<String, JClass> entry : classMap.entrySet()) {
+      String k = entry.getKey();
+      JClass v = entry.getValue();
 
-    String className;
-
-    while(it.hasNext()) {
-
-      className = (String) it.next();
-
-      if (! _classList.contains(className))
-        _classList.add(className);
+      if (! _classMap.containsKey(k))
+        _classMap.put(k, v);
     }
   }
 
@@ -170,8 +173,11 @@ public class PersistenceUnitConfig {
 
     unit.init();
 
-    for (String cl : _classList) {
-      unit.addEntityClass(cl);
+    for (Map.Entry<String, JClass> entry : _classMap.entrySet()) {
+      String className = entry.getKey();
+      JClass type = entry.getValue();
+
+      unit.addEntityClass(className, type);
     }
 
     unit.generate();

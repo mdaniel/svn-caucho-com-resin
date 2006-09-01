@@ -1049,14 +1049,12 @@ public class EntityIntrospector {
                          new JClass[] { method.getReturnType() }) == null) {
         JAnnotation ann = isAnnotatedMethod(method);
 
-        /*
-          if (ann != null) {
+        if (ann != null) {
           throw new ConfigException(L.l("'{0}' is not a valid annotation for {1}.  Only public persistent property getters with matching setters may have property annotations.",
-          ann.getType(), method.getFullName()));
-          }
+                                        ann.getType(), method.getFullName()));
+        }
 
-          continue;
-        */
+        continue;
       }
 
       // ejb/0g03 for private

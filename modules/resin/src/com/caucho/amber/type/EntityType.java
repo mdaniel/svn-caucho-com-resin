@@ -1214,6 +1214,7 @@ public class EntityType extends Type {
       getParentType().generateCopyUpdateObject(out, dst, src, loadGroup);
 
     ArrayList<AmberField> fields = getFields();
+
     for (int i = 0; i < fields.size(); i++) {
       AmberField field = fields.get(i);
 

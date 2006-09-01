@@ -67,12 +67,12 @@ public class LinkColumns {
 
   private AmberCompletion _tableDeleteCompletion;
   private AmberCompletion _tableUpdateCompletion;
-  
+
   /**
    * Creates the table link.
    */
   public LinkColumns(Table sourceTable, Table targetTable,
-		     ArrayList<ForeignColumn> columns)
+                     ArrayList<ForeignColumn> columns)
   {
     _sourceTable = sourceTable;
     _targetTable = targetTable;
@@ -94,7 +94,7 @@ public class LinkColumns {
   {
     if (isCascadeDelete) {
       assert(_cascadeDelete != TARGET_CASCADE_DELETE);
-      
+
       _cascadeDelete = SOURCE_CASCADE_DELETE;
     }
     else if (_cascadeDelete == SOURCE_CASCADE_DELETE)
@@ -108,7 +108,7 @@ public class LinkColumns {
   {
     if (isCascadeDelete) {
       assert(_cascadeDelete != SOURCE_CASCADE_DELETE);
-      
+
       _cascadeDelete = TARGET_CASCADE_DELETE;
     }
     else if (_cascadeDelete == TARGET_CASCADE_DELETE)
@@ -166,9 +166,9 @@ public class LinkColumns {
   {
     for (int i = _columns.size() - 1; i >= 0; i--) {
       ForeignColumn column = _columns.get(i);
-      
+
       if (column.getTargetColumn() == targetKey)
-	return column;
+        return column;
     }
 
 
@@ -181,16 +181,16 @@ public class LinkColumns {
   public String generateSelectSQL(String table)
   {
     CharBuffer cb = new CharBuffer();
-    
+
     for (int i = 0; i < _columns.size(); i++) {
       if (i != 0)
-	cb.append(", ");
+        cb.append(", ");
 
       if (table != null) {
-	cb.append(table);
-	cb.append(".");
+        cb.append(table);
+        cb.append(".");
       }
-      
+
       cb.append(_columns.get(i).getName());
     }
 
@@ -212,10 +212,10 @@ public class LinkColumns {
   public String generateUpdateSQL()
   {
     CharBuffer cb = new CharBuffer();
-    
+
     for (int i = 0; i < _columns.size(); i++) {
       if (i != 0)
-	cb.append(", ");
+        cb.append(", ");
 
       cb.append(_columns.get(i).getName() + "=?");
     }
@@ -229,16 +229,16 @@ public class LinkColumns {
   public String generateMatchArgSQL(String table)
   {
     CharBuffer cb = new CharBuffer();
-    
+
     for (int i = 0; i < _columns.size(); i++) {
       if (i != 0)
-	cb.append(" and ");
+        cb.append(" and ");
 
       if (table != null) {
-	cb.append(table);
-	cb.append(".");
+        cb.append(table);
+        cb.append(".");
       }
-      
+
       cb.append(_columns.get(i).getName());
       cb.append("=?");
     }
@@ -253,17 +253,17 @@ public class LinkColumns {
    * @param targetTable the SQL table name for the target
    */
   public String generateJoin(String sourceTable,
-			     String targetTable)
+                             String targetTable)
   {
     CharBuffer cb = new CharBuffer();
-    
+
     cb.append('(');
 
     for (int i = 0; i < _columns.size(); i++) {
       ForeignColumn column = _columns.get(i);
 
       if (i != 0)
-	cb.append(" and ");
+        cb.append(" and ");
 
       cb.append(sourceTable);
       cb.append('.');
@@ -275,7 +275,7 @@ public class LinkColumns {
       cb.append('.');
       cb.append(column.getTargetColumn().getName());
     }
-    
+
     cb.append(')');
 
     return cb.toString();
@@ -288,23 +288,23 @@ public class LinkColumns {
    * @param targetTable the SQL table name for the target
    */
   public String generateWhere(String sourceTable,
-			      String targetTable)
+                              String targetTable)
   {
     CharBuffer cb = new CharBuffer();
-    
+
     cb.append('(');
 
     for (int i = 0; i < _columns.size(); i++) {
       ForeignColumn column = _columns.get(i);
 
       if (i != 0)
-	cb.append(" and ");
+        cb.append(" and ");
 
       if (! column.isNotNull()) {
-	cb.append(sourceTable);
-	cb.append('.');
-	cb.append(column.getName());
-	cb.append(" is not null ");
+        cb.append(sourceTable);
+        cb.append('.');
+        cb.append(column.getName());
+        cb.append(" is not null ");
       }
 
       cb.append(" and ");
@@ -319,7 +319,7 @@ public class LinkColumns {
       cb.append('.');
       cb.append(column.getTargetColumn().getName());
     }
-    
+
     cb.append(')');
 
     return cb.toString();
@@ -332,38 +332,38 @@ public class LinkColumns {
     throws SQLException
   {
     aConn.flush();
-    
+
     String sourceTable = _sourceTable.getName();
 
     if (! isSourceCascadeDelete()) {
       CharBuffer cb = new CharBuffer();
-      
+
       cb.append("update " + sourceTable + " set ");
 
       ArrayList<ForeignColumn> columns = getColumns();
 
       for (int i = 0; i < columns.size(); i++) {
-	if (i != 0)
-	  cb.append (", ");
-	
-	cb.append(columns.get(i).getName() + "=null");
+        if (i != 0)
+          cb.append (", ");
+
+        cb.append(columns.get(i).getName() + "=null");
       }
-	
+
       cb.append(" where ");
 
       for (int i = 0; i < columns.size(); i++) {
-	if (i != 0)
-	  cb.append (" and ");
-	
-	cb.append(columns.get(i).getName() + "=?");
+        if (i != 0)
+          cb.append (" and ");
+
+        cb.append(columns.get(i).getName() + "=?");
       }
-    
+
       PreparedStatement pstmt = aConn.prepareStatement(cb.toString());
 
       entity.__caucho_setKey(pstmt, 1);
 
       pstmt.executeUpdate();
-      
+
       aConn.addCompletion(_sourceTable.getUpdateCompletion());
     }
     else if (_sourceTable.isCascadeDelete()) {
@@ -377,7 +377,7 @@ public class LinkColumns {
       EntityType entityType = (EntityType) _sourceTable.getType();
 
       CharBuffer cb = new CharBuffer();
-      
+
       cb.append("select ");
       cb.append(entityType.getId().generateSelect("o"));
       cb.append(" from " + sourceTable + " o");
@@ -386,52 +386,52 @@ public class LinkColumns {
       ArrayList<ForeignColumn> columns = getColumns();
 
       for (int i = 0; i < columns.size(); i++) {
-	if (i != 0)
-	  cb.append (" and ");
-	
-	cb.append(columns.get(i).getName() + "=?");
+        if (i != 0)
+          cb.append (" and ");
+
+        cb.append(columns.get(i).getName() + "=?");
       }
-    
+
       PreparedStatement pstmt = aConn.prepareStatement(cb.toString());
 
       entity.__caucho_setKey(pstmt, 1);
 
       ArrayList<Object> proxyList = new ArrayList<Object>();
-      
+
       ResultSet rs = pstmt.executeQuery();
       while (rs.next()) {
-	proxyList.add(entityType.getHome().loadLazy(aConn, rs, 1));
+        proxyList.add(entityType.getHome().loadLazy(aConn, rs, 1));
       }
       rs.close();
 
       for (Object obj : proxyList) {
-	entityType.getHome().getEntityFactory().delete(aConn, obj);
+        entityType.getHome().getEntityFactory().delete(aConn, obj);
       }
     }
     else {
       CharBuffer cb = new CharBuffer();
-      
+
       cb.append("delete from " + sourceTable +
-		" where ");
+                " where ");
 
       ArrayList<ForeignColumn> columns = getColumns();
 
       for (int i = 0; i < columns.size(); i++) {
-	if (i != 0)
-	  cb.append (" and ");
-	
-	cb.append(columns.get(i).getName() + "=?");
+        if (i != 0)
+          cb.append (" and ");
+
+        cb.append(columns.get(i).getName() + "=?");
       }
-    
+
       PreparedStatement pstmt = aConn.prepareStatement(cb.toString());
 
       entity.__caucho_setKey(pstmt, 1);
 
       pstmt.executeUpdate();
-      
+
       aConn.addCompletion(_sourceTable.getDeleteCompletion());
     }
-    
+
     aConn.expire();
   }
 
@@ -442,5 +442,10 @@ public class LinkColumns {
     throws SQLException
   {
     // this should be handled programmatically
+  }
+
+  public String toString()
+  {
+    return "[" + _sourceTable + ", " + _targetTable + ", " + _columns + "]";
   }
 }
