@@ -40,6 +40,7 @@ import java.net.URL;
 import java.math.BigDecimal;
 
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.Timestamp;
 import java.sql.Time;
 import java.sql.Ref;
@@ -76,6 +77,7 @@ public class ResultSetImpl implements ResultSet {
 
   private QueryCacheKey _cacheKey;
   private ResultSetCacheChunk _cacheChunk;
+  private ResultSetMetaData _cacheMetaData;
   private boolean _isCache;
 
   private int _firstResult;
@@ -98,8 +100,22 @@ public class ResultSetImpl implements ResultSet {
    * Sets the result set.
    */
   public void setResultSet(ResultSet rs)
+    throws SQLException
   {
     _rs = rs;
+
+    if (rs != null)
+      _cacheMetaData = rs.getMetaData();
+  }
+
+  /**
+   * Sets the result set and meta data.
+   */
+  public void setResultSet(ResultSet rs,
+                           ResultSetMetaData metaData)
+  {
+    _rs = rs;
+    _cacheMetaData = metaData;
   }
 
   /**
@@ -123,9 +139,11 @@ public class ResultSetImpl implements ResultSet {
   /**
    * Sets the first cache chunk
    */
-  public void setCacheChunk(ResultSetCacheChunk cacheChunk)
+  public void setCacheChunk(ResultSetCacheChunk cacheChunk,
+                            ResultSetMetaData metaData)
   {
     _cacheChunk = cacheChunk;
+    _cacheMetaData = metaData;
     _isCache = true;
   }
 
@@ -184,20 +202,22 @@ public class ResultSetImpl implements ResultSet {
           if (expr instanceof LoadEntityExpr) {
             LoadEntityExpr entityExpr = (LoadEntityExpr) expr;
 
-            tail.setValue(i, j,
-                          entityExpr.getCacheObject(_session,
-                                                    _rs,
-                                                    index + offset,
-                                                    _joinFetchMap));
+            Object obj = entityExpr.getCacheObject(_session,
+                                                   _rs,
+                                                   index + offset,
+                                                   _joinFetchMap);
 
-            // jpa/0t71
+            tail.setValue(i, j, obj);
+
+            // jpa/11z1
             offset += entityExpr.getIndex();
           }
           else {
-            tail.setValue(i, j,
-                          expr.getCacheObject(_session,
-                                              _rs,
-                                              index + offset));
+            Object obj = expr.getCacheObject(_session,
+                                             _rs,
+                                             index + offset);
+
+            tail.setValue(i, j, obj);
           }
         }
       }
@@ -285,7 +305,20 @@ public class ResultSetImpl implements ResultSet {
   public java.sql.ResultSetMetaData getMetaData()
     throws SQLException
   {
-    return _rs.getMetaData();
+    try {
+
+      if (_rs == null)
+        return _cacheMetaData;
+      else {
+        _cacheMetaData = _rs.getMetaData();
+
+        return _cacheMetaData;
+      }
+
+    } catch (NullPointerException ex) {
+    }
+
+    return null;
   }
 
   /**
@@ -396,6 +429,8 @@ public class ResultSetImpl implements ResultSet {
         return true;
       else if (_userQuery != null) {
         _rs = _userQuery.executeQuery(row, -1);
+
+        _cacheMetaData = _rs.getMetaData();
 
         return _rs.next();
       }

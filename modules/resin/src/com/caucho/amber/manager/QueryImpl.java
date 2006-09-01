@@ -36,6 +36,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -96,22 +97,6 @@ public class QueryImpl implements Query {
       ResultSetMetaData metaData = null;
       int columnCount = -1;
 
-      try {
-
-        metaData = rs.getMetaData();
-
-        if (metaData != null)
-          columnCount = metaData.getColumnCount();
-
-      } catch (Exception ex) {
-        // Below, we work around if DB is not able
-        // to retrieve result set meta data. jpa/0t00
-        metaData = null;
-      }
-
-      if (columnCount < 0)
-        columnCount = 10000;
-
       int n = 0;
 
       Object row[] = null;
@@ -130,20 +115,36 @@ public class QueryImpl implements Query {
         Object object = null;
 
         if (n == 0) {
+
+          try {
+
+            metaData = rs.getMetaData();
+
+            if (metaData != null)
+              columnCount = metaData.getColumnCount();
+
+          } catch (Exception ex) {
+            // Below, we work around if DB is not able
+            // to retrieve result set meta data. jpa/0t00
+            metaData = null;
+          }
+
+          if (columnCount < 0)
+            columnCount = 10000;
+
           for (int i=1; i<=columnCount; i++) {
+
             try {
 
-              object = rs.getObject(i);
+              object = getInternalObject(i, rs, metaData);
+
               columns.add(object);
 
             } catch (Exception ex) {
 
-              // XXX: add this check when meta data
-              // is working properly.
-              //
-              // if (metaData != null) {
-              //   throw ex;
-              // }
+              if (metaData != null) {
+                throw ex;
+              }
 
               // this will only happen when DB does
               // not support result set meta data (above).
@@ -156,24 +157,37 @@ public class QueryImpl implements Query {
 
           if (constructorClass != null) {
 
+            StringBuilder argTypes = new StringBuilder();
+
             try {
 
               Class paramTypes[] = new Class[n];
 
-              for (int i=0; i < n; i++)
+              boolean isFirst = true;
+
+              for (int i=0; i < n; i++) {
                 paramTypes[i] = row[i].getClass();
 
-              constructor = constructorClass.getConstructor(paramTypes);
+                if (isFirst)
+                  isFirst = false;
+                else
+                  argTypes.append(", ");
+
+                argTypes.append(paramTypes[i].getName());
+              }
+
+              constructor = constructorClass.getDeclaredConstructor(paramTypes);
 
             } catch (Exception ex) {
-              throw error(L.l("Unable to find constructor {0}. Make sure there is a public constructor for the given arguments", constructorClass.getName()));
+              throw error(L.l("Unable to find constructor {0}. Make sure there is a public constructor for the given argument types ({1})", constructorClass.getName(), argTypes));
             }
           }
         }
         else {
           row = new Object[n];
+
           for (int i=1; i<=n; i++) {
-            row[i-1] = rs.getObject(i);
+            row[i-1] = getInternalObject(i, rs, metaData);
           }
         }
 
@@ -184,7 +198,32 @@ public class QueryImpl implements Query {
             results.add(row);
         }
         else {
-          results.add(constructor.newInstance(row));
+
+          try {
+            object = constructor.newInstance(row);
+          } catch (Exception ex) {
+
+            StringBuilder argTypes = new StringBuilder();
+
+            boolean isFirst = true;
+
+            for (int i=0; i<row.length; i++) {
+
+              if (isFirst)
+                isFirst = false;
+              else
+                argTypes.append(", ");
+
+              if (row[i] == null)
+                argTypes.append("null");
+              else
+                argTypes.append(row[i].toString()); // .getClass().getName());
+            }
+
+            throw error(L.l("Unable to instantiate {0} with parameters ({1}).", constructorClass.getName(), argTypes));
+          }
+
+          results.add(object);
         }
       }
 
@@ -356,5 +395,42 @@ public class QueryImpl implements Query {
     msg += "\nin \"" + _query.getQueryString() + "\"";
 
     return new AmberException(msg);
+  }
+
+  /**
+   * Returns the object using the correct
+   * result set getter based on meta data.
+   */
+  private Object getInternalObject(int i,
+                                   ResultSet rs,
+                                   ResultSetMetaData metaData)
+    throws Exception
+  {
+    Object object = null;
+
+    switch (metaData.getColumnType(i)) {
+    case Types.BIT:
+    case Types.TINYINT:
+    case Types.SMALLINT:
+    case Types.INTEGER:
+    case Types.BIGINT:
+      // XXX: needs to be extended
+      object = rs.getInt(i);
+      break;
+
+    case Types.DECIMAL:
+    case Types.DOUBLE:
+    case Types.FLOAT:
+    case Types.NUMERIC:
+    case Types.REAL:
+      // XXX: needs to be extended
+      object = rs.getDouble(i);
+      break;
+
+    default:
+      object = rs.getObject(i);
+    }
+
+    return object;
   }
 }

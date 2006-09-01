@@ -33,7 +33,6 @@ import java.io.InputStream;
 
 import java.net.URL;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -44,6 +43,7 @@ import javax.sql.DataSource;
 
 import com.caucho.amber.AmberRuntimeException;
 
+import com.caucho.amber.cfg.EntityMappingsConfig;
 import com.caucho.amber.cfg.PersistenceConfig;
 import com.caucho.amber.cfg.PersistenceUnitConfig;
 
@@ -52,6 +52,7 @@ import com.caucho.amber.type.EntityType;
 import com.caucho.amber.gen.AmberEnhancer;
 import com.caucho.amber.gen.AmberGenerator;
 
+import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JClassLoader;
 
 import com.caucho.config.Config;
@@ -333,10 +334,23 @@ public class AmberContainer {
 
     try {
 
-      ArrayList<String> classList = new ArrayList<String>();
+      Path ormXml = root.lookup("META-INF/orm.xml");
+
+      if (ormXml.exists()) {
+        is = ormXml.openRead();
+
+        EntityMappingsConfig entityMappings = new EntityMappingsConfig();
+        entityMappings.setRoot(root);
+
+        new Config().configure(entityMappings, is,
+                               "com/caucho/amber/cfg/mapping-30.rnc");
+      }
+
+      HashMap<String, JClass> classMap
+        = new HashMap<String, JClass>();
 
       // XXX: This is not necessary when <exclude-unlisted-classes/>
-      lookupClasses(root.getPath().length(), root, classList);
+      lookupClasses(root.getPath().length(), root, classMap);
 
       is = persistenceXml.openRead();
 
@@ -348,7 +362,7 @@ public class AmberContainer {
 
       for (PersistenceUnitConfig unitConfig : persistence.getUnitList()) {
         try {
-          unitConfig.addAllClasses(classList);
+          unitConfig.addAllClasses(classMap);
 
           AmberPersistenceUnit unit = unitConfig.init(this);
 
@@ -383,7 +397,7 @@ public class AmberContainer {
    */
   public void lookupClasses(int rootNameLength,
                             Path curr,
-                            ArrayList<String> list)
+                            HashMap<String, JClass> classMap)
     throws Exception
   {
     Iterator<String> it = curr.iterator();
@@ -395,7 +409,7 @@ public class AmberContainer {
       Path path = curr.lookup(s);
 
       if (path.isDirectory()) {
-        lookupClasses(rootNameLength, path, list);
+        lookupClasses(rootNameLength, path, classMap);
       }
       else if (s.endsWith(".class")) {
         String packageName = curr.getPath().substring(rootNameLength);
@@ -405,7 +419,23 @@ public class AmberContainer {
         if (packageName.length() > 0)
           packageName = packageName + '.';
 
-        list.add(packageName + s.substring(0, s.length() - 6));
+        String className = packageName + s.substring(0, s.length() - 6);
+
+        JClass type = _jClassLoader.forName(className);
+
+        if (type != null) {
+
+          boolean isEntity
+            = type.getAnnotation(javax.persistence.Entity.class) != null;
+          boolean isEmbeddable
+            = type.getAnnotation(javax.persistence.Embeddable.class) != null;
+          boolean isMappedSuperclass
+            = type.getAnnotation(javax.persistence.MappedSuperclass.class) != null;
+
+          if (isEntity || isEmbeddable || isMappedSuperclass) {
+            classMap.put(className, type);
+          }
+        }
       }
     }
   }

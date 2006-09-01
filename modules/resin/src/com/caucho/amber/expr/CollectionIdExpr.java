@@ -54,4 +54,13 @@ public class CollectionIdExpr extends IdExpr {
   {
     return _path;
   }
+
+  /**
+   * Returns true if the expression uses the from item.
+   */
+  public boolean usesFrom(FromItem from, int type, boolean isNot)
+  {
+    return ((getFromItem() == from) ||
+            (getFromItem().getJoinExpr().getJoinTarget() == from));
+  }
 }

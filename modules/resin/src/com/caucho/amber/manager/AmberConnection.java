@@ -41,6 +41,7 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
@@ -1385,6 +1386,14 @@ public class AmberConnection
   }
 
   /**
+   * Returns the result set meta data from cache.
+   */
+  public ResultSetMetaData getQueryMetaData()
+  {
+    return _persistenceUnit.getQueryMetaData(_queryKey);
+  }
+
+  /**
    * Sets the cache chunk.
    *
    * @param sql the SQL for the cache chunk
@@ -1395,7 +1404,8 @@ public class AmberConnection
   public void putQueryCacheChunk(String sql,
                                  Object []args,
                                  int startRow,
-                                 ResultSetCacheChunk cacheChunk)
+                                 ResultSetCacheChunk cacheChunk,
+                                 ResultSetMetaData cacheMetaData)
   {
     QueryCacheKey key = new QueryCacheKey();
     Object []newArgs = new Object[args.length];
@@ -1405,6 +1415,7 @@ public class AmberConnection
     key.init(sql, newArgs, startRow);
 
     _persistenceUnit.putQueryChunk(key, cacheChunk);
+    _persistenceUnit.putQueryMetaData(key, cacheMetaData);
   }
 
   /**

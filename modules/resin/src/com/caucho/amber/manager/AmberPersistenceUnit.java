@@ -35,6 +35,7 @@ import java.lang.ref.SoftReference;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 import java.util.ArrayList;
@@ -140,6 +141,9 @@ public class AmberPersistenceUnit {
 
   private LruCache<QueryCacheKey,SoftReference<ResultSetCacheChunk>> _queryCache =
     new LruCache<QueryCacheKey,SoftReference<ResultSetCacheChunk>>(1024);
+
+  private LruCache<QueryCacheKey,SoftReference<ResultSetMetaData>> _queryCacheMetaData =
+    new LruCache<QueryCacheKey,SoftReference<ResultSetMetaData>>(16);
 
   private LruCache<EntityKey,SoftReference<EntityItem>> _entityCache =
     new LruCache<EntityKey,SoftReference<EntityItem>>(32 * 1024);
@@ -387,23 +391,35 @@ public class AmberPersistenceUnit {
 
   /**
    * Add an entity.
+   *
+   * @param className the class name
+   * @param type the JClass type if it is already verified as an
+   *             Entity | Embeddable | MappedSuperclass
    */
-  public void addEntityClass(String className)
+  public void addEntityClass(String className,
+                             JClass type)
     throws ConfigException
   {
-    JClass type = getJClassLoader().forName(className);
-
     if (type == null) {
-      throw new ConfigException(L.l("'{0}' is an unknown type",
-                                    className));
-    }
 
-    boolean isEntity = type.getAnnotation(javax.persistence.Entity.class) != null;
-    boolean isEmbeddable = type.getAnnotation(javax.persistence.Embeddable.class) != null;
-    boolean isMappedSuperclass = type.getAnnotation(javax.persistence.MappedSuperclass.class) != null;
-    if (! (isEntity || isEmbeddable || isMappedSuperclass)) {
-      throw new ConfigException(L.l("'{0}' must implement javax.persistence.Entity, javax.persistence.Embeddable or javax.persistence.MappedSuperclass",
-                                    className));
+      type = getJClassLoader().forName(className);
+
+      if (type == null) {
+        throw new ConfigException(L.l("'{0}' is an unknown type",
+                                      className));
+      }
+
+      boolean isEntity
+        = type.getAnnotation(javax.persistence.Entity.class) != null;
+      boolean isEmbeddable
+        = type.getAnnotation(javax.persistence.Embeddable.class) != null;
+      boolean isMappedSuperclass
+        = type.getAnnotation(javax.persistence.MappedSuperclass.class) != null;
+
+      if (! (isEntity || isEmbeddable || isMappedSuperclass)) {
+        throw new ConfigException(L.l("'{0}' must implement javax.persistence.Entity, javax.persistence.Embeddable or javax.persistence.MappedSuperclass",
+                                      className));
+      }
     }
 
     try {
@@ -977,11 +993,32 @@ public class AmberPersistenceUnit {
   }
 
   /**
+   * Returns the query meta data.
+   */
+  public ResultSetMetaData getQueryMetaData(QueryCacheKey key)
+  {
+    SoftReference<ResultSetMetaData> ref = _queryCacheMetaData.get(key);
+
+    if (ref == null)
+      return null;
+    else
+      return ref.get();
+  }
+
+  /**
    * Sets the query result.
    */
   public void putQueryChunk(QueryCacheKey key, ResultSetCacheChunk chunk)
   {
     _queryCache.put(key, new SoftReference<ResultSetCacheChunk>(chunk));
+  }
+
+  /**
+   * Sets the query meta data.
+   */
+  public void putQueryMetaData(QueryCacheKey key, ResultSetMetaData metaData)
+  {
+    _queryCacheMetaData.put(key, new SoftReference<ResultSetMetaData>(metaData));
   }
 
   /**

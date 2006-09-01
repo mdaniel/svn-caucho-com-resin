@@ -34,6 +34,7 @@ import java.lang.reflect.Method;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 import java.util.ArrayList;
@@ -327,13 +328,15 @@ public class UserQuery implements AmberQuery {
       isCacheable = true;
 
     ResultSetCacheChunk cacheChunk = null;
+    ResultSetMetaData metaData = null;
 
     if (isCacheable) {
       int row = 0;
 
       cacheChunk = _aConn.getQueryCacheChunk(query.getSQL(), _argValues, row);
+      metaData = _aConn.getQueryMetaData();
 
-      _rs.setCacheChunk(cacheChunk);
+      _rs.setCacheChunk(cacheChunk, metaData);
       _rs.setUserQuery(this);
     }
 
@@ -341,7 +344,10 @@ public class UserQuery implements AmberQuery {
       ResultSet rs;
 
       rs = executeQuery(0, _maxResults);
-      _rs.setResultSet(rs);
+
+      metaData = rs.getMetaData();
+
+      _rs.setResultSet(rs, metaData);
 
       if (isCacheable) {
         cacheChunk = new ResultSetCacheChunk();
@@ -349,9 +355,10 @@ public class UserQuery implements AmberQuery {
 
         _rs.fillCacheChunk(cacheChunk);
 
-        _rs.setCacheChunk(cacheChunk);
+        _rs.setCacheChunk(cacheChunk, metaData);
 
-        _aConn.putQueryCacheChunk(query.getSQL(), _argValues, 0, cacheChunk);
+        _aConn.putQueryCacheChunk(query.getSQL(), _argValues, 0,
+                                  cacheChunk, metaData);
       }
     }
 
