@@ -35,8 +35,11 @@ import com.caucho.util.L10N;
 import com.caucho.java.JavaWriter;
 
 import java.sql.ResultSet;
+import java.sql.PreparedStatement;
 import java.sql.Types;
 import java.sql.SQLException;
+
+import javax.persistence.TemporalType;
 
 import com.caucho.amber.manager.AmberPersistenceUnit;
 
@@ -46,10 +49,18 @@ import com.caucho.amber.manager.AmberPersistenceUnit;
 public class UtilDateType extends Type {
   private static final L10N L = new L10N(UtilDateType.class);
 
-  private static final UtilDateType UTIL_DATE_TYPE = new UtilDateType();
+  public static final UtilDateType
+    TEMPORAL_DATE_TYPE = new UtilDateType(TemporalType.DATE);
+  public static final UtilDateType
+    TEMPORAL_TIME_TYPE = new UtilDateType(TemporalType.TIME);
+  public static final UtilDateType
+    TEMPORAL_TIMESTAMP_TYPE = new UtilDateType(TemporalType.TIMESTAMP);
 
-  private UtilDateType()
+  private TemporalType _temporalType;
+
+  private UtilDateType(TemporalType temporalType)
   {
+    _temporalType = temporalType;
   }
 
   /**
@@ -57,7 +68,7 @@ public class UtilDateType extends Type {
    */
   public static UtilDateType create()
   {
-    return UTIL_DATE_TYPE;
+    return TEMPORAL_TIMESTAMP_TYPE;
   }
 
   /**
@@ -71,7 +82,10 @@ public class UtilDateType extends Type {
   /**
    * Generates the type for the table.
    */
-  public String generateCreateColumnSQL(AmberPersistenceUnit manager, int length, int precision, int scale)
+  public String generateCreateColumnSQL(AmberPersistenceUnit manager,
+                                        int length,
+                                        int precision,
+                                        int scale)
   {
     return manager.getCreateColumnSQL(Types.TIMESTAMP, length, precision, scale);
   }
@@ -79,8 +93,10 @@ public class UtilDateType extends Type {
   /**
    * Generates a string to load the property.
    */
-  public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index)
+  public int generateLoad(JavaWriter out,
+                          String rs,
+                          String indexVar,
+                          int index)
     throws IOException
   {
     out.print("com.caucho.amber.type.UtilDateType.toDate(" + rs + ".getTimestamp(" + indexVar + " + " + index + "))");
@@ -91,8 +107,10 @@ public class UtilDateType extends Type {
   /**
    * Generates a string to set the property.
    */
-  public void generateSet(JavaWriter out, String pstmt,
-			  String index, String value)
+  public void generateSet(JavaWriter out,
+                          String pstmt,
+                          String index,
+                          String value)
     throws IOException
   {
     out.println("if (" + value + " == null)");
@@ -122,5 +140,28 @@ public class UtilDateType extends Type {
       return null;
     else
       return new java.util.Date(date.getTime());
+  }
+
+  /**
+   * Sets the value.
+   */
+  public void setParameter(PreparedStatement pstmt,
+                           int index,
+                           Object value)
+    throws SQLException
+  {
+    switch (_temporalType) {
+    case DATE:
+      pstmt.setObject(index, value, Types.DATE);
+      break;
+
+    case TIME:
+      pstmt.setObject(index, value, Types.TIME);
+      break;
+
+    default:
+      pstmt.setObject(index, value, Types.TIMESTAMP);
+      break;
+    }
   }
 }

@@ -55,6 +55,8 @@ import com.caucho.amber.query.AbstractQuery;
 import com.caucho.amber.query.SelectQuery;
 import com.caucho.amber.query.UserQuery;
 
+import com.caucho.amber.type.UtilDateType;
+
 import com.caucho.util.L10N;
 
 import com.caucho.ejb.EJBExceptionWrapper;
@@ -129,22 +131,36 @@ public class QueryImpl implements Query {
             metaData = null;
           }
 
-          if (columnCount < 0)
+          if (columnCount <= 0)
             columnCount = 10000;
 
           for (int i=1; i<=columnCount; i++) {
 
+            int columnType = -1;
+
+            try {
+              columnType = metaData.getColumnType(i);
+            } catch (Exception ex) {
+            }
+
             try {
 
-              object = getInternalObject(i, rs, metaData);
+              object = getInternalObject(i, rs, columnType);
 
               columns.add(object);
 
-            } catch (Exception ex) {
+            } catch (ArrayIndexOutOfBoundsException ex1) {
 
-              if (metaData != null) {
-                throw ex;
-              }
+              // XXX: Add this when caucho.db meta data
+              // is working properly.
+              //
+              // if (metaData != null) {
+              //   throw ex1;
+              // }
+
+              break;
+
+            } catch (Exception ex2) {
 
               // this will only happen when DB does
               // not support result set meta data (above).
@@ -184,10 +200,19 @@ public class QueryImpl implements Query {
           }
         }
         else {
+
           row = new Object[n];
 
           for (int i=1; i<=n; i++) {
-            row[i-1] = getInternalObject(i, rs, metaData);
+
+            int columnType = -1;
+
+            try {
+              columnType = metaData.getColumnType(i);
+            } catch (Exception ex) {
+            }
+
+            row[i-1] = getInternalObject(i, rs, columnType);
           }
         }
 
@@ -306,7 +331,7 @@ public class QueryImpl implements Query {
    */
   public Query setParameter(String name, Object value)
   {
-    ArrayList<String> mapping =_query.getPreparedMapping();
+    ArrayList<String> mapping = _query.getPreparedMapping();
 
     int n = mapping.size();
 
@@ -324,6 +349,16 @@ public class QueryImpl implements Query {
    */
   public Query setParameter(String name, Date value, TemporalType type)
   {
+    ArrayList<String> mapping = _query.getPreparedMapping();
+
+    int n = mapping.size();
+
+    for (int i=0; i < n; i++) {
+      if (mapping.get(i).equals(name)) {
+        setParameter(i+1, value, type);
+      }
+    }
+
     return this;
   }
 
@@ -332,6 +367,16 @@ public class QueryImpl implements Query {
    */
   public Query setParameter(String name, Calendar value, TemporalType type)
   {
+    ArrayList<String> mapping = _query.getPreparedMapping();
+
+    int n = mapping.size();
+
+    for (int i=0; i < n; i++) {
+      if (mapping.get(i).equals(name)) {
+        setParameter(i+1, value, type);
+      }
+    }
+
     return this;
   }
 
@@ -355,6 +400,23 @@ public class QueryImpl implements Query {
    */
   public Query setParameter(int index, Date value, TemporalType type)
   {
+    if (value == null)
+      _userQuery.setNull(index, Types.JAVA_OBJECT);
+    else {
+      switch (type) {
+      case TIME:
+        _userQuery.setObject(index, value, UtilDateType.TEMPORAL_TIME_TYPE);
+        break;
+
+      case DATE:
+        _userQuery.setObject(index, value, UtilDateType.TEMPORAL_DATE_TYPE);
+        break;
+
+      default:
+        _userQuery.setObject(index, value, UtilDateType.TEMPORAL_TIMESTAMP_TYPE);
+      }
+    }
+
     return this;
   }
 
@@ -363,6 +425,24 @@ public class QueryImpl implements Query {
    */
   public Query setParameter(int index, Calendar value, TemporalType type)
   {
+    /*
+    if (value == null)
+      _userQuery.setNull(index, Types.JAVA_OBJECT);
+    else {
+      switch (type) {
+      case TIME:
+        _userQuery.setObject(index, value, UtilCalendar.TEMPORAL_TIME_TYPE);
+        break;
+
+      case DATE:
+        _userQuery.setObject(index, value, UtilCalendar.TEMPORAL_DATE_TYPE);
+        break;
+
+      default:
+        _userQuery.setObject(index, value, UtilCalendar.TEMPORAL_TIMESTAMP_TYPE);
+      }
+    }*/
+
     return this;
   }
 
@@ -399,23 +479,23 @@ public class QueryImpl implements Query {
 
   /**
    * Returns the object using the correct
-   * result set getter based on meta data.
+   * result set getter based on SQL type.
    */
-  private Object getInternalObject(int i,
+  private Object getInternalObject(int index,
                                    ResultSet rs,
-                                   ResultSetMetaData metaData)
+                                   int columnType)
     throws Exception
   {
     Object object = null;
 
-    switch (metaData.getColumnType(i)) {
+    switch (columnType) {
     case Types.BIT:
     case Types.TINYINT:
     case Types.SMALLINT:
     case Types.INTEGER:
     case Types.BIGINT:
       // XXX: needs to be extended
-      object = rs.getInt(i);
+      object = rs.getInt(index);
       break;
 
     case Types.DECIMAL:
@@ -424,11 +504,11 @@ public class QueryImpl implements Query {
     case Types.NUMERIC:
     case Types.REAL:
       // XXX: needs to be extended
-      object = rs.getDouble(i);
+      object = rs.getDouble(index);
       break;
 
     default:
-      object = rs.getObject(i);
+      object = rs.getObject(index);
     }
 
     return object;

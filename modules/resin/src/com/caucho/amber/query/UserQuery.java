@@ -36,6 +36,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -264,6 +265,16 @@ public class UserQuery implements AmberQuery {
   }
 
   /**
+   * Sets the argument with an object and its Amber type.
+   */
+  public void setObject(int index, Object v, Type type)
+  {
+    _argTypes[index - 1] = type;
+    _argValues[index - 1] = v;
+    _argLength = index;
+  }
+
+  /**
    * Sets the argument with a null
    */
   public void setNull(int index, int v)
@@ -414,8 +425,9 @@ public class UserQuery implements AmberQuery {
     pstmt.clearParameters();
 
     for (int i = 0; i < _argLength; i++) {
-      if (_argValues[i] != null)
+      if (_argValues[i] != null) {
         _argTypes[i].setParameter(pstmt, i + 1, _argValues[i]);
+      }
     }
 
     _query.prepare(this, _aConn);

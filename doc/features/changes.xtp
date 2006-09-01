@@ -8,6 +8,9 @@
 
 <s2 title="3.1snap - Aug 1, 2006">
 <ul>
+<li>Amber query with named parameters was not implemented (#1063, rep by keith)</li>
+<li>Amber NEW was not implemented in the SELECT clause (#1215, rep by fbertra)</li>
+<li>Amber JOIN was not implemented in the FROM clause (#1214, rep by fbertra, Francois Bertrand)</li>
 <li>&lt;database> prepared statement caching shouldn't cache with resultType (#1310, rep by gzhu)</li>
 <li>JNDI now throws NameNotFoundException instead of returning null (#1134, rep by Jan Heise)</li>
 <li>Get certificates for code signing from jar files (#1008, solved by Andrew)</li>
