@@ -283,6 +283,8 @@ public class LoadEntityExpr extends AbstractAmberExpr {
 
     _index = entity.__caucho_load(aConn, rs, index + keyLength);
 
+    item.setNumberOfLoadingColumns(_index);
+
     String property = joinFetchMap.get(this._expr);
 
     if (property != null) {

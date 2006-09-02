@@ -84,6 +84,8 @@ public class ResultSetImpl implements ResultSet {
   private int _maxResults = Integer.MAX_VALUE / 2;
   private int _row;
 
+  private int _numberOfLoadingColumns = 1;
+
   public ResultSetImpl()
   {
   }
@@ -241,6 +243,8 @@ public class ResultSetImpl implements ResultSet {
     throws SQLException
   {
     _row = 0;
+    _numberOfLoadingColumns = 1;
+
     while (_row < _firstResult && next()) {
     }
   }
@@ -1033,10 +1037,13 @@ public class ResultSetImpl implements ResultSet {
 
       if (obj instanceof EntityItem) {
         EntityItem entityItem = (EntityItem) obj;
+
         Entity entity = entityItem.getEntity();
 
         Object value = _session.loadProxy(entity.__caucho_getEntityType(),
                                           entity.__caucho_getPrimaryKey());
+
+        _numberOfLoadingColumns = entityItem.getNumberOfLoadingColumns();
 
         return value;
       }
@@ -1049,6 +1056,11 @@ public class ResultSetImpl implements ResultSet {
       AmberExpr expr = _resultList.get(column - 1);
 
       Object value = expr.getObject(_session, _rs, index);
+
+      if (expr instanceof LoadEntityExpr) {
+        LoadEntityExpr entityExpr = (LoadEntityExpr) expr;
+        _numberOfLoadingColumns = entityExpr.getIndex();
+      }
 
       return value;
     }
@@ -1652,6 +1664,11 @@ public class ResultSetImpl implements ResultSet {
     throws SQLException
   {
     throw new UnsupportedOperationException();
+  }
+
+  public int getNumberOfLoadingColumns()
+  {
+    return _numberOfLoadingColumns;
   }
 
   private int getColumn(String name)

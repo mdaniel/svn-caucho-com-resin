@@ -49,9 +49,12 @@ import javax.persistence.FlushModeType;
 
 import com.caucho.amber.AmberException;
 
+import com.caucho.amber.entity.Entity;
+
 import com.caucho.amber.manager.AmberConnection;
 
 import com.caucho.amber.query.AbstractQuery;
+import com.caucho.amber.query.ResultSetImpl;
 import com.caucho.amber.query.SelectQuery;
 import com.caucho.amber.query.UserQuery;
 
@@ -75,6 +78,8 @@ public class QueryImpl implements Query {
   private int _firstResult;
   private int _maxResults = Integer.MAX_VALUE / 2;
 
+  private int _currIndex;
+
   /**
    * Creates a manager instance.
    */
@@ -93,6 +98,20 @@ public class QueryImpl implements Query {
   public List getResultList()
   {
     try {
+
+      Class constructorClass = null;
+
+      SelectQuery selectQuery;
+
+      if (_query instanceof SelectQuery) {
+        selectQuery = (SelectQuery) _query;
+        constructorClass = selectQuery.getConstructorClass();
+      }
+      else
+        throw new IllegalStateException(L.l("javax.persistence.Query.getResultList() can only be applied to a SELECT statement"));
+
+      Constructor constructor = null;
+
       ArrayList results = new ArrayList();
 
       ResultSet rs = executeQuery();
@@ -106,16 +125,10 @@ public class QueryImpl implements Query {
 
       ArrayList columns = new ArrayList();
 
-      Class constructorClass = null;
-
-      if (_query instanceof SelectQuery) {
-        constructorClass = ((SelectQuery) _query).getConstructorClass();
-      }
-
-      Constructor constructor = null;
-
       while (rs.next()) {
         Object object = null;
+
+        _currIndex = 1;
 
         if (n == 0) {
 
@@ -135,18 +148,18 @@ public class QueryImpl implements Query {
           if (columnCount <= 0)
             columnCount = 10000;
 
-          for (int i=1; i<=columnCount; i++) {
+          while (_currIndex <= columnCount) {
 
             int columnType = -1;
 
             try {
-              columnType = metaData.getColumnType(i);
+              columnType = metaData.getColumnType(_currIndex);
             } catch (Exception ex) {
             }
 
             try {
 
-              object = getInternalObject(i, rs, columnType);
+              object = getInternalObject(rs, columnType);
 
               columns.add(object);
 
@@ -204,16 +217,16 @@ public class QueryImpl implements Query {
 
           row = new Object[n];
 
-          for (int i=1; i<=n; i++) {
+          while (_currIndex <= n) {
 
             int columnType = -1;
 
             try {
-              columnType = metaData.getColumnType(i);
+              columnType = metaData.getColumnType(_currIndex);
             } catch (Exception ex) {
             }
 
-            row[i-1] = getInternalObject(i, rs, columnType);
+            row[_currIndex-1] = getInternalObject(rs, columnType);
           }
         }
 
@@ -481,12 +494,23 @@ public class QueryImpl implements Query {
    * Returns the object using the correct
    * result set getter based on SQL type.
    */
-  private Object getInternalObject(int index,
-                                   ResultSet rs,
+  private Object getInternalObject(ResultSet rs,
                                    int columnType)
     throws Exception
   {
-    Object object = null;
+    int oldIndex = _currIndex;
+
+    _currIndex++;
+
+    Object object = rs.getObject(oldIndex);
+
+    if (object instanceof Entity) {
+      _currIndex += ((ResultSetImpl) rs).getNumberOfLoadingColumns();
+      return object;
+    }
+
+    if (object == null)
+      return null;
 
     switch (columnType) {
     case Types.BIT:
@@ -495,7 +519,7 @@ public class QueryImpl implements Query {
     case Types.INTEGER:
     case Types.BIGINT:
       // XXX: needs to be extended
-      object = rs.getInt(index);
+      object = rs.getInt(oldIndex);
       break;
 
     case Types.DECIMAL:
@@ -504,11 +528,11 @@ public class QueryImpl implements Query {
     case Types.NUMERIC:
     case Types.REAL:
       // XXX: needs to be extended
-      object = rs.getDouble(index);
+      object = rs.getDouble(oldIndex);
       break;
 
     default:
-      object = rs.getObject(index);
+      object = rs.getObject(oldIndex);
     }
 
     return object;

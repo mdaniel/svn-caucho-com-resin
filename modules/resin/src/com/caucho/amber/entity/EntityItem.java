@@ -37,7 +37,20 @@ import com.caucho.amber.manager.AmberConnection;
  * An entity item handles the living entities.
  */
 abstract public class EntityItem {
+
+  private int _numberOfLoadingColumns;
+
   abstract public Entity getEntity();
+
+  public int getNumberOfLoadingColumns()
+  {
+    return _numberOfLoadingColumns;
+  }
+
+  public void setNumberOfLoadingColumns(int number)
+  {
+    _numberOfLoadingColumns = number;
+  }
 
   public Entity loadEntity(int index)
   {
