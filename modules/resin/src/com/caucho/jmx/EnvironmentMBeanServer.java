@@ -32,17 +32,7 @@ package com.caucho.jmx;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-import javax.management.ObjectName;
-import javax.management.NotificationBroadcaster;
-import javax.management.NotificationEmitter;
-import javax.management.NotificationListener;
-import javax.management.NotificationFilter;
-import javax.management.StandardMBean;
-import javax.management.MBeanServerDelegate;
-import javax.management.MBeanServerDelegateMBean;
-import javax.management.ListenerNotFoundException;
-import javax.management.InstanceNotFoundException;
-import javax.management.RuntimeOperationsException;
+import javax.management.*;
 
 import javax.management.loading.ClassLoaderRepository;
 
@@ -50,7 +40,7 @@ import com.caucho.util.L10N;
 
 import com.caucho.log.Log;
 
-import com.caucho.loader.EnvironmentLocal;
+import com.caucho.loader.*;
 
 /**
  * JNDI object for the Resin mbean server.
@@ -103,6 +93,11 @@ public class EnvironmentMBeanServer extends AbstractMBeanServer {
       MBeanContext context = _localContext.getLevel(loader);
 
       if (context == null) {
+	if (loader instanceof DynamicClassLoader
+	    && ((DynamicClassLoader) loader).isDestroyed())
+	  throw new IllegalStateException(L.l("JMX context {0} has been closed.",
+					      loader));
+	
 	MBeanServerDelegate delegate;
 	delegate = new MBeanServerDelegateImpl("Resin-JMX");
 

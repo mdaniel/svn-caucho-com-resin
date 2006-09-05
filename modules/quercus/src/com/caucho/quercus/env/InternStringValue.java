@@ -75,6 +75,7 @@ public final class InternStringValue extends StringValueImpl {
   /**
    * Returns true for a number
    */
+  @Override
   public final boolean isNumber()
   {
     return _type != IS_STRING;

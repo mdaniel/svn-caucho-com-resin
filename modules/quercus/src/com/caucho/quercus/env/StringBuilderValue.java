@@ -161,6 +161,7 @@ public class StringBuilderValue extends UnicodeValue {
   /**
    * Returns true for a number
    */
+  @Override
   public boolean isNumber()
   {
     return getNumericType() != IS_STRING;
@@ -182,8 +183,10 @@ public class StringBuilderValue extends UnicodeValue {
     char []buffer = _buffer;
     int len = _length;
 
-    if (len == 0)
-      return IS_LONG;
+    if (len == 0) {
+      // php/120y
+      return IS_STRING;
+    }
 
     int i = 0;
     int ch = 0;

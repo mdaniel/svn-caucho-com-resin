@@ -265,6 +265,13 @@ public class ClusterServer {
   }
 
   /**
+   * Arguments on boot
+   */
+  public void addJvmArgs(String args)
+  {
+  }
+
+  /**
    * Sets a port.
    */
   public void setPort(int port)

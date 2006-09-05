@@ -63,11 +63,10 @@ import com.caucho.quercus.module.ClassImplementation;
  * JMS functions
  */
 @ClassImplementation
-public class JMSModule extends AbstractQuercusModule 
-  implements ModuleStartupListener {
-
-  private static final Logger log =
-    Logger.getLogger(JMSModule.class.getName());
+public class JMSModule extends AbstractQuercusModule
+{
+  private static final Logger log
+    = Logger.getLogger(JMSModule.class.getName());
 
   private static final L10N L = new L10N(JMSModule.class);
 
@@ -85,38 +84,11 @@ public class JMSModule extends AbstractQuercusModule
     return _iniMap;
   }
 
-  public void startup(Env env)
-  {
-    StringValue factoryName = env.getIni("jms.connection_factory");
-
-    if (factoryName == null)
-      log.fine("jms.connection_factory not set");
-
-    try {
-      _context = (Context) new InitialContext().lookup("java:comp/env");
-
-      _connectionFactory = 
-        (ConnectionFactory) _context.lookup(factoryName.toString());
-
-      if (_connectionFactory == null)
-        log.warning("Couldn't find factory " + factoryName.toString());
-    } catch (Exception e) {
-      log.fine(e.toString());
-    }
-
-    try {
-      env.getQuercus().addJavaClass("JMSQueue", 
-                                    com.caucho.quercus.lib.jms.JMSQueue.class);
-    } catch (ConfigException e) {
-      env.warning(L.l("JMSQueue unavailable: {0}", e));
-    }
-  }
-
   static JMSQueue message_get_queue(Env env, String queueName, 
                                     ConnectionFactory connectionFactory)
   {
     if (connectionFactory == null)
-      connectionFactory = _connectionFactory;
+      connectionFactory = getConnectionFactory(env);
 
     if (connectionFactory == null) {
       env.warning(L.l("No connection factory"));
@@ -130,6 +102,30 @@ public class JMSModule extends AbstractQuercusModule
 
       return null;
     }
+  }
+
+  private static ConnectionFactory getConnectionFactory(Env env)
+  {
+    StringValue factoryName = env.getIni("jms.connection_factory");
+
+    if (factoryName == null)
+      log.fine("jms.connection_factory not set");
+
+    try {
+      Context context = (Context) new InitialContext().lookup("java:comp/env");
+
+      _connectionFactory = 
+        (ConnectionFactory) context.lookup(factoryName.toString());
+
+      if (_connectionFactory == null)
+        log.warning("Couldn't find factory " + factoryName.toString());
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new QuercusModuleException(e);
+    }
+
+    return _connectionFactory;
   }
 
   static {

@@ -1544,13 +1544,24 @@ public final class Env {
       for (String key : keys) {
         String []value = _request.getParameterValues(key);
 
-        Post.addFormValue(array, key, value, getIniBoolean("magic_quotes_gpc"));
+        Post.addFormValue(array,
+			  key,
+			  value,
+			  getIniBoolean("magic_quotes_gpc"));
       }
 
       if (name.equals("_REQUEST") && _post != null) {
         for (Map.Entry<Value, Value> entry : _post.entrySet()) {
           array.put(entry.getKey(), entry.getValue().copy());
         }
+      }
+
+      Cookie []cookies = _request.getCookies();
+      for (int i = 0; cookies != null && i < cookies.length; i++) {
+	Post.addFormValue(array,
+			  cookies[i].getName(),
+			  new String[] { cookies[i].getValue() },
+			  getIniBoolean("magic_quotes_gpc"));
       }
 
       return var;

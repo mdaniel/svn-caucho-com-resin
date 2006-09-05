@@ -30,7 +30,9 @@ for the new server tags.</p>
 
     &lt;host id="">
       &lt;web-app id="/">
-        ...
+        &lt;rewrite-dispatch>
+          &lt;load-balance regexp="" cluster="app-tier"/>
+        &lt;/rewrite-dispatch>
       &lt;/web-app>
     &lt;/host>
   &lt;/cluster>
@@ -110,6 +112,19 @@ can now write to the client APIs without worrying about proxy generation.</p>
 
 <p>See <a href="../ioc/tutorial/jaxb-bean-config/index.xtp">JAXB Bean
 Configuration tutorial</a></p>
+
+</s1>
+
+<s1 title="Quercus">
+
+<s2 title="New Applications">
+
+<ol>
+<li>DokuWiki
+<li>Joomla
+</ol>
+
+</s2>
 
 </s1>
 

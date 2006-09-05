@@ -504,7 +504,7 @@ public class VariableModule extends AbstractQuercusModule {
    */
   public static boolean is_numeric(Env env, @ReadOnly Value v)
   {
-    return v.isLongConvertible() || v.isDoubleConvertible();
+    return v.isNumeric();
   }
 
   /**

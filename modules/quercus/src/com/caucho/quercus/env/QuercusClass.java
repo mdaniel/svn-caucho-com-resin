@@ -76,6 +76,9 @@ public class QuercusClass {
   private final IdentityIntMap _fieldMap
     = new IdentityIntMap();
   
+  private final HashMap<StringValue,Expr> _fieldInitMap
+    = new HashMap<StringValue,Expr>();
+  
   private final IdentityHashMap<String,AbstractFunction> _methodMap
     = new IdentityHashMap<String,AbstractFunction>();
   
@@ -189,10 +192,11 @@ public class QuercusClass {
   /**
    * Adds a field.
    */
-  public void addField(String name, int index)
+  public void addField(String name, int index, Expr initExpr)
   {
     _fieldNames.add(name);
     _fieldMap.put(name, index);
+    _fieldInitMap.put(new StringValueImpl(name), initExpr);
   }
 
   /**
@@ -212,6 +216,23 @@ public class QuercusClass {
 
       return index;
     }
+  }
+  
+  /**
+   * Returns a set of the fields and their initial values
+   */
+  public HashMap<StringValue,Expr> getClassVars()
+  {
+    return _fieldInitMap;
+  }
+  
+  /**
+   * Returns a set of the method names and their values
+   * @return a set of the method names and their values
+   */
+  public Set<Map.Entry<String, AbstractFunction>> getClassMethods()
+  {
+    return _classDef.functionSet();
   }
 
   /**
@@ -641,24 +662,6 @@ public class QuercusClass {
   public String toString()
   {
     return "QuercusClass[" + getName() + "]";
-  }
-  
-  /**
-   * Returns a set of the fields and their values
-   * @return a set of the fields and their values
-   */
-  public Set<Map.Entry<String, Expr>> getClassVars()
-  {
-    return _classDef.fieldSet();
-  }
-  
-  /**
-   * Returns a set of the method names and their values
-   * @return a set of the method names and their values
-   */
-  public Set<Map.Entry<String, AbstractFunction>> getClassMethods()
-  {
-    return _classDef.functionSet();
   }
 }
 

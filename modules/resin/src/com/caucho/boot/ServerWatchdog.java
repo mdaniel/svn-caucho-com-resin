@@ -55,6 +55,11 @@ public class ServerWatchdog implements Runnable {
 
   private String []_argv;
 
+  private ArrayList<String> _jvmArgs = new ArrayList<String>();
+  private boolean _is64bit;
+  private boolean _hasXss;
+  private boolean _hasXmx;
+
   private Path _serverRoot;
 
   private Boot _jniBoot;
@@ -124,6 +129,32 @@ public class ServerWatchdog implements Runnable {
   public int getWatchdogPort()
   {
     return _watchdogPort;
+  }
+  
+  public void addJvmArgs(String args)
+  {
+    String []argArray = args.split("\\s+");
+
+    for (int i = 0; i < argArray.length; i++) {
+      String arg = argArray[i];
+
+      if ("".equals(arg))
+	continue;
+
+      _jvmArgs.add(arg);
+
+      if (arg.equals("-d64"))
+	_is64bit = true;
+      else if (arg.startsWith("-Xss"))
+	_hasXss = true;
+      else if (arg.startsWith("-Xmx"))
+	_hasXmx = true;
+    }
+  }
+
+  public ArrayList<String> getJvmArgs()
+  {
+    return _jvmArgs;
   }
 
   /**
@@ -252,8 +283,19 @@ public class ServerWatchdog implements Runnable {
     String classPath = WatchdogManager.calculateClassPath(resinHome);
 
     env.put("CLASSPATH", classPath);
-    env.put("LD_LIBRARY_PATH", resinHome.lookup("libexec").getNativePath());
-    env.put("DYLD_LIBRARY_PATH", resinHome.lookup("libexec").getNativePath());
+
+    if (_is64bit) {
+      env.put("LD_LIBRARY_PATH",
+	      resinHome.lookup("libexec64").getNativePath());
+      env.put("DYLD_LIBRARY_PATH",
+	      resinHome.lookup("libexec64").getNativePath());
+    }
+    else {
+      env.put("LD_LIBRARY_PATH",
+	      resinHome.lookup("libexec").getNativePath());
+      env.put("DYLD_LIBRARY_PATH",
+	      resinHome.lookup("libexec").getNativePath());
+    }
 
     ArrayList<String> list = new ArrayList<String>();
 
@@ -263,7 +305,10 @@ public class ServerWatchdog implements Runnable {
     list.add("-Djava.awt.headless=true");
     list.add("-Dresin.home=" + resinHome.getPath());
     list.add("-Xrs");
-    list.add("-Xss1m");
+
+    if (! _hasXss)
+      list.add("-Xss1m");
+    
     list.add("com.caucho.boot.WatchdogManager");
 
     for (int i = 0; i < argv.length; i++)
@@ -504,8 +549,19 @@ public class ServerWatchdog implements Runnable {
     HashMap<String,String> env = new HashMap<String,String>();
 
     env.put("CLASSPATH", classPath);
-    env.put("LD_LIBRARY_PATH", resinHome.lookup("libexec").getNativePath());
-    env.put("DYLD_LIBRARY_PATH", resinHome.lookup("libexec").getNativePath());
+
+    if (_is64bit) {
+      env.put("LD_LIBRARY_PATH",
+	      resinHome.lookup("libexec64").getNativePath());
+      env.put("DYLD_LIBRARY_PATH",
+	      resinHome.lookup("libexec64").getNativePath());
+    }
+    else {
+      env.put("LD_LIBRARY_PATH",
+	      resinHome.lookup("libexec").getNativePath());
+      env.put("DYLD_LIBRARY_PATH",
+	      resinHome.lookup("libexec").getNativePath());
+    }
 
     ArrayList<String> list = new ArrayList<String>();
 
@@ -516,7 +572,17 @@ public class ServerWatchdog implements Runnable {
     list.add("-Dresin.home=" + resinHome.getPath());
     list.add("-Dserver.root=" + _serverRoot.getPath());
     list.add("-Xrs");
-    list.add("-Xss1m");
+
+    if (! _hasXss)
+      list.add("-Xss1m");
+    
+    if (! _hasXmx)
+      list.add("-Xmx256m");
+
+    for (String arg : getJvmArgs()) {
+      list.add(arg);
+    }
+    
     list.add("com.caucho.server.resin.ResinMain");
     list.add("-socketwait");
     list.add(String.valueOf(socketPort));

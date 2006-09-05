@@ -148,6 +148,62 @@ public class ArrayResolverExpr extends Expr {
   }
 
   /**
+   * Evaluates the expression, returning an object.
+   *
+   * @param env the variable environment
+   *
+   * @return the value of the expression as an object
+   */
+  @Override
+  public MethodInfo getMethodInfo(ELContext env,
+				  Class<?> returnType,
+				  Class<?> []argTypes)
+    throws ELException
+  {
+    Object base = _left.getValue(env);
+
+    if (base == null)
+      throw new ELException(L.l("'{0}' is an illegal method expression.",
+				toString()));
+
+    return new MethodInfo(_right.evalString(env),
+			  returnType,
+			  argTypes);
+  }
+
+  /**
+   * Evaluates the expression, returning an object.
+   *
+   * @param env the variable environment
+   *
+   * @return the value of the expression as an object
+   */
+  @Override
+  public Object invoke(ELContext env, Class<?> []argTypes, Object []args)
+    throws ELException
+  {
+    Object base = _left.getValue(env);
+
+    if (base == null)
+      throw new ELException(L.l("'{0}' is an illegal method expression.",
+				toString()));
+
+    String name = _right.evalString(env);
+
+    try {
+      Method method = base.getClass().getMethod(name, argTypes);
+
+      return method.invoke(base, args);
+    } catch (NoSuchMethodException e) {
+      throw new ELException(e);
+    } catch (IllegalAccessException e) {
+      throw new ELException(e);
+    } catch (InvocationTargetException e) {
+      throw new ELException(e.getCause());
+    }
+  }
+
+  /**
    * Prints the code to create an LongLiteral.
    *
    * @param os stream to the generated *.java code

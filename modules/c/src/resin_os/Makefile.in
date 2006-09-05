@@ -10,6 +10,7 @@ PROXY_LIBS=@PROXY_LIBS@
 APACHE_INC=@APACHE_INC@
 resin_conf=@apache_conf@
 resin_libexec=@apache_libexec@
+LIBEXEC=@LIBEXEC@
 resin_home=@resin_home@
 JNI_INCLUDE=@JNI_INCLUDE@
 INCLUDES = @INCLUDES@ $(JNI_INCLUDE) -I../common
@@ -31,8 +32,8 @@ clean	:
 
 install	: libresin_os.$(SO)
 #	cp resin $(resin_home)/bin
-	- mkdir $(resin_home)/libexec
-	cp libresin_os.$(SO) $(resin_home)/libexec
+	- mkdir $(resin_home)/$(LIBEXEC)
+	cp libresin_os.$(SO) $(resin_home)/$(LIBEXEC)
 
 
 

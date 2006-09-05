@@ -159,16 +159,6 @@ abstract public class CompiledMethod_5 extends CompiledMethod {
 				   Value a3,
 				   Value a4,
 				   Value a5);
-
-  /**
-   * Evaluates the method as a static function
-   */
-  public Value call(Env env, Value []argValues)
-  {
-    env.warning(L.l("can't call '{0}' as a static function", _name));
-
-    return NullValue.NULL;
-  }
   
   public String toString()
   {

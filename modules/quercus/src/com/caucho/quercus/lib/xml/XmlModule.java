@@ -30,10 +30,7 @@
 package com.caucho.quercus.lib.xml;
 
 import com.caucho.quercus.QuercusModuleException;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Optional;
@@ -118,6 +115,34 @@ public class XmlModule extends AbstractQuercusModule {
   }
 
   /**
+   * Returns the error code for xml parser
+   */
+  public Value xml_get_error_code(Xml parser)
+  {
+    if (parser == null)
+      return BooleanValue.FALSE;
+
+    return LongValue.create(parser.getErrorCode());
+  }
+
+  /**
+   * Returns the error string for xml parser
+   */
+  public Value xml_error_string(int code)
+  {
+    switch (code) {
+    case XML_ERROR_NONE:
+      return StringValue.create("");
+      
+    case XML_ERROR_SYNTAX:
+      return StringValue.create("syntax error");
+
+    default:
+      return BooleanValue.FALSE;
+    }
+  }
+
+  /**
    * @see boolean Xml.xml_parse
    *
    * @param parser
@@ -126,7 +151,8 @@ public class XmlModule extends AbstractQuercusModule {
    * @return false if parser == null
    * @throws Exception
    */
-  public boolean xml_parse(@NotNull Xml parser,
+  public boolean xml_parse(Env env,
+			   @NotNull Xml parser,
                            String data,
                            @Optional("true") boolean isFinal)
   {
@@ -134,7 +160,7 @@ public class XmlModule extends AbstractQuercusModule {
       return false;
 
     try {
-      return parser.xml_parse(data, isFinal);
+      return parser.xml_parse(env, data, isFinal);
     } catch (Exception e) {
       throw QuercusModuleException.create(e);
     }

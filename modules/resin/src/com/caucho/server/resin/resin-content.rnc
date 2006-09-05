@@ -11,11 +11,6 @@ l_resin = element l:caucho.com {
   r_any-Group
 }
 
-r_boot = element boot {
-  (attribute jvm-arg { string }
-   | element jvm-arg { string })*
-}
-
 r_cache = element cache {
   r_path?
 
@@ -452,8 +447,6 @@ r_resin = element resin {
 r_resin-Basis = 
   r_env-Basis
 
-  & r_boot?
-
   & r_cluster*
 
   & r_cluster-default*
@@ -535,6 +528,9 @@ r_server-Basis =
   & r_group-name?
 
   & r_http*
+
+  & (attribute jvm-args { string }
+    | element jvm-args { string })*
 
   & r_keepalive-max?
 

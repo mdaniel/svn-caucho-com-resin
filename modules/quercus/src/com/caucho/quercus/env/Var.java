@@ -150,6 +150,15 @@ public class Var extends Value {
   }
 
   /**
+   * Returns true for is_numeric
+   */
+  @Override
+  public boolean isNumeric()
+  {
+    return _value.isNumeric();
+  }
+
+  /**
    * Returns true for a scalar
    */
   /*

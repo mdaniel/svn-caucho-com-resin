@@ -8,6 +8,12 @@
 
 <s2 title="3.1snap - Aug 1, 2006">
 <ul>
+<li>&lt;jvm-args> defines boot parameters (#1218)
+<li>SessionManager was created for closed web-app (#1295, rep by sks)
+<li>Connection pool needs to rollback after resetting the connection isolation for Oracle (#1208, rep by Will Jaynes)
+<li>Amber: added named parameters to JPA-QL (#1063, rep by Keith Fetterman) 
+<li>Removed unnecessary #include "jvmdi.h" for resin-pro (#1313, rep by bdoperations)
+<li>./configure heuristics to catch IBM JDK 64-bit (#1311, rep by bdoperations)
 <li>Amber query with named parameters was not implemented (#1063, rep by keith)</li>
 <li>Amber NEW was not implemented in the SELECT clause (#1215, rep by fbertra)</li>
 <li>Amber JOIN was not implemented in the FROM clause (#1214, rep by fbertra, Francois Bertrand)</li>

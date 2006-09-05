@@ -132,6 +132,36 @@ public class PathExpr extends Expr {
   }
 
   /**
+   * Returns the method info.
+   *
+   * @param env the variable environment
+   *
+   * @return the value of the expression as an object
+   */
+  @Override
+  public MethodInfo getMethodInfo(ELContext env,
+				  Class<?> retType,
+				  Class<?> []argTypes)
+    throws ELException
+  {
+    return _expr.getMethodInfo(env, retType, argTypes);
+  }
+
+  /**
+   * Evaluates the expression, returning an object.
+   *
+   * @param env the variable environment
+   *
+   * @return the value of the expression as an object
+   */
+  @Override
+  public Object invoke(ELContext env, Class<?> []argTypes, Object []args)
+    throws ELException
+  {
+    return _expr.invoke(env, argTypes, args);
+  }
+
+  /**
    * Prints the code to create an LongLiteral.
    *
    * @param os stream to the generated *.java code

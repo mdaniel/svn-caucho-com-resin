@@ -140,6 +140,17 @@ abstract public class StringValue extends Value implements CharSequence {
   }
 
   /**
+   * Returns true for is_numeric
+   */
+  @Override
+  public boolean isNumeric()
+  {
+    // php/120y
+
+    return getNumericType() != IS_STRING;
+  }
+
+  /**
    * Returns true for a scalar
    */
   public boolean isScalar()
@@ -217,11 +228,17 @@ abstract public class StringValue extends Value implements CharSequence {
   public int cmpString(StringValue rValue)
   {
     if (isNumberConvertible() && rValue.isNumberConvertible()) {
+      
       double thisDouble = toDouble();
+      
       double rDouble = rValue.toDouble();
-      if (thisDouble < rDouble) return -1;
-      if (thisDouble > rDouble) return 1;
-      return 0;
+      
+      if (thisDouble < rDouble)
+	return -1;
+      else if (thisDouble > rDouble)
+	return 1;
+      else
+	return 0;
     }
     return toString().compareTo(rValue.toString());
   }

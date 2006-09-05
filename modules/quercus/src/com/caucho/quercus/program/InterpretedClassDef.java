@@ -139,6 +139,10 @@ public class InterpretedClassDef extends ClassDef
     for (Map.Entry<String,AbstractFunction> entry : _functionMap.entrySet()) {
       cl.addMethod(entry.getKey(), entry.getValue());
     }
+    
+    for (Map.Entry<String,Expr> entry : _fieldMap.entrySet()) {
+      cl.addField(entry.getKey(), 0, entry.getValue());
+    }
 
     for (Map.Entry<String,Expr> entry : _staticFieldMap.entrySet()) {
       cl.addStaticField(entry.getKey(), entry.getValue());
@@ -348,6 +352,15 @@ public class InterpretedClassDef extends ClassDef
       out.print("cl.addMethod(\"");
       out.printJavaString(key);
       out.println("\", fun_" + key + ");");
+    }
+
+    for (Map.Entry<String,Expr> entry : _fieldMap.entrySet()) {
+      out.print("cl.addField(\"");
+      out.printJavaString(entry.getKey());
+      out.print("\", ");
+      out.print("0, ");
+      entry.getValue().generateExpr(out);
+      out.println(");");
     }
 
     for (Map.Entry<String,Expr> entry : _staticFieldMap.entrySet()) {

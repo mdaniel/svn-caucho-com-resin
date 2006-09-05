@@ -60,7 +60,13 @@ public class JspExpressionFactoryImpl extends  ExpressionFactory {
 			   Class<?>[] expectedParamTypes)
     throws ELException
   {
-    throw new UnsupportedOperationException();
+    JspELParser parser = new JspELParser(context, expression);
+
+    Expr expr = parser.parse();
+
+    return new MethodExpressionImpl(expr, expression,
+				    expectedReturnType,
+				    expectedParamTypes);
   }
 
   public ValueExpression

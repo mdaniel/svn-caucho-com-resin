@@ -104,17 +104,6 @@ abstract public class CompiledMethod_N extends CompiledMethod {
 
   abstract public Value callMethodImpl(Env env, Value obj, Value []argValues);
 
-  /**
-   * Evaluates the method as a static function
-   */
-  public Value call(Env env, Value []argValues)
-  {
-    env.error(L.l("can't call {0} as a static function",
-		  _name));
-
-    return NullValue.NULL;
-  }
-  
   public String toString()
   {
     return "CompiledMethod_N[" + _name + "]";

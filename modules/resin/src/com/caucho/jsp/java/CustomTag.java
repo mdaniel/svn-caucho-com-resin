@@ -382,8 +382,10 @@ public class CustomTag extends GenericTag {
       String value = _tag.getAttribute(name);
       if (value == null)
         continue;
+      
+      TagAttributeInfo attrInfo = _tag.getAttributeInfo(name.getLocalName());
 
-      generateSetAttribute(out, var, name, value, false, false);
+      generateSetAttribute(out, var, name, value, false, false, attrInfo);
     }
   }
 

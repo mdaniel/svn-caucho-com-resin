@@ -201,7 +201,7 @@ public class TagInstance {
     return _cl != null && JspTagFileSupport.class.isAssignableFrom(_cl);
   }
   
-  TagInfo getTagInfo()
+  public TagInfo getTagInfo()
   {
     return _tagInfo;
   }
@@ -411,6 +411,21 @@ public class TagInstance {
     }
 
     return false;
+  }
+
+  public TagAttributeInfo getAttributeInfo(String name)
+  {
+    TagAttributeInfo attrs[] = _tagInfo.getAttributes();
+
+    if (attrs == null)
+      return null;
+
+    for (int i = 0; i < attrs.length; i++) {
+      if (name.equals(attrs[i].getName()))
+        return attrs[i];
+    }
+
+    return null;
   }
 
   /**

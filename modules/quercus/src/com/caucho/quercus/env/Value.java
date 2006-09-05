@@ -128,6 +128,14 @@ abstract public class Value {
   }
 
   /**
+   * Matches is_numeric
+   */
+  public boolean isNumeric()
+  {
+    return false;
+  }
+
+  /**
    * Returns true for an object.
    */
   public boolean isObject()

@@ -197,27 +197,28 @@ public class ClassesModule extends AbstractQuercusModule {
    */
   public static Value get_class_vars(Env env, String className)
   {
-  	//  php/1j10
+    // php/1j10
   	
     QuercusClass cl = null;
     
-    try{
+    try {
       cl = env.getClass(className);
-    }
-    catch(Throwable t) {
-    	log.log(Level.WARNING, t.toString(), t);
+    } catch (Exception t) {
+      log.log(Level.WARNING, t.toString(), t);
     	
       return NullValue.NULL;
     }
+
+    if (cl == null)
+      return null;
     
     ArrayValue varArray = new ArrayValueImpl();
-    
-    for (Map.Entry<String, Expr> entry: cl.getClassVars()) {
-    	Value key = StringValue.create(entry.getKey());
+
+    for (Map.Entry<StringValue,Expr> entry : cl.getClassVars().entrySet()) {
+      Value key = entry.getKey();
+      Value value = entry.getValue().eval(env);
     	
-    	Value value = entry.getValue().eval(env);
-    	
-    	varArray.append(key, value);
+      varArray.append(key, value);
     }
     
     return varArray;
@@ -241,11 +242,14 @@ public class ClassesModule extends AbstractQuercusModule {
     try {
       cl = env.getClass(className);
     }
-    catch (Throwable t) {
+    catch (Exception t) {
       log.log(Level.WARNING, t.toString(), t);
     	
       return NullValue.NULL;
     }
+
+    if (cl == null)
+      return null;
     
     ArrayValue methArray = new ArrayValueImpl();
     

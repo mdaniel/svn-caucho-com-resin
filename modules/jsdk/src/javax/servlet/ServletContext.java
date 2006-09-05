@@ -141,6 +141,12 @@ public interface ServletContext {
    * @return the ServletContext responsible for the given uri.
    */
   public ServletContext getContext(String uri);
+
+  /**
+   * Returns the context-path for the web-application.
+   */
+  public String getContextPath();
+  
   /**
    * Returns the real file path for the given uri.  The file path will
    * be in native path format (with native path separators.)
@@ -273,4 +279,5 @@ public interface ServletContext {
    * @deprecated
    */
   public void log(Exception exception, String msg);
+
 }

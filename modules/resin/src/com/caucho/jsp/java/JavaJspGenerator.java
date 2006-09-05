@@ -57,6 +57,7 @@ import com.caucho.xml.XmlChar;
 
 import com.caucho.server.http.*;
 import com.caucho.java.*;
+import com.caucho.config.types.*;
 import com.caucho.jsp.*;
 import com.caucho.jsp.el.*;
 import com.caucho.xpath.*;
@@ -139,6 +140,9 @@ public class JavaJspGenerator extends JspGenerator {
   
   private ArrayList<com.caucho.el.Expr> _valueExprList =
   new ArrayList<com.caucho.el.Expr>();
+  
+  private ArrayList<MethodExpr> _methodExprList =
+  new ArrayList<MethodExpr>();
   
   private ArrayList<com.caucho.xpath.Expr> _xpathExprList =
   new ArrayList<com.caucho.xpath.Expr>();
@@ -1170,6 +1174,46 @@ public class JavaJspGenerator extends JspGenerator {
 
     return index;
   }
+  
+  /**
+   * Adds an expression to the expression list.
+   */
+  public int addMethodExpr(String value, String sigString)
+    throws JspParseException, ELException
+  {
+    JspELParser parser = new JspELParser(_elContext, value);
+
+    com.caucho.el.Expr expr = parser.parse();
+
+    Class []args = new Class[0];
+
+    try {
+      if (sigString != null) {
+	Signature sig = new Signature(sigString);
+
+	String []types = sig.getParameterTypes();
+
+	args = new Class[types.length];
+
+	for (int i = 0; i < types.length; i++) {
+	  args[i] = getBeanClass(types[i]);
+	}
+      }
+    } catch (ClassNotFoundException e) {
+      throw new ELException(e);
+    }
+
+    MethodExpr methodExpr = new MethodExpr(expr, args);
+
+    int index = _methodExprList.indexOf(methodExpr);
+    if (index >= 0)
+      return index;
+
+    index = _methodExprList.size();
+    _methodExprList.add(methodExpr);
+
+    return index;
+  }
 
   /**
    * out.Prints the expressions
@@ -1192,6 +1236,28 @@ public class JavaJspGenerator extends JspGenerator {
       out.print("  ");
       expr.printCreate(out.getWriteStream());
       out.println(");");
+    }
+    
+    for (int i = 0; i < _methodExprList.size(); i++) {
+      MethodExpr expr = _methodExprList.get(i);
+      
+      out.println("private final static javax.el.MethodExpression _caucho_method_expr_" + i + " = new com.caucho.el.MethodExpressionImpl(");
+      out.print("  ");
+      expr.getExpr().printCreate(out.getWriteStream());
+      out.print(", \"");
+      out.printJavaString(expr.getExpr().toString());
+      out.print("\", String.class, new Class[] {");
+
+      Class []args = expr.getArgs();
+      for (int j = 0; j < args.length; j++) {
+	if (j != 0)
+	  out.print(", ");
+
+	out.printClass(args[j]);
+	out.print(".class");
+      }
+      
+      out.println("});");
     }
   }
 
@@ -1851,6 +1917,27 @@ public class JavaJspGenerator extends JspGenerator {
     exn.setErrorPage(_parseState.getErrorPage());
 
     return exn;
+  }
+
+  static class MethodExpr {
+    com.caucho.el.Expr _expr;
+    Class []_args;
+
+    MethodExpr(com.caucho.el.Expr expr, Class []args)
+    {
+      _expr = expr;
+      _args = args;
+    }
+
+    com.caucho.el.Expr getExpr()
+    {
+      return _expr;
+    }
+
+    Class []getArgs()
+    {
+      return _args;
+    }
   }
 
   static {

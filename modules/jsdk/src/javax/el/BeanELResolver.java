@@ -29,7 +29,7 @@
 
 package javax.el;
 
-import java.beans.FeatureDescriptor;
+import java.beans.*;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.logging.*;
@@ -135,5 +135,65 @@ public class BeanELResolver extends ELResolver {
 		       Object property,
 		       Object value)
   {
+  }
+
+  protected static final class BeanProperties {
+    private Class _base;
+
+    private HashMap<String,BeanProperty> _propMap
+      = new HashMap<String,BeanProperty>();
+    
+    public BeanProperties(Class baseClass)
+    {
+      _base = baseClass;
+
+      try {
+	BeanInfo info = Introspector.getBeanInfo(baseClass);
+
+	for (PropertyDescriptor descriptor : info.getPropertyDescriptors()) {
+	  _propMap.put(descriptor.getName(),
+		       new BeanProperty(baseClass, descriptor));
+	}
+      } catch (IntrospectionException e) {
+	throw new ELException(e);
+      }
+    }
+    
+    public BeanProperty getBeanProperty(String property)
+    {
+      return _propMap.get(property);
+    }
+  }
+
+  protected static final class BeanProperty {
+    private Class _base;
+    private PropertyDescriptor _descriptor;
+    
+    public BeanProperty(Class baseClass,
+			PropertyDescriptor descriptor)
+    {
+      _base = baseClass;
+      _descriptor = descriptor;
+    }
+
+    public Class getPropertyType()
+    {
+      return _descriptor.getPropertyType();
+    }
+
+    public Method getReadMethod()
+    {
+      return _descriptor.getReadMethod();
+    }
+
+    public Method getWriteMethod()
+    {
+      return _descriptor.getWriteMethod();
+    }
+
+    public boolean isReadOnly()
+    {
+      return getWriteMethod() == null;
+    }
   }
 }

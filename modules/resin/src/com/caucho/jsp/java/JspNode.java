@@ -48,6 +48,7 @@ import javax.servlet.jsp.tagext.*;
 import com.caucho.vfs.*;
 import com.caucho.util.*;
 import com.caucho.jsp.*;
+import com.caucho.jsp.cfg.*;
 import com.caucho.log.Log;
 import com.caucho.el.*;
 import com.caucho.xml.QName;
@@ -704,7 +705,7 @@ public abstract class JspNode {
   void generateSetParameter(JspJavaWriter out,
                             String obj, Object objValue, Method method,
                             boolean allowRtexpr, String contextVar,
-			    boolean isFragment)
+			    boolean isFragment, TagAttributeInfo attrInfo)
     throws Exception
   {
     Class type = method.getParameterTypes()[0];
@@ -732,7 +733,10 @@ public abstract class JspNode {
     
     String strValue = (String) objValue;
     
-    String convValue = generateParameterValue(type, strValue, allowRtexpr);
+    String convValue = generateParameterValue(type,
+					      strValue,
+					      allowRtexpr,
+					      attrInfo);
 
     PropertyEditor editor;
     
@@ -830,7 +834,7 @@ public abstract class JspNode {
     throws Exception
   {
     if (value instanceof String)
-      return generateParameterValue(type, (String) value, true);
+      return generateParameterValue(type, (String) value, true, null);
     else {
       JspAttribute attr = (JspAttribute) value;
       
@@ -954,16 +958,19 @@ public abstract class JspNode {
   String generateValue(Class type, String value)
     throws Exception
   {
-    return generateParameterValue(type, value, true);
+    return generateParameterValue(type, value, true, null);
   }
 
   String generateParameterValue(Class type, String value)
     throws Exception
   {
-    return generateParameterValue(type, value, true);
+    return generateParameterValue(type, value, true, null);
   }
 
-  String generateParameterValue(Class type, String value, boolean rtexpr)
+  String generateParameterValue(Class type,
+				String value,
+				boolean rtexpr,
+				TagAttributeInfo attrInfo)
     throws Exception
   {
     boolean isEmpty = value == null || value.equals("");
@@ -1032,6 +1039,18 @@ public abstract class JspNode {
           exprIndex = _gen.addValueExpr(value);
       
         return ("_caucho_value_expr_" + exprIndex);
+      }
+      else if (MethodExpression.class.isAssignableFrom(type)) {
+        int exprIndex;
+
+	String sig = attrInfo != null ? attrInfo.getMethodSignature() : "";
+
+        if (isEmpty)
+          exprIndex = _gen.addMethodExpr("", sig);
+        else
+          exprIndex = _gen.addMethodExpr(value, sig);
+      
+        return ("_caucho_method_expr_" + exprIndex);
       }
       else if (com.caucho.el.Expr.class.isAssignableFrom(type)) {
         int exprIndex;

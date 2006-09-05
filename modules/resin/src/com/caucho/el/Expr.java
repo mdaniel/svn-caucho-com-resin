@@ -175,6 +175,36 @@ public abstract class Expr extends ValueExpression {
    *
    * @return the value of the expression as an object
    */
+  public MethodInfo getMethodInfo(ELContext env,
+				  Class<?> returnType,
+				  Class<?> []argTypes)
+    throws ELException
+  {
+    throw new ELException(L.l("'{0}' is an illegal method expression." + getClass(),
+			      toString()));
+  }
+
+  /**
+   * Evaluates the expression, returning an object.
+   *
+   * @param env the variable environment
+   *
+   * @return the value of the expression as an object
+   */
+  public Object invoke(ELContext env, Class<?> []argTypes, Object []args)
+    throws ELException
+  {
+    throw new ELException(L.l("'{0}' is an illegal method expression." + getClass(),
+			      toString()));
+  }
+
+  /**
+   * Evaluates the expression, returning an object.
+   *
+   * @param env the variable environment
+   *
+   * @return the value of the expression as an object
+   */
   public final Object evalObject(ELContext env)
     throws ELException
   {

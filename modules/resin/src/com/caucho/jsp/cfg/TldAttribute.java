@@ -30,6 +30,8 @@ package com.caucho.jsp.cfg;
 
 import java.util.ArrayList;
 
+import com.caucho.config.types.Signature;
+
 /**
  * Configuration for the taglib attribute in the .tld
  */
@@ -40,6 +42,8 @@ public class TldAttribute {
   private Class _type = String.class;
   private String _description;
   private boolean _isFragment;
+
+  private DeferredMethod _deferredMethod;
 
   /**
    * Sets the attribute name.
@@ -62,6 +66,12 @@ public class TldAttribute {
    */
   public void setDescription(String description)
   {
+    _description = description;
+  }
+
+  public String getDescription()
+  {
+    return _description;
   }
 
   /**
@@ -126,5 +136,67 @@ public class TldAttribute {
   public Class getType()
   {
     return _type;
+  }
+
+  /**
+   * Sets the deferred value.
+   */
+  public void setDeferredValue(String v)
+  {
+  }
+
+  /**
+   * Sets the deferred method.
+   */
+  public void setDeferredMethod(DeferredMethod defer)
+  {
+    _deferredMethod = defer;
+  }
+
+  public String getExpectedType()
+  {
+    return null;
+  }
+
+  public DeferredValue getDeferredValue()
+  {
+    return null;
+  }
+
+  public DeferredMethod getDeferredMethod()
+  {
+    return _deferredMethod;
+  }
+  
+  public String getDeferredMethodSignature()
+  {
+    if (_deferredMethod != null) {
+      Signature sig = _deferredMethod.getMethodSignature();
+
+      if (sig != null)
+	return sig.getSignature();
+    }
+    
+    return null;
+  }
+
+  public static class DeferredValue {
+    public void setExpectedType(String type)
+    {
+    }
+  }
+
+  public static class DeferredMethod {
+    private Signature _signature;
+
+    public void setMethodSignature(Signature sig)
+    {
+      _signature = sig;
+    }
+
+    public Signature getMethodSignature()
+    {
+      return _signature;
+    }
   }
 }

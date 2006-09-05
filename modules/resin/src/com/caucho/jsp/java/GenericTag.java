@@ -458,7 +458,7 @@ abstract public class GenericTag extends JspContainerNode {
 
       generateSetAttribute(out, name, attrName, value,
                            attribute == null || attribute.canBeRequestTime(),
-			   isFragment);
+			   isFragment, attribute);
     }
   }
 
@@ -510,7 +510,8 @@ abstract public class GenericTag extends JspContainerNode {
    */
   void generateSetAttribute(JspJavaWriter out,
                             String name, QName attrName, Object value,
-                            boolean allowRtexpr, boolean isFragment)
+                            boolean allowRtexpr, boolean isFragment,
+			    TagAttributeInfo attrInfo)
     throws Exception
   {
     Method method = getAttributeMethod(attrName);
@@ -524,7 +525,7 @@ abstract public class GenericTag extends JspContainerNode {
 			method.getName()));
 
       generateSetParameter(out, name, value, method,
-			   allowRtexpr, "pageContext", isFragment);
+			   allowRtexpr, "pageContext", isFragment, attrInfo);
     }
     else if (! isDynamic) {
       throw error(L.l("attribute `{0}' in tag `{1}' has no corresponding set method in tag class `{2}'",
@@ -909,12 +910,7 @@ abstract public class GenericTag extends JspContainerNode {
 	return;
       }
 
-      String fullClassName = className;
-      if (fullClassName.indexOf('.') < 0)
-	fullClassName = "java.lang." + className;
-      
-      ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      Class cl = Class.forName(fullClassName, false, loader);
+      Class cl = _gen.getBeanClass(className);
     } catch (ClassNotFoundException e) {
       throw error(L.l("'{0}' is an unknown class for tag variable '{1}'.",
 		      className, varName));

@@ -2299,6 +2299,9 @@ public class WebApp extends ServletContextImpl
   public SessionManager getSessionManager()
   {
     if (_sessionManager == null) {
+      if (_lifecycle.isStopped())
+	throw new IllegalStateException(L.l("Resin is shutting down."));
+	
       if (_isInheritSession && _parent != null)
 	_sessionManager = _parent.getSessionManager();
 

@@ -88,6 +88,9 @@ public class Xml {
    */
   private String _separator;
 
+  private int _errorCode = XmlModule.XML_ERROR_NONE;
+  private String _errorString;
+
   private Callback _startElementHandler;
   private Callback _endElementHandler;
   private Callback _characterDataHandler;
@@ -113,6 +116,16 @@ public class Xml {
     _xmlOptionTargetEncoding = outputEncoding;
     _parser = _env.wrapJava(this);
     _separator = separator;
+  }
+
+  public int getErrorCode()
+  {
+    return _errorCode;
+  }
+
+  public String getErrorString()
+  {
+    return _errorString;
   }
 
   /**
@@ -313,7 +326,7 @@ public class Xml {
    * @throws SAXException
    * @throws ParserConfigurationException
    */
-  public boolean xml_parse(String data,
+  public boolean xml_parse(Env env, String data,
                            @Optional("true") boolean isFinal)
     throws Exception
   {
@@ -323,12 +336,18 @@ public class Xml {
       InputSource is = new InputSource(new StringReader(_xmlString.toString()));
       if (_xmlOptionTargetEncoding == null)
         _xmlOptionTargetEncoding = is.getEncoding();
+      
       try {
+	_errorCode = XmlModule.XML_ERROR_NONE;
+	_errorString = null;
+	
         SAXParser saxParser = _factory.newSAXParser();
         saxParser.parse(is, new XmlHandler());
       } catch (Exception ex) {
-        log.log(Level.FINE, ex.toString(), ex);
-        throw new Exception(L.l(ex.getMessage()));
+	ArrayValue array = new ArrayValueImpl();
+	_errorCode = XmlModule.XML_ERROR_SYNTAX;
+	
+        throw ex;
       }
     }
 

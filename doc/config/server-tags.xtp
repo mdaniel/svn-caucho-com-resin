@@ -329,6 +329,13 @@ will use @virtual-host.</p>
 
 </defun>
 
+<defun title="&lt;jvm-args>" version="Resin 3.1">
+<parents>server</parents>
+
+<p>&lt;jvm-args> configures JVM arguments to be passed to Resin on
+the command line, typically -X memory parameters and -D defines.</p>
+</defun>
+
 <defun title="protocol" version="Resin 3.1">
 <parents>server</parents>
 

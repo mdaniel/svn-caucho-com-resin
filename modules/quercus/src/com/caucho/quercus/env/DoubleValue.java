@@ -79,6 +79,15 @@ public class DoubleValue extends NumberValue {
   }
 
   /**
+   * Returns true for is_numeric
+   */
+  @Override
+  public boolean isNumeric()
+  {
+    return true;
+  }
+
+  /**
    * Returns true for a scalar
    */
   public boolean isScalar()

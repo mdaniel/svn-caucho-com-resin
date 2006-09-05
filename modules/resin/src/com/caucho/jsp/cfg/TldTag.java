@@ -412,7 +412,12 @@ public class TldTag implements DependencyBean {
                                     attribute.getRequired(),
                                     type == null ? null : type.getName(),
                                     attribute.getRtexprvalue(),
-				    attribute.isFragment());
+				    attribute.isFragment(),
+				    attribute.getDescription(),
+				    attribute.getDeferredValue() != null,
+				    attribute.getDeferredMethod() != null,
+				    attribute.getExpectedType(),
+				    attribute.getDeferredMethodSignature());
     
     _attributeList.add(attrInfo);
   }

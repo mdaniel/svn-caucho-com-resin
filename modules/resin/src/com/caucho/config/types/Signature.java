@@ -51,6 +51,16 @@ public class Signature {
 
   private int _index;
 
+  public Signature()
+  {
+  }
+
+  public Signature(String sig)
+  {
+    addText(sig);
+    init();
+  }
+
   /**
    * Returns the signature.
    */
