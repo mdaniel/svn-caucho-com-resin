@@ -217,7 +217,8 @@ public class CustomSimpleTag extends GenericTag {
       if (value == null)
         continue;
 
-      generateSetAttribute(out, var, name, value, false, false);
+      generateSetAttribute(out, var, name, value, false, false,
+			   _tag.getAttributeInfo(name.getLocalName()));
     }
   }
 }

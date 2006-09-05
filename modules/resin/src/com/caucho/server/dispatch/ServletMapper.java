@@ -175,6 +175,8 @@ public class ServletMapper {
 
       _servletMap.addRegexp(regexp, regexp);
       _regexpMap.put(regexp, servletRegexp);
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       throw new ServletException(e);
     }
@@ -311,10 +313,8 @@ public class ServletMapper {
 
     ServletMapping regexp = _regexpMap.get(servletName);
 
-    /*
     if (regexp != null)
-      servletName = regexp.initRegexp(_servletManager, vars);
-    */
+      servletName = regexp.initRegexp(_servletContext, _servletManager, vars);
 
     if (servletName.equals("invoker"))
       servletName = handleInvoker(invocation);

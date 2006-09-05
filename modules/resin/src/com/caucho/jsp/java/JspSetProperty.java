@@ -128,7 +128,7 @@ public class JspSetProperty extends JspContainerNode {
                       _name, _property));
     
     generateSetParameter(out, _name, value, setMethod, true,
-			 "pageContext", false);
+			 "pageContext", false, null);
   }
 
   private void generateSetParamProperty(JspJavaWriter out,

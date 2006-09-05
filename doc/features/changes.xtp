@@ -8,6 +8,7 @@
 
 <s2 title="3.1snap - Aug 1, 2006">
 <ul>
+<li>servlet-mapping url-regexp wasn't working with welcome-file-list (#1298, rep by marcelloh)</li>
 <li>&lt;jvm-args> defines boot parameters (#1218)
 <li>SessionManager was created for closed web-app (#1295, rep by sks)
 <li>Connection pool needs to rollback after resetting the connection isolation for Oracle (#1208, rep by Will Jaynes)

@@ -82,6 +82,14 @@ public class ServletContextImpl implements ServletContext {
   }
 
   /**
+   * Gets the servlet context name
+   */
+  public String getContextPath()
+  {
+    return _name;
+  }
+
+  /**
    * Adds the listener.
    */
   protected void addAttributeListener(ServletContextAttributeListener listener)

@@ -256,7 +256,8 @@ public class TagFileTag extends GenericTag {
       else {
 	String convValue = generateParameterValue(cl,
 						  (String) value,
-						  true);
+						  true,
+						  attribute);
       
 	//					attribute.allowRtexpr());
 
