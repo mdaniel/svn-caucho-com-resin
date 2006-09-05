@@ -70,7 +70,7 @@ public class ColumnExpr extends AbstractAmberExpr {
   /**
    * Returns the name.
    */
-  Column getColumn()
+  public Column getColumn()
   {
     return _column;
   }
@@ -142,16 +142,15 @@ public class ColumnExpr extends AbstractAmberExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
-    if (_fromItem != null) {
-      cb.append(_fromItem.getName());
-      cb.append('.');
-      cb.append(_column.getName());
-    }
-    else {
-      cb.append(_parent.getChildFromItem().getName());
-      cb.append('.');
-      cb.append(_column.getName());
-    }
+    generateInternalWhere(cb, true);
+  }
+
+  /**
+   * Generates the (update) where expression.
+   */
+  public void generateUpdateWhere(CharBuffer cb)
+  {
+    generateInternalWhere(cb, false);
   }
 
   /**
@@ -165,5 +164,31 @@ public class ColumnExpr extends AbstractAmberExpr {
   public String toString()
   {
     return _parent + "." + _column.getName();
+  }
+
+  //
+  // private
+
+  private void generateInternalWhere(CharBuffer cb,
+                                     boolean select)
+  {
+    if (_fromItem != null) {
+
+      if (select) {
+        cb.append(_fromItem.getName());
+        cb.append('.');
+      }
+
+      cb.append(_column.getName());
+    }
+    else {
+
+      if (select) {
+        cb.append(_parent.getChildFromItem().getName());
+        cb.append('.');
+      }
+
+      cb.append(_column.getName());
+    }
   }
 }

@@ -85,6 +85,23 @@ public class TrimFunExpr extends FunExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
+    generateInternalWhere(cb, true);
+  }
+
+  /**
+   * Generates the (update) where expression.
+   */
+  public void generateUpdateWhere(CharBuffer cb)
+  {
+    generateInternalWhere(cb, false);
+  }
+
+  //
+  // private
+
+  private void generateInternalWhere(CharBuffer cb,
+                                     boolean select)
+  {
     ArrayList<AmberExpr> args = getArgs();
 
     int n = args.size();
@@ -109,12 +126,19 @@ public class TrimFunExpr extends FunExpr {
       cb.append("both ");
     }
 
-    if (_trimChar != null)
-      _trimChar.generateWhere(cb);
+    if (_trimChar != null) {
+      if (select)
+        _trimChar.generateWhere(cb);
+      else
+        _trimChar.generateUpdateWhere(cb);
+    }
 
     cb.append(" from ");
 
-    args.get(0).generateWhere(cb);
+    if (select)
+      args.get(0).generateWhere(cb);
+    else
+      args.get(0).generateUpdateWhere(cb);
 
     cb.append(")");
   }

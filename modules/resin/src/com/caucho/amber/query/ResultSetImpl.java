@@ -542,10 +542,15 @@ public class ResultSetImpl implements ResultSet {
   /**
    * Returns the boolean value for the column.
    */
-  public boolean getBoolean(String column)
+  public boolean getBoolean(String columnName)
     throws SQLException
   {
-    return _rs.getBoolean(getColumn(column));
+    int column = getColumn(columnName);
+
+    if (_cacheChunk != null)
+      return _cacheChunk.getBoolean(_row - 1, column - 1);
+    else
+      return _rs.getBoolean(column);
   }
 
   /**
@@ -554,16 +559,24 @@ public class ResultSetImpl implements ResultSet {
   public boolean getBoolean(int column)
     throws SQLException
   {
-    return _rs.getBoolean(getColumn(column));
+    if (_cacheChunk != null)
+      return _cacheChunk.getBoolean(_row - 1, column - 1);
+    else
+      return _rs.getBoolean(column);
   }
 
   /**
    * Returns the byte value for the column.
    */
-  public byte getByte(String column)
+  public byte getByte(String columnName)
     throws SQLException
   {
-    return _rs.getByte(getColumn(column));
+    int column = getColumn(columnName);
+
+    if (_cacheChunk != null)
+      return _cacheChunk.getByte(_row - 1, column - 1);
+    else
+      return _rs.getByte(column);
   }
 
   /**
@@ -572,16 +585,24 @@ public class ResultSetImpl implements ResultSet {
   public byte getByte(int column)
     throws SQLException
   {
-    return _rs.getByte(getColumn(column));
+    if (_cacheChunk != null)
+      return _cacheChunk.getByte(_row - 1, column - 1);
+    else
+      return _rs.getByte(column);
   }
 
   /**
    * Returns the short value for the column.
    */
-  public short getShort(String column)
+  public short getShort(String columnName)
     throws SQLException
   {
-    return _rs.getShort(getColumn(column));
+    int column = getColumn(columnName);
+
+    if (_cacheChunk != null)
+      return _cacheChunk.getShort(_row - 1, column - 1);
+    else
+      return _rs.getShort(column);
   }
 
   /**
@@ -590,7 +611,10 @@ public class ResultSetImpl implements ResultSet {
   public short getShort(int column)
     throws SQLException
   {
-    return _rs.getShort(getColumn(column));
+    if (_cacheChunk != null)
+      return _cacheChunk.getShort(_row - 1, column - 1);
+    else
+      return _rs.getShort(column);
   }
 
   /**
@@ -648,10 +672,15 @@ public class ResultSetImpl implements ResultSet {
   /**
    * Returns the float value for the column.
    */
-  public float getFloat(String column)
+  public float getFloat(String columnName)
     throws SQLException
   {
-    return _rs.getFloat(getColumn(column));
+    int column = getColumn(columnName);
+
+    if (_cacheChunk != null)
+      return _cacheChunk.getFloat(_row - 1, column - 1);
+    else
+      return _rs.getFloat(column);
   }
 
   /**
@@ -660,16 +689,24 @@ public class ResultSetImpl implements ResultSet {
   public float getFloat(int column)
     throws SQLException
   {
-    return _rs.getFloat(getColumn(column));
+    if (_cacheChunk != null)
+      return _cacheChunk.getFloat(_row - 1, column - 1);
+    else
+      return _rs.getFloat(column);
   }
 
   /**
    * Returns the double value for the column.
    */
-  public double getDouble(String column)
+  public double getDouble(String columnName)
     throws SQLException
   {
-    return _rs.getDouble(getColumn(column));
+    int column = getColumn(columnName);
+
+    if (_cacheChunk != null)
+      return _cacheChunk.getDouble(_row - 1, column - 1);
+    else
+      return _rs.getDouble(column);
   }
 
   /**
@@ -678,9 +715,11 @@ public class ResultSetImpl implements ResultSet {
   public double getDouble(int column)
     throws SQLException
   {
-    return _rs.getDouble(getColumn(column));
+    if (_cacheChunk != null)
+      return _cacheChunk.getDouble(_row - 1, column - 1);
+    else
+      return _rs.getDouble(column);
   }
-
 
   /**
    * Returns the string value for the column.
@@ -688,16 +727,24 @@ public class ResultSetImpl implements ResultSet {
   public String getString(int column)
     throws SQLException
   {
-    return _rs.getString(getColumn(column));
+    if (_cacheChunk != null)
+      return _cacheChunk.getString(_row - 1, column - 1);
+    else
+      return _rs.getString(column);
   }
 
   /**
    * Returns the string value for the column.
    */
-  public String getString(String column)
+  public String getString(String columnName)
     throws SQLException
   {
-    return _rs.getString(getColumn(column));
+    int column = getColumn(columnName);
+
+    if (_cacheChunk != null)
+      return _cacheChunk.getString(_row - 1, column - 1);
+    else
+      return _rs.getString(column);
   }
 
   /**

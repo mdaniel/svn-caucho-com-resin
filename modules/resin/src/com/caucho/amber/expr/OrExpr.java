@@ -138,18 +138,15 @@ public class OrExpr extends AbstractAmberExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
-    cb.append('(');
+    generateInternalWhere(cb, true);
+  }
 
-    for (int i = 0; i < _components.size(); i++) {
-      if (i != 0)
-        cb.append(" OR ");
-
-      AmberExpr expr = _components.get(i);
-
-      expr.generateWhere(cb);
-    }
-
-    cb.append(')');
+  /**
+   * Generates the (update) where expression.
+   */
+  public void generateUpdateWhere(CharBuffer cb)
+  {
+    generateInternalWhere(cb, false);
   }
 
   /**
@@ -202,5 +199,28 @@ public class OrExpr extends AbstractAmberExpr {
 
       return cb.toString();
     }
+  }
+
+  //
+  // private
+
+  private void generateInternalWhere(CharBuffer cb,
+                                     boolean select)
+  {
+    cb.append('(');
+
+    for (int i = 0; i < _components.size(); i++) {
+      if (i != 0)
+        cb.append(" OR ");
+
+      AmberExpr expr = _components.get(i);
+
+      if (select)
+        expr.generateWhere(cb);
+      else
+        expr.generateUpdateWhere(cb);
+    }
+
+    cb.append(')');
   }
 }

@@ -65,4 +65,12 @@ public class SizeFunExpr extends FunExpr {
   {
     throw new UnsupportedOperationException();
   }
+
+  /**
+   * Generates the (update) where expression.
+   */
+  public void generateUpdateWhere(CharBuffer cb)
+  {
+    generateWhere(cb);
+  }
 }

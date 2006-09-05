@@ -124,22 +124,15 @@ public class InExpr extends AbstractAmberExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
-    cb.append('(');
-    _expr.generateWhere(cb);
+    generateInternalWhere(cb, true);
+  }
 
-    if (_isNot)
-      cb.append(" NOT");
-
-    cb.append(" IN (");
-
-    for (int i = 0; i < _values.size(); i++) {
-      if (i != 0)
-        cb.append(',');
-
-      _values.get(i).generateWhere(cb);
-    }
-
-    cb.append("))");
+  /**
+   * Generates the (update) where expression.
+   */
+  public void generateUpdateWhere(CharBuffer cb)
+  {
+    generateInternalWhere(cb, false);
   }
 
   /**
@@ -172,5 +165,36 @@ public class InExpr extends AbstractAmberExpr {
     cb.append("))");
 
     return cb.toString();
+  }
+
+  //
+  // private
+
+  private void generateInternalWhere(CharBuffer cb,
+                                     boolean select)
+  {
+    cb.append('(');
+
+    if (select)
+      _expr.generateWhere(cb);
+    else
+      _expr.generateUpdateWhere(cb);
+
+    if (_isNot)
+      cb.append(" NOT");
+
+    cb.append(" IN (");
+
+    for (int i = 0; i < _values.size(); i++) {
+      if (i != 0)
+        cb.append(',');
+
+      if (select)
+        _values.get(i).generateWhere(cb);
+      else
+        _values.get(i).generateUpdateWhere(cb);
+    }
+
+    cb.append("))");
   }
 }

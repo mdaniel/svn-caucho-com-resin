@@ -148,12 +148,12 @@ public class QueryImpl implements Query {
           if (columnCount <= 0)
             columnCount = 10000;
 
-          while (_currIndex <= columnCount) {
+          for (int i=1; i <= columnCount; i++) {
 
             int columnType = -1;
 
             try {
-              columnType = metaData.getColumnType(_currIndex);
+              columnType = metaData.getColumnType(i);
             } catch (Exception ex) {
             }
 
@@ -164,22 +164,11 @@ public class QueryImpl implements Query {
               columns.add(object);
 
             } catch (ArrayIndexOutOfBoundsException ex1) {
-
-              // XXX: Add this when caucho.db meta data
-              // is working properly.
-              //
-              // if (metaData != null) {
-              //   throw ex1;
-              // }
-
-              break;
-
-            } catch (Exception ex2) {
-
-              // this will only happen when DB does
-              // not support result set meta data (above).
               break;
             }
+            // catch (Exception ex2) {
+            //  break;
+            // }
           }
 
           n = columns.size();
@@ -217,16 +206,16 @@ public class QueryImpl implements Query {
 
           row = new Object[n];
 
-          while (_currIndex <= n) {
+          for (int i=0; i < n; i++) {
 
             int columnType = -1;
 
             try {
-              columnType = metaData.getColumnType(_currIndex);
+              columnType = metaData.getColumnType(i + 1);
             } catch (Exception ex) {
             }
 
-            row[_currIndex-1] = getInternalObject(rs, columnType);
+            row[i] = getInternalObject(rs, columnType);
           }
         }
 
@@ -403,8 +392,9 @@ public class QueryImpl implements Query {
       _userQuery.setNull(index, java.sql.Types.JAVA_OBJECT);
     else if (value instanceof Double)
       _userQuery.setDouble(index, ((Double) value).doubleValue());
-    else
+    else {
       _userQuery.setObject(index, value);
+    }
 
     return this;
   }
@@ -498,6 +488,8 @@ public class QueryImpl implements Query {
                                    int columnType)
     throws Exception
   {
+    // jpa/110-, jpa/11a4, and jpa/11z1
+
     int oldIndex = _currIndex;
 
     _currIndex++;
@@ -505,7 +497,8 @@ public class QueryImpl implements Query {
     Object object = rs.getObject(oldIndex);
 
     if (object instanceof Entity) {
-      _currIndex += ((ResultSetImpl) rs).getNumberOfLoadingColumns();
+      // _currIndex += ((ResultSetImpl) rs).getNumberOfLoadingColumns();
+
       return object;
     }
 
@@ -514,25 +507,46 @@ public class QueryImpl implements Query {
 
     switch (columnType) {
     case Types.BIT:
+    case Types.BOOLEAN:
+      //      try {
+      //        object = rs.getInt(oldIndex);
+      //      } catch (Exception ex) {
+      if (! (object instanceof Boolean))
+        object = rs.getBoolean(oldIndex);
+      //      }
+      break;
+
     case Types.TINYINT:
+      if (! (object instanceof Number))
+        object = rs.getByte(oldIndex);
+      break;
+
     case Types.SMALLINT:
+      if (! (object instanceof Number))
+        object = rs.getShort(oldIndex);
+      break;
+
     case Types.INTEGER:
-    case Types.BIGINT:
-      // XXX: needs to be extended
-      object = rs.getInt(oldIndex);
+      if (! (object instanceof Number))
+        object = rs.getLong(oldIndex);
       break;
 
     case Types.DECIMAL:
     case Types.DOUBLE:
-    case Types.FLOAT:
     case Types.NUMERIC:
     case Types.REAL:
-      // XXX: needs to be extended
-      object = rs.getDouble(oldIndex);
+      if (! (object instanceof Number))
+        object = rs.getDouble(oldIndex);
       break;
 
-    default:
-      object = rs.getObject(oldIndex);
+    case Types.FLOAT:
+      if (! (object instanceof Number))
+        object = rs.getFloat(oldIndex);
+      break;
+
+    // It was fetched with getObject (see top).
+    // default:
+    //  object = rs.getObject(oldIndex);
     }
 
     return object;

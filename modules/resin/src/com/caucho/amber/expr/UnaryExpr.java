@@ -112,6 +112,54 @@ public class UnaryExpr extends AbstractAmberExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
+    generateInternalWhere(cb, true);
+  }
+
+  /**
+   * Generates the (update) where expression.
+   */
+  public void generateUpdateWhere(CharBuffer cb)
+  {
+    generateInternalWhere(cb, false);
+  }
+
+  /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb)
+  {
+    generateWhere(cb);
+  }
+
+  public String toString()
+  {
+    String str = null;
+
+    switch (_token) {
+    case '-':
+      str = "-";
+      break;
+    case '+':
+      str = "+";
+      break;
+    case QueryParser.NOT:
+      str = "not";
+      break;
+    case QueryParser.NULL:
+      return _expr + " is null";
+    case QueryParser.NOT_NULL:
+      return _expr + " is not null";
+    }
+
+    return str + " " + _expr;
+  }
+
+  //
+  // private
+
+  private void generateInternalWhere(CharBuffer cb,
+                                     boolean select)
+  {
     switch (_token) {
     case '-':
       cb.append(" -");
@@ -145,7 +193,12 @@ public class UnaryExpr extends AbstractAmberExpr {
         cb.append(')');
       }
       else {
-        _expr.generateWhere(cb);
+
+        if (select)
+          _expr.generateWhere(cb);
+        else
+          _expr.generateUpdateWhere(cb);
+
         if (_token == QueryParser.NULL)
           cb.append(" is null");
         else
@@ -154,37 +207,9 @@ public class UnaryExpr extends AbstractAmberExpr {
       return;
     }
 
-    _expr.generateWhere(cb);
-  }
-
-  /**
-   * Generates the having expression.
-   */
-  public void generateHaving(CharBuffer cb)
-  {
-    generateWhere(cb);
-  }
-
-  public String toString()
-  {
-    String str = null;
-
-    switch (_token) {
-    case '-':
-      str = "-";
-      break;
-    case '+':
-      str = "+";
-      break;
-    case QueryParser.NOT:
-      str = "not";
-      break;
-    case QueryParser.NULL:
-      return _expr + " is null";
-    case QueryParser.NOT_NULL:
-      return _expr + " is not null";
-    }
-
-    return str + " " + _expr;
+    if (select)
+      _expr.generateWhere(cb);
+    else
+      _expr.generateUpdateWhere(cb);
   }
 }

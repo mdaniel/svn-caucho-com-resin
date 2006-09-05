@@ -131,24 +131,15 @@ public class BooleanColumnExpr extends AbstractAmberExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
-    CharBuffer term = new CharBuffer();
+    generateInternalWhere(cb, true);
+  }
 
-    if (_fromItem != null) {
-      term.append(_fromItem.getName());
-      term.append('.');
-      term.append(_column.getName());
-    }
-    else {
-      term.append(_parent.getChildFromItem().getName());
-      term.append('.');
-      term.append(_column.getName());
-    }
-
-    AmberPersistenceUnit manager = _column.getTable().getAmberManager();
-
-    JdbcMetaData metaData = manager.getMetaData();
-
-    cb.append(metaData.generateBoolean(term.toString()));
+  /**
+   * Generates the (update) where expression.
+   */
+  public void generateUpdateWhere(CharBuffer cb)
+  {
+    generateInternalWhere(cb, false);
   }
 
   /**
@@ -162,5 +153,39 @@ public class BooleanColumnExpr extends AbstractAmberExpr {
   public String toString()
   {
     return _parent + "." + _column.getName();
+  }
+
+  //
+  // private
+
+  private void generateInternalWhere(CharBuffer cb,
+                                     boolean select)
+  {
+    CharBuffer term = new CharBuffer();
+
+    if (_fromItem != null) {
+
+      if (select) {
+        term.append(_fromItem.getName());
+        term.append('.');
+      }
+
+      term.append(_column.getName());
+    }
+    else {
+
+      if (select) {
+        term.append(_parent.getChildFromItem().getName());
+        term.append('.');
+      }
+
+      term.append(_column.getName());
+    }
+
+    AmberPersistenceUnit manager = _column.getTable().getAmberManager();
+
+    JdbcMetaData metaData = manager.getMetaData();
+
+    cb.append(metaData.generateBoolean(term.toString()));
   }
 }

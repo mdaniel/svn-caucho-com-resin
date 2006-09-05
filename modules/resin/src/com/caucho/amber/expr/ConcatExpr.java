@@ -73,11 +73,15 @@ public class ConcatExpr extends AbstractAmberExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
-    cb.append('(');
-    _left.generateWhere(cb);
-    cb.append(" || ");
-    _right.generateWhere(cb);
-    cb.append(')');
+    generateInternalWhere(cb, true);
+  }
+
+  /**
+   * Generates the (update) where expression.
+   */
+  public void generateUpdateWhere(CharBuffer cb)
+  {
+    generateInternalWhere(cb, false);
   }
 
   /**
@@ -91,5 +95,28 @@ public class ConcatExpr extends AbstractAmberExpr {
   public String toString()
   {
     return "(" + _left + " || " + _right + ")";
+  }
+
+  //
+  // private
+
+  private void generateInternalWhere(CharBuffer cb,
+                                     boolean select)
+  {
+    cb.append('(');
+
+    if (select)
+      _left.generateWhere(cb);
+    else
+      _left.generateUpdateWhere(cb);
+
+    cb.append(" || ");
+
+    if (select)
+      _right.generateWhere(cb);
+    else
+      _right.generateUpdateWhere(cb);
+
+    cb.append(')');
   }
 }

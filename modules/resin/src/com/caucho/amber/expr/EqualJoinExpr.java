@@ -133,26 +133,15 @@ public class EqualJoinExpr extends JoinExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
-    cb.append('(');
+    generateInternalWhere(cb, true);
+  }
 
-    for (int i = 0; i < _keyColumns.size(); i++) {
-      Column column = _keyColumns.get(i);
-
-      if (i != 0)
-        cb.append(" AND ");
-
-      cb.append(_fromItemA.getName());
-      cb.append('.');
-      cb.append(column.getName());
-
-      cb.append('=');
-
-      cb.append(_fromItemB.getName());
-      cb.append('.');
-      cb.append(column.getName());
-    }
-
-    cb.append('(');
+  /**
+   * Generates the (update) where expression.
+   */
+  public void generateUpdateWhere(CharBuffer cb)
+  {
+    generateInternalWhere(cb, false);
   }
 
   /**
@@ -183,5 +172,33 @@ public class EqualJoinExpr extends JoinExpr {
   {
     return ("EqualJoinExpr[" + _keyColumns + "," +
             _fromItemA + "," + _fromItemB + "]");
+  }
+
+  //
+  // private
+
+  private void generateInternalWhere(CharBuffer cb,
+                                     boolean select)
+  {
+    cb.append('(');
+
+    for (int i = 0; i < _keyColumns.size(); i++) {
+      Column column = _keyColumns.get(i);
+
+      if (i != 0)
+        cb.append(" AND ");
+
+      cb.append(_fromItemA.getName());
+      cb.append('.');
+      cb.append(column.getName());
+
+      cb.append('=');
+
+      cb.append(_fromItemB.getName());
+      cb.append('.');
+      cb.append(column.getName());
+    }
+
+    cb.append('(');
   }
 }

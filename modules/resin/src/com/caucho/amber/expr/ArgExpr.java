@@ -105,10 +105,15 @@ public class ArgExpr extends AbstractAmberExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
-    if (_sqlIndex < 0)
-      _sqlIndex = _parser.generateSQLArg();
+    generateInternalWhere(cb, true);
+  }
 
-    cb.append("?");
+  /**
+   * Generates the (update) literal.
+   */
+  public void generateUpdateWhere(CharBuffer cb)
+  {
+    generateInternalWhere(cb, false);
   }
 
   /**
@@ -135,11 +140,22 @@ public class ArgExpr extends AbstractAmberExpr {
                            Type []argTypes, Object []argValues)
     throws SQLException
   {
-    if (argTypes[_index - 1] != null)
-      argTypes[_index - 1].setParameter(pstmt, _sqlIndex + 1,
-                                        argValues[_index - 1]);
-    else
-      pstmt.setString(_sqlIndex + 1, null);
+    if (_name == null) {
+
+      if (argTypes[_index - 1] != null)
+        argTypes[_index - 1].setParameter(pstmt, _sqlIndex + 1,
+                                          argValues[_index - 1]);
+      else
+        pstmt.setString(_sqlIndex + 1, null);
+    }
+    else {
+
+      if (argTypes[i - 1] != null)
+        argTypes[i - 1].setParameter(pstmt, i, argValues[i - 1]);
+      else
+        pstmt.setString(i, null);
+    }
+
   }
 
   public String toString()
@@ -148,5 +164,17 @@ public class ArgExpr extends AbstractAmberExpr {
       return "?" + _index;
     else
       return ":" + _name;
+  }
+
+  //
+  // private
+
+  private void generateInternalWhere(CharBuffer cb,
+                                     boolean select)
+  {
+    if (_sqlIndex < 0)
+      _sqlIndex = _parser.generateSQLArg();
+
+    cb.append("?");
   }
 }

@@ -201,14 +201,15 @@ public class ManyToOneExpr extends AbstractPathExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
-    if (_fromItem != null) {
-      cb.append(_fromItem.getName());
-      cb.append('.');
-      cb.append(_linkColumns.getColumns().get(0).getName());
-    }
-    else {
-      super.generateWhere(cb);
-    }
+    generateInternalWhere(cb, true);
+  }
+
+  /**
+   * Generates the (update) where expression.
+   */
+  public void generateUpdateWhere(CharBuffer cb)
+  {
+    generateInternalWhere(cb, false);
   }
 
   /**
@@ -254,5 +255,29 @@ public class ManyToOneExpr extends AbstractPathExpr {
   public String toString()
   {
     return "ManyToOneExpr[" + _childFromItem + "," + _fromItem + "," + _parent + "]";
+  }
+
+  //
+  // private
+
+  private void generateInternalWhere(CharBuffer cb,
+                                     boolean select)
+  {
+    if (_fromItem != null) {
+
+      if (select) {
+        cb.append(_fromItem.getName());
+        cb.append('.');
+      }
+
+      cb.append(_linkColumns.getColumns().get(0).getName());
+    }
+    else {
+
+      if (select)
+        super.generateWhere(cb);
+      else
+        super.generateUpdateWhere(cb);
+    }
   }
 }

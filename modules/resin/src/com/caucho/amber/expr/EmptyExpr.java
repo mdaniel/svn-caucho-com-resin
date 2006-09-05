@@ -90,6 +90,31 @@ public class EmptyExpr extends AbstractAmberExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
+    generateInternalWhere(cb, true);
+  }
+
+  /**
+   * Generates the (update) where expression.
+   */
+  public void generateUpdateWhere(CharBuffer cb)
+  {
+    generateInternalWhere(cb, false);
+  }
+
+  /**
+   * Generates the having expression.
+   */
+  public void generateHaving(CharBuffer cb)
+  {
+    generateWhere(cb);
+  }
+
+  //
+  // private
+
+  private void generateInternalWhere(CharBuffer cb,
+                                     boolean select)
+  {
     OneToManyExpr oneToMany = null;
 
     // ManyToMany is implemented as a
@@ -117,13 +142,5 @@ public class EmptyExpr extends AbstractAmberExpr {
     cb.append(join.generateJoin(_tableName, targetTable));
 
     cb.append(')');
-  }
-
-  /**
-   * Generates the having expression.
-   */
-  public void generateHaving(CharBuffer cb)
-  {
-    generateWhere(cb);
   }
 }

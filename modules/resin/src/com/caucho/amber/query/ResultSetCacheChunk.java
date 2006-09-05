@@ -223,6 +223,24 @@ public class ResultSetCacheChunk {
   }
 
   /**
+   * Returns the byte value for the column.
+   */
+  public byte getByte(int row, int column)
+    throws SQLException
+  {
+    Object object = getObject(row, column);
+
+    if (object instanceof Byte)
+      return ((Byte) object).byteValue();
+    else if (object instanceof String)
+      return Byte.parseByte((String) object);
+    else if (object == null)
+      return 0;
+    else
+      return Byte.parseByte(String.valueOf(object));
+  }
+
+  /**
    * Returns the int value for the column.
    */
   public int getInt(int row, int column)
@@ -238,6 +256,24 @@ public class ResultSetCacheChunk {
       return 0;
     else
       return Integer.parseInt(String.valueOf(object));
+  }
+
+  /**
+   * Returns the short value for the column.
+   */
+  public short getShort(int row, int column)
+    throws SQLException
+  {
+    Object object = getObject(row, column);
+
+    if (object instanceof Number)
+      return ((Number) object).shortValue();
+    else if (object instanceof String)
+      return Short.parseShort((String) object);
+    else if (object == null)
+      return 0;
+    else
+      return Short.parseShort(String.valueOf(object));
   }
 
   /**
@@ -276,6 +312,24 @@ public class ResultSetCacheChunk {
       return 0;
     else
       return Double.parseDouble(String.valueOf(object));
+  }
+
+  /**
+   * Returns the float value for the column.
+   */
+  public float getFloat(int row, int column)
+    throws SQLException
+  {
+    Object object = getObject(row, column);
+
+    if (object instanceof Number)
+      return ((Number) object).floatValue();
+    else if (object instanceof String)
+      return Float.parseFloat((String) object);
+    else if (object == null)
+      return 0;
+    else
+      return Float.parseFloat(String.valueOf(object));
   }
 
   /**

@@ -70,6 +70,14 @@ public class CurrentTimeFunExpr extends DateTimeFunExpr {
   }
 
   /**
+   * Generates the (update) where expression.
+   */
+  public void generateUpdateWhere(CharBuffer cb)
+  {
+    generateWhere(cb);
+  }
+
+  /**
    * Returns the expr type.
    */
   public Type getType()

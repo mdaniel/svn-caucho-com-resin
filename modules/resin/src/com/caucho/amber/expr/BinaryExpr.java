@@ -125,51 +125,15 @@ public class BinaryExpr extends AbstractAmberExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
-    cb.append('(');
+    generateInternalWhere(cb, true);
+  }
 
-    _left.generateWhere(cb);
-
-    switch (_token) {
-    case QueryParser.EQ:
-      cb.append(" = ");
-      break;
-    case QueryParser.NE:
-      cb.append(" <> ");
-      break;
-    case QueryParser.LT:
-      cb.append(" < ");
-      break;
-    case QueryParser.LE:
-      cb.append(" <= ");
-      break;
-    case QueryParser.GT:
-      cb.append(" > ");
-      break;
-    case QueryParser.GE:
-      cb.append(" >= ");
-      break;
-    case '+':
-      cb.append(" + ");
-      break;
-    case '-':
-      cb.append(" - ");
-      break;
-    case '*':
-      cb.append(" * ");
-      break;
-    case '/':
-      cb.append(" / ");
-      break;
-    case '%':
-      cb.append(" % ");
-      break;
-    default:
-      throw new IllegalStateException();
-    }
-
-    _right.generateWhere(cb);
-
-    cb.append(')');
+  /**
+   * Generates the (update) where expression.
+   */
+  public void generateUpdateWhere(CharBuffer cb)
+  {
+    generateInternalWhere(cb, false);
   }
 
   /**
@@ -221,5 +185,64 @@ public class BinaryExpr extends AbstractAmberExpr {
     }
 
     return str + _right + ")";
+  }
+
+  //
+  // private
+
+  private void generateInternalWhere(CharBuffer cb,
+                                     boolean select)
+  {
+    cb.append('(');
+
+    if (select)
+      _left.generateWhere(cb);
+    else
+      _left.generateUpdateWhere(cb);
+
+    switch (_token) {
+    case QueryParser.EQ:
+      cb.append(" = ");
+      break;
+    case QueryParser.NE:
+      cb.append(" <> ");
+      break;
+    case QueryParser.LT:
+      cb.append(" < ");
+      break;
+    case QueryParser.LE:
+      cb.append(" <= ");
+      break;
+    case QueryParser.GT:
+      cb.append(" > ");
+      break;
+    case QueryParser.GE:
+      cb.append(" >= ");
+      break;
+    case '+':
+      cb.append(" + ");
+      break;
+    case '-':
+      cb.append(" - ");
+      break;
+    case '*':
+      cb.append(" * ");
+      break;
+    case '/':
+      cb.append(" / ");
+      break;
+    case '%':
+      cb.append(" % ");
+      break;
+    default:
+      throw new IllegalStateException();
+    }
+
+    if (select)
+      _right.generateWhere(cb);
+    else
+      _right.generateUpdateWhere(cb);
+
+    cb.append(')');
   }
 }

@@ -136,6 +136,15 @@ public class MapFieldExpr extends AbstractAmberExpr {
     */
   }
 
+
+  /**
+   * Generates the (update) where expression.
+   */
+  public void generateUpdateWhere(CharBuffer cb)
+  {
+    generateWhere(cb);
+  }
+
   /**
    * Generates the having expression.
    */

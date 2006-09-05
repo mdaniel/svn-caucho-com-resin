@@ -84,7 +84,7 @@ public class DeleteQuery extends AbstractQuery {
 
     if (_where != null) {
       cb.append(" WHERE ");
-      _where.generateWhere(cb);
+      _where.generateUpdateWhere(cb);
     }
 
     _sql = cb.close();

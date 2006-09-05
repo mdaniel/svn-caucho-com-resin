@@ -651,7 +651,7 @@ public class QueryParser {
     if (token != SET)
       throw error(L.l("expected 'SET' at {0}", tokenName(token)));
 
-    ArrayList<AmberField> fields = new ArrayList<AmberField>();
+    ArrayList<AmberExpr> fields = new ArrayList<AmberExpr>();
     ArrayList<AmberExpr> values = new ArrayList<AmberExpr>();
 
     parseSetValues(fromItem, fields, values);
@@ -669,9 +669,10 @@ public class QueryParser {
     if (token >= 0)
       throw error(L.l("'{0}' not expected at end of query.", tokenName(token)));
 
-    query.init();
+    if (! query.setArgList(_argList.toArray(new ArgExpr[_argList.size()])))
+      throw error(L.l("Unable to parse all query parameters. Make sure named parameters are not mixed with positional parameters"));
 
-    query.setArgList(_argList.toArray(new ArgExpr[_argList.size()]));
+    query.init();
 
     return query;
   }
@@ -690,11 +691,7 @@ public class QueryParser {
 
     token = scanToken();
     if (token == WHERE) {
-      AmberExpr where = parseExpr();
-
-      where = where.bindSelect(this);
-
-      query.setWhere(where);
+      query.setWhere(parseExpr().createBoolean().bindSelect(this));
 
       token = scanToken();
     }
@@ -702,9 +699,10 @@ public class QueryParser {
     if (token >= 0)
       throw error(L.l("'{0}' not expected at end of query.", tokenName(token)));
 
-    query.init();
+    if (! query.setArgList(_argList.toArray(new ArgExpr[_argList.size()])))
+      throw error(L.l("Unable to parse all query parameters. Make sure named parameters are not mixed with positional parameters"));
 
-    query.setArgList(_argList.toArray(new ArgExpr[_argList.size()]));
+    query.init();
 
     return query;
   }
@@ -713,31 +711,54 @@ public class QueryParser {
    * Parses the set values.
    */
   private void parseSetValues(FromItem fromItem,
-                              ArrayList<AmberField> fields,
+                              ArrayList<AmberExpr> fields,
                               ArrayList<AmberExpr> values)
     throws QueryParseException
   {
     EntityType entity = fromItem.getEntityType();
 
-    int token;
+    int token = -1;
 
     do {
-      String fieldName = parseIdentifier();
-
-      AmberField field = entity.getField(fieldName);
-
-      if (field == null)
-        throw error(L.l("'{0}' is an unknown field in entity {1}.",
-                        fieldName, entity.getName()));
 
       token = scanToken();
-      if (token != EQ)
+
+      AmberExpr expr = null;
+
+      String name = _lexeme.toString();
+
+      IdExpr tableExpr = getIdentifier(name);
+
+      if (tableExpr != null) {
+        expr = parsePath(tableExpr);
+      }
+      else {
+
+        tableExpr = fromItem.getIdExpr();
+
+        AmberExpr next = tableExpr.createField(this, name);
+
+        if (next instanceof PathExpr)
+          expr = addPath((PathExpr) next);
+        else if (next != null)
+          expr = next;
+      }
+
+      expr = expr.bindSelect(this);
+
+      fields.add(expr);
+
+      if ((token = peekToken()) != EQ)
         throw error(L.l("expected '=' at {0}", tokenName(token)));
 
-      AmberExpr expr = parseExpr();
+      scanToken();
 
-      fields.add(field);
+      expr = parseSimpleTerm();
+
+      expr = expr.bindSelect(this);
+
       values.add(expr);
+
     } while ((token = scanToken()) == ',');
 
     _token = token;

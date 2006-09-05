@@ -111,22 +111,15 @@ public class LikeExpr extends AbstractAmberExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
-    cb.append('(');
-    _expr.generateWhere(cb);
+    generateInternalWhere(cb, true);
+  }
 
-    if (_isNot)
-      cb.append(" NOT");
-
-    cb.append(" LIKE ");
-
-    _value.generateWhere(cb);
-
-    if (_escape != null) {
-      cb.append(" ESCAPE ");
-      cb.append(_escape);
-    }
-
-    cb.append(')');
+  /**
+   * Generates the (update) where expression.
+   */
+  public void generateUpdateWhere(CharBuffer cb)
+  {
+    generateInternalWhere(cb, false);
   }
 
   /**
@@ -154,5 +147,36 @@ public class LikeExpr extends AbstractAmberExpr {
     cb.append(')');
 
     return cb.close();
+  }
+
+  //
+  // private
+
+  private void generateInternalWhere(CharBuffer cb,
+                                     boolean select)
+  {
+    cb.append('(');
+
+    if (select)
+      _expr.generateWhere(cb);
+    else
+      _expr.generateUpdateWhere(cb);
+
+    if (_isNot)
+      cb.append(" NOT");
+
+    cb.append(" LIKE ");
+
+    if (select)
+      _value.generateWhere(cb);
+    else
+      _value.generateUpdateWhere(cb);
+
+    if (_escape != null) {
+      cb.append(" ESCAPE ");
+      cb.append(_escape);
+    }
+
+    cb.append(')');
   }
 }

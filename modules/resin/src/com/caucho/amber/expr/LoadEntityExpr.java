@@ -211,6 +211,14 @@ public class LoadEntityExpr extends AbstractAmberExpr {
   }
 
   /**
+   * Generates the (update) where expression.
+   */
+  public void generateUpdateWhere(CharBuffer cb, String fieldName)
+  {
+    generateWhere(cb, fieldName);
+  }
+
+  /**
    * Generates the having expression.
    */
   public void generateHaving(CharBuffer cb, String fieldName)

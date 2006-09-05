@@ -69,20 +69,37 @@ public class AllExpr extends AbstractAmberExpr {
   }
 
   /**
-   * Generates the where expression.
-   */
-  public void generateWhere(CharBuffer cb)
-  {
-    cb.append("ALL(");
-    cb.append(_query.generateLoadSQL());
-    cb.append(')');
-  }
-
-  /**
    * Generates the having expression.
    */
   public void generateHaving(CharBuffer cb)
   {
     generateWhere(cb);
+  }
+
+  /**
+   * Generates the where expression.
+   */
+  public void generateWhere(CharBuffer cb)
+  {
+    generateInternalWhere(cb, true);
+  }
+
+  /**
+   * Generates the (update) where expression.
+   */
+  public void generateUpdateWhere(CharBuffer cb)
+  {
+    generateInternalWhere(cb, false);
+  }
+
+  //
+  // private
+
+  private void generateInternalWhere(CharBuffer cb,
+                                     boolean select)
+  {
+    cb.append("ALL(");
+    cb.append(_query.generateLoadSQL());
+    cb.append(')');
   }
 }

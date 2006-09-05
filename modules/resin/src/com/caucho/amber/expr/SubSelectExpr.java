@@ -71,6 +71,14 @@ public class SubSelectExpr extends AbstractAmberExpr {
   }
 
   /**
+   * Generates the (update) where expression.
+   */
+  public void generateUpdateWhere(CharBuffer cb)
+  {
+    generateWhere(cb);
+  }
+
+  /**
    * Generates the having expression.
    */
   public void generateHaving(CharBuffer cb)

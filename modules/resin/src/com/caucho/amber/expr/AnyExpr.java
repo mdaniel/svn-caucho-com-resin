@@ -73,9 +73,15 @@ public class AnyExpr extends AbstractAmberExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
-    cb.append("ANY(");
-    cb.append(_query.generateLoadSQL());
-    cb.append(')');
+    generateInternalWhere(cb, true);
+  }
+
+  /**
+   * Generates the (update) where expression.
+   */
+  public void generateUpdateWhere(CharBuffer cb)
+  {
+    generateInternalWhere(cb, false);
   }
 
   /**
@@ -84,5 +90,16 @@ public class AnyExpr extends AbstractAmberExpr {
   public void generateHaving(CharBuffer cb)
   {
     generateWhere(cb);
+  }
+
+  //
+  // private
+
+  private void generateInternalWhere(CharBuffer cb,
+                                     boolean select)
+  {
+    cb.append("ANY(");
+    cb.append(_query.generateLoadSQL());
+    cb.append(')');
   }
 }

@@ -76,6 +76,14 @@ public class LiteralExpr extends AbstractAmberExpr {
   }
 
   /**
+   * Generates the (update) literal.
+   */
+  public void generateUpdateWhere(CharBuffer cb)
+  {
+    generateWhere(cb);
+  }
+
+  /**
    * Generates the having expression.
    */
   public void generateHaving(CharBuffer cb)

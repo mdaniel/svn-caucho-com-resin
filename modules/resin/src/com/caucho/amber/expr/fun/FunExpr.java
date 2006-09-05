@@ -28,10 +28,14 @@
 
 package com.caucho.amber.expr.fun;
 
+import com.caucho.amber.manager.AmberConnection;
+
 import com.caucho.amber.expr.*;
 
 import com.caucho.amber.query.*;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import java.util.ArrayList;
 
@@ -104,20 +108,15 @@ public class FunExpr extends AbstractAmberExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
-    cb.append(_id);
-    cb.append('(');
+    generateInternalWhere(cb, true);
+  }
 
-    if (_distinct)
-      cb.append("distinct ");
-
-    for (int i = 0; i < _args.size(); i++) {
-      if (i != 0)
-        cb.append(',');
-
-      _args.get(i).generateWhere(cb);
-    }
-
-    cb.append(')');
+  /**
+   * Generates the (update) where expression.
+   */
+  public void generateUpdateWhere(CharBuffer cb)
+  {
+    generateInternalWhere(cb, false);
   }
 
   /**
@@ -136,6 +135,19 @@ public class FunExpr extends AbstractAmberExpr {
     return _args;
   }
 
+  /**
+   * Returns the object for the expr.
+   */
+  public Object getObject(AmberConnection aConn, ResultSet rs, int index)
+    throws SQLException
+  {
+    // XXX: needs to be factored into a CountFunExpr
+    if (_id.equalsIgnoreCase("count"))
+      return rs.getLong(index);
+    else
+      return super.getObject(aConn, rs, index);
+  }
+
   public String toString()
   {
     String str = _id + "(";
@@ -151,5 +163,29 @@ public class FunExpr extends AbstractAmberExpr {
     }
 
     return str + ")";
+  }
+
+  // private
+
+  private void generateInternalWhere(CharBuffer cb,
+                                     boolean select)
+  {
+    cb.append(_id);
+    cb.append('(');
+
+    if (_distinct)
+      cb.append("distinct ");
+
+    for (int i = 0; i < _args.size(); i++) {
+      if (i != 0)
+        cb.append(',');
+
+      if (select)
+        _args.get(i).generateWhere(cb);
+      else
+        _args.get(i).generateUpdateWhere(cb);
+    }
+
+    cb.append(')');
   }
 }

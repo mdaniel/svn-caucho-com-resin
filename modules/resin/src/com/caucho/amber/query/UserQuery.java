@@ -419,15 +419,16 @@ public class UserQuery implements AmberQuery {
     _aConn.flush();
     // XXX: sync
 
-    PreparedStatement pstmt;
+    String sql = _query.getSQL();
 
-    pstmt = _aConn.prepareStatement(_query.getSQL());
-    pstmt.clearParameters();
+    PreparedStatement pstmt = _aConn.prepareStatement(sql);
+    ArgExpr []args = _query.getArgList();
 
-    for (int i = 0; i < _argLength; i++) {
-      if (_argValues[i] != null) {
-        _argTypes[i].setParameter(pstmt, i + 1, _argValues[i]);
-      }
+    if (args.length > 0)
+      pstmt.clearParameters();
+
+    for (int i = 0; i < args.length; i++) {
+      args[i].setParameter(pstmt, i + 1, _argTypes, _argValues);
     }
 
     _query.prepare(this, _aConn);

@@ -85,6 +85,11 @@ public interface AmberExpr {
   void generateWhere(CharBuffer cb);
 
   /**
+   * Generates the (update) where expression.
+   */
+  void generateUpdateWhere(CharBuffer cb);
+
+  /**
    * Generates the having expression.
    */
   void generateHaving(CharBuffer cb);

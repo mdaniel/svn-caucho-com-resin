@@ -105,19 +105,46 @@ public class BetweenExpr extends AbstractAmberExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
+    generateInternalWhere(cb, true);
+  }
+
+  /**
+   * Generates the (update) where expression.
+   */
+  public void generateUpdateWhere(CharBuffer cb)
+  {
+    generateInternalWhere(cb, false);
+  }
+
+  //
+  // private
+
+  private void generateInternalWhere(CharBuffer cb,
+                                     boolean select)
+  {
     cb.append('(');
-    _expr.generateWhere(cb);
+
+    if (select)
+      _expr.generateWhere(cb);
+    else
+      _expr.generateUpdateWhere(cb);
 
     if (_isNot)
       cb.append(" NOT");
 
     cb.append(" BETWEEN ");
 
-    _min.generateWhere(cb);
+    if (select)
+      _min.generateWhere(cb);
+    else
+      _min.generateUpdateWhere(cb);
 
     cb.append(" AND ");
 
-    _max.generateWhere(cb);
+    if (select)
+      _max.generateWhere(cb);
+    else
+      _max.generateUpdateWhere(cb);
 
     cb.append(')');
   }

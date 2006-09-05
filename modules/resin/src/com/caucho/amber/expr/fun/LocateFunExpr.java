@@ -63,6 +63,23 @@ public class LocateFunExpr extends FunExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
+    generateInternalWhere(cb, true);
+  }
+
+  /**
+   * Generates the (update) where expression.
+   */
+  public void generateUpdateWhere(CharBuffer cb)
+  {
+    generateInternalWhere(cb, false);
+  }
+
+  //
+  // private
+
+  private void generateInternalWhere(CharBuffer cb,
+                                     boolean select)
+  {
     // Translate to => POSITION('word' in SUBSTRING(data,i,LENGTH(data)))+(i-1)
 
     ArrayList<AmberExpr> args = getArgs();
@@ -80,11 +97,17 @@ public class LocateFunExpr extends FunExpr {
 
     charBuffer.append("position(");
 
-    args.get(0).generateWhere(charBuffer);
+    if (select)
+      args.get(0).generateWhere(charBuffer);
+    else
+      args.get(0).generateUpdateWhere(charBuffer);
 
     charBuffer.append(" in substring(");
 
-    args.get(1).generateWhere(charBuffer);
+    if (select)
+      args.get(1).generateWhere(charBuffer);
+    else
+      args.get(1).generateUpdateWhere(charBuffer);
 
     charBuffer.append(",");
 
@@ -105,12 +128,18 @@ public class LocateFunExpr extends FunExpr {
         // throw new QueryParseException(L.l("expected an integer for LOCATE 3rd argument"));
       }
 
-      expr.generateWhere(charBuffer);
+      if (select)
+        expr.generateWhere(charBuffer);
+      else
+        expr.generateUpdateWhere(charBuffer);
     }
 
     charBuffer.append(",length(");
 
-    args.get(1).generateWhere(charBuffer);
+    if (select)
+      args.get(1).generateWhere(charBuffer);
+    else
+      args.get(1).generateUpdateWhere(charBuffer);
 
     charBuffer.append(")))");
 

@@ -63,6 +63,23 @@ public class LengthFunExpr extends FunExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
+    generateInternalWhere(cb, true);
+  }
+
+  /**
+   * Generates the (update) where expression.
+   */
+  public void generateUpdateWhere(CharBuffer cb)
+  {
+    generateInternalWhere(cb, false);
+  }
+
+  //
+  // private
+
+  private void generateInternalWhere(CharBuffer cb,
+                                     boolean select)
+  {
     ArrayList<AmberExpr> args = getArgs();
 
     int n = args.size();
@@ -73,7 +90,10 @@ public class LengthFunExpr extends FunExpr {
 
     cb.append("length(");
 
-    args.get(0).generateWhere(cb);
+    if (select)
+      args.get(0).generateWhere(cb);
+    else
+      args.get(0).generateUpdateWhere(cb);
 
     cb.append(")");
   }

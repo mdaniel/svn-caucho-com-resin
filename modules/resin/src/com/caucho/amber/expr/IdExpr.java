@@ -131,9 +131,15 @@ public class IdExpr extends AbstractPathExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
-    cb.append(_fromItem.getName());
-    cb.append('.');
-    cb.append(getTargetType().getId().getColumns().get(0).getName());
+    generateInternalWhere(cb, true);
+  }
+
+  /**
+   * Generates the (update) where expression.
+   */
+  public void generateUpdateWhere(CharBuffer cb)
+  {
+    generateInternalWhere(cb, false);
   }
 
   /**
@@ -162,5 +168,19 @@ public class IdExpr extends AbstractPathExpr {
     IdExpr id = (IdExpr) o;
 
     return _fromItem.equals(id._fromItem);
+  }
+
+  //
+  // private
+
+  private void generateInternalWhere(CharBuffer cb,
+                                     boolean select)
+  {
+    if (select) {
+      cb.append(_fromItem.getName());
+      cb.append('.');
+    }
+
+    cb.append(getTargetType().getId().getColumns().get(0).getName());
   }
 }

@@ -63,6 +63,23 @@ public class ConcatFunExpr extends FunExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
+    generateInternalWhere(cb, true);
+  }
+
+  /**
+   * Generates the (update) where expression.
+   */
+  public void generateUpdateWhere(CharBuffer cb)
+  {
+    generateInternalWhere(cb, false);
+  }
+
+  //
+  // private
+
+  private void generateInternalWhere(CharBuffer cb,
+                                     boolean select)
+  {
     // Translate to => arg1 || arg2 (XXX: Mysql CONCAT??)
 
     ArrayList<AmberExpr> args = getArgs();
@@ -75,11 +92,17 @@ public class ConcatFunExpr extends FunExpr {
 
     cb.append("(");
 
-    args.get(0).generateWhere(cb);
+    if (select)
+      args.get(0).generateWhere(cb);
+    else
+      args.get(0).generateUpdateWhere(cb);
 
     cb.append(" || ");
 
-    args.get(1).generateWhere(cb);
+    if (select)
+      args.get(1).generateWhere(cb);
+    else
+      args.get(1).generateUpdateWhere(cb);
 
     cb.append(")");
   }
