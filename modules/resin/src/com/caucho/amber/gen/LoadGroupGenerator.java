@@ -210,16 +210,18 @@ public class LoadGroupGenerator extends ClassComponent {
     out.pushDepth();
     _entityType.generateLoad(out, "rs", "", 1, _index);
     out.println("__caucho_loadMask_" + group + " |= " + mask + "L;");
+
     _entityType.generateLoadEager(out, "rs", "", 1, _index);
 
-    ArrayList<JMethod> postLoadCallbacks = _entityType.getPostLoadCallbacks();
-    if (postLoadCallbacks.size() > 0 && _index == 0) {
-      out.println("if (__caucho_state == com.caucho.amber.entity.Entity.P_TRANSACTIONAL) {");
-      out.pushDepth();
-      generateCallbacks(out, postLoadCallbacks);
-      out.popDepth();
-      out.println("}");
-    }
+    // commented out: jpa/0r01
+    // ArrayList<JMethod> postLoadCallbacks = _entityType.getPostLoadCallbacks();
+    // if (postLoadCallbacks.size() > 0 && _index == 0) {
+    //   out.println("if (__caucho_state == com.caucho.amber.entity.Entity.P_TRANSACTIONAL) {");
+    //   out.pushDepth();
+    //   generateCallbacks(out, postLoadCallbacks);
+    //   out.popDepth();
+    //   out.println("}");
+    // }
 
     if (_entityType.getHasLoadCallback())
       out.println("__caucho_load_callback();");

@@ -952,13 +952,13 @@ public class EntityComponent extends ClassComponent {
       out.println("__caucho_loadMask_" + i + " = " + _entityType.getCreateLoadMask(i) + ";");
     }
 
+    for (JMethod method : _entityType.getPrePersistCallbacks()) {
+      out.println(method.getName() + "();");
+    }
+
     int dirtyCount = _entityType.getDirtyIndex();
     for (int i = 0; i <= dirtyCount / 64; i++) {
       out.println("__caucho_dirtyMask_" + i + " = 0L;");
-    }
-
-    for (JMethod method : _entityType.getPrePersistCallbacks()) {
-      out.println(method.getName() + "();");
     }
 
     Table table = _entityType.getTable();
@@ -1035,6 +1035,12 @@ public class EntityComponent extends ClassComponent {
     out.println();
     out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
     out.println("  __caucho_log.fine(\"amber create \" + this);");
+    out.println();
+    out.println("if (aConn.isInTransaction()) {");
+    out.println("  __caucho_state = com.caucho.amber.entity.Entity.P_TRANSACTIONAL;");
+    out.println("  aConn.makeTransactional(this);");
+    out.println("}");
+    out.println();
 
     for (JMethod method : _entityType.getPostPersistCallbacks()) {
       out.println(method.getName() + "();");
@@ -1228,7 +1234,7 @@ public class EntityComponent extends ClassComponent {
     _entityType.generateCopyLoadObject(out, "o", "super", 0);
 
     out.println("o.__caucho_session = aConn;");
-    out.println("o.__caucho_state = com.caucho.amber.entity.Entity.P_NON_TRANSACTIONAL;");
+    out.println("o.__caucho_state = __caucho_state;"); // com.caucho.amber.entity.Entity.P_NON_TRANSACTIONAL;");
     out.println("o.__caucho_loadMask_0 = __caucho_loadMask_0;"); // & 1L;");
 
     generateCallbacks(out, "o", _entityType.getPostLoadCallbacks());
@@ -1267,7 +1273,10 @@ public class EntityComponent extends ClassComponent {
     }
 
     out.println("__caucho_session = aConn;");
+
+    // out.println("if (__caucho_state != com.caucho.amber.entity.Entity.P_TRANSACTIONAL) {");
     out.println("__caucho_state = com.caucho.amber.entity.Entity.P_NON_TRANSACTIONAL;");
+    // out.println("}");
 
     out.popDepth();
     out.println("}");
