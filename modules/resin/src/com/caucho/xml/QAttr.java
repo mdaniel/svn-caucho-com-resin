@@ -40,7 +40,7 @@ public class QAttr extends QNode implements Attr {
   private String _value;
   private boolean _specified = true;
 
-  public QAttr(QName name, String value)
+  protected QAttr(QName name, String value)
   { 
     _name = name; 
     _value = value;

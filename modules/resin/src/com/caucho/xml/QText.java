@@ -39,7 +39,7 @@ public class QText extends QCharacterData implements Text {
   /**
    * Creates a new text node with initial data.
    */
-  public QText(String data)
+  protected QText(String data)
   {
     super(data);
   }

@@ -152,7 +152,7 @@ public class QDocumentType extends QNode implements DocumentType {
     return _systemId;
   }
 
-  void setSystemId(String systemId)
+  protected void setSystemId(String systemId)
   {
     _systemId = systemId;
   }
@@ -162,7 +162,7 @@ public class QDocumentType extends QNode implements DocumentType {
     return _publicId;
   }
 
-  void setPublicId(String publicId)
+  protected void setPublicId(String publicId)
   {
     _publicId = publicId;
   }

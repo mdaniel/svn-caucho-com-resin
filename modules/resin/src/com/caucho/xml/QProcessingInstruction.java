@@ -38,7 +38,7 @@ public class QProcessingInstruction extends QNode
   String _name;
   String _data;
 
-  public QProcessingInstruction(String name, String data)
+  protected QProcessingInstruction(String name, String data)
   {
     _name = name.intern();
     _data = data;

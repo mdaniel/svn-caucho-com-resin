@@ -34,7 +34,7 @@ import org.w3c.dom.Node;
 import java.io.IOException;
 
 public class QComment extends QCharacterData implements Comment {
-  public QComment(String data)
+  protected QComment(String data)
   {
     super(data);
   }

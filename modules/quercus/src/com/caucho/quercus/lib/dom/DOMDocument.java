@@ -73,6 +73,11 @@ public class DOMDocument
       setEncoding(encoding);
   }
 
+  DOMDocument(DOMImplementation implementation)
+  {
+    super(implementation.getQDOMImplementation());
+  }
+
   public String getEncoding()
   {
     return _encoding;

@@ -36,7 +36,7 @@ import java.io.IOException;
 public class QEntityReference extends QNode implements EntityReference {
   String _name;
 
-  public QEntityReference(String name)
+  protected QEntityReference(String name)
   {
     _name = name;
   }

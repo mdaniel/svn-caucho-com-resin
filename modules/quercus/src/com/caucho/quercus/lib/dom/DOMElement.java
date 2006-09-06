@@ -29,50 +29,18 @@
 
 package com.caucho.quercus.lib.dom;
 
-import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.xml.QElement;
 import com.caucho.xml.QName;
 
-import java.lang.reflect.Method;
-
-public class DOMElementDef
-  extends JavaClassDef
+public class DOMElement
+  extends QElement
 {
-  public DOMElementDef(ModuleContext moduleContext, String name, Class type)
+  public DOMElement(String name, @Optional String textContent, @Optional String namespace)
   {
-    super(moduleContext, name, type);
+    super(new QName(name, namespace));
 
-  }
-
-  public synchronized void introspect()
-  {
-    super.introspect();
-
-    try {
-      Method method = getClass().getMethod("__construct",
-                                           String.class,
-                                           String.class,
-                                           String.class);
-      setCons(method);
-    }
-    catch (NoSuchMethodException ex) {
-      throw new AssertionError(ex);
-    }
-  }
-
-  public static QElement __construct(String name,
-                                     @Optional String textContent,
-                                     @Optional String namespace)
-  {
-    QName qName = new QName(name, namespace);
-
-    QElement element = new QElement(qName);
-
-    if (textContent.length() > 0)
-      element.setTextContent(textContent);
-
-    return element;
+    if (textContent != null && textContent.length() > 0)
+      setTextContent(textContent);
   }
 }

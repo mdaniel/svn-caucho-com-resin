@@ -53,7 +53,7 @@ public class QElement extends QAttributedNode implements CauchoElement {
    *
    * @param name the element's name.
    */
-  public QElement(QName name)
+  protected QElement(QName name)
   { 
     _name = name; 
   }

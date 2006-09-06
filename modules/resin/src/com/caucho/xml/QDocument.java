@@ -70,7 +70,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
     _owner = this;
   }
 
-  QDocument(QDOMImplementation impl)
+  public QDocument(QDOMImplementation impl)
   {
     _implementation = impl;
     _owner = this;
