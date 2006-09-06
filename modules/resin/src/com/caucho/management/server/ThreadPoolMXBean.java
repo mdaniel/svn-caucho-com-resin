@@ -47,10 +47,16 @@ public interface ThreadPoolMXBean extends ManagedObjectMXBean {
   public int getThreadMax();
   
   /**
-   * Returns the minimum number of spare threads.
+   * Returns the minimum number of idle threads.
    */
-  @Description("The configured minimum number of spare threads")
-  public int getSpareThreadMin();
+  @Description("The configured minimum number of idle threads")
+  public int getThreadIdleMin();
+  
+  /**
+   * Returns the maximum number of idle threads.
+   */
+  @Description("The configured maximum number of idle threads")
+  public int getThreadIdleMax();
 
   //
   // Statistics

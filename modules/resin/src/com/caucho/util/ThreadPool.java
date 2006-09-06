@@ -34,22 +34,24 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-import com.caucho.vfs.EnvironmentStream;
+import com.caucho.config.*;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
 
 /**
  * A generic pool of threads available for Alarms and Work tasks.
  */
 public class ThreadPool implements Runnable {
+  private static final L10N L = new L10N(ThreadPool.class);
   private static final Logger log
     = Logger.getLogger(ThreadPool.class.getName());
   
   private static final long MAX_EXPIRE = Long.MAX_VALUE / 2;
 
-  private static final int SPARE_GAP = 5;
+  private static int _threadMax = 256;
   
-  private static int _maxThreads = 128;
-  
-  private static int _minSpareThreads = 5;
+  private static int _threadIdleMin = 5;
+  private static int _threadIdleMax = 10;
 
   private static long _resetCount;
 
@@ -109,7 +111,11 @@ public class ThreadPool implements Runnable {
    */
   public static void setThreadMax(int max)
   {
-    _maxThreads = max;
+    if (max < _threadIdleMax)
+      throw new ConfigException(L.l("lt;thread-max> ({0}) must be less than &lt;thread-idle-max> ({1})", max, _threadIdleMax));
+	
+    _threadMax = max;
+
   }
 
   /**
@@ -117,23 +123,50 @@ public class ThreadPool implements Runnable {
    */
   public static int getThreadMax()
   {
-    return _maxThreads;
+    return _threadMax;
   }
 
   /**
    * Sets the minimum number of idle threads.
    */
-  public static void setSpareThreadMin(int min)
+  public static void setThreadIdleMin(int min)
   {
-    _minSpareThreads = min;
+    if (_threadIdleMax < min)
+      throw new ConfigException(L.l("lt;thread-idle-min> ({0}) must be less than &lt;thread-idle-max> ({1})", min, _threadIdleMax));
+    
+    _threadIdleMin = min;
   }
 
   /**
    * Gets the minimum number of idle threads.
    */
-  public static int getSpareThreadMin()
+  public static int getThreadIdleMin()
   {
-    return _minSpareThreads;
+    return _threadIdleMin;
+  }
+
+  /**
+   * Sets the maximum number of idle threads.
+   */
+  public static void setThreadIdleMax(int max)
+  {
+    if (max < _threadIdleMin)
+      throw new ConfigException(L.l("lt;thread-idle-max> ({0}) must be greater than &lt;thread-idle-min> ({1})",
+				    max, _threadIdleMin));
+    
+    if (_threadMax < max)
+      throw new ConfigException(L.l("lt;thread-idle-max> ({0}) must be less than &lt;thread-max> ({1})",
+				    max, _threadMax));
+    
+    _threadIdleMax = max;
+  }
+
+  /**
+   * Gets the maximum number of idle threads.
+   */
+  public static int getThreadIdleMax()
+  {
+    return _threadIdleMax;
   }
 
   /**
@@ -147,7 +180,7 @@ public class ThreadPool implements Runnable {
   /**
    * Returns the idle thread count.
    */
-  public static int getIdleThreadCount()
+  public static int getThreadIdleCount()
   {
     return _idleCount;
   }
@@ -155,9 +188,9 @@ public class ThreadPool implements Runnable {
   /**
    * Returns the active thread count.
    */
-  public static int getActiveThreadCount()
+  public static int getThreadActiveCount()
   {
-    return getThreadCount() - getIdleThreadCount();
+    return getThreadCount() - getThreadIdleCount();
   }
 
   /**
@@ -165,7 +198,7 @@ public class ThreadPool implements Runnable {
    */
   public static int getFreeThreadCount()
   {
-    return _maxThreads - _threadCount;
+    return _threadMax - _threadCount;
   }
 
   /**
@@ -184,7 +217,7 @@ public class ThreadPool implements Runnable {
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
-    return schedule(task, loader, _minSpareThreads, MAX_EXPIRE, true);
+    return schedule(task, loader, _threadIdleMin, MAX_EXPIRE, true);
   }
 
   /**
@@ -201,7 +234,7 @@ public class ThreadPool implements Runnable {
     
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
-    return schedule(task, loader, _minSpareThreads, expire, true);
+    return schedule(task, loader, _threadIdleMin, expire, true);
   }
 
   /**
@@ -221,7 +254,7 @@ public class ThreadPool implements Runnable {
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
-    return schedule(task, loader, _minSpareThreads, MAX_EXPIRE, false);
+    return schedule(task, loader, _threadIdleMin, MAX_EXPIRE, false);
   }
 
   /**
@@ -238,7 +271,7 @@ public class ThreadPool implements Runnable {
     
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
-    return schedule(task, loader, _minSpareThreads, expire, false);
+    return schedule(task, loader, _threadIdleMin, expire, false);
   }
 
   /**
@@ -304,7 +337,7 @@ public class ThreadPool implements Runnable {
       try {
 	synchronized (_idleLock) {
 	  int idleCount = _idleCount;
-	  int freeCount = idleCount + _maxThreads - _threadCount;
+	  int freeCount = idleCount + _threadMax - _threadCount;
 	  boolean startNew = false;
 
 	  if (idleCount > 0 && freeThreads < freeCount) {
@@ -319,7 +352,7 @@ public class ThreadPool implements Runnable {
 
 	    _idleCount--;
 
-	    if (idleCount < _minSpareThreads)
+	    if (idleCount < _threadIdleMin)
 	      startNew = true;
 	  }
 	  else
@@ -447,7 +480,7 @@ public class ThreadPool implements Runnable {
 	_threads.remove(this);
       }
 
-      if (_threadCount < _minSpareThreads) {
+      if (_threadCount < _threadIdleMin) {
 	synchronized (_launcher) {
 	  _launcher.notify();
 	}
@@ -472,7 +505,7 @@ public class ThreadPool implements Runnable {
 	  isIdle = true;
 	  
 	  synchronized (_idleLock) {
-	    if (_minSpareThreads + SPARE_GAP < _idleCount) {
+	    if (_threadIdleMax < _idleCount) {
 	      return;
 	    }
 	      
@@ -528,10 +561,10 @@ public class ThreadPool implements Runnable {
 	  boolean isDead = false;
 	  boolean isReset = false;
 
-	  // check to see if we're over the spare thread limit
+	  // check to see if we're over the idle thread limit
 	  synchronized (_idleLock) {
 	    if (_isIdle &&
-		(_minSpareThreads + SPARE_GAP < _idleCount ||
+		(_threadIdleMax < _idleCount ||
 		 _resetCount != _threadResetCount)) {
 	      isDead = true;
 
@@ -601,9 +634,9 @@ public class ThreadPool implements Runnable {
       synchronized (_idleLock) {
 	int idleCount = _idleCount;
 
-	if (_maxThreads < _threadCount + _startCount)
+	if (_threadMax < _threadCount + _startCount)
 	  doStart = false;
-	else if (_minSpareThreads < idleCount + _startCount)
+	else if (_threadIdleMin < idleCount + _startCount)
 	  doStart = false;
 
 	if (doStart)
@@ -648,7 +681,7 @@ public class ThreadPool implements Runnable {
       Thread.currentThread().setContextClassLoader(systemLoader);
 
       try {
-	for (int i = 0; i < _minSpareThreads; i++)
+	for (int i = 0; i < _threadIdleMin; i++)
 	  startConnection(0);
       } catch (Throwable e) {
 	e.printStackTrace();
@@ -719,7 +752,7 @@ public class ThreadPool implements Runnable {
 	  }
 
 	  if (task != null) {
-	    schedule(task, loader, _minSpareThreads, MAX_EXPIRE, false);
+	    schedule(task, loader, _threadIdleMin, MAX_EXPIRE, false);
 	  }
 	} catch (OutOfMemoryError e) {
 	  System.exit(10);

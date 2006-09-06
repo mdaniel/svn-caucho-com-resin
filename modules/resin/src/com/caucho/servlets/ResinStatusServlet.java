@@ -290,14 +290,14 @@ public class ResinStatusServlet extends GenericServlet {
     out.println("<tr><th colspan='3'>Threads");
     out.println("    <th colspan='3'>Config");
     out.println("<tr><th>Active<th>Idle<th>Total");
-    out.println("    <th>thread-max<th>spare-thread-min");
+    out.println("    <th>thread-max<th>thread-idle-min");
     out.println("<tr align='right'>");
     out.println("    <td>" + threadPool.getThreadActiveCount());
     out.println("    <td>" + threadPool.getThreadIdleCount());
     out.println("    <td>" + threadPool.getThreadCount());
 
     out.println("    <td>" + threadPool.getThreadMax());
-    out.println("    <td>" + threadPool.getSpareThreadMin());
+    out.println("    <td>" + threadPool.getThreadIdleMin());
 
     out.println("</table>");
   }

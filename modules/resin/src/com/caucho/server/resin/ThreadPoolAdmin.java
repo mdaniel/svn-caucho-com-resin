@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -78,13 +79,24 @@ public class ThreadPoolAdmin extends AbstractManagedObject
   }
 
   /**
-   * Returns the minimum number of spare threads.
+   * Returns the minimum number of idle threads.
    */
-  public int getSpareThreadMin()
+  public int getThreadIdleMin()
   {
-    return ThreadPool.getSpareThreadMin();
+    return ThreadPool.getThreadIdleMin();
   }
 
+  /**
+   * Returns the maximum number of idle threads.
+   */
+  public int getThreadIdleMax()
+  {
+    return ThreadPool.getThreadIdleMax();
+  }
+
+  /**
+   * Returns the total number of threads.
+   */
   public int getThreadCount()
   {
     return ThreadPool.getThreadCount();
@@ -95,7 +107,7 @@ public class ThreadPoolAdmin extends AbstractManagedObject
    */
   public int getThreadActiveCount()
   {
-    return ThreadPool.getActiveThreadCount();
+    return ThreadPool.getThreadActiveCount();
   }
 
   /**
@@ -103,6 +115,6 @@ public class ThreadPoolAdmin extends AbstractManagedObject
    */
   public int getThreadIdleCount()
   {
-    return ThreadPool.getIdleThreadCount();
+    return ThreadPool.getThreadIdleCount();
   }
 }

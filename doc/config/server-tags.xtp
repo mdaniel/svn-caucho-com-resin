@@ -5,7 +5,10 @@
 
   <description>
 
-  <p>Describes the server configuration tags.</p>
+  <p>The &lt;server> tags configure a JVM instance in a cluster.  It
+configures HTTP and cluster sockets,
+keepalives and timeouts, thread pooling,
+load balancing, and JVM arguments.</p>
 
   </description>
 </header>
@@ -17,7 +20,7 @@
 
 <ul>
 <li>See the <a href="index-tags.xtp">index</a> for a list of all the tags.</li>
-<li>See <a href="cluster-tags.xtp">Cluster tag</a> configuration</li>
+<li>See &lt;<a href="cluster-tags.xtp">cluster</a>&lt; tag configuration</li>
 </ul>
 
 </s1>
@@ -162,7 +165,7 @@ report bogus failures when the server machine is just a little slow.</p>
 
 </defun>
 
-<defun title="client-warmup-time" version="Resin 3.1">
+<defun title="&lt;client-warmup-time>" version="Resin 3.1">
 <parents>server</parents>
 
 <p>The time the <a href="resin-load-balance.xtp">load balancer</a>
@@ -197,7 +200,7 @@ app-tier server until the server has warmed up.</p>
 
 </defun>
 
-<defun title="client-weight" version="Resin 3.1">
+<defun title="&lt;client-weight>" version="Resin 3.1">
 <parents>server</parents>
 
 <p>client-weight assigns a load-balance weight to a backend server.
@@ -234,10 +237,11 @@ the app-tier server.</p>
 
 </defun>
 
-<defun title="cluster-port" version="Resin 3.0">
+<defun title="&lt;cluster-port>" version="Resin 3.0">
 <parents>server</parents>
 
-<p>Configures a clustered HMUX listener.</p>
+<p>&lt;cluster-port> configures the cluster and load balancing socket,
+for load balancing, distributed sessions, and distributed management.</p>
 
 <p>When configuring Resin in a load-balanced cluster, each Resin instance
 will have its own &lt;srun&gt; configuration, which Resin uses for distributed
@@ -278,10 +282,10 @@ which ports the server should listen to.</p>
 
 </defun>
 
-<defun title="http" version="Resin 3.0">
+<defun title="&lt;http>" version="Resin 3.0">
 <parents>server</parents>
 
-<p>Configures a HTTP port listening for HTTP requests.</p>
+<p>&lt;http> configures a HTTP or HTTPS port listening for HTTP requests.</p>
 
 <p>When configuring multiple JVMs, each &lt;http&gt; will have a
 unique &lt;server-id&gt; which allows the -server command-line to select
@@ -336,10 +340,10 @@ will use @virtual-host.</p>
 the command line, typically -X memory parameters and -D defines.</p>
 </defun>
 
-<defun title="protocol" version="Resin 3.1">
+<defun title="&lt;protocol>" version="Resin 3.1">
 <parents>server</parents>
 
-<p>The port tag allows for custom protocols using Resin's thread
+<p>&lt;protocol> configures custom socket protocols using Resin's thread
 and connection management.</p>
 
 <p>The custom protocol will extend from com.caucho.server.port.Protocol.</p>
@@ -360,11 +364,11 @@ and connection management.</p>
 
 </defun>
 
-<defun title="server" version="Resin 3.1">
+<defun title="&lt;server>" version="Resin 3.1">
 <parents>cluster</parents>
 
-<p>Each server is a JVM instance in the cluster and must be configured
-with a &lt;server&gt; tag.  Each &lt;server&gt; is uniquely identified by
+<p>&lt;server> configures a JVM instance in the cluster.
+Each &lt;server&gt; is uniquely identified by
 its <var>id</var> attribute.  The <var>id</var> will match
 the -server-id command line argument.</p>
 
@@ -414,24 +418,30 @@ The <g>ObjectName</g> is <var>resin:type=Server</var>.</p>
 
 </defun>
 
-<defun title="server-default" version="Resin 3.1">
+<defun title="&lt;server-default>" version="Resin 3.1">
 <parents>cluster</parents>
 
-<p>Defines default values for all &lt;server&gt; instances. See
-<a href="server-tags.xtp">server configuration</a> for more details.</p>
+<p>&lt;server-default> defines default values for
+all &lt;server&gt; instances.  Since most &lt;server> configuration
+is identical for all server instances, the shared configuration belongs
+in a &lt;server-default>.  For example, &lt;http> ports, timeouts,
+JVM arguments, and keepalives are typically identical for all
+server instances and therefore belong in a server-default.</p>
 
 <example title="server">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
     &lt;cluster id="web-tier"&gt;
         &lt;server-default&gt;
-            &lt;server-port&gt;6800&lt;/server-port&gt;
+           &lt;thread-max>512&lt;/thread-max>
 
-            &lt;http port="8080"/&gt;
+           &lt;jvm-args>-Xmx512m -Xss1m&lt;/jvm-args>
+
+           &lt;http port="8080"/&gt;
         &lt;/server-default&gt;
 
-        &lt;server id="a" address="192.168.0.10"/&gt;
-        &lt;server id="b" address="192.168.0.11"/&gt;
-        &lt;server id="c" address="192.168.0.12"/&gt;
+        &lt;server id="a" address="192.168.0.10" port="6800"/&gt;
+        &lt;server id="b" address="192.168.0.11" port="6800"/&gt;
+        &lt;server id="c" address="192.168.0.12" port="6800"/&gt;
 
         &lt;host id=""&gt;
           ...

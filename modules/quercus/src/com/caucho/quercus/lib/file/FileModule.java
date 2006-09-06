@@ -2304,7 +2304,12 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static String realpath(Path path)
   {
-    return path.getFullPath();
+    String fullPath = path.getFullPath();
+
+    if (fullPath.endsWith("/") && ! fullPath.equals("/"))
+      return fullPath.substring(fullPath.length() - 1);
+    else
+      return fullPath;
   }
 
   /**

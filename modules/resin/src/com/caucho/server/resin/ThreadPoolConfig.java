@@ -34,16 +34,28 @@ import com.caucho.util.L10N;
 public class ThreadPoolConfig {
   private static final L10N L = new L10N(ThreadPoolConfig.class);
 
+  private static final int THREAD_GAP = 5;
+
+  private int _threadMax = 256;
+  private int _threadSpareMin = 5;
+
   public void setThreadMax(int threadMax)
   {
-    ThreadPool.setThreadMax(threadMax);
+    _threadMax = threadMax;
   }
 
   /**
    * The minimum number of spare threads waiting for a connection.
    */
-  public void setSpareThreadMin(int spareThreadMin)
+  public void setSpareThreadMin(int threadSpareMin)
   {
-    ThreadPool.setSpareThreadMin(spareThreadMin);
+    _threadSpareMin = threadSpareMin;
+  }
+
+  public void init()
+  {
+    ThreadPool.setThreadMax(_threadMax);
+    ThreadPool.setThreadIdleMin(_threadSpareMin);
+    ThreadPool.setThreadIdleMax(_threadSpareMin + THREAD_GAP);
   }
 }
