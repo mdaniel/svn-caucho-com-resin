@@ -73,7 +73,7 @@ public class InjectIntrospector {
   {
     if (obj != null) {
       for (BuilderProgram program : introspect(obj.getClass())) {
-	program.configure(obj);
+        program.configure(obj);
       }
     }
   }
@@ -85,7 +85,7 @@ public class InjectIntrospector {
     throws ConfigException
   {
     ArrayList<BuilderProgram> initList = new ArrayList<BuilderProgram>();
-    
+
     try {
       introspectImpl(initList, type);
     } catch (ClassNotFoundException e) {
@@ -94,9 +94,9 @@ public class InjectIntrospector {
 
     return initList;
   }
-    
+
   private static void introspectImpl(ArrayList<BuilderProgram> initList,
-				     Class type)
+                                     Class type)
     throws ConfigException, ClassNotFoundException
   {
     if (type == null || type.equals(Object.class))
@@ -107,34 +107,34 @@ public class InjectIntrospector {
     for (Field field : type.getDeclaredFields()) {
       configure(initList, field, field.getName(), field.getType());
     }
-    
+
     for (Method method : type.getDeclaredMethods()) {
       String fieldName = method.getName();
       Class []param = method.getParameterTypes();
 
       if (param.length != 1)
-	continue;
-      
-      if (fieldName.startsWith("set") && fieldName.length() > 3) {
-	fieldName = fieldName.substring(3);
+        continue;
 
-	char ch = fieldName.charAt(0);
-	
-	if (Character.isUpperCase(ch) &&
-	    (fieldName.length() == 1 ||
-	     Character.isLowerCase(fieldName.charAt(1)))) {
-	  fieldName = Character.toLowerCase(ch) + fieldName.substring(1);
-	}
+      if (fieldName.startsWith("set") && fieldName.length() > 3) {
+        fieldName = fieldName.substring(3);
+
+        char ch = fieldName.charAt(0);
+
+        if (Character.isUpperCase(ch) &&
+            (fieldName.length() == 1 ||
+             Character.isLowerCase(fieldName.charAt(1)))) {
+          fieldName = Character.toLowerCase(ch) + fieldName.substring(1);
+        }
       }
 
       configure(initList, method, fieldName, param[0]);
     }
   }
-  
+
   public static void configure(ArrayList<BuilderProgram> initList,
-			       AccessibleObject field,
-			       String fieldName,
-			       Class fieldType)
+                               AccessibleObject field,
+                               String fieldName,
+                               Class fieldType)
     throws ConfigException
   {
     if (field.isAnnotationPresent(Resource.class))
@@ -146,58 +146,58 @@ public class InjectIntrospector {
     else if (field.isAnnotationPresent(PersistenceContext.class))
       configurePersistenceContext(initList, field, fieldName, fieldType);
   }
-  
+
   private static void configureResource(ArrayList<BuilderProgram> initList,
-					AccessibleObject field,
-					String fieldName,
-					Class fieldType)
+                                        AccessibleObject field,
+                                        String fieldName,
+                                        Class fieldType)
     throws ConfigException
   {
     Resource resource = field.getAnnotation(Resource.class);
 
     initList.add(configureResource(field,
-				   fieldName, fieldType,
-				   resource.name(),
-				   resource.type().getName(),
-				   resource.name()));
+                                   fieldName, fieldType,
+                                   resource.name(),
+                                   resource.type().getName(),
+                                   resource.name()));
   }
-  
+
   public static BuilderProgram
     introspectResource(AccessibleObject field,
-		       String fieldName,
-		       Class fieldType)
+                       String fieldName,
+                       Class fieldType)
     throws ConfigException
   {
     Resource resource = field.getAnnotation(Resource.class);
 
     if (resource != null)
       return configureResource(field,
-			       fieldName, fieldType,
-			       resource.name(),
-			       resource.type().getName(),
-			       resource.name());
+                               fieldName, fieldType,
+                               resource.name(),
+                               resource.type().getName(),
+                               resource.name());
     else
       return null;
   }
-  
+
   private static void configureEJB(ArrayList<BuilderProgram> initList,
-				      AccessibleObject field,
-				      String fieldName,
-				      Class fieldType)
+                                   AccessibleObject field,
+                                   String fieldName,
+                                   Class fieldType)
     throws ConfigException
   {
     EJB ejb = (EJB) field.getAnnotation(javax.ejb.EJB.class);
 
     initList.add(configureResource(field, fieldName, fieldType,
-				   ejb.name(),
-				   "javax.ejb.EJBLocalObject",
-				   ejb.jndiName()));
+                                   ejb.name(),
+                                   "javax.ejb.EJBLocalObject",
+                                   ejb.jndiName()));
   }
-  
+
   private static void configurePersistenceUnit(ArrayList<BuilderProgram> initList,
-					       AccessibleObject field,
-					       String fieldName,
-					       Class fieldType)
+                                               AccessibleObject field,
+                                               String fieldName,
+                                               Class fieldType)
     throws ConfigException
   {
     PersistenceUnit pUnit = field.getAnnotation(PersistenceUnit.class);
@@ -209,46 +209,46 @@ public class InjectIntrospector {
 
     try {
       if (! unitName.equals(""))
-	jndiName = jndiPrefix + '/' + unitName;
+        jndiName = jndiPrefix + '/' + unitName;
       else {
-	InitialContext ic = new InitialContext();
+        InitialContext ic = new InitialContext();
 
-	NamingEnumeration<NameClassPair> iter = ic.list(jndiPrefix);
+        NamingEnumeration<NameClassPair> iter = ic.list(jndiPrefix);
 
-	if (iter == null) {
-	  log.warning("Can't find configured PersistenceUnit");
-	  return; // XXX: error?
-	}
+        if (iter == null) {
+          log.warning("Can't find configured PersistenceUnit");
+          return; // XXX: error?
+        }
 
-	String ejbJndiName = null;
-	while (iter.hasMore()) {
-	  NameClassPair pair = iter.next();
+        String ejbJndiName = null;
+        while (iter.hasMore()) {
+          NameClassPair pair = iter.next();
 
-	  if (pair.getName().equals("resin-ejb"))
-	    ejbJndiName = jndiPrefix + '/' + pair.getName();
-	  else {
-	    jndiName = jndiPrefix + '/' + pair.getName();
-	    break;
-	  }
-	}
+          if (pair.getName().equals("resin-ejb"))
+            ejbJndiName = jndiPrefix + '/' + pair.getName();
+          else {
+            jndiName = jndiPrefix + '/' + pair.getName();
+            break;
+          }
+        }
 
-	if (jndiName == null)
-	  jndiName = ejbJndiName;
+        if (jndiName == null)
+          jndiName = ejbJndiName;
       }
 
       initList.add(configureResource(field, fieldName, fieldType,
-				     unitName,
-				     "javax.persistence.EntityManagerFactory",
-				     jndiName));
+                                     unitName,
+                                     "javax.persistence.EntityManagerFactory",
+                                     jndiName));
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     }
   }
-  
+
   private static void configurePersistenceContext(ArrayList<BuilderProgram> initList,
-					       AccessibleObject field,
-					       String fieldName,
-					       Class fieldType)
+                                                  AccessibleObject field,
+                                                  String fieldName,
+                                                  Class fieldType)
     throws ConfigException
   {
     PersistenceContext pContext = field.getAnnotation(PersistenceContext.class);
@@ -260,49 +260,49 @@ public class InjectIntrospector {
 
     try {
       if (! unitName.equals(""))
-	jndiName = jndiPrefix + '/' + unitName;
+        jndiName = jndiPrefix + '/' + unitName;
       else {
-	InitialContext ic = new InitialContext();
+        InitialContext ic = new InitialContext();
 
-	NamingEnumeration<NameClassPair> iter = ic.list(jndiPrefix);
+        NamingEnumeration<NameClassPair> iter = ic.list(jndiPrefix);
 
-	if (iter == null) {
-	  log.warning("Can't find configured PersistenceContext");
-	  return; // XXX: error?
-	}
+        if (iter == null) {
+          log.warning("Can't find configured PersistenceContext");
+          return; // XXX: error?
+        }
 
-	String ejbJndiName = null;
-	while (iter.hasMore()) {
-	  NameClassPair pair = iter.next();
+        String ejbJndiName = null;
+        while (iter.hasMore()) {
+          NameClassPair pair = iter.next();
 
-	  if (pair.getName().equals("resin-ejb"))
-	    ejbJndiName = jndiPrefix + '/' + pair.getName();
-	  else {
-	    jndiName = jndiPrefix + '/' + pair.getName();
-	    break;
-	  }
-	}
+          if (pair.getName().equals("resin-ejb"))
+            ejbJndiName = jndiPrefix + '/' + pair.getName();
+          else {
+            jndiName = jndiPrefix + '/' + pair.getName();
+            break;
+          }
+        }
 
-	if (jndiName == null)
-	  jndiName = ejbJndiName;
+        if (jndiName == null)
+          jndiName = ejbJndiName;
       }
 
       initList.add(configureResource(field, fieldName, fieldType,
-				     unitName,
-				     "javax.persistence.EntityManager",
-				     jndiName));
+                                     unitName,
+                                     "javax.persistence.EntityManager",
+                                     jndiName));
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     }
   }
-  
+
   private static
     BuilderProgram configureResource(AccessibleObject field,
-				     String fieldName,
-				     Class fieldType,
-				     String name,
-				     String resourceType,
-				     String jndiName)
+                                     String fieldName,
+                                     Class fieldType,
+                                     String name,
+                                     String resourceType,
+                                     String jndiName)
     throws ConfigException
   {
     String prefix = "";
@@ -323,10 +323,10 @@ public class InjectIntrospector {
       prefix = "url/";
     else if (resourceType.startsWith("javax.ejb."))
       prefix = "ejb/";
-    
+
     if (! jndiName.equals("")) {
     }
-    else if ("javax.transaction.UserTransaction".equals(resourceType)) {
+    else if (UserTransaction.class.equals(fieldType)) {
       jndiName = "java:comp/UserTransaction";
     }
     else {
@@ -335,7 +335,7 @@ public class InjectIntrospector {
 
     int colon = jndiName.indexOf(':');
     int slash = jndiName.indexOf('/');
-    
+
     if (colon < 0 || slash > 0 && slash < colon)
       jndiName = "java:comp/env/" + prefix + jndiName;
 
