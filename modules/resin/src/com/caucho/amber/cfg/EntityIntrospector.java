@@ -838,7 +838,7 @@ public class EntityIntrospector {
         throw new ConfigException(L.l("'{0}' does not support sequence.",
                                       metaData.getDatabaseName()));
 
-      addSequenceIdGenerator(persistenceUnit, idField, id);
+      addSequenceIdGenerator(persistenceUnit, idField, gen);
     }
     else if (GenerationType.TABLE.equals(gen.get("strategy"))) {
       addTableIdGenerator(persistenceUnit, idField, id);
@@ -849,7 +849,7 @@ public class EntityIntrospector {
         idField.setGenerator("identity");
       }
       else if (metaData.supportsSequences()) {
-        addSequenceIdGenerator(persistenceUnit, idField, id);
+        addSequenceIdGenerator(persistenceUnit, idField, gen);
       }
       else
         addTableIdGenerator(persistenceUnit, idField, id);
@@ -874,13 +874,14 @@ public class EntityIntrospector {
 
   private void addSequenceIdGenerator(AmberPersistenceUnit persistenceUnit,
                                       KeyPropertyField idField,
-                                      JAnnotation idAnn)
+                                      JAnnotation genAnn)
     throws ConfigException
   {
     idField.setGenerator("sequence");
     idField.getColumn().setGeneratorType("sequence");
 
-    String name = idAnn.getString("generator");
+    String name = genAnn.getString("generator");
+
     if (name == null || "".equals(name))
       name = idField.getSourceType().getTable().getName() + "_cseq";
 
@@ -1045,9 +1046,15 @@ public class EntityIntrospector {
         continue;
       }
 
-      if (type.getMethod("set" + propName,
-                         new JClass[] { method.getReturnType() }) == null) {
+      JMethod setter = type.getMethod("set" + propName,
+                                      new JClass[] { method.getReturnType() });
+      if ((! method.isPublic()) ||
+          (setter == null) || (! setter.isPublic())) {
+
         JAnnotation ann = isAnnotatedMethod(method);
+
+        if (ann == null)
+          ann = isAnnotatedMethod(setter);
 
         if (ann != null) {
           throw new ConfigException(L.l("'{0}' is not a valid annotation for {1}.  Only public persistent property getters with matching setters may have property annotations.",

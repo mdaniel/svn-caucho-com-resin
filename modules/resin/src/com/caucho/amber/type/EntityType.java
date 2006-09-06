@@ -73,6 +73,7 @@ import com.caucho.amber.field.StubMethod;
 import com.caucho.amber.field.VersionField;
 
 import com.caucho.amber.idgen.IdGenerator;
+import com.caucho.amber.idgen.SequenceIdGenerator;
 
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.manager.AmberConnection;
@@ -1183,7 +1184,12 @@ public class EntityType extends Type {
   public long nextGeneratorId(AmberConnection aConn, String name)
     throws SQLException
   {
-    return _idGenMap.get(name).allocate(aConn);
+    IdGenerator idGen = _idGenMap.get(name);
+
+    if (idGen instanceof SequenceIdGenerator)
+      ((SequenceIdGenerator) idGen).init(_amberPersistenceUnit);
+
+    return idGen.allocate(aConn);
   }
 
   /**

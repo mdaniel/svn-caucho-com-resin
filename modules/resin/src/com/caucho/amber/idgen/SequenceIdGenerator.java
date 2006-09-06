@@ -56,7 +56,7 @@ import com.caucho.amber.manager.AmberConnection;
 public class SequenceIdGenerator extends IdGenerator {
   private static final L10N L = new L10N(SequenceIdGenerator.class);
   private static final Logger log = Log.open(SequenceIdGenerator.class);
-  
+
   private AmberPersistenceUnit _manager;
   private String _name;
   private int _size;
@@ -64,13 +64,13 @@ public class SequenceIdGenerator extends IdGenerator {
   private String _selectSQL;
 
   private boolean _isInit;
-  
+
   /**
    * Creates the table generator.
    */
   public SequenceIdGenerator(AmberPersistenceUnit manager,
-			     String name,
-			     int size)
+                             String name,
+                             int size)
     throws ConfigException
   {
     _manager = manager;
@@ -86,6 +86,7 @@ public class SequenceIdGenerator extends IdGenerator {
   {
     // XXX: should use non-XA
     Connection conn = aConn.getConnection();
+
     PreparedStatement selectStmt = conn.prepareStatement(_selectSQL);
 
     long value = -1;
@@ -93,7 +94,7 @@ public class SequenceIdGenerator extends IdGenerator {
     ResultSet rs = selectStmt.executeQuery();
     if (rs.next())
       value = rs.getLong(1);
-    
+
     rs.close();
 
     return value;
@@ -117,15 +118,15 @@ public class SequenceIdGenerator extends IdGenerator {
       _selectSQL = metaData.selectSequenceSQL(_name);
 
       if (amberPersistenceUnit.getCreateDatabaseTables()) {
-	String sql = metaData.createSequenceSQL(_name, getGroupSize());
+        String sql = metaData.createSequenceSQL(_name, getGroupSize());
 
-	try {
-	  Statement stmt = conn.createStatement();
-	  stmt.executeUpdate(sql);
-	  stmt.close();
-	} catch (Exception e) {
-	  log.log(Level.FINER, e.toString(), e);
-	}
+        try {
+          Statement stmt = conn.createStatement();
+          stmt.executeUpdate(sql);
+          stmt.close();
+        } catch (Exception e) {
+          log.log(Level.FINER, e.toString(), e);
+        }
       }
     } finally {
       conn.close();
