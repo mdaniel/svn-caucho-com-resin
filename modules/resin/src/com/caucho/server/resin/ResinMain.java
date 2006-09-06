@@ -89,7 +89,6 @@ public class ResinMain implements ResinServerListener {
   private long _startTime;
   
   private volatile boolean _isClosed;
-  private volatile boolean _isRestarting;
 
   private InputStream _waitIn;
   
@@ -376,7 +375,6 @@ public class ResinMain implements ResinServerListener {
     server.setServerId(_serverId);
     server.addListener(this);
     server.setResinProfessional(isResinProfessional);
-    server.setRestartOnClose(_waitIn == null);
 
     _mainThread.setContextClassLoader(_systemClassLoader);
 
@@ -434,24 +432,17 @@ public class ResinMain implements ResinServerListener {
   public void closeEvent(ResinServer resin)
   {
     try {
-      if (_resin != null && _resin.isRestartOnClose()) {
-	_isRestarting = true;
-	_resin = null;
-
-	log().info("restarting Resin");
-
-	init();
-      }
-      else {
-	_isClosed = true;
-
-	Socket socket = _pingSocket;
-	
-	if (socket != null)
-	  socket.setSoTimeout(1000);
-      }
-    } catch (Throwable e) {
       _isClosed = true;
+
+      synchronized (this) {
+	notifyAll();
+      }
+      
+      Socket socket = _pingSocket;
+	
+      if (socket != null)
+	socket.setSoTimeout(1000);
+    } catch (Throwable e) {
       log().log(Level.WARNING, e.toString(), e);
     }
   }
@@ -523,13 +514,9 @@ public class ResinMain implements ResinServerListener {
      * gracefully when the parent dies.
      */
     while (! _isClosed && 
-	   (resin = _resin) != null &&
-	   (! resin.isClosing() || resin.isRestartOnClose())) {
+	   (resin = _resin) != null && ! resin.isClosing()) {
       try {
 	Thread.sleep(10);
-
-	if (_isRestarting)
-	  continue;
 	
 	long minFreeMemory = _resin.getMinFreeMemory();
 
@@ -595,10 +582,12 @@ public class ResinMain implements ResinServerListener {
           _isClosed = true;
         }
         else {
-	  if (_isClosed && ! _isRestarting)
-	    Thread.sleep(1000);
-	  else
-	    Thread.sleep(10000);
+	  synchronized (this) {
+	    if (_isClosed)
+	      wait(1000);
+	    else
+	      wait(10000);
+	  }
         }
       } catch (SocketTimeoutException e) {
         socketExceptionCount = 0;

@@ -69,6 +69,7 @@ import com.caucho.server.log.AccessLog;
 import com.caucho.server.port.AbstractSelectManager;
 import com.caucho.server.port.Port;
 import com.caucho.server.port.ProtocolDispatchServer;
+import com.caucho.server.resin.*;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.ErrorPage;
 import com.caucho.server.webapp.RewriteInvocation;
@@ -96,6 +97,7 @@ public class Server extends ProtocolDispatchServer
     = new EnvironmentLocal<String>("caucho.server-id");
 
   private final ClusterServer _clusterServer;
+  private final ResinServer _resin;
   
   private EnvironmentClassLoader _classLoader;
 
@@ -135,6 +137,7 @@ public class Server extends ProtocolDispatchServer
       throw new NullPointerException();
     
     _clusterServer = clusterServer;
+    _resin = _clusterServer.getCluster().getResin();
 
     try {
       Thread thread = Thread.currentThread();
@@ -1156,10 +1159,10 @@ public class Server extends ProtocolDispatchServer
     } finally {
       DynamicClassLoader.setOldLoader(thread, oldLoader);
 
-      /*
-      if (_controller.getResinServer() != null)
-        _controller.getResinServer().closeEvent(this);
-      */
+      ResinServer resin = _resin;
+      
+      if (resin != null)
+        resin.close();
     }
   }
 

@@ -100,11 +100,10 @@ public class BeanELResolver extends ELResolver {
     try {
       method = base.getClass().getMethod(getName, new Class[0]);
     } catch (NoSuchMethodException e) {
-      return null;
     }
 
     if (method == null)
-      return null;
+      throw new PropertyNotFoundException("'" + fieldName + "' is an unknown property of bean '" + base + "' (" + base.getClass().getName() + ")");
 
     Class []paramTypes = method.getParameterTypes();
     if (paramTypes.length != 0)

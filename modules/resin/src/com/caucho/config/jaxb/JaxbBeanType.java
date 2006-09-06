@@ -192,6 +192,7 @@ public class JaxbBeanType extends TypeStrategy {
 	continue;
 
       Class []paramTypes = setter.getParameterTypes();
+      Type []genericParamTypes = setter.getGenericParameterTypes();
 
       if (paramTypes.length != 1)
 	continue;
@@ -265,10 +266,11 @@ public class JaxbBeanType extends TypeStrategy {
 	continue;
 
       Class<?> propType = paramTypes[0];
+      Type genericType = genericParamTypes[0];
       Class<?> valueType = null;
 
       if (Collection.class.isAssignableFrom(propType)) {
-	Class componentType = getCollectionComponent(propType);
+	Class componentType = getCollectionComponent(genericType);
 
 	HashMap<String,AttributeStrategy> attrMap = _attributeMap;
 

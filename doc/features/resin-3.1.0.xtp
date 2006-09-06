@@ -126,6 +126,17 @@ Configuration tutorial</a></p>
 
 </s2>
 
+
+</s1>
+
+<s1 title="Administration/JMX">
+
+<s2 title="ConnectionPoolMXBean">
+
+<p>Added <code>clear()</code> operation to clear idle connections in
+the pool.</p>
+
+</s2>
 </s1>
 
 </body>

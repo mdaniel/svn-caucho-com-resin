@@ -1030,6 +1030,16 @@ public abstract class JspNode {
         return String.valueOf(Double.valueOf(value));
       else if (type.equals(Double.class))
         return ("new java.lang.Double(" + Double.valueOf(value) + ")");
+      else if (com.caucho.el.Expr.class.isAssignableFrom(type)) {
+        int exprIndex;
+
+        if (isEmpty)
+          exprIndex = _gen.addExpr("");
+        else
+          exprIndex = _gen.addExpr(value);
+      
+        return ("_caucho_expr_" + exprIndex);
+      }
       else if (ValueExpression.class.isAssignableFrom(type)) {
         int exprIndex;
 
@@ -1051,16 +1061,6 @@ public abstract class JspNode {
           exprIndex = _gen.addMethodExpr(value, sig);
       
         return ("_caucho_method_expr_" + exprIndex);
-      }
-      else if (com.caucho.el.Expr.class.isAssignableFrom(type)) {
-        int exprIndex;
-
-        if (isEmpty)
-          exprIndex = _gen.addExpr("");
-        else
-          exprIndex = _gen.addExpr(value);
-      
-        return ("_caucho_expr_" + exprIndex);
       }
       else if (com.caucho.xpath.Expr.class.isAssignableFrom(type)) {
         int exprIndex;

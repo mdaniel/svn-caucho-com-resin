@@ -8,6 +8,10 @@
 
 <s2 title="3.1snap - Aug 1, 2006">
 <ul>
+<li>EJB: ejb-entry was not properly applied for EJB entity beans (#1322, rep by gzhu)</li>
+<li>javax.el behavior incorrect for b.bogus (#1327, rep by slonopatamus)</li>
+<li>Add ConnectionPoolMXBean.clear() to clear idle connections in the pool (#1314, rep by Sergiy Proskuryakov)</li>
+<li>Update resin.conf change logic to avoid restart race condition (#1269, rep by Nick Berry)</li>
 <li>servlet-mapping url-regexp wasn't working with welcome-file-list (#1298, rep by marcelloh)</li>
 <li>&lt;jvm-args> defines boot parameters (#1218)
 <li>SessionManager was created for closed web-app (#1295, rep by sks)

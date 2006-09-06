@@ -107,13 +107,20 @@ public class ELFormatter extends MessageFormatter {
       _logRecord = new ELFormatterLogRecord(logRecord);
     }
 
+    @Override
     public Object getValue(ELContext env, Object base, Object property)
       throws ELException 
     {
-      if ("log".equals(base))
+      if (base != null || ! (property instanceof String))
+	return null;
+
+      if ("log".equals(property)) {
+	env.setPropertyResolved(true);
+	
         return _logRecord;
-      else
-        return env.getELResolver().getValue(env, base, null);
+      }
+
+      return null;
     }
   }
 

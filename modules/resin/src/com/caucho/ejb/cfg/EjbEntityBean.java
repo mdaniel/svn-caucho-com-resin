@@ -1077,6 +1077,25 @@ public class EjbEntityBean extends EjbBean {
     if (isCMP()) {
       server.setAmberEntityHome(getEntityType().getHome());
     }
+    
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(server.getClassLoader());
+
+      try {
+	// ejb/086d
+	if (getServerProgram() != null)
+	  getServerProgram().configure(server);
+      } catch (ConfigException e) {
+	throw e;
+      } catch (Throwable e) {
+	throw new ConfigException(e);
+      }
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
 
     return server;
   }

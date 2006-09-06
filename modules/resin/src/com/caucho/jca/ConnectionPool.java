@@ -579,6 +579,35 @@ public class ConnectionPool extends AbstractManagedObject
   }
 
   /**
+   * Clears the idle connections in the pool.
+   */
+  public void clear()
+  {
+    ArrayList<PoolItem> pool = _pool;
+
+    if (pool == null)
+      return;
+    
+    ArrayList<PoolItem> clearItems = new ArrayList<PoolItem>();
+
+    synchronized (pool) {
+      clearItems.addAll(pool);
+
+      pool.clear();
+    }
+    
+    for (int i = 0; i < clearItems.size(); i++) {
+      PoolItem poolItem = clearItems.get(i);
+
+      try {
+	poolItem.destroy();
+      } catch (Throwable e) {
+	log.log(Level.WARNING, e.toString(), e);
+      }
+    }
+  }
+
+  /**
    * Returns the transaction.
    */
   UserTransactionImpl getTransaction()

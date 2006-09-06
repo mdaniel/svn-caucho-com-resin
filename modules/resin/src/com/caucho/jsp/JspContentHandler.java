@@ -143,6 +143,9 @@ public class JspContentHandler extends DefaultHandler {
 	    offset++;
 	}
 
+	if (offset < end)
+	  offset++;
+	
 	String value = new String(buf, begin, offset - begin);
 
 	QName qname = new QName("resin-c", "out", JspParser.JSTL_CORE_URI);
@@ -152,7 +155,6 @@ public class JspContentHandler extends DefaultHandler {
 	_builder.endAttributes();
 	_builder.endElement("resin-c:out");
 
-	offset++;
 	begin = offset;
       }
     }

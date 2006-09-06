@@ -101,8 +101,6 @@ public class ResinServer
   private long _minFreeMemory = 2 * 1024L * 1024L;
   private long _shutdownWaitMax = 60000L;
 
-  private boolean _isRestartOnClose;
-
   private SecurityManager _securityManager;
 
   private HashMap<String,Object> _variableMap = new HashMap<String,Object>();
@@ -340,24 +338,6 @@ public class ResinServer
   public ArrayList<Cluster> getClusterList()
   {
     return _clusters;
-  }
-
-  /**
-   * Set true if the server should restart rather than exit when
-   * the instance shuts down.
-   */
-  public boolean isRestartOnClose()
-  {
-    return _isRestartOnClose;
-  }
-
-  /**
-   * Set true if the server should restart rather than exit when
-   * the instance shuts down.
-   */
-  public void setRestartOnClose(boolean isRestartOnClose)
-  {
-    _isRestartOnClose = isRestartOnClose;
   }
 
   /**

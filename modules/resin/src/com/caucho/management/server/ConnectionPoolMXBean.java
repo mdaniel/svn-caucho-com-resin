@@ -121,4 +121,14 @@ public interface ConnectionPoolMXBean extends ManagedObjectMXBean {
    */
   @Description("The current number of idle connections")
   public int getConnectionIdleCount();
+
+  //
+  // Operations
+  //
+
+  /**
+   * Clears all idle connections in the pool.
+   */
+  @Description("Clear idle connections in the pool")
+  public void clear();
 }
