@@ -6,12 +6,18 @@
     <jndi-name>service/HelloService</jndi-name>
 
     <hessian>
-      <url-pattern>/hello/</url-pattern>
+      <url-pattern>/hello/hessian/</url-pattern>
     </hessian>
+
+    <rest>
+      <query-binding/>
+      <path-binding/>
+      <url-pattern>/hello/rest/*</url-pattern>
+    </rest>
   </web-service>
 
   <web-service-client jndi-name="hessian/HelloService">
-    <url>hessian:${webApp.url}/hello/</url>
+    <url>hessian:${webApp.url}/hello/hessian/</url>
     <interface>example.HelloService</interface>
   </web-service-client>
 </web-app>

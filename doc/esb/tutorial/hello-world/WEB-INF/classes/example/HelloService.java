@@ -4,5 +4,5 @@ public interface HelloService {
   /**
    * Returns "hello, world".
    */
-  public String hello();
+  public HelloResult hello();
 }

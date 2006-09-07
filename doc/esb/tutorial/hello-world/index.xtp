@@ -26,6 +26,8 @@ plain-old Java objects (POJOs) and made available to many different protocols.
     </td><td>Interface for the hello service.
 </td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/HelloServiceImpl.java"/>
     </td><td>The main service implementation.
+</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/HelloResult.java"/>
+    </td><td>The result object
 </td></tr><tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
     </td><td>Configures the environment
 </td></tr><tr><td><viewfile-link file="demo.jsp"/>
@@ -51,9 +53,32 @@ public class HelloServiceImpl implements HelloService {
    * Returns "hello, world".
    */
   @WebMethod
-  public String hello()
+  public HelloResult hello()
   {
-    return "hello, world";
+    return new HelloResult();
+  }
+}
+</example>
+
+<p>In this case the result object, of type HelloResult, is simply a wrapper
+around a String.  In more complex cases, the JAXB annotations make it possible
+to return complex objects as XML.</p>
+
+<example title="HelloResult.java">
+package example;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name="hello")
+public class HelloResult {
+
+  @XmlElement
+  public String value = "hello, world";
+
+  public String toString()
+  {
+    return value;
   }
 }
 </example>
@@ -72,7 +97,7 @@ public interface HelloService {
   /**
    * Returns "hello, world".
    */
-  public String hello();
+  public HelloResult hello();
 }
 </example>
 
@@ -88,7 +113,23 @@ To register the service in JNDI, use a &lt;jndi-name> child tag.
 <p>
 To expose the service as a Hessian service, use the &lt;hessian> tag.
 Hessian is one of the <em>service encodings</em> available for web services.
-SOAP and REST are also available. <!-- TODO: add these to this example -->
+SOAP is also available. <!-- TODO: add this to this example -->
+</p>
+
+<p>
+Here a REST interface is also exposed.  In this example, the REST interface
+allows two <em>REST bindings</em>, a path-based binding and a query-based
+binding.  A path-based binding interprets URLs of the form 
+<i>http://www.foo.com/myMethod/foo/bar</i> to be a call to the method
+"myMethod" with two arguments, "foo" and "bar".  A query-based binding
+interprets URLs of the form 
+<i>http://www.foo.com/?method=myMethod&amp;arg1=foo&amp;arg2=bar</i>
+in the same way.
+</p>
+
+<p>
+<a href="hello/rest/hello/">Path binding</a><br/>
+<a href="hello/rest/?method=hello">Query binding</a>
 </p>
 
 <p>
@@ -102,8 +143,14 @@ to indicate the location of the service.
   &lt;jndi-name>service/HelloService&lt;/jndi-name>
 
   &lt;hessian>
-    &lt;url-pattern>/hello/&lt;/url-pattern>
+    &lt;url-pattern>/hello/hessian/&lt;/url-pattern>
   &lt;/hessian>
+
+  &lt;rest>
+    &lt;query-binding/>
+    &lt;path-binding/>
+    &lt;url-pattern>/hello/rest/*&lt;/url-pattern>
+  &lt;/rest>
 &lt;/web-service>
 </example>
 

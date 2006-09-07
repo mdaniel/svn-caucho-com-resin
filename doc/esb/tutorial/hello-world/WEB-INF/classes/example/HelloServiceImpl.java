@@ -9,8 +9,8 @@ public class HelloServiceImpl implements HelloService {
    * Returns "hello, world".
    */
   @WebMethod
-  public String hello()
+  public HelloResult hello()
   {
-    return "hello, world";
+    return new HelloResult();
   }
 }
