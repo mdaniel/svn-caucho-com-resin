@@ -29,23 +29,15 @@
 
 package com.caucho.quercus.program;
 
-import java.io.IOException;
-
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Set;
-
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.ObjectExtValue;
+import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.expr.Expr;
 import com.caucho.util.L10N;
 
-import com.caucho.quercus.QuercusRuntimeException;
-
-import com.caucho.quercus.program.AbstractFunction;
-
-import com.caucho.quercus.env.*;
-
-import com.caucho.quercus.expr.Expr;
-
-import com.caucho.quercus.gen.PhpWriter;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Represents a Quercus class definition
@@ -150,11 +142,11 @@ abstract public class ClassDef {
    */
   public boolean isA(String name)
   {
-    if (_name.equals(name))
+    if (_name.equalsIgnoreCase(name))
       return true;
 
     for (int i = 0; i < _ifaceList.length; i++) {
-      if (_ifaceList[i].equals(name))
+      if (_ifaceList[i].equalsIgnoreCase(name))
 	return true;
     }
 

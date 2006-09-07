@@ -29,20 +29,16 @@
 
 package com.caucho.quercus.env;
 
-import java.io.*;
-
-import java.util.*;
-
-import java.util.logging.Logger;
-
 import com.caucho.quercus.expr.Expr;
-
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.JavaClassDef;
+import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
-
-import com.caucho.vfs.WriteStream;
+import java.io.InputStream;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Represents a Quercus java value.
@@ -163,6 +159,11 @@ public class JavaValue extends ResourceValue {
   public Value toKey()
   {
     return new LongValue(System.identityHashCode(this));
+  }
+
+  public boolean isA(String name)
+  {
+    return _classDef.isA(name);
   }
 
   /**

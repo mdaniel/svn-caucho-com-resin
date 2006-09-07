@@ -153,6 +153,40 @@ public class JavaClassDef extends ClassDef {
     return _type;
   }
 
+  public boolean isA(String name)
+  {
+    Class type = _type;
+
+    while (type != null) {
+      if (type.getSimpleName().equalsIgnoreCase(name))
+        return true;
+
+      if (isAInterface(name, type))
+        return true;
+
+      type = type.getSuperclass();
+    }
+
+    return false;
+  }
+
+  private boolean isAInterface(String name, Class type)
+  {
+    Class[] interfaces = type.getInterfaces();
+
+    if (interfaces != null) {
+      for (Class intfc : interfaces) {
+        if (intfc.getSimpleName().equalsIgnoreCase(name))
+          return true;
+
+        if (isAInterface(name, intfc))
+          return true;
+      }
+    }
+
+    return false;
+  }
+
   public boolean isArray()
   {
     return _isArray;
