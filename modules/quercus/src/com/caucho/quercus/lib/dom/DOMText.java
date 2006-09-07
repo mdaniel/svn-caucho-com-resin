@@ -10,4 +10,9 @@ public class DOMText
   {
     super(content);
   }
+
+  DOMText(DOMDocument owner, String content)
+  {
+    super(owner, content);
+  }
 }

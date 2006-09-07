@@ -28,14 +28,19 @@
 
 package com.caucho.xml;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.WriteStream;
 
-import org.w3c.dom.*;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.w3c.dom.UserDataHandler;
 
-import com.caucho.vfs.*;
-import com.caucho.util.*;
+import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * QAbstractNode is an abstract implementation for any DOM node.
@@ -53,7 +58,16 @@ public abstract class QAbstractNode implements CauchoNode, java.io.Serializable 
   String _systemId;
   String _filename;
   int _line;
-  
+
+  protected QAbstractNode()
+  {
+  }
+
+  protected QAbstractNode(QDocument owner)
+  {
+    _owner = owner;
+  }
+
   public void setLocation(String systemId, String filename,
 			  int line, int column)
   {

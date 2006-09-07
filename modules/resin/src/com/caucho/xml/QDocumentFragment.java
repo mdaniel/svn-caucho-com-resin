@@ -34,8 +34,17 @@ import org.w3c.dom.*;
 import com.caucho.vfs.*;
 import com.caucho.util.*;
 
-class QDocumentFragment extends QNode implements DocumentFragment {
+public class QDocumentFragment extends QNode implements DocumentFragment {
   protected Document _masterDoc;
+
+  QDocumentFragment()
+  {
+  }
+
+  protected QDocumentFragment(QDocument owner)
+  {
+    super(owner);
+  }
 
   public short getNodeType() { return DOCUMENT_FRAGMENT_NODE; }
 

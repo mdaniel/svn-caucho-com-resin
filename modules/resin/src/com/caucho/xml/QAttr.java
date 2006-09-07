@@ -46,6 +46,13 @@ public class QAttr extends QNode implements Attr {
     _value = value;
   }
 
+  protected QAttr(QDocument owner, QName name)
+  {
+    super(owner);
+
+    _name = name;
+  }
+
   public Element getOwnerElement()
   {
     return (Element) getParentNode();

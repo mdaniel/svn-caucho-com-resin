@@ -44,6 +44,11 @@ public class QText extends QCharacterData implements Text {
     super(data);
   }
 
+  protected QText(QDocument owner, String data)
+  {
+    super(owner, data);
+  }
+
   public String getNodeName() { return "#text"; }
   public short getNodeType() { return TEXT_NODE; }
 

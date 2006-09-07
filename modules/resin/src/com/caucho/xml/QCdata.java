@@ -28,15 +28,21 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
-import com.caucho.vfs.*;
+import org.w3c.dom.CDATASection;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Text;
 
-class QCdata extends QText implements CDATASection {
+import java.io.IOException;
+
+public class QCdata extends QText implements CDATASection {
   QCdata(String data)
   {
     super(data);
+  }
+
+  protected QCdata(QDocument owner, String data)
+  {
+    super(owner, data);
   }
 
   public String getNodeName() { return "#cdata-section"; }

@@ -44,6 +44,13 @@ public class QProcessingInstruction extends QNode
     _data = data;
   }
 
+  protected QProcessingInstruction(QDocument owner, String name, String data)
+  {
+    super(owner);
+    _name = name.intern();
+    _data = data;
+  }
+
   public String getNodeName() { return _name; }
   public String getNodeValue() { return _data; }
   public short getNodeType() { return PROCESSING_INSTRUCTION_NODE; }

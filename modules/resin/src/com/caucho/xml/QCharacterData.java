@@ -28,9 +28,10 @@
 
 package com.caucho.xml;
 
-import java.io.*;
-import org.w3c.dom.*;
-import com.caucho.vfs.*;
+import org.w3c.dom.CharacterData;
+import org.w3c.dom.DOMException;
+
+import java.io.IOException;
 
 abstract class QCharacterData extends QAbstractNode implements CharacterData {
   protected String _data;
@@ -41,6 +42,12 @@ abstract class QCharacterData extends QAbstractNode implements CharacterData {
    */
   QCharacterData(String data)
   {
+    _data = data;
+  }
+
+  QCharacterData(QDocument owner, String data)
+  {
+    super(owner);
     _data = data;
   }
 

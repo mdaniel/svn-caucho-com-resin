@@ -10,4 +10,9 @@ public class DOMComment
   {
     super(content);
   }
+
+  DOMComment(DOMDocument owner, String content)
+  {
+    super(owner, content);
+  }
 }

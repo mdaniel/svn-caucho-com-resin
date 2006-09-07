@@ -39,6 +39,11 @@ public class QComment extends QCharacterData implements Comment {
     super(data);
   }
 
+  protected QComment(QDocument owner, String data)
+  {
+    super(owner, data);
+  }
+
   public String getNodeName() { return "#comment"; }
   public short getNodeType() { return COMMENT_NODE; }
 

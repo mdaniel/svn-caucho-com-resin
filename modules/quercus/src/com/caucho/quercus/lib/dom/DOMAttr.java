@@ -11,4 +11,9 @@ public class DOMAttr
   {
     super(new QName(name), textContent);
   }
+
+  DOMAttr(DOMDocument owner, QName qname)
+  {
+    super(owner, qname);
+  }
 }

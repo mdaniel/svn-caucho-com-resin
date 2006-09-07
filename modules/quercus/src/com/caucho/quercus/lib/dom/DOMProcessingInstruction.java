@@ -10,4 +10,9 @@ public class DOMProcessingInstruction
   {
     super(name, content);
   }
+
+  DOMProcessingInstruction(DOMDocument owner, String name, String content)
+  {
+    super(owner, name, content);
+  }
 }

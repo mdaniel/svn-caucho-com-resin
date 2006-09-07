@@ -57,7 +57,13 @@ public class QElement extends QAttributedNode implements CauchoElement {
   { 
     _name = name; 
   }
-  
+
+  protected QElement(QDocument owner, QName name)
+  {
+    _owner = owner;
+    _name = name;
+  }
+
   /**
    * Create a new named element with initial parameters.
    *

@@ -43,13 +43,13 @@ import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempStream;
 import com.caucho.vfs.WriteStream;
 import com.caucho.xml.QDocument;
+import com.caucho.xml.QName;
 import com.caucho.xml.Xml;
 import com.caucho.xml.XmlPrinter;
 
 import org.w3c.dom.DOMConfiguration;
-import org.w3c.dom.Element;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Node;
-import org.w3c.dom.ProcessingInstruction;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
@@ -163,27 +163,129 @@ public class DOMDocument
     throw new UnimplementedException();
   }
 
-  public Element createElement(String name, String textContent)
+  public DOMAttr createAttribute(String name)
+    throws DOMException
   {
-    Element element = super.createElement(name);
+    /** XXX:
+     if (! isNameValid(name))
+     throw new QDOMException(DOMException.INVALID_CHARACTER_ERR,
+     "illegal attribute `" + name + "'");
+     */
 
-    element.setTextContent(textContent);
+    QName qname = new QName(null, name, null);
 
-    return element;
+    return new DOMAttr(this, qname);
   }
 
-  public Element createElementNS(String namespaceURI, String qualifiedName, String textContent)
+  public DOMAttr createAttributeNS(String namespaceURI, String qualifiedName)
+    throws DOMException
   {
-    Element element = super.createElementNS(namespaceURI, qualifiedName);
+    QName qname = createName(namespaceURI, qualifiedName);
 
-    element.setTextContent(textContent);
+    validateName(qname);
+    addNamespace(qname);
 
-    return element;
+    return new DOMAttr(this, qname);
+  }
+  public DOMCDATASection createCDATASection(String data)
+  {
+    return new DOMCDATASection(this, data);
   }
 
-  public ProcessingInstruction createProcessingInstruction(String target)
+  public DOMComment createComment(String data)
   {
-    throw new UnimplementedException();
+    return new DOMComment(this, data);
+  }
+
+  public DOMDocumentFragment createDocumentFragment()
+  {
+    return new DOMDocumentFragment(this);
+  }
+
+  public DOMElement createElement(String tagName)
+    throws DOMException
+  {
+    /**
+     if (! isNameValid(tagName))
+     throw new QDOMException(DOMException.INVALID_CHARACTER_ERR,
+     "illegal tag `" + tagName + "'");
+     */
+    return new DOMElement(this, createName(null, tagName), null);
+  }
+
+  public DOMElement createElement(String tagName, String textContent)
+    throws DOMException
+  {
+    /**
+     if (! isNameValid(tagName))
+     throw new QDOMException(DOMException.INVALID_CHARACTER_ERR,
+     "illegal tag `" + tagName + "'");
+     */
+    return new DOMElement(this, createName(null, tagName), textContent);
+  }
+
+  public DOMElement createElementNS(String namespaceURI, String name)
+    throws DOMException
+  {
+    QName qname = createName(namespaceURI, name);
+
+    validateName(qname);
+    addNamespace(qname);
+
+    return new DOMElement(this, qname, null);
+  }
+
+  public DOMElement createElementNS(String namespaceURI,
+                                    String name,
+                                    String textContent)
+    throws DOMException
+  {
+    QName qname = createName(namespaceURI, name);
+
+    validateName(qname);
+    addNamespace(qname);
+
+    return new DOMElement(this, qname, textContent);
+  }
+
+  public DOMEntityReference createEntityReference(String name)
+    throws DOMException
+  {
+    /**
+     if (! isNameValid(name))
+     throw new QDOMException(DOMException.INVALID_CHARACTER_ERR,
+     "illegal entityReference `" + name + "'");
+     */
+
+    return new DOMEntityReference(this, name);
+  }
+
+  public DOMProcessingInstruction createProcessingInstruction(String target)
+    throws DOMException
+  {
+    return createProcessingInstruction(target, null);
+  }
+
+  public DOMProcessingInstruction createProcessingInstruction(String target,
+                                                              String data)
+    throws DOMException
+  {
+    /** XXX:
+     if (target == null || target.length() == 0)
+     throw new QDOMException(DOMException.INVALID_CHARACTER_ERR,
+     L.l("Empty processing instruction name.  The processing instruction syntax is: <?name ... ?>"));
+
+     if (! isNameValid(target))
+     throw new QDOMException(DOMException.INVALID_CHARACTER_ERR,
+     L.l("`{0}' is an invalid processing instruction name.  The processing instruction syntax is: <?name ... ?>", target));
+     */
+
+    return new DOMProcessingInstruction(this, target, data);
+  }
+
+  public DOMText createTextNode(String data)
+  {
+    return new DOMText(this, data);
   }
 
   public Node importNode(Node node)
@@ -330,5 +432,10 @@ public class DOMDocument
   public int xinclude(@Optional int options)
   {
     throw new UnimplementedException();
+  }
+
+  public String toString()
+  {
+    return "DOMDocument[]";
   }
 }

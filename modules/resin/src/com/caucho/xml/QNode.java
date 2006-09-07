@@ -40,6 +40,15 @@ public abstract class QNode extends QAbstractNode {
   protected QAbstractNode _firstChild;
   protected QAbstractNode _lastChild;
 
+  protected QNode()
+  {
+  }
+
+  protected QNode(QDocument owner)
+  {
+    super(owner);
+  }
+
   public String getNodeValue() { return null; }
 
   public void setNodeValue(String value) {}

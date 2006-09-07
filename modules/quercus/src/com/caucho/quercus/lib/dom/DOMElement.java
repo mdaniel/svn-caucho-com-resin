@@ -43,4 +43,17 @@ public class DOMElement
     if (textContent != null && textContent.length() > 0)
       setTextContent(textContent);
   }
+
+  DOMElement(DOMDocument owner, QName name, String textContent)
+  {
+    super(owner, name);
+
+    if (textContent != null && textContent.length() > 0)
+      setTextContent(textContent);
+  }
+
+  public String toString()
+  {
+    return "DOMElement[" + getTagName() + "]";
+  }
 }

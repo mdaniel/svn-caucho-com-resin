@@ -41,6 +41,13 @@ public class QEntityReference extends QNode implements EntityReference {
     _name = name;
   }
 
+  protected QEntityReference(QDocument owner, String name)
+  {
+    super(owner);
+
+    _name = name;
+  }
+
   public String getNodeName() { return _name; }
   public String getTagName() { return _name; }
   public short getNodeType() { return ENTITY_REFERENCE_NODE; }

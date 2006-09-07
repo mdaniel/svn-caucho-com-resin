@@ -378,25 +378,32 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
   {
     QName qname = createName(namespaceURI, name);
 
-    String prefix = qname.getPrefix();
-    String namespace = qname.getNamespaceURI();
+    validateName(qname);
+    addNamespace(qname);
 
-    if (prefix == "xml" &&
-        namespace != "http://www.w3.org/XML/1998/namespace")
+    QElement elt = new QElement(qname);
+    elt._owner = this;
+
+    return elt;
+  }
+
+  protected void validateName(QName qname)
+    throws DOMException
+  {
+    String prefix = qname.getPrefix();
+    String namespaceURI = qname.getNamespaceURI();
+
+    if (qname.getPrefix() == "") {
+    }
+    else if (prefix == "xml" &&
+        namespaceURI != "http://www.w3.org/XML/1998/namespace")
       throw new DOMException(DOMException.NAMESPACE_ERR,
                              L.l("`xml' prefix expects namespace uri 'http://www.w3.org/XML/1998/namespace'"));
     else if (prefix != "" && prefix != null && namespaceURI == null)
       throw new DOMException(DOMException.NAMESPACE_ERR,
                              L.l("`{0}' prefix expects a namespace uri",
                                  prefix));
-    
-    if (namespace != null && namespace != "")
-      addNamespace(prefix, namespace);
 
-    QElement elt = new QElement(qname);
-    elt._owner = this;
-
-    return elt;
   }
 
   /**
@@ -406,8 +413,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
     throws DOMException
   {
     QName name = new QName(prefix, local, url);
-    if (url != null && ! url.equals(""))
-      addNamespace(prefix, url);
+    addNamespace(name);
 
     QElement elt = new QElement(name);
     elt._owner = this;
@@ -415,9 +421,6 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
     return elt;
   }
 
-  /**
-   * Creates a new namespace-aware element
-   */
   public Element createElementByName(QName name)
     throws DOMException
   {
@@ -547,22 +550,14 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
   /**
    * Creates a new namespace-aware attribute
    */
-  public Attr createAttributeNS(String uri, String qname)
+  public Attr createAttributeNS(String namespaceURI, String qualifiedName)
     throws DOMException
   {
-    QName name = createName(uri, qname);
+    QName qname = createName(namespaceURI, qualifiedName);
 
-    if (name.getPrefix() == "") {
-    }
-    else if (name.getPrefix() == "xml" &&
-             name.getNamespace() != "http://www.w3.org/XML/1998/namespace")
-      throw new DOMException(DOMException.NAMESPACE_ERR,
-                             L.l("Invalid name `{0}' with namespace `{1}'. `xml' prefix expects namespace uri 'http://www.w3.org/XML/1998/namespace'",
-                                 qname, uri));
-    else if (name.getPrefix() == "xmlns" &&
-             name.getNamespace() != DOMBuilder.XMLNS)
-      throw new DOMException(DOMException.NAMESPACE_ERR,
-                             L.l("`xmlns' prefix expects namespace uri '{0}'", DOMBuilder.XMLNS));
+    validateName(qname);
+    addNamespace(qname);
+
     /* xml/0213
     else if (name.getNamespace() == "")
       throw new DOMException(DOMException.NAMESPACE_ERR,
@@ -570,10 +565,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
                                  name.getPrefix()));
     */
     
-    if (uri != null && ! uri.equals("") && uri != XmlParser.XMLNS)
-      addNamespace(name.getPrefix(), uri);
-
-    QAttr attr = new QAttr(name, null);
+    QAttr attr = new QAttr(qname, null);
     attr._owner = this;
 
     return attr;
@@ -733,14 +725,24 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
 
   // non-DOM
 
+  public void addNamespace(QName qname)
+  {
+    addNamespace(qname.getPrefix(), qname.getNamespaceURI());
+  }
+
   /**
    * Add a namespace declaration to a document.  If the declaration
    * prefix already has a namespace, the old one wins.
    */
   public void addNamespace(String prefix, String url)
   {
-    if (url == null || XmlParser.XMLNS.equals(url) || XmlParser.XML.equals(url))
+    if (url == null
+        || url.length() == 0
+        || XmlParser.XMLNS.equals(url)
+        || XmlParser.XML.equals(url))
+    {
       return;
+    }
 
     if (prefix == null)
       prefix = "";

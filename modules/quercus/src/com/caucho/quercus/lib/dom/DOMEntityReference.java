@@ -9,4 +9,9 @@ public class DOMEntityReference
   {
     super(name);
   }
+
+  DOMEntityReference(DOMDocument owner, String name)
+  {
+    super(owner, name);
+  }
 }
