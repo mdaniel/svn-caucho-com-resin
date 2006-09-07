@@ -34,10 +34,15 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import com.caucho.config.types.InitProgram;
+
 import com.caucho.esb.encoding.ServiceEncoding;
 import com.caucho.esb.encoding.ServiceEncodingConfig;
+import com.caucho.esb.rest.RestServletMapping;
+
 import com.caucho.naming.Jndi;
+
 import com.caucho.server.webapp.WebApp;
+
 import com.caucho.util.CauchoSystem;
 
 /**
@@ -49,6 +54,9 @@ public class WebService {
 
   private ArrayList<ServiceEncoding> _encodings
     = new ArrayList<ServiceEncoding>();
+  private ArrayList<RestServletMapping> _restServlets
+    = new ArrayList<RestServletMapping>();
+
   private InitProgram _init;
   private Object _service;
   private String _serviceClass;
@@ -83,19 +91,6 @@ public class WebService {
     _init = init;
   }
 
-  public ServiceEncodingConfig createSoap()
-    throws Throwable
-  {
-    ServiceEncodingConfig config = new ServiceEncodingConfig(this);
-    config.setType("soap");
-    return config;
-  }
-
-  public void addSoap(ServiceEncoding encoding)
-  {
-    _encodings.add(encoding);
-  }
-
   public ServiceEncodingConfig createHessian()
     throws Throwable
   {
@@ -109,12 +104,38 @@ public class WebService {
     _encodings.add(encoding);
   }
 
+  public ServiceEncodingConfig createSoap()
+    throws Throwable
+  {
+    ServiceEncodingConfig config = new ServiceEncodingConfig(this);
+    config.setType("soap");
+    return config;
+  }
+
+  public void addSoap(ServiceEncoding encoding)
+  {
+    _encodings.add(encoding);
+  }
+
+  public RestServletMapping createRest()
+    throws Throwable
+  {
+    RestServletMapping restServlet = new RestServletMapping(this);
+    _restServlets.add(restServlet);
+    return restServlet;
+  }
+
   public void init()
     throws Throwable
   {
     for (ServiceEncoding encoding : _encodings) {
       encoding.setService(getServiceInstance());
       encoding.init();
+    }
+
+    for (RestServletMapping restServlet : _restServlets) {
+      restServlet.setService(getServiceInstance());
+      restServlet.init();
     }
   }
 

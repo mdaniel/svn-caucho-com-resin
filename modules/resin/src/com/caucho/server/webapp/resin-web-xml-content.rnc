@@ -398,6 +398,14 @@ r_redeploy-mode =
   attribute redeploy-mode { string }
   | element redeploy-mode { string }
 
+r_rest = element rest {
+  r_url-pattern
+
+  & element query-binding { empty }?
+
+  & element path-binding { empty }?
+}
+
 r_rewrite-dispatch = element rewrite-dispatch {
   element dispatch {
      (attribute regexp { string }
@@ -927,6 +935,8 @@ r_web-service = element web-service {
   | element class { r_string-Group })
 
   & r_hessian-encoding*
+
+  & r_rest*
 
   & r_soap-encoding*
 
