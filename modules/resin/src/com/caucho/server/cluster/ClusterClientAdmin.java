@@ -101,7 +101,7 @@ public class ClusterClientAdmin extends AbstractManagedObject
    */
   public long getFailRecoverTime()
   {
-    return _client.getServer().getClientFailRecoverTime();
+    return _client.getServer().getLoadBalanceFailRecoverTime();
   }
 
   /**
@@ -109,7 +109,7 @@ public class ClusterClientAdmin extends AbstractManagedObject
    */
   public long getMaxIdleTime()
   {
-    return _client.getServer().getClientMaxIdleTime();
+    return _client.getServer().getLoadBalanceMaxIdleTime();
   }
 
   /**
@@ -117,7 +117,7 @@ public class ClusterClientAdmin extends AbstractManagedObject
    */
   public long getConnectTimeout()
   {
-    return _client.getServer().getClientConnectTimeout();
+    return _client.getServer().getLoadBalanceConnectTimeout();
   }
 
   /**
@@ -125,7 +125,7 @@ public class ClusterClientAdmin extends AbstractManagedObject
    */
   public long getReadTimeout()
   {
-    return _client.getServer().getClientReadTimeout();
+    return _client.getServer().getLoadBalanceReadTimeout();
   }
 
   /**
@@ -133,7 +133,7 @@ public class ClusterClientAdmin extends AbstractManagedObject
    */
   public long getWriteTimeout()
   {
-    return _client.getServer().getClientWriteTimeout();
+    return _client.getServer().getLoadBalanceWriteTimeout();
   }
 
   /**
@@ -141,7 +141,7 @@ public class ClusterClientAdmin extends AbstractManagedObject
    */
   public long getWarmupTime()
   {
-    return _client.getServer().getClientWarmupTime();
+    return _client.getServer().getLoadBalanceWarmupTime();
   }
 
   /**
@@ -149,7 +149,7 @@ public class ClusterClientAdmin extends AbstractManagedObject
    */
   public int getWeight()
   {
-    return _client.getServer().getClientWeight();
+    return _client.getServer().getLoadBalanceWeight();
   }
 
   //

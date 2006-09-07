@@ -117,8 +117,8 @@ public final class ClusterClient {
 
     _debugId = selfId + "->" + targetId;
 
-    _failRecoverTime = server.getClientFailRecoverTime();
-    _warmupTime = server.getClientWarmupTime();
+    _failRecoverTime = server.getLoadBalanceFailRecoverTime();
+    _warmupTime = server.getLoadBalanceWarmupTime();
 
     _state = ST_STARTING;
   }
@@ -520,7 +520,7 @@ public final class ClusterClient {
         _free[_freeHead] = null;
         _freeHead = (_freeHead + _free.length - 1) % _free.length;
 
-        if (now < freeTime + _server.getClientMaxIdleTime()) {
+        if (now < freeTime + _server.getLoadBalanceMaxIdleTime()) {
           _activeCount++;
 	  _keepaliveCountTotal++;
 	  
@@ -552,7 +552,7 @@ public final class ClusterClient {
     try {
       ReadWritePair pair = _server.openTCPPair();
       ReadStream rs = pair.getReadStream();
-      rs.setAttribute("timeout", new Integer((int) _server.getClientReadTimeout()));
+      rs.setAttribute("timeout", new Integer((int) _server.getLoadBalanceReadTimeout()));
 
       synchronized (this) {
         _activeCount++;

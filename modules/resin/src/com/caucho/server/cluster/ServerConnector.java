@@ -151,60 +151,60 @@ public class ServerConnector {
   /**
    * Returns the time in milliseconds for the slow start throttling.
    */
-  public long getClientWarmupTime()
+  public long getLoadBalanceWarmupTime()
   {
-    return _server.getClientWarmupTime();
+    return _server.getLoadBalanceWarmupTime();
   }
 
   /**
    * Returns the socket timeout when connecting to the
    * target server.
    */
-  public long getClientConnectTimeout()
+  public long getLoadBalanceConnectTimeout()
   {
-    return _server.getClientConnectTimeout();
+    return _server.getLoadBalanceConnectTimeout();
   }
 
   /**
    * Returns the socket timeout when reading from the
    * target server.
    */
-  public long getClientReadTimeout()
+  public long getLoadBalanceReadTimeout()
   {
-    return _server.getClientReadTimeout();
+    return _server.getLoadBalanceReadTimeout();
   }
 
   /**
    * Returns the socket timeout when writing to the
    * target server.
    */
-  public long getClientWriteTimeout()
+  public long getLoadBalanceWriteTimeout()
   {
-    return _server.getClientWriteTimeout();
+    return _server.getLoadBalanceWriteTimeout();
   }
 
   /**
    * Returns how long the connection can be cached in the free pool.
    */
-  public long getClientMaxIdleTime()
+  public long getLoadBalanceMaxIdleTime()
   {
-    return _server.getClientMaxIdleTime();
+    return _server.getLoadBalanceMaxIdleTime();
   }
 
   /**
    * Returns how long the connection will be treated as dead.
    */
-  public long getClientFailRecoverTime()
+  public long getLoadBalanceFailRecoverTime()
   {
-    return _server.getClientFailRecoverTime();
+    return _server.getLoadBalanceFailRecoverTime();
   }
 
   /**
    * Returns the load balance weight.
    */
-  public int getClientWeight()
+  public int getLoadBalanceWeight()
   {
-    return _server.getClientWeight();
+    return _server.getLoadBalanceWeight();
   }
 
   /**
@@ -219,7 +219,7 @@ public class ServerConnector {
       address = "localhost";
 
     HashMap<String,Object> attr = new HashMap<String,Object>();
-    attr.put("connect-timeout", new Long(getClientConnectTimeout()));
+    attr.put("connect-timeout", new Long(getLoadBalanceConnectTimeout()));
 
     if (_port.isSSL())
       _tcpPath = Vfs.lookup("tcps://" + address + ":" + getPort(), attr);
