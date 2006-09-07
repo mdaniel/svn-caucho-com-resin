@@ -517,7 +517,7 @@ public class ResinMain implements ResinServerListener {
 	   (resin = _resin) != null && ! resin.isClosing()) {
       try {
 	Thread.sleep(10);
-	
+
 	long minFreeMemory = _resin.getMinFreeMemory();
 
 	if (minFreeMemory <= 0) {
@@ -665,35 +665,41 @@ public class ResinMain implements ResinServerListener {
     try {
       validateEnvironment();
 
-      ResinMain resin = new ResinMain(argv);
+      ResinMain resinMain = new ResinMain(argv);
 
-      _resinMain = resin;
+      _resinMain = resinMain;
 
-      resin.init();
+      resinMain.init();
 
-      resin.waitForExit();
+      resinMain.waitForExit();
 
       System.err.println(L().l("closing server"));
 
-      final ResinServer server = resin.getServer();
+      final ResinServer resin = resinMain.getServer();
 
       new Thread() {
 	public void run()
 	{
 	  setName("resin-destroy");
 
-	  if (server != null)
-	    server.destroy();
+	  if (resin != null)
+	    resin.destroy();
 	}
       }.start();
+
+      Server server = null;
+
+      if (resin != null)
+	server = resin.getServer();
 
       long stopTime = System.currentTimeMillis();
       long endTime = stopTime +	15000L;
       
-      if (server != null) {
-	endTime = stopTime + server.getShutdownWaitMax() ;
+      if (resin != null) {
+	if (server != null)
+	  endTime = stopTime + server.getShutdownWaitMax() ;
 	
-	while (System.currentTimeMillis() < endTime && ! server.isClosed()) {
+	while (System.currentTimeMillis() < endTime && ! resin.isClosed()) {
 	  try {
 	    Thread.interrupted();
 	    Thread.sleep(100);
@@ -702,7 +708,7 @@ public class ResinMain implements ResinServerListener {
 	}
       }
 
-      if (server != null && ! server.isClosed())
+      if (resin != null && ! resin.isClosed())
 	Runtime.getRuntime().halt(1);
       // resin.destroy();
 

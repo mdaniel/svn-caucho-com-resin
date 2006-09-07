@@ -44,18 +44,12 @@ import java.util.regex.Pattern;
 import javax.resource.spi.ResourceAdapter;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.SchemaBean;
-import com.caucho.config.types.Period;
+import com.caucho.config.*;
+import com.caucho.config.types.*;
 import com.caucho.jca.ResourceManagerImpl;
 import com.caucho.jmx.Jmx;
 import com.caucho.lifecycle.Lifecycle;
-import com.caucho.loader.ClassLoaderListener;
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentBean;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.EnvironmentLocal;
+import com.caucho.loader.*;
 import com.caucho.log.Log;
 import com.caucho.make.AlwaysModified;
 import com.caucho.security.PermissionManager;
@@ -115,15 +109,23 @@ public class Server extends ProtocolDispatchServer
 
   private long _waitForActiveTime = 10000L;
 
-  private int _threadMax = Integer.MAX_VALUE / 2;
-  private int _threadIdleMin = 5;
-  private int _threadIdleMax = 10;
-
+  // <server> configuration
+  
   private int _keepaliveThreadMax = -1;
   private long _keepaliveThreadTimeout = 5000;
 
   private int _keepaliveSelectMax = -1;
   private long _keepaliveSelectTimeout = 5000;
+
+  private long _memoryFreeMin = 1024 * 1024;
+  
+  private long _shutdownWaitMax = 60 * 1000;
+  
+  private int _threadMax = Integer.MAX_VALUE / 2;
+  private int _threadIdleMin = 5;
+  private int _threadIdleMax = 10;
+
+  // <cluster> configuration
 
   private String _connectionErrorPage;
 
@@ -206,6 +208,142 @@ public class Server extends ProtocolDispatchServer
   {
     _configException = exn;
   }
+
+  //
+  // Configuration from <server>
+  //
+
+  /**
+   * Sets the minimum free memory after a GC
+   */
+  public void setMemoryFreeMin(Bytes min)
+  {
+    _memoryFreeMin = min.getBytes();
+  }
+
+  /**
+   * Sets the minimum free memory after a GC
+   */
+  public long getMemoryFreeMin()
+  {
+    return _memoryFreeMin;
+  }
+
+  /**
+   * Sets the maximum thread-based keepalive
+   */
+  public void setKeepaliveThreadMax(int max)
+  {
+    _keepaliveThreadMax = max;
+  }
+
+  /**
+   * Returns the thread-based keepalive max.
+   *
+   * @return the keepalive max.
+   */
+  public int getKeepaliveThreadMax()
+  {
+    return _keepaliveThreadMax;
+  }
+
+  /**
+   * Sets the thread-based keepalive timeout
+   */
+  public void setKeepaliveThreadTimeout(Period period)
+  {
+    _keepaliveThreadTimeout = period.getPeriod();
+  }
+
+  /**
+   * Sets the thread-based keepalive timeout
+   */
+  public long getKeepaliveThreadTimeout()
+  {
+    return _keepaliveThreadTimeout;
+  }
+
+  /**
+   * Sets the maximum select-based keepalive
+   */
+  public void setKeepaliveSelectMax(int max)
+  {
+    _keepaliveSelectMax = max;
+  }
+
+  /**
+   * Returns the select-based keepalive max.
+   *
+   * @return the keepalive max.
+   */
+  public int getKeepaliveSelectMax()
+  {
+    return _keepaliveSelectMax;
+  }
+
+  /**
+   * Sets the select-based keepalive timeout
+   */
+  public void setKeepaliveSelectTimeout(Period period)
+  {
+    _keepaliveSelectTimeout = period.getPeriod();
+  }
+
+  /**
+   * Sets the select-based keepalive timeout
+   */
+  public long getKeepaliveSelectTimeout()
+  {
+    return _keepaliveSelectTimeout;
+  }
+
+  /**
+   * Sets the max wait time for shutdown.
+   */
+  public void setShutdownWaitMax(Period waitTime)
+  {
+    _shutdownWaitMax = waitTime.getPeriod();
+  }
+
+  /**
+   * Gets the max wait time for a shutdown.
+   */
+  public long getShutdownWaitMax()
+  {
+    return _shutdownWaitMax;
+  }
+
+  /**
+   * Sets the maximum thread-based keepalive
+   */
+  public void setThreadMax(int max)
+  {
+    if (max < 0)
+      throw new ConfigException(L.l("<thread-max> ({0}) must be greater than zero.",
+				    max));
+    
+    _threadMax = max;
+  }
+
+  /**
+   * Sets the minimum number of idle threads in the thread pool.
+   */
+  public void setThreadIdleMin(int min)
+  {
+    _threadIdleMin = min;
+  }
+
+  /**
+   * Sets the maximum number of idle threads in the thread pool.
+   */
+  public void setThreadIdleMax(int max)
+  {
+    _threadIdleMax = max;
+  }
+
+  //
+  // Configuration from <cluster>
+  //
 
   /**
    * Sets the connection error page.
@@ -493,102 +631,6 @@ public class Server extends ProtocolDispatchServer
     throws ConfigException
   {
     ResourceManagerImpl.addResource(ping);
-  }
-
-  /**
-   * Sets the maximum thread-based keepalive
-   */
-  public void setThreadMax(int max)
-  {
-    if (max < 0)
-      throw new ConfigException(L.l("<thread-max> ({0}) must be greater than zero.",
-				    max));
-    
-    _threadMax = max;
-  }
-
-  /**
-   * Sets the minimum number of idle threads in the thread pool.
-   */
-  public void setThreadIdleMin(int min)
-  {
-    _threadIdleMin = min;
-  }
-
-  /**
-   * Sets the maximum number of idle threads in the thread pool.
-   */
-  public void setThreadIdleMax(int max)
-  {
-    _threadIdleMax = max;
-  }
-
-  /**
-   * Sets the maximum thread-based keepalive
-   */
-  public void setKeepaliveThreadMax(int max)
-  {
-    _keepaliveThreadMax = max;
-  }
-
-  /**
-   * Returns the thread-based keepalive max.
-   *
-   * @return the keepalive max.
-   */
-  public int getKeepaliveThreadMax()
-  {
-    return _keepaliveThreadMax;
-  }
-
-  /**
-   * Sets the thread-based keepalive timeout
-   */
-  public void setKeepaliveThreadTimeout(Period period)
-  {
-    _keepaliveThreadTimeout = period.getPeriod();
-  }
-
-  /**
-   * Sets the thread-based keepalive timeout
-   */
-  public long getKeepaliveThreadTimeout()
-  {
-    return _keepaliveThreadTimeout;
-  }
-
-  /**
-   * Sets the maximum select-based keepalive
-   */
-  public void setKeepaliveSelectMax(int max)
-  {
-    _keepaliveSelectMax = max;
-  }
-
-  /**
-   * Returns the select-based keepalive max.
-   *
-   * @return the keepalive max.
-   */
-  public int getKeepaliveSelectMax()
-  {
-    return _keepaliveSelectMax;
-  }
-
-  /**
-   * Sets the select-based keepalive timeout
-   */
-  public void setKeepaliveSelectTimeout(Period period)
-  {
-    _keepaliveSelectTimeout = period.getPeriod();
-  }
-
-  /**
-   * Sets the select-based keepalive timeout
-   */
-  public long getKeepaliveSelectTimeout()
-  {
-    return _keepaliveSelectTimeout;
   }
 
   /**

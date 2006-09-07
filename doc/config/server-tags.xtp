@@ -61,6 +61,106 @@ to connect to the server.</p>
 
 </defun>
 
+<defun title="&lt;cluster-port>" version="Resin 3.0">
+<parents>server</parents>
+
+<p>&lt;cluster-port> configures the cluster and load balancing socket,
+for load balancing, distributed sessions, and distributed management.</p>
+
+<p>When configuring Resin in a load-balanced cluster, each Resin instance
+will have its own &lt;srun&gt; configuration, which Resin uses for distributed
+session management and for the load balancing itself.</p>
+
+<p>When configuring multiple JVMs, each &lt;srun&gt; will have a
+unique &lt;server-id&gt; which allows the -server command-line to select
+which ports the server should listen to.</p>
+
+<deftable-childtags>
+<tr><td>address</td>
+    <td>hostname of the interface to listen to</td>
+    <td>*</td></tr>
+<tr><td>jsse-ssl</td>
+    <td>configures the port to use JSSE for SSL</td>
+    <td>none</td></tr>
+<tr><td>openssl</td>
+    <td>configures the port to use OpenSSL</td>
+    <td>none</td></tr>
+<tr><td>port</td>
+    <td>port to listen to</td>
+    <td>required</td></tr>
+<tr><td>read-timeout</td>
+    <td>timeout waiting to read from idle client</td>
+    <td>65s</td></tr>
+<tr><td>write-timeout</td>
+     <td>timeout waiting to write to idle client</td>
+     <td>65s</td></tr>
+<tr><td>socket-listen-backlog</td>
+    <td>The socket factory's listen backlog for receiving sockets</td>
+    <td>100</td></tr>
+<tr><td>tcp-no-delay</td>
+    <td>sets the NO_DELAY socket parameter</td>
+    <td>true</td></tr>
+</deftable-childtags>
+
+<p>The class that corresponds to &lt;srun&gt; is <a href="javadoc|com.caucho.server.cluster.ClusterPort|"/></p>
+
+</defun>
+
+<defun title="&lt;http>" version="Resin 3.0">
+<parents>server</parents>
+
+<p>&lt;http> configures a HTTP or HTTPS port listening for HTTP requests.</p>
+
+<p>When configuring multiple JVMs, each &lt;http&gt; will have a
+unique &lt;server-id&gt; which allows the -server command-line to select
+which ports the server should listen to.</p>
+
+<deftable-childtags>
+<tr><td>address</td>
+    <td>IP address of the interface to listen to</td>
+    <td>*</td></tr>
+<tr><td>port</td>
+    <td>port to listen to</td>
+    <td>required</td></tr>
+<tr><td>tcp-no-delay</td>
+    <td>sets the NO_DELAY socket parameter</td>
+    <td>true</td></tr>
+<tr><td>read-timeout</td>
+    <td>timeout waiting to read from idle client</td>
+    <td>65s</td></tr>
+<tr><td>write-timeout</td>
+    <td>timeout waiting to write to idle client</td>
+    <td>65s</td></tr>
+<tr><td>socket-listen-backlog</td>
+    <td>The socket factory's listen backlog for receiving sockets</td>
+    <td>100</td></tr>
+<tr><td>virtual-host</td>
+    <td>forces all requests to this &lt;http&gt; to use the named virtual host</td>
+    <td>none</td></tr>
+<tr><td>openssl</td>
+    <td>configures the port to use OpenSSL</td>
+    <td>none</td></tr>
+<tr><td>jsse-ssl</td>
+    <td>configures the port to use JSSE for SSL</td>
+    <td>none</td></tr>
+</deftable-childtags>
+
+<p>The <var>virtual-host</var> attribute overrides the browser's
+Host directive, specifying the explicit host and port for
+<code>request.getServerName()</code> and <code>getServerPort()</code>.
+It is not used in most virtual host configurations.
+Only IP-based virtual hosts which wish to ignore the browser's Host
+will use @virtual-host.</p>
+
+</defun>
+
+<defun title="&lt;jvm-args>" version="Resin 3.1">
+<parents>server</parents>
+
+<p>&lt;jvm-args> configures JVM arguments to be passed to Resin on
+the command line, typically -X memory parameters and -D defines.</p>
+</defun>
+
 <defun title="&lt;keepalive-select-max>" version="Resin 3.1">
 <parents>server</parents>
 
@@ -436,129 +536,45 @@ the app-tier server.</p>
 
 </defun>
 
-<defun title="&lt;cluster-port>" version="Resin 3.0">
+<defun title="&lt;memory-free-min>" version="Resin 3.1">
 <parents>server</parents>
 
-<p>&lt;cluster-port> configures the cluster and load balancing socket,
-for load balancing, distributed sessions, and distributed management.</p>
+<p>&lt;memory-free-min> improves server reliability by detecting
+low-memory situations caused by memory leaks and forcing a
+clean server restart.  Since Resin's <g>watchdog</g> service
+reliably restarts the server, a website can improve stability by forcing
+a restart before memory becomes a major problem.  The memory-free-min
+restart will also log a warning, notifying the developers that
+a potential memory leak needs to be resolved.</p>
 
-<p>When configuring Resin in a load-balanced cluster, each Resin instance
-will have its own &lt;srun&gt; configuration, which Resin uses for distributed
-session management and for the load balancing itself.</p>
+<p>When free heap memory gets very low, the garbage collector can
+run continually trying to free up extra memory.  This continual
+garbage collection can send the CPU time to 100%, cause the site to
+become completely unresponsive, and yet take a long time before finally
+failing to an out of memory error (forcing an unclean restart).  To avoid this
+situation, Resin will detect the low-memory condition and gracefully
+restart the server when free memory becomes too low.</p>
 
-<p>When configuring multiple JVMs, each &lt;srun&gt; will have a
-unique &lt;server-id&gt; which allows the -server command-line to select
-which ports the server should listen to.</p>
+<p>The ultimate solution to any memory leak issues is to get a
+memory profiler, find the leaking memory and fix it.  &lt;memory-free-min>
+is just a temporary bandage to keep the site running reliably until
+the memory leak can be found and fixed.</p>
 
-<deftable-childtags>
-<tr><td>address</td>
-    <td>hostname of the interface to listen to</td>
-    <td>*</td></tr>
-<tr><td>jsse-ssl</td>
-    <td>configures the port to use JSSE for SSL</td>
-    <td>none</td></tr>
-<tr><td>openssl</td>
-    <td>configures the port to use OpenSSL</td>
-    <td>none</td></tr>
-<tr><td>port</td>
-    <td>port to listen to</td>
-    <td>required</td></tr>
-<tr><td>read-timeout</td>
-    <td>timeout waiting to read from idle client</td>
-    <td>65s</td></tr>
-<tr><td>write-timeout</td>
-     <td>timeout waiting to write to idle client</td>
-     <td>65s</td></tr>
-<tr><td>socket-listen-backlog</td>
-    <td>The socket factory's listen backlog for receiving sockets</td>
-    <td>100</td></tr>
-<tr><td>tcp-no-delay</td>
-    <td>sets the NO_DELAY socket parameter</td>
-    <td>true</td></tr>
-</deftable-childtags>
+<default>1m</default>
 
-<p>The class that corresponds to &lt;srun&gt; is <a href="javadoc|com.caucho.server.cluster.ClusterPort|"/></p>
-
-</defun>
-
-<defun title="&lt;http>" version="Resin 3.0">
-<parents>server</parents>
-
-<p>&lt;http> configures a HTTP or HTTPS port listening for HTTP requests.</p>
-
-<p>When configuring multiple JVMs, each &lt;http&gt; will have a
-unique &lt;server-id&gt; which allows the -server command-line to select
-which ports the server should listen to.</p>
-
-<deftable-childtags>
-<tr><td>server-id</td>
-    <td>server id matching the -server command line</td>
-    <td>none</td></tr>
-<tr><td>host</td>
-    <td>hostname of the interface to listen to</td>
-    <td>*</td></tr>
-<tr><td>port</td>
-    <td>port to listen to</td>
-    <td>required</td></tr>
-<tr><td>tcp-no-delay</td>
-    <td>sets the NO_DELAY socket parameter</td>
-    <td>true</td></tr>
-<tr><td>read-timeout</td>
-    <td>timeout waiting to read from idle client</td>
-    <td>65s</td></tr>
-<tr><td>write-timeout</td>
-    <td>timeout waiting to write to idle client</td>
-    <td>65s</td></tr>
-<tr><td>socket-listen-backlog</td>
-    <td>The socket factory's listen backlog for receiving sockets</td>
-    <td>100</td></tr>
-<tr><td>virtual-host</td>
-    <td>forces all requests to this &lt;http&gt; to use the named virtual host</td>
-    <td>none</td></tr>
-<tr><td>openssl</td>
-    <td>configures the port to use OpenSSL</td>
-    <td>none</td></tr>
-<tr><td>jsse-ssl</td>
-    <td>configures the port to use JSSE for SSL</td>
-    <td>none</td></tr>
-</deftable-childtags>
-
-<p>The @virtual-host attribute overrides the browser's Host directive,
-specifying the explicit host and port for
-<code>request.getServerName()</code> and <code>getServerPort()</code>.
-It is not used in most virtual host configurations.
-Only IP-based virtual hosts which wish to ignore the browser's Host
-will use @virtual-host.</p>
-
-</defun>
-
-<defun title="&lt;jvm-args>" version="Resin 3.1">
-<parents>server</parents>
-
-<p>&lt;jvm-args> configures JVM arguments to be passed to Resin on
-the command line, typically -X memory parameters and -D defines.</p>
-</defun>
-
-<defun title="&lt;protocol>" version="Resin 3.1">
-<parents>server</parents>
-
-<p>&lt;protocol> configures custom socket protocols using Resin's thread
-and connection management.</p>
-
-<p>The custom protocol will extend from com.caucho.server.port.Protocol.</p>
-
-<example>
+<example title="memory-free-min resin.conf">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-&lt;cluster id="web-tier"&gt;
+  &lt;cluster id="web-tier"&gt;
+    &lt;server-default&gt;
+      &lt;thread-max>512&lt;/thread-max>
 
-  &lt;server id="a"&gt;
-    &lt;protocol address="localhost" port="8888"&gt;
-      &lt;type>example.Magic8BallProtocol&lt;/type>
-    &lt;/port&gt;
-  &lt;/server&gt;
+      &lt;memory-free-min>1m&lt;/memory-free-min>
+    &lt;/server-default&gt;
 
-&lt;/cluster&gt;
-&lt;/resin&gt;
+    &lt;server id="web-a" address="192.168.0.10"/>
+        ...
+  &lt;/cluster>
+&lt;/resin>
 </example>
 
 </defun>
@@ -585,6 +601,30 @@ servers may use multiple ports like 6800 and 6801.</p>
     ...
   &lt;/cluster>
 &lt;/resin>
+</example>
+
+</defun>
+
+<defun title="&lt;protocol>" version="Resin 3.1">
+<parents>server</parents>
+
+<p>&lt;protocol> configures custom socket protocols using Resin's thread
+and connection management.</p>
+
+<p>The custom protocol will extend from com.caucho.server.port.Protocol.</p>
+
+<example>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+&lt;cluster id="web-tier"&gt;
+
+  &lt;server id="a"&gt;
+    &lt;protocol address="localhost" port="8888"&gt;
+      &lt;type>example.Magic8BallProtocol&lt;/type>
+    &lt;/port&gt;
+  &lt;/server&gt;
+
+&lt;/cluster&gt;
+&lt;/resin&gt;
 </example>
 
 </defun>
@@ -737,6 +777,16 @@ server instances and therefore belong in a server-default.</p>
     &lt;/cluster&gt;
 &lt;/resin&gt;
 </example>
+
+</defun>
+
+<defun title="&lt;shutdown-wait-max>" version="Resin 3.0">
+<parents>server</parents>
+
+<p>&lt;shutdown-wait-max> configures the maximum time the server
+will wait for the graceful shutdown before forcing an exit.</p>
+
+<default>60s</default>
 
 </defun>
 

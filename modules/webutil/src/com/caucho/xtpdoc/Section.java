@@ -106,9 +106,32 @@ public abstract class Section extends ContainerNode {
   public String getHref()
   {
     if (_name != null)
-      return _name;
+      return cleanHref(_name);
     else
-      return _title;
+      return cleanHref(_title);
+  }
+
+  public static String cleanHref(String href)
+  {
+    if (href == null)
+      return href;
+    
+    StringBuilder sb = new StringBuilder();
+
+    for (int i = 0; i < href.length(); i++) {
+      char ch = href.charAt(i);
+
+      switch (ch) {
+      case '<': case '>': case '(': case ')': case '?':
+	break;
+	
+      default:
+	sb.append(ch);
+	break;
+      }
+    }
+
+    return sb.toString();
   }
 
   public DefinitionList createDl()

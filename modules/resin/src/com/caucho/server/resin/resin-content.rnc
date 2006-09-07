@@ -325,18 +325,12 @@ r_keepalive-select-timeout =
   attribute keepalive-select-timeout { r_period-Type }
   | element keepalive-select-timeout { r_period-Type }
 
-r_min-free-memory =
-  attribute min-free-memory { string }
-  | element min-free-memory { string }
+r_memory-free-min =
+  attribute memory-free-min { string }
+  | element memory-free-min { string }
 
 r_openssl = element openssl {
-  (attribute certificate-file { string }
-   | element certificate-file { r_string-Group })
-
-  & (attribute password { string }
-     | element password { r_string-Group })
-
-  & (attribute ca-certificate-file { string }
+  (attribute ca-certificate-file { string }
      | element ca-certificate-file { r_string-Group })?
 
   & (attribute ca-certificate-path { string }
@@ -348,6 +342,9 @@ r_openssl = element openssl {
   & (attribute ca-revocation-path { string }
      | element ca-revocation-path { r_string-Group })?
 
+  & (attribute certificate-file { string }
+   | element certificate-file { r_string-Group })
+
   & (attribute certificate-chain-file { string }
      | element certificate-chain-file { r_string-Group })?
 
@@ -356,6 +353,9 @@ r_openssl = element openssl {
 
   & (attribute cipher-suite { string }
      | element cipher-suite { r_string-Group })?
+
+  & (attribute password { string }
+     | element password { r_string-Group })
 
   & (attribute protocol { string }
      | element protocol { r_string-Group })?
@@ -539,6 +539,8 @@ r_server-Basis =
   & r_keepalive-thread-max?
 
   & r_keepalive-thread-timeout?
+
+  & r_memory-free-min?
 
   & r_thread-max?
 

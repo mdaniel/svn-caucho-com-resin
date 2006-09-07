@@ -3,13 +3,14 @@
     <item link="howto.xtp" title="howto"/>
     <item link="tags.xtp"  title="tags">
       <item link="index-tags.xtp" title="index"/>
-      <item link="env-tags.xtp" title="env"/>
-      <item link="resin-tags.xtp" title="resin"/>
-      <item link="cluster-tags.xtp" title="cluster"/>
-      <item link="server-tags.xtp" title="server"/>
-      <item link="host-tags.xtp" title="host"/>
-      <item link="webapp-tags.xtp" title="web-app"/>
-      <item link="rewrite-tags.xtp" title="rewrite"/>
+      <item link="env-tags.xtp" title="env tags"/>
+      <item link="resin-tags.xtp" title="&lt;resin>"/>
+      <item link="cluster-tags.xtp" title="&lt;cluster>"/>
+      <item link="server-tags.xtp" title="&lt;server>"/>
+      <item link="port-tags.xtp" title="port tags"/>
+      <item link="host-tags.xtp" title="&lt;host>"/>
+      <item link="webapp-tags.xtp" title="&lt;web-app>"/>
+      <item link="rewrite-tags.xtp" title="rewrite tags"/>
       <item link="log.xtp" title="log"/>
       <item link="control.xtp" title="el & control"/>
     </item>

@@ -27,6 +27,10 @@ r_keepalive-timeout =
   attribute keepalive-timeout { string }
   | element keepalive-timeout { string }
 
+r_min-free-memory =
+  attribute min-free-memory { string }
+  | element min-free-memory { string }
+
 ## old-style <server>
 r_server-Compat = element server {
   attribute id { string }?,
