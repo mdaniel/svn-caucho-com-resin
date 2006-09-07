@@ -54,8 +54,10 @@ public class ThreadPoolConfig {
 
   public void init()
   {
-    ThreadPool.setThreadMax(_threadMax);
-    ThreadPool.setThreadIdleMin(_threadSpareMin);
-    ThreadPool.setThreadIdleMax(_threadSpareMin + THREAD_GAP);
+    ThreadPool threadPool = ThreadPool.getThreadPool();
+    
+    threadPool.setThreadMax(_threadMax);
+    threadPool.setThreadIdleMax(_threadSpareMin + THREAD_GAP);
+    threadPool.setThreadIdleMin(_threadSpareMin);
   }
 }

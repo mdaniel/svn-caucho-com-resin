@@ -108,23 +108,23 @@ r_cluster-Flow =
 r_cluster-Content = r_cluster-Flow
 
 r_cluster-client-Group =
-  (attribute client-connect-timeout { r_period-Type }
-   | element client-connect-timeout { r_period-Type })?
+  (attribute load-balance-connect-timeout { r_period-Type }
+   | element load-balance-connect-timeout { r_period-Type })?
 
-  & (attribute client-fail-recover-time { r_period-Type }
-     | element client-fail-recover-time { r_period-Type })?
+  & (attribute load-balance-fail-recover-time { r_period-Type }
+     | element load-balance-fail-recover-time { r_period-Type })?
 
-  & (attribute client-max-idle-time { r_period-Type }
-     | element client-max-idle-time { r_period-Type })?
+  & (attribute load-balance-max-idle-time { r_period-Type }
+     | element load-balance-max-idle-time { r_period-Type })?
 
-  & (attribute client-timeout { r_period-Type }
-     | element client-timeout { r_period-Type })?
+  & (attribute load-balance-timeout { r_period-Type }
+     | element load-balance-timeout { r_period-Type })?
 
-  & (attribute client-warmup-time { r_period-Type }
-     | element client-warmup-time { r_period-Type })?
+  & (attribute load-balance-warmup-time { r_period-Type }
+     | element load-balance-warmup-time { r_period-Type })?
 
-  & (attribute client-weight { r_int-Type }
-     | element client-weight { r_int-Type })?
+  & (attribute load-balance-weight { r_int-Type }
+     | element load-balance-weight { r_int-Type })?
 
 r_cluster-port-Content =
   (attribute id { string }
@@ -143,8 +143,8 @@ r_cluster-port-Content =
   & (attribute keepalive-max { r_int-Type }
      | element keepalive-max { r_int-Type })?
 
-  & (attribute client-weight { r_int-Type }
-     | element client-weight { r_int-Type })?
+  & (attribute load-balance-weight { r_int-Type }
+     | element load-balance-weight { r_int-Type })?
 
   & (r_openssl | r_jsse-ssl)?
 
@@ -309,13 +309,21 @@ r_jsse-ssl = element jsse-ssl {
      | element verify-client { r_string-Group })?
 }
 
-r_keepalive-max =
-  attribute keepalive-max { string }
-  | element keepalive-max { string }
+r_keepalive-thread-max =
+  attribute keepalive-thread-max { string }
+  | element keepalive-thread-max { string }
 
-r_keepalive-timeout =
-  attribute keepalive-timeout { string }
-  | element keepalive-timeout { string }
+r_keepalive-thread-timeout =
+  attribute keepalive-thread-timeout { r_period-Type }
+  | element keepalive-thread-timeout { r_period-Type }
+
+r_keepalive-select-max =
+  attribute keepalive-select-max { string }
+  | element keepalive-select-max { string }
+
+r_keepalive-select-timeout =
+  attribute keepalive-select-timeout { r_period-Type }
+  | element keepalive-select-timeout { r_period-Type }
 
 r_min-free-memory =
   attribute min-free-memory { string }
@@ -454,8 +462,6 @@ r_resin-Basis =
   & (attribute environment-system-properties { string }
      | element environment-system-properties { string })?
 
-  & (attribute group-name { string } | element group-name { string })?
-
   & r_min-free-memory?
 
   & (attribute security-provider { string }
@@ -471,8 +477,6 @@ r_resin-Basis =
   & r_thread-pool?
 
   & r_transaction-manager?
-
-  & (attribute user-name { string } | element user-name { string })?
 
 ## <resin> flow control
 r_resin-Flow =
@@ -502,10 +506,6 @@ r_security-manager =
        | element policy-file { string })
     }
 
-r_select-manager = element select-manager {
-  r_enable?
-}
-
 r_server = element server {
   attribute id { string }
 
@@ -532,15 +532,23 @@ r_server-Basis =
   & (attribute jvm-args { string }
     | element jvm-args { string })*
 
-  & r_keepalive-max?
+  & r_keepalive-select-max?
 
-  & r_keepalive-timeout?
+  & r_keepalive-select-timeout?
+
+  & r_keepalive-thread-max?
+
+  & r_keepalive-thread-timeout?
+
+  & r_thread-max?
+
+  & r_thread-idle-max?
+
+  & r_thread-idle-min?
 
   & r_port*
 
   & r_protocol*
-
-  & r_select-manager?
 
   & r_user-name?
 
@@ -566,27 +574,21 @@ r_session-url-prefix =
   | attribute session-url-prefix { string }
   | element session-url-prefix { string }
 
-r_spare-thread-max =
-  attribute spare-thread-max { string }
-  | element spare-thread-max { string }
-
-r_spare-thread-min =
-  attribute spare-thread-min { string }
-  | element spare-thread-min { string }
-
 r_ssl-session-cookie = 
   attribute ssl-session-cookie { string }
   | element ssl-session-cookie { string }
 
-r_thread-pool = element thread-pool {
-  r_thread-max?
-
-  & r_spare-thread-min?
-}
-
 r_thread-max =
   attribute thread-max { string }
   | element thread-max { string }
+
+r_thread-idle-max =
+  attribute thread-idle-max { string }
+  | element thread-idle-max { string }
+
+r_thread-idle-min =
+  attribute thread-idle-min { string }
+  | element thread-idle-min { string }
 
 r_transaction-log = element transaction-log {
   r_path+

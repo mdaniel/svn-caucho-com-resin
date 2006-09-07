@@ -29,8 +29,11 @@
 
 package com.caucho.resources;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import java.util.concurrent.*;
+
+import java.util.logging.*;
+
+import javax.annotation.*;
 
 import javax.resource.spi.BootstrapContext;
 
@@ -56,9 +59,13 @@ import com.caucho.jca.AbstractResourceAdapter;
  * intervals.
  */
 public class CronResource extends AbstractResourceAdapter
-  implements AlarmListener {
+  implements AlarmListener
+{
   private static final L10N L = new L10N(CronResource.class);
   private static final Logger log = Log.open(CronResource.class);
+
+  @Resource
+  private Executor _threadPool;
 
   private ClassLoader _loader;
   
@@ -142,7 +149,7 @@ public class CronResource extends AbstractResourceAdapter
       if (_work instanceof Work)
 	_workManager.scheduleWork((Work) _work);
       else
-	ThreadPool.schedule(_work);
+	_threadPool.execute(_work);
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {

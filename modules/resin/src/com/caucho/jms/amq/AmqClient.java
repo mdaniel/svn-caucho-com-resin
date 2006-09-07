@@ -182,7 +182,7 @@ public class AmqClient extends AmqConnection {
     System.out.println("OPEN:");
     // also the heartbeak
     
-    ThreadPool.schedule(_readThread);
+    ThreadPool.getThreadPool().schedule(_readThread);
 
     return true;
   }

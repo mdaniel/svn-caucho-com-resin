@@ -19,63 +19,56 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.resources;
+package com.caucho.util;
+
+import java.util.*;
 
 import java.util.concurrent.*;
 import java.util.logging.*;
 
-import javax.annotation.*;
-
-import com.caucho.util.L10N;
-import com.caucho.util.ThreadPool;
-
-import com.caucho.log.Log;
-
-import com.caucho.config.ConfigException;
+import com.caucho.config.*;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
 
 /**
- * The task resource starts a backgroun task on initialization.
- * intervals.
+ * A generic pool of threads available for Alarms and Work tasks.
  */
-public class TaskResource {
-  private static final L10N L = new L10N(TaskResource.class);
-  private static final Logger log = Log.open(TaskResource.class);
+public class ScheduledExecutorServiceImpl implements Executor {
+  private static final L10N L = new L10N(ScheduledExecutorServiceImpl.class);
+  private static final Logger log
+    = Logger.getLogger(ScheduledExecutorServiceImpl.class.getName());
 
-  @Resource
-  private Executor _executor;
-  
-  private Runnable _work;
+  private static ScheduledExecutorServiceImpl _service
+    = new ScheduledExecutorServiceImpl();
+    
+  private ThreadPool _threadPool = ThreadPool.getThreadPool();
 
-  /**
-   * Sets the work task.
-   */
-  public void setWork(Runnable work)
+  private ScheduledExecutorServiceImpl()
   {
-    _work = work;
   }
 
-  /**
-   * Initialization.
-   */
-  public void init()
-    throws ConfigException
+  public static ScheduledExecutorServiceImpl create()
   {
-    if (_work == null)
-      throw new ConfigException(L.l("TaskResource needs a <work> task."));
+    return _service;
   }
 
-  /**
-   * Starting.
-   */
-  public void start()
+  //
+  // java.util.concurrent
+  //
+
+  public void execute(Runnable task)
   {
-    _executor.execute(_work);
+    if (task == null)
+      throw new NullPointerException();
+    
+    _threadPool.schedule(task);
   }
 }

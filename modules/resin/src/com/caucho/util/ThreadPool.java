@@ -29,10 +29,10 @@
 
 package com.caucho.util;
 
-import java.util.ArrayList;
+import java.util.*;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import java.util.concurrent.*;
+import java.util.logging.*;
 
 import com.caucho.config.*;
 import com.caucho.util.*;
@@ -41,37 +41,41 @@ import com.caucho.vfs.*;
 /**
  * A generic pool of threads available for Alarms and Work tasks.
  */
-public class ThreadPool implements Runnable {
+public class ThreadPool {
   private static final L10N L = new L10N(ThreadPool.class);
   private static final Logger log
     = Logger.getLogger(ThreadPool.class.getName());
   
   private static final long MAX_EXPIRE = Long.MAX_VALUE / 2;
 
-  private static int _threadMax = 256;
+  private static final ThreadPool _globalThreadPool = new ThreadPool();
+
+  private static int _g_id;
+    
+  private int _threadMax = Integer.MAX_VALUE / 2;
   
-  private static int _threadIdleMin = 5;
-  private static int _threadIdleMax = 10;
+  private int _threadIdleMin = 5;
+  private int _threadIdleMax = 10;
 
-  private static long _resetCount;
+  private long _resetCount;
 
-  private final static ArrayList<ThreadPool> _threads
-    = new ArrayList<ThreadPool>();
+  private final ArrayList<Item> _threads
+    = new ArrayList<Item>();
 
-  private final static ArrayList<Runnable> _taskQueue
+  private final ArrayList<Runnable> _taskQueue
     = new ArrayList<Runnable>();
 
-  private final static ArrayList<ClassLoader> _loaderQueue
+  private final ArrayList<ClassLoader> _loaderQueue
     = new ArrayList<ClassLoader>();
 
-  private final static ThreadLauncher _launcher = ThreadLauncher.create();
-  private final static ScheduleThread _scheduler = ScheduleThread.create();
+  private final ThreadLauncher _launcher = new ThreadLauncher();
+  private final ScheduleThread _scheduler = new ScheduleThread();
   
-  private static boolean _isQueuePriority;
+  private boolean _isQueuePriority;
 
-  private static final Object _idleLock = new Object();
+  private final Object _idleLock = new Object();
   
-  private static ThreadPool _idleHead;
+  private Item _idleHead;
 
   private static int _threadCount;
   // number of threads in the idle stack
@@ -81,35 +85,23 @@ public class ThreadPool implements Runnable {
 
   private static int _scheduleWaitCount;
 
-  private static int _g_id;
-
-  private final int _id;
-  private final String _name;
-
-  private Thread _thread;
-  private Thread _queueThread;
-
-  private ThreadPool _prev;
-  private ThreadPool _next;
-  private boolean _isIdle;
-
-  private long _threadResetCount;
-  
-  private Runnable _task;
-  private ClassLoader _classLoader;
-
   private ThreadPool()
   {
-    synchronized (ThreadPool.class) {
-      _id = _g_id++;
-      _name = "resin-" + _id;
-    }
   }
+
+  public static ThreadPool getThreadPool()
+  {
+    return _globalThreadPool;
+  }
+
+  //
+  // Configuration properties
+  //
 
   /**
    * Sets the maximum number of threads.
    */
-  public static void setThreadMax(int max)
+  public void setThreadMax(int max)
   {
     if (max < _threadIdleMax)
       throw new ConfigException(L.l("lt;thread-max> ({0}) must be less than &lt;thread-idle-max> ({1})", max, _threadIdleMax));
@@ -121,7 +113,7 @@ public class ThreadPool implements Runnable {
   /**
    * Gets the maximum number of threads.
    */
-  public static int getThreadMax()
+  public int getThreadMax()
   {
     return _threadMax;
   }
@@ -129,7 +121,7 @@ public class ThreadPool implements Runnable {
   /**
    * Sets the minimum number of idle threads.
    */
-  public static void setThreadIdleMin(int min)
+  public void setThreadIdleMin(int min)
   {
     if (_threadIdleMax < min)
       throw new ConfigException(L.l("lt;thread-idle-min> ({0}) must be less than &lt;thread-idle-max> ({1})", min, _threadIdleMax));
@@ -140,7 +132,7 @@ public class ThreadPool implements Runnable {
   /**
    * Gets the minimum number of idle threads.
    */
-  public static int getThreadIdleMin()
+  public int getThreadIdleMin()
   {
     return _threadIdleMin;
   }
@@ -148,7 +140,7 @@ public class ThreadPool implements Runnable {
   /**
    * Sets the maximum number of idle threads.
    */
-  public static void setThreadIdleMax(int max)
+  public void setThreadIdleMax(int max)
   {
     if (max < _threadIdleMin)
       throw new ConfigException(L.l("lt;thread-idle-max> ({0}) must be greater than &lt;thread-idle-min> ({1})",
@@ -164,7 +156,7 @@ public class ThreadPool implements Runnable {
   /**
    * Gets the maximum number of idle threads.
    */
-  public static int getThreadIdleMax()
+  public int getThreadIdleMax()
   {
     return _threadIdleMax;
   }
@@ -172,7 +164,7 @@ public class ThreadPool implements Runnable {
   /**
    * Returns the total thread count.
    */
-  public static int getThreadCount()
+  public int getThreadCount()
   {
     return _threadCount;
   }
@@ -180,7 +172,7 @@ public class ThreadPool implements Runnable {
   /**
    * Returns the idle thread count.
    */
-  public static int getThreadIdleCount()
+  public int getThreadIdleCount()
   {
     return _idleCount;
   }
@@ -188,7 +180,7 @@ public class ThreadPool implements Runnable {
   /**
    * Returns the active thread count.
    */
-  public static int getThreadActiveCount()
+  public int getThreadActiveCount()
   {
     return getThreadCount() - getThreadIdleCount();
   }
@@ -196,24 +188,37 @@ public class ThreadPool implements Runnable {
   /**
    * Returns the free thread count.
    */
-  public static int getFreeThreadCount()
+  public int getFreeThreadCount()
   {
     return _threadMax - _threadCount;
   }
 
+  //
+  // Resin methods
+  //
+
   /**
    * Resets the thread pool, letting old threads drain.
    */
-  public static void reset()
+  public void reset()
   {
     // XXX: not reliable
     _resetCount++;
   }
 
   /**
+   * Resets the thread pool, letting old threads drain.
+   */
+  public void closeEnvironment(ClassLoader env)
+  {
+    // XXX: incorrect
+    reset();
+  }
+
+  /**
    * Schedules a new task.
    */
-  public static boolean schedule(Runnable task)
+  public boolean schedule(Runnable task)
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
@@ -223,7 +228,7 @@ public class ThreadPool implements Runnable {
   /**
    * Adds a new task.
    */
-  public static boolean schedule(Runnable task, long timeout)
+  public boolean schedule(Runnable task, long timeout)
   {
     long expire;
     
@@ -240,7 +245,7 @@ public class ThreadPool implements Runnable {
   /**
    * Adds a new task.
    */
-  public static void schedulePriority(Runnable task)
+  public void schedulePriority(Runnable task)
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
@@ -250,7 +255,7 @@ public class ThreadPool implements Runnable {
   /**
    * Adds a new task.
    */
-  public static boolean start(Runnable task)
+  public boolean start(Runnable task)
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
@@ -260,7 +265,7 @@ public class ThreadPool implements Runnable {
   /**
    * Adds a new task.
    */
-  public static boolean start(Runnable task, long timeout)
+  public boolean start(Runnable task, long timeout)
   {
     long expire;
     
@@ -277,7 +282,7 @@ public class ThreadPool implements Runnable {
   /**
    * Adds a new task.
    */
-  public static void startPriority(Runnable task)
+  public void startPriority(Runnable task)
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
@@ -287,7 +292,7 @@ public class ThreadPool implements Runnable {
   /**
    * Adds a new task.
    */
-  public static boolean startPriority(Runnable task, long timeout)
+  public boolean startPriority(Runnable task, long timeout)
   {
     long expire;
     
@@ -304,10 +309,10 @@ public class ThreadPool implements Runnable {
   /**
    * interrupts all the threads.
    */
-  public static void interrupt()
+  public void interrupt()
   {
     synchronized (_idleLock) {
-      for (ThreadPool item = _idleHead;
+      for (Item item = _idleHead;
 	   item != null;
 	   item = item._next) {
 	Thread thread = item.getThread();
@@ -325,13 +330,13 @@ public class ThreadPool implements Runnable {
   /**
    * Adds a new task.
    */
-  private static boolean schedule(Runnable task,
-				  ClassLoader loader,
-				  int freeThreads,
-				  long expireTime,
-				  boolean queueIfFull)
+  private boolean schedule(Runnable task,
+			   ClassLoader loader,
+			   int freeThreads,
+			   long expireTime,
+			   boolean queueIfFull)
   {
-    ThreadPool poolItem = null;
+    Item poolItem = null;
 
     while (poolItem == null) {
       try {
@@ -406,206 +411,229 @@ public class ThreadPool implements Runnable {
     return true;
   }
 
-  /**
-   * Returns the id.
-   */
-  int getId()
-  {
-    return _id;
-  }
+  class Item implements Runnable {
+    private final int _id;
+    private final String _name;
 
-  /**
-   * Returns the name.
-   */
-  public String getName()
-  {
-    return _name;
-  }
+    private Thread _thread;
+    private Thread _queueThread;
 
-  /**
-   * Returns the thread id.
-   */
-  public long getThreadId()
-  {
-    return _thread.getId();
-  }
+    private Item _prev;
+    private Item _next;
+    private boolean _isIdle;
 
-  /**
-   * Returns the thread.
-   */
-  Thread getThread()
-  {
-    return _thread;
-  }
+    private long _threadResetCount;
+  
+    private Runnable _task;
+    private ClassLoader _classLoader;
 
-  /**
-   * Starts the thread.
-   */
-  private boolean start(Runnable task, ClassLoader loader)
-  {
-    synchronized (this) {
-      _task = task;
-      _classLoader = loader;
-
-      notify();
-    }
-
-    return true;
-  }
-
-  /**
-   * The main thread execution method.
-   */
-  public void run()
-  {
-    _thread = Thread.currentThread();
-
-    synchronized (_idleLock) {
-      _threadCount++;
-      _startCount--;
-      _threads.add(this);
-
-      if (_startCount < 0) {
-	System.out.println("ThreadPool start count is negative: " + _startCount);
-	_startCount = 0;
+    private Item()
+    {
+      synchronized (Item.class) {
+	_id = _g_id++;
+	_name = "resin-" + _id;
       }
     }
-      
-    try {
-      runTasks();
-    } finally {
+
+    /**
+     * Returns the id.
+     */
+    int getId()
+    {
+      return _id;
+    }
+
+    /**
+     * Returns the name.
+     */
+    public String getName()
+    {
+      return _name;
+    }
+
+    /**
+     * Returns the thread id.
+     */
+    public long getThreadId()
+    {
+      return _thread.getId();
+    }
+
+    /**
+     * Returns the thread.
+     */
+    Thread getThread()
+    {
+      return _thread;
+    }
+
+    /**
+     * Starts the thread.
+     */
+    private boolean start(Runnable task, ClassLoader loader)
+    {
+      synchronized (this) {
+	_task = task;
+	_classLoader = loader;
+
+	notify();
+      }
+
+      return true;
+    }
+
+    /**
+     * The main thread execution method.
+     */
+    public void run()
+    {
+      _thread = Thread.currentThread();
+
       synchronized (_idleLock) {
-	_threadCount--;
+	_threadCount++;
+	_startCount--;
+	_threads.add(this);
 
-	_threads.remove(this);
-      }
-
-      if (_threadCount < _threadIdleMin) {
-	synchronized (_launcher) {
-	  _launcher.notify();
+	if (_startCount < 0) {
+	  System.out.println("ThreadPool start count is negative: " + _startCount);
+	  _startCount = 0;
 	}
       }
-    }
-  }
-
-  private void runTasks()
-  {
-    _threadResetCount = _resetCount;
-    
-    Thread thread = Thread.currentThread();
-    ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
-    boolean isIdle = false;
-
-    while (true) {
+      
       try {
-	// put the thread into the idle ring
-	if (! isIdle) {
-	  _isQueuePriority = true;
+	runTasks();
+      } finally {
+	synchronized (_idleLock) {
+	  _threadCount--;
+
+	  _threads.remove(this);
+	}
+
+	if (_threadCount < _threadIdleMin) {
+	  synchronized (_launcher) {
+	    _launcher.notify();
+	  }
+	}
+      }
+    }
+
+    private void runTasks()
+    {
+      _threadResetCount = _resetCount;
+    
+      Thread thread = Thread.currentThread();
+      ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
+      boolean isIdle = false;
+
+      while (true) {
+	try {
+	  // put the thread into the idle ring
+	  if (! isIdle) {
+	    _isQueuePriority = true;
 	  
-	  isIdle = true;
+	    isIdle = true;
 	  
-	  synchronized (_idleLock) {
-	    if (_threadIdleMax < _idleCount) {
-	      return;
-	    }
+	    synchronized (_idleLock) {
+	      if (_threadIdleMax < _idleCount) {
+		return;
+	      }
 	      
-	    _next = _idleHead;
-	    _prev = null;
-	    _isIdle = true;
-
-	    if (_idleHead != null)
-	      _idleHead._prev = this;
-
-	    _idleHead = this;
-	    _idleCount++;
-
-	    if (_scheduleWaitCount > 0)
-	      _idleLock.notify();
-	  }
-	}
-
-	Runnable task = null;
-	ClassLoader classLoader = null;
-
-	// clear interrupted flag
-	Thread.interrupted();
-	
-	// wait for the next available task
-	synchronized (this) {
-	  if (_task == null) {
-	    thread.setContextClassLoader(systemClassLoader);
-	    wait(60000L);
-	  }
-
-	  task = _task;
-	  _task = null;
-
-	  classLoader = _classLoader;
-	  _classLoader = null;
-	}
-
-	// if the task is available, run it in the proper context
-	if (task != null) {
-	  isIdle = false;
-	  
-	  thread.setContextClassLoader(classLoader);
-	  try {
-	    task.run();
-	  } catch (Throwable e) {
-	    log.log(Level.WARNING, e.toString(), e);
-	  } finally {
-	    thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
-	  }
-	}
-	else {
-	  boolean isDead = false;
-	  boolean isReset = false;
-
-	  // check to see if we're over the idle thread limit
-	  synchronized (_idleLock) {
-	    if (_isIdle &&
-		(_threadIdleMax < _idleCount ||
-		 _resetCount != _threadResetCount)) {
-	      isDead = true;
-
-	      isReset = _resetCount != _threadResetCount;
-	      
-	      ThreadPool next = _next;
-	      ThreadPool prev = _prev;
-
-	      _next = null;
+	      _next = _idleHead;
 	      _prev = null;
-	      _isIdle = false;
+	      _isIdle = true;
 
-	      if (next != null)
-		next._prev = prev;
+	      if (_idleHead != null)
+		_idleHead._prev = this;
 
-	      if (prev != null)
-		prev._next = next;
-	      else
-		_idleHead = next;
+	      _idleHead = this;
+	      _idleCount++;
 
-	      _idleCount--;
+	      if (_scheduleWaitCount > 0)
+		_idleLock.notify();
 	    }
 	  }
 
-	  if (isReset) {
-	    synchronized (_launcher) {
-	      _launcher.notify();
+	  Runnable task = null;
+	  ClassLoader classLoader = null;
+
+	  // clear interrupted flag
+	  Thread.interrupted();
+	
+	  // wait for the next available task
+	  synchronized (this) {
+	    if (_task == null) {
+	      thread.setContextClassLoader(systemClassLoader);
+	      wait(60000L);
 	    }
+
+	    task = _task;
+	    _task = null;
+
+	    classLoader = _classLoader;
+	    _classLoader = null;
 	  }
+
+	  // if the task is available, run it in the proper context
+	  if (task != null) {
+	    isIdle = false;
 	  
-	  if (isDead)
-	    return;
+	    thread.setContextClassLoader(classLoader);
+	    try {
+	      task.run();
+	    } catch (Throwable e) {
+	      log.log(Level.WARNING, e.toString(), e);
+	    } finally {
+	      thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
+	    }
+	  }
+	  else {
+	    boolean isDead = false;
+	    boolean isReset = false;
+
+	    // check to see if we're over the idle thread limit
+	    synchronized (_idleLock) {
+	      if (_isIdle &&
+		  (_threadIdleMax < _idleCount ||
+		   _resetCount != _threadResetCount)) {
+		isDead = true;
+
+		isReset = _resetCount != _threadResetCount;
+	      
+		Item next = _next;
+		Item prev = _prev;
+
+		_next = null;
+		_prev = null;
+		_isIdle = false;
+
+		if (next != null)
+		  next._prev = prev;
+
+		if (prev != null)
+		  prev._next = next;
+		else
+		  _idleHead = next;
+
+		_idleCount--;
+	      }
+	    }
+
+	    if (isReset) {
+	      synchronized (_launcher) {
+		_launcher.notify();
+	      }
+	    }
+	  
+	    if (isDead)
+	      return;
+	  }
+	} catch (Throwable e) {
 	}
-      } catch (Throwable e) {
       }
     }
   }
 
-  static class ThreadLauncher implements Runnable {
-    private static ThreadLauncher _launcher;
-    
+  class ThreadLauncher implements Runnable {
     private ThreadLauncher()
     {
       Thread thread = new Thread(this);
@@ -613,14 +641,6 @@ public class ThreadPool implements Runnable {
       thread.setDaemon(true);
 
       thread.start();
-    }
-
-    static ThreadLauncher create()
-    {
-      if (_launcher == null)
-	_launcher = new ThreadLauncher();
-
-      return _launcher;
     }
 
     /**
@@ -645,7 +665,7 @@ public class ThreadPool implements Runnable {
 
       if (doStart) {
 	try {
-	  ThreadPool poolItem = new ThreadPool();
+	  Item poolItem = new Item();
     
 	  Thread thread = new Thread(poolItem, poolItem.getName());
 	  thread.setDaemon(true);
@@ -702,9 +722,7 @@ public class ThreadPool implements Runnable {
     }
   }
 
-  static class ScheduleThread implements Runnable {
-    private static ScheduleThread _scheduler;
-    
+  class ScheduleThread implements Runnable {
     private ScheduleThread()
     {
       Thread thread = new Thread(this);
@@ -712,14 +730,6 @@ public class ThreadPool implements Runnable {
       thread.setDaemon(true);
 
       thread.start();
-    }
-
-    static ScheduleThread create()
-    {
-      if (_scheduler == null)
-	_scheduler = new ScheduleThread();
-
-      return _scheduler;
     }
     
     public void run()

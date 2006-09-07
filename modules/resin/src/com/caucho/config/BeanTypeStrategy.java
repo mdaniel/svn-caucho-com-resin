@@ -234,6 +234,14 @@ public class BeanTypeStrategy extends TypeStrategy {
           _addDependency.invoke(bean, dependList.get(i));
       }
 
+      for (int i = 0; i < _injectList.size(); i++) {
+	try {
+	  _injectList.get(i).configure(bean);
+	} catch (Throwable e) {
+	  throw new ConfigException(e);
+	}
+      }
+
       super.configureBean(builder, bean, node);
 
       if (bean instanceof Validator)

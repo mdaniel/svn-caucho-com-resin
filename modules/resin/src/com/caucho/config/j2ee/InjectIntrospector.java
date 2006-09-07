@@ -35,8 +35,9 @@ import java.lang.reflect.Method;
 
 import java.util.ArrayList;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import java.util.concurrent.*;
+
+import java.util.logging.*;
 
 import javax.sql.DataSource;
 
@@ -310,7 +311,7 @@ public class InjectIntrospector {
     if (name.equals(""))
       name = fieldName;
 
-    if (resourceType.equals(""))
+    if (resourceType.equals("") || resourceType.equals("java.lang.Object"))
       resourceType = fieldType.getName();
 
     if (resourceType.equals("javax.sql.DataSource"))
@@ -329,6 +330,9 @@ public class InjectIntrospector {
     else if (UserTransaction.class.equals(fieldType)) {
       jndiName = "java:comp/UserTransaction";
     }
+    else if ("java.util.concurrent.Executor".equals(resourceType)) {
+      jndiName = "java:comp/ThreadPool";
+    }
     else {
       jndiName = name;
     }
@@ -342,7 +346,7 @@ public class InjectIntrospector {
     if (field instanceof Method)
       return new JndiInjectProgram(jndiName, (Method) field);
     else
-      return  new JndiFieldInjectProgram(jndiName, (Field) field);
+      return new JndiFieldInjectProgram(jndiName, (Field) field);
   }
 }
 

@@ -222,9 +222,9 @@ public class WorkManagerImpl implements WorkManager {
 					   work, null, 0));
 
       if (waitForStart)
-	isStart = ThreadPool.start(workThread, startTimeout);
+	isStart = ThreadPool.getThreadPool().start(workThread, startTimeout);
       else
-	isStart = ThreadPool.schedule(workThread, startTimeout);
+	isStart = ThreadPool.getThreadPool().schedule(workThread, startTimeout);
     } finally {
       synchronized (this) {
 	if (! isStart)

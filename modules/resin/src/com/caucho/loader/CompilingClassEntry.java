@@ -116,7 +116,7 @@ class CompilingClassEntry extends ClassEntry {
       return true;
 
     CompileThread compileThread = new CompileThread();
-    ThreadPool.start(compileThread);
+    ThreadPool.getThreadPool().start(compileThread);
 
     try {
       synchronized (compileThread) {

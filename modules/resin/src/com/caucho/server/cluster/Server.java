@@ -115,8 +115,15 @@ public class Server extends ProtocolDispatchServer
 
   private long _waitForActiveTime = 10000L;
 
-  private boolean _enableSelectManager;
-  private int _keepaliveMax = 256;
+  private int _threadMax = Integer.MAX_VALUE / 2;
+  private int _threadIdleMin = 5;
+  private int _threadIdleMax = 10;
+
+  private int _keepaliveThreadMax = -1;
+  private long _keepaliveThreadTimeout = 5000;
+
+  private int _keepaliveSelectMax = -1;
+  private long _keepaliveSelectTimeout = 5000;
 
   private String _connectionErrorPage;
 
@@ -160,6 +167,8 @@ public class Server extends ProtocolDispatchServer
         _hostContainer = new HostContainer();
         _hostContainer.setClassLoader(_classLoader);
         _hostContainer.setDispatchServer(this);
+
+	_clusterServer.getServerProgram().configure(this);
 	
 	_alarm = new Alarm(this);
       } finally {
@@ -487,33 +496,99 @@ public class Server extends ProtocolDispatchServer
   }
 
   /**
-   * Returns the keepalive max.
+   * Sets the maximum thread-based keepalive
+   */
+  public void setThreadMax(int max)
+  {
+    if (max < 0)
+      throw new ConfigException(L.l("<thread-max> ({0}) must be greater than zero.",
+				    max));
+    
+    _threadMax = max;
+  }
+
+  /**
+   * Sets the minimum number of idle threads in the thread pool.
+   */
+  public void setThreadIdleMin(int min)
+  {
+    _threadIdleMin = min;
+  }
+
+  /**
+   * Sets the maximum number of idle threads in the thread pool.
+   */
+  public void setThreadIdleMax(int max)
+  {
+    _threadIdleMax = max;
+  }
+
+  /**
+   * Sets the maximum thread-based keepalive
+   */
+  public void setKeepaliveThreadMax(int max)
+  {
+    _keepaliveThreadMax = max;
+  }
+
+  /**
+   * Returns the thread-based keepalive max.
    *
    * @return the keepalive max.
    */
-  public int getKeepaliveMax()
+  public int getKeepaliveThreadMax()
   {
-    return _keepaliveMax;
+    return _keepaliveThreadMax;
   }
 
   /**
-   * Sets the maximum keepalive
+   * Sets the thread-based keepalive timeout
    */
-  public void setKeepaliveMax(int max)
+  public void setKeepaliveThreadTimeout(Period period)
   {
-    _keepaliveMax = max;
-
-    AbstractSelectManager selectManager = getSelectManager();
-    if (selectManager != null)
-      selectManager.setSelectMax(max);
+    _keepaliveThreadTimeout = period.getPeriod();
   }
 
   /**
-   * Sets true if the select manager should be enabled
+   * Sets the thread-based keepalive timeout
    */
-  public SelectManagerConfig createSelectManager()
+  public long getKeepaliveThreadTimeout()
   {
-    return new SelectManagerConfig();
+    return _keepaliveThreadTimeout;
+  }
+
+  /**
+   * Sets the maximum select-based keepalive
+   */
+  public void setKeepaliveSelectMax(int max)
+  {
+    _keepaliveSelectMax = max;
+  }
+
+  /**
+   * Returns the select-based keepalive max.
+   *
+   * @return the keepalive max.
+   */
+  public int getKeepaliveSelectMax()
+  {
+    return _keepaliveSelectMax;
+  }
+
+  /**
+   * Sets the select-based keepalive timeout
+   */
+  public void setKeepaliveSelectTimeout(Period period)
+  {
+    _keepaliveSelectTimeout = period.getPeriod();
+  }
+
+  /**
+   * Sets the select-based keepalive timeout
+   */
+  public long getKeepaliveSelectTimeout()
+  {
+    return _keepaliveSelectTimeout;
   }
 
   /**
@@ -521,13 +596,13 @@ public class Server extends ProtocolDispatchServer
    */
   public boolean isEnableSelectManager()
   {
-    return _enableSelectManager;
+    return _keepaliveSelectMax > 0;
   }
 
   /**
    * Returns the number of select keepalives available.
    */
-  public int getFreeSelectKeepalive()
+  public int getFreeKeepaliveSelect()
   {
     AbstractSelectManager selectManager = getSelectManager();
 
@@ -535,16 +610,6 @@ public class Server extends ProtocolDispatchServer
       return selectManager.getFreeKeepalive();
     else
       return Integer.MAX_VALUE / 2;
-  }
-
-  /**
-   * Sets the keepalive timeout
-   */
-  public void setKeepaliveTimeout(Period period)
-  {
-    AbstractSelectManager selectManager = getSelectManager();
-    if (selectManager != null)
-      selectManager.setSelectTimeout(period.getPeriod());
   }
 
   /**
@@ -737,7 +802,15 @@ public class Server extends ProtocolDispatchServer
 
     super.init();
 
-    if (_enableSelectManager && getSelectManager() == null) {
+    if (_threadMax < _threadIdleMax)
+      throw new ConfigException(L.l("<thread-idle-max> ({0}) must be less than <thread-max> ({1})",
+				    _threadIdleMax, _threadMax));
+
+    if (_threadIdleMax < _threadIdleMin)
+      throw new ConfigException(L.l("<thread-idle-min> ({0}) must be less than <thread-max> ({1})",
+				    _threadIdleMin, _threadIdleMax));
+    
+    if (_keepaliveSelectMax > 0 && getSelectManager() == null) {
       try {
         Class cl = Class.forName("com.caucho.server.port.JniSelectManager");
         Method method = cl.getMethod("create", new Class[0]);
@@ -1097,7 +1170,7 @@ public class Server extends ProtocolDispatchServer
       }
 
       try {
-        ThreadPool.interrupt();
+        ThreadPool.getThreadPool().interrupt();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }
@@ -1168,19 +1241,7 @@ public class Server extends ProtocolDispatchServer
 
   public String toString()
   {
-    return ("Server[id=" + getServerId() +
-	    ",cluster=" + _clusterServer.getCluster().getId() + "]");
-  }
-
-  public class SelectManagerConfig {
-    public void setEnable(boolean enable)
-    {
-      _enableSelectManager = enable;
-    }
-
-    public boolean getEnable()
-    {
-      return _enableSelectManager;
-    }
+    return ("Server[id=" + getServerId()
+	    + ",cluster=" + _clusterServer.getCluster().getId() + "]");
   }
 }

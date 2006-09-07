@@ -717,7 +717,7 @@ public class SessionImpl implements Session, ThreadTask {
     }
     
     if (_isAsynchronous) {
-      ThreadPool.schedule(this);
+      ThreadPool.getThreadPool().schedule(this);
       // the yield is only needed for the regressions
       Thread.yield();
     }

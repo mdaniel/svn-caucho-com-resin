@@ -45,8 +45,12 @@ public class ThreadPoolAdmin extends AbstractManagedObject
 
   private static ThreadPoolAdmin _admin;
 
-  private ThreadPoolAdmin()
+  private final ThreadPool _threadPool;
+
+  private ThreadPoolAdmin(ThreadPool threadPool)
   {
+    _threadPool = threadPool;
+    
     registerSelf();
   }
 
@@ -57,7 +61,7 @@ public class ThreadPoolAdmin extends AbstractManagedObject
   public static ThreadPoolMXBean create()
   {
     if (_admin == null)
-      _admin = new ThreadPoolAdmin();
+      _admin = new ThreadPoolAdmin(ThreadPool.getThreadPool());
 
     return _admin;
   }
@@ -75,7 +79,7 @@ public class ThreadPoolAdmin extends AbstractManagedObject
    */
   public int getThreadMax()
   {
-    return ThreadPool.getThreadMax();
+    return _threadPool.getThreadMax();
   }
 
   /**
@@ -83,7 +87,7 @@ public class ThreadPoolAdmin extends AbstractManagedObject
    */
   public int getThreadIdleMin()
   {
-    return ThreadPool.getThreadIdleMin();
+    return _threadPool.getThreadIdleMin();
   }
 
   /**
@@ -91,7 +95,7 @@ public class ThreadPoolAdmin extends AbstractManagedObject
    */
   public int getThreadIdleMax()
   {
-    return ThreadPool.getThreadIdleMax();
+    return _threadPool.getThreadIdleMax();
   }
 
   /**
@@ -99,7 +103,7 @@ public class ThreadPoolAdmin extends AbstractManagedObject
    */
   public int getThreadCount()
   {
-    return ThreadPool.getThreadCount();
+    return _threadPool.getThreadCount();
   }
 
   /**
@@ -107,7 +111,7 @@ public class ThreadPoolAdmin extends AbstractManagedObject
    */
   public int getThreadActiveCount()
   {
-    return ThreadPool.getThreadActiveCount();
+    return _threadPool.getThreadActiveCount();
   }
 
   /**
@@ -115,6 +119,6 @@ public class ThreadPoolAdmin extends AbstractManagedObject
    */
   public int getThreadIdleCount()
   {
-    return ThreadPool.getThreadIdleCount();
+    return _threadPool.getThreadIdleCount();
   }
 }

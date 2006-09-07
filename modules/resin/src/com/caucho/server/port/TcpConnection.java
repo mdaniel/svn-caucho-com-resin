@@ -181,7 +181,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
     QSocket socket = _socket;
 
     if (socket != null) {
-      int freeCount = ThreadPool.getFreeThreadCount();
+      int freeCount = ThreadPool.getThreadPool().getFreeThreadCount();
 
       if (freeCount < 20) {
 	return false;
@@ -430,7 +430,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
         log.fine("[" + getId() + "] keepalive (thread)");
 
       setKeepalive();
-      ThreadPool.schedule(this);
+      ThreadPool.getThreadPool().schedule(this);
     }
   }
 

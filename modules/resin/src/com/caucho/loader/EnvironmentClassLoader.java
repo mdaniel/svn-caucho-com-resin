@@ -36,7 +36,7 @@ import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.naming.Jndi;
 import com.caucho.security.PolicyImpl;
 import com.caucho.transaction.TransactionManagerImpl;
-import com.caucho.util.ThreadPool;
+import com.caucho.util.*;
 import com.caucho.vfs.EnvironmentStream;
 import com.caucho.vfs.SchemeMap;
 
@@ -435,6 +435,9 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
+
+      // drain the thread pool for GC
+      ResinThreadPoolExecutor.getThreadPool().stopEnvironment(this); 
     }
   }
 
@@ -486,8 +489,6 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
       _owner = null;
       _attributes = null;
       _listeners = null;
-
-      ThreadPool.reset(); // drain the thread pool for GC
     }
   }
 
@@ -553,6 +554,9 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
 
       UserTransactionProxy ut = UserTransactionProxy.getInstance();
       Jndi.bindDeep("java:comp/UserTransaction", ut);
+      
+      Jndi.bindDeep("java:comp/ThreadPool",
+		    ResinThreadPoolExecutor.getThreadPool());
 
       String oldBuilder = props.getProperty("javax.management.builder.initial");
       if (oldBuilder == null)

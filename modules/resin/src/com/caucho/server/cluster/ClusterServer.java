@@ -29,8 +29,8 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.Period;
+import com.caucho.config.*;
+import com.caucho.config.types.*;
 import com.caucho.log.Log;
 import com.caucho.server.http.HttpProtocol;
 import com.caucho.server.port.Port;
@@ -63,15 +63,18 @@ public class ClusterServer {
   private ClusterPort _clusterPort;
   private ServerConnector _serverConnector;
 
-  private long _clientMaxIdleTime = 30000L;
-  private long _clientFailRecoverTime = 15000L;
-  private long _clientWarmupTime = 60000L;
+  private long _loadBalanceMaxIdleTime = 30000L;
+  private long _loadBalanceFailRecoverTime = 15000L;
+  private long _loadBalanceWarmupTime = 60000L;
   
-  private long _clientReadTimeout = 60000L;
-  private long _clientWriteTimeout = 60000L;
-  private long _clientConnectTimeout = 5000L;
+  private long _loadBalanceReadTimeout = 60000L;
+  private long _loadBalanceWriteTimeout = 60000L;
+  private long _loadBalanceConnectTimeout = 5000L;
   
-  private int _clientWeight = 100;
+  private int _loadBalanceWeight = 100;
+
+  private BuilderProgramContainer _serverProgram
+    = new BuilderProgramContainer();
 
   private ArrayList<Port> _ports = new ArrayList<Port>();
 
@@ -158,110 +161,110 @@ public class ClusterServer {
   }
 
   /**
-   * Sets the client connection time.
+   * Sets the loadBalance connection time.
    */
-  public void setClientConnectTimeout(Period period)
+  public void setLoadBalanceConnectTimeout(Period period)
   {
-    _clientConnectTimeout = period.getPeriod();
+    _loadBalanceConnectTimeout = period.getPeriod();
   }
 
   /**
-   * Gets the client connection time.
+   * Gets the loadBalance connection time.
    */
-  public long getClientConnectTimeout()
+  public long getLoadBalanceConnectTimeout()
   {
-    return _clientConnectTimeout;
+    return _loadBalanceConnectTimeout;
   }
 
   /**
-   * Sets the client max-idle-time.
+   * Sets the loadBalance max-idle-time.
    */
-  public void setClientMaxIdleTime(Period period)
+  public void setLoadBalanceMaxIdleTime(Period period)
   {
-    _clientMaxIdleTime = period.getPeriod();
+    _loadBalanceMaxIdleTime = period.getPeriod();
   }
 
   /**
-   * Sets the client max-idle-time.
+   * Sets the loadBalance max-idle-time.
    */
-  public long getClientMaxIdleTime()
+  public long getLoadBalanceMaxIdleTime()
   {
-    return _clientMaxIdleTime;
+    return _loadBalanceMaxIdleTime;
   }
 
   /**
-   * Sets the client fail-recover-time.
+   * Sets the loadBalance fail-recover-time.
    */
-  public void setClientFailRecoverTime(Period period)
+  public void setLoadBalanceFailRecoverTime(Period period)
   {
-    _clientFailRecoverTime = period.getPeriod();
+    _loadBalanceFailRecoverTime = period.getPeriod();
   }
 
   /**
-   * Gets the client fail-recover-time.
+   * Gets the loadBalance fail-recover-time.
    */
-  public long getClientFailRecoverTime()
+  public long getLoadBalanceFailRecoverTime()
   {
-    return _clientFailRecoverTime;
+    return _loadBalanceFailRecoverTime;
   }
 
   /**
-   * Sets the client read/write timeout
+   * Sets the loadBalance read/write timeout
    */
-  public void setClientTimeout(Period period)
+  public void setLoadBalanceTimeout(Period period)
   {
     long timeout = period.getPeriod();
     
-    _clientReadTimeout = timeout;
-    _clientWriteTimeout = timeout;
+    _loadBalanceReadTimeout = timeout;
+    _loadBalanceWriteTimeout = timeout;
   }
 
   /**
-   * Gets the client read/write timeout
+   * Gets the loadBalance read/write timeout
    */
-  public long getClientReadTimeout()
+  public long getLoadBalanceReadTimeout()
   {
-    return _clientReadTimeout;
+    return _loadBalanceReadTimeout;
   }
 
   /**
-   * Gets the client read/write timeout
+   * Gets the loadBalance read/write timeout
    */
-  public long getClientWriteTimeout()
+  public long getLoadBalanceWriteTimeout()
   {
-    return _clientWriteTimeout;
+    return _loadBalanceWriteTimeout;
   }
 
   /**
-   * Sets the client warmup time
+   * Sets the loadBalance warmup time
    */
-  public void setClientWarmupTime(Period period)
+  public void setLoadBalanceWarmupTime(Period period)
   {
-    _clientWarmupTime = period.getPeriod();
+    _loadBalanceWarmupTime = period.getPeriod();
   }
 
   /**
-   * Gets the client warmup time
+   * Gets the loadBalance warmup time
    */
-  public long getClientWarmupTime()
+  public long getLoadBalanceWarmupTime()
   {
-    return _clientWarmupTime;
+    return _loadBalanceWarmupTime;
   }
 
   /**
-   * Sets the client weight
+   * Sets the loadBalance weight
    */
-  public void setClientWeight(int weight)
+  public void setLoadBalanceWeight(int weight)
   {
-    _clientWeight = weight;
+    _loadBalanceWeight = weight;
   }
 
   /**
-   * Gets the client weight
+   * Gets the loadBalance weight
    */
-  public int getClientWeight()
+  public int getLoadBalanceWeight()
   {
-    return _clientWeight;
+    return _loadBalanceWeight;
   }
 
   /**
@@ -378,6 +381,22 @@ public class ClusterServer {
   public ServerConnector getServerConnector()
   {
     return _serverConnector;
+  }
+
+  /**
+   * Adds a program.
+   */
+  public void addBuilderProgram(BuilderProgram program)
+  {
+    _serverProgram.addProgram(program);
+  }
+
+  /**
+   * Adds a program.
+   */
+  public BuilderProgram getServerProgram()
+  {
+    return _serverProgram;
   }
 
   /**

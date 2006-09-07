@@ -576,7 +576,7 @@ public class Alarm implements ThreadTask {
       }
       
       if (! isRunning)
-	ThreadPool.schedulePriority(this);
+	ThreadPool.getThreadPool().schedulePriority(this);
     }
     
     /**
@@ -602,7 +602,7 @@ public class Alarm implements ThreadTask {
 	    }
 	  }
 
-	  ThreadPool.startPriority(alarm);
+	  ThreadPool.getThreadPool().startPriority(alarm);
 	}
 
 	// thread.setName(oldName);

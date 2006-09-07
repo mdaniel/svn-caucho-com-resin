@@ -113,7 +113,7 @@ public class AmqServerChannel extends AmqChannel {
 	Runnable action = new PublishAction(is);
 	is = null;
 
-	ThreadPool.schedule(action);
+	ThreadPool.getThreadPool().schedule(action);
 	return;
       default:
 	System.out.println("UNKNOWN: " + (contentType >> 8) + "." + (contentType & 0xffff));

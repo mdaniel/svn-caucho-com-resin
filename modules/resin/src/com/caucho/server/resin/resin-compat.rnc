@@ -19,6 +19,14 @@ r_cluster-port-Compat =
 
   | r_srun-Compat
 
+r_keepalive-max =
+  attribute keepalive-max { string }
+  | element keepalive-max { string }
+
+r_keepalive-timeout =
+  attribute keepalive-timeout { string }
+  | element keepalive-timeout { string }
+
 ## old-style <server>
 r_server-Compat = element server {
   attribute id { string }?,
@@ -26,6 +34,10 @@ r_server-Compat = element server {
   r_root-directory?,
 
   r_server-Content-Compat
+}
+
+r_select-manager = element select-manager {
+  r_enable?
 }
 
 ## <server> basic contents
@@ -117,4 +129,18 @@ r_srun-Compat = element srun {
    | element server-id { string })?
 
   & r_port-Content
+}
+
+r_spare-thread-max =
+  attribute spare-thread-max { string }
+  | element spare-thread-max { string }
+
+r_spare-thread-min =
+  attribute spare-thread-min { string }
+  | element spare-thread-min { string }
+
+r_thread-pool = element thread-pool {
+  r_thread-max?
+
+  & r_spare-thread-min?
 }

@@ -221,7 +221,7 @@ public class PageManager {
 	}
 
 	if (spawn)
-	  ThreadPool.schedule(new CompileThread());
+	  ThreadPool.getThreadPool().schedule(new CompileThread());
 	
 	return new InterpretedPage(program);
       }
