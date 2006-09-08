@@ -174,7 +174,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
     else if (getReadStream().getBufferAvailable() > 0)
       return true;
     else if (port.getServer().isEnableSelectManager())
-      return true;
+      return false;
     else if (port.getKeepaliveMax() == 0)
       return false;
     

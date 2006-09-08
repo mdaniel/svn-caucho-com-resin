@@ -1070,14 +1070,6 @@ cse_update_host(config_t *config, resin_host_t *host, time_t now)
 {
   if (now < host->last_update + config->update_interval)
     return;
-  {
-    char timestamp[256];
-    time_t t = host->last_update;
-    
-    strftime(timestamp, sizeof(timestamp), "[%m/%b/%Y:%H:%M:%S %z]",
-	     localtime(&t));
-    LOG(("UPDATE %d %s\n", config->update_interval, timestamp));
-  }
 
   cse_update_host_from_resin(host, now);
 }
