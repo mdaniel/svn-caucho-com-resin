@@ -472,7 +472,7 @@ public class EntityIntrospector {
   {
     JAnnotation ann = isAnnotatedMethod(method);
 
-    if (ann != null) {
+    if ((ann != null) && (! ann.getType().equals("javax.persistence.Version")))  {
       throw error(method,
                   L.l("'{0}' is not a valid annotation for {1}.  Only public getters and fields may have property annotations.",
                       ann.getType(), method.getFullName()));
@@ -1046,28 +1046,34 @@ public class EntityIntrospector {
         continue;
       }
 
-      JMethod setter = type.getMethod("set" + propName,
-                                      new JClass[] { method.getReturnType() });
-      if ((! method.isPublic()) ||
-          (setter == null) || (! setter.isPublic())) {
+      if (method.getAnnotation(Version.class) != null) {
+        validateNonGetter(method);
+      }
+      else {
 
-        JAnnotation ann = isAnnotatedMethod(method);
+        JMethod setter = type.getMethod("set" + propName,
+                                        new JClass[] { method.getReturnType() });
+        if ((! method.isPublic()) ||
+            (setter == null) || (! setter.isPublic())) {
 
-        if (ann == null)
-          ann = isAnnotatedMethod(setter);
+          JAnnotation ann = isAnnotatedMethod(method);
 
-        if (ann != null) {
-          throw new ConfigException(L.l("'{0}' is not a valid annotation for {1}.  Only public persistent property getters with matching setters may have property annotations.",
-                                        ann.getType(), method.getFullName()));
+          if (ann == null)
+            ann = isAnnotatedMethod(setter);
+
+          if (ann != null) {
+            throw new ConfigException(L.l("'{0}' is not a valid annotation for {1}.  Only public persistent property getters with matching setters may have property annotations.",
+                                          ann.getType(), method.getFullName()));
+          }
+
+          continue;
         }
 
-        continue;
-      }
-
-      // ejb/0g03 for private
-      if (method.isStatic()) { // || ! method.isPublic()) {
-        validateNonGetter(method);
-        continue;
+        // ejb/0g03 for private
+        if (method.isStatic()) { // || ! method.isPublic()) {
+          validateNonGetter(method);
+          continue;
+        }
       }
 
       String fieldName = toFieldName(propName);

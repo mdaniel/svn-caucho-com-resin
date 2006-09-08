@@ -240,7 +240,27 @@ public class PropertyField extends AbstractField {
         out.println("  return;");
       }
 
+      out.println("try {");
+      out.pushDepth();
       out.println(generateSuperSetter("v") + ";");
+      out.popDepth();
+      out.println("} catch (Exception e1) {");
+      out.pushDepth();
+
+      out.println("if (__caucho_session != null) {");
+      out.pushDepth();
+      out.println("try {");
+      out.println("  __caucho_session.rollback();");
+      out.println("} catch (java.sql.SQLException e2) {");
+      out.println("  throw new javax.persistence.PersistenceException(e2);");
+      out.println("}");
+      out.println();
+      out.println("throw new javax.persistence.PersistenceException(e1);");
+      out.popDepth();
+      out.println("}");
+
+      out.popDepth();
+      out.println("}");
 
       int dirtyGroup = getIndex() / 64;
       String dirtyVar = "__caucho_dirtyMask_" + dirtyGroup;

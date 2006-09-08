@@ -936,7 +936,7 @@ public class AmberConnection
   }
 
   /**
-   * Commits a transaction.
+   * Rollbacks a transaction.
    */
   public void rollback()
     throws SQLException
