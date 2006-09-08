@@ -834,6 +834,8 @@ read_all_config_impl(config_t *config)
   int code;
   int  ch;
   int is_change = 1;
+  struct stat st;
+  int mtime = time(0);
 
   if (! config->config_path)
     return 0;
@@ -842,6 +844,10 @@ read_all_config_impl(config_t *config)
 
   if (fd < 0)
     return 0;
+
+  if (fstat(fd, &st) == 0) {
+    mtime = st.st_mtime;
+  }
 
   memset(&s, 0, sizeof(s));
   s.socket = fd;
@@ -867,6 +873,7 @@ read_all_config_impl(config_t *config)
 	}
       
 	host = cse_create_host(config, buffer, port);
+	host->last_update = mtime;
 	read_config(&s, config, host, 0, &is_change);
       }
       break;
