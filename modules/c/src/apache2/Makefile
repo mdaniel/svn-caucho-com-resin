@@ -2,20 +2,20 @@
 
 CC=gcc
 CP=/bin/cp
-CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI -DHAS_JVMDI -O2 -g -pipe -march=i386 -mcpu=i686 -I/usr/kerberos/include
-CFLAGS_SHLIB=-fpic
+CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI -DHAS_JVMDI   -DDARWIN -DSIGPROCMASK_SETS_THREAD_MASK -no-cpp-precomp  -g -O2
+CFLAGS_SHLIB=-DSHARED_MODULE
 EGREP=grep -E
-LIBTOOL=EGREP="grep -E" /home/ferg/ws30/resin/libtool --silent
-LD=/usr/bin/ld
+LIBTOOL=EGREP="grep -E" /Users/ferg/ws30/test-resin/libtool --silent
+LD=gcc
 LD_SHLIB=gcc
 LIBS_SHLIB=
 LDFLAGS=
-LDFLAGS_SHLIB=-shared -L/usr/lib
-APACHE_INC=-I/usr/include/httpd
-apache_conf=/etc/httpd/conf/httpd.conf
-apache_dir=/etc/httpd
-apache_libexec=/usr/lib/httpd/modules
-resin_home=/home/ferg/ws30/resin
+LDFLAGS_SHLIB=-bundle -undefined suppress -flat_namespace -L/usr/lib
+APACHE_INC=-I/usr/local/apache2/include  -I/usr/local/apache2/include 
+apache_conf=/usr/local/apache2/conf/httpd.conf
+apache_dir=/usr/local/apache2
+apache_libexec=/usr/local/apache2/modules
+resin_home=/Users/ferg/ws30/test-resin
 INCLUDES = $(APACHE_INC) -DRESIN_HOME=\"$(resin_home)\" -I../common
 C=../common
 COMMON_OBJ=$C/stream.lo $C/config.lo $C/memory.lo

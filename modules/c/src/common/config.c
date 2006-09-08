@@ -350,7 +350,12 @@ cse_add_backup(cluster_t *cluster, const char *hostname, int port)
 void
 cse_log_config(config_t *config)
 {
-  resin_host_t *host = config->hosts;
+  resin_host_t *host;
+
+  if (! config)
+    return;
+
+  host = config->hosts;
 
   for (; host; host = host->next) {
     web_app_t *app = host->applications;
@@ -617,10 +622,15 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	  else
 	    srun = cse_add_host(&cluster, host, port);
 
-	  if (srun->srun && live_time > 0)
-	    srun->srun->live_time = live_time;
-	  if (srun->srun && dead_time > 0)
-	    srun->srun->dead_time = dead_time;
+	  if (! srun || ! srun->srun) {
+	    ERR(("srun value for host %s cannot be resolved"));
+	  }
+	  else {
+	    if (live_time > 0)
+	      srun->srun->live_time = live_time;
+	    if (dead_time > 0)
+	      srun->srun->dead_time = dead_time;
+	  }
 	}
       }
       break;
@@ -828,6 +838,8 @@ read_all_config_impl(config_t *config)
   int code;
   int  ch;
   int is_change = 1;
+  struct stat st;
+  int mtime = time(0);
 
   if (! *config->config_path)
     return 0;
@@ -836,6 +848,10 @@ read_all_config_impl(config_t *config)
 
   if (fd < 0)
     return 0;
+
+  if (fstat(fd, &st) == 0) {
+    mtime = st.st_mtime;
+  }
 
   memset(&s, 0, sizeof(s));
   s.socket = fd;
@@ -861,6 +877,7 @@ read_all_config_impl(config_t *config)
 	}
       
 	host = cse_create_host(config, buffer, port);
+	host->last_update = mtime;
 	read_config(&s, config, host, 0, &is_change);
       }
       break;
@@ -917,8 +934,11 @@ cse_update_host_from_resin(resin_host_t *host, time_t now)
   stream_t s;
   char *uri = "";
 
+  /*
   if (host->has_data)
     host->last_update = now;
+  */
+  host->last_update = now;
     
   if (cse_open_live_connection(&s, &host->config->config_cluster, now)) {
     int code;
@@ -1050,6 +1070,14 @@ cse_update_host(config_t *config, resin_host_t *host, time_t now)
 {
   if (now < host->last_update + config->update_interval)
     return;
+  {
+    char timestamp[256];
+    time_t t = host->last_update;
+    
+    strftime(timestamp, sizeof(timestamp), "[%m/%b/%Y:%H:%M:%S %z]",
+	     localtime(&t));
+    LOG(("UPDATE %d %s\n", config->update_interval, timestamp));
+  }
 
   cse_update_host_from_resin(host, now);
 }

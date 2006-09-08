@@ -628,12 +628,6 @@ public class ManagedConnectionImpl
       }
       */
 
-      if (! _autoCommit) {
-	conn.rollback();
-	conn.setAutoCommit(true);
-      }
-      _autoCommit = true;
-
       if (_readOnly)
 	conn.setReadOnly(false);
       _readOnly = false;
@@ -646,9 +640,23 @@ public class ManagedConnectionImpl
 	conn.setTypeMap(_typeMap);
       _typeMap = null;
 
-      if (_isolation != _oldIsolation)
+      // Oracle requires a rollback after a reset of
+      // the transaction isolation, since setting the isolation
+      // starts a new transaction
+      boolean needsRollback = ! _autoCommit;
+      if (_isolation != _oldIsolation) {
+	needsRollback = true;
 	conn.setTransactionIsolation(_oldIsolation);
+      }
       _isolation = _oldIsolation;
+
+      if (needsRollback)
+	conn.rollback();
+      
+      if (! _autoCommit) {
+	conn.setAutoCommit(true);
+      }
+      _autoCommit = true;
 
       conn.clearWarnings();
     } catch (SQLException e) {

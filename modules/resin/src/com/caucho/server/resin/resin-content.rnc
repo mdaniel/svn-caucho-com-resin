@@ -10,11 +10,6 @@ l_resin = element l:caucho.com {
   r_any-Group
 }
 
-r_boot = element boot {
-  (attribute jvm-arg { string }
-   | element jvm-arg { string })*
-}
-
 r_cache = element cache {
   r_path?
 
@@ -233,8 +228,6 @@ r_resin = element resin {
 ## <resin> basic contents
 r_resin-Basis = 
   r_env-Basis
-
-  & r_boot?
 
   & (attribute environment-system-properties { string }
      | element environment-system-properties { string })?

@@ -311,10 +311,8 @@ public class ServletMapper {
 
     ServletMapping regexp = _regexpMap.get(servletName);
 
-    /*
     if (regexp != null)
-      servletName = regexp.initRegexp(_servletManager, vars);
-    */
+      servletName = regexp.initRegexp(_servletContext, _servletManager, vars);
 
     if (servletName.equals("invoker"))
       servletName = handleInvoker(invocation);

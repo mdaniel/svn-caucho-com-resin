@@ -1,4 +1,4 @@
-PREFIX=/home/ferg/ws30/resin
+PREFIX=/Users/ferg/ws30/resin
 
 all	: 
 	(cd modules/c/src; $(MAKE))
