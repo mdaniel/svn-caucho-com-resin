@@ -160,7 +160,7 @@ public class JAXBContextImpl extends JAXBContext {
     throw new UnsupportedOperationException("Schema validation not supported");
   }
 
-  Skeleton getSkeleton(Class c)
+  public Skeleton getSkeleton(Class c)
     throws JAXBException
   {
     Skeleton skeleton = _skeletons.get(c);
@@ -198,6 +198,9 @@ public class JAXBContextImpl extends JAXBContext {
 
     if (Boolean.class.equals(type) || Boolean.TYPE.equals(type))
       return new BooleanProperty(a);
+
+    if (Character.class.equals(type) || Character.TYPE.equals(type))
+      return new CharacterProperty(a);
 
     if (Short.class.equals(type) || Short.TYPE.equals(type))
       return new ShortProperty(a);

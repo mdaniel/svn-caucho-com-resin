@@ -18,18 +18,17 @@
  * details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Resin Open Source; if not, write to the
+ * aboolean with Resin Open Source; if not, write to the
  *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Adam Megacz
+ * @author Emil Ong
  */
 
 package com.caucho.jaxb.skeleton;
 import com.caucho.jaxb.*;
-import javax.xml.bind.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
@@ -40,25 +39,26 @@ import java.io.*;
 import com.caucho.vfs.WriteStream;
 
 /**
- * a List Property
+ * a Character Property
  */
-public class ListProperty extends IterableProperty {
+public class CharacterProperty extends CDataProperty {
 
-  public ListProperty(Accessor a)
-    throws JAXBException
-  {
-    super(a, a.getContext()
-          .createProperty(new Accessor.CollectionComponentAccessor(a)));
+  public CharacterProperty(Accessor a) {
+    super(a);
   }
 
-  public int size(Object o)
+  protected String write(Object in)
+      throws IOException, XMLStreamException
   {
-    return ((List) o).size();
+    return ((int) ((Character)in).charValue()) + "";
   }
 
-  public Iterator getIterator(Object o)
+  protected Object read(String in)
+    throws IOException, XMLStreamException
   {
-    return ((List) o).iterator();
+    int i = new Integer(in).intValue();
+
+    return new Character((char) i);
   }
 }
 

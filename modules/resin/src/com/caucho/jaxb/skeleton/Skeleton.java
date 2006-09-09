@@ -28,24 +28,42 @@
  */
 
 package com.caucho.jaxb.skeleton;
-import com.caucho.jaxb.*;
 
-import com.caucho.jaxb.*;
-import com.caucho.jaxb.skeleton.*;
-import javax.xml.bind.*;
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import javax.xml.bind.annotation.*;
-import java.lang.reflect.*;
-import java.lang.annotation.*;
-import org.w3c.dom.*;
-import java.util.*;
-import java.io.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+
+import java.io.IOException;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+
+import java.util.logging.Logger;
+
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
+
+import javax.xml.namespace.QName;
+
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
+import com.caucho.jaxb.JAXBContextImpl;
 
 public class Skeleton<C> {
+  private static final Logger log = Logger.getLogger(Skeleton.class.getName());
 
   private JAXBContextImpl _context;
-  private Constructor _constructor;
   private Class<C> _class;
 
   private Method _beforeUnmarshal;
@@ -67,7 +85,6 @@ public class Skeleton<C> {
     try {
       _context = context;
       _class = c;
-      _constructor = c.getConstructor(new Class[] { });
 
       try {
         _beforeUnmarshal =
@@ -130,12 +147,6 @@ public class Skeleton<C> {
         if (f.isAnnotationPresent(XmlTransient.class))
           continue;
 
-        if (c.isAnnotationPresent(XmlRootElement.class) ||
-            c.isAnnotationPresent(XmlType.class))
-          if (!f.isAnnotationPresent(XmlElement.class) &&
-              !f.isAnnotationPresent(XmlType.class))
-            continue;
-
         Accessor a = new Accessor.FieldAccessor(f, _context);
         Property p = _context.createProperty(a);
         _properties.put(p.getName(), p);
@@ -196,7 +207,8 @@ public class Skeleton<C> {
     throws IOException, XMLStreamException, JAXBException
   {
     try {
-      C ret = (C)_constructor.newInstance();
+      Constructor constructor = _class.getConstructor(new Class[] { });
+      C ret = (C) constructor.newInstance();
       in.next();
 
       if (_beforeUnmarshal != null)
@@ -204,12 +216,13 @@ public class Skeleton<C> {
       if (u.getListener() != null)
         u.getListener().beforeUnmarshal(ret, null);
       
-      while(in.getEventType() != -1) {
+      while (in.getEventType() != -1) {
         if (in.getEventType() == in.START_ELEMENT) {
           Property prop = getProperty(in.getName());
           Object val = prop.read(u, in);
           prop.set(ret, val);
-        } else if (in.getEventType() == in.END_ELEMENT) {
+        } 
+        else if (in.getEventType() == in.END_ELEMENT) {
           in.next();
           break;
         }
@@ -222,6 +235,9 @@ public class Skeleton<C> {
         u.getListener().afterUnmarshal(ret, null);
       
       return ret;
+    }
+    catch (NoSuchMethodException e) {
+      throw new JAXBException(e);
     }
     catch (InstantiationException e) {
       throw new JAXBException(e);
@@ -251,7 +267,7 @@ public class Skeleton<C> {
       if (m.getListener() != null)
         m.getListener().beforeMarshal(obj);
       
-      QName tagName = getElementName((C)obj);
+      QName tagName = getElementName((C) obj);
       
       if (tagName == null)
         tagName = fieldName;

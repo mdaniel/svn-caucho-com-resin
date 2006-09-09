@@ -73,23 +73,18 @@ public abstract class IterableProperty extends Property {
       if (_wrap == null || !_wrap.nillable()) return;
     }
 
-    writeStartElement(out, obj);
+    if (_wrap != null)
+      writeStartElement(out, obj);
 
-    if (obj == null) {
-      out.writeAttribute("xsi", "http://www.w3.org/2001/XMLSchema-instance",
-                         "nil", "true");
+    if (obj != null) {
+      Iterator it = getIterator(obj);
 
-    } else {
-
-      for(Iterator it = getIterator(obj);
-          it.hasNext();)
+      while (it.hasNext())
         _componentProperty.write(m, out, it.next());
-
     }
 
-    writeEndElement(out, obj);
+    if (_wrap != null)
+      writeEndElement(out, obj);
   }
 
 }
-
-
