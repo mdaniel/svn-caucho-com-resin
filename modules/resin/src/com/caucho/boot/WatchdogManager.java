@@ -119,8 +119,8 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
     ServletMapping servlet = new ServletMapping();
 
-    servlet.setServletName("watchdog");
-    servlet.setURLPattern("/watchdog");
+    servlet.setServletName("admin");
+    servlet.setURLPattern("/admin");
     servlet.setServletClass("com.caucho.boot.WatchdogServlet");
     servlet.init();
 

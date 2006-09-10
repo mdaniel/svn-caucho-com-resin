@@ -31,7 +31,6 @@ package com.caucho.jmx.remote;
 
 import com.caucho.hessian.client.HessianProxyFactory;
 import com.caucho.hessian.jmx.JMXSerializerFactory;
-import com.caucho.services.jmx.RemoteJMX;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.vfs.IOExceptionWrapper;
@@ -414,11 +413,7 @@ public class HessianMBeanServerConnection
   public boolean isRegistered(ObjectName name)
     throws IOException
   {
-
-    // XXX: unimplemented
-    if (true) throw new UnsupportedOperationException("unimplemented");
-
-    return false;
+    return true;
   }
 
   public Integer getMBeanCount()

@@ -55,22 +55,19 @@ public class MBeanServer {
   private final MBeanServerConnection _server;
 
   /**
-   * Create an MBeanServer for the local server.
-   */
-  public MBeanServer()
-  {
-    _server = Jmx.getGlobalMBeanServer();
-  }
-
-  /**
    * Create an MBeanServer that connects to a remote server.
    *
    * @param remoteUrl a url that connects to a
    * {@link com.caucho.services.jmx.JMXService} ussing the hessian protocol.
    */
-  public MBeanServer(String remoteUrl)
+  public MBeanServer(String url)
   {
-    _server = new HessianMBeanServerConnection(remoteUrl);
+    if (url == null || "".equals(url)) {
+      _server = Jmx.getGlobalMBeanServer();
+    }
+    else {
+      _server = new HessianMBeanServerConnection(url);
+    }
   }
 
   /**

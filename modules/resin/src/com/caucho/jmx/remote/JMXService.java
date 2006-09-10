@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,20 +19,26 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.server;
+package com.caucho.jmx.remote;
+
+import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
+import javax.management.ObjectInstance;
+import javax.management.JMException;
+
+import com.caucho.services.server.GenericService;
 
 /**
- * Event handler waiting for the server to shutdown.
- *
- * @see TcpServer
+ * JMX service.
  */
-public interface ShutdownListener {
-  public void handleShutdown();
+public class JMXService extends ReadJMXService {
 }
