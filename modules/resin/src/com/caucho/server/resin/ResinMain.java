@@ -63,7 +63,7 @@ import com.caucho.license.LicenseCheck;
 
 import com.caucho.server.cluster.*;
 
-public class ResinMain implements ResinServerListener {
+public class ResinMain {
   private static L10N _L;
   private static Logger _log;
 
@@ -80,7 +80,7 @@ public class ResinMain implements ResinServerListener {
   private ClassLoader _systemClassLoader;
   private Thread _mainThread;
   
-  private ResinServer _resin;
+  private Resin _resin;
   private EnvironmentClassLoader _classLoader;
 
   private ArrayList<BoundPort> _boundPortList
@@ -123,7 +123,7 @@ public class ResinMain implements ResinServerListener {
   /**
    * Returns the server.
    */
-  public ResinServer getServer()
+  public Resin getServer()
   {
     return _resin;
   }
@@ -361,7 +361,7 @@ public class ResinMain implements ResinServerListener {
       log().info("Using configuration from " + _configServer);
     }
 
-    ResinServer server = new ResinServer();
+    Resin server = new Resin();
 
     Path resinConf = _resinHome.lookup(_resinConf);
 
@@ -373,7 +373,6 @@ public class ResinMain implements ResinServerListener {
     server.setInitialStartTime(_startTime);
     server.setConfigFile(resinConf.getNativePath());
     server.setServerId(_serverId);
-    server.addListener(this);
     server.setResinProfessional(isResinProfessional);
 
     _mainThread.setContextClassLoader(_systemClassLoader);
@@ -429,7 +428,7 @@ public class ResinMain implements ResinServerListener {
   /**
    * Called when the server restarts.
    */
-  public void closeEvent(ResinServer resin)
+  public void closeEvent(Resin resin)
   {
     try {
       _isClosed = true;
@@ -455,7 +454,7 @@ public class ResinMain implements ResinServerListener {
     int socketExceptionCount = 0;
     Integer memoryTest;
     Runtime runtime = Runtime.getRuntime();
-    ResinServer resin;
+    Resin resin;
     InputStream pingIn = null;
     OutputStream pingOut = null;
 
@@ -645,7 +644,7 @@ public class ResinMain implements ResinServerListener {
     ResinMain resinMain = _resinMain;
 
     if (resinMain != null) {
-      ResinServer resin = resinMain.getServer();
+      Resin resin = resinMain.getServer();
 
       if (resin != null)
 	resin.destroy();
@@ -675,7 +674,7 @@ public class ResinMain implements ResinServerListener {
 
       System.err.println(L().l("closing server"));
 
-      final ResinServer resin = resinMain.getServer();
+      final Resin resin = resinMain.getServer();
 
       new Thread() {
 	public void run()
@@ -819,19 +818,19 @@ public class ResinMain implements ResinServerListener {
   }
 
   public class ResinContainer {
-    private ResinServer _resin;
+    private Resin _resin;
 
-    public ResinContainer(ResinServer resin)
+    public ResinContainer(Resin resin)
     {
       _resin = resin;
     }
     
-    public ResinServer createResin()
+    public Resin createResin()
     {
       return _resin;
     }
 
-    public ResinServer createCauchoCom()
+    public Resin createCauchoCom()
     {
       return _resin;
     }

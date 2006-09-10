@@ -45,9 +45,10 @@ import com.caucho.vfs.*;
 /**
  * Thread responsible for watching a backend server.
  */
-public class ServerWatchdog implements Runnable {
+public class Watchdog implements Runnable
+{
   private static final Logger log
-    = Logger.getLogger(ServerWatchdog.class.getName());
+    = Logger.getLogger(Watchdog.class.getName());
 
   private ClusterConfig _cluster;
   
@@ -79,7 +80,7 @@ public class ServerWatchdog implements Runnable {
 
   private Thread _thread;
   
-  ServerWatchdog(ClusterConfig cluster)
+  Watchdog(ClusterConfig cluster)
   {
     _cluster = cluster;
 
@@ -583,7 +584,7 @@ public class ServerWatchdog implements Runnable {
       list.add(arg);
     }
     
-    list.add("com.caucho.server.resin.ResinMain");
+    list.add("com.caucho.server.resin.Resin");
     list.add("-socketwait");
     list.add(String.valueOf(socketPort));
 

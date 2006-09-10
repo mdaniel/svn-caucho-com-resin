@@ -62,7 +62,7 @@ public class Cluster implements EnvironmentListener {
 
   private EnvironmentClassLoader _classLoader;
   
-  private ResinServer _resin;
+  private Resin _resin;
 
   private ClusterAdmin _admin;
   private ObjectName _objectName;
@@ -96,7 +96,7 @@ public class Cluster implements EnvironmentListener {
 
   private volatile boolean _isClosed;
 
-  public Cluster(ResinServer resin)
+  public Cluster(Resin resin)
   {
     this();
 
@@ -151,7 +151,7 @@ public class Cluster implements EnvironmentListener {
   /**
    * Returns the owning resin server.
    */
-  public ResinServer getResin()
+  public Resin getResin()
   {
     return _resin;
   }

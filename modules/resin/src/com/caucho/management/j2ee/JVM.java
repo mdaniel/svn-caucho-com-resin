@@ -29,7 +29,7 @@
 
 package com.caucho.management.j2ee;
 
-import com.caucho.server.resin.ResinServer;
+import com.caucho.server.resin.Resin;
 import com.caucho.util.CauchoSystem;
 
 import javax.management.j2ee.statistics.JVMStats;
@@ -49,7 +49,7 @@ public class JVM
 
   protected String getName()
   {
-    String name = ResinServer.getResinServer().getServerId();
+    String name = Resin.getLocal().getServerId();
 
     return (name == null) ? "" : name;
   }

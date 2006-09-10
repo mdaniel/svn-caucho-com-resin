@@ -31,6 +31,7 @@ package com.caucho.server.port;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
+import com.caucho.server.cluster.*;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
@@ -100,9 +101,10 @@ public class Port
   private int _minSpareConnection = 16;
 
   private int _keepaliveMax = -1;
+  private long _keepaliveTimeout = 15000L;
 
-  private int _minSpareListen = 5;
-  private int _maxSpareListen = 10;
+  private int _acceptThreadMin = 5;
+  private int _acceptThreadMax = 10;
 
   private int _listenBacklog = 100;
 
@@ -380,7 +382,7 @@ public class Port
     if (minSpare < 1)
       throw new ConfigException(L.l("min-spare-listen must be at least 1."));
 
-    _minSpareListen = minSpare;
+    _acceptThreadMin = minSpare;
   }
 
   /**
@@ -392,7 +394,31 @@ public class Port
     if (maxSpare < 1)
       throw new ConfigException(L.l("max-spare-listen must be at least 1."));
 
-    _maxSpareListen = maxSpare;
+    _acceptThreadMax = maxSpare;
+  }
+
+  /**
+   * Sets the minimum spare listen.
+   */
+  public void setAcceptThreadMin(int minSpare)
+    throws ConfigException
+  {
+    if (minSpare < 1)
+      throw new ConfigException(L.l("min-spare-listen must be at least 1."));
+
+    _acceptThreadMin = minSpare;
+  }
+
+  /**
+   * Sets the maximum spare listen.
+   */
+  public void setAcceptThreadMax(int maxSpare)
+    throws ConfigException
+  {
+    if (maxSpare < 1)
+      throw new ConfigException(L.l("max-spare-listen must be at least 1."));
+
+    _acceptThreadMax = maxSpare;
   }
 
   /**
@@ -570,6 +596,16 @@ public class Port
   public int getKeepaliveMax()
   {
     return _keepaliveMax;
+  }
+
+  public long getKeepaliveTimeout()
+  {
+    return _keepaliveTimeout;
+  }
+
+  public long getKeepaliveThreadTimeout()
+  {
+    return ((Server) _server).getKeepaliveThreadTimeout();
   }
 
   /**
@@ -862,7 +898,7 @@ public class Port
           }
         }
 
-        if (_maxSpareListen < _idleThreadCount) {
+        if (_acceptThreadMax < _idleThreadCount) {
           return false;
         }
       }
@@ -877,7 +913,7 @@ public class Port
           return true;
         }
         else {
-          if (_maxSpareListen < _idleThreadCount) {
+          if (_acceptThreadMax < _idleThreadCount) {
             return false;
           }
         }
@@ -889,7 +925,7 @@ public class Port
       synchronized (this) {
         _idleThreadCount--;
 
-        if (_idleThreadCount + _startThreadCount < _minSpareListen) {
+        if (_idleThreadCount + _startThreadCount < _acceptThreadMin) {
           notify();
         }
       }
@@ -985,7 +1021,7 @@ public class Port
         Thread.sleep(10);
 
         synchronized (this) {
-          isStart = _startThreadCount + _idleThreadCount < _minSpareListen;
+          isStart = _startThreadCount + _idleThreadCount < _acceptThreadMin;
           if (_connectionMax <= _connectionCount)
             isStart = false;
 

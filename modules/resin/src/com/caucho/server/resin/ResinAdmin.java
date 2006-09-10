@@ -45,14 +45,14 @@ public class ResinAdmin extends AbstractManagedObject
 
   private static final String THREAD_POOL_OBJECT_NAME = "resin:type=ThreadPool";
 
-  private final ResinServer _resinServer;
+  private final Resin _resin;
 
   /**
    * Creates the admin object and registers with JMX.
    */
-  public ResinAdmin(ResinServer resinServer)
+  public ResinAdmin(Resin resin)
   {
-    _resinServer = resinServer;
+    _resin = resin;
 
     registerSelf();
   }
@@ -71,7 +71,7 @@ public class ResinAdmin extends AbstractManagedObject
    */
   public ClusterMXBean []getClusters()
   {
-    return _resinServer.getClusters();
+    return _resin.getClusters();
   }
 
   //
@@ -80,7 +80,7 @@ public class ResinAdmin extends AbstractManagedObject
 
   public String getConfigFile()
   {
-    return _resinServer.getConfigFile();
+    return _resin.getConfigFile();
   }
 
   public String getResinHome()
@@ -95,7 +95,7 @@ public class ResinAdmin extends AbstractManagedObject
 
   public ServerMXBean getServer()
   {
-    return _resinServer.getServer().getAdmin();
+    return _resin.getServer().getAdmin();
   }
 
   public String getVersion()
@@ -105,7 +105,7 @@ public class ResinAdmin extends AbstractManagedObject
   
   public boolean isProfessional()
   {
-    return _resinServer.isProfessional();
+    return _resin.isProfessional();
   }
 
   public String getLocalHost()
@@ -115,6 +115,6 @@ public class ResinAdmin extends AbstractManagedObject
 
   public String toString()
   {
-    return "ResinServerAdmin[" + getObjectName() + "]";
+    return "ResinAdmin[" + getObjectName() + "]";
   }
 }

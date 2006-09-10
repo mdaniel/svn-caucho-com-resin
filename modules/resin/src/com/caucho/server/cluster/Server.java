@@ -91,7 +91,7 @@ public class Server extends ProtocolDispatchServer
     = new EnvironmentLocal<String>("caucho.server-id");
 
   private final ClusterServer _clusterServer;
-  private final ResinServer _resin;
+  private final Resin _resin;
   
   private EnvironmentClassLoader _classLoader;
 
@@ -999,7 +999,7 @@ public class Server extends ProtocolDispatchServer
         // XXX: message slightly wrong
         log.info("Resin restarting due to configuration change");
 
-        _clusterServer.getCluster().getResin().close();
+        _clusterServer.getCluster().getResin().destroy();
         return;
       }
 
@@ -1274,10 +1274,10 @@ public class Server extends ProtocolDispatchServer
     } finally {
       DynamicClassLoader.setOldLoader(thread, oldLoader);
 
-      ResinServer resin = _resin;
+      Resin resin = _resin;
       
       if (resin != null)
-        resin.close();
+        resin.destroy();
     }
   }
 

@@ -142,7 +142,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
   void start()
     throws Throwable
   {
-    ServerWatchdog server = _resin.findServer(_initialServerId);
+    Watchdog server = _resin.findServer(_initialServerId);
 
     if (server == null)
       throw new ConfigException(L().l("No matching <server> found for -server '{0}'",
@@ -174,7 +174,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
   boolean startServer(String serverId)
   {
-    ServerWatchdog server = _resin.findServer(serverId);
+    Watchdog server = _resin.findServer(serverId);
 
     if (server == null)
       throw new ConfigException(L().l("No matching <server> found for -server '{0}'",
@@ -194,7 +194,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
   boolean stopServer(String serverId)
   {
-    ServerWatchdog server = _resin.findServer(serverId);
+    Watchdog server = _resin.findServer(serverId);
 
     if (server == null)
       throw new ConfigException(L().l("No matching <server> found for -server '{0}'",

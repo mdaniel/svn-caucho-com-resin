@@ -81,12 +81,12 @@ public class ResinConfig {
   /**
    * Finds a server.
    */
-  public ServerWatchdog findServer(String id)
+  public Watchdog findServer(String id)
   {
     for (int i = 0; i < _clusterList.size(); i++) {
       ClusterConfig cluster = _clusterList.get(i);
 
-      ServerWatchdog server = cluster.findServer(id);
+      Watchdog server = cluster.findServer(id);
 
       if (server != null)
 	return server;

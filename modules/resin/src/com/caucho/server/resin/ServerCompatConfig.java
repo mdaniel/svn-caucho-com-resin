@@ -39,7 +39,7 @@ import com.caucho.util.*;
 public class ServerCompatConfig {
   private static final L10N L = new L10N(ServerCompatConfig.class);
 
-  private final ResinServer _resin;
+  private final Resin _resin;
 
   private BuilderProgramContainer _program
     = new BuilderProgramContainer();
@@ -47,7 +47,7 @@ public class ServerCompatConfig {
   /**
    * Creates a new resin server.
    */
-  public ServerCompatConfig(ResinServer resin)
+  public ServerCompatConfig(Resin resin)
   {
     if (resin == null)
       throw new NullPointerException();

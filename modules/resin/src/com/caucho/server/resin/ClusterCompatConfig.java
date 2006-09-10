@@ -39,7 +39,7 @@ import com.caucho.server.cluster.*;
 public class ClusterCompatConfig {
   private static final L10N L = new L10N(ClusterCompatConfig.class);
 
-  private final ResinServer _resin;
+  private final Resin _resin;
   
   private String _id = "";
   private Cluster _cluster;
@@ -47,7 +47,7 @@ public class ClusterCompatConfig {
   /**
    * Creates a new cluster compat
    */
-  public ClusterCompatConfig(ResinServer resin)
+  public ClusterCompatConfig(Resin resin)
   {
     _resin = resin;
   }

@@ -164,50 +164,29 @@ public class TcpConnection extends PortConnection implements ThreadTask
   /**
    * Try to read nonblock
    */
-  public boolean readNonBlock()
+  private boolean allowThreadKeepalive()
     throws IOException
   {
     Port port = getPort();
+    QSocket socket = _socket;
     
     if (port.isClosed())
       return false;
     else if (getReadStream().getBufferAvailable() > 0)
       return true;
-    else if (port.getServer().isEnableSelectManager())
-      return true;
-    else if (port.getKeepaliveMax() == 0)
+    else if (socket == null)
       return false;
     
-    QSocket socket = _socket;
-
-    if (socket != null) {
-      int freeCount = ThreadPool.getThreadPool().getFreeThreadCount();
-
-      if (freeCount < 20) {
-	return false;
-      }
-      
-      int freeKeepalive = port.getFreeKeepalive();
-
-      if (freeKeepalive < freeCount)
-	freeCount = freeKeepalive;
-
-      // server/01c0 -- can't kill these threads if force keepalive
-      /*
-      if (freeCount > 50)
-	return true;
-      */
-
-      // timeout = 1;
-      
-      int timeout = 100;
-
-      boolean hasData = socket.readNonBlock(timeout);
-
-      return hasData;
+    long timeout = port.getKeepaliveTimeout();
+    
+    if (port.getServer().isEnableSelectManager()) {
+      timeout = port.getKeepaliveThreadTimeout();
     }
-    else
-      return false;
+
+    if (timeout >= 1000)
+      return socket.readNonBlock((int) (timeout / 1000));
+
+    return false;
   }
 
   public boolean isSecure()
@@ -511,7 +490,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
 		isKeepalive = request.handleRequest();
 	      }
 	    }
-	  } while (isKeepalive && readNonBlock() && ! port.isClosed());
+	  } while (isKeepalive && allowThreadKeepalive() && ! port.isClosed());
 
           if (isKeepalive) {
 	    return;

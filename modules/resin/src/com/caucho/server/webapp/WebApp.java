@@ -90,7 +90,7 @@ import com.caucho.server.host.Host;
 import com.caucho.server.log.AbstractAccessLog;
 import com.caucho.server.log.AccessLog;
 
-import com.caucho.server.resin.ResinServer;
+import com.caucho.server.resin.*;
 
 import com.caucho.server.security.*;
 
@@ -1488,12 +1488,12 @@ public class WebApp extends ServletContextImpl
   {
     _shutdownWaitTime = wait.getPeriod();
 
-    ResinServer resinServer = ResinServer.getResinServer();
-    if (resinServer != null &&
-	resinServer.getShutdownWaitMax() < _shutdownWaitTime) {
+    Resin resin = Resin.getLocal();
+    if (resin != null &&
+	resin.getShutdownWaitMax() < _shutdownWaitTime) {
       log.warning(L.l("web-app shutdown-wait-max '{0}' is longer than resin shutdown-wait-max '{1}'.",
 		      _shutdownWaitTime,
-		      resinServer.getShutdownWaitMax()));
+		      resin.getShutdownWaitMax()));
     }
   }
 

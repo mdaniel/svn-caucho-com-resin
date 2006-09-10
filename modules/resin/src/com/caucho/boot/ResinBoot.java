@@ -50,7 +50,7 @@ public class ResinBoot {
   private Path _resinConf;
   private String _serverId = "";
 
-  private ServerWatchdog _server;
+  private Watchdog _server;
 
   private StartMode _startMode = StartMode.DIRECT;
 
