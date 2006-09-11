@@ -1,0 +1,138 @@
+<document>
+  <header>
+    <title>Quercus Overview</title>
+    <level>toplevel-topic</level>
+    <type>contents</type>
+    <description>
+      <p>
+      <em>Quercus</em> is Caucho Technology's fast, open-source, 100%
+      Java implementation of the PHP language.
+      </p>
+    </description>
+  </header>
+
+  <body>
+
+<localtoc/>
+
+<s1 title="Language Status">
+
+<p>Quercus implements the PHP 5 language in Java, including object
+and exception support.  Quercus is a mixed interpreted/compiled implementation.
+Long-running PHP scripts are compiled to Java for performance, while
+short scripts, like <code>eval()</code> scripts are interpreted to
+avoid compilation overhead.</p>
+
+<p>Because Quercus is a Java implementation, it natively supports 16-bit
+unicode strings and functions.  Quercus (in 3.1.0) supports the
+new PHP 6 internationalization syntax, and the older unicode conversion
+functions like <code>iconv</code>.  By default, Quercus uses UTF-8
+encoding for PHP scripts and runtime unicode conversion.</p>
+
+</s1>
+
+<s1 title="Application Status">
+
+<p>At present, a major development focus is getting 100 PHP applications to
+run on Quercus.  Since PHP and its libraries are fairly large with a
+number of obscure details, we expect this process to take some time.
+Based on the current development snapshot, the current list of applications
+is:</p>
+
+<p>DokuWiki, Drupal, Gallery2, Mantis, MediaWiki, phpBB,
+phpMyAdmin, Wordpress.</p>
+
+</s1>
+
+<s1 title="Module Status">
+
+<s2 title="Standard Modules">
+
+<p>Quercus implements the standard PHP libraries (arrays, strings,
+date, regexp, etc).  It also supports extension libraries like zip and
+zlib for compression, mcrypt for encryption, mail (implemented with
+JavaMail), and bcmath for large numbers.</p>
+
+</s2>
+
+<s2 title="Database Modules">
+
+<p>The database support in Quercus supports robust database connection
+pooling since Quercus runs in Resin, a fast Java application server.
+All PHP database access automatically uses JDBC-pooled connections.  PHP
+code does not need changing to take advantage of this capability.</p>
+
+<p>The PHP database apis supported include PDO (portable database objects),
+mysql, mysql improved, postgres and oracle.  Any JDBC-compliant database
+is available to PHP scripts using PDO.</p>
+
+<example title="PDO access to JNDI-configured databases">
+&lt;php
+
+$db = new PDO("java:comp/env/jdbc/my-database");
+
+...
+?>
+</example>
+
+</s2>
+
+<s2 title="APC (object caching)">
+
+<p>For PHP object caching, Quercus implements the APC module.  PHP applications
+can use the APC functions to save PHP objects without resorting to
+serialization and database persistence.  Because Quercus runs in Resin,
+a Java web server, the saved objects are quickly available to any
+thread running PHP.  In other words, unlike Apache which makes sharing across
+different PHP processes difficult, Quercus can just store a singleton cache
+of the APC-cached objects.</p>
+
+<p>Because Quercus compiles PHP to Java code, PHP scripts get the opcode
+caching of APC for free.  At this time, performance of Quercus is roughtly
+comparable with performance of mod_php with APC, i.e. it is significantly
+faster (3-5 times) than mod_php running by itself.</p>
+
+</s2>
+
+<s2 title="Image support ('gd')">
+
+<p>Quercus provides the image module, so users can use image manipulation
+functions like watermarking and thumbnail generation in
+any PHP script on Quercus.  .jpg, .png, and .gif files are currently
+supported.  Java users will also find these libraries convenient.</p>
+
+</s2>
+
+<s2 title="PDF generation (PDFlib api)">
+
+<p>PDF generation in Quercus follows the PDFlib API.  Since the Quercus
+PDF implementation is a new implementation in Java, no special downloads
+are needed to use PDF.</p>
+
+</s2>
+
+<s2 title="AJAX (JSON)">
+
+<p>Quercus also includes the new JSON module for encoding and decoding
+AJAX-style requests.  The JSON modules is an excellent example of
+the benefits of writing modules in Java.  Because Java supports
+garbage collection and protects from pointer overruns, the JSON module
+implementation is straightforward and reliable, without having to worry
+about all the possible memory problem in a C library.</p>
+
+</s2>
+
+<s2 title="Gettext (localization)">
+
+<p>Quercus in Resin 3.1.0 supports the gettext API and .po and .mo files.
+gettext is a portable API for localization, i.e. translation of program
+messages.  In the future, the Quercus gettext implementation will
+support Java message bundles so Java applications using PHP can use
+standard Java localization techniques.</p>
+
+</s2>
+
+</s1>
+
+  </body>
+</document>

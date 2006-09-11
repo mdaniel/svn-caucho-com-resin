@@ -1,4 +1,4 @@
-<navigation threaded="true" section="Resin : XML and XSLT : " comment="true">
+<navigation section="Resin : XML and XSLT : " threaded="true">
   <item title="XML and XSLT" link="index.xtp">
     <item title="Introduction" link="intro.xtp">
     </item>
@@ -17,7 +17,7 @@
       <item link="xpath-fun.xtp" title="XPath Functions"/>
     </item>
 
-    <item title="FAQ" link="faq.xtp" atoc-descend="yes">
+    <item title="FAQ" link="faq.xtp" atoc-descend="1">
     </item>
     <item title="Scrapbook" link="scrapbook.xtp">
     </item>

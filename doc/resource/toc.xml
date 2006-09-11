@@ -5,7 +5,7 @@
       <item title="RMI" link="rmi.xtp"/>
     </item>
 
-    <item title="Tutorials" link="tutorial/index.xtp" atoc-descend='2'/>
+    <item title="Tutorials" link="tutorial/index.xtp" atoc-descend="2"/>
 
     <item title="Resource FAQ" link="faq.xtp">
     </item>

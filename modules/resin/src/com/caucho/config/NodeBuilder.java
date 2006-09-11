@@ -726,8 +726,14 @@ public class NodeBuilder {
       
       return expr.evalBoolean(getELContext());
     }
+    else if (exprString.equals("false")
+	     || exprString.equals("no")
+	     || exprString.equals("")
+	     || exprString.equals("0")) {
+      return false;
+    }
     else
-      return Expr.toBoolean(exprString, null);
+      return true;
   }
 
   /**

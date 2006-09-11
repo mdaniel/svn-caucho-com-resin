@@ -152,6 +152,14 @@ public class Header {
     out.writeAttribute("href", _document.getContextPath() + "/css/default.css");
 
     out.writeStartElement("title");
+
+    NavigationItem nav = _document.getNavigation();
+
+    if (nav != null
+	&& nav.getNavigation() != null
+	&& nav.getNavigation().getSection() != null)
+      out.writeCharacters(nav.getNavigation().getSection());
+    
     out.writeCharacters(_title);
     out.writeEndElement(); // title
 

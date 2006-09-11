@@ -50,6 +50,20 @@ public class UnorderedList extends ContainerNode {
     return item;
   }
 
+  public UnorderedList createUl()
+  {
+    UnorderedList item = new UnorderedList(getDocument());
+    addItem(item);
+    return item;
+  }
+
+  public OrderedList createOl()
+  {
+    OrderedList item = new OrderedList(getDocument());
+    addItem(item);
+    return item;
+  }
+
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {

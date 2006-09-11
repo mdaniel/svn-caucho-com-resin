@@ -1,22 +1,22 @@
-<navigation threaded='true' section='Resin : Troubleshooting : ' comment='true'>
+<navigation threaded="true" section="Resin : Troubleshooting : " comment="true">
 
   <item link="index.xtp" title="Troubleshooting" title="Technique">
-    <item link='technique.xtp' title='Techniques' atoc-descend="true"/>
-    <item link='symptoms.xtp' title='Symptoms' atoc-descend="true"/>
-    <item link='faq.xtp' title='FAQ'>
-      <item link='../features/faq.xtp' title='Features' atoc-descend="true"/>
-      <item link='../install/faq.xtp' title='Features' atoc-descend="true"/>
-      <item link='../config/faq.xtp' title='Configuration' atoc-descend="true"/>
-      <item link='../webapp/faq.xtp' title='Web Applications' atoc-descend="true"/>
-      <item link='../resource/faq.xtp' title='Resources/JNDI/JCA' atoc-descend="true"/>
-      <item link='../jsp/faq.xtp' title='JSP' atoc-descend="true"/>
-      <item link='../security/faq.xtp' title='Security' atoc-descend="true"/>
-      <item link='../xml/faq.xtp' title='XML' atoc-descend="true"/>
+    <item link="technique.xtp" title="Techniques" atoc-descend="1"/>
+    <item link="symptoms.xtp" title="Symptoms" atoc-descend="1"/>
+    <item link="faq.xtp" title="FAQ">
+      <item link="../features/faq.xtp" title="Features" atoc-descend="1"/>
+      <item link="../install/faq.xtp" title="Features" atoc-descend="1"/>
+      <item link="../config/faq.xtp" title="Configuration" atoc-descend="1"/>
+      <item link="../webapp/faq.xtp" title="Web Applications" atoc-descend="1"/>
+      <item link="../resource/faq.xtp" title="Resources/JNDI/JCA" atoc-descend="1"/>
+      <item link="../jsp/faq.xtp" title="JSP" atoc-descend="1"/>
+      <item link="../security/faq.xtp" title="Security" atoc-descend="1"/>
+      <item link="../xml/faq.xtp" title="XML" atoc-descend="1"/>
       <!--
-      <item link='../webservices/faq.xtp' title='Web Services' atoc-descend="true"/>
+      <item link="../webservices/faq.xtp" title="Web Services" atoc-descend="1"/>
       -->
-      <item link='../performance/faq.xtp' title='Performance' atoc-descend="true"/>
-      <item link='common-problems.xtp' title='Common Problems' atoc-descend="true"/>
+      <item link="../performance/faq.xtp" title="Performance" atoc-descend="1"/>
+      <item link="common-problems.xtp" title="Common Problems" atoc-descend="1"/>
     </item>
 
   </item>

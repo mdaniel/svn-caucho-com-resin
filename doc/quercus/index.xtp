@@ -80,7 +80,7 @@ easy to develop, compared with C libraries.  Since Java is the library
 language, developers won't need to be paranoid about third-party libraries
 having C-memory problems or segvs.</li>
 <li>PHP applications can take advantage of Java libraries and capabilities
-like JMS, SOA frameworks, Hibernate, or Spring.  (Or EJB if you really wanted.)</li>
+like JMS, EJB, SOA frameworks, Hibernate, or Spring.</li>
 <li>Java application can move presentation code to PHP, leaving behind
 templating systems, or languages with small libraries, and taking advantage
 of PHP flexibility and capability.</li>

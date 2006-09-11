@@ -45,11 +45,13 @@ public class Navigation {
   private static final Logger log 
     = Logger.getLogger(Navigation.class.getName());
 
+  private Document _document;
+  private Navigation _parent;
+  
   private int _depth;
   private Path _rootPath;
   private String _uri;
   private String _section;
-  private Document _document;
   private boolean _threaded;
   private boolean _comment;
   private ArrayList<NavigationItem> _items 
@@ -64,6 +66,15 @@ public class Navigation {
   public Navigation(Document document, String uri, Path path, int depth)
   {
     _document = document;
+    _rootPath = path;
+    _uri = uri;
+    _depth = depth;
+  }
+
+  public Navigation(Navigation parent, String uri, Path path, int depth)
+  {
+    _parent = parent;
+    _document = parent.getDocument();
     _rootPath = path;
     _uri = uri;
     _depth = depth;
@@ -89,9 +100,19 @@ public class Navigation {
     return _document;
   }
 
+  public Navigation getParent()
+  {
+    return _parent;
+  }
+
   public void setSection(String section)
   {
     _section = section;
+  }
+
+  public String getSection()
+  {
+    return _section;
   }
 
   public void setComment(boolean comment)
@@ -125,11 +146,18 @@ public class Navigation {
   public void putItem(String uri, NavigationItem item)
   {
     if (_child != null && _child.getUri().equals(uri)) {
-      _child.setParent(item.getParent());
+      if (item.getParent() != null)
+	_child.setParent(item.getParent());
       _itemMap.put(uri, _child);
+
+      if (_parent != null)
+	_parent.putItem(uri, item);
     }
     else {
       _itemMap.put(uri, item);
+
+      if (_parent != null)
+	_parent.putItem(uri, item);
     }
   }
 

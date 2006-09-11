@@ -414,6 +414,8 @@ server is selected with the <var>-server web-a</var> command-line argument.</p>
 
     &lt;server id="web-a" address="192.168.1.10" port="6800"/>
 
+    &lt;cache disk-size="1024m" memory-size="64m"/>
+
     &lt;host id="">
       &lt;web-app id="">
 

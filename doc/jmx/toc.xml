@@ -7,7 +7,7 @@
     <item title="Instrumenting" link="instrumenting.xtp">
     </item>
 
-    <item title="Tutorials" link="tutorial/index.xtp" atoc-descend='2'/>
-    <item title="Cookbook" link="cookbook/index.xtp" atoc-descend='2'/>
+    <item title="Tutorials" link="tutorial/index.xtp" atoc-descend="2"/>
+    <item title="Cookbook" link="cookbook/index.xtp" atoc-descend="2"/>
   </item>
 </navigation>

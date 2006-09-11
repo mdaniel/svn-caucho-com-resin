@@ -3,7 +3,7 @@
     <item link="caching.xtp" title="Server Caching"/>
     <item link="jvm-tuning.xtp" title="JVM Tuning"/>
 
-    <item title="FAQ" link="faq.xtp" atoc-descend='2'/>
-    <item link="scrapbook.xtp" title="Scrapbook" atoc-descend='5'/>
+    <item title="FAQ" link="faq.xtp" atoc-descend="2"/>
+    <item link="scrapbook.xtp" title="Scrapbook" atoc-descend="5"/>
   </item>
 </navigation>

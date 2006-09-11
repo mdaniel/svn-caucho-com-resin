@@ -54,17 +54,16 @@ public class NavigationItem {
 
   private String _uri;
 
-  private int _maxDepth = 4;
+  private int _maxDepth = 3;
   private int _depth;
   private String _link;
   private String _title;
   private String _product;
   private Document _document;
   private ContentItem _description;
-  private boolean _atocDescend = false;
+  private boolean _atocDescend;
   private Navigation _child;
   private ArrayList<NavigationItem> _items = new ArrayList<NavigationItem>();
-  private Path _rootPath;
 
   public NavigationItem(Navigation navigation,
 			NavigationItem parent,
@@ -73,9 +72,8 @@ public class NavigationItem {
     _navigation = navigation;
     _parent = parent;
     
-    _document = navigation.getDocument();;
+    _document = navigation.getDocument();
     _depth = depth;
-    _rootPath = _document.getDocumentPath().getParent();
   }
 
   public Navigation getNavigation()
@@ -146,41 +144,40 @@ public class NavigationItem {
     if (_child != null || _description != null)
       return;
 
-    if (_rootPath != null && _link != null) {
-      Path linkPath = _rootPath.lookup(_link);
+    Path rootPath = _document.getDocumentPath().getParent();
+    
+    if (_uri != null) {
+      Path linkPath = _document.getRealPath(_uri);
 
       if (linkPath.exists()) {
         Config config = new Config();
 
-        Document document = new Document(linkPath, _document.getContextPath());
-
         try {
-          config.configure(document, linkPath);
+          config.configure(_document, linkPath);
 
-          if (document.getHeader() != null)
-            _description = document.getHeader().getDescription();
+          if (_document.getHeader() != null)
+            _description = _document.getHeader().getDescription();
 	  else
-	    _description = new Description(document);
+	    _description = new Description(_document);
         } catch (NullPointerException e) {
           log.info("error configuring " + linkPath + ": " + e);
-          e.printStackTrace();
         } catch (Exception e) {
           log.info("error configuring " + linkPath + ": " + e);
         }
 
         if (_atocDescend) {
           Path linkRoot = linkPath.getParent();
-	  
+
 	  if (linkRoot.equals(_navigation.getRootPath().getParent()))
 	    return;
 
           Path subToc = linkPath.getParent().lookup("toc.xml");
-
+	  
           if (subToc.exists()) {
-            _child = new Navigation(_document,
-					      _uri,
-					      linkRoot,
-					      _depth + 1);
+            _child = new Navigation(_navigation,
+				    _uri,
+				    linkRoot,
+				    _depth + 1);
 
             try {
               config.configure(_child, subToc);

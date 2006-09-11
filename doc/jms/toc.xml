@@ -1,4 +1,4 @@
-<navigation threaded="true" section="Resin : JMS : " comment="true">
+<navigation section="Resin : JMS : " threaded="true">
   <item title="JMS" link="index.xtp">
     <item link="config.xtp" title="Config"/>
 

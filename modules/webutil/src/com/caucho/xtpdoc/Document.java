@@ -78,6 +78,20 @@ public class Document {
     _uri = uri;
   }
 
+  public Path getRealPath(String uri)
+  {
+    if (_webApp != null) {
+      String contextPath = _webApp.getContextPath();
+
+      if (uri.startsWith(contextPath))
+	uri = uri.substring(contextPath.length());
+      
+      return Vfs.lookup(_webApp.getRealPath(uri));
+    }
+    else
+      return Vfs.lookup("./" + uri);
+  }
+
   NavigationItem getNavigation()
   {
     if (_navItem != null)

@@ -1,4 +1,4 @@
-<navigation threaded="true" section="Resin : Protocols : " comment="true">
+<navigation section="Resin : Hessian : " threaded="true">
   <item title="Protocols" link="index.xtp">
     <item link="hessian.xtp" title="Hessian"/>
     <item link="hessian-messaging.xtp" title="Hessian Messaging"/>
@@ -9,6 +9,6 @@
     <item link="burlap-1.0-spec.xtp" title="Burlap 1.0 Spec"/>
     <item link="burlap-notes.xtp" title="Burlap Design Notes"/>
 
-    <item title='Tutorials' link="tutorial/index.xtp" atoc-descend='1'/>
+    <item title="Tutorials" link="tutorial/index.xtp" atoc-descend="1"/>
   </item>
 </navigation>

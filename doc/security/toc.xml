@@ -7,9 +7,9 @@
     <item title="Security Manager" link="securitymanager.xtp"/>
     <item title="Malicious Attacks" link="malicious.xtp"/>
 
-    <item title='Tutorials' link="tutorial/index.xtp" atoc-descend='1'/>
+    <item title='Tutorials' link="tutorial/index.xtp" atoc-descend="1"/>
     
-    <item title="FAQ" link="faq.xtp" atoc-descend='2'/>
+    <item title="FAQ" link="faq.xtp" atoc-descend="2"/>
     <item title="Scrapbook" link="scrapbook.xtp" atoc-descend="1"/>
 
   </item>

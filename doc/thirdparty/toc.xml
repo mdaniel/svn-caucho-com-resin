@@ -11,7 +11,7 @@
 
     <item link="groovy.xtp" title="Groovy"/>
 
-    <item link="codelibraries.xtp" title="Code Libraries" atoc-descend="true"/>
+    <item link="codelibraries.xtp" title="Code Libraries" atoc-descend="1"/>
 <!--
     <item link="ejb.xtp" title="EJB Servers" >
       <item link="ejb-jboss.xtp" title="jBoss"/>
@@ -31,7 +31,7 @@
       <item link="hibernate.xtp" title="Hibernate" />
     </item>
 
-    <item link="jmx.xtp" title="JMX" atoc-descend="true"/>
+    <item link="jmx.xtp" title="JMX" atoc-descend="1"/>
 
     <item link="sslhardware.xtp" title="SSL Accelerators"/>
 

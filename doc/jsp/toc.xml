@@ -21,13 +21,13 @@
       <item link="tld-schema.xtp" title="Schema for JSP-2.0 .tld files"/>
     </item>
 
-    <item title='Tutorials' link="tutorial/index.xtp" atoc-descend='2'/>
+    <item title='Tutorials' link="tutorial/index.xtp" atoc-descend="2"/>
 
     <item link='articles.xtp' title="Articles">
-        <item link="templates.xtp" title='JSP Templates'/>
+        <item link="templates.xtp" title="JSP Templates"/>
     </item>
 
-    <item title="FAQ" link="faq.xtp" atoc-descend='2'/>
+    <item title="FAQ" link="faq.xtp" atoc-descend="2"/>
 
     <!-- empty right now
     <item title="Scrapbook" link="scrapbook.xtp"/>

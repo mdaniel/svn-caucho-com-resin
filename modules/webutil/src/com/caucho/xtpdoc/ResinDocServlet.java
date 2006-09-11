@@ -97,7 +97,7 @@ public class ResinDocServlet extends HttpServlet {
     PrintWriter out = response.getWriter();
     String servletPath = request.getServletPath();
 
-    Path path = _pwd.lookup(servletPath);
+    Path path = Vfs.lookup(request.getRealPath(servletPath));
 
     Document document = new Document(getServletContext(),
 				     path, _contextPath,

@@ -3,6 +3,6 @@
     <item title="Amber" link="amber.xtp"/>
     <item title="Lifecycle" link="lifecycle.xtp"/>
     <item title="@Table" link="amber-table.xtp"/>
-    <item title="Tutorials" link="tutorial/index.xtp" atoc-descend='1'/>
+    <item title="Tutorials" link="tutorial/index.xtp" atoc-descend="1"/>
   </item>
 </navigation>
