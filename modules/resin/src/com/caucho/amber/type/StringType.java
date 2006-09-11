@@ -100,7 +100,7 @@ public class StringType extends Type {
                           String index, String value)
     throws IOException
   {
-    out.println("if (value == null)");
+    out.println("if (" + value + " == null)");
     out.println("  " + pstmt + ".setNull(" + index + "++, java.sql.Types.OTHER);");
     out.println("else");
     out.println("  " + pstmt + ".setString(" + index + "++, " + value + ");");
