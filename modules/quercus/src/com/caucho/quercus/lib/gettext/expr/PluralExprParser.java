@@ -27,7 +27,7 @@
  * @author Nam Nguyen
  */
 
-package com.caucho.quercus.lib.gettext;
+package com.caucho.quercus.lib.gettext.expr;
 
 import com.caucho.quercus.UnimplementedException;
 
@@ -49,137 +49,80 @@ import java.util.logging.Logger;
 
 
 /**
- * Represents a plural expression of an MO file.
+ * Parses a gettext plural expression.
  */
-class PluralExpr
+class PluralExprParser
 {
   final static int INTEGER = 256;
-  final static int LPAREN = INTEGER + 1;
-  final static int RPAREN = INTEGER + 2;
-  final static int SEMI = INTEGER + 3;
-  final static int IF_QUESTION = INTEGER + 4;
-  final static int IF_COLON = INTEGER + 5;
 
-  final static int EQ = INTEGER + 6;
-  final static int NEQ = INTEGER + 7;
-  final static int LT = INTEGER + 8;
-  final static int LE = INTEGER + 9;
-  final static int GT = INTEGER + 10;
-  final static int GE = INTEGER + 11;
+  final static int EQ = 270;
+  final static int NEQ = 271;
+  final static int LE = 272;
+  final static int GE = 273;
 
-  final static int ADD = INTEGER + 12;
-  final static int SUB = INTEGER + 13;
-  final static int MUL = INTEGER + 14;
-  final static int DIV = INTEGER + 15;
-  final static int MOD = INTEGER + 16;
+  final static int AND = 280;
+  final static int OR = 281;
 
-  final static int AND = INTEGER + 17;
-  final static int OR = INTEGER + 18;
-
-  final static int UNKNOWN = INTEGER + 19;
-  final static int UNSET = INTEGER + 20;
+  final static int VARIABLE_N = 290;
+  final static int UNKNOWN = 291;
+  final static int UNSET = 292;
 
   private CharSequence _expr;
   private int _exprLength;
   private int _parseIndex;
 
-  private int _nplurals = -1;
-  private int _plural = -1;
+  private Expr _npluralsExpr;
+  private Expr _pluralExpr;
 
   private int _peekToken;
   private int _integer;
-  private int _n;
 
-  private boolean _errorEncountered;
+  private boolean _isError;
+  private boolean _isInitialized;
 
-  private PluralExpr() {}
-
-  private PluralExpr(CharSequence expr)
+  protected PluralExprParser(CharSequence expr)
   {
     _expr = expr;
     _exprLength = expr.length();
+
+    _isInitialized = false;
   }
 
-  private void init(int n)
+  public Expr getNpluralsExpr()
+  {
+    if (! _isInitialized)
+      init();
+
+    if (_isError)
+      return null;
+
+    return _npluralsExpr;
+  }
+
+  public Expr getPluralExpr()
+  {
+    if (! _isInitialized)
+      init();
+
+    if (_isError)
+      return null;
+
+    return _pluralExpr;
+  }
+
+  private void init()
   {
     _parseIndex = 0;
     _peekToken = UNSET;
-    _n = n;
-    _errorEncountered = false;
+    _isError = false;
+
+    parseAssignExpr();
+    parseAssignExpr();
+
+    _isInitialized = true;
   }
 
-  /**
-   * Extracts plural expression from metadata and returns a PluralExpr for the
-   * plural expression.
-   *
-   * @param metadata containing plural expression
-   */
-  public static PluralExpr getPluralExpr(String metaData)
-  {
-    String pluralForms = "Plural-Forms:";
-    int i = metaData.indexOf(pluralForms);
-
-    if (i < 0)
-      return new PluralExpr("nplurals=2; plural=n!=1");
-
-    i += pluralForms.length();
-    int j = metaData.indexOf('\n', i);
-
-    if (j < 0)
-      return new PluralExpr(metaData.substring(i));
-    else
-      return new PluralExpr(metaData.substring(i, j));
-  }
-
-  /**
-   * Returns evaluated plural expression
-   *
-   * @param expr
-   * @param n number of items
-   */
-  public static int eval(CharSequence expr, int n)
-  {
-    PluralExpr pluralExpr = new PluralExpr(expr);
-
-    return pluralExpr.eval(n);
-  }
-
-  /**
-   * Evaluates this plural expression.
-   */
-  public int eval(int n)
-  {
-    init(n);
-
-    evalAssignExpr();
-    evalAssignExpr();
-
-    return validate();
-  }
-
-  private int validate()
-  {
-    if (_errorEncountered) {
-      if (_n == 1)
-        return 0;
-      else
-        return 1;
-    }
-
-    if (_nplurals < 1 || _plural < 0)
-    {
-      if (_n == 1)
-        return 0;
-      else return 1;
-    }
-
-    if (_plural >= _nplurals)
-      return 0;
-
-    return _plural;
-  }
-
-  private void evalAssignExpr()
+  private void parseAssignExpr()
   {
     int ch = consumeWhiteSpace();
 
@@ -212,55 +155,57 @@ class PluralExpr
       return;
 
     if (isNplurals)
-      _nplurals = evalIfExpr();
+      _npluralsExpr = parseIfExpr();
     else
-      _plural = evalIfExpr();
+      _pluralExpr = parseIfExpr();
 
     // Read semicolon
     parseToken();
   }
 
-  private int evalLiteralExpr()
+  private Expr parseLiteralExpr()
   {
     int token = parseToken();
 
     if (token == INTEGER)
-      return _integer;
+      return new LiteralExpr(_integer);
+    else if (token == VARIABLE_N)
+      return NExpr.N_EXPR;
     else
-      throw new RuntimeException("");
+      return error("Expected INTEGER");
   }
 
-  private int evalParenExpr()
+  private Expr parseParenExpr()
   {
     int token = parseToken();
 
-    if (token != LPAREN) {
+    if (token != '(') {
       _peekToken = token;
-      return evalLiteralExpr();
+      return parseLiteralExpr();
     }
 
-    int expr = evalIfExpr();
-    if (parseToken() != RPAREN)
-      throw new RuntimeException("");
+    Expr expr = parseIfExpr();
+    if (parseToken() != ')')
+      return error("Expected ')'");
 
     return expr;
   }
 
-  private int evalMulExpr()
+  private Expr parseMulExpr()
   {
-    int expr = evalParenExpr();
+    Expr expr = parseParenExpr();
 
     while (true) {
       int token = parseToken();
       switch (token) {
-        case MOD:
-          expr = expr % evalParenExpr();
+        case '%':
+          expr = new ModExpr(expr, parseParenExpr());
           break;
-        case MUL:
-          expr = expr * evalParenExpr();
+        case '*':
+          expr = new MulExpr(expr, parseParenExpr());
           break;
-        case DIV:
-          expr = expr / evalParenExpr();
+        case '/':
+          expr = new DivExpr(expr, parseParenExpr());
           break;
         default:
           _peekToken = token;
@@ -269,19 +214,19 @@ class PluralExpr
     }
   }
 
-  private int evalAddExpr()
+  private Expr parseAddExpr()
   {
-    int expr = evalMulExpr();
+    Expr expr = parseMulExpr();
 
     while (true) {
       int token = parseToken();
 
       switch (token) {
-        case ADD:
-          expr += evalMulExpr();
+        case '+':
+          expr = new AddExpr(expr, parseMulExpr());
           break;
-        case SUB:
-          expr -= evalMulExpr();
+        case '-':
+          expr = new SubExpr(expr, parseMulExpr());
           break;
         default:
           _peekToken = token;
@@ -290,48 +235,30 @@ class PluralExpr
     }
   }
 
-  private int evalCmpExpr()
+  private Expr parseCmpExpr()
   {
-    int expr = evalAddExpr();
+    Expr expr = parseAddExpr();
 
     while (true) {
       int token = parseToken();
       switch (token) {
-        case GT:
-          if (expr > evalAddExpr())
-            expr = 1;
-          else
-            expr = 0;
+        case '>':
+          expr = new GTExpr(expr, parseAddExpr());
+          break;
+        case '<':
+          expr = new LTExpr(expr, parseAddExpr());
           break;
         case GE:
-          if (expr >= evalAddExpr())
-            expr = 1;
-          else
-            expr = 0;
-          break;
-        case LT:
-          if (expr < evalAddExpr())
-            expr = 1;
-          else
-            expr = 0;
+          expr = new GEExpr(expr, parseAddExpr());
           break;
         case LE:
-          if (expr <= evalAddExpr())
-            expr = 1;
-          else
-            expr = 0;
+          expr = new LEExpr(expr, parseAddExpr());
           break;
         case EQ:
-          if (expr == evalAddExpr())
-            expr = 1;
-          else
-            expr = 0;
+          expr = new EQExpr(expr, parseAddExpr());
           break;
         case NEQ:
-          if (expr != evalAddExpr())
-            expr = 1;
-          else
-            expr = 0;
+          expr = new NEQExpr(expr, parseAddExpr());
           break;
         default:
           _peekToken = token;
@@ -340,9 +267,9 @@ class PluralExpr
     }
   }
 
-  private int evalAndExpr()
+  private Expr parseAndExpr()
   {
-    int expr = evalCmpExpr();
+    Expr expr = parseCmpExpr();
 
     while (true) {
       int token = parseToken();
@@ -351,18 +278,13 @@ class PluralExpr
         return expr;
       }
 
-      int expr2 = evalCmpExpr();
-
-      if (expr != 0 && expr2 != 0)
-        expr = 1;
-      else
-        expr = 0;
+      expr = new AndExpr(expr, parseCmpExpr());
     }
   }
 
-  private int evalOrExpr()
+  private Expr parseOrExpr()
   {
-    int expr = evalAndExpr();
+    Expr expr = parseAndExpr();
 
     while (true) {
       int token = parseToken();
@@ -371,37 +293,29 @@ class PluralExpr
         return expr;
       }
 
-      int expr2 = evalAndExpr();
-
-      if (expr != 0 || expr2 != 0)
-        expr = 1;
-      else
-        expr = 0;
+      expr = new OrExpr(expr, parseAndExpr());
     }
   }
 
-  private int evalIfExpr()
+  private Expr parseIfExpr()
   {
-    int expr = evalOrExpr();
+    Expr expr = parseOrExpr();
 
     int token = parseToken();
-    if (token != IF_QUESTION) {
+    if (token != '?') {
       _peekToken = token;
       return expr;
     }
 
-    int trueExpr = evalIfExpr();
+    Expr trueExpr = parseIfExpr();
 
     token = parseToken();
-    if (token != IF_COLON)
-      throw new RuntimeException();
+    if (token != ':')
+      return error("Expected ':'");
 
-    int falseExpr = evalIfExpr();
+    Expr falseExpr = parseIfExpr();
 
-    if (expr != 0)
-      return trueExpr;
-
-    return falseExpr;
+    return new IfExpr(expr, trueExpr, falseExpr);
   }
 
   private int parseToken()
@@ -417,35 +331,26 @@ class PluralExpr
 
     switch (ch) {
       case '(':
-        return LPAREN;
       case ')':
-        return RPAREN;
       case '?':
-        return IF_QUESTION;
       case ':':
-        return IF_COLON;
       case ';':
-        return SEMI;
       case '+':
-        return ADD;
       case '-':
-        return SUB;
       case '%':
-        return MOD;
       case '*':
-        return MUL;
       case '/':
-        return DIV;
+        return ch;
       case '>':
         if (read() == '=')
           return GE;
         unread();
-        return GT;
+        return '>';
       case '<':
         if (read() == '=')
           return LE;
         unread();
-        return LT;
+        return '<';
       case '=':
         if (read() == '=')
           return EQ;
@@ -483,10 +388,8 @@ class PluralExpr
       if (Character.isLetter(read()))
         return UNKNOWN;
 
-      _integer = _n;
-
       unread();
-      return INTEGER;
+      return VARIABLE_N;
     }
 
     return UNKNOWN;
@@ -513,15 +416,21 @@ class PluralExpr
 
   private int read()
   {
-    if (_parseIndex >= _exprLength)
+    if (_parseIndex < _exprLength)
+      return _expr.charAt(_parseIndex++);
+    else
       return -1;
-
-    return _expr.charAt(_parseIndex++);
   }
 
   private void unread()
   {
     if (_parseIndex > 0 && _parseIndex < _exprLength)
       _parseIndex--;
+  }
+
+  private Expr error(String message)
+  {
+    _isError = true;
+    return NExpr.N_EXPR;
   }
 }

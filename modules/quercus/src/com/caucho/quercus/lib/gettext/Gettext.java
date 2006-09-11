@@ -32,11 +32,11 @@ package com.caucho.quercus.lib.gettext;
 import com.caucho.quercus.UnimplementedException;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LocaleInfo;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 
+import com.caucho.quercus.lib.i18n.IconvUtility;
 import com.caucho.quercus.lib.string.StringModule;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
@@ -49,46 +49,50 @@ import com.caucho.util.LruCache;
 import com.caucho.vfs.Path;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Locale;
 
 public class Gettext
 {
-  private static final Logger log
-    = Logger.getLogger(Gettext.class.getName());
+  private static final Logger log =
+          Logger.getLogger(Gettext.class.getName());
   private static final L10N L = new L10N(Gettext.class);
 
-  private String currentCharset;
   private StringValue currentDomain = new StringValueImpl("messages");
 
-  private HashMap<StringValue,Path> domainPaths = new HashMap();
-  private HashMap<StringValue,String> domainCharsets = new HashMap();
+  private HashMap<StringValue,Path> domainPaths =
+          new HashMap<StringValue,Path>();
+  private HashMap<StringValue,String> domainCharsets =
+          new HashMap<StringValue,String>();
 
-  private LruCache<String,StringValue> cache = new LruCache(128);
+  private LruCache<ArrayList<Object>,GettextResource> resourceCache =
+          new LruCache<ArrayList<Object>,GettextResource>(16);
 
   public StringValue bind_textdomain_codeset(Env env,
-                          StringValue domain,
-                          StringValue codeset)
+                              StringValue domain,
+                              StringValue codeset)
   {
     domainCharsets.put(domain, codeset.toString());
     return codeset;
   }
 
   public StringValue bindtextdomain(Env env,
-                          StringValue domain,
-                          StringValue directory)
+                              StringValue domain,
+                              StringValue directory)
   {
     domainPaths.put(domain, env.lookupPwd(directory));
     return directory;
   }
 
   public StringValue dcgettext(Env env,
-                          StringValue domain,
-                          StringValue message,
-                          int category)
+                              StringValue domain,
+                              StringValue message,
+                              int category)
   {
     return translate(env,
                 domain,
@@ -97,11 +101,11 @@ public class Gettext
   }
 
   public StringValue dcngettext(Env env,
-                          StringValue domain,
-                          StringValue msgid1,
-                          StringValue msgid2,
-                          int n,
-                          int category)
+                              StringValue domain,
+                              StringValue msgid1,
+                              StringValue msgid2,
+                              int n,
+                              int category)
   {
     return translate(env,
                 domain,
@@ -112,8 +116,8 @@ public class Gettext
   }
 
   public StringValue dgettext(Env env,
-                          StringValue domain,
-                          StringValue message)
+                              StringValue domain,
+                              StringValue message)
   {
     return translate(env,
                 domain,
@@ -122,10 +126,10 @@ public class Gettext
   }
 
   public StringValue dngettext(Env env,
-                          StringValue domain,
-                          StringValue msgid1,
-                          StringValue msgid2,
-                          int n)
+                              StringValue domain,
+                              StringValue msgid1,
+                              StringValue msgid2,
+                              int n)
   {
     return translate(env,
                 domain,
@@ -136,7 +140,7 @@ public class Gettext
   }
 
   public StringValue gettext(Env env,
-                          StringValue message)
+                              StringValue message)
   {
     return translate(env,
                 currentDomain,
@@ -145,11 +149,10 @@ public class Gettext
   }
 
   public StringValue ngettext(Env env,
-                          StringValue msgid1,
-                          StringValue msgid2,
-                          int n)
+                              StringValue msgid1,
+                              StringValue msgid2,
+                              int n)
   {
-
     return translate(env,
                 currentDomain,
                 "LC_MESSAGES",
@@ -158,8 +161,7 @@ public class Gettext
                 n);
   }
 
-  public StringValue textdomain(Env env,
-                          Value text_domain)
+  public StringValue textdomain(Env env, Value text_domain)
   {
     if (text_domain.isNull())
       return currentDomain;
@@ -168,85 +170,119 @@ public class Gettext
     return currentDomain;
   }
 
+  /**
+   * Retrieves the translation for message.
+   * 
+   * @param env
+   * @param domain
+   * @param category
+   * @param message
+   *
+   * @return translation found, else message
+   */
   private StringValue translate(Env env,
-                          CharSequence domain,
-                          CharSequence category,
-                          StringValue message)
-  {
-    Path path = getPath(env, category, domain);
-
-    if (path == null) {
-      env.notice(L.l("Translation MO file was not found."));
-      return message;
-    }
-
-    String id = getCacheId(path, message);
-    StringValue translation = cache.get(id);
-
-    if (translation != null)
-      return translation;
-
-    translation = MOFileParser.search(env, path, message);
-
-    if (translation == null)
-      translation = message;
-
-    cache.put(id, translation);
-    return translation;
-  }
-
-  private StringValue translate(Env env,
-                          CharSequence domain,
-                          CharSequence category,
-                          StringValue msgid1,
-                          StringValue msgid2,
-                          int n)
-  {
-    Path path = getPath(env, category, domain);
-
-    if (path == null) {
-      env.notice(L.l("Translation MO file was not found."));
-      return errorReturn(msgid1, msgid2, n);
-    }
-
-    String id = getCacheId(path, msgid1, msgid2, n);
-    StringValue translation = cache.get(id);
-
-    if (translation != null)
-      return translation;
-
-    translation = MOFileParser.search(env, path, msgid1, msgid2, n);
-
-    if (translation == null)
-      translation = errorReturn(msgid1, msgid2, n);
-
-    cache.put(id, translation);
-    return translation;
-  }
-
-  private Path getPath(Env env, CharSequence category, CharSequence domain)
+                              StringValue domain,
+                              CharSequence category,
+                              StringValue message)
   {
     Locale locale = env.getLocaleInfo().getMessages();
-    Path path = domainPaths.get(domain);
 
-    StringBuilder sb = new StringBuilder(locale.toString());
-    sb.append('/');
-    sb.append(category);
-    sb.append('/');
-    sb.append(domain);
-    sb.append(".mo");
+    ArrayList<Object> key = new ArrayList<Object>();
 
-    if (path != null)
-      path = path.lookup(sb.toString());
-    else
-      path = env.lookup(sb.toString());
+    key.add(locale);
+    key.add(domain);
+    key.add(category);
 
-    if (path != null && path.exists())
-      return path;
-    else
-      return null;
+    GettextResource resource = resourceCache.get(key);
+
+    if (resource == null) {
+      resource = new GettextResource(env,
+                  domainPaths.get(domain),
+                  locale,
+                  category,
+                  domain);
+
+      resourceCache.put(key, resource);
+    }
+
+    StringValue translation = resource.getTranslation(message);
+
+    if (translation == null)
+      return message;
+
+    String charset = domainCharsets.get(domain);
+
+    try {
+      if (charset != null)
+        translation = IconvUtility.encode(translation, charset);
+    } catch (UnsupportedEncodingException e) {
+      env.warning(L.l(e.getMessage()));
+      log.log(Level.FINE, e.getMessage(), e);
+    }
+
+    return translation;
   }
 
+  /**
+   * Retrieves the plural translation for msgid1.
+   * 
+   * @param env
+   * @param domain
+   * @param category
+   * @param msgid1
+   * @param msgid2
+   *
+   * @return translation found, else msgid1 if n == 1, else msgid2
+   */
+  private StringValue translate(Env env,
+                              StringValue domain,
+                              CharSequence category,
+                              StringValue msgid1,
+                              StringValue msgid2,
+                              int quantity)
+  {
+
+    Locale locale = env.getLocaleInfo().getMessages();
+
+    ArrayList<Object> key = new ArrayList<Object>();
+
+    key.add(locale);
+    key.add(domain);
+    key.add(category);
+
+    GettextResource resource = resourceCache.get(key);
+
+    if (resource == null) {
+      resource = new GettextResource(env,
+                  domainPaths.get(domain),
+                  locale,
+                  category,
+                  domain);
+
+      resourceCache.put(key, resource);
+    }
+
+    StringValue translation = resource.getTranslation(msgid1, quantity);
+
+    if (translation == null)
+      return errorReturn(msgid1, msgid2, quantity);
+
+    String charset = domainCharsets.get(domain);
+
+    try {
+      if (charset != null)
+        translation = IconvUtility.encode(translation, charset);
+    } catch (UnsupportedEncodingException e) {
+      env.warning(L.l(e.getMessage()));
+      log.log(Level.FINE, e.getMessage(), e);
+    }
+
+    return translation;
+  }
+
+  /**
+   * Gets the name for this category.
+   */
   private String getCategory(Env env, int category)
   {
     if (category == StringModule.LC_MESSAGES)
@@ -269,47 +305,13 @@ public class Gettext
     }
   }
 
-  private static String getCacheId(Path path,
-                          StringValue message)
-  {
-    StringBuilder sb = new StringBuilder();
-
-    sb.append(path.toString());
-    sb.append('\u0000');
-    sb.append(path.getLastModified());
-    sb.append('\u0000');
-    sb.append(message);
-
-    return sb.toString();
-  }
-
-  private static String getCacheId(Path path,
-                          StringValue msgid1,
-                          StringValue msgid2,
-                          int n)
-  {
-    StringBuilder sb = new StringBuilder();
-
-    sb.append(path.toString());
-    sb.append('\u0000');
-    sb.append(path.getLastModified());
-    sb.append('\u0000');
-    sb.append(msgid1);
-    sb.append('\u0000');
-    sb.append(msgid2);
-    sb.append(n);
-
-    return sb.toString();
-  }
-
   private static StringValue errorReturn(StringValue msgid1,
-                          StringValue msgid2,
-                          int n)
+                              StringValue msgid2,
+                              int n)
   {
     if (n == 1)
       return msgid1;
     else
       return msgid2;
   }
-
 }

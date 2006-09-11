@@ -74,9 +74,7 @@ public class GettextModule
                           StringValue domain,
                           StringValue codeset)
   {
-    throw new UnimplementedException("bind_textdomain_codeset");
-
-//    return getGettext(env).bind_textdomain_codeset(env, domain, codeset);
+    return getGettext(env).bind_textdomain_codeset(env, domain, codeset);
   }
 
   /**

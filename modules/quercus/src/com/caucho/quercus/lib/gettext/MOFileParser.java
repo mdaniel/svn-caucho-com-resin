@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.gettext;
 
+import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.UnimplementedException;
 
 import com.caucho.quercus.env.BooleanValue;
@@ -40,7 +41,9 @@ import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.lib.i18n.UnicodeModule;
+import com.caucho.quercus.lib.i18n.IconvUtility;
+
+import com.caucho.quercus.lib.gettext.expr.PluralExpr;
 
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -50,44 +53,47 @@ import com.caucho.vfs.TempBuffer;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Parses Gettext MO files.
  */
-class MOFileParser
+class MOFileParser extends GettextParser
 {
   private static final Logger log
     = Logger.getLogger(MOFileParser.class.getName());
   private static final L10N L = new L10N(MOFileParser.class);
 
+  private ReadStream _in;
   private byte[] _tmpBuf = new byte[4];
 
   private boolean _isLittleEndian;
-  private ReadStream _in;
 
   private int _numberOfStrings;
   private int _offsetOriginal;
   private int _offsetTranslation;
 
-  private PluralExpr _pluralExpr;
   private String _charset;
 
-  private MOFileParser() {}
-
-  private boolean init(Path path)
+  MOFileParser(Path path)
     throws IOException
   {
-    close();
+    init(path);
+  }
 
-    _isLittleEndian = true;
+  private void init(Path path)
+    throws IOException
+  {
     _in = path.openRead();
 
+    _isLittleEndian = true;
     int magic = readInt();
 
     if (magic == 0xde120495)
       _isLittleEndian = false;
     else if (magic != 0x950412de)
-      return false;
+      return;
 
     // Ignore file format revision
     readInt();
@@ -97,224 +103,126 @@ class MOFileParser
     _offsetTranslation = readInt();
 
     if (_numberOfStrings < 0 || _offsetOriginal < 0 || _offsetTranslation < 0)
-      return false;
+      return;
 
-    String metaData = getMetaData();
-    _pluralExpr = PluralExpr.getPluralExpr(metaData);
-    _charset = getCharset(metaData);
-
-    return true;
-  }
-
-  private static String getCharset(String metaData)
-  {
-    String header = "charset=";
-    int i = metaData.indexOf(header);
-
-    if (i < 0)
-      return "UTF-8";
-
-    i = i + header.length();
-    int len = metaData.length();
-
-    int j = i + 1;
-    for (; j < len; j++) {
-      char ch = metaData.charAt(j);
-
-      switch (ch) {
-        case ' ':
-        case '\t':
-        case '\r':
-        case '\n':
-          return metaData.substring(i, j);
-        default:
-          continue; 
-      }
-    }
-
-    return metaData.substring(i, j);
+    StringValue metadata = getMetadata();
+    _pluralExpr = PluralExpr.getPluralExpr(metadata);
+    _charset = getCharset(metadata);
   }
 
   /**
-   * Finds translated string and it.
-   *
-   * @param env
-   * @param path
-   * @param message untranslated string
-   *
-   * @return translated string, or original message if translation not found.
+   * Returns the gettext metadata.
    */
-  public static StringValue search(Env env,
-                       Path path,
-                       StringValue message)
-  {
-    MOFileParser parser = new MOFileParser();
-
-    try {
-      if (parser.init(path) == false) {
-        env.warning(L.l("Error reading MO file: {1}", path));
-        return null;
-      }
-
-      return parser.binarySearch(
-                  env,
-                  message.toString(),
-                  0,
-                  parser._numberOfStrings,
-                  0);
-
-    } catch (IOException e) {
-      env.warning(L.l(e.getMessage()));
-      log.log(Level.FINE, e.toString(), e);
-      return null;
-
-    } finally {
-      parser.close();
-    }
-  }
-
-  /**
-   * Finds translated plural string and returns it.
-   *
-   * @param env
-   * @param path
-   * @param message untranslated string
-   * @param n get plural form for this quantity
-   *
-   * @return translated string, or original message if translation not found.
-   */
-  public static StringValue search(Env env,
-                          Path path,
-                          StringValue msgid1,
-                          StringValue msgid2,
-                          int n)
-  {
-    MOFileParser parser = new MOFileParser();
-
-    try {
-      if (parser.init(path) == false) {
-        env.warning(L.l("Error reading MO file: {1}", path));
-        return null;
-      }
-
-      return parser.binarySearch(
-                  env,
-                  msgid1.toString(),
-                  0,
-                  parser._numberOfStrings,
-                  parser._pluralExpr.eval(n));
-
-    } catch (IOException e) {
-      env.warning(L.l(e.getMessage()));
-      log.log(Level.FINE, e.toString(), e);
-      return null;
-
-    } finally {
-      parser.close();
-    }
-  }
-
-  /**
-   * Strings are ordered lexicographically, so use binary search.
-   * Converts strings to system encoding for comparison.
-   * (Documentation do not mandate encoding of original strings)
-   */
-  private StringValue binarySearch(Env env,
-                          String message,
-                          int left,
-                          int right,
-                          int pluralForm)
+  private StringValue getMetadata()
     throws IOException
   {
-    if (right < left)
-      return null;
-
-    int middle = (right - left) / 2 + left;
-    int result = message.compareTo(getOriginal(middle));
-
-    if (result > 0)
-      return binarySearch(env,
-                  message,
-                  middle + 1,
-                  right,
-                  pluralForm);
-
-    else if (result < 0)
-      return binarySearch(env,
-                  message,
-                  left,
-                  middle - 1,
-                  pluralForm);
-
-    StringValue translation = readTranslation(env, middle, pluralForm);
-
-    if (translation != null)
-      return translation;
-
-    return readTranslation(env, middle, 0);
-  }
-
-  /**
-   * XXX: implement charset decoding after 2nd pass of iconv is done.
-   * Returns the desired plural form of the translated string.
-   */
-  private StringValue readTranslation(Env env, int pos, int pluralForm)
-    throws IOException
-  {
-    int len = seek(_offsetTranslation, pos);
-
-    while (pluralForm > 0) {
-      int ch = _in.read();
-
-      if (ch < 0)
-        break;
-      if (ch == 0)
-        pluralForm--;
-
-      len--;
-    }
-
-    if (len < 0)
-      return null;
-
-    if (len == 0 && pluralForm > 0)
-      return null;
-
-    BinaryBuilderValue bbv = new BinaryBuilderValue();
-
-    for (int i = 0; i < len; i++) {
-      int ch = _in.read();
-
-      if (ch <= 0)
-        break;
-
-      bbv.append(ch);
-    }
-
-    return bbv;
-
-/*
-    Value val = UnicodeModule.iconv(env, _charset, "UTF-16", bbv);
-    
-    if (val == BooleanValue.FALSE)
-      return bbv;
-
-    return val.toStringValue();
-*/
-  }
-
-  /**
-   * Seeks to specified position and returns length of string at this position.
-   */
-  private int seek(int offset, int pos)
-    throws IOException
-  {
-    _in.setPosition(offset + pos * 8);
-    int len = readInt();
-
+    _in.setPosition(_offsetTranslation);
+    int length = readInt();
     _in.setPosition(readInt());
 
-    return len;
+    return readPluralForms(length).get(0);
+  }
+
+  /**
+   * Returns the gettext translations.
+   *
+   * @return translations from file, or null on error
+   */
+  HashMap<StringValue, ArrayList<StringValue>> readTranslations()
+    throws IOException
+  {
+    int[] originalOffsets = new int[_numberOfStrings];
+    int[] translatedOffsets = new int[_numberOfStrings];
+    int[] translatedLengths = new int[_numberOfStrings];
+    StringValue[] originals = new StringValue[_numberOfStrings];
+
+    _in.setPosition(_offsetOriginal);
+
+    // Read in offsets of the original strings
+    for (int i = 0; i < _numberOfStrings; i++) {
+      // XXX: length of original strings not needed?
+      readInt();
+
+      originalOffsets[i] = readInt();
+
+      if (originalOffsets[i] <= 0)
+        return null;
+    }
+
+    _in.setPosition(_offsetTranslation);
+
+    // Read in lengths and offsets of the translated strings
+    for (int i = 0; i < _numberOfStrings; i++) {
+      translatedLengths[i] = readInt();
+
+      translatedOffsets[i] = readInt();
+
+      if (translatedLengths[i] < 0 || translatedOffsets[i] <= 0)
+        return null;
+    }
+
+    _in.setEncoding(_charset);
+
+    // Read in the original strings
+    for (int i = 0; i < _numberOfStrings; i++) {
+      _in.setPosition(originalOffsets[i]);
+
+      originals[i] = readOriginalString();
+    }
+
+    HashMap<StringValue, ArrayList<StringValue>> map =
+            new HashMap<StringValue, ArrayList<StringValue>>();
+
+    // Read translated strings into the HashMap
+    for (int i = 0; i < _numberOfStrings; i++) {
+      _in.setPosition(translatedOffsets[i]);
+
+      map.put(originals[i], readPluralForms(translatedLengths[i]));
+    }
+
+    return map;
+  }
+
+  /**
+   * Reads in a string until NULL or EOF encountered.
+   */
+  private StringValue readOriginalString()
+    throws IOException
+  {
+    StringBuilderValue sb = new StringBuilderValue();
+
+    for (int ch = _in.readChar(); ch > 0; ch = _in.readChar()) {
+      sb.append((char)ch);
+    }
+
+    return sb;
+  }
+
+  /**
+   * Reads in translated plurals forms that are separated by NULL.
+   */
+  private ArrayList<StringValue> readPluralForms(int length)
+    throws IOException
+  {
+    ArrayList<StringValue> list = new ArrayList<StringValue>();
+    StringBuilderValue sb = new StringBuilderValue();
+
+    for (; length > 0; length--) {
+      int ch = _in.readChar();
+
+      if (ch > 0)
+        sb.append((char)ch);
+
+      else if (ch == 0) {
+        list.add(sb);
+        sb = new StringBuilderValue();
+      }
+      else
+        break;
+    }
+
+    list.add(sb);
+    return list;
   }
 
   private int readInt()
@@ -339,46 +247,7 @@ class MOFileParser
     }
   }
 
-  /**
-   * Returns original string at this position
-   */
-  private String getOriginal(int pos)
-    throws IOException
-  {
-    return getString(_offsetOriginal, pos);
-  }
-
-  private String getMetaData()
-    throws IOException
-  {
-    return getString(_offsetTranslation, 0);
-  }
-
-  /**
-   * Returns a String in the MO file in the default encoding.
-   */
-  private String getString(int offset, int pos)
-    throws IOException
-  {
-    int len = seek(offset, pos);
-    byte[] buffer = new byte[len];
-
-    int i = 0;
-    for (; len > 0; len--) {
-      int ch = _in.read();
-
-      if (ch == 0)
-        break;
-
-      if (ch < 0)
-        break;
-      buffer[i++] = (byte)ch;
-    }
-
-    return new String(buffer, 0, i);
-  }
-
-  public void close()
+  void close()
   {
     try {
       if (_in != null)
