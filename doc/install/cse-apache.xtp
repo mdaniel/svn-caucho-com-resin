@@ -178,7 +178,7 @@ JAVA_HOME=/&lt;installdir&gt;/jdk1.4
 export JAVA_HOME
 
 # Resin location (optional).  Usually Resin can figure this out.
-RESIN_HOME=/&lt;installdir&gt;/resin-3.0.2
+RESIN_HOME=/&lt;installdir&gt;/resin-3.1.2
 export RESIN_HOME
 
 # If you're using additional class libraries, you'll need to put them
@@ -202,7 +202,7 @@ The httpd.conf file is also easily modified manually:
 
 <example title="httpd.conf">
 LoadModule caucho_module \
-    &lt;installdir&gt;/resin-3.0.x/win32/apache-2.0/mod_caucho.dll
+    &lt;installdir&gt;/resin-3.1.x/win32/apache-2.0/mod_caucho.dll
 
 ResinConfigServer localhost 6802
 &lt;Location /caucho-status&gt;
@@ -254,9 +254,9 @@ should be consistent between Apache and the backend Resin server.
 
 
 <p>The default resin.conf looks in
-<code>resin-3.0.x/webapps/ROOT</code> 
+<code>resin-3.1.x/webapps/ROOT</code> 
 for JSP files and
-<code>resin-3.0.x/webapps/ROOT/WEB-INF/classes</code>
+<code>resin-3.1.x/webapps/ROOT/WEB-INF/classes</code>
 for servlets and java source files.  To tell Resin
 to use Apache's document area, you configure an explicit 
 <var>web-app</var> with the appropriate document-directory:
@@ -286,23 +286,25 @@ to use Apache's document area, you configure an explicit
 
 </s1>
 
-<s1 title="Starting the backend Resin server">
+<s1 title="Starting the app-tier Resin server">
 
-<p>Now you need to start the backend Resin server.  Starting Resin is the same
-with Apache or standalone.  See the <a href="httpd.xtp#deploy">httpd</a> page
+<p>Now you need to start the app-tier Resin server.  Starting Resin is the same
+with Apache or standalone.  See the <a href="resin-web-server.xtp#deploy">Resin Web Server</a> page
 for a detailed description.</p>
 
 <example>
+unix&gt; java -jar $RESIN_HOME/lib/resin.jar
+
 unix&gt; bin/httpd.sh
 
 win&gt; httpd.exe
 </example>
 
 <results>
-Resin 3.0.2-beta (built Mon Aug  4 09:26:44 PDT 2003)
-Copyright(c) 1998-2003 Caucho Technology.  All rights reserved.
+Resin 3.1.2 (built Mon Aug  4 09:26:44 PDT 2006)
+Copyright(c) 1998-2006 Caucho Technology.  All rights reserved.
  
-Starting Resin on Mon, 04 Aug 2003 09:43:39 -0700 (PDT)
+Starting Resin on Mon, 04 Aug 2006 09:43:39 -0700 (PDT)
 [09:43:40.664] Loaded Socket JNI library.
 [09:43:40.664] http listening to *:8080
 [09:43:40.664] ServletServer[] starting
@@ -323,20 +325,22 @@ configured http listener on port 8080 is a useful debugging tool, it allows you
 to bypass Apache and make a request straight to Resin.
 </p>
 
-<p>The following snippet shows the <var>&lt;http&gt;</var> and <var>&lt;srun&gt;</var>
+<p>The following snippet shows the
+&lt;<a href="config|port-tags.xtp#http">http</a>&gt;
+and &lt;<a href="config|server-tags.xtp#server">server</a>&gt;
 configuration for the above example.</p>
 
 <example>
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-  &lt;server&gt;
-    &lt;http id="" host="*" port="8080"/&gt;
+  &lt;cluster id="app-tier"&gt;
+    &lt;server-default&gt;
+      &lt;http address="*" port="8080"/&gt;
+    &lt;/server-default&gt;
 
-    &lt;cluster&gt;
-      &lt;srun id="" host="localhost" port="6802" index="1"/&gt;
-    &lt;/cluster&gt;
+    &lt;server id="" host="192.168.2.10" port="6800"/&gt;
 
     ...
-  &lt;/server&gt;
+  &lt;/cluster&gt;
 &lt;/resin&gt;
 </example>
 
@@ -377,7 +381,7 @@ ResinConfigServer localhost 6802
 
 <example title="Windows - httpd.conf">
 LoadModule caucho_module \
-    &lt;installdir&gt;/resin-3.0.x/libexec/apache-2.0/mod_caucho.dll
+    &lt;installdir&gt;/resin-3.1.x/libexec/apache-2.0/mod_caucho.dll
 
 ResinConfigServer localhost 6802
 &lt;Location /caucho-status&gt;
@@ -656,7 +660,7 @@ properly started.
 </li><li>If you get a "cannot connect to servlet engine", caucho-status
 will show red, and Resin hasn't started properly.
 </li><li>If Resin doesn't start properly, you should look at the logs
-in resin-3.0.x/log.  You should start <var>httpd.sh -verbose</var> or
+in resin-3.1.x/log.  You should start <var>httpd.sh -verbose</var> or
 <var>httpd.exe -verbose</var> to get more information.
 </li><li>If Resin never shows a "srun listening to *:6802" line,
 it's not listening for connections from mod_caucho.

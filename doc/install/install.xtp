@@ -12,7 +12,7 @@
 <s1 name="quickstart" title="Quick Start for the Impatient">
 
 <p>The Resin standalone web server starts 
-listening to HTTP requests on port 8080 and listens on port 6802
+listening to HTTP requests on port 8080 and listens on port 6800
 for any Apache or IIS plugin.  Resin can then be
 used for development or evaluation.  The steps are:</p>
 
@@ -22,20 +22,20 @@ link /usr/java to the java home.  On Windows, check to make sure the
 JDK installation set JAVA_HOME correctly.</li>
 <li>unzip/untar the Resin download</li>
 <li>On Unix, execute use ./configure; make; make install</li>
-<li>Start <var>resin-3.0.0/bin/httpd.sh</var> on Unix or <var>resin-3.0.0/httpd.exe</var> on Win32</li>
+<li>Start <var>resin-3.1.0/bin/httpd.sh</var> on Unix or <var>resin-3.1.0/httpd.exe</var> on Win32</li>
 <li>Browse <code>http://localhost:8080</code></li>
-<li>Add JSP files like <var>resin-3.0.0/doc/hello.jsp</var>.  The URL in your
+<li>Add JSP files like <var>resin-3.1.0/webapps/ROOT/hello.jsp</var>.  The URL in your
 browser will be <code>http://localhost:8080/hello.jsp</code></li>
-<li>Add servlets like <var>resin-3.0.0/doc/WEB-INF/classes/test/HelloServlet.java</var></li>
-<li>Add .war files like <var>resin-3.0.0/webapps/hello.war</var>, url in your
+<li>Add servlets like <var>resin-3.1.0/webapps/ROOT/WEB-INF/classes/test/HelloServlet.java</var></li>
+<li>Add .war files like <var>resin-3.1.0/webapps/hello.war</var>, url in your
 browser is <code>http://localhost:8080/hello</code></li>
 <li>Create web-apps directly like
-<var>resin-3.0.0/webapps/hello/index.jsp</var>
+<var>resin-3.1.0/webapps/hello/index.jsp</var>
 url in your browser is <code>http://localhost:8080/hello</code>.
-Create a file <var>resin-3.0.0/webapps/hello/WEB-INF/web.xml</var> to
+Create a file <var>resin-3.1.0/webapps/hello/WEB-INF/web.xml</var> to
 configure the 'hello' web application.</li>
-<li>If needed, modify the Resin configuration in <var>resin-3.0.0/conf/resin.conf</var></li>
-<li>.war files will be deployed in resin-3.0.x/webapps.</li>
+<li>If needed, modify the Resin configuration in <var>resin-3.1.0/conf/resin.conf</var></li>
+<li>.war files will be deployed in resin-3.1.x/webapps.</li>
 </ol>
 
 <p>Until you're ready to deploy the server, those are all the
@@ -45,7 +45,7 @@ steps needed to get started with Resin.</p>
 
 <s1 title="Preconditions">
 
-<p>Resin needs Java before it can run.  It needs JDK 1.4 or a later JDK.</p>
+<p>Resin 3.1 needs Java before it can run.  It needs JDK 1.5 or a later JDK.</p>
 
 <p>Sun's JDK for Windows, Solaris, and Linux can be found at
 <a href="http://java.sun.com">http://java.sun.com</a>.  Sun also has
@@ -70,12 +70,12 @@ can be changed to the HTTP port 80 during deployment.</p>
 <s2 title="Windows">
 
 <ol>
-<li>Install JDK 1.4 or later.</li>
-<li>Check that the environemnt variable JAVA_HOME is set to the JDK location, i.e "c:\j2sdk1.4.1_01"</li>
-<li>Unzip resin-3.0.0.zip</li>
+<li>Install JDK 1.5 or later.</li>
+<li>Check that the environemnt variable JAVA_HOME is set to the JDK location, e.g. "c:\j2sdk1.4.1_01"</li>
+<li>Unzip resin-3.1.0.zip</li>
 <li>Define the environment variable RESIN_HOME to the location of
-Resin, for example "c:\resin-3.0.0"</li>
-<li>Execute resin-3.0.0/httpd.exe</li>
+Resin, for example "c:\resin-3.1.0"</li>
+<li>Execute resin-3.1.0/httpd.exe</li>
 <li>Browse http://localhost:8080</li>
 </ol>
 </s2>
@@ -83,13 +83,13 @@ Resin, for example "c:\resin-3.0.0"</li>
 <s2 title="Unix (including MacOS-X)">
 
 <ol>
-<li>Install JDK 1.4 or later and link /usr/java to the Java home or define the environment variable JAVA_HOME.</li>
-<li>tar -vzxf resin-3.0.0.tar.gz</li>
-<li>cd resin-3.0.0</li>
+<li>Install JDK 1.5 or later and link /usr/java to the Java home or define the environment variable JAVA_HOME.</li>
+<li>tar -vzxf resin-3.1.0.tar.gz</li>
+<li>cd resin-3.1.0</li>
 <li>./configure</li>
 <li>make</li>
 <li>make install</li>
-<li>Execute resin-3.0.0/bin/httpd.sh</li>
+<li>Execute resin-3.1.0/bin/httpd.sh</li>
 <li>Browse http://localhost:8080</li>
 </ol>
 
@@ -123,8 +123,8 @@ configuration tells Apache how to find Resin.</p>
 <li>Make any needed Apache httpd.conf changes</li>
 <li>Make any needed Resin resin.conf changes</li>
 <li>Restart Apache</li>
-<li>Start Resin with <code>resin-3.0.0/bin/httpd.sh</code> on Unix or
-<code>resin-3.0.0/httpd.exe</code> on Windows.</li>
+<li>Start Resin with <code>resin-3.1.0/bin/httpd.sh</code> on Unix or
+<code>resin-3.1.0/httpd.exe</code> on Windows.</li>
 </ol>
 
 <p>On Unix, you'll run configure using <code>--with-apache</code> and then <code>make</code>:
@@ -157,10 +157,10 @@ configuration tells IIS how to find Resin.
 </p>
 
 <ol>
-<li>Setup the registry and IIS using resin-3.0.0/bin/setup</li>
+<li>Setup the registry and IIS using resin-3.1.0/bin/setup</li>
 <li>Any needed Resin resin.conf changes</li>
 <li>Restart IIS</li>
-<li>Start Resin with resin-3.0.0/httpd.exe.</li>
+<li>Start Resin with resin-3.1.0/httpd.exe.</li>
 </ol>
 
 <p>For more details and troubleshooting steps, see the

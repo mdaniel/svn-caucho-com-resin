@@ -24,9 +24,7 @@
 
 </s1>
 
-<s1 title="resin.conf">
-
-<s1 title="access-log" version="Resin 3.0" type="defun">
+<defun title="access-log" version="Resin 3.0">
 <parents>server, host</parents>
 
 <p>Specifies the access log file.</p>
@@ -108,9 +106,9 @@ at midnight in the local time if the time period is a day or longer.
 <p>If the web-app doesn't specify an access-log, it will use the host's
 access-log.</p>
 
-</s1>
+</defun>
 
-<s1 title="cache" version="Resin 3.0" type="defun">
+<defun title="cache" version="Resin 3.0">
 <parents>server</parents>
 
 <p>Configures Resin's internal HTTP proxy cache.
@@ -143,9 +141,9 @@ in the <a href="doc|performance|caching">caching documentation.</a></p>
     <td>true</td></tr>
 </deftable-childtags>
 
-</s1>
+</defun>
 
-<s1 title="cluster" version="Resin 3.0" type="defun">
+<defun title="cluster" version="Resin 3.0">
 <parents>server</parents>
 
 <p>Defines the cluster of Resin JVMs used for load-balancing and for
@@ -175,26 +173,10 @@ sharing distributed sessions.</p>
     <td>60s</td></tr>
 </deftable-childtags>
 
-</s1>
+</defun>
 
-<s1 title="document-directory" version="Resin 3.0" type="defun">
-<parents>web-app</parents>
 
-<p>Configures the directory where web pages will be placed when
-using webserver-style deployment instead of war-based deployment.</p>
-</s1>
-
-<s1 title="group-name" version="Resin 3.0" type="defun">
-<parents>resin</parents>
-
-<p>Configures the Unix setuid group name used after Resin binds the
-reserved ports as root.</p>
-
-<p>Note, Linux requires the new thread package (e.g. RedHat 9.0 or
-later) to support group-name.</p>
-</s1>
-
-<s1 title="host" version="Resin 3.0" type="defun">
+<defun title="host" version="Resin 3.0">
 <parents>server</parents>
 
 <p>Configures a virtual host.  Virtual hosts must be
@@ -251,9 +233,9 @@ configured explicitly.</p>
 <p>It is recommended that any &lt;host&gt; using a regexp include
 a &lt;host-name&gt; to set the canonical name for the host.</p>
 
-</s1>
+</defun>
 
-<s1 title="host-default" version="Resin 3.0" type="defun">
+<defun title="host-default" version="Resin 3.0">
 <parents>server, host-deploy</parents>
 
 <p>Defaults for a virtual host.</p>
@@ -261,7 +243,7 @@ a &lt;host-name&gt; to set the canonical name for the host.</p>
 <p>The host-default can contain any of the host configuration tags.
 It will be used as defaults for any virtual host.</p>
 
-</s1>
+</defun>
 
 <s1 title="host-deploy" version="Resin 3.0.4" type="defun">
 <parents>server</parents>
@@ -874,137 +856,6 @@ which ports the server should listen to.</p>
 <p>The class that corresponds to &lt;srun&gt; is <a href="javadoc|com.caucho.server.cluster.ClusterPort|"/></p>
 
 </s1>
-
-<s1 title="thread-pool" version="Resin 3.0" type="defun">
-<parents>server</parents>
-
-<p>Configures the thread pool shared among all ports.</p>
-
-<deftable-childtags>
-<tr><td>thread-max</td>
-    <td>maximum number of working threads</td>
-    <td>200</td></tr>
-<!--
-<tr><td>spare-thread-max</td><td>maximum number of spare working threads</td><td>20</td></tr>
--->
-<tr><td>spare-thread-min</td><td>minimum number of spare working threads</td><td>5</td></tr>
-</deftable-childtags>
-
-<p>&lt;thread-max&gt; is the absolute maximum number of connection worker
-threads allowed.  &lt;thread-max&gt; may be limited by OS/JVM
-restrictions, especially the stack size.  -Xss and/or ulimit -s may be
-required for large numbers of threads, e.g. "ulimit -s 2048" on some
-versions of Linux would allow for 1024 total threads in the JVM.</p>
-
-<!--
-<p>&lt;spare-thread-max> and &lt;spare-thread-min> configure Resin's
-adaptive thread pooling.  Resin tries to keep between &lt;spare-thead-min>
-and &lt;spare-thread-max> idle threads available at all time.  Sites
-with large spikes in connection loads may need to increase the
-&lt;spare-thread-min> value.</p>
--->
-
-<p>&lt;spare-thread-min&gt; configures Resin's
-adaptive thread pooling.  Resin tries to keep &lt;spare-thead-min&gt;
-idle threads available at all time.  Sites
-with large spikes in connection loads may need to increase the
-&lt;spare-thread-min&gt; value.</p>
-
-</s1>
-
-<s1 title="user-name" version="Resin 3.0" type="defun">
-<parents>resin</parents>
-
-<p>Note: at present, this directive is deprecated because of timing
-issues with log file creation and ownership.  It is recommended that
-you use some other method to remap port 80 to port 8080.</p>
-
-<p>Configures the Unix setuid user name used after Resin binds the
-reserved ports as root.</p>
-
-</s1>
-
-</s1> <!-- resin.conf -->
-
-<s1 name="common" title="Common Tags">
-
-<p>There are some conventions for tag names that provide similar functionality.</p>
-
-<s1 title="fileset" version="Resin 3.0.7" type="defun">
-
-<p>&lt;fileset&gt; provides the ability to match a set of files.  It is
-modelled after the ant tag by the same name.</p>
-
-<deftable-childtags>
-<tr><td>dir</td>
-    <td>the starting directory</td>
-    <td>required</td></tr>
-<tr><td>include</td>
-    <td>an include pattern</td>
-    <td>do not include all files</td></tr>
-<tr><td>exclude</td>
-    <td>an exclude pattern</td>
-    <td>do not exclude any files</td></tr>
-</deftable-childtags>
-
-<p>A pattern can contain two special characters: '*' and '**'.  '*' matches any
-part of path, but does not match the path separator.  '**' matches any part of
-a path, including the path separator. </p>
-
-<example>
-&lt;fileset dir="lib"&gt;
-  &lt;include name="*.jar"/&gt;
-&lt;/fileset&gt;
-
-MATCH    lib/foo.jar
-MATCH    lib/bar.jar
-NO MATCH lib/baz/foo.jar
-</example>
-
-<example>
-&lt;fileset dir="lib"&gt;
-  &lt;include name="**/*.jar"/&gt;
-&lt;/fileset&gt;
-
-MATCH    lib/foo.jar
-MATCH    lib/bar.jar
-MATCH    lib/baz/foo.jar
-</example>
-
-<p>
-The class that corresponds to &lt;fileset&gt; is 
-<a href="javadoc|com.caucho.config.types.FileSetType|"/>.  
-The class that corresponds to the &lt;include&gt; and &lt;exclude&gt; patterns
-is <a href="javadoc|com.caucho.config.types.PathPatternType|"/>
-</p>
-
-</s1>
-
-</s1> <!-- common -->
-
-<s1 name="startup-mode" title="Startup and Redeploy Mode">
-
-<p>The <a config-tag="startup-mode"/> is used in a number of places to
-determine the behaviour of a resource when the server starts.</p>
-
-<p>The startup-mode has three values: "automatic", "lazy", and "manual".</p>
-<ul>
-<li>automatic - starts the resource on server start (default)</li>
-<li>lazy - starts the resource on the first use</li>
-<li>manual - waits for JMX to start the resource</li>
-</ul>
-
-<p>The <a config-tag="redeploy-mode"/> is used in a number of places to
-determine the behaviour of a resource when it is replaced or modified while the
-server is running.</p>
-
-<p>The redeploy-mode has two values: "automatic", and "manual".</p>
-<ul>
-<li>automatic - restarts the resource when it is modified (web.xml, *.class, *.war, etc).</li>
-<li>manual - waits for JMX to restart the resource when changes occur.</li>
-</ul>
-
-</s1> <!-- startup-mode -->
 
 </body>
 </document>

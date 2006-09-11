@@ -1,0 +1,442 @@
+<document>
+  <header>
+    <product>resin</product>
+    <version>Resin 3.1</version>
+    <title>Resin Web Server</title>
+    <description>
+      <p>Resin provides a fast web server which can be used
+by itself or as a load balancer.
+In our benchmarks, it serves static pages faster than Apache!
+For most sites, the Resin web server is ideal because of its
+performance, security and reliability.</p>
+
+        <figure src="httpd.gif"/>
+    </description>
+
+  </header>
+
+  <body>
+    <localtoc/>
+
+<s1 title="Unix (including Linux and MacOS-X)">
+
+<s2 title="Getting Started">
+
+<p>The following steps will start Resin for development:</p>
+
+<ol>
+<li>Install JDK 1.5 or later and link /usr/java to the Java home or
+set environment variable JAVA_HOME.</li>
+<li>tar -vzxf resin-3.1.0.tar.gz</li>
+<li>(Optional) Link /usr/local/resin to the resin-3.1.0 directory.</li>
+<li>./configure; make; make install</li>
+<li>Run <code>java -jar resin/lib/resin.jar</code></li>
+<li>Or <code>resin/bin/httpd.sh</code></li>
+<li>Browse http://localhost:8080</li>
+</ol>
+
+<example title="Getting Started on Unix">
+unix&gt; java -jar resin/lib/resin.jar
+Resin Professional 3.1.0 (built Fri, 08 Sep 2006 12:49:30 PDT)
+Copyright(c) 1998-2006 Caucho Technology.  All rights reserved.
+
+  001111.license - 1 Resin server Hogwarts School
+
+Starting Resin on Tue, 12 Sep 2006 19:11:52 -0700 (PDT)
+
+[21:22:21.282] Proxy Cache disk-size=1024M memory-size=8M
+[21:22:21.477] Server[id=,cluster=app-tier] starting
+[21:22:21.477] 
+[21:22:21.477] Mac OS X 10.4.7 ppc
+[21:22:21.477] Java 1.5.0_06-64, 32, mixed mode, sharing, MacRoman, en, "Apple Computer, Inc."
+[21:22:21.477] resin.home = /usr/local/resin
+[21:22:21.478] server.root = /var/www
+[21:22:21.478] 
+[21:22:21.492] Loaded Socket JNI library.
+[21:22:21.595] hmux listening to localhost:6800
+[21:22:21.696] http listening to *:8080
+[21:22:21.842] Host[] starting
+[21:22:22.089] WebApp[] starting
+</example>
+
+</s2>
+
+<s2 title="./configure options">
+
+<deftable>
+<tr><td>--enable-64bit</td><td>Compiles the JNI using 64-bits</td></tr>
+</deftable>
+
+<p>The 64-bit JNI compilation must match the JDK you're using, i.e.
+you'll need to use something like "-J-d64" to properly enable 64 bit JDKs.
+</p>
+
+</s2>
+
+<s2 name="deploy" title="Deployment Directories">
+
+<p>When deploying, it's a good idea to create a bit of structure to
+make Resin and website upgrades easier and more maintainable.</p>
+
+<ol>
+<li>Create a user to run Resin (e.g. resin or another non-root user)</li>
+<li>Link <code>/usr/local/resin</code> to the current Resin version.  This is $RESIN_HOME.</li>
+<li>Create a deployment root, e.g. <code>/var/www</code>, owned by
+the resin user.  This is $SERVER_ROOT.</li>
+<li>Put the modified resin.conf in <code>/etc/resin/resin.conf</code></li>
+<li>Put the site documents in <code>/var/www/webapps/ROOT</code>.</li>
+<li>Put any .war files in <code>/var/www/webapps</code>.</li>
+<li>Put any virtual hosts in <code>/var/www/hosts/www.foo.com</code>.</li>
+<li>Output logs will appear in <code>/var/www/log</code>.</li>
+<li>Create a startup script and configure the server to start it
+when the machine reboots.</li>
+</ol>
+
+</s2>
+
+<s2 title="start/stop and the watchdog process">
+
+<p>In a deployment environment, Resin will be started with "start", "stop",
+and "restart" arguments to the resin.jar, e.g.</p>
+
+<example title="starting resin">
+unix> java -jar /usr/local/resin/lib/resin.jar \
+           -conf /etc/resin/resin.conf \
+           start
+</example>
+
+<p>The "start" and "stop" send messages to a watchdog process which
+takes care of starting the actual Resin process.  The watchdog monitors
+the state of Resin and restarts it if necessary to improve reliability.</p>
+
+<p>Because of the watchdog manager, if you ever need to stop Resin with
+<var>kill</var>, you will need to kill the watchdog. If you just kill
+the Resin process, the watchdog will restart it automatically.
+JDK 1.5 includes a "jps" command which will show the
+pids of any java processes.  The WatchdogManager is the watchdog
+and Resin is the Resin instance.</p>
+
+</s2>
+
+<s2 name="script" title="Starting Script">
+
+<p>You can create your own starting script which will start and stop
+your Resin instance, and will pass any <a href="#command-line">command-line arguments</a>.  The script
+will typically do a number of things:</p>
+
+<ol>
+<li>Configure the location of Java in JAVA_HOME</li>
+<li>Configure the location of Resin in RESIN_HOME</li>
+<li>Configure your web site directory in SERVER_ROOT</li>
+<li>Select a server and pid file if you have multiple Resin servers.</li>
+<li>Start and stop the Resin daemon.</li>
+</ol>
+
+<p>The start script might look like:</p>
+
+<example title="Example start.sh script">
+#!/bin/sh
+
+JAVA_HOME=/usr/java
+RESIN_HOME=/usr/local/resin
+SERVER_ROOT=/usr/local/web
+
+java=$JAVA_HOME/bin/java
+
+export JAVA_HOME
+export RESIN_HOME
+export SERVER_ROOT
+
+$java -jar $RESIN_HOME/lib/resin.jar \
+      -server-root $SERVER_ROOT \
+      -conf /etc/conf/resin.conf \
+      -server a \
+       $*
+</example>
+
+<p>The script would be called as "./start.sh start" to start
+and "./start.sh stop" to stop.</p>
+
+<p>The <code>-server</code> argument is only
+necessary if you have multiple servers (JVM instances) either
+on different machines or the same machine.
+The <a href="doc|config|balance">load balancing</a> and
+<a href="doc|config|sessions">distributed sessions</a> pages describe when
+you might use -server.</p>
+
+<p>More information on deploying on Unix is available at:</p>
+<ul>
+<li><a href="doc|install|linux-boot">Linux boot</a></li>
+</ul>
+
+</s2>
+
+</s1>
+
+<s1 title="Windows">
+
+<s2 title="Getting Started">
+
+<ol>
+<li>Install JDK 1.5 or later.</li>
+<li>Make sure the JDK installation set the environment variable JAVA_HOME correctly</li>
+<li>Unzip resin-3.1.0.zip</li>
+<li>Run <code>java -jar resin-3.1.0/lib/resin.jar</code></li>
+<li>Or execute <code>resin-3.1.0/httpd.exe</code></li>
+<li>Browse http://localhost:8080</li>
+</ol>
+
+<example title="Starting on Win32">
+C:\win32&gt; resin-3.1.0\bin\httpd
+Resin 3.1.0-beta (built Thu Feb 13 18:21:13 PST 2003)
+Copyright(c) 1998-2002 Caucho Technology.  All rights reserved.
+
+Starting Resin on Sat, 01 Mar 2003 19:11:52 -0500 (EST)
+[19:11:56.479] ServletServer[] starting
+[19:11:57.000] Host[] starting
+[19:11:58.312] Application[http://localhost:8380/doc] starting
+[19:12:11.872] Application[http://localhost:8380/quercus] starting
+
+...
+
+[19:12:12.803]http listening to *:8380
+[19:12:12.933]hmux listening to *:6802
+</example>
+
+</s2>
+
+<s2 title="Deploying as a Windows Service">
+
+<p>The Resin Web Server can be installed as an Windows service.</p>
+
+<p>To install the service, use</p>
+
+<example>
+C:\&gt; resin-3.1.x\bin\httpd -install -conf conf/myconf.conf
+</example>
+
+<p>To remove the service, use</p>
+
+<example>
+C:\&gt; resin-3.1.x\bin\httpd -remove
+</example>
+
+<p>You will either need to reboot the machine or start the service
+from the Control&#160;Panel/Services panel to start the server.  On a
+machine reboot, Windows will automatically start the web server.</p>
+
+<p>You can also start and stop the service from the command-line:</p>
+
+<example>
+C:\&gt; net start resin
+...
+C:\&gt; net stop resin
+</example>
+
+<p>Resin's -install saves the command-line arguments and starts the service
+with those arguments.  You can look at them in the control panel, under
+the executable string.</p>
+
+<p>With multiple servers, you can use -install-as <var>foo</var> to specify
+the service name.</p>
+
+<example>
+C:\&gt; resin-3.1.x\httpd -install-as ResinA \
+                       -conf conf/myconf.conf \
+                       -server a
+C:\&gt; net start ResinA
+</example>
+
+</s2>
+</s1>
+
+<s1 name="command-line" title="Command-line arguments">
+
+<deftable>
+<tr>
+  <th>Argument</th>
+  <th>Meaning</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>-conf <var>xxx</var></td>
+  <td>Selects the Resin configuration file</td>
+  <td>conf/resin.conf</td>
+</tr>
+<tr>
+  <td>-resin-home <var>xxx</var></td>
+  <td>Sets the Resin home directory (also recognizes the environment variable RESIN_HOME.)</td>
+  <td>The parent directory of resin.jar</td>
+</tr>
+<tr>
+  <td>-server <var>xxx</var></td>
+  <td>Selects the &lt;server> in the resin.conf</td>
+  <td>""</td>
+</tr>
+<tr>
+  <td>-stdout <var>xxx</var></td>
+  <td>Sets the file to save stdout messages.</td>
+  <td>log/stdout.log.</td>
+</tr>
+<tr>
+  <td>-stderr <var>xxx</var></td>
+  <td>Sets the file to save stdout messages.</td><td>log/stderr.log.</td>
+</tr>
+<tr>
+  <td>-verbose</td>
+  <td>Show the Java environment before starting Resin.</td>
+  <td>off</td>
+</tr>
+<tr>
+  <td>start</td>
+  <td>Starts Resin as a daemon, starting the watchdog if necessary</td>
+  <td>n/a</td>
+</tr>
+<tr>
+  <td>stop</td>
+  <td>Stops Resin as a daemon by contacting the watchdog.</td>
+  <td>n/a</td>
+</tr>
+<tr>
+  <td>restart</td>
+  <td>Restarts Resin as a daemon by contacting the watchdog.</td>
+  <td>n/a</td>
+</tr>
+<tr>
+  <td>-install</td>
+  <td>(Windows) install Resin as a service (but doesn't automatically start.)</td>
+  <td>n/a</td>
+</tr>
+<tr>
+  <td>-install-as <var>xxx</var></td>
+  <td>(Windows) install Resin as a named service (but doesn't automatically start.)</td>
+  <td>n/a</td>
+</tr>
+<tr>
+  <td>-remove</td>
+  <td>(Windows) install Resin as a service (but doesn't automatically start.)</td>
+   <td>n/a</td>
+</tr>
+<tr>
+  <td>-remove-as <var>xxx</var></td>
+  <td>(Windows) remove Resin as a named service (but doesn't automatically start.)</td>
+  <td>n/a</td>
+</tr>
+</deftable>
+
+<s2 title="Memory Configuration">
+
+<p>Memory configuration is part of the JVM's arguments.  For most JVMs,
+you can find the full list by starting "java -X".</p>
+
+<deftable title="Memory Configuration">
+<tr><td>-Xms&lt;size&gt;</td><td>Initial Java heap size, e.g. -Xms32m
+</td></tr><tr><td>-Xmx&lt;size&gt;</td><td>Maximum Java heap size, e.g. -Xmx128m
+</td></tr></deftable>
+
+</s2>
+
+</s1>
+
+<s1 title="JDK arguments">
+
+<p>Resin 3.1 has moved all JDK arguments into the resin.conf
+file, in the &lt;<a href="config|server-tags.xtp#jvm-args">jvm-args</a>&gt;
+tag. Because the Resin 3.1 watchdog JVM starts the Resin server instance,
+it can pass the arguments defined in the configuration file.  By moving
+the Java arguments to the configuration file, the site configuraion
+is easier and more maintainable.</p>
+
+<example title="resin.conf with Java arguments">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  &lt;cluster id="app-tier">
+
+    &lt;server-default>
+      &lt;jvm-args>-Xmx512m&lt;/jvm-args>
+      &lt;jvm-args>-Xss1m&lt;/jvm-args>
+      &lt;jvm-args>-verbosegc&lt;/jvm-args>
+
+      &lt;http port="8080"/>
+    &lt;/server-default>
+
+    &lt;server id="a" address="192.168.2.1" port="6800"/>
+
+    ...
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+<deftable-childtags>
+<tr>
+  <td>-verbosegc</td>
+  <td>Writes garbage collection information to standard error (recommended)</td>
+  <td>conf/resin.conf</td>
+</tr>
+<tr>
+  <td>-Dfoo=bar</td>
+  <td>Sets a system property</td>
+  <td/>
+</tr>
+<tr>
+  <td>-Xss1m</td>
+  <td>Sets the maximum thread stack size</td>
+  <td>1m</td>
+</tr>
+<tr>
+  <td>-Xmx256m</td>
+  <td>Sets the maximum java heap size</td>
+  <td>256m</td>
+</tr>
+</deftable-childtags>
+
+</s1>
+
+<s1 title="Load balancing">
+
+<p>Resin's web server can scale to large loads with its load-balancing
+capability.</p>
+
+<p>The <a href="config|balance.xtp">Reliability and Load Balancing</a>
+section provides more details of Resin's load balancing.</p>
+
+<p>Load balancing divides the Resin servers into two clusters: the
+web-tier and the app-tier.  In Resin 3.1, all the cluster and load
+balance configuration is in a single resin.conf.  The actual deployed
+server is selected with the <var>-server web-a</var> command-line argument.</p>
+
+<example title="resin.conf">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+
+  &lt;cluster id="web-tier"&gt;
+    &lt;server-default>
+      &lt;http port="80"/>
+    &lt;/server-default>
+
+    &lt;server id="web-a" address="192.168.1.10" port="6800"/>
+
+    &lt;host id="">
+      &lt;web-app id="">
+
+        &lt;rewrite-dispatch>
+          &lt;load-balance regexp="" target="app-tier"/>
+        &lt;/rewrite-dispatch>
+
+      &lt;/web-app>
+    &lt;/host>
+  &lt;/cluster>
+
+  &lt;cluster id="app-tier"&gt;
+    &lt;server id="app-a" address="192.168.2.10" port="6800"/>
+    &lt;server id="app-b" address="192.168.2.11" port="6800"/>
+    &lt;server id="app-c" address="192.168.2.12" port="6800"/>
+
+    ... &lt;!-- hosts and web-app configuration -->
+  &lt;/cluster&gt;
+&lt;/resin&gt;
+</example>
+
+</s1>
+
+  </body>
+
+</document>

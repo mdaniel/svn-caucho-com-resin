@@ -44,19 +44,19 @@ export RESIN_HOME
 StartService ()
 {
         ConsoleMessage "Starting Resin"
-        $RESIN_HOME/bin/httpd.sh start -J-server -Xms32M -Xmx64M
+        $JAVA_HOME/bin/java -jar $RESIN_HOME/lib/resin.jar start
 }
 
 StopService ()
 {
         ConsoleMessage "Stopping Resin"
-        $RESIN_HOME/bin/httpd.sh stop
+        $JAVA_HOME/bin/java -jar $RESIN_HOME/lib/resin.jar stop
 }
 
 RestartService ()
 {
         ConsoleMessage "Restarting Resin"
-        $RESIN_HOME/bin/httpd.sh restart
+        $JAVA_HOME/bin/java -jar $RESIN_HOME/lib/resin.jar restart
 }
 
 RunService "$1"
