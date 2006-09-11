@@ -20,6 +20,8 @@
 #
 # trace script and simlinks to find thw wrapper
 #
+java=java
+
 script=`/bin/ls -l $0 | awk '{ print $NF; }'`
 
 while test -h "$script"

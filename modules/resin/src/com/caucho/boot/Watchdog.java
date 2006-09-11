@@ -231,8 +231,6 @@ public class Watchdog implements Runnable
     try {
       return watchdog.stop(getId());
     } catch (Exception e) {
-      e.printStackTrace();
-      
       log.log(Level.FINE, e.toString(), e);
 
       return false;
@@ -247,8 +245,6 @@ public class Watchdog implements Runnable
     try {
       return watchdog.shutdown();
     } catch (Exception e) {
-      e.printStackTrace();
-      
       log.log(Level.FINE, e.toString(), e);
 
       return false;

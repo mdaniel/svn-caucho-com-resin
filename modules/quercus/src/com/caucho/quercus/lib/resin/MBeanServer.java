@@ -31,12 +31,12 @@
 package com.caucho.quercus.lib.resin;
 
 import com.caucho.jmx.Jmx;
-import com.caucho.jmx.remote.HessianMBeanServerConnection;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.module.Optional;
+import com.caucho.server.admin.*;
 
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
@@ -66,7 +66,7 @@ public class MBeanServer {
       _server = Jmx.getGlobalMBeanServer();
     }
     else {
-      _server = new HessianMBeanServerConnection(url);
+      _server = RemoteMBeanConnectionFactory.create(url);
     }
   }
 

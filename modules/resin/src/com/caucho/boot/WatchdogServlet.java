@@ -74,8 +74,20 @@ public class WatchdogServlet extends HessianServlet implements WatchdogAPI {
   {
     log.info("Watchdog shutdown");
 
-    System.exit(0);
+    new Thread(new Shutdown()).start();
 
     return true;
+  }
+
+  static class Shutdown implements Runnable {
+    public void run()
+    {
+      try {
+	Thread.sleep(1000);
+      } catch (Exception e) {
+      }
+
+      System.exit(0);
+    }
   }
 }

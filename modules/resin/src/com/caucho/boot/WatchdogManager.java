@@ -115,12 +115,12 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
     host.addWebApp(webAppConfig);
 
-    WebApp webApp = host.findWebAppByURI("/resin-admin");
+    WebApp webApp = host.findWebAppByURI("/");
 
     ServletMapping servlet = new ServletMapping();
 
-    servlet.setServletName("admin");
-    servlet.setURLPattern("/admin");
+    servlet.setServletName("watchdog");
+    servlet.setURLPattern("/watchdog");
     servlet.setServletClass("com.caucho.boot.WatchdogServlet");
     servlet.init();
 
