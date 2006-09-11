@@ -29,23 +29,18 @@
 
 package com.caucho.quercus.program;
 
-import java.util.ArrayList;
-
-import java.io.IOException;
-
 import com.caucho.java.JavaWriter;
-
+import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.QuercusLanguageException;
-
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.AbstractVarExpr;
 import com.caucho.quercus.expr.RawExpr;
-import com.caucho.quercus.expr.Expr;
-
 import com.caucho.quercus.gen.PhpWriter;
-import com.caucho.quercus.Location;
+
+import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Represents sequence of statements.
@@ -126,7 +121,8 @@ public class TryStatement extends Statement {
   protected void generateImpl(PhpWriter out)
     throws IOException
   {
-    out.println("try {");
+    // php/3g07 requires the "if (true)"
+    out.println("if (true) try {");
     out.pushDepth();
     
     _block.generate(out);
