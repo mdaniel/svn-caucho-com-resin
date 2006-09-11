@@ -206,6 +206,10 @@ public final class ReadStream extends InputStream {
   public boolean setPosition(long pos)
     throws IOException
   {
+    // Allow seeks to be reflected in the char Reader.
+    if (_readEncoding != null)
+      _readEncoding = Encoding.getReadEncoding(this, _readEncodingName);
+
     if (pos < _position) {
       _position = pos;
       _readLength = _readOffset = 0;
