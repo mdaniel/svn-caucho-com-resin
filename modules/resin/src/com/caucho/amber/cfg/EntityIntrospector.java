@@ -574,7 +574,7 @@ public class EntityIntrospector {
 
       subType.getParentType().addSubClass(subType);
 
-      JAnnotation joinAnn = type.getAnnotation(JoinColumn.class);
+      JAnnotation joinAnn = type.getAnnotation(PrimaryKeyJoinColumn.class);
 
       if (subType.isJoinedSubClass()) {
         linkInheritanceTable(subType.getRootType().getTable(),

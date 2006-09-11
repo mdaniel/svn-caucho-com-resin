@@ -391,7 +391,9 @@ public class QueryImpl implements Query {
     if (value == null)
       _userQuery.setNull(index, java.sql.Types.JAVA_OBJECT);
     else if (value instanceof Double)
-      _userQuery.setDouble(index, ((Double) value).doubleValue());
+      _userQuery.setString(index, value.toString()); // commented out (jpa/141a): ((Double) value).doubleValue());
+    else if (value instanceof Character)
+      _userQuery.setString(index, value.toString());
     else {
       _userQuery.setObject(index, value);
     }

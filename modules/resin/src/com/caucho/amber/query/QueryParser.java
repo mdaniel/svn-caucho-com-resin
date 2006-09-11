@@ -316,6 +316,7 @@ public class QueryParser {
            ((token != FROM) || (_depth > 0))) {
     }
 
+    // "SELECT CURRENT_DATE" does NOT have a FROM clause.
     boolean hasFrom = (token == FROM) ? true : false;
 
     _token = token;
@@ -1353,6 +1354,9 @@ public class QueryParser {
 
           if (tableExpr != null)
             return parsePath(tableExpr);
+
+          if (_query.getFromList().size() == 0)
+            throw error(L.l("Expected a FROM clause before '{0}'", name));
 
           FromItem fromItem = _query.getFromList().get(0);
 
