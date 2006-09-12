@@ -46,6 +46,8 @@ import com.caucho.esb.WebService;
 import com.caucho.server.dispatch.ServletMapping;
 import com.caucho.server.webapp.ServletContextImpl;
 
+import com.caucho.util.CauchoSystem;
+
 /**
  * An HTTP Servlet to dispatch REST requests
  */
@@ -53,14 +55,14 @@ public class RestServletMapping extends ServletMapping {
   private static final Logger log = 
       Logger.getLogger(RestServletMapping.class.getName());
 
-  private static final String BINDINGS = "REST_BINDINGS";
+  private static final String BINDING = "REST_BINDING";
   private static final String SERVICE = "REST_SERVICE";
   private static final String SKELETON = "REST_SKELETON";
 
   private Object _service;
   private WebService _webService;
   private RestSkeleton _skeleton;
-  private HashSet<RestBinding> _bindings = new HashSet<RestBinding>();
+  private RestBinding _binding;
 
   public RestServletMapping(WebService webService)
     throws ServletException
@@ -75,24 +77,41 @@ public class RestServletMapping extends ServletMapping {
   {
     _service = service;
     _skeleton = new RestSkeleton(_service);
-  }
 
-  public void setQueryBinding(String empty)
-  {
-    _bindings.add(new QueryBinding());
-  }
+    Class cl = _service.getClass();
 
-  public void setPathBinding(String empty)
-  {
-    _bindings.add(new PathBinding());
+    // Check for the @RestEncoding on the service class and the
+    // endpointInterface, if applicable
+    RestEncoding restEncoding = null;
+
+    if (cl.isAnnotationPresent(RestEncoding.class))
+      restEncoding = (RestEncoding) cl.getAnnotation(RestEncoding.class);
+    else if (cl.isAnnotationPresent(javax.jws.WebService.class)) {
+      javax.jws.WebService webService = 
+        (javax.jws.WebService) cl.getAnnotation(javax.jws.WebService.class);
+
+      if (webService.endpointInterface() != null) {
+        cl = CauchoSystem.loadClass(webService.endpointInterface());
+
+        if (cl.isAnnotationPresent(RestEncoding.class))
+          restEncoding = (RestEncoding) cl.getAnnotation(RestEncoding.class);
+      }
+    }
+
+    if (restEncoding != null) {
+      if (restEncoding.value().equals("path"))
+        _binding = new PathBinding();
+      else if (restEncoding.value().equals("query"))
+        _binding = new QueryBinding();
+    }
+
+    if (_binding == null)
+      _binding = new PathBinding();
   }
 
   public void init()
     throws ServletException
   {
-    if (_bindings.isEmpty())
-      _bindings.add(new PathBinding());
-
     _webService.getWebApp().addServletMapping(this);
   }
 
@@ -103,7 +122,7 @@ public class RestServletMapping extends ServletMapping {
     if (context == null)
       context = new ServletContextImpl();
 
-    context.setAttribute(BINDINGS, _bindings);
+    context.setAttribute(BINDING, _binding);
     context.setAttribute(SERVICE, _service);
     context.setAttribute(SKELETON, _skeleton);
 
@@ -117,24 +136,15 @@ public class RestServletMapping extends ServletMapping {
     protected void service(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException
     {
-      HashSet<RestBinding> bindings = 
-        (HashSet<RestBinding>) getServletContext().getAttribute(BINDINGS);
+      RestBinding binding = 
+        (RestBinding) getServletContext().getAttribute(BINDING);
 
       RestSkeleton skeleton = 
         (RestSkeleton) getServletContext().getAttribute(SKELETON);
 
       Object service = getServletContext().getAttribute(SERVICE);
 
-      boolean bindingFound = false;
-
-      for (RestBinding binding : bindings) {
-        bindingFound = binding.invoke(req, resp, skeleton, service);
-
-        if (bindingFound)
-          break;
-      }
-
-      if (! bindingFound)
+      if (! binding.invoke(req, resp, skeleton, service))
         resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
     }
   }

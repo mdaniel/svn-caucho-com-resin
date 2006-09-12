@@ -83,22 +83,14 @@ public class PathBinding implements RestBinding {
       arguments = new String[0];
 
     try {
-      Object result = 
-        skeleton.invoke(service, req.getMethod(), methodName, arguments);
+      Object result = skeleton.invoke(service, req.getMethod(), methodName, 
+                                      arguments, req.getInputStream());
 
-      PrintStream out = new PrintStream(resp.getOutputStream());
-
-      /* // XXX Reinstate when marshalling starts working
       JAXBContext context = JAXBContext.newInstance("");
       Marshaller marshaller = context.createMarshaller();
       marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 
-      marshaller.marshal(result, out);
-      */
-
-      out.print(result.toString());
-
-      out.flush();
+      marshaller.marshal(result, resp.getOutputStream());
     } 
     catch (NoSuchMethodException e) {
       return false;

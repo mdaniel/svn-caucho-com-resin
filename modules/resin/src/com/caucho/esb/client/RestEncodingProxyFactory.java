@@ -27,17 +27,20 @@
  * @author Emil Ong
  */
 
-package com.caucho.esb.rest;
+package com.caucho.esb.client;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
+import java.lang.reflect.Proxy;
 
-/**
- * The given method is intended to be executed on a DELETE.
- */
-@Target({ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface DELETE {
+import java.net.MalformedURLException;
+
+import com.caucho.esb.rest.RestProxy;
+
+public class RestEncodingProxyFactory implements EncodingProxyFactory {
+  public Object getProxy(Class serviceInterface, String url) 
+    throws MalformedURLException
+  {
+    return Proxy.newProxyInstance(serviceInterface.getClassLoader(),
+                                  new Class[] { serviceInterface },
+                                  new RestProxy(serviceInterface, url));
+  }
 }

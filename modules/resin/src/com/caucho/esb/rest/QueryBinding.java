@@ -42,6 +42,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+
 /**
  * A binding for REST services.
  */
@@ -64,22 +67,14 @@ public class QueryBinding implements RestBinding {
       return false;
 
     try {
-      Object result = 
-        skeleton.invoke(service, req.getMethod(), methodName, arguments);
+      Object result = skeleton.invoke(service, req.getMethod(), methodName, 
+                                      arguments, req.getInputStream());
 
-      PrintStream out = new PrintStream(resp.getOutputStream());
-
-      /* // XXX Reinstate when marshalling starts working
       JAXBContext context = JAXBContext.newInstance("");
       Marshaller marshaller = context.createMarshaller();
       marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 
-      marshaller.marshal(result, out);
-      */
-
-      out.print(result.toString());
-
-      out.flush();
+      marshaller.marshal(result, resp.getOutputStream());
     } 
     catch (NoSuchMethodException e) {
       return false;

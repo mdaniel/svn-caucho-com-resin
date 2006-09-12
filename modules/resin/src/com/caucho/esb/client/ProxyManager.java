@@ -67,8 +67,9 @@ public class ProxyManager {
   }
 
   static {
-    addEncodingProxyFactory("soap", new SoapEncodingProxyFactory());
     addEncodingProxyFactory("hessian", new HessianEncodingProxyFactory());
+    addEncodingProxyFactory("rest", new RestEncodingProxyFactory());
+    addEncodingProxyFactory("soap", new SoapEncodingProxyFactory());
     addEncodingProxyFactory("vm", new VMEncodingProxyFactory());
   }
 }

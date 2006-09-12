@@ -29,6 +29,7 @@
 
 package com.caucho.esb.rest;
 
+import java.io.InputStream;
 import java.io.IOException;
 
 import java.lang.annotation.Annotation;
@@ -51,6 +52,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+
 import com.caucho.util.CauchoSystem;
 
 /**
@@ -62,6 +66,7 @@ public class RestSkeleton {
 
   public static final String DELETE = "DELETE";
   public static final String GET = "GET";
+  public static final String HEAD = "HEAD";
   public static final String POST = "POST";
   public static final String PUT = "PUT";
 
@@ -92,6 +97,7 @@ public class RestSkeleton {
     _methods.put(null, new HashMap<String,Method>());
     _methods.put(DELETE, new HashMap<String,Method>());
     _methods.put(GET, new HashMap<String,Method>());
+    _methods.put(HEAD, new HashMap<String,Method>());
     _methods.put(POST, new HashMap<String,Method>());
     _methods.put(PUT, new HashMap<String,Method>());
 
@@ -117,23 +123,28 @@ public class RestSkeleton {
 
         boolean hasHTTPMethod = false;
 
-        if (method.isAnnotationPresent(DELETE.class)) {
+        if (method.isAnnotationPresent(Delete.class)) {
           _methods.get(DELETE).put(methodName, method);
           hasHTTPMethod = true;
         }
 
-        if (method.isAnnotationPresent(GET.class)) {
+        if (method.isAnnotationPresent(Get.class)) {
           _methods.get(GET).put(methodName, method);
           hasHTTPMethod = true;
         }
 
-        if (method.isAnnotationPresent(POST.class)) {
+        if (method.isAnnotationPresent(Post.class)) {
           _methods.get(POST).put(methodName, method);
           hasHTTPMethod = true;
         }
         
-        if (method.isAnnotationPresent(PUT.class)) {
+        if (method.isAnnotationPresent(Put.class)) {
           _methods.get(PUT).put(methodName, method);
+          hasHTTPMethod = true;
+        }
+
+        if (method.isAnnotationPresent(Head.class)) {
+          _methods.get(HEAD).put(methodName, method);
           hasHTTPMethod = true;
         }
 
@@ -144,7 +155,8 @@ public class RestSkeleton {
   }
 
   public Object invoke(Object object, String httpMethod,
-                       String methodName, String[] stringArguments)
+                       String methodName, String[] stringArguments,
+                       InputStream postData)
     throws Throwable
   {
     Method method = _methods.get(httpMethod).get(methodName);
@@ -155,11 +167,28 @@ public class RestSkeleton {
     if (method == null)
       throw new NoSuchMethodException(methodName);
 
-    ArrayList arguments = new ArrayList();
+    boolean hasPostData = false;
+
     Class[] parameterTypes = method.getParameterTypes();
 
-    if (stringArguments.length != parameterTypes.length)
+    if (httpMethod.equals(POST) && parameterTypes.length > 0) {
+      Annotation[][] allAnnotations = method.getParameterAnnotations();
+
+      Annotation[] annotations = allAnnotations[allAnnotations.length-1];
+
+      for (Annotation annotation : annotations) {
+        if (annotation.annotationType().equals(PostData.class)) {
+          hasPostData = true;
+          break;
+        }
+      }
+    }
+
+    if ((hasPostData && stringArguments.length != (parameterTypes.length-1)) ||
+        (! hasPostData && stringArguments.length != parameterTypes.length))
       throw new IllegalArgumentException("Incorrect number of arguments");
+
+    ArrayList arguments = new ArrayList();
 
     for (int i = 0; i < stringArguments.length; i++) {
       Class type = parameterTypes[i];
@@ -168,11 +197,23 @@ public class RestSkeleton {
       arguments.add(stringToType(type, stringArgument));
     }
 
+    if (hasPostData) {
+      Class cl = parameterTypes[parameterTypes.length - 1];
+
+      JAXBContext context = JAXBContext.newInstance(new Class[] { cl });
+      Unmarshaller unmarshaller = context.createUnmarshaller();
+
+      arguments.add(unmarshaller.unmarshal(postData));
+    }
+
+    // XXX var args
+
     return method.invoke(object, arguments.toArray());
   }
 
   public Object invoke(Object object, String httpMethod,
-                       String methodName, Map<String,String> argumentMap)
+                       String methodName, Map<String,String> argumentMap,
+                       InputStream postData)
     throws Throwable
   {
     Method method = _methods.get(httpMethod).get(methodName);

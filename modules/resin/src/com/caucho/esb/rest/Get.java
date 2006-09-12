@@ -35,9 +35,9 @@ import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 
 /**
- * The given method is intended to be executed on a POST.
+ * The given method is intended to be executed on a GET.
  */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface POST {
+public @interface Get {
 }
