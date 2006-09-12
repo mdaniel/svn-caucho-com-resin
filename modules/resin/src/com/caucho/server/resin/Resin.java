@@ -76,7 +76,8 @@ public class Resin implements EnvironmentBean, SchemaBean
 
   private ObjectName _objectName;
 
-  private ClassLoader _classLoader;
+  private EnvironmentClassLoader _classLoader;
+  private boolean _isGlobal;
 
   private String _serverId = "";
   private String _configFile = "conf/resin.conf";
@@ -141,6 +142,8 @@ public class Resin implements EnvironmentBean, SchemaBean
 
     if (loader == null)
       loader = ClassLoader.getSystemClassLoader();
+
+    _isGlobal = (loader == ClassLoader.getSystemClassLoader());
 
     if (loader instanceof EnvironmentClassLoader)
       _classLoader = (EnvironmentClassLoader) loader;
@@ -666,13 +669,17 @@ public class Resin implements EnvironmentBean, SchemaBean
     J2EEManagedObject.unregister(j2eeDomainManagedObject);
 
     try {
-      _server.destroy();
+      if (_server != null)
+	_server.destroy();
     } catch (Throwable e) {
       log().log(Level.WARNING, e.toString(), e);
     }
     
     try {
-      Environment.closeGlobal();
+      if (_isGlobal)
+	Environment.closeGlobal();
+      else
+	_classLoader.destroy();
     } finally {
       _lifecycle.toDestroy();
     }

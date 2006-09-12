@@ -350,7 +350,12 @@ cse_add_backup(cluster_t *cluster, const char *hostname, int port)
 void
 cse_log_config(config_t *config)
 {
-  resin_host_t *host = config->hosts;
+  resin_host_t *host;
+
+  if (! config)
+    return;
+
+  host = config->hosts;
 
   for (; host; host = host->next) {
     web_app_t *app = host->applications;
@@ -394,6 +399,7 @@ cse_create_host(config_t *config, const char *host_name, int port)
   memset(host, 0, sizeof(resin_host_t));
   host->config = config;
   host->canonical = host;
+
   host->name = cse_strdup(config->p, host_name);
   host->port = port;
   host->next = config->hosts;
@@ -577,9 +583,14 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	  live_time = resin_atoi(value);
 	else if (! strcmp(buffer, "dead-time"))
 	  dead_time = resin_atoi(value);
-	else {
-	  handle_config_header(config, buffer, value);
+	else if (! strcmp(buffer, "last-update")) {
+	  int last_update = resin_atoi(value);
+	  if (host) {
+	    host->last_update = last_update;
+	  }
 	}
+	else
+	  handle_config_header(config, buffer, value);
       }
       break;
 	
@@ -633,6 +644,9 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 
     case HMUX_EXIT:
     case HMUX_QUIT:
+      if (now)
+	host->last_update = now;
+      
       if (is_change > 0 || ! host->etag || ! *host->etag) {
 	mem_pool_t *old_pool = host->pool;
 	g_update_count++;
@@ -690,8 +704,11 @@ write_config(config_t *config)
   char buffer[1024];
   char *tail;
 
-  if (! config->config_path)
+  if (! *config->config_path)
     return;
+  
+  ERR(("%s:%d:write_config(): writing cached config\n",
+       __FILE__, __LINE__));
 
   strncpy(temp, config->config_path, sizeof(temp));
 
@@ -746,6 +763,13 @@ write_config(config_t *config)
     }
     else
       hmux_write_string(&s, HMUX_DISPATCH_HOST, host->name);
+    
+    sprintf(buffer, "%d", host->last_update);
+    hmux_write_string(&s, HMUX_HEADER, "last-update");
+    hmux_write_string(&s, HMUX_STRING, buffer);
+    
+    ERR(("%s:%d:write_config(): update %s:%d -> %d\n",
+       __FILE__, __LINE__, host->name, host->port, host->last_update));
 
     if (host->canonical && host->canonical != host) {
       if (host->canonical->port) {
@@ -837,7 +861,7 @@ read_all_config_impl(config_t *config)
   struct stat st;
   int mtime = time(0);
 
-  if (! config->config_path)
+  if (! *config->config_path)
     return 0;
   
   fd = open(config->config_path, O_RDONLY);
@@ -847,6 +871,7 @@ read_all_config_impl(config_t *config)
 
   if (fstat(fd, &st) == 0) {
     mtime = st.st_mtime;
+    config->last_file_update = mtime;
   }
 
   memset(&s, 0, sizeof(s));
@@ -918,14 +943,26 @@ read_all_config(config_t *config)
   }
 }
 
+void
+reread_config(config_t *config)
+{
+  LOG(("%s:%d:reread_config(): forcing read()\n",
+       __FILE__, __LINE__));
+  
+  read_all_config(config);
+}
+
 static int
 cse_update_host_from_resin(resin_host_t *host, time_t now)
 {
   stream_t s;
   char *uri = "";
 
+  /*
   if (host->has_data)
     host->last_update = now;
+  */
+  host->last_update = now;
     
   if (cse_open_live_connection(&s, &host->config->config_cluster, now)) {
     int code;
@@ -953,8 +990,9 @@ cse_update_host_from_resin(resin_host_t *host, time_t now)
     else
       cse_close(&s, "close");
 
-    if (is_change > 0)
+    if (is_change > 0 || host->config->update_interval >= 3600) {
       write_config(host->config);
+    }
 
     return 1;
   }
@@ -1006,10 +1044,10 @@ cse_init_config(config_t *config)
   config->config_cluster.config = config;
   
 #ifdef WIN32  
-  config->work_dir = "/temp";
+  strcpy(config->work_dir, "/temp");
   mkdir("/temp");
 #else
-  config->work_dir = "/tmp";
+  strcpy(config->work_dir, "/tmp");
 #endif
 
   /*
@@ -1025,7 +1063,9 @@ cse_init_config(config_t *config)
     config->config_lock = cse_create_lock(config);
   }
 
+  /*
   read_all_config(config);
+  */
 }
 
 void
@@ -1035,10 +1075,13 @@ cse_add_config_server(config_t *config, const char *host, int port)
   
   cse_add_host(&config->config_cluster, host, port);
 
-  if (! config->config_path && config->work_dir) {
-    sprintf(buffer, "%s/%s_%d", config->work_dir, host, port);
-    
-    config->config_path = strdup(buffer);
+  if (! *config->config_file) {
+    sprintf(config->config_file, "%s_%d", host, port);
+  }
+
+  if (*config->work_dir) {
+    sprintf(config->config_path, "%s/%s", config->work_dir,
+	    config->config_file);
 
     read_all_config(config);
   }
@@ -1050,10 +1093,27 @@ cse_add_config_server(config_t *config, const char *host, int port)
 static void
 cse_update_host(config_t *config, resin_host_t *host, time_t now)
 {
+  struct stat st;
+  
   if (now < host->last_update + config->update_interval)
     return;
 
+  if (config->config_path && stat(config->config_path, &st) == 0) {
+    if (config->last_file_update < st.st_mtime) {
+      config->last_file_update = st.st_mtime;
+      read_all_config_impl(config);
+    }
+
+    return;
+  }
+  
+  LOG(("%s:%d:cse_update_host(): %s:%d(%p) old:%d now:%d()\n",
+       __FILE__, __LINE__, host->name, host->port, host, host->last_update, now));
+
   cse_update_host_from_resin(host, now);
+  
+  LOG(("%s:%d:cse_update_host(): complete %s:%d(%p) old:%d now:%d()\n",
+       __FILE__, __LINE__, host->name, host->port, host, host->last_update, now));
 }
 
 /**
@@ -1186,7 +1246,7 @@ normalize_uri(config_t *config, const char *raw_uri,
   int ch;
   int test_ch = config->session_url_prefix[0];
   int prefix_len = strlen(config->session_url_prefix);
-  
+
   k = 0;
   for (i = 0; (ch = raw_uri[i]) && i + 1 < len; i++) {
     /* strip the session_url_prefix */
@@ -1263,8 +1323,6 @@ cse_is_match(config_t *config,
   resin_host_t *host;
   int is_match = 0;
 
-  normalize_uri(config, raw_uri, uri, len, unescape);
-  
   for (i = 0; raw_host && (ch = raw_host[i]) && i + 1 < host_len; i++) {
     if (isupper(ch))
       host_name[i] = tolower(ch);
@@ -1280,6 +1338,8 @@ cse_is_match(config_t *config,
     return 0;
 
   host = host->canonical;
+
+  normalize_uri(config, raw_uri, uri, len, unescape);
 
   has_host = 0;
   best_len = 0;
