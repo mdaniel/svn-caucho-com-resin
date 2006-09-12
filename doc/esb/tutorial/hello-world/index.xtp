@@ -35,34 +35,40 @@ plain-old Java objects (POJOs) and made available to many different protocols.
 </td></tr></deftable>
 </s1>
 
-<s1 title="Service Implementation">
+<s1 title="What is an Enterprise Service Bus?">
+<figure src="esb.png"/>
+<p>
+An Enterprise Service Bus (ESB) is an infrastructure that allows a service
+to be exposed via many different service protocols.  For example in this
+tutorial, there is a plain-old Java object (POJO) that implements a service
+and this service is made available using REST, SOAP, Hessian, and JNDI.  The
+service is implemented once and these protocols are activated with a few 
+simple changes to the configuration file.
+</p>
+</s1>
 
-<p>The HelloService implementation is just a Java class that implements
-the HelloService API.  For Java Web Service compatibility, the class also
-has @WebService and @WebMethod annotations.</p>
+<s1 title="Service Interface">
 
-<example title="HelloServiceImpl.java">
+<p>In this example, the service interface is for a simple Hello, World service.
+There is a single method, <code>hello()</code> that the service must implement
+and the client may invoke.</p>
+
+<example title="HelloService.java">
 package example;
 
-import javax.jws.WebMethod;
-import javax.jws.WebService;
-
-@WebService(endpointInterface="example.HelloService")
-public class HelloServiceImpl implements HelloService {
+public interface HelloService {
   /**
    * Returns "hello, world".
    */
-  @WebMethod
-  public HelloResult hello()
-  {
-    return new HelloResult();
-  }
+  public HelloResult hello();
 }
 </example>
 
-<p>In this case the result object, of type HelloResult, is simply a wrapper
-around a String.  In more complex cases, the JAXB annotations make it possible
-to return complex objects as XML.</p>
+<p>Notice that the service returns a <code>HelloResult</code> object.  As
+seen below, <code>HelloResult</code> is a simple wrapper for a String.  This
+allows type-checking and proper serialization of the returned result.  There
+are also JAXB annotations in this case which control how the object is
+serialized.</p>
 
 <example title="HelloResult.java">
 package example;
@@ -85,19 +91,28 @@ public class HelloResult {
 
 </s1>
 
-<s1 title="Remote Interface">
+<s1 title="Service Implementation">
 
-<p>The Java interface describes the remote API.  This example has a
-single method, <code>hello()</code>.</p>
+<p>The HelloService implementation is just a Java class that implements
+the HelloService API.  For Java Web Service (JAX-WS) compatibility,
+the class also has @WebService and @WebMethod annotations.</p>
 
-<example title="HelloService.java">
+<example title="HelloServiceImpl.java">
 package example;
 
-public interface HelloService {
+import javax.jws.WebMethod;
+import javax.jws.WebService;
+
+@WebService(endpointInterface="example.HelloService")
+public class HelloServiceImpl implements HelloService {
   /**
    * Returns "hello, world".
    */
-  public HelloResult hello();
+  @WebMethod
+  public HelloResult hello()
+  {
+    return new HelloResult();
+  }
 }
 </example>
 
@@ -107,35 +122,26 @@ public interface HelloService {
 
 <p>Services on the Resin ESB are configured with the &lt;web-service>
 tag.  The implementation class is given as the <code>class</code> attribute.
-To register the service in JNDI, use a &lt;jndi-name> child tag.
+It is possible to allow access to the service within the same virtual machine
+by registering the service in JNDI using a &lt;jndi-name> child tag.
 </p>
 
 <p>
 To expose the service as a Hessian service, use the &lt;hessian> tag.
 Hessian is one of the <em>service encodings</em> available for web services.
-SOAP is also available. <!-- TODO: add this to this example -->
+Because Hessian (usually) uses HTTP as the underlying transport protocol,
+the &lt;hessian> tag has a &lt;url-pattern> child tag to specify the 
+service's location on the server.
 </p>
 
 <p>
 Here a REST interface is also exposed.  In this example, the REST interface
-allows two <em>REST bindings</em>, a path-based binding and a query-based
-binding.  A path-based binding interprets URLs of the form 
+is a path-based binding that interprets URLs of the form 
 <i>http://www.foo.com/myMethod/foo/bar</i> to be a call to the method
-"myMethod" with two arguments, "foo" and "bar".  A query-based binding
-interprets URLs of the form 
-<i>http://www.foo.com/?method=myMethod&amp;arg1=foo&amp;arg2=bar</i>
-in the same way.
-</p>
-
-<p>
-<a href="hello/rest/hello/">Path binding</a><br/>
-<a href="hello/rest/?method=hello">Query binding</a>
-</p>
-
-<p>
-Each service encoding must also have a <em>transport</em>.  By default, 
-services use HTTP as a transport and thus must specify a &lt;url-pattern>     
-to indicate the location of the service.
+"myMethod" with two arguments, "foo" and "bar".  This binding is default, but
+a query-based binding is also available that accepts URLs of the form 
+<i>http://www.foo.com/?method=myMethod&amp;arg1=foo&amp;arg2=bar</i>.
+The &lt;url-pattern> child tag specifies the base URL for the REST interface.
 </p>
 
 <example title="<web-service>">
@@ -147,32 +153,40 @@ to indicate the location of the service.
   &lt;/hessian>
 
   &lt;rest>
-    &lt;query-binding/>
-    &lt;path-binding/>
     &lt;url-pattern>/hello/rest/*&lt;/url-pattern>
   &lt;/rest>
 &lt;/web-service>
 </example>
 
+</s1>
+
+<s1 title="Client configuration">
+
 <p>
-Resin's ESB also makes it easy to access services using the 
+Resin also makes it easy to access services using the 
 &lt;web-service-client> tag.  This tag connects to a service
 using a URL of the form <i>&lt;encoding>:&lt;protocol>:&lt;location></i>.
 The example below shows just such a URL.  The interface of the service
 and a JNDI name must also be given.  The &lt;web-service-client> tag
 creates a proxy client instance for the service and registers the
-proxy with the given JNDI name.</p>
+proxy with the given JNDI name.
+</p>
 
 <example title="<web-service-client>">
 &lt;web-service-client jndi-name="hessian/HelloService">
-  &lt;url>hessian:${webApp.url}/hello/&lt;/url>
+  &lt;url>hessian:${webApp.url}/hello/hessian/&lt;/url>
+  &lt;interface>example.HelloService&lt;/interface>
+&lt;/web-service-client>  
+
+&lt;web-service-client jndi-name="rest/HelloService">
+  &lt;url>rest:${webApp.url}/hello/rest/&lt;/url>
   &lt;interface>example.HelloService&lt;/interface>
 &lt;/web-service-client>
 </example>
 
 </s1>
 
-<s1 title="Java Client">
+<s1 title="JSP Client Script">
 
 <p>The client can now connect to the HelloService using any supported
 encoding simply by doing a lookup in JNDI.</p>
@@ -182,15 +196,18 @@ encoding simply by doing a lookup in JNDI.</p>
 &lt;%@ page import="example.HelloService" %>
 &lt;%
 HelloService hessianHello = (HelloService) Jndi.lookup("hessian/HelloService");
+HelloService restHello = (HelloService) Jndi.lookup("rest/HelloService");
 HelloService vmHello = (HelloService) Jndi.lookup("service/HelloService");
 %>
 &lt;pre>
 From Hessian: &lt;%= hessianHello.hello() %>
+From REST: &lt;%= restHello.hello() %>
 From VM: &lt;%= vmHello.hello() %>
 &lt;/pre>
 </example>
 <results>
 From Hessian: hello, world
+From REST: hello, world
 From VM: hello, world
 </results>
 
