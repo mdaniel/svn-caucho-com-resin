@@ -43,6 +43,7 @@ import javax.sql.DataSource;
 
 import com.caucho.amber.AmberRuntimeException;
 
+import com.caucho.amber.cfg.EntityConfig;
 import com.caucho.amber.cfg.EntityMappingsConfig;
 import com.caucho.amber.cfg.PersistenceConfig;
 import com.caucho.amber.cfg.PersistenceUnitConfig;
@@ -336,10 +337,12 @@ public class AmberContainer {
 
       Path ormXml = root.lookup("META-INF/orm.xml");
 
+      EntityMappingsConfig entityMappings = null;
+
       if (ormXml.exists()) {
         is = ormXml.openRead();
 
-        EntityMappingsConfig entityMappings = new EntityMappingsConfig();
+        entityMappings = new EntityMappingsConfig();
         entityMappings.setRoot(root);
 
         new Config().configure(entityMappings, is,
@@ -350,7 +353,7 @@ public class AmberContainer {
         = new HashMap<String, JClass>();
 
       // XXX: This is not necessary when <exclude-unlisted-classes/>
-      lookupClasses(root.getPath().length(), root, classMap);
+      lookupClasses(root.getPath().length(), root, classMap, entityMappings);
 
       is = persistenceXml.openRead();
 
@@ -364,7 +367,7 @@ public class AmberContainer {
         try {
           unitConfig.addAllClasses(classMap);
 
-          AmberPersistenceUnit unit = unitConfig.init(this);
+          AmberPersistenceUnit unit = unitConfig.init(this, entityMappings);
 
           _unitMap.put(unit.getName(), unit);
         } catch (Throwable e) {
@@ -397,7 +400,8 @@ public class AmberContainer {
    */
   public void lookupClasses(int rootNameLength,
                             Path curr,
-                            HashMap<String, JClass> classMap)
+                            HashMap<String, JClass> classMap,
+                            EntityMappingsConfig entityMappings)
     throws Exception
   {
     Iterator<String> it = curr.iterator();
@@ -409,7 +413,7 @@ public class AmberContainer {
       Path path = curr.lookup(s);
 
       if (path.isDirectory()) {
-        lookupClasses(rootNameLength, path, classMap);
+        lookupClasses(rootNameLength, path, classMap, entityMappings);
       }
       else if (s.endsWith(".class")) {
         String packageName = curr.getPath().substring(rootNameLength);
@@ -432,7 +436,13 @@ public class AmberContainer {
           boolean isMappedSuperclass
             = type.getAnnotation(javax.persistence.MappedSuperclass.class) != null;
 
-          if (isEntity || isEmbeddable || isMappedSuperclass) {
+          EntityConfig entityConfig = null;
+
+          if (entityMappings != null)
+            entityConfig = entityMappings.getEntityConfig(className);
+
+          if (isEntity || isEmbeddable || isMappedSuperclass ||
+              (entityConfig != null)) {
             classMap.put(className, type);
           }
         }

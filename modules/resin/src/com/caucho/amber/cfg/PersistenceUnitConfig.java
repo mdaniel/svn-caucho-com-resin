@@ -166,10 +166,14 @@ public class PersistenceUnitConfig {
     return new PropertiesConfig();
   }
 
-  public AmberPersistenceUnit init(AmberContainer container)
+  public AmberPersistenceUnit init(AmberContainer container,
+                                   EntityMappingsConfig entityMappings)
     throws Exception
   {
-    AmberPersistenceUnit unit = new AmberPersistenceUnit(container, _name);
+    AmberPersistenceUnit unit
+      = new AmberPersistenceUnit(container, _name);
+
+    unit.setEntityMappingsConfig(entityMappings);
 
     unit.init();
 

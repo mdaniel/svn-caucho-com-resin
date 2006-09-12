@@ -38,6 +38,7 @@ import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.config.ConfigException;
 
+
 /**
  * <entity> tag in the orm.xml
  */
@@ -88,6 +89,14 @@ public class EntityConfig {
   }
 
   /**
+   * Returns the attributes.
+   */
+  public AttributesConfig getAttributes()
+  {
+    return _attributes;
+  }
+
+  /**
    * Returns the class name.
    */
   public String getClassName()
@@ -120,9 +129,17 @@ public class EntityConfig {
   }
 
   /**
+   * Sets the attributes.
+   */
+  public void setAttributes(AttributesConfig attributes)
+  {
+    _attributes = attributes;
+  }
+
+  /**
    * Sets the class name.
    */
-  public void setClassName(String className)
+  public void addClass(String className)
   {
     _className = className;
   }

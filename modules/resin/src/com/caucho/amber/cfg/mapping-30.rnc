@@ -11,9 +11,13 @@ t_class = string
 
 ## gen-type "TABLE", "SEQUENCE", "IDENTITY", "AUTO"
 
-orm30_attribute = element attribute {
-  attribute name { string },
+orm30_attributes = element attributes {
+  (orm30_id? | orm30_embedded-id?),
 
+  orm30_attribute+
+}
+
+orm30_attribute = (
   (orm30_basic
 
   | orm30_version
@@ -45,7 +49,7 @@ orm30_attribute = element attribute {
   | orm30_order-by)?,
 
   orm30_attribute-override*
-}
+)
 
 orm30_attribute-override = element attribute-override {
   attribute name { string },
@@ -54,6 +58,8 @@ orm30_attribute-override = element attribute-override {
 }
 
 orm30_basic = element basic {
+  attribute name { string },
+
   attribute fetch { "EAGER", "LAZY" }?,
 
   attribute optional { t_boolean }?
@@ -142,6 +148,8 @@ orm30_entity = element entity {
 
   attribute access { "PROPERTY" | "FIELD" }?,
 
+  attribute metadata-complete { t_boolean }?,
+
   orm30_table?,
 
   orm30_secondary-table*,
@@ -188,9 +196,7 @@ orm30_entity = element entity {
 
   orm30_post-load?,
 
-  (orm30_id? | orm30_embedded_id?),
-
-  orm30_attribute*
+  orm30_attributes
 }
 
 orm30_entity-listener = element entity-listener {
@@ -329,6 +335,10 @@ orm30_map-key = element map-key {
   attribute name { string }
 }
 
+orm30_order-by = element order-by {
+  attribute value { string }
+}
+
 orm30_mapped-superclass = element mapped-superclass {
   attribute class { string },
 
@@ -356,9 +366,7 @@ orm30_mapped-superclass = element mapped-superclass {
 
   orm30_post-load?,
 
-  (orm30_id | orm30_embedded-id)?,
-
-  orm30_attribute*
+  orm30_attributes
 }
 
 orm30_named-native-query = element named-native-query {
@@ -403,22 +411,6 @@ orm30_one-to-one = element one-to-one {
   orm30_cascade*
 }
 
-orm30_post-persist = element post-persist {
-  attribute method-name { string }
-}
-
-orm30_post-remove = element post-remove {
-  attribute method-name { string }
-}
-
-orm30_post-update = element post-update {
-  attribute method-name { string }
-}
-
-orm30_post-load = element post-load {
-  attribute method-name { string }
-}
-
 orm30_primary-key-join-column = element primary-key-join-column {
   attribute name { string }?,
 
@@ -431,7 +423,27 @@ orm30_pre-persist = element pre-persist {
   attribute method-name { string }
 }
 
+orm30_post-persist = element post-persist {
+  attribute method-name { string }
+}
+
+orm30_pre-remove = element pre-remove {
+  attribute method-name { string }
+}
+
+orm30_post-remove = element post-remove {
+  attribute method-name { string }
+}
+
 orm30_pre-update = element pre-update {
+  attribute method-name { string }
+}
+
+orm30_post-update = element post-update {
+  attribute method-name { string }
+}
+
+orm30_post-load = element post-load {
   attribute method-name { string }
 }
 
@@ -444,7 +456,7 @@ orm30_secondary-table = element secondary-table {
 
   orm30_primary-key-join-column*,
 
-  orm30_uique-constraint*
+  orm30_unique-constraint*
 }
 
 orm30_sequence-generator = element sequence-generator {

@@ -122,6 +122,9 @@ public class EntityIntrospector {
   private HashMap<String,EntityType> _entityMap
     = new HashMap<String,EntityType>();
 
+  private HashMap<String,EntityConfig> _entityConfigMap
+    = new HashMap<String,EntityConfig>();
+
   private ArrayList<Completion> _linkCompletions = new ArrayList<Completion>();
   private ArrayList<Completion> _depCompletions = new ArrayList<Completion>();
 
@@ -134,16 +137,29 @@ public class EntityIntrospector {
   }
 
   /**
+   * Sets the entity config map.
+   */
+  public void setEntityConfigMap(HashMap<String, EntityConfig> entityConfigMap)
+  {
+    _entityConfigMap = entityConfigMap;
+  }
+
+  /**
    * Introspects.
    */
   public EntityType introspect(JClass type)
     throws ConfigException, SQLException
   {
+    EntityConfig entityConfig = null;
+
+    if (_entityConfigMap != null)
+      entityConfig = _entityConfigMap.get(type.getName());
+
     JAnnotation entityAnn = type.getAnnotation(Entity.class);
     JAnnotation embeddableAnn = type.getAnnotation(Embeddable.class);
     JAnnotation mappedSuperclassAnn = type.getAnnotation(MappedSuperclass.class);
 
-    boolean isEntity = entityAnn != null;
+    boolean isEntity = (entityAnn != null) || (entityConfig != null);
     boolean isEmbeddable = embeddableAnn != null;
     boolean isMappedSuperclass = mappedSuperclassAnn != null;
     if (! (isEntity || isEmbeddable || isMappedSuperclass)) {
@@ -213,7 +229,16 @@ public class EntityIntrospector {
         }
       }
 
-      entityName = entityAnn.getString("name");
+      if (entityAnn != null)
+        entityName = entityAnn.getString("name");
+      else {
+        entityName = entityConfig.getClassName();
+
+        int p = entityName.lastIndexOf('.');
+
+        if (p > 0)
+          entityName = entityName.substring(p + 1);
+      }
     }
     else {
       entityName = type.getName();
@@ -297,19 +322,19 @@ public class EntityIntrospector {
       }
       else if (isField)
         introspectIdField(_persistenceUnit, entityType, parentType,
-                          type, idClass);
+                          type, idClass, entityConfig);
       else
         introspectIdMethod(_persistenceUnit, entityType, parentType,
-                           type, idClass);
+                           type, idClass, entityConfig);
 
       if (isEntity && (entityType.getId() == null))
         throw new ConfigException(L.l("{0} does not have any primary keys.  Entities must have at least one @Id or exactly one @EmbeddedId field.",
                                       entityType.getName()));
 
       if (isField)
-        introspectFields(_persistenceUnit, entityType, parentType, type);
+        introspectFields(_persistenceUnit, entityType, parentType, type, entityConfig);
       else
-        introspectMethods(_persistenceUnit, entityType, parentType, type);
+        introspectMethods(_persistenceUnit, entityType, parentType, type, entityConfig);
 
       if (isEntity) {
         for (JMethod method : type.getMethods()) {
@@ -650,12 +675,18 @@ public class EntityIntrospector {
                                   EntityType entityType,
                                   EntityType parentType,
                                   JClass type,
-                                  JClass idClass)
+                                  JClass idClass,
+                                  EntityConfig entityConfig)
     throws ConfigException, SQLException
   {
     ArrayList<IdField> keys = new ArrayList<IdField>();
 
     IdField idField = null;
+
+    AttributesConfig attributesConfig = null;
+
+    if (entityConfig != null)
+      attributesConfig = entityConfig.getAttributes();
 
     for (JMethod method : type.getMethods()) {
       String methodName = method.getName();
@@ -675,12 +706,18 @@ public class EntityIntrospector {
 
       JAnnotation id = method.getAnnotation(javax.persistence.Id.class);
 
-      if (id != null) {
+      IdConfig idConfig = null;
+
+      if (attributesConfig != null)
+        idConfig = attributesConfig.getId(fieldName);
+
+      if ((id != null) || (idConfig != null)) {
         idField = introspectId(persistenceUnit,
                                entityType,
                                method,
                                fieldName,
-                               method.getReturnType());
+                               method.getReturnType(),
+                               idConfig);
 
         if (idField != null)
           keys.add(idField);
@@ -731,10 +768,16 @@ public class EntityIntrospector {
                                  EntityType entityType,
                                  EntityType parentType,
                                  JClass type,
-                                 JClass idClass)
+                                 JClass idClass,
+                                 EntityConfig entityConfig)
     throws ConfigException, SQLException
   {
     ArrayList<IdField> keys = new ArrayList<IdField>();
+
+    AttributesConfig attributesConfig = null;
+
+    if (entityConfig != null)
+      attributesConfig = entityConfig.getAttributes();
 
     for (JField field : type.getFields()) {
       String fieldName = field.getName();
@@ -746,14 +789,20 @@ public class EntityIntrospector {
       JAnnotation embeddedId
         = field.getAnnotation(javax.persistence.EmbeddedId.class);
 
-      if ((id == null) && (embeddedId == null))
+      IdConfig idConfig = null;
+
+      if (attributesConfig != null)
+        idConfig = attributesConfig.getId(fieldName);
+
+      if ((id == null) && (embeddedId == null) && (idConfig == null))
         continue;
 
       IdField idField = introspectId(persistenceUnit,
                                      entityType,
                                      field,
                                      fieldName,
-                                     field.getType());
+                                     field.getType(),
+                                     idConfig);
 
       if (idField != null)
         keys.add(idField);
@@ -803,12 +852,18 @@ public class EntityIntrospector {
                                EntityType entityType,
                                JAccessibleObject field,
                                String fieldName,
-                               JClass fieldType)
+                               JClass fieldType,
+                               IdConfig idConfig)
     throws ConfigException, SQLException
   {
     JAnnotation id = field.getAnnotation(javax.persistence.Id.class);
     JAnnotation column = field.getAnnotation(javax.persistence.Column.class);
     JAnnotation gen = field.getAnnotation(javax.persistence.GeneratedValue.class);
+
+    ColumnConfig columnConfig = null;
+
+    if (idConfig != null)
+      columnConfig = idConfig.getColumn();
 
     Type amberType = persistenceUnit.createType(fieldType);
 
@@ -816,7 +871,8 @@ public class EntityIntrospector {
                                     field,
                                     fieldName,
                                     column,
-                                    amberType);
+                                    amberType,
+                                    columnConfig);
 
     KeyPropertyField idField;
     idField = new KeyPropertyField(entityType, fieldName, keyColumn);
@@ -1015,7 +1071,8 @@ public class EntityIntrospector {
   private void introspectMethods(AmberPersistenceUnit persistenceUnit,
                                  EntityType entityType,
                                  EntityType parentType,
-                                 JClass type)
+                                 JClass type,
+                                 EntityConfig entityConfig)
     throws ConfigException
   {
     for (JMethod method : type.getMethods()) {
@@ -1083,7 +1140,7 @@ public class EntityIntrospector {
 
       JClass fieldType = method.getReturnType();
 
-      introspectField(persistenceUnit, entityType, method, fieldName, fieldType);
+      introspectField(persistenceUnit, entityType, method, fieldName, fieldType, entityConfig);
     }
   }
 
@@ -1093,7 +1150,8 @@ public class EntityIntrospector {
   private void introspectFields(AmberPersistenceUnit persistenceUnit,
                                 EntityType entityType,
                                 EntityType parentType,
-                                JClass type)
+                                JClass type,
+                                EntityConfig entityConfig)
     throws ConfigException
   {
     if (entityType.getId() == null)
@@ -1110,7 +1168,7 @@ public class EntityIntrospector {
 
       JClass fieldType = field.getType();
 
-      introspectField(persistenceUnit, entityType, field, fieldName, fieldType);
+      introspectField(persistenceUnit, entityType, field, fieldName, fieldType, entityConfig);
     }
   }
 
@@ -1118,10 +1176,23 @@ public class EntityIntrospector {
                                EntityType sourceType,
                                JAccessibleObject field,
                                String fieldName,
-                               JClass fieldType)
+                               JClass fieldType,
+                               EntityConfig entityConfig)
     throws ConfigException
   {
-    if (field.isAnnotationPresent(javax.persistence.Id.class)) {
+    AttributesConfig attributesConfig = null;
+    IdConfig idConfig = null;
+    BasicConfig basicConfig = null;
+
+    if (entityConfig != null) {
+      attributesConfig = entityConfig.getAttributes();
+
+      idConfig = attributesConfig.getId(field.getName());
+      basicConfig = attributesConfig.getBasic(field.getName());
+    }
+
+    if ((idConfig != null) ||
+        field.isAnnotationPresent(javax.persistence.Id.class)) {
       validateAnnotations(field, _idAnnotations);
 
       if (! _idTypes.contains(fieldType.getName())) {
@@ -1129,10 +1200,11 @@ public class EntityIntrospector {
                                fieldType.getName(), field.getName()));
       }
     }
-    else if (field.isAnnotationPresent(javax.persistence.Basic.class)) {
+    else if ((basicConfig != null) ||
+             field.isAnnotationPresent(javax.persistence.Basic.class)) {
       validateAnnotations(field, _basicAnnotations);
 
-      addBasic(sourceType, field, fieldName, fieldType);
+      addBasic(sourceType, field, fieldName, fieldType, basicConfig);
     }
     else if (field.isAnnotationPresent(javax.persistence.Version.class)) {
       validateAnnotations(field, _versionAnnotations);
@@ -1237,14 +1309,15 @@ public class EntityIntrospector {
     else if (field.isAnnotationPresent(javax.persistence.Transient.class)) {
     }
     else {
-      addBasic(sourceType, field, fieldName, fieldType);
+      addBasic(sourceType, field, fieldName, fieldType, basicConfig);
     }
   }
 
   private void addBasic(EntityType sourceType,
                         JAccessibleObject field,
                         String fieldName,
-                        JClass fieldType)
+                        JClass fieldType,
+                        BasicConfig basicConfig)
     throws ConfigException
   {
     AmberPersistenceUnit persistenceUnit = sourceType.getPersistenceUnit();
@@ -1262,14 +1335,21 @@ public class EntityIntrospector {
 
     Type amberType = persistenceUnit.createType(fieldType);
 
+    ColumnConfig columnConfig = null;
+
+    if (basicConfig != null)
+      columnConfig = basicConfig.getColumn();
+
     Column fieldColumn = createColumn(sourceType, field, fieldName,
-                                      columnAnn, amberType);
+                                      columnAnn, amberType, columnConfig);
 
     PropertyField property = new PropertyField(sourceType, fieldName);
     property.setColumn(fieldColumn);
 
     if (basicAnn != null)
       property.setLazy(basicAnn.get("fetch") == FetchType.LAZY);
+    else if (basicConfig != null)
+      property.setLazy(basicConfig.getFetchType() == FetchType.LAZY);
 
     /*
       field.setInsertable(insertable);
@@ -1296,8 +1376,13 @@ public class EntityIntrospector {
 
     Type amberType = persistenceUnit.createType(fieldType);
 
+    ColumnConfig columnConfig = null;
+
+    // if (versionConfig != null)
+    //   columnConfig = Config.getColumn();
+
     Column fieldColumn = createColumn(sourceType, field, fieldName,
-                                      columnAnn, amberType);
+                                      columnAnn, amberType, columnConfig);
 
     VersionField version = new VersionField(sourceType, fieldName);
     version.setColumn(fieldColumn);
@@ -1308,13 +1393,17 @@ public class EntityIntrospector {
   private Column createColumn(EntityType entityType,
                               JAccessibleObject field,
                               String fieldName,
-                              JAnnotation columnAnn, Type amberType)
+                              JAnnotation columnAnn,
+                              Type amberType,
+                              ColumnConfig columnConfig)
     throws ConfigException
   {
     String name;
 
     if (columnAnn != null && ! columnAnn.get("name").equals(""))
       name = (String) columnAnn.get("name");
+    else if (columnConfig != null && ! columnConfig.getName().equals(""))
+      name = columnConfig.getName();
     else
       name = toSqlName(fieldName);
 
@@ -2306,13 +2395,21 @@ public class EntityIntrospector {
 
       HashMap<String, Column> embeddedColumns = new HashMap<String, Column>();
       HashMap<String, String> fieldNameByColumn = new HashMap<String, String>();
+      JField fields[] = _fieldType.getDeclaredFields();
 
       for (int i=0; i<attOverridesAnn.length; i++) {
         String embeddedFieldName = ((JAnnotation) attOverridesAnn[i]).getString("name");
 
         JAnnotation columnAnn = ((JAnnotation) attOverridesAnn[i]).getAnnotation("column");
         String columnName = columnAnn.getString("name");
-        Type amberType = persistenceUnit.createType("java.lang.String"); // _fieldType);
+
+        Type amberType = StringType.create();
+
+        for (int j=0; j < fields.length; j++) {
+          if (embeddedFieldName.equals(fields[j].getName()))
+            amberType = _persistenceUnit.createType(fields[j].getType());
+        }
+
         Column column = sourceTable.createColumn(columnName, amberType);
 
         column.setNotNull(! columnAnn.getBoolean("nullable"));

@@ -29,7 +29,7 @@
 
 package com.caucho.amber.cfg;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.caucho.config.ConfigException;
 
@@ -51,7 +51,8 @@ public class EntityMappingsConfig {
   private String _catalog;
   public enum AccessType { PROPERTY, FIELD };
   private AccessType _access;
-  private ArrayList<EntityConfig> _entityList = new ArrayList<EntityConfig>();
+  private HashMap<String, EntityConfig> _entityMap
+    = new HashMap<String, EntityConfig>();
 
   // XXX: to do ...
   /*
@@ -147,19 +148,27 @@ public class EntityMappingsConfig {
    */
   public void addEntity(EntityConfig entity)
   {
-    _entityList.add(entity);
+    _entityMap.put(entity.getClassName(), entity);
   }
 
   /**
-   * Returns the entity list.
+   * Returns an entity config.
    */
-  public ArrayList<EntityConfig> getEntityList()
+  public EntityConfig getEntityConfig(String name)
   {
-    return _entityList;
+    return _entityMap.get(name);
+  }
+
+  /**
+   * Returns the entity map.
+   */
+  public HashMap<String, EntityConfig> getEntityMap()
+  {
+    return _entityMap;
   }
 
   public String toString()
   {
-    return _entityList.toString();
+    return _entityMap.toString();
   }
 }

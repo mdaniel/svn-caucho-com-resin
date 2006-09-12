@@ -29,26 +29,17 @@
 
 package com.caucho.amber.cfg;
 
-import java.util.ArrayList;
-
 /**
- * <id> tag in the orm.xml
+ * <column> tag in the orm.xml
  */
-public class IdConfig {
+public class ColumnConfig {
 
   // attributes
   private String _name;
+  // XXX: to do ...
 
   // elements
-  private ColumnConfig _column;
-
   // XXX: to do ...
-  /*
-  private GeneratedValueConfig _generatedValue;
-  private TemporalConfig _temporal;
-  private TableGeneratorConfig _tableGenerator;
-  private SequenceGeneratorConfig _sequenceGenerator;
-  */
 
   /**
    * Returns the name.
@@ -64,21 +55,5 @@ public class IdConfig {
   public void setName(String name)
   {
     _name = name;
-  }
-
-  /**
-   * Returns the column.
-   */
-  public ColumnConfig getColumn()
-  {
-    return _column;
-  }
-
-  /**
-   * Sets the column.
-   */
-  public void setColumn(ColumnConfig column)
-  {
-    _column = column;
   }
 }

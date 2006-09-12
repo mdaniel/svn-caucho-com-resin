@@ -31,19 +31,23 @@ package com.caucho.amber.cfg;
 
 import java.util.ArrayList;
 
+import javax.persistence.FetchType;
+
 /**
- * <id> tag in the orm.xml
+ * <basic> tag in the orm.xml
  */
-public class IdConfig {
+public class BasicConfig {
 
   // attributes
   private String _name;
+  private FetchType _fetchType;
 
   // elements
   private ColumnConfig _column;
 
   // XXX: to do ...
   /*
+  private ColumnConfig _column;
   private GeneratedValueConfig _generatedValue;
   private TemporalConfig _temporal;
   private TableGeneratorConfig _tableGenerator;
@@ -64,6 +68,22 @@ public class IdConfig {
   public void setName(String name)
   {
     _name = name;
+  }
+
+  /**
+   * Returns the fetch type.
+   */
+  public FetchType getFetchType()
+  {
+    return _fetchType;
+  }
+
+  /**
+   * Sets the fetch type.
+   */
+  public void setFetchType(FetchType fetchType)
+  {
+    _fetchType = fetchType;
   }
 
   /**

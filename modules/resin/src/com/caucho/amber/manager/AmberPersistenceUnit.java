@@ -52,6 +52,7 @@ import com.caucho.amber.AmberException;
 import com.caucho.amber.AmberRuntimeException;
 
 import com.caucho.amber.cfg.EntityIntrospector;
+import com.caucho.amber.cfg.EntityMappingsConfig;
 
 import com.caucho.amber.entity.AmberCompletion;
 import com.caucho.amber.entity.AmberEntityHome;
@@ -160,6 +161,8 @@ public class AmberPersistenceUnit {
   private HashMap<String,String> _namedQueryMap =
     new HashMap<String,String>();
 
+  private EntityMappingsConfig _entityMappings;
+
   private EntityIntrospector _introspector;
   private AmberGenerator _generator;
 
@@ -172,7 +175,8 @@ public class AmberPersistenceUnit {
 
   private long _xid = 1;
 
-  public AmberPersistenceUnit(AmberContainer container, String name)
+  public AmberPersistenceUnit(AmberContainer container,
+                              String name)
   {
     _amberContainer = container;
     _name = name;
@@ -845,6 +849,17 @@ public class AmberPersistenceUnit {
   public boolean hasReturnGeneratedKeys()
   {
     return _supportsGetGeneratedKeys;
+  }
+
+  /**
+   * Sets the entity mappings config.
+   */
+  public void setEntityMappingsConfig(EntityMappingsConfig entityMappings)
+  {
+    _entityMappings = entityMappings;
+
+    if (_entityMappings != null)
+      _introspector.setEntityConfigMap(_entityMappings.getEntityMap());
   }
 
   /**

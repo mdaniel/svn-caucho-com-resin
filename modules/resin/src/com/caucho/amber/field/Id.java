@@ -86,9 +86,10 @@ public class Id {
     if (key instanceof EmbeddedIdField) {
       _embeddedIdField = (EmbeddedIdField) key;
     }
-
-    // ejb/0623
-    addKey(key);
+    else {
+      // ejb/0623
+      addKey(key);
+    }
   }
 
   /**

@@ -29,7 +29,7 @@
 
 package com.caucho.amber.cfg;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * <attributes> tag in the orm.xml
@@ -37,12 +37,15 @@ import java.util.ArrayList;
 public class AttributesConfig {
 
   // elements
-  private ArrayList<IdConfig> _idList = new ArrayList<IdConfig>();
+  private HashMap<String, IdConfig> _idMap
+    = new HashMap<String, IdConfig>();
+
+  private HashMap<String, BasicConfig> _basicMap
+    = new HashMap<String, BasicConfig>();
 
   // XXX: to do ...
   /*
   private EmbeddedIdConfig _embeddedId;
-  private ArrayList<BasicConfig> _basicList = new ArrayList<BasicConfig>();
   private ArrayList<VersionConfig> _versionList = new ArrayList<VersionConfig>();
   private ArrayList<ManyToOneConfig> _manyToOneList = new ArrayList<ManyToOneConfig>();
   private ArrayList<OneToManyConfig> _oneToManyList = new ArrayList<OneToManyConfig>();
@@ -53,18 +56,50 @@ public class AttributesConfig {
   */
 
   /**
+   * Adds a new <basic>.
+   */
+  public void addBasic(BasicConfig basic)
+  {
+    _basicMap.put(basic.getName(), basic);
+  }
+
+  /**
+   * Returns the <basic> map.
+   */
+  public HashMap<String, BasicConfig> getBasicMap()
+  {
+    return _basicMap;
+  }
+
+  /**
+   * Returns a <basic> config.
+   */
+  public BasicConfig getBasic(String name)
+  {
+    return _basicMap.get(name);
+  }
+
+  /**
    * Adds a new <id>.
    */
   public void addId(IdConfig id)
   {
-    _idList.add(id);
+    _idMap.put(id.getName(), id);
   }
 
   /**
-   * Returns the id.
+   * Returns the <id> map.
    */
-  public ArrayList<IdConfig> getIdList()
+  public HashMap<String, IdConfig> getIdMap()
   {
-    return _idList;
+    return _idMap;
+  }
+
+  /**
+   * Returns an <id> config.
+   */
+  public IdConfig getId(String name)
+  {
+    return _idMap.get(name);
   }
 }
