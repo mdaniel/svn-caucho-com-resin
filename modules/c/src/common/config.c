@@ -399,6 +399,7 @@ cse_create_host(config_t *config, const char *host_name, int port)
   memset(host, 0, sizeof(resin_host_t));
   host->config = config;
   host->canonical = host;
+
   host->name = cse_strdup(config->p, host_name);
   host->port = port;
   host->next = config->hosts;
@@ -582,6 +583,12 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	  live_time = resin_atoi(value);
 	else if (! strcmp(buffer, "dead-time"))
 	  dead_time = resin_atoi(value);
+	else if (! strcmp(buffer, "last-update")) {
+	  int last_update = resin_atoi(value);
+	  if (host) {
+	    host->last_update = last_update;
+	  }
+	}
 	else
 	  handle_config_header(config, buffer, value);
       }
@@ -637,6 +644,9 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 
     case HMUX_EXIT:
     case HMUX_QUIT:
+      if (now)
+	host->last_update = now;
+      
       if (is_change > 0 || ! host->etag || ! *host->etag) {
 	mem_pool_t *old_pool = host->pool;
 	g_update_count++;
@@ -696,6 +706,9 @@ write_config(config_t *config)
 
   if (! *config->config_path)
     return;
+  
+  ERR(("%s:%d:write_config(): writing cached config\n",
+       __FILE__, __LINE__));
 
   strncpy(temp, config->config_path, sizeof(temp));
 
@@ -750,6 +763,13 @@ write_config(config_t *config)
     }
     else
       hmux_write_string(&s, HMUX_DISPATCH_HOST, host->name);
+    
+    sprintf(buffer, "%d", host->last_update);
+    hmux_write_string(&s, HMUX_HEADER, "last-update");
+    hmux_write_string(&s, HMUX_STRING, buffer);
+    
+    ERR(("%s:%d:write_config(): update %s:%d -> %d\n",
+       __FILE__, __LINE__, host->name, host->port, host->last_update));
 
     if (host->canonical && host->canonical != host) {
       if (host->canonical->port) {
@@ -851,6 +871,7 @@ read_all_config_impl(config_t *config)
 
   if (fstat(fd, &st) == 0) {
     mtime = st.st_mtime;
+    config->last_file_update = mtime;
   }
 
   memset(&s, 0, sizeof(s));
@@ -925,6 +946,9 @@ read_all_config(config_t *config)
 void
 reread_config(config_t *config)
 {
+  LOG(("%s:%d:reread_config(): forcing read()\n",
+       __FILE__, __LINE__));
+  
   read_all_config(config);
 }
 
@@ -966,8 +990,9 @@ cse_update_host_from_resin(resin_host_t *host, time_t now)
     else
       cse_close(&s, "close");
 
-    if (is_change > 0)
+    if (is_change > 0 || host->config->update_interval >= 3600) {
       write_config(host->config);
+    }
 
     return 1;
   }
@@ -1068,10 +1093,27 @@ cse_add_config_server(config_t *config, const char *host, int port)
 static void
 cse_update_host(config_t *config, resin_host_t *host, time_t now)
 {
+  struct stat st;
+  
   if (now < host->last_update + config->update_interval)
     return;
 
+  if (config->config_path && stat(config->config_path, &st) == 0) {
+    if (config->last_file_update < st.st_mtime) {
+      config->last_file_update = st.st_mtime;
+      read_all_config_impl(config);
+    }
+
+    return;
+  }
+  
+  LOG(("%s:%d:cse_update_host(): %s:%d(%p) old:%d now:%d()\n",
+       __FILE__, __LINE__, host->name, host->port, host, host->last_update, now));
+
   cse_update_host_from_resin(host, now);
+  
+  LOG(("%s:%d:cse_update_host(): complete %s:%d(%p) old:%d now:%d()\n",
+       __FILE__, __LINE__, host->name, host->port, host, host->last_update, now));
 }
 
 /**

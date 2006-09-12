@@ -4,6 +4,8 @@
 
 <s2 title='3.0.snap - Sep 7, 2006'>
 <ul>
+<li>resin-admin was using incorrect MBeanServer (#1331, #1328, rep by vc, J SHepard)
+<li>select manager keepalive enable issue (rep by Serge Knystautas)
 <li>mod_caucho update configuration time on cache file load (rep by Serge Knystautas)
 <li>EJB: ejb-entry was not properly applied for EJB entity beans (#1322, rep by gzhu)</li>
 <li>servlet-mapping url-regexp wasn't working with welcome-file-list (#1298, rep by marcelloh)</li>
