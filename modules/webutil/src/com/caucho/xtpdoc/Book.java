@@ -54,7 +54,7 @@ public class Book {
     throws IOException
   {
     out.println("\\documentclass{report}");
-
+    out.println();
     out.println("\\usepackage{url}");
     out.println("\\usepackage{hyperref}");
     out.println("\\usepackage{graphicx}");
@@ -67,6 +67,9 @@ public class Book {
     out.println("\\usepackage{ltxtable}");
     out.println("\\usepackage{epsfig}");
     out.println("\\usepackage{boxedminipage}");
+    out.println("\\usepackage{fancyhdr}");
+    out.println();
+    out.println("\\pagestyle{fancy}");
     out.println();
     out.println("\\definecolor{example-gray}{gray}{0.8}");
     out.println("\\definecolor{results-gray}{gray}{0.6}");

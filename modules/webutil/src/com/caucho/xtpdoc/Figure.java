@@ -68,6 +68,8 @@ public class Figure implements ContentItem {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
+    out.writeStartElement("center");
+
     out.writeEmptyElement("img");
 
     if (_height >= 0)
@@ -76,8 +78,10 @@ public class Figure implements ContentItem {
     if (_width >= 0)
       out.writeAttribute("width", Integer.toString(_width));
 
+    out.writeAttribute("src", 
+                       _document.getContextPath() + "/images/" + _source);
 
-    out.writeAttribute("src", _document.getContextPath() + "/images/" + _source);
+    out.writeEndElement(); // center
   }
 
   public void writeLaTeX(PrintWriter out)

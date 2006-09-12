@@ -135,4 +135,11 @@ public class FormattedText extends ContainerNode {
     addItem(example);
     return example;
   }
+
+  public WebOnly createWebOnly()
+  {
+    WebOnly webOnly = new WebOnly(getDocument());
+    addItem(webOnly);
+    return webOnly;
+  }
 }
