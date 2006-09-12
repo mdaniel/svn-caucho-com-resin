@@ -28,13 +28,15 @@
 
 package com.caucho.xml;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import com.caucho.util.CharBuffer;
+import com.caucho.xpath.pattern.NodeListIterator;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.caucho.util.CharBuffer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * Generic implementation of a node list.
@@ -97,5 +99,11 @@ public class NodeListImpl implements NodeList {
     cb.append("]");
 
     return cb.toString();
+  }
+
+  // for quercus
+  public Iterator<Node> iterator()
+  {
+    return new NodeListIterator(null, this);
   }
 }

@@ -28,13 +28,12 @@
 
 package com.caucho.xml;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.xpath.pattern.NodeListIterator;
 
-import org.w3c.dom.*;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
-import com.caucho.vfs.*;
-import com.caucho.util.*;
+import java.util.Iterator;
 
 /**
  * QAbstractNode is an abstract implementation for any DOM node.
@@ -54,5 +53,11 @@ public class QEmptyNodeList implements NodeList {
   public int getLength()
   {
     return 0;
+  }
+
+  // for quercus
+  public Iterator<Node> iterator()
+  {
+    return new NodeListIterator(null, this);
   }
 }

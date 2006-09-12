@@ -28,10 +28,14 @@
 
 package com.caucho.xml;
 
+import com.caucho.xpath.pattern.NodeListIterator;
+
 import org.w3c.dom.DOMException;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import java.util.Iterator;
 
 /**
  * QNode represents any node that can have children.
@@ -343,7 +347,7 @@ public abstract class QNode extends QAbstractNode {
 
   // NodeList methods
 
-  class ChildNodeList implements NodeList {
+  public class ChildNodeList implements NodeList {
     /**
      * Returns the child with the given index.
      */
@@ -367,6 +371,12 @@ public abstract class QNode extends QAbstractNode {
         index++;
 
       return index;
+    }
+
+    // for quercus
+    public Iterator<Node> iterator()
+    {
+      return new NodeListIterator(null, this);
     }
   }
 }

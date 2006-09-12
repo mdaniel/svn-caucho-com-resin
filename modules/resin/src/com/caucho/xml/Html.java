@@ -28,15 +28,6 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.io.*;
-
-import org.w3c.dom.*;
-import org.xml.sax.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 /**
  * HTML parser interface.  The parser can parse directly into the DOM, or it
  * can be used as a SAX parser.
@@ -67,5 +58,7 @@ public class Html extends XmlParser {
   {
     super(new HtmlPolicy(), null);
     _forgiving = true;
+    
+    init();
   }
 }

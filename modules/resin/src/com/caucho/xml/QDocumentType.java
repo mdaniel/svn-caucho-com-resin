@@ -51,6 +51,11 @@ public class QDocumentType extends QNode implements DocumentType {
    */
   public QDocumentType(String name)
   {
+    this(name, null, null);
+  }
+
+  public QDocumentType(String name, String publicId, String systemId)
+  {
     _name = name;
 
     _entities.put("amp", new QEntity("amp", "&"));
@@ -58,6 +63,9 @@ public class QDocumentType extends QNode implements DocumentType {
     _entities.put("gt", new QEntity("gt", ">"));
     _entities.put("quot", new QEntity("quot", "\""));
     _entities.put("apos", new QEntity("apos", "'"));
+
+    _publicId = publicId;
+    _systemId = systemId;
   }
 
   public String getNodeName() { return _name; }

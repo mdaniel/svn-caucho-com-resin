@@ -29,9 +29,10 @@
 
 package com.caucho.quercus.lib.dom;
 
-import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.UnimplementedException;
+import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.TempBufferStringValue;
 import com.caucho.quercus.env.Value;
@@ -40,9 +41,12 @@ import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.ReturnNullAsFalse;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.StringStream;
 import com.caucho.vfs.TempStream;
 import com.caucho.vfs.WriteStream;
+import com.caucho.xml.Html;
 import com.caucho.xml.QDocument;
+import com.caucho.xml.QDocumentType;
 import com.caucho.xml.QName;
 import com.caucho.xml.Xml;
 import com.caucho.xml.XmlPrinter;
@@ -296,6 +300,9 @@ public class DOMDocument
   // XXX: also can be called statically, returns a DOMDocument in that case
   public boolean load(Env env, Path path, @Optional Value options)
   {
+    if (options != null)
+      env.stub(L.l("`{0}' is ignored", "options"));
+
     ReadStream is = null;
 
     try {
@@ -307,9 +314,12 @@ public class DOMDocument
     }
     catch (SAXException ex) {
       env.warning(ex);
+
+      return false;
     }
     catch (IOException ex) {
-      throw new QuercusModuleException(ex);
+      env.warning(ex);
+      return false;
     }
     finally {
       if (is != null) {
@@ -326,24 +336,118 @@ public class DOMDocument
   }
 
   /**
-   * @param source A string containing the XML
+   * @param source A string containing the HTML
    */
   // XXX: also can be called statically, returns a DOMDocument in that case
-  public boolean loadHTML(String source)
+  public boolean loadHTML(Env env, String source)
   {
-    throw new UnimplementedException();
+    ReadStream is = StringStream.open(source);
+
+    try {
+      Html html = new Html();
+
+      html.parseDocument(this, is, null);
+
+      setStandalone(true);
+      setDoctype(new QDocumentType("html",
+                                   "-//W3C//DTD HTML 4.0 Transitional//EN",
+                                   "http://www.w3.org/TR/REC-html40/loose.dtd"));
+    }
+    catch (SAXException ex) {
+      env.warning(ex);
+      return false;
+    }
+    catch (IOException ex) {
+      env.warning(ex);
+      return false;
+    }
+    finally {
+      if (is != null) {
+        try {
+          is.close();
+        }
+        catch (IOException ex) {
+          log.log(Level.FINE, ex.toString(), ex);
+        }
+      }
+    }
+
+    return true;
   }
 
   // XXX: also can be called statically, returns a DOMDocument in that case
-  public boolean loadHTMLFile(String filename)
+  public boolean loadHTMLFile(Env env, Path path)
   {
-    throw new UnimplementedException();
+    ReadStream is = null;
+
+    try {
+      is = path.openRead();
+
+      Html html = new Html();
+
+      html.parseDocument(this, is, path.getPath());
+
+      setStandalone(true);
+      setDoctype(new QDocumentType("html",
+                                   "-//W3C//DTD HTML 4.0 Transitional//EN",
+                                   "http://www.w3.org/TR/REC-html40/loose.dtd"));
+    }
+    catch (SAXException ex) {
+      env.warning(ex);
+      return false;
+    }
+    catch (IOException ex) {
+      env.warning(ex);
+      return false;
+    }
+    finally {
+      if (is != null) {
+        try {
+          is.close();
+        }
+        catch (IOException ex) {
+          log.log(Level.FINE, ex.toString(), ex);
+        }
+      }
+    }
+
+    return true;
   }
 
   // XXX: also can be called statically, returns a DOMDocument in that case
-  public boolean loadXML(String source, @Optional Value options)
+  public boolean loadXML(Env env, String source, @Optional Value options)
   {
-    throw new UnimplementedException();
+    if (options != null)
+      env.stub(L.l("`{0}' is ignored", "options"));
+
+    ReadStream is = StringStream.open(source);
+
+    try {
+      Xml xml = new Xml();
+
+      xml.parseDocument(this, is, null);
+    }
+    catch (SAXException ex) {
+      env.warning(ex);
+
+      return false;
+    }
+    catch (IOException ex) {
+      env.warning(ex);
+      return false;
+    }
+    finally {
+      if (is != null) {
+        try {
+          is.close();
+        }
+        catch (IOException ex) {
+          log.log(Level.FINE, ex.toString(), ex);
+        }
+      }
+    }
+
+    return true;
   }
 
   public boolean relaxNGValidate(String rngFilename)
@@ -356,32 +460,54 @@ public class DOMDocument
     throw new UnimplementedException();
   }
 
-  /**
-   * @return the number of bytes written, or FALSE for an error
-   */
-  public Value save(String filename, @Optional Value options)
+  private void saveToStream(WriteStream os, boolean isHTML)
+    throws IOException
   {
-    throw new UnimplementedException();
+    XmlPrinter printer = new XmlPrinter(os);
+
+    printer.setMethod(isHTML ? "html" : "xml");
+
+    printer.setVersion(_version);
+    printer.setEncoding(_encoding);
+
+    printer.setPrintDeclaration(true);
+
+    if (getStandalone())
+      printer.setStandalone("yes");
+
+    printer.printXml(this);
+
+    os.println();
   }
 
-  @ReturnNullAsFalse
-  public void saveHTML()
+  private Value saveToFile(Env env, Path path, boolean isHTML)
   {
-    throw new UnimplementedException();
+    WriteStream os = null;
+
+    try {
+      os = path.openWrite();
+      saveToStream(os, isHTML);
+
+    }
+    catch (IOException ex) {
+      env.warning(ex);
+      return BooleanValue.FALSE;
+    }
+    finally {
+      if (os != null) {
+        try {
+          os.close();
+        }
+        catch (Exception ex) {
+          log.log(Level.FINE, ex.toString(), ex);
+        }
+      }
+    }
+
+    return new LongValue(path.getLength());
   }
 
-  /**
-   * @return the number of bytes written, or FALSE for an error
-   */
-
-  @ReturnNullAsFalse
-  public String saveHTMLFile(String filename)
-  {
-    throw new UnimplementedException();
-  }
-
-  @ReturnNullAsFalse
-  public StringValue saveXML()
+  private StringValue saveToString(Env env, boolean isHTML)
   {
     TempStream tempStream = new TempStream();
 
@@ -389,22 +515,14 @@ public class DOMDocument
       tempStream.openWrite();
       WriteStream os = new WriteStream(tempStream);
 
-      XmlPrinter printer = new XmlPrinter(os);
+      saveToStream(os, isHTML);
 
-      printer.setVersion(_version);
-      printer.setEncoding(_encoding);
-
-      printer.setPrintDeclaration(true);
-
-      printer.printXml(this);
-
-      os.println();
-      
       os.close();
     }
     catch (IOException ex) {
       tempStream.discard();
-      throw new QuercusModuleException(ex);
+      env.warning(ex);
+      return null;
     }
 
     TempBufferStringValue result = new TempBufferStringValue(tempStream.getHead());
@@ -412,6 +530,38 @@ public class DOMDocument
     tempStream.discard();
 
     return result;
+  }
+
+  /**
+   * @return the number of bytes written, or FALSE for an error
+   */
+  public Value save(Env env, Path path, @Optional Value options)
+  {
+    if (options != null)
+      env.stub(L.l("`{0}' is ignored", "options"));
+
+    return saveToFile(env, path, false);
+  }
+
+  @ReturnNullAsFalse
+  public StringValue saveHTML(Env env)
+  {
+    return saveToString(env, true);
+  }
+
+  /**
+   * @return the number of bytes written, or FALSE for an error
+   */
+
+  public Value saveHTMLFile(Env env, Path path)
+  {
+    return saveToFile(env, path, true);
+  }
+
+  @ReturnNullAsFalse
+  public StringValue saveXML(Env env)
+  {
+    return saveToString(env, false);
   }
 
   public boolean schemaValidate(String schemaFilename)
@@ -429,8 +579,11 @@ public class DOMDocument
     throw new UnimplementedException();
   }
 
-  public int xinclude(@Optional int options)
+  public int xinclude(Env env, @Optional Value options)
   {
+    if (options != null)
+      env.stub(L.l("`{0}' is ignored", "options"));
+
     throw new UnimplementedException();
   }
 

@@ -28,11 +28,14 @@
 
 package com.caucho.xml;
 
-import java.io.*;
-import org.w3c.dom.*;
-import com.caucho.vfs.*;
+import com.caucho.xpath.pattern.NodeListIterator;
 
-class QDeepNodeList implements NodeList {
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import java.util.Iterator;
+
+public class QDeepNodeList implements NodeList {
   QNode _top;
   QNodePredicate _predicate;
   QAbstractNode _first;
@@ -65,7 +68,7 @@ class QDeepNodeList implements NodeList {
     while (i < index && next != end) {
       next = next.getNextPreorder();
       if (next != end && _predicate.isMatch(next)) {
-	i++;
+        i++;
       }
     }
 
@@ -78,12 +81,12 @@ class QDeepNodeList implements NodeList {
 
     return i == _index ? next : null;
   }
-  
+
   public int getLength()
   {
     if (_changeCount != _top._owner._changeCount)
       _length = -1;
-    
+
     if (_length >= 0)
       return _length;
 
@@ -91,9 +94,9 @@ class QDeepNodeList implements NodeList {
     _length = 0;
     for (QAbstractNode ptr = _first; ptr != end; ptr = ptr.getNextPreorder()) {
       if (_predicate.isMatch(ptr))
-	_length++;
+        _length++;
     }
-      
+
     return _length;
   }
 
@@ -111,5 +114,11 @@ class QDeepNodeList implements NodeList {
       end = end._parent;
 
     return end == null ? null : end._next;
+  }
+
+  // for quercus
+  public Iterator<Node> iterator()
+  {
+    return new NodeListIterator(null, this);
   }
 }

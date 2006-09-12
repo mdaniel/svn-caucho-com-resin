@@ -28,12 +28,12 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
-import com.caucho.vfs.*;
+import org.w3c.dom.Attr;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 
-abstract class QAttributedNode extends QNode {
+public abstract class QAttributedNode extends QNode {
   QAttr _firstAttribute;
 
   /**
@@ -209,7 +209,9 @@ abstract class QAttributedNode extends QNode {
   {
     QAttr qAttr = (QAttr) attr;
 
-    if (qAttr._owner != _owner)
+    if (qAttr._owner == null)
+      qAttr._owner = _owner;
+    else if (qAttr._owner != _owner)
       throw new QDOMException(DOMException.WRONG_DOCUMENT_ERR,
 			      "attribute from wrong document");
 

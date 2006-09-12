@@ -63,7 +63,8 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
   // possibly different from the systemId if the DOCTYPE doesn't match
   // the actual file location
   String _rootFilename;
-  
+  private boolean _standalone;
+
   public QDocument()
   {
     _implementation = new QDOMImplementation();
@@ -830,12 +831,12 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
 
   public boolean getStandalone()
   {
-    throw new UnsupportedOperationException();
+    return _standalone;
   }
   
   public void setStandalone(boolean standalone)
   {
-    throw new UnsupportedOperationException();
+    _standalone = true;
   }
 
   public String getVersion()

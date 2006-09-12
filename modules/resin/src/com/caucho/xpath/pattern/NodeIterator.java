@@ -28,18 +28,21 @@
 
 package com.caucho.xpath.pattern;
 
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
-
-import org.w3c.dom.*;
-
-import com.caucho.util.*;
 import com.caucho.log.Log;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.xpath.*;
-import com.caucho.xpath.expr.*;
+import com.caucho.xml.XmlUtil;
+import com.caucho.xpath.ExprEnvironment;
+import com.caucho.xpath.StylesheetEnv;
+import com.caucho.xpath.XPathException;
+import com.caucho.xpath.XPathFun;
+import com.caucho.xpath.expr.Var;
+
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Iterates through matching nodes.
@@ -55,8 +58,10 @@ public abstract class NodeIterator implements ExprEnvironment, Iterator<Node> {
 
   protected NodeIterator(ExprEnvironment env)
   {
-    if (env == null)
-      throw new NullPointerException();
+    /** XXX: children of NodeList implement iterator() for quercus
+     if (env == null)
+     throw new NullPointerException();
+     */
     
     _env = env;
   }
