@@ -153,7 +153,11 @@ public abstract class AbstractMarshallerImpl implements Marshaller {
   {
     try {
       XMLOutputFactory factory = XMLOutputFactory.newInstance();
-      marshal(obj, factory.createXMLStreamWriter(os));
+      XMLStreamWriter out = factory.createXMLStreamWriter(os);
+
+      marshal(obj, out);
+
+      out.flush();
     }
     catch (XMLStreamException e) {
       throw new JAXBException(e);
@@ -164,7 +168,11 @@ public abstract class AbstractMarshallerImpl implements Marshaller {
   {
     try {
       XMLOutputFactory factory = XMLOutputFactory.newInstance();
-      marshal(obj, factory.createXMLStreamWriter(w));
+      XMLStreamWriter out = factory.createXMLStreamWriter(w);
+
+      marshal(obj, out);
+
+      out.flush();
     }
     catch (XMLStreamException e) {
       throw new JAXBException(e);
