@@ -1110,8 +1110,8 @@ public class EntityIntrospector {
 
         JMethod setter = type.getMethod("set" + propName,
                                         new JClass[] { method.getReturnType() });
-        if ((! method.isPublic()) ||
-            (setter == null) || (! setter.isPublic())) {
+        if (method.isPrivate() ||
+            (setter == null) || setter.isPrivate()) {
 
           JAnnotation ann = isAnnotatedMethod(method);
 

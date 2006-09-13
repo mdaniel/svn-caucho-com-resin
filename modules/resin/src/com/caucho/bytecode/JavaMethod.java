@@ -49,7 +49,7 @@ public class JavaMethod extends JMethod {
   private static final JClass []NULL_CLASS = new JClass[0];
 
   private JavaClassLoader _loader;
-  
+
   private JavaClass _jClass;
 
   private int _accessFlags;
@@ -70,7 +70,7 @@ public class JavaMethod extends JMethod {
   public JavaMethod()
   {
   }
-  
+
   /**
    * Sets the JavaClass.
    */
@@ -78,7 +78,7 @@ public class JavaMethod extends JMethod {
   {
     _jClass = jClass;
   }
-  
+
   /**
    * Sets the name.
    */
@@ -126,7 +126,7 @@ public class JavaMethod extends JMethod {
   {
     return _loader;
   }
-  
+
   /**
    * Sets the access flags
    */
@@ -157,6 +157,14 @@ public class JavaMethod extends JMethod {
   public boolean isPublic()
   {
     return Modifier.isPublic(getAccessFlags());
+  }
+
+  /**
+   * Returns true for a private method
+   */
+  public boolean isPrivate()
+  {
+    return Modifier.isPrivate(getAccessFlags());
   }
 
   /**
@@ -228,7 +236,7 @@ public class JavaMethod extends JMethod {
 
       return _loader.parseParameterizedType(sig.substring(t + 1));
     }
-    
+
     return getReturnType();
   }
 
@@ -249,7 +257,7 @@ public class JavaMethod extends JMethod {
     JClass []types = new JClass[typeList.size()];
 
     typeList.toArray(types);
-    
+
     return types;
   }
 
@@ -258,34 +266,34 @@ public class JavaMethod extends JMethod {
     switch (name.charAt(i)) {
     case ')':
       return -1;
-      
-    case '(': 
-    case 'V': 
-    case 'Z': 
-    case 'C': 
-    case 'B': 
-    case 'S': 
-    case 'I': 
-    case 'J': 
-    case 'F': 
+
+    case '(':
+    case 'V':
+    case 'Z':
+    case 'C':
+    case 'B':
+    case 'S':
+    case 'I':
+    case 'J':
+    case 'F':
     case 'D':
       i += 1;
       break;
-      
+
     case '[':
       return nextDescriptor(name, i + 1);
-      
+
     case 'L':
       {
-	int tail = name.indexOf( ';', i);
+  int tail = name.indexOf( ';', i);
 
-	if (tail < 0)
-	  throw new IllegalStateException();
+  if (tail < 0)
+    throw new IllegalStateException();
 
-	i = tail + 1;
+  i = tail + 1;
       }
       break;
-      
+
     default:
       throw new UnsupportedOperationException(name.substring(i));
     }
@@ -339,7 +347,7 @@ public class JavaMethod extends JMethod {
       Attribute attr = _attributes.get(i);
 
       if (attr.getName().equals(name))
-	return attr;
+  return attr;
     }
 
     return null;
@@ -354,25 +362,25 @@ public class JavaMethod extends JMethod {
       Attribute attr = getAttribute("RuntimeVisibleAnnotations");
 
       if (attr instanceof OpaqueAttribute) {
-	byte []buffer = ((OpaqueAttribute) attr).getValue();
-	
-	try {
-	  ByteArrayInputStream is = new ByteArrayInputStream(buffer);
+  byte []buffer = ((OpaqueAttribute) attr).getValue();
 
-	  ConstantPool cp = _jClass.getConstantPool();
+  try {
+    ByteArrayInputStream is = new ByteArrayInputStream(buffer);
 
-	  _annotations = JavaAnnotation.parseAnnotations(is, cp,
-							 getClassLoader());
-	} catch (IOException e) {
-	  log.log(Level.FINER, e.toString(), e);
-	}
+    ConstantPool cp = _jClass.getConstantPool();
+
+    _annotations = JavaAnnotation.parseAnnotations(is, cp,
+               getClassLoader());
+  } catch (IOException e) {
+    log.log(Level.FINER, e.toString(), e);
+  }
       }
 
       if (_annotations == null) {
-	_annotations = new JavaAnnotation[0];
+  _annotations = new JavaAnnotation[0];
       }
     }
-    
+
     return _annotations;
   }
 
@@ -385,12 +393,12 @@ public class JavaMethod extends JMethod {
       Attribute attr = _attributes.get(i);
 
       if (attr instanceof CodeAttribute)
-	return (CodeAttribute) attr;
+  return (CodeAttribute) attr;
     }
 
     return null;
   }
-  
+
 
   /**
    * Writes the field to the output.
@@ -401,7 +409,7 @@ public class JavaMethod extends JMethod {
     out.writeShort(_accessFlags);
     out.writeUTF8Const(_name);
     out.writeUTF8Const(_descriptor);
-    
+
     out.writeShort(_attributes.size());
     for (int i = 0; i < _attributes.size(); i++) {
       Attribute attr = _attributes.get(i);
@@ -463,7 +471,7 @@ public class JavaMethod extends JMethod {
     ArrayList<CodeAttribute.ExceptionItem> exns = tailCodeAttr.getExceptions();
     for (int i = 0; i < exns.size();  i++) {
       CodeAttribute.ExceptionItem exn = exns.get(i);
-      
+
       CodeAttribute.ExceptionItem newExn = new CodeAttribute.ExceptionItem();
 
       newExn.setType(exn.getType());

@@ -40,18 +40,18 @@ import java.lang.reflect.Type;
  */
 public class JConstructorWrapper extends JMethod {
   private JClassLoader _loader;
-  
+
   private Constructor _method;
 
   public JConstructorWrapper(Constructor method, JClassLoader loader)
   {
     if (loader == null)
       throw new NullPointerException();
-    
+
     _method = method;
     _loader = loader;
   }
-  
+
   /**
    * Returns the method name.
    */
@@ -59,7 +59,7 @@ public class JConstructorWrapper extends JMethod {
   {
     return _method.getName();
   }
-  
+
   /**
    * Returns true for a static method.
    */
@@ -67,7 +67,15 @@ public class JConstructorWrapper extends JMethod {
   {
     return Modifier.isStatic(_method.getModifiers());
   }
-  
+
+  /**
+   * Returns true for a private method
+   */
+  public boolean isPrivate()
+  {
+    return Modifier.isPrivate(_method.getModifiers());
+  }
+
   /**
    * Returns true for a public method.
    */
@@ -75,7 +83,7 @@ public class JConstructorWrapper extends JMethod {
   {
     return Modifier.isPublic(_method.getModifiers());
   }
-  
+
   /**
    * Returns true for a final method.
    */
@@ -83,7 +91,7 @@ public class JConstructorWrapper extends JMethod {
   {
     return Modifier.isFinal(_method.getModifiers());
   }
-  
+
   /**
    * Returns true for an abstract method.
    */

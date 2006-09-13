@@ -39,27 +39,32 @@ abstract public class JMethod extends JAccessibleObject {
    * Returns the method name.
    */
   abstract public String getName();
-  
+
   /**
    * Returns true for a static method.
    */
   abstract public boolean isStatic();
-  
+
+  /**
+   * Returns true for a private method.
+   */
+  abstract public boolean isPrivate();
+
   /**
    * Returns true for a public method.
    */
   abstract public boolean isPublic();
-  
+
   /**
    * Returns true for an abstract method.
    */
   abstract public boolean isAbstract();
-  
+
   /**
    * Returns true for a final method.
    */
   abstract public boolean isFinal();
-  
+
   /**
    * Returns the declaring class
    */
@@ -89,7 +94,7 @@ abstract public class JMethod extends JAccessibleObject {
    * Returns the declared annotaions.
    */
   abstract public JAnnotation []getDeclaredAnnotations();
-  
+
   /**
    * Returns a full method name with arguments.
    */
@@ -137,7 +142,7 @@ abstract public class JMethod extends JAccessibleObject {
 
     for (int i = 0; i < aParam.length; i++) {
       if (! aParam[i].equals(bParam[i]))
-	return false;
+  return false;
     }
 
     return true;

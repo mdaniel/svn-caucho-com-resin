@@ -39,18 +39,18 @@ import java.lang.reflect.Type;
  */
 public class JMethodWrapper extends JMethod {
   private JClassLoader _loader;
-  
+
   private Method _method;
 
   public JMethodWrapper(Method method, JClassLoader loader)
   {
     if (loader == null)
       throw new NullPointerException();
-    
+
     _method = method;
     _loader = loader;
   }
-  
+
   /**
    * Returns the method name.
    */
@@ -58,7 +58,7 @@ public class JMethodWrapper extends JMethod {
   {
     return _method.getName();
   }
-  
+
   /**
    * Returns true for a static method.
    */
@@ -66,7 +66,15 @@ public class JMethodWrapper extends JMethod {
   {
     return Modifier.isStatic(_method.getModifiers());
   }
-  
+
+  /**
+   * Returns true for a private method
+   */
+  public boolean isPrivate()
+  {
+    return Modifier.isPrivate(_method.getModifiers());
+  }
+
   /**
    * Returns true for a public method.
    */
@@ -74,7 +82,7 @@ public class JMethodWrapper extends JMethod {
   {
     return Modifier.isPublic(_method.getModifiers());
   }
-  
+
   /**
    * Returns true for a final method.
    */
@@ -82,7 +90,7 @@ public class JMethodWrapper extends JMethod {
   {
     return Modifier.isFinal(_method.getModifiers());
   }
-  
+
   /**
    * Returns true for an abstract method.
    */
@@ -114,11 +122,11 @@ public class JMethodWrapper extends JMethod {
   {
     try {
       Type retType = _method.getGenericReturnType();
-      
+
       if (retType instanceof Class)
-	return _loader.forName(((Class) retType).getName());
+  return _loader.forName(((Class) retType).getName());
       else
-	return new JTypeWrapper(_loader, (ParameterizedType) retType);
+  return new JTypeWrapper(_loader, (ParameterizedType) retType);
     } catch (NoSuchMethodError e) {
       return getReturnType();
     }
