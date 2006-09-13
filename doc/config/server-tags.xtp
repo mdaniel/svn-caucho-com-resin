@@ -25,6 +25,30 @@ load balancing, and JVM arguments.</p>
 
 </s1>
 
+<defun title="&lt;accept-listen-backlog>" version="Resin 3.1">
+<parents>http, connection-port, protocol</parents>
+
+<p>&lt;accept-listen-backlog> configures operating system TCP listen
+queue size for the port.</p>
+
+</defun>
+
+<defun title="&lt;accept-thread-max>" version="Resin 3.1">
+<parents>http, connection-port, protocol</parents>
+
+<p>&lt;accept-thread-min> configures the maximum number of 
+threads listening for new connections on this port.</p>
+
+</defun>
+
+<defun title="&lt;accept-thread-min>" version="Resin 3.1">
+<parents>http, connection-port, protocol</parents>
+
+<p>&lt;accept-thread-min> configures the minimum number of 
+threads listening for new connections on this port.</p>
+
+</defun>
+
 <defun title="&lt;address>" version="Resin 3.1">
 <parents>server</parents>
 
@@ -161,33 +185,41 @@ will use @virtual-host.</p>
 the command line, typically -X memory parameters and -D defines.</p>
 </defun>
 
-<defun title="&lt;keepalive-select-max>" version="Resin 3.1">
+<defun title="&lt;keepalive-max>" version="Resin 3.1">
 <parents>server</parents>
 
-<p>&lt;keepalive-select-max> configures the maximum number of
-sockets which can be used as keepalive connections.  The select
-keepalives have been separated from a thread, so they are very
-lightweight, only consuming a file descriptor.  The number of
-select keepalives is limited by the number of file descriptors allowed
-for a process.</p>
+<p>&lt;keepalive-max> configures the maximum number of
+threads which can be used directly for keepalive connections.
+Connections beyond &lt;keepalive-thread-max> are put into the select
+keepalive manager (which is larger), releasing the thread to handle
+other requests.</p>
 
-<p>&lt;keepalive-select-max> requires Resin Professional.</p>
+<p>A value of -1 disables thread keepalives.</p>
 
-<p>Higher values of &lt;keepalive-select-max> improve network efficiency,
-but tie up more file descriptors.  So, &lt;keepalive-select-max> should
-be significantly less than the maximum number of file descriptors, e.g. half.</p>
+<p>Keepalives are an important TCP technique used with HTTP and
+Resin's load-balancing to avoid the heavy network cost of creating
+a new socket.  Since an initial HTTP request is usually immediately
+followed by extra requests to load files like images and stylesheets,
+it's generally more efficient to keep the socket open for a short time
+instead of creating a new one.  The socket keepalive is even more
+important for Resin's load balancing, to avoid creating extra sockets
+between the web-tier and the app-tier and to make distributed sessions
+more efficient.</p>
 
-<default>-1 (disabled)</default>
+<p>Higher values of &lt;keepalive-max> improve network efficiency
+but increase the number of threads waiting for new client data.</p>
 
-<example title="keepalive-select-max resin.conf">
+<default>100</default>
+
+<example title="keepalive-thread-max in resin.conf">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
   &lt;cluster id="web-tier"&gt;
     &lt;server-default&gt;
+      &lt;http port="80"/>
+
       &lt;thread-max>512&lt;/thread-max>
 
-      &lt;keepalive-thread-max>64&lt;/keepalive-thread-max>
-
-      &lt;keepalive-select-max>1024&lt;/keepalive-select-max>
+      &lt;keepalive-max>100&lt;/keepalive-max>
     &lt;/server-default&gt;
 
     &lt;server id="web-a" address="192.168.0.10"/>
@@ -222,56 +254,10 @@ clients, they can have longer timeouts.</p>
 
       &lt;thread-max>512&lt;/thread-max>
 
-      &lt;keepalive-thread-max>100&lt;/keepalive-thread-max>
+      &lt;keepalive-max>2048&lt;/keepalive-select-max>
+
       &lt;keepalive-thread-timeout>2s&lt;/keepalive-thread-timeout>
-
-      &lt;keepalive-select-max>2048&lt;/keepalive-select-max>
       &lt;keepalive-select-timeout>60s&lt;/keepalive-select-timeout>
-    &lt;/server-default&gt;
-
-    &lt;server id="web-a" address="192.168.0.10"/>
-        ...
-  &lt;/cluster>
-&lt;/resin>
-</example>
-
-</defun>
-
-<defun title="&lt;keepalive-thread-max>" version="Resin 3.1">
-<parents>server</parents>
-
-<p>&lt;keepalive-thread-max> configures the maximum number of
-threads which can be used directly for keepalive connections.
-Connections beyond &lt;keepalive-thread-max> are put into the select
-keepalive manager (which is larger), releasing the thread to handle
-other requests.</p>
-
-<p>A value of -1 disables thread keepalives.</p>
-
-<p>Keepalives are an important TCP technique used with HTTP and
-Resin's load-balancing to avoid the heavy network cost of creating
-a new socket.  Since an initial HTTP request is usually immediately
-followed by extra requests to load files like images and stylesheets,
-it's generally more efficient to keep the socket open for a short time
-instead of creating a new one.  The socket keepalive is even more
-important for Resin's load balancing, to avoid creating extra sockets
-between the web-tier and the app-tier and to make distributed sessions
-more efficient.</p>
-
-<p>Higher values of &lt;keepalive-thread-max> improve network efficiency
-but increase the number of threads waiting for new client data.</p>
-
-<default>-1 (disabled)</default>
-
-<example title="keepalive-thread-max in resin.conf">
-&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-  &lt;cluster id="web-tier"&gt;
-    &lt;server-default&gt;
-      &lt;http port="80"/>
-
-      &lt;thread-max>512&lt;/thread-max>
-
-      &lt;keepalive-thread-max>100&lt;/keepalive-thread-max>
     &lt;/server-default&gt;
 
     &lt;server id="web-a" address="192.168.0.10"/>
@@ -356,15 +342,15 @@ can timeout too quickly for a live server with some network congestion.</p>
 
 </defun>
 
-<defun title="&lt;load-balance-fail-recover-time>" version="Resin 3.1">
+<defun title="&lt;load-balance-recover-time>" version="Resin 3.1">
 <parents>server</parents>
 
-<p>&lt;load-balance-fail-recover-time> is the maximum time
+<p>&lt;load-balance-recover-time> is the maximum time
 the <a href="resin-load-balance.xtp">load balancer</a>
 will consider the server dead after a failure before retrying
 the connection.</p>
 
-<p>Resin uses the load-balance-fail-recover-time to avoid wasting time trying to
+<p>Resin uses the load-balance-recover-time to avoid wasting time trying to
 connect to an unavailable app-tier server.</p>
 
 <p>Lower values let the load balancer use a restarted <g>app-tier</g> server
@@ -373,11 +359,11 @@ contact unavailable servers.</p>
 
 <default>15s</default>
 
-<example title="load-balance-fail-recover-time">
+<example title="load-balance-recover-time">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
     &lt;cluster id="app-tier"&gt;
         &lt;server-default>
-          &lt;load-balance-fail-recover-time>10s&lt;/load-balance-fail-recover-time>
+          &lt;load-balance-recover-time>10s&lt;/load-balance-recover-time>
         &lt;/server-default>
 
         &lt;server id="a" address="192.168.0.10" port="6800"/&gt;
@@ -391,20 +377,20 @@ contact unavailable servers.</p>
 
 </defun>
 
-<defun title="&lt;load-balance-max-idle-time>" version="Resin 3.1">
+<defun title="&lt;load-balance-idle-time>" version="Resin 3.1">
 <parents>server</parents>
 
-<p>&lt;load-balance-max-idle-time> is the maximum time
+<p>&lt;load-balance-idle-time> is the maximum time
 the <a href="resin-load-balance.xtp">load balancer</a>
 and <a href="sessions.xtp">distributed sessions</a> will leave an
 idle socket before closing it.</p>
 
-<p>load-balance-max-idle-time must be less than the <var>timeout</var> value of
+<p>load-balance-idle-time must be less than the <var>timeout</var> value of
 the target <a href="port-tags.xtp#cluster-port">cluster-port</a>.</p>
 
 <p>The load balancer and distributed sessions reuse sockets to the
 cluster peer and <g>app-tier</g> servers to improve TCP performance.
-The load-balance-max-idle-time limits the amount of time those sockets can
+The load-balance-idle-time limits the amount of time those sockets can
 remain idle.</p>
 
 <p>Higher values may improve the socket pooling, but may also increase
@@ -417,40 +403,6 @@ the chance of connecting to a closed server.</p>
     &lt;cluster id="app-tier"&gt;
         &lt;server-default>
           &lt;load-balance-max-idle-time>20s&lt;/load-balance-max-idle-time>
-        &lt;/server-default>
-
-        &lt;server id="a" address="192.168.0.10" port="6800"/&gt;
-        &lt;server id="b" address="192.168.0.11" port="6800"/&gt;
-
-        &lt;host id=""&gt;
-          ...
-    &lt;/cluster&gt;
-&lt;/resin&gt;
-</example>
-
-</defun>
-
-<defun title="&lt;load-balance-timeout>" version="Resin 3.1">
-<parents>server</parents>
-
-<p>&lt;load-balance-timeout> is the maximum time
-the <a href="resin-load-balance.xtp">load balancer</a>
-and <a href="sessions.xtp">distributed sessions</a> will wait for
-a read or write to a cluster socket.</p>
-
-<p>Crashed servers may never respond to a read request or accept a write.
-The load-balance-timeout lets Resin recover from these kinds of crashes.</p>
-
-<p>Lower values can detect crashes more quickly, but too-low values may
-report bogus failures when the server machine is just a little slow.</p>
-
-<default>60s</default>
-
-<example title="load-balance-timeout">
-&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-    &lt;cluster id="app-tier"&gt;
-        &lt;server-default>
-          &lt;load-balance-timeout>60s&lt;/load-balance-timeout>
         &lt;/server-default>
 
         &lt;server id="a" address="192.168.0.10" port="6800"/&gt;
@@ -787,6 +739,40 @@ server instances and therefore belong in a server-default.</p>
 will wait for the graceful shutdown before forcing an exit.</p>
 
 <default>60s</default>
+
+</defun>
+
+<defun title="&lt;socket-timeout>" version="Resin 3.1">
+<parents>http, cluster-port, protocol, server</parents>
+
+<p>&lt;socket-timeout> is the maximum time
+a socket <a href="resin-load-balance.xtp">load balancer</a>
+and <a href="sessions.xtp">distributed sessions</a> will wait for
+a read or write to a cluster socket.</p>
+
+<p>Crashed servers may never respond to a read request or accept a write.
+The socket-timeout lets Resin recover from these kinds of crashes.</p>
+
+<p>Lower values can detect crashes more quickly, but too-low values may
+report bogus failures when the server machine is just a little slow.</p>
+
+<default>60s</default>
+
+<example title="socket-timeout">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+    &lt;cluster id="app-tier"&gt;
+        &lt;server-default>
+          &lt;socket-timeout>60s&lt;/socket-timeout>
+        &lt;/server-default>
+
+        &lt;server id="a" address="192.168.0.10" port="6800"/&gt;
+        &lt;server id="b" address="192.168.0.11" port="6800"/&gt;
+
+        &lt;host id=""&gt;
+          ...
+    &lt;/cluster&gt;
+&lt;/resin&gt;
+</example>
 
 </defun>
 

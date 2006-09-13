@@ -91,22 +91,20 @@ public class Port
   private InetAddress _socketAddress;
 
   // default timeout
-  private long _timeout = 65000L;
-
-  // time in milliseconds to wait on a socket read/write before giving up
-  private long _readTimeout;
-  private long _writeTimeout;
+  private long _socketTimeout = 65000L;
 
   private int _connectionMax = 512;
   private int _minSpareConnection = 16;
 
   private int _keepaliveMax = -1;
-  private long _keepaliveTimeout = 15000L;
+  
+  private long _keepaliveThreadTimeout = 5000L;
+  private long _keepaliveSocketTimeout = 60000L;
 
   private int _acceptThreadMin = 5;
   private int _acceptThreadMax = 10;
 
-  private int _listenBacklog = 100;
+  private int _acceptListenBacklog = 100;
 
   // The virtual host name
   private String _virtualHost;
@@ -166,6 +164,17 @@ public class Port
 
     if (_protocol != null)
       _protocol.setServer(server);
+
+    if (server instanceof Server) {
+      _acceptThreadMax = ((Server) server).getAcceptThreadMax();
+      _acceptThreadMin = ((Server) server).getAcceptThreadMin();
+      _acceptListenBacklog = ((Server) server).getAcceptListenBacklog();
+      
+      _keepaliveMax = ((Server) server).getKeepaliveMax();
+      _keepaliveThreadTimeout = ((Server) server).getKeepaliveThreadTimeout();
+      
+      _socketTimeout = ((Server) server).getSocketTimeout();
+    }
   }
 
   /**
@@ -438,14 +447,6 @@ public class Port
   }
 
   /**
-   * Sets the socket's listen property
-   */
-  public void setSocketListenBacklog(int backlog)
-  {
-    _listenBacklog = backlog;
-  }
-
-  /**
    * Returns true for ignore-client-disconnect.
    */
   public boolean isIgnoreClientDisconnect()
@@ -464,47 +465,36 @@ public class Port
   /**
    * Sets the default read/write timeout for the accepted sockets.
    */
-  public void setTimeout(Period period)
+  public void setSocketTimeout(Period period)
   {
-    _timeout = period.getPeriod();
-  }
-
-  /**
-   * Sets the read timeout for the accepted sockets.
-   */
-  public void setReadTimeout(Period period)
-  {
-    _readTimeout = period.getPeriod();
+    _socketTimeout = period.getPeriod();
   }
 
   /**
    * Gets the read timeout for the accepted sockets.
    */
-  public long getReadTimeout()
+  public long getSocketTimeout()
   {
-    if (_readTimeout != 0)
-      return _readTimeout;
-    else
-      return _timeout;
+    return _socketTimeout;
+  }
+
+  /**
+   * Sets the read timeout for the accepted sockets.
+   *
+   * @deprecated
+   */
+  public void setReadTimeout(Period period)
+  {
+    setSocketTimeout(period);
   }
 
   /**
    * Sets the write timeout for the accepted sockets.
+   *
+   * @deprecated
    */
   public void setWriteTimeout(Period period)
   {
-    _writeTimeout = period.getPeriod();
-  }
-
-  /**
-   * Gets the write timeout for the accepted sockets.
-   */
-  public long getWriteTimeout()
-  {
-    if (_writeTimeout != 0)
-      return _writeTimeout;
-    else
-      return _timeout;
   }
 
   /**
@@ -582,11 +572,6 @@ public class Port
    */
   public void setKeepaliveMax(int max)
   {
-    if (_server != null && _server.getKeepaliveMax() < max) {
-      max = _server.getKeepaliveMax();
-      log.config(L.l("keepalive limited to {0}", max));
-    }
-
     _keepaliveMax = max;
   }
 
@@ -598,14 +583,14 @@ public class Port
     return _keepaliveMax;
   }
 
-  public long getKeepaliveTimeout()
+  public void setKeepaliveThreadTimeout(Period period)
   {
-    return _keepaliveTimeout;
+    _keepaliveThreadTimeout = period.getPeriod();
   }
 
   public long getKeepaliveThreadTimeout()
   {
-    return ((Server) _server).getKeepaliveThreadTimeout();
+    return _keepaliveThreadTimeout;
   }
 
   /**
@@ -712,12 +697,12 @@ public class Port
     }
     else if (_socketAddress != null) {
       _serverSocket = QJniServerSocket.create(_socketAddress, _port,
-                                              _listenBacklog);
+                                              _acceptListenBacklog);
 
       log.info(_protocol.getProtocolName() + " listening to " + _socketAddress.getHostName() + ":" + _port);
     }
     else {
-      _serverSocket = QJniServerSocket.create(_port, _listenBacklog);
+      _serverSocket = QJniServerSocket.create(_port, _acceptListenBacklog);
 
       log.info(_protocol.getProtocolName() + " listening to *:" + _port);
     }
@@ -725,8 +710,7 @@ public class Port
     if (_tcpNoDelay)
       _serverSocket.setTcpNoDelay(_tcpNoDelay);
 
-    _serverSocket.setConnectionReadTimeout((int) getReadTimeout());
-    _serverSocket.setConnectionWriteTimeout((int) getWriteTimeout());
+    _serverSocket.setConnectionSocketTimeout((int) getSocketTimeout());
   }
 
   /**
@@ -761,8 +745,7 @@ public class Port
     if (_tcpNoDelay)
       _serverSocket.setTcpNoDelay(_tcpNoDelay);
 
-    _serverSocket.setConnectionReadTimeout((int) getReadTimeout());
-    _serverSocket.setConnectionWriteTimeout((int) getWriteTimeout());
+    _serverSocket.setConnectionSocketTimeout((int) getSocketTimeout());
   }
 
   /**
@@ -775,7 +758,7 @@ public class Port
     
     if (_socketAddress != null) {
       ss = QJniServerSocket.createJNI(_socketAddress, _port,
-				      _listenBacklog);
+				      _acceptListenBacklog);
 
       if (ss == null)
 	return null;
@@ -783,7 +766,7 @@ public class Port
       log.fine("watchdog binding to " + _socketAddress.getHostName() + ":" + _port);
     }
     else {
-      ss = QJniServerSocket.createJNI(null, _port, _listenBacklog);
+      ss = QJniServerSocket.createJNI(null, _port, _acceptListenBacklog);
 
       if (ss == null)
 	return null;
@@ -800,8 +783,7 @@ public class Port
     if (_tcpNoDelay)
       ss.setTcpNoDelay(_tcpNoDelay);
 
-    ss.setConnectionReadTimeout((int) getReadTimeout());
-    ss.setConnectionWriteTimeout((int) getWriteTimeout());
+    ss.setConnectionSocketTimeout((int) getSocketTimeout());
 
     return ss;
   }  

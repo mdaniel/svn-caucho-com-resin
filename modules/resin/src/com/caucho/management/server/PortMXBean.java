@@ -85,14 +85,7 @@ public interface PortMXBean extends ManagedObjectMXBean {
    */
   @Description("The configured timeout for socket reads when waiting for data from a client")
   @Units("milliseconds")    
-  public long getReadTimeout();
-
-  /**
-   * Returns the timeout for socket writes when writing data to a client.
-   */
-  @Description("The configured timeout for socket writes when sending data to a client")
-  @Units("milliseconds")    
-  public long getWriteTimeout();
+  public long getSocketTimeout();
 
   //
   // State attributes

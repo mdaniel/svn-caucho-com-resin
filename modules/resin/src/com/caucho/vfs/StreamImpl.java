@@ -122,6 +122,22 @@ public class StreamImpl {
   }
 
   /**
+   * Reads the next chunk from the stream in non-blocking mode.
+   *
+   * @param buffer byte array receiving the data.
+   * @param offset starting offset into the array.
+   * @param length number of bytes to read.
+   *
+   * @return the number of bytes read or -1 on end of file.
+   */
+  public int readTimeout(byte []buffer, int offset, int length,
+			 long timeout)
+    throws IOException
+  {
+    return 0;
+  }
+
+  /**
    * Returns the number of bytes available without blocking.  Depending on
    * the stream, this may return less than the actual bytes, but will always
    * return a number > 0 if there is any data available.

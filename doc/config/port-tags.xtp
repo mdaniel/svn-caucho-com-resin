@@ -23,6 +23,30 @@
 
 </s1>
 
+<defun title="&lt;accept-listen-backlog>" version="Resin 3.1">
+<parents>http, connection-port, protocol</parents>
+
+<p>&lt;accept-listen-backlog> configures operating system TCP listen
+queue size for the port.</p>
+
+</defun>
+
+<defun title="&lt;accept-thread-max>" version="Resin 3.1">
+<parents>http, connection-port, protocol</parents>
+
+<p>&lt;accept-thread-min> configures the maximum number of 
+threads listening for new connections on this port.</p>
+
+</defun>
+
+<defun title="&lt;accept-thread-min>" version="Resin 3.1">
+<parents>http, connection-port, protocol</parents>
+
+<p>&lt;accept-thread-min> configures the minimum number of 
+threads listening for new connections on this port.</p>
+
+</defun>
+
 <defun title="&lt;address>" version="Resin 3.1">
 <parents>server</parents>
 
@@ -142,13 +166,10 @@ which ports the server should listen to.</p>
 <tr><td>port</td>
     <td>port to listen to</td>
     <td>required</td></tr>
-<tr><td>read-timeout</td>
-    <td>timeout waiting to read from idle client</td>
-    <td>65s</td></tr>
-<tr><td>write-timeout</td>
-     <td>timeout waiting to write to idle client</td>
+<tr><td>socket-timeout</td>
+     <td>timeout waiting to read/write to idle client</td>
      <td>65s</td></tr>
-<tr><td>socket-listen-backlog</td>
+<tr><td>accept-listen-backlog</td>
     <td>The socket factory's listen backlog for receiving sockets</td>
     <td>100</td></tr>
 <tr><td>tcp-no-delay</td>
@@ -187,13 +208,10 @@ which ports the server should listen to.</p>
 <tr><td>tcp-no-delay</td>
     <td>sets the NO_DELAY socket parameter</td>
     <td>true</td></tr>
-<tr><td>read-timeout</td>
-    <td>timeout waiting to read from idle client</td>
-    <td>65s</td></tr>
-<tr><td>write-timeout</td>
+<tr><td>socket-timeout</td>
     <td>timeout waiting to write to idle client</td>
     <td>65s</td></tr>
-<tr><td>socket-listen-backlog</td>
+<tr><td>accept-listen-backlog</td>
     <td>The socket factory's listen backlog for receiving sockets</td>
     <td>100</td></tr>
 <tr><td>virtual-host</td>
@@ -267,22 +285,6 @@ support.</p>
 
 <p>&lt;keepalive-max> configures the maximum number of 
 keepalives on this port.</p>
-
-</defun>
-
-<defun title="&lt;min-spare-listen>" version="Resin 3.1">
-<parents>http, connection-port, protocol</parents>
-
-<p>&lt;min-spare-listen> configures the minimum number of 
-threads listening for new connections on this port.</p>
-
-</defun>
-
-<defun title="&lt;max-spare-listen>" version="Resin 3.1">
-<parents>http, connection-port, protocol</parents>
-
-<p>&lt;max-spare-listen> configures the maximum number of 
-threads listening for new connections on this port.</p>
 
 </defun>
 
@@ -434,14 +436,6 @@ and connection management.</p>
 
 </defun>
 
-<defun title="&lt;read-timeout>" version="Resin 3.1">
-<parents>http, connection-port, protocol</parents>
-
-<p>&lt;read-timeout> configures the timeout for reads on
-sockets from this port.</p>
-
-</defun>
-
 <defun title="&lt;session-cache> (OpenSSL)" version="Resin 3.1">
 <parents>openssl</parents>
 
@@ -456,11 +450,11 @@ sockets from this port.</p>
 
 </defun>
 
-<defun title="&lt;socket-listen-backlog>" version="Resin 3.1">
-<parents>http, connection-port, protocol</parents>
+<defun title="&lt;socket-timeout>" version="Resin 3.1">
+<parents>http, cluster-port, protocol, server</parents>
 
-<p>&lt;socket-listen-backlog> configures operating system TCP listen
-queue size for the port.</p>
+<p>&lt;socket-timeout> overrides the socket timeout from the
+&lt;server>.</p>
 
 </defun>
 
@@ -490,14 +484,6 @@ connection close.</p>
 <parents>openssl</parents>
 
 <p>&lt;verify-depth> configures the OpenSSL client verification depth.</p>
-
-</defun>
-
-<defun title="&lt;write-timeout>" version="Resin 3.1">
-<parents>http, connection-port, protocol</parents>
-
-<p>&lt;write-timeout> configures the timeout for writes on
-sockets from this port.</p>
 
 </defun>
 

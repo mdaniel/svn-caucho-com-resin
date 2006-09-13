@@ -929,6 +929,39 @@ public final class ReadStream extends InputStream {
   }
 
   /**
+   * Fills the buffer with a non-blocking read.
+   */
+  public boolean fillWithTimeout(long timeout)
+    throws IOException
+  {
+    if (_readOffset < _readLength)
+      return true;
+    
+    if (_readBuffer == null) {
+      _readOffset = 0;
+      _readLength = 0;
+      return false;
+    }
+
+    if (_sibling != null)
+      _sibling.flush();
+
+    _readOffset = 0;
+    _readLength = _source.readTimeout(_readBuffer, 0, _readBuffer.length,
+				      timeout);
+    
+    // Setting to 0 is needed to avoid int to long conversion errors with AIX
+    if (_readLength > 0) {
+      _position += _readLength;
+      return true;
+    }
+    else {
+      _readLength = 0;
+      return false;
+    }
+  }
+
+  /**
    * Fills the read buffer, flushing the write buffer.
    *
    * @return false on end of file and true if there's more data.

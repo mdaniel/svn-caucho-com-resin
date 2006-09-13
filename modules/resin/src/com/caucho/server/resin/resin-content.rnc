@@ -107,25 +107,6 @@ r_cluster-Flow =
 
 r_cluster-Content = r_cluster-Flow
 
-r_cluster-client-Group =
-  (attribute load-balance-connect-timeout { r_period-Type }
-   | element load-balance-connect-timeout { r_period-Type })?
-
-  & (attribute load-balance-fail-recover-time { r_period-Type }
-     | element load-balance-fail-recover-time { r_period-Type })?
-
-  & (attribute load-balance-max-idle-time { r_period-Type }
-     | element load-balance-max-idle-time { r_period-Type })?
-
-  & (attribute load-balance-timeout { r_period-Type }
-     | element load-balance-timeout { r_period-Type })?
-
-  & (attribute load-balance-warmup-time { r_period-Type }
-     | element load-balance-warmup-time { r_period-Type })?
-
-  & (attribute load-balance-weight { r_int-Type }
-     | element load-balance-weight { r_int-Type })?
-
 r_cluster-port-Content =
   (attribute id { string }
    | attribute server-id { string }
@@ -140,8 +121,11 @@ r_cluster-port-Content =
 
   & (attribute index { string } | element index { r_string-Group })?
 
-  & (attribute keepalive-max { r_int-Type }
-     | element keepalive-max { r_int-Type })?
+  & (attribute keepalive-select-max { r_int-Type }
+     | element keepalive-select-max { r_int-Type })?
+
+  & (attribute keepalive-thread-max { r_int-Type }
+     | element keepalive-thread-max { r_int-Type })?
 
   & (attribute load-balance-weight { r_int-Type }
      | element load-balance-weight { r_int-Type })?
@@ -426,16 +410,14 @@ r_port-Content =
    & (attribute max-spare-listen { r_int-Type }
       | element max-spare-listen { r_int-Type })?
 
-   & (attribute read-timeout { r_period-Type }
-      | element read-timeout { r_period-Type })?
+   & (attribute socket-timeout { r_period-Type }
+      | element socket-timeout { r_period-Type })?
 
-   & (attribute write-timeout { r_period-Type }
-      | element write-timeout { r_period-Type })?
+   & (attribute accept-listen-backlog { r_int-Type }
+      | element accept-listen-backlog { r_int-Type })?
 
-   & (attribute socket-listen-backlog { r_int-Type }
-      | element socket-listen-backlog { r_int-Type })?
-
-   & (attribute tcp-no-delay { string } | element tcp-no-delay { string })?
+   & (attribute tcp-no-delay { string }
+      | element tcp-no-delay { string })?
 
    & (r_openssl | r_jsse-ssl)?
    )
@@ -523,24 +505,41 @@ r_server-default = element server-default {
 }
 
 r_server-Basis =
-  r_cluster-client-Group*
-
-  & r_group-name?
+  r_group-name?
 
   & r_http*
 
   & (attribute jvm-args { string }
     | element jvm-args { string })*
 
-  & r_keepalive-select-max?
-
-  & r_keepalive-select-timeout?
-
-  & r_keepalive-thread-max?
+  & r_keepalive-max?
 
   & r_keepalive-thread-timeout?
 
+  & r_keepalive-select-timeout?
+
+  & (attribute load-balance-connect-timeout { r_period-Type }
+    | element load-balance-connect-timeout { r_period-Type })?
+
+  & (attribute load-balance-recover-time { r_period-Type }
+     | element load-balance-recover-time { r_period-Type })?
+
+  & (attribute load-balance-idle-time { r_period-Type }
+     | element load-balance-idle-time { r_period-Type })?
+
+  & (attribute load-balance-timeout { r_period-Type }
+     | element load-balance-timeout { r_period-Type })?
+
+  & (attribute load-balance-warmup-time { r_period-Type }
+     | element load-balance-warmup-time { r_period-Type })?
+
+  & (attribute load-balance-weight { r_int-Type }
+     | element load-balance-weight { r_int-Type })?
+
   & r_memory-free-min?
+
+  & (attribute socket-timeout { r_period-Type }
+     | element socket-timeout { r_period-Type })?
 
   & r_thread-max?
 

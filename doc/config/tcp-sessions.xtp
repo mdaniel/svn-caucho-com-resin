@@ -1,7 +1,6 @@
 <document>
   <header>
     <product>resin</product>
-    <resin-2.0>$resin/java_tut/tcp-sessions.xtp</resin-2.0>
     <title>Clustered Distributed Sessions</title>
   </header>
 
@@ -41,30 +40,29 @@ host, including the current host.  Since cluster sessions uses
 Resin's srun protocol, each host must listen for srun requests.</p>
 
 <example title="resin.conf fragment">
-...
-&lt;server&gt;
-  &lt;cluster&gt;
-    &lt;srun id="a" host="192.168.0.1" index="1"/&gt;
-    &lt;srun id="b" host="192.168.0.2" index="2"/&gt;
-    &lt;srun id="c" host="192.168.0.3" index="3"/&gt;
-    &lt;srun id="d" host="192.168.0.4" index="4"/&gt;
-  &lt;/cluster&gt;
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  &lt;cluster id="app-tier"&gt;
 
-  &lt;persistent-store type="cluster"&gt;
-    &lt;init path="cluster"/&gt;
-  &lt;/persistent-store&gt;
+    &lt;server id="app-a" host="192.168.0.1"/>
+    &lt;server id="app-b" host="192.168.0.2"/>
+    &lt;server id="app-c" host="192.168.0.3"/>
+    &lt;server id="app-d" host="192.168.0.4"/>
 
-  ...
-  &lt;host id=""&gt;
-  &lt;web-app id='myapp'&gt;
+    &lt;persistent-store type="cluster"&gt;
+      &lt;init path="cluster"/&gt;
+    &lt;/persistent-store&gt;
+
     ...
-    &lt;session-config&gt;
-      &lt;use-persistent-store/&gt;
-    &lt;/session-config&gt;
-  &lt;/web-app&gt;
-  &lt;/host&gt;
-&lt;/server&gt;
-...
+    &lt;host id=""&gt;
+    &lt;web-app id='myapp'&gt;
+      ...
+      &lt;session-config&gt;
+        &lt;use-persistent-store/&gt;
+      &lt;/session-config&gt;
+    &lt;/web-app&gt;
+    &lt;/host&gt;
+  &lt;/cluster&gt;
+&lt;/resin&gt;
 </example>
 
 <p>Usually, hosts will share the same resin.conf.  Each host will be
@@ -107,7 +105,7 @@ true, Resin will back up the session on every request.</p>
 
 <example>
 ...
-&lt;web-app id='/foo'&gt;
+&lt;web-app id="/foo"&gt;
 ...
 &lt;session-config&gt;
   &lt;use-persistent-store/&gt;

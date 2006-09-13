@@ -51,7 +51,7 @@ public class QServerSocketWrapper extends QServerSocket {
   
   private ServerSocket _ss;
   private boolean _tcpNoDelay = true;
-  private int _connectionReadTimeout = 65000;
+  private int _connectionSocketTimeout = 65000;
   
   public QServerSocketWrapper()
   {
@@ -77,13 +77,9 @@ public class QServerSocketWrapper extends QServerSocket {
     return _tcpNoDelay;
   }
 
-  public void setConnectionReadTimeout(int readTimeout)
+  public void setConnectionSocketTimeout(int socketTimeout)
   {
-    _connectionReadTimeout = readTimeout;
-  }
-
-  public void setConnectionWriteTimeout(int writeTimeout)
-  {
+    _connectionSocketTimeout = socketTimeout;
   }
   
   /**
@@ -103,8 +99,8 @@ public class QServerSocketWrapper extends QServerSocket {
     if (_tcpNoDelay)
       socket.setTcpNoDelay(true);
 
-    if (_connectionReadTimeout > 0)
-      socket.setSoTimeout(_connectionReadTimeout);
+    if (_connectionSocketTimeout > 0)
+      socket.setSoTimeout(_connectionSocketTimeout);
 
     s.init(socket);
 

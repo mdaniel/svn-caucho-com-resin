@@ -74,12 +74,7 @@ abstract public class QServerSocket {
   /**
    * Sets the connection read timeout.
    */
-  abstract public void setConnectionReadTimeout(int ms);
-
-  /**
-   * Sets the connection write timeout.
-   */
-  abstract public void setConnectionWriteTimeout(int ms);
+  abstract public void setConnectionSocketTimeout(int ms);
   
   abstract public boolean accept(QSocket socket)
     throws IOException;

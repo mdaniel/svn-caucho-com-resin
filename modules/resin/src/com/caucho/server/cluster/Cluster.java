@@ -79,7 +79,7 @@ public class Cluster implements EnvironmentListener {
 
   private StoreManager _clusterStore;
 
-  // XXX: moving to server-default
+  // compatibility with 3.0
   private long _clientMaxIdleTime = 30000L;
   private long _clientFailRecoverTime = 15000L;
   private long _clientWarmupTime = 60000L;
@@ -370,15 +370,6 @@ public class Cluster implements EnvironmentListener {
    */
   public void setClientWriteTimeout(Period period)
   {
-    _clientWriteTimeout = period.getPeriod();
-  }
-
-  /**
-   * Gets the write timeout.
-   */
-  public long getClientWriteTimeout()
-  {
-    return _clientWriteTimeout;
   }
 
   public StoreManager createJdbcStore()
@@ -483,21 +474,6 @@ public class Cluster implements EnvironmentListener {
   public void init()
     throws ConfigException
   {
-    for (int i = 0; i < _serverList.size(); i++) {
-      ClusterServer server = _serverList.get(i);
-
-      if (server == null)
-        continue;
-
-      ClusterPort port = server.getClusterPort();
-
-      if (port.getReadTimeout() < getClientMaxIdleTime()) {
-        throw new ConfigException(L.l("client-max-idle-time '{0}s' must be less than the read-timeout '{1}s'.",
-                                      getClientMaxIdleTime() / 1000L,
-                                      port.getReadTimeout() / 1000L));
-      }
-    }
-
     String serverId = _serverIdLocal.get();
 
     if (serverId == null)

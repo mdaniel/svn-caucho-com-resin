@@ -82,14 +82,9 @@ public class PortAdmin extends AbstractManagedObject
     return _port.isSSL();
   }
 
-  public long getReadTimeout()
+  public long getSocketTimeout()
   {
-    return _port.getReadTimeout();
-  }
-
-  public long getWriteTimeout()
-  {
-    return _port.getWriteTimeout();
+    return _port.getSocketTimeout();
   }
 
   public String getState()

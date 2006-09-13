@@ -6,10 +6,10 @@ namespace l = ""
 include "../webapp/resin-web-xml-content.rnc"
 include "../e_app/resin-ear-content.rnc"
 
+
 r_cluster-Compat = element cluster {
   (attribute id { string }?
 
-     & r_cluster-client-Group
 
      & r_cluster-port-Compat*)
 }

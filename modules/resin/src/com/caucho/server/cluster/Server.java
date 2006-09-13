@@ -110,18 +110,23 @@ public class Server extends ProtocolDispatchServer
   private long _waitForActiveTime = 10000L;
 
   // <server> configuration
+  private int _acceptListenBacklog = 100;
   
-  private int _keepaliveThreadMax = -1;
-  private long _keepaliveThreadTimeout = 5000;
+  private int _acceptThreadMin = 5;
+  private int _acceptThreadMax = 10;
 
-  private int _keepaliveSelectMax = -1;
-  private long _keepaliveSelectTimeout = 5000;
+  private int _keepaliveMax = -1;
+  
+  private long _keepaliveThreadTimeout = 5000;
+  private long _keepaliveSelectTimeout = -1;
 
   private long _memoryFreeMin = 1024 * 1024;
   
+  private long _socketTimeout = 65000L;
+  
   private long _shutdownWaitMax = 60 * 1000;
   
-  private int _threadMax = Integer.MAX_VALUE / 2;
+  private int _threadMax = 4096;
   private int _threadIdleMin = 5;
   private int _threadIdleMax = 10;
 
@@ -214,6 +219,62 @@ public class Server extends ProtocolDispatchServer
   //
 
   /**
+   * Sets the socket's listen property
+   */
+  public void setAcceptListenBacklog(int backlog)
+  {
+    _acceptListenBacklog = backlog;
+  }
+
+  /**
+   * Gets the socket's listen property
+   */
+  public int getAcceptListenBacklog()
+  {
+    return _acceptListenBacklog;
+  }
+
+  /**
+   * Sets the minimum spare listen.
+   */
+  public void setAcceptThreadMin(int minSpare)
+    throws ConfigException
+  {
+    if (minSpare < 1)
+      throw new ConfigException(L.l("accept-thread-max must be at least 1."));
+
+    _acceptThreadMin = minSpare;
+  }
+
+  /**
+   * Gets the minimum spare listen.
+   */
+  public int getAcceptThreadMin()
+  {
+    return _acceptThreadMin;
+  }
+
+  /**
+   * Sets the maximum spare listen.
+   */
+  public void setAcceptThreadMax(int maxSpare)
+    throws ConfigException
+  {
+    if (maxSpare < 1)
+      throw new ConfigException(L.l("accept-thread-max must be at least 1."));
+
+    _acceptThreadMax = maxSpare;
+  }
+
+  /**
+   * Sets the maximum spare listen.
+   */
+  public int getAcceptThreadMax()
+  {
+    return _acceptThreadMax;
+  }
+
+  /**
    * Sets the minimum free memory after a GC
    */
   public void setMemoryFreeMin(Bytes min)
@@ -230,11 +291,11 @@ public class Server extends ProtocolDispatchServer
   }
 
   /**
-   * Sets the maximum thread-based keepalive
+   * Sets the maximum keepalive
    */
-  public void setKeepaliveThreadMax(int max)
+  public void setKeepaliveMax(int max)
   {
-    _keepaliveThreadMax = max;
+    _keepaliveMax = max;
   }
 
   /**
@@ -242,9 +303,9 @@ public class Server extends ProtocolDispatchServer
    *
    * @return the keepalive max.
    */
-  public int getKeepaliveThreadMax()
+  public int getKeepaliveMax()
   {
-    return _keepaliveThreadMax;
+    return _keepaliveMax;
   }
 
   /**
@@ -261,24 +322,6 @@ public class Server extends ProtocolDispatchServer
   public long getKeepaliveThreadTimeout()
   {
     return _keepaliveThreadTimeout;
-  }
-
-  /**
-   * Sets the maximum select-based keepalive
-   */
-  public void setKeepaliveSelectMax(int max)
-  {
-    _keepaliveSelectMax = max;
-  }
-
-  /**
-   * Returns the select-based keepalive max.
-   *
-   * @return the keepalive max.
-   */
-  public int getKeepaliveSelectMax()
-  {
-    return _keepaliveSelectMax;
   }
 
   /**
@@ -311,6 +354,22 @@ public class Server extends ProtocolDispatchServer
   public long getShutdownWaitMax()
   {
     return _shutdownWaitMax;
+  }
+
+  /**
+   * Sets the default read/write timeout for the request sockets.
+   */
+  public void setSocketTimeout(Period period)
+  {
+    _socketTimeout = period.getPeriod();
+  }
+
+  /**
+   * Gets the read timeout for the request sockets.
+   */
+  public long getSocketTimeout()
+  {
+    return _socketTimeout;
   }
 
   /**
@@ -638,7 +697,7 @@ public class Server extends ProtocolDispatchServer
    */
   public boolean isEnableSelectManager()
   {
-    return _keepaliveSelectMax > 0;
+    return _keepaliveSelectTimeout > 0;
   }
 
   /**
@@ -852,7 +911,7 @@ public class Server extends ProtocolDispatchServer
       throw new ConfigException(L.l("<thread-idle-min> ({0}) must be less than <thread-max> ({1})",
 				    _threadIdleMin, _threadIdleMax));
     
-    if (_keepaliveSelectMax > 0 && getSelectManager() == null) {
+    if (_keepaliveSelectTimeout > 0 && getSelectManager() == null) {
       try {
         Class cl = Class.forName("com.caucho.server.port.JniSelectManager");
         Method method = cl.getMethod("create", new Class[0]);

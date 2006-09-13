@@ -44,15 +44,18 @@ connection open for following requests, Resin can improve performance.
 </p>
 
 <example title="resin.conf for thread-keepalive">
-&lt;resin ...&gt;
-  &lt;thread-pool&gt;
-    &lt;thread-max&gt;250&lt;/thread-max&gt;
-  &lt;/thread-pool&gt;
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;cluster id="app-tier">
 
-  &lt;server&gt;
-    &lt;keepalive-max&gt;500&lt;/keepalive-max&gt;
-    &lt;keepalive-timeout&gt;120s&lt;/keepalive-timeout&gt;
+    &lt;server-default>
+      &lt;thread-max&gt;250&lt;/thread-max&gt;
+
+      &lt;keepalive-max&gt;500&lt;/keepalive-max&gt;
+      &lt;keepalive-timeout&gt;120s&lt;/keepalive-timeout&gt;
+    &lt;/server-default>
     ...
+  &lt;/cluster>
+&lt;/resin>
 </example>
 
 <s2 title="Timeouts">
@@ -64,44 +67,55 @@ within the timeout, Resin will close the TCP socket.  The timeout
 prevents idle clients from hogging Resin resources.</p>
 
 <example>
-...
-&lt;thread-pool&gt;
-  &lt;thread-max&gt;250&lt;/thread-max&gt;
-&lt;/thread-pool&gt;
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  &lt;cluster id="app-tier">
 
-&lt;server&gt;
+    &lt;server-default>
+      &lt;thread-max&gt;250&lt;/thread-max&gt;
 
-   &lt;http port="8080" read-timeout="30s" write-timeout="30s"/&gt;
+      &lt;socket-timeout&gt;30s&lt;/socket-timeout&gt;
 
-...
+      &lt;http port="8080"/>
+    &lt;/server-default>
+
+    ...
+  &lt;/cluster>
+&lt;/resin>
 </example>
 
 <example>
-...
-&lt;thread-max&gt;250&lt;/thread-max&gt;
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  &lt;cluster id="app-tier">
 
-&lt;server&gt;
+    &lt;server-default>
+      &lt;thread-max&gt;250&lt;/thread-max&gt;
 
+      &lt;load-balance-idle-time&gt;20s&lt;/load-balance-idle-time&gt;
+
+      &lt;socket-timeout&gt;30s&lt;/socket-timeout&gt;
+
+      &lt;http port="8080"/>
+    &lt;/server-default>
+
+     &lt;server id="app-a" address="192.168.2.1" port="6802"/>
+
+     ...
    &lt;cluster&gt;
-     &lt;client-live-time&gt;20s&lt;/client-live-time&gt;
-
-     &lt;srun id="a" port="6802" read-timeout="30s"/&gt;
-   &lt;/cluster&gt;
-
-...
+ &lt;resin&gt;
 </example>
 
-<p>In general, the read-timeout and keepalives are less important
+<p>In general, the socket-timeout and keepalives are less important
 for Resin standalone configurations than Apache/IIS/srun
 configurations.  Very heavy traffic sites may want to reduce the
 timeout for Resin standalone.</p>
 
-<p>Since <var>read-timeout</var> will close srun connections, its
-setting needs to take into consideration the <var>client-live-time</var> setting
-for mod_caucho or isapi_srun.  <var>client-live-time</var> is the time the
-plugin will keep a connection open.  <var>read-timeout</var> must
-always be larger than <var>client-live-time</var>, otherwise the plugin will try
-to reuse a closed socket.</p>
+<p>Since <var>socket-timeout</var> will close srun connections, its
+setting needs to take into consideration the
+&lt;<a href="config|server-tags.xtp#load-balance-idle-time">load-balance-idle-time</a>
+setting for mod_caucho or isapi_srun.  <var>load-balance-idle-time</var> is the
+time the plugin will keep a connection open.  <var>read-timeout</var> must
+always be larger than <var>load-balance-idle-time</var>, otherwise the plugin
+will try to reuse a closed socket.</p>
 
 </s2>
 
@@ -114,7 +128,7 @@ has closed the other end of the socket.  If the JVM has restarted
 or if closed the socket because of <var>read-timeout</var>,
 mod_caucho will not know about the closed socket.  So mod_caucho needs
 to know how long to consider a connection reusable before closing it.
-<var>client-live-time</var> tells the plugin how long it should consider a
+<var>load-balance-idle-time</var> tells the plugin how long it should consider a
 socket usable.</p>
 
 <p>Because the plugin isn't signalled when Resin closes the socket,
@@ -122,7 +136,7 @@ the socket will remain half-closed until the next web server request.
 A <var>netstat</var> will show that as a bunch of sockets in the FIN_WAIT_2
 state.  With Apache, there doesn't appear to be a good way around
 this.  If these become a problem, you can increase
-<var>read-timeout</var> and <var>client-live-time</var> so the JVM won't close the
+<var>read-timeout</var> and <var>load-balance-idle-time</var> so the JVM won't close the
 keepalive connections as fast.</p>
 
 <example>
@@ -187,26 +201,29 @@ the maximum number of keepalive connections.  <var>live-time</var> and
 reused.</p>
 
 <example title="Configuration for a medium-loaded Apache">
-...
-&lt;thread-pool&gt;
-  &lt;thread-max&gt;250&lt;/thread-max&gt;
- &lt;/thread-pool&gt;
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  &lt;cluster id="app-tier"&gt;
 
-&lt;server&gt;
-  &lt;keepalive-max&gt;250&lt;/keepalive-max&gt;
-  &lt;keepalive-timeout&gt;120s&lt;/keepalive-timeout&gt;
+    &lt;server-default>
+      &lt;thread-max&gt;250&lt;/thread-max&gt;
 
-  &lt;cluster&gt;
-    &lt;client-live-time&gt;120s&lt;/client-live-time&gt;
+      &lt;keepalive-max&gt;250&lt;/keepalive-max&gt;
+      &lt;keepalive-timeout&gt;120s&lt;/keepalive-timeout&gt;
 
-    &lt;srun id="a" port="6802" read-timeout="120s"/&gt;
+      &lt;load-balance-idle-time&gt;120s&lt;/load-balance-idle-time&gt;
+    &lt;/server-default>
+
+    &lt;server id="app-a" address="192.168.2.1"/&gt;
+
+    ...
   &lt;/cluster&gt;
-...
+&lt;/resin&gt;
 </example>
 
-<p><var>read-timeout</var> must always be larger than
-<var>client-live-time</var>.  In addition, <var>keepalive-max</var> should be
-larger than the maximum number of Apache processes.</p>
+<p><var>socket-timeout</var> must always be larger than
+<var>load-balance-idle-time</var>.
+In addition, <var>keepalive-max</var> should be larger than
+the maximum number of Apache processes.</p>
 
 </s2>
 

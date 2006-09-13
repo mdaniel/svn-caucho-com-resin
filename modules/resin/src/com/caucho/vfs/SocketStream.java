@@ -51,6 +51,7 @@ public class SocketStream extends StreamImpl {
   private byte []_newline = UNIX_NEWLINE;
 
   private boolean _throwReadInterrupts = false;
+  private int _socketTimeout;
 
   private long _totalReadBytes;
   private long _totalWriteBytes;
@@ -76,7 +77,6 @@ public class SocketStream extends StreamImpl {
     _is = null;
     _os = null;
     _needsFlush = false;
-
   }
 
   /**
@@ -162,6 +162,34 @@ public class SocketStream extends StreamImpl {
       }
 
       return -1;
+    }
+  }
+
+  /**
+   * Reads bytes from the socket.
+   *
+   * @param buf byte buffer receiving the bytes
+   * @param offset offset into the buffer
+   * @param length number of bytes to read
+   * @return number of bytes read or -1
+   * @exception throws ClientDisconnectException if the connection is dropped
+   */
+  public int readTimeout(byte []buf, int offset, int length, long timeout)
+    throws IOException
+  {
+    Socket s = _s;
+      
+    if (s == null)
+      return -1;
+
+    int oldTimeout = s.getSoTimeout();;
+
+    try {
+      s.setSoTimeout((int) timeout);
+
+      return read(buf, offset, length);
+    } finally {
+      s.setSoTimeout(oldTimeout);
     }
   }
 

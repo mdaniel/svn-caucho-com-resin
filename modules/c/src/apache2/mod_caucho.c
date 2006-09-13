@@ -333,8 +333,8 @@ resin_config_cache_command(cmd_parms *cmd, void *pconfig, char *cache_dir)
     return 0;
 
   config->has_config = 1;
-  
-  config->work_dir = strdup(cache_dir);
+
+  strcpy(config->work_dir, cache_dir);
 
   return 0;
 }

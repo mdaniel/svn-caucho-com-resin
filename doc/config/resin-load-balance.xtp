@@ -221,18 +221,14 @@ remove the &lt;save-only-on-shutdown/&gt; flag.)</p>
 
 <example title="resin.conf">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-&lt;server&gt;
-  &lt;http id='a' port='80'/&gt;
+&lt;cluster id="app-tier"&gt;
+  &lt;server-default>
+    &lt;http port='80'/&gt;
+  &lt;/server-default>
 
-  &lt;http id='b' port='80'/&gt;
-
-  &lt;http id='c' port='80'/&gt;
-
-  &lt;cluster&gt;
-    &lt;srun id='a' port='6802' host='192.168.0.1'/&gt;
-    &lt;srun id='b' port='6802' host='192.168.0.2'/&gt;
-    &lt;srun id='c' port='6802' host='192.168.0.3'/&gt;
-  &lt;/cluster&gt;
+  &lt;server id='app-a' address='192.168.0.1'/&gt;
+  &lt;server id='app-b' address='192.168.0.2'/&gt;
+  &lt;server id='app-c' address='192.168.0.3'/&gt;
 
   &lt;persistent-store type="cluster"&gt;
     &lt;init path="cluster"/&gt;
@@ -247,7 +243,7 @@ remove the &lt;save-only-on-shutdown/&gt; flag.)</p>
   &lt;/web-app-default&gt;
 
   ...
-&lt;/server&gt;
+&lt;/cluster&gt;
 &lt;/resin&gt;
 </example>
 

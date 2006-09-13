@@ -37,8 +37,7 @@ import com.caucho.util.ThreadPool;
 import com.caucho.util.ThreadTask;
 import com.caucho.util.Alarm;
 
-import com.caucho.vfs.QSocket;
-import com.caucho.vfs.ClientDisconnectException;
+import com.caucho.vfs.*;
 
 import com.caucho.jmx.Jmx;
 
@@ -172,21 +171,20 @@ public class TcpConnection extends PortConnection implements ThreadTask
     
     if (port.isClosed())
       return false;
-    else if (getReadStream().getBufferAvailable() > 0)
+
+    ReadStream is = getReadStream();
+    
+    if (getReadStream().getBufferAvailable() > 0)
       return true;
-    else if (socket == null)
+    
+    long timeout = port.getKeepaliveThreadTimeout();
+
+    if (timeout > 0 && timeout < port.getSocketTimeout())
+      return is.fillWithTimeout(timeout);
+    else if (port.getServer().isEnableSelectManager())
       return false;
-    
-    long timeout = port.getKeepaliveTimeout();
-    
-    if (port.getServer().isEnableSelectManager()) {
-      timeout = port.getKeepaliveThreadTimeout();
-    }
-
-    if (timeout >= 1000)
-      return socket.readNonBlock((int) (timeout / 1000));
-
-    return false;
+    else
+      return true;
   }
 
   public boolean isSecure()

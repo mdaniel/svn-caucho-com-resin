@@ -83,29 +83,28 @@ root for logfiles.
 gryffindor and slytherin, each with its own document directory.</p>
 
 <example title="resin.conf">
-&lt;server&gt;
-  ...
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;cluster id="app-tier">
+  &lt;server id="app-a" .../&gt;
 
-&lt;host id='gryffindor.caucho.com'&gt;
+  &lt;host-default>
+    &lt;web-app-deploy path="webapps"/>
+  &lt;/host-default>
 
-  &lt;root-directory&gt;/home/www/gryffindor&lt;/root-directory&gt;
+  &lt;host id="gryffindor.caucho.com"&gt;
 
-  &lt;web-app id="/"&gt;
-    &lt;document-directory&gt;webapps/ROOT&lt;/document-directory&gt;
-  &lt;/web-app&gt;
-  ...		    
-&lt;/host&gt;
+    &lt;root-directory&gt;/home/www/gryffindor&lt;/root-directory&gt;
 
-&lt;host id='slytherin.caucho.com'&gt;
+  &lt;/host&gt;
 
-  &lt;root-directory&gt;/home/www/slytherin&lt;/root-directory&gt;
+  &lt;host id="slytherin.caucho.com"&gt;
 
-  &lt;web-app id="/"&gt;
-    &lt;document-directory&gt;webapps/ROOT&lt;/document-directory&gt;
-  &lt;/web-app&gt;
-  ...		    
-&lt;/host&gt;
+    &lt;root-directory&gt;/home/www/slytherin&lt;/root-directory&gt;
 
+  &lt;/host>
+
+&lt;/cluster&gt;
+&lt;/resin&gt;
 </example>
 
 <p>Browsing http://gryffindor.caucho.com/test.jsp will look for
@@ -166,6 +165,9 @@ on the file-system is established, and subdirectories become virtual hosts.</p>
 
 <example title="host-deploy dynamic virtual hosts">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+&lt;cluster id="app-tier">
+  &lt;server id="app-a" .../>
+
   &lt;host-deploy path="hosts"&gt;
     &lt;host-default&gt;
       &lt;class-loader&gt;
@@ -180,30 +182,33 @@ on the file-system is established, and subdirectories become virtual hosts.</p>
       &lt;web-app-deploy path='deploy'/&gt;
     &lt;/host-default&gt;
   &lt;/host-deploy&gt;
+&lt;/cluster&gt;
 &lt;/resin&gt;
 </example>
 
-<p>Any directory created in <code>$RESIN_HOME/hosts</code> will now become a virtual
-host. You can also place a .jar file in <code>$RESIN_HOME/hosts</code>, it is expanded to
+<p>Any directory created in <code>$SERVER_ROOT/hosts</code> will now become a virtual
+host. You can also place a .jar file in <code>$SERVER_ROOT/hosts</code>, it is expanded to
 become a virtual host.</p>
 
 <example>
-$RESIN_HOME/hosts/www.gryffindor.com/
-$RESIN_HOME/hosts/www.gryffindor.com/webapps/ROOT/index.jsp
-$RESIN_HOME/hosts/www.gryffindor.com/webapps/foo/index.jsp
+$SERVER_ROOT/hosts/www.gryffindor.com/
+$SERVER_ROOT/hosts/www.gryffindor.com/webapps/ROOT/index.jsp
+$SERVER_ROOT/hosts/www.gryffindor.com/webapps/foo/index.jsp
 
-$RESIN_HOME/hosts/www.slytherin.com.jar
+$SERVER_ROOT/hosts/www.slytherin.com.jar
 </example>
 
 <p>Jar libraries and class files that are shared amongst all webapps in the host
 can be placed in <code>lib</code> and <code>classes</code> subdirectories of the host:</p>
 
 <example>
-$RESIN_HOME/hosts/www.gryffindor.com/lib/mysql-connector-java-3.1.0-alpha-bin.jar 
-$RESIN_HOME/hosts/www.gryffindor.com/classes/example/CustomAuthenticator.java
+$SERVER_ROOT/hosts/www.gryffindor.com/lib/mysql-connector-java-3.1.0-alpha-bin.jar 
+$SERVER_ROOT/hosts/www.gryffindor.com/classes/example/CustomAuthenticator.java
 </example>
 
-<p>More information is available in the configuration documentation for <a config-tag="host-deploy"/> and <a config-tag="host-default"/>.</p>
+<p>More information is available in the configuration documentation
+for &lt;<a href="config|host.xtp#host-deploy">host-deploy</a>&gt;
+and &lt;<a href="config|host.xtp#host-default">host-default</a>&gt;.</p>
 
 </s1>
 
@@ -231,65 +236,42 @@ startup of the back-end, host specific instances of Resin.  The second step is
 the by the configuration of the front-end server that dispatches requests to
 the appropriate back-end JVM.</p>
 
-<example title="$RESIN_HOME/conf/gryffindor.conf">
+<example title="$RESIN_HOME/conf/resin.conf">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-&lt;server&gt;
-  &lt;cluster&gt;
-    &lt;srun id="gryffindor" host="localhost" port="6802" index="1"/&gt;
-  &lt;/cluster&gt;
 
-  &lt;host id='www.gryffindor.com'&gt;
+  &lt;cluster id="gryffindor&gt;
+    &lt;server id="gryffindor" host="localhost" port="6802"/&gt;
+
+    &lt;host id="www.gryffindor.com"&gt;
   
-    &lt;root-directory&gt;/home/www/gryffindor&lt;/root-directory&gt;
+      &lt;root-directory&gt;/home/www/gryffindor&lt;/root-directory&gt;
 
-    &lt;web-app id="/"&gt;
-      &lt;document-directory&gt;webapps/ROOT&lt;/document-directory&gt;
-    &lt;/web-app&gt;
-
-    &lt;resin:include href='host-common.conf'/&gt;
-
-  &lt;/host&gt;
-
-&lt;/server&gt;
-&lt;/resin&gt;
-</example>
-
-<example title="$RESIN_HOME/conf/slytherin.conf">
-&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-&lt;server&gt;
-  &lt;cluster&gt;
-    &lt;srun id="slytherin" host="localhost" port="6803" index="1"/&gt;
+    &lt;/host&gt;
   &lt;/cluster&gt;
 
-  &lt;host id='www.slytherin.com'&gt;
+  &lt;cluster id="slytherin"&gt;
+    &lt;server id="slytherin" host="localhost" port="6803"/&gt;
 
-    &lt;root-directory&gt;/home/www/gryffindor&lt;/root-directory&gt;
+    &lt;host id="www.slytherin.com"&gt;
+  
+      &lt;root-directory&gt;/home/www/slytherin&lt;/root-directory&gt;
 
-    &lt;web-app id="/"&gt;
-      &lt;document-directory&gt;webapps/ROOT&lt;/document-directory&gt;
-    &lt;/web-app&gt;
+    &lt;/host&gt;
+  &lt;/cluster&gt;
 
-    &lt;resin:include href='host-common.conf'/&gt;
-
-  &lt;/host&gt;
-
-&lt;/server&gt;
 &lt;/resin&gt;
 </example>
 
 <p>Each back-end JVM is started separately:</p>
 
 <example>
-unix&gt; bin/httpd.sh -server gryffindor -conf gryffindor.conf -pid gryffindor.pid start
-unix&gt; bin/httpd.sh -server slytherin -conf slytherin.conf -pid slytherin.pid start
+unix&gt; java -jar lib/resin.jar -server gryffindor start
+unix&gt; java -jar lib/resin.jar -server slytherin start
 </example>
 
-<p>On Unix, the <var>-pid</var> will let httpd.sh know
-which server to stop:</p>
-
 <example>
-unix&gt; bin/httpd.sh -server gryffindor -conf gryffindor.conf -pid gryffindor.pid stop
-unix&gt; bin/httpd.sh -server slytherin -conf slytherin.conf -pid slytherin.pid stop
+unix&gt; java -jar lib/resin.jar -server gryffindor stop
+unix&gt; java -jar lib/resin.jar -server slytherin stop
 </example>
 </s2>
 
@@ -308,51 +290,56 @@ LoadBalanceServlet knows how to find them.</p>
 
 <example title="$RESIN_HOME/conf/resin.conf for front-end web server">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-&lt;server&gt;
-  &lt;http id="resin" port='80'/&gt;
+  &lt;cluster id="web-tier"&gt;
+    &lt;server-default>
+      &lt;http port="80"/&gt;
+    &lt;/server-default>
+
+    &lt;server id="web-a" address="192.168.2.1"/&gt;
+
+    &lt;host id="gryffindor.com"&gt;
+      &lt;web-app id="/"&gt;
+
+        &lt;rewrite-dispatch>
+          &lt;load-balance regexp="" cluster="gryffindor"/>
+        &lt;rewrite-dispatch>
+
+      &lt;/web-app>
+    &lt;/host>
+
+    &lt;host id="slytherin.com"&gt;
+      &lt;web-app id="/"&gt;
+
+        &lt;rewrite-dispatch>
+          &lt;load-balance regexp="" cluster="slytherin"/>
+        &lt;rewrite-dispatch>
+
+      &lt;/web-app>
+    &lt;/host>
+  &lt;/cluster&gt;
 
   &lt;cluster id="gryffindor"&gt;
-    &lt;srun id='gryffindor' host='localhost' port='6802' index='1'/&gt;
+    &lt;server id="gryffindor" address="localhost" port="6802"/>
+
+    ...
   &lt;/cluster&gt;
 
   &lt;cluster id="slytherin"&gt;
-    &lt;srun id='slytherin' host='localhost' port='6803' index='1'/&gt;
+    &lt;server id="slytherin" address="localhost" port="6803"/>
+
+    ...
   &lt;/cluster&gt;
-
-
-  &lt;host id='gryffindor.com'&gt;
-    &lt;web-app id='/'&gt;
-      &lt;servlet&gt;
-        &lt;servlet-name&gt;balance&lt;/servlet-name&gt;
-        &lt;servlet-class&gt;com.caucho.servlets.LoadBalanceServlet&lt;/servlet-class&gt;
-        &lt;init cluster='gryffindor'/&gt;
-      &lt;/servlet&gt;
-      &lt;servlet-mapping url-pattern='/*' servlet-name='balance'/&gt;
-    &lt;/web-app&gt;
-  &lt;/host&gt;
-
-  &lt;host id='slytherin.com'&gt;
-    &lt;web-app id='/'&gt;
-      &lt;servlet&gt;
-        &lt;servlet-name&gt;balance&lt;/servlet-name&gt;
-        &lt;servlet-class&gt;com.caucho.servlets.LoadBalanceServlet&lt;/servlet-class&gt;
-        &lt;init cluster='slytherin'/&gt;
-      &lt;/servlet&gt;
-      &lt;servlet-mapping url-pattern='/*' servlet-name='balance'/&gt;
-    &lt;/web-app&gt;
-  &lt;/host&gt;
-&lt;/server&gt;
 &lt;/resin&gt;
 </example>
 
-<s3 title="Starting the server's on Unix">
+<s3 title="Starting the servers on Unix">
 
 <p>The front-end server JVM is started similar to the back-end JVM's:</p>
 
 <example>
-unix&gt; bin/httpd.sh -server resin -conf conf/resin.conf -pid resin.pid start
+unix&gt; bin/httpd.sh -server resin -conf conf/resin.conf start
 ...
-unix&gt; bin/httpd.sh -server resin -conf conf/resin.conf -pid resin.pid stop
+unix&gt; bin/httpd.sh -server resin -conf conf/resin.conf stop
 </example>
 
 <p>A script that handles the syntax for all three is convenient, and provides the opportunity 
@@ -526,16 +513,26 @@ with the virtual host name.  This configuration will override any
 virtual host supplied by the browser.</p>
 
 <example>
-&lt;server&gt;
-  &lt;http host='192.168.0.1' port='80'
-        virtual-host='slytherin.caucho.com'/&gt;
+&lt;resin xmlns="http://caucho.com/ns/resin">
+
+&lt;cluster id="web-tier">
+  &lt;server id="a"&gt;
+
+    &lt;http address="192.168.0.1" port="80"
+          virtual-host="slytherin.caucho.com"/&gt;
+
+    &lt;http address="192.168.0.2" port="80"
+          virtual-host="gryffindor.caucho.com"/&gt;
+
+  &lt;/server>
 
   ...
 
-  &lt;host id='slytherin.caucho.com'&gt;
+  &lt;host id="slytherin.caucho.com"&gt;
     ...
   &lt;/host&gt;
-&lt;/server&gt;
+&lt;/cluster&gt;
+&lt;/resin&gt;
 </example>
 
 </s1>

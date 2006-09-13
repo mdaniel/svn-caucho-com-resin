@@ -2,19 +2,19 @@
 
 CC=gcc
 CP=/bin/cp
-CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI -DHAS_JVMDI   -DDARWIN -DSIGPROCMASK_SETS_THREAD_MASK -no-cpp-precomp  -g -O2
+CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI -DHAS_JVMDI -DDARWIN -DUSE_HSREGEX -DUSE_EXPAT -I../lib/expat-lite -g -Os -pipe -DHARD_SERVER_LIMIT=2048 -DEAPI
 CFLAGS_SHLIB=-DSHARED_MODULE
 EGREP=grep -E
 LIBTOOL=EGREP="grep -E" /Users/ferg/ws/test-resin/libtool --silent
 LD=gcc
-LD_SHLIB=gcc
+LD_SHLIB=cc
 LIBS_SHLIB=
 LDFLAGS=
-LDFLAGS_SHLIB=-bundle -undefined suppress -flat_namespace -L/usr/lib
-APACHE_INC=-I/usr/local/apache2/include  -I/usr/local/apache2/include 
-apache_conf=/usr/local/apache2/conf/httpd.conf
-apache_dir=/usr/local/apache2
-apache_libexec=/usr/local/apache2/modules
+LDFLAGS_SHLIB=-bundle -undefined suppress -flat_namespace -Wl,-bind_at_load -L/usr/lib
+APACHE_INC=-I/usr/include/httpd
+apache_conf=/private/etc/httpd/httpd.conf
+apache_dir=/usr
+apache_libexec=/usr/libexec/httpd
 resin_home=/Users/ferg/ws/test-resin
 INCLUDES = $(APACHE_INC) -DRESIN_HOME=\"$(resin_home)\" -I../common
 C=../common
