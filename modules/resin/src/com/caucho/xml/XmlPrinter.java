@@ -758,7 +758,14 @@ public class XmlPrinter implements XMLWriter {
     }
     else {
       if (_printDeclaration) {
-        print("<?xml version=\"1.0\"");
+        String version = _version;
+
+        if (version == null)
+          version = "1.0";
+
+        print("<?xml version=\"");
+        print(version);
+        print("\"");
 
 	if (encoding == null ||
 	    encoding.equals("") ||

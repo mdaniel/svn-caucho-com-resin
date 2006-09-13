@@ -33,6 +33,9 @@ import com.caucho.quercus.module.Optional;
 import com.caucho.xml.QElement;
 import com.caucho.xml.QName;
 
+import org.w3c.dom.CharacterData;
+import org.w3c.dom.Node;
+
 public class DOMElement
   extends QElement
 {
@@ -50,6 +53,29 @@ public class DOMElement
 
     if (textContent != null && textContent.length() > 0)
       setTextContent(textContent);
+  }
+
+  public String getNodeValue()
+  {
+    StringBuilder value = new StringBuilder();
+
+    Node node = getFirstChild();
+
+    while (node != null) {
+      if (node instanceof CharacterData) {
+        String nodeValue = node.getNodeValue();
+
+        if (nodeValue != null)
+          value.append(nodeValue);
+      }
+      else if (node instanceof DOMElement) {
+        value.append(node.getNodeValue());
+      }
+
+      node = node.getNextSibling();
+    }
+
+    return value.toString();
   }
 
   public String toString()

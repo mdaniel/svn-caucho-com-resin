@@ -52,14 +52,14 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
   private String _systemId;
 
   private HashMap<String,String> _namespaces;
-  
+
   private transient HashMap<NameKey,QName> _nameCache = new HashMap<NameKey,QName>();
   private transient NameKey _nameKey = new NameKey();
   private transient ArrayList<Path> _depends;
   private transient ArrayList<Depend> _dependList;
 
   int _changeCount;
-  
+
   // possibly different from the systemId if the DOCTYPE doesn't match
   // the actual file location
   String _rootFilename;
@@ -85,7 +85,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
       _encoding = value;
     else {
       if (_attributes == null)
-	_attributes = new HashMap<String,String>();
+        _attributes = new HashMap<String,String>();
       _attributes.put(name, value);
     }
   }
@@ -140,7 +140,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
   {
     return "#document";
   }
-  
+
   public short getNodeType()
   {
     return DOCUMENT_NODE;
@@ -169,7 +169,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
       newDoc._attributes = (HashMap) _attributes.clone();
     newDoc._encoding = _encoding;
     newDoc._version = _version;
-    
+
     if (_namespaces != null)
       newDoc._namespaces = (HashMap) _namespaces.clone();
 
@@ -203,7 +203,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
       return null;
 
     QName name;
-    
+
     switch (node.getNodeType()) {
     case ELEMENT_NODE:
       return importElement((Element) node, deep);
@@ -233,25 +233,25 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
     case ENTITY_NODE:
       Entity oldEntity = (Entity) node;
       QEntity newEntity = new QEntity(oldEntity.getNodeName(),
-				      oldEntity.getNodeValue(),
-				      oldEntity.getPublicId(),
-				      oldEntity.getSystemId());
+                                      oldEntity.getNodeValue(),
+                                      oldEntity.getPublicId(),
+                                      oldEntity.getSystemId());
       newEntity._owner = this;
       return newEntity;
-      
+
     case PROCESSING_INSTRUCTION_NODE:
       QProcessingInstruction newPI;
       newPI = new QProcessingInstruction(node.getNodeName(),
-					 node.getNodeValue());
-      
+                                         node.getNodeValue());
+
       newPI._owner = this;
       return newPI;
-      
+
     case COMMENT_NODE:
       QComment newComment = new QComment(node.getNodeValue());
       newComment._owner = this;
       return newComment;
-      
+
     case DOCUMENT_FRAGMENT_NODE:
       return importFragment((DocumentFragment) node, deep);
 
@@ -266,12 +266,12 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
   private Element importElement(Element elt, boolean deep)
   {
     QElement newElt = new QElement(createName(elt.getNamespaceURI(),
-					      elt.getNodeName()));
+                                              elt.getNodeName()));
     QElement oldElt = null;
 
     if (elt instanceof QElement)
-      oldElt = (QElement) elt; 
-    
+      oldElt = (QElement) elt;
+
     newElt._owner = this;
 
     if (oldElt != null) {
@@ -292,8 +292,8 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
       return newElt;
 
     for (Node node = elt.getFirstChild();
-	 node != null;
-	 node = node.getNextSibling()) {
+         node != null;
+         node = node.getNextSibling()) {
       newElt.appendChild(importNode(node, true));
     }
 
@@ -306,27 +306,27 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
   private DocumentFragment importFragment(DocumentFragment elt, boolean deep)
   {
     QDocumentFragment newFrag = new QDocumentFragment();
-    
+
     newFrag._owner = this;
 
     if (! deep)
       return newFrag;
 
     for (Node node = elt.getFirstChild();
-	 node != null;
-	 node = node.getNextSibling()) {
+         node != null;
+         node = node.getNextSibling()) {
       newFrag.appendChild(importNode(node, true));
     }
 
     return newFrag;
   }
-  
+
   public DocumentType getDoctype() { return _dtd; }
-  
+
   public void setDoctype(DocumentType dtd)
   {
     QDocumentType qdtd = (QDocumentType) dtd;
-    
+
     _dtd = qdtd;
     if (qdtd != null)
       qdtd._owner = this;
@@ -358,19 +358,19 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
   /**
    * Creates a new element
    */
-  public Element createElement(String tagName) 
+  public Element createElement(String tagName)
     throws DOMException
-  { 
+  {
     if (! isNameValid(tagName))
-      throw new QDOMException(DOMException.INVALID_CHARACTER_ERR, 
-			      "illegal tag `" + tagName + "'");
+      throw new QDOMException(DOMException.INVALID_CHARACTER_ERR,
+                              "illegal tag `" + tagName + "'");
 
     QElement elt = new QElement(createName(null, tagName));
     elt._owner = this;
 
     return elt;
   }
-  
+
   /**
    * Creates a new namespace-aware element
    */
@@ -397,7 +397,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
     if (qname.getPrefix() == "") {
     }
     else if (prefix == "xml" &&
-        namespaceURI != "http://www.w3.org/XML/1998/namespace")
+             namespaceURI != "http://www.w3.org/XML/1998/namespace")
       throw new DOMException(DOMException.NAMESPACE_ERR,
                              L.l("`xml' prefix expects namespace uri 'http://www.w3.org/XML/1998/namespace'"));
     else if (prefix != "" && prefix != null && namespaceURI == null)
@@ -468,7 +468,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
   }
 
   public Comment createComment(String data)
-  { 
+  {
     if (data == null)
       data = "";
 
@@ -490,16 +490,16 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
   }
 
   public ProcessingInstruction createProcessingInstruction(String target,
-							   String data)
+                                                           String data)
     throws DOMException
-  { 
+  {
     if (target == null || target.length() == 0)
-      throw new QDOMException(DOMException.INVALID_CHARACTER_ERR, 
-			      L.l("Empty processing instruction name.  The processing instruction syntax is: <?name ... ?>"));
+      throw new QDOMException(DOMException.INVALID_CHARACTER_ERR,
+                              L.l("Empty processing instruction name.  The processing instruction syntax is: <?name ... ?>"));
 
     if (! isNameValid(target))
-      throw new QDOMException(DOMException.INVALID_CHARACTER_ERR, 
-			      L.l("`{0}' is an invalid processing instruction name.  The processing instruction syntax is: <?name ... ?>", target));
+      throw new QDOMException(DOMException.INVALID_CHARACTER_ERR,
+                              L.l("`{0}' is an invalid processing instruction name.  The processing instruction syntax is: <?name ... ?>", target));
 
     if (data == null)
       data = "";
@@ -512,10 +512,10 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
 
   public Attr createAttribute(String name, String value)
     throws DOMException
-  { 
+  {
     if (! isNameValid(name))
-      throw new QDOMException(DOMException.INVALID_CHARACTER_ERR, 
-			      "illegal attribute `" + name + "'");
+      throw new QDOMException(DOMException.INVALID_CHARACTER_ERR,
+                              "illegal attribute `" + name + "'");
 
     if (value == null)
       value = "";
@@ -565,7 +565,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
                              L.l("`{0}' prefix expects a namespace uri",
                                  name.getPrefix()));
     */
-    
+
     QAttr attr = new QAttr(qname, null);
     attr._owner = this;
 
@@ -576,7 +576,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
   {
     _nameKey.init(name, uri);
     QName qName = _nameCache.get(_nameKey);
-    
+
     if (qName != null)
       return qName;
 
@@ -588,12 +588,12 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
       String prefix;
       String local;
       if (p < 0) {
-	prefix = null;
-	local = name;
+        prefix = null;
+        local = name;
       }
       else {
-	prefix = name.substring(0, p);
-	local = name.substring(p + 1);
+        prefix = name.substring(0, p);
+        local = name.substring(p + 1);
       }
 
       qName = new QName(prefix, local, uri);
@@ -611,7 +611,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
     throws DOMException
   {
     String url = name.getNamespace();
-    
+
     if (url != null && url != "") {
       addNamespace(name.getPrefix(), url);
     }
@@ -624,10 +624,10 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
 
   public EntityReference createEntityReference(String name)
     throws DOMException
-  { 
+  {
     if (! isNameValid(name))
-      throw new QDOMException(DOMException.INVALID_CHARACTER_ERR, 
-			      "illegal entityReference `" + name + "'");
+      throw new QDOMException(DOMException.INVALID_CHARACTER_ERR,
+                              "illegal entityReference `" + name + "'");
 
     QEntityReference er = new QEntityReference(name);
     er._owner = this;
@@ -639,7 +639,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
    * Returns a list of elements, filtered by the tag name.
    */
   public NodeList getElementsByTagName(String name)
-  { 
+  {
     if (_element == null)
       return new QDeepNodeList(null, null, null);
     else
@@ -647,7 +647,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
   }
 
   public NodeList getElementsByTagNameNS(String uri, String name)
-  { 
+  {
     if (_element == null)
       return new QDeepNodeList(null, null, null);
     else
@@ -668,7 +668,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
           return elt;
       }
     }
-    
+
     return null;
   }
 
@@ -692,24 +692,24 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
 
       // xml/0201
       if (false && _namespaces != null) {
-	Iterator<String> iter = _namespaces.keySet().iterator();
-	
-	while (iter.hasNext()) {
-	  String prefix = iter.next();
-	  String ns = _namespaces.get(prefix);
+        Iterator<String> iter = _namespaces.keySet().iterator();
 
-	  String xmlns;
+        while (iter.hasNext()) {
+          String prefix = iter.next();
+          String ns = _namespaces.get(prefix);
 
-	  if (prefix.equals(""))
-	    xmlns = "xmlns";
-	  else
-	    xmlns = "xmlns:" + prefix;
+          String xmlns;
 
-	  if (_element.getAttribute(xmlns).equals("")) {
-	    QName qName = new QName(xmlns, XmlParser.XMLNS);
-	    _element.setAttributeNode(createAttribute(qName, ns));
-	  }
-	}
+          if (prefix.equals(""))
+            xmlns = "xmlns";
+          else
+            xmlns = "xmlns:" + prefix;
+
+          if (_element.getAttribute(xmlns).equals("")) {
+            QName qName = new QName(xmlns, XmlParser.XMLNS);
+            _element.setAttributeNode(createAttribute(qName, ns));
+          }
+        }
       }
     }
 
@@ -747,10 +747,10 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
 
     if (prefix == null)
       prefix = "";
-    
+
     if (_namespaces == null)
       _namespaces = new HashMap<String,String>();
-    
+
     String old = _namespaces.get(prefix);
     if (old == null)
       _namespaces.put(prefix, url.intern());
@@ -812,7 +812,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
   {
     throw new UnsupportedOperationException();
   }
-  
+
   public void setActualEncoding(String actualEncoding)
   {
     throw new UnsupportedOperationException();
@@ -823,7 +823,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
     throw new UnsupportedOperationException();
   }
 */
-  
+
   public void setEncoding(String encoding)
   {
     throw new UnsupportedOperationException();
@@ -833,34 +833,23 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
   {
     return _standalone;
   }
-  
+
   public void setStandalone(boolean standalone)
   {
     _standalone = true;
   }
 
-  public String getVersion()
-  {
-    throw new UnsupportedOperationException();
-  }
-    
-  public void setVersion(String version)
-    throws DOMException
-  {
-    throw new UnsupportedOperationException();
-  }
-
   public String getXmlVersion()
   {
-    throw new UnsupportedOperationException();
+    return _version;
   }
-    
+
   public void setXmlVersion(String version)
     throws DOMException
   {
-    throw new UnsupportedOperationException();
+    _version = version;
   }
-    
+
   public void setXmlStandalone(boolean value)
     throws DOMException
   {
@@ -880,7 +869,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
   {
     return null;
   }
-    
+
   public boolean getXmlStandalone()
     throws DOMException
   {
@@ -891,7 +880,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
   {
     throw new UnsupportedOperationException();
   }
-  
+
   public void setStrictErrorChecking(boolean strictErrorChecking)
   {
     throw new UnsupportedOperationException();
@@ -901,7 +890,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
   {
     throw new UnsupportedOperationException();
   }
-  
+
   public void setErrorHandler(DOMErrorHandler errorHandler)
   {
     throw new UnsupportedOperationException();
@@ -911,7 +900,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
   {
     throw new UnsupportedOperationException();
   }
-    
+
   public void setDocumentURI(String documentURI)
   {
     throw new UnsupportedOperationException();
@@ -928,13 +917,13 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
     throw new UnsupportedOperationException();
   }
 
-  public boolean canSetNormalizationFeature(String name, 
+  public boolean canSetNormalizationFeature(String name,
                                             boolean state)
   {
     throw new UnsupportedOperationException();
   }
 
-  public void setNormalizationFeature(String name, 
+  public void setNormalizationFeature(String name,
                                       boolean state)
     throws DOMException
   {
@@ -947,8 +936,8 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
     throw new UnsupportedOperationException();
   }
 
-  public Node renameNode(Node n, 
-                         String namespaceURI, 
+  public Node renameNode(Node n,
+                         String namespaceURI,
                          String name)
     throws DOMException
   {
@@ -961,7 +950,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
   {
     if (path == null)
       return;
-    
+
     if (_depends == null)
       _depends = new ArrayList<Path>();
 
@@ -969,7 +958,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
       _depends.add(path);
 
       if (_dependList == null)
-	_dependList = new ArrayList<Depend>();
+        _dependList = new ArrayList<Depend>();
 
       _dependList.add(new Depend(path));
     }
@@ -984,7 +973,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
       Depend depend = _dependList.get(i);
 
       if (depend.isModified())
-	return true;
+        return true;
     }
 
     return false;
@@ -993,7 +982,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
   void print(XmlPrinter os) throws IOException
   {
     os.startDocument(this);
-    
+
     if (_namespaces != null) {
       Iterator<String> iter = _namespaces.keySet().iterator();
       while (iter.hasNext()) {
@@ -1017,7 +1006,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
       if (os.isPretty())
         os.println();
     }
-    
+
     os.endDocument();
   }
 
@@ -1056,10 +1045,10 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
     {
       if (qName == null)
         throw new NullPointerException();
-      
+
       if (url == null)
         url = "";
-      
+
       _qName = qName;
       _url = url;
     }

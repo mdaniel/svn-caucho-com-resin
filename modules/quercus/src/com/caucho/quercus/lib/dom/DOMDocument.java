@@ -65,13 +65,13 @@ public class DOMDocument
 {
   private final static Logger log = Logger.getLogger(DOMDocument.class.getName());
 
-  private String _version;
   private String _encoding;
 
   @Construct
   public DOMDocument(@Optional("'1.0'") String version, @Optional String encoding)
   {
-    _version = version;
+    if (version != null && version.length() > 0)
+      setXmlVersion(version);
 
     if (encoding != null && encoding.length() > 0)
       setEncoding(encoding);
@@ -90,16 +90,6 @@ public class DOMDocument
   public void setEncoding(String encoding)
   {
     _encoding = encoding;
-  }
-
-  public String getVersion()
-  {
-    return _version;
-  }
-
-  public void setVersion(String version)
-  {
-    _version = version;
   }
 
   public DOMConfiguration getConfig()
@@ -467,17 +457,18 @@ public class DOMDocument
 
     printer.setMethod(isHTML ? "html" : "xml");
 
-    printer.setVersion(_version);
-    printer.setEncoding(_encoding);
-
     printer.setPrintDeclaration(true);
+
+    printer.setVersion(getXmlVersion());
+    printer.setEncoding(_encoding);
 
     if (getStandalone())
       printer.setStandalone("yes");
 
     printer.printXml(this);
 
-    os.println();
+    if (hasChildNodes())
+      os.println();
   }
 
   private Value saveToFile(Env env, Path path, boolean isHTML)
