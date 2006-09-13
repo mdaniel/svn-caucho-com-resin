@@ -29,61 +29,24 @@
 
 package com.caucho.amber.cfg;
 
+import javax.persistence.InheritanceType;
+
+
 /**
- * <column> tag in the orm.xml
+ * The <inheritance> tag in orm.xml
  */
-public class ColumnConfig extends AbstractColumnConfig {
+public class InheritanceConfig {
 
   // attributes
-  private int _length;
-  private int _precision;
-  private int _scale;
+  private InheritanceType _strategy;
 
-  /**
-   * Returns the length.
-   */
-  public int getLength()
+  public InheritanceType getStrategy()
   {
-    return _length;
+    return _strategy;
   }
 
-  /**
-   * Sets the length.
-   */
-  public void setLength(int length)
+  public void setStrategy(InheritanceType strategy)
   {
-    _length = length;
-  }
-
-  /**
-   * Returns the precision.
-   */
-  public int getPrecision()
-  {
-    return _precision;
-  }
-
-  /**
-   * Sets the precision.
-   */
-  public void setPrecision(int precision)
-  {
-    _precision = precision;
-  }
-
-  /**
-   * Returns the scale.
-   */
-  public int getScale()
-  {
-    return _scale;
-  }
-
-  /**
-   * Sets the scale.
-   */
-  public void setScale(int scale)
-  {
-    _scale = scale;
+    _strategy = strategy;
   }
 }

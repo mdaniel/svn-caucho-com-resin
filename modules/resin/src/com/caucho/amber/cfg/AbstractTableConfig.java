@@ -29,61 +29,60 @@
 
 package com.caucho.amber.cfg;
 
+import java.util.ArrayList;
+
+
 /**
- * <column> tag in the orm.xml
+ * The base class for <table>, <secondary-table>, and <join-table>
  */
-public class ColumnConfig extends AbstractColumnConfig {
+abstract public class AbstractTableConfig {
 
   // attributes
-  private int _length;
-  private int _precision;
-  private int _scale;
+  private String _name;
+  private String _catalog;
+  private String _schema;
 
-  /**
-   * Returns the length.
-   */
-  public int getLength()
+  // elements
+  private ArrayList<UniqueConstraintConfig> _uniqueConstraintList
+    = new ArrayList<UniqueConstraintConfig>();
+
+  public String getName()
   {
-    return _length;
+    return _name;
   }
 
-  /**
-   * Sets the length.
-   */
-  public void setLength(int length)
+  public void setName(String name)
   {
-    _length = length;
+    _name = name;
   }
 
-  /**
-   * Returns the precision.
-   */
-  public int getPrecision()
+  public String getCatalog()
   {
-    return _precision;
+    return _catalog;
   }
 
-  /**
-   * Sets the precision.
-   */
-  public void setPrecision(int precision)
+  public void setCatalog(String catalog)
   {
-    _precision = precision;
+    _catalog = catalog;
   }
 
-  /**
-   * Returns the scale.
-   */
-  public int getScale()
+  public String getSchema()
   {
-    return _scale;
+    return _schema;
   }
 
-  /**
-   * Sets the scale.
-   */
-  public void setScale(int scale)
+  public void setSchema(String schema)
   {
-    _scale = scale;
+    _schema = schema;
+  }
+
+  public void addUniqueConstraint(UniqueConstraintConfig uniqueConstraint)
+  {
+    _uniqueConstraintList.add(uniqueConstraint);
+  }
+
+  public ArrayList<UniqueConstraintConfig> getUniqueConstraintList()
+  {
+    return _uniqueConstraintList;
   }
 }

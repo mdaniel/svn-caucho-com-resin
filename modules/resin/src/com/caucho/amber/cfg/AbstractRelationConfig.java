@@ -29,61 +29,71 @@
 
 package com.caucho.amber.cfg;
 
+import javax.persistence.CascadeType;
+import javax.persistence.FetchType;
+
+
 /**
- * <column> tag in the orm.xml
+ * The base class for <one-to-one>, <one-to-many> and so on.
  */
-public class ColumnConfig extends AbstractColumnConfig {
+abstract public class AbstractRelationConfig {
 
   // attributes
-  private int _length;
-  private int _precision;
-  private int _scale;
+  private String _name;
+  private String _targetEntity;
+  private FetchType _fetch;
 
-  /**
-   * Returns the length.
-   */
-  public int getLength()
+  // elements
+  private JoinTableConfig _joinTable;
+  private CascadeType _cascade;
+
+  public String getName()
   {
-    return _length;
+    return _name;
   }
 
-  /**
-   * Sets the length.
-   */
-  public void setLength(int length)
+  public void setName(String name)
   {
-    _length = length;
+    _name = name;
   }
 
-  /**
-   * Returns the precision.
-   */
-  public int getPrecision()
+  public String getTargetEntity()
   {
-    return _precision;
+    return _targetEntity;
   }
 
-  /**
-   * Sets the precision.
-   */
-  public void setPrecision(int precision)
+  public void setTargetEntity(String targetEntity)
   {
-    _precision = precision;
+    _targetEntity = targetEntity;
   }
 
-  /**
-   * Returns the scale.
-   */
-  public int getScale()
+  public FetchType getFetch()
   {
-    return _scale;
+    return _fetch;
   }
 
-  /**
-   * Sets the scale.
-   */
-  public void setScale(int scale)
+  public void setFetch(FetchType fetch)
   {
-    _scale = scale;
+    _fetch = fetch;
+  }
+
+  public CascadeType getCascade()
+  {
+    return _cascade;
+  }
+
+  public void setCascade(CascadeType cascade)
+  {
+    _cascade = cascade;
+  }
+
+  public JoinTableConfig getJoinTable()
+  {
+    return _joinTable;
+  }
+
+  public void setJoinTable(JoinTableConfig joinTable)
+  {
+    _joinTable = joinTable;
   }
 }

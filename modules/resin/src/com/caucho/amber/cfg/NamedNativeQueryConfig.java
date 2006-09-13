@@ -29,61 +29,68 @@
 
 package com.caucho.amber.cfg;
 
+
 /**
- * <column> tag in the orm.xml
+ * The <named-native-query> tag in orm.xml
  */
-public class ColumnConfig extends AbstractColumnConfig {
+public class NamedNativeQueryConfig {
 
   // attributes
-  private int _length;
-  private int _precision;
-  private int _scale;
+  private String _name;
+  private String _resultClass;
+  private String _resultSetMapping;
 
-  /**
-   * Returns the length.
-   */
-  public int getLength()
+  // elements
+  private String _query;
+  private QueryHintConfig _hint;
+
+  public String getName()
   {
-    return _length;
+    return _name;
   }
 
-  /**
-   * Sets the length.
-   */
-  public void setLength(int length)
+  public String getResultClass()
   {
-    _length = length;
+    return _resultClass;
   }
 
-  /**
-   * Returns the precision.
-   */
-  public int getPrecision()
+  public String getResultSetMapping()
   {
-    return _precision;
+    return _resultSetMapping;
   }
 
-  /**
-   * Sets the precision.
-   */
-  public void setPrecision(int precision)
+  public String getQuery()
   {
-    _precision = precision;
+    return _query;
   }
 
-  /**
-   * Returns the scale.
-   */
-  public int getScale()
+  public QueryHintConfig getHint()
   {
-    return _scale;
+    return _hint;
   }
 
-  /**
-   * Sets the scale.
-   */
-  public void setScale(int scale)
+  public void setName(String name)
   {
-    _scale = scale;
+    _name = name;
+  }
+
+  public void setQuery(String query)
+  {
+    _query = query;
+  }
+
+  public void setHint(QueryHintConfig hint)
+  {
+    _hint = hint;
+  }
+
+  public void setResultClass(String resultClass)
+  {
+    _resultClass = resultClass;
+  }
+
+  public void setResultSetMapping(String resultSetMapping)
+  {
+    _resultSetMapping = resultSetMapping;
   }
 }

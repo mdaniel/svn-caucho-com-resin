@@ -29,23 +29,19 @@
 
 package com.caucho.amber.cfg;
 
-import javax.persistence.TemporalType;
-
-
 /**
- * <id> tag in the orm.xml
+ * Base class for <column> and <join-column> tag in the orm.xml
  */
-public class IdConfig {
+abstract public class AbstractColumnConfig {
 
   // attributes
   private String _name;
-
-  // elements
-  private ColumnConfig _column;
-  private GeneratedValueConfig _generatedValue;
-  private TemporalType _temporal;
-  private TableGeneratorConfig _tableGenerator;
-  private SequenceGeneratorConfig _sequenceGenerator;
+  private boolean _isUnique;
+  private boolean _isNullable;
+  private boolean _isInsertable;
+  private boolean _isUpdatable;
+  private String _columnDefinition;
+  private String _table;
 
   /**
    * Returns the name.
@@ -63,59 +59,75 @@ public class IdConfig {
     _name = name;
   }
 
-  /**
-   * Returns the column.
-   */
-  public ColumnConfig getColumn()
+  public boolean getUnique()
   {
-    return _column;
+    return _isUnique;
+  }
+
+  public boolean getNullable()
+  {
+    return _isNullable;
+  }
+
+  public boolean getInsertable()
+  {
+    return _isInsertable;
+  }
+
+  public boolean getUpdatable()
+  {
+    return _isUpdatable;
+  }
+
+  public void setUnique(boolean isUnique)
+  {
+    _isUnique = isUnique;
+  }
+
+  public void setNullable(boolean isNullable)
+  {
+    _isNullable = isNullable;
+  }
+
+  public void setInsertable(boolean isInsertable)
+  {
+    _isInsertable = isInsertable;
+  }
+
+  public void setUpdatable(boolean isUpdatable)
+  {
+    _isUpdatable = isUpdatable;
   }
 
   /**
-   * Sets the column.
+   * Returns the column definition.
    */
-  public void setColumn(ColumnConfig column)
+  public String getColumnDefinition()
   {
-    _column = column;
+    return _columnDefinition;
   }
 
-  public GeneratedValueConfig getGeneratedValue()
+  /**
+   * Sets the column definition.
+   */
+  public void setColumnDefinition(String columnDefinition)
   {
-    return _generatedValue;
+    _columnDefinition = columnDefinition;
   }
 
-  public TemporalType getTemporal()
+  /**
+   * Returns the table.
+   */
+  public String getTable()
   {
-    return _temporal;
+    return _table;
   }
 
-  public TableGeneratorConfig getTableGenerator()
+  /**
+   * Sets the table.
+   */
+  public void setTable(String table)
   {
-    return _tableGenerator;
-  }
-
-  public SequenceGeneratorConfig getSequenceGenerator()
-  {
-    return _sequenceGenerator;
-  }
-
-  public void setGeneratedValue(GeneratedValueConfig generatedValue)
-  {
-    _generatedValue = generatedValue;
-  }
-
-  public void setTemporal(TemporalType temporal)
-  {
-    _temporal = temporal;
-  }
-
-  public void setTableGenerator(TableGeneratorConfig tableGenerator)
-  {
-    _tableGenerator = tableGenerator;
-  }
-
-  public void setSequenceGenerator(SequenceGeneratorConfig sequenceGenerator)
-  {
-    _sequenceGenerator = sequenceGenerator;
+    _table = table;
   }
 }

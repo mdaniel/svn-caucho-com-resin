@@ -46,32 +46,36 @@ public class EntityMappingsConfig {
 
   // elements
   private String _description;
+  private PersistenceUnitMetaDataConfig _persistenceUnitMetaData;
   private String _package;
   private String _schema;
   private String _catalog;
-  public enum AccessType { PROPERTY, FIELD };
   private AccessType _access;
+
+  private HashMap<String, SequenceGeneratorConfig> _sequenceGeneratorMap
+    = new HashMap<String, SequenceGeneratorConfig>();
+
+  private HashMap<String, TableGeneratorConfig> _tableGeneratorMap
+    = new HashMap<String, TableGeneratorConfig>();
+
+  private HashMap<String, NamedQueryConfig> _namedQueryMap
+    = new HashMap<String, NamedQueryConfig>();
+
+  private HashMap<String, NamedNativeQueryConfig> _namedNativeQueryMap
+    = new HashMap<String, NamedNativeQueryConfig>();
+
+  private HashMap<String, SqlResultSetMappingConfig> _sqlResultSetMappingMap
+    = new HashMap<String, SqlResultSetMappingConfig>();
+
+  private HashMap<String, MappedSuperclassConfig> _mappedSuperclassMap
+    = new HashMap<String, MappedSuperclassConfig>();
+
   private HashMap<String, EntityConfig> _entityMap
     = new HashMap<String, EntityConfig>();
 
-  // XXX: to do ...
-  /*
-  private PersistenceUnitMetaDataConfig _PersistenceUnitMetaDataConfig;
-  private ArrayList<SequenceGeneratorConfig> _sequenceGeneratorList
-    = new ArrayList<SequenceGeneratorConfig>();
-  private ArrayList<TableGeneratorConfig> _tableGeneratorList
-    = new ArrayList<TableGeneratorConfig>();
-  private ArrayList<NamedQueryConfig> _namedQueryList
-    = new ArrayList<NamedQueryConfig>();
-  private ArrayList<NamedNativeQueryConfig> _namedNativeQueryList
-    = new ArrayList<NamedNativeQueryConfig>();
-  private ArrayList<SqlResultSetMappingConfig> _sqlResultSetMappingList
-    = new ArrayList<SqlResultSetMappingConfig>();
-  private ArrayList<MappedSuperclassConfig> _mappedSuperclassList
-    = new ArrayList<MappedSuperclassConfig>();
-  private ArrayList<EmbeddableConfig> _embeddableList
-    = new ArrayList<EmbeddableConfig>();
-  */
+  private HashMap<String, EmbeddableConfig> _embeddableMap
+    = new HashMap<String, EmbeddableConfig>();
+
 
   public AccessType getAccess()
   {
@@ -91,6 +95,16 @@ public class EntityMappingsConfig {
   public String getPackage()
   {
     return _package;
+  }
+
+  public PersistenceUnitMetaDataConfig getPersistenceUnitMetaData()
+  {
+    return _persistenceUnitMetaData;
+  }
+
+  public void setPersistenceUnitMetaData(PersistenceUnitMetaDataConfig persistenceUnitMetaData)
+  {
+    _persistenceUnitMetaData = persistenceUnitMetaData;
   }
 
   public Path getRoot()
@@ -165,6 +179,111 @@ public class EntityMappingsConfig {
   public HashMap<String, EntityConfig> getEntityMap()
   {
     return _entityMap;
+  }
+
+  public void addSequenceGenerator(SequenceGeneratorConfig sequenceGenerator)
+  {
+    _sequenceGeneratorMap.put(sequenceGenerator.getName(), sequenceGenerator);
+  }
+
+  public SequenceGeneratorConfig getSequenceGenerator(String name)
+  {
+    return _sequenceGeneratorMap.get(name);
+  }
+
+  public HashMap<String, SequenceGeneratorConfig> getSequenceGeneratorMap()
+  {
+    return _sequenceGeneratorMap;
+  }
+
+  public void addTableGenerator(TableGeneratorConfig tableGenerator)
+  {
+    _tableGeneratorMap.put(tableGenerator.getName(), tableGenerator);
+  }
+
+  public TableGeneratorConfig getTableGenerator(String name)
+  {
+    return _tableGeneratorMap.get(name);
+  }
+
+  public HashMap<String, TableGeneratorConfig> getTableGeneratorMap()
+  {
+    return _tableGeneratorMap;
+  }
+
+  public void addNamedQuery(NamedQueryConfig namedQuery)
+  {
+    _namedQueryMap.put(namedQuery.getName(), namedQuery);
+  }
+
+  public NamedQueryConfig getNamedQuery(String name)
+  {
+    return _namedQueryMap.get(name);
+  }
+
+  public HashMap<String, NamedQueryConfig> getNamedQueryMap()
+  {
+    return _namedQueryMap;
+  }
+
+  public void addNamedNativeQuery(NamedNativeQueryConfig namedNativeQuery)
+  {
+    _namedNativeQueryMap.put(namedNativeQuery.getName(), namedNativeQuery);
+  }
+
+  public NamedNativeQueryConfig getNamedNativeQuery(String name)
+  {
+    return _namedNativeQueryMap.get(name);
+  }
+
+  public HashMap<String, NamedNativeQueryConfig> getNamedNativeQueryMap()
+  {
+    return _namedNativeQueryMap;
+  }
+
+  public void addSqlResultSetMapping(SqlResultSetMappingConfig sqlResultSetMapping)
+  {
+    _sqlResultSetMappingMap.put(sqlResultSetMapping.getName(), sqlResultSetMapping);
+  }
+
+  public SqlResultSetMappingConfig getSqlResultSetMapping(String name)
+  {
+    return _sqlResultSetMappingMap.get(name);
+  }
+
+  public HashMap<String, SqlResultSetMappingConfig> getSqlResultSetMappingMap()
+  {
+    return _sqlResultSetMappingMap;
+  }
+
+  public void addMappedSuperclass(MappedSuperclassConfig mappedSuperclass)
+  {
+    _mappedSuperclassMap.put(mappedSuperclass.getClassName(), mappedSuperclass);
+  }
+
+  public MappedSuperclassConfig getMappedSuperclass(String name)
+  {
+    return _mappedSuperclassMap.get(name);
+  }
+
+  public HashMap<String, MappedSuperclassConfig> getMappedSuperclassMap()
+  {
+    return _mappedSuperclassMap;
+  }
+
+  public void addEmbeddable(EmbeddableConfig embeddable)
+  {
+    _embeddableMap.put(embeddable.getClassName(), embeddable);
+  }
+
+  public EmbeddableConfig getEmbeddable(String name)
+  {
+    return _embeddableMap.get(name);
+  }
+
+  public HashMap<String, EmbeddableConfig> getEmbeddableMap()
+  {
+    return _embeddableMap;
   }
 
   public String toString()

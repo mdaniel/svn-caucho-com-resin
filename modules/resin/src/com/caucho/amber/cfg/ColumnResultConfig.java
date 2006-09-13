@@ -29,61 +29,22 @@
 
 package com.caucho.amber.cfg;
 
+
 /**
- * <column> tag in the orm.xml
+ * The <column-result> tag in orm.xml
  */
-public class ColumnConfig extends AbstractColumnConfig {
+public class ColumnResultConfig {
 
   // attributes
-  private int _length;
-  private int _precision;
-  private int _scale;
+  private String _name;
 
-  /**
-   * Returns the length.
-   */
-  public int getLength()
+  public String getName()
   {
-    return _length;
+    return _name;
   }
 
-  /**
-   * Sets the length.
-   */
-  public void setLength(int length)
+  public void setName(String name)
   {
-    _length = length;
-  }
-
-  /**
-   * Returns the precision.
-   */
-  public int getPrecision()
-  {
-    return _precision;
-  }
-
-  /**
-   * Sets the precision.
-   */
-  public void setPrecision(int precision)
-  {
-    _precision = precision;
-  }
-
-  /**
-   * Returns the scale.
-   */
-  public int getScale()
-  {
-    return _scale;
-  }
-
-  /**
-   * Sets the scale.
-   */
-  public void setScale(int scale)
-  {
-    _scale = scale;
+    _name = name;
   }
 }

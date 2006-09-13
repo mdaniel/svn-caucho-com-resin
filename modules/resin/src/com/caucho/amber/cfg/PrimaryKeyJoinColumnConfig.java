@@ -29,61 +29,62 @@
 
 package com.caucho.amber.cfg;
 
+
 /**
- * <column> tag in the orm.xml
+ * <primary-key-join-column> tag in the orm.xml
  */
-public class ColumnConfig extends AbstractColumnConfig {
+public class PrimaryKeyJoinColumnConfig {
 
   // attributes
-  private int _length;
-  private int _precision;
-  private int _scale;
+  private String _name;
+  private String _referencedColumnName;
+  private String _columnDefinition;
 
   /**
-   * Returns the length.
+   * Returns the name.
    */
-  public int getLength()
+  public String getName()
   {
-    return _length;
+    return _name;
   }
 
   /**
-   * Sets the length.
+   * Sets the name.
    */
-  public void setLength(int length)
+  public void setName(String name)
   {
-    _length = length;
+    _name = name;
   }
 
   /**
-   * Returns the precision.
+   * Returns the referenced column name.
    */
-  public int getPrecision()
+  public String getReferencedColumnName()
   {
-    return _precision;
+    return _referencedColumnName;
   }
 
   /**
-   * Sets the precision.
+   * Sets the referenced column name.
    */
-  public void setPrecision(int precision)
+  public void setReferencedColumnName(String referencedColumnName)
   {
-    _precision = precision;
+    _referencedColumnName = referencedColumnName;
   }
 
   /**
-   * Returns the scale.
+   * Returns the column definition.
    */
-  public int getScale()
+  public String getColumnDefinition()
   {
-    return _scale;
+    return _columnDefinition;
   }
 
   /**
-   * Sets the scale.
+   * Sets the column definition.
    */
-  public void setScale(int scale)
+  public void setColumnDefinition(String columnDefinition)
   {
-    _scale = scale;
+    _columnDefinition = columnDefinition;
   }
 }

@@ -29,15 +29,67 @@
 
 package com.caucho.amber.cfg;
 
+import javax.persistence.DiscriminatorType;
+
+
 /**
- * <column> tag in the orm.xml
+ * <discriminator-column> tag in the orm.xml
  */
-public class ColumnConfig extends AbstractColumnConfig {
+public class DiscriminatorColumnConfig {
 
   // attributes
-  private int _length;
-  private int _precision;
-  private int _scale;
+  private String _name = "DTYPE";
+  private DiscriminatorType _discriminatorType = DiscriminatorType.STRING;
+  private String _columnDefinition;
+  private int _length = 31;
+
+  /**
+   * Returns the entity name.
+   */
+  public String getName()
+  {
+    return _name;
+  }
+
+  /**
+   * Sets the entity name.
+   */
+  public void setName(String name)
+  {
+    _name = name;
+  }
+
+  /**
+   * Returns the discriminator type.
+   */
+  public DiscriminatorType getDiscriminatorType()
+  {
+    return _discriminatorType;
+  }
+
+  /**
+   * Sets the discriminator type.
+   */
+  public void setDiscriminatorType(DiscriminatorType discriminatorType)
+  {
+    _discriminatorType = discriminatorType;
+  }
+
+  /**
+   * Returns the column definition.
+   */
+  public String getColumnDefinition()
+  {
+    return _columnDefinition;
+  }
+
+  /**
+   * Sets the column definition.
+   */
+  public void setColumnDefinition(String columnDefinition)
+  {
+    _columnDefinition = columnDefinition;
+  }
 
   /**
    * Returns the length.
@@ -53,37 +105,5 @@ public class ColumnConfig extends AbstractColumnConfig {
   public void setLength(int length)
   {
     _length = length;
-  }
-
-  /**
-   * Returns the precision.
-   */
-  public int getPrecision()
-  {
-    return _precision;
-  }
-
-  /**
-   * Sets the precision.
-   */
-  public void setPrecision(int precision)
-  {
-    _precision = precision;
-  }
-
-  /**
-   * Returns the scale.
-   */
-  public int getScale()
-  {
-    return _scale;
-  }
-
-  /**
-   * Sets the scale.
-   */
-  public void setScale(int scale)
-  {
-    _scale = scale;
   }
 }

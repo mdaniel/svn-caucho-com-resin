@@ -29,61 +29,29 @@
 
 package com.caucho.amber.cfg;
 
+import java.util.ArrayList;
+
 /**
- * <column> tag in the orm.xml
+ * <unique-constraint> tag in the orm.xml
  */
-public class ColumnConfig extends AbstractColumnConfig {
+public class UniqueConstraintConfig {
 
   // attributes
-  private int _length;
-  private int _precision;
-  private int _scale;
+  private ArrayList<String> _columnNameList;
 
   /**
-   * Returns the length.
+   * Returns the column names.
    */
-  public int getLength()
+  public ArrayList<String> getColumnNames()
   {
-    return _length;
+    return _columnNameList;
   }
 
   /**
-   * Sets the length.
+   * Sets the column name.
    */
-  public void setLength(int length)
+  public void addColumnName(String columnName)
   {
-    _length = length;
-  }
-
-  /**
-   * Returns the precision.
-   */
-  public int getPrecision()
-  {
-    return _precision;
-  }
-
-  /**
-   * Sets the precision.
-   */
-  public void setPrecision(int precision)
-  {
-    _precision = precision;
-  }
-
-  /**
-   * Returns the scale.
-   */
-  public int getScale()
-  {
-    return _scale;
-  }
-
-  /**
-   * Sets the scale.
-   */
-  public void setScale(int scale)
-  {
-    _scale = scale;
+    _columnNameList.add(columnName);
   }
 }

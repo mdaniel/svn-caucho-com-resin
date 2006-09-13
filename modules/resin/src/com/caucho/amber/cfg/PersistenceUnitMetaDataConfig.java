@@ -24,66 +24,40 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Rodrigo Westrupp
+ * @author Scott Ferguson
  */
 
 package com.caucho.amber.cfg;
 
 /**
- * <column> tag in the orm.xml
+ * <persistence-unit-metadata> tag in the persistence.xml
  */
-public class ColumnConfig extends AbstractColumnConfig {
+public class PersistenceUnitMetaDataConfig {
 
-  // attributes
-  private int _length;
-  private int _precision;
-  private int _scale;
+  // no attributes
 
-  /**
-   * Returns the length.
-   */
-  public int getLength()
+  // elements
+  private boolean _isXmlMappingMetaDataComplete;
+  private PersistenceUnitDefaultsConfig _persistenceUnitDefaults;
+
+
+  public boolean getXmlMappingsMetaDataComplete()
   {
-    return _length;
+    return _isXmlMappingMetaDataComplete;
   }
 
-  /**
-   * Sets the length.
-   */
-  public void setLength(int length)
+  public void setXmlMappingsMetaDataComplete(boolean isXmlMappingMetaDataComplete)
   {
-    _length = length;
+    _isXmlMappingMetaDataComplete = isXmlMappingMetaDataComplete;
   }
 
-  /**
-   * Returns the precision.
-   */
-  public int getPrecision()
+  public PersistenceUnitDefaultsConfig getPersistenceUnitDefaults()
   {
-    return _precision;
+    return _persistenceUnitDefaults;
   }
 
-  /**
-   * Sets the precision.
-   */
-  public void setPrecision(int precision)
+  public void setPersistenceUnitDefaults(PersistenceUnitDefaultsConfig persistenceUnitDefaults)
   {
-    _precision = precision;
-  }
-
-  /**
-   * Returns the scale.
-   */
-  public int getScale()
-  {
-    return _scale;
-  }
-
-  /**
-   * Sets the scale.
-   */
-  public void setScale(int scale)
-  {
-    _scale = scale;
+    _persistenceUnitDefaults = persistenceUnitDefaults;
   }
 }

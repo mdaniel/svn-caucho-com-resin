@@ -29,61 +29,49 @@
 
 package com.caucho.amber.cfg;
 
+import java.util.HashMap;
+
+
 /**
- * <column> tag in the orm.xml
+ * The <embedded> tag in orm.xml
  */
-public class ColumnConfig extends AbstractColumnConfig {
+public class EmbeddedConfig {
 
   // attributes
-  private int _length;
-  private int _precision;
-  private int _scale;
+  private String _name;
+
+  // elements
+  private HashMap<String, AttributeOverrideConfig> _attributeOverrideMap
+    = new HashMap<String, AttributeOverrideConfig>();
 
   /**
-   * Returns the length.
+   * Returns the name.
    */
-  public int getLength()
+  public String getName()
   {
-    return _length;
+    return _name;
   }
 
   /**
-   * Sets the length.
+   * Sets the name.
    */
-  public void setLength(int length)
+  public void setName(String name)
   {
-    _length = length;
+    _name = name;
   }
 
-  /**
-   * Returns the precision.
-   */
-  public int getPrecision()
+  public AttributeOverrideConfig getAttributeOverride(String name)
   {
-    return _precision;
+    return _attributeOverrideMap.get(name);
   }
 
-  /**
-   * Sets the precision.
-   */
-  public void setPrecision(int precision)
+  public void addAttributeOverride(AttributeOverrideConfig attributeOverride)
   {
-    _precision = precision;
+    _attributeOverrideMap.put(attributeOverride.getName(), attributeOverride);
   }
 
-  /**
-   * Returns the scale.
-   */
-  public int getScale()
+  public HashMap<String, AttributeOverrideConfig> getAttributeOverrideMap()
   {
-    return _scale;
-  }
-
-  /**
-   * Sets the scale.
-   */
-  public void setScale(int scale)
-  {
-    _scale = scale;
+    return _attributeOverrideMap;
   }
 }

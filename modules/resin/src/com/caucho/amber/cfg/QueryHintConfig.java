@@ -29,61 +29,33 @@
 
 package com.caucho.amber.cfg;
 
+
 /**
- * <column> tag in the orm.xml
+ * The <query-hint> tag in orm.xml
  */
-public class ColumnConfig extends AbstractColumnConfig {
+public class QueryHintConfig {
 
   // attributes
-  private int _length;
-  private int _precision;
-  private int _scale;
+  private String _name;
+  private String _value;
 
-  /**
-   * Returns the length.
-   */
-  public int getLength()
+  public String getName()
   {
-    return _length;
+    return _name;
   }
 
-  /**
-   * Sets the length.
-   */
-  public void setLength(int length)
+  public String getValue()
   {
-    _length = length;
+    return _value;
   }
 
-  /**
-   * Returns the precision.
-   */
-  public int getPrecision()
+  public void setName(String name)
   {
-    return _precision;
+    _name = name;
   }
 
-  /**
-   * Sets the precision.
-   */
-  public void setPrecision(int precision)
+  public void setValue(String value)
   {
-    _precision = precision;
-  }
-
-  /**
-   * Returns the scale.
-   */
-  public int getScale()
-  {
-    return _scale;
-  }
-
-  /**
-   * Sets the scale.
-   */
-  public void setScale(int scale)
-  {
-    _scale = scale;
+    _value = value;
   }
 }

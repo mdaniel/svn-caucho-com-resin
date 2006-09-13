@@ -29,61 +29,46 @@
 
 package com.caucho.amber.cfg;
 
+
 /**
- * <column> tag in the orm.xml
+ * The <sql-result-set-mapping> tag in orm.xml
  */
-public class ColumnConfig extends AbstractColumnConfig {
+public class SqlResultSetMappingConfig {
 
   // attributes
-  private int _length;
-  private int _precision;
-  private int _scale;
+  private String _name;
 
-  /**
-   * Returns the length.
-   */
-  public int getLength()
+  // elements
+  private EntityResultConfig _entityResult;
+  private ColumnResultConfig _columnResult;
+
+  public String getName()
   {
-    return _length;
+    return _name;
   }
 
-  /**
-   * Sets the length.
-   */
-  public void setLength(int length)
+  public EntityResultConfig getEntityResult()
   {
-    _length = length;
+    return _entityResult;
   }
 
-  /**
-   * Returns the precision.
-   */
-  public int getPrecision()
+  public ColumnResultConfig getColumnResult()
   {
-    return _precision;
+    return _columnResult;
   }
 
-  /**
-   * Sets the precision.
-   */
-  public void setPrecision(int precision)
+  public void setName(String name)
   {
-    _precision = precision;
+    _name = name;
   }
 
-  /**
-   * Returns the scale.
-   */
-  public int getScale()
+  public void setEntityResult(EntityResultConfig entityResult)
   {
-    return _scale;
+    _entityResult = entityResult;
   }
 
-  /**
-   * Sets the scale.
-   */
-  public void setScale(int scale)
+  public void setColumnResult(ColumnResultConfig columnResult)
   {
-    _scale = scale;
+    _columnResult = columnResult;
   }
 }

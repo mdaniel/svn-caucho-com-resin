@@ -31,7 +31,10 @@ package com.caucho.amber.cfg;
 
 import java.util.ArrayList;
 
+import javax.persistence.EnumType;
 import javax.persistence.FetchType;
+import javax.persistence.TemporalType;
+
 
 /**
  * <basic> tag in the orm.xml
@@ -40,19 +43,15 @@ public class BasicConfig {
 
   // attributes
   private String _name;
-  private FetchType _fetchType;
+  private FetchType _fetch;
+  private boolean _optional;
 
   // elements
   private ColumnConfig _column;
-
-  // XXX: to do ...
-  /*
-  private ColumnConfig _column;
-  private GeneratedValueConfig _generatedValue;
-  private TemporalConfig _temporal;
-  private TableGeneratorConfig _tableGenerator;
-  private SequenceGeneratorConfig _sequenceGenerator;
-  */
+  // XXX: lob type?
+  private String _lob;
+  private TemporalType _temporal;
+  private EnumType _enumerated;
 
   /**
    * Returns the name.
@@ -73,17 +72,33 @@ public class BasicConfig {
   /**
    * Returns the fetch type.
    */
-  public FetchType getFetchType()
+  public FetchType getFetch()
   {
-    return _fetchType;
+    return _fetch;
   }
 
   /**
    * Sets the fetch type.
    */
-  public void setFetchType(FetchType fetchType)
+  public void setFetch(FetchType fetch)
   {
-    _fetchType = fetchType;
+    _fetch = fetch;
+  }
+
+  /**
+   * Returns the optional.
+   */
+  public boolean getOptional()
+  {
+    return _optional;
+  }
+
+  /**
+   * Sets the optional.
+   */
+  public void setOptional(boolean optional)
+  {
+    _optional = optional;
   }
 
   /**
@@ -100,5 +115,53 @@ public class BasicConfig {
   public void setColumn(ColumnConfig column)
   {
     _column = column;
+  }
+
+  /**
+   * Returns the lob.
+   */
+  public String getLob()
+  {
+    return _lob;
+  }
+
+  /**
+   * Sets the lob.
+   */
+  public void setLob(String lob)
+  {
+    _lob = lob;
+  }
+
+  /**
+   * Returns the temporal.
+   */
+  public TemporalType getTemporal()
+  {
+    return _temporal;
+  }
+
+  /**
+   * Sets the temporal.
+   */
+  public void setTemporal(TemporalType temporal)
+  {
+    _temporal = temporal;
+  }
+
+  /**
+   * Returns the enumerated.
+   */
+  public EnumType getEnumerated()
+  {
+    return _enumerated;
+  }
+
+  /**
+   * Sets the enumerated.
+   */
+  public void setEnumerated(EnumType enumerated)
+  {
+    _enumerated = enumerated;
   }
 }

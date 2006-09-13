@@ -24,66 +24,74 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Rodrigo Westrupp
+ * @author Scott Ferguson
  */
 
 package com.caucho.amber.cfg;
 
+
 /**
- * <column> tag in the orm.xml
+ * <persistence-unit-defaults> tag in the persistence.xml
  */
-public class ColumnConfig extends AbstractColumnConfig {
+public class PersistenceUnitDefaultsConfig {
 
-  // attributes
-  private int _length;
-  private int _precision;
-  private int _scale;
+  // no attributes
 
-  /**
-   * Returns the length.
-   */
-  public int getLength()
+  // elements
+  private String _schema;
+  private String _catalog;
+  private AccessType _accessType;
+  private boolean _isCascadePersist;
+  private EntityListenersConfig _entityListeners;
+
+
+  public String getSchema()
   {
-    return _length;
+    return _schema;
   }
 
-  /**
-   * Sets the length.
-   */
-  public void setLength(int length)
+  public void setSchema(String schema)
   {
-    _length = length;
+    _schema = schema;
   }
 
-  /**
-   * Returns the precision.
-   */
-  public int getPrecision()
+  public String getCatalog()
   {
-    return _precision;
+    return _catalog;
   }
 
-  /**
-   * Sets the precision.
-   */
-  public void setPrecision(int precision)
+  public void setCatalog(String catalog)
   {
-    _precision = precision;
+    _catalog = catalog;
   }
 
-  /**
-   * Returns the scale.
-   */
-  public int getScale()
+  public AccessType getAccessType()
   {
-    return _scale;
+    return _accessType;
   }
 
-  /**
-   * Sets the scale.
-   */
-  public void setScale(int scale)
+  public void setAccessType(AccessType accessType)
   {
-    _scale = scale;
+    _accessType = accessType;
+  }
+
+  public boolean getCascadePersist()
+  {
+    return _isCascadePersist;
+  }
+
+  public void setCascadePersist(boolean isCascadePersist)
+  {
+    _isCascadePersist = isCascadePersist;
+  }
+
+  public EntityListenersConfig getEntityListeners()
+  {
+    return _entityListeners;
+  }
+
+  public void setEntityListeners(EntityListenersConfig entityListeners)
+  {
+    _entityListeners = entityListeners;
   }
 }

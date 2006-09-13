@@ -36,6 +36,8 @@ import java.util.HashMap;
  */
 public class AttributesConfig {
 
+  // no attributes
+
   // elements
   private HashMap<String, IdConfig> _idMap
     = new HashMap<String, IdConfig>();
@@ -43,17 +45,29 @@ public class AttributesConfig {
   private HashMap<String, BasicConfig> _basicMap
     = new HashMap<String, BasicConfig>();
 
-  // XXX: to do ...
-  /*
   private EmbeddedIdConfig _embeddedId;
-  private ArrayList<VersionConfig> _versionList = new ArrayList<VersionConfig>();
-  private ArrayList<ManyToOneConfig> _manyToOneList = new ArrayList<ManyToOneConfig>();
-  private ArrayList<OneToManyConfig> _oneToManyList = new ArrayList<OneToManyConfig>();
-  private ArrayList<OneToOneConfig> _oneToOneList = new ArrayList<OneToOneConfig>();
-  private ArrayList<ManyToManyConfig> _manyToManyList = new ArrayList<ManyToManyConfig>();
-  private ArrayList<EmbeddedConfig> _embeddedList = new ArrayList<EmbeddedConfig>();
-  private ArrayList<TransientConfig> _transientList = new ArrayList<TransientConfig>();
-  */
+
+  private HashMap<String, VersionConfig> _versionMap
+    = new HashMap<String, VersionConfig>();
+
+  private HashMap<String, ManyToOneConfig> _manyToOneMap
+    = new HashMap<String, ManyToOneConfig>();
+
+  private HashMap<String, OneToManyConfig> _oneToManyMap
+    = new HashMap<String, OneToManyConfig>();
+
+  private HashMap<String, OneToOneConfig> _oneToOneMap
+    = new HashMap<String, OneToOneConfig>();
+
+  private HashMap<String, ManyToManyConfig> _manyToManyMap
+    = new HashMap<String, ManyToManyConfig>();
+
+  private HashMap<String, EmbeddedConfig> _embeddedMap
+    = new HashMap<String, EmbeddedConfig>();
+
+  private HashMap<String, TransientConfig> _transientMap
+    = new HashMap<String, TransientConfig>();
+
 
   /**
    * Adds a new <basic>.
@@ -101,5 +115,126 @@ public class AttributesConfig {
   public IdConfig getId(String name)
   {
     return _idMap.get(name);
+  }
+
+  /**
+   * Returns the <embedded-id> config.
+   */
+  public EmbeddedIdConfig getEmbeddedId()
+  {
+    return _embeddedId;
+  }
+
+  /**
+   * Sets the <embedded-id> config.
+   */
+  public void setEmbeddedId(EmbeddedIdConfig embeddedId)
+  {
+    _embeddedId = embeddedId;
+  }
+
+  public HashMap<String, VersionConfig> getVersionMap()
+  {
+    return _versionMap;
+  }
+
+  public void addVersion(VersionConfig version)
+  {
+    _versionMap.put(version.getName(), version);
+  }
+
+  public VersionConfig getVersion(String name)
+  {
+    return _versionMap.get(name);
+  }
+
+  public HashMap<String, ManyToOneConfig> getManyToOneMap()
+  {
+    return _manyToOneMap;
+  }
+
+  public void addManyToOne(ManyToOneConfig manyToOne)
+  {
+    _manyToOneMap.put(manyToOne.getName(), manyToOne);
+  }
+
+  public ManyToOneConfig getManyToOne(String name)
+  {
+    return _manyToOneMap.get(name);
+  }
+
+  public HashMap<String, OneToManyConfig> getOneToManyMap()
+  {
+    return _oneToManyMap;
+  }
+
+  public void addOneToMany(OneToManyConfig oneToMany)
+  {
+    _oneToManyMap.put(oneToMany.getName(), oneToMany);
+  }
+
+  public OneToManyConfig getOneToMany(String name)
+  {
+    return _oneToManyMap.get(name);
+  }
+
+  public HashMap<String, OneToOneConfig> getOneToOneMap()
+  {
+    return _oneToOneMap;
+  }
+
+  public void addOneToOne(OneToOneConfig oneToOne)
+  {
+    _oneToOneMap.put(oneToOne.getName(), oneToOne);
+  }
+
+  public OneToOneConfig getOneToOne(String name)
+  {
+    return _oneToOneMap.get(name);
+  }
+
+  public HashMap<String, ManyToManyConfig> getManyToManyMap()
+  {
+    return _manyToManyMap;
+  }
+
+  public void addManyToMany(ManyToManyConfig manyToMany)
+  {
+    _manyToManyMap.put(manyToMany.getName(), manyToMany);
+  }
+
+  public ManyToManyConfig getManyToMany(String name)
+  {
+    return _manyToManyMap.get(name);
+  }
+
+  public HashMap<String, EmbeddedConfig> getEmbeddedMap()
+  {
+    return _embeddedMap;
+  }
+
+  public void addEmbedded(EmbeddedConfig embedded)
+  {
+    _embeddedMap.put(embedded.getName(), embedded);
+  }
+
+  public EmbeddedConfig getEmbedded(String name)
+  {
+    return _embeddedMap.get(name);
+  }
+
+  public HashMap<String, TransientConfig> getTransientMap()
+  {
+    return _transientMap;
+  }
+
+  public void addTransient(TransientConfig transientConfig)
+  {
+    _transientMap.put(transientConfig.getName(), transientConfig);
+  }
+
+  public TransientConfig getTransient(String name)
+  {
+    return _transientMap.get(name);
   }
 }

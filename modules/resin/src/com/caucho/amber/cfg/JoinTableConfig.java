@@ -29,61 +29,50 @@
 
 package com.caucho.amber.cfg;
 
+import java.util.HashMap;
+
+
 /**
- * <column> tag in the orm.xml
+ * The <join-table> tag in orm.xml
  */
-public class ColumnConfig extends AbstractColumnConfig {
+public class JoinTableConfig extends AbstractTableConfig {
 
-  // attributes
-  private int _length;
-  private int _precision;
-  private int _scale;
+  // elements
+  private HashMap<String, JoinColumnConfig> _joinColumnMap
+    = new HashMap<String, JoinColumnConfig>();
 
-  /**
-   * Returns the length.
-   */
-  public int getLength()
+  private HashMap<String, JoinColumnConfig> _inverseJoinColumnMap
+    = new HashMap<String, JoinColumnConfig>();
+
+  public JoinColumnConfig getJoinColumn(String name)
   {
-    return _length;
+    return _joinColumnMap.get(name);
   }
 
-  /**
-   * Sets the length.
-   */
-  public void setLength(int length)
+  public void addJoinColumn(JoinColumnConfig joinColumn)
   {
-    _length = length;
+    _joinColumnMap.put(joinColumn.getName(),
+                       joinColumn);
   }
 
-  /**
-   * Returns the precision.
-   */
-  public int getPrecision()
+  public HashMap<String, JoinColumnConfig> getJoinColumnMap()
   {
-    return _precision;
+    return _joinColumnMap;
   }
 
-  /**
-   * Sets the precision.
-   */
-  public void setPrecision(int precision)
+  public JoinColumnConfig getInverseJoinColumn(String name)
   {
-    _precision = precision;
+    return _inverseJoinColumnMap.get(name);
   }
 
-  /**
-   * Returns the scale.
-   */
-  public int getScale()
+  public void addInverseJoinColumn(JoinColumnConfig joinColumn)
   {
-    return _scale;
+    _inverseJoinColumnMap.put(joinColumn.getName(),
+                              joinColumn);
   }
 
-  /**
-   * Sets the scale.
-   */
-  public void setScale(int scale)
+  public HashMap<String, JoinColumnConfig> getInverseJoinColumnMap()
   {
-    _scale = scale;
+    return _inverseJoinColumnMap;
   }
 }

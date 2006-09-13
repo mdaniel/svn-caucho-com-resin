@@ -29,61 +29,48 @@
 
 package com.caucho.amber.cfg;
 
+import java.util.HashMap;
+
+
 /**
- * <column> tag in the orm.xml
+ * The <embeddable-attributes> tag in orm.xml
  */
-public class ColumnConfig extends AbstractColumnConfig {
+public class EmbeddableAttributesConfig {
 
-  // attributes
-  private int _length;
-  private int _precision;
-  private int _scale;
+  // elements
+  private HashMap<String, BasicConfig> _basicMap
+    = new HashMap<String, BasicConfig>();
 
-  /**
-   * Returns the length.
-   */
-  public int getLength()
+  private HashMap<String, TransientConfig> _transientMap
+    = new HashMap<String, TransientConfig>();
+
+  public BasicConfig getBasic(String name)
   {
-    return _length;
+    return _basicMap.get(name);
   }
 
-  /**
-   * Sets the length.
-   */
-  public void setLength(int length)
+  public void addBasic(BasicConfig basic)
   {
-    _length = length;
+    _basicMap.put(basic.getName(), basic);
   }
 
-  /**
-   * Returns the precision.
-   */
-  public int getPrecision()
+  public HashMap<String, BasicConfig> getBasicMap()
   {
-    return _precision;
+    return _basicMap;
   }
 
-  /**
-   * Sets the precision.
-   */
-  public void setPrecision(int precision)
+  public TransientConfig getTransient(String name)
   {
-    _precision = precision;
+    return _transientMap.get(name);
   }
 
-  /**
-   * Returns the scale.
-   */
-  public int getScale()
+  public void addTransient(TransientConfig transientConfig)
   {
-    return _scale;
+    _transientMap.put(transientConfig.getName(), transientConfig);
   }
 
-  /**
-   * Sets the scale.
-   */
-  public void setScale(int scale)
+  public HashMap<String, TransientConfig> getTransientMap()
   {
-    _scale = scale;
+    return _transientMap;
   }
 }

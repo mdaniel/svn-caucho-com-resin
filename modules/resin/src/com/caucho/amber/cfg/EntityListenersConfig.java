@@ -29,61 +29,42 @@
 
 package com.caucho.amber.cfg;
 
+import java.util.HashMap;
+
 /**
- * <column> tag in the orm.xml
+ * <entity-listeners> tag in the orm.xml
  */
-public class ColumnConfig extends AbstractColumnConfig {
+public class EntityListenersConfig {
 
-  // attributes
-  private int _length;
-  private int _precision;
-  private int _scale;
+  // no attributes
+
+  // elements
+  private HashMap<String, EntityListenerConfig> _entityListenerMap
+    = new HashMap<String, EntityListenerConfig>();
+
 
   /**
-   * Returns the length.
+   * Adds a new <entity-listener>.
    */
-  public int getLength()
+  public void addEntityListener(EntityListenerConfig entityListener)
   {
-    return _length;
+    _entityListenerMap.put(entityListener.getMethodName(),
+                           entityListener);
   }
 
   /**
-   * Sets the length.
+   * Returns the <entity-listener> map.
    */
-  public void setLength(int length)
+  public HashMap<String, EntityListenerConfig> getEntityListenerMap()
   {
-    _length = length;
+    return _entityListenerMap;
   }
 
   /**
-   * Returns the precision.
+   * Returns a <entity-listener> config.
    */
-  public int getPrecision()
+  public EntityListenerConfig getEntityListener(String methodName)
   {
-    return _precision;
-  }
-
-  /**
-   * Sets the precision.
-   */
-  public void setPrecision(int precision)
-  {
-    _precision = precision;
-  }
-
-  /**
-   * Returns the scale.
-   */
-  public int getScale()
-  {
-    return _scale;
-  }
-
-  /**
-   * Sets the scale.
-   */
-  public void setScale(int scale)
-  {
-    _scale = scale;
+    return _entityListenerMap.get(methodName);
   }
 }

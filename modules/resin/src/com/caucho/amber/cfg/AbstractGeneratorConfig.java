@@ -29,61 +29,44 @@
 
 package com.caucho.amber.cfg;
 
+
 /**
- * <column> tag in the orm.xml
+ * The base class for <sequence-generator> and <table-generator>
  */
-public class ColumnConfig extends AbstractColumnConfig {
+abstract public class AbstractGeneratorConfig {
 
   // attributes
-  private int _length;
-  private int _precision;
-  private int _scale;
+  private String _name;
+  private int _initialValue;
+  private int _allocationSize;
 
-  /**
-   * Returns the length.
-   */
-  public int getLength()
+  public String getName()
   {
-    return _length;
+    return _name;
   }
 
-  /**
-   * Sets the length.
-   */
-  public void setLength(int length)
+  public void setName(String name)
   {
-    _length = length;
+    _name = name;
   }
 
-  /**
-   * Returns the precision.
-   */
-  public int getPrecision()
+  public int getInitialValue()
   {
-    return _precision;
+    return _initialValue;
   }
 
-  /**
-   * Sets the precision.
-   */
-  public void setPrecision(int precision)
+  public void setInitialValue(int initialValue)
   {
-    _precision = precision;
+    _initialValue = initialValue;
   }
 
-  /**
-   * Returns the scale.
-   */
-  public int getScale()
+  public int getAllocationSize()
   {
-    return _scale;
+    return _allocationSize;
   }
 
-  /**
-   * Sets the scale.
-   */
-  public void setScale(int scale)
+  public void setAllocationSize(int allocationSize)
   {
-    _scale = scale;
+    _allocationSize = allocationSize;
   }
 }

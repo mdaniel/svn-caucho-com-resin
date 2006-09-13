@@ -29,61 +29,68 @@
 
 package com.caucho.amber.cfg;
 
+import java.util.HashMap;
+
+
 /**
- * <column> tag in the orm.xml
+ * <one-to-many> tag in orm.xml
  */
-public class ColumnConfig extends AbstractColumnConfig {
+public class OneToManyConfig extends AbstractRelationConfig {
 
   // attributes
-  private int _length;
-  private int _precision;
-  private int _scale;
+  private String _mappedBy;
 
-  /**
-   * Returns the length.
-   */
-  public int getLength()
+  // elements
+  private MapKeyConfig _mapKey;
+
+  private String _orderBy;
+
+  private HashMap<String, JoinColumnConfig> _joinColumnMap
+    = new HashMap<String, JoinColumnConfig>();
+
+  public String getMappedBy()
   {
-    return _length;
+    return _mappedBy;
   }
 
-  /**
-   * Sets the length.
-   */
-  public void setLength(int length)
+  public void setMappedBy(String mappedBy)
   {
-    _length = length;
+    _mappedBy = mappedBy;
   }
 
-  /**
-   * Returns the precision.
-   */
-  public int getPrecision()
+  public MapKeyConfig getMapKey()
   {
-    return _precision;
+    return _mapKey;
   }
 
-  /**
-   * Sets the precision.
-   */
-  public void setPrecision(int precision)
+  public void setMapKey(MapKeyConfig mapKey)
   {
-    _precision = precision;
+    _mapKey = mapKey;
   }
 
-  /**
-   * Returns the scale.
-   */
-  public int getScale()
+  public String getOrderBy()
   {
-    return _scale;
+    return _orderBy;
   }
 
-  /**
-   * Sets the scale.
-   */
-  public void setScale(int scale)
+  public void setOrderBy(String orderBy)
   {
-    _scale = scale;
+    _orderBy = orderBy;
+  }
+
+  public JoinColumnConfig getJoinColumn(String name)
+  {
+    return _joinColumnMap.get(name);
+  }
+
+  public void addJoinColumn(JoinColumnConfig joinColumn)
+  {
+    _joinColumnMap.put(joinColumn.getName(),
+                       joinColumn);
+  }
+
+  public HashMap<String, JoinColumnConfig> getJoinColumnMap()
+  {
+    return _joinColumnMap;
   }
 }

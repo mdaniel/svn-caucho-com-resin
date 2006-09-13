@@ -29,61 +29,46 @@
 
 package com.caucho.amber.cfg;
 
+
 /**
- * <column> tag in the orm.xml
+ * The <entity-result> tag in orm.xml
  */
-public class ColumnConfig extends AbstractColumnConfig {
+public class EntityResultConfig {
 
   // attributes
-  private int _length;
-  private int _precision;
-  private int _scale;
+  private String _entityClass;
+  private String _discriminatorColumn;
 
-  /**
-   * Returns the length.
-   */
-  public int getLength()
+  // elements
+  private FieldResultConfig _fieldResult;
+
+  public String getEntityClass()
   {
-    return _length;
+    return _entityClass;
   }
 
-  /**
-   * Sets the length.
-   */
-  public void setLength(int length)
+  public void setEntityClass(String entityClass)
   {
-    _length = length;
+    _entityClass = entityClass;
   }
 
-  /**
-   * Returns the precision.
-   */
-  public int getPrecision()
+  public String getDiscriminatorColumn()
   {
-    return _precision;
+    return _discriminatorColumn;
   }
 
-  /**
-   * Sets the precision.
-   */
-  public void setPrecision(int precision)
+  public void setDiscriminatorColumn(String discriminatorColumn)
   {
-    _precision = precision;
+    _discriminatorColumn = discriminatorColumn;
   }
 
-  /**
-   * Returns the scale.
-   */
-  public int getScale()
+  public FieldResultConfig getFieldResult()
   {
-    return _scale;
+    return _fieldResult;
   }
 
-  /**
-   * Sets the scale.
-   */
-  public void setScale(int scale)
+  public void setFieldResult(FieldResultConfig fieldResult)
   {
-    _scale = scale;
+    _fieldResult = fieldResult;
   }
 }

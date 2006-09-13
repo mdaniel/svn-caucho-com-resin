@@ -29,61 +29,47 @@
 
 package com.caucho.amber.cfg;
 
+
 /**
- * <column> tag in the orm.xml
+ * <attribute-override> tag in the orm.xml
  */
-public class ColumnConfig extends AbstractColumnConfig {
+public class AttributeOverrideConfig {
 
   // attributes
-  private int _length;
-  private int _precision;
-  private int _scale;
+  private String _name;
+
+  // elements
+  private ColumnConfig _column;
 
   /**
-   * Returns the length.
+   * Returns the name.
    */
-  public int getLength()
+  public String getName()
   {
-    return _length;
+    return _name;
   }
 
   /**
-   * Sets the length.
+   * Sets the name.
    */
-  public void setLength(int length)
+  public void setName(String name)
   {
-    _length = length;
+    _name = name;
   }
 
   /**
-   * Returns the precision.
+   * Returns the column.
    */
-  public int getPrecision()
+  public ColumnConfig getColumn()
   {
-    return _precision;
+    return _column;
   }
 
   /**
-   * Sets the precision.
+   * Sets the column.
    */
-  public void setPrecision(int precision)
+  public void setColumn(ColumnConfig column)
   {
-    _precision = precision;
-  }
-
-  /**
-   * Returns the scale.
-   */
-  public int getScale()
-  {
-    return _scale;
-  }
-
-  /**
-   * Sets the scale.
-   */
-  public void setScale(int scale)
-  {
-    _scale = scale;
+    _column = column;
   }
 }

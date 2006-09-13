@@ -29,61 +29,35 @@
 
 package com.caucho.amber.cfg;
 
+import javax.persistence.GenerationType;
+
+
 /**
- * <column> tag in the orm.xml
+ * The <generated-value> tag in orm.xml
  */
-public class ColumnConfig extends AbstractColumnConfig {
+public class GeneratedValueConfig {
 
   // attributes
-  private int _length;
-  private int _precision;
-  private int _scale;
+  private GenerationType _strategy;
+  private String _generator;
 
-  /**
-   * Returns the length.
-   */
-  public int getLength()
+  public GenerationType getStrategy()
   {
-    return _length;
+    return _strategy;
   }
 
-  /**
-   * Sets the length.
-   */
-  public void setLength(int length)
+  public void setStrategy(GenerationType strategy)
   {
-    _length = length;
+    _strategy = strategy;
   }
 
-  /**
-   * Returns the precision.
-   */
-  public int getPrecision()
+  public String getGenerator()
   {
-    return _precision;
+    return _generator;
   }
 
-  /**
-   * Sets the precision.
-   */
-  public void setPrecision(int precision)
+  public void setGenerator(String generator)
   {
-    _precision = precision;
-  }
-
-  /**
-   * Returns the scale.
-   */
-  public int getScale()
-  {
-    return _scale;
-  }
-
-  /**
-   * Sets the scale.
-   */
-  public void setScale(int scale)
-  {
-    _scale = scale;
+    _generator = generator;
   }
 }

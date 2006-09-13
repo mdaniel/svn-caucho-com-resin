@@ -29,61 +29,45 @@
 
 package com.caucho.amber.cfg;
 
+import java.util.HashMap;
+
+
 /**
- * <column> tag in the orm.xml
+ * <many-to-one> tag in orm.xml
  */
-public class ColumnConfig extends AbstractColumnConfig {
+public class ManyToOneConfig extends AbstractRelationConfig {
 
   // attributes
-  private int _length;
-  private int _precision;
-  private int _scale;
+  private boolean _isOptional;
 
-  /**
-   * Returns the length.
-   */
-  public int getLength()
+  // elements
+  private HashMap<String, JoinColumnConfig> _joinColumnMap
+    = new HashMap<String, JoinColumnConfig>();
+
+
+  public boolean getOptional()
   {
-    return _length;
+    return _isOptional;
   }
 
-  /**
-   * Sets the length.
-   */
-  public void setLength(int length)
+  public void setOptional(boolean isOptional)
   {
-    _length = length;
+    _isOptional = isOptional;
   }
 
-  /**
-   * Returns the precision.
-   */
-  public int getPrecision()
+  public JoinColumnConfig getJoinColumn(String name)
   {
-    return _precision;
+    return _joinColumnMap.get(name);
   }
 
-  /**
-   * Sets the precision.
-   */
-  public void setPrecision(int precision)
+  public void addJoinColumn(JoinColumnConfig joinColumn)
   {
-    _precision = precision;
+    _joinColumnMap.put(joinColumn.getName(),
+                       joinColumn);
   }
 
-  /**
-   * Returns the scale.
-   */
-  public int getScale()
+  public HashMap<String, JoinColumnConfig> getJoinColumnMap()
   {
-    return _scale;
-  }
-
-  /**
-   * Sets the scale.
-   */
-  public void setScale(int scale)
-  {
-    _scale = scale;
+    return _joinColumnMap;
   }
 }

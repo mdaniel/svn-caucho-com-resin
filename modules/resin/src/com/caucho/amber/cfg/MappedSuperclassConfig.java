@@ -31,29 +31,18 @@ package com.caucho.amber.cfg;
 
 
 /**
- * <entity> tag in the orm.xml
+ * <mapped-superclass> tag in the orm.xml
  */
-public class EntityConfig {
+public class MappedSuperclassConfig {
+
   // attributes
-  private String _name;
   private String _className;
   private AccessType _access;
   private boolean _isMetadataComplete;
 
   // elements
   private String _description;
-  private TableConfig _table;
-  private SecondaryTableConfig _secondaryTable;
-  private PrimaryKeyJoinColumnConfig _primaryKeyJoinColumn;
   private IdClassConfig _idClass;
-  private InheritanceConfig _inheritance;
-  private String _discriminatorValue;
-  private DiscriminatorColumnConfig _discriminatorColumn;
-  private SequenceGeneratorConfig _sequenceGenerator;
-  private TableGeneratorConfig _tableGenerator;
-  private NamedQueryConfig _namedQuery;
-  private NamedNativeQueryConfig _namedNativeQuery;
-  private SqlResultSetMappingConfig _sqlResultSetMapping;
   private boolean _excludeDefaultListeners;
   private boolean _excludeSuperclassListeners;
   private EntityListenersConfig _entityListeners;
@@ -64,8 +53,6 @@ public class EntityConfig {
   private PreUpdateConfig _preUpdate;
   private PostUpdateConfig _postUpdate;
   private PostLoadConfig _postLoad;
-  private AttributeOverrideConfig _attributeOverride;
-  private AssociationOverrideConfig _associationOverride;
   private AttributesConfig _attributes;
 
   /**
@@ -90,14 +77,6 @@ public class EntityConfig {
   public String getClassName()
   {
     return _className;
-  }
-
-  /**
-   * Returns the entity name.
-   */
-  public String getName()
-  {
-    return _name;
   }
 
   /**
@@ -140,14 +119,6 @@ public class EntityConfig {
     _isMetadataComplete = isMetaDataComplete;
   }
 
-  /**
-   * Sets the entity name.
-   */
-  public void setName(String name)
-  {
-    _name = name;
-  }
-
   public String getDescription()
   {
     return _description;
@@ -158,36 +129,6 @@ public class EntityConfig {
     _description = description;
   }
 
-  public TableConfig getTable()
-  {
-    return _table;
-  }
-
-  public void setTable(TableConfig table)
-  {
-    _table = table;
-  }
-
-  public SecondaryTableConfig getSecondaryTable()
-  {
-    return _secondaryTable;
-  }
-
-  public void setSecondaryTable(SecondaryTableConfig secondaryTable)
-  {
-    _secondaryTable = secondaryTable;
-  }
-
-  public PrimaryKeyJoinColumnConfig getPrimaryKeyJoinColumn()
-  {
-    return _primaryKeyJoinColumn;
-  }
-
-  public void setPrimaryKeyJoinColumn(PrimaryKeyJoinColumnConfig primaryKeyJoinColumn)
-  {
-    _primaryKeyJoinColumn = primaryKeyJoinColumn;
-  }
-
   public IdClassConfig getIdClass()
   {
     return _idClass;
@@ -196,86 +137,6 @@ public class EntityConfig {
   public void setIdClass(IdClassConfig idClass)
   {
     _idClass = idClass;
-  }
-
-  public InheritanceConfig getInheritance()
-  {
-    return _inheritance;
-  }
-
-  public void setInheritance(InheritanceConfig inheritance)
-  {
-    _inheritance = inheritance;
-  }
-
-  public String getDiscriminatorValue()
-  {
-    return _discriminatorValue;
-  }
-
-  public void setDiscriminatorValue(String discriminatorValue)
-  {
-    _discriminatorValue = discriminatorValue;
-  }
-
-  public DiscriminatorColumnConfig getDiscriminatorColumn()
-  {
-    return _discriminatorColumn;
-  }
-
-  public void setDiscriminatorColumn(DiscriminatorColumnConfig discriminatorColumn)
-  {
-    _discriminatorColumn = discriminatorColumn;
-  }
-
-  public SequenceGeneratorConfig getSequenceGenerator()
-  {
-    return _sequenceGenerator;
-  }
-
-  public void setSequenceGenerator(SequenceGeneratorConfig sequenceGenerator)
-  {
-    _sequenceGenerator = sequenceGenerator;
-  }
-
-  public TableGeneratorConfig getTableGenerator()
-  {
-    return _tableGenerator;
-  }
-
-  public void setTableGenerator(TableGeneratorConfig tableGenerator)
-  {
-    _tableGenerator = tableGenerator;
-  }
-
-  public NamedQueryConfig getNamedQuery()
-  {
-    return _namedQuery;
-  }
-
-  public void setNamedQuery(NamedQueryConfig namedQuery)
-  {
-    _namedQuery = namedQuery;
-  }
-
-  public NamedNativeQueryConfig getNamedNativeQuery()
-  {
-    return _namedNativeQuery;
-  }
-
-  public void setNamedNativeQuery(NamedNativeQueryConfig namedNativeQuery)
-  {
-    _namedNativeQuery = namedNativeQuery;
-  }
-
-  public SqlResultSetMappingConfig getSqlResultSetMapping()
-  {
-    return _sqlResultSetMapping;
-  }
-
-  public void setSqlResultSetMapping(SqlResultSetMappingConfig sqlResultSetMapping)
-  {
-    _sqlResultSetMapping = sqlResultSetMapping;
   }
 
   public boolean getExcludeDefaultListeners()
@@ -378,28 +239,8 @@ public class EntityConfig {
     _postLoad = postLoad;
   }
 
-  public AttributeOverrideConfig getAttributeOverride()
-  {
-    return _attributeOverride;
-  }
-
-  public void setAttributeOverride(AttributeOverrideConfig attributeOverride)
-  {
-    _attributeOverride = attributeOverride;
-  }
-
-  public AssociationOverrideConfig getAssociationOverride()
-  {
-    return _associationOverride;
-  }
-
-  public void setAssociationOverride(AssociationOverrideConfig associationOverride)
-  {
-    _associationOverride = associationOverride;
-  }
-
   public String toString()
   {
-    return "EntityConfig[" + _name + ", " + _className + "]";
+    return "MappedSuperclassConfig[" + _className + "]";
   }
 }

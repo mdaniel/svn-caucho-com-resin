@@ -29,61 +29,70 @@
 
 package com.caucho.amber.cfg;
 
+import java.util.ArrayList;
+
+import javax.persistence.FetchType;
+import javax.persistence.TemporalType;
+
+
 /**
- * <column> tag in the orm.xml
+ * <version> tag in the orm.xml
  */
-public class ColumnConfig extends AbstractColumnConfig {
+public class VersionConfig {
 
   // attributes
-  private int _length;
-  private int _precision;
-  private int _scale;
+  private String _name;
+
+  // elements
+  private ColumnConfig _column;
+  private TemporalType _temporal;
+
 
   /**
-   * Returns the length.
+   * Returns the name.
    */
-  public int getLength()
+  public String getName()
   {
-    return _length;
+    return _name;
   }
 
   /**
-   * Sets the length.
+   * Sets the name.
    */
-  public void setLength(int length)
+  public void setName(String name)
   {
-    _length = length;
+    _name = name;
   }
 
   /**
-   * Returns the precision.
+   * Returns the column.
    */
-  public int getPrecision()
+  public ColumnConfig getColumn()
   {
-    return _precision;
+    return _column;
   }
 
   /**
-   * Sets the precision.
+   * Sets the column.
    */
-  public void setPrecision(int precision)
+  public void setColumn(ColumnConfig column)
   {
-    _precision = precision;
+    _column = column;
   }
 
   /**
-   * Returns the scale.
+   * Returns the temporal.
    */
-  public int getScale()
+  public TemporalType getTemporal()
   {
-    return _scale;
+    return _temporal;
   }
 
   /**
-   * Sets the scale.
+   * Sets the temporal.
    */
-  public void setScale(int scale)
+  public void setTemporal(TemporalType temporal)
   {
-    _scale = scale;
+    _temporal = temporal;
   }
 }

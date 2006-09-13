@@ -29,61 +29,28 @@
 
 package com.caucho.amber.cfg;
 
+
 /**
- * <column> tag in the orm.xml
+ * Base class for <pre-persist>, <post-persist> and so on.
  */
-public class ColumnConfig extends AbstractColumnConfig {
+abstract public class AbstractListenerConfig {
 
   // attributes
-  private int _length;
-  private int _precision;
-  private int _scale;
+  private String _methodName;
 
   /**
-   * Returns the length.
+   * Returns the method name.
    */
-  public int getLength()
+  public String getMethodName()
   {
-    return _length;
+    return _methodName;
   }
 
   /**
-   * Sets the length.
+   * Sets the method name.
    */
-  public void setLength(int length)
+  public void setMethodName(String methodName)
   {
-    _length = length;
-  }
-
-  /**
-   * Returns the precision.
-   */
-  public int getPrecision()
-  {
-    return _precision;
-  }
-
-  /**
-   * Sets the precision.
-   */
-  public void setPrecision(int precision)
-  {
-    _precision = precision;
-  }
-
-  /**
-   * Returns the scale.
-   */
-  public int getScale()
-  {
-    return _scale;
-  }
-
-  /**
-   * Sets the scale.
-   */
-  public void setScale(int scale)
-  {
-    _scale = scale;
+    _methodName = methodName;
   }
 }

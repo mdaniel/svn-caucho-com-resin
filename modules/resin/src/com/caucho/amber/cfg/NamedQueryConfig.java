@@ -29,61 +29,46 @@
 
 package com.caucho.amber.cfg;
 
+
 /**
- * <column> tag in the orm.xml
+ * The <named-query> tag in orm.xml
  */
-public class ColumnConfig extends AbstractColumnConfig {
+public class NamedQueryConfig {
 
   // attributes
-  private int _length;
-  private int _precision;
-  private int _scale;
+  private String _name;
 
-  /**
-   * Returns the length.
-   */
-  public int getLength()
+  // elements
+  private String _query;
+  private QueryHintConfig _hint;
+
+  public String getName()
   {
-    return _length;
+    return _name;
   }
 
-  /**
-   * Sets the length.
-   */
-  public void setLength(int length)
+  public String getQuery()
   {
-    _length = length;
+    return _query;
   }
 
-  /**
-   * Returns the precision.
-   */
-  public int getPrecision()
+  public QueryHintConfig getHint()
   {
-    return _precision;
+    return _hint;
   }
 
-  /**
-   * Sets the precision.
-   */
-  public void setPrecision(int precision)
+  public void setName(String name)
   {
-    _precision = precision;
+    _name = name;
   }
 
-  /**
-   * Returns the scale.
-   */
-  public int getScale()
+  public void setQuery(String query)
   {
-    return _scale;
+    _query = query;
   }
 
-  /**
-   * Sets the scale.
-   */
-  public void setScale(int scale)
+  public void setHint(QueryHintConfig hint)
   {
-    _scale = scale;
+    _hint = hint;
   }
 }

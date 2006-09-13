@@ -1349,7 +1349,7 @@ public class EntityIntrospector {
     if (basicAnn != null)
       property.setLazy(basicAnn.get("fetch") == FetchType.LAZY);
     else if (basicConfig != null)
-      property.setLazy(basicConfig.getFetchType() == FetchType.LAZY);
+      property.setLazy(basicConfig.getFetch() == FetchType.LAZY);
 
     /*
       field.setInsertable(insertable);

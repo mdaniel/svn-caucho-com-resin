@@ -29,61 +29,31 @@
 
 package com.caucho.amber.cfg;
 
+import java.util.HashMap;
+
+
 /**
- * <column> tag in the orm.xml
+ * The <secondary-table> tag in orm.xml
  */
-public class ColumnConfig extends AbstractColumnConfig {
+public class SecondaryTableConfig extends AbstractTableConfig {
 
-  // attributes
-  private int _length;
-  private int _precision;
-  private int _scale;
+  // elements
+  private HashMap<String, PrimaryKeyJoinColumnConfig> _primaryKeyJoinColumnMap
+    = new HashMap<String, PrimaryKeyJoinColumnConfig>();
 
-  /**
-   * Returns the length.
-   */
-  public int getLength()
+  public PrimaryKeyJoinColumnConfig getPrimaryKeyJoinColumn(String columnName)
   {
-    return _length;
+    return _primaryKeyJoinColumnMap.get(columnName);
   }
 
-  /**
-   * Sets the length.
-   */
-  public void setLength(int length)
+  public void addPrimaryKeyJoinColumn(PrimaryKeyJoinColumnConfig primaryKeyJoinColumn)
   {
-    _length = length;
+    _primaryKeyJoinColumnMap.put(primaryKeyJoinColumn.getName(),
+                                 primaryKeyJoinColumn);
   }
 
-  /**
-   * Returns the precision.
-   */
-  public int getPrecision()
+  public HashMap<String, PrimaryKeyJoinColumnConfig> getPrimaryKeyJoinColumnMap()
   {
-    return _precision;
-  }
-
-  /**
-   * Sets the precision.
-   */
-  public void setPrecision(int precision)
-  {
-    _precision = precision;
-  }
-
-  /**
-   * Returns the scale.
-   */
-  public int getScale()
-  {
-    return _scale;
-  }
-
-  /**
-   * Sets the scale.
-   */
-  public void setScale(int scale)
-  {
-    _scale = scale;
+    return _primaryKeyJoinColumnMap;
   }
 }
