@@ -228,11 +228,12 @@ public class PojoMethodSkeleton {
   {
     Object []args = new Object[_argMarshall.length];
 
+    in.nextTag();
+
+    if (args.length > 0 && in.getEventType() != in.START_ELEMENT)
+      throw new IOException("expected <argName>");
+
     for (int i = 0; i < args.length; i++) {
-
-      if (in.nextTag() != in.START_ELEMENT)
-        throw new IOException("expected <argName>");
-
       String tagName = in.getLocalName();
 
       ParameterMarshall marshall = argNames.get(tagName);
@@ -241,8 +242,16 @@ public class PojoMethodSkeleton {
 
       args[marshall._arg] = marshall._marshall.deserialize(in);
 
-      if (in.nextTag() != in.END_ELEMENT)
+      in.nextTag();
+
+      if (i + 1 == args.length) {
+        if (in.getEventType() != in.END_ELEMENT)
           throw new IOException("expected close-tag");
+      } 
+      else {
+        if (in.getEventType() != in.START_ELEMENT)
+          throw new IOException("expected <argName>");
+      }
     }
 
     Object value = null;

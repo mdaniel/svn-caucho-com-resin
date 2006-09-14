@@ -162,10 +162,12 @@ public class DirectSkeleton extends Skeleton {
       // XXX: fault
       out.println("no such action:" + action);*/
 
-    if (in.nextTag() != in.END_ELEMENT)
-      throw new IOException("expected </" + action + ">");
+    if (in.getEventType() != in.END_ELEMENT)
+      throw new IOException("expected </" + action + ">, " + 
+                            "not </" + in.getName().getLocalPart() + ">");
     else if (! action.equals(in.getName().getLocalPart()))
-      throw new IOException("expected </" + action + ">");
+      throw new IOException("expected </" + action + ">, " +
+                            "not </" + in.getName().getLocalPart() + ">");
 
     if (in.nextTag() != in.END_ELEMENT)
       throw new IOException("expected </Body>");

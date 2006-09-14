@@ -55,7 +55,12 @@ public abstract class CDataMarshall extends Marshall {
       if (in.next() != in.CHARACTERS)
           throw new IOException("expected element to have CDATA");
 
-      return deserialize(in.getText());
+      Object o = deserialize(in.getText());
+
+      if (in.nextTag() != in.END_ELEMENT)
+        throw new IOException("expected argument closing tag");
+
+      return o;
   }
 
   protected abstract String serialize(Object in)
