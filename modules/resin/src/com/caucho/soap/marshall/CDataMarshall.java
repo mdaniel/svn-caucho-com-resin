@@ -52,15 +52,15 @@ public abstract class CDataMarshall extends Marshall {
   public Object deserialize(XMLStreamReader in)
       throws IOException, XMLStreamException
   {
-      if (in.next() != in.CHARACTERS)
-          throw new IOException("expected element to have CDATA");
+    if (in.next() != in.CHARACTERS)
+      throw new IOException("expected element to have CDATA");
 
-      Object o = deserialize(in.getText());
+    Object o = deserialize(in.getText());
 
-      if (in.nextTag() != in.END_ELEMENT)
-        throw new IOException("expected argument closing tag");
+    if (in.nextTag() != in.END_ELEMENT)
+      throw new IOException("expected argument closing tag");
 
-      return o;
+    return o;
   }
 
   protected abstract String serialize(Object in)
