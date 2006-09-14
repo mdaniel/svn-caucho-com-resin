@@ -29,8 +29,12 @@
 
 package com.caucho.server.resin;
 
+import java.util.*;
+import java.util.logging.*;
+
 import com.caucho.config.*;
 import com.caucho.server.cluster.*;
+import com.caucho.server.port.*;
 import com.caucho.util.*;
 
 /**
@@ -38,8 +42,13 @@ import com.caucho.util.*;
  */
 public class ServerCompatConfig {
   private static final L10N L = new L10N(ServerCompatConfig.class);
+  private static final Logger log
+    = Logger.getLogger(ServerCompatConfig.class.getName());
 
   private final Resin _resin;
+
+  private ArrayList<HttpCompatConfig> _httpList
+    = new ArrayList<HttpCompatConfig>();
 
   private BuilderProgramContainer _program
     = new BuilderProgramContainer();
@@ -61,6 +70,16 @@ public class ServerCompatConfig {
   }
 
   /**
+   * Creates a http compat.
+   */
+  public HttpCompatConfig createHttp()
+  {
+    HttpCompatConfig http = new HttpCompatConfig();
+
+    return http;
+  }
+
+  /**
    * Creates a cluster compat.
    */
   public ClusterCompatConfig createCluster()
@@ -77,11 +96,12 @@ public class ServerCompatConfig {
 
       if (clusterServer != null) {
       }
-      else if (_resin.getClusterList().size() > 0 || ! "".equals(serverId)) {
-	throw new ConfigException(L.l("-server '{0}' does not match any defined servers",
-				      serverId));
-      }
       else {
+	if (_resin.getClusterList().size() > 0 || ! "".equals(serverId)) {
+	  log.warning(L.l("-server '{0}' does not match any defined servers",
+			  serverId));
+	}
+
 	Cluster cluster = _resin.createCluster();
 	_resin.addCluster(cluster);
 
@@ -97,6 +117,55 @@ public class ServerCompatConfig {
       throw e;
     } catch (Throwable e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  public class HttpCompatConfig {
+    private String _id = "";
+
+    private BuilderProgramContainer _program
+      = new BuilderProgramContainer();
+
+    HttpCompatConfig()
+    {
+    }
+
+    public void setId(String id)
+    {
+      _id = id;
+    }
+
+    public void setServerId(String id)
+    {
+      setId(id);
+    }
+
+    public void addBuilderProgram(BuilderProgram program)
+    {
+      _program.addProgram(program);
+    }
+
+    public void init()
+      throws Throwable
+    {
+      ClusterServer server = _resin.findClusterServer(_id);
+
+      if (server == null) {
+	Cluster cluster = _resin.findCluster("");
+
+	if (cluster == null) {
+	  cluster = _resin.createCluster();
+	  _resin.addCluster(cluster);
+	}
+
+	server = cluster.createServer();
+	server.setId(_id);
+	server.getClusterPort().setPort(0);
+	cluster.addServer(server);
+      }
+
+      Port http = server.createHttp();
+      _program.configure(http);
     }
   }
 }

@@ -487,6 +487,10 @@ r_rewrite-real-path = element rewrite-real-path {
   )
 }
 
+r_root-directory =
+  attribute root-directory { r_path-Type }
+  | element root-directory { r_path-Type }
+
 r_run-at =
    attribute run-at { string }
    | element run-at {
@@ -751,11 +755,11 @@ r_web-app-deploy = element web-app-deploy {
   & r_web-app-default*
 
   & element web-app {
-      r_context-path?,
+      r_context-path?
 
-      r_document-directory,
+      & (r_root-directory | r_document-directory)
 
-      r_web-app-Content
+      & r_web-app-Content
     }*
 }
 
@@ -901,7 +905,7 @@ rc_web-app = element web-app {
 
   (r_context-path?
 
-  & r_document-directory?
+  & (r_root-directory | r_document-directory)?
 
   & element prologue {
       r_web-app-Content

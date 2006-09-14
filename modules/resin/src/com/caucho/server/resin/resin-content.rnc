@@ -398,17 +398,17 @@ r_port-Content =
 
    & (attribute port { string } | element port { string })
 
+   & (attribute accept-thread-min { r_int-Type }
+      | element accept-thread-min { r_int-Type })?
+
+   & (attribute accept-thread-max { r_int-Type }
+      | element accept-thread-max { r_int-Type })?
+
    & (attribute connection-max { r_int-Type }
       | element connection-max { r_int-Type })?
 
    & (attribute keepalive-max { r_int-Type }
       | element keepalive-max { r_int-Type })?
-
-   & (attribute min-spare-listen { r_int-Type }
-      | element min-spare-listen { r_int-Type })?
-
-   & (attribute max-spare-listen { r_int-Type }
-      | element max-spare-listen { r_int-Type })?
 
    & (attribute socket-timeout { r_period-Type }
       | element socket-timeout { r_period-Type })?

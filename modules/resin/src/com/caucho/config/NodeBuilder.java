@@ -164,6 +164,7 @@ public class NodeBuilder {
     throws LineConfigException
   {
     NodeBuilder oldBuilder = _currentBuilder.get();
+    Object oldFile = _varResolver.getValue(_elContext, null, "__FILE__");
     try {
       _currentBuilder.set(this);
 
@@ -182,6 +183,8 @@ public class NodeBuilder {
       throw error(e, top);
     } finally {
       _currentBuilder.set(oldBuilder);
+      
+      _varResolver.setValue(_elContext, null, "__FILE__", oldFile);
     }
   }
 

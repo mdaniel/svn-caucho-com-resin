@@ -8,7 +8,13 @@
 
 <s2 title="3.1snap - Aug 1, 2006">
 <ul>
-<li>mod_caucho needs to update cached file for large dependency-check-interval (rep by Steve Baugus)</li>
+<li>Change to addByteCodeEnhancer (#1157, rep by Costin Leau)</li>
+<li>Add DynamicClassLoader.getNewTempClassLoader() (#1157, rep by Costin Leau)</li>
+<li>Additional CodeSource fixes for JSPWiki (#1333, fixed! by ajaquith2)</li>
+<li>ClassEntry for hot reloading needs to reset the dependency (#1345, rep by WIll Jaynes)
+<li>QDate needs to look up "GMT" not "UTC" to handle French locales (#1340, rebp by jiib75)</li>
+<li>JSP validation of tag variables needs to handle inner classes (rep by Bill Au)</li>
+<li>(2006-09-13) mod_caucho needs to update cached file for large dependency-check-interval (rep by Steve Baugus)</li>
 <li>EJB/Amber create/getter/setter issues (#1265, rep by gzhu)</li>
 <li>EJB: ejb-entry was not properly applied for EJB entity beans (#1322, rep by gzhu)</li>
 <li>javax.el behavior incorrect for b.bogus (#1327, rep by slonopatamus)</li>

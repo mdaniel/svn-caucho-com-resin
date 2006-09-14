@@ -137,6 +137,9 @@ public class Cluster implements EnvironmentListener {
    */
   public void setId(String id)
   {
+    if (id == null)
+      throw new NullPointerException();
+    
     _id = id;
   }
 

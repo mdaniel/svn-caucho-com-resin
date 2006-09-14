@@ -66,6 +66,8 @@ public class Port
 
   private static final Logger log = Log.open(Port.class);
 
+  private static final int DEFAULT = -0xcafe;
+
   // started at 128, but that seems wasteful since the active threads
   // themselves are buffering the free connections
   private FreeList<TcpConnection> _freeConn
@@ -96,15 +98,15 @@ public class Port
   private int _connectionMax = 512;
   private int _minSpareConnection = 16;
 
-  private int _keepaliveMax = -1;
+  private int _keepaliveMax = DEFAULT;
   
-  private long _keepaliveThreadTimeout = 5000L;
-  private long _keepaliveSocketTimeout = 60000L;
+  private long _keepaliveThreadTimeout = DEFAULT;
+  private long _keepaliveSocketTimeout = DEFAULT;
 
-  private int _acceptThreadMin = 5;
-  private int _acceptThreadMax = 10;
+  private int _acceptThreadMin = DEFAULT;
+  private int _acceptThreadMax = DEFAULT;
 
-  private int _acceptListenBacklog = 100;
+  private int _acceptListenBacklog = DEFAULT;
 
   // The virtual host name
   private String _virtualHost;
@@ -147,6 +149,10 @@ public class Port
   {
   }
 
+  public Port(ClusterServer server)
+  {
+  }
+
   /**
    * Sets the containing server.
    */
@@ -158,22 +164,33 @@ public class Port
   /**
    * Sets the server.
    */
-  public void setServer(ProtocolDispatchServer server)
+  public void setServer(ProtocolDispatchServer protocolServer)
   {
-    _server = server;
+    _server = protocolServer;
 
     if (_protocol != null)
-      _protocol.setServer(server);
+      _protocol.setServer(protocolServer);
 
-    if (server instanceof Server) {
-      _acceptThreadMax = ((Server) server).getAcceptThreadMax();
-      _acceptThreadMin = ((Server) server).getAcceptThreadMin();
-      _acceptListenBacklog = ((Server) server).getAcceptListenBacklog();
-      
-      _keepaliveMax = ((Server) server).getKeepaliveMax();
-      _keepaliveThreadTimeout = ((Server) server).getKeepaliveThreadTimeout();
-      
-      _socketTimeout = ((Server) server).getSocketTimeout();
+    if (protocolServer instanceof Server) {
+      Server server = (Server) protocolServer;
+
+      if (_acceptThreadMax == DEFAULT)
+	_acceptThreadMax = server.getAcceptThreadMax();
+
+      if (_acceptThreadMin == DEFAULT)
+	_acceptThreadMin = server.getAcceptThreadMin();
+
+      if (_acceptListenBacklog == DEFAULT)
+	_acceptListenBacklog = server.getAcceptListenBacklog();
+
+      if (_keepaliveMax == DEFAULT)
+	_keepaliveMax = server.getKeepaliveMax();
+
+      if (_keepaliveThreadTimeout == DEFAULT)
+	_keepaliveThreadTimeout = server.getKeepaliveThreadTimeout();
+
+      if (_socketTimeout == DEFAULT)
+	_socketTimeout = server.getSocketTimeout();
     }
   }
 
@@ -388,10 +405,7 @@ public class Port
   public void setMinSpareListen(int minSpare)
     throws ConfigException
   {
-    if (minSpare < 1)
-      throw new ConfigException(L.l("min-spare-listen must be at least 1."));
-
-    _acceptThreadMin = minSpare;
+    setAcceptThreadMin(minSpare);
   }
 
   /**
@@ -400,10 +414,7 @@ public class Port
   public void setMaxSpareListen(int maxSpare)
     throws ConfigException
   {
-    if (maxSpare < 1)
-      throw new ConfigException(L.l("max-spare-listen must be at least 1."));
-
-    _acceptThreadMax = maxSpare;
+    setAcceptThreadMax(maxSpare);
   }
 
   /**
@@ -667,7 +678,8 @@ public class Port
     if (_protocol == null)
       throw new IllegalStateException(L.l("`{0}' must have a configured protocol before starting.", this));
 
-    _admin.register();
+    if (_port == 0)
+      return;
     
     if (_serverSocket != null) {
       if (_port == 0) {
@@ -794,6 +806,9 @@ public class Port
   public void start()
     throws Throwable
   {
+    if (_port == 0)
+      return;
+    
     if (! _lifecycle.toActive())
       return;
 

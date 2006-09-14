@@ -132,6 +132,9 @@ r_srun-Compat = element srun {
    | attribute server-id { string }
    | element server-id { string })?
 
+  & (attribute index { string }
+    | element index { string })?
+
   & r_port-Content
 }
 

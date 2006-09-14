@@ -128,7 +128,7 @@ public class EnhancerManager implements ByteCodeEnhancer, ByteCodeClassMatcher {
 
       for (; loader != null; loader = loader.getParent()) {
 	if (loader instanceof DynamicClassLoader) {
-	  ((DynamicClassLoader) loader).setByteCodeEnhancer(enhancer);
+	  ((DynamicClassLoader) loader).addByteCodeEnhancer(enhancer);
 	  break;
 	}
       }

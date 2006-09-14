@@ -83,7 +83,7 @@ class JarEntry {
 
     try {
       _codeSource = new CodeSource(new URL(jarPath.getURL()),
-				   (Certificate []) null);
+				   (Certificate []) jarPath.getCertificates());
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -240,9 +240,19 @@ class JarEntry {
   /**
    * Returns the code source.
    */
-  public CodeSource getCodeSource()
+  public CodeSource getCodeSource(String path)
   {
-    return _codeSource;
+    try {
+      Path jarPath = _jarPath.lookup(path);
+      
+      Certificate []certificates = jarPath.getCertificates();
+	
+      return new CodeSource(new URL(jarPath.getURL()), certificates);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+
+      return null;
+    }
   }
 
   /**

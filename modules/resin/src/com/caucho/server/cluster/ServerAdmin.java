@@ -30,4 +30,10 @@
 package com.caucho.server.cluster;
 
 public class ServerAdmin {
+  private Server _server;
+
+  ServerAdmin(Server server)
+  {
+    _server = server;
+  }
 }

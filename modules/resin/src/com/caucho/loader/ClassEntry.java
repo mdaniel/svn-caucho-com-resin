@@ -310,6 +310,13 @@ public class ClassEntry implements Dependency {
 	return true;
       }
 
+      setDependPath(_classPath);
+      
+      if (_sourcePath != null) {
+	_sourceLastModified = _sourcePath.getLastModified();
+	_sourceLength = _sourcePath.getLength();
+      }
+
       log.info("Reloading " + cl.getName());
 
       return false;

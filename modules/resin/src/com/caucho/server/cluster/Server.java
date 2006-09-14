@@ -772,10 +772,11 @@ public class Server extends ProtocolDispatchServer
   }
 
   /**
-   * Returns the admi.
+   * Returns the admin.
    */
   public ServerMXBean getAdmin()
   {
+    //return _admin;
     return null;
   }
 

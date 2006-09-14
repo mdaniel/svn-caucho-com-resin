@@ -60,6 +60,8 @@ import com.caucho.server.dispatch.ExceptionFilterChain;
 
 import com.caucho.server.cluster.*;
 
+import com.caucho.server.port.*;
+
 import com.caucho.server.webapp.WebAppContainer;
 
 /**
@@ -233,8 +235,34 @@ public class Host extends WebAppContainer
   {
     if (_url != null)
       return _url;
-    else if (_hostName == null || _hostName.equals(""))
+    else if (_hostName == null || _hostName.equals("")) {
+      Server server = getServer();
+
+      if (server == null)
+	return "";
+
+      for (Port port : server.getPorts()) {
+	if ("http".equals(port.getProtocolName())) {
+	  String address = port.getAddress();
+	  if (address == null)
+	    address = "localhost";
+	  
+	  return "http://" + address + ":" + port.getPort();
+	}
+      }
+
+      for (Port port : server.getPorts()) {
+	if ("https".equals(port.getProtocolName())) {
+	  String address = port.getAddress();
+	  if (address == null)
+	    address = "localhost";
+	  
+	  return "https://" + address + ":" + port.getPort();
+	}
+      }
+
       return "";
+    }
     else if (_hostName.startsWith("http:") ||
              _hostName.startsWith("https:"))
       return _hostName;

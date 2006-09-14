@@ -285,31 +285,31 @@ public class ClusterServer {
   /**
    * Adds a http.
    */
-  public void addHttp(Port port)
+  public Port createHttp()
     throws ConfigException
   {
-    if (port.getProtocol() == null) {
-      HttpProtocol protocol = new HttpProtocol();
-      protocol.setParent(port);
-      port.setProtocol(protocol);
-    }
+    Port port = new Port(this);
+    
+    HttpProtocol protocol = new HttpProtocol();
+    protocol.setParent(port);
+    port.setProtocol(protocol);
 
     _ports.add(port);
+
+    return port;
   }
 
   /**
    * Adds a custom-protocol port.
    */
-  public void addProtocol(Port port)
+  public Port createProtocol()
     throws ConfigException
   {
-    if (port.getProtocol() == null) {
-      HttpProtocol protocol = new HttpProtocol();
-      protocol.setParent(port);
-      port.setProtocol(protocol);
-    }
+    Port port = new Port(this);
 
     _ports.add(port);
+
+    return port;
   }
 
   /**

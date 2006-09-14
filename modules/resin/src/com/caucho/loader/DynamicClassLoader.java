@@ -140,7 +140,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   private CodeSource _codeSource;
 
   // Any enhancer
-  private ByteCodeEnhancer _byteCodeEnhancer;
+  private ArrayList<ByteCodeEnhancer> _byteCodeEnhancerList;
 
   private URL []_urls = NULL_URL_ARRAY;
 
@@ -737,17 +737,17 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   /**
    * Sets any enhancer.
    */
-  public void setByteCodeEnhancer(ByteCodeEnhancer enhancer)
+  public void addByteCodeEnhancer(ByteCodeEnhancer enhancer)
   {
-    _byteCodeEnhancer = enhancer;
+    if (_byteCodeEnhancerList == null)
+      _byteCodeEnhancerList = new ArrayList<ByteCodeEnhancer>();
+    
+    _byteCodeEnhancerList.add(enhancer);
   }
 
-  /**
-   * Sets any enhancer.
-   */
-  public ByteCodeEnhancer getByteCodeEnhancer()
+  protected ArrayList<ByteCodeEnhancer> getByteCodeEnhancerList()
   {
-    return _byteCodeEnhancer;
+    return _byteCodeEnhancerList;
   }
 
   /**
@@ -1230,29 +1230,33 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       byte []bBuf = buffer.getBuffer();
       int bLen = buffer.length();
 
-      if (_byteCodeEnhancer != null) {
-        try {
-          byte []enhancedBuffer = _byteCodeEnhancer.enhance(name,
-                                                            bBuf, 0, bLen);
+      if (_byteCodeEnhancerList != null) {
+	for (int i = 0; i < _byteCodeEnhancerList.size(); i++) {
+	  ByteCodeEnhancer byteCodeEnhancer = _byteCodeEnhancerList.get(i);
+	  
+	  try {
+	    byte []enhancedBuffer = byteCodeEnhancer.enhance(name,
+							     bBuf, 0, bLen);
 
-          if (enhancedBuffer != null) {
-            bBuf = enhancedBuffer;
-            bLen = enhancedBuffer.length;
+	    if (enhancedBuffer != null) {
+	      bBuf = enhancedBuffer;
+	      bLen = enhancedBuffer.length;
 
-            if (_isVerbose)
-              verbose(name, String.valueOf(_byteCodeEnhancer));
-          }
-          /* RSN-109
-         } catch (RuntimeException e) {
-           throw e;
-         } catch (Error e) {
-           throw e;
-           */
-        } catch (EnhancerRuntimeException e) {
-          throw e;
-        } catch (Throwable e) {
-          log().log(Level.WARNING, e.toString(), e);
-        }
+	      if (_isVerbose)
+		verbose(name, String.valueOf(byteCodeEnhancer));
+	    }
+	    /* RSN-109
+	       } catch (RuntimeException e) {
+	       throw e;
+	       } catch (Error e) {
+	       throw e;
+	    */
+	  } catch (EnhancerRuntimeException e) {
+	    throw e;
+	  } catch (Throwable e) {
+	    log().log(Level.WARNING, e.toString(), e);
+	  }
+	}
       }
 
       try {
@@ -1585,7 +1589,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       _permissions = null;
       _securityManager = null;
       _codeSource = null;
-      _byteCodeEnhancer = null;
+      _byteCodeEnhancerList = null;
 
       _lifecycle.toDestroy();
     }
@@ -1607,6 +1611,17 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       thread.setContextClassLoader(oldLoader);
     else
       thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
+  }
+
+  public ClassLoader getNewTempClassLoader()
+  {
+    DynamicClassLoader dynLoader = new DynamicClassLoader(getParent());
+
+    for (int i = 0; i < _loaders.size(); i++) {
+      dynLoader.addLoader(_loaders.get(i));
+    }
+
+    return dynLoader;
   }
 
   /**

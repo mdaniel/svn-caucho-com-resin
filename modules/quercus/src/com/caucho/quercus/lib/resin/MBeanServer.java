@@ -60,7 +60,7 @@ public class MBeanServer {
    * @param remoteUrl a url that connects to a
    * {@link com.caucho.services.jmx.JMXService} ussing the hessian protocol.
    */
-  public MBeanServer(String url)
+  public MBeanServer(@Optional String url)
   {
     if (url == null || "".equals(url)) {
       _server = Jmx.getGlobalMBeanServer();

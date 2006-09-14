@@ -940,16 +940,19 @@ public class JavaJspGenerator extends JspGenerator {
       Class cl = getBeanClass(typeName);
 
       if (cl == null)
-        throw error(L.l("Can't find class `{0}'",
+        throw error(L.l("Can't find class '{0}'",
                         typeName));
 
       _classes.put(id, cl);
     } catch (CompileClassNotFound e) {
-      throw e;
+      log.log(Level.WARNING, e.toString(), e);
+
+      throw error(L.l("Can't find class '{0}'\n{1}",
+		      typeName, e.getMessage()));
     } catch (ClassNotFoundException e) {
       log.log(Level.FINE, e.toString(), e);
 
-      throw error(L.l("Can't find class `{0}'", typeName));
+      throw error(L.l("Can't find class '{0}'", typeName));
     }
   }
 
@@ -1006,7 +1009,7 @@ public class JavaJspGenerator extends JspGenerator {
     try {
       return CauchoSystem.loadClass(typeName);
     } catch (CompileClassNotFound e) {
-      throw e;
+      log.log(Level.FINE, e.toString(), e);
     } catch (ClassNotFoundException e) {
     }
 
@@ -1029,7 +1032,7 @@ public class JavaJspGenerator extends JspGenerator {
       try {
         return CauchoSystem.loadClass(fullName);
       } catch (CompileClassNotFound e) {
-        throw e;
+        log.log(Level.WARNING, e.toString(), e);
       } catch (ClassNotFoundException e) {
       }
     }

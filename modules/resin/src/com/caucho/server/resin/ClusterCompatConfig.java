@@ -29,6 +29,8 @@
 
 package com.caucho.server.resin;
 
+import java.net.*;
+
 import com.caucho.util.*;
 
 import com.caucho.server.cluster.*;
@@ -83,7 +85,7 @@ public class ClusterCompatConfig {
   }
 
   public class SrunCompatConfig {
-    private String _id;
+    private String _id = "";
     private ClusterServer _server;
 
     SrunCompatConfig()
@@ -101,9 +103,20 @@ public class ClusterCompatConfig {
       setId(id);
     }
 
+    public void setHost(String host)
+      throws UnknownHostException
+    {
+      getClusterPort().setAddress(host);
+    }
+
     public void setPort(int port)
     {
       getClusterPort().setPort(port);
+    }
+
+    public void setIndex(int index)
+    {
+      // getClusterServer().setIndex(index);
     }
 
     private ClusterPort getClusterPort()

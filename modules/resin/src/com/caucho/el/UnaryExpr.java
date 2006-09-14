@@ -209,7 +209,7 @@ public class UnaryExpr extends Expr {
   public void printCreate(WriteStream os)
     throws IOException
   {
-    os.print("new com.caucho.el.UnaryExpr(");
+    os.print("com.caucho.el.UnaryExpr.create(");
     os.print(_op + ", ");
     _expr.printCreate(os);
     os.print(")");
