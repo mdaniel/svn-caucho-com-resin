@@ -33,7 +33,9 @@ import java.lang.reflect.*;
 import java.lang.annotation.*;
 
 import java.io.*;
+import java.net.*;
 import java.util.*;
+import java.util.logging.*;
 
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
@@ -49,6 +51,8 @@ import com.caucho.soap.marshall.*;
  * Invokes a SOAP request on a Java POJO method
  */
 public class PojoMethodSkeleton {
+  private final static Logger log = 
+    Logger.getLogger(PojoMethodSkeleton.class.getName());
 
   private final Method _method;
   private final QName _resultName;
@@ -68,7 +72,7 @@ public class PojoMethodSkeleton {
       this._arg = arg;
       this._marshall = marshall;
     }
-    public void serialize(Object o, WriteStream out)
+    public void serialize(Object o, XMLStreamWriter out)
       throws IOException, XMLStreamException
     {
       _marshall.serialize(out, o, new QName(_name));
@@ -115,7 +119,6 @@ public class PojoMethodSkeleton {
       }
     }
 
-
     _retMarshall = factory.createSerializer(method.getReturnType());
 
     if (method.isAnnotationPresent(WebResult.class))
@@ -129,31 +132,98 @@ public class PojoMethodSkeleton {
   /**
    * Invokes the request for a call.
    */
-  public Object invoke(String name, XMLStreamReader in, WriteStream out,
-                       Object[] args, String namespace)
-    throws IOException, XMLStreamException
+  public Object invoke(String name, String url, Object[] args, String namespace)
+    throws IOException, XMLStreamException, MalformedURLException
   {
-    out.println("<env:Envelope");
-    out.println("    xmlns:env='http://www.w3.org/2003/05/soap-enveloper'>");
-    out.println("<env:Body>");
-    out.println("<"+name+" xmlns='"+namespace+"'>");
-    if (args != null)
+    URL urlObject = new URL(url);
+    URLConnection connection = urlObject.openConnection();
+
+    if (! (connection instanceof HttpURLConnection))
+      return null;
+
+    HttpURLConnection httpConnection = (HttpURLConnection) connection;
+    httpConnection.setRequestMethod("POST");
+    httpConnection.setDoInput(true);
+    httpConnection.setDoOutput(true);
+
+    XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
+    XMLStreamWriter out =
+      outputFactory.createXMLStreamWriter(httpConnection.getOutputStream());
+
+    out.writeStartDocument();
+    out.writeStartElement("env", "Envelope", Skeleton.SOAP_ENVELOPE);
+    out.writeNamespace("env", Skeleton.SOAP_ENVELOPE);
+
+    out.writeStartElement("env", "Body", Skeleton.SOAP_ENVELOPE);
+
+    out.writeStartElement("m", name, namespace);
+    out.writeNamespace("m", namespace);
+
+    if (args != null) {
       for(int i=0; i<args.length; i++) {
         if (_argMarshall[i] != null)
           _argMarshall[i].serialize(args[i], out);
       }
-    out.println("</"+name+"'>");
-    out.println("</env:Body>");
-    out.println("</env:Envelope>");
+    }
+
+    out.writeEndElement(); // name
+    out.writeEndElement(); // Body
+    out.writeEndElement(); // Envelope
     out.flush();
-    out.close();
-    return null;
+
+    if (httpConnection.getResponseCode() != 200)
+      return null; // XXX more meaningful error
+
+    XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+    XMLStreamReader in = 
+      inputFactory.createXMLStreamReader(httpConnection.getInputStream());
+
+    in.nextTag();
+    
+    if (! "Envelope".equals(in.getName().getLocalPart()))
+      throw new IOException("expected Envelope at " + in.getName());
+
+    in.nextTag();
+
+    // XXX: Header
+
+    if (! "Body".equals(in.getName().getLocalPart()))
+      throw new IOException("expected Body");
+
+    if (_wrapped) {
+      in.nextTag();
+
+      if (! getResponseName().equals(in.getName().getLocalPart()))
+        throw new IOException("expected " + getResponseName());
+    }
+
+    in.nextTag();
+
+    if (! _resultName.equals(in.getName()))
+      throw new IOException("expected '" + _resultName);
+
+    in.nextTag();
+
+    Object ret = _retMarshall.deserialize(in);
+
+    if (_wrapped) {
+      if (in.nextTag() != in.END_ELEMENT)
+        throw new IOException("expected </" + getResponseName() + ">");
+    }
+
+    if (in.nextTag() != in.END_ELEMENT)
+      throw new IOException("expected </Body>");
+
+    if (in.nextTag() != in.END_ELEMENT)
+      throw new IOException("expected </Envelope>");
+
+    return ret;
   }
 
   /**
    * Invokes the request for a call.
    */
-  public void invoke(Object service, XMLStreamReader in, WriteStream out)
+  public void invoke(Object service, XMLStreamReader in, XMLStreamWriter out)
     throws IOException, XMLStreamException
   {
     Object []args = new Object[_argMarshall.length];
@@ -185,19 +255,13 @@ public class PojoMethodSkeleton {
       throw new MarshallException(e.getCause());
     }
 
-    if (_wrapped) {
-      out.print('<');
-      out.print(getResponseName());
-      out.print('>');
-    }    
+    if (_wrapped)
+      out.writeStartElement(getResponseName());
 
     _retMarshall.serialize(out, value, _resultName);
     
-    if (_wrapped) {
-      out.print("</");
-      out.print(getResponseName());
-      out.print('>');
-    }
+    if (_wrapped)
+      out.writeEndElement();
   }
 
   private String getResponseName()

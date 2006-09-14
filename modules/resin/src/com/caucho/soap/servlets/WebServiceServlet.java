@@ -81,15 +81,18 @@ public class WebServiceServlet extends HttpServlet {
   {
     try {
 
-      XMLInputFactory factory =
-        XMLInputFactory.newInstance();
+      XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 
       XMLStreamReader xmlReader =
-        factory.createXMLStreamReader(req.getInputStream());
+        inputFactory.createXMLStreamReader(req.getInputStream());
       
-      WriteStream ws = Vfs.openWrite(resp.getOutputStream());
-      skeleton().invoke(_object, xmlReader, ws);
-      ws.flush();
+      XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
+
+      XMLStreamWriter xmlWriter =
+        outputFactory.createXMLStreamWriter(resp.getOutputStream());
+      
+      skeleton().invoke(_object, xmlReader, xmlWriter);
+      xmlWriter.flush();
     }
     catch (XMLStreamException e) {
       throw new ServletException(e);

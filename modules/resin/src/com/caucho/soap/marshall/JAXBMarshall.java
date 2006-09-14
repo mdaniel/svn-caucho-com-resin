@@ -24,10 +24,12 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Emil Ong
  */
 
 package com.caucho.soap.marshall;
+
+import javax.xml.bind.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
@@ -38,22 +40,32 @@ import java.io.*;
 import com.caucho.vfs.WriteStream;
 
 /**
- * Marshalls data for a string object
+ * Marshalls data for a JAXB object
  */
-public class MapMarshall extends Marshall {
-  public static final MapMarshall MARSHALL = new MapMarshall();
+public class JAXBMarshall extends Marshall {
+  private JAXBContext _context;
 
-  private MapMarshall()
+  public JAXBMarshall(Class cl)
+    throws JAXBException
   {
+    _context = JAXBContext.newInstance(new Class[] { cl });
   }
-  
+
+
   /**
    * Deserializes the data from the input.
    */
   public Object deserialize(XMLStreamReader in)
     throws IOException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    try {
+      Unmarshaller unmarshaller = _context.createUnmarshaller();
+      return unmarshaller.unmarshal(in);
+    } catch (JAXBException e) {
+      IOException ioException = new IOException();
+      ioException.initCause(e);
+      throw ioException;
+    }
   }
 
   /**
@@ -63,12 +75,18 @@ public class MapMarshall extends Marshall {
     throws IOException, XMLStreamException
   {
     out.writeStartElement(fieldName.toString());
-    
-    //StringMarshall.escapify((String)obj, out);
-    
-    out.writeEndElement();
 
-    throw new UnsupportedOperationException(getClass().getName());
+    try {
+      Marshaller marshaller = _context.createMarshaller();
+      marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
+      marshaller.marshal(obj, out);
+    } catch (JAXBException e) {
+      IOException ioException = new IOException();
+      ioException.initCause(e);
+      throw ioException;
+    }
+
+    out.writeEndElement(); // fieldName
   }
 }
 

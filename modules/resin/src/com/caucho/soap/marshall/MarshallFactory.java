@@ -31,6 +31,7 @@ package com.caucho.soap.marshall;
 
 import java.util.*;
 import java.math.*;
+import javax.xml.bind.*;
 
 /**
  * Factory for creating marshall instances
@@ -74,7 +75,11 @@ public class MarshallFactory {
     if (Object[].class.isAssignableFrom(type))
       return ArrayMarshall.MARSHALL;
 
-    throw new UnsupportedOperationException(type.getName());
+    try {
+      return new JAXBMarshall(type);
+    } catch (JAXBException e) {
+      throw new UnsupportedOperationException(type.getName(), e);
+    }
   }
   
   /**
@@ -115,7 +120,11 @@ public class MarshallFactory {
     if (Object[].class.isAssignableFrom(type))
       return ArrayMarshall.MARSHALL;
 
-    throw new UnsupportedOperationException(type.getName());
+    try {
+      return new JAXBMarshall(type);
+    } catch (JAXBException e) {
+      throw new UnsupportedOperationException(type.getName(), e);
+    }
   }
 }
 

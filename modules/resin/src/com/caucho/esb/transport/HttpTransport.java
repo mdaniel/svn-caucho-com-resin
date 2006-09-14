@@ -31,6 +31,9 @@ package com.caucho.esb.transport;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.*;
+
+import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -47,6 +50,9 @@ import com.caucho.server.webapp.ServletContextImpl;
 import com.caucho.util.NullOutputStream;
 
 public class HttpTransport extends ServletMapping implements ServiceTransport {
+  private static final Logger log = 
+    Logger.getLogger(HttpTransport.class.getName());
+  
   private static final String SERVICE_ENCODING = "service-encoding";
   private ServiceEncoding _encoding;
   private WebService _webService;
@@ -77,6 +83,12 @@ public class HttpTransport extends ServletMapping implements ServiceTransport {
     context.setAttribute(SERVICE_ENCODING, _encoding);
 
     return context;
+  }
+
+  public String getServletName()
+  {
+    return "com.caucho.esb.HttpTransport/" + _encoding.getClass().getName() + 
+           " - " + getURLPattern();
   }
 
   public void init()

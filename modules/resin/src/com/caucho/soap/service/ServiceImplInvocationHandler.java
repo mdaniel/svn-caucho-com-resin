@@ -27,49 +27,46 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.soap.marshall;
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import java.util.*;
+package com.caucho.soap.service;
 
+import com.caucho.soap.reflect.*;
 import java.lang.reflect.*;
+import javax.jws.*;
+import com.caucho.soap.marshall.*;
+import com.caucho.soap.skeleton.*;
+import com.caucho.util.*;
 import java.io.*;
+import javax.xml.namespace.*;
+import javax.xml.ws.*;
+import javax.xml.stream.*;
+import com.caucho.vfs.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 
-import com.caucho.vfs.WriteStream;
+public class ServiceImplInvocationHandler implements InvocationHandler {
 
-/**
- * Marshalls data for a string object
- */
-public class MapMarshall extends Marshall {
-  public static final MapMarshall MARSHALL = new MapMarshall();
+  private Class _class;
+  private DirectSkeleton _skeleton;
+  private String _url;
 
-  private MapMarshall()
-  {
-  }
-  
-  /**
-   * Deserializes the data from the input.
-   */
-  public Object deserialize(XMLStreamReader in)
-    throws IOException
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
+  public ServiceImplInvocationHandler(Class c, String url)
+    throws com.caucho.config.ConfigException
+    {
+      _class = c;
+      _url = url;
+      _skeleton = new WebServiceIntrospector().introspect(c);
+    }
 
-  /**
-   * Serializes the data to the result
-   */
-  public void serialize(XMLStreamWriter out, Object obj, QName fieldName)
-    throws IOException, XMLStreamException
-  {
-    out.writeStartElement(fieldName.toString());
-    
-    //StringMarshall.escapify((String)obj, out);
-    
-    out.writeEndElement();
+  public Object invoke(Object proxy, Method method, Object[] args)
+    throws IOException, XMLStreamException, MalformedURLException
+    {
+      Object ret = _skeleton.invoke(method.getName(), _url, args);
 
-    throw new UnsupportedOperationException(getClass().getName());
-  }
+      return ret == null ? new Integer(12) : ret;
+    }
+
 }
 
 

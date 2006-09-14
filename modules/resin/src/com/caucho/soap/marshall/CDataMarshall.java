@@ -61,48 +61,20 @@ public abstract class CDataMarshall extends Marshall {
   protected abstract String serialize(Object in)
     throws IOException, XMLStreamException;
 
-  public void serialize(WriteStream out, Object obj, QName fieldName)
+  public void serialize(XMLStreamWriter out, Object obj, QName fieldName)
     throws IOException, XMLStreamException
   {
-    out.print('<');
-    out.print(fieldName.getLocalPart());
+    out.writeStartElement(fieldName.getLocalPart());
 
     String nsuri = fieldName.getNamespaceURI();
-    if (nsuri != null && !nsuri.equals("")) {
-      out.print(" xmlns=\"");
-      escapify(nsuri, out);
-      out.print("\"");
-    }
 
-    out.print('>');
+    if (nsuri != null && !nsuri.equals(""))
+      out.writeDefaultNamespace(nsuri);
 
-    escapify(serialize(obj), out);
+    out.writeCharacters(serialize(obj));
 
-    out.print("</");
-    out.print(fieldName.getLocalPart());
-    out.print(">");
-    
+    out.writeEndElement();
   }
-
-  public static void escapify(String s, WriteStream out)
-    throws IOException
-  {
-    int len = s.length();
-
-    for(int i=0; i<len; i++) {
-      char c = s.charAt(i);
-      if ((c < 32 || c > 127) || c=='\'' || c=='\"' ||
-          c=='<' || c=='>' || c=='&') {
-        out.print("&#");
-        out.print((int)c);
-        out.print(";");
-      } else {
-        out.print(c);
-      }
-    }
-
-  }
-
 }
 
 

@@ -30,6 +30,7 @@
 package com.caucho.soap.skeleton;
 
 import java.io.*;
+import java.net.*;
 import java.util.*;
 
 import javax.xml.stream.*;
@@ -113,13 +114,10 @@ public class DirectSkeleton extends Skeleton {
   /**
    * Invokes the request on a remote object using an outbound XML stream.
    */
-  public Object invoke(String name,
-                       XMLStreamReader in,
-                       WriteStream out,
-                       Object[] args)
-    throws IOException, XMLStreamException
+  public Object invoke(String name, String url, Object[] args)
+    throws IOException, XMLStreamException, MalformedURLException
   {
-    return _actionMap.get(name).invoke(name, in, out, args, _namespace);
+    return _actionMap.get(name).invoke(name, url, args, _namespace);
   }
   
   /**
@@ -127,7 +125,7 @@ public class DirectSkeleton extends Skeleton {
    */
   public void invoke(Object service,
                      XMLStreamReader in,
-                     WriteStream out)
+                     XMLStreamWriter out)
     throws IOException, XMLStreamException
   {
     in.nextTag();
@@ -146,20 +144,23 @@ public class DirectSkeleton extends Skeleton {
 
     String action = in.getName().getLocalPart();
 
-    out.println("<?xml version=\"1.0\"?>");
-    out.print("<env:Envelope xmlns:env=\"" + SOAP_ENVELOPE + "\"");
-    out.print(" xmlns:xsi=\"" + XMLNS_XSI + "\"");
-    out.print(" xmlns:xsd=\"" + XMLNS_XSD + "\">");
-    out.println("<env:Body>");
+    out.writeStartDocument();
+    out.writeStartElement("env:Envelope");
+    out.writeNamespace("env", SOAP_ENVELOPE);
+    out.writeNamespace("xsi", XMLNS_XSI);
+    out.writeNamespace("xsd", XMLNS_XSD);
+
+    out.writeStartElement("env:Body");
 
     PojoMethodSkeleton method = _actionMap.get(action);
 
     // XXX: exceptions<->faults
     if (method != null)
       method.invoke(service, in, out);    
+    /*
     else
       // XXX: fault
-      out.println("no such action:" + action);
+      out.println("no such action:" + action);*/
 
     if (in.nextTag() != in.END_ELEMENT)
       throw new IOException("expected </" + action + ">");
@@ -176,7 +177,9 @@ public class DirectSkeleton extends Skeleton {
     else if (! "Envelope".equals(in.getName().getLocalPart()))
       throw new IOException("expected </Envelope>");
     */
-    out.print("\n</env:Body></env:Envelope>");
+
+    out.writeEndElement(); // Body
+    out.writeEndElement(); // Envelope
   }
 
   public void dumpWSDL(WriteStream w, String address)

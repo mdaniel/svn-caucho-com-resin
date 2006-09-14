@@ -30,6 +30,7 @@
 package com.caucho.soap.skeleton;
 
 import java.io.*;
+import java.net.*;
 import javax.xml.stream.*;
 
 import com.caucho.vfs.WriteStream;
@@ -56,14 +57,11 @@ abstract public class Skeleton {
    */
   abstract public void invoke(Object service,
                               XMLStreamReader in,
-                              WriteStream out)
+                              XMLStreamWriter out)
     throws IOException, XMLStreamException;
 
-  abstract public Object invoke(String name,
-                                XMLStreamReader in,
-                                WriteStream out,
-                                Object[] args)
-    throws IOException, XMLStreamException;
+  abstract public Object invoke(String name, String url, Object[] args)
+    throws IOException, XMLStreamException, MalformedURLException;
 }
 
 

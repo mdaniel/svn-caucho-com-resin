@@ -29,12 +29,21 @@
 
 package com.caucho.esb.client;
 
+import java.lang.reflect.Proxy;
+
 import java.net.MalformedURLException;
+
+import com.caucho.soap.service.ServiceImplInvocationHandler;
 
 public class SoapEncodingProxyFactory implements EncodingProxyFactory {
   public Object getProxy(Class serviceInterface, String url) 
     throws MalformedURLException
   {
-    return null;
+    ServiceImplInvocationHandler handler = 
+      new ServiceImplInvocationHandler(serviceInterface, url);
+
+    return Proxy.newProxyInstance(serviceInterface.getClassLoader(),
+                                  new Class[] { serviceInterface },
+                                  handler);
   }
 }

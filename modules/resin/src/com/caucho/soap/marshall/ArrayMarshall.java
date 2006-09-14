@@ -59,18 +59,14 @@ public class ArrayMarshall extends Marshall {
   /**
    * Serializes the data to the result
    */
-  public void serialize(WriteStream out, Object obj, QName fieldName)
-    throws IOException
+  public void serialize(XMLStreamWriter out, Object obj, QName fieldName)
+    throws IOException, XMLStreamException
   {
-    out.print('<');
-    out.print(fieldName);
-    out.print('>');
+    out.writeStartElement(fieldName.toString());
     
     //StringMarshall.escapify((String)obj, out);
     
-    out.print("</");
-    out.print(fieldName);
-    out.print(">");
+    out.writeEndElement();
 
     throw new UnsupportedOperationException(getClass().getName());
   }

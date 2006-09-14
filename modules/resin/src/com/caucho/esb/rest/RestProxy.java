@@ -42,6 +42,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 
+import java.util.logging.Logger;
+
 import javax.jws.WebMethod;
 
 import javax.xml.bind.JAXBContext;
@@ -49,6 +51,8 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 public class RestProxy implements InvocationHandler {
+  private static final Logger log = Logger.getLogger(RestProxy.class.getName());
+
   private Class _api;
   private String _restEncoding = "path";
   private String _url;
@@ -187,7 +191,9 @@ public class RestProxy implements InvocationHandler {
         Unmarshaller unmarshaller = context.createUnmarshaller();
 
         return unmarshaller.unmarshal(httpConnection.getInputStream());
-      } 
+      }
+      else
+        log.info("request failed: " + httpConnection.getResponseMessage());
     }
 
     throw new RestException();

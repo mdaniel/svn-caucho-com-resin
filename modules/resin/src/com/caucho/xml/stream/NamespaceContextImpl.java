@@ -296,8 +296,14 @@ public class NamespaceContextImpl implements NamespaceContext {
       throws IOException
     {
       for(Map.Entry<String,String> e : _prefixes.entrySet()) {
-        ws.print(" xmlns:");
-        ws.print(Escapifier.escape(e.getKey()));
+        if (e.getKey() == null || "".equals(e.getKey())) {
+          ws.print(" xmlns");
+        }
+        else {
+          ws.print(" xmlns:");
+          ws.print(Escapifier.escape(e.getKey()));
+        }
+
         ws.print("='");
         ws.print(Escapifier.escape(e.getValue()));
         ws.print("'");

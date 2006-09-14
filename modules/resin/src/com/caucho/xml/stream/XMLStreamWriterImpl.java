@@ -64,7 +64,7 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
         _ws.print(" ");
         _ws.print(printQName(_pendingAttributeNames.get(i)));
         _ws.print("='");
-	Escapifier.escape(_pendingAttributeValues.get(i), _ws);
+        Escapifier.escape(_pendingAttributeValues.get(i), _ws);
         _ws.print("'");
       }
       flushContext();

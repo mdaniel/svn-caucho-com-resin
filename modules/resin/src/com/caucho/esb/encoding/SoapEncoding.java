@@ -36,16 +36,15 @@ import java.io.OutputStream;
 import java.util.logging.Logger;
 
 import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
 
 import com.caucho.esb.WebService;
 
 import com.caucho.soap.reflect.WebServiceIntrospector;
 import com.caucho.soap.skeleton.DirectSkeleton;
-
-import com.caucho.vfs.VfsStream;
-import com.caucho.vfs.WriteStream;
 
 /**
  * Invokes a service based on a Hessian-encoded request.
@@ -84,16 +83,16 @@ public class SoapEncoding implements ServiceEncoding {
 
   public void invoke(InputStream is, OutputStream os)
   {
-    WriteStream ws = new WriteStream(new VfsStream(null, os));
-
     try {
-      XMLInputFactory factory = XMLInputFactory.newInstance();
+      XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+      XMLStreamReader in = inputFactory.createXMLStreamReader(is);
 
-      XMLStreamReader xmlReader = factory.createXMLStreamReader(is);
+      XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
+      XMLStreamWriter out = outputFactory.createXMLStreamWriter(os);
 
-      getSkeleton().invoke(_object, xmlReader, ws);
+      getSkeleton().invoke(_object, in, out);
 
-      ws.flush();
+      out.flush();
     } catch (XMLStreamException e) {
       log.info(e.toString());
     } catch (IOException e) {

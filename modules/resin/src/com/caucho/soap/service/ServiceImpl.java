@@ -74,41 +74,5 @@ public class ServiceImpl extends Service {
       throw new RuntimeException(e);
     }
   }
-
-  private class ServiceImplInvocationHandler implements InvocationHandler {
-
-    private Class _class;
-    private DirectSkeleton _skeleton;
-    private String _url;
-
-    public ServiceImplInvocationHandler(Class c, String url)
-      throws com.caucho.config.ConfigException
-    {
-      this._class = c;
-      this._url = url;
-      this._skeleton = new WebServiceIntrospector().introspect(c);
-    }
-    
-    public Object invoke(Object proxy, Method method, Object[] args)
-      throws IOException, XMLStreamException
-    {
-      Path path = Vfs.lookup(_url);
-      ReadWritePair rwp = path.openReadWrite();
-      /*
-      XMLStreamReader reader =
-        XMLInputFactory.newInstance()
-        .createXMLStreamReader(rwp.getReadStream());
-      */
-      Object ret = 
-        _skeleton.invoke(method.getName(),
-                         //reader,
-                         null,
-                         rwp.getWriteStream(),
-                         args);
-      return ret==null ? new Integer(12) : null;
-    }
-
-  }
-
 }
 

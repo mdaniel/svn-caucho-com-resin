@@ -658,8 +658,7 @@ r_shutdown-wait-max =
   | element shutdown-wait-max { r_period }
 
 r_soap-encoding = element soap {
-  r_service-transport*
-  & element interface { r_string-Group }?
+  r_url-pattern
 }
 
 r_startup-mode =
