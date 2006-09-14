@@ -195,15 +195,33 @@ Configuration tutorial</a></p>
 
 <s1 title="Quercus">
 
-<s2 title="New Applications">
+<p>Quercus now supports the i18n and l10n features of PHP.  This includes
+gettext, iconv, and multi-byte strings.  In addition, Quercus has PHP6 Unicode
+support in anticipation of the upcoming release of PHP6.</p>
+
+<s2 title="Certified Applications">
+
+<ol>
+<li>Drupal</li>
+<li>Gallery2</li>
+<li>Mantis</li>
+<li>MediaWiki</li>
+<li>phpBB</li>
+<li>phpMyAdmin</li>
+<li>Wordpress</li>
+</ol>
+
+<s3 title="Newly Certified">
 
 <ol>
 <li>DokuWiki</li>
 <li>Joomla</li>
+<li>PHP-Nuke</li>
 </ol>
 
-</s2>
+</s3>
 
+</s2>
 
 </s1>
 
