@@ -56,10 +56,15 @@ and the client may invoke.</p>
 <example title="HelloService.java">
 package example;
 
+import javax.jws.WebMethod;
+import javax.jws.WebService;
+
+@WebService
 public interface HelloService {
   /**
    * Returns "hello, world".
    */
+  @WebMethod
   public HelloResult hello();
 }
 </example>
@@ -144,17 +149,25 @@ a query-based binding is also available that accepts URLs of the form
 The &lt;url-pattern> child tag specifies the base URL for the REST interface.
 </p>
 
+<p>
+Finally, a SOAP interface is available. <!-- XXX -->
+</p>
+
 <example title="<web-service>">
 &lt;web-service class="example.HelloServiceImpl">
   &lt;jndi-name>service/HelloService&lt;/jndi-name>
 
   &lt;hessian>
-    &lt;url-pattern>/hello/hessian/&lt;/url-pattern>
+    &lt;url-pattern>/hello/hessian/*&lt;/url-pattern>
   &lt;/hessian>
 
   &lt;rest>
     &lt;url-pattern>/hello/rest/*&lt;/url-pattern>
   &lt;/rest>
+
+  &lt;soap>
+    &lt;url-pattern>/hello/soap/*&lt;/url-pattern>
+  &lt;/soap>
 &lt;/web-service>
 </example>
 
@@ -182,6 +195,11 @@ proxy with the given JNDI name.
   &lt;url>rest:${webApp.url}/hello/rest/&lt;/url>
   &lt;interface>example.HelloService&lt;/interface>
 &lt;/web-service-client>
+
+&lt;web-service-client jndi-name="soap/HelloService">
+  &lt;url>soap:${webApp.url}/hello/soap/&lt;/url>
+  &lt;interface>example.HelloService&lt;/interface>
+&lt;/web-service-client>
 </example>
 
 </s1>
@@ -197,17 +215,20 @@ encoding simply by doing a lookup in JNDI.</p>
 &lt;%
 HelloService hessianHello = (HelloService) Jndi.lookup("hessian/HelloService");
 HelloService restHello = (HelloService) Jndi.lookup("rest/HelloService");
+HelloService soapHello = (HelloService) Jndi.lookup("soap/HelloService");
 HelloService vmHello = (HelloService) Jndi.lookup("service/HelloService");
 %>
 &lt;pre>
 From Hessian: &lt;%= hessianHello.hello() %>
 From REST: &lt;%= restHello.hello() %>
+From SOAP: &lt;%= soapHello.hello() %>
 From VM: &lt;%= vmHello.hello() %>
 &lt;/pre>
 </example>
 <results>
 From Hessian: hello, world
 From REST: hello, world
+From SOAP: hello, world
 From VM: hello, world
 </results>
 
