@@ -45,8 +45,8 @@ public class InheritanceConfig {
     return _strategy;
   }
 
-  public void setStrategy(InheritanceType strategy)
+  public void setStrategy(String strategy)
   {
-    _strategy = strategy;
+    _strategy = InheritanceType.valueOf(strategy);
   }
 }

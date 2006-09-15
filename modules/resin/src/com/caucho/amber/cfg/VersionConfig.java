@@ -31,7 +31,6 @@ package com.caucho.amber.cfg;
 
 import java.util.ArrayList;
 
-import javax.persistence.FetchType;
 import javax.persistence.TemporalType;
 
 
@@ -91,8 +90,8 @@ public class VersionConfig {
   /**
    * Sets the temporal.
    */
-  public void setTemporal(TemporalType temporal)
+  public void setTemporal(String temporal)
   {
-    _temporal = temporal;
+    _temporal = TemporalType.valueOf(temporal);
   }
 }

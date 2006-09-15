@@ -70,9 +70,9 @@ public class DiscriminatorColumnConfig {
   /**
    * Sets the discriminator type.
    */
-  public void setDiscriminatorType(DiscriminatorType discriminatorType)
+  public void setDiscriminatorType(String discriminatorType)
   {
-    _discriminatorType = discriminatorType;
+    _discriminatorType = DiscriminatorType.valueOf(discriminatorType);
   }
 
   /**

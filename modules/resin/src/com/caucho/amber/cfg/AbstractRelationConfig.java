@@ -72,9 +72,9 @@ abstract public class AbstractRelationConfig {
     return _fetch;
   }
 
-  public void setFetch(FetchType fetch)
+  public void setFetch(String fetch)
   {
-    _fetch = fetch;
+    _fetch = FetchType.valueOf(fetch);
   }
 
   public CascadeType getCascade()
@@ -82,9 +82,9 @@ abstract public class AbstractRelationConfig {
     return _cascade;
   }
 
-  public void setCascade(CascadeType cascade)
+  public void setCascade(String cascade)
   {
-    _cascade = cascade;
+    _cascade = CascadeType.valueOf(cascade);
   }
 
   public JoinTableConfig getJoinTable()

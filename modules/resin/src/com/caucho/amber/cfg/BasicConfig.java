@@ -80,9 +80,9 @@ public class BasicConfig {
   /**
    * Sets the fetch type.
    */
-  public void setFetch(FetchType fetch)
+  public void setFetch(String fetch)
   {
-    _fetch = fetch;
+    _fetch = FetchType.valueOf(fetch);
   }
 
   /**
@@ -144,9 +144,9 @@ public class BasicConfig {
   /**
    * Sets the temporal.
    */
-  public void setTemporal(TemporalType temporal)
+  public void setTemporal(String temporal)
   {
-    _temporal = temporal;
+    _temporal = TemporalType.valueOf(temporal);
   }
 
   /**
@@ -160,8 +160,8 @@ public class BasicConfig {
   /**
    * Sets the enumerated.
    */
-  public void setEnumerated(EnumType enumerated)
+  public void setEnumerated(String enumerated)
   {
-    _enumerated = enumerated;
+    _enumerated = EnumType.valueOf(enumerated);
   }
 }

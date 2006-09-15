@@ -104,9 +104,9 @@ public class IdConfig {
     _generatedValue = generatedValue;
   }
 
-  public void setTemporal(TemporalType temporal)
+  public void setTemporal(String temporal)
   {
-    _temporal = temporal;
+    _temporal = TemporalType.valueOf(temporal);
   }
 
   public void setTableGenerator(TableGeneratorConfig tableGenerator)

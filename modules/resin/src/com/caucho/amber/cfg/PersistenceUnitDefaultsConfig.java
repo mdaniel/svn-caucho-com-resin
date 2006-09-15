@@ -40,7 +40,7 @@ public class PersistenceUnitDefaultsConfig {
   // elements
   private String _schema;
   private String _catalog;
-  private AccessType _accessType;
+  private AccessType _access;
   private boolean _isCascadePersist;
   private EntityListenersConfig _entityListeners;
 
@@ -65,14 +65,14 @@ public class PersistenceUnitDefaultsConfig {
     _catalog = catalog;
   }
 
-  public AccessType getAccessType()
+  public AccessType getAccess()
   {
-    return _accessType;
+    return _access;
   }
 
-  public void setAccessType(AccessType accessType)
+  public void setAccess(String access)
   {
-    _accessType = accessType;
+    _access = AccessType.valueOf(access);
   }
 
   public boolean getCascadePersist()

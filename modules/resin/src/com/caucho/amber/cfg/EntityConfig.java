@@ -111,9 +111,9 @@ public class EntityConfig {
   /**
    * Sets the access type.
    */
-  public void setAccess(AccessType access)
+  public void setAccess(String access)
   {
-    _access = access;
+    _access = AccessType.valueOf(access);
   }
 
   /**

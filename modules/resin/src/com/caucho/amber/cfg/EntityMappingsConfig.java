@@ -122,9 +122,9 @@ public class EntityMappingsConfig {
     return _version;
   }
 
-  public void setAccess(AccessType access)
+  public void setAccess(String access)
   {
-    _access = access;
+    _access = AccessType.valueOf(access);
   }
 
   public void setCatalog(String catalog)
@@ -162,7 +162,11 @@ public class EntityMappingsConfig {
    */
   public void addEntity(EntityConfig entity)
   {
-    _entityMap.put(entity.getClassName(), entity);
+    if (_package == null)
+      _entityMap.put(entity.getClassName(), entity);
+    else
+      _entityMap.put(_package + "." + entity.getClassName(),
+                     entity);
   }
 
   /**

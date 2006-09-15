@@ -46,9 +46,9 @@ public class GeneratedValueConfig {
     return _strategy;
   }
 
-  public void setStrategy(GenerationType strategy)
+  public void setStrategy(String strategy)
   {
-    _strategy = strategy;
+    _strategy = GenerationType.valueOf(strategy);
   }
 
   public String getGenerator()

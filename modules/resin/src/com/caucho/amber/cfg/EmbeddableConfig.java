@@ -37,7 +37,7 @@ public class EmbeddableConfig {
 
   // attributes
   private String _className;
-  private AccessType _access;
+  private String _access; // AccessType;
   private boolean _isMetadataComplete;
 
   // elements
@@ -47,7 +47,7 @@ public class EmbeddableConfig {
   /**
    * Returns the access type.
    */
-  public AccessType getAccess()
+  public String getAccess()
   {
     return _access;
   }
@@ -55,7 +55,7 @@ public class EmbeddableConfig {
   /**
    * Sets the access type.
    */
-  public void setAccess(AccessType access)
+  public void setAccess(String access)
   {
     _access = access;
   }

@@ -67,7 +67,7 @@ import com.caucho.util.L10N;
 /**
  * Configuration for an entity bean
  */
-public class EntityIntrospector {
+public class EntityIntrospector extends AbstractConfigIntrospector {
   private static final L10N L = new L10N(EntityIntrospector.class);
   private static final Logger log
     = Logger.getLogger(EntityIntrospector.class.getName());
@@ -122,11 +122,9 @@ public class EntityIntrospector {
   private HashMap<String,EntityType> _entityMap
     = new HashMap<String,EntityType>();
 
-  private HashMap<String,EntityConfig> _entityConfigMap
-    = new HashMap<String,EntityConfig>();
-
   private ArrayList<Completion> _linkCompletions = new ArrayList<Completion>();
   private ArrayList<Completion> _depCompletions = new ArrayList<Completion>();
+
 
   /**
    * Creates the introspector.
@@ -150,12 +148,10 @@ public class EntityIntrospector {
   public EntityType introspect(JClass type)
     throws ConfigException, SQLException
   {
-    EntityConfig entityConfig = null;
+    getInternalConfig(type, Entity.class);
+    JAnnotation entityAnn = _annotationCfg.getAnnotation();
+    EntityConfig entityConfig = _annotationCfg.getEntityConfig();
 
-    if (_entityConfigMap != null)
-      entityConfig = _entityConfigMap.get(type.getName());
-
-    JAnnotation entityAnn = type.getAnnotation(Entity.class);
     JAnnotation embeddableAnn = type.getAnnotation(Embeddable.class);
     JAnnotation mappedSuperclassAnn = type.getAnnotation(MappedSuperclass.class);
 
@@ -169,11 +165,13 @@ public class EntityIntrospector {
 
     // Adds named queries, if any.
 
-    JAnnotation namedQueryAnn = null;
-    JAnnotation namedQueriesAnn = null;
+    getInternalConfig(type, NamedQuery.class);
+    JAnnotation namedQueryAnn = _annotationCfg.getAnnotation();
+    NamedQueryConfig namedQueryConfig = _annotationCfg.getNamedQueryConfig();
 
-    namedQueryAnn = type.getAnnotation(NamedQuery.class);
-    namedQueriesAnn = type.getAnnotation(NamedQueries.class);
+    // getInternalConfig(type, NamedQueries.class);
+    JAnnotation namedQueriesAnn = type.getAnnotation(NamedQueries.class);
+    // NamedQueriesConfig namedQueriesConfig = _annotationCfg.getNamedQueriesConfig();
 
     if (! ((namedQueryAnn == null) && (namedQueriesAnn == null))) {
 
@@ -214,15 +212,20 @@ public class EntityIntrospector {
     if (isEntity) {
       validateType(type);
 
-      inheritanceAnn = type.getAnnotation(Inheritance.class);
+      getInternalConfig(type, Inheritance.class);
+      inheritanceAnn = _annotationCfg.getAnnotation();
+      InheritanceConfig inheritanceConfig = _annotationCfg.getInheritanceConfig();
 
-      if (inheritanceAnn != null) {
+      if (! _annotationCfg.isNull()) {
         for (JClass parentClass = type.getSuperClass();
              parentClass != null;
              parentClass = parentClass.getSuperClass()) {
-          JAnnotation parentEntity = parentClass.getAnnotation(Entity.class);
 
-          if (parentEntity != null) {
+          getInternalConfig(parentClass, Entity.class);
+          JAnnotation parentEntity = _annotationCfg.getAnnotation();
+          EntityConfig superEntityConfig = _annotationCfg.getEntityConfig();
+
+          if (! _annotationCfg.isNull()) {
             parentType = introspect(parentClass);
             break;
           }
@@ -269,7 +272,10 @@ public class EntityIntrospector {
       entityType.setEnhanced(true);
 
       Table table = null;
-      JAnnotation tableAnn = type.getAnnotation(javax.persistence.Table.class);
+
+      getInternalConfig(type, javax.persistence.Table.class);
+      JAnnotation tableAnn = _annotationCfg.getAnnotation();
+      TableConfig tableConfig = _annotationCfg.getTableConfig();
 
       String tableName = null;
       if (tableAnn != null)
@@ -288,6 +294,7 @@ public class EntityIntrospector {
       }
 
       JAnnotation tableCache = type.getAnnotation(AmberTableCache.class);
+
       if (tableCache != null) {
         entityType.getTable().setReadOnly(tableCache.getBoolean("readOnly"));
 
@@ -295,7 +302,9 @@ public class EntityIntrospector {
         entityType.getTable().setCacheTimeout(cacheTimeout);
       }
 
-      JAnnotation secondaryTableAnn = type.getAnnotation(SecondaryTable.class);
+      getInternalConfig(type, SecondaryTable.class);
+      JAnnotation secondaryTableAnn = _annotationCfg.getAnnotation();
+      SecondaryTableConfig secondaryTableConfig = _annotationCfg.getSecondaryTableConfig();
 
       Table secondaryTable = null;
 
@@ -312,10 +321,12 @@ public class EntityIntrospector {
         // XXX: pk
       }
 
-      JAnnotation idClassAnn = type.getAnnotation(IdClass.class);
+      getInternalConfig(type, IdClass.class);
+      JAnnotation idClassAnn = _annotationCfg.getAnnotation();
+      IdClassConfig idClassConfig = _annotationCfg.getIdClassConfig();
 
       JClass idClass = null;
-      if (idClassAnn != null)
+      if (! _annotationCfg.isNull())
         idClass = idClassAnn.getClass("value");
 
       if (entityType.getId() != null) {
@@ -327,7 +338,17 @@ public class EntityIntrospector {
         introspectIdMethod(_persistenceUnit, entityType, parentType,
                            type, idClass, entityConfig);
 
-      if (isEntity && (entityType.getId() == null))
+      HashMap<String, IdConfig> idMap = null;
+
+      AttributesConfig attributes = null;
+
+      if (entityConfig != null) {
+        attributes = entityConfig.getAttributes();
+
+        idMap = attributes.getIdMap();
+      }
+
+      if (isEntity && (entityType.getId() == null) && ((idMap == null) || (idMap.size() == 0)))
         throw new ConfigException(L.l("{0} does not have any primary keys.  Entities must have at least one @Id or exactly one @EmbeddedId field.",
                                       entityType.getName()));
 
@@ -381,43 +402,57 @@ public class EntityIntrospector {
   {
     JClass []param = method.getParameterTypes();
 
-    if (method.getAnnotation(PostLoad.class) != null) {
+    getInternalConfig(method, PostLoad.class);
+
+    if (! _annotationCfg.isNull()) {
       validateCallback("PostLoad", method);
 
       type.addPostLoadCallback(method);
     }
 
-    if (method.getAnnotation(PrePersist.class) != null) {
+    getInternalConfig(method, PrePersist.class);
+
+    if (! _annotationCfg.isNull()) {
       validateCallback("PrePersist", method);
 
       type.addPrePersistCallback(method);
     }
 
-    if (method.getAnnotation(PostPersist.class) != null) {
+    getInternalConfig(method, PostPersist.class);
+
+    if (! _annotationCfg.isNull()) {
       validateCallback("PostPersist", method);
 
       type.addPostPersistCallback(method);
     }
 
-    if (method.getAnnotation(PreUpdate.class) != null) {
+    getInternalConfig(method, PreUpdate.class);
+
+    if (! _annotationCfg.isNull()) {
       validateCallback("PreUpdate", method);
 
       type.addPreUpdateCallback(method);
     }
 
-    if (method.getAnnotation(PostUpdate.class) != null) {
+    getInternalConfig(method, PostUpdate.class);
+
+    if (! _annotationCfg.isNull()) {
       validateCallback("PostUpdate", method);
 
       type.addPostUpdateCallback(method);
     }
 
-    if (method.getAnnotation(PreRemove.class) != null) {
+    getInternalConfig(method, PreRemove.class);
+
+    if (! _annotationCfg.isNull()) {
       validateCallback("PreRemove", method);
 
       type.addPreRemoveCallback(method);
     }
 
-    if (method.getAnnotation(PostRemove.class) != null) {
+    getInternalConfig(method, PostRemove.class);
+
+    if (! _annotationCfg.isNull()) {
       validateCallback("PostRemove", method);
 
       type.addPostRemoveCallback(method);
@@ -574,7 +609,9 @@ public class EntityIntrospector {
                                      JClass type)
     throws ConfigException, SQLException
   {
-    JAnnotation inheritanceAnn = type.getAnnotation(Inheritance.class);
+    getInternalConfig(type, Inheritance.class);
+    JAnnotation inheritanceAnn = _annotationCfg.getAnnotation();
+    InheritanceConfig inheritanceConfig = _annotationCfg.getInheritanceConfig();
 
     JAnnotation discValueAnn = type.getAnnotation(DiscriminatorValue.class);
 
@@ -599,7 +636,9 @@ public class EntityIntrospector {
 
       subType.getParentType().addSubClass(subType);
 
-      JAnnotation joinAnn = type.getAnnotation(PrimaryKeyJoinColumn.class);
+      getInternalConfig(type, PrimaryKeyJoinColumn.class);
+      JAnnotation joinAnn = _annotationCfg.getAnnotation();
+      PrimaryKeyJoinColumnConfig primaryKeyJoinColumnConfig = _annotationCfg.getPrimaryKeyJoinColumnConfig();
 
       if (subType.isJoinedSubClass()) {
         linkInheritanceTable(subType.getRootType().getTable(),
@@ -618,8 +657,9 @@ public class EntityIntrospector {
       break;
     }
 
-    JAnnotation discriminatorAnn =
-      type.getAnnotation(DiscriminatorColumn.class);
+    getInternalConfig(type, DiscriminatorColumn.class);
+    JAnnotation discriminatorAnn = _annotationCfg.getAnnotation();
+    DiscriminatorColumnConfig discriminatorConfig = _annotationCfg.getDiscriminatorColumnConfig();
 
     String columnName = null;
 
@@ -704,14 +744,11 @@ public class EntityIntrospector {
       if (parentType != null && parentType.getField(fieldName) != null)
         continue;
 
-      JAnnotation id = method.getAnnotation(javax.persistence.Id.class);
+      getInternalConfig(method, javax.persistence.Id.class);
+      JAnnotation id = _annotationCfg.getAnnotation();
+      IdConfig idConfig = _annotationCfg.getIdConfig();
 
-      IdConfig idConfig = null;
-
-      if (attributesConfig != null)
-        idConfig = attributesConfig.getId(fieldName);
-
-      if ((id != null) || (idConfig != null)) {
+      if (! _annotationCfg.isNull()) {
         idField = introspectId(persistenceUnit,
                                entityType,
                                method,
@@ -723,10 +760,11 @@ public class EntityIntrospector {
           keys.add(idField);
       }
       else {
-        JAnnotation embeddedId
-          = method.getAnnotation(javax.persistence.EmbeddedId.class);
+        getInternalConfig(method, javax.persistence.EmbeddedId.class);
+        JAnnotation embeddedId = _annotationCfg.getAnnotation();
+        EmbeddedIdConfig embeddedIdConfig = _annotationCfg.getEmbeddedIdConfig();
 
-        if (embeddedId != null) {
+        if (! _annotationCfg.isNull()) {
           idField = introspectEmbeddedId(persistenceUnit,
                                          entityType,
                                          method,
@@ -785,16 +823,19 @@ public class EntityIntrospector {
       if (parentType != null && parentType.getField(fieldName) != null)
         continue;
 
-      JAnnotation id = field.getAnnotation(javax.persistence.Id.class);
-      JAnnotation embeddedId
-        = field.getAnnotation(javax.persistence.EmbeddedId.class);
+      getInternalConfig(field, javax.persistence.Id.class);
+      JAnnotation id = _annotationCfg.getAnnotation();
+      IdConfig idConfig = _annotationCfg.getIdConfig();
 
-      IdConfig idConfig = null;
+      boolean hasId = ! _annotationCfg.isNull();
 
-      if (attributesConfig != null)
-        idConfig = attributesConfig.getId(fieldName);
+      getInternalConfig(field, javax.persistence.EmbeddedId.class);
+      JAnnotation embeddedId = _annotationCfg.getAnnotation();
+      EmbeddedIdConfig embeddedIdConfig = _annotationCfg.getEmbeddedIdConfig();
 
-      if ((id == null) && (embeddedId == null) && (idConfig == null))
+      boolean hasEmbeddedId = ! _annotationCfg.isNull();
+
+      if (! (hasId || hasEmbeddedId))
         continue;
 
       IdField idField = introspectId(persistenceUnit,
@@ -834,12 +875,17 @@ public class EntityIntrospector {
       return false;
 
     for (JField field : type.getDeclaredFields()) {
-      JAnnotation id = field.getAnnotation(javax.persistence.Id.class);
+
+      getInternalConfig(field, javax.persistence.Id.class);
+      JAnnotation id = _annotationCfg.getAnnotation();
+      Object idConfig = _annotationCfg.getIdConfig();
 
       if (id != null)
         return true;
 
-      id = field.getAnnotation(javax.persistence.EmbeddedId.class);
+      getInternalConfig(field, javax.persistence.EmbeddedId.class);
+      id = _annotationCfg.getAnnotation();
+      idConfig = _annotationCfg.getEmbeddedIdConfig();
 
       if (id != null)
         return true;
@@ -857,13 +903,19 @@ public class EntityIntrospector {
     throws ConfigException, SQLException
   {
     JAnnotation id = field.getAnnotation(javax.persistence.Id.class);
-    JAnnotation column = field.getAnnotation(javax.persistence.Column.class);
-    JAnnotation gen = field.getAnnotation(javax.persistence.GeneratedValue.class);
 
-    ColumnConfig columnConfig = null;
+    getInternalConfig(field, javax.persistence.Column.class);
+    JAnnotation column = _annotationCfg.getAnnotation();
+    ColumnConfig columnConfig = _annotationCfg.getColumnConfig();
+    //
+    //    ColumnConfig columnConfig = null;
+    //
+    //    if (idConfig != null)
+    //      columnConfig = idConfig.getColumn();
 
-    if (idConfig != null)
-      columnConfig = idConfig.getColumn();
+    getInternalConfig(field, javax.persistence.GeneratedValue.class);
+    JAnnotation gen = _annotationCfg.getAnnotation();
+    GeneratedValueConfig generatedValueConfig = _annotationCfg.getGeneratedValueConfig();
 
     Type amberType = persistenceUnit.createType(fieldType);
 
@@ -1103,7 +1155,11 @@ public class EntityIntrospector {
         continue;
       }
 
-      if (method.getAnnotation(Version.class) != null) {
+      getInternalConfig(method, Version.class);
+      JAnnotation versionAnn = _annotationCfg.getAnnotation();
+      VersionConfig versionConfig = _annotationCfg.getVersionConfig();
+
+      if (! _annotationCfg.isNull()) {
         validateNonGetter(method);
       }
       else {
@@ -1212,7 +1268,9 @@ public class EntityIntrospector {
       addVersion(sourceType, field, fieldName, fieldType);
     }
     else if (field.isAnnotationPresent(javax.persistence.ManyToOne.class)) {
-      JAnnotation ann = field.getAnnotation(javax.persistence.ManyToOne.class);
+      getInternalConfig(field, javax.persistence.ManyToOne.class);
+      JAnnotation ann = _annotationCfg.getAnnotation();
+      ManyToOneConfig manyToOneConfig = _annotationCfg.getManyToOneConfig();
 
       validateAnnotations(field, _manyToOneAnnotations);
 
@@ -1283,7 +1341,9 @@ public class EntityIntrospector {
                                                        fieldName,
                                                        fieldType);
 
-      JAnnotation ann = field.getAnnotation(ManyToMany.class);
+      getInternalConfig(field, ManyToMany.class);
+      JAnnotation ann = _annotationCfg.getAnnotation();
+      ManyToManyConfig manyToManyConfig = _annotationCfg.getManyToManyConfig();
 
       if ("".equals(ann.getString("mappedBy")))
         _linkCompletions.add(completion);
@@ -1322,8 +1382,11 @@ public class EntityIntrospector {
   {
     AmberPersistenceUnit persistenceUnit = sourceType.getPersistenceUnit();
 
-    JAnnotation basicAnn = field.getAnnotation(javax.persistence.Basic.class);
-    JAnnotation columnAnn = field.getAnnotation(javax.persistence.Column.class);
+    JAnnotation basicAnn = field.getAnnotation(Basic.class);
+
+    getInternalConfig(field, javax.persistence.Column.class);
+    JAnnotation columnAnn = _annotationCfg.getAnnotation();
+    ColumnConfig columnConfig = _annotationCfg.getColumnConfig();
 
     if (_basicTypes.contains(fieldType.getName())) {
     }
@@ -1335,10 +1398,10 @@ public class EntityIntrospector {
 
     Type amberType = persistenceUnit.createType(fieldType);
 
-    ColumnConfig columnConfig = null;
-
-    if (basicConfig != null)
-      columnConfig = basicConfig.getColumn();
+    //    ColumnConfig columnConfig = null;
+    //
+    //    if (basicConfig != null)
+    //      columnConfig = basicConfig.getColumn();
 
     Column fieldColumn = createColumn(sourceType, field, fieldName,
                                       columnAnn, amberType, columnConfig);
@@ -1367,7 +1430,9 @@ public class EntityIntrospector {
   {
     AmberPersistenceUnit persistenceUnit = sourceType.getPersistenceUnit();
 
-    JAnnotation columnAnn = field.getAnnotation(javax.persistence.Column.class);
+    getInternalConfig(field, javax.persistence.Column.class);
+    JAnnotation columnAnn = _annotationCfg.getAnnotation();
+    ColumnConfig columnConfig = _annotationCfg.getColumnConfig();
 
     if (! _versionTypes.contains(fieldType.getName())) {
       throw error(field, L.l("{0} is an invalid @Version type for {1}.",
@@ -1376,8 +1441,8 @@ public class EntityIntrospector {
 
     Type amberType = persistenceUnit.createType(fieldType);
 
-    ColumnConfig columnConfig = null;
-
+    // ColumnConfig columnConfig = null;
+    //
     // if (versionConfig != null)
     //   columnConfig = Config.getColumn();
 
@@ -1472,11 +1537,16 @@ public class EntityIntrospector {
   {
     AmberPersistenceUnit persistenceUnit = sourceType.getPersistenceUnit();
 
-    JAnnotation manyToOneAnn = field.getAnnotation(ManyToOne.class);
+    getInternalConfig(field, ManyToOne.class);
+    JAnnotation manyToOneAnn = _annotationCfg.getAnnotation();
+    ManyToOneConfig manyToOneConfig = _annotationCfg.getManyToOneConfig();
 
     if (manyToOneAnn == null) {
       // XXX: ejb/0o03
-      manyToOneAnn = field.getAnnotation(OneToOne.class);
+
+      getInternalConfig(field, OneToOne.class);
+      manyToOneAnn = _annotationCfg.getAnnotation();
+      manyToOneConfig = _annotationCfg.getManyToOneConfig();
     }
 
     if (manyToOneAnn.get("fetch") == FetchType.EAGER) {
@@ -1487,12 +1557,18 @@ public class EntityIntrospector {
       }
     }
 
+    // getInternalConfig(field, JoinColumns.class);
     JAnnotation joinColumns = field.getAnnotation(JoinColumns.class);
+    // JoinColumnsConfig joinColumnsConfig = _annotationCfg.getJoinColumnsConfig();
+
     Object []joinColumnsAnn = null;
 
     if (joinColumns != null)
       joinColumnsAnn = (Object []) joinColumns.get("value");
-    JAnnotation joinColumnAnn = field.getAnnotation(JoinColumn.class);
+
+    getInternalConfig(field, JoinColumn.class);
+    JAnnotation joinColumnAnn = _annotationCfg.getAnnotation();
+    JoinColumnConfig joinColumnConfig = _annotationCfg.getJoinColumnConfig();
 
     if (joinColumnsAnn != null && joinColumnAnn != null) {
       throw error(field, L.l("{0} may not have both @JoinColumn and @JoinColumns",
@@ -1650,7 +1726,9 @@ public class EntityIntrospector {
                              JClass fieldType)
     throws ConfigException
   {
-    JAnnotation manyToManyAnn = field.getAnnotation(ManyToMany.class);
+    getInternalConfig(field, ManyToMany.class);
+    JAnnotation manyToManyAnn = _annotationCfg.getAnnotation();
+    ManyToManyConfig manyToManyConfig = _annotationCfg.getManyToManyConfig();
 
     JType retType;
 
@@ -1705,7 +1783,9 @@ public class EntityIntrospector {
 
     String sqlTable = sourceType.getTable().getName() + "_" + targetType.getTable().getName();
 
-    JAnnotation joinTableAnn = field.getAnnotation(JoinTable.class);
+    getInternalConfig(field, JoinTable.class);
+    JAnnotation joinTableAnn = _annotationCfg.getAnnotation();
+    JoinTableConfig joinTableConfig = _annotationCfg.getJoinTableConfig();
 
     Table mapTable = null;
 
@@ -1753,9 +1833,11 @@ public class EntityIntrospector {
                                                   targetType.getTable(),
                                                   targetColumns));
 
-    JAnnotation mapKeyAnn = field.getAnnotation(MapKey.class);
+    getInternalConfig(field, MapKey.class);
+    JAnnotation mapKeyAnn = _annotationCfg.getAnnotation();
+    MapKeyConfig mapKeyConfig = _annotationCfg.getMapKeyConfig();
 
-    if (mapKeyAnn != null) {
+    if (! _annotationCfg.isNull()) {
 
       String key = mapKeyAnn.getString("name");
 
@@ -1990,7 +2072,9 @@ public class EntityIntrospector {
     void complete()
       throws ConfigException
     {
-      JAnnotation oneToManyAnn = _field.getAnnotation(OneToMany.class);
+      getInternalConfig(_field, OneToMany.class);
+      JAnnotation oneToManyAnn = _annotationCfg.getAnnotation();
+      OneToManyConfig oneToManyConfig = _annotationCfg.getOneToManyConfig();
 
       AmberPersistenceUnit persistenceUnit = _entityType.getPersistenceUnit();
 
@@ -2018,11 +2102,20 @@ public class EntityIntrospector {
                                 _field.getName()));
 
       EntityType targetType = persistenceUnit.getEntity(targetName);
-      if (targetType == null)
-        throw error(_field,
-                    L.l("targetEntity '{0}' is not an @Entity bean for {1}.  The targetEntity of a @OneToMany collection must be an @Entity bean.",
-                        targetName,
-                        _field.getName()));
+      if (targetType == null) {
+
+        EntityConfig entityConfig = null;
+
+        if (_entityConfigMap != null) {
+          entityConfig = _entityConfigMap.get(targetName);
+        }
+
+        if (entityConfig == null)
+          throw error(_field,
+                      L.l("targetEntity '{0}' is not an @Entity bean for {1}.  The targetEntity of a @OneToMany collection must be an @Entity bean.",
+                          targetName,
+                          _field.getName()));
+      }
 
       String mappedBy = oneToManyAnn.getString("mappedBy");
 
@@ -2039,7 +2132,11 @@ public class EntityIntrospector {
                                         String mappedBy)
       throws ConfigException
     {
-      if (_field.getAnnotation(JoinTable.class) != null) {
+      getInternalConfig(_field, JoinTable.class);
+      JAnnotation joinTableAnn = _annotationCfg.getAnnotation();
+      JoinTableConfig joinTableConfig = _annotationCfg.getJoinTableConfig();
+
+      if (! _annotationCfg.isNull()) {
         throw error(_field,
                     L.l("Bidirectional @ManyToOne property {0} may not have a @JoinTable annotation.",
                         _field.getName()));
@@ -2058,9 +2155,11 @@ public class EntityIntrospector {
       oneToMany = new EntityOneToManyField(_entityType, _fieldName);
       oneToMany.setSourceField(sourceField);
 
-      JAnnotation mapKeyAnn = _field.getAnnotation(MapKey.class);
+      getInternalConfig(_field, MapKey.class);
+      JAnnotation mapKeyAnn = _annotationCfg.getAnnotation();
+      MapKeyConfig mapKeyConfig = _annotationCfg.getMapKeyConfig();
 
-      if (mapKeyAnn != null) {
+      if (! _annotationCfg.isNull()) {
 
         String key = mapKeyAnn.getString("name");
 
@@ -2092,8 +2191,9 @@ public class EntityIntrospector {
 
       String sqlTable = _entityType.getTable().getName() + "_" + targetType.getTable().getName();
 
-      JAnnotation joinTableAnn =
-        _field.getAnnotation(JoinTable.class);
+      getInternalConfig(_field, JoinTable.class);
+      JAnnotation joinTableAnn = _annotationCfg.getAnnotation();
+      JoinTableConfig joinTableConfig = _annotationCfg.getJoinTableConfig();
 
       Table mapTable = null;
 
@@ -2141,9 +2241,11 @@ public class EntityIntrospector {
                                                     targetType.getTable(),
                                                     targetColumns));
 
-      JAnnotation mapKeyAnn = _field.getAnnotation(MapKey.class);
+      getInternalConfig(_field, MapKey.class);
+      JAnnotation mapKeyAnn = _annotationCfg.getAnnotation();
+      MapKeyConfig mapKeyConfig = _annotationCfg.getMapKeyConfig();
 
-      if (mapKeyAnn != null) {
+      if (! _annotationCfg.isNull()) {
 
         String key = mapKeyAnn.getString("name");
 
@@ -2188,7 +2290,9 @@ public class EntityIntrospector {
     void complete()
       throws ConfigException
     {
-      JAnnotation oneToOneAnn = _field.getAnnotation(OneToOne.class);
+      getInternalConfig(_field, OneToOne.class);
+      JAnnotation oneToOneAnn = _annotationCfg.getAnnotation();
+      OneToOneConfig oneToOneConfig = _annotationCfg.getOneToOneConfig();
 
       if (oneToOneAnn.get("fetch") == FetchType.EAGER) {
         if (_entityType.getBeanClass().getName().equals(_fieldType.getName())) {
@@ -2350,10 +2454,21 @@ public class EntityIntrospector {
     void complete()
       throws ConfigException
     {
-      JAnnotation attributeOverrideAnn = _field.getAnnotation(AttributeOverride.class);
+      getInternalConfig(_field, AttributeOverride.class);
+      JAnnotation attributeOverrideAnn = _annotationCfg.getAnnotation();
+      AttributeOverrideConfig attributeOverrideConfig = _annotationCfg.getAttributeOverrideConfig();
+
+      boolean hasAttributeOverride = ! _annotationCfg.isNull();
+
       JAnnotation attributeOverridesAnn = _field.getAnnotation(AttributeOverrides.class);
 
-      if (attributeOverrideAnn != null && attributeOverridesAnn != null) {
+      // getInternalConfig(_field, AttributeOverrides.class);
+      // JAnnotation attributeOverridesAnn = _annotationCfg.getAnnotation();
+      // AttributeOverridesConfig attributeOverridesConfig = _annotationCfg.getAttributeOverridesConfig();
+
+      boolean hasAttributeOverrides = ! _annotationCfg.isNull();
+
+      if (hasAttributeOverride && hasAttributeOverrides) {
         throw error(_field, L.l("{0} may not have both @AttributeOverride and @AttributeOverrides",
                                 _field.getName()));
       }
