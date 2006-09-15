@@ -31,13 +31,36 @@ load balancing, and JVM arguments.</p>
 <p>&lt;accept-listen-backlog> configures operating system TCP listen
 queue size for the port.</p>
 
+<p>When a browser connects to a server, the server's operating
+system handles the TCP initialization before handing the socket to
+the server's application.  The operating system will hold the opened
+connections in a small queue, until the application is ready to
+receive them.  When the queue fills up, the operating system will
+start refusing new connections.</p>
+
+<default>100</default>
+
 </defun>
 
 <defun title="&lt;accept-thread-max>" version="Resin 3.1">
 <parents>http, connection-port, protocol</parents>
 
-<p>&lt;accept-thread-min> configures the maximum number of 
-threads listening for new connections on this port.</p>
+<p>&lt;accept-thread-max> configures the maximum number of 
+threads listening for new connections on this port.  &lt;accept-thread-max>
+works with &lt;accept-thread-min> to handle spiky loads without
+creating and destroying too many threads.</p>
+
+<p>Socket connections are associated with a thread which handles
+the request.  In Resin, a number of threads wait to accept a new
+connection and then handle the request.  &lt;accept-thread-max>
+specifies the maximum number of threads which are waiting for
+a new connection.</p>
+
+<p>Larger values handle spiky loads better but require more threads
+to wait for the connections.  Smaller values use less threads, but may
+be slower handling spikes.</p>
+
+<default>10</default>
 
 </defun>
 
@@ -45,7 +68,21 @@ threads listening for new connections on this port.</p>
 <parents>http, connection-port, protocol</parents>
 
 <p>&lt;accept-thread-min> configures the minimum number of 
-threads listening for new connections on this port.</p>
+threads listening for new connections on this port   &lt;accept-thread-min>
+works with &lt;accept-thread-max> to handle spiky loads without
+creating and destroying too many threads.</p>
+
+<p>Socket connections are associated with a thread which handles
+the request.  In Resin, a number of threads wait to accept a new
+connection and then handle the request.  &lt;accept-thread-min>
+specifies the minimum number of threads which are waiting for
+a new connection.  If many connections appear rapidly with a small
+value of &lt;accept-thread-min>, the application
+may pause until a new thread is available for the new connection.</p>
+
+<p>Larger values handle spiky loads better but require more threads
+to wait for the connections.  Smaller values use less threads, but may
+be slower handling spikes.</p>
 
 </defun>
 
@@ -188,13 +225,14 @@ the command line, typically -X memory parameters and -D defines.</p>
 <defun title="&lt;keepalive-max>" version="Resin 3.1">
 <parents>server</parents>
 
-<p>&lt;keepalive-max> configures the maximum number of
-threads which can be used directly for keepalive connections.
-Connections beyond &lt;keepalive-thread-max> are put into the select
-keepalive manager (which is larger), releasing the thread to handle
-other requests.</p>
+<p>&lt;keepalive-max> configures the maximum number of sockets
+which can be used directly for <g>keepalive</g> connections.
+In Resin Professional, the <g>select manager</g> allows for
+a much larger number of keepalive sockets, since it can detach
+threads from connections.  Without the select manager, each
+connection is associated with a thread.</p>
 
-<p>A value of -1 disables thread keepalives.</p>
+<p>A value of -1 disables keepalives.</p>
 
 <p>Keepalives are an important TCP technique used with HTTP and
 Resin's load-balancing to avoid the heavy network cost of creating
@@ -665,7 +703,7 @@ thread pool.</p>
 <tr><td>keepalive-max</td>
     <td>the maximum number of keepalive connections</td>
     <td>512</td></tr>
-<tr><td>keepalive-timeout</td>
+<tr><td>keepalive-thread-timeout</td>
     <td>the maximum time a connection is maintained in the keepalive state</td>
     <td>120s</td></tr>
 </deftable-childtags>

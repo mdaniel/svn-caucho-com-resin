@@ -548,12 +548,13 @@ to the root directory.</p>
 <defun title="&lt;server>" version="Resin 3.1">
 <parents>cluster</parents>
 
-<p>Each server is a JVM instance in the cluster and must be configured
-with a &lt;server&gt; tag.  Each &lt;server&gt; is uniquely identified by
+<p>The &lt;server> tag confgiures a JVM instance in
+the cluster.  Each &lt;server&gt; is uniquely identified by
 its <var>id</var> attribute.  The <var>id</var> will match
 the -server-id command line argument.</p>
 
-<p>See the full <a href="server-tags.xtp">server configuration</a>.</p>
+<p>See the full <a href="server-tags.xtp">server configuration</a>
+for more details of the &lt;server> tag and its children.</p>
 
 <p>The current server is managed with a
 <a href="javadoc|com.caucho.management.server.ServerMXBean">ServerMXBean</a>.

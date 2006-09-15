@@ -117,6 +117,60 @@ element gone {
 </def>
 </defun>
 
+<defun title="&lt;load-balance>">
+<parents>rewrite-dispatch</parents>
+
+<p>&lt;load-balance> forwards requests from a <g>web-tier</g> server
+to a cluster of <g>app-tier</g> servers for
+<a href="resin-load-balance.xtp">load-balancing</a>.  Load balancing
+provides scalability by splitting load among many application servers
+and increases reliability by avoiding servers which are upgrading or
+restarting.</p>
+
+<p>In the following example, the web-tier load-balances all traffic
+to a cluster of backend application servers.  Because the web-tier
+has a <a href="performance|caching.xtp">proxy cache</a>, static pages
+and cached pages will be served directory from the web-tier.</p>
+
+<p>&lt;load-balance> requires Resin Professional.</p>
+
+<example title="Load balancing to an app-tier">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+
+  &lt;cluster id="web-tier">
+    &lt;server id="web-a" address="192.168.2.1">
+      &lt;http port="80"/>
+    &lt;/server>
+
+    &lt;cache/>
+
+    &lt;host id="">
+      &lt;web-app id="/">
+
+        &lt;rewrite-dispatch>
+          &lt;load-balance regexp="" cluster="app-tier"/>
+        &lt;/rewrite-dispatch>
+
+      &lt;/web-app>
+    &lt;/host>
+
+  &lt;cluster id="app-tier">
+    &lt;server id="app-a" address="192.168.3.1">
+    &lt;server id="app-b" address="192.168.3.2">
+    ...
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+<def title="load-balance grammar">
+element load-balance {
+  regexp &amp; cluster
+}
+</def>
+
+</defun>
+
+
 <defun title="&lt;moved-permanently>">
 <parents>rewrite-dispatch</parents>
 
