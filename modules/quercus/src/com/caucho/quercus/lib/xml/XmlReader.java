@@ -1,3 +1,31 @@
+/*
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *   Free SoftwareFoundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
 package com.caucho.quercus.lib.xml;
 
 import com.caucho.util.L10N;
@@ -27,13 +55,18 @@ public class XmlReader {
 
   private int _depth;
   private int _lastNodeType;
+  private int _lastNonTextNode;
 
-  private int _nextType;
+  private int _currentNodeType;
+
+  private boolean _hasAttribute;
 
   private XMLStreamReader  _streamReader;
 
   private static final HashMap<Integer, Integer> _constConvertMap =
   	new HashMap<Integer, Integer>();
+
+  private  HashMap<String, Integer> _startElements;
 
   public static final int NONE = 0;
   public static final int ELEMENT = 1;
@@ -69,9 +102,13 @@ public class XmlReader {
   public XmlReader(@Optional String[] string) {
     _depth = 0;
     _lastNodeType = -1;
-    _nextType = XMLStreamConstants.START_DOCUMENT;
+    _currentNodeType = XMLStreamConstants.START_DOCUMENT;
 
     _streamReader = null;
+
+    _startElements = new HashMap<String, Integer>();
+
+    _hasAttribute = false;
   }
 
   /**
@@ -81,15 +118,15 @@ public class XmlReader {
    * @param operation name of the operation being performed (i.e. read, etc.)
    * @return true if the stream is open, false otherwise
    */
-  private boolean streamIsOpen(Env env, @ReadOnly String operation) {
+  private boolean streamIsOpen(Env env, String operation) {
     if (! streamIsOpen()) {
       env.warning(L.l("Load Data before trying to " + operation));
 
       return false;
-   }
+    }
 
     return true;
-   }
+  }
 
   /**
    * Determines if the stream has been opened.
@@ -110,6 +147,9 @@ public class XmlReader {
       return NullValue.NULL;
 
     try {
+    	if (_currentNodeType == XMLStreamConstants.CHARACTERS)
+    		return LongValue.create(0);
+
       return LongValue.create(_streamReader.getAttributeCount());
     }
     catch (IllegalStateException ex) {
@@ -159,7 +199,10 @@ public class XmlReader {
       return NullValue.NULL;
 
     try {
-      return BooleanValue.create(_streamReader.getAttributeCount() > 0);
+    	if (_currentNodeType == XMLStreamConstants.CHARACTERS)
+    		return BooleanValue.FALSE;
+
+      return BooleanValue.create(_hasAttribute ||  _streamReader.getAttributeCount() > 0);
     }
     catch (IllegalStateException ex) {
       log.log(Level.WARNING, ex.toString(), ex);
@@ -190,8 +233,9 @@ public class XmlReader {
       return NullValue.NULL;
 
     // XXX:  StreamReaderImpl.isAttributeSpecified() only checks for
-    // attribute existence
-    return BooleanValue.create(_streamReader.isAttributeSpecified(0));
+    // attribute existence.  This should be tested against the atttribute list
+    // but couldn't find anything like that in StreamReader.
+    return BooleanValue.FALSE;
   }
 
   /**
@@ -203,7 +247,11 @@ public class XmlReader {
     if (! streamIsOpen())
       return NullValue.NULL;
 
-    return BooleanValue.create(! _streamReader.hasText());
+    // XXX: The only case I found for isEmptyElement was for something
+    // like <element/>.  Even something like <element></element> was
+    // not considered empty.  Currently, <element/> is being returned as
+    // <element></element> so it can't be tested properly.
+    return BooleanValue.FALSE;
   }
 
   /**
@@ -215,7 +263,16 @@ public class XmlReader {
     if (! streamIsOpen())
       return NullValue.NULL;
 
-    return StringValue.create(_streamReader.getLocalName());
+    String name = "";
+
+  	if (_currentNodeType == XMLStreamConstants.CHARACTERS)
+  		name = "#text";
+  	else if (_currentNodeType == XMLStreamConstants.COMMENT)
+  		name = "#comment";
+  	else
+  		name = _streamReader.getLocalName();
+
+    return StringValue.create(name);
   }
 
   /**
@@ -228,7 +285,25 @@ public class XmlReader {
       return NullValue.NULL;
 
     try {
-      return StringValue.create(_streamReader.getName().toString());
+    	String name = "";
+
+    	// XXX: Next line should be "String prefix = _streamReader.getPrefix();"
+    	// but there was a NullPointerException for XMLStreamReaderImpl._name.
+
+    	String prefix = null; // _streamReader.getPrefix();
+
+    	if (_currentNodeType == XMLStreamConstants.CHARACTERS)
+    		name = "#text";
+    	else if (_currentNodeType == XMLStreamConstants.COMMENT)
+    		name = "#comment";
+    	else {
+    		if (prefix == null)
+    			name = _streamReader.getName().toString();
+    		else
+    			name = prefix + ":" + _streamReader.getLocalName().toString();
+    	}
+
+      return StringValue.create(name);
     }
     catch (IllegalStateException ex) {
       log.log(Level.WARNING, ex.toString(), ex);
@@ -255,10 +330,26 @@ public class XmlReader {
    * @return the node type, otherwise null
    */
   public Value getNodeType() {
-    if (! streamIsOpen())
-      return NullValue.NULL;
+  	if (! streamIsOpen())
+  		return NullValue.NULL;
 
-    return getConvertedNextType();
+  	/*
+  	Integer convertedInteger = _constConvertMap.get(_nextType);
+
+  	int convertedInt = convertedInteger.intValue();
+
+  	return LongValue.create(convertedInt);*/
+
+  	int convertedInt = SIGNIFICANT_WHITESPACE;
+
+  	if (! _streamReader.isWhiteSpace()) {
+  		Integer convertedInteger =
+  		_constConvertMap.get(_streamReader.getEventType());
+
+  		convertedInt = convertedInteger.intValue();
+  	}
+
+  	return LongValue.create(convertedInt);
   }
 
   /**
@@ -282,7 +373,13 @@ public class XmlReader {
     if (! streamIsOpen())
       return NullValue.NULL;
 
-    return StringValue.create(_streamReader.getText());
+    // XXX: This is returning an end of line along with the text when
+    // it probably should be only the text.
+
+    if (_currentNodeType != XMLStreamConstants.END_ELEMENT)
+    	return StringValue.create(_streamReader.getText());
+
+    return StringValue.create(null);
   }
 
   /**
@@ -294,8 +391,8 @@ public class XmlReader {
     if (! streamIsOpen())
       return NullValue.NULL;
 
-    // XXX: Not sure if this is the proper implementation or not.
-    return StringValue.create(_streamReader.getEncoding());
+    // XXX: Defaulted for now.
+    return StringValue.create("");
   }
 
   /**
@@ -475,7 +572,11 @@ public class XmlReader {
    *
    */
   private void updateLastNode() {
-    _lastNodeType = _nextType;
+    _lastNodeType = _currentNodeType;
+
+    if (_currentNodeType != XMLStreamConstants.CHARACTERS &&
+    		_currentNodeType != XMLStreamConstants.COMMENT)
+    	_lastNonTextNode = _currentNodeType;
   }
 
   /**
@@ -483,12 +584,37 @@ public class XmlReader {
    *
    */
   private void updateDepth(Env env) {
-    if (_lastNodeType != XMLStreamConstants.START_DOCUMENT &&
-    		_streamReader.isStartElement())
+    if (_lastNodeType == XMLStreamConstants.START_ELEMENT &&
+    		! _streamReader.isEndElement())
       _depth++;
-    else if (_lastNodeType != XMLStreamConstants.START_ELEMENT &&
-    		_streamReader.isEndElement())
-      _depth--;
+    else if ((_lastNodeType == XMLStreamConstants.CHARACTERS ||
+    		_lastNodeType == XMLStreamConstants.COMMENT) &&
+    		_currentNodeType == XMLStreamConstants.END_ELEMENT)
+    	_depth--;
+  }
+
+  /**
+   * Maintains the _hasAttribute variable.
+   *
+   */
+  private void updateAttribute(Env env) {
+  	_hasAttribute = false;
+
+  	String key = getName(env).toString() + _depth;
+
+  	 if (_currentNodeType == XMLStreamConstants.START_ELEMENT &&
+  		   _streamReader.getAttributeCount() > 0) {
+  			 _startElements.put(key, _depth);
+
+  			 _hasAttribute = true;
+  		 }
+
+  	 if (_currentNodeType == XMLStreamConstants.END_ELEMENT &&
+  		   _startElements.containsKey(key))  {
+  				 _hasAttribute = true;
+
+  				 _startElements.remove(key);
+  	}
   }
 
   /**
@@ -504,21 +630,25 @@ public class XmlReader {
       if (! _streamReader.hasNext())
         return BooleanValue.FALSE;
 
-
       updateLastNode();
 
-      _nextType = _streamReader.next();
+      _currentNodeType = _streamReader.next();
 
-      if (_nextType == XMLStreamConstants.END_DOCUMENT)
+      if (_currentNodeType == XMLStreamConstants.SPACE)
+      	return read(env);
+
+      if (_currentNodeType == XMLStreamConstants.END_DOCUMENT)
       	return BooleanValue.FALSE;
 
       updateDepth(env);
+
+      updateAttribute(env);
 
     }
     catch (XMLStreamException ex) {
       log.log(Level.WARNING, ex.toString(), ex);
 
-      env.warning(L.l("Unable to read"));
+      env.warning(L.l("Unable to read :" + ex.toString()));
 
       return BooleanValue.FALSE;
     }
@@ -527,15 +657,7 @@ public class XmlReader {
   }
 
   public LongValue getNextType() {
-    return LongValue.create(_nextType);
-  }
-
-  public LongValue getConvertedNextType() {
-  	Integer convertedInteger = _constConvertMap.get(_nextType);
-
-  	int convertedInt = convertedInteger.intValue();
-
-  	return LongValue.create(convertedInt);
+    return LongValue.create(_currentNodeType);
   }
 
   /**
@@ -576,87 +698,49 @@ public class XmlReader {
   }
 
   static {
-  	_constConvertMap.put(
-  			new Integer(XMLStreamConstants.ATTRIBUTE),
-  			new Integer(ATTRIBUTE));
-  	_constConvertMap.put(
-  			new Integer(XMLStreamConstants.CDATA),
-  			new Integer(CDATA));
-  	_constConvertMap.put(
-  			new Integer(XMLStreamConstants.CHARACTERS),
-  			new Integer(TEXT));
-  	_constConvertMap.put(
-  			new Integer(XMLStreamConstants.COMMENT),
-  			new Integer(COMMENT));
-  	_constConvertMap.put(
-  			new Integer(XMLStreamConstants.END_ELEMENT),
-  			new Integer(END_ELEMENT));
+  	_constConvertMap.put(XMLStreamConstants.ATTRIBUTE,
+  			ATTRIBUTE);
+  	_constConvertMap.put(XMLStreamConstants.CDATA,
+  			CDATA);
+  	_constConvertMap.put(XMLStreamConstants.CHARACTERS,
+  			TEXT);
+  	_constConvertMap.put(XMLStreamConstants.COMMENT,
+  			COMMENT);
+  	_constConvertMap.put(XMLStreamConstants.END_ELEMENT,
+  			END_ELEMENT);
         /*
-  	_constConvertMap.put(
-  			new Integer(XMLStreamConstants.END_ENTITY),
-  			new Integer(END_ENTITY));
+  	_constConvertMap.put(XMLStreamConstants.END_ENTITY,
+  			END_ENTITY);
         */
-  	// XXX: XMLStreamConstants.ENTITY_DECLARATION is 17 in the Sun Docs
+  	// XXX: XMLStreamConstants.ENTITY_DECLARATION is 17 in the BAE docs
   	// but is 15 in the Resin implementation.
-  	_constConvertMap.put(
-  			new Integer(XMLStreamConstants.ENTITY_DECLARATION),
-  			new Integer(ENTITY)); // ENTITY used twice
-  	_constConvertMap.put(
-  			new Integer(XMLStreamConstants.ENTITY_REFERENCE),
-  			new Integer(ENTITY_REF));
-  	_constConvertMap.put(
-  			new Integer(XMLStreamConstants.NOTATION_DECLARATION),
-  			new Integer(NOTATION));
-  	_constConvertMap.put(
-  			new Integer(XMLStreamConstants.PROCESSING_INSTRUCTION),
-  			new Integer(PI));
-  	_constConvertMap.put(
-  			new Integer(XMLStreamConstants.SPACE),
-  			new Integer(WHITESPACE));
-  	_constConvertMap.put(
-  			new Integer(XMLStreamConstants.START_ELEMENT),
-  			new Integer(ELEMENT));
+  	_constConvertMap.put(XMLStreamConstants.ENTITY_DECLARATION,
+  			ENTITY); // ENTITY used twice
+  	_constConvertMap.put(XMLStreamConstants.ENTITY_REFERENCE,
+  			ENTITY_REF);
+  	_constConvertMap.put(XMLStreamConstants.NOTATION_DECLARATION,
+  			NOTATION);
+  	_constConvertMap.put(XMLStreamConstants.PROCESSING_INSTRUCTION,
+  			PI);
+  	_constConvertMap.put(XMLStreamConstants.SPACE,
+  			WHITESPACE);
+  	_constConvertMap.put(XMLStreamConstants.START_ELEMENT,
+  			ELEMENT);
         /*
-  	_constConvertMap.put(
-  			new Integer(XMLStreamConstants.START_ENTITY),
-  			new Integer(ENTITY));
+  	_constConvertMap.put(XMLStreamConstants.START_ENTITY,
+  			ENTITY);
         */
   	// Following constants did not match
-  	_constConvertMap.put(
-  			new Integer(XMLStreamConstants.DTD),
-  			new Integer(NONE));
-  	_constConvertMap.put(
-  			new Integer(XMLStreamConstants.END_DOCUMENT),
-  			new Integer(NONE));
-  	_constConvertMap.put(
-  			new Integer(XMLStreamConstants.NAMESPACE),
-  			new Integer(NONE));
-  	_constConvertMap.put(
-  			new Integer(XMLStreamConstants.START_DOCUMENT),
-  			new Integer(NONE));
-  	_constConvertMap.put(
-  			new Integer(0),
-  			new Integer(NONE)); // Pre-Read
-  	_constConvertMap.put(
-  			new Integer(-1),
-  			new Integer(NONE));
-  	_constConvertMap.put(
-  			new Integer(-1),
-  			new Integer(DOC));
-  	_constConvertMap.put(
-  			new Integer(-1),
-  			new Integer(DOC_TYPE));
-  	_constConvertMap.put(
-  			new Integer(-1),
-  			new Integer(DOC_FRAGMENT));
-  	_constConvertMap.put(
-  			new Integer(-1),
-  			new Integer(DOC_TYPE));
-  	_constConvertMap.put(
-  			new Integer(-1),
-  			new Integer(SIGNIFICANT_WHITESPACE));
-  	_constConvertMap.put(
-  			new Integer(-1),
-  			new Integer(XML_DECLARATION));
+  	_constConvertMap.put(XMLStreamConstants.DTD, NONE);
+  	_constConvertMap.put(XMLStreamConstants.END_DOCUMENT, NONE);
+  	_constConvertMap.put(XMLStreamConstants.NAMESPACE, NONE);
+  	_constConvertMap.put(XMLStreamConstants.START_DOCUMENT, NONE);
+  	_constConvertMap.put(0, NONE); // Pre-Read
+  	_constConvertMap.put(-1, NONE);
+  	_constConvertMap.put(-1, DOC);
+  	_constConvertMap.put(-1, DOC_TYPE);
+  	_constConvertMap.put(-1, DOC_FRAGMENT);
+  	_constConvertMap.put(-1, DOC_TYPE);
+  	_constConvertMap.put(-1, XML_DECLARATION);
   }
 }
