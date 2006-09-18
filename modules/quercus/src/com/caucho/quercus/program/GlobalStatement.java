@@ -103,9 +103,9 @@ public class GlobalStatement extends Statement {
     out.println("\");");
 
     FunctionInfo funInfo = _var.getVarInfo().getFunction();
-    if ((funInfo.isVariableVar() || funInfo.isUsesSymbolTable())
-	&& ! funInfo.isPageMain()) {
-      // php/3a84, php/3235
+    if ((funInfo.isVariableVar() || funInfo.isUsesSymbolTable())) {
+      // php/3a84, php/3235, php/3b29
+      out.print("if (! env.isGlobalEnv()) ");
       out.print("env.setVar(\"");
       out.printJavaString(_var.getName());
       out.print("\", (Var) ");

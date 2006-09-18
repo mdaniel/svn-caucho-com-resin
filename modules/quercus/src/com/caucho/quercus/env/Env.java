@@ -1785,6 +1785,11 @@ public final class Env {
     return var;
   }
 
+  public boolean isGlobalEnv()
+  {
+    return _map == _globalMap;
+  }
+
   /**
    * Sets a value.
    */
