@@ -1,0 +1,246 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>Resin PHP Functions</title>
+  <version>Resin 3.0</version>
+
+  <description>
+<p>Quercus provides a number of Resin-specific function to
+integrate with JNDI, JMS, JMX, and provide extra debugging.</p>
+
+  </description>
+</header>
+
+<body>
+
+<localtoc/>
+
+<defun title="jndi_lookup">
+
+<p>Retrives an object from JNDI.  jndi_lookup is useful in a
+<a href="soa|index.xtp">SOA (Service Oriented Architecture)</a>
+system to locate a Java service.
+</p>
+
+<example>
+&lt;?php
+
+$conn = jndi_lookup("java:comp/env/jms/jms-connection-factory");
+$queue = jndi_lookup("java:comp/env/jms/test-queue");
+
+...
+?>
+</example>
+
+</defun>
+
+<defun title="mbean_explode">
+
+<p>Explodes a JMX ObjectName into an array.</p>
+
+<example title="mbean_explode">
+&lt;?php
+
+var_dump(mbean_explode("resin:type=WebApp,name=/foo,Host=bar.com"));
+
+?>
+</example>
+<results>
+array(4) {
+  [":domain:"]=>
+  string(5) "resin"
+  ["Host"]=>
+  string(7) "bar.com"
+  ["name"]=>
+  string(4) "/foo"
+  ["type"]=>
+  string(6) "WebApp"
+}
+</results>
+
+</defun>
+
+<defun title="mbean_implode">
+
+<p>Creates a JMX ObjectName from an array.</p>
+
+<example title="mbean_implode">
+&lt;?php
+
+$a = array(":domain:"=>"resin", "type" => "ThreadPool");
+
+var_dump(mbean_implode($a));
+
+?>
+</example>
+<results>
+resin:type=ThreadPool
+</results>
+
+</defun>
+
+<defun title="MBeanServer">
+
+<p>An object representing a JMX MBeanServer.</p>
+
+<example>
+&lt;?php
+
+$mbeanServer = new MBeanServer();
+
+$threadPool = $mbeanServer->lookup("resin:type=ThreadPool");
+
+echo "thread-max: " . $threadPool->threadMax;
+</example>
+
+<s2 title="lookup">
+
+<p>Returns a proxy to the mbean matching the given name.</p>
+
+<example>
+&lt;?php
+
+$mbeanServer = new MBeanServer();
+
+$threadPool = $mbeanServer->lookup("resin:type=ThreadPool");
+</example>
+
+</s2>
+
+<s2 title="query">
+
+<p>Returns mbean proxies matching the name pattern.</p>
+
+<example>
+&lt;?php
+
+$mbeanServer = new MBeanServer();
+
+foreach ($webApp in $mbeanServer->query("resin:type=WebApp,*")) {
+  echo $webApp->name . "&lt;br>\n";
+}
+</example>
+
+</s2>
+
+</defun>
+
+<defun title="resin_debug">
+
+<p>Write debugging information to the log.  The log is at INFO level.</p>
+
+<example title="resin_thread_dump">
+&lt;?php
+
+$a = array("a", "b");
+
+resin_debug("ARRAY: $a[0]");
+
+?>
+</example>
+
+</defun>
+
+<defun title="resin_thread_dump">
+
+<p>Produce a thread_dump to the logs.  The log is at INFO level.</p>
+
+<example title="resin_thread_dump">
+&lt;?php
+
+$a = array("a"=>"b");
+
+resin_thread_dump();
+
+?>
+</example>
+
+</defun>
+
+<defun title="resin_var_dump">
+
+<p>Produce a var_dump to the logs.  The log is at INFO level.</p>
+
+<example title="resin_var_dump">
+&lt;?php
+
+$a = array("a"=>"b");
+
+resin_var_dump($a);
+
+?>
+</example>
+
+</defun>
+
+<defun title="resin_version">
+
+<p>Returns the version of Resin running Quercus.</p>
+
+<example>
+&lt;?php
+
+var_dump(resin_version());
+
+?>
+</example>
+
+</defun>
+
+<defun title="xa_begin">
+
+<p>Starts a distributed transaction.  All database connections will
+automatically participate in the transaction.</p>
+
+<example>
+&lt;?php
+
+xa_begin();
+
+...
+
+xa_commit();
+?>
+</example>
+
+</defun>
+
+<defun title="xa_commit">
+
+<p>Commits a distributed transaction.  All database connections will
+automatically participate in the transaction.</p>
+
+<example>
+&lt;?php
+
+xa_begin();
+
+...
+
+xa_commit();
+?>
+</example>
+
+</defun>
+
+<defun title="xa_rollback">
+
+<p>Rollsback a distributed transaction.  All database connections will
+automatically participate in the transaction.</p>
+
+<example>
+&lt;?php
+
+xa_begin();
+
+...
+
+xa_rollback();
+?>
+</example>
+
+</defun>
+
+</body>
+
+</document>

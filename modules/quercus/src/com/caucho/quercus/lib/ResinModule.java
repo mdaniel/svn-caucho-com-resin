@@ -29,10 +29,9 @@
 
 package com.caucho.quercus.lib;
 
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 
-import java.util.Hashtable;
-import java.util.Map;
+import java.util.*;
 
 import javax.transaction.UserTransaction;
 import javax.transaction.SystemException;
@@ -68,6 +67,8 @@ import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.ReadOnly;
 
 import com.caucho.util.L10N;
+
+import com.caucho.vfs.*;
 
 
 public class ResinModule
@@ -297,6 +298,31 @@ public class ResinModule
 
       return objectName.getCanonicalName();
     } catch (MalformedObjectNameException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  /**
+   * Prints a debug version of the variable
+   *
+   * @param env the quercus calling environment
+   * @param v the variable to print
+   * @return the escaped stringPhp
+   */
+  public static Value resin_var_dump(Env env, @ReadOnly Value v)
+  {
+    try {
+      WriteStream out = Vfs.openWrite("stdout:");
+
+      if (v != null)
+	v.varDump(env, out, 0, new IdentityHashMap<Value,String>());
+
+      out.println();
+
+      out.close();
+
+      return NullValue.NULL;
+    } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
   }

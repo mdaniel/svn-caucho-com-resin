@@ -928,9 +928,11 @@ r_web-resource-collection = element web-resource-collection {
 }
 
 r_web-service-client = element web-service-client {
-  attribute jndi-name { string }
-  & element url { string }
-  & element interface { string }
+  r_jndi-name
+
+  & r_url
+
+  & r_interface
 }
 
 r_web-service = element web-service {
@@ -939,13 +941,13 @@ r_web-service = element web-service {
 
   & r_hessian-encoding*
 
-  & r_rest*
-
-  & r_soap-encoding*
-
   & r_init*
 
   & r_jndi-name?
+
+  & r_rest*
+
+  & r_soap-encoding*
 
   & r_var?
 }

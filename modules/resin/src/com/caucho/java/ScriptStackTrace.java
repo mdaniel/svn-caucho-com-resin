@@ -163,7 +163,7 @@ public class ScriptStackTrace {
     
     try {
       String pathName = cl.getName().replace('.', '/') + ".class";
-      
+
       InputStream is = loader.getResourceAsStream(pathName);
 
       if (is == null)
@@ -174,8 +174,17 @@ public class ScriptStackTrace {
 
 	Attribute attr = jClass.getAttribute("SourceDebugExtension");
 
-	if (attr == null)
+	if (attr == null) {
+	  int p = cl.getName().indexOf('$');
+	  
+	  if (p > 0) {
+	    String className = cl.getName().substring(0, p);
+
+	    return loadScriptMap(loader.loadClass(className));
+	  }
+
 	  return new LineMap();
+	}
 	else if (attr instanceof OpaqueAttribute) {
 	  byte []value = ((OpaqueAttribute) attr).getValue();
 

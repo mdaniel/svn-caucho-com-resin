@@ -278,8 +278,7 @@ public class QuercusSessionManager implements ObjectManager, AlarmListener {
       return null;
 
     if (isNew) {
-      killSession = ! load(env, session, now);
-      isNew = killSession;
+      isNew = ! load(env, session, now);
     }
     else if (! getSaveOnlyOnShutdown() && ! session.load()) {
       // if the load failed, then the session died out from underneath
@@ -287,13 +286,7 @@ public class QuercusSessionManager implements ObjectManager, AlarmListener {
       isNew = true;
     }
 
-    if (killSession) {
-      session.setValid(false);
-      _sessions.remove(key);
-
-      return null;
-    }
-    else if (! isNew)
+    if (! isNew)
       session.setAccess(now);
 
     return (SessionArrayValue)session.copy(env);
@@ -301,14 +294,15 @@ public class QuercusSessionManager implements ObjectManager, AlarmListener {
 
   public void saveSession(Env env, SessionArrayValue session)
   {
+    SessionArrayValue copy = (SessionArrayValue) session.copy(env);
+
+    _sessions.put(session.getId(), copy);
     session.finish();
-    _sessions.put(session.getId(), (SessionArrayValue) session.copy(env));
   }
 
   /**
    * Creates a session.  It's already been established that the
    * key does not currently have a session.
-   *
    */
   private SessionArrayValue create(Env env, String key, long now)
   {

@@ -215,6 +215,9 @@ public final class Env {
   private HashMap<StringValue,Path> _lookupCache
     = new HashMap<StringValue,Path>();
 
+  private HashMap<ConnectionEntry,ConnectionEntry> _connMap
+    = new HashMap<ConnectionEntry,ConnectionEntry>();
+
   private AbstractFunction _autoload;
 
   private long _startTime;
@@ -492,15 +495,39 @@ public final class Env {
   {
     DataSource database = _quercus.getDatabase();
 
-    if (database != null)
-      return database.getConnection();
+    if (database != null) {
+      ConnectionEntry entry = new ConnectionEntry();
+      entry.init(database, null, null);
+
+      ConnectionEntry oldEntry = _connMap.get(entry);
+
+      if (oldEntry != null)
+	return oldEntry.getConnection();
+
+      entry.setConnection(database.getConnection());
+      _connMap.put(entry, entry);
+      
+      return entry.getConnection();
+    }
 
     database = DatabaseManager.findDatabase(driver, url);
+    
+    ConnectionEntry entry = new ConnectionEntry();
+    entry.init(database, userName, password);
+
+    ConnectionEntry oldEntry = _connMap.get(entry);
+
+    if (oldEntry != null)
+      return oldEntry.getConnection();
 
     if (userName == null || userName.equals(""))
-      return database.getConnection();
+      entry.setConnection(database.getConnection());
     else
-      return database.getConnection(userName, password);
+      entry.setConnection(database.getConnection(userName, password));
+      
+    _connMap.put(entry, entry);
+      
+    return entry.getConnection();
   }
 
   /**
@@ -919,7 +946,18 @@ public final class Env {
     _session = session;
 
     if (session != null) {
-      setGlobalValue("_SESSION", session);
+      System.out.println("SS: " + session + " " + getGlobalVar("_SESSION"));
+
+      Value var = getGlobalVar("_SESSION");
+      
+      if (! (var instanceof SessionVar)) {
+	var = new SessionVar();
+	setGlobalValue("_SESSION", var);
+      }
+
+      var.set(session);
+      System.out.println("VAR: " + var);
+
       setGlobalValue("HTTP_SESSION_VARS", session);
 
       session.addUse();
@@ -1442,6 +1480,9 @@ public final class Env {
 
       _globalMap.put(name, var);
 
+      if (_request == null)
+	return null;
+
       ArrayValue post = new ArrayValueImpl();
 
       if (_post != null) {
@@ -1459,7 +1500,8 @@ public final class Env {
       }
 
       ArrayList<String> keys = new ArrayList<String>();
-      keys.addAll(_request.getParameterMap().keySet());
+      if (_request.getParameterMap() != null)
+	keys.addAll(_request.getParameterMap().keySet());
 
       Collections.sort(keys);
 
@@ -3766,6 +3808,27 @@ public final class Env {
     return Location.UNKNOWN;
   }
 
+  public int getSourceLine(String className, int javaLine)
+  {
+    if (className.startsWith("_quercus")) {
+      ClassLoader loader = SimpleLoader.create(WorkDir.getLocalWorkDir());
+      
+      LineMap lineMap = ScriptStackTrace.getScriptLineMap(className,
+							  loader);
+
+      LineMap.Line line = null;
+
+      if (lineMap != null)
+	line = lineMap.getLine(javaLine);
+
+      if (line != null) {
+	return line.getSourceLine(javaLine);
+      }
+    }
+
+    return javaLine;
+  }
+
   /**
    * Returns the current function.
    */
@@ -4026,6 +4089,55 @@ public final class Env {
 
       else
 	return false;
+    }
+  }
+
+  static class ConnectionEntry {
+    private DataSource _ds;
+    private String _user;
+    private String _password;
+    private Connection _conn;
+
+    public void init(DataSource ds, String user, String password)
+    {
+      _ds = ds;
+      _user = user;
+      _password = password;
+    }
+
+    public void setConnection(Connection conn)
+    {
+      _conn = conn;
+    }
+
+    public Connection getConnection()
+    {
+      return _conn;
+    }
+
+    public int hashCode()
+    {
+      int hash = _ds.hashCode();
+      
+      if (_user == null)
+	return hash;
+      else
+	return 65521 * hash + _user.hashCode();
+    }
+
+    public boolean equals(Object o)
+    {
+      if (! (o instanceof ConnectionEntry))
+	return false;
+
+      ConnectionEntry entry = (ConnectionEntry) o;
+
+      if (_ds != entry._ds)
+	return false;
+      else if (_user == null)
+	return entry._user == null;
+      else
+	return _user.equals(entry._user);
     }
   }
 

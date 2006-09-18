@@ -1330,6 +1330,76 @@ element.</p>
 
 </defun>
 
+<defun title="&lt;web-service>">
+<parents>web-app</parents>
+
+<p>The &lt;web-service> tag configures a bean as a service.
+The service can receive request from multiple protocols, including
+REST, SOAP, Hessian, and direct local-JVM calls.  The service
+will normally be configured with IoC.</p>
+
+<p>See the <a href="config|soa-tags.xtp#web-service">web-service</a>
+documentation for more information.</p>
+
+<p>See the <a href="soa|tutorial/esb-hello-world">hello world tutorial</a>
+for an example.</p>
+
+<deftable-childtags>
+<tr>
+  <td>class</td>
+  <td>Defines the implementation class for the web-service</td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>hessian</td>
+  <td>Adds a <a href="hessian|index.xtp">Hessian</a> port for
+the web service.</td>
+  <td></td>
+</tr>
+<tr>
+  <td>init</td>
+  <td>IoC-based initialization.  See <a href="soa|ioc-bean.xtp">IoC init
+documentation</a> for more information.</td>
+  <td></td>
+</tr>
+<tr>
+  <td>jndi-name</td>
+  <td>Specifies the jndi-name to store the web service for lookup
+by local-JVM clients.</td>
+  <td></td>
+</tr>
+<tr>
+  <td>rest</td>
+  <td>Adds a REST interface for the web service.</td>
+  <td></td>
+</tr>
+<tr>
+  <td>soap</td>
+  <td>Adds a SOAP interface for the web service.</td>
+  <td></td>
+</tr>
+<tr>
+  <td>var</td>
+  <td>Sets a Resin EL-variable for IoC injection for other beans in the
+resin.conf.</td>
+  <td></td>
+</tr>
+</deftable-childtags>
+
+<def title="web-service definition">
+element web-service {
+  class
+  &amp; hessian*
+  &amp; init*
+  &amp; jndi-name?
+  &amp; rest*
+  &amp; soap*
+  &amp; var?
+}
+</def>
+
+</defun>
+
 </body>
 
 </document>

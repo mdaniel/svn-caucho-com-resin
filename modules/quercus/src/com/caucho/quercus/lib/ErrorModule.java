@@ -51,12 +51,12 @@ import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Callback;
 
-import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.expr.FunctionExpr;
-import com.caucho.quercus.expr.MethodCallExpr;
+import com.caucho.quercus.expr.*;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
+
+import com.caucho.vfs.*;
 
 /**
  * PHP error handling.
@@ -118,44 +118,219 @@ public class ErrorModule extends AbstractQuercusModule {
   {
     ArrayValue result = new ArrayValueImpl();
 
-    for (int i = 1; i < env.getCallDepth(); i++) {
-      Expr expr = env.peekCall(i);
+    Exception e = new Exception();
+    e.fillInStackTrace();
 
-      ArrayValue call = new ArrayValueImpl();
-      result.put(call);
+    StackTraceElement []stack = e.getStackTrace();
+    int depth = 0;
 
-      if (expr instanceof FunctionExpr) {
-	FunctionExpr callExpr = (FunctionExpr) expr;
+    for (int i = 1; i < stack.length; i++) {
+      StackTraceElement elt = stack[i];
 
-	if (callExpr.getFileName() != null) {
-	  call.put("file", callExpr.getFileName());
-	  call.put("line", callExpr.getLine());
-	}
+      String name = elt.getMethodName();
+      String className = elt.getClassName();
+
+      // System.out.println("NAME: " + name + " " + elt.getClassName());
+    
+      if (name.equals("executeTop")) {
+	return result;
+      }
+      else if (className.startsWith("_quercus._")
+	  && name.equals("call")) {
+	String path = unmangleFile(className);
+	String fileName = Vfs.lookup("./" + path).getNativePath();
 	
-	call.put("function", callExpr.getName());
+	ArrayValue call = new ArrayValueImpl();
+	result.put(call);
+
+	call.put("file", fileName);
+	call.put("line", env.getSourceLine(className, elt.getLineNumber()));
+	
+	call.put("function", unmangleFunction(className));
 
 	call.put(new StringValueImpl("args"), new ArrayValueImpl());
       }
-      else if (expr instanceof MethodCallExpr) {
-	MethodCallExpr callExpr = (MethodCallExpr) expr;
-
-	if (callExpr.getFileName() != null) {
-	  call.put("file", callExpr.getFileName());
-	  call.put("line", callExpr.getLine());
-	}
+      else if (className.startsWith("_quercus._")
+	       && name.equals("callMethod")) {
+	String path = unmangleFile(className);
+	String fileName = Vfs.lookup("./" + path).getNativePath();
 	
-	call.put("function", callExpr.getName());
+	ArrayValue call = new ArrayValueImpl();
+	result.put(call);
 
-	call.put("class",
-		 env.peekCallThis(i).getQuercusClass().getName());
-
+	call.put("file", fileName);
+	call.put("line", env.getSourceLine(className, elt.getLineNumber()));
+	
+	call.put("function", unmangleFunction(className));
+	call.put("class", unmangleClass(className));
 	call.put("type", "->");
+
+	call.put(new StringValueImpl("args"), new ArrayValueImpl());
+      }
+      else if (className.startsWith("_quercus._")
+	       && name.equals("execute")) {
+	if (stack[i - 1].getMethodName().equals("include") &&
+	    stack[i - 1].getClassName().equals("com.caucho.quercus.env.Env")) {
+	  String path = unmangleFile(className);
+	  String fileName = Vfs.lookup("./" + path).getNativePath();
+	
+	  ArrayValue call = new ArrayValueImpl();
+	  result.put(call);
+
+	  call.put("file", fileName);
+	  call.put("line", env.getSourceLine(className, elt.getLineNumber()));
+
+	  call.put(new StringValueImpl("args"), new ArrayValueImpl());
+	}
+      }
+      else if (className.equals("com.caucho.quercus.expr.FunctionExpr")
+	       && name.equals("evalImpl")) {
+	if (stack[i - 1].getMethodName().equals("evalArguments")) {
+	}
+	else if (result.getSize() == 0 && depth == 0)
+	  depth++;
+	else
+	  addInterpreted(env, result, depth++);
+      }
+      else if (className.equals("com.caucho.quercus.expr.MethodCallExpr")
+	       && name.equals("eval")) {
+	if (stack[i - 1].getMethodName().equals("evalArguments")) {
+	}
+	else if (result.getSize() == 0 && depth == 0)
+	  depth++;
+	else
+	  addInterpreted(env, result, depth++);
+      }
+      else if (className.equals("com.caucho.quercus.expr.IncludeExpr")
+	       && name.equals("eval")) {
+	addInterpreted(env, result, depth++);
+      }
+      else if (className.startsWith("com.caucho.quercus")) {
+      }
+      else if (name.equals("invoke") || name.equals("invoke0")) {
+      }
+      else {
+	ArrayValue call = new ArrayValueImpl();
+	result.put(call);
+
+	call.put("file", elt.getFileName());
+	call.put("line", elt.getLineNumber());
+	
+	call.put("function", elt.getMethodName());
+	call.put("class", elt.getClassName());
 
 	call.put(new StringValueImpl("args"), new ArrayValueImpl());
       }
     }
 
     return result;
+  }
+
+  private static void addInterpreted(Env env, ArrayValue result, int i)
+  {
+    Expr expr = env.peekCall(i);
+    System.out.println("EX:" + expr);
+    if (expr instanceof FunctionExpr) {
+      FunctionExpr callExpr = (FunctionExpr) expr;
+
+      ArrayValue call = new ArrayValueImpl();
+      result.put(call);
+      
+      if (callExpr.getFileName() != null) {
+	call.put("file", callExpr.getFileName());
+	call.put("line", callExpr.getLine());
+      }
+	
+      call.put("function", callExpr.getName());
+
+      call.put(new StringValueImpl("args"), new ArrayValueImpl());
+    }
+    else if (expr instanceof MethodCallExpr) {
+      MethodCallExpr callExpr = (MethodCallExpr) expr;
+
+      ArrayValue call = new ArrayValueImpl();
+      result.put(call);
+      
+      if (callExpr.getFileName() != null) {
+	call.put("file", callExpr.getFileName());
+	call.put("line", callExpr.getLine());
+      }
+	
+      call.put("function", callExpr.getName());
+
+      call.put("class",
+	       env.peekCallThis(i).getQuercusClass().getName());
+
+      call.put("type", "->");
+
+      call.put(new StringValueImpl("args"), new ArrayValueImpl());
+    }
+    else if (expr instanceof IncludeExpr) {
+      ArrayValue call = new ArrayValueImpl();
+      result.put(call);
+      
+      if (expr.getFileName() != null) {
+	call.put("file", expr.getFileName());
+	call.put("line", expr.getLine());
+      }
+	
+      call.put("function", "include");
+
+      call.put(new StringValueImpl("args"), new ArrayValueImpl());
+    }
+  }
+
+  private static String unmangleFile(String className)
+  {
+    int i = "_quercus".length();
+    int end = className.indexOf('$');
+
+    if (end < 0)
+      end = className.length();
+    
+    StringBuilder sb = new StringBuilder();
+
+    for (; i < end; i++) {
+      char ch = className.charAt(i);
+
+      if (ch == '.' && className.charAt(i + 1) == '_') {
+	sb.append('/');
+	i++;
+      }
+      else if (ch != '_') {
+	sb.append(ch);
+      }
+      else if (className.charAt(i + 1) == '_') {
+	sb.append('.');
+	i++;
+      }
+      else {
+	System.out.println("UNKNOWN:" + className.charAt(i + 1) + " " + className);
+      }
+    }
+
+    return sb.toString();
+  }
+
+  private static String unmangleFunction(String className)
+  {
+    int p = className.lastIndexOf("$fun_");
+
+    if (p > 0)
+      return className.substring(p + "$fun_".length());
+    else
+      return className;
+  }
+
+  private static String unmangleClass(String className)
+  {
+    int p = className.lastIndexOf("$quercus_");
+    int q = className.lastIndexOf("$");
+
+    if (p > 0 && p < q)
+      return className.substring(p + "$quercus_".length(), q);
+    else
+      return className;
   }
 
   /**

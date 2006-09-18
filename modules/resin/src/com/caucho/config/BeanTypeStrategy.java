@@ -37,6 +37,7 @@ import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.annotation.*;
 import javax.el.*;
 
 import org.w3c.dom.Node;
@@ -76,7 +77,7 @@ public class BeanTypeStrategy extends TypeStrategy {
   private final Method _addDependency;
   private final Method _setSystemId;
   private final Method _setNode;
-  private final Method _init;
+  private final ArrayList<Method> _initList = new ArrayList<Method>();
   private final Method _replaceObject;
 
   BeanTypeStrategy(Class type)
@@ -91,7 +92,9 @@ public class BeanTypeStrategy extends TypeStrategy {
 
     _setParent = setParent;
 
-    _init = findMethod("init", new Class[0]);
+    Method init = findMethod("init", new Class[0]);
+    if (init != null)
+      _initList.add(init);
 
     _replaceObject = findMethod("replaceObject", new Class[0]);
 
@@ -338,8 +341,8 @@ public class BeanTypeStrategy extends TypeStrategy {
   public void init(Object bean)
     throws Exception
   {
-    if (_init != null)
-      _init.invoke(bean);
+    for (int i = 0; i < _initList.size(); i++)
+      _initList.get(i).invoke(bean);
   }
 
   /**

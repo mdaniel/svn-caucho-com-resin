@@ -43,6 +43,13 @@
         <init doc-context-path="${doc_context_path}"/>
       </servlet>
       <servlet-mapping url-pattern="*.xtp" servlet-name="xtp-doc"/>
+		   
+      <welcome-file-list>
+        <welcome-file>index.xtp</welcome-file>
+        <welcome-file>index.jsp</welcome-file>
+        <welcome-file>index.php</welcome-file>
+        <welcome-file>index.html</welcome-file>
+      </welcome-file-list>
     </web-app-default>
 
   <web-app-deploy url-prefix="/jsp/tutorial"
@@ -79,21 +86,23 @@
                   path="ejb/tutorial"
                   startup-mode="lazy">
   </web-app-deploy>
-
+<!--
   <web-app-deploy url-prefix="/esb/tutorial"
                   path="esb/tutorial"
                   startup-mode="lazy">
   </web-app-deploy>
+  -->
 
-  <web-app-deploy url-prefix="/ioc/tutorial"
-                  path="ioc/tutorial"
+  <web-app-deploy url-prefix="/soa/tutorial"
+                  path="soa/tutorial"
                   startup-mode="lazy">
   </web-app-deploy>
-
+<!--
   <web-app-deploy url-prefix="/jms/tutorial"
                   path="jms/tutorial"
                   startup-mode="lazy">
   </web-app-deploy>
+  -->
 
   <web-app-deploy url-prefix="/security/tutorial"
                   path="security/tutorial"

@@ -34,12 +34,13 @@ import java.lang.annotation.RetentionPolicy;
 import static java.lang.annotation.ElementType.*;
 
 /**
- * The resource annotation.
+ * The EJB annotation.
  */
-@Target({TYPE, METHOD, FIELD, PARAMETER})
+@Target({TYPE, METHOD, FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface EJB {
   String name() default "";
-  String businessInterface() default "";
-  String jndiName() default "";
+  Class beanInterface() default Object.class;
+  String beanName() default "";
+  String mappedName() default "";
 }

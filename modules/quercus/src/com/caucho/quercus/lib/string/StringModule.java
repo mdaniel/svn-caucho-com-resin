@@ -2070,6 +2070,8 @@ v   *
             i = j;
             break loop;
 
+	  case 'i': case 'u':
+	    ch = 'd';
           case 'd': case 'x': case 'o': case 'X':
             if (isLeft)
               sb.append('-');

@@ -1,7 +1,13 @@
-<navigation threaded="true" section="Resin : ESB : Tutorials" comment="true">
+<navigation threaded="true" section="Resin : SOA : Tutorials" comment="true">
   <item title="Tutorials" link="index.xtp">
-    <item link="hello-world/index.xtp" title="Simple Service"/>
-    <item link="hello-jaxb/index.xtp" title="Configuring a service with JAXB"/>
-    <item link="servlet-client/index.xtp" title="An ESB client"/>
+    <item link="esb-hello-world/index.xtp" title="Simple Service"/>
+    <item link="esb-hello-jaxb/index.xtp" title="Configuring a service with JAXB"/>
+    <item link="esb-servlet-client/index.xtp" title="An ESB client"/>
+    <item link="jaxb-bean-config/index.xtp" title="JAXB IoC"/>
+    <item link="jms-php-queue-send/index.xtp" title="JMS/PHP Send"/>
+    <item link="jms-php-queue-receive/index.xtp" title="JMS/PHP Receive"/>
+    <item link="jms-listener/index.xtp" title="JMS Listener"/>
+    <item link="jms-ioc-listener/index.xtp" title="JMS IOC Listener"/>
+    <item link="services/index.xtp" title="Services"/>
   </item>
 </navigation>

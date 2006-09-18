@@ -155,7 +155,7 @@ public class Mysqli extends JdbcConnectionResource {
       return false;
     } catch (Exception e) {
       env.warning(L.l("A link to the server could not be established.\n  url={0}\n  driver={1}\n  {2}", url, driver, e.toString()));
-      env.setSpecialValue("mysqli.connectError", new StringValueImpl(e.getMessage()));
+      env.setSpecialValue("mysqli.connectError", new StringValueImpl(e.toString()));
 
       log.log(Level.FINE, e.toString(), e);
       return false;

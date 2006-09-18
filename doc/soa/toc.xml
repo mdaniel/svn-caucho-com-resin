@@ -1,0 +1,12 @@
+<navigation section="Resin : SOA : " threaded="true">
+  <item link="index.xtp" title="SOA">
+    <item link="jaxb-annotations.xtp" title="JAXB Annotations"/>
+    <item link="ioc-annotations.xtp" title="IoC Annotations"/>
+    <item link="jaxws-annotations.xtp" title="JAX-WS Annotations"/>
+    <item link="jms-config.xtp" title="JMS Configuration"/>
+    <item link="ioc-bean.xtp" title="init"/>
+    <item link="bean-patterns.xtp" title="bean"/>
+    <item link="misc.xtp" title="misc"/>
+    <item title="Tutorials" link="tutorial/index.xtp" atoc-descend="1"/>
+  </item>
+</navigation>

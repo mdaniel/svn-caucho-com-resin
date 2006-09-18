@@ -906,6 +906,43 @@ This is the path used in
 
 </defun>
 
+<defun title="&lt;web-service-client>">
+<parents>web-app</parents>
+
+<p>&lt;web-service-client> configures a proxy to a web-service.
+It uses a Java interface and a URL to select the web-service.</p>
+
+<p>The URL is defined as: <var>encoding</var>:<var>location</var>, where
+location is typically a HTTP URL.</p>
+
+<p>See the <a href="soa|tutorial/esb-hello-world">hello world tutorial</a>
+for an example.</p>
+
+<deftable>
+<tr>
+  <td><var>hessian</var>:http://foo.com/hello/hessian</td>
+  <td>Defines a hessian service at http://foo.com/hello/hessian</td>
+</tr>
+<tr>
+  <td><var>rest</var>:http://foo.com/hello/rest</td>
+  <td>Defines a REST service at http://foo.com/hello/rest</td>
+</tr>
+<tr>
+  <td><var>soap</var>:http://foo.com/hello/soap</td>
+  <td>Defines a REST service at http://foo.com/hello/soap</td>
+</tr>
+</deftable>
+
+<def title="web-service-client">
+element web-service-client {
+  jndi-name
+  &amp; url
+  &amp; interface
+}
+</def>
+
+</defun>
+
 <defun title="&lt;work-dir>" occur="?" version="Resin 2.0.0" type="defun">
 <parents>resin, config, host, web-app</parents>
 <default>Defaults to <var>WEB-INF/work</var></default>

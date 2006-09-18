@@ -342,10 +342,14 @@ public class SessionArrayValue extends ArrayValueWrapper
    */
   public void removeEvent()
   {
+    // XXX: logic doesn't make sense
+    
+    /*
     boolean isValid = _isValid;
 
-    if (log.isLoggable(Level.FINE))
+    if (log.isLoggable(Level.FINE)) {
       log.fine("remove session " + _id);
+    }
 
     long now = Alarm.getCurrentTime();
 
@@ -359,5 +363,6 @@ public class SessionArrayValue extends ArrayValueWrapper
         log.log(Level.WARNING, "Can't serialize session", e);
       }
     }
+    */
   }
 }

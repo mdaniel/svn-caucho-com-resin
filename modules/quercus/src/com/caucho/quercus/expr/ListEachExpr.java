@@ -139,11 +139,15 @@ public class ListEachExpr extends Expr {
 
     _value.analyze(info);
 
+    AnalyzeInfo trueBlockInfo = info.copy();
+    
     if (_keyVar != null)
-      _keyVar.analyzeAssign(info);
+      _keyVar.analyzeAssign(trueBlockInfo);
 
     if (_valueVar != null)
-      _valueVar.analyzeAssign(info);
+      _valueVar.analyzeAssign(trueBlockInfo);
+    
+    info.merge(trueBlockInfo);
   }
 
   /**

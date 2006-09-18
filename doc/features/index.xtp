@@ -9,19 +9,27 @@ The Resin 3.1 Application Server offers:      </p>
 
 <ul>
 <li>A <a href="quercus|index.xtp">100% Java PHP 5 implementation</a></li>
+
 <li>A fast <a href="install|httpd.xtp">Java HTTP Web Server</a>
 for security, performance, and manageability.</li>
+
 <li><a href="config|resin-load-balance.xtp">HTTP Load Balancing</a> for
 scalability and reliability</li>
+
 <li>Built-in <a href="performance|caching.xtp">HTTP Proxy Cache</a></li>
 <li>New <a href="config|cluster-tags.xtp">clustering</a> configuration
 to simplify load balancing and distributed sessions.</li>
-<li>New <a href="esb|index.xtp">web services</a> capabilities
+
+<li>New <a href="soa|index.xtp">web services</a> capabilities
 with JAXB, SOAP, and Hessian.</li>
+
 <li>Flexible <a href="config|host-tags.xtp">virtual host</a> configuration</li>
-<li>New <a href="ioc|tutorial/jaxb-bean-config/index.xtp">JAXB-based IoC configuration</a></li>
+
+<li>New <a href="soa|tutorial/jaxb-bean-config/index.xtp">JAXB-based IoC configuration</a></li>
+
 <li>URL <a href="config|rewrite-tags.xtp">rewrite tags</a> for easy
 redirection, aliasing, and smart *.php URLs.</li>
+
 <li><a href="hessian|index.xtp">Hessian</a> compact binary webservices protocol</li>
 </ul>
 

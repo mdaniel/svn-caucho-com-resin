@@ -419,7 +419,7 @@ public class MathModule extends AbstractQuercusModule {
       return max;
     }
     else {
-      double maxValue = Double.MIN_VALUE;
+      double maxValue = - Double.MAX_VALUE;
       Value max = NullValue.NULL;
 
       for (int i = 0; i < args.length; i++) {

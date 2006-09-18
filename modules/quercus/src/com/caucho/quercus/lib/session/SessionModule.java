@@ -87,6 +87,11 @@ public class SessionModule extends AbstractQuercusModule
     return _iniMap;
   }
 
+  public String []getLoadedExtensions()
+  {
+    return new String[] { "session" };
+  }
+
   public void startup(Env env)
   {
     if (env.getConfigVar("session.auto_start").toBoolean())
@@ -303,16 +308,23 @@ public class SessionModule extends AbstractQuercusModule
   /**
    * Registers global variables in the session.
    */
-  private void sessionRegisterImpl(Env env, ArrayValue session, Value value)
+  private void sessionRegisterImpl(Env env, ArrayValue session, Value nameV)
   {
-    value = value.toValue();
+    nameV = nameV.toValue();
 
-    if (value instanceof StringValue) {
-      String name = value.toString();
+    if (nameV instanceof StringValue) {
+      String name = nameV.toString();
 
-      session.put(new StringValueImpl(name), env.getGlobalVar(name));
-    } else if (value.isArray()) {
-      ArrayValue array = (ArrayValue) value.toValue();
+      Value var = env.getGlobalVar(name);
+
+      Value value = session.get(nameV);
+
+      if (value.isset())
+	var.set(value);
+
+      session.put(nameV, var);
+    } else if (nameV.isArray()) {
+      ArrayValue array = (ArrayValue) nameV.toValue();
 
       for (Value subValue : array.values()) {
         sessionRegisterImpl(env, session, subValue);

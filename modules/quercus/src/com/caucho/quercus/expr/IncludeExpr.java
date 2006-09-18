@@ -32,8 +32,7 @@ package com.caucho.quercus.expr;
 import java.io.IOException;
 
 import com.caucho.quercus.QuercusException;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 
 import com.caucho.quercus.gen.PhpWriter;
 
@@ -88,7 +87,12 @@ public class IncludeExpr extends UnaryExpr {
   {
     String name = _expr.evalString(env);
       
-    return env.include(_dir, name, _isRequire, false);
+    env.pushCall(this, NullValue.NULL);
+    try {
+      return env.include(_dir, name, _isRequire, false);
+    } finally {
+      env.popCall();
+    }
   }
 
   //

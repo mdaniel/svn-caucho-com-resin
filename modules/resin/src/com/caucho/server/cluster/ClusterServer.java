@@ -380,7 +380,10 @@ public class ClusterServer {
    */
   public ServerConnector getServerConnector()
   {
-    return _serverConnector;
+    if (_cluster.getSelfServer() != this)
+      return _serverConnector;
+    else
+      return null;
   }
 
   /**

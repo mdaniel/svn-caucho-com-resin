@@ -73,6 +73,8 @@ public class OptionsModule extends AbstractQuercusModule {
   public static final int INFO_VARIABLES = 32;
   public static final int INFO_LICENSE = 64;
 
+  private static final Value _SERVER = StringValue.create("_SERVER");
+
   private static final HashMap<String,StringValue> _iniMap
     = new HashMap<String,StringValue>();
 
@@ -197,10 +199,16 @@ public class OptionsModule extends AbstractQuercusModule {
   /**
    * Returns the environment value.
    */
-  public static Value getenv(Env env, String var)
+  public static Value getenv(Env env, StringValue var)
   {
-    if ("REMOTE_ADDR".equals(var))
-      return new StringValueImpl(env.getRequest().getRemoteAddr());
+    Value server = env.getGlobalValue("_SERVER");
+
+    if (server != null) {
+      Value value = server.get(var);
+
+      if (value != null && value.isset())
+	return value;
+    }
 
     return NullValue.NULL;
   }
@@ -692,8 +700,8 @@ public class OptionsModule extends AbstractQuercusModule {
     addIni(_iniMap, "enable_dl", "1", PHP_INI_SYSTEM);
     addIni(_iniMap, "max_execution_time", "30", PHP_INI_ALL);
     addIni(_iniMap, "max_input_time", "-1", PHP_INI_PERDIR);
+    addIni(_iniMap, "magic_quotes_gpc", "1", PHP_INI_PERDIR);
     // magic_quotes is ignored in PHP 6
-    addIni(_iniMap, "magic_quotes_gpc", "0", PHP_INI_PERDIR);
     addIni(_iniMap, "magic_quotes_runtime", "0", PHP_INI_ALL);
 
     // basic

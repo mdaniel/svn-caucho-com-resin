@@ -115,30 +115,6 @@ public class VariableModule extends AbstractQuercusModule {
   }
 
   /**
-   * Prints a debug version of the variable
-   *
-   * @param env the quercus calling environment
-   * @param v the variable to print
-   * @return the escaped stringPhp
-   */
-  public static Value resin_var_dump(Env env, @ReadOnly Value v)
-  {
-    try {
-      WriteStream out = Vfs.openWrite("stdout:");
-
-      v.varDump(env, out, 0, new IdentityHashMap<Value,String>());
-
-      out.println();
-
-      out.close();
-
-      return NullValue.NULL;
-    } catch (IOException e) {
-      throw new QuercusModuleException(e);
-    }
-  }
-
-  /**
    * Defines a constant
    *
    * @param env the quercus calling environment

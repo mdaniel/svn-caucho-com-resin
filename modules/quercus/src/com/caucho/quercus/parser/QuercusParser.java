@@ -29,9 +29,7 @@
 
 package com.caucho.quercus.parser;
 
-import java.io.StringReader;
-import java.io.Reader;
-import java.io.IOException;
+import java.io.*;
 
 import java.lang.reflect.Modifier;
 
@@ -4060,9 +4058,12 @@ public class QuercusParser {
 	else
 	  tail = new VarExpr(getLocation(), _function.createVar(varName));
 
-	while (((ch = read()) == '[' ||  ch == '-')) {
+	// php/013n
+	if (((ch = read()) == '[' || ch == '-')) {
 	  if (ch == '[') {
 	    tail = parseSimpleArrayTail(tail);
+
+	    ch = read();
 	  }
 	  else {
 	    if ((ch = read()) != '>') {
@@ -4554,6 +4555,9 @@ public class QuercusParser {
 	_hasCr = false;
 
       return ch;
+    } catch (CharConversionException e) {
+      throw new QuercusParseException(getFileName() + ":" + getLine() + ": " + e + "\nCheck that the script-encoding setting matches the source file's encoding",
+				   e);
     } catch (IOException e) {
       throw new IOExceptionWrapper(getFileName() + ":" + getLine() + ":" + e, e);
     }

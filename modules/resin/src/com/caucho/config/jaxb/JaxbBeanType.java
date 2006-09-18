@@ -38,6 +38,7 @@ import java.lang.ref.SoftReference;
 
 import java.util.*;
 
+import javax.annotation.*;
 import javax.el.*;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.*;
@@ -49,6 +50,8 @@ import com.caucho.util.*;
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 
+import com.caucho.loader.*;
+
 import com.caucho.xml.*;
 
 public class JaxbBeanType extends TypeStrategy {
@@ -59,6 +62,12 @@ public class JaxbBeanType extends TypeStrategy {
 
   private ArrayList<BuilderProgram> _injectList
     = new ArrayList<BuilderProgram>();
+
+  private ArrayList<Method> _postConstructList
+    = new ArrayList<Method>();
+  
+  private ArrayList<Method> _preDestroyList
+    = new ArrayList<Method>();
 
   private HashMap<String,AttributeStrategy> _attributeMap
     = new HashMap<String,AttributeStrategy>();
@@ -137,6 +146,26 @@ public class JaxbBeanType extends TypeStrategy {
     }
     else
       builder.configureBeanImpl(this, bean, top);
+    
+    for (int i = 0; i < _postConstructList.size(); i++) {
+      try {
+	_postConstructList.get(i).invoke(bean);
+      } catch (Throwable e) {
+	throw builder.error(e, top);
+      }
+    }
+    
+    for (int i = 0; i < _preDestroyList.size(); i++) {
+      try {
+	Method method = _preDestroyList.get(i);
+	EnvironmentListener listener;
+	listener = new WeakDestroyListener(method, bean);
+	
+	Environment.addEnvironmentListener(listener);
+      } catch (Throwable e) {
+	throw builder.error(e, top);
+      }
+    }
   }
 
   /**
@@ -181,38 +210,62 @@ public class JaxbBeanType extends TypeStrategy {
     Method []methods = _type.getDeclaredMethods();
 
     for (int i = 0; i < methods.length; i++) {
-      Method setter = methods[i];
-      String name = setter.getName();
+      Method getter = methods[i];
+      String name = getter.getName();
+      String setterName;
+      String propName;
 
-      if (! name.startsWith("set"))
-	continue;
+      if (getter.isAnnotationPresent(PostConstruct.class)) {
+	if (getter.getParameterTypes().length != 0)
+	  throw new ConfigException(L.l("@PostConstruct method must have zero arguments."));
 
-      Class retType = setter.getReturnType();
-      if (! void.class.equals(retType))
-	continue;
 
-      Class []paramTypes = setter.getParameterTypes();
-      Type []genericParamTypes = setter.getGenericParameterTypes();
-
-      if (paramTypes.length != 1)
-	continue;
+	_postConstructList.add(getter);
+      }
       
-      InjectIntrospector.configure(_injectList,
-				   setter,
-				   name.substring(3),
-				   paramTypes[0]);
+      if (getter.isAnnotationPresent(PreDestroy.class)) {
+	if (getter.getParameterTypes().length != 0)
+	  throw new ConfigException(L.l("@PreDestroy method must have zero arguments."));
 
-      String getName = "get" + name.substring(3);
-      String isName = "";
 
-      if (boolean.class.equals(paramTypes[0])
-	  || Boolean.class.equals(paramTypes[0])) {
-	isName = "is" + name.substring(3);
+	_preDestroyList.add(getter);
       }
 
-      Method getter = findGetter(_type, getName, isName, paramTypes[0]);
+      Class retType = getter.getReturnType();
+      if (void.class.equals(retType))
+	continue;
 
-      if (getter == null)
+      Class []paramTypes = getter.getParameterTypes();
+      if (paramTypes.length != 0)
+	continue;
+
+      if (name.startsWith("get")) {
+	propName = name.substring(3);
+	setterName = "set" + propName;
+      }
+      else if (name.startsWith("is")) {
+	propName = name.substring(2);
+	setterName = "set" + propName;
+	
+	if (! boolean.class.equals(retType))
+	  continue;
+      }
+      else
+	continue;
+      
+      Class<?> propType = retType;
+      Type genericType = getter.getGenericReturnType();
+
+      Method setter = findSetter(_type, setterName, retType);
+
+      if (setter != null) {
+	InjectIntrospector.configure(_injectList,
+				     setter,
+				     propName,
+				     retType);
+      }
+      else if (! Collection.class.isAssignableFrom(retType) &&
+	       ! Map.class.isAssignableFrom(retType))
 	continue;
 
       if (hasAnnotation(XmlTransient.class, getter, setter))
@@ -265,8 +318,6 @@ public class JaxbBeanType extends TypeStrategy {
       else
 	continue;
 
-      Class<?> propType = paramTypes[0];
-      Type genericType = genericParamTypes[0];
       Class<?> valueType = null;
 
       if (Collection.class.isAssignableFrom(propType)) {
@@ -354,9 +405,8 @@ public class JaxbBeanType extends TypeStrategy {
     }
   }
 
-  private Method findGetter(Class type,
-			    String getName,
-			    String isName,
+  private Method findSetter(Class type,
+			    String setName,
 			    Class retType)
   {
     if (type == null || Object.class.equals(type))
@@ -367,14 +417,13 @@ public class JaxbBeanType extends TypeStrategy {
     for (int i = 0; i < methods.length; i++) {
       Method method = methods[i];
       
-      if (method.getParameterTypes().length != 0)
+      if (method.getParameterTypes().length != 1)
 	continue;
-      else if (! retType.equals(method.getReturnType()))
+      else if (! method.getParameterTypes()[0].equals(retType))
 	continue;
-
-      else if (getName.equals(method.getName()))
-	return method;
-      else if (isName.equals(method.getName()))
+      else if (! retType.equals(void.class))
+	continue;
+      else if (setName.equals(method.getName()))
 	return method;
     }
 

@@ -577,7 +577,7 @@ class ResponseStream extends ToByteResponseStream {
     try {
       _disableAutoFlush = false;
       _isCommitted = true;
-      
+
       if (_allowFlush && ! _isClosed) {
         flushBuffer();
 

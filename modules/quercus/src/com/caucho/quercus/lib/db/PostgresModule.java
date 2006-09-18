@@ -143,7 +143,7 @@ public class PostgresModule extends AbstractQuercusModule {
    */
   public String []getLoadedExtensions()
   {
-    return new String[] { "postgres" };
+    return new String[] { "postgres", "pgsql" };
   }
 
   /**

@@ -1,8 +1,18 @@
 <document>
   <header>
     <product>resin</product>
-    <title>ESB Tutorials</title>
+    <title>SOA Tutorials</title>
     <type>contents</type>
+
+    <description>
+<p>The SOA tutorials include examples for:</p>
+
+<ul>
+<li>Creating REST, SOAP, Hessian and VM Web Services</li>
+<li>Using JAXB as a design pattern for IoC configuration</li>
+<li>Using JMS in Resin</li>
+</ul>
+</description>
   </header>
 
   <body>

@@ -12,10 +12,10 @@
       <item link="webapp-tags.xtp" title="&lt;web-app>"/>
       <item link="session-tags.xtp" title="session tags"/>
       <item link="rewrite-tags.xtp" title="rewrite tags"/>
+      <item link="soa-tags.xtp" title="service tags"/>
       <item link="log.xtp" title="log"/>
       <item link="control.xtp" title="el & control"/>
     </item>
-    <item link="init.xtp" title="Bean Config"/>
 
     <item title="Common Tasks" link="commontasks.xtp">
       <item link="virtual-host.xtp" title="Virtual Hosting"/>
