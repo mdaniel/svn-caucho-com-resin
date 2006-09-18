@@ -1,0 +1,74 @@
+<persistence xmlns="http://java.sun.com/xml/ns/persistence" version="1.0">
+  <persistence-unit name="drupal">
+    <class>demo.drupal.persistence.Access</class>
+    <class>demo.drupal.persistence.Accesslog</class>
+    <class>demo.drupal.persistence.AggregatorCategory</class>
+    <class>demo.drupal.persistence.AggregatorFeed</class>
+    <class>demo.drupal.persistence.AggregatorItem</class>
+    <class>demo.drupal.persistence.Authmap</class>
+    <!-- XXX: no primary key
+    <class>demo.drupal.persistence.Blocks</class>
+    -->
+    <class>demo.drupal.persistence.Book</class>
+    <class>demo.drupal.persistence.Box</class>
+    <class>demo.drupal.persistence.Cache</class>
+    <class>demo.drupal.persistence.Comment</class>
+    <class>demo.drupal.persistence.Contact</class>
+    <class>demo.drupal.persistence.Directory</class>
+    <!-- XXX: no primary key
+    <class>demo.drupal.persistence.Files</class>
+    -->
+    <class>demo.drupal.persistence.FilterFormat</class>
+    <!-- XXX: no primary key
+    <class>demo.drupal.persistence.Filters</class>
+    <class>demo.drupal.persistence.Flood</class>
+    -->
+    <class>demo.drupal.persistence.Forum</class>
+    <!-- XXX: multiple primary keys
+    <class>demo.drupal.persistence.History</class>
+    -->
+    <class>demo.drupal.persistence.LocaleMeta</class>
+    <class>demo.drupal.persistence.LocaleSource</class>
+    <!-- XXX: no primary key
+    <class>demo.drupal.persistence.LocalesTarget</class>
+    -->
+    <class>demo.drupal.persistence.Menu</class>
+    <class>demo.drupal.persistence.ModerationFilter</class>
+    <!-- XXX: no primary key
+    <class>demo.drupal.persistence.ModerationRoles</class>
+    -->
+    <class>demo.drupal.persistence.ModerationVote</class>
+    <!-- XXX: multiple primary keys
+    <class>demo.drupal.persistence.NodeAccess</class>
+    -->
+    <class>demo.drupal.persistence.Node</class>
+    <class>demo.drupal.persistence.NodeCommentStatistic</class>
+    <class>demo.drupal.persistence.NodeCounter</class>
+    <!-- XXX: multiple primary keys
+    <class>demo.drupal.persistence.NodeRevisions</class>
+    -->
+    <!-- XXX: no primary key
+    <class>demo.drupal.persistence.Permission</class>
+    -->
+    <class>demo.drupal.persistence.PollChoice</class>
+    <class>demo.drupal.persistence.Poll</class>
+    <class>demo.drupal.persistence.ProfileField</class>
+    <class>demo.drupal.persistence.ProfileValue</class>
+    <class>demo.drupal.persistence.Role</class>
+    <!-- XXX: no primary key
+    <class>demo.drupal.persistence.SearchDataset</class>
+    <class>demo.drupal.persistence.SearchIndex</class>
+    -->
+    <class>demo.drupal.persistence.SearchTotal</class>
+    <class>demo.drupal.persistence.Sequence</class>
+    <class>demo.drupal.persistence.Session</class>
+    <class>demo.drupal.persistence.System</class>
+    <class>demo.drupal.persistence.TermData</class>
+    <class>demo.drupal.persistence.UrlAlias</class>
+    <class>demo.drupal.persistence.User</class>
+    <class>demo.drupal.persistence.Variable</class>
+    <class>demo.drupal.persistence.Vocabulary</class>
+    <class>demo.drupal.persistence.Watchdog</class>
+  </persistence-unit>
+</persistence>
+
