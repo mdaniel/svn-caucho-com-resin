@@ -192,7 +192,7 @@ public class InjectIntrospector {
     initList.add(configureResource(field, fieldName, fieldType,
                                    ejb.name(),
                                    "javax.ejb.EJBLocalObject",
-                                   ejb.jndiName()));
+                                   ejb.name()));
   }
 
   private static void configurePersistenceUnit(ArrayList<BuilderProgram> initList,
