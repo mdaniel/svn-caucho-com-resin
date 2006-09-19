@@ -256,8 +256,8 @@ public class ResinStatusServlet extends GenericServlet {
     out.println(" (" + invocationHitCount + "/" + totalCount + ")");
 
     if (_proxyCache != null) {
-      long proxyHitCount = _proxyCache.getHitCountLifetime();
-      long proxyMissCount = _proxyCache.getMissCountLifetime();
+      long proxyHitCount = _proxyCache.getHitCountTotal();
+      long proxyMissCount = _proxyCache.getMissCountTotal();
 
       totalCount = proxyHitCount + proxyMissCount;
       if (totalCount == 0)

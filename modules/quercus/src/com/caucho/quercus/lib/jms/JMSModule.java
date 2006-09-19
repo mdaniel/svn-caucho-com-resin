@@ -96,7 +96,7 @@ public class JMSModule extends AbstractQuercusModule
                                     ConnectionFactory connectionFactory)
   {
     if (connectionFactory == null)
-      connectionFactory = getConnectionFactory();
+      connectionFactory = getConnectionFactory(env);
 
     if (connectionFactory == null) {
       env.warning(L.l("No connection factory"));
@@ -104,7 +104,9 @@ public class JMSModule extends AbstractQuercusModule
     }
 
     try {
-      return new JMSQueue(_context, connectionFactory, queueName);
+      Context cxt = (Context) new InitialContext().lookup("java:comp/env");
+      
+      return new JMSQueue(cxt, connectionFactory, queueName);
     } catch (Exception e) {
       env.warning(e);
 
@@ -112,17 +114,17 @@ public class JMSModule extends AbstractQuercusModule
     }
   }
 
-  private ConnectionFactory getConnectionFactory()
+  private static ConnectionFactory getConnectionFactory(Env env)
   {
     try {
-      Context context = (Context) new InitialContext().lookup("java:comp/env");
+      Context cxt = (Context) new InitialContext().lookup("java:comp/env");
       
       StringValue factoryName = env.getIni("jms.connection_factory");
 
       if (factoryName == null)
 	log.fine("jms.connection_factory not set");
 
-      return (ConnectionFactory) _context.lookup(factoryName.toString());
+      return (ConnectionFactory) cxt.lookup(factoryName.toString());
     } catch (Exception e) {
       log.fine(e.toString());
 
