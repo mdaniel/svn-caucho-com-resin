@@ -32,6 +32,9 @@ import java.util.*;
 
 import javax.annotation.*;
 
+import com.caucho.config.*;
+import com.caucho.config.types.*;
+
 import com.caucho.util.L10N;
 
 /**
@@ -45,6 +48,8 @@ public class Listener {
 
   // The listener object
   private Object _object;
+  
+  private InitProgram _init;
 
   /**
    * Sets the listener class.
@@ -63,15 +68,19 @@ public class Listener {
   }
 
   /**
-   * Returns the object for initialization.
+   * Sets the init block
    */
-  public Object createInit()
-    throws Exception
+  public void setInit(InitProgram init)
   {
-    if (_object == null)
-      _object = _listenerClass.newInstance();
+    _init = init;
+  }
 
-    return _object;
+  /**
+   * Gets the init block
+   */
+  public InitProgram getInit()
+  {
+    return _init;
   }
 
   /**
@@ -79,10 +88,21 @@ public class Listener {
    */
   @PostConstruct
   public void init()
-    throws Exception
+    throws Throwable
   {
     if (_object == null)
       _object = _listenerClass.newInstance();
+    
+    InitProgram init = getInit();
+    BuilderProgram program;
+
+    if (init != null)
+      program = init.getBuilderProgram();
+    else
+      program = NodeBuilderProgram.NULL;
+
+    program.configure(_object);
+    program.init(_object);
   }
 
   /**

@@ -43,9 +43,7 @@ import javax.servlet.jsp.tagext.*;
 import javax.servlet.jsp.jstl.core.*;
 import javax.servlet.jsp.jstl.fmt.*;
 
-import javax.servlet.jsp.el.ExpressionEvaluator;
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
+import javax.servlet.jsp.el.*;
 
 import org.w3c.dom.Node;
 
@@ -86,7 +84,7 @@ import com.caucho.server.webapp.RequestDispatcherImpl;
 
 import com.caucho.jsp.cfg.JspPropertyGroup;
 
-import com.caucho.jsp.el.ExpressionEvaluatorImpl;
+import com.caucho.jsp.el.*;
 
 import com.caucho.jstl.JstlPageContext;
 
@@ -1166,14 +1164,22 @@ public class PageContextImpl extends PageContext
     if (_elContext == null) {
       _elContext = new PageELContext();
 
-      CompositeELResolver elResolver = new CompositeELResolver();
-      elResolver.add(new ArrayELResolver());
-      elResolver.add(new MapELResolver());
-      elResolver.add(new BeanELResolver());
-      elResolver.add(new ListELResolver());
-      elResolver.add(new PageELResolver());
+      JspApplicationContextImpl jspContext
+	= (JspApplicationContextImpl) _webApp.getJspApplicationContext();
+
+      ELResolver []resolverArray = jspContext.getELResolverArray();
       
-      _elResolver = elResolver;
+      _elResolver = new PageContextELResolver(this, resolverArray);
+
+      ELContextListener []listenerArray = jspContext.getELListenerArray();
+
+      if (listenerArray.length > 0) {
+	ELContextEvent event = new ELContextEvent(_elContext);
+
+	for (int i = 0; i < listenerArray.length; i++) {
+	  listenerArray[i].contextCreated(event);
+	}
+      }
     }
     
     return _elContext;
@@ -1675,7 +1681,7 @@ public class PageContextImpl extends PageContext
    * @return the attribute value
    */
   public Object resolveVariable(String name)
-    throws ELException
+    throws javax.el.ELException
   {
     Object value = findAttribute(name);
 
@@ -1775,6 +1781,11 @@ public class PageContextImpl extends PageContext
   }
 
   public class PageELContext extends ELContext {
+    public PageELContext()
+    {
+      putContext(JspContext.class, PageContextImpl.this);
+    }
+    
     public PageContextImpl getPageContext()
     {
       return PageContextImpl.this;
@@ -1785,40 +1796,14 @@ public class PageContextImpl extends PageContext
       return _elResolver;
     }
 
-    public FunctionMapper getFunctionMapper()
-    {
-      throw new UnsupportedOperationException();
-    }
-
-    public VariableMapper getVariableMapper()
+    public javax.el.FunctionMapper getFunctionMapper()
     {
       return null;
     }
-  }
 
-  class PageELResolver extends AbstractVariableResolver {
-    public Object getValue(ELContext env, Object base, Object property)
+    public javax.el.VariableMapper getVariableMapper()
     {
-      if (base != null)
-	return null;
-      else if (property instanceof String) {
-	env.setPropertyResolved(true);
-	
-	return getAttribute(property.toString());
-      }
-      else
-	return null;
-    }
-    
-    public void setValue(ELContext env,
-			 Object base,
-			 Object property,
-			 Object value)
-    {
-      if (base != null) {
-      }
-      else if (base instanceof String)
-	setAttribute(base.toString(), value);
+      return null;
     }
   }
 }

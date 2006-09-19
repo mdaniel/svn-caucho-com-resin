@@ -40,6 +40,9 @@ public class JspApplicationContextImpl implements JspApplicationContext
   
   private final ExpressionFactory _expressionFactory;
 
+  private ELResolver []_resolverArray = new ELResolver[0];
+  private ELContextListener []_listenerArray = new ELContextListener[0];
+
   public JspApplicationContextImpl(WebApp webApp)
   {
     _webApp = webApp;
@@ -65,6 +68,20 @@ public class JspApplicationContextImpl implements JspApplicationContext
    */
   public void addELContextListener(ELContextListener listener)
   {
+    ELContextListener []listenerArray
+      = new ELContextListener[_listenerArray.length + 1];
+    System.arraycopy(_listenerArray, 0,
+		     listenerArray, 0,
+		     _listenerArray.length);
+
+    listenerArray[_listenerArray.length] = listener;
+    
+    _listenerArray = listenerArray;
+  }
+
+  public ELContextListener []getELListenerArray()
+  {
+    return _listenerArray;
   }
   
   /**
@@ -72,6 +89,19 @@ public class JspApplicationContextImpl implements JspApplicationContext
    */
   public void addELResolver(ELResolver resolver)
   {
+    ELResolver []resolverArray = new ELResolver[_resolverArray.length + 1];
+    System.arraycopy(_resolverArray, 0,
+		     resolverArray, 0,
+		     _resolverArray.length);
+
+    resolverArray[_resolverArray.length] = resolver;
+    
+    _resolverArray = resolverArray;
+  }
+
+  public ELResolver []getELResolverArray()
+  {
+    return _resolverArray;
   }
   
   /**
