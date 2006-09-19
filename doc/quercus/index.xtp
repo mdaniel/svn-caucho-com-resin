@@ -18,80 +18,136 @@
 
 <ul>
 <li><a href="http://wiki.caucho.com/Quercus">Quercus</a> wiki page.</li>
+<li>Caucho <a href="http://bugs.caucho.com">BugTrack</a></li>
+<li>Caucho <a href="http://forum.caucho.com">Forums</a></li>
+<li>Resin <a href="http://maillist.caucho.com/">Mailing List</a></li>
 </ul>
 
 </s1>
 
-<s1 title="Overview">
+<s1 title="Introduction to Quercus">
 
-<p>Implementing PHP in Java brings benefits to both PHP users and pure
-Java users.  And developers who are clever enough to use PHP in combination
-with Java will gain the most.</p>
+<p>Quercus is Caucho Technology's fast, open-source, 100% Java implementation
+of the PHP language.  Quercus is a feature of Caucho Technology's Resin
+Application Server and is built into Resin - there is no additional
+download/install.  Developers using Resin can launch PHP projects without
+having to install the standard PHP interpreter (http://www.php.net) as Quercus
+takes on the roll of the PHP engine.</p>
 
-<s2 title="Applications">
 
-<p>DokuWiki, Dragonfly CMS, Drupal, Gallery2, Joomla, Mambo, Mantis,
-MediaWiki, Phorum, phpBB, phpMyAdmin, PHP-Nuke, Wordpress, XOOPS.</p>
+<s2 title="What is Quercus">
 
-</s2>
+<p>Quercus implements PHP 5 and is internationalization/localization
+(i18n/l10n) aware.  Quercus natively supports Unicode and the new Unicode
+syntax of the up-and-coming PHP 6.  Quercus implements a growing list of PHP
+extensions (i.e. APC, iconv, GD, gettext, JSON, MySQL, Oracle, PDF, Postgres,
+etc.).  Many popular PHP applications will run as well as, if not better, than
+the standard PHP interpreter straight out of the box.  The growing list of PHP
+software certified running on Quercus includes DokuWiki, Drupal, Gallery2,
+Joomla, Mambo, Mantis, MediaWiki, Phorum, phpBB, phpMyAdmin, PHP-Nuke,
+Wordpress, and XOOPS.</p>
 
-<s2 title="PHP Users">
+<s3 title="Resin with Quercus">
 
-<p>PHP developers will gain from using Quercus, even if they have no
-intention of writing Java code.  Because Quercus is written for Resin,
-a Java application server, it gains all the advantages of Java applications
-including:</p>
+<p>Quercus is much more than just yet another PHP engine.  Quercus is the first
+to tightly integrate the web server with a PHP engine.  Quercus runs on top of
+Caucho Technology's Resin Application Server.  As a result, PHP applications
+can automatically and immediately take advantage of Resin's advanced features
+like connection pooling, distributed sessions, load balancing, and proxy
+caching.</p>
 
-<ul>
-<li>Security: since Quercus and its modules are entirely in Java, C
-pointer overruns and segmentation violations are no longer possible.</li>
-<li>Scalability: PHP programs can take advantage of
-<a href="http://caucho.com/articles/php-sessions.pdf">distributed
-sessions in PHP</a> and <a href="../config/balance.xtp">load balancing</a>.</li>
-<li>Performance: Quercus outperforms a straight mod_php implementation
-by about 4x (for Mediawiki and Drupal).  Quercus roughly matches
-PHP performance with accelerators like APC.</li>
-<li>Caching: PHP applications using Quercus can immediately take
-advantage of Resin's <a href="../performance/caching.xtp">proxy caching</a>.
-They can also use the PHP APC caching API since the APC functions are
-included with Quercus.</li>
-<li>Connection pooling, transactions, JMS: PHP programs using Quercus
-automatically take advantage of Resin's connection pooling, and can
-use the full distributation transactions, and Java capabilities like JMS.</li>
-<li>Java tools: PHP developers can use Java tools like profilers to
-get in-depth information about the PHP program performance.</li>
-</ul>
+</s3>
 
-</s2>
+<s3 title="A New Java/PHP Architecture">
 
-<s2 title="Java Users">
+<p>Quercus is pioneering a new mixed Java/PHP approach to web applications and
+services.  On Quercus, Java and PHP is tightly integrated with each other - PHP
+applications can choose to use Java libraries and technologies like JMS, EJB,
+SOA frameworks, Hibernate, and Spring.  This revolutionary capability is made
+possible because 1)PHP code is interpreted/compiled into Java and 2)Quercus and
+its libraries are written entirely in Java.  This enables PHP applications and
+Java libraries to talk directly with one another at the program level.  To
+faciliate this new Java/PHP architecture, Quercus provides an API and interface
+to expose Java libraries to PHP.</p>
 
-<ul>
-<li>Java developers can use Quercus immediately to deploy PHP applications
-such as MediaWiki, Drupal, Wordpress, Gallery2 and DocuWiki.</li>
-<li>Since Resin's administration uses PHP to script JMX beans, Resin
-users can customize the administration views of the JMX management.</li>
-</ul>
+</s3>
 
 </s2>
 
-<s2 title="New Java/PHP Architecture">
+<s2 title="Benefits of Quercus">
 
-<p>Although PHP users and Java users can take advantage of Quercus
-immediately without modifying their application, the real benefits
-come from developing mixed Java/PHP applications:</p>
+<p>Quercus and Quercus' PHP libraries are written entirely in Java, thereby
+taking the advantages of Java applications and infusing them into PHP.  PHP
+applications running on Quercus are simply faster, easier to develop, more
+capable, more secure, and more scalable than any other PHP solution.</p>
+
+<s3 title="Performance - simply faster">
 
 <ul>
-<li>PHP libraries written in Java are fast, safe, and relatively
-easy to develop, compared with C libraries.  Since Java is the library
-language, developers won't need to be paranoid about third-party libraries
-having C-memory problems or segvs.</li>
-<li>PHP applications can take advantage of Java libraries and capabilities
-like JMS, EJB, SOA frameworks, Hibernate, or Spring.</li>
-<li>Java application can move presentation code to PHP, leaving behind
-templating systems, or languages with small libraries, and taking advantage
-of PHP flexibility and capability.</li>
+<li>Quercus outperforms straight mod_php by about 4x for MediaWiki and
+Drupal.</li>
+<li>PHP developers can use Java tools like profilers to get in-depth
+information about the PHP program performance.</li>
 </ul>
+
+</s3>
+
+<s3 title="Development - fast, safe, and easy">
+
+<ul>
+<li>PHP extensions written in Java are fast, safe, and relatively easy to
+develop compared to those written in C.  Since Java is the library language,
+developers won't need to be paranoid about third-party libraries having
+C-memory problems or segvs and are freed to concentrate on solving the
+objectives at hand.</li>
+</ul>
+
+</s3>
+
+<s3 title="Capability - powerful Java technologies at the developer's
+fingertips">
+
+<ul>
+
+<li>Quercus has the best of both worlds: PHP and Java.  PHP applications can take advantage of Java technologies like JMS, EJB,
+SOA frameworks, Hibernate, and Spring.</li>
+</ul>
+
+</s3>
+
+<s3 title="Security - no more pesky C memory bugs">
+
+<ul>
+<li>All Quercus extensions libraries are coded in Java.  Therefore, developers
+do not have to worry about C pointer overruns and segmentation faults from PHP
+extensions anymore.</li>
+</ul>
+
+</s3>
+
+<s3 title="Scalability - PHP for the masses, literally">
+
+<ul>
+<li>Thanks to Resin, PHP applications can beautifully scale to as many servers
+as desired.</li>
+<li>PHP applications can now enjoy connection pooling, distributed sessions,
+fail-safe load balancing, and proxy caching.  These benefits require no change
+in the PHP code.</li>
+</ul>
+
+</s3>
+
+<p>Quercus gives both Java and PHP developers a fast, safe, and powerful
+alternative to the standard PHP intepreter.  Developers ambitious enough to
+use PHP in combination with Java will benefit the most from what Quercus has
+to offer.</p>
+
+</s2>
+
+<s2 title="Getting Started with Quercus">
+
+<p>Quercus is officially part of 3.1.0.  Please go through the Hello World
+tutorial to get a simple PHP page up and running on Quercus.</p>
 
 </s2>
 
