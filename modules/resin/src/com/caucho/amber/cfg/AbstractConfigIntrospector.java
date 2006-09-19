@@ -44,42 +44,295 @@ abstract public class AbstractConfigIntrospector {
   HashMap<String,EntityConfig> _entityConfigMap
     = new HashMap<String,EntityConfig>();
 
-  void getInternalConfig(JClass type, Class cl)
+  void getInternalEntityConfig(JClass type)
   {
-    _annotationCfg.reset();
+    _annotationCfg.reset(type, Entity.class);
 
-    _annotationCfg.setAnnotation(type.getAnnotation(cl));
+    EntityConfig entityConfig = null;
 
-    if (cl.equals(Entity.class)) {
+    if (_entityConfigMap != null)
+      entityConfig = _entityConfigMap.get(type.getName());
 
-      EntityConfig entityConfig = null;
+    _annotationCfg.setConfig(entityConfig);
+  }
 
-      if (_entityConfigMap != null)
-        entityConfig = _entityConfigMap.get(type.getName());
+  void getInternalInheritanceConfig(JClass type)
+  {
+    _annotationCfg.reset(type, Inheritance.class);
 
-      _annotationCfg.setConfig(entityConfig);
+    EntityConfig entityConfig = null;
+
+    if (_entityConfigMap != null)
+      entityConfig = _entityConfigMap.get(type.getName());
+
+    if (entityConfig != null) {
+      _annotationCfg.setConfig(entityConfig.getInheritance());
     }
   }
 
-  void getInternalConfig(JAccessibleObject type, Class cl)
+  void getInternalNamedQueryConfig(JClass type)
   {
-    _annotationCfg.reset();
+    _annotationCfg.reset(type, NamedQuery.class);
 
-    _annotationCfg.setAnnotation(type.getAnnotation(cl));
+    EntityConfig entityConfig = null;
+
+    if (_entityConfigMap != null)
+      entityConfig = _entityConfigMap.get(type.getName());
+
+    if (entityConfig != null) {
+      _annotationCfg.setConfig(entityConfig.getNamedQuery());
+    }
   }
 
-  void getInternalConfig(JField field, Class cl)
+  void getInternalTableConfig(JClass type)
   {
-    _annotationCfg.reset();
+    _annotationCfg.reset(type, Table.class);
 
-    _annotationCfg.setAnnotation(field.getAnnotation(cl));
+    EntityConfig entityConfig = null;
+
+    if (_entityConfigMap != null)
+      entityConfig = _entityConfigMap.get(type.getName());
+
+    if (entityConfig != null) {
+      _annotationCfg.setConfig(entityConfig.getTable());
+    }
   }
 
-  void getInternalConfig(JMethod method, Class cl)
+  void getInternalSecondaryTableConfig(JClass type)
   {
-    _annotationCfg.reset();
+    _annotationCfg.reset(type, SecondaryTable.class);
 
-    _annotationCfg.setAnnotation(method.getAnnotation(cl));
+    EntityConfig entityConfig = null;
+
+    if (_entityConfigMap != null)
+      entityConfig = _entityConfigMap.get(type.getName());
+
+    if (entityConfig != null) {
+      _annotationCfg.setConfig(entityConfig.getSecondaryTable());
+    }
+  }
+
+  void getInternalIdClassConfig(JClass type)
+  {
+    _annotationCfg.reset(type, IdClass.class);
+
+    EntityConfig entityConfig = null;
+
+    if (_entityConfigMap != null)
+      entityConfig = _entityConfigMap.get(type.getName());
+
+    if (entityConfig != null) {
+      _annotationCfg.setConfig(entityConfig.getIdClass());
+    }
+  }
+
+  void getInternalPrimaryKeyJoinColumnConfig(JClass type)
+  {
+    _annotationCfg.reset(type, PrimaryKeyJoinColumn.class);
+
+    EntityConfig entityConfig = null;
+
+    if (_entityConfigMap != null)
+      entityConfig = _entityConfigMap.get(type.getName());
+
+    if (entityConfig != null) {
+      _annotationCfg.setConfig(entityConfig.getPrimaryKeyJoinColumn());
+    }
+  }
+
+  void getInternalDiscriminatorColumnConfig(JClass type)
+  {
+    _annotationCfg.reset(type, DiscriminatorColumn.class);
+
+    EntityConfig entityConfig = null;
+
+    if (_entityConfigMap != null)
+      entityConfig = _entityConfigMap.get(type.getName());
+
+    if (entityConfig != null) {
+      _annotationCfg.setConfig(entityConfig.getDiscriminatorColumn());
+    }
+  }
+
+  void getInternalOneToManyConfig(JClass type,
+                                  JAccessibleObject field,
+                                  String fieldName)
+  {
+    _annotationCfg.reset(field, OneToMany.class);
+
+    EntityConfig entityConfig = null;
+
+    if (_entityConfigMap != null)
+      entityConfig = _entityConfigMap.get(type.getName());
+
+    if (entityConfig != null) {
+
+      AttributesConfig attributes = entityConfig.getAttributes();
+
+      if (attributes != null) {
+        OneToManyConfig oneToMany = attributes.getOneToMany(fieldName);
+
+        _annotationCfg.setConfig(oneToMany);
+      }
+    }
+  }
+
+  void getInternalManyToOneConfig(JClass type,
+                                  JAccessibleObject field,
+                                  String fieldName)
+  {
+    _annotationCfg.reset(field, ManyToOne.class);
+
+    EntityConfig entityConfig = null;
+
+    if (_entityConfigMap != null)
+      entityConfig = _entityConfigMap.get(type.getName());
+
+    if (entityConfig != null) {
+
+      AttributesConfig attributes = entityConfig.getAttributes();
+
+      if (attributes != null) {
+        ManyToOneConfig manyToOne = attributes.getManyToOne(fieldName);
+
+        _annotationCfg.setConfig(manyToOne);
+      }
+    }
+  }
+
+  void getInternalIdConfig(JClass type,
+                           JAccessibleObject method,
+                           String fieldName)
+  {
+    _annotationCfg.reset(method, Id.class);
+
+    EntityConfig entityConfig = null;
+
+    if (_entityConfigMap != null)
+      entityConfig = _entityConfigMap.get(type.getName());
+
+    if (entityConfig != null) {
+
+      AttributesConfig attributes = entityConfig.getAttributes();
+
+      if (attributes != null) {
+        IdConfig id = attributes.getId(fieldName);
+
+        _annotationCfg.setConfig(id);
+      }
+    }
+  }
+
+  void getInternalPostLoadConfig(JClass type,
+                                 JAccessibleObject method,
+                                 String fieldName)
+  {
+    _annotationCfg.reset(method, PostLoad.class);
+  }
+
+  void getInternalPrePersistConfig(JClass type,
+                                   JAccessibleObject method,
+                                   String fieldName)
+  {
+    _annotationCfg.reset(method, PrePersist.class);
+  }
+
+  void getInternalPostPersistConfig(JClass type,
+                                    JAccessibleObject method,
+                                    String fieldName)
+  {
+    _annotationCfg.reset(method, PostPersist.class);
+  }
+
+  void getInternalPreUpdateConfig(JClass type,
+                                  JAccessibleObject method,
+                                  String fieldName)
+  {
+    _annotationCfg.reset(method, PreUpdate.class);
+  }
+
+  void getInternalPostUpdateConfig(JClass type,
+                                   JAccessibleObject method,
+                                   String fieldName)
+  {
+    _annotationCfg.reset(method, PostUpdate.class);
+  }
+
+  void getInternalPreRemoveConfig(JClass type,
+                                  JAccessibleObject method,
+                                  String fieldName)
+  {
+    _annotationCfg.reset(method, PreRemove.class);
+  }
+
+  void getInternalPostRemoveConfig(JClass type,
+                                   JAccessibleObject method,
+                                   String fieldName)
+  {
+    _annotationCfg.reset(method, PostRemove.class);
+  }
+
+  void getInternalEmbeddedIdConfig(JClass type,
+                                   JAccessibleObject method,
+                                   String fieldName)
+  {
+    _annotationCfg.reset(method, EmbeddedId.class);
+  }
+
+  void getInternalVersionConfig(JClass type,
+                                JAccessibleObject method,
+                                String fieldName)
+  {
+    _annotationCfg.reset(method, Version.class);
+  }
+
+  void getInternalManyToManyConfig(JClass type,
+                                   JAccessibleObject field,
+                                   String fieldName)
+  {
+    _annotationCfg.reset(field, ManyToMany.class);
+  }
+
+  void getInternalColumnConfig(JClass type,
+                               JAccessibleObject field,
+                               String fieldName)
+  {
+    _annotationCfg.reset(field, Column.class);
+  }
+
+  void getInternalOneToOneConfig(JClass type,
+                                 JAccessibleObject field,
+                                 String fieldName)
+  {
+    _annotationCfg.reset(field, OneToOne.class);
+  }
+
+  void getInternalJoinColumnConfig(JClass type,
+                                   JAccessibleObject field,
+                                   String fieldName)
+  {
+    _annotationCfg.reset(field, JoinColumn.class);
+  }
+
+  void getInternalJoinTableConfig(JClass type,
+                                  JAccessibleObject field,
+                                  String fieldName)
+  {
+    _annotationCfg.reset(field, JoinTable.class);
+  }
+
+  void getInternalMapKeyConfig(JClass type,
+                               JAccessibleObject field,
+                               String fieldName)
+  {
+    _annotationCfg.reset(field, MapKey.class);
+  }
+
+  void getInternalAttributeOverrideConfig(JClass type,
+                                          JAccessibleObject field,
+                                          String fieldName)
+  {
+    _annotationCfg.reset(field, AttributeOverride.class);
   }
 
   class AnnotationConfig {
@@ -114,6 +367,18 @@ abstract public class AbstractConfigIntrospector {
     public void reset()
     {
       _annotation = null;
+      _config = null;
+    }
+
+    public void reset(JClass type, Class cl)
+    {
+      _annotation = type.getAnnotation(cl);
+      _config = null;
+    }
+
+    public void reset(JAccessibleObject field, Class cl)
+    {
+      _annotation = field.getAnnotation(cl);
       _config = null;
     }
 

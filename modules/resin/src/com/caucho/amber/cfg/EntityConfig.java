@@ -37,7 +37,7 @@ public class EntityConfig {
   // attributes
   private String _name;
   private String _className;
-  private AccessType _access;
+  private String _access;
   private boolean _isMetadataComplete;
 
   // elements
@@ -71,7 +71,7 @@ public class EntityConfig {
   /**
    * Returns the access type.
    */
-  public AccessType getAccess()
+  public String getAccess()
   {
     return _access;
   }
@@ -113,7 +113,7 @@ public class EntityConfig {
    */
   public void setAccess(String access)
   {
-    _access = AccessType.valueOf(access);
+    _access = access;
   }
 
   /**

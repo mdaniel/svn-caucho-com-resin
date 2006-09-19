@@ -100,8 +100,8 @@ public class StringType extends Type {
                           String index, String value)
     throws IOException
   {
-    if (pstmt.equals("query"))
-      out.println("query.setString(" + index + "++, " + value + ");");
+    if (pstmt.startsWith("query"))
+      out.println(pstmt + ".setString(" + index + "++, " + value + ");");
     else
       out.println("__caucho_setInternalString(" + pstmt + ", " + index + "++, " + value + ");");
   }

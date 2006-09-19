@@ -312,7 +312,7 @@ public class EntityManyToOneField extends AbstractField {
 
     Id id = getEntityType().getId();
 
-    out.println("private transient " + id.getForeignTypeName() + " __caucho_" + getName() + ";");
+    out.println("protected transient " + id.getForeignTypeName() + " __caucho_" + getName() + ";");
 
     if (_aliasField == null) {
       id.generatePrologue(out, completedSet, getName());

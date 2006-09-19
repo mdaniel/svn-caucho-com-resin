@@ -62,7 +62,7 @@ public class ManyToOneConfig extends AbstractRelationConfig {
 
   public void addJoinColumn(JoinColumnConfig joinColumn)
   {
-    _joinColumnMap.put(joinColumn.getName(),
+    _joinColumnMap.put(joinColumn.getReferencedColumnName(),
                        joinColumn);
   }
 
