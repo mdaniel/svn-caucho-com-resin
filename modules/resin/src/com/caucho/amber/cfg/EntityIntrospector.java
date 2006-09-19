@@ -700,7 +700,7 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
       columnName = discriminatorAnn.getString("name");
 
     if (columnName == null || columnName.equals(""))
-      columnName = "TYPE";
+      columnName = "DTYPE";
 
     Type columnType = null;
     DiscriminatorType discType = DiscriminatorType.STRING;
