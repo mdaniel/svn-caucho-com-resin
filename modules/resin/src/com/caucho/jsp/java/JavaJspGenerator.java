@@ -979,7 +979,7 @@ public class JavaJspGenerator extends JspGenerator {
     try {
       return CauchoSystem.loadClass(typeName);
     } catch (CompileClassNotFound e) {
-      throw e;
+      log.log(Level.FINE, e.toString(), e);
     } catch (ClassNotFoundException e) {
     }
 
@@ -1002,7 +1002,7 @@ public class JavaJspGenerator extends JspGenerator {
       try {
         return CauchoSystem.loadClass(fullName);
       } catch (CompileClassNotFound e) {
-        throw e;
+	log.log(Level.FINE, e.toString(), e);
       } catch (ClassNotFoundException e) {
       }
     }

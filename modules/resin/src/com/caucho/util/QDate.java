@@ -91,7 +91,7 @@ public class QDate {
   };
 
   private static TimeZone _localTimeZone = TimeZone.getDefault();
-  private static TimeZone _gmtTimeZone = TimeZone.getTimeZone("UTC");
+  private static TimeZone _gmtTimeZone = TimeZone.getTimeZone("GMT");
 
   private static String _localDstName =
     _localTimeZone.getDisplayName(true, TimeZone.SHORT);
@@ -597,7 +597,7 @@ public class QDate {
     cb.append((_timeOfDay / 10000L) % 6);
     cb.append((_timeOfDay / 1000L) % 10);
 
-    if (_zoneName == null || _zoneName.equals("UTC")) {
+    if (_zoneName == null || _zoneName.equals("GMT")) {
       cb.append(" GMT");
       return;
     }

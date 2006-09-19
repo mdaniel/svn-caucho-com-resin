@@ -1231,28 +1231,22 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       int bLen = buffer.length();
 
       if (_byteCodeEnhancer != null) {
-        try {
-          byte []enhancedBuffer = _byteCodeEnhancer.enhance(name,
-                                                            bBuf, 0, bLen);
+	try {
+	  byte []enhancedBuffer = _byteCodeEnhancer.enhance(name,
+							    bBuf, 0, bLen);
 
-          if (enhancedBuffer != null) {
-            bBuf = enhancedBuffer;
-            bLen = enhancedBuffer.length;
+	  if (enhancedBuffer != null) {
+	    bBuf = enhancedBuffer;
+	    bLen = enhancedBuffer.length;
 
-            if (_isVerbose)
-              verbose(name, String.valueOf(_byteCodeEnhancer));
-          }
-          /* RSN-109
-         } catch (RuntimeException e) {
-           throw e;
-         } catch (Error e) {
-           throw e;
-           */
-        } catch (EnhancerRuntimeException e) {
-          throw e;
-        } catch (Throwable e) {
-          log().log(Level.WARNING, e.toString(), e);
-        }
+	    if (_isVerbose)
+	      verbose(name, String.valueOf(_byteCodeEnhancer));
+	  }
+	} catch (EnhancerRuntimeException e) {
+	  throw e;
+	} catch (Throwable e) {
+	  log().log(Level.WARNING, e.toString(), e);
+	}
       }
 
       try {

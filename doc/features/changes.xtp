@@ -4,6 +4,12 @@
 
 <s2 title='3.0.snap - Sep 7, 2006'>
 <ul>
+<li>ProxyCache not registered with admin (#1334, rep by hpniemi)
+<li>IntMap wasn't handling deletes properly for ThrottleFilter (#1356, rep by sksamuel)</li>
+<li>Additional CodeSource fixes for JSPWiki (#1333, fixed! by ajaquith2)</li>
+<li>Support old-style srun index assignment (#1326, rep by Anupam Bagchi)</li>
+<li>QDate needs to look up "GMT" not "UTC" to handle French locales (#1340, rebp by jiib75)</li>
+<li>mod_caucho needs to update cached file for large dependency-check-interval</li>
 <li>resin-admin was using incorrect MBeanServer (#1331, #1328, rep by vc, J SHepard)
 <li>select manager keepalive enable issue (rep by Serge Knystautas)
 <li>mod_caucho update configuration time on cache file load (rep by Serge Knystautas)

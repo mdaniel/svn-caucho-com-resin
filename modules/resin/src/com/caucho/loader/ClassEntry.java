@@ -99,7 +99,7 @@ public class ClassEntry implements Dependency {
 
     _classPath = classPath;
 
-    setDependPath(classPath);
+    setDependPath(_classPath);
 
     if (sourcePath != null && ! sourcePath.equals(classPath)) {
       _sourcePath = sourcePath;
@@ -308,6 +308,13 @@ public class ClassEntry implements Dependency {
       if (result != 0) {
 	_classIsModified = true;
 	return true;
+      }
+
+      setDependPath(_classPath);
+      
+      if (_sourcePath != null) {
+	_sourceLastModified = _sourcePath.getLastModified();
+	_sourceLength = _sourcePath.getLength();
       }
 
       log.info("Reloading " + cl.getName());

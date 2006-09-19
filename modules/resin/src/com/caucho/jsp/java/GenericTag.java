@@ -904,17 +904,8 @@ abstract public class GenericTag extends JspContainerNode {
     try {
       if (_primTypes.contains(className))
 	return;
-      else if (className.endsWith("[]")) {
-	validateClass(className.substring(0, className.length() - 2), varName);
-	return;
-      }
-
-      String fullClassName = className;
-      if (fullClassName.indexOf('.') < 0)
-	fullClassName = "java.lang." + className;
       
-      ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      Class cl = Class.forName(fullClassName, false, loader);
+      Class cl = _gen.getBeanClass(className);
     } catch (ClassNotFoundException e) {
       throw error(L.l("'{0}' is an unknown class for tag variable '{1}'.",
 		      className, varName));

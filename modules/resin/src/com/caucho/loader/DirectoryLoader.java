@@ -286,7 +286,7 @@ public class DirectoryLoader extends Loader implements Dependency {
       if (filePath.canRead() && filePath.getLength() > 0) {
         ClassEntry entry = new ClassEntry(getLoader(), name, filePath,
                                           filePath,
-					  jarEntry.getCodeSource());
+					  jarEntry.getCodeSource(pathName));
 
         ClassPackage classPackage = jarEntry.getPackage(pkg);
 

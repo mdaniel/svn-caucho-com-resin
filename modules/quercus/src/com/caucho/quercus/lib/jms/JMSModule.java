@@ -71,9 +71,6 @@ public class JMSModule extends AbstractQuercusModule
 
   private static final L10N L = new L10N(JMSModule.class);
 
-  private static Context _context;
-  private static ConnectionFactory _connectionFactory = null;
-
   private static final HashMap<String,StringValue> _iniMap
     = new HashMap<String,StringValue>();
 
@@ -87,20 +84,6 @@ public class JMSModule extends AbstractQuercusModule
 
   public void startup(Env env)
   {
-    StringValue factoryName = env.getIni("jms.connection_factory");
-
-    if (factoryName == null)
-      log.fine("jms.connection_factory not set");
-
-    try {
-      _context = (Context) new InitialContext().lookup("java:comp/env");
-
-      _connectionFactory = 
-        (ConnectionFactory) _context.lookup(factoryName.toString());
-    } catch (Exception e) {
-      log.fine(e.toString());
-    }
-
     try {
       env.getQuercus().addJavaClass("JMSQueue", 
                                     com.caucho.quercus.lib.jms.JMSQueue.class);
@@ -113,7 +96,7 @@ public class JMSModule extends AbstractQuercusModule
                                     ConnectionFactory connectionFactory)
   {
     if (connectionFactory == null)
-      connectionFactory = _connectionFactory;
+      connectionFactory = getConnectionFactory();
 
     if (connectionFactory == null) {
       env.warning(L.l("No connection factory"));
@@ -124,6 +107,24 @@ public class JMSModule extends AbstractQuercusModule
       return new JMSQueue(_context, connectionFactory, queueName);
     } catch (Exception e) {
       env.warning(e);
+
+      return null;
+    }
+  }
+
+  private ConnectionFactory getConnectionFactory()
+  {
+    try {
+      Context context = (Context) new InitialContext().lookup("java:comp/env");
+      
+      StringValue factoryName = env.getIni("jms.connection_factory");
+
+      if (factoryName == null)
+	log.fine("jms.connection_factory not set");
+
+      return (ConnectionFactory) _context.lookup(factoryName.toString());
+    } catch (Exception e) {
+      log.fine(e.toString());
 
       return null;
     }

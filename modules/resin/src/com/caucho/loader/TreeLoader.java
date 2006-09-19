@@ -281,7 +281,7 @@ public class TreeLoader extends Loader implements Dependency {
       if (filePath.canRead() && filePath.getLength() > 0) {
         ClassEntry entry = new ClassEntry(getLoader(), name, filePath,
                                           filePath,
-					  getCodeSource(filePath));
+					  jarEntry.getCodeSource(pathName));
 
         ClassPackage classPackage = jarEntry.getPackage(pkg);
 

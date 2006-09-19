@@ -175,7 +175,11 @@ public class Cluster implements EnvironmentListener {
       log.warning(L.l("duplicate <srun> with server-id='{0}'",
                       server.getId()));
 
-    _serverList.add(server);
+    while (_serverList.size() <= server.getClusterPort().getIndex())
+      _serverList.add(null);
+
+    _serverList.set(server.getClusterPort().getIndex(), server);
+    
     _serverArray = new ClusterServer[_serverList.size()];
     _serverList.toArray(_serverArray);
   }
@@ -196,8 +200,8 @@ public class Cluster implements EnvironmentListener {
 		     port.getServerId(),
 		     _serverList.size() + 1));
     }
-
-    port.setIndex(_serverList.size() + 1);
+    else
+      port.setIndex(_serverList.size() + 1);
     
     server.init();
     

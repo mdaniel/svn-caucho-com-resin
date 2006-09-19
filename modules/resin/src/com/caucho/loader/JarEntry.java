@@ -72,21 +72,12 @@ class JarEntry {
   private JarPath _jarPath;
   private ArrayList<ClassPackage> _packages = new ArrayList<ClassPackage>();
 
-  private CodeSource _codeSource;
-
   /**
    * Creates a JarEntry.
    */
   JarEntry(JarPath jarPath)
   {
     _jarPath = jarPath;
-
-    try {
-      _codeSource = new CodeSource(new URL(jarPath.getURL()),
-				   (Certificate []) null);
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
 
     readManifest();
   }
@@ -240,9 +231,19 @@ class JarEntry {
   /**
    * Returns the code source.
    */
-  public CodeSource getCodeSource()
+  public CodeSource getCodeSource(String path)
   {
-    return _codeSource;
+    try {
+      Path jarPath = _jarPath.lookup(path);
+      
+      Certificate []certificates = jarPath.getCertificates();
+	
+      return new CodeSource(new URL(jarPath.getURL()), certificates);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+
+      return null;
+    }
   }
 
   /**
