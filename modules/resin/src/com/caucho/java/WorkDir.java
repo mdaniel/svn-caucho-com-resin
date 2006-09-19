@@ -29,6 +29,8 @@
 
 package com.caucho.java;
 
+import javax.annotation.*;
+
 import com.caucho.loader.EnvironmentLocal;
 
 import com.caucho.vfs.Path;
@@ -126,6 +128,7 @@ public class WorkDir {
   /**
    * Stores self.
    */
+  @PostConstruct
   public void init()
   {
     setLocalWorkDir(_path);

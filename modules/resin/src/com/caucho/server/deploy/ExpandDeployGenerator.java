@@ -39,6 +39,8 @@ import java.util.Iterator;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import javax.annotation.*;
+
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
 import com.caucho.util.WeakAlarm;
@@ -308,6 +310,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
   /**
    * Configuration checks on init.
    */
+  @PostConstruct
   public void init()
     throws ConfigException
   {

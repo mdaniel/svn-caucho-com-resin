@@ -32,6 +32,8 @@ package com.caucho.server.dispatch;
 import java.util.*;
 import java.util.regex.*;
 import java.io.*;
+
+import javax.annotation.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
@@ -46,7 +48,7 @@ public class FilterMapping extends FilterConfigImpl {
   static L10N L = new L10N(FilterMapping.class);
 
   private String _urlPattern;
-  private String _servletName;
+  private final ArrayList<String> _servletNames = new ArrayList<String>();
   
   // The match expressions
   private final ArrayList<Match> _matchList = new ArrayList<Match>();
@@ -96,17 +98,9 @@ public class FilterMapping extends FilterConfigImpl {
   /**
    * Sets the servlet name
    */
-  public void setServletName(String servletName)
+  public void addServletName(String servletName)
   {
-    _servletName = servletName;
-  }
-
-  /**
-   * Gets the servlet name
-   */
-  public String getServletName()
-  {
-    return _servletName;
+    _servletNames.add(servletName);
   }
 
   /**
@@ -170,7 +164,14 @@ public class FilterMapping extends FilterConfigImpl {
    */
   boolean isMatch(String servletName)
   {
-    return servletName != null && servletName.equals(_servletName);
+    for (int i = 0; i < _servletNames.size(); i++) {
+      String matchName = _servletNames.get(i);
+
+      if (servletName.equals(matchName) || "*".equals(matchName))
+	return true;
+    }
+
+    return false;
   }
 
   /**
@@ -403,6 +404,7 @@ public class FilterMapping extends FilterConfigImpl {
     /**
      * Initialize, adding the all-match for exclude patterns.
      */
+    @PostConstruct
     public void init()
       throws Exception
     {

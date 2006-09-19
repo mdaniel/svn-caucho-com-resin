@@ -36,6 +36,7 @@ import java.util.logging.Level;
 
 import java.io.IOException;
 
+import javax.annotation.*;
 import javax.management.ObjectName;
 
 import com.caucho.log.Log;
@@ -210,6 +211,7 @@ public class ServerConnector {
   /**
    * Initialize
    */
+  @PostConstruct
   public void init()
     throws Exception
   {

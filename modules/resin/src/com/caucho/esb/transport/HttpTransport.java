@@ -35,6 +35,8 @@ import java.io.*;
 
 import java.util.logging.Logger;
 
+import javax.annotation.*;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -87,10 +89,12 @@ public class HttpTransport extends ServletMapping implements ServiceTransport {
 
   public String getServletName()
   {
-    return "com.caucho.esb.HttpTransport/" + _encoding.getClass().getName() + 
-           " - " + getURLPattern();
+    return "com.caucho.esb.HttpTransport/" + _encoding.getClass().getName();
+
+    // + " - " + getURLPattern();
   }
 
+  @PostConstruct
   public void init()
     throws ServletException
   {

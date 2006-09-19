@@ -120,7 +120,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
     ServletMapping servlet = new ServletMapping();
 
     servlet.setServletName("watchdog");
-    servlet.setURLPattern("/watchdog");
+    servlet.addURLPattern("/watchdog");
     servlet.setServletClass("com.caucho.boot.WatchdogServlet");
     servlet.init();
 

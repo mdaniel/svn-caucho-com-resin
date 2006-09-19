@@ -34,6 +34,9 @@ import java.util.*;
 import java.util.logging.Level;
 
 import java.io.*;
+
+import javax.annotation.*;
+
 import javax.servlet.*;
 import javax.servlet.http.*;
 
@@ -55,6 +58,8 @@ import com.caucho.server.webapp.WebApp;
 public class ServletMapping extends ServletConfigImpl {
   private static final L10N L = new L10N(ServletMapping.class);
 
+  private ArrayList<Mapping> _mappingList
+    = new ArrayList<Mapping>();
   private String _urlPattern;
   private String _urlRegexp;
   private boolean _isStrictMapping;
@@ -69,33 +74,17 @@ public class ServletMapping extends ServletConfigImpl {
   /**
    * Sets the url pattern
    */
-  public void setURLPattern(String pattern)
+  public void addURLPattern(String pattern)
   {
-    _urlPattern = pattern;
-  }
-
-  /**
-   * Gets the url pattern
-   */
-  public String getURLPattern()
-  {
-    return _urlPattern;
+    _mappingList.add(new Mapping(pattern, null));
   }
 
   /**
    * Sets the url regexp
    */
-  public void setURLRegexp(String pattern)
+  public void addURLRegexp(String pattern)
   {
-    _urlRegexp = pattern;
-  }
-
-  /**
-   * Gets the url regexp
-   */
-  public String getURLRegexp()
-  {
-    return _urlRegexp;
+    _mappingList.add(new Mapping(null, pattern));
   }
 
   /**
@@ -117,17 +106,42 @@ public class ServletMapping extends ServletConfigImpl {
   /**
    * initialize.
    */
-  public void init()
+  public void init(ServletMapper mapper)
     throws ServletException
   {
+    boolean hasInit = false;
+    
+    for (int i = 0; i < _mappingList.size(); i++) {
+      Mapping mapping = _mappingList.get(i);
+
+      String urlPattern = mapping.getUrlPattern();
+      String urlRegexp = mapping.getUrlRegexp();
+
+      if (getServletName() == null
+	  && getServletClassName() != null
+	  && urlPattern != null) {
+	setServletName(urlPattern);
+      }
+
+      if (urlPattern != null && ! hasInit) {
+	hasInit = true;
+	super.init();
+      }
+
+      if (urlPattern != null)
+	mapper.addUrlMapping(urlPattern, getServletName(), this);
+      else
+	mapper.addUrlRegexp(urlRegexp, this);
+    }
+
+    /*
     if (_urlRegexp == null) {
       if (getServletName() == null && getServletClassName() != null) {
 	// server/13f4
-	setServletName(getURLPattern());
       }
 
-      super.init();
     }
+    */
   }
 
   /**
@@ -201,5 +215,26 @@ public class ServletMapping extends ServletConfigImpl {
   public String toString()
   {
     return "ServletMapping[pattern=" + _urlPattern + ",name=" + getServletName() + "]";
+  }
+
+  static class Mapping {
+    private final String _urlPattern;
+    private final String _urlRegexp;
+
+    Mapping(String urlPattern, String urlRegexp)
+    {
+      _urlPattern = urlPattern;
+      _urlRegexp = urlRegexp;
+    }
+
+    String getUrlPattern()
+    {
+      return _urlPattern;
+    }
+
+    String getUrlRegexp()
+    {
+      return _urlRegexp;
+    }
   }
 }

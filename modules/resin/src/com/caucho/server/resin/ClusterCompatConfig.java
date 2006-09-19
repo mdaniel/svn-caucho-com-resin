@@ -31,6 +31,8 @@ package com.caucho.server.resin;
 
 import java.net.*;
 
+import javax.annotation.*;
+
 import com.caucho.util.*;
 
 import com.caucho.server.cluster.*;
@@ -139,6 +141,7 @@ public class ClusterCompatConfig {
       return _server;
     }
 
+    @PostConstruct
     public void init()
       throws Exception
     {

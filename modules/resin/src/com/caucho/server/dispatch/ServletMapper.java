@@ -109,23 +109,21 @@ public class ServletMapper {
   /**
    * Adds a servlet mapping
    */
-  public void addServletMapping(ServletMapping mapping)
+  public void addUrlRegexp(String regexp, ServletMapping mapping)
+    throws ServletException
+  {
+    _servletMap.addRegexp(regexp, regexp);
+  }
+
+  /**
+   * Adds a servlet mapping
+   */
+  void addUrlMapping(String urlPattern,
+		     String servletName,
+		     ServletMapping mapping)
     throws ServletException
   {
     try {
-      if (mapping.getURLRegexp() != null) {
-	String regexp = mapping.getURLRegexp();
-
-	_servletMap.addRegexp(regexp, regexp);
-	_regexpMap.put(regexp, mapping);
-	return;
-      }
-      
-      String servletName = mapping.getServletName();
-
-      if (servletName == null)
-	servletName = mapping.getServletClassName();
-
       if (servletName == null) {
 	throw new ServletConfigException(L.l("servlet needs a servlet-name."));
       }
@@ -138,25 +136,24 @@ public class ServletMapper {
       }
       else if (servletName.equals("plugin_ignore") ||
 	       servletName.equals("plugin-ignore")) {
-	if (mapping.getURLPattern() != null)
-	  _ignorePatterns.add(mapping.getURLPattern());
+	if (urlPattern != null)
+	  _ignorePatterns.add(urlPattern);
 	
 	return;
       }
       else if (_servletManager.getServlet(servletName) == null)
         throw new ServletConfigException(L.l("`{0}' is an unknown servlet-name.  servlet-mapping requires that the named servlet be defined in a <servlet> configuration before the <servlet-mapping>.", servletName));
 
-      if ("/".equals(mapping.getURLPattern())) {
+      if ("/".equals(urlPattern)) {
         _defaultServlet = servletName;
       }
       else if (mapping.isStrictMapping()) {
-        _servletMap.addStrictMap(mapping.getURLPattern(), null, servletName);
+        _servletMap.addStrictMap(urlPattern, null, servletName);
       }
       else
-        _servletMap.addMap(mapping.getURLPattern(), servletName);
+        _servletMap.addMap(urlPattern, servletName);
 
-      log.config("servlet-mapping " + mapping.getURLPattern() +
-                 " -> " + servletName);
+      log.config("servlet-mapping " + urlPattern + " -> " + servletName);
     } catch (ServletException e) {
       throw e;
     } catch (Exception e) {
@@ -167,6 +164,7 @@ public class ServletMapper {
   /**
    * Adds a servlet mapping
    */
+  /*
   public void addServletRegexp(ServletMapping servletRegexp)
     throws ServletException
   {
@@ -181,6 +179,7 @@ public class ServletMapper {
       throw new ServletException(e);
     }
   }
+  */
   
   /**
    * Sets the default servlet.

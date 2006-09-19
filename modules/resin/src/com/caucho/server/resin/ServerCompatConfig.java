@@ -32,6 +32,8 @@ package com.caucho.server.resin;
 import java.util.*;
 import java.util.logging.*;
 
+import javax.annotation.*;
+
 import com.caucho.config.*;
 import com.caucho.server.cluster.*;
 import com.caucho.server.port.*;
@@ -87,6 +89,7 @@ public class ServerCompatConfig {
     return new ClusterCompatConfig(_resin);
   }
 
+  @PostConstruct
   public void init()
   {
     try {
@@ -145,6 +148,7 @@ public class ServerCompatConfig {
       _program.addProgram(program);
     }
 
+    @PostConstruct
     public void init()
       throws Throwable
     {

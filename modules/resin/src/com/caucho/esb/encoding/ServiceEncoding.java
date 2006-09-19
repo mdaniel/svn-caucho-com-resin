@@ -32,6 +32,8 @@ package com.caucho.esb.encoding;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import com.caucho.config.ConfigException;
+
 import com.caucho.esb.WebService;
 
 /**
@@ -44,5 +46,5 @@ public interface ServiceEncoding {
 
   public void setWebService(WebService webService);
 
-  public void init() throws Throwable;
+  public void init() throws Exception;
 }

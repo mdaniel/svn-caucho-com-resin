@@ -34,6 +34,8 @@ import java.util.logging.*;
 import java.security.*;
 import java.sql.*;
 
+import javax.annotation.*;
+
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.naming.*;
@@ -252,6 +254,7 @@ public class JdbcAuthenticator extends AbstractAuthenticator {
   /**
    * Initialize the authenticator.
    */
+  @PostConstruct
   public void init()
     throws ServletException
   {

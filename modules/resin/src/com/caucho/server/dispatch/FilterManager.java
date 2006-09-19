@@ -33,6 +33,8 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.annotation.*;
+
 import javax.servlet.*;
 
 import com.caucho.util.*;
@@ -40,6 +42,7 @@ import com.caucho.vfs.*;
 
 import com.caucho.log.Log;
 
+import com.caucho.config.*;
 import com.caucho.config.types.InitProgram;
 
 import com.caucho.config.j2ee.InjectIntrospector;
@@ -80,6 +83,7 @@ public class FilterManager {
   /**
    * Initialize filters that need starting at server start.
    */
+  @PostConstruct
   public void init()
   {
     for (String name : _filters.keySet()) {
@@ -123,13 +127,17 @@ public class FilterManager {
 
         filter = (Filter) filterClass.newInstance();
 
-	InjectIntrospector.configure(filter);
+	// InjectIntrospector.configure(filter);
 
         // Initialize bean properties
         InitProgram init = config.getInit();
+	BuilderProgram program = NodeBuilderProgram.NULL;
         
         if (init != null)
-          init.getBuilderProgram().configure(filter);
+          program = init.getBuilderProgram();
+
+	program.configure(filter);
+	program.init(filter);
 
         filter.init(config);
         

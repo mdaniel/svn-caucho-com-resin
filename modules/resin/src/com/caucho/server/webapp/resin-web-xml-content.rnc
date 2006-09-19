@@ -158,11 +158,10 @@ r_filter-mapping = element filter-mapping {
    | element filter-name { string }),
 
   (r_url-pattern
-
    | attribute url-regexp { string }
    | element url-regexp { string }
    | attribute servlet-name { string }
-   | element servlet-name { string }),
+   | element servlet-name { string })+,
 
   (attribute dispatcher { string }
    | element dispatcher { string }*)
@@ -563,7 +562,7 @@ r_servlet-mapping = element servlet-mapping {
 
        & r_servlet-Content))
 
-  & (r_url-pattern | r_url-regexp)
+  & (r_url-pattern | r_url-regexp)+
 }
 
 r_servlet-regexp = element servlet-regexp {

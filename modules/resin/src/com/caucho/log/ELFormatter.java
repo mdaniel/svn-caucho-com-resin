@@ -40,6 +40,8 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import javax.annotation.*;
+
 import javax.el.*;
 
 /**
@@ -61,6 +63,7 @@ public class ELFormatter extends MessageFormatter {
     return _format;
   }
 
+  @PostConstruct
   public void init()
     throws ConfigException
   {

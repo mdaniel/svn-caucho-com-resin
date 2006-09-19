@@ -30,6 +30,8 @@ package com.caucho.server.webapp;
 
 import java.util.*;
 
+import javax.annotation.*;
+
 import com.caucho.util.L10N;
 
 /**
@@ -75,6 +77,7 @@ public class Listener {
   /**
    * Initialize.
    */
+  @PostConstruct
   public void init()
     throws Exception
   {

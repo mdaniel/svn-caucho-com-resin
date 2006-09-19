@@ -64,6 +64,7 @@ public class TaskResource {
   /**
    * Initialization.
    */
+  @PostConstruct
   public void init()
     throws ConfigException
   {

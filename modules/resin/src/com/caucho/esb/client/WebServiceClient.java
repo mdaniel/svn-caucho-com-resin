@@ -29,9 +29,14 @@
 
 package com.caucho.esb.client;
 
+import java.net.*;
+
 import java.util.ArrayList;
 
 import java.util.logging.Logger;
+
+import javax.annotation.*;
+import javax.naming.*;
 
 import com.caucho.config.ConfigException;
 import com.caucho.naming.Jndi;
@@ -61,8 +66,9 @@ public class WebServiceClient {
     _url = url;
   }
 
+  @PostConstruct
   public void init()
-    throws Throwable
+    throws Exception
   {
     if (_jndiName == null)
       throw new ConfigException("jndi-name not set for <web-service-client>");

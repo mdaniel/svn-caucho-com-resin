@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 
 import java.io.InputStream;
 
+import javax.annotation.*;
 import javax.resource.spi.ResourceAdapter;
 
 import com.caucho.util.L10N;
@@ -94,6 +95,7 @@ public class ResourceManagerConfig {
     return null;
   }
 
+  @PostConstruct
   public void init()
     throws ConfigException
   {

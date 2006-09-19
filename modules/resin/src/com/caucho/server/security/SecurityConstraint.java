@@ -33,6 +33,8 @@ import java.util.*;
 import java.util.regex.*;
 import java.util.logging.*;
 
+import javax.annotation.*;
+
 import javax.servlet.*;
 
 import com.caucho.log.Log;
@@ -199,6 +201,7 @@ public class SecurityConstraint {
   /**
    * initialize
    */
+  @PostConstruct
   public void init()
   {
   }

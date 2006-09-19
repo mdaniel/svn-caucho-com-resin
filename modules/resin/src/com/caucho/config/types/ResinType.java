@@ -34,6 +34,8 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+import javax.annotation.*;
+
 import javax.servlet.jsp.el.ELException;
 
 import com.caucho.util.L10N;
@@ -85,6 +87,7 @@ public class ResinType {
   /**
    * Initialize the signature.
    */
+  @PostConstruct
   public void init()
     throws ConfigException
   {

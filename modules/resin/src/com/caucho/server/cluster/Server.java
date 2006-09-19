@@ -41,6 +41,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.*;
 import javax.resource.spi.ResourceAdapter;
 import javax.servlet.http.HttpServletResponse;
 
@@ -898,6 +899,7 @@ public class Server extends ProtocolDispatchServer
   /**
    * Initialization.
    */
+  @PostConstruct
   public void init()
   {
     _classLoader.init();

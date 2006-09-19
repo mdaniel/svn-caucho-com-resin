@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import javax.annotation.*;
+
 import javax.servlet.jsp.tagext.*;
 
 import com.caucho.util.*;
@@ -161,6 +163,7 @@ public class TldFunction {
   /**
    * Initialize
    */
+  @PostConstruct
   public void init()
     throws ConfigException
   {

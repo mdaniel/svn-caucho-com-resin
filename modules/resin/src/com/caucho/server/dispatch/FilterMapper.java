@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -54,7 +55,7 @@ public class FilterMapper {
   static final L10N L = new L10N(FilterMapper.class);
 
   private ServletContext _servletContext;
-
+  
   private int _unique;
   private FilterManager _filterManager;
 
@@ -116,12 +117,7 @@ public class FilterMapper {
 
       _filterMap.add(mapping);
 
-      if (mapping.getServletName() != null)
-	log.fine("filter-mapping " + mapping.getServletName() +
-		 " -> " + filterName);
-      else
-	log.fine("filter-mapping " + mapping.getURLPattern() +
-		 " -> " + filterName);
+      log.fine("filter-mapping " + mapping + " -> " + filterName);
     } catch (ServletException e) {
       throw e;
     } catch (Exception e) {

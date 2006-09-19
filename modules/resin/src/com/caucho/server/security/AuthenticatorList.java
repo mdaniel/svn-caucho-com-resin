@@ -32,6 +32,8 @@ import java.security.Principal;
 
 import java.util.ArrayList;
 
+import javax.annotation.*;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -87,6 +89,7 @@ public class AuthenticatorList implements ServletAuthenticator {
     _authenticators.add(authenticator);
   }
 
+  @PostConstruct
   public void init()
     throws ServletException
   {

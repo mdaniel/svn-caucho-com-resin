@@ -85,7 +85,7 @@ servers and use the -server flag to start the correct one on each machine:</p>
 </example>
 
 <p>On Unix, the servers will generally be started using a
-<a href="doc|install|httpd#script">startup script</a>.  Each server will have
+<a href="install|resin-web-server.xtp#script">startup script</a>.  Each server will have
 a different value for -server and for -pid.</p>
 
 <example title="Starting each server on Unix">

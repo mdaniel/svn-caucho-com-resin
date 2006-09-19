@@ -29,6 +29,8 @@
 
 package com.caucho.server.webapp;
 
+import javax.annotation.*;
+
 import javax.servlet.*;
 
 import com.caucho.util.L10N;
@@ -106,6 +108,7 @@ public class ErrorPage {
   /**
    * Init
    */
+  @PostConstruct
   public void init()
     throws ServletException
   {

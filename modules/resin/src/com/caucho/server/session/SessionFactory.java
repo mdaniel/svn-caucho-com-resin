@@ -33,6 +33,8 @@ import java.net.*;
 import java.util.*;
 import java.util.logging.*;
 
+import javax.annotation.*;
+
 import javax.servlet.*;
 import javax.servlet.http.*;
 
@@ -69,6 +71,7 @@ public class SessionFactory  {
   /**
    * Initialize after all the attributes are set.
    */
+  @PostConstruct
   public void init()
     throws ServletException
   {

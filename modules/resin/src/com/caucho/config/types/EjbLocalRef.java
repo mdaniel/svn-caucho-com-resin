@@ -30,6 +30,8 @@ package com.caucho.config.types;
 
 import java.util.*;
 
+import javax.annotation.*;
+
 import javax.naming.*;
 
 import com.caucho.util.L10N;
@@ -72,6 +74,7 @@ public class EjbLocalRef {
     _link = link;
   }
 
+  @PostConstruct
   public void init()
     throws Exception
   {

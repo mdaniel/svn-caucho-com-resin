@@ -105,6 +105,7 @@ public class CronResource extends AbstractResourceAdapter
   /**
    * Initialization.
    */
+  @PostConstruct
   public void init()
     throws ConfigException
   {

@@ -39,6 +39,8 @@ import java.security.CodeSource;
 
 import java.security.cert.Certificate;
 
+import javax.annotation.*;
+
 import com.caucho.log.Log;
 
 import com.caucho.util.CharBuffer;
@@ -201,6 +203,7 @@ public class SimpleLoader extends Loader {
   /**
    * Initializes the loader.
    */
+  @PostConstruct
   public void init()
     throws ConfigException
   {

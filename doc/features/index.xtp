@@ -10,7 +10,7 @@ The Resin 3.1 Application Server offers:      </p>
 <ul>
 <li>A <a href="quercus|index.xtp">100% Java PHP 5 implementation</a></li>
 
-<li>A fast <a href="install|httpd.xtp">Java HTTP Web Server</a>
+<li>A fast <a href="install|resin-web-server.xtp">Java HTTP Web Server</a>
 for security, performance, and manageability.</li>
 
 <li><a href="config|resin-load-balance.xtp">HTTP Load Balancing</a> for

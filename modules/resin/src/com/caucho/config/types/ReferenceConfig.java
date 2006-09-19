@@ -30,6 +30,8 @@ package com.caucho.config.types;
 
 import java.util.*;
 
+import javax.annotation.*;
+
 import javax.naming.*;
 import javax.naming.spi.*;
 
@@ -120,6 +122,7 @@ public class ReferenceConfig {
   /**
    * Initialize the resource.
    */
+  @PostConstruct
   public void init()
     throws Exception
   {

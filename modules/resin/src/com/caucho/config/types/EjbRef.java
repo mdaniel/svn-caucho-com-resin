@@ -32,6 +32,8 @@ package com.caucho.config.types;
 import java.util.*;
 import java.rmi.*;
 
+import javax.annotation.*;
+
 import javax.ejb.*;
 import javax.naming.*;
 
@@ -105,6 +107,7 @@ public class EjbRef implements ObjectProxy {
     _link = link;
   }
 
+  @PostConstruct
   public void init()
     throws Exception
   {

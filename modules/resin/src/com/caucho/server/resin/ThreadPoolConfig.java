@@ -28,6 +28,8 @@
 
 package com.caucho.server.resin;
 
+import javax.annotation.*;
+
 import com.caucho.util.ThreadPool;
 import com.caucho.util.L10N;
 
@@ -52,6 +54,7 @@ public class ThreadPoolConfig {
     _threadSpareMin = threadSpareMin;
   }
 
+  @PostConstruct
   public void init()
   {
     ThreadPool threadPool = ThreadPool.getThreadPool();

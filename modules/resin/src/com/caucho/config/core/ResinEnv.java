@@ -28,6 +28,8 @@
 
 package com.caucho.config.core;
 
+import javax.annotation.*;
+
 import com.caucho.util.L10N;
 
 import com.caucho.loader.EnvironmentBean;
@@ -82,6 +84,7 @@ public class ResinEnv extends ResinControl implements EnvironmentBean {
     _init.addProgram(program);
   }
 
+  @PostConstruct
   public void init()
     throws Throwable
   {

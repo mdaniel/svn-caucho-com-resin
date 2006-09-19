@@ -32,12 +32,16 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 
 import com.caucho.util.L10N;
+import com.caucho.xml.*;
 
 /**
  * Stored configuration program for an attribute.
  */
 public class NodeBuilderProgram extends BuilderProgram {
   static final L10N L = new L10N(NodeBuilderChildProgram.class);
+
+  public static final NodeBuilderProgram NULL
+    = new NodeBuilderProgram(null, new QElement());
 
   private final Node _node;
 

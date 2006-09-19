@@ -33,6 +33,8 @@ import java.io.OutputStream;
 
 import java.util.logging.Logger;
 
+import javax.annotation.*;
+
 import javax.ejb.MessageDrivenContext;
 
 import javax.jms.BytesMessage;
@@ -118,6 +120,7 @@ public class JmsTransport implements ServiceTransport {
     _connectionFactory = connectionFactory;
   }
 
+  @PostConstruct
   public void init()
   {
     try {
@@ -238,6 +241,7 @@ public class JmsTransport implements ServiceTransport {
   }
 
   public static class QueueConfig extends DestinationConfig {
+    @PostConstruct
     public void init()
       throws Throwable
     {
@@ -260,6 +264,7 @@ public class JmsTransport implements ServiceTransport {
   }
   
   public static class TopicConfig extends DestinationConfig {
+    @PostConstruct
     public void init()
       throws Throwable
     {

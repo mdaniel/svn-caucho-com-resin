@@ -33,6 +33,8 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import javax.annotation.*;
+
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -106,8 +108,9 @@ public class HessianEncoding implements ServiceEncoding {
     getSerializerFactory().setSendCollectionType(sendType);
   }
 
+  @PostConstruct
   public void init()
-    throws Throwable
+    throws Exception
   {
     if (_serviceImpl == null)
       _serviceImpl = this;

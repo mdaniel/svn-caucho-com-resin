@@ -364,7 +364,7 @@ that can use more threads than they should.
 <s1 title="64-bit JNI">
 
 <p>The JNI has been updated to support 64-bit compilation on Solaris.
-The <a href="install|httpd.xtp">configuration</a> looks like:</p>
+The <a href="install|resin-web-server.xtp">configuration</a> looks like:</p>
 
 <example>
 unix&gt; ./configure --enable-64bit

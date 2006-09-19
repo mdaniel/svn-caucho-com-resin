@@ -30,6 +30,8 @@ package com.caucho.config.core;
 
 import java.util.ArrayList;
 
+import javax.annotation.*;
+
 import com.caucho.util.L10N;
 
 import com.caucho.config.BuilderProgram;
@@ -62,6 +64,7 @@ public class ResinChoose extends ResinControl {
     _otherwise.setTest(true);
   }
 
+  @PostConstruct
   public void init()
     throws Throwable
   {

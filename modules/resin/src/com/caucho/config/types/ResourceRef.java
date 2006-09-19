@@ -34,6 +34,8 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import javax.annotation.*;
+
 import javax.naming.*;
 
 import com.caucho.util.L10N;
@@ -170,6 +172,7 @@ public class ResourceRef implements Validator {
   /**
    * Initialize the resource.
    */
+  @PostConstruct
   public void init()
     throws Throwable
   {

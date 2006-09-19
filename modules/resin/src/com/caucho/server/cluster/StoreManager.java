@@ -35,6 +35,8 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import javax.annotation.*;
+
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
@@ -261,6 +263,7 @@ abstract public class StoreManager
   /**
    * Called after any factory settings.
    */
+  @PostConstruct
   public boolean init()
     throws Exception
   {

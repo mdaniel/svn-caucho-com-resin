@@ -38,6 +38,8 @@ import java.util.logging.Level;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import javax.annotation.*;
+
 import com.caucho.util.L10N;
 
 import com.caucho.vfs.Path;
@@ -183,6 +185,7 @@ public class ResourceArchive implements EnvironmentBean {
   /**
    * Configures the resource.
    */
+  @PostConstruct
   public void init()
     throws ConfigException
   {

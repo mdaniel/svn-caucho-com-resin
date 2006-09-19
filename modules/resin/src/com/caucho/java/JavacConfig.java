@@ -28,6 +28,8 @@
 
 package com.caucho.java;
 
+import javax.annotation.*;
+
 import com.caucho.loader.EnvironmentLocal;
 
 public class JavacConfig {
@@ -129,10 +131,10 @@ public class JavacConfig {
   /**
    * Stores self.
    */
+  @PostConstruct
   public void init()
   {
     _localJavac.set(this);
   }
-
 }
 

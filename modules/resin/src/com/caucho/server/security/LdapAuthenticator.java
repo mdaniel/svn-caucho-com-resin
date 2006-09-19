@@ -40,6 +40,8 @@ import java.util.Iterator;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import javax.annotation.*;
+
 import javax.naming.*;
 import javax.naming.directory.*;
 
@@ -110,6 +112,7 @@ public class LdapAuthenticator extends AbstractAuthenticator {
   /**
    * Initialize the authenticator.
    */
+  @PostConstruct
   public synchronized void init()
     throws ServletException
   {

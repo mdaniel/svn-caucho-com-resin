@@ -46,7 +46,7 @@ j2ee_filter-mapping = element filter-mapping {
 
   j2ee_filter-name,
 
-  (j2ee_url-pattern | j2ee_servlet-name),
+  (j2ee_url-pattern | j2ee_servlet-name)+,
 
   j2ee_dispatcher*
 }
@@ -158,7 +158,7 @@ j2ee_servlet-mapping = element servlet-mapping {
 
   j2ee_servlet-name,
 
-  j2ee_url-pattern
+  j2ee_url-pattern+
 }
 
 j2ee_servlet = element servlet {

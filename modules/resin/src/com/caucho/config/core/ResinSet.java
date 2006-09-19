@@ -29,6 +29,8 @@
 
 package com.caucho.config.core;
 
+import javax.annotation.*;
+
 import com.caucho.util.L10N;
 
 import com.caucho.config.ConfigException;
@@ -92,6 +94,7 @@ public class ResinSet {
     Config.setCurrentVar(name, value);
   }
 
+  @PostConstruct
   public void init()
     throws Exception
   {

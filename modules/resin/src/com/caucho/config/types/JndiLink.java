@@ -30,6 +30,8 @@ package com.caucho.config.types;
 
 import java.util.*;
 
+import javax.annotation.*;
+
 import javax.naming.*;
 import javax.naming.spi.*;
 
@@ -110,6 +112,7 @@ public class JndiLink {
   /**
    * Initialize the resource.
    */
+  @PostConstruct
   public void init()
     throws Exception
   {

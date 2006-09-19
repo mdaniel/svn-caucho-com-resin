@@ -29,6 +29,8 @@
 
 package com.caucho.config.core;
 
+import javax.annotation.*;
+
 import com.caucho.util.L10N;
 
 import com.caucho.config.BuilderProgram;
@@ -61,6 +63,7 @@ public class ResinIf extends ResinControl {
     _init.addProgram(program);
   }
 
+  @PostConstruct
   public void init()
     throws Throwable
   {

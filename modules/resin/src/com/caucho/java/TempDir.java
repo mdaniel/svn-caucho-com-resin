@@ -28,6 +28,8 @@
 
 package com.caucho.java;
 
+import javax.annotation.*;
+
 import com.caucho.loader.Environment;
 
 import com.caucho.vfs.Path;
@@ -46,6 +48,7 @@ public class TempDir {
   /**
    * Stores self.
    */
+  @PostConstruct
   public void init()
   {
     Environment.setAttribute("caucho.temp-dir", _path);

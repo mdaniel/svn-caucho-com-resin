@@ -38,6 +38,8 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.annotation.*;
+
 import javax.management.ObjectName;
 
 import javax.naming.InitialContext;
@@ -733,32 +735,12 @@ public class WebApp extends ServletContextImpl
   /**
    * Adds a servlet-mapping configuration.
    */
-  public ServletMapping createServletMapping()
-    throws ServletException
-  {
-    ServletMapping servletMapping = new ServletMapping();
-    servletMapping.setStrictMapping(_isStrictMapping);
-
-    return servletMapping;
-  }
-
-  /**
-   * Adds a servlet-mapping configuration.
-   */
   public void addServletMapping(ServletMapping servletMapping)
     throws ServletException
   {
-    if (servletMapping.getURLRegexp() == null &&
-	servletMapping.getServletClassName() != null) {
-      if (servletMapping.getServletName() == null)
-	servletMapping.setServletName(servletMapping.getServletClassName());
-
-      addServlet(servletMapping);
-    }
-
     log.fine("adding servlet mapping: " + servletMapping);
     
-    _servletMapper.addServletMapping(servletMapping);
+    servletMapping.init(_servletMapper);
   }
 
   /**
@@ -786,13 +768,15 @@ public class WebApp extends ServletContextImpl
     throws ServletException, ClassNotFoundException
   {
     ServletMapping mapping = new ServletMapping();
-    mapping.setURLRegexp(servletRegexp.getURLRegexp());
+    mapping.addURLRegexp(servletRegexp.getURLRegexp());
     mapping.setServletName(servletRegexp.getServletName());
     mapping.setServletClass(servletRegexp.getServletClass());
     mapping.setServletContext(this);
     mapping.setInit(new InitProgram(servletRegexp.getBuilderProgram()));
 
-    _servletMapper.addServletRegexp(mapping);
+    mapping.init();
+
+    //_servletMapper.addServletRegexp(mapping);
   }
 
   /**
@@ -1572,6 +1556,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Initializes.
    */
+  @PostConstruct
   public void init()
     throws Exception
   {

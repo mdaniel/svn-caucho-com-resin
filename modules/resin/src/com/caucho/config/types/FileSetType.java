@@ -36,6 +36,8 @@ import java.util.logging.Level;
 
 import java.io.IOException;
 
+import javax.annotation.*;
+
 import com.caucho.util.L10N;
 
 import com.caucho.vfs.Path;
@@ -109,6 +111,7 @@ public class FileSetType {
   /**
    * Initialize the type.
    */
+  @PostConstruct
   public void init()
     throws ConfigException
   {

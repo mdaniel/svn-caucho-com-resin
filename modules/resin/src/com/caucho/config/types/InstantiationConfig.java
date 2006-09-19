@@ -33,6 +33,8 @@ import java.lang.reflect.Constructor;
 
 import java.util.ArrayList;
 
+import javax.annotation.*;
+
 import com.caucho.util.L10N;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CauchoSystem;
@@ -81,6 +83,7 @@ public class InstantiationConfig {
   /**
    * Initialize the signature.
    */
+  @PostConstruct
   public void init()
     throws Exception
   {

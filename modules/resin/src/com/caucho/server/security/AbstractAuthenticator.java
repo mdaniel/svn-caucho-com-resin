@@ -35,6 +35,8 @@ import java.util.*;
 import java.util.logging.*;
 import java.security.*;
 
+import javax.annotation.*;
+
 import javax.servlet.http.*;
 import javax.servlet.*;
 
@@ -166,6 +168,7 @@ public class AbstractAuthenticator implements ServletAuthenticator {
   /**
    * Initialize the authenticator with the application.
    */
+  @PostConstruct
   public void init()
     throws ServletException
   {

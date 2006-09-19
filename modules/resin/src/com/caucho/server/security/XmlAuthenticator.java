@@ -32,6 +32,8 @@ import java.io.*;
 import java.util.*;
 import java.security.*;
 
+import javax.annotation.*;
+
 import javax.servlet.http.*;
 import javax.servlet.*;
 
@@ -103,6 +105,7 @@ public class XmlAuthenticator extends AbstractAuthenticator {
   /**
    * Initialize the XML authenticator.
    */
+  @PostConstruct
   public synchronized void init()
     throws ServletException
   {

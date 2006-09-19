@@ -33,6 +33,8 @@ import java.net.*;
 import java.util.*;
 import java.util.logging.*;
 
+import javax.annotation.*;
+
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
@@ -55,6 +57,7 @@ public class ClusterDef extends Cluster {
   /**
    * Initializes the cluster.
    */
+  @PostConstruct
   public void init()
   {
     ClusterContainer container = ClusterContainer.create();

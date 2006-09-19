@@ -28,10 +28,12 @@
 
 package com.caucho.config.core;
 
+import java.util.logging.Logger;
+
+import javax.annotation.*;
+
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
-
-import java.util.logging.Logger;
 
 /**
  * Logs an EL value.
@@ -61,6 +63,7 @@ public class ResinLog {
   /**
    * Initialization logs the data.
    */
+  @PostConstruct
   public void init()
   {
     Logger log = Logger.getLogger(_name);

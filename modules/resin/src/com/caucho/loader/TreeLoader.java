@@ -36,6 +36,8 @@ import java.util.jar.Attributes;
 
 import java.net.URL;
 
+import javax.annotation.*;
+
 import com.caucho.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
 
@@ -128,6 +130,7 @@ public class TreeLoader extends Loader implements Dependency {
   /**
    * Initialize
    */
+  @PostConstruct
   public void init()
   {
     _lastModified = _dir.getLastModified();

@@ -44,6 +44,8 @@ import java.util.jar.Manifest;
 
 import java.io.IOException;
 
+import javax.annotation.*;
+
 import javax.naming.InitialContext;
 import javax.naming.Context;
 
@@ -370,6 +372,7 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
   /**
    * Initialize the client.
    */
+  @PostConstruct
   public void init()
   {
     System.out.println("INIT: " + _links);

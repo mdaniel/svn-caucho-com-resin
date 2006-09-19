@@ -35,6 +35,8 @@ import java.util.HashSet;
 
 import java.util.logging.Logger;
 
+import javax.annotation.*;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -109,6 +111,7 @@ public class RestServletMapping extends ServletMapping {
       _binding = new PathBinding();
   }
 
+  @PostConstruct
   public void init()
     throws ServletException
   {

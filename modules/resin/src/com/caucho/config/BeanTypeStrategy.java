@@ -49,6 +49,7 @@ import com.caucho.util.NotImplementedException;
 import com.caucho.config.types.Validator;
 import com.caucho.config.j2ee.*;
 
+import com.caucho.loader.*;
 import com.caucho.make.PersistentDependency;
 
 import com.caucho.vfs.Depend;
@@ -78,6 +79,7 @@ public class BeanTypeStrategy extends TypeStrategy {
   private final Method _setSystemId;
   private final Method _setNode;
   private final ArrayList<Method> _initList = new ArrayList<Method>();
+  private final ArrayList<Method> _destroyList = new ArrayList<Method>();
   private final Method _replaceObject;
 
   BeanTypeStrategy(Class type)
@@ -92,9 +94,13 @@ public class BeanTypeStrategy extends TypeStrategy {
 
     _setParent = setParent;
 
+    scanMethods(type);
+
+    /*
     Method init = findMethod("init", new Class[0]);
     if (init != null)
       _initList.add(init);
+    */
 
     _replaceObject = findMethod("replaceObject", new Class[0]);
 
@@ -343,6 +349,14 @@ public class BeanTypeStrategy extends TypeStrategy {
   {
     for (int i = 0; i < _initList.size(); i++)
       _initList.get(i).invoke(bean);
+    
+    for (int i = 0; i < _destroyList.size(); i++) {
+      Method method = _destroyList.get(i);
+      EnvironmentListener listener;
+      listener = new WeakDestroyListener(method, bean);
+	
+      Environment.addEnvironmentListener(listener);
+    }
   }
 
   /**
@@ -371,6 +385,48 @@ public class BeanTypeStrategy extends TypeStrategy {
     return method;
   }
 
+  private void scanMethods(Class cl)
+  {
+    if (cl == null || Object.class.equals(cl))
+      return;
+
+    Method []methods = cl.getDeclaredMethods();
+
+    for (int i = 0; i < methods.length; i++) {
+      Method method = methods[i];
+
+      if (method.isAnnotationPresent(PostConstruct.class)) {
+	if (method.getParameterTypes().length != 0)
+	  throw new ConfigException(L.l("{0}::{1} is an invalid @PostConstruct method.  @PostConstruct must have zero arguments.",
+					method.getDeclaringClass().getName(),
+					method.getName()));
+
+	if (! hasMethod(_initList, method))
+	  _initList.add(method);
+      }
+      else if (method.isAnnotationPresent(PreDestroy.class)) {
+	if (method.getParameterTypes().length != 0)
+	  throw new ConfigException(L.l("{0}::{1} is an invalid @PreDestroy method.  @PreDestroy must have zero arguments.",
+					method.getDeclaringClass().getName(),
+					method.getName()));
+
+	_destroyList.add(method);
+      }
+    }
+
+    scanMethods(cl.getSuperclass());
+  }
+
+  private boolean hasMethod(ArrayList<Method> methodList, Method method)
+  {
+    for (int i = 0; i < methodList.size(); i++) {
+      if (methodList.get(i).getName() == method.getName())
+	return true;
+    }
+
+    return false;
+  }
+  
   protected Method findCreate(String attributeName)
   {
     String methodSuffix = attributeNameToBeanName(attributeName);

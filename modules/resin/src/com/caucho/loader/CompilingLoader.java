@@ -36,6 +36,8 @@ import java.util.logging.Level;
 
 import java.io.IOException;
 
+import javax.annotation.*;
+
 import java.net.URL;
 
 import java.security.CodeSource;
@@ -279,6 +281,7 @@ public class CompilingLoader extends Loader implements Make {
   /**
    * Initialize.
    */
+  @PostConstruct
   public void init()
     throws ConfigException
   {

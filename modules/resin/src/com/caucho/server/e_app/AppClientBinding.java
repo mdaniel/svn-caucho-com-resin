@@ -30,6 +30,8 @@ package com.caucho.server.e_app;
 
 import java.util.ArrayList;
 
+import javax.annotation.*;
+
 import com.caucho.util.L10N;
 
 import com.caucho.config.ConfigException;
@@ -73,6 +75,7 @@ public class AppClientBinding {
       _jndiName = jndiName;
     }
 
+    @PostConstruct
     public void init()
     {
       System.out.println("ENB: " + _ejbName + " " + _jndiName);

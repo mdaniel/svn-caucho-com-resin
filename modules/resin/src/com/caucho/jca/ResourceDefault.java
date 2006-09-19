@@ -33,6 +33,8 @@ import java.util.ArrayList;
 
 import java.util.logging.Logger;
 
+import javax.annotation.*;
+
 import com.caucho.config.BuilderProgram;
 
 import com.caucho.loader.EnvironmentLocal;
@@ -64,6 +66,7 @@ public class ResourceDefault {
     _config.addBuilderProgram(program);
   }
 
+  @PostConstruct
   public void init()
   {
     ArrayList<ResourceConfig> defaultList = _localConfig.getLevel();

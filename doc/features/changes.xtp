@@ -8,6 +8,7 @@
 
 <s2 title="3.1snap - Aug 1, 2006">
 <ul>
+<li>IntMap wasn't handling deletes properly for ThrottleFilter (#1356, rep by sksamuel)</li>
 <li>Change to addByteCodeEnhancer (#1157, rep by Costin Leau)</li>
 <li>Add DynamicClassLoader.getNewTempClassLoader() (#1157, rep by Costin Leau)</li>
 <li>Additional CodeSource fixes for JSPWiki (#1333, fixed! by ajaquith2)</li>

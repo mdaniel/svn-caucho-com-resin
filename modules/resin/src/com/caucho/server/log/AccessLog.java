@@ -40,6 +40,8 @@ import java.util.zip.GZIPOutputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 
+import javax.annotation.*;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
@@ -199,6 +201,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener {
   /**
    * Initialize the log.
    */
+  @PostConstruct
   public void init()
     throws ServletException, IOException
   {

@@ -35,6 +35,8 @@ import java.io.OutputStream;
 
 import java.util.logging.Logger;
 
+import javax.annotation.*;
+
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -76,8 +78,8 @@ public class SoapEncoding implements ServiceEncoding {
     _class = cl;
   }
 
+  @PostConstruct
   public void init()
-    throws Throwable
   {
   }
 

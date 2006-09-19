@@ -32,6 +32,9 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.*;
 import java.security.*;
+
+import javax.annotation.*;
+
 import javax.naming.*;
 
 import javax.servlet.http.*;
@@ -120,6 +123,7 @@ public abstract class AbstractLogin {
    * Initialize the login.  <code>init()</code> will be called after all
    * the bean parameters have been set.
    */
+  @PostConstruct
   public void init()
     throws ServletException
   {

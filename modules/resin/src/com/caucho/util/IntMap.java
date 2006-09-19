@@ -43,26 +43,24 @@ public class IntMap {
    */
   public final static int NULL = -65536; // Integer.MIN_VALUE + 1;
   private static int DELETED = 0x1;
-  private Object []keys;
-  private int nullValue;
-  private int []values;
-  private byte []flags;
-  private int size;
-  private int mask;
+  private Object []_keys;
+  private int _nullValue;
+  private int []_values;
+  private int _size;
+  private int _mask;
 
   /**
    * Create a new IntMap.  Default size is 16.
    */
   public IntMap()
   {
-    keys = new Object[16];
-    values = new int[16];
-    flags = new byte[16];
+    _keys = new Object[16];
+    _values = new int[16];
 
-    mask = keys.length - 1;
-    size = 0;
+    _mask = _keys.length - 1;
+    _size = 0;
 
-    nullValue = NULL;
+    _nullValue = NULL;
   }
 
   /**
@@ -77,20 +75,19 @@ public class IntMap {
    */
   public void clear()
   {
-    nullValue = NULL;
-    for (int i = 0; i < values.length; i++) {
-      keys[i] = null;
-      flags[i] = 0;
-      values[i] = 0;
+    _nullValue = NULL;
+    for (int i = 0; i < _values.length; i++) {
+      _keys[i] = null;
+      _values[i] = 0;
     }
-    size = 0;
+    _size = 0;
   }
   /**
    * Returns the current number of entries in the map.
    */
   public int size() 
   { 
-    return size;
+    return _size;
   }
 
   /**
@@ -99,24 +96,25 @@ public class IntMap {
   public int get(Object key)
   {
     if (key == null)
-      return nullValue;
+      return _nullValue;
 
-    int hash = key.hashCode() & mask;
+    int hash = key.hashCode() & _mask;
+    Object []keys = _keys;
 
-    while (true) {
+    for (int i = keys.length; i >= 0; i--) {
       Object mapKey = keys[hash];
 
       if (mapKey == key)
-	return values[hash];
-      else if (mapKey == null) {
-	if ((flags[hash] & DELETED) == 0)
-	  return NULL;
-      }
+	return _values[hash];
+      else if (mapKey == null)
+	return NULL;
       else if (mapKey.equals(key))
-	return values[hash];
+	return _values[hash];
 
-      hash = (hash + 1) & mask;
+      hash = (hash + 1) & _mask;
     }
+
+    return NULL;
   }
 
   /**
@@ -126,30 +124,27 @@ public class IntMap {
   {
     Object []newKeys = new Object[newSize];
     int []newValues = new int[newSize];
-    byte []newFlags = new byte[newSize];
 
-    mask = newKeys.length - 1;
+    _mask = newKeys.length - 1;
 
-    for (int i = 0; i < keys.length; i++) {
-      if (keys[i] == null || (flags[i] & DELETED) != 0)
+    for (int i = 0; i < _keys.length; i++) {
+      if (_keys[i] == null)
 	continue;
 
-      int hash = keys[i].hashCode() & mask;
+      int hash = _keys[i].hashCode() & _mask;
 
-      while (true) {
+      for (int j = _mask; j >= 0; j--) {
 	if (newKeys[hash] == null) {
-	  newKeys[hash] = keys[i];
-	  newValues[hash] = values[i];
-	  newFlags[hash] = flags[i];
+	  newKeys[hash] = _keys[i];
+	  newValues[hash] = _values[i];
 	  break;
 	}
-	hash = (hash + 1) & mask;
+	hash = (hash + 1) & _mask;
       }
     }
 
-    keys = newKeys;
-    values = newValues;
-    flags = newFlags;
+    _keys = newKeys;
+    _values = newValues;
   }
 
   /**
@@ -158,40 +153,41 @@ public class IntMap {
   public int put(Object key, int value)
   {
     if (key == null) {
-      int old = nullValue;
-      nullValue = value;
+      int old = _nullValue;
+      _nullValue = value;
       return old;
     }
 
-    int hash = key.hashCode() & mask;
+    int hash = key.hashCode() & _mask;
 
-    while (true) {
-      Object testKey = keys[hash];
+    for (int count = _size; count >= 0; count--) {
+      Object testKey = _keys[hash];
 
-      if (testKey == null || (flags[hash] & DELETED) != 0) {
-	keys[hash] = key;
-	values[hash] = value;
-	flags[hash] = 0;
+      if (testKey == null) {
+	_keys[hash] = key;
+	_values[hash] = value;
 
-	size++;
+	_size++;
 
-	if (keys.length <= 2 * size)
-	  resize(2 * keys.length);
+	if (_keys.length <= 4 * _size)
+	  resize(4 * _keys.length);
 
 	return NULL;
       }
       else if (key != testKey && ! testKey.equals(key)) {
-	hash = (hash + 1) & mask;
+	hash = (hash + 1) & _mask;
 	continue;
       }
       else {
-	int old = values[hash];
+	int old = _values[hash];
 
-	values[hash] = value;
+	_values[hash] = value;
 
 	return old;
       }
     }
+
+    return NULL;
   }
 
   /**
@@ -200,29 +196,69 @@ public class IntMap {
   public int remove(Object key)
   {
     if (key == null) {
-      int old = nullValue;
-      nullValue = NULL;
+      int old = _nullValue;
+      _nullValue = NULL;
       return old;
     }
 
-    int hash = key.hashCode() & mask;
+    int hash = key.hashCode() & _mask;
 
-    while (true) {
-      Object mapKey = keys[hash];
+    for (int j = _size; j >= 0; j--) {
+      Object mapKey = _keys[hash];
 
       if (mapKey == null)
 	return NULL;
       else if (mapKey.equals(key)) {
-	flags[hash] |= DELETED;
+	_size--;
 
-	size--;
+	_keys[hash] = null;
 
-	keys[hash] = null;
+	int value = _values[hash];
 
-	return values[hash];
+	refillEntries(hash);
+
+	return value;
       }
 
-      hash = (hash + 1) & mask;
+      hash = (hash + 1) & _mask;
+    }
+
+    return NULL;
+  }
+
+  /**
+   * Put the item in the best location available in the hash table.
+   */
+  private void refillEntries(int hash)
+  {
+    for (int count = _size; count >= 0; count--) {
+      hash = (hash + 1) & _mask;
+
+      if (_keys[hash] == null)
+	return;
+
+      refillEntry(hash);
+    }
+  }
+  
+  /**
+   * Put the item in the best location available in the hash table.
+   */
+  private void refillEntry(int baseHash)
+  {
+    Object key = _keys[baseHash];
+    int value = _values[baseHash];
+    
+    int hash = key.hashCode();
+    
+    for (int count = _size; count >= 0; count--) {
+      if (_keys[hash] == null) {
+	_keys[hash] = key;
+	_values[hash] = value;
+	return;
+      }
+
+      hash = (hash + 1) & _mask;
     }
   }
   /**
@@ -237,19 +273,16 @@ public class IntMap {
   {
     IntMap clone = new IntMap(true);
 
-    clone.keys = new Object[keys.length];
-    System.arraycopy(keys, 0, clone.keys, 0, keys.length);
+    clone._keys = new Object[_keys.length];
+    System.arraycopy(_keys, 0, clone._keys, 0, _keys.length);
     
-    clone.values = new int[values.length];
-    System.arraycopy(values, 0, clone.values, 0, values.length);
+    clone._values = new int[_values.length];
+    System.arraycopy(_values, 0, clone._values, 0, _values.length);
     
-    clone.flags = new byte[flags.length];
-    System.arraycopy(flags, 0, clone.flags, 0, flags.length);
+    clone._mask = _mask;
+    clone._size = _size;
 
-    clone.mask = mask;
-    clone.size = size;
-
-    clone.nullValue = nullValue;
+    clone._nullValue = _nullValue;
 
     return clone;
   }
@@ -260,14 +293,14 @@ public class IntMap {
 
     sbuf.append("IntMap[");
     boolean isFirst = true;
-    for (int i = 0; i <= mask; i++) {
-      if ((flags[i] & DELETED) == 0 && keys[i] != null) {
+    for (int i = 0; i <= _mask; i++) {
+      if (_keys[i] != null) {
 	if (! isFirst)
 	  sbuf.append(", ");
 	isFirst = false;
-	sbuf.append(keys[i]);
+	sbuf.append(_keys[i]);
 	sbuf.append(":");
-	sbuf.append(values[i]);
+	sbuf.append(_values[i]);
       }
     }
     sbuf.append("]");
@@ -279,8 +312,8 @@ public class IntMap {
 
     public boolean hasNext()
     {
-      for (; index < keys.length; index++)
-	if (keys[index] != null && (flags[index] & DELETED) == 0)
+      for (; index < _keys.length; index++)
+	if (_keys[index] != null)
 	  return true;
 
       return false;
@@ -288,9 +321,9 @@ public class IntMap {
 
     public Object next()
     {
-      for (; index < keys.length; index++)
-	if (keys[index] != null && (flags[index] & DELETED) == 0)
-	  return keys[index++];
+      for (; index < _keys.length; index++)
+	if (_keys[index] != null)
+	  return _keys[index++];
 
       return null;
     }

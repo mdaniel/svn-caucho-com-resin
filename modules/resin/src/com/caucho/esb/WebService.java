@@ -33,6 +33,8 @@ import java.util.ArrayList;
 
 import java.util.logging.Logger;
 
+import javax.annotation.*;
+
 import com.caucho.config.types.InitProgram;
 
 import com.caucho.esb.encoding.ServiceEncoding;
@@ -125,6 +127,7 @@ public class WebService {
     return restServlet;
   }
 
+  @PostConstruct
   public void init()
     throws Throwable
   {

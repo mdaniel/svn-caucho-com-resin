@@ -35,6 +35,8 @@ import java.util.logging.Logger;
 
 import java.util.regex.Pattern;
 
+import javax.annotation.*;
+
 import com.caucho.util.L10N;
 
 import com.caucho.log.Log;
@@ -226,6 +228,7 @@ public class HostConfig extends DeployConfig {
   /**
    * Initialize the config.
    */
+  @PostConstruct
   public void init()
   {
     if (_regexp != null && getId() == null)

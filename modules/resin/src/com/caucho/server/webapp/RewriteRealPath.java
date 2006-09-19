@@ -37,6 +37,8 @@ import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
+import javax.annotation.*;
+
 import com.caucho.config.ConfigException;
 
 import com.caucho.config.types.PathBuilder;
@@ -209,6 +211,7 @@ public class RewriteRealPath {
     /**
      * Init
      */
+    @PostConstruct
     public void init()
       throws ConfigException
     {
@@ -254,6 +257,7 @@ public class RewriteRealPath {
     /**
      * Init
      */
+    @PostConstruct
     public void init()
       throws ConfigException
     {

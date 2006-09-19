@@ -33,6 +33,8 @@ import java.util.*;
 import java.util.logging.*;
 import java.security.*;
 
+import javax.annotation.*;
+
 import javax.servlet.http.*;
 import javax.servlet.*;
 
@@ -144,6 +146,7 @@ public class FormLogin extends AbstractLogin {
   /**
    * Initialize
    */
+  @PostConstruct
   public void init()
     throws ServletException
   {

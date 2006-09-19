@@ -29,6 +29,8 @@
 
 package com.caucho.server.webapp;
 
+import javax.annotation.*;
+
 import com.caucho.config.ConfigException;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.ClassLoaderListener;
@@ -637,6 +639,7 @@ public class WebAppContainer
   /**
    * Init the container.
    */
+  @PostConstruct
   public void init()
     throws Exception
   {

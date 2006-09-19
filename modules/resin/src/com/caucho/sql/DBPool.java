@@ -43,6 +43,7 @@ import com.caucho.naming.Jndi;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.L10N;
 
+import javax.annotation.*;
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
@@ -579,6 +580,7 @@ public class DBPool implements DataSource {
   /**
    * Initialize the pool.
    */
+  @PostConstruct
   public void init()
     throws Exception
   {

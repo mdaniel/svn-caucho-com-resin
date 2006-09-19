@@ -44,7 +44,7 @@ public class QElement extends QAttributedNode implements CauchoElement {
   /**
    * Create a new element.
    */
-  QElement()
+  public QElement()
   {
   }
 

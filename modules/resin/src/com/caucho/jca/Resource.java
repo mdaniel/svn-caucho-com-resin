@@ -34,6 +34,8 @@ import java.lang.reflect.Constructor;
 
 import java.util.*;
 
+import javax.annotation.*;
+
 import javax.naming.*;
 import javax.naming.spi.*;
 
@@ -334,6 +336,7 @@ public class Resource {
   /**
    * Initialize the resource.
    */
+  @PostConstruct
   public void init()
     throws Throwable
   {
@@ -515,6 +518,7 @@ public class Resource {
       return _handback;
     }
 
+    @PostConstruct
     public void init()
       throws Throwable
     {

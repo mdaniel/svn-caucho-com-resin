@@ -41,6 +41,8 @@ import java.util.logging.Level;
 
 import java.security.Principal;
 
+import javax.annotation.*;
+
 import javax.security.auth.Subject;
 
 import javax.security.auth.spi.LoginModule;
@@ -101,6 +103,7 @@ public class JaasAuthenticator extends AbstractAuthenticator {
   /**
    * Initialize the authenticator.
    */
+  @PostConstruct
   public synchronized void init()
     throws ServletException
   {

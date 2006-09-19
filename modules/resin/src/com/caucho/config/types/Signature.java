@@ -31,6 +31,8 @@ package com.caucho.config.types;
 import java.util.ArrayList;
 import java.lang.reflect.Method;
 
+import javax.annotation.*;
+
 import com.caucho.util.L10N;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CauchoSystem;
@@ -138,6 +140,7 @@ public class Signature {
   /**
    * Initialize the signature.
    */
+  @PostConstruct
   public void init()
     throws ConfigException
   {

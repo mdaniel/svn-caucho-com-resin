@@ -37,6 +37,8 @@ import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
+import javax.annotation.*;
+
 import javax.servlet.*;
 import javax.servlet.http.*;
 
@@ -224,6 +226,7 @@ public class RewriteInvocation {
     /**
      * Init
      */
+    @PostConstruct
     public void init()
       throws ConfigException
     {
@@ -267,6 +270,7 @@ public class RewriteInvocation {
     /**
      * Init
      */
+    @PostConstruct
     public void init()
       throws ConfigException
     {
@@ -317,6 +321,7 @@ public class RewriteInvocation {
 	return null;
     }
 
+    @PostConstruct
     public void init()
       throws ConfigException
     {
@@ -368,6 +373,7 @@ public class RewriteInvocation {
 	return null;
     }
 
+    @PostConstruct
     public void init()
       throws ConfigException
     {
@@ -420,6 +426,7 @@ public class RewriteInvocation {
 	return null;
     }
 
+    @PostConstruct
     public void init()
       throws ConfigException, ServletException
     {
@@ -480,6 +487,7 @@ public class RewriteInvocation {
 	return null;
     }
 
+    @PostConstruct
     public void init()
       throws ConfigException
     {
@@ -520,6 +528,7 @@ public class RewriteInvocation {
 	return null;
     }
 
+    @PostConstruct
     public void init()
       throws ConfigException
     {

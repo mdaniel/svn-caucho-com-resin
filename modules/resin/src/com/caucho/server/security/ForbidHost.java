@@ -33,6 +33,8 @@ import java.net.*;
 import java.util.*;
 import java.util.logging.*;
 
+import javax.annotation.*;
+
 import com.caucho.log.Log;
 
 import com.caucho.util.*;
@@ -123,6 +125,7 @@ public class ForbidHost {
   /**
    * Initialize the forbidden host.
    */
+  @PostConstruct
   public void init()
   {
   }

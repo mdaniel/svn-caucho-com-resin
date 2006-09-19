@@ -37,6 +37,7 @@ import com.caucho.server.port.Port;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 
+import javax.annotation.*;
 import javax.management.ObjectName;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -405,6 +406,7 @@ public class ClusterServer {
   /**
    * Initialize
    */
+  @PostConstruct
   public void init()
     throws Exception
   {

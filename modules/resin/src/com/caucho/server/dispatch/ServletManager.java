@@ -32,6 +32,8 @@ package com.caucho.server.dispatch;
 import java.util.*;
 import java.util.logging.*;
 
+import javax.annotation.*;
+
 import javax.servlet.*;
 
 import com.caucho.util.*;
@@ -118,6 +120,7 @@ public class ServletManager {
   /**
    * Initialize servlets that need starting at server start.
    */
+  @PostConstruct
   public void init()
     throws ServletException
   {

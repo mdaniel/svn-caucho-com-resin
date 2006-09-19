@@ -33,6 +33,8 @@ import java.io.*;
 import java.util.*;
 import java.security.*;
 
+import javax.annotation.*;
+
 import javax.servlet.http.*;
 import javax.servlet.*;
 
@@ -152,6 +154,7 @@ public class PasswordDigest {
   /**
    * Initialize the digest.
    */
+  @PostConstruct
   synchronized public void init()
     throws ServletException
   {

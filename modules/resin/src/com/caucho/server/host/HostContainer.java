@@ -51,10 +51,7 @@ import com.caucho.lifecycle.Lifecycle;
 
 import com.caucho.make.AlwaysModified;
 
-import com.caucho.server.dispatch.DispatchServer;
-import com.caucho.server.dispatch.DispatchBuilder;
-import com.caucho.server.dispatch.Invocation;
-import com.caucho.server.dispatch.ErrorFilterChain;
+import com.caucho.server.dispatch.*;
 
 import com.caucho.server.deploy.DeployContainer;
 
@@ -462,8 +459,8 @@ public class HostContainer implements DispatchBuilder {
 	_errorWebApp = new WebApp();
 	_errorWebApp.setAppDir(getRootDirectory());
 	com.caucho.server.dispatch.ServletMapping file;
-	file = _errorWebApp.createServletMapping();
-	file.setURLPattern("/");
+	file = new ServletMapping();
+	file.addURLPattern("/");
 	file.setServletName("resin-file");
 	file.setServletClass("com.caucho.servlets.FileServlet");
 	file.init();

@@ -35,6 +35,8 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import javax.annotation.*;
+
 import javax.naming.*;
 
 import javax.resource.spi.ResourceAdapter;
@@ -357,6 +359,7 @@ public class ConnectorResource implements EnvironmentListener {
   /**
    * Initialize the resource.
    */
+  @PostConstruct
   public void init()
     throws Exception
   {
@@ -585,6 +588,7 @@ public class ConnectorResource implements EnvironmentListener {
       return _init;
     }
 
+    @PostConstruct
     public void init()
       throws Exception
     {
@@ -650,6 +654,7 @@ public class ConnectorResource implements EnvironmentListener {
       return _endpointFactory;
     }
 
+    @PostConstruct
     public void init()
       throws ConfigException
     {
@@ -785,6 +790,7 @@ public class ConnectorResource implements EnvironmentListener {
       return _object;
     }
 
+    @PostConstruct
     public void init()
       throws ConfigException
     {

@@ -34,6 +34,8 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.regex.PatternSyntaxException;
 
+import javax.annotation.*;
+
 import com.caucho.util.L10N;
 import com.caucho.util.CharBuffer;
 
@@ -121,6 +123,7 @@ public class PathPatternType {
   /**
    * initialize the pattern.
    */
+  @PostConstruct
   public void init()
     throws ConfigException
   {

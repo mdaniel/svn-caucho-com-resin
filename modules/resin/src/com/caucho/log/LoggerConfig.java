@@ -32,6 +32,8 @@ package com.caucho.log;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import javax.annotation.*;
+
 import com.caucho.config.ConfigException;
 
 import com.caucho.util.L10N;
@@ -93,6 +95,7 @@ public class LoggerConfig {
   /**
    * Initialize the logger.
    */
+  @PostConstruct
   public void init()
   {
     if (_level != null)

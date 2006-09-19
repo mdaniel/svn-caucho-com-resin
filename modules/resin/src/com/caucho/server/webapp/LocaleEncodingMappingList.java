@@ -30,6 +30,8 @@ package com.caucho.server.webapp;
 
 import java.util.logging.Logger;
 
+import javax.annotation.*;
+
 import com.caucho.util.L10N;
 
 import com.caucho.log.Log;
@@ -73,6 +75,7 @@ public class LocaleEncodingMappingList {
       _encoding = encoding;
     }
 
+    @PostConstruct
     public void init()
     {
       _app.putLocaleEncoding(_locale, _encoding);

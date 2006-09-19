@@ -44,12 +44,13 @@ import java.util.logging.Level;
 
 import java.util.regex.Pattern;
 
-
 import java.net.URL;
 
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.CodeSource;
+
+import javax.annotation.*;
 
 import com.caucho.util.L10N;
 import com.caucho.util.CauchoSystem;
@@ -978,6 +979,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   /**
    * Initialize the class loader.
    */
+  @PostConstruct
   public void init()
   {
     if (! _lifecycle.toActive())

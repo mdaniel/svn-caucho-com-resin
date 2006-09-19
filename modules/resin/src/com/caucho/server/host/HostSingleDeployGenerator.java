@@ -35,6 +35,8 @@ import java.util.Set;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import javax.annotation.*;
+
 import com.caucho.log.Log;
 
 import com.caucho.vfs.Path;
@@ -110,6 +112,7 @@ public class HostSingleDeployGenerator
   /**
    * Initializes the entry.
    */
+  @PostConstruct
   public void init()
     throws Exception
   {

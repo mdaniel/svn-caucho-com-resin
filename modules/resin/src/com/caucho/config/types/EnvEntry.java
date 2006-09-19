@@ -32,6 +32,8 @@ package com.caucho.config.types;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import javax.annotation.*;
+
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -129,6 +131,7 @@ public class EnvEntry implements Validator {
   /**
    * Gets the env-entry-value
    */
+  @PostConstruct
   public void init()
     throws Exception
   {

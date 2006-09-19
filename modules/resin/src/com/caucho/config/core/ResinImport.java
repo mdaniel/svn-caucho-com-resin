@@ -32,6 +32,8 @@ import java.util.ArrayList;
 
 import java.util.logging.Logger;
 
+import javax.annotation.*;
+
 import javax.el.*;
 
 import com.caucho.util.L10N;
@@ -83,6 +85,7 @@ public class ResinImport extends ResinControl
     _isOptional = optional;
   }
 
+  @PostConstruct
   public void init()
     throws Exception
   {

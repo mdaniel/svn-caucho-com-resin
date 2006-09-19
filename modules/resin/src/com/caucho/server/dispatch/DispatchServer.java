@@ -29,13 +29,15 @@
 
 package com.caucho.server.dispatch;
 
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.make.Dependency;
-import com.caucho.util.LruCache;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+
+import javax.annotation.*;
+
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.make.Dependency;
+import com.caucho.util.LruCache;
 
 /**
  * The dispatch server is responsible for building Invocations,
@@ -131,6 +133,7 @@ public class DispatchServer implements Dependency {
   /**
    * Initializes the server.
    */
+  @PostConstruct
   public void init()
   {
     _invocationCache = new LruCache<Object,Invocation>(_invocationCacheSize);

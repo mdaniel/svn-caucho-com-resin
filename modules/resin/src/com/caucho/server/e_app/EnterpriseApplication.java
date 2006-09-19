@@ -46,6 +46,8 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
 
+import javax.annotation.*;
+
 import javax.naming.Context;
 
 import javax.servlet.jsp.el.VariableResolver;
@@ -365,6 +367,7 @@ public class EnterpriseApplication
   /**
    * Configures the application.
    */
+  @PostConstruct
   public void init()
     throws Exception
   {

@@ -32,6 +32,8 @@ package com.caucho.server.cluster;
 import java.io.*;
 import java.net.*;
 
+import javax.annotation.*;
+
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 
@@ -98,6 +100,7 @@ public class ClusterPort extends Port {
     return _clientWeight;
   }
 
+  @PostConstruct
   public void init()
   {
   }

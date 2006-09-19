@@ -34,6 +34,7 @@ import java.net.*;
 import java.util.*;
 import java.util.logging.*;
 
+import javax.annotation.*;
 import javax.naming.*;
 
 import com.caucho.util.*;
@@ -120,6 +121,7 @@ public class PersistentStoreConfig {
     return _store;
   }
 
+  @PostConstruct
   public void init()
     throws Exception
   {

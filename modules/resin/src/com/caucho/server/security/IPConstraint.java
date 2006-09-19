@@ -39,6 +39,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
+import javax.annotation.*;
+
 import javax.servlet.*;
 import javax.servlet.http.*;
 
@@ -217,6 +219,7 @@ public class IPConstraint extends AbstractConstraint {
     _denyNetworkList.add(d);
   }
 
+  @PostConstruct
   public void init()
     throws ConfigException
   {

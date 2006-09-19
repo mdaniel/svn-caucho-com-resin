@@ -36,6 +36,8 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Formatter;
 
+import javax.annotation.*;
+
 import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.TimestampFilter;
 
@@ -239,6 +241,7 @@ public class LogConfig extends RotateLog {
   /**
    * Initialize the log.
    */
+  @PostConstruct
   public void init()
     throws ConfigException, java.io.IOException
   {

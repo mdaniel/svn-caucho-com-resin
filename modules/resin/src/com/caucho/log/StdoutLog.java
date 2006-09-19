@@ -33,6 +33,8 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.*;
 
+import javax.annotation.*;
+
 import com.caucho.vfs.Path;
 import com.caucho.vfs.RotateStream;
 import com.caucho.vfs.WriteStream;
@@ -76,6 +78,7 @@ public class StdoutLog extends RotateLog {
   /**
    * Initialize the log.
    */
+  @PostConstruct
   public void init()
     throws ConfigException, IOException
   {

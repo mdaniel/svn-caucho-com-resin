@@ -34,6 +34,8 @@ import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import javax.annotation.*;
+
 import com.caucho.util.L10N;
 import com.caucho.util.CauchoSystem;
 
@@ -127,6 +129,7 @@ public class ResourceDeploy {
   /**
    * Initialize the resource-deploy.
    */
+  @PostConstruct
   public void init()
     throws ConfigException
   {

@@ -35,6 +35,8 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.annotation.*;
+
 import com.caucho.db.sql.Parser;
 import com.caucho.db.sql.Query;
 import com.caucho.db.store.Store;
@@ -137,6 +139,7 @@ public class Database {
    * Initializes the database.  All *.db files in the database directory
    * are read for stored tables.
    */
+  @PostConstruct
   public void init()
     throws SQLException
   {

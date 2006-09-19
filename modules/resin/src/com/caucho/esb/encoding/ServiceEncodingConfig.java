@@ -104,7 +104,7 @@ public class ServiceEncodingConfig {
     HttpTransport transport = new HttpTransport();
     transport.setWebService(_webService);
     transport.setEncoding(_encoding);
-    transport.setURLPattern(pattern);
+    transport.addURLPattern(pattern);
     transport.init();
   }
 

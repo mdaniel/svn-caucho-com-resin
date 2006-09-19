@@ -31,6 +31,8 @@ package com.caucho.server.cluster;
 
 import java.util.logging.Level;
 
+import javax.annotation.*;
+
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
@@ -70,6 +72,7 @@ public class FileStore extends StoreManager {
   /**
    * Initialize.
    */
+  @PostConstruct
   public boolean init()
     throws Exception
   {

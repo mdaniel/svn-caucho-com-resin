@@ -41,8 +41,11 @@ import java.util.Enumeration;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import javax.annotation.*;
+
 import javax.servlet.*;
 
+import com.caucho.config.*;
 import com.caucho.config.types.InitParam;
 import com.caucho.config.types.InitProgram;
 
@@ -403,6 +406,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
   /**
    * Initialize the servlet config.
    */
+  @PostConstruct
   public void init()
     throws ServletException
   {
@@ -659,13 +663,19 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
   void configureServlet(Servlet servlet)
     throws Throwable
   {
-    InjectIntrospector.configure(servlet);
+    //InjectIntrospector.configure(servlet);
 
     // Initialize bean properties
     InitProgram init = getInit();
+    BuilderProgram program;
 
     if (init != null)
-      init.getBuilderProgram().configure(servlet);
+      program = init.getBuilderProgram();
+    else
+      program = NodeBuilderProgram.NULL;
+
+    program.configure(servlet);
+    program.init(servlet);
   }
 
   /**

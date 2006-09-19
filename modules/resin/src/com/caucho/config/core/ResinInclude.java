@@ -31,6 +31,8 @@ package com.caucho.config.core;
 
 import java.util.logging.Logger;
 
+import javax.annotation.*;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -93,6 +95,7 @@ public class ResinInclude extends ResinControl {
     _isOptional = optional;
   }
 
+  @PostConstruct
   public void init()
     throws Exception
   {

@@ -34,6 +34,8 @@ import java.security.*;
 import java.util.*;
 import java.util.logging.*;
 import java.net.*;
+
+import javax.annotation.*;
 import javax.el.*;
 import javax.management.ObjectName;
 
@@ -521,6 +523,7 @@ public class Resin implements EnvironmentBean, SchemaBean
   /**
    * Initialize the server.
    */
+  @PostConstruct
   public void init()
   {
     _lifecycle.toInit();

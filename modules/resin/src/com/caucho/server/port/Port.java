@@ -29,6 +29,16 @@
 
 package com.caucho.server.port;
 
+import java.net.ConnectException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.annotation.*;
+
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.server.cluster.*;
@@ -47,14 +57,6 @@ import com.caucho.vfs.QJniServerSocket;
 import com.caucho.vfs.QServerSocket;
 import com.caucho.vfs.QSocket;
 import com.caucho.vfs.SSLFactory;
-
-import java.net.ConnectException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Represents a protocol connection.
@@ -93,7 +95,7 @@ public class Port
   private InetAddress _socketAddress;
 
   // default timeout
-  private long _socketTimeout = 65000L;
+  private long _socketTimeout = DEFAULT;
 
   private int _connectionMax = 512;
   private int _minSpareConnection = 16;
@@ -653,6 +655,7 @@ public class Port
   /**
    * Initializes the port.
    */
+  @PostConstruct
   public void init()
     throws ConfigException
   {
