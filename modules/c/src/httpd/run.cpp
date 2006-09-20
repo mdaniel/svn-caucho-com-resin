@@ -514,9 +514,49 @@ get_server_args(char *name, char *full_name, char *main, int argc, char **argv)
 	if (! server_root)
 		server_root = resin_home;
 
+	if (stderr_file && ! stdout_file)
+		stdout_file = stderr_file;
+	if (stdout_file && ! stderr_file)
+		stderr_file = stdout_file;
+
 	if (! g_is_standalone) {
 		AllocConsole();
 	}
+
+	if (! g_console && (g_is_service || stderr_file)) {
+		CreateDirectory(rsprintf(buf, "%s/log", server_root), NULL);
+		SECURITY_ATTRIBUTES security;
+		memset(&security, 0, sizeof(security));
+		security.nLength = sizeof(security);
+		security.lpSecurityDescriptor = 0;
+		security.bInheritHandle = TRUE;
+
+	    char *file_name;
+		
+		if (! jvm_file || ! *jvm_file)
+			file_name = rsprintf(buf, "%s/log/jvm.log", server_root);
+		else
+			file_name = rsprintf(buf, "%s/%s", server_root, jvm_file);
+		HANDLE errfile = CreateFile(file_name, GENERIC_WRITE, 
+			                      FILE_SHARE_READ|FILE_SHARE_WRITE,
+								  &security,
+								  OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+		SetStdHandle(STD_ERROR_HANDLE, errfile);
+		SetFilePointer(errfile, 0, 0, FILE_END);
+		HANDLE outfile = errfile;
+		SetStdHandle(STD_OUTPUT_HANDLE, outfile);
+		SetFilePointer(outfile, 0, 0, FILE_END);
+	}
+	
+	int fdOut = _open_osfhandle((long) GetStdHandle(STD_OUTPUT_HANDLE), _O_TEXT);
+	int fdErr = _open_osfhandle((long) GetStdHandle(STD_ERROR_HANDLE), _O_TEXT);
+	out = fdopen(fdOut, "w");
+	err = fdopen(fdErr, "w");
+	*stdout = *out;
+	*stderr = *err;
+	
+	setvbuf(out, NULL, _IONBF, 0);
+	setvbuf(err, NULL, _IONBF, 0);
 
 	if (msjava)
 		java_home = 0;
@@ -561,7 +601,7 @@ get_server_args(char *name, char *full_name, char *main, int argc, char **argv)
 	//fflush(out);
 	//fflush(err);
 
-	if (1) {
+	if (g_is_standalone) {
 		int result = exec_java(java_exe, args);
 		exit(result);
 	}
