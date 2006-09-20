@@ -1,5 +1,5 @@
 /*
- * Copyright 1999-2004 Caucho Technology.  All rights reserved.
+ * Copyright 1999-2006 Caucho Technology.  All rights reserved.
  */
 
 #include <windows.h>
@@ -100,20 +100,11 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdLine, int nCmdSho
 {
 	char *name = "Resin";
     char *full_name = "Resin Web Server";
-	char *class_name = "com.caucho.server.resin.Resin";
+	char *class_name = "com.caucho.boot.BootMain";
 	DWORD threadId;
 
-	if (start_service(name, full_name, class_name, __argc, __argv))
-		return FALSE;
-	g_args = get_server_args(name, full_name, class_name, __argc, __argv);
-	if (! g_args)
-		return FALSE;
+	start_service(name, full_name, class_name, __argc, __argv);
 
-
-	CreateThread(0, 0, (LPTHREAD_START_ROUTINE) StartThread, 0, 0, &threadId);
-
-	DialogBox(hInstance, (LPCTSTR) IDD_SERVER, NULL, (DLGPROC) ServerAction);
-	
 	return FALSE;
 }
 
