@@ -135,11 +135,15 @@ public class Server extends ProtocolDispatchServer
 
   private String _connectionErrorPage;
 
+  private ServerAdmin _admin;
+
   private Alarm _alarm;
   private AbstractCache _cache;
 
   private boolean _isBindPortsAtEnd;
   private volatile boolean _isStartedPorts;
+
+  private long _startTime;
 
   private final Lifecycle _lifecycle;
 
@@ -177,6 +181,8 @@ public class Server extends ProtocolDispatchServer
         _hostContainer.setDispatchServer(this);
 
 	_clusterServer.getServerProgram().configure(this);
+
+	_admin = new ServerAdmin(this);
 	
 	_alarm = new Alarm(this);
       } finally {
@@ -722,6 +728,30 @@ public class Server extends ProtocolDispatchServer
     getErrorWebApp().addErrorPage(errorPage);
   }
 
+  //
+  // statistics
+  //
+
+  /**
+   * Returns the time the server started in ms.
+   */
+  public long getStartTime()
+  {
+    return _startTime;
+  }
+
+  /**
+   * Returns the lifecycle state 
+   */
+  public String getState()
+  {
+    return _lifecycle.getStateName();
+  }
+
+  //
+  // runtime operations
+  //
+
   /**
    * Sets the invocation
    */
@@ -777,8 +807,7 @@ public class Server extends ProtocolDispatchServer
    */
   public ServerMXBean getAdmin()
   {
-    //return _admin;
-    return null;
+    return _admin;
   }
 
   /**
@@ -945,6 +974,8 @@ public class Server extends ProtocolDispatchServer
       if (! _lifecycle.toStarting())
         return;
 
+      _startTime = Alarm.getCurrentTime();
+
       if (! Alarm.isTest()) {
         log.info("");
         log.info(System.getProperty("os.name") + " " +
@@ -956,6 +987,8 @@ public class Server extends ProtocolDispatchServer
                  System.getProperty("file.encoding") + ", " +
                  System.getProperty("user.language") + ", " +
                  System.getProperty("java.vm.vendor"));
+
+	System.out.println(System.getProperties());
 
         log.info("resin.home = " + System.getProperty("resin.home"));
         log.info("server.root = " + System.getProperty("server.root"));

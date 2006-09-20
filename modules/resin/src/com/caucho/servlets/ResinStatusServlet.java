@@ -219,12 +219,9 @@ public class ResinStatusServlet extends GenericServlet {
     if (configFile != null)
       out.println("<tr><td><b>Config:</b><td>" + configFile);
 
-    long initialStartTime = _server.getInitialStartTime().getTime();
     long startTime = _server.getStartTime().getTime();
 
-    out.println("<tr><td><b>Server Start:</b><td>" +
-                QDate.formatLocal(initialStartTime));
-    out.println("<tr><td><b>Server Reload:</b><td> " +
+    out.println("<tr><td><b>Server Start:</b><td> " +
                 QDate.formatLocal(startTime));
 
     long totalMemory = _server.getRuntimeMemory();
@@ -256,8 +253,8 @@ public class ResinStatusServlet extends GenericServlet {
     out.println(" (" + invocationHitCount + "/" + totalCount + ")");
 
     if (_proxyCache != null) {
-      long proxyHitCount = _proxyCache.getHitCountLifetime();
-      long proxyMissCount = _proxyCache.getMissCountLifetime();
+      long proxyHitCount = _proxyCache.getHitCountTotal();
+      long proxyMissCount = _proxyCache.getMissCountTotal();
 
       totalCount = proxyHitCount + proxyMissCount;
       if (totalCount == 0)

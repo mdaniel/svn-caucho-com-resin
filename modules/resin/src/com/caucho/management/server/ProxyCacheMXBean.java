@@ -50,14 +50,14 @@ public interface ProxyCacheMXBean extends ManagedObjectMXBean {
    */
   @Description("The proxy cache is used to cache responses that"
                + " set appropriate HTTP headers")
-  public long getHitCountLifetime();
+  public long getHitCountTotal();
 
   /**
    * Returns the proxy cache miss count.
    */
   @Description("The proxy cache is used to cache responses that"
                + " set appropriate HTTP headers")
-  public long getMissCountLifetime();
+  public long getMissCountTotal();
 
   //
   // Operations

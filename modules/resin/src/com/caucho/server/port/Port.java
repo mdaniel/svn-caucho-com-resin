@@ -800,6 +800,8 @@ public class Port
 
     ss.setConnectionSocketTimeout((int) getSocketTimeout());
 
+    _admin.register();
+
     return ss;
   }  
 
@@ -817,6 +819,8 @@ public class Port
 
     try {
       bind();
+
+      _admin.register();
 
       if (_serverSocket.isJNI() && _server.isEnableSelectManager()) {
         _selectManager = _server.getSelectManager();

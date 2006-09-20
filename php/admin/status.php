@@ -74,7 +74,7 @@ if (! empty($server->Id))
 
   <tr title="The ip address of the machine that is running this instance of Resin.">
     <th>Local host:</th>
-    <td><?= $server->LocalHost ?></td>
+    <td><?= $resin->LocalHost ?></td>
   </tr>
 
   <tr title="The current lifecycle state">
@@ -110,7 +110,8 @@ $proxy_cache = $mbeanServer->lookup("resin:type=ProxyCache");
 
   <tr title="Percentage of requests that have been served from the proxy cache:">
     <th>Proxy cache hit ratio:</th>
-    <td><?= format_hit_ratio($proxy_cache->HitCountTotal, $proxy_cache->MissCountTotal) ?></td>
+    <td><?= format_hit_ratio($proxy_cache->HitCountTotal,
+                             $proxy_cache->MissCountTotal) ?></td>
   </tr>
 
 <!-- XXX: show how cacheable apps are: cacheable/non-cacheable -->

@@ -29,11 +29,283 @@
 
 package com.caucho.server.cluster;
 
-public class ServerAdmin {
+import java.util.*;
+
+import com.caucho.management.server.*;
+import com.caucho.server.port.*;
+import com.caucho.util.*;
+
+public class ServerAdmin extends AbstractManagedObject
+  implements ServerMXBean
+{
   private Server _server;
 
   ServerAdmin(Server server)
   {
     _server = server;
+
+    registerSelf();
+  }
+
+  public String getName()
+  {
+    return null;
+  }
+
+  public String getType()
+  {
+    return "Server";
+  }
+
+  public String getId()
+  {
+    return _server.getServerId();
+  }
+
+  //
+  // Hierarchy
+  //
+  
+  /**
+   * Returns the cluster owning this server
+   */
+  public ClusterMXBean getCluster()
+  {
+    return _server.getCluster().getAdmin();
+  }
+
+  /**
+   * Returns the array of ports.
+   */
+  public PortMXBean []getPorts()
+  {
+    Collection<Port> portList = _server.getPorts();
+
+    PortMXBean []ports = new PortMXBean[portList.size()];
+
+    int i = 0;
+    for (Port port : portList) {
+      ports[i++] = port.getAdmin();
+    }
+    
+    return ports;
+  }
+
+  /**
+   * Returns the server's thread pool administration
+   */
+  public ThreadPoolMXBean getThreadPool()
+  {
+    //return ThreadPool.getThreadPool().getAdmin();
+    return null;
+  }
+
+  /**
+   * Returns the cluster port
+   */
+  public PortMXBean getClusterPort()
+  {
+    return null;
+  }
+
+  //
+  // Configuration attributes
+  //
+
+  /**
+   * Returns true if a {@link com.caucho.server.port.AbstractSelectManager} is enabled and active
+   */
+  public boolean isSelectManagerEnabled()
+  {
+    // return _server.isSelectManagedEnabled();
+    return false;
+  }
+
+  /**
+   * Returns true if detailed statistics are being kept.
+   */
+  public boolean isDetailedStatistics()
+  {
+    return false;
+  }
+
+  //
+  // state
+  //
+
+  /**
+   * The current lifecycle state.
+   */
+  public String getState()
+  {
+    return _server.getState();
+  }
+
+  /**
+   * Returns the last start time.
+   */
+  public Date getStartTime()
+  {
+    return new Date(_server.getStartTime());
+  }
+
+  //
+  // statistics
+  //
+
+  /**
+   * Returns the current number of threads that are servicing requests.
+   */
+  public int getThreadActiveCount()
+  {
+    int activeThreadCount = -1;
+
+    for (Port port : _server.getPorts()) {
+      if (port.getActiveThreadCount() >= 0) {
+        if (activeThreadCount == -1)
+          activeThreadCount = 0;
+
+        activeThreadCount += port.getActiveThreadCount();
+      }
+    }
+
+    return activeThreadCount;
+  }
+
+  /**
+   * Returns the current number of connections that are in the keepalive
+   * state and are using a thread to maintain the connection.
+   */
+  public int getThreadKeepaliveCount()
+  {
+    int keepaliveThreadCount = -1;
+
+    for (Port port : _server.getPorts()) {
+      if (port.getKeepaliveConnectionCount() >= 0) {
+        if (keepaliveThreadCount == -1)
+          keepaliveThreadCount = 0;
+
+        keepaliveThreadCount += port.getKeepaliveConnectionCount();
+      }
+    }
+
+    return keepaliveThreadCount;
+  }
+
+  /**
+   * Returns the current number of connections that are in the keepalive
+   * state and are using select to maintain the connection.
+   */
+  public int getSelectKeepaliveCount()
+  {
+    return -1;
+  }
+
+  /**
+   * Returns the total number of requests serviced by the server
+   * since it started.
+   */
+  public long getRequestCountTotal()
+  {
+    long lifetimeRequestCount = 0;
+
+    for (Port port : _server.getPorts())
+      lifetimeRequestCount += port.getLifetimeRequestCount();
+
+    return lifetimeRequestCount;
+  }
+
+  /**
+   * Returns the number of requests that have ended up in the keepalive state
+   * for this server in it's lifetime.
+   */
+  public long getKeepaliveCountTotal()
+  {
+    return -1;
+  }
+
+  /**
+   * The total number of connections that have terminated with
+   * {@link com.caucho.vfs.ClientDisconnectException}.
+   */
+  public long getClientDisconnectCountTotal()
+  {
+    long lifetimeClientDisconnectCount = 0;
+
+    for (Port port : _server.getPorts())
+      lifetimeClientDisconnectCount += port.getLifetimeClientDisconnectCount();
+
+    return lifetimeClientDisconnectCount;
+  }
+
+  /**
+   * Returns the total duration in milliseconds that requests serviced by
+   * this server have taken.
+   */
+  public long getRequestTimeTotal()
+  {
+    return -1;
+  }
+
+  /**
+   * Returns the total number of bytes that requests serviced by this
+   * server have read.
+   */
+  public long getRequestReadBytesTotal()
+  {
+    return -1;
+  }
+
+  /**
+   * Returns the total number of bytes that requests serviced by this
+   * server have written.
+   */
+  public long getRequestWriteBytesTotal()
+  {
+    return -1;
+  }
+
+  /**
+   * Returns the invocation cache hit count.
+   */
+  public long getInvocationCacheHitCountTotal()
+  {
+    return _server.getInvocationCacheHitCount();
+  }
+
+  /**
+   * Returns the invocation cache miss count.
+   */
+  public long getInvocationCacheMissCountTotal()
+  {
+    return _server.getInvocationCacheMissCount();
+  }
+
+  /**
+   * Returns the current total amount of memory available for the JVM, in bytes.
+   */
+  public long getRuntimeMemory()
+  {
+    return Runtime.getRuntime().totalMemory();
+  }
+
+  /**
+   * Returns the current free amount of memory available for the JVM, in bytes.
+   */
+  public long getRuntimeMemoryFree()
+  {
+    return Runtime.getRuntime().freeMemory();
+  }
+
+  //
+  // Operations
+  //
+
+  /**
+   * Restart this Resin server.
+   */
+  public void restart()
+  {
+    _server.destroy();
   }
 }

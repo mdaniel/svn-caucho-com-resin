@@ -92,6 +92,11 @@ public class InetNetwork {
         i++;
     }
 
+    for (; i < len; i++) {
+      address *= 256;
+    }
+      
+
     int mask;
     if (i < len && network.charAt(i) == '/') {
       mask = 0;

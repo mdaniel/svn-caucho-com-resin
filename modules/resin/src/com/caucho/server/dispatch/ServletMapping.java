@@ -110,7 +110,7 @@ public class ServletMapping extends ServletConfigImpl {
     throws ServletException
   {
     boolean hasInit = false;
-    
+
     for (int i = 0; i < _mappingList.size(); i++) {
       Mapping mapping = _mappingList.get(i);
 
@@ -126,6 +126,9 @@ public class ServletMapping extends ServletConfigImpl {
       if (urlPattern != null && ! hasInit) {
 	hasInit = true;
 	super.init();
+
+	if (getServletClassName() != null)
+	  mapper.getServletManager().addServlet(this);
       }
 
       if (urlPattern != null)

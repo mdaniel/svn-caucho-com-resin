@@ -1029,6 +1029,10 @@ public class Resin implements EnvironmentBean, SchemaBean
 		       getFreeMemory(runtime)));
 	  
 	  runtime.gc();
+
+	  Thread.sleep(1000);
+	  
+	  runtime.gc();
 	  
 	  if (getFreeMemory(runtime) < minFreeMemory) {
 	    log().severe(L().l("Restarting due to low free memory. {0} free bytes",

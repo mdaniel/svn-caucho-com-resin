@@ -115,12 +115,6 @@ public interface ServerMXBean {
   public String getState();
 
   /**
-   * Returns the initial start time.
-   */
-  @Description("The time that this instance was first started")
-  public Date getInitialStartTime();
-
-  /**
    * Returns the last start time.
    */
   @Description("The time that this instance was last started or restarted")
