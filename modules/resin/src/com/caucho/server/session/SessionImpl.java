@@ -689,8 +689,18 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   public boolean load()
   {
-    if (_clusterObject != null)
+    if (_clusterObject != null) {
+      /*
+      for (int i = 1; i <= 10 && _isChanged && _useCount > 0; i++) {
+	try {
+	  Thread.sleep(10 * i);
+	} catch (Throwable e) {
+	}
+      }
+      */
+      
       return _clusterObject.load(this);
+    }
     else
       return true;
   }
@@ -791,16 +801,19 @@ public class SessionImpl implements HttpSession, CacheListener {
     _accessTime = Alarm.getCurrentTime();
 
     synchronized (this) {
-      count = --_useCount;
+      if (_useCount > 1) {
+	_useCount--;
+	return;
+      }
     }
 
-    if (count > 0)
-      return;
-
-    if (count < 0)
-      throw new IllegalStateException();
-
-    saveAfterRequest();
+    try {
+      saveAfterRequest();
+    } finally {
+      synchronized (this) {
+	--_useCount;
+      }
+    }
   }
 
   /**
@@ -830,6 +843,7 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   public final void saveAfterRequest()
   {
+
     if (_manager == null || ! _manager.isSaveAfterRequest())
       return;
 
