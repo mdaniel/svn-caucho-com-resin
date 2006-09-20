@@ -38,9 +38,7 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.log.Log;
 import com.caucho.management.server.PortMXBean;
-import com.caucho.util.FreeList;
-import com.caucho.util.L10N;
-import com.caucho.util.ThreadPool;
+import com.caucho.util.*;
 import com.caucho.vfs.JsseSSLFactory;
 import com.caucho.vfs.QJniServerSocket;
 import com.caucho.vfs.QServerSocket;
@@ -709,8 +707,8 @@ public class Port
       if (_serverSocket.isJNI() && _server.isEnableSelectManager()) {
         _selectManager = _server.getSelectManager();
 
-        if (_selectManager == null) {
-          throw new IllegalStateException(L.l("Cannot load select manager"));
+        if (_selectManager == null && ! CauchoSystem.isWindows()) {
+	  log.log(Level.WARNING, L.l("Cannot load select manager"));
         }
       }
 

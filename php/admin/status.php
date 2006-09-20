@@ -105,7 +105,6 @@ if (! empty($server->Id))
 <?php
 
 $proxy_cache = $mbeanServer->lookup("resin:type=ProxyCache");
-resin_var_dump($proxy_cache);
 
 ?>
 

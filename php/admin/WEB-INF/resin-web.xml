@@ -34,7 +34,7 @@
   
         <ip-constraint>
           <allow>127.0.0.1</allow>
-          <allow>192.168/16</allow>
+          <allow>192.168.0.0/16</allow>
         </ip-constraint>
       </security-constraint>
     </resin:when>

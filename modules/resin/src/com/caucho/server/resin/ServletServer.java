@@ -129,8 +129,8 @@ public class ServletServer extends ProtocolDispatchServer
 
   private long _waitForActiveTime = 10000L;
 
-  private boolean _enableSelectManager;
-  private int _keepaliveMax = 256;
+  private boolean _enableSelectManager = true;
+  private int _keepaliveMax = 128;
   private ArrayList<Port> _ports = new ArrayList<Port>();
 
   private String _connectionErrorPage;
@@ -882,9 +882,9 @@ public class ServletServer extends ProtocolDispatchServer
 
         initSelectManager((AbstractSelectManager) method.invoke(null, null));
       } catch (ClassNotFoundException e) {
-        log.warning(L.l("'select-manager' requires Resin Professional.  See http://www.caucho.com for information and licensing."));
+        log.fine(L.l("'select-manager' requires Resin Professional.  See http://www.caucho.com for information and licensing."));
       } catch (Throwable e) {
-        log.warning(L.l("Cannot enable select-manager {0}", e.toString()));
+        log.fine(L.l("Cannot enable select-manager {0}", e.toString()));
 
         log.log(Level.FINER, e.toString());
       }

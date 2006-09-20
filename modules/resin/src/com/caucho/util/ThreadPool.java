@@ -47,7 +47,7 @@ public class ThreadPool implements Runnable {
 
   private static final int SPARE_GAP = 5;
   
-  private static int _maxThreads = 128;
+  private static int _maxThreads = 256;
   
   private static int _minSpareThreads = 5;
 
