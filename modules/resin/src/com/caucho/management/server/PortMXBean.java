@@ -73,6 +73,12 @@ public interface PortMXBean extends ManagedObjectMXBean {
   @Description("The configured maximum number of keepalive connections")
   public int getKeepaliveMax();
 
+  /**
+   * Returns the timeout for a keepalive connection
+   */
+  @Description("The configured timeout for keepalive connections")
+  public long getKeepaliveTimeout();
+
   @Description("True if the port is using SSL encryption")
   public boolean isSSL();
 

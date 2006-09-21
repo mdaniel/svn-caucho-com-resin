@@ -132,25 +132,16 @@ public class Watchdog implements Runnable
     return _watchdogPort;
   }
   
-  public void addJvmArgs(String args)
+  public void addJvmArg(String arg)
   {
-    String []argArray = args.split("\\s+");
+    _jvmArgs.add(arg);
 
-    for (int i = 0; i < argArray.length; i++) {
-      String arg = argArray[i];
-
-      if ("".equals(arg))
-	continue;
-
-      _jvmArgs.add(arg);
-
-      if (arg.equals("-d64"))
-	_is64bit = true;
-      else if (arg.startsWith("-Xss"))
-	_hasXss = true;
-      else if (arg.startsWith("-Xmx"))
-	_hasXmx = true;
-    }
+    if (arg.equals("-d64"))
+      _is64bit = true;
+    else if (arg.startsWith("-Xss"))
+      _hasXss = true;
+    else if (arg.startsWith("-Xmx"))
+      _hasXmx = true;
   }
 
   public ArrayList<String> getJvmArgs()

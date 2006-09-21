@@ -77,6 +77,11 @@ public class PortAdmin extends AbstractManagedObject
     return _port.getKeepaliveMax();
   }
 
+  public long getKeepaliveTimeout()
+  {
+    return _port.getKeepaliveTimeout();
+  }
+
   public boolean isSSL()
   {
     return _port.isSSL();

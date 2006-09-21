@@ -41,12 +41,12 @@ import com.caucho.management.server.*;
 /**
  * Implementation of the ClusterClient's administration mbean.
  */
-public class ClusterClientAdmin extends AbstractManagedObject
+public class ServerConnectorAdmin extends AbstractManagedObject
   implements ServerConnectorMXBean
 {
   private final ClusterClient _client;
 
-  public ClusterClientAdmin(ClusterClient client)
+  public ServerConnectorAdmin(ClusterClient client)
   {
     _client = client;
   }
@@ -99,17 +99,17 @@ public class ClusterClientAdmin extends AbstractManagedObject
    * Returns the time the client will consider the connection dead
    * before retrying.
    */
-  public long getFailRecoverTime()
+  public long getRecoverTime()
   {
-    return _client.getServer().getLoadBalanceFailRecoverTime();
+    return _client.getServer().getLoadBalanceRecoverTime();
   }
 
   /**
    * Returns the maximum time a socket can remain idle in the pool.
    */
-  public long getMaxIdleTime()
+  public long getIdleTime()
   {
-    return _client.getServer().getLoadBalanceMaxIdleTime();
+    return _client.getServer().getLoadBalanceIdleTime();
   }
 
   /**
@@ -121,19 +121,11 @@ public class ClusterClientAdmin extends AbstractManagedObject
   }
 
   /**
-   * Returns the read timeout for a client.
+   * Returns the socket timeout for a client.
    */
-  public long getReadTimeout()
+  public long getSocketTimeout()
   {
-    return _client.getServer().getLoadBalanceReadTimeout();
-  }
-
-  /**
-   * Returns the write timeout for a client.
-   */
-  public long getWriteTimeout()
-  {
-    return _client.getServer().getLoadBalanceWriteTimeout();
+    return _client.getServer().getSocketTimeout();
   }
 
   /**

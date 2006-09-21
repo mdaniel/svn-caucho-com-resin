@@ -58,6 +58,7 @@
 #include "cse.h"
 
 #define CACHE_SIZE 16384
+#define AUTO_WRITE_TIME (15 * 60)
 
 #define HMUX_DISPATCH_QUERY           'q'
 #define HMUX_DISPATCH_QUERY_CLUSTER   's'
@@ -585,7 +586,7 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	  dead_time = resin_atoi(value);
 	else if (! strcmp(buffer, "last-update")) {
 	  int last_update = resin_atoi(value);
-	  if (host) {
+	  if (host && host->config->start_time < last_update) {
 	    host->last_update = last_update;
 	  }
 	}
@@ -644,9 +645,6 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 
     case HMUX_EXIT:
     case HMUX_QUIT:
-      if (now)
-	host->last_update = now;
-      
       if (is_change > 0 || ! host->etag || ! *host->etag) {
 	mem_pool_t *old_pool = host->pool;
 	g_update_count++;
@@ -898,7 +896,6 @@ read_all_config_impl(config_t *config)
 	}
       
 	host = cse_create_host(config, buffer, port);
-	host->last_update = mtime;
 	read_config(&s, config, host, 0, &is_change);
       }
       break;
@@ -958,16 +955,12 @@ cse_update_host_from_resin(resin_host_t *host, time_t now)
   stream_t s;
   char *uri = "";
 
-  /*
-  if (host->has_data)
-    host->last_update = now;
-  */
-  host->last_update = now;
-    
   if (cse_open_live_connection(&s, &host->config->config_cluster, now)) {
     int code;
     int len;
     int is_change;
+
+    host->last_update = now;
     
     hmux_start_channel(&s, 1);
     hmux_write_int(&s, HMUX_PROTOCOL, HMUX_DISPATCH_PROTOCOL);
@@ -990,7 +983,7 @@ cse_update_host_from_resin(resin_host_t *host, time_t now)
     else
       cse_close(&s, "close");
 
-    if (is_change > 0 || host->config->update_interval >= 3600) {
+    if (is_change > 0 || host->config->update_interval >= AUTO_WRITE_TIME) {
       write_config(host->config);
     }
 
@@ -1030,6 +1023,9 @@ cse_init_config(config_t *config)
     g_url_cache[i].uri = 0;
   }
   */
+
+  if (! config->start_time)
+    config->start_time = time(0);
   
   config->update_count++;
 
@@ -1104,7 +1100,8 @@ cse_update_host(config_t *config, resin_host_t *host, time_t now)
       read_all_config_impl(config);
     }
 
-    return;
+    if (now < host->last_update + config->update_interval)
+      return;
   }
   
   LOG(("%s:%d:cse_update_host(): %s:%d(%p) old:%d now:%d()\n",

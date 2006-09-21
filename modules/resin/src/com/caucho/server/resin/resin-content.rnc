@@ -121,11 +121,8 @@ r_cluster-port-Content =
 
   & (attribute index { string } | element index { r_string-Group })?
 
-  & (attribute keepalive-select-max { r_int-Type }
-     | element keepalive-select-max { r_int-Type })?
-
-  & (attribute keepalive-thread-max { r_int-Type }
-     | element keepalive-thread-max { r_int-Type })?
+  & (attribute keepalive-max { r_int-Type }
+     | element keepalive-max { r_int-Type })?
 
   & (attribute load-balance-weight { r_int-Type }
      | element load-balance-weight { r_int-Type })?
@@ -141,6 +138,9 @@ r_cluster-port-Content =
 
   & (attribute socket-listen-backlog { r_int-Type }
      | element socket-listen-backlog { r_int-Type })?
+
+  & (attribute socket-timeout { r_period }
+     | element socket-timeout { r_period })?
 
   & (attribute tcp-no-delay { r_boolean-Type }
      | element tcp-no-delay { r_boolean-Type })?
@@ -293,21 +293,21 @@ r_jsse-ssl = element jsse-ssl {
      | element verify-client { r_string-Group })?
 }
 
-r_keepalive-thread-max =
-  attribute keepalive-thread-max { string }
-  | element keepalive-thread-max { string }
+r_keepalive-max =
+  attribute keepalive-max { string }
+  | element keepalive-max { string }
 
-r_keepalive-thread-timeout =
-  attribute keepalive-thread-timeout { r_period-Type }
-  | element keepalive-thread-timeout { r_period-Type }
+r_keepalive-timeout =
+  attribute keepalive-timeout { r_period-Type }
+  | element keepalive-timeout { r_period-Type }
 
-r_keepalive-select-max =
-  attribute keepalive-select-max { string }
-  | element keepalive-select-max { string }
+r_keepalive-select-thread-timeout =
+  attribute keepalive-select-thread-timeout { r_period-Type }
+  | element keepalive-select-thread-timeout { r_period-Type }
 
-r_keepalive-select-timeout =
-  attribute keepalive-select-timeout { r_period-Type }
-  | element keepalive-select-timeout { r_period-Type }
+r_keepalive-select-enable =
+  attribute keepalive-select-enable { r_boolean-Type }
+  | element keepalive-select-enable { r_boolean-Type }
 
 r_memory-free-min =
   attribute memory-free-min { string }
@@ -509,14 +509,16 @@ r_server-Basis =
 
   & r_http*
 
-  & (attribute jvm-args { string }
-    | element jvm-args { string })*
+  & (attribute jvm-arg { string }
+     | element jvm-arg { string })*
 
   & r_keepalive-max?
 
-  & r_keepalive-thread-timeout?
+  & r_keepalive-timeout?
 
-  & r_keepalive-select-timeout?
+  & r_keepalive-select-enable?
+
+  & r_keepalive-select-thread-timeout?
 
   & (attribute load-balance-connect-timeout { r_period-Type }
     | element load-balance-connect-timeout { r_period-Type })?
@@ -526,9 +528,6 @@ r_server-Basis =
 
   & (attribute load-balance-idle-time { r_period-Type }
      | element load-balance-idle-time { r_period-Type })?
-
-  & (attribute load-balance-timeout { r_period-Type }
-     | element load-balance-timeout { r_period-Type })?
 
   & (attribute load-balance-warmup-time { r_period-Type }
      | element load-balance-warmup-time { r_period-Type })?

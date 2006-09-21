@@ -54,6 +54,8 @@ public class ClusterServer {
   private static final Logger log = Log.open(ClusterServer.class);
   private static final L10N L = new L10N(ClusterServer.class);
 
+  private static final long DEFAULT = 0xcafebabe;
+  
   private ObjectName _objectName;
 
   private Cluster _cluster;
@@ -64,12 +66,13 @@ public class ClusterServer {
   private ClusterPort _clusterPort;
   private ServerConnector _serverConnector;
 
-  private long _loadBalanceMaxIdleTime = 30000L;
-  private long _loadBalanceFailRecoverTime = 15000L;
+  private long _socketTimeout = 65000L;
+  private long _keepaliveTimeout = 15000L;
+  
+  private long _loadBalanceIdleTime = DEFAULT;
+  private long _loadBalanceRecoverTime = 15000L;
   private long _loadBalanceWarmupTime = 60000L;
   
-  private long _loadBalanceReadTimeout = 60000L;
-  private long _loadBalanceWriteTimeout = 60000L;
   private long _loadBalanceConnectTimeout = 5000L;
   
   private int _loadBalanceWeight = 100;
@@ -139,17 +142,19 @@ public class ClusterServer {
   }
 
   /**
-   * Sets the keepalive max.
-   */
-  public void setKeepaliveMax(int max)
-  {
-  }
-
-  /**
    * Sets the keepalive timeout.
    */
   public void setKeepaliveTimeout(Period timeout)
   {
+    _keepaliveTimeout = timeout.getPeriod();
+  }
+
+  /**
+   * Gets the keepalive timeout.
+   */
+  public long getKeepaliveTimeout()
+  {
+    return _keepaliveTimeout;
   }
 
   /**
@@ -180,60 +185,52 @@ public class ClusterServer {
   /**
    * Sets the loadBalance max-idle-time.
    */
-  public void setLoadBalanceMaxIdleTime(Period period)
+  public void setLoadBalanceIdleTime(Period period)
   {
-    _loadBalanceMaxIdleTime = period.getPeriod();
+    _loadBalanceIdleTime = period.getPeriod();
   }
 
   /**
-   * Sets the loadBalance max-idle-time.
+   * Sets the loadBalance idle-time.
    */
-  public long getLoadBalanceMaxIdleTime()
+  public long getLoadBalanceIdleTime()
   {
-    return _loadBalanceMaxIdleTime;
+    if (_loadBalanceIdleTime != DEFAULT)
+      return _loadBalanceIdleTime;
+    else
+      return _keepaliveTimeout - 1000L;
   }
 
   /**
    * Sets the loadBalance fail-recover-time.
    */
-  public void setLoadBalanceFailRecoverTime(Period period)
+  public void setLoadBalanceRecoverTime(Period period)
   {
-    _loadBalanceFailRecoverTime = period.getPeriod();
+    _loadBalanceRecoverTime = period.getPeriod();
   }
 
   /**
    * Gets the loadBalance fail-recover-time.
    */
-  public long getLoadBalanceFailRecoverTime()
+  public long getLoadBalanceRecoverTime()
   {
-    return _loadBalanceFailRecoverTime;
+    return _loadBalanceRecoverTime;
   }
 
   /**
    * Sets the loadBalance read/write timeout
    */
-  public void setLoadBalanceTimeout(Period period)
+  public void setSocketTimeout(Period period)
   {
-    long timeout = period.getPeriod();
-    
-    _loadBalanceReadTimeout = timeout;
-    _loadBalanceWriteTimeout = timeout;
+    _socketTimeout = period.getPeriod();
   }
 
   /**
    * Gets the loadBalance read/write timeout
    */
-  public long getLoadBalanceReadTimeout()
+  public long getSocketTimeout()
   {
-    return _loadBalanceReadTimeout;
-  }
-
-  /**
-   * Gets the loadBalance read/write timeout
-   */
-  public long getLoadBalanceWriteTimeout()
-  {
-    return _loadBalanceWriteTimeout;
+    return _socketTimeout;
   }
 
   /**
@@ -271,7 +268,7 @@ public class ClusterServer {
   /**
    * Arguments on boot
    */
-  public void addJvmArgs(String args)
+  public void addJvmArg(String args)
   {
   }
 

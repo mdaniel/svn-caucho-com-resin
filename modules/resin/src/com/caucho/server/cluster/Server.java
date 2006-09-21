@@ -116,10 +116,12 @@ public class Server extends ProtocolDispatchServer
   private int _acceptThreadMin = 5;
   private int _acceptThreadMax = 10;
 
-  private int _keepaliveMax = -1;
+  private int _keepaliveMax = 128;
   
-  private long _keepaliveThreadTimeout = 5000;
-  private long _keepaliveSelectTimeout = -1;
+  private long _keepaliveTimeout = 5000;
+  
+  private boolean _keepaliveSelectEnable = true;
+  private long _keepaliveSelectThreadTimeout = 1000;
 
   private long _memoryFreeMin = 1024 * 1024;
   
@@ -316,35 +318,51 @@ public class Server extends ProtocolDispatchServer
   }
 
   /**
-   * Sets the thread-based keepalive timeout
+   * Sets the keepalive timeout
    */
-  public void setKeepaliveThreadTimeout(Period period)
+  public void setKeepaliveTimeout(Period period)
   {
-    _keepaliveThreadTimeout = period.getPeriod();
+    _keepaliveTimeout = period.getPeriod();
   }
 
   /**
-   * Sets the thread-based keepalive timeout
+   * Sets the keepalive timeout
    */
-  public long getKeepaliveThreadTimeout()
+  public long getKeepaliveTimeout()
   {
-    return _keepaliveThreadTimeout;
-  }
-
-  /**
-   * Sets the select-based keepalive timeout
-   */
-  public void setKeepaliveSelectTimeout(Period period)
-  {
-    _keepaliveSelectTimeout = period.getPeriod();
+    return _keepaliveTimeout;
   }
 
   /**
    * Sets the select-based keepalive timeout
    */
-  public long getKeepaliveSelectTimeout()
+  public void setKeepaliveSelectEnable(boolean enable)
   {
-    return _keepaliveSelectTimeout;
+    _keepaliveSelectEnable = enable;
+  }
+
+  /**
+   * Gets the select-based keepalive timeout
+   */
+  public boolean isKeepaliveSelectEnable()
+  {
+    return _keepaliveSelectEnable;
+  }
+
+  /**
+   * Sets the select-based keepalive timeout
+   */
+  public void getKeepaliveSelectThreadTimeout(Period period)
+  {
+    _keepaliveSelectThreadTimeout = period.getPeriod();
+  }
+
+  /**
+   * Sets the select-based keepalive timeout
+   */
+  public long getKeepaliveSelectThreadTimeout()
+  {
+    return _keepaliveSelectThreadTimeout;
   }
 
   /**
@@ -702,9 +720,9 @@ public class Server extends ProtocolDispatchServer
   /**
    * Sets true if the select manager should be enabled
    */
-  public boolean isEnableSelectManager()
+  public boolean isSelectManagerEnabled()
   {
-    return _keepaliveSelectTimeout > 0;
+    return getSelectManager() != null;
   }
 
   /**
@@ -943,7 +961,7 @@ public class Server extends ProtocolDispatchServer
       throw new ConfigException(L.l("<thread-idle-min> ({0}) must be less than <thread-max> ({1})",
 				    _threadIdleMin, _threadIdleMax));
     
-    if (_keepaliveSelectTimeout > 0 && getSelectManager() == null) {
+    if (_keepaliveSelectEnable) {
       try {
         Class cl = Class.forName("com.caucho.server.port.JniSelectManager");
         Method method = cl.getMethod("create", new Class[0]);
@@ -987,8 +1005,7 @@ public class Server extends ProtocolDispatchServer
                  System.getProperty("file.encoding") + ", " +
                  System.getProperty("user.language") + ", " +
                  System.getProperty("java.vm.vendor"));
-
-	System.out.println(System.getProperties());
+	log.info("user: " + System.getProperty("user.name"));
 
         log.info("resin.home = " + System.getProperty("resin.home"));
         log.info("server.root = " + System.getProperty("server.root"));
@@ -996,7 +1013,7 @@ public class Server extends ProtocolDispatchServer
       }
 
       AbstractSelectManager selectManager = getSelectManager();
-      if (isEnableSelectManager() && selectManager != null)
+      if (_keepaliveSelectEnable && selectManager != null)
         selectManager.start();
 
       if (! _isBindPortsAtEnd) {

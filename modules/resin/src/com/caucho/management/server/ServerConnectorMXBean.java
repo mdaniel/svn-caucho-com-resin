@@ -87,7 +87,7 @@ public interface ServerConnectorMXBean extends ManagedObjectMXBean {
 	      " When the timeout period elapses another" +
 	      " attempt is made to connect to the target server")
   @Units("milliseconds")
-  public long getFailRecoverTime();
+  public long getRecoverTime();
 
   /**
    * Returns the timeout for an idle socket that is connected to the target
@@ -99,7 +99,7 @@ public interface ServerConnectorMXBean extends ManagedObjectMXBean {
 	       " used within the timeout period the idle" +
 	       " connection is closed")
   @Units("milliseconds")
-  public long getMaxIdleTime();
+  public long getIdleTime();
 
   /**
    * Returns the timeout to use for reads when communicating with
@@ -107,7 +107,7 @@ public interface ServerConnectorMXBean extends ManagedObjectMXBean {
    */
   @Description("The configured timeout for a client read from the server")
   @Units("milliseconds")
-  public long getReadTimeout();
+  public long getSocketTimeout();
 
   /**
    * Returns the warmup time in milliseconds.
@@ -122,14 +122,6 @@ public interface ServerConnectorMXBean extends ManagedObjectMXBean {
    */
   @Description("The configured load balance weight.  Weights over 100 will get more traffic and weights less than 100 will get less traffic")
   public int getWeight();
-
-  /**
-   * Returns the timeout to use for writes when communicating with
-   * the target server.
-   */
-  @Description("The configured timeout for a client write to the server")
-  @Units("milliseconds")
-  public long getWriteTimeout();
 
   //
   // State attributes

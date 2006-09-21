@@ -217,6 +217,7 @@ typedef struct config_t {
   int update_interval;
   time_t last_update;
   time_t last_file_update;
+  time_t start_time;
   int update_count;
 } config_t;
 

@@ -791,16 +791,19 @@ public class SessionImpl implements HttpSession, CacheListener {
     _accessTime = Alarm.getCurrentTime();
 
     synchronized (this) {
-      count = --_useCount;
+      if (_useCount > 1) {
+	_useCount--;
+	return;
+      }
     }
 
-    if (count > 0)
-      return;
-
-    if (count < 0)
-      throw new IllegalStateException();
-
-    saveAfterRequest();
+    try {
+      saveAfterRequest();
+    } finally {
+      synchronized (this) {
+	_useCount--;
+      }
+    }
   }
 
   /**

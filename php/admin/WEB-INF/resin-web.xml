@@ -23,6 +23,8 @@
            servlet-class="com.caucho.quercus.servlet.QuercusServlet">
   </servlet>
 
+  <welcome-file-list>index.php</welcome-file-list>
+
   <servlet-mapping url-pattern="*.php" servlet-name="resin-php"/>
 
   <resin:choose>

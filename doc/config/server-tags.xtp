@@ -215,11 +215,28 @@ will use @virtual-host.</p>
 
 </defun>
 
-<defun title="&lt;jvm-args>" version="Resin 3.1">
+<defun title="&lt;jvm-arg>" version="Resin 3.1">
 <parents>server</parents>
 
-<p>&lt;jvm-args> configures JVM arguments to be passed to Resin on
+<p>&lt;jvm-arg> configures JVM arguments to be passed to Resin on
 the command line, typically -X memory parameters and -D defines.</p>
+
+<example title="standard jvm-args">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  &lt;cluster id="web-tier">
+    &lt;server-default>
+      &lt;jvm-arg>-Xmx512m&lt;/jvm-arg>
+      &lt;jvm-arg>-Xss1m&lt;/jvm-arg>
+      &lt;jvm-arg>-verbosegc&lt;/jvm-arg>
+    &lt;/server-default>
+
+    &lt;server id="app-a" address="192.168.2.10"/>
+
+    ...
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
 </defun>
 
 <defun title="&lt;keepalive-max>" version="Resin 3.1">
@@ -268,57 +285,38 @@ but increase the number of threads waiting for new client data.</p>
 
 </defun>
 
-<defun title="&lt;keepalive-select-timeout>" version="Resin 3.1">
+<defun title="&lt;keepalive-select-enable>" version="Resin 3.1">
 <parents>server</parents>
 
-<p>&lt;keepalive-select-timeout> configures how long a keepalive
-connection can wait in the select pool before closing.   The select pool
-detaches sockets from threads and stores them in a pool, waiting for a new
-request.  Because the select frees threads, the overhead is lower than
-thread-based keepalives and can handle more connections, improving
-network efficiency.</p>
+<p>&lt;keepalive-select-enable> enables the select manager for
+keepalives.  The select manager is a Resin Professional feature allowing
+more keepalives by detaching threads from sockets.</p>
 
-<p>The load-balancing and clustering keepalives have a different
-timeout behavior.  Since load-balancing sockets are reused for multiple
-clients, they can have longer timeouts.</p>
+<p>Normally, this should be left enabled.</p>
 
-<default>10s</default>
-
-<example title="keepalive-thread-max in resin.conf">
-&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-  &lt;cluster id="web-tier"&gt;
-    &lt;server-default&gt;
-      &lt;http port="80"/>
-
-      &lt;thread-max>512&lt;/thread-max>
-
-      &lt;keepalive-max>2048&lt;/keepalive-select-max>
-
-      &lt;keepalive-thread-timeout>2s&lt;/keepalive-thread-timeout>
-      &lt;keepalive-select-timeout>60s&lt;/keepalive-select-timeout>
-    &lt;/server-default&gt;
-
-    &lt;server id="web-a" address="192.168.0.10"/>
-        ...
-  &lt;/cluster>
-&lt;/resin>
-</example>
-
+<default>true</default>
 </defun>
 
-<defun title="&lt;keepalive-thread-timeout>" version="Resin 3.1">
+<defun title="&lt;keepalive-select-thread-timeout>" version="Resin 3.1">
 <parents>server</parents>
 
-<p>&lt;keepalive-thread-timeout> configures how long a keepalive
-connection should wait for a new request before closing.  
-Connections beyond &lt;keepalive-thread-timeout> are put into the select
-keepalive manager (which has a longer time), releasing the thread to handle
-other requests.</p>
+<p>&lt;keepalive-select-thread-timeout> is a short timeout allowing
+the select manager to wait for a keepalive before detaching the
+thread.  This value would not normally be changed.d wou</p>
+
+<default>1s</default>
+</defun>
+
+<defun title="&lt;keepalive-timeout>" version="Resin 3.1">
+<parents>server</parents>
+
+<p>&lt;keepalive-timeout> configures how long a keepalive
+connection should wait for a new request before closing.  </p>
 
 <p>Keepalives are used both for HTTP connections and for load-balancing and
 clustering connections.  HTTP connections generally have a single HTML page,
 followed by a number of image requests.  By using keepalives, all the requests
-can use a single socket.  The &lt;keepalive-thread-timeout> should be long
+can use a single socket.  The &lt;keepalive-timeout> should be long
 enough to catch all the HTTP burst requests, but can close after the
 burst is complete.  A value of 5s or 10s is generally sufficient.</p>
 
@@ -336,8 +334,8 @@ clients, they can have longer timeouts.</p>
 
       &lt;thread-max>512&lt;/thread-max>
 
-      &lt;keepalive-thread-max>100&lt;/keepalive-thread-max>
-      &lt;keepalive-thread-timeout>10s&lt;/keepalive-thread-timeout>
+      &lt;keepalive-max>100&lt;/keepalive-max>
+      &lt;keepalive-timeout>10s&lt;/keepalive-timeout>
     &lt;/server-default&gt;
 
     &lt;server id="web-a" address="192.168.0.10"/>
@@ -423,7 +421,10 @@ the <a href="resin-load-balance.xtp">load balancer</a>
 and <a href="sessions.xtp">distributed sessions</a> will leave an
 idle socket before closing it.</p>
 
-<p>load-balance-idle-time must be less than the <var>timeout</var> value of
+<p>The default value is normally sufficient, since it tracks the
+keepalive of the cluster port.</p>
+
+<p>load-balance-idle-time must be less than the <var>keepalive</var> value of
 the target <a href="port-tags.xtp#cluster-port">cluster-port</a>.</p>
 
 <p>The load balancer and distributed sessions reuse sockets to the
@@ -434,23 +435,7 @@ remain idle.</p>
 <p>Higher values may improve the socket pooling, but may also increase
 the chance of connecting to a closed server.</p>
 
-<default>30s</default>
-
-<example title="load-balance-max-idle-time">
-&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-    &lt;cluster id="app-tier"&gt;
-        &lt;server-default>
-          &lt;load-balance-max-idle-time>20s&lt;/load-balance-max-idle-time>
-        &lt;/server-default>
-
-        &lt;server id="a" address="192.168.0.10" port="6800"/&gt;
-        &lt;server id="b" address="192.168.0.11" port="6800"/&gt;
-
-        &lt;host id=""&gt;
-          ...
-    &lt;/cluster&gt;
-&lt;/resin&gt;
-</example>
+<default>keepalive-timeout - 1s</default>
 
 </defun>
 

@@ -163,7 +163,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
   /**
    * Try to read nonblock
    */
-  private boolean allowThreadKeepalive()
+  private boolean waitForKeepalive()
     throws IOException
   {
     Port port = getPort();
@@ -177,11 +177,16 @@ public class TcpConnection extends PortConnection implements ThreadTask
     if (getReadStream().getBufferAvailable() > 0)
       return true;
     
-    long timeout = port.getKeepaliveThreadTimeout();
+    long timeout = port.getKeepaliveTimeout();
+
+    boolean isSelectManager = port.getServer().isEnableSelectManager();
+    
+    if (isSelectManager)
+      timeout = port.getKeepaliveSelectThreadTimeout();
 
     if (timeout > 0 && timeout < port.getSocketTimeout())
       return is.fillWithTimeout(timeout);
-    else if (port.getServer().isEnableSelectManager())
+    else if (isSelectManager)
       return false;
     else
       return true;
@@ -488,7 +493,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
 		isKeepalive = request.handleRequest();
 	      }
 	    }
-	  } while (isKeepalive && allowThreadKeepalive() && ! port.isClosed());
+	  } while (isKeepalive && waitForKeepalive() && ! port.isClosed());
 
           if (isKeepalive) {
 	    return;

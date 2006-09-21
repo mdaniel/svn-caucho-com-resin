@@ -6,8 +6,11 @@
 <a href="changes-2.xtp">Resin 2.1 changes</a>
 </p>
 
-<s2 title="3.1snap - Aug 1, 2006">
+<s2 title="3.1snap - Sep 20, 2006">
 <ul>
+<li>(2006-09-20) mod_caucho issues with config server (rep by Steve Baugus)</li>
+<li>session write at finish was clearing useCount too early, causing spurious session failures (rep by Ed Hollingsworth)</li>
+<li>Disable select-manager for win32 because of socket limits (#1344, rep by Olaf Fentsch)</li>
 <li>IntMap wasn't handling deletes properly for ThrottleFilter (#1356, rep by sksamuel)</li>
 <li>Change to addByteCodeEnhancer (#1157, rep by Costin Leau)</li>
 <li>Add DynamicClassLoader.getNewTempClassLoader() (#1157, rep by Costin Leau)</li>

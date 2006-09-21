@@ -45,12 +45,10 @@ if (! empty($server->Id))
 
 <h2>Server: <?= $server->Id ?></h2>
 
-<?php if (! empty($server->Id)) {  ?>
   <tr title="The server id used when starting this instance of Resin, the value of `-server'.">
     <th>Server id:</th>
-    <td><?= $server->Id ?></td>
+    <td><?= $server->Id ? $server->Id : '\"\"' ?></td>
   </tr>
-<? } ?>
 
   <tr title="The configuration file used when starting this instance of Resin, the value of `-conf'.">
     <th>Version:</th>
@@ -80,11 +78,6 @@ if (! empty($server->Id))
   <tr title="The current lifecycle state">
     <th>State:</th>
     <td><?= $server->State ?></td>
-  </tr>
-
-  <tr title="The time that this instance was first started.">
-    <th>Inital start time:</th>
-    <td><?= format_datetime($server->InitialStartTime) ?></td>
   </tr>
 
   <tr title="The time that this instance was last started or restarted.">
@@ -160,50 +153,6 @@ The ThreadPool manages all threads used by Resin.
   </tr>
 </table>
 
-<!-- Connection pools -->
-
-<?php
-$db_pools = $mbeanServer->query("resin:*,type=ConnectionPool");
-
-if ($db_pools) {
-?>
-
-<h2>Connection pools</h2>
-
-<table>
-  <tr>
-    <th>&nbsp;</th>
-    <th colspan='3'>Connections</th>
-    <th colspan='2'>Config</th>
-  </tr>
-  <tr>
-    <th>Name</th>
-    <th>Active count</th>
-    <th>Idle count</th>
-    <th>Total count</th>
-    <th>max-connections</th>
-    <th>idle-time</th>
-  </tr>
-
-<?php
-  foreach ($db_pools as $pool) {
-?>
-
-  <tr>
-    <td><?= $pool->Name ?></td>
-    <td><?= $pool->ConnectionActiveCount ?></td>
-    <td><?= $pool->ConnectionIdleCount ?></td>
-    <td><?= $pool->ConnectionCount ?></td>
-    <td><?= $pool->MaxConnections ?></td>
-    <td><?= $pool->MaxIdleTime ?></td>
-  </tr>
-
-<?php
-  }
-}
-?>
-</table>
-
 <!-- TCP ports -->
 
 <?php
@@ -217,16 +166,24 @@ if ($ports) {
   <tr>
     <th colspan='2'>&nbsp;</th>
   <th colspan='3'>Threads</th>
-  <th colspan='2'>&nbsp;</th>
+  <th colspan='1'>&nbsp;</th>
+  <th colspan='2'>Keepalive</th>
+  <th colspan='1'>Socket</th>
 
   <tr>
     <th>&nbsp;</th>
     <th>Status</th>
+
     <th>Active count</th>
     <th>Idle count</th>
     <th>Total count</th>
-    <th>Keepalive count</th>
-    <th>Select count</th>
+
+    <th>Keepalive</th>
+
+    <th>max</th>
+    <th>timeout</th>
+
+    <th>timeout</th>
   </tr>
 <?php
   foreach ($ports as $port) {
@@ -238,8 +195,16 @@ if ($ports) {
     <td><?= $port->ThreadActiveCount ?></td>
     <td><?= $port->ThreadIdleCount ?></td>
     <td><?= $port->ThreadCount ?></td>
-    <td><?= $port->ThreadKeepaliveCount ?></td>
-    <td><?= $port->SelectKeepaliveCount < 0 ? "N/A" : $port->SelectKeepaliveCount ?></td>
+
+    <td><?= $port->ThreadKeepaliveCount ?>
+        <?= $port->SelectKeepaliveCount < 0
+            ? ""
+            : ("(" . $port->SelectKeepaliveCount . ")") ?></td>
+
+    <td><?= $port->KeepaliveMax ?></td>
+    <td><?= $port->KeepaliveTimeout ?></td>
+
+    <td><?= $port->SocketTimeout ?></td>
   </tr>
 <?php 
   }
@@ -252,7 +217,10 @@ if ($ports) {
 <?php
   foreach ($resin->Clusters as $cluster) {
 
-echo "<h2>Cluster: $cluster->Name</h2>";
+  if (empty($cluster->Servers))
+    continue;
+
+echo "<h2>Server Connectors: $cluster->Name</h2>";
 
 ?>
 
@@ -297,6 +265,50 @@ foreach ($cluster->Servers as $client) {
 <?php 
 }
 ?>
+
+<!-- Connection pools -->
+
+<?php
+$db_pools = $mbeanServer->query("resin:*,type=ConnectionPool");
+
+if ($db_pools) {
+?>
+
+<h2>Connection pools</h2>
+
+<table>
+  <tr>
+    <th>&nbsp;</th>
+    <th colspan='3'>Connections</th>
+    <th colspan='2'>Config</th>
+  </tr>
+  <tr>
+    <th>Name</th>
+    <th>Active count</th>
+    <th>Idle count</th>
+    <th>Total count</th>
+    <th>max-connections</th>
+    <th>idle-time</th>
+  </tr>
+
+<?php
+  foreach ($db_pools as $pool) {
+?>
+
+  <tr>
+    <td><?= $pool->Name ?></td>
+    <td><?= $pool->ConnectionActiveCount ?></td>
+    <td><?= $pool->ConnectionIdleCount ?></td>
+    <td><?= $pool->ConnectionCount ?></td>
+    <td><?= $pool->MaxConnections ?></td>
+    <td><?= $pool->MaxIdleTime ?></td>
+  </tr>
+
+<?php
+  }
+}
+?>
+</table>
 
 <!-- Hosts and Applications -->
 <h2>Hosts and Applications</h2>

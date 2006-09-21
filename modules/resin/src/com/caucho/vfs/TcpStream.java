@@ -57,7 +57,7 @@ class TcpStream extends StreamImpl {
     if (timeout > 0)
       _s.connect(path.getSocketAddress(), (int) timeout);
     else
-      _s.connect(path.getSocketAddress());
+      _s.connect(path.getSocketAddress(), 120000);
 
     if (! _s.isConnected())
       throw new IOException("connection timeout");

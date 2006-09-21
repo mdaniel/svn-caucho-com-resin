@@ -102,8 +102,8 @@ public class Port
 
   private int _keepaliveMax = DEFAULT;
   
-  private long _keepaliveThreadTimeout = DEFAULT;
-  private long _keepaliveSocketTimeout = DEFAULT;
+  private long _keepaliveTimeout = DEFAULT;
+  private long _keepaliveSelectThreadTimeout = DEFAULT;
 
   private int _acceptThreadMin = DEFAULT;
   private int _acceptThreadMax = DEFAULT;
@@ -188,8 +188,13 @@ public class Port
       if (_keepaliveMax == DEFAULT)
 	_keepaliveMax = server.getKeepaliveMax();
 
-      if (_keepaliveThreadTimeout == DEFAULT)
-	_keepaliveThreadTimeout = server.getKeepaliveThreadTimeout();
+      if (_keepaliveTimeout == DEFAULT)
+	_keepaliveTimeout = server.getKeepaliveTimeout();
+
+      if (_keepaliveSelectThreadTimeout == DEFAULT) {
+	_keepaliveSelectThreadTimeout
+	  = server.getKeepaliveSelectThreadTimeout();
+      }
 
       if (_socketTimeout == DEFAULT)
 	_socketTimeout = server.getSocketTimeout();
@@ -596,14 +601,19 @@ public class Port
     return _keepaliveMax;
   }
 
-  public void setKeepaliveThreadTimeout(Period period)
+  public void setKeepaliveTimeout(Period period)
   {
-    _keepaliveThreadTimeout = period.getPeriod();
+    _keepaliveTimeout = period.getPeriod();
   }
 
-  public long getKeepaliveThreadTimeout()
+  public long getKeepaliveTimeout()
   {
-    return _keepaliveThreadTimeout;
+    return _keepaliveTimeout;
+  }
+
+  public long getKeepaliveSelectThreadTimeout()
+  {
+    return _keepaliveSelectThreadTimeout;
   }
 
   /**

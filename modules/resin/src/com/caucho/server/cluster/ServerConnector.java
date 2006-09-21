@@ -76,7 +76,7 @@ public class ServerConnector {
 
   private ClusterClient _client;
 
-  private ClusterClientAdmin _admin;
+  private ServerConnectorAdmin _admin;
 
   public ServerConnector(ClusterServer server)
   {
@@ -170,34 +170,25 @@ public class ServerConnector {
    * Returns the socket timeout when reading from the
    * target server.
    */
-  public long getLoadBalanceReadTimeout()
+  public long getSocketTimeout()
   {
-    return _server.getLoadBalanceReadTimeout();
-  }
-
-  /**
-   * Returns the socket timeout when writing to the
-   * target server.
-   */
-  public long getLoadBalanceWriteTimeout()
-  {
-    return _server.getLoadBalanceWriteTimeout();
+    return _server.getSocketTimeout();
   }
 
   /**
    * Returns how long the connection can be cached in the free pool.
    */
-  public long getLoadBalanceMaxIdleTime()
+  public long getLoadBalanceIdleTime()
   {
-    return _server.getLoadBalanceMaxIdleTime();
+    return _server.getLoadBalanceIdleTime();
   }
 
   /**
    * Returns how long the connection will be treated as dead.
    */
-  public long getLoadBalanceFailRecoverTime()
+  public long getLoadBalanceRecoverTime()
   {
-    return _server.getLoadBalanceFailRecoverTime();
+    return _server.getLoadBalanceRecoverTime();
   }
 
   /**
@@ -230,7 +221,7 @@ public class ServerConnector {
 
     _client = new ClusterClient(this);
 
-    _admin = new ClusterClientAdmin(_client);
+    _admin = new ServerConnectorAdmin(_client);
 
     try {
       String name = getId();

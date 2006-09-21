@@ -111,7 +111,7 @@ public class Store {
   public final static long BLOCK_OFFSET_MASK = BLOCK_SIZE - 1;
 
   public final static int ALLOC_PER_BLOCK = BLOCK_SIZE / 2;
-  public final static long ALLOC_SEGMENT = BLOCK_SIZE * ALLOC_PER_BLOCK;
+  public final static long ALLOC_SEGMENT = (long) BLOCK_SIZE * ALLOC_PER_BLOCK;
   
   public final static int ALLOC_FREE     = 0x00;
   public final static int ALLOC_ROW      = 0x01;
