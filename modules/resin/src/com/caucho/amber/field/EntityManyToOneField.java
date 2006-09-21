@@ -393,6 +393,7 @@ public class EntityManyToOneField extends AbstractField {
 
       out.popDepth();
       out.println("} else {");
+
       out.println("  " + generateSuperSetter("(" + javaType + ") preloadedProperties.get(\"" + getName() + "\")") + ";");
       out.println("}");
     }
@@ -438,8 +439,9 @@ public class EntityManyToOneField extends AbstractField {
     out.popDepth();
     out.println("}");
 
-    out.println("else");
+    out.println("else {");
     out.println("  return " + generateSuperGetter() + ";");
+    out.println("}");
 
     out.popDepth();
     out.println("}");
@@ -486,14 +488,17 @@ public class EntityManyToOneField extends AbstractField {
                                        int updateIndex)
     throws IOException
   {
-    if (getIndex() == updateIndex) {
-      // order matters: ejb/06gc
-      String var = "__caucho_" + getName();
-      out.println(generateAccessor(dst, var) + " = " + generateAccessor(src, var) + ";");
+    // jpa/0s29
+    // if (getIndex() == updateIndex) {
 
-      String value = generateGet(src);
-      out.println(generateSet(dst, value) + ";");
-    }
+    // order matters: ejb/06gc
+    String var = "__caucho_" + getName();
+    out.println(generateAccessor(dst, var) + " = " + generateAccessor(src, var) + ";");
+
+    String value = generateGet(src);
+    out.println(generateSet(dst, value) + ";");
+
+    // }
   }
 
   /**
@@ -519,10 +524,13 @@ public class EntityManyToOneField extends AbstractField {
     // jpa/0o05
     // }
 
-    if (_targetLoadIndex == updateIndex) { // ejb/0h20
-      String value = generateGet(src);
-      out.println(generateSet(dst, value) + ";");
-    }
+    // commented out: jpa/0s29
+    // if (_targetLoadIndex == updateIndex) { // ejb/0h20
+
+    String value = generateGet(src);
+    out.println(generateSet(dst, value) + ";");
+
+    // }
 
     /*
       if (_targetLoadIndex == updateIndex) {

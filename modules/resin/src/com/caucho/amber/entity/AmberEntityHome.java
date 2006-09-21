@@ -372,8 +372,13 @@ public class AmberEntityHome {
         if (_homeBean == null && _configException != null)
           throw _configException;
 
+        // XXX: this is an initial optimization and bug fix also for jpa/0s29
+        // XXX: another point is inheritance with many-to-one (jpa/0l40 and jpa/0s29)
+        //      still get twice the number of loading SQLs.
+        boolean loadFromResultSet = ! getEntityType().hasDependent();
+
         Entity cacheEntity;
-        cacheEntity = (Entity) _homeBean.__caucho_home_new(aConn, this, key);
+        cacheEntity = (Entity) _homeBean.__caucho_home_new(aConn, this, key, loadFromResultSet);
 
         if (isLoad) {
           cacheEntity.__caucho_retrieve(aConn, preloadedProperties);

@@ -1340,6 +1340,17 @@ public class EntityComponent extends ClassComponent {
     out.print("Object key)");
     out.println("  throws java.sql.SQLException");
     out.println("{");
+    out.println("  return __caucho_home_new(aConn, home, key, true);");
+    out.println("}");
+
+    out.println();
+    out.print("public com.caucho.amber.entity.Entity __caucho_home_new(");
+    out.print("com.caucho.amber.manager.AmberConnection aConn,");
+    out.print("com.caucho.amber.entity.AmberEntityHome home,");
+    out.print("Object key,");
+    out.print("boolean loadFromResultSet)");
+    out.println("  throws java.sql.SQLException");
+    out.println("{");
     out.pushDepth();
 
     Column discriminator = _entityType.getDiscriminator();
@@ -1375,8 +1386,11 @@ public class EntityComponent extends ClassComponent {
       out.println("}");
       out.println("com.caucho.amber.entity.EntityItem item = home.findDiscriminatorEntityItem(aConn, key, rs.getString(1));");
 
-      out.println("item.getEntity().__caucho_load(aConn, rs, 1);");
+      out.println("if (loadFromResultSet)");
+      out.println("  item.getEntity().__caucho_load(aConn, rs, 1);");
+
       out.println(getClassName() + " entity = (" + getClassName() + ") item.copy(aConn);");
+
       out.println("rs.close();");
       out.println("return entity;");
     }

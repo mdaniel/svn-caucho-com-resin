@@ -123,7 +123,8 @@ public class LoadGroupGenerator extends ClassComponent {
 
     _entityType.generateCopyLoadObject(out, "super", "item", _index);
 
-    out.println("__caucho_loadMask_" + group + " |= " + mask + "L;");
+    // out.println("__caucho_loadMask_" + group + " |= " + mask + "L;");
+    out.println("__caucho_loadMask_" + group + " |= item.__caucho_loadMask_" + group + ";"); // mask + "L;");
 
     out.println();
     out.println("return;");

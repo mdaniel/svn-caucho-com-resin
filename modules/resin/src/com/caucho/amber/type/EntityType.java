@@ -104,11 +104,16 @@ public class EntityType extends Type {
 
   private ArrayList<AmberField> _fields = new ArrayList<AmberField>();
 
+  private HashMap<String,String> _completionFields
+    = new HashMap<String,String>();
+
   private HashMap<String,EntityType> _subEntities;
 
   private JClass _beanClass;
 
   private boolean _isFieldAccess;
+
+  private boolean _hasDependent;
 
   private Throwable _exception;
 
@@ -270,6 +275,24 @@ public class EntityType extends Type {
   public boolean isFieldAccess()
   {
     return _isFieldAccess;
+  }
+
+  /**
+   * Returns true if and only if it has a
+   * many-to-one, one-to-one or embedded field/property.
+   */
+  public boolean hasDependent()
+  {
+    return _hasDependent;
+  }
+
+  /**
+   * Sets true if and only if it has a
+   * many-to-one, one-to-one or embedded field/property.
+   */
+  public void setHasDependent(boolean hasDependent)
+  {
+    _hasDependent = hasDependent;
   }
 
   /**
@@ -634,6 +657,30 @@ public class EntityType extends Type {
     }
 
     return null;
+  }
+
+  /**
+   * Adds a new completion field.
+   */
+  public void addCompletionField(String name)
+  {
+    _completionFields.put(name, name);
+  }
+
+  /**
+   * Returns true if and only if it has the completion field.
+   */
+  public boolean containsCompletionField(String completionField)
+  {
+    return _completionFields.containsKey(completionField);
+  }
+
+  /**
+   * Remove all completion fields.
+   */
+  public void removeAllCompletionFields()
+  {
+    _completionFields.clear();
   }
 
   /**

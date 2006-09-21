@@ -118,6 +118,15 @@ public interface Entity {
     throws SQLException;
 
   /**
+   * Returns a new entity.
+   */
+  public Entity __caucho_home_new(AmberConnection aConn,
+                                  AmberEntityHome home,
+                                  Object key,
+                                  boolean loadFromResultSet)
+    throws SQLException;
+
+  /**
    * Creates a new instance based the current entity
    */
   public Entity __caucho_copy(AmberConnection aConn, EntityItem cacheItem);

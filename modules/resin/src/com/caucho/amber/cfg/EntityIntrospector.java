@@ -208,16 +208,48 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
     String entityName;
     EntityType parentType = null;
     JAnnotation inheritanceAnn = null;
-    Object inheritanceConfig = null;
+    InheritanceConfig inheritanceConfig = null;
 
     if (isEntity) {
       validateType(type);
+
+      // Inheritance annotation/configuration is specified
+      // on the entity class that is the root of the entity
+      // class hierarachy.
+
+      JClass rootClass = type;
 
       getInternalInheritanceConfig(type);
       inheritanceAnn = _annotationCfg.getAnnotation();
       inheritanceConfig = _annotationCfg.getInheritanceConfig();
 
-      if (! _annotationCfg.isNull()) {
+      boolean hasInheritance = ! _annotationCfg.isNull();
+
+      for (JClass parentClass = type.getSuperClass();
+           parentClass != null;
+           parentClass = parentClass.getSuperClass()) {
+
+        getInternalEntityConfig(parentClass);
+        JAnnotation parentEntity = _annotationCfg.getAnnotation();
+        EntityConfig superEntityConfig = _annotationCfg.getEntityConfig();
+
+        if (_annotationCfg.isNull())
+          break;
+
+        rootClass = parentClass;
+
+        if (hasInheritance)
+          throw new ConfigException(L.l("'{0}' cannot have @Inheritance. It must be specified on the entity class that is the root of the entity class hierarchy.",
+                                        type));
+
+        getInternalInheritanceConfig(rootClass);
+        inheritanceAnn = _annotationCfg.getAnnotation();
+        inheritanceConfig = _annotationCfg.getInheritanceConfig();
+
+        hasInheritance = ! _annotationCfg.isNull();
+      }
+
+      if (hasInheritance) {
 
         for (JClass parentClass = type.getSuperClass();
              parentClass != null;
@@ -314,7 +346,8 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
       Table secondaryTable = null;
 
       if ((inheritanceAnn != null) || (inheritanceConfig != null))
-        introspectInheritance(_persistenceUnit, entityType, type);
+        introspectInheritance(_persistenceUnit, entityType, type,
+                              inheritanceAnn, inheritanceConfig);
 
       if ((secondaryTableAnn != null) || (secondaryTableConfig != null)) {
         String secondaryName;
@@ -631,13 +664,11 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
    */
   private void introspectInheritance(AmberPersistenceUnit persistenceUnit,
                                      EntityType entityType,
-                                     JClass type)
+                                     JClass type,
+                                     JAnnotation inheritanceAnn,
+                                     InheritanceConfig inheritanceConfig)
     throws ConfigException, SQLException
   {
-    getInternalInheritanceConfig(type);
-    JAnnotation inheritanceAnn = _annotationCfg.getAnnotation();
-    InheritanceConfig inheritanceConfig = _annotationCfg.getInheritanceConfig();
-
     InheritanceType strategy;
 
     if (inheritanceAnn != null)
@@ -774,7 +805,7 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
 
       String fieldName = toFieldName(methodName.substring(3));
 
-      if (parentType != null && parentType.getField(fieldName) != null)
+      if (containsFieldOrCompletion(parentType, fieldName))
         continue;
 
       getInternalIdConfig(type, method, fieldName);
@@ -853,7 +884,7 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
     for (JField field : type.getFields()) {
       String fieldName = field.getName();
 
-      if (parentType != null && parentType.getField(fieldName) != null)
+      if (containsFieldOrCompletion(parentType, fieldName))
         continue;
 
       getInternalIdConfig(type, field, fieldName);
@@ -1150,7 +1181,10 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
 
       if (joinColumnsAnn == null) {
 
-        name = pkJoinColumnCfg.getName();
+        if (pkJoinColumnCfg == null)
+          name = column.getName();
+        else
+          name = pkJoinColumnCfg.getName();
       }
       else {
         JAnnotation join;
@@ -1254,7 +1288,7 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
 
       String fieldName = toFieldName(propName);
 
-      if (parentType != null && parentType.getField(fieldName) != null)
+      if (containsFieldOrCompletion(parentType, fieldName))
         continue;
 
       JClass fieldType = method.getReturnType();
@@ -1279,7 +1313,7 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
     for (JField field : type.getFields()) {
       String fieldName = field.getName();
 
-      if (parentType != null && parentType.getField(fieldName) != null)
+      if (containsFieldOrCompletion(parentType, fieldName))
         continue;
 
       if (field.isStatic() || field.isTransient())
@@ -1307,32 +1341,27 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
 
     JClass parentClass = sourceType.getBeanClass();
 
-    do {
-      getInternalEntityConfig(parentClass);
-      JAnnotation parentEntity = _annotationCfg.getAnnotation();
-      EntityConfig superEntityConfig = _annotationCfg.getEntityConfig();
+    getInternalEntityConfig(parentClass);
+    JAnnotation parentEntity = _annotationCfg.getAnnotation();
+    EntityConfig superEntityConfig = _annotationCfg.getEntityConfig();
 
-      if (superEntityConfig != null) {
-        attributesConfig = superEntityConfig.getAttributes();
+    if (superEntityConfig != null) {
+      attributesConfig = superEntityConfig.getAttributes();
 
-        if (attributesConfig != null) {
-          if (idConfig == null)
-            idConfig = attributesConfig.getId(fieldName);
+      if (attributesConfig != null) {
+        if (idConfig == null)
+          idConfig = attributesConfig.getId(fieldName);
 
-          if (basicConfig == null)
-            basicConfig = attributesConfig.getBasic(fieldName);
+        if (basicConfig == null)
+          basicConfig = attributesConfig.getBasic(fieldName);
 
-          if (oneToManyConfig == null)
-            oneToManyConfig = attributesConfig.getOneToMany(fieldName);
+        if (oneToManyConfig == null)
+          oneToManyConfig = attributesConfig.getOneToMany(fieldName);
 
-          if (manyToOneConfig == null)
-            manyToOneConfig = attributesConfig.getManyToOne(fieldName);
-        }
+        if (manyToOneConfig == null)
+          manyToOneConfig = attributesConfig.getManyToOne(fieldName);
       }
-
-      parentClass = parentClass.getSuperClass();
     }
-    while (parentClass != null);
 
     if ((idConfig != null) ||
         field.isAnnotationPresent(javax.persistence.Id.class)) {
@@ -1366,11 +1395,6 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
         targetEntity = ann.getClass("targetEntity");
       else {
 
-        // jpa/0s29 (inheritance and many-to-one)
-        getInternalManyToOneConfig(sourceType.getBeanClass(), field, fieldName);
-        if (_annotationCfg.getManyToOneConfig() == null)
-          return;
-
         String s = manyToOneConfig.getTargetEntity();
 
         if ((s != null) && (s.length() > 0))
@@ -1397,6 +1421,8 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
                                field.getName(),
                                fieldType.getName()));
       }
+
+      sourceType.setHasDependent(true);
 
       _linkCompletions.add(new ManyToOneCompletion(sourceType,
                                                    field,
@@ -1427,6 +1453,9 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
     }
     else if (field.isAnnotationPresent(javax.persistence.OneToOne.class)) {
       validateAnnotations(field, _oneToOneAnnotations);
+
+      sourceType.setHasDependent(true);
+
       _depCompletions.add(new OneToOneCompletion(sourceType,
                                                  field,
                                                  fieldName,
@@ -1458,6 +1487,9 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
     }
     else if (field.isAnnotationPresent(javax.persistence.Embedded.class)) {
       validateAnnotations(field, _embeddedAnnotations);
+
+      sourceType.setHasDependent(true);
+
       _depCompletions.add(new EmbeddedCompletion(sourceType,
                                                  field,
                                                  fieldName,
@@ -2224,15 +2256,32 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
     return null;
   }
 
+  private boolean containsFieldOrCompletion(EntityType type,
+                                            String fieldName)
+  {
+    if (type == null)
+      return false;
+
+    if (type.getField(fieldName) != null)
+      return true;
+
+    if (type.containsCompletionField(fieldName))
+      return true;
+
+    return false;
+  }
+
   /**
    * completes for dependent
    */
   class Completion {
     protected EntityType _entityType;
 
-    protected Completion(EntityType entityType)
+    protected Completion(EntityType entityType,
+                         String fieldName)
     {
       _entityType = entityType;
+      _entityType.addCompletionField(fieldName);
     }
 
     EntityType getEntityType()
@@ -2259,7 +2308,7 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
                         String fieldName,
                         JClass fieldType)
     {
-      super(type);
+      super(type, fieldName);
 
       _field = field;
       _fieldName = fieldName;
@@ -2500,7 +2549,7 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
                        String fieldName,
                        JClass fieldType)
     {
-      super(type);
+      super(type, fieldName);
 
       _field = field;
       _fieldName = fieldName;
@@ -2609,7 +2658,7 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
                          String fieldName,
                          JClass fieldType)
     {
-      super(type);
+      super(type, fieldName);
 
       _field = field;
       _fieldName = fieldName;
@@ -2636,7 +2685,7 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
                         String fieldName,
                         JClass fieldType)
     {
-      super(type);
+      super(type, fieldName);
 
       _field = field;
       _fieldName = fieldName;
@@ -2667,7 +2716,7 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
                        JClass fieldType,
                        boolean embeddedId)
     {
-      super(type);
+      super(type, fieldName);
 
       _field = field;
       _fieldName = fieldName;
