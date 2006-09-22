@@ -185,9 +185,6 @@ public class QuercusServlet
   public void init()
     throws ServletException
   {
-    if (! CauchoSystem.isJdk15())
-      throw new ServletException(L.l("Quercus requires JDK 1.5"));
-
     initImpl();
   }
 

@@ -5,7 +5,8 @@
 
   <description>
 
-  <p>The &lt;http> tags configure HTTP ports.</p>
+  <p>The port tags configure &lt;http> ports, addresses, cluster-ports
+and custom protocol TCP ports.</p>
 
   </description>
 </header>

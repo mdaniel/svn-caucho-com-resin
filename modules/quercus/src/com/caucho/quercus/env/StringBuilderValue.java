@@ -59,6 +59,9 @@ public class StringBuilderValue extends UnicodeValue {
 
   public StringBuilderValue(String value)
   {
+    if (value == null)
+      value = "";
+    
     int length = value.length();
     
     _buffer = new char[length];

@@ -1,0 +1,9 @@
+<web-app xmlns="http://caucho.com/ns/resin">
+  <database jndi-name="jdbc/resin">
+    <driver type="com.caucho.db.jdbc.ConnectionPoolDataSourceImpl">
+      <path>WEB-INF/db</path>
+      <remove-on-error/>
+    </driver>
+    <spy/>
+  </database>
+</web-app>

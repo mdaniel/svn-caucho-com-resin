@@ -39,6 +39,21 @@ import com.caucho.config.types.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
+/**
+ * ResinBoot is the main bootstrap class for Resin.  It parses the
+ * resin.conf and looks for the &lt;server> block matching the -server
+ * argument.
+ *
+ * <h3>Start Modes:</h3>
+ *
+ * The start modes are DIRECT, START, STOP, RESTART.
+ *
+ * <ul>
+ * <li>DIRECT starts a <server> from the command line
+ * <li>START starts a <server> with a Watchdog in the background
+ * <li>STOP stop the <server> Resin in the background
+ * </ul>
+ */
 public class ResinBoot {
   private static L10N _L;
   private static Logger _log;
@@ -146,11 +161,13 @@ public class ResinBoot {
     for (int i = 0; i < argv.length; i++) {
       String arg = argv[i];
 
-      if ("-conf".equals(arg)) {
+      if ("-conf".equals(arg)
+	  || "--conf".equals(arg)) {
 	_resinConf = _resinHome.lookup(argv[i + 1]);
 	i++;
       }
-      else if ("-resin-home".equals(arg)) {
+      else if ("-resin-home".equals(arg)
+	       || "-resin-home".equals(arg)) {
 	_resinHome = Vfs.lookup(argv[i + 1]);
 	i++;
       }
@@ -159,7 +176,8 @@ public class ResinBoot {
 	_serverRoot = Vfs.lookup(argv[i + 1]);
 	i++;
       }
-      else if ("-server".equals(arg)) {
+      else if ("-server".equals(arg)
+	       || "--server".equals(arg)) {
 	_serverId = argv[i + 1];
 	i++;
       }
@@ -218,8 +236,8 @@ public class ResinBoot {
    * The main start of the web server.
    *
    * <pre>
-   * -conf resin.conf   : alternate configuration file
-   * -port port         : set the server's port
+   * -conf resin.conf  : alternate configuration file
+   * -server web-a     : &lt;server> to start
    * <pre>
    */
   public static void main(String []argv)

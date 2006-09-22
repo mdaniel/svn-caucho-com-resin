@@ -289,7 +289,6 @@ public class PDO implements java.io.Closeable {
       stmt.setEscapeProcessing(false);
 
       if (stmt.execute(query)) {
-
         ResultSet resultSet = null;
 
         try {

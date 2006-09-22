@@ -5,9 +5,8 @@
 
   <description>
 
-  <p>The &lt;server> tags configure a JVM instance in a cluster.  It
-configures HTTP and cluster sockets,
-keepalives and timeouts, thread pooling,
+  <p>The &lt;server> tag configures a JVM instance in a cluster.  It
+configures HTTP and cluster sockets, keepalives and timeouts, thread pooling,
 load balancing, and JVM arguments.</p>
 
   </description>

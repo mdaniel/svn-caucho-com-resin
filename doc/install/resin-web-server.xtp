@@ -27,11 +27,12 @@ performance, security and reliability.</p>
 <ol>
 <li>Install JDK 1.5 or later and link /usr/java to the Java home or
 set environment variable JAVA_HOME.</li>
-<li>tar -vzxf resin-3.1.0.tar.gz</li>
-<li>(Optional) Link /usr/local/resin to the resin-3.1.0 directory.</li>
+<li>tar -vzxf resin-3.1.0.tar.gz in /usr/local/share</li>
+<li>(Optional) Link /usr/local/share/resin to the resin-3.1.0 directory.</li>
 <li>./configure; make; make install</li>
-<li>Run <code>java -jar resin/lib/resin.jar</code></li>
-<li>Or <code>resin/bin/httpd.sh</code></li>
+<li>Run <code>java -jar resin/lib/resin.jar</code>
+<ul><li>Or <code>resin/bin/httpd.sh</code></li></ul>
+</li>
 <li>Browse http://localhost:8080</li>
 </ol>
 
@@ -49,7 +50,7 @@ Starting Resin on Tue, 12 Sep 2006 19:11:52 -0700 (PDT)
 [21:22:21.477] 
 [21:22:21.477] Mac OS X 10.4.7 ppc
 [21:22:21.477] Java 1.5.0_06-64, 32, mixed mode, sharing, MacRoman, en, "Apple Computer, Inc."
-[21:22:21.477] resin.home = /usr/local/resin
+[21:22:21.477] resin.home = /usr/local/share/resin
 [21:22:21.478] server.root = /var/www
 [21:22:21.478] 
 [21:22:21.492] Loaded Socket JNI library.
@@ -80,7 +81,7 @@ make Resin and website upgrades easier and more maintainable.</p>
 
 <ol>
 <li>Create a user to run Resin (e.g. resin or another non-root user)</li>
-<li>Link <code>/usr/local/resin</code> to the current Resin version.  This is $RESIN_HOME.</li>
+<li>Link <code>/usr/local/share/resin</code> to the current Resin version.  This is $RESIN_HOME.</li>
 <li>Create a deployment root, e.g. <code>/var/www</code>, owned by
 the resin user.  This is $SERVER_ROOT.</li>
 <li>Put the modified resin.conf in <code>/etc/resin/resin.conf</code></li>
@@ -100,7 +101,7 @@ when the machine reboots.</li>
 and "restart" arguments to the resin.jar, e.g.</p>
 
 <example title="starting resin">
-unix> java -jar /usr/local/resin/lib/resin.jar \
+unix> java -jar /usr/local/share/resin/lib/resin.jar \
            -conf /etc/resin/resin.conf \
            start
 </example>
@@ -138,8 +139,8 @@ will typically do a number of things:</p>
 #!/bin/sh
 
 JAVA_HOME=/usr/java
-RESIN_HOME=/usr/local/resin
-SERVER_ROOT=/usr/local/web
+RESIN_HOME=/usr/local/share/resin
+SERVER_ROOT=/var/www
 
 java=$JAVA_HOME/bin/java
 

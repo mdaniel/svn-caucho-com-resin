@@ -5,12 +5,18 @@
 <version>Resin 3.0</version>
 
 <description>
-<p>Resin organizes resources and classloaders into nested environments.
-Each environment context merges its own configuration with configuration
-inherited from the parent environment.  Each environment context: server,
-host, web-app, etc. may be configured with any of the environment
-configuration tags.
-</p>
+<p>Environment tags configure class-loaders, logging, authentication,
+EL variables and control,
+and resources like databases, JMS queues, EJB servers, and web service
+clients.  Many of the resources are stored in JNDI or in EL variables
+for later assemply.</p>
+
+<p>Any environment resource can appear in any
+of Resin environments: &lt;resin>, &lt;cluster>, &lt;host> and &lt;web-app>.
+Resources configured at parent levels are shared among all children,
+so a database can share connection pools for all web-apps or an
+authenticator can provide single-signon.</p>
+
 </description>
 </header>
 

@@ -2,7 +2,9 @@
   <item title="Configuration" link="index.xtp">
     <item link="howto.xtp" title="howto"/>
     <item link="tags.xtp"  title="tags">
+    <!--
       <item link="index-tags.xtp" title="index"/>
+      -->
       <item link="env-tags.xtp" title="env tags"/>
       <item link="resin-tags.xtp" title="&lt;resin>"/>
       <item link="cluster-tags.xtp" title="&lt;cluster>"/>
