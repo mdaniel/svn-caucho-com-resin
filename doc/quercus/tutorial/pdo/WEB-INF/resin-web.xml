@@ -6,4 +6,7 @@
     </driver>
     <spy/>
   </database>
+
+  <servlet-mapping url-pattern="*.php"
+                   servlet-class="com.caucho.quercus.lib.QuercusServlet"/>
 </web-app>
