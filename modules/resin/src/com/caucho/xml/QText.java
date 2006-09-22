@@ -37,16 +37,19 @@ import org.w3c.dom.Text;
  */
 public class QText extends QCharacterData implements Text {
   /**
-   * Creates a new text node with initial data.
+   * Creates a new text node.
    */
-  protected QText(String data)
+  public QText()
   {
-    super(data);
+    super();
   }
 
-  protected QText(QDocument owner, String data)
+  /**
+   * Creates a new text node with initial data.
+   */
+  public QText(String data)
   {
-    super(owner, data);
+    super(data);
   }
 
   public String getNodeName() { return "#text"; }
@@ -83,7 +86,7 @@ public class QText extends QCharacterData implements Text {
 
   public Text joinText(Text node1, Text node2)
     throws DOMException
-  { 
+  {
     return new QText(node1.getData() + node2.getData());
   }
 

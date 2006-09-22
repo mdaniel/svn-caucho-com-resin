@@ -29,19 +29,47 @@
 
 package com.caucho.quercus.lib.dom;
 
+import com.caucho.quercus.env.Env;
 import com.caucho.quercus.module.Optional;
-import com.caucho.xml.QProcessingInstruction;
+
+import org.w3c.dom.ProcessingInstruction;
 
 public class DOMProcessingInstruction
-  extends QProcessingInstruction
+  extends DOMNode<ProcessingInstruction>
 {
-  public DOMProcessingInstruction(String name, @Optional String content)
+  public static DOMProcessingInstruction __construct(Env env, String name, @Optional String data)
   {
-    super(name, content);
+    DOMProcessingInstruction pi = getImpl(env).createProcessingInstruction(name);
+
+    if (data != null && data.length() > 0)
+      pi.setData(data);
+
+    return pi;
   }
 
-  DOMProcessingInstruction(DOMDocument owner, String name, String content)
+  DOMProcessingInstruction(DOMImplementation impl, ProcessingInstruction delegate)
   {
-    super(owner, name, content);
+    super(impl, delegate);
+  }
+
+  public String getData()
+  {
+    return _delegate.getData();
+  }
+
+  public String getTarget()
+  {
+    return _delegate.getTarget();
+  }
+
+  public void setData(String data)
+    throws DOMException
+  {
+    try {
+    _delegate.setData(data);
+    }
+    catch (org.w3c.dom.DOMException ex) {
+      throw wrap(ex);
+    }
   }
 }

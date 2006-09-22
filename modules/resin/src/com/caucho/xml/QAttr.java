@@ -40,6 +40,16 @@ public class QAttr extends QNode implements Attr {
   private String _value;
   private boolean _specified = true;
 
+  public QAttr(String name)
+  {
+    _name = new QName(name);
+  }
+
+  public QAttr(QName name)
+  {
+    _name = name;
+  }
+
   protected QAttr(QName name, String value)
   { 
     _name = name; 

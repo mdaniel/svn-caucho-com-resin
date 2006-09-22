@@ -39,16 +39,7 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.ReadOnly;
 import com.caucho.quercus.module.Optional;
 
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.ObjectValue;
-import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.*;
 
 import com.caucho.quercus.expr.Expr;
 
@@ -83,8 +74,87 @@ public class ClassesModule extends AbstractQuercusModule {
 
       return new StringValueImpl(obj.getName());
     }
+    else if (value instanceof JavaValue) {
+      JavaValue obj = (JavaValue) value;
+
+      return new StringValueImpl(obj.getClassName());
+    }
     else
       return BooleanValue.FALSE;
+  }
+
+  /**
+   * Returns an array of method names and values
+   *
+   * @param className the name of the class
+   *
+   * @return an array of method names and values
+   *
+   * @throws errorException
+   */
+  public static Value get_class_methods(Env env, String className)
+  {
+    // php/1j11
+
+    QuercusClass cl = null;
+
+    try {
+      cl = env.getClass(className);
+    }
+    catch (Exception t) {
+      log.log(Level.WARNING, t.toString(), t);
+
+      return NullValue.NULL;
+    }
+
+    if (cl == null)
+      return null;
+
+    ArrayValue methArray = new ArrayValueImpl();
+
+    for (Map.Entry<String, AbstractFunction> entry: cl.getClassMethods()) {
+      Value key = StringValue.create(entry.getKey());
+
+      methArray.append(key);
+    }
+
+    return methArray;
+  }
+
+  /**
+   * Returns an array of member names and values
+   *
+   * @param className the name of the class
+   *
+   * @return an array of member names and values
+   */
+  public static Value get_class_vars(Env env, String className)
+  {
+    // php/1j10
+
+    QuercusClass cl = null;
+
+    try {
+      cl = env.getClass(className);
+    } catch (Exception t) {
+      log.log(Level.WARNING, t.toString(), t);
+
+      return NullValue.NULL;
+    }
+
+    if (cl == null)
+      return null;
+
+    ArrayValue varArray = new ArrayValueImpl();
+
+    for (Map.Entry<StringValue,Expr> entry : cl.getClassVars().entrySet()) {
+      Value key = entry.getKey();
+      Value value = entry.getValue().eval(env);
+
+      varArray.append(key, value);
+    }
+
+    return varArray;
   }
 
   /**
@@ -108,42 +178,6 @@ public class ClassesModule extends AbstractQuercusModule {
     }
 
     return result;
-  }
-
-  /**
-   * Returns true if the object implements the given class.
-   */
-  public static boolean is_a(@ReadOnly Value value, String name)
-  {
-    return value.isA(name);
-  }
-
-  /**
-   * Returns true if the argument is an object.
-   */
-  public static boolean is_object(@ReadOnly Value value)
-  {
-    return value instanceof ObjectValue;
-  }
-
-  /**
-   * Returns true if the object implements the given class.
-   */
-  public static boolean is_subclass_of(Env env,
-				       @ReadOnly Value value,
-				       String name)
-  {
-    QuercusClass cl;
-    
-    if (value instanceof StringValue)
-      cl = env.findClass(value.toString());
-    else
-      cl = value.getQuercusClass();
-
-    if (cl == null || cl.getName().equalsIgnoreCase(name))
-      return false;
-    else
-      return cl.isA(name);
   }
 
   /**
@@ -176,6 +210,42 @@ public class ClassesModule extends AbstractQuercusModule {
   }
 
   /**
+   * Returns true if the object implements the given class.
+   */
+  public static boolean is_a(@ReadOnly Value value, String name)
+  {
+    return value.isA(name);
+  }
+
+  /**
+   * Returns true if the argument is an object.
+   */
+  public static boolean is_object(@ReadOnly Value value)
+  {
+    return value instanceof ObjectValue;
+  }
+
+  /**
+   * Returns true if the object implements the given class.
+   */
+  public static boolean is_subclass_of(Env env,
+				       @ReadOnly Value value,
+				       String name)
+  {
+    QuercusClass cl;
+
+    if (value instanceof StringValue)
+      cl = env.findClass(value.toString());
+    else
+      cl = value.getQuercusClass();
+
+    if (cl == null || cl.getName().equalsIgnoreCase(name))
+      return false;
+    else
+      return cl.isA(name);
+  }
+
+  /**
    * Returns true if the named method exists on the object.
    *
    * @param obj the object to test
@@ -184,81 +254,5 @@ public class ClassesModule extends AbstractQuercusModule {
   public static boolean method_exists(Value obj, String methodName)
   {
     return obj.findFunction(methodName.intern()) != null;
-  }
-  
-  /**
-   * Returns an array of member names and values
-   *
-   * @param className the name of the class
-   * 
-   * @return an array of member names and values
-   * 
-   * @throws errorException
-   */
-  public static Value get_class_vars(Env env, String className)
-  {
-    // php/1j10
-  	
-    QuercusClass cl = null;
-    
-    try {
-      cl = env.getClass(className);
-    } catch (Exception t) {
-      log.log(Level.WARNING, t.toString(), t);
-    	
-      return NullValue.NULL;
-    }
-
-    if (cl == null)
-      return null;
-    
-    ArrayValue varArray = new ArrayValueImpl();
-
-    for (Map.Entry<StringValue,Expr> entry : cl.getClassVars().entrySet()) {
-      Value key = entry.getKey();
-      Value value = entry.getValue().eval(env);
-    	
-      varArray.append(key, value);
-    }
-    
-    return varArray;
-  }
-  
-  /**
-   * Returns an array of method names and values
-   *
-   * @param className the name of the class
-   * 
-   * @return an array of method names and values
-   * 
-   * @throws errorException
-   */
-  public static Value get_class_methods(Env env, String className)
-  {
-    // php/1j11
-  	
-    QuercusClass cl = null;
-    
-    try {
-      cl = env.getClass(className);
-    }
-    catch (Exception t) {
-      log.log(Level.WARNING, t.toString(), t);
-    	
-      return NullValue.NULL;
-    }
-
-    if (cl == null)
-      return null;
-    
-    ArrayValue methArray = new ArrayValueImpl();
-    
-    for (Map.Entry<String, AbstractFunction> entry: cl.getClassMethods()) {
-      Value key = StringValue.create(entry.getKey());
-    	
-      methArray.append(key);
-    }
-    
-    return methArray;
   }
 }

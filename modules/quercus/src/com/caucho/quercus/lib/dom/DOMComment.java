@@ -29,19 +29,29 @@
 
 package com.caucho.quercus.lib.dom;
 
+import com.caucho.quercus.env.Env;
 import com.caucho.quercus.module.Optional;
-import com.caucho.xml.QComment;
+
+import org.w3c.dom.Comment;
 
 public class DOMComment
-  extends QComment
+  extends DOMCharacterData<Comment>
 {
-  public DOMComment(@Optional String content)
+  public static DOMComment __construct(Env env, @Optional String value)
   {
-    super(content);
+    DOMComment comment = getImpl(env).createComment();
+
+    if (value != null && value.length() > 0)
+      comment.setNodeValue(value);
+
+    return comment;
   }
 
-  DOMComment(DOMDocument owner, String content)
+  DOMComment(DOMImplementation impl, Comment delegate)
   {
-    super(owner, content);
+    super(impl, delegate);
   }
+
+
+  // no methods
 }

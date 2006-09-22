@@ -29,20 +29,68 @@
 
 package com.caucho.quercus.lib.dom;
 
+import com.caucho.quercus.env.Env;
 import com.caucho.quercus.module.Optional;
-import com.caucho.xml.QAttr;
-import com.caucho.xml.QName;
+
+import org.w3c.dom.Attr;
+import org.w3c.dom.Element;
 
 public class DOMAttr
-  extends QAttr
+  extends DOMNode<Attr>
 {
-  public DOMAttr(String name, @Optional String textContent)
+  public static DOMAttr __construct(Env env, String name, @Optional String value)
   {
-    super(new QName(name), textContent);
+    DOMAttr attr = getImpl(env).createAttr(name);
+
+    if (value != null && value.length() > 0)
+      attr.setNodeValue(value);
+
+    return attr;
   }
 
-  DOMAttr(DOMDocument owner, QName qname)
+  DOMAttr(DOMImplementation impl, Attr delegate)
   {
-    super(owner, qname);
+    super(impl, delegate);
+  }
+
+  public String getName()
+  {
+    return _delegate.getName();
+  }
+
+  public Element getOwnerElement()
+  {
+    return wrap(_delegate.getOwnerElement());
+  }
+
+  public DOMTypeInfo getSchemaTypeInfo()
+  {
+    return wrap(_delegate.getSchemaTypeInfo());
+  }
+
+  public boolean getSpecified()
+  {
+    return _delegate.getSpecified();
+  }
+
+  public String getValue()
+  {
+    return _delegate.getValue();
+  }
+
+  public boolean isId()
+  {
+    return _delegate.isId();
+  }
+
+  public void setValue(String value)
+    throws DOMException
+  {
+    try {
+      _delegate.setValue(value);
+    }
+    catch (org.w3c.dom.DOMException ex) {
+      throw wrap(ex);
+    }
   }
 }

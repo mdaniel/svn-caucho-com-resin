@@ -29,18 +29,22 @@
 
 package com.caucho.quercus.lib.dom;
 
-import com.caucho.xml.QEntityReference;
+import com.caucho.quercus.env.Env;
+
+import org.w3c.dom.EntityReference;
 
 public class DOMEntityReference
-  extends QEntityReference
+  extends DOMNode<EntityReference>
 {
-  public DOMEntityReference(String name)
+  public static DOMEntityReference __construct(Env env, String name)
   {
-    super(name);
+    return getImpl(env).createEntityReference(name);
   }
 
-  DOMEntityReference(DOMDocument owner, String name)
+  DOMEntityReference(DOMImplementation impl, EntityReference delegate)
   {
-    super(owner, name);
+    super(impl, delegate);
   }
+
+  // no methods
 }

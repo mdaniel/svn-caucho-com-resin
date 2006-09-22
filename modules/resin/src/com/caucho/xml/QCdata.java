@@ -35,14 +35,9 @@ import org.w3c.dom.Text;
 import java.io.IOException;
 
 public class QCdata extends QText implements CDATASection {
-  QCdata(String data)
+  public QCdata(String data)
   {
     super(data);
-  }
-
-  protected QCdata(QDocument owner, String data)
-  {
-    super(owner, data);
   }
 
   public String getNodeName() { return "#cdata-section"; }

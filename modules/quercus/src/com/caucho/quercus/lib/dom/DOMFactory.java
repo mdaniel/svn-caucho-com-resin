@@ -29,43 +29,42 @@
 
 package com.caucho.quercus.lib.dom;
 
-import org.w3c.dom.DocumentType;
+import org.w3c.dom.*;
+import org.xml.sax.SAXException;
 
-public class DOMDocumentType
-  extends DOMNode<DocumentType>
-{
-  DOMDocumentType(DOMImplementation impl, DocumentType delegate)
-  {
-    super(impl, delegate);
-  }
+import java.io.InputStream;
+import java.io.IOException;
 
-  public DOMNamedNodeMap getEntities()
-  {
-    return wrap(_delegate.getEntities());
-  }
+public interface DOMFactory {
+  Attr createAttr(String name);
 
-  public String getInternalSubset()
-  {
-    return _delegate.getInternalSubset();
-  }
+  Comment createComment();
 
-  public String getName()
-  {
-    return _delegate.getName();
-  }
+  Document createDocument();
 
-  public DOMNamedNodeMap getNotations()
-  {
-    return wrap(_delegate.getNotations());
-  }
+  Document createDocument(DocumentType docType);
 
-  public String getPublicId()
-  {
-    return _delegate.getPublicId();
-  }
+  DocumentType createDocumentType(String qualifiedName);
 
-  public String getSystemId()
-  {
-    return _delegate.getSystemId();
-  }
+  DocumentType createDocumentType(String qualifiedName,
+                                  String publicId,
+                                  String systemId);
+
+  Element createElement(String name);
+
+  Element createElement(String name, String namespace);
+
+  EntityReference createEntityReference(String name);
+
+  ProcessingInstruction createProcessingInstruction(String name);
+
+  Text createText();
+
+  org.w3c.dom.DOMImplementation getImplementation();
+
+  void parseXMLDocument(Document document, InputStream is, String path)
+    throws IOException, SAXException;
+
+  void parseHTMLDocument(Document document, InputStream is, String path)
+    throws IOException, SAXException;
 }

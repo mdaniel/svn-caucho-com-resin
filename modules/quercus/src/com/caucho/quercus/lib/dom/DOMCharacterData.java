@@ -29,60 +29,87 @@
 
 package com.caucho.quercus.lib.dom;
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.module.Optional;
+import org.w3c.dom.CharacterData;
 
-import org.w3c.dom.Text;
-
-public class DOMText
-  extends DOMNode<Text>
+public class DOMCharacterData<T extends CharacterData>
+  extends DOMNode<T>
 {
-  public static DOMText __construct(Env env, @Optional String value)
-  {
-    DOMText text = getImpl(env).createText();
-
-    if (value != null && value.length() > 0)
-      text.setNodeValue(value);
-
-    return text;
-  }
-
-  DOMText(DOMImplementation impl, Text delegate)
+  protected DOMCharacterData(DOMImplementation impl, T delegate)
   {
     super(impl, delegate);
   }
 
-  public String getWholeText()
+  public void appendData(String arg)
+    throws DOMException
   {
-    return _delegate.getWholeText();
+    _delegate.appendData(arg);
   }
 
-  public boolean isElementContentWhitespace()
-  {
-    return _delegate.isElementContentWhitespace();
-  }
-
-  public boolean isWhitespaceInElementContent()
-  {
-    return _delegate.isElementContentWhitespace();
-  }
-
-  public DOMText replaceWholeText(String content)
+  public void deleteData(int offset, int count)
     throws DOMException
   {
     try {
-      return wrap(_delegate.replaceWholeText(content));
+      _delegate.deleteData(offset, count);
     }
     catch (org.w3c.dom.DOMException ex) {
       throw wrap(ex);
     }
   }
 
-  public DOMText splitText(int offset)
+  public String getData()
     throws DOMException
   {
     try {
-      return wrap(_delegate.splitText(offset));
+      return _delegate.getData();
+    }
+    catch (org.w3c.dom.DOMException ex) {
+      throw wrap(ex);
+    }
+  }
+
+  public int getLength()
+  {
+    return _delegate.getLength();
+  }
+
+  public void insertData(int offset, String arg)
+    throws DOMException
+  {
+    try {
+      _delegate.insertData(offset, arg);
+    }
+    catch (org.w3c.dom.DOMException ex) {
+      throw wrap(ex);
+    }
+  }
+
+  public void replaceData(int offset, int count, String arg)
+    throws DOMException
+  {
+    try {
+      _delegate.replaceData(offset, count, arg);
+    }
+    catch (org.w3c.dom.DOMException ex) {
+      throw wrap(ex);
+    }
+  }
+
+  public void setData(String data)
+    throws DOMException
+  {
+    try {
+      _delegate.setData(data);
+    }
+    catch (org.w3c.dom.DOMException ex) {
+      throw wrap(ex);
+    }
+  }
+
+  public String substringData(int offset, int count)
+    throws DOMException
+  {
+    try {
+      return _delegate.substringData(offset, count);
     }
     catch (org.w3c.dom.DOMException ex) {
       throw wrap(ex);

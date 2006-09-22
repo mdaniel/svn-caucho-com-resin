@@ -53,7 +53,27 @@ public class QElement extends QAttributedNode implements CauchoElement {
    *
    * @param name the element's name.
    */
-  protected QElement(QName name)
+  public QElement(String name)
+  {
+    _name = new QName(name);
+  }
+
+  /**
+   * Create a new named element.
+   *
+   * @param name the element's name.
+   */
+  public QElement(String name, String namespace)
+  {
+    _name = new QName(name, namespace);
+  }
+
+  /**
+   * Create a new named element.
+   *
+   * @param name the element's name.
+   */
+  public QElement(QName name)
   { 
     _name = name; 
   }

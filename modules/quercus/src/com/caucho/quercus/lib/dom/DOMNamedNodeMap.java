@@ -29,47 +29,80 @@
 
 package com.caucho.quercus.lib.dom;
 
-import org.w3c.dom.CDATASection;
+import org.w3c.dom.NamedNodeMap;
 
-public class DOMCDATASection
-  extends DOMCharacterData<CDATASection>
+public class DOMNamedNodeMap
+  extends DOMWrapper<NamedNodeMap>
 {
-  DOMCDATASection(DOMImplementation impl, CDATASection delegate)
+  DOMNamedNodeMap(DOMImplementation impl, NamedNodeMap delegate)
   {
     super(impl, delegate);
   }
 
-  public String getWholeText()
+  public int getLength()
   {
-    return _delegate.getWholeText();
+    return _delegate.getLength();
   }
 
-  public boolean isElementContentWhitespace()
+  public DOMNode getNamedItem(String name)
   {
-    return _delegate.isElementContentWhitespace();
+    return wrap(_delegate.getNamedItem(name));
   }
 
-  public boolean isWhitespaceInElementContent()
-  {
-    return _delegate.isElementContentWhitespace();
-  }
-
-  public DOMText replaceWholeText(String content)
+  public DOMNode getNamedItemNS(String namespaceURI, String localName)
     throws DOMException
   {
     try {
-      return wrap(_delegate.replaceWholeText(content));
+      return wrap(_delegate.getNamedItemNS(namespaceURI, localName));
     }
     catch (org.w3c.dom.DOMException ex) {
       throw wrap(ex);
     }
   }
 
-  public DOMText splitText(int offset)
+  public DOMNode item(int index)
+  {
+    return wrap(_delegate.item(index));
+  }
+
+  public DOMNode removeNamedItem(String name)
     throws DOMException
   {
     try {
-      return wrap(_delegate.splitText(offset));
+      return wrap(_delegate.removeNamedItem(name));
+    }
+    catch (org.w3c.dom.DOMException ex) {
+      throw wrap(ex);
+    }
+  }
+
+  public DOMNode removeNamedItemNS(String namespaceURI, String localName)
+    throws DOMException
+  {
+    try {
+      return wrap(_delegate.removeNamedItemNS(namespaceURI, localName));
+    }
+    catch (org.w3c.dom.DOMException ex) {
+      throw wrap(ex);
+    }
+  }
+
+  public DOMNode setNamedItem(DOMNode arg)
+    throws DOMException
+  {
+    try {
+      return wrap(_delegate.setNamedItem(arg.getDelegate()));
+    }
+    catch (org.w3c.dom.DOMException ex) {
+      throw wrap(ex);
+    }
+  }
+
+  public DOMNode setNamedItemNS(DOMNode arg)
+    throws DOMException
+  {
+    try {
+      return wrap(_delegate.setNamedItemNS(arg.getDelegate()));
     }
     catch (org.w3c.dom.DOMException ex) {
       throw wrap(ex);

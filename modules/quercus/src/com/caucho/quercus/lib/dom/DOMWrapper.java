@@ -19,52 +19,46 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
-package com.caucho.xml;
+package com.caucho.quercus.lib.dom;
 
-import org.w3c.dom.Comment;
-import org.w3c.dom.Node;
+import com.caucho.quercus.env.Env;
 
-import java.io.IOException;
+public class DOMWrapper<T> {
+  private final DOMImplementation _impl;
+  final T _delegate;
 
-public class QComment extends QCharacterData implements Comment {
-  public QComment()
+  protected static DOMImplementation getImpl(Env env)
   {
+    return DOMImplementation.get(env);
   }
 
-  public QComment(String data)
+  public DOMWrapper(DOMImplementation impl, T delegate)
   {
-    super(data);
+    _impl = impl;
+    _delegate = delegate;
   }
 
-  public String getNodeName() { return "#comment"; }
-  public short getNodeType() { return COMMENT_NODE; }
-
-  Node importNode(QDocument owner, boolean deep) 
+  protected DOMImplementation getImpl()
   {
-    QComment comment = new QComment(_data);
-    comment._owner = owner;
-    return comment;
+    return _impl;
   }
 
-  public void print(XmlPrinter os) throws IOException
+  protected <T> T wrap(Object obj)
   {
-    os.comment(getData());
+    return (T) _impl.getWrapper(obj);
   }
 
-  private Object writeReplace()
+  protected DOMException wrap(org.w3c.dom.DOMException ex)
   {
-    return new SerializedXml(this);
+    return (DOMException) _impl.getWrapper(ex);
   }
 
-  public String toString()
-  {
-    return "Comment[" + getData() + "]";
-  }
 }

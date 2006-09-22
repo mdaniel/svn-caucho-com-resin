@@ -40,14 +40,15 @@ abstract class QCharacterData extends QAbstractNode implements CharacterData {
   /**
    * Creates new character data with initial data.
    */
-  QCharacterData(String data)
+  QCharacterData()
   {
-    _data = data;
   }
 
-  QCharacterData(QDocument owner, String data)
+  /**
+   * Creates new character data with initial data.
+   */
+  QCharacterData(String data)
   {
-    super(owner);
     _data = data;
   }
 

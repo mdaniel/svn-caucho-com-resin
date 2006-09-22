@@ -36,50 +36,52 @@ import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.TempBufferStringValue;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.module.Construct;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.ReturnNullAsFalse;
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.StringStream;
 import com.caucho.vfs.TempStream;
 import com.caucho.vfs.WriteStream;
-import com.caucho.xml.Html;
-import com.caucho.xml.QDocument;
-import com.caucho.xml.QDocumentType;
-import com.caucho.xml.QName;
-import com.caucho.xml.Xml;
 import com.caucho.xml.XmlPrinter;
 
-import org.w3c.dom.DOMConfiguration;
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
+import org.w3c.dom.Document;
 
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DOMDocument
-  extends QDocument
+  extends DOMNode<Document>
 {
+  private final static L10N L = new L10N(DOMDocument.class);
   private final static Logger log = Logger.getLogger(DOMDocument.class.getName());
 
   private String _encoding;
 
-  @Construct
-  public DOMDocument(@Optional("'1.0'") String version, @Optional String encoding)
+  public static DOMDocument __construct(Env env, @Optional("'1.0'") String version, @Optional String encoding)
   {
+    DOMDocument document = getImpl(env).createDocument();
+
     if (version != null && version.length() > 0)
-      setXmlVersion(version);
+      document.setVersion(version);
 
     if (encoding != null && encoding.length() > 0)
-      setEncoding(encoding);
+      document.setEncoding(encoding);
+
+    return document;
   }
 
-  DOMDocument(DOMImplementation implementation)
+  public void setVersion(String version)
   {
-    super(implementation.getQDOMImplementation());
+    _delegate.setXmlVersion(version);
+  }
+
+  DOMDocument(DOMImplementation impl, Document document)
+  {
+    super(impl, document);
   }
 
   public String getEncoding()
@@ -92,9 +94,180 @@ public class DOMDocument
     _encoding = encoding;
   }
 
+  public DOMNode adoptNode(DOMNode source)
+    throws DOMException
+  {
+    return wrap(_delegate.adoptNode(source.getDelegate()));
+  }
+
+  public DOMAttr createAttribute(String name)
+    throws DOMException
+  {
+    try {
+      return wrap(_delegate.createAttribute(name));
+    }
+    catch (org.w3c.dom.DOMException ex) {
+      throw wrap(ex);
+    }
+  }
+
+  public DOMAttr createAttributeNS(String namespaceURI, String qualifiedName)
+    throws DOMException
+  {
+    try {
+      return wrap(_delegate.createAttributeNS(namespaceURI, qualifiedName));
+    }
+    catch (org.w3c.dom.DOMException ex) {
+      throw wrap(ex);
+    }
+  }
+
+  public DOMCDATASection createCDATASection(String data)
+  {
+    return wrap(_delegate.createCDATASection(data));
+  }
+
+  public DOMComment createComment(String data)
+  {
+    return wrap(_delegate.createComment(data));
+  }
+
+  public DOMDocumentFragment createDocumentFragment()
+  {
+    return wrap(_delegate.createDocumentFragment());
+  }
+
+  public DOMElement createElement(String tagName)
+    throws DOMException
+  {
+    try {
+      return wrap(_delegate.createElement(tagName));
+    }
+    catch (org.w3c.dom.DOMException ex) {
+      throw wrap(ex);
+    }
+  }
+
+  public DOMElement createElement(String tagName, String textContent)
+    throws DOMException
+  {
+    try {
+      DOMElement element = createElement(tagName);
+
+      element.setTextContent(textContent);
+
+      return element;
+    }
+    catch (org.w3c.dom.DOMException ex) {
+      throw wrap(ex);
+    }
+  }
+
+  public DOMElement createElementNS(String namespaceURI, String tagName)
+    throws DOMException
+  {
+    try {
+      return wrap(_delegate.createElementNS(namespaceURI, tagName));
+    }
+    catch (org.w3c.dom.DOMException ex) {
+      throw wrap(ex);
+    }
+  }
+
+  public DOMElement createElementNS(String namespaceURI,
+                                    String tagName,
+                                    String textContent)
+    throws DOMException
+  {
+    try {
+      DOMElement element = createElementNS(namespaceURI, tagName);
+
+      element.setTextContent(textContent);
+
+      return element;
+    }
+    catch (org.w3c.dom.DOMException ex) {
+      throw wrap(ex);
+    }
+  }
+
+  public DOMEntityReference createEntityReference(String name)
+    throws DOMException
+  {
+    try {
+      return wrap(_delegate.createEntityReference(name));
+    }
+    catch (org.w3c.dom.DOMException ex) {
+      throw wrap(ex);
+    }
+  }
+
+  public DOMProcessingInstruction createProcessingInstruction(String target)
+    throws DOMException
+  {
+    try {
+      return createProcessingInstruction(target, null);
+    }
+    catch (org.w3c.dom.DOMException ex) {
+      throw wrap(ex);
+    }
+  }
+
+  public DOMProcessingInstruction createProcessingInstruction(String target,
+                                                              String data)
+    throws DOMException
+  {
+    try {
+      return wrap(_delegate.createProcessingInstruction(target, data));
+    }
+    catch (org.w3c.dom.DOMException ex) {
+      throw wrap(ex);
+    }
+  }
+
+  public DOMText createTextNode(String data)
+  {
+    return wrap(_delegate.createTextNode(data));
+  }
+
   public DOMConfiguration getConfig()
   {
     throw new UnimplementedException();
+  }
+
+  public DOMDocumentType getDoctype()
+  {
+    return wrap(_delegate.getDoctype());
+  }
+
+  public DOMElement getDocumentElement()
+  {
+    return wrap(_delegate.getDocumentElement());
+  }
+
+  public String getDocumentURI()
+  {
+    return _delegate.getDocumentURI();
+  }
+
+  public DOMConfiguration getDomConfig()
+  {
+    return wrap(_delegate.getDomConfig());
+  }
+
+  public DOMElement getElementById(String elementId)
+  {
+    return wrap(_delegate.getElementById(elementId));
+  }
+
+  public DOMNodeList getElementsByTagName(String name)
+  {
+    return wrap(_delegate.getElementsByTagName(name));
+  }
+
+  public DOMNodeList getElementsByTagNameNS(String uri, String name)
+  {
+    return wrap(_delegate.getElementsByTagNameNS(uri, name));
   }
 
   public boolean getFormatOutput()
@@ -102,17 +275,17 @@ public class DOMDocument
     throw new UnimplementedException();
   }
 
-  public void setFormatOutput(boolean formatOutput)
+  public DOMImplementation getImplementation()
   {
-    throw new UnimplementedException();
+    return getImpl();
+  }
+
+  public String getInputEncoding()
+  {
+    return _delegate.getInputEncoding();
   }
 
   public boolean getPreserveWhiteSpace()
-  {
-    throw new UnimplementedException();
-  }
-
-  public void setPreserveWhiteSpace(boolean preserveWhiteSpace)
   {
     throw new UnimplementedException();
   }
@@ -122,27 +295,17 @@ public class DOMDocument
     throw new UnimplementedException();
   }
 
-  public void setRecover(boolean recover)
-  {
-    throw new UnimplementedException();
-  }
-
   public boolean getResolveExternals()
   {
     throw new UnimplementedException();
   }
 
-  public void setResolveExternals(boolean resolveExternals)
+  public boolean getStrictErrorChecking()
   {
-    throw new UnimplementedException();
+    return _delegate.getStrictErrorChecking();
   }
 
   public boolean getSubstituteEntities()
-  {
-    throw new UnimplementedException();
-  }
-
-  public void setSubstituteEntities(boolean substituteEntities)
   {
     throw new UnimplementedException();
   }
@@ -152,143 +315,45 @@ public class DOMDocument
     throw new UnimplementedException();
   }
 
-  public void setValidateOnParse(boolean validateOnParse)
+  public String getVersion()
   {
-    throw new UnimplementedException();
+    return _delegate.getXmlVersion();
   }
 
-  public DOMAttr createAttribute(String name)
+  public String getXmlEncoding()
+  {
+    return _delegate.getXmlEncoding();
+  }
+
+  public boolean getXmlStandalone()
+  {
+    return _delegate.getXmlStandalone();
+  }
+
+  public String getXmlVersion()
+  {
+    return _delegate.getXmlVersion();
+  }
+
+  public DOMNode importNode(DOMNode node)
+  {
+    return importNode(node, false);
+  }
+
+  public DOMNode importNode(DOMNode importedNode, boolean deep)
     throws DOMException
   {
-    /** XXX:
-     if (! isNameValid(name))
-     throw new QDOMException(DOMException.INVALID_CHARACTER_ERR,
-     "illegal attribute `" + name + "'");
-     */
-
-    QName qname = new QName(null, name, null);
-
-    return new DOMAttr(this, qname);
-  }
-
-  public DOMAttr createAttributeNS(String namespaceURI, String qualifiedName)
-    throws DOMException
-  {
-    QName qname = createName(namespaceURI, qualifiedName);
-
-    validateName(qname);
-    addNamespace(qname);
-
-    return new DOMAttr(this, qname);
-  }
-  public DOMCDATASection createCDATASection(String data)
-  {
-    return new DOMCDATASection(this, data);
-  }
-
-  public DOMComment createComment(String data)
-  {
-    return new DOMComment(this, data);
-  }
-
-  public DOMDocumentFragment createDocumentFragment()
-  {
-    return new DOMDocumentFragment(this);
-  }
-
-  public DOMElement createElement(String tagName)
-    throws DOMException
-  {
-    /**
-     if (! isNameValid(tagName))
-     throw new QDOMException(DOMException.INVALID_CHARACTER_ERR,
-     "illegal tag `" + tagName + "'");
-     */
-    return new DOMElement(this, createName(null, tagName), null);
-  }
-
-  public DOMElement createElement(String tagName, String textContent)
-    throws DOMException
-  {
-    /**
-     if (! isNameValid(tagName))
-     throw new QDOMException(DOMException.INVALID_CHARACTER_ERR,
-     "illegal tag `" + tagName + "'");
-     */
-    return new DOMElement(this, createName(null, tagName), textContent);
-  }
-
-  public DOMElement createElementNS(String namespaceURI, String name)
-    throws DOMException
-  {
-    QName qname = createName(namespaceURI, name);
-
-    validateName(qname);
-    addNamespace(qname);
-
-    return new DOMElement(this, qname, null);
-  }
-
-  public DOMElement createElementNS(String namespaceURI,
-                                    String name,
-                                    String textContent)
-    throws DOMException
-  {
-    QName qname = createName(namespaceURI, name);
-
-    validateName(qname);
-    addNamespace(qname);
-
-    return new DOMElement(this, qname, textContent);
-  }
-
-  public DOMEntityReference createEntityReference(String name)
-    throws DOMException
-  {
-    /**
-     if (! isNameValid(name))
-     throw new QDOMException(DOMException.INVALID_CHARACTER_ERR,
-     "illegal entityReference `" + name + "'");
-     */
-
-    return new DOMEntityReference(this, name);
-  }
-
-  public DOMProcessingInstruction createProcessingInstruction(String target)
-    throws DOMException
-  {
-    return createProcessingInstruction(target, null);
-  }
-
-  public DOMProcessingInstruction createProcessingInstruction(String target,
-                                                              String data)
-    throws DOMException
-  {
-    /** XXX:
-     if (target == null || target.length() == 0)
-     throw new QDOMException(DOMException.INVALID_CHARACTER_ERR,
-     L.l("Empty processing instruction name.  The processing instruction syntax is: <?name ... ?>"));
-
-     if (! isNameValid(target))
-     throw new QDOMException(DOMException.INVALID_CHARACTER_ERR,
-     L.l("`{0}' is an invalid processing instruction name.  The processing instruction syntax is: <?name ... ?>", target));
-     */
-
-    return new DOMProcessingInstruction(this, target, data);
-  }
-
-  public DOMText createTextNode(String data)
-  {
-    return new DOMText(this, data);
-  }
-
-  public Node importNode(Node node)
-  {
-    throw new UnimplementedException();
+    try {
+      return wrap(_delegate.importNode(importedNode.getDelegate(), deep));
+    }
+    catch (org.w3c.dom.DOMException ex) {
+      throw wrap(ex);
+    }
   }
 
   // XXX: also can be called statically, returns a DOMDocument in that case
   public boolean load(Env env, Path path, @Optional Value options)
+    throws IOException
   {
     if (options != null)
       env.stub(L.l("`{0}' is ignored", "options"));
@@ -298,9 +363,7 @@ public class DOMDocument
     try {
       is = path.openRead();
 
-      Xml xml = new Xml();
-
-      xml.parseDocument(this, is, path.getPath());
+      getImpl().parseXMLDocument(_delegate, is, path.getPath());
     }
     catch (SAXException ex) {
       env.warning(ex);
@@ -334,14 +397,16 @@ public class DOMDocument
     ReadStream is = StringStream.open(source);
 
     try {
-      Html html = new Html();
+      getImpl().parseHTMLDocument(_delegate, is, null);
 
-      html.parseDocument(this, is, null);
+      _delegate.setXmlStandalone(true);
 
-      setStandalone(true);
-      setDoctype(new QDocumentType("html",
-                                   "-//W3C//DTD HTML 4.0 Transitional//EN",
-                                   "http://www.w3.org/TR/REC-html40/loose.dtd"));
+      /**
+       * XXX:
+       _delegate.setDoctype(new QDocumentType("html",
+       "-//W3C//DTD HTML 4.0 Transitional//EN",
+       "http://www.w3.org/TR/REC-html40/loose.dtd"));
+       */
     }
     catch (SAXException ex) {
       env.warning(ex);
@@ -373,14 +438,15 @@ public class DOMDocument
     try {
       is = path.openRead();
 
-      Html html = new Html();
+      getImpl().parseHTMLDocument(_delegate, is, path.getPath());
 
-      html.parseDocument(this, is, path.getPath());
-
-      setStandalone(true);
-      setDoctype(new QDocumentType("html",
-                                   "-//W3C//DTD HTML 4.0 Transitional//EN",
-                                   "http://www.w3.org/TR/REC-html40/loose.dtd"));
+      _delegate.setXmlStandalone(true);
+      /**
+       * XXX:
+       _delegate.setDoctype(new QDocumentType("html",
+       "-//W3C//DTD HTML 4.0 Transitional//EN",
+       "http://www.w3.org/TR/REC-html40/loose.dtd"));
+       */
     }
     catch (SAXException ex) {
       env.warning(ex);
@@ -413,9 +479,7 @@ public class DOMDocument
     ReadStream is = StringStream.open(source);
 
     try {
-      Xml xml = new Xml();
-
-      xml.parseDocument(this, is, null);
+      getImpl().parseXMLDocument(_delegate, is, null);
     }
     catch (SAXException ex) {
       env.warning(ex);
@@ -440,6 +504,11 @@ public class DOMDocument
     return true;
   }
 
+  public void normalizeDocument()
+  {
+    _delegate.normalizeDocument();
+  }
+
   public boolean relaxNGValidate(String rngFilename)
   {
     throw new UnimplementedException();
@@ -450,25 +519,26 @@ public class DOMDocument
     throw new UnimplementedException();
   }
 
-  private void saveToStream(WriteStream os, boolean isHTML)
-    throws IOException
+  public DOMNode renameNode(DOMNode node, String namespaceURI, String qualifiedName)
+    throws DOMException
   {
-    XmlPrinter printer = new XmlPrinter(os);
+    try {
+      return wrap(_delegate.renameNode(node.getDelegate(), namespaceURI, qualifiedName));
+    }
+    catch (org.w3c.dom.DOMException ex) {
+      throw wrap(ex);
+    }
+  }
 
-    printer.setMethod(isHTML ? "html" : "xml");
+  /**
+   * @return the number of bytes written, or FALSE for an error
+   */
+  public Value save(Env env, Path path, @Optional Value options)
+  {
+    if (options != null)
+      env.stub(L.l("`{0}' is ignored", "options"));
 
-    printer.setPrintDeclaration(true);
-
-    printer.setVersion(getXmlVersion());
-    printer.setEncoding(_encoding);
-
-    if (getStandalone())
-      printer.setStandalone("yes");
-
-    printer.printXml(this);
-
-    if (hasChildNodes())
-      os.println();
+    return saveToFile(env, path, false);
   }
 
   private Value saveToFile(Env env, Path path, boolean isHTML)
@@ -478,7 +548,6 @@ public class DOMDocument
     try {
       os = path.openWrite();
       saveToStream(os, isHTML);
-
     }
     catch (IOException ex) {
       env.warning(ex);
@@ -496,6 +565,33 @@ public class DOMDocument
     }
 
     return new LongValue(path.getLength());
+  }
+
+  private void saveToStream(WriteStream os, boolean isHTML)
+    throws IOException
+  {
+    XmlPrinter printer = new XmlPrinter(os);
+
+    printer.setMethod(isHTML ? "html" : "xml");
+
+    printer.setPrintDeclaration(true);
+
+    printer.setVersion(_delegate.getXmlVersion());
+    printer.setEncoding(_encoding);
+
+    if (_delegate.getXmlStandalone())
+      printer.setStandalone("yes");
+
+    printer.printXml(_delegate);
+
+    if (hasChildNodes())
+      os.println();
+  }
+
+  @ReturnNullAsFalse
+  public StringValue saveHTML(Env env)
+  {
+    return saveToString(env, true);
   }
 
   private StringValue saveToString(Env env, boolean isHTML)
@@ -526,23 +622,6 @@ public class DOMDocument
   /**
    * @return the number of bytes written, or FALSE for an error
    */
-  public Value save(Env env, Path path, @Optional Value options)
-  {
-    if (options != null)
-      env.stub(L.l("`{0}' is ignored", "options"));
-
-    return saveToFile(env, path, false);
-  }
-
-  @ReturnNullAsFalse
-  public StringValue saveHTML(Env env)
-  {
-    return saveToString(env, true);
-  }
-
-  /**
-   * @return the number of bytes written, or FALSE for an error
-   */
 
   public Value saveHTMLFile(Env env, Path path)
   {
@@ -565,6 +644,58 @@ public class DOMDocument
     throw new UnimplementedException();
   }
 
+  public void setDocumentURI(String documentURI)
+  {
+    _delegate.setDocumentURI(documentURI);
+  }
+
+  public void setFormatOutput(boolean formatOutput)
+  {
+    throw new UnimplementedException();
+  }
+
+  public void setPreserveWhiteSpace(boolean preserveWhiteSpace)
+  {
+    throw new UnimplementedException();
+  }
+
+  public void setRecover(boolean recover)
+  {
+    throw new UnimplementedException();
+  }
+
+  public void setResolveExternals(boolean resolveExternals)
+  {
+    throw new UnimplementedException();
+  }
+
+  public void setStrictErrorChecking(boolean strictErrorChecking)
+  {
+    _delegate.setStrictErrorChecking(strictErrorChecking);
+  }
+
+  public void setSubstituteEntities(boolean substituteEntities)
+  {
+    throw new UnimplementedException();
+  }
+
+  public void setValidateOnParse(boolean validateOnParse)
+  {
+    throw new UnimplementedException();
+  }
+
+  public void setXmlStandalone(boolean xmlStandalone)
+    throws DOMException
+  {
+    _delegate.setXmlStandalone(xmlStandalone);
+  }
+
+  public void setXmlVersion(String xmlVersion)
+    throws DOMException
+  {
+    _delegate.setXmlVersion(xmlVersion);
+  }
+
   public boolean validate()
   {
     throw new UnimplementedException();
@@ -576,10 +707,5 @@ public class DOMDocument
       env.stub(L.l("`{0}' is ignored", "options"));
 
     throw new UnimplementedException();
-  }
-
-  public String toString()
-  {
-    return "DOMDocument[]";
   }
 }

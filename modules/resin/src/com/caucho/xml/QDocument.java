@@ -71,6 +71,12 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
     _owner = this;
   }
 
+  public QDocument(DocumentType docType)
+  {
+    _owner = this;
+    setDoctype(docType);
+  }
+
   public QDocument(QDOMImplementation impl)
   {
     _implementation = impl;
@@ -388,7 +394,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
     return elt;
   }
 
-  protected void validateName(QName qname)
+  public void validateName(QName qname)
     throws DOMException
   {
     String prefix = qname.getPrefix();

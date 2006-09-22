@@ -38,15 +38,13 @@ public class QProcessingInstruction extends QNode
   String _name;
   String _data;
 
-  protected QProcessingInstruction(String name, String data)
+  public QProcessingInstruction(String name)
   {
     _name = name.intern();
-    _data = data;
   }
 
-  protected QProcessingInstruction(QDocument owner, String name, String data)
+  public QProcessingInstruction(String name, String data)
   {
-    super(owner);
     _name = name.intern();
     _data = data;
   }

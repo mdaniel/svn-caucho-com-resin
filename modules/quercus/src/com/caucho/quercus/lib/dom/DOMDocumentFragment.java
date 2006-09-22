@@ -29,13 +29,15 @@
 
 package com.caucho.quercus.lib.dom;
 
-import com.caucho.xml.QDocumentFragment;
+import org.w3c.dom.DocumentFragment;
 
 public class DOMDocumentFragment
-  extends QDocumentFragment
+  extends DOMNode<DocumentFragment>
 {
-  DOMDocumentFragment(DOMDocument owner)
+  DOMDocumentFragment(DOMImplementation impl, DocumentFragment delegate)
   {
-    super(owner);
+    super(impl, delegate);
   }
+
+  // no methods
 }

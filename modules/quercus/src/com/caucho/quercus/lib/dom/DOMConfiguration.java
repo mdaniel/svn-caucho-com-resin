@@ -19,52 +19,53 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
-package com.caucho.xml;
+package com.caucho.quercus.lib.dom;
 
-import org.w3c.dom.Comment;
-import org.w3c.dom.Node;
-
-import java.io.IOException;
-
-public class QComment extends QCharacterData implements Comment {
-  public QComment()
+public class DOMConfiguration
+  extends DOMWrapper<org.w3c.dom.DOMConfiguration>
+{
+  DOMConfiguration(DOMImplementation impl, org.w3c.dom.DOMConfiguration delegate)
   {
+    super(impl, delegate);
   }
 
-  public QComment(String data)
+  public boolean canSetParameter(String name, Object value)
   {
-    super(data);
+    return _delegate.canSetParameter(name, value);
   }
 
-  public String getNodeName() { return "#comment"; }
-  public short getNodeType() { return COMMENT_NODE; }
-
-  Node importNode(QDocument owner, boolean deep) 
+  public Object getParameter(String name)
+    throws DOMException
   {
-    QComment comment = new QComment(_data);
-    comment._owner = owner;
-    return comment;
+    try {
+      return wrap(_delegate.getParameter(name));
+    }
+    catch (org.w3c.dom.DOMException ex) {
+      throw wrap(ex);
+    }
   }
 
-  public void print(XmlPrinter os) throws IOException
+  public DOMStringList getParameterNames()
   {
-    os.comment(getData());
+    return wrap(_delegate.getParameterNames());
   }
 
-  private Object writeReplace()
+  public void setParameter(String name, Object value)
+    throws DOMException
   {
-    return new SerializedXml(this);
-  }
-
-  public String toString()
-  {
-    return "Comment[" + getData() + "]";
+    try {
+      _delegate.setParameter(name, value);
+    }
+    catch (org.w3c.dom.DOMException ex) {
+      throw wrap(ex);
+    }
   }
 }
