@@ -34,8 +34,8 @@ interface.</p>
 <p>At the minimal level, PDO can be reduced to three statements:</p>
 <ol>
 <li>Creating a PDO object with <code>new PDO(<var>url</var>)</code></li>
-<li>Querying a SQL statement with results with <code>$pdo->query(sql)</code></li>
-<li>Executing a SQL statement with <code>$pdo->exec(sql)</code></li>
+<li>Querying a SQL statement with results with <code>$pdo->query(<var>sql</var>)</code></li>
+<li>Executing a SQL statement with <code>$pdo->exec(<var>sql</var>)</code></li>
 </ol>
 
 <p>PDO has several variations on those three statements, but you can always
@@ -296,6 +296,8 @@ In this case, we'll raise the prices of some of the brooms.  As
 with the creation, PDO's updates use the <code>exec</code> and
 <code>prepare</code> methods.</p>
 
+<s2 title="Transactions">
+
 <p>In this case, though, we'd like some extra reliability, so we'll
 add some transaction support.  Transactions are a generalized lock
 in a database, allowing multiple statements to execute atomically.  That
@@ -334,6 +336,8 @@ foreach ($brooms as $broom => $price) {
 
 $pdo->commit();
 </example>
+
+</s2>
 
 </s1>
 
