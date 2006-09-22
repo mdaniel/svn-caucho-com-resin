@@ -3085,16 +3085,16 @@ v   *
    * @param haystack the string to search in
    * @param needleV the string to search for
    */
-  public static Value strrpos(String haystack,
+  public static Value strrpos(StringValue haystack,
                               Value needleV,
                               @Optional Value offsetV)
   {
-    String needle;
+    StringValue needle;
 
     if (needleV instanceof StringValue)
-      needle = needleV.toString();
+      needle = needleV.toStringValue();
     else
-      needle = String.valueOf((char) needleV.toInt());
+      needle = StringValue.create((char) needleV.toInt());
 
     int offset;
 

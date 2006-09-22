@@ -38,7 +38,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Enumeration;
 
-import javax.mail.internet.MimeUtility;
 import javax.mail.MessagingException;
 import javax.mail.internet.HeaderTokenizer;
 import javax.mail.Header;
@@ -47,6 +46,7 @@ import javax.mail.internet.InternetHeaders;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.DefaultValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.NullValue;
@@ -139,57 +139,62 @@ public class UnicodeModule extends AbstractQuercusModule {
    */
   public static Value iconv_mime_decode_headers(Env env,
                        StringValue encoded_headers,
-                       @Optional("1") int mode,
+                       @Optional() int mode,
                        @Optional() String charset)
   {
     if (charset.length() == 0)
       charset = env.getIniString("iconv.internal_encoding");
 
-    ArrayValue headers = new ArrayValueImpl();
-
     try {
-      Enumeration<Header> enumeration = 
-          new InternetHeaders(encoded_headers.toInputStream()).getAllHeaders();
+      return decodeMimeHeaders(env, encoded_headers, charset);
 
-      while (enumeration.hasMoreElements()) {
-        Header header = enumeration.nextElement();
-
-        StringValue name = new StringValueImpl(decodeMime(header.getName()));
-        name = IconvUtility.encode(name, charset);
-
-        StringValue value = new StringValueImpl(decodeMime(header.getValue()));
-        value = IconvUtility.encode(value, charset);
-
-        Value val;
-        if ((val = headers.containsKey(name)) == null) {
-          headers.put(name, value);
-          continue;
-        }
-
-        ArrayValue inner;
-        if (val.isArray())
-          inner = val.toArrayValue(env);
-        else {
-          inner = new ArrayValueImpl();
-          inner.put(val);
-        }
-
-        inner.put(value);
-        headers.put(name, inner);
-      }
-
-      return headers;
-
-    } catch (MessagingException e) {
+    } catch (UnsupportedEncodingException e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(L.l(e.getMessage()));
 
-    } catch (UnsupportedEncodingException e) {
+    } catch (MessagingException e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(L.l(e.getMessage()));
     }
 
     return BooleanValue.FALSE;
+  }
+
+  private static Value decodeMimeHeaders(Env env,
+                              StringValue encodedHeaders,
+                              String charset)
+    throws MessagingException, UnsupportedEncodingException
+  {
+    ArrayValue headers = new ArrayValueImpl();
+
+    Enumeration<Header> enumeration = 
+        new InternetHeaders(encodedHeaders.toInputStream()).getAllHeaders();
+
+    while (enumeration.hasMoreElements()) {
+      Header header = enumeration.nextElement();
+
+      StringValue name = IconvUtility.decodeMime(header.getName(), charset);
+      StringValue val = IconvUtility.decodeMime(header.getValue(), charset);
+
+      Value headerName;
+      if ((headerName = headers.containsKey(name)) == null) {
+        headers.put(name, val);
+        continue;
+      }
+
+      ArrayValue inner;
+      if (headerName.isArray())
+        inner = headerName.toArrayValue(env);
+      else {
+        inner = new ArrayValueImpl();
+        inner.put(headerName);
+      }
+
+      inner.put(val);
+      headers.put(name, inner);
+    }
+
+    return headers;
   }
 
   /**
@@ -203,9 +208,9 @@ public class UnicodeModule extends AbstractQuercusModule {
    * @param charset to encode resultant 
    */
   public static Value iconv_mime_decode(Env env,
-                       StringValue encoded_header,
-                       @Optional("1") int mode,
-                       @Optional("") String charset)
+                              StringValue encoded_header,
+                              @Optional("1") int mode,
+                              @Optional("") String charset)
   {
     if (charset.length() == 0)
       charset = env.getIniString("iconv.internal_encoding");
@@ -219,10 +224,7 @@ public class UnicodeModule extends AbstractQuercusModule {
         return BooleanValue.FALSE;
       }
 
-      StringValue header =
-          new StringValueImpl(decodeMime(enumeration.nextElement()));
-
-      return IconvUtility.encode(header, charset); 
+      return IconvUtility.decodeMime(enumeration.nextElement(), charset);
 
     } catch (MessagingException e) {
       log.log(Level.FINE, e.getMessage(), e);
@@ -246,49 +248,48 @@ public class UnicodeModule extends AbstractQuercusModule {
    * @param preferences
    */
   public static Value iconv_mime_encode(Env env,
-                       StringValue field_name,
-                       StringValue field_value,
-                       @Optional() ArrayValue preferences)
+                              StringValue field_name,
+                              StringValue field_value,
+                              @Optional() ArrayValue preferences)
   {
     try {
       String scheme = "B";
       String lineBreakChars = "\r\n";
-      String inputCharset = env.getIniString("iconv.internal_encoding");
-      String outputCharset = inputCharset;
+      String inCharset = env.getIniString("iconv.internal_encoding");
+      String outCharset = inCharset;
       int lineLength = 76;
 
       if (preferences != null) {
         Value tmp = new StringValueImpl("scheme");
-        if ((tmp = preferences.get(tmp)) != UnsetValue.UNSET)
+        if ((tmp = preferences.get(tmp)).isset())
           scheme = tmp.toString();
 
         tmp = new StringValueImpl("line-break-chars");
-        if ((tmp = preferences.get(tmp)) != UnsetValue.UNSET)
+        if ((tmp = preferences.get(tmp)).isset())
           lineBreakChars = tmp.toString();
 
         tmp = new StringValueImpl("input-charset");
-        if ((tmp = preferences.get(tmp)) != UnsetValue.UNSET)
-          inputCharset = tmp.toString();
+        if ((tmp = preferences.get(tmp)).isset())
+          inCharset = tmp.toString();
 
         tmp = new StringValueImpl("output-charset");
-        if ((tmp = preferences.get(tmp)) != UnsetValue.UNSET)
-          outputCharset = tmp.toString();
+        if ((tmp = preferences.get(tmp)).isset())
+          outCharset = tmp.toString();
 
         tmp = new StringValueImpl("line-length");
-        if ((tmp = preferences.get(tmp)) != UnsetValue.UNSET) {
+        if ((tmp = preferences.get(tmp)).isset()) {
         if (tmp.isLongConvertible())
           lineLength = (int)tmp.toLong();
         }
       }
 
-      if (lineLength != 76 || ! "\r\n".equals(lineBreakChars))
-        throw new UnimplementedException("Specific options");
-
-      field_name = IconvUtility.decode(field_name, inputCharset);
-      field_value = IconvUtility.decode(field_value, inputCharset);
-
-      return encodeMime(env, field_name, field_value, lineBreakChars,
-          outputCharset, scheme, lineLength);
+      return IconvUtility.encodeMime(field_name,
+                                     field_value,
+                                     inCharset,
+                                     outCharset,
+                                     scheme,
+                                     lineBreakChars,
+                                     lineLength);
 
     } catch (UnsupportedEncodingException e) {
       log.log(Level.FINE, e.getMessage(), e);
@@ -342,7 +343,7 @@ public class UnicodeModule extends AbstractQuercusModule {
       charset = env.getIniString("iconv.internal_encoding");
 
     try {
-      return new LongValue(IconvUtility.stringLength(str, charset));
+      return new LongValue(strlen(str, charset));
 
     } catch (UnsupportedEncodingException e) {
       log.log(Level.FINE, "Cannot convert from " + charset, e);
@@ -373,7 +374,10 @@ public class UnicodeModule extends AbstractQuercusModule {
       charset = env.getIniString("iconv.internal_encoding");
 
     try {
-      int index = IconvUtility.indexOf(haystack, needle, offset, charset);
+      haystack = IconvUtility.decode(haystack, charset);
+      needle = IconvUtility.decode(needle, charset);
+
+      int index = haystack.indexOf(needle, offset);
 
       if (index < 0)
         return BooleanValue.FALSE;
@@ -409,7 +413,10 @@ public class UnicodeModule extends AbstractQuercusModule {
       charset = env.getIniString("iconv.internal_encoding");
 
     try {
-      int index = IconvUtility.lastIndexOf(haystack, needle, charset);
+      haystack = IconvUtility.decode(haystack, charset);
+      needle = IconvUtility.decode(needle, charset);
+
+      int index = haystack.lastIndexOf(needle);
 
       if (index < 0)
         return BooleanValue.FALSE;
@@ -439,24 +446,36 @@ public class UnicodeModule extends AbstractQuercusModule {
   public static Value iconv_substr(Env env,
                        StringValue str,
                        int offset,
-                       @Optional("2147483647") int length,
+                       @Optional("7fffffff") int length,
                        @Optional("") String charset)
   {
     try {
+
       if (charset.length() == 0)
         charset = env.getIniString("iconv.internal_encoding");
 
-      int strlen = IconvUtility.stringLength(str, charset);
+      str = IconvUtility.decode(str, charset);
 
+      int tail;
+      int strlen = str.length();
+
+      // Imitating PHP5 behavior
       if (offset < 0)
         offset = strlen + offset;
-      if (length < 0)
-        length = (strlen + length) - offset;
 
-      if (offset < 0 || length < 0)
+      if (length < 0)
+        tail = strlen + length;
+      else if (length > strlen - offset)
+        tail = strlen;
+      else
+        tail = offset + length;
+
+      if (offset < 0 || tail < offset)
         return StringValue.EMPTY;
 
-      return IconvUtility.decodeEncode(charset, charset, offset, length, str);
+      str = str.substring(offset, tail);
+
+      return IconvUtility.encode(str, charset);
 
     } catch (UnsupportedEncodingException e) {
       String error = "Cannot convert from " + charset;
@@ -481,13 +500,13 @@ public class UnicodeModule extends AbstractQuercusModule {
                        StringValue str)
   {
     try {
-      return IconvUtility.decodeEncode(in_charset, out_charset,
-          0, Integer.MAX_VALUE, str);
+      return IconvUtility.decodeEncode(str, in_charset, out_charset);
 
     } catch (UnsupportedEncodingException e) {
-      String error = "Cannot convert from " + in_charset + " to " + out_charset;
-      log.log(Level.FINE, error, e);
-      env.warning(L.l(error));
+
+      String msg = L.l("error converting {1} to {2}", in_charset, out_charset);
+      log.log(Level.FINE, msg, e);
+      env.warning(msg);
 
       return BooleanValue.FALSE;
     }
@@ -497,41 +516,13 @@ public class UnicodeModule extends AbstractQuercusModule {
                        StringValue contents,
                        int status)
   {
-    throw new UnimplementedException();
+    throw new UnimplementedException("ob_iconv_handler");
   }
 
-
-
-  /**
-   * Returns decoded Mime header/field.
-   */
-  private static String decodeMime(String word)
+  private static int strlen(StringValue str, String charset)
     throws UnsupportedEncodingException
   {
-    return MimeUtility.unfold(MimeUtility.decodeText(word));
-  }
-
-  /**
-   * Returns an encoded Mime header.
-   */
-  private static Value encodeMime(Env env,
-                       StringValue name,
-                       StringValue value,
-                       String lineBreakChars,
-                       String charset,
-                       String encoding,
-                       int lineLength)
-    throws UnsupportedEncodingException
-  {
-    StringBuilderValue sb = new StringBuilderValue();
-    sb.append(name);
-    sb.append(':');
-    sb.append(' ');
-
-    String word = MimeUtility.encodeWord(value.toString(), charset, encoding);
-    sb.append(MimeUtility.fold(sb.length(), word));
-
-    return sb;
+    return IconvUtility.decode(str, charset).length();
   }
 
   static {

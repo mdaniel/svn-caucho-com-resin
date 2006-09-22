@@ -29,24 +29,12 @@
 
 package com.caucho.quercus.lib.i18n;
 
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.Enumeration;
-
-import javax.mail.internet.MimeUtility;
-import javax.mail.MessagingException;
-import javax.mail.internet.HeaderTokenizer;
-import javax.mail.Header;
-import javax.mail.internet.InternetHeaders;
+import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.UnimplementedException;
 
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.BinaryValue;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
@@ -56,15 +44,13 @@ import com.caucho.quercus.env.StringInputStream;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.TempBufferStringValue;
+import com.caucho.quercus.env.UnicodeValue;
 import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.NotNull;
-
-import com.caucho.quercus.QuercusModuleException;
-import com.caucho.quercus.UnimplementedException;
 
 import com.caucho.util.L10N;
 import com.caucho.util.Base64;
@@ -76,56 +62,23 @@ import com.caucho.vfs.TempStream;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
+import java.io.InputStream;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.mail.internet.MimeUtility;
+
 public class IconvUtility {
-
-  public static int indexOf(StringValue haystack,
-                              StringValue needle,
-                              int offset,
-                              String charset)
-    throws UnsupportedEncodingException
-  {
-    haystack = decode(haystack, charset);
-    needle = decode(needle, charset);
-
-    return haystack.indexOf(needle, offset);
-  }
-
-  public static int lastIndexOf(StringValue haystack,
-                                  StringValue needle,
-                                  String charset)
-    throws UnsupportedEncodingException
-  {
-    haystack = decode(haystack, charset);
-    needle = decode(needle, charset);
-
-    return haystack.lastIndexOf(needle);
-  }
-
-  /**
-   * Returns the length of the string after decoding.
-   */
-  public static int stringLength(StringValue str, String charset)
-    throws UnsupportedEncodingException
-  {
-    int length = 0;
-
-    try {
-      Reader in = getReader(str, charset);
-
-      while (in.read() >= 0) {
-        length++;
-      }
-    } catch (IOException e) {
-      throw new QuercusModuleException(e.getMessage());
-    }
-
-    return length;
-  }
 
   /**
    * Decodes to specified charset.
    */
-  public static StringValue decode(StringValue bytes, String charset)
+  public static UnicodeValue decode(StringValue str, String charset)
     throws UnsupportedEncodingException
   {
     StringBuilderValue sb = new StringBuilderValue();
@@ -134,7 +87,7 @@ public class IconvUtility {
     char[] charBuf = tb.getBuffer();
 
     try {
-      Reader in = getReader(bytes, charset);
+      Reader in = getReader(str, charset);
 
       int sublen;
       while ((sublen = in.read(charBuf, 0, charBuf.length)) >= 0) {
@@ -154,7 +107,7 @@ public class IconvUtility {
   /**
    * Encodes chars to specified charset.
    */
-  public static StringValue encode(StringValue chars, String charset)
+  public static BinaryValue encode(StringValue chars, String charset)
     throws UnsupportedEncodingException
   {
     TempBuffer tb = TempBuffer.allocate();
@@ -181,25 +134,42 @@ public class IconvUtility {
     }
   }
 
+  public static BinaryValue decodeEncode(StringValue str,
+                              String inCharset,
+                              String outCharset)
+    throws UnsupportedEncodingException
+  {
+    return decodeEncode(str, inCharset, outCharset, 0, Integer.MAX_VALUE);
+  }
+
+  public static BinaryValue decodeEncode(StringValue str,
+                              String inCharset,
+                              String outCharset,
+                              int offset)
+    throws UnsupportedEncodingException
+  {
+    return decodeEncode(str, inCharset, outCharset, offset, Integer.MAX_VALUE);
+  }
+
   /**
    * Decodes and encodes to specified charsets at the same time.
    */
-  public static Value decodeEncode(String in_charset,
-                       String out_charset,
-                       int offset,
-                       int length,
-                       StringValue bytes)
+  public static BinaryValue decodeEncode(StringValue str,
+                              String inCharset,
+                              String outCharset,
+                              int offset,
+                              int length)
     throws UnsupportedEncodingException
   {
     TempCharBuffer tb = TempCharBuffer.allocate();
     char[] charBuf = tb.getBuffer();
 
     try {
-      Reader in = getReader(bytes, in_charset);
+      Reader in = getReader(str, inCharset);
 
       TempStream ts = new TempStream();
       WriteStream out = new WriteStream(ts);
-      out.setEncoding(out_charset);
+      out.setEncoding(outCharset);
 
       while (offset > 0) {
         if (in.read() < 0)
@@ -210,7 +180,8 @@ public class IconvUtility {
       int sublen;
 
       while (length > 0 &&
-          (sublen = in.read(charBuf, 0, charBuf.length)) >= 0) {
+             (sublen = in.read(charBuf, 0, charBuf.length)) >= 0) {
+
         sublen = Math.min(length, sublen);
 
         out.print(charBuf, 0, sublen);
@@ -228,6 +199,82 @@ public class IconvUtility {
       TempCharBuffer.free(tb);
     }
   }
+
+  /**
+   * Returns decoded Mime header/field.
+   */
+  public static BinaryValue decodeMime(CharSequence word, String charset)
+    throws UnsupportedEncodingException
+  {
+    StringValue str = new StringValueImpl(
+            MimeUtility.unfold(MimeUtility.decodeText(word.toString())));
+
+    return encode(str, charset);
+  }
+
+  public static Value encodeMime(StringValue name,
+                              StringValue value,
+                              String inCharset,
+                              String outCharset,
+                              String scheme)
+    throws UnsupportedEncodingException
+  {
+    return encodeMime(name, value, inCharset, outCharset, scheme, "\r\n", 76);
+  }
+
+  /**
+   * Encodes a MIME header.
+   *
+   * XXX: preferences
+   *
+   * @param field_name header field name
+   * @param field_value header field value
+   * @param preferences
+   */
+  /**
+   * Returns an encoded Mime header.
+   */
+  public static StringValue encodeMime(StringValue name,
+                              StringValue value,
+                              String inCharset,
+                              String outCharset,
+                              String scheme,
+                              String lineBreakChars,
+                              int lineLength)
+    throws UnsupportedEncodingException
+  {
+    name = decode(name, inCharset);
+    value = decode(value, inCharset);
+
+    StringBuilderValue sb = new StringBuilderValue();
+    sb.append(name);
+    sb.append(':');
+    sb.append(' ');
+
+    String word = encodeMimeWord(
+            value.toString(), outCharset, scheme, lineBreakChars, lineLength);
+
+    sb.append(MimeUtility.fold(sb.length(), word));
+
+    return sb;
+  }
+
+  public static String encodeMimeWord(String value,
+                              String charset,
+                              String scheme,
+                              String lineBreakChars,
+                              int lineLength)
+    throws UnsupportedEncodingException
+  {
+    if (lineLength != 76)
+      throw new UnimplementedException("Mime line length option");
+
+    if (! lineBreakChars.equals("\r\n"))
+      throw new UnimplementedException("Mime line break option");
+
+    return MimeUtility.encodeWord(value, charset, scheme);
+  }
+
 
   private static Reader getReader(StringValue str, String charset)
     throws IOException

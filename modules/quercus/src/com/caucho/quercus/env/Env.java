@@ -363,6 +363,14 @@ public final class Env {
   }
 
   /**
+   * Sets the encoding used for runtime conversions.
+   */
+  public Value setRuntimeEncoding(String encoding)
+  {
+    return setIni("unicode.runtime_encoding", encoding);
+  }
+
+  /**
    * Returns the encoding used for input, i.e. post
    */
   public StringValue getHttpInputEncoding()
