@@ -124,7 +124,7 @@ public class SubEntityType extends EntityType {
       // initialized by getLoadGroupIndex()
       getLoadGroupIndex();
     }
-    
+
     return _defaultLoadGroupIndex;
   }
 
@@ -140,7 +140,7 @@ public class SubEntityType extends EntityType {
 
     return _dirtyIndex;
   }
-  
+
 
   /**
    * Printable version of the entity.

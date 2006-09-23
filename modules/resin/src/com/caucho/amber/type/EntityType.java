@@ -94,6 +94,8 @@ public class EntityType extends Type {
 
   private Table _table;
 
+  private String _rootTableName;
+
   private ArrayList<Table> _secondaryTables = new ArrayList<Table>();
 
   private Id _id;
@@ -208,6 +210,25 @@ public class EntityType extends Type {
     _table = table;
 
     table.setType(this);
+
+    if (_rootTableName == null)
+      _rootTableName = table.getName();
+  }
+
+  /**
+   * Returns the root table name.
+   */
+  public String getRootTableName()
+  {
+    return _rootTableName;
+  }
+
+  /**
+   * Sets the root table name.
+   */
+  public void setRootTableName(String rootTableName)
+  {
+    _rootTableName = rootTableName;
   }
 
   /**

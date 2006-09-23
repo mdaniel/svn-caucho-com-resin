@@ -702,10 +702,13 @@ abstract public class AbstractField implements AmberField {
                                        int updateIndex)
     throws IOException
   {
-    if (getIndex() == updateIndex) {
-      String value = generateGet(src);
-      out.println(generateSet(dst, value) + ";");
-    }
+    // commented out: jpa/0l03
+    // if (getIndex() == updateIndex) {
+
+    String value = generateGet(src);
+    out.println(generateSet(dst, value) + ";");
+
+    // }
   }
 
   /**

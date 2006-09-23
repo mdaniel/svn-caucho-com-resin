@@ -43,6 +43,7 @@ import com.caucho.java.gen.ClassComponent;
 import com.caucho.loader.Environment;
 
 import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.SubEntityType;
 import com.caucho.amber.type.Type;
 
 import com.caucho.amber.field.AmberField;
@@ -450,60 +451,67 @@ public class EntityComponent extends ClassComponent {
   private void generateLoad(JavaWriter out)
     throws IOException
   {
-    if (_entityType.getParentType() != null)
-      return;
+    // commented out: jpa/0l03
+    // if (_entityType.getParentType() != null)
+    //   return;
 
-    out.println();
-    out.println("public boolean __caucho_makePersistent(com.caucho.amber.manager.AmberConnection aConn, com.caucho.amber.type.EntityType home)");
-    out.println("  throws java.sql.SQLException");
-    out.println("{");
-    out.pushDepth();
+    if (_entityType.getParentType() == null) {
+      out.println();
+      out.println("public boolean __caucho_makePersistent(com.caucho.amber.manager.AmberConnection aConn, com.caucho.amber.type.EntityType home)");
+      out.println("  throws java.sql.SQLException");
+      out.println("{");
+      out.pushDepth();
 
-    out.println("__caucho_session = aConn;");
-    out.println("if (home != null)");
-    out.println("  __caucho_home = home;");
+      out.println("__caucho_session = aConn;");
+      out.println("if (home != null)");
+      out.println("  __caucho_home = home;");
 
-    out.println("__caucho_state = com.caucho.amber.entity.Entity.P_NON_TRANSACTIONAL;");
+      out.println("__caucho_state = com.caucho.amber.entity.Entity.P_NON_TRANSACTIONAL;");
 
-    int loadCount = _entityType.getLoadGroupIndex();
-    for (int i = 0; i <= loadCount / 64; i++) {
-      out.println("  __caucho_loadMask_" + i + " = 0L;");
+      int loadCount = _entityType.getLoadGroupIndex();
+      for (int i = 0; i <= loadCount / 64; i++) {
+        out.println("  __caucho_loadMask_" + i + " = 0L;");
+      }
+
+      int dirtyCount = _entityType.getDirtyIndex();
+      for (int i = 0; i <= dirtyCount / 64; i++) {
+        out.println("  __caucho_dirtyMask_" + i + " = 0L;");
+        out.println("  __caucho_updateMask_" + i + " = 0L;");
+      }
+
+      out.println();
+      out.println("return true;");
+
+      out.popDepth();
+      out.println("}");
     }
 
-    int dirtyCount = _entityType.getDirtyIndex();
-    for (int i = 0; i <= dirtyCount / 64; i++) {
-      out.println("  __caucho_dirtyMask_" + i + " = 0L;");
-      out.println("  __caucho_updateMask_" + i + " = 0L;");
+    if (_entityType.getFields().size() > 0) {
+      int index = _entityType.getLoadGroupIndex();
+
+      out.println();
+      out.println("public void __caucho_retrieve(com.caucho.amber.manager.AmberConnection aConn)");
+      out.println("  throws java.sql.SQLException");
+      out.println("{");
+      out.pushDepth();
+
+      out.println("__caucho_load_" + index + "(aConn);");
+
+      out.popDepth();
+      out.println("}");
+
+      out.println();
+      out.println("public void __caucho_retrieve(com.caucho.amber.manager.AmberConnection aConn, java.util.Map preloadedProperties)");
+      out.println("  throws java.sql.SQLException");
+      out.println("{");
+      out.pushDepth();
+
+      out.println();
+      out.println("__caucho_load_" + index + "(aConn, preloadedProperties);");
+
+      out.popDepth();
+      out.println("}");
     }
-
-    out.println();
-    out.println("return true;");
-
-    out.popDepth();
-    out.println("}");
-
-    out.println();
-    out.println("public void __caucho_retrieve(com.caucho.amber.manager.AmberConnection aConn)");
-    out.println("  throws java.sql.SQLException");
-    out.println("{");
-    out.pushDepth();
-
-    out.println("__caucho_load_0(aConn);");
-
-    out.popDepth();
-    out.println("}");
-
-    out.println();
-    out.println("public void __caucho_retrieve(com.caucho.amber.manager.AmberConnection aConn, java.util.Map preloadedProperties)");
-    out.println("  throws java.sql.SQLException");
-    out.println("{");
-    out.pushDepth();
-
-    out.println();
-    out.println("__caucho_load_0(aConn, preloadedProperties);");
-
-    out.popDepth();
-    out.println("}");
   }
 
   /**
@@ -1291,7 +1299,10 @@ public class EntityComponent extends ClassComponent {
     throws IOException
   {
     generateHomeFind(out);
-    generateHomeNew(out);
+
+    if (! (_entityType instanceof SubEntityType)) {
+      generateHomeNew(out);
+    }
   }
 
   /**
@@ -1364,38 +1375,71 @@ public class EntityComponent extends ClassComponent {
       out.println("return entity;");
     }
     else {
-      out.print("String sql = \"select ");
-      out.print(_entityType.generateLoadSelect("o"));
-      out.print(" from " + _entityType.getTable().getName() + " o where ");
-      out.print(_entityType.getId().generateMatchArgWhere("o"));
-      out.println("\";");
 
-      out.println("java.sql.PreparedStatement pstmt = aConn.prepareStatement(sql);");
+      String rootTableName = _entityType.getRootTableName();
 
-      String keyType = _entityType.getId().getForeignTypeName();
+      generateHomeNewLoading(out, rootTableName);
 
-      out.println(keyType + " keyValue = (" + keyType + ") key;");
+      out.println("com.caucho.amber.entity.EntityItem item = home.findDiscriminatorEntityItem(aConn, key, rs" + rootTableName + ".getString(1));");
 
-      out.println("int index = 1;");
-      _entityType.getId().generateSetKey(out, "pstmt", "index", "keyValue");
+      /* jpa/0l03
+         out.println("if (loadFromResultSet) {");
+         out.pushDepth();
 
-      out.println("java.sql.ResultSet rs = pstmt.executeQuery();");
-      out.println("if (! rs.next()) {");
-      out.println("  rs.close();");
-      out.println("  throw new com.caucho.amber.AmberException(key + \" has no matching object\");");
-      out.println("}");
-      out.println("com.caucho.amber.entity.EntityItem item = home.findDiscriminatorEntityItem(aConn, key, rs.getString(1));");
+         generateHomeNewLoading(out, null);
 
-      out.println("if (loadFromResultSet)");
-      out.println("  item.getEntity().__caucho_load(aConn, rs, 1);");
+         out.println("item.getEntity().__caucho_load(aConn, rs, 1);");
+
+         out.popDepth();
+         out.println("}");
+      */
 
       out.println(getClassName() + " entity = (" + getClassName() + ") item.copy(aConn);");
 
-      out.println("rs.close();");
+      out.println("rs" + rootTableName + ".close();");
       out.println("return entity;");
     }
 
     out.popDepth();
+    out.println("}");
+  }
+
+  /**
+   * Generates the loading for home_new
+   */
+  private void generateHomeNewLoading(JavaWriter out,
+                                      String rootTableName)
+    throws IOException
+  {
+    String varSuffix = rootTableName == null ? "" : rootTableName;
+
+    out.print("String sql" + varSuffix + " = \"select ");
+    out.print(_entityType.generateLoadSelect("o"));
+    out.print(" from ");
+
+    if (rootTableName == null)
+      out.print(_entityType.getTable().getName());
+    else
+      out.print(rootTableName);
+
+    out.print(" o where ");
+    out.print(_entityType.getId().generateMatchArgWhere("o"));
+    out.println("\";");
+
+    out.println("java.sql.PreparedStatement pstmt" + varSuffix + " = aConn.prepareStatement(sql" + varSuffix + ");");
+
+    String keyType = _entityType.getId().getForeignTypeName();
+
+    out.println(keyType + " " + "keyValue" + varSuffix + " = (" + keyType + ") key;");
+
+    out.println("int index" + varSuffix + " = 1;");
+    _entityType.getId().generateSetKey(out, "pstmt"+varSuffix,
+                                       "index"+varSuffix, "keyValue"+varSuffix);
+
+    out.println("java.sql.ResultSet rs" + varSuffix + " = pstmt" + varSuffix + ".executeQuery();");
+    out.println("if (! rs" + varSuffix + ".next()) {");
+    out.println("  rs" + varSuffix + ".close();");
+    out.println("  throw new com.caucho.amber.AmberException(key + \" has no matching object\");");
     out.println("}");
   }
 

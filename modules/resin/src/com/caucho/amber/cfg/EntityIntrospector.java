@@ -209,6 +209,9 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
     EntityType parentType = null;
     JAnnotation inheritanceAnn = null;
     InheritanceConfig inheritanceConfig = null;
+    JClass rootClass = type;
+    JAnnotation rootEntityAnn = null;
+    EntityConfig rootEntityConfig = null;
 
     if (isEntity) {
       validateType(type);
@@ -216,8 +219,6 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
       // Inheritance annotation/configuration is specified
       // on the entity class that is the root of the entity
       // class hierarachy.
-
-      JClass rootClass = type;
 
       getInternalInheritanceConfig(type);
       inheritanceAnn = _annotationCfg.getAnnotation();
@@ -230,11 +231,12 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
            parentClass = parentClass.getSuperClass()) {
 
         getInternalEntityConfig(parentClass);
-        JAnnotation parentEntity = _annotationCfg.getAnnotation();
-        EntityConfig superEntityConfig = _annotationCfg.getEntityConfig();
 
         if (_annotationCfg.isNull())
           break;
+
+        rootEntityAnn = _annotationCfg.getAnnotation();
+        rootEntityConfig = _annotationCfg.getEntityConfig();
 
         rootClass = parentClass;
 
@@ -322,10 +324,59 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
         tableName = entityName.toUpperCase();
 
       if (isEntity) {
+
+        InheritanceType strategy = null;
+
+        if (inheritanceAnn != null)
+          strategy = (InheritanceType) inheritanceAnn.get("strategy");
+        else if (inheritanceConfig != null)
+          strategy = inheritanceConfig.getStrategy();
+
         if (parentType == null)
           entityType.setTable(_persistenceUnit.createTable(tableName));
-        else if (parentType.isJoinedSubClass())
+        else if (strategy == InheritanceType.JOINED) {
           entityType.setTable(_persistenceUnit.createTable(tableName));
+
+          getInternalTableConfig(rootClass);
+          JAnnotation rootTableAnn = _annotationCfg.getAnnotation();
+          TableConfig rootTableConfig = _annotationCfg.getTableConfig();
+
+          String rootTableName = null;
+
+          if (rootTableAnn != null)
+            rootTableName = (String) rootTableAnn.get("name");
+          else if (rootTableConfig != null)
+            rootTableName = rootTableConfig.getName();
+
+          if (rootTableName == null || rootTableName.equals("")) {
+
+            String rootEntityName;
+
+            if (rootEntityAnn != null)
+              rootEntityName = rootEntityAnn.getString("name");
+            else {
+              rootEntityName = rootEntityConfig.getClassName();
+
+              int p = rootEntityName.lastIndexOf('.');
+
+              if (p > 0)
+                rootEntityName = rootEntityName.substring(p + 1);
+            }
+
+            if (rootEntityName.equals("")) {
+              rootEntityName = rootClass.getName();
+
+              int p = rootEntityName.lastIndexOf('.');
+
+              if (p > 0)
+                rootEntityName = rootEntityName.substring(p + 1);
+            }
+
+            rootTableName = rootEntityName.toUpperCase();
+          }
+
+          entityType.setRootTableName(rootTableName);
+        }
         else
           entityType.setTable(parentType.getTable());
       }
@@ -703,7 +754,8 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
       JAnnotation joinAnn = _annotationCfg.getAnnotation();
       PrimaryKeyJoinColumnConfig primaryKeyJoinColumnConfig = _annotationCfg.getPrimaryKeyJoinColumnConfig();
 
-      if (subType.isJoinedSubClass()) {
+      // if (subType.isJoinedSubClass()) {
+      if (strategy == InheritanceType.JOINED) {
         linkInheritanceTable(subType.getRootType().getTable(),
                              subType.getTable(),
                              joinAnn,
@@ -1339,14 +1391,8 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
     OneToManyConfig oneToManyConfig = null;
     ManyToOneConfig manyToOneConfig = null;
 
-    JClass parentClass = sourceType.getBeanClass();
-
-    getInternalEntityConfig(parentClass);
-    JAnnotation parentEntity = _annotationCfg.getAnnotation();
-    EntityConfig superEntityConfig = _annotationCfg.getEntityConfig();
-
-    if (superEntityConfig != null) {
-      attributesConfig = superEntityConfig.getAttributes();
+    if (entityConfig != null) {
+      attributesConfig = entityConfig.getAttributes();
 
       if (attributesConfig != null) {
         if (idConfig == null)

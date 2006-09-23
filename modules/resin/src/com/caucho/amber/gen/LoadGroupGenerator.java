@@ -85,6 +85,41 @@ public class LoadGroupGenerator extends ClassComponent {
     int group = _index / 64;
     long mask = (1L << (_index % 64));
 
+    generateTransactionChecks(out, group, mask);
+
+    int min = 0;
+
+    // XXX: need to do another check for a long hierarchy and/or many-to-one
+    // if ((_entityType.getParentType() != null) &&
+    //     (_index = _entityType.getParentType().getLoadGroupIndex() + 1)) {
+    //   min = _entityType.getParentType().getLoadGroupIndex();
+    // }
+
+    int max = _index;
+
+    for (int i = min; i <= max; i++) {
+      out.println("__caucho_load_select_" + i + "(aConn, preloadedProperties);");
+    }
+
+    // needs to be after load to prevent loop if toString() expects data
+    out.println();
+    out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
+    out.println("  __caucho_log.fine(\"amber loaded-" + _index + " \" + this);");
+
+    out.popDepth();
+    out.println("}");
+
+    if (_index == 0 && _entityType.getHasLoadCallback()) {
+      out.println();
+      out.println("protected void __caucho_load_callback() {}");
+    }
+
+    generateLoadSelect(out, group, mask);
+  }
+
+  private void generateTransactionChecks(JavaWriter out, int group, long mask)
+    throws IOException
+  {
     // non-read-only entities must be reread in a transaction
     if (! _entityType.isReadOnly()) {
       out.println("if (aConn.isInTransaction()) {");
@@ -133,6 +168,16 @@ public class LoadGroupGenerator extends ClassComponent {
     out.println("}");
 
     out.println();
+  }
+
+  private void generateLoadSelect(JavaWriter out, int group, long mask)
+    throws IOException
+  {
+    out.println();
+    out.println("protected void __caucho_load_select_" + _index +  "(com.caucho.amber.manager.AmberConnection aConn, java.util.Map preloadedProperties)");
+    out.println("{");
+    out.pushDepth();
+
     out.println("try {");
     out.pushDepth();
 
@@ -245,18 +290,8 @@ public class LoadGroupGenerator extends ClassComponent {
     out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
     out.println("}");
 
-    // needs to be after load to prevent loop if toString() expects data
-    out.println();
-    out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
-    out.println("  __caucho_log.fine(\"amber loaded-" + _index + " \" + this);");
-
     out.popDepth();
     out.println("}");
-
-    if (_index == 0 && _entityType.getHasLoadCallback()) {
-      out.println();
-      out.println("protected void __caucho_load_callback() {}");
-    }
   }
 
   private void generateCallbacks(JavaWriter out, ArrayList<JMethod> callbacks)
