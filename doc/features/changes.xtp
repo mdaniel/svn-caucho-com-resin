@@ -4,6 +4,9 @@
 
 <s2 title='3.0.snap - Sep 7, 2006'>
 <ul>
+<li>mod_caucho issues with config server (rep by Steve Baugus)</li>
+<li>session write at finish was clearing useCount too early, causing spurious session failures (rep by Ed Hollingsworth)</li>
+<li>Disable select-manager for win32 because of socket limits (#1344, rep by Olaf Fentsch)</li>
 <li>ProxyCache not registered with admin (#1334, rep by hpniemi)
 <li>IntMap wasn't handling deletes properly for ThrottleFilter (#1356, rep by sksamuel)</li>
 <li>Additional CodeSource fixes for JSPWiki (#1333, fixed! by ajaquith2)</li>
