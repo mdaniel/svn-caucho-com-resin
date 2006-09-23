@@ -3361,8 +3361,7 @@ public class ArrayModule
   }
 
   private static class CompareNormal
-    implements
-    Comparator<Map.Entry<Value, Value>>
+    implements Comparator<Map.Entry<Value, Value>>
   {
     private AbstractGet _getter;
 
@@ -3378,12 +3377,12 @@ public class ArrayModule
                        Map.Entry<Value, Value> bEntry)
     {
       if (_getter instanceof GetKey) {
-        KeyComparator k = new KeyComparator();
+        KeyComparator k = KeyComparator.CMP;
 
         return k.compare(aEntry, bEntry) * _order;
       }
 
-      ValueComparator c = new ValueComparator();
+      ValueComparator c = ValueComparator.CMP;
 
       return c.compare(aEntry, bEntry) * _order;
     }

@@ -224,6 +224,7 @@ public class NullValue extends Value {
   /**
    * Returns true for equality
    */
+  @Override
   public int cmp(Value rValue)
   {
     rValue = rValue.toValue();
@@ -232,7 +233,7 @@ public class NullValue extends Value {
       int l = 0;
       int r = rValue.toBoolean() ? 1 : 0;
 
-      return r - l;
+      return l - r;
     }
     else if (rValue.isNumberConvertible()) {
       double l = 0;

@@ -7,6 +7,13 @@
     <item link="ioc-bean.xtp" title="init"/>
     <item link="bean-patterns.xtp" title="bean"/>
     <item link="misc.xtp" title="misc"/>
+    <item title="Library" link="resource-library.xtp">
+      <item title="CronResource" link="cron.xtp"/>
+      <item title="RMI" link="rmi.xtp"/>
+    </item>
+
+    <item title="Resource FAQ" link="faq.xtp">
+    </item>
     <item title="Tutorials" link="tutorial/index.xtp" atoc-descend="1"/>
   </item>
 </navigation>

@@ -577,7 +577,7 @@ public class VarExpr
       throw new IllegalStateException(getLocation() +
                                       "'" + this + "' is not analyzed.");
     }
-    
+
     if (_var.isValue()) {
       if (isTop) {
         // php/3a60

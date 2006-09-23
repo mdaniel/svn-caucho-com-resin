@@ -1261,7 +1261,7 @@ public abstract class JspNode {
     else if (Character.class.equals(type))
       return "new Character(" + var + ".evalCharacter(_jsp_env))";
     else if (String.class.equals(type))
-      return var + ".evalStringNonNull(_jsp_env)";
+      return var + ".evalString(_jsp_env)";
     else if (BigInteger.class.equals(type))
       return var + ".evalBigInteger(_jsp_env)";
     else if (BigDecimal.class.equals(type))

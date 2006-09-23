@@ -1164,8 +1164,10 @@ public class PageContextImpl extends PageContext
     if (_elContext == null) {
       _elContext = new PageELContext();
 
+      WebApp webApp = getApplication();
+      
       JspApplicationContextImpl jspContext
-	= (JspApplicationContextImpl) _webApp.getJspApplicationContext();
+	= (JspApplicationContextImpl) webApp.getJspApplicationContext();
 
       ELResolver []resolverArray = jspContext.getELResolverArray();
       

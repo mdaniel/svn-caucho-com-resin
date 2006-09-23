@@ -1263,8 +1263,15 @@ abstract public class ArrayValue extends Value {
     }
   }
 
-  public static class ValueComparator implements
-                                      Comparator<Map.Entry<Value,Value>> {
+  public static class ValueComparator
+    implements Comparator<Map.Entry<Value,Value>>
+  {
+    public static final ValueComparator CMP = new ValueComparator();
+    
+    private ValueComparator()
+    {
+    }
+    
     public int compare(Map.Entry<Value,Value> aEntry,
                        Map.Entry<Value,Value> bEntry)
     {
@@ -1284,8 +1291,15 @@ abstract public class ArrayValue extends Value {
     }
   }
 
-  public static class KeyComparator implements
-                                    Comparator<Map.Entry<Value,Value>> {
+  public static class KeyComparator
+    implements Comparator<Map.Entry<Value,Value>>
+  {
+    public static final KeyComparator CMP = new KeyComparator();
+    
+    private KeyComparator()
+    {
+    }
+    
     public int compare(Map.Entry<Value,Value> aEntry,
                        Map.Entry<Value,Value> bEntry)
     {
@@ -1309,7 +1323,14 @@ abstract public class ArrayValue extends Value {
     public abstract Value get(Map.Entry<Value, Value> entry);
   }
 
-  public static class GetKey extends AbstractGet {
+  public static class GetKey extends AbstractGet
+  {
+    public static final GetKey GET = new GetKey();
+    
+    private GetKey()
+    {
+    }
+    
     public Value get(Map.Entry<Value, Value> entry)
     {
       return entry.getKey();
@@ -1317,6 +1338,12 @@ abstract public class ArrayValue extends Value {
   }
 
   public static class GetValue extends AbstractGet {
+    public static final GetValue GET = new GetValue();
+    
+    private GetValue()
+    {
+    }
+    
     public Value get(Map.Entry<Value, Value> entry)
     {
       return entry.getValue();

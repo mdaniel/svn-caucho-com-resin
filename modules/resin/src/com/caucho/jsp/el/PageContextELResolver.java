@@ -58,6 +58,11 @@ public class PageContextELResolver extends AbstractVariableResolver {
     
     _pageContext = pageContext;
   }
+
+  public ELResolver []getCustomResolvers()
+  {
+    return _customResolvers;
+  }
   
   public Object getValue(ELContext env, Object base, Object property)
   {

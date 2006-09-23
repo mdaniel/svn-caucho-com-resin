@@ -179,7 +179,8 @@ public class VarInfo {
   public boolean isValue()
   {
     // php/3a71
-    return ! (_isReference || isGlobal() || isVariable());
+    // php/3435
+    return ! (_isArgument || _isReference || isGlobal() || isVariable());
   }
   
   /**

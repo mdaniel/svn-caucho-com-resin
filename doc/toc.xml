@@ -9,7 +9,9 @@
     <item link="quercus/index.xtp" title="Quercus" atoc-descend="true"/>
     <item link="soa/index.xtp" title="SOA/IoC" atoc-descend="true"/>
     <item link="webapp/index.xtp" title="Web Applications" atoc-descend="true"/>
+    <!--
     <item link="resource/index.xtp" title="Resources" atoc-descend="true"/>
+    -->
     <item link="jsp/index.xtp" title="JSP" atoc-descend="true"/>
     <item link="servlet/index.xtp" title="Servlets and Filters" atoc-descend="true"/>
     <!--

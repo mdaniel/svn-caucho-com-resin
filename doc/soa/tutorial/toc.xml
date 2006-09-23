@@ -9,5 +9,13 @@
     <item link="jms-listener/index.xtp" title="JMS Listener"/>
     <item link="jms-ioc-listener/index.xtp" title="JMS IOC Listener"/>
     <item link="services/index.xtp" title="Services"/>
+    <item link="basic/index.xtp" title="Basic Resource"/>
+    <item link="injection/index.xtp" title="Injection"/>
+    <item link="jca-lifecycle/index.xtp" title="JCA Lifecycle"/>
+    <item link="jca-work/index.xtp" title="JCA Work"/>
+    <item link="jca-timer/index.xtp" title="JCA Timer"/>
+    <item link="jca-cron/index.xtp" title="JCA Cron"/>
+    <item link="jca-connectionAbstract/index.xtp" title="JCA Connector"/>
+    <item link="jndi-appconfig/index.xtp" title="JNDI appconfig"/>
   </item>
 </navigation>
