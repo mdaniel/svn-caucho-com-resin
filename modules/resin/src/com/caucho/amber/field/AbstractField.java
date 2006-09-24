@@ -358,10 +358,12 @@ abstract public class AbstractField implements AmberField {
   public void init()
     throws ConfigException
   {
-    if (_isLazy)
-      _loadGroupIndex = getSourceType().nextLoadGroupIndex();
-    else
-      _loadGroupIndex = getSourceType().getDefaultLoadGroupIndex();
+    if (_loadGroupIndex < 0) {
+      if (_isLazy)
+        _loadGroupIndex = getSourceType().nextLoadGroupIndex();
+      else
+        _loadGroupIndex = getSourceType().getDefaultLoadGroupIndex();
+    }
   }
 
   /**

@@ -489,6 +489,9 @@ public class EntityComponent extends ClassComponent {
     if (_entityType.getFields().size() > 0) {
       int index = _entityType.getLoadGroupIndex();
 
+      if (_entityType.getParentType() == null)
+        index = 0;
+
       out.println();
       out.println("public void __caucho_retrieve(com.caucho.amber.manager.AmberConnection aConn)");
       out.println("  throws java.sql.SQLException");
@@ -1382,17 +1385,16 @@ public class EntityComponent extends ClassComponent {
 
       out.println("com.caucho.amber.entity.EntityItem item = home.findDiscriminatorEntityItem(aConn, key, rs" + rootTableName + ".getString(1));");
 
-      /* jpa/0l03
-         out.println("if (loadFromResultSet) {");
-         out.pushDepth();
+      // jpa/0l03
+      out.println("if (loadFromResultSet) {");
+      out.pushDepth();
 
-         generateHomeNewLoading(out, null);
+      // generateHomeNewLoading(out, null);
 
-         out.println("item.getEntity().__caucho_load(aConn, rs, 1);");
+      out.println("item.getEntity().__caucho_load(aConn, rs" + rootTableName + ", 1);");
 
-         out.popDepth();
-         out.println("}");
-      */
+      out.popDepth();
+      out.println("}");
 
       out.println(getClassName() + " entity = (" + getClassName() + ") item.copy(aConn);");
 

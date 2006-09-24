@@ -231,7 +231,7 @@ public class EntityManyToOneField extends AbstractField {
       }
     }
 
-    _targetLoadIndex = getSourceType().nextLoadGroupIndex();
+    _targetLoadIndex = getSourceType().getLoadGroupIndex(); // nextLoadGroupIndex();
 
     _linkColumns.setTargetCascadeDelete(isTargetCascadeDelete());
     _linkColumns.setSourceCascadeDelete(isSourceCascadeDelete());
@@ -355,7 +355,9 @@ public class EntityManyToOneField extends AbstractField {
 
     out.println(generateSuperSetter(proxy) + ";");
     */
-    out.println(generateSuperSetter("null") + ";");
+
+    // commented out jpa/0l40
+    // out.println(generateSuperSetter("null") + ";");
 
     int group = _targetLoadIndex / 64;
     long mask = (1L << (_targetLoadIndex % 64));
@@ -379,7 +381,8 @@ public class EntityManyToOneField extends AbstractField {
       long mask = (1L << (_targetLoadIndex % 64));
       String loadVar = "__caucho_loadMask_" + group;
 
-      out.println(loadVar + " |= " + mask + "L;");
+      // commented out jpa/0l40
+      // out.println(loadVar + " |= " + mask + "L;");
 
       String javaType = getJavaTypeName();
 
@@ -414,34 +417,70 @@ public class EntityManyToOneField extends AbstractField {
     String loadVar = "__caucho_loadMask_" + group;
 
     out.println();
-    out.println("public " + javaType + " " + getGetterName() + "()");
+    out.println("public " + javaType + " __caucho_item_" + getGetterName() + "(com.caucho.amber.manager.AmberConnection aConn)");
     out.println("{");
     out.pushDepth();
 
-    out.println();
-    out.print("if (__caucho_session != null && ");
-    out.println("(" + loadVar + " & " + mask + "L) == 0) {");
+    out.println("if (aConn != null) {");
     out.pushDepth();
 
     String index = "_" + (_targetLoadIndex / 64);
     index += "_" + (1L << (_targetLoadIndex % 64));
 
     if (_aliasField == null) {
-      out.println("__caucho_load_" + getLoadGroupIndex() + "(__caucho_session);");
+      out.println("__caucho_load_" + getLoadGroupIndex() + "(aConn);");
     }
 
     out.println(loadVar + " |= " + mask + "L;");
 
-    generateLoadProperty(out, index, "__caucho_session");
+    generateLoadProperty(out, index, "aConn");
 
     out.println("return v"+index+";");
 
     out.popDepth();
     out.println("}");
 
-    out.println("else {");
-    out.println("  return " + generateSuperGetter() + ";");
+    out.println("return null;");
+
+    out.popDepth();
     out.println("}");
+
+    out.println();
+    out.println("public " + javaType + " " + getGetterName() + "()");
+    out.println("{");
+    out.pushDepth();
+
+    out.println("if (__caucho_item != null) {");
+    out.pushDepth();
+
+    String extClassName = getSourceType().getName() + "__ResinExt";
+
+    out.println(extClassName + " item = (" + extClassName + ") __caucho_item.getEntity();");
+
+    out.println("item.__caucho_item_" + getGetterName() + "(__caucho_session);");
+
+    generateCopyLoadObject(out, "super", "item", getLoadGroupIndex());
+
+    // out.println("__caucho_loadMask_" + group + " |= " + mask + "L;");
+    out.println("__caucho_loadMask_" + group + " |= item.__caucho_loadMask_" + group + ";"); // mask + "L;");
+
+    out.popDepth();
+    out.println("}");
+
+    out.println("else");
+    out.pushDepth();
+    out.print("if (__caucho_session != null && ");
+    out.println("(" + loadVar + " & " + mask + "L) == 0) {");
+    out.pushDepth();
+
+    out.println("return __caucho_item_" + getGetterName() + "(__caucho_session);");
+
+    out.popDepth();
+    out.println("}");
+    out.popDepth();
+
+    out.println();
+    out.println("return " + generateSuperGetter() + ";");
 
     out.popDepth();
     out.println("}");

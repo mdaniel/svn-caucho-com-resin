@@ -89,6 +89,9 @@ public class LoadGroupGenerator extends ClassComponent {
 
     int min = 0;
 
+    if (_entityType.getParentType() == null)
+      min = _index;
+
     // XXX: need to do another check for a long hierarchy and/or many-to-one
     // if ((_entityType.getParentType() != null) &&
     //     (_index = _entityType.getParentType().getLoadGroupIndex() + 1)) {
