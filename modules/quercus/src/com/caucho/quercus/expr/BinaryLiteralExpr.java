@@ -44,8 +44,8 @@ import com.caucho.quercus.Location;
 /**
  * Represents a PHP string literal expression.
  */
-public class BinaryLiteralExpr extends StringLiteralExpr {
-
+public class BinaryLiteralExpr extends StringLiteralExpr
+{
   public BinaryLiteralExpr(Location location, byte[] bytes)
   {
     super(location, new BinaryBuilderValue(bytes));
@@ -80,6 +80,25 @@ public class BinaryLiteralExpr extends StringLiteralExpr {
       String var = out.addValue(_value);
 
       out.print(var);
+    }
+  }
+
+  /**
+   * Generates code to append to a string builder.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generateAppend(PhpWriter out)
+    throws IOException
+  {
+    if (_value.length() == 1) {
+      int ch = _value.charAt(0);
+
+      out.print("(byte) " + ch);
+    }
+    else {
+      // XXX:
+      generateString(out);
     }
   }
 

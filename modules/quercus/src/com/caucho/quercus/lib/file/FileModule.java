@@ -1783,7 +1783,7 @@ public class FileModule extends AbstractQuercusModule {
     }
 
     if ((flags & GLOB_NOSORT) == 0 && result.isArray())
-      ((ArrayValue) result).sort(new ArrayValue.ValueComparator(), true, true);
+      ((ArrayValue) result).sort(ArrayValue.ValueComparator.CMP, true, true);
 
     return result;
   }

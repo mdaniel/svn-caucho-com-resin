@@ -954,8 +954,6 @@ public final class Env {
     _session = session;
 
     if (session != null) {
-      System.out.println("SS: " + session + " " + getGlobalVar("_SESSION"));
-
       Value var = getGlobalVar("_SESSION");
       
       if (! (var instanceof SessionVar)) {
@@ -964,7 +962,6 @@ public final class Env {
       }
 
       var.set(session);
-      System.out.println("VAR: " + var);
 
       setGlobalValue("HTTP_SESSION_VARS", session);
 
@@ -2999,7 +2996,7 @@ public final class Env {
   {
     try {
       Path pwd = getPwd();
-      
+
       Path path = lookupInclude(include, pwd, scriptPwd);
 
       if (path != null) {

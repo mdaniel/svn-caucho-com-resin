@@ -915,11 +915,11 @@ public class MiscModule extends AbstractQuercusModule {
 	int ch = is.read();
 
 	if (ch >= 0)
-	  bb.append(ch);
+	  bb.appendByte(ch);
 	else if (length == Integer.MAX_VALUE)
 	  return i;
 	else
-	  bb.append(_pad);
+	  bb.appendByte(_pad);
       }
 
       return i;
@@ -1000,13 +1000,13 @@ public class MiscModule extends AbstractQuercusModule {
 
 	d += hexToDigit(env, ch);
 
-	bb.append(d);
+	bb.appendByte(d);
       }
       
       if ((strlen & 1) == 1) {
 	int d = 16 * hexToDigit(env, s.charAt(strlen - 1));
 
-	bb.append(d);
+	bb.appendByte(d);
       }
 
       return i;
@@ -1083,13 +1083,13 @@ public class MiscModule extends AbstractQuercusModule {
 
 	d += 16 * hexToDigit(env, ch);
 
-	bb.append(d);
+	bb.appendByte(d);
       }
       
       if ((strlen & 1) == 1) {
 	int d = hexToDigit(env, s.charAt(strlen - 1));
 
-	bb.append(d);
+	bb.appendByte(d);
       }
 
       return i;
@@ -1153,7 +1153,7 @@ public class MiscModule extends AbstractQuercusModule {
 	long v = arg.toLong();
 
 	for (int k = _bytes - 1; k >= 0; k--) {
-	  bb.append((int) (v >> (8 * k)));
+	  bb.appendByte((int) (v >> (8 * k)));
 	}
       }
 
@@ -1245,7 +1245,7 @@ public class MiscModule extends AbstractQuercusModule {
 	long v = arg.toLong();
 
 	for (int k = 0; k < _bytes; k++) {
-	  bb.append((int) (v >> (8 * k)));
+	  bb.appendByte((int) (v >> (8 * k)));
 	}
       }
 
@@ -1320,7 +1320,7 @@ public class MiscModule extends AbstractQuercusModule {
 	long v = Double.doubleToLongBits(d);
 
 	for (int k = 7; k >= 0; k--) {
-	  bb.append((int) (v >> (8 * k)));
+	  bb.appendByte((int) (v >> (8 * k)));
 	}
       }
 
@@ -1395,7 +1395,7 @@ public class MiscModule extends AbstractQuercusModule {
 	int v = Float.floatToIntBits((float) d);
 
 	for (int k = 3; k >= 0; k--) {
-	  bb.append((int) (v >> (8 * k)));
+	  bb.appendByte((int) (v >> (8 * k)));
 	}
       }
 
@@ -1456,7 +1456,7 @@ public class MiscModule extends AbstractQuercusModule {
       throws IOException
     {
       for (int j = 0; j < _length; j++) {
-	bb.append(0);
+	bb.appendByte(0);
       }
 
       return i;
@@ -1490,7 +1490,7 @@ public class MiscModule extends AbstractQuercusModule {
       throws IOException
     {
       while (bb.length() < _length) {
-	bb.append(0);
+	bb.appendByte(0);
       }
 
       return i;

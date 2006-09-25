@@ -117,7 +117,7 @@ public class OutputBuffer {
 
       // XXX: encoding
       while ((ch = rs.read()) >= 0) {
-        bb.append(ch);
+        bb.appendByte(ch);
       }
 
       return bb;

@@ -31,10 +31,7 @@ package com.caucho.quercus.expr;
 
 import java.io.IOException;
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.StringBuilderValue;
+import com.caucho.quercus.env.*;
 
 import com.caucho.quercus.program.AnalyzeInfo;
 
@@ -75,6 +72,8 @@ public class AppendExpr extends Expr {
   {
     AppendExpr leftAppend;
 
+    // XXX: i18n binary vs unicode issues
+    /*
     if (left instanceof ToStringExpr)
       left = ((ToStringExpr) left).getExpr();
 
@@ -84,6 +83,7 @@ public class AppendExpr extends Expr {
       if (string.evalConstant().length() == 0)
 	return ToStringExpr.create(right);
     }
+    */
 
     if (left instanceof AppendExpr)
       leftAppend = (AppendExpr) left;
@@ -91,7 +91,8 @@ public class AppendExpr extends Expr {
       leftAppend = new AppendExpr(left.getLocation(), left, null);
     
     AppendExpr next;
-    
+
+    /*
     if (right instanceof ToStringExpr)
       right = ((ToStringExpr) right).getExpr();
 
@@ -101,6 +102,7 @@ public class AppendExpr extends Expr {
       if (string.evalConstant().length() == 0)
 	return ToStringExpr.create(left);
     }
+    */
 
     if (right instanceof AppendExpr)
       next = (AppendExpr) right;
@@ -126,7 +128,8 @@ public class AppendExpr extends Expr {
 
     tail = append(left._next, tail);
 
-    if (left._value instanceof StringLiteralExpr &&
+    if (false &&
+	left._value instanceof StringLiteralExpr &&
         tail._value instanceof StringLiteralExpr) {
       StringLiteralExpr leftString = (StringLiteralExpr) left._value;
       StringLiteralExpr rightString = (StringLiteralExpr) tail._value;
@@ -152,23 +155,25 @@ public class AppendExpr extends Expr {
     return true;
   }
 
+  @Override
   public Value eval(Env env)
   {
-    StringBuilderValue sb = new StringBuilderValue();
+    StringValue sb = _value.eval(env).toStringBuilder();
 
-    for (AppendExpr ptr = this; ptr != null; ptr = ptr._next) {
+    for (AppendExpr ptr = _next; ptr != null; ptr = ptr._next) {
       sb.append(ptr._value.eval(env));
     }
 
     return sb;
   }
 
+  @Override
   public String evalString(Env env)
   {
-    StringBuilder sb = new StringBuilder();
+    StringValue sb = _value.eval(env).toStringBuilder();
 
-    for (AppendExpr ptr = this; ptr != null; ptr = ptr._next) {
-      sb.append(ptr._value.evalString(env));
+    for (AppendExpr ptr = _next; ptr != null; ptr = ptr._next) {
+      sb.append(ptr._value.eval(env));
     }
 
     return sb.toString();
@@ -197,9 +202,10 @@ public class AppendExpr extends Expr {
   public void generate(PhpWriter out)
     throws IOException
   {
-    out.print("new StringBuilderValue()");
+    _value.generate(out);
+    out.print(".toStringBuilder()");
 
-    for (AppendExpr ptr = this; ptr != null; ptr = ptr._next) {
+    for (AppendExpr ptr = _next; ptr != null; ptr = ptr._next) {
       out.print(".append(");
       ptr._value.generateAppend(out);
       out.print(")");
@@ -229,9 +235,10 @@ public class AppendExpr extends Expr {
   public void generateString(PhpWriter out)
     throws IOException
   {
-    out.print("new StringBuilderValue()");
+    _value.generate(out);
+    out.print(".toStringBuilder()");
 
-    for (AppendExpr ptr = this; ptr != null; ptr = ptr._next) {
+    for (AppendExpr ptr = _next; ptr != null; ptr = ptr._next) {
       out.print(".append(");
       ptr._value.generateAppend(out);
       out.print(")");

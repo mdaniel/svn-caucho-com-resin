@@ -50,6 +50,19 @@ abstract public class UnicodeValue extends StringValue {
   }
 
   /**
+   * Converts to a string builder
+   */
+  @Override
+  public StringValue toStringBuilder()
+  {
+    StringBuilderValue sb = new StringBuilderValue();
+    
+    sb.append(this);
+    
+    return sb;
+  }
+
+  /**
    * Returns a byte stream of chars.
    * @param charset to encode chars to
    */

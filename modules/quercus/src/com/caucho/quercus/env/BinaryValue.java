@@ -128,6 +128,19 @@ abstract public class BinaryValue extends StringValue {
     return new InputStreamReader(toInputStream(), charset);
   }
 
+  /**
+   * Converts to a string builder
+   */
+  @Override
+  public StringValue toStringBuilder()
+  {
+    BinaryBuilderValue bb = new BinaryBuilderValue();
+    
+    bb.append(this);
+    
+    return bb;
+  }
+
   abstract public byte[] toBytes();
 }
 

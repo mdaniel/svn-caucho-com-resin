@@ -73,6 +73,25 @@ public class StringBuilderValue extends UnicodeValue {
     _value = value;
   }
 
+  public StringBuilderValue(String value, int minLength)
+  {
+    if (value == null)
+      value = "";
+    
+    _length = value.length();
+    
+    int length = _length;
+
+    if (length < minLength)
+      length = minLength;
+    
+    _buffer = new char[length];
+
+    value.getChars(0, _length, _buffer, 0);
+
+    _value = value;
+  }
+
   public StringBuilderValue(char []buffer, int offset, int length)
   {
     int capacity;
@@ -365,8 +384,18 @@ public class StringBuilderValue extends UnicodeValue {
   }
 
   /**
+   * Converts to a string builder
+   */
+  @Override
+  public StringValue toStringBuilder()
+  {
+    return new StringBuilderValue(_buffer, 0, _length);
+  }
+
+  /**
    * Append to a string builder.
    */
+  @Override
   public void appendTo(StringBuilderValue sb)
   {
     sb.append(_buffer, 0, _length);
@@ -626,7 +655,8 @@ public class StringBuilderValue extends UnicodeValue {
   /**
    * Append a Java string to the value.
    */
-  public final StringBuilderValue append(String s)
+  @Override
+  public final StringValue append(String s)
   {
     int len = s.length();
 
@@ -643,7 +673,8 @@ public class StringBuilderValue extends UnicodeValue {
   /**
    * Append a Java string to the value.
    */
-  public final StringBuilderValue append(String s, int start, int end)
+  @Override
+  public final StringValue append(String s, int start, int end)
   {
     int len = end - start;
 
@@ -660,7 +691,8 @@ public class StringBuilderValue extends UnicodeValue {
   /**
    * Append a Java buffer to the value.
    */
-  public final StringBuilderValue append(char []buf, int offset, int length)
+  @Override
+  public final StringValue append(char []buf, int offset, int length)
   {
     if (_buffer.length < _length + length)
       ensureCapacity(_length + length);
@@ -673,17 +705,10 @@ public class StringBuilderValue extends UnicodeValue {
   }
 
   /**
-   * Append a Java double to the value.
-   */
-  public final StringBuilderValue append(char []buf)
-  {
-    return append(buf, 0, buf.length);
-  }
-
-  /**
    * Append a Java buffer to the value.
    */
-  public final StringBuilderValue append(CharSequence buf, int head, int tail)
+  @Override
+  public final StringValue append(CharSequence buf, int head, int tail)
   {
     int length = tail - head;
     
@@ -707,8 +732,8 @@ public class StringBuilderValue extends UnicodeValue {
   /**
    * Append a Java buffer to the value.
    */
-  public final StringBuilderValue append(StringBuilderValue sb,
-					 int head, int tail)
+  @Override
+  public final StringValue append(StringBuilderValue sb, int head, int tail)
   {
     int length = tail - head;
     
@@ -725,7 +750,8 @@ public class StringBuilderValue extends UnicodeValue {
   /**
    * Append a Java char to the value.
    */
-  public final StringBuilderValue append(char v)
+  @Override
+  public final StringValue append(char v)
   {
     if (_buffer.length < _length + 1)
       ensureCapacity(_length + 1);
@@ -736,42 +762,10 @@ public class StringBuilderValue extends UnicodeValue {
   }
 
   /**
-   * Append a Java boolean to the value.
-   */
-  public final StringBuilderValue append(boolean v)
-  {
-    return append(v ? "true" : "false");
-  }
-
-  /**
-   * Append a Java long to the value.
-   */
-  public final StringBuilderValue append(long v)
-  {
-    // XXX: change for perf
-    return append(String.valueOf(v));
-  }
-
-  /**
-   * Append a Java double to the value.
-   */
-  public final StringBuilderValue append(double v)
-  {
-    return append(String.valueOf(v));
-  }
-
-  /**
    * Append a Java value to the value.
    */
-  public final StringBuilderValue append(Object v)
-  {
-    return append(v.toString());
-  }
-
-  /**
-   * Append a Java value to the value.
-   */
-  public final StringBuilderValue append(Value v)
+  @Override
+  public final StringValue append(Value v)
   {
     v.appendTo(this);
 
@@ -868,9 +862,12 @@ public class StringBuilderValue extends UnicodeValue {
       return;
 
     int newCapacity;
-    
+
     if (capacity < 4096) {
       newCapacity = _buffer.length;
+
+      if (newCapacity < 64)
+	newCapacity = 64;
 
       while (newCapacity < capacity)
 	newCapacity = 4 * newCapacity;

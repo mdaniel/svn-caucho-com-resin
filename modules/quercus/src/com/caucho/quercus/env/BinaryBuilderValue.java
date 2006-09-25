@@ -482,12 +482,126 @@ public class BinaryBuilderValue extends BinaryValue {
     sb.append("\";");
   }
 
+  //
   // append code
+  //
+
+  /**
+   * Append a Java string to the value.
+   */
+  @Override
+  public final StringValue append(String s)
+  {
+    // XXX: different encoding?
+    
+    if (s == null)
+      return this;
+    
+    for (int i = 0; i < s.length(); i++) {
+      append((byte) s.charAt(i));
+    }
+    
+    return this;
+  }
+
+  /**
+   * Append a Java string to the value.
+   */
+  @Override
+  public final StringValue append(String s, int start, int end)
+  {
+    // XXX: different encoding?
+    
+    if (s == null)
+      return this;
+    
+    for (int i = start; i < end; i++) {
+      append((byte) s.charAt(i));
+    }
+    
+    return this;
+  }
+
+  /**
+   * Append a Java buffer to the value.
+   */
+  @Override
+  public final StringValue append(char []buf, int offset, int length)
+  {
+    // XXX: different encoding?
+    
+    if (buf == null)
+      return this;
+
+    int end = offset + length;
+    for (int i = offset; i < end; i++) {
+      append((byte) buf[i]);
+    }
+    
+    return this;
+  }
+
+  /**
+   * Append a Java buffer to the value.
+   */
+  @Override
+  public final StringValue append(CharSequence buf, int head, int tail)
+  {
+    int length = tail - head;
+    
+    if (_buffer.length < _length + length)
+      ensureCapacity(_length + length);
+
+    if (buf instanceof BinaryBuilderValue) {
+      BinaryBuilderValue sb = (BinaryBuilderValue) buf;
+      
+      System.arraycopy(sb._buffer, head, _buffer, _length, tail - head);
+
+      _length += tail - head;
+    }
+    else {
+      // XXX: encoding(?)
+      
+      for (; head < tail; head++)
+	_buffer[_length++] = (byte) buf.charAt(head);
+    }
+
+    return this;
+  }
+
+  /**
+   * Append a Java buffer to the value.
+   */
+  // @Override
+  public final StringValue append(BinaryBuilderValue sb, int head, int tail)
+  {
+    int length = tail - head;
+    
+    if (_buffer.length < _length + length)
+      ensureCapacity(_length + length);
+
+    System.arraycopy(sb._buffer, head, _buffer, _length, tail - head);
+
+    _length += tail - head;
+
+    return this;
+  }
+
+  /**
+   * Append a Java value to the value.
+   */
+  @Override
+  public final StringValue append(Value v)
+  {
+    v.appendTo(this);
+
+    return this;
+  }
 
   /**
    * Append a buffer to the value.
    */
-  public final BinaryBuilderValue append(byte []buf, int offset, int length)
+  public final StringValue append(byte []buf, int offset, int length)
   {
     if (_buffer.length < _length + length)
       ensureCapacity(_length + length);
@@ -502,7 +616,7 @@ public class BinaryBuilderValue extends BinaryValue {
   /**
    * Append a double to the value.
    */
-  public final BinaryBuilderValue append(byte []buf)
+  public final StringValue append(byte []buf)
   {
     return append(buf, 0, buf.length);
   }
@@ -510,7 +624,20 @@ public class BinaryBuilderValue extends BinaryValue {
   /**
    * Append a byte to the value.
    */
-  public final BinaryBuilderValue append(int v)
+  public final StringValue append(byte v)
+  {
+    if (_buffer.length < _length + 1)
+      ensureCapacity(_length + 1);
+
+    _buffer[_length++] = v;
+
+    return this;
+  }
+
+  /**
+   * Append a byte to the value.
+   */
+  public final StringValue appendByte(int v)
   {
     if (_buffer.length < _length + 1)
       ensureCapacity(_length + 1);

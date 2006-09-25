@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.lib;
 
+import java.io.*;
+import java.util.*;
 import java.util.logging.Logger;
 
 import com.caucho.quercus.Quercus;
@@ -39,14 +41,10 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.Reference;
 
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringBuilderValue;
+import com.caucho.quercus.env.*;
 
-import com.caucho.util.L10N;
-import com.caucho.util.IntMap;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
 
 /**
  * Quercus tokenizer 
@@ -179,9 +177,168 @@ public class TokenModule extends AbstractQuercusModule {
 
   private static final IntMap _reservedMap = new IntMap();
 
+  private static final HashMap<String,StringValue> _iniMap
+    = new HashMap<String,StringValue>();
+
   public String []getLoadedExtensions()
   {
     return new String[] { "tokenizer" };
+  }
+
+  /**
+   * Returns the default quercus.ini values.
+   */
+  public Map<String,StringValue> getDefaultIni()
+  {
+    return _iniMap;
+  }
+
+  public static Value highlight_string(Env env,
+				       StringValue s,
+				       @Optional boolean isReturn)
+  {
+    try {
+      StringBuilderValue sb = isReturn ? new StringBuilderValue() : null;
+      WriteStream out = env.getOut();
+
+      Token lexer = new Token(s);
+      int token;
+      StringValue topColor = new StringValueImpl("#000000");
+      StringValue lastColor = topColor;
+
+      highlight(sb, out, "<code>");
+      highlight(sb, out, "<span style=\"color: #000000\">\n");
+      
+      while ((token = lexer.nextToken()) >= 0) {
+	StringValue color = getColor(env, token);
+
+	if (color != null && ! color.equals(lastColor)) {
+	  if (! topColor.equals(lastColor))
+	    highlight(sb, out, "</span>");
+	  
+	  if (! topColor.equals(color))
+	    highlight(sb, out, "<span style=\"color: " + color + "\">");
+	  
+	  lastColor = color;
+	}
+	
+	if (0x20 <= token && token <= 0x7f) {
+	  if (sb != null)
+	    sb.append((char) token);
+	  else
+	    out.print((char) token);
+	}
+	else {
+	  StringValue lexeme = lexer.getLexeme();
+
+	  highlight(sb, out, lexeme);
+	}
+      }
+      
+      if (! topColor.equals(lastColor))
+	highlight(sb, out, "</span>\n");
+      highlight(sb, out, "</span>\n");
+      highlight(sb, out, "</code>");
+
+      if (sb != null)
+	return sb;
+      else
+	return BooleanValue.TRUE;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  private static void highlight(StringBuilderValue sb,
+				WriteStream out,
+				String string)
+    throws IOException
+  {
+    if (sb != null) {
+      sb.append(string);
+    }
+    else {
+      out.print(string);
+    }
+  }
+
+  private static void highlight(StringBuilderValue sb,
+				WriteStream out,
+				StringValue string)
+    throws IOException
+  {
+    if (sb != null) {
+      int len = string.length();
+      for (int i = 0; i < len; i++) {
+	char ch = string.charAt(i);
+
+	switch (ch) {
+	case '<':
+	  sb.append("&lt;");
+	  break;
+	case '>':
+	  sb.append("&gt;");
+	  break;
+	default:
+	  sb.append(ch);
+	  break;
+	}
+      }
+    }
+    else {
+      int len = string.length();
+      for (int i = 0; i < len; i++) {
+	char ch = string.charAt(i);
+
+	switch (ch) {
+	case '<':
+	  out.print("&lt;");
+	  break;
+	case '>':
+	  out.print("&gt;");
+	  break;
+	default:
+	  out.print(ch);
+	  break;
+	}
+      }
+    }
+  }
+
+  private static StringValue getColor(Env env, int token)
+  {
+    switch (token) {
+    case T_INLINE_HTML:
+      return env.getIni("highlight.html");
+
+    case T_BAD_CHARACTER:
+    case T_CHARACTER:
+    case T_CLOSE_TAG:
+    case T_DNUMBER:
+    case T_END_HEREDOC:
+    case T_FILE:
+    case T_LINE:
+    case T_LNUMBER:
+    case T_OPEN_TAG:
+    case T_OPEN_TAG_WITH_ECHO:
+      return env.getIni("highlight.default");
+      
+    case T_COMMENT:
+    case T_DOC_COMMENT:
+    case T_ML_COMMENT:
+      return env.getIni("highlight.comment");
+      
+    case T_CONSTANT_ENCAPSED_STRING:
+    case T_STRING:
+      return env.getIni("highlight.string");
+
+    case T_ENCAPSED_AND_WHITESPACE:
+    case T_WHITESPACE:
+      return null;
+      
+    default:
+      return env.getIni("highlight.keyword");
+    }
   }
 
   /**
@@ -890,5 +1047,14 @@ public class TokenModule extends AbstractQuercusModule {
     _reservedMap.put("while", T_WHILE);
     _reservedMap.put("__FUNCTION__", T_FUNC_C);
     _reservedMap.put("__CLASS__", T_CLASS_C);
+  }
+
+  static {
+    addIni(_iniMap, "highlight.string", "#DD0000", PHP_INI_ALL);
+    addIni(_iniMap, "highlight.comment", "#FF8000", PHP_INI_ALL);
+    addIni(_iniMap, "highlight.keyword", "#007700", PHP_INI_ALL);
+    addIni(_iniMap, "highlight.bg", "#ffffff", PHP_INI_ALL);
+    addIni(_iniMap, "highlight.default", "#0000BB", PHP_INI_ALL);
+    addIni(_iniMap, "highlight.html", "#000000", PHP_INI_ALL);
   }
 }

@@ -282,6 +282,13 @@ public class NullValue extends Value {
     return new ArrayValueImpl();
   }
 
+  /**
+   * Append to a binary builder.
+   */
+  public void appendTo(BinaryBuilderValue sb)
+  {
+  }
+
   //
   // Java generator code
   //

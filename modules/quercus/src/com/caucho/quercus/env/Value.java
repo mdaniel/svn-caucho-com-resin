@@ -573,6 +573,14 @@ abstract public class Value {
     return new StringInputStream(toString());
   }
 
+  /**
+   * Converts to a string builder
+   */
+  public StringValue toStringBuilder()
+  {
+    return new StringBuilderValue(toString(), 32);
+  }
+
   //
   // Operations
   //
@@ -581,6 +589,14 @@ abstract public class Value {
    * Append to a string builder.
    */
   public void appendTo(StringBuilderValue sb)
+  {
+    sb.append(toString());
+  }
+
+  /**
+   * Append to a binary builder.
+   */
+  public void appendTo(BinaryBuilderValue sb)
   {
     sb.append(toString());
   }

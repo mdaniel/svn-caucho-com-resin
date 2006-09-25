@@ -84,6 +84,9 @@ public class ServerArrayValue extends ArrayValueImpl {
   private static final StringValue HTTPS_V
     = new StringValueImpl("HTTPS");
   
+  private static final StringValue HTTP_HOST_V
+    = new StringValueImpl("HTTP_HOST");
+  
   private final Env _env;
   
   private boolean _isFilled;
@@ -205,6 +208,7 @@ public class ServerArrayValue extends ArrayValueImpl {
 
     super.put(SERVER_NAME_V,
 	      new StringValueImpl(request.getServerName()));
+    
     super.put(SERVER_PORT_V,
 	      new LongValue(request.getServerPort()));
     super.put(REMOTE_HOST_V,
@@ -267,7 +271,18 @@ public class ServerArrayValue extends ArrayValueImpl {
 
       String value = request.getHeader(key);
 
-      super.put(convertHttpKey(key), new StringValueImpl(value));
+      if (key.equalsIgnoreCase("Host")) {
+	// php/1b19 (yacs)
+	int p = value.indexOf(':');
+
+	if (p > 0)
+	  super.put(HTTP_HOST_V, new StringValueImpl(value.substring(0, p)));
+	else
+	  super.put(HTTP_HOST_V, new StringValueImpl(value));
+      }
+      else {
+	super.put(convertHttpKey(key), new StringValueImpl(value));
+      }
     }
   }
 

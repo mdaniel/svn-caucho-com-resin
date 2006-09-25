@@ -69,9 +69,6 @@ public class ArrayValueImpl extends ArrayValue {
   private static final int SORT_STRING = 2;
   private static final int SORT_LOCALE_STRING = 5;
   
-  public static final GetKey GET_KEY = new GetKey();
-  public static final GetValue GET_VALUE = new GetValue();
-  
   private Entry []_entries;
   private int _hashMask;
 

@@ -588,7 +588,114 @@ abstract public class StringValue extends Value implements CharSequence {
     sb.append("\";");
   }
 
+  //
+  // append code
+  //
 
+  /**
+   * Append a Java string to the value.
+   */
+  public StringValue append(String s)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Append a Java string to the value.
+   */
+  public StringValue append(String s, int start, int end)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Append a Java buffer to the value.
+   */
+  public StringValue append(char []buf, int offset, int length)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Append a Java double to the value.
+   */
+  public final StringValue append(char []buf)
+  {
+    return append(buf, 0, buf.length);
+  }
+
+  /**
+   * Append a Java buffer to the value.
+   */
+  public StringValue append(CharSequence buf, int head, int tail)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Append a Java buffer to the value.
+   */
+  public StringValue append(StringBuilderValue sb, int head, int tail)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Append a Java char to the value.
+   */
+  public StringValue append(char v)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Append a Java long to the value.
+   */
+  public StringValue append(byte v)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Append a Java boolean to the value.
+   */
+  public final StringValue append(boolean v)
+  {
+    return append(v ? "true" : "false");
+  }
+
+  /**
+   * Append a Java long to the value.
+   */
+  public StringValue append(long v)
+  {
+    return append(String.valueOf(v));
+  }
+
+  /**
+   * Append a Java double to the value.
+   */
+  public StringValue append(double v)
+  {
+    return append(String.valueOf(v));
+  }
+
+  /**
+   * Append a Java value to the value.
+   */
+  public StringValue append(Object v)
+  {
+    return append(String.valueOf(v));
+  }
+
+  /**
+   * Append a Java value to the value.
+   */
+  public StringValue append(Value v)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
   /**
    * Append to a string builder.
    */
