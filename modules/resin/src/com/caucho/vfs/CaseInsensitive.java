@@ -32,6 +32,8 @@ import java.util.*;
 import java.io.*;
 import java.net.*;
 
+import javax.annotation.*;
+
 import com.caucho.loader.EnvironmentLocal;
 
 /**
@@ -71,6 +73,7 @@ public class CaseInsensitive {
   /**
    * Init.
    */
+  @PostConstruct
   public void init()
   {
     _caseInsensitive.set(new Boolean(_isCaseInsensitive));

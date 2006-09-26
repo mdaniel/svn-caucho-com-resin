@@ -79,4 +79,9 @@ public class ResinThreadPoolExecutor implements Executor {
   {
     _threadPool.closeEnvironment(env);
   }
+
+  public String toString()
+  {
+    return "ResinThreadPoolExecutor[]";
+  }
 }

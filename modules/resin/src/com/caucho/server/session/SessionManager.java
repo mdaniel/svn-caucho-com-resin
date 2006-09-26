@@ -254,11 +254,13 @@ public final class SessionManager implements ObjectManager, AlarmListener
       if (_cluster == null) {
 	_cluster = Cluster.getLocal();
 	ClusterServer selfServer = null;
+
 	if (_cluster != null) {
 	  _srunLength = _cluster.getServerList().length;
 	  
 	  selfServer = _cluster.getSelfServer();
 	  _selfServer = selfServer;
+
 	  if (selfServer != null) {
 	    _srunGroup = _cluster.getServerList();
 	    _srunIndex = selfServer.getIndex();
@@ -1201,7 +1203,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
 
     if (_isAppendServerIndex) {
       cb.append('.');
-      cb.append(index);
+      cb.append((index + 1));
     }
 
     return cb.toString();
@@ -1214,8 +1216,8 @@ public final class SessionManager implements ObjectManager, AlarmListener
   {
     long backupCode;
 
-    if (_selfServer != null && _selfServer.getServerConnector() != null)
-      backupCode = _selfServer.getServerConnector().generateBackupCode();
+    if (_selfServer != null)
+      backupCode = _selfServer.generateBackupCode();
     else
       backupCode = 0x000200010000L;
     

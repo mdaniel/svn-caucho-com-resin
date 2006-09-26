@@ -29,6 +29,8 @@
 
 package com.caucho.i18n;
 
+import javax.annotation.*;
+
 import com.caucho.util.L10N;
 
 import com.caucho.vfs.Encoding;
@@ -64,12 +66,13 @@ public class CharacterEncoding {
   /**
    * Initialize the resource.
    */
+  @PostConstruct
   public void init()
     throws Exception
   {
     if (_encoding == null)
       throw new ConfigException(L.l("character-encoding requires a 'value' attribute with the character encoding."));
-        
+
     _localEncoding.set(_encoding);
   }
 

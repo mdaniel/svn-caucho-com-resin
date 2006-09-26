@@ -379,6 +379,12 @@ public class Var extends Value {
     return _value.toUnicodeValue(env);
   }
 
+  @Override
+  public StringValue toStringBuilder()
+  {
+    return _value.toStringBuilder();
+  }
+
   //
   // Operations
   //

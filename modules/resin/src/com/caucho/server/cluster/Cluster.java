@@ -48,7 +48,7 @@ import java.util.logging.Logger;
 /**
  * Defines a set of clustered servers.
  */
-public class Cluster implements EnvironmentListener {
+public class Cluster implements EnvironmentListener, EnvironmentBean {
   private static final L10N L = new L10N(ClusterGroup.class);
   private static final Logger log = Logger.getLogger(Cluster.class.getName());
 
@@ -226,9 +226,9 @@ public class Cluster implements EnvironmentListener {
     ClusterServer oldServer = findServer(server.getId());
 
     if (oldServer != null)
-      log.warning(L.l("duplicate <srun> with server-id='{0}'",
+      log.warning(L.l("duplicate <server> with id='{0}'",
                       server.getId()));
-    
+
     _serverList.add(server);
     _serverArray = new ClusterServer[_serverList.size()];
     _serverList.toArray(_serverArray);

@@ -31,6 +31,8 @@ package com.caucho.naming;
 import java.io.*;
 import java.util.*;
 
+import javax.annotation.*;
+
 import javax.naming.*;
 import javax.naming.spi.*;
 
@@ -197,6 +199,7 @@ public class LinkProxy implements ObjectProxy, java.io.Serializable {
   /**
    * Initialize the resource.
    */
+  @PostConstruct
   public void init()
     throws Exception
   {
