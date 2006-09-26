@@ -178,9 +178,9 @@ public class LoadEntityExpr extends AbstractAmberExpr {
    */
   public void generateSelect(CharBuffer cb)
   {
-    cb.append(getEntityType().getId().generateSelect(getTable()));
-
     EntityType type = getEntityType();
+
+    cb.append(type.getId().generateSelect(getTable()));
 
     String valueSelect = type.generateLoadSelect(_fromItem.getTable(),
                                                  _fromItem.getName());

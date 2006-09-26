@@ -37,27 +37,37 @@ import com.caucho.amber.AmberRuntimeException;
 
 import com.caucho.amber.field.AmberField;
 
+import com.caucho.amber.type.EntityType;
+
 /**
  * Represents an amber mapping query expression
  */
 abstract public class AbstractPathExpr extends AbstractAmberExpr
   implements PathExpr {
   private static final L10N L = new L10N(AbstractPathExpr.class);
-  
+
   /**
    * Creates the expr from the path.
    */
   public AmberExpr createField(QueryParser parser, String fieldName)
   {
-    AmberField field = getTargetType().getField(fieldName);
+    AmberField field = null;
+
+    EntityType type = getTargetType();
+
+    do {
+      field = type.getField(fieldName);
+      type = type.getParentType();
+    }
+    while ((type != null) && (field == null));
 
     if (field == null)
       throw new AmberRuntimeException(L.l("'{0}' is an unknown field of '{1}'.",
-					  fieldName, getTargetType().getName()));
+            fieldName, getTargetType().getName()));
 
     return field.createExpr(parser, this);
   }
-  
+
   /**
    * Creates an array reference.
    */
@@ -81,7 +91,7 @@ abstract public class AbstractPathExpr extends AbstractAmberExpr
   {
     return null;
   }
-  
+
   /**
    * Returns the from item
    */

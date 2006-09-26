@@ -1405,6 +1405,7 @@ public class EntityType extends Type {
         continue;
 
       String propSelect = field.generateLoadSelect(table, id);
+
       if (propSelect == null)
         continue;
 

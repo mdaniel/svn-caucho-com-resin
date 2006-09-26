@@ -125,6 +125,9 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
   private ArrayList<Completion> _linkCompletions = new ArrayList<Completion>();
   private ArrayList<Completion> _depCompletions = new ArrayList<Completion>();
 
+  private HashMap<EntityType, ArrayList<OneToOneCompletion>> _oneToOneCompletions
+    = new HashMap<EntityType, ArrayList<OneToOneCompletion>>();
+
 
   /**
    * Creates the introspector.
@@ -1264,6 +1267,15 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
     link.setSourceCascadeDelete(true);
 
     secondaryTable.setDependentIdLink(link);
+
+    // jpa/0l48
+    //    link = new LinkColumns(primaryTable,
+    //                           secondaryTable,
+    //                           linkColumns);
+    //
+    //    link.setSourceCascadeDelete(true);
+    //
+    //    primaryTable.setDependentIdLink(link);
   }
 
   /**
@@ -1502,10 +1514,22 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
 
       sourceType.setHasDependent(true);
 
-      _depCompletions.add(new OneToOneCompletion(sourceType,
-                                                 field,
-                                                 fieldName,
-                                                 fieldType));
+      OneToOneCompletion oneToOne = new OneToOneCompletion(sourceType,
+                                                           field,
+                                                           fieldName,
+                                                           fieldType);
+
+      _depCompletions.add(oneToOne);
+
+      ArrayList<OneToOneCompletion> oneToOneList
+        = _oneToOneCompletions.get(sourceType);
+
+      if (oneToOneList == null) {
+        oneToOneList = new ArrayList<OneToOneCompletion>();
+        _oneToOneCompletions.put(sourceType, oneToOneList);
+      }
+
+      oneToOneList.add(oneToOne);
     }
     else if (field.isAnnotationPresent(javax.persistence.ManyToMany.class)) {
 
@@ -1834,7 +1858,22 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
       n = joinColumnMap.size();
 
     ArrayList<ForeignColumn> foreignColumns = new ArrayList<ForeignColumn>();
-    for (Column keyColumn : targetType.getId().getColumns()) {
+
+    EntityType parentType = targetType;
+
+    ArrayList<Column> targetIdColumns = targetType.getId().getColumns();
+
+    while (targetIdColumns.size() == 0) {
+
+      parentType = parentType.getParentType();
+
+      if (parentType == null)
+        break;
+
+      targetIdColumns = parentType.getId().getColumns();
+    }
+
+    for (Column keyColumn : targetIdColumns) {
 
       String columnName = fieldName.toUpperCase() + '_' + keyColumn.getName();
       boolean nullable = true;
@@ -2294,8 +2333,28 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
                                               String mappedBy)
   {
     for (AmberField field : targetType.getFields()) {
+
       if (field.getName().equals(mappedBy)) {
         return (EntityManyToOneField) field;
+      }
+    }
+
+    return null;
+  }
+
+  private OneToOneCompletion getSourceCompletion(EntityType targetType,
+                                                 String mappedBy)
+  {
+    ArrayList<OneToOneCompletion> sourceCompletions
+      = _oneToOneCompletions.get(targetType);
+
+    if (sourceCompletions == null)
+      return null;
+
+    for (OneToOneCompletion oneToOne : sourceCompletions) {
+
+      if (oneToOne.getFieldName().equals(mappedBy)) {
+        return oneToOne;
       }
     }
 
@@ -2602,6 +2661,11 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
       _fieldType = fieldType;
     }
 
+    String getFieldName()
+    {
+      return _fieldName;
+    }
+
     void complete()
       throws ConfigException
     {
@@ -2671,6 +2735,16 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
         // XXX: set unique
       }
       else {
+
+        OneToOneCompletion otherSide
+          = getSourceCompletion(targetType, mappedBy);
+
+        if (otherSide != null) {
+          _depCompletions.remove(otherSide);
+
+          otherSide.complete();
+        }
+
         EntityManyToOneField sourceField
           = getSourceField(targetType, mappedBy);
 

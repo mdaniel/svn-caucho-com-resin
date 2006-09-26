@@ -109,6 +109,10 @@ public class ColumnExpr extends AbstractAmberExpr {
     }
 
     LinkColumns link = getColumn().getTable().getDependentIdLink();
+
+    if (link == null)
+      return this;
+
     _fromItem = parser.createDependentFromItem(parentFromItem, link);
 
     return this;
