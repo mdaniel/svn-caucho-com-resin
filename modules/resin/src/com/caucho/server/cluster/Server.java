@@ -960,7 +960,7 @@ public class Server extends ProtocolDispatchServer
     if (_threadIdleMax < _threadIdleMin)
       throw new ConfigException(L.l("<thread-idle-min> ({0}) must be less than <thread-max> ({1})",
 				    _threadIdleMin, _threadIdleMax));
-    
+
     if (_keepaliveSelectEnable) {
       try {
         Class cl = Class.forName("com.caucho.server.port.JniSelectManager");

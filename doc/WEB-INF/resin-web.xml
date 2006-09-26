@@ -129,6 +129,11 @@
                   startup-mode="lazy">
   </web-app-deploy>
 
+  <web-app-deploy url-prefix="/hessian/tutorial"
+                  path="hessian/tutorial"
+                  startup-mode="lazy">
+  </web-app-deploy>
+
   <web-app-deploy url-prefix="/demo"
                   path="demo"
                   startup-mode="lazy">

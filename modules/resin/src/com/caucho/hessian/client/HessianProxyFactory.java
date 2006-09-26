@@ -285,11 +285,7 @@ public class HessianProxyFactory implements ServiceProxyFactory, ObjectFactory {
 
     if (_readTimeout > 0) {
       try {
-	// only available for JDK 1.5
-	Method method = conn.getClass().getMethod("setReadTimeout", new Class[] { int.class });
-
-	if (method != null)
-	  method.invoke(conn, new Object[] { new Integer((int) _readTimeout) });
+	conn.setReadTimeout((int) _readTimeout);
       } catch (Throwable e) {
       }
     }

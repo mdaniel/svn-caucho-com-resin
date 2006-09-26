@@ -84,6 +84,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
       factory.setUser(user);
       factory.setPassword(password);
       factory.setDebug(true);
+      factory.setReadTimeout(120000);
 
       _proxy =
 	(DeploymentManagerAPI) factory.create(DeploymentManagerAPI.class, _uri);
@@ -104,7 +105,6 @@ public class DeploymentManagerImpl implements DeploymentManager {
   public Target []getTargets()
     throws IllegalStateException
   {
-    System.out.println("GET-TARGETS");
     if (_proxy == null)
       throw new IllegalStateException("DeploymentManager is disconnected");
 
@@ -115,10 +115,8 @@ public class DeploymentManagerImpl implements DeploymentManager {
 
       Target []targets = _proxy.getTargets();
 
-      System.out.println("TARGETS:" + targets);
       if (targets == null)
 	return new Target[0];
-      System.out.println("TARGETS:" + targets.length);
       
       return targets;
     } catch (Throwable e) {
