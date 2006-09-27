@@ -486,35 +486,30 @@ public class EntityComponent extends ClassComponent {
       out.println("}");
     }
 
-    if (_entityType.getFields().size() > 0) {
-      int index = _entityType.getLoadGroupIndex();
+    int index = _entityType.getLoadGroupIndex();
 
-      if (_entityType.getParentType() == null)
-        index = 0;
+    if (_entityType.getParentType() == null)
+      index = 0;
 
-      out.println();
-      out.println("public void __caucho_retrieve(com.caucho.amber.manager.AmberConnection aConn)");
-      out.println("  throws java.sql.SQLException");
-      out.println("{");
-      out.pushDepth();
+    out.println();
+    out.println("public void __caucho_retrieve(com.caucho.amber.manager.AmberConnection aConn)");
+    out.println("  throws java.sql.SQLException");
+    out.println("{");
 
-      out.println("__caucho_load_" + index + "(aConn);");
+    if (_entityType.getFields().size() > 0)
+      out.println("  __caucho_load_" + index + "(aConn);");
 
-      out.popDepth();
-      out.println("}");
+    out.println("}");
 
-      out.println();
-      out.println("public void __caucho_retrieve(com.caucho.amber.manager.AmberConnection aConn, java.util.Map preloadedProperties)");
-      out.println("  throws java.sql.SQLException");
-      out.println("{");
-      out.pushDepth();
+    out.println();
+    out.println("public void __caucho_retrieve(com.caucho.amber.manager.AmberConnection aConn, java.util.Map preloadedProperties)");
+    out.println("  throws java.sql.SQLException");
+    out.println("{");
 
-      out.println();
-      out.println("__caucho_load_" + index + "(aConn, preloadedProperties);");
+    if (_entityType.getFields().size() > 0)
+      out.println("  __caucho_load_" + index + "(aConn, preloadedProperties);");
 
-      out.popDepth();
-      out.println("}");
-    }
+    out.println("}");
   }
 
   /**

@@ -511,10 +511,10 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
   {
     JClass []param = method.getParameterTypes();
 
-    String fieldName = toFieldName(method.getName().substring(3));
+    String methodName = method.getName();
     JClass jClass = type.getBeanClass();
 
-    getInternalPostLoadConfig(jClass, method, fieldName);
+    getInternalPostLoadConfig(jClass, method, methodName);
 
     if (! _annotationCfg.isNull()) {
       validateCallback("PostLoad", method);
@@ -522,7 +522,7 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
       type.addPostLoadCallback(method);
     }
 
-    getInternalPrePersistConfig(jClass, method, fieldName);
+    getInternalPrePersistConfig(jClass, method, methodName);
 
     if (! _annotationCfg.isNull()) {
       validateCallback("PrePersist", method);
@@ -530,7 +530,7 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
       type.addPrePersistCallback(method);
     }
 
-    getInternalPostPersistConfig(jClass, method, fieldName);
+    getInternalPostPersistConfig(jClass, method, methodName);
 
     if (! _annotationCfg.isNull()) {
       validateCallback("PostPersist", method);
@@ -538,7 +538,7 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
       type.addPostPersistCallback(method);
     }
 
-    getInternalPreUpdateConfig(jClass, method, fieldName);
+    getInternalPreUpdateConfig(jClass, method, methodName);
 
     if (! _annotationCfg.isNull()) {
       validateCallback("PreUpdate", method);
@@ -546,7 +546,7 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
       type.addPreUpdateCallback(method);
     }
 
-    getInternalPostUpdateConfig(jClass, method, fieldName);
+    getInternalPostUpdateConfig(jClass, method, methodName);
 
     if (! _annotationCfg.isNull()) {
       validateCallback("PostUpdate", method);
@@ -554,7 +554,7 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
       type.addPostUpdateCallback(method);
     }
 
-    getInternalPreRemoveConfig(jClass, method, fieldName);
+    getInternalPreRemoveConfig(jClass, method, methodName);
 
     if (! _annotationCfg.isNull()) {
       validateCallback("PreRemove", method);
@@ -562,7 +562,7 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
       type.addPreRemoveCallback(method);
     }
 
-    getInternalPostRemoveConfig(jClass, method, fieldName);
+    getInternalPostRemoveConfig(jClass, method, methodName);
 
     if (! _annotationCfg.isNull()) {
       validateCallback("PostRemove", method);
@@ -1940,8 +1940,7 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
                                    EntityType targetType)
     throws ConfigException
   {
-    if ((joinColumnMap == null) || (joinColumnMap.size() == 0) &&
-        (columnsAnn == null)) // || columnsAnn.length == 0)
+    if ((joinColumnMap == null) && (columnsAnn == null))
       return;
 
     com.caucho.amber.field.Id id = targetType.getId();
@@ -2280,7 +2279,21 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
   {
     ArrayList<ForeignColumn> columns = new ArrayList<ForeignColumn>();
 
-    for (Column key : type.getId().getColumns()) {
+    EntityType parentType = type;
+
+    ArrayList<Column> targetIdColumns = type.getId().getColumns();
+
+    while (targetIdColumns.size() == 0) {
+
+      parentType = parentType.getParentType();
+
+      if (parentType == null)
+        break;
+
+      targetIdColumns = parentType.getId().getColumns();
+    }
+
+    for (Column key : targetIdColumns) {
       columns.add(mapTable.createForeignColumn(key.getName(), key));
     }
 
@@ -2293,7 +2306,21 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
   {
     ArrayList<ForeignColumn> columns = new ArrayList<ForeignColumn>();
 
-    for (Column key : type.getId().getColumns()) {
+    EntityType parentType = type;
+
+    ArrayList<Column> targetIdColumns = type.getId().getColumns();
+
+    while (targetIdColumns.size() == 0) {
+
+      parentType = parentType.getParentType();
+
+      if (parentType == null)
+        break;
+
+      targetIdColumns = parentType.getId().getColumns();
+    }
+
+    for (Column key : targetIdColumns) {
       columns.add(mapTable.createForeignColumn(prefix + key.getName(), key));
     }
 
