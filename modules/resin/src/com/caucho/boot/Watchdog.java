@@ -383,8 +383,6 @@ public class Watchdog extends AbstractManagedObject
     if (! _lifecycle.toActive())
       return -1;
 
-    registerSelf();
-
     _argv = argv;
     _serverRoot = serverRoot;
     _isSingle = true;

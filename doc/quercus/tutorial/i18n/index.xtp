@@ -14,24 +14,32 @@ application.
 
 <body>
 
-<summary localtoc="3" />
+<localtoc/>
 
-<section title="Files in this tutorial">
+<s1 title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="i18n.php"/>
-    <td>The i18n example page
-<tr><td><viewfile-link file="locale/de_DE/LC_MESSAGES/messages.po"/>
-    <td>German translations
-<tr><td><viewfile-link file="locale/en_AU/LC_MESSAGES/messages.po"/>
-    <td>Australian translations
-<tr><td><viewfile-link file="locale/fr_CA/LC_MESSAGES/messages.po"/>
-    <td>French translations
+<tr>
+    <td><viewfile-link file="i18n.php"/></td>
+    <td>The i18n example page</td>
+</tr>
+<tr>
+    <td><viewfile-link file="locale/de_DE/LC_MESSAGES/messages.po"/></td>
+    <td>German translations</td>
+</tr>
+<tr>
+    <td><viewfile-link file="locale/en_AU/LC_MESSAGES/messages.po"/></td>
+    <td>Australian translations</td>
+</tr>
+<tr>
+    <td><viewfile-link file="locale/fr_CA/LC_MESSAGES/messages.po"/></td>
+    <td>French translations</td>
+</tr>
 </deftable>
-</section>
+</s1>
 
-<section title="Internationalization in PHP/Quercus">
+<s1 title="Internationalization in PHP/Quercus">
 
-<section title="Introduction">
+<s2 title="Introduction">
 
 <p>For most PHP applications, internationalization simply means using gettext
 to prepare the application for translations.  Gettext works by creating
@@ -43,9 +51,9 @@ source code.</p>
 simple PHP program and showcases the benefits of using Quercus, Caucho
 Technology's PHP implementation in Java, over the standard PHP interpreter.</p>
 
-</section>
+</s2>
 
-<section title="Simple PHP Application">
+<s2 title="Simple PHP Application">
 
 <p>Below is a non-internationalized PHP script that just outputs
 "Good morning":</p>
@@ -58,9 +66,9 @@ Technology's PHP implementation in Java, over the standard PHP interpreter.</p>
 ?>
 </example>
 
-</section>
+</s2>
 
-<section title="Preparing translation files">
+<s2 title="Preparing translation files">
 
 <p>The developer would need to extract the strings from the above script into
 a .po file.  The downloadable <a href="http://www.gnu.org/software/gettext/">
@@ -104,26 +112,18 @@ msgstr ""
 <p>The string right after msgstr will be the string that gettext returns as the
 translation for "Good morning".  Before giving the PO file to the translators,
 the developer needs to set the CHARSET, or character set, of the
-original/translated strings.  The translators should type their translations in
- this character set.  The most common character set is "UTF-8".</p>
+original/translated strings.  The translators should type their translations
+in  this character set.  The most common character set is "UTF-8".</p>
 
-<p>After the translations are done, the .po file needs to be turned into a
-binary .mo file that gettext can use.  The command line GNU msgfmt utility
-will create a messages.mo file:</p>
-
-<example>
-  $msgfmt messages.po
-</example>
-
-<p>Notice: Quercus' gettext library works with both .po and .mo files, so the
+<p>(Quercus' gettext library works with both .po and .mo files, so the
 conversion from .po to .mo can be skipped, thus preventing source control
 problems when a .mo file is not kept up to date with the .po file.  Quercus
 will try to read translations from the .po file and if the .po file is not
-found, it will try to read the .mo file.</p>
+found, it will try to read the .mo file.)</p>
 
-</section>
+</s2>
 
-<section title="Modifying the application">
+<s2 title="Modifying the application">
 
 <p>The following is the internationalized script:</p>
 
@@ -141,9 +141,9 @@ found, it will try to read the .mo file.</p>
 directory of the translation files with prefix "messages".  The underscore
 function is the shorthand version of the gettext() function.</p>
 
-</section>
+</s2>
 
-<section title="Organizing the translation files">
+<s2 title="Organizing the translation files">
 
 <p>Translation files should be placed in a directory hierarchy in the base
 directory specified by bindtextdomain().  Below are examples for US English,
@@ -152,9 +152,9 @@ Canada French, and Germany German for the default gettext category/directory
 default category.</p>
 
 <example>
-  ./locale/de_DE/LC_MESSAGES/messages.mo
-  ./locale/en_US/LC_MESSAGES/messages.mo
-  ./locale/fr_CA/LC_MESSAGES/messages.mo
+  ./locale/de_DE/LC_MESSAGES/messages.po
+  ./locale/en_US/LC_MESSAGES/messages.po
+  ./locale/fr_CA/LC_MESSAGES/messages.po
 </example>
 
 <p>The locale strings "en_US", "fr_CA", and "de_DE" are made up of
@@ -166,22 +166,9 @@ on the locale of the host machine.  The locale can be changed manually by:</p>
   setlocale(LC_MESSAGES, "de_DE");
 </example>
 
-<p>The following will also work, but not recommended:</p>
+</s2>
 
-<example>
-  putenv("LANG=de_DE");
-</example>
-
-<p>For non-CGI configurations of PHP, gettext only searches for the translation
-files once and keeps them in cache.  Adding or changing .mo files will require
-restarting the webserver.</p>
-
-<p>Notice: For Quercus, a restart is not required as Quercus will automatically
-reload new and modified translation files.</p>
-
-</section>
-
-</section>
+</s1>
 
 </body>
 </document>

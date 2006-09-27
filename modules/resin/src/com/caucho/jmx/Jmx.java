@@ -248,8 +248,13 @@ public class Jmx {
 
     try {
       thread.setContextClassLoader(loader);
-      
-      return getMBeanServer().registerMBean(createMBean(object, name), name);
+
+      AbstractMBeanServer mbeanServer = getMBeanServer();
+
+      if (mbeanServer != null)
+	return mbeanServer.registerMBean(createMBean(object, name), name);
+      else
+	return null;
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
