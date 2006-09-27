@@ -1630,7 +1630,7 @@ public class PageContextImpl extends PageContext
   /**
    * Set/Remove an webApp attribute.
    */
-  public void webAppSetOrRemove(String var, Object value)
+  public void applicationSetOrRemove(String var, Object value)
   {
     if (value != null)
       getApplication().setAttribute(var, value);

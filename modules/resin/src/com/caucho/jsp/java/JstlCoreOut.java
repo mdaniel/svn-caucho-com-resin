@@ -150,7 +150,7 @@ public class JstlCoreOut extends JstlNode {
       int index = _gen.addExpr(_value);
     
       out.print("_caucho_expr_" + index +
-		".print(out, pageContext.getELContext(), " + escapeXml + ")");
+		".print(out, _jsp_env, " + escapeXml + ")");
     }
     
     if (_default != null || _defaultAttr != null) {
@@ -190,7 +190,7 @@ public class JstlCoreOut extends JstlNode {
 	else {
 	  int defaultIndex = _gen.addExpr(defaultExpr);
 	  out.println("_caucho_expr_" + defaultIndex +
-		      ".print(out, pageContext.getELContext(), " + escapeXml + ");");
+		      ".print(out, _jsp_env, " + escapeXml + ");");
 	}
       }
       

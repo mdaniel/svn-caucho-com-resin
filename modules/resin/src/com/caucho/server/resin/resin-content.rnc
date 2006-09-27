@@ -507,6 +507,8 @@ r_server-default = element server-default {
 r_server-Basis =
   r_group-name?
 
+  & r_cluster-port*
+
   & r_http*
 
   & (attribute jvm-arg { string }
@@ -545,8 +547,6 @@ r_server-Basis =
   & r_thread-idle-max?
 
   & r_thread-idle-min?
-
-  & r_port*
 
   & r_protocol*
 

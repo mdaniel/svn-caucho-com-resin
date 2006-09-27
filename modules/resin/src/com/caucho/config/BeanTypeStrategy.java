@@ -347,8 +347,12 @@ public class BeanTypeStrategy extends TypeStrategy {
   public void init(Object bean)
     throws Exception
   {
-    for (int i = 0; i < _initList.size(); i++)
-      _initList.get(i).invoke(bean);
+    try {
+      for (int i = 0; i < _initList.size(); i++)
+	_initList.get(i).invoke(bean);
+    } catch (InvocationTargetException e) {
+      throw new ConfigException(e.getCause());
+    }
     
     for (int i = 0; i < _destroyList.size(); i++) {
       Method method = _destroyList.get(i);

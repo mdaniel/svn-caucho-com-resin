@@ -951,7 +951,7 @@ public abstract class JspNode {
       else if (outValue.startsWith("\""))
 	out.print(" + (" + outValue + ")");
       else
-	out.print(" + com.caucho.el.Expr.toStringNonNull(" + outValue + ", null)");
+	out.print(" + com.caucho.el.Expr.toString(" + outValue + ", null)");
     }
   }
 

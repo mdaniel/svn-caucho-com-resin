@@ -8,6 +8,7 @@
 
 <s2 title="3.1snap - Sep 20, 2006">
 <ul>
+<li>cookie-append-server-index should append exact index (rep by Serge Knystautas, #1346)</li>
 <li>(2006-09-20) mod_caucho issues with config server (rep by Steve Baugus)</li>
 <li>session write at finish was clearing useCount too early, causing spurious session failures (rep by Ed Hollingsworth)</li>
 <li>Disable select-manager for win32 because of socket limits (#1344, rep by Olaf Fentsch)</li>

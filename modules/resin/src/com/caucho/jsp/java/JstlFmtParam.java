@@ -111,7 +111,7 @@ public class JstlFmtParam extends JstlNode {
       else {
 	int paramIndex = _gen.addExpr(_value);
 
-	out.println(lhs + " = _caucho_expr_" + paramIndex + ".evalObject(pageContext);");
+	out.println(lhs + " = _caucho_expr_" + paramIndex + ".evalObject(_jsp_env);");
       }
     }
     else {

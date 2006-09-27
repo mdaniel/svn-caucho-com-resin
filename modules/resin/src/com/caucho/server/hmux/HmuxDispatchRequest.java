@@ -369,7 +369,6 @@ public class HmuxDispatchRequest {
     */
 
     Cluster cluster = host.getCluster();
-    System.out.println("CLUSTER:" + cluster);
 
     if (cluster == null)
       return 0;

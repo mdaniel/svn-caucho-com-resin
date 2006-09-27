@@ -76,6 +76,7 @@ public class InetNetwork {
     int len = network.length();
     
     long address = 0;
+    int digits = 0;
 
     int ch = 0;
     while (i < len) {
@@ -88,11 +89,13 @@ public class InetNetwork {
 
       address = 256 * address + digit;
 
+      digits++;
+
       if (i < len && ch == '.')
         i++;
     }
 
-    for (; i < len; i++) {
+    while (digits++ < 4) {
       address *= 256;
     }
       

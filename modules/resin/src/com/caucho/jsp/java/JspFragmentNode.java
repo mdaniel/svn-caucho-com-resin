@@ -241,6 +241,7 @@ abstract public class JspFragmentNode extends JspContainerNode
     out.pushDepth();
 
     out.println("JspWriter out = pageContext.pushBody();");
+    out.println("javax.el.ELContext _jsp_env = pageContext.getELContext();");
 
     out.println("try {");
     out.pushDepth();

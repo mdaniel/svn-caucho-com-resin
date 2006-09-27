@@ -1363,6 +1363,7 @@ public class JavaJspGenerator extends JspGenerator {
     out.println();
     out.println("frag._frag_code = code;");
     out.println("frag.pageContext = pageContext;");
+    out.println("frag._jsp_env = pageContext.getELContext();");
     out.println("frag._jsp_parent_tag = parent;");
     out.println("frag._jspBody = jspBody;");
     out.println();

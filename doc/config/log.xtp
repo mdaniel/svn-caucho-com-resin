@@ -578,7 +578,7 @@ of your filesystem path:</p>
 
 <example title="Filesystem path using Environment EL variables">
   &lt;log name="" level="all" 
-       path="log/debug-${'${'}server.name}.log"
+       path="log/debug-${'${'}server.id}.log"
        rollover-period="1h" rollover-count="1"/&gt;
 </example>
 

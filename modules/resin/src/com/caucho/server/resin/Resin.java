@@ -53,6 +53,7 @@ import com.caucho.lifecycle.*;
 import com.caucho.loader.*;
 import com.caucho.management.j2ee.*;
 import com.caucho.management.server.*;
+import com.caucho.naming.*;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.cluster.*;
 import com.caucho.transaction.cfg.TransactionManagerConfig;
@@ -170,8 +171,16 @@ public class Resin implements EnvironmentBean, SchemaBean
     
     EL.setEnvironment(elContext);
     EL.setVariableMap(_variableMap, _classLoader);
+    
     _variableMap.put("fmt", new com.caucho.config.functions.FmtFunctions());
 
+    try {
+      _variableMap.put("jndi", Jndi.class.getMethod("lookup", new Class[] { String.class }));
+      _variableMap.put("jndi:lookup", Jndi.class.getMethod("lookup", new Class[] { String.class }));
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
+    
     new ResinAdmin(this);
   }
 

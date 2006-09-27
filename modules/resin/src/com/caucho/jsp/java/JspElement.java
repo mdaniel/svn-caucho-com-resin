@@ -142,7 +142,7 @@ public class JspElement extends JspContainerNode {
       var = "_caucho_var" + _gen.uniqueId();
       int index = _gen.addExpr(_name);
       
-      out.println("String " + var + " = _caucho_expr_" + index + ".evalString(pageContext);");
+      out.println("String " + var + " = _caucho_expr_" + index + ".evalString(_jsp_env);");
     }
     else if (hasRuntimeAttribute(_name)) {
       // jsp/0408

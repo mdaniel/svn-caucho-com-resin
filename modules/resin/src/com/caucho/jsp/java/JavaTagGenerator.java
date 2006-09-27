@@ -364,6 +364,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
     }
     
     out.println("com.caucho.jsp.PageContextWrapper jspContext = pageContext;");
+    out.println("javax.el.ELContext _jsp_env = pageContext.getELContext();");
     out.println("javax.servlet.jsp.JspWriter out = pageContext.getOut();");
     generateTagAttributes(out);
     if (hasScripting())

@@ -32,6 +32,8 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.*;
 
+import javax.el.*;
+
 import javax.servlet.*;
 import javax.servlet.jsp.*;
 import javax.servlet.http.*;
@@ -52,6 +54,9 @@ abstract public class JspFragmentSupport extends JspFragment {
 
   // the page context
   protected PageContextImpl pageContext;
+
+  // the EL context
+  protected ELContext _jsp_env;
   
   // the parent tag
   protected JspTag _jsp_parent_tag;

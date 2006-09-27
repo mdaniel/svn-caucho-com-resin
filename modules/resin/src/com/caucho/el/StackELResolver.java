@@ -135,8 +135,9 @@ public class StackELResolver extends ELResolver {
 
       Object value = resolver.getValue(context, base, property);
 
-      if (context.isPropertyResolved())
+      if (context.isPropertyResolved()) {
 	return value;
+      }
     }
 
     return null;

@@ -195,7 +195,7 @@ public class JstlFmtBundle extends JstlNode {
       int bundleIndex = _gen.addExpr(prefix);
       
       out.println("String " + oldPrefix + "  = _caucho_bundle_prefix;");
-      out.println("_caucho_bundle_prefix = _caucho_expr_" + bundleIndex + ".evalString(pageContext);");
+      out.println("_caucho_bundle_prefix = _caucho_expr_" + bundleIndex + ".evalString(_jsp_env);");
     }
     */
 

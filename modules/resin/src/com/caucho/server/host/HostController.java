@@ -375,7 +375,9 @@ public class HostController extends EnvironmentDeployController<Host,HostConfig>
       varMap.put("regexp", vars);
       varMap.put("host", new TestVar(matcher.group(0), vars));
 
-      return PathBuilder.lookupPath(_rootDirectoryPattern, varMap);
+      Path path = PathBuilder.lookupPath(_rootDirectoryPattern, varMap);
+      
+      return path;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 

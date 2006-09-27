@@ -98,8 +98,8 @@ public class PathBuilder {
       resolver = new MapVariableResolver(map);
     else
       resolver = parent;
-    
-    return lookupPath(string, new ConfigELContext(map));
+
+    return lookupPath(string, new ConfigELContext(resolver));
   }
 
   public static Path lookupPath(String string, ELContext env)

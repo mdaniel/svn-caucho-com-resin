@@ -526,7 +526,7 @@ public class TldManager {
     if (_loadAllTldException != null)
       throw _loadAllTldException;
     else
-      throw new JspParseException(L.l("Can't find taglib-location `{0}'.  The taglib-location must match a tag library either:\n1) by pointing to a .tld directly, relative to the webApp's root directory\n2) specified in the web.xml\n3) defined in a jar's .tld in META-INF\n4) defined in a .tld in WEB-INF\n5) predefined by Resin",
+      throw new JspParseException(L.l("Can't find taglib-location `{0}'.  The taglib-location must match a tag library either:\n1) by pointing to a .tld directly, relative to the application's root directory\n2) specified in the web.xml\n3) defined in a jar's .tld in META-INF\n4) defined in a .tld in WEB-INF\n5) predefined by Resin",
                                       location));
   }
 

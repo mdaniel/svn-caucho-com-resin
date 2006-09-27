@@ -242,6 +242,8 @@ public class JaxbBeanType extends TypeStrategy {
       if (name.startsWith("get")) {
 	propName = name.substring(3);
 	setterName = "set" + propName;
+
+	propName = Introspector.decapitalize(propName);
       }
       else if (name.startsWith("is")) {
 	propName = name.substring(2);
@@ -249,6 +251,8 @@ public class JaxbBeanType extends TypeStrategy {
 	
 	if (! boolean.class.equals(retType))
 	  continue;
+	
+	propName = Introspector.decapitalize(propName);
       }
       else
 	continue;
@@ -257,7 +261,6 @@ public class JaxbBeanType extends TypeStrategy {
       Type genericType = getter.getGenericReturnType();
 
       Method setter = findSetter(_type, setterName, retType);
-
       if (setter != null) {
 	InjectIntrospector.configure(_injectList,
 				     setter,
@@ -313,7 +316,7 @@ public class JaxbBeanType extends TypeStrategy {
       else if (accessType == XmlAccessType.PROPERTY) {
       }
       else if (accessType == XmlAccessType.PUBLIC_MEMBER
-	       && Modifier.isPublic(setter.getModifiers())) {
+	       && Modifier.isPublic(getter.getModifiers())) {
       }
       else
 	continue;
@@ -416,18 +419,18 @@ public class JaxbBeanType extends TypeStrategy {
 
     for (int i = 0; i < methods.length; i++) {
       Method method = methods[i];
-      
+
       if (method.getParameterTypes().length != 1)
 	continue;
       else if (! method.getParameterTypes()[0].equals(retType))
 	continue;
-      else if (! retType.equals(void.class))
+      else if (! void.class.equals(method.getReturnType()))
 	continue;
       else if (setName.equals(method.getName()))
 	return method;
     }
 
-    return null;
+    return findSetter(type.getSuperclass(), setName, retType);
   }
 
   private void introspectFields(XmlAccessType accessType)
@@ -730,7 +733,7 @@ public class JaxbBeanType extends TypeStrategy {
 							Method getter,
 							Method setter)
   {
-    X ann = setter.getAnnotation(annType);
+    X ann = setter != null ? setter.getAnnotation(annType) : null;
 
     if (ann != null)
       return ann;
@@ -742,8 +745,8 @@ public class JaxbBeanType extends TypeStrategy {
 				       Method getter,
 				       Method setter)
   {
-    return (getter.isAnnotationPresent(annType)
-	    || setter.isAnnotationPresent(annType));
+    return (getter != null && getter.isAnnotationPresent(annType)
+	    || setter != null && setter.isAnnotationPresent(annType));
   }
 
   private AttributeStrategy createFieldAttribute(Field field,
