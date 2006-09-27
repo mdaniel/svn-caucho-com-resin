@@ -53,7 +53,7 @@ public class NodeBuilderProgram extends BuilderProgram {
   }
 
   public void configureImpl(NodeBuilder builder, Object bean)
-    throws Exception
+    throws ConfigException
   {
     builder.configureBean(bean, _node);
   }

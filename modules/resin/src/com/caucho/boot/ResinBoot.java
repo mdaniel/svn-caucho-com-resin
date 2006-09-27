@@ -64,6 +64,7 @@ public class ResinBoot {
   private Path _serverRoot;
   private Path _resinConf;
   private String _serverId = "";
+  private boolean _isVerbose;
 
   private Watchdog _server;
 
@@ -83,6 +84,10 @@ public class ResinBoot {
 
     Vfs.setPwd(_serverRoot);
 
+    if (! _resinConf.canRead())
+      throw new ConfigException(L().l("Can't open resin.conf file '{0}'",
+				      _resinConf.getNativePath()));
+
     Config config = new Config();
 
     ResinConfig conf = new ResinConfig(_resinHome, _serverRoot);
@@ -94,6 +99,9 @@ public class ResinBoot {
     if (_server == null)
       throw new ConfigException(L().l("-server '{0}' does not match any defined <server id> in {1}.",
 				    _serverId, _resinConf));
+
+    if (_isVerbose)
+      _server.setVerbose(_isVerbose);
   }
 
   private void calculateResinHome()
@@ -181,6 +189,10 @@ public class ResinBoot {
 	_serverId = argv[i + 1];
 	i++;
       }
+      else if ("-verbose".equals(arg)
+	       || "--verbose".equals(arg)) {
+	_isVerbose = true;
+      }
       else if ("start".equals(arg)) {
 	_startMode = StartMode.START;
       }
@@ -205,6 +217,15 @@ public class ResinBoot {
       }
       else
 	System.out.println(L().l("Can't start server '{0}'", _server.getId()));
+      
+      return false;
+    }
+    else if (_startMode == StartMode.RESTART) {
+      if (_server.restartWatchdog(_argv)) {
+	System.out.println(L().l("Restarted server '{0}'", _server.getId()));
+      }
+      else
+	System.out.println(L().l("Can't restart server '{0}'", _server.getId()));
       
       return false;
     }

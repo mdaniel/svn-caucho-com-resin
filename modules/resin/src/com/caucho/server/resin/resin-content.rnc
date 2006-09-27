@@ -552,6 +552,9 @@ r_server-Basis =
 
   & r_user-name?
 
+  & (attribute watchdog-arg { string }
+     | element watchdog-arg { string })*
+
 r_server-Flow =
   r_server-Basis
 

@@ -32,12 +32,16 @@ package com.caucho.boot;
 import java.util.*;
 
 import com.caucho.config.*;
+import com.caucho.config.types.*;
 import com.caucho.util.*;
 
 public class ClusterConfig {
   private static final L10N L = new L10N(ClusterConfig.class);
   
   private ResinConfig _resin;
+
+  private ArrayList<InitProgram> _serverDefaultList
+    = new ArrayList<InitProgram>();
 
   private ArrayList<Watchdog> _serverList
     = new ArrayList<Watchdog>();
@@ -64,9 +68,23 @@ public class ClusterConfig {
     return _resin;
   }
 
+  /**
+   * Adds a new server to the cluster.
+   */
+  public void addServerDefault(InitProgram program)
+    throws Throwable
+  {
+    _serverDefaultList.add(program);
+  }
+
   public Watchdog createServer()
   {
-    return new Watchdog(this);
+    Watchdog watchdog = new Watchdog(this);
+
+    for (int i = 0; i < _serverDefaultList.size(); i++)
+      _serverDefaultList.get(i).configure(watchdog);
+
+    return watchdog;
   }
 
   public void addServer(Watchdog server)

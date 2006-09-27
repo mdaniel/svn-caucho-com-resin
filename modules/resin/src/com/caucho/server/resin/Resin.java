@@ -753,9 +753,14 @@ public class Resin implements EnvironmentBean, SchemaBean
 	_serverId = argv[i + 1];
 	i += 2;
       }
-      else if (argv[i].equals("-version")) {
+      else if (argv[i].equals("-version")
+	       || argv[i].equals("--version")) {
 	System.out.println(com.caucho.Version.FULL_VERSION);
 	System.exit(66);
+      }
+      else if (argv[i].equals("-verbose")
+	       || argv[i].equals("--verbose")) {
+	i += 1;
       }
       else if (argv[i].equals("-resin-home")
 	       || argv[i].equals("--resin-home")) {
@@ -1143,7 +1148,7 @@ public class Resin implements EnvironmentBean, SchemaBean
     try {
       validateEnvironment();
 
-      Resin resin = new Resin();
+      final Resin resin = new Resin();
 
       resin.parseCommandLine(argv);
 
@@ -1158,7 +1163,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 	{
 	  setName("resin-destroy");
 
-	  destroy();
+	  resin.destroy();
 	}
       }.start();
 

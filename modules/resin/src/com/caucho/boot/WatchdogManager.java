@@ -57,13 +57,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
   private static WatchdogManager _watchdog;
 
-  private String []_argv;
-
-  private Path _resinHome;
-  private Path _serverRoot;
-  private Path _resinConf;
-
-  private String _initialServerId = "";
+  private Args _args;
 
   private Lifecycle _lifecycle = new Lifecycle();
 
@@ -80,19 +74,12 @@ public class WatchdogManager extends ProtocolDispatchServer {
     throws Exception
   {
     _watchdog = this;
-    
-    _argv = argv;
 
-    _resinHome = calculateResinHome();
-    _serverRoot = calculateServerRoot(_resinHome);
+    _args = new Args(argv);
 
-    _resinConf = _resinHome.lookup("conf/resin.conf");
+    Vfs.setPwd(_args.getServerRoot());
 
-    parseCommandLine(argv);
-
-    Vfs.setPwd(_serverRoot);
-
-    _resin = readConfig();
+    _resin = readConfig(_args);
 
     Cluster cluster = new Cluster();
     ClusterServer clusterServer = new ClusterServer(cluster);
@@ -142,11 +129,11 @@ public class WatchdogManager extends ProtocolDispatchServer {
   void start()
     throws Throwable
   {
-    Watchdog server = _resin.findServer(_initialServerId);
+    Watchdog server = _resin.findServer(_args.getServerId());
 
     if (server == null)
       throw new ConfigException(L().l("No matching <server> found for -server '{0}'",
-				      _initialServerId));
+				      _args.getServerId()));
 
     _port = new Port();
     _port.setAddress(server.getAddress().getHostAddress());
@@ -158,7 +145,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
     //_port.bind();
     _port.start();
     
-    startServer(_initialServerId);
+    startServer(_args.getServerId(), _args.getArgv());
 
     _lifecycle.toActive();
 
@@ -172,13 +159,30 @@ public class WatchdogManager extends ProtocolDispatchServer {
     }
   }
 
-  boolean startServer(String serverId)
+  boolean startServer(String serverId, String []argv)
   {
-    Watchdog server = _resin.findServer(serverId);
+    Args args = new Args(argv);
+
+    serverId = args.getServerId();
+
+    ResinConfig resin;
+    
+    try {
+      resin = readConfig(args);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
+    
+    Watchdog server = resin.findServer(serverId);
 
     if (server == null)
       throw new ConfigException(L().l("No matching <server> found for -server '{0}'",
 				      serverId));
+
+    if (args.isVerbose())
+      server.setVerbose(args.isVerbose());
 
     synchronized (_activeServerList) {
       if (_activeServerList.contains(serverId))
@@ -187,7 +191,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
       _activeServerList.add(serverId);
     }
     
-    server.start(_argv, _serverRoot);
+    server.start(argv, args.getServerRoot());
 
     return true;
   }
@@ -212,43 +216,18 @@ public class WatchdogManager extends ProtocolDispatchServer {
     return true;
   }
 
-  private void parseCommandLine(String []argv)
-  {
-    for (int i = 0; i < argv.length; i++) {
-      String arg = argv[i];
-
-      if ("-conf".equals(arg)
-	  || "--conf".equals(arg)) {
-	_resinConf = _resinHome.lookup(argv[i + 1]);
-	i++;
-      }
-      else if ("-resin-home".equals(arg)
-	       || "--resin-home".equals(arg)) {
-	_resinHome = Vfs.lookup(argv[i + 1]);
-	i++;
-      }
-      else if ("-server-root".equals(arg)
-	       || "--server-root".equals(arg)) {
-	_serverRoot = Vfs.lookup(argv[i + 1]);
-	i++;
-      }
-      else if ("-server".equals(arg)
-	       || "--server".equals(arg)) {
-	_initialServerId = argv[i + 1];
-	i++;
-      }
-    }
-  }
-
-  private ResinConfig readConfig()
+  private ResinConfig readConfig(Args args)
     throws Exception
   {
     Config config = new Config();
 
-    Vfs.setPwd(_serverRoot);
-    ResinConfig resin = new ResinConfig(_resinHome, _serverRoot);
+    Vfs.setPwd(args.getServerRoot());
+    ResinConfig resin = new ResinConfig(args.getResinHome(),
+					args.getServerRoot());
 
-    config.configure(resin, _resinConf, "com/caucho/server/resin/resin.rnc");
+    config.configure(resin,
+		     args.getResinConf(),
+		     "com/caucho/server/resin/resin.rnc");
 
     return resin;
   }
@@ -401,5 +380,91 @@ public class WatchdogManager extends ProtocolDispatchServer {
       _log = Logger.getLogger(ResinBoot.class.getName());
 
     return _log;
+  }
+
+  static class Args {
+    private Path _resinHome;
+    private Path _serverRoot;
+    private String []_argv;
+
+    private Path _resinConf;
+
+    private String _serverId = "";
+
+    private boolean _isVerbose;
+    
+    Args(String []argv)
+    {
+      _resinHome = calculateResinHome();
+      _serverRoot = calculateServerRoot(_resinHome);
+      
+      _argv = argv;
+
+      _resinConf = _resinHome.lookup("conf/resin.conf");
+
+      parseCommandLine(argv);
+    }
+
+    Path getResinHome()
+    {
+      return _resinHome;
+    }
+
+    Path getServerRoot()
+    {
+      return _serverRoot;
+    }
+
+    Path getResinConf()
+    {
+      return _resinConf;
+    }
+
+    String getServerId()
+    {
+      return _serverId;
+    }
+
+    String []getArgv()
+    {
+      return _argv;
+    }
+
+    boolean isVerbose()
+    {
+      return _isVerbose;
+    }
+
+    private void parseCommandLine(String []argv)
+    {
+      for (int i = 0; i < argv.length; i++) {
+	String arg = argv[i];
+
+	if ("-conf".equals(arg)
+	    || "--conf".equals(arg)) {
+	  _resinConf = _resinHome.lookup(argv[i + 1]);
+	  i++;
+	}
+	else if ("-resin-home".equals(arg)
+		 || "--resin-home".equals(arg)) {
+	  _resinHome = Vfs.lookup(argv[i + 1]);
+	  i++;
+	}
+	else if ("-server-root".equals(arg)
+		 || "--server-root".equals(arg)) {
+	  _serverRoot = Vfs.lookup(argv[i + 1]);
+	  i++;
+	}
+	else if ("-server".equals(arg)
+		 || "--server".equals(arg)) {
+	  _serverId = argv[i + 1];
+	  i++;
+	}
+	else if ("-verbose".equals(arg)
+		 || "--verbose".equals(arg)) {
+	  _isVerbose = true;
+	}
+      }
+    }
   }
 }

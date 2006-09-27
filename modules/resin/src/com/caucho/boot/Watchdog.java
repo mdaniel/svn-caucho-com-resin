@@ -37,6 +37,7 @@ import java.util.logging.*;
 import com.caucho.config.*;
 import com.caucho.config.types.*;
 import com.caucho.lifecycle.*;
+import com.caucho.management.server.*;
 import com.caucho.util.*;
 import com.caucho.server.admin.*;
 import com.caucho.server.port.*;
@@ -45,7 +46,8 @@ import com.caucho.vfs.*;
 /**
  * Thread responsible for watching a backend server.
  */
-public class Watchdog implements Runnable
+public class Watchdog extends AbstractManagedObject
+  implements Runnable, WatchdogMXBean
 {
   private static final Logger log
     = Logger.getLogger(Watchdog.class.getName());
@@ -57,6 +59,8 @@ public class Watchdog implements Runnable
   private String []_argv;
 
   private ArrayList<String> _jvmArgs = new ArrayList<String>();
+  private ArrayList<String> _watchdogArgs = new ArrayList<String>();
+  
   private boolean _is64bit;
   private boolean _hasXss;
   private boolean _hasXmx;
@@ -76,9 +80,16 @@ public class Watchdog implements Runnable
 
   private long _shutdownWaitTime = 60000L;
 
+  private boolean _isVerbose;
+
   private boolean _isSingle;
 
   private Thread _thread;
+
+  // statistics
+  private Date _initialStartTime;
+  private Date _lastStartTime;
+  private int _startCount;
   
   Watchdog(ClusterConfig cluster)
   {
@@ -109,6 +120,11 @@ public class Watchdog implements Runnable
   public String getId()
   {
     return _id;
+  }
+
+  public void setVerbose(boolean isVerbose)
+  {
+    _isVerbose = isVerbose;
   }
 
   public void setAddress(String address)
@@ -142,6 +158,11 @@ public class Watchdog implements Runnable
       _hasXss = true;
     else if (arg.startsWith("-Xmx"))
       _hasXmx = true;
+  }
+  
+  public void addWatchdogArg(String arg)
+  {
+    _watchdogArgs.add(arg);
   }
 
   public ArrayList<String> getJvmArgs()
@@ -205,6 +226,32 @@ public class Watchdog implements Runnable
 
     try {
       return watchdog.start(getId(), argv);
+    } catch (ConfigException e) {
+      throw e;
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    launchManager(argv);
+
+    return true;
+  }
+
+  public boolean restartWatchdog(String []argv)
+    throws IOException
+  {
+    WatchdogAPI watchdog = getProxy();
+
+    try {
+      watchdog.stop(getId());
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    try {
+      return watchdog.start(getId(), argv);
+    } catch (ConfigException e) {
+      throw e;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
@@ -221,6 +268,8 @@ public class Watchdog implements Runnable
 
     try {
       return watchdog.stop(getId());
+    } catch (ConfigException e) {
+      throw e;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 
@@ -292,10 +341,11 @@ public class Watchdog implements Runnable
     list.add("-Djava.system.class.loader=com.caucho.loader.SystemClassLoader");
     list.add("-Djava.awt.headless=true");
     list.add("-Dresin.home=" + resinHome.getPath());
-    list.add("-Xrs");
 
     if (! _hasXss)
       list.add("-Xss1m");
+
+    list.addAll(_watchdogArgs);
     
     list.add("com.caucho.boot.WatchdogManager");
 
@@ -320,6 +370,8 @@ public class Watchdog implements Runnable
     if (! _lifecycle.toActive())
       return;
 
+    registerSelf();
+
     _thread = new Thread(this, "watchdog-" + _id);
     _thread.setDaemon(true);
 
@@ -331,11 +383,13 @@ public class Watchdog implements Runnable
     if (! _lifecycle.toActive())
       return -1;
 
+    registerSelf();
+
     _argv = argv;
     _serverRoot = serverRoot;
+    _isSingle = true;
 
     _thread = new Thread(this, "watchdog-" + _id);
-
     _thread.start();
 
     while (_lifecycle.isActive()) {
@@ -356,6 +410,8 @@ public class Watchdog implements Runnable
     if (! _lifecycle.toActive())
       return false;
 
+    registerSelf();
+
     _argv = argv;
     _serverRoot = serverRoot;
 
@@ -371,6 +427,8 @@ public class Watchdog implements Runnable
     if (! _lifecycle.toStop())
       return;
 
+    unregisterSelf();
+
     Thread thread = _thread;
     _thread = null;
 
@@ -383,12 +441,15 @@ public class Watchdog implements Runnable
 
   public void run()
   {
+    _initialStartTime = new Date();
+    
     while (_lifecycle.isActive()) {
       InputStream watchdogIs = null;
+      WriteStream jvmOut = null;
 
       try {
 	watchdogIs = null;
-	
+
 	ServerSocket ss = new ServerSocket(0, 5,
 					   InetAddress.getByName("127.0.0.1"));
 	int port = ss.getLocalPort();
@@ -396,7 +457,34 @@ public class Watchdog implements Runnable
 	Path resinHome = _cluster.getResin().getResinHome();
 	Path serverRoot = _cluster.getResin().getRootDirectory();
 
-	Process process = createProcess(resinHome, serverRoot, port);
+	if (! _isSingle) {
+	  String name;
+
+	  if ("".equals(_id))
+	    name = "jvm-default.log";
+	  else
+	    name = "jvm-" + _id + ".log";
+
+	  Path jvmPath = serverRoot.lookup("log/" + name);
+
+	  try {
+	    jvmPath.getParent().mkdirs();
+	  } catch (Exception e) {
+	    log.log(Level.FINE, e.toString(), e);
+	  }
+
+	  RotateStream rotateStream = RotateStream.create(jvmPath);
+	  rotateStream.init();
+	  jvmOut = rotateStream.getStream();
+	}
+	else
+	  jvmOut = Vfs.openWrite(System.out);
+
+	_lastStartTime = new Date();
+	_startCount++;
+    
+	Process process = createProcess(resinHome, serverRoot, port,
+					jvmOut);
 
 	ss.setSoTimeout(60000);
 
@@ -430,7 +518,9 @@ public class Watchdog implements Runnable
 	      break;
 	    
 	    stdoutTimeout = stdoutTimeoutMax;
-	    System.out.print(new String(data, 0, len));
+	    
+	    jvmOut.write(data, 0, len);
+	    jvmOut.flush();
 	  }
 
 	  try {
@@ -474,7 +564,8 @@ public class Watchdog implements Runnable
 		break;
 	      }
 	  
-	      System.out.print(new String(data, 0, len));
+	      jvmOut.write(data, 0, len);
+	      jvmOut.flush();
 	    }
 	  } catch (IOException e) {
 	    log.log(Level.FINER, e.toString(), e);
@@ -515,6 +606,13 @@ public class Watchdog implements Runnable
 	  } catch (IOException e) {
 	  }
 	}
+	
+	if (jvmOut != null) {
+	  try {
+	    jvmOut.close();
+	  } catch (IOException e) {
+	  }
+	}
       }
 
       if (_isSingle) {
@@ -529,7 +627,8 @@ public class Watchdog implements Runnable
 
   private Process createProcess(Path resinHome,
 				Path serverRoot,
-				int socketPort)
+				int socketPort,
+				WriteStream out)
     throws IOException
   {
     String classPath = WatchdogManager.calculateClassPath(resinHome);
@@ -559,7 +658,6 @@ public class Watchdog implements Runnable
     list.add("-Djava.awt.headless=true");
     list.add("-Dresin.home=" + resinHome.getPath());
     list.add("-Dserver.root=" + _serverRoot.getPath());
-    list.add("-Xrs");
 
     if (! _hasXss)
       list.add("-Xss1m");
@@ -570,13 +668,35 @@ public class Watchdog implements Runnable
     for (String arg : getJvmArgs()) {
       list.add(arg);
     }
+
+    ArrayList<String> resinArgs = new ArrayList<String>();
+    for (int i = 0; i < _argv.length; i++) {
+      if (_argv[i].startsWith("-J")) {
+	list.add(_argv[i].substring(2));
+      }
+      else
+	resinArgs.add(_argv[i]);
+    }
     
     list.add("com.caucho.server.resin.Resin");
     list.add("-socketwait");
     list.add(String.valueOf(socketPort));
 
-    for (int i = 0; i < _argv.length; i++)
-      list.add(_argv[i]);
+    list.addAll(resinArgs);
+
+    if (_isVerbose) {
+      for (int i = 0; i < list.size(); i++) {
+	if (i > 0)
+	  out.print("  ");
+	
+	out.print(list.get(i));
+
+	if (i + 1 < list.size())
+	  out.println(" \\");
+	else
+	  out.println();
+      }
+    }
 
     if (_jniBoot != null) {
       ArrayList<QServerSocket> boundSockets = new ArrayList<QServerSocket>();
@@ -655,6 +775,44 @@ public class Watchdog implements Runnable
 
     return "java";
   }
+
+  //
+  // management
+  //
+
+  public String getName()
+  {
+    return getId();
+  }
+
+  public String getType()
+  {
+    return "Watchdog";
+  }
+
+  public String getState()
+  {
+    return _lifecycle.getStateName();
+  }
+
+  public Date getInitialStartTime()
+  {
+    return _initialStartTime;
+  }
+
+  public Date getStartTime()
+  {
+    return _lastStartTime;
+  }
+
+  public int getStartCount()
+  {
+    return _startCount;
+  }
+
+  //
+  // main
+  //
   
   /**
    * The main start of the web server.

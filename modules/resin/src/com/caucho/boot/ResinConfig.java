@@ -32,9 +32,13 @@ package com.caucho.boot;
 import java.util.*;
 
 import com.caucho.config.*;
+import com.caucho.config.types.*;
 import com.caucho.vfs.*;
 
 public class ResinConfig {
+  private ArrayList<InitProgram> _clusterDefaultList
+    = new ArrayList<InitProgram>();
+  
   private ArrayList<ClusterConfig> _clusterList
     = new ArrayList<ClusterConfig>();
 
@@ -57,14 +61,26 @@ public class ResinConfig {
     return _rootDirectory;
   }
 
-  public void setRootDirector(Path rootDirectory)
+  public void setRootDirectory(Path rootDirectory)
   {
     _rootDirectory = rootDirectory;
+  }
+
+  /**
+   * Adds a new default to the cluster.
+   */
+  public void addClusterDefault(InitProgram program)
+    throws Throwable
+  {
+    _clusterDefaultList.add(program);
   }
 
   public ClusterConfig createCluster()
   {
     ClusterConfig cluster = new ClusterConfig(this);
+
+    for (int i = 0; i < _clusterDefaultList.size(); i++)
+      _clusterDefaultList.get(i).configure(cluster);
     
     _clusterList.add(cluster);
 

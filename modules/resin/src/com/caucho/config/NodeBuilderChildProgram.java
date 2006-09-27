@@ -49,7 +49,7 @@ public class NodeBuilderChildProgram extends BuilderProgram {
   }
 
   public void configureImpl(NodeBuilder builder, Object bean)
-    throws Exception
+    throws ConfigException
   {
     builder.configureAttribute(bean, _node);
   }

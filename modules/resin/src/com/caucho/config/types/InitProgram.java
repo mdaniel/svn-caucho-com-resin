@@ -30,10 +30,7 @@ package com.caucho.config.types;
 
 import com.caucho.util.L10N;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BuilderProgramContainer;
-import com.caucho.config.NodeBuilder;
-import com.caucho.config.Config;
+import com.caucho.config.*;
 
 /**
  * Configuration for an init program
@@ -75,7 +72,7 @@ public class InitProgram {
    * Initialize the object
    */
   public Object create(Class type)
-    throws Throwable
+    throws ConfigException
   {
     if (_init != null)
       return _init.configure(type);
@@ -87,7 +84,7 @@ public class InitProgram {
    * Initialize the object
    */
   public void configure(Object obj)
-    throws Throwable
+    throws ConfigException
   {
     if (_init != null)
       _init.configure(obj);

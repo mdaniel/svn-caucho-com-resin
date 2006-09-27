@@ -36,8 +36,7 @@ import javax.naming.InitialContext;
 
 import com.caucho.util.L10N;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.NodeBuilder;
+import com.caucho.config.*;
 
 public class JndiFieldInjectProgram extends BuilderProgram {
   private static final L10N L = new L10N(JndiFieldInjectProgram.class);
@@ -52,16 +51,22 @@ public class JndiFieldInjectProgram extends BuilderProgram {
   }
 
   public void configureImpl(NodeBuilder builder, Object bean)
-    throws Throwable
+    throws ConfigException
   {
-    Object value = new InitialContext().lookup(_jndiName);
+    try {
+      Object value = new InitialContext().lookup(_jndiName);
 
-    _field.setAccessible(true);
-    _field.set(bean, value);
+      _field.setAccessible(true);
+      _field.set(bean, value);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
   }
 
   public Object configure(NodeBuilder builder, Class type)
-    throws Exception
+    throws ConfigException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

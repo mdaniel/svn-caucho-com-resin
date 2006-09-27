@@ -43,31 +43,32 @@ public class WatchdogServlet extends HessianServlet implements WatchdogAPI {
   private static final Logger log
     = Logger.getLogger(WatchdogServlet.class.getName());
 
-  private WatchdogManager _watchdog;
+  private WatchdogManager _watchdogManager;
   
   public void init()
   {
-    _watchdog = WatchdogManager.getWatchdog();
+    _watchdogManager = WatchdogManager.getWatchdog();
   }
   public boolean start(String serverId, String []argv)
   {
     log.info("Watchdog start: " + serverId);
 
-    return _watchdog.startServer(serverId);
+    return _watchdogManager.startServer(serverId, argv);
   }
   
   public boolean restart(String serverId, String []argv)
   {
     log.info("Watchdog restart: " + serverId);
-    
-    return true;
+
+    stop(serverId);
+    return start(serverId, argv);
   }
   
   public boolean stop(String serverId)
   {
     log.info("Watchdog stop: " + serverId);
     
-    return _watchdog.stopServer(serverId);
+    return _watchdogManager.stopServer(serverId);
   }
   
   public boolean shutdown()

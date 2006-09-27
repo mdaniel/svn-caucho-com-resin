@@ -46,16 +46,22 @@ public class ObjectAttributeProgram extends BuilderProgram {
    * Configures the object.
    */
   public void configureImpl(NodeBuilder builder, Object bean)
-    throws Throwable
+    throws ConfigException
   {
     if (bean == null)
       return;
 
-    Config.setAttribute(bean, _key, _value);
+    try {
+      Config.setAttribute(bean, _key, _value);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
   }
 
   public Object configure(Class cl)
-    throws Exception
+    throws ConfigException
   {
     throw new UnsupportedOperationException();
   }

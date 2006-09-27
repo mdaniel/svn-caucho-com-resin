@@ -501,11 +501,20 @@ public class Config {
     attrStrategy.setAttribute(obj, attrName, value);
   }
 
-  public static void init(Object bean) throws Exception
+  public static void init(Object bean)
+    throws ConfigException
   {
-    TypeStrategy strategy = TypeStrategyFactory.getTypeStrategy(bean.getClass());
+    try {
+      TypeStrategy strategy;
 
-    strategy.init(bean);
+      strategy = TypeStrategyFactory.getTypeStrategy(bean.getClass());
+
+      strategy.init(bean);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
   }
 
   public static Object replaceObject(Object bean) throws Exception

@@ -54,7 +54,7 @@ public class BuilderProgramContainer extends BuilderProgram {
   }
   
   public void configureImpl(NodeBuilder builder, Object bean)
-    throws Throwable
+    throws ConfigException
   {
     for (int i = 0; i < _programList.size(); i++) {
       BuilderProgram program = _programList.get(i);
@@ -64,7 +64,7 @@ public class BuilderProgramContainer extends BuilderProgram {
   }
 
   protected Object configureImpl(NodeBuilder builder, Class type)
-    throws Throwable
+    throws ConfigException
   {
     Object bean = null;
     

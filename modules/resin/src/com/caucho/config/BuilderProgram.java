@@ -61,13 +61,13 @@ public abstract class BuilderProgram {
    * Configures the object.
    */
   public void configure(Object bean)
-    throws Throwable
+    throws ConfigException
   {
     configureImpl(new NodeBuilder(), bean);
   }
 
   public Object configure(Class type)
-    throws Throwable
+    throws ConfigException
   {
     return configureImpl(new NodeBuilder(), type);
   }
@@ -76,7 +76,7 @@ public abstract class BuilderProgram {
    * Configures the object.
    */
   public void configureImpl(NodeBuilder builder, Object bean)
-    throws Throwable
+    throws ConfigException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -85,17 +85,23 @@ public abstract class BuilderProgram {
    * Configures a bean given a class to instantiate.
    */
   protected Object configureImpl(NodeBuilder builder, Class type)
-    throws Throwable
+    throws ConfigException
   {
-    Object bean = type.newInstance();
+    try {
+      Object bean = type.newInstance();
     
-    configureImpl(builder, bean);
+      configureImpl(builder, bean);
 
-    return bean;
+      return bean;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
   }
 
   public void init(Object bean)
-    throws Throwable
+    throws ConfigException
   {
     Config.init(bean);
   }

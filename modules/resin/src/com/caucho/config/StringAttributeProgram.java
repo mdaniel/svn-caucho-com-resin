@@ -43,16 +43,22 @@ public class StringAttributeProgram extends BuilderProgram {
   }
 
   public void configure(Object bean)
-    throws Exception
+    throws ConfigException
   {
     if (bean == null)
       return;
 
-    Config.setAttribute(bean, _key, _value);
+    try {
+      Config.setAttribute(bean, _key, _value);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
   }
 
   public Object configure(Class cl)
-    throws Exception
+    throws ConfigException
   {
     throw new UnsupportedOperationException();
   }
