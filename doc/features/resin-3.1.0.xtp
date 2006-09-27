@@ -8,6 +8,32 @@
 
 <summary objsummary="localtoc"/>
 
+<s1 title="Amber capabilities">
+
+<p>With Resin 3.1, the JPA features have been reviewed.
+Amber now provides a near to complete and stable 
+implementation of the JPA specification.</p>
+
+<p>JPA queries are fully supported, including queries with
+parameters, named queries, and subqueries. The 
+javax.persistence.Query API is also supported, 
+including date/time (temporal) data types.</p>
+
+<p>Embedded properties and optimistic-locking with 
+version fields have been added to Amber in Resin 3.1.
+Also, inheritance combined with many-to-one, one-to-many, 
+one-to-one, and many-to-many relationships have been reviewed
+and are now totally stable following the final release
+of the JPA specification.</p>
+
+<p>Finally, an object relational mapping file (orm.xml) can now
+be merged together with annotations, when present. In 
+other words, with Resin 3.1, the set of JPA features supported
+by Amber is near to complete, i.e., only a few unusual features
+will be added to the next release.</p>
+
+</s1>
+
 <s1 title="watchdog/startup changes">
 
 <p>Resin 3.1 now uses a Java watchdog process to manage Resin instances
