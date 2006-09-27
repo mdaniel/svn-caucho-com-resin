@@ -4,6 +4,7 @@
     <item link="module/index.xtp" title="Java Modules"/>
     <item link="json/index.xtp" title="JSON" />
     <item link="pdo/index.xtp" title="PDO" />
+    <item link="i18n/index.xtp" title="i18n" />
   </item>
 </navigation>
 
