@@ -668,21 +668,12 @@ public class Resin implements EnvironmentBean, SchemaBean
       log().log(Level.WARNING, e.toString(), e);
     }
 
-    J2EEManagedObject jvmManagedObject;
-    J2EEManagedObject j2eeDomainManagedObject;
-
-    jvmManagedObject = _jvmManagedObject;
-    _jvmManagedObject = null;
-    
-    j2eeDomainManagedObject = _j2eeDomainManagedObject;
-    _j2eeDomainManagedObject = null;
-
-    J2EEManagedObject.unregister(jvmManagedObject);
-    J2EEManagedObject.unregister(j2eeDomainManagedObject);
-
     try {
-      if (_server != null)
-	_server.destroy();
+      Server server = _server;
+      _server = null;
+      
+      if (server != null)
+	server.destroy();
     } catch (Throwable e) {
       log().log(Level.WARNING, e.toString(), e);
     }

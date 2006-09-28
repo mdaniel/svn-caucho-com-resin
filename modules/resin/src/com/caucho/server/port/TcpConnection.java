@@ -109,6 +109,8 @@ public class TcpConnection extends PortConnection implements ThreadTask
     }
 
     _socket = socket;
+
+    _admin.register();
   }
 
   /**
@@ -181,8 +183,9 @@ public class TcpConnection extends PortConnection implements ThreadTask
 
     boolean isSelectManager = port.getServer().isEnableSelectManager();
     
-    if (isSelectManager)
+    if (isSelectManager) {
       timeout = port.getKeepaliveSelectThreadTimeout();
+    }
 
     if (timeout > 0 && timeout < port.getSocketTimeout())
       return is.fillWithTimeout(timeout);
@@ -417,23 +420,12 @@ public class TcpConnection extends PortConnection implements ThreadTask
   }
 
   /**
-   * Kills the connection
-   */
-  public void kill()
-  {
-    _isDead = true;
-    close();
-  }
-
-  /**
    * Starts the connection.
    */
   public void start()
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
-
-    _admin.register();
   }
   
   /**
@@ -628,11 +620,15 @@ public class TcpConnection extends PortConnection implements ThreadTask
   }
   
   /**
-   * Frees the connection()
+   * Destroys the connection()
    */
-  public final void close()
+  public final void destroy()
   {
+    _isDead = true;
+    
     closeImpl();
+    
+    _admin.unregister();
   }
   
   /**
@@ -641,8 +637,6 @@ public class TcpConnection extends PortConnection implements ThreadTask
   final void free()
   {
     closeImpl();
-
-    _admin.unregister();
 
     setState("free");
     

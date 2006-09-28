@@ -1091,7 +1091,8 @@ public class Port
   {
     closeConnection(conn);
 
-    _freeConn.free(conn);
+    if (! _freeConn.free(conn))
+      conn.destroy();
   }
 
   /**
