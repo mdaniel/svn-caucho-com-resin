@@ -28,6 +28,8 @@
 
 package com.caucho.loader;
 
+import javax.annotation.*;
+
 /**
  * Configuration class for the servlet classloader
  */
@@ -45,6 +47,7 @@ public class ServletClassloaderHack {
   /**
    * init
    */
+  @PostConstruct
   public void init()
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();

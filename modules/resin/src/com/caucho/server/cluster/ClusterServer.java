@@ -487,6 +487,8 @@ public class ClusterServer {
    */
   public void close()
   {
+    if (_serverConnector != null)
+      _serverConnector.close();
   }
 
   public String toString()

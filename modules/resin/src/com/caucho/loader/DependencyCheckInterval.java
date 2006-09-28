@@ -28,6 +28,8 @@
 
 package com.caucho.loader;
 
+import javax.annotation.*;
+
 import com.caucho.config.types.Period;
 
 /**
@@ -47,6 +49,7 @@ public class DependencyCheckInterval {
   /**
    * Initialize
    */
+  @PostConstruct
   public void init()
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
