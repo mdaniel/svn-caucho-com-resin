@@ -535,7 +535,9 @@ public class QueryParser {
     if (token == WHERE) {
       scanToken();
 
-      AmberExpr expr = parseExpr().createBoolean();
+      AmberExpr expr = parseExpr();
+
+      expr = expr.createBoolean();
 
       query.setWhere(expr.bindSelect(this));
     }

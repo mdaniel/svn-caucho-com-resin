@@ -488,15 +488,19 @@ public class EntityComponent extends ClassComponent {
 
     int index = _entityType.getLoadGroupIndex();
 
-    if (_entityType.getParentType() == null)
+    boolean hasLoad = (_entityType.getFields().size() > 0);
+
+    if (_entityType.getParentType() == null) {
       index = 0;
+      hasLoad = hasLoad || (_entityType.getId() != null);
+    }
 
     out.println();
     out.println("public void __caucho_retrieve(com.caucho.amber.manager.AmberConnection aConn)");
     out.println("  throws java.sql.SQLException");
     out.println("{");
 
-    if (_entityType.getFields().size() > 0)
+    if (hasLoad)
       out.println("  __caucho_load_" + index + "(aConn);");
 
     out.println("}");
@@ -506,7 +510,7 @@ public class EntityComponent extends ClassComponent {
     out.println("  throws java.sql.SQLException");
     out.println("{");
 
-    if (_entityType.getFields().size() > 0)
+    if (hasLoad)
       out.println("  __caucho_load_" + index + "(aConn, preloadedProperties);");
 
     out.println("}");

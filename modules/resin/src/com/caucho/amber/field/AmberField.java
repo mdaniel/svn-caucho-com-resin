@@ -67,6 +67,11 @@ public interface AmberField {
   public EntityType getSourceType();
 
   /**
+   * Returns true if and only if this is a LAZY field.
+   */
+  public boolean isLazy();
+
+  /**
    * Returns the field name.
    */
   public String getName();

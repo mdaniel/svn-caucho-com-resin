@@ -81,7 +81,7 @@ abstract public class AbstractField implements AmberField {
   private JMethod _getterMethod;
   private JMethod _setterMethod;
 
-  private boolean _isLazy;
+  private boolean _isLazy = true;
 
   private int _updateIndex;
   private int _loadGroupIndex = -1;

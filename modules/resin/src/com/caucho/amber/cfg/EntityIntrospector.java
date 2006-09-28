@@ -1621,6 +1621,8 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
       property.setLazy(basicAnn.get("fetch") == FetchType.LAZY);
     else if (basicConfig != null)
       property.setLazy(basicConfig.getFetch() == FetchType.LAZY);
+    else
+      property.setLazy(false);
 
     /*
       field.setInsertable(insertable);

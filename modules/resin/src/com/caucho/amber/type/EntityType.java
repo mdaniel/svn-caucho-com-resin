@@ -31,6 +31,7 @@ package com.caucho.amber.type;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Collections;
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -105,6 +106,8 @@ public class EntityType extends Type {
   private boolean _isJoinedSubClass;
 
   private ArrayList<AmberField> _fields = new ArrayList<AmberField>();
+
+  private HashSet<String> _eagerFieldNames;
 
   private HashMap<String,String> _completionFields
     = new HashMap<String,String>();
@@ -644,6 +647,22 @@ public class EntityType extends Type {
   {
     _fields.add(field);
     Collections.sort(_fields, new AmberFieldCompare());
+
+    if (! field.isLazy()) {
+
+      if (_eagerFieldNames == null)
+        _eagerFieldNames = new HashSet<String>();
+
+      _eagerFieldNames.add(field.getName());
+    }
+  }
+
+  /**
+   * Gets the EAGER field names.
+   */
+  public HashSet<String> getEagerFieldNames()
+  {
+    return _eagerFieldNames;
   }
 
   /**

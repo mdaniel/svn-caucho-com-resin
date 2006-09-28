@@ -37,6 +37,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 
 import com.caucho.amber.entity.Entity;
@@ -278,6 +280,8 @@ public class LoadEntityExpr extends AbstractAmberExpr {
                              Map<AmberExpr, String> joinFetchMap)
     throws SQLException
   {
+    // jpa/0h13, jpa/1160
+
     EntityType entityType = getEntityType();
 
     EntityItem item = entityType.getHome().findItem(aConn, rs, index);
@@ -295,6 +299,17 @@ public class LoadEntityExpr extends AbstractAmberExpr {
 
     String property = joinFetchMap.get(this._expr);
 
+    Iterator eagerFieldsIterator = null;
+
+    HashSet<String> eagerFieldNames = entityType.getEagerFieldNames();
+
+    if (eagerFieldNames != null)
+      eagerFieldsIterator = eagerFieldNames.iterator();
+
+    if (property == null)
+      if ((eagerFieldsIterator != null) && (eagerFieldsIterator.hasNext()))
+        property = (String) eagerFieldsIterator.next();
+
     if (property != null) {
 
       try {
@@ -304,22 +319,45 @@ public class LoadEntityExpr extends AbstractAmberExpr {
 
         Class cl = entityType.getInstanceClass();
 
-        Method method
-          = cl.getDeclaredMethod("get" +
-                                 Character.toUpperCase(property.charAt(0)) +
-                                 property.substring(1),
-                                 null);
+        do {
 
-        Object collection = method.invoke(entity, null);
+          String methodName = "get" +
+            Character.toUpperCase(property.charAt(0)) +
+            property.substring(1);
 
-        // XXX: for now, invoke the toString() method on
-        // the collection to fetch all the objects (join fetch).
+          Method method = cl.getDeclaredMethod(methodName, null);
 
-        cl = collection.getClass();
+          Object field = method.invoke(entity, null);
 
-        method = cl.getMethod("toString", null);
+          // XXX: for now, invoke the toString() method on
+          // the collection to fetch all the objects (join fetch).
 
-        method.invoke(collection, null);
+          if (field == null) {
+            try {
+              methodName = "__caucho_item_" + methodName;
+
+              method = cl.getDeclaredMethod(methodName, new Class[] {AmberConnection.class});
+
+              field = method.invoke(entity, aConn);
+            } catch (Exception ex) {
+            }
+          }
+
+          if (field != null) {
+
+            Class fieldClass = field.getClass();
+
+            method = fieldClass.getMethod("toString", null);
+
+            method.invoke(field, null);
+          }
+
+          property = null;
+
+          if ((eagerFieldsIterator != null) && (eagerFieldsIterator.hasNext()))
+            property = (String) eagerFieldsIterator.next();
+        }
+        while (property != null);
 
       } catch (NoSuchMethodException e1) {
         // XXX: this exception must never happen if the
