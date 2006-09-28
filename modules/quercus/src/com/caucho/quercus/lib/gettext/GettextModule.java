@@ -32,8 +32,13 @@ package com.caucho.quercus.lib.gettext;
 import com.caucho.quercus.UnimplementedException;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.UnicodeValue;
 import com.caucho.quercus.env.Value;
+
+import com.caucho.quercus.lib.string.StringModule;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.NotNull;
@@ -41,9 +46,15 @@ import com.caucho.quercus.module.ReturnNullAsFalse;
 import com.caucho.quercus.module.Optional;
 
 import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
+import com.caucho.vfs.Path;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 
 /**
  * Module to find translated strings and return them in desired charset.
@@ -52,10 +63,12 @@ import java.util.logging.Logger;
 public class GettextModule
     extends AbstractQuercusModule
 {
+  private LruCache<Object,GettextResource> _cache =
+      new LruCache<Object,GettextResource>(16);
 
-//  private static final Logger log
-//    = Logger.getLogger(GettextModule.class.getName());
-//  private static final L10N L = new L10N(GettextModule.class);
+  private final Logger log
+    = Logger.getLogger(GettextModule.class.getName());
+  private final L10N L = new L10N(GettextModule.class);
 
   public String []getLoadedExtensions()
   {
@@ -70,11 +83,11 @@ public class GettextModule
    * @param codeset
    * @return codeset
    */
-  public static StringValue bind_textdomain_codeset(Env env,
-                          StringValue domain,
-                          StringValue codeset)
+  public StringValue bind_textdomain_codeset(Env env,
+                              StringValue domain,
+                              StringValue codeset)
   {
-    return getGettext(env).bind_textdomain_codeset(env, domain, codeset);
+    return new StringValueImpl("UTF-16");
   }
 
   /**
@@ -85,11 +98,11 @@ public class GettextModule
    * @param directory
    * @return directory
    */
-  public static StringValue bindtextdomain(Env env,
-                          StringValue domain,
-                          StringValue directory)
+  public Value bindtextdomain(Env env,
+                              StringValue domain,
+                              StringValue directory)
   {
-    return getGettext(env).bindtextdomain(env, domain, directory);
+    return setPath(env, domain, directory);
   }
 
   /**
@@ -100,12 +113,15 @@ public class GettextModule
    * @param message
    * @param category
    */
-  public static StringValue dcgettext(Env env,
-                          StringValue domain,
-                          StringValue message,
-                          int category)
+  public StringValue dcgettext(Env env,
+                              StringValue domain,
+                              StringValue message,
+                              int category)
   {
-    return getGettext(env).dcgettext(env, domain, message, category);
+    return translate(env,
+                     domain,
+                     getCategory(env, category),
+                     message);
   }
 
   /**
@@ -118,15 +134,19 @@ public class GettextModule
    * @param n
    * @param category
    */
-  public static StringValue dcngettext(Env env,
+  public StringValue dcngettext(Env env,
                           StringValue domain,
                           StringValue msgid1,
                           StringValue msgid2,
                           int n,
                           int category)
   {
-    return
-        getGettext(env).dcngettext(env, domain, msgid1, msgid2, n, category);
+    return translate(env,
+                     domain,
+                     getCategory(env, category),
+                     msgid1,
+                     msgid2,
+                     n);
   }
 
   /**
@@ -136,11 +156,14 @@ public class GettextModule
    * @param domain
    * @param message
    */
-  public static StringValue dgettext(Env env,
-                          StringValue domain,
-                          StringValue message)
+  public StringValue dgettext(Env env,
+                              StringValue domain,
+                              StringValue message)
   {
-    return getGettext(env).dgettext(env, domain, message);
+    return translate(env,
+                     domain,
+                     "LC_MESSAGES",
+                     message);
   }
 
   /**
@@ -152,13 +175,18 @@ public class GettextModule
    * @param msgid2
    * @param n
    */
-  public static StringValue dngettext(Env env,
-                          StringValue domain,
-                          StringValue msgid1,
-                          StringValue msgid2,
-                          int n)
+  public StringValue dngettext(Env env,
+                              StringValue domain,
+                              StringValue msgid1,
+                              StringValue msgid2,
+                              int n)
   {
-    return getGettext(env).dngettext(env, domain, msgid1, msgid2, n);
+    return translate(env,
+                     domain,
+                     "LC_MESSAGES",
+                     msgid1,
+                     msgid2,
+                     n);
   }
 
   /**
@@ -167,8 +195,7 @@ public class GettextModule
    * @param env
    * @param message
    */
-  public static StringValue _(Env env,
-                          StringValue message)
+  public StringValue _(Env env, StringValue message)
   {
     return gettext(env, message);
   }
@@ -179,10 +206,12 @@ public class GettextModule
    * @param env
    * @param message
    */
-  public static StringValue gettext(Env env,
-                          StringValue message)
+  public StringValue gettext(Env env, StringValue message)
   {
-    return getGettext(env).gettext(env, message);
+    return translate(env,
+                     getCurrentDomain(env),
+                     "LC_MESSAGES",
+                     message);
   }
 
   /**
@@ -196,39 +225,212 @@ public class GettextModule
    * @return translated string, or original plural string if n == 1,
    *     else return original singular string
    */
-  public static StringValue ngettext(Env env,
-                          StringValue msgid1,
-                          StringValue msgid2,
-                          int n)
+  public StringValue ngettext(Env env,
+                              StringValue msgid1,
+                              StringValue msgid2,
+                              int n)
   {
-    return getGettext(env).ngettext(env, msgid1, msgid2, n);
+    return translate(env,
+                     getCurrentDomain(env),
+                     "LC_MESSAGES",
+                     msgid1,
+                     msgid2,
+                     n);
   }
 
   /**
    * Changes the current domain.
    *
    * @param env
-   * @param text_domain
+   * @param domain
    * @return name of current domain after change.
    */
-  public static StringValue textdomain(Env env,
-                          @Optional Value text_domain)
+  public StringValue textdomain(Env env,
+                              @Optional Value domain)
   {
-    return getGettext(env).textdomain(env, text_domain);
+    if (! domain.isNull())
+      return setCurrentDomain(env, domain.toStringValue());
+
+    return getCurrentDomain(env);
   }
 
-  private static Gettext getGettext(Env env)
+  /**
+   * Retrieves the translation for message.
+   * 
+   * @param env
+   * @param domain
+   * @param category
+   * @param message
+   *
+   * @return translation found, else message
+   */
+  private StringValue translate(Env env,
+                              StringValue domain,
+                              CharSequence category,
+                              StringValue message)
   {
-    Object val = env.getSpecialValue("caucho.gettext");
+    Locale locale = env.getLocaleInfo().getMessages();
 
-    if (val == null) {
-      Gettext gettext = new Gettext();
-      env.setSpecialValue("caucho.gettext", gettext);
+    GettextResource resource = getResource(env,
+                                           getPath(env, domain),
+                                           locale,
+                                           category,
+                                           domain);
 
-      return gettext;
+    UnicodeValue translation = resource.getTranslation(message);
+
+    if (translation == null)
+      return message;
+
+    return translation;
+  }
+
+  /**
+   * Retrieves the plural translation for msgid1.
+   * 
+   * @param env
+   * @param domain
+   * @param category
+   * @param msgid1
+   * @param msgid2
+   *
+   * @return translation found, else msgid1 if n == 1, else msgid2
+   */
+  private StringValue translate(Env env,
+                              StringValue domain,
+                              CharSequence category,
+                              StringValue msgid1,
+                              StringValue msgid2,
+                              int quantity)
+  {
+    Locale locale = env.getLocaleInfo().getMessages();
+
+    GettextResource resource = getResource(env,
+                                           getPath(env, domain),
+                                           locale,
+                                           category,
+                                           domain);
+
+    UnicodeValue translation = resource.getTranslation(msgid1, quantity);
+
+    if (translation == null)
+      return errorReturn(msgid1, msgid2, quantity);
+
+    return translation;
+  }
+
+  private GettextResource getResource(Env env,
+                              Path path,
+                              Locale locale,
+                              CharSequence category,
+                              StringValue domain)
+  {
+    ArrayList<Object> key = new ArrayList<Object>();
+
+    key.add(path.getFullPath());
+    key.add(locale);
+    key.add(category);
+    key.add(domain);
+
+    GettextResource resource = _cache.get(key);
+
+    if (resource == null) {
+      resource = new GettextResource(env, path, locale, category, domain);
+      _cache.put(key, resource);
     }
 
-    return (Gettext)val;
+    return resource;
   }
 
+  private Path getPath(Env env, StringValue domain)
+  {
+    Object val = env.getSpecialValue("caucho.gettext_paths");
+
+    if (val == null) {
+      val = new HashMap<StringValue,Path>();
+
+      env.setSpecialValue("caucho.gettext_paths", val);
+    }
+
+    Path path = ((HashMap<StringValue,Path>)val).get(domain);
+
+    if (path == null)
+      return env.getPwd();
+
+    return path;
+  }
+
+  private Value setPath(Env env,
+                              StringValue domain,
+                              StringValue directory)
+  {
+    Object val = env.getSpecialValue("caucho.gettext_paths");
+
+    if (val == null) {
+      val = new HashMap<StringValue,Path>();
+
+      env.setSpecialValue("caucho.gettext_paths", val);
+    }
+
+    Path path = env.lookupPwd(directory);
+
+    if (path == null)
+      return BooleanValue.FALSE;
+
+    ((HashMap<StringValue,Path>)val).put(domain, path);
+
+    return directory;
+  }
+
+  private StringValue getCurrentDomain(Env env)
+  {
+    Object val = env.getSpecialValue("caucho.gettext_current");
+
+    if (val == null)
+      return setCurrentDomain(env, new StringValueImpl("messages"));
+
+    return (StringValue)val;
+  }
+
+  private StringValue setCurrentDomain(Env env, StringValue currentDomain)
+  {
+    env.setSpecialValue("caucho.gettext_current", currentDomain);
+
+    return currentDomain;
+  }
+
+  /**
+   * Gets the name for this category.
+   */
+  private String getCategory(Env env, int category)
+  {
+    if (category == StringModule.LC_MESSAGES)
+      return "LC_MESSAGES";
+    else if (category == StringModule.LC_ALL)
+      return "LC_ALL";
+    else if (category == StringModule.LC_CTYPE)
+      return "LC_CTYPE";
+    else if (category == StringModule.LC_NUMERIC)
+      return "LC_NUMERIC";
+    else if (category == StringModule.LC_TIME)
+      return "LC_TIME";
+    else if (category == StringModule.LC_COLLATE)
+      return "LC_COLLATE";
+    else if (category == StringModule.LC_MONETARY)
+      return "LC_MONETARY";
+    else {
+      env.warning(L.l("Invalid category. Please use named constants"));
+      return "LC_MESSAGES";
+    }
+  }
+
+  private static StringValue errorReturn(StringValue msgid1,
+                              StringValue msgid2,
+                              int n)
+  {
+    if (n == 1)
+      return msgid1;
+    else
+      return msgid2;
+  }
 }

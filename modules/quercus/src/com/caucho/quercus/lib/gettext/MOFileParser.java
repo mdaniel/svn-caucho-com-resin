@@ -39,6 +39,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.UnicodeValue;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.lib.i18n.IconvUtility;
@@ -128,13 +129,13 @@ class MOFileParser extends GettextParser
    *
    * @return translations from file, or null on error
    */
-  HashMap<StringValue, ArrayList<StringValue>> readTranslations()
+  HashMap<UnicodeValue, ArrayList<UnicodeValue>> readTranslations()
     throws IOException
   {
     int[] originalOffsets = new int[_numberOfStrings];
     int[] translatedOffsets = new int[_numberOfStrings];
     int[] translatedLengths = new int[_numberOfStrings];
-    StringValue[] originals = new StringValue[_numberOfStrings];
+    UnicodeValue[] originals = new UnicodeValue[_numberOfStrings];
 
     _in.setPosition(_offsetOriginal);
 
@@ -170,8 +171,8 @@ class MOFileParser extends GettextParser
       originals[i] = readOriginalString();
     }
 
-    HashMap<StringValue, ArrayList<StringValue>> map =
-            new HashMap<StringValue, ArrayList<StringValue>>();
+    HashMap<UnicodeValue, ArrayList<UnicodeValue>> map =
+            new HashMap<UnicodeValue, ArrayList<UnicodeValue>>();
 
     // Read translated strings into the HashMap
     for (int i = 0; i < _numberOfStrings; i++) {
@@ -186,7 +187,7 @@ class MOFileParser extends GettextParser
   /**
    * Reads in a string until NULL or EOF encountered.
    */
-  private StringValue readOriginalString()
+  private UnicodeValue readOriginalString()
     throws IOException
   {
     StringBuilderValue sb = new StringBuilderValue();
@@ -201,10 +202,10 @@ class MOFileParser extends GettextParser
   /**
    * Reads in translated plurals forms that are separated by NULL.
    */
-  private ArrayList<StringValue> readPluralForms(int length)
+  private ArrayList<UnicodeValue> readPluralForms(int length)
     throws IOException
   {
-    ArrayList<StringValue> list = new ArrayList<StringValue>();
+    ArrayList<UnicodeValue> list = new ArrayList<UnicodeValue>();
     StringBuilderValue sb = new StringBuilderValue();
 
     for (; length > 0; length--) {

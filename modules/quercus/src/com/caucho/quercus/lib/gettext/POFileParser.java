@@ -39,6 +39,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.UnicodeValue;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.lib.i18n.IconvUtility;
@@ -75,7 +76,7 @@ class POFileParser extends GettextParser
   private static final int UNKNOWN = 260;
 
   private int _peekChar;
-  private StringValue _string;
+  private UnicodeValue _string;
 
   POFileParser(Path path)
     throws IOException
@@ -123,11 +124,11 @@ class POFileParser extends GettextParser
    *
    * @return translations from file, or null on error
    */
-  HashMap<StringValue, ArrayList<StringValue>> readTranslations()
+  HashMap<UnicodeValue, ArrayList<UnicodeValue>> readTranslations()
     throws IOException
   {
-    HashMap<StringValue, ArrayList<StringValue>> translations =
-            new HashMap<StringValue, ArrayList<StringValue>>();
+    HashMap<UnicodeValue, ArrayList<UnicodeValue>> translations =
+            new HashMap<UnicodeValue, ArrayList<UnicodeValue>>();
 
     int token = readToken();
 
@@ -135,13 +136,13 @@ class POFileParser extends GettextParser
       if (token != MSGID)
         return null;
 
-      StringValue msgid = _string;
+      UnicodeValue msgid = _string;
 
       token = readToken();
       if (token == MSGID_PLURAL)
         token = readToken();
 
-      ArrayList<StringValue> msgstrs = new ArrayList<StringValue>();
+      ArrayList<UnicodeValue> msgstrs = new ArrayList<UnicodeValue>();
 
       for (; token == MSGSTR; token = readToken()) {
         msgstrs.add(_string);

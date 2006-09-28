@@ -29,17 +29,18 @@
 
 package com.caucho.quercus.lib.gettext;
 
-import com.caucho.quercus.QuercusModuleException;
+import com.caucho.make.DependencyContainer;
 
+import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
-
+import com.caucho.quercus.env.UnicodeValue;
 import com.caucho.quercus.lib.gettext.expr.PluralExpr;
 
+import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
 
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
@@ -49,18 +50,17 @@ import java.util.Locale;
  */
 class GettextResource
 {
-  private Path _pathPO;
+  protected Path _pathPO;
   private Path _pathMO;
+  private Path _currentPath;
 
-  private Path _path;
-  private long _lastModified;
+  private DependencyContainer _depend;
 
-  private GettextParser _parser;
   private PluralExpr _pluralExpr;
 
-  private HashMap<StringValue, ArrayList<StringValue>> _translations;
+  private HashMap<UnicodeValue, ArrayList<UnicodeValue>> _translations;
 
-  public GettextResource(Env env,
+  protected GettextResource(Env env,
                               Path root,
                               Locale locale,
                               CharSequence category,
@@ -83,56 +83,39 @@ class GettextResource
 
   private Path lookupPath(Env env, Path root, String relPath)
   {
-    if (root != null)
-      return root.lookup(relPath);
-    else
-      return env.lookup(relPath);
+    return root.lookup(relPath);
   }
 
   private void init()
   {
-    if (_pathPO != null && _pathPO.exists()) {
-      _path = _pathPO;
-    }
-    else if (_pathMO != null && _pathMO.exists()) {
-      _path = _pathMO;
-    }
+    if (_pathPO != null && _pathPO.exists())
+      _currentPath = _pathPO;
+    else if (_pathMO != null && _pathMO.exists())
+      _currentPath = _pathMO;
+    else
+      return;
 
-    initLazy();
-  }
-
-  /**
-   * Reads translations from current path.
-   */
-  private void initLazy()
-  {
     try {
-      if (_path != null) {
-        _lastModified = _path.getLastModified();
+      GettextParser parser;
 
-        if (_path == _pathPO)
-          _parser = new POFileParser(_path);
-        else
-          _parser = new MOFileParser(_path);
+      if (_depend == null)
+        _depend = new DependencyContainer();
 
-        _pluralExpr = _parser.getPluralExpr();
-        _translations = _parser.readTranslations();
+      _depend.add(new Depend(_currentPath));
 
-        _parser.close();
-      }
+      if (_currentPath == _pathPO)
+        parser = new POFileParser(_currentPath);
+      else
+        parser = new MOFileParser(_currentPath);
+
+      _pluralExpr = parser.getPluralExpr();
+      _translations = parser.readTranslations();
+
+      parser.close();
+
     } catch (IOException e) {
       throw new QuercusModuleException(e.getMessage());
     }
-  }
-
-  private boolean isDirty()
-  {
-    if (_path == null) {
-      init();
-      return false;
-    }
-    else
-      return _path.getLastModified() != _lastModified;
   }
 
   /**
@@ -140,12 +123,20 @@ class GettextResource
    *
    * @param key
    */
-  protected StringValue getTranslation(StringValue key)
+  protected UnicodeValue getTranslation(StringValue key)
   {
-    if (isDirty())
-      initLazy();
+    if (isModified())
+      init();
 
     return getTranslationImpl(key, 0);
+  }
+
+  private boolean isModified()
+  {
+    if (_depend == null)
+      return true;
+
+    return _depend.isModified();
   }
 
   /**
@@ -154,10 +145,10 @@ class GettextResource
    * @param key
    * @param quantity
    */
-  protected StringValue getTranslation(StringValue key, int quantity)
+  protected UnicodeValue getTranslation(StringValue key, int quantity)
   {
-    if (isDirty())
-      initLazy();
+    if (isModified())
+      init();
 
     if (_pluralExpr != null)
       return getTranslationImpl(key, _pluralExpr.eval(quantity));
@@ -173,12 +164,12 @@ class GettextResource
    *
    * @return translated string, else null on error.
    */
-  protected StringValue getTranslationImpl(StringValue key, int index)
+  protected UnicodeValue getTranslationImpl(StringValue key, int index)
   {
     if (_translations == null)
       return null;
 
-    ArrayList<StringValue> pluralForms = _translations.get(key);
+    ArrayList<UnicodeValue> pluralForms = _translations.get(key);
 
     if (pluralForms == null || pluralForms.size() == 0)
       return null;
