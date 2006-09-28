@@ -35,8 +35,8 @@ import java.io.IOException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
-public class SuperText extends FormattedText {
-  public SuperText(Document document)
+public class SmallText extends FormattedTextWithAnchors {
+  public SmallText(Document document)
   {
     super(document);
   }
@@ -44,7 +44,7 @@ public class SuperText extends FormattedText {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    out.writeStartElement("sup");
+    out.writeStartElement("small");
 
     super.writeHtml(out);
 
@@ -54,10 +54,10 @@ public class SuperText extends FormattedText {
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    out.print("\\ensuremath{^{");
+    out.print("{\\small ");
 
     super.writeLaTeX(out);
 
-    out.print("}}");
+    out.print("}");
   }
 }

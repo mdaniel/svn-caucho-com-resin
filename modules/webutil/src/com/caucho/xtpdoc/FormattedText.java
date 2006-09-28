@@ -94,6 +94,13 @@ public class FormattedText extends ContainerNode {
     return text;
   }
 
+  public SmallText createSmall()
+  {
+    SmallText text = new SmallText(getDocument());
+    addItem(text);
+    return text;
+  }
+
   public PreFormattedText createPre()
   {
     PreFormattedText pretext = new PreFormattedText(getDocument());
