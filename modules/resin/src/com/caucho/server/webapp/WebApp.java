@@ -51,8 +51,8 @@ import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionListener;
 import javax.servlet.jsp.JspApplicationContext;
 
-import com.caucho.esb.WebService;
-import com.caucho.esb.client.WebServiceClient;
+import com.caucho.soa.WebService;
+import com.caucho.soa.client.WebServiceClient;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;

@@ -404,9 +404,7 @@ r_redeploy-mode =
 r_rest = element rest {
   r_url-pattern
 
-  & element query-binding { empty }?
-
-  & element path-binding { empty }?
+  & (element jaxb-package { string }* | element jaxb-class { string }*)?
 }
 
 r_rewrite-dispatch = element rewrite-dispatch {
@@ -940,6 +938,8 @@ r_web-service-client = element web-service-client {
   & r_url
 
   & r_interface
+
+  & (element jaxb-package { string }* | element jaxb-class { string }*)?
 }
 
 r_web-service = element web-service {
