@@ -1,9 +1,9 @@
 <document>
   <header>
     <product>resin</product>
-    <title>A Simple Service on the Resin ESB</title>
+    <title>A Simple Service for the Resin SOA</title>
     <description>
-      <p>Writing a service for the Resin ESB as a plain-old Java object (POJO)
+      <p>Writing a service for the Resin SOA as a plain-old Java object (POJO)
       eliminates protocol dependencies and simplifies service testing.
       </p>
     </description>
@@ -15,8 +15,9 @@
     <summary/>
 
   <s1>
-<p>With the Resin Enterprise Service Bus (ESB), services can be written as 
-plain-old Java objects (POJOs) and made available to many different protocols.
+<p>With the Resin Service-Oriented Architecture, services can be written as 
+plain-old Java objects (POJOs) and made available to many different protocols
+using simple configuration changes.
 </p>
 </s1>
 
@@ -35,15 +36,16 @@ plain-old Java objects (POJOs) and made available to many different protocols.
 </td></tr></deftable>
 </s1>
 
-<s1 title="What is an Enterprise Service Bus?">
-<figure src="esb.png"/>
+<s1 title="What is a Service-Oriented Architecture?">
+<p></p>
+<figure src="soa.png"/>
 <p>
-An Enterprise Service Bus (ESB) is an infrastructure that allows a service
-to be exposed via many different service protocols.  For example in this
-tutorial, there is a plain-old Java object (POJO) that implements a service
-and this service is made available using REST, SOAP, Hessian, and JNDI.  The
-service is implemented once and these protocols are activated with a few 
-simple changes to the configuration file.
+The Resin Service-Oriented Architecture is an infrastructure that
+allows a service to be exposed via many different service protocols.
+For example in this tutorial, there is a plain-old Java object (POJO) that
+implements a service and this service is made available using REST, SOAP,
+Hessian, and JNDI.  The service is implemented once and these protocols
+are activated with a few simple changes to the configuration file.
 </p>
 </s1>
 
@@ -125,7 +127,7 @@ public class HelloServiceImpl implements HelloService {
 
 <s1 title="Service configuration">
 
-<p>Services on the Resin ESB are configured with the &lt;web-service>
+<p>Services in the Resin SOA are configured with the &lt;web-service>
 tag.  The implementation class is given as the <code>class</code> attribute.
 It is possible to allow access to the service within the same virtual machine
 by registering the service in JNDI using a &lt;jndi-name> child tag.
