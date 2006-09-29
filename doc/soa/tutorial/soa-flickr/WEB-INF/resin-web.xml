@@ -1,0 +1,19 @@
+<web-app xmlns="http://caucho.com/ns/resin">
+  <system-property javax.xml.stream.XMLInputFactory="com.caucho.xml.stream.XMLInputFactoryImpl"/>
+  <system-property javax.xml.stream.XMLOutputFactory="com.caucho.xml.stream.XMLOutputFactoryImpl"/>
+
+  <web-service class="example.FlickrImpl">
+    <jndi-name>service/FlickrImpl</jndi-name>
+
+    <rest>
+      <url-pattern>/flickr/rest/*</url-pattern>
+      <jaxb-package>example.data</jaxb-package>
+    </rest>
+  </web-service>
+
+  <web-service-client jndi-name="rest/flickr">
+    <url>rest:http://localhost:8080/resin-doc/soa/tutorial/soa-flickr/flickr/rest/</url>
+    <interface>example.FlickrAPI</interface>
+    <jaxb-package>example.data</jaxb-package>
+  </web-service-client>
+</web-app>
