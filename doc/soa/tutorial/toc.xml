@@ -1,6 +1,6 @@
 <navigation threaded="true" section="Resin : SOA : Tutorials" comment="true">
   <item title="Tutorials" link="index.xtp">
-    <item link="esb-hello-world/index.xtp" title="Simple Service"/>
+    <item link="soa-hello-world/index.xtp" title="Simple Service"/>
     <item link="esb-hello-jaxb/index.xtp" title="Configuring a service with JAXB"/>
     <item link="esb-servlet-client/index.xtp" title="An ESB client"/>
     <item link="soa-flickr/index.xtp" title="Flickr REST"/>

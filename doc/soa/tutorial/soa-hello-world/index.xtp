@@ -142,12 +142,14 @@ service's location on the server.
 </p>
 
 <p>
-Here a REST interface is also exposed.  In this example, the REST interface
-is a path-based binding that interprets URLs of the form 
-<i>http://www.foo.com/myMethod/foo/bar</i> to be a call to the method
-"myMethod" with two arguments, "foo" and "bar".  This binding is default, but
-a query-based binding is also available that accepts URLs of the form 
-<i>http://www.foo.com/?method=myMethod&amp;arg1=foo&amp;arg2=bar</i>.
+Here a REST interface is also exposed.  In this
+example, the REST interface uses the default
+query-based binding that interprets URLs of the form
+<url>http://www.foo.com/?method=myMethod&amp;arg1=foo&amp;arg2=bar</url>.
+to be a call to the method "myMethod" with two arguments,
+"foo" and "bar".  Other custom bindings are possible, including
+for example a path-based binding that with URLs of the form
+<url>http://www.foo.com/myMethod/foo/bar</url>.
 The &lt;url-pattern> child tag specifies the base URL for the REST interface.
 </p>
 

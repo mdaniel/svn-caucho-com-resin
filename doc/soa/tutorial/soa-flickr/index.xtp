@@ -79,6 +79,7 @@ well-designed and consistent which allows very clean client construction.
 </s1>
 
 <s1 title="REST Client Architecture">
+<p></p>
 <figure src="rest-client.png"/>
 <p>
 The REST client architecture in Resin can be thought of as a stack.  At the
