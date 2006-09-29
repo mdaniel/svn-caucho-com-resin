@@ -135,6 +135,9 @@ r_srun-Compat = element srun {
   & (attribute index { string }
     | element index { string })?
 
+  & (attribute backup { string }
+    | element backup { string })?
+
   & r_port-Content
 }
 

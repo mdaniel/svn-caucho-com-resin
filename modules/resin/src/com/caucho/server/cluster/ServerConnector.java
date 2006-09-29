@@ -299,7 +299,8 @@ public class ServerConnector {
    */
   public void wake()
   {
-    _client.wake();
+    if (_client != null)
+      _client.wake();
   }
 
   /**

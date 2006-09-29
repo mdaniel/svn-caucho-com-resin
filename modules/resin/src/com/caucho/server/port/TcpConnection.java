@@ -518,6 +518,8 @@ public class TcpConnection extends PortConnection implements ThreadTask
       log.log(Level.WARNING, e.toString(), e);
       isKeepalive = false;
     } finally {
+      _admin.unregister();
+      
       port.threadEnd(this);
 
       if (isKeepalive)
@@ -527,8 +529,6 @@ public class TcpConnection extends PortConnection implements ThreadTask
 
       _thread = null;
       thread.setName(oldThreadName);
-      
-      _admin.unregister();
     }
   }
 

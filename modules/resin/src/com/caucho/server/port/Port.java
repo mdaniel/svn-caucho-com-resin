@@ -1210,7 +1210,7 @@ public class Port
         }
       }
     }
-
+    
     TcpConnection conn;
     while ((conn = _freeConn.allocate()) != null) {
       conn.destroy();

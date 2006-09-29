@@ -121,6 +121,11 @@ public class ClusterCompatConfig {
       // getClusterServer().setIndex(index);
     }
 
+    public void setBackup(boolean backup)
+    {
+      // getClusterServer().setBackup(index);
+    }
+
     private ClusterPort getClusterPort()
     {
       return getClusterServer().getClusterPort();
@@ -128,6 +133,9 @@ public class ClusterCompatConfig {
 
     private ClusterServer getClusterServer()
     {
+      if (_server == null)
+	_server = _cluster.findServer(_id);
+      
       if (_server == null) {
 	try {
 	  _server = _cluster.createServer();
