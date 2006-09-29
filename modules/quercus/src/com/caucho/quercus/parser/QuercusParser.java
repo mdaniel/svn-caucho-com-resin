@@ -2211,7 +2211,15 @@ public class QuercusParser {
       return new GeqExpr(getLocation(), expr, parseShiftExpr());
 
     case INSTANCEOF:
-      return new InstanceOfExpr(getLocation(), expr, parseIdentifier());
+      Location location = getLocation();
+
+      token = parseToken();
+      _peekToken = token;
+
+      if (token == '$')
+        return new InstanceOfVarExpr(location, expr, parseShiftExpr());
+      else
+        return new InstanceOfExpr(location, expr, parseIdentifier());
       
     default:
       _peekToken = token;

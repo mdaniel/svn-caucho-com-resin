@@ -2307,7 +2307,7 @@ public class FileModule extends AbstractQuercusModule {
     String fullPath = path.getFullPath();
 
     if (fullPath.endsWith("/") && ! fullPath.equals("/"))
-      return fullPath.substring(fullPath.length() - 1);
+      return fullPath.substring(0, fullPath.length() - 1);
     else
       return fullPath;
   }
