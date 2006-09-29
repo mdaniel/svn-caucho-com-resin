@@ -225,37 +225,45 @@ public class RestProxy implements InvocationHandler {
     if (connection instanceof HttpURLConnection) {
       HttpURLConnection httpConnection = (HttpURLConnection) connection;
 
-      httpConnection.setRequestMethod(httpMethod);
-      httpConnection.setDoInput(true);
+      try {
+	httpConnection.setRequestMethod(httpMethod);
+	httpConnection.setDoInput(true);
 
-      if (postValues.size() > 0) {
-        httpConnection.setDoOutput(true);
+	if (postValues.size() > 0) {
+	  httpConnection.setDoOutput(true);
 
-        OutputStream out = httpConnection.getOutputStream();
+	  OutputStream out = httpConnection.getOutputStream();
 
-        Marshaller marshaller = _context.createMarshaller();
-        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+	  Marshaller marshaller = _context.createMarshaller();
+	  marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT,
+				 Boolean.TRUE);
 
-        for (Object postValue : postValues)
-          marshaller.marshal(postValue, out);
+	  for (Object postValue : postValues)
+	    marshaller.marshal(postValue, out);
 
-        out.flush();
+	  out.flush();
+	}
+
+	int code = httpConnection.getResponseCode();
+
+	if (code == 200) {
+	  if (method.getReturnType() == null)
+	    return null;
+
+	  Unmarshaller unmarshaller = _context.createUnmarshaller();
+
+	  return unmarshaller.unmarshal(httpConnection.getInputStream());
+	}
+	else {
+	  log.info("request failed: " + httpConnection.getResponseMessage());
+	
+	  throw new RestException(httpConnection.getResponseMessage());
+	}
+      } finally {
+	httpConnection.disconnect();
       }
-
-      int code = httpConnection.getResponseCode();
-
-      if (code == 200) {
-        if (method.getReturnType() == null)
-          return null;
-
-        Unmarshaller unmarshaller = _context.createUnmarshaller();
-
-        return unmarshaller.unmarshal(httpConnection.getInputStream());
-      }
-      else
-        log.info("request failed: " + httpConnection.getResponseMessage());
     }
-
-    throw new RestException();
+    else
+      throw new RestException();
   }
 }

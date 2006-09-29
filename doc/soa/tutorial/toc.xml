@@ -3,6 +3,7 @@
     <item link="esb-hello-world/index.xtp" title="Simple Service"/>
     <item link="esb-hello-jaxb/index.xtp" title="Configuring a service with JAXB"/>
     <item link="esb-servlet-client/index.xtp" title="An ESB client"/>
+    <item link="soa-flickr/index.xtp" title="Flickr REST"/>
     <item link="jaxb-bean-config/index.xtp" title="JAXB IoC"/>
     <item link="jms-php-queue-send/index.xtp" title="JMS/PHP Send"/>
     <item link="jms-php-queue-receive/index.xtp" title="JMS/PHP Receive"/>

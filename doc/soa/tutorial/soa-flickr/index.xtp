@@ -141,7 +141,8 @@ package example;
 import javax.jws.*;
 import example.data.*;
 
-public interface FlickrAPI {
+public interface FlickrAPI
+{
   @WebMethod(operationName="flickr.people.findByEmail")
   public FlickrResponse
   findByEmail(@WebParam(name="api_key") String api_key,
@@ -254,8 +255,9 @@ public class FlickrUser implements FlickrPayload {
 }
 </example>
 <p>
-This class is somewhat simpler than the <code>FlickrResponse</code> example
-above in that it only has a root element, <code>&lt;user></code>, a single
+The <code>FlickrUser</code> class is somewhat simpler than
+the <code>FlickrResponse</code> example above in that it only has a root
+element, <code>&lt;user></code>, a single
 attribute, <code>nsid</code>, and a single child element, 
 <code>&lt;username></code>.  The attribute and child element here are both
 simply strings.  <code>FlickrPhotos</code> is a more complex class with
@@ -329,8 +331,11 @@ the following XML:
 <example title="">
 &lt;rsp stat="ok">
   &lt;photos total="2" perpage="10" pages="1" page="1">
-    &lt;photo isfamily="0" isfriend="0" ispublic="1" title="Our wedding" server="2" secret="x123456" owner="12345678901@N01" id="3041"/>
-    &lt;photo isfamily="0" isfriend="1" ispublic="0" title="Best friends" server="1" secret="y123456" owner="12345678901@N01" id="3042"/>
+    &lt;photo isfamily="0" isfriend="0" ispublic="1" title="Our wedding"
+           server="2" secret="x123456" owner="12345678901@N01" id="3041"/>
+
+    &lt;photo isfamily="0" isfriend="1" ispublic="0" title="Best friends"
+           server="1" secret="y123456" owner="12345678901@N01" id="3042"/>
   &lt;/photos>
 &lt;/rsp>
 </example>

@@ -528,7 +528,7 @@ public class HostController extends EnvironmentDeployController<Host,HostConfig>
       return HostController.this.getHostName();
     }
     
-    public String getURL()
+    public String getUrl()
     {
       Host host = getDeployInstance();
       

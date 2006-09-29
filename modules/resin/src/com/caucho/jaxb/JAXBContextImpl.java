@@ -233,9 +233,9 @@ public class JAXBContextImpl extends JAXBContext {
     _roots.put(q, s);
   }
 
-  public Skeleton getRootElement(QName q) {
+  public Skeleton getRootElement(QName q)
+  {
     return _roots.get(q);
   }
-
 }
 

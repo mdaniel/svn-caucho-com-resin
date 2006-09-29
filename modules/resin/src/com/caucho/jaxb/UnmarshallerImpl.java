@@ -32,21 +32,26 @@ import javax.xml.bind.*;
 import java.util.*;
 import javax.xml.stream.*;
 import javax.xml.transform.*;
-import org.w3c.dom.*;
 import java.io.*;
-import org.xml.sax.*;
+import java.net.*;
 import javax.xml.bind.attachment.*;
 import javax.xml.bind.Unmarshaller.*;
 import javax.xml.validation.*;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.*;
-import java.net.*;
-import com.caucho.jaxb.skeleton.*;
-import com.caucho.jaxb.adapters.*;
 import javax.xml.bind.helpers.*;
 import javax.xml.namespace.*;
 
-public class UnmarshallerImpl extends AbstractUnmarshallerImpl {
+import org.xml.sax.*;
+import org.w3c.dom.*;
+
+import com.caucho.jaxb.skeleton.*;
+import com.caucho.jaxb.adapters.*;
+import com.caucho.util.*;
+
+public class UnmarshallerImpl extends AbstractUnmarshallerImpl
+{
+  private static final L10N L = new L10N(UnmarshallerImpl.class);
 
   private JAXBContextImpl _context;
 
@@ -84,12 +89,19 @@ public class UnmarshallerImpl extends AbstractUnmarshallerImpl {
     throws JAXBException
   {
     try {
-      while(reader.getEventType() != XMLStreamReader.START_ELEMENT)
+      while (reader.getEventType() != XMLStreamReader.START_ELEMENT)
         reader.next();
-      
-      return _context.getRootElement(reader.getName()).read(this, reader);
-    }
-    catch (Exception e) {
+
+      Skeleton skel =  _context.getRootElement(reader.getName());
+
+      if (skel == null)
+	throw new JAXBException(L.l("'{0}' is an unknown root element",
+				    reader.getName()));
+
+      return skel.read(this, reader);
+    } catch (JAXBException e) {
+      throw e;
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }

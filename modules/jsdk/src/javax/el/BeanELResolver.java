@@ -42,6 +42,9 @@ public class BeanELResolver extends ELResolver {
     = Logger.getLogger(MapELResolver.class.getName());
   
   private final boolean _isReadOnly;
+
+  private WeakHashMap<Class,BeanProperties> _classMap
+    = new WeakHashMap<Class,BeanProperties>();
   
   public BeanELResolver()
   {
@@ -92,27 +95,29 @@ public class BeanELResolver extends ELResolver {
     if (fieldName.length() == 0)
       return null;
 
-    String getName = "get" + Character.toUpperCase(fieldName.charAt(0)) +
-      fieldName.substring(1);
-      
-    Method method = null;
+    Class cl = base.getClass();
+    BeanProperties props = _classMap.get(cl);
 
-    try {
-      method = base.getClass().getMethod(getName, new Class[0]);
-    } catch (NoSuchMethodException e) {
+    if (props == null) {
+      if (cl.isArray()
+	  || Collection.class.isAssignableFrom(cl)
+	  || Map.class.isAssignableFrom(cl)) {
+	return null;
+      }
+	  
+      props = new BeanProperties(cl);
+      _classMap.put(cl, props);
     }
 
-    if (method == null)
-      throw new PropertyNotFoundException("'" + fieldName + "' is an unknown property of bean '" + base + "' (" + base.getClass().getName() + ")");
+    BeanProperty prop = props.getBeanProperty(fieldName);
 
-    Class []paramTypes = method.getParameterTypes();
-    if (paramTypes.length != 0)
-      return null;
-      
     context.setPropertyResolved(true);
 
+    if (prop == null)
+      throw new PropertyNotFoundException(fieldName);
+
     try {
-      return method.invoke(base);
+      return prop.getReadMethod().invoke(base);
     } catch (IllegalAccessException e) {
       throw new ELException(e);
     } catch (InvocationTargetException e) {
@@ -153,11 +158,43 @@ public class BeanELResolver extends ELResolver {
 	  _propMap.put(descriptor.getName(),
 		       new BeanProperty(baseClass, descriptor));
 	}
+
+	Method []methods = baseClass.getMethods();
+
+	for (int i = 0; i < methods.length; i++) {
+	  Method method = methods[i];
+
+	  String name = method.getName();
+
+	  if (method.getParameterTypes().length != 0)
+	    continue;
+
+	  if (! Modifier.isPublic(method.getModifiers()))
+	    continue;
+
+	  if (Modifier.isStatic(method.getModifiers()))
+	    continue;
+
+	  String propName;
+	  if (name.startsWith("get"))
+	    propName = Introspector.decapitalize(name.substring(3));
+	  else if (name.startsWith("is"))
+	    propName = Introspector.decapitalize(name.substring(2));
+	  else
+	    continue;
+
+	  if (_propMap.get(propName) != null)
+	    continue;
+
+	  _propMap.put(propName, new BeanProperty(baseClass,
+						  propName,
+						  method));
+	}
       } catch (IntrospectionException e) {
 	throw new ELException(e);
       }
     }
-    
+
     public BeanProperty getBeanProperty(String property)
     {
       return _propMap.get(property);
@@ -173,6 +210,18 @@ public class BeanELResolver extends ELResolver {
     {
       _base = baseClass;
       _descriptor = descriptor;
+    }
+    
+    public BeanProperty(Class baseClass,
+			String name,
+			Method getter)
+    {
+      try {
+	_base = baseClass;
+	_descriptor = new PropertyDescriptor(name, getter, null);
+      } catch (Exception e) {
+	throw new RuntimeException(e);
+      }
     }
 
     public Class getPropertyType()
