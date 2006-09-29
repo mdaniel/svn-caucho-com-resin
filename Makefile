@@ -1,4 +1,4 @@
-PREFIX=/Users/ferg/ws/resin
+PREFIX=/home/caucho/regression/build/resin
 
 all	: 
 	(cd modules/c/src; $(MAKE))

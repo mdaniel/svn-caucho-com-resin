@@ -109,8 +109,6 @@ public class TcpConnection extends PortConnection implements ThreadTask
     }
 
     _socket = socket;
-
-    _admin.register();
   }
 
   /**
@@ -457,6 +455,8 @@ public class TcpConnection extends PortConnection implements ThreadTask
 
     long startTime = Alarm.getExactTime();
 
+    _admin.register();
+
     try {
       _thread = thread;
       
@@ -527,6 +527,8 @@ public class TcpConnection extends PortConnection implements ThreadTask
 
       _thread = null;
       thread.setName(oldThreadName);
+      
+      _admin.unregister();
     }
   }
 
@@ -627,8 +629,6 @@ public class TcpConnection extends PortConnection implements ThreadTask
     _isDead = true;
     
     closeImpl();
-    
-    _admin.unregister();
   }
   
   /**

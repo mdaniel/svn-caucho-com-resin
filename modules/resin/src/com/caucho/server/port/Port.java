@@ -1121,7 +1121,7 @@ public class Port
   }
 
   /**
-   * Shuts the TcpServer down.  The server gives connections 30
+   * Shuts the Port down.  The server gives connections 30
    * seconds to complete.
    */
   public void close()

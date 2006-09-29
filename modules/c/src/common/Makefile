@@ -2,13 +2,13 @@
 
 CC=gcc
 CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI -DHAS_JVMDI
-CFLAGS_SHLIB=-DSHARED_MODULE
-LIBTOOL=/Users/ferg/ws/test-resin/libtool --silent
+CFLAGS_SHLIB=-fpic
+LIBTOOL=/home/caucho/regression/build/resin/libtool --silent
 EGREP=grep -E
-LD=gcc
-LD_SHLIB=cc
+LD=/usr/bin/ld
+LD_SHLIB=gcc
 LDFLAGS=
-LDFLAGS_SHLIB=-bundle -undefined suppress -flat_namespace -Wl,-bind_at_load -L/usr/lib
+LDFLAGS_SHLIB=-shared -melf_i386 -L/usr/local/ssl/lib
 OBJ=stream.o config.o memory.o
 OBJ_PICS=stream.lo config.lo memory.lo
 INCLUDES= -I/usr/include
