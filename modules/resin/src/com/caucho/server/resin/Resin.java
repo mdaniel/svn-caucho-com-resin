@@ -226,6 +226,8 @@ public class Resin implements EnvironmentBean, SchemaBean
    */
   public void setServerId(String serverId)
   {
+    _variableMap.put("serverId", serverId);
+    
     _serverId = serverId;
     _serverIdLocal.set(serverId);
   }
@@ -1336,6 +1338,33 @@ public class Resin implements EnvironmentBean, SchemaBean
     }
 
     /**
+     * Returns the local address
+     *
+     * @return IP address
+     */
+    public String getAddress()
+    {
+      try {
+	if (Alarm.isTest())
+	  return "127.0.0.1";
+	else
+	  return InetAddress.getLocalHost().getHostAddress();
+      } catch (Exception e) {
+	log().log(Level.FINE, e.toString(), e);
+
+	return "localhost";
+      }
+    }
+
+    /**
+     * Returns the resin config.
+     */
+    public Path getConf()
+    {
+      return getHome().lookup(Resin.this.getConfigFile());
+    }
+
+    /**
      * Returns the resin home.
      */
     public Path getHome()
@@ -1351,6 +1380,38 @@ public class Resin implements EnvironmentBean, SchemaBean
     public Path getRoot()
     {
       return Resin.this.getRootDirectory();
+    }
+
+    /**
+     * Returns the version
+     *
+     * @return version
+     */
+    public String getVersion()
+    {
+      if (Alarm.isTest())
+	return "3.1.test";
+      else
+	return com.caucho.Version.VERSION;
+    }
+
+    /**
+     * Returns the local hostname
+     *
+     * @return version
+     */
+    public String getHostName()
+    {
+      try {
+	if (Alarm.isTest())
+	  return "localhost";
+	else
+	  return InetAddress.getLocalHost().getHostName();
+      } catch (Exception e) {
+	log().log(Level.FINE, e.toString(), e);
+
+	return "localhost";
+      }
     }
 
     /**
@@ -1380,6 +1441,14 @@ public class Resin implements EnvironmentBean, SchemaBean
     {
       return _isResinProfessional;
     }
+    
+    /**
+     * Returns the -server id
+     */
+    public String getServerId()
+    {
+      return _serverId;
+    }
   }
 
   /**
@@ -1392,6 +1461,13 @@ public class Resin implements EnvironmentBean, SchemaBean
     public boolean isJava5()
     {
       return CauchoSystem.isJdk15();
+    }
+    /**
+     * Returns the JDK version
+     */
+    public String getVersion()
+    {
+      return System.getProperty("java.version");
     }
   }
 

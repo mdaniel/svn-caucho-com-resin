@@ -35,12 +35,16 @@ import java.io.*;
 import java.net.*;
 
 class FactoryLoader {
-
   private static Logger log =
     Logger.getLogger("javax.xml.bind.FactoryLoader");
 
-  private static HashMap<String,FactoryLoader>
-    _factoryLoaders = new HashMap<String,FactoryLoader>();
+  private static HashMap<String,FactoryLoader> _factoryLoaders
+    = new HashMap<String,FactoryLoader>();
+
+  private String _factoryId;
+
+  private WeakHashMap<ClassLoader,Object[]> _providerMap
+    = new WeakHashMap<ClassLoader,Object[]>();
 
   public static FactoryLoader getFactoryLoader(String factoryId) {
 
@@ -54,18 +58,9 @@ class FactoryLoader {
     return ret;
   }
 
-  //////////////////////////////////////////////////////////////////////////////
-
-  private String _factoryId;
-
-  private WeakHashMap<ClassLoader,Object[]>
-    _providerMap = new WeakHashMap<ClassLoader,Object[]>();
-
-  //////////////////////////////////////////////////////////////////////////////
-
   private FactoryLoader(String factoryId)
   {
-    this._factoryId = factoryId;
+    _factoryId = factoryId;
   }
 
   public Object newInstance(ClassLoader classLoader)
@@ -76,7 +71,6 @@ class FactoryLoader {
     className = System.getProperty(_factoryId);
 
     if (className == null) {
-      
       String fileName =
         System.getProperty("java.home") +
         File.separatorChar +
@@ -96,7 +90,6 @@ class FactoryLoader {
       }
       catch (IOException e) {
         log.log(Level.FINER, "ignoring exception", e);
-
       }
       finally {
         if (is != null)

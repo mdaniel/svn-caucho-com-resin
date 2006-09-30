@@ -114,7 +114,7 @@ public class BeanELResolver extends ELResolver {
     context.setPropertyResolved(true);
 
     if (prop == null)
-      throw new PropertyNotFoundException(fieldName);
+      return null;//throw new PropertyNotFoundException(fieldName);
 
     try {
       return prop.getReadMethod().invoke(base);

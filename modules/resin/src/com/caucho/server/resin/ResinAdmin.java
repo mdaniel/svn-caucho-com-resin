@@ -85,12 +85,17 @@ public class ResinAdmin extends AbstractManagedObject
 
   public String getResinHome()
   {
-    return CauchoSystem.getResinHome().getNativePath();
+    return _resin.getResinHome().getNativePath();
+  }
+
+  public String getRootDirectory()
+  {
+    return _resin.getRootDirectory().getNativePath();
   }
 
   public String getServerRoot()
   {
-    return CauchoSystem.getServerRoot().getNativePath();
+    return getRootDirectory();
   }
 
   public ServerMXBean getServer()

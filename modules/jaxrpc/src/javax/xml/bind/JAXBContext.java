@@ -90,8 +90,10 @@ public abstract class JAXBContext {
     try {
       ClassLoader classLoader =
         Thread.currentThread().getContextClassLoader();
+      
       FactoryLoader factoryLoader =
         FactoryLoader.getFactoryLoader("javax.xml.bind.JAXBContext");
+      
       Object obj = factoryLoader.newInstance(classLoader);
       if (obj != null) {
         Class c = obj.getClass();
@@ -100,6 +102,7 @@ public abstract class JAXBContext {
                                Map.class);
         return (JAXBContext)m.invoke(null, classesToBeBound, properties);
       }
+      
       Class c = Class.forName("com.caucho.jaxb.JAXBContextImpl");
       Constructor con = c.getConstructor(new Class[] {
 	Class[].class,
@@ -136,12 +139,26 @@ public abstract class JAXBContext {
       throws JAXBException
   {
     try {
+      FactoryLoader factoryLoader =
+        FactoryLoader.getFactoryLoader("javax.xml.bind.JAXBContext");
+      
+      Object obj = factoryLoader.newInstance(classLoader);
+      if (obj != null) {
+        Class c = obj.getClass();
+        Method m = c.getMethod("createContext",
+                               String.class,
+			       ClassLoader.class,
+                               Map.class);
+        return (JAXBContext)m.invoke(null, contextPath, classLoader, properties);
+      }
+      
       Class c = Class.forName("com.caucho.jaxb.JAXBContextImpl");
       Constructor con = c.getConstructor(new Class[] {
 	String.class,
 	ClassLoader.class,
 	Map.class
       });
+      
       return (JAXBContext)
 	con.newInstance(new Object[] {
 	  contextPath,

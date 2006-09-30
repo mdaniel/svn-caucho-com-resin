@@ -16,6 +16,7 @@
       <item link="rewrite-tags.xtp" title="rewrite tags"/>
       <item link="soa-tags.xtp" title="service tags"/>
       <item link="log.xtp" title="log"/>
+      <item link="el-var.xtp" title="el variables"/>
       <item link="control.xtp" title="el & control"/>
     </item>
 

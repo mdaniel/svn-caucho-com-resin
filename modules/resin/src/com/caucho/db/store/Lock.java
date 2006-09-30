@@ -47,7 +47,7 @@ import com.caucho.sql.SQLExceptionWrapper;
 /**
  * Locking for tables/etc.
  */
-public class Lock implements ClockCacheItem {
+public final class Lock implements ClockCacheItem {
   private final static L10N L = new L10N(Lock.class);
   private final static Logger log = Log.open(Lock.class);
 
@@ -87,8 +87,9 @@ public class Lock implements ClockCacheItem {
       log.finest("LockRead$" + System.identityHashCode(this) + "[" + _id + "] read:" + _readCount +
 		 " upgrade:" + _upgradeCount);
 
-    if (_upgradeCount == 0)
+    if (_upgradeCount == 0) {
       _readCount++;
+    }
     else if (queue(xa, Alarm.getCurrentTime() + timeout)) {
       _readCount++;
 
@@ -347,22 +348,10 @@ public class Lock implements ClockCacheItem {
   private boolean queue(Transaction xa, long expireTime)
     throws SQLException
   {
-    return queue(xa, expireTime, false);
-  }
-
-  /**
-   * Queues the transaction for the lock.
-   */
-  private boolean queue(Transaction xa, long expireTime, boolean isLifo)
-    throws SQLException
-  {
     if (_queue == null)
       _queue = new ArrayList<Transaction>();
 
-    if (isLifo)
-      _queue.add(0, xa);
-    else
-      _queue.add(xa);
+    _queue.add(xa);
 
     long startTime = Alarm.getCurrentTime();
 
@@ -404,7 +393,7 @@ public class Lock implements ClockCacheItem {
       // fifo
       _xa = _queue.remove(0);
 
-      notifyAll();
+      notify();
 
       return true;
     } catch (Throwable e) {

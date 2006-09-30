@@ -339,6 +339,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
     if (resinLib.lookup("pro.jar").canRead())
       classPath.add(resinLib.lookup("pro.jar").getNativePath());
     classPath.add(resinLib.lookup("resin.jar").getNativePath());
+    classPath.add(resinLib.lookup("jaxrpc-15.jar").getNativePath());
 		  
     String []list = resinLib.list();
 

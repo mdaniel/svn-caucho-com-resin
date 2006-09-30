@@ -332,7 +332,8 @@ public class ServerConnector {
    */
   public void close()
   {
-    _client.close();
+    if (_client != null)
+      _client.close();
   }
 
   public String toString()
