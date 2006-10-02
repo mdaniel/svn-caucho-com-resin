@@ -178,7 +178,7 @@ public class InterpretedClassDef extends ClassDef
       _setField = fun;
     else if (name.equals("__call"))
       _call = fun;
-    else if (name.equals(getName()) && _constructor == null)
+    else if (name.equalsIgnoreCase(getName()) && _constructor == null)
       _constructor = fun;
   }
 

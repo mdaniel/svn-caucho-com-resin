@@ -853,7 +853,7 @@ abstract public class StringValue extends Value implements CharSequence {
   {
     int length = length();
 
-    if (length < tail)
+    if (tail >= length)
       tail = length - 1;
     
     for (; tail >= 0; tail--) {
