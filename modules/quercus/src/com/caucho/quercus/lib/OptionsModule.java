@@ -197,20 +197,29 @@ public class OptionsModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns the environment value.
+   * Sets an environment name/value pair.
    */
-  public static Value getenv(Env env, StringValue var)
+  public static BooleanValue putenv(Env env, StringValue settings)
   {
-    Value server = env.getGlobalValue("_SERVER");
+    int eqIndex = settings.indexOf('=');
 
-    if (server != null) {
-      Value value = server.get(var);
+    if (eqIndex < 0)
+      return BooleanValue.FALSE;
 
-      if (value != null && value.isset())
-	return value;
-    }
+    StringValue key = settings.substring(0, eqIndex);
+    StringValue val = settings.substring(eqIndex + 1);
 
-    return NullValue.NULL;
+    env.getQuercus().setServerEnv(key, val);
+
+    return BooleanValue.TRUE;
+  }
+
+  /**
+   * Gets an environment value.
+   */
+  public static Value getenv(Env env, StringValue key)
+  {
+    return env.getQuercus().getServerEnv(key);
   }
 
   /**

@@ -396,8 +396,23 @@ public class Quercus {
    */
   public void setServerEnv(String name, String value)
   {
-    _serverEnvMap.put(new StringValueImpl(name),
-                      new StringValueImpl(value));
+    setServerEnv(new StringValueImpl(name), new StringValueImpl(value));
+  }
+
+  /**
+   * Sets a server env value.
+   */
+  public void setServerEnv(StringValue name, StringValue value)
+  {
+    _serverEnvMap.put(name, value);
+  }
+
+  /**
+   * Gets a server env value.
+   */
+  public Value getServerEnv(StringValue name)
+  {
+    return _serverEnvMap.get(name);
   }
 
   /**
