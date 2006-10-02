@@ -610,6 +610,10 @@
         <include name="lib/activation.jar"/>
         <include name="lib/javamail-14.jar"/>
         <include name="lib/ejb-15.jar"/>
+        <include name="lib/jaxb-api.jar"/>
+        <include name="lib/jaxb-xjc.jar"/>
+        <include name="lib/jaxb-impl.jar"/>
+        <include name="lib/jaxb1-impl.jar"/>
         <include name="lib/jaxrpc-15.jar"/>
         <include name="lib/jpa-15.jar"/>
         <include name="lib/j2ee-deploy-10.jar"/>
