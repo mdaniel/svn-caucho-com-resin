@@ -162,7 +162,7 @@ extra overhead.</p>
 <s1 title="WebServices capabilities and configuration">
 
 <p>Documentation for the new web services capabilities is
-in the <a href="esb|index.xtp">web services</a> section.</p>
+in the <a href="soa|index.xtp">web services</a> section.</p>
 
 <p>Resin has updated its configuration for web services like
 Hessian, and has extended the web service capabilities to include

@@ -353,7 +353,7 @@ public class LogConfig extends RotateLog {
   public static class SubLogger {
     private Logger _logger;
     private String _name = "";
-    private Level _level;
+    private Level _level = Level.INFO;
     private boolean _useParentHandlers = true;
 
     // for mbean management
@@ -460,6 +460,7 @@ public class LogConfig extends RotateLog {
       return _handler;
     }
 
+    @PostConstruct
     public void init()
       throws ConfigException
     {

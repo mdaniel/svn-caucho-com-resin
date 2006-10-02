@@ -33,6 +33,7 @@ import java.util.*;
 
 import com.caucho.management.server.*;
 import com.caucho.server.port.*;
+import com.caucho.server.resin.*;
 import com.caucho.util.*;
 
 public class ServerAdmin extends AbstractManagedObject
@@ -96,8 +97,7 @@ public class ServerAdmin extends AbstractManagedObject
    */
   public ThreadPoolMXBean getThreadPool()
   {
-    //return ThreadPool.getThreadPool().getAdmin();
-    return null;
+    return ThreadPoolAdmin.create();
   }
 
   /**

@@ -351,7 +351,12 @@ public class BeanTypeStrategy extends TypeStrategy {
       for (int i = 0; i < _initList.size(); i++)
 	_initList.get(i).invoke(bean);
     } catch (InvocationTargetException e) {
-      throw new ConfigException(e.getCause());
+      Throwable cause = e.getCause();
+
+      if (cause instanceof Exception)
+	throw (Exception) cause;
+      else
+	throw new ConfigException(cause);
     }
     
     for (int i = 0; i < _destroyList.size(); i++) {

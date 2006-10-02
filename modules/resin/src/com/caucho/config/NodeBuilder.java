@@ -115,6 +115,12 @@ public class NodeBuilder {
     _elContext = new ConfigELContext();
     _varResolver = _elContext.getVariableResolver();
   }
+
+  NodeBuilder(ConfigELContext context)
+  {
+    _elContext = context;
+    _varResolver = _elContext.getVariableResolver();
+  }
   
   NodeBuilder(Config config)
   {
@@ -125,6 +131,11 @@ public class NodeBuilder {
       _elContext = new ConfigELContext();
     
     _varResolver = _elContext.getVariableResolver();
+  }
+
+  public static NodeBuilder createForProgram()
+  {
+    return new NodeBuilder(new ConfigELContext((ELResolver) null));
   }
 
   public static NodeBuilder getCurrentBuilder()
@@ -164,13 +175,12 @@ public class NodeBuilder {
     throws LineConfigException
   {
     NodeBuilder oldBuilder = _currentBuilder.get();
-    Object oldFile = _varResolver.getValue(_elContext, null, "__FILE__");
+    Object oldFile = _elContext.getValue("__FILE__");
     try {
       _currentBuilder.set(this);
 
       if (top instanceof QNode) {
-	_varResolver.setValue(_elContext, null, "__FILE__",
-			      ((QNode) top).getBaseURI());
+	_elContext.setValue("__FILE__", ((QNode) top).getBaseURI());
       }
 
       TypeStrategy typeStrategy;
@@ -184,7 +194,7 @@ public class NodeBuilder {
     } finally {
       _currentBuilder.set(oldBuilder);
       
-      _varResolver.setValue(_elContext, null, "__FILE__", oldFile);
+      _elContext.setValue("__FILE__", oldFile);
     }
   }
 
@@ -202,13 +212,11 @@ public class NodeBuilder {
       _currentBuilder.set(this);
 
       if (top instanceof QNode) {
-	_varResolver.setValue(_elContext, null, "__FILE__",
-			    ((QNode) top).getBaseURI());
+	_elContext.setValue("__FILE__", ((QNode) top).getBaseURI());
       }
 
       TypeStrategy typeStrategy;
       typeStrategy = TypeStrategyFactory.getTypeStrategy(bean.getClass());
-
       typeStrategy.configureBean(this, bean, top);
     } catch (LineConfigException e) {
       throw e;

@@ -59,10 +59,7 @@ import com.caucho.jsp.Page;
 import com.caucho.server.connection.StubServletRequest;
 import com.caucho.server.connection.StubServletResponse;
 
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
+import com.caucho.util.*;
 import com.caucho.management.j2ee.J2EEManagedObject;
 
 /**
@@ -435,6 +432,9 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
       try {
         _servletClass = Class.forName(_servletClassName, false, loader);
       } catch (ClassNotFoundException e) {
+	if (e instanceof CompileException)
+	  throw error(e);
+	
         log.log(Level.FINER, e.toString(), e);
       }
 
@@ -728,6 +728,14 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
       return new ServletLineConfigException(_location + msg);
     else
       return new ServletConfigException(msg);
+  }
+
+  protected ServletException error(Throwable e)
+  {
+    if (_location != null)
+      return new ServletLineConfigException(_location + e.getMessage(), e);
+    else
+      return new ServletConfigException(e);
   }
 
   /**

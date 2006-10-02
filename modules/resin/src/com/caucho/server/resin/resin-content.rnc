@@ -46,6 +46,8 @@ r_cluster-default = element cluster-default {
 r_cluster-Basis =
   r_env-Basis
 
+  & r_access-log?
+
   & r_cache?
 
   & (attribute connection-error-page { string }

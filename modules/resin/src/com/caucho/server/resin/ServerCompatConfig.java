@@ -42,7 +42,7 @@ import com.caucho.util.*;
 /**
  * Compatiblity configuration for Resin 3.0-style configuration.
  */
-public class ServerCompatConfig {
+public class ServerCompatConfig implements SchemaBean {
   private static final L10N L = new L10N(ServerCompatConfig.class);
   private static final Logger log
     = Logger.getLogger(ServerCompatConfig.class.getName());
@@ -64,6 +64,14 @@ public class ServerCompatConfig {
       throw new NullPointerException();
     
     _resin = resin;
+  }
+
+  /**
+   * Returns the relax schema.
+   */
+  public String getSchema()
+  {
+    return "com/caucho/server/resin/server.rnc";
   }
 
   public void addBuilderProgram(BuilderProgram program)

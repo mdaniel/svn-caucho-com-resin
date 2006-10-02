@@ -416,7 +416,8 @@ public class ClusterServer {
   {
     _clusterPort.init();
 
-    _serverConnector.init();
+    if (! _cluster.getServerId().equals(getId()))
+      _serverConnector.init();
   }
 
   /**

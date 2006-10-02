@@ -59,7 +59,8 @@ import com.caucho.util.RandomUtil;
  * communicate with this ClusterServer when it is active in another instance of
  * Resin .
  */
-public class ServerConnector {
+public class ServerConnector
+{
   private static final Logger log
     = Logger.getLogger(ServerConnector.class.getName());
   private static final L10N L = new L10N(ServerConnector.class);
@@ -202,7 +203,6 @@ public class ServerConnector {
   /**
    * Initialize
    */
-  @PostConstruct
   public void init()
     throws Exception
   {

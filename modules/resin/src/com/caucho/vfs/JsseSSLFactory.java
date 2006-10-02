@@ -37,6 +37,7 @@ import java.security.GeneralSecurityException;
 
 import java.security.cert.Certificate;
 
+import javax.annotation.*;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -54,7 +55,7 @@ import com.caucho.config.ConfigException;
 public class JsseSSLFactory implements SSLFactory {
   private static final L10N L = new L10N(JsseSSLFactory.class);
   
-  private String _keyStoreFile;
+  private Path _keyStoreFile;
   private String _alias;
   private String _password;
   private String _verifyClient;
@@ -74,7 +75,7 @@ public class JsseSSLFactory implements SSLFactory {
   /**
    * Sets the key store
    */
-  public void setKeyStoreFile(String keyStoreFile)
+  public void setKeyStoreFile(Path keyStoreFile)
   {
     _keyStoreFile = keyStoreFile;
   }
@@ -82,7 +83,7 @@ public class JsseSSLFactory implements SSLFactory {
   /**
    * Returns the certificate file.
    */
-  public String getKeyStoreFile()
+  public Path getKeyStoreFile()
   {
     return _keyStoreFile;
   }
@@ -162,6 +163,7 @@ public class JsseSSLFactory implements SSLFactory {
   /**
    * Initialize
    */
+  @PostConstruct
   public void init()
     throws ConfigException, IOException, GeneralSecurityException
   {
@@ -172,7 +174,7 @@ public class JsseSSLFactory implements SSLFactory {
 
     _keyStore = KeyStore.getInstance(_keyStoreType);
     
-    InputStream is = Vfs.openRead(_keyStoreFile);
+    InputStream is = _keyStoreFile.openRead();
     try {
       _keyStore.load(is, _password.toCharArray());
     } finally {

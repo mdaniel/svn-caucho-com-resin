@@ -186,6 +186,9 @@ public class Store {
     _name = name;
     _path = path;
 
+    if (path == null)
+      throw new NullPointerException();
+
     _id = _blockManager.allocateStoreId();
 
     if (rowLock == null)

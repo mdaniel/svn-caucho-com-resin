@@ -37,7 +37,8 @@ import com.caucho.vfs.*;
 import org.xml.sax.*;
 
 public class XmlParseException extends SAXException
-  implements LineCompileException {
+  implements LineCompileException
+{
   XmlParseException(String msg)
   {
     super(msg);

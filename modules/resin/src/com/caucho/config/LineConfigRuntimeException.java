@@ -35,7 +35,9 @@ import com.caucho.util.LineCompileException;
 /**
  * Thrown by the various Builders
  */
-public class LineConfigRuntimeException extends RuntimeException
+public class LineConfigRuntimeException
+  extends RuntimeException
+  implements LineCompileException
 {
   /**
    * Create a null exception

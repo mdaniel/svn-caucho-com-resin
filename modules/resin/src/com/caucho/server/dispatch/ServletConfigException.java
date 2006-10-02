@@ -60,4 +60,12 @@ public class ServletConfigException extends ServletException
   {
     super(msg, e);
   }
+  
+  /**
+   * Creates a servlet config exception.
+   */
+  public ServletConfigException(Throwable e)
+  {
+    super(e);
+  }
 }

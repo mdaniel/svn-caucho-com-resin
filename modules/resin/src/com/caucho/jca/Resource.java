@@ -150,6 +150,14 @@ public class Resource {
   }
 
   /**
+   * Sets the class
+   */
+  public void setClass(Class resourceClass)
+  {
+    _type = resourceClass;
+  }
+
+  /**
    * Gets the type;
    */
   public Class getType()

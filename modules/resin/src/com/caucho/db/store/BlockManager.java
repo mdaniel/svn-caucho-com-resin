@@ -182,6 +182,15 @@ public final class BlockManager
     for (Block block : removeBlocks) {
       _blockCache.remove(block.getBlockId());
     }
+
+    synchronized (_writeQueue) {
+      while (_writeQueue.size() > 0) {
+	try {
+	  _writeQueue.wait();
+	} catch (InterruptedException e) {
+	}
+      }
+    }
   }
 
   /**

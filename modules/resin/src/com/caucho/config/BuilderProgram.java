@@ -63,13 +63,20 @@ public abstract class BuilderProgram {
   public void configure(Object bean)
     throws ConfigException
   {
-    configureImpl(new NodeBuilder(), bean);
+    // server/23e7
+    if (NodeBuilder.getCurrentBuilder() != null)
+      configureImpl(NodeBuilder.getCurrentBuilder(), bean);
+    else
+      configureImpl(NodeBuilder.createForProgram(), bean);
   }
 
   public Object configure(Class type)
     throws ConfigException
   {
-    return configureImpl(new NodeBuilder(), type);
+    if (NodeBuilder.getCurrentBuilder() != null)
+      return configureImpl(NodeBuilder.getCurrentBuilder(), type);
+    else
+      return configureImpl(NodeBuilder.createForProgram(), type);
   }
   
   /**

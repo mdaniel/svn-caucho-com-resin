@@ -36,7 +36,9 @@ import com.caucho.util.*;
 /**
  * Wrapper for a compile error.
  */
-public class CompileClassNotFound extends ClassNotFoundException {
+public class CompileClassNotFound
+  extends ClassNotFoundException
+  implements CompileException {
   private Throwable _cause;
 
   /**

@@ -75,7 +75,9 @@ public class ConfigELContext extends ELContext {
     
     _stackResolver.push(new SystemPropertiesResolver());
     _stackResolver.push(EnvironmentELResolver.create());
-    _stackResolver.push(varResolver);
+
+    if (varResolver != null)
+      _stackResolver.push(varResolver);
   }
 
   public void push(ELResolver elResolver)
@@ -91,6 +93,20 @@ public class ConfigELContext extends ELContext {
   public ELResolver getVariableResolver()
   {
     return _varResolver;
+  }
+
+  public Object getValue(String var)
+  {
+    if (_varResolver != null)
+      return _varResolver.getValue(this, null, var);
+    else
+      return null;
+  }
+
+  public void setValue(String var, Object value)
+  {
+    if (_varResolver != null)
+      _varResolver.setValue(this, null, var, value);
   }
 
   @Override

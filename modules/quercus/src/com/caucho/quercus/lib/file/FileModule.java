@@ -890,7 +890,10 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static boolean file_exists(Env env, @NotNull Path path)
   {
-    return path.exists();
+    if (path != null)
+      return path.exists();
+    else
+      return false;
   }
 
   /**

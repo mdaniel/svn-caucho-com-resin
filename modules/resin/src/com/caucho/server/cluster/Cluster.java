@@ -37,6 +37,7 @@ import com.caucho.management.server.ClusterMXBean;
 import com.caucho.server.host.*;
 import com.caucho.server.resin.*;
 import com.caucho.util.*;
+import com.caucho.vfs.*;
 
 import javax.annotation.*;
 import javax.management.ObjectName;
@@ -48,7 +49,9 @@ import java.util.logging.Logger;
 /**
  * Defines a set of clustered servers.
  */
-public class Cluster implements EnvironmentListener, EnvironmentBean {
+public class Cluster
+  implements EnvironmentListener, EnvironmentBean, SchemaBean
+{
   private static final L10N L = new L10N(ClusterGroup.class);
   private static final Logger log = Logger.getLogger(Cluster.class.getName());
 
@@ -65,6 +68,8 @@ public class Cluster implements EnvironmentListener, EnvironmentBean {
   private EnvironmentClassLoader _classLoader;
   
   private Resin _resin;
+
+  private Path _rootDirectory;
 
   private ClusterAdmin _admin;
   private ObjectName _objectName;
@@ -112,6 +117,10 @@ public class Cluster implements EnvironmentListener, EnvironmentBean {
     _clusterLocal.set(this, _classLoader);
   
     Environment.addEnvironmentListener(this, _classLoader);
+    
+    Config.setCurrentVar("cluster", new Var());
+
+    _rootDirectory = Vfs.getPwd();
   }
 
   /**
@@ -167,6 +176,32 @@ public class Cluster implements EnvironmentListener, EnvironmentBean {
   public ClassLoader getClassLoader()
   {
     return _classLoader;
+  }
+
+  /**
+   * Returns the relax schema.
+   */
+  public String getSchema()
+  {
+    return "com/caucho/server/resin/cluster.rnc";
+  }
+
+  /**
+   * Gets the root directory.
+   */
+  public Path getRootDirectory()
+  {
+    return _rootDirectory;
+  }
+
+  /**
+   * Sets the root directory.
+   */
+  public void setRootDirectory(Path rootDirectory)
+  {
+    Vfs.setPwd(rootDirectory);
+    
+    _rootDirectory = rootDirectory;
   }
 
   /**
@@ -685,5 +720,48 @@ public class Cluster implements EnvironmentListener, EnvironmentBean {
   public String toString()
   {
     return "Cluster[" + _id + "]";
+  }
+
+  /**
+   * EL variables
+   */
+  public class Var {
+    /**
+     * Returns the resin.id
+     */
+    public String getId()
+    {
+      return _id;
+    }
+
+    /**
+     * Returns the root directory.
+     *
+     * @return server-root
+     */
+    public Path getRoot()
+    {
+      return Cluster.this.getRootDirectory();
+    }
+
+    /**
+     * Returns the root directory.
+     *
+     * @return resin.home
+     */
+    public Path getRootDir()
+    {
+      return getRoot();
+    }
+
+    /**
+     * Returns the root directory.
+     *
+     * @return resin.home
+     */
+    public Path getRootDirectory()
+    {
+      return getRoot();
+    }
   }
 }

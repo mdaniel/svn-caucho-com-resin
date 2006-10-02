@@ -160,6 +160,7 @@ public class Resin implements EnvironmentBean, SchemaBean
     _startTime = Alarm.getCurrentTime();
 
     _variableMap.put("resin", new Var());
+    _variableMap.put("server", new Var());
     _variableMap.put("java", new JavaVar());
 
     setResinHome(Vfs.getPwd());
@@ -180,6 +181,8 @@ public class Resin implements EnvironmentBean, SchemaBean
     } catch (Exception e) {
       throw new ConfigException(e);
     }
+
+    ThreadPoolAdmin.create();
     
     new ResinAdmin(this);
   }
