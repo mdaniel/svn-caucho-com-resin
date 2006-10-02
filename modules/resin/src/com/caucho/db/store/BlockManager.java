@@ -30,8 +30,8 @@
 package com.caucho.db.store;
 
 import com.caucho.log.Log;
-import com.caucho.util.L10N;
-import com.caucho.util.LongKeyLruCache;
+import com.caucho.management.server.*;
+import com.caucho.util.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,7 +42,10 @@ import java.util.logging.Logger;
 /**
  * Manages the block cache
  */
-public class BlockManager {
+public final class BlockManager
+  extends AbstractManagedObject
+  implements BlockManagerMXBean
+{
   private static final Logger log = Log.open(BlockManager.class);
   private static final L10N L = new L10N(BlockManager.class);
 
@@ -51,12 +54,23 @@ public class BlockManager {
   private final byte []_storeMask = new byte[8192];
   private final LongKeyLruCache<Block> _blockCache;
 
+  private final ArrayList<Block> _writeQueue = new ArrayList<Block>();
+  private int _writeQueueMax = 32;
+
   private BlockManager(int capacity)
   {
     _blockCache = new LongKeyLruCache<Block>(capacity);
 
     // the first store id is not available to allow for tests for zero.
     _storeMask[0] |= 1;
+
+    registerSelf();
+
+    BlockManagerWriter writer = new BlockManagerWriter();
+    Thread thread = new Thread(writer, "block-manager-writer");
+    thread.setDaemon(true);
+
+    thread.start();
   }
 
   /**
@@ -69,6 +83,11 @@ public class BlockManager {
 
     _staticManager.ensureCapacity(minEntries);
 
+    return _staticManager;
+  }
+
+  public static BlockManager getBlockManager()
+  {
     return _staticManager;
   }
 
@@ -186,6 +205,25 @@ public class BlockManager {
     
     Block block = _blockCache.get(blockId);
 
+    if (block == null) {
+      synchronized (_writeQueue) {
+	int size = _writeQueue.size();
+	
+	for (int i = 0; i < size; i++) {
+	  block = _writeQueue.get(i);
+
+	  if (block.getBlockId() == blockId) {
+	    break;
+	  }
+	  else
+	    block = null;
+	}
+      }
+
+      if (block != null)
+	_blockCache.putIfNew(blockId, block);
+    }
+
     if (block != null && block.allocate())
       return block;
     
@@ -203,9 +241,56 @@ public class BlockManager {
   }
 
   /**
+   * Adds a block that's needs to be flushed.
+   */
+  void addLruDirtyWriteBlock(Block block)
+  {
+    synchronized (_writeQueue) {
+      while (_writeQueueMax < _writeQueue.size()) {
+	try {
+	  _writeQueue.wait();
+	} catch (InterruptedException e) {
+	}
+      }
+
+      _writeQueue.add(block);
+
+      _writeQueue.notifyAll();
+    }
+  }
+
+  //
+  // management/statistics
+  //
+
+  /**
+   * The managed name is null
+   */
+  public String getName()
+  {
+    return null;
+  }
+
+  /**
+   * The managed type is BlockManager
+   */
+  public String getType()
+  {
+    return "BlockManager";
+  }
+
+  /**
+   * Returns the capacity.
+   */
+  public long getBlockCapacity()
+  {
+    return _blockCache.getCapacity();
+  }
+  
+  /**
    * Returns the hit count.
    */
-  public long getHitCount()
+  public long getHitCountTotal()
   {
     return _blockCache.getHitCount();
   }
@@ -213,7 +298,7 @@ public class BlockManager {
   /**
    * Returns the miss count.
    */
-  public long getMissCount()
+  public long getMissCountTotal()
   {
     return _blockCache.getMissCount();
   }
@@ -224,5 +309,35 @@ public class BlockManager {
     e.fillInStackTrace();
     log.log(Level.WARNING, e.toString(), e);
     return e;
+  }
+
+  class BlockManagerWriter implements Runnable {
+    public void run()
+    {
+      while (true) {
+	try {
+	  Block block = null;
+	  
+	  synchronized (_writeQueue) {
+	    while (_writeQueue.size() == 0) {
+	      _writeQueue.wait();
+	    }
+
+	    block = _writeQueue.get(0);
+	  }
+
+	  block.close();
+
+	  synchronized (_writeQueue) {
+	    _writeQueue.remove(0);
+
+	    _writeQueue.notifyAll();
+	  }
+	} catch (InterruptedException e) {
+	} catch (Throwable e) {
+	  log.log(Level.WARNING, e.toString(), e);
+	}
+      }
+    }
   }
 }

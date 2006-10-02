@@ -19,47 +19,51 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.server.hmux;
+package com.caucho.management.server;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
-
-import java.security.cert.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.jsp.*;
-
-import com.caucho.server.cluster.Cluster;
+import com.caucho.jmx.Description;
+import com.caucho.jmx.Name;
 
 /**
- * Handles cluster requests from a remote dispatcher.
+ * Management interface for the block manager used by the proxy cache
+ * and persistent sessions.
+ *
+ * <pre>
+ * resin:type=BlockManager
+ * </pre>
  */
-abstract public class AbstractClusterRequest {
-  abstract public void setCluster(Cluster cluster);
+@Description("Resin's backing store block manager")
+public interface BlockManagerMXBean extends ManagedObjectMXBean {
   
-  abstract public void setRequest(HmuxRequest request);
+  /**
+   * Returns the number of blocks in the block manager
+   */
+  @Description("The number of blocks in the block manager")
+  public long getBlockCapacity();
+  
+  //
+  // Statistics
+  //
+  
+  /**
+   * Returns the block LRU cache hit count.
+   */
+  @Description("The hit count is the number of block accesses found in"
+	       + " the cache.")
+  public long getHitCountTotal();
 
   /**
-   * Handles a new request.  Initializes the protocol handler and
-   * the request streams.
-   *
-   * <p>Note: ClientDisconnectException must be rethrown to
-   * the caller.
+   * Returns the proxy cache miss count.
    */
-  abstract public int handleRequest(ReadStream is, WriteStream os)
-    throws IOException;
+  @Description("The hit count is the number of block accesses missing in"
+	       + " the cache.")
+  public long getMissCountTotal();
 }

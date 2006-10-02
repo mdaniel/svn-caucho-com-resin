@@ -184,6 +184,12 @@ public class HmuxRequest extends AbstractHttpRequest
 
   public static final int HMUX_CLUSTER_PROTOCOL = 0x101;
   public static final int HMUX_DISPATCH_PROTOCOL = 0x102;
+
+  public enum ProtocolResult {
+    QUIT,
+    EXIT,
+    YIELD
+  };
   
   static final int HTTP_0_9 = 0x0009;
   static final int HTTP_1_0 = 0x0100;
@@ -622,6 +628,7 @@ public class HmuxRequest extends AbstractHttpRequest
                      (is.read() << 8) +
                      (is.read()));
 
+	int result = HMUX_EXIT;
 	boolean isKeepalive = false;
         if (value == HMUX_CLUSTER_PROTOCOL) {
           if (isLoggable)
@@ -632,7 +639,7 @@ public class HmuxRequest extends AbstractHttpRequest
 	    return false;
 	  }
 	  
-          isKeepalive = _clusterRequest.handleRequest(is, _rawWrite);
+          result = _clusterRequest.handleRequest(is, _rawWrite);
         }
         else if (value == HMUX_DISPATCH_PROTOCOL) {
           if (isLoggable)
@@ -644,25 +651,34 @@ public class HmuxRequest extends AbstractHttpRequest
 	  }
 	  
           isKeepalive = _dispatchRequest.handleRequest(is, _rawWrite);
+
+	  if (isKeepalive)
+	    result = HMUX_QUIT;
+	  else
+	    result = HMUX_EXIT;
         }
 	else {
 	  log.fine(dbgId() + (char) code + ": unknown protocol (" + value + ")");
-	  isKeepalive = false;
+	  result = HMUX_EXIT;
 	}
 
-	if (! allowKeepalive())
-	  isKeepalive = false;
-	
-        if (isKeepalive) {
-          _rawWrite.write(HMUX_QUIT);
-	  _rawWrite.flush();
-	}
+	if (result == HMUX_YIELD)
+	  break;
 	else {
-          _rawWrite.write(HMUX_EXIT);
-	  _rawWrite.close();
-	}
+	  if (result == HMUX_QUIT && ! allowKeepalive())
+	    result = HMUX_EXIT;
+	
+	  if (result == HMUX_QUIT) {
+	    _rawWrite.write(HMUX_QUIT);
+	    _rawWrite.flush();
+	  }
+	  else {
+	    _rawWrite.write(HMUX_EXIT);
+	    _rawWrite.close();
+	  }
 
-	return isKeepalive;
+	  return result == HMUX_QUIT;
+	}
 
       case HMUX_URI:
         hasURI = true;

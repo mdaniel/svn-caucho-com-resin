@@ -311,7 +311,20 @@ abstract public class Block implements ClockCacheItem, CacheListener {
    */
   public void removeEvent()
   {
-    close();
+    synchronized (this) {
+      // If the block is clean, just discard it
+      if (_dirtyMax <= _dirtyMin) {
+	freeImpl();
+
+	if (log.isLoggable(Level.FINER))
+	  log.finer("db-block remove " + this);
+
+	return;
+      }
+    }
+
+    // dirty blocks get queued for writing
+    BlockManager.getBlockManager().addLruDirtyWriteBlock(this);
   }
   
   /**

@@ -59,7 +59,7 @@ public final class Lock implements ClockCacheItem {
 
   private boolean _isUsed;
 
-  private ArrayList<Transaction> _queue;
+  private final ArrayList<Transaction> _queue = new ArrayList<Transaction>();
   private Transaction _xa;
   
   public Lock(long id)
@@ -280,7 +280,7 @@ public final class Lock implements ClockCacheItem {
 
     try {
       while (_readCount != 0) {
-	queue(xa, expire); // , ! isFirst);
+	queue(xa, expire);
       }
 
       isOkay = _readCount == 0;
@@ -348,24 +348,24 @@ public final class Lock implements ClockCacheItem {
   private boolean queue(Transaction xa, long expireTime)
     throws SQLException
   {
-    if (_queue == null)
-      _queue = new ArrayList<Transaction>();
+    long startTime = Alarm.getCurrentTime();
 
     _queue.add(xa);
-
-    long startTime = Alarm.getCurrentTime();
 
     try {
       do {
 	long delta = expireTime - Alarm.getCurrentTime();
 
-	if (delta > 0)
+	if (delta > 0) {
 	  wait(delta);
+	}
 
-	if (xa == _xa)
+	if (_queue.get(0) == xa)
 	  return true;
       } while (Alarm.getCurrentTime() < expireTime && ! Alarm.isTest()); 
 
+      notifyAll();
+      
       log.fine(L.l("transaction timed out waiting for lock"));
       throw new SQLException(L.l("transaction timed out waiting for lock {0}",
 				 Alarm.getCurrentTime() - startTime));
@@ -374,9 +374,6 @@ public final class Lock implements ClockCacheItem {
     } catch (Exception e) {
       throw new SQLExceptionWrapper(e);
     } finally {
-      if (xa == _xa)
-	_xa = null;
-	
       _queue.remove(xa);
     }
   }
@@ -387,12 +384,6 @@ public final class Lock implements ClockCacheItem {
   private boolean wake()
   {
     try {
-      if (_queue == null || _queue.size() == 0 || _xa != null)
-	return false;
-
-      // fifo
-      _xa = _queue.remove(0);
-
       notify();
 
       return true;

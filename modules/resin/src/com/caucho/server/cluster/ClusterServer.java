@@ -198,7 +198,7 @@ public class ClusterServer {
     if (_loadBalanceIdleTime != DEFAULT)
       return _loadBalanceIdleTime;
     else
-      return _keepaliveTimeout - 1000L;
+      return _keepaliveTimeout - 2000L;
   }
 
   /**

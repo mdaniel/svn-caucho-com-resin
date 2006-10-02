@@ -455,6 +455,8 @@ public class TcpConnection extends PortConnection implements ThreadTask
 
     long startTime = Alarm.getExactTime();
 
+    thread.setContextClassLoader(systemLoader);
+    
     _admin.register();
 
     try {
@@ -518,6 +520,8 @@ public class TcpConnection extends PortConnection implements ThreadTask
       log.log(Level.WARNING, e.toString(), e);
       isKeepalive = false;
     } finally {
+      thread.setContextClassLoader(systemLoader);
+    
       _admin.unregister();
       
       port.threadEnd(this);
