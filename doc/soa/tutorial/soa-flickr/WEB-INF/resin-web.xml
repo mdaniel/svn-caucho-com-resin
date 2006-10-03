@@ -1,8 +1,4 @@
 <web-app xmlns="http://caucho.com/ns/resin">
-  <system-property javax.xml.stream.XMLInputFactory="com.caucho.xml.stream.XMLInputFactoryImpl"/>
-  <system-property javax.xml.stream.XMLOutputFactory="com.caucho.xml.stream.XMLOutputFactoryImpl"/>
-  <system-property javax.xml.bind.JAXBContext="com.sun.xml.bind.v2.ContextFactory" />
-
   <web-service class="example.FlickrImpl">
     <jndi-name>service/FlickrImpl</jndi-name>
 

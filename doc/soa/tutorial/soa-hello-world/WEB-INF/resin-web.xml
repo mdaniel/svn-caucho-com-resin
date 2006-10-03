@@ -2,10 +2,6 @@
    - web.xml configuration file for the Hessian addition example.
   -->
 <web-app xmlns="http://caucho.com/ns/resin">
-  <system-property javax.xml.stream.XMLInputFactory="com.caucho.xml.stream.XMLInputFactoryImpl"/>
-  <system-property javax.xml.stream.XMLOutputFactory="com.caucho.xml.stream.XMLOutputFactoryImpl"/>
-  <system-property javax.xml.bind.JAXBContext="com.sun.xml.bind.v2.ContextFactory" />
-
   <web-service class="example.HelloServiceImpl">
     <jndi-name>service/HelloService</jndi-name>
 

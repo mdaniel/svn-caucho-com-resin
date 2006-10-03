@@ -1,10 +1,19 @@
-<%@ page import="com.caucho.naming.Jndi" %>
+<%@ page import="javax.naming.*" %>
 <%@ page import="example.HelloService" %>
 <%
-HelloService hessianHello = (HelloService) Jndi.lookup("hessian/HelloService");
-HelloService restHello = (HelloService) Jndi.lookup("rest/HelloService");
-HelloService soapHello = (HelloService) Jndi.lookup("soap/HelloService");
-HelloService vmHello = (HelloService) Jndi.lookup("service/HelloService");
+Context context = (Context) new InitialContext().lookup("java:comp/env");
+
+HelloService hessianHello 
+  = (HelloService) context.lookup("hessian/HelloService");
+
+HelloService restHello 
+  = (HelloService) context.lookup("rest/HelloService");
+
+HelloService soapHello 
+  = (HelloService) context.lookup("soap/HelloService");
+
+HelloService vmHello 
+  = (HelloService) context.lookup("service/HelloService");
 %>
 <pre>
 From Hessian: <%= hessianHello.hello() %>

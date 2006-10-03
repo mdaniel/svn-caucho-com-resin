@@ -11,11 +11,12 @@
   </style>
 </head>
 <body>
-<%@ page import="com.caucho.naming.Jndi" %>
+<%@ page import="javax.naming.*" %>
 <%@ page import="example.FlickrAPI" %>
 <%@ page import="example.data.*" %>
 <%
-FlickrAPI flickr = (FlickrAPI) Jndi.lookup("rest/flickr");
+Context context = (Context) new InitialContext().lookup("java:comp/env");
+FlickrAPI flickr = (FlickrAPI) context.lookup("rest/flickr");
 %>
 <dl>
   <dt>flickr.findByEmail("", "resin@caucho.com")</dt>
