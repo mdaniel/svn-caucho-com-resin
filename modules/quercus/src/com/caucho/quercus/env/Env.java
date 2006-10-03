@@ -2882,10 +2882,11 @@ public final class Env {
     if (qClassRef != null) {
       qClass = qClassRef.get();
 
-      if (qClass != null) {
-	qClass.init(this);
-	return qClass;
-      }
+      if (qClass != null)
+        // php/096d
+        //qClass.init(this);
+
+        return qClass;
     }
 
     qClass = new QuercusClass(def, parent);

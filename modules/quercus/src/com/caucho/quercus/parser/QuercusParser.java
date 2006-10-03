@@ -2852,34 +2852,52 @@ public class QuercusParser {
 
     case IDENTIFIER:
       {
-	if (_lexeme.equals("new"))
-	  return parseNew();
+        if (_lexeme.equals("new"))
+          return parseNew();
 
-	String className = null;
-	String name = _lexeme;
+        String className = null;
+        String name = _lexeme;
 	    
         token = parseToken();
         _peekToken = token;
 
-	if (token == SCOPE) {
-	  _peekToken = -1;
-	  
-	  className = name;
+        boolean isInstantiated = false;
 
-	  token = parseToken();
-	  if (token == '$')
-	    return parseStaticClassField(className);
-	  else
-	    _peekToken = token;
-	  
-	  name = parseIdentifier();
+	    if (token == SCOPE) {
+	      _peekToken = -1;
 
-	  token = parseToken();
-	  _peekToken = token;
-	}
+          className = name;
+
+          if (className.equals("self")) {
+            isInstantiated = true;
+            className = _quercusClass.getName();
+
+            if (className == null)
+              throw error(L.l("cannot access self when not in object scope"));
+          }
+          else if (className.equals("parent")) {
+            isInstantiated = true;
+            className = _quercusClass.getParentName();
+
+            if (className == null)
+              throw error(L.l("object does not have a parent class"));
+          }
+
+          token = parseToken();
+          if (token == '$')
+              return parseStaticClassField(className);
+	      else
+	        _peekToken = token;
+	  
+	      name = parseIdentifier();
+
+	      token = parseToken();
+	      _peekToken = token;
+
+	    }
 	  
         if (token == '(')
-          return parseFunction(className, name);
+          return parseFunction(className, name, isInstantiated);
         else
           return parseConstant(className, name);
       }
@@ -3023,7 +3041,9 @@ public class QuercusParser {
   /**
    * Parses the next function
    */
-  private Expr parseFunction(String className, String name)
+  private Expr parseFunction(String className,
+                              String name,
+                              boolean isInstantiated)
     throws IOException
   {
     if (name.equalsIgnoreCase("array"))
@@ -3040,28 +3060,18 @@ public class QuercusParser {
 
     if (className == null) {
       if (name.equals("each")) {
-	if (args.size() != 1)
-	  throw error(L.l("each requires a single expression"));
-      
-	return new EachExpr(getLocation(), args.get(0));
+        if (args.size() != 1)
+          throw error(L.l("each requires a single expression"));
+
+        return new EachExpr(getLocation(), args.get(0));
       }
 
-      return new FunctionExpr(getLocation(), name, args);
-      
+      return new FunctionExpr(getLocation(), name, args);     
     }
-    else if (className.equals("parent")) {
-      className = _quercusClass.getParentName();
-      
+    else if (isInstantiated)
       return new ClassMethodExpr(getLocation(), className, name, args);
-    }
-    else if (className.equals("self")) {
-      className = _quercusClass.getName();
-      
-      return new ClassMethodExpr(getLocation(), className, name, args);
-    }
-    else {
+    else
       return new StaticMethodExpr(getLocation(), className, name, args);
-    }
   }
 
   /**
