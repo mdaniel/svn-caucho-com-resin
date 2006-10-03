@@ -27,44 +27,38 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.soap.service;
-
-import com.caucho.soap.reflect.*;
-import java.lang.reflect.*;
-import javax.jws.*;
-import com.caucho.soap.marshall.*;
-import com.caucho.soap.skeleton.*;
-import com.caucho.util.*;
-import java.io.*;
-import javax.xml.bind.*;
+package com.caucho.soap.marshall;
 import javax.xml.namespace.*;
-import javax.xml.ws.*;
 import javax.xml.stream.*;
-import com.caucho.vfs.*;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
+import java.util.*;
+import java.math.*;
 
-public class ServiceImplInvocationHandler implements InvocationHandler {
+import java.lang.reflect.*;
+import java.io.*;
 
-  private Class _class;
-  private DirectSkeleton _skeleton;
-  private String _url;
+import com.caucho.vfs.WriteStream;
 
-  public ServiceImplInvocationHandler(Class c, String url)
-    throws com.caucho.config.ConfigException, JAXBException
+/**
+ * Marshalls data for a string object
+ */
+public class BigIntegerMarshall extends CDataMarshall {
+  public static final BigIntegerMarshall MARSHALL = new BigIntegerMarshall();
+
+  private BigIntegerMarshall()
   {
-    _class = c;
-    _url = url;
-    _skeleton = new WebServiceIntrospector().introspect(c);
   }
 
-  public Object invoke(Object proxy, Method method, Object[] args)
-    throws IOException, XMLStreamException, MalformedURLException
+  protected String serialize(Object in)
+      throws IOException, XMLStreamException
   {
-    Object ret = _skeleton.invoke(method.getName(), _url, args);
+    return ((BigInteger)in).toString();
+  }
 
-    return ret == null ? new Integer(12) : ret;
+  protected Object deserialize(String in)
+    throws IOException, XMLStreamException
+  {
+    return new BigInteger(in);
   }
 }
+
+

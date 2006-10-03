@@ -40,13 +40,16 @@ public class MarshallFactory {
   /**
    * Returns the deserializer for the given type.
    */
-  public Marshall createDeserializer(Class type)
+  public Marshall createDeserializer(Class type, JAXBContext jaxbContext)
   {
     if (String.class.equals(type))
       return StringMarshall.MARSHALL;
 
     if (Map.class.equals(type))
       return MapMarshall.MARSHALL;
+
+    if (Void.class.equals(type) || Void.TYPE.equals(type))
+      return VoidMarshall.MARSHALL;
 
     if (Double.class.equals(type) || Double.TYPE.equals(type))
       return DoubleMarshall.MARSHALL;
@@ -59,6 +62,9 @@ public class MarshallFactory {
 
     if (Long.class.equals(type) || Long.TYPE.equals(type))
       return LongMarshall.MARSHALL;
+
+    if (BigInteger.class.equals(type))
+      return BigIntegerMarshall.MARSHALL;
 
     if (BigDecimal.class.equals(type))
       return BigDecimalMarshall.MARSHALL;
@@ -76,7 +82,7 @@ public class MarshallFactory {
       return ArrayMarshall.MARSHALL;
 
     try {
-      return new JAXBMarshall(type);
+      return new JAXBMarshall(type, jaxbContext);
     } catch (JAXBException e) {
       throw new UnsupportedOperationException(type.getName(), e);
     }
@@ -85,13 +91,16 @@ public class MarshallFactory {
   /**
    * Returns the serializer for the given type.
    */
-  public Marshall createSerializer(Class type)
+  public Marshall createSerializer(Class type, JAXBContext jaxbContext)
   {
     if (String.class.equals(type))
       return StringMarshall.MARSHALL;
 
     if (Map.class.equals(type))
       return MapMarshall.MARSHALL;
+
+    if (Void.class.equals(type) || Void.TYPE.equals(type))
+      return VoidMarshall.MARSHALL;
 
     if (Double.class.equals(type) || Double.TYPE.equals(type))
       return DoubleMarshall.MARSHALL;
@@ -108,6 +117,9 @@ public class MarshallFactory {
     if (BigDecimal.class.equals(type))
       return BigDecimalMarshall.MARSHALL;
 
+    if (BigInteger.class.equals(type))
+      return BigIntegerMarshall.MARSHALL;
+
     if (List.class.equals(type))
       return ListMarshall.MARSHALL;
 
@@ -121,7 +133,7 @@ public class MarshallFactory {
       return ArrayMarshall.MARSHALL;
 
     try {
-      return new JAXBMarshall(type);
+      return new JAXBMarshall(type, jaxbContext);
     } catch (JAXBException e) {
       throw new UnsupportedOperationException(type.getName(), e);
     }

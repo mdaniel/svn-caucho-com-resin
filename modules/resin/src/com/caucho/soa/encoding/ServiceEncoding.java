@@ -40,7 +40,8 @@ import com.caucho.soa.WebService;
  * An encoding for a (web) service.
  */
 public interface ServiceEncoding {
-  public void invoke(InputStream is, OutputStream os);
+  public void invoke(InputStream is, OutputStream os)
+    throws Throwable;
 
   public void setService(Object service);
 

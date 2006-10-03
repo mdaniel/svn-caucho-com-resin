@@ -24,7 +24,7 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Emil Ong
  */
 
 package com.caucho.soap.marshall;
@@ -34,51 +34,37 @@ import java.util.*;
 
 import java.lang.reflect.*;
 import java.io.*;
+import com.caucho.util.*;
 
 import com.caucho.vfs.WriteStream;
 
 /**
- * Marshalls data for a string object
+ * Marshalls data for a void object (for method return values)
  */
-public abstract class CDataMarshall extends Marshall {
+public class VoidMarshall extends Marshall {
+  public static final VoidMarshall MARSHALL = new VoidMarshall();
 
-  protected CDataMarshall()
+  private VoidMarshall()
   {
   }
-  
-  protected abstract Object deserialize(String in)
-    throws IOException, XMLStreamException;
-
-  public Object deserialize(XMLStreamReader in)
-    throws IOException, XMLStreamException
-  {
-    if (in.next() != in.CHARACTERS)
-      throw new IOException("expected element to have CDATA");
-
-    Object o = deserialize(in.getText());
-
-    if (in.nextTag() != in.END_ELEMENT)
-      throw new IOException("expected argument closing tag");
-
-    return o;
-  }
-
-  protected abstract String serialize(Object in)
-    throws IOException, XMLStreamException;
-
+    /**
+   * Serializes the data to the result
+   */
   public void serialize(XMLStreamWriter out, Object obj, QName fieldName)
     throws IOException, XMLStreamException
   {
-    out.writeStartElement(fieldName.getLocalPart());
+  }
 
-    String nsuri = fieldName.getNamespaceURI();
+  /**
+   * Deserializes the data from the input.
+   */
+  public Object deserialize(XMLStreamReader in)
+      throws IOException, XMLStreamException
+  {
+    if (in.nextTag() != in.END_ELEMENT)
+      throw new IOException("expected argument closing tag");
 
-    if (nsuri != null && !nsuri.equals(""))
-      out.writeDefaultNamespace(nsuri);
-
-    out.writeCharacters(serialize(obj));
-
-    out.writeEndElement();
+    return null;
   }
 }
 

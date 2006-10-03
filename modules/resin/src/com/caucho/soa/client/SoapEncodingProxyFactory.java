@@ -33,11 +33,13 @@ import java.lang.reflect.Proxy;
 
 import java.net.MalformedURLException;
 
+import javax.xml.bind.JAXBException;
+
 import com.caucho.soap.service.ServiceImplInvocationHandler;
 
 public class SoapEncodingProxyFactory implements EncodingProxyFactory {
   public Object getProxy(Class serviceInterface, String url) 
-    throws MalformedURLException
+    throws MalformedURLException, JAXBException
   {
     ServiceImplInvocationHandler handler = 
       new ServiceImplInvocationHandler(serviceInterface, url);

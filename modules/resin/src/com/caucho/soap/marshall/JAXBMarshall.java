@@ -45,20 +45,20 @@ import com.caucho.vfs.WriteStream;
 public class JAXBMarshall extends Marshall {
   private JAXBContext _context;
 
-  public JAXBMarshall(Class cl)
+  public JAXBMarshall(Class cl, JAXBContext jaxbContext)
     throws JAXBException
   {
-    _context = JAXBContext.newInstance(new Class[] { cl });
+    _context = jaxbContext;
   }
-
 
   /**
    * Deserializes the data from the input.
    */
   public Object deserialize(XMLStreamReader in)
-    throws IOException
+    throws IOException, XMLStreamException
   {
     try {
+      in.nextTag();
       Unmarshaller unmarshaller = _context.createUnmarshaller();
       return unmarshaller.unmarshal(in);
     } catch (JAXBException e) {
@@ -89,5 +89,3 @@ public class JAXBMarshall extends Marshall {
     out.writeEndElement(); // fieldName
   }
 }
-
-

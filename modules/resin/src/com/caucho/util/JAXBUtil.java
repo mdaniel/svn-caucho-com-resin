@@ -36,24 +36,58 @@ import javax.xml.bind.*;
  * JAXB utilities.
  */
 public class JAXBUtil {
-  /**
-   * Finds all the classes mentioned in a method signature (return type and
-   * parameters) and adds them to the passed in classList.
-   */
-  public static void introspectMethod(Method method, ArrayList<Class> classList)
-  {
-    // XXX do generic types
-    classList.add(method.getReturnType());
-
-    for (Class cl : method.getParameterTypes())
-      classList.add(cl);
-  }
-
-  public static void introspectClass(Class cl, ArrayList<Class> classList)
+  public static void introspectClass(Class cl, 
+                                     Collection<Class> jaxbClasses)
   {
     Method[] methods = cl.getMethods();
 
     for (Method method : methods)
-      introspectMethod(method, classList);
+      introspectMethod(method, jaxbClasses);
+  }
+
+  /**
+   * Finds all the classes mentioned in a method signature (return type and
+   * parameters) and adds them to the passed in classList.  Pass in a set if
+   * you expect multiple references.
+   */
+  public static void introspectMethod(Method method, 
+                                      Collection<Class> jaxbClasses)
+  {
+    introspectType(method.getReturnType(), jaxbClasses);
+
+    Type[] params = method.getGenericParameterTypes();
+
+    for (Type param : params)
+      introspectType(param, jaxbClasses);
+  }
+
+  /**
+   * Add all classes referenced by type to jaxbClasses.
+   */
+  private static void introspectType(Type type, Collection<Class> jaxbClasses)
+  {
+    if (type instanceof Class) {
+      Class cl = (Class) type;
+
+      if (! cl.isInterface())
+        jaxbClasses.add((Class) type);
+    }
+    else if (type instanceof ParameterizedType) {
+      ParameterizedType pType = (ParameterizedType) type;
+
+      introspectType(pType.getRawType(), jaxbClasses);
+      introspectType(pType.getOwnerType(), jaxbClasses);
+
+      Type[] arguments = pType.getActualTypeArguments();
+
+      for (Type argument : arguments)
+        introspectType(argument, jaxbClasses);
+    }
+    else if (type != null) {
+      // Type variables must be instantiated
+      throw new UnsupportedOperationException("Method arguments cannot have " +
+                                              "uninstantiated type variables " +
+                                              "or wildcards (" + type + ")");
+    }
   }
 }

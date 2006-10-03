@@ -37,6 +37,8 @@ import java.util.logging.Logger;
 
 import javax.annotation.*;
 
+import javax.xml.bind.JAXBException;
+
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -84,30 +86,21 @@ public class SoapEncoding implements ServiceEncoding {
   }
 
   public void invoke(InputStream is, OutputStream os)
+    throws Throwable
   {
-    try {
-      XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-      XMLStreamReader in = inputFactory.createXMLStreamReader(is);
+    XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+    XMLStreamReader in = inputFactory.createXMLStreamReader(is);
 
-      XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
-      XMLStreamWriter out = outputFactory.createXMLStreamWriter(os);
+    XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
+    XMLStreamWriter out = outputFactory.createXMLStreamWriter(os);
 
-      getSkeleton().invoke(_object, in, out);
+    getSkeleton().invoke(_object, in, out);
 
-      out.flush();
-    } catch (XMLStreamException e) {
-      log.info(e.toString());
-    } catch (IOException e) {
-      log.info(e.toString());
-      e.printStackTrace();
-      if (e.getCause() != null) {
-        log.info(e.getCause().toString());
-        e.getCause().printStackTrace();
-      }
-    }
+    out.flush();
   }    
 
   private DirectSkeleton getSkeleton()
+    throws JAXBException
   {
     if (_skeleton == null)
       _skeleton = new WebServiceIntrospector().introspect(_class);

@@ -89,7 +89,8 @@ public class HttpTransport extends ServletMapping implements ServiceTransport {
 
   public String getServletName()
   {
-    return "com.caucho.soa.HttpTransport/" + _encoding.getClass().getName();
+    return "com.caucho.soa.transport.HttpTransport/" + 
+           _encoding.getClass().getName();
 
     // + " - " + getURLPattern();
   }
@@ -108,8 +109,13 @@ public class HttpTransport extends ServletMapping implements ServiceTransport {
       ServiceEncoding encoding = 
         (ServiceEncoding) getServletContext().getAttribute(SERVICE_ENCODING);
 
-      if (encoding != null)
-        encoding.invoke(request.getInputStream(), response.getOutputStream());
+      try {
+        if (encoding != null)
+          encoding.invoke(request.getInputStream(), response.getOutputStream());
+      }
+      catch (Throwable t) {
+        throw new ServletException(t);
+      }
     }
   }
 }

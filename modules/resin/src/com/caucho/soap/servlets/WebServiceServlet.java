@@ -68,11 +68,18 @@ public class WebServiceServlet extends HttpServlet {
   {
     // XXX: show that nifty debugging screen like Sun does
     
-    if (req.getParameter("wsdl") != null) {
-      resp.setContentType("text/xml");
-      skeleton().dumpWSDL(Vfs.openWrite(resp.getOutputStream()),
-			  req.getRequestURL().toString());
-      return;
+    try {
+      if (req.getParameter("wsdl") != null) {
+        resp.setContentType("text/xml");
+
+        skeleton().dumpWSDL(Vfs.openWrite(resp.getOutputStream()),
+                            req.getRequestURL().toString());
+
+        return;
+      }
+    }
+    catch (JAXBException e) {
+      throw new ServletException(e);
     }
   }
            
@@ -95,6 +102,9 @@ public class WebServiceServlet extends HttpServlet {
       xmlWriter.flush();
     }
     catch (XMLStreamException e) {
+      throw new ServletException(e);
+    }
+    catch (JAXBException e) {
       throw new ServletException(e);
     }
   }
@@ -140,9 +150,11 @@ public class WebServiceServlet extends HttpServlet {
   }
 
   private DirectSkeleton skeleton()
+    throws JAXBException
   {
     if (_skeleton == null)
       _skeleton = new WebServiceIntrospector().introspect(_class);
+
     return _skeleton;
   }
 

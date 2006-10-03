@@ -130,7 +130,8 @@ public class JmsTransport implements ServiceTransport {
       }
 
       _jmsConnection = _connectionFactory.createConnection();
-    } catch (Exception e) {
+    } 
+    catch (Exception e) {
       log.warning(e.toString());
     }
     
@@ -201,8 +202,12 @@ public class JmsTransport implements ServiceTransport {
           if (_sendResponse && message.getJMSReplyTo() != null)
             producer.send(outMessage);
         }    
-      } catch (JMSException e) {
+      } 
+      catch (JMSException e) {
         log.fine("JMS exception: " + e);
+      }
+      catch (Throwable t) {
+        log.fine("Invocation exception: " + t);
       }
     }
   }

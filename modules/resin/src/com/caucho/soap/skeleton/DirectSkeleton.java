@@ -32,6 +32,7 @@ package com.caucho.soap.skeleton;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.logging.*;
 
 import javax.xml.stream.*;
 
@@ -42,6 +43,8 @@ import javax.jws.*;
  * Invokes a SOAP request on a Java POJO
  */
 public class DirectSkeleton extends Skeleton {
+  private static final Logger log =
+    Logger.getLogger(DirectSkeleton.class.getName());
 
   private HashMap<String,PojoMethodSkeleton> _actionMap
     = new HashMap<String,PojoMethodSkeleton>();
@@ -79,17 +82,19 @@ public class DirectSkeleton extends Skeleton {
 
   private void setNamespace(Class type) {
     WebService webService = (WebService)type.getAnnotation(WebService.class);
+
     if (webService != null && !webService.targetNamespace().equals("")) {
       _namespace = webService.targetNamespace();
-
     }
     else {
       _namespace = null;
       String packageName = type.getPackage().getName();
       StringTokenizer st = new StringTokenizer(packageName, ".");
-      while(st.hasMoreTokens())
+
+      while (st.hasMoreTokens()) {
         _namespace = st.nextToken() +
-          (_namespace==null ? "" : ("."+_namespace));
+          (_namespace == null ? "" : ("."+_namespace));
+      }
 
       _namespace = "http://"+_namespace+"/";
 

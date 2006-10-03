@@ -32,6 +32,7 @@ package com.caucho.soap.reflect;
 import java.lang.reflect.*;
 
 import javax.jws.*;
+import javax.xml.bind.*;
 
 import com.caucho.config.ConfigException;
 
@@ -50,6 +51,7 @@ public class WebServiceIntrospector {
    */
   public DirectSkeleton introspect(Class type)
     //throws ConfigException
+    throws JAXBException
   {
     if (! type.isAnnotationPresent(WebService.class))
       throw new RuntimeException(L.l("{0}: needs a @WebService annotation.  WebServices need a @WebService annotation.",
