@@ -55,27 +55,29 @@ public class Document {
   private int _level;
   private Navigation _navigation;
   private NavigationItem _navItem;
+  private String _encoding;
 
   Document()
   {
-    this(null, null, null, null);
+    this(null, null, null, null, "utf-8");
   }
 
-  public Document(Path documentPath,
-		  String contextPath)
+  public Document(Path documentPath, String contextPath)
   {
-    this(null, documentPath, contextPath, null);
+    this(null, documentPath, contextPath, null, "utf-8");
   }
 
   public Document(ServletContext webApp,
-		  Path documentPath,
-		  String contextPath,
-		  String uri)
+                  Path documentPath,
+                  String contextPath,
+                  String uri,
+                  String encoding)
   {
     _webApp = webApp;
     _documentPath = documentPath;
     _contextPath = contextPath;
     _uri = uri;
+    _encoding = encoding;
   }
 
   public Path getRealPath(String uri)
@@ -201,7 +203,7 @@ public class Document {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    out.writeStartDocument("1.0", "UTF-8");
+    out.writeStartDocument("1.0", _encoding);
     /*
     out.writeDTD("html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" " +
                  "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"");*/

@@ -29,8 +29,9 @@
 
 package com.caucho.xtpdoc;
 
-import java.io.PrintWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.OutputStream;
 
 import java.util.logging.Logger;
 
@@ -63,6 +64,12 @@ public class ResinDocServlet extends HttpServlet {
   private Config _config;
   private Path _pwd;
   private XMLOutputFactory _outputFactory;
+  private String _encoding = "utf-8";
+
+  public void setDocumentEncoding(String encoding)
+  {
+    _encoding = encoding;
+  }
 
   public void setDocContextPath(String contextPath)
   {
@@ -94,19 +101,21 @@ public class ResinDocServlet extends HttpServlet {
                       HttpServletResponse response)
     throws ServletException, IOException
   {
-    PrintWriter out = response.getWriter();
+    OutputStream os = response.getOutputStream();
     String servletPath = request.getServletPath();
 
     Path path = Vfs.lookup(request.getRealPath(servletPath));
 
     Document document = new Document(getServletContext(),
-				     path, _contextPath,
-				     request.getContextPath() + servletPath);
+                                     path, _contextPath,
+                                     request.getContextPath() + servletPath,
+                                     _encoding);
 
     try {
       response.setContentType("text/html");
       
-      XMLStreamWriter xmlOut = _outputFactory.createXMLStreamWriter(out);
+      XMLStreamWriter xmlOut 
+        = _outputFactory.createXMLStreamWriter(os, _encoding);
       
       _config.configure(document, path);
 
@@ -120,6 +129,8 @@ public class ResinDocServlet extends HttpServlet {
         throw new ServletException("Error configuring document", e);
 
       try {
+        PrintWriter out = response.getWriter();
+
         out.println("<html>");
         out.println("<body>");
 
