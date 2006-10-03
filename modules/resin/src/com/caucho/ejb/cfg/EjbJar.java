@@ -28,6 +28,8 @@
 
 package com.caucho.ejb.cfg;
 
+import javax.annotation.*;
+
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Signature;
 import com.caucho.j2ee.cfg.J2eeSecurityRole;
@@ -162,6 +164,7 @@ public class EjbJar {
       return _sql;
     }
 
+    @PostConstruct
     public void init()
     {
       _sig.setSQL(_sql);

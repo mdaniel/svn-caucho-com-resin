@@ -36,6 +36,7 @@ import java.util.Enumeration;
 
 import java.io.IOException;
 
+import javax.annotation.*;
 import javax.sql.DataSource;
 
 import javax.ejb.EJBLocalHome;
@@ -612,6 +613,7 @@ public class EjbEntityBean extends EjbBean {
   /**
    * Configure initialization.
    */
+  @PostConstruct
   public void init()
     throws ConfigException
   {

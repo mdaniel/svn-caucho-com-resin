@@ -30,6 +30,8 @@ package com.caucho.ejb.cfg;
 
 import java.util.Collection;
 
+import javax.annotation.*;
+
 import com.caucho.util.*;
 
 import com.caucho.config.ConfigException;
@@ -383,6 +385,7 @@ public class CmpRelationRole {
       _value = value;
     }
 
+    @PostConstruct
     public void init()
     {
       CmpRelationRole.this.addSQLColumn(_value, _references);

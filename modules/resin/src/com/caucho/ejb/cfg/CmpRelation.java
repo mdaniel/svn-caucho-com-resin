@@ -28,6 +28,8 @@
 
 package com.caucho.ejb.cfg;
 
+import javax.annotation.*;
+
 import com.caucho.util.L10N;
 
 import com.caucho.config.ConfigException;
@@ -397,6 +399,7 @@ public class CmpRelation {
   /**
    * Initialization sanity checks.
    */
+  @PostConstruct
   public void init()
     throws ConfigException
   {

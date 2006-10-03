@@ -56,6 +56,7 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
 import java.rmi.*;
+import javax.annotation.*;
 import javax.ejb.*;
 import javax.jms.ConnectionFactory;
 import javax.naming.NamingException;
@@ -563,6 +564,7 @@ public class EJBServer
   /**
    * Initialize the container.
    */
+  @PostConstruct
   public void init()
     throws Exception
   {

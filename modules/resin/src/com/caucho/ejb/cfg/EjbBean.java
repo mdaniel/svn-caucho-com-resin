@@ -38,6 +38,7 @@ import java.util.logging.Level;
 
 import java.lang.reflect.*;
 
+import javax.annotation.*;
 import javax.ejb.*;
 
 import com.caucho.bytecode.JMethod;
@@ -746,6 +747,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Configure initialization.
    */
+  @PostConstruct
   public void init()
     throws ConfigException
   {

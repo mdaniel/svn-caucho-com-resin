@@ -28,6 +28,8 @@
 
 package com.caucho.ejb.cfg;
 
+import javax.annotation.*;
+
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
@@ -51,6 +53,7 @@ public class EjbSessionConfigProxy extends EjbBeanConfigProxy {
   /**
    * Initializes and configures the session bean.
    */
+  @PostConstruct
   public void init()
     throws Throwable
   {

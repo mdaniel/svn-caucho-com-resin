@@ -29,6 +29,7 @@
 
 package com.caucho.ejb.cfg;
 
+import javax.annotation.*;
 import javax.ejb.EJBLocalObject;
 import javax.ejb.EJBObject;
 
@@ -163,6 +164,7 @@ public class CmpField extends CmpProperty {
   /**
    * Initialize the field.
    */
+  @PostConstruct
   public void init()
     throws ConfigException
   {

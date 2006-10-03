@@ -36,6 +36,7 @@ import com.caucho.make.PersistentDependency;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
+import javax.annotation.*;
 
 /**
  * Proxy for an ejb bean configuration.  This proxy is needed to handle
@@ -159,6 +160,7 @@ public class EjbBeanConfigProxy implements DependencyBean {
   /**
    * Initializes and configures the entity bean.
    */
+  @PostConstruct
   public void init()
     throws Throwable
   {

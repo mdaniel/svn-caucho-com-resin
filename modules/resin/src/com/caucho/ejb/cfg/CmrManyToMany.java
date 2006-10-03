@@ -31,6 +31,8 @@ package com.caucho.ejb.cfg;
 
 import java.util.ArrayList;
 
+import javax.annotation.*;
+
 import com.caucho.bytecode.JMethod;
 import com.caucho.bytecode.JClass;
 

@@ -29,6 +29,7 @@
 
 package com.caucho.ejb.cfg;
 
+import javax.annotation.*;
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JMethod;
 import com.caucho.config.BuilderProgram;
@@ -145,6 +146,7 @@ public class EjbSessionBean extends EjbBean {
   /**
    * Configure initialization.
    */
+  @PostConstruct
   public void init()
     throws ConfigException
   {
