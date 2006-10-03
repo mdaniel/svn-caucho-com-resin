@@ -219,7 +219,17 @@ public class OptionsModule extends AbstractQuercusModule {
    */
   public static Value getenv(Env env, StringValue key)
   {
-    return env.getQuercus().getServerEnv(key);
+    Value val = env.getQuercus().getServerEnv(key);
+
+    if (val == null) {
+      ArrayValue serverVars = env.getGlobalVar("_SERVER").toArrayValue(env);
+      val = serverVars.get(key);
+    }
+
+    if (val == null || ! val.isset())
+      return BooleanValue.FALSE;
+
+    return val;
   }
 
   /**
