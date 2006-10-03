@@ -60,7 +60,6 @@ public class ExpressionImpl extends Expression {
   public Object evaluate(VariableResolver resolver)
     throws ELException
   {
-    throw new UnsupportedOperationException();
-    //return _expr.evalObject(resolver);
+    return _expr.evalObject(new ELContextAdapter(resolver));
   }
 }

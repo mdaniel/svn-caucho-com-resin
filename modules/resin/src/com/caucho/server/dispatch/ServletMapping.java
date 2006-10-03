@@ -239,5 +239,10 @@ public class ServletMapping extends ServletConfigImpl {
     {
       return _urlRegexp;
     }
+
+    public String toString()
+    {
+      return "ServletMapping[" + _urlPattern + ", " + _urlRegexp + "]";
+    }
   }
 }

@@ -104,7 +104,7 @@ public class ResinSet {
     if (_var != null) {
       if (_hasValue)
 	Config.setCurrentVar(_var, _value);
-      else if (_default != null && Config.getVar(_var) == null)
+      else if (_default != null && Config.getCurrentVar(_var) == null)
 	Config.setCurrentVar(_var, _default);
     }
   }

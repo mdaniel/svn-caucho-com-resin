@@ -113,6 +113,7 @@ public class ServletMapper {
     throws ServletException
   {
     _servletMap.addRegexp(regexp, regexp);
+    _regexpMap.put(regexp, mapping);
   }
 
   /**
@@ -221,6 +222,7 @@ public class ServletMapper {
       servletName = _servletMap.map(contextURI, vars);
 
       ServletMapping servletRegexp = _regexpMap.get(servletName);
+
       if (servletRegexp != null) {
 	servletName = servletRegexp.initRegexp(_servletContext,
 					       _servletManager,

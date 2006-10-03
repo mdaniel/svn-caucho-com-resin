@@ -586,6 +586,19 @@ public class Config {
   }
 
   /**
+   * Sets an EL configuration variable.
+   */
+  public static Object getCurrentVar(String var)
+  {
+    NodeBuilder builder = NodeBuilder.getCurrentBuilder();
+
+    if (builder != null)
+      return builder.getVar(var);
+    else
+      return null;
+  }
+
+  /**
    * Gets an EL configuration variable.
    */
   public static Object getVar(String var) throws ELException

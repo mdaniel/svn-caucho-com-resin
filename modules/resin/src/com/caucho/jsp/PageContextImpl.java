@@ -1151,7 +1151,7 @@ public class PageContextImpl extends PageContext
   public ExpressionEvaluator getExpressionEvaluator()
   {
     if (_expressionEvaluator == null)
-      _expressionEvaluator = new ExpressionEvaluatorImpl();
+      _expressionEvaluator = new ExpressionEvaluatorImpl(getELContext());
     
     return _expressionEvaluator;
   }

@@ -770,13 +770,14 @@ public class WebApp extends ServletContextImpl
     throws ServletException, ClassNotFoundException
   {
     ServletMapping mapping = new ServletMapping();
+
     mapping.addURLRegexp(servletRegexp.getURLRegexp());
     mapping.setServletName(servletRegexp.getServletName());
     mapping.setServletClass(servletRegexp.getServletClass());
     mapping.setServletContext(this);
     mapping.setInit(new InitProgram(servletRegexp.getBuilderProgram()));
-
-    mapping.init();
+    mapping.setStrictMapping(getStrictMapping());
+    mapping.init(_servletMapper);
 
     //_servletMapper.addServletRegexp(mapping);
   }

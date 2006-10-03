@@ -79,12 +79,12 @@ public class SimpleXMLModule
                                               @Optional int options)
   {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    
     try {
-
       DocumentBuilder builder = factory.newDocumentBuilder();
       Document document = builder.parse(file.openRead());
+      
       return new SimpleXMLElement(env, document, document.getDocumentElement());
-
     } catch (Exception e) {
       log.log(Level.FINE, L.l(e.toString()), e);
       return null;

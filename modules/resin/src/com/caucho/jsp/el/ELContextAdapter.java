@@ -19,8 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -32,61 +31,66 @@ package com.caucho.jsp.el;
 import java.io.*;
 import java.util.*;
 
-import javax.el.ELContext;
+import javax.el.*;
 
 import javax.servlet.http.*;
 import javax.servlet.jsp.*;
-import javax.servlet.jsp.el.*;
+import javax.servlet.jsp.el.VariableResolver;
 
+import com.caucho.el.*;
 import com.caucho.vfs.*;
 import com.caucho.jsp.*;
-import com.caucho.el.*;
+
+import com.caucho.el.Expr;
 
 /**
  * Implementation of the expression evaluator.
  */
-public class ExpressionEvaluatorImpl extends ExpressionEvaluator {
-  private ELContext _elContext;
+public class ELContextAdapter extends ELContext {
+  private VariableResolver _resolver;
+  private ELResolver _elResolver = new ELResolverAdapter();
+
+  /**
+   * Implements the expression.
+   */
+  ELContextAdapter(VariableResolver resolver)
+  {
+    _resolver = resolver;
+  }
   
-  /**
-   * Creates the expression evaluator.
-   */
-  public ExpressionEvaluatorImpl(ELContext elContext)
+  public ELResolver getELResolver()
   {
-    _elContext = elContext;
+    return _elResolver;
   }
 
-  /**
-   * Evaluates an expression.
-   */
-  public Object evaluate(String expression, Class expectedType,
-			 javax.servlet.jsp.el.VariableResolver resolver,
-			 FunctionMapper funMapper)
-    throws javax.servlet.jsp.el.ELException
+  public javax.el.FunctionMapper getFunctionMapper()
   {
-    Expression expr = parseExpression(expression, expectedType, funMapper);
-      
-    return expr.evaluate(resolver);
+    return null;
   }
 
-  /**
-   * Parses an expression.
-   */
-  public Expression parseExpression(String expression,
-				    Class expectedType,
-				    FunctionMapper funMapper)
-    throws javax.servlet.jsp.el.ELException
+  public javax.el.VariableMapper getVariableMapper()
   {
-    JspELParser parser = new JspELParser(_elContext, expression);
+    return null;
+  }
 
-    // parser.setFunctionMapper(funMapper);
+  class ELResolverAdapter extends AbstractVariableResolver
+  {
+    @Override
+    public Object getValue(ELContext context, Object base, Object property)
+    {
+      if (base == null && property instanceof String) {
+	if (context != null)
+	  context.setPropertyResolved(true);
 
-    try {
-      Expr expr = parser.parse();
-    
-      return new ExpressionImpl(expr);
-    } catch (com.caucho.el.ELParseException e) {
-      throw new javax.servlet.jsp.el.ELParseException(e.getMessage());
+	try {
+	  return _resolver.resolveVariable((String) property);
+	} catch (Exception e) {
+	  throw new ELException(e);
+	}
+      }
+      else
+	return null;
     }
+    
   }
 }
