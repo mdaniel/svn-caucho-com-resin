@@ -44,10 +44,19 @@ public abstract class Section extends ContainerNode {
   protected String _version;
   protected String _type;
 
+  private String _parentHref;
+
   public Section(Document document)
   {
-    super(document);
+    this(document, "");
   }
+
+    public Section(Document document, String parentHref)
+  {
+    super(document);
+    _parentHref = parentHref;
+  }
+
 
   // 
   // XXX: Stubbed

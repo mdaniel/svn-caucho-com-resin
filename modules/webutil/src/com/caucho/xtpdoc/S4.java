@@ -35,9 +35,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class S4 extends Section {
-  public S4(Document document)
+  public S4(Document document, String parentHref)
   {
-    super(document);
+    super(document, parentHref);
   }
 
   public void writeLaTeXTop(PrintWriter out)

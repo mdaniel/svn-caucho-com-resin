@@ -37,14 +37,14 @@ import java.util.ArrayList;
 import javax.xml.stream.*;
 
 public class S3 extends Section {
-  public S3(Document document)
+  public S3(Document document, String parentHref)
   {
-    super(document);
+    super(document, parentHref);
   }
 
   public S4 createS4()
   {
-    S4 s4 = new S4(getDocument());
+    S4 s4 = new S4(getDocument(), getHref());
     addItem(s4);
     return s4;
   }

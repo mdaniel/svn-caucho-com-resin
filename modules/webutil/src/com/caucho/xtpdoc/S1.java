@@ -45,7 +45,7 @@ public class S1 extends Section {
 
   public S2 createS2()
   {
-    S2 s2 = new S2(getDocument());
+    S2 s2 = new S2(getDocument(), getHref());
     addItem(s2);
     return s2;
   }
