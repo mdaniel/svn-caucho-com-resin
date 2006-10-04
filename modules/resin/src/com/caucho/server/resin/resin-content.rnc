@@ -557,6 +557,9 @@ r_server-Basis =
   & (attribute watchdog-arg { string }
      | element watchdog-arg { string })*
 
+  & (attribute watchdog-port { r_int-Type }
+     | element watchdog-port { r_int-Type })?
+
 r_server-Flow =
   r_server-Basis
 

@@ -1,5 +1,6 @@
 <navigation threaded="true" section="Resin : Resin Configuration : " comment="true">
   <item title="Configuration" link="index.xtp">
+    <item link="overview.xtp" title="overview"/>
     <item link="howto.xtp" title="howto"/>
     <item link="tags.xtp"  title="tags">
     <!--

@@ -1,5 +1,9 @@
 <document>
+<header>
+<title>Resin Change Log</title>
+</header>
 <body>
+
 <s1 title="Resin Change Log">
 
 <p>
@@ -17,7 +21,7 @@
 <li>Change to addByteCodeEnhancer (#1157, rep by Costin Leau)</li>
 <li>Add DynamicClassLoader.getNewTempClassLoader() (#1157, rep by Costin Leau)</li>
 <li>Additional CodeSource fixes for JSPWiki (#1333, fixed! by ajaquith2)</li>
-<li>ClassEntry for hot reloading needs to reset the dependency (#1345, rep by WIll Jaynes)
+<li>ClassEntry for hot reloading needs to reset the dependency (#1345, rep by WIll Jaynes)</li>
 <li>QDate needs to look up "GMT" not "UTC" to handle French locales (#1340, rebp by jiib75)</li>
 <li>JSP validation of tag variables needs to handle inner classes (rep by Bill Au)</li>
 <li>(2006-09-13) mod_caucho needs to update cached file for large dependency-check-interval (rep by Steve Baugus)</li>
