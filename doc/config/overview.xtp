@@ -438,5 +438,82 @@ actual urls like <var>/wiki/index.php/Load-balance</var></p>
 
 </s1>
 
+<s1 title="Web Services: REST, Hessian, SOAP">
+
+<p>With Resin 3.1, applications can deploy
+<a href="soa|tutorial/soa-flickr/index.xtp">REST</a>, 
+<a href="hessian|index.xtp">Hessian</a>, and SOAP using the
+same instance class.  A good introductary example
+is the <a href="soa|tutorial/soa-hello-world/index.xtp">SOA Hello, World tutorial.</a></p>
+
+<s2 title="Web Service configuration">
+
+<p>The <a href="soa-tags.xtp#web-service">&lt;web-service&gt;</a>
+tag configures the web service.  The service is a Java object which
+exposes a JAX-WS interface and receives and sends Java objects
+encoded with JAXB.  The service object itself is configured
+using JAXB-style IoC, i.e. standard bean-style property
+initialization.</p>
+
+<example title="resin-web.xml web-service">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+&lt;web-service class="example.HelloServiceImpl">
+  &lt;jndi-name>service/HelloService&lt;/jndi-name>
+
+  &lt;init>
+    &lt;greeting>Hello, World&lt;/greeting>
+  &lt;/init>
+
+  &lt;hessian>
+    &lt;url-pattern>/hello/hessian/*&lt;/url-pattern>
+  &lt;/hessian>
+
+  &lt;rest>
+    &lt;url-pattern>/hello/rest/*&lt;/url-pattern>
+  &lt;/rest>
+
+  &lt;soap>
+    &lt;url-pattern>/hello/soap/*&lt;/url-pattern>
+  &lt;/soap>
+&lt;/web-service>
+
+&lt;/web-app>
+</example>
+
+</s2>
+
+<s2 title="Web Service Client configuration">
+
+<p>The web service client configuration makes a Java proxy
+available to servlets and PHP pages through JNDI, or through a
+@Resource injection.  The client can be SOAP, Hessian, or REST.
+A <a href="soa|tutorial/soa-flickr/index.xtp">REST tutorial</a> shows
+how to obtain a proxy to the Flickr REST service.</p>
+
+<p>The <a href="soa-tags.xtp#web-service-client">&lt;web-service-client></a>
+tag configures the client proxy.  It provides a Java interface and
+a URL for the service.  The URL specifies the encoding and the protocol,
+e.g. REST over HTTP or Hessian over HTTP.  The client will typically
+have a <var>jndi-name</var> to store the client proxy.</p>
+
+<example title="web-service-client in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;web-service-client jndi-name="rest/flickr">
+    &lt;url>rest:http://foo.com/flickr/rest/&lt;/url>
+
+    &lt;interface>example.FlickrAPI&lt;/interface>
+
+    &lt;jaxb-package>example.data&lt;/jaxb-package>
+  &lt;/web-service-client>
+
+&lt;/web-app>
+</example>
+
+</s2>
+
+</s1>
+
 </body>
 </document>
