@@ -305,7 +305,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
   public void generate(EntityType type)
     throws Exception
   {
-    if (!type.isEmbeddable()) {
+    if (! type.isEmbeddable()) {
       JavaClassGenerator javaGen = new JavaClassGenerator();
 
       javaGen.setWorkDir(getWorkDir());
@@ -338,8 +338,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
     javaClass.setSuperClassName(type.getBeanClass().getName());
 
-    if (!type.isEmbeddable())
-      javaClass.addInterfaceName("com.caucho.amber.entity.Entity");
+    javaClass.addInterfaceName("com.caucho.amber.entity.Entity");
 
     type.setEnhanced(true);
 
@@ -419,6 +418,9 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
       if (type == null || ! type.isFieldAccess())
         continue;
+
+      if (type.isEmbeddable())
+        return;
 
       for (AmberField field : type.getId().getKeys()) {
         fieldMaps.add(new FieldMap(baseClass, field.getName()));

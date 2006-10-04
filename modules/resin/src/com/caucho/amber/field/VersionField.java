@@ -67,11 +67,15 @@ public class VersionField extends PropertyField {
     throws ConfigException
   {
     super(entityType, name);
+
+    setLazy(false);
   }
 
   public VersionField(EntityType entityType)
   {
     super(entityType);
+
+    setLazy(false);
   }
 
   /**

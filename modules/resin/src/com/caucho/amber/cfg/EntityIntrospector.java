@@ -302,7 +302,7 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
       entityType = _persistenceUnit.createEntity(entityName, type, isEmbeddable);
       _entityMap.put(entityName, entityType);
 
-      boolean isField = isField(type, entityConfig);
+      boolean isField = isField(type, entityConfig, isEmbeddable);
 
       if (isField)
         entityType.setFieldAccess(true);
@@ -462,7 +462,7 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
                                       entityType.getName()));
 
       if (isField)
-        introspectFields(_persistenceUnit, entityType, parentType, type, entityConfig);
+        introspectFields(_persistenceUnit, entityType, parentType, type, entityConfig, isEmbeddable);
       else
         introspectMethods(_persistenceUnit, entityType, parentType, type, entityConfig);
 
@@ -988,11 +988,25 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
    * Check if it's field
    */
   private boolean isField(JClass type,
-                          EntityConfig entityConfig)
+                          EntityConfig entityConfig,
+                          boolean isEmbeddable)
     throws ConfigException
   {
     if (type == null)
       return false;
+
+    if (isEmbeddable) {
+
+      for (JMethod method : type.getDeclaredMethods()) {
+
+        JAnnotation ann[] = method.getDeclaredAnnotations();
+
+        if ((ann != null) && (ann.length > 0))
+          return false;
+      }
+
+      return true;
+    }
 
     if (entityConfig != null) {
 
@@ -1012,7 +1026,7 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
         if (superEntityConfig == null)
           return false;
 
-        return isField(parentClass, superEntityConfig);
+        return isField(parentClass, superEntityConfig, false);
       }
     }
 
@@ -1029,7 +1043,7 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
         return true;
     }
 
-    return isField(type.getSuperClass(), null);
+    return isField(type.getSuperClass(), null, false);
   }
 
   private IdField introspectId(AmberPersistenceUnit persistenceUnit,
@@ -1332,7 +1346,7 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
 
           JAnnotation ann = isAnnotatedMethod(method);
 
-          if (ann == null)
+          if ((ann == null) && (setter != null))
             ann = isAnnotatedMethod(setter);
 
           if (ann != null) {
@@ -1368,11 +1382,13 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
                                 EntityType entityType,
                                 EntityType parentType,
                                 JClass type,
-                                EntityConfig entityConfig)
+                                EntityConfig entityConfig,
+                                boolean isEmbeddable)
     throws ConfigException
   {
-    if (entityType.getId() == null)
-      throw new IllegalStateException(L.l("{0} has no key", entityType));
+    if (! isEmbeddable)
+      if (entityType.getId() == null)
+        throw new IllegalStateException(L.l("{0} has no key", entityType));
 
     for (JField field : type.getFields()) {
       String fieldName = field.getName();
@@ -2895,16 +2911,13 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
                                 _field.getName()));
       }
 
-      Object attOverridesAnn[];
+      Object attOverridesAnn[] = null;
 
       if (attributeOverrideAnn != null) {
         attOverridesAnn = new Object[] { attributeOverrideAnn };
       }
       else if (attributeOverridesAnn != null) {
         attOverridesAnn = (Object []) attributeOverridesAnn.get("value");
-      }
-      else {
-        return;
       }
 
       EntityEmbeddedField embeddedField;
@@ -2916,6 +2929,8 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
       }
 
       embeddedField.setEmbeddedId(_embeddedId);
+
+      embeddedField.setLazy(false);
 
       AmberPersistenceUnit persistenceUnit = _entityType.getPersistenceUnit();
 
@@ -2932,25 +2947,39 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
 
       HashMap<String, Column> embeddedColumns = new HashMap<String, Column>();
       HashMap<String, String> fieldNameByColumn = new HashMap<String, String>();
-      JField fields[] = _fieldType.getDeclaredFields();
 
-      for (int i=0; i<attOverridesAnn.length; i++) {
-        String embeddedFieldName = ((JAnnotation) attOverridesAnn[i]).getString("name");
+      ArrayList<AmberField> fields = type.getFields();
 
-        JAnnotation columnAnn = ((JAnnotation) attOverridesAnn[i]).getAnnotation("column");
-        String columnName = columnAnn.getString("name");
+      for (int i=0; i < fields.size(); i++) {
 
-        Type amberType = StringType.create();
+        String embeddedFieldName = fields.get(i).getName();
 
-        for (int j=0; j < fields.length; j++) {
-          if (embeddedFieldName.equals(fields[j].getName()))
-            amberType = _persistenceUnit.createType(fields[j].getType());
+        String columnName = toSqlName(embeddedFieldName);
+        boolean notNull = false;
+        boolean unique = false;
+
+        if (attOverridesAnn != null) {
+          for (int j=0; j<attOverridesAnn.length; j++) {
+
+            if (embeddedFieldName.equals(((JAnnotation) attOverridesAnn[j]).getString("name"))) {
+
+              JAnnotation columnAnn = ((JAnnotation) attOverridesAnn[j]).getAnnotation("column");
+
+              if (columnAnn != null) {
+                columnName = columnAnn.getString("name");
+                notNull = ! columnAnn.getBoolean("nullable");
+                unique = columnAnn.getBoolean("unique");
+              }
+            }
+          }
         }
+
+        Type amberType = _persistenceUnit.createType(fields.get(i).getJavaType().getName());
 
         Column column = sourceTable.createColumn(columnName, amberType);
 
-        column.setNotNull(! columnAnn.getBoolean("nullable"));
-        column.setUnique(columnAnn.getBoolean("unique"));
+        column.setNotNull(notNull);
+        column.setUnique(unique);
 
         embeddedColumns.put(columnName, column);
         fieldNameByColumn.put(columnName, embeddedFieldName);

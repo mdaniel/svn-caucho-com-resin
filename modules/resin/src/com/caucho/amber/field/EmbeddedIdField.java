@@ -90,14 +90,6 @@ public class EmbeddedIdField extends EntityEmbeddedField implements IdField {
   }
 
   /**
-   * Returns type
-   */
-  public Type getType()
-  {
-    return null;
-  }
-
-  /**
    * Set true if key fields are accessed through fields.
    */
   public void setKeyField(boolean isKeyField)

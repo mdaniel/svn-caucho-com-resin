@@ -395,9 +395,16 @@ public class EntityEmbeddedField extends AbstractField {
 
     for (Map.Entry<String, Column> entry : _columns.entrySet()) {
       Column column = entry.getValue();
+
       String getter = _fieldNameByColumn.get(column.getName());
-      getter = "get" + Character.toUpperCase(getter.charAt(0)) + getter.substring(1);
-      column.generateSet(out, pstmt, index, generateGet(obj)+"."+getter+"()");
+
+      EntityType entityType = (EntityType) getType();
+
+      if (! entityType.isFieldAccess())
+        getter = "get" + Character.toUpperCase(getter.charAt(0)) +
+          getter.substring(1) + "()";
+
+      column.generateSet(out, pstmt, index, generateGet(obj)+"."+getter);
     }
   }
 
@@ -424,9 +431,18 @@ public class EntityEmbeddedField extends AbstractField {
       out.print(" amber_ld" + index + " = ");
       index = column.generateLoad(out, rs, indexVar, index);
       out.println(";");
+
       String setter = _fieldNameByColumn.get(column.getName());
-      setter = Character.toUpperCase(setter.charAt(0)) + setter.substring(1);
-      out.println(var + ".set" + setter + "(amber_ld" + (index-1) + ");");
+
+      EntityType entityType = (EntityType) getType();
+
+      if (entityType.isFieldAccess()) {
+        out.println(var + "." + setter + " = amber_ld" + (index-1) + ";");
+      }
+      else {
+        out.println(var + ".set" + Character.toUpperCase(setter.charAt(0)) +
+                    setter.substring(1) + "(amber_ld" + (index-1) + ");");
+      }
     }
 
     out.println(generateSuperSetter(var) + ";");
