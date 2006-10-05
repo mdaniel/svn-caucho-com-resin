@@ -453,7 +453,8 @@ public class EntityManyToOneField extends AbstractField {
     out.println("if (__caucho_item != null) {");
     out.pushDepth();
 
-    String extClassName = getSourceType().getName() + "__ResinExt";
+    // ejb/06h0
+    String extClassName = getSourceType().getInstanceClassName(); // getSourceType().getName() + "__ResinExt";
     out.println(extClassName + " item = (" + extClassName + ") __caucho_item.getEntity();");
 
     out.println("item.__caucho_item_" + getGetterName() + "(__caucho_session);");

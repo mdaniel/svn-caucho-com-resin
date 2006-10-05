@@ -622,7 +622,9 @@ public class EntityManyToManyField extends AssociationField {
     out.println("query = __caucho_session.prepareQuery(sql);");
 
     out.println("int index = 1;");
-    getSourceType().getId().generateSet(out, "query", getSourceType().getName() + "__ResinExt.this", "index");
+
+    // ejb/06h0
+    getSourceType().getId().generateSet(out, "query", getSourceType().getInstanceClassName() + ".this", "index"); // "__ResinExt.this", "index");
 
     out.println("java.sql.ResultSet rs = query.executeQuery();");
 

@@ -408,7 +408,9 @@ public class EntityOneToManyField extends CollectionField {
     out.println("query = __caucho_session.prepareQuery(sql);");
 
     out.println("int index = 1;");
-    getSourceType().getId().generateSet(out, "query", "index", getSourceType().getName() + "__ResinExt.this");
+
+    // ejb/06h0
+    getSourceType().getId().generateSet(out, "query", "index", getSourceType().getInstanceClassName() + ".this"); // "__ResinExt.this");
 
     out.println("java.sql.ResultSet rs = query.executeQuery();");
 
