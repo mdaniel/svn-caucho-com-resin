@@ -29,6 +29,8 @@
 
 package com.caucho.ejb.metadata;
 
+import javax.annotation.*;
+
 import com.caucho.amber.cfg.EntityIntrospector;
 import com.caucho.bytecode.JAnnotation;
 import com.caucho.bytecode.JClass;
@@ -122,6 +124,7 @@ public class Bean {
   /**
    * Initializes the bean.
    */
+  @PostConstruct
   public void init()
     throws ConfigException
   {

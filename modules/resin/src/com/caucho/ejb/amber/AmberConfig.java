@@ -204,6 +204,7 @@ public class AmberConfig {
     column.setConfigLocation(cmpField.getLocation());
       
     PropertyField field = new PropertyField(type, fieldName);
+    field.setLazy(false);
     field.setColumn(column);
 
     type.addField(field);
