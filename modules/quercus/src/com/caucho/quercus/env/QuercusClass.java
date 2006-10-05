@@ -39,6 +39,7 @@ import java.util.logging.Logger;
 
 import com.caucho.quercus.QuercusRuntimeException;
 
+import com.caucho.quercus.expr.ClassConstExpr;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.AbstractFunction;
@@ -303,7 +304,16 @@ public class QuercusClass {
   public void init(Env env)
   {
     for (Map.Entry<String,Expr> entry : _staticFieldMap.entrySet()) {
-      env.setGlobalValue(entry.getKey(), entry.getValue().eval(env));
+      Value val;
+      Expr expr = entry.getValue();
+
+      //php/096f
+      if (expr instanceof ClassConstExpr)
+        val = ((ClassConstExpr)expr).eval(env, this);
+      else
+        val = expr.eval(env);
+
+      env.setGlobalValue(entry.getKey(), val);
     }
   }
 

@@ -2883,9 +2883,7 @@ public final class Env {
       qClass = qClassRef.get();
 
       if (qClass != null)
-        // php/096d
-        //qClass.init(this);
-
+        qClass.init(this);
         return qClass;
     }
 

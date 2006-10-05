@@ -32,6 +32,7 @@ package com.caucho.quercus.expr;
 import java.io.IOException;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.program.AnalyzeInfo;
@@ -73,7 +74,12 @@ public class ClassConstExpr extends Expr {
    */
   public Value eval(Env env)
   {
-    return env.getClass(_className).getConstant(env, _name);
+    return eval(env, env.getClass(_className));
+  }
+
+  public Value eval(Env env, QuercusClass ownerClass)
+  {
+    return ownerClass.getConstant(env, _name);
   }
 
   //
