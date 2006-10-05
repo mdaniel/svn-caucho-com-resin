@@ -23,7 +23,7 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Emil Ong
  */
 
 package com.caucho.soap.wsdl;
@@ -37,48 +37,56 @@ import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.*;
 
 /**
- * WSDL binding definition
+ * WSDL operation definition
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="binding", namespace="http://schemas.xmlsoap.org/wsdl/")
-public class WSDLBinding extends WSDLNamedExtensibleAttributeDocumented
-                         implements WSDLDefinition {
-  @XmlElement(name="operation", namespace="http://schemas.xmlsoap.org/wsdl/")
-  private List<WSDLBindingOperation> _operations;
+@XmlRootElement(name="operation", namespace="http://schemas.xmlsoap.org/wsdl/")
+public class WSDLBindingOperation extends WSDLNamedExtensibleDocumented {
+  @XmlElement(name="input", namespace="http://schemas.xmlsoap.org/wsdl/")
+  private WSDLBindingOperationMessage _input;
 
-  @XmlAttribute(required=true, 
-                name="type", namespace="http://schemas.xmlsoap.org/wsdl/")
-  @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
-  private QName _type;
+  @XmlElement(name="output", namespace="http://schemas.xmlsoap.org/wsdl/")
+  private WSDLBindingOperationMessage _output;
 
-  /**
-   * Sets the binding type.
-   */
-  public void setType(QName type)
+  @XmlElement(name="fault", namespace="http://schemas.xmlsoap.org/wsdl/")
+  private List<WSDLBindingOperationFault> _faults;
+
+  public void setInput(WSDLBindingOperationMessage input)
   {
-    _type = type;
-  }
-
-  public QName getType()
-  {
-    return _type;
+    _input = input;
   }
 
   /**
-   * Adds an operation.
+   * Returns the input.
    */
-  public void addOperation(WSDLBindingOperation operation)
+  public WSDLBindingOperationMessage getInput()
   {
-    _operations.add(operation);
+    return _input;
   }
 
-  public List<WSDLBindingOperation> getOperations()
+  public void setOutput(WSDLBindingOperationMessage output)
   {
-    return _operations;
+    _output = output;
   }
 
-  public String toString()
+  /**
+   * Returns the output.
+   */
+  public WSDLBindingOperationMessage getOutput()
   {
-    return "WSDLBinding[" + getName() + "]";
+    return _output;
+  }
+
+  public void addFault(WSDLBindingOperationFault fault)
+  {
+    if (_faults == null)
+      _faults = new ArrayList<WSDLBindingOperationFault>();
+
+    _faults.add(fault);
+  }
+
+  public List<WSDLBindingOperationFault> getFaults()
+  {
+    return _faults;
   }
 }

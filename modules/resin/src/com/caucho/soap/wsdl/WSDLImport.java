@@ -23,38 +23,58 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Emil Ong
  */
 
 package com.caucho.soap.wsdl;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.*;
 
 /**
- * WSDL Service definition
+ * WSDL Import.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="service", namespace="http://schemas.xmlsoap.org/wsdl/")
-public class WSDLService extends WSDLNamedExtensibleDocumented
-                         implements WSDLDefinition 
-{
-  @XmlElement(name="port", namespace="http://schemas.xmlsoap.org/wsdl/")
-  private List<WSDLPort> _ports;
+@XmlRootElement(name="import", namespace="http://schemas.xmlsoap.org/wsdl/")
+public class WSDLImport extends WSDLExtensibleAttributeDocumented
+                        implements WSDLDefinition {
+  @XmlAttribute(required = true,
+                name="location", namespace="http://schemas.xmlsoap.org/wsdl/")
+  private String _location;
 
-  public void addPort(WSDLPort port)
+  @XmlAttribute(required = true,
+                name="namespace", namespace="http://schemas.xmlsoap.org/wsdl/")
+  private String _namespace;
+
+  /**
+   * Sets the namespace.
+   */
+  public void setNamespace(String namespace)
   {
-    if (_ports == null)
-      _ports = new ArrayList<WSDLPort>();
-
-    _ports.add(port);
+    _namespace = namespace;
+  }
+  
+  /**
+   * Returns the namespace.
+   */
+  public String getNamespace()
+  {
+    return _namespace;
   }
 
-  public List<WSDLPort> getPorts()
+  /**
+   * Sets the location.
+   */
+  public void setLocation(String location)
   {
-    return _ports;
+    _location = location;
+  }
+  
+  /**
+   * Returns the location.
+   */
+  public String getLocation()
+  {
+    return _location;
   }
 }

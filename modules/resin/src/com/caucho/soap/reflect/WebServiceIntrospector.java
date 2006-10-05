@@ -54,16 +54,16 @@ public class WebServiceIntrospector {
     throws JAXBException
   {
     if (! type.isAnnotationPresent(WebService.class))
-      throw new RuntimeException(L.l("{0}: needs a @WebService annotation.  WebServices need a @WebService annotation.",
-                                    type.getName()));
+      throw new RuntimeException(L.l("{0}: needs a @WebService annotation.",
+                                     type.getName()));
 
     MarshallFactory marshallFactory = new MarshallFactory();
 
-    WebService webService = (WebService)type.getAnnotation(WebService.class);
+    WebService webService = (WebService) type.getAnnotation(WebService.class);
 
     DirectSkeleton skel = new DirectSkeleton(type);
 
-    Method []methods = type.getMethods();
+    Method[] methods = type.getMethods();
 
     for (int i = 0; i < methods.length; i++) {
 

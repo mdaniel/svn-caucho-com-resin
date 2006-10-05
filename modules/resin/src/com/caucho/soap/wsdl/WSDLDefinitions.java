@@ -28,32 +28,42 @@
 
 package com.caucho.soap.wsdl;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.xml.namespace.QName;
-
-import com.caucho.util.L10N;
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.*;
 
 /**
  * WSDL Definitions top level
  */
-public class WSDLDefinitions {
-  private final static L10N L = new L10N(WSDLParser.class);
-
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(name="definitions", 
+                namespace="http://schemas.xmlsoap.org/wsdl/")
+public class WSDLDefinitions extends WSDLExtensibleDocumented {
+  @XmlAttribute(name="name", namespace="http://schemas.xmlsoap.org/wsdl/")
+  @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
   private String _name;
+
+  @XmlAttribute(name="targetNamespace", 
+                namespace="http://schemas.xmlsoap.org/wsdl/")
   private String _targetNamespace;
 
-  private HashMap<QName,WSDLMessage> _messageMap =
-    new HashMap<QName,WSDLMessage>();
-
-  private HashMap<QName,WSDLPortType> _portTypeMap =
-    new HashMap<QName,WSDLPortType>();
-
-  private HashMap<QName,WSDLBinding> _bindingMap =
-    new HashMap<QName,WSDLBinding>();
-
-  private HashMap<QName,WSDLService> _serviceMap =
-    new HashMap<QName,WSDLService>();
+  @XmlElements({
+    @XmlElement(name="portType", namespace="http://schemas.xmlsoap.org/wsdl/", 
+                required=true, type=WSDLPortType.class),
+    @XmlElement(name="types", namespace="http://schemas.xmlsoap.org/wsdl/", 
+                required=true, type=WSDLTypes.class),
+    @XmlElement(name="message", namespace="http://schemas.xmlsoap.org/wsdl/", 
+                required=true, type=WSDLMessage.class),
+    @XmlElement(name="import", namespace="http://schemas.xmlsoap.org/wsdl/", 
+                required=true, type=WSDLImport.class),
+    @XmlElement(name="service", namespace="http://schemas.xmlsoap.org/wsdl/", 
+                required=true, type=WSDLService.class),
+    @XmlElement(name="binding", namespace="http://schemas.xmlsoap.org/wsdl/", 
+                required=true, type=WSDLBinding.class)
+  })
+  private List<WSDLDefinition> _definitions;
 
   /**
    * Sets the definition name.
@@ -61,6 +71,11 @@ public class WSDLDefinitions {
   public void setName(String name)
   {
     _name = name;
+  }
+
+  public String getName()
+  {
+    return _name;
   }
 
   /**
@@ -79,99 +94,16 @@ public class WSDLDefinitions {
     return _targetNamespace;
   }
 
-  /**
-   * Create a message.
-   */
-  public WSDLMessage createMessage()
+  public List<WSDLDefinition> getDefinitions()
   {
-    return new WSDLMessage(this);
+    return _definitions;
   }
 
-  /**
-   * Adds a message.
-   */
-  public void addMessage(WSDLMessage message)
+  public void addDefinition(WSDLDefinition definition)
   {
-    _messageMap.put(message.getName(), message);
-  }
+    if (_definitions == null)
+      _definitions = new ArrayList<WSDLDefinition>();
 
-  /**
-   * Gest a message.
-   */
-  public WSDLMessage getMessage(QName name)
-  {
-    return _messageMap.get(name);
-  }
-
-  /**
-   * Creates a PortType.
-   */
-  public WSDLPortType createPortType()
-  {
-    return new WSDLPortType(this);
-  }
-
-  /**
-   * Adds a PortType.
-   */
-  public void addPortType(WSDLPortType portType)
-  {
-    _portTypeMap.put(portType.getName(), portType);
-  }
-
-  /**
-   * Gets a PortType.
-   */
-  public WSDLPortType getPortType(QName name)
-  {
-    return _portTypeMap.get(name);
-  }
-
-  /**
-   * Adds a Binding
-   */
-  public WSDLBinding createBinding()
-  {
-    return new WSDLBinding(this);
-  }
-
-  /**
-   * Adds a Binding
-   */
-  public void addBinding(WSDLBinding binding)
-  {
-    _bindingMap.put(binding.getName(), binding);
-  }
-
-  /**
-   * Gets the matching Binding
-   */
-  public WSDLBinding getBinding(QName name)
-  {
-    return _bindingMap.get(name);
-  }
-
-  /**
-   * Adds a Service
-   */
-  public WSDLService createService()
-  {
-    return new WSDLService(this);
-  }
-
-  /**
-   * Adds a Service
-   */
-  public void addService(WSDLService service)
-  {
-    _serviceMap.put(service.getName(), service);
-  }
-
-  /**
-   * Gets a service.
-   */
-  public WSDLService getService(QName name)
-  {
-    return _serviceMap.get(name);
+    _definitions.add(definition);
   }
 }

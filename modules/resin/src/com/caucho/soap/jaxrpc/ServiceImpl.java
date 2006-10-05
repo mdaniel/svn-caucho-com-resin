@@ -69,7 +69,7 @@ public class ServiceImpl implements Service {
 
   ServiceImpl(WSDLService service)
   {
-    _serviceName = service.getName();
+    _serviceName = null;//service.getName();
     _service = service;
   }
   
@@ -95,6 +95,7 @@ public class ServiceImpl implements Service {
   public Call createCall(QName portName, QName opName)
     throws ServiceException
   {
+    /*
     WSDLPort port = getPort(portName);
     WSDLOperation op = port.getOperation(opName);
 
@@ -103,6 +104,8 @@ public class ServiceImpl implements Service {
                                      portName, opName));
 
     return new CallImpl(port, op);
+    */
+    throw new UnsupportedOperationException();
   }
   
   /**
@@ -151,7 +154,8 @@ public class ServiceImpl implements Service {
    */
   public Iterator getPorts()
   {
-    return _service.getPortNames();
+    throw new UnsupportedOperationException();
+    //return _service.getPortNames();
   }
 
   /**
@@ -184,13 +188,15 @@ public class ServiceImpl implements Service {
   private WSDLPort getPort(QName portName)
     throws ServiceException
   {
+    throw new UnsupportedOperationException();
+    /*
     WSDLPort port = _service.getPort(portName);
 
     if (port == null)
       throw new ServiceException(L.l("'{0}' is an unknown port in service '{1}'",
                                      portName, getServiceName()));
 
-    return port;
+    return port;*/
   }
 
   /**

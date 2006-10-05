@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
@@ -23,38 +24,40 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Emil Ong
  */
 
 package com.caucho.soap.wsdl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.*;
 
 /**
- * WSDL Service definition
+ * A WSDL element with arbitrary children.
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="service", namespace="http://schemas.xmlsoap.org/wsdl/")
-public class WSDLService extends WSDLNamedExtensibleDocumented
-                         implements WSDLDefinition 
+public abstract class WSDLNamedExtensibleDocumented 
+  extends WSDLExtensibleDocumented 
 {
-  @XmlElement(name="port", namespace="http://schemas.xmlsoap.org/wsdl/")
-  private List<WSDLPort> _ports;
+  @XmlAttribute(required=true, 
+                name="name", namespace="http://schemas.xmlsoap.org/wsdl/")
+  @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+  private String _name;
 
-  public void addPort(WSDLPort port)
+  /**
+   * Sets the message name.
+   */
+  public void setName(String name)
   {
-    if (_ports == null)
-      _ports = new ArrayList<WSDLPort>();
-
-    _ports.add(port);
+    _name = name;
   }
-
-  public List<WSDLPort> getPorts()
+  
+  /**
+   * Returns the message name.
+   */
+  public String getName()
   {
-    return _ports;
+    return _name;
   }
 }

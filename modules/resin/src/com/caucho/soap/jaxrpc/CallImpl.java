@@ -280,6 +280,7 @@ public class CallImpl implements Call {
    */
   private void writeCall(Object []params)
   {
+    /*
     if (_op.getInput() == null)
       throw new IllegalStateException(L.l("writing call with no input"));
 
@@ -299,6 +300,7 @@ public class CallImpl implements Call {
       } catch (Throwable e) {
       }
     }
+    */
   }
 
   /**
@@ -308,6 +310,7 @@ public class CallImpl implements Call {
     throws IOException, SAXException
   {
     writer.startDocument();
+    /*
 
     WSDLOperation op = _op;
     QName opName = op.getName();
@@ -322,11 +325,13 @@ public class CallImpl implements Call {
                      SOAP_ENCODING);
 
     writer.startElement(SOAP_ENVELOPE, "Header", "env:Header");
+    */
     /*
     writer.attribute(SOAP_ENVELOPE, "encodingStyle", "env:encodingStyle",
                      "ook");
     */
 
+    /*
     writer.endElement(SOAP_ENVELOPE, "Header", "env:Header");
 
     writer.startElement(SOAP_ENVELOPE, "Body", "env:Body");
@@ -347,13 +352,13 @@ public class CallImpl implements Call {
 
     writer.endElement(SOAP_ENVELOPE, "env", "Envelope");
     writer.endPrefixMapping("env");
+    */
 
     writer.endDocument();
   }
 
-  /**
+  /*
    * Starts writing an element.
-   */
   private void writeParams(XMLWriter writer,
                            ArrayList<WSDLMessage.Part> msgParts,
                            Object []params)
@@ -376,6 +381,7 @@ public class CallImpl implements Call {
       writer.endElement("", name, name);
     }
   }
+   */
 
   /**
    * Starts writing an element.

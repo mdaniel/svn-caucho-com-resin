@@ -33,6 +33,8 @@ import java.util.logging.Logger;
 import java.io.InputStream;
 import java.io.IOException;
 
+import javax.xml.bind.*;
+
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
@@ -54,32 +56,24 @@ import com.caucho.config.Config;
 public class WSDLParser {
   private final static Logger log = Log.open(WSDLParser.class);
   private final static L10N L = new L10N(WSDLParser.class);
+  private static JAXBContext _context = null;
 
   /**
    * Starts a WSDL element.
    */
-  public static WSDLDefinitions parse(InputStream is, String systemId)
-    throws IOException, SAXException
+  public static WSDLDefinitions parse(InputStream is)
+    throws IOException, JAXBException
   {
     try {
-      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      DocumentBuilder builder = factory.newDocumentBuilder();
+      if (_context == null)
+        _context = JAXBContext.newInstance("com.caucho.soap.wsdl");
 
-      Document doc = builder.parse(is, systemId);
-
-      WSDLDefinitions wsdl = new WSDLDefinitions();
-      
-      new Config().configure(wsdl, doc.getDocumentElement());
-
-      return wsdl;
-    } catch (ParserConfigurationException e) {
-      throw new RuntimeException(e);
-    } catch (IOException e) {
-      throw e;
-    } catch (SAXException e) {
+      Unmarshaller unmarshaller = _context.createUnmarshaller();
+      return (WSDLDefinitions) unmarshaller.unmarshal(is);
+    } catch (JAXBException e) {
       throw e;
     } catch (Exception e) {
-      throw new SAXException(e);
+      throw new JAXBException(e);
     }
   }
 }

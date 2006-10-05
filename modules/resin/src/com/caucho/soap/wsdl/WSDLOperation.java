@@ -29,179 +29,58 @@
 package com.caucho.soap.wsdl;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import javax.xml.namespace.QName;
-
-import org.w3c.dom.Node;
-
-import com.caucho.util.L10N;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.xml.XmlUtil;
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.*;
 
 /**
  * WSDL operation definition
  */
-public class WSDLOperation {
-  private final static L10N L = new L10N(WSDLOperation.class);
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(name="operation", namespace="http://schemas.xmlsoap.org/wsdl/")
+public class WSDLOperation extends WSDLNamedExtensibleDocumented {
 
-  private WSDLDefinitions _defs;
-  
-  private QName _name;
+  @XmlElements({
+    @XmlElement(type=WSDLOperationInput.class,
+                name="input", namespace="http://schemas.xmlsoap.org/wsdl/"),
+    @XmlElement(type=WSDLOperationOutput.class,
+                name="output", namespace="http://schemas.xmlsoap.org/wsdl/"),
+    @XmlElement(type=WSDLOperationFault.class,
+                name="fault", namespace="http://schemas.xmlsoap.org/wsdl/")
+  })
+  private List<WSDLOperationPart> _parts;
 
-  private ArrayList<Param> _params = new ArrayList<Param>();
+  @XmlAttribute(name="parameterOrder", 
+                namespace="http://schemas.xmlsoap.org/wsdl/")
+  private List<String> _parameterOrder;
 
-  /**
-   * Creates the operation.
-   */
-  WSDLOperation(WSDLDefinitions defs)
+  public List<String> getParameterOrder()
   {
-    _defs = defs;
+    return _parameterOrder;
   }
 
-  /**
-   * Creates the operation.
-   */
-  WSDLOperation(WSDLOperation op)
+  public void addParameterOrder(String param)
   {
-    _defs = op._defs;
-    _name = op._name;
+    if (_parameterOrder == null)
+      _parameterOrder = new ArrayList<String>();
 
-    for (int i = 0; i < op._params.size(); i++) {
-      Param param = op._params.get(i);
-
-      _params.add(param);
-    }
+    _parameterOrder.add(param);
   }
 
-  /**
-   * Returns the defs.
-   */
-  WSDLDefinitions getDefs()
+  public List<WSDLOperationPart> getOperationParts()
   {
-    return _defs;
+    if (_parts == null)
+      _parts = new ArrayList<WSDLOperationPart>();
+
+    return _parts;
   }
-  
-  /**
-   * Sets the operation name.
-   */
-  public void setName(String name)
+
+  public void addOperationPart(WSDLOperationPart part)
   {
-    _name = new QName(getDefs().getTargetNamespace(), name);
-  }
-  
-  /**
-   * Sets the operation name.
-   */
-  public void setName(QName name)
-  {
-    _name = name;
-  }
+    if (_parts == null)
+      _parts = new ArrayList<WSDLOperationPart>();
 
-  /**
-   * Returns the operation name.
-   */
-  public QName getName()
-  {
-    return _name;
-  }
-
-  /**
-   * Creates the input.
-   */
-  public Input createInput()
-  {
-    Input input = new Input();
-    
-    _params.add(input);
-
-    return input;
-  }
-
-  /**
-   * Adds the output.
-   */
-  public void addOutput(Output output)
-  {
-    _params.add(output);
-  }
-
-  /**
-   * Returns the input.
-   */
-  public WSDLMessage getInput()
-  {
-    for (int i = 0; i < _params.size(); i++) {
-      Param param = _params.get(i);
-
-      if (param instanceof Input) {
-        return param.getMessage();
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * A part of the operation.
-   */
-  public class Param {
-    private Node _node;
-  
-    private WSDLMessage _message;
-    
-    /**
-     * Sets the configuration node (for the namespace).
-     */
-    public void setConfigNode(Node node)
-    {
-      _node = node;
-    }
-    
-    /**
-     * Sets the message definition for the param.
-     */
-    public void setMessage(String name)
-      throws ConfigException
-    {
-      int p = name.indexOf(':');
-      String uri;
-
-      QName messageName;
-
-      if (p < 0) {
-        uri = XmlUtil.getNamespace(_node, "");
-        messageName = new QName(uri, name);
-      }
-      else {
-        String prefix = name.substring(0, p);
-        uri = XmlUtil.getNamespace(_node, prefix);
-        messageName = new QName(uri, name.substring(p + 1), prefix);
-      }
-
-      _message = _defs.getMessage(messageName);
-
-      if (_message == null)
-        throw new ConfigException(L.l("{0} is an unknown message.",
-                                      messageName));
-    }
-
-    public WSDLMessage getMessage()
-    {
-      return _message;
-    }
-  }
-
-  /**
-   * A part of the operation.
-   */
-  public class Input extends Param {
-  }
-
-  /**
-   * A part of the operation.
-   */
-  public class Output extends Param {
+    _parts.add(part);
   }
 }

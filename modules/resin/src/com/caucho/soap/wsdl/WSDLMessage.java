@@ -29,104 +29,39 @@
 package com.caucho.soap.wsdl;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import javax.xml.namespace.QName;
-
-import com.caucho.util.L10N;
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.*;
 
 /**
  * WSDL Message definition
  */
-public class WSDLMessage {
-  private final static L10N L = new L10N(WSDLMessage.class);
-
-  private WSDLDefinitions _defs;
-  
-  private QName _name;
-  private ArrayList<Part> _parts = new ArrayList<Part>();
-
-  /**
-   * Creates the operation.
-   */
-  WSDLMessage(WSDLDefinitions defs)
-  {
-    _defs = defs;
-  }
-
-  /**
-   * Returns the defs.
-   */
-  WSDLDefinitions getDefs()
-  {
-    return _defs;
-  }
-  
-  /**
-   * Sets the operation name.
-   */
-  public void setName(String name)
-  {
-    _name = new QName(getDefs().getTargetNamespace(), name);
-  }
-  
-  /**
-   * Sets the operation name.
-   */
-  public void setName(QName name)
-  {
-    _name = name;
-  }
-
-  /**
-   * Returns the operation name.
-   */
-  public QName getName()
-  {
-    return _name;
-  }
-
-  /**
-   * Adds a message part.
-   */
-  public void addPart(Part part)
-  {
-    _parts.add(part);
-  }
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(name="message", namespace="http://schemas.xmlsoap.org/wsdl/")
+public class WSDLMessage extends WSDLNamedExtensibleDocumented 
+                         implements WSDLDefinition 
+{
+  @XmlElement(name="part", namespace="http://schemas.xmlsoap.org/wsdl/",
+              type=WSDLPart.class)
+  private List<WSDLPart> _parts;
 
   /**
    * Returns the message part.
    */
-  public ArrayList<Part> getParts()
+  public List<WSDLPart> getParts()
   {
+    if (_parts == null)
+      _parts = new ArrayList<WSDLPart>();
+
     return _parts;
   }
 
-  public static class Part {
-    private String _name;
-    private String _type;
+  public void addPart(WSDLPart part)
+  {
+    if (_parts == null)
+      _parts = new ArrayList<WSDLPart>();
 
-    /**
-     * Sets the part name.
-     */
-    public void setName(String name)
-    {
-      _name = name;
-    }
-
-    /**
-     * Gets the part name.
-     */
-    public String getName()
-    {
-      return _name;
-    }
-
-    /**
-     * Sets the part type.
-     */
-    public void setType(String type)
-    {
-      _type = type;
-    }
+    _parts.add(part);
   }
 }

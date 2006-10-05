@@ -72,6 +72,7 @@ public class ServiceFactoryImpl extends ServiceFactory {
   public Service createService(URL wsdl, QName serviceName)
     throws ServiceException
   {
+    /*
     WSDLDefinitions defs = parseWSDL(wsdl);
 
     WSDLService service = defs.getService(serviceName);
@@ -81,6 +82,8 @@ public class ServiceFactoryImpl extends ServiceFactory {
                                      serviceName, wsdl));
 
     return new ServiceImpl(service);
+    */
+    throw new UnsupportedOperationException();
   }
   
   /**
@@ -126,7 +129,7 @@ public class ServiceFactoryImpl extends ServiceFactory {
     try {
       InputStream is = wsdl.openStream();
       try {
-        return WSDLParser.parse(is, wsdl.toString());
+        return WSDLParser.parse(is);
       } finally {
         is.close();
       }

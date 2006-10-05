@@ -28,67 +28,42 @@
 
 package com.caucho.soap.wsdl;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.xml.namespace.QName;
-
-import com.caucho.util.L10N;
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.*;
 
 /**
  * WSDL PortType definition
  */
-public class WSDLPortType {
-  private final static L10N L = new L10N(WSDLPortType.class);
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(name="portType", namespace="http://schemas.xmlsoap.org/wsdl/")
+public class WSDLPortType extends WSDLNamedExtensibleAttributeDocumented {
 
-  private WSDLDefinitions _defs;
-  
-  private QName _name;
+  @XmlElement(name="operation", namespace="http://schemas.xmlsoap.org/wsdl/",
+              type=WSDLOperation.class)
+  private List<WSDLOperation> _operations;
 
-  private HashMap<QName,WSDLOperation> _opMap =
-    new HashMap<QName,WSDLOperation>();
-
-  WSDLPortType(WSDLDefinitions defs)
-  {
-    _defs = defs;
-  }
-  
-  /**
-   * Sets the PortType name.
-   */
-  public void setName(String name)
-  {
-    _name = new QName(_defs.getTargetNamespace(), name);
-  }
-
-  /**
-   * Returns the PortType name.
-   */
-  public QName getName()
-  {
-    return _name;
-  }
-
-  /**
-   * Creates an operation.
-   */
-  public WSDLOperation createOperation()
-  {
-    return new WSDLOperation(_defs);
-  }
-  
   /**
    * Adds an operation.
    */
-  public void addOperation(WSDLOperation op)
+  public void addOperation(WSDLOperation operation)
   {
-    _opMap.put(op.getName(), op);
+    if (_operations == null)
+      _operations = new ArrayList<WSDLOperation>();
+
+    _operations.add(operation);
   }
 
   /**
-   * Returns the operation.
+   * Returns the operations.
    */
-  public WSDLOperation getOperation(QName name)
+  public List<WSDLOperation> getOperations()
   {
-    return _opMap.get(name);
+    if (_operations == null)
+      _operations = new ArrayList<WSDLOperation>();
+
+    return _operations;
   }
 }

@@ -23,38 +23,53 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Emil Ong
  */
 
 package com.caucho.soap.wsdl;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.xml.namespace.QName;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.*;
 
 /**
- * WSDL Service definition
+ * WSDL message part.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="service", namespace="http://schemas.xmlsoap.org/wsdl/")
-public class WSDLService extends WSDLNamedExtensibleDocumented
-                         implements WSDLDefinition 
-{
-  @XmlElement(name="port", namespace="http://schemas.xmlsoap.org/wsdl/")
-  private List<WSDLPort> _ports;
+@XmlRootElement(name="part", namespace="http://schemas.xmlsoap.org/wsdl/")
+public class WSDLPart extends WSDLNamedExtensibleAttributeDocumented {
+  @XmlAttribute(name="type", namespace="http://schemas.xmlsoap.org/wsdl/")
+  @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+  private QName _type;
 
-  public void addPort(WSDLPort port)
+  @XmlAttribute(name="element", namespace="http://schemas.xmlsoap.org/wsdl/")
+  @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+  private QName _element;
+
+  /**
+   * Sets the type.
+   */
+  public void setType(QName type)
   {
-    if (_ports == null)
-      _ports = new ArrayList<WSDLPort>();
-
-    _ports.add(port);
+    _type = type;
   }
 
-  public List<WSDLPort> getPorts()
+  public QName getType()
   {
-    return _ports;
+    return _type;
+  }
+
+  /**
+   * Sets the element.
+   */
+  public void setElement(QName element)
+  {
+    _element = element;
+  }
+
+  public QName getElement()
+  {
+    return _element;
   }
 }

@@ -23,38 +23,19 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Emil Ong
  */
 
 package com.caucho.soap.wsdl;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.*;
 
 /**
- * WSDL Service definition
+ * WSDL operation direction.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="service", namespace="http://schemas.xmlsoap.org/wsdl/")
-public class WSDLService extends WSDLNamedExtensibleDocumented
-                         implements WSDLDefinition 
+@XmlRootElement(name="output", namespace="http://schemas.xmlsoap.org/wsdl/")
+public class WSDLOperationOutput extends WSDLOperationDirection
 {
-  @XmlElement(name="port", namespace="http://schemas.xmlsoap.org/wsdl/")
-  private List<WSDLPort> _ports;
-
-  public void addPort(WSDLPort port)
-  {
-    if (_ports == null)
-      _ports = new ArrayList<WSDLPort>();
-
-    _ports.add(port);
-  }
-
-  public List<WSDLPort> getPorts()
-  {
-    return _ports;
-  }
 }
