@@ -1199,7 +1199,7 @@ public final class SessionManager implements ObjectManager, AlarmListener {
 
     if (_isAppendServerIndex) {
       cb.append('.');
-      cb.append(index);
+      cb.append((index + 1));
     }
 
     return cb.toString();

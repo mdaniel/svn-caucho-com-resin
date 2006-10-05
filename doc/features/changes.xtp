@@ -4,6 +4,10 @@
 
 <s2 title='3.0.snap - Sep 7, 2006'>
 <ul>
+<li>jsp:useBean in tag file was using unavailable objects (#1389, rep by Matthew Schmidt)</li>
+<li>JSP tag file adds attributes as java variables (#1389, rep by Matthew Schmidt)</li>
+<li>session persistence requires original request (rep by Takahiro Fukuda)</li>
+<li>cookie-append-server-index should append exact index (rep by Serge Knystautas)</li>
 <li>mod_caucho issues with config server (rep by Steve Baugus)</li>
 <li>session write at finish was clearing useCount too early, causing spurious session failures (rep by Ed Hollingsworth)</li>
 <li>Disable select-manager for win32 because of socket limits (#1344, rep by Olaf Fentsch)</li>
