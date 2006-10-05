@@ -267,6 +267,7 @@
         <include name="**/*.tld"/>
         <include name="**/*.afm"/>
         <include name="**/*.properties"/>
+        <include name="**/jaxb.index"/>
         <include name="META-INF/**"/>
       </fileset>
     </copy>
