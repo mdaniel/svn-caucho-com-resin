@@ -2502,7 +2502,7 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
       if (! targetName.equals("") && ! targetName.equals("void")) {
       }
       else if (typeArgs.length > 0)
-        targetName = typeArgs[0].getName();
+        targetName = typeArgs[typeArgs.length-1].getName();
       else
         throw error(_field, L.l("Can't determine targetEntity for {0}.  @OneToMany properties must target @Entity beans.",
                                 _field.getName()));

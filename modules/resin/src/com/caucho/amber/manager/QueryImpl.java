@@ -163,7 +163,7 @@ public class QueryImpl implements Query {
 
               columns.add(object);
 
-            } catch (ArrayIndexOutOfBoundsException ex1) {
+            } catch (IndexOutOfBoundsException ex1) {
               break;
             }
             // catch (Exception ex2) {
