@@ -88,7 +88,7 @@ public class PageContextELResolver extends AbstractVariableResolver {
     else if (property instanceof String) {
       env.setPropertyResolved(true);
 	
-      return _pageContext.getAttribute(property.toString());
+      return _pageContext.findAttribute(property.toString());
     }
     else
       return null;

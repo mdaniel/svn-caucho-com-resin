@@ -141,7 +141,8 @@ public class BeanELResolver extends ELResolver {
   {
   }
 
-  protected static final class BeanProperties {
+  protected static final class BeanProperties
+  {
     private Class _base;
 
     private HashMap<String,BeanProperty> _propMap
@@ -210,6 +211,9 @@ public class BeanELResolver extends ELResolver {
     {
       _base = baseClass;
       _descriptor = descriptor;
+
+      if (descriptor.getReadMethod() != null)
+	descriptor.getReadMethod().setAccessible(true);
     }
     
     public BeanProperty(Class baseClass,
@@ -219,6 +223,9 @@ public class BeanELResolver extends ELResolver {
       try {
 	_base = baseClass;
 	_descriptor = new PropertyDescriptor(name, getter, null);
+
+	if (getter != null)
+	  getter.setAccessible(true);
       } catch (Exception e) {
 	throw new RuntimeException(e);
       }

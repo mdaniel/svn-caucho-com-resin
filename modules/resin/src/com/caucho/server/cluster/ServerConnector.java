@@ -338,7 +338,7 @@ public class ServerConnector
 
   public String toString()
   {
-    return ("ClusterServer[id=" + _port.getServerId() +
+    return ("ServerConnector[id=" + getId() +
             " index=" + _port.getIndex() +
             " address=" + _port.getAddress() + ":" + _port.getPort() +
             " cluster=" + _cluster.getId() + "]");

@@ -39,15 +39,17 @@ import java.io.IOException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
+import com.caucho.config.types.*;
+
 public class GlossaryItem implements ContentItem {
   private static final Logger log
     = Logger.getLogger(GlossaryItem.class.getName());
 
   private String _value;
 
-  public void addText(String text)
+  public void addText(RawString text)
   {
-    _value = text.trim();
+    _value = text.getValue().trim();
   }
 
   public void writeHtml(XMLStreamWriter out)

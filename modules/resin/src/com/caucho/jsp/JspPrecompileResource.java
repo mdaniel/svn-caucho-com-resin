@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import javax.annotation.*;
+
 import javax.servlet.jsp.JspFactory;
 
 import com.caucho.log.Log;
@@ -103,6 +105,7 @@ public class JspPrecompileResource {
   /**
    * Initialize the resource.
    */
+  @PostConstruct
   public void init()
     throws ConfigException
   {

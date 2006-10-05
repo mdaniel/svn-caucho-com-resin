@@ -59,6 +59,11 @@ public class ServerConnectorAdmin extends AbstractManagedObject
     return _client.getServer().getId();
   }
 
+  public String getType()
+  {
+    return "ServerConnector";
+  }
+
   /**
    * Returns the owning cluster's object name.
    */

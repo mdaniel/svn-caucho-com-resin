@@ -81,6 +81,9 @@ public class TextAttributeMarshal extends SetterAttributeStrategy {
                         Node node)
     throws Exception
   {
-    setAttribute(bean, name, builder.configureRawStringNoTrim(node));
+    // server/13cq
+    //setAttribute(bean, name, builder.configureRawStringNoTrim(node));
+    
+    setAttribute(bean, name, builder.configureString(node));
   }
 }

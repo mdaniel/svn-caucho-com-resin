@@ -29,14 +29,16 @@
 
 package com.caucho.xtpdoc;
 
+import com.caucho.config.types.*;
+
 public class VerboseFormattedText extends FormattedText {
   public VerboseFormattedText(Document document)
   {
     super(document);
   }
 
-  public void addText(String text)
+  public void addText(RawString text)
   {
-    addItem(new VerboseText(text, getDocument()));
+    addItem(new VerboseText(text.getValue(), getDocument()));
   }
 }

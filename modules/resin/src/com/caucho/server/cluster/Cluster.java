@@ -113,6 +113,7 @@ public class Cluster
   public Cluster()
   {
     _classLoader = new EnvironmentClassLoader();
+    _classLoader.setId("cluster:??");
 
     _clusterLocal.set(this, _classLoader);
   
@@ -152,6 +153,8 @@ public class Cluster
       throw new NullPointerException();
     
     _id = id;
+
+    _classLoader.setId("cluster:" + _id);
   }
 
   /**

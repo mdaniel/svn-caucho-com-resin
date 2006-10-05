@@ -274,6 +274,24 @@ public class JspCompiler implements EnvironmentBean {
   }
 
   /**
+   * Initialize values based on the ServletContext.  When the calling code
+   * has the ServletContext available, it can take advantage of it.
+   */
+  public WebApp createApplication()
+  {
+    return createWebApp();
+  }
+
+  /**
+   * Initialize values based on the ServletContext.  When the calling code
+   * has the ServletContext available, it can take advantage of it.
+   */
+  public void setApplication(WebApp webApp)
+  {
+    setWebApp(webApp);
+  }
+
+  /**
    * Returns the app.
    */
   public WebApp getWebApp()

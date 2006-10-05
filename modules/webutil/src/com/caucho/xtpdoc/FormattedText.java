@@ -49,9 +49,9 @@ public class FormattedText extends ContainerNode {
   {
   }
 
-  public void addText(String text)
+  public void addText(RawString text)
   {
-    addItem(new Text(text));
+    addItem(new Text(text.getValue()));
   }
 
   public void addG(GlossaryText text)
