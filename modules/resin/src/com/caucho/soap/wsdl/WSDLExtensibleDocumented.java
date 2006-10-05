@@ -38,5 +38,5 @@ import javax.xml.bind.annotation.adapters.*;
  */
 public abstract class WSDLExtensibleDocumented {
   @XmlAnyElement(lax = true)
-  protected List<Object> any;
+  protected List<Object> _any;
 }

@@ -39,12 +39,10 @@ import javax.xml.bind.annotation.adapters.*;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name="part", namespace="http://schemas.xmlsoap.org/wsdl/")
 public class WSDLPart extends WSDLNamedExtensibleAttributeDocumented {
-  @XmlAttribute(name="type", namespace="http://schemas.xmlsoap.org/wsdl/")
-  @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+  @XmlAttribute(name="type")
   private QName _type;
 
-  @XmlAttribute(name="element", namespace="http://schemas.xmlsoap.org/wsdl/")
-  @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+  @XmlAttribute(name="element")
   private QName _element;
 
   /**

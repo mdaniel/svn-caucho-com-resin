@@ -41,14 +41,12 @@ import javax.xml.bind.annotation.adapters.*;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name="binding", namespace="http://schemas.xmlsoap.org/wsdl/")
-public class WSDLBinding extends WSDLNamedExtensibleAttributeDocumented
+public class WSDLBinding extends WSDLNamedExtensibleDocumented
                          implements WSDLDefinition {
   @XmlElement(name="operation", namespace="http://schemas.xmlsoap.org/wsdl/")
   private List<WSDLBindingOperation> _operations;
 
-  @XmlAttribute(required=true, 
-                name="type", namespace="http://schemas.xmlsoap.org/wsdl/")
-  @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+  @XmlAttribute(required=true, name="type")
   private QName _type;
 
   /**

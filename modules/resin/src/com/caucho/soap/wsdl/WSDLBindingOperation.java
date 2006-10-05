@@ -31,8 +31,6 @@ package com.caucho.soap.wsdl;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.namespace.QName;
-
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.*;
 

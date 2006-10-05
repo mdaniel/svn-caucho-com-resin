@@ -51,8 +51,7 @@ public class WSDLOperation extends WSDLNamedExtensibleDocumented {
   })
   private List<WSDLOperationPart> _parts;
 
-  @XmlAttribute(name="parameterOrder", 
-                namespace="http://schemas.xmlsoap.org/wsdl/")
+  @XmlAttribute(name="parameterOrder")
   private List<String> _parameterOrder;
 
   public List<String> getParameterOrder()

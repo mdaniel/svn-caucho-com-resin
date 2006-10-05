@@ -28,51 +28,18 @@
 
 package com.caucho.soap.wsdl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.*;
 
 /**
- * WSDL Import.
+ * SOAP binding definition
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="import", namespace="http://schemas.xmlsoap.org/wsdl/")
-public class WSDLImport extends WSDLExtensibleAttributeDocumented
-                        implements WSDLDefinition {
-  @XmlAttribute(required = true, name="location")
-  private String _location;
-
-  @XmlAttribute(required = true, name="namespace")
-  private String _namespace;
-
-  /**
-   * Sets the namespace.
-   */
-  public void setNamespace(String namespace)
-  {
-    _namespace = namespace;
-  }
-  
-  /**
-   * Returns the namespace.
-   */
-  public String getNamespace()
-  {
-    return _namespace;
-  }
-
-  /**
-   * Sets the location.
-   */
-  public void setLocation(String location)
-  {
-    _location = location;
-  }
-  
-  /**
-   * Returns the location.
-   */
-  public String getLocation()
-  {
-    return _location;
-  }
+@XmlType(namespace="http://schemas.xmlsoap.org/wsdl/soap/")
+@XmlEnum(String.class)
+public enum SOAPUseChoice {
+  @XmlEnumValue("literal") LITERAL,
+  @XmlEnumValue("encoded") ENCODED
 }

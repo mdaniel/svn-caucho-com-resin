@@ -41,12 +41,11 @@ import javax.xml.bind.annotation.adapters.*;
 @XmlRootElement(name="definitions", 
                 namespace="http://schemas.xmlsoap.org/wsdl/")
 public class WSDLDefinitions extends WSDLExtensibleDocumented {
-  @XmlAttribute(name="name", namespace="http://schemas.xmlsoap.org/wsdl/")
+  @XmlAttribute(name="name")
   @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
   private String _name;
 
-  @XmlAttribute(name="targetNamespace", 
-                namespace="http://schemas.xmlsoap.org/wsdl/")
+  @XmlAttribute(name="targetNamespace")
   private String _targetNamespace;
 
   @XmlElements({

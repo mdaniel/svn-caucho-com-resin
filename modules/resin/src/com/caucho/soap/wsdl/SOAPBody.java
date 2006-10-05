@@ -28,51 +28,79 @@
 
 package com.caucho.soap.wsdl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.*;
 
 /**
- * WSDL Import.
+ * SOAP body definition
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="import", namespace="http://schemas.xmlsoap.org/wsdl/")
-public class WSDLImport extends WSDLExtensibleAttributeDocumented
-                        implements WSDLDefinition {
-  @XmlAttribute(required = true, name="location")
-  private String _location;
+@XmlRootElement(name="body", namespace="http://schemas.xmlsoap.org/wsdl/soap/")
+public class SOAPBody extends WSDLExtensibilityElement {
+  @XmlAttribute(name="parts")
+  private List<String> _parts;
 
-  @XmlAttribute(required = true, name="namespace")
+  @XmlAttribute(name="encodingStyle")
+  private List<String> _encodingStyle;
+
+  @XmlAttribute(name="namespace")
   private String _namespace;
 
-  /**
-   * Sets the namespace.
-   */
+  @XmlAttribute(name="use")
+  private SOAPUseChoice _use;
+
+  public void addPart(String part)
+  {
+    if (_parts == null)
+      _parts = new ArrayList<String>();
+
+    _parts.add(part);
+  }
+
+  public List<String> getParts()
+  {
+    if (_parts == null)
+      _parts = new ArrayList<String>();
+
+    return _parts;
+  }
+
+  public void addEncodingStyle(String encodingStyle)
+  {
+    if (_encodingStyle == null)
+      _encodingStyle = new ArrayList<String>();
+
+    _encodingStyle.add(encodingStyle);
+  }
+
+  public List<String> getEncodingStyle()
+  {
+    if (_encodingStyle == null)
+      _encodingStyle = new ArrayList<String>();
+
+    return _encodingStyle;
+  }
+
   public void setNamespace(String namespace)
   {
     _namespace = namespace;
   }
-  
-  /**
-   * Returns the namespace.
-   */
+
   public String getNamespace()
   {
     return _namespace;
   }
 
-  /**
-   * Sets the location.
-   */
-  public void setLocation(String location)
+  public void setUse(SOAPUseChoice use)
   {
-    _location = location;
+    _use = use;
   }
-  
-  /**
-   * Returns the location.
-   */
-  public String getLocation()
+
+  public SOAPUseChoice getUse()
   {
-    return _location;
+    return _use;
   }
 }

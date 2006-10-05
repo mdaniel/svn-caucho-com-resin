@@ -28,51 +28,45 @@
 
 package com.caucho.soap.wsdl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.*;
 
 /**
- * WSDL Import.
+ * SOAP binding definition
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="import", namespace="http://schemas.xmlsoap.org/wsdl/")
-public class WSDLImport extends WSDLExtensibleAttributeDocumented
-                        implements WSDLDefinition {
-  @XmlAttribute(required = true, name="location")
-  private String _location;
+@XmlRootElement(name="operation", 
+                namespace="http://schemas.xmlsoap.org/wsdl/soap/")
+public class SOAPOperation extends WSDLExtensibilityElement {
+  @XmlAttribute(name="soapAction")
+  private String _soapAction;
 
-  @XmlAttribute(required = true, name="namespace")
-  private String _namespace;
-
-  /**
-   * Sets the namespace.
-   */
-  public void setNamespace(String namespace)
-  {
-    _namespace = namespace;
-  }
-  
-  /**
-   * Returns the namespace.
-   */
-  public String getNamespace()
-  {
-    return _namespace;
-  }
+  @XmlAttribute(name="style")
+  private SOAPStyleChoice _style;
 
   /**
-   * Sets the location.
+   * Sets the soap action.
    */
-  public void setLocation(String location)
+  public void setSoapAction(String soapAction)
   {
-    _location = location;
+    _soapAction = soapAction;
   }
-  
-  /**
-   * Returns the location.
-   */
-  public String getLocation()
+
+  public String getSoapAction()
   {
-    return _location;
+    return _soapAction;
+  }
+
+  public void setStyle(SOAPStyleChoice style)
+  {
+    _style = style;
+  }
+
+  public SOAPStyleChoice getStyle()
+  {
+    return _style;
   }
 }

@@ -39,7 +39,7 @@ import javax.xml.bind.annotation.adapters.*;
 public abstract class WSDLNamedExtensibleAttributeDocumented
   extends WSDLExtensibleAttributeDocumented 
 {
-  @XmlAttribute(name="name", namespace="http://schemas.xmlsoap.org/wsdl/")
+  @XmlAttribute(name="name")
   @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
   private String _name;
 
