@@ -31,6 +31,16 @@ function format_hit_ratio($hit, $miss)
     return sprintf("%.2f%% (%d / %d)", 100 * $hit / $total, $hit, $total);
 }
 
+function format_miss_ratio($hit, $miss)
+{
+  $total = $hit + $miss;
+
+  if ($total == 0)
+    return "0.00% (0 / 0)";
+  else
+    return sprintf("%.2f%% (%d / %d)", 100 * $miss / $total, $miss, $total);
+}
+
 $resin = $mbeanServer->lookup("resin:type=Resin");
 $server = $mbeanServer->lookup("resin:type=Server");
 
@@ -97,14 +107,21 @@ if (! empty($server->Id))
 
 <?php
 
+$block_cache = $mbeanServer->lookup("resin:type=BlockManager");
 $proxy_cache = $mbeanServer->lookup("resin:type=ProxyCache");
 
 ?>
 
   <tr title="Percentage of requests that have been served from the proxy cache:">
-    <th>Proxy cache hit ratio:</th>
-    <td><?= format_hit_ratio($proxy_cache->HitCountTotal,
-                             $proxy_cache->MissCountTotal) ?></td>
+    <th>Proxy cache miss ratio:</th>
+    <td><?= format_miss_ratio($proxy_cache->HitCountTotal,
+                              $proxy_cache->MissCountTotal) ?></td>
+  </tr>
+
+  <tr title="Percentage of requests that have been served from the proxy cache:">
+    <th>Block cache miss ratio:</th>
+    <td><?= format_miss_ratio($block_manager->HitCountTotal,
+                              $block_manager->MissCountTotal) ?></td>
   </tr>
 
 <!-- XXX: show how cacheable apps are: cacheable/non-cacheable -->
@@ -139,14 +156,14 @@ The ThreadPool manages all threads used by Resin.
   </tr>
   <tr>
     <th title="The maximum number of threads that Resin can allocate.">thread-max</th>
-    <th title="The minimum number of threads Resin should have available for new requests or other tasks.  This value causes a minimum number of idle threads, useful for situations where there is a sudden increase in the number of threads required.">spare-thread-min</th>
+    <th title="The minimum number of threads Resin should have available for new requests or other tasks.  This value causes a minimum number of idle threads, useful for situations where there is a sudden increase in the number of threads required.">thread-idle-min</th>
     <th title="The number of active threads. These threads are busy servicing requests or performing other tasks.">Active thread count</th>
     <th title="The number of idle threads. These threads are allocated but inactive, available for new requests or tasks.">Idle thread count</th>
     <th title="The current total number of threads managed by the pool.">Total count</th>
   </tr>
   <tr align='right'>
     <td><?= $thread_pool->ThreadMax ?></td>
-    <td><?= $thread_pool->SpareThreadMin ?></td>
+    <td><?= $thread_pool->ThreadIdleMin ?></td>
     <td><?= $thread_pool->ThreadActiveCount ?></td>
     <td><?= $thread_pool->ThreadIdleCount ?></td>
     <td><?= $thread_pool->ThreadCount ?></td>

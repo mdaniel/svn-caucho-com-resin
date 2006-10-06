@@ -224,6 +224,9 @@ public class Jar implements CacheListener {
       path = path.substring(1);
 
     try {
+      if (! _backing.canRead())
+	return null;
+      
       JarFile jarFile = new JarFile(_backing.getNativePath());
       JarEntry entry;
       InputStream is = null;

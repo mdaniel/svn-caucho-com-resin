@@ -32,15 +32,19 @@ package com.caucho.boot;
 import java.util.*;
 
 import com.caucho.config.*;
+import com.caucho.config.core.*;
 import com.caucho.config.types.*;
+import com.caucho.loader.*;
 import com.caucho.vfs.*;
 
-public class ResinConfig {
+public class ResinConfig implements EnvironmentBean {
   private ArrayList<InitProgram> _clusterDefaultList
     = new ArrayList<InitProgram>();
   
   private ArrayList<ClusterConfig> _clusterList
     = new ArrayList<ClusterConfig>();
+
+  private ClassLoader _classLoader;
 
   private Path _resinHome;
   private Path _rootDirectory;
@@ -49,6 +53,8 @@ public class ResinConfig {
   {
     _resinHome = resinHome;
     _rootDirectory = serverRoot;
+
+    _classLoader = Thread.currentThread().getContextClassLoader();
   }
 
   public Path getResinHome()
@@ -64,6 +70,11 @@ public class ResinConfig {
   public void setRootDirectory(Path rootDirectory)
   {
     _rootDirectory = rootDirectory;
+  }
+
+  public ClassLoader getClassLoader()
+  {
+    return _classLoader;
   }
 
   /**
@@ -90,7 +101,19 @@ public class ResinConfig {
   /**
    * Ignore items we can't understand.
    */
-  public void addBuilderProgram(BuilderProgram program)
+  public void addThreadPool(BuilderProgram program)
+  {
+  }
+  
+  public void setGroupName(BuilderProgram program)
+  {
+  }
+  
+  public void setUserName(BuilderProgram program)
+  {
+  }
+
+  public void setMinFreeMemory(BuilderProgram program)
   {
   }
 
