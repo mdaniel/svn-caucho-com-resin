@@ -24,27 +24,27 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Rodrigo Westrupp
  */
 
-package javax.persistence.spi;
-
-import java.util.Map;
-
-import javax.persistence.EntityManagerFactory;
+package javax.persistence;
 
 /**
- * Bootstrap class to obtain an EntityManagerFactory.
+ * Thrown by the persistence provider when an entity reference
+ * obtained by EntityManager.getReference(Class, Object) is accessed
+ * but the entity does not exist. Also thrown when
+ * EntityManager.refresh(Object) is called and the object no longer
+ * exists in the database. The current transaction, if one is active
+ * will be marked for rollback.
  */
-public interface PersistenceProvider {
-  /**
-   * Create an return an EntityManagerFactory for the named unit.
-   */
-  public EntityManagerFactory createEntityManagerFactory(String name, Map map);
+public class EntityNotFoundException extends PersistenceException
+{
+  public EntityNotFoundException()
+  {
+  }
 
-  /**
-   * Create an return an EntityManagerFactory for the named unit.
-   */
-  public EntityManagerFactory
-    createContainerEntityManagerFactory(PersistenceUnitInfo info, Map map);
+  public EntityNotFoundException(String message)
+  {
+    super(message);
+  }
 }

@@ -24,27 +24,22 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Rodrigo Westrupp
  */
 
-package javax.persistence.spi;
+package javax.persistence;
 
-import java.util.Map;
-
-import javax.persistence.EntityManagerFactory;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
 
 /**
- * Bootstrap class to obtain an EntityManagerFactory.
+ * The @AssociationOverride annotation.
  */
-public interface PersistenceProvider {
-  /**
-   * Create an return an EntityManagerFactory for the named unit.
-   */
-  public EntityManagerFactory createEntityManagerFactory(String name, Map map);
-
-  /**
-   * Create an return an EntityManagerFactory for the named unit.
-   */
-  public EntityManagerFactory
-    createContainerEntityManagerFactory(PersistenceUnitInfo info, Map map);
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface AssociationOverride {
+  String name();
+  JoinColumn[] joinColumns();
 }

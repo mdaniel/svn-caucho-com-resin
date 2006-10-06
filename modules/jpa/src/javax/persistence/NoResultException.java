@@ -24,23 +24,25 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Rodrigo Westrupp
  */
 
-package com.caucho.amber.manager;
-
-import java.util.logging.Logger;
-
-import com.caucho.util.L10N;
+package javax.persistence;
 
 /**
- * The persistence provider implementation.
+ * Thrown by the persistence provider when getSingleResult() is
+ * executed on a query and there is no result to return.
+ * This exception will not cause the transaction, if one
+ * is active, to be marked for roll back.
  */
-public class PersistenceProviderImpl {
-  private static final Logger log
-    = Logger.getLogger(PersistenceProviderImpl.class.getName());
-  private static final L10N L
-    = new L10N(PersistenceProviderImpl.class);
+public class NoResultException extends PersistenceException
+{
+  public NoResultException()
+  {
+  }
 
-  
+  public NoResultException(String message)
+  {
+    super(message);
+  }
 }

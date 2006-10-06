@@ -49,12 +49,12 @@ import javax.persistence.spi.PersistenceProvider;
 public class Persistence {
   private static final Logger log
     = Logger.getLogger(Persistence.class.getName());
-  
+
   private static final String SERVICE
-    = "META-INF/services/javax.persistence.PersistenceProvider";
+    = "META-INF/services/javax.persistence.spi.PersistenceProvider";
   private static WeakHashMap<ClassLoader,PersistenceProvider[]>
     _providerMap = new WeakHashMap<ClassLoader,PersistenceProvider[]>();
-  
+
   /**
    * Create an return an EntityManagerFactory for the named unit.
    */
@@ -65,23 +65,23 @@ public class Persistence {
     for (int i = 0; i < providers.length; i++) {
       EntityManagerFactory factory;
 
-      factory = providers[i].createEntityManagerFactory(name);
+      factory = providers[i].createEntityManagerFactory(name, null);
 
       if (factory != null)
-	return factory;
+        return factory;
     }
-    
+
     return null;
   }
-  
+
   /**
    * Create an return an EntityManagerFactory for the named unit.
    */
   public static EntityManagerFactory createEntityManagerFactory(String name,
-								Map props)
+                                                                Map props)
   {
     PersistenceProvider []providerList = getProviderList();
-    
+
     throw new UnsupportedOperationException();
   }
 
@@ -93,19 +93,19 @@ public class Persistence {
 
     if (providers != null)
       return providers;
-    
+
     ArrayList<PersistenceProvider> list = new ArrayList<PersistenceProvider>();
 
     try {
       Enumeration e = loader.getResources(SERVICE);
 
       while (e.hasMoreElements()) {
-	URL url = (URL) e.nextElement();
+        URL url = (URL) e.nextElement();
 
-	PersistenceProvider provider = loadProvider(url, loader);
+        PersistenceProvider provider = loadProvider(url, loader);
 
-	if (provider != null)
-	  list.add(provider);
+        if (provider != null)
+          list.add(provider);
       }
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -115,7 +115,7 @@ public class Persistence {
     list.toArray(providers);
 
     _providerMap.put(loader, providers);
-    
+
     return providers;
   }
 
@@ -127,34 +127,34 @@ public class Persistence {
       int ch;
 
       while ((ch = is.read()) >= 0) {
-	if (Character.isWhitespace((char) ch)) {
-	}
-	else if (ch == '#') {
-	  for (; ch >= 0 && ch != '\n' && ch != '\r'; ch = is.read()) {
-	  }
-	}
-	else {
-	  StringBuilder sb = new StringBuilder();
+        if (Character.isWhitespace((char) ch)) {
+        }
+        else if (ch == '#') {
+          for (; ch >= 0 && ch != '\n' && ch != '\r'; ch = is.read()) {
+          }
+        }
+        else {
+          StringBuilder sb = new StringBuilder();
 
-	  for (;
-	       ch >= 0 && ! Character.isWhitespace((char) ch);
-	       ch = is.read()) {
-	    sb.append((char) ch);
-	  }
+          for (;
+               ch >= 0 && ! Character.isWhitespace((char) ch);
+               ch = is.read()) {
+            sb.append((char) ch);
+          }
 
-	  String className = sb.toString();
+          String className = sb.toString();
 
-	  Class cl = Class.forName(className, false, loader);
+          Class cl = Class.forName(className, false, loader);
 
-	  return (PersistenceProvider) cl.newInstance();
-	}
+          return (PersistenceProvider) cl.newInstance();
+        }
       }
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
       try {
-	if (is != null)
-	  is.close();
+        if (is != null)
+          is.close();
       } catch (Throwable e) {
       }
     }

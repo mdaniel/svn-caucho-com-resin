@@ -24,27 +24,25 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Rodrigo Westrupp
  */
 
-package javax.persistence.spi;
-
-import java.util.Map;
-
-import javax.persistence.EntityManagerFactory;
+package javax.persistence;
 
 /**
- * Bootstrap class to obtain an EntityManagerFactory.
+ * Thrown by the persistence provider when getSingleResult() is
+ * executed on a query and there is more than one result from the
+ * query. This exception will not cause the transaction, if one
+ * is active, to be marked for roll back.
  */
-public interface PersistenceProvider {
-  /**
-   * Create an return an EntityManagerFactory for the named unit.
-   */
-  public EntityManagerFactory createEntityManagerFactory(String name, Map map);
+public class NonUniqueResultException extends PersistenceException
+{
+  public NonUniqueResultException()
+  {
+  }
 
-  /**
-   * Create an return an EntityManagerFactory for the named unit.
-   */
-  public EntityManagerFactory
-    createContainerEntityManagerFactory(PersistenceUnitInfo info, Map map);
+  public NonUniqueResultException(String message)
+  {
+    super(message);
+  }
 }

@@ -24,7 +24,7 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Rodrigo Westrupp
  */
 
 package javax.persistence;
@@ -35,10 +35,10 @@ import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 
 /**
- * The @FlushMode annotation.
+ * The @AssociationOverrides annotation.
  */
-@Target({ElementType.METHOD,ElementType.FIELD})
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface FlushMode {
-  FlushModeType value() default FlushModeType.AUTO;
+public @interface AssociationOverrides {
+  AssociationOverride[] value();
 }

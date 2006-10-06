@@ -31,6 +31,8 @@ package com.caucho.amber.manager;
 
 import java.util.logging.Logger;
 
+import java.util.Map;
+
 import javax.persistence.*;
 import javax.persistence.spi.*;
 
@@ -44,10 +46,12 @@ public class AmberPersistenceProvider implements PersistenceProvider {
     = Logger.getLogger(AmberPersistenceProvider.class.getName());
   private static final L10N L
     = new L10N(AmberPersistenceProvider.class);
+
   /**
    * Create an return an EntityManagerFactory for the named unit.
    */
-  public EntityManagerFactory createEntityManagerFactory(String name)
+  public EntityManagerFactory createEntityManagerFactory(String name,
+                                                         Map map)
   {
     AmberContainer container = AmberContainer.getLocalContainer();
 
@@ -58,12 +62,13 @@ public class AmberPersistenceProvider implements PersistenceProvider {
     else
       return null;
   }
-  
+
   /**
    * Create an return an EntityManagerFactory for the named unit.
    */
   public EntityManagerFactory
-    createContainerEntityManagerFactory(PersistenceUnitInfo info)
+    createContainerEntityManagerFactory(PersistenceUnitInfo info,
+                                        Map map)
   {
     return null;
   }

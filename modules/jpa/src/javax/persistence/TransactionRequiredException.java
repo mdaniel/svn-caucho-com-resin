@@ -24,27 +24,19 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Rodrigo Westrupp
  */
 
-package javax.persistence.spi;
+package javax.persistence;
 
-import java.util.Map;
+public class TransactionRequiredException extends PersistenceException
+{
+  public TransactionRequiredException()
+  {
+  }
 
-import javax.persistence.EntityManagerFactory;
-
-/**
- * Bootstrap class to obtain an EntityManagerFactory.
- */
-public interface PersistenceProvider {
-  /**
-   * Create an return an EntityManagerFactory for the named unit.
-   */
-  public EntityManagerFactory createEntityManagerFactory(String name, Map map);
-
-  /**
-   * Create an return an EntityManagerFactory for the named unit.
-   */
-  public EntityManagerFactory
-    createContainerEntityManagerFactory(PersistenceUnitInfo info, Map map);
+  public TransactionRequiredException(String message)
+  {
+    super(message);
+  }
 }
