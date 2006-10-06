@@ -289,7 +289,9 @@ public class OptionsModule extends AbstractQuercusModule {
    */
   public static Value get_magic_quotes_gpc(Env env)
   {
-    return BooleanValue.FALSE; // PHP 6 removes, so we don't support
+    return (env.getIniBoolean("magic_quotes_gpc")
+	    ? BooleanValue.TRUE
+	    : BooleanValue.FALSE);
   }
 
   /**

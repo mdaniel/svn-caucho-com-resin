@@ -229,7 +229,6 @@ public class ErrorModule extends AbstractQuercusModule {
   private static void addInterpreted(Env env, ArrayValue result, int i)
   {
     Expr expr = env.peekCall(i);
-    System.out.println("EX:" + expr);
     if (expr instanceof FunctionExpr) {
       FunctionExpr callExpr = (FunctionExpr) expr;
 

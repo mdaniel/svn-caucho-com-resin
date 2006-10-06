@@ -293,7 +293,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
       String isSetName = "_jsp_" + name + "_isSet";
 
       out.println();
-      out.println("private " + type + " _" + name + ";");
+      out.println("private " + type + " " + name + ";");
       out.println("private boolean " + isSetName + ";");
       
       out.println();
@@ -301,7 +301,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
       out.println("{");
       out.pushDepth();
       out.println("this." + isSetName + " = true;");
-      out.println("this._" + name + " = value;");
+      out.println("this." + name + " = value;");
       out.popDepth();
       out.println("}");
 
@@ -329,13 +329,13 @@ public class JavaTagGenerator extends JavaJspGenerator {
     String dyn = _dynamicAttributes;
 
     out.println();
-    out.println("java.util.HashMap _" + dyn + " = new java.util.HashMap();");
+    out.println("java.util.HashMap " + dyn + " = new java.util.HashMap();");
     out.println();
     out.println("public void setDynamicAttribute(String uri, String localName, Object value)");
     out.println("  throws javax.servlet.jsp.JspException");
     out.println("{");
     out.println("  if (uri == null || \"\".equals(uri))");
-    out.println("    _" + dyn + ".put(localName, value);");
+    out.println("    " + dyn + ".put(localName, value);");
     out.println("}");
   }
 
@@ -431,13 +431,13 @@ public class JavaTagGenerator extends JavaJspGenerator {
       
       out.println("if (" + isSetName + ")");
       out.println("  pageContext.setAttribute(\"" + name + "\", " +
-                  JspNode.toELObject("_" + name, cl) + ");");
+                  JspNode.toELObject(name, cl) + ");");
     }
 
     // jsp/10a1
     if (_dynamicAttributes != null) {
       out.println("pageContext.setAttribute(\"" + _dynamicAttributes + "\"," +
-		  "_" + _dynamicAttributes + ");");
+		  _dynamicAttributes + ");");
     }
   }
 

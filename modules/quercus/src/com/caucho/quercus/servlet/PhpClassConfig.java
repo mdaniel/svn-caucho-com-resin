@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.servlet;
 
+import javax.annotation.*;
+
 import com.caucho.config.ConfigException;
 
 import com.caucho.util.L10N;
@@ -77,6 +79,7 @@ public class PhpClassConfig {
   /**
    * Initialize the class.
    */
+  @PostConstruct
   public void init()
     throws ConfigException
   {

@@ -12,6 +12,8 @@
 
 <s2 title="3.1snap - Sep 20, 2006">
 <ul>
+<li>jsp:useBean in tag file was using unavailable objects (#1389, rep by Matthew Schmidt)</li>
+<li>JSP tag file adds attributes as java variables (#1389, rep by Matthew Schmidt)</li>
 <li>session persistence requires original request (rep by Takahiro Fukuda)</li>
 <li>cookie-append-server-index should append exact index (rep by Serge Knystautas, #1346)</li>
 <li>(2006-09-20) mod_caucho issues with config server (rep by Steve Baugus)</li>

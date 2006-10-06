@@ -935,7 +935,7 @@ public class MiscModule extends AbstractQuercusModule {
 	if (ch == _pad) {
 	}
 	else if (ch >= 0)
-	  bb.append(ch);
+	  bb.appendByte(ch);
 	else
 	  break;
       }

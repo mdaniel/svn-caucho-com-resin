@@ -180,11 +180,10 @@ public class ModuleContext {
 
   private JavaClassDef addClassInfo(String name, Class type,
                                     String extension, Class javaClassDefClass)
-    throws
-    NoSuchMethodException,
-    InvocationTargetException,
-    IllegalAccessException,
-    InstantiationException
+    throws NoSuchMethodException,
+	   InvocationTargetException,
+	   IllegalAccessException,
+	   InstantiationException
   {
     JavaClassDef def = _javaClassWrappers.get(name);
 

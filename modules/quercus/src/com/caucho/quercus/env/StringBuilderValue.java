@@ -79,6 +79,7 @@ public class StringBuilderValue extends UnicodeValue {
       value = "";
     
     _length = value.length();
+    _value = value;
     
     int length = _length;
 
@@ -88,8 +89,6 @@ public class StringBuilderValue extends UnicodeValue {
     _buffer = new char[length];
 
     value.getChars(0, _length, _buffer, 0);
-
-    _value = value;
   }
 
   public StringBuilderValue(char []buffer, int offset, int length)
@@ -666,6 +665,7 @@ public class StringBuilderValue extends UnicodeValue {
     s.getChars(0, len, _buffer, _length);
 
     _length += len;
+    _value = null;
 
     return this;
   }
@@ -684,6 +684,7 @@ public class StringBuilderValue extends UnicodeValue {
     s.getChars(start, end, _buffer, _length);
 
     _length += len;
+    _value = null;
 
     return this;
   }
@@ -700,6 +701,7 @@ public class StringBuilderValue extends UnicodeValue {
     System.arraycopy(buf, offset, _buffer, _length, length);
 
     _length += length;
+    _value = null;
 
     return this;
   }
@@ -710,6 +712,8 @@ public class StringBuilderValue extends UnicodeValue {
   @Override
   public final StringValue append(CharSequence buf, int head, int tail)
   {
+    _value = null;
+    
     int length = tail - head;
     
     if (_buffer.length < _length + length)
@@ -735,6 +739,8 @@ public class StringBuilderValue extends UnicodeValue {
   @Override
   public final StringValue append(StringBuilderValue sb, int head, int tail)
   {
+    _value = null;
+    
     int length = tail - head;
     
     if (_buffer.length < _length + length)
@@ -753,6 +759,8 @@ public class StringBuilderValue extends UnicodeValue {
   @Override
   public final StringValue append(char v)
   {
+    _value = null;
+    
     if (_buffer.length < _length + 1)
       ensureCapacity(_length + 1);
 
@@ -767,6 +775,8 @@ public class StringBuilderValue extends UnicodeValue {
   @Override
   public final StringValue append(Value v)
   {
+    _value = null;
+    
     v.appendTo(this);
 
     return this;

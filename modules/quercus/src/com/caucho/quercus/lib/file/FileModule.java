@@ -684,23 +684,23 @@ public class FileModule extends AbstractQuercusModule {
 
           for (int ch = is.read(); ch >= 0; ch = is.read()) {
             if (ch == '\n') {
-              bb.append((char) ch);
+              bb.appendByte(ch);
               break;
             }
             else if (ch == '\r') {
-              bb.append('\r');
+              bb.appendByte('\r');
 
               int ch2 = is.read();
 
               if (ch == '\n')
-                bb.append('\n');
+                bb.appendByte('\n');
               else
                 is.unread();
 
               break;
             }
             else
-              bb.append(ch);
+              bb.appendByte(ch);
           }
 
           if (bb.length() > 0)

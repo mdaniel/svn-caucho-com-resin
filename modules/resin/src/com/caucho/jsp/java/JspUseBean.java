@@ -134,12 +134,24 @@ public class JspUseBean extends JspContainerNode {
     String context = null;
     if (_scope == null || _scope.equals("page"))
       context = "pageContext";
-    else if (_scope.equals("request"))
-      context = "request";
-    else if (_scope.equals("session"))
-      context = "session";
-    else if (_scope.equals("application"))
-      context = "application";
+    else if (_scope.equals("request")) {
+      if (_gen.isTag() && ! _gen.hasScripting())
+	context = "pageContext.getRequest()";
+      else
+	context = "request";
+    }
+    else if (_scope.equals("session")) {
+      if (_gen.isTag() && ! _gen.hasScripting())
+	context = "pageContext.getSession()";
+      else
+	context = "session";
+    }
+    else if (_scope.equals("application")) {
+      if (_gen.isTag() && ! _gen.hasScripting())
+	context = "pageContext.getApplication()";
+      else
+	context = "application";
+    }
     else
       throw error(L.l("Unknown scope `{0}' in <jsp:useBean>.  Scope must be `page', `request', `session', or `application'.", _scope));
 
@@ -147,7 +159,7 @@ public class JspUseBean extends JspContainerNode {
     out.println(_typeName + " " + _id + ";");
 
     // application and session beans need synchronization
-    if (context.equals("application") || context.equals("session")) {
+    if ("application".equals(_scope) || "session".equals(_scope)) {
       out.println("synchronized (" + context + ") {");
       out.pushDepth();
     }
@@ -204,7 +216,7 @@ public class JspUseBean extends JspContainerNode {
     out.println("}");
 
     // Close the synchronization if necessary
-    if (context.equals("application") || context.equals("session")) {
+    if ("application".equals(_scope) || "session".equals(_scope)) {
       out.popDepth();
       out.println("}");
     }

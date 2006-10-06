@@ -4689,8 +4689,8 @@ public class QuercusParser {
     case CLONE: return "'clone'";
     case INSTANCEOF: return "'instanceof'";
       
-    case SIMPLE_STRING_ESCAPE: return "'string'";
-    case COMPLEX_STRING_ESCAPE: return "'string'";
+    case SIMPLE_STRING_ESCAPE: return "string";
+    case COMPLEX_STRING_ESCAPE: return "string";
       
     case REQUIRE: return "'require'";
     case REQUIRE_ONCE: return "'require_once'";

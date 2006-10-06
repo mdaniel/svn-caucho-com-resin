@@ -62,6 +62,9 @@ public class SessionVar extends Var {
 
       return value;
     }
+    else if (! value.isset()) {
+      return super.set(value);
+    }
     else
       throw new QuercusModuleException(L.l("Can't set this variable"));
   }

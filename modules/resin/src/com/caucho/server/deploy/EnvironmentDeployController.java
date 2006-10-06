@@ -351,8 +351,15 @@ abstract public class
       HashMap<String,Object> varMap = new HashMap<String,Object>();
       varMap.putAll(_variableMap);
 
+      for (Map.Entry<String,Object> entry : varMap.entrySet()) {
+	Config.setCurrentVar(entry.getKey(), entry.getValue());
+      }
+
       EL.setVariableMap(varMap, classLoader);
-      EL.setEnvironment(new ConfigELContext(varMap), classLoader);
+      ConfigELContext elContext = new ConfigELContext(varMap);
+      
+      EL.setEnvironment(elContext, classLoader);
+      Config.setELContext(elContext);
 
       configureInstanceVariables(instance);
 

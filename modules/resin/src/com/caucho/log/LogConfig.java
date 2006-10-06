@@ -233,6 +233,7 @@ public class LogConfig extends RotateLog {
   {
     SubLogger subLogger = new SubLogger();
 
+    subLogger.setLevel("info");
     _subLoggers.add(subLogger);
     
     return subLogger;
@@ -353,7 +354,7 @@ public class LogConfig extends RotateLog {
   public static class SubLogger {
     private Logger _logger;
     private String _name = "";
-    private Level _level = Level.INFO;
+    private Level _level;
     private boolean _useParentHandlers = true;
 
     // for mbean management
