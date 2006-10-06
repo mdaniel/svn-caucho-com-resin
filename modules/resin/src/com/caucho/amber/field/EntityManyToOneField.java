@@ -462,7 +462,9 @@ public class EntityManyToOneField extends AbstractField {
     generateCopyLoadObject(out, "super", "item", getLoadGroupIndex());
 
     // out.println("__caucho_loadMask_" + group + " |= " + mask + "L;");
-    out.println("__caucho_loadMask_" + group + " |= item.__caucho_loadMask_" + group + ";"); // mask + "L;");
+    // out.println("__caucho_loadMask_" + group + " |= item.__caucho_loadMask_" + group + ";"); // mask + "L;");
+
+    out.println("__caucho_loadMask_" + group + " |= item.__caucho_loadMask_" + group + " & " + mask + "L;");
 
     out.popDepth();
     out.println("}");
@@ -502,21 +504,33 @@ public class EntityManyToOneField extends AbstractField {
       out.println();
     }
 
-    out.print(javaType + " v"+index+" = (" + javaType + ") "+session+".find(" + javaType + ".class, ");
+    // ejb/06h0
+    if (isAbstract()) {
+      String proxy = "aConn.loadProxy(\"" + getEntityType().getName() + "\", __caucho_" + getName() + ")";
 
-    if (_aliasField == null) {
-      out.print("__caucho_" + getName());
+      proxy = getEntityType().getProxyClass().getName() + " v" + index + " = (" + getEntityType().getProxyClass().getName() + ") " + proxy + ";";
+
+      out.println(proxy);
+      out.println(generateSuperSetter("v" + index) + ";");
     }
     else {
-      out.print(_aliasField.generateGet("super"));
+      String targetType = _targetType.getBeanClass().getName();
+      out.print(targetType + " v"+index+" = (" + targetType + ") "+session+".find(" + targetType + ".class, ");
+
+      if (_aliasField == null) {
+        out.print("__caucho_" + getName());
+      }
+      else {
+        out.print(_aliasField.generateGet("super"));
+      }
+
+      if (_targetField == null)
+        out.println(");");
+      else
+        out.println(", map_" + index + ");");
+
+      out.println(generateSuperSetter("v" + index) + ";");
     }
-
-    if (_targetField == null)
-      out.println(");");
-    else
-      out.println(", map_" + index + ");");
-
-    out.println(generateSuperSetter("v" + index) + ";");
   }
 
   /**
@@ -655,6 +669,7 @@ public class EntityManyToOneField extends AbstractField {
       out.println("}");
 
       out.println();
+
       out.println(generateSuperSetter("v") + ";");
       out.println();
       out.println("if (__caucho_session != null) {");

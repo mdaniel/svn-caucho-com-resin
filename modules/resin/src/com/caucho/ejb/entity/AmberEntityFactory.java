@@ -31,6 +31,8 @@ package com.caucho.ejb.entity;
 
 import java.util.logging.Logger;
 
+import java.util.Map;
+
 import javax.ejb.FinderException;
 
 import com.caucho.util.L10N;
@@ -54,7 +56,7 @@ public class AmberEntityFactory extends EntityFactory {
   {
     _entityServer = entityServer;
   }
-  
+
   /**
    * Gets the appropriate entity given the EntityItem.
    */
@@ -62,13 +64,23 @@ public class AmberEntityFactory extends EntityFactory {
   {
     try {
       Object key = item.getEntity().__caucho_getPrimaryKey();
-    
+
       return _entityServer.getContext(key, false).getEJBLocalObject();
     } catch (FinderException e) {
       throw new RuntimeException(e);
     }
   }
-  
+
+  /**
+   * Gets the appropriate entity given the EntityItem.
+   */
+  public Object getEntity(AmberConnection aConn,
+                          EntityItem item,
+                          Map preloadedProperties)
+  {
+    return getEntity(aConn, item);
+  }
+
   /**
    * Gets the appropriate entity given the EntityItem.
    */
