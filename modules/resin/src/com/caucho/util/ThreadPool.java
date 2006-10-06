@@ -52,7 +52,7 @@ public class ThreadPool {
 
   private static int _g_id;
     
-  private int _threadMax = Integer.MAX_VALUE / 2;
+  private int _threadMax = 8192;
   
   private int _threadIdleMin = 5;
   private int _threadIdleMax = 10;
