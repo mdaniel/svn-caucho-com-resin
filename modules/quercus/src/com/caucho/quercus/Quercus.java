@@ -323,7 +323,7 @@ public class Quercus {
         type = Class.forName(className, false, loader);
       }
       catch (ClassNotFoundException e) {
-        throw new ClassNotFoundException(L.l("`{0}' not valid {1}", className, e.toString()));
+        throw new ClassNotFoundException(L.l("'{0}' not valid {1}", className, e.toString()));
 
       }
 

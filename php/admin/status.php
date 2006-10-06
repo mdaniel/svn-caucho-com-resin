@@ -120,15 +120,15 @@ $proxy_cache = $mbeanServer->lookup("resin:type=ProxyCache");
 
   <tr title="Percentage of requests that have been served from the proxy cache:">
     <th>Block cache miss ratio:</th>
-    <td><?= format_miss_ratio($block_manager->HitCountTotal,
-                              $block_manager->MissCountTotal) ?></td>
+    <td><?= format_miss_ratio($block_cache->HitCountTotal,
+                              $block_cache->MissCountTotal) ?></td>
   </tr>
 
 <!-- XXX: show how cacheable apps are: cacheable/non-cacheable -->
 
   <tr>
-    <th>Invocation hit ratio:</th>
-    <td><?= format_hit_ratio($server->InvocationCacheHitCountTotal,
+    <th>Invocation miss ratio:</th>
+    <td><?= format_miss_ratio($server->InvocationCacheHitCountTotal,
                              $server->InvocationCacheMissCountTotal) ?></td>
   </tr>
 

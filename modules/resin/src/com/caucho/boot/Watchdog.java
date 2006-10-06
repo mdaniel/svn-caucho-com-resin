@@ -107,6 +107,8 @@ public class Watchdog extends AbstractManagedObject
       Class cl = Class.forName("com.caucho.boot.JniBoot");
       
       _jniBoot = (Boot) cl.newInstance();
+    } catch (ClassNotFoundException e) {
+      log.finer(e.toString());
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
     }
@@ -425,8 +427,6 @@ public class Watchdog extends AbstractManagedObject
     if (! _lifecycle.toStop())
       return;
 
-    unregisterSelf();
-
     Thread thread = _thread;
     _thread = null;
 
@@ -434,6 +434,12 @@ public class Watchdog extends AbstractManagedObject
       _lifecycle.toStop();
 
       _lifecycle.notifyAll();
+    }
+
+    try {
+      unregisterSelf();
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
     }
   }
 
@@ -480,7 +486,8 @@ public class Watchdog extends AbstractManagedObject
 
 	_lastStartTime = new Date();
 	_startCount++;
-    
+
+	log.info("starting Resin " + this);
 	Process process = createProcess(resinHome, serverRoot, port,
 					jvmOut);
 
@@ -551,6 +558,8 @@ public class Watchdog extends AbstractManagedObject
 
 	long endTime = Alarm.getCurrentTime() + _shutdownWaitTime;
 	isLive = true;
+
+	log.info(this + " stopping Resin");
 
 	while (isLive && Alarm.getCurrentTime() < endTime) {
 	  try {
@@ -807,6 +816,11 @@ public class Watchdog extends AbstractManagedObject
   {
     return _startCount;
   }
+  
+  public String toString()
+  {
+    return "Watchdog[" + getId() + "]";
+  }
 
   //
   // main
@@ -839,4 +853,5 @@ public class Watchdog extends AbstractManagedObject
       e.printStackTrace();
     }
   }
+
 }

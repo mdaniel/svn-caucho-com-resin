@@ -249,7 +249,10 @@ public class MBean {
 
   public String toString()
   {
-    return "MBean[" + _name.getCanonicalName() + "]";
+    if (_name != null)
+      return "MBean[]";
+    else
+      return "MBean[" + _name.getCanonicalName() + "]";
   }
 
   static class Marshall {

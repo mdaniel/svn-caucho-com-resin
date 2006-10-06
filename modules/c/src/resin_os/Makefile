@@ -3,18 +3,18 @@ CFLAGS_SHLIB=-fpic
 LD=/usr/bin/ld
 OS=
 SO=so
-CPU=x86_64
+CPU=i386
 LDFLAGS=
-LDFLAGS_SHLIB=-shared -melf_i386 -L/usr/local/ssl/lib
+LDFLAGS_SHLIB=-shared -L/usr/lib
 PROXY_LIBS=-lpthread
-APACHE_INC=-I/usr/include/httpd  -I/usr/include/apr-0 
-resin_conf=/etc/httpd/conf/httpd.conf
-resin_libexec=/usr/lib64/httpd/modules
+APACHE_INC=-I
+resin_conf=
+resin_libexec=
 LIBEXEC=libexec
-resin_home=/home/caucho/regression/build/resin
+resin_home=/home/ferg/ws/test-resin
 JNI_INCLUDE=-I/usr/java/include -I/usr/java/include/linux
 INCLUDES =  -I/usr/include $(JNI_INCLUDE) -I../common
-CFLAGS = -g -O2 -DPOLL -DHAS_JVMTI -DHAS_JVMDI  -m32 -D_FILE_OFFSET_BITS=64 -DRESIN_HOME=\"$(resin_home)\" $(INCLUDES) -DCPU=\"$(CPU)\" -DOS=$(OS)
+CFLAGS = -g -O2 -DPOLL -DHAS_JVMTI -DHAS_JVMDI  -D_FILE_OFFSET_BITS=64 -DRESIN_HOME=\"$(resin_home)\" $(INCLUDES) -DCPU=\"$(CPU)\" -DOS=$(OS)
 OBJ= jni_os.o jni_jvmti.o jni_jvmdi.o
 
 all	: libresin_os.$(SO)

@@ -8,7 +8,8 @@ body {
 
 table {
   font-size: 100%;
-  background: #eeccff;
+/*  background: #eeccff; */
+  background: #ccddff;
   color: black;
   border-collapse: collapse;
 }
@@ -27,7 +28,7 @@ td {
 
 th {
   padding: 3px 4px 3px 4px;
-  background: #c78ae6;
+  background: #99bbff;
   text-align: center;
   border: thin solid grey;
 }

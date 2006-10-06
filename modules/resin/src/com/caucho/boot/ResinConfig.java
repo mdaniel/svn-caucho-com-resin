@@ -54,7 +54,7 @@ public class ResinConfig implements EnvironmentBean {
     _resinHome = resinHome;
     _rootDirectory = serverRoot;
 
-    _classLoader = Thread.currentThread().getContextClassLoader();
+    _classLoader = new EnvironmentClassLoader();
   }
 
   public Path getResinHome()

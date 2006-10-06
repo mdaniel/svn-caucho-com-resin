@@ -2,20 +2,20 @@
 
 CC=gcc
 CP=/bin/cp
-CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI -DHAS_JVMDI   -DLINUX=2 -D_REENTRANT -D_GNU_SOURCE   -pthread
+CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI -DHAS_JVMDI 
 CFLAGS_SHLIB=-fpic
 EGREP=grep -E
-LIBTOOL=EGREP="grep -E" /home/caucho/regression/build/resin/libtool --silent
+LIBTOOL=EGREP="grep -E" /home/ferg/ws/test-resin/libtool --silent
 LD=/usr/bin/ld
 LD_SHLIB=gcc
 LIBS_SHLIB=
 LDFLAGS=
-LDFLAGS_SHLIB=-shared -melf_i386 -L/usr/local/ssl/lib
-APACHE_INC=-I/usr/include/httpd  -I/usr/include/apr-0 
-apache_conf=/etc/httpd/conf/httpd.conf
-apache_dir=/etc/httpd
-apache_libexec=/usr/lib64/httpd/modules
-resin_home=/home/caucho/regression/build/resin
+LDFLAGS_SHLIB=-shared -L/usr/lib
+APACHE_INC=-I
+apache_conf=
+apache_dir=
+apache_libexec=
+resin_home=/home/ferg/ws/test-resin
 INCLUDES = $(APACHE_INC) -DRESIN_HOME=\"$(resin_home)\" -I../common
 C=../common
 COMMON_OBJ=$C/stream.lo $C/config.lo $C/memory.lo

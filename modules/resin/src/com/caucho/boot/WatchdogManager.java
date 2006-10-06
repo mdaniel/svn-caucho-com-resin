@@ -164,18 +164,8 @@ public class WatchdogManager extends ProtocolDispatchServer {
     Args args = new Args(argv);
 
     serverId = args.getServerId();
-
-    ResinConfig resin;
     
-    try {
-      resin = readConfig(args);
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new ConfigException(e);
-    }
-    
-    Watchdog server = resin.findServer(serverId);
+    Watchdog server = _resin.findServer(serverId);
 
     if (server == null)
       throw new ConfigException(L().l("No matching <server> found for -server '{0}'",
@@ -210,7 +200,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
       _activeServerList.remove(serverId);
     }
-    
+
     server.stop();
 
     return true;

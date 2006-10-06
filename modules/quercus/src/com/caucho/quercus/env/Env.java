@@ -2848,7 +2848,7 @@ public final class Env {
     if (cl != null)
       return cl;
 
-    throw errorException(L.l("{0} is an unknown name.", name));
+    throw errorException(L.l("'{0}' is an unknown class name.", name));
     /*
     // return _quercus.findJavaClassWrapper(name);
 
@@ -2882,9 +2882,10 @@ public final class Env {
     if (qClassRef != null) {
       qClass = qClassRef.get();
 
-      if (qClass != null)
+      if (qClass != null) {
         qClass.init(this);
         return qClass;
+      }
     }
 
     qClass = new QuercusClass(def, parent);
