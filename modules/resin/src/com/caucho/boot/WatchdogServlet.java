@@ -49,19 +49,16 @@ public class WatchdogServlet extends HessianServlet implements WatchdogAPI {
   {
     _watchdogManager = WatchdogManager.getWatchdog();
   }
-  public boolean start(String serverId, String []argv)
+    
+  public boolean start(String []argv)
   {
-    log.info("Watchdog start: " + serverId);
-
     return _watchdogManager.startServer(argv);
   }
   
   public boolean restart(String serverId, String []argv)
   {
-    log.info("Watchdog restart: " + serverId);
-
     stop(serverId);
-    return start(serverId, argv);
+    return start(argv);
   }
   
   public boolean stop(String serverId)

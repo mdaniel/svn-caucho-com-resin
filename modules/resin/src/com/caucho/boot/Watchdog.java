@@ -72,7 +72,7 @@ public class Watchdog extends AbstractManagedObject
   private String _groupName;
 
   private InetAddress _address;
-  private int _watchdogPort;
+  private int _watchdogPort = 6600;
 
   private ArrayList<Port> _ports = new ArrayList<Port>();
   
@@ -101,8 +101,6 @@ public class Watchdog extends AbstractManagedObject
       throw new ConfigException(e);
     }
     
-    _watchdogPort = 6600;
-
     try {
       Class cl = Class.forName("com.caucho.boot.JniBoot");
       
@@ -227,7 +225,7 @@ public class Watchdog extends AbstractManagedObject
     WatchdogAPI watchdog = getProxy();
 
     try {
-      return watchdog.start(getId(), argv);
+      return watchdog.start(argv);
     } catch (ConfigException e) {
       throw e;
     } catch (Exception e) {
@@ -251,7 +249,7 @@ public class Watchdog extends AbstractManagedObject
     }
 
     try {
-      return watchdog.start(getId(), argv);
+      return watchdog.start(argv);
     } catch (ConfigException e) {
       throw e;
     } catch (Exception e) {
@@ -273,6 +271,8 @@ public class Watchdog extends AbstractManagedObject
     } catch (ConfigException e) {
       throw e;
     } catch (Exception e) {
+	e.printStackTrace();
+	
       log.log(Level.FINE, e.toString(), e);
 
       return false;

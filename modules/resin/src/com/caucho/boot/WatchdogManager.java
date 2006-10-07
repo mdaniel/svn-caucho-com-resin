@@ -81,9 +81,16 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
     _resin = readConfig(_args);
 
+    Watchdog server = _resin.findServer(_args.getServerId());
+
     Cluster cluster = new Cluster();
     ClusterServer clusterServer = new ClusterServer(cluster);
-    clusterServer.setPort(0);
+    if (server != null) {
+      clusterServer.setAddress(server.getAddress().getHostAddress());
+      clusterServer.setPort(server.getWatchdogPort());
+    }
+    else
+      clusterServer.setPort(6600);
     _dispatchServer = new Server(clusterServer);
 
     HostConfig hostConfig = new HostConfig();
@@ -142,6 +149,8 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
     _port.setProtocol(new HmuxProtocol());
     _port.setServer(_dispatchServer);
+
+    System.out.println("PORT: " + server.getAddress() + " " + server.getWatchdogPort());
 
     //_port.bind();
     _port.start();
@@ -207,6 +216,8 @@ public class WatchdogManager extends ProtocolDispatchServer {
     synchronized (_activeServerMap) {
       server = _activeServerMap.remove(serverId);
     }
+
+    log().info("STOP: '" + serverId + " " + server);
 
     if (server == null)
       throw new ConfigException(L().l("No matching <server> found for -server '{0}'",

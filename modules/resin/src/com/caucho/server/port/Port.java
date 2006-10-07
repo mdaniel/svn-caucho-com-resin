@@ -827,8 +827,6 @@ public class Port
     try {
       bind();
 
-      _admin.register();
-
       if (_serverSocket.isJNI() && _server.isEnableSelectManager()) {
         _selectManager = _server.getSelectManager();
 
@@ -848,6 +846,8 @@ public class Port
       thread.setDaemon(true);
 
       thread.start();
+
+      _admin.register();
     } catch (Throwable e) {
       close();
 
