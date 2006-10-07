@@ -590,6 +590,7 @@ abstract public class Value {
    */
   public void appendTo(StringBuilderValue sb)
   {
+    System.out.println("APPEND: " + toString());
     sb.append(toString());
   }
 

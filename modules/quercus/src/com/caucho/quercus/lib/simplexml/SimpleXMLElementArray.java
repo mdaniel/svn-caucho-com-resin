@@ -49,11 +49,15 @@ public class SimpleXMLElementArray extends ArrayValueImpl {
   @Override
   public Value get(Value key)
   {
+    Value value;
+    
     if (key instanceof StringValue) {
-      return super.get(LongValue.ZERO).get(key);
+      value = super.get(LongValue.ZERO).get(key);
     } else {
-      return super.get(key);
+      value = super.get(key);
     }
+
+    return value;
   }
 
   /**
@@ -96,6 +100,13 @@ public class SimpleXMLElementArray extends ArrayValueImpl {
   public Value copy()
   {
     return this;
+  }
+
+  public String toString()
+  {
+    Value value = super.get(LongValue.ZERO);
+
+    return value.toString();
   }
 
 }

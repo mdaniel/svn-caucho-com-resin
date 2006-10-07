@@ -37,9 +37,9 @@ import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusModuleException;
 
-import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.Reference;
+import com.caucho.quercus.module.*;
+
+import com.caucho.quercus.lib.file.*;
 
 import com.caucho.quercus.env.*;
 
@@ -191,6 +191,23 @@ public class TokenModule extends AbstractQuercusModule {
   public Map<String,StringValue> getDefaultIni()
   {
     return _iniMap;
+  }
+
+  public static Value highlight_file(Env env,
+				     String filename,
+				     @Optional boolean isReturn)
+  {
+    StringValue v = FileModule.file_get_contents(env,
+						 filename,
+						 false,
+						 null,
+						 0,
+						 Integer.MAX_VALUE);
+
+    if (v == null)
+      return BooleanValue.FALSE;
+    
+    return highlight_string(env, v, isReturn);
   }
 
   public static Value highlight_string(Env env,

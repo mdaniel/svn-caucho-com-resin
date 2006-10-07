@@ -485,7 +485,8 @@ public class ImageModule extends AbstractQuercusModule {
   /**
    * Output image to browser or file
    */
-  public static boolean imagejpeg(Env env, QuercusImage image,
+  public static boolean imagejpeg(Env env,
+				  QuercusImage image,
 				  @Optional Path path,
 				  @Optional int quality)
   {

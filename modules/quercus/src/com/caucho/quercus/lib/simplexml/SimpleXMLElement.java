@@ -55,8 +55,8 @@ import java.util.Set;
  * SimpleXMLElement object oriented API facade
  */
 
-public class SimpleXMLElement {
-
+public class SimpleXMLElement
+{
   private Env _env;
   private Document _document;
   private Element _element;
@@ -73,7 +73,7 @@ public class SimpleXMLElement {
    * @param element
    */
   public SimpleXMLElement(Env env,
-                          Document document,
+			  Document document,
                           Element element)
   {
     _env = env;
@@ -125,8 +125,9 @@ public class SimpleXMLElement {
     // If <foo><bar>misc</bar></foo>, then put (bar , misc)
     // into foo's _childMap
     if ((nodeLength == 1) && (children.item(0).getNodeType() == Node.TEXT_NODE)) {
-        _childMap.put(new StringValueImpl("0"), new StringValueImpl(children.item(0).getNodeValue()));
+      String value = children.item(0).getNodeValue();
 
+      _childMap.put(new StringValueImpl("0"), new StringValueImpl(value));
     } else {
       for (int i=0; i < nodeLength; i++) {
         Node child = children.item(i);
@@ -156,8 +157,12 @@ public class SimpleXMLElement {
       for (int i=0; i < keyLength; i++) {
         Map.Entry entry = (Map.Entry) keyIterator.next();
         ArrayValue childArray = (ArrayValue) entry.getValue();
-        if (childArray.getSize() == 1)
-          _childMap.put((StringValue) entry.getKey(), childArray.get(new LongValue(0)));
+	
+        if (childArray.getSize() == 1) {
+	  Value value = childArray.get(LongValue.ZERO);
+
+          _childMap.put((StringValue) entry.getKey(), value);
+	}
       }
     }
   }
@@ -256,10 +261,12 @@ public class SimpleXMLElement {
   {
     //If this is a text node, then print the value
     NodeList children = _element.getChildNodes();
-    if ((children.getLength() == 1) && (children.item(0).getNodeType() == Node.TEXT_NODE))
+    if ((children.getLength() == 1)
+	&& (children.item(0).getNodeType() == Node.TEXT_NODE)) {
       return children.item(0).getNodeValue();
+    }
 
-    return "SimpleXMLElement Object";
+    return "";
   }
 /*
   public Element getElement()

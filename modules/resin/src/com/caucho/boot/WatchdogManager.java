@@ -67,8 +67,8 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
   private Port _port;
 
-  private ArrayList<String> _activeServerList
-    = new ArrayList<String>();
+  private HashMap<String,Watchdog> _activeServerMap
+    = new HashMap<String,Watchdog>();
 
   WatchdogManager(String []argv)
     throws Exception
@@ -126,6 +126,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
     return _watchdog;
   }
 
+  /*
   void start()
     throws Throwable
   {
@@ -158,14 +159,27 @@ public class WatchdogManager extends ProtocolDispatchServer {
       }
     }
   }
+  */
 
-  boolean startServer(String serverId, String []argv)
+  boolean startServer(String []argv)
   {
     Args args = new Args(argv);
 
-    serverId = args.getServerId();
+    String serverId = args.getServerId();
+
+    Vfs.setPwd(_args.getServerRoot());
+
+    ResinConfig resin = null;
+
+    try {
+      resin = readConfig(args);
+    } catch (ConfigException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
     
-    Watchdog server = _resin.findServer(serverId);
+    Watchdog server = resin.findServer(serverId);
 
     if (server == null)
       throw new ConfigException(L().l("No matching <server> found for -server '{0}'",
@@ -174,11 +188,11 @@ public class WatchdogManager extends ProtocolDispatchServer {
     if (args.isVerbose())
       server.setVerbose(args.isVerbose());
 
-    synchronized (_activeServerList) {
-      if (_activeServerList.contains(serverId))
+    synchronized (_activeServerMap) {
+      if (_activeServerMap.get(serverId) != null)
 	return false;
 
-      _activeServerList.add(serverId);
+      _activeServerMap.put(serverId, server);
     }
     
     server.start(argv, args.getServerRoot());
@@ -188,18 +202,15 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
   boolean stopServer(String serverId)
   {
-    Watchdog server = _resin.findServer(serverId);
+    Watchdog server = null;
+    
+    synchronized (_activeServerMap) {
+      server = _activeServerMap.remove(serverId);
+    }
 
     if (server == null)
       throw new ConfigException(L().l("No matching <server> found for -server '{0}'",
 				      serverId));
-
-    synchronized (_activeServerList) {
-      if (! _activeServerList.contains(serverId))
-	return false;
-
-      _activeServerList.remove(serverId);
-    }
 
     server.stop();
 
@@ -246,7 +257,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
       WatchdogManager manager = new WatchdogManager(argv);
 
-      manager.start();
+      manager.startServer(argv);
     } catch (Exception e) {
       e.printStackTrace();
     }

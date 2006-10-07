@@ -29,13 +29,11 @@
 
 package com.caucho.quercus.lib.file;
 
-import java.io.IOException;
+import java.io.*;
 
 import java.net.*;
 
-import com.caucho.vfs.SocketStream;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.*;
 
 import com.caucho.quercus.QuercusException;
 
@@ -47,7 +45,8 @@ import com.caucho.quercus.resources.StreamReadWrite;
 /**
  * Represents read/write stream
  */
-public class SocketReadWrite extends StreamReadWrite {
+public class SocketReadWrite extends AbstractBinaryInputOutput
+{
   public enum Domain { AF_INET, AF_INET6, AF_UNIX };
 
   private int _lastError;
@@ -56,8 +55,8 @@ public class SocketReadWrite extends StreamReadWrite {
 
   public SocketReadWrite(Env env, Socket socket, Domain domain)
   {
-    super(env);
-
+    env.addClose(this);
+    
     _socket = socket;
     _domain = domain;
   }
@@ -96,16 +95,24 @@ public class SocketReadWrite extends StreamReadWrite {
    */
   public void close()
   {
+    super.close();
+    
     Socket s = _socket;
     _socket = null;
-    
-    super.close();
 
     try {
       if (s != null)
         s.close();
     } catch (IOException e) {
     }
+  }
+
+  public String toString()
+  {
+    if (_socket != null)
+      return "SocketReadWrite[" + _socket.getInetAddress() + "," + _socket.getPort() + "]";
+    else
+      return "SocketReadWrite[closed]";
   }
 }
 

@@ -50,8 +50,8 @@ import com.caucho.quercus.QuercusModuleException;
  */
 abstract public class AbstractBinaryOutput
   extends OutputStream
-  implements BinaryOutput {
-
+  implements BinaryOutput
+{
   private int lockedShared = 0;
   private boolean lockedExclusive = false;
 

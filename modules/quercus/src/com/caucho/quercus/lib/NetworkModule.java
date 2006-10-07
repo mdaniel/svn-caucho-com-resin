@@ -42,12 +42,9 @@ import java.util.logging.Logger;
 import java.net.InetAddress;
 import java.net.Socket;
 
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
+import javax.naming.*;
 
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
-import javax.naming.directory.Attributes;
+import javax.naming.directory.*;
 
 import com.caucho.util.L10N;
 
@@ -71,9 +68,9 @@ import com.caucho.quercus.lib.file.SocketReadWrite;
 
 import com.caucho.quercus.resources.StreamReadWrite;
 
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.SocketStream;
+import com.caucho.util.*;
+
+import com.caucho.vfs.*;
 
 /**
  * Information about PHP network
@@ -83,12 +80,12 @@ public class NetworkModule extends AbstractQuercusModule {
   private static final Logger log
     = Logger.getLogger(NetworkModule.class.getName());
 
-  private static final HashMap<String,Value> _constMap =
-          new HashMap<String,Value>();
-  private static final LinkedHashMap<String, LongValue> _protoToNum =
-  				new LinkedHashMap<String, LongValue>();
-  private static final LinkedHashMap<String, ServiceNode> _servToNum =
-    		  new LinkedHashMap<String, ServiceNode>();
+  private static final LinkedHashMap<String, LongValue> _protoToNum
+    = new LinkedHashMap<String, LongValue>();
+  private static final LinkedHashMap<String, ServiceNode> _servToNum
+    = new LinkedHashMap<String, ServiceNode>();
+
+  private static final IntMap _dnsTypeMap = new IntMap();
 
   public static final int LOG_EMERG = 0;
   public static final int LOG_ALERT = 1;
@@ -125,32 +122,53 @@ public class NetworkModule extends AbstractQuercusModule {
   public static final int LOG_USER = 17;
   public static final int LOG_UUCP = 18;
 
-  /**
-   * Adds the constant to the PHP engine's constant map.
-   *
-   * @return the new constant chain
-   */
-  public Map<String,Value> getConstMap()
-  {
-    return _constMap;
-  }
+  public static final int DNS_A = 1;
+  public static final int DNS_CNAME = 2;
+  public static final int DNS_HINFO = 3;
+  public static final int DNS_MX = 4;
+  public static final int DNS_NS = 5;
+  public static final int DNS_PTR = 6;
+  public static final int DNS_SOA = 7;
+  public static final int DNS_TXT = 8;
+  public static final int DNS_AAAA = 9;
+  public static final int DNS_SRV = 10;
+  public static final int DNS_NAPTR = 11;
+  public static final int DNS_A6 = 12;
+  public static final int DNS_ALL = 13;
+  public static final int DNS_ANY = 14;
 
   /**
    * Opens a socket
    */
-  public static Value fsockopen(Env env,
-				String host,
-                                @Optional("80") int port,
-                                @Optional @Reference Value errno,
-                                @Optional @Reference Value errstr,
-                                @Optional double timeout)
+  public static SocketReadWrite
+    fsockopen(Env env,
+	      String host,
+	      @Optional("80") int port,
+	      @Optional @Reference Value errno,
+	      @Optional @Reference Value errstr,
+	      @Optional double timeout)
   {
     try {
       Socket s = new Socket(host, port);
 
-      return new SocketReadWrite(env, s, SocketReadWrite.Domain.AF_INET);
+      if (timeout > 0)
+	s.setSoTimeout((int) (timeout * 1000));
+      else
+	s.setSoTimeout(120000);
+
+      SocketReadWrite stream;
+      stream = new SocketReadWrite(env, s, SocketReadWrite.Domain.AF_INET);
+
+      stream.init();
+
+      return stream;
     } catch (IOException e) {
-      throw new QuercusModuleException(e);
+      log.log(Level.FINE, e.toString(), e);
+      
+      if (errstr != null)
+	errstr.set(new StringValueImpl(e.toString()));
+      
+      return null;
     }
   }
 
@@ -472,11 +490,10 @@ public class NetworkModule extends AbstractQuercusModule {
   }
 
   public static boolean checkdnsrr(Env env,
-					 String hostname,
-					 @Reference ArrayValue mxhosts,
-					 @Optional @Reference  ArrayValue weight)
+				   String hostname,
+				   @Optional("MX") String type)
   {
-    return dns_check_record(env, hostname, mxhosts, weight);
+    return dns_check_record(env, hostname, _dnsTypeMap.get(type), null, null);
   }
 
   /**
@@ -492,8 +509,9 @@ public class NetworkModule extends AbstractQuercusModule {
    */
   public static boolean dns_check_record(Env env,
 					 String hostname,
-					 @Reference ArrayValue mxhosts,
-					 @Optional @Reference  ArrayValue weight)
+					 @Optional("DNS_ALL") int type,
+					 @Optional ArrayValue mxhosts,
+					 @Optional ArrayValue weight)
   {
     // php/1m09
 
@@ -506,37 +524,40 @@ public class NetworkModule extends AbstractQuercusModule {
       ArrayValue weights = new ArrayValueImpl();
 
       try {
-	NamingEnumeration list = atrs.getAll();
+	NamingEnumeration<? extends Attribute> e = atrs.getAll();
+	
+	while (e.hasMoreElements()) {
+	  Attribute attr = e.nextElement();
+	  
+	  String id = attr.getID();
+	  
+	  String[] tokens = attr.toString().split("\\s");
 
-	if (! (list.hasMore()))
-	  return false;
+	  for (int k = 1; k < tokens.length; k++) {
+	    int weightToInt = Integer.valueOf(tokens[k]).intValue();
 
-	String[] tokens = list.next().toString().split("\\s");
+	    weights.append(LongValue.create(weightToInt));
 
-	for (int k = 1; k < tokens.length; k++) {
-	  int weightToInt = Integer.valueOf(tokens[k]).intValue();
+	    k++;
 
-	  weights.append(LongValue.create(weightToInt));
+	    String uncleanHost = tokens[k];
 
-	  k++;
+	    int numOfCharacters = 0;
 
-	  String uncleanHost = tokens[k];
+	    if (k < tokens.length - 1)
+	      numOfCharacters = uncleanHost.length() - 2;
+	    else
+	      numOfCharacters = uncleanHost.length() -1;
 
-	  int numOfCharacters = 0;
+	    String cleanHost = uncleanHost.substring(0, numOfCharacters);
 
-	  if (k < tokens.length - 1)
-	    numOfCharacters = uncleanHost.length() - 2;
-	  else
-	    numOfCharacters = uncleanHost.length() -1;
-
-	  String cleanHost = uncleanHost.substring(0, numOfCharacters);
-
-	  hosts.append(StringValue.create(cleanHost));
+	    hosts.append(StringValue.create(cleanHost));
+	  }
 	}
-      }
-      catch(Exception e) {
+      } catch (Exception e) {
     	log.log(Level.WARNING, e.toString(), e);
-	env.warning("An error occurred while processing the records");
+	env.warning(L.l("An error occurred while processing the records\n{0}",
+			e));
 
 	return false;
       }
@@ -750,6 +771,18 @@ public class NetworkModule extends AbstractQuercusModule {
     _servToNum.put("nfsd", new ServiceNode(2049, false, true));
     _servToNum.put("knetd", new ServiceNode(2053, true, false));
     _servToNum.put("man", new ServiceNode(9535, true, false));
+
+    _dnsTypeMap.put("A", DNS_A);
+    _dnsTypeMap.put("MX", DNS_MX);
+    _dnsTypeMap.put("NS", DNS_NS);
+    _dnsTypeMap.put("SOA", DNS_SOA);
+    _dnsTypeMap.put("PTR", DNS_PTR);
+    _dnsTypeMap.put("CNAME", DNS_CNAME);
+    _dnsTypeMap.put("AAAA", DNS_AAAA);
+    _dnsTypeMap.put("A6", DNS_A6);
+    _dnsTypeMap.put("SRV", DNS_SRV);
+    _dnsTypeMap.put("NAPTR", DNS_NAPTR);
+    _dnsTypeMap.put("ANY", DNS_ANY);
   }
 }
 

@@ -12,6 +12,10 @@
 
 <s2 title="3.1snap - Sep 20, 2006">
 <ul>
+<li>Quercus: realpath must strip trailing slash (#1261, rep by koreth)</li>
+<li>Quercus: highlight_file (#720)</li>
+<li>Quercus: fsockopen must return BinaryInput/BinaryOutput (#1383, rep by David Berry)</li>
+<li>Quercus: JavaValue.toString() was stripping '@' (#1388, rep by David Berry)</li>
 <li>jsp:useBean in tag file was using unavailable objects (#1389, rep by Matthew Schmidt)</li>
 <li>JSP tag file adds attributes as java variables (#1389, rep by Matthew Schmidt)</li>
 <li>session persistence requires original request (rep by Takahiro Fukuda)</li>

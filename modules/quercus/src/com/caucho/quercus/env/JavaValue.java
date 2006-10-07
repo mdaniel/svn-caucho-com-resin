@@ -331,13 +331,8 @@ public class JavaValue extends ResourceValue {
    */
   public String toString()
   {
-    String result = String.valueOf(_object);
-    int endOfClassName = result.indexOf("@");
-
-    if (endOfClassName > 0)
-      return result.substring(0,endOfClassName);
-    else
-      return result;
+    // php/1x0b
+    return String.valueOf(_object);
   }
 
 

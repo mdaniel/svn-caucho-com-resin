@@ -50,7 +50,6 @@ import java.util.logging.Logger;
 public class SimpleXMLModule
   extends AbstractQuercusModule
 {
-
   private static final Logger log
     = Logger.getLogger(SimpleXMLModule.class.getName());
   private static final L10N L = new L10N(SimpleXMLModule.class);
@@ -61,12 +60,13 @@ public class SimpleXMLModule
                                                 @Optional int options)
   {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    
     try {
-
       DocumentBuilder builder = factory.newDocumentBuilder();
-      Document document = builder.parse(data);
-      return new SimpleXMLElement(env, document, document.getDocumentElement());
 
+      Document document = builder.parse(data);
+      
+      return new SimpleXMLElement(env, document, document.getDocumentElement());
     } catch (Exception e) {
       log.log(Level.FINE, L.l(e.toString()), e);
       return null;

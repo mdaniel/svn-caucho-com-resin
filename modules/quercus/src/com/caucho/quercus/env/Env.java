@@ -3054,6 +3054,9 @@ public final class Env {
       return null;
 
     StringValue relPath = relPathV.toStringValue();
+
+    if (relPath.length() == 0)
+      return null;
     
     Path path = _lookupCache.get(relPath);
 

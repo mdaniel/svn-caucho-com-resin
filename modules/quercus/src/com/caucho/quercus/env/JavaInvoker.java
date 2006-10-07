@@ -185,8 +185,15 @@ abstract public class JavaInvoker
 
 	Class argType = _param[i + envOffset];
 
-	if (isReference)
+	if (isReference) {
 	  _marshallArgs[i] = Marshall.MARSHALL_REFERENCE;
+
+	  if (! Value.class.equals(argType)
+	      && ! Var.class.equals(argType)) {
+	    throw new QuercusException(L.l("reference must be Value or Var for {0}",
+					   _name));
+	  }
+	}
 	else
 	  _marshallArgs[i] = Marshall.create(_moduleContext,
 					     argType,
