@@ -68,15 +68,6 @@ public class AmberEntityManagerFactory implements EntityManagerFactory {
     return new AmberEntityManager(_unit);
   }
 
-  /* XXX: to be removed
-   * Returns an entity manager related to JTA.
-   *
-  public EntityManager getEntityManager()
-  {
-    return new EntityManagerProxy(_unit);
-  }
-  */
-
   /**
    * Close the factory an any resources.
    */
