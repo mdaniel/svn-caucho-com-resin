@@ -10,9 +10,9 @@
 <a href="changes-2.xtp">Resin 2.1 changes</a>
 </p>
 
-<s2 title="3.1snap - Sep 20, 2006">
+<s2 title="3.1snap - Oct 6, 2006">
 <ul>
-<li>Quercus: realpath must strip trailing slash (#1261, rep by koreth)</li>
+<li>(2006-10-06) Quercus: realpath must strip trailing slash (#1261, rep by koreth)</li>
 <li>Quercus: highlight_file (#720)</li>
 <li>Quercus: fsockopen must return BinaryInput/BinaryOutput (#1383, rep by David Berry)</li>
 <li>Quercus: JavaValue.toString() was stripping '@' (#1388, rep by David Berry)</li>
