@@ -39,13 +39,14 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.TempCharBuffer;
 
-import java.io.IOException;
+import java.io.*;
+
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 /**
  * Information and actions for about sockets
@@ -300,20 +301,7 @@ public class SocketModule extends AbstractQuercusModule {
 
     try {
       if (type == PHP_NORMAL_READ) {
-        tempCharBuffer = TempCharBuffer.allocate();
-
-        if (length > tempCharBuffer.getCapacity())
-          length = tempCharBuffer.getCapacity();
-
-        char []buffer = tempCharBuffer.getBuffer();
-
-        length = socket.readLine(buffer);
-
-        if (length > 0) {
-          StringBuilderValue sb = new StringBuilderValue(buffer, 0, length);
-          return sb;
-        } else
-          return BooleanValue.FALSE;
+        return socket.readLine(length);
       } else {
         tempBuffer = TempBuffer.allocate();
 
@@ -352,26 +340,18 @@ public class SocketModule extends AbstractQuercusModule {
   }
 
   public static Value socket_write(Env env, @NotNull SocketReadWrite socket,
-                                   @NotNull BinaryValue buffer, 
+                                   @NotNull InputStream is, 
                                    @Optional("-1") int length)
   {
-    try {
-      byte []bytes = buffer.toBytes();
-
-      if (length == -1)
-        length = bytes.length;
-      else if (bytes.length < length)
-        length = bytes.length;
-
-      length = socket.write(bytes, 0, length);
-
-      if (length < 0)
-        return BooleanValue.FALSE;
-      else
-        return LongValue.create(length);
-    } catch (IOException e) {
+    if (is == null)
       return BooleanValue.FALSE;
-    }
+    
+    int result = socket.write(is, length);
+
+    if (result < 0)
+      return BooleanValue.FALSE;
+    else
+      return LongValue.create(result);
   }
 
   /**
@@ -380,7 +360,7 @@ public class SocketModule extends AbstractQuercusModule {
    * @param how 0 = read, 1 = write, 2 = both
    */
   public boolean socket_shutdown(Env env,
-				 @NotNull StreamResource file,
+				 @NotNull SocketReadWrite file,
 				 int how)
   {
     if (file == null)
