@@ -371,6 +371,22 @@ public class AmberConnection
   }
 
   /**
+   * Joins the transaction.
+   */
+  public void joinTransaction()
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Gets the delegate.
+   */
+  public Object getDelegate()
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
    * Closes the context.
    */
   public void close()

@@ -37,7 +37,7 @@ public interface EntityTransaction {
    * Starts a resource transaction.
    */
   public void begin();
-  
+
   /**
    * Commits a resource transaction.
    */
@@ -47,6 +47,16 @@ public interface EntityTransaction {
    * Rolls the current transaction back.
    */
   public void rollback();
+
+  /**
+   * Marks the current transaction for rollback only.
+   */
+  public void setRollbackOnly();
+
+  /**
+   * Returns true if the transaction is for rollback only.
+   */
+  public boolean getRollbackOnly();
 
   /**
    * Test if a transaction is in progress.

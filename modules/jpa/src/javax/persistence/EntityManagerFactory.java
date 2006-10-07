@@ -29,6 +29,8 @@
 
 package javax.persistence;
 
+import java.util.Map;
+
 /**
  * Factory for getting an entity manager.
  */
@@ -37,16 +39,11 @@ public interface EntityManagerFactory {
    * Create a new EntityManager with TRANSACTION type.
    */
   public EntityManager createEntityManager();
-  
-  /**
-   * Create a new EntityManager with the given persistence type.
-   */
-  public EntityManager createEntityManager(PersistenceContextType type);
 
   /**
-   * Returns an entity manager related to JTA.
+   * Create a new EntityManager with the given properties.
    */
-  public EntityManager getEntityManager();
+  public EntityManager createEntityManager(Map map);
 
   /**
    * Close the factory an any resources.

@@ -108,12 +108,27 @@ public interface EntityManager {
   /**
    * Creates a native SQL query.
    */
+  public Query createNativeQuery(String sql);
+
+  /**
+   * Creates a native SQL query.
+   */
   public Query createNativeQuery(String sql, Class resultClass);
 
   /**
    * Creates a query for SQL.
    */
   public Query createNativeQuery(String sql, String resultSEtMapping);
+
+  /**
+   * Joins the transaction.
+   */
+  public void joinTransaction();
+
+  /**
+   * Gets the delegate.
+   */
+  public Object getDelegate();
 
   /**
    * Closes the entity manager.

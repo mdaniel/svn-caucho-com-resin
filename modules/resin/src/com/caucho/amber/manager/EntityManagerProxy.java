@@ -150,6 +150,22 @@ public class EntityManagerProxy implements EntityManager {
   }
 
   /**
+   * Joins the transaction.
+   */
+  public void joinTransaction()
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Gets the delegate.
+   */
+  public Object getDelegate()
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
    * Clears the manager.
    */
   public void close()

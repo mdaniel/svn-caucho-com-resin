@@ -31,6 +31,8 @@ package com.caucho.amber.manager;
 
 import java.util.logging.Logger;
 
+import java.util.Map;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContextType;
@@ -49,30 +51,31 @@ public class AmberEntityManagerFactory implements EntityManagerFactory {
   {
     _unit = unit;
   }
-  
+
   /**
    * Create a new EntityManager with TRANSACTION type.
    */
   public EntityManager createEntityManager()
   {
-    return createEntityManager(PersistenceContextType.TRANSACTION);
+    return createEntityManager(null);
   }
-  
+
   /**
-   * Create a new EntityManager with the given persistence type.
+   * Create a new EntityManager with the given properties.
    */
-  public EntityManager createEntityManager(PersistenceContextType type)
+  public EntityManager createEntityManager(Map map)
   {
     return new AmberEntityManager(_unit);
   }
 
-  /**
+  /* XXX: to be removed
    * Returns an entity manager related to JTA.
-   */
+   *
   public EntityManager getEntityManager()
   {
     return new EntityManagerProxy(_unit);
   }
+  */
 
   /**
    * Close the factory an any resources.
