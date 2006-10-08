@@ -419,12 +419,12 @@ public final class ClusterClient {
     if (now < _lastBusyTime + _failRecoverTime)
       return null;
 
+    ClusterStream stream = openRecycle();
+
+    if (stream != null)
+      return stream;
+
     if (canOpenSoft()) {
-      ClusterStream stream = openRecycle();
-
-      if (stream != null)
-	return stream;
-
       return connect();
     }
     else

@@ -293,7 +293,7 @@ public class BeanTypeStrategy extends TypeStrategy {
     if (setterMethod == null) {
     }
     else if (qName.getName().equals("#text")) {
-      strategy = new TextAttributeMarshal(setterMethod);
+      strategy = TextAttributeMarshal.create(setterMethod);
 
       return strategy;
     }

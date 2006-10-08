@@ -56,26 +56,15 @@ import org.w3c.dom.Node;
 /**
  * Attribute strategy for a setText or addXXX method.
  */
-public class TextAttributeMarshal extends SetterAttributeStrategy {
+public class RawTextAttributeMarshal extends SetterAttributeStrategy {
   private static final Logger log
-    = Logger.getLogger(TextAttributeMarshal.class.getName());
-  private static final L10N L = new L10N(TextAttributeMarshal.class);
+    = Logger.getLogger(RawTextAttributeMarshal.class.getName());
+  private static final L10N L = new L10N(RawTextAttributeMarshal.class);
 
-  private TextAttributeMarshal(Method setter)
+  public RawTextAttributeMarshal(Method setter)
     throws Exception
   {
     super(setter);
-  }
-  
-  public static SetterAttributeStrategy create(Method setter)
-    throws Exception
-  {
-    Class []param = setter.getParameterTypes();
-
-    if (RawString.class.equals(param[0]))
-      return new RawTextAttributeMarshal(setter);
-    else
-      return new TextAttributeMarshal(setter);
   }
 
   /**
@@ -93,7 +82,6 @@ public class TextAttributeMarshal extends SetterAttributeStrategy {
     throws Exception
   {
     // server/13cq
-    //setAttribute(bean, name, builder.configureRawStringNoTrim(node));
-    setAttribute(bean, name, builder.configureString(node));
+    setAttribute(bean, name, new RawString(builder.configureRawStringNoTrim(node)));
   }
 }
