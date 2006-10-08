@@ -32,7 +32,10 @@ package com.caucho.quercus.lib.gettext;
 import com.caucho.quercus.UnimplementedException;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.BinaryBuilderValue;
+import com.caucho.quercus.env.BinaryValue;
 import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.UnicodeValue;
@@ -116,12 +119,14 @@ public class GettextModule
   public StringValue dcgettext(Env env,
                               StringValue domain,
                               StringValue message,
-                              int category)
+                              int category,
+                              Value args[])
   {
     return translate(env,
                      domain,
                      getCategory(env, category),
-                     message);
+                     message,
+                     args);
   }
 
   /**
@@ -135,18 +140,20 @@ public class GettextModule
    * @param category
    */
   public StringValue dcngettext(Env env,
-                          StringValue domain,
-                          StringValue msgid1,
-                          StringValue msgid2,
-                          int n,
-                          int category)
+                              StringValue domain,
+                              StringValue msgid1,
+                              StringValue msgid2,
+                              int n,
+                              int category,
+                              Value args[])
   {
     return translate(env,
                      domain,
                      getCategory(env, category),
                      msgid1,
                      msgid2,
-                     n);
+                     n,
+                     args);
   }
 
   /**
@@ -158,12 +165,14 @@ public class GettextModule
    */
   public StringValue dgettext(Env env,
                               StringValue domain,
-                              StringValue message)
+                              StringValue message,
+                              Value args[])
   {
     return translate(env,
                      domain,
                      "LC_MESSAGES",
-                     message);
+                     message,
+                     args);
   }
 
   /**
@@ -179,14 +188,16 @@ public class GettextModule
                               StringValue domain,
                               StringValue msgid1,
                               StringValue msgid2,
-                              int n)
+                              int n,
+                              Value args[])
   {
     return translate(env,
                      domain,
                      "LC_MESSAGES",
                      msgid1,
                      msgid2,
-                     n);
+                     n,
+                     args);
   }
 
   /**
@@ -195,9 +206,9 @@ public class GettextModule
    * @param env
    * @param message
    */
-  public StringValue _(Env env, StringValue message)
+  public StringValue _(Env env, StringValue message, Value []args)
   {
-    return gettext(env, message);
+    return gettext(env, message, args);
   }
 
   /**
@@ -206,12 +217,13 @@ public class GettextModule
    * @param env
    * @param message
    */
-  public StringValue gettext(Env env, StringValue message)
+  public StringValue gettext(Env env, StringValue message, Value []args)
   {
     return translate(env,
                      getCurrentDomain(env),
                      "LC_MESSAGES",
-                     message);
+                     message,
+                     args);
   }
 
   /**
@@ -228,14 +240,16 @@ public class GettextModule
   public StringValue ngettext(Env env,
                               StringValue msgid1,
                               StringValue msgid2,
-                              int n)
+                              int n,
+                              Value args[])
   {
     return translate(env,
                      getCurrentDomain(env),
                      "LC_MESSAGES",
                      msgid1,
                      msgid2,
-                     n);
+                     n,
+                     args);
   }
 
   /**
@@ -267,7 +281,8 @@ public class GettextModule
   private StringValue translate(Env env,
                               StringValue domain,
                               CharSequence category,
-                              StringValue message)
+                              StringValue message,
+                              Value []args)
   {
     Locale locale = env.getLocaleInfo().getMessages();
 
@@ -277,12 +292,12 @@ public class GettextModule
                                            category,
                                            domain);
 
-    UnicodeValue translation = resource.getTranslation(message);
+    StringValue translation = resource.getTranslation(message);
 
     if (translation == null)
-      return message;
+      translation = message;
 
-    return translation;
+    return format(env, translation, args);
   }
 
   /**
@@ -301,7 +316,8 @@ public class GettextModule
                               CharSequence category,
                               StringValue msgid1,
                               StringValue msgid2,
-                              int quantity)
+                              int quantity,
+                              Value []args)
   {
     Locale locale = env.getLocaleInfo().getMessages();
 
@@ -311,12 +327,12 @@ public class GettextModule
                                            category,
                                            domain);
 
-    UnicodeValue translation = resource.getTranslation(msgid1, quantity);
+    StringValue translation = resource.getTranslation(msgid1, quantity);
 
     if (translation == null)
-      return errorReturn(msgid1, msgid2, quantity);
+      translation = errorReturn(msgid1, msgid2, quantity);
 
-    return translation;
+    return format(env, translation, args);
   }
 
   private GettextResource getResource(Env env,
@@ -432,5 +448,102 @@ public class GettextModule
       return msgid1;
     else
       return msgid2;
+  }
+
+  private static StringValue format(Env env,
+                              StringValue msg,
+                              Value []args)
+  {
+    if (args.length == 0)
+      return msg;
+    else if (msg instanceof UnicodeValue)
+      return formatUnicode(env, msg, args);
+    else
+      return formatBinary(env, msg, args);
+  }
+
+  private static BinaryValue formatBinary(Env env,
+                              StringValue msg,
+                              Value []args)
+  {
+    BinaryBuilderValue sb = new BinaryBuilderValue();
+
+    int i = 0;
+    int length = msg.length();
+
+    while (i < length) {
+      char ch = msg.charAt(i);
+
+      if (ch != '[' || i + 4 > length) {
+        sb.append(ch);
+        i++;
+      }
+      else if (msg.charAt(i + 1) != '_') {
+        sb.append('[');
+        i++;
+      }
+      else if (msg.charAt(i + 3) != ']') {
+        sb.append('[');
+        sb.append('_');
+        i += 2;
+      }
+      else {
+        ch = msg.charAt(i + 2);
+        int argIndex = ch - '0';
+
+        if (0 <= argIndex && argIndex < args.length) {
+          args[argIndex].appendTo(sb);
+          i += 4;
+        }
+        else {
+          sb.append('{');
+          i++;
+        }
+      }
+    }
+
+    return sb;
+  }
+
+  private static UnicodeValue formatUnicode(Env env,
+                              StringValue msg,
+                              Value []args)
+  {
+    StringBuilderValue sb = new StringBuilderValue();
+
+    int i = 0;
+    int length = msg.length();
+
+    while (i < length) {
+      char ch = msg.charAt(i);
+
+      if (ch != '[' || i + 4 > length) {
+        sb.append(ch);
+        i++;
+      }
+      else if (msg.charAt(i + 1) != '_') {
+        sb.append(ch);
+        i++;
+      }
+      else if (msg.charAt(i + 3) != ']') {
+        sb.append(ch);
+        i++;
+      }
+      else {
+        ch = msg.charAt(i + 2);
+        int argIndex = ch - '0';
+
+        if (0 <= argIndex && argIndex < args.length) {
+          args[argIndex].appendTo(sb);
+          i += 4;
+        }
+        else {
+          sb.append('[');
+          i++;
+        }
+      }
+    }
+
+    return sb;
   }
 }
