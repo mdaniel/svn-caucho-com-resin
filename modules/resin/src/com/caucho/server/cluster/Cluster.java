@@ -740,7 +740,7 @@ public class Cluster
     /**
      * Returns the root directory.
      *
-     * @return server-root
+     * @return root directory
      */
     public Path getRoot()
     {
@@ -750,7 +750,7 @@ public class Cluster
     /**
      * Returns the root directory.
      *
-     * @return resin.home
+     * @return root directory
      */
     public Path getRootDir()
     {
@@ -760,7 +760,7 @@ public class Cluster
     /**
      * Returns the root directory.
      *
-     * @return resin.home
+     * @return root directory
      */
     public Path getRootDirectory()
     {

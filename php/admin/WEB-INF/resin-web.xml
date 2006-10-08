@@ -16,7 +16,7 @@
     </init>
   </authenticator>
 
-  <login-config auth-method="DIGEST"
+  <login-config auth-method="BASIC"
         authenticator="${jndi('caucho/admin/auth')}"/>
 
   <servlet servlet-name="resin-php"
@@ -64,9 +64,27 @@
 
   <servlet-mapping url-pattern='/remote' servlet-name='remote'/>
 
+  <!--
+    - Provide a remote interface for jsr88 deployment
+   -->
+
+  <servlet servlet-name='deploy'
+           servlet-class='com.caucho.j2ee.deployserver.DeployServlet'>
+    <init>
+      <deploy-path>deploy</deploy-path>
+     </init>
+  </servlet>
+
+  <servlet-mapping url-pattern='/deploy' servlet-name='deploy'/>
+
+  <!--
+    - Security constraints limit access to remote management
+   -->
+
   <security-constraint>
     <web-resource-collection>
       <url-pattern>/remote</url-pattern>
+      <url-pattern>/deploy</url-pattern>
     </web-resource-collection>
     
     <auth-constraint role-name='*'/>

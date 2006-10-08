@@ -2,4 +2,6 @@ Class-Path: jsdk-15.jar jta-101.jar ejb-15.jar jca-15.jar jms-11.jar jaxrpc-15.j
 Main-Class: com.caucho.boot.ResinBoot
 Implementation-Vendor: Caucho Technology, Inc.
 Implementation-Version: 3.1.0
+J2EE-DeploymentFactory-Implementation-Class: com.caucho.j2ee.deployclient.DeploymentFactoryImpl
+
 

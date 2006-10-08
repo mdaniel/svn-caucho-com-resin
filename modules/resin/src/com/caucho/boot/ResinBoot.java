@@ -90,6 +90,9 @@ public class ResinBoot {
 
     Config config = new Config();
 
+    config.setVar("resin.home", _resinHome);
+    config.setVar("server.root", _serverRoot);
+    
     ResinConfig conf = new ResinConfig(_resinHome, _serverRoot);
 
     config.configure(conf, _resinConf, "com/caucho/server/resin/resin.rnc");

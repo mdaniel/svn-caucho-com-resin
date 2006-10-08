@@ -159,12 +159,24 @@ public class Resin implements EnvironmentBean, SchemaBean
     
     _startTime = Alarm.getCurrentTime();
 
+
+    String resinHome = System.getProperty("resin.home");
+
+    if (resinHome != null)
+      setResinHome(Vfs.lookup(resinHome));
+    else
+      setResinHome(Vfs.getPwd());
+
+    String serverRoot = System.getProperty("server.root");
+
+    if (serverRoot != null)
+      setRootDirectory(Vfs.lookup(serverRoot));
+    else
+      setRootDirectory(Vfs.getPwd());
+
     _variableMap.put("resin", new Var());
     _variableMap.put("server", new Var());
     _variableMap.put("java", new JavaVar());
-
-    setResinHome(Vfs.getPwd());
-    setRootDirectory(Vfs.getPwd());
 
     ELResolver varResolver = new SystemPropertiesResolver();
     ConfigELContext elContext = new ConfigELContext(varResolver);
