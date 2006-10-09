@@ -60,8 +60,6 @@ public class TcpConnection extends PortConnection implements ThreadTask
   private static final Logger log
     = Logger.getLogger(TcpConnection.class.getName());
 
-  private static int _g_id;
-  
   private final QSocket _socket;
 
   private boolean _isInUse;
@@ -73,7 +71,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
 
   private final Object _requestLock = new Object();
 
-  private String _id = "tcp-connection-" + _g_id++;
+  private final String _id;
   private String _name;
 
   private final Admin _admin = new Admin();
@@ -92,11 +90,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
   {
     setPort(port);
 
-    int id;
-    
-    synchronized (TcpConnection.class) {
-      id = _g_id++;
-    }
+    int id = getId();
 
     if (port.getAddress() == null) {
       _id = "resin-tcp-connection-*:" + port.getPort() + "-" + id;
@@ -457,7 +451,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
 
     thread.setContextClassLoader(systemLoader);
     
-    _admin.register();
+    //_admin.register();
 
     try {
       _thread = thread;
@@ -522,7 +516,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
     } finally {
       thread.setContextClassLoader(systemLoader);
     
-      _admin.unregister();
+      //_admin.unregister();
       
       port.threadEnd(this);
 

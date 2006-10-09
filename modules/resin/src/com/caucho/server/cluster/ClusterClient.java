@@ -294,7 +294,7 @@ public final class ClusterClient {
       int idleCount = getIdleCount();
       int totalCount = _activeCount + _startingCount + idleCount;
       
-      if (totalCount == 0)
+      if (totalCount <= 1)
 	return true;
       else if (warmupCount < 8)
 	return false;

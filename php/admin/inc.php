@@ -99,6 +99,7 @@ function decorator_header($script, $title)
 </head>
 
 <body>
+
 <h1><?= $title ?></h1>
 
 <?php

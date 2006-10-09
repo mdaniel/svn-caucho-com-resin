@@ -53,7 +53,7 @@ import com.caucho.log.Log;
 import com.caucho.server.cache.AbstractCacheFilterChain;
 import com.caucho.server.cache.AbstractCacheEntry;
 
-import com.caucho.server.dispatch.InvocationDecoder;
+import com.caucho.server.dispatch.*;
 
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.ErrorPageManager;
@@ -1941,7 +1941,14 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       if (_originalRequest instanceof AbstractHttpRequest) {
 	AbstractHttpRequest request = (AbstractHttpRequest) _originalRequest;
 
-	request.skip();
+	try {
+	  request.skip();
+	} catch (BadRequestException e) {
+	  log.warning(e.toString());
+	  log.log(Level.FINE, e.toString(), e);
+	} catch (Exception e) {
+	  log.log(Level.WARNING, e.toString(), e);
+	}
       }
 
       if (_statusCode == SC_NOT_MODIFIED) {

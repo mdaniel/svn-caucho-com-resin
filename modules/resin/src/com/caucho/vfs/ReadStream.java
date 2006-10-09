@@ -62,6 +62,8 @@ public final class ReadStream extends InputStream {
   private StreamImpl _source;
   private long _position;
 
+  private long _readTime;
+
   private Reader _readEncoding;
   private String _readEncodingName;
   private int _specialEncoding;
@@ -109,6 +111,7 @@ public final class ReadStream extends InputStream {
   {
     _disableClose = false;
     _isDisableCloseSource = false;
+    _readTime = 0;
 
     if (_source != null && _source != source) {
       try {
@@ -198,6 +201,14 @@ public final class ReadStream extends InputStream {
   public long getPosition()
   {
     return _position - (_readLength - _readOffset);
+  }
+
+  /**
+   * Returns the last read-time.
+   */
+  public long getReadTime()
+  {
+    return _readTime;
   }
   
   /**
@@ -386,8 +397,10 @@ public final class ReadStream extends InputStream {
 
         int len = _source.read(buf, offset, length);
 
-	if (len > 0)
+	if (len > 0) {
 	  _position += len;
+	  _readTime = Alarm.getCurrentTime();
+	}
 
 	return len;
       }
@@ -920,6 +933,8 @@ public final class ReadStream extends InputStream {
     // Setting to 0 is needed to avoid int to long conversion errors with AIX
     if (_readLength > 0) {
       _position += _readLength;
+      _readTime = Alarm.getCurrentTime();
+      
       return true;
     }
     else {
@@ -953,6 +968,7 @@ public final class ReadStream extends InputStream {
     // Setting to 0 is needed to avoid int to long conversion errors with AIX
     if (_readLength > 0) {
       _position += _readLength;
+      _readTime = Alarm.getCurrentTime();
       return true;
     }
     else {
@@ -984,6 +1000,7 @@ public final class ReadStream extends InputStream {
     // Setting to 0 is needed to avoid int to long conversion errors with AIX
     if (_readLength > 0) {
       _position += _readLength;
+      _readTime = Alarm.getCurrentTime();
       return true;
     }
     else {
@@ -1007,6 +1024,7 @@ public final class ReadStream extends InputStream {
     // Setting to 0 is needed to avoid int to long conversion errors with AIX
     if (_readLength > 0) {
       _position += _readLength;
+      _readTime = Alarm.getCurrentTime();
       return true;
     }
     else {

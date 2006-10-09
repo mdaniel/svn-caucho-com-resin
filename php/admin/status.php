@@ -51,6 +51,7 @@ if (! empty($server->Id))
 ?>
 
 <?php decorator_header("status.php", $title) ?>
+
 <table>
 
 <h2>Server: <?= $server->Id ?></h2>

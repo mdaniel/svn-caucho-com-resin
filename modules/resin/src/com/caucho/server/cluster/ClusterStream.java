@@ -125,7 +125,8 @@ public class ClusterStream {
    */
   public void free()
   {
-    _freeTime = Alarm.getCurrentTime();
+    if (_is != null)
+      _freeTime = _is.getReadTime();
 
     _srun.free(this);
   }

@@ -62,7 +62,9 @@ public abstract class PortConnection extends Connection
    */
   protected PortConnection()
   {
-    _connectionId = _connectionCount++;
+    synchronized (PortConnection.class) {
+      _connectionId = _connectionCount++;
+    }
   }
 
   /**
