@@ -234,7 +234,7 @@ public final class BlockManager
       }
 
       if (block != null)
-	_blockCache.putIfNew(blockId, block);
+	block = _blockCache.putIfNew(blockId, block);
     }
 
     if (block != null && block.allocate())

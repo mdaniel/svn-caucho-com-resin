@@ -49,9 +49,9 @@ public class StringKeyCompare extends KeyCompare {
     if (blockSize < end)
       end = blockSize;
     
-    for (int i = 0; i < end; i++) {
-      int ch1 = keyBuffer[keyOffset + i + 1] & 0xff;
-      int ch2 = block[offset + i + 1] & 0xff;
+    for (int i = 1; i <= end; i++) {
+      int ch1 = keyBuffer[keyOffset + i] & 0xff;
+      int ch2 = block[offset + i] & 0xff;
 
       if (ch1 < ch2)
 	return -1;

@@ -155,32 +155,34 @@ public final class BTree {
    * Looks up the block for the given key in the btree, returning
    * BTree.FAIL for a failed lookup.
    */
-  public synchronized long lookup(byte []keyBuffer,
-				  int keyOffset,
-				  int keyLength,
-				  Transaction xa)
+  public long lookup(byte []keyBuffer,
+		     int keyOffset,
+		     int keyLength,
+		     Transaction xa)
     throws IOException
   {
-    long index = _indexRoot;
+    synchronized (this) {
+      long index = _indexRoot;
 
-    while (index != 0) {
-      Block block = _store.readBlockByAddress(index);
-      boolean isLeaf = true;
+      while (index != 0) {
+	Block block = _store.readBlockByAddress(index);
+	boolean isLeaf = true;
       
-      try {
-	byte []buffer = block.getBuffer();
+	try {
+	  byte []buffer = block.getBuffer();
 
-	int flags = getInt(buffer, FLAGS_OFFSET);
-	isLeaf = (flags & LEAF_FLAG) == 0;
+	  int flags = getInt(buffer, FLAGS_OFFSET);
+	  isLeaf = (flags & LEAF_FLAG) == 0;
       
-	index = lookupTuple(block.getBlockId(),
-			    buffer, keyBuffer, keyOffset, keyLength, isLeaf);
-      } finally {
-	block.free();
+	  index = lookupTuple(block.getBlockId(),
+			      buffer, keyBuffer, keyOffset, keyLength, isLeaf);
+	} finally {
+	  block.free();
+	}
+
+	if (isLeaf || index == FAIL)
+	  return index;
       }
-
-      if (isLeaf || index == FAIL)
-	return index;
     }
 
     return FAIL;
@@ -189,73 +191,75 @@ public final class BTree {
   /**
    * Inserts the new value for the given key.
    */
-  public synchronized void insert(byte []keyBuffer,
-				  int keyOffset,
-				  int keyLength,
-				  long value,
-				  Transaction xa)
+  public void insert(byte []keyBuffer,
+		     int keyOffset,
+		     int keyLength,
+		     long value,
+		     Transaction xa)
     throws SQLException
   {
-    try {
-      if (value == FAIL)
-	throw new IllegalArgumentException();
+    synchronized (this) {
+      try {
+	if (value == FAIL)
+	  throw new IllegalArgumentException();
     
-      long lastIndex;
-      long index = _indexRoot;
-      long parentIndex = 0;
+	long lastIndex;
+	long index = _indexRoot;
+	long parentIndex = 0;
     
-      while (index != FAIL) {
-	lastIndex = index;
+	while (index != FAIL) {
+	  lastIndex = index;
         
-	Block block = _store.readBlockByAddress(index);
+	  Block block = _store.readBlockByAddress(index);
 
-	try {
-	  byte []buffer = block.getBuffer();
+	  try {
+	    byte []buffer = block.getBuffer();
 
-	  int flags = getInt(buffer, FLAGS_OFFSET);
+	    int flags = getInt(buffer, FLAGS_OFFSET);
 	
-	  boolean isLeaf = (flags & LEAF_FLAG) == 0;
+	    boolean isLeaf = (flags & LEAF_FLAG) == 0;
 
-	  int length = getLength(buffer);
+	    int length = getLength(buffer);
 
-	  if (length == _n) {
-	    if (index == _indexRoot) {
-	      split(index, xa);
+	    if (length == _n) {
+	      if (index == _indexRoot) {
+		split(index, xa);
 
-	      continue;
-	    }
-	    else if (parentIndex != 0) {
-	      split(parentIndex, index, xa);
+		continue;
+	      }
+	      else if (parentIndex != 0) {
+		split(parentIndex, index, xa);
 	    
-	      index = parentIndex;
-	      parentIndex = 0;
+		index = parentIndex;
+		parentIndex = 0;
 
-	      continue;
+		continue;
+	      }
 	    }
-	  }
 	  
-	  if (! isLeaf) {
-	    parentIndex = index;
-	    index = lookupTuple(block.getBlockId(),
-				buffer, keyBuffer, keyOffset, keyLength,
-				isLeaf);
-	  }
-	  else {
-	    block.setFlushDirtyOnCommit(false);
-	    block.setDirty(0, Store.BLOCK_SIZE);
+	    if (! isLeaf) {
+	      parentIndex = index;
+	      index = lookupTuple(block.getBlockId(),
+				  buffer, keyBuffer, keyOffset, keyLength,
+				  isLeaf);
+	    }
+	    else {
+	      block.setFlushDirtyOnCommit(false);
+	      block.setDirty(0, Store.BLOCK_SIZE);
 	    
-	    insertLeafBlock(index, block.getBuffer(),
-			    keyBuffer, keyOffset, keyLength,
-			    value);
+	      insertLeafBlock(index, block.getBuffer(),
+			      keyBuffer, keyOffset, keyLength,
+			      value);
 
-	    return;
+	      return;
+	    }
+	  } finally {
+	    block.free();
 	  }
-	} finally {
-	  block.free();
 	}
+      } catch (IOException e) {
+	throw new SQLExceptionWrapper(e);
       }
-    } catch (IOException e) {
-      throw new SQLExceptionWrapper(e);
     }
   }
 
@@ -352,19 +356,21 @@ public final class BTree {
 
     try {
       parentBlock = _store.readBlockByAddress(parentIndex);
+      parentBlock.setFlushDirtyOnCommit(false);
       parentBlock.setDirty(0, Store.BLOCK_SIZE);
     
       byte []parentBuffer = parentBlock.getBuffer();
       int parentLength = getLength(parentBuffer);
     
       rightBlock = _store.readBlockByAddress(index);
+      rightBlock.setFlushDirtyOnCommit(false);
       rightBlock.setDirty(0, Store.BLOCK_SIZE);
-
 
       byte []rightBuffer = rightBlock.getBuffer();
       long rightBlockId = rightBlock.getBlockId();
     
       leftBlock = _store.allocateIndexBlock();
+      leftBlock.setFlushDirtyOnCommit(false);
       leftBlock.setDirty(0, Store.BLOCK_SIZE);
       
       byte []leftBuffer = leftBlock.getBuffer();
@@ -420,6 +426,7 @@ public final class BTree {
 
     try {
       parentBlock = _store.readBlockByAddress(index);
+      parentBlock.setFlushDirtyOnCommit(false);
       parentBlock.setDirty(0, Store.BLOCK_SIZE);
 
       byte []parentBuffer = parentBlock.getBuffer();
@@ -427,11 +434,13 @@ public final class BTree {
       int parentFlags = getInt(parentBuffer, FLAGS_OFFSET);
 
       leftBlock = _store.allocateIndexBlock();
+      leftBlock.setFlushDirtyOnCommit(false);
       leftBlock.setDirty(0, Store.BLOCK_SIZE);
       
       long leftBlockId = leftBlock.getBlockId();
     
       rightBlock = _store.allocateIndexBlock();
+      rightBlock.setFlushDirtyOnCommit(false);
       rightBlock.setDirty(0, Store.BLOCK_SIZE);
       
       long rightBlockId = rightBlock.getBlockId();
@@ -491,16 +500,18 @@ public final class BTree {
   /**
    * Inserts the new value for the given key.
    */
-  public synchronized void remove(byte []keyBuffer,
-				  int keyOffset,
-				  int keyLength,
-				  Transaction xa)
+  public void remove(byte []keyBuffer,
+		     int keyOffset,
+		     int keyLength,
+		     Transaction xa)
     throws SQLException
   {
-    try {
-      remove(-1, _indexRoot, keyBuffer, keyOffset, keyLength, xa);
-    } catch (IOException e) {
-      throw new SQLExceptionWrapper(e);
+    synchronized (this) {
+      try {
+	remove(-1, _indexRoot, keyBuffer, keyOffset, keyLength, xa);
+      } catch (IOException e) {
+	throw new SQLExceptionWrapper(e);
+      }
     }
   }
 
@@ -526,6 +537,7 @@ public final class BTree {
       boolean isLeaf = (flags & LEAF_FLAG) == 0;
       
       if (isLeaf) {
+	block.setFlushDirtyOnCommit(false);
 	block.setDirty(0, Store.BLOCK_SIZE);
 
 	removeLeafBlock(index, block.getBuffer(),
@@ -592,8 +604,10 @@ public final class BTree {
 	  int leftLength = getLength(leftBuffer);
 
 	  if (_minN < leftLength) {
+	    parent.setFlushDirtyOnCommit(false);
 	    parent.setDirty(0, Store.BLOCK_SIZE);
 	    
+	    leftBlock.setFlushDirtyOnCommit(false);
 	    leftBlock.setDirty(0, Store.BLOCK_SIZE);
 	  
 	    moveFromLeft(parent.getBuffer(),
@@ -616,8 +630,10 @@ public final class BTree {
 	  int rightLength = getLength(rightBuffer);
 	  
 	  if (_minN < rightLength) {
+	    parent.setFlushDirtyOnCommit(false);
 	    parent.setDirty(0, Store.BLOCK_SIZE);
 	    
+	    rightBlock.setFlushDirtyOnCommit(false);
 	    rightBlock.setDirty(0, Store.BLOCK_SIZE);
 
 	    moveFromRight(parent.getBuffer(),
@@ -638,8 +654,10 @@ public final class BTree {
 	Block leftBlock = _store.readBlockByAddress(leftIndex);
       
 	try {
+	  parent.setFlushDirtyOnCommit(false);
 	  parent.setDirty(0, Store.BLOCK_SIZE);
 	  
+	  leftBlock.setFlushDirtyOnCommit(false);
 	  leftBlock.setDirty(0, Store.BLOCK_SIZE);
       
 	  mergeLeft(parent.getBuffer(), leftBlock.getBuffer(), buffer, index);
@@ -654,8 +672,10 @@ public final class BTree {
 	Block rightBlock = _store.readBlockByAddress(rightIndex);
 
 	try {
+	  rightBlock.setFlushDirtyOnCommit(false);
 	  rightBlock.setDirty(0, Store.BLOCK_SIZE);
 	  
+	  parent.setFlushDirtyOnCommit(false);
 	  parent.setDirty(0, Store.BLOCK_SIZE);
 	  
 	  mergeRight(parent.getBuffer(), rightBlock.getBuffer(),
@@ -1214,13 +1234,15 @@ public final class BTree {
   /**
    * Opens the BTree.
    */
-  private synchronized void start()
+  private void start()
     throws IOException
   {
-    if (_isStarted)
-      return;
+    synchronized (this) {
+      if (_isStarted)
+	return;
 
-    _isStarted = true;
+      _isStarted = true;
+    }
   }
   
   /**
