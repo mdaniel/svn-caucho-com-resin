@@ -58,6 +58,8 @@ import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.Environment;
 
+import com.caucho.management.server.*;
+
 import com.caucho.config.types.Period;
 
 import com.caucho.server.hmux.HmuxRequest;
@@ -93,6 +95,16 @@ abstract public class StoreManager
 
   private final Lifecycle _lifecycle = new Lifecycle(log, toString());
 
+  //
+  // statistics
+  //
+  
+  protected volatile long _loadCount;
+  protected volatile long _loadFailCount;
+
+  protected volatile long _saveCount;
+  protected volatile long _saveFailCount;
+
   protected StoreManager()
   {
     _storeMap = new HashMap<String,Store>();
@@ -116,6 +128,14 @@ abstract public class StoreManager
   public Cluster getCluster()
   {
     return _cluster;
+  }
+
+  /**
+   * Returns the admin.
+   */
+  public PersistentStoreMXBean getAdmin()
+  {
+    return null;
   }
 
   /**
@@ -206,6 +226,50 @@ abstract public class StoreManager
       return 60000L;
     else
       return window;
+  }
+
+  //
+  // statistics
+  //
+
+  /**
+   * Returns the objects in the store
+   */
+  public long getObjectCount()
+  {
+    return -1;
+  }
+
+  /**
+   * Returns the total objects loaded.
+   */
+  public long getLoadCount()
+  {
+    return _loadCount;
+  }
+
+  /**
+   * Returns the objects which failed to load.
+   */
+  public long getLoadFailCount()
+  {
+    return _loadFailCount;
+  }
+
+  /**
+   * Returns the total objects saved.
+   */
+  public long getSaveCount()
+  {
+    return _saveCount;
+  }
+
+  /**
+   * Returns the objects which failed to save.
+   */
+  public long getSaveFailCount()
+  {
+    return _saveFailCount;
   }
 
   /**

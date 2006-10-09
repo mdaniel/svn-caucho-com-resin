@@ -39,13 +39,12 @@ import java.util.logging.Level;
 
 import java.sql.SQLException;
 
-import com.caucho.util.FreeList;
+import com.caucho.util.*;
 
 import com.caucho.log.Log;
 
-import com.caucho.db.store.Transaction;
-
-import com.caucho.db.table.TableIterator;
+import com.caucho.db.store.*;
+import com.caucho.db.table.*;
 
 import com.caucho.db.jdbc.GeneratedKeysResultSet;
 
@@ -54,12 +53,16 @@ import com.caucho.db.jdbc.GeneratedKeysResultSet;
  */
 public class QueryContext {
   private static final Logger log = Log.open(QueryContext.class);
+  private static final L10N L = new L10N(QueryContext.class);
 
-  private static final FreeList<QueryContext> _freeList =
-    new FreeList<QueryContext>(64);
+  private static final long LOCK_TIMEOUT = 120000;
+
+  private static final FreeList<QueryContext> _freeList
+    = new FreeList<QueryContext>(64);
 
   private Transaction _xa;
   private TableIterator []_tableIterators;
+  private boolean _isWrite;
 
   private Data []_parameters = new Data[8];
 
@@ -70,6 +73,9 @@ public class QueryContext {
   private SelectResult _result;
   private GeneratedKeysResultSet _generatedKeys;
   private int _rowUpdateCount;
+
+  private Block []_blockLocks;
+  private boolean _isLocked;
 
   private HashMap<GroupItem,GroupItem> _groupMap;
 
@@ -108,10 +114,14 @@ public class QueryContext {
   /**
    * Initializes the query state.
    */
-  public void init(Transaction xa, TableIterator []tableIterators)
+  public void init(Transaction xa,
+		   TableIterator []tableIterators,
+		   boolean isReadOnly)
   {
     _xa = xa;
+    _isWrite = ! isReadOnly;
     _tableIterators = tableIterators;
+    _blockLocks = new Block[_tableIterators.length];
 
     _rowUpdateCount = 0;
     _groupItem = _tempGroupItem;
@@ -417,6 +427,89 @@ public class QueryContext {
       _generatedKeys = new GeneratedKeysResultSet();
     
     return _generatedKeys;
+  }
+
+  /**
+   * Lock the blocks.  The blocks are locked in ascending block id
+   * order to avoid deadlocks.
+   *
+   * @param isWrite if true, the block should be locked for writing
+   */
+  public void lock()
+    throws SQLException
+  {
+    if (_isLocked)
+      throw new IllegalStateException(L.l("blocks are already locked"));
+    _isLocked = true;
+    
+    int len = _blockLocks.length;
+
+    for (int i = 0; i < len; i++) {
+      Block bestBlock = null;
+      long bestId = Long.MAX_VALUE;
+
+      loop:
+      for (int j = 0; j < len; j++) {
+	TableIterator iter = _tableIterators[j];
+
+	if (iter == null)
+	  continue;
+	
+	Block block = iter.getBlock();
+
+	if (block == null)
+	  continue;
+
+	long id = block.getBlockId();
+	if (bestId <= id)
+	  continue;
+	
+	for (int k = 0; k < i; k++) {
+	  if (_blockLocks[k] == block)
+	    continue loop;
+	}
+
+	bestId = id;
+	bestBlock = block;
+      }
+
+      _blockLocks[i] = bestBlock;
+
+      if (bestBlock == null) {
+      }
+      else if (_isWrite)
+	_xa.lockWrite(bestBlock.getLock());
+      else
+	_xa.lockRead(bestBlock.getLock());
+    }
+  }
+
+  /**
+   * Unlock the blocks.  The blocks are unlocked in descending order.
+   *
+   * @param isWrite if true, the block should be unlocked for writing
+   */
+  public void unlock()
+    throws SQLException
+  {
+    if (! _isLocked)
+      return;
+    
+    _isLocked = false;
+    
+    int len = _blockLocks.length;
+
+    for (int i = len - 1; i >= 0; i--) {
+      Block block = _blockLocks[i];
+      _blockLocks[i] = null;
+
+      if (block == null) {
+      }
+      else if (_isWrite)
+	_xa.autoCommitWrite(block.getLock());
+      else
+	_xa.autoCommitRead(block.getLock());
+    }
   }
 
   /**

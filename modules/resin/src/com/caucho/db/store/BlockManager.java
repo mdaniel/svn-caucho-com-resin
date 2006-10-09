@@ -104,23 +104,25 @@ public final class BlockManager
   /**
    * Allocates a store id.
    */
-  public synchronized int allocateStoreId()
+  public int allocateStoreId()
   {
-    for (int i = 0; i < _storeMask.length; i++) {
-      int mask = _storeMask[i];
+    synchronized (_storeMask) {
+      for (int i = 0; i < _storeMask.length; i++) {
+	int mask = _storeMask[i];
 
-      if (mask != 0xff) {
-	for (int j = 0; j < 8; j++) {
-	  if ((mask & (1 << j)) == 0) {
-	    _storeMask[i] |= (1 << j);
+	if (mask != 0xff) {
+	  for (int j = 0; j < 8; j++) {
+	    if ((mask & (1 << j)) == 0) {
+	      _storeMask[i] |= (1 << j);
 
-	    return 8 * i + j;
+	      return 8 * i + j;
+	    }
 	  }
 	}
       }
-    }
 
-    throw new IllegalStateException(L.l("All store ids used."));
+      throw new IllegalStateException(L.l("All store ids used."));
+    }
   }
 
   /**
@@ -130,7 +132,7 @@ public final class BlockManager
   {
     ArrayList<Block> dirtyBlocks = null;
 
-    synchronized (this) {
+    synchronized (_blockCache) {
       Iterator<Block> values = _blockCache.values();
 
       while (values.hasNext()) {
@@ -168,7 +170,7 @@ public final class BlockManager
   {
     ArrayList<Block> removeBlocks = new ArrayList<Block>();
 
-    synchronized (this) {
+    synchronized (_blockCache) {
       Iterator<Block> iter = _blockCache.values();
 
       while (iter.hasNext()) {
@@ -196,18 +198,20 @@ public final class BlockManager
   /**
    * Frees a store id.
    */
-  public synchronized void freeStoreId(int storeId)
+  public void freeStoreId(int storeId)
   {
-    if (storeId <= 0)
-      throw new IllegalArgumentException(String.valueOf(storeId));
+    synchronized (_storeMask) {
+      if (storeId <= 0)
+	throw new IllegalArgumentException(String.valueOf(storeId));
 
-    _storeMask[storeId / 8] &= ~(1 << storeId % 8);
+      _storeMask[storeId / 8] &= ~(1 << storeId % 8);
+    }
   }
 
   /**
    * Gets the table's block.
    */
-  synchronized Block getBlock(Store store, long blockId)
+  Block getBlock(Store store, long blockId)
   {
     // XXX: proper handling of the synchronized is tricky because
     // the LRU dirty write might have timing issues
@@ -240,11 +244,12 @@ public final class BlockManager
       throw stateError(L.l("Block 0 is reserved."));
 
     block = new ReadBlock(store, blockId);
-    block.allocate();
 
     // needs to be outside the synchronized since the put
     // can cause an LRU drop which might lead to a dirty write
-    _blockCache.put(blockId, block);
+    block = _blockCache.putIfNew(blockId, block);
+    
+    block.allocate();
 
     return block;
   }

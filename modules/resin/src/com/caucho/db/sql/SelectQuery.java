@@ -151,15 +151,9 @@ public class SelectQuery extends Query {
     FromItem []fromItems = getFromItems();
     TableIterator []rows = null;
 
-    int lockIndex = 0;
-
     try {
-      for (; lockIndex < fromItems.length; lockIndex++) {
-	xa.lockRead(fromItems[lockIndex].getTable().getLock());
-      }
-
       rows = result.initRows(fromItems);
-      context.init(xa, rows);
+      context.init(xa, rows, isReadOnly());
 
       if (isGroup())
 	executeGroup(result, rows, context, xa);
@@ -174,9 +168,7 @@ public class SelectQuery extends Query {
     } finally {
       // autoCommitRead must be before freeRows in case freeRows
       // throws an exception
-      for (int i = 0; i < lockIndex; i++) {
-	xa.autoCommitRead(fromItems[i].getTable().getLock());
-      }
+      context.unlock();
       
       if (rows != null)
 	freeRows(rows, rows.length);

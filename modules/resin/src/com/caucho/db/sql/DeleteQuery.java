@@ -66,6 +66,11 @@ class DeleteQuery extends Query {
     setFromItems(new FromItem[] { new FromItem(table, table.getName()) });
   }
 
+  public boolean isReadOnly()
+  {
+    return false;
+  }
+
   /**
    * Executes the query.
    */
@@ -75,11 +80,8 @@ class DeleteQuery extends Query {
     int count = 0;
     TableIterator []rows = new TableIterator[1];
     rows[0] = _table.createTableIterator();
-    context.init(xa, rows);
+    context.init(xa, rows, isReadOnly());
 
-    // must be outside finally so failed locks don't get unlocked
-    xa.lockWrite(_table.getLock());
-    
     try {
       if (! start(rows, rows.length, context, xa))
 	return;
@@ -91,7 +93,7 @@ class DeleteQuery extends Query {
     } finally {
       // autoCommitWrite must be before freeRows in case freeRows
       // throws an exception
-      xa.autoCommitWrite(_table.getLock());
+      context.unlock();
       
       freeRows(rows, rows.length);
     }
@@ -99,7 +101,7 @@ class DeleteQuery extends Query {
 
   public String toString()
   {
-    CharBuffer cb = CharBuffer.allocate();
+    CharBuffer cb = new CharBuffer();
     cb.append("DeleteQuery[");
     if (_whereExpr != null) {
       cb.append(",where:" + _whereExpr);

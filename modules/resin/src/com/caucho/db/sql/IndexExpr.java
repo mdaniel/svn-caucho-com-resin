@@ -97,13 +97,13 @@ class IndexExpr extends RowIterateExpr {
   {
     rowIter.init(context);
 
-    return rowIter.next();
+    return initRow(context, rowIter);
   }
 
   /**
    * Sets the initial row.
    */
-  boolean initRow(QueryContext context, TableIterator table)
+  boolean initRow(QueryContext context, TableIterator tableIter)
     throws SQLException, IOException
   {
     long rowAddr = evalIndex(context);
@@ -111,7 +111,11 @@ class IndexExpr extends RowIterateExpr {
     if (rowAddr == 0)
       return false;
 
-    table.setRow(rowAddr);
+    context.unlock();
+
+    tableIter.setRow(rowAddr);
+    
+    context.lock();
 
     return true;
   }

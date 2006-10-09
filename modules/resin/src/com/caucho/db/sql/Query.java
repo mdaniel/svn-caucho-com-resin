@@ -68,8 +68,8 @@ abstract public class Query {
 
   private RowIterateExpr []_indexExprs;
 
-  private ArrayList<SubSelectParamExpr> _paramExprs =
-    new ArrayList<SubSelectParamExpr>();
+  private ArrayList<SubSelectParamExpr> _paramExprs
+    = new ArrayList<SubSelectParamExpr>();
 
   protected Query(Database db, String sql)
   {
@@ -219,6 +219,11 @@ abstract public class Query {
   public boolean isSelect()
   {
     return false;
+  }
+
+  public boolean isReadOnly()
+  {
+    return true;
   }
 
   /**
@@ -623,6 +628,7 @@ abstract public class Query {
     try {
       Expr []whereExprs = _whereExprs;
 
+      // Test the constant expression
       if (whereExprs == null || whereExprs[rowLength] == null) {
       }
       else if (! whereExprs[rowLength].isSelect(queryContext)) {
@@ -641,8 +647,10 @@ abstract public class Query {
 	}
 
 	// XXX: check to make sure others actually lock this properly
+	/*
 	if (! xa.isAutoCommit())
 	  xa.lockRead(row.getTable().getLock());
+	*/
       }
 
       return (initBlockRow(rowLength - 1, rows, queryContext) ||

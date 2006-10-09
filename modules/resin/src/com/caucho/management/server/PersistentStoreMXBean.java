@@ -37,4 +37,33 @@ package com.caucho.management.server;
  * </pre>
  */
 public interface PersistentStoreMXBean extends ManagedObjectMXBean {
+  /**
+   * Returns the store type.
+   */
+  public String getStoreType();
+  
+  /**
+   * Returns the total current objects
+   */
+  public long getObjectCount();
+  
+  /**
+   * Returns the total objects loaded.
+   */
+  public long getLoadCountTotal();
+
+  /**
+   * Returns the objects which failed to load.
+   */
+  public long getLoadFailCountTotal();
+
+  /**
+   * Returns the total objects saved.
+   */
+  public long getSaveCountTotal();
+
+  /**
+   * Returns the objects which failed to save.
+   */
+  public long getSaveFailCountTotal();
 }

@@ -60,7 +60,6 @@ public final class Lock implements ClockCacheItem {
   private boolean _isUsed;
 
   private final ArrayList<Transaction> _queue = new ArrayList<Transaction>();
-  private Transaction _xa;
   
   public Lock(long id)
   {
@@ -83,9 +82,10 @@ public final class Lock implements ClockCacheItem {
   synchronized void lockRead(Transaction xa, long timeout)
     throws SQLException
   {
-    if (log.isLoggable(Level.FINEST))
+    if (log.isLoggable(Level.FINEST)) {
       log.finest("LockRead$" + System.identityHashCode(this) + "[" + _id + "] read:" + _readCount +
 		 " upgrade:" + _upgradeCount);
+    }
 
     if (_upgradeCount == 0) {
       _readCount++;
@@ -96,7 +96,7 @@ public final class Lock implements ClockCacheItem {
       wake();
     }
     else
-      throw new SQLException(L.l("can't obtain read lock"));
+      throw new LockTimeoutException(L.l("can't obtain read lock"));
   }
 
   /**
@@ -281,6 +281,10 @@ public final class Lock implements ClockCacheItem {
     try {
       while (_readCount != 0) {
 	queue(xa, expire);
+
+	if (_readCount != 0 && (expire < Alarm.getCurrentTime() ||
+				Alarm.isTest()))
+	  throw new LockTimeoutException(L.l("Can't obtain write lock."));
       }
 
       isOkay = _readCount == 0;
@@ -367,7 +371,7 @@ public final class Lock implements ClockCacheItem {
       notifyAll();
       
       log.fine(L.l("transaction timed out waiting for lock"));
-      throw new SQLException(L.l("transaction timed out waiting for lock {0}",
+      throw new LockTimeoutException(L.l("transaction timed out waiting for lock {0}",
 				 Alarm.getCurrentTime() - startTime));
     } catch (SQLException e) {
       throw e;

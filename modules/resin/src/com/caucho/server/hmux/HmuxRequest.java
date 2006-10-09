@@ -582,15 +582,6 @@ public class HmuxRequest extends AbstractHttpRequest
     int code;
     int len;
 
-    code = is.read();
-    if (code != HMUX_CHANNEL) {
-      if (isLoggable)
-        log.fine(dbgId() + "closing " + (char) code + "(" + code + ")");
-      return false;
-    }
-
-    int channel = (is.read() << 8) + is.read();
-
     while (true) {
       code = is.read();
 
@@ -599,6 +590,13 @@ public class HmuxRequest extends AbstractHttpRequest
         if (isLoggable)
           log.fine(dbgId() + "end of file");
         return false;
+
+      case HMUX_CHANNEL:
+	int channel = (is.read() << 8) + is.read();
+	
+        if (isLoggable)
+          log.fine(dbgId() + "channel " + channel);
+	break;
 
       case HMUX_QUIT:
         if (isLoggable)

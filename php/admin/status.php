@@ -327,6 +327,24 @@ if ($db_pools) {
 ?>
 </table>
 
+<!-- Persistent store -->
+<?php
+$store = $mbeanServer->lookup("resin:type=PersistentStore");
+
+if ($store) {
+  echo "<h2>Persistent Store: $store->StoreType</h2>\n";
+  echo "<table>";
+
+  echo "<tr><th>Object Count</th><td>$store->ObjectCount</td>\n";
+  echo "<tr><th>Load Count</th><td>$store->LoadCountTotal</td>\n";
+  echo "<tr><th>Load Fail Count</th><td>$store->LoadFailCountTotal</td>\n";
+  echo "<tr><th>Save Count</th><td>$store->SaveCountTotal</td>\n";
+  echo "<tr><th>Save Fail Count</th><td>$store->SaveFailCountTotal</td>\n";
+  echo "</table>";
+}
+
+?>
+
 <!-- Hosts and Applications -->
 <h2>Hosts and Applications</h2>
 

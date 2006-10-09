@@ -191,8 +191,10 @@ public class TableIterator {
     _transaction = xa;
 
     // XXX:
+    /*
     if (! _transaction.isAutoCommit())
       _transaction.lockRead(_table.getLock());
+    */
   }
 
   public void initRow()
@@ -217,8 +219,16 @@ public class TableIterator {
     _rowOffset = rowOffset;
   }
 
+  public Block getBlock()
+  {
+    return _block;
+  }
+
   /**
    * Returns the next tuple in the current row.
+   *
+   * @return true if a tuple is found,
+   * or false if the block has no more tuples
    */
   public boolean nextRow()
     throws IOException
@@ -247,39 +257,12 @@ public class TableIterator {
   public boolean next()
     throws IOException
   {
-    int rowOffset = _rowOffset;
-    int rowLength = _rowLength;
-    int rowEnd = _rowEnd;
-    byte []buffer = _buffer;
+    do {
+      if (nextRow())
+	return true;
+    } while (nextBlock());
 
-    rowOffset += rowLength;
-    while (true) {
-      for (; rowOffset < rowEnd; rowOffset += rowLength) {
-	if ((buffer[rowOffset] & 0x01) != 0) {
-	  _rowOffset = rowOffset;
-	  return true;
-	}
-      }
-
-      Block block = _block;
-      _block = null;
-      _buffer = null;
-
-      if (block != null)
-	block.free();
-
-      _blockId = _table.firstRow(_blockId + Table.BLOCK_SIZE);
-
-      if (_blockId < 0)
-	return false;
-
-      block = _transaction.readBlock(_table, _blockId);
-
-      buffer = block.getBuffer();
-      _block = block;
-      _buffer = buffer;
-      rowOffset = 0;
-    }
+    return false;
   }
 
   /**

@@ -52,11 +52,13 @@ abstract public class Block implements ClockCacheItem, CacheListener {
   private static final Logger log = Log.open(Block.class);
   private static final L10N L = new L10N(Block.class);
 
-  protected static final FreeList<byte[]> _freeBuffers =
-    new FreeList<byte[]>(4);
+  protected static final FreeList<byte[]> _freeBuffers
+    = new FreeList<byte[]>(4);
 
   private final Store _store;
   private final long _blockId;
+
+  private final Lock _lock;
 
   private int _useCount;
 
@@ -72,7 +74,9 @@ abstract public class Block implements ClockCacheItem, CacheListener {
     
     _store = store;
     _blockId = blockId;
-
+    
+    _lock = new Lock(_blockId);
+    
     _isFlushDirtyOnCommit = _store.isFlushDirtyBlocksOnCommit();
 
     if (log.isLoggable(Level.FINER))
@@ -132,6 +136,11 @@ abstract public class Block implements ClockCacheItem, CacheListener {
   public long getBlockId()
   {
     return _blockId;
+  }
+
+  public Lock getLock()
+  {
+    return _lock;
   }
   
   /**

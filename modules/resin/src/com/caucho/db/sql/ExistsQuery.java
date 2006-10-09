@@ -67,12 +67,14 @@ public class ExistsQuery extends SelectQuery {
 
     try {
       TableIterator []rows = result.initRows(getFromItems());
-      context.init(xa, rows);
+      context.init(xa, rows, isReadOnly());
 
       return execute(result, rows, context, xa);
     } catch (IOException e) {
       throw new SQLExceptionWrapper(e);
     } finally {
+      context.unlock();
+
       result.close();
     }
   }

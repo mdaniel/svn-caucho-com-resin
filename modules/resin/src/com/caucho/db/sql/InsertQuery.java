@@ -45,10 +45,9 @@ import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.db.Database;
 import com.caucho.db.ResultSetImpl;
 
-import com.caucho.db.store.Transaction;
+import com.caucho.db.store.*;
 
-import com.caucho.db.table.Table;
-import com.caucho.db.table.Column;
+import com.caucho.db.table.*;
 
 class InsertQuery extends Query {
   private static final Logger log = Log.open(InsertQuery.class);
@@ -66,6 +65,11 @@ class InsertQuery extends Query {
     _table = table;
 
     _columns = columns;
+  }
+
+  public boolean isReadOnly()
+  {
+    return false;
   }
 
   public void setValues(ArrayList<Expr> values)
@@ -111,8 +115,9 @@ class InsertQuery extends Query {
   public void execute(QueryContext queryContext, Transaction xa)
     throws SQLException
   {
-    // must be outside finally so failed locks don't get unlocked
-    xa.lockWrite(_table.getLock());
+    TableIterator []rows = new TableIterator[1];
+    rows[0] = _table.createTableIterator();
+    queryContext.init(xa, rows, isReadOnly());
     
     try {
       _table.insert(queryContext, xa, _columns, _values);
@@ -121,7 +126,7 @@ class InsertQuery extends Query {
     } catch (java.io.IOException e) {
       throw new SQLExceptionWrapper(e);
     } finally {
-      xa.autoCommitWrite(_table.getLock());
+      queryContext.unlock();
     }
   }
 

@@ -625,7 +625,7 @@ public class Table extends Store {
     TableIterator iter = createTableIterator();
     TableIterator []iterSet = new TableIterator[] { iter };
     // QueryContext context = QueryContext.allocate();
-    queryContext.init(xa, iterSet);
+    queryContext.init(xa, iterSet, true);
     iter.init(queryContext);
 
     boolean isLoop = false;
@@ -703,6 +703,11 @@ public class Table extends Store {
 	try {
 	  iter.setRow(writeBlock, rowOffset);
 
+	  queryContext.lock();
+
+	  for (int i = rowOffset + _rowLength - 1; rowOffset <= i; i--)
+	    buffer[i] = 0;
+
 	  for (int i = 0; i < columns.size(); i++) {
 	    Column column = columns.get(i);
 	    Expr value = values.get(i);
@@ -729,10 +734,14 @@ public class Table extends Store {
 	    if (_autoIncrementValue < value)
 	      _autoIncrementValue = value;
 	  }
+	  queryContext.unlock();
+
 	  isOkay = true;
 	} finally {
 	  if (! isOkay)
 	    buffer[rowOffset] &= ~1;
+
+	  queryContext.unlock();
 	}
     
 	_entries++;

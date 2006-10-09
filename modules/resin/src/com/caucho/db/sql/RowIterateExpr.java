@@ -54,7 +54,7 @@ class RowIterateExpr extends Expr {
   {
     rowIter.init(context);
 
-    return rowIter.next();
+    return nextBlock(context, rowIter);
   }
 
   /**
@@ -89,8 +89,21 @@ class RowIterateExpr extends Expr {
    * Returns the next block.
    */
   boolean nextBlock(QueryContext context, TableIterator rowIter)
-    throws IOException
+    throws IOException, SQLException
   {
-    return rowIter.next();
+    context.unlock();
+    
+    while (rowIter.nextBlock()) {
+      context.lock();
+
+      rowIter.initRow();
+
+      if (rowIter.nextRow())
+	return true;
+      
+      context.unlock();
+    }
+    
+    return false;
   }
 }

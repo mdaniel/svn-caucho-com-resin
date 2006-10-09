@@ -72,6 +72,11 @@ class UpdateQuery extends Query {
     _setItems = setItems;
   }
 
+  public boolean isReadOnly()
+  {
+    return false;
+  }
+
   /**
    * Binds the query.
    */
@@ -99,10 +104,7 @@ class UpdateQuery extends Query {
     SetItem []setItems = _setItems;
     TableIterator []rows = new TableIterator[1];
     rows[0] = _table.createTableIterator();
-    context.init(xa, rows);
-
-    // must be outside finally so failed locks don't get unlocked
-    xa.lockWrite(_table.getLock());
+    context.init(xa, rows, isReadOnly());
     
     try {
       if (! start(rows, rows.length, context, xa))
@@ -123,7 +125,7 @@ class UpdateQuery extends Query {
     } finally {
       // autoCommitWrite must be before freeRows in case freeRows
       // throws an exception
-      xa.autoCommitWrite(_table.getLock());
+      context.unlock();
       
       freeRows(rows, rows.length);
     }

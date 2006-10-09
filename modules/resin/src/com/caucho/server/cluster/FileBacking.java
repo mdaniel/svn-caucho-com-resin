@@ -101,6 +101,7 @@ public class FileBacking {
   private String _invalidateQuery;
   private String _timeoutQuery;
   private String _dumpQuery;
+  private String _countQuery;
 
   /**
    * Returns the path to the directory.
@@ -154,6 +155,8 @@ public class FileBacking {
     _dumpQuery = ("SELECT id, expire_interval, data FROM " + _tableName +
 		  " WHERE ? <= mod_time AND " +
 		  "   (?=server1 OR ?=server2 OR ?=server3)");
+    
+    _countQuery = "SELECT count(*) FROM " + _tableName;
     
     try {
       _path.mkdirs();
@@ -521,7 +524,7 @@ public class FileBacking {
 	return true;
       }
     } catch (SQLException e) {
-      log.log(Level.FINER, e.toString(), e);
+      log.log(Level.WARNING, e.toString(), e);
     }
 
     return false;
@@ -560,6 +563,37 @@ public class FileBacking {
     }
 
     return false;
+  }
+
+  //
+  // statistics
+  //
+
+  public long getObjectCount()
+    throws SQLException
+  {
+    ClusterConnection conn = getConnection();
+    
+    try {
+      PreparedStatement stmt = conn.prepareCount();
+      
+      ResultSet rs = stmt.executeQuery();
+
+      if (rs != null && rs.next()) {
+	long value = rs.getLong(1);
+	rs.close();
+	return value;
+      }
+      
+      return -1;
+    } catch (SQLException e) {
+      e.printStackTrace();
+      log.log(Level.FINE, e.toString(), e);
+    } finally {
+      conn.close();
+    }
+    
+    return -1;
   }
 
   public void destroy()
@@ -626,6 +660,7 @@ public class FileBacking {
     private PreparedStatement _setExpiresStatement;
     private PreparedStatement _invalidateStatement;
     private PreparedStatement _timeoutStatement;
+    private PreparedStatement _countStatement;
 
     ClusterConnection(Connection conn)
     {
@@ -684,6 +719,15 @@ public class FileBacking {
 	_invalidateStatement = _conn.prepareStatement(_invalidateQuery);
 
       return _invalidateStatement;
+    }
+
+    PreparedStatement prepareCount()
+      throws SQLException
+    {
+      if (_countStatement == null)
+	_countStatement = _conn.prepareStatement(_countQuery);
+
+      return _countStatement;
     }
 
     void close()

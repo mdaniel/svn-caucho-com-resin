@@ -20,46 +20,68 @@
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
  *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.db.sql;
+package com.caucho.db.store;
 
-import java.io.IOException;
+import java.io.*;
+import java.sql.*;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import com.caucho.util.*;
 
-import java.sql.SQLException;
-
-import com.caucho.log.Log;
-
-import com.caucho.sql.SQLExceptionWrapper;
-
-import com.caucho.db.ResultSetImpl;
-
-import com.caucho.db.store.Transaction;
-
-import com.caucho.db.table.TableIterator;
-
-public class TempQuery extends Query {
-  private static final Logger log = Log.open(Query.class);
-
-  protected TempQuery(FromItem []fromItems)
+/**
+ * Wraps an exception in a SQLException wrapper.
+ */
+public class LockTimeoutException extends java.sql.SQLException {
+  private Throwable _cause;
+  
+  /**
+   * Creates the wrapper with a message.
+   */
+  public LockTimeoutException()
   {
-    super(null, "temp", fromItems);
+    super();
   }
 
   /**
-   * Executes the query.
+   * Creates the wrapper with a message.
    */
-  public void execute(QueryContext queryCtx, Transaction xa)
-    throws SQLException
+  public LockTimeoutException(String message)
   {
-    throw new UnsupportedOperationException();
+    super(message);
+  }
+
+  /**
+   * Creates the wrapper with a message and a root cause.
+   *
+   * @param message the message.
+   * @param e the rootCause exception
+   */
+  public LockTimeoutException(String message, Throwable e)
+  {
+    super(message);
+
+    _cause = e;
+  }
+  
+  /**
+   * Creates the wrapper with a root cause.
+   *
+   * @param message the message.
+   * @param e the rootCause exception
+   */
+  public LockTimeoutException(Throwable e)
+  {
+    _cause = e;
+  }
+
+  public Throwable getCause()
+  {
+    return _cause;
   }
 }

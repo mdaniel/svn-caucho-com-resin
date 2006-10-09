@@ -299,6 +299,9 @@ public class Inode {
 					 store,
 					 currentLength);
 
+	if (fragAddr == 0)
+	  throw new IllegalStateException("inode: illegal fragment at " + currentLength);
+
 	int fragOffset = (int) (currentLength % INODE_BLOCK_SIZE);
 	int sublen = length;
 

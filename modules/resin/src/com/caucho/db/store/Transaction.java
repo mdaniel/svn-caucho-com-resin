@@ -66,7 +66,6 @@ public class Transaction extends StoreTransaction {
   private ConnectionImpl _conn;
   
   private ArrayList<Lock> _readLocks;
-  private ArrayList<Lock> _upgradeLocks;
   private ArrayList<Lock> _writeLocks;
   
   private LongKeyHashMap<WriteBlock> _writeBlocks;
@@ -161,11 +160,6 @@ public class Transaction extends StoreTransaction {
     if (_isRollbackOnly)
       throw new SQLException(L.l("can't get lock with rollback transaction"));
 
-    if (_isAutoCommit) {
-      lock.lockRead(this, _timeout);
-      return;
-    }
-
     try {
       if (_readLocks == null)
 	_readLocks = new ArrayList<Lock>();
@@ -191,31 +185,23 @@ public class Transaction extends StoreTransaction {
     if (_isRollbackOnly)
       throw new SQLException(L.l("can't get lock with rollback transaction"));
 
-    if (_isAutoCommit) {
-      lock.lockReadAndWrite(this, _timeout);
-      return;
-    }
-
     try {
       if (_readLocks == null)
 	_readLocks = new ArrayList<Lock>();
-      if (_upgradeLocks == null)
-	_upgradeLocks = new ArrayList<Lock>();
+      if (_writeLocks == null)
+	_writeLocks = new ArrayList<Lock>();
       
-      // the actual locking happens at the commit
-      // this should probably be an upgrade lock
-      
-      if (_upgradeLocks.contains(lock)) {
+      if (_writeLocks.contains(lock)) {
 	return;
       }
       else if (_readLocks.contains(lock)) {
-	lock.lockUpgrade(this, _timeout);
-	_upgradeLocks.add(lock);
+	lock.lockWrite(this, _timeout);
+	_writeLocks.add(lock);
       }
       else {
-	lock.lockReadAndUpgrade(this, _timeout);
+	lock.lockReadAndWrite(this, _timeout);
 	_readLocks.add(lock);
-	_upgradeLocks.add(lock);
+	_writeLocks.add(lock);
       }
     } catch (SQLException e) {
       setRollbackOnly();
@@ -230,7 +216,7 @@ public class Transaction extends StoreTransaction {
   public void autoCommitRead(Lock lock)
     throws SQLException
   {
-    if (_isAutoCommit)
+    if (_readLocks.remove(lock))
       lock.unlockRead();
   }
   
@@ -240,7 +226,9 @@ public class Transaction extends StoreTransaction {
   public void autoCommitWrite(Lock lock)
     throws SQLException
   {
-    if (_isAutoCommit) {
+    _readLocks.remove(lock);
+
+    if (_writeLocks.remove(lock)) {
       try {
 	commit();
       } finally {
@@ -456,18 +444,6 @@ public class Transaction extends StoreTransaction {
     try {
       LongKeyHashMap<WriteBlock> writeBlocks = _writeBlocks;
 
-      if (_upgradeLocks != null) {
-	for (int i = 0; i < _upgradeLocks.size(); i++) {
-	  Lock lock = _upgradeLocks.get(i);
-	  lock.lockWrite(this, _timeout);
-
-	  if (_writeLocks == null)
-	    _writeLocks = new ArrayList<Lock>();
-
-	  _writeLocks.add(lock);
-	}
-      }
-
       if (_deleteInodes != null) {
 	for (int i = 0; i < _deleteInodes.size(); i++) {
 	  Inode inode = _deleteInodes.get(i);
@@ -524,9 +500,6 @@ public class Transaction extends StoreTransaction {
       for (int i = 0; i < _writeLocks.size(); i++) {
 	Lock lock = _writeLocks.get(i);
 
-	if (_upgradeLocks != null)
-	  _upgradeLocks.remove(lock);
-
 	if (_readLocks != null)
 	  _readLocks.remove(lock);
 
@@ -538,24 +511,6 @@ public class Transaction extends StoreTransaction {
       }
 
       _writeLocks.clear();
-    }
-    
-    if (_upgradeLocks != null) {
-      for (int i = 0; i < _upgradeLocks.size(); i++) {
-	Lock lock = _upgradeLocks.get(i);
-
-	if (_readLocks != null)
-	  _readLocks.remove(lock);
-
-	try {
-	  // if (! _writeLocks.contains(lock))
-	  lock.unlockUpgrade();
-	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
-      }
-
-      _upgradeLocks.clear();
     }
     
     if (_readLocks != null) {
