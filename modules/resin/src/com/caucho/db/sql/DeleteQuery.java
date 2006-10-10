@@ -88,6 +88,7 @@ class DeleteQuery extends Query {
 
       do {
 	rows[0].delete();
+	
 	context.setRowUpdateCount(++count);
       } while (nextTuple(rows, rows.length, context, xa));
     } finally {

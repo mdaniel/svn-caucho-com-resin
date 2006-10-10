@@ -138,7 +138,10 @@ public final class Lock implements ClockCacheItem {
 
       isOkay = waitForRead(xa, expire, 1);
     } finally {
-      if (! isOkay) {
+      if (isOkay) {
+	_readCount--;
+      }
+      else {
 	_upgradeCount--;
 
 	wake();
@@ -171,9 +174,7 @@ public final class Lock implements ClockCacheItem {
 
       isOkay = waitForRead(xa, expire, 0);
     } finally {
-      if (isOkay)
-	_readCount = 1;
-      else {
+      if (! isOkay) {
 	_upgradeCount--;
 
 	wake();
@@ -243,7 +244,10 @@ public final class Lock implements ClockCacheItem {
 
       isOkay = waitForRead(xa, expire, 1);
     } finally {
-      if (! isOkay) {
+      if (isOkay) {
+	_readCount--;
+      }
+      else {
 	_writeCount--;
 
 	wake();
@@ -277,7 +281,6 @@ public final class Lock implements ClockCacheItem {
       isOkay = waitForRead(xa, expire, 0);
     } finally {
       if (isOkay) {
-	_readCount = 1;
 	_writeCount = 1;
       }
       else {
@@ -401,8 +404,11 @@ public final class Lock implements ClockCacheItem {
 	}
       }
 
-      if (_readCount <= readCount)
+      if (_readCount <= readCount) {
+	_readCount++;
+	
 	return true;
+      }
       
       log.fine(L.l("transaction timed out waiting for read lock"));
       
