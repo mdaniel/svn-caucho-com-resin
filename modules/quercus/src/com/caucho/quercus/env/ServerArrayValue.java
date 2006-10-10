@@ -272,16 +272,10 @@ public class ServerArrayValue extends ArrayValueImpl {
       String value = request.getHeader(key);
 
       if (key.equalsIgnoreCase("Host")) {
-	// php/1b19 (yacs)
-	int p = value.indexOf(':');
-
-	if (p > 0)
-	  super.put(HTTP_HOST_V, new StringValueImpl(value.substring(0, p)));
-	else
-	  super.put(HTTP_HOST_V, new StringValueImpl(value));
+	    super.put(HTTP_HOST_V, new StringValueImpl(value));
       }
       else {
-	super.put(convertHttpKey(key), new StringValueImpl(value));
+        super.put(convertHttpKey(key), new StringValueImpl(value));
       }
     }
   }
