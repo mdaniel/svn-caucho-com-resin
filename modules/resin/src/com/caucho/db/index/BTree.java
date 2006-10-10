@@ -74,7 +74,7 @@ public final class BTree {
   private final static L10N L = new L10N(BTree.class);
   private final static Logger log = Log.open(BTree.class);
   
-  public final static long FAIL = Long.MIN_VALUE;
+  public final static long FAIL = 0;
   private final static int BLOCK_SIZE = Store.BLOCK_SIZE;
   private final static int PTR_SIZE = 8;
 
@@ -539,7 +539,7 @@ public final class BTree {
 	block.setFlushDirtyOnCommit(false);
 	block.setDirty(0, Store.BLOCK_SIZE);
 
-	removeLeafEntry(index, block.getBuffer(),
+	removeLeafEntry(index, buffer,
 			keyBuffer, keyOffset, keyLength);
       }
       else {
@@ -549,7 +549,7 @@ public final class BTree {
 				 buffer, keyBuffer, keyOffset, keyLength,
 				 isLeaf);
 
-	if (childIndex == FAIL)
+	if (childIndex == 0)
 	  return;
 
 	remove(block.getBlockId(), childIndex, 
@@ -827,13 +827,6 @@ public final class BTree {
       if (pointer == index) {
 	int leftOffset = HEADER_SIZE + leftLength * tupleSize;
 
-	/* XXX: for non-leaf?
-	// append the key from the parent to the left
-	System.arraycopy(parentBuffer, parentOffset,
-			 leftBuffer, leftOffset,
-			 tupleSize);
-	*/
-
 	// copy the pointer from the left pointer
 	setPointer(parentBuffer, parentOffset,
 		   getPointer(parentBuffer, parentOffset - tupleSize));
@@ -844,9 +837,6 @@ public final class BTree {
 			 parentEnd - parentOffset);
 	setLength(parentBuffer, parentLength - 1);
 
-	// the key from the parent gets the old left.next value
-	setPointer(leftBuffer, leftOffset,
-		   getPointer(leftBuffer, NEXT_OFFSET));
 	// the new left.next value is the buffer's next value
 	setPointer(leftBuffer, NEXT_OFFSET,
 		   getPointer(buffer, NEXT_OFFSET));

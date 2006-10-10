@@ -441,9 +441,6 @@ class DispatchRequest extends RequestAdapter {
     else {
       SessionImpl oldSession = _session;
       _session = createSession(create, oldSession != null);
-
-      if (_session != null && _session != oldSession)
-	_session.addUse();
     }
 
     if (_session != null)
