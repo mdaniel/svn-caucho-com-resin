@@ -19,3 +19,7 @@ msgstr ""
 #: i18n.php:23
 msgid "Good morning"
 msgstr "Good'ay mate!"
+
+#: i18n.php:5
+msgid "[_0]/[_1]/[_2]"
+msgstr "[_1]/[_0]/[_2]"
