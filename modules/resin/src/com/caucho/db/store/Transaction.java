@@ -346,22 +346,10 @@ public class Transaction extends StoreTransaction {
   /**
    * Returns a modified block.
    */
-  public WriteBlock allocateRow(Store store)
+  public Block allocateRow(Store store)
     throws IOException
   {
-    Block block = store.allocateRow();
-
-    WriteBlock writeBlock;
-
-    if (isAutoCommit())
-      writeBlock = new AutoCommitWriteBlock(block);
-    else {
-      writeBlock = new XAWriteBlock(block);
-
-      setBlock(writeBlock);
-    }
-
-    return writeBlock;
+    return store.allocateRow();
   }
 
   /**

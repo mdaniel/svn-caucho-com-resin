@@ -452,8 +452,8 @@ public class Table extends Store {
 
       Column []columns = _row.getColumns();
     
-      while (iter.next()) {
-	iter.prevRow();
+      while (iter.nextBlock()) {
+	iter.initRow();
 
 	byte []blockBuffer = iter.getBuffer();
       

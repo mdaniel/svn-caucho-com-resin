@@ -1147,7 +1147,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
   /**
    * Creates a pseudo-random session id.  If there's an old id and the
    * group matches, then use it because different webApps on the
-   * same matchine should use the same cookie.
+   * same machine should use the same cookie.
    *
    * @param sessionGroup possibly assigned by the web server
    */
@@ -1262,14 +1262,20 @@ public final class SessionManager implements ObjectManager, AlarmListener
     if (session != null && ! session.getId().equals(key))
       throw new IllegalStateException(key + " != " + session.getId());
 
-    if (session != null && session.addUse()) {
+    if (now <= 0) // just generating id
+      return session;
+
+    if (session != null && ! session.addUse()) {
+      session = null;
     }
-    else if (now > 0 && _sessionStore != null) {
+    
+    if (session == null && _sessionStore != null) {
       if (! isInSessionGroup(key))
 	return null;
 
       session = create(key, now, create);
-      session.addUse();
+      if (! session.addUse())
+	session = null;
       isNew = true;
     }
 

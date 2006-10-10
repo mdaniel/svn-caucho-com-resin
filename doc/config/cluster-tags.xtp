@@ -508,7 +508,7 @@ restarted.</p>
 dispatching and forwarding URLs.  Applications can use these rules
 to redirect old URLs to their new replacements.</p>
 
-<p>See <a href="rewrite-dispatch.xtp">rewrite-dispatch</a> for more
+<p>See <a href="rewrite-tags.xtp">rewrite-dispatch</a> for more
 details.</p>
 
 <example title="rewrite-dispatch">
