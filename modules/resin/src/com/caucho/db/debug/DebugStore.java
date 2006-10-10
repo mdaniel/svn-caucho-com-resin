@@ -60,9 +60,8 @@ public class DebugStore {
     throws Exception
   {
     _path = path;
-    
+
     _store = Store.create(path);
-    _store.init();
   }
 
   public static void main(String []args)

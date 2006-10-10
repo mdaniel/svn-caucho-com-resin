@@ -327,29 +327,45 @@ public class PreparedStatementImpl extends StatementImpl
     return getUpdateCount();
   }
 
+  private int _count;
+
   public boolean execute()
     throws SQLException
   {
-    Transaction xa = _conn.getTransaction();
-    QueryContext queryContext = getQueryContext();
-    
-    if (_query.isSelect()) {
-      com.caucho.db.ResultSetImpl rs = null;
-    
-      _query.execute(queryContext, xa);
+    _count++;
 
-      _wasResultSet = true;
-      _resultSet = new ResultSetImpl(this, queryContext.getResult());
+    Transaction xa = null;
 
-      return true;
-    }
-    else {
-      queryContext.setReturnGeneratedKeys(_isReturnGeneratedKeys);
+    try {
+      if (_count != 1)
+	throw new IllegalStateException("Multithreading execute");
+      
+      xa = _conn.getTransaction();
+      QueryContext queryContext = getQueryContext();
+    
+      if (_query.isSelect()) {
+	com.caucho.db.ResultSetImpl rs = null;
+    
+	_query.execute(queryContext, xa);
+
+	_wasResultSet = true;
+	_resultSet = new ResultSetImpl(this, queryContext.getResult());
+
+	return true;
+      }
+      else {
+	queryContext.setReturnGeneratedKeys(_isReturnGeneratedKeys);
 	
-      _query.execute(queryContext, xa);
+	_query.execute(queryContext, xa);
 
-      _wasResultSet = false;
-      return false;
+	_wasResultSet = false;
+	return false;
+      }
+    } finally {
+      _count--;
+
+      if (xa != null && xa.isAutoCommit())
+	xa.rollback();
     }
   }
 

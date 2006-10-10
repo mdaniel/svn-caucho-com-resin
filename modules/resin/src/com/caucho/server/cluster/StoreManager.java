@@ -620,7 +620,7 @@ abstract public class StoreManager
    */
   abstract protected void store(ClusterObject clusterObject,
 				TempStream tempStream,
-				long crc, int updateCount)
+				long crc)
     throws Exception;
   
   /**

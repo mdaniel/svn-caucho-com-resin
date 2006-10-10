@@ -76,13 +76,12 @@ public class SessionImpl implements HttpSession, CacheListener {
   private boolean _isNew = true;
   // true if the session is still valid, i.e. not invalidated
   boolean _isValid = true;
-  // true if the session is still valid, i.e. not invalidated
+  // true if the session is closing
+  boolean _isClosing = false;
+  // true if the session is being closed from an invalidation
   boolean _isInvalidating = false;
-  // true if the session should be loaded when next accessed
-  boolean _needsLoad;
-  // XXX: threading?
+  //To protect for threading
   private int _useCount;
-  private boolean _isChanged;
 
   private ClusterObject _clusterObject;
   // The logged-in user
@@ -157,6 +156,8 @@ public class SessionImpl implements HttpSession, CacheListener {
   void setClusterObject(ClusterObject clusterObject)
   {
     _clusterObject = clusterObject;
+    if (clusterObject != null)
+      clusterObject.update();
   }
 
   /**
@@ -459,12 +460,31 @@ public class SessionImpl implements HttpSession, CacheListener {
     _isValid = isValid;
   }
 
+  boolean isClosing()
+  {
+    return _isClosing;
+  }
+
   /**
    * Callback when the session is removed from the session cache, generally
    * because the session cache is full.
    */
   public void removeEvent()
   {
+    synchronized (this) {
+      if (_isInvalidating || _useCount <= 0)
+	_isClosing = true;
+    }
+
+    if (! _isClosing) {
+      log.config(L.l("session {0} LRU while in use.  Consider increasing session-count.",
+		     _id));
+
+      // LRU while in use
+      _manager.addSession(this);
+      return;
+    }
+    
     boolean isValid = _isValid;
 
     _manager.decrementSessionCount();
@@ -517,7 +537,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     if (! _isValid)
       throw new IllegalStateException(L.l("Can't call invalidate() when session is no longer valid."));
-
+      
     if (log.isLoggable(Level.FINE))
       log.fine("invalidate session " + _id);
 
@@ -528,7 +548,6 @@ public class SessionImpl implements HttpSession, CacheListener {
       // server/12i1
       logout(isLRU ? this : null);
     }
-
 
     /*
     boolean invalidateAfterListener = _manager.isInvalidateAfterListener();
@@ -547,7 +566,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 
       _manager.removeSession(this);
 
-      invalidateImpl();
+      invalidateImpl(true);
 
       _isValid = false;
     } finally {
@@ -592,7 +611,7 @@ public class SessionImpl implements HttpSession, CacheListener {
    * Invalidate the session, removing it from the manager,
    * unbinding the values, and removing it from the store.
    */
-  void invalidateImpl()
+  void invalidateImpl(boolean isLRU)
   {
     boolean invalidateAfterListener = _manager.isInvalidateAfterListener();
     if (! invalidateAfterListener)
@@ -600,9 +619,9 @@ public class SessionImpl implements HttpSession, CacheListener {
 
     try {
       ClusterObject clusterObject = _clusterObject;
-      _clusterObject = null;
+      // _clusterObject = null;
 
-      if (clusterObject != null)
+      if (clusterObject != null && ! isLRU)
 	clusterObject.remove();
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
@@ -618,9 +637,9 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     ClusterObject clusterObject = _clusterObject;
     if (_isValid && ! _isInvalidating && clusterObject != null) {
-      clusterObject.update();
-
       if (_manager.isSaveOnlyOnShutdown()) {
+	clusterObject.update();
+
 	try {
 	  clusterObject.store(this);
 	} catch (Throwable e) {
@@ -662,10 +681,25 @@ public class SessionImpl implements HttpSession, CacheListener {
   /**
    * Set true if the session is in use.
    */
-  public void addUse()
+  boolean addUse()
   {
     synchronized (this) {
+      if (_isClosing)
+	return false;
+      
       _useCount++;
+
+      return true;
+    }
+  }
+
+  /**
+   * Set true if the session is in use.
+   */
+  void endUse()
+  {
+    synchronized (this) {
+      _useCount--;
     }
   }
 
@@ -689,10 +723,15 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   public boolean load()
   {
-    if (_clusterObject != null)
-      return _clusterObject.load(this);
+    boolean isValid;
+
+    ClusterObject clusterObject = _clusterObject;
+    if (clusterObject != null)
+      isValid = clusterObject.load(this);
     else
-      return true;
+      isValid = true;
+
+    return isValid;
   }
 
   /**
@@ -711,24 +750,39 @@ public class SessionImpl implements HttpSession, CacheListener {
     if (_values.size() == 0)
       return;
 
-    ArrayList<String> names = new ArrayList<String>();
-    Iterator<String> iter = _values.keySet().iterator();
-    while (iter.hasNext()) {
-      String name = iter.next();
+    ClusterObject clusterObject = _clusterObject;
 
-      names.add(name);
+    ArrayList<String> names = new ArrayList<String>();
+    ArrayList<Object> values = new ArrayList<Object>();
+    
+    synchronized (this) {
+      //System.out.println("UNBIND: " + this + " " + clusterObject + " " + System.identityHashCode(this));
+
+      /*
+      if (_useCount > 0)
+	Thread.dumpStack();
+      */
+
+      Iterator<Map.Entry<String,Object>> iter = _values.entrySet().iterator();
+      while (iter.hasNext()) {
+	Map.Entry<String,Object> entry = iter.next();
+
+	names.add(entry.getKey());
+	values.add(entry.getValue());
+      }
+
+      _values.clear();
+
+      if (clusterObject != null)
+	clusterObject.update();
     }
 
     for (int i = 0; i < names.size(); i++) {
       String name = names.get(i);
-      Object value = null;
-
-      value = _values.remove(name);
+      Object value = values.get(i);
 
       notifyValueUnbound(name, value);
     }
-
-    _values.clear();
   }
 
   /**
@@ -882,6 +936,9 @@ public class SessionImpl implements HttpSession, CacheListener {
 
       try {
 	int size = in.readInt();
+
+	//System.out.println("LOAD: " + size + " " + this + " " + _clusterObject + System.identityHashCode(this));
+
 	for (int i = 0; i < size; i++) {
 	  String key = in.readUTF();
 	  Object value = in.readObject();
@@ -890,6 +947,8 @@ public class SessionImpl implements HttpSession, CacheListener {
 	    setAttribute(key, value);
 	}
       } catch (Exception e) {
+	e.printStackTrace();
+	
 	throw IOExceptionWrapper.create(e);
       }
 

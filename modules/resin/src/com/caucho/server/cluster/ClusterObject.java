@@ -60,9 +60,10 @@ public class ClusterObject {
   private long _accessTime;
 
   private long _crc = -1;
-  private int _updateCount = -1;
 
   private boolean _isSerializable = true;
+  // true if the current data is valid and up to date
+  private boolean _isValid = true;
   private boolean _isChanged = false;
   private boolean _isDead = false;
 
@@ -223,19 +224,19 @@ public class ClusterObject {
   }
 
   /**
-   * Returns the object's update count
+   * Returns true if the object has up-to-date loaded values
    */
-  int getUpdateCount()
+  boolean isValid()
   {
-    return _updateCount;
+    return _isValid;
   }
 
   /**
    * Sets the object's saved update count
    */
-  void setUpdateCount(int count)
+  void setValid(boolean isValid)
   {
-    _updateCount = count;
+    _isValid = isValid;
   }
 
   /**
@@ -252,7 +253,7 @@ public class ClusterObject {
     if (_isDead)
       throw new IllegalStateException();
 
-    if (_isPrimary && _updateCount >= 0)
+    if (_isPrimary && _isValid)
       return true;
 
     try {
@@ -268,6 +269,8 @@ public class ClusterObject {
       _crc = -1;
 
       return false;
+    } finally {
+      _isChanged = false;
     }
   }
 
@@ -287,6 +290,7 @@ public class ClusterObject {
 
     _objectManager.load(in, obj);
 
+    _isValid = true;
     _crc = crcStream.getCRC();
 
     in.close();
@@ -302,7 +306,7 @@ public class ClusterObject {
    */
   public void update()
   {
-    _updateCount = -1;
+    _isValid = false;
   }
 
   /**
@@ -311,9 +315,6 @@ public class ClusterObject {
    */
   public void change()
   {
-    if (! _isChanged)
-      _updateCount++;
-
     _isChanged = true;
   }
 
@@ -374,10 +375,10 @@ public class ClusterObject {
     if (! _isSerializable)
       return;
 
-    int updateCount = _updateCount;
+    boolean isValid = _isValid;
 
     if (! _isPrimary)
-      _updateCount = -1;
+      _isValid = false;
 
     if (! _isChanged && ! _storeManager.isAlwaysSave())
       return;
@@ -406,12 +407,13 @@ public class ClusterObject {
 	return;
 
       _crc = crc;
-      updateCount++;
 
-      _storeManager.store(this, tempStream, crc, updateCount);
+      //System.out.println("STORING: " + _uniqueId);
+      _storeManager.store(this, tempStream, crc);
+      //System.out.println("STORED: " + _uniqueId);
 
       if (_isPrimary)
-	_updateCount = updateCount;
+	_isValid = true;
 
       _accessTime = Alarm.getCurrentTime();
     } catch (NotSerializableException e) {
@@ -421,7 +423,7 @@ public class ClusterObject {
       log.warning(e.toString());
       log.log(Level.FINE, e.toString(), e);
 
-      _updateCount = -1;
+      _isValid = false;
     } finally {
       tempStream.destroy();
     }

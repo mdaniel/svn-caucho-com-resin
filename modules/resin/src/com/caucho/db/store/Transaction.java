@@ -216,6 +216,12 @@ public class Transaction extends StoreTransaction {
   public void autoCommitRead(Lock lock)
     throws SQLException
   {
+    unlockRead(lock);
+  }
+  
+  public void unlockRead(Lock lock)
+    throws SQLException
+  {
     if (_readLocks.remove(lock))
       lock.unlockRead();
   }
@@ -234,6 +240,16 @@ public class Transaction extends StoreTransaction {
       } finally {
 	lock.unlockWrite();
       }
+    }
+  }
+  
+  public void unlockWrite(Lock lock)
+    throws SQLException
+  {
+    _readLocks.remove(lock);
+
+    if (_writeLocks.remove(lock)) {
+      lock.unlockWrite();
     }
   }
 

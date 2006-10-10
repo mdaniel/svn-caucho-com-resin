@@ -50,10 +50,7 @@ import com.caucho.sql.SQLExceptionWrapper;
 
 import com.caucho.db.Database;
 
-import com.caucho.db.store.Block;
-import com.caucho.db.store.BlockManager;
-import com.caucho.db.store.Store;
-import com.caucho.db.store.Transaction;
+import com.caucho.db.store.*;
 
 /**
  * Structure of the table:
@@ -90,6 +87,8 @@ public final class BTree {
   private final static int LEAF_FLAG = 1;
 
   private BlockManager _blockManager;
+
+  private final Lock _lock;
   private Store _store;
   private long _indexRoot;
   private int _keySize;
@@ -117,7 +116,8 @@ public final class BTree {
     _store = store;
     _blockManager = _store.getBlockManager();
     _indexRoot = indexRoot;
-
+    _lock = new Lock(_indexRoot);
+    
     if (BLOCK_SIZE < keySize + HEADER_SIZE)
       throw new IOException(L.l("BTree key size `{0}' is too large.",
                                 keySize));
@@ -159,9 +159,11 @@ public final class BTree {
 		     int keyOffset,
 		     int keyLength,
 		     Transaction xa)
-    throws IOException
+    throws IOException, SQLException
   {
-    synchronized (this) {
+    xa.lockRead(_lock);
+
+    try {
       long index = _indexRoot;
 
       while (index != 0) {
@@ -171,8 +173,7 @@ public final class BTree {
 	try {
 	  byte []buffer = block.getBuffer();
 
-	  int flags = getInt(buffer, FLAGS_OFFSET);
-	  isLeaf = (flags & LEAF_FLAG) == 0;
+	  isLeaf = isLeaf(buffer);
       
 	  index = lookupTuple(block.getBlockId(),
 			      buffer, keyBuffer, keyOffset, keyLength, isLeaf);
@@ -183,6 +184,8 @@ public final class BTree {
 	if (isLeaf || index == FAIL)
 	  return index;
       }
+    } finally {
+      xa.unlockRead(_lock);
     }
 
     return FAIL;
@@ -198,68 +201,65 @@ public final class BTree {
 		     Transaction xa)
     throws SQLException
   {
-    synchronized (this) {
-      try {
-	if (value == FAIL)
-	  throw new IllegalArgumentException();
+    xa.lockWrite(_lock);
     
-	long lastIndex;
-	long index = _indexRoot;
-	long parentIndex = 0;
+    try {
+      if (value == FAIL)
+	throw new IllegalArgumentException();
     
-	while (index != FAIL) {
-	  lastIndex = index;
-        
-	  Block block = _store.readBlockByAddress(index);
+      long index = _indexRoot;
+      long parentIndex = 0;
+    
+      while (index != FAIL) {
+	Block block = _store.readBlockByAddress(index);
 
-	  try {
-	    byte []buffer = block.getBuffer();
+	try {
+	  byte []buffer = block.getBuffer();
 
-	    int flags = getInt(buffer, FLAGS_OFFSET);
-	
-	    boolean isLeaf = (flags & LEAF_FLAG) == 0;
+	  boolean isLeaf = isLeaf(buffer);
 
-	    int length = getLength(buffer);
+	  int length = getLength(buffer);
 
-	    if (length == _n) {
-	      if (index == _indexRoot) {
-		split(index, xa);
+	  if (length == _n) {
+	    if (index == _indexRoot) {
+	      splitRoot(_indexRoot, xa);
 
-		continue;
-	      }
-	      else if (parentIndex != 0) {
-		split(parentIndex, index, xa);
+	      continue;
+	    }
+	    else if (parentIndex != 0) {
+	      split(parentIndex, index, xa);
 	    
-		index = parentIndex;
-		parentIndex = 0;
+	      index = parentIndex;
+	      parentIndex = 0;
 
-		continue;
-	      }
+	      continue;
 	    }
-	  
-	    if (! isLeaf) {
-	      parentIndex = index;
-	      index = lookupTuple(block.getBlockId(),
-				  buffer, keyBuffer, keyOffset, keyLength,
-				  isLeaf);
-	    }
-	    else {
-	      block.setFlushDirtyOnCommit(false);
-	      block.setDirty(0, Store.BLOCK_SIZE);
-	    
-	      insertLeafBlock(index, block.getBuffer(),
-			      keyBuffer, keyOffset, keyLength,
-			      value);
-
-	      return;
-	    }
-	  } finally {
-	    block.free();
 	  }
+	  
+	  if (! isLeaf) {
+	    parentIndex = index;
+	    index = lookupTuple(block.getBlockId(),
+				buffer, keyBuffer, keyOffset, keyLength,
+				isLeaf);
+	  }
+	  else {
+	    block.setFlushDirtyOnCommit(false);
+	    block.setDirty(0, Store.BLOCK_SIZE);
+	    
+	    insertLeafBlock(index, block.getBuffer(),
+			    keyBuffer, keyOffset, keyLength,
+			    value);
+
+	    return;
+	  }
+	} finally {
+	  block.free();
 	}
-      } catch (IOException e) {
-	throw new SQLExceptionWrapper(e);
       }
+    } catch (IOException e) {
+      throw new SQLExceptionWrapper(e);
+    } finally {
+      xa.unlockWrite(_lock);
     }
   }
 
@@ -415,10 +415,10 @@ public final class BTree {
    * Splits the current leaf into two.  Half of the entries go to the
    * left leaf and half go to the right leaf.
    */
-  private long split(long index, Transaction xa)
+  private long splitRoot(long index, Transaction xa)
     throws IOException
   {
-    log.finer("btree splitting " + (index / BLOCK_SIZE));
+    log.finer("btree splitting root " + (index / BLOCK_SIZE));
 
     Block parentBlock = null;
     Block leftBlock = null;
@@ -506,12 +506,14 @@ public final class BTree {
 		     Transaction xa)
     throws SQLException
   {
-    synchronized (this) {
-      try {
-	remove(-1, _indexRoot, keyBuffer, keyOffset, keyLength, xa);
-      } catch (IOException e) {
-	throw new SQLExceptionWrapper(e);
-      }
+    xa.lockWrite(_lock);
+
+    try {
+      remove(-1, _indexRoot, keyBuffer, keyOffset, keyLength, xa);
+    } catch (IOException e) {
+      throw new SQLExceptionWrapper(e);
+    } finally {
+      xa.unlockWrite(_lock);
     }
   }
 
@@ -526,21 +528,18 @@ public final class BTree {
 		      Transaction xa)
     throws IOException
   {
-    long lastIndex;
-    
     Block block = _store.readBlockByAddress(index);
 
     try {
       byte []buffer = block.getBuffer();
 
-      int flags = getInt(buffer, FLAGS_OFFSET);
-      boolean isLeaf = (flags & LEAF_FLAG) == 0;
+      boolean isLeaf = isLeaf(buffer);
       
       if (isLeaf) {
 	block.setFlushDirtyOnCommit(false);
 	block.setDirty(0, Store.BLOCK_SIZE);
 
-	removeLeafBlock(index, block.getBuffer(),
+	removeLeafEntry(index, block.getBuffer(),
 			keyBuffer, keyOffset, keyLength);
       }
       else {
@@ -548,7 +547,7 @@ public final class BTree {
 	
 	childIndex = lookupTuple(block.getBlockId(),
 				 buffer, keyBuffer, keyOffset, keyLength,
-				 false);
+				 isLeaf);
 
 	if (childIndex == FAIL)
 	  return;
@@ -603,16 +602,14 @@ public final class BTree {
 	
 	  int leftLength = getLength(leftBuffer);
 
-	  if (_minN < leftLength) {
+	  if (_minN < leftLength && isLeaf(buffer) == isLeaf(leftBuffer)) {
 	    parent.setFlushDirtyOnCommit(false);
 	    parent.setDirty(0, Store.BLOCK_SIZE);
 	    
 	    leftBlock.setFlushDirtyOnCommit(false);
 	    leftBlock.setDirty(0, Store.BLOCK_SIZE);
 	  
-	    moveFromLeft(parent.getBuffer(),
-			 leftBlock.getBuffer(),
-			 buffer, index);
+	    moveFromLeft(parentBuffer, leftBuffer, buffer, index);
 
 	    return false;
 	  }
@@ -629,16 +626,14 @@ public final class BTree {
 	
 	  int rightLength = getLength(rightBuffer);
 	  
-	  if (_minN < rightLength) {
+	  if (_minN < rightLength & isLeaf(buffer) == isLeaf(rightBuffer)) {
 	    parent.setFlushDirtyOnCommit(false);
 	    parent.setDirty(0, Store.BLOCK_SIZE);
 	    
 	    rightBlock.setFlushDirtyOnCommit(false);
 	    rightBlock.setDirty(0, Store.BLOCK_SIZE);
 
-	    moveFromRight(parent.getBuffer(),
-			  rightBlock.getBuffer(),
-			  buffer, index);
+	    moveFromRight(parentBuffer, rightBuffer, buffer, index);
 
 	    return false;
 	  }
@@ -654,15 +649,19 @@ public final class BTree {
 	Block leftBlock = _store.readBlockByAddress(leftIndex);
       
 	try {
-	  parent.setFlushDirtyOnCommit(false);
-	  parent.setDirty(0, Store.BLOCK_SIZE);
+	  byte []leftBuffer = leftBlock.getBuffer();
 	  
-	  leftBlock.setFlushDirtyOnCommit(false);
-	  leftBlock.setDirty(0, Store.BLOCK_SIZE);
+	  if (isLeaf(leftBuffer) == isLeaf(buffer)) {
+	    parent.setFlushDirtyOnCommit(false);
+	    parent.setDirty(0, Store.BLOCK_SIZE);
+	  
+	    leftBlock.setFlushDirtyOnCommit(false);
+	    leftBlock.setDirty(0, Store.BLOCK_SIZE);
       
-	  mergeLeft(parent.getBuffer(), leftBlock.getBuffer(), buffer, index);
+	    mergeLeft(parentBuffer, leftBuffer, buffer, index);
 
-	  return true;
+	    return true;
+	  }
 	} finally {
 	  leftBlock.free();
 	}
@@ -672,16 +671,19 @@ public final class BTree {
 	Block rightBlock = _store.readBlockByAddress(rightIndex);
 
 	try {
-	  rightBlock.setFlushDirtyOnCommit(false);
-	  rightBlock.setDirty(0, Store.BLOCK_SIZE);
+	  byte []rightBuffer = rightBlock.getBuffer();
+
+	  if (isLeaf(buffer) == isLeaf(rightBuffer)) {
+	    rightBlock.setFlushDirtyOnCommit(false);
+	    rightBlock.setDirty(0, Store.BLOCK_SIZE);
 	  
-	  parent.setFlushDirtyOnCommit(false);
-	  parent.setDirty(0, Store.BLOCK_SIZE);
+	    parent.setFlushDirtyOnCommit(false);
+	    parent.setDirty(0, Store.BLOCK_SIZE);
 	  
-	  mergeRight(parent.getBuffer(), rightBlock.getBuffer(),
-		     buffer, index);
+	    mergeRight(parentBuffer, rightBuffer, buffer, index);
 	
-	  return true;
+	    return true;
+	  }
 	} finally {
 	  rightBlock.free();
 	}
@@ -1090,7 +1092,7 @@ public final class BTree {
   /**
    * Removes from the next block given the current block and the given key.
    */
-  private long removeLeafBlock(long blockIndex,
+  private long removeLeafEntry(long blockIndex,
                                byte []block,
                                byte []keyBuffer,
                                int keyOffset,
@@ -1152,6 +1154,19 @@ public final class BTree {
   }
   */
 
+  private boolean isLeaf(byte []buffer)
+  {
+    return (getInt(buffer, FLAGS_OFFSET) & LEAF_FLAG) == 0;
+  }
+
+  private void setLeaf(byte []buffer, boolean isLeaf)
+  {
+    if (isLeaf)
+      setInt(buffer, FLAGS_OFFSET, getInt(buffer, FLAGS_OFFSET) & ~LEAF_FLAG);
+    else
+      setInt(buffer, FLAGS_OFFSET, getInt(buffer, FLAGS_OFFSET) | LEAF_FLAG);
+  }
+  
   /**
    * Reads an int
    */

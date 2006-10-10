@@ -1254,9 +1254,6 @@ public abstract class AbstractHttpRequest
 
     boolean hasOldSession = _session != null;
     _session = createSession(create, hasOldSession);
-
-    if (_session != null)
-      _session.addUse();
     
     return _session;
   }

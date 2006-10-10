@@ -145,11 +145,10 @@ public class FileStore extends StoreManager {
    */
   public void store(ClusterObject obj,
 		    TempStream tempStream,
-		    long crc,
-		    int updateCount)
+		    long crc)
     throws Exception
   {
-    if (crc == 0 && updateCount == 0)
+    if (crc == 0)
       return;
 
     int length = tempStream.getLength();

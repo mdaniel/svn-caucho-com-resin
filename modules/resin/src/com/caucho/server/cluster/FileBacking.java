@@ -559,6 +559,7 @@ public class FileBacking {
 
       return true;
     } catch (SQLException e) {
+      e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
     }
 

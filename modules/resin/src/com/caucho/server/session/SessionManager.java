@@ -1115,6 +1115,8 @@ public final class SessionManager implements ObjectManager, AlarmListener
 
     if (session == null)
       return null;
+
+    session.addUse();
     
     handleCreateListeners(session);
 
@@ -1260,20 +1262,21 @@ public final class SessionManager implements ObjectManager, AlarmListener
     if (session != null && ! session.getId().equals(key))
       throw new IllegalStateException(key + " != " + session.getId());
 
-    if (session != null) {
-      if (session.inUse())
-	return session;
+    if (session != null && session.addUse()) {
     }
     else if (now > 0 && _sessionStore != null) {
       if (! isInSessionGroup(key))
 	return null;
 
       session = create(key, now, create);
+      session.addUse();
       isNew = true;
     }
 
     if (session == null)
       return null;
+    
+    //System.out.println("SM: " + session);
 
     if (isNew) {
       killSession = ! load(session, now);
@@ -1287,6 +1290,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
 
     if (killSession && (! create || ! reuseSessionId(fromCookie))) {
       // XXX: session.setClosed();
+      session.endUse();
       session._isValid = false;
       _sessions.remove(key);
         
@@ -1349,7 +1353,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
     SessionImpl session = _sessions.remove(id);
 
     if (session != null)
-      session.invalidateImpl();
+      session.invalidateImpl(true);
   }
 
   /**
@@ -1408,10 +1412,12 @@ public final class SessionManager implements ObjectManager, AlarmListener
     try {
       // XXX: session.setNeedsLoad(false);
 
-      if (session.inUse()) {
+      /*
+      if (session.getUseCount() > 1) {
+	// if used by more than just us, 
 	return true;
       }
-      else if (now <= 0) {
+      else*/ if (now <= 0) {
         return false;
       }
       else if (session.load()) {
@@ -1422,6 +1428,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
         session.create(now);
       }
     } catch (Exception e) {
+      e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
       session.reset(now);
     }

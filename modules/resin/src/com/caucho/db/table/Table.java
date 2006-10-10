@@ -692,16 +692,13 @@ public class Table extends Store {
 	  continue;
 	}
 
-	WriteBlock writeBlock = xa.createWriteBlock(block);
-	block = writeBlock;
+	byte []buffer = block.getBuffer();
 
-	byte []buffer = writeBlock.getBuffer();
-
-	long rowAddr = blockIdToAddress(writeBlock.getBlockId(), rowOffset);
+	long rowAddr = blockIdToAddress(block.getBlockId(), rowOffset);
 
 	boolean isOkay = false;
 	try {
-	  iter.setRow(writeBlock, rowOffset);
+	  iter.setRow(block, rowOffset);
 
 	  queryContext.lock();
 
@@ -715,11 +712,17 @@ public class Table extends Store {
 	    column.setExpr(xa, buffer, rowOffset, value, queryContext);
 	  }
 
-	  writeBlock.setDirty(rowOffset, nextRowOffset);
+	  block.setDirty(rowOffset, nextRowOffset);
     
 	  buffer[rowOffset] |= 1;
-      
-	  validate(writeBlock, rowOffset, queryContext, xa);
+
+	  try {
+	    validate(block, rowOffset, queryContext, xa);
+	  } catch (SQLException e) {
+	    delete(xa, buffer, rowOffset);
+	    
+	    throw e;
+	  }
 
 	  for (int i = 0; i < columns.size(); i++) {
 	    Column column = columns.get(i);
@@ -734,7 +737,6 @@ public class Table extends Store {
 	    if (_autoIncrementValue < value)
 	      _autoIncrementValue = value;
 	  }
-	  queryContext.unlock();
 
 	  isOkay = true;
 	} finally {

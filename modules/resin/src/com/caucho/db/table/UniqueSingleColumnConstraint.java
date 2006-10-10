@@ -41,7 +41,7 @@ import com.caucho.sql.SQLExceptionWrapper;
 
 import com.caucho.db.index.BTree;
 
-import com.caucho.db.store.Transaction;
+import com.caucho.db.store.*;
 
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
@@ -155,11 +155,13 @@ public class UniqueSingleColumnConstraint extends Constraint {
       if (value != 0) {
 	Table table = sourceRow.getTable();
 
-	throw new SQLException(L.l("`{0}' in {1}.{2} fails uniqueness constraint.",
+	throw new SQLException(L.l("'{0}' in {1}.{2} fails uniqueness constraint with block address {3}.",
 				   column.getString(sourceBuffer,
 						    sourceOffset),
 				   table.getName(),
-				   column.getName()));
+				   column.getName(),
+				   ("" + (value / Store.BLOCK_SIZE)
+				    + "." + (value % Store.BLOCK_SIZE))));
       }
     } catch (IOException e) {
       throw new SQLExceptionWrapper(e);

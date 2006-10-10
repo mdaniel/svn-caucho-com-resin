@@ -371,8 +371,12 @@ public final class Lock implements ClockCacheItem {
       notifyAll();
       
       log.fine(L.l("transaction timed out waiting for lock"));
-      throw new LockTimeoutException(L.l("transaction timed out waiting for lock {0}",
-				 Alarm.getCurrentTime() - startTime));
+      
+      throw new LockTimeoutException(L.l("transaction timed out waiting for lock {0}ms, read:{1} upgrade:{2}, write:{3}",
+					 Alarm.getCurrentTime() - startTime,
+					 _readCount,
+					 _upgradeCount,
+					 _writeCount));
     } catch (SQLException e) {
       throw e;
     } catch (Exception e) {
