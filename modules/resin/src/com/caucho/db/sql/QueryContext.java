@@ -122,6 +122,7 @@ public class QueryContext {
     _isWrite = ! isReadOnly;
     _tableIterators = tableIterators;
     _blockLocks = new Block[_tableIterators.length];
+    _isLocked = false;
 
     _rowUpdateCount = 0;
     _groupItem = _tempGroupItem;

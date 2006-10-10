@@ -324,6 +324,9 @@ public class Inode {
 
 	long fragAddr = store.allocateFragment(xa);
 
+	if (fragAddr == 0)
+	  throw new IllegalStateException(L.l("illegal fragment"));
+
 	writeFragmentAddr(inode, inodeOffset,
 			  store, xa,
 			  currentLength, fragAddr);

@@ -87,16 +87,15 @@ public final class Lock implements ClockCacheItem {
 		 " upgrade:" + _upgradeCount);
     }
 
-    if (_upgradeCount == 0) {
-      _readCount++;
-    }
-    else if (queue(xa, Alarm.getCurrentTime() + timeout)) {
-      _readCount++;
+    long expire = Alarm.getCurrentTime() + timeout;
+    
+    queue(xa, expire);
 
-      wake();
-    }
-    else
-      throw new LockTimeoutException(L.l("can't obtain read lock"));
+    _readCount++;
+
+    dequeue(xa);
+
+    wake();
   }
 
   /**
@@ -135,11 +134,9 @@ public final class Lock implements ClockCacheItem {
     try {
       long expire = Alarm.getCurrentTime() + timeout;
       
-      while (_readCount != 1) {
-	queue(xa, expire);
-      }
+      queue(xa, expire);
 
-      isOkay = _readCount == 1;
+      isOkay = waitForRead(xa, expire, 1);
     } finally {
       if (! isOkay) {
 	_upgradeCount--;
@@ -170,11 +167,9 @@ public final class Lock implements ClockCacheItem {
     boolean isOkay = false;
 
     try {
-      while (_readCount != 0) {
-	queue(xa, expire); // , ! isFirst);
-      }
+      queue(xa, expire);
 
-      isOkay = _readCount == 0;
+      isOkay = waitForRead(xa, expire, 0);
     } finally {
       if (isOkay)
 	_readCount = 1;
@@ -244,11 +239,9 @@ public final class Lock implements ClockCacheItem {
     try {
       long expire = Alarm.getCurrentTime() + timeout;
 
-      while (_readCount != 1) {
-	queue(xa, expire); // , ! isFirst);
-      }
+      queue(xa, expire);
 
-      isOkay = _readCount == 1;
+      isOkay = waitForRead(xa, expire, 1);
     } finally {
       if (! isOkay) {
 	_writeCount--;
@@ -273,21 +266,15 @@ public final class Lock implements ClockCacheItem {
       log.finest("LockWrite[" + _id + "] read:" + _readCount +
 		" upgrade:" + _upgradeCount);
 
-    _upgradeCount++;
-
     long expire = Alarm.getCurrentTime() + timeout;
     boolean isOkay = false;
 
+    _upgradeCount++;
+
     try {
-      while (_readCount != 0) {
-	queue(xa, expire);
+      queue(xa, expire);
 
-	if (_readCount != 0 && (expire < Alarm.getCurrentTime() ||
-				Alarm.isTest()))
-	  throw new LockTimeoutException(L.l("Can't obtain write lock."));
-      }
-
-      isOkay = _readCount == 0;
+      isOkay = waitForRead(xa, expire, 0);
     } finally {
       if (isOkay) {
 	_readCount = 1;
@@ -353,8 +340,12 @@ public final class Lock implements ClockCacheItem {
     throws SQLException
   {
     long startTime = Alarm.getCurrentTime();
+    boolean isOkay = false;
 
     _queue.add(xa);
+
+    if (_queue.size() == 1)
+      return true;
 
     try {
       do {
@@ -364,8 +355,10 @@ public final class Lock implements ClockCacheItem {
 	  wait(delta);
 	}
 
-	if (_queue.get(0) == xa)
+	if (_queue.get(0) == xa) {
+	  isOkay = true;
 	  return true;
+	}
       } while (Alarm.getCurrentTime() < expireTime && ! Alarm.isTest()); 
 
       notifyAll();
@@ -382,8 +375,56 @@ public final class Lock implements ClockCacheItem {
     } catch (Exception e) {
       throw new SQLExceptionWrapper(e);
     } finally {
+      if (! isOkay)
+	_queue.remove(xa);
+    }
+  }
+
+  /**
+   * Waits for the reads to be a certain level.
+   */
+  private boolean waitForRead(Transaction xa, long expireTime, int readCount)
+    throws SQLException
+  {
+    boolean isOkay = false;
+
+    if (_queue.size() < 1 || _queue.get(0) != xa)
+      throw new IllegalStateException(L.l("illegal lock state"));
+
+    try {
+      while (readCount < _readCount &&
+	     Alarm.getCurrentTime() < expireTime && ! Alarm.isTest()) {
+	long delta = expireTime - Alarm.getCurrentTime();
+
+	if (delta > 0) {
+	  wait(delta);
+	}
+      }
+
+      if (_readCount <= readCount)
+	return true;
+      
+      log.fine(L.l("transaction timed out waiting for read lock"));
+      
+      throw new LockTimeoutException(L.l("transaction timed out waiting for write lock, read:{0} upgrade:{1}, write:{2}",
+					 _readCount,
+					 _upgradeCount,
+					 _writeCount));
+    } catch (SQLException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new SQLExceptionWrapper(e);
+    } finally {
       _queue.remove(xa);
     }
+  }
+
+  /**
+   * Wakes any transaction for the lock.
+   */
+  private void dequeue(Transaction xa)
+  {
+    _queue.remove(xa);
   }
 
   /**
@@ -392,7 +433,7 @@ public final class Lock implements ClockCacheItem {
   private boolean wake()
   {
     try {
-      notify();
+      notifyAll();
 
       return true;
     } catch (Throwable e) {
