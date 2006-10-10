@@ -1572,6 +1572,20 @@ public class RegexpModule
           quote = 0;
         break;
 
+      // non-capturing special constructs
+      case '(':
+        sb.append(ch);
+
+        if (i + 1 < len) {
+          ch = regexp.charAt(i + 1);
+
+          if (ch == '?') {
+            sb.append(ch);
+            i++;
+          }
+        }
+        break;
+
       case '*':
       case '?':
       case '+':
@@ -1579,6 +1593,10 @@ public class RegexpModule
 
         if (i + 1 < len && (ch = regexp.charAt(i + 1)) != '?') {
           sb.append('?');
+        }
+        else {
+          // invert non-greedy to greedy
+          i++;
         }
         break;
 
