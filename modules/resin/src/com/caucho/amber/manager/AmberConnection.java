@@ -913,7 +913,8 @@ public class AmberConnection
   public void beforeCommit()
     throws SQLException
   {
-    for (int i = 0; i < _txEntities.size(); i++) {
+    // jpa/0gh0
+    for (int i = _txEntities.size() - 1; i >= 0; i--) {
       Entity entity = _txEntities.get(i);
 
       entity.__caucho_flush();
@@ -1254,7 +1255,9 @@ public class AmberConnection
   {
     Table table = entity.__caucho_getEntityType().getTable();
 
-    addCompletion(new RowInvalidateCompletion(table.getName(), entity.__caucho_getPrimaryKey()));
+    Object key = entity.__caucho_getPrimaryKey();
+
+    addCompletion(new RowInvalidateCompletion(table.getName(), key));
 
     if (! _txEntities.contains(entity))
       _txEntities.add(entity);
