@@ -44,6 +44,11 @@ public class TargetModuleIDImpl implements TargetModuleID, java.io.Serializable 
   {
   }
 
+  private void log(String message)
+  {
+    System.out.println(getClass().getSimpleName() + ": " + message);
+  }
+
   public TargetModuleIDImpl(TargetImpl target, String moduleID)
   {
     _target = target;
@@ -55,7 +60,7 @@ public class TargetModuleIDImpl implements TargetModuleID, java.io.Serializable 
    */
   public Target getTarget()
   {
-    System.out.println("GET-TARGET");
+    log("GET-TARGET");
     return _target;
   }
     
@@ -64,7 +69,7 @@ public class TargetModuleIDImpl implements TargetModuleID, java.io.Serializable 
    */
   public String getModuleID()
   {
-    System.out.println("GET-MODULE-ID");
+    log("GET-MODULE-ID");
 
     return _moduleID;
   }
@@ -74,7 +79,7 @@ public class TargetModuleIDImpl implements TargetModuleID, java.io.Serializable 
    */
   public String getWebURL()
   {
-    System.out.println("GET-WEB-URL");
+    log("GET-WEB-URL");
 
     throw new UnsupportedOperationException();
   }
@@ -84,7 +89,7 @@ public class TargetModuleIDImpl implements TargetModuleID, java.io.Serializable 
    */
   public TargetModuleID getParentTargetModuleID()
   {
-    System.out.println("GET-PARENT-TARGET");
+    log("GET-PARENT-TARGET");
 
     return _parent;
   }
@@ -102,7 +107,7 @@ public class TargetModuleIDImpl implements TargetModuleID, java.io.Serializable 
    */
   public TargetModuleID []getChildTargetModuleID()
   {
-    System.out.println("GET-CHILD-TARGET");
+    log("GET-CHILD-TARGET");
 
     return new TargetModuleID[0];
   }

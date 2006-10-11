@@ -29,12 +29,10 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.caucho.util.NullIterator;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.util.Iterator;
 
 /**
  * This is the service provider's interface for a stream supported by

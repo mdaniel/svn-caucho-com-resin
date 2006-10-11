@@ -72,7 +72,6 @@ changes the resulting digest is different.</p>
 the user registers, the application needs to compute the
 digest to store it.</p>
 
-
 <!-- a form for calculating an MD5 digest -->
 <jsp:scriptlet>
 
@@ -127,6 +126,11 @@ pageContext.setAttribute("digest_requestURI",digest_requestURI);
   </td></tr></table>
 </form>
 
+<p>Unix users can quickly calculate a digest:</p>
+<example>
+echo -n "user:resin:password" | openssl dgst -md5 -binary | uuencode -m -
+</example>
+
 <p>The class <a href="javadoc|com.caucho.http.security.PasswordDigest|"/> can
 be used to calculate a digest.</p>
 
@@ -154,8 +158,10 @@ be used to calculate a digest.</p>
   $digest = $passwordDigest-&gt;getPasswordDigest($username, $password, $realm);
 </example>
 
+<p>
 The realm for JdbcAuthenticator and XmlAuthenticator defaults to "resin";
 the realm can be specified during configuration:
+</p>
 
 <example title="Specifying a realm">
 

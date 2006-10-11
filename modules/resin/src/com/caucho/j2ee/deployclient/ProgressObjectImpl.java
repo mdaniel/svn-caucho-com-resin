@@ -46,6 +46,11 @@ public class ProgressObjectImpl implements ProgressObject, java.io.Serializable 
   {
   }
 
+  private void log(String message)
+  {
+    System.out.println(getClass().getSimpleName() + ": " + message);
+  }
+
   public ProgressObjectImpl(TargetModuleID []targetModuleIDs)
   {
     _targetModuleIDs = targetModuleIDs;
@@ -83,7 +88,7 @@ public class ProgressObjectImpl implements ProgressObject, java.io.Serializable 
    */
   public ClientConfiguration getClientConfiguration(TargetModuleID id)
   {
-    System.out.println("GET-CLIENT-CONFIG:");
+    log("GET-CLIENT-CONFIG:");
     throw new UnsupportedOperationException();
   }
   
@@ -126,7 +131,7 @@ public class ProgressObjectImpl implements ProgressObject, java.io.Serializable 
    */
   public void addProgressListener(ProgressListener listener)
   {
-    System.out.println("ADD-LISTENER:");
+    log("ADD-LISTENER:");
   }
   
   /**
@@ -134,7 +139,7 @@ public class ProgressObjectImpl implements ProgressObject, java.io.Serializable 
    */
   public void removeProgressListener(ProgressListener listener)
   {
-    System.out.println("REMOVE-LISTENER:");
+    log("REMOVE-LISTENER:");
   }
 }
 

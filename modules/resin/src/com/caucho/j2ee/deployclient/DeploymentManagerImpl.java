@@ -28,30 +28,24 @@
 
 package com.caucho.j2ee.deployclient;
 
-import java.util.Locale;
-
-import java.io.File;
-import java.io.InputStream;
-import java.io.FileInputStream;
+import com.caucho.hessian.client.HessianProxyFactory;
 
 import javax.enterprise.deploy.model.DeployableObject;
-
 import javax.enterprise.deploy.shared.DConfigBeanVersionType;
 import javax.enterprise.deploy.shared.ModuleType;
-
-import javax.enterprise.deploy.spi.DeploymentManager;
 import javax.enterprise.deploy.spi.DeploymentConfiguration;
+import javax.enterprise.deploy.spi.DeploymentManager;
 import javax.enterprise.deploy.spi.Target;
 import javax.enterprise.deploy.spi.TargetModuleID;
-
-import javax.enterprise.deploy.spi.status.ProgressObject;
-
-import javax.enterprise.deploy.spi.exceptions.TargetException;
-import javax.enterprise.deploy.spi.exceptions.InvalidModuleException;
 import javax.enterprise.deploy.spi.exceptions.DConfigBeanVersionUnsupportedException;
 import javax.enterprise.deploy.spi.exceptions.DeploymentManagerCreationException;
-
-import com.caucho.hessian.client.HessianProxyFactory;
+import javax.enterprise.deploy.spi.exceptions.InvalidModuleException;
+import javax.enterprise.deploy.spi.exceptions.TargetException;
+import javax.enterprise.deploy.spi.status.ProgressObject;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.Locale;
 
 /**
  * Manager for the deployments.
@@ -70,6 +64,11 @@ public class DeploymentManagerImpl implements DeploymentManager {
     _uri = uri.substring(p);
   }
 
+  private void log(String message)
+  {
+    System.out.println(getClass().getSimpleName() + ": " + message);
+  }
+
   /**
    * Connect to the manager.
    */
@@ -77,7 +76,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
     throws DeploymentManagerCreationException
   {
     try {
-      System.out.println("CONNECT:");
+      log("CONNECT:");
       
       HessianProxyFactory factory = new HessianProxyFactory();
 
@@ -120,7 +119,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
       
       return targets;
     } catch (Throwable e) {
-      System.out.println("EXCEPTION-TARGETS:");
+      log("EXCEPTION-TARGETS:");
       e.printStackTrace();
       
       return new Target[0];
@@ -136,7 +135,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
 					    Target []targetList)
     throws TargetException, IllegalStateException
   {
-    System.out.println("GET-RUN-MODULES");
+    log("GET-RUN-GET-RUN-MMODULES");
     return new TargetModuleID[0];
   }
   
@@ -147,7 +146,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
 					       Target []targetList)
     throws TargetException, IllegalStateException
   {
-    System.out.println("GET-NON-RUN-MODULES");
+    log("GET-NON-RUN-MODULES");
     return new TargetModuleID[0];
   }
   
@@ -158,7 +157,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
 					      Target []targetList)
     throws TargetException, IllegalStateException
   {
-    System.out.println("GET-MODULES:");
+    log("GET-MODULES:");
     if (_proxy == null)
       throw new IllegalStateException("DeploymentManager is disconnected");
 
@@ -179,7 +178,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
   public DeploymentConfiguration createConfiguration(DeployableObject dObj)
     throws InvalidModuleException
   {
-    System.out.println("CREATE-CONF");
+    log("CREATE-CONF");
     throw new UnsupportedOperationException();
   }
   
@@ -194,7 +193,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
     InputStream archiveIn = null;
     InputStream ddIn = null;
 
-    System.out.println("PRE-DIST:");
+    log("PRE-DIST:");
 
     try {
       archiveIn = new FileInputStream(archive);
@@ -202,7 +201,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
 
       ProgressObject progress = distribute(targetList, archiveIn, ddIn);
 
-      System.out.println("POST-DIST:" + progress + " " + progress.getDeploymentStatus().isFailed() + " " + progress.getDeploymentStatus().getMessage());
+      log("POST-DIST:" + progress + " " + progress.getDeploymentStatus().isFailed() + " " + progress.getDeploymentStatus().getMessage());
     
       return progress;
     } catch (Exception e) {
@@ -228,7 +227,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
 				   InputStream deploymentPlan)
     throws IllegalStateException
   {
-    System.out.println("DISTRIBUTE:");
+    log("DISTRIBUTE:");
     if (_proxy == null)
       throw new IllegalStateException("DeploymentManager is disconnected");
 
@@ -274,7 +273,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
   public ProgressObject undeploy(TargetModuleID []moduleIDList)
     throws IllegalStateException
   {
-    System.out.println("UNDEPLOY:");
+    log("UNDEPLOY:");
     if (_proxy == null)
       throw new IllegalStateException("DeploymentManager is disconnected");
 

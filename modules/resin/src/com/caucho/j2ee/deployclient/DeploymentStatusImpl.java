@@ -28,13 +28,11 @@
 
 package com.caucho.j2ee.deployclient;
 
-import java.io.Serializable;
-
-import javax.enterprise.deploy.spi.status.DeploymentStatus;
-
 import javax.enterprise.deploy.shared.ActionType;
 import javax.enterprise.deploy.shared.CommandType;
 import javax.enterprise.deploy.shared.StateType;
+import javax.enterprise.deploy.spi.status.DeploymentStatus;
+import java.io.Serializable;
 
 /**
  * Represents the status of a deployed module.
@@ -42,7 +40,12 @@ import javax.enterprise.deploy.shared.StateType;
 public class DeploymentStatusImpl implements DeploymentStatus, Serializable {
   private String _message;
   private boolean _isFailed;
-  
+
+  private void log(String message)
+  {
+    System.out.println(getClass().getSimpleName() + ": " + message);
+  }
+
   /**
    * Returns the StateType value.
    */
@@ -56,7 +59,7 @@ public class DeploymentStatusImpl implements DeploymentStatus, Serializable {
    */
   public CommandType getCommand()
   {
-    System.out.println("COMMAND");
+    log("COMMAND");
     return CommandType.DISTRIBUTE;
   }
   
@@ -65,7 +68,7 @@ public class DeploymentStatusImpl implements DeploymentStatus, Serializable {
    */
   public ActionType getAction()
   {
-    System.out.println("ACTION");
+    log("ACTION");
     return ActionType.EXECUTE;
   }
   

@@ -327,6 +327,42 @@ your PATH.
 </p>
 
 </s1>
+
+<s1 title="Problems reading POST data">
+
+<p>
+A first step is to enable <a href="troubleshoot|technique#debug-log">debug
+logging</a>.  Debug logging will show the request coming into to Resin, and
+provide some information on how Resin is dealing with the post.
+</p>
+
+<p>
+It is important to make sure the encoding is set properly before reading POST
+parameters.
+</p>
+
+<p>
+The browser will always send back parameters in the same encoding as
+the output page.  Since the request doesn't include the encoding (an oversight
+in the HTTP spec), the application code needs to make sure the encoding
+matches.
+</p>
+
+<p>
+So the first thing to do is to determine that encoding your form page has when
+it is sent to the browser.  Your application should always specify that.
+Having established that, you will know what encoding the browser is going to
+use for the POST.  (utf-8 is a natural choice for encoding here, I'm not sure
+why you would use anything else).
+</p>
+
+<p>
+Then before reading the POST parameters make sure you set the encoding to
+match.  You can call request.setCharacterEncoding(encoding) to do that.
+</p>
+
+</s1>
+
 </body>
 
 </document>

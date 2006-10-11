@@ -29,55 +29,34 @@
 
 package com.caucho.j2ee.deployserver;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
-
-import javax.servlet.GenericServlet;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.ServletException;
-
-import javax.management.ObjectName;
-
-import javax.enterprise.deploy.spi.TargetModuleID;
-
-import javax.enterprise.deploy.spi.status.ProgressObject;
-
-import org.w3c.dom.Node;
-
-import com.caucho.util.L10N;
-import com.caucho.util.IntMap;
-
+import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-
+import com.caucho.hessian.io.HessianInput;
+import com.caucho.hessian.io.HessianOutput;
+import com.caucho.j2ee.deployclient.DeploymentStatusImpl;
+import com.caucho.j2ee.deployclient.ProgressObjectImpl;
+import com.caucho.j2ee.deployclient.TargetImpl;
+import com.caucho.j2ee.deployclient.TargetModuleIDImpl;
 import com.caucho.log.Log;
-
+import com.caucho.management.server.HostMXBean;
+import com.caucho.server.webapp.Application;
+import com.caucho.util.IntMap;
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.config.Config;
-
-import com.caucho.jmx.Jmx;
-
-import com.caucho.xml.XmlPrinter;
-
-import com.caucho.server.webapp.Application;
-
-import com.caucho.management.server.HostMXBean;
-
-import com.caucho.hessian.io.HessianInput;
-import com.caucho.hessian.io.HessianOutput;
-
-import com.caucho.j2ee.deployclient.TargetImpl;
-import com.caucho.j2ee.deployclient.TargetModuleIDImpl;
-import com.caucho.j2ee.deployclient.DeploymentStatusImpl;
-import com.caucho.j2ee.deployclient.ProgressObjectImpl;
+import javax.enterprise.deploy.spi.TargetModuleID;
+import javax.enterprise.deploy.spi.status.ProgressObject;
+import javax.servlet.GenericServlet;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Manager for the deployments.
@@ -93,7 +72,6 @@ public class DeployServlet extends GenericServlet {
 
   private static final IntMap _methodMap = new IntMap();
 
-  private TargetImpl _target;
   private TargetImpl []_targets;
 
   private Path _deployPath;
@@ -115,9 +93,9 @@ public class DeployServlet extends GenericServlet {
     throws ServletException
   {
     try {
-      _target = new TargetImpl("Resin-target", "default target");
+      TargetImpl target = new TargetImpl("Resin-target", "default target");
 
-      _targets = new TargetImpl[] { _target };
+      _targets = new TargetImpl[] { target };
 
       if (_deployPath == null)
 	throw new ServletException(L.l("<deploy-path> is required."));
@@ -173,11 +151,13 @@ public class DeployServlet extends GenericServlet {
 	{
 	  TargetImpl []targets = (TargetImpl[]) in.readObject(TargetImpl[].class);
 	  DeploymentPlan plan = new DeploymentPlan();
-	  InputStream planIs = in.readInputStream();
-	  try {
+
+          InputStream planIs = in.readInputStream();
+
+          try {
 	    new Config().configure(plan, planIs);
 	  } finally {
-	    planIs.close();
+            planIs.close();
 	  }
 
 	  InputStream archiveIs = in.readInputStream();
@@ -187,9 +167,7 @@ public class DeployServlet extends GenericServlet {
 	  in.completeCall();
 	  out.startReply();
 
-	  System.out.println("DIST: " + po);
 	  out.writeObject(po);
-	  System.out.println("DONE ");
 	  out.completeReply();
 	  break;
 	}
@@ -233,6 +211,9 @@ public class DeployServlet extends GenericServlet {
 
     Path path = _deployPath.lookup(plan.getArchiveName());
 
+    if (log.isLoggable(Level.FINER))
+      log.log(Level.FINER, L.l("creating local file {0}", path));
+
     WriteStream os = path.openWrite();
 
     try {
@@ -241,26 +222,39 @@ public class DeployServlet extends GenericServlet {
       os.close();
     }
 
+    if (log.isLoggable(Level.FINER))
+      log.log(Level.FINER, L.l("distribute {0}", plan));
+
     _hostMXBean.expandEarDeploy(plan.getName());
     
     Path metaPath = _deployPath.lookup(plan.getMetaPathName());
-    System.out.println("META:" + metaPath);
 
+    if (log.isLoggable(Level.FINEST))
+      log.log(Level.FINEST, L.l("metaPath {0}", metaPath));
+
+    /**
+     * XXX: this doesn;t work, it stops the deployment of the ear
+     * because the file it creates is newer than the ear
     ArrayList<DeploymentPlan.ExtFile> _extFileList;
     _extFileList = plan.getExtFileList();
-    System.out.println("EXT: " + _extFileList);
 
     for (int i = 0; i < _extFileList.size(); i++) {
       DeploymentPlan.ExtFile extFile = _extFileList.get(i);
 
+      if (log.isLoggable(Level.FINEST))
+        log.log(Level.FINEST, L.l("extFile {0}", extFile));
+
       Path filePath = metaPath.lookup(extFile.getName());
       Node node = extFile.getData();
 
+      if (log.isLoggable(Level.FINEST))
+        log.log(Level.FINEST, L.l("file {0}", filePath));
+
       filePath.getParent().mkdirs();
-      System.out.println("FILE:" + filePath);
 
       XmlPrinter.print(filePath, node);
     }
+     */
 
     log.info("deploying: " + plan.getName());
     
@@ -274,8 +268,6 @@ public class DeployServlet extends GenericServlet {
       configException = e;
       
       log.log(Level.FINE, e.toString(), e);
-      
-      System.out.println("--- Exception: " + e);
     }
     
 
@@ -296,7 +288,6 @@ public class DeployServlet extends GenericServlet {
     DeploymentStatusImpl status = new DeploymentStatusImpl();
     progress.setDeploymentStatus(status);
 
-    System.out.println("CONFIG-EXCEPTION: " + configException);
     if (configException != null) {
       status.setFailed(true);
       
@@ -314,7 +305,6 @@ public class DeployServlet extends GenericServlet {
   {
     TargetImpl target = _targets[0];
 
-    System.out.println("MODES: " + type);
     ArrayList<TargetModuleID> idList = new ArrayList<TargetModuleID>();
     
     String []list = _deployPath.list();
@@ -367,27 +357,43 @@ public class DeployServlet extends GenericServlet {
     if (ids == null || ids.length == 0)
       return null;
 
-    stop(ids);
+    for (int i = 0; i < ids.length; i++) {
+      TargetModuleID targetModuleID = ids[i];
+      log.info(L.l("undeploying {0}", targetModuleID.getModuleID()));
+      stop(ids[i]);
+    }
 
     for (int i = 0; i < ids.length; i++) {
       String name = ids[i].getModuleID();
+
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, L.l("deleting {0}", _deployPath.lookup(name)));
 
       _deployPath.lookup(name).remove();
 
       if (name.endsWith(".war")) {
 	name = name.substring(0, name.length() - 4);
 
-	_deployPath.lookup(name).removeAll();
+        if (log.isLoggable(Level.FINER))
+          log.log(Level.FINER, L.l("deleting {0}", _deployPath.lookup(name)));
+
+        _deployPath.lookup(name).removeAll();
       }
       else if (name.endsWith(".ear")) {
 	name = "_ear_" + name.substring(0, name.length() - 4);
 
-	_deployPath.lookup(name).removeAll();
+        if (log.isLoggable(Level.FINER))
+          log.log(Level.FINER, L.l("deleting {0}", _deployPath.lookup(name)));
+
+        _deployPath.lookup(name).removeAll();
       }
       else if (name.endsWith(".rar")) {
 	name = "_rar_" + name.substring(0, name.length() - 4);
 
-	_deployPath.lookup(name).removeAll();
+        if (log.isLoggable(Level.FINER))
+          log.log(Level.FINER, L.l("deleting {0}", _deployPath.lookup(name)));
+
+        _deployPath.lookup(name).removeAll();
       }
 
       Throwable configException = null;
@@ -404,7 +410,7 @@ public class DeployServlet extends GenericServlet {
     return new ProgressObjectImpl(ids);
   }
   
-  private void stop(TargetModuleID []targets)
+  private void stop(TargetModuleID target)
     throws IOException
   {
   }

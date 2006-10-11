@@ -71,7 +71,7 @@
   <servlet servlet-name='deploy'
            servlet-class='com.caucho.j2ee.deployserver.DeployServlet'>
     <init>
-      <deploy-path>deploy</deploy-path>
+      <deploy-path>${server.root}/jsr88-deploy</deploy-path>
      </init>
   </servlet>
 

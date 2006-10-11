@@ -199,6 +199,16 @@ of read-only sessions or must save the session on each request.</p>
 
 </s2>
 
+<s2 title="Disk copy">
+<p>Resin stores a disk copy of the session information, in the location
+specified by the <var>path</var>.  The disk copy serves two purposes.  The first is
+that it allows Resin to keep session information for a large number of
+sessions. An efficient memory cache keeps the most active sessions in memory
+and the disk holds all of the sessions without requiring large amounts of
+memory.  The second purpose of the disk copy is that the sessions are recovered
+from disk when the server is restarted.</p>
+</s2>
+
 <s2 title="Failover">
 
 <p>Since the session always has a current copy on two servers, the load
