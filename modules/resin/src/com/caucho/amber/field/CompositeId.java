@@ -505,15 +505,7 @@ public class CompositeId extends Id {
   public void generateMatch(JavaWriter out, String key)
     throws IOException
   {
-    if (! isEmbeddedId()) {
-      out.println("return " + generateEquals("super", key) + ";");
-    }
-    else {
-      EmbeddedIdField embedded = getEmbeddedIdField();
-      String getter = embedded.generateGet("this");
-      out.println("return " +
-                  generateEquals(getter, key) + ";");
-    }
+    out.println("return __caucho_getPrimaryKey().equals(" + key + ");");
   }
 
   /**
