@@ -408,6 +408,69 @@ public class EntityEmbeddedField extends AbstractField {
     }
   }
 
+  /*
+   * Generates make key.
+   *
+  public void generateMakeKey(JavaWriter out)
+  {
+    if (! isFieldAccess() && getGetterMethod() == null)
+      return;
+
+    boolean isFirst = true;
+
+    for (Map.Entry<String, Column> entry : _columns.entrySet()) {
+      Column column = entry.getValue();
+
+      String getter = _fieldNameByColumn.get(column.getName());
+
+      EntityType entityType = (EntityType) getType();
+
+      if (! entityType.isFieldAccess()) {
+        getter = "get" + Character.toUpperCase(getter.charAt(0)) +
+          getter.substring(1);
+      }
+
+      if (isFirst)
+        isFirst = false;
+      else
+        cb.append(", ");
+
+      cb.append(thisGetter + "." + getter + "()");
+      out.print(field.getJavaTypeName() + " a" + i);
+    }
+  }
+  */
+
+  /**
+   * Generates get property.
+   */
+  public void generateGetPrimaryKey(CharBuffer cb)
+  {
+    if (! isFieldAccess() && getGetterMethod() == null)
+      return;
+
+    String thisGetter = generateGet("this");
+
+    EntityType entityType = (EntityType) getType();
+
+    ArrayList<AmberField> fields = entityType.getFields();
+    for (int i = 0; i < fields.size(); i++) {
+      if (i != 0)
+        cb.append(", ");
+
+      AmberField field = fields.get(i);
+
+      String getter = field.getName();
+
+      if (! entityType.isFieldAccess()) {
+        getter = "get" + Character.toUpperCase(getter.charAt(0)) +
+          getter.substring(1);
+      }
+
+      cb.append(thisGetter + "." + getter + "()");
+    }
+  }
+
   /**
    * Generates loading code
    */

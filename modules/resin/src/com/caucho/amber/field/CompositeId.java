@@ -142,24 +142,53 @@ public class CompositeId extends Id {
     out.print(getForeignTypeName() + " " + makeName);
     out.print("(");
 
-    ArrayList<IdField> keys = getKeys();
-    for (int i = 0; i < keys.size(); i++) {
-      if (i != 0)
-        out.print(", ");
+    if (! isEmbeddedId()) {
+      ArrayList<IdField> keys = getKeys();
+      for (int i = 0; i < keys.size(); i++) {
+        if (i != 0)
+          out.print(", ");
 
-      IdField key = keys.get(i);
+        IdField key = keys.get(i);
 
-      out.print(key.getJavaTypeName() + " a" + i);
+        out.print(key.getJavaTypeName() + " a" + i);
+      }
     }
+    else {
+      EntityType embeddable = (EntityType) getEmbeddedIdField().getType();
+
+      ArrayList<AmberField> fields = embeddable.getFields();
+      for (int i = 0; i < fields.size(); i++) {
+        if (i != 0)
+          out.print(", ");
+
+        AmberField field = fields.get(i);
+
+        out.print(field.getJavaTypeName() + " a" + i);
+      }
+    }
+
     out.println(")");
     out.println("{");
     out.pushDepth();
     out.println(getForeignTypeName() + " key = new " + getForeignTypeName() + "();");
 
-    for (int i = 0; i < keys.size(); i++) {
-      IdField key = keys.get(i);
+    if (! isEmbeddedId()) {
+      ArrayList<IdField> keys = getKeys();
+      for (int i = 0; i < keys.size(); i++) {
+        IdField key = keys.get(i);
 
-      out.println(key.generateSetKeyProperty("key", "a" + i) + ";");
+        out.println(key.generateSetKeyProperty("key", "a" + i) + ";");
+      }
+    }
+    else {
+      EntityType embeddable = (EntityType) getEmbeddedIdField().getType();
+
+      ArrayList<AmberField> fields = embeddable.getFields();
+      for (int i = 0; i < fields.size(); i++) {
+        AmberField field = fields.get(i);
+
+        out.println(field.generateSet("key", "a" + i) + ";");
+      }
     }
 
     out.println("return key;");
@@ -285,11 +314,16 @@ public class CompositeId extends Id {
 
     ArrayList<IdField> keys = getKeys();
 
-    for (int i = 0; i < keys.size(); i++) {
-      if (i != 0)
-        cb.append(", ");
+    if (! isEmbeddedId()) {
+      for (int i = 0; i < keys.size(); i++) {
+        if (i != 0)
+          cb.append(", ");
 
-      cb.append(keys.get(i).generateGet(value));
+        cb.append(keys.get(i).generateGet(value));
+      }
+    }
+    else {
+      getEmbeddedIdField().generateGetPrimaryKey(cb);
     }
 
     cb.append(")");
@@ -471,7 +505,15 @@ public class CompositeId extends Id {
   public void generateMatch(JavaWriter out, String key)
     throws IOException
   {
-    out.println("return " + generateEquals("super", key) + ";");
+    if (! isEmbeddedId()) {
+      out.println("return " + generateEquals("super", key) + ";");
+    }
+    else {
+      EmbeddedIdField embedded = getEmbeddedIdField();
+      String getter = embedded.generateGet("this");
+      out.println("return " +
+                  generateEquals(getter, key) + ";");
+    }
   }
 
   /**

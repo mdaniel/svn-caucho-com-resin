@@ -39,7 +39,7 @@ import java.lang.reflect.Modifier;
  */
 public class JFieldWrapper extends JField {
   private JClassLoader _loader;
-  
+
   private Field _field;
 
   public JFieldWrapper(Field field, JClassLoader loader)
@@ -47,7 +47,7 @@ public class JFieldWrapper extends JField {
     _loader = loader;
     _field = field;
   }
-  
+
   /**
    * Returns the field name.
    */
@@ -81,14 +81,14 @@ public class JFieldWrapper extends JField {
       Type type = _field.getGenericType();
 
       if (type instanceof Class)
-	return getType();
+  return getType();
       else
-	return new JTypeWrapper(_loader, (ParameterizedType) type);
+  return new JTypeWrapper(_loader, (ParameterizedType) type);
     } catch (NoSuchMethodError e) {
       return getType();
     }
   }
-  
+
   /**
    * Returns true for a static field.
    */
@@ -96,7 +96,15 @@ public class JFieldWrapper extends JField {
   {
     return Modifier.isStatic(_field.getModifiers());
   }
-  
+
+  /**
+   * Returns true for a private field.
+   */
+  public boolean isPrivate()
+  {
+    return Modifier.isPrivate(_field.getModifiers());
+  }
+
   /**
    * Returns true for a transient field.
    */

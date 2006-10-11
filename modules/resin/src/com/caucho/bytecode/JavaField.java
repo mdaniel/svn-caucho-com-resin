@@ -53,7 +53,7 @@ public class JavaField extends JField {
   private ArrayList<Attribute> _attributes = new ArrayList<Attribute>();
 
   private JavaAnnotation []_annotations;
-  
+
   /**
    * Sets the JavaClass.
    */
@@ -61,7 +61,7 @@ public class JavaField extends JField {
   {
     _jClass = jClass;
   }
-  
+
   /**
    * Returns the declaring class.
    */
@@ -93,7 +93,7 @@ public class JavaField extends JField {
   {
     return _name;
   }
-  
+
   /**
    * Sets the access flags
    */
@@ -128,7 +128,7 @@ public class JavaField extends JField {
   {
     return _descriptor;
   }
-  
+
   /**
    * Gets the typename.
    */
@@ -136,7 +136,7 @@ public class JavaField extends JField {
   {
     return getClassLoader().descriptorToClass(getDescriptor(), 0);
   }
-  
+
   /**
    * Returns true for a static field.
    */
@@ -144,7 +144,15 @@ public class JavaField extends JField {
   {
     return Modifier.isStatic(getAccessFlags());
   }
-  
+
+  /**
+   * Returns true for a private field.
+   */
+  public boolean isPrivate()
+  {
+    return Modifier.isPrivate(getAccessFlags());
+  }
+
   /**
    * Returns true for a transient field.
    */
@@ -152,7 +160,7 @@ public class JavaField extends JField {
   {
     return Modifier.isTransient(getAccessFlags());
   }
-  
+
   /**
    * Gets the typename.
    */
@@ -184,7 +192,7 @@ public class JavaField extends JField {
       Attribute attr = _attributes.get(i);
 
       if (attr.getName().equals(name))
-	return attr;
+  return attr;
     }
 
     return null;
@@ -199,25 +207,25 @@ public class JavaField extends JField {
       Attribute attr = getAttribute("RuntimeVisibleAnnotations");
 
       if (attr instanceof OpaqueAttribute) {
-	byte []buffer = ((OpaqueAttribute) attr).getValue();
-	
-	try {
-	  ByteArrayInputStream is = new ByteArrayInputStream(buffer);
+  byte []buffer = ((OpaqueAttribute) attr).getValue();
 
-	  ConstantPool cp = _jClass.getConstantPool();
+  try {
+    ByteArrayInputStream is = new ByteArrayInputStream(buffer);
 
-	  _annotations = JavaAnnotation.parseAnnotations(is, cp,
-							 getClassLoader());
-	} catch (IOException e) {
-	  log.log(Level.FINER, e.toString(), e);
-	}
+    ConstantPool cp = _jClass.getConstantPool();
+
+    _annotations = JavaAnnotation.parseAnnotations(is, cp,
+               getClassLoader());
+  } catch (IOException e) {
+    log.log(Level.FINER, e.toString(), e);
+  }
       }
 
       if (_annotations == null) {
-	_annotations = new JavaAnnotation[0];
+  _annotations = new JavaAnnotation[0];
       }
     }
-    
+
     return _annotations;
   }
 

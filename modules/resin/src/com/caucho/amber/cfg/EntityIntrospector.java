@@ -1005,6 +1005,13 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
           return false;
       }
 
+      // jpa/0gh0
+      for (JField field : type.getDeclaredFields()) {
+
+        if ((! field.isTransient()) && field.isPrivate())
+          return false;
+      }
+
       return true;
     }
 
