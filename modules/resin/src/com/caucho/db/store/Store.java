@@ -106,12 +106,13 @@ public class Store {
   
   public final static int BLOCK_BITS = 16;
   public final static int BLOCK_SIZE = 1 << BLOCK_BITS;
-  public final static int BLOCK_INDEX_MASK = BLOCK_SIZE - 1;
+  public final static long BLOCK_INDEX_MASK = BLOCK_SIZE - 1;
   public final static long BLOCK_MASK = ~ BLOCK_INDEX_MASK;
   public final static long BLOCK_OFFSET_MASK = BLOCK_SIZE - 1;
 
-  public final static int ALLOC_PER_BLOCK = BLOCK_SIZE / 2;
-  public final static long ALLOC_SEGMENT = (long) BLOCK_SIZE * ALLOC_PER_BLOCK;
+  private final static int ALLOC_BYTES_PER_BLOCK = 8;
+
+  private final static int ALLOC_CHUNK_SIZE = 1024 * ALLOC_BYTES_PER_BLOCK;
   
   public final static int ALLOC_FREE     = 0x00;
   public final static int ALLOC_ROW      = 0x01;
@@ -121,13 +122,12 @@ public class Store {
   public final static int ALLOC_MASK     = 0x0f;
 
   public final static int FRAGMENT_SIZE = 8 * 1024;
-  public final static int FRAGMENT_PER_BLOCK = BLOCK_SIZE / FRAGMENT_SIZE;
+  public final static int FRAGMENT_PER_BLOCK
+    = (int) (BLOCK_SIZE / FRAGMENT_SIZE);
   
   public final static long DATA_START = BLOCK_SIZE;
   
   public final static int STORE_CREATE_END = 1024;
-
-  public final static int ALLOC_CHUNK_SIZE = 1024;
   
   protected final Database _database;
   protected final BlockManager _blockManager;
@@ -153,7 +153,6 @@ public class Store {
   private int _allocDirtyMax;
   
   private final Object _fragmentLock = new Object();
-  private byte []_fragmentTable;
 
   private final Object _statLock = new Object();
   // number of fragments currently used
@@ -284,7 +283,7 @@ public class Store {
    * Converts from the block index to the address for database
    * storage.
    */
-  static long blockIndexToAddr(long blockIndex)
+  private static long blockIndexToAddr(long blockIndex)
   {
     return blockIndex << BLOCK_BITS;
   }
@@ -292,9 +291,18 @@ public class Store {
   /**
    * Converts from the block index to the unique block id.
    */
-  public final long blockIndexToBlockId(long blockIndex)
+  private final long blockIndexToBlockId(long blockIndex)
   {
     return (blockIndex << BLOCK_BITS) + _id;
+  }
+
+  /**
+   * Converts from the block index to the address for database
+   * storage.
+   */
+  private static long blockIdToIndex(long blockId)
+  {
+    return blockId >> BLOCK_BITS;
   }
 
   /**
@@ -346,7 +354,6 @@ public class Store {
       throw new SQLException(L.l("Table `{0}' already exists.  CREATE can not override an existing table.", _name));
 
     _allocationTable = new byte[ALLOC_CHUNK_SIZE];
-    _fragmentTable = new byte[ALLOC_CHUNK_SIZE];
 
     // allocates the allocation table itself
     setAllocation(0, ALLOC_USED);
@@ -378,9 +385,9 @@ public class Store {
       _fileSize = file.getLength();
       _blockCount = ((_fileSize + BLOCK_SIZE - 1) / BLOCK_SIZE);
 
-      int allocCount = (int) (_blockCount * 2) + ALLOC_CHUNK_SIZE;
+      int allocCount = (int) (_blockCount * ALLOC_BYTES_PER_BLOCK);
 
-      allocCount -= allocCount % ALLOC_CHUNK_SIZE;
+      allocCount += ALLOC_CHUNK_SIZE - allocCount % ALLOC_CHUNK_SIZE;
 
       _allocationTable = new byte[allocCount];
 
@@ -390,7 +397,8 @@ public class Store {
 	if (BLOCK_SIZE < len)
 	  len = BLOCK_SIZE;
 	
-	readBlock(i * 2L * BLOCK_SIZE, _allocationTable, i, len);
+	readBlock((long) i / ALLOC_BYTES_PER_BLOCK * BLOCK_SIZE,
+		  _allocationTable, i, len);
       }
     } finally {
       wrapper.close();
@@ -455,18 +463,11 @@ public class Store {
   /**
    * Returns the matching block.
    */
-  public Block readBlockByAddress(long blockAddress)
+  public final Block readBlock(long blockAddress)
     throws IOException
   {
-    return readBlock(addressToBlockId(blockAddress));
-  }
-
-  /**
-   * Returns the matching block.
-   */
-  public Block readBlock(long blockId)
-    throws IOException
-  {
+    long blockId = addressToBlockId(blockAddress);
+    
     Block block = _blockManager.getBlock(this, blockId);
 
     try {
@@ -493,6 +494,14 @@ public class Store {
     throws IOException
   {
     return allocateBlock(ALLOC_ROW);
+  }
+
+  /**
+   * Return true if the block is a row block.
+   */
+  public boolean isRowBlock(long blockAddress)
+  {
+    return getAllocation(blockAddress / BLOCK_SIZE) == ALLOC_ROW;
   }
 
   /**
@@ -527,7 +536,15 @@ public class Store {
   {
     return allocateBlock(ALLOC_INDEX);
   }
-  
+
+  /**
+   * Return true if the block is an index block.
+   */
+  public boolean isIndexBlock(long blockAddress)
+  {
+    return getAllocation(blockAddress / BLOCK_SIZE) == ALLOC_INDEX;
+  }
+
   /**
    * Allocates a new block.
    *
@@ -541,15 +558,15 @@ public class Store {
     synchronized (_allocationLock) {
       long end = _blockCount;
 
-      if (_allocationTable.length < 2 * end)
-	end = _allocationTable.length / 2;
+      if (_allocationTable.length < ALLOC_BYTES_PER_BLOCK * end)
+	end = _allocationTable.length / ALLOC_BYTES_PER_BLOCK;
 
       for (blockIndex = 0; blockIndex < end; blockIndex++) {
 	if (getAllocation(blockIndex) == ALLOC_FREE)
 	  break;
       }
 
-      if (_allocationTable.length <= 2 * blockIndex) {
+      if (_allocationTable.length <= ALLOC_BYTES_PER_BLOCK * blockIndex) {
 	// expand the allocation table
 	byte []newTable = new byte[_allocationTable.length + ALLOC_CHUNK_SIZE];
 	System.arraycopy(_allocationTable, 0,
@@ -559,7 +576,7 @@ public class Store {
 
 	// if the allocation table is over 32k, allocate the block for the
 	// extension (each allocation block of 32k allocates 2G)
-	if (blockIndex % ALLOC_PER_BLOCK == 0) {
+	if (blockIndex % (BLOCK_SIZE / ALLOC_BYTES_PER_BLOCK) == 0) {
 	  setAllocation(blockIndex, ALLOC_USED);
 	  blockIndex++;
 	}
@@ -646,7 +663,7 @@ public class Store {
       return;
     
     synchronized (_allocationLock) {
-      setAllocation(blockId >> BLOCK_BITS, ALLOC_FREE);
+      setAllocation(blockIdToIndex(blockId), ALLOC_FREE);
     }
 
     saveAllocation();
@@ -655,9 +672,9 @@ public class Store {
   /**
    * Sets the allocation for a block.
    */
-  public final int getAllocation(long blockIndex)
+  private final int getAllocation(long blockIndex)
   {
-    int allocOffset = (int) (2 * blockIndex);
+    int allocOffset = (int) (ALLOC_BYTES_PER_BLOCK * blockIndex);
 
     return _allocationTable[allocOffset] & ALLOC_MASK;
   }
@@ -667,12 +684,14 @@ public class Store {
    */
   private void setAllocation(long blockIndex, int code)
   {
-    int allocOffset = (int) (2 * blockIndex);
+    int allocOffset = (int) (ALLOC_BYTES_PER_BLOCK * blockIndex);
 
     _allocationTable[allocOffset] = (byte) code;
-    _allocationTable[allocOffset + 1] = 0;
+    
+    for (int i = 1; i < ALLOC_BYTES_PER_BLOCK; i++)
+      _allocationTable[allocOffset + i] = 0;
 
-    setAllocDirty(allocOffset, allocOffset + 2);
+    setAllocDirty(allocOffset, allocOffset + ALLOC_BYTES_PER_BLOCK);
   }
 
   /**
@@ -709,15 +728,24 @@ public class Store {
 	_allocDirtyMax = 0;
       }
 
-      if (dirtyMax < dirtyMin)
-	return;
-      
-      long allocBlock = dirtyMin / ALLOC_PER_BLOCK;
-      long allocOffset = dirtyMin % ALLOC_PER_BLOCK;
+      // Write each dirty block to disk.  The physical blocks are
+      // broken up each BLOCK_SIZE / ALLOC_BYTES_PER_BLOCK.
+      for (;
+	   dirtyMin < dirtyMax;
+	   dirtyMin = (dirtyMin + BLOCK_SIZE) - dirtyMin % BLOCK_SIZE) {
+	int block = dirtyMin / (BLOCK_SIZE / ALLOC_BYTES_PER_BLOCK);
+	
+	int offset = dirtyMin % BLOCK_SIZE;
+	int length;
 
-      // XXX: 2G issues
-      writeBlock(allocBlock * ALLOC_SEGMENT + allocOffset,
-		 _allocationTable, dirtyMin, dirtyMax - dirtyMin);
+	if (dirtyMin / BLOCK_SIZE != dirtyMax / BLOCK_SIZE)
+	  length = BLOCK_SIZE - dirtyMin;
+	else
+	  length = dirtyMax - dirtyMin;
+
+	writeBlock((long) block * BLOCK_SIZE + offset,
+		   _allocationTable, offset, length);
+      }
     }
   }
   
@@ -841,7 +869,7 @@ public class Store {
     synchronized (_allocationLock) {
       byte []allocationTable = _allocationTable;
       
-      for (int i = 0; i < allocationTable.length; i += 2) {
+      for (int i = 0; i < allocationTable.length; i += ALLOC_BYTES_PER_BLOCK) {
 	int fragMask =  allocationTable[i + 1];
 
 	if (allocationTable[i] == ALLOC_FRAGMENT && fragMask != 0xff) {
@@ -853,7 +881,7 @@ public class Store {
 
 	      _fragmentUseCount++;
 
-	      return ((long) i) * BLOCK_SIZE / 2 + j;
+	      return BLOCK_SIZE * ((long) i / ALLOC_BYTES_PER_BLOCK) + j;
 	    }
 	  }
 	}
@@ -869,7 +897,7 @@ public class Store {
 	synchronized (_allocationLock) {
 	  byte []allocationTable = _allocationTable;
 
-	  int i = 2 * (int) (blockId / BLOCK_SIZE);
+	  int i = ALLOC_BYTES_PER_BLOCK * (int) (blockId / BLOCK_SIZE);
 	
 	  int fragMask =  allocationTable[i + 1];
 
@@ -882,7 +910,7 @@ public class Store {
 
 		_fragmentUseCount++;
 
-		return ((long) i) * BLOCK_SIZE / 2 + j;
+		return BLOCK_SIZE * ((long) i / ALLOC_BYTES_PER_BLOCK) + j;
 	      }
 	    }
 	  }
@@ -1027,7 +1055,7 @@ public class Store {
       byte []blockBuffer = block.getBuffer();
 
       synchronized (_allocationLock) {
-	int i = 2 * (int) (fragmentAddress / BLOCK_SIZE);
+	int i = ALLOC_BYTES_PER_BLOCK * (int) (fragmentAddress / BLOCK_SIZE);
 	int j = (int) fragmentAddress & 0xff;
 
 	_allocationTable[i + 1] &= ~(1 << j);

@@ -476,18 +476,13 @@ public class SessionImpl implements HttpSession, CacheListener {
 	_isClosing = true;
     }
 
+    //System.out.println("REMOVE: " + this);
     if (! _isClosing) {
-      log.config(L.l("session {0} LRU while in use.  Consider increasing session-count.",
+      log.warning(L.l("session {0} LRU while in use.  Consider increasing session-count.",
 		     _id));
-
-      // LRU while in use
-      _manager.addSession(this);
-      return;
     }
     
     boolean isValid = _isValid;
-
-    _manager.decrementSessionCount();
 
     if (log.isLoggable(Level.FINE))
       log.fine("remove session " + _id);

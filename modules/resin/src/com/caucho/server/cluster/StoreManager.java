@@ -84,7 +84,7 @@ abstract public class StoreManager
   
   // protected long _maxIdleTime = 24 * 3600 * 1000L;
   protected long _maxIdleTime = 3 * 3600 * 1000L;
-  protected long _idleCheckInterval = 15 * 60 * 1000L;
+  protected long _idleCheckInterval = 5 * 60 * 1000L;
 
   protected boolean _isAlwaysLoad;
   protected boolean _isAlwaysSave;
@@ -359,7 +359,8 @@ abstract public class StoreManager
 	_serverList[i] = serverList[i].getServerConnector();
       }
     }
-    
+
+
     Environment.addEnvironmentListener(this);
 
     return true;
@@ -403,22 +404,6 @@ abstract public class StoreManager
   }
 
   /**
-   * Returns the owning index.
-   */
-  public int getOwnerIndex(String id)
-  {
-    return 0;
-  }
-
-  /**
-   * Returns the backup index.
-   */
-  public int getBackupIndex(String id)
-  {
-    return 0;
-  }
-
-  /**
    * Cleans old objects.  Living objects corresponding to the old
    * objects are not cleared, since their timeout should be less than
    * the store timeout.
@@ -426,6 +411,38 @@ abstract public class StoreManager
   public void clearOldObjects()
     throws Exception
   {
+  }
+
+  /**
+   * Returns true if this server is a primary for the given object id.
+   */
+  protected boolean isPrimary(String id)
+  {
+    return getPrimaryIndex(id, 0) == getSelfIndex();
+  }
+
+  /**
+   * Returns the owning index.
+   */
+  public int getPrimaryIndex(String id, int offset)
+  {
+    return 0;
+  }
+
+  /**
+   * Returns the backup index.
+   */
+  public int getSecondaryIndex(String id, int offset)
+  {
+    return 0;
+  }
+
+  /**
+   * Returns the backup index.
+   */
+  public int getTertiaryIndex(String id, int offset)
+  {
+    return 0;
   }
 
   /**

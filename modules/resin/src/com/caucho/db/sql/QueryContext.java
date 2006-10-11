@@ -507,9 +507,9 @@ public class QueryContext {
       if (block == null) {
       }
       else if (_isWrite)
-	_xa.autoCommitWrite(block.getLock());
+	_xa.unlockWrite(block.getLock());
       else
-	_xa.autoCommitRead(block.getLock());
+	_xa.unlockRead(block.getLock());
     }
   }
 

@@ -218,32 +218,36 @@ public final class BlockManager
     
     Block block = _blockCache.get(blockId);
 
-    if (block == null) {
-      synchronized (_writeQueue) {
-	int size = _writeQueue.size();
-	
-	for (int i = 0; i < size; i++) {
-	  block = _writeQueue.get(i);
-
-	  if (block.getBlockId() == blockId) {
-	    break;
-	  }
-	  else
-	    block = null;
-	}
-      }
-
-      if (block != null)
-	block = _blockCache.putIfNew(blockId, block);
-    }
-
     if (block != null && block.allocate())
       return block;
+
+    // Find any matching block in the process of being written
+    Block dirtyBlock = null;
+    synchronized (_writeQueue) {
+      int size = _writeQueue.size();
+	
+      for (int i = 0; i < size; i++) {
+	dirtyBlock = _writeQueue.get(i);
+
+	if (dirtyBlock.getBlockId() == blockId) {
+	  break;
+	}
+	else
+	  dirtyBlock = null;
+      }
+    }
     
     if ((blockId & Store.BLOCK_MASK) == 0)
       throw stateError(L.l("Block 0 is reserved."));
 
     block = new ReadBlock(store, blockId);
+
+    if (dirtyBlock != null && dirtyBlock.allocate()) {
+      byte []buffer = dirtyBlock.getBuffer();
+
+      if (buffer != null)
+	System.arraycopy(buffer, 0, block.getBuffer(), 0, buffer.length);
+    }
 
     // needs to be outside the synchronized since the put
     // can cause an LRU drop which might lead to a dirty write

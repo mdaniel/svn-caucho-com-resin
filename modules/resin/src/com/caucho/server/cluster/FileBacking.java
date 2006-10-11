@@ -279,6 +279,8 @@ public class FileBacking {
 
         int count = pstmt.executeUpdate();
 
+	System.out.println("OBSOLETE:" + count);
+
 	if (count > 0)
 	  log.fine(this + " purged " + count + " old sessions");
 
@@ -311,6 +313,7 @@ public class FileBacking {
       boolean validLoad = false;
 
       if (rs.next()) {
+	//System.out.println("LOAD: " + uniqueId);
 	long accessTime = rs.getInt(1) * 60000L;
 	
         InputStream is = rs.getBinaryStream(2);
@@ -327,6 +330,9 @@ public class FileBacking {
       }
       else if (log.isLoggable(Level.FINE))
         log.fine("no local object loaded for " + uniqueId);
+      else {
+	System.out.println("NO-LOAD: " + uniqueId);
+      }
 
       rs.close();
 
@@ -476,9 +482,11 @@ public class FileBacking {
       // read on a failure
 
       if (storeSelfUpdate(conn, uniqueId, is, length)) {
+	//System.out.println("SAVE-UPDATE: " + uniqueId);
       }
       else if (storeSelfInsert(conn, uniqueId, is, length, expireInterval,
 			       primary, secondary, tertiary)) {
+	//System.out.println("SAVE-INSERT: " + uniqueId);
       }
       else if (! storeSelfUpdate(conn, uniqueId, is, length)) {
 	// The second update is for the rare case where
@@ -486,7 +494,11 @@ public class FileBacking {
 	
 	log.warning(L.l("Can't store session {0}", uniqueId));
       }
+      else {
+	//System.out.println("SAVE-UPDATE2: " + uniqueId);
+      }
     } catch (SQLException e) {
+      e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
     } finally {
       if (conn != null)
@@ -551,7 +563,7 @@ public class FileBacking {
       stmt.setInt(6, primary);
       stmt.setInt(7, secondary);
       stmt.setInt(8, tertiary);
-      
+
       stmt.executeUpdate();
         
       if (log.isLoggable(Level.FINE))
@@ -559,7 +571,8 @@ public class FileBacking {
 
       return true;
     } catch (SQLException e) {
-      e.printStackTrace();
+      System.out.print(e);
+      
       log.log(Level.FINE, e.toString(), e);
     }
 

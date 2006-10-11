@@ -221,6 +221,9 @@ abstract public class AbstractResultSet implements java.sql.ResultSet {
     try {
       Blob blob = getBlob(columnIndex);
 
+      if (blob == null)
+	return null;
+
       int length = (int) blob.length();
 
       byte []bytes = new byte[length];
@@ -480,7 +483,12 @@ abstract public class AbstractResultSet implements java.sql.ResultSet {
   public InputStream getBinaryStream(int columnIndex)
     throws SQLException
   {
-    return getBlob(columnIndex).getBinaryStream();
+    Blob blob = getBlob(columnIndex);
+
+    if (blob != null)
+      return blob.getBinaryStream();
+    else
+      return null;
   }
 
   public InputStream getBinaryStream(String columnName)

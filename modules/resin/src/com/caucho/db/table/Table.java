@@ -662,6 +662,7 @@ public class Table extends Store {
 	    else {
 	      // if no free row is available, allocate a new one
 	      block = xa.allocateRow(this);
+	      //System.out.println("ALLOC: " + block);
 
 	      blockId = block.getBlockId();
 
@@ -702,6 +703,7 @@ public class Table extends Store {
 	  byte []buffer = block.getBuffer();
 
 	  long rowAddr = blockIdToAddress(block.getBlockId(), rowOffset);
+	  //System.out.println("ADDR:" + rowAddr + " " + rowOffset + " " + block);
 
 	  boolean isOkay = false;
 	  try {

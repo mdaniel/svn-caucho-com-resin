@@ -295,7 +295,7 @@ class DateColumn extends Column {
   public boolean isEqual(byte []block1, int rowOffset1,
 			 byte []block2, int rowOffset2)
   {
-    System.out.println("EQ:");
+    //System.out.println("EQ:");
     if (isNull(block1, rowOffset1) != isNull(block2, rowOffset2))
       return false;
 

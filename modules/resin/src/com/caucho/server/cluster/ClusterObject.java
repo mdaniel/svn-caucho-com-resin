@@ -109,6 +109,7 @@ public class ClusterObject {
     _objectManager = objectManager;
   }
 
+  // XXX: move to store manager?
   private boolean isPrimary(String id)
   {
     if (_store != null && _store.isAlwaysLoad())
@@ -116,18 +117,8 @@ public class ClusterObject {
     
     else if (_store == null && _storeManager.isAlwaysLoad())
       return false;
-      
-    Cluster cluster = Cluster.getLocal();
 
-    if (cluster == null)
-      return true;
-      
-    ClusterServer selfServer = cluster.getSelfServer();
-
-    if (selfServer == null)
-      return true;
-    else
-      return _storeManager.getOwnerIndex(id) == selfServer.getIndex();
+    return _storeManager.isPrimary(id);
   }
 
   /**
@@ -258,6 +249,8 @@ public class ClusterObject {
 
     try {
       if (_storeManager.load(this, obj)) {
+	_isValid = true;
+	
 	return true;
       }
       else {
@@ -377,8 +370,9 @@ public class ClusterObject {
 
     boolean isValid = _isValid;
 
-    if (! _isPrimary)
+    if (! _isPrimary) {
       _isValid = false;
+    }
 
     if (! _isChanged && ! _storeManager.isAlwaysSave())
       return;
@@ -408,7 +402,7 @@ public class ClusterObject {
 
       _crc = crc;
 
-      //System.out.println("STORING: " + _uniqueId);
+      //System.oout.println("STORING: " + _uniqueId);
       _storeManager.store(this, tempStream, crc);
       //System.out.println("STORED: " + _uniqueId);
 

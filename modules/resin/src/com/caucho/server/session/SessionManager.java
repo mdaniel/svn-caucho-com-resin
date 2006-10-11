@@ -114,8 +114,6 @@ public final class SessionManager implements ObjectManager, AlarmListener
   private Iterator<SessionImpl> _sessionIter;
   // array list for session timeout
   private ArrayList<SessionImpl> _sessionList = new ArrayList<SessionImpl>();
-  // total number of active sessions
-  private int sessionCount;
   // generate cookies
   private boolean _enableSessionCookies = true;
   // allow session rewriting
@@ -1117,7 +1115,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
       return null;
 
     session.addUse();
-    
+
     handleCreateListeners(session);
 
     synchronized (_statisticsLock) {
@@ -1274,6 +1272,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
 	return null;
 
       session = create(key, now, create);
+      //System.out.println("CREATE: " + session);
       if (! session.addUse())
 	session = null;
       isNew = true;
@@ -1476,13 +1475,6 @@ public final class SessionManager implements ObjectManager, AlarmListener
   public void removeSession(SessionImpl session)
   {
     _sessions.remove(session.getId());
-  }
-
-  public void decrementSessionCount()
-  {
-    synchronized (_sessions) {
-      sessionCount--;
-    }
   }
 
   /**
