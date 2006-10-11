@@ -408,39 +408,6 @@ public class EntityEmbeddedField extends AbstractField {
     }
   }
 
-  /*
-   * Generates make key.
-   *
-  public void generateMakeKey(JavaWriter out)
-  {
-    if (! isFieldAccess() && getGetterMethod() == null)
-      return;
-
-    boolean isFirst = true;
-
-    for (Map.Entry<String, Column> entry : _columns.entrySet()) {
-      Column column = entry.getValue();
-
-      String getter = _fieldNameByColumn.get(column.getName());
-
-      EntityType entityType = (EntityType) getType();
-
-      if (! entityType.isFieldAccess()) {
-        getter = "get" + Character.toUpperCase(getter.charAt(0)) +
-          getter.substring(1);
-      }
-
-      if (isFirst)
-        isFirst = false;
-      else
-        cb.append(", ");
-
-      cb.append(thisGetter + "." + getter + "()");
-      out.print(field.getJavaTypeName() + " a" + i);
-    }
-  }
-  */
-
   /**
    * Generates get property.
    */
