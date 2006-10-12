@@ -331,7 +331,7 @@ public class FileBacking {
       else if (log.isLoggable(Level.FINE))
         log.fine("no local object loaded for " + uniqueId);
       else {
-	System.out.println("NO-LOAD: " + uniqueId);
+	// System.out.println("NO-LOAD: " + uniqueId);
       }
 
       rs.close();
