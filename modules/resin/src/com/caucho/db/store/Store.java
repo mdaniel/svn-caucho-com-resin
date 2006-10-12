@@ -110,7 +110,7 @@ public class Store {
   public final static long BLOCK_MASK = ~ BLOCK_INDEX_MASK;
   public final static long BLOCK_OFFSET_MASK = BLOCK_SIZE - 1;
 
-  private final static int ALLOC_BYTES_PER_BLOCK = 8;
+  private final static int ALLOC_BYTES_PER_BLOCK = 2;
 
   private final static int ALLOC_CHUNK_SIZE = 1024 * ALLOC_BYTES_PER_BLOCK;
   
@@ -739,7 +739,7 @@ public class Store {
 	int length;
 
 	if (dirtyMin / BLOCK_SIZE != dirtyMax / BLOCK_SIZE)
-	  length = BLOCK_SIZE - dirtyMin;
+	  length = BLOCK_SIZE - offset;
 	else
 	  length = dirtyMax - dirtyMin;
 
@@ -870,7 +870,7 @@ public class Store {
       byte []allocationTable = _allocationTable;
       
       for (int i = 0; i < allocationTable.length; i += ALLOC_BYTES_PER_BLOCK) {
-	int fragMask =  allocationTable[i + 1];
+	int fragMask = allocationTable[i + 1];
 
 	if (allocationTable[i] == ALLOC_FRAGMENT && fragMask != 0xff) {
 	  for (int j = 0; j < FRAGMENT_PER_BLOCK; j++) {

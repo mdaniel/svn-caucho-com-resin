@@ -446,46 +446,52 @@ public class Transaction extends StoreTransaction {
     throws SQLException
   {
     try {
-      LongKeyHashMap<WriteBlock> writeBlocks = _writeBlocks;
-
-      if (_deleteInodes != null) {
-	for (int i = 0; i < _deleteInodes.size(); i++) {
-	  Inode inode = _deleteInodes.get(i);
-
-	  // XXX: should be allocating based on auto-commit
-	  inode.remove();
-	}
-      }
-
-      if (writeBlocks != null) {
-	try {
-	  Iterator<WriteBlock> blockIter = writeBlocks.valueIterator();
-
-	  while (blockIter.hasNext()) {
-	    WriteBlock block = blockIter.next();
-
-	    block.commit();
-	  }
-	} catch (IOException e) {
-	  throw new SQLExceptionWrapper(e);
-	}
-      }
-
-      if (_deallocateBlocks != null) {
-	for (int i = 0; i < _deallocateBlocks.size(); i++) {
-	  Block block = _deallocateBlocks.get(i);
-
-	  try {
-	    block.getStore().freeBlock(block.getBlockId());
-	  } catch (IOException e) {
-	    throw new SQLExceptionWrapper(e);
-	  }
-	}
-      }
+      writeData();
     } finally {
       releaseLocks();
 
       close();
+    }
+  }
+
+  public void writeData()
+    throws SQLException
+  {
+    LongKeyHashMap<WriteBlock> writeBlocks = _writeBlocks;
+
+    if (_deleteInodes != null) {
+      while (_deleteInodes.size() > 0) {
+	Inode inode = _deleteInodes.remove(0);
+
+	// XXX: should be allocating based on auto-commit
+	inode.remove();
+      }
+    }
+
+    if (writeBlocks != null) {
+      try {
+	Iterator<WriteBlock> blockIter = writeBlocks.valueIterator();
+
+	while (blockIter.hasNext()) {
+	  WriteBlock block = blockIter.next();
+
+	  block.commit();
+	}
+      } catch (IOException e) {
+	throw new SQLExceptionWrapper(e);
+      }
+    }
+
+    if (_deallocateBlocks != null) {
+      while (_deallocateBlocks.size() > 0) {
+	Block block = _deallocateBlocks.remove(0);
+
+	try {
+	  block.getStore().freeBlock(block.getBlockId());
+	} catch (IOException e) {
+	  throw new SQLExceptionWrapper(e);
+	}
+      }
     }
   }
 

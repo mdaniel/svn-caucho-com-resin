@@ -245,8 +245,10 @@ public final class BlockManager
     if (dirtyBlock != null && dirtyBlock.allocate()) {
       byte []buffer = dirtyBlock.getBuffer();
 
-      if (buffer != null)
+      if (buffer != null) {
 	System.arraycopy(buffer, 0, block.getBuffer(), 0, buffer.length);
+	block.validate();
+      }
     }
 
     // needs to be outside the synchronized since the put

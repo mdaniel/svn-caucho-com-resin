@@ -551,7 +551,7 @@ public final class BTree {
 	
 	childId = lookupTuple(blockId, buffer,
 			      keyBuffer, keyOffset, keyLength,
-				 isLeaf);
+			      isLeaf);
 
 	if (childId == 0)
 	  return;

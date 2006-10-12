@@ -497,19 +497,30 @@ public class QueryContext {
       return;
     
     _isLocked = false;
-    
-    int len = _blockLocks.length;
 
-    for (int i = len - 1; i >= 0; i--) {
-      Block block = _blockLocks[i];
-      _blockLocks[i] = null;
+    try {
+      _xa.writeData();
+    } finally {
+      int len = _blockLocks.length;
 
-      if (block == null) {
+      for (int i = len - 1; i >= 0; i--) {
+	Block block = _blockLocks[i];
+	_blockLocks[i] = null;
+
+	if (block == null) {
+	}
+	else if (_isWrite) {
+	  _xa.unlockWrite(block.getLock());
+
+	  try {
+	    block.commit();
+	  } catch (IOException e) {
+	    log.log(Level.FINE, e.toString(), e);
+	  }
+	}
+	else
+	  _xa.unlockRead(block.getLock());
       }
-      else if (_isWrite)
-	_xa.unlockWrite(block.getLock());
-      else
-	_xa.unlockRead(block.getLock());
     }
   }
 

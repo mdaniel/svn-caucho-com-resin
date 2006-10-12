@@ -279,7 +279,7 @@ public class FileBacking {
 
         int count = pstmt.executeUpdate();
 
-	System.out.println("OBSOLETE:" + count);
+	// System.out.println("OBSOLETE:" + count);
 
 	if (count > 0)
 	  log.fine(this + " purged " + count + " old sessions");
