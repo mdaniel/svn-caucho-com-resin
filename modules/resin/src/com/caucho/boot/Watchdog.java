@@ -110,6 +110,8 @@ public class Watchdog extends AbstractManagedObject
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
     }
+
+    _is64bit = "64".equals(System.getProperty("sun.arch.data.model"));
   }
 
   public void setId(String id)
@@ -703,6 +705,9 @@ public class Watchdog extends AbstractManagedObject
 	else
 	  out.println();
       }
+
+      if (env.get("LD_LIBRARY_PATH") != null)
+	  out.print("LD_LIBRARY_PATH: " + env.get("LD_LIBRARY_PATH"));
     }
 
     if (_jniBoot != null) {
