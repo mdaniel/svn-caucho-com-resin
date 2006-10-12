@@ -118,7 +118,7 @@ public class Server extends ProtocolDispatchServer
 
   private int _keepaliveMax = 128;
   
-  private long _keepaliveTimeout = 5000;
+  private long _keepaliveTimeout = 15000;
   
   private boolean _keepaliveSelectEnable = true;
   private long _keepaliveSelectThreadTimeout = 1000;
