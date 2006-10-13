@@ -1,21 +1,31 @@
 <navigation threaded="true">
   <item link="index.xtp" title="Resin 3.1">
-<!--
-    <item link="reorg/index.xtp" title="Reorg Notes" product="caucho-dev"/>
--->
-    <item link="features/index.xtp" title="Features" atoc-descend="true"/>
-    <item link="install/index.xtp" title="Installation" atoc-descend="true"/>
+    <!--
+       - Overview
+      -->    
+    <item link="overview.xtp" title="Overview"/>
+    
+    <!--
+       - Installation
+      -->    
+    <item link="install.xtp" title="Installation">
+      <item link="install.xtp" title="Quick Start"/>
+      <item link="resin-web-server.xtp" title="Resin Web Server"/>
+      <item link="install-apache.xtp" title="Apache"/>
+      <item link="install-iis.xtp" title="IIS"/>
+      <item link="plugin-dispatch.xtp" title="Plugin Dispatch"/>
+      <item link="linux-boot.xtp" title="Linux Boot"/>
+      <item link="install-faq.xtp" title="FAQ"/>
+      <item link="install-scrapbook.xtp" title="Scrapbook"/>
+    </item>
 
     <!--
        - Configuration
       -->    
     <item link="config.xtp" title="Configuration">
-      <item link="overview.xtp" title="overview"/>
+      <item link="config-overview.xtp" title="overview"/>
       <item link="howto.xtp" title="howto"/>
       <item link="tags.xtp"  title="tags">
-      <!--
-        <item link="index-tags.xtp" title="index"/>
-        -->
         <item link="env-tags.xtp" title="env tags"/>
         <item link="resin-tags.xtp" title="&lt;resin>"/>
         <item link="cluster-tags.xtp" title="&lt;cluster>"/>
@@ -26,21 +36,21 @@
         <item link="session-tags.xtp" title="session tags"/>
         <item link="rewrite-tags.xtp" title="rewrite tags"/>
         <item link="soa-tags.xtp" title="service tags"/>
-        <item link="log.xtp" title="log"/>
+        <item link="config-log.xtp" title="log"/>
         <item link="el-var.xtp" title="el variables"/>
-        <item link="control.xtp" title="el & control"/>
+        <item link="config-control.xtp" title="el & control"/>
       </item>
 
       <item title="Common Tasks" link="commontasks.xtp">
         <item link="virtual-host.xtp" title="Virtual Hosting"/>
+        <item link="config-database.xtp" title="Database"/>
         <item link="resin-load-balance.xtp" title="Load Balancing"/>
-        <!--
-        <item link="balance.xtp" title="Load Balancing"/>
-        -->
         <item link="sessions.xtp" title="Sessions"/>
         <item link="tcp-sessions.xtp" title="Clustered Sessions"/>
         <item link="tuning.xtp" title="Tuning"/>
-       <item link="isp.xtp" title="ISP"/>
+        <item link="isp.xtp" title="ISP"/>
+        <item link="webapp-overview.xtp" title="WebApp"/>
+        <item link="webapp-deploy.xtp" title="Deploy"/>
       </item>
 
       <item title="Relax Schema" link="schema.xtp">
@@ -53,31 +63,176 @@
         <item link="j2ee-web-xml-schema.xtp" title="J2EE web.xml"/>
       </item>
 
-      <item link="faq.xtp" title="Config FAQ" atoc-descend="1"/>
-      <item link="scrapbook.xtp" title="Scrapbook" atoc-descend="1"/>
+      <item link="config-faq.xtp" title="Config FAQ"/>
+      <item link="config-scrapbook.xtp" title="Scrapbook"/>
+      <item link="db-scrapbook.xtp" title="DB Scrapbook"/>
+    </item>
+
+    <!--
+       - Quercus
+      -->
+    <item link="quercus.xtp" title="Quercus">
+      <item title="Overview" link="quercus-overview.xtp"/>
+      <item title="Module Status" link="quercus-module-status.xtp"/>
+      <item title="Resin Module" link="quercus-resin-module.xtp"/>
+    </item>
+
+    <!--
+       - soa
+      -->
+    <item link="soa.xtp" title="SOA/IoC">
+      <item link="jaxb-annotations.xtp" title="JAXB Annotations"/>
+      <item link="ioc-annotations.xtp" title="IoC Annotations"/>
+      <item link="jaxws-annotations.xtp" title="JAX-WS Annotations"/>
+      <item link="jms-config.xtp" title="JMS Configuration"/>
+      <item link="ioc-bean.xtp" title="init"/>
+      <item link="bean-patterns.xtp" title="bean"/>
+      <item link="soa-cron.xtp" title="CronResource"/>
+      <item link="soa-rmi.xtp" title="RMI"/>
+      <item link="soa-faq.xtp" title="Resource FAQ"/>
+    </item>
+
+    <!--
+       - JSP
+      -->
+    <item link="jsp.xtp" title="JSP">
+      <item link="jsp-intro.xtp" title="Introduction"/>
+
+      <item link="jsp-compile.xtp" title="Compilation"/>
+      <item link="jsp-el.xtp" title="EL"/>
+      <item link="jstl.xtp" title="JSTL"/>
+      <item link="jsp-directives.xtp" title="Directives"/>
+      <item link="jsp-variables.xtp" title="Variables"/>
+      <item link="jsp-actions.xtp" title="Actions"/>
+      <item link="jsp-applications.xtp" title="Applications"/>
+      <item link="tld-schema.xtp" title="Schema for JSP-2.0 .tld files"/>
+
+      <item link="jsp-templates.xtp" title="JSP Templates"/>
+      <item link="jsp-faq.xtp" title="FAQ"/>
     </item>
     
-    <item link="quercus/index.xtp" title="Quercus" atoc-descend="true"/>
-    <item link="soa/index.xtp" title="SOA/IoC" atoc-descend="true"/>
-    <item link="webapp/index.xtp" title="Web Applications" atoc-descend="true"/>
     <!--
-    <item link="resource/index.xtp" title="Resources" atoc-descend="true"/>
-    -->
-    <item link="jsp/index.xtp" title="JSP" atoc-descend="true"/>
-    <item link="servlet/index.xtp" title="Servlets and Filters" atoc-descend="true"/>
+       - Servlet
+      -->
+    <item link="servlet.xtp" title="Servlets and Filters">
+      <item link="config-servlet.xtp" title="Servlets"/>
+      <item link="servlet-library.xtp" title="Servlet Lib"/>
+      <item link="webdav.xtp" title="WebDAV"/>
+      <item link="servlet-run-at.xtp" title="run-at"/>
+      <item link="config-filter.xtp" title="Filters"/>
+      <item link="filter-library.xtp" title="Filter Lib"/>
+      <item link="servlet-faq.xtp" title="FAQ"/>
+    </item>
+    
     <!--
     <item link="portlet/index.xtp" title="Portlets" atoc-descend="true"/>
     -->
-    <item link="db/index.xtp" title="Databases" atoc-descend="true"/>
-    <item link="jmx/index.xtp" title="Admin (JMX)" atoc-descend="true"/>
-    <item link="ejb/index.xtp" title="EJB" product="resin-ee" atoc-descend="true"/>
-    <item link="amber/index.xtp" title="Amber" atoc-descend="true"/>
-    <item link="security/index.xtp" title="Security" atoc-descend="true"/>
-    <item link="xml/index.xtp" title="XML and XSLT" atoc-descend="true"/>
-    <item link="performance/index.xtp" title="Performance" atoc-descend="true"/>
-    <item link="hessian/index.xtp" title="Hessian" atoc-descend="true"/>
-    <item link="thirdparty/index.xtp" title="Third-party" atoc-descend="true"/>
-    <item link="troubleshoot/index.xtp" title="Troubleshooting/FAQ" atoc-descend="true"/>
+    
+    <!--
+       - Admin/JMX
+      -->
+    <item link="jmx.xtp" title="Admin (JMX)"/>
+    
+    <!--
+       - EJB
+      -->
+    <item link="ejb.xtp" title="EJB">
+    <item title="Annotation" link="ejb-annotations.xtp"/>
+    </item>
+    
+    <!--
+       - Amber
+      -->
+    <item link="amber.xtp" title="Amber">
+      <item title="Amber" link="amber-overview.xtp"/>
+      <item title="Lifecycle" link="amber-lifecycle.xtp"/>
+      <item title="@Table" link="amber-table.xtp"/>
+    </item>
+    
+    <!--
+       - Security
+      -->
+    <item link="security.xtp" title="Security">
+      <item title="Authentication" link="authentication.xtp"/>
+      <item title="Digest Passwords" link="security-digest.xtp"/>
+      <item title="Authorization" link="authorization.xtp"/>
+      <item title="SSL" link="ssl.xtp"/>
+      <item title="Security Manager" link="securitymanager.xtp"/>
+      <item title="Malicious Attacks" link="security-malicious.xtp"/>
+      <item title="FAQ" link="security-faq.xtp"/>
+      <item title="Scrapbook" link="security-scrapbook.xtp"/>
+    </item>
+    
+    <!--
+       - Performance
+      -->
+    <item link="xml.xtp" title="XML and XSLT">
+      <item link="xml-intro.xtp" title="Introduction"/>
+
+      <item link="jaxp.xtp" title="JAXP"/>
+
+      <item link="xpath.xtp" title="XML Path Language (XPath)"/>
+      <item link="xslt-filter.xtp" title="XSLT Filter"/>
+
+      <item link="xslt-fun.xtp" title="XSLT"/>
+      <item link="xpath-fun.xtp" title="XPath Functions"/>
+
+      <item link="xml-faq.xtp" title="FAQ"/>
+      <item link="xml-scrapbook.xtp" title="Scrapbook"/>
+    </item>
+    
+    <!--
+       - Performance
+      -->
+    <item link="performance.xtp" title="Performance">
+      <item link="jvm-tuning.xtp" title="JVM Tuning"/>
+      <item link="proxy-cache.xtp" title="Proxy Caching"/>
+
+      <item link="performance-faq.xtp" title="Performance FAQ"/>
+      <item link="performance-scrapbook.xtp" title="Performance Scrapbook"/>
+    </item>
+    
+    <!--
+       - Hessian
+      -->
+    <item link="hessian.xtp" title="Hessian">
+      <item link="hessian-overview.xtp" title="Hessian"/>
+      <item link="hessian-1.0-spec.xtp" title="Hessian 1.0 spec"/>
+      <item link="hessian-2.0-spec.xtp" title="Hessian 2.0 draft spec"/>
+      <item link="hessian-java-binding-draft-spec.xtp" title="Java Binding"/>
+      <item link="burlap.xtp" title="Burlap"/>
+      <item link="burlap-1.0-spec.xtp" title="Burlap 1.0 Spec"/>
+      <item link="burlap-notes.xtp" title="Burlap Design Notes"/>
+      <item link="hessian-messaging.xtp" title="Hessian Messaging"/>
+    </item>
+
+    <!--
+       - Third party
+      -->      
+    <item link="thirdparty.xtp" title="Third-party">
+      <item link="ide.xtp" title="IDE's">
+        <item link="ide-jbuilder.xtp" title="JBuilder (OpenTool)"/>
+        <item link="ide-eclipse.xtp" title="Eclipse"/>
+        <item link="ide-intellij.xtp" title="IntelliJ"/>
+        <item link="ide-kawa.xtp" title="Kawa"/>
+      </item>
+
+      <item link="scottit.xtp" title="Scottit"/>
+
+      <item link="groovy.xtp" title="Groovy"/>
+
+      <item link="swiftmq.xtp" title="SwiftMQ" />
+      <item link="openjms.xtp" title="OpenJMS" />
+      <item link="hibernate.xtp" title="Hibernate" />
+      <item link="sslhardware.xtp" title="SSL Accelerators"/>
+      <item link="db-thirdparty" title="Database"/>
+    </item>
+    
+    <item link="troubleshoot.xtp" title="Troubleshooting/FAQ">
+      <item link="troubleshoot-technique.xtp" title="Techniques"/>
+      <item link="troubleshoot-symptoms.xtp" title="Symptoms"/>
+      <item link="troubleshoot-common-problems.xtp" title="Common Problems"/>
+    </item>
     <!--
     <item link="" title="PDF Manuals" atoc-descend="true"/>
     -->

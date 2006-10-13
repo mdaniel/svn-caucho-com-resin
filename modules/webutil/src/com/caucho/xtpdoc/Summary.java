@@ -91,11 +91,8 @@ public class Summary implements ContentItem {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    if (_document.getURI().endsWith("/")
-	|| _document.getURI().endsWith("index.xtp")) {
-      if (_document.getNavigation() != null)
-	_document.getNavigation().writeHtml(out, "");
-    }
+    if (_document.getNavigation() != null)
+      _document.getNavigation().writeHtml(out, "");
   }
 
   public void writeLaTeXTop(PrintWriter out)

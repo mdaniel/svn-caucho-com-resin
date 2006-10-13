@@ -7,7 +7,7 @@
 </header>
 
 <body>
-<summary objsummary="localtoc"/>
+<localtoc/>
 
 <s1 title="Where is the configuration GUI, and the GUI for deploying web-apps and new virtual hosts?" type="faq">
 <description>
