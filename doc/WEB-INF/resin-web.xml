@@ -52,90 +52,18 @@
       </welcome-file-list>
     </web-app-default>
 
-  <web-app-deploy url-prefix="/jsp/tutorial"
-                  path="jsp/tutorial"
-                  startup-mode="lazy">
-  </web-app-deploy>
-
   <rewrite-dispatch>
-    <redirect regexp='/php' target='${app.contextPath}/quercus'/>
+    <redirect regexp="/php" target="${app.contextPath}/quercus"/>
+
+    <redirect regexp="/soa/tutorial/soa-flickr"
+              target="${app.contextPath}/tutorial/rest-flickr"/>
+    <redirect regexp="/.*/tutorial" target="${app.contextPath}/tutorial"/>
+    
+    <redirect regexp="/quercus/" target="${app.contextPath}/doc/quercus.xtp"/>
   </rewrite-dispatch>
     
-  <web-app-deploy url-prefix="/quercus/tutorial"
-                  path="quercus/tutorial"
-                  startup-mode="lazy">
-  </web-app-deploy>
-
-  <web-app-deploy url-prefix="/servlet/tutorial"
-                  path="servlet/tutorial"
-                  startup-mode="lazy">
-  </web-app-deploy>
-
-  <web-app-deploy url-prefix="/webapp/tutorial"
-                  path="webapp/tutorial"
-                  startup-mode="lazy">
-  </web-app-deploy>
-
-
-  <web-app-deploy url-prefix="/portlet/tutorial"
-                  path="portlet/tutorial"
-                  startup-mode="lazy">
-  </web-app-deploy>
-
-  <web-app-deploy url-prefix="/ejb/tutorial"
-                  path="ejb/tutorial"
-                  startup-mode="lazy">
-  </web-app-deploy>
-<!--
-  <web-app-deploy url-prefix="/esb/tutorial"
-                  path="esb/tutorial"
-                  startup-mode="lazy">
-  </web-app-deploy>
-  -->
-
-  <web-app-deploy url-prefix="/soa/tutorial"
-                  path="soa/tutorial"
-                  startup-mode="lazy">
-  </web-app-deploy>
-<!--
-  <web-app-deploy url-prefix="/jms/tutorial"
-                  path="jms/tutorial"
-                  startup-mode="lazy">
-  </web-app-deploy>
-  -->
-
-  <web-app-deploy url-prefix="/security/tutorial"
-                  path="security/tutorial"
-                  startup-mode="lazy">
-  </web-app-deploy>
-
-  <web-app-deploy url-prefix="/resource/tutorial"
-                  path="resource/tutorial"
-                  startup-mode="lazy">
-  </web-app-deploy>
-
-  <web-app-deploy url-prefix="/db/tutorial"
-                  path="db/tutorial"
-                  startup-mode="lazy">
-  </web-app-deploy>
-
-  <web-app-deploy url-prefix="/jmx/tutorial"
-                  path="jmx/tutorial"
-                  startup-mode="lazy">
-  </web-app-deploy>
-
-  <web-app-deploy url-prefix="/amber/tutorial"
-                  path="amber/tutorial"
-                  startup-mode="lazy">
-  </web-app-deploy>
-
-  <web-app-deploy url-prefix="/hessian/tutorial"
-                  path="hessian/tutorial"
-                  startup-mode="lazy">
-  </web-app-deploy>
-
-  <web-app-deploy url-prefix="/demo"
-                  path="demo"
+  <web-app-deploy url-prefix="/tutorial"
+                  path="tutorial"
                   startup-mode="lazy">
   </web-app-deploy>
 
