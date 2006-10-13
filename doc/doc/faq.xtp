@@ -1,0 +1,138 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>Configuration FAQ</title>
+  <description>
+  </description>
+</header>
+
+<body>
+<summary objsummary="localtoc"/>
+
+<s1 title="Where is the configuration GUI, and the GUI for deploying web-apps and new virtual hosts?" type="faq">
+<description>
+</description>
+
+<p>
+Resin deliberately does not include any kind of GUI for
+deployment or management.  Or philosophy is:
+</p>
+
+<ul>
+<li>a single xml configuration file for the server (<code>resin.conf</code>)
+
+</li><li>changes to the server configuration file (<code>resin.conf</code>) are automatically
+detected and cause a restart of the server
+
+</li><li>changes to the <code>WEB-INF/web.xml</code> configuration file for a web
+application are automatically detected and cause a restart of the web
+application
+
+</li><li>new web applications are added either with <code>resin.conf</code> file
+changes, or by adding a <code>.war</code> or subdirectory to a
+<code>webapps/</code> directory
+
+</li><li>new <a href="doc|config|virtual-host">virtual hosts</a> are added either
+with <code>resin.conf</code> file changes, or by adding a <code>.jar</code> or
+subdirectory in a <code>hosts</code> directory.
+</li></ul>
+</s1>
+
+<s1 title="Where can I find the .rnc files that Resin uses for validating configuration files?" type="faq">
+<description>
+</description>
+
+<p>The .rnc files used by Resin for validation are in
+<code>$RESIN_HOME/lib/resin.jar</code>.</p>
+
+<ul>
+<li>com/caucho/server/resin/resin.rnc
+</li><li>com/caucho/server/webapp/web-xml.rnc
+</li><li>com/caucho/server/webapp/resin-web-xml.rnc
+</li><li>com/caucho/server/resin/env.rnc
+</li><li>com/caucho/jsp/cfg/jsp-tld.rnc
+</li><li>com/caucho/jsp/cfg/jsp11-tld.rnc
+</li><li>com/caucho/jsp/cfg/jsp12-tld.rnc
+</li><li>com/caucho/jsp/cfg/jsp1_2-tld.rnc
+</li><li>com/caucho/jsp/cfg/jsp20-tld.rnc
+</li></ul>
+</s1>
+
+<s1 title="Can I precompile JSP's?" type="faq">
+<description>
+</description>
+
+<p>
+See <a href="doc|jsp|compile">JSP Compilation.</a>
+</p>
+</s1>
+
+<s1 title="How can I disable directory listings?" type="faq">
+<p>
+Directory listing is performed by a servlet named `directory'.
+The standard resin.conf contains a definition of that servlet:
+</p>
+<example title="resin.conf definition of directory servlet">
+&lt;web-app-default&gt;
+  ...
+  &lt;servlet servlet-name="directory"
+           servlet-class="com.caucho.servlets.DirectoryServlet"/&gt;
+</example>
+
+<p>
+Directory listing is disabled by removing or commenting out this definition.
+</p>
+
+<example title="resin.conf disabled directory servlet">
+&lt;web-app-default&gt;
+  ...
+  &lt;!-- disabled:
+  &lt;servlet servlet-name="directory"
+           servlet-class="com.caucho.servlets.DirectoryServlet"/&gt;
+  --&gt;
+</example>
+</s1>
+
+<s1 title="What impact does always-save-session have on performance?" type="faq">
+
+<description>
+We've seen significant performance issues when distributed sessions are
+enabled, and are trying to find some clues as to the cause.  We've seen as much
+as 30% increase in cpu utilization when disttributed sessions are enabled, and
+we are using <a config-tag="always-save-session"/>.
+</description>
+
+<p>
+<a config-tag="always-save-session"/> has a significant impact on performance.
+</p>
+
+<p>
+When using <a config-tag="always-save-session"/>, Resin can't know if an
+internal bean value has changed, so the session is serialized with every
+request.  That's a pretty significant amount of work, depending on how much is
+stored in the session.
+</p>
+
+<p>
+It is far more efficient to design the session to avoid the need for <a config-tag="always-save-session"/>, so session values are only saved once and
+then are read-only.
+</p>
+
+<p>
+You can avoid <a config-tag="always-save-session"/> if you call setAttribute()
+each time the session state changes.  If your web application calls
+session.setAttribute("key",value) everytime you change the <var>value</var> object,
+then Resin can intercept that call and realize that the session needs to be
+written to the distributed store again.
+</p>
+
+<p>
+Resin 3.0 is a little more efficient thatn Resin 2.1.  Resin 3.0 compares the
+crc sum of the serialization; it compares the crc value of the serialization of
+current session objects with the objects in the backing store, and if there is
+no change the session is not written.
+</p>
+</s1>
+
+</body>
+</document>

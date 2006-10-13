@@ -1,0 +1,961 @@
+<document>
+<header>
+<product>resin</product>
+<title>Environment: Class Loaders, Resources and JNDI</title>
+<version>Resin 3.0</version>
+
+<description>
+<p>Environment tags configure class-loaders, logging, authentication,
+EL variables and control,
+and resources like databases, JMS queues, EJB servers, and web service
+clients.  Many of the resources are stored in JNDI or in EL variables
+for later assemply.</p>
+
+<p>Any environment resource can appear in any
+of Resin environments: &lt;resin>, &lt;cluster>, &lt;host> and &lt;web-app>.
+Resources configured at parent levels are shared among all children,
+so a database can share connection pools for all web-apps or an
+authenticator can provide single-signon.</p>
+
+</description>
+</header>
+
+<body>
+
+<localtoc/>
+
+<defun title="&lt;authenticator>" occur="*">
+<parents>resin, cluster, host, web-app, login-config</parents>
+  <!-- com.caucho.config.types.Authenticator -->
+
+<p>&lt;authenticator configures an authentication resource
+for the current environment.</p>
+
+<p>Resin's servlet authentication uses an authentication resource to
+validate user login and to provide single-signon capability.
+The authenticator is configured in the environment context
+where it is shared.  So an authenticator configured in the web-app
+only applies to the web-app, but an authenticator configured in
+the host will apply to all hosts.</p>
+
+<p>The authenticator class is selected with the <var>type</var> attribute.  It
+can be any custom class
+extending <code>com.caucho.server.security.AbstractAuthenticator</code>.
+Configuration of the authenticator uses bean-style configuration in the
+&lt;init&gt; tag.</p>
+
+<deftable-childtags>
+<tr><td>jndi-name</td>
+    <td>The JNDI name where the authenticator is stored.  Since Resin 3.0</td>
+    <td>java:comp/env/caucho/auth</td></tr>
+<tr><td>type</td>
+    <td>The implementing class for the authenticator.  Since Resin 3.0</td>
+    <td>required</td></tr>
+<tr><td>init</td>
+    <td>A bean-style configuration section.  Since Resin 3.0</td>
+    <td>none</td></tr>
+</deftable-childtags>
+
+</defun>
+
+<defun title="&lt;bean>" occur="*" version="Resin 3.0">
+<parents>resin, server, host, web-app</parents>
+  <!-- com.caucho.config.types.Resource -->
+
+<p>&lt;bean> configures a custom bean resource and stores in JNDI.
+&lt;bean> is a synonym for &lt;bean>.</p>
+
+<p>Resources are beans stored in JNDI.  The resources can be
+created from any Java class that conforms to the bean conventions.
+Configuration of the resource is in the &lt;init&gt; section.  Field values may
+use JSP-EL expressions as well as constant strings or even complex
+sub-beans.</p>
+
+<deftable-childtags>
+<tr><td>jndi-name</td>
+    <td>JNDI name for the resource.  Since Resin 3.0</td>
+    <td></td></tr>
+<tr><td>type</td>
+    <td>Application class implementing the resource. Since Resin 3.0</td>
+    <td>required</td></tr>
+<tr><td>arg</td>
+    <td>Arguments to the resource's constructor.  Since Resin 3.0</td>
+    <td>optional</td></tr>
+<tr><td>init</td>
+    <td>IoC/JAXB configuration for the bean</td>
+     <td>optional</td></tr>
+<tr><td>listener</td>
+    <td>Registers the bean as a listener for a JMX emitter. Resin 3.0</td>
+    <td>optional</td></tr>
+<tr><td>mbean-name</td>
+    <td>JMX name for management registration. Resin 3.0</td>
+    <td>optional</td></tr>
+<tr><td>var</td>
+    <td>EL variable name for the bean. Resin 3.0</td>
+    <td>optional</td></tr>
+</deftable-childtags>
+
+<example title="Custom Bean configured in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+  &lt;bean jndi-name="env/test"&gt;
+    &lt;type&gt;test.MyBean&lt;/type&gt;
+    &lt;init&gt;
+      &lt;greeting&gt;Hello&lt;/greeting&gt;
+      &lt;server&gt;${serverId}&lt;/server&gt;
+      &lt;sub-bean&gt;
+        &lt;value&gt;${2 + 2}&lt;/value&gt;
+      &lt;/sub-bean&gt;
+    &lt;/init&gt;
+  &lt;/bean&gt;
+&lt;/web-app>
+</example>
+
+<def title="&lt;bean> schema">
+r_bean = element bean {
+  (jndi-name?
+  &amp; mbean-name?
+  &amp; mbean-interface?
+  &amp; var?),
+
+  (type, arg*)?,
+
+  (init | listener)*
+}
+
+element listener {
+  mbean-name,
+
+  handback*
+}
+
+</def>
+
+</defun> 
+
+<defun title="&lt;case-insensitive>" occur="?">
+<parents>resin, cluster, host, web-app</parents>
+<default>true on Windows, false on Unix.</default>
+
+<p>&lt;case-ensensitive> specifies whether the environment
+context is case sensitive or insensitive.</p>
+
+<p>Because some operating systems are case-insensitive, it is important
+for security reasons for Resin to behave differently for case-sensitive
+and case-insensitive directories.  For example, when case-insensitive
+is true, url-patterns will match in a case-insensitive manner, so TEST.JSP
+will work like test.jsp.</p>
+
+</defun>
+
+<defun title="&lt;character-encoding>" occur="?" version="Resin 1.1" type="defun">
+<parents>resin, server, host, web-app</parents>
+<default>The default value is ISO-8859-1.</default>
+
+<p>&lt;character-encoding> specifies the default character
+encoding for the environment.</p>
+
+<example>
+&lt;web-app id='/'&gt;
+  &lt;character-encoding&gt;shift_jis&lt;/character-encoding&gt;
+  ...
+
+&lt;/web-app&gt;
+</example>
+
+</defun>
+
+<defun title="&lt;class-loader>" occur="*" version="Resin 3.0">
+  <parents>resin, cluster, host, web-app</parents>
+  <!-- com.caucho.loader.EnvironmentClassLoader -->
+
+<p>&lt;class-loader> configures a dynamic classloader
+for the current environment.</p>
+
+<p>Each environment (&lt;cluster&gt;, &lt;host&gt;, &lt;web-app&gt;) etc,
+can add dynamic classloaders.  The environment will inherit the parent
+classloaders.  Each &lt;class-loader&gt; is comprised of several implementing
+loader items: library-loader for WEB-INF/lib, compiling-loader for
+WEB-INF/classes.</p>
+
+<example title="&lt;class-loader> in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;prologue>
+    &lt;class-loader&gt;
+      &lt;compiling-loader path="WEB-INF/classes"/&gt;
+
+      &lt;library-loader path="WEB-INF/lib"/&gt;
+    &lt;/class-loader&gt;
+  &lt;/prologue>
+&lt;/web-app&gt;
+</example>
+
+</defun>
+
+<defun title="&lt;compiling-loader>" occur="*" version="Resin 3.0" type="defun">
+  <parents>class-loader</parents>
+  <!-- com.caucho.loader.CompilingLoader -->
+
+<p>&lt;compiling-loader> automatically compiles Java code into .class
+files before loading them.</p>
+
+<deftable-childtags>
+<tr><td>args</td>
+    <td>Additional arguments to be passed to the Java compiler. Resin 3.0</td>
+    <td>none</td></tr>
+<tr><td>batch</td>
+    <td>If true, multiple changed *.java files will be compiled in a single batch. Resin 3.0.7</td>
+     <td>true</td></tr>
+<tr><td>encoding</td>
+    <td>I18N encoding for the Java compiler. Since Resin 3.0</td>
+    <td>none</td></tr>
+<tr><td>path</td>
+    <td>Filesystem path for the class loader.  Since Resin 3.0</td>
+    <td>required</td></tr>
+<tr><td>source</td>
+    <td>Java source directory. Since Resin 3.0</td>
+    <td>value of path</td></tr>
+<tr><td>require-source</td>
+    <td>If true, .class files without matching .java files will be deleted. Since Resin 3.0</td>
+    <td>false</td></tr>
+</deftable-childtags>
+
+<example title="&lt;compiling-loader> for WEB-INF/src">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+  &lt;prologue>
+    &lt;class-loader>
+      &lt;compiling-loader path="WEB-INF/classes"
+                        source="WEB-INF/src"/>
+    &lt;/class-loader>
+  &lt;/prologue>
+&lt;/web-app xmlns="http://caucho.com/ns/resin">
+</example>
+
+</defun>
+
+<defun title="&lt;connector>" occur="*" version="Resin 3.0" type="defun">
+<parents>resin, server, host, web-app</parents>
+  <!-- com.caucho.jca.ConnectorResource -->
+
+<p>&lt;connector> configures a JCA resource adapter and its
+associated connection factories.</p>
+
+<p>The resource adapter/connector  will have been added as a rar
+file (see <a href="#resource-deploy">resource-deploy</a>.  The
+&lt;connector&gt; configures that rar resource.</p>
+
+<example title="Connector Example">
+&lt;connector connector-name="Test Resource"&gt;
+  &lt;connection-factory jndi-name="eis/test"&gt;
+    &lt;init&gt;
+      &lt;value&gt;b&lt;/value&gt;
+    &lt;/init&gt;
+  &lt;/connection-factory&gt;
+&lt;/connector&gt;
+</example>
+
+<deftable-childtags>
+<tr><td>connector</td><td>Configures a connector</td><td>required
+</td></tr><tr><td>connector-name</td><td>Specifies the rar connector's display-name</td><td>required
+</td></tr><tr><td>resource-adapter</td><td>Configures the resource-adapter</td><td>optional
+</td></tr><tr><td>connection-factory</td><td>Configures a connection-factory</td><td>optional
+</td></tr><tr><td>jndi-name</td><td>JNDI name for a resource-adapter or connection-factory</td><td>required
+</td></tr><tr><td>type</td><td>For connectors with multiple connection-factories, specifies the connection-factory</td><td>optional
+</td></tr><tr><td>local-transaction-optimization</td><td>Enables the local transaction optimization. Resin 3.0.7</td><td>true
+</td></tr><tr><td>init</td><td>Bean-style initialization</td><td>optional
+</td></tr></deftable-childtags>
+
+<def title="connector schema">
+element connector {
+  connector-name { string }
+
+  &amp; resource-adapter?
+
+  &amp; connection-factory*
+}
+
+element connection-factory {
+  jndi-name,
+
+  type?,
+
+  element init { any }?
+}
+
+element resource-adapter {
+  jndi-name,
+
+  element init { any }?
+}
+</def>
+
+</defun>
+
+<defun title="&lt;database>" occur="*" version="Resin 3.0" type="defun">
+<parents>resin, server, host, web-app</parents>
+  <!-- com.caucho.sql.DBPool -->
+
+<p>&lt;database> defines a database (i.e. DataSource)  resource.</p>
+
+<p>The <a href="doc|db|config">database configuration</a> section has
+more details on the configuration.  A code pattern for using databases
+is in a <a href="doc|db|tutorial/jdbc-basic/index">DataSource tutorial.</a></p>
+
+<example>
+&lt;database jndi-name='jdbc/test_mysql'&gt;
+  &lt;driver 
+    type="com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource"&gt;
+    &lt;url&gt;jdbc:mysql://localhost:3306/test&lt;/url&gt;
+    &lt;user&gt;&lt;/user&gt;
+    &lt;password&gt;&lt;/password&gt;
+  &lt;/driver&gt;
+&lt;/database&gt;
+</example>
+
+</defun>
+
+<defun title="&lt;dependency>" occur="?" version="Resin 3.0.1" type="defun">
+<parents>resin, cluster, host, web-app</parents>
+
+<p>&lt;dependency> adds dependent files which should force a
+reload when changed, like web.xml and resin-web.xml.</p>
+
+<deftable-childtags>
+<tr><td>path</td><td>Filesystem path to the dependent file.  Since Resin 3.0</td><td>required
+</td></tr></deftable-childtags>
+
+<example title="web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;dependency path="WEB-INF/struts-config.xml"/&gt;
+  ...
+&lt;/web-app&gt;
+</example>
+
+</defun>
+
+<defun title="&lt;dependency-check-interval>" occur="?" version="Resin 3.0">
+<parents>resin, cluster, host, web-app</parents>
+<default>2s</default>
+
+<p>&lt;dependency-check-interval> Configures how often the environment context
+should be checked for changes.  The default value is set low for
+development purposes, deployments should use something larger like
+5m or 1h.</p>
+
+<p>Resin automatically checks each environment for updates, generally
+class or configuration updates.  Because these checks can take a considerable
+amount of time, deployment servers should use high values like 60s or more while development machines will want low values like 2s.</p>
+
+<p>The interval defaults to the parent's interval.  So the web-app will
+default to the host's value.</p>
+
+<default>2s</default>
+
+<example title="deployment dependency-check-interval">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  &lt;cluster id="app-tier">
+    &lt;dependency-check-interval>1h&lt;dependency-check-interval>
+
+    &lt;server id="app-a" .../>
+
+    &lt;host id=""/>
+      ...
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+</defun>
+
+<defun title="&lt;ejb-server>" occur="*" version="Resin 3.0">
+<parents>resin, server, host, web-app</parents>
+  <!-- com.caucho.ejb.EJBServer -->
+
+<p>Configures an EJB/JPA server.  See the CMP configuration for more details.</p>
+</defun>
+
+<defun title="&lt;env-entry>" occur="*" version="Resin 3.0" type="defun">
+<parents>resin, server, host-default, host, web-app-default, web-app</parents>
+  <!-- com.caucho.config.types.EnvEntry -->
+
+<p>&lt;env-entry> configures a JNDI scalar value
+for JNDI-based application configuration.</p>
+
+<p>Some application beans prefer to retrieve configuration data from JNDI,
+including String, Integer, and Double constants.  env-entry configures
+that data in the current context.  As with other Resin configuration, the
+value can use JSP-EL expressions.</p>
+
+<deftable-childtags>
+<tr><td>env-entry-name</td><td>JNDI name to store the value.  Since Servlet 2.1</td><td>required
+</td></tr><tr><td>env-entry-type</td><td>Java type for the value.  Since Servlet 2.1</td><td>required
+</td></tr><tr><td>env-entry-value</td><td>Value to be stored.  Since Servlet 2.1</td><td>required
+</td></tr></deftable-childtags>
+
+<p>The example configuration stores a string in java:comp/env/greeting.
+Following the J2EE spec, the env-entry-name is relative to
+java:comp/env.  If the env-entry is in the &lt;host&gt; context, it will
+be visible to all web-apps in the host.</p>
+
+<example title="Example resin-web.xml fragment">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+  &lt;env-entry&gt;
+    &lt;env-entry-name&gt;greeting&lt;/env-entry-name&gt;
+    &lt;env-entry-type&gt;java.lang.String&lt;/env-entry-type&gt;
+    &lt;env-entry-value&gt;Hello, World&lt;/env-entry-value&gt;
+  &lt;/env-entry&gt;
+
+  &lt;servlet ...>
+  &lt;/servlet>
+&lt;/web-app>
+</example>
+
+<p>The following servlet fragment is a typical use in a servlet.  The
+servlet only looks up the variable once and stores it for later use.
+</p>
+
+<example title="GreetingServlet.java">
+import java.io.*;
+import javax.naming.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+
+public class TestServlet extends HttpServlet {
+  private String greeting;
+
+  public void init()
+    throws ServletException
+  {
+    try {
+      Context env = 
+        (Context) new InitialContext().lookup("java:comp/env");
+      greeting = (String) env.lookup("greeting");
+    } catch (NamingException e) {
+      throw new ServletException(e);
+    }
+  }
+
+  ...
+}
+</example>
+
+<def title="env-entry schema">
+element env-entry {
+  env-entry-name,
+
+  env-entry-type,
+
+  env-entry-value
+}
+</def>
+
+</defun>
+
+<defun title="&lt;javac>" occur="?" type="defun">
+<parents>resin, cluster, host, web-app</parents>
+  <!-- com.caucho.java.JavacConfig -->
+
+<p>&lt;javac> configures the Java compiler for automatically
+compiled files.</p>
+
+<p>The javac configuration is used for JSP, PHP, EJB and
+compiling-loader configuration.</p>
+
+<deftable-childtags>
+<tr><td>compiler</td><td>Configures the Java compiler to use.  Since Resin 3.0</td><td>internal
+</td></tr><tr><td>args</td><td>Any additional arguments for the compiler.  Since Resin 3.0</td><td>none
+</td></tr><tr><td>encoding</td><td>Any encoding valued for the compiler.  Since Resin 3.0</td><td>none
+</td></tr></deftable-childtags>
+
+</defun>
+
+<defun title="&lt;jndi-link>" occur="*" version="Resin 1.2">
+<parents>resin, cluster, host, web-app</parents>
+  <!-- com.caucho.naming.LinkProxy -->
+
+<p>&lt;jndi-link> links a foreign JNDI contexts or JNDI object.</p>
+
+<p>Resin's JNDI can link to foreign JNDI contexts.  For example, third-party
+EJB servers will often expose their EJB beans through a JNDI context.
+jndi-link will create the appropriate InitialContextFactory, configure it,
+and lookup the foreign JNDI objects.</p>
+
+<deftable-childtags>
+<tr><td>jndi-name</td><td>The JNDI name where the foreign context should be linked.  Resin 3.0</td><td>required
+</td></tr><tr><td>factory</td><td>Class name of the JNDI InitialContextFactory.  Since Resin 1.2</td><td>optional
+</td></tr><tr><td>foreign-name</td><td>Sub-context of the foreign JNDI context.  Since Resin 1.2</td><td>none
+</td></tr><tr><td>init-param</td><td>Configuration parameters for the JNDI environment passed to InitialContextFactory.  Since Resin 1.2</td><td>none
+</td></tr></deftable-childtags>
+
+<example title="A JNDI symbolic link EJB client bean">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+  &lt;ejb-server jndi-name="java:comp/env/foo"/>
+
+  &lt;jndi-link&gt;
+    &lt;jndi-name&gt;java:comp/env/ejb/MyBean&lt;/jndi-name&gt;
+    &lt;foreign-name&gt;java:comp/env/foo/SampleBean&lt;/foreign-name&gt;
+  &lt;/jndi-link&gt;
+&lt;/web-app>
+</example>
+
+</defun>
+
+<defun title="&lt;library-loader>" occur="*" version="Resin 3.0">
+  <parents>class-loader</parents>
+
+<p>&lt;library-loader> configures a jar
+library, <var>WEB-INF/lib</var>-style class loader.</p>
+
+<p>The library-loader will add jar files in its path to the current classpath.
+Jar files are recognized wihen they have a filename extension of
+<code>.jar</code> or <code>.zip</code>.</p>
+
+<deftable-childtags>
+<tr><td>path</td><td>Filesystem path for the class loader.  Since Resin 3.0</td><td>required
+</td></tr></deftable-childtags>
+
+<p>See <a href="javadoc|com.caucho.loader.DirectoryLoader">DirectoryLoader</a>.</p>
+</defun>
+
+<defun title="&lt;log>" occur="*" type="defun">
+<parents>resin, server, host, web-app</parents>
+
+<p>&lt;log> configures JDK 1.4 java.util.logger handler.</p>
+
+<p>The <a href="config|log">log configuration</a> describes
+log in detail.</p>
+
+</defun>
+
+<defun title="&lt;logger>" occur="*">
+<parents>resin, server, host, web-app</parents>
+
+<p>&lt;log> configures JDK 1.4 java.util.logger Logger level.</p>
+
+<p>The <a href="config|log">log configuration</a> describes
+log in detail.</p>
+
+<example title="compilation logging">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  &lt;log name="" level="all" path="log/debug.log"/>
+  &lt;logger name="com.caucho.java" level="fine"/>
+
+  &lt;cluster id="app-tier">
+    ...
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+</defun>
+
+<defun title="&lt;reference>" occur="*" version="Resin 3.0">
+<parents>resin, cluster, host, web-app</parents>
+  <!-- com.caucho.config.types.ReferenceConfig -->
+
+<p>&lt;reference> configures a JNDI ObjectFactory.</p>
+
+<p>JNDI ObjectFactories are used to create objects from JNDI references.
+The &lt;reference&gt; tag configures the ObjectFactory and stores it in JNDI.</p>
+
+<deftable-childtags>
+<tr><td>jndi-name</td><td>JNDI name for the reference.  Since Resin 3.0</td><td>required
+</td></tr><tr><td>factory</td><td>Class name of the ObjectFactory. Resin 3.0</td><td>required
+</td></tr><tr><td>init</td><td>Bean-style initialization for the factory</td><td>none
+</td></tr></deftable-childtags>
+
+<example>
+&lt;reference&gt;
+  &lt;jndi-name&gt;hessian/hello&lt;/jndi-name&gt;
+  &lt;factory&gt;com.caucho.hessian.client.HessianProxyFactory&lt;/factory&gt;
+  &lt;init url="http://localhost:8080/ejb/hello"/&gt;
+        type="test.HelloHome"/&gt;
+&lt;/reference&gt;
+</example>
+
+</defun>
+
+<defun title="&lt;resin:if>" version="Resin 3.0.7">
+
+<p>&lt;resin:if> executes part of the configuration file conditionally.</p>
+
+<deftable-childtags>
+<tr><td>test</td><td>the test to perform</td></tr>
+</deftable-childtags>
+</defun>
+
+<defun title="&lt;resin:choose>" version="Resin 3.0.7">
+
+<p>&lt;resin:choose> implements an if, elsif, else.</p>
+
+<def>
+&lt;resin:choose&gt;
+  &lt;resin:when test="\${expr1}"&gt;
+    ...
+  &lt;/resin:when&gt;
+
+  &lt;resin:when test="\${expr2}"&gt;
+    ...
+  &lt;/resin:when&gt;
+
+  &lt;resin:otherwise&gt;
+    ...
+  &lt;/resin:otherwise&gt;
+&lt;resin:choose&gt;
+</def>
+
+<deftable-childtags>
+<tr><td>resin:when</td><td>
+</td></tr><tr><td>resin:choose</td><td>
+</td></tr></deftable-childtags>
+
+</defun>
+
+<defun title="&lt;resin:import>" version="Resin 3.0.7">
+
+<p>&lt;resin:import> reads configuration information from another file.
+The target file is validated by a schema where the schema depends on the
+location of the resin:import.</p>
+
+<p>A resin:import in &lt;cluster&gt; will have a target with a top-level
+of &lt;server&gt;.</p>
+
+<p>&lt;resin:import> is a key capability of the resin.conf file.  User
+configuration files like web.xml and resin-web.xml are implemented by
+&lt;resin:import>.</p>
+
+<deftable-childtags>
+<tr><td>path</td>
+    <td>a path to a file</td><td>either path or fileset is required</td></tr>
+<tr><td>fileset</td>
+    <td>a <a config-tag="fileset"/></td>
+    <td>either path or fileset is required</td></tr>
+<tr><td>optional</td>
+    <td>if true, no error when file does not exist</td><td>false</td></tr>
+</deftable-childtags>
+
+<example title="resin-web.xml as used in app-default.xml">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+          xmlns:resin="http://caucho.com/ns/resin/core">
+  &lt;cluster id="app-tier">
+
+    &lt;web-app-default>
+      &lt;resin:import path="WEB-INF/web.xml" optional="true"/>
+      &lt;resin:import path="WEB-INF/resin-web.xml" optional="true"/>
+    &lt;/web-app-default>
+
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+</defun>
+
+<defun title="&lt;resin:log>" version="Resin 3.0.7">
+
+<p>&lt;resin:log> logs a message to the given log file.
+The content of the element is the
+message.</p>
+
+<example title="logging in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;resin:log&gt;Starting server \${server.name}&lt;/resin:log&gt;
+&lt;/web-app>
+</example>
+</defun>
+
+<defun title="&lt;resin:set>" version="Resin 3.0.7">
+
+<p>&lt;resin:set> adds an EL variable to the current context.</p>
+
+<deftable-childtags>
+<tr><td>name</td>
+    <td>name of the variable to set</td>
+    <td>required</td></tr>
+<tr><td>value</td>
+    <td>value</td>
+   <td>required</td></tr>
+</deftable-childtags>
+
+<example title="resin:set in resin.conf">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+          xmlns:resin="http://caucho.com/ns/resin/core">
+  &lt;resin:set name="root" value="/var/www">
+
+  &lt;cluster id="app-tier">
+    &lt;root-directory>${root}&lt;/root-directory>
+
+    ...
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+</defun>
+
+<defun title="&lt;resin:otherwise>" version="Resin 3.0.7">
+<parents>resin:choose</parents>
+
+<p>&lt;resin:otherwise> is the catch-all configuration for a &lt;resin:choose>
+block when none of the &lt;resin:when> items match.</p>
+
+</defun>
+
+<defun title="&lt;resin:when>" version="Resin 3.0.7">
+<parents>resin:choose</parents>
+
+<p>&lt;resin:when> conditionally configures a block within a
+&lt;resin:choose> block.  If the <var>test</var> matches, Resin will
+use the enclosed configuration.</p>
+
+<deftable-childtags>
+<tr><td>test</td><td>the test to perform
+</td></tr></deftable-childtags>
+</defun>
+
+<defun title="&lt;resource>" occur="*" version="Resin 3.0" type="defun">
+<parents>resin, server, host, web-app</parents>
+  <!-- com.caucho.config.types.Resource -->
+
+<p>&lt;resource> configures a custom bean resource and stores in JNDI.
+&lt;resource> is a synonym for &lt;bean>.</p>
+
+<p>Resources are beans stored in JNDI.  The resources can be
+created from any Java class that conforms to the bean conventions.
+Configuration of the resource is in the &lt;init&gt; section.  Field values may
+use JSP-EL expressions as well as constant strings or even complex
+sub-beans.</p>
+
+<deftable-childtags>
+<tr><td>jndi-name</td><td>JNDI name for the resource.  Since Resin 3.0</td><td>required
+</td></tr><tr><td>type</td><td>Bean class implementing the resource. Since Resin 3.0</td><td>required
+</td></tr><tr><td>arg</td><td>Arguments to the resource's constructor.  Since Resin 3.0</td><td>optional
+</td></tr><tr><td>mbean-name</td><td>JMX name for management registration. Resin 3.0</td><td>optional
+</td></tr><tr><td>init</td><td>Bean-style initialization for the bean</td><td>optional
+</td></tr><tr><td>listener</td><td>Registers the bean as a listener for a JMX emitter. Resin 3.0</td><td>optional
+</td></tr><tr><td>local-transaction-optimization</td><td>Enables the local transaction optimization. Resin 3.0.7</td><td>true
+</td></tr></deftable-childtags>
+
+<example>
+&lt;resource jndi-name="env/test"&gt;
+  &lt;type&gt;test.MyBean&lt;/type&gt;
+  &lt;init&gt;
+    &lt;greeting&gt;Hello&lt;/greeting&gt;
+    &lt;server&gt;${'${'}serverId}&lt;/server&gt;
+    &lt;sub-bean&gt;
+      &lt;value&gt;${'${2'} + 2}&lt;/value&gt;
+    &lt;/sub-bean&gt;
+  &lt;/init&gt;
+&lt;/resource&gt;
+</example>
+
+<def title="schema">
+r_listener-Resource = element listener {
+  r_mbean-name,
+
+  r_handback*
+}
+
+r_resource = element resource {
+  (r_jndi-name?
+
+  &amp; r_mbean-name?
+
+  &amp; r_mbean-interface?),
+
+  (r_type,
+
+  r_arg*)?,
+
+  (r_init*
+
+  &amp; r_listener-Resource*)
+}
+</def>
+
+</defun> 
+
+<defun title="&lt;resource-deploy>" occur="*" version="Resin 3.0" type="defun">
+<parents>resin, server, host-default, host, web-app-default, web-app</parents>
+  <!-- com.caucho.jca.ResourceDeploy -->
+
+<p>&lt;resource-deploy> defines a deployment directory for .rar files.</p>
+
+<p>Connectors and resources defined in .rar files must be deployed
+before they can be configured by <a href="#connector">connector</a>.
+The &lt;resource-deploy&gt; tag specifies the directory for that deployment.
+</p>
+
+<deftable-childtags>
+<tr><td>resource-deploy</td><td>Configures .rar deployment</td><td>required
+</td></tr><tr><td>path</td><td>Configures the path where users will place .rar files</td><td>required
+</td></tr><tr><td>expand-path</td><td>Configures the directory where Resin will expand rar files</td><td>the path value
+</td></tr></deftable-childtags>
+
+<def title="schema">
+element resource-deploy {
+  path
+
+  &amp; expand-path?
+}
+</def>
+
+<example title="example resource-deploy">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  &lt;cluster id="app-tier">
+
+    &lt;host id=""&gt;
+      &lt;resource-deploy path="deploy"/&gt;
+    &lt;/host>
+  &lt;/cluster&gt;
+&lt;/resin&gt;
+</example>
+
+</defun>
+
+<defun title="&lt;resource-ref>" occur="*" version="Servlet 2.2" type="defun">
+<parents>resin, cluster, host, web-app</parents>
+  <!-- com.caucho.config.types.ResourceRef -->
+
+<p>&lt;resource-ref> declares that the application needs
+a resouce configuration.</p>
+
+<p>resource-ref is not directly used by Resin.  It's a servlet configuration
+item intended to tell GUI tools which resources need configuration.
+Resource configuration in Resin uses the resource, reference,
+database, and ejb-server tags.</p>
+
+<p>For backwards compatibility, Resin 2.1-style configuration files
+may still use resource-ref to configure resources, but it's recommended to
+convert the configuration.</p>
+
+</defun>
+
+<defun title="&lt;servlet-hack>" occur="*" version="Resin 3.0" type="defun">
+  <parents>class-loader</parents>
+
+<p>Use of servlet-hack is discouraged.  Using servlet-hack violates
+the JDK's classloader delegation model and can
+produce surprising ClassCastExceptions.</p>
+
+<p>servlet-hack reverses the normal class loader order.
+Instead of parent classloaders having priority, child classloaders
+have priority.</p>
+
+</defun>
+
+<defun title="&lt;simple-loader>" occur="*" version="Resin 3.0" type="defun">
+  <parents>class-loader</parents>
+  <!-- com.caucho.loader.SimpleLoader -->
+
+<p>&lt;simple-loader> Configures a
+simple <var>WEB-INF/classes</var>-style class loader.</p>
+
+<p>.class files in the specified directory will be loaded without any
+special compilation steps (in contrast with compiling-loader.)</p>
+
+<deftable-childtags>
+<tr><td>path</td><td>Filesystem path for the class loader.  Since Resin 3.0</td><td>required
+</td></tr><tr><td>prefix</td><td>Class package prefix to only load to a subset of classes. Resin 3.0</td><td>none
+</td></tr></deftable-childtags>
+
+</defun>
+
+<defun title="&lt;stderr-log>" occur="?" type="defun">
+<parents>resin, server, host-default, host, web-app-default, web-app</parents>
+
+<p>Configures the destination for <code>System.err</code>.</p>
+
+<p>The <a href="doc|config|log">log configuration</a> describes
+stderr-log in detail.</p>
+
+</defun>
+
+<defun title="&lt;stdout-log>" occur="?" type="defun">
+<parents>resin, server, host-default, host, web-app-default, web-app</parents>
+
+<p>Configures the destination for <code>System.out</code>.</p>
+
+<p>The <a href="doc|config|log">log configuration</a> describes
+stderr-log in detail.</p>
+</defun>
+
+<defun title="&lt;system-property>" occur="*" version="Resin 2.0" type="defun">
+<parents>resin, cluster, host, web-app</parents>
+
+<p>Sets a Java system property.  The effect is the same as if you
+had called <a href="javadoc|java.lang.System|setProperty(String,String)"/> before starting Resin.</p>
+
+<example>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;system-property foo="bar"/&gt;
+&lt;/resin&gt;
+</example>
+</defun>
+
+<defun title="&lt;temp-dir>" occur="?" version="Resin 1.1" type="defun">
+<parents>resin, server, host-default, host, web-app-default, web-app</parents>
+<default>Defaults to <var>WEB-INF/tmp</var></default>
+
+<p>&lt;temp-dir> configures the application temp directory.
+This is the path used in
+<var>javax.servlet.context.tempdir</var>.</p>
+</defun>
+
+<defun title="&lt;tree-loader>" occur="*" version="Resin 3.0" type="defun">
+  <parents>class-loader</parents>
+  <!-- com.caucho.loader.TreeLoader -->
+
+<p>&lt;tree-loader> configures a jar library, <var>WEB-INF/lib</var>-style class loader similar to
+<a config-tag="library-loader"/>, but will also find <code>.jar</code> and
+<code>.zip</code> files in subdirectories.</p>
+
+<deftable-childtags>
+<tr><td>path</td><td>Filesystem path for the class loader.  Since Resin 3.0</td><td>required
+</td></tr></deftable-childtags>
+
+</defun>
+
+<defun title="&lt;web-service-client>">
+<parents>web-app</parents>
+
+<p>&lt;web-service-client> configures a proxy to a web-service.
+It uses a Java interface and a URL to select the web-service.</p>
+
+<p>The URL is defined as: <var>encoding</var>:<var>location</var>, where
+location is typically a HTTP URL.</p>
+
+<p>See the <a href="soa|tutorial/esb-hello-world">hello world tutorial</a>
+for an example.</p>
+
+<deftable>
+<tr>
+  <td><var>hessian</var>:http://foo.com/hello/hessian</td>
+  <td>Defines a hessian service at http://foo.com/hello/hessian</td>
+</tr>
+<tr>
+  <td><var>rest</var>:http://foo.com/hello/rest</td>
+  <td>Defines a REST service at http://foo.com/hello/rest</td>
+</tr>
+<tr>
+  <td><var>soap</var>:http://foo.com/hello/soap</td>
+  <td>Defines a REST service at http://foo.com/hello/soap</td>
+</tr>
+</deftable>
+
+<def title="web-service-client">
+element web-service-client {
+  jndi-name
+  &amp; url
+  &amp; interface
+}
+</def>
+
+</defun>
+
+<defun title="&lt;work-dir>" occur="?" version="Resin 2.0.0" type="defun">
+<parents>resin, config, host, web-app</parents>
+<default>Defaults to <var>WEB-INF/work</var></default>
+
+<p>&lt;work-dir> configures a work directory for automatically generated
+code, e.g. for JSP, PHP, and JPA classes.</p>
+</defun>
+
+</body>
+</document>
