@@ -29,7 +29,10 @@
 
 package com.caucho.management.server;
 
-public interface HostExpandDeployGeneratorMXBean
+import com.caucho.jmx.Description;
+
+@Description("A generator that detects new rar archive files and deploys resources")
+public interface ResourceDeployMXBean
   extends ExpandDeployGeneratorMXBean
 {
 }

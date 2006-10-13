@@ -29,35 +29,20 @@
 
 package com.caucho.server.webapp;
 
-import java.io.IOException;
+import com.caucho.config.ConfigException;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentListener;
+import com.caucho.log.Log;
+import com.caucho.server.deploy.DeployContainer;
+import com.caucho.server.deploy.ExpandDeployGenerator;
+import com.caucho.vfs.CaseInsensitive;
+import com.caucho.vfs.Path;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Set;
-
-import java.util.logging.Logger;
 import java.util.logging.Level;
-
-import com.caucho.util.Alarm;
-
-import com.caucho.log.Log;
-
-import com.caucho.vfs.Path;
-import com.caucho.vfs.CaseInsensitive;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentListener;
-import com.caucho.loader.EnvironmentClassLoader;
-
-import com.caucho.el.EL;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.config.types.RawString;
-
-import com.caucho.server.deploy.ExpandDeployGenerator;
-import com.caucho.server.deploy.DeployContainer;
+import java.util.logging.Logger;
 
 /**
  * The generator for the web-app deploy
@@ -66,8 +51,10 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
   implements EnvironmentListener {
   private static final Logger log = Log.open(WebAppExpandDeployGenerator.class);
 
+  private final WebAppExpandDeployGeneratorAdmin _admin;
+
   private WebAppContainer _container;
-  
+
   private WebAppController _parent;
 
   private String _urlPrefix = "";
@@ -84,20 +71,25 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
 
   private ClassLoader _parentLoader;
 
-  private boolean _isActive;
-
   /**
    * Creates the new expand deploy.
    */
-  public WebAppExpandDeployGenerator(DeployContainer<WebAppController> container)
+  public WebAppExpandDeployGenerator(DeployContainer<WebAppController> container,
+                                     WebAppContainer webAppContainer)
   {
-    super(container);
-    
+    super(container, webAppContainer.getRootDirectory());
+
+    _container = webAppContainer;
+
+    _parentLoader = webAppContainer.getClassLoader();
+
     try {
       setExtension(".war");
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
+
+    _admin = new WebAppExpandDeployGeneratorAdmin(this);
   }
 
   /**
@@ -108,16 +100,6 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
     return _container;
   }
 
-  /**
-   * Sets the webApp container.
-   */
-  public void setContainer(WebAppContainer container)
-  {
-    _container = container;
-
-    if (_parentLoader == null)
-      _parentLoader = container.getClassLoader();
-  }
   /**
    * Sets the parent webApp.
    */
@@ -141,10 +123,10 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
   {
     if (prefix.equals("")) {
     }
-    
+
     while (prefix.endsWith("/"))
       prefix = prefix.substring(0, prefix.length() - 1);
-    
+
     _urlPrefix = prefix;
 
   }
@@ -193,6 +175,14 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
     _webAppDefaults.add(config);
   }
 
+  @Override
+  protected void initImpl()
+  {
+    super.initImpl();
+
+    _admin.register();
+  }
+
   /**
    * Returns the log.
    */
@@ -210,20 +200,20 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
 
     for (WebAppConfig cfg : _webAppConfigMap.values()) {
       if (cfg.getContextPath() != null)
-	keys.add(cfg.getContextPath());
+        keys.add(cfg.getContextPath());
     }
   }
 
   /**
    * Start the deploy.
    */
-  public void start()
+  protected void startImpl()
   {
+    super.startImpl();
+
     Environment.addEnvironmentListener(this, _parentLoader);
-    
-    super.start();
   }
-  
+
   /**
    * Returns the current array of webApp entries.
    */
@@ -235,7 +225,7 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
     String segmentName = name.substring(_urlPrefix.length());
 
     Path webAppRoot = _contextPathMap.get(segmentName);
-    
+
     if (webAppRoot != null)
       segmentName = "/" + webAppRoot.getTail();
     else if (segmentName.indexOf('/', 1) > 0)
@@ -243,14 +233,14 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
 
     if (segmentName.equals("")) {
       if (CaseInsensitive.isCaseInsensitive())
-	segmentName = "/root";
+        segmentName = "/root";
       else
-	segmentName = "/ROOT";
+        segmentName = "/ROOT";
     }
 
     String expandName = (getExpandPrefix() +
-			 segmentName.substring(1) +
-			 getExpandSuffix());
+                         segmentName.substring(1) +
+                         getExpandSuffix());
 
     String archiveName = segmentName + ".war";
     Path jarPath = getArchiveDirectory().lookup("." + archiveName);
@@ -267,10 +257,10 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
     }
 
     if (! rootDirectory.isDirectory() &&
-	(jarPath == null || ! jarPath.isFile()))
+        (jarPath == null || ! jarPath.isFile()))
       return null;
     else if (rootDirectory.isDirectory() &&
-	     ! isValidDirectory(rootDirectory, segmentName.substring(1)))
+             ! isValidDirectory(rootDirectory, segmentName.substring(1)))
       return null;
 
     WebAppConfig cfg = _webAppConfigMap.get(rootDirectory);
@@ -280,9 +270,9 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
 
     WebAppController controller
       = new WebAppController(name, rootDirectory, _container);
-    
+
     controller.setWarName(segmentName.substring(1));
-      
+
     controller.setParentWebApp(_parent);
 
     controller.setDynamicDeploy(true);
@@ -291,43 +281,43 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
     return controller;
   }
 
-  
+
   /**
    * Returns the current array of webApp entries.
    */
   protected WebAppController mergeController(WebAppController controller,
-					     String key)
+                                             String key)
   {
     try {
       Path expandDirectory = getExpandDirectory();
       Path rootDirectory = controller.getRootDirectory();
-	
+
       if (! expandDirectory.equals(rootDirectory.getParent()))
-	return controller;
+        return controller;
 
       controller = super.mergeController(controller, key);
 
       if (controller.getArchivePath() == null) {
-	String archiveName = rootDirectory.getTail() + ".war";
-	
-	Path jarPath = getArchiveDirectory().lookup(archiveName);
+        String archiveName = rootDirectory.getTail() + ".war";
 
-	if (! jarPath.isDirectory()) {
-	  controller.setArchivePath(jarPath);
-	  controller.addDepend(jarPath);
-	}
+        Path jarPath = getArchiveDirectory().lookup(archiveName);
+
+        if (! jarPath.isDirectory()) {
+          controller.setArchivePath(jarPath);
+          controller.addDepend(jarPath);
+        }
       }
 
       controller.setStartupMode(getStartupMode());
       // controller.setRedeployMode(getRedeployMode());
 
       for (int i = 0; i < _webAppDefaults.size(); i++)
-	controller.addConfigDefault(_webAppDefaults.get(i));
+        controller.addConfigDefault(_webAppDefaults.get(i));
 
       WebAppConfig cfg = _webAppConfigMap.get(rootDirectory);
 
       if (cfg != null)
-	controller.addConfigDefault(cfg);
+        controller.addConfigDefault(cfg);
     } catch (ConfigException e) {
       controller.setConfigException(e);
 
@@ -354,19 +344,19 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
 
     if (CaseInsensitive.isCaseInsensitive()) {
       try {
-	String []list = getExpandDirectory().list();
+        String []list = getExpandDirectory().list();
 
-	String matchName = null;
+        String matchName = null;
 
-	for (int i = 0; i < list.length; i++) {
-	  if (list[i].equalsIgnoreCase(entryName))
-	    matchName = list[i];
-	}
+        for (int i = 0; i < list.length; i++) {
+          if (list[i].equalsIgnoreCase(entryName))
+            matchName = list[i];
+        }
 
-	if (matchName == null)
-	  matchName = entryName.toLowerCase();
+        if (matchName == null)
+          matchName = entryName.toLowerCase();
       } catch (Exception e) {
-	entryName = entryName.toLowerCase();
+        entryName = entryName.toLowerCase();
       }
     }
 
@@ -375,38 +365,19 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
     else
       return _urlPrefix + "/" + entryName;
   }
-  
-  /**
-   * Handles the case where the environment is starting (after init).
-   */
-  public void environmentStart(EnvironmentClassLoader loader)
-  {
-    _isActive = true;
-  }
-  
-  /**
-   * Handles the case where the environment is stopping
-   */
-  public void environmentStop(EnvironmentClassLoader loader)
-  {
-    destroy();
-  }
 
   /**
    * Destroy the deployment.
    */
-  public void destroy()
+  @Override
+  protected void destroyImpl()
   {
-    _isActive = false;
+    _admin.unregister();
 
     _container.removeWebAppDeploy(this);
-    Environment.removeEnvironmentListener(this, _parentLoader);
-    
-    super.destroy();
-  }
 
-  public String toString()
-  {
-    return "WebAppExpandDeployGenerator[" + getExpandDirectory() + "]";
+    Environment.removeEnvironmentListener(this, _parentLoader);
+
+    super.destroyImpl();
   }
 }

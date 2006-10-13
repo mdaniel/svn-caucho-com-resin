@@ -29,16 +29,19 @@
 
 package com.caucho.server.deploy;
 
-import java.util.Set;
-import java.util.logging.Logger;
-
 import com.caucho.config.ConfigException;
-import com.caucho.loader.Environment;
+import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
+import com.caucho.loader.Environment;
 import com.caucho.make.Dependency;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
+
+import javax.annotation.PostConstruct;
+import java.util.Set;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * The generator for the deploy
@@ -56,6 +59,8 @@ abstract public class DeployGenerator<E extends DeployController>
   private String _startupMode = DeployController.STARTUP_AUTOMATIC;
   private String _redeployMode = DeployController.REDEPLOY_AUTOMATIC;
 
+  private final Lifecycle _lifecycle = new Lifecycle(getLog());
+
   /**
    * Creates the deploy.
    */
@@ -63,6 +68,8 @@ abstract public class DeployGenerator<E extends DeployController>
   {
     _parentClassLoader = Thread.currentThread().getContextClassLoader();
     _container = container;
+
+    _lifecycle.setName(toString());
   }
 
   /**
@@ -117,6 +124,27 @@ abstract public class DeployGenerator<E extends DeployController>
     return _redeployMode;
   }
 
+  @PostConstruct
+  final public void init()
+    throws ConfigException
+  {
+    if (! _lifecycle.toInitializing())
+      return;
+
+    initImpl();
+
+    _lifecycle.setName(toString());
+
+    _lifecycle.toInit();
+  }
+
+  /**
+   * Derived class implementation of init
+   */
+  protected void initImpl()
+  {
+  }
+
   /**
    * Returns true if the deployment has modified.
    */
@@ -125,10 +153,39 @@ abstract public class DeployGenerator<E extends DeployController>
     return false;
   }
 
+  public String getState()
+  {
+    return _lifecycle.getStateName();
+  } 
+
   /**
    * Starts the deployment.
    */
-  public void start()
+  final public void start()
+  {
+    try {
+      init();
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+
+    if (!_lifecycle.toStarting())
+      return;
+
+    startImpl();
+
+    _lifecycle.toActive();
+  }
+
+  public boolean isActive()
+  {
+    return _lifecycle.isActive();
+  }
+
+  /**
+   * Derived class implentation of start.
+   */
+  protected void startImpl()
   {
     Environment.addEnvironmentListener(this);
   }
@@ -182,18 +239,50 @@ abstract public class DeployGenerator<E extends DeployController>
   /**
    * Stops the deploy
    */
-  public void stop()
+  final public void stop()
+  {
+    if (!_lifecycle.toStopping())
+      return;
+
+    stopImpl();
+
+    _lifecycle.toStop();
+  }
+
+  /**
+   * Derived class implentation of stop.
+   */
+  protected void stopImpl()
   {
   }
 
   /**
    * Closes the deploy
    */
-  public void destroy()
+  final public void destroy()
+  {
+    try {
+      stop();
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+
+    if (!_lifecycle.toDestroying())
+      return;
+
+    destroyImpl();
+
+    _lifecycle.toDestroy();
+  }
+
+  /**
+   * Derived class implentation of destroy.
+   */
+  protected void destroyImpl()
   {
     _container.remove(this);
   }
-  
+
   /**
    * Handles the case where the environment is starting (after init).
    */
@@ -201,7 +290,7 @@ abstract public class DeployGenerator<E extends DeployController>
   {
     start();
   }
-  
+
   /**
    * Handles the case where the environment is stopping
    */
@@ -209,4 +298,15 @@ abstract public class DeployGenerator<E extends DeployController>
   {
     destroy();
   }
+
+  public String toString()
+  {
+    String name = getClass().getName();
+    int p = name.lastIndexOf('.');
+    if (p > 0)
+      name = name.substring(p + 1);
+
+    return name + "[]";
+  }
+
 }

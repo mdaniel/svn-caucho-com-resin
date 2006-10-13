@@ -29,50 +29,39 @@
 
 package com.caucho.server.deploy;
 
-import java.io.IOException;
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.FileSetType;
+import com.caucho.config.types.Period;
+import com.caucho.loader.Environment;
+import com.caucho.log.Log;
+import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
+import com.caucho.util.L10N;
+import com.caucho.util.WeakAlarm;
+import com.caucho.vfs.Path;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Iterator;
-
-import java.util.logging.Logger;
 import java.util.logging.Level;
-
-import javax.annotation.*;
-
-import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
-import com.caucho.util.WeakAlarm;
-import com.caucho.util.AlarmListener;
-
-import com.caucho.log.Log;
-
-import com.caucho.vfs.Path;
-
-import com.caucho.loader.Environment;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.config.types.FileSetType;
-import com.caucho.config.types.Period;
-
-import com.caucho.make.Dependency;
-
-import com.caucho.lifecycle.Lifecycle;
+import java.util.logging.Logger;
 
 /**
  * The generator for the deploy
  */
-abstract public class ExpandDeployGenerator<E extends ExpandDeployController> extends DeployGenerator<E>
-  implements AlarmListener {
+abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
+  extends DeployGenerator<E>
+  implements AlarmListener
+{
   private static final Logger log = Log.open(ExpandDeployGenerator.class);
   private static final L10N L = new L10N(ExpandDeployGenerator.class);
 
   private static final long MIN_CRON_INTERVAL = 5000L;
 
   private Path _path; // default path
-  
+
+  private Path _containerRootDirectory;
   private Path _archiveDirectory;
   private Path _expandDirectory;
 
@@ -97,20 +86,25 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
   private volatile boolean _isModified;
   private volatile boolean _isDeploying;
 
-  private final Lifecycle _lifecycle = new Lifecycle();
-  
   /**
    * Creates the deploy.
    */
-  public ExpandDeployGenerator(DeployContainer<E> container)
+  public ExpandDeployGenerator(DeployContainer<E> container, Path containerRootDirectory)
   {
     super(container);
+
+    _containerRootDirectory = containerRootDirectory;
 
     _alarm = new WeakAlarm(this);
 
     _cronInterval = Environment.getDependencyCheckInterval();
     if (_cronInterval < MIN_CRON_INTERVAL)
       _cronInterval = MIN_CRON_INTERVAL;
+  }
+
+  Path getContainerRootDirectory()
+  {
+    return _containerRootDirectory;
   }
 
   /**
@@ -188,6 +182,11 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
       _cronInterval = Period.INFINITE;
     else if (_cronInterval < MIN_CRON_INTERVAL)
       _cronInterval = MIN_CRON_INTERVAL;
+  }
+
+  public long getDependencyCheckInterval()
+  {
+    return _cronInterval;
   }
 
   /**
@@ -310,16 +309,15 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
   /**
    * Configuration checks on init.
    */
-  @PostConstruct
-  public void init()
+  @Override
+  protected void initImpl()
     throws ConfigException
   {
-    if (! _lifecycle.toInit())
-      return;
+    super.initImpl();
 
     if (getExpandDirectory() == null)
       throw new ConfigException(L.l("<expand-directory> must be specified for deployment of archive expansion."));
-    
+
     if (getArchiveDirectory() == null)
       throw new ConfigException(L.l("<archive-directory> must be specified for deployment of archive expansion."));
   }
@@ -327,19 +325,11 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
   /**
    * Starts the deploy.
    */
-  public void start()
+  @Override
+  protected void startImpl()
   {
-    try {
-      init();
-    } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
-    
-    if (! _lifecycle.toActive())
-      return;
+    super.startImpl();
 
-    log.finer(this + " starting");
-    
     handleAlarm(_alarm);
   }
 
@@ -635,7 +625,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
    */
   public void handleAlarm(Alarm alarm)
   {
-    if (! _lifecycle.isActive())
+    if (! isActive())
       return;
     
     try {
@@ -650,24 +640,12 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
   /**
    * Stops the deploy.
    */
-  public void stop()
+  @Override
+  protected void stopImpl()
   {
-    _lifecycle.toStop();
-    
     _alarm.dequeue();
-  }
 
-  /**
-   * Destroys the deploy.
-   */
-  public void destroy()
-  {
-    stop();
-
-    if (! _lifecycle.toDestroy())
-      return;
-    
-    _lifecycle.toDestroy();
+    super.stopImpl();
   }
 
   /**
@@ -682,7 +660,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
 
     Path expandDirectory = getExpandDirectory();
     Path deployExpandDirectory = deploy.getExpandDirectory();
-    
+
     if (expandDirectory != deployExpandDirectory &&
 	(expandDirectory == null ||
 	 ! expandDirectory.equals(deployExpandDirectory)))

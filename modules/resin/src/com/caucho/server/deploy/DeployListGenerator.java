@@ -29,24 +29,14 @@
 
 package com.caucho.server.deploy;
 
-import java.io.IOException;
+import com.caucho.log.Log;
+import com.caucho.make.Dependency;
+import com.caucho.util.L10N;
 
 import java.util.ArrayList;
 import java.util.Set;
-import java.util.Iterator;
-
-import java.util.logging.Logger;
 import java.util.logging.Level;
-
-import com.caucho.util.L10N;
-
-import com.caucho.log.Log;
-
-import com.caucho.vfs.Path;
-
-import com.caucho.make.Dependency;
-
-import com.caucho.lifecycle.Lifecycle;
+import java.util.logging.Logger;
 
 /**
  * A list of deploy objects.
@@ -167,8 +157,11 @@ public class DeployListGenerator<E extends DeployController>
   /**
    * Starts the deploys.
    */
-  public void start()
+  @Override
+  protected void startImpl()
   {
+    super.startImpl();
+
     for (int i = 0; i < _generatorList.size(); i++) {
       _generatorList.get(i).start();
     }
@@ -177,17 +170,21 @@ public class DeployListGenerator<E extends DeployController>
   /**
    * Stops the deploys.
    */
-  public void stop()
+  @Override
+  protected void stopImpl()
   {
     for (int i = 0; i < _generatorList.size(); i++) {
       _generatorList.get(i).stop();
     }
+
+    super.stopImpl();
   }
   
   /**
    * Closes the deploys.
    */
-  public void destroy()
+  @Override
+  protected void destroyImpl()
   {
     ArrayList<DeployGenerator<E>> generatorList
       = new ArrayList<DeployGenerator<E>>(_generatorList);
@@ -201,10 +198,12 @@ public class DeployListGenerator<E extends DeployController>
 	log.log(Level.FINE, e.toString(), e);
       }
     }
+
+    super.destroyImpl();
   }
 
   public String toString()
   {
-    return "DeployListGenerator" + _generatorList;
+    return "DeployListGenerator[" + _generatorList + "]";
   }
 }

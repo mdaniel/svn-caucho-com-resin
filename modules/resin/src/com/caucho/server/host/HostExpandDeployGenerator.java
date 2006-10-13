@@ -29,35 +29,30 @@
 
 package com.caucho.server.host;
 
-import java.io.IOException;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.el.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.vfs.Path;
-
+import com.caucho.config.Config;
+import com.caucho.config.ConfigELContext;
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.RawString;
 import com.caucho.el.EL;
 import com.caucho.el.MapVariableResolver;
-
-import com.caucho.config.*;
-
-import com.caucho.config.types.RawString;
-
-import com.caucho.server.deploy.ExpandDeployGenerator;
+import com.caucho.log.Log;
 import com.caucho.server.deploy.DeployContainer;
+import com.caucho.server.deploy.ExpandDeployGenerator;
+import com.caucho.vfs.Path;
+
+import javax.el.ELContext;
+import javax.el.ELResolver;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The generator for the host deploy
  */
 public class HostExpandDeployGenerator extends ExpandDeployGenerator<HostController> {
   private static final Logger log = Log.open(HostExpandDeployGenerator.class);
+
+  private final HostExpandDeployGeneratorAdmin _admin = new HostExpandDeployGeneratorAdmin(this);
 
   private HostContainer _container;
 
@@ -71,7 +66,7 @@ public class HostExpandDeployGenerator extends ExpandDeployGenerator<HostControl
   public HostExpandDeployGenerator(DeployContainer<HostController> container,
 			  HostContainer hostContainer)
   {
-    super(container);
+    super(container, hostContainer.getRootDirectory());
     
     _container = hostContainer;
   }
@@ -119,6 +114,15 @@ public class HostExpandDeployGenerator extends ExpandDeployGenerator<HostControl
   public void addHostDefault(HostConfig config)
   {
     _hostDefaults.add(config);
+  }
+
+  @Override
+  protected void initImpl()
+    throws ConfigException
+  {
+    super.initImpl();
+
+    _admin.register();
   }
 
   /**
@@ -209,7 +213,15 @@ public class HostExpandDeployGenerator extends ExpandDeployGenerator<HostControl
 
     return controller;
   }
-  
+
+  @Override
+  protected void destroyImpl()
+  {
+    _admin.unregister();
+
+    super.destroyImpl();
+  }
+
   public boolean equals(Object o)
   {
     if (o == null || ! getClass().equals(o.getClass()))

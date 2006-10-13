@@ -29,33 +29,22 @@
 
 package com.caucho.server.e_app;
 
-import java.io.*;
-import java.util.*;
-
-import javax.servlet.*;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CauchoSystem;
-
+import com.caucho.server.deploy.DeployContainer;
+import com.caucho.server.deploy.ExpandDeployGenerator;
+import com.caucho.server.webapp.WebAppContainer;
 import com.caucho.vfs.Path;
-
 import com.caucho.config.ConfigException;
 
-import com.caucho.make.Dependency;
-
-import com.caucho.loader.EnvironmentClassLoader;
-
-import com.caucho.server.deploy.ExpandDeployGenerator;
-import com.caucho.server.deploy.DeployContainer;
-
-import com.caucho.server.webapp.WebAppContainer;
-import com.caucho.server.webapp.WebAppController;
+import java.util.ArrayList;
 
 /**
  * The generator for the ear-deploy
  */
 public class EarDeployGenerator
-  extends ExpandDeployGenerator<EarDeployController> {
+  extends ExpandDeployGenerator<EarDeployController>
+{
+  private final EarDeployGeneratorAdmin _admin = new EarDeployGeneratorAdmin(this);
+
   private String _urlPrefix = "";
 
   private WebAppContainer _parentContainer;
@@ -68,7 +57,7 @@ public class EarDeployGenerator
   public EarDeployGenerator(DeployContainer<EarDeployController> deployContainer,
 			    WebAppContainer parentContainer)
   {
-    super(deployContainer);
+    super(deployContainer, parentContainer.getRootDirectory());
 
     try {
       setExpandPrefix("_ear_");
@@ -112,6 +101,15 @@ public class EarDeployGenerator
   public void addEarDefault(EarConfig config)
   {
     _earDefaultList.add(config);
+  }
+
+  @Override
+  protected void initImpl()
+    throws ConfigException
+  {
+    super.initImpl();
+
+    _admin.register();
   }
 
   /**
@@ -158,5 +156,13 @@ public class EarDeployGenerator
       controller.addConfigDefault(config);
 
     return controller;
+  }
+
+  @Override
+  protected void destroyImpl()
+  {
+    _admin.unregister();
+
+    super.destroyImpl();
   }
 }

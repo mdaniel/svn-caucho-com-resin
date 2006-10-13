@@ -29,7 +29,28 @@
 
 package com.caucho.management.server;
 
+import com.caucho.jmx.Description;
+import com.caucho.jmx.Units;
+
 public interface ExpandDeployGeneratorMXBean
   extends DeployGeneratorMXBean
 {
+  @Description("The configured millisecond interval between checks for new archives")
+  @Units("milliseconds")
+  public long getDependencyCheckInterval();
+
+  @Description("The configured directory where archive files are found")
+  public String getArchiveDirectory();
+
+  @Description("The configured extension used to recognize archive files")
+  public String getExtension();
+
+  @Description("The configured directory where archives should be expanded")
+  public String getExpandDirectory();
+
+  @Description("The configured prefix to use for the subdirectory created in the expand directory")
+  public String getExpandPrefix();
+
+  @Description("The configured suffix to use for the subdirectory created in the expand directory")
+  public String getExpandSuffix();
 }

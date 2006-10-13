@@ -27,15 +27,27 @@
  * @author Sam
  */
 
-package com.caucho.server.deploy;
+package com.caucho.server.host;
 
-import com.caucho.server.host.HostExpandDeployGenerator;
+import com.caucho.server.deploy.ExpandDeployGeneratorAdmin;
+import com.caucho.management.server.HostDeployMXBean;
 
 public class HostExpandDeployGeneratorAdmin
   extends ExpandDeployGeneratorAdmin<HostExpandDeployGenerator>
+  implements HostDeployMXBean
 {
   public HostExpandDeployGeneratorAdmin(HostExpandDeployGenerator hostDeployGenerator)
   {
     super(hostDeployGenerator);
+  }
+
+  void register()
+  {
+    registerSelf();
+  }
+
+  void unregister()
+  {
+    unregisterSelf();
   }
 }

@@ -28,23 +28,18 @@
 
 package com.caucho.server.webapp;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-
+import com.caucho.config.types.PathBuilder;
 import com.caucho.log.Log;
-
+import com.caucho.server.deploy.DeployContainer;
+import com.caucho.server.deploy.DeployGenerator;
 import com.caucho.vfs.Path;
 
-import com.caucho.config.types.PathBuilder;
-
-import com.caucho.server.deploy.DeployGenerator;
-import com.caucho.server.deploy.DeployContainer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The generator for the web-app deploy
@@ -197,15 +192,11 @@ public class WebAppRegexpDeployGenerator
     return controller;
   }
 
-  /**
-   * Destroy the deployment.
-   */
-  public void destroy()
-  {
-  }
-
   public String toString()
   {
-    return "WebAppRegexpDeployGenerator[" + _config.getURLRegexp().pattern() + "]";
+    if (_config == null)
+      return "WebAppRegexpDeployGenerator[]";
+    else
+      return "WebAppRegexpDeployGenerator[" + _config.getURLRegexp().pattern() + "]";
   }
 }

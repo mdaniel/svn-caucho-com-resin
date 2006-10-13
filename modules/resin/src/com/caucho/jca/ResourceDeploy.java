@@ -28,30 +28,30 @@
 
 package com.caucho.jca;
 
-import java.io.IOException;
-
-import java.util.HashSet;
-import java.util.ArrayList;
-import java.util.Iterator;
-
-import javax.annotation.*;
-
-import com.caucho.util.L10N;
+import com.caucho.config.ConfigException;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.server.deploy.DeployController;
 import com.caucho.util.CauchoSystem;
-
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
-import com.caucho.config.ConfigException;
-
-import com.caucho.log.Log;
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 
 /**
  * The generator for the resource-deploy
  */
 public class ResourceDeploy {
   private static final L10N L = new L10N(ResourceDeploy.class);
-  
+
+  private final ResourceDeployAdmin _admin = new ResourceDeployAdmin(this);
+
+  private Path _containerRootDirectory;
+
   private Path _rarDir;
   private Path _rarExpandDir;
 
@@ -64,6 +64,14 @@ public class ResourceDeploy {
   public ResourceDeploy()
   {
     setExpandPrefix("_rar_");
+
+    _containerRootDirectory = Vfs.getPwd();
+
+  }
+
+  Path getContainerRootDirectory()
+  {
+    return _containerRootDirectory;
   }
 
   /**
@@ -80,6 +88,11 @@ public class ResourceDeploy {
   public void setPath(Path path)
   {
     _rarDir = path;
+  }
+
+  public Path getArchiveDirectory()
+  {
+    return getPath();
   }
 
   /**
@@ -176,6 +189,8 @@ public class ResourceDeploy {
     } catch (Throwable e) {
       throw new ConfigException(e);
     }
+
+    _admin.register();
   }
 
   /**
@@ -245,4 +260,53 @@ public class ResourceDeploy {
 
     return rarNames;
   }
+
+  public String getExtension()
+  {
+    return ".rar";
+  }
+
+  public String getExpandSuffix()
+  {
+    return "";
+  }
+
+  public long getDependencyCheckInterval()
+  {
+    return -1;
+  }
+
+  public String getStartupMode()
+  {
+    return DeployController.STARTUP_AUTOMATIC;
+  }
+
+  public String getRedeployMode()
+  {
+    return DeployController.REDEPLOY_MANUAL;
+  }
+
+  public String getState()
+  {
+    if (!_isInit)
+      return Lifecycle.getStateName(Lifecycle.IS_NEW);
+    else
+      return Lifecycle.getStateName(Lifecycle.IS_ACTIVE);
+  }
+
+  public void start()
+  {
+    // XXX:
+  }
+
+  public void stop()
+  {
+    // XXX:
+  }
+
+  public void update()
+  {
+    // XXX:
+  }
+
 }

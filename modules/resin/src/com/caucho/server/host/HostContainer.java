@@ -29,49 +29,30 @@
 
 package com.caucho.server.host;
 
-import java.io.*;
-import java.util.*;
-import java.util.regex.*;
-import java.util.logging.*;
-
-import javax.servlet.*;
-
-import javax.servlet.jsp.el.VariableResolver;
-
-import com.caucho.config.BuilderProgram;
-
-import com.caucho.config.types.PathBuilder;
-import com.caucho.config.types.StringTypeBuilder;
-
-import com.caucho.log.Log;
-
-import com.caucho.loader.EnvironmentClassLoader;
-
 import com.caucho.lifecycle.Lifecycle;
-
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.log.Log;
 import com.caucho.make.AlwaysModified;
-
-import com.caucho.server.dispatch.*;
-
+import com.caucho.server.cluster.Server;
 import com.caucho.server.deploy.DeployContainer;
-
-import com.caucho.server.port.ProtocolDispatchServer;
-
+import com.caucho.server.dispatch.DispatchBuilder;
+import com.caucho.server.dispatch.DispatchServer;
+import com.caucho.server.dispatch.ErrorFilterChain;
+import com.caucho.server.dispatch.Invocation;
+import com.caucho.server.dispatch.ServletMapping;
+import com.caucho.server.e_app.EarConfig;
+import com.caucho.server.webapp.RewriteInvocation;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.util.L10N;
-import com.caucho.util.RandomUtil;
-import com.caucho.util.Alarm;
-
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
 
-import com.caucho.server.cluster.Server;
-
-import com.caucho.server.e_app.EarConfig;
-
-import com.caucho.server.webapp.WebAppConfig;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.server.webapp.RewriteInvocation;
+import javax.servlet.FilterChain;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Resin's host container implementation.

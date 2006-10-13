@@ -29,12 +29,19 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.util.CauchoSystem;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.Crc64;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
+import com.caucho.util.RandomUtil;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.security.cert.Certificate;
-
-import com.caucho.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * A virtual filesystem path, essentially represented by a URL.
@@ -201,6 +208,32 @@ public abstract class Path {
   public Path lookupNative(String name, Map<String,Object> attributes)
   {
     return lookup(name, attributes);
+  }
+
+  /**
+   * Returns a native path relative to this native path if the passed path
+   * is relative to this path, or an absolute path if the passed path is not
+   * relative to this path.
+   */
+  public String lookupRelativeNativePath(Path path)
+  {
+    String thisNative = getNativePath();
+    String pathNative = path.getNativePath();
+
+    if (pathNative.startsWith(thisNative)) {
+      int i = thisNative.length();
+
+      while (i < pathNative.length()) {
+        if (pathNative.charAt(i) != CauchoSystem.getFileSeparatorChar())
+          break;
+
+        i++;
+      }
+
+      return i == pathNative.length() ? "" : pathNative.substring(i);
+    }
+    else
+      return pathNative;
   }
 
   /**

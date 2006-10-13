@@ -249,7 +249,7 @@ public class MBean {
 
   public String toString()
   {
-    if (_name != null)
+    if (_name == null)
       return "MBean[]";
     else
       return "MBean[" + _name.getCanonicalName() + "]";

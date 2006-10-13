@@ -29,86 +29,74 @@
 
 package com.caucho.server.webapp;
 
-import java.io.File;
+import com.caucho.config.ConfigException;
+import com.caucho.config.SchemaBean;
+import com.caucho.config.types.InitParam;
+import com.caucho.config.types.InitProgram;
+import com.caucho.config.types.PathBuilder;
+import com.caucho.config.types.Period;
+import com.caucho.config.types.ResourceRef;
+import com.caucho.config.types.Validator;
+import com.caucho.java.WorkDir;
+import com.caucho.jsp.JspServlet;
+import com.caucho.jsp.cfg.JspConfig;
+import com.caucho.jsp.cfg.JspPropertyGroup;
+import com.caucho.jsp.cfg.JspTaglib;
+import com.caucho.jsp.el.JspApplicationContextImpl;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentBean;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.make.AlwaysModified;
+import com.caucho.make.Dependency;
+import com.caucho.make.DependencyContainer;
+import com.caucho.management.server.HostMXBean;
+import com.caucho.server.cache.AbstractCache;
+import com.caucho.server.cluster.Cluster;
+import com.caucho.server.deploy.DeployContainer;
+import com.caucho.server.deploy.DeployGenerator;
+import com.caucho.server.deploy.EnvironmentDeployInstance;
+import com.caucho.server.dispatch.*;
+import com.caucho.server.host.Host;
+import com.caucho.server.log.AbstractAccessLog;
+import com.caucho.server.log.AccessLog;
+import com.caucho.server.resin.Resin;
+import com.caucho.server.security.AbstractLogin;
+import com.caucho.server.security.ConstraintManager;
+import com.caucho.server.security.LoginConfig;
+import com.caucho.server.security.SecurityConstraint;
+import com.caucho.server.security.ServletAuthenticator;
+import com.caucho.server.security.TransportConstraint;
+import com.caucho.server.session.SessionManager;
+import com.caucho.soa.WebService;
+import com.caucho.soa.client.WebServiceClient;
+import com.caucho.transaction.TransactionManagerImpl;
+import com.caucho.util.Alarm;
+import com.caucho.util.CauchoSystem;
+import com.caucho.util.L10N;
+import com.caucho.util.Log;
+import com.caucho.util.LruCache;
+import com.caucho.vfs.Encoding;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.annotation.*;
-
+import javax.annotation.PostConstruct;
 import javax.management.ObjectName;
-
 import javax.naming.InitialContext;
-
 import javax.servlet.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionListener;
 import javax.servlet.jsp.JspApplicationContext;
-
-import com.caucho.soa.WebService;
-import com.caucho.soa.client.WebServiceClient;
-
-import com.caucho.config.ConfigException;
-import com.caucho.config.SchemaBean;
-import com.caucho.config.types.*;
-
-import com.caucho.java.WorkDir;
-
-import com.caucho.jsp.JspServlet;
-import com.caucho.jsp.cfg.*;
-import com.caucho.jsp.el.*;
-
-import com.caucho.lifecycle.Lifecycle;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentBean;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.EnvironmentLocal;
-
-import com.caucho.make.AlwaysModified;
-import com.caucho.make.Dependency;
-import com.caucho.make.DependencyContainer;
-
-import com.caucho.management.server.*;
-
-import com.caucho.server.cache.AbstractCache;
-
-import com.caucho.server.cluster.Cluster;
-
-import com.caucho.server.deploy.DeployContainer;
-import com.caucho.server.deploy.DeployGenerator;
-import com.caucho.server.deploy.EnvironmentDeployInstance;
-
-import com.caucho.server.dispatch.*;
-
-import com.caucho.server.host.Host;
-
-import com.caucho.server.log.AbstractAccessLog;
-import com.caucho.server.log.AccessLog;
-
-import com.caucho.server.resin.*;
-
-import com.caucho.server.security.*;
-
-import com.caucho.server.session.SessionManager;
-
-import com.caucho.transaction.TransactionManagerImpl;
-
-import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
-import com.caucho.util.LruCache;
-import com.caucho.util.CauchoSystem;
-
-import com.caucho.vfs.Encoding;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Resin's webApp implementation.
@@ -1336,7 +1324,6 @@ public class WebApp extends ServletContextImpl
 
     deploy.setURLPrefix(contextPath + prefix);
     deploy.setParent(_controller);
-    deploy.setContainer(_parent);
 
     // _parent.addWebAppDeploy(gen);
 

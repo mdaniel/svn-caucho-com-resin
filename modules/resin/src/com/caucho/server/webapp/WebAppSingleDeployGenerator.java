@@ -29,26 +29,18 @@
 
 package com.caucho.server.webapp;
 
-import java.util.ArrayList;
-import java.util.Set;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.annotation.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.vfs.Path;
-
+import com.caucho.config.types.PathBuilder;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentListener;
-import com.caucho.loader.EnvironmentClassLoader;
-
-import com.caucho.config.types.PathBuilder;
-
-import com.caucho.server.deploy.DeployGenerator;
+import com.caucho.log.Log;
 import com.caucho.server.deploy.DeployContainer;
+import com.caucho.server.deploy.DeployGenerator;
+import com.caucho.vfs.Path;
+
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The generator for the web-app deploy
@@ -188,10 +180,11 @@ public class WebAppSingleDeployGenerator
   /**
    * Initializes the controller.
    */
-  @PostConstruct
-  public void init()
-    throws Exception
+  @Override
+  protected void initImpl()
   {
+    super.initImpl();
+
     if (_controller != null)
       return;
 
@@ -300,28 +293,18 @@ public class WebAppSingleDeployGenerator
   /**
    * Destroy the deployment.
    */
-  public void destroy()
+  @Override
+  protected void destroyImpl()
   {
-    _container.removeWebAppDeploy(this);
-  }
-  
-  /**
-   * Handles the case where the environment is starting (after init).
-   */
-  public void environmentStart(EnvironmentClassLoader loader)
-  {
-  }
-  
-  /**
-   * Handles the case where the environment is stopping
-   */
-  public void environmentStop(EnvironmentClassLoader loader)
-  {
-    destroy();
-  }
+    Environment.removeEnvironmentListener(this, _parentLoader);
 
+    _container.removeWebAppDeploy(this);
+
+    super.destroyImpl();
+  }
+  
   public String toString()
   {
-    return "WebAppDeploy[" + _urlPrefix + "]";
+    return "WebAppSingleDeployGenerator[" + _urlPrefix + "]";
   }
 }

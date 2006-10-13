@@ -126,9 +126,10 @@ public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> 
   /**
    * Starts the deployment.
    */
-  public void start()
+  @Override
+  protected void startImpl()
   {
-    super.start();
+    super.startImpl();
 
     _earContainer.start();
   }
@@ -169,21 +170,23 @@ public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> 
   /**
    * Destroy the deployment.
    */
-  public void stop()
+  @Override
+  protected void stopImpl()
   {
-    super.stop();
-
     _earContainer.stop();
+
+    super.stopImpl();
   }
   
   /**
    * Destroy the deployment.
    */
-  public void destroy()
+  @Override
+  protected void destroyImpl()
   {
-    super.destroy();
-
     _earContainer.destroy();
+
+    super.destroyImpl();
   }
 
   public String toString()

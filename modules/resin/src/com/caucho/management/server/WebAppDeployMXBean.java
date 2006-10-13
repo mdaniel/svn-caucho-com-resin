@@ -29,7 +29,12 @@
 
 package com.caucho.management.server;
 
-public interface WebAppExpandDeployGeneratorMXBean
+import com.caucho.jmx.Description;
+
+@Description("A generator that detects new war archive files or new subdirectories and deploys webapps")
+public interface WebAppDeployMXBean
   extends ExpandDeployGeneratorMXBean
 {
+  @Description("The configured prefix to prepend to the context path of every deployed webapp")
+  public String getURLPrefix();
 }

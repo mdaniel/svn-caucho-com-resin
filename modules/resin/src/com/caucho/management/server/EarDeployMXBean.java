@@ -27,15 +27,14 @@
  * @author Sam
  */
 
-package com.caucho.server.deploy;
+package com.caucho.management.server;
 
-import com.caucho.server.e_app.EarDeployGenerator;
+import com.caucho.jmx.Description;
 
-public class EarDeployGeneratorAdmin
-  extends ExpandDeployGeneratorAdmin<EarDeployGenerator>
+@Description("A generator that detects new ear archive files and deploys enterprise applications")
+public interface EarDeployMXBean
+  extends ExpandDeployGeneratorMXBean
 {
-  public EarDeployGeneratorAdmin(EarDeployGenerator earDeployGenerator)
-  {
-    super(earDeployGenerator);
-  }
+  @Description("The configured prefix to prepend to the context path of every deployed enterprise application")
+  public String getURLPrefix();
 }

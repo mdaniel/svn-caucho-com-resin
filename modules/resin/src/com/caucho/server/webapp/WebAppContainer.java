@@ -29,8 +29,6 @@
 
 package com.caucho.server.webapp;
 
-import javax.annotation.*;
-
 import com.caucho.config.ConfigException;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.ClassLoaderListener;
@@ -40,6 +38,7 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.log.Log;
 import com.caucho.make.AlwaysModified;
+import com.caucho.server.cluster.Server;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.DeployGenerator;
 import com.caucho.server.dispatch.DispatchBuilder;
@@ -55,7 +54,6 @@ import com.caucho.server.e_app.EarSingleDeployGenerator;
 import com.caucho.server.host.Host;
 import com.caucho.server.log.AbstractAccessLog;
 import com.caucho.server.log.AccessLog;
-import com.caucho.server.cluster.Server;
 import com.caucho.server.session.SessionManager;
 import com.caucho.util.CauchoSystem;
 import com.caucho.util.L10N;
@@ -63,6 +61,7 @@ import com.caucho.util.LruCache;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -179,8 +178,7 @@ public class WebAppContainer
 
       _appDeploy = new DeployContainer<WebAppController>();
 
-      _warGenerator = new WebAppExpandDeployGenerator(_appDeploy);
-      _warGenerator.setContainer(this);
+      _warGenerator = new WebAppExpandDeployGenerator(_appDeploy, this);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -404,7 +402,7 @@ public class WebAppContainer
    */
   public WebAppExpandDeployGenerator createWarDeploy()
   {
-    return new WebAppExpandDeployGenerator(_appDeploy);
+    return new WebAppExpandDeployGenerator(_appDeploy, this);
   }
 
   /**
@@ -430,7 +428,7 @@ public class WebAppContainer
   public void addWarDeploy(WebAppExpandDeployGenerator webAppDeploy)
     throws ConfigException
   {
-    webAppDeploy.setContainer(this);
+    assert webAppDeploy.getContainer() == this;
 
     if (! _hasWarGenerator) {
       _hasWarGenerator = true;

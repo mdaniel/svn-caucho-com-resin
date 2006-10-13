@@ -27,61 +27,32 @@
  * @author Sam
  */
 
-package com.caucho.server.deploy;
+package com.caucho.server.webapp;
 
-import com.caucho.management.server.AbstractManagedObject;
-import com.caucho.management.server.DeployGeneratorMXBean;
+import com.caucho.management.server.WebAppDeployMXBean;
+import com.caucho.server.deploy.ExpandDeployGeneratorAdmin;
 
-abstract public class DeployGeneratorAdmin<C extends DeployGenerator>
-  extends AbstractManagedObject
-  implements DeployGeneratorMXBean
+public class WebAppExpandDeployGeneratorAdmin
+  extends ExpandDeployGeneratorAdmin<WebAppExpandDeployGenerator>
+  implements WebAppDeployMXBean
 {
-  private final C _deployGenerator;
-
-  public DeployGeneratorAdmin(C deployGenerator)
+  public WebAppExpandDeployGeneratorAdmin(WebAppExpandDeployGenerator webAppDeployGenerator)
   {
-    _deployGenerator = deployGenerator;
+    super(webAppDeployGenerator);
   }
 
-  protected C getDeployGenerator()
+  boolean register()
   {
-    return _deployGenerator;
+    return registerSelf();
   }
 
-  abstract public String getName();
-
-  public String getRedeployMode()
+  boolean unregister()
   {
-    return _deployGenerator.getRedeployMode();
+    return unregisterSelf();
   }
 
-  public String getStartupMode()
+  public String getURLPrefix()
   {
-    return _deployGenerator.getStartupMode();
-  }
-
-  public boolean isModified()
-  {
-    return _deployGenerator.isModified();
-  }
-
-  public String getState()
-  {
-    return _deployGenerator.getState();
-  }
-
-  public void start()
-  {
-    _deployGenerator.start();
-  }
-
-  public void stop()
-  {
-    _deployGenerator.stop();
-  }
-
-  public void update()
-  {
-    _deployGenerator.update();
+    return getDeployGenerator().getURLPrefix();
   }
 }

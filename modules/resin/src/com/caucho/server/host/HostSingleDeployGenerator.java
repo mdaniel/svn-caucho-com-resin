@@ -29,24 +29,13 @@
 
 package com.caucho.server.host;
 
-import java.util.ArrayList;
-import java.util.Set;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.annotation.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.vfs.Path;
-
 import com.caucho.config.Config;
-
-import com.caucho.config.types.PathBuilder;
-
-import com.caucho.server.deploy.DeployGenerator;
+import com.caucho.log.Log;
 import com.caucho.server.deploy.DeployContainer;
+import com.caucho.server.deploy.DeployGenerator;
+
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * The generator for the host deploy
@@ -112,10 +101,11 @@ public class HostSingleDeployGenerator
   /**
    * Initializes the entry.
    */
-  @PostConstruct
-  public void init()
-    throws Exception
+  @Override
+  public void initImpl()
   {
+    super.initImpl();
+
     String hostName = null;
     String id = null;
     
@@ -189,6 +179,9 @@ public class HostSingleDeployGenerator
 
   public String toString()
   {
-    return "HostDeploy[" + _config.getHostName() + "]";
+    if (_config == null)
+      return "HostSingleDeployGenerator[]";
+    else
+      return "HostSingleDeployGenerator[" + _config.getHostName() + "]";
   }
 }

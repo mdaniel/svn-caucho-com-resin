@@ -29,16 +29,29 @@
 
 package com.caucho.management.server;
 
-public interface DeployGeneratorMXBean {
+import com.caucho.jmx.Description;
+
+public interface DeployGeneratorMXBean
+  extends ManagedObjectMXBean
+{
+  @Description("The configured redeploy-mode, one of `default', `automatic', `lazy', or `manual'")
   public String getRedeployMode();
 
+  @Description("The configured startup-mode, one of `default', `automatic', `lazy', or `manual'")
   public String getStartupMode();
 
+  @Description("True if there are modifications that have not been updated")
   public boolean isModified();
 
+  @Description("The current lifecycle state")
+  public String getState();
+
+  @Description("Start")
   public void start();
 
+  @Description("Stop")
   public void stop();
 
+  @Description("Update")
   public void update();
 }
