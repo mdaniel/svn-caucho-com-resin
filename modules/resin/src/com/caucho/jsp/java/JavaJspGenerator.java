@@ -1191,7 +1191,7 @@ public class JavaJspGenerator extends JspGenerator {
     Class []args = new Class[0];
 
     try {
-      if (sigString != null) {
+      if (sigString != null && ! sigString.equals("")) {
 	Signature sig = new Signature(sigString);
 
 	String []types = sig.getParameterTypes();

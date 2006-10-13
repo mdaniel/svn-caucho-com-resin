@@ -131,7 +131,7 @@ public class ExistsExpr extends SubSelectExpr {
     for (int i = 0; i < paramExprs.size(); i++) {
       paramExprs.get(i).eval(context, subcontext);
     }
-    
+
     boolean exists = _exists.exists(subcontext, context.getTransaction());
     Data data = context.getGroupData(_groupIndex);
 

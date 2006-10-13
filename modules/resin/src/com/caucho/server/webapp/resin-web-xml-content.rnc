@@ -6,7 +6,7 @@ namespace rcore = "http://caucho.com/ns/resin/core"
 namespace xsi = "http://www.w3.org/2001/XMLSchema-instance"
 
 include "../resin/env.rnc"
-include "web-xml-content.rnc"
+include "web-xml-j2ee.rnc"
 
 ## l_web-app should probably be handled in web-xml.rnc as Servlet 2.3
 l_web-app = element l:web-app { r_any-Group }

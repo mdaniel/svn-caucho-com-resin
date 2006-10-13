@@ -426,9 +426,11 @@ r_port-Content =
 
 r_protocol =
   element protocol {
-    r_resin-type,
+    r_port-Content
 
-    r_any-Group*
+    & (r_class | r_type)
+
+    & r_init?
   }
 
 r_resin = element resin {

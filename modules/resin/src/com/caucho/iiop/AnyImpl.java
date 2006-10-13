@@ -93,7 +93,7 @@ public class AnyImpl extends Any {
       
       _objValue = ((TypeCodeImpl) typeCode).readValue((IiopReader) is);
 
-      System.out.println("VALUE: " + _objValue);
+      log.fine("VALUE: " + _objValue);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -375,7 +375,7 @@ public class AnyImpl extends Any {
   public Serializable extract_Value()
     throws BAD_OPERATION
   {
-    System.out.println("EXTRACT: " + _objValue);
+    log.fine("EXTRACT: " + _objValue);
     
     return (Serializable) _objValue;
   }

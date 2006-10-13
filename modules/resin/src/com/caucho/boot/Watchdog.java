@@ -489,7 +489,9 @@ public class Watchdog extends AbstractManagedObject
 	_lastStartTime = new Date();
 	_startCount++;
 
-	log.info("starting Resin " + this);
+	if (! _isSingle)
+	  log.info("starting Resin " + this);
+	
 	Process process = createProcess(resinHome, serverRoot, port,
 					jvmOut);
 

@@ -71,6 +71,9 @@ public class JavaTagGenerator extends JavaJspGenerator {
   static final L10N L = new L10N(JavaTagGenerator.class);
   static final Logger log = Log.open(JavaTagGenerator.class);
 
+  private static HashSet<String> _reserved
+    = new HashSet<String>();
+
   private String _bodyContent = "scriptless";
   private String _dynamicAttributes = null;
   
@@ -292,8 +295,10 @@ public class JavaTagGenerator extends JavaJspGenerator {
 
       String isSetName = "_jsp_" + name + "_isSet";
 
+      String fieldName = toFieldName(name);
+
       out.println();
-      out.println("private " + type + " " + name + ";");
+      out.println("private " + type + " " + fieldName + ";");
       out.println("private boolean " + isSetName + ";");
       
       out.println();
@@ -301,7 +306,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
       out.println("{");
       out.pushDepth();
       out.println("this." + isSetName + " = true;");
-      out.println("this." + name + " = value;");
+      out.println("this." + fieldName + " = value;");
       out.popDepth();
       out.println("}");
 
@@ -311,7 +316,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
       out.println("public " + type + " get" + upperName + "()");
       out.println("{");
       out.pushDepth();
-      out.println("return _" + name + ";");
+      out.println("return " + fieldName + ";");
       out.popDepth();
       out.println("}");
       */
@@ -326,7 +331,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
   protected void generateDynamicAttributes(JspJavaWriter out)
     throws IOException, JspParseException
   {
-    String dyn = _dynamicAttributes;
+    String dyn = toFieldName(_dynamicAttributes);
 
     out.println();
     out.println("java.util.HashMap " + dyn + " = new java.util.HashMap();");
@@ -428,16 +433,17 @@ public class JavaTagGenerator extends JavaJspGenerator {
       String type = cl.getName();
 
       String isSetName = "_jsp_" + name + "_isSet";
+      String fieldName = toFieldName(name);
       
       out.println("if (" + isSetName + ")");
       out.println("  pageContext.setAttribute(\"" + name + "\", " +
-                  JspNode.toELObject(name, cl) + ");");
+                  JspNode.toELObject(fieldName, cl) + ");");
     }
 
     // jsp/10a1
     if (_dynamicAttributes != null) {
       out.println("pageContext.setAttribute(\"" + _dynamicAttributes + "\"," +
-		  _dynamicAttributes + ");");
+		  toFieldName(_dynamicAttributes) + ");");
     }
   }
 
@@ -711,5 +717,50 @@ public class JavaTagGenerator extends JavaJspGenerator {
     out.println("return new com.caucho.jsp.java.TagTaglib(\"x\", \"http://test.com\");");
     out.popDepth();
     out.println("}");
+  }
+
+  private String toFieldName(String name)
+  {
+    if (hasScripting() && ! _reserved.contains(name))
+      return name;
+    else
+      return "_" + name;
+  }
+
+  static {
+    _reserved.add("public");
+    _reserved.add("private");
+    _reserved.add("protected");
+    _reserved.add("static");
+    _reserved.add("final");
+    _reserved.add("class");
+    _reserved.add("interface");
+    _reserved.add("extends");
+    _reserved.add("implements");
+    _reserved.add("package");
+    _reserved.add("import");
+    _reserved.add("new");
+    _reserved.add("if");
+    _reserved.add("else");
+    _reserved.add("for");
+    _reserved.add("do");
+    _reserved.add("while");
+    _reserved.add("break");
+    _reserved.add("continue");
+    _reserved.add("switch");
+    _reserved.add("case");
+    _reserved.add("default");
+    _reserved.add("throw");
+    _reserved.add("throws");
+    
+    _reserved.add("void");
+    _reserved.add("boolean");
+    _reserved.add("byte");
+    _reserved.add("char");
+    _reserved.add("short");
+    _reserved.add("int");
+    _reserved.add("long");
+    _reserved.add("float");
+    _reserved.add("double");
   }
 }

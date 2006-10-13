@@ -118,6 +118,8 @@ class UpdateQuery extends Query {
 	  TableIterator iter = rows[0];
 
 	  column.set(xa, iter, expr, context);
+
+	  xa.addUpdateBlock(iter.getBlock());
 	}
 
 	context.setRowUpdateCount(++count);

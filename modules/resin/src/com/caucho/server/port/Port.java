@@ -39,7 +39,7 @@ import java.util.logging.Logger;
 
 import javax.annotation.*;
 
-import com.caucho.config.ConfigException;
+import com.caucho.config.*;
 import com.caucho.config.types.Period;
 import com.caucho.server.cluster.*;
 import com.caucho.lifecycle.Lifecycle;
@@ -238,6 +238,35 @@ public class Port
     return _admin;
   }
 
+  /**
+   * Sets protocol class.
+   */
+  public void setType(Class cl)
+    throws InstantiationException, IllegalAccessException
+  {
+    setClass(cl);
+  }
+
+  /**
+   * Sets protocol class.
+   */
+  public void setClass(Class cl)
+    throws InstantiationException, IllegalAccessException
+  {
+    Config.validate(cl, Protocol.class);
+
+    _protocol = (Protocol) cl.newInstance();
+  }
+
+  public Object createInit()
+    throws ConfigException
+  {
+    if (_protocol == null)
+      throw new ConfigException(L.l("<init> requires a protocol class"));
+    
+    return _protocol;
+  }
+  
   /**
    * Set protocol.
    */

@@ -69,6 +69,8 @@ public class Transaction extends StoreTransaction {
   private ArrayList<Lock> _writeLocks;
   
   private LongKeyHashMap<WriteBlock> _writeBlocks;
+  
+  private ArrayList<Block> _updateBlocks;
 
   // inodes that need to be deleted on a commit
   private ArrayList<Inode> _deleteInodes;
@@ -208,6 +210,22 @@ public class Transaction extends StoreTransaction {
       
       throw e;
     }
+  }
+
+  /**
+   * Adds a block for update.
+   */
+  public void addUpdateBlock(Block block)
+  {
+    if (block == null)
+      return;
+    
+    if (_updateBlocks == null)
+      _updateBlocks = new ArrayList<Block>();
+
+    if (_updateBlocks.size() == 0
+	|| _updateBlocks.get(_updateBlocks.size() - 1) != block)
+      _updateBlocks.add(block);
   }
   
   /**
@@ -468,18 +486,35 @@ public class Transaction extends StoreTransaction {
       }
     }
 
-    if (writeBlocks != null) {
-      try {
-	Iterator<WriteBlock> blockIter = writeBlocks.valueIterator();
+    ArrayList<Block> updateBlocks = _updateBlocks;
+    _updateBlocks = null;
+    
+    if (updateBlocks != null) {
+      while (updateBlocks.size() > 0) {
+	Block block = updateBlocks.remove(updateBlocks.size() - 1);
 
-	while (blockIter.hasNext()) {
-	  WriteBlock block = blockIter.next();
-
+	try {
 	  block.commit();
+	} catch (IOException e) {
+	  log.log(Level.WARNING, e.toString(), e);
 	}
-      } catch (IOException e) {
-	throw new SQLExceptionWrapper(e);
       }
+    }
+
+    if (writeBlocks != null) {
+      Iterator<WriteBlock> blockIter = writeBlocks.valueIterator();
+
+      while (blockIter.hasNext()) {
+	WriteBlock block = blockIter.next();
+
+	try {
+	  block.commit();
+	} catch (IOException e) {
+	  log.log(Level.WARNING, e.toString(), e);
+	}
+      }
+      
+      // writeBlocks.clear();
     }
 
     if (_deallocateBlocks != null) {

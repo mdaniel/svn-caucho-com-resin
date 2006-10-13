@@ -397,7 +397,7 @@ public class TypeCodeImpl extends TypeCode {
   public Object readValue(IiopReader reader)
     throws IOException
   {
-    System.out.println("READ: " + this);
+    log.fine("READ: " + this);
     
     switch (_kind.value()) {
     case TCKind._tk_null:

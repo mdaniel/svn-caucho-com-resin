@@ -740,6 +740,8 @@ public class Table extends Store {
 	      column.setIndex(xa, buffer, rowOffset, rowAddr, queryContext);
 	    }
 
+	    xa.addUpdateBlock(block);
+
 	    if (_autoIncrementColumn != null) {
 	      long value = _autoIncrementColumn.getLong(buffer, rowOffset);
 

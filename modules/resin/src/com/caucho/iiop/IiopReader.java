@@ -510,7 +510,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 	int delta = read_long();
 	int target = start + delta;
 	
-	System.out.println("INDIRECT:" + delta);
+	log.fine("INDIRECT:" + delta);
 
 	for (int i = 0; i < _refOffsets.size(); i++) {
 	  int refOffset = _refOffsets.get(i);
@@ -529,7 +529,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 	boolean hasCodeBase = (code & 1) == 1;
 	int repository = (code & 6);
 
-	System.out.println("CHUNKED:");
+	log.fine("CHUNKED:");
       
 	if (hasCodeBase) {
 	  readCodeBase();
@@ -567,7 +567,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 	    throw new RuntimeException("unknown RMI: " + repId);
 
 	  String className = repId.substring(4, p);
-	  System.out.println("CLASS-NAME: " + className);
+	  log.fine("CLASS-NAME: " + className);
 	  if (className.equals("javax.rmi.CORBA.ClassDesc")) {
 	    return readClass();
 	  }
@@ -629,8 +629,8 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     String codebase = (String) read_value(String.class);
     String repId = (String) read_value(String.class);
 
-    System.out.println("CODE: " + codebase);
-    System.out.println("REP-ID: " + repId);
+    log.fine("CODE: " + codebase);
+    log.fine("REP-ID: " + repId);
 
     if (codebase != null && codebase.startsWith("RMI:")) {
       String temp = repId;
@@ -1060,12 +1060,8 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
    */
   public void read_longlong_array(long []v, int offset, int length)
   {
-    System.out.println("LL: " + length);
     for (int i = 0; i < length; i++)
       v[i + offset] = read_longlong();
-
-    for (int i = 0; i < length; i++)
-      System.out.println("V(" + i + "): " + v[offset + i]);
   }
 
   /**
@@ -1091,7 +1087,6 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
    */
   public void read_double_array(double []v, int offset, int length)
   {
-    System.out.println("D: " + length);
     try {
       align8();
       for (int i = 0; i < length; i++) {
@@ -1134,7 +1129,6 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   public org.omg.CORBA.TypeCode read_TypeCode()
   {
     int kind = read_long();
-    System.out.println("KIND: " + kind);
 
     try {
     switch (kind) {
@@ -1210,7 +1204,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
       throw new UnsupportedOperationException("unknown typecode kind: " + kind);
     }
     } finally {
-      System.out.println("DONE:" + kind);
+      //System.out.println("DONE:" + kind);
     }
   }
 
@@ -1444,8 +1438,9 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   {
     if (_offset == _chunkEnd)
       handleChunk();
-    else if (_chunkEnd > 0 && _chunkEnd < _offset)
-      System.out.println("PAST: " + _offset+ " " + _chunkEnd);
+    else if (_chunkEnd > 0 && _chunkEnd < _offset) {
+      //System.out.println("PAST: " + _offset+ " " + _chunkEnd);
+    }
     
     return readImpl();
   }

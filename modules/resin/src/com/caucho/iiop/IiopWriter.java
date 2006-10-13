@@ -243,7 +243,6 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
   
   public org.omg.CORBA.portable.InputStream create_input_stream()
   {
-    System.out.println("INPUT-STREAM:");
     throw new UnsupportedOperationException("no input stream");
   }
 
@@ -424,7 +423,7 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
    */
   public void write_TypeCode(TypeCode tc)
   {
-    System.out.println("WRITE: " + tc);
+    //System.out.println("WRITE: " + tc);
     if (tc == null) {
       write_long(TCKind._tk_null);
       return;
@@ -520,7 +519,6 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
   
   public void write_Principal(org.omg.CORBA.Principal principal)
   {
-    System.out.println("PRINCIPAL:");
     throw new UnsupportedOperationException();
   }
 
