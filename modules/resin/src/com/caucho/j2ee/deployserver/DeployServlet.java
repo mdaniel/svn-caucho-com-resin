@@ -44,6 +44,9 @@ import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.WriteStream;
+import com.caucho.xml.XmlPrinter;
+
+import org.w3c.dom.Node;
 
 import javax.enterprise.deploy.spi.TargetModuleID;
 import javax.enterprise.deploy.spi.status.ProgressObject;
@@ -212,7 +215,7 @@ public class DeployServlet extends GenericServlet {
     Path path = _deployPath.lookup(plan.getArchiveName());
 
     if (log.isLoggable(Level.FINER))
-      log.log(Level.FINER, L.l("creating local file {0}", path));
+      log.log(Level.FINER, L.l("jsr88 creating local file {0}", path));
 
     WriteStream os = path.openWrite();
 
@@ -223,40 +226,33 @@ public class DeployServlet extends GenericServlet {
     }
 
     if (log.isLoggable(Level.FINER))
-      log.log(Level.FINER, L.l("distribute {0}", plan));
+      log.log(Level.FINER, L.l("jsr88 distribute {0}", plan));
 
     _hostMXBean.expandEarDeploy(plan.getName());
     
     Path metaPath = _deployPath.lookup(plan.getMetaPathName());
 
     if (log.isLoggable(Level.FINEST))
-      log.log(Level.FINEST, L.l("metaPath {0}", metaPath));
+      log.log(Level.FINEST, L.l("jsr88 metaPath {0}", metaPath));
 
-    /**
-     * XXX: this doesn;t work, it stops the deployment of the ear
-     * because the file it creates is newer than the ear
     ArrayList<DeploymentPlan.ExtFile> _extFileList;
     _extFileList = plan.getExtFileList();
 
     for (int i = 0; i < _extFileList.size(); i++) {
       DeploymentPlan.ExtFile extFile = _extFileList.get(i);
-
-      if (log.isLoggable(Level.FINEST))
-        log.log(Level.FINEST, L.l("extFile {0}", extFile));
-
       Path filePath = metaPath.lookup(extFile.getName());
-      Node node = extFile.getData();
 
       if (log.isLoggable(Level.FINEST))
-        log.log(Level.FINEST, L.l("file {0}", filePath));
+        log.log(Level.FINEST, L.l("jsr88 extFile {0} output to {1}", extFile, filePath));
+
+      Node node = extFile.getData();
 
       filePath.getParent().mkdirs();
 
       XmlPrinter.print(filePath, node);
     }
-     */
 
-    log.info("deploying: " + plan.getName());
+    log.info("jsr88 deploying: " + plan.getName());
     
     Throwable configException = null;
 

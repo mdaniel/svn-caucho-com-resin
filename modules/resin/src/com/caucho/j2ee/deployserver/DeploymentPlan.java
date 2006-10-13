@@ -29,13 +29,12 @@
 
 package com.caucho.j2ee.deployserver;
 
-import java.util.ArrayList;
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
 
 import org.w3c.dom.Node;
 
-import com.caucho.util.L10N;
-
-import com.caucho.config.ConfigException;
+import java.util.ArrayList;
 
 /**
  * Plan for the deployment.
@@ -167,6 +166,11 @@ public class DeploymentPlan {
     public Node getData()
     {
       return _data;
+    }
+
+    public String toString()
+    {
+      return "ExtFile[" + getName() + "]";
     }
   }
 }
