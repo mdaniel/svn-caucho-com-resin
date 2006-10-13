@@ -178,6 +178,10 @@ public class PropertyField extends AbstractField {
    */
   protected String getFieldName()
   {
+    // jpa/0w10
+    if (getColumn() == null)
+      return getName();
+
     return getColumn().getFieldName();
   }
 

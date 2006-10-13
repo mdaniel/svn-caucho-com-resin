@@ -431,10 +431,10 @@ public class EntityEmbeddedField extends AbstractField {
 
       if (! entityType.isFieldAccess()) {
         getter = "get" + Character.toUpperCase(getter.charAt(0)) +
-          getter.substring(1);
+          getter.substring(1) + "()";
       }
 
-      cb.append(thisGetter + "." + getter + "()");
+      cb.append(thisGetter + "." + getter);
     }
   }
 
