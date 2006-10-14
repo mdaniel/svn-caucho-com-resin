@@ -213,12 +213,22 @@ public class DependentEntityOneToOneExpr extends AbstractPathExpr {
   {
     if (_fromItem != null) {
 
+      String s;
+
       if (select) {
-        cb.append(_fromItem.getName());
+
+        s = _fromItem.getName();
+
+        cb.append(s);
         cb.append('.');
       }
 
-      cb.append(_linkColumns.getColumns().get(0).getName());
+      // commented out: jpa/0o12
+      // s = _linkColumns.getColumns().get(0).getName();
+
+      s = _childFromItem.getTable().getIdColumns().get(0).getName();
+
+      cb.append(s);
     }
     else {
 
