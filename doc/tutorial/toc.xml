@@ -1,0 +1,117 @@
+<navigation threaded="true" section="Resin : Tutorials : ">
+  <item link="index.xtp" title="Tutorials">
+
+    <!--
+       - Quercus
+      -->
+    <item link="quercus.xtp" title="Quercus">
+      <item link="quercus-hello/index.xtp" title="Hello World"/>
+      <item link="quercus-module/index.xtp" title="Java Modules"/>
+      <item link="quercus-json/index.xtp" title="JSON" />
+      <item link="quercus-pdo/index.xtp" title="PDO" />
+      <item link="quercus-gettext/index.xtp" title="Gettext" />
+    </item>
+
+    <!--
+       - Database
+      -->
+    <item link="database.xtp" title="Database">
+      <item link="db-jdbc/index.xtp" title="JDBC Basic"/>
+      <item link="db-jdbc-ioc/index.xtp" title="JDBC IoC"/>
+    </item>
+
+    <!--
+       - Amber
+      -->
+    <item link="amber.xtp" title="Amber">
+      <item link="amber-basic-field/index.xtp" title="Field"/>
+      <item link="amber-basic/index.xtp" title="Property"/>
+      <item link="amber-create/index.xtp" title="Create"/>
+      <item link="amber-query/index.xtp" title="Query"/>
+      <item link="amber-many2one/index.xtp" title="Many-to-One"/>
+      <item link="amber-one2many/index.xtp" title="One-to-Many"/>
+      <item link="amber-many2many/index.xtp" title="Many-to-Many"/>
+      <item link="amber-inherit/index.xtp" title="Inherit"/>
+      <item link="amber-session/index.xtp" title="Sessions"/>
+    </item>
+
+    <!--
+       - EJB
+      -->
+    <item link="ejb.xtp" title="EJB">
+      <item link="ejb-stateless/index.xtp" title="Stateless"/>
+    </item>
+
+    <!--
+       - SOA
+      -->
+    <item link="soa.xtp" title="SOA/ESB">
+      <item link="soa-hello-world/index.xtp" title="Simple Service"/>
+      <item link="esb-hello-jaxb/index.xtp" title="Configuring a service with JAXB"/>
+      <item link="esb-servlet-client/index.xtp" title="An ESB client"/>
+      <item link="rest-flickr/index.xtp" title="Flickr REST"/>
+    </item>
+
+    <!--
+       - IoC
+      -->
+    <item link="ioc.xtp" title="IoC">
+      <item link="jaxb-bean-config/index.xtp" title="JAXB IoC"/>
+      <item link="ioc-services/index.xtp" title="Services"/>
+      <item link="ioc-basic/index.xtp" title="Basic Resource"/>
+      <item link="ioc-injection/index.xtp" title="Injection"/>
+      <item link="ioc-periodictask/index.xtp" title="Periodic Task"/>
+      <item link="jndi-appconfig/index.xtp" title="JNDI appconfig"/>
+    </item>
+
+    <!--
+       - JMS
+      -->
+    <item link="jms.xtp" title="JMS">
+      <item link="jms-php-queue-send/index.xtp" title="JMS/PHP Send"/>
+      <item link="jms-php-queue-receive/index.xtp" title="JMS/PHP Receive"/>
+      <item link="jms-listener/index.xtp" title="JMS Listener"/>
+      <item link="jms-ioc-listener/index.xtp" title="JMS IOC Listener"/>
+     </item>
+     
+    <!--
+       - Servlet
+      -->
+    <item link="servlet.xtp" title="Servlet">
+      <item link="servlet-hello/index.xtp" title="Hello, World"/>
+      <item link="servlet-ioc/index.xtp" title="IoC"/>
+    </item>
+     
+    <!--
+       - JMX
+      -->
+    <item link="jmx.xtp" title="JMX">
+      <item link="jmx-basic/index.xtp" title="Basic"/>
+      <item link="jmx-listener/index.xtp" title="Listener"/>
+      <item link="jmx-registration/index.xtp" title="Registration"/>
+      <item link="jmx-mbean-server/index.xtp" title="MBeanServer"/>
+    </item>
+
+    <!--
+       - Hessian
+      -->
+    <item link="hessian.xtp" title="Hessian">
+      <item link="hessian-add/index.xtp" title="Hessian Addition"/>
+      <item link="hessian-service/index.xtp" title="Service Addition"/>
+      <item link="hessian-ioc/index.xtp" title="Hessian with DI"/>
+      <item link="burlap-add/index.xtp" title="Burlap Addition"/>
+      <item link="custom-protocol/index.xtp" title="custom-protocol"/>
+    </item>
+    
+    <item link="security-basic/index.xtp" title="Security"/>
+  
+     <!--     
+    <item link="jca-lifecycle/index.xtp" title="JCA Lifecycle"/>
+    <item link="jca-work/index.xtp" title="JCA Work"/>
+    <item link="jca-timer/index.xtp" title="JCA Timer"/>
+    <item link="jca-cron/index.xtp" title="JCA Cron"/>
+    <item link="jca-connectionAbstract/index.xtp" title="JCA Connector"/>
+      -->
+  </item>
+</navigation>
+
