@@ -133,7 +133,7 @@ website</a>.  For JDK's prior to 5, Sun provides the
 
 <p>
 The most useful tool is <var>jconsole</var>.  Details on using jconsole are
-provided in the <a href="doc|jmx|console">Administration</a> section of the
+provided in the <a href="jmx.xtp#console">Administration</a> section of the
 Resin documentation.
 </p>
 

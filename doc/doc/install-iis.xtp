@@ -10,7 +10,7 @@
 
       <figure src="iis_srun.gif"/>
 
-      <p>If you have not yet done so, we suggest you use the <a href="install|httpd">Resin standalone web server</a> option
+      <p>If you have not yet done so, we suggest you use the <a href="resin-web-server.xtp">Resin standalone web server</a> option
       first.</p>
 
     </description>
@@ -22,11 +22,11 @@
 
 <s1 title="Prerequisites and Environment Variables">
 
-<p>Resin requires a 1.4 JDK.  You can download one from Sun and install it.</p>
+<p>Resin requires a 1.5 JDK.  You can download one from Sun and install it.</p>
  
 <p>The Control Panel is used to configure two environment variables:</p>
 <example>
-JAVA_HOME=C:\j2sdk1.4.2
+JAVA_HOME=C:\jdk1.5.0
 RESIN_HOME=C:\resin-3.0
 </example>
 </s1>

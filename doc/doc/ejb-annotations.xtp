@@ -34,7 +34,7 @@ other than javax.ejb as J2EE 1.5 drafts progress.</note>
 
 <p>Marks the class as an entity bean.  Each entity bean corresponds to
 a database row. Entity bean persistence is configured with
-the <a href="cmp-table.xtp">CMP annotations</a>.
+the <a href="amber-table.xtp">Amber annotations</a>.
 
 </p><p>In EJB 3.0, the application uses entity bean instances directly.  Unlike
 EJB 2.1, there is no pooling, local stub, or home interface for an entity.</p>

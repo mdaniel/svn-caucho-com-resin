@@ -161,13 +161,13 @@ and "./start.sh stop" to stop.</p>
 <p>The <code>-server</code> argument is only
 necessary if you have multiple servers (JVM instances) either
 on different machines or the same machine.
-The <a href="doc|config|balance">load balancing</a> and
-<a href="doc|config|sessions">distributed sessions</a> pages describe when
+The <a href="resin-load-balance.xtp">load balancing</a> and
+<a href="sessions.xtp">distributed sessions</a> pages describe when
 you might use -server.</p>
 
 <p>More information on deploying on Unix is available at:</p>
 <ul>
-<li><a href="doc|install|linux-boot">Linux boot</a></li>
+<li><a href="linux-boot.xtp">Linux boot</a></li>
 </ul>
 
 </s2>
@@ -342,7 +342,7 @@ you can find the full list by starting "java -X".</p>
 <s1 title="JDK arguments">
 
 <p>Resin 3.1 has moved all JDK arguments into the resin.conf
-file, in the &lt;<a href="config|server-tags.xtp#jvm-args">jvm-args</a>&gt;
+file, in the &lt;<a href="server-tags.xtp#jvm-args">jvm-args</a>&gt;
 tag. Because the Resin 3.1 watchdog JVM starts the Resin server instance,
 it can pass the arguments defined in the configuration file.  By moving
 the Java arguments to the configuration file, the site configuraion
@@ -397,7 +397,7 @@ is easier and more maintainable.</p>
 <p>Resin's web server can scale to large loads with its load-balancing
 capability.</p>
 
-<p>The <a href="config|balance.xtp">Reliability and Load Balancing</a>
+<p>The <a href="resin-load-balance.xtp">Reliability and Load Balancing</a>
 section provides more details of Resin's load balancing.</p>
 
 <p>Load balancing divides the Resin servers into two clusters: the

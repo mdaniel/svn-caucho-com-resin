@@ -17,7 +17,7 @@
 Applications need only create a standard
 <code>java.lang.Runnable</code> task and configure the CronResource.
 Resin configure's the work task with 
-<a href="doc|config|init">bean-style configuration</a>.
+<a href="ioc-bean-patterns.xtp">bean-style configuration</a>.
 </p>
 
 <example title="Task running every 15 minutes">

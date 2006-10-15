@@ -247,7 +247,7 @@ design pattern.</p>
 
 <s1 title="Groovy Support">
 
-<p>Resin can use <a href="thirdparty|groovy.xtp">Groovy
+<p>Resin can use <a href="doc|groovy.xtp">Groovy
 scripts as Java classes</a> or even as servlets.</p>
 
 <p>Full Groovy support is waiting for an important bug fixes from Groovy.
@@ -282,7 +282,7 @@ public class MyBean {
 <s1 title="PHP">
 
 <p>PHP support has been fixed in 3.0.8.  The full configuration
-doc is in  <a href="../thirdparty/php.xtp">thirdparty/php</a>.</p>
+doc is in  <a href="quercus.xtp">thirdparty/php</a>.</p>
 
 <example title="web.xml">
 &lt;web-xml&gt;

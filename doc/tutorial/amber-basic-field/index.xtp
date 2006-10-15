@@ -154,20 +154,20 @@ package example;
 
 import javax.persistence.*;
 
-<a href="amber|amber-table.xtp#@Entity">@Entity</a>
-<a href="amber|amber-table.xtp#@Table">@Table</a>(name="amber_basic_course")
+<a href="doc|amber-table.xtp#@Entity">@Entity</a>
+<a href="doc|amber-table.xtp#@Table">@Table</a>(name="amber_basic_course")
 public class Course {
-  <a href="amber|amber-table.xtp#@Id">@Id</a>
-  <a href="amber|amber-table.xtp#@Column">@Column</a>(name="id")
-  <a href="amber|amber-table.xtp#@GeneratedValue">@GeneratedValue</a>
+  <a href="doc|amber-table.xtp#@Id">@Id</a>
+  <a href="doc|amber-table.xtp#@Column">@Column</a>(name="id")
+  <a href="doc|amber-table.xtp#@GeneratedValue">@GeneratedValue</a>
   private int _id;
 
-  <a href="amber|amber-table.xtp#@Basic">@Basic</a>
-  <a href="amber|amber-table.xtp#@Column">@Column</a>(name="course")
+  <a href="doc|amber-table.xtp#@Basic">@Basic</a>
+  <a href="doc|amber-table.xtp#@Column">@Column</a>(name="course")
   private String _course;
 
-  <a href="amber|amber-table.xtp#@Basic">@Basic</a>
-  <a href="amber|amber-table.xtp#@Column">@Column</a>(name="teacher")
+  <a href="doc|amber-table.xtp#@Basic">@Basic</a>
+  <a href="doc|amber-table.xtp#@Column">@Column</a>(name="teacher")
   private String _teacher;
 
   public String course()
@@ -197,7 +197,7 @@ persistent object.</p>
 @javax.persistence.Entity
 </example>
 
-<p><a href="amber|amber-table.xtp#@Entity">@javax.persistence.Entity</a> declares
+<p><a href="doc|amber-table.xtp#@Entity">@javax.persistence.Entity</a> declares
 a Java class as an entity bean.</p>
 
 <p>Since the @Id annotation marks a field, the
@@ -213,7 +213,7 @@ the methods would be enhanced. </p>
 
 <s2 title="@Table - naming the table">
 
-<p><a href="amber|amber-table.xtp#@Table">@javax.persistence.Table</a> specifies
+<p><a href="doc|amber-table.xtp#@Table">@javax.persistence.Table</a> specifies
 the SQL database table name to be used.  If <code>@Table</code> is
 unspecified, Amber will use the class name as the table name.</p>
 
@@ -225,7 +225,7 @@ unspecified, Amber will use the class name as the table name.</p>
 
 <s2 title="@Id - marking the primary key">
 
-<p>The <a href="amber|amber-table.xtp#@Id">@Id</a> attribute marks the
+<p>The <a href="doc|amber-table.xtp#@Id">@Id</a> attribute marks the
 bean's primary key.  The <code>EntityManager.find</code> method
 looks up a bean instance with the primary key, and relations use
 the primary key to link beans together.</p>
@@ -243,7 +243,7 @@ strategy <code>AUTO</code> generates primary keys depending on the database.
 Postgres, for example, will use a SEQUENCE, while Resin's built-in
 database will use an auto_increment IDENTITY.</p>
 
-<p>The optional <a href="amber|amber-table.xtp#@Column">@Column</a> annotation specifies the
+<p>The optional <a href="doc|amber-table.xtp#@Column">@Column</a> annotation specifies the
 SQL column name.  The default SQL column for an @Id is
 the property name.</p>
 
@@ -251,7 +251,7 @@ the property name.</p>
 
 <s2 title="@Basic - marking a persistent field">
 
-<p>The <a href="amber|amber-table.xtp#@Basic">@Basic</a> attribute
+<p>The <a href="doc|amber-table.xtp#@Basic">@Basic</a> attribute
 marks a basic data column like a string or integer or double.</p>
 
 <example>
@@ -264,7 +264,7 @@ private String _course;
 
 <s2 title="@Column - naming the column">
 
-<p>The optional <a href="amber|amber-table.xtp#@Column">@Column</a>
+<p>The optional <a href="doc|amber-table.xtp#@Column">@Column</a>
 annotation specifies SQL column name.
 For a @Basic field, the
 default column name is the field name.</p>

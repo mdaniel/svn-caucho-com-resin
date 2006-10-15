@@ -54,9 +54,9 @@ JVM command-line arguments must now be specified in the resin.conf.</p>
 
 <p>With Resin 3.1, JVM command-line arguments are specified in the
 resin.conf.  The watchdog JVM will read the resin.conf, select the
-proper &lt;<a href="config|server-tags.xtp#server">server</a>&gt;, and
+proper &lt;<a href="doc|server-tags.xtp#server">server</a>&gt;, and
 apply the server's arguments.  As usual, the
-&lt;<a href="config|server-tags.xtp#server-default">server-default</a>&gt;
+&lt;<a href="doc|server-tags.xtp#server-default">server-default</a>&gt;
 tag can provide common defaults.</p>
 
 <example title="setting -Xmx and -Xss">
@@ -102,18 +102,18 @@ for the new server tags.</p>
 
 <p>The &lt;cluster> is a collection of servers serving identical content.
 So the &lt;cluster> contains a set of &lt;server> tags, plus
-the &lt;<a href="config|host-tags.xtp#host">host</a>&gt;,
-&lt;<a href="config|env-tags.xtp">resource</a>&gt;, and
-the &lt;<a href="config|webapp-tags.xtp">web-app</a>&gt; configuration
+the &lt;<a href="doc|host-tags.xtp#host">host</a>&gt;,
+&lt;<a href="doc|env-tags.xtp">resource</a>&gt;, and
+the &lt;<a href="doc|webapp-tags.xtp">web-app</a>&gt; configuration
 common to all servers.</p>
 
-<p>&lt;<a href="config|cluster-tags.xtp">cluster</a>&gt; tag
+<p>&lt;<a href="doc|cluster-tags.xtp">cluster</a>&gt; tag
 for the new cluster tags.</p>
 
 <p>The following example shows a basic load-balancing configuration in
 Resin 3.0 with a set of web-tier servers load balancing
 to a larger set of app-tier servers.  Since the web-tier includes
-a proxy &lt;<a href="config|cluster-tags.xtp#cache">cache</a>&gt;
+a proxy &lt;<a href="doc|cluster-tags.xtp#cache">cache</a>&gt;
 configuration, the web-tier will serve static files without
 extra overhead.</p>
 

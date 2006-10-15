@@ -158,7 +158,7 @@ work with Hessian 2.0 servers without modification.</p>
 
 <s1 title="Quercus">
 
-<p><a href="../quercus">Quercus</a>, Caucho's implementation of
+<p><a href="../doc/quercus.xtp">Quercus</a>, Caucho's implementation of
 the PHP language in Java, has continued its rapid development, adding
 advanced features as well as more PHP libraries.</p>
 

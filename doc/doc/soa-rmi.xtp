@@ -59,7 +59,7 @@ ramifications for the naming of services.
 <s1 title="The Hessian alternative">
 
 <p>If you are considering RMI as a mechanism for publishing services, you may
-want to consider using <a href="doc|protocols|hessian">Hessian</a> instead.  Hessian offers the following
+want to consider using <a href="hessian.xtp">Hessian</a> instead.  Hessian offers the following
 advantages:</p>
 
 <ul>
@@ -72,7 +72,7 @@ services with the same name without conflict
 
 <p>
 More information is available in the 
-<a href="doc|protocols|hessian">Hessian</a> section of the documentation.
+<a href="hessian.xtp">Hessian</a> section of the documentation.
 </p>
 
 </s1>
@@ -101,7 +101,7 @@ security manager; the browser provides the security manager.
 
 <p>
 More information is available in the 
-<a href="doc|security|securitymanager">Security</a>
+<a href="securitymanager.xtp">Security</a>
 section of the documentation.
 </p>
 

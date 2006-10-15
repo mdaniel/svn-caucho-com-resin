@@ -151,7 +151,7 @@ an error.</note>
 </s2>
 
 <s2 title="IIS">
-<p>Configuration and installation for IIS virtual sites is discussed in the <a href="doc|install|cse-iis">IIS installation</a> section.</p>
+<p>Configuration and installation for IIS virtual sites is discussed in the <a href="install-iis.xtp">IIS installation</a> section.</p>
 </s2>
 </s1> <!-- with Apache or IIS -->
 

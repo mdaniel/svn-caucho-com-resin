@@ -42,7 +42,7 @@ source, follow the database use pattern in the
 <a href="tutorial/jdbc-basic/index.xtp">DataSource tutorial.</a></p>
 
 <p>Sample &lt;database&gt; configurations
-are available in the <a href="thirdparty.xtp">thirdparty driver page.</a>
+are available in the <a href="db-thirdparty.xtp">thirdparty driver page.</a>
 
 </p><p>Although some deployments will specify driver and
 connection pool parameters, the default values will be fine for most
@@ -265,9 +265,9 @@ although it is often best to place your datbase driver's jar file in
 your web applications.
 </p>
 
-<p>Examples of common driver configurations are in <a href="db|thirdparty">Third-party Database Configuration</a>.</p>
+<p>Examples of common driver configurations are in <a href="db-thirdparty.xtp">Third-party Database Configuration</a>.</p>
 
-<p>The class that corresponds to &lt;driver&gt; is <a href="javadoc|com.caucho.sql.DriverConfig|"/></p>
+<p>The class that corresponds to &lt;driver&gt; is <a href="javadoc|com.caucho.sql.DriverConfig"/></p>
 
 <deftable-childtags>
 <tr><td>type</td><td>The Java class name of the database driver.</td><td> 
@@ -535,9 +535,9 @@ will happen even if the code using the connection throws an exception.</p>
 <s1 title="See also">
 
 <ul>
-<li><a href="db|thirdparty">Sample configurations</a> for several database drivers
-</li><li><a href="doc|db|tutorial/jdbc-basic/index.xtp">Basic JNDI/JDBC usage tutorial</a>
-</li><li>Using <a href="doc|db|tutorial/jdbc-ioc/index.xtp">Dependency Injection for Databases</a>
+<li><a href="db-thirdparty.xtp">Sample configurations</a> for several database drivers
+</li><li><a href="tutorial|jdbc-basic/index.xtp">Basic JNDI/JDBC usage tutorial</a>
+</li><li>Using <a href="tutorial|jdbc-ioc/index.xtp">Dependency Injection for Databases</a>
 </li></ul>
 
 </s1>

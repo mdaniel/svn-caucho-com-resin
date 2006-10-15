@@ -25,7 +25,7 @@ it.</p>
 
 <p>See the <a href="resin-3.0.2.xtp">Resin 3.0.2</a> release notes
 for a more detailed explanation or read
-the <a href="doc|install|index">install</a> section.  The plugin
+the <a href="doc|install.xtp">install</a> section.  The plugin
 protocol and configuration has changed  significantly from Resin 2.1.
 Resin 3.0 plugins read their configuration from a configuration
 server, not from the resin.conf directly.</p>

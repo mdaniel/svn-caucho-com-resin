@@ -174,7 +174,7 @@ EJB servers, the outer &lt;resin&gt; declaration, even individual
 session beans.</p>
 
 <p>Any of the class loader and resource configuration is allowed in
-any environment.  See the <a href="doc|config|env">environment
+any environment.  See the <a href="doc|env.xtp">environment
 configuration</a> for the list.</p>
 
   </s2>
@@ -189,8 +189,8 @@ intended to make class loader configuration more clear.</p>
 
   <s2 title="reference configuration">
 
-<p><a href="doc|config|env#reference">reference</a> configures
-JNDI ObjectFactories, while <a href="doc|config|env#resource">resource</a> configures bean objects
+<p><a href="doc|env.xtp#reference">reference</a> configures
+JNDI ObjectFactories, while <a href="doc|env.xtp#resource">resource</a> configures bean objects
 directly.  Several third-party components expect to be configured as
 ObjectFactory references instead of configured as beans.</p>
   </s2>
@@ -285,7 +285,7 @@ configuration would be possible:</p>
 <s1 title="JDK 1.4 logging">
 
 <p>Resin's logging is now integrated with the JDK 1.4
-java.util.logging classes.  The <a href="doc|config|log">log</a>
+java.util.logging classes.  The <a href="doc|config-log.xtp">log</a>
 configuration configures the Logger classes.  So applications which
 use JDK 1.4 will automatically get integration with Resin's
 log configuration.</p>

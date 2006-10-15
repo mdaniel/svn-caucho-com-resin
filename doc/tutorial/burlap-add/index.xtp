@@ -34,7 +34,7 @@ services to clients from other languages.</p>
 underlying protocol, even if you intend to deploy with another protocol,
 like RMI/IIOP, you can develop using Resin's Burlap.</p>
 
-<p>The <a href="../../burlap-1.0-spec.xtp">Burlap 1.0 spec</a> describes
+<p>The <a href="doc|burlap-1.0-spec.xtp">Burlap 1.0 spec</a> describes
 the full Burlap protocol.</p>
 </s1>
 

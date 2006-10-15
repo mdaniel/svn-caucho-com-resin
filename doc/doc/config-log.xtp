@@ -218,7 +218,7 @@ in.</p>
 
 <p><var>resin:type</var> allows for custom logging.  Applications can
 extend a custom class from <a href="javadoc|com.caucho.http.log.AccessLog|"/>.  
-<a href="doc|config|init">Bean-style initialization</a> can be used to set bean
+<a href="ioc.xtp">Bean-style initialization</a> can be used to set bean
 parameters in the custom class.</p>
 
 <example>
@@ -285,12 +285,12 @@ java.util.logging.* API.</p>
 
 </td></tr><tr><td>handler
     </td><td>add a custom Handler, the name of a class that extends 
-        <a href="javadoc|java.util.logging.Handler|"/>
+        <a href="javadoc|java.util.logging.Handler"/>
     </td><td>&#160;
 </td></tr><tr><td>formatter
     </td><td>set a custom Formatter, the name of a class that extends 
-        <a href="javadoc|java.util.logging.Formatter|"/>
-    </td><td>none, or <a href="javadoc|com.caucho.log.ELFormatter|"/> if 
+        <a href="javadoc|java.util.logging.Formatter"/>
+    </td><td>none, or <a href="javadoc|com.caucho.log.ELFormatter"/> if 
         <var>format</var> is used.
 </td></tr></deftable-childtags>
 
@@ -323,7 +323,7 @@ java.util.logging.* API.</p>
 &lt;/resin&gt;
 </example>
 
-<p>More examples of debug logging are in the <a href="doc|troubleshoot|technique#debug-log">Troubleshooting</a> section.</p>
+<p>More examples of debug logging are in the <a href="troubleshoot-technique.xtp#debug-log">Troubleshooting</a> section.</p>
 
 <p>The class that corresponds to &lt;log&gt; is <a href="javadoc|com.caucho.log.LogConfig|"/>.</p>
 
@@ -460,7 +460,7 @@ log message.  <code>format</code> recognizes EL-expressions. The EL variable
 </td></tr><tr><td>${'${'}log.thrown}</td><td>Get any <a href="javadoc|java.lang.Throwable|"/> associated with the logging request
 </td></tr></deftable>
 
-<p>You can also use the <a href="el.xtp">Environment EL variables</a> in your format string:</p>
+<p>You can also use the <a href="el-var.xtp">Environment EL variables</a> in your format string:</p>
 
 <example title="log format string using an Environment EL variable.">
 &lt;host ...&gt;
@@ -485,7 +485,7 @@ log message.  <code>format</code> recognizes EL-expressions. The EL variable
 
 </results>
 
-<p>The <a href="doc|config|el#sprintf">fmt.sprintf()</a> function can
+<p>The <a href="el-var.xtp#sprintf">fmt.sprintf()</a> function can
 space pad the values and make the results look a little nicer:</p>
 
 <example title="fmt.sprintf() in log format string">
@@ -502,7 +502,7 @@ space pad the values and make the results look a little nicer:</p>
 </results>
 
 
-<p><a href="doc|config|el#sprintf">fmt.sprintf()</a> and <a href="doc|config|el#timestamp">fmt.timestamp()</a> can be used to produce CSV files:</p>
+<p><a href="config-el.xtp#sprintf">fmt.sprintf()</a> and <a href="config-el.xtp#timestamp">fmt.timestamp()</a> can be used to produce CSV files:</p>
 
 <example title="CSV log files">
 &lt;log name='' level='all' path='log/debug.csv' timestamp=""
@@ -573,7 +573,7 @@ to go to files, and <code>log</code> is configured to go to a file or to
   &lt;log name="" level="all" path="stdout:"/&gt;
 </example>
 
-<p>You can use the <a href="doc|config|el">Environment EL variables</a> as part
+<p>You can use the <a href="config-el.xtp">Environment EL variables</a> as part
 of your filesystem path:</p>
 
 <example title="Filesystem path using Environment EL variables">
@@ -615,7 +615,7 @@ days (15D), weeks (2W), months (1M), or hours (1h).</p>
 log file is started.</p>
 
 <p><code>archive-format</code> is used to specify the name of the archive file.  It
-can contain regular characters, <a href="doc|config|el">EL Environment
+can contain regular characters, <a href="el-var.xtp">EL Environment
 variables</a>, and % codes that capture the current date and time.  The % codes
 are the same as the ones used for <code>timestamp</code> 
 (see <a href="#timestamp">Timestamp format string)</a>.</p>

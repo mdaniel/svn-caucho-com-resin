@@ -7,7 +7,7 @@
          allowing Apache to run servlets and JSP files.
       </p>
 
-      <p>If you have not yet done so, we suggest you use the <a href="install|httpd">Resin standalone web server</a> option
+      <p>If you have not yet done so, we suggest you use the <a href="resin-web-server.xtp">Resin standalone web server</a> option
       first.</p>
 
     </description>
@@ -19,7 +19,7 @@
 <s1 name="standalone" title="Before you integrate Resin with Apache">
 <p>
 Before integrating Resin with Apache, it is valuable to configure Resin as a
-<a href="install|httpd">standalone server</a>, especially with more
+<a href="resin-web-server.xtp">standalone server</a>, especially with more
 complicated setups such as those involving virtual hosts.  Doing so isolates
 the steps and makes troubleshooting easier.
 </p>
@@ -556,7 +556,7 @@ $ bin/httpd.sh -pid gryffindor.pid stop
 
 <s1 name="balance" title="Load Balancing">
 
-<p>The <a href="doc|config|balance">Reliability and Load Balancing</a>
+<p>The <a href="resin-load-balance.xtp">Reliability and Load Balancing</a>
 section provides an introduction to the concepts of load balancing.</p>
 
 <p>mod_caucho recognizes cluster configurations for load balancing. 

@@ -247,7 +247,7 @@ asks a backend database for the password matching the user's name.
 It uses the DataSource specified by the <var>pool-name</var> option, or
 the JNDI <var>java:comp/env/jdbc/db-pool</var> by default.
 <var>pool-name</var> refers to a DataSource configured with
-<a href="doc|config|env#database">database</a>.</p>
+<a href="env.xtp#database">database</a>.</p>
 
 <p>The following are the attributes for the JdbcAuthenticator:</p>
 
@@ -365,7 +365,7 @@ You can implement single signon by configuring the authenticator in
 the proper environment: web-app, host, or server.  The login will last for
 all the web-apps in that environment.</p>
 
-<p>The authenticator is a resource which is shared across its <a href="config|env">environment</a>.  For example, to configure the XML authenticator
+<p>The authenticator is a resource which is shared across its <a href="env.xtp">environment</a>.  For example, to configure the XML authenticator
 for all web-apps in foo.com, you might configure as follows:</p>
 
 <example title="Single Signon for foo.com">

@@ -60,9 +60,8 @@ in Resin 3.0.5.</p>
 
 <s1 title="Amber">
 
-<p><a href="amber|index">Amber</a> is Resin's new persistence manager,
-currently in development.  We have added some <a href="amber|tutorial/index">sample
-tutorials</a> as a preview.  Since the tutorials are direct
+<p><a href="../doc/amber.xtp">Amber</a> is Resin's new persistence manager,
+currently in development.  We have added some <a href="../tutorial/amber-basic/">sample tutorials</a> as a preview.  Since the tutorials are direct
 translations of the old CMP tutorials, you can compare the two
 persistence methods directly.</p>
 

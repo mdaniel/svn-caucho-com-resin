@@ -52,33 +52,33 @@ the site.
 </deftable>
 
 <ul>
-<li><img src="/images/folder.gif"/>&#160;example
+<li><img src="folder.gif"/>&#160;example
 <ul>
-  <li><img src="/images/file.gif"/>&#160;index.html
-  </li><li><img src="/images/file.gif"/>&#160;folder.gif
-  </li><li><img src="/images/file.gif"/>&#160;article.gif
-  </li><li><img src="/images/jsp.gif"/>&#160;post-article.xtp
-  </li><li><img src="/images/folder.gif"/>&#160;jsp-interest
+  <li><img src="file.gif"/>&#160;index.html
+  </li><li><img src="file.gif"/>&#160;folder.gif
+  </li><li><img src="file.gif"/>&#160;article.gif
+  </li><li><img src="jsp.gif"/>&#160;post-article.xtp
+  </li><li><img src="folder.gif"/>&#160;jsp-interest
   <ul>
-    <li><img src="/images/jsp.gif"/>&#160;index.jsp
-    </li><li><img src="/images/jsp.gif"/>&#160;article1.jsp
-    </li><li><img src="/images/jsp.gif"/>&#160;article2.jsp
+    <li><img src="jsp.gif"/>&#160;index.jsp
+    </li><li><img src="jsp.gif"/>&#160;article1.jsp
+    </li><li><img src="jsp.gif"/>&#160;article2.jsp
   </li></ul>
-  </li><li><img src="/images/folder.gif"/>&#160;WEB-INF
+  </li><li><img src="folder.gif"/>&#160;WEB-INF
   <ul>
-    <li><img src="/images/folder.gif"/>&#160;lib
+    <li><img src="folder.gif"/>&#160;lib
     <ul>
-      <li><img src="/images/bean.gif"/>&#160;bulletin-board.jar
+      <li><img src="bean.gif"/>&#160;bulletin-board.jar
     </li></ul>
-    </li><li><img src="/images/folder.gif"/>&#160;classes
+    </li><li><img src="folder.gif"/>&#160;classes
     <ul>
-      <li><img src="/images/bean.gif"/>&#160;Navigation.class
-      </li><li><img src="/images/bean.gif"/>&#160;HelloWorld.class
+      <li><img src="bean.gif"/>&#160;Navigation.class
+      </li><li><img src="bean.gif"/>&#160;HelloWorld.class
     </li></ul>
-    </li><li><img src="/images/folder.gif"/>&#160;xsl
+    </li><li><img src="folder.gif"/>&#160;xsl
     <ul>
-      <li><img src="/images/style.gif"/>&#160;default.xsl
-      </li><li><img src="/images/style.gif"/>&#160;article.xsl
+      <li><img src="style.gif"/>&#160;default.xsl
+      </li><li><img src="style.gif"/>&#160;article.xsl
     </li></ul>
   </li></ul>
 </li></ul>
@@ -90,7 +90,7 @@ the site.
 <p>Java Beans get first class treatment in JSP 1.0.  Beans can be
 created for a page, across a session, or for the entire application.</p>
 
-<p>The classes and lib directories can contain application beans used by <a href="jsp|actions#usebean">jsp:useBean</a>.  These are simply Java
+<p>The classes and lib directories can contain application beans used by <a href="jsp-actions.xtp#usebean">jsp:useBean</a>.  These are simply Java
 classes implementing the bitmechanic work of an application.</p>
 
 <p>For example, a shopping cart application may have a set of Java
@@ -107,10 +107,11 @@ directory and access them from the JSP page.</p>
 </li></ul>
 
 <p>Requests and pages often last the same lifetime, but may differ if one
-page <a href="jsp|actions#forward">forwards</a> or <a href="jsp|actions#include">includes</a> another page. </p>
+page <a href="jsp-actions.xtp#forward">forwards</a>
+or <a href="jsp-actions.xtp#include">includes</a> another page. </p>
 
 <s2 title="Accessing Beans">
-<p>Each bean is defined with a <a href="jsp|actions#usebean">jsp:useBean</a>
+<p>Each bean is defined with a <a href="jsp-actions.xtp#usebean">jsp:useBean</a>
 directive.</p>
 
 <p>JSP assigns the created bean object to the JavaScript variable

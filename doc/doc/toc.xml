@@ -86,7 +86,7 @@
       <item link="jaxws-annotations.xtp" title="JAX-WS Annotations"/>
       <item link="jms-config.xtp" title="JMS Configuration"/>
       <item link="ioc-bean.xtp" title="init"/>
-      <item link="bean-patterns.xtp" title="bean"/>
+      <item link="ioc-bean-patterns.xtp" title="bean"/>
       <item link="soa-cron.xtp" title="CronResource"/>
       <item link="soa-rmi.xtp" title="RMI"/>
       <item link="soa-faq.xtp" title="Resource FAQ"/>
@@ -225,7 +225,7 @@
       <item link="openjms.xtp" title="OpenJMS" />
       <item link="hibernate.xtp" title="Hibernate" />
       <item link="sslhardware.xtp" title="SSL Accelerators"/>
-      <item link="db-thirdparty" title="Database"/>
+      <item link="db-thirdparty.xtp" title="Database"/>
     </item>
     
     <item link="troubleshoot.xtp" title="Troubleshooting/FAQ">

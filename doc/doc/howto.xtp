@@ -15,15 +15,15 @@
 <s1 title="Configure and use a database connection" type="faq">
 
 <p>See
-the <a href="db|config">database configuration page</a> for the full
+the <a href="database.xtp">database configuration page</a> for the full
 configuration documentation.
 
-</p><p>See the <a href="db|thirdparty">thirdparty driver configuration page</a> for
+</p><p>See the <a href="db-thirdparty.xtp">thirdparty driver configuration page</a> for
 sample configurations for several database drivers.</p>
 
 <p>See the
-<a href="db|tutorial/jdbc-basic/index">JNDI DataSource tutorial</a>
-and the <a href="db|tutorial/jdbc-ioc/index">DataSource
+<a href="tutorial|db-jdbc-basic/index.xtp">JNDI DataSource tutorial</a>
+and the <a href="tutorial|db-jdbc-ioc/index.xtp">DataSource
 inversion-of-control tutorial</a> for sample JDBC usage patterns.</p>
 
 </s1>
@@ -35,9 +35,9 @@ avoid running as root for security.  It's best to use a port mapper
 or firewall to map the protected port to an unprotected port
 like 8080 to avoid running as root entirely.</p>
 
-<p>On Linux, use iptables.  <a href="scrapbook.xtp">An example iptable configuration.</a></p>
+<p>On Linux, use iptables.  <a href="config-scrapbook.xtp">An example iptable configuration.</a></p>
 
-<p>If iptables is not available, the <a href="config|resin.xtp#user-name">user-name</a> and <a href="config|resin.xtp#group-name">group-name</a>
+<p>If iptables is not available, the <a href="server-tags.xtp#user-name">user-name</a> and <a href="server-tags.xtp#group-name">group-name</a>
 configuration can use setuid to change Resin's user after binding ports.
 </p>
 
@@ -49,7 +49,7 @@ configuration can use setuid to change Resin's user after binding ports.
 redirects to an internal IP address, the application often needs
 the external address, not the server's view.</p>
 
-<p>Use <a href="resin.xtp#server-name">host-name</a> in the &lt;host&gt;
+<p>Use <a href="host-tags.xtp#server-name">host-name</a> in the &lt;host&gt;
 to set the canonical host and port name to the external address.</p>
 
 <example>
@@ -63,7 +63,7 @@ to set the canonical host and port name to the external address.</p>
 
 <s1 title="Reload .war files manually" type="faq">
 
-<p>See the <a href="jmx|cookbook/restart.xtp">JMX restart</a> example.</p>
+<p>See the <a href="jmx.xtp">JMX restart</a> example.</p>
 
 </s1>
 

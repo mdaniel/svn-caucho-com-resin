@@ -219,7 +219,7 @@ public class Body extends ContainerNode {
     out.writeAttribute("alt", "");
     out.writeAttribute("width", "1");
     out.writeAttribute("height", "20");
-    out.writeAttribute("src", cp + "/images/pixel.jpg");
+    out.writeAttribute("src", cp + "/images/pixel.gif");
     out.writeEndElement(); // </img>
     
     out.writeEndElement(); // </td>
@@ -230,7 +230,7 @@ public class Body extends ContainerNode {
     out.writeAttribute("alt", "");
     out.writeAttribute("width", "1");
     out.writeAttribute("height", "20");
-    out.writeAttribute("src", cp + "/images/pixel.jpg");
+    out.writeAttribute("src", cp + "/images/pixel.gif");
     out.writeEndElement(); // </td>
     out.writeEndElement(); // </tr>
 

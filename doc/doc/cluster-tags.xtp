@@ -22,7 +22,7 @@ and reliability.</p>
 <ul>
 <li>See the <a href="index-tags.xtp">index</a> for a list of all the tags.</li>
 <li>See <a href="webapp.xtp">Web Application</a> configuration for web.xml (Servlet) configuration.</li>
-<li>See <a href="env.xtp">Environment</a> configuration for resources: classloader, databases, connectors, and resources.</li>
+<li>See <a href="config-env.xtp">Environment</a> configuration for resources: classloader, databases, connectors, and resources.</li>
 <li>See <a href="log.xtp">Log</a> configuration for access log configuration, java.util.logging, and stdout/stderr logging.</li>
 </ul>
 
@@ -174,7 +174,7 @@ that host or web-app will be used instead.</p>
 <defun title="Environment" version="Resin 3.1">
 <parents>cluster</parents>
 
-<p>All <a href="env.xtp">Environment tags</a> are
+<p>All <a href="config-env.xtp">Environment tags</a> are
 available to the &lt;cluster&gt;.  For example,
 resources like &lt;database&gt;.</p>
 
