@@ -62,13 +62,13 @@ to model the house columns.  House annotates <code>getId</code> with <code>@Id</
 with <code>@Basic</code> to mark it as a data column.</p>
 
 <example title="House.java">
-<a href="amber|amber-table.xtp#@Entity">@Entity</a>
+<a href="doc|amber-table.xtp#@Entity">@Entity</a>
 public class House {
-  <a href="amber|amber-table.xtp#@Id">@Id</a>
-  <a href="amber|amber-table.xtp#@Column">@Column</a>(name="id")
+  <a href="doc|amber-table.xtp#@Id">@Id</a>
+  <a href="doc|amber-table.xtp#@Column">@Column</a>(name="id")
   public long getId()
 
-  <a href="amber|amber-table.xtp#@Basic">@Basic</a>
+  <a href="doc|amber-table.xtp#@Basic">@Basic</a>
   public String getName()
 }
 </example>
@@ -78,24 +78,24 @@ public class House {
 getter with <code>@ManyToOne</code> to mark it as a many-to-one column.</p>
 
 <example title="Student.java">
-<a href="amber|amber-table.xtp#@Entity">@Entity</a>
+<a href="doc|amber-table.xtp#@Entity">@Entity</a>
 public class Student {
-  <a href="amber|amber-table.xtp#@Id">@Id</a>
-  <a href="amber|amber-table.xtp#@Column">@Column</a>(name="id")
+  <a href="doc|amber-table.xtp#@Id">@Id</a>
+  <a href="doc|amber-table.xtp#@Column">@Column</a>(name="id")
   public long getId()
 
-  <a href="amber|amber-table.xtp#@Basic">@Basic</a>
+  <a href="doc|amber-table.xtp#@Basic">@Basic</a>
   public String getName()
 
-  <a href="amber|amber-table.xtp#@ManyToOne">@ManyToOne</a>
-  <a href="amber|amber-table.xtp#@JoinColumn">@JoinColumn</a>(name="house")
+  <a href="doc|amber-table.xtp#@ManyToOne">@ManyToOne</a>
+  <a href="doc|amber-table.xtp#@JoinColumn">@JoinColumn</a>(name="house")
   public House getHouse()
 }
 </example>
 
 <s2 title="@ManyToOne">
 
-<p><a href="amber|amber-table.xtp#@ManyToOne">@ManyToOne</a> marks the
+<p><a href="doc|amber-table.xtp#@ManyToOne">@ManyToOne</a> marks the
 field as a many-to-one field.  The <code>@ManyToOne</code> annotation
 can also specify the target bean.  By default, the field's type determines
 the target bean.</p>
@@ -104,7 +104,7 @@ the target bean.</p>
 
 <s2 title="@JoinColumn">
 
-<p><a href="amber|amber-table.xtp#@JoinColumn">@JoinColumn</a> specifies
+<p><a href="doc|amber-table.xtp#@JoinColumn">@JoinColumn</a> specifies
 the SQL column name and the target column for a many-to-one field.</p>
 
 <p>The default column name is the name of the many-to-one field.</p>

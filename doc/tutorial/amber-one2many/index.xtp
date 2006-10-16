@@ -9,7 +9,7 @@ represents a collection of children belonging to a parent,
 like students in Gryffindor house at Hogwarts school.</p>
 
 <p>
-The <a href="amber|tutorial/cmp-many2one/index.xtp">Many-To-One tutorial</a>
+The <a href="../amber-many2one/index.xtp">Many-To-One tutorial</a>
 illustrated that a many-to-one relation links one source entity to another
 target entity.  A one-to-many relation links the target entity back to the
 source entity.
@@ -52,7 +52,7 @@ Student has a many-to-one relationship with House
 
 <p>
 The database schema is unchanged from the
-<a href="amber|tutorial/cmp-many2one/index.xtp">Many-To-One tutorial</a>,
+<a href="../amber-many2one/index.xtp">Many-To-One tutorial</a>,
 and might look like:</p>
 
 <example title="SQL">
@@ -90,7 +90,7 @@ that is the <code>@ManyToOne</code> link.
 A @OneToMany always requires a corresponding @ManyToOne on the target entity.
 The Student has a house field annotated a <code>@ManyToOne</code>,
 unchanged from the 
-<a href="ejb3|tutorial/cmp-many2one/index.xtp">Many-To-One tutorial</a>.
+<a href="../amber-many2one/index.xtp">Many-To-One tutorial</a>.
 </p>
 
 <example title="Student.java" file="WEB-INF/classes/example/Student.java" 

@@ -3,7 +3,7 @@
 <%
 BurlapProxyFactory factory = new BurlapProxyFactory();
 
-// http://localhost:8080/resin-doc/protocols/tutorial/burlap-add/burlap/math
+// http://localhost:8080/resin-doc/tutorial/burlap-add/burlap/math
 
 String url = ("http://" +
               request.getServerName() + ":" + request.getServerPort() +

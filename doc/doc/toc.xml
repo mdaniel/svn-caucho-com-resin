@@ -211,7 +211,9 @@
       -->      
     <item link="thirdparty.xtp" title="Third-party">
       <item link="ide.xtp" title="IDE's">
+      <!--
         <item link="ide-jbuilder.xtp" title="JBuilder (OpenTool)"/>
+	-->
         <item link="ide-eclipse.xtp" title="Eclipse"/>
         <item link="ide-intellij.xtp" title="IntelliJ"/>
         <item link="ide-kawa.xtp" title="Kawa"/>
@@ -228,11 +230,13 @@
       <item link="db-thirdparty.xtp" title="Database"/>
     </item>
     
-    <item link="troubleshoot.xtp" title="Troubleshooting/FAQ">
+    <item link="troubleshoot.xtp" title="Troubleshooting/FAQ"/>
+    <!--
       <item link="troubleshoot-technique.xtp" title="Techniques"/>
       <item link="troubleshoot-symptoms.xtp" title="Symptoms"/>
       <item link="troubleshoot-common-problems.xtp" title="Common Problems"/>
     </item>
+    -->
     <!--
     <item link="" title="PDF Manuals" atoc-descend="true"/>
     -->

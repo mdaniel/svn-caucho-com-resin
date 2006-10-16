@@ -536,8 +536,8 @@ will happen even if the code using the connection throws an exception.</p>
 
 <ul>
 <li><a href="db-thirdparty.xtp">Sample configurations</a> for several database drivers
-</li><li><a href="tutorial|jdbc-basic/index.xtp">Basic JNDI/JDBC usage tutorial</a>
-</li><li>Using <a href="tutorial|jdbc-ioc/index.xtp">Dependency Injection for Databases</a>
+</li><li><a href="tutorial|db-jdbc/index.xtp">Basic JNDI/JDBC usage tutorial</a>
+</li><li>Using <a href="tutorial|db-jdbc-ioc/index.xtp">Dependency Injection for Databases</a>
 </li></ul>
 
 </s1>

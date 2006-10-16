@@ -456,7 +456,7 @@ appear in /caucho-status.
 <s1 name="vhosts" title="Virtual Hosts">
 
 <p>
-The <a href="doc|config|virtual-host">virtual host</a> topic describes virtual
+The <a href="virtual-host.xtp">virtual host</a> topic describes virtual
 hosts in detail.  If you're using a single JVM, you only need to configure
 the resin.conf.
 </p>

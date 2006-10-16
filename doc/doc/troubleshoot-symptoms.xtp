@@ -10,14 +10,14 @@
 </header>
 
 <body>
-<summary localtoc="1"/>
+<localtoc/>
 
 <s1 title="Resin stops responding">
 <ul>
 
-<li>There may be a thread deadlock problem, <a href="troubleshoot|technique#thread-dump">obtain a thread dump</a>.
+<li>There may be a thread deadlock problem, <a href="troubleshoot-technique.xtp#thread-dump">obtain a thread dump</a>.
 
-</li><li>Enable <a href="troubleshoot|technique#debug-log">full debug logging</a> and check
+</li><li>Enable <a href="troubleshoot-technique.xtp#debug-log">full debug logging</a> and check
 the last log entries for hints about what the last thing to happen was.
 
 </li></ul>
@@ -26,7 +26,7 @@ the last log entries for hints about what the last thing to happen was.
 <s1 title="Resin keeps restarting">
 <ul>
 
-<li>Enable <a href="troubleshoot|technique#debug-log">full debug logging</a> and check
+<li>Enable <a href="troubleshoot-technique.xtp#debug-log">full debug logging</a> and check
 the entries for an explanation of why Resin thinks it should restart.
 
 </li></ul>
@@ -57,12 +57,12 @@ unix&gt; bin/httpd.sh -nojit
 <ul>
 
 <li>Use JVM startup arguments to 
-<a href="performance|jvm-tuning#memory">increase heap memory.</a>
+<a href="jvm-tuning.xtp#memory">increase heap memory.</a>
 
-</li><li>Obtain a <a href="troubleshoot|technique#heap-dump">heap dump</a> to
+</li><li>Obtain a <a href="troubleshoot-technique.xtp#heap-dump">heap dump</a> to
 determine which objects are not getting garbage collected.
 
-</li><li>Obtain a <a href="troubleshoot|technique#thread-dump">thread dump</a> and
+</li><li>Obtain a <a href="troubleshoot-technique.xtp#thread-dump">thread dump</a> and
 check for unreleased threads that might be holding onto objects.
 
 </li></ul>

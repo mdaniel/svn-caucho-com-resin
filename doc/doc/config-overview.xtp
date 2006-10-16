@@ -176,7 +176,7 @@ and default configuration like <g>resin-web.xml</g> and <g>web.xml</g>.</p>
 
 <s2 title="\${resin.home}">
 
-<p>Resin's configuration files can use <a href="jsp|el.xtp">EL</a>
+<p>Resin's configuration files can use <a href="jsp-el.xtp">EL</a>
 expressions, including predefined variables like
 <a href="el-var.xtp#resin">${resin}</a>, 
 <a href="el-var.xtp#cluster">${cluster}</a>, 
@@ -441,8 +441,8 @@ actual urls like <var>/wiki/index.php/Load-balance</var></p>
 <s1 title="Web Services: REST, Hessian, SOAP">
 
 <p>With Resin 3.1, applications can deploy
-<a href="soa|tutorial/soa-flickr/index.xtp">REST</a>, 
-<a href="hessian|index.xtp">Hessian</a>, and SOAP using the
+<a href="../tutorial/rest-flickr/index.xtp">REST</a>, 
+<a href="hessian.xtp">Hessian</a>, and SOAP using the
 same instance class.  A good introductary example
 is the <a href="soa|tutorial/soa-hello-world/index.xtp">SOA Hello, World tutorial.</a></p>
 

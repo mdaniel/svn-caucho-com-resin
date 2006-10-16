@@ -258,7 +258,7 @@ resources like &lt;database&gt;.</p>
 &lt;/web-app&gt;
 </example>
 
-<p>Or <a href="../ioc">IoC-configured Beans</a>:</p>
+<p>Or <a href="ioc-bean.xtp">IoC-configured Beans</a>:</p>
 
 <example title="IoC bean in resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
@@ -643,21 +643,27 @@ there are a large number of sub-web-apps for the individual tutorials..</p>
 <default>no authentication</default>
 
 <deftable-childtags title="Servlet 2.4 definition for login-config">
-<tr><td>auth-method</td><td>Authentication method, either <var>BASIC</var> for HTTP Basic Authentication, <var>FORM</var> for form based authentication, or <var>DIGEST</var> for HTTP <a href="security|digest">Digest Authentication</a>.
+<tr><td>auth-method</td><td>Authentication method, either <var>BASIC</var> for HTTP Basic Authentication, <var>FORM</var> for form based authentication, or <var>DIGEST</var> for HTTP <a href="security-digest.xtp">Digest Authentication</a>.
 </td></tr><tr><td>realm-name</td><td>The realm name to use in HTTP authentication
 </td></tr><tr><td>form-login-config</td><td>Configuration for form login, see <a config-tag="form-login-config"/>
 </td></tr></deftable-childtags>
 
 <deftable-childtags title="Resin extensions to login-config">
-<tr><td>type</td><td>Defines a custom class which extends <code>com.caucho.server.security.AbstractLogin</code>
-</td></tr><tr><td>init</td><td>Initialization for the custom login class
-</td></tr></deftable-childtags>
+<tr>
+  <td>type</td>
+  <td>Defines a custom class which extends <code>com.caucho.server.security.AbstractLogin</code></td>
+</tr>
+<tr>
+  <td>init</td>
+  <td>Initialization for the custom login class</td>
+</tr>
+</deftable-childtags>
 
 
 <p>HTTP Authentication is defined in the RFC <a href="external|spec|http-authentication">HTTP Authentication: Basic and
 Digest</a>.</p> 
 
-<p>HTTP digest authentication is discussed in <a href="security|digest">Digest Passwords</a>.
+<p>HTTP digest authentication is discussed in <a href="security-digest.xtp">Digest Passwords</a>.
 
 </p></defun>
 
@@ -1338,10 +1344,10 @@ The service can receive request from multiple protocols, including
 REST, SOAP, Hessian, and direct local-JVM calls.  The service
 will normally be configured with IoC.</p>
 
-<p>See the <a href="config|soa-tags.xtp#web-service">web-service</a>
+<p>See the <a href="soa-tags.xtp#web-service">web-service</a>
 documentation for more information.</p>
 
-<p>See the <a href="soa|tutorial/esb-hello-world">hello world tutorial</a>
+<p>See the <a href="tutorial/esb-hello-world/index.xtp">hello world tutorial</a>
 for an example.</p>
 
 <deftable-childtags>
@@ -1352,13 +1358,13 @@ for an example.</p>
 </tr>
 <tr>
   <td>hessian</td>
-  <td>Adds a <a href="hessian|index.xtp">Hessian</a> port for
+  <td>Adds a <a href="hessian.xtp">Hessian</a> port for
 the web service.</td>
   <td></td>
 </tr>
 <tr>
   <td>init</td>
-  <td>IoC-based initialization.  See <a href="soa|ioc-bean.xtp">IoC init
+  <td>IoC-based initialization.  See <a href="ioc-bean.xtp">IoC init
 documentation</a> for more information.</td>
   <td></td>
 </tr>

@@ -138,20 +138,20 @@ automatically load the servlet and execute it.
 </p>
 
 <ul>
-<li><img src="/images/folder.gif"/>&#160;doc
+<li><img src="folder.gif"/>&#160;doc
 <ul>
-  <li><img src="/images/file.gif"/>&#160;index.html
-  </li><li><img src="/images/jsp.gif"/>&#160;login.jsp
-  </li><li><img src="/images/jsp.gif"/>&#160;add.jsp
-  </li><li><img src="/images/folder.gif"/>&#160;WEB-INF
+  <li><img src="file.gif"/>&#160;index.html
+  </li><li><img src="jsp.gif"/>&#160;login.jsp
+  </li><li><img src="jsp.gif"/>&#160;add.jsp
+  </li><li><img src="folder.gif"/>&#160;WEB-INF
   <ul>
-    <li><img src="/images/folder.gif"/>&#160;classes
+    <li><img src="folder.gif"/>&#160;classes
     <ul>
-    <li><img src="/images/folder.gif"/>&#160;jsp
+    <li><img src="folder.gif"/>&#160;jsp
       <ul>
-      <li><img src="/images/bean.gif"/>&#160;GuestJsp.class
-      </li><li><img src="/images/bean.gif"/>&#160;GuestBook.class
-      </li><li><img src="/images/bean.gif"/>&#160;Guest.class
+      <li><img src="bean.gif"/>&#160;GuestJsp.class
+      </li><li><img src="bean.gif"/>&#160;GuestBook.class
+      </li><li><img src="bean.gif"/>&#160;Guest.class
       </li></ul>
     </li></ul>
   </li></ul>
@@ -417,9 +417,7 @@ for (var guest in guestBook) {
 <s1 title="Conclusion">
 <p>
 The Resin demo shows a few ways to extend the guest book, including
-adding some intelligence to the form processing.  However, as forms
-get more intelligent, even JSP templates become complicated.  There is
-a solution: <a href="xtp|templates">XTP templates</a>.
+adding some intelligence to the form processing.
 </p>
 </s1>
 

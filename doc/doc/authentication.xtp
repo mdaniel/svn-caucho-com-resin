@@ -100,7 +100,7 @@ which uses usernames, passwords, and roles stored in a database.</p>
 
 <s2 title="login-config" type="defun">
 
-<p>Configures the login class.  The <a href="config|webapp#login-config">web.xml configuration</a> describes the
+<p>Configures the login class.  The <a href="webapp-tags.xtp#login-config">web.xml configuration</a> describes the
 configuration in more detail.</p>
 
 <p>The login can be customized by selecting the <code>com.caucho.server.security.AbstractLogin</code>.  The <var>type</var> attribute will select that
@@ -247,7 +247,7 @@ asks a backend database for the password matching the user's name.
 It uses the DataSource specified by the <var>pool-name</var> option, or
 the JNDI <var>java:comp/env/jdbc/db-pool</var> by default.
 <var>pool-name</var> refers to a DataSource configured with
-<a href="env.xtp#database">database</a>.</p>
+<a href="env-tags.xtp#database">database</a>.</p>
 
 <p>The following are the attributes for the JdbcAuthenticator:</p>
 
@@ -365,7 +365,7 @@ You can implement single signon by configuring the authenticator in
 the proper environment: web-app, host, or server.  The login will last for
 all the web-apps in that environment.</p>
 
-<p>The authenticator is a resource which is shared across its <a href="env.xtp">environment</a>.  For example, to configure the XML authenticator
+<p>The authenticator is a resource which is shared across its <a href="env-tags.xtp">environment</a>.  For example, to configure the XML authenticator
 for all web-apps in foo.com, you might configure as follows:</p>
 
 <example title="Single Signon for foo.com">

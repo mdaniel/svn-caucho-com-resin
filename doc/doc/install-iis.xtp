@@ -71,7 +71,7 @@ need to configure the document root and any directory aliases.</p>
 <a config-tag="document-directory"/> attribute from 'webapps/ROOT' to something
 like 'C:/inetpub/wwwroot'.  The mapping of url paths from the browser to real
 files on the disk must be the same for Resin as they are for IIS. For more
-complicated configurations that use mappings in IIS, you'll need to add <a href="doc|config|webapp">path-mapping</a> attributes
+complicated configurations that use mappings in IIS, you'll need to add <a href="webapp-tags.xtp">path-mapping</a> attributes
 to match.</p>
 
 <example title="resin.conf" language="xml">
@@ -155,7 +155,7 @@ you can find the full list by starting "java -X".</p>
 </td></tr><tr><td>-Xms&lt;size&gt;</td><td>the size of the heap for the young generation
 </td></tr></deftable>
 
-<p>See <a href="performance|jvm-tuning#memory">Performance : JVM Tuning : Memory</a> for more information on JVM memory usage.</p>
+<p>See <a href="jvm-tuning.xtp#memory">Performance : JVM Tuning : Memory</a> for more information on JVM memory usage.</p>
 
 </s2>
 
@@ -204,7 +204,7 @@ available machine.</p>
 <p>In addition, you can specify backup machines.  The backup only will serve
 requests if all primaries are down.</p>
 
-<p>See the <a href="doc|config|resin">Resin config</a> section for more
+<p>See the <a href="cluster.xtp">Resin config</a> section for more
 details.</p>
 
 <example title="resin.conf">

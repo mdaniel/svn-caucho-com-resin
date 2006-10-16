@@ -60,13 +60,13 @@ CREATE TABLE grade_map (
 <p>The Course has an @Id and a data column for the name.</p>
 
 <example title="Course.java">
-<a href="amber|amber-table.xtp#@Entity">@Entity</a>
+<a href="doc|amber-table.xtp#@Entity">@Entity</a>
 public class Course {
-  <a href="amber|amber-table.xtp#@Id">@Id</a>
-  <a href="amber|amber-table.xtp#@Column">@Column</a>(name="course_id")
+  <a href="doc|amber-table.xtp#@Id">@Id</a>
+  <a href="doc|amber-table.xtp#@Column">@Column</a>(name="course_id")
   public long getId()
 
-  <a href="amber|amber-table.xtp#@Basic">@Basic</a>
+  <a href="doc|amber-table.xtp#@Basic">@Basic</a>
   public String getName()
 }
 </example>
@@ -74,20 +74,20 @@ public class Course {
 <p>The Student includes the many-to-many relation in its definition.</p>
 
 <example title="Student.java">
-<a href="amber|amber-table.xtp#@Entity">@Entity</a>
+<a href="doc|amber-table.xtp#@Entity">@Entity</a>
 public class Student {
-  <a href="amber|amber-table.xtp#@Id">@Id</a>
-  <a href="amber|amber-table.xtp#@Column">@Column</a>(name="student_id")
+  <a href="doc|amber-table.xtp#@Id">@Id</a>
+  <a href="doc|amber-table.xtp#@Column">@Column</a>(name="student_id")
   public long getId()
 
-  <a href="amber|amber-table.xtp#@Basic">@Basic</a>
+  <a href="doc|amber-table.xtp#@Basic">@Basic</a>
   public String getName()
 
-  <a href="amber|amber-table.xtp#@ManyToMany">@ManyToMany(targetEntity="Course")</a>
-  <a href="amber|amber-table.xtp#@JoinTable">@JoinTable</a>(
-      table=<a href="amber|amber-table.xtp#@Table">@Table</a>(name="student_course_map"),
-      joinColumns=<a href="amber|amber-table.xtp#@JoinColumn">@JoinColumn</a>(name="student_id")",
-      inverseJoinColumns=<a href="amber|amber-table.xtp#@JoinColumn">@JoinColumn</a>(name="course_id")")
+  <a href="doc|amber-table.xtp#@ManyToMany">@ManyToMany(targetEntity="Course")</a>
+  <a href="doc|amber-table.xtp#@JoinTable">@JoinTable</a>(
+      table=<a href="doc|amber-table.xtp#@Table">@Table</a>(name="student_course_map"),
+      joinColumns=<a href="doc|amber-table.xtp#@JoinColumn">@JoinColumn</a>(name="student_id")",
+      inverseJoinColumns=<a href="doc|amber-table.xtp#@JoinColumn">@JoinColumn</a>(name="course_id")")
   public Collection getCourses()
 }
 </example>
@@ -95,7 +95,7 @@ public class Student {
 
 <s1 title="@ManyToMany">
 
-<p>The <a href="amber|amber-table.xtp#@ManyToMany">@ManyToMany</a>
+<p>The <a href="doc|amber-table.xtp#@ManyToMany">@ManyToMany</a>
 annotation marks a collection-valued field as a many-to-many relation.
 The <code>targetEntity</code> value specifies the target of the
 relation.

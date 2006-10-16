@@ -55,13 +55,13 @@ a
 <s1 name="jsp" title="JSP Actions">
 
 <s2 name="directive" title="&lt;%@ name att1=&quot;v1&quot;... %&gt;" index="directive" type="defun">
-<p>Sets a JSP <a href="jsp|directives">directive</a></p>
+<p>Sets a JSP <a href="jsp-directives.xtp">directive</a></p>
 
 </s2>
 
 <s2 name="expr" title="&lt;%= expression %&gt;" index="expression" type="defun">
 <p>Prints the value of <var>expression</var> evaluated the page's
-<a href="jsp|directives#language">language</a>.</p>
+<a href="jsp-directives.xtp#language">language</a>.</p>
 
 <p>The expression action is equivalent to the following:</p>
 <def>
@@ -88,10 +88,10 @@ Name: George Washington
 
 <s2 name="scriptlet" title="&lt;% scriptlet %&gt;" index="scriptlets" type="defun">
 <p>Executes the statements in <var>scriptlet</var> using the page's
-<a href="jsp|directives#language">language</a>.</p>
+<a href="jsp-directives.xtp#language">language</a>.</p>
 
 <p>The <var>scriptlet</var> is any statement list in the language,
-e.g. Java.  The scriptlet can use any of the <a href="jsp|variables">implicit variables</a>, such as the request
+e.g. Java.  The scriptlet can use any of the <a href="jsp-variables.xtp">implicit variables</a>, such as the request
 object and the out writer.</p>
 
 <p>Scriptlets have the following XML equivalent</p>
@@ -163,7 +163,7 @@ of that page will be included in the current page.</p>
 <p><var>path</var> is relative to the current page.  Its root is the root
 of the application.</p>
 
-<p>For compile-time includes, use <a href="jsp|directives.xtp#include">&lt;%@ include file='path'%&gt;</a></p>
+<p>For compile-time includes, use <a href="jsp-directives.xtp#include">&lt;%@ include file='path'%&gt;</a></p>
 
 <example title="inc.jsp">
 &lt;%= 2 + 2 %&gt;
@@ -186,7 +186,7 @@ Footer
 <p>Forwards the request to another page, i.e. an internal redirect.</p>
 
 <p>If the page has already written some output, jsp:request will clear
-the output <a href="jsp|directives.xtp#buffer">buffer</a>.</p>
+the output <a href="jsp-directives.xtp#buffer">buffer</a>.</p>
 
 <p><var>path</var> is relative to the current page.</p>
 

@@ -520,7 +520,7 @@ Jar files are recognized wihen they have a filename extension of
 
 <p>&lt;log> configures JDK 1.4 java.util.logger handler.</p>
 
-<p>The <a href="config|log">log configuration</a> describes
+<p>The <a href="config-log.xtp">log configuration</a> describes
 log in detail.</p>
 
 </defun>
@@ -530,7 +530,7 @@ log in detail.</p>
 
 <p>&lt;log> configures JDK 1.4 java.util.logger Logger level.</p>
 
-<p>The <a href="config|log">log configuration</a> describes
+<p>The <a href="config-log.xtp">log configuration</a> describes
 log in detail.</p>
 
 <example title="compilation logging">
@@ -556,10 +556,22 @@ log in detail.</p>
 The &lt;reference&gt; tag configures the ObjectFactory and stores it in JNDI.</p>
 
 <deftable-childtags>
-<tr><td>jndi-name</td><td>JNDI name for the reference.  Since Resin 3.0</td><td>required
-</td></tr><tr><td>factory</td><td>Class name of the ObjectFactory. Resin 3.0</td><td>required
-</td></tr><tr><td>init</td><td>Bean-style initialization for the factory</td><td>none
-</td></tr></deftable-childtags>
+<tr>
+  <td>jndi-name</td>
+  <td>JNDI name for the reference.  Since Resin 3.0</td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>factory</td>
+  <td>Class name of the ObjectFactory. Resin 3.0</td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>init</td>
+  <td>Bean-style initialization for the factory</td>
+  <td>none</td>
+</tr>
+</deftable-childtags>
 
 <example>
 &lt;reference&gt;
@@ -577,7 +589,10 @@ The &lt;reference&gt; tag configures the ObjectFactory and stores it in JNDI.</p
 <p>&lt;resin:if> executes part of the configuration file conditionally.</p>
 
 <deftable-childtags>
-<tr><td>test</td><td>the test to perform</td></tr>
+<tr>
+  <td>test</td>
+  <td>the test to perform</td>
+</tr>
 </deftable-childtags>
 </defun>
 
@@ -602,9 +617,15 @@ The &lt;reference&gt; tag configures the ObjectFactory and stores it in JNDI.</p
 </def>
 
 <deftable-childtags>
-<tr><td>resin:when</td><td>
-</td></tr><tr><td>resin:choose</td><td>
-</td></tr></deftable-childtags>
+<tr>
+  <td>resin:when</td>
+  <td></td>
+</tr>
+<tr>
+  <td>resin:choose</td>
+  <td></td>
+</tr>
+</deftable-childtags>
 
 </defun>
 

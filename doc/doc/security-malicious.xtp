@@ -118,7 +118,7 @@ requests.
 </p>
 
 <p>
-In configurations that use a <a href="doc|config|balance">cluster</a>, the
+In configurations that use a <a href="resin-load-balance.xtp">cluster</a>, the
 ThrottleFilter should be used on the front-end server that is running the
 <code>LoadBalanceFilter</code>. If using IIS or Apache then throttling features
 of those servers should be used.

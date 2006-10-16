@@ -528,7 +528,7 @@ is true.</p>
 <s2 name="fun" title="fun(arg1, ..., argn)" type="defun">
 <p>Function calls.</p>
 
-<p>The function library is in the <a href="xpath|fun">XPath function</a> section.</p>
+<p>The function library is in the <a href="xpath-fun.xtp">XPath function</a> section.</p>
 </s2>
 
 <s2 name="not" title="not(expr)" type="defun">

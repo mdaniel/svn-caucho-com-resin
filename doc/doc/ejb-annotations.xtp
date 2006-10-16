@@ -17,12 +17,12 @@
 other than javax.ejb as J2EE 1.5 drafts progress.</note>
 </s1>
 
-<summary objsummary="localtoc"/>
+<localtoc/>
 
 <s1 title="See Also">
 
 <ul>
-<li>See <a href="tutorial/session/index.xtp">session tutorial
+<li>See <a href="../tutorial/ejb/session/index.xtp">session tutorial
 </a> for an example.
 </li></ul>
 
@@ -47,9 +47,9 @@ EJB 2.1, there is no pooling, local stub, or home interface for an entity.</p>
 </td></tr></deftable-childtags>
 
 <ul>
-<li>See the <a href="tutorial/cmp-basic/index.xtp">basic tutorial</a>
+<li>See the <a href="tutorial|amber-basic/index.xtp">basic tutorial</a>
 for PROPERTY-based entity beans.
-</li><li>See the <a href="tutorial/cmp-basic-field/index.xtp">basic field
+</li><li>See the <a href="tutorial|amber-basic-field/index.xtp">basic field
 tutorial</a> for FIELD-based entity beans.
 </li></ul>
 

@@ -5,7 +5,7 @@
     <title>Burlap Notes</title>
     <date>December 31, 2001</date>
     <description>
-      <p>As described in the <a href="protocols|burlap-draft-spec">Burlap draft spec</a>, 
+      <p>As described in the <a href="burlap-1.0-spec.xtp">Burlap 1.0 spec</a>, 
         we created Burlap to implement Enterprise Java Beans (EJB) using
         an XML-based protocol with reasonable performance.  Although many
         RPC protocols already exist, including several based on XML, none met

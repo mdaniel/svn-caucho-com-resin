@@ -129,7 +129,7 @@ restarting.</p>
 
 <p>In the following example, the web-tier load-balances all traffic
 to a cluster of backend application servers.  Because the web-tier
-has a <a href="performance|caching.xtp">proxy cache</a>, static pages
+has a <a href="proxy-cache.xtp">proxy cache</a>, static pages
 and cached pages will be served directory from the web-tier.</p>
 
 <p>&lt;load-balance> requires Resin Professional.</p>

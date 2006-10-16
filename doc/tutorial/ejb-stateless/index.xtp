@@ -15,8 +15,11 @@ method as a read-only transaction boundary.</p>
 <p>See also:</p>
 <ul>
   <li>The <a href="../resin-xa/index.xtp">Resin Transaction</a> example for a more detailed description of method transaction enhancement.
-  </li><li>The <a href="../cmp-xa/index.xtp">CMP Transaction</a> example for a traditional session bean pattern.
-  </li><li>The <a href="ejb3|bean-ann.xtp#@TransactionAttribute">@TransactionAttribute</a> reference.
+  </li>
+<!--
+  <li>The <a href="../amber-xa/index.xtp">CMP Transaction</a> example for a traditional session bean pattern.  </li>
+-->
+<li>The <a href="doc|ejb-annotations.xtp#@TransactionAttribute">@TransactionAttribute</a> reference.
 </li></ul>
 
 </description>
@@ -64,7 +67,7 @@ deployed within Resin.</p>
 It declares all the business methods.  Our
 only business method is the <code>hello</code> method.</p>
 
-<example title="Hello.java" file="WEB-INF/classes/example/Hello.java">
+<example title="Hello.java">
 package example;
 
 public interface Hello {
@@ -79,7 +82,7 @@ public interface Hello {
 <p>The second class for EJBs is the bean implementation class.  It implements
 the functionality provided by the remote interface.</p> 
 
-<example title="HelloBean.java" file="WEB-INF/classes/example/HelloBean.java">
+<example title="HelloBean.java">
 package example;
 
 import static javax.ejb.TransactionAttributeType.SUPPORTS;
@@ -182,7 +185,7 @@ Typically it configures the EJB root using jndi-name and configures
 a number of EJB classes using &lt;bean&gt;.  The &lt;bean&gt; entry will
 look at the bean's annotations to enhance the class.</p>
 
-<example title="ejb-server in web.xml" file="WEB-INF/web.xml">
+<example title="ejb-server in web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
 
   ...
@@ -206,7 +209,7 @@ look at the bean's annotations to enhance the class.</p>
 
 <s1 title="Client">
 
-<example file="WEB-INF/classes/example/HelloServlet.java">
+<example title="HelloServlet.java">
 public class HelloServlet extends GenericServlet {
   private Hello _hello;
 
@@ -238,7 +241,7 @@ web.xml:
 
 <example title="alternative configuration">
 &lt;servlet servlet-name="hello" servlet-class="example.HelloServlet"&gt;
-  &lt;init hello="\${jndi:lookup('java:comp/env/ejb/HelloBean')}"/&gt;
+  &lt;init hello="\${jndi('java:comp/env/ejb/HelloBean')}"/&gt;
 &lt;/servlet&gt;
 </example>
 

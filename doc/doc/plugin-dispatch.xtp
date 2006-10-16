@@ -39,15 +39,15 @@ is based on the configuration in the ResinConfigServer's resin.conf.</p>
 
 <s1 title="servlet-mapping selects URLs">
 
-<p>The <a href="doc|config|webapp#servlet-mapping">servlet-mapping</a>
+<p>The <a href="webapp-tags.xtp#servlet-mapping">servlet-mapping</a>
 tag selects the URLs to send to Resin.
-<a href="doc|config|resin#host">&lt;host&gt;</a> and 
-<a href="doc|config|webapp">&lt;web-app&gt;</a> group the
+<a href="host-tags.xtp#host">&lt;host&gt;</a> and 
+<a href="webapp-tags.xtp">&lt;web-app&gt;</a> group the
 servlet-mapping tags.</p>
 
 <s2 title="url-pattern">
 
-<p>servlet-mapping's <a href="doc|config|webapp#url-pattern">url-pattern</a>
+<p>servlet-mapping's <a href="webapp-tags.xtp#url-pattern">url-pattern</a>
 selects the URLs to pass to Resin.  servlet-mapping and url-pattern
 are part of the Servlet 2.3 standard, so there are many references explaining
 how it works.</p>
@@ -109,7 +109,7 @@ served by the web server.</p>
 
 <s2 title="&lt;web-app&gt;">
 
-<p><a href="doc|config|webapp">web-apps</a> collect servlets and
+<p><a href="webapp-tags.xtp">web-apps</a> collect servlets and
 JSP files into separate applications.  All the servlet-mappings in a
 web-app apply only to the URL suffix.</p>
 
@@ -139,8 +139,8 @@ in the resin.conf.</note>
 
 <s2 title="&lt;host&gt;">
 
-<p><a href="doc|config|resin#host">host</a> blocks configure
-<a href="doc|config|virtual-host">virtual hosts</a>.  There's a bit of
+<p><a href="cluster-tags.xtp#host">host</a> blocks configure
+<a href="virtual-host.xtp">virtual hosts</a>.  There's a bit of
 extra work for virtual hosts that we'll ignore here.  (Basically, you
 need to add Apache <var>ServerName</var> directives so Resin knows the name
 of the virtual host.)</p>

@@ -534,7 +534,7 @@ convert the configuration.</p>
 
 <p>Configures JDK 1.4 java.util.logger logging.</p>
 
-<p>The <a href="config|log">log configuration</a> describes
+<p>The <a href="config-log.xtp">log configuration</a> describes
 log in detail.</p>
 
 </s2>
@@ -544,7 +544,7 @@ log in detail.</p>
 
 <p>Configures the destination for <code>System.err</code>.</p>
 
-<p>The <a href="doc|config|log">log configuration</a> describes
+<p>The <a href="config-log.xtp">log configuration</a> describes
 stderr-log in detail.</p>
 
 </s2>
@@ -554,7 +554,7 @@ stderr-log in detail.</p>
 
 <p>Configures the destination for <code>System.out</code>.</p>
 
-<p>The <a href="doc|config|log">log configuration</a> describes
+<p>The <a href="config-log.xtp">log configuration</a> describes
 stderr-log in detail.</p>
 </s2>
 </s1>

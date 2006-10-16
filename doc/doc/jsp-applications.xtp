@@ -152,7 +152,7 @@ other beans and functions retrieve the beans.</p>
 through the site.  Any e-commerce site needs this capability to keep
 track of the user's purchases.</p>
 
-<p>JSP sessions start when the page accesses the <a href="jsp|variables#session">session</a> variable.</p>
+<p>JSP sessions start when the page accesses the <a href="jsp-variables.xtp#session">session</a> variable.</p>
 
 <p>Sessions end when the session times out, when the session is
 invalidated, or when the application ends.</p>

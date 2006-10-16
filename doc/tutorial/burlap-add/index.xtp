@@ -40,15 +40,23 @@ the full Burlap protocol.</p>
 
 <s1 title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="WEB-INF/classes/example/MathService.java"/>
-    </td><td>Interface for the math service.
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/BurlapMathService.java"/>
-    </td><td>The main service implementation.
-</td></tr><tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    </td><td>Configures the environment
-</td></tr><tr><td><viewfile-link file="demo.jsp"/>
-    </td><td>Client JSP
-</td></tr></deftable>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/MathService.java"/></td>
+  <td>Interface for the math service.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/BurlapMathService.java"/></td>
+  <td>The main service implementation.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/web.xml"/></td>
+  <td>Configures the environment</td>
+</tr>
+<tr>
+  <td><viewfile-link file="demo.jsp"/></td>
+  <td>Client JSP</td>
+</tr>
+</deftable>
 </s1>
 
 <s1 title="The Burlap Protocol">
@@ -152,7 +160,7 @@ public interface MathService {
 &lt;%
 BurlapProxyFactory factory = new BurlapProxyFactory();
 
-// http://localhost:8080/resin-doc/protocols/tutorial/burlap-add/burlap/math
+// http://localhost:8080/resin-doc/tutorial/burlap-add/burlap/math
 
 String url = ("http://" +
               request.getServerName() + ":" + request.getServerPort() +

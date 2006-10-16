@@ -16,7 +16,7 @@ I set the content-type to application/xsl, then added a PI
 <code>&lt;?xml-stylesheet type="text/xsl" href="transform.xsl"?&gt;</code>
 </description>
 
-<p>You must now explicitly enable this functionality with the use of <a href="|filter|library#XsltFilter">XsltFilter</a>.
+<p>You must now explicitly enable this functionality with the use of <a href="filter-library.xtp#XsltFilter">XsltFilter</a>.
 
 </p></s1>
 
@@ -29,7 +29,7 @@ I set the content-type to application/xsl, then added a PI
 </li><li><code>default.xsl</code>
 </li></ol>
 
-<p>More information is provided in the documentation for <a href="|filter|library#XsltFilter">XsltFilter</a>.</p>
+<p>More information is provided in the documentation for <a href="filter-library.xtp#XsltFilter">XsltFilter</a>.</p>
 
 </s1>
 

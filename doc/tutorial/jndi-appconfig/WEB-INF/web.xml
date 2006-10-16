@@ -1,4 +1,4 @@
-<web-app>
+<web-app xmlns="http://caucho.com/ns/resin">
   <!-- make an example.AppConfig object, available with the
      - JNDI name "java:comp/env/config/Application"
     -->

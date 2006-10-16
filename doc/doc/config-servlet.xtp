@@ -12,7 +12,7 @@
         Normally, users put servlets in <var>WEB-INF/classes</var> so Resin will
           automatically reload them when they change.</p>
       
-      <p><a href="jsp|index">JSP</a> pages are implemented as
+      <p><a href="jsp.xtp">JSP</a> pages are implemented as
         Servlets, and tend to be more efficient for pages with lots of text.</p>
     </description>
   </header>
@@ -142,7 +142,7 @@ connections.  The <var>try ... finally</var> block is very important.  Without
 the close in the finally block, Resin's database pool can loose connections.</p>
 
 <p>Configuring the database is described in the
-<a href="doc|db|index">database configuration</a> page.</p>
+<a href="database.xtp">database configuration</a> page.</p>
 
 <example title="TestDatabase.java">
 package test;

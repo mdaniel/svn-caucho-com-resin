@@ -32,7 +32,7 @@
 
 <s2 name="session" title="session" index="session, variable" type="defun">
 <p>The current session.  <code>session</code> is available only
-when the <a href="jsp|directives#session">session</a> directive
+when the <a href="jsp-directives.xtp#session">session</a> directive
 is true.</p>
 </s2>
 

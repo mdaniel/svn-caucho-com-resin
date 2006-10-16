@@ -21,14 +21,14 @@ is "setter based dependency injection."</p>
 <p>The upgraded, buzzword-compliant documentation includes:</p>
 
 <ul>
-<li><a href="resource|tutorial/injection/index.xtp">Dependency Injection for the MovieFinder example</a>
-</li><li><a href="db|tutorial/jdbc-basic/index.xtp">Dependency Injection for a servlet's DataSource</a>
-</li><li><a href="webapp|tutorial/periodictask/index.xtp">Dependency Injection for a PeriodicTask resource</a>
-</li><li><a href="jmx|tutorial/listener/index.xtp">Dependency Injection for a JMX client emitter/listener</a>
-</li><li><a href="protocols|hessian.xtp">Dependency Injection for Hessian Service configuration</a>
+<li><a href="tutorial|ioc-injection/index.xtp">Dependency Injection for the MovieFinder example</a>
+</li><li><a href="tutorial|db-jdbc/index.xtp">Dependency Injection for a servlet's DataSource</a>
+</li><li><a href="tutorial|ioc-periodictask/index.xtp">Dependency Injection for a PeriodicTask resource</a>
+</li><li><a href="tutorial|jmx-listener/index.xtp">Dependency Injection for a JMX client emitter/listener</a>
+</li><li><a href="tutorial|hessian/index.xtp">Dependency Injection for Hessian Service configuration</a>
 </li></ul>
 
-<p>The main documentation on Resin's <a href="config|init.xtp">bean-style
+<p>The main documentation on Resin's <a href="ioc.xtp">bean-style
 init</a> has not yet been upgraded to the new buzzwords, but
 provides more information on the configuration patterns.</p>
 
@@ -207,7 +207,7 @@ and through JMX.</p>
 <s1 title="log rotation and compression">
 
 <p>If the archive-name for log rotation ends in ".gz", then Resin will
-use GZip to compress the log when it's rotated.  See the <a href="config|log.xtp#Compression">log configuration</a>.
+use GZip to compress the log when it's rotated.  See the <a href="doc|config-log.xtp#Compression">log configuration</a>.
 </p>
 
 <example>
@@ -237,7 +237,7 @@ deadlocks are detected.</p>
 
 <s1 title="Portlet Support">
 
-<p>Resin's <a href="portlet|index">Portlet support</a> provides
+<p>Resin's <a href="../doc/portlet.xtp">Portlet support</a> provides
 a generic library package for application to use the portal/portlet
 design pattern.</p>
 
@@ -282,7 +282,7 @@ public class MyBean {
 <s1 title="PHP">
 
 <p>PHP support has been fixed in 3.0.8.  The full configuration
-doc is in  <a href="quercus.xtp">thirdparty/php</a>.</p>
+doc is in  <a href="doc|quercus.xtp">quercus</a>.</p>
 
 <example title="web.xml">
 &lt;web-xml&gt;
@@ -301,7 +301,7 @@ doc is in  <a href="quercus.xtp">thirdparty/php</a>.</p>
 
 <s1 title="Hessian">
 
-<p><a href="../protocols/hessian-1.0-spec.xtp">Hessian 1.0.1</a> has
+<p><a href="../doc/hessian-1.0-spec.xtp">Hessian 1.0.1</a> has
 been released. Hessian 1.0.1 clarifies the non-normative
 naming conventions for the meta-info protocol and the object names.</p>
 
@@ -327,7 +327,7 @@ Bean bean = (Bean) ic.lookup("hessian://localhost:8080/hessian/bean");
 
 <s1 title="jndi-link">
 
-<p><a href="config|env.xtp#jndi-link">jndi-link</a> no longer
+<p><a href="doc|env.xtp#jndi-link">jndi-link</a> no longer
 requires the &lt;factory&gt;.  Now it can be used
 as a symbolic link to another JNDI name.</p>
 
@@ -364,7 +364,7 @@ that can use more threads than they should.
 <s1 title="64-bit JNI">
 
 <p>The JNI has been updated to support 64-bit compilation on Solaris.
-The <a href="install|resin-web-server.xtp">configuration</a> looks like:</p>
+The <a href="../doc/resin-web-server.xtp">configuration</a> looks like:</p>
 
 <example>
 unix&gt; ./configure --enable-64bit

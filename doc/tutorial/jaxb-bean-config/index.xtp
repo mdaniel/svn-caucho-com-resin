@@ -41,7 +41,7 @@ like the resin-web.xml.</p>
 
 <s1 title="Configuration">
 
-<p>The <a href="config|env-tags.xtp#%3Cbean%3E">&lt;bean&gt;</a> configuration
+<p>The <a href="doc|env-tags.xtp#%3Cbean%3E">&lt;bean&gt;</a> configuration
 sets the movies and theater name.</p>
 
 <example title="WEB-INF/resin-web.xml">

@@ -18,7 +18,7 @@ integrate with JNDI, JMS, JMX, and provide extra debugging.</p>
 <defun title="jndi_lookup">
 
 <p>Retrives an object from JNDI.  jndi_lookup is useful in a
-<a href="soa|index.xtp">SOA (Service Oriented Architecture)</a>
+<a href="soa.xtp">SOA (Service Oriented Architecture)</a>
 system to locate a Java service.
 </p>
 

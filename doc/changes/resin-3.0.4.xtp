@@ -75,7 +75,7 @@ we'll only be supporting Amber's native API.</p>
 
 <p>Amber currently uses <a href="http://www.hibernate.org">Hibernate's</a> configuration files
 and its API model resembles Hibernate, but uses JDBC more directly.
-Amber's <a href="amber|lifecycle.xtp">lifecycle</a> is patterned after
+Amber's <a href="doc|amber-lifecycle.xtp">lifecycle</a> is patterned after
 JDO, using bytecode enhancement to make the JDO state changes possible.</p>
 
 <p>Amber's JDBC use appears in its queries.  Here's an example:</p>

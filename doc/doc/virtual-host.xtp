@@ -207,8 +207,8 @@ $SERVER_ROOT/hosts/www.gryffindor.com/classes/example/CustomAuthenticator.java
 </example>
 
 <p>More information is available in the configuration documentation
-for &lt;<a href="config|host.xtp#host-deploy">host-deploy</a>&gt;
-and &lt;<a href="config|host.xtp#host-default">host-default</a>&gt;.</p>
+for &lt;<a href="host-tags.xtp#host-deploy">host-deploy</a>&gt;
+and &lt;<a href="host-tags.xtp#host-default">host-default</a>&gt;.</p>
 
 </s1>
 
@@ -219,7 +219,7 @@ virtual host.  The isolation of web-apps may not be
 sufficient; each host needs a separate JVM.  In this configuration,
 each JVM needs its own srun-port and possibly its own srun-host.</p>
 
-<p>The setup is similar to <a href="doc|config|balance">load-balancing</a>.  A
+<p>The setup is similar to <a href="resin-load-balance.xtp">load-balancing</a>.  A
 front-end web server receives all requests, and is configured to dispath to back-end Resin
 JVM's that correspond to the host name.</p>
 

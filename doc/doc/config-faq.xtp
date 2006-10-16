@@ -32,7 +32,7 @@ application
 changes, or by adding a <code>.war</code> or subdirectory to a
 <code>webapps/</code> directory
 
-</li><li>new <a href="doc|config|virtual-host">virtual hosts</a> are added either
+</li><li>new <a href="virtual-host.xtp">virtual hosts</a> are added either
 with <code>resin.conf</code> file changes, or by adding a <code>.jar</code> or
 subdirectory in a <code>hosts</code> directory.
 </li></ul>

@@ -37,7 +37,8 @@ services to clients from other languages.</p>
 underlying protocol, even if you intend to deploy with another protocol,
 like RMI/IIOP, you can develop using Resin's Hessian.</p>
 
-<p>The <a href="../../hessian-1.0-spec.xtp">Hessian 1.0 spec</a> describes
+<p>The <a href="doc|hessian-1.0-spec.xtp">Hessian 1.0 spec</a>
+and  <a href="doc|hessian-2.0-spec.xtp">Hessian 2.0 spec</a> describe
 the full Hessian protocol.</p>
 </s1>
 

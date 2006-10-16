@@ -33,7 +33,7 @@ that people stress tested their applications before deploying on 3.0.x.</p>
 discrepancies should be reported as bugs.</p>
 
 <p>In particular, Resin 3.0.1 adds support for *.tag and *.tagx files,
-see <a href="doc|jsp|tutorial/tagfile-basic/index">.tag tutorial</a>.</p>
+see <a href="tutorial|jsp-tagfile-basic/index.xtp">.tag tutorial</a>.</p>
 
 <p>Resin 3.0.1 does not yet include the full support for the third
 draft of Servlet 2.4.  In particular, the ERROR dispatch configuration

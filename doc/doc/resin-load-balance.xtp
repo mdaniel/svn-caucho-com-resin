@@ -120,12 +120,12 @@ sessions</a> to make sure the users see the same session values.</p>
 
 <p>In most cases, the web-tier will dispatch
 everything to the app-tier servers.  Because of Resin's
-<a href="../performance/caching.xtp">proxy cache</a>, the web-tier servers
+<a href="proxy-cache.xtp">proxy cache</a>, the web-tier servers
 will serve static pages as fast as if they were local pages.</p>
 
 <p>In some cases, though, it may be important to send different
 requests to different backend clusters.  The
-&lt;<a href="rewrite-tags.xtp%3Cload-balance%3E">load-balance</a>&gt; tag can
+&lt;<a href="rewrite-tags.xtp#load-balance">load-balance</a>&gt; tag can
 choose clusters based on URL patterns.</p>
 
 <p>The following &lt;<a href="rewrite-tags.xtp">rewrite-dispatch</a>&gt;
@@ -252,9 +252,9 @@ remove the &lt;save-only-on-shutdown/&gt; flag.)</p>
 <s1 title="See Also">
 
 <ul>
-<li><a href="config|sessions.xtp">Distributed Sessions</a>
-</li><li><a href="config|tcp-sessions.xtp">Distributed Sessions with Cluster Store</a>
-</li><li><a href="config|resin.xtp#persistent-store">&lt;persistent-store&gt;</a>
+<li><a href="sessions.xtp">Distributed Sessions</a>
+</li><li><a href="tcp-sessions.xtp">Distributed Sessions with Cluster Store</a>
+</li><li><a href="cluster-tags.xtp#persistent-store">&lt;persistent-store&gt;</a>
 </li></ul>
 
 </s1>

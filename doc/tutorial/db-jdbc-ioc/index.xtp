@@ -74,7 +74,7 @@ configuration from the application code.</p>
 
 <p>The &lt;driver&gt; tag configures the database driver.  The database
 vendor will make the driver classes available and describe the
-configuration variables.  The <a href="../../thirdparty.xtp">thirdparty database page</a> describes
+configuration variables.  The <a href="doc|db-thirdparty.xtp">thirdparty database page</a> describes
 several important database configurations.</p>
 
 <p>The &lt;type&gt; tag is the most important driver configuration item.

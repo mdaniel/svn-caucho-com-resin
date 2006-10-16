@@ -24,7 +24,7 @@ The service can receive request from multiple protocols, including
 REST, SOAP, Hessian, and direct local-JVM calls.  The service
 will normally be configured with IoC.</p>
 
-<p>See the <a href="soa|tutorial/esb-hello-world">hello world tutorial</a>
+<p>See the <a href="tutorial|esb-hello-world/index.xtp">hello world tutorial</a>
 for an example.</p>
 
 <deftable-childtags>
@@ -35,7 +35,7 @@ for an example.</p>
 </tr>
 <tr>
   <td>hessian</td>
-  <td>Adds a <a href="hessian|index.xtp">Hessian</a> port for
+  <td>Adds a <a href="hessian.xtp">Hessian</a> port for
 the web service.</td>
   <td></td>
 </tr>

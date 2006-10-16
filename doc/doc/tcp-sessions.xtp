@@ -27,10 +27,10 @@ uses sticky-session caching to avoid unnecessary network traffic.</p>
 <p>The cluster configuration must tell each host the servers in the
 cluster
 and it must enable the persistent in the session configuration
-with <a href="config|webapp.xtp#session-config">use-persistent-store</a>.
+with <a href="session-tags.xtp#session-config">use-persistent-store</a>.
 Because session configuration is specific to a virtual host and a
 web-application, each web-app needs <var>use-persistent-store</var> enabled
-individually.  The <a href="webapp.xtp#web-app-default">web-app-default</a>
+individually.  The <a href="webapp-tags.xtp#web-app-default">web-app-default</a>
 tag can be used to enable distributed sessions across an entire site.
 </p>
 

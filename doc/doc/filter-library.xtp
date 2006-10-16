@@ -167,7 +167,7 @@ See <a href="javadoc|com.caucho.servlets.TransactionFilter|"/>.
 servlet output and jsp results to be cached for a short time.</p>
 
 <p>This is useful for indicating an Expires time to the browser, and it is even
-more useful when used in conjunction with <a href="doc|performance|caching">Resin's HTTP proxy cache</a>.  If Resin's HTTP proxy cache is in use, even a short Expires time (like 2s) can result in performance gains.</p>
+more useful when used in conjunction with <a href="proxy-cache.xtp">Resin's HTTP proxy cache</a>.  If Resin's HTTP proxy cache is in use, even a short Expires time (like 2s) can result in performance gains.</p>
 
 <deftable-parameters>
 <tr><td>cache-time</td><td>The amount of time before the servlet output will be requested again. In seconds (2s), minutes (2m), hours (2h), or days (2D).</td><td>2s

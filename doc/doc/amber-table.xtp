@@ -16,9 +16,9 @@
 
 <ul>
 <li>See <a href="http://wiki.caucho.com/Amber">http://wiki.caucho.com/Amber</a> the Amber wiki.
-</li><li>See <a href="tutorial/cmp-basic/index.xtp">Basic tutorial</a> for
+</li><li>See <a href="../tutorial/amber-basic/index.xtp">Basic tutorial</a> for
 a complete single-table example.
-</li><li>See <a href="tutorial/cmp-many2one/index.xtp">Many-to-one tutorial</a> for
+</li><li>See <a href="../tutorial/amber-many2one/index.xtp">Many-to-one tutorial</a> for
 basic relations.
 </li></ul>
 
@@ -30,13 +30,16 @@ basic relations.
 
 <p>Annotates the class as an entity bean.</p>
 
-<p>See the <a href="tutorial/cmp-basic/index.xtp">basic property tutorial</a>
-and the <a href="tutorial/cmp-basic-field/index.xtp">basic field tutorial</a>
+<p>See the <a href="../tutorial/amber-basic/index.xtp">basic property tutorial</a>
+and the <a href="../tutorial/amber-basic-field/index.xtp">basic field tutorial</a>
 for an introduction.</p>
 
 <deftable-childtags>
-<tr><td>name</td><td>The name of the bean</td><td>The class name (unqualified)
-</td></tr></deftable-childtags>
+<tr>
+  <td>name</td>
+  <td>The name of the bean</td><td>The class name (unqualified)</td>
+</tr>
+</deftable-childtags>
 
 <p>The fields or properties will be annotated by @Id, @Basic, etc.
 Amber will detect either field or property annotation by the
@@ -63,12 +66,30 @@ The secondary table will contain the fields with a secondaryTable
 in the @Column.</p>
 
 <deftable-childtags>
-<tr><td>name</td><td>The name of the table</td><td>The unqualified class name.
-</td></tr><tr><td>catalog</td><td>the table's catalog</td><td>none
-</td></tr><tr><td>schema</td><td>the table's schema</td><td>none
-</td></tr><tr><td>pkJoinColumns</td><td>join column to the primary table</td><td>joins the primary key
-</td></tr><tr><td>uniqueConstraint</td><td>unique constraints during generation</td><td>none
-</td></tr></deftable-childtags>
+<tr>
+  <td>name</td>
+  <td>The name of the table</td><td>The unqualified class name.</td>
+</tr>
+<tr>
+  <td>catalog</td>
+  <td>the table's catalog</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>schema</td>
+  <td>the table's schema</td><td>none</td>
+</tr>
+<tr>
+  <td>pkJoinColumns</td>
+  <td>join column to the primary table</td>
+  <td>joins the primary key</td>
+</tr>
+<tr>
+  <td>uniqueConstraint</td>
+  <td>unique constraints during generation</td>
+  <td>none</td>
+</tr>
+</deftable-childtags>
 
 <def>
 package javax.persistence;
@@ -354,7 +375,7 @@ public @interface JoinTable {
 <p>See also <a href="#@Column">@Column</a> for
 corresponding definition for <a href="#@Basic">@Basic</a> columns.</p>
 
-<p>See the <a href="tutorial/cmp-many2one/index.xtp">Many-to-One
+<p>See the <a href="../tutorial/amber-many2one/index.xtp">Many-to-One
 tutorial</a> for a full example.</p>
 
 <deftable-childtags>
@@ -425,7 +446,7 @@ public @interface JoinColumns {
 
 <p>The column names are the key columns of the source and target tables.</p>
 
-<p>See the <a href="tutorial/cmp-many2many/index.xtp">many-to-many tutorial</a> for an example.</p>
+<p>See the <a href="../tutorial/amber-many2many/index.xtp">many-to-many tutorial</a> for an example.</p>
 
 <deftable-childtags>
 <tr><td>targetEntity</td><td>The class of the target entity</td><td>the property's type
@@ -468,7 +489,7 @@ public @interface ManyToMany {
 
 <p>The default column name is the column name of the target key.</p>
 
-<p>See the <a href="tutorial/cmp-many2one/index.xtp">many-to-one tutorial</a> for an example.</p>
+<p>See the <a href="../tutorial/amber-many2one/index.xtp">many-to-one tutorial</a> for an example.</p>
 
 <deftable-childtags>
 <tr><td>targetEntity</td><td>The class of the target entity</td><td>the property's type

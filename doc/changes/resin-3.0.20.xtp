@@ -139,7 +139,7 @@ time the load balancer will skip a dead backend server before retrying.</p>
 
 <s2 title="Hessian 2.0 Draft">
 
-<p>An early draft of <a href="../protocols/hessian-2.0-spec.xtp">Hessian
+<p>An early draft of <a href="../doc/hessian-2.0-spec.xtp">Hessian
 2.0</a> protocol is available.</p>
 
 <p>Hessian 2.0 provides a number of compact bytecodes to reduce the
@@ -179,7 +179,7 @@ for PHP</a>, with the same distributed capabilities as servlets already use.</p>
 <li><a href="http://www.php.net/manual/en/ref.pgsql.php">Postgres</a></li>
 <li><a href="http://www.php.net/manual/en/ref.oci8.php">Oracle OCI8</a></li>
 <li><a href="http://www.php.net/manual/en/ref.image.php">Image Library</a></li>
-<li><a href="../quercus/tutorial/json/index.xtp">JSON</a></li>
+<li><a href="../tutorial/quercus-json/index.xtp">JSON</a></li>
 </ul>
 </s2>
 
