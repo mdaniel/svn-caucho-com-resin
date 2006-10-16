@@ -31,7 +31,7 @@ package com.caucho.management.server;
 
 import com.caucho.jmx.Description;
 
-public interface DeployGeneratorMXBean
+public interface DeployMXBean
   extends ManagedObjectMXBean
 {
   @Description("The configured redeploy-mode, one of `default', `automatic', `lazy', or `manual'")
@@ -54,4 +54,7 @@ public interface DeployGeneratorMXBean
 
   @Description("Update")
   public void update();
+
+  @Description("Returns an exception or null if there is no exception")
+  public Throwable getConfigException();
 }

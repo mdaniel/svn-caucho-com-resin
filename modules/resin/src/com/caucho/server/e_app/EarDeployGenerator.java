@@ -139,10 +139,8 @@ public class EarDeployGenerator
       archivePath = null;
     }
     else {
-      rootDirectory = getExpandDirectory().lookup(getExpandPrefix() +
-						  name +
-						  getExpandSuffix());
-      
+      rootDirectory = getExpandDirectory().lookup(getExpandName(name));
+
       if (! archivePath.canRead() && ! rootDirectory.canRead())
 	return null;
     }

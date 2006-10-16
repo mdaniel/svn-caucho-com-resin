@@ -69,10 +69,7 @@
    -->
 
   <servlet servlet-name='deploy'
-           servlet-class='com.caucho.j2ee.deployserver.DeployServlet'>
-    <init>
-      <deploy-path>${server.root}/jsr88-deploy</deploy-path>
-     </init>
+           servlet-class='com.caucho.j2ee.deployserver.DeploymentServlet'>
   </servlet>
 
   <servlet-mapping url-pattern='/deploy' servlet-name='deploy'/>

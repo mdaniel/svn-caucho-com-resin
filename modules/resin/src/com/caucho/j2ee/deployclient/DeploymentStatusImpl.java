@@ -38,37 +38,59 @@ import java.io.Serializable;
  * Represents the status of a deployed module.
  */
 public class DeploymentStatusImpl implements DeploymentStatus, Serializable {
-  private String _message;
-  private boolean _isFailed;
+  public static final int RUNNING = 0;
+  public static final int COMPLETED = 1;
+  public static final int FAILED = 2;
+  public static final int RELEASED = 3;
 
-  private void log(String message)
-  {
-    System.out.println(getClass().getSimpleName() + ": " + message);
-  }
+  private String _message;
+  private int _state = RUNNING;
 
   /**
    * Returns the StateType value.
    */
   public StateType getState()
   {
-    return StateType.RUNNING;
+    switch (_state) {
+      case RUNNING:
+        return StateType.RUNNING;
+      case COMPLETED:
+        return StateType.COMPLETED;
+      case FAILED:
+        return StateType.FAILED;
+      case RELEASED:
+        return StateType.RELEASED;
+      default:
+        return StateType.FAILED;
+    }
   }
-  
+
+  public void setState(StateType stateType)
+  {
+    if (stateType == StateType.RUNNING)
+      _state = RUNNING;
+    else if (stateType == StateType.COMPLETED)
+      _state = COMPLETED;
+    else if (stateType == StateType.FAILED)
+      _state = FAILED;
+    else if (stateType == StateType.RELEASED)
+      _state = RELEASED;
+    else throw new AssertionError(stateType);
+  }
+
   /**
    * Returns the CommandType value.
    */
   public CommandType getCommand()
   {
-    log("COMMAND");
     return CommandType.DISTRIBUTE;
   }
-  
+
   /**
    * Returns the ActionType value.
    */
   public ActionType getAction()
   {
-    log("ACTION");
     return ActionType.EXECUTE;
   }
   
@@ -93,7 +115,7 @@ public class DeploymentStatusImpl implements DeploymentStatus, Serializable {
    */
   public boolean isCompleted()
   {
-    return true;
+    return _state == COMPLETED;
   }
   
   /**
@@ -101,23 +123,20 @@ public class DeploymentStatusImpl implements DeploymentStatus, Serializable {
    */
   public boolean isFailed()
   {
-    return _isFailed;
+    return _state == FAILED;
   }
 
-  /**
-   * Set true if the deployment failed.
-   */
-  public void setFailed(boolean isFailed)
-  {
-    _isFailed = isFailed;
-  }
-  
   /**
    * Returns true if the deployment is running.
    */
   public boolean isRunning()
   {
-    return ! _isFailed;
+    return _state == RUNNING;
+  }
+
+  public String toString()
+  {
+    return "DeploymentStatusImpl[" + getState() + "," + getMessage() + "]";
   }
 }
 

@@ -33,6 +33,6 @@ import com.caucho.jmx.Description;
 
 @Description("A generator that detects new jar archive files or new subdirectories and deploys virtual hosts")
 public interface HostDeployMXBean
-  extends ExpandDeployGeneratorMXBean
+  extends ArchiveDeployMXBean
 {
 }

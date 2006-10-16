@@ -30,11 +30,11 @@
 package com.caucho.server.deploy;
 
 import com.caucho.management.server.AbstractManagedObject;
-import com.caucho.management.server.DeployGeneratorMXBean;
+import com.caucho.management.server.DeployMXBean;
 
 abstract public class DeployGeneratorAdmin<C extends DeployGenerator>
   extends AbstractManagedObject
-  implements DeployGeneratorMXBean
+  implements DeployMXBean
 {
   private final C _deployGenerator;
 
@@ -83,5 +83,10 @@ abstract public class DeployGeneratorAdmin<C extends DeployGenerator>
   public void update()
   {
     _deployGenerator.update();
+  }
+
+  public Throwable getConfigException()
+  {
+    return _deployGenerator.getConfigException();
   }
 }

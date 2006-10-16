@@ -81,6 +81,11 @@ public class ResourceDeployAdmin
     return getResourceDeploy().getArchiveDirectory().getNativePath();
   }
 
+  public String getArchivePath(String name)
+  {
+    return getResourceDeploy().getArchivePath(name).getNativePath();
+  }
+
   public String getExtension()
   {
     return getResourceDeploy().getExtension();
@@ -88,7 +93,7 @@ public class ResourceDeployAdmin
 
   public String getExpandDirectory()
   {
-    return getResourceDeploy().getExpandPath().getNativePath();
+    return getResourceDeploy().getExpandDirectory().getNativePath();
   }
 
   public String getExpandPrefix()
@@ -99,6 +104,13 @@ public class ResourceDeployAdmin
   public String getExpandSuffix()
   {
     return getResourceDeploy().getExpandSuffix();
+  }
+
+  public String getExpandPath(String name)
+  {
+    Path path = getResourceDeploy().getExpandPath(name);
+
+    return path == null ? null : path.getNativePath();
   }
 
   public String getRedeployMode()
@@ -126,6 +138,11 @@ public class ResourceDeployAdmin
     getResourceDeploy().start();
   }
 
+  public Throwable getConfigException()
+  {
+    return getResourceDeploy().getConfigException();
+  }
+
   public void stop()
   {
     getResourceDeploy().stop();
@@ -136,4 +153,28 @@ public class ResourceDeployAdmin
     getResourceDeploy().update();
   }
 
+  public String[] getNames()
+  {
+    return getResourceDeploy().getNames();
+  }
+
+  public void start(String name)
+  {
+    getResourceDeploy().start(name);
+  }
+
+  public Throwable getConfigException(String moduleID)
+  {
+    return getResourceDeploy().getConfigException(moduleID);
+  }
+
+  public void stop(String name)
+  {
+    getResourceDeploy().stop(name);
+  }
+
+  public void undeploy(String name)
+  {
+    getResourceDeploy().undeploy(name);
+  }
 }

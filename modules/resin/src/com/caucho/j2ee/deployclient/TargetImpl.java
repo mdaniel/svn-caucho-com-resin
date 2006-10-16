@@ -33,7 +33,9 @@ import javax.enterprise.deploy.spi.Target;
 /**
  * Target for a deployment.
  */
-public class TargetImpl implements Target, java.io.Serializable {
+public class TargetImpl
+  implements Target, Comparable<TargetImpl>, java.io.Serializable
+{
   private String _name;
   private String _description;
 
@@ -62,6 +64,23 @@ public class TargetImpl implements Target, java.io.Serializable {
   }
 
   /**
+   * Sorts according to name.
+   */
+  public int compareTo(TargetImpl o)
+  {
+    if (o == null)
+      return 1;
+
+    if (_name == null)
+      return o._name == null ? 0 : 1;
+
+    if (o._name == null)
+      return 1;
+
+    return _name.compareTo(o._name);
+  }
+
+  /**
    * Returns the target description.
    */
   public String getDescription()
@@ -76,5 +95,6 @@ public class TargetImpl implements Target, java.io.Serializable {
   {
     return "TargetImpl[" + _name + "]";
   }
+
 }
 

@@ -33,7 +33,7 @@ import com.caucho.jmx.Description;
 
 @Description("A generator that detects new ear archive files and deploys enterprise applications")
 public interface EarDeployMXBean
-  extends ExpandDeployGeneratorMXBean
+  extends ArchiveDeployMXBean
 {
   @Description("The configured prefix to prepend to the context path of every deployed enterprise application")
   public String getURLPrefix();

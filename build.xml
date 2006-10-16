@@ -845,11 +845,13 @@
     <delete dir="${build}"/>
     <delete dir="${dist}"/>
     <delete>
-      <fileset dir=".">
-        <include name="**/*.class"/>
-      </fileset>
       <fileset dir="modules">
         <include name="*/classes"/>
+      </fileset>
+    </delete>
+    <delete>
+      <fileset dir=".">
+        <include name="**/*.class"/>
       </fileset>
     </delete>
   </target>

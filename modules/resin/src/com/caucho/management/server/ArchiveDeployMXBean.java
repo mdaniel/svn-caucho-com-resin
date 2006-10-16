@@ -32,8 +32,8 @@ package com.caucho.management.server;
 import com.caucho.jmx.Description;
 import com.caucho.jmx.Units;
 
-public interface ExpandDeployGeneratorMXBean
-  extends DeployGeneratorMXBean
+public interface ArchiveDeployMXBean
+  extends DeployMXBean
 {
   @Description("The configured millisecond interval between checks for new archives")
   @Units("milliseconds")
@@ -53,4 +53,25 @@ public interface ExpandDeployGeneratorMXBean
 
   @Description("The configured suffix to use for the subdirectory created in the expand directory")
   public String getExpandSuffix();
+
+  @Description("Returns the location for deploying an archive with the specified name")
+  public String getArchivePath(@Description("The archive name, without a file extension") String name);
+
+  @Description("Returns the location of an expanded archive, or null if no archive with the passed name is deployed")
+  public String getExpandPath(@Description("The archive name, without a file extension") String name);
+
+  @Description("Start the resource associated with the archive")
+  public void start(@Description("The archive name, without a file extension") String name);
+
+  @Description("Stop the resource associated with the archive")
+  public void stop(@Description("The archive name, without a file extension") String name);
+
+  @Description("Stop the resource associated with the archive and delete the archive")
+  public void undeploy(@Description("The archive name, without a file extension") String name);
+
+  @Description("Returns a list of the current set of archive names")
+  public String[] getNames();
+
+  @Description("Returns an exception for the named archive or null if there is no exception")
+  public Throwable getConfigException(String name);
 }

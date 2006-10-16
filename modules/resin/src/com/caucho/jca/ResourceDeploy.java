@@ -95,6 +95,23 @@ public class ResourceDeploy {
     return getPath();
   }
 
+  public Path getArchivePath(String name)
+  {
+    return getArchiveDirectory().lookup(name + getExtension());
+  }
+
+  /**
+   * Returns the combination of prefix, name, and suffix used for expanded
+   * archives.
+   *
+   * @return
+   */
+  protected String getExpandName(String name)
+  {
+    return getExpandPrefix() + name + getExpandSuffix();
+  }
+
+
   /**
    * Sets the war expand dir to check for new applications.
    */
@@ -104,14 +121,41 @@ public class ResourceDeploy {
   }
 
   /**
-   * Gets the war expand directory.
+   * @deprecated use {@link @getExpandDirectory}
    */
   public Path getExpandPath()
+  {
+    return getExpandDirectory();
+  }
+
+  /**
+   * Gets the rar expand directory.
+   */
+  public Path getExpandDirectory()
   {
     if (_rarExpandDir != null)
       return _rarExpandDir;
     else
       return _rarDir;
+  }
+
+  /**
+   * Returns the location of an expanded archive, or null if no archive with
+   * the passed name is deployed.
+   *
+   * @param name a name, without an extension
+   */
+  public Path getExpandPath(String name)
+  {
+    if (!isDeployedKey(name))
+      return null;
+
+    return getExpandDirectory().lookup(getExpandName(name));
+  }
+
+  private boolean isDeployedKey(String name)
+  {
+    return _rarNames.contains(name);
   }
 
   /**
@@ -299,12 +343,45 @@ public class ResourceDeploy {
     // XXX:
   }
 
+  public Throwable getConfigException()
+  {
+    // XXX:
+    return null;
+  }
+
   public void stop()
   {
     // XXX:
   }
 
   public void update()
+  {
+    // XXX:
+  }
+
+  public String[] getNames()
+  {
+    // XXX:
+    return new String[0];
+  }
+
+  public void stop(String name)
+  {
+    // XXX:
+  }
+
+  public void start(String name)
+  {
+    // XXX:
+  }
+
+  public Throwable getConfigException(String moduleID)
+  {
+    // XXX:
+    return null;
+  }
+
+  public void undeploy(String name)
   {
     // XXX:
   }

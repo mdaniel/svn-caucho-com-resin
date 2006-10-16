@@ -29,25 +29,8 @@
 
 package com.caucho.server.e_app;
 
-import java.io.*;
-import java.util.*;
-
-import javax.servlet.*;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CauchoSystem;
-
-import com.caucho.vfs.Path;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.make.Dependency;
-
-import com.caucho.loader.EnvironmentClassLoader;
-
-import com.caucho.server.deploy.DeployGenerator;
 import com.caucho.server.deploy.DeployContainer;
-
+import com.caucho.server.deploy.DeployGenerator;
 import com.caucho.server.webapp.WebAppContainer;
 import com.caucho.server.webapp.WebAppController;
 
@@ -59,7 +42,7 @@ public class EarSingleDeployGenerator extends DeployGenerator<EarDeployControlle
 
   private WebAppContainer _parentContainer;
   
-  private EarDeployController _entry;
+  private EarDeployController _controller;
 
   public EarSingleDeployGenerator(DeployContainer<EarDeployController> deployContainer,
 			 WebAppContainer parentContainer,
@@ -69,7 +52,7 @@ public class EarSingleDeployGenerator extends DeployGenerator<EarDeployControlle
     
     _parentContainer = parentContainer;
 
-    _entry = new EarDeployController("", parentContainer, config);
+    _controller = new EarDeployController("", parentContainer, config);
   }
 
   /**
@@ -85,7 +68,7 @@ public class EarSingleDeployGenerator extends DeployGenerator<EarDeployControlle
    */
   public WebAppController findWebAppEntry(String name)
   {
-    WebAppController entry = _entry.findWebAppController(name);
+    WebAppController entry = _controller.findWebAppController(name);
 
     return entry;
   }
@@ -97,5 +80,15 @@ public class EarSingleDeployGenerator extends DeployGenerator<EarDeployControlle
     throws Exception
   {
     return null;
+  }
+
+  public Throwable getConfigException()
+  {
+    Throwable configException =  super.getConfigException();
+
+    if (configException == null && _controller != null)
+      configException = _controller.getConfigException();
+
+    return configException;
   }
 }

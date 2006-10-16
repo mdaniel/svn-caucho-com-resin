@@ -29,27 +29,21 @@
 
 package com.caucho.server.deploy;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.IOException;
-
-import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
-import com.caucho.util.WeakAlarm;
-import com.caucho.util.AlarmListener;
-
-import com.caucho.log.Log;
-
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
-
-import com.caucho.loader.DynamicClassLoader;
-
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.lifecycle.LifecycleListener;
-
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.log.Log;
 import com.caucho.make.Dependency;
+import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
+import com.caucho.util.L10N;
+import com.caucho.util.WeakAlarm;
+
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * DeployController controls the lifecycle of the DeployInstance.
@@ -515,6 +509,12 @@ abstract public class DeployController<I extends DeployInstance>
   public final void start()
   {
     _strategy.start(this);
+  }
+
+
+  public Throwable getConfigException()
+  {
+    return null;
   }
 
   /**

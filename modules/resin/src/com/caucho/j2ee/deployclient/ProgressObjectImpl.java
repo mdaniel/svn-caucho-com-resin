@@ -27,35 +27,34 @@
  */
 package com.caucho.j2ee.deployclient;
 
+import javax.enterprise.deploy.shared.StateType;
 import javax.enterprise.deploy.spi.TargetModuleID;
-
-import javax.enterprise.deploy.spi.status.ProgressObject;
-import javax.enterprise.deploy.spi.status.ClientConfiguration;
-import javax.enterprise.deploy.spi.status.ProgressListener;
-import javax.enterprise.deploy.spi.status.DeploymentStatus;
-
 import javax.enterprise.deploy.spi.exceptions.OperationUnsupportedException;
+import javax.enterprise.deploy.spi.status.ClientConfiguration;
+import javax.enterprise.deploy.spi.status.DeploymentStatus;
+import javax.enterprise.deploy.spi.status.ProgressListener;
+import javax.enterprise.deploy.spi.status.ProgressObject;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Status of the progress.
  */
 public class ProgressObjectImpl implements ProgressObject, java.io.Serializable {
+  private static final Logger log = Logger.getLogger(ProgressObjectImpl.class.getName());
+
   private TargetModuleID []_targetModuleIDs;
-  private DeploymentStatus _status;
+  private final DeploymentStatusImpl _status = new DeploymentStatusImpl();
 
   ProgressObjectImpl()
   {
-  }
-
-  private void log(String message)
-  {
-    System.out.println(getClass().getSimpleName() + ": " + message);
   }
 
   public ProgressObjectImpl(TargetModuleID []targetModuleIDs)
   {
     _targetModuleIDs = targetModuleIDs;
   }
-  
+
   /**
    * Returns the status.
    */
@@ -66,15 +65,7 @@ public class ProgressObjectImpl implements ProgressObject, java.io.Serializable 
     else
       return new DeploymentStatusImpl();
   }
-  
-  /**
-   * Sets the status.
-   */
-  public void setDeploymentStatus(DeploymentStatus status)
-  {
-    _status = status;
-  }
-  
+
   /**
    * Returns the target ids.
    */
@@ -82,16 +73,15 @@ public class ProgressObjectImpl implements ProgressObject, java.io.Serializable 
   {
     return _targetModuleIDs;
   }
-  
+
   /**
    * Returns the client configuration.
    */
   public ClientConfiguration getClientConfiguration(TargetModuleID id)
   {
-    log("GET-CLIENT-CONFIG:");
     throw new UnsupportedOperationException();
   }
-  
+
   /**
    * Returns true if cancel is supported.
    */
@@ -99,7 +89,7 @@ public class ProgressObjectImpl implements ProgressObject, java.io.Serializable 
   {
     return false;
   }
-  
+
   /**
    * Cancels the operation.
    */
@@ -108,7 +98,7 @@ public class ProgressObjectImpl implements ProgressObject, java.io.Serializable 
   {
     throw new UnsupportedOperationException();
   }
-  
+
   /**
    * Returns true if stop is supported.
    */
@@ -116,7 +106,7 @@ public class ProgressObjectImpl implements ProgressObject, java.io.Serializable 
   {
     return false;
   }
-  
+
   /**
    * Stops the operation.
    */
@@ -125,21 +115,45 @@ public class ProgressObjectImpl implements ProgressObject, java.io.Serializable 
   {
     throw new UnsupportedOperationException();
   }
-  
+
   /**
    * Adds a listener.
    */
   public void addProgressListener(ProgressListener listener)
   {
-    log("ADD-LISTENER:");
   }
-  
+
   /**
    * Removes a listener.
    */
   public void removeProgressListener(ProgressListener listener)
   {
-    log("REMOVE-LISTENER:");
+  }
+
+  /**
+   * Change to the failed state.
+   */
+  public void failed(String message)
+  {
+    if (log.isLoggable(Level.FINEST))
+      log.log(Level.FINEST, "failed " +  message);
+
+    _status.setState(StateType.FAILED);
+    _status.setMessage(message);
+  }
+
+  /**
+   * Change to the running state.
+   */
+  public void completed(String message)
+  {
+    _status.setState(StateType.COMPLETED);
+    _status.setMessage(message);
+  }
+
+  public String toString()
+  {
+    return "ProgressObjectImpl[" + _status + "]";
   }
 }
 

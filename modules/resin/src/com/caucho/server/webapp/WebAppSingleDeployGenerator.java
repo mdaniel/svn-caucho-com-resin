@@ -289,7 +289,17 @@ public class WebAppSingleDeployGenerator
       log.log(Level.WARNING, e.toString(), e);
     }
   }
-  
+
+  public Throwable getConfigException()
+  {
+    Throwable configException =   super.getConfigException();
+
+    if (configException == null && _controller != null)
+      configException = _controller.getConfigException();
+
+    return configException;
+  }
+
   /**
    * Destroy the deployment.
    */

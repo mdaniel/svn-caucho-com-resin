@@ -29,28 +29,25 @@
 
 package com.caucho.server.deploy;
 
-import com.caucho.config.*;
-
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.Config;
+import com.caucho.config.ConfigELContext;
+import com.caucho.config.ConfigException;
 import com.caucho.config.types.PathBuilder;
-
-import com.caucho.el.*;
-
+import com.caucho.el.EL;
 import com.caucho.jmx.Jmx;
-
-import com.caucho.loader.*;
-
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentListener;
 import com.caucho.log.Log;
-
 import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
-import com.caucho.vfs.*;
-
-import javax.el.*;
-
-import javax.management.JMException;
-import javax.management.MalformedObjectNameException;
+import javax.el.ELContext;
+import javax.el.ELException;
+import javax.el.ELResolver;
 import javax.management.ObjectName;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -179,15 +176,19 @@ abstract public class
    */
   public Throwable getConfigException()
   {
-    if (_configException != null)
-      return _configException;
+    Throwable configException = super.getConfigException();
 
-    DeployInstance deploy = getDeployInstance();
+    if (configException == null)
+      configException = _configException;
 
-    if (deploy != null)
-      return deploy.getConfigException();
-    else
-      return null;
+    if (configException == null) {
+      DeployInstance deploy = getDeployInstance();
+
+      if (deploy != null)
+        configException = deploy.getConfigException();
+    }
+
+    return configException;
   }
 
   /**

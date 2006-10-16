@@ -186,6 +186,7 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
   /**
    * Returns the log.
    */
+  @Override
   protected Logger getLog()
   {
     return log;
@@ -194,6 +195,7 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
   /**
    * Returns the deployed keys.
    */
+  @Override
   protected void fillDeployedKeys(Set<String> keys)
   {
     super.fillDeployedKeys(keys);
@@ -207,6 +209,7 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
   /**
    * Start the deploy.
    */
+  @Override
   protected void startImpl()
   {
     super.startImpl();
@@ -215,8 +218,9 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
   }
 
   /**
-   * Returns the current array of webApp entries.
+   * Returns the new controller.
    */
+  @Override
   protected WebAppController createController(String name)
   {
     if (! name.startsWith(_urlPrefix))
@@ -238,9 +242,7 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
         segmentName = "/ROOT";
     }
 
-    String expandName = (getExpandPrefix() +
-                         segmentName.substring(1) +
-                         getExpandSuffix());
+    String expandName = getExpandName(segmentName.substring(1));
 
     String archiveName = segmentName + ".war";
     Path jarPath = getArchiveDirectory().lookup("." + archiveName);
@@ -285,6 +287,7 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
   /**
    * Returns the current array of webApp entries.
    */
+  @Override
   protected WebAppController mergeController(WebAppController controller,
                                              String key)
   {
@@ -335,6 +338,7 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
   /**
    * Converts the name.
    */
+  @Override
   protected String pathNameToEntryName(String name)
   {
     String entryName = super.pathNameToEntryName(name);
@@ -364,6 +368,19 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
       return _urlPrefix;
     else
       return _urlPrefix + "/" + entryName;
+  }
+
+  @Override
+  protected String entryNameToArchiveName(String entryName)
+  {
+    String prefix = _urlPrefix + "/";
+
+    if (entryName.equals(_urlPrefix))
+      return "ROOT" + getExtension();
+    else if (entryName.startsWith(prefix))
+      return entryName.substring(prefix.length()) + getExtension();
+    else
+      return null;
   }
 
   /**

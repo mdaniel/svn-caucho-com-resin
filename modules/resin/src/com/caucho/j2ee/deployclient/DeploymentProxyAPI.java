@@ -29,37 +29,45 @@
 
 package com.caucho.j2ee.deployclient;
 
-import java.io.InputStream;
-
 import javax.enterprise.deploy.spi.Target;
 import javax.enterprise.deploy.spi.TargetModuleID;
-
 import javax.enterprise.deploy.spi.status.ProgressObject;
+import java.io.InputStream;
 
 /**
  * Interface for the deployment manager.
  */
-public interface DeploymentManagerAPI {
+public interface DeploymentProxyAPI {
   /**
    * Returns the targets for the server.
    */
   public TargetImpl []getTargets();
-  
+
+  /**
+   * Gets the current modules.
+   */
+  public TargetModuleID []getAvailableModules(String moduleType);
+
   /**
    * Distributes the archive.
    */
   public ProgressObject distribute(Target []targets,
 				   InputStream deploymentPlan,
 				   InputStream archiveIs);
-  
   /**
-   * Gets the current modules.
+   * Starts the archive.
    */
-  public TargetModuleID []getAvailableModules(String moduleType);
-  
+  public ProgressObject start(TargetModuleID []ids);
+
+  /**
+   * Stops the archive.
+   */
+  public ProgressObject stop(TargetModuleID []ids);
+
   /**
    * Undeploys the archive.
    */
   public ProgressObject undeploy(TargetModuleID []ids);
+
 }
 

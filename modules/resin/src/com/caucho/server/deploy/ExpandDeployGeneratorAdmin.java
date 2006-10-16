@@ -29,12 +29,12 @@
 
 package com.caucho.server.deploy;
 
-import com.caucho.management.server.ExpandDeployGeneratorMXBean;
+import com.caucho.management.server.ArchiveDeployMXBean;
 import com.caucho.vfs.Path;
 
 abstract public class ExpandDeployGeneratorAdmin<C extends ExpandDeployGenerator>
   extends DeployGeneratorAdmin<C>
-  implements ExpandDeployGeneratorMXBean
+  implements ArchiveDeployMXBean
 {
   public ExpandDeployGeneratorAdmin(C expandDeployGenerator)
   {
@@ -63,6 +63,11 @@ abstract public class ExpandDeployGeneratorAdmin<C extends ExpandDeployGenerator
     return getDeployGenerator().getArchiveDirectory().getNativePath();
   }
 
+  public String getArchivePath(String name)
+  {
+    return getDeployGenerator().getArchivePath(name).getNativePath();
+  }
+
   public String getExpandDirectory()
   {
     return getDeployGenerator().getExpandDirectory().getNativePath();
@@ -73,6 +78,13 @@ abstract public class ExpandDeployGeneratorAdmin<C extends ExpandDeployGenerator
     return getDeployGenerator().getExpandPrefix();
   }
 
+  public String getExpandPath(String name)
+  {
+    Path path =  getDeployGenerator().getExpandPath(name);
+
+    return path == null ? null : path.getNativePath();
+  }
+
   public String getExpandSuffix()
   {
     return getDeployGenerator().getExpandSuffix();
@@ -81,5 +93,30 @@ abstract public class ExpandDeployGeneratorAdmin<C extends ExpandDeployGenerator
   public String getExtension()
   {
     return getDeployGenerator().getExtension();
+  }
+
+  public String[] getNames()
+  {
+    return getDeployGenerator().getNames();
+  }
+
+  public void start(String name)
+  {
+    getDeployGenerator().start(name);
+  }
+
+  public void stop(String name)
+  {
+    getDeployGenerator().stop(name);
+  }
+
+  public void undeploy(String name)
+  {
+    getDeployGenerator().undeploy(name);
+  }
+
+  public Throwable getConfigException(String name)
+  {
+    return getDeployGenerator().getConfigException(name);
   }
 }

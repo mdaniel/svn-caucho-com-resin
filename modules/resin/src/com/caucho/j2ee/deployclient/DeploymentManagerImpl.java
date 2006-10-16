@@ -29,6 +29,7 @@
 package com.caucho.j2ee.deployclient;
 
 import com.caucho.hessian.client.HessianProxyFactory;
+import com.caucho.util.L10N;
 
 import javax.enterprise.deploy.model.DeployableObject;
 import javax.enterprise.deploy.shared.DConfigBeanVersionType;
@@ -46,14 +47,19 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Manager for the deployments.
  */
 public class DeploymentManagerImpl implements DeploymentManager {
+  private static final L10N L = new L10N(DeploymentManagerImpl.class);
+  private static final Logger log = Logger.getLogger(DeploymentManagerImpl.class.getName());
+
   private String _uri;
 
-  private DeploymentManagerAPI _proxy;
+  private DeploymentProxyAPI _proxy;
 
   DeploymentManagerImpl(String uri)
   {
@@ -64,11 +70,6 @@ public class DeploymentManagerImpl implements DeploymentManager {
     _uri = uri.substring(p);
   }
 
-  private void log(String message)
-  {
-    System.out.println(getClass().getSimpleName() + ": " + message);
-  }
-
   /**
    * Connect to the manager.
    */
@@ -76,28 +77,25 @@ public class DeploymentManagerImpl implements DeploymentManager {
     throws DeploymentManagerCreationException
   {
     try {
-      log("CONNECT:");
-      
       HessianProxyFactory factory = new HessianProxyFactory();
 
       factory.setUser(user);
       factory.setPassword(password);
-      factory.setDebug(true);
       factory.setReadTimeout(120000);
 
       _proxy =
-	(DeploymentManagerAPI) factory.create(DeploymentManagerAPI.class, _uri);
+        (DeploymentProxyAPI) factory.create(DeploymentProxyAPI.class, _uri);
     } catch (Exception e) {
-      e.printStackTrace();
-      
+      log.log(Level.FINE, e.toString(), e);
+
       DeploymentManagerCreationException exn;
-      
+
       exn = new DeploymentManagerCreationException(e.getMessage());
       exn.initCause(e);
       throw exn;
     }
   }
-  
+
   /**
    * Returns the targets supported by the manager.
    */
@@ -115,49 +113,45 @@ public class DeploymentManagerImpl implements DeploymentManager {
       Target []targets = _proxy.getTargets();
 
       if (targets == null)
-	return new Target[0];
-      
+        return new Target[0];
+
       return targets;
     } catch (Throwable e) {
-      log("EXCEPTION-TARGETS:");
-      e.printStackTrace();
-      
+      log.log(Level.INFO, e.toString(), e);
+
       return new Target[0];
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
   }
-  
+
   /**
    * Returns the current running modules.
    */
   public TargetModuleID []getRunningModules(ModuleType moduleType,
-					    Target []targetList)
+                                            Target []targetList)
     throws TargetException, IllegalStateException
   {
-    log("GET-RUN-GET-RUN-MMODULES");
     return new TargetModuleID[0];
   }
-  
+
   /**
    * Returns the current non-running modules.
    */
   public TargetModuleID []getNonRunningModules(ModuleType moduleType,
-					       Target []targetList)
+                                               Target []targetList)
     throws TargetException, IllegalStateException
   {
-    log("GET-NON-RUN-MODULES");
     return new TargetModuleID[0];
   }
-  
+
   /**
    * Returns all available modules.
    */
   public TargetModuleID []getAvailableModules(ModuleType moduleType,
-					      Target []targetList)
+                                              Target []targetList)
     throws TargetException, IllegalStateException
   {
-    log("GET-MODULES:");
     if (_proxy == null)
       throw new IllegalStateException("DeploymentManager is disconnected");
 
@@ -165,115 +159,106 @@ public class DeploymentManagerImpl implements DeploymentManager {
     ClassLoader oldLoader = thread.getContextClassLoader();
     try {
       thread.setContextClassLoader(getClass().getClassLoader());
-      
+
       return _proxy.getAvailableModules(moduleType.toString());
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
   }
-  
+
   /**
    * Returns a configuration for the deployable object.
    */
   public DeploymentConfiguration createConfiguration(DeployableObject dObj)
     throws InvalidModuleException
   {
-    log("CREATE-CONF");
     throw new UnsupportedOperationException();
   }
-  
+
   /**
    * Deploys the object.
    */
   public ProgressObject distribute(Target []targetList,
-				   File archive,
-				   File deploymentPlan)
+                                   File archive,
+                                   File deploymentPlan)
     throws IllegalStateException
   {
     InputStream archiveIn = null;
     InputStream ddIn = null;
 
-    log("PRE-DIST:");
-
     try {
       archiveIn = new FileInputStream(archive);
       ddIn = new FileInputStream(deploymentPlan);
 
-      ProgressObject progress = distribute(targetList, archiveIn, ddIn);
+      return distribute(targetList, archiveIn, ddIn);
 
-      log("POST-DIST:" + progress + " " + progress.getDeploymentStatus().isFailed() + " " + progress.getDeploymentStatus().getMessage());
-    
-      return progress;
     } catch (Exception e) {
       throw new RuntimeException(e);
     } finally {
       try {
-	archiveIn.close();
+        if (archiveIn != null)
+          archiveIn.close();
       } catch (Throwable e) {
+        log.log(Level.FINE, e.toString(), e);
       }
-      
+
       try {
-	ddIn.close();
+        if (ddIn != null)
+          ddIn.close();
       } catch (Throwable e) {
-      }      
+        log.log(Level.FINE, e.toString(), e);
+      }
     }
   }
-  
+
   /**
    * Deploys the object.
    */
   public ProgressObject distribute(Target []targetList,
-				   InputStream archive,
-				   InputStream deploymentPlan)
+                                   InputStream archive,
+                                   InputStream deploymentPlan)
     throws IllegalStateException
   {
-    log("DISTRIBUTE:");
-    if (_proxy == null)
-      throw new IllegalStateException("DeploymentManager is disconnected");
+    if (_proxy == null) {
+      String message = L.l("DeploymentManager is disconnected");
 
-    if (deploymentPlan == null)
-      return null;
+      log.log(Level.FINE, message);
+
+      ProgressObjectImpl progress = new ProgressObjectImpl(new TargetModuleID[] {});
+      progress.failed(message);
+
+      return progress;
+    }
+
+    if (deploymentPlan == null) {
+      String message = L.l("{0} is required", "deployment plan");
+
+      log.log(Level.FINE, message);
+
+      ProgressObjectImpl progress = new ProgressObjectImpl(new TargetModuleID[] {});
+      progress.failed(message);
+
+      return progress;
+    }
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
     try {
       thread.setContextClassLoader(getClass().getClassLoader());
 
-      
-      ProgressObject progress
-	= _proxy.distribute(targetList, deploymentPlan, archive);
 
-      return progress;
+      return _proxy.distribute(targetList, deploymentPlan, archive);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
   }
-  
+
   /**
    * Starts the modules.
    */
   public ProgressObject start(TargetModuleID []moduleIDList)
     throws IllegalStateException
   {
-    return new ProgressObjectImpl(moduleIDList);
-  }
-  
-  /**
-   * Stops the modules.
-   */
-  public ProgressObject stop(TargetModuleID []moduleIDList)
-    throws IllegalStateException
-  {
-    return new ProgressObjectImpl(moduleIDList);
-  }
-  
-  /**
-   * Undeploys the modules.
-   */
-  public ProgressObject undeploy(TargetModuleID []moduleIDList)
-    throws IllegalStateException
-  {
-    log("UNDEPLOY:");
     if (_proxy == null)
       throw new IllegalStateException("DeploymentManager is disconnected");
 
@@ -281,7 +266,47 @@ public class DeploymentManagerImpl implements DeploymentManager {
     ClassLoader oldLoader = thread.getContextClassLoader();
     try {
       thread.setContextClassLoader(getClass().getClassLoader());
-      
+
+      return _proxy.start(moduleIDList);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
+  }
+
+  /**
+   * Stops the modules.
+   */
+  public ProgressObject stop(TargetModuleID []moduleIDList)
+    throws IllegalStateException
+  {
+    if (_proxy == null)
+      throw new IllegalStateException("DeploymentManager is disconnected");
+
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+    try {
+      thread.setContextClassLoader(getClass().getClassLoader());
+
+      return _proxy.stop(moduleIDList);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
+  }
+
+  /**
+   * Undeploys the modules.
+   */
+  public ProgressObject undeploy(TargetModuleID []moduleIDList)
+    throws IllegalStateException
+  {
+    if (_proxy == null)
+      throw new IllegalStateException("DeploymentManager is disconnected");
+
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+    try {
+      thread.setContextClassLoader(getClass().getClassLoader());
+
       return _proxy.undeploy(moduleIDList);
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -295,24 +320,24 @@ public class DeploymentManagerImpl implements DeploymentManager {
   {
     return false;
   }
-  
+
   /**
    * Redeploys the object.
    */
   public ProgressObject redeploy(TargetModuleID []targetList,
-				 File archive,
-				 File deploymentPlan)
+                                 File archive,
+                                 File deploymentPlan)
     throws IllegalStateException
   {
     throw new UnsupportedOperationException();
   }
-  
+
   /**
    * Redeploys the object.
    */
   public ProgressObject redeploy(TargetModuleID []targetList,
-				 InputStream archive,
-				 InputStream deploymentPlan)
+                                 InputStream archive,
+                                 InputStream deploymentPlan)
     throws IllegalStateException
   {
     throw new UnsupportedOperationException();

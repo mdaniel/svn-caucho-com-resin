@@ -177,6 +177,16 @@ public class HostSingleDeployGenerator
       return controller;
   }
 
+  public Throwable getConfigException()
+  {
+    Throwable configException =  super.getConfigException();
+
+    if (configException == null && _controller != null)
+      configException = _controller.getConfigException();
+
+    return configException;
+  }
+
   public String toString()
   {
     if (_config == null)

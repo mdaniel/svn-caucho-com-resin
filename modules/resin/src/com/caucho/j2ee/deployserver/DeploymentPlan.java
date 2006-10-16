@@ -31,9 +31,13 @@ package com.caucho.j2ee.deployserver;
 
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
+import com.caucho.xml.XmlPrinter;
 
 import org.w3c.dom.Node;
 
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
 /**
@@ -41,27 +45,34 @@ import java.util.ArrayList;
  */
 public class DeploymentPlan {
   private static final L10N L = new L10N(DeploymentPlan.class);
-  
+
   private String _archiveType;
   private String _name;
+  private String _metaInf;
 
   private ArrayList<ExtFile> _extFileList = new ArrayList<ExtFile>();
-  
+
   /**
    * Sets the deployment type.
    */
   public void setArchiveType(String type)
     throws ConfigException
   {
-    if (type.equals("war")
-	|| type.equals("ear")
-	|| type.equals("rar"))
-      _archiveType = type;
+    if (type.equals("war")) {
+      _metaInf = "WEB-INF/";
+    }
+    else if (type.equals("ear")) {
+      _metaInf = "META-INF/";
+    }
+    else if (type.equals("rar")) {
+      _metaInf = "META-INF/";
+    }
     else
-      throw new ConfigException(L.l("'{0}' is an unknown archive type.",
-				    type));
+      throw new ConfigException(L.l("'{0}' is an unknown archive type.", type));
+
+    _archiveType = type;
   }
-  
+
   /**
    * Gets the deployment type.
    */
@@ -69,7 +80,7 @@ public class DeploymentPlan {
   {
     return _archiveType;
   }
-  
+
   /**
    * Sets the name
    */
@@ -77,7 +88,7 @@ public class DeploymentPlan {
   {
     _name = name;
   }
-  
+
   /**
    * Gets the name
    */
@@ -85,43 +96,32 @@ public class DeploymentPlan {
   {
     return _name;
   }
-  
-  /**
-   * Gets the deployment type.
-   */
-  public String getArchiveName()
+
+  @PostConstruct
+  public void init()
   {
-    return getName() + "." + getArchiveType();
-  }
-  
-  /**
-   * Gets the deployment type.
-   */
-  public String getExpandName()
-  {
-    if (_archiveType.equals("war"))
-      return getName();
-    else
-      return "_" + _archiveType + "_" + getName();
-  }
-  
-  /**
-   * Gets the deployment type.
-   */
-  public String getMetaPathName()
-  {
-    if (_archiveType.equals("war"))
-      return getExpandName() + "/WEB-INF";
-    else
-      return getExpandName() + "/META-INF";
+    if (_archiveType == null)
+      throw new ConfigException(L.l("`{0}' is required", "archive-type"));
+
+    if (_name == null)
+      throw new ConfigException(L.l("`{0}' is required", "name"));
   }
 
   /**
-   * Adds an extFile.
+   * Creates an ExtFile, subsequently added with {@link #addExtFile}
+   * @return
    */
-  public void addExtFile(ExtFile file)
+  public ExtFile createExtFile()
   {
-    _extFileList.add(file);
+    return new ExtFile();
+  }
+
+  /**
+   * Adds a ext file.
+   */
+  public void addExtFile(ExtFile extFile)
+  {
+    _extFileList.add(extFile);
   }
 
   /**
@@ -132,7 +132,7 @@ public class DeploymentPlan {
     return _extFileList;
   }
 
-  public static class ExtFile {
+  public class ExtFile {
     private String _name;
     private Node _data;
 
@@ -141,36 +141,43 @@ public class DeploymentPlan {
      */
     public void setName(String name)
     {
+      if (name.startsWith("/"))
+        throw new ConfigException(L.l("name `{0}' cannot start with /", name));
+
       _name = name;
     }
 
-    /**
-     * Gets the file name.
-     */
-    public String getName()
-    {
-      return _name;
-    }
-
-    /**
-     * Sets the data name.
-     */
     public void setData(Node data)
     {
       _data = data.getFirstChild();
     }
 
-    /**
-     * Gets the data name.
-     */
-    public Node getData()
+    @PostConstruct
+    public void init()
     {
-      return _data;
+      if (_name == null)
+        throw new ConfigException(L.l("`{0}' is required", "name"));
+
+      if (_data == null)
+        throw new ConfigException(L.l("`{0}' is required", "data"));
+    }
+
+    public String getPath()
+    {
+      return _metaInf + _name;
+    }
+
+    public void writeToStream(OutputStream os)
+      throws IOException
+    {
+      XmlPrinter xmlPrinter = new XmlPrinter(os);
+      xmlPrinter.setPretty(true);
+      xmlPrinter.printXml(_data);
     }
 
     public String toString()
     {
-      return "ExtFile[" + getName() + "]";
+      return "DeploymentPlan$ExtFile[" + getPath() + "]";
     }
   }
 }

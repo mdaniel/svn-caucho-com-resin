@@ -28,11 +28,9 @@
 
 package com.caucho.j2ee.deployclient;
 
-import javax.enterprise.deploy.spi.factories.DeploymentFactory;
-
 import javax.enterprise.deploy.spi.DeploymentManager;
-
 import javax.enterprise.deploy.spi.exceptions.DeploymentManagerCreationException;
+import javax.enterprise.deploy.spi.factories.DeploymentFactory;
 
 /**
  * Factory for the implementation classes.

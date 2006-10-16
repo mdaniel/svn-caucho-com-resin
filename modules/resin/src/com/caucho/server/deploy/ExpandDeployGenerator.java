@@ -153,6 +153,31 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   }
 
   /**
+   * Returns the location of an expanded archive, or null if no archive with
+   * the passed name is deployed.
+   *
+   * @param name a name, without an extension
+   */
+  public Path getExpandPath(String name)
+  {
+    if (!isDeployedKey(nameToEntryName(name)))
+      return null;
+
+    return getExpandDirectory().lookup(getExpandName(name));
+  }
+
+  /**
+   * Returns the combination of prefix, name, and suffix used for expanded
+   * archives.
+   *
+   * @return
+   */
+  protected String getExpandName(String name)
+  {
+    return getExpandPrefix() + name + getExpandSuffix();
+  }
+
+  /**
    * Sets the war expand dir to check for new archive files.
    */
   public void setArchiveDirectory(Path path)
@@ -169,6 +194,16 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
       return _archiveDirectory;
     else
       return _path;
+  }
+
+  /**
+   * Returns the location for deploying an archive with the specified name.
+   *
+   * @param name a name, without an extension
+   */
+  public Path getArchivePath(String name)
+  {
+    return getArchiveDirectory().lookup(name + getExtension());
   }
 
   /**
@@ -574,7 +609,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
 
   /**
    * Converts the expand-path name to the entry name, returns null if
-   * the path name is not a valid entry name.
+   * the path name is not valid.
    */
   protected String pathNameToEntryName(String name)
   {
@@ -603,7 +638,16 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
 
   /**
    * Converts the archive name to the entry name, returns null if
-   * the path name is not a valid entry name.
+   * the archive name is not valid.
+   */
+  protected String entryNameToArchiveName(String entryName)
+  {
+    return entryName + getExtension();
+  }
+
+  /**
+   * Converts the entry name to the archive name, returns null if
+   * the entry name is not valid.
    */
   protected String archiveNameToEntryName(String archiveName)
   {
@@ -619,6 +663,164 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
    * Creates a new entry.
    */
   abstract protected E createController(String name);
+
+  private String nameToEntryName(String name)
+  {
+    return archiveNameToEntryName(name + getExtension());
+  }
+
+  private String entryNameToName(String name)
+  {
+    String archiveName = entryNameToArchiveName(name);
+
+    if (archiveName == null)
+      return null;
+    else
+      return archiveName.substring(0, archiveName.length() - getExtension().length());
+  }
+
+  public String[] getNames()
+  {
+    String[] names = new String[_controllerNames.size()];
+
+    int i = 0;
+
+    for (String controllerName : _controllerNames) {
+      names[i++] = entryNameToName(controllerName);
+    }
+
+    return names;
+  }
+
+  private String getNamesAsString()
+  {
+    StringBuilder builder = new StringBuilder();
+
+    for (String name : getNames()) {
+      if (builder.length() > 0)
+        builder.append(", ");
+
+      builder.append(name);
+    }
+
+    builder.insert(0, '[');
+    builder.append(']');
+
+    return builder.toString();
+  }
+
+  /**
+   * Start the archive.
+   */
+  public boolean start(String name)
+  {
+    DeployController controller = getDeployContainer().findController(nameToEntryName(name));
+
+    if (controller == null) {
+      if (log.isLoggable(Level.FINE))
+        log.log(Level.FINE, L.l("unknown name `{0}'", name));
+
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, L.l("known names are {0}", getNamesAsString()));
+
+      return false;
+    }
+
+    controller.start();
+    return true;
+  }
+
+  /**
+   * Returns an exception for the named archive or null if there is no exception
+   */
+  public Throwable getConfigException(String name)
+  {
+    DeployController controller = getDeployContainer().findController(nameToEntryName(name));
+
+    if (controller == null) {
+      if (log.isLoggable(Level.FINE))
+        log.log(Level.FINE, L.l("unknown name `{0}'", name));
+
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, L.l("known names are {0}", getNamesAsString()));
+
+      return new ConfigException(L.l("unknown name `{0}'", name));
+    }
+
+    return controller.getConfigException();
+  }
+  /**
+   * Stop the archive.
+   */
+  public boolean stop(String name)
+  {
+    DeployController controller = getDeployContainer().findController(nameToEntryName(name));
+
+    if (controller == null) {
+      if (log.isLoggable(Level.FINE))
+        log.log(Level.FINE, L.l("unknown name `{0}'", name));
+
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, L.l("known names are {0}", getNamesAsString()));
+
+      return false;
+    }
+
+    controller.stop();
+    return true;
+  }
+
+  /**
+   * Undeploy the archive.
+   */
+  public boolean undeploy(String name)
+  {
+    DeployController controller = getDeployContainer().findController(nameToEntryName(name));
+
+    if (controller == null) {
+      if (log.isLoggable(Level.FINE))
+        log.log(Level.FINE, L.l("unknown name `{0}'", name));
+
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, L.l("known names are {0}", getNamesAsString()));
+
+      return false;
+    }
+
+    Path archivePath = getArchivePath(name);
+    Path expandPath = getExpandPath(name);
+
+    controller.stop();
+
+    try {
+      if (log.isLoggable(Level.FINEST))
+        log.log(Level.FINEST, L.l("deleting {0}", archivePath));
+
+      archivePath.removeAll();
+    }
+    catch (IOException ex) {
+      if (log.isLoggable(Level.FINE))
+        log.log(Level.FINE, ex.toString(), ex);
+    }
+
+    try {
+      if (expandPath != null) {
+        if (log.isLoggable(Level.FINEST))
+          log.log(Level.FINEST, L.l("deleting {0}", expandPath));
+
+        expandPath.removeAll();
+      }
+    }
+    catch (IOException ex) {
+      if (log.isLoggable(Level.FINE))
+        log.log(Level.FINE, ex.toString(), ex);
+    }
+
+    getDeployContainer().update(nameToEntryName(name));
+
+    return true;
+  }
+
 
   /**
    * Checks for updates.
@@ -678,4 +880,5 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
     
     return name + "[" + getExpandDirectory() + "]";
   }
+
 }

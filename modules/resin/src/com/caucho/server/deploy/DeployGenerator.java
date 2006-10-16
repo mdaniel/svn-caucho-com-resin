@@ -59,6 +59,8 @@ abstract public class DeployGenerator<E extends DeployController>
   private String _startupMode = DeployController.STARTUP_AUTOMATIC;
   private String _redeployMode = DeployController.REDEPLOY_AUTOMATIC;
 
+  private Throwable _configException;
+
   private final Lifecycle _lifecycle = new Lifecycle(getLog());
 
   /**
@@ -70,6 +72,7 @@ abstract public class DeployGenerator<E extends DeployController>
     _container = container;
 
     _lifecycle.setName(toString());
+    _lifecycle.setLevel(Level.FINER);
   }
 
   /**
@@ -131,7 +134,13 @@ abstract public class DeployGenerator<E extends DeployController>
     if (! _lifecycle.toInitializing())
       return;
 
-    initImpl();
+    try {
+      initImpl();
+    }
+    catch (RuntimeException ex) {
+      _configException = ex;
+      throw ex;
+    }
 
     _lifecycle.setName(toString());
 
@@ -254,6 +263,11 @@ abstract public class DeployGenerator<E extends DeployController>
    */
   protected void stopImpl()
   {
+  }
+
+  public Throwable getConfigException()
+  {
+    return _configException;
   }
 
   /**
