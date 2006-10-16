@@ -37,7 +37,7 @@ exposes the resource's methods to be managed.</p>
 <s2 title="The Test resource">
 
 <p>The test resource is identical to the
-<a href="../basic/index.xtp">basic example</a> but implements
+<a href="../jmx-basic/index.xtp">basic example</a> but implements
 <code>TestAdmin</code> instead of <code>TestMBean</code>.  Because
 the name <code>TestAdmin</code> does not conform to the MBean convention,
 the web.xml will need to specify the interface explicitly.</p>

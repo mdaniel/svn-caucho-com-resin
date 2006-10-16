@@ -18,8 +18,8 @@
 <ul>
 <li>See the <a href="index-tags.xtp">index</a> for a list of all the tags.</li>
 <li>See <a href="webapp.xtp">Web Application</a> configuration for web.xml (Servlet) configuration.</li>
-<li>See <a href="env.xtp">Environment</a> configuration for resources: classloader, databases, connectors, and resources.</li>
-<li>See <a href="log.xtp">Log</a> configuration for access log configuration, java.util.logging, and stdout/stderr logging.</li>
+<li>See <a href="config-env.xtp">Environment</a> configuration for resources: classloader, databases, connectors, and resources.</li>
+<li>See <a href="config-log.xtp">Log</a> configuration for access log configuration, java.util.logging, and stdout/stderr logging.</li>
 </ul>
 
 </s1>
@@ -118,7 +118,7 @@ recommend using the proxy caching when possible for a simple,
 standards-based performance boost.</p>
 
 <p>Using the proxy cache is described more fully
-in the <a href="doc|performance|caching">caching documentation.</a></p>
+in the <a href="proxy-cache.xtp">caching documentation.</a></p>
 
 <deftable-childtags>
 <tr><td>path</td>
@@ -353,7 +353,7 @@ detects the low memory before those errors can be thrown.</p>
     <td>the certificate key password</td>
     <td>required</td></tr>
 <tr><td>certificate-chain-file</td>
-    <td>A file containing an intermediate (untrusted) and root (trusted) certificate. See <a href="doc|security|ssl#Certificate-Chains">Certificate Chains</a>.</td>
+    <td>A file containing an intermediate (untrusted) and root (trusted) certificate. See <a href="ssl.xtp#Certificate-Chains">Certificate Chains</a>.</td>
     <td>none</td></tr>
 <tr><td>session-cache</td>
     <td>true or false, enables the SSL session cache</td>
@@ -382,7 +382,7 @@ detects the low memory before those errors can be thrown.</p>
 </deftable-childtags>
 
 <p>
-More documentation is available in the <a href="doc|security|ssl">Security
+More documentation is available in the <a href="ssl.xtp">Security
 section.</a>
 </p>
 
@@ -694,7 +694,7 @@ Enable the use of the security manager for the JVM.
 
 <p>See also:</p>
 <ul>
-<li><a href="doc|security|securitymanager">Security Manager</a></li>
+<li><a href="securitymanager.xtp">Security Manager</a></li>
 </ul>
 </s1>
 

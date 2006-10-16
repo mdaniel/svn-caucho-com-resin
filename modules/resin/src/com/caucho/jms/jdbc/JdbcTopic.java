@@ -41,6 +41,8 @@ import java.sql.PreparedStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import javax.annotation.*;
+
 import javax.jms.Message;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
@@ -123,6 +125,7 @@ public class JdbcTopic extends JdbcDestination implements Topic {
   /**
    * Initializes the JdbcQueue
    */
+  @PostConstruct
   public void init()
     throws ConfigException, SQLException
   {

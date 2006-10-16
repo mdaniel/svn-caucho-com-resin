@@ -275,7 +275,7 @@ public class JdbcQueueConsumer extends MessageConsumerImpl
 	long id = -1;
 	while (true) {
 	  id = -1;
-	
+
 	  selectStmt.setLong(1, minId);
 	  selectStmt.setInt(2, _queue.getId());
 	  selectStmt.setLong(3, Alarm.getCurrentTime());

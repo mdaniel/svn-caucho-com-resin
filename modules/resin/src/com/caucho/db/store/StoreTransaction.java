@@ -72,6 +72,21 @@ abstract public class StoreTransaction {
     throws IOException;
 
   /**
+   * Adds an updated block.
+   */
+  abstract public void addUpdateBlock(Block block)
+    throws IOException;
+
+  /**
+   * Add an update fragment block.
+   */
+  public void addUpdateFragmentBlock(Block block)
+    throws IOException
+  {
+    addUpdateBlock(block);
+  }
+
+  /**
    * Returns a modified block.
    */
   public Block createAutoCommitWriteBlock(Block block)

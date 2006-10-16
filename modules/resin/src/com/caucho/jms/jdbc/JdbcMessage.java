@@ -92,8 +92,9 @@ import com.caucho.vfs.ContextLoaderObjectInputStream;
 /**
  * Represents a JDBC message.
  */
-public class JdbcMessage {
-  static final Logger log = Log.open(JdbcMessage.class);
+public class JdbcMessage
+{
+  static final Logger log = Logger.getLogger(JdbcMessage.class.getName());
   static final L10N L = new L10N(JdbcMessage.class);
 
   private static final int MESSAGE = 0;
@@ -400,8 +401,6 @@ public class JdbcMessage {
       String sql = ("DELETE FROM " +  _messageTable + " " +
 		    "WHERE consumer=?");
 
-      System.out.println("DEL:");
-      
       PreparedStatement pstmt;
       pstmt = conn.prepareStatement(sql);
 

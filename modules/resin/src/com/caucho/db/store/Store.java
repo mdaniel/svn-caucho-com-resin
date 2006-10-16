@@ -945,7 +945,7 @@ public class Store {
     Block block = xa.readBlock(this, addressToBlockId(fragmentAddress));
 
     try {
-      block = xa.createAutoCommitWriteBlock(block);
+      xa.addUpdateFragmentBlock(block);
       
       int blockOffset = getFragmentOffset(fragmentAddress);
 
@@ -1048,7 +1048,7 @@ public class Store {
     Block block = xa.readBlock(this, addressToBlockId(fragmentAddress));
 
     try {
-      block = xa.createAutoCommitWriteBlock(block);
+      xa.addUpdateFragmentBlock(block);
       
       int fragOffset = getFragmentOffset(fragmentAddress);
 

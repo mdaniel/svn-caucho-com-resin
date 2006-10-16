@@ -46,6 +46,8 @@ import java.sql.PreparedStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import javax.annotation.*;
+
 import javax.jms.Message;
 import javax.jms.Queue;
 import javax.jms.QueueBrowser;
@@ -111,6 +113,7 @@ public class JdbcQueue extends JdbcDestination implements Queue {
   /**
    * Initializes the JdbcQueue
    */
+  @PostConstruct
   public void init()
     throws ConfigException, SQLException
   {

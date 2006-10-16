@@ -87,7 +87,7 @@ can be reclaimed.
 
 <p>See also:</p>
 <ul>
-<li><a href="troubleshoot|technique#garbage-collector">Troubleshooting Technique: Garbage Collector</a>
+<li><a href="troubleshoot.xtp#garbage-collector">Troubleshooting Technique: Garbage Collector</a>
 </li><li><a href="http://java.sun.com/docs/hotspot/gc1.4.2/">Sun documentation on garbage collection</a>
 </li></ul>
 </s1> <!-- garbage-collection -->
@@ -153,7 +153,7 @@ unix&gt; jconsole
 <var>jps</var> and <var>jstack</var> are also useful, providing a quick command line
 method for obtaining stack traces of all current threads.
 Details on obtaining and interpreting stack traces is in the
-<a href="doc|troubleshoot|technique#thread-dump">Troubleshooting</a>
+<a href="troubleshoot.xtp#thread-dump">Troubleshooting</a>
 section of the Resin documentation.
 </p>
 

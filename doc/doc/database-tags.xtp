@@ -1,0 +1,117 @@
+<document>
+<header>
+  <title>database: Database tag configuration</title>
+  <version>Resin 3.1</version>
+</header>
+<body>
+
+<localtoc/>
+
+<s1 title="See Also">
+
+<ul>
+<li>See <a href="config-env.xtp">Environment</a> configuration for resources: classloader, databases, connectors, and resources.</li>
+</ul>
+
+</s1>
+
+<defun title="&lt;connection-wait-time>" version="Resin 3.1">
+<parents>database</parents>
+
+<p>&lt;connection-wait-time> configures the time a <code>getConnection</code>
+call should wait when then pool is full before trying to create an
+overflow connection.</p>
+
+</defun>
+
+<defun title="&lt;driver>" version="Resin 3.1">
+<parents>database</parents>
+
+<p>&lt;driver> configures a database driver for a connection pool.
+The individual driver information is available from the driver vendor
+or in the <a href="db-thirdparty.xtp">database driver</a> page.</p>
+
+<p>The content of the driver tag configures bean properties of
+the driver class, e.g. url, user, password.</p>
+
+<def title="driver schema">
+element driver {
+  type,
+  *
+}
+</def>
+
+</defun>
+
+<defun title="&lt;database>" version="Resin 3.1">
+<parents>resin, cluster, host, web-app</parents>
+
+<p>&lt;database> configures a database as a <code>javax.sql.DataSource</code>
+and stores it in jndi with the given <var>jndi-name</var>.</p>
+
+<deftable-childtags>
+<tr>
+  <td>connection-wait-time</td>
+  <td>When the pool it full, how long to wait before opening a new connection anyway.</td>
+  <td>?</td>
+</tr>
+</deftable-childtags>
+
+<example title="database">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+  &lt;database jndi-name="jdbc/test">
+    &lt;driver type="com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource">
+      &lt;url>jdbc:mysql://localhost:3306/test&lt;/url>
+      &lt;user>&lt;/user>
+      &lt;password>&lt;/password>
+    &lt;/driver>
+  &lt;/database>
+&lt;/web-app&gt;
+</example>
+
+<def title="database schema">
+element database {
+  jndi-name
+  & connection-Database?
+  & driver+
+  & connection-wait-time
+  & max-active-time
+  & max-close-statements
+  & max-connections
+  & max-create-connections
+  & max-idle-time
+  & max-overflow-connections
+  & max-pool-time
+  & password
+  & ping
+  & ping-table
+  & ping-query
+  & ping-interval
+  & prepared-statement-cache-size
+  & save-allocation-stack-trace
+  & spy
+  & transaction-timeout
+  & user
+  & xa
+  & xa-forbid-same-rm
+  & wrap-statements
+}
+</def>
+
+</defun>
+
+<defun title="&lt;max-active-time>" version="Resin 3.1">
+<parents>database</parents>
+
+<p>&lt;max-active-time> configures the maximum time a connection
+can be active before Resin will automatically close it.  Normally,
+the max-active-time should not be configured, since Resin will
+also automatically close a connection at the end of a request.</p>
+
+<p>Sites should generally leave max-active-time at the default.</p>
+
+<default>6h</default>
+</defun>
+
+</body>
+</document>

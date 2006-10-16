@@ -115,6 +115,15 @@ public class FileStore extends StoreManager {
       log.log(Level.WARNING, e.toString(), e);
     }
   }
+
+  /**
+   * Returns true if this server is a primary for the given object id.
+   */
+  @Override
+  protected boolean isPrimary(String id)
+  {
+    return true;
+  }
   
   /**
    * Creates the cluster object.

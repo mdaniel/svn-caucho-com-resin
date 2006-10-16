@@ -200,7 +200,7 @@ public class JdbcDestination extends AbstractDestination {
 	pstmt.executeUpdate();
 
 	rs = pstmt.getGeneratedKeys();
-	
+
 	if (rs.next()) {
 	  int id = rs.getInt(1);
 

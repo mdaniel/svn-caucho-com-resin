@@ -50,16 +50,17 @@ public class MapELResolver extends ELResolver {
   
   public MapELResolver(boolean isReadOnly)
   {
-    _isReadOnly = true;
+    _isReadOnly = isReadOnly;
   }
 
   @Override
   public Class<?> getCommonPropertyType(ELContext context, Object base)
   {
-    if (base == null)
-      return null;
-    else if (base instanceof Map)
+    if (base instanceof Map) {
+      context.setPropertyResolved(true);
+      
       return Object.class;
+    }
     else
       return null;
   }
@@ -68,7 +69,14 @@ public class MapELResolver extends ELResolver {
   public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext context,
 							   Object base)
   {
-    return null;
+    if (base instanceof Map) {
+      context.setPropertyResolved(true);
+
+      return null;
+    }
+    else {
+      return null;
+    }
   }
 
   @Override
@@ -76,9 +84,7 @@ public class MapELResolver extends ELResolver {
 			  Object base,
 			  Object property)
   {
-    if (base == null)
-      return null;
-    else if (base instanceof Map) {
+    if (base instanceof Map) {
       Object value = getValue(context, base, property);
 
       if (value != null)
@@ -95,9 +101,7 @@ public class MapELResolver extends ELResolver {
 			 Object base,
 			 Object property)
   {
-    if (base == null)
-      return null;
-    else if (base instanceof Map && property != null) {
+    if (base instanceof Map && property != null) {
       Map map = (Map) base;
       
       context.setPropertyResolved(true);
@@ -114,7 +118,13 @@ public class MapELResolver extends ELResolver {
 			    Object base,
 			    Object property)
   {
-    return _isReadOnly;
+    if (base instanceof Map) {
+      context.setPropertyResolved(true);
+      
+      return _isReadOnly;
+    }
+    else
+      return true;
   }
 
   @Override
@@ -123,9 +133,7 @@ public class MapELResolver extends ELResolver {
 		       Object property,
 		       Object value)
   {
-    if (base == null) {
-    }
-    else if (base instanceof Map && property != null) {
+    if (base instanceof Map && property != null) {
       Map map = (Map) base;
       
       context.setPropertyResolved(true);

@@ -41,7 +41,7 @@ the web service.</td>
 </tr>
 <tr>
   <td>init</td>
-  <td>IoC-based initialization.  See <a href="soa|ioc-bean.xtp">IoC init
+  <td>IoC-based initialization.  See <a href="ioc-bean.xtp">IoC init
 documentation</a> for more information.</td>
   <td></td>
 </tr>

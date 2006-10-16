@@ -354,7 +354,7 @@ extending <a href="javadoc|com.caucho.server.security.AbstractAuthenticator|"/> 
 The password-digest has two parts: the digest algorithm
 and the encoding format.  "MD5-base64" is a typical digest format, and is the default for the Resin authenticators..</p>
 
-<p>The use of a password digest is more completely described in <a href="security|digest">Digest Passwords</a>.
+<p>The use of a password digest is more completely described in <a href="security-digest.xtp">Digest Passwords</a>.
 </p></s1>
 
 <s1 title="Single Signon" version="Resin 3.0.0">

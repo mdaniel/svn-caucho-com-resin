@@ -174,7 +174,7 @@ EJB servers, the outer &lt;resin&gt; declaration, even individual
 session beans.</p>
 
 <p>Any of the class loader and resource configuration is allowed in
-any environment.  See the <a href="doc|env.xtp">environment
+any environment.  See the <a href="doc|config-env.xtp">environment
 configuration</a> for the list.</p>
 
   </s2>

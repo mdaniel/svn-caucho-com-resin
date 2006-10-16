@@ -135,13 +135,13 @@ class UpdateQuery extends Query {
 
   public String toString()
   {
-    CharBuffer cb = CharBuffer.allocate();
+    StringBuilder cb = new StringBuilder();
     cb.append("UpdateQuery[");
     if (_whereExpr != null) {
       cb.append(",where:" + _whereExpr);
     }
     cb.append("]");
     
-    return cb.close();
+    return cb.toString();
   }
 }

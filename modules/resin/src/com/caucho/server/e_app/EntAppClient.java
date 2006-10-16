@@ -420,7 +420,7 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
 
     // AppClientBinding binding = new AppClientBinding(this);
 
-    // builder.setCompactSchema("com/caucho/server/e_app/app-client-14.rnc");
+    // builder.setCompactSchema("com/caucho/server/e_app/app-client.rnc");
 
     new Config().configure(this, xml);
   }

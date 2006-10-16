@@ -85,7 +85,7 @@ share> java -jar resin-3.1.0/lib/resin.jar start
 <p>The <a href="resin-tags.xtp#resin">&lt;resin&gt;</a> tag is a container
 for all the Resin configuration.  It will generally contain one or
 most &lt;cluster> configuration.  In more complete configuration, it
-may also contain <a href="log-tags.xtp">logging</a>, <a href="env-tags.xtp#class-loader">class loader</a>,
+may also contain <a href="config-log.xtp">logging</a>, <a href="env-tags.xtp#class-loader">class loader</a>,
 <a href="env-tags.xtp#system-property">system-property</a> or global
 resource definitions.</p>
 

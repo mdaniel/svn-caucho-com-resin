@@ -287,7 +287,7 @@ public class AppClientDeployController extends ExpandDeployController<EntAppClie
       return;
     
     new Config().configureBean(appClient, xml,
-			   "com/caucho/server/e_app/app-client-14.rnc");
+			   "com/caucho/server/e_app/app-client.rnc");
   }
 
   private void configClientConfig(EntAppClient appClient, Path xml)

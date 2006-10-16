@@ -3,23 +3,25 @@
 <product>resin</product>
 <title>Features - Resin and Resin Professional</title>
 <description>
-<p>
-An overview of the features and capabilities in Resin and Resin Professional.
-</p>
+
+<p>Resin is a high-performance, scalable Java/PHP application server.  We
+release two versions of Resin: an open source version, and a professional
+version with enhanced performance, clustering, and reliability features.</p>
+
 </description>
 </header>
 
 <body>
 
-<summary/>
+<localtoc/>
 
 <s1 name="resinpro" title="Resin Professional">
 <p>
 Resin is provided in two versions, Resin Professional and Resin Open Source.
 Resin Professional adds features and enhancements commonly needed in a 
-production environment.  Resin Open Source is suitable for hobbyists,
-developers, and low traffic websites that do not need the performance and
-reliability enhancements of Resin Professional.
+professional production environment.  Resin Open Source is suitable
+for hobbyists, developers, and low traffic websites that do not
+need the performance and reliability enhancements of Resin Professional.
 </p>
 
 <s2 name="reliability" title="Reliability features">
@@ -30,9 +32,9 @@ stalled servers, and monitoring of JVM memory usage for applications
 with memory leaks.</p>
 
 <ul>
-<li>Resin configuration: <a config-tag="ping"/>
-</li><li>Resin configuration: <a config-tag="min-free-memory"/>
-</li></ul>
+<li>Resin configuration: <a href="cluster.xtp#ping">&lt;ping&gt;</a></li>
+<li>Resin configuration: <a href="server.xtp#min-free-memory">min-free-memory</a></li>
+</ul>
 
 </s2>
 
@@ -158,15 +160,15 @@ and may provide significant cost savings.
 
 <s1 name="os" title="Operating Systems">
 
-<p>Resin and Resin-EE are tested and supported on the following operating
-systems:</p>
+<p>Resin and Resin-Professional are tested and supported on
+the following operating systems:</p>
 
 <ul>
-<li>Linux
-</li><li>Solaris
-</li><li>Windows
-</li><li>Mac OS X
-</li></ul>
+<li>Linux</li>
+<li>Solaris</li>
+<li>Windows</li>
+<li>Mac OS X</li>
+</ul>
 
 <p>Resin is known to work on the following operating systems:</p>
 
@@ -197,17 +199,18 @@ database driver.
 </li></ul>
 </s1> <!-- db -->
 
-<s1 name="servlet" title="Java Servlet 2.4">
+<s1 name="servlet" title="Java Servlet 2.5">
 <ul>
-<li><a href="servlet.xtp">Resin documentation</a>
-</li><li><a href="external|spec|servlet24">External: specification 2.4 (JSR-154)</a>
-</li></ul>
+<li><a href="servlet.xtp">Resin documentation</a></li>
+<li><a href="external|spec|servlet25">External: specification 2.5 (JSR-154)</a>
+</li>
+</ul>
 </s1>
 
-<s1 name="jsp" title="Java Server Pages (JSP) 2.0">
+<s1 name="jsp" title="Java Server Pages (JSP) 2.1">
 <ul>
 <li><a href="jsp.xtp">Resin documentation</a>
-</li><li><a href="external|spec|jsp20">External: specification 2.0 (JSR-152)</a>
+</li><li><a href="external|spec|jsp21">External: specification 2.1 (JSR-152)</a>
 </li></ul>
 </s1>
 
@@ -295,36 +298,28 @@ database driver.
 </li></ul>
 </s1>
 
-<!-- ======== -->
-<!-- Resin EE -->
-<!-- ======== -->
-
-<s1 name="jta" title="Java Transaction API (JTA) 1.0.1b" product="resin-ee">
-<p>Included with Resin EE.</p>
+<s1 name="jta" title="Java Transaction API (JTA) 1.0.1b">
 
 <ul>
 <li><a href="external|spec|jta101b">External: specification 1.0.1b</a>
 </li></ul>
 </s1>
 
-<s1 name="jts" title="Java Transaction Service (JTS) 1.0" product="resin-ee">
-<p>Included with Resin EE.</p>
+<s1 name="jts" title="Java Transaction Service (JTS) 1.0">
 <ul>
 <li><a href="external|spec|jts10">External: specification 1.0</a>
 </li></ul>
 </s1>
 
 
-<s1 name="jms" title="Java Message Service (JMS) 1.1" product="resin-ee">
-<p>Included with Resin EE.</p>
+<s1 name="jms" title="Java Message Service (JMS) 1.1">
 <ul>
-<li><a href="jms.xtp">Resin documentation</a>
+<li><a href="jms-config.xtp">Resin documentation</a>
 </li><li><a href="external|spec|">External: specification 1.1 (JSR-914)</a>
 </li></ul>
 </s1>
 
-<s1 name="ejb" title="Enterprise Java Beans (EJB) 2.0" product="resin-ee">
-<p>Included with Resin EE.</p>
+<s1 name="ejb" title="Enterprise Java Beans (EJB) 2.0">
 <ul>
 <li><a href="ejb.xtp">Resin EJB documentation</a>
 </li><li><a href="amber.xtp">Amber (JPA, EJB 3.0) documentation</a>
@@ -332,8 +327,7 @@ database driver.
 </li></ul>
 </s1>
 
-<s1 name="corba" title="CORBA/IDL" product="resin-ee">
-<p>Included with Resin EE.</p>
+<s1 name="corba" title="CORBA/IDL">
 <p>
 The J2EE specification requires that containers support CORBA.  Although Resin
 supports CORBA, CAucho does not recommend the use of CORBA.

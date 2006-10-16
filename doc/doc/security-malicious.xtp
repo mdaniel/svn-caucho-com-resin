@@ -112,7 +112,7 @@ packets for the offending system.
 
 <p>
 For a less extreme DoS attack, you can use
-<a href="doc|filter|library#ThrottleFilter">com.caucho.filters.ThrottleFilter</a> 
+<a href="filter-library.xtp#ThrottleFilter">com.caucho.filters.ThrottleFilter</a> 
 to minimize the number of concurrent
 requests.
 </p>

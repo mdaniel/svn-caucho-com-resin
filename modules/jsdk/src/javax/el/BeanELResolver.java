@@ -126,11 +126,19 @@ public class BeanELResolver extends ELResolver {
   }
 
   @Override
-  public boolean isReadOnly(ELContext context,
+  public boolean isReadOnly(ELContext env,
 			    Object base,
 			    Object property)
   {
-    return _isReadOnly;
+    BeanProperties props = getProp(env, base, property);
+
+    if (props != null) {
+      env.setPropertyResolved(true);
+
+      return _isReadOnly;
+    }
+    else
+      return true;
   }
 
   @Override
@@ -139,6 +147,35 @@ public class BeanELResolver extends ELResolver {
 		       Object property,
 		       Object value)
   {
+  }
+
+  private BeanProperties getProp(ELContext context,
+				 Object base,
+				 Object property)
+  {
+    if (base == null || ! (property instanceof String))
+      return null;
+
+    String fieldName = (String) property;
+
+    if (fieldName.length() == 0)
+      return null;
+
+    Class cl = base.getClass();
+    BeanProperties props = _classMap.get(cl);
+
+    if (props == null) {
+      if (cl.isArray()
+	  || Collection.class.isAssignableFrom(cl)
+	  || Map.class.isAssignableFrom(cl)) {
+	return null;
+      }
+	  
+      props = new BeanProperties(cl);
+      _classMap.put(cl, props);
+    }
+
+    return props;
   }
 
   protected static final class BeanProperties

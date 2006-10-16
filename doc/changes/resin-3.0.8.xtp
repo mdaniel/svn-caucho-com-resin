@@ -342,7 +342,7 @@ as a symbolic link to another JNDI name.</p>
 
 <s1 title="ThrottleFilter">
 
-<p>A new standard <a href="servlet|filter-library.xtp#ThrottleFilter">ThrottleFilter</a> has been added.  The filter restricts
+<p>A new standard <a href="doc|filter-library.xtp#ThrottleFilter">ThrottleFilter</a> has been added.  The filter restricts
 the number of requests from the same IP, defaulting to 2 (the HTTP spec limit.)
 The ThrottleFilter is useful to limit some parallel download programs
 that can use more threads than they should.

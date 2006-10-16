@@ -218,7 +218,7 @@ in.</p>
 
 <p><var>resin:type</var> allows for custom logging.  Applications can
 extend a custom class from <a href="javadoc|com.caucho.http.log.AccessLog|"/>.  
-<a href="ioc.xtp">Bean-style initialization</a> can be used to set bean
+<a href="ioc-bean.xtp">Bean-style initialization</a> can be used to set bean
 parameters in the custom class.</p>
 
 <example>

@@ -557,15 +557,15 @@ in the first column is the number of seconds since the process started. </p>
 invaluable in diagnosing garbe collection related problems.</p>
 
 <p>Possible reasons for excessive garbage collection are 
-<a href="troubleshoot|symptoms#memory-leaks">memory leaks</a> and 
-<a href="troubleshoot|technique#increase-memory">inadequate heap memory</a> 
+<a href="troubleshoot.xtp#memory-leaks">memory leaks</a> and 
+<a href="troubleshoot.xtp#increase-memory">inadequate heap memory</a> 
 </p>
 
 </s2> <!-- garbage-collection -->
 
 <s2 name="increase-memory" title="Increase heap memory">
 
-<p>See <a href="performance|jvm-tuning#memory">Performance : JVM Tuning : Memory</a>.</p>
+<p>See <a href="jvm-tuning.xtp#memory">Performance : JVM Tuning : Memory</a>.</p>
 </s2> <!-- increase-memory -->
 
 </s1>

@@ -19,8 +19,8 @@
 <ul>
 <li>See the <a href="index-tags.xtp">index</a> for a list of all the tags.</li>
 <li>See <a href="webapp.xtp">Web Application</a> configuration for web.xml (Servlet) configuration.</li>
-<li>See <a href="env.xtp">Environment</a> configuration for resources: classloader, databases, connectors, and resources.</li>
-<li>See <a href="log.xtp">Log</a> configuration for access log configuration, java.util.logging, and stdout/stderr logging.</li>
+<li>See <a href="config-env.xtp">Environment</a> configuration for resources: classloader, databases, connectors, and resources.</li>
+<li>See <a href="config-log.xtp">Log</a> configuration for access log configuration, java.util.logging, and stdout/stderr logging.</li>
 </ul>
 
 </s1>

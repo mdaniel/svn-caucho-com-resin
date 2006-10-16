@@ -55,6 +55,8 @@ public class AutoCommitWriteBlock extends WriteBlock {
   {
     super(block);
 
+    Thread.dumpStack();
+    
     // The block should already be allocated
     // block.allocate();
     block.read();

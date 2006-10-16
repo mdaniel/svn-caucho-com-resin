@@ -50,15 +50,23 @@ deployed within Resin.</p>
 
 <s1 title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    </td><td>web.xml configuration
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/Hello.java"/>
-    </td><td>The local interface for the stateless session bean
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/HelloBean.java"/>
-    </td><td>The implementation for the stateless session bean
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/HelloServlet.java"/>
-    </td><td>The client for the stateless session bean
-</td></tr></deftable>
+<tr>
+  <td><viewfile-link file="WEB-INF/web.xml"/></td>
+  <td>web.xml configuration</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/Hello.java"/></td>
+  <td>The local interface for the stateless session bean</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/HelloBean.java"/></td>
+  <td>The implementation for the stateless session bean</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/HelloServlet.java"/></td>
+  <td>The client for the stateless session bean</td>
+</tr>
+</deftable>
 </s1>
 
 <s1 title="Local Interface">
@@ -91,7 +99,7 @@ import static javax.ejb.TransactionAttributeType.SUPPORTS;
 public class HelloBean implements Hello {
   private String _greeting = "Default Hello";
 
-  <a href="ejb3|inject.xtp#@Inject">@javax.ejb.Inject</a>
+  <a href="doc|ioc-inject.xtp#@Inject">@javax.ejb.Inject</a>
   public void setGreeting(String greeting)
   {
     _greeting = greeting;
@@ -118,7 +126,7 @@ value which overrides the default name of "HelloBean".</p>
 
 <s2 title="@Inject">
 
-<p>The <a href="ejb3|inject.xtp#@Inject">@javax.ejb.Inject</a>
+<p>The <a href="doc|ioc-inject.xtp#@Inject">@javax.ejb.Inject</a>
 annotation tells Resin to lookup the greeting from JNDI when the
 session bean is created.  The JNDI name will be
 java:comp/env/greeting.</p>
@@ -152,7 +160,7 @@ some clarity.</p>
 <p>Managing transactions is the primary purpose of stateless
 session beans.  Transactions are a more powerful version of
 a <code>synchronized</code> lock used to protect database integrity.
-<a href="ejb3|bean-ann.xtp#@TransactionAttribute">@TransactionAttribute</a>
+<a href="doc|ejb-annotations.xtp#@TransactionAttribute">@TransactionAttribute</a>
 marks the transaction boundary for each business method.</p>
 
 <example>
@@ -231,7 +239,7 @@ public class HelloServlet extends GenericServlet {
 
 <s2 title="@EJB">
 
-<p>The <a href="ejb3|cmp-inject.xtp#@EJB">@EJB</a> annotation tells
+<p>The <a href="doc|ioc-inject.xtp#@EJB">@EJB</a> annotation tells
 Resin to lookup the session bean in JNDI with name
 "java:comp/env/ejb/HelloBean".</p>
 

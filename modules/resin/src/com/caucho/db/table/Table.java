@@ -592,16 +592,12 @@ public class Table extends Store {
       TableIterator iter = createTableIterator();
       iter.init(context);
       while (iter.next()) {
-	iter.prevRow();
-
 	byte []buffer = iter.getBuffer();
       
-	while (iter.nextRow()) {
-	  long value = _autoIncrementColumn.getLong(buffer, iter.getRowOffset());
+	long value = _autoIncrementColumn.getLong(buffer, iter.getRowOffset());
 
-	  if (max < value)
-	    max = value;
-	}
+	if (max < value)
+	  max = value;
       }
     } catch (IOException e) {
       throw new SQLExceptionWrapper(e);
@@ -745,8 +741,10 @@ public class Table extends Store {
 	    if (_autoIncrementColumn != null) {
 	      long value = _autoIncrementColumn.getLong(buffer, rowOffset);
 
-	      if (_autoIncrementValue < value)
-		_autoIncrementValue = value;
+	      synchronized (this) {
+		if (_autoIncrementValue < value)
+		  _autoIncrementValue = value;
+	      }
 	    }
 
 	    isOkay = true;

@@ -68,7 +68,14 @@ public class ListELResolver extends ELResolver {
   public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext context,
 							   Object base)
   {
-    return null;
+    if (base instanceof List) {
+      context.setPropertyResolved(true);
+
+      return null;
+    }
+    else {
+      return null;
+    }
   }
 
   @Override
@@ -76,9 +83,7 @@ public class ListELResolver extends ELResolver {
 			  Object base,
 			  Object property)
   {
-    if (base == null)
-      return null;
-    else if (base instanceof List) {
+    if (base instanceof List) {
       Object value = getValue(context, base, property);
 
       if (value != null)
@@ -95,9 +100,7 @@ public class ListELResolver extends ELResolver {
 			 Object base,
 			 Object property)
   {
-    if (base == null)
-      return null;
-    else if (base instanceof List) {
+    if (base instanceof List) {
       List list = (List) base;
       
       context.setPropertyResolved(true);
@@ -129,7 +132,13 @@ public class ListELResolver extends ELResolver {
 			    Object base,
 			    Object property)
   {
-    return _isReadOnly;
+    if (base instanceof List) {
+      context.setPropertyResolved(true);
+
+      return _isReadOnly;
+    }
+    else
+      return false;
   }
 
   @Override
@@ -138,9 +147,7 @@ public class ListELResolver extends ELResolver {
 		       Object property,
 		       Object value)
   {
-    if (base == null) {
-    }
-    else if (base instanceof List) {
+    if (base instanceof List) {
       List list = (List) base;
       
       context.setPropertyResolved(true);

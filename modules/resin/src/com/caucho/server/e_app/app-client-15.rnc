@@ -1,0 +1,32 @@
+default namespace javaee = "http://java.sun.com/xml/ns/javaee"
+namespace local = ""
+
+namespace xsi = "http://www.w3.org/2001/XMLSchema-instance"
+
+include "../resin/javaee.rnc"
+
+javaee15_application-client = element application-client {
+  attribute id { string }?,
+
+  attribute version { string },
+
+  attribute xsi:schemaLocation { string },
+
+  javaee_description-Group,
+
+  javaee_env-entry*,
+
+  javaee_ejb-ref*,
+
+  javaee_service-ref-Group,
+
+  javaee_resource-ref*,
+
+  javaee_resource-env-ref*,
+
+  javaee_message-destination-ref*,
+
+  element callback-handler { javaee_fully-qualified-class }?,
+
+  javaee_message-destination*
+}

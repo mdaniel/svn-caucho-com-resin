@@ -78,9 +78,13 @@ public class CompositeELResolver extends ELResolver {
       Iterator<FeatureDescriptor> iter
 	= resolver.getFeatureDescriptors(env, base);
 
-      if (iter == null)
+      if (! env.isPropertyResolved())
 	continue;
+      
+      if (iter == null)
+	return null;
 
+      /*
       if (descriptors == null)
 	descriptors = new ArrayList<FeatureDescriptor>();
 
@@ -89,12 +93,18 @@ public class CompositeELResolver extends ELResolver {
 
 	descriptors.add(desc);
       }
+      */
+
+      return iter;
     }
 
+    /*
     if (descriptors != null)
       return descriptors.iterator();
     else
       return null;
+    */
+    return null;
   }
 
   @Override
@@ -142,6 +152,18 @@ public class CompositeELResolver extends ELResolver {
 			    Object base,
 			    Object property)
   {
+    context.setPropertyResolved(false);
+
+    int size = _resolvers.size();
+    for (int i = 0; i < size; i++) {
+      ELResolver resolver = _resolvers.get(i);
+
+      boolean value = resolver.isReadOnly(context, base, property);
+
+      if (context.isPropertyResolved())
+	return value;
+    }
+    
     return true;
   }
 

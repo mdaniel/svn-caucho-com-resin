@@ -50,7 +50,7 @@ public class ArrayELResolver extends ELResolver {
   
   public ArrayELResolver(boolean isReadOnly)
   {
-    _isReadOnly = true;
+    _isReadOnly = isReadOnly;
   }
 
   @Override
@@ -68,7 +68,15 @@ public class ArrayELResolver extends ELResolver {
   public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext context,
 							   Object base)
   {
-    return null;
+    if (base == null)
+      return null;
+    else if (base.getClass().isArray()) {
+      context.setPropertyResolved(true);
+
+      return null;
+    }
+    else
+      return null;
   }
 
   @Override
@@ -124,7 +132,15 @@ public class ArrayELResolver extends ELResolver {
 			    Object base,
 			    Object property)
   {
-    return _isReadOnly;
+    if (base == null)
+      return false;
+    else if (base.getClass().isArray()) {
+      context.setPropertyResolved(true);
+
+      return _isReadOnly;
+    }
+    else
+      return false;
   }
 
   @Override

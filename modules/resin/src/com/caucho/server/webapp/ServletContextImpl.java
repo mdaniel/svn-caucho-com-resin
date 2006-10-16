@@ -121,7 +121,7 @@ public class ServletContextImpl implements ServletContext {
    */
   public int getMinorVersion()
   {
-    return 4;
+    return 5;
   }
 
   /**

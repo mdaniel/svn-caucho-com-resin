@@ -561,7 +561,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 
       _manager.removeSession(this);
 
-      invalidateImpl(true);
+      invalidateImpl(isLRU);
 
       _isValid = false;
     } finally {
@@ -616,7 +616,7 @@ public class SessionImpl implements HttpSession, CacheListener {
       ClusterObject clusterObject = _clusterObject;
       // _clusterObject = null;
 
-      if (clusterObject != null && ! isLRU)
+      if (clusterObject != null && _isInvalidating)
 	clusterObject.remove();
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
@@ -647,7 +647,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   }
 
   /**
-   * Clears the session when reading a bad saved session.
+   * Creates a new session.
    */
   void create(long now)
   {
@@ -663,6 +663,9 @@ public class SessionImpl implements HttpSession, CacheListener {
     _isNew = true;
     _accessTime = now;
     _creationTime = now;
+
+    if (_clusterObject != null)
+      _clusterObject.setValid();
   }
 
   /**

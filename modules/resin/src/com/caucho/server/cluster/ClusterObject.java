@@ -231,6 +231,14 @@ public class ClusterObject {
   }
 
   /**
+   * Sets the object's saved update count
+   */
+  public void setValid()
+  {
+    _isValid = true;
+  }
+
+  /**
    * Loads the object from the cluster.  If the object fails to load,
    * its contents may be in an inconsistent state.
    *

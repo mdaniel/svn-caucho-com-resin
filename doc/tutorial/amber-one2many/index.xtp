@@ -78,8 +78,7 @@ CREATE TABLE student (
 that is the <code>@ManyToOne</code> link.
 </p>
 
-<example title="House.java" file="WEB-INF/classes/example/House.java" 
-         language="java">
+<example title="House.java">
   @OneToMany(mappedBy="house")
   private Set&lt;Student&gt; _students;
 </example>
@@ -93,9 +92,7 @@ unchanged from the
 <a href="../amber-many2one/index.xtp">Many-To-One tutorial</a>.
 </p>
 
-<example title="Student.java" file="WEB-INF/classes/example/Student.java" 
-         language="java">
-
+<example title="Student.java">
   @ManyToOne
   @JoinColumn(name="house")
   private House _house;
@@ -120,9 +117,7 @@ Student's will not be needed and it would be inefficient to fetch them each
 time.
 </p>
 
-<example title="House.java"
-         file="WEB-INF/classes/example/House.java"
-         language="java">
+<example title="House.java">
   @OneToMany(targetEntity=Student.class, mappedBy="house")
   public Set&lt;Student&gt; getStudents()
 </example>
@@ -140,10 +135,7 @@ database lookup.
 <p>The example queries all houses and prints their
 names and all of their students.</p>
 
-<example title="Using House.getStudents()" 
-         file="WEB-INF/classes/example/OneToManyServlet.java" 
-         language="java">
-
+<example title="Using House.getStudents()">
 private void doService(PrintWriter out)
   throws java.io.IOException
 {

@@ -1125,6 +1125,8 @@ public final class SessionManager implements ObjectManager, AlarmListener
     synchronized (session) {
       if (_sessionStore != null && id.equals(oldId))
         load(session, now);
+      else
+	session.create(now);
     }
     
     return session;
@@ -1561,14 +1563,14 @@ public final class SessionManager implements ObjectManager, AlarmListener
 
 	  if (_storeManager == null) {
 	    // if no persistent store then invalidate
-	    session.invalidate(true);
+	    session.invalidate();
 	  }
 	  else if (session.getSrunIndex() != _srunIndex && _srunIndex >= 0) {
 	    // if not the owner, then just remove
 	    _sessions.remove(session.getId());
 	  }
 	  else {
-	    session.invalidate(true);
+	    session.invalidate();
 	  }
 	} catch (Throwable e) {
 	  log.log(Level.FINER, e.toString(), e);

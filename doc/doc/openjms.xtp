@@ -10,7 +10,7 @@
 <s1 title="OpenJMS">
 
 <p>The <a href="http://www.openjms.com">OpenJMS</a> client is configured
-by adding a <a href="doc|env.xtp#jndi-link">jndi-link</a> to the web.xml
+by adding a <a href="env-tags.xtp#jndi-link">jndi-link</a> to the web.xml
 or resin.conf.</p>
 
 <s2 title="Configured with OpenJMS tcp connectory">

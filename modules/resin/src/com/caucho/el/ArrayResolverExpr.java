@@ -122,6 +122,29 @@ public class ArrayResolverExpr extends Expr {
   }
   
   /**
+   * Returns the read-only value of the expression.
+   *
+   * @param env the variable environment
+   *
+   * @return true if read-only
+   */
+  @Override
+  public boolean isReadOnly(ELContext env)
+    throws ELException
+  {
+    Object aObj = _left.getValue(env);
+
+    if (aObj == null)
+      return true;
+
+    Object fieldObj = _right.getValue(env);
+    if (fieldObj == null)
+      return true;
+
+    return env.getELResolver().isReadOnly(env, aObj, fieldObj);
+  }
+  
+  /**
    * Evaluate the expression as an object.
    *
    * @param env the variable environment

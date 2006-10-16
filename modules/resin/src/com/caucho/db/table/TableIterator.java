@@ -443,21 +443,9 @@ public class TableIterator {
   public void setDirty()
     throws SQLException
   {
-    try {
-      WriteBlock writeBlock = _transaction.getWriteBlock(_blockId);
+    _transaction.addUpdateBlock(_block);
 
-      if (writeBlock == null) {
-	// _transaction.lockWrite(_block.getLock());
-	writeBlock = _transaction.createWriteBlock(_block);
-      }
-
-      _block = writeBlock;
-      _buffer = _block.getBuffer();
-
-      writeBlock.setDirty(getRowOffset(), getRowOffset() + _rowLength);
-    } catch (IOException e) {
-      throw new SQLExceptionWrapper(e);
-    }
+    _block.setDirty(getRowOffset(), getRowOffset() + _rowLength);
   }
 
   public void free()

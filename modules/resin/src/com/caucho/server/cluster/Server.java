@@ -1335,7 +1335,8 @@ public class Server extends ProtocolDispatchServer
       }
 
       try {
-        _hostContainer.stop();
+	if (_hostContainer != null)
+	  _hostContainer.stop();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }

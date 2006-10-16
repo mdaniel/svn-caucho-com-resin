@@ -96,13 +96,13 @@ public class AbstractVariableResolver extends ELResolver
   public Class<?> getCommonPropertyType(ELContext context,
 					Object base)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return null;
   }
 
   public Iterator<FeatureDescriptor>
     getFeatureDescriptors(ELContext context, Object base)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return null;
   }
 
   public Class<?> getType(ELContext context,
