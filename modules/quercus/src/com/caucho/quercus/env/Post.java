@@ -155,7 +155,7 @@ public class Post {
 		     null, addSlashesToValues);
 	
 	addFormValue(entry, "tmp_name" + index,
-		     new StringValueImpl(tmpName.getTail()),
+		     new StringValueImpl(tmpName.getFullPath()),
 		     null, addSlashesToValues);
 
         // XXX: error
