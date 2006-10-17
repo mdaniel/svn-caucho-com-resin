@@ -59,11 +59,11 @@ javaee_ejb-ref = element ejb-ref {
 
   javaee_ejb-ref-name,
 
-  javaee_ejb-ref-type,
+  javaee_ejb-ref-type?,
 
-  javaee_home,
+  javaee_home?,
 
-  javaee_remote,
+  javaee_remote?,
 
   javaee_ejb-link?
 }
