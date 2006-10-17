@@ -456,7 +456,7 @@ public class GettextModule
   {
     if (args.length == 0)
       return msg;
-    else if (msg instanceof UnicodeValue)
+    else if (msg.isUnicode())
       return formatUnicode(env, msg, args);
     else
       return formatBinary(env, msg, args);
@@ -475,16 +475,16 @@ public class GettextModule
       char ch = msg.charAt(i);
 
       if (ch != '[' || i + 4 > length) {
-        sb.append(ch);
+        sb.appendByte(ch);
         i++;
       }
       else if (msg.charAt(i + 1) != '_') {
-        sb.append('[');
+        sb.appendByte('[');
         i++;
       }
       else if (msg.charAt(i + 3) != ']') {
-        sb.append('[');
-        sb.append('_');
+        sb.appendByte('[');
+        sb.appendByte('_');
         i += 2;
       }
       else {
@@ -496,7 +496,7 @@ public class GettextModule
           i += 4;
         }
         else {
-          sb.append('{');
+          sb.appendByte('{');
           i++;
         }
       }

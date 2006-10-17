@@ -64,4 +64,9 @@ public class Directory {
   {
     handle.close();
   }
+
+  public String toString()
+  {
+    return "Directory[]";
+  }
 }
