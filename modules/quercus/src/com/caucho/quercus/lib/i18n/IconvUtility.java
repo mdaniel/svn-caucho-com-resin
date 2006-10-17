@@ -75,65 +75,6 @@ import javax.mail.internet.MimeUtility;
 
 public class IconvUtility {
 
-  /**
-   * Decodes to specified charset.
-   */
-  public static UnicodeValue decode(StringValue str, String charset)
-    throws UnsupportedEncodingException
-  {
-    StringBuilderValue sb = new StringBuilderValue();
-
-    TempCharBuffer tb = TempCharBuffer.allocate();
-    char[] charBuf = tb.getBuffer();
-
-    try {
-      Reader in = getReader(str, charset);
-
-      int sublen;
-      while ((sublen = in.read(charBuf, 0, charBuf.length)) >= 0) {
-        sb.append(charBuf, 0, sublen);
-      }
-
-    } catch (IOException e) {
-      throw new QuercusModuleException(e.getMessage());
-
-    } finally {
-      TempCharBuffer.free(tb);
-    }
-
-    return sb;
-  }
-
-  /**
-   * Encodes chars to specified charset.
-   */
-  public static BinaryValue encode(StringValue chars, String charset)
-    throws UnsupportedEncodingException
-  {
-    TempBuffer tb = TempBuffer.allocate();
-    byte[] buffer = tb.getBuffer();
-
-    try {
-      InputStream in = chars.toInputStream(charset);
-      TempStream out = new TempStream();
-
-      int sublen = in.read(buffer, 0, buffer.length);
-
-      while (sublen >= 0) {
-        out.write(buffer, 0, sublen, false);
-        sublen = in.read(buffer, 0, buffer.length);
-      }
-
-      out.flush();
-      return new TempBufferStringValue(out.getHead());
-
-    } catch (IOException e) {
-      throw new QuercusModuleException(e.getMessage());
-    } finally {
-      TempBuffer.free(tb);
-    }
-  }
-
   public static BinaryValue decodeEncode(StringValue str,
                               String inCharset,
                               String outCharset)
@@ -165,7 +106,7 @@ public class IconvUtility {
     char[] charBuf = tb.getBuffer();
 
     try {
-      Reader in = getReader(str, inCharset);
+      Reader in = str.toReader(inCharset);
 
       TempStream ts = new TempStream();
       WriteStream out = new WriteStream(ts);
@@ -203,23 +144,33 @@ public class IconvUtility {
   /**
    * Returns decoded Mime header/field.
    */
-  public static BinaryValue decodeMime(CharSequence word, String charset)
+  public static BinaryValue decodeMime(Env env,
+                              CharSequence word,
+                              String charset)
     throws UnsupportedEncodingException
   {
     StringValue str = new StringValueImpl(
             MimeUtility.unfold(MimeUtility.decodeText(word.toString())));
 
-    return encode(str, charset);
+    return str.toBinaryValue(env, charset);
   }
 
-  public static Value encodeMime(StringValue name,
+  public static Value encodeMime(Env env,
+                              StringValue name,
                               StringValue value,
                               String inCharset,
                               String outCharset,
                               String scheme)
     throws UnsupportedEncodingException
   {
-    return encodeMime(name, value, inCharset, outCharset, scheme, "\r\n", 76);
+    return encodeMime(env,
+                      name,
+                      value,
+                      inCharset,
+                      outCharset,
+                      scheme,
+                      "\r\n",
+                      76);
   }
 
   /**
@@ -234,7 +185,8 @@ public class IconvUtility {
   /**
    * Returns an encoded Mime header.
    */
-  public static StringValue encodeMime(StringValue name,
+  public static StringValue encodeMime(Env env,
+                              StringValue name,
                               StringValue value,
                               String inCharset,
                               String outCharset,
@@ -243,8 +195,8 @@ public class IconvUtility {
                               int lineLength)
     throws UnsupportedEncodingException
   {
-    name = decode(name, inCharset);
-    value = decode(value, inCharset);
+    name = name.toUnicodeValue(env, inCharset);
+    value = value.toUnicodeValue(env, inCharset);
 
     StringBuilderValue sb = new StringBuilderValue();
     sb.append(name);
@@ -274,12 +226,4 @@ public class IconvUtility {
 
     return MimeUtility.encodeWord(value, charset, scheme);
   }
-
-
-  private static Reader getReader(StringValue str, String charset)
-    throws IOException
-  {
-    return str.toReader(charset);
-  }
-
 }

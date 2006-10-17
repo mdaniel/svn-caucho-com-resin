@@ -312,8 +312,7 @@ public class BinaryBuilderValue extends BinaryValue {
    */
   public void appendTo(StringBuilderValue sb)
   {
-    for (int i = 0; i < _length; i++)
-      sb.append((char) (_buffer[i] & 0xff));
+    toUnicodeValue(Env.getInstance()).appendTo(sb);
   }
 
   /**
@@ -492,16 +491,12 @@ public class BinaryBuilderValue extends BinaryValue {
   @Override
   public final StringValue append(String s)
   {
-    // XXX: different encoding?
-    
-    if (s == null)
-      return this;
-    
-    for (int i = 0; i < s.length(); i++) {
-      append((byte) s.charAt(i));
-    }
-    
-    return this;
+    StringBuilderValue sb = new StringBuilderValue();
+
+    appendTo(sb);
+    sb.append(s);
+
+    return sb;
   }
 
   /**
@@ -510,16 +505,12 @@ public class BinaryBuilderValue extends BinaryValue {
   @Override
   public final StringValue append(String s, int start, int end)
   {
-    // XXX: different encoding?
-    
-    if (s == null)
-      return this;
-    
-    for (int i = start; i < end; i++) {
-      append((byte) s.charAt(i));
-    }
-    
-    return this;
+    StringBuilderValue sb = new StringBuilderValue();
+
+    appendTo(sb);
+    sb.append(s, start, end);
+
+    return sb;
   }
 
   /**
@@ -528,17 +519,12 @@ public class BinaryBuilderValue extends BinaryValue {
   @Override
   public final StringValue append(char []buf, int offset, int length)
   {
-    // XXX: different encoding?
-    
-    if (buf == null)
-      return this;
+    StringBuilderValue sb = new StringBuilderValue();
 
-    int end = offset + length;
-    for (int i = offset; i < end; i++) {
-      append((byte) buf[i]);
-    }
-    
-    return this;
+    appendTo(sb);
+    sb.append(buf, offset, length);
+
+    return sb;
   }
 
   /**
@@ -558,15 +544,17 @@ public class BinaryBuilderValue extends BinaryValue {
       System.arraycopy(sb._buffer, head, _buffer, _length, tail - head);
 
       _length += tail - head;
+
+      return this;
     }
     else {
-      // XXX: encoding(?)
-      
-      for (; head < tail; head++)
-	_buffer[_length++] = (byte) buf.charAt(head);
-    }
+      StringBuilderValue sb = new StringBuilderValue();
 
-    return this;
+      appendTo(sb);
+      sb.append(buf, head, tail);
+
+      return sb;
+    }
   }
 
   /**
@@ -593,9 +581,19 @@ public class BinaryBuilderValue extends BinaryValue {
   @Override
   public final StringValue append(Value v)
   {
-    v.appendTo(this);
+    if (v.isUnicode()) {
+      StringBuilderValue sb = new StringBuilderValue();
 
-    return this;
+      appendTo(sb);
+      v.appendTo(sb);
+
+      return sb;
+    }
+    else {
+      v.appendTo(this);
+
+      return this;
+    }
   }
 
   /**
@@ -643,6 +641,50 @@ public class BinaryBuilderValue extends BinaryValue {
       ensureCapacity(_length + 1);
 
     _buffer[_length++] = (byte) v;
+
+    return this;
+  }
+
+  /**
+   * Append a Java boolean to the value.
+   */
+  @Override
+  public final StringValue append(boolean v)
+  {
+    return appendBytes(v ? "true" : "false");
+  }
+
+  /**
+   * Append a Java long to the value.
+   */
+  @Override
+  public StringValue append(long v)
+  {
+    return appendBytes(String.valueOf(v));
+  }
+
+  /**
+   * Append a Java double to the value.
+   */
+  @Override
+  public StringValue append(double v)
+  {
+    return appendBytes(String.valueOf(v));
+  }
+
+  /**
+   * Append a bytes to the value.
+   */
+  public StringValue appendBytes(String s)
+  {
+    int sublen = s.length();
+
+    if (_buffer.length < _length + sublen)
+      ensureCapacity(_length + sublen);
+
+    for (int i = 0; i < sublen; i++) {
+      _buffer[_length++] = (byte) s.charAt(i);
+    }
 
     return this;
   }

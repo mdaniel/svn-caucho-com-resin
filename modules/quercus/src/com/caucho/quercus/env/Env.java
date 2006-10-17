@@ -150,6 +150,8 @@ public final class Env {
     LruCache<IncludeKey,SoftReference<IncludeCache>> _includeCache
     = new LruCache<IncludeKey,SoftReference<IncludeCache>>(4096);
 
+  private static ThreadLocal<Env> _env = new ThreadLocal<Env>();
+
   private Quercus _quercus;
   private QuercusPage _page;
 
@@ -326,6 +328,11 @@ public final class Env {
     this(quercus, null, null, null, null);
   }
 
+  public static Env getInstance()
+  {
+    return _env.get();
+  }
+
   //
   // i18n
   //
@@ -417,6 +424,8 @@ public final class Env {
   
   public void start()
   {
+    _env.set(this);
+
     // quercus/1b06
     String encoding = getOutputEncoding().toString();
     String type = getIni("default_mimetype").toString();

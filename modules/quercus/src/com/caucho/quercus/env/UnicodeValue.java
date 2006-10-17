@@ -63,28 +63,12 @@ abstract public class UnicodeValue extends StringValue {
   }
 
   /**
-   * Returns a byte stream of chars.
-   * @param charset to encode chars to
+   * Returns true for UnicodeValue
    */
-  public InputStream toInputStream(String charset)
-    throws UnsupportedEncodingException
+  @Override
+  public boolean isUnicode()
   {
-    return new ByteArrayInputStream(toString().getBytes(charset));
-  }
-
-  /**
-   * Returns a char stream.
-   * XXX: when decoding fails
-   *
-   * @param charset to decode bytes by
-   */
-  public Reader toReader(String charset)
-    throws UnsupportedEncodingException
-  {
-//    return new StringReader(toString());
-
-    return new InputStreamReader(
-        new ByteArrayInputStream(toString().getBytes()), charset);
+    return true;
   }
 
 

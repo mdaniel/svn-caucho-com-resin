@@ -112,6 +112,7 @@ abstract public class BinaryValue extends StringValue {
    * Returns a byte stream.
    * @param charset ignored since BinaryValue has no set encoding
    */
+  @Override
   public InputStream toInputStream(String charset)
     throws UnsupportedEncodingException
   {
@@ -122,6 +123,7 @@ abstract public class BinaryValue extends StringValue {
    * Returns a Unicode char stream.
    * @param charset encoding of the StringValue 
    */
+  @Override
   public Reader toReader(String charset)
     throws UnsupportedEncodingException
   {
@@ -139,6 +141,40 @@ abstract public class BinaryValue extends StringValue {
     bb.append(this);
     
     return bb;
+  }
+
+  /**
+   * Converts to a BinaryValue in desired charset.
+   *
+   * @param env
+   * @param charset ignored since BinaryValue has no set encoding
+   */
+  @Override
+  public BinaryValue toBinaryValue(Env env, String charset)
+  {
+    return this;
+  }
+
+  /**
+   * Converts from default charset to a UnicodeValue.
+   *
+   * @param env
+   */
+  @Override
+  public UnicodeValue toUnicodeValue(Env env)
+  {
+    String encoding = env.getRuntimeEncoding().toString();
+
+    return toUnicodeValue(env, encoding);
+  }
+
+  /**
+   * Returns true for BinaryValue
+   */
+  @Override
+  public boolean isBinary()
+  {
+    return true;
   }
 
   abstract public byte[] toBytes();

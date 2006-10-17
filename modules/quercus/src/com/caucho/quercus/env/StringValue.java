@@ -31,14 +31,20 @@ package com.caucho.quercus.env;
 
 import java.util.IdentityHashMap;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 
+import com.caucho.vfs.TempBuffer;
+import com.caucho.vfs.TempCharBuffer;
+import com.caucho.vfs.TempStream;
 import com.caucho.vfs.WriteStream;
 
 import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusModuleException;
 
 /**
  * Represents a Quercus string value.
@@ -154,6 +160,15 @@ abstract public class StringValue extends Value implements CharSequence {
    * Returns true for a scalar
    */
   public boolean isScalar()
+  {
+    return true;
+  }
+
+  /**
+   * Returns true for StringValue
+   */
+  @Override
+  public boolean isString()
   {
     return true;
   }
@@ -659,7 +674,7 @@ abstract public class StringValue extends Value implements CharSequence {
   /**
    * Append a Java boolean to the value.
    */
-  public final StringValue append(boolean v)
+  public StringValue append(boolean v)
   {
     return append(v ? "true" : "false");
   }
@@ -988,15 +1003,87 @@ abstract public class StringValue extends Value implements CharSequence {
    * Returns a byte stream of chars.
    * @param charset to encode chars to
    */
-  abstract public InputStream toInputStream(String charset)
-    throws UnsupportedEncodingException;
+  public InputStream toInputStream(String charset)
+    throws UnsupportedEncodingException
+  {
+    return new ByteArrayInputStream(toString().getBytes(charset));
+  }
 
   /**
-   * Returns a Unicode char stream.
-   * @param charset encoding of the StringValue
+   * Returns a char stream.
+   * XXX: when decoding fails
+   *
+   * @param charset to decode bytes by
    */
-  abstract public Reader toReader(String charset)
-    throws UnsupportedEncodingException;
+  public Reader toReader(String charset)
+    throws UnsupportedEncodingException
+  {
+    return new InputStreamReader(
+        new ByteArrayInputStream(toString().getBytes()), charset);
+  }
+
+  /**
+   * Converts to a BinaryValue in desired charset.
+   *
+   * @param env
+   * @param charset
+   */
+  public BinaryValue toBinaryValue(Env env, String charset)
+  {
+    TempBuffer tb = TempBuffer.allocate();
+    byte[] buffer = tb.getBuffer();
+
+    try {
+      InputStream in = toInputStream(charset);
+      TempStream out = new TempStream();
+
+      int sublen = in.read(buffer, 0, buffer.length);
+
+      while (sublen >= 0) {
+        out.write(buffer, 0, sublen, false);
+        sublen = in.read(buffer, 0, buffer.length);
+      }
+
+      out.flush();
+      return new TempBufferStringValue(out.getHead());
+
+    } catch (IOException e) {
+      throw new QuercusModuleException(e.getMessage());
+    } finally {
+      TempBuffer.free(tb);
+    }
+  }
+
+  /**
+   * Decodes from charset and returns UnicodeValue.
+   *
+   * @param env
+   * @param charset
+   */
+  public UnicodeValue toUnicodeValue(Env env, String charset)
+  {
+    StringBuilderValue sb = new StringBuilderValue();
+
+    TempCharBuffer tb = TempCharBuffer.allocate();
+    char[] charBuf = tb.getBuffer();
+
+    try {
+      Reader in = toReader(charset);
+
+      int sublen;
+      while ((sublen = in.read(charBuf, 0, charBuf.length)) >= 0) {
+        sb.append(charBuf, 0, sublen);
+      }
+
+    } catch (IOException e) {
+      throw new QuercusModuleException(e.getMessage());
+
+    } finally {
+      TempCharBuffer.free(tb);
+    }
+
+    return sb;
+  }
 
   //
   // java.lang.Object methods

@@ -91,15 +91,7 @@ public class BinaryLiteralExpr extends StringLiteralExpr
   public void generateAppend(PhpWriter out)
     throws IOException
   {
-    if (_value.length() == 1) {
-      int ch = _value.charAt(0);
-
-      out.print("(byte) " + ch);
-    }
-    else {
-      // XXX:
-      generateString(out);
-    }
+    generate(out);
   }
 
   /**

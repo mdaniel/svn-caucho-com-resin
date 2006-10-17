@@ -161,7 +161,7 @@ public class AppendExpr extends Expr {
     StringValue sb = _value.eval(env).toStringBuilder();
 
     for (AppendExpr ptr = _next; ptr != null; ptr = ptr._next) {
-      sb.append(ptr._value.eval(env));
+      sb = sb.append(ptr._value.eval(env));
     }
 
     return sb;
@@ -173,7 +173,7 @@ public class AppendExpr extends Expr {
     StringValue sb = _value.eval(env).toStringBuilder();
 
     for (AppendExpr ptr = _next; ptr != null; ptr = ptr._next) {
-      sb.append(ptr._value.eval(env));
+      sb = sb.append(ptr._value.eval(env));
     }
 
     return sb.toString();

@@ -246,6 +246,24 @@ public class DoubleValue extends NumberValue {
   }
 
   /**
+   * Append to a string builder.
+   */
+  @Override
+  public void appendTo(StringBuilderValue sb)
+  {
+    sb.append(_value);
+  }
+
+  /**
+   * Append to a binary builder.
+   */
+  @Override
+  public void appendTo(BinaryBuilderValue sb)
+  {
+    sb.append(_value);
+  }
+
+  /**
    * Serializes the value.
    */
   public void serialize(StringBuilder sb)

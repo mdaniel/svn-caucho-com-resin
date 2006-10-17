@@ -45,6 +45,7 @@ import javax.mail.internet.InternetHeaders;
 
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.BinaryValue;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.DefaultValue;
 import com.caucho.quercus.env.Env;
@@ -53,6 +54,7 @@ import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.UnicodeValue;
 import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
 
@@ -92,6 +94,25 @@ public class UnicodeModule extends AbstractQuercusModule {
   public Map<String,StringValue> getDefaultIni()
   {
     return _iniMap;
+  }
+
+  public static BooleanValue unicode_semantics(Env env)
+  {
+    return BooleanValue.TRUE;
+  }
+
+  public static UnicodeValue unicode_decode(Env env,
+                              BinaryValue str,
+                              String encoding)
+  {
+    return str.toUnicodeValue(env, encoding);
+  }
+
+  public static BinaryValue unicode_encode(Env env,
+                              UnicodeValue str,
+                              String encoding)
+  {
+    return str.toBinaryValue(env, encoding);
   }
 
   /**
@@ -147,12 +168,12 @@ public class UnicodeModule extends AbstractQuercusModule {
 
     try {
       return decodeMimeHeaders(env, encoded_headers, charset);
-
-    } catch (UnsupportedEncodingException e) {
+    }
+    catch (UnsupportedEncodingException e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(L.l(e.getMessage()));
-
-    } catch (MessagingException e) {
+    }
+    catch (MessagingException e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(L.l(e.getMessage()));
     }
@@ -167,14 +188,16 @@ public class UnicodeModule extends AbstractQuercusModule {
   {
     ArrayValue headers = new ArrayValueImpl();
 
-    Enumeration<Header> enumeration = 
-        new InternetHeaders(encodedHeaders.toInputStream()).getAllHeaders();
+    Enumeration<Header> enumeration
+        = new InternetHeaders(encodedHeaders.toInputStream()).getAllHeaders();
 
     while (enumeration.hasMoreElements()) {
       Header header = enumeration.nextElement();
 
-      StringValue name = IconvUtility.decodeMime(header.getName(), charset);
-      StringValue val = IconvUtility.decodeMime(header.getValue(), charset);
+      StringValue name
+          = IconvUtility.decodeMime(env, header.getName(), charset);
+      StringValue val
+          = IconvUtility.decodeMime(env, header.getValue(), charset);
 
       Value headerName;
       if ((headerName = headers.containsKey(name)) == null) {
@@ -183,8 +206,9 @@ public class UnicodeModule extends AbstractQuercusModule {
       }
 
       ArrayValue inner;
-      if (headerName.isArray())
+      if (headerName.isArray()) {
         inner = headerName.toArrayValue(env);
+      }
       else {
         inner = new ArrayValueImpl();
         inner.put(headerName);
@@ -224,13 +248,14 @@ public class UnicodeModule extends AbstractQuercusModule {
         return BooleanValue.FALSE;
       }
 
-      return IconvUtility.decodeMime(enumeration.nextElement(), charset);
+      return IconvUtility.decodeMime(env, enumeration.nextElement(), charset);
 
-    } catch (MessagingException e) {
+    }
+    catch (MessagingException e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(L.l(e.getMessage()));
-
-    } catch (UnsupportedEncodingException e) {
+    }
+    catch (UnsupportedEncodingException e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(L.l(e.getMessage()));
     }
@@ -283,7 +308,8 @@ public class UnicodeModule extends AbstractQuercusModule {
         }
       }
 
-      return IconvUtility.encodeMime(field_name,
+      return IconvUtility.encodeMime(env,
+                                     field_name,
                                      field_value,
                                      inCharset,
                                      outCharset,
@@ -291,7 +317,8 @@ public class UnicodeModule extends AbstractQuercusModule {
                                      lineBreakChars,
                                      lineLength);
 
-    } catch (UnsupportedEncodingException e) {
+    }
+    catch (UnsupportedEncodingException e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(L.l(e.getMessage()));
 
@@ -342,15 +369,7 @@ public class UnicodeModule extends AbstractQuercusModule {
     if (charset.length() == 0 )
       charset = env.getIniString("iconv.internal_encoding");
 
-    try {
-      return new LongValue(strlen(str, charset));
-
-    } catch (UnsupportedEncodingException e) {
-      log.log(Level.FINE, "Cannot convert from " + charset, e);
-      env.warning(L.l("Cannot convert from " + charset));
-
-      return BooleanValue.FALSE;
-    }
+    return LongValue.create(str.toUnicodeValue(env, charset).length());
   }
 
   /**
@@ -373,24 +392,15 @@ public class UnicodeModule extends AbstractQuercusModule {
     if (charset.length() == 0)
       charset = env.getIniString("iconv.internal_encoding");
 
-    try {
-      haystack = IconvUtility.decode(haystack, charset);
-      needle = IconvUtility.decode(needle, charset);
+    haystack = haystack.toUnicodeValue(env, charset);
+    needle = needle.toUnicodeValue(env, charset);
 
-      int index = haystack.indexOf(needle, offset);
+    int index = haystack.indexOf(needle, offset);
 
-      if (index < 0)
-        return BooleanValue.FALSE;
-
-      return new LongValue(index);
-
-    } catch (UnsupportedEncodingException e) {
-      String error = "Cannot convert from " + charset;
-      log.log(Level.FINE, error, e);
-      env.warning(L.l(error));
-
+    if (index < 0)
       return BooleanValue.FALSE;
-    }
+
+    return LongValue.create(index);
   }
 
   /**
@@ -412,24 +422,15 @@ public class UnicodeModule extends AbstractQuercusModule {
     if (charset.length() == 0)
       charset = env.getIniString("iconv.internal_encoding");
 
-    try {
-      haystack = IconvUtility.decode(haystack, charset);
-      needle = IconvUtility.decode(needle, charset);
+    haystack = haystack.toUnicodeValue(env, charset);
+    needle = needle.toUnicodeValue(env, charset);
 
-      int index = haystack.lastIndexOf(needle);
+    int index = haystack.lastIndexOf(needle);
 
-      if (index < 0)
-        return BooleanValue.FALSE;
-
-      return new LongValue(index);
-
-    } catch (UnsupportedEncodingException e) {
-      String error = "Cannot convert from " + charset;
-      log.log(Level.FINE, error, e);
-      env.warning(L.l(error));
-      
+    if (index < 0)
       return BooleanValue.FALSE;
-    }
+
+    return LongValue.create(index);
   }
 
   /**
@@ -449,41 +450,31 @@ public class UnicodeModule extends AbstractQuercusModule {
                        @Optional("7fffffff") int length,
                        @Optional("") String charset)
   {
-    try {
+    if (charset.length() == 0)
+      charset = env.getIniString("iconv.internal_encoding");
 
-      if (charset.length() == 0)
-        charset = env.getIniString("iconv.internal_encoding");
+    str = str.toUnicodeValue(env, charset);
 
-      str = IconvUtility.decode(str, charset);
+    int tail;
+    int strlen = str.length();
 
-      int tail;
-      int strlen = str.length();
+    // Imitating PHP5 behavior
+    if (offset < 0)
+      offset = strlen + offset;
 
-      // Imitating PHP5 behavior
-      if (offset < 0)
-        offset = strlen + offset;
+    if (length < 0)
+      tail = strlen + length;
+    else if (length > strlen - offset)
+      tail = strlen;
+    else
+      tail = offset + length;
 
-      if (length < 0)
-        tail = strlen + length;
-      else if (length > strlen - offset)
-        tail = strlen;
-      else
-        tail = offset + length;
+    if (offset < 0 || tail < offset)
+      return StringValue.EMPTY;
 
-      if (offset < 0 || tail < offset)
-        return StringValue.EMPTY;
+    str = str.substring(offset, tail);
 
-      str = str.substring(offset, tail);
-
-      return IconvUtility.encode(str, charset);
-
-    } catch (UnsupportedEncodingException e) {
-      String error = "Cannot convert from " + charset;
-      log.log(Level.FINE, error, e);
-      env.warning(L.l(error));
-
-      return BooleanValue.FALSE;
-    }
+    return str.toBinaryValue(env, charset);
   }
 
   /**
@@ -501,12 +492,10 @@ public class UnicodeModule extends AbstractQuercusModule {
   {
     try {
       return IconvUtility.decodeEncode(str, in_charset, out_charset);
-
-    } catch (UnsupportedEncodingException e) {
-
-      String msg = L.l("error converting {1} to {2}", in_charset, out_charset);
-      log.log(Level.FINE, msg, e);
-      env.warning(msg);
+    }
+    catch (UnsupportedEncodingException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(L.l("error converting {1} to {2}", in_charset, out_charset));
 
       return BooleanValue.FALSE;
     }
@@ -517,12 +506,6 @@ public class UnicodeModule extends AbstractQuercusModule {
                        int status)
   {
     throw new UnimplementedException("ob_iconv_handler");
-  }
-
-  private static int strlen(StringValue str, String charset)
-    throws UnsupportedEncodingException
-  {
-    return IconvUtility.decode(str, charset).length();
   }
 
   static {

@@ -168,6 +168,30 @@ public class Var extends Value {
   }
   */
 
+  /**
+   * Returns true for a StringValue.
+   */
+  public boolean isString()
+  {
+    return _value.isString();
+  }
+
+  /**
+   * Returns true for a BinaryValue.
+   */
+  public boolean isBinary()
+  {
+    return _value.isBinary();
+  }
+
+  /**
+   * Returns true for a UnicodeValue.
+   */
+  public boolean isUnicode()
+  {
+    return _value.isUnicode();
+  }
+
   //
   // Conversions
   //
@@ -284,6 +308,14 @@ public class Var extends Value {
    * Append to a string builder.
    */
   public void appendTo(StringBuilderValue sb)
+  {
+    _value.appendTo(sb);
+  }
+
+  /**
+   * Append to a string builder.
+   */
+  public void appendTo(BinaryBuilderValue sb)
   {
     _value.appendTo(sb);
   }

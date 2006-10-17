@@ -85,10 +85,10 @@ public class MbstringModule
     if (mode == MB_CASE_TITLE) {
       encoding = getEncoding(env, encoding);
 
-      str = decode(env, str, encoding);
+      str = str.toUnicodeValue(env, encoding);
       str = toUpperCaseTitle(str);
 
-      return encode(env, str, encoding);
+      return str.toBinaryValue(env, encoding);
     }
     else if (mode == MB_CASE_LOWER)
       return mb_strtolower(env, str, encoding);
@@ -173,7 +173,7 @@ public class MbstringModule
     String encoding = getEncoding(env);
 
     try {
-      return IconvUtility.decodeMime(str, encoding);
+      return IconvUtility.decodeMime(env, str, encoding);
 
     } catch (UnsupportedEncodingException e) {
       throw new QuercusModuleException(e.getMessage());
@@ -257,8 +257,8 @@ public class MbstringModule
   {
     String encoding = getEncoding(env);
 
-    pattern = decode(env, pattern, encoding);
-    string = decode(env, string, encoding);
+    pattern = pattern.toUnicodeValue(env, encoding);
+    string = string.toUnicodeValue(env, encoding);
 
     // XXX: option
 
@@ -281,9 +281,9 @@ public class MbstringModule
   {
     String encoding = getEncoding(env);
 
-    pattern = decode(env, pattern, encoding);
-    replacement = decode(env, replacement, encoding);
-    subject = decode(env, subject, encoding);
+    pattern = pattern.toUnicodeValue(env, encoding);
+    replacement = replacement.toUnicodeValue(env, encoding);
+    subject = subject.toUnicodeValue(env, encoding);
 
     //XXX: option
 
@@ -314,9 +314,9 @@ public class MbstringModule
   {
     String encoding = getEncoding(env);
 
-    pattern = decode(env, pattern, encoding);
-    replacement = decode(env, replacement, encoding);
-    subject = decode(env, subject, encoding);
+    pattern = pattern.toUnicodeValue(env, encoding);
+    replacement = replacement.toUnicodeValue(env, encoding);
+    subject = subject.toUnicodeValue(env, encoding);
 
     //XXX: option
 
@@ -344,8 +344,8 @@ public class MbstringModule
   {
     String encoding = getEncoding(env);
 
-    pattern = decode(env, pattern, encoding);
-    string = decode(env, string, encoding);
+    pattern = pattern.toUnicodeValue(env, encoding);
+    string = string.toUnicodeValue(env, encoding);
 
     if (regs == null) {
       if (isCaseSensitive)
@@ -712,9 +712,9 @@ public class MbstringModule
   {
     String encoding = getEncoding(env);
 
-    subject = encode(env, subject, encoding);
-    message = encode(env, message, encoding);
-    additionalHeaders = encode(env, additionalHeaders, encoding);
+    subject = subject.toBinaryValue(env, encoding);
+    message = message.toBinaryValue(env, encoding);
+    additionalHeaders = additionalHeaders.toBinaryValue(env, encoding);
 
     boolean result = MailModule.mail(env,
                                      to.toString(),
@@ -736,8 +736,8 @@ public class MbstringModule
   {
     String encoding = getEncoding(env);
 
-    pattern = decode(env, pattern, encoding);
-    string = decode(env, string, encoding);
+    pattern = pattern.toUnicodeValue(env, encoding);
+    string = string.toUnicodeValue(env, encoding);
 
     Value val = RegexpModule.split(env, pattern, string, limit);
 
@@ -756,7 +756,7 @@ public class MbstringModule
   {
     encoding = getEncoding(env, encoding);
 
-    str = decode(env, str, encoding);
+    str = str.toUnicodeValue(env, encoding);
 
     int len = str.length();
     int end = start + length;
@@ -773,7 +773,7 @@ public class MbstringModule
 
     str = str.substring(start, end);
 
-    return encode(env, str, encoding);
+    return str.toBinaryValue(env, encoding);
   }
 
   /**
@@ -788,7 +788,7 @@ public class MbstringModule
   {
     encoding = getEncoding(env, encoding);
 
-    str = decode(env, str, encoding);
+    str = str.toUnicodeValue(env, encoding);
 
     int len = str.length();
     int end = start + width;
@@ -805,12 +805,12 @@ public class MbstringModule
       StringBuilderValue sb = new StringBuilderValue();
 
       sb.append(str);
-      sb.append(decode(env, trimmarker, encoding));
+      sb.append(trimmarker.toUnicodeValue(env, encoding));
 
       str = sb;
     }
 
-    return encode(env, str, encoding);
+    return str.toBinaryValue(env, encoding);
   }
 
   /**
@@ -822,7 +822,7 @@ public class MbstringModule
   {
     encoding = getEncoding(env, encoding);
 
-    str = decode(env ,str, encoding);
+    str = str.toUnicodeValue(env, encoding);
 
     return LongValue.create(str.length());
   }
@@ -838,8 +838,8 @@ public class MbstringModule
   {
     encoding = getEncoding(env, encoding);
 
-    haystack = decode(env, haystack, encoding);
-    needle = decode(env, needle, encoding);
+    haystack = haystack.toUnicodeValue(env, encoding);
+    needle = needle.toUnicodeValue(env, encoding);
 
     Value val = StringModule.strpos(haystack, needle, offset);
 
@@ -857,8 +857,8 @@ public class MbstringModule
   {
     encoding = getEncoding(env, encoding);
 
-    haystack = decode(env, haystack, encoding);
-    needle = decode(env, needle, encoding);
+    haystack = haystack.toUnicodeValue(env, encoding);
+    needle = needle.toUnicodeValue(env, encoding);
 
     Value val = StringModule.strrpos(haystack, needle, offsetV);
 
@@ -874,10 +874,10 @@ public class MbstringModule
   {
     encoding = getEncoding(env, encoding);
 
-    str = decode(env, str, encoding);
+    str = str.toUnicodeValue(env, encoding);
     str = new StringValueImpl(StringModule.strtolower(str.toString()));
 
-    return encode(env, str, encoding);
+    return str.toBinaryValue(env, encoding);
   }
 
   /**
@@ -889,24 +889,24 @@ public class MbstringModule
   {
     encoding = getEncoding(env, encoding);
 
-    str = decode(env, str, encoding);
+    str = str.toUnicodeValue(env, encoding);
     str = new StringValueImpl(StringModule.strtoupper(str.toString()));
 
-    return encode(env, str, encoding);
+    return str.toBinaryValue(env, encoding);
   }
 
   /**
    * Returns the width of this multibyte string.
    */
   public static LongValue mb_strwidth(Env env,
-                              StringValue string,
+                              StringValue str,
                               @Optional("") String encoding)
   {
     encoding = getEncoding(env, encoding);
 
-    string = decode(env, string, encoding);
+    str = str.toUnicodeValue(env, encoding);
 
-    return LongValue.create(string.length());
+    return LongValue.create(str.length());
 
 /*
     int width = 0;
@@ -947,8 +947,8 @@ public class MbstringModule
   {
     encoding = getEncoding(env, encoding);
 
-    haystack = decode(env, haystack, encoding);
-    needle = decode(env, needle, encoding);
+    haystack = haystack.toUnicodeValue(env, encoding);
+    needle = needle.toUnicodeValue(env, encoding);
 
     int count = 0;
     int sublen = needle.length();
@@ -974,14 +974,14 @@ public class MbstringModule
   {
     encoding = getEncoding(env, encoding);
 
-    str = decode(env, str, encoding);
+    str = str.toUnicodeValue(env, encoding);
 
     Value val = StringModule.substr(env, str, start, lengthV);
 
     if (val == BooleanValue.FALSE)
       return StringValue.EMPTY;
 
-    return encode(env, val.toStringValue(), encoding);
+    return val.toStringValue().toBinaryValue(env, encoding);
   }
 
 
@@ -1038,17 +1038,6 @@ public class MbstringModule
     env.setRuntimeEncoding(encoding);
   }
 
-  private static StringValue decode(Env env,
-                              StringValue str,
-                              String encoding)
-  {
-    try {
-      return IconvUtility.decode(str, encoding);
-    } catch (UnsupportedEncodingException e) {
-      throw new QuercusModuleException(e.getMessage());
-    }
-  }
-
   /**
    * Recursively decodes objects and arrays.
    */
@@ -1059,7 +1048,7 @@ public class MbstringModule
     val = val.toValue();
 
     if (val instanceof StringValue)
-      return decode(env, (StringValue)val, encoding);
+      return ((StringValue)val).toUnicodeValue(env, encoding);
 
     else if (val instanceof ArrayValue) {
       ArrayValue array = new ArrayValueImpl();
@@ -1085,18 +1074,6 @@ public class MbstringModule
       return val;
   }
 
-  private static StringValue encode(Env env,
-                              StringValue str,
-                              String encoding)
-  {
-    try {
-      return IconvUtility.encode(str, encoding);
-
-    } catch (UnsupportedEncodingException e) {
-      throw new QuercusModuleException(e.getMessage());
-    }
-  }
-
   /**
    * Recursively encodes objects and arrays.
    */
@@ -1107,7 +1084,7 @@ public class MbstringModule
     val = val.toValue();
 
     if (val instanceof StringValue)
-      return encode(env, (StringValue)val, encoding);
+      return ((StringValue)val).toBinaryValue(env, encoding);
 
     else if (val instanceof ArrayValue) {
       ArrayValue array = new ArrayValueImpl();
@@ -1166,7 +1143,7 @@ public class MbstringModule
                  Value pattern,
                  Value option)
     {
-      _string = decode(env, string, getEncoding(env));
+      _string = string.toUnicodeValue(env, getEncoding(env));
       _position = 0;
       _length = _string.length();
 

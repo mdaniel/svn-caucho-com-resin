@@ -152,6 +152,30 @@ abstract public class Value {
   }
 
   /**
+   * Returns true for a StringValue.
+   */
+  public boolean isString()
+  {
+    return false;
+  }
+
+  /**
+   * Returns true for a BinaryValue.
+   */
+  public boolean isBinary()
+  {
+    return false;
+  }
+
+  /**
+   * Returns true for a UnicodeValue.
+   */
+  public boolean isUnicode()
+  {
+    return false;
+  }
+
+  /**
    * Returns true if there are more elements.
    */
   public boolean hasCurrent()
@@ -590,7 +614,7 @@ abstract public class Value {
    */
   public void appendTo(StringBuilderValue sb)
   {
-    System.out.println("APPEND: " + toString());
+    //System.out.println("APPEND: " + toString());
     sb.append(toString());
   }
 
