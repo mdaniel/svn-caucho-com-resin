@@ -53,13 +53,16 @@ public class BeanELResolver extends ELResolver {
   
   public BeanELResolver(boolean isReadOnly)
   {
-    _isReadOnly = true;
+    _isReadOnly = isReadOnly;
   }
 
   @Override
   public Class<?> getCommonPropertyType(ELContext context, Object base)
   {
-    return null;
+    if (base == null)
+      return null;
+    
+    return Object.class;
   }
 
   @Override

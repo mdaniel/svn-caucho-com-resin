@@ -138,8 +138,8 @@ public class JavaJspGenerator extends JspGenerator {
   private ArrayList<com.caucho.el.Expr> _exprList =
   new ArrayList<com.caucho.el.Expr>();
   
-  private ArrayList<com.caucho.el.Expr> _valueExprList =
-  new ArrayList<com.caucho.el.Expr>();
+  private ArrayList<ValueExpr> _valueExprList =
+  new ArrayList<ValueExpr>();
   
   private ArrayList<MethodExpr> _methodExprList =
   new ArrayList<MethodExpr>();
@@ -1161,7 +1161,7 @@ public class JavaJspGenerator extends JspGenerator {
   /**
    * Adds an expression to the expression list.
    */
-  public int addValueExpr(String value)
+  public int addValueExpr(String value, String type)
     throws JspParseException, ELException
   {
     JspELParser parser = new JspELParser(_elContext, value);
@@ -1173,7 +1173,15 @@ public class JavaJspGenerator extends JspGenerator {
       return index;
 
     index = _valueExprList.size();
-    _valueExprList.add(expr);
+
+    try {
+      if (type == null || type.equals(""))
+	_valueExprList.add(new ValueExpr(expr, null));
+      else
+	_valueExprList.add(new ValueExpr(expr, getBeanClass(type)));
+    } catch (ClassNotFoundException e) {
+      throw new ELException(e);
+    }
 
     return index;
   }
@@ -1188,6 +1196,7 @@ public class JavaJspGenerator extends JspGenerator {
 
     com.caucho.el.Expr expr = parser.parse();
 
+    Class retType = String.class;
     Class []args = new Class[0];
 
     try {
@@ -1201,12 +1210,14 @@ public class JavaJspGenerator extends JspGenerator {
 	for (int i = 0; i < types.length; i++) {
 	  args[i] = getBeanClass(types[i]);
 	}
+
+	retType = getBeanClass(sig.getReturnType());
       }
     } catch (ClassNotFoundException e) {
       throw new ELException(e);
     }
 
-    MethodExpr methodExpr = new MethodExpr(expr, args);
+    MethodExpr methodExpr = new MethodExpr(expr, args, retType);
 
     int index = _methodExprList.indexOf(methodExpr);
     if (index >= 0)
@@ -1233,11 +1244,36 @@ public class JavaJspGenerator extends JspGenerator {
     }
     
     for (int i = 0; i < _valueExprList.size(); i++) {
-      com.caucho.el.Expr expr = _valueExprList.get(i);
+      ValueExpr expr = _valueExprList.get(i);
+
+      String exprType = "ObjectValueExpression";
+
+      if (String.class.equals(expr.getReturnType()))
+	exprType = "StringValueExpression";
+      else if (Byte.class.equals(expr.getReturnType()))
+	exprType = "ByteValueExpression";
+      else if (Short.class.equals(expr.getReturnType()))
+	exprType = "ShortValueExpression";
+      else if (Integer.class.equals(expr.getReturnType()))
+	exprType = "IntegerValueExpression";
+      else if (Long.class.equals(expr.getReturnType()))
+	exprType = "LongValueExpression";
+      else if (Float.class.equals(expr.getReturnType()))
+	exprType = "FloatValueExpression";
+      else if (Double.class.equals(expr.getReturnType()))
+	exprType = "DoubleValueExpression";
       
       out.println("private final static javax.el.ValueExpression _caucho_value_expr_" + i + " = new com.caucho.el.ObjectValueExpression(");
       out.print("  ");
-      expr.printCreate(out.getWriteStream());
+      expr.getExpr().printCreate(out.getWriteStream());
+      out.print(", \"");
+      out.printJavaString(expr.getExpr().getExpressionString());
+      out.print("\"");
+      if (expr.getReturnType() != null) {
+	out.print(", ");
+	out.printClass(expr.getReturnType());
+	out.print(".class");
+      }
       out.println(");");
     }
     
@@ -1249,7 +1285,9 @@ public class JavaJspGenerator extends JspGenerator {
       expr.getExpr().printCreate(out.getWriteStream());
       out.print(", \"");
       out.printJavaString(expr.getExpr().toString());
-      out.print("\", String.class, new Class[] {");
+      out.print("\", ");
+      out.printClass(expr.getReturnType());
+      out.print(".class, new Class[] {");
 
       Class []args = expr.getArgs();
       for (int j = 0; j < args.length; j++) {
@@ -1926,11 +1964,13 @@ public class JavaJspGenerator extends JspGenerator {
   static class MethodExpr {
     com.caucho.el.Expr _expr;
     Class []_args;
+    Class _retType;
 
-    MethodExpr(com.caucho.el.Expr expr, Class []args)
+    MethodExpr(com.caucho.el.Expr expr, Class []args, Class retType)
     {
       _expr = expr;
       _args = args;
+      _retType = retType;
     }
 
     com.caucho.el.Expr getExpr()
@@ -1941,6 +1981,32 @@ public class JavaJspGenerator extends JspGenerator {
     Class []getArgs()
     {
       return _args;
+    }
+
+    Class getReturnType()
+    {
+      return _retType;
+    }
+  }
+
+  static class ValueExpr {
+    com.caucho.el.Expr _expr;
+    Class _retType;
+
+    ValueExpr(com.caucho.el.Expr expr, Class retType)
+    {
+      _expr = expr;
+      _retType = retType;
+    }
+
+    com.caucho.el.Expr getExpr()
+    {
+      return _expr;
+    }
+
+    Class getReturnType()
+    {
+      return _retType;
     }
   }
 

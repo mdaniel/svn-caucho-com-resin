@@ -411,6 +411,9 @@ public class PageContextImpl extends PageContext
 
   public void removeAttribute(String name, int scope)
   {
+    if (name == null)
+      throw new NullPointerException(L.l("removeAttribute must have a non-null name"));
+    
     switch (scope) {
     case PAGE_SCOPE:
       if (name != null)

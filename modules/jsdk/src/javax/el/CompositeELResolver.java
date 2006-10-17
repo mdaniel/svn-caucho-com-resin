@@ -55,21 +55,29 @@ public class CompositeELResolver extends ELResolver {
   @Override
   public Class<?> getCommonPropertyType(ELContext env, Object base)
   {
+    Class commonClass = null;
+    
     int size = _resolvers.size();
     for (int i = 0; i < size; i++) {
       ELResolver resolver = _resolvers.get(i);
 
-      return getCommonPropertyType(env, base);
+      Class cl = resolver.getCommonPropertyType(env, base);
+
+      if (cl == null)
+	continue;
+
+      commonClass = cl;
     }
 
-    return null;
+    return commonClass;
   }
 
   @Override
   public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext env,
 							   Object base)
   {
-    ArrayList<FeatureDescriptor> descriptors = null;
+    ArrayList<FeatureDescriptor> descriptors
+      = new ArrayList<FeatureDescriptor>();
 
     int size = _resolvers.size();
     for (int i = 0; i < size; i++) {
@@ -77,50 +85,34 @@ public class CompositeELResolver extends ELResolver {
 
       Iterator<FeatureDescriptor> iter
 	= resolver.getFeatureDescriptors(env, base);
-
-      if (! env.isPropertyResolved())
-	continue;
       
       if (iter == null)
-	return null;
-
-      /*
-      if (descriptors == null)
-	descriptors = new ArrayList<FeatureDescriptor>();
+	continue;
 
       while (iter.hasNext()) {
 	FeatureDescriptor desc = iter.next();
 
 	descriptors.add(desc);
       }
-      */
-
-      return iter;
     }
 
-    /*
-    if (descriptors != null)
-      return descriptors.iterator();
-    else
-      return null;
-    */
-    return null;
+    return descriptors.iterator();
   }
 
   @Override
-  public Class<?> getType(ELContext context,
+  public Class<?> getType(ELContext env,
 			  Object base,
 			  Object property)
   {
-    context.setPropertyResolved(false);
+    env.setPropertyResolved(false);
 
     int size = _resolvers.size();
     for (int i = 0; i < size; i++) {
       ELResolver resolver = _resolvers.get(i);
 
-      Class type = resolver.getType(context, base, property);
+      Class type = resolver.getType(env, base, property);
 
-      if (context.isPropertyResolved())
+      if (env.isPropertyResolved())
 	return type;
     }
 

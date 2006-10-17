@@ -80,7 +80,7 @@ public class ConnectionPool extends AbstractManagedObject
   private UserTransactionProxy _tm;
 
   // the maximum number of connections
-  private int _maxConnections = 20;
+  private int _maxConnections = 128;
 
   // the maximum number of overflow connections
   private int _maxOverflowConnections = 0;

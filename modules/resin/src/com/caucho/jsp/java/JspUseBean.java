@@ -135,22 +135,13 @@ public class JspUseBean extends JspContainerNode {
     if (_scope == null || _scope.equals("page"))
       context = "pageContext";
     else if (_scope.equals("request")) {
-      if (_gen.isTag() && ! _gen.hasScripting())
-	context = "pageContext.getRequest()";
-      else
-	context = "request";
+      context = "pageContext.getRequest()";
     }
     else if (_scope.equals("session")) {
-      if (_gen.isTag() && ! _gen.hasScripting())
-	context = "pageContext.getSession()";
-      else
-	context = "session";
+      context = "pageContext.getSession()";
     }
     else if (_scope.equals("application")) {
-      if (_gen.isTag() && ! _gen.hasScripting())
-	context = "pageContext.getApplication()";
-      else
-	context = "application";
+      context = "pageContext.getApplication()";
     }
     else
       throw error(L.l("Unknown scope `{0}' in <jsp:useBean>.  Scope must be `page', `request', `session', or `application'.", _scope));

@@ -1043,10 +1043,12 @@ public abstract class JspNode {
       else if (ValueExpression.class.isAssignableFrom(type)) {
         int exprIndex;
 
+	String typeName = attrInfo != null ? attrInfo.getExpectedTypeName() : "";
+
         if (isEmpty)
-          exprIndex = _gen.addValueExpr("");
+          exprIndex = _gen.addValueExpr("", typeName);
         else
-          exprIndex = _gen.addValueExpr(value);
+          exprIndex = _gen.addValueExpr(value, typeName);
       
         return ("_caucho_value_expr_" + exprIndex);
       }
@@ -1100,7 +1102,7 @@ public abstract class JspNode {
     else if (ValueExpression.class.isAssignableFrom(type)) {
       int exprIndex;
 
-      exprIndex = _gen.addValueExpr(value);
+      exprIndex = _gen.addValueExpr(value, "");
       
       return ("_caucho_value_expr_" + exprIndex);
     }

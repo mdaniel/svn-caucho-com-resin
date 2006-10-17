@@ -109,6 +109,7 @@ jsp20_tag-file = element tag-file {
   element tag-extension { jsp20_extension-Type }*
 }
 
+## XXX: tck requires short-name to be optional
 jsp20_taglib = element taglib {
   attribute version { "2.0" },
 
@@ -118,7 +119,7 @@ jsp20_taglib = element taglib {
 
   element tlib-version { j2ee_dewey-version },
 
-  element short-name { string },
+  element short-name { string }?,
 
   element uri { string }?,
 

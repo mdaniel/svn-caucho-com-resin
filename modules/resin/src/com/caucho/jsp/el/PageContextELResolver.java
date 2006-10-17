@@ -63,7 +63,41 @@ public class PageContextELResolver extends AbstractVariableResolver {
   {
     return _customResolvers;
   }
+
+  @Override
+  public Class<?> getCommonPropertyType(ELContext env,
+					Object base)
+  {
+    Class common = null;
+
+    common = common(common, _mapResolver.getCommonPropertyType(env, base));
+    common = common(common, _listResolver.getCommonPropertyType(env, base));
+    common = common(common, _arrayResolver.getCommonPropertyType(env, base));
+    common = common(common, _beanResolver.getCommonPropertyType(env, base));
+
+    for (int i = 0; i < _customResolvers.length; i++) {
+      common = common(common,
+		      _customResolvers[i].getCommonPropertyType(env, base));
+    }
+    
+    return common;
+  }
+
+  private static Class common(Class a, Class b)
+  {
+    if (a == null)
+      return b;
+    else if (b == null)
+      return a;
+    else if (a.isAssignableFrom(b))
+      return a;
+    else if (b.isAssignableFrom(a))
+      return b;
+    else // XXX:
+      return Object.class;
+  }
   
+  @Override
   public Object getValue(ELContext env, Object base, Object property)
   {
     env.setPropertyResolved(false);

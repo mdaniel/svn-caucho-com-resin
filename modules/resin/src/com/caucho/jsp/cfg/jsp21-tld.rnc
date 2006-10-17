@@ -25,9 +25,7 @@ jsp21_attribute = element attribute {
 
     element type { javaee_fully-qualified-class }?,
 
-    (jsp21_deferred-value?
-
-     | jsp21_deferred-method?))
+   (jsp21_deferred-value | jsp21_deferred-method)?)
 
    | element fragment { javaee_generic-boolean }?)
 }

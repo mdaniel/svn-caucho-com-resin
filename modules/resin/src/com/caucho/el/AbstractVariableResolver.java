@@ -92,7 +92,7 @@ public class AbstractVariableResolver extends ELResolver
   // ELResolver stubs
   //
 
-
+  @Override
   public Class<?> getCommonPropertyType(ELContext context,
 					Object base)
   {

@@ -72,7 +72,30 @@ public class MapELResolver extends ELResolver {
     if (base instanceof Map) {
       context.setPropertyResolved(true);
 
-      return null;
+      ArrayList<FeatureDescriptor> keys = new ArrayList<FeatureDescriptor>();
+
+      for (Object key : ((Map) base).keySet()) {
+	String name = String.valueOf(key);
+
+	FeatureDescriptor desc = new FeatureDescriptor();
+	desc.setName(name);
+	desc.setDisplayName(name);
+	desc.setShortDescription("");
+	desc.setExpert(false);
+	desc.setHidden(false);
+	desc.setPreferred(true);
+
+	if (key == null)
+	  desc.setValue(ELResolver.TYPE, null);
+	else
+	  desc.setValue(ELResolver.TYPE, key.getClass());
+	
+	desc.setValue(ELResolver.RESOLVABLE_AT_DESIGN_TIME, Boolean.TRUE);
+	
+	keys.add(desc);
+      }
+
+      return keys.iterator();
     }
     else {
       return null;

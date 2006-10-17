@@ -63,6 +63,36 @@ public class StringLiteral extends Expr {
   {
     return true;
   }
+
+  /**
+   * Evaluates the expression, returning an object.
+   *
+   * @param env the variable environment
+   *
+   * @return the value of the expression as an object
+   */
+  @Override
+  public MethodInfo getMethodInfo(ELContext env,
+				  Class<?> returnType,
+				  Class<?> []argTypes)
+    throws ELException
+  {
+    return new MethodInfo(_value, returnType, argTypes);
+  }
+
+  /**
+   * Evaluates the expression, returning an object.
+   *
+   * @param env the variable environment
+   *
+   * @return the value of the expression as an object
+   */
+  @Override
+  public Object invoke(ELContext env, Class<?> []argTypes, Object []args)
+    throws ELException
+  {
+    return _value;
+  }
   
   /**
    * Returns the value of the literal.

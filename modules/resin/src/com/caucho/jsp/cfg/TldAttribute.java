@@ -44,6 +44,7 @@ public class TldAttribute {
   private boolean _isFragment;
 
   private DeferredMethod _deferredMethod;
+  private DeferredValue _deferredValue;
 
   /**
    * Sets the attribute name.
@@ -141,8 +142,17 @@ public class TldAttribute {
   /**
    * Sets the deferred value.
    */
-  public void setDeferredValue(String v)
+  public void setDeferredValue(DeferredValue v)
   {
+    _deferredValue = v;
+  }
+
+  /**
+   * Sets the deferred value.
+   */
+  public DeferredValue getDeferredValue()
+  {
+    return _deferredValue;
   }
 
   /**
@@ -155,12 +165,10 @@ public class TldAttribute {
 
   public String getExpectedType()
   {
-    return null;
-  }
-
-  public DeferredValue getDeferredValue()
-  {
-    return null;
+    if (_deferredValue != null)
+      return _deferredValue.getType();
+    else
+      return null;
   }
 
   public DeferredMethod getDeferredMethod()
@@ -180,12 +188,6 @@ public class TldAttribute {
     return null;
   }
 
-  public static class DeferredValue {
-    public void setExpectedType(String type)
-    {
-    }
-  }
-
   public static class DeferredMethod {
     private Signature _signature;
 
@@ -197,6 +199,24 @@ public class TldAttribute {
     public Signature getMethodSignature()
     {
       return _signature;
+    }
+  }
+
+  public static class DeferredValue {
+    private String _type;
+
+    public void setId(String id)
+    {
+    }
+
+    public void setType(String type)
+    {
+      _type = type;
+    }
+
+    public String getType()
+    {
+      return _type;
     }
   }
 }

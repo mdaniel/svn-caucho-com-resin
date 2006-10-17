@@ -145,7 +145,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   private String _password;
 
   // total connections allowed in this pool
-  private int _maxConnections = 20;
+  private int _maxConnections = 128;
   // time before an idle connection is closed
   private long _maxIdleTime = MAX_IDLE_TIME;
   // max time a connection is allowed to be active (6 hr)
@@ -174,7 +174,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   // Ping when the connection is reused.
   private boolean _isPing;
   // How long between pings
-  private long _pingInterval;
+  private long _pingInterval = 1000;
 
   // True if the pool is transactional
   private boolean _isTransactional = true;
