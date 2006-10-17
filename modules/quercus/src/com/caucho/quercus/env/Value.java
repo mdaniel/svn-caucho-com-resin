@@ -623,7 +623,7 @@ abstract public class Value {
    */
   public void appendTo(BinaryBuilderValue sb)
   {
-    sb.append(toString());
+    sb.appendBytes(toString());
   }
 
   /**

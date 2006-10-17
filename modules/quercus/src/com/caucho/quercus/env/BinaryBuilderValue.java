@@ -677,6 +677,8 @@ public class BinaryBuilderValue extends BinaryValue {
    */
   public StringValue appendBytes(String s)
   {
+    //XXX: encoding?
+
     int sublen = s.length();
 
     if (_buffer.length < _length + sublen)
