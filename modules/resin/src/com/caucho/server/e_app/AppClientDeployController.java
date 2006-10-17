@@ -190,30 +190,51 @@ public class AppClientDeployController extends ExpandDeployController<EntAppClie
       appClient.setArchivePath(getArchivePath());
 
       rootDir = getRootDirectory();
-	
+
       if (rootDir == null)
-	throw new NullPointerException("Null root-directory");
+        throw new NullPointerException("Null root-directory");
 
       /*
         if (! rootDir.isDirectory()) {
-	throw new ConfigException(L.l("root-directory `{0}' must specify a directory.",
-	rootDir.getPath()));
+        throw new ConfigException(L.l("root-directory `{0}' must specify a directory.",
+        rootDir.getPath()));
         }
       */
 
       appClient.setRootDirectory(rootDir);
-	
+
       thread.setContextClassLoader(appClient.getClassLoader());
       Vfs.setPwd(rootDir);
 
       addManifestClassPath();
 
       configApplication(appClient);
-      
-      configClientApplication(appClient);
+
+      // configClientApplication(appClient);
+
+      Path curr = rootDir;
+
+      Iterator<String> it = curr.iterator();
+
+      while (it.hasNext()) {
+
+        String s = it.next();
+
+        Path path = curr.lookup(s);
+
+        if (path.isDirectory()) {
+        }
+        else if (s.endsWith(".jar")) {
+          appClient.getClassLoader().addJar(path);
+
+          _clientJar = JarPath.create(path);
+
+          configClientApplication(appClient);
+        }
+      }
 
       for (int i = 0; i < _configList.size(); i++)
-	configClientConfig(appClient, _configList.get(i));
+        configClientConfig(appClient, _configList.get(i));
 
       appClient.init();
     } finally {
@@ -225,53 +246,53 @@ public class AppClientDeployController extends ExpandDeployController<EntAppClie
     throws Exception
   {
     Path rootDir = getRootDirectory();
-    
+
     Path xml = rootDir.lookup("META-INF/application.xml");
 
     new Config().configureBean(appClient, xml);
 
     /*
      * XXX:
-    config = EnterpriseApplication.parseApplicationConfig(rootDir, xml);
+     config = EnterpriseApplication.parseApplicationConfig(rootDir, xml);
     */
-      
-    /*
-    ArrayList<Path> ejbModules = config.getEjbModules();
-    EJBClientInterface ejbClient = null;
 
-    if (ejbModules.size() > 0) {
+    /*
+      ArrayList<Path> ejbModules = config.getEjbModules();
+      EJBClientInterface ejbClient = null;
+
+      if (ejbModules.size() > 0) {
       Class cl = Class.forName("com.caucho.iiop.IiopClient");
       ejbClient = (EJBClientInterface) cl.newInstance();
-    }
+      }
     */
 
     /*
-    for (int i = 0; i < ejbModules.size(); i++) {
+      for (int i = 0; i < ejbModules.size(); i++) {
       Path path = ejbModules.get(i);
 
       appClient.getClassLoader().addJar(path);
 
       if (ejbClient != null)
-	ejbClient.addEJBJar(path);
-    }
+      ejbClient.addEJBJar(path);
+      }
 
-    if (ejbClient != null)
+      if (ejbClient != null)
       ejbClient.initEJBs();
 
-    ArrayList<Path> javaModules = config.getJavaModules();
+      ArrayList<Path> javaModules = config.getJavaModules();
 
-    for (int i = 0; i < javaModules.size(); i++) {
+      for (int i = 0; i < javaModules.size(); i++) {
       Path path = javaModules.get(i);
 
       appClient.getClassLoader().addJar(path);
-	
+
       _clientJar = JarPath.create(path);
 
       Manifest manifest = _clientJar.getManifest();
       String mainClass = manifest.getMainAttributes().getValue("Main-Class");
 
       appClient.setMainClass(mainClass);
-    }
+      }
     */
   }
 
@@ -280,14 +301,14 @@ public class AppClientDeployController extends ExpandDeployController<EntAppClie
   {
     if (_clientJar == null)
       return;
-    
+
     Path xml = _clientJar.lookup("META-INF/application-client.xml");
 
     if (! xml.canRead())
       return;
-    
+
     new Config().configureBean(appClient, xml,
-			   "com/caucho/server/e_app/app-client.rnc");
+                               "com/caucho/server/e_app/app-client.rnc");
   }
 
   private void configClientConfig(EntAppClient appClient, Path xml)
@@ -295,7 +316,7 @@ public class AppClientDeployController extends ExpandDeployController<EntAppClie
   {
     if (! xml.canRead())
       return;
-    
+
     new Config().configureBean(appClient, xml);
   }
 
