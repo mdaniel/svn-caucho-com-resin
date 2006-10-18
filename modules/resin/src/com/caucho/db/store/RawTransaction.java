@@ -67,6 +67,14 @@ public class RawTransaction extends StoreTransaction {
   }
 
   /**
+   * Adds an update block
+   */
+  public void addUpdateBlock(Block block)
+    throws IOException
+  {
+  }
+
+  /**
    * Returns a modified block.
    */
   public Block createAutoCommitWriteBlock(Block block)
