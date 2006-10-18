@@ -47,7 +47,7 @@ public class TagInfoImpl extends TagInfoExt {
     super(tag.getName(),
 	  tag.getTagClassName(),
 	  tag.getBodyContent(),
-	  tag.getInfo(),
+	  tag.getDescription() != null ? tag.getDescription() : tag.getInfo(),
 	  taglib,
 	  tag.getTagExtraInfo(),
 	  tag.getAttributes(),
@@ -55,6 +55,7 @@ public class TagInfoImpl extends TagInfoExt {
 	  tag.getSmallIcon(),
 	  tag.getLargeIcon(),
 	  tag.getVariables(),
+	  tag.getDynamicAttributes(),
 	  tag.getDynamicAttributeName(),
 	  tag.getDependencyList());
 

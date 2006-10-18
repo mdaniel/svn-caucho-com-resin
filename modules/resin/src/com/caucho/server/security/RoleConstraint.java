@@ -79,7 +79,7 @@ public class RoleConstraint extends AbstractConstraint {
       }
     }
     
-    response.sendError(HttpServletResponse.SC_FORBIDDEN, null);
+    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, null);
 
     return false;
   }

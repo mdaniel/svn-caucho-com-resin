@@ -30,6 +30,7 @@
 package com.caucho.jsp;
 
 import java.io.*;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.logging.*;
 import java.util.zip.*;
@@ -70,8 +71,10 @@ public class TaglibManager {
   private String _tldDir;
   private FileSetType _tldFileSet;
 
-  private HashMap<String,String> _uriLocationMap =
-    new HashMap<String,String>();
+  private TagFileManager _tagFileManager;
+
+  private HashMap<String,String> _uriLocationMap
+    = new HashMap<String,String>();
   private HashMap<String,TldTaglib> _tldMap = new HashMap<String,TldTaglib>();
   private HashMap<String,Taglib> _taglibMap = new HashMap<String,Taglib>();
   private HashMap<String,Taglib> _taglibDirMap = new HashMap<String,Taglib>();
@@ -81,13 +84,17 @@ public class TaglibManager {
   private volatile boolean _isInit;
 
   public TaglibManager(JspResourceManager resourceManager,
-		       WebApp webApp)
+		       WebApp webApp,
+		       TagFileManager tagFileManager)
     throws JspParseException, IOException
   {
     _resourceManager = resourceManager;
     _webApp = webApp;
 
     _tldManager = TldManager.create(resourceManager, webApp);
+    _tagFileManager = tagFileManager;
+
+    _webApp.getJspApplicationContext().setTaglibManager(this);
   }
 
   /**
@@ -196,12 +203,38 @@ public class TaglibManager {
 
     TldTaglib tldTaglib = new TldTaglib();
     
-    taglib = new Taglib(prefix, "urn:jsptagdir:" + dir, tldTaglib);
+    taglib = new Taglib(prefix, "urn:jsptagdir:" + dir,
+			tldTaglib,
+			_tagFileManager);
 
     if (taglib != null)
       _taglibDirMap.put(dir, taglib);
 
     return taglib;
+  }
+
+  /**
+   * Returns the taglib with the given prefix and uri.
+   */
+  public void addTaglibFunctions(HashMap<String,Method> functionMap,
+				 String prefix,
+				 String uri)
+    throws JspParseException
+  {
+    Taglib taglib = _taglibMap.get(uri);
+
+    if (taglib == null)
+      return;
+			 
+    ArrayList<TldFunction> functions = taglib.getFunctionList();
+
+    for (int i = 0; i < functions.size(); i++) {
+      TldFunction function = functions.get(i);
+
+      String name = prefix + ":" + function.getName();
+
+      functionMap.put(name, function.getMethod());
+    }
   }
 
   /**
@@ -231,7 +264,7 @@ public class TaglibManager {
 	if (tldTaglib.getConfigException() != null)
 	  throw JspParseException.create(tldTaglib.getConfigException());
 	
-	return new Taglib(prefix, uri, tldTaglib);
+	return new Taglib(prefix, uri, tldTaglib, _tagFileManager);
       }
       else
 	return null;

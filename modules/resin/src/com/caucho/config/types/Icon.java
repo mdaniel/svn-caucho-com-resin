@@ -53,12 +53,22 @@ public class Icon {
     _smallIcon = value;
   }
 
+  public String getSmallIcon()
+  {
+    return _smallIcon;
+  }
+
   /**
    * Sets the large icon
    */
   public void setLargeIcon(String value)
   {
     _largeIcon = value;
+  }
+
+  public String getLargeIcon()
+  {
+    return _largeIcon;
   }
 
   public String toString()

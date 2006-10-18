@@ -264,7 +264,7 @@ public class WebApp extends ServletContextImpl
   private int _jspState;
   private JspPropertyGroup _jsp;
   private ArrayList<JspTaglib> _taglibList;
-  private JspApplicationContext _jspApplicationContext;
+  private JspApplicationContextImpl _jspApplicationContext;
   private HashMap<String,Object> _extensions = new HashMap<String,Object>();
   
   private MultipartForm _multipartForm;
@@ -1256,7 +1256,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Returns the JspApplicationContext for EL evaluation.
    */
-  public JspApplicationContext getJspApplicationContext()
+  public JspApplicationContextImpl getJspApplicationContext()
   {
     return _jspApplicationContext;
   }

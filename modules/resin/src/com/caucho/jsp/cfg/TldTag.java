@@ -123,6 +123,10 @@ public class TldTag implements DependencyBean {
    */
   public void setIcon(com.caucho.config.types.Icon icon)
   {
+    if (icon != null) {
+      _smallIcon = icon.getSmallIcon();
+      _largeIcon = icon.getLargeIcon();
+    }
   }
 
   /**
@@ -389,7 +393,7 @@ public class TldTag implements DependencyBean {
   }
 
   /**
-   * Returns the attributes.
+   * Returns the variables.
    */
   public TagVariableInfo []getVariables()
   {
@@ -435,9 +439,6 @@ public class TldTag implements DependencyBean {
    */
   public TagAttributeInfo []getAttributes()
   {
-    if (_attributeList.size() == 0)
-      return null;
-    
     TagAttributeInfo []attributes;
 
     attributes = new TagAttributeInfo[_attributeList.size()];

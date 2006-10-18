@@ -103,7 +103,10 @@ public class TldVariable {
    */
   public String getVariableClass()
   {
-    return _variableClass;
+    if (_variableClass != null)
+      return _variableClass;
+    else
+      return "java.lang.String";
   }
 
   /**

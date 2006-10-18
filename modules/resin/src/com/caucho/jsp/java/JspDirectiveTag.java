@@ -72,6 +72,8 @@ public class JspDirectiveTag extends JspNode {
   public void addAttribute(QName name, String value)
     throws JspParseException
   {
+    JavaTagGenerator gen = (JavaTagGenerator) _gen;
+
     if (IS_EL_IGNORED.equals(name)) {
       boolean isIgnored = value.equals("true");
 
@@ -111,12 +113,11 @@ public class JspDirectiveTag extends JspNode {
     else if (LARGE_ICON.equals(name)) {
     }
     else if (DESCRIPTION.equals(name)) {
+      gen.setDescription(value);
     }
     else if (EXAMPLE.equals(name)) {
     }
     else if (DYNAMIC_ATTRIBUTES.equals(name)) {
-      JavaTagGenerator gen = (JavaTagGenerator) _gen;
-
       gen.setDynamicAttributes(value);
     }
     else if (BODY_CONTENT.equals(name)) {
@@ -128,7 +129,7 @@ public class JspDirectiveTag extends JspNode {
 	throw error(L.l("`{0}' is an unknown body-content value for the JSP tag directive attribute.  'scriptless', 'tagdependent', and 'empty' are the allowed values.",
                       value));
 
-      ((JavaTagGenerator) _gen).setBodyContent(value);
+      gen.setBodyContent(value);
     }
     else {
       throw error(L.l("`{0}' is an unknown JSP tag directive attribute.  See the JSP documentation for a complete list of tag directive attributes.",

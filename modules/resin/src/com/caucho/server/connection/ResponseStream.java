@@ -184,11 +184,12 @@ class ResponseStream extends ToByteResponseStream {
   }
 
   public void clear()
+    throws IOException
   {
     clearBuffer();
     
     if (_isCommitted)
-      throw new IllegalStateException(L.l("can't clear response after writing headers"));
+      throw new IOException(L.l("can't clear response after writing headers"));
   }
   
   public void clearBuffer()

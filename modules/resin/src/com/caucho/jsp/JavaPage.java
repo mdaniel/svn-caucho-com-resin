@@ -41,7 +41,8 @@ import javax.servlet.jsp.HttpJspPage;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public abstract class JavaPage extends Page implements HttpJspPage {
+public abstract class JavaPage extends Page implements HttpJspPage
+{
   public void init(ServletConfig config)
     throws ServletException
   {

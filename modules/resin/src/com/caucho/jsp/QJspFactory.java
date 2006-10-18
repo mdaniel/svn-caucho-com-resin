@@ -41,7 +41,7 @@ import com.caucho.server.webapp.WebApp;
 
 public class QJspFactory extends JspFactory {
   private static JspEngineInfo _engineInfo = new EngineInfo();
-  
+
   private static FreeList<PageContextImpl> _freePages =
     new FreeList<PageContextImpl>(32);
   

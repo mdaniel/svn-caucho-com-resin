@@ -52,6 +52,9 @@ public class HttpResponse extends AbstractHttpResponse {
   static final byte []_contentLengthBytes = "\r\nContent-Length: ".getBytes();
   static final byte []_contentTypeBytes = "\r\nContent-Type: ".getBytes();
   static final byte []_textHtmlBytes = "\r\nContent-Type: text/html".getBytes();
+  static final byte []_charsetBytes = "; charset=".getBytes();
+  static final byte []_textHtmlLatin1Bytes = "\r\nContent-Type: text/html; charset=iso-8859-1".getBytes();
+  
   static final byte []_connectionCloseBytes = "\r\nConnection: close".getBytes();
 
   final byte []_resinServerBytes;
@@ -264,18 +267,28 @@ public class HttpResponse extends AbstractHttpResponse {
     }
 
     String contentType = _contentType;
-    if (contentType == "text/html") {
-      os.write(_textHtmlBytes, 0, _textHtmlBytes.length);
-
-      if (debug)
-        log.fine(_request.dbgId() + "Content-Type: text/html");
+    if (contentType == null) {
     }
-    else if (contentType != null) {
+    else if (contentType != "text/html") {
       os.write(_contentTypeBytes, 0, _contentTypeBytes.length);
       os.print(contentType);
 
-      if (debug)
-        log.fine(_request.dbgId() + "Content-Type: " + contentType);
+      if (_charEncoding != null) {
+	os.write(_charsetBytes, 0, _charsetBytes.length);
+	os.print(_charEncoding);
+      }
+      else if (_hasWriter) {
+	os.write(_charsetBytes, 0, _charsetBytes.length);
+	os.print("iso-8859-1");
+      }
+    }
+    else if (_charEncoding != null) {
+      os.write(_textHtmlBytes, 0, _textHtmlBytes.length);
+      os.write(_charsetBytes, 0, _charsetBytes.length);
+      os.print(_charEncoding);
+    }
+    else {
+      os.write(_textHtmlLatin1Bytes, 0, _textHtmlLatin1Bytes.length);
     }
 
     boolean hasContentLength = false;

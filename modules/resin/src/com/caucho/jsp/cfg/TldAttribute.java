@@ -30,6 +30,8 @@ package com.caucho.jsp.cfg;
 
 import java.util.ArrayList;
 
+import javax.servlet.jsp.tagext.*;
+
 import com.caucho.config.types.Signature;
 
 /**
@@ -39,7 +41,7 @@ public class TldAttribute {
   private String _name;
   private boolean _required;
   private boolean _rtexprvalue;
-  private Class _type = String.class;
+  private Class _type;
   private String _description;
   private boolean _isFragment;
 
@@ -136,7 +138,12 @@ public class TldAttribute {
    */
   public Class getType()
   {
-    return _type;
+    if (_type != null)
+      return _type;
+    else if (isFragment())
+      return JspFragment.class;
+    else
+      return String.class;
   }
 
   /**

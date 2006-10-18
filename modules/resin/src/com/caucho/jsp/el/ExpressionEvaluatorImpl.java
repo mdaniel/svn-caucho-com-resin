@@ -31,8 +31,10 @@ package com.caucho.jsp.el;
 
 import java.io.*;
 import java.util.*;
+import java.lang.reflect.Method;
 
 import javax.el.ELContext;
+import javax.el.ELResolver;
 
 import javax.servlet.http.*;
 import javax.servlet.jsp.*;
@@ -77,7 +79,14 @@ public class ExpressionEvaluatorImpl extends ExpressionEvaluator {
 				    FunctionMapper funMapper)
     throws javax.servlet.jsp.el.ELException
   {
-    JspELParser parser = new JspELParser(_elContext, expression);
+    ELContext elContext;
+
+    if (funMapper != null)
+      elContext = new ParseELContext(funMapper);
+    else
+      elContext = _elContext;
+    
+    JspELParser parser = new JspELParser(elContext, expression);
 
     // parser.setFunctionMapper(funMapper);
 
@@ -87,6 +96,46 @@ public class ExpressionEvaluatorImpl extends ExpressionEvaluator {
       return new ExpressionImpl(expr);
     } catch (com.caucho.el.ELParseException e) {
       throw new javax.servlet.jsp.el.ELParseException(e.getMessage());
+    }
+  }
+
+  public class ParseELContext extends ELContext
+  {
+    private javax.el.FunctionMapper _funMapper;
+
+    ParseELContext(FunctionMapper funMapper)
+    {
+      _funMapper = new FunctionMapperAdapter(funMapper);
+    }
+    
+    public ELResolver getELResolver()
+    {
+      return _elContext.getELResolver();
+    }
+
+    public javax.el.FunctionMapper getFunctionMapper()
+    {
+      return _funMapper;
+    }
+
+    public javax.el.VariableMapper getVariableMapper()
+    {
+      return _elContext.getVariableMapper();
+    }
+  }
+
+  public class FunctionMapperAdapter extends javax.el.FunctionMapper
+  {
+    private FunctionMapper _funMap;
+
+    FunctionMapperAdapter(FunctionMapper funMap)
+    {
+      _funMap = funMap;
+    }
+    
+    public Method resolveFunction(String prefix, String localName)
+    {
+      return _funMap.resolveFunction(prefix, localName);
     }
   }
 }

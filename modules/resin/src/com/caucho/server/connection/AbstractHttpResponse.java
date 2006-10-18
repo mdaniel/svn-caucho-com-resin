@@ -745,19 +745,27 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       return;
 
     int i = 0;
+    boolean hasHeader = false;
 
-    for (; i < _headerKeys.size(); i++) {
+    for (i = _headerKeys.size() - 1; i >= 0; i--) {
       String oldKey = _headerKeys.get(i);
 
-      if (oldKey.equalsIgnoreCase(key))
-	break;
+      if (oldKey.equalsIgnoreCase(key)) {
+	if (hasHeader) {
+	  _headerKeys.remove(i);
+	  _headerValues.remove(i);
+	}
+	else {
+	  hasHeader = true;
+
+	  _headerValues.set(i, value);
+	}
+      }
     }
 
-    if (i == _headerKeys.size()) {
+    if (! hasHeader) {
       _headerKeys.add(key);
       _headerValues.add(value);
-    } else {
-      _headerValues.set(i, value);
     }
   }
 
@@ -925,8 +933,10 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    */
   public void setContentType(String value)
   {
-    if (_disableHeaders || value == null)
+    if (_disableHeaders || value == null) {
+      _contentType = null;
       return;
+    }
     else if (value == "text/html" || value.equals("text/html")) {
       _contentType = "text/html";
 
@@ -956,6 +966,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       _contentPrefix = _contentType;
 
     while ((i = value.indexOf(';', i)) > 0) {
+      int semicolon = i;
       for (i++; i < length && XmlChar.isWhitespace(value.charAt(i)); i++) {
       }
 
@@ -1000,7 +1011,17 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
           encoding = value.substring(k, j);
         }
 
-        _charEncoding = encoding;
+	int tail = value.indexOf(';', semicolon + 1);
+
+	StringBuilder sb = new StringBuilder();
+	sb.append(value, 0, semicolon);
+	if (tail > 0)
+	  sb.append(value, tail, value.length());
+	
+	_contentType = sb.toString();
+
+	if (! _hasWriter)
+	  _charEncoding = encoding;
 	break;
       }
       else
@@ -1009,7 +1030,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     // XXX: conflict with servlet exception throwing order?
     try {
-      setCharacterEncoding(_charEncoding);
+      if (! _hasWriter)
+	setCharacterEncoding(_charEncoding);
     } catch (Throwable e) {
     }
   }
@@ -1019,7 +1041,10 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    */
   public String getContentType()
   {
-    return _contentType;
+    if (_contentType == null)
+      return null;
+    else
+      return _contentType + "; charset=" + getCharacterEncoding();
   }
 
   /**
@@ -1035,10 +1060,15 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    */
   public void setCharacterEncoding(String encoding)
   {
+    if (_hasWriter)
+      return;
+    
     if (encoding == null ||
 	encoding.equals("ISO-8859-1") ||
-	encoding.equals(""))
+	encoding.equals("")) {
+      encoding = "iso-8859-1";
       _charEncoding = null;
+    }
     else
       _charEncoding = encoding;
 
@@ -1420,9 +1450,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	}
       } catch (IOException e) {
       }
-
-      if (_contentType != null && _contentType.indexOf("charset=") < 0)
-        _contentType = _contentType + "; charset=" + _charEncoding;
     }
 
     CharBuffer cb = _cb;

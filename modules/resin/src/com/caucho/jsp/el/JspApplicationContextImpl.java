@@ -32,16 +32,24 @@ package com.caucho.jsp.el;
 import javax.el.*;
 import javax.servlet.jsp.*;
 
+import com.caucho.jsp.*;
 import com.caucho.server.webapp.*;
+import com.caucho.util.*;
 
 public class JspApplicationContextImpl implements JspApplicationContext
 {
+  private static final L10N L = new L10N(JspApplicationContextImpl.class);
+  
   private final WebApp _webApp;
   
   private final ExpressionFactory _expressionFactory;
 
+  private TaglibManager _taglibManager;
+
   private ELResolver []_resolverArray = new ELResolver[0];
   private ELContextListener []_listenerArray = new ELContextListener[0];
+
+  private boolean _hasRequest;
 
   public JspApplicationContextImpl(WebApp webApp)
   {
@@ -59,6 +67,16 @@ public class JspApplicationContextImpl implements JspApplicationContext
     return _webApp;
   }
 
+  public TaglibManager getTaglibManager()
+  {
+    return _taglibManager;
+  }
+
+  public void setTaglibManager(TaglibManager taglibManager)
+  {
+    _taglibManager = taglibManager;
+  }
+
   //
   // JspApplicationContext API methods
   //
@@ -68,6 +86,9 @@ public class JspApplicationContextImpl implements JspApplicationContext
    */
   public void addELContextListener(ELContextListener listener)
   {
+    if (_hasRequest)
+      throw new IllegalStateException(L.l("Cannot add ELContextListener after requests have started."));
+    
     ELContextListener []listenerArray
       = new ELContextListener[_listenerArray.length + 1];
     System.arraycopy(_listenerArray, 0,
@@ -81,6 +102,8 @@ public class JspApplicationContextImpl implements JspApplicationContext
 
   public ELContextListener []getELListenerArray()
   {
+    _hasRequest = true;
+    
     return _listenerArray;
   }
   

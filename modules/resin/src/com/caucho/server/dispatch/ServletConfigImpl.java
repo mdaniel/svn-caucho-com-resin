@@ -575,11 +575,14 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
    *
    * @return the initialized servlet.
    */
-  synchronized Servlet createServlet()
+  Servlet createServlet()
     throws ServletException
   {
-    if (_servlet != null)
-      return _servlet;
+    // XXX: single thread
+    //if (_servlet != null)
+    //  return _servlet;
+
+    Servlet servlet = null;
 
     if (Alarm.getCurrentTime() < _nextInitTime)
       throw _initException;
@@ -588,32 +591,39 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
       log.fine("Servlet[" + _servletName + "] starting");
 
     try {
-      _servlet = createServletImpl();
+      servlet = createServletImpl();
+
+      synchronized (this) {
+	if (_servlet == null)
+	  _servlet = servlet;
+      }
 
       //J2EEManagedObject.register(new com.caucho.management.j2ee.Servlet(this));
 
-      // If the servlet has an MBean, register it
-      try {
-        Hashtable<String,String> props = new Hashtable<String,String>();
+      if (_servlet == servlet) {
+	// If the servlet has an MBean, register it
+	try {
+	  Hashtable<String,String> props = new Hashtable<String,String>();
 
-	String className = _servlet.getClass().getName();
-	int p = className.lastIndexOf('.');
-        props.put("type", className.substring(p + 1));
-        props.put("name", _servletName);
-        Jmx.register(_servlet, props);
-      } catch (Exception e) {
-        log.finest(e.toString());
-      }
+	  String className = _servlet.getClass().getName();
+	  int p = className.lastIndexOf('.');
+	  props.put("type", className.substring(p + 1));
+	  props.put("name", _servletName);
+	  Jmx.register(_servlet, props);
+	} catch (Exception e) {
+	  log.finest(e.toString());
+	}
 
-      if (_runAt != null && _alarm != null) {
-        long nextTime = _runAt.getNextTimeout(Alarm.getCurrentTime());
-        _alarm.queue(nextTime - Alarm.getCurrentTime());
+	if (_runAt != null && _alarm != null) {
+	  long nextTime = _runAt.getNextTimeout(Alarm.getCurrentTime());
+	  _alarm.queue(nextTime - Alarm.getCurrentTime());
+	}
       }
 
       if (log.isLoggable(Level.FINER))
         log.finer("Servlet[" + _servletName + "] started");
 
-      return _servlet;
+      return servlet;
     } catch (ServletException e) {
       throw e;
     } catch (Throwable e) {

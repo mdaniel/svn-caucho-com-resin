@@ -97,12 +97,7 @@ public class TagData implements Cloneable {
    */
   public String getAttributeString(String name)
   {
-    Object value = attributes.get(name);
-    
-    if (value == null)
-      return null;
-    else
-      return String.valueOf(value);
+    return (String) attributes.get(name);
   }
 
   /**

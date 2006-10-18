@@ -57,9 +57,9 @@ public class ImplicitObjectELResolverImpl extends ImplicitObjectELResolver {
   }
 
   @Override
-    public Class getType(ELContext context,
-			 Object base,
-			 Object property)
+  public Class getType(ELContext context,
+		       Object base,
+		       Object property)
   {
     Object value = getValue(context, base, property);
 
@@ -70,26 +70,26 @@ public class ImplicitObjectELResolverImpl extends ImplicitObjectELResolver {
   }
 
   @Override
-    public Object getValue(ELContext context,
+  public Object getValue(ELContext context,
 			 Object base,
 			 Object property)
   {
-    throw new UnsupportedOperationException();
+    return null;
   }
 
   @Override
-    public boolean isReadOnly(ELContext context,
-			 Object base,
-			 Object property)
+  public boolean isReadOnly(ELContext context,
+			    Object base,
+			    Object property)
   {
     return true;
   }
 
   @Override
-    public void setValue(ELContext context,
-			 Object base,
-			 Object property,
-			 Object value)
+  public void setValue(ELContext context,
+		       Object base,
+		       Object property,
+		       Object value)
   {
   }
 }

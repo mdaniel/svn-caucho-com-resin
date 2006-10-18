@@ -70,7 +70,7 @@ public class JspCompiler implements EnvironmentBean {
 
   private JspResourceManager _resourceManager;
   private TaglibManager _taglibManager;
-  private TagFileManager _tagFileManager;
+  private final TagFileManager _tagFileManager;
 
   private JspPropertyGroup _jspPropertyGroup;
 
@@ -87,6 +87,8 @@ public class JspCompiler implements EnvironmentBean {
   public JspCompiler()
   {
     _loader = new EnvironmentClassLoader();
+
+    _tagFileManager = new TagFileManager(this);
   }
 
   /**
@@ -207,14 +209,6 @@ public class JspCompiler implements EnvironmentBean {
   public TaglibManager getTaglibManager()
   {
     return _taglibManager;
-  }
-
-  /**
-   * Sets the tag file manager.
-   */
-  public void setTagFile(TagFileManager manager)
-  {
-    _tagFileManager = manager;
   }
 
   /**

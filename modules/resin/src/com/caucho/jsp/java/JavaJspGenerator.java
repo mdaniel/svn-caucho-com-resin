@@ -127,28 +127,29 @@ public class JavaJspGenerator extends JspGenerator {
   private String _filename;
 
   private final JspGenELContext _elContext;
-  
+
   private HashMap<String,Method> _elFunctionMap = new HashMap<String,Method>();
-  private ArrayList<Taglib> _tagLibraryList =
-    new ArrayList<Taglib>();
+  private ArrayList<Taglib> _tagLibraryList
+    = new ArrayList<Taglib>();
+  
   private PageData _pageData;
   
   protected IntMap _strings = new IntMap();
   
-  private ArrayList<com.caucho.el.Expr> _exprList =
-  new ArrayList<com.caucho.el.Expr>();
+  private ArrayList<com.caucho.el.Expr> _exprList
+    = new ArrayList<com.caucho.el.Expr>();
   
-  private ArrayList<ValueExpr> _valueExprList =
-  new ArrayList<ValueExpr>();
+  private ArrayList<ValueExpr> _valueExprList
+    = new ArrayList<ValueExpr>();
   
-  private ArrayList<MethodExpr> _methodExprList =
-  new ArrayList<MethodExpr>();
+  private ArrayList<MethodExpr> _methodExprList
+    = new ArrayList<MethodExpr>();
   
-  private ArrayList<com.caucho.xpath.Expr> _xpathExprList =
-  new ArrayList<com.caucho.xpath.Expr>();
+  private ArrayList<com.caucho.xpath.Expr> _xpathExprList
+    = new ArrayList<com.caucho.xpath.Expr>();
   
-  private ArrayList<JspFragmentNode> _fragmentList =
-    new ArrayList<JspFragmentNode>();
+  private ArrayList<JspFragmentNode> _fragmentList
+    = new ArrayList<JspFragmentNode>();
 
   private String _workPath;
   private String _sourceName;
@@ -752,8 +753,11 @@ public class JavaJspGenerator extends JspGenerator {
         out.print(" implements javax.servlet.SingleThreadModel");
     }
 
+    out.println();
     out.println("{");
     out.pushDepth();
+
+    out.println("private final java.util.HashMap<String,java.lang.reflect.Method> _jsp_functionMap = new java.util.HashMap<String,java.lang.reflect.Method>();");
 
     out.println("private boolean _caucho_isDead;");
 
@@ -1579,6 +1583,8 @@ public class JavaJspGenerator extends JspGenerator {
     out.println("}");
     */
 
+    generateInit(out);
+
     if (_parseState.getExtends() == null && ! _parseState.isTag()) {
       out.println();
       out.println("public void destroy()");
@@ -1609,9 +1615,50 @@ public class JavaJspGenerator extends JspGenerator {
 	    ! _parseState.isTag() &&
 	    _parseState.getExtends() == null);
   }
+  /**
+   * Generates the normal init.
+   */
+  private void generateInit(JspJavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("public java.util.HashMap<String,java.lang.reflect.Method> _caucho_getFunctionMap()");
+    out.println("{");
+    out.pushDepth();
+
+    out.println("return _jsp_functionMap;");
+    
+    out.popDepth();
+    out.println("}");
+
+    if (! isTag()) {
+      out.println();
+      out.println("public void init(ServletConfig config)");
+      out.println("  throws ServletException");
+      out.println("{");
+      out.pushDepth();
+    
+      out.println("super.init(config);");
+
+      out.println("com.caucho.server.webapp.WebApp webApp");
+      out.println("  = (com.caucho.server.webapp.WebApp) config.getServletContext();");
+      out.println("com.caucho.jsp.TaglibManager manager = webApp.getJspApplicationContext().getTaglibManager();");
+
+      for (Taglib taglib : _tagLibraryList) {
+	out.print("manager.addTaglibFunctions(_jsp_functionMap, \"");
+	out.printJavaString(taglib.getPrefixString());
+	out.print("\", \"");
+	out.printJavaString(taglib.getURI());
+	out.print("\");");
+      }
+
+      out.popDepth();
+      out.println("}");
+    }
+  }
 
   /**
-   * out.Prints the initialization methods to track dependencies.
+   * Prints the initialization methods to track dependencies.
    */
   private void printDependInit(JspJavaWriter out,
 			       ArrayList<PersistentDependency> depends)

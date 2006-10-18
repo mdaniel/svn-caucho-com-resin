@@ -54,7 +54,8 @@ public class Taglib extends TagLibraryInfo {
   TagLibraryValidator _validator;
   private ArrayList<TldFunction> _functionList = new ArrayList<TldFunction>();
   
-  Taglib(String prefix, String uri, TldTaglib tldTaglib)
+  Taglib(String prefix, String uri, TldTaglib tldTaglib,
+	 TagFileManager tagFileManager)
     throws JspParseException
   {
     super(prefix, uri);
@@ -62,7 +63,7 @@ public class Taglib extends TagLibraryInfo {
     try {
       _tldTaglib = tldTaglib;
       
-      fillTagLibraryInfo(tldTaglib);
+      fillTagLibraryInfo(tldTaglib, tagFileManager);
     } catch (JspParseException e) {
       throw e;
     } catch (Exception e) {
@@ -107,7 +108,8 @@ public class Taglib extends TagLibraryInfo {
    *            validator?, listener*, tag+, function*
    * </pre>
    */
-  private void fillTagLibraryInfo(TldTaglib taglib)
+  private void fillTagLibraryInfo(TldTaglib taglib,
+				  TagFileManager tagFileManager)
     throws Exception
   {
     this.tlibversion = taglib.getTlibVersion();
@@ -118,6 +120,9 @@ public class Taglib extends TagLibraryInfo {
     
     this.urn = taglib.getURI();
     this.info = taglib.getInfo();
+
+    if (taglib.getDescription() != null)
+      this.info = taglib.getDescription();
 
     TldValidator validator = taglib.getValidator();
 
@@ -136,7 +141,32 @@ public class Taglib extends TagLibraryInfo {
       tags[i] = tagInfo;
     }
 
+    ArrayList<TldTagFile> tagFileList = taglib.getTagFileList();
+
+    this.tagFiles = new TagFileInfo[tagFileList.size()];
+
+    for (int i = 0; i < tagFileList.size(); i++) {
+      TldTagFile tagFile = tagFileList.get(i);
+      
+      TagInfo tagInfo = tagFileManager.getTag("",
+					      tagFile.getName(),
+					      tagFile.getPath());
+      System.out.println("TI: " + tagInfo);
+
+      TagFileInfo tagFileInfo = new TagFileInfo(tagFile.getName(),
+						tagFile.getPath(),
+						tagInfo);
+
+      this.tagFiles[i] = tagFileInfo;
+    }
+
     _functionList = taglib.getFunctionList();
+
+    this.functions = new FunctionInfo[_functionList.size()];
+
+    for (int i = 0; i < _functionList.size(); i++) {
+      this.functions[i] = _functionList.get(i).toFunctionInfo();
+    }
   }
     
   /**
@@ -225,7 +255,7 @@ public class Taglib extends TagLibraryInfo {
   @Override
   public TagLibraryInfo []getTagLibraryInfos()
   {
-    throw new UnsupportedOperationException();
+    return new TagLibraryInfo[] { this };
   }
 
   public String toString()

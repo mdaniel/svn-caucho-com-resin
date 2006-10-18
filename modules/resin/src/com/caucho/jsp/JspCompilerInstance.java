@@ -271,10 +271,12 @@ public class JspCompilerInstance {
       resourceManager = new AppDirResourceManager(appDir);
     }
 
+    TagFileManager tagFileManager =_jspCompiler.getTagFileManager();
+
     TaglibManager taglibManager = _jspCompiler.getTaglibManager();
 
     if (taglibManager == null) {
-      taglibManager = new TaglibManager(resourceManager, app);
+      taglibManager = new TaglibManager(resourceManager, app, tagFileManager);
       taglibManager.setWebApp(app);
 
       if (jspConfig != null) {
@@ -333,8 +335,6 @@ public class JspCompilerInstance {
     }
     _parseState.setResourceManager(resourceManager);
     LineMap lineMap = null;
-
-    TagFileManager tagFileManager = new TagFileManager(_jspCompiler);
 
     _tagManager = new ParseTagManager(resourceManager,
                                       taglibManager,

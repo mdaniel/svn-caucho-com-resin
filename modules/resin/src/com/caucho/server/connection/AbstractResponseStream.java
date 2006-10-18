@@ -209,6 +209,7 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
    * Clears the output buffer, including headers if possible.
    */
   public void clear()
+    throws IOException
   {
     clearBuffer();
   }

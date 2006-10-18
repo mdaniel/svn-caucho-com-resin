@@ -206,6 +206,13 @@ public class TldFunction {
                                     _signature.getSignature()));
   }
 
+  public FunctionInfo toFunctionInfo()
+  {
+    return new FunctionInfo(_name,
+			    _functionClass.getName(),
+			    _signature.getSignature());
+  }
+
   public String toString()
   {
     return "TldFunction[" + _signature.getSignature() + "]";

@@ -95,7 +95,7 @@ public class JspDirectivePage extends JspNode {
       String oldInfo = _parseState.getInfo();
       
       if (oldInfo != null && ! value.equals(oldInfo))
-        throw error(L.l("info `{0}' conflicts with previous value of info `{1}'.  Check the .jsp and any included .jsp files for conflicts.", value, oldInfo));
+        throw error(L.l("info '{0}' conflicts with previous value of info '{1}'.  Check the .jsp and any included .jsp files for conflicts.", value, oldInfo));
       
       _parseState.setInfo(value);
     }
@@ -103,7 +103,7 @@ public class JspDirectivePage extends JspNode {
       String oldContentType = _parseState.getContentType();
       
       if (oldContentType != null && ! value.equals(oldContentType))
-        throw error(L.l("contentType `{0}' conflicts with previous value of contentType `{1}'.  Check the .jsp and any included .jsp files for conflicts.", value, oldContentType));
+        throw error(L.l("contentType '{0}' conflicts with previous value of contentType '{1}'.  Check the .jsp and any included .jsp files for conflicts.", value, oldContentType));
       
       _parseState.setContentType(value);
       String charEncoding = parseCharEncoding(value);
@@ -118,14 +118,14 @@ public class JspDirectivePage extends JspNode {
 	String newCanonical = Encoding.getMimeName(value);
 
 	if (! newCanonical.equals(oldCanonical))
-	  throw error(L.l("pageEncoding `{0}' conflicts with previous value of pageEncoding `{1}'.  Check the .jsp and any included .jsp files for conflicts.", value, oldEncoding));
+	  throw error(L.l("pageEncoding '{0}' conflicts with previous value of pageEncoding '{1}'.  Check the .jsp and any included .jsp files for conflicts.", value, oldEncoding));
       }
       
       _parseState.setPageEncoding(value);
     }
     else if (LANGUAGE.equals(name)) {
       if (! value.equals("java"))
-        throw error(L.l("`{0}' is not supported as a JSP scripting language.",
+        throw error(L.l("'{0}' is not supported as a JSP scripting language.",
                         value));
     }
     else if (IMPORT.equals(name)) {
@@ -139,7 +139,7 @@ public class JspDirectivePage extends JspNode {
       else if (value.equals("false"))
         isValid = _parseState.setSession(false);
       else
-        throw error(L.l("session expects `true' or `false' at `{0}'",
+        throw error(L.l("session expects 'true' or 'false' at '{0}'",
                         value));
 
       _parseState.markSessionSet();
@@ -179,7 +179,7 @@ public class JspDirectivePage extends JspNode {
       else if (value.equals("false"))
         isValid = _parseState.setErrorPage(false);
       else
-        throw error(L.l("isErrorPage expects `true' or `false' at `{0}'",
+        throw error(L.l("isErrorPage expects 'true' or 'false' at '{0}'",
                         value));
 
       _parseState.markErrorPage();
@@ -195,7 +195,7 @@ public class JspDirectivePage extends JspNode {
       else if (value.equals("false"))
         isValid = _parseState.setAutoFlush(false);
       else
-        throw error(L.l("autoFlush expects `true' or `false' at `{0}'",
+        throw error(L.l("autoFlush expects 'true' or 'false' at '{0}'",
                         value));
 
       if (! isValid)
@@ -212,7 +212,7 @@ public class JspDirectivePage extends JspNode {
       else if (value.equals("false"))
         isValid = _parseState.setThreadSafe(false);
       else
-        throw error(L.l("isThreadSafe expects `true' or `false' at `{0}'",
+        throw error(L.l("isThreadSafe expects 'true' or 'false' at '{0}'",
                         value));
 
       _parseState.markThreadSafeSet();
@@ -230,12 +230,12 @@ public class JspDirectivePage extends JspNode {
       }
         
       if (! HttpJspPage.class.isAssignableFrom(cl))
-        throw error(L.l("`{0}' must implement HttpJspPage.  The class named by jsp:directive.page extends='...' must implement HttpJspPage.", value));
+        throw error(L.l("'{0}' must implement HttpJspPage.  The class named by jsp:directive.page extends='...' must implement HttpJspPage.", value));
       
       Class oldExtends = _parseState.getExtends();
       
       if (oldExtends != null && ! cl.equals(oldExtends))
-        throw error(L.l("extends `{0}' conflicts with previous value of extends `{1}'.  Check the .jsp and any included .jsp files for conflicts.", value, oldExtends.getName()));
+        throw error(L.l("extends '{0}' conflicts with previous value of extends '{1}'.  Check the .jsp and any included .jsp files for conflicts.", value, oldExtends.getName()));
       
       _parseState.setExtends(cl);
     }
@@ -245,7 +245,7 @@ public class JspDirectivePage extends JspNode {
       else if (value.equals("false"))
         _parseState.setTrimWhitespace(false);
       else
-        throw error(L.l("trimDirectiveWhitespaces expects `true' or `false' at `{0}'",
+        throw error(L.l("trimDirectiveWhitespaces expects 'true' or 'false' at '{0}'",
                         value));
     }
     else if (DEFER.equals(name)) {
@@ -254,11 +254,11 @@ public class JspDirectivePage extends JspNode {
       else if (value.equals("false"))
         _parseState.setDeferredSyntaxAllowedAsLiteral(false);
       else
-        throw error(L.l("deferredSyntaxAllowedAsLiteral expects `true' or `false' at `{0}'",
+        throw error(L.l("deferredSyntaxAllowedAsLiteral expects 'true' or 'false' at '{0}'",
                         value));
     }
     else {
-      throw error(L.l("`{0}' is an unknown JSP page directive attribute.  See the JSP documentation for a complete list of page directive attributes.",
+      throw error(L.l("'{0}' is an unknown JSP page directive attribute.  See the JSP documentation for a complete list of page directive attributes.",
                       name.getName()));
     }
   }

@@ -55,12 +55,13 @@ public class TagInfoExt extends TagInfo {
 		    String smallIcon,
 		    String largeIcon,
 		    TagVariableInfo []tvi,
+		    boolean hasDynamicAttributes,
 		    String dynamicAttributesName,
 		    ArrayList<PersistentDependency> dependList)
   {
     super(tagName, tagClassName, bodyContent, infoString,
 	  taglib, tagExtraInfo, attributeInfo, displayName,
-	  smallIcon, largeIcon, tvi, dynamicAttributesName != null);
+	  smallIcon, largeIcon, tvi, hasDynamicAttributes);
 
     _dynamicAttributesName = dynamicAttributesName;
     if (dependList != null)

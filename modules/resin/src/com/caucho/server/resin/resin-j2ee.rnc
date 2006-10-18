@@ -260,9 +260,9 @@ r_role-name =
   attribute role-name { string }
   | element role-name { string }
 
-r_role-link = element role-link {
-  string
-}
+r_role-link =
+  attribute role-link { string }
+  | element role-link { string }
 
 r_run-as = element run-as {
   attribute id { string }?,

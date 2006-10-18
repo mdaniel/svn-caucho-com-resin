@@ -113,9 +113,11 @@ public class ArrayELResolver extends ELResolver {
 	try {
 	  index = Integer.parseInt((String) property);
 	} catch (Exception e) {
-	  log.log(Level.FINE, e.toString(), e);
+	  throw new ELException("can't convert '" + property + "' to long.");
 	}
       }
+      else
+	throw new ELException("can't convert '" + property + "' to long.");
 
       if (0 <= index && index < Array.getLength(base))
 	return Array.get(base, index);

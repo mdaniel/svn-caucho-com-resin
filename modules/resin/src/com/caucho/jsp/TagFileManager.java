@@ -52,13 +52,10 @@ public class TagFileManager {
   private static final Logger log = Log.open(TagFileManager.class);
   
   private JspCompiler _jspCompiler;
-  private JspResourceManager _resourceManager;
 
   public TagFileManager(JspCompiler compiler)
-    throws JspParseException, IOException
   {
     _jspCompiler = compiler;
-    _resourceManager = _jspCompiler.getResourceManager();
   }
 
   public TagInfo getTag(String prefix, String shortName, String location)
@@ -73,13 +70,20 @@ public class TagFileManager {
       if (location.startsWith("urn:jsptagdir:"))
 	location = location.substring("urn:jsptagdir:".length());
 
+      TagLibraryInfo taglib = new TagTaglib(prefix, originalLocation);
+      
+      String uri = location;
+      
+      TagInfo tag = getTag(uri, taglib);
+      if (tag != null)
+	return tag;
+      
       if (! location.endsWith("/"))
 	location = location + "/";
       
-      String uri = location + shortName + ".tag";
-      TagLibraryInfo taglib = new TagTaglib(prefix, originalLocation);
+      uri = location + shortName + ".tag";
       
-      TagInfo tag = getTag(uri, taglib);
+      tag = getTag(uri, taglib);
       if (tag != null)
 	return tag;
 
@@ -101,10 +105,11 @@ public class TagFileManager {
   public TagInfo getTag(String location, TagLibraryInfo taglib)
     throws JspParseException
   {
-    if (_resourceManager == null)
+    JspResourceManager resourceManager = _jspCompiler.getResourceManager();
+    if (resourceManager == null)
       return null;
     
-    Path path = _resourceManager.resolvePath(location);
+    Path path = resourceManager.resolvePath(location);
     
     return getTag(path, location, taglib);
   }

@@ -32,6 +32,7 @@ package com.caucho.jsp;
 import java.io.*;
 import java.util.*;
 import java.util.logging.*;
+import java.lang.reflect.Method;
 
 import javax.servlet.http.*;
 import javax.servlet.*;
@@ -339,6 +340,11 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
         _lastUpdateCheck = now;
       return isModified;
     }
+  }
+
+  protected HashMap<String,Method> _caucho_getFunctionMap()
+  {
+    return null;
   }
   
   /**

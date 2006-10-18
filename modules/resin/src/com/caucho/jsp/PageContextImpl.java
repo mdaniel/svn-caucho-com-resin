@@ -32,6 +32,7 @@ package com.caucho.jsp;
 import java.io.*;
 import java.util.*;
 import java.util.logging.*;
+import java.lang.reflect.Method;
 import java.text.*;
 
 import javax.el.*;
@@ -130,7 +131,10 @@ public class PageContextImpl extends PageContext
   private VariableResolver _varResolver;
   private ELContext _elContext;
   private ELResolver _elResolver;
+  private javax.el.FunctionMapper _functionMapper;
   private boolean _hasException;
+
+  private HashMap<String,Method> _functionMap;
 
   private ExpressionEvaluatorImpl _expressionEvaluator;
 
@@ -235,6 +239,14 @@ public class PageContextImpl extends PageContext
     _bundleManager = null;
     _varResolver = null;
     _nodeEnv = null;
+
+    if (servlet instanceof Page) {
+      Page page = (Page) servlet;
+
+      _functionMap = page._caucho_getFunctionMap();
+    }
+    else
+      _functionMap = null;
   }
 
   protected void setOut(JspWriter out)
@@ -1185,6 +1197,8 @@ public class PageContextImpl extends PageContext
 	  listenerArray[i].contextCreated(event);
 	}
       }
+      
+      _functionMapper = new PageFunctionMapper();
     }
     
     return _elContext;
@@ -1803,12 +1817,22 @@ public class PageContextImpl extends PageContext
 
     public javax.el.FunctionMapper getFunctionMapper()
     {
-      return null;
+      return _functionMapper;
     }
 
     public javax.el.VariableMapper getVariableMapper()
     {
       return null;
+    }
+  }
+
+  public class PageFunctionMapper extends javax.el.FunctionMapper {
+    public Method resolveFunction(String prefix, String localName)
+    {
+      if (_functionMap != null)
+	return _functionMap.get(prefix + ":" + localName);
+      else
+	return null;
     }
   }
 }

@@ -74,6 +74,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
   private static HashSet<String> _reserved
     = new HashSet<String>();
 
+  private String _description = "A sample tag";
   private String _bodyContent = "scriptless";
   private String _dynamicAttributes = null;
   
@@ -104,6 +105,11 @@ public class JavaTagGenerator extends JavaJspGenerator {
     return true;
   }
   */
+
+  public void setDescription(String description)
+  {
+    _description = description;
+  }
 
   /**
    * Sets the body content.
@@ -260,6 +266,8 @@ public class JavaTagGenerator extends JavaJspGenerator {
 
     out.println(" {");
     out.pushDepth();
+
+    out.println("private final java.util.HashMap<String,java.lang.reflect.Method> _jsp_functionMap = new java.util.HashMap<String,java.lang.reflect.Method>();");
 
     out.println("private boolean _caucho_isDead;");
 
@@ -594,6 +602,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
 			  tag.getSmallIcon(),
 			  tag.getLargeIcon(),
 			  tag.getVariables(),
+			  _dynamicAttributes != null,
 			  _dynamicAttributes,
 			  null);
   }
@@ -667,7 +676,9 @@ public class JavaTagGenerator extends JavaJspGenerator {
     out.println("return new com.caucho.jsp.java.TagInfoExt(tag.getName(),");
     out.println("                   getClass().getName(),");
     out.println("                   \"" + _bodyContent + "\",");
-    out.println("                   \"A sample tag\",");
+    out.print("                   \"");
+    out.printJavaString(_description);
+    out.println("\",");
     out.println("                   taglib,");
     out.println("                   null,");
     out.println("                   tag.getAttributes(),");
@@ -675,6 +686,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
     out.println("                   tag.getSmallIcon(),");
     out.println("                   tag.getLargeIcon(),");
     out.println("                   tag.getVariables(),");
+    out.println("                   " + (_dynamicAttributes != null) + ",");
     if (_dynamicAttributes != null)
       out.println("                   \"" + _dynamicAttributes + "\",");
     else
@@ -751,6 +763,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
     _reserved.add("case");
     _reserved.add("default");
     _reserved.add("throw");
+    _reserved.add("enum");
     _reserved.add("throws");
     
     _reserved.add("void");
