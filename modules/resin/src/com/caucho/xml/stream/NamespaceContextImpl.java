@@ -181,41 +181,40 @@ public class NamespaceContextImpl implements NamespaceContext {
     public Iterator getPrefixes(final String uri)
     {
       return new Iterator() {
+        private int i = 0;
+        private Object waiting = null;
 
-          private int i = 0;
-          private Object waiting = null;
+        public void remove()
+        {
+          throw new RuntimeException("not supported");
+        }
 
-          public void remove()
-          {
-            throw new RuntimeException("not supported");
+        public boolean hasNext()
+        {
+          if (waiting != null) return true;
+          waiting = next();
+          return waiting != null;
+        }
+
+        public Object next()
+        {
+          if (waiting != null) {
+            Object ret = waiting;
+            waiting = null;
+            return ret;
           }
-
-          public boolean hasNext()
-          {
-            if (waiting != null) return true;
-            waiting = next();
-            return waiting != null;
-          }
-
-          public Object next()
-          {
-            if (waiting != null) {
-              Object ret = waiting;
-              waiting = null;
-              return ret;
-            }
-            while (i < _decls.size())
-              {
-                if (uri.equals(getUri(i))) {
-                  i++;
-                  return getPrefix(i);
-                } else {
-                  i++;
-                }
+          while (i < _decls.size())
+            {
+              if (uri.equals(getUri(i))) {
+                i++;
+                return getPrefix(i);
+              } else {
+                i++;
               }
-            return null;
-          }
-        };
+            }
+          return null;
+        }
+      };
     }
 
     public Context push(QName tagName)

@@ -32,6 +32,7 @@ import java.io.*;
 import javax.xml.stream.*;
 import javax.xml.stream.util.*;
 import javax.xml.transform.*;
+import javax.xml.transform.dom.*;
 import com.caucho.vfs.*;
 
 public class XMLOutputFactoryImpl extends XMLOutputFactory {
@@ -99,6 +100,9 @@ public class XMLOutputFactoryImpl extends XMLOutputFactory {
   public XMLStreamWriter createXMLStreamWriter(Result result)
     throws XMLStreamException
   {
+    if (result instanceof DOMResult) 
+      return new DOMResultXMLStreamWriterImpl((DOMResult) result);
+
     throw new JAXPNotSupportedInStAXException();
   }
 
