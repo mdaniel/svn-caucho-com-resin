@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -78,10 +79,35 @@ public class JspDirectiveVariable extends JspNode {
   public void addAttribute(QName name, String value)
     throws JspParseException
   {
-    if (NAME_GIVEN.equals(name))
+    if (! _gen.getParseState().isTag())
+      throw error(L.l("'{0}' is only allowed in .tag files.  Attribute directives are not allowed in normal JSP files.",
+                      getTagName()));
+    
+    JavaTagGenerator gen = (JavaTagGenerator) _gen;
+    if (NAME_GIVEN.equals(name)) {
+      if (gen.findVariable(value) != null) {
+	throw error(L.l("@variable name-given '{0}' is already used by another variable.",
+			value));
+      }
+      else if (gen.findAttribute(value) != null) {
+	throw error(L.l("@variable name-given '{0}' is already used by an attribute.",
+			value));
+      }
+      
       _nameGiven = value;
-    else if (NAME_FROM_ATTRIBUTE.equals(name))
+    }
+    else if (NAME_FROM_ATTRIBUTE.equals(name)) {
+      if (gen.findVariable(value) != null) {
+	throw error(L.l("@variable name-from-attribute '{0}' is already used by another variable.",
+			value));
+      }
+      else if (gen.findAttribute(value) != null) {
+	throw error(L.l("@variable name-from-attribute '{0}' is already used by an attribute.",
+			value));
+      }
+      
       _nameFromAttribute = value;
+    }
     else if (ALIAS.equals(name))
       _alias = value;
     else if (VARIABLE_CLASS.equals(name))
@@ -92,7 +118,7 @@ public class JspDirectiveVariable extends JspNode {
       if (! "NESTED".equals(value) &&
 	  ! "AT_BEGIN".equals(value) &&
 	  ! "AT_END".equals(value))
-	throw error(L.l("`{0}' is an illegal scope value.  NESTED, AT_BEGIN, and AT_END are the only accepted values.",
+	throw error(L.l("'{0}' is an illegal scope value.  NESTED, AT_BEGIN, and AT_END are the only accepted values.",
 			value));
 
       _scope = value;
@@ -100,7 +126,7 @@ public class JspDirectiveVariable extends JspNode {
     else if (DESCRIPTION.equals(name))
       _description = value;
     else {
-      throw error(L.l("`{0}' is an unknown JSP attribute directive attributes.  See the JSP documentation for a complete list of page directive attributes.",
+      throw error(L.l("'{0}' is an unknown JSP variable directive attributes.  Valid attributes are: alias, declare, description, name-from-attribute, name-given, scope, variable-class.",
                       name.getName()));
     }
   }
@@ -112,15 +138,15 @@ public class JspDirectiveVariable extends JspNode {
     throws JspParseException
   {
     if (! _gen.getParseState().isTag())
-      throw error(L.l("`{0}' is only allowed in .tag files.  Variable directives are not allowed in normal JSP files.",
+      throw error(L.l("'{0}' is only allowed in .tag files.  Variable directives are not allowed in normal JSP files.",
                       getTagName()));
     
     if (_nameGiven == null && _nameFromAttribute == null)
-      throw error(L.l("<{0}> needs a `name-given' or `name-from-attribute' attribute.",
+      throw error(L.l("<{0}> needs a 'name-given' or 'name-from-attribute' attribute.",
                       getTagName()));
 
     if (_nameFromAttribute != null && _alias == null)
-      throw error(L.l("<{0}> needs an `alias' attribute.  name-from-attribute requires an alias attribute.",
+      throw error(L.l("<{0}> needs an 'alias' attribute.  name-from-attribute requires an alias attribute.",
                       getTagName()));
 
     JavaTagGenerator tagGen = (JavaTagGenerator) _gen;
@@ -161,6 +187,7 @@ public class JspDirectiveVariable extends JspNode {
     throws IOException
   {
     os.print("<jsp:directive.variable");
+    os.print(" jsp:id=\"" + _gen.generateJspId() + "\"");
 
     if (_nameGiven != null)
       os.print(" name-given=\"" + _nameGiven + "\"");
@@ -195,13 +222,13 @@ public class JspDirectiveVariable extends JspNode {
 	continue;
 
       if (! String.class.equals(attr.getType()))
-	throw error(L.l("name-from-attribute variable `{0}' needs a matching String attribute, not `{1}' .  name-from-attribute requires a matching String attribute.",
+	throw error(L.l("name-from-attribute variable '{0}' needs a matching String attribute, not '{1}' .  name-from-attribute requires a matching String attribute.",
 			_nameFromAttribute, attr.getType().getName()));
 
       return;
     }
     
-    throw error(L.l("name-from-attribute variable `{0}' needs a matching String attribute.",
+    throw error(L.l("name-from-attribute variable '{0}' needs a matching String attribute.",
 		    _nameFromAttribute));
   }
 

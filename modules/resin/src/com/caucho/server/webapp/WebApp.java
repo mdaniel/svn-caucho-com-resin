@@ -1289,6 +1289,11 @@ public class WebApp extends ServletContextImpl
     return _taglibList;
   }
 
+  public JspConfig createJspConfig()
+  {
+    return new JspConfig(this);
+  }
+  
   /**
    * jsp-config configuration
    */

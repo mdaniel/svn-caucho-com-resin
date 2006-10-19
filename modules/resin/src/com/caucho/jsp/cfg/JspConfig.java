@@ -30,6 +30,8 @@ package com.caucho.jsp.cfg;
 
 import java.util.ArrayList;
 
+import com.caucho.server.webapp.*;
+
 /**
  * Configuration from the web.xml.
  *
@@ -40,8 +42,16 @@ import java.util.ArrayList;
  */
 public class JspConfig {
   private ArrayList<JspTaglib> _taglibList = new ArrayList<JspTaglib>();
-  private ArrayList<JspPropertyGroup> _propertyGroupList =
-    new ArrayList<JspPropertyGroup>();
+
+  private WebApp _webApp;
+  
+  private ArrayList<JspPropertyGroup> _propertyGroupList
+    = new ArrayList<JspPropertyGroup>();
+
+  public JspConfig(WebApp webApp)
+  {
+    _webApp = webApp;
+  }
 
   /**
    * Adds a new taglib to the configuration.
@@ -57,6 +67,11 @@ public class JspConfig {
   public ArrayList<JspTaglib> getTaglibList()
   {
     return _taglibList;
+  }
+
+  public JspPropertyGroup createJspPropertyGroup()
+  {
+    return new JspPropertyGroup(_webApp);
   }
 
   /**
@@ -89,5 +104,23 @@ public class JspConfig {
     }
 
     return null;
+  }
+
+  /**
+   * Returns the first matching property group.
+   */
+  public ArrayList<JspPropertyGroup> findJspPropertyGroupList(String url)
+  {
+    ArrayList<JspPropertyGroup> list = new ArrayList<JspPropertyGroup>();
+    
+    for (int i = 0; i < _propertyGroupList.size(); i++) {
+      JspPropertyGroup group = _propertyGroupList.get(i);
+
+      if (group.match(url)) {
+	list.add(group);
+      }
+    }
+
+    return list;
   }
 }

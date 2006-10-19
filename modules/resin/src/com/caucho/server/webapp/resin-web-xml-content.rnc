@@ -219,6 +219,9 @@ r_jsp = element jsp {
  (attribute auto-compile { r_boolean-Type }
   | element auto-compile { r_boolean-Type })?
 
+ & (attribute deferred-syntax-allowed-as-literal { r_period }
+    | element deferred-syntax-allowed-as-literal { r_period })?
+
  & (attribute dependency-check-interval { r_period }
     | element dependency-check-interval { r_period })?
 
@@ -297,11 +300,15 @@ r_jsp-property-group = element jsp-property-group {
 
   r_url-pattern*,
 
+  element deferred-syntax-allowed-as-literal { j2ee_boolean }?,
+
   element el-ignored { j2ee_boolean }?,
 
   element page-encoding { j2ee_string }?,
 
   element scripting-invalid { j2ee_boolean }?,
+
+  element trim-directive-whitespaces { j2ee_boolean }?,
 
   element is-xml { j2ee_boolean }?,
 

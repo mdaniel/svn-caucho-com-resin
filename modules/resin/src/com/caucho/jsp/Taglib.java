@@ -151,7 +151,6 @@ public class Taglib extends TagLibraryInfo {
       TagInfo tagInfo = tagFileManager.getTag("",
 					      tagFile.getName(),
 					      tagFile.getPath());
-      System.out.println("TI: " + tagInfo);
 
       TagFileInfo tagFileInfo = new TagFileInfo(tagFile.getName(),
 						tagFile.getPath(),

@@ -2,7 +2,7 @@
          xmlns:resin="http://caucho.com/ns/resin/core">
 
 <ear-default>
-  <resin:import path="META-INF/application.xml"/>
+  <resin:import path="META-INF/application.xml" optional="true"/>
 </ear-default>
 
 <web-app-default>

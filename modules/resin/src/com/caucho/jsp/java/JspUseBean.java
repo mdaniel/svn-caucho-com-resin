@@ -71,7 +71,7 @@ public class JspUseBean extends JspContainerNode {
     else if (SCOPE.equals(name))
       _scope = value;
     else
-      throw error(L.l("`{0}' is an invalid attribute in <jsp:useBean>",
+      throw error(L.l("'{0}' is an invalid attribute in <jsp:useBean>",
                       name.getName()));
   }
 
@@ -120,13 +120,13 @@ public class JspUseBean extends JspContainerNode {
     throws Exception
   {
     if (_id == null)
-      throw error(L.l("<jsp:useBean> expects an `id' attribute.  id specifies the variable name for the bean."));
+      throw error(L.l("<jsp:useBean> expects an 'id' attribute.  id specifies the variable name for the bean."));
 
     if (_typeName == null)
       _typeName = _className;
     
     if (_typeName == null)
-      throw error(L.l("<jsp:useBean> expects a `type' or 'class' attribute.  The `type' specifies the Java type of the bean."));
+      throw error(L.l("<jsp:useBean> expects a 'type' or 'class' attribute.  The 'type' specifies the Java type of the bean."));
 
     // Save the bean's type
     _gen.addBeanClass(_id, _typeName);
@@ -144,7 +144,7 @@ public class JspUseBean extends JspContainerNode {
       context = "pageContext.getApplication()";
     }
     else
-      throw error(L.l("Unknown scope `{0}' in <jsp:useBean>.  Scope must be `page', `request', `session', or `application'.", _scope));
+      throw error(L.l("Unknown scope '{0}' in <jsp:useBean>.  Scope must be 'page', 'request', 'session', or 'application'.", _scope));
 
     // declare the bean
     out.println(_typeName + " " + _id + ";");
@@ -176,7 +176,7 @@ public class JspUseBean extends JspContainerNode {
 	out.println("throw new java.lang.InstantiationException(\"" + msg + "\");");
     }
     else if (_beanName == null)
-      out.println("throw new java.lang.InstantiationException(\"jsp:useBean needs `bean' or 'class'\");");
+      out.println("throw new java.lang.InstantiationException(\"jsp:useBean needs 'bean' or 'class'\");");
     // instantiate beans with a request time attribute
     else if (hasRuntimeAttribute(_beanName)) {
       String beanName = getRuntimeAttribute(_beanName);
@@ -223,11 +223,11 @@ public class JspUseBean extends JspContainerNode {
       Class cl = _gen.getBeanClass(className);
       int modifiers = cl.getModifiers();
       if (Modifier.isInterface(modifiers))
-	return L.l("`{0}' is an interface", className);
+	return L.l("'{0}' is an interface", className);
       if (Modifier.isAbstract(modifiers))
-	return L.l("`{0}' is abstract", className);
+	return L.l("'{0}' is abstract", className);
       if (! Modifier.isPublic(modifiers))
-	return L.l("`{0}' must be public", className);
+	return L.l("'{0}' must be public", className);
 
       Constructor []constructors = cl.getConstructors();
       for (int i = 0; i < constructors.length; i++) {
@@ -240,6 +240,6 @@ public class JspUseBean extends JspContainerNode {
       throw error(e.getMessage());
     }
 
-    return L.l("`{0}' has no public zero-arg constructor", className);
+    return L.l("'{0}' has no public zero-arg constructor", className);
   }
 }

@@ -107,6 +107,22 @@ public class VerifierHandlerImpl extends DefaultHandler
     _verifier.setErrorHandler(errorHandler);
   }
 
+  private String getFileName()
+  {
+    if (_locator != null)
+      return _locator.getSystemId();
+    else
+      return null;
+  }
+
+  private int getLine()
+  {
+    if (_locator != null)
+      return _locator.getLineNumber();
+    else
+      return -1;
+  }
+
   /**
    * Called when the document starts.
    */
@@ -410,7 +426,8 @@ public class VerifierHandlerImpl extends DefaultHandler
       expected = namesToString(values, parentName, qName,
 			       currentItem.allowEmpty());
     
-    return syntaxMessage(item, parentItem, parentName, qName, expected);
+    return (getLineContext(getFileName(), getLine())
+	    + syntaxMessage(item, parentItem, parentName, qName, expected));
   }
 
   /**
@@ -434,7 +451,8 @@ public class VerifierHandlerImpl extends DefaultHandler
 			       currentItem.allowEmpty());
     }
     
-    return syntaxMessage(item, parentItem, parentName, qName, expected);
+    return (getLineContext(getFileName(), getLine())
+	    + syntaxMessage(item, parentItem, parentName, qName, expected));
   }
 
   /**
@@ -450,7 +468,8 @@ public class VerifierHandlerImpl extends DefaultHandler
     
     String allowed = allowedAttributes(currentItem, qName);
     
-    return syntaxMessage(item, parentItem, parentName, qName, allowed);
+    return (getLineContext(getFileName(), getLine())
+	    + syntaxMessage(item, parentItem, parentName, qName, allowed));
   }
 
   /**
@@ -668,6 +687,45 @@ public class VerifierHandlerImpl extends DefaultHandler
   public boolean isValid() throws IllegalStateException
   {
     return _isValid;
+  }
+
+  private String getLineContext(String filename, int errorLine)
+  {
+    if (filename == null || errorLine <= 0)
+      return "";
+    
+    ReadStream is = null;
+    try {
+      Path path = Vfs.lookup().lookup(filename);
+
+      StringBuilder sb = new StringBuilder("\n\n");
+
+      is = path.openRead();
+      int line = 0;
+      String text;
+      while ((text = is.readLine()) != null) {
+	line++;
+
+	if (errorLine - 1 <= line && line <= errorLine + 1) {
+	  sb.append(line);
+	  sb.append(": ");
+	  sb.append(text);
+	  sb.append("\n");
+	}
+      }
+
+      return sb.toString();
+    } catch (IOException e) {
+      log.log(Level.FINEST, e.toString(), e);
+
+      return "";
+    } finally {
+      try {
+	if (is != null)
+	  is.close();
+      } catch (IOException e) {
+      }
+    }
   }
 
   static class StartKey {

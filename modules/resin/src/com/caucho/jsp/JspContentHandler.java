@@ -38,6 +38,7 @@ import com.caucho.xml.QName;
 import com.caucho.jsp.java.JspNode;
 
 import com.caucho.jsp.cfg.JspPropertyGroup;
+import com.caucho.vfs.*;
 
 /**
  * Generates the nodes for JSP code.
@@ -263,7 +264,10 @@ public class JspContentHandler extends DefaultHandler {
    */
   private void setLocation()
   {
-    if (_locator != null)
-      _builder.setLocation(_locator.getSystemId(), _locator.getLineNumber());
+    if (_locator != null) {
+      _builder.setLocation(Vfs.lookup(_locator.getSystemId()),
+			   _locator.getSystemId(),
+			   _locator.getLineNumber());
+    }
   }
 }

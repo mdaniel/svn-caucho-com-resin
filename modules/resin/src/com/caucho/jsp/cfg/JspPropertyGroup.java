@@ -29,11 +29,16 @@
 
 package com.caucho.jsp.cfg;
 
+import javax.annotation.*;
+import javax.servlet.*;
+
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.Period;
-import com.caucho.server.dispatch.UrlMap;
+import com.caucho.server.dispatch.*;
+import com.caucho.server.webapp.*;
 import com.caucho.util.L10N;
+import com.caucho.jsp.*;
 import com.caucho.vfs.Path;
 
 import java.util.ArrayList;
@@ -45,6 +50,10 @@ import java.util.regex.Pattern;
 public class JspPropertyGroup {
   private static final L10N L = new L10N(JspPropertyGroup.class);
 
+  private static int _gId;
+
+  private WebApp _webApp;
+  
   private String _id;
   private ArrayList<String> _urlPatterns = new ArrayList<String>();
   private String _pageEncoding;
@@ -77,7 +86,17 @@ public class JspPropertyGroup {
   private FileSetType _tldFileSet;
 
   private boolean _isTrimWhitespace = false;
+  private boolean _isDeferredSyntaxAllowedAsLiteral = false;
 
+  public JspPropertyGroup()
+  {
+  }
+
+  public JspPropertyGroup(WebApp webApp)
+  {
+    _webApp = webApp;
+  }
+  
   /**
    * Returns the group's identifier.
    */
@@ -436,6 +455,22 @@ public class JspPropertyGroup {
   }
 
   /**
+   * Sets the deferred-syntax.
+   */
+  public void setDeferredSyntaxAllowedAsLiteral(boolean isAllowed)
+  {
+    _isDeferredSyntaxAllowedAsLiteral = isAllowed;
+  }
+
+  /**
+   * Sets the deferred-syntax.
+   */
+  public boolean isDeferredSyntaxAllowedAsLiteral()
+  {
+    return _isDeferredSyntaxAllowedAsLiteral;
+  }
+
+  /**
    * Sets the recompile-on-errrkReturns true if JSP logging should be disabled.
    */
   public void setRecompileOnError(boolean recompile)
@@ -522,6 +557,26 @@ public class JspPropertyGroup {
   public void setTrimDirectiveWhitespaces(boolean isTrim)
   {
     _isTrimWhitespace = isTrim;
+  }
+
+  @PostConstruct
+  public void init()
+    throws ServletException
+  {
+    if (_webApp != null) {
+      ServletMapping mapping = new ServletMapping();
+      mapping.setServletName("jsp-property-group-" + _gId++);
+      if (_isXml)
+	mapping.setServletClass(JspXmlServlet.class.getName());
+      else
+	mapping.setServletClass(JspServlet.class.getName());
+
+      for (int i = 0; i < _urlPatterns.size(); i++) {
+	mapping.addURLPattern(_urlPatterns.get(i));
+      }
+
+      _webApp.addServletMapping(mapping);
+    }
   }
 
   /**

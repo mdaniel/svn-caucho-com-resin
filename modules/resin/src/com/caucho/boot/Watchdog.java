@@ -107,6 +107,8 @@ public class Watchdog extends AbstractManagedObject
       _jniBoot = (Boot) cl.newInstance();
     } catch (ClassNotFoundException e) {
       log.finer(e.toString());
+    } catch (IllegalStateException e) {
+      log.finer(e.toString());
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
     }
@@ -618,19 +620,11 @@ public class Watchdog extends AbstractManagedObject
 	  }
 	}
 	
-	if (jvmOut != null) {
+	if (jvmOut != null && ! _isSingle) {
 	  try {
 	    jvmOut.close();
 	  } catch (IOException e) {
 	  }
-	}
-      }
-
-      if (_isSingle) {
-	_lifecycle.toStop();
-
-	synchronized (_lifecycle) {
-	  _lifecycle.notify();
 	}
       }
     }

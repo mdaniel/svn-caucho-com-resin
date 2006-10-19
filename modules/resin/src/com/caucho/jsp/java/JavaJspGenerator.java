@@ -109,7 +109,7 @@ public class JavaJspGenerator extends JspGenerator {
   
   protected TagInstance _topTag;
   protected int _tagId;
-  
+
   // XXX: needed in combination with XTP
   boolean _alwaysModified;
   
@@ -232,7 +232,8 @@ public class JavaJspGenerator extends JspGenerator {
    */
   boolean isXml()
   {
-    return _jspCompiler.isXml();
+    // jsp/0362
+    return _parseState.isXml();
   }
 
   /**
@@ -474,7 +475,7 @@ public class JavaJspGenerator extends JspGenerator {
     for (int i = 0; i < _tagLibraryList.size(); i++) {
       Taglib taglib = _tagLibraryList.get(i);
       TagLibraryValidator validator = taglib.getValidator();
-
+    
       if (validator != null) {
 	ValidationMessage []messages;
 
@@ -483,14 +484,14 @@ public class JavaJspGenerator extends JspGenerator {
 				      getPageData());
 
 	if (messages != null && messages.length > 0) {
-          CharBuffer message = CharBuffer.allocate();
+          StringBuilder message = new StringBuilder();
           for (int j = 0; j < messages.length; j++) {
             if (j != 0)
               message.append("\n");
             message.append(messages[j].getMessage());
           }
           
-          throw _rootNode.error(message.close());
+          throw _rootNode.error(message.toString());
 	}
       }
     }
@@ -903,6 +904,15 @@ public class JavaJspGenerator extends JspGenerator {
       out.printJavaString(contentType);
     }
     out.println("\");");
+
+    if (contentType == null || contentType.indexOf("charset") < 0) {
+      out.print("response.setCharacterEncoding(\"");
+      if (encoding != null)
+	out.printJavaString(encoding);
+      else
+	out.printJavaString("iso-8859-1");
+      out.println("\");");
+    }
     
     if (encoding != null)
       out.println("request.setCharacterEncoding(\"" + encoding + "\");");
@@ -1991,6 +2001,47 @@ public class JavaJspGenerator extends JspGenerator {
     return _tagManager.addTaglib(qname);
   }
 
+  public String getSourceLines(Path source, int errorLine)
+  {
+    if (source == null || errorLine < 1)
+      return "";
+
+    boolean hasLine = false;
+    StringBuilder sb = new StringBuilder("\n\n");
+
+    ReadStream is = null;
+    try {
+      is = source.openRead();
+      is.setEncoding(_parseState.getPageEncoding());
+
+      int line = 0;
+      String text;
+      while ((text = is.readLine()) != null) {
+	line++;
+
+	if (errorLine - 1 <= line && line <= errorLine + 1) {
+	  sb.append(line);
+	  sb.append(":  ");
+	  sb.append(text);
+	  sb.append("\n");
+	  hasLine = true;
+	}
+      }
+    } catch (IOException e) {
+      log.log(Level.FINER, e.toString(), e);
+    } finally {
+      try {
+	if (is != null)
+	  is.close();
+      } catch (IOException e) {
+      }
+    }
+
+    if (hasLine)
+      return sb.toString();
+    else
+      return "";
+  }
   public JspParseException error(String message)
   {
     JspParseException e = new JspParseException(message);

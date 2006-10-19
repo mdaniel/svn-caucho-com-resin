@@ -222,7 +222,7 @@ public class ThreadPool {
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
-    return schedule(task, loader, _threadIdleMin, MAX_EXPIRE, true);
+    return schedule(task, loader, getDefaultPriority(), MAX_EXPIRE, true);
   }
 
   /**
@@ -239,7 +239,7 @@ public class ThreadPool {
     
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
-    return schedule(task, loader, _threadIdleMin, expire, true);
+    return schedule(task, loader, getDefaultPriority(), expire, true);
   }
 
   /**
@@ -259,7 +259,7 @@ public class ThreadPool {
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
-    return schedule(task, loader, _threadIdleMin, MAX_EXPIRE, false);
+    return schedule(task, loader, getDefaultPriority(), MAX_EXPIRE, false);
   }
 
   /**
@@ -276,7 +276,7 @@ public class ThreadPool {
     
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
-    return schedule(task, loader, _threadIdleMin, expire, false);
+    return schedule(task, loader, getDefaultPriority(), expire, false);
   }
 
   /**
@@ -304,6 +304,18 @@ public class ThreadPool {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
     return schedule(task, loader, 0, expire, true);
+  }
+
+  private int getDefaultPriority()
+  {
+    if (_threadIdleMin >= 10)
+      return 5;
+    else if (_threadIdleMin >= 5)
+      return 2;
+    else if (_threadIdleMin >= 1)
+      return 1;
+    else
+      return 0;
   }
 
   /**

@@ -74,8 +74,12 @@ public class JavaTagGenerator extends JavaJspGenerator {
   private static HashSet<String> _reserved
     = new HashSet<String>();
 
-  private String _description = "A sample tag";
-  private String _bodyContent = "scriptless";
+  private String _description = null;
+  private String _displayName = null;
+  private String _smallIcon = null;
+  private String _largeIcon = null;
+  private String _example = null;
+  private String _bodyContent = null;
   private String _dynamicAttributes = null;
   
   private ArrayList<TldAttribute> _attributes = new ArrayList<TldAttribute>();
@@ -109,6 +113,51 @@ public class JavaTagGenerator extends JavaJspGenerator {
   public void setDescription(String description)
   {
     _description = description;
+  }
+
+  public String getDescription()
+  {
+    return _description;
+  }
+
+  public void setDisplayName(String displayName)
+  {
+    _displayName = displayName;
+  }
+
+  public String getDisplayName()
+  {
+    return _displayName;
+  }
+
+  public void setSmallIcon(String smallIcon)
+  {
+    _smallIcon = smallIcon;
+  }
+
+  public String getSmallIcon()
+  {
+    return _smallIcon;
+  }
+
+  public void setLargeIcon(String largeIcon)
+  {
+    _largeIcon = largeIcon;
+  }
+
+  public String getLargeIcon()
+  {
+    return _largeIcon;
+  }
+
+  public void setExample(String example)
+  {
+    _example = example;
+  }
+
+  public String getExample()
+  {
+    return _example;
   }
 
   /**
@@ -160,11 +209,42 @@ public class JavaTagGenerator extends JavaJspGenerator {
   }
 
   /**
+   * Finds an attribute.
+   */
+  public TldAttribute findAttribute(String name)
+  {
+    for (int i = 0; i < _attributes.size(); i++) {
+      TldAttribute attr = _attributes.get(i);
+
+      if (name.equals(attr.getName()))
+	return attr;
+    }
+
+    return null;
+  }
+
+  /**
    * Adds a variable.
    */
   public void addVariable(TldVariable var)
   {
     _variables.add(var);
+  }
+
+  /**
+   * Finds a variable.
+   */
+  public TldVariable findVariable(String name)
+  {
+    for (int i = 0; i < _variables.size(); i++) {
+      TldVariable var = _variables.get(i);
+
+      if (name.equals(var.getNameGiven())
+	  || name.equals(var.getNameFromAttribute()))
+	return var;
+    }
+
+    return null;
   }
 
   /**
@@ -374,6 +454,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
       out.println("javax.servlet.http.HttpServletResponse response = (javax.servlet.http.HttpServletResponse) pageContext.getResponse();");
       out.println("javax.servlet.http.HttpSession session = pageContext.getSession();");
       out.println("javax.servlet.ServletContext application = pageContext.getServletContext();");
+      out.println("javax.servlet.ServletConfig config = pageContext.getServletConfig();");
     }
     
     out.println("com.caucho.jsp.PageContextWrapper jspContext = pageContext;");
@@ -590,17 +671,21 @@ public class JavaTagGenerator extends JavaJspGenerator {
 	log.log(Level.WARNING, e.toString(), e);
       }
     }
-
+    
+    String bodyContent = _bodyContent;
+    if (bodyContent == null)
+      bodyContent = "scriptless";
+    
     return new TagInfoExt(tag.getName(),
 			  _fullClassName,
-			  _bodyContent,
-			  "tagfile tag",
+			  bodyContent,
+			  getDescription(),
 			  taglib,
 			  null,
 			  tag.getAttributes(),
-			  tag.getDisplayName(),
-			  tag.getSmallIcon(),
-			  tag.getLargeIcon(),
+			  getDisplayName(),
+			  getSmallIcon(),
+			  getLargeIcon(),
 			  tag.getVariables(),
 			  _dynamicAttributes != null,
 			  _dynamicAttributes,
@@ -672,12 +757,19 @@ public class JavaTagGenerator extends JavaJspGenerator {
 
       out.println("tag.addVariable(var);");
     }
+    
+    String bodyContent = _bodyContent;
+    if (bodyContent == null)
+      bodyContent = "scriptless";
 
     out.println("return new com.caucho.jsp.java.TagInfoExt(tag.getName(),");
     out.println("                   getClass().getName(),");
-    out.println("                   \"" + _bodyContent + "\",");
+    out.println("                   \"" + bodyContent + "\",");
     out.print("                   \"");
-    out.printJavaString(_description);
+    if (_description != null)
+      out.printJavaString(_description);
+    else
+      out.printJavaString("A simple tag");
     out.println("\",");
     out.println("                   taglib,");
     out.println("                   null,");

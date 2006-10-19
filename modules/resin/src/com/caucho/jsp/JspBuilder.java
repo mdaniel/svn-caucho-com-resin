@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -28,6 +29,7 @@
 
 package com.caucho.jsp;
 
+import com.caucho.vfs.*;
 import com.caucho.xml.QName;
 
 import com.caucho.jsp.java.JspNode;
@@ -38,6 +40,9 @@ import com.caucho.jsp.cfg.JspPropertyGroup;
  * Generates the nodes for JSP code.
  */
 abstract public class JspBuilder {
+  // The current source
+  protected Path _sourcePath;
+  
   // The current filename
   protected String _filename;
   
@@ -192,8 +197,9 @@ abstract public class JspBuilder {
   /**
    * Sets the source line number.
    */
-  public void setLocation(String filename, int line)
+  public void setLocation(Path sourcePath, String filename, int line)
   {
+    _sourcePath = sourcePath;
     _filename = filename;
     _line = line;
   }

@@ -112,6 +112,7 @@ public class JspDirectivePage extends JspNode {
     else if (PAGE_ENCODING.equals(name)) {
       String oldEncoding = _parseState.getPageEncoding();
 
+      /*
       // jsp/01f1
       if (oldEncoding != null) {
 	String oldCanonical = Encoding.getMimeName(oldEncoding);
@@ -120,8 +121,10 @@ public class JspDirectivePage extends JspNode {
 	if (! newCanonical.equals(oldCanonical))
 	  throw error(L.l("pageEncoding '{0}' conflicts with previous value of pageEncoding '{1}'.  Check the .jsp and any included .jsp files for conflicts.", value, oldEncoding));
       }
-      
+      */
+
       _parseState.setPageEncoding(value);
+      _parseState.setCharEncoding(value);
     }
     else if (LANGUAGE.equals(name)) {
       if (! value.equals("java"))

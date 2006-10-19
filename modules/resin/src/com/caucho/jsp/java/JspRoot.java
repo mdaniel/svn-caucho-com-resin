@@ -119,6 +119,15 @@ public class JspRoot extends JspContainerNode {
     if (_version == null)
       throw error(L.l("'version' is a required attribute of jsp:root"));
   }
+  
+  /**
+   * Adds a child node.
+   */
+  public void addChild(JspNode node)
+    throws JspParseException
+  {
+    super.addChild(node);
+  }
 
   /**
    * Adds a namespace, e.g. from a prefix declaration.

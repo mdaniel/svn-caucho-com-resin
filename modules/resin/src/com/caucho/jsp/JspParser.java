@@ -199,6 +199,14 @@ public class JspParser {
   }
 
   /**
+   * Returns true if JSP EL expressions are enabled.
+   */
+  private boolean isDeferredSyntaxAllowedAsLiteral()
+  {
+    return _parseState.isDeferredSyntaxAllowedAsLiteral();
+  }
+
+  /**
    * Adds a prelude.
    */
   public void addPrelude(String prelude)
@@ -509,6 +517,7 @@ public class JspParser {
               _text.clear();
               _isXml = true;
 	      _parseState.setELIgnoredDefault(false);
+	      _parseState.setXml(true);
             }
             _isTop = false;
 	    parseOpenTag(name, ch, tagCode == TAG_UNKNOWN);
@@ -550,12 +559,14 @@ public class JspParser {
       case '#':
         ch = read();
 
-        if (ch == '{' && ! isELIgnored()) {
-	  // XXX: error
-          ch = parseJspExpression();
+	if (ch != '{' || isELIgnored()) {
+          addText('#');
+	}
+        else if (isDeferredSyntaxAllowedAsLiteral()) {
+          addText('#');
 	}
         else
-          addText('#');
+	  throw error(L.l("Deferred syntax ('#{...}') not allowed as literal."));
         break;
 
       case '\\':
@@ -616,6 +627,7 @@ public class JspParser {
   {
     addText();
 
+    Path jspPath = _jspPath;
     String filename = _filename;
     int line = _line;
 
@@ -630,7 +642,7 @@ public class JspParser {
 
     processTaglib("resin-c", JSTL_CORE_URI);
     
-    setLocation(filename, line);
+    setLocation(jspPath, filename, line);
     _jspBuilder.startElement(JSTL_CORE_OUT);
     _jspBuilder.attribute(new QName("value"), cb.close());
     _jspBuilder.attribute(new QName("escapeXml"), "false");
@@ -753,7 +765,7 @@ public class JspParser {
       break;
     }
 
-    setLocation(_filename, _lineStart);
+    setLocation(_jspPath, _filename, _lineStart);
     _jspBuilder.startElement(eltName);
     _jspBuilder.endAttributes();
 
@@ -850,7 +862,7 @@ public class JspParser {
                       badChar(ch), _lineStart));
     }
 
-    setLocation(_filename, _lineStart);
+    setLocation(_jspPath, _filename, _lineStart);
     _lineStart = _line;
     _jspBuilder.startElement(qname);
 
@@ -946,7 +958,7 @@ public class JspParser {
 
     QName qname = getElementQName(name);
 
-    setLocation(_filename, _lineStart);
+    setLocation(_jspPath, _filename, _lineStart);
     _lineStart = _line;
 
     _jspBuilder.startElement(qname);
@@ -1545,7 +1557,7 @@ public class JspParser {
   {
     String string = _text.toString();
 
-    setLocation(_filename, _lineStart);
+    setLocation(_jspPath, _filename, _lineStart);
 
     if (_parseState.isTrimWhitespace() && isWhitespace(string)) {
     }
@@ -1669,7 +1681,7 @@ public class JspParser {
     _seenCr = false;
     
     if (_includes.size() > 0) {
-      setLocation(_filename, _line);
+      setLocation(_jspPath, _filename, _line);
       
       Include include = _includes.get(_includes.size() - 1);
       _includes.remove(_includes.size() - 1);
@@ -1682,7 +1694,7 @@ public class JspParser {
       _uriPwd = include._uriPwd;
       _parseState.setUriPwd(_uriPwd);
 
-      setLocation(_filename, _line);
+      setLocation(_jspPath, _filename, _line);
       
       return read();
     }
@@ -1767,7 +1779,7 @@ public class JspParser {
    */
   private void setLocation()
   {
-    setLocation(_filename, _line);
+    setLocation(_jspPath, _filename, _line);
   }
 
   /**
@@ -1776,16 +1788,17 @@ public class JspParser {
    * @param filename the filename
    * @param line the line in the source file
    */
-  private void setLocation(String filename, int line)
+  private void setLocation(Path jspPath, String filename, int line)
   {
     if (_lineMap == null) {
-      _jspBuilder.setLocation(filename, line);
+      _jspBuilder.setLocation(jspPath, filename, line);
     }
     else {
       LineMap.Line srcLine = _lineMap.getLine(line);
 
       if (srcLine != null) {
-        _jspBuilder.setLocation(srcLine.getSourceFilename(),
+        _jspBuilder.setLocation(jspPath,
+				srcLine.getSourceFilename(),
                                 srcLine.getSourceLine(line));
       }
     }

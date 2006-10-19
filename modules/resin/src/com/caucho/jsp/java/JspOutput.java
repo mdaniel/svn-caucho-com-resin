@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -77,16 +78,40 @@ public class JspOutput extends JspNode {
       _gen.setOmitXmlDeclaration(attributeToBoolean(name.getName(), value));
     }
     else if (DOCTYPE_SYSTEM.equals(name)) {
+      String oldValue = _gen.getDoctypeSystem();
+
+      if (oldValue != null && ! oldValue.equals(value)) {
+        throw error(L.l("jsp:output doctype-system '{0}' conflicts with previous value '{1}'.  The doctype-system attribute may only be specified once.",
+			value, oldValue));
+      }
+
+      _gen.setDoctypeSystem(value);
       _doctypeSystem = value;
     }
     else if (DOCTYPE_PUBLIC.equals(name)) {
+      String oldValue = _gen.getDoctypePublic();
+
+      if (oldValue != null && ! oldValue.equals(value)) {
+        throw error(L.l("jsp:output doctype-public '{0}' conflicts with previous value '{1}'.  The doctype-public attribute may only be specified once.",
+			value, oldValue));
+      }
+
+      _gen.setDoctypePublic(value);
       _doctypePublic = value;
     }
     else if (DOCTYPE_ROOT_ELEMENT.equals(name)) {
+      String oldValue = _gen.getDoctypeRootElement();
+
+      if (oldValue != null && ! oldValue.equals(value)) {
+        throw error(L.l("jsp:output doctype-root-element '{0}' conflicts with previous value '{1}'.  The doctype-root-element attribute may only be specified once.",
+			value, oldValue));
+      }
+
+      _gen.setDoctypeRootElement(value);
       _doctypeRootElement = value;
     }
     else {
-      throw error(L.l("`{0}' is an unknown jsp:output attribute.  See the JSP documentation for a complete list of jsp:output directive attributes.",
+      throw error(L.l("'{0}' is an unknown jsp:output attribute.  Value attributes are: doctype-public, doctype-system, doctype-root-element.",
                       name.getName()));
     }
   }

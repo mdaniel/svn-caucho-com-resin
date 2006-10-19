@@ -78,6 +78,8 @@ public class TagFileTag extends GenericTag {
       JspNode node = _children.get(i);
 
       if (node instanceof JspBody) {
+	if (_body != null)
+	  throw error(L.l("Only one <jsp:body> is allowed as a child of a tag."));
         _body = (JspBody) node;
         _children.remove(i);
         return;
@@ -223,10 +225,15 @@ public class TagFileTag extends GenericTag {
 	throw error(L.l("unexpected attribute `{0}' in <{1}>",
                         attrName.getName(), getTagName()));
 
+      boolean rtexprvalue = true;
+
       Class cl = null;
 
-      if (attribute != null)
+      if (attribute != null) {
 	cl = _gen.loadBeanClass(attribute.getTypeName());
+
+	rtexprvalue = attribute.canBeRequestTime();
+      }
       
       if (cl == null)
 	cl = String.class;
@@ -256,7 +263,7 @@ public class TagFileTag extends GenericTag {
       else {
 	String convValue = generateParameterValue(cl,
 						  (String) value,
-						  true,
+						  rtexprvalue,
 						  attribute);
       
 	//					attribute.allowRtexpr());

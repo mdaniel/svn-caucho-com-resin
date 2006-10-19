@@ -98,7 +98,11 @@ javaee_jsp-property-group = element jsp-property-group {
 
   element include-prelude { javaee_path }*,
 
-  element include-coda { javaee_path }*
+  element include-coda { javaee_path }*,
+
+  element deferred-syntax-allowed-as-literal { j2ee_boolean }?,
+
+  element trim-directive-whitespaces { j2ee_boolean }?
 }
 
 javaee_listener = element listener {

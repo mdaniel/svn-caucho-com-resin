@@ -164,7 +164,7 @@ public class JavaJspBuilder extends JspBuilder {
       _rootNode = new JspTop();
       _rootNode.setParseState(getParseState());
       _rootNode.setGenerator(_gen);
-      _rootNode.setStartLocation(_filename, _line);
+      _rootNode.setStartLocation(_sourcePath, _filename, _line);
       _gen.setRootNode(_rootNode);
       _gen.init();
       
@@ -205,7 +205,7 @@ public class JavaJspBuilder extends JspBuilder {
         node.setParseState(_parseState);
         node.setQName(qname);
         node.setParent(_currentNode);
-        node.setStartLocation(_filename, _line);
+        node.setStartLocation(_sourcePath, _filename, _line);
 
         _openNode = node;
 
@@ -221,7 +221,7 @@ public class JavaJspBuilder extends JspBuilder {
       elt.setParseState(_parseState);
       elt.setQName(qname);
       elt.setParent(_currentNode);
-      elt.setStartLocation(_filename, _line);
+      elt.setStartLocation(_sourcePath, _filename, _line);
 
       _openNode = elt;
 
@@ -245,7 +245,7 @@ public class JavaJspBuilder extends JspBuilder {
       elt.setParseState(_parseState);
       elt.setQName(qname);
       elt.setParent(_currentNode);
-      elt.setStartLocation(_filename, _line);
+      elt.setStartLocation(_sourcePath, _filename, _line);
 
       _openNode = elt;
 
@@ -286,7 +286,7 @@ public class JavaJspBuilder extends JspBuilder {
       customTag.setTagClass(tagClass);
 
       _openNode = customTag;
-      _openNode.setStartLocation(_filename, _line);
+      _openNode.setStartLocation(_sourcePath, _filename, _line);
     }
     else if (Tag.class.isAssignableFrom(tagClass)) {
       CustomTag customTag = new CustomTag();
@@ -298,7 +298,7 @@ public class JavaJspBuilder extends JspBuilder {
       customTag.setTagClass(tagClass);
 
       _openNode = customTag;
-      _openNode.setStartLocation(_filename, _line);
+      _openNode.setStartLocation(_sourcePath, _filename, _line);
     }
     else if (SimpleTag.class.isAssignableFrom(tagClass)) {
       CustomSimpleTag customTag = new CustomSimpleTag();
@@ -310,7 +310,7 @@ public class JavaJspBuilder extends JspBuilder {
       customTag.setTagClass(tagClass);
 
       _openNode = customTag;
-      _openNode.setStartLocation(_filename, _line);
+      _openNode.setStartLocation(_sourcePath, _filename, _line);
     }
     else
       throw _gen.error(L.l("<{0}>: tag class {0} must either implement Tag or SimpleTag.", qname.getName(), tagClass.getName()));
@@ -398,7 +398,7 @@ public class JavaJspBuilder extends JspBuilder {
       JspNode node = _currentNode.addText(text);
 
       if (node != null) {
-	node.setStartLocation(_filename, _line);
+	node.setStartLocation(_sourcePath, _filename, _line);
       }
     }
   }
@@ -415,7 +415,7 @@ public class JavaJspBuilder extends JspBuilder {
       JspNode node = _currentNode.addText(text);
 
       if (node != null) {
-	node.setStartLocation(srcFilename, startLine);
+	node.setStartLocation(null, srcFilename, startLine);
 	node.setEndLocation(srcFilename, endLine);
       }
     }

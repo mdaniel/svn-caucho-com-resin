@@ -88,6 +88,9 @@ public class CustomSimpleTag extends GenericTag {
       JspNode node = (JspNode) _children.get(i);
 
       if (node instanceof JspBody) {
+	if (_body != null)
+	  throw error(L.l("Only one <jsp:body> is allowed as a child of a tag."));
+		      
         _body = (JspBody) node;
         _children.remove(i);
         return;
@@ -96,7 +99,7 @@ public class CustomSimpleTag extends GenericTag {
 
     _body = new JspBody();
     _body.setParent(this);
-    _body.setStartLocation(_filename, _startLine);
+    _body.setStartLocation(_sourcePath, _filename, _startLine);
     _body.setGenerator(_gen);
     _body.endAttributes();
     _body.setEndLocation(_filename, _startLine);

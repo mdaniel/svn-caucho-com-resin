@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -50,6 +51,7 @@ import com.caucho.jsp.cfg.TldVariable;
 public class JspDoBody extends JspNode {
   private static final QName VAR = new QName("var");
   private static final QName VAR_READER = new QName("varReader");
+  private static final QName SCOPE = new QName("scope");
   
   private String _var;
   private String _varReader;
@@ -65,8 +67,10 @@ public class JspDoBody extends JspNode {
       _var = value;
     else if (VAR_READER.equals(name))
       _varReader = value;
+    else if (SCOPE.equals(name))
+      _scope = value;
     else
-      throw error(L.l("`{0}' is an unknown attribute for jsp:doBody.",
+      throw error(L.l("'{0}' is an unknown attribute for jsp:doBody.",
                       name.getName()));
   }
 
@@ -77,7 +81,7 @@ public class JspDoBody extends JspNode {
     throws JspParseException
   {
     if (! _gen.getParseState().isTag())
-      throw error(L.l("`{0}' is only allowed in .tag files.  Attribute directives are not allowed in normal JSP files.",
+      throw error(L.l("'{0}' is only allowed in .tag files.  Attribute directives are not allowed in normal JSP files.",
                       getTagName()));
   }
 
@@ -90,6 +94,7 @@ public class JspDoBody extends JspNode {
     throws IOException
   {
     os.print("<jsp:do-body");
+    os.print(" jsp:id=\"" + _gen.generateJspId() + "\"");
     if (_var != null)
       os.print(" var=\"" + _var + "\"");
     os.print(">");
@@ -145,11 +150,11 @@ public class JspDoBody extends JspNode {
     */
 
     if (_var != null) {
-      out.print("pageContext.setAttribute(\"" + _var + "\", ");
+      out.print(getScope() + ".setAttribute(\"" + _var + "\", ");
       out.println("pageContext.invoke(" + name + "));");
     }
     else if (_varReader != null) {
-      out.print("pageContext.setAttribute(\"" + _varReader + "\", ");
+      out.print(getScope() + ".setAttribute(\"" + _varReader + "\", ");
       out.println("pageContext.invokeReader(" + name + "));");
     }
     else {
@@ -191,4 +196,24 @@ public class JspDoBody extends JspNode {
     out.popDepth();
     out.println("}");
   }
+
+  private String getScope()
+    throws JspParseException
+  {
+    String context = null;
+    if (_scope == null || _scope.equals("page"))
+      return "pageContext";
+    else if (_scope.equals("request")) {
+      return "pageContext.getRequest()";
+    }
+    else if (_scope.equals("session")) {
+      return "pageContext.getSession()";
+    }
+    else if (_scope.equals("application")) {
+      return "pageContext.getApplication()";
+    }
+    else
+      throw error(L.l("Unknown scope '{0}' in <jsp:doBody>.  Scope must be 'page', 'request', 'session', or 'application'.", _scope));
+  }
 }
+  

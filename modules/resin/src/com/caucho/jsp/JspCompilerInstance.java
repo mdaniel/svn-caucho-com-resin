@@ -248,19 +248,34 @@ public class JspCompilerInstance {
     if (jspConfig == null && app != null)
       jspConfig = (JspConfig) app.getExtension("jsp-config");
 
+    ArrayList<JspPropertyGroup> jspList = new ArrayList<JspPropertyGroup>();
     _jspPropertyGroup = null;
 
-    if (_jspPropertyGroup == null)
+    if (_jspPropertyGroup == null) {
       _jspPropertyGroup = _jspCompiler.getJspPropertyGroup();
-    
-    if (_jspPropertyGroup == null && jspConfig != null)
-      _jspPropertyGroup = jspConfig.findJspPropertyGroup(_uri);
 
-    if (_jspPropertyGroup == null && app != null)
+      if (_jspPropertyGroup != null) {
+	jspList.add(_jspPropertyGroup);
+      }
+    }
+
+    if (jspConfig != null) {
+      jspList.addAll(jspConfig.findJspPropertyGroupList(_uri));
+    }
+
+    if (_jspPropertyGroup == null && app != null) {
       _jspPropertyGroup = app.getJsp();
+      
+      if (_jspPropertyGroup != null)
+	jspList.add(_jspPropertyGroup);
+    }
 
-    if (_jspPropertyGroup == null)
+    if (_jspPropertyGroup == null) {
       _jspPropertyGroup = _jspCompiler.getJspPropertyGroup();
+      
+      if (_jspPropertyGroup != null)
+	jspList.add(_jspPropertyGroup);
+    }
 
     JspResourceManager resourceManager = _jspCompiler.getResourceManager();
     if (resourceManager != null) {
@@ -302,37 +317,37 @@ public class JspCompilerInstance {
 
     JspPageConfig pageConfig = new JspPageConfig();
 
-    if (_jspPropertyGroup != null) {
-      ArrayList<String> preludeList = _jspPropertyGroup.getIncludePreludeList();
+    for (JspPropertyGroup jspPropertyGroup : jspList) {
+      ArrayList<String> preludeList = jspPropertyGroup.getIncludePreludeList();
       for (int i = 0; preludeList != null && i < preludeList.size(); i++) {
         String prelude = preludeList.get(i);
         _preludeList.add(prelude);
       }
 
-      ArrayList<String> codaList = _jspPropertyGroup.getIncludeCodaList();
+      ArrayList<String> codaList = jspPropertyGroup.getIncludeCodaList();
       for (int i = 0; codaList != null && i < codaList.size(); i++) {
         String coda = codaList.get(i);
         _codaList.add(coda);
       }
 
-      _parseState.setJspPropertyGroup(_jspPropertyGroup);
-      _parseState.setSession(_jspPropertyGroup.isSession());
-      _parseState.setScriptingInvalid(_jspPropertyGroup.isScriptingInvalid());
-      _parseState.setELIgnored(_jspPropertyGroup.isELIgnored());
-      _parseState.setVelocityEnabled(_jspPropertyGroup.isVelocityEnabled());
-      _parseState.setPageEncoding(_jspPropertyGroup.getPageEncoding());
+      _parseState.setJspPropertyGroup(jspPropertyGroup);
+      _parseState.setSession(jspPropertyGroup.isSession());
+      _parseState.setScriptingInvalid(jspPropertyGroup.isScriptingInvalid());
+      _parseState.setELIgnored(jspPropertyGroup.isELIgnored());
+      _parseState.setVelocityEnabled(jspPropertyGroup.isVelocityEnabled());
+      _parseState.setPageEncoding(jspPropertyGroup.getPageEncoding());
 
-      pageConfig.setStaticEncoding(_jspPropertyGroup.isStaticEncoding());
+      pageConfig.setStaticEncoding(jspPropertyGroup.isStaticEncoding());
 
-      _parseState.setRecycleTags(_jspPropertyGroup.isRecycleTags());
+      _parseState.setRecycleTags(jspPropertyGroup.isRecycleTags());
       
-      _parseState.setTrimWhitespace(_jspPropertyGroup.isTrimDirectiveWhitespaces());
+      _parseState.setTrimWhitespace(jspPropertyGroup.isTrimDirectiveWhitespaces());
+      _parseState.setDeferredSyntaxAllowedAsLiteral(jspPropertyGroup.isDeferredSyntaxAllowedAsLiteral());
 
-      if (_jspPropertyGroup.getTldFileSet() != null)
-        taglibManager.setTldFileSet(_jspPropertyGroup.getTldFileSet());
+      if (jspPropertyGroup.getTldFileSet() != null)
+        taglibManager.setTldFileSet(jspPropertyGroup.getTldFileSet());
     }
-    else {
-    }
+    
     _parseState.setResourceManager(resourceManager);
     LineMap lineMap = null;
 
@@ -573,6 +588,8 @@ public class JspCompilerInstance {
 	return _generator.generateTagInfo(_className, taglib);
       }
 
+      _generator.validate();
+      
       _generator.generate(_jspPath, _className);
 
       if (_jspCompiler.hasRecursiveCompile()) {

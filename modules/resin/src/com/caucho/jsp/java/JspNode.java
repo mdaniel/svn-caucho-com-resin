@@ -62,6 +62,7 @@ public abstract class JspNode {
 
   static final String JSP_NS = JspParser.JSP_NS;
 
+  protected Path _sourcePath;
   protected String _filename;
   protected int _startLine;
   protected int _endAttributeLine;
@@ -141,8 +142,9 @@ public abstract class JspNode {
   /**
    * Sets the start location of the node.
    */
-  public void setStartLocation(String filename, int line)
+  public void setStartLocation(Path sourcePath, String filename, int line)
   {
+    _sourcePath = sourcePath;
     _filename = filename;
     _startLine = line;
     _endAttributeLine = line;
@@ -371,7 +373,7 @@ public abstract class JspNode {
   public void addAttribute(QName name, String value)
     throws JspParseException
   {
-    throw error(L.l("attribute `{0}' is not allowed in <{1}>.",
+    throw error(L.l("attribute '{0}' is not allowed in <{1}>.",
                     name.getName(), getTagName()));
   }
 
@@ -388,7 +390,7 @@ public abstract class JspNode {
       addAttribute(name, value.getStaticText().trim());
     }
     else
-      throw error(L.l("attribute `{0}' is not allowed in <{1}>.",
+      throw error(L.l("attribute '{0}' is not allowed in <{1}>.",
 		      name.getName(), getTagName()));
   }
 
@@ -410,7 +412,7 @@ public abstract class JspNode {
       char ch = text.charAt(i);
 
       if (! XmlChar.isWhitespace(ch))
-        throw error(L.l("Text is not allowed in <{0}> at `{1}'.",
+        throw error(L.l("Text is not allowed in <{0}> at '{1}'.",
                         _name.getName(), text));
     }
 
@@ -685,7 +687,7 @@ public abstract class JspNode {
     else if (value.equals("no") || value.equals("false"))
       return false;
     else
-      throw error(L.l("`{0}' is an unknown value for {1}.  'true' or 'false' are the expected values.",
+      throw error(L.l("'{0}' is an unknown value for {1}.  'true' or 'false' are the expected values.",
 		      value, attr));
   }
 
@@ -746,7 +748,7 @@ public abstract class JspNode {
       generateSetParameter(out, obj, strValue, method, editor.getClass());
     }
     else
-      throw error(L.l("expected `<%= ... %>' at `{0}' for tag attribute setter `{1}'.  Tag attributes which can't be converted from strings must use a runtime attribute expression.",
+      throw error(L.l("expected '<%= ... %>' at '{0}' for tag attribute setter '{1}'.  Tag attributes which can't be converted from strings must use a runtime attribute expression.",
                       strValue, method.getName() + "(" + type.getName() + ")"));
   }
 
@@ -780,7 +782,7 @@ public abstract class JspNode {
       out.print("new com.caucho.jsp.ELExprFragment(pageContext, _caucho_expr_" + index + ")");
     }
     else {
-      throw error(L.l("can't handle fragment `{0}' of type {1}",
+      throw error(L.l("can't handle fragment '{0}' of type {1}",
                       objValue, objValue.getClass()));
     }
     out.println(");");
@@ -973,6 +975,7 @@ public abstract class JspNode {
 				TagAttributeInfo attrInfo)
     throws Exception
   {
+    System.out.println("GPV: " + value + " " + rtexpr);
     boolean isEmpty = value == null || value.equals("");
     if (isEmpty)
       value = "0";
@@ -980,11 +983,41 @@ public abstract class JspNode {
     try {
       if (JspFragment.class.equals(type))
 	return generateFragmentParameter(value, rtexpr);
+      else if (ValueExpression.class.isAssignableFrom(type)) {
+        int exprIndex;
+
+	String typeName = attrInfo != null ? attrInfo.getExpectedTypeName() : "";
+
+        if (isEmpty)
+          exprIndex = _gen.addValueExpr("", typeName);
+        else
+          exprIndex = _gen.addValueExpr(value, typeName);
+      
+        return ("_caucho_value_expr_" + exprIndex);
+      }
+      else if (MethodExpression.class.isAssignableFrom(type)) {
+        int exprIndex;
+
+	String sig = attrInfo != null ? attrInfo.getMethodSignature() : "";
+
+        if (isEmpty)
+          exprIndex = _gen.addMethodExpr("", sig);
+        else
+          exprIndex = _gen.addMethodExpr(value, sig);
+      
+        return ("_caucho_method_expr_" + exprIndex);
+      }
       else if (rtexpr && hasRuntimeAttribute(value)) {
         return getRuntimeAttribute(value);
       }
       else if (rtexpr && hasELAttribute(value)) { // jsp/0138
         return generateELValue(type, value);
+      }
+      else if (! rtexpr
+	       && hasDeferredAttribute(value)
+	       && ! _gen.getParseState().isDeferredSyntaxAllowedAsLiteral()) {
+	throw error(L.l("Deferred syntax '{0}' is not allowed as a literal.",
+			value));
       }
       else if (type.equals(boolean.class))
         return String.valueOf(Boolean.valueOf(isEmpty ? "false" : value));
@@ -1039,30 +1072,6 @@ public abstract class JspNode {
           exprIndex = _gen.addExpr(value);
       
         return ("_caucho_expr_" + exprIndex);
-      }
-      else if (ValueExpression.class.isAssignableFrom(type)) {
-        int exprIndex;
-
-	String typeName = attrInfo != null ? attrInfo.getExpectedTypeName() : "";
-
-        if (isEmpty)
-          exprIndex = _gen.addValueExpr("", typeName);
-        else
-          exprIndex = _gen.addValueExpr(value, typeName);
-      
-        return ("_caucho_value_expr_" + exprIndex);
-      }
-      else if (MethodExpression.class.isAssignableFrom(type)) {
-        int exprIndex;
-
-	String sig = attrInfo != null ? attrInfo.getMethodSignature() : "";
-
-        if (isEmpty)
-          exprIndex = _gen.addMethodExpr("", sig);
-        else
-          exprIndex = _gen.addMethodExpr(value, sig);
-      
-        return ("_caucho_method_expr_" + exprIndex);
       }
       else if (com.caucho.xpath.Expr.class.isAssignableFrom(type)) {
         int exprIndex;
@@ -1326,7 +1335,7 @@ public abstract class JspNode {
       return true;
     else if (value.indexOf("<%=") >= 0 &&
              value.indexOf("<%=") < value.indexOf("%>"))
-      throw error(L.l("interpolated runtime values are forbidden by the JSP spec at `{0}'",
+      throw error(L.l("interpolated runtime values are forbidden by the JSP spec at '{0}'",
                       value));
     else
       return false;
@@ -1358,6 +1367,14 @@ public abstract class JspNode {
   public boolean hasELAttribute(String value)
   {
     return ! _parseState.isELIgnored() && value.indexOf("${") >= 0;
+  }
+  
+  /**
+   * Returns true if the value is a runtime attribute.
+   */
+  public boolean hasDeferredAttribute(String value)
+  {
+    return ! _parseState.isELIgnored() && value.indexOf("#{") >= 0;
   }
   
   /**
@@ -1515,8 +1532,11 @@ public abstract class JspNode {
    */
   protected JspParseException error(String msg, Throwable e)
   {
-    if (_filename != null)
-      return new JspLineParseException(_filename + ":" + _startLine + ": " + msg, e);
+    if (_filename != null) {
+      String lines = _gen.getSourceLines(_sourcePath, _startLine);
+      
+      return new JspLineParseException(_filename + ":" + _startLine + ": " + msg + lines, e);
+    }
     else
       return new JspParseException(msg, e);
   }

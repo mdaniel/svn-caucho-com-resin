@@ -44,20 +44,25 @@ import com.caucho.xml.QName;
 import com.caucho.xml.XmlChar;
 
 public class JspDirectiveTag extends JspNode {
-  private static final QName IS_EL_IGNORED = new QName("isELIgnored");
-  private static final QName IS_VELOCITY_ENABLED =
-    new QName("isVelocityEnabled");
-  private static final QName PAGE_ENCODING = new QName("pageEncoding");
-  private static final QName LANGUAGE = new QName("language");
   private static final QName IMPORT = new QName("import");
   private static final QName DISPLAY_NAME = new QName("display-name");
+  private static final QName BODY_CONTENT = new QName("body-content");
+  private static final QName DYNAMIC_ATTRIBUTES
+    = new QName("dynamic-attributes");
   private static final QName SMALL_ICON = new QName("small-icon");
   private static final QName LARGE_ICON = new QName("large-icon");
   private static final QName DESCRIPTION = new QName("description");
   private static final QName EXAMPLE = new QName("example");
-  private static final QName DYNAMIC_ATTRIBUTES =
-    new QName("dynamic-attributes");
-  private static final QName BODY_CONTENT = new QName("body-content");
+  private static final QName LANGUAGE = new QName("language");
+  private static final QName PAGE_ENCODING = new QName("pageEncoding");
+  private static final QName IS_EL_IGNORED = new QName("isELIgnored");
+  private static final QName DEFERRED_AS_LITERAL
+    = new QName("deferredSyntaxAllowedAsLiteral");
+  private static final QName TRIM_WHITESPACES
+    = new QName("trimDirectiveWhitespaces");
+  
+  private static final QName IS_VELOCITY_ENABLED =
+    new QName("isVelocityEnabled");
   
   static final L10N L = new L10N(JspDirectiveTag.class);
 
@@ -107,32 +112,87 @@ public class JspDirectiveTag extends JspNode {
       _parseState.addImport(value);
     }
     else if (DISPLAY_NAME.equals(name)) {
+      String oldValue = gen.getDisplayName();
+      
+      if (oldValue != null && ! oldValue.equals(value))
+        throw error(L.l("@tag display-name '{0}' conflicts with previous value '{1}'.  The display-name attribute may only be specified once.",
+			value, oldValue));
+
+      
+      gen.setDisplayName(value);
     }
     else if (SMALL_ICON.equals(name)) {
+      String oldValue = gen.getSmallIcon();
+      
+      if (oldValue != null && ! oldValue.equals(value))
+        throw error(L.l("@tag small-icon '{0}' conflicts with previous value '{1}'.  The small-icon attribute may only be specified once.",
+			value, oldValue));
+
+      
+      gen.setSmallIcon(value);
     }
     else if (LARGE_ICON.equals(name)) {
+      String oldValue = gen.getLargeIcon();
+      
+      if (oldValue != null && ! oldValue.equals(value))
+        throw error(L.l("@tag large-icon '{0}' conflicts with previous value '{1}'.  The large-icon attribute may only be specified once.",
+			value, oldValue));
+
+      
+      gen.setLargeIcon(value);
     }
     else if (DESCRIPTION.equals(name)) {
+      String oldValue = gen.getDescription();
+      
+      if (oldValue != null && ! oldValue.equals(value))
+        throw error(L.l("@tag description '{0}' conflicts with previous value '{1}'.  The description attribute may only be specified once.",
+			value, oldValue));
+
+      
       gen.setDescription(value);
     }
     else if (EXAMPLE.equals(name)) {
+      String oldValue = gen.getExample();
+      
+      if (oldValue != null && ! oldValue.equals(value))
+        throw error(L.l("@tag example '{0}' conflicts with previous value '{1}'.  The example attribute may only be specified once.",
+			value, oldValue));
+
+      
+      gen.setExample(value);
     }
     else if (DYNAMIC_ATTRIBUTES.equals(name)) {
+      String oldValue = gen.getDynamicAttributes();
+      
+      if (oldValue != null && ! oldValue.equals(value))
+        throw error(L.l("@tag dynamic-attributes '{0}' conflicts with previous value '{1}'.  The dynamic-attributes attribute may only be specified once.",
+			value, oldValue));
+      
       gen.setDynamicAttributes(value);
     }
     else if (BODY_CONTENT.equals(name)) {
+      String oldValue = gen.getBodyContent();
+      
+      if (oldValue != null && ! oldValue.equals(value)) {
+        throw error(L.l("@tag body-content '{0}' conflicts with previous value '{1}'.  The body-content attribute may only be specified once.",
+			value, oldValue));
+      }
+	
       if (value.equals("scriptless") ||
 	  value.equals("tagdependent") ||
 	  value.equals("empty")) {
       }
       else
-	throw error(L.l("`{0}' is an unknown body-content value for the JSP tag directive attribute.  'scriptless', 'tagdependent', and 'empty' are the allowed values.",
+	throw error(L.l("'{0}' is an unknown body-content value for the JSP tag directive attribute.  'scriptless', 'tagdependent', and 'empty' are the allowed values.",
                       value));
 
       gen.setBodyContent(value);
     }
+    else if (DEFERRED_AS_LITERAL.equals(name)) {
+      _parseState.setDeferredSyntaxAllowedAsLiteral(value.equals("true"));
+    }
     else {
-      throw error(L.l("`{0}' is an unknown JSP tag directive attribute.  See the JSP documentation for a complete list of tag directive attributes.",
+      throw error(L.l("'{0}' is an unknown JSP tag directive attribute.  The valid attributes are: body-content, deferredSyntaxAllowedAsLiteral, display-name, dynamic-attributes, example, isELIgnored, language, large-icon, pageEncoding, small-icon, trimDirectiveWhitespace.",
                       name.getName()));
     }
   }
@@ -217,6 +277,8 @@ public class JspDirectiveTag extends JspNode {
     JavaTagGenerator gen = (JavaTagGenerator) _gen;
     
     os.print("<jsp:directive.tag");
+    os.print(" jsp:id=\"" + gen.generateJspId() + "\"");
+
     if (! _parseState.isELIgnored())
       os.print(" el-ignored='false'");
     /*

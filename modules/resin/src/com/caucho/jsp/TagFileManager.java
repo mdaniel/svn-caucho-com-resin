@@ -74,9 +74,15 @@ public class TagFileManager {
       
       String uri = location;
       
-      TagInfo tag = getTag(uri, taglib);
-      if (tag != null)
-	return tag;
+      TagInfo tag = null;
+
+      try {
+	getTag(uri, taglib);
+	if (tag != null)
+	  return tag;
+      } catch (Exception e) {
+	log.log(Level.FINEST, e.toString(), e);
+      }
       
       if (! location.endsWith("/"))
 	location = location + "/";
@@ -146,7 +152,7 @@ public class TagFileManager {
 	return tagCompiler.compileTag(taglib);
       }
       else
-	throw new JspParseException(L.l("tag file `{0}' must end with .tag or .tagx",
+	throw new JspParseException(L.l("tag file '{0}' must end with .tag or .tagx",
 					location));
     } catch (Exception e) {
       throw JspParseException.create(e);

@@ -37,6 +37,8 @@ import javax.servlet.jsp.*;
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
 
+import com.caucho.config.types.*;
+
 import com.caucho.vfs.*;
 import com.caucho.util.*;
 
@@ -50,11 +52,19 @@ public class JspDirectiveAttribute extends JspNode {
   static L10N L = new L10N(JspDirectiveAttribute.class);
 
   private static final QName NAME = new QName("name");
-  private static final QName TYPE = new QName("type");
   private static final QName REQUIRED = new QName("required");
   private static final QName FRAGMENT = new QName("fragment");
   private static final QName RTEXPRVALUE = new QName("rtexprvalue");
+  private static final QName TYPE = new QName("type");
   private static final QName DESCRIPTION = new QName("description");
+  private static final QName DEFERRED_VALUE
+    = new QName("deferredValue");
+  private static final QName DEFERRED_VALUE_TYPE
+    = new QName("deferredValueType");
+  private static final QName DEFERRED_METHOD
+    = new QName("deferredMethod");
+  private static final QName DEFERRED_METHOD_SIGNATURE
+    = new QName("deferredMethodSignature");
 
   private String _name;
   private String _type;
@@ -63,6 +73,10 @@ public class JspDirectiveAttribute extends JspNode {
   private Boolean _isRtexprvalue;
   private String _description;
 
+  private boolean _deferredValue;
+  private String _deferredValueType;
+  private boolean _deferredMethod;
+  private String _deferredMethodSignature;
   
   /**
    * Adds an attribute.
@@ -73,8 +87,24 @@ public class JspDirectiveAttribute extends JspNode {
   public void addAttribute(QName name, String value)
     throws JspParseException
   {
-    if (NAME.equals(name))
+    if (! _gen.getParseState().isTag())
+      throw error(L.l("'{0}' is only allowed in .tag files.  Attribute directives are not allowed in normal JSP files.",
+                      getTagName()));
+    
+    JavaTagGenerator gen = (JavaTagGenerator) _gen;
+    
+    if (NAME.equals(name)) {
+      if (gen.findVariable(value) != null) {
+	throw error(L.l("@attribute name '{0}' is already used by a variable.",
+			value));
+      }
+      else if (gen.findAttribute(value) != null) {
+	throw error(L.l("@attribute name '{0}' is already used by another attribute.",
+			value));
+      }
+      
       _name = value;
+    }
     else if (TYPE.equals(name))
       _type = value;
     else if (REQUIRED.equals(name))
@@ -85,8 +115,23 @@ public class JspDirectiveAttribute extends JspNode {
       _isRtexprvalue = attributeToBoolean(name.getName(), value);
     else if (DESCRIPTION.equals(name))
       _description = value;
+    else if (DEFERRED_VALUE.equals(name))
+      _deferredValue = attributeToBoolean(name.getName(), value);
+    else if (DEFERRED_VALUE_TYPE.equals(name))
+      _deferredValueType = value;
+    else if (DEFERRED_METHOD.equals(name))
+      _deferredMethod = attributeToBoolean(name.getName(), value);
+    else if (DEFERRED_METHOD_SIGNATURE.equals(name)) {
+      try {
+	new Signature(value);
+      } catch (Exception e) {
+	throw error(e.getMessage());
+      }
+      
+      _deferredMethodSignature = value;
+    }
     else {
-      throw error(L.l("`{0}' is an unknown JSP attribute directive attributes.  See the JSP documentation for a complete list of page directive attributes.",
+      throw error(L.l("'{0}' is an unknown JSP attribute directive attributes.  The valid attributes are: deferredMethod, deferredMethodSignature, deferredValue, deferredValueType, description, fragment, name, rtexprvalue, type.",
                       name.getName()));
     }
   }
@@ -98,11 +143,11 @@ public class JspDirectiveAttribute extends JspNode {
     throws JspParseException
   {
     if (! _gen.getParseState().isTag())
-      throw error(L.l("`{0}' is only allowed in .tag files.  Attribute directives are not allowed in normal JSP files.",
+      throw error(L.l("'{0}' is only allowed in .tag files.  Attribute directives are not allowed in normal JSP files.",
                       getTagName()));
     
     if (_name == null)
-      throw error(L.l("<{0}> needs a `name' attribute.",
+      throw error(L.l("<{0}> needs a 'name' attribute.",
                       getTagName()));
 
     JavaTagGenerator tagGen = (JavaTagGenerator) _gen;
@@ -114,7 +159,11 @@ public class JspDirectiveAttribute extends JspNode {
       Class type = loadClass(_type);
       
       if (type == null)
-        throw error(L.l("`{0}' is an unknown class for tag attribute {1}.",
+        throw error(L.l("type '{0}' is an unknown class for tag attribute {1}.",
+                        _type, _name));
+      
+      if (type.isPrimitive())
+        throw error(L.l("attribute type '{0}' cannot be a Java primitive for {1}.",
                         _type, _name));
       
       attr.setType(type);
@@ -123,7 +172,10 @@ public class JspDirectiveAttribute extends JspNode {
     attr.setRequired(_isRequired);
     
     if (_isFragment && _isRtexprvalue != null)
-      throw error(L.l("rtexprvalue cannot be set when fragment is true."));
+      throw error(L.l("@attribute rtexprvalue cannot be set when fragment is true."));
+    
+    if (_isFragment && _type != null)
+      throw error(L.l("@attribute type cannot be set when fragment is true."));
 
     if (_isRtexprvalue == null || Boolean.TRUE.equals(_isRtexprvalue))
       attr.setRtexprvalue(Boolean.TRUE);
@@ -150,10 +202,14 @@ public class JspDirectiveAttribute extends JspNode {
   public void printXml(WriteStream os)
     throws IOException
   {
-    os.print("<jsp:directive.attribute name=\"" + _name + "\"");
+    os.print("<jsp:directive.attribute");
+    os.print(" jsp:id=\"" + _gen.generateJspId() + "\"");
+    os.print(" name=\"" + _name + "\"");
 
     if (_type != null)
-      os.print(" type=\"" + _type + "\"/>");
+      os.print(" type=\"" + _type + "\"");
+
+    os.println("/>");
   }
 
   /**

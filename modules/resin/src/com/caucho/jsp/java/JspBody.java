@@ -116,7 +116,7 @@ public class JspBody extends JspFragmentNode {
     JspNode parent = getParent();
 
     if (parent == null ||
-	parent instanceof JspRoot ||
+	//	parent instanceof JspRoot ||
 	parent instanceof JspTop) {
       throw error(L.l("jsp:body must be contained in a valid tag."));
     }
@@ -135,7 +135,8 @@ public class JspBody extends JspFragmentNode {
   public void printXml(WriteStream os)
     throws IOException
   {
-    os.print("<jsp:body>");
+    os.print("<jsp:body");
+    os.print(" jsp:id=\"" + _gen.generateJspId() + "\">");
     printXmlChildren(os);
     os.print("</jsp:body>");
   }
