@@ -2869,12 +2869,12 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
 
       if (_annotationCfg.isNull()) {
         throw error(_field, L.l("'{0}' is an illegal targetEntity for {1}.  @OneToOne relations must target a valid @Entity.",
-                                targetName, _field.getName()));
+                                targetEntity.getName(), _field.getName()));
       }
 
       if (! _fieldType.isAssignableFrom(targetEntity)) {
         throw error(_field, L.l("'{0}' is an illegal targetEntity for {1}.  @OneToOne targetEntity must be assignable to the field type '{2}'.",
-                                targetName,
+                                targetEntity.getName(),
                                 _field.getName(),
                                 _fieldType.getName()));
       }
