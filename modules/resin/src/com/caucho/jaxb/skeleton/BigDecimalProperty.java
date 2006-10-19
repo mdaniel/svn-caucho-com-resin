@@ -29,6 +29,7 @@
 
 package com.caucho.jaxb.skeleton;
 import com.caucho.jaxb.*;
+import javax.xml.bind.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
@@ -51,13 +52,18 @@ public class BigDecimalProperty extends CDataProperty {
   protected String write(Object in)
       throws IOException, XMLStreamException
   {
-    return ((BigDecimal)in).toString();
+    return DatatypeConverter.printDecimal((BigDecimal) in);
   }
 
   protected Object read(String in)
     throws IOException, XMLStreamException
   {
-    return new BigDecimal(in);
+    return DatatypeConverter.parseDecimal(in);
+  }
+
+  protected String getSchemaType()
+  {
+    return "xsd:decimal";
   }
 }
 

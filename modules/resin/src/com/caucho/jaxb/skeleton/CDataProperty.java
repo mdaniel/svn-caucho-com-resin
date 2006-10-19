@@ -29,6 +29,7 @@
 
 package com.caucho.jaxb.skeleton;
 import com.caucho.jaxb.*;
+import javax.xml.bind.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import javax.xml.bind.*;

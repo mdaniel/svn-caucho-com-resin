@@ -71,6 +71,17 @@ public class MapProperty extends Property {
     */
     throw new UnsupportedOperationException(getClass().getName());
   }
+
+  public void generateSchema(XMLStreamWriter out)
+    throws XMLStreamException
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  protected String getSchemaType()
+  {
+    throw new UnsupportedOperationException();
+  }
 }
 
 

@@ -29,6 +29,7 @@
 
 package com.caucho.jaxb.skeleton;
 import com.caucho.jaxb.*;
+import javax.xml.bind.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
@@ -39,6 +40,7 @@ import com.caucho.util.*;
 
 import com.caucho.vfs.WriteStream;
 
+// XXX hexBinary
 /**
  * a ByteArray Property
  */
@@ -51,13 +53,18 @@ public class ByteArrayProperty extends CDataProperty {
   protected String write(Object in)
       throws IOException, XMLStreamException
   {
-    return Base64.encodeFromByteArray((byte[])in);
+    return DatatypeConverter.printBase64Binary((byte[]) in);
   }
 
   protected Object read(String in)
     throws IOException, XMLStreamException
   {
-    return Base64.decodeToByteArray(in);
+    return DatatypeConverter.parseBase64Binary(in);
+  }
+
+  protected String getSchemaType()
+  {
+    return "xsd:base64Binary";
   }
 }
 

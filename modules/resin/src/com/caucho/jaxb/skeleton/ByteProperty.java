@@ -29,6 +29,7 @@
 
 package com.caucho.jaxb.skeleton;
 import com.caucho.jaxb.*;
+import javax.xml.bind.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
@@ -50,14 +51,17 @@ public class ByteProperty extends CDataProperty {
   protected String write(Object in)
       throws IOException, XMLStreamException
   {
-    return ((Byte)in).byteValue()+"";
+    return DatatypeConverter.printByte(((Byte) in).byteValue());
   }
 
   protected Object read(String in)
     throws IOException, XMLStreamException
   {
-    return new Byte(in);
+    return DatatypeConverter.parseByte(in);
+  }
+
+  protected String getSchemaType()
+  {
+    return "xsd:byte";
   }
 }
-
-

@@ -29,73 +29,169 @@
 
 package com.caucho.jaxb;
 
-import com.caucho.jaxb.skeleton.*;
+import java.io.*;
 import java.math.*;
+import java.net.*;
+import java.util.*;
+
 import javax.xml.bind.*;
 import javax.xml.namespace.*;
+import javax.xml.stream.*;
+import javax.xml.transform.*;
+
 import org.w3c.dom.*;
-import java.util.*;
-import java.io.*;
+
+import com.caucho.jaxb.skeleton.*;
+import com.caucho.util.*;
 
 /**
  * Entry point to API
  */
 public class JAXBContextImpl extends JAXBContext {
+  private static final L10N L = new L10N(JAXBContextImpl.class);
 
   private Class[]     _classes;
   private String[]    _packages;
   private ClassLoader _classLoader;
   private JAXBIntrospector _jaxbIntrospector;
 
-  private HashMap<String,Object> _properties =
-    new HashMap<String,Object>();
+  private ArrayList<ObjectFactorySkeleton> _objectFactories 
+    = new ArrayList<ObjectFactorySkeleton>();
 
-  private HashMap<Class,Skeleton> _skeletons =
-    new HashMap<Class,Skeleton>();
+  private HashMap<String,Object> _properties 
+    = new HashMap<String,Object>();
 
-  private HashMap<QName,Skeleton> _roots =
-    new HashMap<QName,Skeleton>();
+  private HashMap<Class,Skeleton> _skeletons 
+    = new HashMap<Class,Skeleton>();
 
-  // 
-  // XXX: JAXB Providers are required to call the setDatatypeConverter
-  // api at some point before the first marshal or unmarshal operation
-  // (perhaps during the call to JAXBContext.newInstance)
-  //
+  private HashMap<QName,Skeleton> _roots 
+    = new HashMap<QName,Skeleton>();
+
+  /**
+   * Sorts classes in reverse depth order.  When searching for the correct
+   * class for an instance, we need the most specific known type.
+   */
+  private static class ClassDepthComparator implements Comparator<Class> {
+    public int compare(Class o1, Class o2) 
+    {
+      int d1 = classDepth(o1);
+      int d2 = classDepth(o2);
+
+      if (d1 < d2)
+        return 1;
+      else if (d1 > d2)
+        return -1;
+      else
+        return 0;
+    }
+
+    public boolean equals(Object obj)
+    {
+      return obj instanceof ClassDepthComparator;
+    }
+
+    // XXX Memoize?
+    private static int classDepth(Class cl)
+    {
+      Class superClass = cl.getSuperclass();
+
+      if (superClass == null)
+        return 0;
+
+      return 1 + classDepth(superClass);
+    }
+  }
 
   public JAXBContextImpl(String contextPath,
-			 ClassLoader classLoader,
-			 Map<String,?> properties)
+                         ClassLoader classLoader,
+                         Map<String,?> properties)
+    throws JAXBException
   {
     this._jaxbIntrospector = new JAXBIntrospectorImpl(this);
     this._classes = new Class[0];
     this._classLoader = classLoader;
 
     StringTokenizer st = new StringTokenizer(contextPath, ":");
-    this._packages = new String[st.countTokens()];
 
-    for(int i=0; i<_packages.length; i++)
-      _packages[i] = st.nextToken();
+    do {
+      String packageName = st.nextToken(); 
+      loadPackage(packageName);
+    } 
+    while (st.hasMoreTokens());
 
     if (properties != null)
       for(Map.Entry<String,?> e : properties.entrySet())
-	setProperty(e.getKey(), e.getValue());
+        setProperty(e.getKey(), e.getValue());
+
+    DatatypeConverter.setDatatypeConverter(new DatatypeConverterImpl());
   }
 
-  public JAXBContextImpl(Class[] classes,
-			 Map<String,?> properties)
+  private void loadPackage(String packageName) 
+    throws JAXBException
+  {
+    boolean success = false;
+
+    String slashedPackageName = "/" + packageName.replace('.', '/');
+
+    try {
+      Class cl = CauchoSystem.loadClass(packageName + ".ObjectFactory");
+      _objectFactories.add(new ObjectFactorySkeleton(cl));
+
+      success = true;
+    }
+    catch (ClassNotFoundException e) {
+      // we can still try for jaxb.index
+    }
+
+    try {
+      ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+
+      InputStream is =
+        classLoader.getResourceAsStream(slashedPackageName + "/jaxb.index");
+      InputStreamReader isr = new InputStreamReader(is, "utf-8");
+      LineNumberReader in = new LineNumberReader(isr);
+
+      for (String line = in.readLine();
+           line != null;
+           line = in.readLine()) {
+        String[] parts = line.split("#", 2);
+        String className = parts[0].trim();
+
+        if (! "".equals(className)) {
+          Class cl = CauchoSystem.loadClass(packageName + "." + className);
+          getSkeleton(cl);
+        }
+      }
+
+      success = true;
+    }
+    catch (Throwable t) {
+      if (! success) {
+        throw new JAXBException(L.l("Unable to open jaxb.index for package {0}",
+                                    packageName), t);
+      }
+    }
+  }
+
+  public JAXBContextImpl(Class[] classes, Map<String,?> properties)
     throws JAXBException
   {
     this._jaxbIntrospector = new JAXBIntrospectorImpl(this);
-    this._classes = classes;
     this._packages = new String[0];
     this._classLoader = null;
+    this._classes = new Class[classes.length];
+
+    System.arraycopy(classes, 0, _classes, 0, classes.length);
+    Arrays.sort(_classes, new ClassDepthComparator());
 
     for(Class c : _classes)
       getSkeleton(c);
 
     if (properties != null)
       for(Map.Entry<String,?> e : properties.entrySet())
-	setProperty(e.getKey(), e.getValue());
+        setProperty(e.getKey(), e.getValue());
+
+    DatatypeConverter.setDatatypeConverter(new DatatypeConverterImpl());
   }
 
   public Marshaller createMarshaller()
@@ -157,7 +253,34 @@ public class JAXBContextImpl extends JAXBContext {
   public void generateSchema(SchemaOutputResolver outputResolver)
     throws IOException
   {
-    throw new UnsupportedOperationException("Schema validation not supported");
+    Result result = outputResolver.createOutput("", "schema1.xsd");
+
+    try {
+      XMLOutputFactory factory = XMLOutputFactory.newInstance();
+      XMLStreamWriter out = factory.createXMLStreamWriter(result);
+
+      out.writeStartDocument();
+
+      generateSchemaWithoutHeader(out);
+    }
+    catch (Exception e) {
+      IOException ioException = new IOException();
+
+      ioException.initCause(e);
+
+      throw ioException;
+    }
+  }
+
+  public void generateSchemaWithoutHeader(XMLStreamWriter out)
+    throws JAXBException, XMLStreamException
+  {
+    out.writeStartElement("xsd", "schema", "http://www.w3.org/2001/XMLSchema");
+
+    for (Skeleton skeleton : _skeletons.values())
+      skeleton.generateSchema(out);
+
+    out.writeEndElement(); // schema
   }
 
   public Skeleton getSkeleton(Class c)

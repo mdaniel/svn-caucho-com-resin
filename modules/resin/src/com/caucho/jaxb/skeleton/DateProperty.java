@@ -29,6 +29,7 @@
 
 package com.caucho.jaxb.skeleton;
 import com.caucho.jaxb.*;
+import javax.xml.bind.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
@@ -49,19 +50,20 @@ public class DateProperty extends CDataProperty {
   }
 
   protected String write(Object in)
-      throws IOException, XMLStreamException
+    throws IOException, XMLStreamException
   {
-    return DateFormat.getDateInstance().format((Date)in);
+    return DatatypeConverter.printDate((Calendar) in);
   }
 
   protected Object read(String in)
     throws IOException, XMLStreamException
   {
-    try {
-      return DateFormat.getDateInstance().parse(in);
-    } catch (ParseException pe) {
-      throw new XMLStreamException(pe);
-    }
+    return DatatypeConverter.parseDate(in);
+  }
+
+  protected String getSchemaType()
+  {
+    return "xsd:date";
   }
 }
 

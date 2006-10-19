@@ -59,6 +59,10 @@ public class StringProperty extends CDataProperty {
     return in;
   }
 
+  protected String getSchemaType()
+  {
+    return "xsd:string";
+  }
 }
 
 

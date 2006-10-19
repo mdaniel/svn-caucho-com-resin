@@ -29,6 +29,7 @@
 
 package com.caucho.jaxb.skeleton;
 import com.caucho.jaxb.*;
+import javax.xml.bind.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
@@ -50,14 +51,17 @@ public class BooleanProperty extends CDataProperty {
   protected String write(Object in)
       throws IOException, XMLStreamException
   {
-    return ((Boolean)in).booleanValue()+"";
+    return DatatypeConverter.printBoolean(((Boolean)in).booleanValue());
   }
 
   protected Object read(String in)
     throws IOException, XMLStreamException
   {
-    return new Boolean(in);
+    return Boolean.valueOf(DatatypeConverter.parseBoolean(in));
+  }
+
+  protected String getSchemaType()
+  {
+    return "xsd:boolean";
   }
 }
-
-

@@ -29,6 +29,7 @@
 
 package com.caucho.jaxb.skeleton;
 import com.caucho.jaxb.*;
+import javax.xml.bind.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
@@ -50,14 +51,17 @@ public class FloatProperty extends CDataProperty {
   protected String write(Object in)
       throws IOException, XMLStreamException
   {
-    return ((Number)in).floatValue()+"";
+    return DatatypeConverter.printFloat(((Number) in).floatValue());
   }
 
   protected Object read(String in)
     throws IOException, XMLStreamException
   {
-    return new Float(in);
+    return DatatypeConverter.parseFloat(in);
+  }
+
+  protected String getSchemaType()
+  {
+    return "xsd:float";
   }
 }
-
-

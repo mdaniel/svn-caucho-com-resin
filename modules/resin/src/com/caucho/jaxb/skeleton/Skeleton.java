@@ -38,6 +38,7 @@ import java.lang.reflect.Modifier;
 import java.io.IOException;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -47,6 +48,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -60,7 +62,12 @@ import javax.xml.stream.XMLStreamException;
 
 import com.caucho.jaxb.JAXBContextImpl;
 
+import com.caucho.util.JAXBUtil;
+
 public class Skeleton<C> {
+  public static final String XML_SCHEMA_NS = "http://www.w3.org/2001/XMLSchema";
+  public static final String XML_SCHEMA_PREFIX = "xsd";
+
   private static final Logger log = Logger.getLogger(Skeleton.class.getName());
 
   private JAXBContextImpl _context;
@@ -71,8 +78,13 @@ public class Skeleton<C> {
   private Method _beforeMarshal;
   private Method _afterMarshal;
 
-  private HashMap<String,Property> _properties = 
-    new HashMap<String,Property>();
+  private QName _typeName;
+
+  private LinkedHashMap<String,Property> _attributeProperties
+    = new LinkedHashMap<String,Property>();
+
+  private LinkedHashMap<String,Property> _elementProperties 
+    = new LinkedHashMap<String,Property>();
 
   public Class<C> getType()
   {
@@ -131,15 +143,19 @@ public class Skeleton<C> {
       
       if (c.isAnnotationPresent(XmlRootElement.class)) {
         XmlRootElement xre = c.getAnnotation(XmlRootElement.class);
+
         if (!"##default".equals(xre.name())) {
-          QName qname = null;
           if ("##default".equals(xre.namespace()))
-            qname = new QName(xre.name());
+            _typeName = new QName(xre.name());
           else
-            qname = new QName(xre.namespace(), xre.name());
-          _context.addRootElement(qname, this);
+            _typeName = new QName(xre.namespace(), xre.name());
+
+          _context.addRootElement(_typeName, this);
         }
       }
+
+      if (_typeName == null)
+        _typeName = new QName(JAXBUtil.classBasename(_class));
       
       for(Field f : c.getFields()) {
         if ((f.getModifiers() & Modifier.PUBLIC) == 0) continue;
@@ -149,7 +165,11 @@ public class Skeleton<C> {
 
         Accessor a = new Accessor.FieldAccessor(f, _context);
         Property p = _context.createProperty(a);
-        _properties.put(p.getName(), p);
+
+        if (f.isAnnotationPresent(XmlAttribute.class))
+          _attributeProperties.put(p.getName(), p);
+        else
+          _elementProperties.put(p.getName(), p);
       }
       
       // XXX: getter/setter methods
@@ -253,7 +273,7 @@ public class Skeleton<C> {
   private Property getProperty(QName q)
   {
     // XXX
-    return _properties.get(q.getLocalPart());
+    return _elementProperties.get(q.getLocalPart());
   }
 
   public void write(Marshaller m, XMLStreamWriter out,
@@ -279,7 +299,7 @@ public class Skeleton<C> {
         out.writeStartElement(tagName.getNamespaceURI(),
                               tagName.getLocalPart());
       
-      for(Property p : _properties.values())
+      for(Property p : _elementProperties.values())
         p.write(m, out, p.get(obj));
       
       out.writeEndElement();
@@ -330,5 +350,24 @@ public class Skeleton<C> {
     }
 
     return tagName;
+  }
+
+  public void generateSchema(XMLStreamWriter out)
+    throws JAXBException, XMLStreamException
+  {
+    out.writeStartElement(XML_SCHEMA_PREFIX, "complexType", XML_SCHEMA_NS);
+    out.writeAttribute("name", _typeName.toString());
+
+    out.writeStartElement(XML_SCHEMA_PREFIX, "sequence", XML_SCHEMA_NS);
+
+    for (Property property : _elementProperties.values())
+      property.generateSchema(out);
+
+    out.writeEndElement(); // sequence
+
+    for (Property property : _attributeProperties.values())
+      property.generateSchema(out);
+
+    out.writeEndElement(); // complexType
   }
 }

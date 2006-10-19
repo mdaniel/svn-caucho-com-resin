@@ -29,6 +29,7 @@
 
 package com.caucho.jaxb.skeleton;
 import com.caucho.jaxb.*;
+import javax.xml.bind.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
@@ -48,15 +49,20 @@ public class IntProperty extends CDataProperty {
   }
 
   protected String write(Object in)
-      throws IOException, XMLStreamException
+    throws IOException, XMLStreamException
   {
-    return ((Integer)in).intValue()+"";
+    return DatatypeConverter.printInt(((Integer) in).intValue());
   }
 
   protected Object read(String in)
     throws IOException, XMLStreamException
   {
-    return new Integer(in);
+    return DatatypeConverter.parseInt(in);
+  }
+
+  protected String getSchemaType()
+  {
+    return "xsd:int";
   }
 }
 

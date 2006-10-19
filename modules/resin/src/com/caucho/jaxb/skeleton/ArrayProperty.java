@@ -92,6 +92,11 @@ public class ArrayProperty extends IterableProperty {
     }
 
   }
+
+  protected String getSchemaType()
+  {
+    throw new UnsupportedOperationException();
+  }
 }
 
 

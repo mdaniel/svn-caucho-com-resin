@@ -43,6 +43,8 @@ import javax.xml.stream.*;
  * represents a property in a skeleton; requires an Accessor to access it
  */
 public abstract class Property {
+  public static final String XML_SCHEMA_NS = "http://www.w3.org/2001/XMLSchema";
+  public static final String XML_SCHEMA_PREFIX = "xsd";
 
   protected Accessor _accessor;
 
@@ -161,4 +163,21 @@ public abstract class Property {
   {
     return _accessor.getName();
   }
+
+  public void generateSchema(XMLStreamWriter out)
+    throws JAXBException, XMLStreamException
+  {
+    XmlAttribute attribute =
+      (XmlAttribute) _accessor.getAnnotation(XmlAttribute.class);
+
+    if (attribute != null)
+      out.writeEmptyElement(XML_SCHEMA_PREFIX, "attribute", XML_SCHEMA_NS);
+    else
+      out.writeEmptyElement(XML_SCHEMA_PREFIX, "element", XML_SCHEMA_NS);
+
+    out.writeAttribute("name", _accessor.getName());
+    out.writeAttribute("type", getSchemaType());
+  }
+
+  protected abstract String getSchemaType();
 }

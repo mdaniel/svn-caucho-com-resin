@@ -29,6 +29,7 @@
 
 package com.caucho.jaxb.skeleton;
 import com.caucho.jaxb.*;
+import javax.xml.bind.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
@@ -48,17 +49,24 @@ public class CharacterProperty extends CDataProperty {
   }
 
   protected String write(Object in)
-      throws IOException, XMLStreamException
+    throws IOException, XMLStreamException
   {
-    return ((int) ((Character)in).charValue()) + "";
+    char ch = ((Character)in).charValue();
+
+    return DatatypeConverter.printUnsignedShort(Character.getNumericValue(ch));
   }
 
   protected Object read(String in)
     throws IOException, XMLStreamException
   {
-    int i = new Integer(in).intValue();
+    int i = DatatypeConverter.parseUnsignedShort(in);
 
     return new Character((char) i);
+  }
+
+  protected String getSchemaType()
+  {
+    return "xsd:unsignedShort";
   }
 }
 

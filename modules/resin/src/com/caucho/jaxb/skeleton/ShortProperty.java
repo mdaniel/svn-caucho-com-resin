@@ -28,14 +28,16 @@
  */
 
 package com.caucho.jaxb.skeleton;
-import com.caucho.jaxb.*;
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import java.util.*;
 
+import java.util.*;
 import java.lang.reflect.*;
 import java.io.*;
 
+import javax.xml.bind.*;
+import javax.xml.namespace.*;
+import javax.xml.stream.*;
+
+import com.caucho.jaxb.*;
 import com.caucho.vfs.WriteStream;
 
 /**
@@ -50,14 +52,17 @@ public class ShortProperty extends CDataProperty {
   protected String write(Object in)
       throws IOException, XMLStreamException
   {
-    return ((Short)in).shortValue()+"";
+    return DatatypeConverter.printShort(((Short) in).shortValue());
   }
 
   protected Object read(String in)
     throws IOException, XMLStreamException
   {
-    return new Short(in);
+    return Short.valueOf(DatatypeConverter.parseShort(in));
+  }
+
+  protected String getSchemaType()
+  {
+    return "xsd:short";
   }
 }
-
-

@@ -29,6 +29,7 @@
 
 package com.caucho.jaxb.skeleton;
 import com.caucho.jaxb.*;
+import javax.xml.bind.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
@@ -50,12 +51,17 @@ public class DoubleProperty extends CDataProperty {
   protected String write(Object in)
       throws IOException, XMLStreamException
   {
-    return ((Number)in).doubleValue()+"";
+    return DatatypeConverter.printDouble(((Number) in).doubleValue());
   }
 
   protected Object read(String in)
     throws IOException, XMLStreamException
   {
-    return new Double(in);
+    return DatatypeConverter.parseDouble(in);
+  }
+
+  protected String getSchemaType()
+  {
+    return "xsd:double";
   }
 }

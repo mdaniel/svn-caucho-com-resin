@@ -63,6 +63,16 @@ public class SkeletonProperty extends Property {
     _skeleton.write(m, out, obj, _accessor.getQName());
   }
 
+  public void generateSchema(XMLStreamWriter out)
+    throws JAXBException, XMLStreamException
+  {
+    _skeleton.generateSchema(out);
+  }
+
+  protected String getSchemaType()
+  {
+    throw new UnsupportedOperationException();
+  }
 }
 
 

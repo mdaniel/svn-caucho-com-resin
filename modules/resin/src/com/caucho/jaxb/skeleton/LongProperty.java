@@ -28,14 +28,16 @@
  */
 
 package com.caucho.jaxb.skeleton;
-import com.caucho.jaxb.*;
+
+import javax.xml.bind.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
+
+import java.io.*;
+import java.lang.reflect.*;
 import java.util.*;
 
-import java.lang.reflect.*;
-import java.io.*;
-
+import com.caucho.jaxb.*;
 import com.caucho.vfs.WriteStream;
 
 /**
@@ -48,15 +50,20 @@ public class LongProperty extends CDataProperty {
   }
 
   protected String write(Object in)
-      throws IOException, XMLStreamException
+    throws IOException, XMLStreamException
   {
-    return ((Long)in).longValue()+"";
+    return DatatypeConverter.printLong(((Long) in).longValue());
   }
 
   protected Object read(String in)
     throws IOException, XMLStreamException
   {
-    return new Long(in);
+    return Long.valueOf(DatatypeConverter.parseLong(in));
+  }
+
+  protected String getSchemaType()
+  {
+    return "xsd:long";
   }
 }
 

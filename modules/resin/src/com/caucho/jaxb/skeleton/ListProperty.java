@@ -60,6 +60,11 @@ public class ListProperty extends IterableProperty {
   {
     return ((List) o).iterator();
   }
+
+  protected String getSchemaType()
+  {
+    throw new UnsupportedOperationException();
+  }
 }
 
 
