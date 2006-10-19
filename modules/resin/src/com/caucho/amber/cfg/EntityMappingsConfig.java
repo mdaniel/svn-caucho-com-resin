@@ -158,11 +158,21 @@ public class EntityMappingsConfig {
   }
 
   /**
+   * Sets the schema location
+   */
+  public void setSchemaLocation(String schema)
+  {
+  }
+
+  /**
    * Adds a new <entity>.
    */
   public void addEntity(EntityConfig entity)
   {
-    if (_package == null)
+    String className = entity.getClassName();
+
+    // jpa/0s2d
+    if ((_package == null) || className.startsWith(_package + "."))
       _entityMap.put(entity.getClassName(), entity);
     else
       _entityMap.put(_package + "." + entity.getClassName(),

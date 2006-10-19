@@ -154,6 +154,29 @@ abstract public class AbstractConfigIntrospector {
     }
   }
 
+  void getInternalOneToOneConfig(JClass type,
+                                 JAccessibleObject field,
+                                 String fieldName)
+  {
+    _annotationCfg.reset(field, OneToOne.class);
+
+    EntityConfig entityConfig = null;
+
+    if (_entityConfigMap != null)
+      entityConfig = _entityConfigMap.get(type.getName());
+
+    if (entityConfig != null) {
+
+      AttributesConfig attributes = entityConfig.getAttributes();
+
+      if (attributes != null) {
+        OneToOneConfig oneToOne = attributes.getOneToOne(fieldName);
+
+        _annotationCfg.setConfig(oneToOne);
+      }
+    }
+  }
+
   void getInternalOneToManyConfig(JClass type,
                                   JAccessibleObject field,
                                   String fieldName)
@@ -196,6 +219,29 @@ abstract public class AbstractConfigIntrospector {
         ManyToOneConfig manyToOne = attributes.getManyToOne(fieldName);
 
         _annotationCfg.setConfig(manyToOne);
+      }
+    }
+  }
+
+  void getInternalManyToManyConfig(JClass type,
+                                   JAccessibleObject field,
+                                   String fieldName)
+  {
+    _annotationCfg.reset(field, ManyToMany.class);
+
+    EntityConfig entityConfig = null;
+
+    if (_entityConfigMap != null)
+      entityConfig = _entityConfigMap.get(type.getName());
+
+    if (entityConfig != null) {
+
+      AttributesConfig attributes = entityConfig.getAttributes();
+
+      if (attributes != null) {
+        ManyToManyConfig manyToMany = attributes.getManyToMany(fieldName);
+
+        _annotationCfg.setConfig(manyToMany);
       }
     }
   }
@@ -284,27 +330,6 @@ abstract public class AbstractConfigIntrospector {
                                 String fieldName)
   {
     _annotationCfg.reset(method, Version.class);
-  }
-
-  void getInternalManyToManyConfig(JClass type,
-                                   JAccessibleObject field,
-                                   String fieldName)
-  {
-    _annotationCfg.reset(field, ManyToMany.class);
-  }
-
-  void getInternalColumnConfig(JClass type,
-                               JAccessibleObject field,
-                               String fieldName)
-  {
-    _annotationCfg.reset(field, Column.class);
-  }
-
-  void getInternalOneToOneConfig(JClass type,
-                                 JAccessibleObject field,
-                                 String fieldName)
-  {
-    _annotationCfg.reset(field, OneToOne.class);
   }
 
   void getInternalJoinColumnConfig(JClass type,

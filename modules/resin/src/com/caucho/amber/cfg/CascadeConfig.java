@@ -29,70 +29,65 @@
 
 package com.caucho.amber.cfg;
 
-import javax.persistence.FetchType;
-
-
 /**
- * The base class for <one-to-one>, <one-to-many> and so on.
+ * <cascade> tag in orm.xml
  */
-abstract public class AbstractRelationConfig {
-
-  // attributes
-  private String _name;
-  private String _targetEntity;
-  private FetchType _fetch;
+public class CascadeConfig {
 
   // elements
-  private JoinTableConfig _joinTable;
-  private CascadeConfig _cascade;
+  private boolean _cascadeAll;
+  private boolean _cascadePersist;
+  private boolean _cascadeMerge;
+  private boolean _cascadeRemove;
+  private boolean _cascadeRefresh;
 
-  public String getName()
+  public boolean getCascadeAll()
   {
-    return _name;
+    return _cascadeAll;
   }
 
-  public void setName(String name)
+  public void setCascadeAll(boolean cascadeAll)
   {
-    _name = name;
+    _cascadeAll = cascadeAll;
   }
 
-  public String getTargetEntity()
+  public boolean getCascadePersist()
   {
-    return _targetEntity;
+    return _cascadePersist;
   }
 
-  public void setTargetEntity(String targetEntity)
+  public void setCascadePersist(boolean cascadePersist)
   {
-    _targetEntity = targetEntity;
+    _cascadePersist = cascadePersist;
   }
 
-  public FetchType getFetch()
+  public boolean getCascadeMerge()
   {
-    return _fetch;
+    return _cascadeMerge;
   }
 
-  public void setFetch(String fetch)
+  public void setCascadeMerge(boolean cascadeMerge)
   {
-    _fetch = FetchType.valueOf(fetch);
+    _cascadeMerge = cascadeMerge;
   }
 
-  public CascadeConfig getCascade()
+  public boolean getCascadeRemove()
   {
-    return _cascade;
+    return _cascadeRemove;
   }
 
-  public void setCascade(CascadeConfig cascade)
+  public void setCascadeRemove(boolean cascadeRemove)
   {
-    _cascade = cascade;
+    _cascadeRemove = cascadeRemove;
   }
 
-  public JoinTableConfig getJoinTable()
+  public boolean getCascadeRefresh()
   {
-    return _joinTable;
+    return _cascadeRefresh;
   }
 
-  public void setJoinTable(JoinTableConfig joinTable)
+  public void setCascadeRefresh(boolean cascadeRefresh)
   {
-    _joinTable = joinTable;
+    _cascadeRefresh = cascadeRefresh;
   }
 }

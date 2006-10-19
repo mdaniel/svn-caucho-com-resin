@@ -14,6 +14,8 @@ t_class = string
 orm30_entity-mappings = element entity-mappings {
   attribute version { "1.0" },
 
+  attribute xsi:schemaLocation { string }?,
+
   element description { string }?,
 
   orm30_persistence-unit-metadata?,
@@ -398,15 +400,15 @@ orm30_many-to-one = element many-to-one {
 }
 
 orm30_cascade = element cascade {
-  element cascade-all { t_boolean },
+  element cascade-all { t_boolean }?,
 
-  element cascade-persist { t_boolean },
+  element cascade-persist { t_boolean }?,
 
-  element cascade-merge { t_boolean },
+  element cascade-merge { t_boolean }?,
 
-  element cascade-remove { t_boolean },
+  element cascade-remove { t_boolean }?,
 
-  element cascade-fresh { t_boolean }
+  element cascade-refresh { t_boolean }?
 }
 
 orm30_one-to-one = element one-to-one {
@@ -442,7 +444,7 @@ orm30_one-to-many = element one-to-many {
 
   orm30_map-key?,
 
-  ((element join-column { orm30_join-column })* | orm30_join-table?),
+  (orm30_join-table? | (element join-column { orm30_join-column })*),
 
   orm30_cascade?
 }
@@ -458,7 +460,7 @@ orm30_join-table = element join-table {
 
   (element inverse-join-column { orm30_join-column })*,
 
-  (element unique-constratin { orm30_unique-constraint })*
+  (element unique-constraint { orm30_unique-constraint })*
 }
 
 orm30_many-to-many = element many-to-many {
