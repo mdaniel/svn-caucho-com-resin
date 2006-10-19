@@ -73,5 +73,5 @@ public interface ArchiveDeployMXBean
   public String[] getNames();
 
   @Description("Returns an exception for the named archive or null if there is no exception")
-  public Throwable getConfigException(String name);
+  public Throwable getConfigException(@Description("The archive name, without a file extension") String name);
 }

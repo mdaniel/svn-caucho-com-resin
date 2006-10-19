@@ -29,81 +29,36 @@
 
 package com.caucho.server.e_app;
 
-import java.lang.reflect.Method;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Hashtable;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.util.jar.Manifest;
-
-import java.io.IOException;
-
-import javax.annotation.*;
-
-import javax.naming.InitialContext;
-import javax.naming.Context;
-
-import javax.ejb.EJBHome;
-import javax.ejb.EJBMetaData;
-
-import javax.rmi.PortableRemoteObject;
-import javax.rmi.CORBA.Stub;
-
-import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
-
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-
 import com.caucho.config.types.EjbRef;
-
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.JarPath;
-import com.caucho.vfs.Depend;
-
-import com.caucho.java.WorkDir;
-
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.EnvironmentListener;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.loader.EnvironmentBean;
-import com.caucho.loader.Environment;
-
-import com.caucho.log.Log;
-
-import com.caucho.relaxng.CompactVerifierFactoryImpl;
-
-import com.caucho.config.NodeBuilder;
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.ConfigException;
-
-import com.caucho.config.types.PathBuilder;
-
-import com.caucho.naming.Jndi;
-
-import com.caucho.jmx.Jmx;
-
-import com.caucho.el.EL;
-import com.caucho.el.MapVariableResolver;
-
 import com.caucho.ejb.AbstractStubLoader;
-
-import com.caucho.lifecycle.Lifecycle;
-
-import com.caucho.server.deploy.DeployInstance;
-
-import com.caucho.server.webapp.WebAppController;
-
 import com.caucho.ejb.EJBClientInterface;
+import com.caucho.java.WorkDir;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentBean;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.log.Log;
+import com.caucho.naming.Jndi;
+import com.caucho.server.deploy.DeployInstance;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+
+import javax.annotation.PostConstruct;
+import javax.naming.InitialContext;
+import javax.rmi.PortableRemoteObject;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.jar.Manifest;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * An enterprise application (ear)
@@ -146,6 +101,11 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
 
   private Alarm _alarm;
   private final Lifecycle _lifecycle;
+
+  private static void log(String message)
+  {
+    System.out.println(EntAppClient.class.getSimpleName() + ": " + message);
+  }
 
   /**
    * Creates the application.
@@ -375,7 +335,7 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
   @PostConstruct
   public void init()
   {
-    System.out.println("INIT: " + _links);
+    log("INIT: " + _links);
     if (! _lifecycle.toInit())
       return;
 
@@ -488,8 +448,8 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
   {
     start();
 
-    System.out.println("MAIN: " + mainClassName);
-    System.out.println("C: " + System.getProperty("java.class.path"));
+    log("MAIN: " + mainClassName);
+    log("C: " + System.getProperty("java.class.path"));
 
     if (_configException != null)
       throw _configException;
@@ -506,13 +466,13 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
 
       Class mainClass = Class.forName(mainClassName, false, _loader);
 
-      System.out.println("MAIN:");
+      log("MAIN:");
       Method main = mainClass.getMethod("main",
 					new Class[] { String[].class });
 
       try {
 	Class cl = Class.forName("com.sun.ts.lib.implementation.sun.common.SunRIURL", false, _loader);
-	System.out.println("CL: " + cl);
+	log("CL: " + cl);
       } catch (Throwable e) {
 	e.printStackTrace();
       }
@@ -556,7 +516,7 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
     public void deploy()
       throws Exception
     {
-      System.out.println("LINK: " + _jndiName + " " + _ejbName);
+      log("LINK: " + _jndiName + " " + _ejbName);
       String orbHost = System.getProperty("org.omg.CORBA.ORBInitialHost");
       String orbPort = System.getProperty("org.omg.CORBA.ORBInitialPort");
 
@@ -576,7 +536,7 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
       
       Object value = PortableRemoteObject.narrow(ior, _api);
 
-      System.out.println("VALUE: " + value + " " + value.getClass() + " " + _api);
+      log("VALUE: " + value + " " + value.getClass() + " " + _api);
       Jndi.rebindDeepShort(_ejbName, value);
     }
   }

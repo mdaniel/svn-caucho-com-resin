@@ -249,6 +249,29 @@ remove the &lt;save-only-on-shutdown/&gt; flag.)</p>
 
 </s1>
 
+<s1 title="Choosing a backend server">
+<p>
+Requests can be made to specific servers in the app-tier.  The web-tier uses
+the value of the jsessionid to maintain sticky sessions.  You can include an
+explicit jsessionid to force the web-tier to use a particular server in the app-tier.
+</p>
+
+<p>
+Resin uses the first character of the jsessionid to identify the backend server
+to use, starting with `a' as the first backend server.  If wwww.example.com
+resolves to your web-tier, then you can use:
+</p>
+
+<ol>
+<li>http://www.example.com/proxooladmin;jsessionid=abc
+<li>http://www.example.com/proxooladmin;jsessionid=bcd
+<li>http://www.example.com/proxooladmin;jsessionid=cde
+<li>http://www.example.com/proxooladmin;jsessionid=def
+<li>http://www.example.com/proxooladmin;jsessionid=efg
+<li>etc.
+</ol>
+</s1>
+
 <s1 title="See Also">
 
 <ul>

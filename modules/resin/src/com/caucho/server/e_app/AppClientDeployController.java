@@ -28,44 +28,17 @@
 
 package com.caucho.server.e_app;
 
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.util.jar.Manifest;
-
-import java.io.IOException;
-
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
-
-import com.caucho.util.L10N;
-import com.caucho.vfs.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.loader.Environment;
-
 import com.caucho.config.Config;
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.PathBuilder;
-
-import com.caucho.make.Dependency;
-
-import com.caucho.lifecycle.Lifecycle;
-
-import com.caucho.ejb.EJBClientInterface;
-
-import com.caucho.el.EL;
-import com.caucho.el.MapVariableResolver;
-
-import com.caucho.server.webapp.WebAppConfig;
-import com.caucho.server.webapp.WebAppController;
-
+import com.caucho.log.Log;
 import com.caucho.server.deploy.ExpandDeployController;
-import com.caucho.server.deploy.DeployContainer;
+import com.caucho.util.L10N;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.logging.Logger;
 
 /**
  * A configuration entry for Enterprise Application clients
@@ -111,11 +84,20 @@ public class AppClientDeployController extends ExpandDeployController<EntAppClie
    */
   public void addEar(Path path)
   {
+    System.out.println("ADD EAR: " + path);
+    
     JarPath jar = JarPath.create(path);
 
     Path app = jar.lookup("META-INF/application.xml");
 
-    System.out.println("APP: " + app + " " + app.exists());
+    System.out.println("  APP: " + app + " " + app.exists());
+
+    if (app.exists())
+      addConfig(app);
+
+    app = jar.lookup("META-INF/resin-application.xml");
+
+    System.out.println("  APP: " + app + " " + app.exists());
 
     if (app.exists())
       addConfig(app);
@@ -249,7 +231,13 @@ public class AppClientDeployController extends ExpandDeployController<EntAppClie
 
     Path xml = rootDir.lookup("META-INF/application.xml");
 
-    new Config().configureBean(appClient, xml);
+    if (xml.canRead())
+      new Config().configureBean(appClient, xml);
+
+    xml = rootDir.lookup("META-INF/resin-application.xml");
+
+    if (xml.canRead())
+      new Config().configureBean(appClient, xml);
 
     /*
      * XXX:

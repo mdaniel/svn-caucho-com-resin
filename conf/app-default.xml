@@ -3,6 +3,7 @@
 
 <ear-default>
   <resin:import path="META-INF/application.xml" optional="true"/>
+  <resin:import path="META-INF/resin-application.xml" optional="true"/>
 </ear-default>
 
 <web-app-default>
