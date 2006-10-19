@@ -85,7 +85,7 @@ public abstract class JAXBContext {
 
   public static JAXBContext newInstance(Class[] classesToBeBound,
                                         Map<String,?> properties)
-      throws JAXBException
+    throws JAXBException
   {
     try {
       ClassLoader classLoader =

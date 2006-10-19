@@ -50,7 +50,7 @@ public class JAXBException extends Exception {
     _errorCode = errorCode;
   }
 
-  JAXBException(String message, Throwable exception)
+  public JAXBException(String message, Throwable exception)
   {
     super(message);
     _exception = exception;

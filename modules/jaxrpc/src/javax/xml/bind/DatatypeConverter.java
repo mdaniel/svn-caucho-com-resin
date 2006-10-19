@@ -28,12 +28,12 @@
 */
 
 package javax.xml.bind;
+
 import javax.xml.namespace.*;
 import java.math.*;
 import java.util.*;
 
 public final class DatatypeConverter {
-
   private static DatatypeConverterInterface _converter = null;
 
   public static String parseAnySimpleType(String lexicalXSDAnySimpleType)
@@ -227,8 +227,13 @@ public final class DatatypeConverter {
   }
 
   public static void setDatatypeConverter(DatatypeConverterInterface converter)
+    throws IllegalArgumentException
   {
-    _converter = converter;
+    if (_converter != null)
+      _converter = converter;
+
+    if (converter == null)
+      throw new IllegalArgumentException("Datatype converter cannot be null");
   }
 
 }
