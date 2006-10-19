@@ -158,6 +158,9 @@ public class EntityComponent extends ClassComponent {
 
       generateGetEntityType(out);
 
+      if (_entityType.getParentType() == null)
+        generateGetEntityState(out);
+
       if (!_entityType.isEmbeddable())
         generateMatch(out);
 
@@ -410,6 +413,23 @@ public class EntityComponent extends ClassComponent {
     out.pushDepth();
 
     out.println("return __caucho_home;");
+
+    out.popDepth();
+    out.println("}");
+  }
+
+  /**
+   * Generates the get entity state
+   */
+  private void generateGetEntityState(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("public int __caucho_getEntityState()");
+    out.println("{");
+    out.pushDepth();
+
+    out.println("return __caucho_state;");
 
     out.popDepth();
     out.println("}");

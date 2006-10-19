@@ -92,6 +92,11 @@ public interface Entity {
   public EntityType __caucho_getEntityType();
 
   /**
+   * Get the entity state.
+   */
+  public int __caucho_getEntityState();
+
+  /**
    * Sets the connection.
    */
   public void __caucho_setConnection(AmberConnection aConn);

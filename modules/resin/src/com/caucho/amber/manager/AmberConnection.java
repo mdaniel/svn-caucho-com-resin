@@ -181,9 +181,47 @@ public class AmberConnection
   /**
    * Merges the state of the entity into the current context.
    */
-  public <T> T merge(T entity)
+  public <T> T merge(T entityT)
   {
-    throw new UnsupportedOperationException();
+    try {
+
+      if (! (entityT instanceof Entity))
+        throw new IllegalArgumentException("Merge operation can only be applied to an entity instance");
+
+      flush();
+
+      Entity entity = (Entity) entityT;
+
+      int state = entity.__caucho_getEntityState();
+
+      if (state == com.caucho.amber.entity.Entity.TRANSIENT) {
+        if (contains(entity)) {
+          // detached entity instance
+          throw new UnsupportedOperationException("Merge operation for detached instances is not supported");
+        }
+        else {
+          // new entity instance
+          persist(entity);
+        }
+      }
+      else if (state >= com.caucho.amber.entity.Entity.P_DELETING) {
+        // removed entity instance
+        throw new IllegalArgumentException("Merge operation cannot be applied to a removed entity instance");
+      }
+      else {
+        // managed entity instance: ignored.
+      }
+
+      // XXX: merge recursively for
+      // cascade=MERGE or cascade=ALL
+
+      return entityT;
+
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new EJBExceptionWrapper(e);
+    }
   }
 
   /**

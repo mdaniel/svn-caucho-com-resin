@@ -648,7 +648,10 @@ public class EntityManyToManyField extends AssociationField {
   public void generateAmberAdd(JavaWriter out)
     throws IOException
   {
-    String targetType = getTargetType().getProxyClass().getName();
+    // commented out: jpa/0s2d
+    // String targetType = getTargetType().getProxyClass().getName();
+
+    String targetType = getTargetType().getInstanceClassName();
 
     out.println();
     out.println("public boolean" +
@@ -721,7 +724,10 @@ public class EntityManyToManyField extends AssociationField {
   public void generateAmberRemove(JavaWriter out)
     throws IOException
   {
-    String targetType = getTargetType().getProxyClass().getName();
+    // commented out: jpa/0s2d
+    // String targetType = getTargetType().getProxyClass().getName();
+
+    String targetType = getTargetType().getInstanceClassName();
 
     out.println();
     out.println("public boolean" +
@@ -783,7 +789,10 @@ public class EntityManyToManyField extends AssociationField {
   public void generateAmberRemoveTargetAll(JavaWriter out)
     throws IOException
   {
-    String targetType = getTargetType().getProxyClass().getName();
+    // commented out: jpa/0s2d
+    // String targetType = getTargetType().getProxyClass().getName();
+
+    String targetType = getTargetType().getInstanceClassName();
 
     out.println();
     out.println("public boolean" +
