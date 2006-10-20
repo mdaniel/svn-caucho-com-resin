@@ -148,13 +148,9 @@ public class Taglib extends TagLibraryInfo {
     for (int i = 0; i < tagFileList.size(); i++) {
       TldTagFile tagFile = tagFileList.get(i);
       
-      TagInfo tagInfo = tagFileManager.getTag("",
-					      tagFile.getName(),
-					      tagFile.getPath());
-
-      TagFileInfo tagFileInfo = new TagFileInfo(tagFile.getName(),
-						tagFile.getPath(),
-						tagInfo);
+      TagFileInfo tagFileInfo = new TagFileInfoExt(tagFileManager,
+						   tagFile.getName(),
+						   tagFile.getPath());
 
       this.tagFiles[i] = tagFileInfo;
     }
@@ -261,4 +257,33 @@ public class Taglib extends TagLibraryInfo {
   {
     return "Taglib[prefix=" + prefix + ",uri=" + uri + "]";
   }
+
+  class TagFileInfoExt extends TagFileInfo
+  {
+    private TagFileManager _manager;
+    private TagInfo _tagInfo;
+    
+    TagFileInfoExt(TagFileManager manager, String name, String path)
+    {
+      super(name, path, null);
+      
+      _manager = manager;
+    }
+
+    public TagInfo getTagInfo()
+    {
+      if (_tagInfo == null) {
+	try {
+	  _tagInfo = _manager.getTag("", getName(), getPath());
+	} catch (JspParseException e) {
+	  throw new RuntimeException(e);
+	}
+
+	System.out.println("TI: " + _tagInfo);
+      }
+
+      return _tagInfo;
+    }
+  }
+    
 }

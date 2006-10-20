@@ -100,7 +100,7 @@ public class JspExpressionFactoryImpl extends  ExpressionFactory {
 
     Expr expr = parser.parse();
 
-    return new MethodExpressionImpl(this, expr, expression,
+    return new MethodExpressionImpl(expr, expression,
 				    expectedReturnType,
 				    expectedParamTypes);
   }

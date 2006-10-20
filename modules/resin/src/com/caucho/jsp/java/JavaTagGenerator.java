@@ -798,9 +798,34 @@ public class JavaTagGenerator extends JavaJspGenerator {
     out.println("                   taglib,");
     out.println("                   null,");
     out.println("                   tag.getAttributes(),");
-    out.println("                   tag.getDisplayName(),");
-    out.println("                   tag.getSmallIcon(),");
-    out.println("                   tag.getLargeIcon(),");
+    
+    if (_displayName != null) {
+      out.print("                   \"");
+      out.printJavaString(_displayName);
+      out.println("\",");
+    }
+    else {
+      out.println("                   null,");
+    }
+    
+    if (_smallIcon != null) {
+      out.print("                   \"");
+      out.printJavaString(_smallIcon);
+      out.println("\",");
+    }
+    else {
+      out.println("                   null,");
+    }
+    
+    if (_largeIcon != null) {
+      out.print("                   \"");
+      out.printJavaString(_largeIcon);
+      out.println("\",");
+    }
+    else {
+      out.println("                   null,");
+    }
+    
     out.println("                   tag.getVariables(),");
     out.println("                   " + (_dynamicAttributes != null) + ",");
     if (_dynamicAttributes != null)

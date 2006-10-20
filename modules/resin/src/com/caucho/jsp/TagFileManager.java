@@ -77,7 +77,7 @@ public class TagFileManager {
       TagInfo tag = null;
 
       try {
-	getTag(uri, taglib);
+	tag = getTag(uri, taglib);
 	if (tag != null)
 	  return tag;
       } catch (Exception e) {
