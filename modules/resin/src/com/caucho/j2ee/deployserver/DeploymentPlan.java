@@ -30,8 +30,11 @@
 package com.caucho.j2ee.deployserver;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.types.RawString;
 import com.caucho.util.L10N;
 import com.caucho.xml.XmlPrinter;
+import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.Vfs;
 
 import org.w3c.dom.Node;
 
@@ -50,7 +53,7 @@ public class DeploymentPlan {
   private String _name;
   private String _metaInf;
 
-  private ArrayList<ExtFile> _extFileList = new ArrayList<ExtFile>();
+  private ArrayList<PlanFile> _fileList = new ArrayList<PlanFile>();
 
   /**
    * Sets the deployment type.
@@ -108,31 +111,56 @@ public class DeploymentPlan {
   }
 
   /**
-   * Creates an ExtFile, subsequently added with {@link #addExtFile}
-   * @return
+   * An ExtFile is an Xml file that is written into the META-INF
+   * (or WEB-INF for a war) * directory.
    */
   public ExtFile createExtFile()
   {
     return new ExtFile();
   }
 
-  /**
-   * Adds a ext file.
-   */
   public void addExtFile(ExtFile extFile)
   {
-    _extFileList.add(extFile);
+    _fileList.add(extFile);
+  }
+
+
+  /**
+   * A RawFile is any format file that is written into a file
+   * specified by the path, relative to the root of the deployed archive.
+   */
+  public RawFile createRawFile()
+  {
+    return new RawFile();
+  }
+
+  public void addRawFile(RawFile rawFile)
+  {
+    _fileList.add(rawFile);
   }
 
   /**
-   * Returns the extFile list.
+   * Returns the list of ext and raw files.
    */
-  public ArrayList<ExtFile> getExtFileList()
+  public ArrayList<PlanFile> getFileList()
   {
-    return _extFileList;
+    return _fileList;
   }
 
-  public class ExtFile {
+  abstract public class PlanFile {
+    abstract public String getPath();
+    abstract public void writeToStream(OutputStream os)
+      throws IOException;
+    public String toString()
+    {
+      return "DeploymentPlan$" + getClass().getSimpleName() + "[" + getPath() + "]";
+    }
+
+  }
+
+  public class ExtFile
+    extends PlanFile
+  {
     private String _name;
     private Node _data;
 
@@ -174,10 +202,56 @@ public class DeploymentPlan {
       xmlPrinter.setPretty(true);
       xmlPrinter.printXml(_data);
     }
+  }
 
-    public String toString()
+  public class RawFile
+    extends PlanFile
+  {
+    private String _path;
+    private String _data;
+
+    /**
+     * Sets the file name.
+     */
+    public void setPath(String path)
     {
-      return "DeploymentPlan$ExtFile[" + getPath() + "]";
+      if (path.startsWith("/"))
+        throw new ConfigException(L.l("path `{0}' cannot start with /", path));
+
+      _path = path;
+    }
+
+    public void setData(RawString data)
+    {
+      _data = data.getValue();
+    }
+
+    @PostConstruct
+    public void init()
+    {
+      if (_path == null)
+        throw new ConfigException(L.l("`{0}' is required", "path"));
+
+      if (_data == null)
+        throw new ConfigException(L.l("`{0}' is required", "data"));
+    }
+
+    public String getPath()
+    {
+      return  _path;
+    }
+
+    public void writeToStream(OutputStream os)
+      throws IOException
+    {
+      WriteStream writeStream = Vfs.openWrite(os);
+
+      try {
+        writeStream.print(_data);
+      }
+      finally {
+        writeStream.close();
+      }
     }
   }
 }

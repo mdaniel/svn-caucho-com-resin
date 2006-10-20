@@ -313,18 +313,18 @@ public class DeploymentService
         while (archiveIs.read() != -1) {}
       }
 
-      int extCount = 0;
+      int fileCount = 0;
 
-      for (DeploymentPlan.ExtFile file : plan.getExtFileList()) {
+      for (DeploymentPlan.PlanFile file : plan.getFileList()) {
         String zipEntryName = file.getPath();
         if (zipEntryName.startsWith("/"))
           zipEntryName = zipEntryName.substring(1);
 
         if (log.isLoggable(Level.FINEST))
-          log.log(Level.FINEST, L.l("jsr88 extFile {0} output to {1}", file, zipEntryName));
+          log.log(Level.FINEST, L.l("jsr88 plan file {0} output to {1}", file, zipEntryName));
 
         if (entryNames.contains(zipEntryName))
-          log.log(Level.WARNING, L.l("extension file {0} overwrites existing file", zipEntryName));
+          log.log(Level.WARNING, L.l("plan file {0} overwrites existing file", zipEntryName));
 
         entryNames.add(zipEntryName);
 
@@ -332,11 +332,11 @@ public class DeploymentService
         zipOutputStream.putNextEntry(zipEntry);
         file.writeToStream(zipOutputStream);
 
-        extCount++;
+        fileCount++;
       }
 
       if (log.isLoggable(Level.FINER))
-        log.log(Level.FINER, L.l("created {0} entries from plan", extCount));
+        log.log(Level.FINER, L.l("created {0} entries from plan", fileCount));
 
       zipInputStream.close();
       zipInputStream = null;
