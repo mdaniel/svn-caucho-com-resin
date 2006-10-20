@@ -690,7 +690,7 @@ abstract public class DeployController<I extends DeployInstance>
 
     try {
       isStopping = _lifecycle.toStopping();
-      
+
       if (! isStopping)
 	return;
 

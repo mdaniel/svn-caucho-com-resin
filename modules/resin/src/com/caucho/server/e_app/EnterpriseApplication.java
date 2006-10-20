@@ -595,6 +595,12 @@ public class EnterpriseApplication
 
       controller.setManifestClassLoader(_loader);
 
+      // XXX: hack for duplicates
+      if (findWebAppEntry(controller.getContextPath()) != null) {
+	log.warning("Duplicate web module: " + web);
+	return;
+      }
+
       _webApps.add(controller);
     }
     

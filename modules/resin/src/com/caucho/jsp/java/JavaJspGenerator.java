@@ -2057,7 +2057,7 @@ public class JavaJspGenerator extends JspGenerator {
       while ((text = is.readLine()) != null) {
 	line++;
 
-	if (errorLine - 1 <= line && line <= errorLine + 1) {
+	if (errorLine - 2 <= line && line <= errorLine + 2) {
 	  sb.append(line);
 	  sb.append(":  ");
 	  sb.append(text);
