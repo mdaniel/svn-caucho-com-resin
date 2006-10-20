@@ -31,6 +31,7 @@ package com.caucho.util;
 import java.lang.reflect.*;
 import java.util.*;
 import javax.xml.bind.*;
+import javax.xml.bind.annotation.*;
 
 /**
  * JAXB utilities.
@@ -59,6 +60,12 @@ public class JAXBUtil {
 
     for (Type param : params)
       introspectType(param, jaxbClasses);
+
+    /* XXX: create wrappers
+    Type[] exceptions = method.getGenericExceptionTypes();
+
+    for (Type exception : exceptions)
+      introspectType(exception, jaxbClasses);*/
   }
 
   /**
@@ -89,5 +96,28 @@ public class JAXBUtil {
                                               "uninstantiated type variables " +
                                               "or wildcards (" + type + ")");
     }
+  }
+
+  public static String classBasename(Class cl)
+  {
+    int i = cl.getName().lastIndexOf('$');
+
+    if (i < 0)
+      i = cl.getName().lastIndexOf('.');
+
+    return cl.getName().substring(i + 1);
+  }
+
+  public static String getXmlSchemaDatatype(Class cl)
+  {
+    String name = java.beans.Introspector.decapitalize(classBasename(cl));
+
+    if (cl.isAnnotationPresent(XmlType.class)) {
+      XmlType xmlType = (XmlType) cl.getAnnotation(XmlType.class);
+
+      return xmlType.name(); // XXX ""
+    }
+
+    return name;
   }
 }
