@@ -267,7 +267,6 @@ public class HttpResponse extends AbstractHttpResponse {
     }
 
     String contentType = _contentType;
-    System.out.println("CT: " + _contentType + " " + _charEncoding);
     
     if (contentType == null) {
     }

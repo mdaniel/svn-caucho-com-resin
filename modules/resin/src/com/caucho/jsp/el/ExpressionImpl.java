@@ -60,6 +60,9 @@ public class ExpressionImpl extends Expression {
   public Object evaluate(VariableResolver resolver)
     throws ELException
   {
-    return _expr.evalObject(new ELContextAdapter(resolver));
+    if (resolver instanceof PageContext)
+      return _expr.evalObject(((PageContext) resolver).getELContext());
+    else
+      return _expr.evalObject(new ELContextAdapter(resolver));
   }
 }

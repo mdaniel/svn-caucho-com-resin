@@ -115,19 +115,28 @@ public class JspDirectiveAttribute extends JspNode {
       _isRtexprvalue = attributeToBoolean(name.getName(), value);
     else if (DESCRIPTION.equals(name))
       _description = value;
-    else if (DEFERRED_VALUE.equals(name))
+    else if (DEFERRED_VALUE.equals(name)) {
       _deferredValue = attributeToBoolean(name.getName(), value);
-    else if (DEFERRED_VALUE_TYPE.equals(name))
+      if (_deferredValue)
+	_type = "javax.el.ValueExpression";
+    }
+    else if (DEFERRED_VALUE_TYPE.equals(name)) {
+      _type = "javax.el.ValueExpression";
       _deferredValueType = value;
-    else if (DEFERRED_METHOD.equals(name))
+    }
+    else if (DEFERRED_METHOD.equals(name)) {
       _deferredMethod = attributeToBoolean(name.getName(), value);
+      if (_deferredMethod)
+	_type = "javax.el.MethodExpression";
+    }
     else if (DEFERRED_METHOD_SIGNATURE.equals(name)) {
       try {
 	new Signature(value);
       } catch (Exception e) {
 	throw error(e.getMessage());
       }
-      
+
+      _type = "javax.el.MethodExpression";
       _deferredMethodSignature = value;
     }
     else {
@@ -182,6 +191,30 @@ public class JspDirectiveAttribute extends JspNode {
     
     if (_isFragment)
       attr.setType(JspFragment.class);
+    
+    if (_deferredValue && _deferredValueType != null)
+      throw error(L.l("@attribute deferredValue and deferredValueType may not both be specified"));
+    
+    if (_deferredMethod && _deferredMethodSignature != null)
+      throw error(L.l("@attribute deferredMethod and deferredMethodSignature may not both be specified"));
+    
+    if ((_deferredValue || _deferredValueType != null)
+	&& (_deferredMethod || _deferredMethodSignature != null))
+      throw error(L.l("@attribute deferredValue and deferredMethod may not both be specified"));
+
+    if (_deferredValue || _deferredValueType != null) {
+      attr.setDeferredValue(new TldAttribute.DeferredValue());
+
+      if (_deferredValueType != null)
+	attr.getDeferredValue().setType(_deferredValueType);
+    }
+
+    if (_deferredMethod || _deferredMethodSignature != null) {
+      attr.setDeferredMethod(new TldAttribute.DeferredMethod());
+
+      if (_deferredMethodSignature != null)
+	attr.getDeferredMethod().setMethodSignature(new Signature(_deferredMethodSignature));
+    }
 
     tagGen.addAttribute(attr);
   }

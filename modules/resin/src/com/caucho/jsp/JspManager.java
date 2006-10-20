@@ -192,6 +192,20 @@ public class JspManager extends PageManager {
     return page;
   }
 
+  protected void initPageManager()
+  {
+    JspCompiler compiler = new JspCompiler();
+
+    compiler.setWebApp(_webApp);
+    compiler.setXml(_isXml);
+
+    try {
+      compiler.init();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   Page compile(Path path, String uri, String className,
 	       ArrayList<PersistentDependency> dependList,
 	       boolean isGenerated)

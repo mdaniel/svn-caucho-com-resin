@@ -107,7 +107,8 @@ public class JspDirectivePage extends JspNode {
       
       _parseState.setContentType(value);
       String charEncoding = parseCharEncoding(value);
-      _parseState.setCharEncoding(charEncoding);
+      if (charEncoding != null)
+	_parseState.setCharEncoding(charEncoding);
     }
     else if (PAGE_ENCODING.equals(name)) {
       String oldEncoding = _parseState.getPageEncoding();

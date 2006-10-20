@@ -93,6 +93,10 @@ public class JspDirectiveVariable extends JspNode {
 	throw error(L.l("@variable name-given '{0}' is already used by an attribute.",
 			value));
       }
+      else if (value.equals(gen.getDynamicAttributes())) {
+	throw error(L.l("@variable name-given '{0}' cannot be the same as the tag's dynamic-attributes.",
+			value));
+      }
       
       _nameGiven = value;
     }
@@ -101,10 +105,12 @@ public class JspDirectiveVariable extends JspNode {
 	throw error(L.l("@variable name-from-attribute '{0}' is already used by another variable.",
 			value));
       }
+      /*
       else if (gen.findAttribute(value) != null) {
 	throw error(L.l("@variable name-from-attribute '{0}' is already used by an attribute.",
 			value));
       }
+      */
       
       _nameFromAttribute = value;
     }
@@ -147,6 +153,9 @@ public class JspDirectiveVariable extends JspNode {
 
     if (_nameFromAttribute != null && _alias == null)
       throw error(L.l("<{0}> needs an 'alias' attribute.  name-from-attribute requires an alias attribute.",
+                      getTagName()));
+    if (_alias != null && _nameFromAttribute == null)
+      throw error(L.l("<{0}> needs an 'name-from-attribute' attribute.  alias requires a name-from-attribute attribute.",
                       getTagName()));
 
     JavaTagGenerator tagGen = (JavaTagGenerator) _gen;

@@ -69,7 +69,31 @@ public class BeanELResolver extends ELResolver {
   public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext context,
 							   Object base)
   {
-    return null;
+    if (base == null)
+      return null;
+
+    Class cl = base.getClass();
+    BeanProperties props = _classMap.get(cl);
+
+    if (props == null) {
+      if (cl.isArray()
+	  || Collection.class.isAssignableFrom(cl)
+	  || Map.class.isAssignableFrom(cl)) {
+	return null;
+      }
+	  
+      props = new BeanProperties(cl);
+      _classMap.put(cl, props);
+    }
+
+    ArrayList<FeatureDescriptor> descriptors
+      = new ArrayList<FeatureDescriptor>();
+
+    for (BeanProperty prop : props.getProperties()) {
+      descriptors.add(prop.getDescriptor());
+    }
+
+    return descriptors.iterator();
   }
 
   @Override
@@ -150,6 +174,42 @@ public class BeanELResolver extends ELResolver {
 		       Object property,
 		       Object value)
   {
+    if (base == null || ! (property instanceof String))
+      return;
+
+    String fieldName = (String) property;
+
+    if (fieldName.length() == 0)
+      return;
+
+    Class cl = base.getClass();
+    BeanProperties props = _classMap.get(cl);
+
+    if (props == null) {
+      if (cl.isArray()
+	  || Collection.class.isAssignableFrom(cl)
+	  || Map.class.isAssignableFrom(cl)) {
+	return;
+      }
+	  
+      props = new BeanProperties(cl);
+      _classMap.put(cl, props);
+    }
+
+    BeanProperty prop = props.getBeanProperty(fieldName);
+
+    context.setPropertyResolved(true);
+
+    if (prop == null || prop.getWriteMethod() == null)
+      throw new PropertyNotWritableException(fieldName);
+
+    try {
+      prop.getWriteMethod().invoke(base, value);
+    } catch (IllegalAccessException e) {
+      throw new ELException(e);
+    } catch (InvocationTargetException e) {
+      throw new ELException(e.getCause());
+    }
   }
 
   private BeanProperties getProp(ELContext context,
@@ -240,6 +300,11 @@ public class BeanELResolver extends ELResolver {
     {
       return _propMap.get(property);
     }
+
+    public Collection<BeanProperty> getProperties()
+    {
+      return _propMap.values();
+    }
   }
 
   protected static final class BeanProperty {
@@ -254,6 +319,8 @@ public class BeanELResolver extends ELResolver {
 
       if (descriptor.getReadMethod() != null)
 	descriptor.getReadMethod().setAccessible(true);
+
+      initDescriptor();
     }
     
     public BeanProperty(Class baseClass,
@@ -269,6 +336,22 @@ public class BeanELResolver extends ELResolver {
       } catch (Exception e) {
 	throw new RuntimeException(e);
       }
+
+      initDescriptor();
+    }
+
+    private void initDescriptor()
+    {
+      _descriptor.setValue(ELResolver.TYPE,
+			   _descriptor.getReadMethod().getReturnType());
+	
+      _descriptor.setValue(ELResolver.RESOLVABLE_AT_DESIGN_TIME,
+			   Boolean.TRUE);
+    }
+
+    public PropertyDescriptor getDescriptor()
+    {
+      return _descriptor;
     }
 
     public Class getPropertyType()

@@ -44,6 +44,17 @@ public class BooleanValueExpression extends AbstractValueExpression
     = Logger.getLogger(BooleanValueExpression.class.getName());
   protected static final L10N L = new L10N(BooleanValueExpression.class);
 
+  private Class _expectedType;
+
+  public BooleanValueExpression(Expr expr,
+				String expressionString,
+				Class expectedType)
+  {
+    super(expr, expressionString);
+
+    _expectedType = expectedType;
+  }
+
   public BooleanValueExpression(Expr expr,
 				String expressionString)
   {
@@ -58,7 +69,10 @@ public class BooleanValueExpression extends AbstractValueExpression
   @Override
   public Class<?> getExpectedType()
   {
-    return Boolean.class;
+    if (_expectedType != null)
+      return _expectedType;
+    else
+      return Boolean.class;
   }
 
   @Override

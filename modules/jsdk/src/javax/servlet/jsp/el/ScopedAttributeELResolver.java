@@ -33,6 +33,7 @@ import java.beans.FeatureDescriptor;
 import java.util.*;
 
 import javax.el.*;
+import javax.servlet.jsp.*;
 
 /**
  * Variable resolution for JSP variables
@@ -52,7 +53,40 @@ public class ScopedAttributeELResolver extends ELResolver {
   public Iterator<FeatureDescriptor>
     getFeatureDescriptors(ELContext context, Object base)
   {
-    throw new UnsupportedOperationException();
+    if (base != null)
+      return null;
+
+    PageContext pageContext
+      = (PageContext) context.getContext(JspContext.class);
+
+    context.setPropertyResolved(true);
+
+    ArrayList<FeatureDescriptor> keys = new ArrayList<FeatureDescriptor>();
+
+    Enumeration e = pageContext.getAttributeNames();
+    while (e.hasMoreElements()) {
+      Object key = e.nextElement();
+      String name = (String) key;
+
+      FeatureDescriptor desc = new FeatureDescriptor();
+      desc.setName(name);
+      desc.setDisplayName(name);
+      desc.setShortDescription("");
+      desc.setExpert(false);
+      desc.setHidden(false);
+      desc.setPreferred(true);
+
+      if (key == null)
+	desc.setValue(ELResolver.TYPE, null);
+      else
+	desc.setValue(ELResolver.TYPE, key.getClass());
+	
+      desc.setValue(ELResolver.RESOLVABLE_AT_DESIGN_TIME, Boolean.TRUE);
+	
+      keys.add(desc);
+    }
+
+    return keys.iterator();
   }
 
   @Override
@@ -60,7 +94,11 @@ public class ScopedAttributeELResolver extends ELResolver {
 			 Object base,
 			 Object property)
   {
-    throw new UnsupportedOperationException();
+    if (base != null)
+      return null;
+
+    context.setPropertyResolved(true);
+    return Object.class;
   }
 
   @Override
@@ -68,7 +106,14 @@ public class ScopedAttributeELResolver extends ELResolver {
 			 Object base,
 			 Object property)
   {
-    throw new UnsupportedOperationException();
+    if (base != null)
+      return null;
+
+    context.setPropertyResolved(true);
+    PageContext pageContext
+      = (PageContext) context.getContext(JspContext.class);
+
+    return pageContext.getAttribute(String.valueOf(property));
   }
 
   @Override
@@ -76,7 +121,12 @@ public class ScopedAttributeELResolver extends ELResolver {
 			 Object base,
 			 Object property)
   {
-    return true;
+    if (base != null)
+      return true;
+
+    context.setPropertyResolved(true);
+    
+    return false;
   }
 
   @Override
@@ -85,6 +135,15 @@ public class ScopedAttributeELResolver extends ELResolver {
 			 Object property,
 			 Object value)
   {
-    throw new UnsupportedOperationException();
+    if (base != null)
+      return;
+
+    context.setPropertyResolved(true);
+
+    context.setPropertyResolved(true);
+    PageContext pageContext
+      = (PageContext) context.getContext(JspContext.class);
+
+    pageContext.setAttribute(String.valueOf(property), value);
   }
 }

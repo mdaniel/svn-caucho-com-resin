@@ -58,7 +58,7 @@ public class SecurityRoleRef {
   }
 
   /**
-   * Sets the role name
+   * Sets the role name which is an alias of the linked value
    */
   public void setRoleName(String roleName)
   {

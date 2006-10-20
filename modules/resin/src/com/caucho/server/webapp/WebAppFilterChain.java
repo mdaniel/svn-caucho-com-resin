@@ -161,8 +161,10 @@ public class WebAppFilterChain implements FilterChain {
 	return;
       }
 
+      /*
       if (_securityRoleMap != null && request instanceof AbstractHttpRequest)
 	((AbstractHttpRequest) request).setRoleMap(_securityRoleMap);
+      */
 
       for (int i = 0; i < _requestListeners.length; i++) {
 	ServletRequestEvent event = new ServletRequestEvent(_app, request);

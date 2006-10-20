@@ -47,7 +47,8 @@ import com.caucho.jsp.*;
 /**
  * Represents a custom tag.
  */
-public class CustomTag extends GenericTag {
+public class CustomTag extends GenericTag
+{
   protected String _bodyContent;
   
   /**
@@ -355,6 +356,15 @@ public class CustomTag extends GenericTag {
     out.print(var + " = new ");
     out.printClass(_tag.getTagClass());
     out.println("();");
+
+    if (JspIdConsumer.class.isAssignableFrom(_tag.getTagClass())) {
+      String shortName = className;
+      int p = shortName.lastIndexOf('.');
+      if (p >= 0)
+	shortName = shortName.substring(p + 1);
+
+      out.print(var + ".setJspId(\"" + shortName + "-" + _gen.generateJspId() + "\");");      
+    }
 
     JspNode parentTagNode = getParent().getParentTagNode();
 

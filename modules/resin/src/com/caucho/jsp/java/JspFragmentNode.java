@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -46,7 +47,8 @@ import com.caucho.jsp.*;
  * Represents the body for a fragment (jsp:attribute or jsp:body)
  */
 abstract public class JspFragmentNode extends JspContainerNode
-  implements JspSegmentNode {
+  implements JspSegmentNode
+{
   private int _fragmentCode;
   private String _fragmentName;
 

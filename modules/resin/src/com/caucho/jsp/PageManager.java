@@ -198,6 +198,8 @@ abstract public class PageManager {
     LruCache<String,Entry> cache = _cache;
 
     if (cache == null) {
+      initPageManager();
+      
       synchronized (this) {
 	if (_cache == null)
 	  _cache = new LruCache<String,Entry>(_pageCacheMax);
@@ -265,6 +267,10 @@ abstract public class PageManager {
 
       return page;
     }
+  }
+
+  protected void initPageManager()
+  {
   }
   
   /**

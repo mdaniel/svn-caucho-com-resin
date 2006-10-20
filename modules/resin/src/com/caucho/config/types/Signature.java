@@ -329,5 +329,10 @@ public class Signature {
     if (ch >= 0)
       _index--;
   }
+
+  public String toString()
+  {
+    return "Signature[" + _signature + "]";
+  }
 }
 

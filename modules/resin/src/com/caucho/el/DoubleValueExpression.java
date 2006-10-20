@@ -44,6 +44,17 @@ public class DoubleValueExpression extends AbstractValueExpression
     = Logger.getLogger(DoubleValueExpression.class.getName());
   protected static final L10N L = new L10N(DoubleValueExpression.class);
 
+  private Class _expectedType;
+
+  public DoubleValueExpression(Expr expr,
+			       String expressionString,
+			       Class expectedType)
+  {
+    super(expr, expressionString);
+
+    _expectedType = expectedType;
+  }
+
   public DoubleValueExpression(Expr expr,
 				String expressionString)
   {
@@ -57,7 +68,10 @@ public class DoubleValueExpression extends AbstractValueExpression
 
   public Class<?> getExpectedType()
   {
-    return Double.class;
+    if (_expectedType != null)
+      return _expectedType;
+    else
+      return Double.class;
   }
 
   @Override

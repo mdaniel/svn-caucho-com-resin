@@ -319,7 +319,14 @@ abstract public class GenericTag extends JspContainerNode {
     if (! isEmpty())
       _tag.setBodyContent(true);
     */
-      
+
+    generatePrologueDeclare(out);
+    generatePrologueChildren(out);
+  }
+
+  public void generatePrologueDeclare(JspJavaWriter out)
+    throws Exception
+  {
     // Any AT_END variables
     for (int i = 0; _varInfo != null && i < _varInfo.length; i++) {
       VariableInfo var = _varInfo[i];
@@ -423,7 +430,7 @@ abstract public class GenericTag extends JspContainerNode {
       int p = getAttributeIndex(attrs[i].getName());
       
       if (p < 0 && attrs[i].isRequired()) {
-	throw error(L.l("required attribute `{0}' missing from <{1}>",
+	throw error(L.l("required attribute '{0}' missing from <{1}>",
                         attrs[i].getName(),
                         getTagName()));
       }
@@ -439,7 +446,7 @@ abstract public class GenericTag extends JspContainerNode {
       TagAttributeInfo attribute = getAttributeInfo(attrName);
       
       if (attrs != null && attribute == null && ! isDynamic)
-	throw error(L.l("unexpected attribute `{0}' in <{1}>",
+	throw error(L.l("unexpected attribute '{0}' in <{1}>",
                         attrName.getName(), getTagName()));
 
       if (_tag.getAttribute(attrName) != null)
@@ -528,7 +535,7 @@ abstract public class GenericTag extends JspContainerNode {
 			   allowRtexpr, "pageContext", isFragment, attrInfo);
     }
     else if (! isDynamic) {
-      throw error(L.l("attribute `{0}' in tag `{1}' has no corresponding set method in tag class `{2}'",
+      throw error(L.l("attribute '{0}' in tag '{1}' has no corresponding set method in tag class '{2}'",
                   attrName.getName(), getTagName(), _tagClass.getName()));
     }
     else if (isFragment) {
@@ -715,14 +722,16 @@ abstract public class GenericTag extends JspContainerNode {
    * @param out the stream to the java code.
    * @param scope the variable scope to print
    */
-  protected void printVarDeclare(JspJavaWriter out, int scope, VariableInfo var)
+  protected void printVarDeclare(JspJavaWriter out,
+				 int scope,
+				 VariableInfo var)
     throws Exception
   {
     if (! _gen.hasScripting() || var == null)
       return;
     
-    if (var.getScope() == scope ||
-        var.getScope() == VariableInfo.AT_BEGIN) {
+    if (var.getScope() == scope
+	|| var.getScope() == VariableInfo.AT_BEGIN) {
       if (var.getVarName() == null)
         throw error(L.l("tag variable expects a name"));
 
@@ -733,17 +742,18 @@ abstract public class GenericTag extends JspContainerNode {
 
       /*
       if (var.getClassName() == null)
-        throw error(L.l("tag variable `{0}' expects a classname",
+        throw error(L.l("tag variable '{0}' expects a classname",
                         var.getVarName()));
       */
 
       validateVarName(var.getVarName());
 
-      if (var.getDeclare() &&
-          var.getScope() == scope &&
-          var.getScope() == VariableInfo.NESTED &&
-	  hasScripting() &&
-          ! varAlreadyDeclared(var.getVarName())) {
+      // jsp/107r
+      if (var.getDeclare()
+	  && var.getScope() == scope
+	  && (var.getScope() == VariableInfo.NESTED && hasScripting()
+	      || var.getScope() == VariableInfo.AT_BEGIN)
+	  && ! varAlreadyDeclared(var.getVarName())) {
 	validateClass(className, var.getVarName());
 	
         out.println(className + " " + var.getVarName() + ";");
@@ -773,7 +783,7 @@ abstract public class GenericTag extends JspContainerNode {
       
       /*
       if (var.getClassName() == null)
-        throw error(L.l("tag variable `{0}' expects a classname",
+        throw error(L.l("tag variable '{0}' expects a classname",
                         var.getVarName()));
       */
 
@@ -797,11 +807,11 @@ abstract public class GenericTag extends JspContainerNode {
     throws JspParseException
   {
     if (! Character.isJavaIdentifierStart(name.charAt(0)))
-      throw error(L.l("tag variable `{0}' is an illegal Java identifier.", name));
+      throw error(L.l("tag variable '{0}' is an illegal Java identifier.", name));
 
     for (int i = 0; i < name.length(); i++) {
       if (! Character.isJavaIdentifierPart(name.charAt(i)))
-        throw error(L.l("tag variable `{0}' is an illegal Java identifier.", name));
+        throw error(L.l("tag variable '{0}' is an illegal Java identifier.", name));
     }
   }
 
@@ -813,9 +823,13 @@ abstract public class GenericTag extends JspContainerNode {
     if (_gen.isDeclared(varName))
       return true;
     
-    for (JspNode node = getParent(); node != null; node = node.getParent()) {
+    for (JspNode node = getParent();
+	 node != null;
+	 node = node.getParent()) {
       if (! (node instanceof GenericTag))
         continue;
+      if (node instanceof JspFragmentNode)
+        break;
 
       GenericTag tag = (GenericTag) node;
       

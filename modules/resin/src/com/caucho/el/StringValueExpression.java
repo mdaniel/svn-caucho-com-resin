@@ -44,6 +44,17 @@ public class StringValueExpression extends AbstractValueExpression
     = Logger.getLogger(StringValueExpression.class.getName());
   protected static final L10N L = new L10N(StringValueExpression.class);
 
+  private Class _expectedType;
+
+  public StringValueExpression(Expr expr,
+			       String expressionString,
+			       Class expectedType)
+  {
+    super(expr, expressionString);
+
+    _expectedType = expectedType;
+  }
+
   public StringValueExpression(Expr expr,
 			       String expressionString)
   {
@@ -57,19 +68,17 @@ public class StringValueExpression extends AbstractValueExpression
 
   public Class<?> getExpectedType()
   {
-    return String.class;
+    if (_expectedType != null)
+      return _expectedType;
+    else
+      return String.class;
   }
 
   public Class<?> getType(ELContext context)
     throws PropertyNotFoundException,
 	   ELException
   {
-    Object value = getValue(context);
-
-    if (value == null)
-      return null;
-    else
-      return value.getClass();
+    return String.class;
   }
 
   @Override

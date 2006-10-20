@@ -33,11 +33,20 @@ import java.beans.FeatureDescriptor;
 import java.util.*;
 
 import javax.el.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import javax.servlet.jsp.*;
 
 /**
  * Variable resolution for JSP variables
  */
 public class ImplicitObjectELResolver extends ELResolver {
+  private static final HashMap<Object,Prop> _propMap
+    = new HashMap<Object,Prop>();
+  
+  private static final ArrayList<FeatureDescriptor> _featureDescriptors
+    = new ArrayList<FeatureDescriptor>();
+  
   @Override
   public Class<String> getCommonPropertyType(ELContext context,
 					     Object base)
@@ -52,7 +61,10 @@ public class ImplicitObjectELResolver extends ELResolver {
   public Iterator<FeatureDescriptor>
     getFeatureDescriptors(ELContext context, Object base)
   {
-    return null;
+    if (base != null)
+      return null;
+    
+    return _featureDescriptors.iterator();
   }
 
   @Override
@@ -60,20 +72,204 @@ public class ImplicitObjectELResolver extends ELResolver {
 			 Object base,
 			 Object property)
   {
-    Object value = getValue(context, base, property);
-
-    if (value != null)
-      return value.getClass();
-    else
+    if (base != null)
       return null;
+
+    Prop prop = _propMap.get(property);
+    if (prop == null)
+      return null;
+
+    context.setPropertyResolved(true);
+
+    return null;
   }
 
   @Override
     public Object getValue(ELContext context,
-			 Object base,
-			 Object property)
+			   Object base,
+			   Object property)
   {
-    throw new UnsupportedOperationException();
+    if (base != null)
+      return null;
+
+    Prop prop = _propMap.get(property);
+    if (prop == null)
+      return null;
+
+    context.setPropertyResolved(true);
+
+    PageContext jspContext = (PageContext) context.getContext(JspContext.class);
+
+    switch (prop) {
+    case PAGE_CONTEXT:
+      return jspContext;
+      
+    case PAGE_SCOPE:
+      {
+	HashMap<String,Object> map = new HashMap<String,Object>();
+
+	Enumeration e = jspContext.getAttributeNames();
+	while (e.hasMoreElements()) {
+	  String name = (String) e.nextElement();
+	  
+	  map.put(name, jspContext.getAttribute(name));
+	}
+
+	return map;
+      }
+      
+    case REQUEST_SCOPE:
+      {
+	HashMap<String,Object> map = new HashMap<String,Object>();
+
+	ServletRequest request = jspContext.getRequest();
+
+	Enumeration e = request.getAttributeNames();
+	while (e.hasMoreElements()) {
+	  String name = (String) e.nextElement();
+	  
+	  map.put(name, request.getAttribute(name));
+	}
+
+	return map;
+      }
+      
+    case SESSION_SCOPE:
+      {
+	HashMap<String,Object> map = new HashMap<String,Object>();
+
+	HttpSession session = jspContext.getSession();
+
+	if (session == null)
+	  return null;
+
+	Enumeration e = session.getAttributeNames();
+	while (e.hasMoreElements()) {
+	  String name = (String) e.nextElement();
+	  
+	  map.put(name, session.getAttribute(name));
+	}
+
+	return map;
+      }
+      
+    case APPLICATION_SCOPE:
+      {
+	HashMap<String,Object> map = new HashMap<String,Object>();
+
+	ServletContext app = jspContext.getServletContext();
+
+	Enumeration e = app.getAttributeNames();
+	while (e.hasMoreElements()) {
+	  String name = (String) e.nextElement();
+	  
+	  map.put(name, app.getAttribute(name));
+	}
+
+	return map;
+      }
+      
+    case PARAM:
+      {
+	HashMap<String,Object> map = new HashMap<String,Object>();
+
+	ServletRequest request = jspContext.getRequest();
+
+	Enumeration e = request.getParameterNames();
+	while (e.hasMoreElements()) {
+	  String name = (String) e.nextElement();
+	  
+	  map.put(name, request.getParameter(name));
+	}
+
+	return map;
+      }
+      
+    case PARAM_VALUES:
+      {
+	HashMap<String,Object> map = new HashMap<String,Object>();
+
+	ServletRequest request = jspContext.getRequest();
+
+	Enumeration e = request.getParameterNames();
+	while (e.hasMoreElements()) {
+	  String name = (String) e.nextElement();
+	  
+	  map.put(name, request.getParameterValues(name));
+	}
+
+	return map;
+      }
+      
+    case HEADER:
+      {
+	HashMap<String,Object> map = new HashMap<String,Object>();
+
+	HttpServletRequest request = (HttpServletRequest) jspContext.getRequest();
+
+	Enumeration e = request.getHeaderNames();
+	while (e.hasMoreElements()) {
+	  String name = (String) e.nextElement();
+	  
+	  map.put(name, request.getHeader(name));
+	}
+
+	return map;
+      }
+      
+    case HEADER_VALUES:
+      {
+	HashMap<String,Object> map = new HashMap<String,Object>();
+
+	HttpServletRequest request = (HttpServletRequest) jspContext.getRequest();
+
+	Enumeration e = request.getHeaderNames();
+	while (e.hasMoreElements()) {
+	  String name = (String) e.nextElement();
+	  
+	  map.put(name, request.getHeaders(name));
+	}
+
+	return map;
+      }
+      
+    case COOKIE:
+      {
+	HashMap<String,Object> map = new HashMap<String,Object>();
+
+	HttpServletRequest request
+	  = (HttpServletRequest) jspContext.getRequest();
+
+	Cookie []cookies = request.getCookies();
+
+	if (cookies == null)
+	  return map;
+	
+	for (int i = cookies.length - 1; i >= 0; i--) {
+	  map.put(cookies[i].getName(), cookies[i].getValue());
+	}
+
+	return map;
+      }
+    
+    case INIT_PARAM:
+      {
+	HashMap<String,Object> map = new HashMap<String,Object>();
+
+	ServletContext app = jspContext.getServletContext();
+
+	Enumeration e = app.getInitParameterNames();
+	while (e.hasMoreElements()) {
+	  String name = (String) e.nextElement();
+	  
+	  map.put(name, app.getInitParameter(name));
+	}
+
+	return map;
+      }
+    }
+
+    return null;
   }
 
   @Override
@@ -81,6 +277,14 @@ public class ImplicitObjectELResolver extends ELResolver {
 			 Object base,
 			 Object property)
   {
+    if (base != null)
+      return true;
+
+    Prop prop = _propMap.get(property);
+    if (prop == null)
+      return true;
+
+    context.setPropertyResolved(true);
     return true;
   }
 
@@ -90,5 +294,61 @@ public class ImplicitObjectELResolver extends ELResolver {
 			 Object property,
 			 Object value)
   {
+    if (base != null)
+      return;
+
+    Prop prop = _propMap.get(property);
+    if (prop == null)
+      return;
+
+    context.setPropertyResolved(true);
+    
+    throw new PropertyNotWritableException(String.valueOf(value));
+  }
+  
+  private enum Prop {
+    PAGE_CONTEXT,
+    PAGE_SCOPE,
+    REQUEST_SCOPE,
+    SESSION_SCOPE,
+    APPLICATION_SCOPE,
+    PARAM,
+    PARAM_VALUES,
+    HEADER,
+    HEADER_VALUES,
+    COOKIE,
+    INIT_PARAM
+  };
+
+  static {
+    _propMap.put("pageContext", Prop.PAGE_CONTEXT);
+    _propMap.put("pageScope", Prop.PAGE_SCOPE);
+    _propMap.put("requestScope", Prop.REQUEST_SCOPE);
+    _propMap.put("sessionScope", Prop.SESSION_SCOPE);
+    _propMap.put("applicationScope", Prop.APPLICATION_SCOPE);
+    _propMap.put("param", Prop.PARAM);
+    _propMap.put("paramValues", Prop.PARAM_VALUES);
+    _propMap.put("header", Prop.HEADER);
+    _propMap.put("headerValues", Prop.HEADER_VALUES);
+    _propMap.put("cookie", Prop.COOKIE);
+    _propMap.put("initParam", Prop.INIT_PARAM);
+
+    for (Object key : _propMap.keySet()) {
+      String name = String.valueOf(key);
+      
+      FeatureDescriptor desc = new FeatureDescriptor();
+      desc.setName(name);
+      desc.setDisplayName(name);
+      desc.setShortDescription("");
+      desc.setExpert(false);
+      desc.setHidden(false);
+      desc.setPreferred(true);
+
+      desc.setValue(ELResolver.TYPE, Map.class);
+	
+      desc.setValue(ELResolver.RESOLVABLE_AT_DESIGN_TIME, Boolean.TRUE);
+	
+      _featureDescriptors.add(desc);
+    }
   }
 }

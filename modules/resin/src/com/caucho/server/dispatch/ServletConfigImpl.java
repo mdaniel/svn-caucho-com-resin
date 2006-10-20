@@ -333,7 +333,8 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
       _roleMap = new HashMap<String,String>();
 
     // server/12h2
-    _roleMap.put(ref.getRoleLink(), ref.getRoleName());
+    // server/12m0
+    _roleMap.put(ref.getRoleName(), ref.getRoleLink());
   }
 
   /**

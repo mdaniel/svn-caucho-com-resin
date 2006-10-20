@@ -183,7 +183,8 @@ public class TagFileTag extends GenericTag {
 
     String name = _contextVarName;
 
-    out.println("com.caucho.jsp.PageContextWrapper " + name + " = com.caucho.jsp.PageContextWrapper.create(pageContext);");
+    out.println("com.caucho.jsp.PageContextWrapper " + name);
+    out.println("  = com.caucho.jsp.PageContextWrapper.create(pageContext);");
 
     TagAttributeInfo attrs[] = _tagInfo.getAttributes();
 

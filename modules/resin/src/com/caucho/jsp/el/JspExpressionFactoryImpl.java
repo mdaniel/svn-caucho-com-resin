@@ -40,6 +40,9 @@ import com.caucho.el.*;
  * Represents an EL expression factory
  */
 public class JspExpressionFactoryImpl extends  ExpressionFactory {
+  private static final HashMap<Class,CoerceType> _coerceMap
+    = new HashMap<Class,CoerceType>();
+  
   private final JspApplicationContextImpl _jspApplicationContext;
 
   JspExpressionFactoryImpl(JspApplicationContextImpl jspApplicationContext)
@@ -50,7 +53,40 @@ public class JspExpressionFactoryImpl extends  ExpressionFactory {
   public Object coerceToType(Object obj, Class<?> targetType)
     throws ELException
   {
-    throw new UnsupportedOperationException();
+    CoerceType type = _coerceMap.get(targetType);
+
+    if (type == null)
+      return obj;
+
+    switch (type) {
+    case BOOLEAN:
+      return Expr.toBoolean(obj, null) ? Boolean.FALSE : Boolean.TRUE;
+    case CHARACTER:
+      return Expr.toCharacter(obj, null);
+    case BYTE:
+      return new Byte((byte) Expr.toLong(obj, null));
+    case SHORT:
+      return new Short((short) Expr.toLong(obj, null));
+    case INTEGER:
+      return new Integer((int) Expr.toLong(obj, null));
+    case LONG:
+      return new Long(Expr.toLong(obj, null));
+    case FLOAT:
+      return new Float((float) Expr.toDouble(obj, null));
+    case DOUBLE:
+      return new Double(Expr.toDouble(obj, null));
+    case STRING:
+      if (obj == null)
+	return "";
+      else
+	return obj.toString();
+    case BIG_DECIMAL:
+      return Expr.toBigDecimal(obj, null);
+    case BIG_INTEGER:
+      return Expr.toBigInteger(obj, null);
+    }
+
+    return null;
   }
 
   public MethodExpression
@@ -64,7 +100,7 @@ public class JspExpressionFactoryImpl extends  ExpressionFactory {
 
     Expr expr = parser.parse();
 
-    return new MethodExpressionImpl(expr, expression,
+    return new MethodExpressionImpl(this, expr, expression,
 				    expectedReturnType,
 				    expectedParamTypes);
   }
@@ -86,30 +122,37 @@ public class JspExpressionFactoryImpl extends  ExpressionFactory {
 						      String expression,
 						      Class<?> expectedType)
   {
-    if (String.class == expectedType)
-      return new StringValueExpression(expr, expression);
-    else if (Integer.class == expectedType || int.class == expectedType)
-      return new IntegerValueExpression(expr, expression);
-    else if (Double.class == expectedType || double.class == expectedType)
-      return new DoubleValueExpression(expr, expression);
-    else if (Long.class == expectedType || long.class == expectedType)
-      return new LongValueExpression(expr, expression);
-    else if (Float.class == expectedType || float.class == expectedType)
-      return new FloatValueExpression(expr, expression);
-    else if (Short.class == expectedType || short.class == expectedType)
-      return new ShortValueExpression(expr, expression);
-    else if (Byte.class == expectedType || byte.class == expectedType)
-      return new ByteValueExpression(expr, expression);
-    else if (BigDecimal.class == expectedType)
-      return new BigDecimalValueExpression(expr, expression);
-    else if (BigInteger.class == expectedType)
-      return new BigIntegerValueExpression(expr, expression);
-    else if (Boolean.class == expectedType)
-      return new BooleanValueExpression(expr, expression);
-    else if (Character.class == expectedType || char.class == expectedType)
-      return new CharacterValueExpression(expr, expression);
-    else
+    CoerceType type = _coerceMap.get(expectedType);
+
+    if (type == null)
       return new ObjectValueExpression(expr, expression);
+
+    switch (type) {
+    case BOOLEAN:
+      return new BooleanValueExpression(expr, expression);
+    case CHARACTER:
+      return new CharacterValueExpression(expr, expression);
+    case BYTE:
+      return new ByteValueExpression(expr, expression);
+    case SHORT:
+      return new ShortValueExpression(expr, expression);
+    case INTEGER:
+      return new IntegerValueExpression(expr, expression);
+    case LONG:
+      return new LongValueExpression(expr, expression);
+    case FLOAT:
+      return new FloatValueExpression(expr, expression);
+    case DOUBLE:
+      return new DoubleValueExpression(expr, expression);
+    case STRING:
+      return new StringValueExpression(expr, expression);
+    case BIG_DECIMAL:
+      return new BigDecimalValueExpression(expr, expression);
+    case BIG_INTEGER:
+      return new BigIntegerValueExpression(expr, expression);
+    }
+
+    return new ObjectValueExpression(expr, expression);
   }
 
   public ValueExpression
@@ -123,5 +166,53 @@ public class JspExpressionFactoryImpl extends  ExpressionFactory {
   public String toString()
   {
     return "JspExpressionFactoryImpl[" + _jspApplicationContext.getWebApp() + "]";
+  }
+
+  private enum CoerceType {
+    BOOLEAN,
+    CHARACTER,
+    STRING,
+    INTEGER,
+    DOUBLE,
+    LONG,
+    FLOAT,
+    SHORT,
+    BYTE,
+    BIG_INTEGER,
+    BIG_DECIMAL,
+    VOID
+  };
+
+  static {
+    _coerceMap.put(boolean.class, CoerceType.BOOLEAN);
+    _coerceMap.put(Boolean.class, CoerceType.BOOLEAN);
+    
+    _coerceMap.put(byte.class, CoerceType.BYTE);
+    _coerceMap.put(Byte.class, CoerceType.BYTE);
+    
+    _coerceMap.put(short.class, CoerceType.SHORT);
+    _coerceMap.put(Short.class, CoerceType.SHORT);
+    
+    _coerceMap.put(int.class, CoerceType.INTEGER);
+    _coerceMap.put(Integer.class, CoerceType.INTEGER);
+    
+    _coerceMap.put(long.class, CoerceType.LONG);
+    _coerceMap.put(Long.class, CoerceType.LONG);
+    
+    _coerceMap.put(float.class, CoerceType.FLOAT);
+    _coerceMap.put(Float.class, CoerceType.FLOAT);
+    
+    _coerceMap.put(double.class, CoerceType.DOUBLE);
+    _coerceMap.put(Double.class, CoerceType.DOUBLE);
+    
+    _coerceMap.put(char.class, CoerceType.CHARACTER);
+    _coerceMap.put(Character.class, CoerceType.CHARACTER);
+    
+    _coerceMap.put(String.class, CoerceType.STRING);
+    
+    _coerceMap.put(BigDecimal.class, CoerceType.BIG_DECIMAL);
+    _coerceMap.put(BigInteger.class, CoerceType.BIG_INTEGER);
+    
+    _coerceMap.put(void.class, CoerceType.VOID);
   }
 }

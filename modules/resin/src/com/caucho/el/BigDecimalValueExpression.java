@@ -45,6 +45,17 @@ public class BigDecimalValueExpression extends AbstractValueExpression
     = Logger.getLogger(BigDecimalValueExpression.class.getName());
   protected static final L10N L = new L10N(BigDecimalValueExpression.class);
 
+  private Class _expectedType;
+
+  public BigDecimalValueExpression(Expr expr,
+				   String expressionString,
+				   Class expectedType)
+  {
+    super(expr, expressionString);
+
+    _expectedType = expectedType;
+  }
+
   public BigDecimalValueExpression(Expr expr,
 				String expressionString)
   {
@@ -58,7 +69,10 @@ public class BigDecimalValueExpression extends AbstractValueExpression
 
   public Class<?> getExpectedType()
   {
-    return BigDecimal.class;
+    if (_expectedType != null)
+      return _expectedType;
+    else
+      return BigDecimal.class;
   }
 
   @Override

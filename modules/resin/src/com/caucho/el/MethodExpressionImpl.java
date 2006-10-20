@@ -88,8 +88,10 @@ public class MethodExpressionImpl extends MethodExpression
 	|| params != null && params.length != _expectedArgs.length) {
       throw new IllegalArgumentException(L.l("expected arguments do not match actual arguments for '{0}'", _expr.toString()));
     }
+
+    Object value = _expr.invoke(context, _expectedArgs, params);
       
-    return _expr.invoke(context, _expectedArgs, params);
+    return Expr.coerceToType(value, _expectedType);
   }
 
   public int hashCode()

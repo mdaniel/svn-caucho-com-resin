@@ -44,6 +44,17 @@ public class FloatValueExpression extends AbstractValueExpression
     = Logger.getLogger(FloatValueExpression.class.getName());
   protected static final L10N L = new L10N(FloatValueExpression.class);
 
+  private Class _expectedType;
+
+  public FloatValueExpression(Expr expr,
+			      String expressionString,
+			      Class expectedType)
+  {
+    super(expr, expressionString);
+
+    _expectedType = expectedType;
+  }
+
   public FloatValueExpression(Expr expr,
 				String expressionString)
   {
@@ -57,7 +68,10 @@ public class FloatValueExpression extends AbstractValueExpression
 
   public Class<?> getExpectedType()
   {
-    return Float.class;
+    if (_expectedType != null)
+      return _expectedType;
+    else
+      return Float.class;
   }
 
   @Override

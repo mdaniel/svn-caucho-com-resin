@@ -132,6 +132,7 @@ public class PageContextImpl extends PageContext
   private ELContext _elContext;
   private ELResolver _elResolver;
   private javax.el.FunctionMapper _functionMapper;
+  private javax.el.VariableMapper _variableMapper;
   private boolean _hasException;
 
   private HashMap<String,Method> _functionMap;
@@ -937,11 +938,11 @@ public class PageContextImpl extends PageContext
                                      relativeUrl));
 
     // the FlushBuffer needs to happen to deal with OpenSymphony (Bug#1710)
-    // jsp/17e9
-    if (_out instanceof FlushBuffer)
-      ((FlushBuffer) _out).flushBuffer();
-    else if (flush)
+    // jsp/17e9, 15lc
+    if (flush)
       _out.flush();
+    else if (_out instanceof FlushBuffer)
+      ((FlushBuffer) _out).flushBuffer();
 
     rd.include(req, res);
   }
@@ -1199,6 +1200,7 @@ public class PageContextImpl extends PageContext
       }
       
       _functionMapper = new PageFunctionMapper();
+      _variableMapper = new PageVariableMapper();
     }
     
     return _elContext;
@@ -1822,7 +1824,7 @@ public class PageContextImpl extends PageContext
 
     public javax.el.VariableMapper getVariableMapper()
     {
-      return null;
+      return _variableMapper;
     }
   }
 
@@ -1833,6 +1835,25 @@ public class PageContextImpl extends PageContext
 	return _functionMap.get(prefix + ":" + localName);
       else
 	return null;
+    }
+  }
+
+  public class PageVariableMapper extends javax.el.VariableMapper {
+    public ValueExpression resolveVariable(String var)
+    {
+      Object v = getAttribute(var);
+
+      if (v instanceof ValueExpression)
+	return (ValueExpression) v;
+      else
+	return null;
+    }
+  
+
+    public ValueExpression setVariable(String variable,
+				       ValueExpression expr)
+    {
+      return expr;
     }
   }
 }

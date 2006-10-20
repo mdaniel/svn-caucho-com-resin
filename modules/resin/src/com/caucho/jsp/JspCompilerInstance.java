@@ -286,34 +286,9 @@ public class JspCompilerInstance {
       resourceManager = new AppDirResourceManager(appDir);
     }
 
-    TagFileManager tagFileManager =_jspCompiler.getTagFileManager();
+    TagFileManager tagFileManager = _jspCompiler.getTagFileManager();
 
     TaglibManager taglibManager = _jspCompiler.getTaglibManager();
-
-    if (taglibManager == null) {
-      taglibManager = new TaglibManager(resourceManager, app, tagFileManager);
-      taglibManager.setWebApp(app);
-
-      if (jspConfig != null) {
-        ArrayList<JspTaglib> tldMapList = jspConfig.getTaglibList();
-        for (int i = 0; i < tldMapList.size(); i++) {
-          JspTaglib taglib = tldMapList.get(i);
-
-          taglibManager.addLocationMap(taglib.getTaglibUri(),
-                                        taglib.getTaglibLocation());
-        }
-      }
-
-      if (app != null) {
-        ArrayList<JspTaglib> taglibs = app.getTaglibList();
-        for (int i = 0; taglibs != null && i < taglibs.size(); i++) {
-          JspTaglib taglib = taglibs.get(i);
-
-          taglibManager.addLocationMap(taglib.getTaglibUri(),
-                                       taglib.getTaglibLocation());
-        }
-      }
-    }
 
     JspPageConfig pageConfig = new JspPageConfig();
 
@@ -336,6 +311,9 @@ public class JspCompilerInstance {
       _parseState.setELIgnored(jspPropertyGroup.isELIgnored());
       _parseState.setVelocityEnabled(jspPropertyGroup.isVelocityEnabled());
       _parseState.setPageEncoding(jspPropertyGroup.getPageEncoding());
+      _parseState.setForbidXml(jspPropertyGroup.isForbidXml());
+      if (jspPropertyGroup.getPageEncoding() != null)
+	_parseState.setCharEncoding(jspPropertyGroup.getPageEncoding());
 
       pageConfig.setStaticEncoding(jspPropertyGroup.isStaticEncoding());
 
@@ -454,8 +432,13 @@ public class JspCompilerInstance {
       throw new IllegalStateException("JspCompilerInstance cannot be reused");
 
     boolean isXml = _isXml;
+    boolean isForbidXml = false;
+    
     if (_jspPropertyGroup != null && ! isXml)
       isXml = _jspPropertyGroup.isXml();
+    
+    if (_jspPropertyGroup != null && _jspPropertyGroup.isForbidXml())
+      _parser.getParseState().setForbidXml(true);
 
     try {
       _parser.getParseState().setBuilder(_jspBuilder);
@@ -557,8 +540,12 @@ public class JspCompilerInstance {
 
     try {
       boolean isXml = _isXml;
+      
       if (_jspPropertyGroup != null && ! isXml)
 	isXml = _jspPropertyGroup.isXml();
+
+      if (_jspPropertyGroup != null && _jspPropertyGroup.isForbidXml())
+	  _parseState.setForbidXml(true);
 
       _parseState.setXml(isXml);
 

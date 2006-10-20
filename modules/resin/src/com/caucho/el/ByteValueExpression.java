@@ -44,6 +44,17 @@ public class ByteValueExpression extends AbstractValueExpression
     = Logger.getLogger(ByteValueExpression.class.getName());
   protected static final L10N L = new L10N(ByteValueExpression.class);
 
+  private Class _expectedType;
+
+  public ByteValueExpression(Expr expr,
+			     String expressionString,
+			     Class expectedType)
+  {
+    super(expr, expressionString);
+
+    _expectedType = expectedType;
+  }
+
   public ByteValueExpression(Expr expr,
 				String expressionString)
   {
@@ -57,7 +68,10 @@ public class ByteValueExpression extends AbstractValueExpression
 
   public Class<?> getExpectedType()
   {
-    return Byte.class;
+    if (_expectedType != null)
+      return _expectedType;
+    else
+      return Byte.class;
   }
 
   @Override

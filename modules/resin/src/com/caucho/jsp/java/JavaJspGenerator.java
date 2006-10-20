@@ -33,6 +33,7 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.*;
 import java.lang.reflect.*;
+import java.math.*;
 import java.beans.*;
 
 import javax.el.*;
@@ -1210,7 +1211,7 @@ public class JavaJspGenerator extends JspGenerator {
 
     com.caucho.el.Expr expr = parser.parse();
 
-    Class retType = String.class;
+    Class retType = void.class;
     Class []args = new Class[0];
 
     try {
@@ -1262,22 +1263,40 @@ public class JavaJspGenerator extends JspGenerator {
 
       String exprType = "ObjectValueExpression";
 
-      if (String.class.equals(expr.getReturnType()))
+      Class retType = expr.getReturnType();
+
+      if (String.class.equals(retType))
 	exprType = "StringValueExpression";
-      else if (Byte.class.equals(expr.getReturnType()))
+      else if (Byte.class.equals(retType)
+	       || byte.class.equals(retType))
 	exprType = "ByteValueExpression";
-      else if (Short.class.equals(expr.getReturnType()))
+      else if (Short.class.equals(retType)
+	       || short.class.equals(retType))
 	exprType = "ShortValueExpression";
-      else if (Integer.class.equals(expr.getReturnType()))
+      else if (Integer.class.equals(retType)
+	       || int.class.equals(retType))
 	exprType = "IntegerValueExpression";
-      else if (Long.class.equals(expr.getReturnType()))
+      else if (Long.class.equals(retType)
+	       || long.class.equals(retType))
 	exprType = "LongValueExpression";
-      else if (Float.class.equals(expr.getReturnType()))
+      else if (Float.class.equals(retType)
+	       || long.class.equals(retType))
 	exprType = "FloatValueExpression";
-      else if (Double.class.equals(expr.getReturnType()))
+      else if (Double.class.equals(retType)
+	       || double.class.equals(retType))
 	exprType = "DoubleValueExpression";
+      else if (Boolean.class.equals(retType)
+	       || boolean.class.equals(retType))
+	exprType = "BooleanValueExpression";
+      else if (Character.class.equals(retType)
+	       || char.class.equals(retType))
+	exprType = "CharacterValueExpression";
+      else if (BigInteger.class.equals(retType))
+	exprType = "BigIntegerValueExpression";
+      else if (BigDecimal.class.equals(retType))
+	exprType = "BigDecimalValueExpression";
       
-      out.println("private final static javax.el.ValueExpression _caucho_value_expr_" + i + " = new com.caucho.el.ObjectValueExpression(");
+      out.println("private final static javax.el.ValueExpression _caucho_value_expr_" + i + " = new com.caucho.el." + exprType + "(");
       out.print("  ");
       expr.getExpr().printCreate(out.getWriteStream());
       out.print(", \"");
@@ -1294,22 +1313,33 @@ public class JavaJspGenerator extends JspGenerator {
     for (int i = 0; i < _methodExprList.size(); i++) {
       MethodExpr expr = _methodExprList.get(i);
       
-      out.println("private final static javax.el.MethodExpression _caucho_method_expr_" + i + " = new com.caucho.el.MethodExpressionImpl(");
-      out.print("  ");
+      out.println("private final static javax.el.MethodExpression _caucho_method_expr_" + i);
+      out.print("  = ");
+
+      out.print("new com.caucho.el.MethodExpressionImpl");
+      
+      out.print("(  ");
       expr.getExpr().printCreate(out.getWriteStream());
       out.print(", \"");
       out.printJavaString(expr.getExpr().toString());
       out.print("\", ");
-      out.printClass(expr.getReturnType());
-      out.print(".class, new Class[] {");
+      if (expr.getReturnType() != null) {
+	out.printClass(expr.getReturnType());
+	out.print(".class");
+      }
+      else
+	out.print("String.class");
+      out.print(", new Class[] {");
 
       Class []args = expr.getArgs();
-      for (int j = 0; j < args.length; j++) {
-	if (j != 0)
-	  out.print(", ");
+      if (args != null) {
+	for (int j = 0; j < args.length; j++) {
+	  if (j != 0)
+	    out.print(", ");
 
-	out.printClass(args[j]);
-	out.print(".class");
+	  out.printClass(args[j]);
+	  out.print(".class");
+	}
       }
       
       out.println("});");
@@ -1438,8 +1468,16 @@ public class JavaJspGenerator extends JspGenerator {
 	out.println("  throws Throwable");
 	out.println("{");
 	out.pushDepth();
-	frag.generatePrologueChildren(out);
-	frag.generate(out);
+
+	HashSet<String> oldDeclaredVariables = _declaredVariables;
+	_declaredVariables = new HashSet<String>();
+	try {
+	  frag.generatePrologueChildren(out);
+	  frag.generate(out);
+	} finally {
+	  _declaredVariables = oldDeclaredVariables;
+	}
+	
 	out.popDepth();
 	out.println("}");
       }

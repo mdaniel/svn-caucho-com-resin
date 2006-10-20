@@ -92,7 +92,7 @@ public class ExpressionEvaluatorImpl extends ExpressionEvaluator {
 
     try {
       Expr expr = parser.parse();
-    
+
       return new ExpressionImpl(expr);
     } catch (com.caucho.el.ELParseException e) {
       throw new javax.servlet.jsp.el.ELParseException(e.getMessage());

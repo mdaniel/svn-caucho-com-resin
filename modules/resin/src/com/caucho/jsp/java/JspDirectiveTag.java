@@ -167,6 +167,14 @@ public class JspDirectiveTag extends JspNode {
       if (oldValue != null && ! oldValue.equals(value))
         throw error(L.l("@tag dynamic-attributes '{0}' conflicts with previous value '{1}'.  The dynamic-attributes attribute may only be specified once.",
 			value, oldValue));
+      else if (gen.findAttribute(value) != null) {
+	throw error(L.l("@tag dynamic-attributes '{0}' conflicts with an attribute.",
+			value));
+      }
+      else if (gen.findVariable(value) != null) {
+	throw error(L.l("@tag dynamic-attributes '{0}' conflicts with a variable.",
+			value));
+      }
       
       gen.setDynamicAttributes(value);
     }

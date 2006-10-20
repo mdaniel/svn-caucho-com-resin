@@ -32,7 +32,7 @@ package com.caucho.jsp;
 import com.caucho.config.Config;
 import com.caucho.java.JavaCompiler;
 import com.caucho.java.LineMap;
-import com.caucho.jsp.cfg.JspPropertyGroup;
+import com.caucho.jsp.cfg.*;
 import com.caucho.loader.*;
 import com.caucho.log.Log;
 import com.caucho.server.webapp.WebApp;
@@ -196,27 +196,66 @@ public class JspCompiler implements EnvironmentBean {
   }
 
   /**
-   * Sets the taglib manager.
-   */
-  public void setTaglibManager(TaglibManager manager)
-  {
-    _taglibManager = manager;
-  }
-
-  /**
-   * Gets the taglib manager.
-   */
-  public TaglibManager getTaglibManager()
-  {
-    return _taglibManager;
-  }
-
-  /**
    * Gets the tag file manager.
    */
   public TagFileManager getTagFileManager()
   {
     return _tagFileManager;
+  }
+
+  public TaglibManager getTaglibManager()
+    throws JspParseException, IOException
+  {
+    synchronized (this) {
+      if (_taglibManager == null) {
+	WebApp app = getWebApp();
+	
+	Path appDir = getAppDir();
+	if (appDir == null && app != null)
+	  appDir = app.getAppDir();
+
+	JspResourceManager resourceManager = getResourceManager();
+	if (resourceManager != null) {
+	}
+	else if (app != null)
+	  resourceManager = new AppResourceManager(app);
+	else {
+	  resourceManager = new AppDirResourceManager(appDir);
+	}
+	
+	_taglibManager = new TaglibManager(resourceManager,
+					   app,
+					   _tagFileManager);
+	_taglibManager.setWebApp(app);
+
+	JspConfig jspConfig = null;
+
+	if (app != null)
+	  jspConfig = (JspConfig) app.getExtension("jsp-config");
+
+	if (jspConfig != null) {
+	  ArrayList<JspTaglib> tldMapList = jspConfig.getTaglibList();
+	  for (int i = 0; i < tldMapList.size(); i++) {
+	    JspTaglib taglib = tldMapList.get(i);
+
+	    _taglibManager.addLocationMap(taglib.getTaglibUri(),
+					  taglib.getTaglibLocation());
+	  }
+	}
+
+	if (app != null) {
+	  ArrayList<JspTaglib> taglibs = app.getTaglibList();
+	  for (int i = 0; taglibs != null && i < taglibs.size(); i++) {
+	    JspTaglib taglib = taglibs.get(i);
+
+	    _taglibManager.addLocationMap(taglib.getTaglibUri(),
+					  taglib.getTaglibLocation());
+	  }
+	}
+      }
+    }
+
+    return _taglibManager;
   }
 
   /**
@@ -377,6 +416,12 @@ public class JspCompiler implements EnvironmentBean {
     return getCompilerInstance(jspPath, uri, null);
   }
 
+  public void init()
+    throws JspParseException, IOException
+  {
+    getTaglibManager();
+  }
+  
   /**
    * Returns the compilation instance.
    */

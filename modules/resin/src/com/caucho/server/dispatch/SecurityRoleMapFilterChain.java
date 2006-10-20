@@ -93,7 +93,7 @@ public class SecurityRoleMapFilterChain implements FilterChain {
                        ServletResponse response)
     throws ServletException, IOException
   {
-    HashMap<String,String> oldMap = null;
+    // HashMap<String,String> oldMap = null;
     ServletRequest ptr = request;
     CauchoRequest req = null;
 
@@ -113,14 +113,16 @@ public class SecurityRoleMapFilterChain implements FilterChain {
     if (ptr instanceof CauchoRequest) {
       req = (CauchoRequest) ptr;
 
-      oldMap = req.setRoleMap(_roleMap);
+      // oldMap = req.setRoleMap(_roleMap);
     }
     
     try {
       _next.doFilter(request, response);
     } finally {
+      /*
       if (req != null)
 	req.setRoleMap(oldMap);
+      */
     }
   }
 }

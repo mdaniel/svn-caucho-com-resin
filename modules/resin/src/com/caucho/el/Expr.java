@@ -54,14 +54,17 @@ public abstract class Expr extends ValueExpression {
     = Logger.getLogger(Expr.class.getName());
   protected static final L10N L = new L10N(Expr.class);
 
-  private static final Character NULL_CHAR =
-    new Character((char) 0);
+  private static final Character NULL_CHAR
+    = new Character((char) 0);
   
   private static final long DAY = 24L * 3600L * 1000L;
 
   private static final BigDecimal BIG_DECIMAL_ZERO = new BigDecimal("0");
 
   private static final BigInteger BIG_INTEGER_ZERO = new BigInteger("0");
+  
+  private static final HashMap<Class,CoerceType> _coerceMap
+    = new HashMap<Class,CoerceType>();
 
   // lexeme codes
   final static int ADD = 1;
@@ -1176,6 +1179,45 @@ public abstract class Expr extends ValueExpression {
 
     return false;
   }
+  
+  public static Object coerceToType(Object obj, Class<?> targetType)
+    throws ELException
+  {
+    CoerceType type = _coerceMap.get(targetType);
+
+    if (type == null)
+      return obj;
+
+    switch (type) {
+    case BOOLEAN:
+      return Expr.toBoolean(obj, null) ? Boolean.FALSE : Boolean.TRUE;
+    case CHARACTER:
+      return Expr.toCharacter(obj, null);
+    case BYTE:
+      return new Byte((byte) Expr.toLong(obj, null));
+    case SHORT:
+      return new Short((short) Expr.toLong(obj, null));
+    case INTEGER:
+      return new Integer((int) Expr.toLong(obj, null));
+    case LONG:
+      return new Long(Expr.toLong(obj, null));
+    case FLOAT:
+      return new Float((float) Expr.toDouble(obj, null));
+    case DOUBLE:
+      return new Double(Expr.toDouble(obj, null));
+    case STRING:
+      if (obj == null)
+	return "";
+      else
+	return obj.toString();
+    case BIG_DECIMAL:
+      return Expr.toBigDecimal(obj, null);
+    case BIG_INTEGER:
+      return Expr.toBigInteger(obj, null);
+    }
+
+    return null;
+  }
 
   /**
    * Returns an error object
@@ -1230,6 +1272,54 @@ public abstract class Expr extends ValueExpression {
       throw (Error) e;
     else
       throw new ELException(e);
+  }
+
+  private enum CoerceType {
+    BOOLEAN,
+    CHARACTER,
+    STRING,
+    INTEGER,
+    DOUBLE,
+    LONG,
+    FLOAT,
+    SHORT,
+    BYTE,
+    BIG_INTEGER,
+    BIG_DECIMAL,
+    VOID
+  };
+
+  static {
+    _coerceMap.put(boolean.class, CoerceType.BOOLEAN);
+    _coerceMap.put(Boolean.class, CoerceType.BOOLEAN);
+    
+    _coerceMap.put(byte.class, CoerceType.BYTE);
+    _coerceMap.put(Byte.class, CoerceType.BYTE);
+    
+    _coerceMap.put(short.class, CoerceType.SHORT);
+    _coerceMap.put(Short.class, CoerceType.SHORT);
+    
+    _coerceMap.put(int.class, CoerceType.INTEGER);
+    _coerceMap.put(Integer.class, CoerceType.INTEGER);
+    
+    _coerceMap.put(long.class, CoerceType.LONG);
+    _coerceMap.put(Long.class, CoerceType.LONG);
+    
+    _coerceMap.put(float.class, CoerceType.FLOAT);
+    _coerceMap.put(Float.class, CoerceType.FLOAT);
+    
+    _coerceMap.put(double.class, CoerceType.DOUBLE);
+    _coerceMap.put(Double.class, CoerceType.DOUBLE);
+    
+    _coerceMap.put(char.class, CoerceType.CHARACTER);
+    _coerceMap.put(Character.class, CoerceType.CHARACTER);
+    
+    _coerceMap.put(String.class, CoerceType.STRING);
+    
+    _coerceMap.put(BigDecimal.class, CoerceType.BIG_DECIMAL);
+    _coerceMap.put(BigInteger.class, CoerceType.BIG_INTEGER);
+    
+    _coerceMap.put(void.class, CoerceType.VOID);
   }
 
   static {

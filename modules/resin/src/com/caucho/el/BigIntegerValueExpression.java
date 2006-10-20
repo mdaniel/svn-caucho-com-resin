@@ -45,6 +45,17 @@ public class BigIntegerValueExpression extends AbstractValueExpression
     = Logger.getLogger(BigIntegerValueExpression.class.getName());
   protected static final L10N L = new L10N(BigIntegerValueExpression.class);
 
+  private Class _expectedType;
+
+  public BigIntegerValueExpression(Expr expr,
+				   String expressionString,
+				   Class expectedType)
+  {
+    super(expr, expressionString);
+
+    _expectedType = expectedType;
+  }
+
   public BigIntegerValueExpression(Expr expr,
 				String expressionString)
   {
@@ -58,7 +69,10 @@ public class BigIntegerValueExpression extends AbstractValueExpression
 
   public Class<?> getExpectedType()
   {
-    return BigInteger.class;
+    if (_expectedType != null)
+      return _expectedType;
+    else
+      return BigInteger.class;
   }
 
   @Override

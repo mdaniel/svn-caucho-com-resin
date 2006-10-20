@@ -60,6 +60,7 @@ public class JspPropertyGroup {
   private boolean _isELIgnored = false;
   private boolean _isScriptingInvalid = false;
   private boolean _isXml = false;
+  private boolean _isForbidXml = false;
   private ArrayList<String> _includePrelude = new ArrayList<String>();
   private ArrayList<String> _includeCoda = new ArrayList<String>();
 
@@ -205,6 +206,9 @@ public class JspPropertyGroup {
   public void setIsXml(boolean isXml)
   {
     _isXml = isXml;
+
+    if (isXml == false)
+      _isForbidXml = true;
   }
 
   /**
@@ -213,6 +217,14 @@ public class JspPropertyGroup {
   public boolean isXml()
   {
     return _isXml;
+  }
+
+  /**
+   * Return true if the JSP uses XML format.
+   */
+  public boolean isForbidXml()
+  {
+    return _isForbidXml;
   }
 
   /**

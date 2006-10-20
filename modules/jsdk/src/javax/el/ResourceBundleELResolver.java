@@ -58,7 +58,32 @@ public class ResourceBundleELResolver extends ELResolver {
   public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext context,
 							   Object base)
   {
-    return null;
+    if (! (base instanceof ResourceBundle))
+      return null;
+
+    ResourceBundle bundle = (ResourceBundle) base;
+
+    ArrayList<FeatureDescriptor> list = new ArrayList<FeatureDescriptor>();
+
+    Enumeration<String> e = bundle.getKeys();
+    while (e.hasMoreElements()) {
+      String key = e.nextElement();
+
+      FeatureDescriptor desc = new FeatureDescriptor();
+      desc.setName(key);
+      desc.setDisplayName(key);
+      desc.setShortDescription("");
+      desc.setExpert(false);
+      desc.setHidden(false);
+      desc.setPreferred(true);
+
+      desc.setValue(ELResolver.TYPE, String.class);
+      desc.setValue(ELResolver.RESOLVABLE_AT_DESIGN_TIME, Boolean.TRUE);
+
+      list.add(desc);
+    }
+
+    return list.iterator();
   }
 
   @Override
@@ -66,15 +91,10 @@ public class ResourceBundleELResolver extends ELResolver {
 			  Object base,
 			  Object property)
   {
-    if (base == null)
-      return null;
-    else if (base instanceof ResourceBundle) {
-      Object value = getValue(context, base, property);
+    if (base instanceof ResourceBundle) {
+      context.setPropertyResolved(true);
 
-      if (value != null)
-	return value.getClass();
-      else
-	return null;
+      return null;
     }
     else
       return null;
@@ -108,6 +128,12 @@ public class ResourceBundleELResolver extends ELResolver {
 			    Object base,
 			    Object property)
   {
+    if (base instanceof ResourceBundle) {
+      context.setPropertyResolved(true);
+
+      return true;
+    }
+    
     return true;
   }
 
@@ -118,6 +144,8 @@ public class ResourceBundleELResolver extends ELResolver {
 		       Object value)
   {
     if (base instanceof ResourceBundle) {
+      context.setPropertyResolved(true);
+      
       throw new PropertyNotWritableException(String.valueOf(base));
     }
   }

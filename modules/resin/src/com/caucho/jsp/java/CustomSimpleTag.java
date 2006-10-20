@@ -202,6 +202,15 @@ public class CustomSimpleTag extends GenericTag {
     out.printClass(_tag.getTagClass());
     out.println("();");
 
+    if (JspIdConsumer.class.isAssignableFrom(_tag.getTagClass())) {
+      String shortName = className;
+      int p = shortName.lastIndexOf('.');
+      if (p >= 0)
+	shortName = shortName.substring(p + 1);
+
+      out.print(var + ".setJspId(\"" + shortName + "-" + _gen.generateJspId() + "\");");      
+    }
+
     out.println(var + ".setJspContext(pageContext);");
     JspNode parentNode = getParent().getParentTagNode();
     if (parentNode != null) {

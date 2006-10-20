@@ -603,6 +603,14 @@ public abstract class JspNode {
   }
 
   /**
+   * generates prologue data.
+   */
+  public void generatePrologueDeclare(JspJavaWriter out)
+    throws Exception
+  {
+  }
+
+  /**
    * generates data for prologue children.
    */
   public void generatePrologueChildren(JspJavaWriter out)
@@ -975,7 +983,6 @@ public abstract class JspNode {
 				TagAttributeInfo attrInfo)
     throws Exception
   {
-    System.out.println("GPV: " + value + " " + rtexpr);
     boolean isEmpty = value == null || value.equals("");
     if (isEmpty)
       value = "0";
@@ -1010,8 +1017,14 @@ public abstract class JspNode {
       else if (rtexpr && hasRuntimeAttribute(value)) {
         return getRuntimeAttribute(value);
       }
-      else if (rtexpr && hasELAttribute(value)) { // jsp/0138
-        return generateELValue(type, value);
+      else if (hasELAttribute(value)) { // jsp/0138
+	if (rtexpr)
+	  return generateELValue(type, value);
+	else {
+	  // jsp/184v
+	  throw error(L.l("EL expression '{0}' is only allowed for a runtime expression value.",
+			  value));
+	}
       }
       else if (! rtexpr
 	       && hasDeferredAttribute(value)

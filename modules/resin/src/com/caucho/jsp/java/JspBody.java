@@ -180,8 +180,8 @@ public class JspBody extends JspFragmentNode {
     super.generatePrologueChildren(out);
     
     JspNode parent = getParent();
-    
-    if (parent instanceof CustomSimpleTag) {
+
+    if (parent instanceof GenericTag) {
       GenericTag tag = (GenericTag) parent;
 
       tag.printVarDeclaration(out, VariableInfo.AT_BEGIN);

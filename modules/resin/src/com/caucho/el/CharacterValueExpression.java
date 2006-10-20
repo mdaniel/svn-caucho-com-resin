@@ -44,6 +44,17 @@ public class CharacterValueExpression extends AbstractValueExpression
     = Logger.getLogger(CharacterValueExpression.class.getName());
   protected static final L10N L = new L10N(CharacterValueExpression.class);
 
+  private Class _expectedType;
+
+  public CharacterValueExpression(Expr expr,
+				  String expressionString,
+				  Class expectedType)
+  {
+    super(expr, expressionString);
+
+    _expectedType = expectedType;
+  }
+
   public CharacterValueExpression(Expr expr,
 				String expressionString)
   {
@@ -57,7 +68,10 @@ public class CharacterValueExpression extends AbstractValueExpression
 
   public Class<?> getExpectedType()
   {
-    return Character.class;
+    if (_expectedType != null)
+      return _expectedType;
+    else
+      return Character.class;
   }
 
   @Override

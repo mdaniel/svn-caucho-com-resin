@@ -46,6 +46,7 @@ import com.caucho.log.Log;
 import com.caucho.xml.QName;
 import com.caucho.xml.XmlChar;
 
+import com.caucho.config.types.*;
 import com.caucho.server.http.*;
 import com.caucho.java.*;
 import com.caucho.jsp.*;
@@ -732,6 +733,29 @@ public class JavaTagGenerator extends JavaJspGenerator {
         out.println("attr.setType(" + type.getName() + ".class);");
       out.println("attr.setRtexprvalue(" + attr.getRtexprvalue() + ");");
       out.println("attr.setRequired(" + attr.getRequired() + ");");
+
+      if (attr.getDeferredValue() != null) {
+	out.println("attr.setDeferredValue(new com.caucho.jsp.cfg.TldAttribute.DeferredValue());");
+
+	if (attr.getDeferredValue().getType() != null) {
+	  out.print("attr.getDeferredValue().setType(\"");
+	  out.printJavaString(attr.getDeferredValue().getType());
+	  out.println("\");");
+	}
+      }
+
+      if (attr.getDeferredMethod() != null) {
+	out.println("attr.setDeferredMethod(new com.caucho.jsp.cfg.TldAttribute.DeferredMethod());");
+
+	Signature sig = attr.getDeferredMethod().getMethodSignature();
+	
+	if (sig != null) {
+	  out.print("attr.getDeferredMethod().setMethodSignature(");
+	  out.print("new com.caucho.config.types.Signature(\"");
+	  out.printJavaString(sig.getSignature());
+	  out.println("\"));");
+	}
+      }
 
       out.println("tag.addAttribute(attr);");
     }

@@ -166,7 +166,6 @@ public abstract class AbstractHttpRequest
   private final Form _formParser = new Form();
   private final HashMapImpl<String,String[]> _form = new HashMapImpl<String,String[]>();
   private HashMapImpl<String,String[]> _filledForm;
-  private HashMap<String,String> _securityRoleRefMap;
   
   private final HashMapImpl<String,Object> _attributes = new HashMapImpl<String,Object>();
 
@@ -1676,18 +1675,7 @@ public abstract class AbstractHttpRequest
     if (_session != null)
       _session.logout();
   }
-
-  /**
-   * Sets the security role ref map.
-   */
-  public HashMap<String,String> setRoleMap(HashMap<String,String> map)
-  {
-    HashMap<String,String> oldMap = _securityRoleRefMap;
-    
-    _securityRoleRefMap = map;
-    
-    return oldMap;
-  }
+  
   /**
    * Returns true if the user represented by the current request
    * plays the named role.
@@ -1697,11 +1685,13 @@ public abstract class AbstractHttpRequest
    */
   public boolean isUserInRole(String role)
   {
-    if (_securityRoleRefMap != null) {
-      String mapRole = _securityRoleRefMap.get(role);
+    HashMap<String,String> roleMap = _invocation.getSecurityRoleMap();
+    
+    if (roleMap != null) {
+      String linkRole = roleMap.get(role);
       
-      if (mapRole != null)
-	role = mapRole;
+      if (linkRole != null)
+	role = linkRole;
     }
     
     WebApp app = getWebApp();

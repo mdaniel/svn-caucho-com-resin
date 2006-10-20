@@ -44,6 +44,17 @@ public class IntegerValueExpression extends AbstractValueExpression
     = Logger.getLogger(IntegerValueExpression.class.getName());
   protected static final L10N L = new L10N(IntegerValueExpression.class);
 
+  private Class _expectedType;
+
+  public IntegerValueExpression(Expr expr,
+				String expressionString,
+				Class expectedType)
+  {
+    super(expr, expressionString);
+
+    _expectedType = expectedType;
+  }
+
   public IntegerValueExpression(Expr expr,
 				String expressionString)
   {
@@ -57,7 +68,10 @@ public class IntegerValueExpression extends AbstractValueExpression
 
   public Class<?> getExpectedType()
   {
-    return Integer.class;
+    if (_expectedType != null)
+      return _expectedType;
+    else
+      return Integer.class;
   }
 
   @Override

@@ -46,16 +46,23 @@ public class PageContextELResolver extends AbstractVariableResolver {
 
   private final ELResolver []_customResolvers;
   
+  private final ImplicitObjectELResolver _implicitResolver
+    = new ImplicitObjectELResolver();
+  private final ScopedAttributeELResolver _attrResolver
+    = new ScopedAttributeELResolver();
+  
   private final MapELResolver _mapResolver = new MapELResolver();
   private final ListELResolver _listResolver = new ListELResolver();
   private final ArrayELResolver _arrayResolver = new ArrayELResolver();
+  private final ResourceBundleELResolver _bundleResolver
+    = new ResourceBundleELResolver();
   private final BeanELResolver _beanResolver = new BeanELResolver();
 
   public PageContextELResolver(PageContextImpl pageContext,
 			       ELResolver []customResolvers)
   {
     _customResolvers = customResolvers;
-    
+
     _pageContext = pageContext;
   }
 
@@ -70,16 +77,20 @@ public class PageContextELResolver extends AbstractVariableResolver {
   {
     Class common = null;
 
-    common = common(common, _mapResolver.getCommonPropertyType(env, base));
-    common = common(common, _listResolver.getCommonPropertyType(env, base));
-    common = common(common, _arrayResolver.getCommonPropertyType(env, base));
-    common = common(common, _beanResolver.getCommonPropertyType(env, base));
+    if (base == null)
+      common = String.class;
 
     for (int i = 0; i < _customResolvers.length; i++) {
       common = common(common,
 		      _customResolvers[i].getCommonPropertyType(env, base));
     }
-    
+
+    common = common(common, _mapResolver.getCommonPropertyType(env, base));
+    common = common(common, _listResolver.getCommonPropertyType(env, base));
+    common = common(common, _arrayResolver.getCommonPropertyType(env, base));
+    common = common(common, _beanResolver.getCommonPropertyType(env, base));
+    common = common(common, _bundleResolver.getCommonPropertyType(env, base));
+
     return common;
   }
 
@@ -95,6 +106,44 @@ public class PageContextELResolver extends AbstractVariableResolver {
       return b;
     else // XXX:
       return Object.class;
+  }
+
+  @Override
+  public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext env,
+							   Object base)
+  {
+    ArrayList<FeatureDescriptor> descriptors
+      = new ArrayList<FeatureDescriptor>();
+
+    for (int i = 0; i < _customResolvers.length; i++) {
+      addDescriptors(descriptors,
+		     _customResolvers[i].getFeatureDescriptors(env, base));
+    }
+
+    addDescriptors(descriptors, _mapResolver.getFeatureDescriptors(env, base));
+    addDescriptors(descriptors,
+		   _beanResolver.getFeatureDescriptors(env, base));
+    addDescriptors(descriptors,
+		   _bundleResolver.getFeatureDescriptors(env, base));
+    addDescriptors(descriptors,
+		   _implicitResolver.getFeatureDescriptors(env, base));
+    addDescriptors(descriptors,
+		   _attrResolver.getFeatureDescriptors(env, base));
+
+    return descriptors.iterator();
+  }
+
+  private void addDescriptors(ArrayList<FeatureDescriptor> descriptors,
+			      Iterator<FeatureDescriptor> iter)
+  {
+    if (iter == null)
+      return;
+
+    while (iter.hasNext()) {
+      FeatureDescriptor desc = iter.next();
+
+      descriptors.add(desc);
+    }
   }
   
   @Override
@@ -126,6 +175,23 @@ public class PageContextELResolver extends AbstractVariableResolver {
     }
     else
       return null;
+  }
+  
+  @Override
+  public boolean isReadOnly(ELContext env, Object base, Object property)
+  {
+    env.setPropertyResolved(false);
+
+    for (int i = 0; i < _customResolvers.length; i++) {
+      boolean value = _customResolvers[i].isReadOnly(env, base, property);
+
+      if (env.isPropertyResolved())
+	return value;
+    }
+
+    env.setPropertyResolved(true);
+
+    return false;
   }
     
   public void setValue(ELContext env,

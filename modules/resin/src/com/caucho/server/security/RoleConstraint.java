@@ -79,14 +79,14 @@ public class RoleConstraint extends AbstractConstraint {
       }
     }
     
-    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, null);
+    response.sendError(HttpServletResponse.SC_FORBIDDEN, null);
 
     return false;
   }
 
   public String toString()
   {
-    CharBuffer cb = CharBuffer.allocate();
+    CharBuffer cb = new CharBuffer();
 
     cb.append("RoleConstraint[");
     for (int i = 0; i < _roles.length; i++) {

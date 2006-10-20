@@ -44,6 +44,17 @@ public class ShortValueExpression extends AbstractValueExpression
     = Logger.getLogger(ShortValueExpression.class.getName());
   protected static final L10N L = new L10N(ShortValueExpression.class);
 
+  private Class _expectedType;
+
+  public ShortValueExpression(Expr expr,
+			      String expressionString,
+			      Class expectedType)
+  {
+    super(expr, expressionString);
+
+    _expectedType = expectedType;
+  }
+
   public ShortValueExpression(Expr expr,
 				String expressionString)
   {
@@ -57,7 +68,10 @@ public class ShortValueExpression extends AbstractValueExpression
 
   public Class<?> getExpectedType()
   {
-    return Short.class;
+    if (_expectedType != null)
+      return _expectedType;
+    else
+      return Short.class;
   }
 
   @Override

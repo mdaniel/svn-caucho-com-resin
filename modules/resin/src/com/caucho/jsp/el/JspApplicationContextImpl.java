@@ -112,6 +112,9 @@ public class JspApplicationContextImpl implements JspApplicationContext
    */
   public void addELResolver(ELResolver resolver)
   {
+    if (_hasRequest)
+      throw new IllegalStateException(L.l("Can't add ELResolver after starting request."));
+    
     ELResolver []resolverArray = new ELResolver[_resolverArray.length + 1];
     System.arraycopy(_resolverArray, 0,
 		     resolverArray, 0,

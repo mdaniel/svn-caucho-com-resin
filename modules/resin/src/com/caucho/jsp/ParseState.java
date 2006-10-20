@@ -82,6 +82,7 @@ public class ParseState {
 
   private boolean _isTag = false;
   private boolean _isXml = false;
+  private boolean _isForbidXml = false;
 
   private int _buffer = 8192;
   private boolean _isBufferSet = false;
@@ -378,10 +379,12 @@ public class ParseState {
   public void setCharEncoding(String charEncoding)
     throws JspParseException
   {
+    /*
     if (_charEncoding != null &&
 	! _charEncoding.equalsIgnoreCase(charEncoding))
       throw new JspParseException(L.l("Cannot change character encoding to '{0}' (old value '{1}').  The character encoding may only be set once.",
 				      charEncoding, _charEncoding));
+    */
     
     _charEncoding = charEncoding;
   }
@@ -485,6 +488,25 @@ public class ParseState {
   public void setXml(boolean isXml)
   {
     _isXml = isXml;
+  }
+
+  /**
+   * Returns true if parsing forbids XML
+   */
+  public boolean isForbidXml()
+  {
+    return _isForbidXml;
+  }
+
+  /**
+   * Set if parsing forbids xml
+   */
+  public void setForbidXml(boolean isForbidXml)
+  {
+    _isForbidXml = isForbidXml;
+
+    if (isForbidXml)
+      Thread.dumpStack();
   }
 
   /**

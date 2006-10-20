@@ -144,4 +144,9 @@ abstract public class JspGenerator {
    */
   abstract protected void generate(Path path, String className)
     throws Exception;
+
+  public String getSourceLines(Path source, int errorLine)
+  {
+    return "";
+  }
 }

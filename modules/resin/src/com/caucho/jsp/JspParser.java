@@ -123,6 +123,8 @@ public class JspParser {
   private ArrayList<String> _codaList = new ArrayList<String>();
   
   private ArrayList<Include> _includes = new ArrayList<Include>();
+
+  private HashSet<String> _prefixes = new HashSet<String>();
   
   private Path _jspPath;
   private ReadStream _stream;
@@ -492,7 +494,7 @@ public class JspParser {
             else if (ch == '-' && (ch = read()) == '-')
               parseXmlComment();
             else
-              throw error(L.l("`{0}' was not expected after `<!'.  In the XML syntax, only <!-- ... --> and <![CDATA[ ... ]> are legal.  You can use `&amp;!' to escape `<!'.",
+              throw error(L.l("'{0}' was not expected after '<!'.  In the XML syntax, only <!-- ... --> and <![CDATA[ ... ]> are legal.  You can use '&amp;!' to escape '<!'.",
                               badChar(ch)));
 
             ch = read();
@@ -514,10 +516,14 @@ public class JspParser {
 	    }
 
 	    if (_isTop && name.equals("jsp:root")) {
+	      if (_parseState.isForbidXml())
+		throw error(L.l("jsp:root must be in a JSP (XML) document, not a plain JSP."));
+	      
               _text.clear();
               _isXml = true;
 	      _parseState.setELIgnoredDefault(false);
 	      _parseState.setXml(true);
+
             }
             _isTop = false;
 	    parseOpenTag(name, ch, tagCode == TAG_UNKNOWN);
@@ -610,7 +616,7 @@ public class JspParser {
 
     /* XXX: end document
     if (! _activeNode.getNodeName().equals("jsp:root"))
-      throw error(L.l("`</{0}>' expected at end of file.  For XML, the top-level tag must have a matching closing tag.",
+      throw error(L.l("'</{0}>' expected at end of file.  For XML, the top-level tag must have a matching closing tag.",
                       activeNode.getNodeName()));
     */
   }
@@ -665,11 +671,11 @@ public class JspParser {
     String name = _tag.toString();
 
     if (! name.equals("CDATA"))
-      throw error(L.l("Expected <![CDATA[ at <![`{0}'.", name,
+      throw error(L.l("Expected <![CDATA[ at <!['{0}'.", name,
                       "XML only recognizes the <![CDATA directive."));
 
     if (ch != '[')
-      throw error(L.l("Expected `[' at `{0}'.  The XML CDATA syntax is <![CDATA[...]]>.",
+      throw error(L.l("Expected '[' at '{0}'.  The XML CDATA syntax is <![CDATA[...]]>.",
                       String.valueOf(ch)));
 
     String filename = _filename;
@@ -826,7 +832,7 @@ public class JspParser {
       directive = _tag.toString();
     }
     else
-      throw error(L.l("Expected jsp directive name at `{0}'.  JSP directive syntax is <%@ name attr1='value1' ... %>",
+      throw error(L.l("Expected jsp directive name at '{0}'.  JSP directive syntax is <%@ name attr1='value1' ... %>",
                       badChar(ch)));
 
     QName qname;
@@ -846,7 +852,7 @@ public class JspParser {
     else if (directive.equals("tag"))
       qname = JSP_DIRECTIVE_TAG;
     else
-      throw error(L.l("`{0}' is an unknown jsp directive.  Only <%@ page ... %>, <%@ include ... %>, <%@ taglib ... %>, and <%@ cache ... %> are known.", directive));
+      throw error(L.l("'{0}' is an unknown jsp directive.  Only <%@ page ... %>, <%@ include ... %>, <%@ taglib ... %>, and <%@ cache ... %> are known.", directive));
 
     unread(ch);
     
@@ -858,7 +864,7 @@ public class JspParser {
     ch = skipWhitespace(read());
 
     if (ch != '%' || (ch = read()) != '>') {
-      throw error(L.l("expected `%>' at {0}.  JSP directive syntax is `<%@ name attr1='value1' ... %>'.  (Started at line {1})",
+      throw error(L.l("expected '%>' at {0}.  JSP directive syntax is '<%@ name attr1='value1' ... %>'.  (Started at line {1})",
                       badChar(ch), _lineStart));
     }
 
@@ -888,7 +894,7 @@ public class JspParser {
         } catch (Exception e) {
 	  log.log(Level.FINER, e.toString(), e);
 	  
-          throw error(L.l("unknown content encoding `{0}'", contentEncoding),
+          throw error(L.l("unknown content encoding '{0}'", contentEncoding),
 		      e);
         }
       }
@@ -981,14 +987,14 @@ public class JspParser {
 
     if (ch == '/') {
       if ((ch = read()) != '>')
-	throw error(L.l("expected `/>' at `{0}' (for tag `<{1}>' at line {2}).  The XML empty tag syntax is: <tag attr1='value1'/>",
+	throw error(L.l("expected '/>' at '{0}' (for tag '<{1}>' at line {2}).  The XML empty tag syntax is: <tag attr1='value1'/>",
                         badChar(ch), name, String.valueOf(_lineStart)));
       
       setLocation();
       _jspBuilder.endElement(qname.getName());
     }
     else if (ch != '>')
-      throw error(L.l("expected `>' at `{0}' (for tag `<{1}>' at line {2}).  The XML tag syntax is: <tag attr1='value1'>",
+      throw error(L.l("expected '>' at '{0}' (for tag '<{1}>' at line {2}).  The XML tag syntax is: <tag attr1='value1'>",
                       badChar(ch), name, String.valueOf(_lineStart)));
     // If tagdependent and not XML mode, then read the raw text.
     else if ("tagdependent".equals(node.getBodyContent()) && ! _isXml) {
@@ -1002,7 +1008,7 @@ public class JspParser {
 	  return;
         }
       }
-      throw error(L.l("expected `{0}' at end of file (for tag <{1}> at line {2}).  Tags with `tagdependent' content need close tags.",
+      throw error(L.l("expected '{0}' at end of file (for tag <{1}> at line {2}).  Tags with 'tagdependent' content need close tags.",
                       tail, String.valueOf(_lineStart)));
     }
   }
@@ -1017,6 +1023,8 @@ public class JspParser {
     if (p > 0) {
       String prefix = name.substring(0, p);
       String url = Namespace.find(_namespaces, prefix);
+
+      _prefixes.add(prefix);
 
       if (url != null)
         return new QName(prefix, name.substring(p + 1), url);
@@ -1119,11 +1127,11 @@ public class JspParser {
       if (XmlChar.isNameChar(ch)) {
         ch = readName(ch);
 
-        throw error(L.l("`{0}' attribute value must be quoted at `{1}'.  JSP attribute syntax is either attr=\"value\" or attr='value'.",
+        throw error(L.l("'{0}' attribute value must be quoted at '{1}'.  JSP attribute syntax is either attr=\"value\" or attr='value'.",
                         attribute, _tag));
       }
       else
-        throw error(L.l("`{0}' attribute value must be quoted at `{1}'.  JSP attribute syntax is either attr=\"value\" or attr='value'.",
+        throw error(L.l("'{0}' attribute value must be quoted at '{1}'.  JSP attribute syntax is either attr=\"value\" or attr='value'.",
                         attribute, badChar(ch)));
     }
 
@@ -1243,7 +1251,7 @@ public class JspParser {
         value = 10 * value + ch - '0';
 
       if (ch != ';')
-        throw error(L.l("expected ';' at `{0}' in character entity.  The XML character entities syntax is &#nn;",
+        throw error(L.l("expected ';' at '{0}' in character entity.  The XML character entities syntax is &#nn;",
                         badChar(ch)));
 
       return (char) value;
@@ -1255,7 +1263,7 @@ public class JspParser {
 
     if (ch != ';') {
       
-      log.warning(L.l("expected ';' at `{0}' in entity `&{1}'.  The XML entity syntax is &name;",
+      log.warning(L.l("expected ';' at '{0}' in entity '&{1}'.  The XML entity syntax is &name;",
                       badChar(ch), cb));
     }
 
@@ -1271,7 +1279,7 @@ public class JspParser {
     else if (entity.equals("quot"))
       return '"';
     else
-      throw error(L.l("unknown entity `&{0};'.  XML only recognizes the special entities &lt;, &gt;, &amp;, &apos; and &quot;", entity));
+      throw error(L.l("unknown entity '&{0};'.  XML only recognizes the special entities &lt;, &gt;, &amp;, &apos; and &quot;", entity));
   }
 
   private int parseCloseTag()
@@ -1294,7 +1302,7 @@ public class JspParser {
 
     ch = skipWhitespace(ch);
     if (ch != '>')
-      throw error(L.l("expected `>' at {0}.  The XML close tag syntax is </name>.", badChar(ch)));
+      throw error(L.l("expected '>' at {0}.  The XML close tag syntax is </name>.", badChar(ch)));
 
     JspNode node = _jspBuilder.getCurrentNode();
     String nodeName = node.getTagName();
@@ -1327,8 +1335,12 @@ public class JspParser {
   {
     int p = keys.indexOf(PREFIX);
     if (p < 0)
-      throw error(L.l("The taglib directive requires a `prefix' attribute.  `prefix' is the XML prefix for all tags in the taglib."));
+      throw error(L.l("The taglib directive requires a 'prefix' attribute.  'prefix' is the XML prefix for all tags in the taglib."));
     String prefix = values.get(p);
+
+    if (_prefixes.contains(prefix))
+      throw error(L.l("The taglib prefix '{0}' must be defined before any matching prefixes are used.",
+		      prefix));
 
     String uri = null;
     p = keys.indexOf(URI);
@@ -1380,7 +1392,7 @@ public class JspParser {
     }
 
     if (colon > 0 && colon < slash)
-      throw error(L.l("Unknown taglib `{0}'.  Taglibs specified with an absolute URI must either be:\n1) specified in the web.xml\n2) defined in a jar's .tld in META-INF\n3) defined in a .tld in WEB-INF\n4) predefined by Resin",
+      throw error(L.l("Unknown taglib '{0}'.  Taglibs specified with an absolute URI must either be:\n1) specified in the web.xml\n2) defined in a jar's .tld in META-INF\n3) defined in a .tld in WEB-INF\n4) predefined by Resin",
                       uri));
   }
 
@@ -1410,7 +1422,7 @@ public class JspParser {
   {
     int p = keys.indexOf("file");
     if (p < 0)
-      throw error(L.l("The include directive requires a `file' attribute."));
+      throw error(L.l("The include directive requires a 'file' attribute."));
     String file = (String) values.get(p);
 
     pushInclude(file);
@@ -1420,7 +1432,7 @@ public class JspParser {
     throws IOException, JspParseException
   {
     if (value.equals(""))
-      throw error("include directive needs `file' attribute. Use either <%@ include file='myfile.jsp' %> or <jsp:directive.include file='myfile.jsp'/>");
+      throw error("include directive needs 'file' attribute. Use either <%@ include file='myfile.jsp' %> or <jsp:directive.include file='myfile.jsp'/>");
 
     Path include;
     if (value.length() > 0 && value.charAt(0) == '/')
@@ -1442,11 +1454,11 @@ public class JspParser {
     newUrlPwd = newUrl.substring(0, p + 1);
     
     if (_jspPath != null && _jspPath.equals(include))
-      throw error(L.l("circular include of `{0}' forbidden.  A JSP file may not include itself.", include));
+      throw error(L.l("circular include of '{0}' forbidden.  A JSP file may not include itself.", include));
     for (int i = 0; i < _includes.size(); i++) {
       Include inc = _includes.get(i);
       if (inc._stream.getPath().equals(include))
-	throw error(L.l("circular include of `{0}'.  A JSP file may not include itself.", include));
+	throw error(L.l("circular include of '{0}'.  A JSP file may not include itself.", include));
     }
 
     try {
@@ -1455,10 +1467,10 @@ public class JspParser {
       log.log(Level.WARNING, e.toString(), e);
 
       if (include.exists())
-        throw error(L.l("can't open include of `{0}'.  `{1}' exists but it's not readable.",
+        throw error(L.l("can't open include of '{0}'.  '{1}' exists but it's not readable.",
                         value, include.getNativePath()));
       else
-        throw error(L.l("can't open include of `{0}'.  `{1}' does not exist.",
+        throw error(L.l("can't open include of '{0}'.  '{1}' does not exist.",
                         value, include.getNativePath()));
     }
   }
@@ -1594,6 +1606,8 @@ public class JspParser {
 
     String prefix = name.substring(0, p);
     String local = name.substring(p + 1);
+    
+    _prefixes.add(prefix);
 
     String url = Namespace.find(_namespaces, prefix);
 
@@ -1744,8 +1758,10 @@ public class JspParser {
    */
   public JspParseException error(String message)
   {
+    JspGenerator gen = _jspBuilder.getGenerator();
+    
     if (_lineMap == null)
-      return new JspLineParseException(_filename + ":" + _line + ": "  + message);
+      return new JspLineParseException(_filename + ":" + _line + ": "  + message + gen.getSourceLines(_jspPath, _line));
     else {
       LineMap.Line line = _lineMap.getLine(_line);
       
@@ -1811,9 +1827,9 @@ public class JspParser {
     else if (ch == '\n' || ch == '\r')
       return "end of line";
     else if (ch >= 0x20 && ch <= 0x7f)
-      return "`" + (char) ch + "'";
+      return "'" + (char) ch + "'";
     else
-      return "`" + (char) ch + "' (\\u" + hex(ch) + ")";
+      return "'" + (char) ch + "' (\\u" + hex(ch) + ")";
   }
 
   private String hex(int value)
