@@ -29,22 +29,30 @@
 
 package com.caucho.relaxng;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import org.xml.sax.*;
-import org.xml.sax.helpers.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
+import com.caucho.log.Log;
+import com.caucho.relaxng.program.EmptyItem;
+import com.caucho.relaxng.program.Item;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
 import com.caucho.xml.QName;
 
-import com.caucho.log.Log;
+import org.xml.sax.Attributes;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.Locator;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.helpers.DefaultHandler;
 
-import com.caucho.relaxng.program.Item;
-import com.caucho.relaxng.program.EmptyItem;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * JARV verifier implementation
@@ -53,7 +61,10 @@ public class VerifierHandlerImpl extends DefaultHandler
   implements VerifierHandler {
   private static final L10N L = new L10N(VerifierHandlerImpl.class);
   protected static final Logger log = Log.open(VerifierHandlerImpl.class);
-  
+
+  // very verbose logging
+  private static final boolean _isDebug = false;
+
   private SchemaImpl _schema;
   private VerifierImpl _verifier;
   private boolean _hasProgram;
@@ -141,7 +152,7 @@ public class VerifierHandlerImpl extends DefaultHandler
 
       _eltLocation = getLocation();
 
-      _isLogFinest = log.isLoggable(Level.FINEST);
+      _isLogFinest = _isDebug && log.isLoggable(Level.FINEST);
       _hasText = false;
       _text.clear();
     } catch (Exception e) {
