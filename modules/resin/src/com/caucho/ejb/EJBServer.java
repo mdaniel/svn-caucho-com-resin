@@ -44,6 +44,8 @@ import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.loader.Loader;
+import com.caucho.loader.SimpleLoader;
 import com.caucho.log.Log;
 import com.caucho.naming.AbstractModel;
 import com.caucho.naming.ContextImpl;
@@ -63,6 +65,7 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -73,46 +76,46 @@ import java.util.logging.Logger;
  */
 public class EJBServer
   implements ObjectProxy, EnvironmentListener, EJBServerInterface,
-	     EnvironmentBean {
+             EnvironmentBean {
   static final L10N L = new L10N(EJBServer.class);
   protected static final Logger log = Log.open(EJBServer.class);
-  
+
   private static EnvironmentLocal<EJBServer> _localServer
     = new EnvironmentLocal<EJBServer>("caucho.ejb-server");
-  
+
   protected static EnvironmentLocal<String> _localURL =
     new EnvironmentLocal<String>("caucho.url");
 
   private String _localJndiName = "java:comp/env/cmp";
   private String _remoteJndiName = "java:comp/env/ejb";
-  
+
   private String _entityManagerJndiName = "java:comp/EntityManager";
 
   private EjbServerManager _ejbManager;
-  
+
   private ArrayList<Path> _descriptors;
   private ArrayList<Path> _ejbJars = new ArrayList<Path>();
 
   private EntityIntrospector _entityIntrospector;
 
   private MergePath _mergePath;
-  
+
   private String _urlPrefix;
-  
+
   private ArrayList<FileSetType> _configFileSetList =
     new ArrayList<FileSetType>();
 
   private DataSource _dataSource;
   private boolean _createDatabaseSchema;
   private boolean _validateDatabaseSchema = true;
-  
+
   private boolean _entityLoadLazyOnTransaction = true;
 
   private String _resinIsolation;
   private String _jdbcIsolation;
 
   private ConnectionFactory _jmsConnectionFactory;
-  
+
   private int _entityCacheSize = 32 * 1024;
   private long _entityCacheTimeout = 5000;
 
@@ -146,19 +149,69 @@ public class EJBServer
     _mergePath.addMergePath(Vfs.lookup());
     _mergePath.addClassPath();
 
+    // XXX: to be reviewed. Workaround to add JARs
+    // to look up the persistence.xml and find the
+    // persistence root.
+    // See com.caucho.amber.manager.PersistenceEnvironmentListener
+    try {
+      EnvironmentClassLoader envLoader = getClassLoader();
+
+      ArrayList<Loader> loaders = envLoader.getLoaders();
+
+      if (loaders.size() > 0) {
+
+        Loader loader = loaders.get(0);
+
+        if (loader instanceof SimpleLoader) {
+          // Gets the root dir for the deployed ear file
+          //
+          // /tmp/caucho/tck/deploy/<ear_dir>/META-INF/work/ejb
+          // /tmp/caucho/tck/deploy/<ear_dir>/*.jar
+
+          Path path = ((SimpleLoader) loader).getPath().lookup("../../..");
+
+          addJarUrls(envLoader, path);
+        }
+      }
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+
     // _entityIntrospector = new EntityIntrospector(_ejbManager);
 
     Environment.addChildEnvironmentListener(new PersistenceEnvironmentListener());
+  }
+
+  public void addJarUrls(EnvironmentClassLoader loader, Path root)
+    throws java.io.IOException
+  {
+    Iterator<String> it = root.iterator();
+
+    while (it.hasNext()) {
+
+      String s = it.next();
+
+      Path path = root.lookup(s);
+
+      if (path.isDirectory()) {
+        addJarUrls(loader, path);
+      }
+      else if (s.endsWith(".jar")) {
+        JarPath jarPath = JarPath.create(path);
+
+        loader.addURL(jarPath);
+      }
+    }
   }
 
   /**
    * Returns the local EJB server.
    */
   /*
-  public static EnvServerManager getLocalManager()
-  {
+    public static EnvServerManager getLocalManager()
+    {
     return EnvServerManager.getLocal();
-  }
+    }
   */
 
   /**
@@ -175,7 +228,7 @@ public class EJBServer
   public void setEnvironmentClassLoader(EnvironmentClassLoader env)
   {
   }
-    
+
   /**
    * Sets the JNDI name.
    */
@@ -265,14 +318,14 @@ public class EJBServer
     FileSetType fileSet = new FileSetType();
 
     fileSet.setDir(dir);
-    
+
     fileSet.addInclude(new PathPatternType("**/*.ejb"));
 
     Path pwd = Vfs.lookup();
 
     String dirPath = dir.getPath();
     String pwdPath = pwd.getPath();
-    
+
     if (dirPath.startsWith(pwdPath)) {
       String prefix = dirPath.substring(pwdPath.length());
 
@@ -303,8 +356,8 @@ public class EJBServer
   {
     if (! ejbJar.canRead() || ! ejbJar.isFile())
       throw new ConfigException(L.l("<ejb-jar> {0} must refer to a valid jar file.",
-				    ejbJar.getURL()));
-    
+                                    ejbJar.getURL()));
+
     _ejbJars.add(ejbJar);
   }
 
@@ -407,7 +460,7 @@ public class EJBServer
 
     if (! (obj instanceof ConnectionFactory))
       throw new ConfigException(L.l("`{0}' must be a JMS ConnectionFactory.", obj));
-		      
+
     _jmsConnectionFactory = (ConnectionFactory) obj;
   }
 
@@ -565,27 +618,27 @@ public class EJBServer
    * Initialize the container.
    */
   @PostConstruct
-  public void init()
+    public void init()
     throws Exception
   {
     /*
-    try {
+      try {
       if (_localJndiName != null)
-	Jndi.rebindDeepShort(_localJndiName, this);
-    } catch (NamingException e) {
+      Jndi.rebindDeepShort(_localJndiName, this);
+      } catch (NamingException e) {
       log.log(Level.FINER, e.toString(), e);
-    }
+      }
     */
 
     if (_localServer.getLevel() == null ||
-	"java:comp/env/cmp".equals(_localJndiName)) {
+        "java:comp/env/cmp".equals(_localJndiName)) {
       _localServer.set(this);
     }
 
     try {
       if (_entityManagerJndiName != null) {
-	Jndi.rebindDeepShort(_entityManagerJndiName,
-			     _ejbManager.getAmberManager().getEntityManager());
+        Jndi.rebindDeepShort(_entityManagerJndiName,
+                             _ejbManager.getAmberManager().getEntityManager());
       }
     } catch (NamingException e) {
       log.log(Level.FINER, e.toString(), e);
@@ -599,7 +652,7 @@ public class EJBServer
 
     manualInit();
   }
-  
+
   /**
    * Initialize the container.
    */
@@ -612,9 +665,9 @@ public class EJBServer
       ProtocolContainer protocol = new ProtocolContainer();
       if (_urlPrefix != null)
         protocol.setURLPrefix(_urlPrefix);
-      
+
       protocol.setServerManager(_ejbManager); // .getEnvServerManager());
-    
+
       _ejbManager.getProtocolManager().setProtocolContainer(protocol);
       _ejbManager.getProtocolManager().setLocalJndiName(_localJndiName);
       _ejbManager.getProtocolManager().setRemoteJndiName(_remoteJndiName);
@@ -641,7 +694,7 @@ public class EJBServer
       else {
         throw new ConfigException(L.l("resin-isolation may only be `row-locking' or `database' in EJBServer, not `{0}'", _resinIsolation));
       }
-    
+
       _ejbManager.setResinIsolation(resinIsolation);
 
       int jdbcIsolation = -1;
@@ -661,7 +714,7 @@ public class EJBServer
       else
         throw new ConfigException(L.l("unknown value for jdbc-isolation at `{0}'",
                                       _jdbcIsolation));
-    
+
       _ejbManager.setJDBCIsolation(jdbcIsolation);
 
       // _entityIntrospector.init();
@@ -671,11 +724,11 @@ public class EJBServer
       _ejbManager.init();
 
       /*
-      String name = _jndiName;
-      if (! name.startsWith("java:"))
+        String name = _jndiName;
+        if (! name.startsWith("java:"))
         name = "java:comp/env/" + name;
 
-	Jndi.bindDeep(name, this);
+        Jndi.bindDeep(name, this);
       */
 
       Environment.addEnvironmentListener(this);
@@ -696,7 +749,7 @@ public class EJBServer
     else
       return null;
   }
-  
+
   /**
    * Initialize all EJBs for any *.ejb or ejb-jar.xml in the WEB-INF or
    * in a META-INF in the classpath.
@@ -706,7 +759,7 @@ public class EJBServer
   {
     manualInit();
   }
-  
+
   /**
    * Initialize all EJBs for any *.ejb or ejb-jar.xml in the WEB-INF or
    * in a META-INF in the classpath.
@@ -715,7 +768,7 @@ public class EJBServer
     throws Exception
   {
     addEJBJars();
-    
+
     if (_descriptors != null) {
       for (int i = 0; i < _descriptors.size(); i++) {
         Path path = _descriptors.get(i);
@@ -731,9 +784,9 @@ public class EJBServer
   {
     for (int i = 0; i < _ejbJars.size(); i++) {
       Path path = _ejbJars.get(i);
-	
+
       Environment.addDependency(path);
-	  
+
       JarPath jar = JarPath.create(path);
 
       _ejbManager.addEJBJar(jar);
@@ -744,14 +797,14 @@ public class EJBServer
   {
     throw new IllegalStateException();
   }
-  
+
   /**
    * Handles the case where a class loader is activated.
    */
   public void environmentStart(EnvironmentClassLoader loader)
   {
   }
-  
+
   /**
    * Handles the case where a class loader is dropped.
    */
