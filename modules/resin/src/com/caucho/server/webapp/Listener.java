@@ -88,7 +88,7 @@ public class Listener {
    */
   @PostConstruct
   public void init()
-    throws Throwable
+    throws Exception
   {
     if (_object == null)
       _object = _listenerClass.newInstance();

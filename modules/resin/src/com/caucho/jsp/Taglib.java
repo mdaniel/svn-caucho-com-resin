@@ -50,9 +50,12 @@ public class Taglib extends TagLibraryInfo {
   static final L10N L = new L10N(Taglib.class);
 
   private TldTaglib _tldTaglib;
+  private TagFileManager _tagFileManager;
   
   TagLibraryValidator _validator;
   private ArrayList<TldFunction> _functionList = new ArrayList<TldFunction>();
+  private ArrayList<Taglib> _libraryList
+    = new ArrayList<Taglib>();
   
   Taglib(String prefix, String uri, TldTaglib tldTaglib,
 	 TagFileManager tagFileManager)
@@ -62,8 +65,11 @@ public class Taglib extends TagLibraryInfo {
 
     try {
       _tldTaglib = tldTaglib;
+      _tagFileManager = tagFileManager;
       
       fillTagLibraryInfo(tldTaglib, tagFileManager);
+
+      _libraryList.add(this);
     } catch (JspParseException e) {
       throw e;
     } catch (Exception e) {
@@ -247,10 +253,27 @@ public class Taglib extends TagLibraryInfo {
     return null;
   }
 
+  public void addTaglib(Taglib taglib)
+  {
+    if (! _libraryList.contains(taglib))
+      _libraryList.add(taglib);
+  }
+
+  public Taglib copy()
+    throws JspParseException
+  {
+    return new Taglib(getPrefixString(), getURI(),
+		      _tldTaglib, _tagFileManager);
+  }
+
   @Override
   public TagLibraryInfo []getTagLibraryInfos()
   {
-    return new TagLibraryInfo[] { this };
+    TagLibraryInfo []infoArray = new TagLibraryInfo[_libraryList.size()];
+
+    _libraryList.toArray(infoArray);
+    
+    return infoArray;
   }
 
   public String toString()
@@ -278,8 +301,6 @@ public class Taglib extends TagLibraryInfo {
 	} catch (JspParseException e) {
 	  throw new RuntimeException(e);
 	}
-
-	System.out.println("TI: " + _tagInfo);
       }
 
       return _tagInfo;

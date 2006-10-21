@@ -67,6 +67,7 @@ public class JspDirectiveTag extends JspNode {
   static final L10N L = new L10N(JspDirectiveTag.class);
 
   private Boolean _isElIgnored;
+  private String _import;
   
   /**
    * Adds an attribute.
@@ -109,6 +110,8 @@ public class JspDirectiveTag extends JspNode {
                         value));
     }
     else if (IMPORT.equals(name)) {
+      _import = value;
+      
       _parseState.addImport(value);
     }
     else if (DISPLAY_NAME.equals(name)) {
@@ -287,8 +290,12 @@ public class JspDirectiveTag extends JspNode {
     os.print("<jsp:directive.tag");
     os.print(" jsp:id=\"" + gen.generateJspId() + "\"");
 
-    if (! _parseState.isELIgnored())
-      os.print(" el-ignored='false'");
+    if (_isElIgnored != null)
+      os.print(" el-ignored='" + _isElIgnored + "'");
+
+    if (_import != null)
+      os.print(" import='" + _import + "'");
+    
     /*
     if (! _parseState.isScriptingEnabled())
       os.print(" scripting-enabled='false'");

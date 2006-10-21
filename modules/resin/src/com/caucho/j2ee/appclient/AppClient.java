@@ -83,6 +83,18 @@ public class AppClient
     return _loader;
   }
 
+  public void setId(String id)
+  {
+  }
+  
+  public void setDescription(String value)
+  {
+  }
+
+  public void setIcon(com.caucho.config.types.Icon icon)
+  {
+  }
+
   private void addConfig(Path path)
     throws Exception
   {

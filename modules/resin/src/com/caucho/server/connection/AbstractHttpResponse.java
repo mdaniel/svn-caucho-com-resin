@@ -88,6 +88,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   protected String _contentType;
   protected String _contentPrefix;
   protected String _charEncoding;
+  protected boolean _hasCharEncoding;
   
   protected final ArrayList<String> _headerKeys = new ArrayList<String>();
   protected final ArrayList<String> _headerValues = new ArrayList<String>();
@@ -287,6 +288,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     _isHeaderWritten = false;
     _isChunked = false;
     _charEncoding = null;
+    _hasCharEncoding = false;
     _contentType = null;
     _contentPrefix = null;
     _locale = null;
@@ -1030,9 +1032,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     // XXX: conflict with servlet exception throwing order?
     try {
-      if (! _hasWriter)
-	setCharacterEncoding(_charEncoding);
-    } catch (Throwable e) {
+      _responseStream.setEncoding(_charEncoding);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
     }
   }
 
@@ -1062,18 +1064,20 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   {
     if (_hasWriter)
       return;
+
+    _hasCharEncoding = true;
     
     if (encoding == null ||
 	encoding.equals("ISO-8859-1") ||
 	encoding.equals("")) {
-      encoding = "iso-8859-1";
-      _charEncoding = null;
+      encoding = null;
+      _charEncoding = "iso-8859-1";
     }
     else
       _charEncoding = encoding;
 
     try {
-      _responseStream.setEncoding(_charEncoding);
+      _responseStream.setEncoding(encoding);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -1440,7 +1444,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   {
     _locale = locale;
     
-    if (_charEncoding == null) {
+    if (! _hasCharEncoding) {
       _charEncoding = getRequest().getWebApp().getLocaleEncoding(locale);
 
       try {

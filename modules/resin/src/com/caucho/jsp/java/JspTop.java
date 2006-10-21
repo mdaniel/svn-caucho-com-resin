@@ -60,7 +60,8 @@ public class JspTop extends JspContainerNode implements JspSegmentNode {
   public JspNode addText(String text)
     throws JspParseException
   {
-    if (! _hasRoot) {
+    // jsp/0705
+    if (true || ! _hasRoot) {
       JspNode node = new StaticText(_gen, text, this);
 
       addChild(node);

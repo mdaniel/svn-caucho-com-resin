@@ -83,6 +83,8 @@ jsp21_function = element function {
 jsp21_listener = element listener {
   attribute id { string }?,
 
+  javaee_description-Group,
+
   element listener-class { javaee_fully-qualified-class }
 }
 

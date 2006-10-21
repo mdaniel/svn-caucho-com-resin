@@ -363,7 +363,7 @@ public class JavaJspGenerator extends JspGenerator {
   /**
    * Adds a taglib.
    */
-  public void addTaglib(String prefix, String uri, boolean isOptional)
+  public Taglib addTaglib(String prefix, String uri, boolean isOptional)
     throws JspParseException
   {
     if (log.isLoggable(Level.FINEST))
@@ -376,7 +376,7 @@ public class JavaJspGenerator extends JspGenerator {
     } catch (JspParseException e) {
       if (isOptional) {
 	log.log(Level.FINE, e.toString(), e);
-	return;
+	return null;
       }
 
       throw e;
@@ -384,14 +384,12 @@ public class JavaJspGenerator extends JspGenerator {
 
     if (taglib == null && isOptional && 
 	! uri.startsWith("urn:jsptld:") && ! uri.startsWith("urn:jsptagdir:"))
-      return;
+      return null;
 
     if (taglib == null)
       throw error(L.l("`{0}' has no matching taglib-uri.  The taglib uri must match a taglib-uri for a taglib specified in the web.xml or implicitly in a taglib.tld in the tag jar.", uri));
 
-    if (! _tagLibraryList.contains(taglib))
-      _tagLibraryList.add(taglib);
-			 
+    taglib = addLibrary(taglib);
     ArrayList<TldFunction> functions = taglib.getFunctionList();
 
     for (int i = 0; i < functions.size(); i++) {
@@ -401,7 +399,36 @@ public class JavaJspGenerator extends JspGenerator {
 
       _elFunctionMap.put(name, function.getMethod());
     }
+
+    return taglib;
   }
+
+  private Taglib addLibrary(Taglib taglib)
+    throws JspParseException
+  {
+    for (int i = 0; i < _tagLibraryList.size(); i++) {
+      Taglib oldTaglib = _tagLibraryList.get(i);
+
+      if (oldTaglib.getURI().equals(taglib.getURI()))
+	return oldTaglib;
+    }
+
+    /*
+    // taglib = taglib.copy();
+    
+    for (int i = 0; i < _tagLibraryList.size(); i++) {
+      Taglib oldTaglib = _tagLibraryList.get(i);
+
+      oldTaglib.addTaglib(taglib);
+      taglib.addTaglib(oldTaglib);
+    }
+    */
+
+    _tagLibraryList.add(taglib);
+
+    return taglib;
+  }
+			 
 
   Method resolveFunction(String prefix, String localName)
   {

@@ -31,13 +31,30 @@ package com.caucho.jsp.cfg;
 
 import java.util.ArrayList;
 
-import com.caucho.server.webapp.WebApp;
+import com.caucho.config.*;
+import com.caucho.server.webapp.*;
 
 /**
  * Configuration for the taglib listener in the .tld
  */
 public class TldListener {
   private Class _listenerClass;
+
+  public void setId(String id)
+  {
+  }
+
+  public void setDescription(String desc)
+  {
+  }
+
+  public void setDisplayName(String displayName)
+  {
+  }
+
+  public void setIcon(com.caucho.config.types.Icon icon)
+  {
+  }
 
   /**
    * Sets the listener class.
@@ -59,7 +76,6 @@ public class TldListener {
    * Registers with the web-app.
    */
   public void register(WebApp app)
-    throws InstantiationException, IllegalAccessException
   {
     if (app == null)
       return;
@@ -67,8 +83,18 @@ public class TldListener {
     if (app.hasListener(_listenerClass))
       return;
 
-    Object listenerObj = _listenerClass.newInstance();
-
-    app.addListenerObject(listenerObj);
+    try {
+      Listener listener = new Listener();
+      listener.setListenerClass(_listenerClass);
+      listener.init();
+    
+      app.addListener(listener);
+    } catch (RuntimeException e) {
+      e.printStackTrace();
+      throw e;
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new ConfigException(e);
+    }
   }
 }

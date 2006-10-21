@@ -32,13 +32,17 @@ package com.caucho.config.j2ee;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 
-import javax.naming.InitialContext;
+import java.util.logging.*;
 
-import com.caucho.util.L10N;
+import javax.naming.*;
 
 import com.caucho.config.*;
+import com.caucho.util.*;
+
 
 public class JndiFieldInjectProgram extends BuilderProgram {
+  private static final Logger log
+    = Logger.getLogger(JndiFieldInjectProgram.class.getName());
   private static final L10N L = new L10N(JndiFieldInjectProgram.class);
 
   private String _jndiName;
@@ -56,10 +60,23 @@ public class JndiFieldInjectProgram extends BuilderProgram {
     try {
       Object value = new InitialContext().lookup(_jndiName);
 
+      if (value == null)
+	return;
+
+      if (! _field.getType().isAssignableFrom(value.getClass())) {
+	throw new ConfigException(L.l("Resource at '{0}' of type {1} is not assignable to field '{2}' of type {3}.",
+				      _jndiName,
+				      value.getClass().getName(),
+				      _field.getName(),
+				      _field.getType().getName()));
+      }
+
       _field.setAccessible(true);
       _field.set(bean, value);
     } catch (RuntimeException e) {
       throw e;
+    } catch (NamingException e) {
+      log.finer(String.valueOf(e));
     } catch (Exception e) {
       throw new ConfigException(e);
     }

@@ -348,11 +348,13 @@ public class JspCompilerInstance {
 
     _jspBuilder.setJspParser(_parser);
 
+    /*
     for (int i = 0; i < _preludeList.size(); i++)
       _parser.addPrelude(_preludeList.get(i));
 
     for (int i = 0; i < _codaList.size(); i++)
       _parser.addCoda(_codaList.get(i));
+    */
   }
 
   public Page compile()
@@ -436,14 +438,23 @@ public class JspCompilerInstance {
     
     if (_jspPropertyGroup != null && ! isXml)
       isXml = _jspPropertyGroup.isXml();
-    
-    if (_jspPropertyGroup != null && _jspPropertyGroup.isForbidXml())
-      _parser.getParseState().setForbidXml(true);
 
+    ParseState parseState = _parser.getParseState();
+    
     try {
       _parser.getParseState().setBuilder(_jspBuilder);
-      _parser.getParseState().setXml(isXml);
+
+      for (String prelude : _preludeList) {
+	parseState.setXml(false);
+	parseState.setForbidXml(false);
+	_parser.parse(parseState.getResourceManager().resolvePath(prelude),
+		      prelude);
+      }
       
+      _parser.getParseState().setXml(isXml);
+      if (_jspPropertyGroup != null && _jspPropertyGroup.isForbidXml())
+	_parser.getParseState().setForbidXml(true);
+
       if (isXml) {
 	_parseState.setELIgnoredDefault(false);
 	
@@ -462,6 +473,13 @@ public class JspCompilerInstance {
 	*/
 	
 	_parser.parse(_jspPath, _uri);
+      }
+
+      for (String coda : _codaList) {
+	parseState.setXml(false);
+	parseState.setForbidXml(false);
+	_parser.parse(parseState.getResourceManager().resolvePath(coda),
+		      coda);
       }
 
       JspGenerator generator = _jspBuilder.getGenerator();

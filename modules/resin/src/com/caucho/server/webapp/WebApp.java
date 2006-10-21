@@ -1116,8 +1116,7 @@ public class WebApp extends ServletContextImpl
    */
   public void addListenerObject(Object listenerObj)
   {
-    if (! _listeners.contains(listenerObj))
-      _listeners.add(listenerObj);
+    _listeners.add(listenerObj);
 
     if (listenerObj instanceof ServletContextListener) {
       ServletContextListener scListener = (ServletContextListener) listenerObj;

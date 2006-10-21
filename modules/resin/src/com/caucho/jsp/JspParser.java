@@ -236,6 +236,8 @@ public class JspParser {
     _namespaces = new Namespace(null, "jsp", JSP_NS);
     _parseState.pushNamespace("jsp", JSP_NS);
 
+    _isXml = _parseState.isXml();
+
     _filename = _contextPath + uri;
  
     if (uri != null) {
@@ -291,12 +293,12 @@ public class JspParser {
     String uriPwd = _uriPwd;
     
     for (int i = _codaList.size() - 1; i >= 0; i--)
-      pushInclude(_codaList.get(i));
+      pushInclude(_codaList.get(i), true);
     
     addInclude(stream, uriPwd);
     
     for (int i = _preludeList.size() - 1; i >= 0; i--)
-      pushInclude(_preludeList.get(i));
+      pushInclude(_preludeList.get(i), true);
 
     setLocation();
     _jspBuilder.startDocument();
@@ -1431,6 +1433,12 @@ public class JspParser {
   public void pushInclude(String value)
     throws IOException, JspParseException
   {
+    pushInclude(value, false);
+  }
+  
+  public void pushInclude(String value, boolean allowDuplicate)
+    throws IOException, JspParseException
+  {
     if (value.equals(""))
       throw error("include directive needs 'file' attribute. Use either <%@ include file='myfile.jsp' %> or <jsp:directive.include file='myfile.jsp'/>");
 
@@ -1453,11 +1461,11 @@ public class JspParser {
     int p = newUrl.lastIndexOf('/');
     newUrlPwd = newUrl.substring(0, p + 1);
     
-    if (_jspPath != null && _jspPath.equals(include))
+    if (_jspPath != null && _jspPath.equals(include) && ! allowDuplicate)
       throw error(L.l("circular include of '{0}' forbidden.  A JSP file may not include itself.", include));
     for (int i = 0; i < _includes.size(); i++) {
       Include inc = _includes.get(i);
-      if (inc._stream.getPath().equals(include))
+      if (inc._stream.getPath().equals(include) && ! allowDuplicate)
 	throw error(L.l("circular include of '{0}'.  A JSP file may not include itself.", include));
     }
 
@@ -1482,8 +1490,13 @@ public class JspParser {
 
     readLf();
 
-    if (_stream != null)
-      _includes.add(new Include(_stream, _line, _uriPwd));
+    Include inc = null;
+
+    if (_stream != null) {
+      inc = new Include(_stream, _line, _uriPwd);
+	
+      _includes.add(inc);
+    }
 
     _parseState.addDepend(stream.getPath());
 
@@ -1760,8 +1773,12 @@ public class JspParser {
   {
     JspGenerator gen = _jspBuilder.getGenerator();
     
-    if (_lineMap == null)
-      return new JspLineParseException(_filename + ":" + _line + ": "  + message + gen.getSourceLines(_jspPath, _line));
+    if (_lineMap == null) {
+      if (gen != null)
+	return new JspLineParseException(_filename + ":" + _line + ": "  + message + gen.getSourceLines(_jspPath, _line));
+      else
+	return new JspLineParseException(_filename + ":" + _line + ": "  + message);
+    }
     else {
       LineMap.Line line = _lineMap.getLine(_line);
       

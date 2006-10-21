@@ -295,6 +295,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
 	// server/1732 wants this commented out
 	/*
+	// TCK wants the code (test?)
 	ServletResponse ptr = res;
 	while (ptr instanceof HttpServletResponseWrapper) {
 	  ptr = ((HttpServletResponseWrapper) ptr).getResponse();

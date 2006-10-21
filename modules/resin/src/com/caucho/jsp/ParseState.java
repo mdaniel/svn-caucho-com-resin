@@ -504,9 +504,6 @@ public class ParseState {
   public void setForbidXml(boolean isForbidXml)
   {
     _isForbidXml = isForbidXml;
-
-    if (isForbidXml)
-      Thread.dumpStack();
   }
 
   /**

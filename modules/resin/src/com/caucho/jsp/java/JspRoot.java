@@ -74,14 +74,16 @@ public class JspRoot extends JspContainerNode {
     throws JspParseException
   {
     if (VERSION.equals(name)) {
-      if (! value.equals("2.0") && ! value.equals("1.2"))
-	throw error(L.l("'{0}' is an supported jsp:root version.",
+      if (! value.equals("2.1")
+	  && ! value.equals("2.0")
+	  && ! value.equals("1.2"))
+	throw error(L.l("'{0}' is an unsupported jsp:root version.",
 			value));
 
       _version = value;
     }
     else {
-      throw error(L.l("`{0}' is an unknown jsp:root attribute.  'version' is the only allowed JSP root value.",
+      throw error(L.l("'{0}' is an unknown jsp:root attribute.  'version' is the only allowed JSP root value.",
                       name.getName()));
     }
   }

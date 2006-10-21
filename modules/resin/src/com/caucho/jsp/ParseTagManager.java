@@ -255,8 +255,26 @@ public class ParseTagManager {
 				       String location)
     throws JspParseException
   {
-    return _taglibManager.getTaglib(prefix, uri, location);
+    Taglib taglib = _taglibManager.getTaglib(prefix, uri, location);
+
+    return addTaglib(taglib);
   }
+
+  private Taglib addTaglib(Taglib taglib)
+    throws JspParseException
+  {
+    taglib = taglib.copy();
+
+    for (Taglib oldTaglib : _taglibMap.values()) {
+      oldTaglib.addTaglib(taglib);
+      taglib.addTaglib(oldTaglib);
+    }
+    
+    _taglibMap.put(taglib.getPrefixString(), taglib);
+
+    return taglib;
+  }
+  
 
   public boolean hasTags()
   {

@@ -68,6 +68,8 @@ jsp20_function = element function {
 jsp20_listener = element listener {
   attribute id { string }?,
 
+  j2ee_description-Group,
+
   element listener-class { j2ee_fully-qualified-class }
 }
 
