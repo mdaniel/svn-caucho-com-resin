@@ -199,8 +199,14 @@ public class ServerArrayValue extends ArrayValueImpl {
       return;
 
     _isFilled = true;
-    
-    for (Map.Entry<Value,Value> entry : _env.getQuercus().getServerEnvMap().entrySet()) {
+
+    for (Map.Entry<String,String> entry: System.getenv().entrySet()) {
+      super.put(new StringValueImpl(entry.getKey()),
+          new StringValueImpl(entry.getValue()));
+    }
+
+    for (Map.Entry<Value,Value> entry:
+        _env.getQuercus().getServerEnvMap().entrySet()) {
       super.put(entry.getKey(), entry.getValue());
     }
     
