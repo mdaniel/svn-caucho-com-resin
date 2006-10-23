@@ -30,6 +30,7 @@ package com.caucho.naming;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.*;
 
 import javax.annotation.*;
 
@@ -46,6 +47,8 @@ import com.caucho.config.types.InitParam;
  * An object proxy for a foreign JNDI factory.
  */
 public class LinkProxy implements ObjectProxy, java.io.Serializable {
+  private static Logger log
+    = Logger.getLogger(LinkProxy.class.getName());
   private static L10N L = new L10N(LinkProxy.class);
 
   // The foreign factory
@@ -204,14 +207,27 @@ public class LinkProxy implements ObjectProxy, java.io.Serializable {
     throws Exception
   {
     if (_name == null)
-      throw new ConfigException(L.l("<jndi-link> configuration needs a <name>.  The <name> is the JNDI name where the context will be linked."));
+      throw new ConfigException(L.l("<jndi-link> configuration needs a <jndi-name>.  The <jndi-name> is the JNDI name where the context will be linked."));
     
     Class factoryClass = _factoryClass;
 
     if (factoryClass != null)
       _factory = (InitialContextFactory) factoryClass.newInstance();
 
-    Jndi.bindDeep(_name, this);
+    if (log.isLoggable(Level.CONFIG)) {
+      if (_foreignName != null)
+	log.config("jndi-link[jndi-name=" + _name
+		   + ", foreign-name=" + _foreignName + "] configured");
+      else if (_factoryClass != null)
+	log.config("jndi-link[jndi-name=" + _name
+		   + ", factory=" + _factoryClass.getName() + "] configured");
+    }
+
+    if (_foreignName != null
+	&& Jndi.getFullName(_name).equals(Jndi.getFullName(_foreignName)))
+      return;
+
+    Jndi.bindDeepShort(_name, this);
   }
 
   public String toString()

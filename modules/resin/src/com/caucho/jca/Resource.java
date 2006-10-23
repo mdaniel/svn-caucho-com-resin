@@ -33,6 +33,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Constructor;
 
 import java.util.*;
+import java.util.logging.*;
 
 import javax.annotation.*;
 
@@ -77,6 +78,9 @@ import com.caucho.jca.cfg.JavaMailConfig;
  * Configuration for the init-param pattern.
  */
 public class Resource {
+  private static final Logger log
+    = Logger.getLogger(Resource.class.getName());
+  
   private static L10N L = new L10N(Resource.class);
 
   private Class _type;
@@ -419,6 +423,51 @@ public class Resource {
     else if (CloseListener.getDestroyMethod(_object.getClass()) != null)
       Environment.addClassLoaderListener(new CloseListener(_object));
 
+    if (log.isLoggable(Level.CONFIG))
+      logConfig();
+  }
+
+  private void logConfig()
+  {
+    StringBuilder sb = new StringBuilder();
+
+    if (_object instanceof ResourceAdapter)
+      sb.append("jca-resource");
+    else if (_object instanceof ManagedConnectionFactory)
+      sb.append("jca-resource");
+    else
+      sb.append("resource");
+
+    sb.append("[");
+    boolean hasValue = false;
+      
+    if (_jndiName != null) {
+      if (hasValue) sb.append(", ");
+      hasValue = true;
+      sb.append("jndi-name=" + _jndiName);
+    }
+    
+    if (_var != null) {
+      if (hasValue) sb.append(", ");
+      hasValue = true;
+      sb.append("var=" + _var);
+    }
+    
+    if (_mbeanName != null) {
+      if (hasValue) sb.append(", ");
+      hasValue = true;
+      sb.append("mbean-name=" + _mbeanName);
+    }
+      
+    if (_type != null) {
+      if (hasValue) sb.append(", ");
+      hasValue = true;
+      sb.append("type=" + _type);
+    }
+      
+    sb.append("]");
+
+    log.config(sb.toString() + " configured");
   }
 
   public String toString()

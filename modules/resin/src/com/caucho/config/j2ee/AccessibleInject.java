@@ -24,69 +24,25 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Scott Ferguson;
  */
 
-package com.caucho.server.e_app;
+package com.caucho.config.j2ee;
 
-import java.util.ArrayList;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 
-import com.caucho.server.webapp.*;
+import java.util.logging.*;
 
-/**
- * Configuration for the application web module
- */
-public class WebModule {
-  private String _webUri;
-  private String _contextRoot;
+import com.caucho.config.*;
+import com.caucho.util.*;
 
-  private WebAppConfig _webAppConfig;
 
-  /**
-   * Sets the location to the .war file.
-   */
-  public void setWebURI(String webUri)
-  {
-    _webUri = webUri;
-  }
-
-  /**
-   * Returns the web uri.
-   */
-  public String getWebURI()
-  {
-    return _webUri;
-  }
-
-  /**
-   * Sets the context-root
-   */
-  public void setContextRoot(String contextRoot)
-  {
-    _contextRoot = contextRoot;
-  }
-
-  /**
-   * Gets the context-root
-   */
-  public String getContextRoot()
-  {
-    return _contextRoot;
-  }
-
-  /**
-   * Customization of web-app.
-   */
-  public void setWebApp(WebAppConfig config)
-  {
-    _webAppConfig = config;
-  }
-
-  /**
-   * Customization of web-app.
-   */
-  public WebAppConfig getWebApp()
-  {
-    return _webAppConfig;
-  }
+abstract public class AccessibleInject {
+  abstract String getName();
+  
+  abstract Class getType();
+  
+  abstract void inject(Object bean, Object value)
+    throws ConfigException;
 }

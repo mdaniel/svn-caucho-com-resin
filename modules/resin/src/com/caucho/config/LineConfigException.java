@@ -88,6 +88,15 @@ public class LineConfigException extends ConfigException
     _line = line;
   }
 
+  public LineConfigException(String filename, int line,
+			     String message, Throwable cause)
+  {
+    super(filename + ":" + line + ": " + message, cause);
+
+    _filename = filename;
+    _line = line;
+  }
+
   public String getFilename()
   {
     return _filename;

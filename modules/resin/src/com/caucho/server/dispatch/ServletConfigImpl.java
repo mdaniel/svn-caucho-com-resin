@@ -44,6 +44,7 @@ import java.util.logging.Level;
 import javax.annotation.*;
 
 import javax.servlet.*;
+import javax.jws.*;
 
 import com.caucho.config.*;
 import com.caucho.config.types.InitParam;
@@ -58,6 +59,8 @@ import com.caucho.jsp.Page;
 
 import com.caucho.server.connection.StubServletRequest;
 import com.caucho.server.connection.StubServletResponse;
+
+import com.caucho.soa.servlet.*;
 
 import com.caucho.util.*;
 import com.caucho.management.j2ee.J2EEManagedObject;
@@ -86,6 +89,10 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
   private InitProgram _init;
 
   private RunAt _runAt;
+
+  private Class _protocolClass;
+  private BuilderProgram _protocolInit;
+  
   private Alarm _alarm;
 
   private ServletContext _servletContext;
@@ -94,7 +101,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
   private ServletException _initException;
   private long _nextInitTime;
 
-  private Servlet _servlet;
+  private Object _servlet;
   private FilterChain _servletChain;
 
   /**
@@ -376,6 +383,15 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
   }
 
   /**
+   * Sets the web service protocol.
+   */
+  public void setProtocol(ServletProtocolConfig protocol)
+  {
+    _protocolClass = protocol.getType();
+    _protocolInit = protocol.getProgram();
+  }
+
+  /**
    * Sets the init exception
    */
   public void setInitException(ServletException exn)
@@ -396,7 +412,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
   /**
    * Returns the servlet.
    */
-  public Servlet getServlet()
+  public Object getServlet()
   {
     return _servlet;
   }
@@ -442,24 +458,35 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
       if (_servletClass != null) {
       }
       else if (requireClass) {
-        throw error(L.l("`{0}' is not a known servlet.  Servlets belong in the classpath, often in WEB-INF/classes.", _servletClassName));
+        throw error(L.l("'{0}' is not a known servlet.  Servlets belong in the classpath, often in WEB-INF/classes.", _servletClassName));
       }
       else {
         String location = _location != null ? _location : "";
 
-        log.warning(L.l(location + "`{0}' is not a known servlet.  Servlets belong in the classpath, often in WEB-INF/classes.", _servletClassName));
+        log.warning(L.l(location + "'{0}' is not a known servlet.  Servlets belong in the classpath, often in WEB-INF/classes.", _servletClassName));
         return;
       }
 
-      if (! Servlet.class.isAssignableFrom(_servletClass))
-        throw error(L.l("`{0}' must implement javax.servlet.Servlet.  All servlets must implement the Servlet interface.", _servletClassName));
+      Config.checkCanInstantiate(_servletClass);
+
+      if (_servletClass.isAnnotationPresent(WebService.class)) {
+	if (_protocolClass == null)
+	  _protocolClass = SoapProtocolServlet.class;
+      }
+      else if (Servlet.class.isAssignableFrom(_servletClass)) {
+      }
+      else
+        throw error(L.l("'{0}' must implement javax.servlet.Servlet or have a @WebService annotation.  All servlets must implement the Servlet interface.", _servletClassName));
+
+      /*
       if (Modifier.isAbstract(_servletClass.getModifiers()))
-        throw error(L.l("`{0}' must not be abstract.  Servlets must be fully-implemented classes.", _servletClassName));
+        throw error(L.l("'{0}' must not be abstract.  Servlets must be fully-implemented classes.", _servletClassName));
 
       if (! Modifier.isPublic(_servletClass.getModifiers()))
-        throw error(L.l("`{0}' must be public.  Servlets must be public classes.", _servletClassName));
+        throw error(L.l("'{0}' must be public.  Servlets must be public classes.", _servletClassName));
 
       checkConstructor();
+      */
     }
   }
 
@@ -480,11 +507,11 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     }
 
     if (zeroArg == null)
-      throw error(L.l("`{0}' must have a zero arg constructor.  Servlets must have public zero-arg constructors.\n{1} is not a valid constructor.", _servletClassName, constructors[0]));
+      throw error(L.l("'{0}' must have a zero arg constructor.  Servlets must have public zero-arg constructors.\n{1} is not a valid constructor.", _servletClassName, constructors[0]));
 
 
     if (! Modifier.isPublic(zeroArg.getModifiers()))
-        throw error(L.l("`{0}' must be public.  '{1}' must have a public, zero-arg constructor.",
+        throw error(L.l("'{0}' must be public.  '{1}' must have a public, zero-arg constructor.",
                         zeroArg,
                         _servletClassName));
   }
@@ -552,6 +579,8 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     else if (SingleThreadModel.class.isAssignableFrom(servletClass)) {
       servletChain = new SingleThreadServletFilterChain(this);
     }
+    else if (servletClass.isAnnotationPresent(WebService.class))
+      servletChain = new WebServiceFilterChain(this);
     else {
       servletChain = new ServletFilterChain(this);
     }
@@ -570,20 +599,52 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
   }
 
   /**
+   * Instantiates a web service.
+   *
+   * @return the initialized servlet.
+   */
+  ProtocolServlet createWebServiceSkeleton()
+    throws ServletException
+  {
+    try {
+      Object service = createServlet();
+
+      ProtocolServlet skeleton
+	= (ProtocolServlet) _protocolClass.newInstance();
+
+      skeleton.setService(service);
+
+      if (_protocolInit != null) {
+	_protocolInit.init(skeleton);
+      }
+
+      skeleton.init(this);
+
+      return skeleton;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (ServletException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ServletException(e);
+    }
+  }
+
+  /**
    * Instantiates a servlet given its configuration.
    *
    * @param servletName the servlet
    *
    * @return the initialized servlet.
    */
-  Servlet createServlet()
+  Object createServlet()
     throws ServletException
   {
     // XXX: single thread
     //if (_servlet != null)
     //  return _servlet;
 
-    Servlet servlet = null;
+    Object servlet = null;
 
     if (Alarm.getCurrentTime() < _nextInitTime)
       throw _initException;
@@ -634,12 +695,12 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     }
   }
 
-  private Servlet createServletImpl()
+  private Object createServletImpl()
     throws Throwable
   {
     Class servletClass = getServletClass();
 
-    Servlet servlet;
+    Object servlet;
     if (_jspFile != null) {
       servlet = createJspServlet(_servletName, _jspFile);
 
@@ -649,16 +710,20 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     }
 
     else if (servletClass != null)
-      servlet = (Servlet) servletClass.newInstance();
+      servlet = servletClass.newInstance();
 
     else
-      throw new ServletException(L.l("Null servlet class for `{0}'.",
+      throw new ServletException(L.l("Null servlet class for '{0}'.",
                                      _servletName));
 
     configureServlet(servlet);
 
     try {
-      servlet.init(this);
+      if (servlet instanceof Servlet) {
+	Servlet servletObj = (Servlet) servlet;
+	
+	servletObj.init(this);
+      }
     } catch (UnavailableException e) {
       setInitException(e);
       throw e;
@@ -671,7 +736,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
    *  Configure the servlet (everything that is done after
    *  instantiation but before servlet.init()
    */
-  void configureServlet(Servlet servlet)
+  void configureServlet(Object servlet)
     throws Throwable
   {
     //InjectIntrospector.configure(servlet);
@@ -716,14 +781,15 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
 
   void killServlet()
   {
-    Servlet servlet = _servlet;
+    Object servlet = _servlet;
     _servlet = null;
 
     if (_alarm != null)
       _alarm.dequeue();
 
-    if (servlet != null)
-      servlet.destroy();
+    if (servlet instanceof Servlet) {
+      ((Servlet) servlet).destroy();
+    }
   }
 
   public void close()

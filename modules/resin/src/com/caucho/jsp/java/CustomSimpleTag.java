@@ -216,6 +216,11 @@ public class CustomSimpleTag extends GenericTag {
     if (parentNode != null) {
       out.println(var + ".setParent(" + parentNode.getCustomTagName() + ");");
     }
+    
+    if (_tag.getAnalyzedTag() != null
+	&& _tag.getAnalyzedTag().getHasInjection()) {
+      out.println("_jsp_inject_" + _tag.getId() + ".configure(" + var + ");");
+    }
 
     if (hasCustomTag()) {
       out.println(var + "_adapter = new javax.servlet.jsp.tagext.TagAdapter(" + var + ");");

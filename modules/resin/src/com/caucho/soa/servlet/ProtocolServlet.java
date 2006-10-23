@@ -27,66 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.e_app;
+package com.caucho.soa.servlet;
 
-import java.util.ArrayList;
-
-import com.caucho.server.webapp.*;
+import javax.servlet.*;
 
 /**
- * Configuration for the application web module
+ * A SOA protocol.
  */
-public class WebModule {
-  private String _webUri;
-  private String _contextRoot;
-
-  private WebAppConfig _webAppConfig;
-
+public interface ProtocolServlet extends Servlet {
   /**
-   * Sets the location to the .war file.
+   * Sets the application service instance.
    */
-  public void setWebURI(String webUri)
-  {
-    _webUri = webUri;
-  }
-
-  /**
-   * Returns the web uri.
-   */
-  public String getWebURI()
-  {
-    return _webUri;
-  }
-
-  /**
-   * Sets the context-root
-   */
-  public void setContextRoot(String contextRoot)
-  {
-    _contextRoot = contextRoot;
-  }
-
-  /**
-   * Gets the context-root
-   */
-  public String getContextRoot()
-  {
-    return _contextRoot;
-  }
-
-  /**
-   * Customization of web-app.
-   */
-  public void setWebApp(WebAppConfig config)
-  {
-    _webAppConfig = config;
-  }
-
-  /**
-   * Customization of web-app.
-   */
-  public WebAppConfig getWebApp()
-  {
-    return _webAppConfig;
-  }
+  public void setService(Object service);
 }

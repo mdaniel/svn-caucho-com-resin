@@ -48,16 +48,16 @@ import java.net.URLConnection;
 
 public class ServiceImplInvocationHandler implements InvocationHandler {
 
-  private Class _class;
+  private Class _api;
   private DirectSkeleton _skeleton;
   private String _url;
 
-  public ServiceImplInvocationHandler(Class c, String url)
+  public ServiceImplInvocationHandler(Class api, String url)
     throws com.caucho.config.ConfigException, JAXBException
   {
-    _class = c;
+    _api = api;
     _url = url;
-    _skeleton = new WebServiceIntrospector().introspect(c);
+    _skeleton = new WebServiceIntrospector().introspect(api);
   }
 
   public Object invoke(Object proxy, Method method, Object[] args)

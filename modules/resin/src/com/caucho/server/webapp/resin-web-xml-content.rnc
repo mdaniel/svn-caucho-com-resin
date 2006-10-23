@@ -400,6 +400,13 @@ r_persistent_store =
   attribute persistent-store { string }
   | element persistent-store { string }
 
+r_protocol-Servlet = element protocol {
+  (attribute type { string }
+   | element type { string })
+
+  & r_any
+}
+
 r_redeploy-check-interval =
   attribute redeploy-check-interval { r_period-Type }
   | element redeploy-check-interval { r_period-Type }
@@ -542,16 +549,18 @@ r_servlet = element servlet {
 }
 
 r_servlet-Content =
-  ((r_init | r_init-param)*,
+  ((r_init | r_init-param)*
 
-   (attribute load-on-startup { string }
-    | element load-on-startup { string })?,
+   & (attribute load-on-startup { string }
+      | element load-on-startup { string })?
 
-   element run-as { string }?,
+   & r_protocol-Servlet?
 
-   r_security-role-ref*,
+   & element run-as { string }?
 
-   r_run-at?)
+   & r_security-role-ref*
+
+   & r_run-at?)
 
 r_servlet-mapping = element servlet-mapping {
   attribute id { string }?
@@ -944,7 +953,7 @@ r_web-service-client = element web-service-client {
 
   & r_url
 
-  & r_interface
+  & r_interface?
 
   & (element jaxb-package { string }* | element jaxb-class { string }*)?
 }

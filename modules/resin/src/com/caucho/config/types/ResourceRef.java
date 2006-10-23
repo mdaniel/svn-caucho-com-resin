@@ -229,7 +229,7 @@ public class ResourceRef implements Validator {
     try {
       obj = new InitialContext().lookup("java:comp/env/" + _name);
     } catch (NamingException e) {
-      log.log(Level.FINER, e.toString(), e);
+      log.log(Level.FINEST, e.toString(), e);
     }
 
     if (obj == null)

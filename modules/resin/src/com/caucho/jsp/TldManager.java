@@ -304,7 +304,6 @@ public class TldManager {
       }
       else if (path.getPath().endsWith(".tld") &&
 	       path.isFile() && path.canRead()) {
-	System.out.println("TLD: " + path.getNativePath());
 	try {
 	  TldPreload taglib = parseTldPreload(path);
 

@@ -31,6 +31,8 @@ package com.caucho.server.webapp;
 import java.util.*;
 
 import javax.annotation.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
 
 import com.caucho.config.*;
 import com.caucho.config.types.*;
@@ -55,7 +57,28 @@ public class Listener {
    * Sets the listener class.
    */
   public void setListenerClass(Class cl)
+    throws ConfigException
   {
+    Config.checkCanInstantiate(cl);
+    
+    if (ServletContextListener.class.isAssignableFrom(cl)) {
+    }
+    else if (ServletContextAttributeListener.class.isAssignableFrom(cl)) {
+    }
+    else if (ServletRequestListener.class.isAssignableFrom(cl)) {
+    }
+    else if (ServletRequestAttributeListener.class.isAssignableFrom(cl)) {
+    }
+    else if (HttpSessionListener.class.isAssignableFrom(cl)) {
+    }
+    else if (HttpSessionAttributeListener.class.isAssignableFrom(cl)) {
+    }
+    else if (HttpSessionActivationListener.class.isAssignableFrom(cl)) {
+    }
+    else
+      throw new ConfigException(L.l("listener-class '{0}' does not implement any web-app listener interface.",
+				    cl.getName()));
+    
     _listenerClass = cl;
   }
 
@@ -86,11 +109,12 @@ public class Listener {
   /**
    * Initialize.
    */
-  @PostConstruct
-  public void init()
+  public Object createListenerObject()
     throws Exception
   {
-    if (_object == null)
+    if (_object != null)
+      return _object;
+    
       _object = _listenerClass.newInstance();
     
     InitProgram init = getInit();
@@ -103,13 +127,7 @@ public class Listener {
 
     program.configure(_object);
     program.init(_object);
-  }
 
-  /**
-   * Returns the listener object.
-   */
-  public Object getListenerObject()
-  {
     return _object;
   }
 }

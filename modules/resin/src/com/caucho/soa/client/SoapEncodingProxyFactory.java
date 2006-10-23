@@ -35,12 +35,18 @@ import java.net.MalformedURLException;
 
 import javax.xml.bind.JAXBException;
 
-import com.caucho.soap.service.ServiceImplInvocationHandler;
+import com.caucho.soap.service.*;
+import com.caucho.util.*;
 
 public class SoapEncodingProxyFactory implements EncodingProxyFactory {
+  private static final L10N L = new L10N(SoapEncodingProxyFactory.class);
+  
   public Object getProxy(Class serviceInterface, String url) 
     throws MalformedURLException, JAXBException
   {
+    if (serviceInterface == null)
+      throw new NullPointerException(L.l("SOAP API is missing from proxy call."));
+    
     ServiceImplInvocationHandler handler = 
       new ServiceImplInvocationHandler(serviceInterface, url);
 

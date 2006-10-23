@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -28,16 +29,20 @@
 
 package com.caucho.jsp;
 
-import com.caucho.bytecode.*;
-import com.caucho.log.Log;
-import com.caucho.util.L10N;
-
-import javax.servlet.jsp.tagext.*;
 import java.io.InputStream;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.annotation.*;
+import javax.ejb.*;
+import javax.xml.ws.*;
+import javax.servlet.jsp.tagext.*;
+
+import com.caucho.bytecode.*;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
 
 /**
  * Analyzes the class for tag.
@@ -260,6 +265,24 @@ public class TagAnalyzer {
     }
     else if (parent != null) {
       tag.setDoFinally(parent.getDoFinally());
+    }
+
+    // check for @Resource injection
+    for (Method method : tagClass.getDeclaredMethods()) {
+      if (method.getName().startsWith("set")
+	  && (method.isAnnotationPresent(Resource.class)
+	      || method.isAnnotationPresent(EJB.class)
+	      || method.isAnnotationPresent(WebServiceRef.class))) {
+	tag.setHasInjection(true);
+      }
+    }
+    
+    for (Field field : tagClass.getDeclaredFields()) {
+      if (field.isAnnotationPresent(Resource.class)
+	  || field.isAnnotationPresent(EJB.class)
+	  || field.isAnnotationPresent(WebServiceRef.class)) {
+	tag.setHasInjection(true);
+      }
     }
   }
 

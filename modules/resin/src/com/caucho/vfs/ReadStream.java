@@ -31,6 +31,7 @@ package com.caucho.vfs;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.logging.*;
 
 import com.caucho.util.*;
 import com.caucho.vfs.*;
@@ -114,12 +115,9 @@ public final class ReadStream extends InputStream {
     _readTime = 0;
 
     if (_source != null && _source != source) {
-      try {
-	close();
-      } catch (IOException e) {
-	e.printStackTrace();
-      }
+      close();
     }
+    
     if (source == null)
       throw new IllegalArgumentException();
 
@@ -1055,29 +1053,33 @@ public final class ReadStream extends InputStream {
   /**
    * Close the stream.
    */
-  public final void close() throws IOException
+  public final void close()
   {
-    if (_disableClose)
-      return;
+    try {
+      if (_disableClose)
+	return;
 
-    if (! _reuseBuffer) {
-      if (_tempRead != null) {
-        TempBuffer.free(_tempRead);
+      if (! _reuseBuffer) {
+	if (_tempRead != null) {
+	  TempBuffer.free(_tempRead);
+	}
+	_tempRead = null;
+	_readBuffer = null;
       }
-      _tempRead = null;
-      _readBuffer = null;
-    }
 
-    if (_readEncoding != null) {
-      Reader reader = _readEncoding;
-      _readEncoding = null;
-      reader.close();
-    }
+      if (_readEncoding != null) {
+	Reader reader = _readEncoding;
+	_readEncoding = null;
+	reader.close();
+      }
     
-    if (_source != null && ! _isDisableCloseSource) {
-      StreamImpl s = _source;
-      _source = null;
-      s.close();
+      if (_source != null && ! _isDisableCloseSource) {
+	StreamImpl s = _source;
+	_source = null;
+	s.close();
+      }
+    } catch (IOException e) {
+      log().log(Level.FINE, e.toString(), e);
     }
   }
 
@@ -1176,6 +1178,11 @@ public final class ReadStream extends InputStream {
       _reader = new StreamReader();
 
     return _reader;
+  }
+
+  private static Logger log()
+  {
+    return Logger.getLogger(ReadStream.class.getName());
   }
 
   /**

@@ -38,19 +38,25 @@ import javax.naming.*;
 
 import com.caucho.config.*;
 import com.caucho.util.*;
+import com.caucho.soa.client.*;
 
 
-public class JndiFieldInjectProgram extends BuilderProgram {
+public class ServiceProxyInjectProgram extends BuilderProgram {
   private static final Logger log
-    = Logger.getLogger(JndiFieldInjectProgram.class.getName());
-  private static final L10N L = new L10N(JndiFieldInjectProgram.class);
+    = Logger.getLogger(ServiceProxyInjectProgram.class.getName());
+  private static final L10N L
+    = new L10N(ServiceProxyInjectProgram.class);
 
   private String _jndiName;
-  private Field _field;
+  private Class _type;
+  private AccessibleInject _field;
 
-  JndiFieldInjectProgram(String jndiName, Field field)
+  ServiceProxyInjectProgram(String jndiName,
+			    Class type,
+			    AccessibleInject field)
   {
     _jndiName = jndiName;
+    _type = type;
     _field = field;
   }
 
@@ -58,10 +64,16 @@ public class JndiFieldInjectProgram extends BuilderProgram {
     throws ConfigException
   {
     try {
-      Object value = new InitialContext().lookup(_jndiName);
+      Object value = new InitialContext().lookupLink(_jndiName);
 
       if (value == null)
 	return;
+
+      if (value instanceof WebServiceClient) {
+	WebServiceClient client = (WebServiceClient) value;
+
+	value = client.createProxy(_type);
+      }
 
       if (! _field.getType().isAssignableFrom(value.getClass())) {
 	throw new ConfigException(L.l("Resource at '{0}' of type {1} is not assignable to field '{2}' of type {3}.",
@@ -71,8 +83,7 @@ public class JndiFieldInjectProgram extends BuilderProgram {
 				      _field.getType().getName()));
       }
 
-      _field.setAccessible(true);
-      _field.set(bean, value);
+      _field.inject(bean, value);
     } catch (RuntimeException e) {
       throw e;
     } catch (NamingException e) {

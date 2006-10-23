@@ -98,7 +98,7 @@ public class ServletManager {
 
 	/* XXX: need something more sophisticated since the
 	 * resin.conf needs to override the web.xml
-	 * throw new ServletConfigException(L.l("`{0}' is a duplicate servlet-name.  Servlets must have a unique servlet-name.", config.getServletName()));
+	 * throw new ServletConfigException(L.l("'{0}' is a duplicate servlet-name.  Servlets must have a unique servlet-name.", config.getServletName()));
 	 */
       }
     
@@ -174,7 +174,7 @@ public class ServletManager {
     ServletConfigImpl config = _servlets.get(servletName);
 
     if (config == null) {
-      throw new ServletConfigException(L.l("`{0}' is not a known servlet.  Servlets must be defined by <servlet> before being used.", servletName));
+      throw new ServletConfigException(L.l("'{0}' is not a known servlet.  Servlets must be defined by <servlet> before being used.", servletName));
     }
 
     return config.createServletChain();
@@ -193,10 +193,10 @@ public class ServletManager {
     ServletConfigImpl config = _servlets.get(servletName);
 
     if (config == null) {
-      throw new ServletException(L.l("`{0}' is not a known servlet.  Servlets must be defined by <servlet> before being used.", servletName));
+      throw new ServletException(L.l("'{0}' is not a known servlet.  Servlets must be defined by <servlet> before being used.", servletName));
     }
 
-    return config.createServlet();
+    return (Servlet) config.createServlet();
   }
 
   /**

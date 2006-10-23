@@ -53,6 +53,8 @@ import javax.ejb.EJBHome;
 import javax.persistence.PersistenceUnit;
 import javax.persistence.PersistenceContext;
 
+import javax.xml.ws.*;
+
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
@@ -77,6 +79,15 @@ public class InjectIntrospector {
         program.configure(obj);
       }
     }
+  }
+  
+  /**
+   * Analyzes a bean for @Inject tags, building an init program for them.
+   */
+  public static InjectProgram introspectProgram(Class type)
+    throws ConfigException
+  {
+    return new InjectProgram(introspect(type));
   }
 
   /**
@@ -146,6 +157,8 @@ public class InjectIntrospector {
       configurePersistenceUnit(initList, field, fieldName, fieldType);
     else if (field.isAnnotationPresent(PersistenceContext.class))
       configurePersistenceContext(initList, field, fieldName, fieldType);
+    else if (field.isAnnotationPresent(WebServiceRef.class))
+      configureWebServiceRef(initList, field, fieldName, fieldType);
   }
 
   private static void configureResource(ArrayList<BuilderProgram> initList,
@@ -193,6 +206,48 @@ public class InjectIntrospector {
                                    ejb.name(),
                                    "javax.ejb.EJBLocalObject",
                                    ejb.name()));
+  }
+
+  private static void
+    configureWebServiceRef(ArrayList<BuilderProgram> initList,
+			   AccessibleObject field,
+			   String fieldName,
+			   Class fieldType)
+    throws ConfigException
+  {
+    WebServiceRef ref
+      = (WebServiceRef) field.getAnnotation(WebServiceRef.class);
+
+    String name = ref.name();
+      name = ref.name();
+
+    if ("".equals(name))
+      name = fieldName;
+
+    name = toFullName(name);
+    // XXX: types
+
+    AccessibleInject inject;
+
+    if (field instanceof Field)
+      inject = new FieldInject((Field) field);
+    else
+      inject = new PropertyInject((Method) field);
+
+    BuilderProgram program;
+
+    if (Service.class.isAssignableFrom(fieldType)) {
+      program = new ServiceInjectProgram(name,
+					 fieldType,
+					 inject);
+    }
+    else {
+      program = new ServiceProxyInjectProgram(name,
+					      fieldType,
+					      inject);
+    }
+    
+    initList.add(program);
   }
 
   private static void configurePersistenceUnit(ArrayList<BuilderProgram> initList,
@@ -334,19 +389,30 @@ public class InjectIntrospector {
       jndiName = "java:comp/ThreadPool";
     }
     else {
-      jndiName = name;
+      jndiName = prefix + name;
     }
 
     int colon = jndiName.indexOf(':');
     int slash = jndiName.indexOf('/');
 
     if (colon < 0 || slash > 0 && slash < colon)
-      jndiName = "java:comp/env/" + prefix + jndiName;
+      jndiName = "java:comp/env/" + jndiName;
 
     if (field instanceof Method)
       return new JndiInjectProgram(jndiName, (Method) field);
     else
       return new JndiFieldInjectProgram(jndiName, (Field) field);
+  }
+
+  private static String toFullName(String jndiName)
+  {
+    int colon = jndiName.indexOf(':');
+    int slash = jndiName.indexOf('/');
+
+    if (colon < 0 || slash > 0 && slash < colon)
+      jndiName = "java:comp/env/" + jndiName;
+
+    return jndiName;
   }
 }
 

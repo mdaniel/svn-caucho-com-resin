@@ -1682,6 +1682,7 @@ public class JavaJspGenerator extends JspGenerator {
     }
 
     printDependInit(out, depends);
+    generateInject(out);
   }
 
   private boolean isGenerateStatic()
@@ -1911,6 +1912,86 @@ public class JavaJspGenerator extends JspGenerator {
     }
   }
 
+  /**
+   * Prints the tag injection.
+   */
+  private void generateInject(JspJavaWriter out) throws IOException
+  {
+    if (_topTag == null || ! _topTag.hasChildren())
+      return;
+
+    Iterator<TagInstance> iter = _topTag.iterator();
+    while (iter.hasNext()) {
+      TagInstance tag = iter.next();
+
+      if (tag != null)
+      generateTagInjectDecl(out, tag);
+    }
+    
+    out.println();
+    out.println("static {");
+    out.pushDepth();
+    out.println("try {");
+    out.pushDepth();
+
+    iter = _topTag.iterator();
+    while (iter.hasNext()) {
+      TagInstance tag = iter.next();
+
+      if (tag != null)
+	generateTagInject(out, tag);
+    }
+    
+    out.popDepth();
+    out.println("} catch (Exception e) {");
+    out.println("  e.printStackTrace();");
+    out.println("  throw new RuntimeException(e);");
+    out.println("}");
+
+    out.popDepth();
+    out.println("}");
+  }
+
+  /**
+   * Prints the tag injection.
+   */
+  private void generateTagInjectDecl(JspJavaWriter out, TagInstance tag)
+    throws IOException
+  {
+    if (tag.getAnalyzedTag() != null
+	&& tag.getAnalyzedTag().getHasInjection()) {
+      out.println("private static com.caucho.config.j2ee.InjectProgram _jsp_inject_" + tag.getId() + ";");
+    }
+
+    Iterator<TagInstance> iter = tag.iterator();
+    while (iter.hasNext()) {
+      TagInstance child = iter.next();
+
+      generateTagInjectDecl(out, child);
+    }
+  }
+
+  /**
+   * Prints the tag injection.
+   */
+  private void generateTagInject(JspJavaWriter out, TagInstance tag)
+    throws IOException
+  {
+    if (tag.getAnalyzedTag() != null
+	&& tag.getAnalyzedTag().getHasInjection()) {
+      out.print("_jsp_inject_" + tag.getId() + " = ");
+      out.println("com.caucho.config.j2ee.InjectIntrospector.introspectProgram("
+		  + tag.getTagClass().getName() + ".class);");
+    }
+
+    Iterator<TagInstance> iter = tag.iterator();
+    while (iter.hasNext()) {
+      TagInstance child = iter.next();
+
+      generateTagInject(out, child);
+    }
+  }
+
   private void generateConstantStrings(JspJavaWriter out)
     throws IOException
   {
@@ -2095,11 +2176,7 @@ public class JavaJspGenerator extends JspGenerator {
     } catch (IOException e) {
       log.log(Level.FINER, e.toString(), e);
     } finally {
-      try {
-	if (is != null)
-	  is.close();
-      } catch (IOException e) {
-      }
+      is.close();
     }
 
     if (hasLine)

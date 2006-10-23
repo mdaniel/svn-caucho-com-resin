@@ -49,6 +49,8 @@ public class DirectSkeleton extends Skeleton {
   private HashMap<String,PojoMethodSkeleton> _actionMap
     = new HashMap<String,PojoMethodSkeleton>();
 
+  private Class _api;
+  
   private String _namespace;
   private String _name;
   private String _typeName;
@@ -56,18 +58,19 @@ public class DirectSkeleton extends Skeleton {
   private String _serviceName;
   private String _wsdlLocation;
 
-  public DirectSkeleton(Class type) {
-
+  public DirectSkeleton(Class type)
+  {
+    _api = type;
+    
     WebService webService = (WebService)type.getAnnotation(WebService.class);
     setNamespace(type);
     setName(type);
 
-    _typeName    = _name + "PortType";
+    _typeName = _name + "PortType";
 
-    _serviceName =
-      webService!=null && !webService.serviceName().equals("")
-      ? webService.serviceName()
-      : _name + "HttpBinding";
+    _serviceName = (webService != null && ! webService.serviceName().equals("")
+		    ? webService.serviceName()
+		    : _name + "HttpBinding");
 
     _portName =
       webService!=null && !webService.portName().equals("")
@@ -101,13 +104,15 @@ public class DirectSkeleton extends Skeleton {
     }
   }
 
-  private void setName(Class type) {
+  private void setName(Class type)
+  {
     WebService webService = (WebService)type.getAnnotation(WebService.class);
-    if (webService != null && !webService.name().equals("")) {
+    
+    if (webService != null && ! webService.name().equals("")) {
       _name = webService.name();
     }
     else {
-      _name = type.getClass().getName();
+      _name = type.getName();
     }
   }
 
@@ -122,7 +127,14 @@ public class DirectSkeleton extends Skeleton {
   public Object invoke(String name, String url, Object[] args)
     throws IOException, XMLStreamException, MalformedURLException
   {
-    return _actionMap.get(name).invoke(name, url, args, _namespace);
+    PojoMethodSkeleton action = _actionMap.get(name);
+
+    if (action != null)
+      return action.invoke(name, url, args, _namespace);
+    else if ("toString".equals(name))
+      return "SoapStub[" + _api.getName() + "]";
+    else
+      throw new RuntimeException("no such method: " + name);
   }
   
   /**

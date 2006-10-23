@@ -226,7 +226,7 @@ public class WebApp extends ServletContextImpl
     = new HashMap<String,String>();
 
   // List of all the listeners.
-  private ArrayList<Object> _listeners = new ArrayList<Object>();
+  private ArrayList<Listener> _listeners = new ArrayList<Listener>();
 
   // List of the ServletContextListeners from the configuration file
   private ArrayList<ServletContextListener> _webAppListeners
@@ -726,7 +726,7 @@ public class WebApp extends ServletContextImpl
   public void addServletMapping(ServletMapping servletMapping)
     throws ServletException
   {
-    log.fine("adding servlet mapping: " + servletMapping);
+    // log.fine("adding servlet mapping: " + servletMapping);
 
     servletMapping.setServletContext(this);
     servletMapping.setStrictMapping(getStrictMapping());
@@ -1093,7 +1093,13 @@ public class WebApp extends ServletContextImpl
   public void addListener(Listener listener)
     throws Exception
   {
-    addListenerObject(listener.getListenerObject());
+    if (! hasListener(listener.getListenerClass())) {
+      _listeners.add(listener);
+
+      if (_lifecycle.isStarting()) {
+	addListenerObject(listener.createListenerObject(), true);
+      }
+    }
   }
 
   /**
@@ -1102,9 +1108,9 @@ public class WebApp extends ServletContextImpl
   public boolean hasListener(Class listenerClass)
   {
     for (int i = 0; i < _listeners.size(); i++) {
-      Object obj = _listeners.get(i);
+      Listener listener = _listeners.get(i);
 
-      if (listenerClass.equals(obj.getClass()))
+      if (listenerClass.equals(listener.getListenerClass()))
 	return true;
     }
 
@@ -1114,15 +1120,13 @@ public class WebApp extends ServletContextImpl
   /**
    * Adds the listener object.
    */
-  public void addListenerObject(Object listenerObj)
+  private void addListenerObject(Object listenerObj, boolean start)
   {
-    _listeners.add(listenerObj);
-
     if (listenerObj instanceof ServletContextListener) {
       ServletContextListener scListener = (ServletContextListener) listenerObj;
       _webAppListeners.add(scListener);
 
-      if (_lifecycle.isActive() || _lifecycle.isStarting()) {
+      if (start) {
 	ServletContextEvent event = new ServletContextEvent(this);
 
 	try {
@@ -1668,6 +1672,14 @@ public class WebApp extends ServletContextImpl
       }
 
       ServletContextEvent event = new ServletContextEvent(this);
+
+      for (Listener listener : _listeners) {
+	try {
+	  addListenerObject(listener.createListenerObject(), false);
+	} catch (Exception e) {
+	  throw new ConfigException(e);
+	}
+      }
 
       for (int i = 0; i < _webAppListeners.size(); i++) {
 	ServletContextListener listener = _webAppListeners.get(i);

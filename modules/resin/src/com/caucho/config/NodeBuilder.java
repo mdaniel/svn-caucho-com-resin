@@ -51,19 +51,13 @@ import com.caucho.el.*;
 
 import com.caucho.util.*;
 
-import com.caucho.log.Log;
-
 import com.caucho.make.Dependency;
 
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentBean;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Depend;
-import com.caucho.vfs.MergePath;
-import com.caucho.vfs.IOExceptionWrapper;
+import com.caucho.vfs.*;
 
 import com.caucho.xml.QDocument;
 import com.caucho.xml.QElement;
@@ -842,12 +836,14 @@ public class NodeBuilder {
   
   public static LineConfigException error(Throwable e, Node node)
   {
+    String systemId = null;
     String filename = null;
     int line = 0;
 
     if (node instanceof QAbstractNode) {
       QAbstractNode qnode = (QAbstractNode) node;
       
+      systemId = qnode.getBaseURI();
       filename = qnode.getFilename();
       line = qnode.getLine();
     }
@@ -868,7 +864,11 @@ public class NodeBuilder {
     else if (e instanceof ConfigException &&
              e.getMessage() != null &&
              filename != null) {
-      return new LineConfigException(filename, line, e);
+      String sourceLines = getSourceLines(systemId, line);
+      
+      return new LineConfigException(filename, line,
+				     e.getMessage() + sourceLines,
+				     e);
     }
     else if (e instanceof LineCompileException) {
       return new LineConfigException(e.getMessage(), e);
@@ -889,6 +889,39 @@ public class NodeBuilder {
       }
       else
 	return new LineConfigException(msg, e);
+    }
+  }
+
+  private static String getSourceLines(String systemId, int errorLine)
+  {
+    if (systemId == null)
+      return "";
+    
+    ReadStream is = null;
+    try {
+      is = Vfs.lookup(systemId).openRead();
+      int line = 0;
+      StringBuilder sb = new StringBuilder("\n\n");
+      String text;
+      while ((text = is.readLine()) != null) {
+	line++;
+
+	if (errorLine - 2 <= line && line <= errorLine + 2) {
+	  sb.append(line);
+	  sb.append(": ");
+	  sb.append(text);
+	  sb.append("\n");
+	}
+      }
+
+      return sb.toString();
+    } catch (IOException e) {
+      log.log(Level.FINEST, e.toString(), e);
+
+      return "";
+    } finally {
+      if (is != null)
+	is.close();
     }
   }
 

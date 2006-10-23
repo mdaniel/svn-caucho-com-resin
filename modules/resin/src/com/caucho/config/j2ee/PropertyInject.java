@@ -29,63 +29,58 @@
 
 package com.caucho.config.j2ee;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.*;
 
 import java.util.logging.*;
-
-import javax.naming.*;
 
 import com.caucho.config.*;
 import com.caucho.util.*;
 
 
-public class JndiFieldInjectProgram extends BuilderProgram {
+public class PropertyInject extends AccessibleInject {
   private static final Logger log
-    = Logger.getLogger(JndiFieldInjectProgram.class.getName());
-  private static final L10N L = new L10N(JndiFieldInjectProgram.class);
+    = Logger.getLogger(PropertyInject.class.getName());
+  private static final L10N L = new L10N(PropertyInject.class);
 
-  private String _jndiName;
-  private Field _field;
+  private Method _method;
+  private Class _type;
 
-  JndiFieldInjectProgram(String jndiName, Field field)
+  PropertyInject(Method method)
   {
-    _jndiName = jndiName;
-    _field = field;
+    _method = method;
+
+    Class []paramTypes = method.getParameterTypes();
+    _type = paramTypes[0];
+    
+    _method.setAccessible(true);
   }
 
-  public void configureImpl(NodeBuilder builder, Object bean)
+  String getName()
+  {
+    return _method.getName();
+  }
+
+  Class getType()
+  {
+    return _type;
+  }
+
+  void inject(Object bean, Object value)
     throws ConfigException
   {
     try {
-      Object value = new InitialContext().lookup(_jndiName);
-
-      if (value == null)
-	return;
-
-      if (! _field.getType().isAssignableFrom(value.getClass())) {
-	throw new ConfigException(L.l("Resource at '{0}' of type {1} is not assignable to field '{2}' of type {3}.",
-				      _jndiName,
+      if (! _type.isAssignableFrom(value.getClass())) {
+	throw new ConfigException(L.l("Resource type {0} is not assignable to method '{1}' of type {2}.",
 				      value.getClass().getName(),
-				      _field.getName(),
-				      _field.getType().getName()));
+				      _method.getName(),
+				      _type.getName()));
       }
 
-      _field.setAccessible(true);
-      _field.set(bean, value);
+      _method.invoke(bean, value);
     } catch (RuntimeException e) {
       throw e;
-    } catch (NamingException e) {
-      log.finer(String.valueOf(e));
-      log.log(Level.FINEST, e.toString(), e);
     } catch (Exception e) {
       throw new ConfigException(e);
     }
-  }
-
-  public Object configure(NodeBuilder builder, Class type)
-    throws ConfigException
-  {
-    throw new UnsupportedOperationException(getClass().getName());
   }
 }

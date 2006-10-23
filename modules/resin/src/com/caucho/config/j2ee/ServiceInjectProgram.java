@@ -29,39 +29,70 @@
 
 package com.caucho.config.j2ee;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.*;
 
+import java.net.*;
 import java.util.logging.*;
 
 import javax.naming.*;
+import javax.xml.namespace.QName;
+import javax.xml.ws.Service;
 
 import com.caucho.config.*;
 import com.caucho.util.*;
+import com.caucho.soa.client.*;
 
 
-public class JndiFieldInjectProgram extends BuilderProgram {
+public class ServiceInjectProgram extends BuilderProgram {
   private static final Logger log
-    = Logger.getLogger(JndiFieldInjectProgram.class.getName());
-  private static final L10N L = new L10N(JndiFieldInjectProgram.class);
+    = Logger.getLogger(ServiceInjectProgram.class.getName());
+  private static final L10N L
+    = new L10N(ServiceInjectProgram.class);
 
   private String _jndiName;
-  private Field _field;
+  private Class _type;
+  private Constructor _constructor;
+  private AccessibleInject _field;
 
-  JndiFieldInjectProgram(String jndiName, Field field)
+  ServiceInjectProgram(String jndiName,
+		       Class type,
+		       AccessibleInject field)
+    throws ConfigException
   {
-    _jndiName = jndiName;
-    _field = field;
+    if (! Service.class.isAssignableFrom(type))
+      throw new ConfigException(L.l("'{0}' needs to extend javax.xml.ws.Service.",
+				    type.getName()));
+    
+    try {
+      _jndiName = jndiName;
+      
+      _type = type;
+      
+      _constructor = type.getConstructor(new Class[] { URL.class,
+						       QName.class });
+
+      _field = field;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
   }
 
   public void configureImpl(NodeBuilder builder, Object bean)
     throws ConfigException
   {
     try {
-      Object value = new InitialContext().lookup(_jndiName);
+      Object value = new InitialContext().lookupLink(_jndiName);
 
       if (value == null)
 	return;
+
+      if (value instanceof WebServiceClient) {
+	WebServiceClient client = (WebServiceClient) value;
+
+	value = client.createService(_constructor);
+      }
 
       if (! _field.getType().isAssignableFrom(value.getClass())) {
 	throw new ConfigException(L.l("Resource at '{0}' of type {1} is not assignable to field '{2}' of type {3}.",
@@ -71,8 +102,7 @@ public class JndiFieldInjectProgram extends BuilderProgram {
 				      _field.getType().getName()));
       }
 
-      _field.setAccessible(true);
-      _field.set(bean, value);
+      _field.inject(bean, value);
     } catch (RuntimeException e) {
       throw e;
     } catch (NamingException e) {

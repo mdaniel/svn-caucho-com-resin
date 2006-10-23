@@ -366,6 +366,12 @@ public class CustomTag extends GenericTag
       out.print(var + ".setJspId(\"" + shortName + "-" + _gen.generateJspId() + "\");");      
     }
 
+    if (_tag.getAnalyzedTag().getHasInjection()) {
+      out.println("_jsp_inject_" + _tag.getId() + ".configure(" + var + ");");
+    }
+    
+    AnalyzedTag analyzedTag = _tag.getAnalyzedTag();
+
     JspNode parentTagNode = getParent().getParentTagNode();
 
     out.println(var + ".setPageContext(pageContext);");

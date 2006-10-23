@@ -31,19 +31,22 @@ package com.caucho.soa.client;
 
 import java.net.*;
 
-import java.util.ArrayList;
+import java.lang.reflect.*;
+import java.util.*;
 
 import java.util.logging.Logger;
 
 import javax.annotation.*;
 import javax.naming.*;
+import javax.naming.spi.*;
+import javax.xml.namespace.QName;
 
 import com.caucho.config.ConfigException;
-import com.caucho.naming.Jndi;
+import com.caucho.naming.*;
 
 /**
  */
-public class WebServiceClient {
+public class WebServiceClient implements ObjectProxy, java.io.Serializable {
   private static final Logger log 
     = Logger.getLogger(WebServiceClient.class.getName());
 
@@ -99,6 +102,98 @@ public class WebServiceClient {
     _jaxbPackages.append(jaxbPackage);
   }
 
+  /**
+   * Creates the object from the proxy.
+   *
+   * @param env the calling environment
+   *
+   * @return the object named by the proxy.
+   */
+  public Object createObject(Hashtable env)
+    throws NamingException
+  {
+    try {
+      Object proxy = null;
+
+      if (_jaxbClasses != null) {
+	Class[] jaxbClasses = _jaxbClasses.toArray(new Class[0]);
+	proxy = ProxyManager.getWebServiceProxy(_serviceClass, _url, jaxbClasses);
+      }
+      else if (_jaxbPackages != null) {
+	String jaxbPackages = _jaxbPackages.toString();
+	proxy = 
+	  ProxyManager.getWebServiceProxy(_serviceClass, _url, jaxbPackages);
+      }
+      else {
+	proxy = ProxyManager.getWebServiceProxy(_serviceClass, _url);
+      }
+
+      return proxy;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Creates the object from the proxy.
+   *
+   * @param env the calling environment
+   *
+   * @return the object named by the proxy.
+   */
+  public Object createService(Constructor ctor)
+    throws ConfigException
+  {
+    try {
+      int p = _url.indexOf(':');
+      
+      URL url = new URL(_url.substring(p + 1));
+      QName name = new QName("foo", "bar");
+
+      return ctor.newInstance(url, name);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
+  }
+
+  /**
+   * Creates the object from the proxy.
+   *
+   * @param env the calling environment
+   *
+   * @return the object named by the proxy.
+   */
+  public Object createProxy(Class api)
+    throws NamingException
+  {
+    try {
+      Object proxy = null;
+
+      if (_jaxbClasses != null) {
+	Class[] jaxbClasses = _jaxbClasses.toArray(new Class[0]);
+	proxy = ProxyManager.getWebServiceProxy(api, _url, jaxbClasses);
+      }
+      else if (_jaxbPackages != null) {
+	String jaxbPackages = _jaxbPackages.toString();
+	proxy = 
+	  ProxyManager.getWebServiceProxy(api, _url, jaxbPackages);
+      }
+      else {
+	proxy = ProxyManager.getWebServiceProxy(api, _url);
+      }
+
+      return proxy;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   @PostConstruct
   public void init()
     throws Throwable
@@ -106,22 +201,12 @@ public class WebServiceClient {
     if (_jndiName == null)
       throw new ConfigException("jndi-name not set for <web-service-client>");
 
-    Object proxy = null;
+    /*
+    if (_serviceClass == null)
+      throw new ConfigException("interface not set for <web-service-client>");
+    */
 
-    if (_jaxbClasses != null) {
-      Class[] jaxbClasses = _jaxbClasses.toArray(new Class[0]);
-      proxy = ProxyManager.getWebServiceProxy(_serviceClass, _url, jaxbClasses);
-    }
-    else if (_jaxbPackages != null) {
-      String jaxbPackages = _jaxbPackages.toString();
-      proxy = 
-        ProxyManager.getWebServiceProxy(_serviceClass, _url, jaxbPackages);
-    }
-    else {
-      proxy = ProxyManager.getWebServiceProxy(_serviceClass, _url);
-    }
-
-    Jndi.bindDeepShort(_jndiName, proxy);
+    Jndi.bindDeepShort(_jndiName, this);
   }
 }
 

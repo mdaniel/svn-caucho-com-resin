@@ -138,8 +138,9 @@ public class HessianEncoding implements ServiceEncoding {
         (javax.jws.WebService)
         implClass.getAnnotation(javax.jws.WebService.class);
 
-      if (webServiceAnnotation.endpointInterface() != null)
-        return CauchoSystem.loadClass(webServiceAnnotation.endpointInterface());
+      String endpoint = webServiceAnnotation.endpointInterface();
+      if (endpoint != null && ! "".equals(endpoint))
+        return CauchoSystem.loadClass(endpoint);
     }
 
     return null;

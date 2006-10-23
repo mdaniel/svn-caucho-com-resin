@@ -27,66 +27,48 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.e_app;
+package com.caucho.soa.servlet;
 
-import java.util.ArrayList;
+import java.io.IOException;
+import java.io.*;
 
-import com.caucho.server.webapp.*;
+import java.util.logging.Logger;
+
+import javax.servlet.*;
+
+import com.caucho.soa.encoding.*;
 
 /**
- * Configuration for the application web module
+ * Generic servlet handling a SOA RPC call.
  */
-public class WebModule {
-  private String _webUri;
-  private String _contextRoot;
+public class RpcServlet extends GenericServlet
+{
+  private static final Logger log = 
+    Logger.getLogger(RpcServlet.class.getName());
 
-  private WebAppConfig _webAppConfig;
-
-  /**
-   * Sets the location to the .war file.
-   */
-  public void setWebURI(String webUri)
+  private final ServiceEncoding _encoding;
+  
+  public RpcServlet(ServiceEncoding encoding)
   {
-    _webUri = webUri;
+    if (encoding == null)
+      throw new NullPointerException();
+    
+    _encoding = encoding;
   }
-
-  /**
-   * Returns the web uri.
-   */
-  public String getWebURI()
+  
+  public void service(ServletRequest request, ServletResponse response)
+      throws IOException, ServletException
   {
-    return _webUri;
-  }
-
-  /**
-   * Sets the context-root
-   */
-  public void setContextRoot(String contextRoot)
-  {
-    _contextRoot = contextRoot;
-  }
-
-  /**
-   * Gets the context-root
-   */
-  public String getContextRoot()
-  {
-    return _contextRoot;
-  }
-
-  /**
-   * Customization of web-app.
-   */
-  public void setWebApp(WebAppConfig config)
-  {
-    _webAppConfig = config;
-  }
-
-  /**
-   * Customization of web-app.
-   */
-  public WebAppConfig getWebApp()
-  {
-    return _webAppConfig;
+    try {
+      _encoding.invoke(request.getInputStream(), response.getOutputStream());
+    } catch (IOException e) {
+      throw e;
+    } catch (ServletException e) {
+      throw e;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Throwable e) { // XXX: change sig
+      throw new ServletException(e);
+    }
   }
 }

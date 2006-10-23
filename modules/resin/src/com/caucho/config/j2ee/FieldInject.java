@@ -34,58 +34,49 @@ import java.lang.reflect.InvocationTargetException;
 
 import java.util.logging.*;
 
-import javax.naming.*;
-
 import com.caucho.config.*;
 import com.caucho.util.*;
 
 
-public class JndiFieldInjectProgram extends BuilderProgram {
+public class FieldInject extends AccessibleInject {
   private static final Logger log
-    = Logger.getLogger(JndiFieldInjectProgram.class.getName());
-  private static final L10N L = new L10N(JndiFieldInjectProgram.class);
+    = Logger.getLogger(FieldInject.class.getName());
+  private static final L10N L = new L10N(FieldInject.class);
 
-  private String _jndiName;
   private Field _field;
 
-  JndiFieldInjectProgram(String jndiName, Field field)
+  FieldInject(Field field)
   {
-    _jndiName = jndiName;
     _field = field;
+    _field.setAccessible(true);
   }
 
-  public void configureImpl(NodeBuilder builder, Object bean)
+  String getName()
+  {
+    return _field.getName();
+  }
+
+  Class getType()
+  {
+    return _field.getType();
+  }
+
+  void inject(Object bean, Object value)
     throws ConfigException
   {
     try {
-      Object value = new InitialContext().lookup(_jndiName);
-
-      if (value == null)
-	return;
-
       if (! _field.getType().isAssignableFrom(value.getClass())) {
-	throw new ConfigException(L.l("Resource at '{0}' of type {1} is not assignable to field '{2}' of type {3}.",
-				      _jndiName,
+	throw new ConfigException(L.l("Resource type {0} is not assignable to field '{1}' of type {2}.",
 				      value.getClass().getName(),
 				      _field.getName(),
 				      _field.getType().getName()));
       }
 
-      _field.setAccessible(true);
       _field.set(bean, value);
     } catch (RuntimeException e) {
       throw e;
-    } catch (NamingException e) {
-      log.finer(String.valueOf(e));
-      log.log(Level.FINEST, e.toString(), e);
     } catch (Exception e) {
       throw new ConfigException(e);
     }
-  }
-
-  public Object configure(NodeBuilder builder, Class type)
-    throws ConfigException
-  {
-    throw new UnsupportedOperationException(getClass().getName());
   }
 }

@@ -53,6 +53,7 @@ public class WebServiceIntrospector {
     //throws ConfigException
     throws JAXBException
   {
+    // server/4221
     if (! type.isAnnotationPresent(WebService.class))
       throw new RuntimeException(L.l("{0}: needs a @WebService annotation.",
                                      type.getName()));
@@ -66,7 +67,6 @@ public class WebServiceIntrospector {
     Method[] methods = type.getMethods();
 
     for (int i = 0; i < methods.length; i++) {
-
       if ((methods[i].getModifiers() & Modifier.PUBLIC) == 0)
         continue;
 

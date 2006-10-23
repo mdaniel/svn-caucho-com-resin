@@ -122,8 +122,9 @@ public class TagInstance {
 	className = className.substring(p + 1);
       _tagId = "_jsp_" + className + "_" + _top._maxId++;
 
-      _analyzedTag = _manager.analyzeTag(cl);
     }
+    
+    _analyzedTag = _manager.analyzeTag(cl);
   }
 
   /**

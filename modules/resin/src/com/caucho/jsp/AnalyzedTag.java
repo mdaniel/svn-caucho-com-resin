@@ -60,6 +60,8 @@ public class AnalyzedTag {
   private boolean _doCatch;
   private boolean _doFinally;
 
+  private boolean _hasInjection;
+
   /**
    * Set true for a body tag.
    */
@@ -274,5 +276,21 @@ public class AnalyzedTag {
   public void setDoFinally(boolean doFinally)
   {
     _doFinally = doFinally;
+  }
+
+  /**
+   * True if the tag has a @Resource.
+   */
+  public boolean getHasInjection()
+  {
+    return _hasInjection;
+  }
+
+  /**
+   * True if the tag has a @Resource.
+   */
+  public void setHasInjection(boolean hasInjection)
+  {
+    _hasInjection = hasInjection;
   }
 }

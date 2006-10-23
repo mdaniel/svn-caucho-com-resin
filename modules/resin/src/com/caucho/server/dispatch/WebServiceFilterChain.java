@@ -31,32 +31,32 @@ package com.caucho.server.dispatch;
 import java.util.*;
 import java.io.*;
 
-import javax.servlet.FilterChain;
-import javax.servlet.Servlet;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.ServletException;
-import javax.servlet.UnavailableException;
+import javax.servlet.*;
 
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
+
+import com.caucho.soa.servlet.*;
+import com.caucho.soa.encoding.*;
 
 /**
  * Represents the final servlet in a filter chain.
  */
-public class ServletFilterChain implements FilterChain {
-  public static String SERVLET_NAME = "javax.servlet.error.servlet_name";
+public class WebServiceFilterChain implements FilterChain {
+  public static final String SERVLET_NAME
+    = "javax.servlet.error.servlet_name";
   
   // servlet config
   private ServletConfigImpl _config;
-  // servlet
-  private Servlet _servlet;
+  
+  // protocol skeleton
+  private ProtocolServlet _skeleton;
 
   /**
    * Create the filter chain servlet.
    *
    * @param servlet the underlying servlet
    */
-  public ServletFilterChain(ServletConfigImpl config)
+  public WebServiceFilterChain(ServletConfigImpl config)
   {
     if (config == null)
       throw new NullPointerException();
@@ -92,10 +92,12 @@ public class ServletFilterChain implements FilterChain {
                        ServletResponse response)
     throws ServletException, IOException
   {
-    if (_servlet == null) {
+    if (_skeleton == null) {
       try {
-        _servlet = (Servlet) _config.createServlet();
+        _skeleton = _config.createWebServiceSkeleton();
       } catch (ServletException e) {
+        throw e;
+      } catch (RuntimeException e) {
         throw e;
       } catch (Exception e) {
         throw new ServletException(e);
@@ -103,9 +105,9 @@ public class ServletFilterChain implements FilterChain {
     }
     
     try {
-      _servlet.service(request, response);
+      _skeleton.service(request, response);
     } catch (UnavailableException e) {
-      _servlet = null;
+      _skeleton = null;
       _config.setInitException(e);
       _config.killServlet();
       request.setAttribute(SERVLET_NAME, _config.getServletName());
@@ -116,6 +118,12 @@ public class ServletFilterChain implements FilterChain {
     } catch (IOException e) {
       request.setAttribute(SERVLET_NAME, _config.getServletName());
       throw e;
+    } catch (RuntimeException e) {
+      request.setAttribute(SERVLET_NAME, _config.getServletName());
+      throw e;
+    } catch (Throwable e) {
+      request.setAttribute(SERVLET_NAME, _config.getServletName());
+      throw new ServletException(e);
     }
   }
 }
