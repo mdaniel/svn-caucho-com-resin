@@ -214,9 +214,9 @@ public class DeploymentService
     for (TargetModuleIDImpl targetModuleID : targetModuleIDs) {
       Throwable exception = null;
 
-      try {
-        ArchiveDeployMXBean mxbean;
+      ArchiveDeployMXBean mxbean = null;
 
+      try {
         mxbean = getMXBean(targetModuleID.getTarget());
 
         Path deployPath = Vfs.lookup(mxbean.getArchivePath(moduleID));
@@ -252,6 +252,15 @@ public class DeploymentService
       if (exception != null) {
         failed = true;
         describe(message, targetModuleID, false, getExceptionMessage(exception));
+
+        if (mxbean != null) {
+          try {
+            mxbean.undeploy(moduleID);
+          }
+          catch (Throwable t) {
+            log.log(Level.FINE, t.toString(), t);
+          }
+        }
       }
       else
         describe(message, targetModuleID, true);

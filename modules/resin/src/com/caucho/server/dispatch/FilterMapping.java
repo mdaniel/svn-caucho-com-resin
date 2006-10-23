@@ -178,13 +178,17 @@ public class FilterMapping extends FilterConfigImpl {
    * Returns true if the filter map matches the invocation URL.
    *
    * @param invocation the request's invocation
-   * @param servletName the servlet name to match
    */
   boolean isMatch(ServletInvocation invocation)
   {
-    String servletPath = invocation.getServletPath();
-    String pathInfo = invocation.getPathInfo();
+    return isMatch(invocation.getServletPath(), invocation.getPathInfo());
+  }
 
+  /**
+   * Returns true if the filter map matches the servlet path and path info.
+   * */
+  public boolean isMatch(String servletPath, String pathInfo)
+  {
     String uri;
 
     if (pathInfo == null)

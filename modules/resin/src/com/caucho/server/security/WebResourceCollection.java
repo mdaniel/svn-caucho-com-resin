@@ -28,14 +28,15 @@
 
 package com.caucho.server.security;
 
-import java.util.*;
-import java.util.regex.*;
-import javax.servlet.*;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CauchoSystem;
-
 import com.caucho.server.dispatch.UrlMap;
+import com.caucho.util.CauchoSystem;
+import com.caucho.util.L10N;
+import com.caucho.config.ConfigException;
+
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Configuration for the web-resource-collection.
@@ -43,10 +44,13 @@ import com.caucho.server.dispatch.UrlMap;
 public class WebResourceCollection {
   static L10N L = new L10N(WebResourceCollection.class);
 
+  public enum HttpMethod { GET, POST, PUT, DELETE, HEAD, OPTIONS, TRACE };
+
   private String _webResourceName;
   private String _description;
   private ArrayList<String> _methodList;
   private ArrayList<Pattern> _urlPatternList = new ArrayList<Pattern>();
+
 
   /**
    * Sets the web-resource-name.
@@ -105,6 +109,22 @@ public class WebResourceCollection {
    */
   public void addHttpMethod(String method)
   {
+    try {
+      HttpMethod.valueOf(method.toUpperCase());
+    }
+    catch (IllegalArgumentException e) {
+      StringBuilder builder = new StringBuilder();
+
+      for (HttpMethod validHttpMethod : EnumSet.allOf(HttpMethod.class)) {
+        if (builder.length() != 0)
+          builder.append(", ");
+
+        builder.append(validHttpMethod.name());
+      }
+
+      throw new ConfigException(L.l("`{0}' is not a valid  value for `{1}', valid values are {2}", method, "http-method", builder));
+    }
+
     if (_methodList == null)
       _methodList = new ArrayList<String>();
 

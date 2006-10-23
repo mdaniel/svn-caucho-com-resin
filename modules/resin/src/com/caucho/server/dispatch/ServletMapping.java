@@ -29,28 +29,19 @@
 
 package com.caucho.server.dispatch;
 
-import java.util.*;
-
-import java.util.logging.Level;
-
-import java.io.*;
-
-import javax.annotation.*;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import javax.el.*;
-
-import com.caucho.util.*;
-
-import com.caucho.config.*;
+import com.caucho.config.ConfigELContext;
+import com.caucho.config.ConfigException;
 import com.caucho.config.types.InitProgram;
-
 import com.caucho.el.EL;
-import com.caucho.el.MapVariableResolver;
-
 import com.caucho.server.webapp.WebApp;
+import com.caucho.util.L10N;
+
+import javax.el.ELContext;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.Level;
 
 /**
  * Configuration for a servlet.
@@ -76,6 +67,9 @@ public class ServletMapping extends ServletConfigImpl {
    */
   public void addURLPattern(String pattern)
   {
+    if (pattern.indexOf('\n') > -1)
+      throw new ConfigException(L.l("`{0}' cannot contain newline", "url-pattern"));
+
     _mappingList.add(new Mapping(pattern, null));
   }
 
