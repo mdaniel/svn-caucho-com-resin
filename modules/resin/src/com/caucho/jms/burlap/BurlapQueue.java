@@ -187,10 +187,7 @@ public class BurlapQueue extends com.caucho.jms.AbstractQueue
       }
       
       if (is != null) {
-        try {
-          is.close();
-        } catch (IOException e) {
-        }
+	is.close();
       }
     }
   }

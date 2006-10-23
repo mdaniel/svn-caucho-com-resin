@@ -86,7 +86,7 @@ public class TldListener {
     try {
       Listener listener = new Listener();
       listener.setListenerClass(_listenerClass);
-      listener.init();
+      //listener.init();
     
       app.addListener(listener);
     } catch (RuntimeException e) {

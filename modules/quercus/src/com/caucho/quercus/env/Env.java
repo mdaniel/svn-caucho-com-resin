@@ -3774,12 +3774,8 @@ public final class Env {
       log.log(Level.FINE, e.toString(), e);
     }
     finally {
-      try {
-        if (is != null)
-          is.close();
-      }
-      catch (IOException e) {
-      }
+      if (is != null)
+	is.close();
     }
 
     return null;

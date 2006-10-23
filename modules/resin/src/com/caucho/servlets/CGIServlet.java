@@ -384,10 +384,7 @@ public class CGIServlet extends GenericServlet {
       return new String[] { path };
     } finally {
       if (is != null) {
-        try {
-          is.close();
-        } catch (IOException e) {
-        }
+	is.close();
       }
     }
   }

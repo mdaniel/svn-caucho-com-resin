@@ -241,10 +241,8 @@ public class PathEcmaWrap {
     {
       ReadWritePair pair = (ReadWritePair) o;
 
-      try {
-	pair.getReadStream().close();
-      } catch (IOException e) {
-      }
+      pair.getReadStream().close();
+
       try {
 	pair.getWriteStream().close();
       } catch (IOException e) {

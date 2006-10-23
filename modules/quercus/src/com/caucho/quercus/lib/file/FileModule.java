@@ -2039,11 +2039,8 @@ public class FileModule extends AbstractQuercusModule {
 
       return BooleanValue.FALSE;
     } finally {
-      try {
-	if (is != null)
-	  is.close();
-      } catch (IOException e) {
-      }
+      if (is != null)
+	is.close();
     }
   }
 

@@ -599,7 +599,7 @@ abstract public class AbstractStylesheetFactory
 	  return generateFromNode(doc, null);
       } finally {
         if (rs != null)
-          try { rs.close(); } catch (IOException e) {}
+          rs.close();
       }
     } catch (TransformerConfigurationException e) {
       throw e;
@@ -741,7 +741,7 @@ abstract public class AbstractStylesheetFactory
         throw new TransformerConfigurationException(e);
       } finally {
         if (rs != null)
-          try { rs.close(); } catch (IOException e) {}
+          rs.close();
       }
     }
     else

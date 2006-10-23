@@ -60,11 +60,11 @@ import com.caucho.soa.servlet.*;
 /**
  * A binding for REST services.
  */
-public class RestProtocolServlet
-  extends GenericServlet
-  implements ProtocolServlet {
+public class RestProtocolServlet extends GenericServlet
+  implements ProtocolServlet
+{
   private static final Logger log = 
-    Logger.getLogger(RestServlet.class.getName());
+    Logger.getLogger(RestProtocolServlet.class.getName());
 
   public static final String DELETE = "DELETE";
   public static final String GET = "GET";

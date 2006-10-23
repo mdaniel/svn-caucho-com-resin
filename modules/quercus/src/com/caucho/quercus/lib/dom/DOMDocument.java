@@ -376,12 +376,7 @@ public class DOMDocument
     }
     finally {
       if (is != null) {
-        try {
-          is.close();
-        }
-        catch (IOException ex) {
-          log.log(Level.FINE, ex.toString(), ex);
-        }
+	is.close();
       }
     }
 
@@ -418,12 +413,7 @@ public class DOMDocument
     }
     finally {
       if (is != null) {
-        try {
-          is.close();
-        }
-        catch (IOException ex) {
-          log.log(Level.FINE, ex.toString(), ex);
-        }
+	is.close();
       }
     }
 
@@ -458,12 +448,7 @@ public class DOMDocument
     }
     finally {
       if (is != null) {
-        try {
-          is.close();
-        }
-        catch (IOException ex) {
-          log.log(Level.FINE, ex.toString(), ex);
-        }
+	is.close();
       }
     }
 
@@ -492,12 +477,7 @@ public class DOMDocument
     }
     finally {
       if (is != null) {
-        try {
-          is.close();
-        }
-        catch (IOException ex) {
-          log.log(Level.FINE, ex.toString(), ex);
-        }
+	is.close();
       }
     }
 

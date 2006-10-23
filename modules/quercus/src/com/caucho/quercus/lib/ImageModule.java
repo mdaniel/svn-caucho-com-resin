@@ -143,7 +143,7 @@ public class ImageModule extends AbstractQuercusModule {
 
       return BooleanValue.FALSE;
     } finally {
-      try { is.close(); } catch (IOException e) {}
+      is.close();
     }
 
     if (imageArray == null)

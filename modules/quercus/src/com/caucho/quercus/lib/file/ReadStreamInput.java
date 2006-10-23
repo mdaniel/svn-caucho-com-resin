@@ -317,15 +317,11 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
    */
   public void close()
   {
-    try {
-      ReadStream is = _is;
-      _is = null;
+    ReadStream is = _is;
+    _is = null;
 
-      if (is != null)
-        is.close();
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
+    if (is != null)
+      is.close();
   }
 
   public Object toJavaObject()

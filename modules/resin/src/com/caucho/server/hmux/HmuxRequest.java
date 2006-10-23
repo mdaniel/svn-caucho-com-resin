@@ -462,8 +462,6 @@ public class HmuxRequest extends AbstractHttpRequest
       try {
 	_readStream.setDisableClose(false);
 	_readStream.close();
-      } catch (ClientDisconnectException e) {
-        throw e;
       } catch (Exception e) {
 	killKeepalive();
         log.log(Level.FINE, dbgId() + e, e);

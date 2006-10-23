@@ -209,11 +209,8 @@ public class StreamReadWrite extends StreamResource {
     ReadStream is = _is;
     _is = null;
 
-    try {
-      if (is != null)
-	is.close();
-    } catch (IOException e) {
-    }
+    if (is != null)
+      is.close();
   }
 
   /**
@@ -242,11 +239,8 @@ public class StreamReadWrite extends StreamResource {
     WriteStream os = _os;
     _os = null;
 
-    try {
-      if (is != null)
-	is.close();
-    } catch (IOException e) {
-    }
+    if (is != null)
+      is.close();
 
     try {
       if (os != null)

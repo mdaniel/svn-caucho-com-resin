@@ -731,11 +731,8 @@ public class VerifierHandlerImpl extends DefaultHandler
 
       return "";
     } finally {
-      try {
-	if (is != null)
-	  is.close();
-      } catch (IOException e) {
-      }
+      if (is != null)
+	is.close();
     }
   }
 

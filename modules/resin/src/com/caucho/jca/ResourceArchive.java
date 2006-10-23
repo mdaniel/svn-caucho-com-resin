@@ -283,11 +283,9 @@ public class ResourceArchive implements EnvironmentBean {
             ois.close();
         } catch (IOException e) {
         }
-        try {
-          if (is != null)
-            is.close();
-        } catch (IOException e) {
-        }
+
+	if (is != null)
+	  is.close();
       }
     }
 
@@ -340,10 +338,8 @@ public class ResourceArchive implements EnvironmentBean {
           zis.close();
         } catch (IOException e) {
         }
-        try {
-          rs.close();
-        } catch (IOException e) {
-        }
+
+	rs.close();
       }
 
       if (! tempDir.equals(expandDir)) {

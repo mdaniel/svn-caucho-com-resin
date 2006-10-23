@@ -285,11 +285,8 @@ abstract public class ExpandDeployController<I extends DeployInstance>
       } catch (Throwable e) {
 	log.log(Level.FINE, e.toString(), e);
       } finally {
-        try {
-          if (is != null)
-            is.close();
-        } catch (IOException e) {
-        }
+	if (is != null)
+	  is.close();
       }
     }
 
@@ -343,10 +340,8 @@ abstract public class ExpandDeployController<I extends DeployInstance>
           zis.close();
         } catch (IOException e) {
         }
-        try {
-          rs.close();
-        } catch (IOException e) {
-        }
+
+	rs.close();
       }
     } catch (IOException e) {
       log.log(Level.WARNING, e.toString(), e);

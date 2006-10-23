@@ -250,9 +250,7 @@ class MOFileParser extends GettextParser
 
   void close()
   {
-    try {
-      if (_in != null)
-        _in.close();
-    } catch (IOException e) {}
+    if (_in != null)
+      _in.close();
   }
 }

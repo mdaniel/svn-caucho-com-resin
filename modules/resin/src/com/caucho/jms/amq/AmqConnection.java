@@ -570,13 +570,10 @@ public class AmqConnection implements AmqConstants {
     } catch (IOException e) {
     }
     
-    try {
-      ReadStream is = _is;
-      _is = null;
+    ReadStream is = _is;
+    _is = null;
 
-      if (is != null)
-	is.close();
-    } catch (IOException e) {
-    }
+    if (is != null)
+      is.close();
   }
 }
