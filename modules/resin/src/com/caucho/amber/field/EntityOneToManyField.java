@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import com.caucho.bytecode.JClass;
+import com.caucho.bytecode.JField;
 import com.caucho.bytecode.JMethod;
 import com.caucho.bytecode.JType;
 
@@ -434,16 +435,30 @@ public class EntityOneToManyField extends CollectionField {
   public void generateSetProperty(JavaWriter out)
     throws IOException
   {
-    JMethod setter = getSetterMethod();
+    // commented out: jpa/0s2d
+    // JMethod setter = getSetterMethod();
+    //
+    // if (setter == null)
+    //   return;
+    //
+    // JClass []paramTypes = setter.getParameterTypes();
 
-    if (setter == null)
-      return;
+    JType type;
 
-    JClass []paramTypes = setter.getParameterTypes();
+    if (! getSourceType().isFieldAccess()) {
+      type = getGetterMethod().getGenericReturnType();
+    }
+    else {
+      JField field = EntityType.getField(getBeanClass(), getName());
+      type = field.getGenericType();
+    }
 
     out.println();
-    out.print("public void " + setter.getName() + "(");
-    out.print(getJavaTypeName() + " value)");
+    // commented out: jpa/0s2d
+    // out.print("public void " + setter.getName() + "(");
+    // out.print(getJavaTypeName() + " value)");
+    out.print("public void " + getSetterName() + "(");
+    out.print(type.getName() + " value)");
     out.println("{");
     out.pushDepth();
     out.popDepth();
