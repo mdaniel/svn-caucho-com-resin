@@ -725,6 +725,11 @@ public class Server extends ProtocolDispatchServer
     return getSelectManager() != null;
   }
 
+  public void addSelectManager(SelectManagerCompat selectManager)
+  {
+    
+  }
+
   /**
    * Returns the number of select keepalives available.
    */
@@ -1398,5 +1403,19 @@ public class Server extends ProtocolDispatchServer
   {
     return ("Server[id=" + getServerId()
 	    + ",cluster=" + _clusterServer.getCluster().getId() + "]");
+  }
+
+  public static class SelectManagerCompat {
+    private boolean _isEnable = true;
+    
+    public void setEnable(boolean isEnable)
+    {
+      _isEnable = isEnable;
+    }
+
+    public boolean isEnable()
+    {
+      return _isEnable;
+    }
   }
 }

@@ -594,6 +594,7 @@ public class ConnectionPool extends AbstractManagedObject
       clearItems.addAll(pool);
 
       pool.clear();
+      _idlePool.clear();
     }
     
     for (int i = 0; i < clearItems.size(); i++) {

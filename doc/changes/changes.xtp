@@ -12,6 +12,12 @@
 
 <s2 title="3.1snap - Oct 6, 2006">
 <ul>
+<li>Add DBPool.closeIdleConnections() (#1394, rep by M Young)
+<li>Apache: added ResinSessionCookie and ResinSessionUrlPrefix (#1376, rep by Steve Baugus)
+<li>Validation for save-mode and always-save-session. (#1386, rep by justinwcs)
+<li>Hessian: specialized serializers were not adding references (#1417, rep by jjviana)
+<li>JSP 2.1
+<li>Servlet 2.5
 <li>(2006-10-06) Quercus: realpath must strip trailing slash (#1261, rep by koreth)</li>
 <li>Quercus: highlight_file (#720)</li>
 <li>Quercus: fsockopen must return BinaryInput/BinaryOutput (#1383, rep by David Berry)</li>

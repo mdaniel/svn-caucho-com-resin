@@ -2,13 +2,13 @@
 
 CC=gcc
 CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI -DHAS_JVMDI
-CFLAGS_SHLIB=-fpic
-LIBTOOL=/home/ferg/ws/test-resin/libtool --silent
+CFLAGS_SHLIB=-DSHARED_MODULE
+LIBTOOL=/Users/ferg/ws/resin/libtool --silent
 EGREP=grep -E
-LD=/usr/bin/ld
+LD=gcc
 LD_SHLIB=gcc
 LDFLAGS=
-LDFLAGS_SHLIB=-shared -L/usr/lib
+LDFLAGS_SHLIB=-bundle -undefined suppress -flat_namespace -L/usr/lib
 OBJ=stream.o config.o memory.o
 OBJ_PICS=stream.lo config.lo memory.lo
 INCLUDES= -I/usr/include

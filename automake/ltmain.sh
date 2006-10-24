@@ -76,6 +76,7 @@ EOF
   exit $EXIT_SUCCESS
 fi
 
+max_cmd_len=1024
 default_mode=
 help="Try \`$progname --help' for more information."
 magic="%%%MAGIC variable%%%"

@@ -992,6 +992,14 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   }
 
   /**
+   * Closes the idle connections in the pool.
+   */
+  public void closeIdleConnections()
+  {
+    
+  }
+
+  /**
    * At the alarm, close all connections which have been sitting in
    * the pool for too long.
    *

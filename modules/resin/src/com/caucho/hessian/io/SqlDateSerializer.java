@@ -66,6 +66,9 @@ public class SqlDateSerializer extends AbstractSerializer {
     else {
       Class cl = obj.getClass();
 
+      if (out.addRef(obj))
+	return;
+      
       int ref = out.writeObjectBegin(cl.getName());
 
       if (ref < 0) {

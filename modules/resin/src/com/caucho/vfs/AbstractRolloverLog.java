@@ -108,6 +108,9 @@ public class AbstractRolloverLog {
   private long _nextPeriodEnd = -1;
   private long _nextRolloverCheckTime = -1;
 
+  private TempStream _tempStream;
+  private boolean _isRollingOver;
+
   private WriteStream _os;
   private WriteStream _zipOut;
 
@@ -342,24 +345,36 @@ public class AbstractRolloverLog {
   /**
    * Writes to the underlying log.
    */
-  protected synchronized void write(byte []buffer, int offset, int length)
+  protected void write(byte []buffer, int offset, int length)
     throws IOException
   {
-    if (_os == null)
-      openLog();
+    synchronized (this) {
+      if (! _isRollingOver) {
+	if (_os == null)
+	  openLog();
 
-    if (_os != null)
-      _os.write(buffer, offset, length);
+	if (_os != null)
+	  _os.write(buffer, offset, length);
+      }
+      else {
+	if (_tempStream == null)
+	  _tempStream = new TempStream();
+
+	_tempStream.write(buffer, offset, length, false);
+      }
+    }
   }
 
   /**
    * Writes to the underlying log.
    */
-  protected synchronized void flush()
+  protected void flush()
     throws IOException
   {
-    if (_os != null)
-      _os.flush();
+    synchronized (this) {
+      if (_os != null)
+	_os.flush();
+    }
   }
 
   /**
@@ -367,45 +382,83 @@ public class AbstractRolloverLog {
    *
    * @param now current time in milliseconds.
    */
-  protected synchronized void rolloverLog(long now)
+  protected void rolloverLog(long now)
   {
-    _nextRolloverCheckTime = now + _rolloverCheckPeriod;
+    boolean isRollingOver = false;
+    
+    try {
+      Path savedPath = null;
 
-    long lastPeriodEnd = _nextPeriodEnd;
-    _nextPeriodEnd = Period.periodEnd(now, getRolloverPeriod());
+      synchronized (this) {
+	if (_isRollingOver)
+	  return;
 
-    Path path = getPath();
-
-    if (lastPeriodEnd < now) {
-      closeLogStream();
+	_isRollingOver = isRollingOver = true;
       
-      if (getPathFormat() == null) {
-	Path savedPath = getArchivePath(lastPeriodEnd - 1);
+	_nextRolloverCheckTime = now + _rolloverCheckPeriod;
 
-	movePathToArchive(savedPath);
+	long lastPeriodEnd = _nextPeriodEnd;
+	_nextPeriodEnd = Period.periodEnd(now, getRolloverPeriod());
+
+	Path path = getPath();
+
+	if (lastPeriodEnd < now) {
+	  closeLogStream();
+      
+	  if (getPathFormat() == null) {
+	    savedPath = getArchivePath(lastPeriodEnd - 1);
+	  }
+
+	  /*
+	    if (log.isLoggable(Level.FINE))
+	    log.fine(getPath() + ": next rollover at " +
+	    QDate.formatLocal(_nextPeriodEnd));
+	  */
+	}
+	else if (path != null && getRolloverSize() <= path.getLength()) {
+	  closeLogStream();
+      
+	  if (getPathFormat() == null) {
+	    savedPath = getArchivePath(now);
+	  }
+	}
+
+	long nextPeriodEnd = _nextPeriodEnd;
+	if (_nextPeriodEnd < _nextRolloverCheckTime && _nextPeriodEnd > 0)
+	  _nextRolloverCheckTime = _nextPeriodEnd;
       }
 
-      /*
-      if (log.isLoggable(Level.FINE))
-	log.fine(getPath() + ": next rollover at " +
-		 QDate.formatLocal(_nextPeriodEnd));
-      */
-    }
-    else if (path != null && getRolloverSize() <= path.getLength()) {
-      closeLogStream();
-      
-      if (getPathFormat() == null) {
-	Path savedPath = getArchivePath(now);
+      // archiving of path is outside of the synchronized block to
+      // avoid freezing during archive
+      if (savedPath != null)
 	movePathToArchive(savedPath);
+    } finally {
+      // Write any new data from the temp stream to the log.
+      synchronized (this) {
+	if (_os == null)
+	  openLog();
+	
+	if (isRollingOver) {
+	  _isRollingOver = false;
+	  TempStream ts = _tempStream;
+	  _tempStream = null;
+
+	  if (ts != null) {
+	    try {
+	      ReadStream is = ts.openRead();
+
+	      try {
+		is.writeToStream(_os);
+	      } finally {
+		is.close();
+	      }
+	    } catch (IOException e) {
+	      e.printStackTrace();
+	    }
+	  }
+	}
       }
     }
-
-    long nextPeriodEnd = _nextPeriodEnd;
-    if (_nextPeriodEnd < _nextRolloverCheckTime && _nextPeriodEnd > 0)
-      _nextRolloverCheckTime = _nextPeriodEnd;
-
-    if (_os == null)
-      openLog();
   }
 
   /**

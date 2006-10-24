@@ -49,6 +49,7 @@
 package com.caucho.hessian.io;
 
 import java.util.*;
+import java.util.logging.*;
 
 import java.io.*;
 import java.io.File;
@@ -60,7 +61,11 @@ import com.caucho.burlap.io.BurlapRemoteObject;
 /**
  * Factory for returning serialization methods.
  */
-public class SerializerFactory extends AbstractSerializerFactory {
+public class SerializerFactory extends AbstractSerializerFactory
+{
+  private static final Logger log
+    = Logger.getLogger(SerializerFactory.class.getName());
+  
   private static Class _enumClass;
   
   private static HashMap _serializerMap;
@@ -384,6 +389,7 @@ public class SerializerFactory extends AbstractSerializerFactory {
 
 	deserializer = getDeserializer(cl);
       } catch (Exception e) {
+	log.log(Level.FINER, e.toString(), e);
       }
     }
 

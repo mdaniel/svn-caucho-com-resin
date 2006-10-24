@@ -56,7 +56,8 @@ import java.lang.reflect.*;
 /**
  * Serializing an object for known object types.
  */
-public class JavaSerializer extends AbstractSerializer {
+public class JavaSerializer extends AbstractSerializer
+{
   private static final Logger log
     = Logger.getLogger(JavaSerializer.class.getName());
   
@@ -67,6 +68,8 @@ public class JavaSerializer extends AbstractSerializer {
   public JavaSerializer(Class cl)
   {
     if (! Serializable.class.isAssignableFrom(cl)) {
+      log.fine("hessian - class " + cl.getName() + " must implement java.io.Serializable");
+      
       throw new IllegalStateException("Serialized class " + cl.getName() + " does not implement java.io.Serializable");
     }
     

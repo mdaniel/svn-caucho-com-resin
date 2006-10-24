@@ -642,6 +642,17 @@ public class DBPool implements DataSource {
   }
 
   /**
+   * Clears the pool.
+   */
+  public void closeIdleConnections()
+  {
+    ConnectionPool connectionPool = _connectionPool;
+    
+    if (connectionPool != null)
+      connectionPool.clear();
+  }
+
+  /**
    * Returns the login timeout
    */
   public int getLoginTimeout() throws SQLException

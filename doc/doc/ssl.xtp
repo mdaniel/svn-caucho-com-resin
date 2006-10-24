@@ -333,7 +333,7 @@ certificates (and documentation) from mod_ssl for Resin.</p>
 <s2 title="Testing">
 
 <s3 title="Testing with the browser">
-
+<!--
 <p><jsp:scriptlet>if (request.isSecure()) {</jsp:scriptlet>
 </p><p><code>request.isSecure()</code> is reporting true, so it looks like
 you have SSL working and are viewing this page over an SSL encrypted
@@ -344,7 +344,10 @@ an <code>https://</code> style URL instead of an <code>http://</code>
 url and you will get a message telling that SSL is working.
 <jsp:scriptlet>}</jsp:scriptlet>
 
-</p><p>A quick test is the following JSP.</p>
+</p>
+-->
+
+<p>A quick test is the following JSP.</p>
 
 <example>
 Secure? &lt;%= request.isSecure() %&gt;

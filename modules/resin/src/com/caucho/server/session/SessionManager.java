@@ -1047,6 +1047,13 @@ public final class SessionManager implements ObjectManager, AlarmListener
     return _isAppendServerIndex;
   }
 
+  public void init()
+  {
+    if (_sessionSaveMode == SAVE_ON_SHUTDOWN
+	&& (_alwaysSaveSession || _alwaysLoadSession == SET_TRUE))
+      throw new ConfigException(L.l("save-mode='on-shutdown' cannot be used with <always-save-session/> or <always-load-session/>"));
+  }
+
   public void start()
     throws Exception
   {

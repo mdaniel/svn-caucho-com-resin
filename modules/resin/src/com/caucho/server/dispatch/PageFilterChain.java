@@ -183,15 +183,18 @@ public class PageFilterChain implements FilterChain {
 	  page.pageservice(req, res);
       } catch (ServletException e) {
 	request.setAttribute(SERVLET_EXN, e);
-	request.setAttribute(SERVLET_NAME, _config.getServletName());
+	if (_config != null)
+	  request.setAttribute(SERVLET_NAME, _config.getServletName());
 	throw e;
       } catch (IOException e) {
 	request.setAttribute(SERVLET_EXN, e);
-	request.setAttribute(SERVLET_NAME, _config.getServletName());
+	if (_config != null)
+	  request.setAttribute(SERVLET_NAME, _config.getServletName());
 	throw e;
       } catch (RuntimeException e) {
 	request.setAttribute(SERVLET_EXN, e);
-	request.setAttribute(SERVLET_NAME, _config.getServletName());
+	if (_config != null)
+	  request.setAttribute(SERVLET_NAME, _config.getServletName());
 	throw e;
       }
     }

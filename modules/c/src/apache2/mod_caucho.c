@@ -275,7 +275,7 @@ cse_get_server_config(server_rec *s)
  */
 static const char *
 resin_config_server_command(cmd_parms *cmd, void *pconfig,
-			    char *host_arg, char *port_arg)
+			    const char *host_arg, const char *port_arg)
 {
   config_t *config = pconfig; /* cse_get_server_config(cmd->server); */
   int port = port_arg ? atoi(port_arg) : DEFAULT_PORT;
@@ -304,7 +304,7 @@ resin_config_server_command(cmd_parms *cmd, void *pconfig,
  * Parse the CauchoStatus configuration in the apache config file.
  */
 static const char *
-caucho_status_command(cmd_parms *cmd, void *pconfig, char *value)
+caucho_status_command(cmd_parms *cmd, void *pconfig, const char *value)
 {
   config_t *config = pconfig; /* = cse_get_server_config(cmd->server); */
   
@@ -325,7 +325,8 @@ caucho_status_command(cmd_parms *cmd, void *pconfig, char *value)
  * Parse the CauchoConfigCacheDirectory configuration in the apache config file.
  */
 static const char *
-resin_config_cache_command(cmd_parms *cmd, void *pconfig, char *cache_dir)
+resin_config_cache_command(cmd_parms *cmd, void *pconfig,
+			   const char *cache_dir)
 {
   config_t *config = pconfig; /* cse_get_server_config(cmd->server); */
   
@@ -352,7 +353,8 @@ cse_config_file_command(cmd_parms *cmd, void *pconfig, char *value)
  * Parse the CauchoHosts configuration in the apache config file.
  */
 static const char *
-cse_host_command(cmd_parms *cmd, void *pconfig, char *host_arg, char *port_arg)
+cse_host_command(cmd_parms *cmd, void *pconfig,
+		 const char *host_arg, const char *port_arg)
 {
   config_t *config = pconfig; /* = cse_get_server_config(cmd->server); */
 
@@ -390,7 +392,7 @@ cse_host_command(cmd_parms *cmd, void *pconfig, char *host_arg, char *port_arg)
  */
 static const char *
 cse_backup_command(cmd_parms *cmd, void *pconfig,
-		   char *host_arg, char *port_arg)
+		   const char *host_arg, const char *port_arg)
 {
   config_t *config = pconfig; /* = cse_get_server_config(cmd->server); */
   int port = port_arg ? atoi(port_arg) : DEFAULT_PORT;
@@ -416,6 +418,44 @@ cse_backup_command(cmd_parms *cmd, void *pconfig,
   }
 
   cse_add_backup(&host->cluster, host_arg, port);
+
+  return 0;
+}
+
+/**
+ * Set the default session cookie used by mod_caucho.
+ */
+static const char *
+resin_session_cookie_command(cmd_parms *cmd, void *pconfig,
+			     const char *cookie_arg)
+{
+  config_t *config = pconfig; /* = cse_get_server_config(cmd->server); */
+
+  if (! config)
+    return 0;
+
+  config->has_config = 1;
+
+  strcpy(config->session_cookie, cookie_arg);
+
+  return 0;
+}
+
+/**
+ * Set the default session url used by mod_caucho.
+ */
+static const char *
+resin_session_url_prefix_command(cmd_parms *cmd, void *pconfig,
+				 const char *cookie_arg)
+{
+  config_t *config = pconfig; /* = cse_get_server_config(cmd->server); */
+
+  if (! config)
+    return 0;
+
+  config->has_config = 1;
+
+  strcpy(config->session_url_prefix, cookie_arg);
 
   return 0;
 }
@@ -1008,6 +1048,13 @@ caucho_status(request_rec *r)
 
   if (config->error)
     ap_rprintf(r, "<h2 color='red'>Error : %s</h2>\n", config->error);
+
+  ap_rprintf(r, "<table border='0'>");
+  ap_rprintf(r, "<tr><th>Session Cookie</th><td>'%s'</td></tr>",
+	     config->session_cookie);
+  ap_rprintf(r, "<tr><th>Session URL</th><td>'%s'</td></tr>",
+	     config->session_url_prefix);
+  ap_rprintf(r, "</table>");
   
   ap_rprintf(r, "<h2>Configuration Cluster</h2>\n");
   jvm_status(&config->config_cluster, r);
@@ -1129,24 +1176,38 @@ cse_dispatch(request_rec *r)
  * Only needed configuration is pointer to resin.conf
  */
 static command_rec caucho_commands[] = {
-    {"ResinConfigServer", resin_config_server_command, NULL,
-     RSRC_CONF|ACCESS_CONF, TAKE12,
-     "Adds a configuration server."},
-    {"CauchoStatus", caucho_status_command, NULL,
-     RSRC_CONF|ACCESS_CONF, TAKE1,
-     "Adds a configuration server."},
-    {"CauchoHost", cse_host_command, NULL,
-     RSRC_CONF|ACCESS_CONF, TAKE12,
-     "Configures a cluster host for manual configuration."},
-    {"CauchoBackup", cse_backup_command, NULL,
-     RSRC_CONF|ACCESS_CONF, TAKE12,
-     "Configures a cluster host for manual configuration."},
-    {"CauchoConfigCacheDirectory", resin_config_cache_command, NULL,
-     RSRC_CONF|ACCESS_CONF, TAKE1,
-     "Configures the saved configuration file."},
-    {"CauchoConfigFile", cse_config_file_command, NULL,
-     RSRC_CONF|ACCESS_CONF, TAKE12,
-     "Obsolete."},
+    AP_INIT_TAKE12("ResinConfigServer", resin_config_server_command,
+		   NULL, RSRC_CONF|ACCESS_CONF,
+		   "Adds a configuration server."),
+    AP_INIT_TAKE12("ResinHost", cse_host_command,
+		   NULL, RSRC_CONF|ACCESS_CONF,
+		   "Configures a cluster host for manual configuration."),
+    AP_INIT_TAKE12("ResinBackup", cse_backup_command,
+		   NULL, RSRC_CONF|ACCESS_CONF,
+		   "Configures a cluster host for manual configuration."),
+    AP_INIT_TAKE1("ResinConfigCacheDirectory", resin_config_cache_command,
+		  NULL, RSRC_CONF|ACCESS_CONF,
+		  "Configures the saved configuration file."),
+    AP_INIT_TAKE1("ResinSessionCookie", resin_session_cookie_command,
+		  NULL, RSRC_CONF|ACCESS_CONF, 
+		  "Configures the session cookie."),
+    AP_INIT_TAKE1("ResinSessionUrlPrefix", resin_session_url_prefix_command,
+		  NULL, RSRC_CONF|ACCESS_CONF,
+		  "Configures the session url."),
+    
+    AP_INIT_TAKE1("CauchoStatus", caucho_status_command,
+		  NULL, RSRC_CONF|ACCESS_CONF, 
+		  "Adds a configuration server."),
+    
+    AP_INIT_TAKE12("CauchoHost", cse_host_command,
+		   NULL, RSRC_CONF|ACCESS_CONF, 
+		   "Configures a cluster host for manual configuration."),
+    AP_INIT_TAKE12("CauchoBackup", cse_backup_command,
+		   NULL, RSRC_CONF|ACCESS_CONF, 
+		   "Configures a cluster host for manual configuration."),
+    AP_INIT_TAKE1("CauchoConfigCacheDirectory", resin_config_cache_command,
+		  NULL, RSRC_CONF|ACCESS_CONF,
+		  "Configures the saved configuration file."),
     {NULL}
 };
 

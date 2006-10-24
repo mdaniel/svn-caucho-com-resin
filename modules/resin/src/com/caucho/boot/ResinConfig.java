@@ -31,6 +31,8 @@ package com.caucho.boot;
 
 import java.util.*;
 
+import javax.annotation.*;
+
 import com.caucho.config.*;
 import com.caucho.config.core.*;
 import com.caucho.config.types.*;
@@ -97,6 +99,11 @@ public class ResinConfig implements EnvironmentBean {
 
     return cluster;
   }
+
+  public ServerCompatConfig createServer()
+  {
+    return new ServerCompatConfig();
+  }
   
   /**
    * Ignore items we can't understand.
@@ -120,6 +127,21 @@ public class ResinConfig implements EnvironmentBean {
   /**
    * Finds a server.
    */
+  public ClusterConfig findCluster(String id)
+  {
+    for (int i = 0; i < _clusterList.size(); i++) {
+      ClusterConfig cluster = _clusterList.get(i);
+
+      if (id.equals(cluster.getId()))
+	return cluster;
+    }
+
+    return null;
+  }
+
+  /**
+   * Finds a server.
+   */
   public Watchdog findServer(String id)
   {
     for (int i = 0; i < _clusterList.size(); i++) {
@@ -132,5 +154,77 @@ public class ResinConfig implements EnvironmentBean {
     }
 
     return null;
+  }
+
+  public class ServerCompatConfig {
+    public ClusterCompatConfig createCluster()
+    {
+      return new ClusterCompatConfig();
+    }
+    
+    public SrunCompatConfig createHttp()
+    {
+      return new SrunCompatConfig();
+    }
+    
+    /**
+     * Ignore items we can't understand.
+     */
+    public void addBuilderProgram(BuilderProgram program)
+    {
+    }
+  }
+
+  public class ClusterCompatConfig {
+    public SrunCompatConfig createSrun()
+    {
+      return new SrunCompatConfig();
+    }
+    
+    /**
+     * Ignore items we can't understand.
+     */
+    public void addBuilderProgram(BuilderProgram program)
+    {
+    }
+  }
+
+  public class SrunCompatConfig {
+    private String _id = "";
+
+    public void setId(String id)
+    {
+      _id = id;
+    }
+
+    public void setServerId(String id)
+    {
+      _id = id;
+    }
+    
+    /**
+     * Ignore items we can't understand.
+     */
+    public void addBuilderProgram(BuilderProgram program)
+    {
+    }
+
+    @PostConstruct
+      public void init()
+    {
+      Watchdog server = findServer(_id);
+
+      if (server != null)
+	return;
+
+      ClusterConfig cluster = findCluster("");
+
+      if (cluster == null)
+	cluster = createCluster();
+
+      server = cluster.createServer();
+      server.setId(_id);
+      cluster.addServer(server);
+    }
   }
 }

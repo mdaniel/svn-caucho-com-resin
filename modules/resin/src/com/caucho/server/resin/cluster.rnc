@@ -2,7 +2,8 @@ default namespace r = "http://caucho.com/ns/resin"
 
 include "resin-content.rnc"
 
-start = element cluster {
-  r_cluster-Content
-}
+start = (element cluster {
+           r_cluster-Content
+         }
+         | r_server-Compat)
 

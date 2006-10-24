@@ -159,7 +159,6 @@ public class Resin implements EnvironmentBean, SchemaBean
     
     _startTime = Alarm.getCurrentTime();
 
-
     String resinHome = System.getProperty("resin.home");
 
     if (resinHome != null)
@@ -610,7 +609,7 @@ public class Resin implements EnvironmentBean, SchemaBean
     }
     */
 
-    log().info("Resin started in " + (Alarm.getCurrentTime() - start) + "ms");
+    log().info("Resin started in " + (Alarm.getCurrentTime() - _startTime) + "ms");
   }
 
   public Cluster findCluster(String id)

@@ -1610,6 +1610,9 @@ public class WebApp extends ServletContextImpl
 	  sessionManager.close();
       }
 
+      if (getSessionManager() != null)
+	getSessionManager().init();
+
       for (int i = 0; i < _resourceValidators.size(); i++) {
 	Validator validator = _resourceValidators.get(i);
 
