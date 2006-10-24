@@ -58,6 +58,7 @@ import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.expr.ManyToOneExpr;
 import com.caucho.amber.expr.OneToManyExpr;
 
+import com.caucho.bytecode.JField;
 import com.caucho.bytecode.JMethod;
 import com.caucho.bytecode.JType;
 
@@ -845,15 +846,28 @@ public class EntityManyToManyField extends AssociationField {
   public void generateSetProperty(JavaWriter out)
     throws IOException
   {
-    JMethod setter = getSetterMethod();
+    // commented out: jpa/0s2i
+    // JMethod setter = getSetterMethod();
+    //
+    // if (setter == null)
+    //   return;
+    //
+    // JType type = getGetterMethod().getGenericReturnType();
 
-    if (setter == null)
-      return;
+    JType type;
 
-    JType type = getGetterMethod().getGenericReturnType();
+    if (! getSourceType().isFieldAccess()) {
+      type = getGetterMethod().getGenericReturnType();
+    }
+    else {
+      JField field = EntityType.getField(getBeanClass(), getName());
+      type = field.getGenericType();
+    }
 
     out.println();
-    out.print("public void " + setter.getName() + "(");
+    // commented out: jpa/0s2i
+    // out.print("public void " + setter.getName() + "(");
+    out.print("public void " + getSetterName() + "(");
     out.print(type.getPrintName() + " value)");
     out.println("{");
     out.pushDepth();

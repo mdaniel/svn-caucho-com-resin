@@ -42,7 +42,7 @@ import com.caucho.amber.AmberRuntimeException;
 import com.caucho.amber.manager.AmberConnection;
 
 import com.caucho.amber.query.UserQuery;
-  
+
 /**
  * Represents a lazy collection.
  */
@@ -58,7 +58,7 @@ public class CollectionImpl<E> extends AbstractList<E>
   public CollectionImpl(AmberConnection aConn, String query)
   {
     _aConn = aConn;
-    
+
     try {
       _query = _aConn.prepareQuery(query);
     } catch (SQLException e) {
@@ -72,14 +72,14 @@ public class CollectionImpl<E> extends AbstractList<E>
 
     setSession(((UserQuery) _query).getConnection());
   }
-  
+
   /**
    * Sets the session.
    */
   public void setSession(AmberConnection aConn)
   {
     _aConn = aConn;
-    
+
     _aConn.register(this);
   }
 
@@ -90,14 +90,14 @@ public class CollectionImpl<E> extends AbstractList<E>
   {
     return _query;
   }
-  
+
   /**
    * Returns the number of items in the collection.
    */
   public int size()
   {
     fill();
-    
+
     return _values.size();
   }
 
@@ -107,7 +107,7 @@ public class CollectionImpl<E> extends AbstractList<E>
   public Iterator<E> iterator()
   {
     fill();
-    
+
     return new ValuesIterator(_values);
   }
 
@@ -119,6 +119,16 @@ public class CollectionImpl<E> extends AbstractList<E>
     fill();
 
     return _values.get(index);
+  }
+
+  /**
+   * Adds an item to the collection.
+   */
+  public boolean add(E o)
+  {
+    fill();
+
+    return _values.add(o);
   }
 
   /**
@@ -147,7 +157,7 @@ public class CollectionImpl<E> extends AbstractList<E>
   {
     if (Alarm.getCurrentTime() <= _expireTime)
       return;
-    
+
     try {
       _expireTime = Alarm.getCurrentTime();
 
@@ -176,9 +186,9 @@ public class CollectionImpl<E> extends AbstractList<E>
     public E next()
     {
       if (i < _values.size())
-	return _values.get(i++);
+        return _values.get(i++);
       else
-	return null;
+        return null;
     }
 
     public void remove()
