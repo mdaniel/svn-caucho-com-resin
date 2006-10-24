@@ -108,6 +108,13 @@ public class EarDeployGenerator
     throws ConfigException
   {
     super.initImpl();
+  }
+
+  @Override
+  protected void startImpl()
+    throws ConfigException
+  {
+    super.startImpl();
 
     _admin.register();
   }

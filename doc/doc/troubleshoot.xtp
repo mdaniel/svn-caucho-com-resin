@@ -776,6 +776,7 @@ minutes), and then stop the server nicely.  i.e. you can't just kill it with ctr
 clean exit.</p>
 
 <p>That will dump a java.hprof.txt.  Skip to the bottom to get the trace.</p>
+</s3>
 
 <s3 title="Understanding java.hprof.txt heap">
 
@@ -887,7 +888,6 @@ TRACE 7266:
 	com/caucho/server/http/Request.finish(Request.java:416)
 </example>
 </s3>
-</s3> <!-- heap-dump -->
 
 <s3 name="garbage-collection" title="Monitor garbage collection">
 
@@ -1122,7 +1122,3 @@ your system and re-install.
 </body>
 </document>
 
-
-</body>
-
-</document>

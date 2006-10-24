@@ -179,8 +179,6 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
   protected void initImpl()
   {
     super.initImpl();
-
-    _admin.register();
   }
 
   /**
@@ -215,6 +213,8 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
     super.startImpl();
 
     Environment.addEnvironmentListener(this, _parentLoader);
+
+    _admin.register();
   }
 
   /**

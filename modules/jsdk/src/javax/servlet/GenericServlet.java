@@ -24,13 +24,12 @@
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
- *
- * $Id: GenericServlet.java,v 1.2 2004/09/29 00:12:46 cvs Exp $
  */
 
 package javax.servlet;
 
 import java.util.*;
+import java.util.logging.*;
 import java.io.*;
 
 /**
@@ -52,7 +51,10 @@ import java.io.*;
  * </code></pre>
  */
 public abstract class GenericServlet
-  implements Servlet, ServletConfig, java.io.Serializable {
+  implements Servlet, ServletConfig, java.io.Serializable
+{
+  private static final Logger log
+    = Logger.getLogger(GenericServlet.class.getName());
 
   private transient ServletConfig _config;
 
@@ -159,13 +161,7 @@ public abstract class GenericServlet
    */
   public void log(String message)
   {
-    ServletContext app = getServletContext();
-    
-    if (app != null) {
-      String name = getServletName();
-
-      app.log(getServletName() + ": " + message);
-    }
+    log.fine(getServletName() + ": " + message);
   }
   
   /**

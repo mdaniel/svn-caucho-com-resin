@@ -283,7 +283,7 @@ database driver.
 
 <s1 name="webdav" title="WebDAV">
 <ul>
-<li><a href="webdav.xtp">Resin documentation</a>
+<li><a href="webdav.xtp">Resin documentation</a></li>
 <!--
 </li><li><a href="external|spec|webdav">External: specification (RFC 2518)</a>
 </li>

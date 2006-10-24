@@ -128,7 +128,7 @@ abstract public class AbstractManagedObject implements ManagedObjectMXBean {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
 
       return false;
     }
@@ -144,7 +144,7 @@ abstract public class AbstractManagedObject implements ManagedObjectMXBean {
 
       return true;
     } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
 
       return false;
     }

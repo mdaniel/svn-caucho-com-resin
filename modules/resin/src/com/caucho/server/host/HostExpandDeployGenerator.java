@@ -121,6 +121,13 @@ public class HostExpandDeployGenerator extends ExpandDeployGenerator<HostControl
     throws ConfigException
   {
     super.initImpl();
+  }
+
+  @Override
+  protected void startImpl()
+    throws ConfigException
+  {
+    super.startImpl();
 
     _admin.register();
   }

@@ -263,12 +263,12 @@ resolves to your web-tier, then you can use:
 </p>
 
 <ol>
-<li>http://www.example.com/proxooladmin;jsessionid=abc
-<li>http://www.example.com/proxooladmin;jsessionid=bcd
-<li>http://www.example.com/proxooladmin;jsessionid=cde
-<li>http://www.example.com/proxooladmin;jsessionid=def
-<li>http://www.example.com/proxooladmin;jsessionid=efg
-<li>etc.
+<li>http://www.example.com/proxooladmin;jsessionid=abc</li>
+<li>http://www.example.com/proxooladmin;jsessionid=bcd</li>
+<li>http://www.example.com/proxooladmin;jsessionid=cde</li>
+<li>http://www.example.com/proxooladmin;jsessionid=def</li>
+<li>http://www.example.com/proxooladmin;jsessionid=efg</li>
+<li>etc.</li>
 </ol>
 </s1>
 

@@ -78,7 +78,7 @@
 int count;
 }#
 
-&lt;h3&gt;A sample ${'${'}count}&lt;/h3&gt;
+&lt;h3&gt;A sample $\{count}&lt;/h3&gt;
 
 #if ("foo" == params.a)
   &lt;h3&gt;Foo!&lt;/h3&gt;
