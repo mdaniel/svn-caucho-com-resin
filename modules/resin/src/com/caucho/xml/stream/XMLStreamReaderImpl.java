@@ -62,7 +62,7 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
   private String _publicId;
   private String _systemId;
 
-  private int _token;
+  private boolean _seenDocumentStart = false;
   private int _current;
   private int _state;
   private boolean _isShortTag;
@@ -118,7 +118,6 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
 
     readHeader();
 
-    _token = 0;
     _current = START_DOCUMENT;
   }
 
@@ -224,6 +223,9 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
 
   public String getLocalName()
   {
+    if (_name == null)
+      throw new IllegalStateException();
+
     return _name.getLocalPart();
   }
 
@@ -234,10 +236,7 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
 
   public QName getName()
   {
-    if (_name != null)
-      return _name;
-    else
-      return null;
+    return _name;
   }
 
   public NamespaceContext getNamespaceContext()
@@ -257,6 +256,9 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
 
   public String getNamespaceURI()
   {
+    if (_name == null)
+      return null;
+
     String uri = _name.getNamespaceURI();
 
     // lame API quirk
@@ -280,6 +282,7 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
   {
     if (_current != PROCESSING_INSTRUCTION)
       return null;
+
     return _processingInstructionData;
   }
 
@@ -287,11 +290,15 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
   {
     if (_current != PROCESSING_INSTRUCTION)
       return null;
+
     return _processingInstructionTarget;
   }
 
   public String getPrefix()
   {
+    if (_name == null)
+      return null;
+
     String prefix = _name.getPrefix();
 
     // lame API quirk
@@ -452,28 +459,15 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
     if (_is == null)
       return false;
 
-    if (_token == 0) {
-      try {
-        _token = readNext();
-      } catch (IOException e) {
-        throw new XMLStreamException(e);
-      }
-    }
-
-    return !_eofEncountered || _token > 0;
+    return _current != END_DOCUMENT;
   }
 
   public int next() throws XMLStreamException
   {
-    int token = _token;
-    _token = 0;
-
-    if (token == 0) {
-      try {
-        token = readNext();
-      } catch (IOException e) {
-        throw new XMLStreamException(e);
-      }
+    try {
+      _current = readNext();
+    } catch (IOException e) {
+      throw new XMLStreamException(e);
     }
 
     // we pop the namespace context when the user is finished
@@ -481,8 +475,8 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
     if (_current == END_ELEMENT)
         _namespaceTracker.pop();
 
-    if (token > 0)
-      return _current = token;
+    if (_current > 0)
+      return _current;
     else {
 
       if (_eofEncountered)
@@ -564,9 +558,9 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
     else
       throw error(L.l("Expected {0} at {1}", ">", charName(ch)));
 
-    for (int i = _attrCount - 1; i >= 0; i--) {
+    for (int i = _attrCount - 1; i >= 0; i--)
       _attrNames[i] = _attrRawNames[i].resolve(_namespaceTracker);
-    }
+
     _name = _rawTagName.resolve(_namespaceTracker);
   }
 
@@ -722,9 +716,9 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
     if ("lt".equals(s))     return "<";
     if ("gt".equals(s))     return ">";
     if (s.startsWith("#x"))
-      return ""+((char)Integer.parseInt(s.substring(2), 16));
+      return ""+((char)Integer.parseInt(s.substring(1), 16));
     if (s.startsWith("#"))
-      return ""+((char)Integer.parseInt(s.substring(2)));
+      return ""+((char)Integer.parseInt(s.substring(1)));
 
     throw new XMLStreamException("unknown entity: \"" + s + "\"");
   }

@@ -41,23 +41,22 @@ public class XMLOutputFactoryImpl extends XMLOutputFactory {
   {
   }
 
+
+  //
+  // Event writer
+  //
+
   public XMLEventWriter createXMLEventWriter(OutputStream stream)
     throws XMLStreamException
   {
-    return new XMLEventWriterImpl(Vfs.openWrite(stream));
+    return new XMLEventWriterImpl(createXMLStreamWriter(stream));
   }
 
   public XMLEventWriter createXMLEventWriter(OutputStream stream,
                                              String encoding)
     throws XMLStreamException
   {
-    try {
-      OutputStreamWriter osw = new OutputStreamWriter(stream, encoding);
-      return new XMLEventWriterImpl(Vfs.openWrite(osw));
-    }
-    catch (IOException e) {
-      throw new XMLStreamException(e);
-    }
+    return new XMLEventWriterImpl(createXMLStreamWriter(stream, encoding));
   }
 
   /**
@@ -72,8 +71,12 @@ public class XMLOutputFactoryImpl extends XMLOutputFactory {
   public XMLEventWriter createXMLEventWriter(Writer stream)
     throws XMLStreamException
   {
-    return new XMLEventWriterImpl(Vfs.openWrite(stream));
+    return new XMLEventWriterImpl(createXMLStreamWriter(stream));
   }
+
+  // 
+  // Stream writer
+  //
 
   public XMLStreamWriter createXMLStreamWriter(OutputStream stream)
     throws XMLStreamException

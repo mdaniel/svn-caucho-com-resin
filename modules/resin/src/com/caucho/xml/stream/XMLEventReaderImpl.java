@@ -24,76 +24,100 @@
 *   59 Temple Place, Suite 330
 *   Boston, MA 02111-1307  USA
 *
-* @author Adam Megacz
+* @author Emil Ong
 */
 
 package com.caucho.xml.stream;
+
+import java.io.*;
+import java.util.*;
+
+import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import javax.xml.stream.events.*;
-import java.util.*;
-import java.io.*;
+
+import com.caucho.util.*;
 import com.caucho.vfs.*;
+import com.caucho.xml.stream.events.*;
 
-public class XMLEventReaderImpl implements XMLEventReader {
+public class XMLEventReaderImpl implements XMLEventReader, XMLStreamConstants {
+  public static final L10N L = new L10N(XMLEventReaderImpl.class);
 
-  public XMLEventReaderImpl(Reader r)
+  private final XMLStreamReader _in;
+  private XMLEvent _current = null;
+  private XMLEvent _next = null;
+
+  public XMLEventReaderImpl(XMLStreamReader in)
+    throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    _in = in;
+    _next = getEvent();
   }
 
-  public XMLEventReaderImpl(InputStream is)
+  public void close() 
+    throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    _in.close();
   }
 
-  public XMLEventReaderImpl(Reader r, String systemId)
+  public String getElementText() 
+    throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    return _in.getElementText();
   }
 
-  public XMLEventReaderImpl(InputStream is, String systemId)
+  public Object getProperty(String name) 
+    throws IllegalArgumentException
   {
-    throw new UnsupportedOperationException();
-  }
-
-  public XMLEventReaderImpl(XMLStreamReader xsr)
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  public void close() throws XMLStreamException
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  public String getElementText() throws XMLStreamException
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  public Object getProperty(String name) throws IllegalArgumentException
-  {
-    throw new UnsupportedOperationException();
+    throw new IllegalArgumentException(name);
   }
 
   public boolean hasNext()
   {
-    throw new UnsupportedOperationException();
+    try {
+      return _next != null || _in.hasNext();
+    } 
+    catch (XMLStreamException e) {
+      return false;
+    }
   }
 
   public XMLEvent nextEvent() throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    if (_next != null) {
+      _current = _next;
+      _next = null;
+    }
+    else {
+      _in.next();
+      _current = getEvent();
+    }
+
+    return _current;
   }
 
   public XMLEvent nextTag() throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    if (_next != null) {
+      _current = _next;
+      _next = null;
+    }
+    else {
+      _in.nextTag();
+      _current = getEvent();
+    }
+
+    return _current;
   }
 
   public XMLEvent peek() throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    if (_next == null) {
+      _in.next();
+      _next = getEvent();
+    }
+
+    return _next;
   }
 
   public void remove()
@@ -103,8 +127,102 @@ public class XMLEventReaderImpl implements XMLEventReader {
 
   public XMLEvent next()
   {
-    throw new UnsupportedOperationException();
+    try {
+      return nextEvent();
+    }
+    catch (XMLStreamException e) {
+      return null;
+    }
   }
 
+  private XMLEvent getEvent()
+    throws XMLStreamException
+  {
+    switch (_in.getEventType()) {
+      case ATTRIBUTE: 
+        // won't happen: our stream reader does not return attributes
+        // independent of start elements/empty elements
+        break;
+
+      case CDATA:
+        return new CharactersImpl(_in.getText(), true, false, false);
+
+      case CHARACTERS: 
+        return new CharactersImpl(_in.getText(), false, false, false);
+
+      case COMMENT:
+        return new CommentImpl(_in.getText());
+
+      case DTD:
+        // XXX
+        break;
+
+      case END_DOCUMENT:
+        return new EndDocumentImpl();
+
+      case END_ELEMENT:
+        return new EndElementImpl(_in.getName());
+
+      case ENTITY_DECLARATION:
+        // XXX
+        break;
+
+      case ENTITY_REFERENCE:
+        // XXX
+        break;
+
+      case NAMESPACE:
+        // won't happen: our stream reader does not return attributes
+        // independent of start elements/empty elements
+        break;
+
+      case NOTATION_DECLARATION:
+        // XXX
+        break;
+
+      case PROCESSING_INSTRUCTION:
+        return new ProcessingInstructionImpl(_in.getPIData(), 
+                                             _in.getPITarget());
+
+      case SPACE:
+        return new CharactersImpl(_in.getText(), false, true, true);
+
+      case START_DOCUMENT:
+        boolean encodingSet = true;
+        String encoding = _in.getCharacterEncodingScheme();
+
+        if (encoding == null) {
+          encoding = "utf-8"; // XXX
+          encodingSet = false;
+        }
+
+        return new StartDocumentImpl(encodingSet, encoding, 
+                                     null /* XXX: system id */, 
+                                     _in.getVersion(), 
+                                     _in.isStandalone(), _in.standaloneSet());
+
+      case START_ELEMENT:
+        HashMap<QName,Attribute> attributes = new HashMap<QName,Attribute>();
+
+        for (int i = 0; i < _in.getAttributeCount(); i++) {
+          Attribute attribute = new AttributeImpl(_in.getAttributeName(i),
+                                                  _in.getAttributeValue(i));
+          attributes.put(_in.getAttributeName(i), attribute);
+        }
+
+        HashMap<String,Namespace> namespaces= new HashMap<String,Namespace>();
+
+        for (int i = 0; i < _in.getNamespaceCount(); i++) {
+          Namespace namespace = new NamespaceImpl(_in.getNamespacePrefix(i),
+                                                  _in.getNamespaceURI(i));
+          namespaces.put(_in.getNamespacePrefix(i), namespace);
+        }
+
+        return new StartElementImpl(_in.getName(), attributes, namespaces,
+                                    _in.getNamespaceContext());
+    }
+
+    throw new XMLStreamException("Event type = " + _in.getEventType());
+  }
 }
 

@@ -43,6 +43,10 @@ public class XMLInputFactoryImpl extends XMLInputFactory {
   {
   }
 
+  //
+  // Filtered
+  //
+  
   public XMLEventReader 
     createFilteredReader(XMLEventReader reader, EventFilter filter)
     throws XMLStreamException
@@ -57,31 +61,29 @@ public class XMLInputFactoryImpl extends XMLInputFactory {
     return new FilteredStreamReader(reader, filter);
   }
 
+  //
+  // Event reader
+  //
+  
   public XMLEventReader 
     createXMLEventReader(InputStream stream)
     throws XMLStreamException
   {
-    return new XMLEventReaderImpl(stream);
+    return new XMLEventReaderImpl(createXMLStreamReader(stream));
   }
 
   public XMLEventReader 
     createXMLEventReader(InputStream stream, String encoding)
     throws XMLStreamException
   {
-    try {
-      InputStreamReader isr = new InputStreamReader(stream, encoding);
-      return new XMLEventReaderImpl(isr);
-    }
-    catch (IOException e) {
-      throw new XMLStreamException(e);
-    }
+    return new XMLEventReaderImpl(createXMLStreamReader(stream, encoding));
   }
 
   public XMLEventReader 
     createXMLEventReader(Reader reader)
     throws XMLStreamException
   {
-    return new XMLEventReaderImpl(reader);
+    return new XMLEventReaderImpl(createXMLStreamReader(reader));
   }
 
   /**
@@ -98,14 +100,14 @@ public class XMLInputFactoryImpl extends XMLInputFactory {
     createXMLEventReader(String systemId, InputStream stream)
     throws XMLStreamException
   {
-    return new XMLEventReaderImpl(stream, systemId);
+    return new XMLEventReaderImpl(createXMLStreamReader(systemId, stream));
   }
 
   public XMLEventReader 
     createXMLEventReader(String systemId, Reader reader)
     throws XMLStreamException
   {
-    return new XMLEventReaderImpl(reader, systemId);
+    return new XMLEventReaderImpl(createXMLStreamReader(systemId, reader));
   }
 
   public XMLEventReader 
@@ -115,6 +117,10 @@ public class XMLInputFactoryImpl extends XMLInputFactory {
     return new XMLEventReaderImpl(reader);
   }
 
+  //
+  // Stream reader
+  //
+  
   public XMLStreamReader 
     createXMLStreamReader(InputStream stream)
     throws XMLStreamException
