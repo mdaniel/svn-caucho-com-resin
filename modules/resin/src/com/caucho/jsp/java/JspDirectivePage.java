@@ -78,12 +78,10 @@ public class JspDirectivePage extends JspNode {
     if (IS_EL_IGNORED.equals(name)) {
       boolean isIgnored = value.equals("true");
 
-      _parseState.setELIgnored(isIgnored);
-      
-      if (_isElIgnored != null && _isElIgnored.booleanValue() != isIgnored)
+      if (! _parseState.setELIgnored(isIgnored))
 	throw error(L.l("isELIgnored values conflict"));
 
-      _isElIgnored = new Boolean(isIgnored);
+      _parseState.markELIgnoredSet();
     }
     /*
     else if (name.equals("isScriptingInvalid"))
@@ -207,6 +205,8 @@ public class JspDirectivePage extends JspNode {
       
       if (_parseState.getBuffer() == 0 && ! _parseState.isAutoFlush())
         throw error(L.l("buffer must be non-zero when autoFlush is false."));
+
+      _parseState.markAutoFlushSet();
     }
     else if (IS_THREAD_SAFE.equals(name)) {
       boolean isValid = false;

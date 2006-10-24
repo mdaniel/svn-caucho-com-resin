@@ -46,6 +46,9 @@ import com.caucho.log.Log;
 public class PageFilterChain implements FilterChain {
   private static final Logger log = Log.open(PageFilterChain.class);
   private static final L10N L = new L10N(PageFilterChain.class);
+  
+  public static String SERVLET_NAME = "javax.servlet.error.servlet_name";
+  public static String SERVLET_EXN = "javax.servlet.error.exception";
 
   private ServletContext _application;
   private QServlet _servlet;
@@ -170,13 +173,27 @@ public class PageFilterChain implements FilterChain {
       ((HttpServletResponse) res).sendError(HttpServletResponse.SC_NOT_FOUND);
     }
     else if (req instanceof HttpServletRequest) {
-      if (_isSingleThread) {
-        synchronized (page) {
-          page.pageservice(req, res);
-        }
+      try {
+	if (_isSingleThread) {
+	  synchronized (page) {
+	    page.pageservice(req, res);
+	  }
+	}
+	else
+	  page.pageservice(req, res);
+      } catch (ServletException e) {
+	request.setAttribute(SERVLET_EXN, e);
+	request.setAttribute(SERVLET_NAME, _config.getServletName());
+	throw e;
+      } catch (IOException e) {
+	request.setAttribute(SERVLET_EXN, e);
+	request.setAttribute(SERVLET_NAME, _config.getServletName());
+	throw e;
+      } catch (RuntimeException e) {
+	request.setAttribute(SERVLET_EXN, e);
+	request.setAttribute(SERVLET_NAME, _config.getServletName());
+	throw e;
       }
-      else
-        page.pageservice(req, res);
     }
   }
 

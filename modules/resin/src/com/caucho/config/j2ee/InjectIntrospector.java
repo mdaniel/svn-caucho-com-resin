@@ -29,6 +29,8 @@
 
 package com.caucho.config.j2ee;
 
+import java.beans.Introspector;
+
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -45,7 +47,7 @@ import javax.naming.*;
 
 import javax.transaction.UserTransaction;
 
-import javax.annotation.Resource;
+import javax.annotation.*;
 
 import javax.ejb.EJB;
 import javax.ejb.EJBHome;
@@ -116,9 +118,7 @@ public class InjectIntrospector {
 
     introspectImpl(initList, type.getSuperclass());
 
-    for (Field field : type.getDeclaredFields()) {
-      configure(initList, field, field.getName(), field.getType());
-    }
+    configureClassResources(initList, type);
 
     for (Method method : type.getDeclaredMethods()) {
       String fieldName = method.getName();
@@ -141,6 +141,89 @@ public class InjectIntrospector {
 
       configure(initList, method, fieldName, param[0]);
     }
+  }
+
+  public static void
+    configureClassResources(ArrayList<BuilderProgram> initList,
+			    Class type)
+    throws ConfigException
+  {
+    Resources resources = (Resources) type.getAnnotation(Resources.class);
+    if (resources != null) {
+      for (Resource resource : resources.value()) {
+	introspectClassResource(initList, type, resource);
+      }
+    }
+
+    Resource resource = (Resource) type.getAnnotation(Resource.class);
+    if (resource != null) {
+      introspectClassResource(initList, type, resource);
+    }
+
+    for (Field field : type.getDeclaredFields()) {
+      configure(initList, field, field.getName(), field.getType());
+    }
+  }
+
+  private static void
+    introspectClassResource(ArrayList<BuilderProgram> initList,
+			    Class type,
+			    Resource resource)
+    throws ConfigException
+  {
+    String name = resource.name();
+
+    Field field = findField(type, name);
+
+    if (field != null) {
+      initList.add(configureResource(field, field.getName(), field.getType(),
+				     resource.name(),
+				     resource.type().getName(),
+				     resource.name()));
+
+      return;
+    }
+
+    Method method = findMethod(type, name);
+
+    if (method != null) {
+      initList.add(configureResource(method, method.getName(),
+				     method.getParameterTypes()[0],
+				     resource.name(),
+				     resource.type().getName(),
+				     resource.name()));
+
+      return;
+    }
+  }
+
+  private static Field findField(Class type, String name)
+  {
+    for (Field field : type.getDeclaredFields()) {
+      if (field.getName().equals(name))
+	return field;
+    }
+
+    return null;
+  }
+
+  private static Method findMethod(Class type, String name)
+  {
+    for (Method method : type.getDeclaredMethods()) {
+      if (method.getParameterTypes().length != 1)
+	continue;
+
+      String methodName = method.getName();
+      if (! methodName.startsWith("set"))
+	continue;
+
+      methodName = Introspector.decapitalize(methodName.substring(3));
+
+      if (name.equals(methodName))
+	return method;
+    }
+
+    return null;
   }
 
   public static void configure(ArrayList<BuilderProgram> initList,

@@ -235,6 +235,10 @@ public class JspCompilerInstance {
     if (_className == null)
       _className = JavaCompiler.mangleName("jsp/" + _uri);
 
+    // default to true if ends with x
+    if (_uri.endsWith("x"))
+      _parseState.setXml(true);
+
     WebApp app = _jspCompiler.getWebApp();
     Path appDir = _jspCompiler.getAppDir();
     if (appDir == null && app != null)
@@ -259,10 +263,6 @@ public class JspCompilerInstance {
       }
     }
 
-    if (jspConfig != null) {
-      jspList.addAll(jspConfig.findJspPropertyGroupList(_uri));
-    }
-
     if (_jspPropertyGroup == null && app != null) {
       _jspPropertyGroup = app.getJsp();
       
@@ -275,6 +275,10 @@ public class JspCompilerInstance {
       
       if (_jspPropertyGroup != null)
 	jspList.add(_jspPropertyGroup);
+    }
+
+    if (jspConfig != null) {
+      jspList.addAll(jspConfig.findJspPropertyGroupList(_uri));
     }
 
     JspResourceManager resourceManager = _jspCompiler.getResourceManager();
@@ -308,12 +312,25 @@ public class JspCompilerInstance {
       _parseState.setJspPropertyGroup(jspPropertyGroup);
       _parseState.setSession(jspPropertyGroup.isSession());
       _parseState.setScriptingInvalid(jspPropertyGroup.isScriptingInvalid());
-      _parseState.setELIgnored(jspPropertyGroup.isELIgnored());
+      
+      if (jspPropertyGroup.isELIgnored() != null)
+	_parseState.setELIgnored(Boolean.TRUE.equals(jspPropertyGroup.isELIgnored()))
+	  ;
       _parseState.setVelocityEnabled(jspPropertyGroup.isVelocityEnabled());
       _parseState.setPageEncoding(jspPropertyGroup.getPageEncoding());
-      _parseState.setForbidXml(jspPropertyGroup.isForbidXml());
-      if (jspPropertyGroup.getPageEncoding() != null)
-	_parseState.setCharEncoding(jspPropertyGroup.getPageEncoding());
+      
+      if (Boolean.TRUE.equals(jspPropertyGroup.isXml()))
+	_parseState.setXml(true);
+      
+      if (Boolean.FALSE.equals(jspPropertyGroup.isXml()))
+	_parseState.setForbidXml(true);
+      
+      if (jspPropertyGroup.getPageEncoding() != null) {
+	try {
+	  _parseState.setPageEncoding(jspPropertyGroup.getPageEncoding());
+	} catch (JspParseException e) {
+	}
+      }
 
       pageConfig.setStaticEncoding(jspPropertyGroup.isStaticEncoding());
 
@@ -433,11 +450,8 @@ public class JspCompilerInstance {
     if (_page != null)
       throw new IllegalStateException("JspCompilerInstance cannot be reused");
 
-    boolean isXml = _isXml;
-    boolean isForbidXml = false;
-    
-    if (_jspPropertyGroup != null && ! isXml)
-      isXml = _jspPropertyGroup.isXml();
+    boolean isXml = _parseState.isXml();
+    boolean isForbidXml = _parseState.isForbidXml();
 
     ParseState parseState = _parser.getParseState();
     
@@ -452,8 +466,7 @@ public class JspCompilerInstance {
       }
       
       _parser.getParseState().setXml(isXml);
-      if (_jspPropertyGroup != null && _jspPropertyGroup.isForbidXml())
-	_parser.getParseState().setForbidXml(true);
+      _parser.getParseState().setForbidXml(isForbidXml);
 
       if (isXml) {
 	_parseState.setELIgnoredDefault(false);
@@ -559,11 +572,13 @@ public class JspCompilerInstance {
     try {
       boolean isXml = _isXml;
       
-      if (_jspPropertyGroup != null && ! isXml)
-	isXml = _jspPropertyGroup.isXml();
+      if (_jspPropertyGroup != null && ! isXml
+	  && _jspPropertyGroup.isXml() != null)
+	isXml = Boolean.TRUE.equals(_jspPropertyGroup.isXml());
 
-      if (_jspPropertyGroup != null && _jspPropertyGroup.isForbidXml())
-	  _parseState.setForbidXml(true);
+      if (_jspPropertyGroup != null
+	  && Boolean.FALSE.equals(_jspPropertyGroup.isXml()))
+	_parseState.setForbidXml(true);
 
       _parseState.setXml(isXml);
 

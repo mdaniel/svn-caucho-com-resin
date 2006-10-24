@@ -1073,6 +1073,7 @@ public class PageContextImpl extends PageContext
       getApplication().log(e.toString(), e);
 
       getCauchoRequest().setAttribute(EXCEPTION, e);
+      getCauchoRequest().setAttribute("javax.servlet.error.exception", e);
       getCauchoRequest().setAttribute("javax.servlet.error.exception_type", e);
       getCauchoRequest().setAttribute("javax.servlet.error.request_uri",
                             getCauchoRequest().getRequestURI());

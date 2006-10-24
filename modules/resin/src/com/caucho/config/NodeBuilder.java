@@ -899,7 +899,7 @@ public class NodeBuilder {
     
     ReadStream is = null;
     try {
-      is = Vfs.lookup(systemId).openRead();
+      is = Vfs.lookup().lookup(systemId).openRead();
       int line = 0;
       StringBuilder sb = new StringBuilder("\n\n");
       String text;

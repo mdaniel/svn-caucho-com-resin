@@ -313,47 +313,49 @@ public class JspParser {
       stream.setEncoding(pageEncoding);
     }
 
-    switch ((ch = read())) {
+    switch ((ch = stream.read())) {
     case 0xfe:
-      if ((ch = read()) != 0xff) {
+      if ((ch = stream.read()) != 0xff) {
 	throw error(L.l("Expected 0xff in UTF-16 header.  UTF-16 pages with the initial byte 0xfe expect 0xff immediately following.  The 0xfe 0xff sequence is used by some application to suggest UTF-16 encoding without a directive."));
       }
       else {
 	_parseState.setContentType("text/html; charset=UTF-16BE");
 	_parseState.setPageEncoding("UTF-16BE");
 	stream.setEncoding("UTF-16BE");
-	ch = read();
       }
       break;
       
     case 0xff:
-      if ((ch = read()) != 0xfe) {
+      if ((ch = stream.read()) != 0xfe) {
 	throw error(L.l("Expected 0xfe in UTF-16 header.  UTF-16 pages with the initial byte 0xff expect 0xfe immediately following.  The 0xff 0xfe sequence is used by some application to suggest UTF-16 encoding without a directive."));
       }
       else {
 	_parseState.setContentType("text/html; charset=UTF-16LE");
 	_parseState.setPageEncoding("UTF-16LE");
 	stream.setEncoding("UTF-16LE");
-	ch = read();
       }
       break;
       
     case 0xef:
-      if ((ch = read()) != 0xbb) {
-	_peek = 0xbb;
-	ch = 0xef;
+      if ((ch = stream.read()) != 0xbb) {
+	stream.unread();
+	stream.unread();
       }
-      else if ((ch = read()) != 0xbf) {
+      else if ((ch = stream.read()) != 0xbf) {
 	throw error(L.l("Expected 0xbf in UTF-8 header.  UTF-8 pages with the initial byte 0xbb expect 0xbf immediately following.  The 0xbb 0xbf sequence is used by some application to suggest UTF-8 encoding without a directive."));
       }
       else {
 	_parseState.setContentType("text/html; charset=UTF-8");
 	_parseState.setPageEncoding("UTF-8");
 	stream.setEncoding("UTF-8");
-	ch = read();
       }
       break;
+      
+    default:
+      stream.unread();
     }
+
+    ch = read();
 
     ch = parseXmlDeclaration(ch);
     

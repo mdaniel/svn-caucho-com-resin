@@ -238,6 +238,8 @@ abstract public class QServlet implements Servlet {
   {
     CauchoRequest cauchoRequest = null;
 
+    initGetPage();
+      
     /*
     if (! _webApp.isActive())
       throw new UnavailableException("JSP compilation unavailable during restart", 10);
@@ -321,6 +323,12 @@ abstract public class QServlet implements Servlet {
 					  uri));
     
     return _manager.getPage(uri, subcontext);
+  }
+
+  private void initGetPage()
+  {
+    // marks the listener array as used
+    _webApp.getJspApplicationContext().getELListenerArray();
   }
 
   public Page getPage(String uri, String pageURI)

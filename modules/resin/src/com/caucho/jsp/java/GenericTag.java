@@ -364,8 +364,6 @@ abstract public class GenericTag extends JspContainerNode {
           out.println("null;");
       }
     }
-
-    generatePrologueChildren(out);
   }
 
   /**

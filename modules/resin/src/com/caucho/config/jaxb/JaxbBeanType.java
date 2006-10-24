@@ -200,6 +200,9 @@ public class JaxbBeanType extends TypeStrategy {
       accessType = accessorType.value();
     else
       accessType = XmlAccessType.PUBLIC_MEMBER;
+
+
+    InjectIntrospector.configureClassResources(_injectList, _type);
     
     introspectMethods(accessType);
     introspectFields(accessType);

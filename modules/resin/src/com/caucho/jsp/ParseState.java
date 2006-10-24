@@ -63,6 +63,8 @@ public class ParseState {
 
   private boolean _isELIgnored = false;
   private boolean _isELIgnoredSet = false;
+  private boolean _isELIgnoredDefault = true;
+  
   private boolean _isScriptingInvalid = false;
   
   private boolean _isVelocityEnabled;
@@ -145,9 +147,21 @@ public class ParseState {
   /**
    * Set if JSP EL is ignored.
    */
-  public void setELIgnored(boolean isELIgnored)
+  public boolean setELIgnored(boolean isELIgnored)
   {
+    boolean oldELIgnored = _isELIgnored;
+    
     _isELIgnored = isELIgnored;
+    _isELIgnoredDefault = false;
+    
+    return (oldELIgnored == isELIgnored || ! _isELIgnoredSet);
+  }
+
+  /**
+   * Mark the el-ignored attribute as set.
+   */
+  public void markELIgnoredSet()
+  {
     _isELIgnoredSet = true;
   }
 
@@ -156,7 +170,7 @@ public class ParseState {
    */
   public void setELIgnoredDefault(boolean isELIgnored)
   {
-    if (! _isELIgnoredSet)
+    if (_isELIgnoredDefault)
       _isELIgnored = isELIgnored;
   }
 
@@ -403,19 +417,30 @@ public class ParseState {
   public void setPageEncoding(String pageEncoding)
     throws JspParseException
   {
-    if (_pageEncoding != null
-	&& ! _pageEncoding.equalsIgnoreCase(pageEncoding)
-	&& ! ("UTF-16".equalsIgnoreCase(_pageEncoding)
-	      && ("UTF-16LE".equalsIgnoreCase(pageEncoding)
-		  || "UTF-16BE".equalsIgnoreCase(pageEncoding)))
-	&& ! ("UTF-16".equalsIgnoreCase(pageEncoding)
-	      && ("UTF-16LE".equalsIgnoreCase(_pageEncoding)
-		  || "UTF-16BE".equalsIgnoreCase(_pageEncoding)))) {
+    if (pageEncoding == null)
+      return;
+
+    if (_pageEncoding == null || _pageEncoding.equals(pageEncoding)) {
+      _pageEncoding = pageEncoding;
+    }
+    else if ("UTF-16".equalsIgnoreCase(_pageEncoding)
+	     && ("UTF-16LE".equalsIgnoreCase(pageEncoding)
+		 || "UTF-16BE".equalsIgnoreCase(pageEncoding))) {
+      _pageEncoding = pageEncoding;
+    }
+    else if ("UTF-16".equalsIgnoreCase(pageEncoding)
+	     && ("UTF-16LE".equalsIgnoreCase(_pageEncoding)
+		 || "UTF-16BE".equalsIgnoreCase(_pageEncoding))) {
+    }
+    else {
+      String oldPageEncoding = _pageEncoding;
+      
+      _pageEncoding = pageEncoding;
+      
       throw new JspParseException(L.l("Cannot change page encoding to '{0}' (old value '{1}').  The page encoding may only be set once.",
-				      pageEncoding, _pageEncoding));
+				      pageEncoding, oldPageEncoding));
     }
     
-    _pageEncoding = pageEncoding;
   }
 
   /**

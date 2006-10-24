@@ -57,10 +57,9 @@ public class JspPropertyGroup {
   private String _id;
   private ArrayList<String> _urlPatterns = new ArrayList<String>();
   private String _pageEncoding;
-  private boolean _isELIgnored = false;
+  private Boolean _isELIgnored;
   private boolean _isScriptingInvalid = false;
-  private boolean _isXml = false;
-  private boolean _isForbidXml = false;
+  private Boolean _isXml = null;
   private ArrayList<String> _includePrelude = new ArrayList<String>();
   private ArrayList<String> _includeCoda = new ArrayList<String>();
 
@@ -157,13 +156,13 @@ public class JspPropertyGroup {
    */
   public void setELIgnored(boolean isELIgnored)
   {
-    _isELIgnored = isELIgnored;
+    _isELIgnored = isELIgnored ? Boolean.TRUE : Boolean.FALSE;;
   }
 
   /**
    * Return true if EL expressions are ignored for the JSP page.
    */
-  public boolean isELIgnored()
+  public Boolean isELIgnored()
   {
     return _isELIgnored;
   }
@@ -205,26 +204,15 @@ public class JspPropertyGroup {
    */
   public void setIsXml(boolean isXml)
   {
-    _isXml = isXml;
-
-    if (isXml == false)
-      _isForbidXml = true;
+    _isXml = isXml ? Boolean.TRUE : Boolean.FALSE;
   }
 
   /**
    * Return true if the JSP uses XML format.
    */
-  public boolean isXml()
+  public Boolean isXml()
   {
     return _isXml;
-  }
-
-  /**
-   * Return true if the JSP uses XML format.
-   */
-  public boolean isForbidXml()
-  {
-    return _isForbidXml;
   }
 
   /**
@@ -578,7 +566,8 @@ public class JspPropertyGroup {
     if (_webApp != null) {
       ServletMapping mapping = new ServletMapping();
       mapping.setServletName("jsp-property-group-" + _gId++);
-      if (_isXml)
+      
+      if (Boolean.TRUE.equals(_isXml))
 	mapping.setServletClass(JspXmlServlet.class.getName());
       else
 	mapping.setServletClass(JspServlet.class.getName());

@@ -109,6 +109,12 @@ public class WebResourceCollection {
    */
   public void addHttpMethod(String method)
   {
+    if (! Pattern.matches("[a-zA-Z]+", method)) {
+      throw new ConfigException(L.l("'{0}' is not a valid http-method.",
+				    method));
+    }
+    
+    /*
     try {
       HttpMethod.valueOf(method.toUpperCase());
     }
@@ -122,8 +128,9 @@ public class WebResourceCollection {
         builder.append(validHttpMethod.name());
       }
 
-      throw new ConfigException(L.l("`{0}' is not a valid  value for `{1}', valid values are {2}", method, "http-method", builder));
+      throw new ConfigException(L.l("'{0}' is not a valid  value for '{1}', valid values are {2}", method, "http-method", builder));
     }
+    */
 
     if (_methodList == null)
       _methodList = new ArrayList<String>();

@@ -976,7 +976,7 @@ public class WebApp extends ServletContextImpl
    */
   public void putLocaleEncoding(String locale, String encoding)
   {
-    _localeMapping.put(locale, encoding);
+    _localeMapping.put(locale.toLowerCase(), encoding);
   }
 
   /**
@@ -988,6 +988,7 @@ public class WebApp extends ServletContextImpl
 
     String key = locale.toString();
     encoding = _localeMapping.get(key.toLowerCase());
+
     if (encoding != null)
       return encoding;
 
@@ -1096,7 +1097,7 @@ public class WebApp extends ServletContextImpl
     if (! hasListener(listener.getListenerClass())) {
       _listeners.add(listener);
 
-      if (_lifecycle.isStarting()) {
+      if (_lifecycle.isStarting() || _lifecycle.isActive()) {
 	addListenerObject(listener.createListenerObject(), true);
       }
     }

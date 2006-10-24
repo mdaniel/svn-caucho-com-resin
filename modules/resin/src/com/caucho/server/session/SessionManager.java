@@ -1116,8 +1116,6 @@ public final class SessionManager implements ObjectManager, AlarmListener
 
     session.addUse();
 
-    handleCreateListeners(session);
-
     synchronized (_statisticsLock) {
       _sessionCreateCount++;
     }
@@ -1128,6 +1126,9 @@ public final class SessionManager implements ObjectManager, AlarmListener
       else
 	session.create(now);
     }
+
+    // after load so a reset doesn't clear any setting
+    handleCreateListeners(session);
     
     return session;
   }
@@ -1274,7 +1275,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
 	return null;
 
       session = create(key, now, create);
-      //System.out.println("CREATE: " + session);
+
       if (! session.addUse())
 	session = null;
       isNew = true;
@@ -1283,8 +1284,6 @@ public final class SessionManager implements ObjectManager, AlarmListener
     if (session == null)
       return null;
     
-    //System.out.println("SM: " + session);
-
     if (isNew) {
       killSession = ! load(session, now);
       isNew = killSession;

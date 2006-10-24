@@ -200,6 +200,26 @@ public class JdbcMetaData {
   }
 
   /**
+   * True if the generated ketys is supported
+   */
+  public boolean supportsGetGeneratedKeys()
+  {
+    try {
+      Connection conn = getConnection();
+
+      try {
+        DatabaseMetaData metaData = conn.getMetaData();
+
+	return metaData.supportsGetGeneratedKeys();
+      } finally {
+        conn.close();
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
    * Returns the long type.
    */
   public String getLongType()

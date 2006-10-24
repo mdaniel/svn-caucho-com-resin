@@ -116,6 +116,9 @@ public class ServletFilterChain implements FilterChain {
     } catch (IOException e) {
       request.setAttribute(SERVLET_NAME, _config.getServletName());
       throw e;
+    } catch (RuntimeException e) {
+      request.setAttribute(SERVLET_NAME, _config.getServletName());
+      throw e;
     }
   }
 }

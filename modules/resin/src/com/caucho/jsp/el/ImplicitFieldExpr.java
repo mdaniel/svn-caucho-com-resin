@@ -61,8 +61,6 @@ public class ImplicitFieldExpr extends Expr {
   public Object getValue(ELContext env)
     throws ELException
   {
-    System.out.println("IMPL:" + env);
-    
     PageContext page = (PageContext) env.getContext(JspContext.class);
 
     Object fieldValue = _field.evalObject(env);
@@ -80,16 +78,18 @@ public class ImplicitFieldExpr extends Expr {
       {
 	HttpSession session = page.getSession();
 
-	if (session != null)
+	System.out.println("GET-S: " + fieldString + " " + session);
+	if (session != null) {
+	  System.out.println(" -> " + session.getAttribute(fieldString));
 	  return session.getAttribute(fieldString);
+	}
 	else
 	  return null;
       }
 
     case ImplicitObjectExpr.REQUEST_SCOPE:
       {
-	System.out.println("GET: " + fieldString + " " + page.getRequest().getAttribute(fieldString));
-      return page.getRequest().getAttribute(fieldString);
+	return page.getRequest().getAttribute(fieldString);
       }
 
     case ImplicitObjectExpr.PAGE_SCOPE:

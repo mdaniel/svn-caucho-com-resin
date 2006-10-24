@@ -166,7 +166,7 @@ public class AmberPersistenceUnit {
   private EntityIntrospector _introspector;
   private AmberGenerator _generator;
 
-  private boolean _supportsGetGeneratedKeys;
+  // private boolean _supportsGetGeneratedKeys;
 
   private ThreadLocal<AmberConnection> _threadConnection
     = new ThreadLocal<AmberConnection>();
@@ -848,7 +848,7 @@ public class AmberPersistenceUnit {
    */
   public boolean hasReturnGeneratedKeys()
   {
-    return _supportsGetGeneratedKeys;
+    return getMetaData().supportsGetGeneratedKeys();
   }
 
   /**
@@ -873,6 +873,7 @@ public class AmberPersistenceUnit {
     if (_dataSource == null)
       return;
 
+    /*
     try {
       Connection conn = _dataSource.getConnection();
 
@@ -889,6 +890,7 @@ public class AmberPersistenceUnit {
     } catch (SQLException e) {
       throw new ConfigException(e);
     }
+    */
   }
 
   /**

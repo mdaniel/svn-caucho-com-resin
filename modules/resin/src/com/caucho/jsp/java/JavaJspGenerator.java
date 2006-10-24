@@ -1707,7 +1707,7 @@ public class JavaJspGenerator extends JspGenerator {
     out.popDepth();
     out.println("}");
 
-    if (! isTag()) {
+    if (! isTag() && _parseState.getExtends() == null) {
       out.println();
       out.println("public void init(ServletConfig config)");
       out.println("  throws ServletException");

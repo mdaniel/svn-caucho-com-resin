@@ -935,21 +935,17 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    */
   public void setContentType(String value)
   {
+    if (isCommitted())
+      return;
     if (_disableHeaders || value == null) {
       _contentType = null;
       return;
     }
     else if (value == "text/html" || value.equals("text/html")) {
       _contentType = "text/html";
-
-      if (_charEncoding != null)
-        _contentType = _contentType + "; charset=" + _charEncoding;
       return;
     }
     
-    if (_charEncoding != null && value.indexOf("charset=") < 0)
-      _contentType = _contentType + "; charset=" + _charEncoding;
-
     _contentType = value;
     
     int length = value.length();
@@ -1022,8 +1018,10 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	
 	_contentType = sb.toString();
 
-	if (! _hasWriter)
+	if (! _hasWriter) {
+	  _hasCharEncoding = true;
 	  _charEncoding = encoding;
+	}
 	break;
       }
       else
@@ -1062,6 +1060,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    */
   public void setCharacterEncoding(String encoding)
   {
+    if (isCommitted())
+      return;
     if (_hasWriter)
       return;
 
@@ -1443,8 +1443,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   public void setLocale(Locale locale)
   {
     _locale = locale;
-    
-    if (! _hasCharEncoding) {
+
+    if (! _hasCharEncoding && ! isCommitted()) {
       _charEncoding = getRequest().getWebApp().getLocaleEncoding(locale);
 
       try {

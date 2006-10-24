@@ -130,4 +130,9 @@ public class Listener {
 
     return _object;
   }
+
+  public String toString()
+  {
+    return "Listener[" + _listenerClass + "]";
+  }
 }

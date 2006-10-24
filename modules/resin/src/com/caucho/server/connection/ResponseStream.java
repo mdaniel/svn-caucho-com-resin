@@ -569,6 +569,14 @@ class ResponseStream extends ToByteResponseStream {
     return (length <= 0);
   }
 
+  public void flushBuffer()
+    throws IOException
+  {
+    super.flushBuffer();
+    
+    _isCommitted = true;
+  }
+
   /**
    * Flushes the buffered response to the output stream.
    */

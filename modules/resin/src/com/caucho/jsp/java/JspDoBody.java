@@ -83,6 +83,12 @@ public class JspDoBody extends JspNode {
     if (! _gen.getParseState().isTag())
       throw error(L.l("'{0}' is only allowed in .tag files.  Attribute directives are not allowed in normal JSP files.",
                       getTagName()));
+
+    if (_var != null && _varReader != null)
+      throw error(L.l("'var' and 'varReader' cannot both be set in jsp:doBody."));
+
+    if (_scope != null && _var == null && _varReader == null)
+      throw error(L.l("jsp:doBody requires a 'var' or 'varReader' if 'scope' is set."));
   }
 
   /**
