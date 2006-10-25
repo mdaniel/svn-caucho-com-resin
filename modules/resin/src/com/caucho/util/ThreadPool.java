@@ -377,7 +377,7 @@ public class ThreadPool {
 
 	  if (startNew) {
 	    synchronized (_launcher) {
-	      _launcher.notify();
+	      _launcher.notifyAll();
 	    }
 	    
 	    if (poolItem == null) {
@@ -385,7 +385,7 @@ public class ThreadPool {
 		synchronized (_taskQueue) {
 		  _taskQueue.add(task);
 		  _loaderQueue.add(loader);
-		  _taskQueue.notify();
+		  _taskQueue.notifyAll();
 		}
 		
 		return false;
@@ -417,7 +417,7 @@ public class ThreadPool {
 	e.printStackTrace();
       }
     }
-    
+
     poolItem.start(task, loader);
 
     return true;
@@ -488,7 +488,7 @@ public class ThreadPool {
 	_task = task;
 	_classLoader = loader;
 
-	notify();
+	notifyAll();
       }
 
       return true;
@@ -523,7 +523,7 @@ public class ThreadPool {
 
 	if (_threadCount < _threadIdleMin) {
 	  synchronized (_launcher) {
-	    _launcher.notify();
+	    _launcher.notifyAll();
 	  }
 	}
       }
@@ -561,7 +561,7 @@ public class ThreadPool {
 	      _idleCount++;
 
 	      if (_scheduleWaitCount > 0)
-		_idleLock.notify();
+		_idleLock.notifyAll();
 	    }
 	  }
 
@@ -588,7 +588,7 @@ public class ThreadPool {
 	  // if the task is available, run it in the proper context
 	  if (task != null) {
 	    isIdle = false;
-	  
+
 	    thread.setContextClassLoader(classLoader);
 	    try {
 	      task.run();
@@ -632,7 +632,7 @@ public class ThreadPool {
 
 	    if (isReset) {
 	      synchronized (_launcher) {
-		_launcher.notify();
+		_launcher.notifyAll();
 	      }
 	    }
 	  

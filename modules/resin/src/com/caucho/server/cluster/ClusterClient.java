@@ -74,10 +74,10 @@ public final class ClusterClient {
 
   private volatile int _enabledMode = ENABLED;
   
-  private ClusterStream []_free = new ClusterStream[64];
-  private volatile int _freeHead;
-  private volatile int _freeTail;
-  private int _freeSize = 16;
+  private ClusterStream []_idle = new ClusterStream[64];
+  private volatile int _idleHead;
+  private volatile int _idleTail;
+  private int _idleSize = 16;
 
   private int _streamCount;
 
@@ -144,7 +144,7 @@ public final class ClusterClient {
    */
   public int getIdleCount()
   {
-    return (_freeHead - _freeTail + _free.length) % _free.length;
+    return (_idleHead - _idleTail + _idle.length) % _idle.length;
   }
 
   /**
@@ -517,12 +517,12 @@ public final class ClusterClient {
     ClusterStream stream = null;
 
     synchronized (this) {
-      if (_freeHead != _freeTail) {
-        stream = _free[_freeHead];
+      if (_idleHead != _idleTail) {
+        stream = _idle[_idleHead];
         long freeTime = stream.getFreeTime();
 
-        _free[_freeHead] = null;
-        _freeHead = (_freeHead + _free.length - 1) % _free.length;
+        _idle[_idleHead] = null;
+        _idleHead = (_idleHead + _idle.length - 1) % _idle.length;
 
         if (now < freeTime + _server.getLoadBalanceIdleTime()) {
           _activeCount++;
@@ -605,7 +605,7 @@ public final class ClusterClient {
   }
 
   /**
-   * Frees the read/write pair for reuse.  Called only from
+   * Free the read/write pair for reuse.  Called only from
    * ClusterStream.free()
    */
   void free(ClusterStream stream)
@@ -613,17 +613,43 @@ public final class ClusterClient {
     synchronized (this) {
       _activeCount--;
 
-      int size = (_freeHead - _freeTail + _free.length) % _free.length;
+      int size = (_idleHead - _idleTail + _idle.length) % _idle.length;
 
-      if (_state != ST_CLOSED && size < _freeSize) {
-        _freeHead = (_freeHead + 1) % _free.length;
-        _free[_freeHead] = stream;
+      if (_state != ST_CLOSED && size < _idleSize) {
+        _idleHead = (_idleHead + 1) % _idle.length;
+        _idle[_idleHead] = stream;
 
-        return;
+	stream = null;
       }
     }
 
-    stream.closeImpl();
+    long now = Alarm.getCurrentTime();
+    long maxIdleTime = _server.getLoadBalanceIdleTime();
+    ClusterStream oldStream = null;
+    
+    do {
+      oldStream = null;
+
+      synchronized (this) {
+	if (_idleHead != _idleTail) {
+	  oldStream = _idle[_idleTail];
+
+	  if (oldStream != null &&
+	      oldStream.getFreeTime() + maxIdleTime < now) {
+	    _idle[_idleTail] = null;
+	    _idleTail = (_idleTail + 1) % _idle.length;
+	  }
+	  else
+	    oldStream = null;
+	}
+      }
+
+      if (oldStream != null)
+	oldStream.closeImpl();
+    } while (oldStream != null);
+
+    if (stream != null)
+      stream.closeImpl();
   }
 
   /**
@@ -649,13 +675,13 @@ public final class ClusterClient {
     ArrayList<ClusterStream> recycleList = null;
 
     synchronized (this) {
-      _freeHead = _freeTail = 0;
+      _idleHead = _idleTail = 0;
 
-      for (int i = 0; i < _free.length; i++) {
+      for (int i = 0; i < _idle.length; i++) {
         ClusterStream stream;
 
-        stream = _free[i];
-        _free[i] = null;
+        stream = _idle[i];
+        _idle[i] = null;
 
         if (stream != null) {
           if (recycleList == null)
@@ -686,15 +712,15 @@ public final class ClusterClient {
     }
     
     synchronized (this) {
-      _freeHead = _freeTail = 0;
+      _idleHead = _idleTail = 0;
     }
 
-    for (int i = 0; i < _free.length; i++) {
+    for (int i = 0; i < _idle.length; i++) {
       ClusterStream stream;
 
       synchronized (this) {
-        stream = _free[i];
-        _free[i] = null;
+        stream = _idle[i];
+        _idle[i] = null;
       }
 
       if (stream != null)

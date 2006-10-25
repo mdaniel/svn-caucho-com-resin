@@ -44,10 +44,7 @@ import java.util.zip.GZIPOutputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 
-import com.caucho.util.Log;
-import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
-import com.caucho.util.QDate;
+import com.caucho.util.*;
 
 import com.caucho.loader.Environment;
 import com.caucho.loader.CloseListener;
@@ -108,8 +105,10 @@ public class AbstractRolloverLog {
   private long _nextPeriodEnd = -1;
   private long _nextRolloverCheckTime = -1;
 
-  private TempStream _tempStream;
   private boolean _isRollingOver;
+  private Path _savedPath;
+  private TempStream _tempStream;
+  private ArchiveTask _archiveTask = new ArchiveTask();
 
   private WriteStream _os;
   private WriteStream _zipOut;
@@ -430,33 +429,16 @@ public class AbstractRolloverLog {
 
       // archiving of path is outside of the synchronized block to
       // avoid freezing during archive
-      if (savedPath != null)
-	movePathToArchive(savedPath);
+      if (savedPath != null) {
+	_savedPath = savedPath;
+	isRollingOver = false;
+	ThreadPool.getThreadPool().start(_archiveTask);
+	Thread.yield();
+      }
     } finally {
-      // Write any new data from the temp stream to the log.
       synchronized (this) {
-	if (_os == null)
-	  openLog();
-	
-	if (isRollingOver) {
+	if (isRollingOver)
 	  _isRollingOver = false;
-	  TempStream ts = _tempStream;
-	  _tempStream = null;
-
-	  if (ts != null) {
-	    try {
-	      ReadStream is = ts.openRead();
-
-	      try {
-		is.writeToStream(_os);
-	      } finally {
-		is.close();
-	      }
-	    } catch (IOException e) {
-	      e.printStackTrace();
-	    }
-	  }
-	}
       }
     }
   }
@@ -782,6 +764,39 @@ public class AbstractRolloverLog {
 	zipOut.close();
     } catch (Throwable e) {
       // can't log in log routines
+    }
+  }
+
+  class ArchiveTask implements Runnable {
+    public void run()
+    {
+      try {
+	movePathToArchive(_savedPath);
+      } finally {
+	// Write any new data from the temp stream to the log.
+	synchronized (this) {
+	  if (_os == null)
+	    openLog();
+	
+	  _isRollingOver = false;
+	  TempStream ts = _tempStream;
+	  _tempStream = null;
+
+	  if (ts != null) {
+	    try {
+	      ReadStream is = ts.openRead();
+
+	      try {
+		is.writeToStream(_os);
+	      } finally {
+		is.close();
+	      }
+	    } catch (IOException e) {
+	      e.printStackTrace();
+	    }
+	  }
+	}
+      }
     }
   }
 }
