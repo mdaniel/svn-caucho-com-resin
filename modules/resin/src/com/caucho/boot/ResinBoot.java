@@ -29,15 +29,19 @@
 
 package com.caucho.boot;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+import com.caucho.server.resin.ResinELContext;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+import com.caucho.el.EL;
 
-import com.caucho.config.*;
-import com.caucho.config.types.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * ResinBoot is the main bootstrap class for Resin.  It parses the
@@ -65,6 +69,7 @@ public class ResinBoot {
   private Path _resinConf;
   private String _serverId = "";
   private boolean _isVerbose;
+  private boolean _isResinProfessional;
 
   private Watchdog _server;
 
@@ -86,14 +91,25 @@ public class ResinBoot {
 
     if (! _resinConf.canRead())
       throw new ConfigException(L().l("Can't open resin.conf file '{0}'",
-				      _resinConf.getNativePath()));
+                                      _resinConf.getNativePath()));
+
+    // XXX: set _isResinProfessional
 
     Config config = new Config();
 
-    config.setVar("resin.home", _resinHome);
-    config.setVar("server.root", _serverRoot);
-    
     ResinConfig conf = new ResinConfig(_resinHome, _serverRoot);
+
+    ResinELContext elContext = new ResinBootELContext();
+
+    EL.setEnvironment(elContext, conf.getClassLoader());
+
+    /**
+     * XXX: the following setVar calls should not be necessary, but the
+     * EL.setEnviornment() call above is not effective:
+     */
+    config.setVar("java", elContext.getJavaVar());
+    config.setVar("resin", elContext.getResinVar());
+    config.setVar("server", elContext.getServerVar());
 
     config.configure(conf, _resinConf, "com/caucho/server/resin/resin.rnc");
 
@@ -101,7 +117,7 @@ public class ResinBoot {
 
     if (_server == null)
       throw new ConfigException(L().l("-server '{0}' does not match any defined <server id> in {1}.",
-				    _serverId, _resinConf));
+                                      _serverId, _resinConf));
 
     if (_isVerbose)
       _server.setVerbose(_isVerbose);
@@ -178,12 +194,12 @@ public class ResinBoot {
 	i++;
       }
       else if ("-resin-home".equals(arg)
-	       || "-resin-home".equals(arg)) {
+	       || "--resin-home".equals(arg)) {
 	_resinHome = Vfs.lookup(argv[i + 1]);
 	i++;
       }
       else if ("-server-root".equals(arg)
-	       || "-server-root".equals(arg)) {
+	       || "--server-root".equals(arg)) {
 	_serverRoot = Vfs.lookup(argv[i + 1]);
 	i++;
       }
@@ -307,4 +323,33 @@ public class ResinBoot {
     RESTART,
     SHUTDOWN
   };
+
+  public class ResinBootELContext
+    extends ResinELContext
+  {
+    public Path getResinHome()
+    {
+      return _resinHome;
+    }
+
+    public Path getRootDirectory()
+    {
+      return _serverRoot;
+    }
+
+    public Path getResinConf()
+    {
+      return _resinConf;
+    }
+
+    public String getServerId()
+    {
+      return _serverId;
+    }
+
+    public boolean isResinProfessional()
+    {
+      return _isResinProfessional;
+    }
+  }
 }

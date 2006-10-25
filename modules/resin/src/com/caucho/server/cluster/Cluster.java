@@ -29,19 +29,29 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.config.*;
-import com.caucho.config.types.*;
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+import com.caucho.config.SchemaBean;
+import com.caucho.config.types.InitProgram;
+import com.caucho.config.types.Period;
 import com.caucho.jmx.Jmx;
-import com.caucho.loader.*;
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentBean;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentListener;
+import com.caucho.loader.EnvironmentLocal;
 import com.caucho.management.server.ClusterMXBean;
-import com.caucho.server.host.*;
-import com.caucho.server.resin.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.server.port.Port;
+import com.caucho.server.resin.Resin;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
-import javax.annotation.*;
+import javax.annotation.PostConstruct;
 import javax.management.ObjectName;
-
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -270,6 +280,11 @@ public class Cluster
     _serverList.add(server);
     _serverArray = new ClusterServer[_serverList.size()];
     _serverList.toArray(_serverArray);
+
+    ClusterServer selfServer = getSelfServer();
+
+    if (selfServer == server)
+      Config.setCurrentVar("server", new ServerVar(server));
   }
 
   /**
@@ -765,6 +780,95 @@ public class Cluster
     public Path getRootDirectory()
     {
       return getRoot();
+    }
+  }
+
+  public class ServerVar {
+    private final ClusterServer _server;
+
+    public ServerVar(ClusterServer server)
+    {
+      _server = server;
+    }
+
+    public String getId()
+    {
+      return _server.getId();
+    }
+
+    private int getPort(Port port)
+    {
+      if (port == null)
+        return 0;
+
+      return port.getPort();
+    }
+
+    private String getAddress(Port port)
+    {
+      if (port == null)
+        return null;
+
+      String address = port.getAddress();
+
+      if (address == null || address.length() == 0)
+        address = "INADDR_ANY";
+
+      return address;
+    }
+
+    private Port getFirstPort(String protocol, boolean isSSL)
+    {
+      if (_server.getPorts() == null)
+        return null;
+
+      for (Port port : _server.getPorts()) {
+        if (protocol.equals(port.getProtocolName()) && (port.isSSL() == isSSL))
+          return port;
+      }
+
+      return null;
+    }
+
+    public String getAddress()
+    {
+      return getAddress(_server.getClusterPort());
+    }
+
+    public int getPort()
+    {
+      return getPort(_server.getClusterPort());
+    }
+
+    public String getHttpAddress()
+    {
+      return getAddress(getFirstPort("http", false));
+    }
+
+    public int getHttpPort()
+    {
+      return getPort(getFirstPort("http", false));
+    }
+
+
+    public String getHttpsAddress()
+    {
+      return getAddress(getFirstPort("http", true));
+    }
+
+    public int getHttpsPort()
+    {
+      return getPort(getFirstPort("http", true));
+    }
+
+    /**
+     * @deprecated backwards compat.
+     */
+    public Path getRoot()
+    {
+      Resin resin =  Resin.getLocal();
+
+      return resin == null ? Vfs.getPwd() : resin.getRootDirectory();
     }
   }
 }

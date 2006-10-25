@@ -31,7 +31,9 @@ package com.caucho.el;
 import javax.el.*;
 
 /**
- * Variable resolver using the system properties
+ * Variable resolver using the system properties (@link System#getProperty()}
+ * and the environment {@link System@getenv()}.
+ *
  */
 public class SystemPropertiesResolver extends AbstractVariableResolver {
   /**
@@ -72,7 +74,15 @@ public class SystemPropertiesResolver extends AbstractVariableResolver {
       env.setPropertyResolved(true);
       return value;
     }
-    else if ("Var".equals(var)) {
+
+    value = System.getenv(var);
+
+    if (value != null) {
+      env.setPropertyResolved(true);
+      return value;
+    }
+
+    if ("Var".equals(var)) {
       env.setPropertyResolved(true);
       return this;
     }
