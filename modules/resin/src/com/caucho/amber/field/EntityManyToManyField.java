@@ -871,6 +871,58 @@ public class EntityManyToManyField extends AssociationField {
     out.print(type.getPrintName() + " value)");
     out.println("{");
     out.pushDepth();
+    //
+    // jpa/0s2j needs to generate the following snippet:
+    //
+    // _caucho___caucho_get_xAnnualReviews
+    //   = new com.caucho.amber.collection.CollectionImpl<qa.XAnnualReview>(__caucho_session, null);
+    // _caucho___caucho_get_xAnnualReviews.addAll(0, value);
+    //
+    //
+    // jpa/0s2j:
+    String var = "_caucho_" + getGetterName();
+
+    out.print(var + " = new ");
+
+    type = getJavaType();
+
+    boolean isSet = type.isAssignableTo(Set.class);
+    boolean isMap = false;
+    if (!isSet) {
+      isMap = type.isAssignableTo(Map.class);
+    }
+
+    JType []paramArgs = type.getActualTypeArguments();
+    JType param = paramArgs.length > 0 ? paramArgs[0] : null;
+    JType param2 = paramArgs.length > 1 ? paramArgs[1] : null;
+
+    String collectionImpl;
+
+    if (isSet)
+      collectionImpl = "com.caucho.amber.collection.SetImpl";
+    else if (isMap)
+      collectionImpl = "com.caucho.amber.collection.MapImpl";
+    else
+      collectionImpl = "com.caucho.amber.collection.CollectionImpl";
+
+    out.print(collectionImpl);
+
+    if (param != null) {
+      out.print("<");
+      out.print(param.getPrintName());
+      if (isMap) {
+        if (param2 != null) {
+          out.print(", ");
+          out.print(param2.getPrintName());
+        }
+      }
+      out.print(">");
+    }
+
+    out.println("(__caucho_session, null);");
+
+    out.println(var + ".addAll(0, value);");
+
     out.popDepth();
     out.println("}");
   }

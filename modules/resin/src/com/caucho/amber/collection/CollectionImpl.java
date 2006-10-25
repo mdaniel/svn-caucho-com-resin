@@ -29,6 +29,7 @@
 package com.caucho.amber.collection;
 
 import java.util.AbstractList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.ArrayList;
 
@@ -59,10 +60,13 @@ public class CollectionImpl<E> extends AbstractList<E>
   {
     _aConn = aConn;
 
-    try {
-      _query = _aConn.prepareQuery(query);
-    } catch (SQLException e) {
-      throw new AmberRuntimeException(e);
+    // jpa/0s2j
+    if (query != null) {
+      try {
+        _query = _aConn.prepareQuery(query);
+      } catch (SQLException e) {
+        throw new AmberRuntimeException(e);
+      }
     }
   }
 
@@ -132,6 +136,17 @@ public class CollectionImpl<E> extends AbstractList<E>
   }
 
   /**
+   * Adds an item to the collection.
+   */
+  public boolean addAll(int index,
+                        Collection<? extends E> collection)
+  {
+    fill();
+
+    return _values.addAll(index, collection);
+  }
+
+  /**
    * Clears the collection.
    */
   public void clear()
@@ -155,6 +170,10 @@ public class CollectionImpl<E> extends AbstractList<E>
 
   private void fill()
   {
+    // jpa/0s2i
+    if (_query == null)
+      return;
+
     if (Alarm.getCurrentTime() <= _expireTime)
       return;
 
