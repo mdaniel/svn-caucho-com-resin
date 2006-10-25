@@ -42,6 +42,7 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 
 import javax.annotation.*;
+import javax.naming.*;
 
 import javax.servlet.*;
 import javax.jws.*;
@@ -53,6 +54,8 @@ import com.caucho.config.types.InitProgram;
 import com.caucho.config.j2ee.InjectIntrospector;
 
 import com.caucho.jmx.Jmx;
+
+import com.caucho.naming.*;
 
 import com.caucho.jsp.QServlet;
 import com.caucho.jsp.Page;
@@ -74,6 +77,9 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
 
   private String _location;
 
+  private String _jndiName;
+  private String _var;
+  
   private String _servletName;
   private String _servletClassName;
   private Class _servletClass;
@@ -323,6 +329,16 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     return _runAt;
   }
 
+  public void setJndiName(String jndiName)
+  {
+    _jndiName = jndiName;
+  }
+
+  public void setVar(String var)
+  {
+    _var = var;
+  }
+
   /**
    * Returns the run-at configuration.
    */
@@ -428,8 +444,39 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
       _alarm = new Alarm(this);
     }
 
-    if (_servletName == null)
+    if (_servletName != null) {
+    }
+    else if (_protocolClass != null) {
+      String protocol = _protocolClass.getName();
+      
+      int p = protocol.lastIndexOf('.');
+      protocol = protocol.substring(p + 1);
+      
+      _servletName = _servletClassName + "-" + protocol;
+    }
+    else
       _servletName = _servletClassName;
+
+    // XXX: should only be for web services
+    if (_jndiName != null) {
+      validateClass(true);
+      
+      Object servlet = createServlet();
+
+      try {
+	Jndi.bindDeepShort(_jndiName, servlet);
+      } catch (NamingException e) {
+	throw new ServletException(e);
+      }
+    }
+
+    if (_var != null) {
+      validateClass(true);
+      
+      Object servlet = createServlet();
+
+      Config.setCurrentVar(_var, servlet);
+    }
   }
 
   protected void validateClass(boolean requireClass)
@@ -615,7 +662,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
       skeleton.setService(service);
 
       if (_protocolInit != null) {
-	_protocolInit.init(skeleton);
+	_protocolInit.configure(skeleton);
       }
 
       skeleton.init(this);

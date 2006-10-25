@@ -2,21 +2,21 @@
    - web.xml configuration file for the Hessian addition example.
   -->
 <web-app xmlns="http://caucho.com/ns/resin">
-  <web-service class="example.HelloServiceImpl">
-    <jndi-name>service/HelloService</jndi-name>
+  <servlet-mapping url-pattern="/hello/soap/*"
+                   jndi-name="service/HelloService"
+                   servlet-class="example.HelloServiceImpl">
+    <protocol type="soap"/>
+  </servlet-mapping>
 
-    <hessian>
-      <url-pattern>/hello/hessian/*</url-pattern>
-    </hessian>
+  <servlet-mapping url-pattern="/hello/hessian/*"
+                   servlet-class="example.HelloServiceImpl">
+    <protocol type="hessian"/>
+  </servlet-mapping>
 
-    <rest>
-      <url-pattern>/hello/rest/*</url-pattern>
-    </rest>
-
-    <soap>
-      <url-pattern>/hello/soap/*</url-pattern>
-    </soap>
-  </web-service>
+  <servlet-mapping url-pattern="/hello/rest/*"
+                   servlet-class="example.HelloServiceImpl">
+    <protocol type="rest"/>
+  </servlet-mapping>
 
   <web-service-client jndi-name="hessian/HelloService">
     <url>hessian:${webApp.url}/hello/hessian/</url>

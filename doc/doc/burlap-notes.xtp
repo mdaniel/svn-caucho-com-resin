@@ -14,6 +14,12 @@
         SOAP and XML-RPC, Burlap is just boring text-based protocol to make
         testing and debugging EJB a little bit easier.</p>
 
+    </description>
+  </header>
+
+  <body>
+
+<s1>
       <p>Because we're an engineering-driven company and lack the resources
         to effectively lobby for Burlap as the standard internet
         services wire-protocol,
@@ -25,12 +31,8 @@
         different goals, the contrasts should not be taken as criticisms
         of the protocols.  Most of the design of Burlap, after all, is merely a
         modification of SOAP and XML-RPC for EJB's needs.</p>
-
-    </description>
-  </header>
-
-  <body>
-    <summary/>
+</s1>
+    <localtoc/>
 
 
 

@@ -7,7 +7,14 @@
       <p>When used with another web server, Resin serves JSPs and Servlets
         and the other web server serves static content like html and
         images.</p>
+    </description>
 
+
+  </header>
+
+  <body>
+
+<s1>
       <p>The web server plugins (mod_caucho and isapi_srun) have
         two main tasks:</p>
       <ol>
@@ -18,13 +25,9 @@
       <note>"mod_caucho" is used to mean all the plugins.  All of the plugins
         work the same, so "mod_caucho" is just a shorthand for
         "mod_caucho and isapi_srun".</note>
-    </description>
+</s1>
 
-
-  </header>
-
-  <body>
-    <summary/>
+    <localtoc/>
 
 <s1 title="ResinConfigServer">
 

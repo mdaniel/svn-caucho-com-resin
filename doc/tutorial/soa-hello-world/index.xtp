@@ -127,18 +127,16 @@ public class HelloServiceImpl implements HelloService {
 
 <s1 title="Service configuration">
 
-<p>Services in the Resin SOA are configured with the &lt;web-service>
-tag.  The implementation class is given as the <code>class</code> attribute.
+<p>Services in the Resin SOA are configured with the &lt;servlet>
+tag.  The implementation class is given as
+the <code>servlet-class</code> attribute.
 It is possible to allow access to the service within the same virtual machine
 by registering the service in JNDI using a &lt;jndi-name> child tag.
 </p>
 
 <p>
 To expose the service as a Hessian service, use the &lt;hessian> tag.
-Hessian is one of the <em>service encodings</em> available for web services.
-Because Hessian (usually) uses HTTP as the underlying transport protocol,
-the &lt;hessian> tag has a &lt;url-pattern> child tag to specify the 
-service's location on the server.
+Hessian is one of the <em>protocols</em> available for web services.
 </p>
 
 <p>
@@ -157,22 +155,29 @@ The &lt;url-pattern> child tag specifies the base URL for the REST interface.
 Finally, a SOAP interface is available. <!-- XXX -->
 </p>
 
-<example title="<web-service>">
-&lt;web-service class="example.HelloServiceImpl">
-  &lt;jndi-name>service/HelloService&lt;/jndi-name>
+<example title="web-service for hessian">
+&lt;servlet-mapping url-pattern="/hello/hessian/*"
+                 jndi-name="service/HelloService"
+                 servlet-name="hello-hessian"
+                 servlet-class="example.HelloServiceImpl">
+  &lt;protocol type="hessian"/>
+&lt;/servlet-mapping>
+</example>
 
-  &lt;hessian>
-    &lt;url-pattern>/hello/hessian/*&lt;/url-pattern>
-  &lt;/hessian>
+<example title="web-service for rest">
+&lt;servlet-mapping url-pattern="/hello/rest/*"
+                 servlet-name="hello-rest"
+                 servlet-class="example.HelloServiceImpl">
+  &lt;protocol type="rest"/>
+&lt;/servlet-mapping>
+</example>
 
-  &lt;rest>
-    &lt;url-pattern>/hello/rest/*&lt;/url-pattern>
-  &lt;/rest>
-
-  &lt;soap>
-    &lt;url-pattern>/hello/soap/*&lt;/url-pattern>
-  &lt;/soap>
-&lt;/web-service>
+<example title="web-service for soap">
+&lt;servlet-mapping url-pattern="/hello/rest/*"
+                 servlet-name="hello-soap"
+                 servlet-class="example.HelloServiceImpl">
+  &lt;protocol type="soap"/>
+&lt;/servlet-mapping>
 </example>
 
 </s1>

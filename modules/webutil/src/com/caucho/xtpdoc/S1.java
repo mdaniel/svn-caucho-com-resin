@@ -58,6 +58,12 @@ public class S1 extends Section {
     out.writeEndElement();
     
     if (_title != null) {
+      out.writeStartElement("h2");
+      out.writeAttribute("class", "section");
+      out.writeCharacters(_title);
+      out.writeEndElement();
+
+      /*
       out.writeStartElement("table");
       out.writeAttribute("border", "0");
       out.writeAttribute("cellpadding", "5");
@@ -75,6 +81,7 @@ public class S1 extends Section {
       out.writeEndElement(); // tr
 
       out.writeEndElement(); // table
+      */
     }
     
     super.writeHtml(out);

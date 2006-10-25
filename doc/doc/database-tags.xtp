@@ -74,29 +74,29 @@ and stores it in jndi with the given <var>jndi-name</var>.</p>
 <def title="database schema">
 element database {
   jndi-name
-  & connection-Database?
-  & driver+
-  & connection-wait-time
-  & max-active-time
-  & max-close-statements
-  & max-connections
-  & max-create-connections
-  & max-idle-time
-  & max-overflow-connections
-  & max-pool-time
-  & password
-  & ping
-  & ping-table
-  & ping-query
-  & ping-interval
-  & prepared-statement-cache-size
-  & save-allocation-stack-trace
-  & spy
-  & transaction-timeout
-  & user
-  & xa
-  & xa-forbid-same-rm
-  & wrap-statements
+  &amp; connection-Database?
+  &amp; driver+
+  &amp; connection-wait-time
+  &amp; max-active-time
+  &amp; max-close-statements
+  &amp; max-connections
+  &amp; max-create-connections
+  &amp; max-idle-time
+  &amp; max-overflow-connections
+  &amp; max-pool-time
+  &amp; password
+  &amp; ping
+  &amp; ping-table
+  &amp; ping-query
+  &amp; ping-interval
+  &amp; prepared-statement-cache-size
+  &amp; save-allocation-stack-trace
+  &amp; spy
+  &amp; transaction-timeout
+  &amp; user
+  &amp; xa
+  &amp; xa-forbid-same-rm
+  &amp; wrap-statements
 }
 </def>
 
@@ -142,6 +142,7 @@ wait <a href="#connection-wait-time">connection-wait-time</a> or until
 a connection is freed before allocating a new connection.</p>
 
 <default>128</default>
+</defun>
 
 <defun title="&lt;max-create-connections>" version="Resin 3.1">
 <parents>database</parents>

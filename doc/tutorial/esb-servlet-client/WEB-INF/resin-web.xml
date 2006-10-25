@@ -1,14 +1,14 @@
 <!--
    - web.xml configuration file for the Hessian addition example.
   -->
-<web-app> <!-- xmlns="http://caucho.com/ns/resin"> -->
-  <web-service class="example.HelloServiceImpl">
-    <jndi-name>service/HelloService</jndi-name>
+<web-app xmlns="http://caucho.com/ns/resin">
 
-    <hessian>
-      <url-pattern>/hello/</url-pattern>
-    </hessian>
-  </web-service>
+  <servlet-mapping url-pattern="/hello/*"
+                   servlet-class="example.HelloServiceImpl"
+                   jndi-name="service/HelloService">
+
+    <protocol type="hessian"/>
+  </servlet-mapping>
 
   <web-service-client jndi-name="hessian/HelloService">
     <url>hessian:${webApp.url}/hello/</url>

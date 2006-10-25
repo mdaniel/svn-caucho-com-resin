@@ -60,7 +60,8 @@ public class NavigationItem {
   private String _title;
   private String _product;
   private Document _document;
-  private ContentItem _description;
+  private String _description;
+  private ContentItem _fullDescription;
   private boolean _atocDescend;
   private Navigation _child;
   private ArrayList<NavigationItem> _items = new ArrayList<NavigationItem>();
@@ -141,7 +142,7 @@ public class NavigationItem {
 
   protected void initSummary()
   {
-    if (_child != null || _description != null)
+    if (_child != null || _fullDescription != null)
       return;
 
     Path rootPath = _document.getDocumentPath().getParent();
@@ -156,9 +157,9 @@ public class NavigationItem {
           config.configure(_document, linkPath);
 
           if (_document.getHeader() != null)
-            _description = _document.getHeader().getDescription();
+            _fullDescription = _document.getHeader().getDescription();
 	  else
-	    _description = new Description(_document);
+	    _fullDescription = new Description(_document);
         } catch (NullPointerException e) {
           log.info("error configuring " + linkPath + ": " + e);
         } catch (Exception e) {
@@ -192,11 +193,13 @@ public class NavigationItem {
     }
   }
 
+  /*
   public ContentItem createDescription()
   {
-    _description = new FormattedText(_document);
-    return _description;
+    _fullDescription = new FormattedText(_document);
+    return _fullDescription;
   }
+  */
 
   public void setATOCDescend(boolean atocDescend)
   {
@@ -212,6 +215,11 @@ public class NavigationItem {
   public void setTitle(String title)
   {
     _title = title;
+  }
+
+  public void setDescription(String description)
+  {
+    _description = description;
   }
 
   public void setProduct(String product)
@@ -241,52 +249,79 @@ public class NavigationItem {
     out.writeAttribute("class", "atoc-top");
     
     for (NavigationItem item : _items)
-      item.writeHtmlImpl(out, path, 0);
+      item.writeHtmlImpl(out, path, 0, 0, 3);
     
     out.writeEndElement();
   }
 
-  public void writeHtml(XMLStreamWriter out, String path, int depth)
+  public void writeHtml(XMLStreamWriter out, String path,
+			int depth, int styleDepth, int maxDepth)
     throws XMLStreamException
   {
     initSummary();
 
     for (NavigationItem item : _items)
-      item.writeHtmlImpl(out, path, depth);
+      item.writeHtmlImpl(out, path, depth, styleDepth, maxDepth);
   }
 
-  protected void writeHtmlImpl(XMLStreamWriter out, String path, int depth)
+  protected void writeHtmlImpl(XMLStreamWriter out, String path,
+			       int depth,
+			       int styleDepth, int maxDepth)
     throws XMLStreamException
   {
-    if (depth >= _maxDepth)
+    if (maxDepth <= depth)
       return;
 
     initSummary();
 
-    if (_child != null && depth + 1 < _maxDepth)
+    if (_child != null && depth + 1 < maxDepth)
       _child.initSummary();
 
-    out.writeStartElement("dt");
-
-    out.writeStartElement("b");
-
-    if (_link != null) {
-      out.writeStartElement("a");
-      out.writeAttribute("href", path + _link);
-      out.writeCharacters(_title);
-      out.writeEndElement(); // a
+    if (depth <= 1) {
+      out.writeStartElement("h2");
+      out.writeAttribute("class", "section");
+      
+      if (_link != null) {
+	out.writeStartElement("a");
+	out.writeAttribute("href", path + _link);
+	out.writeCharacters(_title);
+	out.writeEndElement(); // a
+      }
+      else
+	out.writeCharacters(_title);
+      
+      out.writeEndElement();
     }
+    else {
+      out.writeStartElement("dt");
 
-    out.writeEndElement(); // b
+      out.writeStartElement("b");
 
-    out.writeEndElement(); // dt
+      if (_link != null) {
+	out.writeStartElement("a");
+	out.writeAttribute("href", path + _link);
+	out.writeCharacters(_title);
+	out.writeEndElement(); // a
+      }
+
+      out.writeEndElement(); // b
+      
+      if (_fullDescription != null && depth - styleDepth <= 1) {
+      }
+      else if (_description != null && depth > 1) {
+	out.writeCharacters(" - ");
+	out.writeCharacters(_description);
+      }
+
+      out.writeEndElement(); // dt
+    }
 
     out.writeStartElement("dd");
 
     // XXX: brief/paragraph/none
-    if (_description != null && depth <= 1) {
+    if (_fullDescription != null && depth - styleDepth <= 1) {
       out.writeStartElement("p");
-      _description.writeHtml(out);
+      _fullDescription.writeHtml(out);
       out.writeEndElement(); // p
     }
 
@@ -306,10 +341,10 @@ public class NavigationItem {
 	out.writeAttribute("class", "atoc-" + (depth + 1));
 
 	if (_child != null)
-	  _child.writeHtml(out, tail, depth + 1);
+	  _child.writeHtml(out, tail, depth + 1, styleDepth, maxDepth);
 	else {
 	  for (NavigationItem item : _items)
-	    item.writeHtmlImpl(out, tail, depth + 1);
+	    item.writeHtmlImpl(out, tail, depth + 1, styleDepth, maxDepth);
 	}
 	out.writeEndElement();
       }

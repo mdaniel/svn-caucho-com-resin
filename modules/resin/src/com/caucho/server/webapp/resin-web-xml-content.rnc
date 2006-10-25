@@ -536,20 +536,24 @@ r_security-constraint =
   }
 
 r_servlet = element servlet {
-  r_description-Group,
+  r_description-Group
 
-  r_servlet-name,
+  & r_servlet-name
 
-  (attribute servlet-class { string }
-   | element servlet-class { string }
-   | attribute jsp-file { string }
-   | element jsp-file { string }),
+  & (attribute servlet-class { string }
+     | element servlet-class { string }
+     | attribute jsp-file { string }
+     | element jsp-file { string })
 
-  r_servlet-Content
+  & r_servlet-Content
 }
 
 r_servlet-Content =
-  ((r_init | r_init-param)*
+   r_jndi-name?
+
+   & r_var?
+
+   & ((r_init | r_init-param)*
 
    & (attribute load-on-startup { string }
       | element load-on-startup { string })?
@@ -565,16 +569,14 @@ r_servlet-Content =
 r_servlet-mapping = element servlet-mapping {
   attribute id { string }?
 
-  & (r_servlet-name 
+  & (r_servlet-name?
 
-    | (r_servlet-name?
+     & (attribute servlet-class { string }
+        | element servlet-class { string }
+        | attribute jsp-file { string }
+        | element jsp-file { string })?
 
-       & (attribute servlet-class { string }
-          | element servlet-class { string }
-          | attribute jsp-file { string }
-          | element jsp-file { string })
-
-       & r_servlet-Content))
+     & r_servlet-Content)
 
   & (r_url-pattern | r_url-regexp)+
 }

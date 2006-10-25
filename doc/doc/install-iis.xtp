@@ -5,20 +5,27 @@
     <title>Resin with IIS</title>
 
     <description>
-      <p>Resin provides a fast servlet runner for IIS and PWS, allowing IIS
-        to run servlets and JSP files.</p>
-
-      <figure src="iis_srun.gif"/>
-
-      <p>If you have not yet done so, we suggest you use the <a href="resin-web-server.xtp">Resin standalone web server</a> option
-      first.</p>
+      <p>For sites requiring the use of IIS, Resin provides a fast servlet
+runner, allowing IIS to run servlets and JSP files..</p>
 
     </description>
   </header>
 
   <body>
-    <summary/>
 
+<s1>
+      <figure src="iis_srun.gif"/>
+
+      <p>If you have not yet done so, we suggest you
+consider the <a href="resin-web-server.xtp">Resin
+web server</a> option first, either as a standalone web server or as
+a web-tier server load-balancing to Resin app-tier servers.
+Resin's Java web server provides management, clustering,
+and load-balancing with failover.
+</p>
+</s1>
+
+    <localtoc/>
 
 <s1 title="Prerequisites and Environment Variables">
 

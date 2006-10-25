@@ -9,7 +9,12 @@ Groovy is an agile, dynamic programming language that compiles source files
 directly to java bytecode.  Groovy has a syntax similar to Java and includes
 features found in Python, Ruby, and Smalltalk.  
 </p>
+</description>
+</header>
 
+<body>
+
+<s1>
 <p>
 See also:
 </p>
@@ -18,11 +23,9 @@ See also:
 </li><li><a href="http://dist.codehaus.org/groovy/distributions/">Groovy download</a>
 </li><li><a href="http://www.jcp.org/en/jsr/detail?id=241">JSR 241: The Groovy Programming Language</a>
 </li></ul>
-</description>
-</header>
+</s1>
 
-<body>
-<summary/>
+<localtoc/>
 
 <s1 title="Installing Groovy">
 

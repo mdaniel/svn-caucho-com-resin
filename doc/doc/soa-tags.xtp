@@ -16,10 +16,12 @@ and &lt;web-service-client> for multiple protocols: REST, SOAP, Hessian, VM.
 
 <localtoc/>
 
-<defun title="&lt;web-service>">
+<defun title="&lt;servlet>">
 <parents>web-app</parents>
 
-<p>The &lt;web-service> tag configures a bean as a service.
+<p>The &lt;servlet> tag can configure a bean as a service.
+If the <code>servlet-class</code> has the @WebService annotation,
+the service will be exposed as a service.
 The service can receive request from multiple protocols, including
 REST, SOAP, Hessian, and direct local-JVM calls.  The service
 will normally be configured with IoC.</p>
@@ -29,21 +31,13 @@ for an example.</p>
 
 <deftable-childtags>
 <tr>
-  <td>class</td>
+  <td>servlet-class</td>
   <td>Defines the implementation class for the web-service</td>
   <td>required</td>
 </tr>
 <tr>
-  <td>hessian</td>
-  <td>Adds a <a href="hessian.xtp">Hessian</a> port for
-the web service.</td>
-  <td></td>
-</tr>
-<tr>
-  <td>init</td>
-  <td>IoC-based initialization.  See <a href="ioc-bean.xtp">IoC init
-documentation</a> for more information.</td>
-  <td></td>
+  <td>protocol</td>
+  <td>Selects and configures the web-service protocol.</td>
 </tr>
 <tr>
   <td>jndi-name</td>
@@ -51,35 +45,7 @@ documentation</a> for more information.</td>
 by local-JVM clients.</td>
   <td></td>
 </tr>
-<tr>
-  <td>rest</td>
-  <td>Adds a REST interface for the web service.</td>
-  <td></td>
-</tr>
-<tr>
-  <td>soap</td>
-  <td>Adds a SOAP interface for the web service.</td>
-  <td></td>
-</tr>
-<tr>
-  <td>var</td>
-  <td>Sets a Resin EL-variable for IoC injection for other beans in the
-resin.conf.</td>
-  <td></td>
-</tr>
 </deftable-childtags>
-
-<def title="web-service definition">
-element web-service {
-  class
-  &amp; hessian*
-  &amp; init*
-  &amp; jndi-name?
-  &amp; rest*
-  &amp; soap*
-  &amp; var?
-}
-</def>
 
 </defun>
 

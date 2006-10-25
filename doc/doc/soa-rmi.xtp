@@ -5,14 +5,14 @@
 <description>
 <p>
 Resin supports the use of RMI with the resource class 
-<a href="javadoc|com.caucho.resources.rmi.RmiRegistry|"/>.
+<a href="javadoc|com.caucho.resources.rmi.RmiRegistry">RmiRegistry</a>.
 </p>
 
 </description>
 </header>
 
 <body>
-<summary objsummary="localtoc"/>
+<localtoc/>
 
 <s1 name="concepts" title="RMI concepts">
 

@@ -12,16 +12,11 @@
       <p>Because Burlap is a small protocol, J2ME devices like cell-phones can use
         it to connect to Resin servers.  Because it's powerful, it can be used
         for EJB services.</p>
-
-      <p>The <a href="external|caucho|burlap">Burlap home
-      page</a> contains the latest information about Burlap including
-      the <a href="external|caucho|burlap/spec">Burlap
-          specification</a>.</p>
     </description>
   </header>
 
   <body>
-    <summary/>
+    <localtoc/>
 
 
 <s1 title="Burlap Client">

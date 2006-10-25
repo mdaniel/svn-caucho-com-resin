@@ -9,8 +9,13 @@
         RPC call.  The messaging service itself is based on the standard
         Hessian RPC call, so Hessian itself has no need to become more
         complicated.</p>
+    </description>
+  </header>
 
-      <p>Each hop the message takes uses a simple <code>send</code> method to the
+  <body>
+
+<s1>
+<p>Each hop the message takes uses a simple <code>send</code> method to the
         next server in line.  The receiving service might be the final
         destination or it might choose to send the message to another server,
         making another hop.  This architecture is essentially the same as the
@@ -26,12 +31,9 @@
         for handling messaging, without introducing any extra complications to
         the Hessian protocol itself.  By choosing a layered protocol model, each
         protocol layer can be simple independent of the others.</p>
+</s1>
       
-    </description>
-  </header>
-
-  <body>
-    <summary/>
+    <localtoc/>
 
 <s1 title="Messaging Service">
 

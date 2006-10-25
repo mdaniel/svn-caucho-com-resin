@@ -97,17 +97,16 @@ field is initialized from the &lt;init> child tag of &lt;web-service>.
 </p>
 
 <example title="<web-service>">
-&lt;web-service class="example.HelloServiceImpl">
-  &lt;jndi-name>service/HelloService&lt;/jndi-name>
+&lt;servlet-mapping url-pattern="/hello/*"
+                 servlet-class="example.HelloServiceImpl">
+                 jndi-name="service/HelloService">
 
   &lt;init>
     &lt;hello>hola mundo&lt;/hello>
   &lt;/init>
 
-  &lt;hessian>
-    &lt;url-pattern>/hello/&lt;/url-pattern>
-  &lt;/hessian>
-&lt;/web-service>
+  &lt;protocol type="hessian"/>
+&lt;/servlet-mapping>
 </example>
 
 <p>

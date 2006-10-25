@@ -1,8 +1,17 @@
+/*
 .website a {
   text-decoration : none;
 }
 
 .website a:hover {
+  text-decoration : underline;
+}
+*/
+a {
+  text-decoration : none;
+}
+
+a:hover {
   text-decoration : underline;
 }
 
@@ -42,6 +51,19 @@ div.toc {
 .section {
 /*  background : #ccddff; */
   background : #b9cef7;
+}
+
+h2.section {
+/*  background : #ccddff; */
+  background : #b9cef7;
+  margin : 1.0em 0em;
+  padding : 0.2em;
+  font-family : Arial, Helvetica, sans-serif;
+  font-style : normal;
+}
+
+h3 {
+  font-family : Arial, Helvetica, sans-serif;
 }
 
 div.section-title {

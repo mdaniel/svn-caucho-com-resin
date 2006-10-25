@@ -1,12 +1,11 @@
 <web-app xmlns="http://caucho.com/ns/resin">
-  <web-service class="example.FlickrImpl">
-    <jndi-name>service/FlickrImpl</jndi-name>
-
-    <rest>
-      <url-pattern>/flickr/rest/*</url-pattern>
+  <servlet-mapping url-pattern="/flickr/rest/*"
+                   servlet-class="example.FlickrImpl"
+                   jndi-name="service/FlickrImpl">
+    <protocol type="rest">
       <jaxb-package>example.data</jaxb-package>
-    </rest>
-  </web-service>
+    </protocol>
+  </servlet-mapping>
 
   <web-service-client jndi-name="rest/flickr">
     <url>rest:${webApp.url}/flickr/rest/</url>

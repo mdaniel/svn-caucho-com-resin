@@ -9,7 +9,7 @@
        - Installation
       -->    
     <item link="install.xtp" title="Installation">
-      <item link="install.xtp" title="Quick Start"/>
+      <item link="starting.xtp" title="Quick Start"/>
       <item link="resin-web-server.xtp" title="Resin Web Server"/>
       <item link="install-apache.xtp" title="Apache"/>
       <item link="install-iis.xtp" title="IIS"/>
@@ -23,22 +23,38 @@
        - Configuration
       -->    
     <item link="config.xtp" title="Configuration">
+    <!--
       <item link="config-overview.xtp" title="overview"/>
-      <item link="howto.xtp" title="howto"/>
+      -->
       <item link="tags.xtp"  title="tags">
-        <item link="env-tags.xtp" title="env tags"/>
-        <item link="resin-tags.xtp" title="&lt;resin>"/>
-        <item link="cluster-tags.xtp" title="&lt;cluster>"/>
-        <item link="server-tags.xtp" title="&lt;server>"/>
-        <item link="port-tags.xtp" title="port tags"/>
-        <item link="host-tags.xtp" title="&lt;host>"/>
-        <item link="webapp-tags.xtp" title="&lt;web-app>"/>
-        <item link="session-tags.xtp" title="session tags"/>
-        <item link="rewrite-tags.xtp" title="rewrite tags"/>
-        <item link="soa-tags.xtp" title="service tags"/>
-        <item link="config-log.xtp" title="log"/>
-        <item link="el-var.xtp" title="el variables"/>
-        <item link="config-control.xtp" title="el & control"/>
+        <item link="env-tags.xtp" title="env tags"
+	      description="database, classloader, resource, bean, and IoC"/>
+        <item link="resin-tags.xtp" title="&lt;resin>"
+	      description="top-level configuration container"/>
+        <item link="cluster-tags.xtp" title="&lt;cluster>"
+	      description="clustering, caching, load-balancing, and distributed sessions"/>
+        <item link="server-tags.xtp" title="&lt;server>"
+	      description="threading, keepalive, timeout, and jvm arguments"/>
+        <item link="port-tags.xtp" title="port tags"
+	      description="HTTP, SSL, addresses and ports"/>
+        <item link="host-tags.xtp" title="&lt;host>"
+	      description="virtual hosts" />
+        <item link="webapp-tags.xtp" title="&lt;web-app>"
+	      description="servlet and filter configuration"/>
+        <item link="database-tags.xtp" title="&lt;database>"
+	      description="connection pool and database driver configuration"/>
+        <item link="session-tags.xtp" title="session tags"
+	      description="servlet sessions"/>
+        <item link="rewrite-tags.xtp" title="rewrite tags"
+	      description="URL rewriting, dispatching, and load-balancing"/>
+        <item link="soa-tags.xtp" title="service tags"
+	      description="web service configuration"/>
+        <item link="config-log.xtp" title="log"
+	      description="access log, java.util.logging, and stdout" />
+        <item link="el-var.xtp" title="el variables"
+	      description="configuration variables"/>
+        <item link="config-control.xtp" title="el & control"
+	      description="if, choose, and set"/>
       </item>
 
       <item title="Common Tasks" link="commontasks.xtp">
@@ -63,6 +79,7 @@
         <item link="j2ee-web-xml-schema.xtp" title="J2EE web.xml"/>
       </item>
 
+      <item link="howto.xtp" title="howto"/>
       <item link="config-faq.xtp" title="Config FAQ"/>
       <item link="config-scrapbook.xtp" title="Scrapbook"/>
       <item link="db-scrapbook.xtp" title="DB Scrapbook"/>
@@ -166,24 +183,6 @@
     <!--
        - Performance
       -->
-    <item link="xml.xtp" title="XML and XSLT">
-      <item link="xml-intro.xtp" title="Introduction"/>
-
-      <item link="jaxp.xtp" title="JAXP"/>
-
-      <item link="xpath.xtp" title="XML Path Language (XPath)"/>
-      <item link="xslt-filter.xtp" title="XSLT Filter"/>
-
-      <item link="xslt-fun.xtp" title="XSLT"/>
-      <item link="xpath-fun.xtp" title="XPath Functions"/>
-
-      <item link="xml-faq.xtp" title="FAQ"/>
-      <item link="xml-scrapbook.xtp" title="Scrapbook"/>
-    </item>
-    
-    <!--
-       - Performance
-      -->
     <item link="performance.xtp" title="Performance">
       <item link="jvm-tuning.xtp" title="JVM Tuning"/>
       <item link="proxy-cache.xtp" title="Proxy Caching"/>
@@ -204,6 +203,24 @@
       <item link="burlap-1.0-spec.xtp" title="Burlap 1.0 Spec"/>
       <item link="burlap-notes.xtp" title="Burlap Design Notes"/>
       <item link="hessian-messaging.xtp" title="Hessian Messaging"/>
+    </item>
+    
+    <!--
+       - XML
+      -->
+    <item link="xml.xtp" title="XML and XSLT">
+      <item link="xml-intro.xtp" title="Introduction"/>
+
+      <item link="jaxp.xtp" title="JAXP"/>
+
+      <item link="xpath.xtp" title="XML Path Language (XPath)"/>
+      <item link="xslt-filter.xtp" title="XSLT Filter"/>
+
+      <item link="xslt-fun.xtp" title="XSLT"/>
+      <item link="xpath-fun.xtp" title="XPath Functions"/>
+
+      <item link="xml-faq.xtp" title="FAQ"/>
+      <item link="xml-scrapbook.xtp" title="Scrapbook"/>
     </item>
 
     <!--
@@ -226,7 +243,9 @@
       <item link="swiftmq.xtp" title="SwiftMQ" />
       <item link="openjms.xtp" title="OpenJMS" />
       <item link="hibernate.xtp" title="Hibernate" />
+      <!--
       <item link="sslhardware.xtp" title="SSL Accelerators"/>
+      -->
       <item link="db-thirdparty.xtp" title="Database"/>
     </item>
     

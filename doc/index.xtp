@@ -9,6 +9,8 @@
   </header>
 
   <body>
+    <summary/>
+<!--
     <summary atoc="toplevel">
       <atoc-control>
         <item depth="1" description="brief"/>
@@ -20,6 +22,7 @@
         </item>
       </atoc-control>
     </summary>
+-->
 
   </body>
 </document>

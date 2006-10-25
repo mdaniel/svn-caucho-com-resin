@@ -7,14 +7,17 @@
          allowing Apache to run servlets and JSP files.
       </p>
 
-      <p>If you have not yet done so, we suggest you use the <a href="resin-web-server.xtp">Resin standalone web server</a> option
-      first.</p>
-
     </description>
   </header>
 
 <body>
-<summary/>
+
+<s1>
+<p>If you have not yet done so, we suggest you use the <a href="resin-web-server.xtp">Resin standalone web server</a> option
+      first.</p>
+</s1>
+
+<localtoc/>
 
 <s1 name="standalone" title="Before you integrate Resin with Apache">
 <p>

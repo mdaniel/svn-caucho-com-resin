@@ -9,7 +9,14 @@
       even all 'table' elements in an entire HTML file. The XPath
       language is exceptionally rich.  It can describe an incredible
       number of node selections. </p>
+    </description>
 
+
+  </header>
+
+  <body>
+
+<s1>
       <p>Java applications can use the com.caucho.xpath package to use
       XPath with an XML tree.</p>
 
@@ -23,13 +30,9 @@
       given a set of chapters, XPath can select all sections in those
       chapters, chapters with 'advanced' attributes, or grandchildren
       with 'color' attributes of 'blue'.</p>
-    </description>
+</s1>
 
-
-  </header>
-
-  <body>
-    <summary no-objsummary="1"/>
+    <localtoc/>
 
 <s1 name="Basic" title="Basic Patterns">
 

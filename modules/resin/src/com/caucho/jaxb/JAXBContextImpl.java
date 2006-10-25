@@ -67,41 +67,6 @@ public class JAXBContextImpl extends JAXBContext {
   private HashMap<QName,Skeleton> _roots 
     = new HashMap<QName,Skeleton>();
 
-  /**
-   * Sorts classes in reverse depth order.  When searching for the correct
-   * class for an instance, we need the most specific known type.
-   */
-  private static class ClassDepthComparator implements Comparator<Class> {
-    public int compare(Class o1, Class o2) 
-    {
-      int d1 = classDepth(o1);
-      int d2 = classDepth(o2);
-
-      if (d1 < d2)
-        return 1;
-      else if (d1 > d2)
-        return -1;
-      else
-        return 0;
-    }
-
-    public boolean equals(Object obj)
-    {
-      return obj instanceof ClassDepthComparator;
-    }
-
-    // XXX Memoize?
-    private static int classDepth(Class cl)
-    {
-      Class superClass = cl.getSuperclass();
-
-      if (superClass == null)
-        return 0;
-
-      return 1 + classDepth(superClass);
-    }
-  }
-
   public JAXBContextImpl(String contextPath,
                          ClassLoader classLoader,
                          Map<String,?> properties)
@@ -359,6 +324,41 @@ public class JAXBContextImpl extends JAXBContext {
   public Skeleton getRootElement(QName q)
   {
     return _roots.get(q);
+  }
+
+  /**
+   * Sorts classes in reverse depth order.  When searching for the correct
+   * class for an instance, we need the most specific known type.
+   */
+  private static class ClassDepthComparator implements Comparator<Class> {
+    public int compare(Class o1, Class o2) 
+    {
+      int d1 = classDepth(o1);
+      int d2 = classDepth(o2);
+
+      if (d1 < d2)
+        return 1;
+      else if (d1 > d2)
+        return -1;
+      else
+        return 0;
+    }
+
+    public boolean equals(Object obj)
+    {
+      return obj instanceof ClassDepthComparator;
+    }
+
+    // XXX Memoize?
+    private static int classDepth(Class cl)
+    {
+      Class superClass = cl.getSuperclass();
+
+      if (superClass == null)
+        return 0;
+
+      return 1 + classDepth(superClass);
+    }
   }
 }
 

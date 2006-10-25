@@ -6,6 +6,6 @@
   </header>
 
   <body>
-    <summary/>
+    <summary skip-description='true'/>
   </body>
 </document>

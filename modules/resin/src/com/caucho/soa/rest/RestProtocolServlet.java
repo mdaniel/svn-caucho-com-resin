@@ -56,6 +56,8 @@ import javax.xml.bind.*;
 import com.caucho.util.CauchoSystem;
 import com.caucho.util.JAXBUtil;
 import com.caucho.soa.servlet.*;
+import com.caucho.xml.stream.*;
+import com.caucho.vfs.*;
 
 /**
  * A binding for REST services.
@@ -231,8 +233,13 @@ public class RestProtocolServlet extends GenericServlet
 	  JAXBUtil.introspectMethod(method, jaxbClasses);
       }
 
-      if (_context == null)
-	_context = JAXBContext.newInstance(jaxbClasses.toArray(new Class[0]));
+      if (_context != null) {
+      }
+      else if (_jaxbPackages != null) {
+	_context = JAXBContext.newInstance(_jaxbPackages);
+      }
+      else
+	_context = JAXBContext.newInstance(jaxbClasses.toArray(new Class[jaxbClasses.size()]));
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -406,7 +413,14 @@ public class RestProtocolServlet extends GenericServlet
     Marshaller marshaller = _context.createMarshaller();
     marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 
-    marshaller.marshal(result, out);
+    WriteStream ws = Vfs.openWrite(out);
+
+    try {
+      XMLStreamWriterImpl writer = new XMLStreamWriterImpl(ws);
+      marshaller.marshal(result, writer);
+    } finally {
+      ws.close();
+    }
   }
 
   private static Object stringToType(Class type, String arg)

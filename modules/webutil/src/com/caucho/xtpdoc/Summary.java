@@ -48,6 +48,8 @@ public class Summary implements ContentItem {
   private ATOCControl _atocControl;
   private Navigation _navigation;
 
+  private boolean _isSkipDescription;
+
   public Summary(Document document)
   {
     _document = document;
@@ -60,6 +62,11 @@ public class Summary implements ContentItem {
 
   public void setATOC(String atoc)
   {
+  }
+
+  public void setSkipDescription(boolean isSkip)
+  {
+    _isSkipDescription = isSkip;
   }
 
   public void setObjSummary(String objSummary)
@@ -91,8 +98,14 @@ public class Summary implements ContentItem {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    if (_document.getNavigation() != null)
-      _document.getNavigation().writeHtml(out, "");
+    if (_document.getNavigation() == null) {
+    }
+    else if (_isSkipDescription) {
+      _document.getNavigation().writeHtml(out, "", 1, 1, 4);
+    }
+    else {
+      _document.getNavigation().writeHtml(out, "", 1, 0, 4);
+    }
   }
 
   public void writeLaTeXTop(PrintWriter out)

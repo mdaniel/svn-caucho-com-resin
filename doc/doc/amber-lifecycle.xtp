@@ -6,7 +6,7 @@
     <description>
     <p>
     The Amber bean lifecycle
-    follows the JDO 1.0 model.  Amber supports both transactional
+    follows the JPA model.  Amber supports both transactional
     and non-transactional lifecycles.
     </p>
     </description>
@@ -14,7 +14,7 @@
 
   <body>
 
-    <summary/>
+    <localtoc/>
 
 <s1 title="Example configuration">
 

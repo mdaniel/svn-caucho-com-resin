@@ -177,10 +177,17 @@ public class Navigation {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    writeHtml(out, "", 1);
+    writeHtml(out, "", 1, 0, 4);
+  }
+
+  public void writeHtml(XMLStreamWriter out, int styleDepth)
+    throws XMLStreamException
+  {
+    writeHtml(out, "", 1, styleDepth, 4);
   }
   
-  public void writeHtml(XMLStreamWriter out, String path, int depth)
+  public void writeHtml(XMLStreamWriter out, String path,
+			int depth, int styleDepth, int maxDepth)
     throws XMLStreamException
   {
     /*
@@ -190,7 +197,7 @@ public class Navigation {
     */
 
     for (NavigationItem item : _items)
-      item.writeHtml(out, path, depth);
+      item.writeHtml(out, path, depth, styleDepth, maxDepth);
 
     //out.writeEndElement(); // dl
   }

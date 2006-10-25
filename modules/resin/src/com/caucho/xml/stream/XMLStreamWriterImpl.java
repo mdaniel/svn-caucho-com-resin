@@ -51,41 +51,6 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   private ArrayList<QName> _pendingAttributeNames = new ArrayList<QName>();
   private ArrayList<String> _pendingAttributeValues = new ArrayList<String>();
 
-  private void flushPending()
-    throws XMLStreamException
-  {
-    try {
-      if (_pendingTagName == null) return;
-      
-      _ws.print("<");
-      _ws.print(printQName(_pendingTagName));
-      
-      for(int i=0; i<_pendingAttributeNames.size(); i++) {
-        _ws.print(" ");
-        _ws.print(printQName(_pendingAttributeNames.get(i)));
-        _ws.print("='");
-        Escapifier.escape(_pendingAttributeValues.get(i), _ws);
-        _ws.print("'");
-      }
-      flushContext();
-
-      if (_shortTag) {
-        _ws.print("/>");
-        popContext();
-      } else {
-        _ws.print(">");
-      }
-      
-      _pendingTagName = null;
-      _pendingAttributeNames.clear();
-      _pendingAttributeValues.clear();
-      _shortTag = false;
-    }
-    catch (IOException e) {
-      throw new XMLStreamException(e);
-    }
-  }
-
   public XMLStreamWriterImpl(WriteStream ws)
   {
     _ws = ws;
@@ -442,5 +407,40 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
     if (_flushed) return;
     _tracker.emitDeclarations(_ws);
     _flushed = true;
+  }
+
+  private void flushPending()
+    throws XMLStreamException
+  {
+    try {
+      if (_pendingTagName == null) return;
+      
+      _ws.print("<");
+      _ws.print(printQName(_pendingTagName));
+      
+      for(int i=0; i<_pendingAttributeNames.size(); i++) {
+        _ws.print(" ");
+        _ws.print(printQName(_pendingAttributeNames.get(i)));
+        _ws.print("='");
+        Escapifier.escape(_pendingAttributeValues.get(i), _ws);
+        _ws.print("'");
+      }
+      flushContext();
+
+      if (_shortTag) {
+        _ws.print("/>");
+        popContext();
+      } else {
+        _ws.print(">");
+      }
+      
+      _pendingTagName = null;
+      _pendingAttributeNames.clear();
+      _pendingAttributeValues.clear();
+      _shortTag = false;
+    }
+    catch (IOException e) {
+      throw new XMLStreamException(e);
+    }
   }
 }

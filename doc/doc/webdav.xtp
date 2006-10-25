@@ -10,7 +10,12 @@ of extensions to the HTTP protocol that is a convenient replacement
 for FTP when developing web sites.  Many editing tools can save to a
 WebDAV server directly and several operating systems can provide a
 filesystem to a WebDAV server.</p>
-  
+</description>
+</header>
+
+<body>
+
+<s1>
 <p>From <a href="external|webdav|index">www.webdav.org</a>:
 </p><blockquote>
 <b>What is WebDAV?</b><br/>
@@ -22,11 +27,9 @@ collaboratively edit and manage files on remote web servers.
 
 <p>The WebDAV site also contains pointers to programs which
 understand WebDAV.</p>
-</description>
-</header>
+</s1>
 
-<body>
-<summary/>
+<localtoc/>
 <s1 name="configure" title="Configuring the WebDAV Servlet">
 
 <p>The WebDAV servlet must be enabled explicitly.  By default, it also

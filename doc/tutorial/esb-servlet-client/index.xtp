@@ -50,14 +50,13 @@ public interface HelloService {
 href="../hello-world/index.xtp">the simple service tutorial</a>.
 </p>
 
-<example title="<web-service>">
-&lt;web-service class="example.HelloServiceImpl">
-  &lt;jndi-name>service/HelloService&lt;/jndi-name>
+<example title="<servlet>">
+&lt;servlet-mapping url-pattern="/hello/*"
+                 servlet-class="example.HelloServiceImpl"
+                 jndi-name="service/HelloService">
 
-  &lt;hessian>
-    &lt;url-pattern>/hello/&lt;/url-pattern>
-  &lt;/hessian>
-&lt;/web-service>
+  &lt;protocol type="hessian"/>
+&lt;/servlet-mapping>
 </example>
 </s1>
 

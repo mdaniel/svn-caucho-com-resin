@@ -9,7 +9,13 @@
         spider the web site every day to automatically pick up any new pages.
         Syndication applications might poll their news sites every hour to check for
         updates.</p>
+    </description>
 
+  </header>
+
+  <body>
+
+<s1>
       <p>Resin's <var>run-at</var> servlets make periodic tasks simple.  At the
           specified interval, Resin will execute a configured servlet.  Because the
           periodic task is implemented as a servlet, the API is familiar and
@@ -21,13 +27,9 @@
           Also, <var>run-at</var> automatically handles classloader issues.  A thread
           implementation needs to ensure that the running thread has the same
           classloader as the application.</p>
+</s1>
 
-    </description>
-
-  </header>
-
-  <body>
-    <summary/>
+    <localtoc/>
 <s1 title="Sample Service">
 
 <p>The following example doesn't do much.  When the service routine is called,

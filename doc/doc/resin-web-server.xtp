@@ -6,17 +6,19 @@
     <description>
       <p>Resin provides a fast web server which can be used
 by itself or as a load balancer.
-In our benchmarks, it serves static pages faster than Apache!
+In our benchmarks, it serves static pages faster than Apache.
 For most sites, the Resin web server is ideal because of its
 performance, security and reliability.</p>
 
-        <figure src="httpd.gif"/>
     </description>
 
   </header>
 
   <body>
+
     <localtoc/>
+
+<s1><figure src="httpd.gif"/></s1>
 
 <s1 title="Unix (including Linux and MacOS-X)">
 
