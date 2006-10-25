@@ -554,6 +554,7 @@ public class Store {
     throws IOException
   {
     long blockIndex;
+    boolean isFileExtended = false;
 
     synchronized (_allocationLock) {
       long end = _blockCount;
@@ -588,8 +589,10 @@ public class Store {
       if (log.isLoggable(Level.FINE))
 	log.fine(this + " allocating block " + blockIndex + " " + codeToName(code));
 
-      if (_blockCount <= blockIndex)
+      if (_blockCount <= blockIndex) {
+	isFileExtended = true;
 	_blockCount = blockIndex + 1;
+      }
     }
 
     long blockId = blockIndexToBlockId(blockIndex);
@@ -608,6 +611,15 @@ public class Store {
     }
     
     saveAllocation();
+
+    // if extending file, write the contents now
+    if (isFileExtended) {
+      try {
+	block.write();
+      } catch (IOException e) {
+	log.log(Level.WARNING, e.toString(), e);
+      }
+    }
 
     return block;
   }
@@ -1022,7 +1034,7 @@ public class Store {
     Block block = xa.readBlock(this, addressToBlockId(fragmentAddress));
 
     try {
-      block = xa.createAutoCommitWriteBlock(block);
+      xa.addUpdateBlock(block);
       
       int blockOffset = getFragmentOffset(fragmentAddress);
 

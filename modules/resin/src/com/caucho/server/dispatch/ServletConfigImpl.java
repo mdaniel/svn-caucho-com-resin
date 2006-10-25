@@ -461,7 +461,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     if (_jndiName != null) {
       validateClass(true);
       
-      Object servlet = createServlet();
+      Object servlet = createServlet(false);
 
       try {
 	Jndi.bindDeepShort(_jndiName, servlet);
@@ -473,7 +473,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     if (_var != null) {
       validateClass(true);
       
-      Object servlet = createServlet();
+      Object servlet = createServlet(false);
 
       Config.setCurrentVar(_var, servlet);
     }
@@ -621,7 +621,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
                                           getServletName()));
     }
     else if (QServlet.class.isAssignableFrom(servletClass)) {
-      servletChain = new PageFilterChain(_servletContext, (QServlet) createServlet());
+      servletChain = new PageFilterChain(_servletContext, (QServlet) createServlet(false));
     }
     else if (SingleThreadModel.class.isAssignableFrom(servletClass)) {
       servletChain = new SingleThreadServletFilterChain(this);
@@ -654,7 +654,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     throws ServletException
   {
     try {
-      Object service = createServlet();
+      Object service = createServlet(false);
 
       ProtocolServlet skeleton
 	= (ProtocolServlet) _protocolClass.newInstance();
@@ -684,12 +684,12 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
    *
    * @return the initialized servlet.
    */
-  Object createServlet()
+  Object createServlet(boolean isNew)
     throws ServletException
   {
-    // XXX: single thread
-    //if (_servlet != null)
-    //  return _servlet;
+    // server/102e
+    if (_servlet != null && ! isNew)
+      return _servlet;
 
     Object servlet = null;
 
@@ -703,7 +703,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
       servlet = createServletImpl();
 
       synchronized (this) {
-	if (_servlet == null)
+	if (_servlet == null && ! isNew)
 	  _servlet = servlet;
       }
 
@@ -814,7 +814,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     try {
       ServletConfigImpl jspConfig = _servletManager.getServlet("resin-jsp");
 
-      QServlet jsp = (QServlet) jspConfig.createServlet();
+      QServlet jsp = (QServlet) jspConfig.createServlet(false);
 
       Page page = jsp.getPage(servletName, jspFile);
 

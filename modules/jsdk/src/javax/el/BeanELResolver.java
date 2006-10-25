@@ -342,8 +342,10 @@ public class BeanELResolver extends ELResolver {
 
     private void initDescriptor()
     {
-      _descriptor.setValue(ELResolver.TYPE,
-			   _descriptor.getReadMethod().getReturnType());
+      Method readMethod = _descriptor.getReadMethod();
+
+      if (readMethod != null)
+	_descriptor.setValue(ELResolver.TYPE, readMethod);
 	
       _descriptor.setValue(ELResolver.RESOLVABLE_AT_DESIGN_TIME,
 			   Boolean.TRUE);

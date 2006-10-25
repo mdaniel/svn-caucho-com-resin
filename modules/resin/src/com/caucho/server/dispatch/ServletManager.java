@@ -154,7 +154,7 @@ public class ServletManager {
       ServletConfigImpl config = loadOnStartup.get(i);
 
       try {
-	config.createServlet();
+	config.createServlet(false);
       } catch (ServletException e) {
         log.log(Level.WARNING, e.toString(), e);
 
@@ -196,7 +196,7 @@ public class ServletManager {
       throw new ServletException(L.l("'{0}' is not a known servlet.  Servlets must be defined by <servlet> before being used.", servletName));
     }
 
-    return (Servlet) config.createServlet();
+    return (Servlet) config.createServlet(false);
   }
 
   /**

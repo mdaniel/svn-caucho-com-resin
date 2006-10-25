@@ -221,7 +221,7 @@ public class PageFilterChain implements FilterChain {
       }
 
       if (_config != null)
-	newPage = (Page) _config.createServlet();
+	newPage = (Page) _config.createServlet(false);
       else {
 	newPage = _servlet.getPage(req, res);
 

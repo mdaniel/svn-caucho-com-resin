@@ -161,7 +161,7 @@ public abstract class GenericServlet
    */
   public void log(String message)
   {
-    log.fine(getServletName() + ": " + message);
+    log.config(getServletName() + ": " + message);
   }
   
   /**
