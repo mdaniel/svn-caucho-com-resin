@@ -875,43 +875,15 @@ public class Store {
    *
    * @return the fragment address
    */
-  long allocateFragment(StoreTransaction xa)
+  public long allocateFragment(StoreTransaction xa)
     throws IOException
   {
-    synchronized (_allocationLock) {
-      byte []allocationTable = _allocationTable;
-      
-      for (int i = 0; i < allocationTable.length; i += ALLOC_BYTES_PER_BLOCK) {
-	int fragMask = allocationTable[i + 1];
-
-	if (allocationTable[i] == ALLOC_FRAGMENT && fragMask != 0xff) {
-	  for (int j = 0; j < FRAGMENT_PER_BLOCK; j++) {
-	    if ((fragMask & (1 << j)) == 0) {
-	      allocationTable[i + 1] = (byte) (fragMask | (1 << j));
-
-	      setAllocDirty(i + 1, i + 2);
-
-	      _fragmentUseCount++;
-
-	      return BLOCK_SIZE * ((long) i / ALLOC_BYTES_PER_BLOCK) + j;
-	    }
-	  }
-	}
-      }
-    }
-
     while (true) {
-      Block block = allocateFragmentBlock();
-
-      try {
-	long blockId = block.getBlockId();
-
-	synchronized (_allocationLock) {
-	  byte []allocationTable = _allocationTable;
-
-	  int i = ALLOC_BYTES_PER_BLOCK * (int) (blockId / BLOCK_SIZE);
-	
-	  int fragMask =  allocationTable[i + 1];
+      synchronized (_allocationLock) {
+	byte []allocationTable = _allocationTable;
+      
+	for (int i = 0; i < allocationTable.length; i += ALLOC_BYTES_PER_BLOCK) {
+	  int fragMask = allocationTable[i + 1] & 0xff;
 
 	  if (allocationTable[i] == ALLOC_FRAGMENT && fragMask != 0xff) {
 	    for (int j = 0; j < FRAGMENT_PER_BLOCK; j++) {
@@ -927,9 +899,30 @@ public class Store {
 	    }
 	  }
 	}
-      } finally {
-	block.free();
       }
+
+      // if no fragment, allocate a new one.
+      
+      Block block = allocateFragmentBlock();
+      block.free();
+    }
+  }
+  
+  /**
+   * Deletes a fragment.
+   */
+  public void deleteFragment(StoreTransaction xa, long fragmentAddress)
+    throws IOException
+  {
+    synchronized (_allocationLock) {
+      int i = ALLOC_BYTES_PER_BLOCK * (int) (fragmentAddress / BLOCK_SIZE);
+      int j = (int) fragmentAddress & 0xff;
+
+      _allocationTable[i + 1] &= ~(1 << j);
+
+      _fragmentUseCount--;
+	
+      setAllocDirty(i + 1, i + 2);
     }
   }
   
@@ -1046,38 +1039,6 @@ public class Store {
 
 	block.setDirty(offset, offset + 8);
       }
-    } finally {
-      block.free();
-    }
-  }
-  
-  /**
-   * Deletes a fragment.
-   */
-  void deleteFragment(StoreTransaction xa, long fragmentAddress)
-    throws IOException
-  {
-    Block block = xa.readBlock(this, addressToBlockId(fragmentAddress));
-
-    try {
-      xa.addUpdateFragmentBlock(block);
-      
-      int fragOffset = getFragmentOffset(fragmentAddress);
-
-      byte []blockBuffer = block.getBuffer();
-
-      synchronized (_allocationLock) {
-	int i = ALLOC_BYTES_PER_BLOCK * (int) (fragmentAddress / BLOCK_SIZE);
-	int j = (int) fragmentAddress & 0xff;
-
-	_allocationTable[i + 1] &= ~(1 << j);
-
-	_fragmentUseCount--;
-	
-	setAllocDirty(i + 1, i + 2);
-      }
-
-      // inode handles the save allocation
     } finally {
       block.free();
     }

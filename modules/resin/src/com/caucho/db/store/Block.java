@@ -36,7 +36,7 @@ import java.io.IOException;
 
 import com.caucho.util.L10N;
 import com.caucho.util.ClockCacheItem;
-import com.caucho.util.CacheListener;
+import com.caucho.util.SyncCacheListener;
 import com.caucho.util.FreeList;
 
 import com.caucho.vfs.TempBuffer;
@@ -48,7 +48,7 @@ import com.caucho.db.table.Table;
 /**
  * Represents a versioned row
  */
-abstract public class Block implements ClockCacheItem, CacheListener {
+abstract public class Block implements SyncCacheListener {
   private static final Logger log = Log.open(Block.class);
   private static final L10N L = new L10N(Block.class);
 
@@ -275,7 +275,7 @@ abstract public class Block implements ClockCacheItem, CacheListener {
   /**
    * Frees a block from a query.
    */
-  public void free()
+  public final void free()
   {
     synchronized (this) {
       if (log.isLoggable(Level.FINEST))
@@ -283,13 +283,19 @@ abstract public class Block implements ClockCacheItem, CacheListener {
 
       _useCount--;
       
-      if (_useCount < 0) {
-	_useCount = 0;
-	
-	log.warning("db-block illegal free " + this);
-	throw new IllegalStateException();
+      if (_useCount >= 0)
+	return;
+
+      // If the block is clean, just discard it
+      if (_dirtyMax <= _dirtyMin) {
+	freeImpl();
+
+	return;
       }
     }
+
+    // dirty blocks get queued for writing
+    BlockManager.getBlockManager().addLruDirtyWriteBlock(this);
   }
 
   /**
@@ -318,28 +324,16 @@ abstract public class Block implements ClockCacheItem, CacheListener {
   /**
    * Called when the block is removed from the cache.
    */
-  public void removeEvent()
+  public final void syncRemoveEvent()
   {
-    synchronized (this) {
-      // If the block is clean, just discard it
-      if (_dirtyMax <= _dirtyMin) {
-	freeImpl();
-
-	if (log.isLoggable(Level.FINER))
-	  log.finer("db-block remove " + this);
-
-	return;
-      }
-    }
-
-    // dirty blocks get queued for writing
-    BlockManager.getBlockManager().addLruDirtyWriteBlock(this);
+    free();
   }
   
   /**
    * Called when the block is removed from the cache.
    */
-  public void close()
+  // called only from BlockManagerWriter.run()
+  void close()
   {
     synchronized (this) {
       if (_dirtyMin < _dirtyMax) {
@@ -350,7 +344,8 @@ abstract public class Block implements ClockCacheItem, CacheListener {
 	}
       }
 
-      freeImpl();
+      if (_useCount < 0)
+	freeImpl();
 
       if (log.isLoggable(Level.FINER))
 	log.finer("db-block remove " + this);

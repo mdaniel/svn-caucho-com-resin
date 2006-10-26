@@ -43,6 +43,10 @@ import java.util.logging.Level;
 public class RawTransaction extends StoreTransaction {
   private static final RawTransaction XA = new RawTransaction();
 
+  private RawTransaction()
+  {
+  }
+
   public static RawTransaction create()
   {
     return XA;
@@ -63,7 +67,7 @@ public class RawTransaction extends StoreTransaction {
   public Block createWriteBlock(Block block)
     throws IOException
   {
-    return new AutoCommitWriteBlock(block);
+    return block;
   }
 
   /**
@@ -80,6 +84,6 @@ public class RawTransaction extends StoreTransaction {
   public Block createAutoCommitWriteBlock(Block block)
     throws IOException
   {
-    return new AutoCommitWriteBlock(block);
+    return block;
   }
 }

@@ -218,44 +218,43 @@ public final class BlockManager
     
     Block block = _blockCache.get(blockId);
 
-    if (block != null && block.allocate())
-      return block;
-
-    // Find any matching block in the process of being written
-    Block dirtyBlock = null;
-    synchronized (_writeQueue) {
-      int size = _writeQueue.size();
+    while (block == null || ! block.allocate()) {
+      // Find any matching block in the process of being written
+      Block dirtyBlock = null;
+      synchronized (_writeQueue) {
+	int size = _writeQueue.size();
 	
-      for (int i = 0; i < size; i++) {
-	dirtyBlock = _writeQueue.get(i);
+	for (int i = 0; i < size; i++) {
+	  dirtyBlock = _writeQueue.get(i);
 
-	if (dirtyBlock.getBlockId() == blockId) {
-	  break;
+	  if (dirtyBlock.getBlockId() == blockId && dirtyBlock.allocate()) {
+	    break;
+	  }
+	  else
+	    dirtyBlock = null;
 	}
-	else
-	  dirtyBlock = null;
       }
-    }
     
-    if ((blockId & Store.BLOCK_MASK) == 0)
-      throw stateError(L.l("Block 0 is reserved."));
+      if ((blockId & Store.BLOCK_MASK) == 0)
+	throw stateError(L.l("Block 0 is reserved."));
 
-    block = new ReadBlock(store, blockId);
+      block = new ReadBlock(store, blockId);
 
-    if (dirtyBlock != null && dirtyBlock.allocate()) {
-      byte []buffer = dirtyBlock.getBuffer();
+      if (dirtyBlock != null) {
+	byte []buffer = dirtyBlock.getBuffer();
 
-      if (buffer != null) {
-	System.arraycopy(buffer, 0, block.getBuffer(), 0, buffer.length);
-	block.validate();
+	if (buffer != null) {
+	  System.arraycopy(buffer, 0, block.getBuffer(), 0, buffer.length);
+	  block.validate();
+	}
+
+	dirtyBlock.free();
       }
-    }
 
-    // needs to be outside the synchronized since the put
-    // can cause an LRU drop which might lead to a dirty write
-    block = _blockCache.putIfNew(blockId, block);
-    
-    block.allocate();
+      // needs to be outside the synchronized since the put
+      // can cause an LRU drop which might lead to a dirty write
+      block = _blockCache.putIfNew(blockId, block);
+    }
 
     return block;
   }

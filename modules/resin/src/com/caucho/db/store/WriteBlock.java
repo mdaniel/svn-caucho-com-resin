@@ -75,7 +75,8 @@ abstract public class WriteBlock extends Block {
 
     block.free();
 
-    close();
+    throw new IllegalStateException();
+    //close();
   }
 
   public String toString()

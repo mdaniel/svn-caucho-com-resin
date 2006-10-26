@@ -151,6 +151,7 @@ public class LongKeyLruCache<V> {
   public void clear()
   {
     ArrayList<CacheListener> listeners = null;
+    ArrayList<SyncCacheListener> syncListeners = null;
 
     synchronized (this) {
       for (int i = _entries.length - 1; i >= 0; i--) {
@@ -161,6 +162,12 @@ public class LongKeyLruCache<V> {
             if (listeners == null)
               listeners = new ArrayList<CacheListener>();
             listeners.add((CacheListener) item._value);
+          }
+	  
+          if (item._value instanceof SyncCacheListener) {
+            if (syncListeners == null)
+              syncListeners = new ArrayList<SyncCacheListener>();
+            syncListeners.add((SyncCacheListener) item._value);
           }
         }
         
@@ -178,6 +185,11 @@ public class LongKeyLruCache<V> {
     for (int i = listeners == null ? -1 : listeners.size() - 1; i >= 0; i--) {
       CacheListener listener = listeners.get(i);
       listener.removeEvent();
+    }
+
+    for (int i = syncListeners == null ? -1 : syncListeners.size() - 1; i >= 0; i--) {
+      SyncCacheListener listener = syncListeners.get(i);
+      listener.syncRemoveEvent();
     }
   }
 
@@ -312,6 +324,9 @@ public class LongKeyLruCache<V> {
 
 	hash = (hash + 1) & _mask;
       }
+
+      if (replace && oldValue instanceof SyncCacheListener)
+	((SyncCacheListener) oldValue).syncRemoveEvent();
     }
 
     if (replace && oldValue instanceof CacheListener)
@@ -404,6 +419,9 @@ public class LongKeyLruCache<V> {
 	}
       
 	value = removeImpl(tail._key);
+
+	if (value instanceof SyncCacheListener)
+	  ((SyncCacheListener) value).syncRemoveEvent();
       }
 
       if (value instanceof CacheListener)
@@ -430,6 +448,9 @@ public class LongKeyLruCache<V> {
 
     synchronized (this) {
       value = removeImpl(key);
+
+      if (value instanceof SyncCacheListener)
+	((SyncCacheListener) value).syncRemoveEvent();
     }
 
     if (value instanceof CacheListener)

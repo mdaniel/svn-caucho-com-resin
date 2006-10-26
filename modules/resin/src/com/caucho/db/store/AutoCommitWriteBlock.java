@@ -86,6 +86,7 @@ public class AutoCommitWriteBlock extends WriteBlock {
     _block.commit();
   }
 
+  /*
   public void free()
   {
     super.free();
@@ -93,12 +94,15 @@ public class AutoCommitWriteBlock extends WriteBlock {
     if (isFree())
       destroy();
   }
+  */
 
   /**
    * Closes the write block.
    */
-  void destroy()
+  protected void freeImpl()
   {
+    super.freeImpl();
+    
     Block block = _block;
     _block = block;
 
@@ -111,7 +115,8 @@ public class AutoCommitWriteBlock extends WriteBlock {
       
       block.free();
 
-      close();
+      throw new IllegalStateException();
+      //close();
     }
   }
 

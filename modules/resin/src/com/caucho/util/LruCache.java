@@ -280,6 +280,9 @@ public class LruCache<K,V> {
 
 	hash = (hash + 1) & _mask;
       }
+
+      if (replace && oldValue instanceof SyncCacheListener)
+	((SyncCacheListener) oldValue).syncRemoveEvent();
     }
 
     if (replace && oldValue instanceof CacheListener)
@@ -460,6 +463,9 @@ public class LruCache<K,V> {
 
 	hash = (hash + 1) & _mask;
       }
+
+      if (value instanceof SyncCacheListener)
+	((SyncCacheListener) value).syncRemoveEvent();
     }
 
     if (count < 0)
