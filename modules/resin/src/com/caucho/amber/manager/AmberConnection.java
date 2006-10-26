@@ -163,13 +163,15 @@ public class AmberConnection
     register();
   }
 
-
   /**
    * Makes the instance managed.
    */
   public void persist(Object entity)
   {
     try {
+      if (! (entity instanceof Entity))
+        throw new IllegalArgumentException("persist() operation can only be applied to an entity instance. If the argument is an entity, the corresponding class must be specified in the scope of a persistence unit.");
+
       create(entity);
     } catch (RuntimeException e) {
       throw e;
@@ -186,7 +188,7 @@ public class AmberConnection
     try {
 
       if (! (entityT instanceof Entity))
-        throw new IllegalArgumentException("Merge operation can only be applied to an entity instance");
+        throw new IllegalArgumentException("merge() operation can only be applied to an entity instance. If the argument is an entity, the corresponding class must be specified in the scope of a persistence unit.");
 
       flush();
 
@@ -230,6 +232,9 @@ public class AmberConnection
   public void remove(Object entity)
   {
     try {
+      if (! (entity instanceof Entity))
+        throw new IllegalArgumentException("remove() operation can only be applied to an entity instance. If the argument is an entity, the corresponding class must be specified in the scope of a persistence unit.");
+
       delete(entity);
     } catch (RuntimeException e) {
       throw e;
@@ -271,6 +276,13 @@ public class AmberConnection
                     Map preloadedProperties)
   {
     try {
+      AmberEntityHome entityHome
+        = _persistenceUnit.getEntityHome(entityClass.getName());
+
+      if (entityHome == null) {
+        throw new IllegalArgumentException("find() operation can only be applied if the entity class is specified in the scope of a persistence unit.");
+      }
+
       return (T) load(entityClass, primaryKey, preloadedProperties);
     } catch (AmberObjectNotFoundException e) {
       // XXX: shouldn't be throwing at all?
@@ -355,6 +367,7 @@ public class AmberConnection
    */
   public void refresh(Object entity)
   {
+    throw new UnsupportedOperationException();
   }
 
   /**
@@ -370,6 +383,7 @@ public class AmberConnection
    */
   public void setFlushMode(FlushModeType mode)
   {
+    throw new UnsupportedOperationException();
   }
 
   /**
@@ -377,6 +391,7 @@ public class AmberConnection
    */
   public void lock(Object entity, LockModeType lockMode)
   {
+    throw new UnsupportedOperationException();
   }
 
   /**
@@ -848,7 +863,7 @@ public class AmberConnection
   public boolean contains(Object obj)
   {
     if (! (obj instanceof Entity))
-      return false;
+      throw new IllegalArgumentException("contains() operation can only be applied to an entity instance.");
 
     Entity entity = (Entity) obj;
 
