@@ -29,24 +29,34 @@
 
 package com.caucho.boot;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.log.LogConfig;
+import com.caucho.server.cluster.Cluster;
+import com.caucho.server.cluster.ClusterServer;
+import com.caucho.server.cluster.Server;
+import com.caucho.server.dispatch.ServletMapping;
+import com.caucho.server.host.Host;
+import com.caucho.server.host.HostConfig;
+import com.caucho.server.port.Port;
+import com.caucho.server.port.ProtocolDispatchServer;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.server.webapp.WebAppConfig;
+import com.caucho.util.L10N;
+import com.caucho.vfs.EnvironmentStream;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.RotateStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
-import com.caucho.config.*;
-import com.caucho.config.types.*;
-import com.caucho.lifecycle.*;
-import com.caucho.log.*;
-import com.caucho.server.hmux.*;
-import com.caucho.server.port.*;
-import com.caucho.server.cluster.*;
-import com.caucho.server.host.*;
-import com.caucho.server.resin.*;
-import com.caucho.server.webapp.*;
-import com.caucho.server.dispatch.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Process responsible for watching a backend server.
@@ -77,7 +87,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
     _args = new Args(argv);
 
-    Vfs.setPwd(_args.getServerRoot());
+    Vfs.setPwd(_args.getResinRoot());
 
     _resin = readConfig(_args);
 
@@ -176,7 +186,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
     String serverId = args.getServerId();
 
-    Vfs.setPwd(_args.getServerRoot());
+    Vfs.setPwd(_args.getResinRoot());
 
     ResinConfig resin = null;
 
@@ -204,7 +214,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
       _activeServerMap.put(serverId, server);
     }
     
-    server.start(argv, args.getServerRoot());
+    server.start(argv, args.getResinRoot());
 
     return true;
   }
@@ -233,9 +243,9 @@ public class WatchdogManager extends ProtocolDispatchServer {
   {
     Config config = new Config();
 
-    Vfs.setPwd(args.getServerRoot());
+    Vfs.setPwd(args.getResinRoot());
     ResinConfig resin = new ResinConfig(args.getResinHome(),
-					args.getServerRoot());
+					args.getResinRoot());
 
     config.configure(resin,
 		     args.getResinConf(),
@@ -324,12 +334,12 @@ public class WatchdogManager extends ProtocolDispatchServer {
     return pwd;
   }
 
-  static Path calculateServerRoot(Path resinHome)
+  static Path calculateResinRoot(Path resinHome)
   {
-    String serverRoot = System.getProperty("server.root");
+    String resinRoot = System.getProperty("resin.root");
 
-    if (serverRoot != null)
-      return Vfs.lookup(serverRoot);
+    if (resinRoot != null)
+      return Vfs.lookup(resinRoot);
 
     return resinHome;
   }
@@ -397,7 +407,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
   static class Args {
     private Path _resinHome;
-    private Path _serverRoot;
+    private Path _resinRoot;
     private String []_argv;
 
     private Path _resinConf;
@@ -409,7 +419,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
     Args(String []argv)
     {
       _resinHome = calculateResinHome();
-      _serverRoot = calculateServerRoot(_resinHome);
+      _resinRoot = calculateResinRoot(_resinHome);
       
       _argv = argv;
 
@@ -423,9 +433,9 @@ public class WatchdogManager extends ProtocolDispatchServer {
       return _resinHome;
     }
 
-    Path getServerRoot()
+    Path getResinRoot()
     {
-      return _serverRoot;
+      return _resinRoot;
     }
 
     Path getResinConf()
@@ -463,9 +473,14 @@ public class WatchdogManager extends ProtocolDispatchServer {
 	  _resinHome = Vfs.lookup(argv[i + 1]);
 	  i++;
 	}
+        else if ("-resin-root".equals(arg)
+                 || "--resin-root".equals(arg)) {
+          _resinRoot = Vfs.lookup(argv[i + 1]);
+          i++;
+        }
 	else if ("-server-root".equals(arg)
 		 || "--server-root".equals(arg)) {
-	  _serverRoot = Vfs.lookup(argv[i + 1]);
+	  _resinRoot = Vfs.lookup(argv[i + 1]);
 	  i++;
 	}
 	else if ("-server".equals(arg)

@@ -29,16 +29,18 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.util.*;
-
-import com.caucho.util.*;
 import com.caucho.loader.DynamicClassLoader;
+import com.caucho.util.CauchoSystem;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * A merging of several Paths used like a CLASSPATH.  When the MergePath
- * is opened, the first path in the list which contains the file will
- * be the opened file.
+ * is opened for read, the first path in the list which contains the file will
+ * be the opened file.  When the MergePath is opened for write, the first path
+ * in the list is used for the write.
  *
  * <p>In the following example, "first" has priority over "second".
  * If test.xml exists in both "first" and "second", the open will
@@ -53,7 +55,13 @@ import com.caucho.loader.DynamicClassLoader;
  * ReadStream is = path.openRead();
  * </pre></code>
  *
+ * <p>MergePath corresponds to the "merge:" Vfs schema
+ * <code><pre>
+   Path path = Vfs.lookup("merge:(../custom-foo;foo)");
+ * </pre></code>
+ *
  * @since Resin 1.2
+ * @since Resin 3.0.10 merge: schema
  */
 public class MergePath extends FilesystemPath {
   private ArrayList<Path> _pathList;

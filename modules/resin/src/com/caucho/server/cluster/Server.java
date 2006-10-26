@@ -29,45 +29,40 @@
 
 package com.caucho.server.cluster;
 
-import java.lang.reflect.Method;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.annotation.*;
-import javax.resource.spi.ResourceAdapter;
-import javax.servlet.http.HttpServletResponse;
-
-import com.caucho.config.*;
-import com.caucho.config.types.*;
+import com.caucho.config.ConfigException;
+import com.caucho.config.SchemaBean;
+import com.caucho.config.types.Bytes;
+import com.caucho.config.types.Period;
 import com.caucho.jca.ResourceManagerImpl;
-import com.caucho.jmx.Jmx;
 import com.caucho.lifecycle.Lifecycle;
-import com.caucho.loader.*;
-import com.caucho.log.Log;
+import com.caucho.loader.ClassLoaderListener;
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentBean;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentLocal;
 import com.caucho.make.AlwaysModified;
+import com.caucho.management.server.ServerMXBean;
 import com.caucho.security.PermissionManager;
 import com.caucho.server.cache.AbstractCache;
-import com.caucho.server.deploy.EnvironmentDeployInstance;
-import com.caucho.server.dispatch.*;
+import com.caucho.server.dispatch.ErrorFilterChain;
+import com.caucho.server.dispatch.ExceptionFilterChain;
+import com.caucho.server.dispatch.Invocation;
+import com.caucho.server.dispatch.InvocationMatcher;
 import com.caucho.server.e_app.EarConfig;
-import com.caucho.server.host.*;
-import com.caucho.server.http.HttpProtocol;
+import com.caucho.server.host.Host;
+import com.caucho.server.host.HostConfig;
+import com.caucho.server.host.HostContainer;
+import com.caucho.server.host.HostController;
+import com.caucho.server.host.HostExpandDeployGenerator;
 import com.caucho.server.log.AccessLog;
 import com.caucho.server.port.AbstractSelectManager;
 import com.caucho.server.port.Port;
 import com.caucho.server.port.ProtocolDispatchServer;
-import com.caucho.server.resin.*;
-import com.caucho.server.webapp.WebApp;
+import com.caucho.server.resin.Resin;
 import com.caucho.server.webapp.ErrorPage;
 import com.caucho.server.webapp.RewriteInvocation;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
@@ -76,8 +71,17 @@ import com.caucho.util.ThreadPool;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
-import com.caucho.management.j2ee.*;
-import com.caucho.management.server.*;
+import javax.annotation.PostConstruct;
+import javax.resource.spi.ResourceAdapter;
+import javax.servlet.http.HttpServletResponse;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Server extends ProtocolDispatchServer
   implements EnvironmentBean, SchemaBean, AlarmListener,
@@ -727,7 +731,7 @@ public class Server extends ProtocolDispatchServer
 
   public void addSelectManager(SelectManagerCompat selectManager)
   {
-    
+
   }
 
   /**
@@ -764,7 +768,7 @@ public class Server extends ProtocolDispatchServer
   }
 
   /**
-   * Returns the lifecycle state 
+   * Returns the lifecycle state
    */
   public String getState()
   {
@@ -1001,19 +1005,31 @@ public class Server extends ProtocolDispatchServer
 
       if (! Alarm.isTest()) {
         log.info("");
+
         log.info(System.getProperty("os.name") + " " +
                  System.getProperty("os.version") + " " +
                  System.getProperty("os.arch"));
+
         log.info("Java " + System.getProperty("java.vm.version") + ", " +
                  System.getProperty("sun.arch.data.model") + ", " +
                  System.getProperty("java.vm.info") + ", " +
                  System.getProperty("file.encoding") + ", " +
                  System.getProperty("user.language") + ", " +
                  System.getProperty("java.vm.vendor"));
-	log.info("user: " + System.getProperty("user.name"));
 
-        log.info("resin.home = " + System.getProperty("resin.home"));
-        log.info("server.root = " + System.getProperty("server.root"));
+        log.info("user.name: " + System.getProperty("user.name"));
+
+        Resin resin = Resin.getLocal();
+
+        if (resin != null) {
+          log.info("resin.home = " + resin.getResinHome().getNativePath());
+          log.info("resin.root = " + resin.getRootDirectory().getNativePath());
+        }
+        else {
+          log.info("resin.home = " + System.getProperty("resin.home"));
+          log.info("resin.root = " + System.getProperty("resin.root"));
+        }
+
         log.info("");
       }
 
@@ -1071,7 +1087,7 @@ public class Server extends ProtocolDispatchServer
 	Port port = ports.get(i);
 
 	port.setServer(this);
-	
+
 	port.bind();
       }
     } finally {
@@ -1393,7 +1409,7 @@ public class Server extends ProtocolDispatchServer
       DynamicClassLoader.setOldLoader(thread, oldLoader);
 
       Resin resin = _resin;
-      
+
       if (resin != null)
         resin.destroy();
     }
@@ -1407,7 +1423,7 @@ public class Server extends ProtocolDispatchServer
 
   public static class SelectManagerCompat {
     private boolean _isEnable = true;
-    
+
     public void setEnable(boolean isEnable)
     {
       _isEnable = isEnable;

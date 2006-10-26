@@ -29,12 +29,11 @@
 
 package com.caucho.server.resin;
 
-import javax.management.ObjectName;
-
 import com.caucho.Version;
-
-import com.caucho.management.server.*;
-
+import com.caucho.management.server.AbstractManagedObject;
+import com.caucho.management.server.ClusterMXBean;
+import com.caucho.management.server.ResinMXBean;
+import com.caucho.management.server.ServerMXBean;
 import com.caucho.util.CauchoSystem;
 import com.caucho.util.L10N;
 
@@ -91,11 +90,6 @@ public class ResinAdmin extends AbstractManagedObject
   public String getRootDirectory()
   {
     return _resin.getRootDirectory().getNativePath();
-  }
-
-  public String getServerRoot()
-  {
-    return getRootDirectory();
   }
 
   public ServerMXBean getServer()

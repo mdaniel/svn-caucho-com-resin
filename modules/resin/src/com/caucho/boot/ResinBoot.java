@@ -31,11 +31,11 @@ package com.caucho.boot;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
+import com.caucho.el.EL;
 import com.caucho.server.resin.ResinELContext;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
-import com.caucho.el.EL;
 
 import java.io.File;
 import java.io.IOException;
@@ -81,11 +81,20 @@ public class ResinBoot {
     _argv = argv;
 
     calculateResinHome();
-    calculateServerRoot();
-
-    _resinConf = _resinHome.lookup("conf/resin.conf");
+    calculateResinRoot();
 
     parseCommandLine(argv);
+
+    if (_resinConf == null) {
+      _resinConf = _resinRoot.lookup("conf/resin.conf");
+
+      if (!_resinConf.exists()) {
+        Path resinHomeConf = _resinHome.lookup("conf/resin.conf");
+
+        if (resinHomeConf.exists())
+          _resinConf = resinHomeConf;
+      }
+    }
 
     Vfs.setPwd(_resinRoot);
 
@@ -171,7 +180,7 @@ public class ResinBoot {
     _resinHome = pwd;
   }
 
-  private void calculateServerRoot()
+  private void calculateResinRoot()
   {
     String resinRoot;
 
@@ -190,12 +199,14 @@ public class ResinBoot {
 
   private void parseCommandLine(String []argv)
   {
+    String resinConf = null;
+
     for (int i = 0; i < argv.length; i++) {
       String arg = argv[i];
 
       if ("-conf".equals(arg)
 	  || "--conf".equals(arg)) {
-	_resinConf = _resinHome.lookup(argv[i + 1]);
+	resinConf = argv[i + 1];
 	i++;
       }
       else if ("-resin-home".equals(arg)
@@ -234,6 +245,19 @@ public class ResinBoot {
       else if ("shutdown".equals(arg)) {
 	_startMode = StartMode.SHUTDOWN;
       }
+    }
+
+    if (resinConf != null) {
+      _resinConf = Vfs.getPwd().lookup(resinConf);
+
+      if (! _resinConf.exists() && _resinRoot != null)
+        _resinConf = _resinRoot.lookup(resinConf);
+
+      if (! _resinConf.exists() && _resinHome != null)
+        _resinConf = _resinHome.lookup(resinConf);
+
+      if (! _resinConf.exists())
+        throw new ConfigException(L().l("Can't find resin.conf file '{0}'", resinConf));
     }
   }
 

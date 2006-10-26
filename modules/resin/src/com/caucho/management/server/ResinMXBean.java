@@ -29,10 +29,7 @@
 
 package com.caucho.management.server;
 
-import com.caucho.jmx.*;
-
-import javax.management.ObjectName;
-import java.util.Date;
+import com.caucho.jmx.Description;
 
 /**
  * Management interface for the server.
@@ -74,13 +71,13 @@ public interface ResinMXBean extends ManagedObjectMXBean {
   public String getResinHome();
   
   /**
-   * The server root directory used when starting this instance of Resin.
+   * The root directory used when starting this instance of Resin.
    * This is the root directory of the web server files.
    */
-  @Description("The server root directory used when starting"
+  @Description("The root directory used when starting"
                + " this instance of Resin. This is the root"
                + " directory of the web server files")
-  public String getServerRoot();
+  public String getRootDirectory();
 
   /**
    * Returns the config file, the value of "-conf foo.conf"

@@ -664,7 +664,7 @@ public class Watchdog extends AbstractManagedObject
     list.add("-Djava.awt.headless=true");
     list.add("-Dresin.home=" + resinHome.getPath());
     list.add("-Dresin.root=" + _resinRoot.getPath());
-    list.add("-Dserver.root=" + _resinRoot.getPath());
+    list.add("-Dserver.root=" + _resinRoot.getPath()); // backwards compatability
 
     if (! _hasXss)
       list.add("-Xss1m");
