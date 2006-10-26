@@ -65,7 +65,7 @@ public class ResinBoot {
   private String []_argv;
 
   private Path _resinHome;
-  private Path _serverRoot;
+  private Path _resinRoot;
   private Path _resinConf;
   private String _serverId = "";
   private boolean _isVerbose;
@@ -87,7 +87,7 @@ public class ResinBoot {
 
     parseCommandLine(argv);
 
-    Vfs.setPwd(_serverRoot);
+    Vfs.setPwd(_resinRoot);
 
     if (! _resinConf.canRead())
       throw new ConfigException(L().l("Can't open resin.conf file '{0}'",
@@ -97,7 +97,7 @@ public class ResinBoot {
 
     Config config = new Config();
 
-    ResinConfig conf = new ResinConfig(_resinHome, _serverRoot);
+    ResinConfig conf = new ResinConfig(_resinHome, _resinRoot);
 
     ResinELContext elContext = new ResinBootELContext();
 
@@ -173,14 +173,19 @@ public class ResinBoot {
 
   private void calculateServerRoot()
   {
-    String serverRoot = System.getProperty("server.root");
+    String resinRoot;
 
-    if (serverRoot != null) {
-      _serverRoot = Vfs.lookup(serverRoot);
+    resinRoot = System.getProperty("resin.root");
+
+    if (resinRoot == null)
+      resinRoot = System.getProperty("server.root");
+
+    if (resinRoot != null) {
+      _resinRoot = Vfs.lookup(resinRoot);
       return;
     }
 
-    _serverRoot = _resinHome;
+    _resinRoot = _resinHome;
   }
 
   private void parseCommandLine(String []argv)
@@ -198,9 +203,14 @@ public class ResinBoot {
 	_resinHome = Vfs.lookup(argv[i + 1]);
 	i++;
       }
+      else if ("-resin-root".equals(arg)
+               || "--resin-root".equals(arg)) {
+        _resinRoot = Vfs.lookup(argv[i + 1]);
+        i++;
+      }
       else if ("-server-root".equals(arg)
 	       || "--server-root".equals(arg)) {
-	_serverRoot = Vfs.lookup(argv[i + 1]);
+	_resinRoot = Vfs.lookup(argv[i + 1]);
 	i++;
       }
       else if ("-server".equals(arg)
@@ -268,7 +278,7 @@ public class ResinBoot {
       return false;
     }
     else {
-      return _server.startSingle(_argv, _serverRoot) != 0;
+      return _server.startSingle(_argv, _resinRoot) != 0;
     }
   }
 
@@ -334,7 +344,7 @@ public class ResinBoot {
 
     public Path getRootDirectory()
     {
-      return _serverRoot;
+      return _resinRoot;
     }
 
     public Path getResinConf()

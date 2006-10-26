@@ -46,7 +46,6 @@ import com.caucho.config.types.Period;
 import com.caucho.el.EL;
 import com.caucho.el.MapVariableResolver;
 import com.caucho.el.SystemPropertiesResolver;
-import com.caucho.jmx.Jmx;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.license.*;
 import com.caucho.lifecycle.*;
@@ -54,7 +53,6 @@ import com.caucho.loader.*;
 import com.caucho.management.j2ee.*;
 import com.caucho.management.server.*;
 import com.caucho.naming.*;
-import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.cluster.*;
 import com.caucho.transaction.cfg.TransactionManagerConfig;
 import com.caucho.util.*;
@@ -116,16 +114,16 @@ public class Resin implements EnvironmentBean, SchemaBean
   private String _resinConf = "conf/resin.conf";
   private String _configServer;
 
-  private Path _serverRoot;
+  private Path _resinRoot;
 
   private ClassLoader _systemClassLoader;
   private Thread _mainThread;
-  
+
   private ArrayList<BoundPort> _boundPortList
     = new ArrayList<BoundPort>();
 
   private InputStream _waitIn;
-  
+
   private Socket _pingSocket;
 
   /**
@@ -154,9 +152,9 @@ public class Resin implements EnvironmentBean, SchemaBean
       _classLoader = new EnvironmentClassLoader();
 
     _resinLocal.set(this, _classLoader);
-    
+
     _lifecycle = new Lifecycle(log(), "Resin[]");
-    
+
     _startTime = Alarm.getCurrentTime();
 
     String resinHome = System.getProperty("resin.home");
@@ -166,10 +164,17 @@ public class Resin implements EnvironmentBean, SchemaBean
     else
       setResinHome(Vfs.getPwd());
 
-    String serverRoot = System.getProperty("server.root");
+    String resinRoot = System.getProperty("server.root");
 
-    if (serverRoot != null)
-      setRootDirectory(Vfs.lookup(serverRoot));
+    if (resinRoot != null)
+      setRootDirectory(Vfs.lookup(resinRoot));
+    else
+      setRootDirectory(Vfs.getPwd());
+
+    resinRoot = System.getProperty("resin.root");
+
+    if (resinRoot != null)
+      setRootDirectory(Vfs.lookup(resinRoot));
     else
       setRootDirectory(Vfs.getPwd());
 
@@ -180,10 +185,10 @@ public class Resin implements EnvironmentBean, SchemaBean
     ELResolver varResolver = new SystemPropertiesResolver();
     ConfigELContext elContext = new ConfigELContext(varResolver);
     elContext.push(new MapVariableResolver(_variableMap));
-    
+
     EL.setEnvironment(elContext);
     EL.setVariableMap(_variableMap, _classLoader);
-    
+
     _variableMap.put("fmt", new com.caucho.config.functions.FmtFunctions());
 
     try {
@@ -194,7 +199,7 @@ public class Resin implements EnvironmentBean, SchemaBean
     }
 
     ThreadPoolAdmin.create();
-    
+
     new ResinAdmin(this);
   }
 
@@ -241,7 +246,7 @@ public class Resin implements EnvironmentBean, SchemaBean
   public void setServerId(String serverId)
   {
     _variableMap.put("serverId", serverId);
-    
+
     _serverId = serverId;
     _serverIdLocal.set(serverId);
   }
@@ -295,7 +300,7 @@ public class Resin implements EnvironmentBean, SchemaBean
   public void setRootDirectory(Path root)
   {
     _rootDirectory = root;
-    
+
     _variableMap.put("serverRoot", root);
     _variableMap.put("server-root", root);
   }
@@ -346,7 +351,7 @@ public class Resin implements EnvironmentBean, SchemaBean
     throws Throwable
   {
     Cluster cluster = new Cluster(this);
-    
+
     for (int i = 0; i < _clusterDefaults.size(); i++)
       _clusterDefaults.get(i).configure(cluster);
 
@@ -357,7 +362,7 @@ public class Resin implements EnvironmentBean, SchemaBean
   {
     _clusters.add(cluster);
   }
-  
+
   public ArrayList<Cluster> getClusterList()
   {
     return _clusters;
@@ -586,10 +591,10 @@ public class Resin implements EnvironmentBean, SchemaBean
     if (clusterServer == null)
       throw new ConfigException(L().l("server-id '{0}' has no matching <server> definition.",
 				    _serverId));
-    
+
 
     _server = clusterServer.startServer();
-    
+
     /*
     ArrayList<ServerController> servers = _servers;
 
@@ -675,9 +680,9 @@ public class Resin implements EnvironmentBean, SchemaBean
       synchronized (this) {
 	notifyAll();
       }
-      
+
       Socket socket = _pingSocket;
-	
+
       if (socket != null)
 	socket.setSoTimeout(1000);
     } catch (Throwable e) {
@@ -687,13 +692,13 @@ public class Resin implements EnvironmentBean, SchemaBean
     try {
       Server server = _server;
       _server = null;
-      
+
       if (server != null)
 	server.destroy();
     } catch (Throwable e) {
       log().log(Level.WARNING, e.toString(), e);
     }
-    
+
     try {
       if (_isGlobal)
 	Environment.closeGlobal();
@@ -703,7 +708,7 @@ public class Resin implements EnvironmentBean, SchemaBean
       _lifecycle.toDestroy();
     }
   }
-  
+
   /**
    * Create a new Resin server.
    *
@@ -719,7 +724,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 
     _resinHome = CauchoSystem.getResinHome();
     _serverRoot = _resinHome;
-    
+
     parseCommandLine(argv);
   }
   */
@@ -727,12 +732,12 @@ public class Resin implements EnvironmentBean, SchemaBean
   private void parseCommandLine(String []argv)
     throws Exception
   {
-    int len = argv.length; 
+    int len = argv.length;
     int i = 0;
 
     while (i < len) {
       RandomUtil.addRandom(argv[i]);
-      
+
       if (i + 1 < len &&
           (argv[i].equals("-stdout") ||
            argv[i].equals("--stdout"))) {
@@ -744,7 +749,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 	out.setDisableClose(true);
 
         EnvironmentStream.setStdout(out);
-        
+
 	i += 2;
       }
       else if (i + 1 < len &&
@@ -758,14 +763,18 @@ public class Resin implements EnvironmentBean, SchemaBean
 	out.setDisableClose(true);
 
         EnvironmentStream.setStderr(out);
-        
+
 	i += 2;
       }
-      else if (i + 1 < len && argv[i].equals("-conf")) {
-	_resinConf = argv[i + 1];
+      else if (i + 1 < len &&
+               (argv[i].equals("-conf") ||
+                argv[i].equals("--conf"))) {
+        _resinConf = argv[i + 1];
 	i += 2;
       }
-      else if (i + 1 < len && argv[i].equals("-server")) {
+      else if (i + 1 < len &&
+               (argv[i].equals("-server") ||
+                argv[i].equals("--server"))) {
 	_serverId = argv[i + 1];
 	i += 2;
       }
@@ -784,19 +793,28 @@ public class Resin implements EnvironmentBean, SchemaBean
 
 	i += 2;
       }
+      else if (argv[i].equals("-resin-root")
+               || argv[i].equals("--resin-root")) {
+        _resinRoot = _resinHome.lookup(argv[i + 1]);
+
+        i += 2;
+      }
       else if (argv[i].equals("-server-root")
 	       || argv[i].equals("--server-root")) {
-	_serverRoot = _resinHome.lookup(argv[i + 1]);
+	_resinRoot = _resinHome.lookup(argv[i + 1]);
 
 	i += 2;
       }
-      else if (argv[i].equals("-config-server")) {
-	_configServer = argv[i + 1];
-	i += 2;
+      else if (argv[i].equals("-config-server") ||
+               argv[i].equals("--config-server")) {
+        _configServer = argv[i + 1];
+        i += 2;
       }
       else if (argv[i].equals("-socketwait") ||
-	       argv[i].equals("-pingwait")) {
-	int socketport = Integer.parseInt(argv[i + 1]);
+               argv[i].equals("--socketwait") ||
+               argv[i].equals("-pingwait") ||
+               argv[i].equals("--pingwait")) {
+        int socketport = Integer.parseInt(argv[i + 1]);
 
         Socket socket = null;
         for (int k = 0; k < 15 && socket == null; k++) {
@@ -806,28 +824,28 @@ public class Resin implements EnvironmentBean, SchemaBean
 	    System.out.println(new Date());
 	    e.printStackTrace();
           }
-	  
+
           if (socket == null)
             Thread.sleep(1000);
         }
-        
+
         if (socket == null) {
           System.err.println("Can't connect to parent process through socket " + socketport);
           System.err.println("Resin needs to connect to its parent.");
           System.exit(0);
         }
 
-	if (argv[i].equals("-socketwait"))
-	  _waitIn = socket.getInputStream();
+	if (argv[i].equals("-socketwait") || argv[i].equals("--socketwait"))
+          _waitIn = socket.getInputStream();
 	else
 	  _pingSocket = socket;
-	
+
         socket.setSoTimeout(60000);
-        
+
 	i += 2;
       }
-      else if ("-port".equals(argv[i])) {
-	int fd = Integer.parseInt(argv[i + 1]);
+      else if ("-port".equals(argv[i]) || "--port".equals(argv[i])) {
+        int fd = Integer.parseInt(argv[i + 1]);
 	String addr = argv[i + 2];
 	if ("null".equals(addr))
 	  addr = null;
@@ -871,7 +889,7 @@ public class Resin implements EnvironmentBean, SchemaBean
     System.out.println(com.caucho.Version.FULL_VERSION);
     System.out.println(com.caucho.Version.COPYRIGHT);
     System.out.println();
-    
+
     boolean isResinProfessional = false;
 
     try {
@@ -883,52 +901,52 @@ public class Resin implements EnvironmentBean, SchemaBean
 
       try {
 	license.validate(0);
-	
+
 	license.doLogging(1);
-	
+
 	license.validate(1);
 
 	isResinProfessional = true;
 	System.setProperty("isResinProfessional", "true");
 
 	SchemeMap.initJNI();
-      
+
 	// license.doLogging(1);
       } catch (Throwable e) {
 	String msg;
-	
+
 	if (e instanceof ConfigException)
 	  msg = e.getMessage() + "\n";
 	else {
 	  e.printStackTrace();
-	  
+
 	  msg = e.toString() + "\n";
-	  
+
 	  log().log(Level.WARNING, e.toString(), e);
 	}
-	  
+
 	log().log(Level.FINE, e.toString(), e);
-      
+
 	msg += L().l("\n" +
 		     "Using Resin Open Source under the GNU Public License (GPL).\n" +
 		     "\n" +
 		     "  See http://www.caucho.com for information on Resin Professional.\n");
-    
+
 	log().warning(msg);
 	System.err.println(msg);
       }
     } catch (Throwable e) {
       log().log(Level.FINER, e.toString(), e);
-      
+
       String msg = L().l("  Using Resin(R) Open Source under the GNU Public License (GPL).\n" +
 			 "\n" +
 			 "  See http://www.caucho.com for information on Resin Professional,\n" +
 			 "  including caching, clustering, JNI acceleration, and OpenSSL integration.\n");
-    
+
       log().warning(msg);
       System.err.println(msg);
     }
-    
+
     System.out.println("Starting Resin on " + QDate.formatLocal(Alarm.getCurrentTime()));
     System.out.println();
 
@@ -944,14 +962,14 @@ public class Resin implements EnvironmentBean, SchemaBean
     /*
     if (isResinProfessional && _configServer != null) {
       Path dbDir = Vfs.lookup("work/config");
-	
+
       Class cl = Class.forName("com.caucho.vfs.remote.RemotePath");
       Constructor ctor = cl.getConstructor(new Class[] { String.class,
 							 Path.class,
 							  String.class });
 
       Path path = (Path) ctor.newInstance(_configServer, dbDir, _serverId);
-	
+
       ConfigPath.setRemote(path);
       log().info("Using configuration from " + _configServer);
     }
@@ -959,7 +977,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 
     Path resinConf = _resinHome.lookup(_resinConf);
 
-    Vfs.setPwd(_serverRoot);
+    Vfs.setPwd(_resinRoot);
     // server.setServerRoot(_serverRoot);
 
     setResinProfessional(isResinProfessional);
@@ -980,7 +998,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 			 port.getPort(),
 			 port.getServerSocket());
     }
-    
+
     start();
   }
 
@@ -1008,7 +1026,7 @@ public class Resin implements EnvironmentBean, SchemaBean
       is.close();
     } catch (Throwable e) {
     }
-    
+
     RandomUtil.addRandom(System.currentTimeMillis());
   }
 
@@ -1020,7 +1038,7 @@ public class Resin implements EnvironmentBean, SchemaBean
     int socketExceptionCount = 0;
     Integer memoryTest;
     Runtime runtime = Runtime.getRuntime();
-    
+
     /*
      * If the server has a parent process watching over us, close
      * gracefully when the parent dies.
@@ -1045,16 +1063,16 @@ public class Resin implements EnvironmentBean, SchemaBean
 			  "" + runtime.totalMemory(),
 			  "" + runtime.freeMemory()));
 	  }
-	  
+
 	  log().info(L().l("Forcing GC due to low memory. {0} free bytes.",
 		       getFreeMemory(runtime)));
-	  
+
 	  runtime.gc();
 
 	  Thread.sleep(1000);
-	  
+
 	  runtime.gc();
-	  
+
 	  if (getFreeMemory(runtime) < minFreeMemory) {
 	    log().severe(L().l("Restarting due to low free memory. {0} free bytes",
 			   getFreeMemory(runtime)));
@@ -1079,7 +1097,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 	  log().severe(L().l("Restarting due to frozen Resin timer manager thread (Alarm).  This error generally indicates a JVM freeze, not an application deadlock."));
 	  Runtime.getRuntime().halt(1);
 	}
-	
+
 	if (_waitIn != null) {
           int len;
           if ((len = _waitIn.read()) >= 0) {
@@ -1120,7 +1138,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 	}
       } catch (Throwable e) {
         log().log(Level.FINE, e.toString(), e);
-	
+
         return;
       }
     }
@@ -1187,10 +1205,10 @@ public class Resin implements EnvironmentBean, SchemaBean
 
       long stopTime = System.currentTimeMillis();
       long endTime = stopTime +	15000L;
-      
+
       if (server != null)
 	endTime = stopTime + server.getShutdownWaitMax() ;
-	
+
       while (System.currentTimeMillis() < endTime && ! resin.isClosed()) {
 	try {
 	  Thread.interrupted();
@@ -1207,7 +1225,7 @@ public class Resin implements EnvironmentBean, SchemaBean
       System.out.println(e);
 
       log().log(Level.FINE, e.toString(), e);
-      
+
       System.exit(67);
     } catch (Throwable e) {
       boolean isCompile = false;
@@ -1220,7 +1238,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 	  break;
 	}
       }
-      
+
       if (! isCompile)
 	e.printStackTrace(System.err);
       else
@@ -1256,15 +1274,15 @@ public class Resin implements EnvironmentBean, SchemaBean
     throws ConfigException
   {
     Class cl = null;
-    
+
     try {
       cl = Class.forName(className);
     } catch (Throwable e) {
       throw new ConfigException(L().l("class {0} is not loadable on startup.  Resin requires {0} to be in the classpath on startup.",
 				    className));
-      
+
     }
-    
+
     Package pkg = cl.getPackage();
 
     if (pkg == null) {
@@ -1285,7 +1303,7 @@ public class Resin implements EnvironmentBean, SchemaBean
       if (versions[i].compareTo(pkg.getSpecificationVersion()) <= 0)
 	return;
     }
-      
+
     log().warning(L().l("Specification version {0} of {1} is not compatible with Resin {2}.  Resin {2} requires version {3}.",
 		      pkg.getSpecificationVersion(),
 		      pkg, com.caucho.Version.VERSION,
@@ -1317,7 +1335,7 @@ public class Resin implements EnvironmentBean, SchemaBean
     {
       if (ss == null)
 	throw new NullPointerException();
-      
+
       _ss = ss;
       _address = address;
       _port = port;
@@ -1389,7 +1407,7 @@ public class Resin implements EnvironmentBean, SchemaBean
     /**
      * Returns the root directory.
      *
-     * @return server-root
+     * @return the root directory
      */
     public Path getRoot()
     {
@@ -1455,7 +1473,7 @@ public class Resin implements EnvironmentBean, SchemaBean
     {
       return _isResinProfessional;
     }
-    
+
     /**
      * Returns the -server id
      */

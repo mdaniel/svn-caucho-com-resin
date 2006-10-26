@@ -29,19 +29,34 @@
 
 package com.caucho.boot;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.ConfigException;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.management.server.AbstractManagedObject;
+import com.caucho.management.server.WatchdogMXBean;
+import com.caucho.server.admin.HessianHmuxProxy;
+import com.caucho.server.port.Port;
+import com.caucho.util.Alarm;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.QServerSocket;
+import com.caucho.vfs.RotateStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
-import com.caucho.config.*;
-import com.caucho.config.types.*;
-import com.caucho.lifecycle.*;
-import com.caucho.management.server.*;
-import com.caucho.util.*;
-import com.caucho.server.admin.*;
-import com.caucho.server.port.*;
-import com.caucho.vfs.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Thread responsible for watching a backend server.
@@ -65,7 +80,7 @@ public class Watchdog extends AbstractManagedObject
   private boolean _hasXss;
   private boolean _hasXmx;
 
-  private Path _serverRoot;
+  private Path _resinRoot;
 
   private Boot _jniBoot;
   private String _userName;
@@ -209,20 +224,6 @@ public class Watchdog extends AbstractManagedObject
   {
   }
 
-  /*
-  ServerWatchdog(String serverId,
-		 String []argv,
-		 Path resinHome,
-		 Path serverRoot)
-  {
-    _serverId = serverId;
-    _argv = argv;
-
-    _resinHome = resinHome;
-    _serverRoot = serverRoot;
-  }
-  */
-
   public boolean startWatchdog(String []argv)
     throws IOException
   {
@@ -315,11 +316,11 @@ public class Watchdog extends AbstractManagedObject
     throws IOException
   {
     Path resinHome = _cluster.getResin().getResinHome();
-    Path serverRoot = _cluster.getResin().getRootDirectory();
+    Path resinRoot = _cluster.getResin().getRootDirectory();
     
     ProcessBuilder builder = new ProcessBuilder();
 
-    builder.directory(new File(serverRoot.getNativePath()));
+    builder.directory(new File(resinRoot.getNativePath()));
 
     Map<String,String> env = builder.environment();
 
@@ -384,13 +385,13 @@ public class Watchdog extends AbstractManagedObject
     _thread.start();
   }
 
-  public int startSingle(String []argv, Path serverRoot)
+  public int startSingle(String []argv, Path resinRoot)
   {
     if (! _lifecycle.toActive())
       return -1;
 
     _argv = argv;
-    _serverRoot = serverRoot;
+    _resinRoot = resinRoot;
     _isSingle = true;
 
     _thread = new Thread(this, "watchdog-" + _id);
@@ -409,7 +410,7 @@ public class Watchdog extends AbstractManagedObject
     return 1;
   }
 
-  public boolean start(String []argv, Path serverRoot)
+  public boolean start(String []argv, Path resinRoot)
   {
     if (! _lifecycle.toActive())
       return false;
@@ -417,7 +418,7 @@ public class Watchdog extends AbstractManagedObject
     registerSelf();
 
     _argv = argv;
-    _serverRoot = serverRoot;
+    _resinRoot = resinRoot;
 
     _thread = new Thread(this, "watchdog-" + _id);
 
@@ -463,7 +464,7 @@ public class Watchdog extends AbstractManagedObject
 	int port = ss.getLocalPort();
 
 	Path resinHome = _cluster.getResin().getResinHome();
-	Path serverRoot = _cluster.getResin().getRootDirectory();
+	Path resinRoot = _cluster.getResin().getRootDirectory();
 
 	if (! _isSingle) {
 	  String name;
@@ -473,7 +474,7 @@ public class Watchdog extends AbstractManagedObject
 	  else
 	    name = "jvm-" + _id + ".log";
 
-	  Path jvmPath = serverRoot.lookup("log/" + name);
+	  Path jvmPath = resinRoot.lookup("log/" + name);
 
 	  try {
 	    jvmPath.getParent().mkdirs();
@@ -494,7 +495,7 @@ public class Watchdog extends AbstractManagedObject
 	if (! _isSingle)
 	  log.info("starting Resin " + this);
 	
-	Process process = createProcess(resinHome, serverRoot, port,
+	Process process = createProcess(resinHome, resinRoot, port,
 					jvmOut);
 
 	ss.setSoTimeout(60000);
@@ -631,7 +632,7 @@ public class Watchdog extends AbstractManagedObject
   }
 
   private Process createProcess(Path resinHome,
-				Path serverRoot,
+				Path resinRoot,
 				int socketPort,
 				WriteStream out)
     throws IOException
@@ -662,7 +663,8 @@ public class Watchdog extends AbstractManagedObject
     list.add("-Djava.system.class.loader=com.caucho.loader.SystemClassLoader");
     list.add("-Djava.awt.headless=true");
     list.add("-Dresin.home=" + resinHome.getPath());
-    list.add("-Dserver.root=" + _serverRoot.getPath());
+    list.add("-Dresin.root=" + _resinRoot.getPath());
+    list.add("-Dserver.root=" + _resinRoot.getPath());
 
     if (! _hasXss)
       list.add("-Xss1m");
@@ -747,7 +749,7 @@ public class Watchdog extends AbstractManagedObject
 
     ProcessBuilder builder = new ProcessBuilder();
 
-    builder.directory(new File(serverRoot.getNativePath()));
+    builder.directory(new File(resinRoot.getNativePath()));
 
     builder.environment().putAll(env);
     

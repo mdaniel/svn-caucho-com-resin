@@ -131,8 +131,8 @@ for load balancing, distributed sessions, and distributed management.</p>
 will have its own &lt;srun&gt; configuration, which Resin uses for distributed
 session management and for the load balancing itself.</p>
 
-<p>When configuring multiple JVMs, each &lt;srun&gt; will have a
-unique &lt;server-id&gt; which allows the -server command-line to select
+<p>When configuring multiple JVMs, each &lt;srun&gt; has a
+unique &lt;id&gt; which allows the -server command-line to select
 which ports the server should listen to.</p>
 
 <deftable-childtags>
@@ -154,7 +154,7 @@ which ports the server should listen to.</p>
 <tr><td>write-timeout</td>
      <td>timeout waiting to write to idle client</td>
      <td>65s</td></tr>
-<tr><td>socket-listen-backlog</td>
+<tr><td>accept-listen-backlog</td>
     <td>The socket factory's listen backlog for receiving sockets</td>
     <td>100</td></tr>
 <tr><td>tcp-no-delay</td>

@@ -53,7 +53,7 @@ Starting Resin on Tue, 12 Sep 2006 19:11:52 -0700 (PDT)
 [21:22:21.477] Mac OS X 10.4.7 ppc
 [21:22:21.477] Java 1.5.0_06-64, 32, mixed mode, sharing, MacRoman, en, "Apple Computer, Inc."
 [21:22:21.477] resin.home = /usr/local/share/resin
-[21:22:21.478] server.root = /var/www
+[21:22:21.478] resin.root = /var/www
 [21:22:21.478] 
 [21:22:21.492] Loaded Socket JNI library.
 [21:22:21.595] hmux listening to localhost:6800
@@ -85,7 +85,7 @@ make Resin and website upgrades easier and more maintainable.</p>
 <li>Create a user to run Resin (e.g. resin or another non-root user)</li>
 <li>Link <code>/usr/local/share/resin</code> to the current Resin version.  This is $RESIN_HOME.</li>
 <li>Create a deployment root, e.g. <code>/var/www</code>, owned by
-the resin user.  This is $SERVER_ROOT.</li>
+the resin user.  This is $RESIN_ROOT.</li>
 <li>Put the modified resin.conf in <code>/etc/resin/resin.conf</code></li>
 <li>Put the site documents in <code>/var/www/webapps/ROOT</code>.</li>
 <li>Put any .war files in <code>/var/www/webapps</code>.</li>
@@ -130,7 +130,7 @@ will typically do a number of things:</p>
 <ol>
 <li>Configure the location of Java in JAVA_HOME</li>
 <li>Configure the location of Resin in RESIN_HOME</li>
-<li>Configure your web site directory in SERVER_ROOT</li>
+<li>Configure your web site directory in RESIN_ROOT</li>
 <li>Select a server and pid file if you have multiple Resin servers.</li>
 <li>Start and stop the Resin daemon.</li>
 </ol>
@@ -142,16 +142,16 @@ will typically do a number of things:</p>
 
 JAVA_HOME=/usr/java
 RESIN_HOME=/usr/local/share/resin
-SERVER_ROOT=/var/www
+RESIN_ROOT=/var/www
 
 java=$JAVA_HOME/bin/java
 
 export JAVA_HOME
 export RESIN_HOME
-export SERVER_ROOT
+export RESIN_ROOT
 
 $java -jar $RESIN_HOME/lib/resin.jar \
-      -server-root $SERVER_ROOT \
+      -resin-root $RESIN_ROOT \
       -conf /etc/conf/resin.conf \
       -server a \
        $*
