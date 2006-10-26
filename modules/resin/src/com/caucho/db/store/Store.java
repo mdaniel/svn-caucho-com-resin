@@ -606,12 +606,6 @@ public class Store {
 
     block.setDirty(0, BLOCK_SIZE);
 
-    synchronized (_allocationLock) {
-      setAllocation(blockIndex, code);
-    }
-    
-    saveAllocation();
-
     // if extending file, write the contents now
     if (isFileExtended) {
       try {
@@ -620,6 +614,12 @@ public class Store {
 	log.log(Level.WARNING, e.toString(), e);
       }
     }
+
+    synchronized (_allocationLock) {
+      setAllocation(blockIndex, code);
+    }
+    
+    saveAllocation();
 
     return block;
   }
@@ -697,11 +697,11 @@ public class Store {
   private void setAllocation(long blockIndex, int code)
   {
     int allocOffset = (int) (ALLOC_BYTES_PER_BLOCK * blockIndex);
-
-    _allocationTable[allocOffset] = (byte) code;
     
     for (int i = 1; i < ALLOC_BYTES_PER_BLOCK; i++)
       _allocationTable[allocOffset + i] = 0;
+
+    _allocationTable[allocOffset] = (byte) code;
 
     setAllocDirty(allocOffset, allocOffset + ALLOC_BYTES_PER_BLOCK);
   }
@@ -894,7 +894,11 @@ public class Store {
 
 		_fragmentUseCount++;
 
-		return BLOCK_SIZE * ((long) i / ALLOC_BYTES_PER_BLOCK) + j;
+		long fragmentAddress
+		  = BLOCK_SIZE * ((long) i / ALLOC_BYTES_PER_BLOCK) + j;
+		
+		//System.out.println((fragmentAddress / BLOCK_SIZE) + ":" + j + " ALLOCATE");
+		return fragmentAddress;
 	      }
 	    }
 	  }
@@ -915,10 +919,22 @@ public class Store {
     throws IOException
   {
     synchronized (_allocationLock) {
-      int i = ALLOC_BYTES_PER_BLOCK * (int) (fragmentAddress / BLOCK_SIZE);
-      int j = (int) fragmentAddress & 0xff;
+      int i = (int) (ALLOC_BYTES_PER_BLOCK * (fragmentAddress / BLOCK_SIZE));
+      int j = (int) (fragmentAddress & 0xff);
 
-      _allocationTable[i + 1] &= ~(1 << j);
+      int fragMask = _allocationTable[i + 1] & 0xff;
+      //System.out.println((fragmentAddress / BLOCK_SIZE) + ":" + j + " DELETE");
+
+      if (_allocationTable[i] != ALLOC_FRAGMENT)
+	System.out.println("BAD ENTRY: " + fragMask);
+
+      if (j >= 8)
+	System.out.println("BAD J: " + fragMask);
+
+      if ((fragMask & (1 << j)) == 0)
+	System.out.println("BAD J-MASK: " + fragMask + " " + j);
+
+      _allocationTable[i + 1] = (byte) (fragMask & ~(1 << j));
 
       _fragmentUseCount--;
 	

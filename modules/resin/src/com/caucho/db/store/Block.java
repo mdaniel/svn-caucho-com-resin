@@ -60,7 +60,7 @@ abstract public class Block implements SyncCacheListener {
 
   private final Lock _lock;
 
-  private int _useCount;
+  private int _useCount = 1;
 
   private boolean _isFlushDirtyOnCommit;
   private boolean _isValid;
@@ -81,6 +81,8 @@ abstract public class Block implements SyncCacheListener {
 
     if (log.isLoggable(Level.FINER))
       log.finer(this + " create");
+    
+    //System.out.println(this + " CREATE");
   }
 
   /**
@@ -105,13 +107,15 @@ abstract public class Block implements SyncCacheListener {
   boolean allocate()
   {
     synchronized (this) {
+      if (getBuffer() == null)
+	return false;
+      
       _useCount++;
       
       if (log.isLoggable(Level.FINEST))
 	log.finest(this + " allocate");
-
-      if (getBuffer() == null)
-	return false;
+      
+      //System.out.println(this + " ALLOCATE " + _useCount);
 
       if (_useCount > 32 && log.isLoggable(Level.FINE)) {
 	Thread.dumpStack();
@@ -200,7 +204,9 @@ abstract public class Block implements SyncCacheListener {
 	if (log.isLoggable(Level.FINER))
 	  log.finer("write db-block " + this + " [" + dirtyMin + ", " + dirtyMax + "]");
 
+	//System.out.println(this + " WRITE_BEGIN");
 	writeImpl(dirtyMin, dirtyMax - dirtyMin);
+	//System.out.println(this + " WRITE_END");
       }
       else {
 	if (log.isLoggable(Level.FINER))
@@ -283,9 +289,11 @@ abstract public class Block implements SyncCacheListener {
 
       _useCount--;
       
-      if (_useCount >= 0)
-	return;
+      //System.out.println(this + " FREE " + _useCount);
 
+      if (_useCount > 0)
+	return;
+      
       // If the block is clean, just discard it
       if (_dirtyMax <= _dirtyMin) {
 	freeImpl();
@@ -296,29 +304,6 @@ abstract public class Block implements SyncCacheListener {
 
     // dirty blocks get queued for writing
     BlockManager.getBlockManager().addLruDirtyWriteBlock(this);
-  }
-
-  /**
-   * Returns true if the block is currently in use, i.e. it should not
-   * be removed from the cache.
-   */
-  public boolean isUsed()
-  {
-    return _useCount > 0;
-  }
-
-  /**
-   * Called by the clock cache to mark the item as currently in use.
-   */
-  public void setUsed()
-  {
-  }
-  
-  /**
-   * Called by the clock cache to mark the item as allowed to be removed.
-   */
-  public void clearUsed()
-  {
   }
 
   /**
@@ -344,7 +329,7 @@ abstract public class Block implements SyncCacheListener {
 	}
       }
 
-      if (_useCount < 0)
+      if (_useCount <= 0)
 	freeImpl();
 
       if (log.isLoggable(Level.FINER))

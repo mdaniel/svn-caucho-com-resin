@@ -65,6 +65,7 @@ public class ReadBlock extends Block {
    */
   protected void freeImpl()
   {
+    //System.out.println(this + " FREE-IMPL");
     synchronized (this) {
       byte []buffer = _buffer;
       _buffer = null;

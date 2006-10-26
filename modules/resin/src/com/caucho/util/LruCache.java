@@ -288,7 +288,7 @@ public class LruCache<K,V> {
     if (replace && oldValue instanceof CacheListener)
       ((CacheListener) oldValue).removeEvent();
 
-    return null;
+    return oldValue;
   }
 
   /**

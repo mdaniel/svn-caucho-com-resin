@@ -154,8 +154,7 @@ public final class BlockManager
 
       try {
 	synchronized (block) {
-	  if (block.isDirty())
-	    block.write();
+	  block.write();
 	}
       } catch (IOException e) {
 	log.log(Level.FINER, e.toString(), e);
@@ -241,10 +240,10 @@ public final class BlockManager
       block = new ReadBlock(store, blockId);
 
       if (dirtyBlock != null) {
-	byte []buffer = dirtyBlock.getBuffer();
+	byte []dirtyBuffer = dirtyBlock.getBuffer();
 
-	if (buffer != null) {
-	  System.arraycopy(buffer, 0, block.getBuffer(), 0, buffer.length);
+	if (dirtyBuffer != null) {
+	  System.arraycopy(dirtyBuffer, 0, block.getBuffer(), 0, dirtyBuffer.length);
 	  block.validate();
 	}
 
