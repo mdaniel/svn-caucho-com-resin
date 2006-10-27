@@ -93,13 +93,13 @@ gryffindor and slytherin, each with its own document directory.</p>
 
   &lt;host id="gryffindor.caucho.com"&gt;
 
-    &lt;root-directory&gt;/home/www/gryffindor&lt;/root-directory&gt;
+    &lt;root-directory&gt;/vfs/www/gryffindor&lt;/root-directory&gt;
 
   &lt;/host&gt;
 
   &lt;host id="slytherin.caucho.com"&gt;
 
-    &lt;root-directory&gt;/home/www/slytherin&lt;/root-directory&gt;
+    &lt;root-directory&gt;/vfs/www/slytherin&lt;/root-directory&gt;
 
   &lt;/host>
 
@@ -108,52 +108,12 @@ gryffindor and slytherin, each with its own document directory.</p>
 </example>
 
 <p>Browsing http://gryffindor.caucho.com/test.jsp will look for
-/home/www/gryffindor/webapps/ROOT/test.jsp.</p>
+/vfs/www/gryffindor/webapps/ROOT/test.jsp.</p>
 
 <p>Browsing http://slytherin.caucho.com/test.jsp will look for
-/home/www/slytherin/webapps/ROOT/test.jsp.</p>
+/vfs/www/slytherin/webapps/ROOT/test.jsp.</p>
 
 </s1>
-
-<s1 title="Virtual Hosts with Apache or IIS">
-
-<p>A common configuration uses virtual hosts with Apache or IIS.
-As usual, Apache or IIS will pass matching requests to Resin.</p>
-
-<s2 title="Apache">
-<p>The Resin JVM configuration with Apache is identical to the
-standalone configuration.  That similarity makes it easy to debug the
-Apache configuration by retreating to Resin standalone if needed.</p>
-
-<p>The <var>ServerName</var> directive in Apache is vital to make Resin's
-virtual hosting work.  When Apache passes the request to Resin, it
-tells Resin the <var>ServerName</var>.  Without the <var>ServerName</var>,
-Resin can get very confused which host to serve.</p>
-
-<example title="httpd.conf">
-LoadModule caucho_module /usr/local/apache/libexec/mod_caucho.so
-
-ResinConfigServer localhost 6802
-
-&lt;VirtualHost 127.0.0.1&gt;
-  ServerName gryffindor.caucho.com
-&lt;/VirtualHost&gt;
-
-&lt;VirtualHost 192.168.0.1&gt;
-  ServerName slytherin.caucho.com
-&lt;/VirtualHost&gt;
-</example>
-
-<note>You'll the LoadModule must appear before
-the ResinConfigServer for Apache to properly understand the
-ResinConfigServer command.  If they're missing, Apache will send
-an error.</note>
-</s2>
-
-<s2 title="IIS">
-<p>Configuration and installation for IIS virtual sites is discussed in the <a href="install-iis.xtp">IIS installation</a> section.</p>
-</s2>
-</s1> <!-- with Apache or IIS -->
 
 <s1 title="Dynamic virtual hosts">
 
@@ -165,24 +125,20 @@ on the file-system is established, and subdirectories become virtual hosts.</p>
 
 <example title="host-deploy dynamic virtual hosts">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-&lt;cluster id="app-tier">
-  &lt;server id="app-a" .../>
+  &lt;cluster id="app-tier">
+    &lt;server id="app-a" .../>
 
-  &lt;host-deploy path="hosts"&gt;
-    &lt;host-default&gt;
-      &lt;class-loader&gt;
-        &lt;compiling-loader path='classes'/&gt;
-        &lt;library-loader path='lib'/&gt;
-      &lt;/class-loader&gt;
+    &lt;host-deploy path="hosts"&gt;
+      &lt;host-default&gt;
+        &lt;class-loader&gt;
+          &lt;compiling-loader path='classes'/&gt;
+          &lt;library-loader path='lib'/&gt;
+        &lt;/class-loader&gt;
 
-      &lt;web-app-deploy path='webapps'/&gt;
-
-      &lt;ear-deploy path='deploy'/&gt;
-      &lt;resource-deploy path='deploy'/&gt;
-      &lt;web-app-deploy path='deploy'/&gt;
-    &lt;/host-default&gt;
-  &lt;/host-deploy&gt;
-&lt;/cluster&gt;
+        &lt;web-app-deploy path='webapps'/&gt;
+      &lt;/host-default&gt;
+    &lt;/host-deploy&gt;
+  &lt;/cluster&gt;
 &lt;/resin&gt;
 </example>
 
@@ -548,6 +504,46 @@ the unicode string.</p>
 <p>Support, of course, depends on the browser.  <a href="http://devedge.netscape.com/viewsource/2003/idn/">Mozilla 1.4</a> supports the encoding.
 
 </p></s1>
+
+<s1 title="Virtual Hosts with Apache or IIS">
+
+<p>A common configuration uses virtual hosts with Apache or IIS.
+As usual, Apache or IIS will pass matching requests to Resin.</p>
+
+<s2 title="Apache">
+<p>The Resin JVM configuration with Apache is identical to the
+standalone configuration.  That similarity makes it easy to debug the
+Apache configuration by retreating to Resin standalone if needed.</p>
+
+<p>The <var>ServerName</var> directive in Apache is vital to make Resin's
+virtual hosting work.  When Apache passes the request to Resin, it
+tells Resin the <var>ServerName</var>.  Without the <var>ServerName</var>,
+Resin can get very confused which host to serve.</p>
+
+<example title="httpd.conf">
+LoadModule caucho_module /usr/local/apache/libexec/mod_caucho.so
+
+ResinConfigServer localhost 6802
+
+&lt;VirtualHost 127.0.0.1&gt;
+  ServerName gryffindor.caucho.com
+&lt;/VirtualHost&gt;
+
+&lt;VirtualHost 192.168.0.1&gt;
+  ServerName slytherin.caucho.com
+&lt;/VirtualHost&gt;
+</example>
+
+<note>You'll the LoadModule must appear before
+the ResinConfigServer for Apache to properly understand the
+ResinConfigServer command.  If they're missing, Apache will send
+an error.</note>
+</s2>
+
+<s2 title="IIS">
+<p>Configuration and installation for IIS virtual sites is discussed in the <a href="install-iis.xtp">IIS installation</a> section.</p>
+</s2>
+</s1> <!-- with Apache or IIS -->
 
   </body>
 </document>

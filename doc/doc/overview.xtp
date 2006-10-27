@@ -5,8 +5,9 @@
 <description>
 
 <p>Resin is a high-performance, scalable Java/PHP application server.  We
-release two versions of Resin: an open source version, and a professional
-version with enhanced performance, clustering, and reliability features.</p>
+release two versions of Resin: an open source version under the GPL, and
+a professional version with enhanced performance, clustering,
+and reliability features.</p>
 
 </description>
 </header>

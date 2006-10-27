@@ -6,7 +6,7 @@
 
 <body>
 
-<summary objsummary="localtoc"/>
+<localtoc/>
 
 <s1 title="Amber capabilities">
 
@@ -159,7 +159,7 @@ extra overhead.</p>
 
 </s1>
 
-<s1 title="WebServices capabilities and configuration">
+<s1 title="Web services capabilities and configuration">
 
 <p>Documentation for the new web services capabilities is
 in the <a href="doc|soa.xtp">web services</a> section.</p>
@@ -177,20 +177,22 @@ the services as Hessian, SOAP or Rest.</p>
 <example title="&lt;web-service> configuration">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
-  &lt;web-service class="example.HelloServiceImpl">
+  &lt;servlet-mapping url-pattern="/hello/*"
+                    servlet-class="example.HelloServiceImpl">
+
+    &lt;!-- jndi registration for direct VM calls -->
     &lt;jndi-name>service/HelloService&lt;/jndi-name>
 
+    &lt;!-- IoC-style configuration -->
     &lt;init>
       &lt;hello>hello, world&lt;/hello>
     &lt;/init>
 
-    &lt;hessian>
+    &lt;!-- soap, hessian, burlap protocols -->
+    &lt;protocol type="hessian">
       &lt;api-class>example.HelloService&lt;/api-class>
-      &lt;http>
-        &lt;url-pattern>/hello/&lt;/url-pattern>
-      &lt;/http>
-    &lt;/hessian>
-  &lt;/web-service>
+    &lt;/protocol>
+  &lt;/servlet-mapping>
 
 &lt;/web-app>
 </example>

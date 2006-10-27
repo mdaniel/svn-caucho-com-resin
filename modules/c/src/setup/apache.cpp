@@ -264,7 +264,7 @@ configure_apache(HWND hDlg, char *resin_home, char *apache_home)
 	/*
 	fprintf(os, "  CauchoConfigFile \"%s/conf/resin.conf\"\n", esc_resin_home);
 	*/
-	fprintf(os, "  ResinConfigServer localhost 6802\n");
+	fprintf(os, "  ResinConfigServer localhost 6800\n");
 	fprintf(os, "  CauchoStatus yes\n");
 	fprintf(os, "</IfModule>\n");
 	fclose(is);
