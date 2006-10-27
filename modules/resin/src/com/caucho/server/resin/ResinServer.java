@@ -530,7 +530,7 @@ public class ResinServer
     if (! _lifecycle.toActive())
       return;
 
-    long start = Alarm.getCurrentTime();
+    long start = System.currentTimeMillis();
 
     _j2eeDomainManagedObject = J2EEManagedObject.register(new J2EEDomain());
     _jvmManagedObject = J2EEManagedObject.register(new JVM());
@@ -553,7 +553,8 @@ public class ResinServer
                       _serverId));
     }
 
-    log.info("Resin started in " + (Alarm.getCurrentTime() - start) + "ms");
+    if (! Alarm.isTest())
+      log.info("Resin started in " + (System.currentTimeMillis() - start) + "ms");
   }
 
   /**

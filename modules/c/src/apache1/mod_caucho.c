@@ -264,6 +264,44 @@ cse_config_server_command(cmd_parms *cmd, void *mconfig,
 }
 
 /**
+ * Set the default session cookie used by mod_caucho.
+ */
+static const char *
+resin_session_cookie_command(cmd_parms *cmd, void *pconfig,
+			     const char *cookie_arg)
+{
+  config_t *config = cse_get_cmd_config(cmd);
+
+  if (! config)
+    return 0;
+
+  config->has_config = 1;
+
+  strcpy(config->session_cookie, cookie_arg);
+
+  return 0;
+}
+
+/**
+ * Set the default session url used by mod_caucho.
+ */
+static const char *
+resin_session_url_prefix_command(cmd_parms *cmd, void *pconfig,
+				 const char *cookie_arg)
+{
+  config_t *config = cse_get_cmd_config(cmd);
+
+  if (! config)
+    return 0;
+
+  config->has_config = 1;
+
+  strcpy(config->session_url_prefix, cookie_arg);
+
+  return 0;
+}
+
+/**
  * Parse the CauchoStatus configuration in the apache config file.
  */
 static const char *
@@ -1244,6 +1282,12 @@ static command_rec caucho_commands[] = {
      "Configures the caucho-status."},
     {"CauchoConfigFile", cse_config_file_command, NULL, RSRC_CONF|ACCESS_CONF, TAKE1,
      "Pointer to the Caucho configuration file."},
+    {"ResinSessionCookie", resin_session_url_prefix_command,
+     NULL, RSRC_CONF|ACCESS_CONF, TAKE1,
+     "Sets the Resin session cookie."},
+    {"ResinSessionUrlPrefix", resin_session_url_prefix_command,
+     NULL, RSRC_CONF|ACCESS_CONF, TAKE1,
+     "Sets the Resin session url prefix."},
     {"CauchoServerRoot", cse_config_server_root, NULL, RSRC_CONF|ACCESS_CONF, TAKE1,
      "The root server directory."},
     {"CauchoHost", cse_host_command, NULL, RSRC_CONF|ACCESS_CONF, TAKE12,

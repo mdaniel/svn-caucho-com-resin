@@ -62,6 +62,9 @@ public class StringValueSerializer extends AbstractSerializer {
     if (obj == null)
       out.writeNull();
     else {
+      if (out.addRef(obj))
+	return;
+      
       Class cl = obj.getClass();
 
       int ref = out.writeObjectBegin(cl.getName());

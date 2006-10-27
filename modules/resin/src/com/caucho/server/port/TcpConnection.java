@@ -451,7 +451,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
-    _admin.register();
+    // _admin.register();
   }
   
   /**
@@ -660,7 +660,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
   {
     closeImpl();
 
-    _admin.unregister();
+    // _admin.unregister();
 
     setState("free");
     

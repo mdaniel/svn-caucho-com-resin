@@ -263,6 +263,7 @@ public class JspContentHandler extends DefaultHandler {
   private void setLocation()
   {
     if (_locator != null)
-      _builder.setLocation(_locator.getSystemId(), _locator.getLineNumber());
+      _builder.setLocation(_locator.getSystemId(),
+			   _locator.getLineNumber());
   }
 }

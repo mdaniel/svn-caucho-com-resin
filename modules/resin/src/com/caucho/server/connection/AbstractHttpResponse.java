@@ -1037,8 +1037,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   {
     if (encoding == null ||
 	encoding.equals("ISO-8859-1") ||
-	encoding.equals(""))
+	encoding.equals("")) {
       _charEncoding = null;
+    }
     else
       _charEncoding = encoding;
 
