@@ -32,7 +32,7 @@ of the PHP language.  Quercus is a feature of Caucho Technology's Resin
 Application Server and is built into Resin - there is no additional
 download/install.  Developers using Resin can launch PHP projects without
 having to install the standard PHP interpreter (http://www.php.net) as Quercus
-takes on the roll of the PHP engine.</p>
+takes on the role of the PHP engine.</p>
 
 
 <s2 title="What is Quercus">
@@ -64,9 +64,10 @@ caching.</p>
 services.  On Quercus, Java and PHP is tightly integrated with each other - PHP
 applications can choose to use Java libraries and technologies like JMS, EJB,
 SOA frameworks, Hibernate, and Spring.  This revolutionary capability is made
-possible because 1)PHP code is interpreted/compiled into Java and 2)Quercus and
-its libraries are written entirely in Java.  This enables PHP applications and
-Java libraries to talk directly with one another at the program level.  To
+possible because 1) PHP code is interpreted/compiled into Java and
+2) Quercus and its libraries are written entirely in Java.
+This lets PHP applications and Java libraries to talk directly with one
+another at the program level.  To
 faciliate this new Java/PHP architecture, Quercus provides an API and interface
 to expose Java libraries to PHP.</p>
 

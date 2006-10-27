@@ -78,9 +78,7 @@ public class ImplicitFieldExpr extends Expr {
       {
 	HttpSession session = page.getSession();
 
-	System.out.println("GET-S: " + fieldString + " " + session);
 	if (session != null) {
-	  System.out.println(" -> " + session.getAttribute(fieldString));
 	  return session.getAttribute(fieldString);
 	}
 	else

@@ -990,7 +990,7 @@ public abstract class JspNode {
     try {
       if (JspFragment.class.equals(type))
 	return generateFragmentParameter(value, rtexpr);
-      else if (ValueExpression.class.isAssignableFrom(type)) {
+      else if (type.equals(ValueExpression.class)) {
         int exprIndex;
 
 	String typeName = attrInfo != null ? attrInfo.getExpectedTypeName() : "";
@@ -1002,7 +1002,7 @@ public abstract class JspNode {
       
         return ("_caucho_value_expr_" + exprIndex);
       }
-      else if (MethodExpression.class.isAssignableFrom(type)) {
+      else if (type.equals(MethodExpression.class)) {
         int exprIndex;
 
 	String sig = attrInfo != null ? attrInfo.getMethodSignature() : "";
@@ -1013,6 +1013,27 @@ public abstract class JspNode {
           exprIndex = _gen.addMethodExpr(value, sig);
       
         return ("_caucho_method_expr_" + exprIndex);
+      }
+      else if (com.caucho.el.Expr.class.equals(type)) {
+        int exprIndex;
+
+        if (isEmpty)
+          exprIndex = _gen.addExpr("");
+        else
+          exprIndex = _gen.addExpr(value);
+      
+        return ("_caucho_expr_" + exprIndex);
+      }
+      else if (com.caucho.xpath.Expr.class.equals(type)) {
+        int exprIndex;
+	
+	com.caucho.xpath.Expr expr;
+        if (isEmpty)
+	  expr = XPath.parseExpr("");
+        else
+	  expr = XPath.parseExpr(value, getNamespaceContext());
+	
+	return _gen.addXPathExpr(expr);
       }
       else if (rtexpr && hasRuntimeAttribute(value)) {
         return getRuntimeAttribute(value);
@@ -1076,27 +1097,6 @@ public abstract class JspNode {
         return String.valueOf(Double.valueOf(value));
       else if (type.equals(Double.class))
         return ("new java.lang.Double(" + Double.valueOf(value) + ")");
-      else if (com.caucho.el.Expr.class.isAssignableFrom(type)) {
-        int exprIndex;
-
-        if (isEmpty)
-          exprIndex = _gen.addExpr("");
-        else
-          exprIndex = _gen.addExpr(value);
-      
-        return ("_caucho_expr_" + exprIndex);
-      }
-      else if (com.caucho.xpath.Expr.class.isAssignableFrom(type)) {
-        int exprIndex;
-	
-	com.caucho.xpath.Expr expr;
-        if (isEmpty)
-	  expr = XPath.parseExpr("");
-        else
-	  expr = XPath.parseExpr(value, getNamespaceContext());
-	
-	return _gen.addXPathExpr(expr);
-      }
       else if (! type.equals(String.class) &&
                ! type.equals(Object.class)) {
         return null;
@@ -1114,21 +1114,21 @@ public abstract class JspNode {
   protected String generateELValue(Class type, String value)
     throws Exception
   {
-    if (com.caucho.el.Expr.class.isAssignableFrom(type)) {
+    if (type.equals(com.caucho.el.Expr.class)) {
       int exprIndex;
 
       exprIndex = _gen.addExpr(value);
       
       return ("_caucho_expr_" + exprIndex);
     }
-    else if (ValueExpression.class.isAssignableFrom(type)) {
+    else if (type.equals(ValueExpression.class)) {
       int exprIndex;
 
       exprIndex = _gen.addValueExpr(value, "");
       
       return ("_caucho_value_expr_" + exprIndex);
     }
-    else if (com.caucho.xpath.Expr.class.isAssignableFrom(type)) {
+    else if (type.equals(com.caucho.xpath.Expr.class)) {
       com.caucho.xpath.Expr expr;
 
       expr = XPath.parseExpr(value, getNamespaceContext());

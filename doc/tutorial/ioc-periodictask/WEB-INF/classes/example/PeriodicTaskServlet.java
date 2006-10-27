@@ -12,6 +12,10 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import java.util.concurrent.Executor;
+
+import javax.annotation.Resource;
+
 import javax.servlet.*;
 import javax.servlet.http.*;
 
@@ -23,6 +27,9 @@ public class PeriodicTaskServlet extends HttpServlet {
     Logger.getLogger(PeriodicTaskServlet.class.getName());
 
   int _refreshRate = 5;
+
+  @Resource
+  private Executor _executor;
 
   private PeriodicTask _periodicTask;
 
@@ -83,7 +90,7 @@ public class PeriodicTaskServlet extends HttpServlet {
             task.run();
           }
         };
-        ThreadPool.start(threadTask);
+        _executor.execute(threadTask);
         Thread.yield();
         response.sendRedirect(request.getRequestURI());
       }

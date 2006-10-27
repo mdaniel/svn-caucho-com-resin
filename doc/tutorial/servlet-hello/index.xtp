@@ -29,9 +29,13 @@ The servlets handle Java processing: form handing, calculation and
 database queries.  JSP formats the results.</p>
 
 <p>Servlets belong in <var>WEB-INF/classes</var>.  On this machine,
-the source is in Java source in <var><jsp:expression>
+the source is in Java source in <var>WEB-INF/classes</var>.
+<!--
+<jsp:expression>
 application.getRealPath("/WEB-INF/classes")
-</jsp:expression></var>.  WEB-INF/classes is the standard location
+</jsp:expression></var>.
+-->
+WEB-INF/classes is the standard location
 for servlets and other Java classes.  Resin automatically reloads and
 recompiles servlets, beans, and classes placed in WEB-INF/classes.
 You should make some changes and add errors to become familiar with Resin's
@@ -39,10 +43,14 @@ recompilation and the error reporting.</p>
 
 <p>Create the following servlet in
 <var>WEB-INF/classes/test/HelloServlet.java</var> with your favorite
-text editor: notepad, emacs, vi, or whatever.  (On this machine,
+text editor: notepad, emacs, vi, or whatever.
+<!--
+(On this machine,
 <var><jsp:expression>
   application.getRealPath("/WEB-INF/classes/test/HelloServlet.java")
-</jsp:expression></var>)</p>
+</jsp:expression></var>)
+-->
+</p>
 
 <example title="WEB-INF/classes/test/HelloServlet.java">
 package test;
@@ -65,9 +73,14 @@ public class HelloServlet extends HttpServlet {
 }
 </example>
 
-<p>Now browse the servlet at <a href="hello"><jsp:expression>
+<p>Now browse the servlet at
+<!--
+<a href="hello"><jsp:expression>
 request.getContextPath() + "/hello"
-</jsp:expression></a>.  Resin will automatically compiles the servlet for you.
+</jsp:expression></a>.
+-->
+<a href="hello">http://localhost:8080/resin-doc/tutorial/hello</a>.
+Resin will automatically compiles the servlet for you.
 Browsing servlets differs from page browsing because
 you're executing a servlet class, not looking at a page.
 The <var>/hello</var> URL is configured for the hello, world servlet below.</p>

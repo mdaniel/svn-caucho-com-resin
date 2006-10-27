@@ -279,6 +279,8 @@ public class JspCompilerInstance {
 
     if (jspConfig != null) {
       jspList.addAll(jspConfig.findJspPropertyGroupList(_uri));
+
+      _parseState.setELIgnoredDefault(false);
     }
 
     JspResourceManager resourceManager = _jspCompiler.getResourceManager();

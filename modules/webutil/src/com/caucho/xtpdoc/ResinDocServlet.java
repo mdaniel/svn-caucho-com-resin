@@ -49,6 +49,8 @@ import javax.xml.stream.FactoryConfigurationError;
 import com.caucho.config.Config;
 import com.caucho.config.LineConfigException;
 
+import com.caucho.util.*;
+
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
@@ -113,6 +115,7 @@ public class ResinDocServlet extends HttpServlet {
 
     try {
       response.setContentType("text/html");
+      response.addHeader("Cache-Control", "max-age=3600");
       
       XMLStreamWriter xmlOut 
         = _outputFactory.createXMLStreamWriter(os, _encoding);

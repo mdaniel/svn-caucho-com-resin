@@ -56,6 +56,7 @@ public class Document {
   private Navigation _navigation;
   private NavigationItem _navItem;
   private String _encoding;
+  private boolean _hasChildren;
 
   Document()
   {
@@ -155,6 +156,69 @@ public class Document {
     }
 
     return _navItem;
+  }
+
+  void fillChildNavigation()
+  {
+    getNavigation();
+
+    if (! _hasChildren) {
+      _hasChildren = true;
+      fillChildNavigation(_navItem);
+    }
+  }
+
+  void fillChildNavigation(NavigationItem navItem)
+  {
+    for (NavigationItem child : navItem.getChildren()) {
+      fillChildNavigation(child);
+    }
+    
+    String link = navItem.getLink();
+
+    if (link.indexOf('/') > 0) {
+      ServletContext rootWebApp = _webApp.getContext("/");
+      String uri = navItem.getUri();
+      String realPath = rootWebApp.getRealPath(uri);
+      
+      Path path = Vfs.lookup(realPath);
+
+      Path pwd = path.getParent();
+      Path toc = pwd.lookup("toc.xml");
+
+      if (toc.canRead()) {
+	Config config = new Config();
+
+	int p = uri.lastIndexOf('/');
+	if (p > 0)
+	  uri = uri.substring(0, p + 1);
+
+	Navigation navigation = new Navigation(this, uri, pwd, 0);
+      
+	navigation.setChild(navItem);
+
+	try {
+	  config.configure(navigation, toc);
+
+	  if (navigation.getRootItem() != null)
+	    navItem.addChildren(navigation.getRootItem().getChildren());
+
+	  //navList.add(navigation);
+	} catch (Exception e) {
+	  e.printStackTrace();
+	  log.log(Level.FINE, e.toString(), e);
+	
+	  navigation = null;
+	}
+
+	/*
+	if (navigation != null)
+	  child = navigation.getRootItem();
+	else
+	  child = null;
+	*/
+      }
+    }
   }
 
   public Path getDocumentPath()

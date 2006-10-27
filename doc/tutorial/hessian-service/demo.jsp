@@ -1,7 +1,8 @@
-<%@ page import="com.caucho.naming.Jndi" %>
+<%@ page import="javax.annotation.Resource" %>
 <%@ page import="example.MathService" %>
-<%
-MathService math = (MathService) Jndi.lookup("hessian/MathService");
+<%!
+@Resource(name="hessian/MathService")
+MathService math;
 %>
 <pre>
 3 + 2 = <%= math.add(3, 2) %>

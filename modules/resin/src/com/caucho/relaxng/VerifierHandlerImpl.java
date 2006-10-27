@@ -504,7 +504,7 @@ public class VerifierHandlerImpl extends DefaultHandler
 	 parent != null;
 	 parent = null) { // parent.getParent()) {
       if (qName != null && parent.allowsElement(qName)) {
-	msg = " Check for duplicate and out-of-order tags.";
+	msg = "\n Check for duplicate and out-of-order tags.";
 
 	if (expected != null)
 	  msg += expected + "\n";
@@ -526,7 +526,7 @@ public class VerifierHandlerImpl extends DefaultHandler
       topParent = parentItem;
 
       if (qName != null && topParent.allowsElement(qName)) {
-	msg = " Check for duplicate and out-of-order tags.";
+	msg = "\n Check for duplicate and out-of-order tags.";
 
 	if (expected != null)
 	  msg += expected + "\n";

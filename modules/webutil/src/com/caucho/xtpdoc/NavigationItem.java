@@ -135,6 +135,16 @@ public class NavigationItem {
     return null;
   }
 
+  ArrayList<NavigationItem> getChildren()
+  {
+    return _items;
+  }
+
+  void addChildren(ArrayList<NavigationItem> children)
+  {
+    _items.addAll(children);
+  }
+
   String getUri()
   {
     return _uri;
@@ -210,6 +220,11 @@ public class NavigationItem {
   {
     _link = link;
     _uri = _navigation.getUri() + link;
+  }
+
+  public String getLink()
+  {
+    return _link;
   }
 
   public void setTitle(String title)
@@ -306,7 +321,7 @@ public class NavigationItem {
 
       out.writeEndElement(); // b
       
-      if (_fullDescription != null && depth - styleDepth <= 1) {
+      if (_fullDescription != null && depth + styleDepth <= 1) {
       }
       else if (_description != null && depth > 1) {
 	out.writeCharacters(" - ");
@@ -319,7 +334,7 @@ public class NavigationItem {
     out.writeStartElement("dd");
 
     // XXX: brief/paragraph/none
-    if (_fullDescription != null && depth - styleDepth <= 1) {
+    if (_fullDescription != null && depth + styleDepth <= 1) {
       out.writeStartElement("p");
       _fullDescription.writeHtml(out);
       out.writeEndElement(); // p

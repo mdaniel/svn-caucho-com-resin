@@ -420,7 +420,8 @@ public class ParseState {
     if (pageEncoding == null)
       return;
 
-    if (_pageEncoding == null || _pageEncoding.equals(pageEncoding)) {
+    if (_pageEncoding == null
+	|| _pageEncoding.equalsIgnoreCase(pageEncoding)) {
       _pageEncoding = pageEncoding;
     }
     else if ("UTF-16".equalsIgnoreCase(_pageEncoding)

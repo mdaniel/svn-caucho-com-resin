@@ -49,6 +49,9 @@ the MatchService API.</p>
 <example title="MathServiceImpl.java">
 package example;
 
+import javax.jws.WebService
+
+@WebService
 public class MathServiceImpl implements MathService {
   public int add(int a, int b)
   {
@@ -84,14 +87,10 @@ public interface MathService {
 <example title="resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
-  &lt;web-service class="example.MathServiceImpl">
-    &lt;encoding type="hessian">
-      &lt;api-class>example.MathService&lt;/api-class>
-      &lt;transport type="http">
-        &lt;url-pattern>/math/&lt;/url-pattern>
-      &lt;/transport>
-    &lt;/encoding>
-  &lt;/web-service>
+  &lt;servlet-mapping url-pattern="/math/*"
+                   servlet-class="example.MathService">
+    &lt;protocol type="hessian"/>
+  &lt;/servlet-mapping>
 
   &lt;web-service-client jndi-name="hessian/MathService">
     &lt;url>hessian:http://localhost:8080/resin-doc/hessian/tutorial/hessian-service/math/&lt;/url>
@@ -108,10 +107,11 @@ public interface MathService {
 <p>The client is identical to the basic example.</p>
 
 <example title="demo.jsp">
-&lt;%@ page import="com.caucho.naming.Jndi" %>
+&lt;%@ page import="javax.annotation.Resource" %>
 &lt;%@ page import="example.MathService" %>
-&lt;%
-MathService math = (MathService) Jndi.lookup("hessian/MathService");
+&lt;%!
+@Resource(name="hessian/MathService")
+MathService math;
 %>
 &lt;pre>
 3 + 2 = &lt;%= math.add(3, 2) %>

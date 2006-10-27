@@ -1016,14 +1016,18 @@ public class Store {
       blockOffset += fragmentOffset;
 
       synchronized (blockBuffer) {
-	for (int i = 0; i < length; i += 2) {
+	int blockTail = blockOffset;
+	
+	for (int i = 0; i < length; i++) {
 	  char ch = buffer[offset + i];
 
-	  blockBuffer[blockOffset + i] = (byte) (ch >> 8);
-	  blockBuffer[blockOffset + i + 1] = (byte) (ch);
+	  blockBuffer[blockTail] = (byte) (ch >> 8);
+	  blockBuffer[blockTail + 1] = (byte) (ch);
+
+	  blockTail += 2;
 	}
 
-	block.setDirty(blockOffset, blockOffset + length);
+	block.setDirty(blockOffset, blockTail);
       }
     } finally {
       block.free();

@@ -73,6 +73,7 @@ the user registers, the application needs to compute the
 digest to store it.</p>
 
 <!-- a form for calculating an MD5 digest -->
+<!--
 <jsp:scriptlet>
 
 String digest_user = request.getParameter("digest_user");
@@ -125,6 +126,7 @@ pageContext.setAttribute("digest_requestURI",digest_requestURI);
   </td></tr><tr><td><input type="submit"/>
   </td></tr></table>
 </form>
+-->
 
 <p>Unix users can quickly calculate a digest:</p>
 <example>

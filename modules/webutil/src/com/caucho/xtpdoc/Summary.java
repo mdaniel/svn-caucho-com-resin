@@ -98,13 +98,15 @@ public class Summary implements ContentItem {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
+    _document.fillChildNavigation();
+    
     if (_document.getNavigation() == null) {
     }
     else if (_isSkipDescription) {
-      _document.getNavigation().writeHtml(out, "", 1, 1, 4);
+      _document.getNavigation().writeHtml(out, "", 1, 2, 5);
     }
     else {
-      _document.getNavigation().writeHtml(out, "", 1, 0, 4);
+      _document.getNavigation().writeHtml(out, "", 1, 0, 5);
     }
   }
 

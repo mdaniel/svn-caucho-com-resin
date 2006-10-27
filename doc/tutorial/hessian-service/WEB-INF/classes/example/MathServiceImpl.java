@@ -1,5 +1,8 @@
 package example;
 
+import javax.jws.*;
+
+@WebService
 public class MathServiceImpl implements MathService {
   /**
    * Adds two integers.

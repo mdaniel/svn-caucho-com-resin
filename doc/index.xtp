@@ -9,7 +9,7 @@
   </header>
 
   <body>
-    <summary/>
+    <summary skip-description="true"/>
 <!--
     <summary atoc="toplevel">
       <atoc-control>
