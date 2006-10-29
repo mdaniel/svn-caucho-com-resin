@@ -36,10 +36,10 @@ import java.lang.annotation.ElementType;
 /**
  * The Stateless annotation.
  */
-@Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Stateless {
   String name() default "";
-
-  TransactionManagementType transactionManagement()
-    default TransactionManagementType.CONTAINER;
+  String mappedName() default "";
+  String description() default "";
 }

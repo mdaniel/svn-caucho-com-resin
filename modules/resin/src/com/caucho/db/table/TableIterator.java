@@ -435,9 +435,9 @@ public class TableIterator {
   public void delete()
     throws SQLException
   {
-    setDirty();
-
     _table.delete(_transaction, _buffer, _rowOffset);
+    
+    setDirty();
   }
   
   public void setDirty()

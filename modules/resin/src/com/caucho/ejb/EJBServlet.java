@@ -217,7 +217,7 @@ public class EJBServlet extends GenericServlet {
 	}
 
         if (skeleton == null)
-          throw new ServletException(L.l("Can't load skeleton for `{0}?{1}'",
+          throw new ServletException(L.l("Can't load skeleton for '{0}?{1}'",
                                          pathInfo, queryString));
 
         if (skeleton != null) {

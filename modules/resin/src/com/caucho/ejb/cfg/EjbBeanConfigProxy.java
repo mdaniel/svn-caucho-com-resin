@@ -167,7 +167,7 @@ public class EjbBeanConfigProxy implements DependencyBean {
     _bean = getConfig().getBeanConfig(getEJBName());
 
     if (_bean == null) {
-      throw new ConfigException(L.l("bean  `{0}' has no primary definition.",
+      throw new ConfigException(L.l("bean '{0}' has no primary definition.",
 				    getEJBName()));
     }
 

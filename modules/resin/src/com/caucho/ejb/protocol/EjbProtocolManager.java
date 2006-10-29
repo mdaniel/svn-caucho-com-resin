@@ -360,6 +360,21 @@ public class EjbProtocolManager {
     
     return _serverMap.get(ejbName);
   }
+  
+  /**
+   * Returns the server specified by the serverId.
+   */
+  public AbstractServer getServerByJndiName(String jndiName)
+  {
+    for (AbstractServer server : _serverMap.values()) {
+      System.out.println("SERVER: " + server + " " + server.getJndiName() + " " + jndiName);
+      
+      if (jndiName.equals(server.getJndiName()))
+	return server;
+    }
+
+    return null;
+  }
 
   public Iterator getLocalNames()
   {

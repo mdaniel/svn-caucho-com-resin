@@ -153,6 +153,7 @@ public class EJBServer
     // to look up the persistence.xml and find the
     // persistence root.
     // See com.caucho.amber.manager.PersistenceEnvironmentListener
+    /*
     try {
       EnvironmentClassLoader envLoader = getClassLoader();
 
@@ -176,6 +177,7 @@ public class EJBServer
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
+    */
 
     // _entityIntrospector = new EntityIntrospector(_ejbManager);
 
@@ -618,7 +620,7 @@ public class EJBServer
    * Initialize the container.
    */
   @PostConstruct
-    public void init()
+  public void init()
     throws Exception
   {
     /*
@@ -630,8 +632,8 @@ public class EJBServer
       }
     */
 
-    if (_localServer.getLevel() == null ||
-        "java:comp/env/cmp".equals(_localJndiName)) {
+    if (_localServer.getLevel() == null
+	|| "java:comp/env/cmp".equals(_localJndiName)) {
       _localServer.set(this);
     }
 
@@ -641,9 +643,6 @@ public class EJBServer
                              _ejbManager.getAmberManager().getEntityManager());
       }
     } catch (NamingException e) {
-      log.log(Level.FINER, e.toString(), e);
-    } catch (UnsupportedClassVersionError e) {
-      // JDK 1.4 doesn't support entity manager
       log.log(Level.FINER, e.toString(), e);
     }
 

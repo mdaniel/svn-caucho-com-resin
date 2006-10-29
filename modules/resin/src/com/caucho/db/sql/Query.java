@@ -647,14 +647,12 @@ abstract public class Query {
 	}
 
 	// XXX: check to make sure others actually lock this properly
-	/*
-	if (! xa.isAutoCommit())
-	  xa.lockRead(row.getTable().getLock());
-	*/
+	//if (! xa.isAutoCommit())
+	//  xa.lockRead(row.getTable().getLock());
       }
 
-      return (initBlockRow(rowLength - 1, rows, queryContext) ||
-	      nextBlock(rowLength - 1, rows, rowLength, queryContext));
+      return (initBlockRow(rowLength - 1, rows, queryContext)
+	      || nextBlock(rowLength - 1, rows, rowLength, queryContext));
     } catch (IOException e) {
       throw new SQLExceptionWrapper(e);
     }
@@ -748,8 +746,8 @@ abstract public class Query {
       return false;
     }
 
-    while (expr != null && ! expr.isSelect(queryContext) ||
-	   i > 0 && ! initBlockRow(i - 1, rows, queryContext)) {
+    while (expr != null && ! expr.isSelect(queryContext)
+	   || i > 0 && ! initBlockRow(i - 1, rows, queryContext)) {
       if (! iterExpr.nextRow(queryContext, rowIter)) {
 	return false;
       }

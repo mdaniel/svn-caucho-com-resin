@@ -263,8 +263,6 @@ class BlobColumn extends Column {
 		  TableIterator iter, Expr expr, QueryContext context)
     throws SQLException
   {
-    iter.setDirty();
-
     byte []block = iter.getBuffer();
     int rowOffset = iter.getRowOffset();
 
@@ -274,6 +272,8 @@ class BlobColumn extends Column {
       setStream(xa, block, rowOffset, expr.evalStream(context));
     else
       setString(xa, block, rowOffset, expr.evalString(context));
+    
+    iter.setDirty();
   }
   
   /**

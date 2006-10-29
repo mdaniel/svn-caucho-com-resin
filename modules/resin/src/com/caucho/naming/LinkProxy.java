@@ -214,6 +214,7 @@ public class LinkProxy implements ObjectProxy, java.io.Serializable {
     if (factoryClass != null)
       _factory = (InitialContextFactory) factoryClass.newInstance();
 
+    System.out.println("LINK:" + _name + " " + _factoryClass);
     if (log.isLoggable(Level.CONFIG)) {
       if (_foreignName != null)
 	log.config("jndi-link[jndi-name=" + _name

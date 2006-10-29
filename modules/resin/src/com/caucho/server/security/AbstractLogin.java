@@ -108,7 +108,7 @@ public abstract class AbstractLogin {
       try {
         Context ic = new InitialContext();
         _auth = (ServletAuthenticator) ic.lookup("java:comp/env/caucho/auth");
-      } catch (Throwable e) {
+      } catch (Exception e) {
         log.log(Level.FINEST, e.toString(), e);
       }
 

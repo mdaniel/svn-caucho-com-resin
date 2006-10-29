@@ -30,6 +30,7 @@
 package com.caucho.config.types;
 
 import java.util.*;
+import java.util.logging.*;
 import java.rmi.*;
 
 import javax.annotation.*;
@@ -47,14 +48,26 @@ import com.caucho.ejb.protocol.*;
  */
 public class EjbRef implements ObjectProxy {
   private static final L10N L = new L10N(EjbRef.class);
+  private static final Logger log
+    = Logger.getLogger(EjbRef.class.getName());
 
   private String _name;
   private String _type;
   private Class _home;
   private Class _remote;
+
+  private Hashtable _jndiEnv;
   private String _link;
 
   public EjbRef()
+  {
+  }
+
+  public void setId(String id)
+  {
+  }
+
+  public void setDescription(String description)
   {
   }
   
@@ -107,14 +120,24 @@ public class EjbRef implements ObjectProxy {
     _link = link;
   }
 
+  public void putJndiEnv(String key, String value)
+  {
+    if (_jndiEnv == null)
+      _jndiEnv = new Hashtable();
+
+    _jndiEnv.put(key, value);
+  }
+
   @PostConstruct
   public void init()
     throws Exception
   {
-    
+    System.out.println("BINDING: " + _link + " " + _name);
+    log.warning("BINDING: " + _link + " " + _name);
     if (_link != null && ! _name.equals(_link))
       Jndi.bindDeepShort(_name, this);
   }
+  
   /**
    * Creates the object from the proxy.
    *
@@ -123,6 +146,10 @@ public class EjbRef implements ObjectProxy {
   public Object createObject(Hashtable env)
     throws NamingException
   {
+    if (_jndiEnv != null && _link != null) {
+      return new InitialContext(_jndiEnv).lookup(_link);
+    }
+    
     EJBServer server = EJBServer.getLocal();
 
     if (server != null) {

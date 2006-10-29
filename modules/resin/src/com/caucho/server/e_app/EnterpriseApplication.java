@@ -58,13 +58,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.MergePath;
-import com.caucho.vfs.Jar;
-import com.caucho.vfs.Depend;
+import com.caucho.vfs.*;
 
 import com.caucho.java.WorkDir;
 
@@ -135,6 +129,8 @@ public class EnterpriseApplication
   private ApplicationConfig _config;
 
   private WebAppContainer _container;
+
+  private boolean _hasModule;
 
   // private WarDirApplicationGenerator _warDeploy;
 
@@ -302,6 +298,8 @@ public class EnterpriseApplication
    */
   public Module createModule()
   {
+    _hasModule = true;
+    
     return new Module();
   }
 
@@ -378,8 +376,11 @@ public class EnterpriseApplication
       
     Vfs.setPwd(_rootDir, _loader);
 
+    // XXX: only if application is missing
+    fillDefaultModules();
+
     if (_ejbPaths.size() != 0) {
-      EJBServerInterface ejbServer = EJBServer.getLocal();
+      EJBServer ejbServer = EJBServer.getLocal();
 
       if (ejbServer == null)
 	throw new ConfigException(L.l("Expected configured <ejb-server> in " +
@@ -388,12 +389,46 @@ public class EnterpriseApplication
       for (Path path : _ejbPaths)
 	ejbServer.addEJBJar(path);
 
+      Path ejbJar = _rootDir.lookup("META-INF/ejb-jar.xml");
+      if (ejbJar.canRead()) {
+	ejbServer.addEJBDescriptor("META-INF/ejb-jar.xml");
+      }
+
       ejbServer.initEJBs();
     }
 
     // updates the invocation caches
     if (_container != null)
       _container.clearCache();
+  }
+
+  private void fillDefaultModules()
+  {
+    try {
+      for (String file : _rootDir.list()) {
+	if (file.endsWith(".jar")) {
+	  Path path = _rootDir.lookup(file);
+	  Path jar = JarPath.create(path);
+
+	  if (jar.lookup("META-INF/ejb-jar.xml").canRead()) {
+	    _ejbPaths.add(path);
+      
+	    _loader.addJar(path);
+	    _loader.addJarManifestClassPath(path);
+	  }
+	} else if (file.endsWith(".war")) {
+	  Module module = createModule();
+	  WebModule web = new WebModule();
+	  web.setWebURI(file);
+	  web.setContextRoot(file.substring(file.length() - 4));
+	  module.addWeb(web);
+	}
+      }
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
   }
 
   /**

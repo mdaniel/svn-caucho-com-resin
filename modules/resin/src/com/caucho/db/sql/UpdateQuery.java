@@ -119,7 +119,7 @@ class UpdateQuery extends Query {
 
 	  column.set(xa, iter, expr, context);
 
-	  xa.addUpdateBlock(iter.getBlock());
+	  iter.setDirty();
 	}
 
 	context.setRowUpdateCount(++count);

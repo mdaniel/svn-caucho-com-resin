@@ -494,10 +494,10 @@ abstract public class Column {
 		  TableIterator iter, Expr expr, QueryContext context)
     throws SQLException
   {
-    iter.setDirty();
-
     setString(xa, iter.getBuffer(), iter.getRowOffset(),
 	      expr.evalString(context));
+    
+    iter.setDirty();
   }
   
   /**

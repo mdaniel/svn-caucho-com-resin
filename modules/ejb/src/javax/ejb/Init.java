@@ -34,12 +34,10 @@ import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 
 /**
- * The Stateful annotation.
+ * The Init annotation.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Stateful {
-  String name() default "";
-  String mappedName() default "";
-  String description() default "";
+public @interface Init {
+  String value() default "";
 }

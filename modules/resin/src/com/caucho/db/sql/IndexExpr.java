@@ -97,7 +97,11 @@ class IndexExpr extends RowIterateExpr {
   {
     rowIter.init(context);
 
-    return initRow(context, rowIter);
+    // the Query will call initRow immediately after, so the following
+    // call isn't necessary
+    //return initRow(context, rowIter);
+    
+    return true;
   }
 
   /**

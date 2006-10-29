@@ -8,6 +8,35 @@
 
 <localtoc/>
 
+<s1 title="Servlet 2.5">
+
+<p>Resin 3.1 adds Servlet 2.5 support.  The Servlet 2.5 specification
+adds annotation-based injection to servlets, filters, and listeners.
+Servlets can now mark a field as a @Resource and Resin will assign
+the configured database, bean, or service to the field, avoiding the
+need for a JNDI lookup.
+</p>
+
+<example title="Database configuration">
+package example;
+
+import javax.annotation.Resource;
+import javax.servlet.*;
+import javax.sql.*;
+
+public class MyServlet extends GenericServlet {
+  @Resource(name="jdbc/mysql")
+  private DataSource _database;
+
+  public void service(ServletRequest req, ServletResponse res)
+  {
+     ...
+  }
+}
+</example>
+  
+
+</s1>
 <s1 title="Amber capabilities">
 
 <p>With Resin 3.1, the JPA features have been reviewed.

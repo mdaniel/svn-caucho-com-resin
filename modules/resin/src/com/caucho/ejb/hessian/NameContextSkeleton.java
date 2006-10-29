@@ -106,7 +106,12 @@ public class NameContextSkeleton extends Skeleton {
 
     EjbProtocolManager container = _protocol.getProtocolManager();
     
-    AbstractServer server = container.getServerByEJBName(name);
+    AbstractServer server;
+
+    server = container.getServerByJndiName(name);
+
+    if (server == null)
+      server = container.getServerByEJBName(name);
 
     if (server != null) {
       EJBHome home = server.getEJBHome();

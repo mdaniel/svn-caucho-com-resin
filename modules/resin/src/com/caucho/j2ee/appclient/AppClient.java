@@ -54,11 +54,13 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
 import java.lang.reflect.Method;
+
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
-public class AppClient
-  implements EnvironmentBean
+import javax.naming.*;
+
+public class AppClient implements EnvironmentBean
 {
   private static L10N L = new L10N(AppClient.class);
   private static Logger log = Logger.getLogger(AppClient.class.getName());
@@ -72,6 +74,9 @@ public class AppClient
   private Method _mainMethod;
   private String[] _mainArgs = new String[] {};
   private ArrayList<EjbRef> _ejbRefs = new ArrayList<EjbRef>();
+
+  private Class _jndiRemoteFactory;
+  private String _jndiRemoteUrl;
 
   private AppClient()
   {
@@ -95,6 +100,16 @@ public class AppClient
   {
   }
 
+  public void setJndiRemoteFactory(Class factory)
+  {
+    _jndiRemoteFactory = factory;
+  }
+
+  public void setJndiRemoteUrl(String url)
+  {
+    _jndiRemoteUrl = url;
+  }
+
   private void addConfig(Path path)
     throws Exception
   {
@@ -116,9 +131,20 @@ public class AppClient
     _mainArgs = mainArgs;
   }
 
-  public void addEjbRef(EjbRef ejbRef)
+  public EjbRef createEjbRef()
   {
-    _ejbRefs.add(ejbRef);
+    EjbRef ref = new EjbRef();
+
+    if (_jndiRemoteFactory != null)
+      ref.putJndiEnv(Context.INITIAL_CONTEXT_FACTORY,
+		     _jndiRemoteFactory.getName());
+
+    if (_jndiRemoteUrl != null)
+      ref.putJndiEnv(Context.PROVIDER_URL, _jndiRemoteUrl);
+    
+    _ejbRefs.add(ref);
+
+    return ref;
   }
 
   public void setSchemaLocation(String schemaLocation)
@@ -143,7 +169,7 @@ public class AppClient
       return;
 
     if (_clientJar == null)
-      throw new ConfigException(L.l("`{0}' is required", "client-jar"));
+      throw new ConfigException(L.l("'{0}' is required", "client-jar"));
 
     _loader.setId(toString());
     _loader.addJar(_clientJar);
@@ -162,7 +188,7 @@ public class AppClient
         new Config().configureBean(this, xml, "com/caucho/server/e_app/app-client.rnc");
 
       if (_mainClassName == null)
-        throw new ConfigException(L.l("`{0}' is required", "main-class"));
+        throw new ConfigException(L.l("'main-class' is required"));
 
       Class<?> mainClass = Class.forName(_mainClassName, false, _loader);
       _mainMethod = mainClass.getMethod("main", String[].class);
@@ -225,7 +251,7 @@ public class AppClient
         break;
       }
       else
-        throw new ConfigException(L.l("unknown arg `{0}'", args[i]));
+        throw new ConfigException(L.l("unknown arg '{0}'", args[i]));
     }
 
     AppClient appClient = new AppClient();
@@ -243,8 +269,6 @@ public class AppClient
       appClient.setMainArgs(mainArgs);
 
     appClient.run();
-
   }
-
 }
 

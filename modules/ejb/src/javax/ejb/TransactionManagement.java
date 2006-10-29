@@ -34,12 +34,10 @@ import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 
 /**
- * The Stateful annotation.
+ * The TransactionManagement type for local interfaces.
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Stateful {
-  String name() default "";
-  String mappedName() default "";
-  String description() default "";
+@Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME)
+public @interface TransactionManagement {
+  TransactionManagementType value()
+    default TransactionManagementType.CONTAINER;
 }

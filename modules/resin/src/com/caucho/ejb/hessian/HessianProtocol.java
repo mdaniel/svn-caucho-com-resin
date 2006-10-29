@@ -52,8 +52,9 @@ import com.caucho.ejb.message.MessageServer;
  *
  * <p>Each protocol will extend the container to override Handle creation.
  */
-public class HessianProtocol extends ProtocolContainer {
-  static L10N L = new L10N(HessianProtocol.class);
+public class HessianProtocol extends ProtocolContainer
+{
+  private static final L10N L = new L10N(HessianProtocol.class);
   
   private Class _objectSkelClass; 
   private Class _homeSkelClass;
@@ -118,7 +119,12 @@ public class HessianProtocol extends ProtocolContainer {
     if (serverId.equals("/_ejb_xa_resource"))
       return new XAResourceSkeleton(getProtocolManager().getServerManager().getTransactionManager());
 
-    AbstractServer server = getProtocolManager().getServerByEJBName(serverId);
+    AbstractServer server;
+
+    server = getProtocolManager().getServerByJndiName(serverId);
+
+    if (server == null)
+      server = getProtocolManager().getServerByEJBName(serverId);
 
     if (server == null) {
       ArrayList children = getProtocolManager().getRemoteChildren(serverId);

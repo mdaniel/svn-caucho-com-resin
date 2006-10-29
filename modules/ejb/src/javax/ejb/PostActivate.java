@@ -34,12 +34,9 @@ import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 
 /**
- * The Stateful annotation.
+ * The @PostActivate annotation.
  */
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE,ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Stateful {
-  String name() default "";
-  String mappedName() default "";
-  String description() default "";
+public @interface PostActivate {
 }

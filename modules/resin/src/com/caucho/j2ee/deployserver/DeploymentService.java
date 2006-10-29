@@ -156,37 +156,6 @@ public class DeploymentService
       return exception.toString();
   }
 
-  private void describe(StringBuilder builder,
-                        TargetModuleID targetModuleID,
-                        boolean success)
-  {
-    describe(builder, targetModuleID, success, null);
-  }
-
-  private void describe(StringBuilder builder,
-                        TargetModuleID targetModuleID,
-                        boolean success,
-                        String message)
-  {
-    if (builder.length() > 0)
-      builder.append(", ");
-
-    if (success)
-      builder.append(L.l("successful for target {0} module {1}",
-                         targetModuleID.getTarget().getName(),
-                         targetModuleID.getModuleID()));
-    else
-      builder.append(L.l("failed for target {0} module {1}",
-                         targetModuleID.getTarget().getName(),
-                         targetModuleID.getModuleID()));
-
-    if (message != null) {
-      builder.append(" `");
-      builder.append(message);
-      builder.append("'");
-    }
-  }
-
   public ProgressObject distribute(TargetImpl []targets,
                                    InputStream archiveIs,
                                    DeploymentPlan plan)
@@ -219,6 +188,16 @@ public class DeploymentService
       try {
         mxbean = getMXBean(targetModuleID.getTarget());
 
+	if ("ear".equals(plan.getArchiveType())
+	    && ! "EarDeploy".equals(mxbean.getType()))
+	  continue;
+	else if ("war".equals(plan.getArchiveType())
+		 && ! "WebAppDeploy".equals(mxbean.getType()))
+	  continue;
+	else if ("rar".equals(plan.getArchiveType())
+		 && ! "RarDeploy".equals(mxbean.getType()))
+	  continue;
+
         Path deployPath = Vfs.lookup(mxbean.getArchivePath(moduleID));
 
         deployPath.getParent().mkdirs();
@@ -242,17 +221,18 @@ public class DeploymentService
 
         exception = mxbean.getConfigException(moduleID);
       }
-      catch (Throwable t) {
+      catch (Exception e) {
         if (log.isLoggable(Level.INFO))
-          log.log(Level.INFO, t.toString(), t);
+          log.log(Level.INFO, e.toString(), e);
 
-        exception = t;
+        exception = e;
       }
 
       if (exception != null) {
         failed = true;
         describe(message, targetModuleID, false, getExceptionMessage(exception));
 
+	/*
         if (mxbean != null) {
           try {
             mxbean.undeploy(moduleID);
@@ -261,6 +241,7 @@ public class DeploymentService
             log.log(Level.FINE, t.toString(), t);
           }
         }
+	*/
       }
       else
         describe(message, targetModuleID, true);
@@ -404,13 +385,17 @@ public class DeploymentService
         mxbean = getMXBean(targetModuleID.getTarget());
         mxbean.start(targetModuleID.getModuleID());
       }
-      catch (Throwable t) {
+      catch (Exception t) {
         log.log(Level.INFO, t.toString(), t);
-        exception = t;
+	// XXX: need to handle depending on type
+        //exception = t;
       }
 
-      if (exception == null && mxbean != null)
+      if (exception == null && mxbean != null) {
         exception = mxbean.getConfigException(targetModuleID.getModuleID());
+	// XXX: temp for types
+	exception = null;
+      }
 
       if (exception != null) {
         failed  = true;
@@ -446,7 +431,7 @@ public class DeploymentService
         mxbean = getMXBean(targetModuleID.getTarget());
         mxbean.stop(targetModuleID.getModuleID());
       }
-      catch (Throwable t) {
+      catch (Exception t) {
         log.log(Level.INFO, t.toString(), t);
         exception = t;
       }
@@ -505,5 +490,38 @@ public class DeploymentService
       progress.completed(L.l("undeploy {0}", message));
 
     return progress;
+  }
+
+  private void describe(StringBuilder builder,
+                        TargetModuleID targetModuleID,
+                        boolean success)
+  {
+    describe(builder, targetModuleID, success, null);
+  }
+
+  private void describe(StringBuilder builder,
+                        TargetModuleID targetModuleID,
+                        boolean success,
+                        String message)
+  {
+    if (builder.length() > 0)
+      builder.append(", ");
+
+    if (success)
+      builder.append(L.l("successful for target {0} module {1}",
+                         targetModuleID.getTarget().getName(),
+                         targetModuleID.getModuleID()));
+    else {
+      Thread.dumpStack();
+      builder.append(L.l("failed for target {0} module {1}",
+                         targetModuleID.getTarget().getName(),
+                         targetModuleID.getModuleID()));
+    }
+
+    if (message != null) {
+      builder.append(" '");
+      builder.append(message);
+      builder.append("'");
+    }
   }
 }

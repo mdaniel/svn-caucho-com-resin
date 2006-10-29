@@ -35,13 +35,19 @@ in the JNDI resource map.  The servlet will retrieve the
 
 <s1 title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
-    </td><td>resin-web.xml configuration
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/BasicServlet.java"/>
-    </td><td>The JDBC query servlet.
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/InitServlet.java"/>
-    </td><td>The JDBC initialization servlet.
-</td></tr></deftable>
+<tr>
+  <td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
+  <td>resin-web.xml configuration</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/BasicServlet.java"/></td>
+  <td>The JDBC query servlet.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/InitServlet.java"/></td>
+  <td>The JDBC initialization servlet.</td>
+</tr>
+</deftable>
 </s1>
 
 <s1 title="Database Schema">
@@ -87,20 +93,22 @@ following order, after checking your database vendor's recommendations:</p>
 <ol>
 <li>JCA - Java Connection Architecture - this is a common driver
 interface for more than just JDBC.  If possible, it's generally the
-best to choose.
-</li><li>ConnectionPoolDataSource - JDBC driver which has extra hooks to
-help Resin pool the connections.
-</li><li>Driver - old-style JDBC driver.  Its main benefit is that it's
-generally always available as a fallback.
-</li></ol>
+best to choose.</li>
+<li>ConnectionPoolDataSource - JDBC driver which has extra hooks to
+help Resin pool the connections.</li>
+<li>Driver - old-style JDBC driver.  Its main benefit is that it's
+generally always available as a fallback.</li>
+</ol>
 
 <example>
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+
   &lt;database jndi-name="jdbc/basic"&gt;
     &lt;driver type="com.caucho.db.jca.ConnectionFactory"&gt;
       &lt;url&gt;resin:WEB-INF/db&lt;/url&gt;
     &lt;/driver&gt;
   &lt;/database&gt;
+
 &lt;/web-app&gt;
 </example>
 
@@ -135,48 +143,21 @@ The <code>DataSource</code> is thread-safe, so it
 can be used simultaneously by any of the requesting threads.</p>
 
 <example>
+import javax.annotation.Resource;
+
 public class BasicServlet extends HttpServlet {
+  @Resource(name="jdbc/basic")
   private DataSource _ds;
-
-  public void setDataSource(DataSource ds)
-  {
-    _ds = ds;
-  }
-
-  public void init()
-    throws IOException, ServletException
-  {
-    if (_ds == null)
-      assemble();
-  }
-
-  private void assemble()
-    throws ServletException
-  {
-    try {
-      String name = getInitParameter("data-source");
-
-      Context ic = new InitialContext();
-
-      _ds = (DataSource) ic.lookup("java:comp/env/" + name);
-    } catch (Exception e) {
-      throw new ServletException(e);
-    }
 
   ...
 }
 </example>
-
-<p>The servlet checks see if the DataSource is
-already configured.  If not, the <code>assemble()</code> method
-configures the DataSource itself using JNDI.</p>
 
 <s2 title="Standard configuration">
 
 <example title="resin-web.xml">
 &lt;servlet servlet-name="my-servlet"
          servlet-class="example.BasicServlet"&gt;
-  &lt;init-param data-source="java:comp/env/jdbc/basic"/&gt;
 &lt;/servlet&gt;
 </example>
 
@@ -209,43 +190,52 @@ simplifies the <code>doQuery</code> method, so it can concentrate
 on the database access.</p>
 
 <example>
-public void service(HttpServletRequest req, HttpServletResponse res)
-  throws java.io.IOException, ServletException
-{
-  PrintWriter out = res.getWriter();
+package example;
 
-  try {
-    doQuery(out);
-  } catch (SQLException e) {
-    throw new ServletException(e);
-  }
-}
+public class BasicServlet extends HttpServlet {
+  @Resource(name="jdbc/basic")
+  private DataSource _ds;
 
-private void doQuery(PrintWriter out)
-  throws IOException, SQLException
-{
-  Connection conn = _ds.getConnection();
+  public void service(HttpServletRequest req,
+                      HttpServletResponse res)
+    throws java.io.IOException, ServletException
+  {
+    PrintWriter out = res.getWriter();
 
-  try {
-    String sql = "SELECT name, cost FROM jdbc_basic_brooms ORDER BY cost DESC";
-      
-    Statement stmt = conn.createStatement();
-
-    ResultSet rs = stmt.executeQuery(sql);
-
-    out.println("&lt;table border='3'&gt;");
-      
-    while (rs.next()) {
-      out.println("&lt;tr&gt;&lt;td&gt;" + rs.getString(1));
-      out.println("    &lt;td&gt;" + rs.getString(2));
+    try {
+      doQuery(out);
+    } catch (SQLException e) {
+      throw new ServletException(e);
     }
+  }
 
-    out.println("&lt;/table&gt;");
+  private void doQuery(PrintWriter out)
+    throws IOException, SQLException
+  {
+    Connection conn = _ds.getConnection();
+
+    try {
+      String sql = "SELECT name, cost FROM jdbc_basic_brooms"
+                   + " ORDER BY cost DESC";
       
-    rs.close();
-    stmt.close();
-  } finally {
-    conn.close();
+      Statement stmt = conn.createStatement();
+
+      ResultSet rs = stmt.executeQuery(sql);
+
+      out.println("&lt;table border='3'&gt;");
+      
+      while (rs.next()) {
+        out.println("&lt;tr&gt;&lt;td&gt;" + rs.getString(1));
+        out.println("    &lt;td&gt;" + rs.getString(2));
+      }
+
+      out.println("&lt;/table&gt;");
+      
+      rs.close();
+      stmt.close();
+    } finally {
+      conn.close();
+    }
   }
 }
 </example>
@@ -255,11 +245,11 @@ private void doQuery(PrintWriter out)
 <s1 title="See also">
 
 <ul>
-<li><a href="db|config">Database configuration</a> reference
-</li><li><a href="db|thirdparty">Sample configurations</a> for several database drivers
-</li><li>Using <a href="doc|db|tutorial/jdbc-ioc/index.xtp">Dependency Injection for Databases</a>
-</li><li>The <a href="doc|resource|tutorial/injection/index.xtp">Dependency Injection</a> (or Assembly Line) pattern.
-</li></ul>
+<li><a href="doc|database-tags.xtp">Database configuration</a> reference</li>
+<li><a href="doc|db-thirdparty.xtp">Sample configurations</a> for several database drivers</li>
+<li>Using <a href="tutorial|db-jdbc-ioc/index.xtp">Dependency Injection for Databases</a></li>
+<li>The <a href="tutorial|ioc-injection/index.xtp">Dependency Injection</a> (or Assembly Line) pattern.</li>
+</ul>
 
 </s1>
 
