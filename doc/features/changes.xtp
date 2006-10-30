@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - Sep 7, 2006'>
 <ul>
+<li>mod_caucho updates to avoid extra dispatch requests (rep by Steve Baugus)</li>
 <li>jsp:useBean in tag file was using unavailable objects (#1389, rep by Matthew Schmidt)</li>
 <li>JSP tag file adds attributes as java variables (#1389, rep by Matthew Schmidt)</li>
 <li>session persistence requires original request (rep by Takahiro Fukuda)</li>
