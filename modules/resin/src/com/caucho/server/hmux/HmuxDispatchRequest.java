@@ -270,6 +270,8 @@ public class HmuxDispatchRequest {
     boolean isLoggable = log.isLoggable(Level.FINE);
     
     long crc64 = 0;
+
+    crc64 = Crc64.generate(crc64, com.caucho.Version.FULL_VERSION);
     
     queryServer(os);
     

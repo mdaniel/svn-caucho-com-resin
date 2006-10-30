@@ -16,6 +16,58 @@ and reliability features.</p>
 
 <localtoc/>
 
+<s1 name="about" title="About Caucho">
+
+<p>Caucho Technology, Inc. (www.caucho.com) was founded
+in 1998 as an engineering shop devoted to open source
+and high performance Java. We choose to avoid
+venture capital so we can have full control of our
+software without the pressure to sell the company or
+conform to large and inefficient software development
+models.</p>
+
+<p>We have stayed true to our roots. Almost a decade
+since our inception, Caucho has become globally
+recognized leader in open source Java-PHP server
+technology that delivers fast and stable performance.
+Resin is the application server of choice for over
+6,000 organizations including Fortune 500, innovative
+startups, government and educational institutions
+needing reliable and fast Java-PHP solutions. </p>
+
+<p>We love performance and elegant code.</p>
+
+<p>Check out Quercus, our Java implementation of PHP 5
+that has been benchmarked at four to six times faster
+than mod_php. Since Quercus is included with Resin,
+you can run all your applications - web server, Java,
+PHP - within one open source software product that has
+rock solid stability, is fast and easy to configure. </p>
+
+<p>More than five years ago, we introduced Hessian, an
+open source binary web services protocol that is being
+used in hundreds of applications including mobile
+communications and gaming today. </p>
+
+<p>We have a great team of developers based primarily in San
+Francisco with some developers in Canada and Brazil.  We
+are always looking for bytecode wizards to join our
+team and work on performance, compilers and
+well-organized code.</p>
+
+<p>While we're known as an engineering shop, Caucho's
+sales, training and professional services and 100
+resellers support our customers worldwide. Hundreds of
+large-scale government and corporate deployments are
+run on Resin including CNet, Kodak, Salesforce and
+Japan's largest online gaming portal that take
+advantage Resin features including open source, early
+adoption of Java specifications, PHP, JNI performance
+enhancements and JDBC. Caucho is a Sun Microsystems
+Java licensee.</p>
+
+</s1>
+
 <s1 name="resinpro" title="Resin Professional">
 <p>
 Resin is provided in two versions, Resin Professional and Resin Open Source.

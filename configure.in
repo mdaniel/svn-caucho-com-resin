@@ -153,6 +153,10 @@ if test "${apache_dir}" = "yes"; then
   apache_dir=/usr/local/apache
 fi
 
+if test ! -d "${apache_dir}; then
+  AC_MSG_ERROR([--with-apache=${apache_dir} is not a valid Apache directory])
+fi   
+
 apache=1
 ])
 

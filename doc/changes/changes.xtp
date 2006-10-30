@@ -12,6 +12,7 @@
 
 <s2 title="3.1snap - Oct 6, 2006">
 <ul>
+<li>mod_caucho updates to avoid extra dispatch requests (rep by Steve Baugus)</li>
 <li>Amber now throws correct exceptions for non-entity arguments (#1380, rep by ferg)</li>
 <li>JSP: BeanELResolver needs to check for null getter (rep by Matthew Schmidt)</li>
 <li>Log rotation now buffers during archiving</li>

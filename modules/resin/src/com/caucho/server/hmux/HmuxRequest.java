@@ -144,7 +144,7 @@ public class HmuxRequest extends AbstractHttpRequest
   public static final int HMUX_STRING =         'S';
   public static final int HMUX_HEADER =         'H';
   public static final int HMUX_PROTOCOL =       'P';
-
+  
   // The following are HTTP codes
   public static final int CSE_NULL =            '?';
   public static final int CSE_PATH_INFO =       'b';
