@@ -74,7 +74,7 @@ typedef struct srun_t {
   void *lock;                /* lock specific to the srun            */
   
   int is_dead;               /* true if the connect() failed         */
-  time_t fail_time;    /* when the last connect() failed       */
+  time_t fail_time;          /* when the last connect() failed       */
 
   void *ssl;                 /* ssl context                          */
   int (*open) (stream_t *);
@@ -215,8 +215,10 @@ typedef struct config_t {
 
   /* how often to check for updates */
   int update_interval;
+  /* time of the last update from a resin server */
   time_t last_update;
   time_t last_file_update;
+  /* time the server started */
   time_t start_time;
   int update_count;
 } config_t;

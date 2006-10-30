@@ -983,7 +983,9 @@ cse_update_host_from_resin(resin_host_t *host, time_t now)
     else
       cse_close(&s, "close");
 
-    if (is_change > 0 || host->config->update_interval >= AUTO_WRITE_TIME) {
+    if (is_change > 0
+	|| host->last_file_update < host->start_time 
+	|| host->config->update_interval >= AUTO_WRITE_TIME) {
       write_config(host->config);
     }
 
@@ -1090,9 +1092,11 @@ static void
 cse_update_host(config_t *config, resin_host_t *host, time_t now)
 {
   struct stat st;
-  
-  if (now < host->last_update + config->update_interval)
+
+  if (now < host->last_update + config->update_interval) {
+    /* If current value is still valid, return */
     return;
+  }
 
   if (config->config_path && stat(config->config_path, &st) == 0) {
     if (config->last_file_update < st.st_mtime) {
@@ -1100,8 +1104,14 @@ cse_update_host(config_t *config, resin_host_t *host, time_t now)
       read_all_config_impl(config);
     }
 
-    if (now < host->last_update + config->update_interval)
+    if (now < host->last_update + config->update_interval
+	&& config->start_time < config->last_file_update) {
+      /*
+       * If the cached value is still valid and Resin has been checked
+       * at least once since startup, use the cached value.
+       */
       return;
+    }
   }
   
   LOG(("%s:%d:cse_update_host(): %s:%d(%p) old:%d now:%d()\n",
