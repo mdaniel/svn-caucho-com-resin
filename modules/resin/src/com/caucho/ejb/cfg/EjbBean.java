@@ -343,9 +343,14 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   public Class getEJBClass()
   {
     try {
+      if (_ejbClass == null)
+	return null;
+      
       return Class.forName(_ejbClass.getName(), false, getClassLoader());
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new ConfigException(e);
     }
   }
 

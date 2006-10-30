@@ -75,9 +75,12 @@ public class StatelessServer extends AbstractServer {
   /**
    * Initialize the server
    */
+  @Override
   public void init()
     throws Exception
   {
+    super.init();
+    
     try {
       _localHome = getStatelessContext().createLocalHome();
       _remoteHomeView = getStatelessContext().createRemoteHomeView();

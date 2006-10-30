@@ -42,5 +42,5 @@ public interface ByteCodeClassMatcher {
   /**
    * Returns true if the annotation class is a match.
    */
-  public boolean isMatch(CharBuffer className); 
+  public boolean isMatch(CharBuffer annotationClassName); 
 }

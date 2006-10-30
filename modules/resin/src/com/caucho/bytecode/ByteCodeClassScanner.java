@@ -120,7 +120,7 @@ public class ByteCodeClassScanner {
       }
 
       return false;
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.warning("failed scanning class " + _className);
       log.log(Level.WARNING, e.toString(), e);
 
@@ -345,20 +345,8 @@ public class ByteCodeClassScanner {
       int n = readShort();
 
       for (int i = 0; i < n; i++) {
-	int type = readShort();
-
-	name = parseUTF8(type, 1);
-	name.setLength(name.length() - 1);
-
-	if (_matcher.isMatch(name))
+	if (parseAttributeImpl())
 	  return true;
-      
-	int nPairs = readShort();
-	for (int j = 0; j < nPairs; j++) {
-	  int valueName = readShort();
-	  
-	  parseElementValue();
-	}
       }
     }
     
@@ -383,6 +371,29 @@ public class ByteCodeClassScanner {
     
   }
 
+  /**
+   * Parses an attribute.
+   */
+  private boolean parseAttributeImpl()
+  {
+    int type = readShort();
+
+    CharBuffer name = name = parseUTF8(type, 1);
+    name.setLength(name.length() - 1);
+
+    if (_matcher.isMatch(name))
+      return true;
+      
+    int nPairs = readShort();
+    for (int j = 0; j < nPairs; j++) {
+      int valueName = readShort();
+	  
+      parseElementValue();
+    }
+
+    return false;
+  }
+
   private void parseElementValue()
   {
     int tag = read();
@@ -397,9 +408,19 @@ public class ByteCodeClassScanner {
     case 'c':
       _index += 2;
       break;
+    case 'Z':
+    case 'B':
+    case 'S':
+    case 'I':
+    case 'J':
+    case 'C':
+    case 'F':
+    case 'D':
+      _index += 2;
+      break;
     case '@':
       // read annotation value
-      if (true) throw new IllegalStateException();
+      parseAttributeImpl();
       break;
     case '[':
       {
@@ -409,6 +430,7 @@ public class ByteCodeClassScanner {
       }
       break;
     default:
+      System.out.println("UNKNOWN: " + (char) tag);
       throw new IllegalStateException();
     }
   }

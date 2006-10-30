@@ -76,7 +76,8 @@ import java.util.logging.Logger;
  */
 public class EJBServer
   implements ObjectProxy, EnvironmentListener, EJBServerInterface,
-             EnvironmentBean {
+             EnvironmentBean
+{
   static final L10N L = new L10N(EJBServer.class);
   protected static final Logger log = Log.open(EJBServer.class);
 
@@ -368,7 +369,7 @@ public class EJBServer
    */
   public Bean createBean()
   {
-    return new Bean(_ejbManager, _entityIntrospector);
+    return new Bean(_ejbManager);
   }
 
   /**

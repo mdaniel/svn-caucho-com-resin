@@ -29,10 +29,18 @@
 
 package com.caucho.ejb;
 
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import java.util.zip.*;
+
+import javax.jms.ConnectionFactory;
+import javax.sql.DataSource;
+
 import com.caucho.amber.entity.AmberEntityHome;
 import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.bytecode.JClassLoader;
+import com.caucho.bytecode.*;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.FileSetType;
 import com.caucho.ejb.admin.EJBAdmin;
@@ -40,6 +48,7 @@ import com.caucho.ejb.cfg.EjbConfig;
 import com.caucho.ejb.entity.EntityKey;
 import com.caucho.ejb.entity.EntityServer;
 import com.caucho.ejb.entity.QEntityContext;
+import com.caucho.ejb.metadata.Bean;
 import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.ejb.xa.EjbTransactionManager;
 import com.caucho.lifecycle.Lifecycle;
@@ -47,24 +56,15 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.management.j2ee.EJBModule;
 import com.caucho.management.j2ee.J2EEManagedObject;
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
-import com.caucho.vfs.JarPath;
-import com.caucho.vfs.Path;
-
-import javax.jms.ConnectionFactory;
-import javax.sql.DataSource;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
 
 /**
  * Manages the EJBs.
  */
-public class EjbServerManager implements EJBServerInterface, EnvironmentListener {
+public class EjbServerManager
+  implements EJBServerInterface, EnvironmentListener
+{
   private static final L10N L = new L10N(EjbServerManager.class);
   protected static final Logger log = Log.open(EjbServerManager.class);
 
@@ -476,15 +476,19 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
     else
       jar = JarPath.create(path);
 
+    introspectJar(jar.getContainer());
+
     Path descriptorPath = jar.lookup("META-INF/ejb-jar.xml");
 
-    if (descriptorPath.exists())
+    if (descriptorPath.exists()) {
       addEJBPath(path, descriptorPath);
+    }
     
     descriptorPath = jar.lookup("META-INF/resin-ejb-jar.xml");
 
-    if (descriptorPath.exists())
+    if (descriptorPath.exists()) {
       addEJBPath(path, descriptorPath);
+    }
 
     Path metaInf = jar.lookup("META-INF");
     if (metaInf.isDirectory()) {
@@ -497,6 +501,72 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
 	  addEJBPath(path, metaPath);
 	}
       }
+    }
+  }
+
+  private void introspectJar(Path path)
+  {
+    try {
+      InputStream is = path.openRead();
+      
+      try {
+	ZipInputStream zipIs = new ZipInputStream(is);
+
+	ZipEntry entry;
+	TempBuffer tbuf = TempBuffer.allocate();
+	byte []buffer = tbuf.getBuffer();
+	
+	while ((entry = zipIs.getNextEntry()) != null) {
+	  String classFileName = entry.getName();
+	  
+	  if (! classFileName.endsWith(".class"))
+	    continue;
+
+	  String className
+	    = classFileName.substring(0, classFileName.length() - 6);
+	  className = className.replace('/', '.');
+
+	  ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+	  int size = 0;
+	  int sublen;
+
+	  while ((sublen = zipIs.read(buffer, 0, buffer.length)) > 0) {
+	    bos.write(buffer, 0, sublen);
+
+	    size += size;
+	  }
+
+	  bos.close();
+
+	  byte []classBytes = bos.toByteArray();
+	  ByteCodeClassMatcher matcher = new EjbClassMatcher();
+	  ByteCodeClassScanner scanner
+	    = new ByteCodeClassScanner(className,
+				       classBytes, 0, classBytes.length,
+				       matcher);
+
+	  if (scanner.scan()) {
+	    try {
+	      Bean bean = new Bean(this);
+
+	      bean.setType(className);
+
+	      bean.init();
+	    } catch (ConfigException e) {
+	      throw e;
+	    } catch (Exception e) {
+	      throw new ConfigException(e);
+	    }
+	  }
+	}
+
+	zipIs.close();
+      } finally {
+	is.close();
+      }
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
     }
   }
 
@@ -688,6 +758,25 @@ public class EjbServerManager implements EJBServerInterface, EnvironmentListener
       envServerManager.destroy();
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
+    }
+  }
+
+  class EjbClassMatcher implements ByteCodeClassMatcher {
+    public boolean isClassMatch(String className)
+    {
+      return false;
+    }
+  
+    public boolean isMatch(CharBuffer annotationName)
+    {
+      if (annotationName.matches("javax.ejb.Stateless"))
+	return true;
+      else if (annotationName.matches("javax.ejb.Stateful"))
+	return true;
+      else if (annotationName.matches("javax.ejb.Session"))
+	return true;
+      else
+	return false;
     }
   }
 

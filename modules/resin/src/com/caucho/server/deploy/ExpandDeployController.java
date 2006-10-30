@@ -156,6 +156,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   /**
    * Merges with the old controller.
    */
+  @Override
   protected void mergeController(DeployController oldControllerV)
   {
     super.mergeController(oldControllerV);

@@ -405,22 +405,42 @@ public class EnterpriseApplication
   private void fillDefaultModules()
   {
     try {
+      if (_rootDir.lookup("lib").isDirectory()) {
+	Path lib = _rootDir.lookup("lib");
+	
+	for (String file : lib.list()) {
+	  if (file.endsWith(".jar")) {
+	    _loader.addJar(lib.lookup(file));
+	  }
+	}
+      }
+      
       for (String file : _rootDir.list()) {
 	if (file.endsWith(".jar")) {
 	  Path path = _rootDir.lookup(file);
 	  Path jar = JarPath.create(path);
 
-	  if (jar.lookup("META-INF/ejb-jar.xml").canRead()) {
+	  if (jar.lookup("META-INF/application-client.xml").canRead()) {
+	    // app-client jar
+	  }
+	  else if (jar.lookup("META-INF/ejb-jar.xml").canRead()) {
 	    _ejbPaths.add(path);
       
 	    _loader.addJar(path);
 	    _loader.addJarManifestClassPath(path);
 	  }
-	} else if (file.endsWith(".war")) {
+	  else {
+	    _ejbPaths.add(path);
+      
+	    _loader.addJar(path);
+	  }
+	}
+	else if (file.endsWith(".war")) {
 	  Module module = createModule();
 	  WebModule web = new WebModule();
 	  web.setWebURI(file);
-	  web.setContextRoot(file.substring(file.length() - 4));
+	  web.setContextRoot(file.substring(0, file.length() - 4));
+	  
 	  module.addWeb(web);
 	}
       }

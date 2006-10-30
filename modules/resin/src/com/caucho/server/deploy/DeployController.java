@@ -137,6 +137,7 @@ abstract public class DeployController<I extends DeployInstance>
    */
   protected void mergeController(DeployController newController)
   {
+    newController._parentLoader = _parentLoader;
   }
 
   /**

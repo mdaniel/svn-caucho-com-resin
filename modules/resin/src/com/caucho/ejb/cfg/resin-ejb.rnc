@@ -4,7 +4,7 @@ namespace l = ""
 include "ejb-jar.rnc"
 include "../../server/resin/env.rnc"
 
-start = ejb-jar | r_ejb-jar | l_ejb-jar | l_resin-ejb
+start = ejb14_ejb-jar | ejb15_ejb-jar | r_ejb-jar | l_ejb-jar | l_resin-ejb
 
 r_boolean = string
 
@@ -366,7 +366,7 @@ r_message-destination-ref = element message-destination-ref {
   (attribute message-destination-link { string }
   | element message-destination-link { string }?),
 
-  deployment-extension*
+  r_deployment-extension*
 }
 
 r_message-destination-type = element message-destination-type { string }

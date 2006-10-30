@@ -70,10 +70,13 @@ abstract public class AbstractSessionServer extends AbstractServer {
   /**
    * Initialize the server
    */
+  @Override
   public void init()
     throws Exception
   {
     try {
+      super.init();
+      
       //generate();
 
       /*

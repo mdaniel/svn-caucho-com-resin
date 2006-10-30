@@ -78,6 +78,7 @@ public class SessionServer extends AbstractServer {
   /**
    * Initialize the server
    */
+  @Override
   public void init()
     throws Exception
   {

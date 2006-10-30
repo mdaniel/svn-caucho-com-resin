@@ -92,10 +92,10 @@ public class EjbSessionBean extends EjbBean {
     super.setEJBClass(ejbClass);
 
     if (Modifier.isAbstract(ejbClass.getModifiers()))
-      throw error(L.l("`{0}' must not be abstract.  Session bean implementations must be fully implemented.", ejbClass.getName()));
+      throw error(L.l("'{0}' must not be abstract.  Session bean implementations must be fully implemented.", ejbClass.getName()));
 
     if (! SessionBean.class.isAssignableFrom(ejbClass) && ! isAllowPOJO())
-      throw error(L.l("`{0}' must implement SessionBean.  Session beans must implement javax.ejb.SessionBean.", ejbClass.getName()));
+      throw error(L.l("'{0}' must implement SessionBean.  Session beans must implement javax.ejb.SessionBean.", ejbClass.getName()));
 
   }
 
@@ -118,7 +118,7 @@ public class EjbSessionBean extends EjbBean {
     else if (type.equals("Stateless"))
       _isStateless = true;
     else
-      throw new ConfigException(L.l("`{0}' is an unknown session-type.  session-type must be `Stateless' or `Stateful'.", type));
+      throw new ConfigException(L.l("'{0}' is an unknown session-type.  session-type must be 'Stateless' or 'Stateful'.", type));
   }
 
   /**
@@ -140,7 +140,7 @@ public class EjbSessionBean extends EjbBean {
     else if (type.equals("Bean"))
       _isContainerTransaction = false;
     else
-      throw new ConfigException(L.l("`{0}' is an unknown transaction-type.  transaction-type must be `Container' or `Bean'.", type));
+      throw new ConfigException(L.l("'{0}' is an unknown transaction-type.  transaction-type must be 'Container' or 'Bean'.", type));
   }
 
   /**
@@ -161,6 +161,11 @@ public class EjbSessionBean extends EjbBean {
 	validateRemote(getRemote());
       if (getLocal() != null)
 	validateRemote(getLocal());
+
+      if (getEJBClass() == null) {
+	throw error(L.l("'{0}' does not have a defined ejb-class.  Session beans must have an ejb-class.",
+			getEJBName()));
+      }
 
       if (! getEJBClassWrapper().isAssignableTo(SessionSynchronization.class)) {
       }
@@ -318,16 +323,16 @@ public class EjbSessionBean extends EjbBean {
     boolean hasFindByPrimaryKey = false;
   
     if (! homeClass.isPublic())
-      throw error(L.l("`{0}' must be public", homeName));
+      throw error(L.l("'{0}' must be public", homeName));
   
     if (beanClass.isFinal())
-      throw error(L.l("`{0}' must not be final", beanName));
+      throw error(L.l("'{0}' must not be final", beanName));
 
     if (beanClass.isAbstract())
-      throw error(L.l("`{0}' must not be abstract", beanName));
+      throw error(L.l("'{0}' must not be abstract", beanName));
 
     if (! homeClass.isInterface())
-      throw error(L.l("`{0}' must be an interface", homeName));
+      throw error(L.l("'{0}' must be an interface", homeName));
 
     boolean hasCreate = false;
 
@@ -350,7 +355,7 @@ public class EjbSessionBean extends EjbBean {
 
         if (isStateless() && (! name.equals("create") ||
                               method.getParameterTypes().length != 0)) {
-          throw error(L.l("{0}: `{1}' forbidden in stateless session home.  The create() method for a stateless session bean must have zero arguments.",
+          throw error(L.l("{0}: '{1}' forbidden in stateless session home.  The create() method for a stateless session bean must have zero arguments.",
                           method.getFullName(),
                           homeName));
         }
@@ -359,7 +364,7 @@ public class EjbSessionBean extends EjbBean {
 	  validateException(method, CreateException.class);
 
         if (! retType.equals(objectClass))
-          throw error(L.l("{0}: `{1}' must return {2}.  Create methods must return the local or remote interface.",
+          throw error(L.l("{0}: '{1}' must return {2}.  Create methods must return the local or remote interface.",
                           homeName,
                           method.getFullName(),
                           objectClass.getName()));
@@ -371,7 +376,7 @@ public class EjbSessionBean extends EjbBean {
 
 	if (implMethod != null) {
 	  if (! implMethod.getReturnType().getName().equals("void"))
-	    throw error(L.l("`{0}' must return {1} in {2}",
+	    throw error(L.l("'{0}' must return {1} in {2}",
 			    getFullMethodName(createName, param),
 			    "void",
 			    beanName));
@@ -380,14 +385,14 @@ public class EjbSessionBean extends EjbBean {
 	}
       }
       else if (name.startsWith("ejb") || name.startsWith("remove")) {
-        throw error(L.l("`{0}' forbidden in {1}",
+        throw error(L.l("'{0}' forbidden in {1}",
                         method.getFullName(),
                         homeClass.getName()));
       }
     }
 
     if (! hasCreate)
-      throw error(L.l("`{0}' needs at least one create method.  Session beans need a create method.",
+      throw error(L.l("'{0}' needs at least one create method.  Session beans need a create method.",
                       homeClass.getName()));
   }
 }

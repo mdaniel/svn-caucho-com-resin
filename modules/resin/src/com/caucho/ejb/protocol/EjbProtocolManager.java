@@ -367,8 +367,6 @@ public class EjbProtocolManager {
   public AbstractServer getServerByJndiName(String jndiName)
   {
     for (AbstractServer server : _serverMap.values()) {
-      System.out.println("SERVER: " + server + " " + server.getJndiName() + " " + jndiName);
-      
       if (jndiName.equals(server.getJndiName()))
 	return server;
     }

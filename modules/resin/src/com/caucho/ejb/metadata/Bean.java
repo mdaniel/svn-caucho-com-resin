@@ -61,19 +61,17 @@ public class Bean {
   private ClassLoader _loader;
   
   private EjbServerManager _ejbManager;
-  private EntityIntrospector _introspector;
   
   private JClass _type;
   private String _name;
 
   private ArrayList<InitProgram> _initList = new ArrayList<InitProgram>();
 
-  public Bean(EjbServerManager ejbManager, EntityIntrospector introspector)
+  public Bean(EjbServerManager ejbManager)
   {
     _loader = Thread.currentThread().getContextClassLoader();
     
     _ejbManager = ejbManager;
-    _introspector = introspector;
   }
 
   protected String getEJBModuleName()
@@ -203,17 +201,40 @@ public class Bean {
 
       bean.setEJBName(name);
 
+      JAnnotation local = type.getAnnotation(Local.class);
+      if (local != null) {
+	Object []values = (Object []) local.get("value");
+
+	for (int i = 0; i < values.length; i++) {
+	  JClass localClass = (JClass) values[i];
+	  
+	  bean.setLocalWrapper(localClass);
+	}
+
+      }
+
+      JAnnotation remote = type.getAnnotation(Remote.class);
+      if (remote != null) {
+	Object []values = (Object []) remote.get("value");
+
+	for (int i = 0; i < values.length; i++) {
+	  JClass remoteClass = (JClass) values[i];
+	  
+	  bean.setRemoteWrapper(remoteClass);
+	}
+      }
+
       JClass []ifs = type.getInterfaces();
 
       for (int i = 0; i < ifs.length; i++) {
-	JAnnotation local = ifs[i].getAnnotation(Local.class);
+	local = ifs[i].getAnnotation(Local.class);
 
 	if (local != null) {
 	  bean.setLocalWrapper(ifs[i]);
 	  continue;
 	}
       
-	JAnnotation remote = ifs[i].getAnnotation(Remote.class);
+	remote = ifs[i].getAnnotation(Remote.class);
 
 	if (remote != null || ifs[i].isAssignableTo(java.rmi.Remote.class)) {
 	  bean.setRemoteWrapper(ifs[i]);
