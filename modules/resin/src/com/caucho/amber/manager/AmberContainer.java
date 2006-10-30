@@ -49,6 +49,7 @@ import com.caucho.amber.cfg.PersistenceConfig;
 import com.caucho.amber.cfg.PersistenceUnitConfig;
 
 import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.ListenerType;
 
 import com.caucho.amber.gen.AmberEnhancer;
 import com.caucho.amber.gen.AmberGenerator;
@@ -97,9 +98,15 @@ public class AmberContainer {
   private HashMap<String,EntityType> _entityMap
     = new HashMap<String,EntityType>();
 
+  private HashMap<String,ListenerType> _listenerMap
+    = new HashMap<String,ListenerType>();
+
   private Throwable _exception;
 
   private HashMap<String,Throwable> _entityExceptionMap
+    = new HashMap<String,Throwable>();
+
+  private HashMap<String,Throwable> _listenerExceptionMap
     = new HashMap<String,Throwable>();
 
   private AmberContainer()
@@ -268,6 +275,22 @@ public class AmberContainer {
   }
 
   /**
+   * Returns the ListenerType for an introspected class.
+   */
+  public ListenerType getListener(String className)
+  {
+    Throwable e = _listenerExceptionMap.get(className);
+
+    if (e != null)
+      throw new AmberRuntimeException(e);
+    else if (_exception != null) {
+      throw new AmberRuntimeException(_exception);
+    }
+
+    return _listenerMap.get(className);
+  }
+
+  /**
    * Adds an entity for an introspected class.
    */
   public void addEntityException(String className, Throwable e)
@@ -298,6 +321,14 @@ public class AmberContainer {
   public void addEntity(String className, EntityType type)
   {
     _entityMap.put(className, type);
+  }
+
+  /**
+   * Adds a listener for an introspected class.
+   */
+  public void addListener(String className, ListenerType type)
+  {
+    _listenerMap.put(className, type);
   }
 
   /**

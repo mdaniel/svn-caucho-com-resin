@@ -27,46 +27,56 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amber.gen;
+package com.caucho.amber.entity;
 
-import com.caucho.java.gen.JavaClassGenerator;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-import com.caucho.amber.EnvAmberManager;
+import java.util.Map;
 
-import com.caucho.amber.type.AbstractEnhancedType;
+import com.caucho.amber.manager.AmberConnection;
+
+import com.caucho.amber.type.EntityType;
 
 /**
- * Enhancing the java objects for Amber mapping.
+ * An entity listener instance
  */
-public interface AmberGenerator {
-  /**
-   * Sets the amber manager.
-   */
-
-  // public void setAmberManager(EnvAmberManager manager);
+public interface Listener {
 
   /**
-   * Configures the type.
+   * Called before EntityManager.persist().
    */
-  public void configure(AbstractEnhancedType type)
-    throws Exception;
+  public void __caucho_prePersist(Object entity);
 
   /**
-   * Generates the type.
+   * Called after the entity has been made persistent.
    */
-  public void generate(AbstractEnhancedType type)
-    throws Exception;
+  public void __caucho_postPersist(Object entity);
 
   /**
-   * Generates the Java code
+   * Called before EntityManager.remove().
    */
-  public void generateJava(JavaClassGenerator javaGen,
-                           AbstractEnhancedType type)
-    throws Exception;
+  public void __caucho_preRemove(Object entity);
 
   /**
-   * Compiles the pending classes.
+   * Called after the entity has been made removed.
    */
-  public void compile()
-    throws Exception;
+  public void __caucho_postRemove(Object entity);
+
+  /**
+   * Called before database update operations.
+   */
+  public void __caucho_preUpdate(Object entity);
+
+  /**
+   * Called after database update operations.
+   */
+  public void __caucho_postUpdate(Object entity);
+
+  /**
+   * Called after an entity has been loaded into
+   * the current persistence context.
+   */
+  public void __caucho_postLoad(Object entity);
 }

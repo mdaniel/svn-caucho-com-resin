@@ -27,35 +27,34 @@
  * @author Rodrigo Westrupp
  */
 
-package com.caucho.amber.cfg;
+package com.caucho.amber.type;
 
-import java.util.ArrayList;
+import java.util.logging.Logger;
+
+import com.caucho.util.L10N;
+
+import com.caucho.amber.manager.AmberPersistenceUnit;
 
 /**
- * <entity-listeners> tag in the orm.xml
+ * Represents a default listener type.
  */
-public class EntityListenersConfig {
+public class ListenerType extends AbstractEnhancedType {
+  private static final Logger log = Logger.getLogger(ListenerType.class.getName());
+  private static final L10N L = new L10N(ListenerType.class);
 
-  // no attributes
-
-  // elements
-  private ArrayList<EntityListenerConfig> _entityListeners
-    = new ArrayList<EntityListenerConfig>();
-
-
-  /**
-   * Adds a new <entity-listener>.
-   */
-  public void addEntityListener(EntityListenerConfig entityListener)
+  public ListenerType(AmberPersistenceUnit amberPersistenceUnit)
   {
-    _entityListeners.add(entityListener);
+    super(amberPersistenceUnit);
   }
 
   /**
-   * Returns the <entity-listener> list.
+   * Printable version of the listener.
    */
-  public ArrayList<EntityListenerConfig> getEntityListeners()
+  public String toString()
   {
-    return _entityListeners;
+    if (getBeanClass() == null)
+      return "ListenerType[]";
+    else
+      return "ListenerType[" + getBeanClass().getName() + "]";
   }
 }

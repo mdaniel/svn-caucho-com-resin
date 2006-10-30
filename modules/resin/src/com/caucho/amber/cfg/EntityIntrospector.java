@@ -68,7 +68,7 @@ import com.caucho.util.L10N;
 /**
  * Configuration for an entity bean
  */
-public class EntityIntrospector extends AbstractConfigIntrospector {
+public class EntityIntrospector extends BaseConfigIntrospector {
   private static final L10N L = new L10N(EntityIntrospector.class);
   private static final Logger log
     = Logger.getLogger(EntityIntrospector.class.getName());
@@ -505,74 +505,6 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
   }
 
   /**
-   * Introspects the callbacks.
-   */
-  public void introspectCallbacks(EntityType type, JMethod method)
-    throws ConfigException
-  {
-    JClass []param = method.getParameterTypes();
-
-    String methodName = method.getName();
-    JClass jClass = type.getBeanClass();
-
-    getInternalPostLoadConfig(jClass, method, methodName);
-
-    if (! _annotationCfg.isNull()) {
-      validateCallback("PostLoad", method);
-
-      type.addPostLoadCallback(method);
-    }
-
-    getInternalPrePersistConfig(jClass, method, methodName);
-
-    if (! _annotationCfg.isNull()) {
-      validateCallback("PrePersist", method);
-
-      type.addPrePersistCallback(method);
-    }
-
-    getInternalPostPersistConfig(jClass, method, methodName);
-
-    if (! _annotationCfg.isNull()) {
-      validateCallback("PostPersist", method);
-
-      type.addPostPersistCallback(method);
-    }
-
-    getInternalPreUpdateConfig(jClass, method, methodName);
-
-    if (! _annotationCfg.isNull()) {
-      validateCallback("PreUpdate", method);
-
-      type.addPreUpdateCallback(method);
-    }
-
-    getInternalPostUpdateConfig(jClass, method, methodName);
-
-    if (! _annotationCfg.isNull()) {
-      validateCallback("PostUpdate", method);
-
-      type.addPostUpdateCallback(method);
-    }
-
-    getInternalPreRemoveConfig(jClass, method, methodName);
-
-    if (! _annotationCfg.isNull()) {
-      validateCallback("PreRemove", method);
-
-      type.addPreRemoveCallback(method);
-    }
-
-    getInternalPostRemoveConfig(jClass, method, methodName);
-
-    if (! _annotationCfg.isNull()) {
-      validateCallback("PostRemove", method);
-
-      type.addPostRemoveCallback(method);
-    }
-  }
-
-  /**
    * Validates the bean
    */
   public void validateType(JClass type)
@@ -594,29 +526,6 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
       else if (method.isFinal())
         throw error(method, L.l("'{0}' must not be final.  Entity beans methods may not be final.",
                                 method.getFullName()));
-    }
-  }
-
-  /**
-   * Validates a callback method
-   */
-  private void validateCallback(String callbackName, JMethod method)
-    throws ConfigException
-  {
-    if (method.isFinal())
-      throw new ConfigException(L.l("'{0}' must not be final.  @{1} methods may not be final.",
-                                    method.getFullName(),
-                                    callbackName));
-
-    if (method.isStatic())
-      throw new ConfigException(L.l("'{0}' must not be static.  @{1} methods may not be static.",
-                                    method.getFullName(),
-                                    callbackName));
-
-    if (method.getParameterTypes().length != 0) {
-      throw new ConfigException(L.l("'{0}' must not have any arguments.  @{1} methods have zero arguments.",
-                                    method.getFullName(),
-                                    callbackName));
     }
   }
 
@@ -1317,7 +1226,9 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
       if (method.getDeclaringClass().getName().equals("java.lang.Object"))
         continue;
 
-      introspectCallbacks(entityType, method);
+      // jpa/0r38
+      // Callbacks are introspected in the main introspect() block.
+      // introspectCallbacks(entityType, method);
 
       String propName;
 
@@ -1421,6 +1332,21 @@ public class EntityIntrospector extends AbstractConfigIntrospector {
                                EntityConfig entityConfig)
     throws ConfigException
   {
+    // jpa/0r37: interface fields must not be considered.
+
+    JClass jClass = field.getDeclaringClass();
+
+    if (jClass.isInterface())
+      return;
+
+    // jpa/0r37: fields declared in non-entity superclasses
+    // must not be considered.
+
+    EntityType declaringType = _persistenceUnit.getEntity(jClass.getName());
+
+    if (declaringType == null)
+      return;
+
     AttributesConfig attributesConfig = null;
     IdConfig idConfig = null;
     BasicConfig basicConfig = null;

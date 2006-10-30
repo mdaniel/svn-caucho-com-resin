@@ -43,9 +43,12 @@ import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.java.gen.GenClass;
 import com.caucho.java.gen.DependencyComponent;
 
+import com.caucho.amber.type.AbstractEnhancedType;
 import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.ListenerType;
 
 import com.caucho.amber.entity.Entity;
+import com.caucho.amber.entity.Listener;
 
 import com.caucho.amber.manager.AmberPersistenceUnit;
 
@@ -69,7 +72,7 @@ public class AmberGeneratorImpl implements AmberGenerator {
   /**
    * Configures the type.
    */
-  public void configure(EntityType type)
+  public void configure(AbstractEnhancedType type)
     throws Exception
   {
   }
@@ -77,7 +80,7 @@ public class AmberGeneratorImpl implements AmberGenerator {
   /**
    * Generates the type.
    */
-  public void generate(EntityType type)
+  public void generate(AbstractEnhancedType type)
     throws Exception
   {
     generateJava(null, type);
@@ -86,11 +89,19 @@ public class AmberGeneratorImpl implements AmberGenerator {
   /**
    * Generates the type.
    */
-  public void generateJava(JavaClassGenerator javaGen, EntityType type)
+  public void generateJava(JavaClassGenerator javaGen,
+                           AbstractEnhancedType type)
     throws Exception
   {
-    if (isPreload(javaGen, type) || type.isGenerated() || type.isEmbeddable())
+    if (isPreload(javaGen, type) || type.isGenerated())
       return;
+
+    if (type instanceof EntityType) {
+      EntityType entityType = (EntityType) type;
+
+      if (entityType.isEmbeddable())
+        return;
+    }
 
     type.setGenerated(true);
     //type.setInstanceClassLoader(javaGen.getClassLoader());
@@ -99,27 +110,40 @@ public class AmberGeneratorImpl implements AmberGenerator {
 
     genClass.setSuperClassName(type.getBeanClass().getName());
 
-    genClass.addInterfaceName("com.caucho.amber.entity.Entity");
+    if (type instanceof EntityType) {
+      genClass.addInterfaceName("com.caucho.amber.entity.Entity");
 
-    EntityComponent entity = new EntityComponent();
+      EntityComponent entity = new EntityComponent();
 
-    entity.setEntityType(type);
-    entity.setBaseClassName(type.getBeanClass().getName());
-    entity.setExtClassName(type.getInstanceClassName());
+      entity.setEntityType((EntityType) type);
+      entity.setBaseClassName(type.getBeanClass().getName());
+      entity.setExtClassName(type.getInstanceClassName());
 
-    genClass.addComponent(entity);
+      genClass.addComponent(entity);
 
-    DependencyComponent depend = genClass.addDependencyComponent();
-    depend.addDependencyList(entity.getDependencies());
+      DependencyComponent depend = genClass.addDependencyComponent();
+      depend.addDependencyList(entity.getDependencies());
+    }
+    else {
+      genClass.addInterfaceName("com.caucho.amber.entity.Listener");
+
+      ListenerComponent listener = new ListenerComponent();
+
+      listener.setListenerType((ListenerType) type);
+      listener.setBaseClassName(type.getBeanClass().getName());
+      listener.setExtClassName(type.getInstanceClassName());
+
+      genClass.addComponent(listener);
+    }
 
     javaGen.generate(genClass);
   }
 
-
   /**
    * Generates the type.
    */
-  public boolean isPreload(JavaClassGenerator javaGen, EntityType type)
+  public boolean isPreload(JavaClassGenerator javaGen,
+                           AbstractEnhancedType type)
     throws Exception
   {
     Class cl;
@@ -129,7 +153,12 @@ public class AmberGeneratorImpl implements AmberGenerator {
     else
       cl = javaGen.preload(type.getInstanceClassName());
 
-    return cl != null && Entity.class.isAssignableFrom(cl);
+    Class expectedClass = Listener.class;
+
+    if (type instanceof EntityType)
+      expectedClass = Entity.class;
+
+    return cl != null && expectedClass.isAssignableFrom(cl);
   }
 
   /**

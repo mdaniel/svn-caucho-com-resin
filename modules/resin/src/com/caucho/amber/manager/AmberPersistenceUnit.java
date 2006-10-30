@@ -33,6 +33,8 @@ import java.io.IOException;
 
 import java.lang.ref.SoftReference;
 
+import java.lang.reflect.Method;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSetMetaData;
@@ -51,6 +53,7 @@ import javax.sql.DataSource;
 import com.caucho.amber.AmberException;
 import com.caucho.amber.AmberRuntimeException;
 
+import com.caucho.amber.cfg.BaseConfigIntrospector;
 import com.caucho.amber.cfg.EntityIntrospector;
 import com.caucho.amber.cfg.EntityMappingsConfig;
 
@@ -58,6 +61,7 @@ import com.caucho.amber.entity.AmberCompletion;
 import com.caucho.amber.entity.AmberEntityHome;
 import com.caucho.amber.entity.EntityItem;
 import com.caucho.amber.entity.EntityKey;
+import com.caucho.amber.entity.Listener;
 
 import com.caucho.amber.gen.AmberEnhancer;
 import com.caucho.amber.gen.AmberGenerator;
@@ -75,6 +79,7 @@ import com.caucho.amber.type.*;
 
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JClassLoader;
+import com.caucho.bytecode.JMethod;
 
 import com.caucho.config.ConfigException;
 
@@ -162,6 +167,9 @@ public class AmberPersistenceUnit {
     new HashMap<String,String>();
 
   private EntityMappingsConfig _entityMappings;
+
+  private ArrayList<ListenerType> _defaultListeners =
+    new ArrayList<ListenerType>();
 
   private EntityIntrospector _introspector;
   private AmberGenerator _generator;
@@ -541,6 +549,32 @@ public class AmberPersistenceUnit {
   }
 
   /**
+   * Adds an entity listener.
+   */
+  public ListenerType addDefaultListener(JClass beanClass)
+  {
+    String name = beanClass.getName();
+
+    ListenerType listenerType = (ListenerType) _typeManager.get(name);
+
+    if (listenerType != null)
+      return listenerType;
+
+    listenerType = new ListenerType(this);
+
+    _typeManager.put(name, listenerType);
+
+    listenerType.setName(name);
+    listenerType.setBeanClass(beanClass);
+
+    _defaultListeners.add(listenerType);
+
+    _amberContainer.addListener(name, listenerType);
+
+    return listenerType;
+  }
+
+  /**
    * Adds a new home bean.
    */
   private void addEntityHome(String name, AmberEntityHome home)
@@ -625,22 +659,37 @@ public class AmberPersistenceUnit {
   {
     configure();
 
-    while (_lazyGenerate.size() > 0) {
-      EntityType type = _lazyGenerate.remove(0);
+    AbstractEnhancedType type = null;
 
-      try {
-        if (!type.isEmbeddable()) {
-          type.init();
+    try {
+      while (_lazyGenerate.size() > 0) {
+        EntityType entityType = _lazyGenerate.remove(0);
 
-          getGenerator().generate(type);
+        type = entityType;
+
+        if (! entityType.isEmbeddable()) {
+          entityType.init();
+
+          getGenerator().generate(entityType);
         }
-      } catch (Exception e) {
+      }
+
+      for (ListenerType listenerType : _defaultListeners) {
+
+        type = listenerType;
+
+        type.init();
+
+        getGenerator().generate(type);
+      }
+    } catch (Exception e) {
+      if (type != null) {
         type.setConfigException(e);
 
         _amberContainer.addEntityException(type.getBeanClass().getName(), e);
-
-        throw e;
       }
+
+      throw e;
     }
 
     try {
@@ -690,6 +739,26 @@ public class AmberPersistenceUnit {
 
     for (SequenceIdGenerator gen : _sequenceGenMap.values())
       gen.init(this);
+
+    while (_defaultListeners.size() > 0) {
+      ListenerType type = _defaultListeners.remove(0);
+
+      type.init();
+
+      if (! type.isGenerated()) {
+        if (type.getInstanceClassName() == null)
+          throw new ConfigException(L.l("'{0}' does not have a configured instance class.",
+                                        type));
+
+        type.setGenerated(true);
+
+        try {
+          getGenerator().generateJava(javaGen, type);
+        } catch (Throwable e) {
+          log.log(Level.FINER, e.toString(), e);
+        }
+      }
+    }
   }
 
   /**
@@ -870,6 +939,12 @@ public class AmberPersistenceUnit {
   {
     initLoaders();
 
+    if (_entityMappings != null) {
+      BaseConfigIntrospector introspector = new BaseConfigIntrospector();
+
+      introspector.initMetaData(_entityMappings, this);
+    }
+
     if (_dataSource == null)
       return;
 
@@ -1020,6 +1095,104 @@ public class AmberPersistenceUnit {
       return null;
     else
       return ref.get();
+  }
+
+  /**
+   * Applies persistence unit default entity listeners
+   * for @PrePersist callbacks.
+   */
+  protected void prePersist(Object entity)
+  {
+    for (ListenerType listenerType : _defaultListeners) {
+      for (JMethod m : listenerType.getPrePersistCallbacks()) {
+        Listener listener = (Listener) listenerType.getInstance();
+        listener.__caucho_prePersist(entity);
+      }
+    }
+  }
+
+  /**
+   * Applies persistence unit default entity listeners
+   * for @PostPersist callbacks.
+   */
+  protected void postPersist(Object entity)
+  {
+    for (ListenerType listenerType : _defaultListeners) {
+      for (JMethod m : listenerType.getPostPersistCallbacks()) {
+        Listener listener = (Listener) listenerType.getInstance();
+        listener.__caucho_postPersist(entity);
+      }
+    }
+  }
+
+  /**
+   * Applies persistence unit default entity listeners
+   * for @PreRemove callbacks.
+   */
+  protected void preRemove(Object entity)
+  {
+    for (ListenerType listenerType : _defaultListeners) {
+      for (JMethod m : listenerType.getPreRemoveCallbacks()) {
+        Listener listener = (Listener) listenerType.getInstance();
+        listener.__caucho_preRemove(entity);
+      }
+    }
+  }
+
+  /**
+   * Applies persistence unit default entity listeners
+   * for @PostRemove callbacks.
+   */
+  protected void postRemove(Object entity)
+  {
+    for (ListenerType listenerType : _defaultListeners) {
+      for (JMethod m : listenerType.getPostRemoveCallbacks()) {
+        Listener listener = (Listener) listenerType.getInstance();
+        listener.__caucho_postRemove(entity);
+      }
+    }
+  }
+
+  /**
+   * Applies persistence unit default entity listeners
+   * for @PreUpdate callbacks.
+   */
+  protected void preUpdate(Object entity)
+  {
+    for (ListenerType listenerType : _defaultListeners) {
+      for (JMethod m : listenerType.getPreUpdateCallbacks()) {
+        Listener listener = (Listener) listenerType.getInstance();
+        listener.__caucho_preUpdate(entity);
+      }
+    }
+  }
+
+  /**
+   * Applies persistence unit default entity listeners
+   * for @PostUpdate callbacks.
+   */
+  protected void postUpdate(Object entity)
+  {
+    for (ListenerType listenerType : _defaultListeners) {
+      for (JMethod m : listenerType.getPostUpdateCallbacks()) {
+        Listener listener = (Listener) listenerType.getInstance();
+        listener.__caucho_postUpdate(entity);
+      }
+    }
+  }
+
+  /**
+   * Applies persistence unit default entity listeners
+   * for @PostLoad callbacks.
+   */
+  protected void postLoad(Object entity)
+  {
+    for (ListenerType listenerType : _defaultListeners) {
+      for (JMethod m : listenerType.getPostLoadCallbacks()) {
+        Listener listener = (Listener) listenerType.getInstance();
+        listener.__caucho_postLoad(entity);
+      }
+    }
   }
 
   /**
@@ -1176,6 +1349,6 @@ public class AmberPersistenceUnit {
 
   public String toString()
   {
-    return "AmberPersistenceUnit[]";
+    return "AmberPersistenceUnit[" + _defaultListeners + "]";
   }
 }

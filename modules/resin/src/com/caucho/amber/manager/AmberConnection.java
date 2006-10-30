@@ -164,6 +164,104 @@ public class AmberConnection
   }
 
   /**
+   * @PrePersist callback for default listeners.
+   */
+  public void prePersist(Object entity)
+  {
+    try {
+      _persistenceUnit.prePersist(entity);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new EJBExceptionWrapper(e);
+    }
+  }
+
+  /**
+   * @PostPersist callback for default listeners.
+   */
+  public void postPersist(Object entity)
+  {
+    try {
+      _persistenceUnit.postPersist(entity);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new EJBExceptionWrapper(e);
+    }
+  }
+
+  /**
+   * @PreRemove callback for default listeners.
+   */
+  public void preRemove(Object entity)
+  {
+    try {
+      _persistenceUnit.preRemove(entity);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new EJBExceptionWrapper(e);
+    }
+  }
+
+  /**
+   * @PostRemove callback for default listeners.
+   */
+  public void postRemove(Object entity)
+  {
+    try {
+      _persistenceUnit.postRemove(entity);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new EJBExceptionWrapper(e);
+    }
+  }
+
+  /**
+   * @PreUpdate callback for default listeners.
+   */
+  public void preUpdate(Object entity)
+  {
+    try {
+      _persistenceUnit.preUpdate(entity);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new EJBExceptionWrapper(e);
+    }
+  }
+
+  /**
+   * @PostUpdate callback for default listeners.
+   */
+  public void postUpdate(Object entity)
+  {
+    try {
+      _persistenceUnit.postUpdate(entity);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new EJBExceptionWrapper(e);
+    }
+  }
+
+  /**
+   * @PostLoad callback for default listeners.
+   */
+  public void postLoad(Object entity)
+  {
+    try {
+      _persistenceUnit.postLoad(entity);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new EJBExceptionWrapper(e);
+    }
+  }
+
+  /**
    * Makes the instance managed.
    */
   public void persist(Object entity)

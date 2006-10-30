@@ -70,7 +70,6 @@ import com.caucho.amber.field.AmberFieldCompare;
 import com.caucho.amber.field.EntityManyToOneField;
 import com.caucho.amber.field.Id;
 import com.caucho.amber.field.IdField;
-import com.caucho.amber.field.StubMethod;
 import com.caucho.amber.field.VersionField;
 
 import com.caucho.amber.idgen.IdGenerator;
@@ -85,13 +84,9 @@ import com.caucho.amber.table.Column;
 /**
  * Represents an application persistent bean type
  */
-public class EntityType extends Type {
+public class EntityType extends AbstractEnhancedType {
   private static final Logger log = Logger.getLogger(EntityType.class.getName());
   private static final L10N L = new L10N(EntityType.class);
-
-  private AmberPersistenceUnit _amberPersistenceUnit;
-
-  private String _name;
 
   private Table _table;
 
@@ -114,24 +109,13 @@ public class EntityType extends Type {
 
   private HashMap<String,EntityType> _subEntities;
 
-  private JClass _beanClass;
-
   private boolean _isFieldAccess;
 
   private boolean _hasDependent;
 
-  private Throwable _exception;
-
-  private String _instanceClassName;
-  private boolean _isEnhanced;
-  private ClassLoader _instanceLoader;
-  private Class _instanceClass;
-
   private JClass _proxyClass;
 
   private AmberEntityHome _home;
-
-  private ArrayList<StubMethod> _methods = new ArrayList<StubMethod>();
 
   protected int _defaultLoadGroupIndex;
   protected int _loadGroupIndex;
@@ -147,31 +131,9 @@ public class EntityType extends Type {
   private ArrayList<PersistentDependency> _dependencies
     = new ArrayList<PersistentDependency>();
 
-  private ArrayList<JMethod> _postLoadCallbacks
-    = new ArrayList<JMethod>();
-
-  private ArrayList<JMethod> _prePersistCallbacks
-    = new ArrayList<JMethod>();
-
-  private ArrayList<JMethod> _postPersistCallbacks
-    = new ArrayList<JMethod>();
-
-  private ArrayList<JMethod> _preUpdateCallbacks
-    = new ArrayList<JMethod>();
-
-  private ArrayList<JMethod> _postUpdateCallbacks
-    = new ArrayList<JMethod>();
-
-  private ArrayList<JMethod> _preRemoveCallbacks
-    = new ArrayList<JMethod>();
-
-  private ArrayList<JMethod> _postRemoveCallbacks
-    = new ArrayList<JMethod>();
-
   private final Lifecycle _lifecycle = new Lifecycle();
 
   private volatile boolean _isConfigured;
-  private volatile boolean _isGenerated;
 
   private boolean _isEmbeddable;
 
@@ -180,15 +142,7 @@ public class EntityType extends Type {
 
   public EntityType(AmberPersistenceUnit amberPersistenceUnit)
   {
-    _amberPersistenceUnit = amberPersistenceUnit;
-  }
-
-  /**
-   * Returns the manager.
-   */
-  public AmberPersistenceUnit getPersistenceUnit()
-  {
-    return _amberPersistenceUnit;
+    super(amberPersistenceUnit);
   }
 
   /**
@@ -336,34 +290,6 @@ public class EntityType extends Type {
   }
 
   /**
-   * Sets the bean class.
-   */
-  public void setBeanClass(JClass beanClass)
-  {
-    _beanClass = beanClass;
-
-    if (getName() == null) {
-      String name = beanClass.getName();
-      int p = name.lastIndexOf('.');
-
-      if (p > 0)
-        name = name.substring(p + 1);
-
-      setName(name);
-    }
-
-    addDependency(_beanClass);
-  }
-
-  /**
-   * Gets the bean class.
-   */
-  public JClass getBeanClass()
-  {
-    return _beanClass;
-  }
-
-  /**
    * Gets the proxy class.
    */
   public JClass getProxyClass()
@@ -382,25 +308,12 @@ public class EntityType extends Type {
     _proxyClass = proxyClass;
   }
 
-  public boolean isInit()
-  {
-    return _instanceClass != null;
-  }
-
   /**
-   * Sets the instance class name.
+   * Gets the instance class.
    */
-  public void setInstanceClassName(String className)
+  public Class getInstanceClass()
   {
-    _instanceClassName = className;
-  }
-
-  /**
-   * Gets the instance class name.
-   */
-  public String getInstanceClassName()
-  {
-    return _instanceClassName;
+    return getInstanceClass(Entity.class);
   }
 
   /**
@@ -417,102 +330,6 @@ public class EntityType extends Type {
   public boolean isEmbeddable()
   {
     return _isEmbeddable;
-  }
-
-  /**
-   * Sets true if the class is enhanced.
-   */
-  public void setEnhanced(boolean isEnhanced)
-  {
-    _isEnhanced = isEnhanced;
-  }
-
-  /**
-   * Returns true if the class is enhanced.
-   */
-  public boolean isEnhanced()
-  {
-    return _isEnhanced;
-  }
-
-  /**
-   * Sets the instance class loader
-   */
-  public void setInstanceClassLoader(ClassLoader loader)
-  {
-    _instanceLoader = loader;
-  }
-
-  public void setConfigException(Throwable e)
-  {
-    if (_exception == null)
-      _exception = e;
-  }
-
-  /**
-   * Gets the instance class.
-   */
-  public Class getInstanceClass()
-  {
-    if (_instanceClass == null) {
-      if (getInstanceClassName() == null) {
-        throw new RuntimeException("No instance class:" + this);
-      }
-
-      try {
-        if (_isEnhanced) {
-          ClassLoader loader = getPersistenceUnit().getEnhancedLoader();
-
-          if (log.isLoggable(Level.FINEST))
-            log.finest(L.l("loading bean class `{0}' from `{1}'", getBeanClass().getName(), loader));
-
-          _instanceClass = Class.forName(getBeanClass().getName(), false, loader);
-        }
-        else {
-          ClassLoader loader = _instanceLoader;
-
-          if (loader == null)
-            loader = getPersistenceUnit().getEnhancedLoader();
-
-          if (log.isLoggable(Level.FINEST))
-            log.finest(L.l("loading instance class `{0}' from `{1}'", getInstanceClassName(), loader));
-
-          _instanceClass = Class.forName(getInstanceClassName(), false, loader);
-        }
-      } catch (ClassNotFoundException e) {
-        throw new RuntimeException(e);
-      }
-
-      if (! Entity.class.isAssignableFrom(_instanceClass)) {
-        if (_exception != null)
-          throw new AmberRuntimeException(_exception);
-        else if (_amberPersistenceUnit.getConfigException() != null)
-          throw new AmberRuntimeException(_amberPersistenceUnit.getConfigException());
-
-        throw new AmberRuntimeException(L.l("'{0}' with classloader {1} is an illegal instance class",
-                                            _instanceClass.getName(), _instanceClass.getClassLoader()));
-      }
-    }
-
-    return _instanceClass;
-  }
-
-  /**
-   * Returns true if generated.
-   */
-  public boolean isGenerated()
-  {
-    return _isGenerated;
-  }
-
-  /**
-   * Set true if generated.
-   */
-  public void setGenerated(boolean isGenerated)
-  {
-    // XXX: ejb/0600 vs ejb/0l00
-    if (isEnhanced())
-      _isGenerated = isGenerated;
   }
 
   /**
@@ -590,22 +407,6 @@ public class EntityType extends Type {
   public void setDiscriminatorValue(String value)
   {
     _discriminatorValue = value;
-  }
-
-  /**
-   * Sets the abstract table name.
-   */
-  public void setName(String name)
-  {
-    _name = name;
-  }
-
-  /**
-   * Gets the abstract table name.
-   */
-  public String getName()
-  {
-    return _name;
   }
 
   /**
@@ -796,118 +597,6 @@ public class EntityType extends Type {
   }
 
   /**
-   * Adds a @PostLoad callback.
-   */
-  public void addPostLoadCallback(JMethod callback)
-  {
-    _postLoadCallbacks.add(callback);
-  }
-
-  /**
-   * Gets the post-load callback.
-   */
-  public ArrayList<JMethod> getPostLoadCallbacks()
-  {
-    return _postLoadCallbacks;
-  }
-
-  /**
-   * Adds a pre-persist callback.
-   */
-  public void addPrePersistCallback(JMethod callback)
-  {
-    _prePersistCallbacks.add(callback);
-  }
-
-  /**
-   * Gets the pre-persist callback.
-   */
-  public ArrayList<JMethod> getPrePersistCallbacks()
-  {
-    return _prePersistCallbacks;
-  }
-
-  /**
-   * Adds a post-persist callback.
-   */
-  public void addPostPersistCallback(JMethod callback)
-  {
-    _postPersistCallbacks.add(callback);
-  }
-
-  /**
-   * Gets the post-persist callback.
-   */
-  public ArrayList<JMethod> getPostPersistCallbacks()
-  {
-    return _postPersistCallbacks;
-  }
-
-  /**
-   * Adds a pre-update callback.
-   */
-  public void addPreUpdateCallback(JMethod callback)
-  {
-    _preUpdateCallbacks.add(callback);
-  }
-
-  /**
-   * Gets the pre-update callback.
-   */
-  public ArrayList<JMethod> getPreUpdateCallbacks()
-  {
-    return _preUpdateCallbacks;
-  }
-
-  /**
-   * Adds a post-update callback.
-   */
-  public void addPostUpdateCallback(JMethod callback)
-  {
-    _postUpdateCallbacks.add(callback);
-  }
-
-  /**
-   * Gets the post-update callback.
-   */
-  public ArrayList<JMethod> getPostUpdateCallbacks()
-  {
-    return _postUpdateCallbacks;
-  }
-
-  /**
-   * Adds a pre-remove callback.
-   */
-  public void addPreRemoveCallback(JMethod callback)
-  {
-    _preRemoveCallbacks.add(callback);
-  }
-
-  /**
-   * Gets the pre-remove callback.
-   */
-  public ArrayList<JMethod> getPreRemoveCallbacks()
-  {
-    return _preRemoveCallbacks;
-  }
-
-  /**
-   * Adds a post-remove callback.
-   */
-  public void addPostRemoveCallback(JMethod callback)
-  {
-    _postRemoveCallbacks.add(callback);
-  }
-
-  /**
-   * Gets the post-remove callback.
-   */
-  public ArrayList<JMethod> getPostRemoveCallbacks()
-  {
-    return _postRemoveCallbacks;
-  }
-
-  /**
    * Creates a new entity for this specific instance type.
    */
   public Entity createBean()
@@ -920,19 +609,13 @@ public class EntityType extends Type {
   }
 
   /**
-   * Adds a stub method
+   * Sets the bean class.
    */
-  public void addStubMethod(StubMethod method)
+  public void setBeanClass(JClass beanClass)
   {
-    _methods.add(method);
-  }
+    super.setBeanClass(beanClass);
 
-  /**
-   * Returns the methods
-   */
-  public ArrayList<StubMethod> getMethods()
-  {
-    return _methods;
+    addDependency(_beanClass);
   }
 
   /**
@@ -1081,7 +764,7 @@ public class EntityType extends Type {
   public void init()
     throws ConfigException
   {
-    if (_exception != null)
+    if (getConfigException() != null)
       return;
 
     if (! _lifecycle.toInit())
@@ -1092,7 +775,7 @@ public class EntityType extends Type {
       // forces table lazy load
       getTable();
 
-      assert getId() != null : "null id for " + _name;
+      assert getId() != null : "null id for " + getName();
 
       getId().init();
 
@@ -1103,14 +786,6 @@ public class EntityType extends Type {
         field.init();
       }
     }
-
-    /*
-      if (_amberPersistenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnit.getCreateDatabaseTables())
-      getTable().createDatabaseTable(_amberPersistenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnit);
-
-      if (_amberPersistenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnit.getValidateDatabaseTables())
-      getTable().validateDatabaseTable(_amberPersistenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnitenceUnit);
-    */
   }
 
   /**
