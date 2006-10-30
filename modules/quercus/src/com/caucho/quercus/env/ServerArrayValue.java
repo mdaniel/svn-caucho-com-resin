@@ -29,18 +29,10 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.TreeMap;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.Set;
-import java.util.Iterator;
-import java.util.Enumeration;
-import java.util.LinkedHashMap;
-
-import javax.servlet.http.HttpServletRequest;
-
-import com.caucho.vfs.WriteStream;
 
 /**
  * Represents the server
@@ -212,76 +204,78 @@ public class ServerArrayValue extends ArrayValueImpl {
     
     HttpServletRequest request = _env.getRequest();
 
-    super.put(SERVER_NAME_V,
-	      new StringValueImpl(request.getServerName()));
-    
-    super.put(SERVER_PORT_V,
-	      new LongValue(request.getServerPort()));
-    super.put(REMOTE_HOST_V,
-	      new StringValueImpl(request.getRemoteHost()));
-    super.put(REMOTE_ADDR_V,
-	      new StringValueImpl(request.getRemoteAddr()));
-    super.put(REMOTE_PORT_V,
-	      new LongValue(request.getRemotePort()));
-    
-    super.put(SERVER_PROTOCOL_V,
-	      new StringValueImpl(request.getProtocol()));
-    super.put(REQUEST_METHOD_V,
-	      new StringValueImpl(request.getMethod()));
-    
-    if (request.getQueryString() != null) {
-      super.put(QUERY_STRING_V,
-		new StringValueImpl(request.getQueryString()));
-    }
-    
-    super.put(DOCUMENT_ROOT_V,
-	      new StringValueImpl(request.getRealPath("/")));
-    
-    super.put(SCRIPT_NAME_V,
-	      new StringValueImpl(request.getContextPath() +
-			      request.getServletPath()));
+    if (request != null) {
+      super.put(SERVER_NAME_V,
+                new StringValueImpl(request.getServerName()));
 
-    String requestURI = request.getRequestURI();
-    String queryString = request.getQueryString();
+      super.put(SERVER_PORT_V,
+                new LongValue(request.getServerPort()));
+      super.put(REMOTE_HOST_V,
+                new StringValueImpl(request.getRemoteHost()));
+      super.put(REMOTE_ADDR_V,
+                new StringValueImpl(request.getRemoteAddr()));
+      super.put(REMOTE_PORT_V,
+                new LongValue(request.getRemotePort()));
 
-    if (queryString != null)
-      requestURI = requestURI + '?' + queryString;
-    
-    super.put(REQUEST_URI_V,
-	      new StringValueImpl(requestURI));
-    super.put(SCRIPT_FILENAME_V,
-	      new StringValueImpl(request.getRealPath(request.getServletPath())));
+      super.put(SERVER_PROTOCOL_V,
+                new StringValueImpl(request.getProtocol()));
+      super.put(REQUEST_METHOD_V,
+                new StringValueImpl(request.getMethod()));
 
-    if (request.getPathInfo() != null) {
-      super.put(PATH_INFO_V,
-		new StringValueImpl(request.getPathInfo()));
-      super.put(PATH_TRANSLATED_V,
-		new StringValueImpl(request.getRealPath(request.getPathInfo())));
-    }
-
-    if (request.isSecure())
-      super.put(HTTPS_V, new StringValueImpl("on"));
-
-    String contextPath = request.getContextPath();
-    String servletPath = request.getServletPath();
-    String pathInfo = request.getPathInfo();
-
-    if (pathInfo == null)
-      super.put(PHP_SELF_V, new StringValueImpl(contextPath + servletPath));
-    else
-      super.put(PHP_SELF_V, new StringValueImpl(contextPath + servletPath + pathInfo));
-
-    Enumeration e = request.getHeaderNames();
-    while (e.hasMoreElements()) {
-      String key = (String) e.nextElement();
-
-      String value = request.getHeader(key);
-
-      if (key.equalsIgnoreCase("Host")) {
-	    super.put(HTTP_HOST_V, new StringValueImpl(value));
+      if (request.getQueryString() != null) {
+        super.put(QUERY_STRING_V,
+                  new StringValueImpl(request.getQueryString()));
       }
-      else {
-        super.put(convertHttpKey(key), new StringValueImpl(value));
+
+      super.put(DOCUMENT_ROOT_V,
+                new StringValueImpl(request.getRealPath("/")));
+
+      super.put(SCRIPT_NAME_V,
+                new StringValueImpl(request.getContextPath() +
+                                    request.getServletPath()));
+
+      String requestURI = request.getRequestURI();
+      String queryString = request.getQueryString();
+
+      if (queryString != null)
+        requestURI = requestURI + '?' + queryString;
+
+      super.put(REQUEST_URI_V,
+                new StringValueImpl(requestURI));
+      super.put(SCRIPT_FILENAME_V,
+                new StringValueImpl(request.getRealPath(request.getServletPath())));
+
+      if (request.getPathInfo() != null) {
+        super.put(PATH_INFO_V,
+                  new StringValueImpl(request.getPathInfo()));
+        super.put(PATH_TRANSLATED_V,
+                  new StringValueImpl(request.getRealPath(request.getPathInfo())));
+      }
+
+      if (request.isSecure())
+        super.put(HTTPS_V, new StringValueImpl("on"));
+
+      String contextPath = request.getContextPath();
+      String servletPath = request.getServletPath();
+      String pathInfo = request.getPathInfo();
+
+      if (pathInfo == null)
+        super.put(PHP_SELF_V, new StringValueImpl(contextPath + servletPath));
+      else
+        super.put(PHP_SELF_V, new StringValueImpl(contextPath + servletPath + pathInfo));
+
+      Enumeration e = request.getHeaderNames();
+      while (e.hasMoreElements()) {
+        String key = (String) e.nextElement();
+
+        String value = request.getHeader(key);
+
+        if (key.equalsIgnoreCase("Host")) {
+          super.put(HTTP_HOST_V, new StringValueImpl(value));
+        }
+        else {
+          super.put(convertHttpKey(key), new StringValueImpl(value));
+        }
       }
     }
   }

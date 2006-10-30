@@ -46,19 +46,18 @@ import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.EjbRef;
 import com.caucho.lifecycle.Lifecycle;
-import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentBean;
+import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.util.L10N;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
+import javax.naming.Context;
 import java.lang.reflect.Method;
-
 import java.util.ArrayList;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.naming.*;
 
 public class AppClient implements EnvironmentBean
 {
@@ -91,7 +90,7 @@ public class AppClient implements EnvironmentBean
   public void setId(String id)
   {
   }
-  
+
   public void setDescription(String value)
   {
   }
@@ -179,13 +178,18 @@ public class AppClient implements EnvironmentBean
 
     try {
       thread.setContextClassLoader(_loader);
-      
+
       JarPath jarPath = JarPath.create(_clientJar);
 
       Path xml = jarPath.lookup("META-INF/application-client.xml");
 
-      if (xml.canRead())
+      System.out.println(L.l("APP-CLIENT: reading configuration file {0} from {1}", xml, jarPath));
+
+      if (xml.canRead()) {
+        log.log(Level.FINE, L.l("reading configuration file {0} from {1}", xml, jarPath));
+
         new Config().configureBean(this, xml, "com/caucho/server/e_app/app-client.rnc");
+      }
 
       if (_mainClassName == null)
         throw new ConfigException(L.l("'main-class' is required"));
