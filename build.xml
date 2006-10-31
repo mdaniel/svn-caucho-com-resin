@@ -817,18 +817,6 @@
     <exec dir="${dist}/${dist.name}" executable="make"/>
   </target>
 
-  <target name="dist.deb" depends="dist.configure.make">
-    <exec dir="${dist}/${dist.name}" executable="checkinstall">
-      <arg line="-D --install=no --fstrans=yes -y" />
-    </exec>
-
-    <copy todir="${dist}">
-      <fileset dir="${dist}/${dist.name}">
-        <include name="**/*.deb"/>
-      </fileset>
-    </copy>
-  </target>
-
   <target name="dist.rpm" depends="dist.configure.make">
     <exec dir="${dist}/${dist.name}" executable="checkinstall">
       <arg line="-R --install=no --fstrans=yes -y" />

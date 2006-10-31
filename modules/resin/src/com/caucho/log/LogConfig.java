@@ -291,8 +291,14 @@ public class LogConfig extends RotateLog {
       SubLogger subLogger = _subLoggers.get(i);
       Logger logger = subLogger.getLogger();
 
-      if (subLogger.getLevel() != null)
+      Level subLevel = subLogger.getLevel();
+      Level level = logger.getLevel();
+
+      if (subLevel != null
+	  && (level == null && subLevel.intValue() < Level.INFO.intValue()
+	      || level != null && subLevel.intValue() < level.intValue())) {
 	logger.setLevel(subLogger.getLevel());
+      }
 
       if (_handlers == null) {
 	StreamHandler handler = new StreamHandler(os);
