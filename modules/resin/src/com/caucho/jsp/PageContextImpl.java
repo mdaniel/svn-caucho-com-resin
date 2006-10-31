@@ -1567,7 +1567,7 @@ public class PageContextImpl extends PageContext
     if (value != null)
       putAttribute(var, value);
     else
-      removeAttribute(var);
+      _attributes.remove(var);
   }
 
   /**

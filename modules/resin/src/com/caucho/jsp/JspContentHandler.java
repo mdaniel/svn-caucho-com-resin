@@ -143,7 +143,8 @@ public class JspContentHandler extends DefaultHandler {
 	    offset++;
 	}
 
-	offset++;
+	if (offset < end)
+	  offset++;
 
 	String value = new String(buf, begin, offset - begin);
 

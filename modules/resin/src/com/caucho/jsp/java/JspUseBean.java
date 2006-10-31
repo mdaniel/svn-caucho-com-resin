@@ -159,7 +159,7 @@ public class JspUseBean extends JspContainerNode {
     out.println(_typeName + " " + _id + ";");
 
     // application and session beans need synchronization
-    if (_scope.equals("application") || _scope.equals("session")) {
+    if ("application".equals(_scope) || "session".equals(_scope)) {
       out.println("synchronized (" + context + ") {");
       out.pushDepth();
     }
@@ -216,7 +216,7 @@ public class JspUseBean extends JspContainerNode {
     out.println("}");
 
     // Close the synchronization if necessary
-    if (_scope.equals("application") || _scope.equals("session")) {
+    if ("application".equals(_scope) || "session".equals(_scope)) {
       out.popDepth();
       out.println("}");
     }

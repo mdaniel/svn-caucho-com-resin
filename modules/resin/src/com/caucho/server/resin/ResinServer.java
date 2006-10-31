@@ -177,6 +177,11 @@ public class ResinServer
     return _objectName;
   }
 
+  public Var getVar()
+  {
+    return new Var();
+  }
+
   /**
    * Sets the classLoader
    */
@@ -707,6 +712,22 @@ public class ResinServer
     public boolean isProfessional()
     {
       return _isResinProfessional;
+    }
+
+    public String getVersion()
+    {
+      if (Alarm.isTest())
+	return "3.0.x";
+      else
+	return com.caucho.Version.VERSION;
+    }
+
+    public String getVersionDate()
+    {
+      if (Alarm.isTest())
+	return "19980508T0251";
+      else
+	return com.caucho.Version.VERSION_DATE;
     }
   }
 

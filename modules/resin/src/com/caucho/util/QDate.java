@@ -173,6 +173,7 @@ public class QDate {
       _dstName = _timeZone.getDisplayName(true, TimeZone.SHORT);
     }
 
+
     setLocalTime(Alarm.getCurrentTime());
   }
 

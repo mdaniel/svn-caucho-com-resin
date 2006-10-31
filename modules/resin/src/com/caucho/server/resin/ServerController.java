@@ -97,6 +97,8 @@ public class ServerController
   public void setResinServer(ResinServer resinServer)
   {
     _resinServer = resinServer;
+
+    getVariableMap().put("resin", _resinServer.getVar());
   }
 
   /**
