@@ -376,7 +376,7 @@ public class EnterpriseApplication
       
     Vfs.setPwd(_rootDir, _loader);
 
-    // XXX: only if application is missing
+    // XXX: only if application is missing (?)
     fillDefaultModules();
 
     if (_ejbPaths.size() != 0) {
@@ -407,7 +407,7 @@ public class EnterpriseApplication
     try {
       if (_rootDir.lookup("lib").isDirectory()) {
 	Path lib = _rootDir.lookup("lib");
-	
+
 	for (String file : lib.list()) {
 	  if (file.endsWith(".jar")) {
 	    _loader.addJar(lib.lookup(file));

@@ -494,10 +494,18 @@ public class EnhancerFixup {
       
       if (extCode.getMaxStack() < baseCode.getMaxStack())
 	extCode.setMaxStack(baseCode.getMaxStack());
+
+      // XXX: needs tests badly
+      extCode.removeAttribute("LocalVariableTable");
+      extCode.removeAttribute("LineNumberTable");
+      baseCode.removeAttribute("LocalVariableTable");
+      baseCode.removeAttribute("LineNumberTable");
       
       /*
 	baseMethod.concatenate(extMethod);
       */
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

@@ -392,7 +392,7 @@ public class InjectIntrospector {
   {
     PersistenceContext pContext = field.getAnnotation(PersistenceContext.class);
 
-    String jndiPrefix = "java:comp/env/persistence/PersistenceContext";
+    String jndiPrefix = "java:comp/env/persistence";
 
     String jndiName = null;
     String unitName = pContext.unitName();

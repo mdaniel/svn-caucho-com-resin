@@ -247,7 +247,8 @@ public class AmberContainer {
    */
   public String getPersistenceContextJndiPrefix()
   {
-    return "java:comp/env/persistence/PersistenceContext/";
+    //return "java:comp/env/persistence/PersistenceContext/";
+    return "java:comp/env/persistence/";
   }
 
   /**

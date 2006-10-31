@@ -113,8 +113,6 @@ public class JavaMethod extends JMethod {
       return _line;
     }
 
-    System.out.println("ATTR: " + attr);
-
     _line = 0;
     return _line;
   }
@@ -328,6 +326,23 @@ public class JavaMethod extends JMethod {
   public void addAttribute(Attribute attr)
   {
     _attributes.add(attr);
+  }
+
+  /**
+   * Removes an attribute.
+   */
+  public Attribute removeAttribute(String name)
+  {
+    for (int i = _attributes.size() - 1; i >= 0; i--) {
+      Attribute attr = _attributes.get(i);
+
+      if (attr.getName().equals(name)) {
+	_attributes.remove(i);
+	return attr;
+      }
+    }
+
+    return null;
   }
 
   /**

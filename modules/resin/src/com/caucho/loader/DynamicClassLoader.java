@@ -1244,7 +1244,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 	      bBuf = enhancedBuffer;
 	      bLen = enhancedBuffer.length;
 
-	      if (_isVerbose)
+	      if (_isVerbose || true)
 		verbose(name, String.valueOf(byteCodeEnhancer));
 	    }
 	    /* RSN-109
@@ -1262,9 +1262,15 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       }
 
       try {
-        cl = defineClass(entry.getName(), bBuf, 0, bLen, entry.getCodeSource());
-      } catch (Throwable e) {
-        log().log(Level.FINE, e.toString(), e);
+        cl = defineClass(entry.getName(),
+			 bBuf, 0, bLen,
+			 entry.getCodeSource());
+      } catch (RuntimeException e) {
+        log().log(Level.FINE, entry.getName() + " [" + e.toString() + "]", e);
+
+	throw e;
+      } catch (Exception e) {
+        log().log(Level.FINE, entry.getName() + " [" + e.toString() + "]", e);
 
         ClassNotFoundException exn;
         exn = new ClassNotFoundException(entry.getName() + " [" + e + "]", e);
