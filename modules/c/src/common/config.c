@@ -586,7 +586,7 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	  dead_time = resin_atoi(value);
 	else if (! strcmp(buffer, "last-update")) {
 	  int last_update = resin_atoi(value);
-	  if (host && host->config->start_time < last_update) {
+	  if (host) {
 	    host->last_update = last_update;
 	  }
 	}
@@ -954,12 +954,15 @@ cse_update_host_from_resin(resin_host_t *host, time_t now)
 {
   stream_t s;
   char *uri = "";
+  time_t prev_update;
 
   if (cse_open_live_connection(&s, &host->config->config_cluster, now)) {
     int code;
     int len;
     int is_change;
 
+    prev_update = host->last_update;
+    
     host->last_update = now;
     
     hmux_start_channel(&s, 1);
@@ -984,7 +987,7 @@ cse_update_host_from_resin(resin_host_t *host, time_t now)
       cse_close(&s, "close");
 
     if (is_change > 0
-	|| host->last_file_update < host->start_time 
+	|| prev_update < host->config->start_time 
 	|| host->config->update_interval >= AUTO_WRITE_TIME) {
       write_config(host->config);
     }
@@ -1105,7 +1108,7 @@ cse_update_host(config_t *config, resin_host_t *host, time_t now)
     }
 
     if (now < host->last_update + config->update_interval
-	&& config->start_time < config->last_file_update) {
+	&& config->start_time <= host->last_update) {
       /*
        * If the cached value is still valid and Resin has been checked
        * at least once since startup, use the cached value.
