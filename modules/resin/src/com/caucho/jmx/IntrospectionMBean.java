@@ -431,6 +431,7 @@ v   * Returns the open mbean unmarshaller for the given return type.
 
         if (methodName.startsWith("get") && args.length == 0 &&
             ! retType.equals(void.class)) {
+	  Method getter = method;
           String name = methodName.substring(3);
 
           Method setter = getSetter(methods, name, retType);
@@ -450,9 +451,9 @@ v   * Returns the open mbean unmarshaller for the given return type.
 	  MBeanAttributeInfo attr;
 
           attr = new MBeanAttributeInfo(attributeName,
-					     getDescription(method),
-					     method,
-					     setter);
+					getDescription(method),
+					getter,
+					setter);
 
 	  /*
 	  Descriptor descriptor = attr.getDescriptor();
@@ -475,6 +476,7 @@ v   * Returns the open mbean unmarshaller for the given return type.
         else if (methodName.startsWith("is") && args.length == 0 &&
                  (retType.equals(boolean.class) ||
                   retType.equals(Boolean.class))) {
+	  Method getter = method;
           String name = methodName.substring(2);
 
           Method setter = getSetter(methods, name, retType);
@@ -493,11 +495,12 @@ v   * Returns the open mbean unmarshaller for the given return type.
 	    attributes.put(attributeName,
 			   new MBeanAttributeInfo(attributeName,
 						  getDescription(method),
-						  method,
+						  getter,
 						  setter));
 	  }
         }
         else if (methodName.startsWith("set") && args.length == 1) {
+	  Method setter = method;
           String name = methodName.substring(3);
 
           Method getter = getGetter(methods, name, args[0]);
@@ -517,8 +520,8 @@ v   * Returns the open mbean unmarshaller for the given return type.
 	      attributes.put(attributeName,
 			     new MBeanAttributeInfo(attributeName,
 						    getDescription(method),
-						    method,
-						    null));
+						    null,
+						    setter));
 	    }
 	  }
 	}

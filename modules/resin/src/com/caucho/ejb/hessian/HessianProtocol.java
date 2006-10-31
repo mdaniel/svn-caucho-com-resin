@@ -31,6 +31,7 @@ package com.caucho.ejb.hessian;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.*;
 import java.rmi.*;
 
 import javax.ejb.*;
@@ -55,6 +56,8 @@ import com.caucho.ejb.message.MessageServer;
 public class HessianProtocol extends ProtocolContainer
 {
   private static final L10N L = new L10N(HessianProtocol.class);
+  private static final Logger log
+    = Logger.getLogger(HessianProtocol.class.getName());
   
   private Class _objectSkelClass; 
   private Class _homeSkelClass;
@@ -95,6 +98,14 @@ public class HessianProtocol extends ProtocolContainer
   String calculateURL(String ejbName)
   {
     return getURLPrefix() + ejbName;
+  }
+
+  /**
+   * Adds a server to the protocol.
+   */
+  public void addServer(AbstractServer server)
+  {
+    log.fine("Hessian: add server " + server.getJndiName());
   }
 
   /**

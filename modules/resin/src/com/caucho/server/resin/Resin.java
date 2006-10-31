@@ -1428,6 +1428,19 @@ public class Resin implements EnvironmentBean, SchemaBean
     }
 
     /**
+     * Returns the version
+     *
+     * @return version
+     */
+    public String getVersionDate()
+    {
+      if (Alarm.isTest())
+	return "19980508T0251";
+      else
+	return com.caucho.Version.VERSION_DATE;
+    }
+
+    /**
      * Returns the local hostname
      *
      * @return version

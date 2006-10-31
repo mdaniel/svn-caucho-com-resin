@@ -132,7 +132,6 @@ public class EjbRef implements ObjectProxy {
   public void init()
     throws Exception
   {
-    System.out.println("BINDING: " + _link + " " + _name);
     log.warning("BINDING: " + _link + " " + _name);
     if (_link != null && ! _name.equals(_link))
       Jndi.bindDeepShort(_name, this);

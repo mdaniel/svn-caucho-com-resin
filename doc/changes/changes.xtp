@@ -12,8 +12,11 @@
 
 <s2 title="3.1snap - Oct 6, 2006">
 <ul>
+<li>JMX: getter/setter swapped for Introspector when no getter (#1390, rep by maltem)</li>
+<li>JSP: EL issues with .jspx files (#1433, rep by ccwf)</li>
+<li>Add resin.version and resin.versionDate to EL variables (rep by Bill Au)</li>
 <li>mod_caucho updates to avoid extra dispatch requests (rep by Steve Baugus)</li>
-<li>Amber now throws correct exceptions for non-entity arguments (#1380, rep by ferg)</li>
+<li>Amber now throws correct exceptions for non-entity arguments (#1380)</li>
 <li>JSP: BeanELResolver needs to check for null getter (rep by Matthew Schmidt)</li>
 <li>Log rotation now buffers during archiving</li>
 <li>Add DBPool.closeIdleConnections() (#1394, rep by M Young)</li>

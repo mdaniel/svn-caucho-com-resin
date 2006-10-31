@@ -389,7 +389,7 @@ public class AbstractRolloverLog {
       Path savedPath = null;
 
       synchronized (this) {
-	if (_isRollingOver)
+	if (_isRollingOver || now <= _nextRolloverCheckTime)
 	  return;
 
 	_isRollingOver = isRollingOver = true;

@@ -59,7 +59,7 @@
               target="${app.contextPath}/tutorial/rest-flickr"/>
     <redirect regexp="/.*/tutorial" target="${app.contextPath}/tutorial"/>
     
-    <redirect regexp="/quercus/" target="${app.contextPath}/doc/quercus.xtp"/>
+    <redirect regexp="/quercus/.*" target="${app.contextPath}/doc/quercus.xtp"/>
   </rewrite-dispatch>
     
   <web-app-deploy url-prefix="/tutorial"

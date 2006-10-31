@@ -273,9 +273,22 @@ public class EjbProtocolManager {
     
     try {
       String ejbName = server.getEJBName();
+      String jndiName = server.getJndiName();
 
-      if (server.getEJBHome() != null)
-	addServer(_remoteRoot, ejbName, server.getEJBHome());
+      if (server.getEJBHome() == null) {
+      }
+      else {
+	if (jndiName != null)
+	  addServer(_remoteRoot, jndiName, server.getEJBHome());
+
+	if (ejbName != null) {
+	  Thread.dumpStack();
+	  System.out.println("BIND: " + ejbName);
+	  Jndi.bindDeepShort("ejb/" + ejbName, server.getEJBHome());
+	}
+	// XXX:
+	// addServer(_remoteRoot, ejbName, server.getEJBHome());
+      }
     } catch (RuntimeException e) {
       throw e;
     } catch (NamingException e) {

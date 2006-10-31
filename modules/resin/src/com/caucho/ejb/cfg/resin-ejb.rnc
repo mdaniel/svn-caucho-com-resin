@@ -130,8 +130,14 @@ r_ejb-client-jar =
   attribute ejb-client-jar { string }
   | element ejb-client-jar { string }
 
+r_ejb-ref-Link = element ejb-ref {
+    r_ejb-ref-name
+
+    & r_jndi-name
+  }
 r_ejb_env =
   r_env-entry*,
+
   r_ejb-ref*,
   r_ejb-local-ref*,
   r_service-ref*,

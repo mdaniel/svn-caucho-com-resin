@@ -52,8 +52,9 @@ import com.caucho.util.*;
 
 import com.caucho.log.Log;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.*;
+
+import com.caucho.config.types.*;
 
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Depend;
@@ -64,12 +65,6 @@ import com.caucho.make.ClassDependency;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentBean;
-
-import com.caucho.config.DependencyBean;
-import com.caucho.config.ConfigException;
-import com.caucho.config.LineConfigException;
-
-import com.caucho.config.types.Period;
 
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.java.gen.BaseClass;
@@ -747,6 +742,11 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   public BuilderProgramContainer getServerProgram()
   {
     return _serverProgram;
+  }
+
+  public void addEjbRef(EjbRef ejbRef)
+  {
+    // XXX:
   }
 
   /**
