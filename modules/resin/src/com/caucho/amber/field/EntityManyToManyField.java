@@ -880,6 +880,10 @@ public class EntityManyToManyField extends AssociationField {
     //
     //
     // jpa/0s2j:
+
+    out.println("try {");
+    out.pushDepth();
+
     String var = "_caucho_" + getGetterName();
 
     out.print(var + " = new ");
@@ -919,9 +923,29 @@ public class EntityManyToManyField extends AssociationField {
       out.print(">");
     }
 
-    out.println("(__caucho_session, null);");
+    out.print("(__caucho_session, null");
+    if (isMap) {
+      out.print(", ");
+      out.print(getTargetType().getBeanClass().getName());
+      out.print(".class.getDeclaredMethod(\"get");
+      String getterMapKey = getMapKey();
+      getterMapKey = Character.toUpperCase(getterMapKey.charAt(0)) + getterMapKey.substring(1);
+      out.print(getterMapKey); // "getId");
+      out.print("\")");
+    }
+    out.println(");");
 
-    out.println(var + ".addAll(0, value);");
+    out.print(var + ".");
+
+    if (isMap)
+      out.println("putAll(value);");
+    else
+      out.println("addAll(0, value);");
+
+    out.popDepth();
+    out.println("} catch(Exception e) {");
+    out.println("  throw com.caucho.amber.AmberRuntimeException.create(e);");
+    out.println("}");
 
     out.popDepth();
     out.println("}");
