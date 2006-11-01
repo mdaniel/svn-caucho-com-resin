@@ -239,8 +239,7 @@ public class AmberContainer {
    */
   public String getPersistenceUnitJndiPrefix()
   {
-    //return "java:comp/env/persistence/PersistenceUnit/";
-    return "java:comp/env/persistence/";
+    return "java:comp/env/persistence/_amber_PersistenceUnit/";
   }
 
   /**

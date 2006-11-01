@@ -82,7 +82,7 @@ public class InjectIntrospector {
       }
     }
   }
-  
+
   /**
    * Analyzes a bean for @Inject tags, building an init program for them.
    */
@@ -145,13 +145,13 @@ public class InjectIntrospector {
 
   public static void
     configureClassResources(ArrayList<BuilderProgram> initList,
-			    Class type)
+                            Class type)
     throws ConfigException
   {
     Resources resources = (Resources) type.getAnnotation(Resources.class);
     if (resources != null) {
       for (Resource resource : resources.value()) {
-	introspectClassResource(initList, type, resource);
+        introspectClassResource(initList, type, resource);
       }
     }
 
@@ -167,8 +167,8 @@ public class InjectIntrospector {
 
   private static void
     introspectClassResource(ArrayList<BuilderProgram> initList,
-			    Class type,
-			    Resource resource)
+                            Class type,
+                            Resource resource)
     throws ConfigException
   {
     String name = resource.name();
@@ -177,9 +177,9 @@ public class InjectIntrospector {
 
     if (field != null) {
       initList.add(configureResource(field, field.getName(), field.getType(),
-				     resource.name(),
-				     resource.type().getName(),
-				     resource.name()));
+                                     resource.name(),
+                                     resource.type().getName(),
+                                     resource.name()));
 
       return;
     }
@@ -188,10 +188,10 @@ public class InjectIntrospector {
 
     if (method != null) {
       initList.add(configureResource(method, method.getName(),
-				     method.getParameterTypes()[0],
-				     resource.name(),
-				     resource.type().getName(),
-				     resource.name()));
+                                     method.getParameterTypes()[0],
+                                     resource.name(),
+                                     resource.type().getName(),
+                                     resource.name()));
 
       return;
     }
@@ -201,7 +201,7 @@ public class InjectIntrospector {
   {
     for (Field field : type.getDeclaredFields()) {
       if (field.getName().equals(name))
-	return field;
+        return field;
     }
 
     return null;
@@ -211,16 +211,16 @@ public class InjectIntrospector {
   {
     for (Method method : type.getDeclaredMethods()) {
       if (method.getParameterTypes().length != 1)
-	continue;
+        continue;
 
       String methodName = method.getName();
       if (! methodName.startsWith("set"))
-	continue;
+        continue;
 
       methodName = Introspector.decapitalize(methodName.substring(3));
 
       if (name.equals(methodName))
-	return method;
+        return method;
     }
 
     return null;
@@ -293,16 +293,16 @@ public class InjectIntrospector {
 
   private static void
     configureWebServiceRef(ArrayList<BuilderProgram> initList,
-			   AccessibleObject field,
-			   String fieldName,
-			   Class fieldType)
+                           AccessibleObject field,
+                           String fieldName,
+                           Class fieldType)
     throws ConfigException
   {
     WebServiceRef ref
       = (WebServiceRef) field.getAnnotation(WebServiceRef.class);
 
     String name = ref.name();
-      name = ref.name();
+    name = ref.name();
 
     if ("".equals(name))
       name = fieldName;
@@ -321,15 +321,15 @@ public class InjectIntrospector {
 
     if (Service.class.isAssignableFrom(fieldType)) {
       program = new ServiceInjectProgram(name,
-					 fieldType,
-					 inject);
+                                         fieldType,
+                                         inject);
     }
     else {
       program = new ServiceProxyInjectProgram(name,
-					      fieldType,
-					      inject);
+                                              fieldType,
+                                              inject);
     }
-    
+
     initList.add(program);
   }
 
@@ -413,6 +413,11 @@ public class InjectIntrospector {
         String ejbJndiName = null;
         while (iter.hasMore()) {
           NameClassPair pair = iter.next();
+
+          // Skip reserved prefixes.
+          // See com.caucho.amber.manager.AmberContainer
+          if (pair.getName().startsWith("_amber"))
+            continue;
 
           if (pair.getName().equals("resin-ejb"))
             ejbJndiName = jndiPrefix + '/' + pair.getName();
@@ -498,4 +503,3 @@ public class InjectIntrospector {
     return jndiName;
   }
 }
-
