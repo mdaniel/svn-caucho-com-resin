@@ -86,7 +86,10 @@ abstract public class JstlNode extends JspContainerNode {
   {
     if (var == null) {
     }
-    else if (scope == null || scope.equals("page")) {
+    else if (scope == null) {
+      out.println("pageContext.defaultSetOrRemove(\"" + var + "\", " + value + ");");
+    }
+    else if (scope.equals("page")) {
       out.println("pageContext.pageSetOrRemove(\"" + var + "\", " + value + ");");
     }
     else if (scope.equals("request")) {

@@ -1562,10 +1562,21 @@ public class PageContextImpl extends PageContext
   /**
    * Set/Remove a page attribute.
    */
-  public void pageSetOrRemove(String var, Object value)
+  public void defaultSetOrRemove(String var, Object value)
   {
     if (value != null)
       putAttribute(var, value);
+    else
+      removeAttribute(var);
+  }
+
+  /**
+   * Set/Remove a page attribute.
+   */
+  public void pageSetOrRemove(String var, Object value)
+  {
+    if (value != null)
+      _attributes.put(var, value);
     else
       _attributes.remove(var);
   }
