@@ -42,9 +42,11 @@
 
 package com.caucho.j2ee.appclient;
 
-import com.caucho.config.*;
-import com.caucho.config.types.*;
-import com.caucho.config.j2ee.*;
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+import com.caucho.config.j2ee.InjectIntrospector;
+import com.caucho.config.types.EjbRef;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
@@ -52,8 +54,15 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
+import com.caucho.java.WorkDir;
 
 import javax.naming.Context;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.NameCallback;
+import javax.security.auth.callback.PasswordCallback;
+import javax.security.auth.callback.UnsupportedCallbackException;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -66,6 +75,7 @@ public class AppClient implements EnvironmentBean
 
   private final EnvironmentClassLoader _loader;
 
+  private Path _workDir;
   private String _mainClassName;
   private Path _clientJar;
 
@@ -74,8 +84,10 @@ public class AppClient implements EnvironmentBean
   private String[] _mainArgs = new String[] {};
   private ArrayList<EjbRef> _ejbRefs = new ArrayList<EjbRef>();
 
-  private Class _jndiRemoteFactory;
-  private String _jndiRemoteUrl;
+  private Class _ejbRemoteFactory;
+  private String _ejbRemoteUrl;
+
+  private Class<CallbackHandler> _callbackHandler;
 
   private AppClient()
   {
@@ -85,6 +97,11 @@ public class AppClient implements EnvironmentBean
   public ClassLoader getClassLoader()
   {
     return _loader;
+  }
+
+  public void setWorkDir(Path workDir)
+  {
+    _workDir = workDir;
   }
 
   public void setId(String id)
@@ -99,14 +116,14 @@ public class AppClient implements EnvironmentBean
   {
   }
 
-  public void setJndiRemoteFactory(Class factory)
+  public void setEjbRemoteFactory(Class factory)
   {
-    _jndiRemoteFactory = factory;
+    _ejbRemoteFactory = factory;
   }
 
-  public void setJndiRemoteUrl(String url)
+  public void setEjbRemoteUrl(String url)
   {
-    _jndiRemoteUrl = url;
+    _ejbRemoteUrl = url;
   }
 
   private void addConfig(Path path)
@@ -134,13 +151,13 @@ public class AppClient implements EnvironmentBean
   {
     EjbRef ref = new EjbRef();
 
-    if (_jndiRemoteFactory != null)
+    if (_ejbRemoteFactory != null)
       ref.putJndiEnv(Context.INITIAL_CONTEXT_FACTORY,
-		     _jndiRemoteFactory.getName());
+                     _ejbRemoteFactory.getName());
 
-    if (_jndiRemoteUrl != null)
-      ref.putJndiEnv(Context.PROVIDER_URL, _jndiRemoteUrl);
-    
+    if (_ejbRemoteUrl != null)
+      ref.putJndiEnv(Context.PROVIDER_URL, _ejbRemoteUrl);
+
     _ejbRefs.add(ref);
 
     return ref;
@@ -161,6 +178,19 @@ public class AppClient implements EnvironmentBean
     // not needed
   }
 
+  public void setCallbackHandler(Class<CallbackHandler> callbackHandler)
+    throws Exception
+  {
+    CallbackManager callback = new CallbackManager();
+
+    CallbackHandler handler = callbackHandler.newInstance();
+
+    callback.handle(handler);
+
+    System.setProperty(Context.SECURITY_PRINCIPAL, callback.getName());
+    System.setProperty(Context.SECURITY_CREDENTIALS, callback.getPassword());
+  }
+
   public void init()
     throws Exception
   {
@@ -169,6 +199,19 @@ public class AppClient implements EnvironmentBean
 
     if (_clientJar == null)
       throw new ConfigException(L.l("'{0}' is required", "client-jar"));
+
+    if (_workDir == null) {
+      String name = _clientJar.getTail();
+
+      int lastDot = name.lastIndexOf(".");
+
+      if (lastDot > -1)
+        name = name.substring(0, lastDot);
+
+      _workDir = WorkDir.getLocalWorkDir(_loader).lookup("_appclient").lookup("_" + name);
+    }
+
+    WorkDir.setLocalWorkDir(_workDir, _loader);
 
     _loader.setId(toString());
     _loader.addJar(_clientJar);
@@ -179,39 +222,56 @@ public class AppClient implements EnvironmentBean
     try {
       thread.setContextClassLoader(_loader);
 
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, L.l("work-dir is {1}", this, WorkDir.getLocalWorkDir()));
+
       JarPath jarPath = JarPath.create(_clientJar);
 
-      Path xml = jarPath.lookup("META-INF/application-client.xml");
-
-      System.out.println(L.l("APP-CLIENT: reading configuration file {0} from {1}", xml, jarPath));
-
-      if (xml.canRead()) {
-        log.log(Level.FINE, L.l("reading configuration file {0} from {1}", xml, jarPath));
-
-        new Config().configureBean(this, xml, "com/caucho/server/e_app/app-client.rnc");
-      }
+      configureFrom(jarPath.lookup("META-INF/application-client.xml"), true, true);
+      configureFrom(jarPath.lookup("META-INF/resin-application-client.xml"), true, false);
 
       if (_mainClassName == null)
         throw new ConfigException(L.l("'main-class' is required"));
 
       Class<?> mainClass = Class.forName(_mainClassName, false, _loader);
 
-      // XXX: missing QA
       ArrayList<BuilderProgram> programList
 	= InjectIntrospector.introspectStatic(mainClass);
 
-      System.out.println("CONFIGURE: " + mainClass + " " + programList);
       for (BuilderProgram program : programList) {
-	program.configure((Object) null);
+        if (log.isLoggable(Level.FINEST))
+          log.log(Level.FINER, "configure: " + program);
+
+        program.configure((Object) null);
       }
-      
+
       _mainMethod = mainClass.getMethod("main", String[].class);
-      System.out.println("MM:" + _mainMethod);
 
       _lifecycle.setName(toString());
       _lifecycle.toInit();
     } finally {
       thread.setContextClassLoader(oldLoader);
+    }
+  }
+
+  private void configureFrom(Path xml, boolean optional, boolean validate)
+    throws Exception
+  {
+    if (xml.canRead()) {
+      if (log.isLoggable(Level.FINE))
+        log.log(Level.FINE, L.l("reading configuration file {0}", xml));
+
+      if (validate)
+        new Config().configureBean(this, xml, "com/caucho/server/e_app/app-client.rnc");
+      else
+        new Config().configureBean(this, xml);
+    }
+    else {
+      if (!optional)
+        throw new ConfigException(L.l("missing required configuration file {0}", xml));
+
+      if (log.isLoggable(Level.FINEST))
+        log.log(Level.FINEST, L.l("no configuration file {0}", xml));
     }
   }
 
@@ -244,32 +304,45 @@ public class AppClient implements EnvironmentBean
     String ear = null;
     String main = null;
     String conf = null;
+    String workDir = null;
     String []mainArgs = null;
 
     EnvironmentClassLoader.initializeEnvironment();
 
     for (int i = 0; i < args.length; i++) {
-      if (args[i].equals("-conf")) {
-        conf = args[i + 1];
-        i++;
-      }
-      else if (args[i].equals("-client-jar")) {
-        clientJar = args[i + 1];
-        i++;
-      }
-      else if (args[i].equals("-main")) {
-        main = args[i + 1];
-        i++;
+      String arg = args[i];
 
-        mainArgs = new String[args.length - i - 1];
-        System.arraycopy(args, i + 1, mainArgs, 0, mainArgs.length);
-        break;
+      if (arg.startsWith("-")) {
+        String option = arg.substring((arg.startsWith("--")) ? 2 : 1);
+
+        if (option.equals("conf")) {
+          conf = args[++i];
+          continue;
+        }
+        else if (option.equals("client-jar")) {
+          clientJar = args[++i];
+          continue;
+        }
+        else if (option.equals("work-dir")) {
+          workDir = args[++i];
+          continue;
+        }
+        else if (option.equals("main")) {
+          main = args[++i];
+
+          mainArgs = new String[args.length - i - 1];
+          System.arraycopy(args, i + 1, mainArgs, 0, mainArgs.length);
+          break;
+        }
       }
-      else
-        throw new ConfigException(L.l("unknown arg '{0}'", args[i]));
+
+      throw new ConfigException(L.l("unknown arg '{0}'", args[i]));
     }
 
     AppClient appClient = new AppClient();
+
+    if (workDir != null)
+      appClient.setWorkDir(Vfs.lookup(workDir));
 
     if (clientJar != null)
       appClient.setClientJar(Vfs.lookup(clientJar));
@@ -284,6 +357,40 @@ public class AppClient implements EnvironmentBean
       appClient.setMainArgs(mainArgs);
 
     appClient.run();
+  }
+
+  public class CallbackManager
+  {
+    private final NameCallback _nameCallback;
+    private final PasswordCallback _passwordCallback;
+
+    public CallbackManager()
+    {
+      _nameCallback = new NameCallback(L.l("Name"));
+      _passwordCallback = new PasswordCallback(L.l("Password"), false);
+
+    }
+
+    public void handle(CallbackHandler handler)
+      throws IOException, UnsupportedCallbackException
+    {
+      Callback[] callbacks = new Callback[]{
+        _nameCallback,
+        _passwordCallback
+      };
+
+      handler.handle(callbacks);
+    }
+
+    public String getName()
+    {
+      return _nameCallback.getName();
+    }
+
+    public String getPassword()
+    {
+      return new String(_passwordCallback.getPassword());
+    }
   }
 }
 

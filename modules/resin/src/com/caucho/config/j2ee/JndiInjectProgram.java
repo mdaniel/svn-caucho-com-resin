@@ -28,14 +28,14 @@
 
 package com.caucho.config.j2ee;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
-
-import javax.naming.InitialContext;
-
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.ConfigException;
+import com.caucho.config.NodeBuilder;
 import com.caucho.util.L10N;
 
-import com.caucho.config.*;
+import javax.naming.InitialContext;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public class JndiInjectProgram extends BuilderProgram {
   private static final L10N L = new L10N(JndiInjectProgram.class);
@@ -49,11 +49,14 @@ public class JndiInjectProgram extends BuilderProgram {
     _method = method;
   }
 
+  @Override
   public void configureImpl(NodeBuilder builder, Object bean)
     throws ConfigException
   {
     try {
       Object value = new InitialContext().lookup(_jndiName);
+
+      System.out.println("XXX: inject program for " + _jndiName + " results in " + value);
 
       _method.invoke(bean, value);
     } catch (RuntimeException e) {
@@ -65,9 +68,16 @@ public class JndiInjectProgram extends BuilderProgram {
     }
   }
 
+  @Override
   public Object configureImpl(NodeBuilder builder, Class type)
     throws ConfigException
   {
     throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _jndiName + "," + _method + "]";
   }
 }

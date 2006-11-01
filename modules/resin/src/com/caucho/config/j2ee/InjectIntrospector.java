@@ -29,39 +29,29 @@
 
 package com.caucho.config.j2ee;
 
-import java.beans.Introspector;
-
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
-import java.util.ArrayList;
-
-import java.util.concurrent.*;
-
-import java.util.logging.*;
-
-import javax.sql.DataSource;
-
-import javax.naming.*;
-
-import javax.transaction.UserTransaction;
-
-import javax.annotation.*;
-
-import javax.ejb.EJB;
-import javax.ejb.EJBHome;
-
-import javax.persistence.PersistenceUnit;
-import javax.persistence.PersistenceContext;
-
-import javax.xml.ws.*;
-
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.ConfigException;
+import javax.annotation.Resource;
+import javax.annotation.Resources;
+import javax.ejb.EJB;
+import javax.naming.InitialContext;
+import javax.naming.NameClassPair;
+import javax.naming.NamingEnumeration;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceUnit;
+import javax.transaction.UserTransaction;
+import javax.xml.ws.Service;
+import javax.xml.ws.WebServiceRef;
+import java.beans.Introspector;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Analyzes a bean for @Inject tags.
@@ -495,10 +485,17 @@ public class InjectIntrospector {
     if (colon < 0 || slash > 0 && slash < colon)
       jndiName = "java:comp/env/" + jndiName;
 
+    BuilderProgram program;
+
     if (field instanceof Method)
-      return new JndiInjectProgram(jndiName, (Method) field);
+      program = new JndiInjectProgram(jndiName, (Method) field);
     else
-      return new JndiFieldInjectProgram(jndiName, (Field) field);
+      program = new JndiFieldInjectProgram(jndiName, (Field) field);
+
+    if (log.isLoggable(Level.FINEST))
+      log.log(Level.FINEST,  String.valueOf(program));
+
+    return program;
   }
 
   private static String toFullName(String jndiName)

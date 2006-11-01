@@ -29,15 +29,16 @@
 
 package com.caucho.config.j2ee;
 
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.ConfigException;
+import com.caucho.config.NodeBuilder;
+import com.caucho.util.L10N;
+
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-
-import java.util.logging.*;
-
-import javax.naming.*;
-
-import com.caucho.config.*;
-import com.caucho.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class JndiFieldInjectProgram extends BuilderProgram {
@@ -54,6 +55,7 @@ public class JndiFieldInjectProgram extends BuilderProgram {
     _field = field;
   }
 
+  @Override
   public void configureImpl(NodeBuilder builder, Object bean)
     throws ConfigException
   {
@@ -83,9 +85,16 @@ public class JndiFieldInjectProgram extends BuilderProgram {
     }
   }
 
-  public Object configure(NodeBuilder builder, Class type)
+  @Override
+  public Object configureImpl(NodeBuilder builder, Class type)
     throws ConfigException
   {
     throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _jndiName + "," + _field + "]";
   }
 }

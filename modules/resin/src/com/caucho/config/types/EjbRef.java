@@ -29,19 +29,21 @@
 
 package com.caucho.config.types;
 
-import java.util.*;
-import java.util.logging.*;
-import java.rmi.*;
+import com.caucho.ejb.EJBServer;
+import com.caucho.ejb.protocol.IiopProtocolContainer;
+import com.caucho.naming.Jndi;
+import com.caucho.naming.ObjectProxy;
+import com.caucho.util.L10N;
 
-import javax.annotation.*;
-
-import javax.ejb.*;
-import javax.naming.*;
-
-import com.caucho.util.*;
-import com.caucho.naming.*;
-import com.caucho.ejb.*;
-import com.caucho.ejb.protocol.*;
+import javax.annotation.PostConstruct;
+import javax.ejb.EJBHome;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import java.rmi.RemoteException;
+import java.util.Hashtable;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * Configuration for the ejb-ref
@@ -70,7 +72,7 @@ public class EjbRef implements ObjectProxy {
   public void setDescription(String description)
   {
   }
-  
+
   public void setEjbRefName(String name)
   {
     _name = name;
@@ -132,11 +134,13 @@ public class EjbRef implements ObjectProxy {
   public void init()
     throws Exception
   {
-    log.warning("BINDING: " + _link + " " + _name);
-    if (_link != null && ! _name.equals(_link))
+    if (log.isLoggable(Level.FINER))
+      log.log(Level.FINER, L.l("{0} init", this));
+
+    if (_name != null && ! _name.equals(_link))
       Jndi.bindDeepShort(_name, this);
   }
-  
+
   /**
    * Creates the object from the proxy.
    *
@@ -148,17 +152,17 @@ public class EjbRef implements ObjectProxy {
     if (_jndiEnv != null && _link != null) {
       return new InitialContext(_jndiEnv).lookup(_link);
     }
-    
+
     EJBServer server = EJBServer.getLocal();
 
     if (server != null) {
       try {
-	EJBHome home = server.findRemoteEJB(_link);
+        EJBHome home = server.findRemoteEJB(_link);
 
-	if (home != null)
-	  return home;
+        if (home != null)
+          return home;
       } catch (RemoteException e) {
-	throw new NamingException(e.toString());
+        throw new NamingException(e.toString());
       }
     }
 
@@ -174,6 +178,6 @@ public class EjbRef implements ObjectProxy {
 
   public String toString()
   {
-    return "EjbRef[" + _name + "]";
+    return "EjbRef[" + _name + ", " + _link + "]";
   }
 }

@@ -80,8 +80,6 @@ abstract public class ResinELContext
 
   public Object getValue(String var)
   {
-    System.out.println("XXX: getValue " + var + " " + this);
-
     // backwards compatibility
 
     if ("resinHome".equals(var) || "resin-home".equals(var))

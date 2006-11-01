@@ -28,20 +28,16 @@
 
 package com.caucho.ejb.hessian;
 
-import java.util.*;
-import java.io.*;
-
-import javax.naming.*;
-import javax.naming.spi.*;
-
-import com.caucho.util.*;
-import com.caucho.naming.*;
-import com.caucho.vfs.*;
-import com.caucho.jsp.*;
-import com.caucho.server.*;
-import com.caucho.sql.*;
-import com.caucho.ejb.*;
 import com.caucho.config.ConfigException;
+import com.caucho.naming.AbstractModel;
+import com.caucho.naming.ContextImpl;
+import com.caucho.util.Base64;
+import com.caucho.util.L10N;
+
+import javax.naming.Context;
+import javax.naming.NamingException;
+import javax.naming.spi.InitialContextFactory;
+import java.util.Hashtable;
 
 /**
  * The root context factory.
