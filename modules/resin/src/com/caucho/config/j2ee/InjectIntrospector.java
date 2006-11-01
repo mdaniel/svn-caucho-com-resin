@@ -95,6 +95,15 @@ public class InjectIntrospector {
   /**
    * Analyzes a bean for @Inject tags, building an init program for them.
    */
+  public static ArrayList<BuilderProgram> introspectStatic(Class type)
+    throws ConfigException
+  {
+    return introspect(type);
+  }
+
+  /**
+   * Analyzes a bean for @Inject tags, building an init program for them.
+   */
   public static ArrayList<BuilderProgram> introspect(Class type)
     throws ConfigException
   {
@@ -286,7 +295,7 @@ public class InjectIntrospector {
     EJB ejb = (EJB) field.getAnnotation(javax.ejb.EJB.class);
 
     initList.add(configureResource(field, fieldName, fieldType,
-                                   ejb.name(),
+                                   ejb.beanName(),
                                    "javax.ejb.EJBLocalObject",
                                    ejb.name()));
   }

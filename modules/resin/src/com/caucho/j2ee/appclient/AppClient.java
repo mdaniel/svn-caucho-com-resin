@@ -42,9 +42,9 @@
 
 package com.caucho.j2ee.appclient;
 
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.EjbRef;
+import com.caucho.config.*;
+import com.caucho.config.types.*;
+import com.caucho.config.j2ee.*;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
@@ -195,7 +195,18 @@ public class AppClient implements EnvironmentBean
         throw new ConfigException(L.l("'main-class' is required"));
 
       Class<?> mainClass = Class.forName(_mainClassName, false, _loader);
+
+      // XXX: missing QA
+      ArrayList<BuilderProgram> programList
+	= InjectIntrospector.introspectStatic(mainClass);
+
+      System.out.println("CONFIGURE: " + mainClass + " " + programList);
+      for (BuilderProgram program : programList) {
+	program.configure((Object) null);
+      }
+      
       _mainMethod = mainClass.getMethod("main", String[].class);
+      System.out.println("MM:" + _mainMethod);
 
       _lifecycle.setName(toString());
       _lifecycle.toInit();
