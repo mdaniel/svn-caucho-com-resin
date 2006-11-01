@@ -1053,6 +1053,15 @@ caucho_status(request_rec *r)
 
   if (config->error)
     ap_rprintf(r, "<h2 color='red'>Error : %s</h2>\n", config->error);
+
+  ap_rprintf(r, "<table border='0'>");
+  ap_rprintf(r, "<tr><th>Session Cookie</th><td>'%s'</td></tr>",
+	     config->session_cookie);
+  ap_rprintf(r, "<tr><th>Session URL</th><td>'%s'</td></tr>",
+	     config->session_url_prefix);
+  ap_rprintf(r, "<tr><th>Config Check Interval</th><td>%ds</td></tr>",
+	     config->update_interval);
+  ap_rprintf(r, "</table>");
   
   ap_rprintf(r, "<h2>Configuration Cluster</h2>\n");
   jvm_status(&config->config_cluster, r);

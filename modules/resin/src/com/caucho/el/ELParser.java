@@ -159,8 +159,20 @@ public class ELParser {
 
           exprString.clear();
 
-          for (ch = read(); ch > 0 && ch != '}'; ch = read())
+          for (ch = read(); ch > 0 && ch != '}'; ch = read()) {
             exprString.append((char) ch);
+	    
+	    if (ch == '\'' || ch == '"') {
+	      int end = ch;
+
+	      for (ch = read(); ch > 0 && ch != end; ch = read()) {
+		exprString.append((char) ch);
+	      }
+
+	      if (ch > 0)
+		exprString.append((char) ch);
+	    }
+	  }
 
 	  if (ch != '}')
 	    throw error(L.l("expected '}' at end of EL expression",

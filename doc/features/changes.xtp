@@ -4,6 +4,9 @@
 
 <s2 title='3.0.snap - Sep 7, 2006'>
 <ul>
+<li>JMX: getter/setter swapped for Introspector when no getter (#1390, rep by maltem)</li>
+<li>JSP: EL issues with .jspx files (#1433, rep by ccwf)</li>
+<li>Add resin.version and resin.versionDate to EL variables (rep by Bill Au)</li>
 <li>mod_caucho updates to avoid extra dispatch requests (rep by Steve Baugus)</li>
 <li>jsp:useBean in tag file was using unavailable objects (#1389, rep by Matthew Schmidt)</li>
 <li>JSP tag file adds attributes as java variables (#1389, rep by Matthew Schmidt)</li>

@@ -517,8 +517,8 @@ v   * Returns the open mbean unmarshaller for the given return type.
 	      attributes.put(attributeName,
 			     new MBeanAttributeInfo(attributeName,
 						    getDescription(method),
-						    method,
-						    null));
+						    null,
+						    method));
 	    }
 	  }
 	}

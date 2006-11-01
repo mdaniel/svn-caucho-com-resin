@@ -134,10 +134,16 @@ public class JspContentHandler extends DefaultHandler {
 	  if (buf[offset] == '\'') {
 	    for (offset++; offset < end && buf[offset] != '\''; offset++) {
 	    }
+
+	    if (offset < end)
+	      offset++;
 	  }
 	  else if (buf[offset] == '"') {
 	    for (offset++; offset < end && buf[offset] != '"'; offset++) {
 	    }
+
+	    if (offset < end)
+	      offset++;
 	  }
 	  else
 	    offset++;
@@ -152,6 +158,7 @@ public class JspContentHandler extends DefaultHandler {
 
 	_builder.startElement(qname);
 	_builder.attribute(new QName("value"), value);
+	_builder.attribute(new QName("escapeXml"), "false");
 	_builder.endAttributes();
 	_builder.endElement("resin-c:out");
 

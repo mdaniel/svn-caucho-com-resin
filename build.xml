@@ -326,11 +326,14 @@
     <mkdir dir="${install}/win32"/>
     <mkdir dir="${install}/win32/apache-1.3"/>
     <mkdir dir="${install}/win32/apache-2.0"/>
+    <mkdir dir="${install}/win32/apache-2.2"/>
 
     <copy todir="${install}/win32/apache-1.3"
           file="${win32binaries}/modules/c/src/apache1/Apache136/mod_caucho.dll"/>
     <copy todir="${install}/win32/apache-2.0"
           file="${win32binaries}/modules/c/src/apache2/Release/mod_caucho.dll"/>
+    <copy todir="${install}/win32/apache-2.2"
+          file="${win32binaries}/modules/c/src/apache22/Release/mod_caucho.dll"/>
     <copy todir="${install}/win32"
           file="${win32binaries}/modules/c/src/isapi_srun/release/isapi_srun.dll"/>
     <copy todir="${install}/win32"
