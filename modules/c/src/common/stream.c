@@ -390,9 +390,11 @@ cse_open(stream_t *s, cluster_t *cluster, cluster_srun_t *cluster_srun,
   s->cluster_srun = cluster_srun;
   s->sent_data = 0;
 
+  memset(&sin, 0, sizeof(sin));
   sin.sin_family = AF_INET;
-  if (srun->host)
-    sin.sin_addr = *srun->host;
+  if (srun->host) {
+    memcpy(&sin.sin_addr, srun->host, sizeof(struct in_addr));
+  }
   else
     sin.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
