@@ -132,6 +132,11 @@ public interface AmberField {
   public boolean isAbstract();
 
   /**
+   * Returns true if the field is cascadable.
+   */
+  public boolean isCascadable();
+
+  /**
    * Returns true for an updateable field.
    */
   public boolean isUpdateable();

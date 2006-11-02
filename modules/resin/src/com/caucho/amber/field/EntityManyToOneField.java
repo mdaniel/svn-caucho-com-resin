@@ -35,6 +35,8 @@ import java.util.HashSet;
 
 import java.util.logging.Logger;
 
+import javax.persistence.CascadeType;
+
 import com.caucho.util.L10N;
 import com.caucho.util.CharBuffer;
 
@@ -62,7 +64,7 @@ import com.caucho.amber.query.QueryParser;
 /**
  * Represents a many-to-one link pointing to an entity.
  */
-public class EntityManyToOneField extends AbstractField {
+public class EntityManyToOneField extends CascadableField {
   private static final L10N L = new L10N(EntityManyToOneField.class);
   private static final Logger log = Log.open(EntityManyToOneField.class);
 
@@ -81,10 +83,19 @@ public class EntityManyToOneField extends AbstractField {
   private boolean _isSourceCascadeDelete;
   private boolean _isTargetCascadeDelete;
 
-  public EntityManyToOneField(EntityType entityType, String name)
+  public EntityManyToOneField(EntityType entityType,
+                              String name,
+                              CascadeType[] cascadeType)
     throws ConfigException
   {
-    super(entityType, name);
+    super(entityType, name, cascadeType);
+  }
+
+  public EntityManyToOneField(EntityType entityType,
+                              String name)
+    throws ConfigException
+  {
+    this(entityType, name, null);
   }
 
   public EntityManyToOneField(EntityType entityType)

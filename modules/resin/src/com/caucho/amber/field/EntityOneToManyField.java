@@ -37,6 +37,8 @@ import java.util.Set;
 
 import java.util.logging.Logger;
 
+import javax.persistence.CascadeType;
+
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JField;
 import com.caucho.bytecode.JMethod;
@@ -77,10 +79,19 @@ public class EntityOneToManyField extends CollectionField {
 
   private EntityManyToOneField _sourceField;
 
-  public EntityOneToManyField(EntityType entityType, String name)
+  public EntityOneToManyField(EntityType entityType,
+                              String name,
+                              CascadeType[] cascadeTypes)
     throws ConfigException
   {
-    super(entityType, name);
+    super(entityType, name, cascadeTypes);
+  }
+
+  public EntityOneToManyField(EntityType entityType,
+                              String name)
+    throws ConfigException
+  {
+    this(entityType, name, null);
   }
 
   public EntityOneToManyField(EntityType entityType)

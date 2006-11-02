@@ -29,6 +29,7 @@
 package com.caucho.amber.field;
 
 import java.util.logging.Logger;
+import javax.persistence.CascadeType;
 import com.caucho.util.L10N;
 import com.caucho.log.Log;
 import com.caucho.config.ConfigException;
@@ -42,13 +43,15 @@ import com.caucho.amber.table.LinkColumns;
 public class AssociationField extends CollectionField {
   private static final L10N L = new L10N(AssociationField.class);
   protected static final Logger log = Log.open(AssociationField.class);
-  
+
   private LinkColumns _linkColumns;
 
-  public AssociationField(EntityType entityType, String name)
+  public AssociationField(EntityType entityType,
+                          String name,
+                          CascadeType[] cascadeTypes)
     throws ConfigException
   {
-    super(entityType, name);
+    super(entityType, name, cascadeTypes);
   }
 
   public AssociationField(EntityType entityType)

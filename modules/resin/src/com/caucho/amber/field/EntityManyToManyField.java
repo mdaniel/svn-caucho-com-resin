@@ -37,6 +37,8 @@ import java.util.Set;
 
 import java.util.logging.Logger;
 
+import javax.persistence.CascadeType;
+
 import com.caucho.util.L10N;
 import com.caucho.util.CharBuffer;
 
@@ -81,10 +83,19 @@ public class EntityManyToManyField extends AssociationField {
   private ArrayList<String> _orderByFields;
   private ArrayList<Boolean> _orderByAscending;
 
-  public EntityManyToManyField(EntityType entityType, String name)
+  public EntityManyToManyField(EntityType entityType,
+                               String name,
+                               CascadeType[] cascadeTypes)
     throws ConfigException
   {
-    super(entityType, name);
+    super(entityType, name, cascadeTypes);
+  }
+
+  public EntityManyToManyField(EntityType entityType,
+                               String name)
+    throws ConfigException
+  {
+    this(entityType, name, null);
   }
 
   public EntityManyToManyField(EntityType entityType)
@@ -94,10 +105,11 @@ public class EntityManyToManyField extends AssociationField {
 
   public EntityManyToManyField(EntityType entityType,
                                String name,
-                               EntityManyToManyField source)
+                               EntityManyToManyField source,
+                               CascadeType[] cascadeTypes)
     throws ConfigException
   {
-    super(entityType, name);
+    super(entityType, name, cascadeTypes);
 
     _targetType = source.getSourceType();
     _associationTable = source._associationTable;

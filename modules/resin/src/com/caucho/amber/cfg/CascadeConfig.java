@@ -29,65 +29,77 @@
 
 package com.caucho.amber.cfg;
 
+import java.util.HashSet;
+
+import javax.persistence.CascadeType;
+
+
 /**
  * <cascade> tag in orm.xml
  */
 public class CascadeConfig {
 
   // elements
-  private boolean _cascadeAll;
-  private boolean _cascadePersist;
-  private boolean _cascadeMerge;
-  private boolean _cascadeRemove;
-  private boolean _cascadeRefresh;
+  private HashSet<CascadeType> _cascadeSet
+    = new HashSet<CascadeType>();
+
+  protected CascadeType[] getCascadeTypes() {
+    CascadeType cascade[] = new CascadeType[_cascadeSet.size()];
+    return _cascadeSet.toArray(cascade);
+  }
 
   public boolean getCascadeAll()
   {
-    return _cascadeAll;
+    return _cascadeSet.contains(CascadeType.ALL);
   }
 
   public void setCascadeAll(boolean cascadeAll)
   {
-    _cascadeAll = cascadeAll;
+    if (cascadeAll)
+      _cascadeSet.add(CascadeType.ALL);
   }
 
   public boolean getCascadePersist()
   {
-    return _cascadePersist;
+    return _cascadeSet.contains(CascadeType.PERSIST);
   }
 
   public void setCascadePersist(boolean cascadePersist)
   {
-    _cascadePersist = cascadePersist;
+    if (cascadePersist)
+      _cascadeSet.add(CascadeType.PERSIST);
   }
 
   public boolean getCascadeMerge()
   {
-    return _cascadeMerge;
+    return _cascadeSet.contains(CascadeType.MERGE);
   }
 
   public void setCascadeMerge(boolean cascadeMerge)
   {
-    _cascadeMerge = cascadeMerge;
+    if (cascadeMerge)
+      _cascadeSet.add(CascadeType.MERGE);
   }
 
   public boolean getCascadeRemove()
   {
-    return _cascadeRemove;
+    return _cascadeSet.contains(CascadeType.REMOVE);
   }
 
   public void setCascadeRemove(boolean cascadeRemove)
   {
-    _cascadeRemove = cascadeRemove;
+    if (cascadeRemove)
+      _cascadeSet.add(CascadeType.REMOVE);
   }
 
   public boolean getCascadeRefresh()
   {
-    return _cascadeRefresh;
+    return _cascadeSet.contains(CascadeType.REFRESH);
   }
 
   public void setCascadeRefresh(boolean cascadeRefresh)
   {
-    _cascadeRefresh = cascadeRefresh;
+    if (cascadeRefresh)
+      _cascadeSet.add(CascadeType.REFRESH);
   }
 }

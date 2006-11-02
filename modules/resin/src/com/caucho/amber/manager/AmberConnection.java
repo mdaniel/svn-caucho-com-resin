@@ -270,7 +270,26 @@ public class AmberConnection
       if (! (entity instanceof Entity))
         throw new IllegalArgumentException("persist() operation can only be applied to an entity instance. If the argument is an entity, the corresponding class must be specified in the scope of a persistence unit.");
 
-      create(entity);
+      Entity instance = (Entity) entity;
+
+      // jpa/0h24
+      // Persist child entities first to pass foreign key constraints.
+      instance.__caucho_cascadePersist(this);
+
+      int state = instance.__caucho_getEntityState();
+
+      if (state == Entity.TRANSIENT) {
+        create(instance);
+      }
+      else if (state >= Entity.P_DELETING) {
+        // removed entity instance, reset state and persist.
+        instance.__caucho_makePersistent(null, (EntityType) null);
+        create(instance);
+      }
+      else {
+        // managed entity instance: ignored, i.e.
+        // only the cascade is performed, see above.
+      }
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -1141,6 +1160,23 @@ public class AmberConnection
       for (int i = _txEntities.size() - 1; i >= 0; i--) {
         Entity entity = _txEntities.get(i);
 
+        int state = entity.__caucho_getEntityState();
+
+        // jpa/0h27: for all entities Y referenced by a *managed*
+        // entity X, where the relationship has been annotated
+        // with cascade=PERSIST/ALL, the persist operation is
+        // applied to Y. It is a lazy cascade as the relationship
+        // is not always initialized at the time persist(X) was
+        // called but must be at flush time.
+        if (state < Entity.P_DELETING) {
+          entity.__caucho_cascadePersist(this);
+          state = entity.__caucho_getEntityState();
+        }
+      }
+
+      for (int i = _txEntities.size() - 1; i >= 0; i--) {
+        Entity entity = _txEntities.get(i);
+
         entity.__caucho_flush();
       }
 
@@ -1383,7 +1419,10 @@ public class AmberConnection
   public void create(AmberEntityHome home, Object obj)
     throws SQLException
   {
-    flush(); // need to flush things like delete
+    // XXX: flushing things like delete might be useful?
+    // XXX: the issue is a flush can break FK constraints and
+    //      fail prematurely (jpa/0h26).
+    // commented out: flush();
 
     if (contains(obj)) {
       return;

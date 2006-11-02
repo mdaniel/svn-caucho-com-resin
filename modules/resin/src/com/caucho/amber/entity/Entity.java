@@ -65,6 +65,12 @@ public interface Entity {
     throws SQLException;
 
   /**
+   * Cascades the persist operation to child entities.
+   */
+  public void __caucho_cascadePersist(AmberConnection aConn)
+    throws SQLException;
+
+  /**
    * Detatch the entity
    */
   public void __caucho_detach();

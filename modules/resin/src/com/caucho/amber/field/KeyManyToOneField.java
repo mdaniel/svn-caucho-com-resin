@@ -66,10 +66,10 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
   // fields
   private ArrayList<KeyPropertyField> _idFields =
     new ArrayList<KeyPropertyField>();
-  
+
   // use field accessors to get key values.
   private boolean _isKeyField;
-  
+
   public KeyManyToOneField(EntityType entityType, String name)
     throws ConfigException
   {
@@ -77,8 +77,8 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
   }
 
   public KeyManyToOneField(EntityType entityType,
-			   String name,
-			   LinkColumns columns)
+                           String name,
+                           LinkColumns columns)
     throws ConfigException
   {
     super(entityType, name);
@@ -190,15 +190,15 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
 
     if (_idFields.size() != keys.size()) {
       try {
-	init();
+        init();
       } catch (Exception e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
     }
 
     for (int i = 0; i < keys.size(); i++) {
       if (keys.get(i) == field)
-	return _idFields.get(i);
+        return _idFields.get(i);
     }
 
     throw new IllegalStateException(field.toString());
@@ -230,14 +230,14 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
     String prefix = id + "." + getName();
 
     ArrayList<IdField> keys = getEntityType().getId().getKeys();
-    
+
     for (int i = 0; i < keys.size(); i++) {
       if (i != 0)
-	cb.append(" and ");
+        cb.append(" and ");
 
       cb.append(keys.get(i).generateRawWhere(prefix));
     }
-    
+
     return cb.toString();
   }
 
@@ -271,11 +271,11 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
    * Returns the foreign type.
    */
   public int generateLoadForeign(JavaWriter out, String rs,
-				 String indexVar, int index)
+                                 String indexVar, int index)
     throws IOException
   {
     return generateLoadForeign(out, rs, indexVar, index,
-			       getForeignTypeName().replace('.', '_'));
+                               getForeignTypeName().replace('.', '_'));
   }
 
   /**
@@ -283,7 +283,7 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
    */
   public String generateSuperGetter()
   {
-    if (isAbstract() ||	getGetterMethod() == null)
+    if (isAbstract() || getGetterMethod() == null)
       return getFieldName();
     else
       return getGetterMethod().getName() + "()";
@@ -294,7 +294,7 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
    */
   public String generateSuperSetter(String value)
   {
-    if (isAbstract() ||	getGetterMethod() == null || getSetterMethod() == null)
+    if (isAbstract() || getGetterMethod() == null || getSetterMethod() == null)
       return(getFieldName() + " = " + value + ";");
     else
       return getSetterMethod().getName() + "(" + value + ")";
@@ -304,16 +304,16 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
    * Returns the foreign type.
    */
   public int generateLoadForeign(JavaWriter out, String rs,
-				 String indexVar, int index,
-				 String name)
+                                 String indexVar, int index,
+                                 String name)
     throws IOException
   {
     out.print("(" + getForeignTypeName() + ") ");
-    
+
     out.print("aConn.loadProxy(\"" + getEntityType().getName() + "\", ");
     index = getEntityType().getId().generateLoadForeign(out, rs, indexVar, index,
-						getName());
-    
+                                                        getName());
+
     out.println(");");
 
     return index;
@@ -326,16 +326,16 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
     throws IOException
   {
     super.generatePrologue(out, completedSet);
-    
+
     if (isAbstract()) {
       out.println();
-      
+
       out.println();
       out.println("public " + getJavaTypeName() + " " + getGetterName() + "()");
       out.println("{");
       out.println("  return " + getFieldName() + ";");
       out.println("}");
-      
+
       out.println();
       out.println("public void " + getSetterName() + "(" + getJavaTypeName() + " v)");
       out.println("{");
@@ -348,11 +348,11 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
    * Generates the set clause.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String value)
+                          String index, String value)
     throws IOException
   {
     ArrayList<ForeignColumn> columns = getLinkColumns().getColumns();
-    
+
     Id id = getEntityType().getId();
     ArrayList<IdField> keys = id.getKeys();
 
@@ -378,7 +378,7 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
 
     for (int i = 0; i < keys.size(); i++) {
       IdField key = keys.get(i);
-      
+
       key.getType().generateSet(out, pstmt, index, key.generateGet(var));
     }
   }
@@ -390,7 +390,7 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
     throws IOException
   {
     String value = generateSuperGetter();
-    
+
     out.println("if (" + getEntityType().generateIsNull(value) + ") {");
     out.pushDepth();
 

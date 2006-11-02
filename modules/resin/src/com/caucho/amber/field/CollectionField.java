@@ -33,6 +33,8 @@ import java.io.IOException;
 
 import java.util.logging.Logger;
 
+import javax.persistence.CascadeType;
+
 import com.caucho.util.L10N;
 
 import com.caucho.log.Log;
@@ -55,20 +57,22 @@ import com.caucho.amber.query.QueryParser;
 /**
  * Configuration for a bean's field
  */
-public class CollectionField extends AbstractField {
+public class CollectionField extends CascadableField {
   private static final L10N L = new L10N(CollectionField.class);
   protected static final Logger log = Log.open(CollectionField.class);
-  
+
   private Type _targetType;
-  
+
   private LinkColumns _linkColumns;
 
   private String _table;
 
-  public CollectionField(EntityType entityType, String name)
+  public CollectionField(EntityType entityType,
+                         String name,
+                         CascadeType[] cascadeTypes)
     throws ConfigException
   {
-    super(entityType, name);
+    super(entityType, name, cascadeTypes);
   }
 
   public CollectionField(EntityType entityType)
@@ -128,7 +132,7 @@ public class CollectionField extends AbstractField {
    * Generates the set clause.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String obj, String index)
+                          String obj, String index)
     throws IOException
   {
   }
@@ -137,18 +141,18 @@ public class CollectionField extends AbstractField {
    * Generates loading cache
    */
   public void generateUpdate(JavaWriter out, String mask, String pstmt,
-			     String index)
+                             String index)
     throws IOException
   {
     String maskVar = mask + "_" + (getIndex() / 64);
     long maskValue = (1L << (getIndex() % 64));
-    
+
     out.println();
     out.println("if ((" + maskVar + " & " + maskValue + "L) != 0) {");
     out.pushDepth();
 
     generateSet(out, pstmt, index);
-      
+
     out.popDepth();
     out.println("}");
   }
@@ -157,8 +161,8 @@ public class CollectionField extends AbstractField {
    * Updates the cached copy.
    */
   public void generateCopyUpdateObject(JavaWriter out,
-				       String dst, String src,
-				       int updateIndex)
+                                       String dst, String src,
+                                       int updateIndex)
     throws IOException
   {
   }

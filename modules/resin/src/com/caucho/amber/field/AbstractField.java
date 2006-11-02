@@ -345,6 +345,14 @@ abstract public class AbstractField implements AmberField {
   }
 
   /**
+   * Returns true if the field is cascadable.
+   */
+  public boolean isCascadable()
+  {
+    return false;
+  }
+
+  /**
    * Returns true if the methods are abstract.
    */
   public boolean isUpdateable()

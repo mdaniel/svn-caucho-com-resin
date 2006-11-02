@@ -331,7 +331,8 @@ public class LinkColumns {
   public void beforeTargetDelete(AmberConnection aConn, Entity entity)
     throws SQLException
   {
-    aConn.flush();
+    // commented out: jpa/0h25
+    // aConn.flush();
 
     String sourceTable = _sourceTable.getName();
 

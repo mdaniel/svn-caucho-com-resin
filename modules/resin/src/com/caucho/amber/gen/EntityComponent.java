@@ -32,6 +32,8 @@ package com.caucho.amber.gen;
 import java.io.*;
 import java.util.*;
 
+import javax.persistence.CascadeType;
+
 import com.caucho.util.L10N;
 
 import com.caucho.make.PersistentDependency;
@@ -47,6 +49,7 @@ import com.caucho.amber.type.SubEntityType;
 import com.caucho.amber.type.Type;
 
 import com.caucho.amber.field.AmberField;
+import com.caucho.amber.field.CascadableField;
 //import com.caucho.amber.field.Field;
 //import com.caucho.amber.field.FieldType;
 import com.caucho.amber.field.Id;
@@ -193,6 +196,8 @@ public class EntityComponent extends ClassComponent {
         generateCopy(out);
 
         generateMakePersistent(out);
+
+        generateCascadePersist(out);
 
         generateCreate(out);
 
@@ -979,7 +984,10 @@ public class EntityComponent extends ClassComponent {
     out.pushDepth();
 
     out.println("if (__caucho_session != null)");
-    out.println("  throw new com.caucho.amber.AmberException(\"object \" + " + getDebug() + " + \" is already persistent.\");");
+    out.println("  return true;");
+
+    // commented out: jpa/0h25
+    // out.println("  throw new com.caucho.amber.AmberException(\"object \" + " + getDebug() + " + \" is already persistent.\");");
 
     out.println("__caucho_state = com.caucho.amber.entity.Entity.P_NEW;");
 
@@ -1329,6 +1337,39 @@ public class EntityComponent extends ClassComponent {
   }
 
   /**
+   * Generates the cascade persist
+   */
+  private void generateCascadePersist(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("public void __caucho_cascadePersist(com.caucho.amber.manager.AmberConnection aConn)");
+    out.println("  throws java.sql.SQLException");
+    out.println("{");
+    out.pushDepth();
+
+    // out.println("if (aConn == null)");
+    // out.println("  throw new com.caucho.amber.AmberException(\"Null AmberConnection when object \" + " + getDebug() + " + \" is trying to cascade persist child objects.\");");
+
+    ArrayList<AmberField> fields = _entityType.getFields();
+
+    for (int i = 0; i < fields.size(); i++) {
+      AmberField field = fields.get(i);
+
+      if (field.isCascadable()) {
+        CascadableField cascadable = (CascadableField) field;
+
+        out.println();
+
+        cascadable.generateCascade(out, "aConn", CascadeType.PERSIST);
+      }
+    }
+
+    out.popDepth();
+    out.println("}");
+  }
+
+  /**
    * Generates the home methods
    */
   private void generateHome(JavaWriter out)
@@ -1502,7 +1543,7 @@ public class EntityComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
     out.println("if (s == null)");
-    out.println("  pstmt.setNull(index, java.sql.Types.OTHER);");
+    out.println("  pstmt.setNull(index, java.sql.Types.NULL);");
     out.println("else");
     out.println("  pstmt.setString(index, s);");
     out.popDepth();

@@ -1711,6 +1711,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     JAnnotation manyToOneAnn = _annotationCfg.getAnnotation();
     Object manyToOneConfig = _annotationCfg.getManyToOneConfig();
     HashMap<String, JoinColumnConfig> joinColumnMap = null;
+    CascadeType cascadeTypes[] = null;
 
     JClass parentClass = sourceType.getBeanClass();
 
@@ -1755,6 +1756,11 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       if (manyToOneConfig != null) {
         fetchType = ((ManyToOneConfig) manyToOneConfig).getFetch();
         joinColumnMap = ((ManyToOneConfig) manyToOneConfig).getJoinColumnMap();
+        CascadeConfig cascade = ((ManyToOneConfig) manyToOneConfig).getCascade();
+
+        if (cascade != null) {
+          cascadeTypes = cascade.getCascadeTypes();
+        }
 
         String s = ((ManyToOneConfig) manyToOneConfig).getTargetEntity();
         if (s != null)
@@ -1764,7 +1770,17 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 
     if (manyToOneAnn != null) {
       fetchType = (FetchType) manyToOneAnn.get("fetch");
+
       targetClass = manyToOneAnn.getClass("targetEntity");
+
+      // XXX: runtime does not cast this
+      // cascadeType = (CascadeType []) manyToOneAnn.get("cascade");
+      Object cascade[] = (Object []) manyToOneAnn.get("cascade");
+
+      cascadeTypes = new CascadeType[cascade.length];
+
+      for (int i=0; i < cascade.length; i++)
+        cascadeTypes[i] = (CascadeType) cascade[i];
     }
 
     if (fetchType == FetchType.EAGER) {
@@ -1800,7 +1816,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       targetName = fieldType.getName();
 
     EntityManyToOneField manyToOneField;
-    manyToOneField = new EntityManyToOneField(sourceType, fieldName);
+    manyToOneField = new EntityManyToOneField(sourceType, fieldName, cascadeTypes);
 
     EntityType targetType = persistenceUnit.createEntity(targetName, fieldType);
 
@@ -2041,6 +2057,9 @@ public class EntityIntrospector extends BaseConfigIntrospector {
                       targetName,
                       field.getName()));
 
+    // XXX: introspect cascade types
+    CascadeType[] cascadeTypes = null;
+
     String mappedBy;
 
     if (manyToManyAnn != null)
@@ -2055,7 +2074,9 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       EntityManyToManyField manyToManyField;
 
       manyToManyField = new EntityManyToManyField(sourceType,
-                                                  fieldName, sourceField);
+                                                  fieldName,
+                                                  sourceField,
+                                                  cascadeTypes);
       manyToManyField.setType(targetType);
       sourceType.addField(manyToManyField);
 
@@ -2064,7 +2085,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 
     EntityManyToManyField manyToManyField;
 
-    manyToManyField = new EntityManyToManyField(sourceType, fieldName);
+    manyToManyField = new EntityManyToManyField(sourceType, fieldName, cascadeTypes);
     manyToManyField.setType(targetType);
 
     String sqlTable = sourceType.getTable().getName() + "_" + targetType.getTable().getName();
@@ -2577,9 +2598,12 @@ public class EntityIntrospector extends BaseConfigIntrospector {
                                 targetType.getName(),
                                 mappedBy));
 
+      // XXX: introspect cascade types
+      CascadeType[] cascadeTypes = null;
+
       EntityOneToManyField oneToMany;
 
-      oneToMany = new EntityOneToManyField(_entityType, _fieldName);
+      oneToMany = new EntityOneToManyField(_entityType, _fieldName, cascadeTypes);
       oneToMany.setSourceField(sourceField);
 
       getInternalMapKeyConfig(_entityType.getBeanClass(), _field, _fieldName);
@@ -2611,9 +2635,12 @@ public class EntityIntrospector extends BaseConfigIntrospector {
                                          String targetName)
       throws ConfigException
     {
+      // XXX: introspect cascade types
+      CascadeType[] cascadeTypes = null;
+
       EntityManyToManyField manyToManyField;
 
-      manyToManyField = new EntityManyToManyField(_entityType, _fieldName);
+      manyToManyField = new EntityManyToManyField(_entityType, _fieldName, cascadeTypes);
       manyToManyField.setType(targetType);
 
       String sqlTable = _entityType.getTable().getName() + "_" + targetType.getTable().getName();
