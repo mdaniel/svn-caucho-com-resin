@@ -35,12 +35,15 @@ import org.xml.sax.*;
 import java.util.*;
 import javax.xml.bind.attachment.*;
 import javax.xml.validation.*;
+import javax.xml.transform.dom.*;
+import javax.xml.transform.sax.*;
 import javax.xml.bind.annotation.adapters.*;
 import javax.xml.bind.*;
 import javax.xml.bind.Marshaller.*;
 
 public abstract class AbstractMarshallerImpl implements Marshaller {
 
+  private XMLOutputFactory _factory;
   private AttachmentMarshaller _attachmentMarshaller;
   private String _encoding;
   private ValidationEventHandler _validationEventHandler;
@@ -55,8 +58,13 @@ public abstract class AbstractMarshallerImpl implements Marshaller {
   private HashMap<Class,XmlAdapter> _adapters =
     new HashMap<Class,XmlAdapter>();
 
+  private final HashMap<String,String> _ianaToJavaEncoding =
+    new HashMap<String,String>();
+
   public AbstractMarshallerImpl()
   {
+    _ianaToJavaEncoding.put("UTF-8", "UTF8");
+    // XXX add more encodings
   }
 
   public <A extends XmlAdapter> A getAdapter(Class<A> type)
@@ -82,7 +90,10 @@ public abstract class AbstractMarshallerImpl implements Marshaller {
   protected String getJavaEncoding(String encoding)
     throws UnsupportedEncodingException
   {
-    return encoding;
+    if (_ianaToJavaEncoding.containsKey(encoding))
+      return _ianaToJavaEncoding.get(encoding);
+
+    throw new UnsupportedEncodingException(encoding);
   }
 
   public Listener getListener()
@@ -105,17 +116,24 @@ public abstract class AbstractMarshallerImpl implements Marshaller {
   {
     if (name.equals("jaxb.encoding")) {
       return getEncoding();
-    } else if (name.equals("jaxb.formatted.output")) {
+    } 
+    else if (name.equals("jaxb.formatted.output")) {
       return _formattedOutput;
-    } else if (name.equals("jaxb.schemaLocation")) {
+    } 
+    else if (name.equals("jaxb.schemaLocation")) {
       return getSchemaLocation();
-    } else if (name.equals("jaxb.noNamespaceSchemaLocation")) {
+    } 
+    else if (name.equals("jaxb.noNamespaceSchemaLocation")) {
       return getNoNSSchemaLocation();
-    } else if (name.equals("jaxb.fragment")) {
+    } 
+    else if (name.equals("jaxb.fragment")) {
       return _fragment;
-    } else {
+    } 
+    else if (_properties.containsKey(name)) {
       return _properties.get(name);
     }
+    
+    throw new PropertyException(name);
   }
 
   public Schema getSchema()
@@ -141,19 +159,30 @@ public abstract class AbstractMarshallerImpl implements Marshaller {
   public final void marshal(Object obj, ContentHandler handler)
     throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    SAXResult result = new SAXResult(handler);
+
+    marshal(obj, result);
   }
 
   public final void marshal(Object obj, Node node) throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    DOMResult result = new DOMResult(node);
+
+    marshal(obj, result);
+  }
+
+  private XMLOutputFactory getXMLOutputFactory()
+  {
+    if (_factory == null)
+      _factory = XMLOutputFactory.newInstance();
+
+    return _factory;
   }
 
   public final void marshal(Object obj, OutputStream os) throws JAXBException
   {
     try {
-      XMLOutputFactory factory = XMLOutputFactory.newInstance();
-      XMLStreamWriter out = factory.createXMLStreamWriter(os);
+      XMLStreamWriter out = getXMLOutputFactory().createXMLStreamWriter(os);
 
       marshal(obj, out);
 
@@ -167,8 +196,7 @@ public abstract class AbstractMarshallerImpl implements Marshaller {
   public final void marshal(Object obj, Writer w) throws JAXBException
   {
     try {
-      XMLOutputFactory factory = XMLOutputFactory.newInstance();
-      XMLStreamWriter out = factory.createXMLStreamWriter(w);
+      XMLStreamWriter out = getXMLOutputFactory().createXMLStreamWriter(w);
 
       marshal(obj, out);
 

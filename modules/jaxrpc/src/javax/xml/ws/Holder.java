@@ -29,25 +29,17 @@
 
 package javax.xml.ws;
 
-/** XXX */
 public final class Holder<T> {
-
-  /** XXX */
   public T value;
 
-
-  /** XXX */
   public Holder()
   {
-    throw new UnsupportedOperationException();
+    value = null;
   }
 
-
-  /** XXX */
   public Holder(T value)
   {
-    throw new UnsupportedOperationException();
+    this.value = value;
   }
-
 }
 

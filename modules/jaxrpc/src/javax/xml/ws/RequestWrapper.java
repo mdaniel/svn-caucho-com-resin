@@ -36,7 +36,7 @@ import java.lang.annotation.*;
 @Documented
 public @interface RequestWrapper {
     String className() default "";
-    String targetName() default "";
-    String localNamespace() default "";
+    String localName() default "";
+    String targetNamespace() default "";
 }
 

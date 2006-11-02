@@ -86,5 +86,19 @@ public class TypeConstraintException extends RuntimeException {
     _exception = exception;
   }
 
+  public void printStackTrace(PrintStream s)
+  {
+    super.printStackTrace(s);
+
+    if (_exception != null) {
+      s.print("Linked Exception: ");
+      _exception.printStackTrace(s);
+    }
+  }
+
+  public void printStackTrace()
+  {
+    printStackTrace(System.err);
+  }
 }
 

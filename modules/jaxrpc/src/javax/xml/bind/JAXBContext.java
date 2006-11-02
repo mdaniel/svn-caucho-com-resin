@@ -28,12 +28,17 @@
 */
 
 package javax.xml.bind;
+
 import java.io.*;
-import org.w3c.dom.*;
-import java.util.*;
 import java.lang.reflect.*;
+import java.util.*;
+import java.util.logging.*;
+
+import org.w3c.dom.*;
 
 public abstract class JAXBContext {
+  private static final Logger log =
+    Logger.getLogger(JAXBContext.class.getName());
 
   public static final String JAXB_CONTEXT_FACTORY =
     "javax.xml.bind.context.factory";
@@ -95,24 +100,18 @@ public abstract class JAXBContext {
         FactoryLoader.getFactoryLoader("javax.xml.bind.JAXBContext");
       
       Object obj = factoryLoader.newInstance(classLoader);
+
       if (obj != null) {
         Class c = obj.getClass();
-        Method m = c.getMethod("createContext",
-                               Class[].class,
-                               Map.class);
-        return (JAXBContext)m.invoke(null, classesToBeBound, properties);
+        Method m = c.getMethod("createContext", Class[].class, Map.class);
+        return (JAXBContext) m.invoke(null, classesToBeBound, properties);
       }
       
       Class c = Class.forName("com.caucho.jaxb.JAXBContextImpl");
-      Constructor con = c.getConstructor(new Class[] {
-	Class[].class,
-	Map.class
-      });
-      return (JAXBContext)
-	con.newInstance(new Object[] {
-	  classesToBeBound,
-	  properties
-	});
+      Constructor con = c.getConstructor(new Class[] { Class[].class, 
+                                                       Map.class });
+      return (JAXBContext) con.newInstance(new Object[] { classesToBeBound,
+                                                          properties });
     }
     catch (Exception e) {
       throw new JAXBException(e);
@@ -143,33 +142,27 @@ public abstract class JAXBContext {
         FactoryLoader.getFactoryLoader("javax.xml.bind.JAXBContext");
       
       Object obj = factoryLoader.newInstance(classLoader);
+
       if (obj != null) {
         Class c = obj.getClass();
-        Method m = c.getMethod("createContext",
-                               String.class,
-			       ClassLoader.class,
-                               Map.class);
-        return (JAXBContext)m.invoke(null, contextPath, classLoader, properties);
+        Method m = c.getMethod("createContext", 
+                               String.class, ClassLoader.class, Map.class);
+        return (JAXBContext) m.invoke(null, contextPath, classLoader, 
+                                      properties);
       }
-      
+
       Class c = Class.forName("com.caucho.jaxb.JAXBContextImpl");
-      Constructor con = c.getConstructor(new Class[] {
-	String.class,
-	ClassLoader.class,
-	Map.class
-      });
+      Constructor con = c.getConstructor(new Class[] {String.class,
+                                                      ClassLoader.class,
+                                                      Map.class});
       
-      return (JAXBContext)
-	con.newInstance(new Object[] {
-	  contextPath,
-	  classLoader,
-	  properties
-	});
+      return (JAXBContext) con.newInstance(new Object[] { contextPath,
+                                                          classLoader,
+                                                          properties });
     }
     catch (Exception e) {
       throw new JAXBException(e);
     }
   }
-
 }
 
