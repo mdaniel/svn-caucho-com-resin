@@ -317,9 +317,9 @@ cse_connect(struct sockaddr_in *sin, srun_t *srun)
     
     return -1;
   }
-  else if (! FD_ISSET(sock, &write_fds) ||
-           getsockopt(sock, SOL_SOCKET, SO_ERROR, &error, &len) < 0 ||
-           error) {
+  else if (! FD_ISSET(sock, &write_fds)
+	   || getsockopt(sock, SOL_SOCKET, SO_ERROR, &error, &len) < 0
+	   || error) {
     ERR(("%s:%d:cse_connect(): connect failed %x %d %d\n",
 	 __FILE__, __LINE__,
 	 sin->sin_addr.s_addr,
