@@ -155,6 +155,12 @@ public class ELParser
 
 	      for (ch = read(); ch > 0 && ch != end; ch = read()) {
 		exprString.append((char) ch);
+
+		if (ch == '\\') {
+		  ch = read();
+		  if (ch > 0)
+		    exprString.append((char) ch);
+		}
 	      }
 
 	      if (ch > 0)

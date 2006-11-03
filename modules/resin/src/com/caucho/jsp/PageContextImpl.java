@@ -117,7 +117,8 @@ public class PageContextImpl extends PageContext
   private BodyResponseStream _bodyResponseStream;
   
   private JspPrintWriter _jspPrintWriter;
-  
+
+  private int _bufferSize;
   private boolean autoFlush;
   private BodyContentImpl _bodyOut;
 
@@ -183,8 +184,8 @@ public class PageContextImpl extends PageContext
     _servlet = servlet;
     _request = (HttpServletRequest) request;
 
-    if (response instanceof CauchoResponse &&
-	bufferSize <= TempCharBuffer.SIZE) {
+    if (response instanceof CauchoResponse
+	&& bufferSize <= TempCharBuffer.SIZE) {
       _response = (CauchoResponse) response;
       _responseAdapter = null;
     }
@@ -207,9 +208,10 @@ public class PageContextImpl extends PageContext
 	log.log(Level.FINE, e.toString(), e);
       }
     }
-    
+
     // needed for includes from static pages
 
+    _bufferSize = bufferSize;
     this.autoFlush = autoFlush;
     _session = session;
 
@@ -881,7 +883,7 @@ public class PageContextImpl extends PageContext
   public void include(String relativeUrl)
     throws ServletException, IOException
   {
-    include(relativeUrl, true);
+    include(relativeUrl, false);
   }
   
   /**
@@ -938,11 +940,13 @@ public class PageContextImpl extends PageContext
                                      relativeUrl));
 
     // the FlushBuffer needs to happen to deal with OpenSymphony (Bug#1710)
-    // jsp/17e9, 15lc
-    if (flush)
-      _out.flush();
+    // jsp/17e9, 15lc, 15m4
+    if (! flush) {
+    }
     else if (_out instanceof FlushBuffer)
       ((FlushBuffer) _out).flushBuffer();
+    else if (flush)
+      _out.flush();
 
     rd.include(req, res);
   }
@@ -974,7 +978,15 @@ public class PageContextImpl extends PageContext
   public void forward(String relativeUrl)
     throws ServletException, IOException
   {
-    _out.clearBuffer();
+    if (_bufferSize == 0) {
+      // jsp/15m3, tck
+      if (_out instanceof FlushBuffer)
+	((FlushBuffer) _out).flushBuffer();
+      else
+	_out.flush();
+    }
+
+    _out.clear();
 
     RequestDispatcher rd = null;
 
@@ -999,6 +1011,9 @@ public class PageContextImpl extends PageContext
       throw new ServletException(L.l("unknown forwarding page: `{0}'",
                                      relativeUrl));
     rd.forward(req, res);
+
+    _out.close();
+    _responseStream.close();
   }
 
   /**
@@ -1617,10 +1632,21 @@ public class PageContextImpl extends PageContext
   /**
    * Set/Remove a page attribute.
    */
-  public void pageSetOrRemove(String var, Object value)
+  public void defaultSetOrRemove(String var, Object value)
   {
     if (value != null)
       putAttribute(var, value);
+    else
+      removeAttribute(var);
+  }
+
+  /**
+   * Set/Remove a page attribute.
+   */
+  public void pageSetOrRemove(String var, Object value)
+  {
+    if (value != null)
+      _attributes.put(var, value);
     else
       _attributes.remove(var);
   }

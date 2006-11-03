@@ -94,7 +94,8 @@ public class TaglibManager {
     _tldManager = TldManager.create(resourceManager, webApp);
     _tagFileManager = tagFileManager;
 
-    _webApp.getJspApplicationContext().setTaglibManager(this);
+    if (webApp != null)
+      webApp.getJspApplicationContext().setTaglibManager(this);
   }
 
   /**

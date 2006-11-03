@@ -70,8 +70,8 @@ public class Jar implements CacheListener {
   
   private static LruCache<Path,Jar> _jarCache;
 
-  private static EnvironmentLocal<Integer> _jarSize =
-    new EnvironmentLocal<Integer>("caucho.vfs.jar-size");
+  private static EnvironmentLocal<Integer> _jarSize
+    = new EnvironmentLocal<Integer>("caucho.vfs.jar-size");
   
   private Path _backing;
 
@@ -119,15 +119,13 @@ public class Jar implements CacheListener {
       _jarCache = new LruCache<Path,Jar>(size);
     }
     
-    synchronized (_jarCache) {
-      Jar jar = _jarCache.get(backing);
-      if (jar == null) {
-        jar = new Jar(backing);
-        _jarCache.put(backing, jar);
-      }
-    
-      return jar;
+    Jar jar = _jarCache.get(backing);
+    if (jar == null) {
+      jar = new Jar(backing);
+      jar = _jarCache.putIfNew(backing, jar);
     }
+    
+    return jar;
   }
 
   /**

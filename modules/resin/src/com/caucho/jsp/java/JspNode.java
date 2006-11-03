@@ -1038,15 +1038,18 @@ public abstract class JspNode {
       else if (rtexpr && hasRuntimeAttribute(value)) {
         return getRuntimeAttribute(value);
       }
-      else if (hasELAttribute(value)) { // jsp/0138
-	if (rtexpr)
-	  return generateELValue(type, value);
-	else {
-	  // jsp/184v
+      else if (rtexpr && hasELAttribute(value)) { // jsp/0138 vs jsp/18s0
+	return generateELValue(type, value);
+      }
+      /*
+      else if (! rtexpr && hasELAttribute(value)) {
+	  // jsp/184v vs jsp/18cr
 	  throw error(L.l("EL expression '{0}' is only allowed for a runtime expression value.",
 			  value));
+	  return value;
 	}
       }
+      */
       else if (! rtexpr
 	       && hasDeferredAttribute(value)
 	       && ! _gen.getParseState().isDeferredSyntaxAllowedAsLiteral()) {
@@ -1097,8 +1100,8 @@ public abstract class JspNode {
         return String.valueOf(Double.valueOf(value));
       else if (type.equals(Double.class))
         return ("new java.lang.Double(" + Double.valueOf(value) + ")");
-      else if (! type.equals(String.class) &&
-               ! type.equals(Object.class)) {
+      else if (! type.equals(String.class)
+	       && ! type.equals(Object.class)) {
         return null;
       }
       else if (! isEmpty) {

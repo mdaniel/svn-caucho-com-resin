@@ -154,6 +154,13 @@ class DispatchResponse extends AbstractHttpResponse {
     return false;
   }
 
+  @Override
+  public boolean isCommitted()
+  {
+    // jsp/15m2
+    return _next.isCommitted();
+  }
+
   /**
    * Returns true for a caucho response.
    */

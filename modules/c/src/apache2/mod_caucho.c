@@ -1054,6 +1054,8 @@ caucho_status(request_rec *r)
 	     config->session_cookie);
   ap_rprintf(r, "<tr><th>Session URL</th><td>'%s'</td></tr>",
 	     config->session_url_prefix);
+  ap_rprintf(r, "<tr><th>Config Check Interval</th><td>%ds</td></tr>",
+	     config->update_interval);
   ap_rprintf(r, "</table>");
   
   ap_rprintf(r, "<h2>Configuration Cluster</h2>\n");

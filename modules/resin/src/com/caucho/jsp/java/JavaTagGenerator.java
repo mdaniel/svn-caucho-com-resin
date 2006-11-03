@@ -240,8 +240,9 @@ public class JavaTagGenerator extends JavaJspGenerator {
     for (int i = 0; i < _variables.size(); i++) {
       TldVariable var = _variables.get(i);
 
+      // jsp/1071
       if (name.equals(var.getNameGiven())
-	  || name.equals(var.getNameFromAttribute()))
+	  || name.equals(var.getAlias()))
 	return var;
     }
 

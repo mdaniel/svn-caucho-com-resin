@@ -45,7 +45,7 @@ public class JspInclude extends JspNode {
   private static final QName FLUSH = new QName("flush");
   
   private String _page;
-  private boolean _flush = true;
+  private boolean _flush = false; // jsp/15m4
   
   private String _text;
   

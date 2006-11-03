@@ -217,6 +217,8 @@ public class JspWriterAdapter extends AbstractBodyContent {
   {
     if (_isClosed)
       throw new IOException(L.l("flushBuffer() forbidden after writer is closed"));
+
+    _out.flushBuffer();
   }
 
   /**
