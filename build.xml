@@ -173,8 +173,15 @@
       <param name="module.jar" value="script-10.jar"/>
     </antcall>
   </target>
+  
+  <target name="resin-util" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="util"/>
+      <param name="module.jar" value="resin-utils.jar"/>
+    </antcall>
+  </target>
 
-  <target name="resin-dev" depends="init, ejb, jca, jcr, jms, jsdk, jstl, jta, j2ee-deploy, j2ee-management, saaj, jaxrpc, portlet, script">
+  <target name="resin-dev" depends="init, ejb, jca, jcr, jms, jsdk, jstl, jta, j2ee-deploy, j2ee-management, saaj, jaxrpc, portlet, script, resin-util">
 
     <!-- filter to insert version -->
 

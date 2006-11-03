@@ -29,12 +29,7 @@
 
 package com.caucho.vfs;
 
-import com.caucho.util.CauchoSystem;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.Crc64;
-import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
-import com.caucho.util.RandomUtil;
+import com.caucho.util.*;
 
 import java.io.IOException;
 import java.io.OutputStream;

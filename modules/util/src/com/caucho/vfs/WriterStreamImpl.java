@@ -38,7 +38,8 @@ import java.util.logging.Level;
  * Handles a stream which outputs to a writer.
  */
 public class WriterStreamImpl extends StreamImpl {
-  private static Logger log = Log.open(WriterStreamImpl.class);
+  private static Logger log
+    = Logger.getLogger(WriterStreamImpl.class.getName());
   
   private Writer _writer;
   private ByteToCharWriter _byteToChar = new ByteToCharWriter();

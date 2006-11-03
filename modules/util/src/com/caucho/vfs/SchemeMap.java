@@ -33,9 +33,6 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.loader.EnvironmentClassLoader;
-
 /**
  * The top-level filesystem schemes are collected into a single map.
  *
@@ -56,35 +53,14 @@ public class SchemeMap {
   // Constant null scheme map for protected filesystems.
   private static final SchemeMap NULL_SCHEME_MAP = new SchemeMap(null);
   
-  // constant system-wide root scheme map.
-  private static SchemeMap DEFAULT_SCHEME_MAP;
-
-  private static EnvironmentLocal<SchemeMap> _localSchemeMap =
-    new EnvironmentLocal<SchemeMap>();
-
-  private ClassLoader _loader;
-  private HashMap<String,Path> _schemeMap;
-
+  private final HashMap<String,Path> _schemeMap
+    = new HashMap<String,Path>();
+    
   /**
    * Create an empty SchemeMap.
    */
-  private SchemeMap()
+  public SchemeMap()
   {
-    this(Thread.currentThread().getContextClassLoader());
-  }
-
-  /**
-   * Create an empty SchemeMap.  Normally, applications will never call this.
-   */
-  private SchemeMap(ClassLoader loader)
-  {
-    for (;
-	 loader != null && ! (loader instanceof EnvironmentClassLoader);
-	 loader = loader.getParent()) {
-    }
-
-    _loader = loader;
-    _schemeMap = new HashMap<String,Path>();
   }
 
   /**
@@ -95,69 +71,6 @@ public class SchemeMap {
   static SchemeMap getNullSchemeMap()
   {
     return NULL_SCHEME_MAP;
-  }
-  
-  /**
-   * Returns the local scheme map.
-   */
-  public static SchemeMap getLocalSchemeMap()
-  {
-    return _localSchemeMap.get();
-  }
-  
-  /**
-   * Returns the named root Path of the scheme, e.g. for file:.
-   *
-   * @param scheme the scheme name for the selected path.
-   * @return the named root or a NotFoundPath.
-   */
-  public static Path getScheme(String scheme)
-  {
-    SchemeMap schemeMap = _localSchemeMap.get();
-
-    Path root = schemeMap.get(scheme);
-
-    if (root != null)
-      return root;
-
-    return new NotFoundPath(scheme + ":");
-  }
-
-  /**
-   * Sets the named root Path of the scheme.
-   *
-   * @param scheme name of the scheme.
-   * @param handler root Path for the scheme.
-   */
-  public static void setScheme(String scheme, Path handler)
-  {
-    SchemeMap schemeMap;
-
-    synchronized (_localSchemeMap) {
-      schemeMap = _localSchemeMap.getLevel();
-
-      if (schemeMap == null) {
-	schemeMap = new SchemeMap();
-	_localSchemeMap.set(schemeMap);
-      }
-    }
-
-    schemeMap.put(scheme, handler);
-  }
-
-  /**
-   * Removes the named scheme from the top-level filesystem.
-   *
-   * @param scheme name of the scheme to remove.
-   */
-  public static Path removeScheme(String scheme)
-  {
-    SchemeMap schemeMap = _localSchemeMap.getLevel();
-
-    if (schemeMap != null)
-      return schemeMap.remove(scheme);
-    else
-      return null;
   }
 
   /**
@@ -183,7 +96,7 @@ public class SchemeMap {
   /**
    * Puts a new value in the schemeMap.
    */
-  private Path put(String scheme, Path path)
+  public Path put(String scheme, Path path)
   {
     return _schemeMap.put(scheme, path);
   }
@@ -191,64 +104,8 @@ public class SchemeMap {
   /**
    * Removes value from the schemeMap.
    */
-  private Path remove(String scheme)
+  public Path remove(String scheme)
   {
     return _schemeMap.remove(scheme);
-  }
-
-  /**
-   * Initialize the JNI.
-   */
-  public static void initJNI()
-  {
-    // order matters because of static init and license checking
-    FilesystemPath jniFilePath = JniFilePath.create();
-
-    if (jniFilePath != null) {
-      DEFAULT_SCHEME_MAP.put("file", jniFilePath);
-      
-      SchemeMap localMap = _localSchemeMap.get();
-      if (localMap != null)
-	localMap.put("file", jniFilePath);
-      
-       localMap = _localSchemeMap.get(ClassLoader.getSystemClassLoader());
-      if (localMap != null)
-	localMap.put("file", jniFilePath);
-      
-      Vfs.PWD = jniFilePath;
-      Vfs.setPwd(jniFilePath);
-    }
-  }
-
-  static {
-    DEFAULT_SCHEME_MAP = new SchemeMap(null);
-
-    DEFAULT_SCHEME_MAP.put("file", new FilePath(null));
-    
-    DEFAULT_SCHEME_MAP.put("memory", new MemoryScheme());
-    
-    DEFAULT_SCHEME_MAP.put("jar", new JarScheme(null)); 
-    DEFAULT_SCHEME_MAP.put("mailto",
-				 new MailtoPath(null, null, null, null));
-    DEFAULT_SCHEME_MAP.put("http", new HttpPath("127.0.0.1", 0));
-    DEFAULT_SCHEME_MAP.put("https", new HttpsPath("127.0.0.1", 0));
-    DEFAULT_SCHEME_MAP.put("hmux", new HmuxPath("127.0.0.1", 0));
-    DEFAULT_SCHEME_MAP.put("tcp", new TcpPath(null, null, null, "127.0.0.1", 0));
-    DEFAULT_SCHEME_MAP.put("tcps", new TcpsPath(null, null, null, "127.0.0.1", 0));
-    // DEFAULT_SCHEME_MAP.put("log", new LogPath(null, "/", null, "/"));
-    DEFAULT_SCHEME_MAP.put("merge", new MergePath());
-
-    StreamImpl stdout = StdoutStream.create();
-    StreamImpl stderr = StderrStream.create();
-    DEFAULT_SCHEME_MAP.put("stdout", stdout.getPath());
-    DEFAULT_SCHEME_MAP.put("stderr", stderr.getPath());
-    VfsStream nullStream = new VfsStream(null, null);
-    DEFAULT_SCHEME_MAP.put("null", new ConstPath(null, nullStream));
-    DEFAULT_SCHEME_MAP.put("jndi", new JndiPath());
-    
-    DEFAULT_SCHEME_MAP.put("config", new ConfigPath());
-    DEFAULT_SCHEME_MAP.put("spy", new SpyScheme()); 
-
-    _localSchemeMap.setGlobal(DEFAULT_SCHEME_MAP);
   }
 }

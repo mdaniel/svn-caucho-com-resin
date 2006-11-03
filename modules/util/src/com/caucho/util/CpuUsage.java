@@ -34,7 +34,6 @@ import java.io.*;
 import java.net.*;
 
 import com.caucho.vfs.*;
-import com.caucho.log.Log;
 
 public class CpuUsage {
   static Logger log = Log.open(CpuUsage.class);
