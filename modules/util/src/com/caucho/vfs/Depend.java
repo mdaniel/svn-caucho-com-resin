@@ -43,7 +43,8 @@ import com.caucho.make.CachedDependency;
  * Class for keeping track of modifications.
  */
 public class Depend implements PersistentDependency {
-  private static final Logger log = Log.open(Depend.class);
+  private static final Logger log
+    = Logger.getLogger(Depend.class.getName());
   
   Path _source;
   long _lastModified;

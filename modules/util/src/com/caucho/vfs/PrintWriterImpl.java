@@ -36,13 +36,12 @@ import java.io.IOException;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-import com.caucho.log.Log;
-
 /**
  * A print writer which allows for a changing writer.
  */
 public class PrintWriterImpl extends PrintWriter implements FlushBuffer {
-  private final static Logger log = Log.open(PrintWriterImpl.class);
+  private final static Logger log
+    = Logger.getLogger(PrintWriterImpl.class.getName());
   
   private final static char []_nullChars = "null".toCharArray();
   private final static char []_newline = "\n".toCharArray();

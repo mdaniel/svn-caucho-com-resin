@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -39,7 +40,8 @@ import com.caucho.log.Log;
  * Class for keeping track of modifications.
  */
 public class PathExistsDependency implements Dependency {
-  private static final Logger log = Log.open(PathExistsDependency.class);
+  private static final Logger log
+    = Logger.getLogger(PathExistsDependency.class.getName());
   
   Path _source;
   boolean _exists;
