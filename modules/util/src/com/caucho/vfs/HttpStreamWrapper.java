@@ -40,13 +40,14 @@ import java.security.NoSuchAlgorithmException;
 
 import com.caucho.util.*;
 import com.caucho.vfs.*;
-import com.caucho.log.Log;
 
 /**
  * Facade to HttpStream to properly handle the close.
  */
-class HttpStreamWrapper extends StreamImpl {
-  private static final Logger log = Log.open(HttpStream.class);
+class HttpStreamWrapper extends StreamImpl
+{
+  private static final Logger log
+    = Logger.getLogger(HttpStream.class.getName());
   
   private HttpStream _stream;
 

@@ -36,9 +36,6 @@ import com.caucho.util.Base64;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.Crc64;
 
-import com.caucho.make.PersistentDependency;
-import com.caucho.make.CachedDependency;
-
 /**
  * Class for keeping track of modifications.
  */
@@ -72,8 +69,10 @@ public class Depend implements PersistentDependency {
    */
   public Depend(Path source)
   {
+    /* XXX:
     if (source instanceof JarPath)
       source = ((JarPath) source).getContainer();
+    */
 
     _source = source;
     _lastModified = source.getLastModified();

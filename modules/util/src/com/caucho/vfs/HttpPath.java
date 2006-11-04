@@ -342,6 +342,7 @@ public class HttpPath extends FilesystemPath {
    * @return The contents of this directory or null if the path does not
    * refer to a directory.
    */
+  /*
   public String []list() throws IOException
   {
     try {
@@ -377,6 +378,7 @@ public class HttpPath extends FilesystemPath {
       throw new IOException(L.l("list() is not supported by this server"));
     }
   }
+  */
 
   protected CacheEntry getCache()
   {

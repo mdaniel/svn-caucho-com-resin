@@ -770,7 +770,7 @@ class HttpStream extends StreamImpl {
       }
     }
 
-    if (com.caucho.util.CauchoSystem.isTesting())
+    if (com.caucho.util.Alarm.isTest())
       _isKeepalive = false; // XXX:
     
     if (_isKeepalive) {

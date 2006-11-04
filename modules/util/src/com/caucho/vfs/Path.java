@@ -31,12 +31,11 @@ package com.caucho.vfs;
 
 import com.caucho.util.*;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
+
 import java.security.cert.Certificate;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Map;
+
+import java.util.*;
 
 /**
  * A virtual filesystem path, essentially represented by a URL.
@@ -66,9 +65,15 @@ public abstract class Path {
   private static final LruCache<PathKey,Path> _pathLookupCache
     = new LruCache<PathKey,Path>(8192);
 
+  private static boolean _isTestWindows;
+
+  protected static char _separatorChar = File.separatorChar;
+  protected static char _pathSeparatorChar = File.pathSeparatorChar;
+  private static String _newline;
+  
   private static final PathKey _key = new PathKey();
 
-  protected SchemeMap _schemeMap;
+  protected SchemeMap _schemeMap = SchemeMap.NULL_SCHEME_MAP;
 
   /**
    * Creates a new Path object.
@@ -157,26 +162,24 @@ public abstract class Path {
     Path path;
 
     SchemeMap schemeMap = _schemeMap;
-    if (schemeMap == null)
-      schemeMap = SchemeMap.getLocalSchemeMap();
 
     // Special case to handle the windows special schemes
     // c:xxx -> file:/c:xxx
-    if (CauchoSystem.isWindows()) {
+    if (isWindows()) {
       int length = scheme.length();
       int ch;
 
       if (length == 1 &&
           ((ch = scheme.charAt(0)) >= 'a' && ch <= 'z' ||
             ch >= 'A' && ch <= 'Z')) {
-        path = schemeMap.getScheme("file");
+        path = schemeMap.get("file");
 
         if (path != null)
           return path.schemeWalk(userPath, newAttributes, "/" + userPath, 0);
       }
     }
 
-    path = schemeMap.getScheme(scheme);
+    path = schemeMap.get(scheme);
 
     // assume the foo:bar is a subfile
     if (path == null)
@@ -219,7 +222,7 @@ public abstract class Path {
       int i = thisNative.length();
 
       while (i < pathNative.length()) {
-        if (pathNative.charAt(i) != CauchoSystem.getFileSeparatorChar())
+        if (pathNative.charAt(i) != getFileSeparatorChar())
           break;
 
         i++;
@@ -1306,6 +1309,42 @@ public abstract class Path {
   protected Path cacheCopy()
   {
     return this;
+  }
+
+  protected static final boolean isWindows()
+  {
+    return _separatorChar == '\\' || _isTestWindows;
+  }
+
+  protected static final char getSeparatorChar()
+  {
+    return _separatorChar;
+  }
+
+  protected static final char getFileSeparatorChar()
+  {
+    return _separatorChar;
+  }
+
+  protected static final char getPathSeparatorChar()
+  {
+    return _pathSeparatorChar;
+  }
+
+  protected static String getUserDir()
+  {
+    return System.getProperty("user.dir");
+  }
+
+  public static String getNewlineString()
+  {
+    if (_newline == null) {
+      _newline = System.getProperty("line.separator");
+      if (_newline == null)
+        _newline = "\n";
+    }
+
+    return _newline;
   }
 
   private class ArrayIterator implements Iterator<String> {

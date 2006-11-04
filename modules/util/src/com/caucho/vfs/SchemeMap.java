@@ -51,7 +51,7 @@ import java.util.*;
  */
 public class SchemeMap {
   // Constant null scheme map for protected filesystems.
-  private static final SchemeMap NULL_SCHEME_MAP = new SchemeMap(null);
+  public static final SchemeMap NULL_SCHEME_MAP = new SchemeMap();
   
   private final HashMap<String,Path> _schemeMap
     = new HashMap<String,Path>();
@@ -82,13 +82,6 @@ public class SchemeMap {
 
     if (path != null)
       return path;
-    else if (_loader == null)
-      return new NotFoundPath(scheme + ":");
-
-    SchemeMap parent = _localSchemeMap.get(_loader.getParent());
-    
-    if (parent != null)
-      return parent.get(scheme);
     else
       return new NotFoundPath(scheme + ":");
   }

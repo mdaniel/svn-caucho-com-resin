@@ -66,7 +66,7 @@ public class WriteStream extends OutputStreamWithBuffer {
   private static byte []_sysNewlineBytes;
 
   static {
-    _sysNewline = CauchoSystem.getNewlineString();
+    _sysNewline = Path.getNewlineString();
     _sysNewlineBytes = _sysNewline.getBytes();
   }
   

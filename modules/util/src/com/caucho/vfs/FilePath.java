@@ -39,7 +39,9 @@ import com.caucho.util.*;
  */
 public class FilePath extends FilesystemPath {
   // The underlying Java File object.
-  private static byte []NEWLINE = CauchoSystem.getNewlineString().getBytes();
+  private static byte []NEWLINE = getNewlineString().getBytes();
+
+  private static FilesystemPath PWD;
   
   private File _file;
 
@@ -50,18 +52,21 @@ public class FilePath extends FilesystemPath {
   {
     super(root, userPath, path);
     
-    _separatorChar = CauchoSystem.getFileSeparatorChar();
+    _separatorChar = getFileSeparatorChar();
   }
 
   FilePath(String path)
   {
-    this(Vfs.PWD != null ? Vfs.PWD._root : null,
+    this(PWD != null ? PWD._root : null,
 	 path, normalizePath("/", initialPath(path),
-                             0, CauchoSystem.getFileSeparatorChar()));
+                             0, getFileSeparatorChar()));
 
     if (_root == null) {
       _root = new FilePath(null, "/", "/");
       _root._root = _root;
+
+      if (PWD == null)
+	PWD = _root;
     }
 
     _separatorChar = _root._separatorChar;
@@ -88,11 +93,11 @@ public class FilePath extends FilesystemPath {
    */
   private static String getPwd()
   {
-    String path = CauchoSystem.getUserDir();
+    String path = getUserDir();
 
-    path = path.replace(CauchoSystem.getFileSeparatorChar(), '/');
+    path = path.replace(getFileSeparatorChar(), '/');
 
-    if (CauchoSystem.isWindows())
+    if (isWindows())
       path = convertFromWindowsPath(path);
 
     return path;
@@ -142,7 +147,7 @@ public class FilePath extends FilesystemPath {
 			    String filePath,
                             int offset)
   {
-    if (! CauchoSystem.isWindows())
+    if (! isWindows())
       return super.schemeWalk(userPath, attributes, filePath, offset);
     
     String canonicalPath;
@@ -195,7 +200,7 @@ public class FilePath extends FilesystemPath {
    */
   public String getNativePath()
   {
-    if (_separatorChar == '/' && ! CauchoSystem.isWindows())
+    if (_separatorChar == '/' && ! isWindows())
       return getFullPath();
     
     String path = getFullPath();
@@ -204,7 +209,7 @@ public class FilePath extends FilesystemPath {
     char ch;
     int offset = 0;
     // For windows, convert /c: to c:
-    if (CauchoSystem.isWindows()) {
+    if (isWindows()) {
       if (length >= 3 &&
           path.charAt(0) == '/' &&
           path.charAt(2) == ':' &&
@@ -354,7 +359,8 @@ public class FilePath extends FilesystemPath {
       return true;
     
     if (getPath().endsWith(".jar")) {
-      Jar.create(this).clearCache();
+      // XXX:
+      // Jar.create(this).clearCache();
       return getFile().delete();
     }
 
@@ -488,7 +494,7 @@ public class FilePath extends FilesystemPath {
     if (_file != null)
       return _file;
 
-    if (CauchoSystem.isTesting())
+    if (com.caucho.util.Alarm.isTest())
       _file = new File(getFullPath());
     else
       _file = new File(getNativePath());

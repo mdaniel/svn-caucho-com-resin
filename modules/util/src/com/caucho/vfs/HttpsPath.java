@@ -35,7 +35,6 @@ import java.util.*;
 import org.xml.sax.*;
 
 import com.caucho.util.*;
-import com.caucho.xml.*;
 
 /**
  * The HTTP scheme.  Currently it supports GET and POST.

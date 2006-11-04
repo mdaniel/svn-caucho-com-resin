@@ -44,7 +44,6 @@ abstract public class FilesystemPath extends Path {
   protected BindPath _bindRoot;
   protected String _pathname;
   protected String _userPath;
-  protected char _separatorChar;
 
   /**
    * Create a new filesystemPath
@@ -62,14 +61,12 @@ abstract public class FilesystemPath extends Path {
     if (pathname == null)
       throw new NullPointerException();
 
-    _separatorChar = '/';
     _pathname = pathname;
     _userPath = userPath;
 
     if (root != null) {
       _root = root;
       _bindRoot = root._bindRoot;
-      _separatorChar = root._separatorChar;
     }
   }
 
@@ -287,14 +284,6 @@ abstract public class FilesystemPath extends Path {
   public void setUserPath(String path)
   {
     _userPath = path;
-  }
-
-  /**
-   * Returns the separator char.
-   */
-  public char getSeparatorChar()
-  {
-    return _separatorChar;
   }
 
   /**

@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.make;
+package com.caucho.vfs;
 
 /**
  * Interface representing a resource that might change.
