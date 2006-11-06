@@ -996,9 +996,8 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
     ReadStream is = _is;
     _is = null;
 
-    if (is != null) {
+    if (is != null)
       is.close();
-    }
   }
 
   static class RawName {

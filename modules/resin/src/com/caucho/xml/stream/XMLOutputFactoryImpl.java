@@ -33,10 +33,14 @@ import javax.xml.stream.*;
 import javax.xml.stream.util.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
+import javax.xml.transform.sax.*;
+import javax.xml.transform.stream.*;
 import com.caucho.vfs.*;
 import com.caucho.server.vfs.*;
+import com.caucho.util.*;
 
 public class XMLOutputFactoryImpl extends XMLOutputFactory {
+  private static final L10N L = new L10N(XMLOutputFactoryImpl.class);
 
   public XMLOutputFactoryImpl()
   {
@@ -104,10 +108,15 @@ public class XMLOutputFactoryImpl extends XMLOutputFactory {
   public XMLStreamWriter createXMLStreamWriter(Result result)
     throws XMLStreamException
   {
-    if (result instanceof DOMResult) 
+    if (result instanceof DOMResult) {
       return new DOMResultXMLStreamWriterImpl((DOMResult) result);
+    }
+    else if (result instanceof StreamResult) {
+      Writer writer = ((StreamResult) result).getWriter();
+      return createXMLStreamWriter(writer);
+    }
 
-    throw new JAXPNotSupportedInStAXException();
+    throw new UnsupportedOperationException(L.l("Results of type {0} are not supported", result.getClass().getName()));
   }
 
   public XMLStreamWriter createXMLStreamWriter(Writer stream)
