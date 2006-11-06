@@ -35,8 +35,7 @@ import java.util.*;
 import javax.persistence.CascadeType;
 
 import com.caucho.util.L10N;
-
-import com.caucho.make.PersistentDependency;
+import com.caucho.vfs.*;
 
 import com.caucho.java.JavaWriter;
 

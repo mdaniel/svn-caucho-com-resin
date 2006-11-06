@@ -39,6 +39,7 @@ import javax.servlet.jsp.tagext.*;
 
 import com.caucho.vfs.*;
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 import com.caucho.jsp.*;
 import com.caucho.xml.QName;
 import com.caucho.xml.XmlChar;

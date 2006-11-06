@@ -35,8 +35,8 @@ import com.caucho.loader.EnvironmentListener;
 import com.caucho.log.Log;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.ExpandDeployGenerator;
-import com.caucho.vfs.CaseInsensitive;
-import com.caucho.vfs.Path;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;

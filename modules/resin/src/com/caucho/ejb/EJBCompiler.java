@@ -31,12 +31,10 @@ package com.caucho.ejb;
 
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.SimpleLoader;
-import com.caucho.log.Log;
 import com.caucho.util.ExceptionWrapper;
 import com.caucho.util.L10N;
-import com.caucho.vfs.MergePath;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 import java.util.ArrayList;
 import java.util.logging.Logger;
@@ -46,7 +44,8 @@ import java.util.logging.Logger;
  */
 public class EJBCompiler {
   static L10N L = new L10N(EJBCompiler.class);
-  protected static Logger log = Log.open(EJBCompiler.class);
+  protected static Logger log
+    = Logger.getLogger(EJBCompiler.class.getName());
 
   private Path _classDir;
   private Path _appDir;

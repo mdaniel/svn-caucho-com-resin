@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.vfs;
+package com.caucho.server.vfs;
 
 import java.util.Map;
 import java.util.jar.Manifest;
@@ -37,15 +37,14 @@ import java.io.IOException;
 import java.security.cert.Certificate;
 
 import com.caucho.util.LruCache;
-
-import com.caucho.make.PersistentDependency;
+import com.caucho.vfs.*;
 
 /**
  * A filesystem for .jar files.
  */
 public class JarPath extends FilesystemPath {
-  private static LruCache<Path,JarPath> _jarCache =
-    new LruCache<Path,JarPath>(256);
+  private static LruCache<Path,JarPath> _jarCache
+    = new LruCache<Path,JarPath>(256);
   
   private Path _backing;
 
@@ -83,9 +82,9 @@ public class JarPath extends FilesystemPath {
     return path;
   }
 
-  protected Path fsWalk(String userPath,
-			Map<String,Object> attributes,
-			String path)
+  public Path fsWalk(String userPath,
+		     Map<String,Object> attributes,
+		     String path)
   {
     if ("/".equals(userPath) && "/".equals(path))
       return _root;

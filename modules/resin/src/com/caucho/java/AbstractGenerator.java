@@ -34,11 +34,10 @@ import java.util.*;
 import java.lang.reflect.*;
 
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 import com.caucho.vfs.*;
 
 import com.caucho.loader.SimpleLoader;
-
-import com.caucho.make.PersistentDependency;
 
 import com.caucho.java.gen.GenClass;
 import com.caucho.java.gen.DependencyComponent;

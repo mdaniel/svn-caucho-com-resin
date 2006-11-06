@@ -33,8 +33,8 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.types.RawString;
 import com.caucho.util.L10N;
 import com.caucho.xml.XmlPrinter;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.Vfs;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 import org.w3c.dom.Node;
 

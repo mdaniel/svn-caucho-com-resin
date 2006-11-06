@@ -19,6 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -44,13 +45,11 @@ import javax.annotation.*;
 import com.caucho.log.Log;
 
 import com.caucho.util.CharBuffer;
-import com.caucho.util.CauchoSystem;
 
 import com.caucho.config.ConfigException;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.JarPath;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 /**
  * Class loader which checks for changes in class files and automatically
@@ -249,7 +248,7 @@ public class SimpleLoader extends Loader {
 
     if (! head.equals("")) {
       cb.append(head);
-      cb.append(CauchoSystem.getPathSeparatorChar());
+      cb.append(Path.getPathSeparatorChar());
     }
     
     if (_path instanceof JarPath)

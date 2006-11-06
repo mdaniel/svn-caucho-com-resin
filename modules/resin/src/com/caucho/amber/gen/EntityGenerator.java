@@ -34,8 +34,6 @@ import java.util.*;
 
 import com.caucho.util.L10N;
 
-import com.caucho.make.PersistentDependency;
-
 import com.caucho.java.AbstractGenerator;
 
 import com.caucho.loader.Environment;
@@ -44,6 +42,8 @@ import com.caucho.amber.type.EntityType;
 
 //import com.caucho.amber.field.Field;
 //import com.caucho.amber.field.FieldType;
+
+import com.caucho.vfs.*;
 
 /**
  * Generates the Java code for the wrapped object.

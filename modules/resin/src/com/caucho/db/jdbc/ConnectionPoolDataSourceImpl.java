@@ -39,10 +39,8 @@ import javax.sql.*;
 
 import com.caucho.util.L10N;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
-
-import com.caucho.log.Log;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 import com.caucho.db.Database;
 
@@ -50,7 +48,8 @@ import com.caucho.db.Database;
  * Driver for the internal database.
  */
 public class ConnectionPoolDataSourceImpl implements ConnectionPoolDataSource {
-  private static final Logger log = Log.open(ConnectionPoolDataSourceImpl.class);
+  private static final Logger log
+    = Logger.getLogger(ConnectionPoolDataSourceImpl.class.getName());
   private static final L10N L = new L10N(ConnectionPoolDataSourceImpl.class);
 
   private Database _database;

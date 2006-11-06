@@ -702,22 +702,22 @@ public abstract class PathWrapper extends Path {
     return getWrappedPath().toString();
   }
 
-  protected StreamImpl openReadImpl() throws IOException
+  public StreamImpl openReadImpl() throws IOException
   {
     return getWrappedPath().openReadImpl();
   }
 
-  protected StreamImpl openWriteImpl() throws IOException
+  public StreamImpl openWriteImpl() throws IOException
   {
     return getWrappedPath().openWriteImpl();
   }
 
-  protected StreamImpl openReadWriteImpl() throws IOException
+  public StreamImpl openReadWriteImpl() throws IOException
   {
     return getWrappedPath().openReadWriteImpl();
   }
 
-  protected StreamImpl openAppendImpl() throws IOException
+  public StreamImpl openAppendImpl() throws IOException
   {
     return getWrappedPath().openAppendImpl();
   }

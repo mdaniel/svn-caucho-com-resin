@@ -41,6 +41,7 @@ import com.caucho.util.CharBuffer;
 import com.caucho.log.Log;
 
 import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 import com.caucho.jms.*;
 import com.caucho.jms.session.MessageAvailableListener;
 import com.caucho.jms.selector.*;

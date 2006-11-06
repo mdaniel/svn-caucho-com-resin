@@ -43,6 +43,7 @@ import org.w3c.dom.*;
 
 import com.caucho.jaxb.skeleton.*;
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 
 /**
  * Entry point to API

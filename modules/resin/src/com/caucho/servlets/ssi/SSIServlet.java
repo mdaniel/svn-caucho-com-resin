@@ -37,10 +37,8 @@ import javax.servlet.*;
 
 import com.caucho.util.ByteBuffer;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 /**
  * Serves server-side include files.

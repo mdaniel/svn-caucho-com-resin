@@ -26,10 +26,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.util;
+package com.caucho.server.thread;
 
 import java.io.*;
 import java.util.*;
+
+import com.caucho.util.*;
 
 /**
  * A single item timed cache.  The item will remain valid until it expires.

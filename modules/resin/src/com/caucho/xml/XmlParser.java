@@ -37,6 +37,7 @@ import org.xml.sax.*;
 
 import com.caucho.util.*;
 import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 import com.caucho.xml.readers.*;
 
 /**

@@ -35,6 +35,7 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;

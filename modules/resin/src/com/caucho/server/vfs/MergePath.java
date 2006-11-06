@@ -27,14 +27,14 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.vfs;
+package com.caucho.server.vfs;
+
+import java.io.*;
+import java.util.*;
 
 import com.caucho.loader.DynamicClassLoader;
-import com.caucho.util.CauchoSystem;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Map;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.vfs.*;
 
 /**
  * A merging of several Paths used like a CLASSPATH.  When the MergePath
@@ -293,7 +293,7 @@ public class MergePath extends FilesystemPath {
    * Walking down the path just extends the path.  It won't be evaluated
    * until opening.
    */
-  protected Path fsWalk(String userPath,
+  public Path fsWalk(String userPath,
 			Map<String,Object> attributes,
 			String path)
   {

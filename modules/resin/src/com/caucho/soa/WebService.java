@@ -45,7 +45,7 @@ import com.caucho.naming.Jndi;
 
 import com.caucho.server.webapp.WebApp;
 
-import com.caucho.util.CauchoSystem;
+import com.caucho.server.util.CauchoSystem;
 
 /**
  * A Web Service entry in web.xml (Caucho-specific)

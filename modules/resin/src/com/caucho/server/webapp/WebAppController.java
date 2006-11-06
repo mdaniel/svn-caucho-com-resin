@@ -38,7 +38,7 @@ import com.caucho.management.j2ee.WebModule;
 
 import com.caucho.server.deploy.*;
 import com.caucho.server.host.Host;
-import com.caucho.util.CauchoSystem;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 

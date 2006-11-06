@@ -38,6 +38,7 @@ import javax.servlet.jsp.*;
 import javax.servlet.http.*;
 
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 import com.caucho.vfs.*;
 
 import com.caucho.log.Log;
@@ -52,8 +53,6 @@ import com.caucho.java.LineMap;
 
 import com.caucho.loader.SimpleLoader;
 import com.caucho.loader.DynamicClassLoader;
-
-import com.caucho.make.PersistentDependency;
 
 import com.caucho.server.webapp.WebApp;
 

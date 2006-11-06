@@ -34,7 +34,9 @@ import java.util.*;
 import java.util.logging.*;
 
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 import com.caucho.java.*;
 import com.caucho.es.*;
 import com.caucho.loader.SimpleLoader;

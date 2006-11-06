@@ -55,8 +55,6 @@ import com.caucho.soa.WebService;
 import com.caucho.server.dispatch.ServletMapping;
 import com.caucho.server.webapp.ServletContextImpl;
 
-import com.caucho.util.CauchoSystem;
-
 /**
  * An HTTP Servlet to dispatch REST requests
  */

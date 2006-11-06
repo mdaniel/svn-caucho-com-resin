@@ -37,6 +37,7 @@ import javax.servlet.*;
 import javax.servlet.jsp.tagext.*;
 
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 import com.caucho.vfs.*;
 import com.caucho.log.Log;
 import com.caucho.server.http.*;

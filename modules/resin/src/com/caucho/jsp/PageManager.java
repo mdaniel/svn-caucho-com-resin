@@ -40,7 +40,9 @@ import org.w3c.dom.*;
 
 import com.caucho.Version;
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 import com.caucho.java.*;
 
 import com.caucho.config.j2ee.InjectIntrospector;
@@ -51,8 +53,6 @@ import com.caucho.server.webapp.WebApp;
 
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
-
-import com.caucho.make.PersistentDependency;
 
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;

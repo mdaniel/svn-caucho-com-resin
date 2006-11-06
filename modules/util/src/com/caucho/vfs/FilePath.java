@@ -55,7 +55,7 @@ public class FilePath extends FilesystemPath {
     _separatorChar = getFileSeparatorChar();
   }
 
-  FilePath(String path)
+  public FilePath(String path)
   {
     this(PWD != null ? PWD._root : null,
 	 path, normalizePath("/", initialPath(path),
@@ -175,7 +175,7 @@ public class FilePath extends FilesystemPath {
    *
    * @return the selected path
    */
-  protected Path fsWalk(String userPath,
+  public Path fsWalk(String userPath,
 			Map<String,Object> attributes,
 			String path)
   {

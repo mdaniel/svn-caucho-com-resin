@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.vfs;
+package com.caucho.server.vfs;
 
 import java.io.*;
 import java.net.*;
@@ -35,6 +35,7 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 import com.caucho.vfs.*;
 
 /**

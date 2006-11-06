@@ -45,9 +45,8 @@ import org.xml.sax.SAXNotSupportedException;
 
 import com.caucho.util.L10N;
 
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.TempCharBuffer;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 import com.caucho.xml.QName;
 import com.caucho.xml.XmlChar;

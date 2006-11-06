@@ -31,10 +31,11 @@ package com.caucho.jca;
 import com.caucho.config.ConfigException;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.server.deploy.DeployController;
-import com.caucho.util.CauchoSystem;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;

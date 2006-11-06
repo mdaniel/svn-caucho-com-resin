@@ -38,7 +38,6 @@ import java.lang.reflect.InvocationTargetException;
 
 import com.caucho.util.L10N;
 import com.caucho.util.CharBuffer;
-import com.caucho.util.CauchoSystem;
 import com.caucho.vfs.*;
 import com.caucho.make.Make;
 import com.caucho.log.Log;

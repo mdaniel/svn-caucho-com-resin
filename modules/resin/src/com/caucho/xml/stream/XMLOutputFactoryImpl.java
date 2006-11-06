@@ -34,6 +34,7 @@ import javax.xml.stream.util.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
 import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 public class XMLOutputFactoryImpl extends XMLOutputFactory {
 

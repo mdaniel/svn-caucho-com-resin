@@ -37,6 +37,7 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 import com.caucho.vfs.*;
 
 import com.caucho.log.Log;

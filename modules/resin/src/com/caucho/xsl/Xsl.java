@@ -31,10 +31,11 @@ package com.caucho.xsl;
 
 import com.caucho.log.Log;
 
-import com.caucho.util.CauchoSystem;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.ExceptionWrapper;
 
 import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 import com.caucho.xml.Html;
 import com.caucho.xml.Xml;
 import com.caucho.xml.XmlParser;

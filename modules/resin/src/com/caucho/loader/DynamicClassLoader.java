@@ -53,15 +53,15 @@ import java.security.CodeSource;
 import javax.annotation.*;
 
 import com.caucho.util.L10N;
-import com.caucho.util.CauchoSystem;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.ByteBuffer;
 import com.caucho.util.TimedCache;
 
 import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 import com.caucho.config.ConfigException;
 
-import com.caucho.make.Dependency;
 import com.caucho.make.DependencyContainer;
 import com.caucho.make.Make;
 import com.caucho.make.MakeContainer;

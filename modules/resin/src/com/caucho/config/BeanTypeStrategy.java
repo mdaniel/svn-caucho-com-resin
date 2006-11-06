@@ -50,9 +50,8 @@ import com.caucho.config.types.Validator;
 import com.caucho.config.j2ee.*;
 
 import com.caucho.loader.*;
-import com.caucho.make.PersistentDependency;
 
-import com.caucho.vfs.Depend;
+import com.caucho.vfs.*;
 
 import com.caucho.xml.QName;
 import com.caucho.xml.QNode;

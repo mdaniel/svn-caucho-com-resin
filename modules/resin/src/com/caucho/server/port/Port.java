@@ -52,11 +52,8 @@ import com.caucho.management.server.PortMXBean;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
 import com.caucho.util.ThreadPool;
-import com.caucho.vfs.JsseSSLFactory;
-import com.caucho.vfs.QJniServerSocket;
-import com.caucho.vfs.QServerSocket;
-import com.caucho.vfs.QSocket;
-import com.caucho.vfs.SSLFactory;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 /**
  * Represents a protocol connection.

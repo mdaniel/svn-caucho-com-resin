@@ -31,11 +31,9 @@ package com.caucho.jsp.cfg;
 
 import java.util.ArrayList;
 
-import com.caucho.vfs.Path;
+import com.caucho.vfs.*;
 
 import com.caucho.config.DependencyBean;
-
-import com.caucho.make.PersistentDependency;
 
 import com.caucho.server.webapp.Application;
 

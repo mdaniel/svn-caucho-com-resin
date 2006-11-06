@@ -51,9 +51,8 @@ import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.util.L10N;
-import com.caucho.vfs.JarPath;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 import com.caucho.java.WorkDir;
 
 import javax.naming.Context;

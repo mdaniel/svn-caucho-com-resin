@@ -52,10 +52,8 @@ import com.caucho.naming.ContextImpl;
 import com.caucho.naming.Jndi;
 import com.caucho.naming.ObjectProxy;
 import com.caucho.util.L10N;
-import com.caucho.vfs.JarPath;
-import com.caucho.vfs.MergePath;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import com.caucho.server.vfs.*;
+import com.caucho.vfs.*;
 
 import java.rmi.*;
 import javax.annotation.*;

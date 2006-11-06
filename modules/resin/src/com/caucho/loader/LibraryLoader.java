@@ -41,30 +41,25 @@ import java.net.URL;
 
 import javax.annotation.*;
 
-import com.caucho.util.CauchoSystem;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.JarPath;
-import com.caucho.vfs.Depend;
-
-import com.caucho.log.Log;
+import com.caucho.make.*;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 import com.caucho.config.ConfigException;
 
 import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.PathPatternType;
 
-import com.caucho.make.Dependency;
-import com.caucho.make.DependencyContainer;
-
 /**
  * Class loader which checks for changes in class files and automatically
  * picks up new jars.
  */
 public class LibraryLoader extends Loader implements Dependency {
-  private static final Logger log = Log.open(DirectoryLoader.class);
+  private static final Logger log
+    = Logger.getLogger(DirectoryLoader.class.getName());
   
   // Configured path.
   private Path _path;

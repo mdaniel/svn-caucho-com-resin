@@ -38,16 +38,13 @@ import java.util.logging.Level;
 
 import java.io.IOException;
 
-import com.caucho.util.L10N;
-import com.caucho.util.CauchoSystem;
-import com.caucho.util.CharBuffer;
+import com.caucho.util.*;
+import com.caucho.server.util.*;
 
 import com.caucho.log.Log;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.MergePath;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
+import com.caucho.server.vfs.*;
+import com.caucho.vfs.*;
 
 import com.caucho.java.JavaWriter;
 import com.caucho.java.JavaCompiler;
@@ -62,7 +59,8 @@ import com.caucho.loader.enhancer.EnhancingClassLoader;
  */
 public class JavaClassGenerator {
   private static final L10N L = new L10N(JavaClassGenerator.class);
-  private static final Logger log = Log.open(JavaClassGenerator.class);
+  private static final Logger log
+    = Logger.getLogger(JavaClassGenerator.class.getName());
   
   // Parent class loader
   private ClassLoader _parentLoader;

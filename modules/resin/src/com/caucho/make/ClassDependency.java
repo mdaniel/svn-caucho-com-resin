@@ -43,13 +43,14 @@ import com.caucho.util.CharBuffer;
 import com.caucho.util.Base64;
 import com.caucho.util.Crc64;
 
-import com.caucho.log.Log;
+import com.caucho.vfs.*;
 
 /**
  * Representing a class that might change.
  */
 public class ClassDependency implements PersistentDependency {
-  private final static Logger log = Log.open(ClassDependency.class);
+  private final static Logger log
+    = Logger.getLogger(ClassDependency.class.getName());
   
   private Class _cl;
 

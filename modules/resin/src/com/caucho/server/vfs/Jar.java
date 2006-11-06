@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.vfs;
+package com.caucho.server.vfs;
 
 import java.security.cert.Certificate;
 
@@ -47,15 +47,11 @@ import java.io.FileNotFoundException;
 
 import java.lang.ref.SoftReference;
 
-import com.caucho.util.LruCache;
-import com.caucho.util.Alarm;
-import com.caucho.util.CacheListener;
-
-import com.caucho.log.Log;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
 
 import com.caucho.loader.EnvironmentLocal;
 
-import com.caucho.make.PersistentDependency;
 import com.caucho.make.CachedDependency;
 
 /**

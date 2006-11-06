@@ -40,20 +40,14 @@ import java.util.jar.Attributes;
 
 import java.net.URL;
 
-import com.caucho.util.CauchoSystem;
-import com.caucho.util.CharBuffer;
+import com.caucho.util.*;
+import com.caucho.server.util.*;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.JarPath;
-import com.caucho.vfs.Depend;
+import com.caucho.vfs.*;
 
 import com.caucho.log.Log;
 
 import com.caucho.config.ConfigException;
-
-import com.caucho.make.Dependency;
-import com.caucho.make.DependencyContainer;
 
 /**
  * Class loader which loads specific paths.

@@ -39,7 +39,7 @@ import javax.ejb.EJBObject;
 import javax.ejb.EJBException;
 
 import com.caucho.util.L10N;
-import com.caucho.util.CauchoSystem;
+import com.caucho.server.util.*;
 
 import com.caucho.loader.EnvironmentLocal;
 

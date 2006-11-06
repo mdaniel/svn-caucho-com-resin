@@ -48,8 +48,8 @@ import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Vfs;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 /**
  * Library of static config functions.

@@ -35,8 +35,7 @@ import javax.servlet.jsp.el.VariableResolver;
 import javax.servlet.jsp.el.ELException;
 
 import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import com.caucho.vfs.*;
 import com.caucho.config.NodeBuilder;
 import com.caucho.config.TypeStrategy;
 import com.caucho.el.Expr;

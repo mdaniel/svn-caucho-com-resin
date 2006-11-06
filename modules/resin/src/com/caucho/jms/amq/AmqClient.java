@@ -34,6 +34,7 @@ import java.util.*;
 import java.util.logging.*;
 
 import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 import com.caucho.util.*;
 
 /**

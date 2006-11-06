@@ -39,7 +39,7 @@ import com.caucho.vfs.*;
  * A stream reading data from a string.  The reader produces bytes using
  * UTF-8.
  */
-class StringReader extends StreamImpl {
+public class StringReader extends StreamImpl {
   private String string;
   private int length;
   private int index;

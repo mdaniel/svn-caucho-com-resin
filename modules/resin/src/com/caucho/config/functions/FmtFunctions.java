@@ -33,7 +33,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 import com.caucho.util.Sprintf;
-import com.caucho.util.CauchoSystem;
+import com.caucho.server.util.CauchoSystem;
 
 import java.util.Calendar;
 import java.util.Date;

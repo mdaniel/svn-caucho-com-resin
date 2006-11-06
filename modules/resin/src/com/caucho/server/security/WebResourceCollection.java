@@ -29,8 +29,8 @@
 package com.caucho.server.security;
 
 import com.caucho.server.dispatch.UrlMap;
-import com.caucho.util.CauchoSystem;
-import com.caucho.util.L10N;
+import com.caucho.util.*;
+import com.caucho.server.util.*;
 import com.caucho.config.ConfigException;
 
 import java.util.ArrayList;

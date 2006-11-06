@@ -40,17 +40,15 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-import com.caucho.log.Log;
-
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.Vfs;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 /**
  * Represents a java class.
  */
 public class JavaClass extends JClass {
-  static private final Logger log = Log.open(JavaClass.class);
+  static private final Logger log
+    = Logger.getLogger(JavaClass.class.getName());
 
   public static final int MAGIC = 0xcafebabe;
 

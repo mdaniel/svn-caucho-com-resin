@@ -34,15 +34,9 @@ import java.util.logging.Logger;
 
 import javax.servlet.jsp.tagext.*;
 
+import com.caucho.config.*;
 import com.caucho.util.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.DependencyBean;
-
-import com.caucho.make.PersistentDependency;
+import com.caucho.vfs.*;
 
 import com.caucho.jsp.JspParseException;
 
@@ -51,7 +45,8 @@ import com.caucho.jsp.JspParseException;
  */
 public class TldTag implements DependencyBean {
   private final static L10N L = new L10N(TldTag.class);
-  private final static Logger log = Log.open(TldTag.class);
+  private final static Logger log
+    = Logger.getLogger(TldTag.class.getName());
   
   private String _name;
   private String _tagClassName;

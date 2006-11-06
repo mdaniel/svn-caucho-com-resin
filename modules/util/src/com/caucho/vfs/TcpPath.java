@@ -47,8 +47,9 @@ public class TcpPath extends Path {
   protected SocketAddress _address;
   protected long _timeout = 5000L;
 
-  TcpPath(TcpPath root, String userPath, Map<String,Object> newAttributes,
-	  String host, int port)
+  public TcpPath(TcpPath root, String userPath,
+		 Map<String,Object> newAttributes,
+		 String host, int port)
   {
     super(root);
 

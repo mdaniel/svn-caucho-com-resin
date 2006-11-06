@@ -40,11 +40,9 @@ import com.caucho.xml.QName;
 
 import com.caucho.config.ConfigException;
 
-import com.caucho.vfs.Path;
+import com.caucho.vfs.*;
 
 import com.caucho.java.LineMap;
-
-import com.caucho.make.PersistentDependency;
 
 import com.caucho.jsp.*;
 

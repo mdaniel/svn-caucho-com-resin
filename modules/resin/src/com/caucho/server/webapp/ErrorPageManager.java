@@ -48,7 +48,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.util.ExceptionWrapper;
 import com.caucho.util.CharBuffer;
-import com.caucho.util.CauchoSystem;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CompileException;
 import com.caucho.util.LineCompileException;
 import com.caucho.util.HTTPUtil;

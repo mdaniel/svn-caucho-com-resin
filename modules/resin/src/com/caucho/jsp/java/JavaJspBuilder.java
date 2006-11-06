@@ -38,9 +38,8 @@ import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.SimpleTag;
 
 import com.caucho.util.*;
+import com.caucho.vfs.*;
 import com.caucho.jsp.*;
-
-import com.caucho.make.PersistentDependency;
 
 import com.caucho.log.Log;
 

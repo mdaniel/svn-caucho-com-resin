@@ -62,7 +62,7 @@ public class HttpPath extends FilesystemPath {
    * @param host the target host
    * @param port the target port, if zero, uses port 80.
    */
-  HttpPath(String host, int port)
+  public HttpPath(String host, int port)
   {
     super(null, "/", "/");
 
@@ -197,9 +197,9 @@ public class HttpPath extends FilesystemPath {
    *
    * @return the found path.
    */
-  protected Path fsWalk(String userPath,
-			Map<String,Object> attributes,
-			String uri)
+  public Path fsWalk(String userPath,
+		     Map<String,Object> attributes,
+		     String uri)
   {
     String path;
     String query = null;

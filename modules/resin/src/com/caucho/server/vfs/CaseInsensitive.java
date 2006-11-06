@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.vfs;
+package com.caucho.server.vfs;
 
 import java.util.*;
 import java.io.*;

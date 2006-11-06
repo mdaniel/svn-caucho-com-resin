@@ -41,7 +41,9 @@ import javax.servlet.*;
 import javax.servlet.jsp.tagext.*;
 
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 import com.caucho.log.Log;
 import com.caucho.server.http.*;
 import com.caucho.jsp.cfg.*;
@@ -61,7 +63,8 @@ import com.caucho.server.webapp.WebApp;
  */
 public class TaglibManager {
   static final L10N L = new L10N(TaglibManager.class);
-  private static final Logger log = Log.open(TaglibManager.class);
+  private static final Logger log
+    = Logger.getLogger(TaglibManager.class.getName());
 
   private JspResourceManager _resourceManager;
   private WebApp _webApp;

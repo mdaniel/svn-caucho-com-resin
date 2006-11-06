@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.vfs;
+package com.caucho.log;
 
 import java.lang.ref.SoftReference;
 
@@ -44,10 +44,8 @@ import java.util.zip.GZIPOutputStream;
 
 import com.caucho.config.ConfigException;
 
-import com.caucho.util.AlarmListener;
-import com.caucho.util.Alarm;
-import com.caucho.util.WeakAlarm;
-import com.caucho.util.QDate;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
 
 import com.caucho.config.types.Period;
 

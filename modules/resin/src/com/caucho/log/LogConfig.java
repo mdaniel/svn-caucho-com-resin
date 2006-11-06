@@ -39,7 +39,6 @@ import java.util.logging.Formatter;
 import javax.annotation.*;
 
 import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.TimestampFilter;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.RawString;

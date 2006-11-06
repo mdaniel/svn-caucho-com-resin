@@ -39,11 +39,13 @@ import org.xml.sax.*;
 import org.xml.sax.ext.*;
 
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 import com.caucho.vfs.*;
-import com.caucho.log.Log;
+import com.caucho.server.vfs.*;
 
-abstract public class AbstractParser implements XMLReader, Parser {
-  static final Logger log = Log.open(AbstractParser.class);
+abstract public class AbstractParser implements XMLReader, Parser
+{
+  static final Logger log = Logger.getLogger(AbstractParser.class.getName());
   static final L10N L = new L10N(AbstractParser.class);
 
   static Hashtable<String,String> _attrTypes = new Hashtable<String,String>();

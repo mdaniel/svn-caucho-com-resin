@@ -44,13 +44,11 @@ import java.security.cert.Certificate;
 import com.caucho.log.Log;
 
 import com.caucho.util.CharBuffer;
-import com.caucho.util.CauchoSystem;
+import com.caucho.server.util.CauchoSystem;
 
 import com.caucho.config.ConfigException;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.JarPath;
+import com.caucho.vfs.*;
 
 import com.caucho.java.WorkDir;
 

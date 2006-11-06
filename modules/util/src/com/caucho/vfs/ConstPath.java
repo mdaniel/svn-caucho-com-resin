@@ -33,20 +33,20 @@ import java.util.*;
 
 import com.caucho.util.*;
 
-class ConstPath extends Path {
+public class ConstPath extends Path {
   private String _scheme = "const";
   private String _path = "";
   
   StreamImpl _stream;
 
-  ConstPath(Path root, StreamImpl stream)
+  public ConstPath(Path root, StreamImpl stream)
   {
     super(root);
     _stream = stream;
   }
 
   protected Path schemeWalk(String userPath, Map<String,Object> attributes,
-                            String path, int offset)
+			    String path, int offset)
   {
     return this;
   }

@@ -37,11 +37,8 @@ import java.util.logging.Level;
 
 import java.security.MessageDigest;
 
-import com.caucho.make.PersistentDependency;
-
-import com.caucho.util.CharBuffer;
-import com.caucho.util.Base64;
-import com.caucho.util.Log;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
 
 /**
  * Representing a class that might change.

@@ -26,11 +26,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.vfs;
+package com.caucho.server.vfs;
 
 import com.caucho.util.L10N;
 
 import com.caucho.config.ConfigException;
+import com.caucho.vfs.*;
 
 /**
  * Configures a vfs scheme.
@@ -67,7 +68,7 @@ public class VfsSchemeConfig {
       throw new ConfigException(L.l("vfs-scheme requires a name attribute"));
 
     if (_path != null) {
-      SchemeMap.setScheme(_name, _path);
+      Vfs.getLocalScheme().put(_name, _path);
     }
   }
 }

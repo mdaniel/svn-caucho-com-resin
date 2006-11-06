@@ -50,7 +50,7 @@ public class HttpsPath extends HttpPath {
    * @param host the target host
    * @param port the target port, if zero, uses port 80.
    */
-  HttpsPath(String host, int port)
+  public HttpsPath(String host, int port)
   {
     super(host, port);
   }
@@ -64,9 +64,9 @@ public class HttpsPath extends HttpPath {
    * @param path the full normalized path
    * @param query any query string
    */
-  HttpsPath(FilesystemPath root,
-           String userPath, Map<String,Object> newAttributes,
-	   String path, String query)
+  public HttpsPath(FilesystemPath root, String userPath,
+		   Map<String,Object> newAttributes,
+		   String path, String query)
   {
     super(root, userPath, newAttributes, path, query);
   }

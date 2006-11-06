@@ -41,13 +41,13 @@ import com.caucho.util.*;
  *
  * @since Resin 1.2
  */
-class NotFoundPath extends Path {
+public class NotFoundPath extends Path {
   private String _url;
 
   /**
    * Creates new NotFoundPath
    */
-  NotFoundPath(String url)
+  public NotFoundPath(String url)
   {
     super(null);
 
@@ -97,7 +97,7 @@ class NotFoundPath extends Path {
   /**
    * Throws a FileNotFoundException for any read.
    */
-  protected StreamImpl openReadImpl()
+  public StreamImpl openReadImpl()
     throws IOException
   {
     throw new FileNotFoundException(_url);

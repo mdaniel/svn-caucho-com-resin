@@ -41,16 +41,12 @@ import java.security.CodeSource;
 import com.caucho.util.QDate;
 import com.caucho.util.ByteBuffer;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.JarPath;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Depend;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 import com.caucho.log.Log;
 
-import com.caucho.make.Dependency;
 import com.caucho.make.DependencyContainer;
-import com.caucho.make.PersistentDependency;
 
 /**
  * Describes a cached loaded class entry.

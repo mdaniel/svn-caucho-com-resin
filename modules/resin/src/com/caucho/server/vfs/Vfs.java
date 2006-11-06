@@ -27,17 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.vfs;
+package com.caucho.server.vfs;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Reader;
-import java.io.Writer;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.util.CharBuffer;
+import com.caucho.log.*;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
+import com.caucho.server.hmux.*;
 
 /**
  * Facade to create useful Path and Stream objects.
@@ -57,10 +56,15 @@ import com.caucho.util.CharBuffer;
  * </pre><code>
  */
 public final class Vfs {
-  static FilesystemPath PWD;
-  
-  static final EnvironmentLocal<Path> ENV_PWD
+  private static final EnvironmentLocal<Path> ENV_PWD
     = new EnvironmentLocal<Path>("caucho.vfs.pwd");
+  
+  private static final SchemeMap DEFAULT_SCHEME_MAP;
+  
+  private static final EnvironmentLocal<SchemeMap> _localSchemeMap
+    = new EnvironmentLocal<SchemeMap>();
+  
+  static FilesystemPath PWD;
 
   private Vfs() {}
   
@@ -102,6 +106,24 @@ public final class Vfs {
     }
 
     return pwd;
+  }
+
+  public static SchemeMap getLocalScheme()
+  {
+    synchronized (_localSchemeMap) {
+      SchemeMap map = _localSchemeMap.getLevel();
+
+      if (map == null) {
+	map = _localSchemeMap.get().copy();
+	
+	if (map == null)
+	  map = DEFAULT_SCHEME_MAP.copy();
+
+	_localSchemeMap.set(map);
+      }
+
+      return map;
+    }
   }
 
   /**
@@ -230,7 +252,7 @@ public final class Vfs {
 
   public static ReadStream openString(String string)
   {
-    return StringReader.open(string);
+    return com.caucho.vfs.StringReader.open(string);
   }
 
   public static WriteStream openWrite(OutputStream os)
@@ -261,7 +283,7 @@ public final class Vfs {
    */
   public static WriteStream openWrite(CharBuffer cb)
   {
-    StringWriter s = new StringWriter(cb);
+    com.caucho.vfs.StringWriter s = new com.caucho.vfs.StringWriter(cb);
     WriteStream os = new WriteStream(s);
     
     try {
@@ -282,5 +304,61 @@ public final class Vfs {
     throws IOException
   {
     return lookup(path).openAppend();
+  }
+
+  /**
+   * Initialize the JNI.
+   */
+  public static void initJNI()
+  {
+    // order matters because of static init and license checking
+    FilesystemPath jniFilePath = JniFilePath.create();
+
+    if (jniFilePath != null) {
+      DEFAULT_SCHEME_MAP.put("file", jniFilePath);
+      
+      SchemeMap localMap = _localSchemeMap.get();
+      if (localMap != null)
+	localMap.put("file", jniFilePath);
+      
+       localMap = _localSchemeMap.get(ClassLoader.getSystemClassLoader());
+      if (localMap != null)
+	localMap.put("file", jniFilePath);
+      
+      Vfs.PWD = jniFilePath;
+      Vfs.setPwd(jniFilePath);
+    }
+  }
+
+  static {
+    DEFAULT_SCHEME_MAP = new SchemeMap();
+
+    DEFAULT_SCHEME_MAP.put("file", new FilePath(null));
+    
+    DEFAULT_SCHEME_MAP.put("memory", new MemoryScheme());
+    
+    DEFAULT_SCHEME_MAP.put("jar", new JarScheme(null)); 
+    DEFAULT_SCHEME_MAP.put("mailto",
+				 new MailtoPath(null, null, null, null));
+    DEFAULT_SCHEME_MAP.put("http", new HttpPath("127.0.0.1", 0));
+    DEFAULT_SCHEME_MAP.put("https", new HttpsPath("127.0.0.1", 0));
+    DEFAULT_SCHEME_MAP.put("hmux", new HmuxPath("127.0.0.1", 0));
+    DEFAULT_SCHEME_MAP.put("tcp", new TcpPath(null, null, null, "127.0.0.1", 0));
+    DEFAULT_SCHEME_MAP.put("tcps", new TcpsPath(null, null, null, "127.0.0.1", 0));
+    // DEFAULT_SCHEME_MAP.put("log", new LogPath(null, "/", null, "/"));
+    DEFAULT_SCHEME_MAP.put("merge", new MergePath());
+
+    StreamImpl stdout = StdoutStream.create();
+    StreamImpl stderr = StderrStream.create();
+    DEFAULT_SCHEME_MAP.put("stdout", stdout.getPath());
+    DEFAULT_SCHEME_MAP.put("stderr", stderr.getPath());
+    VfsStream nullStream = new VfsStream(null, null);
+    DEFAULT_SCHEME_MAP.put("null", new ConstPath(null, nullStream));
+    DEFAULT_SCHEME_MAP.put("jndi", new JndiPath());
+    
+    DEFAULT_SCHEME_MAP.put("config", new ConfigPath());
+    DEFAULT_SCHEME_MAP.put("spy", new SpyScheme()); 
+
+    _localSchemeMap.setGlobal(DEFAULT_SCHEME_MAP);
   }
 }

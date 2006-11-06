@@ -56,15 +56,13 @@ import com.caucho.config.*;
 
 import com.caucho.config.types.*;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Depend;
-
-import com.caucho.make.PersistentDependency;
-import com.caucho.make.ClassDependency;
+import com.caucho.vfs.*;
 
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentBean;
+
+import com.caucho.make.*;
 
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.java.gen.BaseClass;

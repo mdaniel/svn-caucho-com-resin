@@ -34,10 +34,10 @@ import java.util.*;
 import java.util.logging.*;
 
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.JarPath;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 import com.caucho.log.Log;
 
@@ -48,9 +48,6 @@ import com.caucho.loader.EnvironmentLocal;
 
 import com.caucho.config.DynamicBean;
 import com.caucho.config.DynamicItem;
-
-import com.caucho.make.task.JavacTask;
-import com.caucho.make.task.DocletTask;
 
 /**
  * Class loader which checks for changes in class files and automatically
@@ -85,8 +82,10 @@ public class MakeLoader extends Loader implements DynamicBean, Make {
     if (configItems == null) {
       ArrayList<DynamicItem> items = new ArrayList<DynamicItem>();
 
+      /*
       items.add(new DynamicItem("javac", JavacTask.class, "make"));
       items.add(new DynamicItem("doclet", DocletTask.class, "make"));
+      */
 
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
       

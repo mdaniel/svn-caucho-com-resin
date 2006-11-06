@@ -44,17 +44,11 @@ import com.caucho.util.LineCompileException;
 
 import com.caucho.log.Log;
 
-import com.caucho.make.Dependency;
-
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentBean;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Depend;
-import com.caucho.vfs.MergePath;
-import com.caucho.vfs.IOExceptionWrapper;
+import com.caucho.vfs.*;
 
 import com.caucho.xml.QName;
 

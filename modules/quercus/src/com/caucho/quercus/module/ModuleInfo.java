@@ -60,7 +60,6 @@ import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.util.L10N;
 
 import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Vfs;
 
 /**
  * Class-loader specific context for loaded PHP.

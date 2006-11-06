@@ -1232,22 +1232,22 @@ public abstract class Path {
     return getPath();
   }
 
-  protected StreamImpl openReadImpl() throws IOException
+  public StreamImpl openReadImpl() throws IOException
   {
     throw new UnsupportedOperationException("openRead:" + getClass().getName());
   }
 
-  protected StreamImpl openWriteImpl() throws IOException
+  public StreamImpl openWriteImpl() throws IOException
   {
     throw new UnsupportedOperationException("openWrite:" + getClass().getName());
   }
 
-  protected StreamImpl openReadWriteImpl() throws IOException
+  public StreamImpl openReadWriteImpl() throws IOException
   {
     throw new UnsupportedOperationException("openReadWrite:" + getClass().getName());
   }
 
-  protected StreamImpl openAppendImpl() throws IOException
+  public StreamImpl openAppendImpl() throws IOException
   {
     throw new UnsupportedOperationException("openAppend:" + getClass().getName());
   }
@@ -1311,7 +1311,7 @@ public abstract class Path {
     return this;
   }
 
-  protected static final boolean isWindows()
+  public static final boolean isWindows()
   {
     return _separatorChar == '\\' || _isTestWindows;
   }
@@ -1321,12 +1321,12 @@ public abstract class Path {
     return _separatorChar;
   }
 
-  protected static final char getFileSeparatorChar()
+  public static final char getFileSeparatorChar()
   {
     return _separatorChar;
   }
 
-  protected static final char getPathSeparatorChar()
+  public static final char getPathSeparatorChar()
   {
     return _pathSeparatorChar;
   }

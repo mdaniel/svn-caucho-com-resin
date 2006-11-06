@@ -33,6 +33,7 @@ import java.lang.reflect.*;
 import java.io.*;
 
 import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 import com.caucho.log.*;
 import javax.xml.namespace.*;
 import javax.xml.bind.*;

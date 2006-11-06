@@ -39,11 +39,9 @@ import com.caucho.quercus.env.QuercusValueException;
 import com.caucho.quercus.module.QuercusModule;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.server.connection.CauchoResponse;
-import com.caucho.util.CauchoSystem;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 import com.caucho.server.session.SessionManager;
 

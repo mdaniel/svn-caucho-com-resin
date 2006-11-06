@@ -35,8 +35,10 @@ import javax.ejb.*;
 import javax.rmi.*;
 
 import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 import com.caucho.java.*;
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 import com.caucho.ejb.*;
 import com.caucho.ejb.protocol.*;
 import com.caucho.burlap.io.*;

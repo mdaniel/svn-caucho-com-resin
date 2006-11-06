@@ -28,11 +28,8 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BuilderProgramContainer;
-import com.caucho.config.ConfigException;
-import com.caucho.config.DependencyBean;
-import com.caucho.make.PersistentDependency;
+import com.caucho.config.*;
+import com.caucho.vfs.*;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;

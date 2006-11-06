@@ -34,10 +34,9 @@ import java.util.logging.Level;
 
 import com.caucho.config.ConfigException;
 
-import com.caucho.make.Dependency;
+import com.caucho.vfs.*;
 
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
+import com.caucho.util.*;
 
 /**
  * Abstract deployment entry.

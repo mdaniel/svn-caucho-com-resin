@@ -62,6 +62,14 @@ public class SchemeMap {
   public SchemeMap()
   {
   }
+    
+  /**
+   * Create an empty SchemeMap.
+   */
+  private SchemeMap(HashMap<String,Path> map)
+  {
+    _schemeMap.putAll(map);
+  }
 
   /**
    * The null scheme map is useful for protected filesystems as used
@@ -92,6 +100,11 @@ public class SchemeMap {
   public Path put(String scheme, Path path)
   {
     return _schemeMap.put(scheme, path);
+  }
+
+  public SchemeMap copy()
+  {
+    return new SchemeMap(_schemeMap);
   }
 
   /**

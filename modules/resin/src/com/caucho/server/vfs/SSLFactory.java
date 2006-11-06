@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.vfs;
+package com.caucho.server.vfs;
 
 import java.io.*;
 import java.net.*;
@@ -34,6 +34,7 @@ import java.util.*;
 import java.security.GeneralSecurityException;
 
 import com.caucho.config.ConfigException;
+import com.caucho.vfs.*;
 
 /**
  * Abstract socket to handle both normal sockets and bin/resin sockets.

@@ -45,8 +45,8 @@ import com.caucho.server.webapp.RewriteInvocation;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 import javax.servlet.FilterChain;
 import java.util.ArrayList;

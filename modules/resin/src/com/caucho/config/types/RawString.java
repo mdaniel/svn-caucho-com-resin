@@ -34,7 +34,6 @@ import java.lang.reflect.Method;
 
 import com.caucho.util.L10N;
 import com.caucho.util.CharBuffer;
-import com.caucho.util.CauchoSystem;
 
 import com.caucho.config.BeanBuilderException;
 

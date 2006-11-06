@@ -54,12 +54,11 @@ import com.caucho.quercus.env.CallbackFunction;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
 import com.caucho.util.CharBuffer;
+
 import com.caucho.vfs.IOExceptionWrapper;
 
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.StringPath;
-import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 /**
  * Parses a PHP program.
@@ -355,7 +354,7 @@ public class QuercusParser {
   {
     Path path = Vfs.lookup("string:");
     
-    return new QuercusParser(quercus, path, new StringReader(str)).parseExpr();
+    return new QuercusParser(quercus, path, new java.io.StringReader(str)).parseExpr();
   }
   
   public static Expr parseDefault(String str)
@@ -363,7 +362,7 @@ public class QuercusParser {
     try {
       Path path = Vfs.lookup("string:");
     
-      return new QuercusParser(null, path, new StringReader(str)).parseExpr();
+      return new QuercusParser(null, path, new java.io.StringReader(str)).parseExpr();
     } catch (IOException e) {
       e.printStackTrace();
       

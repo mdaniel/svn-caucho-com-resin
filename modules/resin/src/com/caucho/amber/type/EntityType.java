@@ -46,12 +46,11 @@ import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JClassDependency;
 import com.caucho.bytecode.JField;
 
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
 
 import com.caucho.config.ConfigException;
 
-import com.caucho.make.PersistentDependency;
 import com.caucho.make.ClassDependency;
 
 import com.caucho.java.JavaWriter;

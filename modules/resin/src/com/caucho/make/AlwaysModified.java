@@ -29,6 +29,8 @@
 
 package com.caucho.make;
 
+import com.caucho.vfs.PersistentDependency;
+
 /**
  * Interface representing a resource that always changes.
  */

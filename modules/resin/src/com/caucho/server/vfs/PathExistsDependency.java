@@ -27,14 +27,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.vfs;
+package com.caucho.server.vfs;
 
 import java.io.*;
 import java.util.*;
 import java.util.logging.*;
 
-import com.caucho.make.Dependency;
-import com.caucho.log.Log;
+import com.caucho.vfs.*;
 
 /**
  * Class for keeping track of modifications.

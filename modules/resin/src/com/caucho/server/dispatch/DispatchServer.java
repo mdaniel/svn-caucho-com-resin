@@ -36,8 +36,8 @@ import java.util.Iterator;
 import javax.annotation.*;
 
 import com.caucho.lifecycle.Lifecycle;
-import com.caucho.make.Dependency;
 import com.caucho.util.LruCache;
+import com.caucho.vfs.*;
 
 /**
  * The dispatch server is responsible for building Invocations,

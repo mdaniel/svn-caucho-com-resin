@@ -36,7 +36,6 @@ import java.lang.reflect.*;
 import com.caucho.vfs.*;
 import com.caucho.util.*;
 
-import com.caucho.make.PersistentDependency;
 import com.caucho.make.ClassDependency;
 
 import com.caucho.ejb.*;

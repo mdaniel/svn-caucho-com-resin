@@ -52,13 +52,11 @@ import com.caucho.util.*;
 import com.caucho.util.Semaphore;
 import com.caucho.util.TimeUnit;
 import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 import com.caucho.xsl.*;
 import com.caucho.xml.*;
 import com.caucho.java.*;
 import com.caucho.xpath.*;
-
-import com.caucho.make.Dependency;
-import com.caucho.make.PersistentDependency;
 
 import com.caucho.server.webapp.WebApp;
 

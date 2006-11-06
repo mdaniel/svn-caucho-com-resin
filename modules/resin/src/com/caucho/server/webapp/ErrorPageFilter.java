@@ -42,7 +42,6 @@ import com.caucho.log.Log;
 
 import com.caucho.util.ExceptionWrapper;
 import com.caucho.util.CharBuffer;
-import com.caucho.util.CauchoSystem;
 import com.caucho.util.CompileException;
 
 import com.caucho.vfs.ClientDisconnectException;

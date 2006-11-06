@@ -34,9 +34,9 @@ import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.loader.Environment;
-import com.caucho.make.Dependency;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
+import com.caucho.vfs.Dependency;
 
 import javax.annotation.PostConstruct;
 import java.util.Set;

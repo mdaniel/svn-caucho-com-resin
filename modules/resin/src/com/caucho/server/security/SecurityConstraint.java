@@ -39,8 +39,8 @@ import javax.servlet.*;
 
 import com.caucho.log.Log;
 
-import com.caucho.util.L10N;
-import com.caucho.util.CauchoSystem;
+import com.caucho.util.*;
+import com.caucho.server.util.*;
 
 import com.caucho.server.dispatch.UrlMap;
 

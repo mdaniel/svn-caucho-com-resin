@@ -36,8 +36,9 @@ import javax.servlet.http.*;
 import javax.servlet.*;
 
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 import com.caucho.vfs.*;
-import com.caucho.vfs.CaseInsensitive;
+import com.caucho.server.vfs.*;
 import com.caucho.server.webapp.Application;
 
 import com.caucho.server.connection.CauchoRequest;

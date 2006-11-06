@@ -38,11 +38,9 @@ import com.caucho.util.L10N;
 
 import com.caucho.log.Log;
 
-import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.*;
 
 import com.caucho.config.ConfigException;
-
-import com.caucho.make.Dependency;
 
 /**
  * Returns a list of the current host entries

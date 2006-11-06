@@ -40,9 +40,9 @@ import javax.servlet.http.*;
 import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Vfs;
+
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 /**
  * Servlet to view a source file, with optional emphasis based on regular

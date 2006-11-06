@@ -26,12 +26,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.vfs;
+package com.caucho.server.vfs;
 
 import java.io.*;
 import java.util.*;
 
 import com.caucho.util.*;
+import com.caucho.vfs.*;
 
 /**
  * JarScheme implements the lookup of the jar scheme.
@@ -68,7 +69,7 @@ public class JarScheme extends FilesystemPath {
     return JarPath.create(backing).lookup(jarPath);
   }
   
-  protected Path fsWalk(String userPath,
+  public Path fsWalk(String userPath,
 			Map<String,Object> attributes,
 			String path)
   {

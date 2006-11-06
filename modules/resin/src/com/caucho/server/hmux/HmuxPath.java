@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.vfs;
+package com.caucho.server.hmux;
 
 import java.io.*;
 import java.net.*;
@@ -37,6 +37,7 @@ import org.xml.sax.*;
 
 import com.caucho.util.*;
 import com.caucho.xml.*;
+import com.caucho.vfs.*;
 
 /**
  * The HTTP scheme.  Currently it supports GET and POST.
@@ -63,7 +64,7 @@ public class HmuxPath extends FilesystemPath {
    * @param host the target host
    * @param port the target port, if zero, uses port 80.
    */
-  HmuxPath(String host, int port)
+  public HmuxPath(String host, int port)
   {
     super(null, "/", "/");
 
@@ -198,7 +199,7 @@ public class HmuxPath extends FilesystemPath {
    *
    * @return the found path.
    */
-  protected Path fsWalk(String userPath,
+  public Path fsWalk(String userPath,
 			Map<String,Object> attributes,
 			String uri)
   {

@@ -26,11 +26,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.vfs;
+package com.caucho.server.vfs;
 
 import java.util.Map;
 
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.vfs.*;
 
 /**
  * ConfigPath implements remote configuration scheme.
@@ -69,6 +70,8 @@ public class ConfigPath extends Path {
 			    Map<String,Object> newAttributes,
 			    String newPath, int offset)
   {
+    throw new UnsupportedOperationException();
+    /*
     Path path = Vfs.lookup();
 
     path = path.schemeWalk(userPath, newAttributes, newPath, offset);
@@ -88,6 +91,7 @@ public class ConfigPath extends Path {
       pathName = pathName.substring(configName.length());
 
     return remotePath.schemeWalk(userPath, newAttributes, pathName, 0);
+    */
   }
 
   /**

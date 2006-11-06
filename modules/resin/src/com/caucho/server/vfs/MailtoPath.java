@@ -26,13 +26,14 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.vfs;
+package com.caucho.server.vfs;
 
 import java.io.*;
 import java.net.*;
 import java.util.*;
 
 import com.caucho.util.*;
+import com.caucho.vfs.*;
 
 /**
  * The mailto: scheme sends mail using the SMTP protocol.
@@ -216,7 +217,7 @@ public class MailtoPath extends Path {
   /**
    * Implementation to open a WriteStream.
    */
-  protected StreamImpl openWriteImpl()
+  public StreamImpl openWriteImpl()
     throws IOException
   {
     return new SmtpStream(_to, _attributes);

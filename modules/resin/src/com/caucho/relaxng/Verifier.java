@@ -37,13 +37,15 @@ import org.xml.sax.*;
 
 import com.caucho.util.*;
 import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 import com.caucho.xml.*;
 
 /**
  * JARV verifier implementation
  */
 abstract public class Verifier {
-  private static final Logger log = Log.open(Verifier.class);
+  private static final Logger log
+    = Logger.getLogger(Verifier.class.getName());
   
   /**
    * Set the error handler.

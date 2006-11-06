@@ -36,13 +36,7 @@ import javax.servlet.*;
 
 import com.caucho.util.*;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Depend;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.TempCharBuffer;
-
-import com.caucho.make.PersistentDependency;
+import com.caucho.vfs.*;
 
 import com.caucho.server.connection.CauchoResponse;
 

@@ -42,10 +42,8 @@ import javax.annotation.*;
 
 import com.caucho.util.L10N;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.Jar;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 import com.caucho.log.Log;
 

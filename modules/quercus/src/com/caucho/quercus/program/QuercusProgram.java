@@ -40,15 +40,11 @@ import com.caucho.quercus.page.QuercusPage;
 
 import com.caucho.quercus.Quercus;
 
-import com.caucho.make.PersistentDependency;
-import com.caucho.make.VersionDependency;
-import com.caucho.make.DependencyContainer;
+import com.caucho.make.*;
 
 import com.caucho.java.gen.GenClass;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Depend;
-import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.*;
 
 /**
  * Represents a compiled Quercus program.

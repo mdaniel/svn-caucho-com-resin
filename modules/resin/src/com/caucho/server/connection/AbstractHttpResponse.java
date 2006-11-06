@@ -39,6 +39,7 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 import com.caucho.util.CaseInsensitiveIntMap;
 
 import com.caucho.vfs.WriteStream;

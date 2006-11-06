@@ -58,6 +58,7 @@ import com.caucho.management.j2ee.EJBModule;
 import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 /**
  * Manages the EJBs.

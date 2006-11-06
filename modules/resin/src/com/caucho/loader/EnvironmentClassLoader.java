@@ -36,9 +36,10 @@ import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.naming.Jndi;
 import com.caucho.security.PolicyImpl;
 import com.caucho.transaction.TransactionManagerImpl;
+import com.caucho.log.*;
 import com.caucho.util.*;
-import com.caucho.vfs.EnvironmentStream;
-import com.caucho.vfs.SchemeMap;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 import javax.management.MBeanServerFactory;
 import java.lang.reflect.Method;
@@ -525,7 +526,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
       EnvironmentStream.setStderr(System.err);
 
       try {
-        SchemeMap.initJNI();
+        Vfs.initJNI();
       } catch (Throwable e) {
       }
 

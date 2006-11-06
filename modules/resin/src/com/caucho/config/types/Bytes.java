@@ -28,7 +28,6 @@
 
 package com.caucho.config.types;
 
-import com.caucho.util.CauchoSystem;
 import com.caucho.util.L10N;
 
 import com.caucho.config.ConfigException;

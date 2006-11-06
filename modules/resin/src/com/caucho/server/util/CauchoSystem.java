@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.util;
+package com.caucho.server.util;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -36,8 +36,10 @@ import java.util.regex.Pattern;
 import java.io.*;
 import java.net.*;
 
+import com.caucho.util.*;
 import com.caucho.loader.*;
 import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 import com.caucho.java.WorkDir;
 
 /**

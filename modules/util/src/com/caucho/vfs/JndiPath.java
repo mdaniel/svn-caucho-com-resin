@@ -50,7 +50,7 @@ public class JndiPath extends FilesystemPath {
   /**
    * Creates a new JndiPath root.
    */
-  JndiPath()
+  public JndiPath()
   {
     super(null, "/", "/");
 
@@ -73,9 +73,9 @@ public class JndiPath extends FilesystemPath {
    * @param path the normalized slash-separated path.
    * @return a new JndiPath representing the new path.
    */
-  protected Path fsWalk(String userPath,
-			Map<String,Object> attributes,
-			String path)
+  public Path fsWalk(String userPath,
+		     Map<String,Object> attributes,
+		     String path)
   {
     return new JndiPath(_root, userPath, path);
   }

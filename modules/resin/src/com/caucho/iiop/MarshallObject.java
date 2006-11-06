@@ -38,6 +38,7 @@ import javax.rmi.CORBA.Util;
 
 import com.caucho.vfs.*;
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 import com.caucho.ejb.*;
 import com.caucho.ejb.protocol.AbstractHandle;
 import com.caucho.log.Log;

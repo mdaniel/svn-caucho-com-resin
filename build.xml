@@ -177,7 +177,7 @@
   <target name="resin-util" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="util"/>
-      <param name="module.jar" value="resin-utils.jar"/>
+      <param name="module.jar" value="resin-util.jar"/>
     </antcall>
   </target>
 

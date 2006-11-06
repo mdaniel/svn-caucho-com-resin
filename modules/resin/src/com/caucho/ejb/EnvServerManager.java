@@ -52,8 +52,8 @@ import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.util.LruCache;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.JarPath;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 import com.caucho.java.WorkDir;
 

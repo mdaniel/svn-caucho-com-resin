@@ -50,7 +50,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 import com.caucho.util.L10N;
-import com.caucho.util.CauchoSystem;
+import com.caucho.server.util.CauchoSystem;
 
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;

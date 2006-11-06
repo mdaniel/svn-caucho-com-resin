@@ -31,7 +31,7 @@ package com.caucho.config;
 import com.caucho.util.L10N;
 import com.caucho.util.NotImplementedException;
 
-import com.caucho.make.PersistentDependency;
+import com.caucho.vfs.*;
 
 /**
  * Represents a bean that adds dependencies based on the config file.

@@ -73,10 +73,9 @@ import com.caucho.util.Log;
 import com.caucho.util.LruCache;
 import com.caucho.util.TimedCache;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.Depend;
+
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 /**
  * Facade for the PHP language.

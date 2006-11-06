@@ -51,7 +51,7 @@ import com.caucho.hessian.server.HessianSkeleton;
 
 import com.caucho.services.server.GenericService;
 
-import com.caucho.util.CauchoSystem;
+import com.caucho.server.util.*;
 
 /**
  * Invokes a service based on a Hessian-encoded request.

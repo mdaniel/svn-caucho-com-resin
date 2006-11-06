@@ -41,9 +41,8 @@ import com.caucho.java.gen.ClassComponent;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.DependencyComponent;
 
-import com.caucho.make.PersistentDependency;
-
 import com.caucho.util.L10N;
+import com.caucho.vfs.*;
 
 /**
  * Assembles the generator structure.

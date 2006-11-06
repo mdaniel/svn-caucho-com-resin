@@ -58,10 +58,8 @@ import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.util.LruCache;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.MergePath;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.IOExceptionWrapper;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 import com.caucho.xml.QName;
 import com.caucho.xml.DOMBuilder;

@@ -33,10 +33,8 @@ import javax.annotation.*;
 
 import com.caucho.loader.EnvironmentLocal;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.MergePath;
-import com.caucho.vfs.MemoryPath;
-import com.caucho.vfs.Vfs;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 public class WorkDir {
   private static final EnvironmentLocal<Path> _localWorkDir =
@@ -62,7 +60,7 @@ public class WorkDir {
       return path;
 
     // Windows uses /temp as a work dir
-    if (com.caucho.util.CauchoSystem.isWindows())
+    if (com.caucho.server.util.CauchoSystem.isWindows())
       path = Vfs.lookup("file:/c:/tmp/caucho");
     else
       path = Vfs.lookup("file:/tmp/caucho");

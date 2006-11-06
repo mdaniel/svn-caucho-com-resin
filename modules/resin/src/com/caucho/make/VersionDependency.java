@@ -32,13 +32,14 @@ import java.util.logging.Logger;
 
 import com.caucho.Version;
 
-import com.caucho.log.Log;
+import com.caucho.vfs.*;
 
 /**
  * Representing a Resin version.
  */
 public class VersionDependency implements PersistentDependency {
-  private final static Logger log = Log.open(VersionDependency.class);
+  private final static Logger log
+    = Logger.getLogger(VersionDependency.class.getName());
   
   private String _version;
 

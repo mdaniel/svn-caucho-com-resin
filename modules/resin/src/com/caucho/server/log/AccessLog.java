@@ -50,9 +50,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 import com.caucho.vfs.*;
 
-import com.caucho.log.Log;
+import com.caucho.log.*;
 
 import com.caucho.loader.Environment;
 import com.caucho.loader.CloseListener;
@@ -70,9 +71,11 @@ import com.caucho.server.dispatch.ServletConfigException;
 /**
  * Represents an log of every top-level request to the server.
  */
-public class AccessLog extends AbstractAccessLog implements AlarmListener {
+public class AccessLog extends AbstractAccessLog implements AlarmListener
+{
   protected static final L10N L = new L10N(AccessLog.class);
-  protected static final Logger log = Log.open(AccessLog.class);
+  protected static final Logger log
+    = Logger.getLogger(AccessLog.class.getName());
   
   // Default maximum log size = 1G
   private static final long ROLLOVER_SIZE = 1024L * 1024L * 1024L;

@@ -37,7 +37,7 @@ import java.util.logging.Level;
 import java.security.CodeSource;
 
 import com.caucho.util.L10N;
-import com.caucho.util.CauchoSystem;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.ThreadPool;
 
 import com.caucho.vfs.Path;

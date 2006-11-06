@@ -35,10 +35,10 @@ public class ReadWritePair {
   /**
    * Creates a ReadWritePair
    */
-  ReadWritePair(ReadStream readStream, WriteStream writeStream)
+  public ReadWritePair(ReadStream readStream, WriteStream writeStream)
   {
-    this._readStream = readStream;
-    this._writeStream = writeStream;
+    _readStream = readStream;
+    _writeStream = writeStream;
   }
 
   /**

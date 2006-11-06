@@ -49,8 +49,8 @@ import com.caucho.quercus.parser.QuercusParser;
 
 import com.caucho.quercus.program.QuercusProgram;
 
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 /**
  * Script engine

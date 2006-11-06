@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.vfs;
+package com.caucho.log;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,8 +44,6 @@ import java.util.zip.GZIPOutputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 
-import com.caucho.util.*;
-
 import com.caucho.loader.Environment;
 import com.caucho.loader.CloseListener;
 
@@ -54,6 +52,9 @@ import com.caucho.config.types.Bytes;
 import com.caucho.config.types.InitProgram;
 import com.caucho.config.ConfigException;
 
+import com.caucho.util.*;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 /**
  * Abstract class for a log that rolls over based on size or period.

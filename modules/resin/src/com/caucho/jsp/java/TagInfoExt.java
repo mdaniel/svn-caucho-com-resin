@@ -33,7 +33,7 @@ import java.util.ArrayList;
 
 import javax.servlet.jsp.tagext.*;
 
-import com.caucho.make.PersistentDependency;
+import com.caucho.vfs.*;
 
 /**
  * Information for a tag file.

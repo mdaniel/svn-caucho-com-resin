@@ -38,6 +38,7 @@ import org.w3c.dom.*;
 import com.caucho.log.Log;
 
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 import com.caucho.vfs.*;
 import com.caucho.xml.*;
 import com.caucho.xpath.*;

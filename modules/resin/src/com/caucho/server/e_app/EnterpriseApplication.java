@@ -59,6 +59,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 
 import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 import com.caucho.java.WorkDir;
 

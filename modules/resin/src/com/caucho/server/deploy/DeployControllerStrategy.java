@@ -34,20 +34,13 @@ import java.util.logging.Level;
 
 import java.io.IOException;
 
-import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
-import com.caucho.util.WeakAlarm;
-import com.caucho.util.AlarmListener;
-
-import com.caucho.log.Log;
+import com.caucho.util.*;
 
 import com.caucho.config.ConfigException;
 
 import com.caucho.loader.DynamicClassLoader;
 
 import com.caucho.lifecycle.Lifecycle;
-
-import com.caucho.make.Dependency;
 
 /**
  * DeployController controls the lifecycle of the DeployInstance.
@@ -79,7 +72,8 @@ import com.caucho.make.Dependency;
  * <li>alarm - timeout
  * <li>
  */
-public interface DeployControllerStrategy {
+public interface DeployControllerStrategy
+{
   /**
    * Called at initialization time for automatic start.
    *

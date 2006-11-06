@@ -35,9 +35,7 @@ import java.util.logging.*;
 
 import javax.annotation.*;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.RotateStream;
-import com.caucho.vfs.AbstractRolloverLog;
+import com.caucho.vfs.*;
 
 import com.caucho.util.L10N;
 

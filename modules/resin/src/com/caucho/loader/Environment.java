@@ -35,11 +35,7 @@ import java.util.ArrayList;
 
 import java.security.Permission;
 
-import com.caucho.vfs.EnvironmentStream;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Depend;
-
-import com.caucho.make.Dependency;
+import com.caucho.vfs.*;
 
 /**
  * Static utility classes.

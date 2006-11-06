@@ -71,7 +71,7 @@ class BindPath extends FilesystemPath {
       _separatorChar = ((FilesystemPath) backing)._separatorChar;
   }
 
-  protected Path fsWalk(String userPath,
+  public Path fsWalk(String userPath,
 			Map<String,Object> attributes,
 			String path)
   {

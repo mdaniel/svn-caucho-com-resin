@@ -32,27 +32,24 @@ package com.caucho.server.deploy;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.Environment;
 import com.caucho.log.Log;
-import com.caucho.make.CachedDependency;
-import com.caucho.make.Dependency;
-import com.caucho.util.L10N;
+import com.caucho.util.*;
+import com.caucho.make.*;
+import com.caucho.vfs.*;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.logging.Logger;
+import java.util.*;
+import java.util.logging.*;
 
 /**
  * A container of deploy objects.
  */
 public class DeployContainer<C extends DeployController>
   extends CachedDependency
-  implements Dependency {
-  private static final Logger log = Log.open(DeployContainer.class);
+  implements Dependency
+{
   private static final L10N L = new L10N(DeployContainer.class);
+  private static final Logger log
+    = Logger.getLogger(DeployContainer.class.getName());
 
   private final DeployListGenerator<C> _deployListGenerator
     = new DeployListGenerator<C>(this);

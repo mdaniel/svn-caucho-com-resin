@@ -50,6 +50,7 @@ import org.omg.CORBA.portable.IndirectionException;
 import org.omg.SendingContext.RunTime;
 
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 import com.caucho.vfs.*;
 import com.caucho.log.Log;
 

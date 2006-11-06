@@ -53,11 +53,12 @@ import javax.servlet.http.*;
 
 import javax.xml.bind.*;
 
-import com.caucho.util.CauchoSystem;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.JAXBUtil;
 import com.caucho.soa.servlet.*;
 import com.caucho.xml.stream.*;
 import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 /**
  * A binding for REST services.

@@ -34,19 +34,12 @@ import java.util.logging.*;
 
 import com.caucho.util.L10N;
 
-import com.caucho.vfs.Path;
-
-import com.caucho.log.Log;
-
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentLocal;
 
 import com.caucho.config.SchemaBean;
 import com.caucho.config.ConfigException;
-
-import com.caucho.make.Dependency;
-import com.caucho.make.AlwaysModified;
 
 import com.caucho.management.server.HostMXBean;
 
@@ -64,14 +57,18 @@ import com.caucho.server.port.*;
 
 import com.caucho.server.webapp.WebAppContainer;
 
+import com.caucho.make.*;
+import com.caucho.vfs.*;
+
 /**
  * Resin's virtual host implementation.
  */
 public class Host extends WebAppContainer
   implements EnvironmentBean, Dependency, SchemaBean,
-	     EnvironmentDeployInstance {
-  static final Logger log = Log.open(Host.class);
-  static final L10N L = new L10N(Host.class);
+	     EnvironmentDeployInstance
+{
+  private static final Logger log = Logger.getLogger(Host.class.getName());
+  private static final L10N L = new L10N(Host.class);
 
   private static EnvironmentLocal<Host> _hostLocal
     = new EnvironmentLocal<Host>("caucho.host");

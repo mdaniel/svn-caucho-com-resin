@@ -30,12 +30,10 @@ package com.caucho.config.types;
 
 import java.util.regex.Pattern;
 
-import com.caucho.util.CauchoSystem;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import com.caucho.vfs.*;
 
 import com.caucho.config.ConfigException;
 

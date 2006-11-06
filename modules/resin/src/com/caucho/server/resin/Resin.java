@@ -56,7 +56,9 @@ import com.caucho.naming.*;
 import com.caucho.server.cluster.*;
 import com.caucho.transaction.cfg.TransactionManagerConfig;
 import com.caucho.util.*;
+import com.caucho.log.*;
 import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 /**
  * The Resin class represents the top-level container for Resin.
@@ -909,7 +911,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 	isResinProfessional = true;
 	System.setProperty("isResinProfessional", "true");
 
-	SchemeMap.initJNI();
+	Vfs.initJNI();
 
 	// license.doLogging(1);
       } catch (Throwable e) {
@@ -1505,7 +1507,7 @@ public class Resin implements EnvironmentBean, SchemaBean
      */
     public boolean isJava5()
     {
-      return CauchoSystem.isJdk15();
+      return true;
     }
     /**
      * Returns the JDK version

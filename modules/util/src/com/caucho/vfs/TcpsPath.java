@@ -38,8 +38,9 @@ import com.caucho.util.*;
  * Implements a tcp stream, essentially just a socket pair.
  */
 public class TcpsPath extends TcpPath {
-  TcpsPath(TcpPath root, String userPath, Map<String,Object> newAttributes,
-	   String host, int port)
+  public TcpsPath(TcpPath root, String userPath,
+		  Map<String,Object> newAttributes,
+		  String host, int port)
   {
     super(root, userPath, newAttributes, host, port);
   }

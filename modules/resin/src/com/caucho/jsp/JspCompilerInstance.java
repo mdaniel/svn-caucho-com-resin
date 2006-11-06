@@ -37,10 +37,8 @@ import com.caucho.jsp.cfg.JspTaglib;
 import com.caucho.jsp.java.JspTagSupport;
 import com.caucho.jsp.java.TagTaglib;
 import com.caucho.log.Log;
-import com.caucho.make.PersistentDependency;
 import com.caucho.server.webapp.WebApp;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import com.caucho.vfs.*;
 import com.caucho.xml.Xml;
 import org.xml.sax.SAXException;
 

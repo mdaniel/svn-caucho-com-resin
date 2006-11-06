@@ -45,6 +45,7 @@ import javax.transaction.*;
 import com.caucho.vfs.*;
 import com.caucho.java.*;
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 
 import com.caucho.server.webapp.*;
 

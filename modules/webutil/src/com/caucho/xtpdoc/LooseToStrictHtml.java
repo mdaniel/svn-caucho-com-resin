@@ -34,6 +34,7 @@ import java.io.*;
 import org.xml.sax.SAXException;
 
 import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 import com.caucho.xml.*;
 

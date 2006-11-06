@@ -39,7 +39,7 @@ import com.caucho.server.deploy.DeployControllerAdmin;
 import com.caucho.server.host.HostController;
 import com.caucho.server.port.AbstractSelectManager;
 import com.caucho.server.port.Port;
-import com.caucho.util.CauchoSystem;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 

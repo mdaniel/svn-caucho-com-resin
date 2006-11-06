@@ -50,9 +50,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.caucho.util.*;
 
 import com.caucho.vfs.*;
-import com.caucho.vfs.AbstractRolloverLog;
-
-import com.caucho.log.Log;
+import com.caucho.log.*;
 
 import com.caucho.loader.Environment;
 import com.caucho.loader.CloseListener;
@@ -70,9 +68,11 @@ import com.caucho.server.dispatch.ServletConfigException;
 /**
  * Represents an log of every top-level request to the server.
  */
-public class AccessLogWriter extends AbstractRolloverLog implements Runnable {
+public class AccessLogWriter extends AbstractRolloverLog implements Runnable
+{
   protected static final L10N L = new L10N(AccessLogWriter.class);
-  protected static final Logger log = Log.open(AccessLogWriter.class);
+  protected static final Logger log
+    = Logger.getLogger(AccessLogWriter.class.getName());
 
   private static final int BUFFER_SIZE = 65536;
   private static final int BUFFER_GAP = 8 * 1024;

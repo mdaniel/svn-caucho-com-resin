@@ -130,7 +130,7 @@ abstract public class FilesystemPath extends Path {
    *
    * @return the matching path
    */
-  abstract protected Path fsWalk(String userPath,
+  abstract public Path fsWalk(String userPath,
                                  Map<String,Object> newAttributes, 
 				 String newPath);
 

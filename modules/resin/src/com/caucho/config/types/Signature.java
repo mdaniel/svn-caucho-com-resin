@@ -35,7 +35,7 @@ import javax.annotation.*;
 
 import com.caucho.util.L10N;
 import com.caucho.util.CharBuffer;
-import com.caucho.util.CauchoSystem;
+import com.caucho.server.util.CauchoSystem;
 
 import com.caucho.config.ConfigException;
 

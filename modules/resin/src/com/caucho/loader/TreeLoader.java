@@ -38,25 +38,23 @@ import java.net.URL;
 
 import javax.annotation.*;
 
-import com.caucho.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.JarPath;
-import com.caucho.vfs.Depend;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 import com.caucho.log.Log;
 
-import com.caucho.make.Dependency;
 import com.caucho.make.DependencyContainer;
 
 /**
  * Class loader which checks for changes in class files and automatically
  * picks up new jars.
  */
-public class TreeLoader extends Loader implements Dependency {
-  private static final Logger log = Log.open(TreeLoader.class);
+public class TreeLoader extends Loader implements Dependency
+{
+  private static final Logger log
+    = Logger.getLogger(TreeLoader.class.getName());
   
   // Directory which may have jars dynamically added
   private Path _dir;
@@ -248,7 +246,7 @@ public class TreeLoader extends Loader implements Dependency {
       JarPath jar = jarEntry.getJarPath();
 
       if (cb.length() > 0)
-        cb.append(CauchoSystem.getPathSeparatorChar());
+        cb.append(Path.getPathSeparatorChar());
       cb.append(jar.getContainer().getNativePath());
     }
 

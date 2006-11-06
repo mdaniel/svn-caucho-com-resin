@@ -34,10 +34,10 @@ import java.beans.*;
 import java.lang.reflect.*;
 
 import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 import com.caucho.java.*;
 import com.caucho.util.*;
 
-import com.caucho.make.PersistentDependency;
 import com.caucho.make.ClassDependency;
 
 /**

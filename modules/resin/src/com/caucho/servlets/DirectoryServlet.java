@@ -37,6 +37,7 @@ import javax.servlet.*;
 
 import com.caucho.util.*;
 import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 import com.caucho.i18n.CharacterEncoding;
 

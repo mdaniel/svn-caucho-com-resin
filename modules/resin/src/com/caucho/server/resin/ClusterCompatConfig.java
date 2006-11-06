@@ -37,6 +37,7 @@ import com.caucho.util.*;
 
 import com.caucho.server.cluster.*;
 import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 /**
  * Compatiblity configuration for Resin 3.0-style configuration.

@@ -35,11 +35,8 @@ import com.caucho.lifecycle.Lifecycle;
 import com.caucho.lifecycle.LifecycleListener;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.log.Log;
-import com.caucho.make.Dependency;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
-import com.caucho.util.L10N;
-import com.caucho.util.WeakAlarm;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -49,8 +46,10 @@ import java.util.logging.Logger;
  * DeployController controls the lifecycle of the DeployInstance.
  */
 abstract public class DeployController<I extends DeployInstance>
-  implements Dependency, AlarmListener {
-  private static final Logger log = Log.open(DeployController.class);
+  implements Dependency, AlarmListener
+{
+  private static final Logger log
+    = Logger.getLogger(DeployController.class.getName());
   private static final L10N L = new L10N(DeployController.class);
 
   public static final String STARTUP_DEFAULT = "default";

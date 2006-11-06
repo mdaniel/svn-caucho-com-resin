@@ -33,17 +33,16 @@ import java.util.ArrayList;
 
 import java.util.logging.Logger;
 
-import com.caucho.util.Alarm;
-import com.caucho.util.CharBuffer;
-
-import com.caucho.log.Log;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
 
 import com.caucho.loader.DynamicClassLoader;
 
 /**
  * Contains a set of dependencies.
  */
-public class DependencyContainer implements Dependency {
+public class DependencyContainer implements Dependency
+{
   private static Logger _log;
   
   private ArrayList<Dependency> _dependencyList = new ArrayList<Dependency>();

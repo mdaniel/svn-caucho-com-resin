@@ -48,11 +48,8 @@ import com.caucho.log.Log;
 
 import com.caucho.loader.EnvironmentLocal;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.ClientDisconnectException;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;

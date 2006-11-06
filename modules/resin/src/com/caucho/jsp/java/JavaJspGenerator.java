@@ -44,9 +44,10 @@ import javax.servlet.jsp.tagext.*;
 import javax.servlet.jsp.el.ELException;
 
 import com.caucho.util.*;
+import com.caucho.server.util.*;
+import com.caucho.server.vfs.*;
 import com.caucho.vfs.*;
 
-import com.caucho.make.PersistentDependency;
 import com.caucho.make.ClassDependency;
 
 import com.caucho.log.Log;

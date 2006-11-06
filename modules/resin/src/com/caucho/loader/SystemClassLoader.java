@@ -29,10 +29,9 @@
 
 package com.caucho.loader;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
+import com.caucho.server.vfs.*;
+import com.caucho.vfs.*;
+import com.caucho.config.*;
 
 import java.net.URL;
 import java.net.URLClassLoader;

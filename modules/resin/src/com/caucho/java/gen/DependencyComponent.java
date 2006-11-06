@@ -32,13 +32,11 @@ import java.util.ArrayList;
 
 import java.io.IOException;
 
-import com.caucho.util.L10N;
-import com.caucho.util.CauchoSystem;
+import com.caucho.server.util.*;
+import com.caucho.util.*;
+import com.caucho.server.util.*;
 
-import com.caucho.make.PersistentDependency;
-
-import com.caucho.vfs.Depend;
-import com.caucho.vfs.Path;
+import com.caucho.vfs.*;
 
 import com.caucho.java.JavaWriter;
 

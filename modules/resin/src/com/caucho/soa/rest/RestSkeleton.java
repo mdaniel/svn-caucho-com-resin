@@ -58,8 +58,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
-import com.caucho.util.CauchoSystem;
-import com.caucho.util.JAXBUtil;
+import com.caucho.util.*;
+import com.caucho.server.util.*;
 
 /**
  * A binding for REST services.

@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.vfs.memory;
+package com.caucho.server.vfs.memory;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -36,7 +36,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
-import com.caucho.vfs.Vfs;
+import com.caucho.server.vfs.Vfs;
 
 /**
  * URL memory handler.

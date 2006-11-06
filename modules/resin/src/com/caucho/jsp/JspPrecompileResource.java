@@ -43,8 +43,8 @@ import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.util.CompileException;
 
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.Path;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 import com.caucho.java.LineMap;
 import com.caucho.java.JavaCompiler;

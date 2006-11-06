@@ -43,9 +43,8 @@ import org.w3c.dom.Node;
 import com.caucho.el.*;
 import com.caucho.util.*;
 import com.caucho.xml.QName;
-import com.caucho.loader.EnvironmentBean;
-import com.caucho.loader.Environment;
-import com.caucho.make.Dependency;
+import com.caucho.loader.*;
+import com.caucho.vfs.*;
 
 public class EnvironmentTypeStrategy extends BeanTypeStrategy {
   EnvironmentTypeStrategy(Class type)

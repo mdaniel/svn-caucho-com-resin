@@ -40,7 +40,6 @@ import com.caucho.quercus.module.UsesSymbolTable;
 import com.caucho.quercus.lib.file.*;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
-import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;

@@ -33,6 +33,7 @@ import java.net.*;
 import java.util.*;
 
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 
 /**
  * JavaScript object representing a Java package or class.

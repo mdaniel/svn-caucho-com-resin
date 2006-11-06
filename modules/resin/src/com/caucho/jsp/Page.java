@@ -44,9 +44,6 @@ import com.caucho.java.*;
 import com.caucho.log.Log;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 
-import com.caucho.make.Dependency;
-import com.caucho.make.PersistentDependency;
-
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
 

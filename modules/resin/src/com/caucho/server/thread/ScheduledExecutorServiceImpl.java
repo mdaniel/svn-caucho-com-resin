@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.util;
+package com.caucho.server.thread;
 
 import java.util.*;
 

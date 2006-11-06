@@ -34,7 +34,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.*;
 
-import com.caucho.config.*;
+import com.caucho.config.ConfigException;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
@@ -686,7 +686,7 @@ public class ThreadPool {
 	} catch (Throwable e) {
 	  _startCount--;
 
-	  e.printStackTrace(EnvironmentStream.getOriginalSystemErr().getPrintWriter());
+	  e.printStackTrace();
 	  if (_startCount < 0) {
 	    Thread.dumpStack();
 	    _startCount = 0;

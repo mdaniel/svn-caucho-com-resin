@@ -35,6 +35,7 @@ import java.lang.ref.*;
 import java.beans.*;
 
 import com.caucho.util.*;
+import com.caucho.server.util.*;
     
 /**
  * Analyzes the class from a JavaScript perspective.

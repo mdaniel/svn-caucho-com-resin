@@ -41,8 +41,6 @@ import com.caucho.vfs.*;
 
 import com.caucho.xml.QName;
 
-import com.caucho.log.Log;
-
 import com.caucho.relaxng.program.Item;
 import com.caucho.relaxng.program.EmptyItem;
 

@@ -35,6 +35,7 @@ import java.rmi.RemoteException;
 import javax.ejb.RemoveException;
 
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 import com.caucho.vfs.*;
 
 import com.caucho.ejb.AbstractServer;

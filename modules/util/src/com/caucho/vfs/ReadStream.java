@@ -1193,7 +1193,7 @@ public final class ReadStream extends InputStream {
     return "ReadStream[" + _source + "]";
   }
 
-  class StreamReader extends Reader {
+  public class StreamReader extends Reader {
     public final int read()
       throws IOException
     {
@@ -1217,7 +1217,7 @@ public final class ReadStream extends InputStream {
     {
     }
 
-    ReadStream getStream()
+    public ReadStream getStream()
     {
       return ReadStream.this;
     }

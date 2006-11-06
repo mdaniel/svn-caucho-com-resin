@@ -27,13 +27,14 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.vfs;
+package com.caucho.server.vfs;
 
 import java.io.*;
 import java.util.*;
 import java.util.logging.*;
 
 import com.caucho.util.*;
+import com.caucho.vfs.*;
 
 /**
  * Logs usage of the path.

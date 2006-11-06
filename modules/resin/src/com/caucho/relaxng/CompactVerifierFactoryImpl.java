@@ -38,7 +38,9 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 import com.caucho.xml.Xml;
 

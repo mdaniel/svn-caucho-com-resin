@@ -127,7 +127,7 @@ public class CachePath extends FilesystemPath {
    *
    * @return a cache path entry
    */
-  protected Path fsWalk(String userPath,
+  public Path fsWalk(String userPath,
 			Map<String,Object> attributes,
 			String path)
   {

@@ -51,15 +51,10 @@ import com.caucho.config.types.FileSetType;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
 
-import com.caucho.util.Log;
-import com.caucho.util.L10N;
+import com.caucho.util.*;
 
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.Jar;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Depend;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 /**
  * A deployment entry that expands from an archive (Jar/Zip) file.

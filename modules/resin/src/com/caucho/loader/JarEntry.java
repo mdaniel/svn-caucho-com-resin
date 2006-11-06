@@ -45,28 +45,21 @@ import java.security.CodeSource;
 
 import java.security.cert.Certificate;
 
-import com.caucho.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.JarPath;
-import com.caucho.vfs.Depend;
-
-import com.caucho.log.Log;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 import com.caucho.config.ConfigException;
-
-import com.caucho.make.Dependency;
-import com.caucho.make.DependencyContainer;
 
 /**
  * JarEntry.
  */
 class JarEntry {
   private static final L10N L = new L10N(JarEntry.class);
-  private static final Logger log = Log.open(JarEntry.class);
+  private static final Logger log
+    = Logger.getLogger(JarEntry.class.getName());
 
   private Manifest _manifest;
   private JarPath _jarPath;

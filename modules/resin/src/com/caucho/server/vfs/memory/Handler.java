@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.vfs.memory;
+package com.caucho.server.vfs.memory;
 
 import java.net.URL;
 import java.net.URLConnection;

@@ -37,8 +37,8 @@ import java.util.ArrayList;
 
 import com.caucho.config.Config;
 
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.Path;
+import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 public class Printer {
   public static void main(String []args)

@@ -27,12 +27,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.vfs;
+package com.caucho.server.vfs;
 
 import java.io.*;
 import java.util.*;
 
 import com.caucho.util.*;
+import com.caucho.vfs.*;
 import com.caucho.config.types.Bytes;
 
 public class MemoryPath extends FilesystemPath {
@@ -346,7 +347,7 @@ public class MemoryPath extends FilesystemPath {
     }
   }
 
-  protected StreamImpl openReadImpl() throws IOException
+  public StreamImpl openReadImpl() throws IOException
   {
     synchronized (_rootNode) {
       Node node = lookupAll();
@@ -360,12 +361,12 @@ public class MemoryPath extends FilesystemPath {
     }
   }
 
-  protected StreamImpl openWriteImpl() throws IOException
+  public StreamImpl openWriteImpl() throws IOException
   {
     return openWriteImpl(false);
   }
 
-  protected StreamImpl openAppendImpl() throws IOException
+  public StreamImpl openAppendImpl() throws IOException
   {
     return openWriteImpl(true);
   }

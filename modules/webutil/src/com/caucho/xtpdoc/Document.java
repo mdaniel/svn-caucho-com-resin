@@ -42,6 +42,7 @@ import javax.xml.stream.XMLStreamException;
 
 import com.caucho.config.*;
 import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 public class Document {
   private static Logger log = Logger.getLogger(ResinDocServlet.class.getName());

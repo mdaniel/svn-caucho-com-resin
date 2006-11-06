@@ -54,13 +54,7 @@ import com.caucho.quercus.module.NotNull;
 
 import com.caucho.util.L10N;
 import com.caucho.util.Base64;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.StreamImpl;
-import com.caucho.vfs.TempBuffer;
-import com.caucho.vfs.TempCharBuffer;
-import com.caucho.vfs.TempStream;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.*;
 
 import java.io.InputStream;
 import java.io.IOException;

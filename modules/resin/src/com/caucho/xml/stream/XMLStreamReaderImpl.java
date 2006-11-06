@@ -37,6 +37,7 @@ import javax.xml.stream.*;
 
 import com.caucho.util.*;
 import com.caucho.vfs.*;
+import com.caucho.server.vfs.*;
 
 /**
  * XML pull-parser interface.
