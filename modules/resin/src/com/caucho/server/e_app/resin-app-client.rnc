@@ -1,0 +1,30 @@
+default namespace javaee = "http://caucho.com/ns/resin"
+namespace local = ""
+
+include "../resin/javaee.rnc"
+
+resin_application-client = element application-client {
+  attribute id { string }?,
+
+  attribute version { string }?,
+
+  attribute xsi:schemaLocation { string }?,
+
+  javaee_description-Group,
+
+  javaee_env-entry*,
+
+  javaee_ejb-ref*,
+
+  javaee_service-ref-Group,
+
+  javaee_resource-ref*,
+
+  javaee_resource-env-ref*,
+
+  javaee_message-destination-ref*,
+
+  element callback-handler { javaee_fully-qualified-class }?,
+
+  javaee_message-destination*
+}

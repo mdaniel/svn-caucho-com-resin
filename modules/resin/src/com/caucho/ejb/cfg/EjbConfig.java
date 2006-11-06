@@ -122,10 +122,10 @@ public class EjbConfig {
     if (ejbModuleName.startsWith(pwd))
       ejbModuleName = ejbModuleName.substring(pwd.length());
     
-    // XXX: null when called from EntAppClient(?)
     if (_ejbManager != null)
       _ejbManager.addEJBModule(ejbModuleName);
 
+    // XXX: merge?
     EjbJar ejbJar = new EjbJar(this, ejbModuleName);
 
     try {

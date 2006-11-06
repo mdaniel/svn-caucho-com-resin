@@ -46,14 +46,18 @@ import com.caucho.config.BuilderProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.j2ee.InjectIntrospector;
-import com.caucho.config.types.EjbRef;
+import com.caucho.j2ee.J2EEVersion;
+import com.caucho.java.WorkDir;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 import com.caucho.server.vfs.*;
-import com.caucho.java.WorkDir;
+
+import org.w3c.dom.Node;
+import org.w3c.dom.Element;
 
 import javax.naming.Context;
 import javax.security.auth.callback.Callback;
@@ -72,25 +76,26 @@ public class AppClient implements EnvironmentBean
   private static L10N L = new L10N(AppClient.class);
   private static Logger log = Logger.getLogger(AppClient.class.getName());
 
+  private static final EnvironmentLocal<AppClient> _local
+    = new EnvironmentLocal<AppClient>();
+
   private final EnvironmentClassLoader _loader;
 
-  private Path _workDir;
+  private J2EEVersion _j2eeVersion = J2EEVersion.RESIN;
+
+  private Path _rootDirectory;
+  private Path _workDirectory;
   private String _mainClassName;
   private Path _clientJar;
 
   private Lifecycle _lifecycle = new Lifecycle(log);
   private Method _mainMethod;
   private String[] _mainArgs = new String[] {};
-  private ArrayList<EjbRef> _ejbRefs = new ArrayList<EjbRef>();
-
-  private Class _ejbRemoteFactory;
-  private String _ejbRemoteUrl;
-
-  private Class<CallbackHandler> _callbackHandler;
 
   private AppClient()
   {
     _loader = new EnvironmentClassLoader();
+    _local.set(this, _loader);
   }
 
   public ClassLoader getClassLoader()
@@ -98,9 +103,33 @@ public class AppClient implements EnvironmentBean
     return _loader;
   }
 
-  public void setWorkDir(Path workDir)
+  public static AppClient getLocal()
   {
-    _workDir = workDir;
+    return _local.get();
+  }
+
+  /**
+   * Used to distinguish the version of the configuration file.
+   */
+  public void setConfigNode(Node node)
+  {
+    _j2eeVersion = J2EEVersion.getJ2EEVersion((Element) node);
+  }
+
+  public J2EEVersion getJ2EEVersion()
+  {
+    return _j2eeVersion;
+  }
+
+  public void setRootDirectory(Path rootDirectory)
+  {
+    _rootDirectory = rootDirectory;
+    Vfs.setPwd(_rootDirectory);
+  }
+
+  public void setWorkDirectory(Path workDirectory)
+  {
+    _workDirectory = workDirectory;
   }
 
   public void setId(String id)
@@ -113,16 +142,6 @@ public class AppClient implements EnvironmentBean
 
   public void setIcon(com.caucho.config.types.Icon icon)
   {
-  }
-
-  public void setEjbRemoteFactory(Class factory)
-  {
-    _ejbRemoteFactory = factory;
-  }
-
-  public void setEjbRemoteUrl(String url)
-  {
-    _ejbRemoteUrl = url;
   }
 
   private void addConfig(Path path)
@@ -146,26 +165,11 @@ public class AppClient implements EnvironmentBean
     _mainArgs = mainArgs;
   }
 
-  public EjbRef createEjbRef()
-  {
-    EjbRef ref = new EjbRef();
-
-    if (_ejbRemoteFactory != null)
-      ref.putJndiEnv(Context.INITIAL_CONTEXT_FACTORY,
-                     _ejbRemoteFactory.getName());
-
-    if (_ejbRemoteUrl != null)
-      ref.putJndiEnv(Context.PROVIDER_URL, _ejbRemoteUrl);
-
-    _ejbRefs.add(ref);
-
-    return ref;
-  }
-
   public void setSchemaLocation(String schemaLocation)
   {
     // not needed
   }
+
 
   public void setVersion(String version)
   {
@@ -199,7 +203,7 @@ public class AppClient implements EnvironmentBean
     if (_clientJar == null)
       throw new ConfigException(L.l("'{0}' is required", "client-jar"));
 
-    if (_workDir == null) {
+    if (_rootDirectory == null) {
       String name = _clientJar.getTail();
 
       int lastDot = name.lastIndexOf(".");
@@ -207,10 +211,13 @@ public class AppClient implements EnvironmentBean
       if (lastDot > -1)
         name = name.substring(0, lastDot);
 
-      _workDir = WorkDir.getLocalWorkDir(_loader).lookup("_appclient").lookup("_" + name);
+      _rootDirectory = WorkDir.getLocalWorkDir(_loader).lookup("_appclient").lookup("_" + name);
     }
 
-    WorkDir.setLocalWorkDir(_workDir, _loader);
+    if (_workDirectory == null)
+      _workDirectory = _rootDirectory.lookup("META-INF/work");
+
+    WorkDir.setLocalWorkDir(_workDirectory, _loader);
 
     _loader.setId(toString());
     _loader.addJar(_clientJar);
@@ -221,8 +228,11 @@ public class AppClient implements EnvironmentBean
     try {
       thread.setContextClassLoader(_loader);
 
+      if (log.isLoggable(Level.FINE))
+        log.log(Level.FINE, L.l("root-directory is {0}", _rootDirectory));
+
       if (log.isLoggable(Level.FINER))
-        log.log(Level.FINER, L.l("work-dir is {1}", this, WorkDir.getLocalWorkDir()));
+        log.log(Level.FINER, L.l("work-directory is {0}", WorkDir.getLocalWorkDir()));
 
       JarPath jarPath = JarPath.create(_clientJar);
 
@@ -235,7 +245,7 @@ public class AppClient implements EnvironmentBean
       Class<?> mainClass = Class.forName(_mainClassName, false, _loader);
 
       ArrayList<BuilderProgram> programList
-	= InjectIntrospector.introspectStatic(mainClass);
+        = InjectIntrospector.introspectStatic(mainClass);
 
       for (BuilderProgram program : programList) {
         if (log.isLoggable(Level.FINEST))
@@ -300,7 +310,6 @@ public class AppClient implements EnvironmentBean
     throws Throwable
   {
     String clientJar = null;
-    String ear = null;
     String main = null;
     String conf = null;
     String workDir = null;
@@ -341,7 +350,7 @@ public class AppClient implements EnvironmentBean
     AppClient appClient = new AppClient();
 
     if (workDir != null)
-      appClient.setWorkDir(Vfs.lookup(workDir));
+      appClient.setWorkDirectory(Vfs.lookup(workDir));
 
     if (clientJar != null)
       appClient.setClientJar(Vfs.lookup(clientJar));

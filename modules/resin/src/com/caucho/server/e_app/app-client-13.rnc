@@ -1,0 +1,21 @@
+namespace local = ""
+
+include "../resin/j2ee.rnc"
+
+start = j2ee13_application-client
+
+j2ee13_application-client = element application-client {
+  attribute id { string }?,
+
+  j2ee_description-Group,
+
+  j2ee_env-entry*,
+
+  j2ee_ejb-ref*,
+
+  j2ee_resource-ref*,
+
+  j2ee_resource-env-ref*,
+
+  element callback-handler { j2ee_fully-qualified-class }?
+}

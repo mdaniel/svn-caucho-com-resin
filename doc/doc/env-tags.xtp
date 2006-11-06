@@ -83,7 +83,7 @@ sub-beans.</p>
     <td>optional</td></tr>
 <tr><td>init</td>
     <td>IoC/JAXB configuration for the bean</td>
-     <td>optional</td></tr>
+    <td>optional</td></tr>
 <tr><td>listener</td>
     <td>Registers the bean as a listener for a JMX emitter. Resin 3.0</td>
     <td>optional</td></tr>
@@ -471,7 +471,7 @@ compiling-loader configuration.</p>
 <parents>resin, cluster, host, web-app</parents>
   <!-- com.caucho.naming.LinkProxy -->
 
-<p>&lt;jndi-link> links a foreign JNDI contexts or JNDI object.</p>
+<p>&lt;jndi-link> creates a symbolic link from one jndi name to another, or links to a foreign JNDI context.</p>
 
 <p>Resin's JNDI can link to foreign JNDI contexts.  For example, third-party
 EJB servers will often expose their EJB beans through a JNDI context.
@@ -479,21 +479,56 @@ jndi-link will create the appropriate InitialContextFactory, configure it,
 and lookup the foreign JNDI objects.</p>
 
 <deftable-childtags>
-<tr><td>jndi-name</td><td>The JNDI name where the foreign context should be linked.  Resin 3.0</td><td>required
-</td></tr><tr><td>factory</td><td>Class name of the JNDI InitialContextFactory.  Since Resin 1.2</td><td>optional
-</td></tr><tr><td>foreign-name</td><td>Sub-context of the foreign JNDI context.  Since Resin 1.2</td><td>none
-</td></tr><tr><td>init-param</td><td>Configuration parameters for the JNDI environment passed to InitialContextFactory.  Since Resin 1.2</td><td>none
-</td></tr></deftable-childtags>
+<tr><td>factory</td>
+    <td>Class name of the JNDI InitialContextFactory.  Since Resin 1.2</td>
+    <td>optional</td></tr>
+<tr><td>foreign-name</td>
+    <td>The target name of the symbolic link, or the sub-context of the foreign JNDI context.  Since Resin 1.2</td>
+    <td>none</td></tr>
+<tr><td>init-param</td>
+    <td>Configuration parameters for the JNDI environment passed to InitialContextFactory.  Since Resin 1.2</td>
+    <td>none</td></tr>
+<tr><td>jndi-name</td>
+    <td>The JNDI name to use for the link.  Resin 3.0</td>
+    <td>required</td></tr>
+</deftable-childtags>
 
-<example title="A JNDI symbolic link EJB client bean">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-  &lt;ejb-server jndi-name="java:comp/env/foo"/>
+<example title="A JNDI symbolic link for an EJB">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;ejb-server name="java:comp/env/ejb"/&gt;
 
-  &lt;jndi-link&gt;
-    &lt;jndi-name&gt;java:comp/env/ejb/MyBean&lt;/jndi-name&gt;
-    &lt;foreign-name&gt;java:comp/env/foo/SampleBean&lt;/foreign-name&gt;
+  &lt;jndi-link jndi-name="java:comp/env/ApplicationName"&gt;
+    &lt;foreign-name&gt;java:comp/env/ejb/EjbJarName&lt;/foreign-name&gt;
   &lt;/jndi-link&gt;
-&lt;/web-app>
+&lt;/web-app&gt;
+</example>
+
+<example title="A JNDI foreign context for all EJB">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;jndi-link jndi-name='java:comp/env/ejb'&gt;
+    &lt;factory&gt;com.caucho.ejb.hessian.HessianContextFactory&lt;/factory&gt;
+    &lt;init-param java.naming.provider.url='http://ejb.hogwarts.com:80/hessian'/&gt;
+  &lt;/jndi-link&gt;
+&lt;/web-app&gt;
+</example>
+
+<example title="A JNDI foreign context for selected EJB">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;ejb-server jndi-name="java:comp/env/local-ejb"/&gt;
+
+  &lt;jndi-link jndi-name='java:comp/env/remote-ejb'&gt;
+    &lt;factory&gt;com.caucho.ejb.hessian.HessianContextFactory&lt;/factory&gt;
+    &lt;init-param java.naming.provider.url='http://ejb.hogwarts.com:80/hessian'/&gt;
+  &lt;/jndi-link&gt;
+
+  &lt;jndi-link jndi-name="java:comp/env/ejb/Foo"&gt;
+    &lt;foreign-name&gt;java:comp/env/remote-ejb/Foo&lt;/foreign-name&gt;
+  &lt;/jndi-link&gt;
+
+  &lt;jndi-link jndi-name="java:comp/env/ejb/Bar"&gt;
+    &lt;foreign-name&gt;java:comp/env/local-ejb/Bar&lt;/foreign-name&gt;
+  &lt;/jndi-link&gt;
+&lt;/web-app&gt;
 </example>
 
 </defun>

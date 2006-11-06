@@ -28,20 +28,18 @@
 
 package com.caucho.naming;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.annotation.*;
-
-import javax.naming.*;
-import javax.naming.spi.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.InitParam;
+import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.naming.spi.InitialContextFactory;
+import java.util.Hashtable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * An object proxy for a foreign JNDI factory.
@@ -64,8 +62,6 @@ public class LinkProxy implements ObjectProxy, java.io.Serializable {
 
   /**
    * Creates a new LinkProxy.
-   *
-   * @param name the jndi-link path in the foreign namespace
    */
   public LinkProxy()
     throws NamingException
@@ -112,11 +108,11 @@ public class LinkProxy implements ObjectProxy, java.io.Serializable {
   }
 
   /**
-   * Sets the jndi name.
+   * @deprecated Use {@link #setJndiName}
    */
   public void setName(String name)
   {
-    setName(name);
+    setJndiName(name);
   }
 
   /**
@@ -128,11 +124,19 @@ public class LinkProxy implements ObjectProxy, java.io.Serializable {
   }
 
   /**
-   * Sets the factory
+   * @deprecated Use {@link #setFactory}
    */
   public void setJndiFactory(Class factoryClass)
   {
     setFactory(factoryClass);
+  }
+
+  /**
+   * Sets the foreign-name
+   */
+  public void setForeignName(String name)
+  {
+    _foreignName = name;
   }
 
   /**
@@ -144,14 +148,6 @@ public class LinkProxy implements ObjectProxy, java.io.Serializable {
       _props = new Hashtable<String,String>();
     
     _props.putAll(initParam.getParameters());
-  }
-
-  /**
-   * Sets the foreign-name
-   */
-  public void setForeignName(String name)
-  {
-    _foreignName = name;
   }
 
   /**
@@ -177,11 +173,14 @@ public class LinkProxy implements ObjectProxy, java.io.Serializable {
       mergeEnv.putAll(env);
     }
 
-    if (_factory != null)
+    if (_factory != null) {
       context = _factory.getInitialContext(mergeEnv);
-    else
+    }
+    else {
       context = new InitialContext(mergeEnv);
-    
+      _foreignName = Jndi.getFullName(_foreignName);
+    }
+
     if (_foreignName != null) {
       try {
 	Object value = context.lookup(_foreignName);
