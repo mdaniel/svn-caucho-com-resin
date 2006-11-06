@@ -54,7 +54,7 @@ import javax.servlet.http.*;
 import javax.xml.bind.*;
 
 import com.caucho.server.util.CauchoSystem;
-import com.caucho.util.JAXBUtil;
+import com.caucho.jaxb.JAXBUtil;
 import com.caucho.soa.servlet.*;
 import com.caucho.xml.stream.*;
 import com.caucho.vfs.*;
@@ -117,13 +117,13 @@ public class RestProtocolServlet extends GenericServlet
       Class cl = _service.getClass();
 
       if (cl.isAnnotationPresent(WebService.class)) {
-	WebService webService
-	  = (WebService) cl.getAnnotation(WebService.class);
+        WebService webService
+          = (WebService) cl.getAnnotation(WebService.class);
 
-	String endpoint = webService.endpointInterface();
+        String endpoint = webService.endpointInterface();
 
-	if (endpoint != null && ! "".equals(endpoint))
-	  cl = CauchoSystem.loadClass(webService.endpointInterface());
+        if (endpoint != null && ! "".equals(endpoint))
+          cl = CauchoSystem.loadClass(webService.endpointInterface());
       }
 
       _methods.put(DELETE, new HashMap<String,Method>());
@@ -135,112 +135,114 @@ public class RestProtocolServlet extends GenericServlet
       ArrayList<Class> jaxbClasses = _jaxbClasses;
 
       for (Method method : cl.getMethods()) {
-	if (method.getDeclaringClass().equals(Object.class))
-	  continue;
-	
-	int modifiers = method.getModifiers();
+        if (method.getDeclaringClass().equals(Object.class))
+          continue;
 
-	// Allow abstract for interfaces
-	if (Modifier.isStatic(modifiers)
-	    || Modifier.isFinal(modifiers)
-	    || ! Modifier.isPublic(modifiers))
-	  continue;
+        int modifiers = method.getModifiers();
 
-	String methodName = method.getName();
+        // Allow abstract for interfaces
+        if (Modifier.isStatic(modifiers)
+            || Modifier.isFinal(modifiers)
+            || ! Modifier.isPublic(modifiers))
+          continue;
 
-	if (method.isAnnotationPresent(WebMethod.class)) {
-	  WebMethod webMethod = 
-	    (WebMethod) method.getAnnotation(WebMethod.class);
+        String methodName = method.getName();
 
-	  if (! "".equals(webMethod.operationName()))
-	    methodName = webMethod.operationName();
-	}
+        if (method.isAnnotationPresent(WebMethod.class)) {
+          WebMethod webMethod = 
+            (WebMethod) method.getAnnotation(WebMethod.class);
 
-	if (method.isAnnotationPresent(RestMethod.class)) {
-	  RestMethod restMethod = 
-	    (RestMethod) method.getAnnotation(RestMethod.class);
+          if (! "".equals(webMethod.operationName()))
+            methodName = webMethod.operationName();
+        }
 
-	  if (! "".equals(restMethod.operationName()))
-	    methodName = restMethod.operationName();
-	}
+        if (method.isAnnotationPresent(RestMethod.class)) {
+          RestMethod restMethod = 
+            (RestMethod) method.getAnnotation(RestMethod.class);
 
-	boolean hasHTTPMethod = false;
+          if (! "".equals(restMethod.operationName()))
+            methodName = restMethod.operationName();
+        }
 
-	if (method.isAnnotationPresent(Delete.class)) {
-	  if (_methods.get(DELETE).containsKey(methodName)) {
-	    throw new UnsupportedOperationException("Overloaded method: " + 
-						    method.getName());
-	  }
+        boolean hasHTTPMethod = false;
 
-	  _methods.get(DELETE).put(methodName, method);
+        if (method.isAnnotationPresent(Delete.class)) {
+          if (_methods.get(DELETE).containsKey(methodName)) {
+            throw new UnsupportedOperationException("Overloaded method: " + 
+                method.getName());
+          }
 
-	  hasHTTPMethod = true;
-	}
+          _methods.get(DELETE).put(methodName, method);
 
-	if (method.isAnnotationPresent(Get.class)) {
-	  if (_methods.get(GET).containsKey(methodName)) {
-	    throw new UnsupportedOperationException("Overloaded method: " + 
-						    method.getName());
-	  }
+          hasHTTPMethod = true;
+        }
 
-	  _methods.get(GET).put(methodName, method);
+        if (method.isAnnotationPresent(Get.class)) {
+          if (_methods.get(GET).containsKey(methodName)) {
+            throw new UnsupportedOperationException("Overloaded method: " + 
+                method.getName());
+          }
 
-	  hasHTTPMethod = true;
-	}
+          _methods.get(GET).put(methodName, method);
 
-	if (method.isAnnotationPresent(Post.class)) {
-	  if (_methods.get(POST).containsKey(methodName)) {
-	    throw new UnsupportedOperationException("Overloaded method: " + 
-						    method.getName());
-	  }
+          hasHTTPMethod = true;
+        }
 
-	  _methods.get(POST).put(methodName, method);
+        if (method.isAnnotationPresent(Post.class)) {
+          if (_methods.get(POST).containsKey(methodName)) {
+            throw new UnsupportedOperationException("Overloaded method: " + 
+                method.getName());
+          }
 
-	  hasHTTPMethod = true;
-	}
-        
-	if (method.isAnnotationPresent(Put.class)) {
-	  if (_methods.get(PUT).containsKey(methodName)) {
-	    throw new UnsupportedOperationException("Overloaded method: " + 
-						    method.getName());
-	  }
+          _methods.get(POST).put(methodName, method);
 
-	  _methods.get(PUT).put(methodName, method);
+          hasHTTPMethod = true;
+        }
 
-	  hasHTTPMethod = true;
-	}
+        if (method.isAnnotationPresent(Put.class)) {
+          if (_methods.get(PUT).containsKey(methodName)) {
+            throw new UnsupportedOperationException("Overloaded method: " + 
+                method.getName());
+          }
 
-	if (method.isAnnotationPresent(Head.class)) {
-	  if (_methods.get(HEAD).containsKey(methodName)) {
-	    throw new UnsupportedOperationException("Overloaded method: " + 
-						    method.getName());
-	  }
+          _methods.get(PUT).put(methodName, method);
 
-	  _methods.get(HEAD).put(methodName, method);
+          hasHTTPMethod = true;
+        }
 
-	  hasHTTPMethod = true;
-	}
+        if (method.isAnnotationPresent(Head.class)) {
+          if (_methods.get(HEAD).containsKey(methodName)) {
+            throw new UnsupportedOperationException("Overloaded method: " + 
+                method.getName());
+          }
 
-	if (! hasHTTPMethod) {
-	  if (_defaultMethods.containsKey(methodName)) {
-	    throw new UnsupportedOperationException("Overloaded method: " + 
-						    method.getName());
-	  }
+          _methods.get(HEAD).put(methodName, method);
 
-	  _defaultMethods.put(methodName, method);
-	}
+          hasHTTPMethod = true;
+        }
 
-	if (_context == null)
-	  JAXBUtil.introspectMethod(method, jaxbClasses);
+        if (! hasHTTPMethod) {
+          if (_defaultMethods.containsKey(methodName)) {
+            throw new UnsupportedOperationException("Overloaded method: " + 
+                method.getName());
+          }
+
+          _defaultMethods.put(methodName, method);
+        }
+
+        if (_context == null)
+          JAXBUtil.introspectMethod(method, jaxbClasses);
       }
 
       if (_context != null) {
       }
       else if (_jaxbPackages != null) {
-	_context = JAXBContext.newInstance(_jaxbPackages);
+        _context = JAXBContext.newInstance(_jaxbPackages);
       }
-      else
-	_context = JAXBContext.newInstance(jaxbClasses.toArray(new Class[jaxbClasses.size()]));
+      else {
+        Class[] classes = jaxbClasses.toArray(new Class[jaxbClasses.size()]);
+        _context = JAXBContext.newInstance(classes);
+      }
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -280,21 +282,25 @@ public class RestProtocolServlet extends GenericServlet
       pathArguments = pathInfo.split("/");
 
       if (pathArguments.length == 1 && pathArguments[0].length() == 0)
-	pathArguments = new String[0];
+        pathArguments = new String[0];
     }
     else
       pathArguments = new String[0];
 
     try {
       invoke(_service, req.getMethod(), pathArguments, queryArguments,
-	     req, req.getInputStream(), res.getOutputStream());
-    } catch (Throwable e) {
+             req, req.getInputStream(), res.getOutputStream());
+    } 
+    catch (NoSuchMethodException e) {
+      res.sendError(HttpServletResponse.SC_BAD_REQUEST);
+    }
+    catch (Throwable e) {
       throw new ServletException(e);
     }
   }
 
   private static void queryToMap(String query, 
-				 Map<String,String> queryArguments)
+                                 Map<String,String> queryArguments)
   {
     String[] entries = query.split("&");
 
@@ -309,12 +315,12 @@ public class RestProtocolServlet extends GenericServlet
   }
 
   private void invoke(Object object,
-		      String httpMethod,
-		      String[] pathArguments,
-		      Map<String,String> queryArguments,
-		      HttpServletRequest req,
-		      InputStream postData,
-		      OutputStream out)
+                      String httpMethod,
+                      String[] pathArguments,
+                      Map<String,String> queryArguments,
+                      HttpServletRequest req,
+                      InputStream postData,
+                      OutputStream out)
     throws Throwable
   {
     int pathIndex = 0;
@@ -419,7 +425,8 @@ public class RestProtocolServlet extends GenericServlet
     try {
       XMLStreamWriterImpl writer = new XMLStreamWriterImpl(ws);
       marshaller.marshal(result, writer);
-    } finally {
+    } 
+    finally {
       ws.close();
     }
   }

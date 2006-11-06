@@ -45,8 +45,6 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
-import com.caucho.soa.WebService;
-
 import com.caucho.soap.reflect.WebServiceIntrospector;
 import com.caucho.soap.skeleton.DirectSkeleton;
 
@@ -60,7 +58,7 @@ public class SoapEncoding implements ServiceEncoding {
   private Object _object;
   private Class _class;
   private DirectSkeleton _skeleton;
-  private WebService _webService;
+  private String _wsdlLocation;
 
   public void setService(Object service)
   {
@@ -68,11 +66,6 @@ public class SoapEncoding implements ServiceEncoding {
 
     if (_class == null)
       _class = service.getClass();
-  }
-
-  public void setWebService(WebService webService)
-  {
-    _webService = webService;
   }
 
   public void setInterface(Class cl)
@@ -100,10 +93,12 @@ public class SoapEncoding implements ServiceEncoding {
   }    
 
   private DirectSkeleton getSkeleton()
-    throws JAXBException
+    throws JAXBException, IOException
   {
-    if (_skeleton == null)
-      _skeleton = new WebServiceIntrospector().introspect(_class);
+    if (_skeleton == null) {
+      _skeleton = 
+        new WebServiceIntrospector().introspect(_class, _wsdlLocation);
+    }
 
     return _skeleton;
   }

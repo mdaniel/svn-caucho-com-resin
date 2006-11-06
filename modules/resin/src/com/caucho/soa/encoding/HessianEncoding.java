@@ -40,8 +40,6 @@ import java.util.logging.Level;
 
 import javax.jws.*;
 
-import com.caucho.soa.WebService;
-
 import com.caucho.hessian.io.AbstractHessianOutput;
 import com.caucho.hessian.io.HessianOutput;
 import com.caucho.hessian.io.Hessian2Input;
@@ -52,6 +50,7 @@ import com.caucho.hessian.server.HessianSkeleton;
 import com.caucho.services.server.GenericService;
 
 import com.caucho.server.util.*;
+import com.caucho.util.L10N;
 
 /**
  * Invokes a service based on a Hessian-encoded request.
@@ -59,19 +58,13 @@ import com.caucho.server.util.*;
 public class HessianEncoding implements ServiceEncoding {
   protected static Logger log
     = Logger.getLogger(HessianEncoding.class.getName());
+  private static final L10N L = new L10N(HessianEncoding.class);
 
   private Object _serviceImpl;
   
   private HessianSkeleton _skeleton;
 
-  private WebService _webService;
-
   private SerializerFactory _serializerFactory;
-
-  public void setWebService(WebService webService)
-  {
-    _webService = webService;
-  }
 
   /**
    * Sets the service class.
@@ -134,9 +127,8 @@ public class HessianEncoding implements ServiceEncoding {
     throws ClassNotFoundException
   {
     if (implClass.isAnnotationPresent(javax.jws.WebService.class)) {
-      javax.jws.WebService webServiceAnnotation = 
-        (javax.jws.WebService)
-        implClass.getAnnotation(javax.jws.WebService.class);
+      WebService webServiceAnnotation = 
+        (WebService) implClass.getAnnotation(javax.jws.WebService.class);
 
       String endpoint = webServiceAnnotation.endpointInterface();
       if (endpoint != null && ! "".equals(endpoint))
@@ -173,7 +165,8 @@ public class HessianEncoding implements ServiceEncoding {
 
       if (code != 'c') {
         // XXX: deflate
-        throw new IOException("expected 'c' in hessian input at " + code);
+        throw new IOException(L.l("expected 'c' in hessian input at {0}", 
+                                  code));
       }
 
       int major = in.read();
@@ -193,9 +186,9 @@ public class HessianEncoding implements ServiceEncoding {
 
       out.close();
     } catch (IOException e) {
-      log.log(Level.INFO, "Unable to process request: ", e);
+      log.log(Level.INFO, L.l("Unable to process request: "), e);
     } catch (Throwable e) {
-      log.log(Level.INFO, "Unable to process request: ", e);
+      log.log(Level.INFO, L.l("Unable to process request: "), e);
     }
   }
 }

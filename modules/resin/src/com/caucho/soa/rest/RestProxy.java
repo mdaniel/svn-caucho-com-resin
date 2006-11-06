@@ -55,7 +55,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
-import com.caucho.util.JAXBUtil;
+import com.caucho.jaxb.JAXBUtil;
+
 import com.caucho.util.URLUtil;
 
 public class RestProxy implements InvocationHandler {

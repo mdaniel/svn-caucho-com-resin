@@ -34,8 +34,6 @@ import java.io.OutputStream;
 
 import com.caucho.config.ConfigException;
 
-import com.caucho.soa.WebService;
-
 /**
  * An encoding for a (web) service.
  */
@@ -43,9 +41,8 @@ public interface ServiceEncoding {
   public void invoke(InputStream is, OutputStream os)
     throws Throwable;
 
-  public void setService(Object service);
-
-  public void setWebService(WebService webService);
+  public void setService(Object service)
+    throws Throwable;
 
   public void init() throws Exception;
 }

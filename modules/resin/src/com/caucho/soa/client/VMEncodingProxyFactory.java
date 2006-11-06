@@ -33,7 +33,11 @@ import java.net.MalformedURLException;
 
 import com.caucho.naming.Jndi;
 
+import com.caucho.util.L10N;
+
 public class VMEncodingProxyFactory implements EncodingProxyFactory {
+  private static final L10N L = new L10N(VMEncodingProxyFactory.class);
+
   public Object getProxy(Class serviceInterface, String url)
     throws MalformedURLException
   {
@@ -43,12 +47,12 @@ public class VMEncodingProxyFactory implements EncodingProxyFactory {
   public Object getProxy(Class serviceInterface, String url, 
                          String jaxbPackages) 
   {
-    throw new UnsupportedOperationException("VM proxy does not use JAXB");
+    throw new UnsupportedOperationException(L.l("VM proxy does not use JAXB"));
   }
 
   public Object getProxy(Class serviceInterface, String url, 
                          Class[] jaxbClasses)
   {
-    throw new UnsupportedOperationException("VM proxy does not use JAXB");
+    throw new UnsupportedOperationException(L.l("VM proxy does not use JAXB"));
   }
 }

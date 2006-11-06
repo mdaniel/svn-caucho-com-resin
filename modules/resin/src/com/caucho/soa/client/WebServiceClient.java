@@ -44,11 +44,14 @@ import javax.xml.namespace.QName;
 import com.caucho.config.ConfigException;
 import com.caucho.naming.*;
 
+import com.caucho.util.L10N;
+
 /**
  */
 public class WebServiceClient implements ObjectProxy, java.io.Serializable {
   private static final Logger log 
     = Logger.getLogger(WebServiceClient.class.getName());
+  private static final L10N L = new L10N(WebServiceClient.class);
 
   private Class _serviceClass;
   private String _jndiName;
@@ -76,8 +79,7 @@ public class WebServiceClient implements ObjectProxy, java.io.Serializable {
     throws ConfigException
   {
     if (_jaxbPackages != null) {
-      throw new ConfigException("cannot set <jaxb-class> and <jaxb-package> " +
-                                "simultaneously");
+      throw new ConfigException(L.l("cannot set <jaxb-class> and <jaxb-package> simultaneously"));
     }
 
     if (_jaxbClasses == null)
@@ -90,8 +92,7 @@ public class WebServiceClient implements ObjectProxy, java.io.Serializable {
     throws ConfigException
   {
     if (_jaxbClasses != null) {
-      throw new ConfigException("cannot set <jaxb-class> and <jaxb-package> " +
-                                "simultaneously");
+      throw new ConfigException(L.l("cannot set <jaxb-class> and <jaxb-package> simultaneously"));
     }
 
     if (_jaxbPackages == null)
@@ -199,7 +200,7 @@ public class WebServiceClient implements ObjectProxy, java.io.Serializable {
     throws Throwable
   {
     if (_jndiName == null)
-      throw new ConfigException("jndi-name not set for <web-service-client>");
+      throw new ConfigException(L.l("jndi-name not set for <web-service-client>"));
 
     /*
     if (_serviceClass == null)

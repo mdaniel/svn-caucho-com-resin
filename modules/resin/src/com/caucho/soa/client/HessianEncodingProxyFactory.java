@@ -33,8 +33,11 @@ import java.net.MalformedURLException;
 
 import com.caucho.hessian.client.HessianProxyFactory;
 
+import com.caucho.util.L10N;
+
 public class HessianEncodingProxyFactory implements EncodingProxyFactory {
   private static HessianProxyFactory _proxyFactory;
+  private static final L10N L = new L10N(HessianEncodingProxyFactory.class);
 
   public Object getProxy(Class serviceInterface, String url)
     throws MalformedURLException
@@ -56,12 +59,12 @@ public class HessianEncodingProxyFactory implements EncodingProxyFactory {
   public Object getProxy(Class serviceInterface, String url, 
                          String jaxbPackages) 
   {
-    throw new UnsupportedOperationException("Hessian does not use JAXB");
+    throw new UnsupportedOperationException(L.l("Hessian does not use JAXB"));
   }
 
   public Object getProxy(Class serviceInterface, String url, 
                          Class[] jaxbClasses)
   {
-    throw new UnsupportedOperationException("Hessian does not use JAXB");
+    throw new UnsupportedOperationException(L.l("Hessian does not use JAXB"));
   }
 }
