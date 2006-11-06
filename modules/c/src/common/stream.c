@@ -295,6 +295,12 @@ cse_connect(struct sockaddr_in *sin, srun_t *srun)
 
     return sock;
   }
+  /*
+   * Solaris can return other errno for a connection that will succeed,
+   * see bug #1415.  So we avoid the extra error checking here and only
+   * check after the select() call.
+   */
+  /*
   else if (errno != EWOULDBLOCK && errno != EINPROGRESS) {
     ERR(("%s:%d:cse_connect(): connect quickfailed %x %d %d\n",
 	 __FILE__, __LINE__,
@@ -305,6 +311,7 @@ cse_connect(struct sockaddr_in *sin, srun_t *srun)
 
     return -1;
   }
+  */
   else if (select(sock + 1, 0, &write_fds, 0, &timeout) <= 0) {
     ERR(("%s:%d:cse_connect(): timeout %x %d %d\n",
 	 __FILE__, __LINE__,

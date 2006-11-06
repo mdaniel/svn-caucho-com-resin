@@ -4,6 +4,7 @@
 
 <s2 title='3.0.snap - Nov 1, 2006'>
 <ul>
+<li>mod_caucho: avoid premature error validation on non-blocking connect() failure for Solaris (#1415, rep by L Kaminsky)</li>
 <li>(2006-11-01) JMX: getter/setter swapped for Introspector when no getter (#1390, rep by maltem)</li>
 <li>JSP: EL issues with .jspx files (#1433, rep by ccwf)</li>
 <li>Add resin.version and resin.versionDate to EL variables (rep by Bill Au)</li>
