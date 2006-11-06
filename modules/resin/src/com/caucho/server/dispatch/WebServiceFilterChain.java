@@ -36,7 +36,6 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 
 import com.caucho.soa.servlet.*;
-import com.caucho.soa.encoding.*;
 
 /**
  * Represents the final servlet in a filter chain.

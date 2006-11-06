@@ -57,7 +57,6 @@ import com.caucho.server.security.SecurityConstraint;
 import com.caucho.server.security.ServletAuthenticator;
 import com.caucho.server.security.TransportConstraint;
 import com.caucho.server.session.SessionManager;
-import com.caucho.soa.WebService;
 import com.caucho.soa.client.WebServiceClient;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.*;
@@ -715,16 +714,6 @@ public class WebApp extends ServletContextImpl
     servletMapping.setServletContext(this);
     servletMapping.setStrictMapping(getStrictMapping());
     servletMapping.init(_servletMapper);
-  }
-
-  /**
-   * Adds a web service.
-   */
-  public WebService createWebService()
-  {
-    WebService webService = new WebService(this);
-
-    return webService;
   }
 
   /**
