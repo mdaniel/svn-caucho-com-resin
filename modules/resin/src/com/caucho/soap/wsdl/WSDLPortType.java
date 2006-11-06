@@ -39,8 +39,9 @@ import javax.xml.bind.annotation.adapters.*;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name="portType", namespace="http://schemas.xmlsoap.org/wsdl/")
-public class WSDLPortType extends WSDLNamedExtensibleAttributeDocumented {
-
+public class WSDLPortType extends WSDLNamedExtensibleAttributeDocumented 
+                          implements WSDLDefinition
+{
   @XmlElement(name="operation", namespace="http://schemas.xmlsoap.org/wsdl/",
               type=WSDLOperation.class)
   private List<WSDLOperation> _operations;

@@ -44,10 +44,18 @@ import com.caucho.vfs.WriteStream;
 public class DateMarshall extends CDataMarshall {
   public static final DateMarshall MARSHALL = new DateMarshall();
 
+  private static final QName _xsdDateTime = 
+    new QName("http://www.w3.org/2001/XMLSchema", "dateTime", "xs");
+       
   private DateMarshall()
   {
   }
   
+  public QName getXmlSchemaDatatype()
+  {
+    return _xsdDateTime;
+  }
+ 
   protected String serialize(Object in)
       throws IOException, XMLStreamException
   {

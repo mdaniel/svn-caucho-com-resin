@@ -44,10 +44,19 @@ import com.caucho.vfs.WriteStream;
 public class BigDecimalMarshall extends CDataMarshall {
   public static final BigDecimalMarshall MARSHALL = new BigDecimalMarshall();
 
+  // XXX
+  private static final QName _xsdDouble = 
+    new QName("http://www.w3.org/2001/XMLSchema", "double", "xs");
+       
   private BigDecimalMarshall()
   {
   }
 
+  public QName getXmlSchemaDatatype()
+  {
+    return _xsdDouble;
+  }
+ 
   protected String serialize(Object in)
       throws IOException, XMLStreamException
   {

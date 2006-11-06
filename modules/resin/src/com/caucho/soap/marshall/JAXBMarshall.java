@@ -37,18 +37,29 @@ import java.util.*;
 import java.lang.reflect.*;
 import java.io.*;
 
+import com.caucho.jaxb.JAXBUtil;
 import com.caucho.vfs.WriteStream;
 
 /**
  * Marshalls data for a JAXB object
  */
 public class JAXBMarshall extends Marshall {
+  private QName _xsd;
   private JAXBContext _context;
-
+       
   public JAXBMarshall(Class cl, JAXBContext jaxbContext)
     throws JAXBException
   {
     _context = jaxbContext;
+
+    String localName = JAXBUtil.getXmlSchemaDatatype(cl);
+
+    _xsd = new QName("http://www.w3.org/2001/XMLSchema", localName, "xs");
+  }
+
+  public QName getXmlSchemaDatatype()
+  {
+    return _xsd;
   }
 
   /**

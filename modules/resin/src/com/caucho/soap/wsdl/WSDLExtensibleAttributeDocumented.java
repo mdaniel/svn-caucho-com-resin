@@ -28,6 +28,7 @@
 
 package com.caucho.soap.wsdl;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.bind.annotation.*;
@@ -41,5 +42,18 @@ import javax.xml.namespace.QName;
 @XmlAccessorType(XmlAccessType.FIELD)
 public abstract class WSDLExtensibleAttributeDocumented {
   @XmlAnyAttribute
-  protected Map<QName,Object> _attributes;
+  private Map<QName,Object> _attributes;
+
+  public Map<QName,Object> getAttributes()
+  {
+    return _attributes;
+  }
+
+  public void putAttribute(QName key, Object value)
+  {
+    if (_attributes == null)
+      _attributes = new HashMap<QName,Object>();
+
+    _attributes.put(key, value);
+  }
 }

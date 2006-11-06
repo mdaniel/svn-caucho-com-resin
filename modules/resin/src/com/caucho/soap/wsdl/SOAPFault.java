@@ -42,7 +42,6 @@ import javax.xml.bind.annotation.adapters.*;
                 namespace="http://schemas.xmlsoap.org/wsdl/soap/")
 public class SOAPFault extends WSDLExtensibilityElement {
   @XmlAttribute(required=true, name="name")
-  @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
   private String _name;
 
   @XmlAttribute(name="encodingStyle")

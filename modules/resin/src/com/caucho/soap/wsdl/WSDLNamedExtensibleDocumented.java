@@ -37,11 +37,11 @@ import javax.xml.bind.annotation.adapters.*;
 /**
  * A WSDL element with arbitrary children.
  */
+@XmlAccessorType(XmlAccessType.FIELD)
 public abstract class WSDLNamedExtensibleDocumented 
   extends WSDLExtensibleDocumented 
 {
   @XmlAttribute(required=true, name="name")
-  @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
   private String _name;
 
   /**

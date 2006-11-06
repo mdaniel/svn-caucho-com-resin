@@ -43,8 +43,16 @@ import com.caucho.vfs.WriteStream;
 public class FloatMarshall extends CDataMarshall {
   public static final FloatMarshall MARSHALL = new FloatMarshall();
 
+  private static final QName _xsdFloat = 
+    new QName("http://www.w3.org/2001/XMLSchema", "float", "xs");
+       
   private FloatMarshall()
   {
+  }
+
+  public QName getXmlSchemaDatatype()
+  {
+    return _xsdFloat;
   }
   
   protected String serialize(Object in)

@@ -51,7 +51,6 @@ public class SOAPHeader extends WSDLExtensibilityElement {
   private QName _message;
 
   @XmlAttribute(required=true, name="part")
-  @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
   private String _part;
 
   @XmlAttribute(required=true, name="use")

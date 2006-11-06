@@ -40,7 +40,6 @@ public abstract class WSDLNamedExtensibleAttributeDocumented
   extends WSDLExtensibleAttributeDocumented 
 {
   @XmlAttribute(name="name")
-  @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
   private String _name;
 
   /**

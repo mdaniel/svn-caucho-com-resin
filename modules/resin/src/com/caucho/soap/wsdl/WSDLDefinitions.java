@@ -42,7 +42,6 @@ import javax.xml.bind.annotation.adapters.*;
                 namespace="http://schemas.xmlsoap.org/wsdl/")
 public class WSDLDefinitions extends WSDLExtensibleDocumented {
   @XmlAttribute(name="name")
-  @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
   private String _name;
 
   @XmlAttribute(name="targetNamespace")

@@ -24,48 +24,28 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Emil Ong
  */
 
 package com.caucho.soap.marshall;
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import java.util.*;
 
-import java.lang.reflect.*;
-import java.io.*;
-
-import com.caucho.vfs.WriteStream;
+import java.util.Collection;
+import javax.xml.bind.annotation.*;
 
 /**
- * Marshalls data for an integer object
+ * Wraps a JAXB object to make Collections work.
  */
-public class IntMarshall extends CDataMarshall {
-  public static final IntMarshall MARSHALL = new IntMarshall();
+@XmlRootElement(name="")
+public class CollectionWrapper {
+  @XmlElement(name="") private Collection _value;
 
-  private static final QName _xsdInt = 
-    new QName("http://www.w3.org/2001/XMLSchema", "int", "xs");
-       
-  private IntMarshall()
+  public void setValue(Collection value)
   {
+    _value = value;
   }
 
-  public QName getXmlSchemaDatatype()
+  public Collection getValue()
   {
-    return _xsdInt;
-  }
-  
-  protected String serialize(Object in)
-      throws IOException, XMLStreamException
-  {
-    return ((Integer)in).intValue()+"";
-  }
-
-  protected Object deserialize(String in)
-    throws IOException, XMLStreamException
-  {
-    return new Integer(in);
+    return _value;
   }
 }
-
-

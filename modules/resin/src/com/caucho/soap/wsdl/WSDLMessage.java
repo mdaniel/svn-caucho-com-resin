@@ -51,9 +51,6 @@ public class WSDLMessage extends WSDLNamedExtensibleDocumented
    */
   public List<WSDLPart> getParts()
   {
-    if (_parts == null)
-      _parts = new ArrayList<WSDLPart>();
-
     return _parts;
   }
 

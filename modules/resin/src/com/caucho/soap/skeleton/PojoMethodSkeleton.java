@@ -45,11 +45,11 @@ import javax.xml.ws.*;
 import javax.jws.*;
 import javax.jws.soap.*;
 
-import com.caucho.util.JAXBUtil;
-
-import com.caucho.vfs.*;
-
+import com.caucho.jaxb.*;
 import com.caucho.soap.marshall.*;
+import com.caucho.soap.wsdl.*;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
 
 /**
  * Invokes a SOAP request on a Java POJO method
@@ -57,125 +57,175 @@ import com.caucho.soap.marshall.*;
 public class PojoMethodSkeleton {
   private final static Logger log = 
     Logger.getLogger(PojoMethodSkeleton.class.getName());
+  private static final L10N L = new L10N(PojoMethodSkeleton.class);
 
-  private final Method _method;
-  private final QName _resultName;
-  private boolean  _wrapped = true;
+  private static final String TARGET_NAMESPACE_PREFIX = "tns";
+  protected static final String SOAP_ENCODING_STYLE 
+    = "http://schemas.xmlsoap.org/soap/encoding/";
 
-  private int _inputArgumentCount = 0;
-  private final ParameterMarshall []_argMarshall;
-  private final HashMap<String,ParameterMarshall> argNames =
-    new HashMap<String,ParameterMarshall>();
+  protected final Method _method;
+  protected final int _arity;
 
-  private final JAXBContext _jaxbContext;
+  protected String _responseName;
+  protected String _operationName;
+  protected QName _requestName;
+  protected QName _resultName;
 
-  private final Marshall _retMarshall;
+  protected final LinkedHashMap<String,ParameterMarshall> _bodyArguments
+    = new LinkedHashMap<String,ParameterMarshall>();
 
-  private static class ParameterMarshall {
-    public int _arg;
-    public Marshall _marshall;
-    public QName _name;
-    public WebParam.Mode _mode = WebParam.Mode.IN;
+  protected final LinkedHashMap<String,ParameterMarshall> _headerArguments
+    = new LinkedHashMap<String,ParameterMarshall>();
 
-    public ParameterMarshall(int arg, Marshall marshall) 
-    {
-      this._arg = arg;
-      this._marshall = marshall;
-    }
+  protected int _headerOutputs;
+  protected int _bodyOutputs;
 
-    public void serialize(Object o, XMLStreamWriter out)
-      throws IOException, XMLStreamException
-    {
-      _marshall.serialize(out, o, _name);
-    }
-  }
+  protected final JAXBContextImpl _jaxbContext;
 
-  public PojoMethodSkeleton(Method method, MarshallFactory factory)
-    throws JAXBException
+  // 
+  // WSDL Constructs
+  //
+  
+  protected final WSDLMessage _inputMessage = new WSDLMessage();
+  protected final WSDLMessage _outputMessage = new WSDLMessage();
+  protected final ArrayList<WSDLMessage> _faultMessages 
+    = new ArrayList<WSDLMessage>();
+
+  protected final WSDLOperation _wsdlOperation = new WSDLOperation();
+  protected final ArrayList<WSDLOperationFault> _wsdlFaults 
+    = new ArrayList<WSDLOperationFault>();
+
+  protected final WSDLBindingOperation _wsdlBindingOperation 
+    = new WSDLBindingOperation();
+
+  protected PojoMethodSkeleton(Method method, 
+                               MarshallFactory factory,
+                               JAXBContextImpl jaxbContext, 
+                               String targetNamespace)
+    throws JAXBException, WebServiceException
   {
-    Class cl = method.getDeclaringClass();
-
-    // Determine whether this method is wrapped or not
-
-    if (cl.isAnnotationPresent(SOAPBinding.class)) {
-      SOAPBinding soapBinding = 
-        (SOAPBinding) cl.getAnnotation(SOAPBinding.class);
-
-      _wrapped = 
-        soapBinding.parameterStyle() == SOAPBinding.ParameterStyle.WRAPPED;
-    }
-    
-    if (method.isAnnotationPresent(SOAPBinding.class)) {
-      SOAPBinding soapBinding = 
-        (SOAPBinding) method.getAnnotation(SOAPBinding.class);
-
-      _wrapped =
-        soapBinding.parameterStyle() == SOAPBinding.ParameterStyle.WRAPPED;
-    }
-    
     _method = method;
+    _arity = _method.getParameterTypes().length;
+    _jaxbContext = jaxbContext;
 
-    // Deep introspection to find all JAXB classes that might be necessary,
-    // then create appropriate JAXB context
+    // set the names for the input/output messages, portType/operation, and
+    // binding/operation.
+    _operationName = method.getName();
+    _responseName = _operationName + "Response";
 
-    HashSet<Class> jaxbClasses = new HashSet<Class>();
+    if (method.isAnnotationPresent(WebMethod.class)) {
+      WebMethod webMethod = (WebMethod) method.getAnnotation(WebMethod.class);
 
-    JAXBUtil.introspectMethod(method, jaxbClasses);
-
-    _jaxbContext = JAXBContext.newInstance(jaxbClasses.toArray(new Class[0]));
-
-    // Get marshallers for each parameter
-
-    Class[] params = _method.getParameterTypes();
-    Annotation [][]annotations = _method.getParameterAnnotations();
-
-    _inputArgumentCount = params.length;
-    _argMarshall = new ParameterMarshall[params.length];
-
-    for (int i = 0; i < params.length; i++) {
-      Marshall marshall = factory.createDeserializer(params[i], _jaxbContext);
-      _argMarshall[i] = new ParameterMarshall(i, marshall);
-
-      String localName = "arg" + i; // As per JAX-WS spec
-
-      for(Annotation a : annotations[i]) {
-        if (a instanceof WebParam) {
-          WebParam webParam = (WebParam) a;
-
-          if (! "".equals(webParam.name()))
-            localName = webParam.name();
-
-          if ("".equals(webParam.targetNamespace()))
-            _argMarshall[i]._name = new QName(localName);
-          else 
-            _argMarshall[i]._name = 
-              new QName(localName, webParam.targetNamespace());
-
-          if (params[i].equals(Holder.class)) {
-            _argMarshall[i]._mode = webParam.mode();
-
-            if (_argMarshall[i]._mode == WebParam.Mode.OUT)
-              _inputArgumentCount--;
-          }
-        }
-      }
-
-      argNames.put(localName, _argMarshall[i]);
+      if (! "".equals(webMethod.operationName()))
+        _operationName = webMethod.operationName();
     }
 
-    _retMarshall = 
-      factory.createSerializer(method.getReturnType(), _jaxbContext);
+    _inputMessage.setName(_operationName);
+    _outputMessage.setName(_responseName);
 
-    if (method.isAnnotationPresent(WebResult.class))
-      _resultName =
-        new QName(method.getAnnotation(WebResult.class).targetNamespace(),
-                  method.getAnnotation(WebResult.class).name());
-    else
-      _resultName = new QName("return");
+    _wsdlOperation.setName(_operationName);
+    _wsdlBindingOperation.setName(_operationName);
+
+    // initialize the binding operation
+
+    _wsdlBindingOperation.setInput(new WSDLBindingOperationMessage());
+    _wsdlBindingOperation.setOutput(new WSDLBindingOperationMessage());
+
+    // SOAP action (URI where SOAP messages are sent)
+    SOAPOperation soapOperation = new SOAPOperation();
+    soapOperation.setSoapAction(""); // XXX
+    _wsdlBindingOperation.addAny(soapOperation);
   }
- 
+
+  public static PojoMethodSkeleton 
+    createMethodSkeleton(Method method, MarshallFactory factory,
+                         JAXBContextImpl jaxbContext, String targetNamespace,
+                         Map<String,String> elements)
+    throws JAXBException, WebServiceException
+  {
+    // There are three valid modes in JAX-WS:
+    //
+    //  1. Document wrapped -- all the parameters and return values 
+    //  are encapsulated in a single encoded object (i.e. the document).  
+    //  This is selected by
+    //    javax.jws.soap.SOAPBinding.style() == DOCUMENT
+    //    javax.jws.soap.SOAPBinding.use() == LITERAL
+    //    javax.jws.soap.SOAPBinding.parameterStyle() == WRAPPED
+    //
+    //  2. Document bare -- the method must have at most one input and
+    //  one output parameter.  No wrapper objects are created.
+    //  This is selected by
+    //    javax.jws.soap.SOAPBinding.style() == DOCUMENT
+    //    javax.jws.soap.SOAPBinding.use() == LITERAL
+    //    javax.jws.soap.SOAPBinding.parameterStyle() == BARE
+    //
+    //  3. RPC style -- parameters and return values are mapped to
+    //  wsdl:parts.  This is selected by:
+    //    javax.jws.soap.SOAPBinding.style() == RPC
+    //    javax.jws.soap.SOAPBinding.use() == LITERAL
+    //    javax.jws.soap.SOAPBinding.parameterStyle() == WRAPPED
+    //
+    // It seems that "use" is never ENCODED in JAX-WS and is not allowed
+    // by WS-I, so we don't allow it either.
+    //
+
+    Class cl = method.getDeclaringClass();
+    javax.jws.soap.SOAPBinding soapBinding = null;
+
+    if (cl.isAnnotationPresent(javax.jws.soap.SOAPBinding.class)) {
+      soapBinding = (javax.jws.soap.SOAPBinding) 
+                    cl.getAnnotation(javax.jws.soap.SOAPBinding.class);
+    }
+    
+    if (method.isAnnotationPresent(javax.jws.soap.SOAPBinding.class)) {
+      soapBinding = (javax.jws.soap.SOAPBinding) 
+                    method.getAnnotation(javax.jws.soap.SOAPBinding.class);
+    }
+
+    // Document wrapped is the default for methods w/o a @SOAPBinding
+    if (soapBinding == null) {
+      return new DocumentWrappedPojoMethodSkeleton(method, 
+                                                   factory, 
+                                                   jaxbContext, 
+                                                   targetNamespace,
+                                                   elements);
+    }
+
+    if (soapBinding.use() == javax.jws.soap.SOAPBinding.Use.ENCODED)
+      throw new UnsupportedOperationException(L.l("SOAP encoded style is not supported by JAX-WS"));
+
+    if (soapBinding.style() == javax.jws.soap.SOAPBinding.Style.DOCUMENT) {
+      if (soapBinding.parameterStyle() == 
+          javax.jws.soap.SOAPBinding.ParameterStyle.WRAPPED) {
+        return new DocumentWrappedPojoMethodSkeleton(method, 
+                                                     factory, 
+                                                     jaxbContext, 
+                                                     targetNamespace,
+                                                     elements);
+      }
+      else {
+        return new DocumentBarePojoMethodSkeleton(method, 
+                                                  factory, 
+                                                  jaxbContext, 
+                                                  targetNamespace,
+                                                  elements);
+      }
+    }
+    else {
+      if (soapBinding.parameterStyle() != 
+          javax.jws.soap.SOAPBinding.ParameterStyle.WRAPPED)
+        throw new UnsupportedOperationException(L.l("SOAP RPC bare style not supported"));
+
+      return new RpcPojoMethodSkeleton(method, 
+                                       factory, 
+                                       jaxbContext, 
+                                       targetNamespace,
+                                       elements);
+    }
+  }
+
   /**
-   * Invokes the request for a call.
+   * Client-side invocation.
    */
   public Object invoke(String name, String url, Object[] args, String namespace)
     throws IOException, XMLStreamException, MalformedURLException
@@ -190,6 +240,10 @@ public class PojoMethodSkeleton {
     HttpURLConnection httpConnection = (HttpURLConnection) connection;
 
     try {
+      //
+      // Send the request
+      //
+
       httpConnection.setRequestMethod("POST");
       httpConnection.setDoInput(true);
       httpConnection.setDoOutput(true);
@@ -202,21 +256,38 @@ public class PojoMethodSkeleton {
       out.writeStartElement("env", "Envelope", Skeleton.SOAP_ENVELOPE);
       out.writeNamespace("env", Skeleton.SOAP_ENVELOPE);
 
+      out.writeStartElement("env", "Header", Skeleton.SOAP_ENVELOPE);
+
+      for (ParameterMarshall marshall : _headerArguments.values()) {
+        Object arg = args[marshall._arg];
+
+        if (marshall._mode == WebParam.Mode.IN) {
+          marshall.serialize(arg, out);
+        }
+        else if (marshall._mode == WebParam.Mode.INOUT) {
+          Holder holder = (Holder) arg;
+
+          marshall.serialize(holder.value, out);
+        }
+      }
+
+      out.writeEndElement(); // Header
+
       out.writeStartElement("env", "Body", Skeleton.SOAP_ENVELOPE);
 
       out.writeStartElement("m", name, namespace);
       out.writeNamespace("m", namespace);
 
-      if (args != null) {
-        for(int i = 0; i < args.length; i++) {
-          if (_argMarshall[i]._mode == WebParam.Mode.IN) {
-            _argMarshall[i].serialize(args[i], out);
-          }
-          else if (_argMarshall[i]._mode == WebParam.Mode.INOUT) {
-            Holder holder = (Holder) args[i];
+      for (ParameterMarshall marshall : _bodyArguments.values()) {
+        Object arg = args[marshall._arg];
 
-            _argMarshall[i].serialize(holder.value, out);
-          }
+        if (marshall._mode == WebParam.Mode.IN) {
+          marshall.serialize(arg, out);
+        }
+        else if (marshall._mode == WebParam.Mode.INOUT) {
+          Holder holder = (Holder) arg;
+
+          marshall.serialize(holder.value, out);
         }
       }
 
@@ -225,8 +296,14 @@ public class PojoMethodSkeleton {
       out.writeEndElement(); // Envelope
       out.flush();
 
+      //
+      // Parse the response
+      // 
+
       if (httpConnection.getResponseCode() != 200)
         return null; // XXX more meaningful error
+
+      Object ret = null;
 
       XMLInputFactory inputFactory = XMLInputFactory.newInstance();
       XMLStreamReader in = 
@@ -237,50 +314,67 @@ public class PojoMethodSkeleton {
       if (! "Envelope".equals(in.getName().getLocalPart()))
         throw new IOException("expected Envelope at " + in.getName());
 
+      // Header
+      if (_headerOutputs > 0) {
+        in.nextTag();
+
+        if (! "Header".equals(in.getName().getLocalPart()))
+          throw new IOException("expected <Header>");
+
+        for (int i = 0; i < _headerOutputs; i++) {
+          String tagName = in.getLocalName();
+
+          ParameterMarshall marshall = _headerArguments.get(tagName);
+
+          if (marshall == null)
+            throw new IOException(L.l("Unknown output in header <{0}>", tagName));
+
+          if (marshall._mode == WebParam.Mode.IN)
+            throw new IOException(L.l("Received value for input parameter <{0}>", tagName));
+
+          Object value = marshall._marshall.deserialize(in);
+
+          if (marshall._arg < 0)
+            ret = value;
+          else
+            ((Holder) args[marshall._arg]).value = value;
+
+          if (i + 1 < _headerOutputs)
+            in.nextTag();
+        }
+
+        if (in.nextTag() != in.END_ELEMENT)
+          throw new IOException("expected </Header>");
+      }
+
+      // Body is manditory
       in.nextTag();
-
-      // XXX: Header
-
       if (! "Body".equals(in.getName().getLocalPart()))
         throw new IOException("expected Body");
 
-      if (_wrapped) {
-        in.nextTag();
+      // Body
+      if (_bodyOutputs > 0) {
+        for (int i = 0; i < _headerOutputs; i++) {
+          String tagName = in.getLocalName();
 
-        if (! getResponseName().equals(in.getName().getLocalPart()))
-          throw new IOException("expected " + getResponseName());
-      }
+          ParameterMarshall marshall = _headerArguments.get(tagName);
 
-      in.nextTag();
+          if (marshall == null)
+            throw new IOException(L.l("Unknown output in header <{0}>", tagName));
 
-      if (! _resultName.equals(in.getName()))
-        throw new IOException("expected '" + _resultName);
+          if (marshall._mode == WebParam.Mode.IN)
+            throw new IOException(L.l("Received value for input parameter <{0}>", tagName));
 
-      Object ret = _retMarshall.deserialize(in);
+          Object value = marshall._marshall.deserialize(in);
 
-      for (int i = 0; i < _argMarshall.length - _inputArgumentCount; i++) {
-        String tagName = in.getLocalName();
+          if (marshall._arg < 0)
+            ret = value;
+          else
+            ((Holder) args[marshall._arg]).value = value;
 
-        ParameterMarshall marshall = argNames.get(tagName);
-
-        if (marshall == null)
-          throw new IOException("Unknown parameter <" + tagName + "/>"); // ???
-
-        if (marshall._mode == WebParam.Mode.IN)
-          throw new IOException("Received value for input parameter " + 
-                                "<" + tagName + "/>");
-
-        Object value = marshall._marshall.deserialize(in);
-
-        ((Holder) args[marshall._arg]).value = value;
-
-        if (i + 1 < _argMarshall.length - _inputArgumentCount)
-          in.nextTag();
-      }
-
-      if (_wrapped) {
-        if (in.nextTag() != in.END_ELEMENT)
-          throw new IOException("expected </" + getResponseName() + ">");
+          if (i + 1 < _headerOutputs)
+            in.nextTag();
+        }
       }
 
       if (in.nextTag() != in.END_ELEMENT)
@@ -303,11 +397,12 @@ public class PojoMethodSkeleton {
   public void invoke(Object service, XMLStreamReader in, XMLStreamWriter out)
     throws IOException, XMLStreamException
   {
+    /*
     // We're starting out at the point in the input stream where the 
     // arguments are listed and the point in the output stream where
     // the results are to be written.
     
-    Object[] args = new Object[_argMarshall.length];
+    Object[] args = new Object[_arity];
 
     in.nextTag();
 
@@ -377,7 +472,7 @@ public class PojoMethodSkeleton {
     }
 
     if (_wrapped)
-      out.writeStartElement(getResponseName());
+      out.writeStartElement(_responseName);
 
     _retMarshall.serialize(out, value, _resultName);
 
@@ -392,10 +487,61 @@ public class PojoMethodSkeleton {
 
     if (_wrapped)
       out.writeEndElement(); // response name
+    */
   }
 
-  private String getResponseName()
+  /**
+   * returns the WSDLMessage for the input of this method.
+   */
+  public WSDLMessage getInputMessage()
   {
-    return _method.getName() + "Response";
+    return _inputMessage;
+  }
+ 
+  /**
+   * returns the WSDLMessage for the output of this method.
+   */
+  public WSDLMessage getOutputMessage()
+  {
+    return _outputMessage;
+  }
+ 
+  public WSDLOperation getOperation()
+  {
+    return _wsdlOperation;
+  }
+
+  public WSDLBindingOperation getBindingOperation()
+  {
+    return _wsdlBindingOperation;
+  }
+
+  protected static Class getHolderValueType(Type holder)
+  {
+    // XXX Generics and arrays
+    Type holderParams[] = ((ParameterizedType) holder).getActualTypeArguments();
+    return (Class) holderParams[0];
+  }
+
+  protected static class ParameterMarshall {
+    public int _arg;
+    public Marshall _marshall;
+    public QName _name;
+    public WebParam.Mode _mode = WebParam.Mode.IN;
+
+    public ParameterMarshall(int arg, Marshall marshall, QName name,
+                             WebParam.Mode mode) 
+    {
+      _arg = arg;
+      _marshall = marshall;
+      _name = name;
+      _mode =mode;
+    }
+
+    public void serialize(Object o, XMLStreamWriter out)
+      throws IOException, XMLStreamException
+    {
+      _marshall.serialize(out, o, _name);
+    }
   }
 }

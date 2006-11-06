@@ -43,8 +43,16 @@ import com.caucho.vfs.WriteStream;
 public class DoubleMarshall extends CDataMarshall {
   public static final DoubleMarshall MARSHALL = new DoubleMarshall();
 
+  private static final QName _xsdDouble = 
+    new QName("http://www.w3.org/2001/XMLSchema", "double", "xs");
+       
   private DoubleMarshall()
   {
+  }
+
+  public QName getXmlSchemaDatatype()
+  {
+    return _xsdDouble;
   }
   
   protected String serialize(Object in)

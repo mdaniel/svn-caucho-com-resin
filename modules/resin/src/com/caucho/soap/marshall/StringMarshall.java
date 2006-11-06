@@ -43,8 +43,16 @@ import com.caucho.vfs.WriteStream;
 public class StringMarshall extends CDataMarshall {
   public static final StringMarshall MARSHALL = new StringMarshall();
 
+  private static final QName _xsdString = 
+    new QName("http://www.w3.org/2001/XMLSchema", "string", "xs");
+       
   private StringMarshall()
   {
+  }
+
+  public QName getXmlSchemaDatatype()
+  {
+    return _xsdString;
   }
   
   protected String serialize(Object in)

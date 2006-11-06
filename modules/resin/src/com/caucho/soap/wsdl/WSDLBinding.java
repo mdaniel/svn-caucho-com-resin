@@ -67,11 +67,17 @@ public class WSDLBinding extends WSDLNamedExtensibleDocumented
    */
   public void addOperation(WSDLBindingOperation operation)
   {
+    if (_operations == null)
+      _operations = new ArrayList<WSDLBindingOperation>();
+
     _operations.add(operation);
   }
 
   public List<WSDLBindingOperation> getOperations()
   {
+    if (_operations == null)
+      _operations = new ArrayList<WSDLBindingOperation>();
+
     return _operations;
   }
 

@@ -36,5 +36,6 @@ import javax.xml.bind.annotation.*;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name="types", namespace="http://schemas.xmlsoap.org/wsdl/")
 public class WSDLTypes extends WSDLExtensibleDocumented 
+                       implements WSDLDefinition
 {
 }

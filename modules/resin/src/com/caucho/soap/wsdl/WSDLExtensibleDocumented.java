@@ -28,6 +28,7 @@
 
 package com.caucho.soap.wsdl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.*;
@@ -38,5 +39,18 @@ import javax.xml.bind.annotation.adapters.*;
  */
 public abstract class WSDLExtensibleDocumented {
   @XmlAnyElement(lax = true)
-  protected List<Object> _any;
+  private List<Object> _any;
+
+  public List<Object> getAny()
+  {
+    return _any;
+  }
+
+  public void addAny(Object any)
+  {
+    if (_any == null)
+      _any = new ArrayList<Object>();
+
+    _any.add(any);
+  }
 }

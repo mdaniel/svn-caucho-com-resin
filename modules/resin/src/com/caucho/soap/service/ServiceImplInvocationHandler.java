@@ -57,7 +57,7 @@ public class ServiceImplInvocationHandler implements InvocationHandler {
   {
     _api = api;
     _url = url;
-    _skeleton = new WebServiceIntrospector().introspect(api);
+    _skeleton = new WebServiceIntrospector().introspect(api, url);
   }
 
   public Object invoke(Object proxy, Method method, Object[] args)

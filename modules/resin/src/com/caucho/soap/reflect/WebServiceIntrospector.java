@@ -29,27 +29,43 @@
 
 package com.caucho.soap.reflect;
 
+import java.io.*;
+
 import java.lang.reflect.*;
+
+import java.util.*;
 
 import javax.jws.*;
 import javax.xml.bind.*;
+import javax.xml.bind.util.*;
+import javax.xml.namespace.*;
+import javax.xml.stream.*;
+import javax.xml.transform.Result;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Node;
 
 import com.caucho.config.ConfigException;
 
 import com.caucho.soap.marshall.*;
 import com.caucho.soap.skeleton.*;
 
+import com.caucho.jaxb.*;
 import com.caucho.util.*;
+//import com.caucho.xml.*;
 
 /**
  * Introspects a web service
  */
 public class WebServiceIntrospector {
+  private static XMLOutputFactory _outputFactory = null;
+
   public static final L10N L = new L10N(WebServiceIntrospector.class);
   /**
    * Introspects the class
    */
-  public DirectSkeleton introspect(Class type)
+  public DirectSkeleton introspect(Class type, String wsdlLocation)
     //throws ConfigException
     throws JAXBException
   {
@@ -62,8 +78,17 @@ public class WebServiceIntrospector {
 
     WebService webService = (WebService) type.getAnnotation(WebService.class);
 
-    DirectSkeleton skel = new DirectSkeleton(type);
+    // Get all the classes that JAXB needs, then generate schema for them
+    HashSet<Class> jaxbClasses = new HashSet<Class>();
+    JAXBUtil.introspectClass(type, jaxbClasses);
 
+    JAXBContextImpl jaxbContext = 
+      new JAXBContextImpl(jaxbClasses.toArray(new Class[0]), null);
+
+    DirectSkeleton skel = new DirectSkeleton(type, wsdlLocation);
+    String namespace = skel.getNamespace();
+
+    LinkedHashMap<String,String> elements = new LinkedHashMap<String,String>();
     Method[] methods = type.getMethods();
 
     for (int i = 0; i < methods.length; i++) {
@@ -82,18 +107,39 @@ public class WebServiceIntrospector {
       if (webMethod != null && webMethod.exclude())
         continue;
 
-      PojoMethodSkeleton methodSkel
-        = new PojoMethodSkeleton(methods[i], marshallFactory);
+      PojoMethodSkeleton methodSkel = 
+        PojoMethodSkeleton.createMethodSkeleton(methods[i], marshallFactory, 
+                                                jaxbContext, namespace,
+                                                elements);
 
-      String name = webMethod==null ? "" : webMethod.operationName();
+      String name = webMethod == null ? "" : webMethod.operationName();
+
       if (name.equals(""))
           name = methods[i].getName();
 
       skel.addAction(name, methodSkel);
     }
-    
+
+    Node typesNode = skel.getTypesNode();
+    DOMResult result = new DOMResult(typesNode);
+
+    try {
+      XMLStreamWriter out = getStreamWriter(result);
+      jaxbContext.generateSchemaWithoutHeader(out, elements);
+    }
+    catch (XMLStreamException e) {
+      throw new JAXBException(e);
+    }
+
     return skel;
   }
+
+  private static XMLStreamWriter getStreamWriter(DOMResult result)
+    throws XMLStreamException
+  {
+    if (_outputFactory == null)
+      _outputFactory = XMLOutputFactory.newInstance();
+
+    return _outputFactory.createXMLStreamWriter(result);
+  }
 }
-
-

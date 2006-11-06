@@ -19,53 +19,20 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Emil Ong
  */
 
-package com.caucho.soap.marshall;
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import java.util.*;
-
-import java.lang.reflect.*;
-import java.io.*;
-
-import com.caucho.vfs.WriteStream;
-
-/**
- * Marshalls data for an integer object
- */
-public class IntMarshall extends CDataMarshall {
-  public static final IntMarshall MARSHALL = new IntMarshall();
-
-  private static final QName _xsdInt = 
-    new QName("http://www.w3.org/2001/XMLSchema", "int", "xs");
-       
-  private IntMarshall()
-  {
+@javax.xml.bind.annotation.XmlSchema (
+  namespace="http://schemas.xmlsoap.org/wsdl/",
+  xmlns = { 
+    @javax.xml.bind.annotation.XmlNs(prefix = "wsdl", 
+      namespaceURI="http://schemas.xmlsoap.org/wsdl/"),
+    @javax.xml.bind.annotation.XmlNs(prefix = "soap", 
+      namespaceURI="http://schemas.xmlsoap.org/wsdl/soap/")
   }
-
-  public QName getXmlSchemaDatatype()
-  {
-    return _xsdInt;
-  }
-  
-  protected String serialize(Object in)
-      throws IOException, XMLStreamException
-  {
-    return ((Integer)in).intValue()+"";
-  }
-
-  protected Object deserialize(String in)
-    throws IOException, XMLStreamException
-  {
-    return new Integer(in);
-  }
-}
-
-
+)
+package com.caucho.soap.wsdl;

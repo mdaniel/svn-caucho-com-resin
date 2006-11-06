@@ -42,6 +42,14 @@ import com.caucho.vfs.WriteStream;
  * Marshalls data to and from soap.
  */
 public class Marshall {
+  private static final QName _xsdAny = 
+    new QName("http://www.w3.org/2001/XMLSchema", "any", "xs");
+       
+  public QName getXmlSchemaDatatype()
+  {
+    return _xsdAny;
+  }
+
   /**
    * Deserializes the data from the input.
    */
