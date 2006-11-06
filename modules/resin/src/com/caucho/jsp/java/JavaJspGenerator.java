@@ -1558,7 +1558,7 @@ public class JavaJspGenerator extends JspGenerator {
     out.println("}");
     
     out.println();
-    out.println("public void _caucho_addDepend(com.caucho.make.PersistentDependency depend)");
+    out.println("public void _caucho_addDepend(com.caucho.vfs.PersistentDependency depend)");
     out.println("{");
     if (_parseState.getExtends() == null)
       out.println("  super._caucho_addDepend(depend);");
@@ -1571,8 +1571,8 @@ public class JavaJspGenerator extends JspGenerator {
     out.pushDepth();
     out.println("if (_caucho_isDead)");
     out.println("  return true;");
-    out.println("if (com.caucho.util.CauchoSystem.getVersionId() != " +
-            CauchoSystem.getVersionId() + "L)");
+    out.println("if (com.caucho.server.util.CauchoSystem.getVersionId() != " +
+		CauchoSystem.getVersionId() + "L)");
     out.println("  return true;");
     
     ArrayList<PersistentDependency> depends;
@@ -1595,8 +1595,8 @@ public class JavaJspGenerator extends JspGenerator {
     else {
       out.println("for (int i = _caucho_depends.size() - 1; i >= 0; i--) {");
       out.pushDepth();
-      out.println("com.caucho.make.Dependency depend;");
-      out.println("depend = (com.caucho.make.Dependency) _caucho_depends.get(i);");
+      out.println("com.caucho.vfs.Dependency depend;");
+      out.println("depend = (com.caucho.vfs.Dependency) _caucho_depends.get(i);");
       out.println("if (depend.isModified())");
       out.println("  return true;");
       out.popDepth();
@@ -1751,8 +1751,8 @@ public class JavaJspGenerator extends JspGenerator {
       out.println("_jsp_init_strings();");
     }
 
-    out.println("com.caucho.vfs.Path resinHome = com.caucho.util.CauchoSystem.getResinHome();");
-    out.println("com.caucho.vfs.MergePath mergePath = new com.caucho.vfs.MergePath();");
+    out.println("com.caucho.vfs.Path resinHome = com.caucho.server.util.CauchoSystem.getResinHome();");
+    out.println("com.caucho.server.vfs.MergePath mergePath = new com.caucho.server.vfs.MergePath();");
     out.println("mergePath.addMergePath(appDir);");
     out.println("mergePath.addMergePath(resinHome);");
     out.println("com.caucho.loader.DynamicClassLoader loader;");

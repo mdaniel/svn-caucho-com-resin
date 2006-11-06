@@ -88,14 +88,14 @@ public class DependencyComponent extends ClassComponent {
   public void generate(JavaWriter out)
     throws IOException
   {
-    out.println("private static com.caucho.make.Dependency []_caucho_depend;");
+    out.println("private static com.caucho.vfs.Dependency []_caucho_depend;");
     
     out.println();
     out.println("public static void " + _initMethod + "(com.caucho.vfs.Path path)");
     out.println("{");
     out.pushDepth();
 
-    out.println("_caucho_depend = new com.caucho.make.Dependency[" +
+    out.println("_caucho_depend = new com.caucho.vfs.Dependency[" +
 		_dependList.size() + "];");
 
     Path searchPath = _searchPath;
@@ -154,7 +154,7 @@ public class DependencyComponent extends ClassComponent {
   protected void printVersionChange(JavaWriter out)
     throws IOException
   {
-    out.println("if (com.caucho.util.CauchoSystem.getVersionId() != " +
+    out.println("if (com.caucho.server.util.CauchoSystem.getVersionId() != " +
 		"0x" + Long.toHexString(CauchoSystem.getVersionId()) + "L)");
     out.println("  return true;");
   }

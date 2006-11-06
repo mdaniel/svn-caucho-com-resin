@@ -20,7 +20,7 @@
 
     <bean>com.caucho.jca.Resource</bean>
 
-    <case-insensitive>com.caucho.vfs.CaseInsensitive</case-insensitive>
+    <case-insensitive>com.caucho.server.vfs.CaseInsensitive</case-insensitive>
 
     <character-encoding>com.caucho.i18n.CharacterEncoding</character-encoding>
 

@@ -338,6 +338,8 @@ public final class Vfs {
   static {
     DEFAULT_SCHEME_MAP = new SchemeMap();
 
+    Path.setDefaultSchemeMap(DEFAULT_SCHEME_MAP);
+
     DEFAULT_SCHEME_MAP.put("file", new FilePath(null));
     
     DEFAULT_SCHEME_MAP.put("memory", new MemoryScheme());

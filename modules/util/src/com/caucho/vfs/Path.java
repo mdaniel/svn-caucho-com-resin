@@ -73,7 +73,11 @@ public abstract class Path {
   
   private static final PathKey _key = new PathKey();
 
-  protected SchemeMap _schemeMap = SchemeMap.NULL_SCHEME_MAP;
+  private static final SchemeMap DEFAULT_SCHEME_MAP;
+  
+  private static SchemeMap _defaultSchemeMap = SchemeMap.NULL_SCHEME_MAP;
+
+  protected SchemeMap _schemeMap = _defaultSchemeMap;
 
   /**
    * Creates a new Path object.
@@ -1311,6 +1315,11 @@ public abstract class Path {
     return this;
   }
 
+  public static final void setDefaultSchemeMap(SchemeMap schemeMap)
+  {
+    _defaultSchemeMap = schemeMap;
+  }
+
   public static final boolean isWindows()
   {
     return _separatorChar == '\\' || _isTestWindows;
@@ -1396,5 +1405,27 @@ public abstract class Path {
 
       return (_parent == key._parent && _lookup.equals(key._lookup));
     }
+  }
+
+  static {
+    DEFAULT_SCHEME_MAP = new SchemeMap();
+
+    Path.setDefaultSchemeMap(DEFAULT_SCHEME_MAP);
+
+    DEFAULT_SCHEME_MAP.put("file", new FilePath(null));
+    
+    //DEFAULT_SCHEME_MAP.put("jar", new JarScheme(null)); 
+    DEFAULT_SCHEME_MAP.put("http", new HttpPath("127.0.0.1", 0));
+    DEFAULT_SCHEME_MAP.put("https", new HttpsPath("127.0.0.1", 0));
+    DEFAULT_SCHEME_MAP.put("tcp", new TcpPath(null, null, null, "127.0.0.1", 0));
+    DEFAULT_SCHEME_MAP.put("tcps", new TcpsPath(null, null, null, "127.0.0.1", 0));
+
+    StreamImpl stdout = StdoutStream.create();
+    StreamImpl stderr = StderrStream.create();
+    DEFAULT_SCHEME_MAP.put("stdout", stdout.getPath());
+    DEFAULT_SCHEME_MAP.put("stderr", stderr.getPath());
+    VfsStream nullStream = new VfsStream(null, null);
+    DEFAULT_SCHEME_MAP.put("null", new ConstPath(null, nullStream));
+    DEFAULT_SCHEME_MAP.put("jndi", new JndiPath());
   }
 }
