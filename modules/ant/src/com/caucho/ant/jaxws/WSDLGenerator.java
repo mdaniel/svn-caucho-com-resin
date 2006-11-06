@@ -29,7 +29,7 @@
 package com.caucho.ant.jaxws;
 
 import com.caucho.soap.reflect.WebServiceIntrospector;
-import com.caucho.util.CauchoSystem;
+import com.caucho.server.util.CauchoSystem;
 
 import java.io.File;
 import java.io.OutputStream;
