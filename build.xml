@@ -639,6 +639,7 @@
         <include name="lib/jta-101.jar"/>
         <include name="lib/portlet-10.jar"/>
         <include name="lib/quercus.jar"/>
+        <include name="lib/resin-util.jar"/>
         <include name="lib/resin.jar"/>
 	<!--
         <include name="lib/resinboot.jar"/>
