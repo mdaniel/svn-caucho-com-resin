@@ -62,8 +62,11 @@ public class JAXBContextImpl extends JAXBContext {
   private HashMap<String,Object> _properties 
     = new HashMap<String,Object>();
 
-  private HashMap<Class,Skeleton> _skeletons 
-    = new HashMap<Class,Skeleton>();
+  private LinkedHashMap<Class,ClassSkeleton> _classSkeletons 
+    = new LinkedHashMap<Class,ClassSkeleton>();
+
+  private LinkedHashSet<WrapperSkeleton> _wrappers 
+    = new LinkedHashSet<WrapperSkeleton>();
 
   private HashMap<QName,Skeleton> _roots 
     = new HashMap<QName,Skeleton>();
@@ -150,8 +153,13 @@ public class JAXBContextImpl extends JAXBContext {
     System.arraycopy(classes, 0, _classes, 0, classes.length);
     Arrays.sort(_classes, new ClassDepthComparator());
 
-    for(Class c : _classes)
-      getSkeleton(c);
+    for(Class c : _classes) {
+      if (! c.isPrimitive() && 
+          ! c.equals(String.class) &&
+          ! c.equals(Class.class) &&
+          ! c.equals(Object.class))
+        getSkeleton(c);
+    }
 
     if (properties != null)
       for(Map.Entry<String,?> e : properties.entrySet())
@@ -227,7 +235,7 @@ public class JAXBContextImpl extends JAXBContext {
 
       out.writeStartDocument();
 
-      generateSchemaWithoutHeader(out);
+      generateSchemaWithoutHeader(out, null);
     }
     catch (Exception e) {
       IOException ioException = new IOException();
@@ -238,12 +246,29 @@ public class JAXBContextImpl extends JAXBContext {
     }
   }
 
-  public void generateSchemaWithoutHeader(XMLStreamWriter out)
+  public void generateSchemaWithoutHeader(XMLStreamWriter out,
+                                          Map<String,String> elements)
     throws JAXBException, XMLStreamException
   {
     out.writeStartElement("xsd", "schema", "http://www.w3.org/2001/XMLSchema");
 
-    for (Skeleton skeleton : _skeletons.values())
+    if (elements != null) {
+      for (Map.Entry<String,String> element : elements.entrySet()) {
+        String name = element.getKey();
+        String type = element.getValue();
+
+        out.writeEmptyElement("xsd", "element", 
+                              "http://www.w3.org/2001/XMLSchema");
+
+        out.writeAttribute("name", name);
+        out.writeAttribute("type", "xsd:" + type);
+      }
+    }
+
+    for (Skeleton skeleton : _classSkeletons.values())
+      skeleton.generateSchema(out);
+
+    for (Skeleton skeleton : _wrappers)
       skeleton.generateSchema(out);
 
     out.writeEndElement(); // schema
@@ -252,11 +277,11 @@ public class JAXBContextImpl extends JAXBContext {
   public Skeleton getSkeleton(Class c)
     throws JAXBException
   {
-    Skeleton skeleton = _skeletons.get(c);
+    ClassSkeleton skeleton = _classSkeletons.get(c);
 
     if (skeleton == null) {
-      skeleton = new Skeleton(this, c);
-      _skeletons.put(c, skeleton);
+      skeleton = new ClassSkeleton(this, c);
+      _classSkeletons.put(c, skeleton);
     }
 
     return skeleton;
@@ -318,13 +343,35 @@ public class JAXBContextImpl extends JAXBContext {
     return new SkeletonProperty(getSkeleton(type), a);
   }
 
-  public void addRootElement(QName q, Skeleton s) {
-    _roots.put(q, s);
+  public void addRootElement(Skeleton s) 
+  {
+    _roots.put(s.getTypeName(), s);
   }
 
   public Skeleton getRootElement(QName q)
   {
     return _roots.get(q);
+  }
+
+  /**
+   *
+   * A Resin-specific method that allows adding a skeleton to the context
+   * which doesn't actually represent a java class.  This is specifically
+   * for JAX-WS functionality which wraps arguments and return values for
+   * communication.  Adding a wrapper as a skeleton also allows writing
+   * its schema without generating a new class.
+   *
+   **/
+  public void addWrapperType(QName typeName, 
+                             List<QName> names, 
+                             List<Class> wrapped)
+    throws JAXBException
+  {
+    WrapperSkeleton wrapper = 
+      new WrapperSkeleton(this, typeName, names, wrapped);
+
+    addRootElement(wrapper);
+    _wrappers.add(wrapper);
   }
 
   /**

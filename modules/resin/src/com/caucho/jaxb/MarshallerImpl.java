@@ -113,7 +113,15 @@ public class MarshallerImpl extends AbstractMarshallerImpl {
 
   public void marshal(Object obj, Result result) throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    try {
+      XMLOutputFactory factory = XMLOutputFactory.newInstance();
+      XMLStreamWriter out = factory.createXMLStreamWriter(result);
+
+      marshal(obj, out);
+    }
+    catch (XMLStreamException e) {
+      throw new JAXBException(e);
+    }
   }
 
   public <A extends XmlAdapter> A getAdapter(Class<A> type)

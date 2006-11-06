@@ -62,312 +62,49 @@ import javax.xml.stream.XMLStreamException;
 
 import com.caucho.jaxb.JAXBContextImpl;
 
-import com.caucho.util.JAXBUtil;
-
-public class Skeleton<C> {
+public abstract class Skeleton {
   public static final String XML_SCHEMA_NS = "http://www.w3.org/2001/XMLSchema";
   public static final String XML_SCHEMA_PREFIX = "xsd";
 
   private static final Logger log = Logger.getLogger(Skeleton.class.getName());
 
-  private JAXBContextImpl _context;
-  private Class<C> _class;
+  protected JAXBContextImpl _context;
+  protected QName _typeName;
 
-  private Method _beforeUnmarshal;
-  private Method _afterUnmarshal;
-  private Method _beforeMarshal;
-  private Method _afterMarshal;
-
-  private QName _typeName;
-
-  private LinkedHashMap<String,Property> _attributeProperties
+  protected LinkedHashMap<String,Property> _attributeProperties
     = new LinkedHashMap<String,Property>();
 
-  private LinkedHashMap<String,Property> _elementProperties 
+  protected LinkedHashMap<String,Property> _elementProperties 
     = new LinkedHashMap<String,Property>();
 
-  public Class<C> getType()
+  protected Skeleton(JAXBContextImpl context)
   {
-    return _class;
+    _context = context;
   }
+
+  public QName getTypeName()
+  {
+    return _typeName;
+  }
+
+  public abstract Object read(Unmarshaller u, XMLStreamReader in)
+    throws IOException, XMLStreamException, JAXBException;
   
-  public Skeleton(JAXBContextImpl context, Class<C> c)
-    throws JAXBException
-  {
-    try {
-      _context = context;
-      _class = c;
+  public abstract void write(Marshaller m, XMLStreamWriter out,
+                             Object obj, QName fieldName)
+    throws IOException, XMLStreamException, JAXBException;
 
-      try {
-        _beforeUnmarshal =
-          c.getMethod("beforeUnmarshal", Unmarshaller.class, Object.class);
-      } catch (NoSuchMethodException _) {
-        // deliberate
-      }
-
-      try {
-        _afterUnmarshal =
-          c.getMethod("afterUnmarshal", Unmarshaller.class, Object.class);
-      } catch (NoSuchMethodException _) {
-        // deliberate
-      }
-
-      try {
-        _beforeMarshal =
-          c.getMethod("beforeMarshal", Marshaller.class, Object.class);
-      } catch (NoSuchMethodException _) {
-        // deliberate
-      }
-
-      try {
-        _afterMarshal =
-          c.getMethod("afterMarshal", Marshaller.class, Object.class);
-      } catch (NoSuchMethodException _) {
-        // deliberate
-      }
-
-      
-      if (List.class.isAssignableFrom(_class)) {
-        // XXX:
-      }
-      if (Set.class.isAssignableFrom(_class)) {
-        // XXX:
-      }
-      if (HashMap.class.isAssignableFrom(_class)) {
-        // XXX:
-      }
-      
-      // XXX: @XmlJavaTypeAdapter
-      
-      // XXX: look for @XmlValue annotation
-      
-      if (c.isAnnotationPresent(XmlRootElement.class)) {
-        XmlRootElement xre = c.getAnnotation(XmlRootElement.class);
-
-        if (!"##default".equals(xre.name())) {
-          if ("##default".equals(xre.namespace()))
-            _typeName = new QName(xre.name());
-          else
-            _typeName = new QName(xre.namespace(), xre.name());
-
-          _context.addRootElement(_typeName, this);
-        }
-      }
-
-      if (_typeName == null)
-        _typeName = new QName(JAXBUtil.classBasename(_class));
-      
-      for(Field f : c.getFields()) {
-        if ((f.getModifiers() & Modifier.PUBLIC) == 0) continue;
-        if ((f.getModifiers() & Modifier.STATIC) != 0) continue;
-        if (f.isAnnotationPresent(XmlTransient.class))
-          continue;
-
-        Accessor a = new Accessor.FieldAccessor(f, _context);
-        Property p = _context.createProperty(a);
-
-        if (f.isAnnotationPresent(XmlAttribute.class))
-          _attributeProperties.put(p.getName(), p);
-        else
-          _elementProperties.put(p.getName(), p);
-      }
-      
-      // XXX: getter/setter methods
-    }
-    catch (Exception e) {
-      throw new JAXBException(e);
-    }
-  }
-
-  public C newInstance()
-    throws JAXBException
-  {
-    try {
-      XmlType xmlType = getXmlType();
-      
-      if (xmlType != null) {
-        Class factoryClass = xmlType.factoryClass();
-        
-        if (xmlType.factoryClass() == XmlType.DEFAULT.class)
-          factoryClass = _class;
-        
-        if (!"".equals(xmlType.factoryMethod())) {
-          Method m = factoryClass.getMethod(xmlType.factoryMethod(),
-                                            new Class[] { });
-          // XXX: make sure m is static
-          return (C)m.invoke(null);
-        }
-      }
-      
-      Constructor con = _class.getConstructor(new Class[] { });
-      return (C)con.newInstance(new Object[] { });
-    }
-    catch (Exception e) {
-      throw new JAXBException(e);
-    }
-  }
-
-  /*
-    private Iterable<String> propNames()
-    {
-    XmlType xmlType = getXmlType();
-    if (xmlType != null) {
-    if (xmlType.propOrder() == 
-    }
-    return null;
-    }
-  */
-
-  public XmlType getXmlType()
-  {
-    return (XmlType)_class.getAnnotation(XmlType.class);
-  }
-
-  public Object read(Unmarshaller u, XMLStreamReader in)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    try {
-      Constructor constructor = _class.getConstructor(new Class[] { });
-      C ret = (C) constructor.newInstance();
-      in.next();
-
-      if (_beforeUnmarshal != null)
-        _beforeUnmarshal.invoke(ret, /*FIXME*/ null, null);
-      if (u.getListener() != null)
-        u.getListener().beforeUnmarshal(ret, null);
-      
-      while (in.getEventType() != -1) {
-        if (in.getEventType() == in.START_ELEMENT) {
-          Property prop = getProperty(in.getName());
-          Object val = prop.read(u, in);
-          prop.set(ret, val);
-        } 
-        else if (in.getEventType() == in.END_ELEMENT) {
-          in.next();
-          break;
-        }
-        in.next();
-      }
-
-      if (_afterUnmarshal != null)
-        _afterUnmarshal.invoke(ret, /*FIXME*/ null, null);
-      if (u.getListener() != null)
-        u.getListener().afterUnmarshal(ret, null);
-      
-      return ret;
-    }
-    catch (NoSuchMethodException e) {
-      throw new JAXBException(e);
-    }
-    catch (InstantiationException e) {
-      throw new JAXBException(e);
-    }
-    catch (InvocationTargetException e) {
-      throw new JAXBException(e);
-    }
-    catch (IllegalAccessException e) {
-      throw new JAXBException(e);
-    }
-  }
-  
-  private Property getProperty(QName q)
+  protected Property getProperty(QName q)
   {
     // XXX
     return _elementProperties.get(q.getLocalPart());
   }
 
-  public void write(Marshaller m, XMLStreamWriter out,
-                    Object obj, QName fieldName)
-    throws IOException, XMLStreamException, JAXBException
+  public abstract void generateSchema(XMLStreamWriter out)
+    throws JAXBException, XMLStreamException;
+
+  public QName getElementName(Object object)
   {
-    try {
-      if (_beforeMarshal != null)
-        _beforeMarshal.invoke(obj, /*FIXME*/ null, /*FIXME*/ null);
-
-      if (m.getListener() != null)
-        m.getListener().beforeMarshal(obj);
-      
-      QName tagName = getElementName((C) obj);
-      
-      if (tagName == null)
-        tagName = fieldName;
-      
-      if (fieldName.getNamespaceURI() == null ||
-          fieldName.getNamespaceURI().equals(""))
-        out.writeStartElement(tagName.getLocalPart());
-      else
-        out.writeStartElement(tagName.getNamespaceURI(),
-                              tagName.getLocalPart());
-      
-      for(Property p : _elementProperties.values())
-        p.write(m, out, p.get(obj));
-      
-      out.writeEndElement();
-      
-      if (_afterMarshal != null)
-        _afterMarshal.invoke(obj, /*FIXME*/ null, /*FIXME*/ null);
-      if (m.getListener() != null)
-        m.getListener().afterMarshal(obj);
-    }
-    catch (InvocationTargetException e) {
-      throw new JAXBException(e);
-    }
-    catch (IllegalAccessException e) {
-      throw new JAXBException(e);
-    }
-  }
-
-  public QName getElementName(C object)
-  {
-    QName tagName = null;
-
-    /*
-    if (tagName==null && _class.isAnnotationPresent(XmlRootElement.class)) {
-      XmlRootElement annotation = _class.getAnnotation(XmlRootElement.class);
-      String localname = annotation.name();
-      String namespace = annotation.namespace();
-
-      if (localname.equals("##default"))
-        tagName = null;
-      else if (namespace.equals("##default"))
-        tagName = new QName(localname);
-      else
-        tagName = new QName(namespace, localname);
-    }
-    */
-
-    if (tagName==null && _class.isAnnotationPresent(XmlElement.class)) {
-      XmlElement annotation = _class.getAnnotation(XmlElement.class);
-      String localname = annotation.name();
-      String namespace = annotation.namespace();
-
-      if (localname.equals("##default"))
-        tagName = null;
-      else if (namespace.equals("##default"))
-        tagName = new QName(localname);
-      else
-        tagName = new QName(namespace, localname);
-    }
-
-    return tagName;
-  }
-
-  public void generateSchema(XMLStreamWriter out)
-    throws JAXBException, XMLStreamException
-  {
-    out.writeStartElement(XML_SCHEMA_PREFIX, "complexType", XML_SCHEMA_NS);
-    out.writeAttribute("name", _typeName.toString());
-
-    out.writeStartElement(XML_SCHEMA_PREFIX, "sequence", XML_SCHEMA_NS);
-
-    for (Property property : _elementProperties.values())
-      property.generateSchema(out);
-
-    out.writeEndElement(); // sequence
-
-    for (Property property : _attributeProperties.values())
-      property.generateSchema(out);
-
-    out.writeEndElement(); // complexType
+    return null;
   }
 }

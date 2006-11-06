@@ -238,27 +238,71 @@ public abstract class Accessor {
 
   public static class CollectionComponentAccessor extends Accessor {
     private Accessor _accessor;
-    public CollectionComponentAccessor(Accessor a) {
+
+    public CollectionComponentAccessor(Accessor a) 
+    {
       super(a.getContext());
       _accessor = a;
     }
-    public Object     get(Object o) throws JAXBException
+
+    public Object get(Object o) throws JAXBException
     {
       throw new JAXBException("can't invoke CollectionComponentAccessor.get()");
     }
-    public void       set(Object o, Object value) throws JAXBException
+
+    public void set(Object o, Object value) throws JAXBException
     {
       throw new JAXBException("can't invoke CollectionComponentAccessor.set()");
     }
-    public String     getName()
+
+    public String getName()
     {
       return _accessor.getName();
     }
-    public Class      getType()
+
+    public Class getType()
     {
       // XXX
       return Object.class;
     }
+
+    public Annotation getAnnotation(Class c)
+    {
+      return null;
+    }
+  }
+  
+  public static class WrapperListAccessor extends Accessor {
+    private QName _name;
+    private Class _type;
+
+    public WrapperListAccessor(JAXBContextImpl context, QName name, Class type) 
+    {
+      super(context);
+      _name = name;
+      _type = type;
+    }
+
+    public Object get(Object o) throws JAXBException
+    {
+      return ((Map<QName,Object>) o).get(_name);
+    }
+
+    public void set(Object o, Object value) throws JAXBException
+    {
+      ((Map<QName,Object>) o).put(_name, value);
+    }
+
+    public String getName()
+    {
+      return _name.getLocalPart(); // XXX _name.toString()?
+    }
+
+    public Class getType()
+    {
+      return _type;
+    }
+
     public Annotation getAnnotation(Class c)
     {
       return null;
