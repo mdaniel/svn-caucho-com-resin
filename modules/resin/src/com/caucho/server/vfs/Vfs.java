@@ -84,6 +84,11 @@ public final class Vfs {
       return PWD.lookup(url, null);
   }
 
+  public static FilesystemPath getGlobalPwd()
+  {
+    return PWD;
+  }
+  
   /**
    * Returns a path for the current directory.
    */
