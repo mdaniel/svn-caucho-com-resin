@@ -69,6 +69,14 @@
           depends="init, ejb, jpa, j2ee-deploy, j2ee-management, jaxrpc, jca, jms, jsdk, jstl, jta, portlet, script, resin, quercus, ecmascript, webutil, deploy, conf, ext">
   </target>
 
+  <target name="ant" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="ant"/>
+      <param name="module.jar" value="resin-ant.jar"/>
+      <param name="javac.source" value="1.5"/>
+    </antcall>
+  </target>
+
   <target name="ejb" depends="init, jta">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="ejb"/>
