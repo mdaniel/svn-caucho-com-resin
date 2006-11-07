@@ -1082,10 +1082,12 @@ public class EntityType extends AbstractEnhancedType {
       if (! parentSelect.equals(""))
         hasSelect = true;
     }
-    else if (loadGroup == 0 && getDiscriminator() != null) {
+    else if ((getTable() == table) && // jpa/0l11
+             (loadGroup == 0 && getDiscriminator() != null)) {
+
       if (id != null) {
         cb.append(id + ".");
-      }
+        }
       cb.append(getDiscriminator().getName());
       hasSelect = true;
     }

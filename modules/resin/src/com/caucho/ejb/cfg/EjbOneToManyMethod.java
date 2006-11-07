@@ -61,7 +61,7 @@ public class EjbOneToManyMethod extends CmpGetter {
   private static final L10N L = new L10N(EjbOneToManyMethod.class);
 
   private CmrOneToMany _oneToMany;
-  
+
   /**
    * Creates a new method.
    *
@@ -70,8 +70,8 @@ public class EjbOneToManyMethod extends CmpGetter {
    * @param implMethod the method from the implementation
    */
   public EjbOneToManyMethod(EjbView view,
-			    JMethod apiMethod, JMethod implMethod,
-			    CmrOneToMany oneToMany)
+                            JMethod apiMethod, JMethod implMethod,
+                            CmrOneToMany oneToMany)
   {
     super(view, apiMethod, implMethod);
 
@@ -85,9 +85,9 @@ public class EjbOneToManyMethod extends CmpGetter {
     throws ConfigException
   {
     String listName = _oneToMany.getName() + "_List";
-    
+
     CollectionClass list = new CollectionClass(_oneToMany, listName);
-    
+
     beanAssembler.addComponent(list);
 
     beanAssembler.addMethod(new BeanMethod(getImplMethod()));
@@ -98,7 +98,7 @@ public class EjbOneToManyMethod extends CmpGetter {
     {
       super(method);
     }
-  
+
     /**
      * Generates the code for the call.
      *
@@ -108,14 +108,14 @@ public class EjbOneToManyMethod extends CmpGetter {
       throws IOException
     {
       String listName = _oneToMany.getName() + "_List";
-      String varName = "__caucho_" + _oneToMany.getName();
+      String varName = "__caucho_field_" + _oneToMany.getName();
 
       out.println(listName + " " + varName + ";");
       out.println();
-      
+
       super.generate(out);
     }
-  
+
     /**
      * Generates the code for the call.
      *
@@ -126,7 +126,7 @@ public class EjbOneToManyMethod extends CmpGetter {
       throws IOException
     {
       String listName = _oneToMany.getName() + "_List";
-      String varName = "__caucho_" + _oneToMany.getName();
+      String varName = "__caucho_field_" + _oneToMany.getName();
 
       out.println("if (" + varName + " != null) {");
       out.println("  " + varName + ".__caucho_init(_ejb_trans.getAmberConnection());");
@@ -140,7 +140,7 @@ public class EjbOneToManyMethod extends CmpGetter {
       out.println("com.caucho.amber.AmberQuery query;");
 
       String abstractSchema = _oneToMany.getBean().getAbstractSchemaName();
-      
+
       out.print("String sql = \"SELECT o." + _oneToMany.getName());
       out.print(" FROM " + abstractSchema + " o");
       out.print(" WHERE ");
@@ -149,31 +149,31 @@ public class EjbOneToManyMethod extends CmpGetter {
       ArrayList<IdField> keys = type.getId().getKeys();
 
       for (int i = 0; i < keys.size(); i++) {
-	IdField key = keys.get(i);
-	
-	if (i != 0)
-	  out.print(" AND ");
+        IdField key = keys.get(i);
 
-	out.print("o." + key.getName() + "=?" + (i + 1));
+        if (i != 0)
+          out.print(" AND ");
+
+        out.print("o." + key.getName() + "=?" + (i + 1));
       }
 
       out.println("\";");
-      
+
       out.println("query = _ejb_trans.getAmberConnection().prepareQuery(sql);");
 
       EjbConfig config = _oneToMany.getBean().getConfig();
 
       out.println("int index = 1;");
       for (int i = 0; i < keys.size(); i++) {
-	IdField key = keys.get(i);
+        IdField key = keys.get(i);
 
-	AbstractQueryMethod.generateSetParameter(out,
-						 config,
-						 key.getJavaType(),
-						 "query",
-						 key.generateGet("super"));
+        AbstractQueryMethod.generateSetParameter(out,
+                                                 config,
+                                                 key.getJavaType(),
+                                                 "query",
+                                                 key.generateGet("super"));
       }
-      
+
       out.println(varName + " = new " + listName + "(this, query);");
 
       out.println("return " + varName + ";");

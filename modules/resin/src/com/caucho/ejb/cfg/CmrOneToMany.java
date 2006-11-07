@@ -69,7 +69,7 @@ public class CmrOneToMany extends CmrRelation {
 
   private ArrayList<String> _orderByFields;
   private ArrayList<Boolean> _orderByAscending;
-  
+
   private SqlRelation []_sqlColumns;
 
   private EntityOneToManyField _amberOneToMany;
@@ -78,9 +78,9 @@ public class CmrOneToMany extends CmrRelation {
    * Creates a new cmp-relation
    */
   public CmrOneToMany(EjbEntityBean entityBean,
-		      String fieldName,
-		      EjbEntityBean targetBean,
-		      String targetField)
+                      String fieldName,
+                      EjbEntityBean targetBean,
+                      String targetField)
     throws ConfigException
   {
     super(entityBean, fieldName);
@@ -132,7 +132,7 @@ public class CmrOneToMany extends CmrRelation {
       ArrayList<Boolean> asc = new ArrayList<Boolean>();
 
       QLParser.parseOrderBy(_targetBean, orderBySQL, fields, asc);
-      
+
       _orderByFields = fields;
       _orderByAscending = asc;
     }
@@ -150,8 +150,8 @@ public class CmrOneToMany extends CmrRelation {
    * Create any bean methods.
    */
   public EjbMethod createGetter(EjbView view,
-				JMethod apiMethod,
-				JMethod implMethod)
+                                JMethod apiMethod,
+                                JMethod implMethod)
     throws ConfigException
   {
     return new EjbOneToManyMethod(view, apiMethod, implMethod, this);
@@ -166,15 +166,15 @@ public class CmrOneToMany extends CmrRelation {
     EntityOneToManyField oneToMany = new EntityOneToManyField(type, getName());
 
     AmberPersistenceUnit manager = type.getPersistenceUnit();
-    
+
     EntityType targetType = _targetBean.getEntityType();
     oneToMany.setType(targetType);
 
     // if bi-directional, then other side handles it
     // if (! (getTargetRelation() instanceof CmrManyToOne)) {
-  
+
     oneToMany.setOrderBy(_orderByFields, _orderByAscending);
-    
+
     _amberOneToMany = oneToMany;
 
     return oneToMany;
@@ -190,7 +190,7 @@ public class CmrOneToMany extends CmrRelation {
 
     _amberOneToMany.setSourceField(manyToOne.getAmberManyToOne());
     _amberOneToMany.setLinkColumns(manyToOne.getAmberManyToOne().getLinkColumns());
-    
+
     _amberOneToMany.init();
   }
 
@@ -201,13 +201,13 @@ public class CmrOneToMany extends CmrRelation {
     throws IOException
   {
     if (getHasGetter())
-      out.println("__caucho_" + getName() + " = null;");
+      out.println("__caucho_field_" + getName() + " = null;");
   }
 
   private LinkColumns calculateColumn(EntityType parentType,
-				      EntityType childType,
-				      String fieldName,
-				      SqlRelation []sqlColumns)
+                                      EntityType childType,
+                                      String fieldName,
+                                      SqlRelation []sqlColumns)
     throws ConfigException
   {
     Id id = parentType.getId();
@@ -216,40 +216,40 @@ public class CmrOneToMany extends CmrRelation {
 
     // XXX: need to remove self from the keys if identifying
     /*
-    for (int i = keys.size() - 1; i >= 0; i--) {
+      for (int i = keys.size() - 1; i >= 0; i--) {
       IdField key = keys.get(i);
 
       if (key instanceof KeyManyToOneField) {
-	KeyManyToOneField manyToOne = (KeyManyToOneField) key;
+      KeyManyToOneField manyToOne = (KeyManyToOneField) key;
 
-	if (manyToOne.getEntityType() == sourceType)
-	  keys.remove(i);
+      if (manyToOne.getEntityType() == sourceType)
+      keys.remove(i);
       }
-    }
+      }
     */
 
     if (_sqlColumns != null && _sqlColumns.length == keys.size()) {
       for (int i = 0; i < keys.size(); i++) {
-	Column key = keys.get(i);
+        Column key = keys.get(i);
 
-	String sqlColumn = getColumn(_sqlColumns, key.getName());
-	ForeignColumn column =
-	  childType.getTable().createForeignColumn(sqlColumn, key);
-	
-	columns.add(column);
+        String sqlColumn = getColumn(_sqlColumns, key.getName());
+        ForeignColumn column =
+          childType.getTable().createForeignColumn(sqlColumn, key);
+
+        columns.add(column);
       }
     }
     else if (_sqlColumns != null && _sqlColumns.length == 1) {
       String baseSqlColumn = _sqlColumns[0].getSQLColumn();
-      
+
       for (Column key : keys) {
-	String sqlColumn;
+        String sqlColumn;
 
-	sqlColumn = baseSqlColumn + "_" + key.getName();
+        sqlColumn = baseSqlColumn + "_" + key.getName();
 
-	ForeignColumn column =
-	  childType.getTable().createForeignColumn(sqlColumn, key);
-	columns.add(column);
+        ForeignColumn column =
+          childType.getTable().createForeignColumn(sqlColumn, key);
+        columns.add(column);
       }
     }
     else if (_sqlColumns != null && _sqlColumns.length > 0) {
@@ -257,11 +257,11 @@ public class CmrOneToMany extends CmrRelation {
     }
     else if (keys.size() == 1) {
       Column key = keys.get(0);
-      
+
       String sqlColumn = CmpField.toSqlName(fieldName);
-	
+
       ForeignColumn column =
-	childType.getTable().createForeignColumn(sqlColumn, key);
+        childType.getTable().createForeignColumn(sqlColumn, key);
 
       columns.add(column);
     }
@@ -269,18 +269,18 @@ public class CmrOneToMany extends CmrRelation {
       String baseSqlColumn = CmpField.toSqlName(fieldName);
 
       for (Column key : keys) {
-	String sqlColumn = baseSqlColumn + "_" + key.getName();
+        String sqlColumn = baseSqlColumn + "_" + key.getName();
 
-	ForeignColumn foreignColumn =
-	  childType.getTable().createForeignColumn(sqlColumn, key);
+        ForeignColumn foreignColumn =
+          childType.getTable().createForeignColumn(sqlColumn, key);
 
-	columns.add(foreignColumn);
+        columns.add(foreignColumn);
       }
     }
 
     return new LinkColumns(childType.getTable(),
-			   parentType.getTable(),
-			   columns);
+                           parentType.getTable(),
+                           columns);
   }
 
   private String getColumn(SqlRelation []sqlColumns, String fieldName)
@@ -293,14 +293,14 @@ public class CmrOneToMany extends CmrRelation {
       String ref = sqlColumns[i].getReferences();
 
       if (ref == null)
-	throw new ConfigException(L.l("sql-column '{0}' needs a references attribute.",
-				      sqlColumns[i].getSQLColumn()));
+        throw new ConfigException(L.l("sql-column '{0}' needs a references attribute.",
+                                      sqlColumns[i].getSQLColumn()));
 
       if (ref.equals(fieldName))
-	return sqlColumns[i].getSQLColumn();
+        return sqlColumns[i].getSQLColumn();
     }
-    
+
     throw new ConfigException(L.l("key '{0}' has no matching sql-column",
-				  fieldName));
+                                  fieldName));
   }
 }

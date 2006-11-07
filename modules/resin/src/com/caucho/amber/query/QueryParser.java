@@ -1751,11 +1751,29 @@ public class QueryParser {
   {
     int token = scanToken();
 
+    String identifier = _lexeme;
+
+    // Resolves ambiguous 'order': "SELECT o FROM Order o"
+    if (token == ORDER) {
+      int parseIndex = _parseIndex;
+
+      scanToken();
+
+      if (peekToken() != BY) {
+        token = IDENTIFIER;
+
+        // Restores parse index right after ORDER.
+        _parseIndex = parseIndex;
+        _lexeme = identifier;
+        _token = -1;
+      }
+    }
+
     if (token != IDENTIFIER) {
       throw error(L.l("expected identifier at `{0}'", tokenName(token)));
     }
 
-    return _lexeme;
+    return identifier;
   }
 
   /**

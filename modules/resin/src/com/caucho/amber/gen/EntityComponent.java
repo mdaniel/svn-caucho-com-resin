@@ -657,6 +657,7 @@ public class EntityComponent extends ClassComponent {
     out.println("public void __caucho_increment_version()");
     out.println("{");
     out.pushDepth();
+
     out.println("if (__caucho_inc_version)");
     out.println("  return;");
     out.println();
@@ -701,9 +702,6 @@ public class EntityComponent extends ClassComponent {
       out.println("  isDirty = true;");
     }
 
-    out.println("if (! isDirty)");
-    out.println("  return true;");
-
     out.println("__caucho_session.preUpdate(this);");
 
     generateCallbacks(out, "this", _entityType.getPreUpdateCallbacks());
@@ -712,6 +710,10 @@ public class EntityComponent extends ClassComponent {
     out.println("__caucho_flush_callback();");
 
     out.println();
+
+    out.println("if (isDirty) {");
+    out.pushDepth();
+
     out.println("com.caucho.util.CharBuffer cb = new com.caucho.util.CharBuffer();");
     out.println("__caucho_home.generateUpdateSQLPrefix(cb);");
     out.println("boolean isFirst = true;");
@@ -727,6 +729,7 @@ public class EntityComponent extends ClassComponent {
     out.println("int index = 1;");
 
     ArrayList<AmberField> fields = _entityType.getFields();
+
     for (int i = 0; i < fields.size(); i++) {
       AmberField field = fields.get(i);
 
@@ -758,13 +761,36 @@ public class EntityComponent extends ClassComponent {
       out.println();
     }
 
+    out.popDepth();
+    out.println("}"); // closes if (isDirty) {
+
+    // XXX: cascade
+    // boolean isCascade = false;
+    //
+    // CharBuffer cb = new CharBuffer();
+    //
+    // for (int i = 0; i < fields.size(); i++) {
+    //   AmberField field = fields.get(i);
+    //
+    //   if (field.isCascadable()) {
+    //     CascadableField cascadable = (CascadableField) field;
+    //     isCascade = cascadable.generateFlush(cb);
+    //
+    //     if (isCascade) {
+    //       cb.append("\n");
+    //     }
+    //   }
+    // }
+    //
+    // out.println(cb.toString());
+
     out.println("__caucho_session.postUpdate(this);");
 
     generateCallbacks(out, "this", _entityType.getPostUpdateCallbacks());
 
     out.println();
     out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
-    out.println("  __caucho_log.fine(\"amber update \" + this);");
+    out.println("  __caucho_log.fine(\"amber update \" + this.getClass().getName() + \" - PK: \" + __caucho_getPrimaryKey());");
 
     out.println();
     out.println("__caucho_inc_version = false;");
@@ -816,7 +842,7 @@ public class EntityComponent extends ClassComponent {
 
     out.println();
     out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
-    out.println("  __caucho_log.fine(\"amber update \" + this);");
+    out.println("  __caucho_log.fine(\"amber update \" + this.getClass().getName() + \" - PK: \" + __caucho_getPrimaryKey());");
 
     // println();
     // println("pstmt.close();");
@@ -1079,7 +1105,7 @@ public class EntityComponent extends ClassComponent {
 
     out.println();
     out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
-    out.println("  __caucho_log.fine(\"amber create \" + this);");
+    out.println("  __caucho_log.fine(\"amber create \" + this.getClass().getName() + \" - PK: \" + __caucho_getPrimaryKey());");
     out.println();
     out.println("if (aConn.isInTransaction()) {");
     out.println("  __caucho_state = com.caucho.amber.entity.Entity.P_TRANSACTIONAL;");
@@ -1342,7 +1368,7 @@ public class EntityComponent extends ClassComponent {
     throws IOException
   {
     out.println();
-    out.println("public void __caucho_cascadePersist(com.caucho.amber.manager.AmberConnection aConn)");
+    out.println("public void __caucho_cascadePrePersist(com.caucho.amber.manager.AmberConnection aConn)");
     out.println("  throws java.sql.SQLException");
     out.println("{");
     out.pushDepth();
@@ -1360,7 +1386,28 @@ public class EntityComponent extends ClassComponent {
 
         out.println();
 
-        cascadable.generateCascade(out, "aConn", CascadeType.PERSIST);
+        cascadable.generatePreCascade(out, "aConn", CascadeType.PERSIST);
+      }
+    }
+
+    out.popDepth();
+    out.println("}");
+
+    out.println();
+    out.println("public void __caucho_cascadePostPersist(com.caucho.amber.manager.AmberConnection aConn)");
+    out.println("  throws java.sql.SQLException");
+    out.println("{");
+    out.pushDepth();
+
+    for (int i = 0; i < fields.size(); i++) {
+      AmberField field = fields.get(i);
+
+      if (field.isCascadable()) {
+        CascadableField cascadable = (CascadableField) field;
+
+        out.println();
+
+        cascadable.generatePostCascade(out, "aConn", CascadeType.PERSIST);
       }
     }
 

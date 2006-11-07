@@ -323,7 +323,7 @@ public class EntityManyToOneField extends CascadableField {
 
     Id id = getEntityType().getId();
 
-    out.println("protected transient " + id.getForeignTypeName() + " __caucho_" + getName() + ";");
+    out.println("protected transient " + id.getForeignTypeName() + " __caucho_field_" + getName() + ";");
 
     if (_aliasField == null) {
       id.generatePrologue(out, completedSet, getName());
@@ -350,7 +350,7 @@ public class EntityManyToOneField extends CascadableField {
     if (_aliasField != null)
       return index;
 
-    out.print("__caucho_" + getName() + " = ");
+    out.print("__caucho_field_" + getName() + " = ");
 
     index = getEntityType().getId().generateLoadForeign(out, rs,
                                                         indexVar, index,
@@ -360,7 +360,7 @@ public class EntityManyToOneField extends CascadableField {
 
     /*
     // ejb/0a06
-    String proxy = "aConn.loadProxy(\"" + getEntityType().getName() + "\", __caucho_" + getName() + ")";
+    String proxy = "aConn.loadProxy(\"" + getEntityType().getName() + "\", __caucho_field_" + getName() + ")";
 
     proxy = "(" + getEntityType().getProxyClass().getName() + ") " + proxy;
 
@@ -517,7 +517,7 @@ public class EntityManyToOneField extends CascadableField {
 
     // ejb/06h0
     if (isAbstract()) {
-      String proxy = "aConn.loadProxy(\"" + getEntityType().getName() + "\", __caucho_" + getName() + ")";
+      String proxy = "aConn.loadProxy(\"" + getEntityType().getName() + "\", __caucho_field_" + getName() + ")";
 
       proxy = getEntityType().getProxyClass().getName() + " v" + index + " = (" + getEntityType().getProxyClass().getName() + ") " + proxy + ";";
 
@@ -529,7 +529,7 @@ public class EntityManyToOneField extends CascadableField {
       out.print(targetType + " v"+index+" = (" + targetType + ") "+session+".find(" + targetType + ".class, ");
 
       if (_aliasField == null) {
-        out.print("__caucho_" + getName());
+        out.print("__caucho_field_" + getName());
       }
       else {
         out.print(_aliasField.generateGet("super"));
@@ -556,7 +556,7 @@ public class EntityManyToOneField extends CascadableField {
     // if (getIndex() == updateIndex) {
 
     // order matters: ejb/06gc
-    String var = "__caucho_" + getName();
+    String var = "__caucho_field_" + getName();
     out.println(generateAccessor(dst, var) + " = " + generateAccessor(src, var) + ";");
 
     String value = generateGet(src);
@@ -577,7 +577,7 @@ public class EntityManyToOneField extends CascadableField {
     // if (getLoadGroupIndex() == updateIndex) {
 
     // order matters: ejb/06gc
-    String var = "__caucho_" + getName();
+    String var = "__caucho_field_" + getName();
     out.println(generateAccessor(dst, var) + " = " + generateAccessor(src, var) + ";");
     // jpa/0o05
     if (! dst.equals("super")) { // || isLazy())) {
@@ -622,7 +622,7 @@ public class EntityManyToOneField extends CascadableField {
     // ejb/06gc - updates with EJB 2.0
 
     Id id = getEntityType().getId();
-    String var = "__caucho_" + getName();
+    String var = "__caucho_field_" + getName();
 
     String keyType = getEntityType().getId().getForeignTypeName();
 
@@ -722,7 +722,7 @@ public class EntityManyToOneField extends CascadableField {
       throw new NullPointerException();
     }
 
-    String var = "__caucho_" + getName();
+    String var = "__caucho_field_" + getName();
 
     if (! source.equals("this") && ! source.equals("super"))
       var = source + "." + var;
@@ -766,7 +766,7 @@ public class EntityManyToOneField extends CascadableField {
   public void generateUpdateFromObject(JavaWriter out, String obj)
     throws IOException
   {
-    String var = "__caucho_" + getName();
+    String var = "__caucho_field_" + getName();
 
     out.println(var + " = " + obj + "." + var + ";");
   }
@@ -796,7 +796,7 @@ public class EntityManyToOneField extends CascadableField {
     if (! isTargetCascadeDelete())
       return;
 
-    String var = "caucho_" + getName();
+    String var = "caucho_field_" + getName();
 
     out.println(getJavaTypeName() + " " + var + " = " + getGetterName() + "();");
   }
@@ -810,7 +810,7 @@ public class EntityManyToOneField extends CascadableField {
     if (! isTargetCascadeDelete())
       return;
 
-    String var = "caucho_" + getName();
+    String var = "caucho_field_" + getName();
 
     out.println("if (" + var + " != null) {");
     out.println("  try {");

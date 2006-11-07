@@ -65,9 +65,15 @@ public interface Entity {
     throws SQLException;
 
   /**
-   * Cascades the persist operation to child entities.
+   * Pre-cascades the persist operation to child entities.
    */
-  public void __caucho_cascadePersist(AmberConnection aConn)
+  public void __caucho_cascadePrePersist(AmberConnection aConn)
+    throws SQLException;
+
+  /**
+   * Post-cascades the persist operation to child entities.
+   */
+  public void __caucho_cascadePostPersist(AmberConnection aConn)
     throws SQLException;
 
   /**

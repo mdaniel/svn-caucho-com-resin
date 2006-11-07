@@ -1477,7 +1477,21 @@ public class EntityIntrospector extends BaseConfigIntrospector {
                                                            fieldName,
                                                            fieldType);
 
-      _depCompletions.add(oneToOne);
+      // jpa/0o03 and jpa/0o06:
+      // @OneToOne with mappedBy should be completed first
+      String mappedBy;
+
+      if (oneToOneConfig != null)
+        mappedBy = oneToOneConfig.getMappedBy();
+      else {
+        JAnnotation oneToOneAnn = field.getAnnotation(OneToOne.class);
+        mappedBy = oneToOneAnn.getString("mappedBy");
+      }
+
+      if ((mappedBy == null) || mappedBy.equals(""))
+        _depCompletions.add(oneToOne);
+      else
+        _depCompletions.add(0, oneToOne);
 
       ArrayList<OneToOneCompletion> oneToOneList
         = _oneToOneCompletions.get(sourceType);
@@ -2062,10 +2076,27 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 
     String mappedBy;
 
-    if (manyToManyAnn != null)
+    if (manyToManyAnn != null) {
       mappedBy = manyToManyAnn.getString("mappedBy");
-    else
+
+      // XXX: runtime does not cast this
+      // cascadeType = (CascadeType []) manyToManyAnn.get("cascade");
+      Object cascade[] = (Object []) manyToManyAnn.get("cascade");
+
+      cascadeTypes = new CascadeType[cascade.length];
+
+      for (int i=0; i < cascade.length; i++)
+        cascadeTypes[i] = (CascadeType) cascade[i];
+    }
+    else {
       mappedBy = manyToManyConfig.getMappedBy();
+
+      CascadeConfig cascade = ((ManyToManyConfig) manyToManyConfig).getCascade();
+
+      if (cascade != null) {
+        cascadeTypes = cascade.getCascadeTypes();
+      }
+    }
 
     if (! ((mappedBy == null) || "".equals(mappedBy))) {
       EntityManyToManyField sourceField
@@ -2556,25 +2587,44 @@ public class EntityIntrospector extends BaseConfigIntrospector {
                           _field.getName()));
       }
 
+      CascadeType[] cascadeTypes = null;
+
       String mappedBy;
 
-      if (oneToManyAnn != null)
+      if (oneToManyAnn != null) {
         mappedBy = oneToManyAnn.getString("mappedBy");
+
+        // XXX: runtime does not cast this
+        // cascadeType = (CascadeType []) oneToManyAnn.get("cascade");
+        Object cascade[] = (Object []) oneToManyAnn.get("cascade");
+
+        cascadeTypes = new CascadeType[cascade.length];
+
+        for (int i=0; i < cascade.length; i++)
+          cascadeTypes[i] = (CascadeType) cascade[i];
+      }
       else {
         mappedBy = oneToManyConfig.getMappedBy();
+
+        CascadeConfig cascade = ((OneToManyConfig) oneToManyConfig).getCascade();
+
+        if (cascade != null) {
+          cascadeTypes = cascade.getCascadeTypes();
+        }
       }
 
       if (mappedBy != null && ! mappedBy.equals("")) {
-        oneToManyBidirectional(targetType, targetName, mappedBy);
+        oneToManyBidirectional(targetType, targetName, mappedBy, cascadeTypes);
       }
       else {
-        oneToManyUnidirectional(targetType, targetName);
+        oneToManyUnidirectional(targetType, targetName, cascadeTypes);
       }
     }
 
     private void oneToManyBidirectional(EntityType targetType,
                                         String targetName,
-                                        String mappedBy)
+                                        String mappedBy,
+                                        CascadeType[] cascadeTypes)
       throws ConfigException
     {
       JAnnotation joinTableAnn = _field.getAnnotation(javax.persistence.JoinTable.class);
@@ -2597,9 +2647,6 @@ public class EntityIntrospector extends BaseConfigIntrospector {
         throw error(_field, L.l("'{0}' does not have matching field for @ManyToOne(mappedBy={1}).",
                                 targetType.getName(),
                                 mappedBy));
-
-      // XXX: introspect cascade types
-      CascadeType[] cascadeTypes = null;
 
       EntityOneToManyField oneToMany;
 
@@ -2632,12 +2679,10 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     }
 
     private void oneToManyUnidirectional(EntityType targetType,
-                                         String targetName)
+                                         String targetName,
+                                         CascadeType[] cascadeTypes)
       throws ConfigException
     {
-      // XXX: introspect cascade types
-      CascadeType[] cascadeTypes = null;
-
       EntityManyToManyField manyToManyField;
 
       manyToManyField = new EntityManyToManyField(_entityType, _fieldName, cascadeTypes);
@@ -2859,8 +2904,10 @@ public class EntityIntrospector extends BaseConfigIntrospector {
                                         _field.getName()));
       }
 
+      // jpa/0o06
       if (mappedBy == null || mappedBy.equals("")) {
-        // ejb/0o03
+        // jpa/0o03
+
         addManyToOne(_entityType, _field, _fieldName, _field.getReturnType());
 
         // XXX: set unique
@@ -3164,6 +3211,8 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     _embeddedAnnotations.add("javax.persistence.Embedded");
     _embeddedAnnotations.add("javax.persistence.AttributeOverride");
     _embeddedAnnotations.add("javax.persistence.AttributeOverrides");
+    // XXX: for tck. ejb30/persistence/query/language/schema30/Customer.java
+    _embeddedAnnotations.add("javax.persistence.Column");
 
     // annotations allowed with a @EmbeddedId annotation
     _embeddedIdAnnotations.add("javax.persistence.EmbeddedId");

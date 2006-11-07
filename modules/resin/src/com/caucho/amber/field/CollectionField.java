@@ -37,6 +37,8 @@ import javax.persistence.CascadeType;
 
 import com.caucho.util.L10N;
 
+import com.caucho.util.CharBuffer;
+
 import com.caucho.log.Log;
 
 import com.caucho.config.ConfigException;
@@ -126,6 +128,69 @@ public class CollectionField extends CascadableField {
   public LinkColumns getLinkColumns()
   {
     return _linkColumns;
+  }
+
+  /**
+   * Generates the (pre) cascade operation from
+   * parent to this child. This field will only
+   * be cascaded first if the operation can be
+   * performed with no risk to break FK constraints.
+   */
+  public void generatePreCascade(JavaWriter out,
+                                 String aConn,
+                                 CascadeType cascadeType)
+    throws IOException
+  {
+    if (isCascade(cascadeType)) {
+
+      String getter = "_caucho_field_" + getGetterName(); // generateSuperGetter();
+
+      out.println("if (" + getter + " != null) {");
+      out.pushDepth();
+
+      out.println("for (Object o : " + getter + ")");
+      out.pushDepth();
+
+      out.print(aConn + ".");
+
+      switch (cascadeType) {
+      case PERSIST:
+        out.print("persist");
+        break;
+
+      case MERGE:
+        out.print("merge");
+        break;
+
+      case REMOVE:
+        out.print("remove");
+        break;
+
+      case REFRESH:
+        out.print("refresh");
+        break;
+      }
+
+      out.println("(o);");
+
+      out.popDepth();
+
+      out.popDepth();
+      out.println("}");
+    }
+  }
+
+  /**
+   * Generates the (post) cascade operation from
+   * parent to this child. This field will only
+   * be cascaded first if the operation can be
+   * performed with no risk to break FK constraints.
+   */
+  public void generatePostCascade(JavaWriter out,
+                                  String aConn,
+                                  CascadeType cascadeType)
+    throws IOException
+  {
   }
 
   /**

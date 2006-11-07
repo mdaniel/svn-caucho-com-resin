@@ -32,6 +32,7 @@ package com.caucho.amber.field;
 import com.caucho.amber.type.EntityType;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
+import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.log.Log;
 import java.io.IOException;
@@ -69,6 +70,9 @@ abstract public class CascadableField extends AbstractField {
    */
   public boolean isCascade(CascadeType cascade)
   {
+    if (_cascadeTypes == null)
+      return false;
+
     for (int i = 0; i < _cascadeTypes.length; i++) {
       if (_cascadeTypes[i] == CascadeType.ALL)
         return true;
@@ -90,14 +94,59 @@ abstract public class CascadableField extends AbstractField {
   }
 
   /**
-   * Generates the cascade operation
-   * from parent to this child.
+   * Generates the (pre) cascade operation from
+   * parent to this child. This field will only
+   * be cascaded first if the operation can be
+   * performed with no risk to break FK constraints.
+   *
+   * Default is to pre-cascade the persist() operation only.
+   *
+   * Check subclasses for one-to-one, many-to-one,
+   * one-to-many and many-to-many relationships.
    */
-  public void generateCascade(JavaWriter out,
-                              String aConn,
-                              CascadeType cascadeType)
+  public void generatePreCascade(JavaWriter out,
+                                 String aConn,
+                                 CascadeType cascadeType)
     throws IOException
   {
+    if (cascadeType != CascadeType.PERSIST)
+      return;
+
+    if (isCascade(cascadeType)) {
+
+      String getter = generateSuperGetter();
+
+      out.println("if (" + getter + " != null) {");
+      out.pushDepth();
+
+      out.print(aConn + ".persist("+ getter + ");");
+
+      out.popDepth();
+      out.println("}");
+    }
+  }
+
+  /**
+   * Generates the (post) cascade operation from
+   * parent to this child. This field will be
+   * (post) cascaded if the operation on the
+   * parent is required to be performed first
+   * to avoid breaking FK constraints.
+   *
+   * Default is to post-cascade all operations,
+   * except the persist() operation.
+   *
+   * Check subclasses for one-to-one, many-to-one,
+   * one-to-many and many-to-many relationships.
+   */
+  public void generatePostCascade(JavaWriter out,
+                                  String aConn,
+                                  CascadeType cascadeType)
+    throws IOException
+  {
+    if (cascadeType == CascadeType.PERSIST)
+      return;
+
     if (isCascade(cascadeType)) {
 
       String getter = generateSuperGetter();
@@ -108,10 +157,6 @@ abstract public class CascadableField extends AbstractField {
       out.print(aConn + ".");
 
       switch (cascadeType) {
-      case PERSIST:
-        out.print("persist");
-        break;
-
       case MERGE:
         out.print("merge");
         break;
@@ -138,5 +183,15 @@ abstract public class CascadableField extends AbstractField {
   public boolean isCascadable()
   {
     return true;
+  }
+
+  /**
+   * Generates the flush of this child.
+   * See EntityManyToManyField.
+   */
+  public boolean generateFlush(CharBuffer cb)
+    throws IOException
+  {
+    return false;
   }
 }

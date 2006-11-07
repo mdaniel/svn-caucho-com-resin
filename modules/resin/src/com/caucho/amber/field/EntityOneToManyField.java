@@ -181,6 +181,75 @@ public class EntityOneToManyField extends CollectionField {
   {
     return new OneToManyExpr(parser, parent, getLinkColumns());
   }
+  /**
+   * Generates the (pre) cascade operation from
+   * parent to this child. This field will only
+   * be cascaded first if the operation can be
+   * performed with no risk to break FK constraints.
+   */
+  public void generatePreCascade(JavaWriter out,
+                                 String aConn,
+                                 CascadeType cascadeType)
+    throws IOException
+  {
+  }
+
+  /**
+   * Generates the (post) cascade operation from
+   * parent to this child. This field will only
+   * be cascaded first if the operation can be
+   * performed with no risk to break FK constraints.
+   */
+  public void generatePostCascade(JavaWriter out,
+                                  String aConn,
+                                  CascadeType cascadeType)
+    throws IOException
+  {
+    if (isCascade(cascadeType)) {
+
+      String getter = "_caucho_field_" + getGetterName(); // generateSuperGetter();
+
+      out.println("if (" + getter + " != null) {");
+      out.pushDepth();
+
+      out.println("for (Object o : " + getter + ") {");
+      out.pushDepth();
+
+      if (_sourceField != null) {
+        String typeName = getEntityTargetType().getJavaTypeName();
+        String setter = _sourceField.getSetterName();
+        out.println("((" + typeName + ") o)." + setter + "(this);");
+      }
+
+      out.print(aConn + ".");
+
+      switch (cascadeType) {
+      case PERSIST:
+        out.print("persist");
+        break;
+
+      case MERGE:
+        out.print("merge");
+        break;
+
+      case REMOVE:
+        out.print("remove");
+        break;
+
+      case REFRESH:
+        out.print("refresh");
+        break;
+      }
+
+      out.println("(o);");
+
+      out.popDepth();
+      out.println("}");
+
+      out.popDepth();
+      out.println("}");
+    }
+  }
 
   /**
    * Generates the set clause.
@@ -236,7 +305,7 @@ public class EntityOneToManyField extends CollectionField {
   public void generateGetProperty(JavaWriter out)
     throws IOException
   {
-    String var = "_caucho_" + getGetterName();
+    String var = "_caucho_field_" + getGetterName();
 
     boolean isSet = getJavaType().isAssignableTo(Set.class);
     boolean isMap = false;
@@ -472,6 +541,82 @@ public class EntityOneToManyField extends CollectionField {
     out.print(type.getName() + " value)");
     out.println("{");
     out.pushDepth();
+
+    //
+    // jpa/0j57 needs to generate the following snippet:
+    //
+    // _caucho___caucho_get_xAnnualReviews
+    //   = new com.caucho.amber.collection.CollectionImpl<qa.XAnnualReview>(__caucho_session, null);
+    // _caucho___caucho_get_xAnnualReviews.addAll(0, value);
+    //
+    // jpa/0j57:
+
+    out.println("try {");
+    out.pushDepth();
+
+    String var = "_caucho_field_" + getGetterName();
+
+    out.print(var + " = new ");
+
+    type = getJavaType();
+
+    boolean isSet = type.isAssignableTo(Set.class);
+    boolean isMap = false;
+    if (!isSet) {
+      isMap = type.isAssignableTo(Map.class);
+    }
+
+    JType []paramArgs = type.getActualTypeArguments();
+    JType param = paramArgs.length > 0 ? paramArgs[0] : null;
+    JType param2 = paramArgs.length > 1 ? paramArgs[1] : null;
+
+    String collectionImpl;
+
+    if (isSet)
+      collectionImpl = "com.caucho.amber.collection.SetImpl";
+    else if (isMap)
+      collectionImpl = "com.caucho.amber.collection.MapImpl";
+    else
+      collectionImpl = "com.caucho.amber.collection.CollectionImpl";
+
+    out.print(collectionImpl);
+
+    if (param != null) {
+      out.print("<");
+      out.print(param.getPrintName());
+      if (isMap) {
+        if (param2 != null) {
+          out.print(", ");
+          out.print(param2.getPrintName());
+        }
+      }
+      out.print(">");
+    }
+
+    out.print("(__caucho_session, null");
+    if (isMap) {
+      out.print(", ");
+      out.print(getEntityTargetType().getBeanClass().getName());
+      out.print(".class.getDeclaredMethod(\"get");
+      String getterMapKey = getMapKey();
+      getterMapKey = Character.toUpperCase(getterMapKey.charAt(0)) + getterMapKey.substring(1);
+      out.print(getterMapKey); // "getId");
+      out.print("\")");
+    }
+    out.println(");");
+
+    out.print(var + ".");
+
+    if (isMap)
+      out.println("putAll(value);");
+    else
+      out.println("addAll(0, value);");
+
+    out.popDepth();
+    out.println("} catch(Exception e) {");
+    out.println("  throw com.caucho.amber.AmberRuntimeException.create(e);");
+    out.println("}");
+
     out.popDepth();
     out.println("}");
   }
@@ -487,7 +632,7 @@ public class EntityOneToManyField extends CollectionField {
     out.println("if (\"" + table.getName() + "\".equals(table)) {");
     out.pushDepth();
 
-    String var = "_caucho_" + getGetterName();
+    String var = "_caucho_field_" + getGetterName();
 
     out.println("if (" + var + " != null)");
     out.println("  " + var + ".update();");
@@ -503,7 +648,7 @@ public class EntityOneToManyField extends CollectionField {
   public void generateExpire(JavaWriter out)
     throws IOException
   {
-    String var = "_caucho_" + getGetterName();
+    String var = "_caucho_field_" + getGetterName();
 
     out.println(var + " = null;");
   }

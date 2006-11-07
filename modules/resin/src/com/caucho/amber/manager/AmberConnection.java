@@ -267,14 +267,17 @@ public class AmberConnection
   public void persist(Object entity)
   {
     try {
+      if (entity == null)
+        return;
+
       if (! (entity instanceof Entity))
         throw new IllegalArgumentException("persist() operation can only be applied to an entity instance. If the argument is an entity, the corresponding class must be specified in the scope of a persistence unit.");
 
       Entity instance = (Entity) entity;
 
       // jpa/0h24
-      // Persist child entities first to pass foreign key constraints.
-      instance.__caucho_cascadePersist(this);
+      // Pre-persist child entities.
+      instance.__caucho_cascadePrePersist(this);
 
       int state = instance.__caucho_getEntityState();
 
@@ -288,8 +291,13 @@ public class AmberConnection
       }
       else {
         // managed entity instance: ignored, i.e.
-        // only the cascade is performed, see above.
+        // only the cascade is performed.
       }
+
+      // jpa/
+      // Post-persist child entities.
+      instance.__caucho_cascadePostPersist(this);
+
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -353,6 +361,7 @@ public class AmberConnection
         throw new IllegalArgumentException("remove() operation can only be applied to an entity instance. If the argument is an entity, the corresponding class must be specified in the scope of a persistence unit.");
 
       delete(entity);
+
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -984,8 +993,16 @@ public class AmberConnection
 
     Entity entity = (Entity) obj;
 
-    return getEntity(entity.getClass().getName(),
-                     entity.__caucho_getPrimaryKey()) != null;
+    entity = getEntity(entity.getClass().getName(),
+                       entity.__caucho_getPrimaryKey());
+
+    if (entity == null)
+      return false;
+
+    if (entity.__caucho_getEntityState() >= Entity.P_DELETING)
+      return false;
+
+    return true;
   }
 
   /**
@@ -1169,7 +1186,8 @@ public class AmberConnection
         // is not always initialized at the time persist(X) was
         // called but must be at flush time.
         if (state < Entity.P_DELETING) {
-          entity.__caucho_cascadePersist(this);
+          entity.__caucho_cascadePrePersist(this);
+          // entity.__caucho_cascadePostPersist(this);
           state = entity.__caucho_getEntityState();
         }
       }

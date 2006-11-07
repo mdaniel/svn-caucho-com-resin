@@ -290,7 +290,7 @@ public class EntityManyToManyField extends AssociationField {
   public void generateGetProperty(JavaWriter out)
     throws IOException
   {
-    String var = "_caucho_" + getGetterName();
+    String var = "_caucho_field_" + getGetterName();
 
     boolean isSet = getJavaType().isAssignableTo(Set.class);
     boolean isMap = false;
@@ -655,6 +655,59 @@ public class EntityManyToManyField extends AssociationField {
     out.println("}");
   }
 
+
+  /**
+   * Generates the (post) cascade operation from
+   * parent to this child. This field will only
+   * be cascaded first if the operation can be
+   * performed with no risk to break FK constraints.
+   */
+  public void generatePostCascade(JavaWriter out,
+                                  String aConn,
+                                  CascadeType cascadeType)
+    throws IOException
+  {
+    if (isCascade(cascadeType)) {
+      out.println("if (__caucho_state <= P_TRANSACTIONAL) {");
+      out.pushDepth();
+
+      String amberAdd = "__amber_" + getGetterName() + "_add";
+
+      String getter = "_caucho_field_" + getGetterName(); // generateSuperGetter();
+
+      out.println("if (" + getter + " != null) {");
+
+      out.println("  for (Object o : " + getter + ")");
+      out.println("    " + amberAdd + "(o);");
+
+      out.println("}");
+
+      out.popDepth();
+      out.println("}");
+    }
+  }
+
+  /* XXX: to be removed
+   * Generates the flush of this child.
+   *
+  public boolean generateFlush(CharBuffer cb)
+    throws IOException
+  {
+    String amberAdd = "__amber_" + getGetterName() + "_add";
+
+    String getter = "_caucho_field_" + getGetterName(); // generateSuperGetter();
+
+    cb.append("if (" + getter + " != null) {\n");
+
+    cb.append("  for (Object o : " + getter + ")\n");
+    cb.append("    " + amberAdd + "(o);\n");
+
+    cb.append("}\n");
+
+    return true;
+  }
+  */
+
   /**
    * Generates the set property.
    */
@@ -896,7 +949,7 @@ public class EntityManyToManyField extends AssociationField {
     out.println("try {");
     out.pushDepth();
 
-    String var = "_caucho_" + getGetterName();
+    String var = "_caucho_field_" + getGetterName();
 
     out.print(var + " = new ");
 
@@ -984,7 +1037,7 @@ public class EntityManyToManyField extends AssociationField {
   public void generateExpire(JavaWriter out)
     throws IOException
   {
-    String var = "_caucho_" + getGetterName();
+    String var = "_caucho_field_" + getGetterName();
 
     out.println("if (" + var + " != null)");
     out.println("  " + var + ".update();");

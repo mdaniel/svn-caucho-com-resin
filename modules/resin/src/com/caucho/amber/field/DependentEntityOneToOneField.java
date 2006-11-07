@@ -288,7 +288,7 @@ public class DependentEntityOneToOneField extends AbstractField {
 
     /*
       out.print(javaType + " v = (" + javaType + ") __caucho_session.loadProxy(\"" + getEntityType().getName() + "\", ");
-      out.println("__caucho_" + getName() + ", true);");
+      out.println("__caucho_field_" + getName() + ", true);");
     */
 
     out.println("return v"+index+";");
