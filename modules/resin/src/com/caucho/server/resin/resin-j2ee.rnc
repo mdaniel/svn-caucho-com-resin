@@ -294,6 +294,11 @@ r_security-role-ref = element security-role-ref {
   r_role-link?
 }
 
+r_service-ref = element service-ref { empty }
+
+r_service-ref-Group =
+  r_service-ref*
+
 r_string = string
 
 r_true-false = "true" | "false"
