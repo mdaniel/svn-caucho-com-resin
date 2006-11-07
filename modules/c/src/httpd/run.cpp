@@ -549,14 +549,19 @@ get_server_args(char *name, char *full_name, char *main, int argc, char **argv)
 	}
 	
 	int fdOut = _open_osfhandle((long) GetStdHandle(STD_OUTPUT_HANDLE), _O_TEXT);
+	if (fdOut >= 0) {
+		out = fdopen(fdOut, "w");
+		*stdout = *out;
+		setvbuf(out, NULL, _IONBF, 0);
+	}
+
 	int fdErr = _open_osfhandle((long) GetStdHandle(STD_ERROR_HANDLE), _O_TEXT);
-	out = fdopen(fdOut, "w");
-	err = fdopen(fdErr, "w");
-	*stdout = *out;
-	*stderr = *err;
-	
-	setvbuf(out, NULL, _IONBF, 0);
-	setvbuf(err, NULL, _IONBF, 0);
+	if (fdErr >= 0) {
+		err = fdopen(fdErr, "w");
+
+		*stderr = *err;	
+		setvbuf(err, NULL, _IONBF, 0);
+	}
 
 	if (msjava)
 		java_home = 0;

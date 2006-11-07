@@ -239,7 +239,7 @@
 				OutputFile="Apache136/mod_caucho.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="c:\Program Files\Apache Group\Apache\src\Release"
+				AdditionalLibraryDirectories="c:\Program Files\Apache Group\Apache\libexec"
 				ProgramDatabaseFile=".\Apache136/mod_caucho.pdb"
 				ImportLibrary=".\Apache136/mod_caucho.lib"
 				TargetMachine="1"/>
