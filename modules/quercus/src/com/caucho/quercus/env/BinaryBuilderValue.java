@@ -514,6 +514,20 @@ public class BinaryBuilderValue extends BinaryValue {
   }
 
   /**
+   * Append a Java char to the value.
+   */
+  @Override
+  public final StringValue append(char ch)
+  {
+    StringBuilderValue sb = new StringBuilderValue();
+
+    appendTo(sb);
+    sb.append(ch);
+
+    return sb;
+  }
+
+  /**
    * Append a Java buffer to the value.
    */
   @Override
