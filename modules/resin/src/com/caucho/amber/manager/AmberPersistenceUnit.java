@@ -1347,8 +1347,10 @@ public class AmberPersistenceUnit {
     return getMetaData().getCreateColumnSQL(sqlType, length, precision, scale);
   }
 
+  /*
   public String toString()
   {
     return "AmberPersistenceUnit[" + _defaultListeners + "]";
   }
+  */
 }

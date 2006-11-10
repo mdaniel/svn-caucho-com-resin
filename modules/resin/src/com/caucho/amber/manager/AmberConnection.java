@@ -360,7 +360,7 @@ public class AmberConnection
       if (! (entity instanceof Entity))
         throw new IllegalArgumentException("remove() operation can only be applied to an entity instance. If the argument is an entity, the corresponding class must be specified in the scope of a persistence unit.");
 
-      delete(entity);
+      delete((Entity) entity);
 
     } catch (RuntimeException e) {
       throw e;
@@ -448,7 +448,7 @@ public class AmberConnection
 
       return new QueryImpl(queryProgram, this);
     } catch (RuntimeException e) {
-      throw e;
+      throw new IllegalArgumentException(e);
     } catch (Exception e) {
       throw new EJBExceptionWrapper(e);
     }
@@ -1476,14 +1476,9 @@ public class AmberConnection
    *
    * @param obj the object to delete
    */
-  public void delete(Object obj)
+  public void delete(Entity entity)
     throws SQLException
   {
-    if (! (obj instanceof Entity))
-      return;
-
-    Entity entity = (Entity) obj;
-
     Entity oldEntity = getEntity(entity.getClass().getName(),
                                  entity.__caucho_getPrimaryKey());
 
@@ -1491,7 +1486,8 @@ public class AmberConnection
       EntityType entityType = entity.__caucho_getEntityType();
 
       if (entityType == null)
-        throw new AmberException(L.l("entity has no entityType"));
+        return;
+        // throw new AmberException(L.l("entity has no entityType"));
 
       AmberEntityHome entityHome = entityType.getHome();
       //entityHome = _persistenceUnit.getEntityHome(entity.getClass().getName());

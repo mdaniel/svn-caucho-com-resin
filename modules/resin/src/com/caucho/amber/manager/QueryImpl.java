@@ -318,6 +318,9 @@ public class QueryImpl implements Query {
    */
   public Query setFirstResult(int startPosition)
   {
+    if (startPosition < 0)
+      throw new IllegalArgumentException("setFirstResult() requires a non-negative argument");
+
     return this;
   }
 

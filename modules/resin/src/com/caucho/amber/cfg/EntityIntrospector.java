@@ -514,9 +514,10 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       throw new ConfigException(L.l("'{0}' must not be final.  Entity beans may not be final.",
                                     type.getName()));
 
-    if (type.isAbstract())
-      throw new ConfigException(L.l("'{0}' must not be abstract.  Entity beans may not be abstract.",
-                                    type.getName()));
+    // Both abstract and concrete classes can be entities.
+    // if (type.isAbstract())
+    //   throw new ConfigException(L.l("'{0}' must not be abstract.  Entity beans may not be abstract.",
+    //                                 type.getName()));
 
     validateConstructor(type);
 
@@ -1477,7 +1478,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
                                                            fieldName,
                                                            fieldType);
 
-      // jpa/0o03 and jpa/0o06:
+      // jpa/0o03 and jpa/0o06 (check also jpa/0o07 with no mappedBy at all)
       // @OneToOne with mappedBy should be completed first
       String mappedBy;
 
@@ -1488,7 +1489,9 @@ public class EntityIntrospector extends BaseConfigIntrospector {
         mappedBy = oneToOneAnn.getString("mappedBy");
       }
 
-      if ((mappedBy == null) || mappedBy.equals(""))
+      boolean isOwner = (mappedBy == null || mappedBy.equals(""));
+
+      if (isOwner)
         _depCompletions.add(oneToOne);
       else
         _depCompletions.add(0, oneToOne);
@@ -2111,6 +2114,31 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       manyToManyField.setType(targetType);
       sourceType.addField(manyToManyField);
 
+      // jpa/0i50
+      // Update column names for bidirectional many-to-many
+
+      if (! sourceField.hasJoinColumns()) {
+        LinkColumns sourceLink = sourceField.getSourceLink();
+        ArrayList<ForeignColumn> columns = sourceLink.getColumns();
+        for (ForeignColumn column : columns) {
+          String columnName = column.getName();
+          columnName = columnName.substring(columnName.indexOf('_'));
+          columnName = manyToManyField.getName().toUpperCase() + columnName;
+          column.setName(columnName);
+        }
+      }
+
+      if (! sourceField.hasInverseJoinColumns()) {
+        LinkColumns targetLink = sourceField.getTargetLink();
+        ArrayList<ForeignColumn> columns = targetLink.getColumns();
+        for (ForeignColumn column : columns) {
+          String columnName = column.getName();
+          columnName = columnName.substring(columnName.indexOf('_'));
+          columnName = sourceField.getName().toUpperCase() + columnName;
+          column.setName(columnName);
+        }
+      }
+
       return;
     }
 
@@ -2119,7 +2147,8 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     manyToManyField = new EntityManyToManyField(sourceType, fieldName, cascadeTypes);
     manyToManyField.setType(targetType);
 
-    String sqlTable = sourceType.getTable().getName() + "_" + targetType.getTable().getName();
+    String sqlTable = sourceType.getTable().getName() + "_" +
+      targetType.getTable().getName();
 
     JAnnotation joinTableAnn = field.getAnnotation(javax.persistence.JoinTable.class);
 
@@ -2141,17 +2170,27 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       HashMap<String, JoinColumnConfig> joinColumnsConfig = null;
       HashMap<String, JoinColumnConfig> inverseJoinColumnsConfig = null;
 
+      manyToManyField.setJoinColumns(true);
+
       String joinTableName;
 
       if (joinTableAnn != null) {
         joinTableName = joinTableAnn.getString("name");
         joinColumns = (Object []) joinTableAnn.get("joinColumns");
         inverseJoinColumns = (Object []) joinTableAnn.get("inverseJoinColumns");
+
+        if ((inverseJoinColumns != null) &&
+            (inverseJoinColumns.length > 0))
+          manyToManyField.setInverseJoinColumns(true);
       }
       else {
         joinTableName = joinTableConfig.getName();
         joinColumnsConfig = joinTableConfig.getJoinColumnMap();
         inverseJoinColumnsConfig = joinTableConfig.getInverseJoinColumnMap();
+
+        if ((inverseJoinColumnsConfig != null) &&
+            (inverseJoinColumnsConfig.size() > 0))
+          manyToManyField.setInverseJoinColumns(true);
       }
 
       if (! joinTableName.equals(""))
@@ -2436,13 +2475,19 @@ public class EntityIntrospector extends BaseConfigIntrospector {
   }
 
   private EntityManyToOneField getSourceField(EntityType targetType,
-                                              String mappedBy)
+                                              String mappedBy,
+                                              EntityType sourceType)
   {
-    for (AmberField field : targetType.getFields()) {
+    ArrayList<AmberField> fields = targetType.getFields();
 
-      if (field.getName().equals(mappedBy)) {
-        return (EntityManyToOneField) field;
+    for (AmberField field : fields) {
+      // jpa/0o07: there is no mappedBy at all on any sides.
+      if ("".equals(mappedBy) || mappedBy == null) {
+        if (field.getJavaType().isAssignableFrom(sourceType.getBeanClass()))
+          return (EntityManyToOneField) field;
       }
+      else if (field.getName().equals(mappedBy))
+        return (EntityManyToOneField) field;
     }
 
     return null;
@@ -2456,6 +2501,10 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 
     if (sourceCompletions == null)
       return null;
+
+    // jpa/0o07
+    if (sourceCompletions.size() == 1)
+      return sourceCompletions.get(0);
 
     for (OneToOneCompletion oneToOne : sourceCompletions) {
 
@@ -2641,7 +2690,8 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       }
 
       EntityManyToOneField sourceField = getSourceField(targetType,
-                                                        mappedBy);
+                                                        mappedBy,
+                                                        null);
 
       if (sourceField == null)
         throw error(_field, L.l("'{0}' does not have matching field for @ManyToOne(mappedBy={1}).",
@@ -2747,7 +2797,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
                                          _entityType);
 
         targetColumns = calculateColumns(mapTable,
-                                         targetType.getTable().getName() + "_",
+                                         _fieldName.toUpperCase() + "_", // jpa/0j40
                                          targetType);
       }
 
@@ -2904,9 +2954,27 @@ public class EntityIntrospector extends BaseConfigIntrospector {
                                         _field.getName()));
       }
 
+      // jpa/0o03, jpa/0o06, jpa/0o07
+
       // jpa/0o06
-      if (mappedBy == null || mappedBy.equals("")) {
-        // jpa/0o03
+      boolean isManyToOne = (mappedBy == null) || "".equals(mappedBy);
+
+      // jpa/0o07
+      if (isManyToOne) {
+
+        getInternalJoinColumnConfig(_entityType.getBeanClass(), _field, _fieldName);
+        JAnnotation joinColumnAnn = _annotationCfg.getAnnotation();
+        JoinColumnConfig joinColumnConfig = _annotationCfg.getJoinColumnConfig();
+
+        if (! _annotationCfg.isNull()) {
+          // jpa/0o07: DstBean.getParent()
+          // OK: isManyToOne = true;
+        }
+        else
+          isManyToOne = false;
+      }
+
+      if (isManyToOne) {
 
         addManyToOne(_entityType, _field, _fieldName, _field.getReturnType());
 
@@ -2914,17 +2982,22 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       }
       else {
 
-        OneToOneCompletion otherSide
-          = getSourceCompletion(targetType, mappedBy);
+        if (! (mappedBy == null || "".equals(mappedBy))) {
 
-        if (otherSide != null) {
-          _depCompletions.remove(otherSide);
+          // jpa/0o06
 
-          otherSide.complete();
+          OneToOneCompletion otherSide
+            = getSourceCompletion(targetType, mappedBy);
+
+          if (otherSide != null) {
+            _depCompletions.remove(otherSide);
+
+            otherSide.complete();
+          }
         }
 
         EntityManyToOneField sourceField
-          = getSourceField(targetType, mappedBy);
+          = getSourceField(targetType, mappedBy, _entityType);
 
         if (sourceField == null)
           throw new ConfigException(L.l("{0}: OneToOne target '{1}' does not have a matching ManyToOne relation.",

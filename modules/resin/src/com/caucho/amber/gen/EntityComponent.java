@@ -371,8 +371,14 @@ public class EntityComponent extends ClassComponent {
     out.println("else {");
     out.pushDepth();
 
+    out.println("try {");
+    out.pushDepth();
     Id id = _entityType.getId();
     id.generateMatch(out, id.generateCastFromObject("key"));
+    out.popDepth();
+    out.println("} catch (ClassCastException e) {");
+    out.println("  throw new IllegalArgumentException(\"Primary key type is incorrect: '\"+key.getClass().getName()+\"'\");");
+    out.println("}");
 
     out.popDepth();
     out.println("}");

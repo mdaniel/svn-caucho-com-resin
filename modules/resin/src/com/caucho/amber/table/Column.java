@@ -109,11 +109,19 @@ public class Column {
   }
 
   /**
-   * Sets the column name.
+   * Gets the column name.
    */
   public String getName()
   {
     return _name;
+  }
+
+  /**
+   * Sets the column name.
+   */
+  public void setName(String name)
+  {
+    _name = name;
   }
 
   /**

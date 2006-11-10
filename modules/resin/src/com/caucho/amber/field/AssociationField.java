@@ -46,6 +46,10 @@ public class AssociationField extends CollectionField {
 
   private LinkColumns _linkColumns;
 
+  private boolean _hasJoinColumns;
+
+  private boolean _hasInverseJoinColumns;
+
   public AssociationField(EntityType entityType,
                           String name,
                           CascadeType[] cascadeTypes)
@@ -59,6 +63,41 @@ public class AssociationField extends CollectionField {
     super(entityType);
   }
 
+  /**
+   * Returns true if this field is annotated with
+   * @JoinTable and the attribute joinColumns.
+   */
+  public boolean hasJoinColumns()
+  {
+    return _hasJoinColumns;
+  }
+
+  /**
+   * Sets true if this field is annotated with
+   * @JoinTable and the attribute joinColumns.
+   */
+  public void setJoinColumns(boolean hasJoinColumns)
+  {
+    _hasJoinColumns = hasJoinColumns;
+  }
+
+  /**
+   * Returns true if this field is annotated with
+   * @JoinTable and the attribute inverseJoinColumns.
+   */
+  public boolean hasInverseJoinColumns()
+  {
+    return _hasInverseJoinColumns;
+  }
+
+  /**
+   * Sets true if this field is annotated with
+   * @JoinTable and the attribute inverseJoinColumns.
+   */
+  public void setInverseJoinColumns(boolean hasInverseJoinColumns)
+  {
+    _hasInverseJoinColumns = hasInverseJoinColumns;
+  }
   /**
    * Sets the result columns.
    */
