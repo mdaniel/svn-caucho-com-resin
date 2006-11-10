@@ -97,6 +97,18 @@ public class HessianSkeleton extends AbstractSkeleton {
    * @param in the Hessian input stream
    * @param out the Hessian output stream
    */
+  public void invoke(HessianInput in, HessianOutput out)
+    throws Throwable
+  {
+    invoke(in, out);
+  }
+
+  /**
+   * Invoke the object with the request from the input stream.
+   *
+   * @param in the Hessian input stream
+   * @param out the Hessian output stream
+   */
   public void invoke(AbstractHessianInput in, AbstractHessianOutput out)
     throws Throwable
   {

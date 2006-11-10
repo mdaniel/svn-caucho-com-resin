@@ -1,0 +1,24 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 3.0.22 Release Notes</title>
+  </header>
+
+<body>
+
+<summary objsummary='localtoc'/>
+
+<section title="misc bugs">
+
+<ul>
+<li>mod_caucho: issues with ResinConfigServer sending too many config requests.</li>
+<li>mod_caucho: Solaris issue with NONBLOCK and connection timeout preventing connection to backend.</li>
+<li>session timing issue on first update, causing race condition and possible failure to save new session information
+<li>Added resin.version EL variable
+<li>&lt;log> configuration with level attribute now can set the logger level.
+</ul>
+
+</section>
+
+</body>
+</document>
