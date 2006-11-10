@@ -50,18 +50,18 @@ public class VarExpr
   private static final NullValue NULL = NullValue.create();
 
   private final VarInfo _var;
-  private final String _name;
+  protected final String _name;
 
   private VarState _varState = VarState.INIT;
 
-  public VarExpr(Location location, VarInfo var)
+  protected VarExpr(Location location, VarInfo var)
   {
     super(location);
     _var = var;
     _name = var.getName();
   }
 
-  public VarExpr(VarInfo var)
+  protected VarExpr(VarInfo var)
   {
     _var = var;
     _name = var.getName();
@@ -302,6 +302,7 @@ public class VarExpr
   /**
    * Analyze the expression
    */
+  /*
   public void analyze(AnalyzeInfo info)
   {
     VarExpr var = info.getVar(_name);
@@ -316,10 +317,12 @@ public class VarExpr
 
     info.addVar(var.analyzeVarState(VarState.VALID));
   }
+  */
 
   /**
    * Analyze a variable assignment
    */
+  /*
   public void analyzeAssign(AnalyzeInfo info)
   {
     getVarInfo().setAssigned();
@@ -345,6 +348,7 @@ public class VarExpr
 
     info.addVar(infoVar);
   }
+  */
 
   /**
    * Analyze the expression as modified
@@ -365,6 +369,7 @@ public class VarExpr
   /**
    * Analyze the expression
    */
+  /*
   public void analyzeUnset(AnalyzeInfo info)
   {
     VarExpr var = info.getVar(_name);
@@ -374,6 +379,7 @@ public class VarExpr
     if (var != null)
       info.addVar(var.analyzeVarState(VarState.UNSET));
   }
+  */
 
   /**
    * Returns the variables used in the expression
@@ -408,6 +414,7 @@ public class VarExpr
   /**
    * Sets the assignment state of the variable.
    */
+  /*
   public VarExpr analyzeVarState(VarState state)
   {
     if (_varState == state)
@@ -419,10 +426,12 @@ public class VarExpr
       return var;
     }
   }
+  */
 
   /**
    * Sets the assignment state of the variable.
    */
+  /*
   public VarExpr analyzeMerge(VarExpr mergeVar)
   {
     if (_varState == mergeVar._varState)
@@ -430,6 +439,7 @@ public class VarExpr
     else
       return analyzeVarState(VarState.UNKNOWN);
   }
+  */
 
   /**
    * Returns the variables state.

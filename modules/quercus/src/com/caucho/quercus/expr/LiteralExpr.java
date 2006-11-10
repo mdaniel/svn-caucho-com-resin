@@ -47,7 +47,7 @@ import com.caucho.quercus.Location;
 public class LiteralExpr extends Expr {
   private final Value _value;
 
-  public LiteralExpr(Location location, Value value)
+  protected LiteralExpr(Location location, Value value)
   {
     super(location);
     _value = value;
@@ -56,6 +56,11 @@ public class LiteralExpr extends Expr {
   public LiteralExpr(Value value)
   {
     this(Location.UNKNOWN, value);// acceptable, for compiled code
+  }
+
+  protected Value getValue()
+  {
+    return _value;
   }
 
   /**

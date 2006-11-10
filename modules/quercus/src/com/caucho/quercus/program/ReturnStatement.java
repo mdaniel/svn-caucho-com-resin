@@ -47,7 +47,7 @@ import com.caucho.vfs.WriteStream;
  * Represents a return expression statement in a PHP program.
  */
 public class ReturnStatement extends Statement {
-  private Expr _expr;
+  protected final Expr _expr;
   
   /**
    * Creates the echo statement.

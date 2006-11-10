@@ -48,8 +48,9 @@ import java.util.ArrayList;
  */
 public class FunctionExpr extends Expr {
   private static final L10N L = new L10N(FunctionExpr.class);
-  private final String _name;
-  private final Expr []_args;
+  
+  protected final String _name;
+  protected final Expr []_args;
 
   public FunctionExpr(Location location, String name, ArrayList<Expr> args)
   {

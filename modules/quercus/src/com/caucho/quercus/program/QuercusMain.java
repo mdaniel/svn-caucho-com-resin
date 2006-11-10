@@ -82,6 +82,9 @@ public class QuercusMain extends ClassComponent {
   protected void generate(JavaWriter javaOut)
     throws IOException
   {
+    if (true)
+      throw new IllegalStateException();
+    
     PhpWriter out = new PhpWriter(javaOut, _program);
 
     Path dstPath = javaOut.getWriteStream().getPath();

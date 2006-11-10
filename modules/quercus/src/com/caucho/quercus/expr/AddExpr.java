@@ -41,12 +41,12 @@ import com.caucho.quercus.Location;
  * Represents a PHP add expression.
  */
 public class AddExpr extends BinaryExpr {
-  public AddExpr(Location location, Expr left, Expr right)
+  protected AddExpr(Location location, Expr left, Expr right)
   {
     super(location, left, right);
   }
 
-  public AddExpr(Expr left, Expr right)
+  protected AddExpr(Expr left, Expr right)
   {
     super(left, right);
   }

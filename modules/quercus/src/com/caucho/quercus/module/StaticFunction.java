@@ -61,8 +61,8 @@ public class StaticFunction extends JavaInvoker {
   private static final Logger log =
     Logger.getLogger(StaticFunction.class.getName());
 
-  private final QuercusModule _quercusModule;
-  private final Method _method;
+  protected final QuercusModule _quercusModule;
+  protected final Method _method;
 
   /**
    * Creates the statically introspected function.

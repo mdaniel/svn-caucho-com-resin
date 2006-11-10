@@ -43,10 +43,9 @@ import com.caucho.quercus.Location;
  * Represents a PHP post increment expression.
  */
 public class PostIncrementExpr extends UnaryExpr {
-  private final int _incr;
+  protected final int _incr;
 
   public PostIncrementExpr(Location location, Expr expr, int incr)
-    throws IOException
   {
     // super(expr.createRef());
     super(location, expr);
@@ -55,7 +54,6 @@ public class PostIncrementExpr extends UnaryExpr {
   }
 
   public PostIncrementExpr(Expr expr, int incr)
-    throws IOException
   {
     super(expr);
 

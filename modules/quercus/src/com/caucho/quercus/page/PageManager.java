@@ -59,7 +59,8 @@ import com.caucho.util.LruCache;
 /**
  * Each "page" refers to a quercus file.
  */
-public class PageManager {
+public class PageManager
+{
   private static final Logger log
     = Logger.getLogger(PageManager.class.getName());
 
@@ -93,6 +94,11 @@ public class PageManager {
   public void setPwd(Path pwd)
   {
     _pwd = pwd;
+  }
+
+  public Quercus getQuercus()
+  {
+    return _quercus;
   }
 
   /**
@@ -207,36 +213,8 @@ public class PageManager {
 
       if (program.getCompiledPage() != null)
 	return program.getCompiledPage();
-    
-      if (isLazyCompile()) {
-	boolean spawn = false;
 
-	synchronized (_pendingPages) {
-	  if (! _pendingPages.contains(path)) {
-	    _pendingPages.add(path);
-	    spawn = ! _isCompilerActive;
-	    _isCompilerActive = true;
-	  }
-	}
-
-	if (spawn)
-	  ThreadPool.getThreadPool().schedule(new CompileThread());
-	
-	return new InterpretedPage(program);
-      }
-      else if (isCompile()) {
-	PhpGenerator gen = new PhpGenerator(_quercus);
-	
-	Class pageClass;
-
-	synchronized (_pendingPages) {
-	  pageClass = gen.generate(program);
-	}
-
-	return createPage(path, program, pageClass);
-      }
-      else
-	return new InterpretedPage(program);
+      return compilePage(program, path);
     } catch (IOException e) {
       throw e;
     } catch (RuntimeException e) {
@@ -246,66 +224,14 @@ public class PageManager {
     }
   }
 
-  private QuercusPage createPage(Path path,
-			     QuercusProgram program,
-			     Class pageClass)
+  protected QuercusPage compilePage(QuercusProgram program, Path path)
   {
-    try {
-      QuercusPage page = (QuercusPage) pageClass.newInstance();
-      
-      page.init(_quercus);
-      
-      Method selfPath = pageClass.getMethod("quercus_setSelfPath",
-					    new Class[] { Path.class });
-      
-      selfPath.invoke(null, path);
-      
-      program.setCompiledPage(page);
-      
-      return page;
-    } catch (Exception e) {
-      throw new QuercusException(e);
-    }
+    return new InterpretedPage(program);
   }
 
   public void close()
   {
     _isClosed = true;
-  }
-
-  class CompileThread implements Runnable {
-    public void run()
-    {
-      while (isActive()) {
-	Path path = null;
-
-	synchronized (_pendingPages) {
-	  if (_pendingPages.size() == 0) {
-	    _isCompilerActive = false;
-	    return;
-	  }
-	  
-	  path = _pendingPages.remove(0);
-	}
-
-	QuercusProgram program = _programCache.get(path);
-
-	if (program == null || program.isModified())
-	  continue;
-	else if (program.getCompiledPage() != null)
-	  continue;
-
-	try {
-	  PhpGenerator gen = new PhpGenerator(_quercus);
-	
-	  Class pageClass = gen.generate(program);
-
-	  createPage(path, program, pageClass);
-	} catch (Throwable e) {
-	  log.log(Level.FINE, e.toString(), e);
-	}
-      }
-    }
   }
 }
 

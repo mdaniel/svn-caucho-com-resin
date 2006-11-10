@@ -42,12 +42,13 @@ import com.caucho.quercus.Location;
  * Represents a PHP assignment expression.
  */
 public class AssignExpr extends Expr {
-  private final AbstractVarExpr _var;
-  private final Expr _value;
+  protected final AbstractVarExpr _var;
+  protected final Expr _value;
 
   public AssignExpr(Location location, AbstractVarExpr var, Expr value)
   {
     super(location);
+    
     _var = var;
     _value = value;
   }

@@ -43,9 +43,9 @@ import com.caucho.quercus.Location;
  * Represents a conditional expression.
  */
 public class ConditionalExpr extends Expr {
-  private final Expr _test;
-  private final Expr _trueExpr;
-  private final Expr _falseExpr;
+  protected final Expr _test;
+  protected final Expr _trueExpr;
+  protected final Expr _falseExpr;
 
   public ConditionalExpr(Location location, Expr test, Expr trueExpr, Expr falseExpr)
   {

@@ -59,6 +59,21 @@ public class IfStatement extends Statement {
     _falseBlock = falseBlock;
   }
 
+  protected Expr getTest()
+  {
+    return _test;
+  }
+
+  protected Statement getTrueBlock()
+  {
+    return _trueBlock;
+  }
+
+  protected Statement getFalseBlock()
+  {
+    return _falseBlock;
+  }
+
   /**
    * Executes the 'if' statement, returning any value.
    */

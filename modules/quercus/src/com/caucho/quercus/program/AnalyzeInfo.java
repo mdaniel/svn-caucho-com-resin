@@ -148,10 +148,12 @@ public class AnalyzeInfo {
     for (VarExpr var : vars) {
       VarExpr mergeVar = info.getVar(var.getName());
 
+      /*
       if (mergeVar == null)
 	var = var.analyzeVarState(VarState.UNKNOWN);
       else
 	var = var.analyzeMerge(mergeVar);
+      */
 
       _varMap.put(var.getName(), var);
     }
@@ -160,7 +162,7 @@ public class AnalyzeInfo {
       VarExpr var = getVar(mergeVar.getName());
 
       if (var == null) {
-	mergeVar = mergeVar.analyzeVarState(VarState.UNKNOWN);
+	//mergeVar = mergeVar.analyzeVarState(VarState.UNKNOWN);
 	
 	_varMap.put(mergeVar.getName(), mergeVar);
       }

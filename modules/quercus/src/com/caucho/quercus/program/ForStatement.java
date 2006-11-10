@@ -45,10 +45,10 @@ import com.caucho.quercus.Location;
  * Represents a for statement.
  */
 public class ForStatement extends Statement {
-  private final Expr _init;
-  private final Expr _test;
-  private final Expr _incr;
-  private final Statement _block;
+  protected final Expr _init;
+  protected final Expr _test;
+  protected final Expr _incr;
+  protected final Statement _block;
 
   public ForStatement(Location location, Expr init, Expr test, Expr incr, Statement block)
   {

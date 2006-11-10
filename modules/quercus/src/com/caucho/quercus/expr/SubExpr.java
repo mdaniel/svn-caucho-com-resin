@@ -41,12 +41,12 @@ import com.caucho.quercus.Location;
  * Represents a PHP subtract expression.
  */
 public class SubExpr extends BinaryExpr {
-  public SubExpr(Location location, Expr left, Expr right)
+  protected SubExpr(Location location, Expr left, Expr right)
   {
     super(location, left, right);
   }
 
-  public SubExpr(Expr left, Expr right)
+  protected SubExpr(Expr left, Expr right)
   {
     super(left, right);
   }

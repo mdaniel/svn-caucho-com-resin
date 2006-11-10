@@ -45,9 +45,9 @@ import com.caucho.quercus.Location;
  * Represents sequence of statements.
  */
 public class BlockStatement extends Statement {
-  private Statement []_statements;
+  protected Statement []_statements;
 
-  BlockStatement(Location location, Statement []statements)
+  public BlockStatement(Location location, Statement []statements)
   {
     super(location);
 
@@ -60,30 +60,6 @@ public class BlockStatement extends Statement {
 
     _statements = new Statement[statementList.size()];
     statementList.toArray(_statements);
-  }
-
-  public static Statement create(Location location, ArrayList<Statement> statementList)
-  {
-    if (statementList.size() == 1)
-      return statementList.get(0);
-
-    Statement []statements = new Statement[statementList.size()];
-
-    statementList.toArray(statements);
-
-    return new BlockStatement(location, statements);
-  }
-
-  public static Statement create(Location location, Statement []statementList)
-  {
-    if (statementList.length == 1)
-      return statementList[0];
-
-    Statement []statements = new Statement[statementList.length];
-
-    System.arraycopy(statementList, 0, statements, 0, statementList.length);
-
-    return new BlockStatement(location, statements);
   }
 
   public BlockStatement append(ArrayList<Statement> statementList)

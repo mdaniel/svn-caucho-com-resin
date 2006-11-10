@@ -41,13 +41,13 @@ import com.caucho.quercus.Location;
 /**
  * Represents a PHP append ('.') expression.
  */
-public class AppendExpr extends Expr {
+public class AppendExpr extends Expr
+{
   private final Expr _value;
   private AppendExpr _next;
 
-  private AppendExpr(Location location, Expr value, AppendExpr next)
+  protected AppendExpr(Expr value, AppendExpr next)
   {
-    super(location);
     _value = value;
     _next = next;
   }
@@ -68,83 +68,12 @@ public class AppendExpr extends Expr {
     return _next;
   }
 
-  public static Expr create(Expr left, Expr right)
-  {
-    AppendExpr leftAppend;
-
-    // XXX: i18n binary vs unicode issues
-    /*
-    if (left instanceof ToStringExpr)
-      left = ((ToStringExpr) left).getExpr();
-
-    if (left instanceof StringLiteralExpr) {
-      StringLiteralExpr string = (StringLiteralExpr) left;
-
-      if (string.evalConstant().length() == 0)
-	return ToStringExpr.create(right);
-    }
-    */
-
-    if (left instanceof AppendExpr)
-      leftAppend = (AppendExpr) left;
-    else
-      leftAppend = new AppendExpr(left.getLocation(), left, null);
-    
-    AppendExpr next;
-
-    /*
-    if (right instanceof ToStringExpr)
-      right = ((ToStringExpr) right).getExpr();
-
-    if (right instanceof StringLiteralExpr) {
-      StringLiteralExpr string = (StringLiteralExpr) right;
-
-      if (string.evalConstant().length() == 0)
-	return ToStringExpr.create(left);
-    }
-    */
-
-    if (right instanceof AppendExpr)
-      next = (AppendExpr) right;
-    else
-      next = new AppendExpr(right.getLocation(), right, null);
-
-    AppendExpr result = append(leftAppend, next);
-
-    if (result.getNext() != null)
-      return result;
-    else
-      return result.getValue();
-  }
-
   /**
-   * Appends the tail to the current expression, combining
-   * constant literals.
+   * Returns the next value in the append chain.
    */
-  private static AppendExpr append(AppendExpr left, AppendExpr tail)
+  void setNext(AppendExpr next)
   {
-    if (left == null)
-      return tail;
-
-    tail = append(left._next, tail);
-
-    if (false &&
-	left._value instanceof StringLiteralExpr &&
-        tail._value instanceof StringLiteralExpr) {
-      StringLiteralExpr leftString = (StringLiteralExpr) left._value;
-      StringLiteralExpr rightString = (StringLiteralExpr) tail._value;
-
-      Expr value = new StringLiteralExpr(leftString.getLocation(),
-                                         leftString.evalConstant().toString() +
-                                         rightString.evalConstant().toString());
-
-      return new AppendExpr(value.getLocation(), value, tail._next);
-    }
-    else {
-      left._next = tail;
-
-      return left;
-    }
+    _next = next;
   }
 
   /**

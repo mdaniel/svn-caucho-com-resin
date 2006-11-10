@@ -496,7 +496,7 @@ echo -n "checking if Java is 64-bit... "
 tmpname="/tmp/java$$.out"
                	
 $JAVA_HOME/bin/java -version 2> $tmpname
-grep -E "(64-Bit|amd64-64)" $tmpname 1> /dev/null
+grep "(64-Bit|amd64-64)" $tmpname 1> /dev/null
      
 if test "$?" = "0"; then
    b64_jni=true
@@ -590,7 +590,7 @@ if test -z "${LD_SHLIB}"; then
 	if test -n "$is_gnu_ld"; then
 	    LDFLAGS_SHLIB="-shared"
         else
-	    LDFLAGS_SHLIB="-G"
+	    LDFLAGS_SHLIB="-G -fPIC"
 	fi
 	;;
 

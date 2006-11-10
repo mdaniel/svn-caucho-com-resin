@@ -216,9 +216,8 @@ public class ModuleInfo {
       Class []params = method.getParameterTypes();
 
       try {
-        StaticFunction function = new StaticFunction(_context,
-						     _module,
-						     method);
+        StaticFunction function
+	  = _context.createStaticFunction(_module, method);
 
         String methodName = method.getName();
 

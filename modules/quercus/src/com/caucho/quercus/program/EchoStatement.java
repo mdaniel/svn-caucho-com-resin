@@ -39,8 +39,7 @@ import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.expr.VarExpr;
+import com.caucho.quercus.expr.*;
 
 import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
@@ -51,7 +50,7 @@ import com.caucho.vfs.WriteStream;
  * Represents an echo statement in a PHP program.
  */
 public class EchoStatement extends Statement {
-  private Expr _expr;
+  protected final Expr _expr;
 
   private String _genId;
   

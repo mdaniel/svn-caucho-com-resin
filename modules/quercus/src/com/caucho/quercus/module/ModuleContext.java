@@ -42,8 +42,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.*;
 
 /**
  * Class-loader specific context for loaded PHP.
@@ -52,9 +51,6 @@ public class ModuleContext {
   private static L10N L = new L10N(ModuleContext.class);
   private static final Logger log
     = Logger.getLogger(ModuleContext.class.getName());
-
-  private static EnvironmentLocal<ModuleContext> _localModuleContext
-    = new  EnvironmentLocal<ModuleContext>();
 
   private ClassLoader _loader;
 
@@ -106,6 +102,8 @@ public class ModuleContext {
 
   public static ModuleContext getLocalContext(ClassLoader loader)
   {
+    throw new UnsupportedOperationException();
+    /*
     ModuleContext context = _localModuleContext.getLevel(loader);
 
     if (context == null) {
@@ -114,11 +112,13 @@ public class ModuleContext {
     }
 
     return context;
+    */
   }
 
   /**
    * Adds a module
    */
+  /*
   public static ModuleInfo addModule(String name, QuercusModule module)
     throws ConfigException
   {
@@ -128,10 +128,12 @@ public class ModuleContext {
 
     return context.addModuleInfo(name, module);
   }
+  */
 
   /**
    * Adds a class
    */
+  /*
   public static JavaClassDef addClass(String name,
                                       Class type,
                                       String ext,
@@ -148,10 +150,12 @@ public class ModuleContext {
 
     return context.addClassInfo(name, type, ext, javaClassDefClass);
   }
+  */
 
   /**
    * Adds a class
    */
+  /*
   public static JavaImplClassDef addClassImpl(String name, Class type, String ext)
     throws ConfigException, IllegalAccessException, InstantiationException
   {
@@ -161,25 +165,28 @@ public class ModuleContext {
 
     return context.addClassImplInfo(name, type, ext);
   }
+  */
 
   /**
    * Adds module info.
    */
-  private ModuleInfo addModuleInfo(String name, QuercusModule module)
+  public ModuleInfo addModule(String name, QuercusModule module)
     throws ConfigException
   {
-    ModuleInfo info = _moduleInfoMap.get(name);
+    synchronized (this) {
+      ModuleInfo info = _moduleInfoMap.get(name);
 
-    if (info == null) {
-      info = new ModuleInfo(this, name, module);
-      _moduleInfoMap.put(name, info);
+      if (info == null) {
+	info = new ModuleInfo(this, name, module);
+	_moduleInfoMap.put(name, info);
+      }
+
+      return info;
     }
-
-    return info;
   }
 
-  private JavaClassDef addClassInfo(String name, Class type,
-                                    String extension, Class javaClassDefClass)
+  public JavaClassDef addClass(String name, Class type,
+			       String extension, Class javaClassDefClass)
     throws NoSuchMethodException,
 	   InvocationTargetException,
 	   IllegalAccessException,
@@ -221,8 +228,9 @@ public class ModuleContext {
     return def;
   }
 
-  private JavaImplClassDef addClassImplInfo(String name, Class type,
-                                            String extension)
+  public JavaImplClassDef addClassImpl(String name,
+				       Class type,
+				       String extension)
     throws IllegalAccessException, InstantiationException
   {
     JavaImplClassDef def = (JavaImplClassDef) _staticClasses.get(name);
@@ -343,6 +351,15 @@ public class ModuleContext {
   public HashMap<String, Value> getConstMap()
   {
     return _constMap;
+  }
+
+  /**
+   * Creates a static function.
+   */
+  public StaticFunction createStaticFunction(QuercusModule module,
+					     Method method)
+  {
+    return new StaticFunction(this, module, method);
   }
 
   /**

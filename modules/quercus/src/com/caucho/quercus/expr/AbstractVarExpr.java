@@ -68,7 +68,7 @@ abstract public class AbstractVarExpr extends Expr {
    */
   public Expr createAssign(QuercusParser parser, Expr value)
   {
-    return new AssignExpr(parser.getLocation(), this, value);
+    return parser.getExprFactory().createAssign(this, value);
   }
 
   /**

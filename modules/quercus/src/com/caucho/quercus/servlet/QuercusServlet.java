@@ -320,8 +320,19 @@ public class QuercusServlet
    */
   private Quercus getQuercus()
   {
-    if (_quercus == null)
-      _quercus = new Quercus();
+    synchronized (this) {
+      if (_quercus == null) {
+	try {
+	  Class cl = Class.forName("com.caucho.quercus.ProQuercus");
+	  _quercus = (Quercus) cl.newInstance();
+	} catch (Exception e) {
+	  log.log(Level.FINEST, e.toString(), e);
+	}
+
+	if (_quercus == null)
+	  _quercus = new Quercus();
+      }
+    }
 
     if (_quercus.getQuercusSessionManager().getSessionManager() == null) {
       Application app = (Application) getServletContext();

@@ -194,6 +194,8 @@ public class QuercusParser {
 
   private ParserLocation _parserLocation = new ParserLocation();
 
+  private ExprFactory _exprFactory;
+
   private boolean _hasCr;
 
   private int _peek = -1;
@@ -219,11 +221,13 @@ public class QuercusParser {
   QuercusParser(Quercus quercus)
   {
     _quercus = quercus;
+    _exprFactory = ExprFactory.create();
   }
 
   public QuercusParser(Quercus quercus, Path sourceFile, Reader is)
   {
     _quercus = quercus;
+    _exprFactory = ExprFactory.create();
 
     init(sourceFile, is);
   }
@@ -389,6 +393,11 @@ public class QuercusParser {
     return _parserLocation.getLineNumber();
   }
 
+  public ExprFactory getExprFactory()
+  {
+    return _exprFactory;
+  }
+
   public QuercusProgram parse()
     throws IOException
   {
@@ -430,7 +439,7 @@ public class QuercusParser {
 			      _globalScope.getFunctionMap(),
 			      _globalScope.getClassMap(),
 			      _function,
-			      BlockStatement.create(location, stmtList));
+			      _exprFactory.createBlock(location, stmtList));
   }
 
   Function parseFunction(Path argPath, Path codePath)
@@ -451,7 +460,11 @@ public class QuercusParser {
 
     statementList = parseStatementList();
 
-    return new Function(Location.UNKNOWN, "anonymous", _function, args, statementList);
+    return _exprFactory.createFunction(Location.UNKNOWN,
+				       "anonymous",
+				       _function,
+				       args,
+				       statementList);
   }
 
   /**
@@ -469,7 +482,7 @@ public class QuercusParser {
     int token = parsePhpText();
 
     if (_lexeme.length() > 0)
-      statements.add(new TextStatement(location, _lexeme));
+      statements.add(_exprFactory.createText(location, _lexeme));
 
     if (token == TEXT_ECHO) {
       parseEcho(statements);
@@ -477,7 +490,7 @@ public class QuercusParser {
     
     statements.addAll(parseStatementList());
 
-    return BlockStatement.create(location, statements);
+    return _exprFactory.createBlock(location, statements);
   }
 
   /**
@@ -641,13 +654,13 @@ public class QuercusParser {
 
       case TEXT:
 	if (_lexeme.length() > 0) {
-	  statements.add(new TextStatement(location, _lexeme));
+	  statements.add(_exprFactory.createText(location, _lexeme));
 	}
 	break;
 	
       case TEXT_ECHO:
 	if (_lexeme.length() > 0)
-	  statements.add(new TextStatement(location, _lexeme));
+	  statements.add(_exprFactory.createText(location, _lexeme));
 
 	parseEcho(statements);
 
@@ -680,7 +693,7 @@ public class QuercusParser {
 
       expect('}');
 
-      return BlockStatement.create(location, statementList);
+      return _exprFactory.createBlock(location, statementList);
 
     case IF:
       return parseIf();
@@ -705,7 +718,7 @@ public class QuercusParser {
 
     case TEXT:
       if (_lexeme.length() > 0) {
-	return new TextStatement(location, _lexeme);
+	return _exprFactory.createText(location, _lexeme);
       }
       else
 	return parseStatement();
@@ -735,7 +748,7 @@ public class QuercusParser {
         ArrayList<Statement> statementList = new ArrayList<Statement>();
 	parseEcho(statementList);
 
-	return BlockStatement.create(location, statementList);
+	return _exprFactory.createBlock(location, statementList);
       }
 
     case PRINT:
@@ -819,12 +832,13 @@ public class QuercusParser {
     else if (expr instanceof StringLiteralExpr) {
       StringLiteralExpr string = (StringLiteralExpr) expr;
       
-      Statement statement = new TextStatement(location, string.evalConstant().toString());
+      Statement statement
+	= _exprFactory.createText(location, string.evalConstant().toString());
 
       statements.add(statement);
     }
     else {
-      Statement statement = new EchoStatement(location, expr);
+      Statement statement = _exprFactory.createEcho(location, expr);
 
       statements.add(statement);
     }
@@ -836,7 +850,7 @@ public class QuercusParser {
   private Statement parsePrint()
     throws IOException
   {
-    return new ExprStatement(getLocation(), parsePrintExpr());
+    return _exprFactory.createExpr(getLocation(), parsePrintExpr());
   }
 
   /**
@@ -848,7 +862,7 @@ public class QuercusParser {
     ArrayList<Expr> args = new ArrayList<Expr>();
     args.add(parseTopExpr());
 
-    return new FunctionExpr(getLocation(), "print", args);
+    return _exprFactory.createFunction(getLocation(), "print", args);
   }
 
   /**
@@ -886,7 +900,7 @@ public class QuercusParser {
 
       if (token != ',') {
 	_peekToken = token;
-	return BlockStatement.create(location, statementList);
+	return _exprFactory.createBlock(location, statementList);
       }
     }
   }
@@ -906,7 +920,7 @@ public class QuercusParser {
 
       String name = parseIdentifier();
 
-      VarExpr var = new VarExpr(getLocation(), _function.createVar(name));
+      VarExpr var = _exprFactory.createVar(_function.createVar(name));
 
       Expr init = null;
 
@@ -922,7 +936,7 @@ public class QuercusParser {
       
       if (token != ',') {
 	_peekToken = token;
-	return BlockStatement.create(location, statementList);
+	return _exprFactory.createBlock(location, statementList);
       }
     }
   }
@@ -938,7 +952,7 @@ public class QuercusParser {
     ArrayList<Statement> statementList = new ArrayList<Statement>();
     parseUnset(statementList);
 
-    return BlockStatement.create(location, statementList);
+    return _exprFactory.createBlock(location, statementList);
   }
 
   /**
@@ -1006,7 +1020,7 @@ public class QuercusParser {
       else
 	_peekToken = token;
 
-      return new IfStatement(location, test, trueBlock, falseBlock);
+      return _exprFactory.createIf(location, test, trueBlock, falseBlock);
 
     } finally {
       _isTop = oldTop;
@@ -1019,7 +1033,8 @@ public class QuercusParser {
   private Statement parseAlternateIf(Expr test, Location location)
     throws IOException
   {
-    Statement trueBlock = BlockStatement.create(location, parseStatementList());
+    Statement trueBlock = _exprFactory.createBlock(location,
+						   parseStatementList());
 
     Statement falseBlock = null;
 
@@ -1036,7 +1051,8 @@ public class QuercusParser {
     else if (token == ELSE) {
       expect(':');
       
-      falseBlock = BlockStatement.create(getLocation(), parseStatementList());
+      falseBlock = _exprFactory.createBlock(getLocation(),
+					    parseStatementList());
 
       expect(ENDIF);
     }
@@ -1045,7 +1061,7 @@ public class QuercusParser {
       expect(ENDIF);
     }
 
-    return new IfStatement(location, test, trueBlock, falseBlock);
+    return _exprFactory.createIf(location, test, trueBlock, falseBlock);
   }
 
   /**
@@ -1133,7 +1149,8 @@ public class QuercusParser {
 	    defaultBlock = block;
 	}
       
-	BlockStatement block = new BlockStatement(caseLocation, newBlockList);
+	BlockStatement block
+	  = _exprFactory.createBlockImpl(caseLocation, newBlockList);
 
 	if (values.length > 0) {
 	  caseList.add(values);
@@ -1190,7 +1207,7 @@ public class QuercusParser {
       int token = parseToken();
 
       if (token == ':') {
-	block = BlockStatement.create(getLocation(), parseStatementList());
+	block = _exprFactory.createBlock(getLocation(), parseStatementList());
 
 	expect(ENDWHILE);
       }
@@ -1279,7 +1296,7 @@ public class QuercusParser {
       token = parseToken();
 
       if (token == ':') {
-	block = BlockStatement.create(getLocation(), parseStatementList());
+	block = _exprFactory.createBlock(getLocation(), parseStatementList());
 
 	expect(ENDFOR);
       }
@@ -1289,8 +1306,7 @@ public class QuercusParser {
 	block = parseStatement();
       }
 
-      return new ForStatement(location, init, test, incr, block);
-
+      return _exprFactory.createFor(location, init, test, incr, block);
     } finally {
       _isTop = oldTop;
     }
@@ -1358,7 +1374,7 @@ public class QuercusParser {
       token = parseToken();
 
       if (token == ':') {
-	block = BlockStatement.create(getLocation(), parseStatementList());
+	block = _exprFactory.createBlock(getLocation(), parseStatementList());
 
 	expect(ENDFOREACH);
       }
@@ -1473,9 +1489,9 @@ public class QuercusParser {
       if (isAbstract) {
 	expect(';');
 
-	function = new MethodDeclaration(location,
-					 _quercusClass, name,
-					 _function, args);
+	function = _exprFactory.createMethodDeclaration(location,
+							_quercusClass, name,
+							_function, args);
       }
       else {
 	expect('{');
@@ -1487,13 +1503,14 @@ public class QuercusParser {
 	expect('}');
 	
 	if (_quercusClass != null)
-	  function = new ObjectMethod(location, _quercusClass,
-				      name, _function,
-				      args, statementList);
+	  function = _exprFactory.createObjectMethod(location,
+						     _quercusClass,
+						     name, _function,
+						     args, statementList);
 	else
-	  function = new Function(location, name,
-				  _function, args,
-				  statementList);
+	  function = _exprFactory.createFunction(location, name,
+						 _function, args,
+						 statementList);
       }
 
       function.setGlobal(oldTop);
@@ -1590,7 +1607,7 @@ public class QuercusParser {
     case ';':
       _peekToken = token;
 
-      return new ReturnStatement(location, NullLiteralExpr.NULL);
+      return _exprFactory.createReturn(location, _exprFactory.createNull());
       
     default:
       _peekToken = token;
@@ -1607,7 +1624,7 @@ public class QuercusParser {
       if (_returnsReference)
 	return new ReturnRefStatement(location, expr);
       else
-	return new ReturnStatement(location, expr);
+	return _exprFactory.createReturn(location, expr);
     }
   }
 
@@ -1776,7 +1793,7 @@ public class QuercusParser {
       }
       else {
 	_peekToken = token;
-	expr = NullLiteralExpr.NULL;
+	expr = _exprFactory.createNull();
       }
 
       if (isStatic)
@@ -1864,7 +1881,7 @@ public class QuercusParser {
 
     Expr expr = parseTopExpr();
 
-    Statement statement = new ExprStatement(location, expr);
+    Statement statement = _exprFactory.createExpr(location, expr);
 
     int token = parseToken();
     _peekToken = token;
@@ -1969,7 +1986,7 @@ public class QuercusParser {
 
       switch (token) {
       case OR_RES:
-	expr = new OrExpr(getLocation(), expr, parseWeakXorExpr());
+	expr = _exprFactory.createOr(expr, parseWeakXorExpr());
 	break;
       default:
 	_peekToken = token;
@@ -2013,7 +2030,7 @@ public class QuercusParser {
 
       switch (token) {
       case AND_RES:
-	expr = new AndExpr(getLocation(), expr, parseConditionalExpr());
+	expr = _exprFactory.createAnd(expr, parseConditionalExpr());
 	break;
       default:
 	_peekToken = token;
@@ -2038,7 +2055,7 @@ public class QuercusParser {
 	Expr trueExpr = parseExpr();
 	expect(':');
 	// php/33c1
-	expr = new ConditionalExpr(getLocation(), expr, trueExpr, parseOrExpr());
+	expr = _exprFactory.createConditional(expr, trueExpr, parseOrExpr());
 	break;
       default:
 	_peekToken = token;
@@ -2060,7 +2077,7 @@ public class QuercusParser {
 
       switch (token) {
       case C_OR:
-	expr = new OrExpr(getLocation(), expr, parseAndExpr());
+	expr = _exprFactory.createOr(expr, parseAndExpr());
 	break;
       default:
 	_peekToken = token;
@@ -2082,7 +2099,7 @@ public class QuercusParser {
 
       switch (token) {
       case C_AND:
-	expr = new AndExpr(getLocation(), expr, parseBitOrExpr());
+	expr = _exprFactory.createAnd(expr, parseBitOrExpr());
 	break;
       default:
 	_peekToken = token;
@@ -2104,7 +2121,7 @@ public class QuercusParser {
 
       switch (token) {
       case '|':
-	expr = new BitOrExpr(getLocation(), expr, parseBitXorExpr());
+	expr = _exprFactory.createBitOr(expr, parseBitXorExpr());
 	break;
       default:
 	_peekToken = token;
@@ -2126,7 +2143,7 @@ public class QuercusParser {
 
       switch (token) {
       case '^':
-	expr = new BitXorExpr(getLocation(), expr, parseBitAndExpr());
+	expr = _exprFactory.createBitXor(expr, parseBitAndExpr());
 	break;
       default:
 	_peekToken = token;
@@ -2148,7 +2165,7 @@ public class QuercusParser {
 
       switch (token) {
       case '&':
-	expr = new BitAndExpr(getLocation(), expr, parseEqExpr());
+	expr = _exprFactory.createBitAnd(expr, parseEqExpr());
 	break;
       default:
 	_peekToken = token;
@@ -2169,16 +2186,17 @@ public class QuercusParser {
 
     switch (token) {
     case EQ:
-      return new EqExpr(getLocation(), expr, parseCmpExpr());
+      return _exprFactory.createEq(expr, parseCmpExpr());
       
     case NEQ:
-      return new NeqExpr(getLocation(), expr, parseCmpExpr());
+      return _exprFactory.createNeq(expr, parseCmpExpr());
       
     case EQUALS:
       return new EqualsExpr(getLocation(), expr, parseCmpExpr());
       
     case NEQUALS:
-      return new NotExpr(getLocation(), new EqualsExpr(getLocation(), expr, parseCmpExpr()));
+      return new NotExpr(getLocation(),
+			 new EqualsExpr(getLocation(), expr, parseCmpExpr()));
       
     default:
       _peekToken = token;
@@ -2198,16 +2216,16 @@ public class QuercusParser {
 
     switch (token) {
     case '<':
-      return new LtExpr(getLocation(), expr, parseShiftExpr());
+      return _exprFactory.createLt(expr, parseShiftExpr());
 
     case '>':
-      return new GtExpr(getLocation(), expr, parseShiftExpr());
+      return _exprFactory.createGt(expr, parseShiftExpr());
 
     case LEQ:
-      return new LeqExpr(getLocation(), expr, parseShiftExpr());
+      return _exprFactory.createLeq(expr, parseShiftExpr());
 
     case GEQ:
-      return new GeqExpr(getLocation(), expr, parseShiftExpr());
+      return _exprFactory.createGeq(expr, parseShiftExpr());
 
     case INSTANCEOF:
       Location location = getLocation();
@@ -2239,10 +2257,10 @@ public class QuercusParser {
 
       switch (token) {
       case LSHIFT:
-	expr = new LeftShiftExpr(getLocation(), expr, parseAddExpr());
+	expr = _exprFactory.createLeftShift(expr, parseAddExpr());
 	break;
       case RSHIFT:
-	expr = new RightShiftExpr(getLocation(), expr, parseAddExpr());
+	expr = _exprFactory.createRightShift(expr, parseAddExpr());
 	break;
       default:
 	_peekToken = token;
@@ -2264,13 +2282,13 @@ public class QuercusParser {
 
       switch (token) {
       case '+':
-	expr = new AddExpr(getLocation(), expr, parseMulExpr());
+	expr = _exprFactory.createAdd(expr, parseMulExpr());
 	break;
       case '-':
-	expr = new SubExpr(getLocation(), expr, parseMulExpr());
+	expr = _exprFactory.createSub(expr, parseMulExpr());
 	break;
       case '.':
-	expr = AppendExpr.create(expr, parseMulExpr());
+	expr = _exprFactory.createAppend(expr, parseMulExpr());
 	break;
       default:
 	_peekToken = token;
@@ -2292,13 +2310,13 @@ public class QuercusParser {
 
       switch (token) {
       case '*':
-	expr = new MulExpr(getLocation(), expr, parseAssignExpr());
+	expr = _exprFactory.createMul(expr, parseAssignExpr());
 	break;
       case '/':
-	expr = new DivExpr(getLocation(), expr, parseAssignExpr());
+	expr = _exprFactory.createDiv(expr, parseAssignExpr());
 	break;
       case '%':
-	expr = new ModExpr(getLocation(), expr, parseAssignExpr());
+	expr = _exprFactory.createMod(expr, parseAssignExpr());
 	break;
       default:
 	_peekToken = token;
@@ -2342,9 +2360,8 @@ public class QuercusParser {
       case PLUS_ASSIGN:
 	if (expr.canRead())
 	  expr = expr.createAssign(this,
-                                   new AddExpr(getLocation(), expr.copy(
-                                     getLocation()),
-                                               parseConditionalExpr()));
+                                   _exprFactory.createAdd(expr.copy(getLocation()),
+							  parseConditionalExpr()));
 	else // php/03d4
 	  expr = expr.createAssign(this, parseConditionalExpr());
 	break;
@@ -2352,7 +2369,7 @@ public class QuercusParser {
       case MINUS_ASSIGN:
 	if (expr.canRead())
 	  expr = expr.createAssign(this,
-                                   new SubExpr(getLocation(), expr.copy(
+                                   _exprFactory.createSub(expr.copy(
                                      getLocation()),
                                                parseConditionalExpr()));
 	else
@@ -2361,7 +2378,8 @@ public class QuercusParser {
 	
       case APPEND_ASSIGN:
 	if (expr.canRead())
-	  expr = expr.createAssign(this, AppendExpr.create(expr.copy(getLocation()),
+	  expr = expr.createAssign(this,
+				   _exprFactory.createAppend(expr.copy(getLocation()),
                                                            parseConditionalExpr()));
 	else
 	  expr = expr.createAssign(this, parseConditionalExpr());
@@ -2370,7 +2388,7 @@ public class QuercusParser {
       case MUL_ASSIGN:
 	if (expr.canRead())
 	  expr = expr.createAssign(this,
-                                   new MulExpr(getLocation(), expr.copy(
+                                   _exprFactory.createMul(expr.copy(
                                      getLocation()),
                                                parseConditionalExpr()));
 	else
@@ -2380,7 +2398,7 @@ public class QuercusParser {
       case DIV_ASSIGN:
 	if (expr.canRead())
 	  expr = expr.createAssign(this,
-                                   new DivExpr(getLocation(), expr.copy(
+                                   _exprFactory.createDiv(expr.copy(
                                      getLocation()),
                                                parseConditionalExpr()));
 	else
@@ -2390,7 +2408,7 @@ public class QuercusParser {
       case MOD_ASSIGN:
 	if (expr.canRead())
 	  expr = expr.createAssign(this,
-                                   new ModExpr(getLocation(), expr.copy(
+                                   _exprFactory.createMod(expr.copy(
                                      getLocation()),
                                                parseConditionalExpr()));
 	else
@@ -2400,7 +2418,7 @@ public class QuercusParser {
       case LSHIFT_ASSIGN:
 	if (expr.canRead())
 	  expr = expr.createAssign(this,
-                                   new LeftShiftExpr(getLocation(), expr.copy(
+                                   _exprFactory.createLeftShift(expr.copy(
                                      getLocation()),
                                                      parseConditionalExpr()));
 	else
@@ -2410,7 +2428,7 @@ public class QuercusParser {
       case RSHIFT_ASSIGN:
 	if (expr.canRead())
 	  expr = expr.createAssign(this,
-                                   new RightShiftExpr(getLocation(), expr.copy(
+                                   _exprFactory.createRightShift(expr.copy(
                                      getLocation()),
                                                       parseConditionalExpr()));
 	else
@@ -2420,7 +2438,7 @@ public class QuercusParser {
       case AND_ASSIGN:
 	if (expr.canRead())
 	  expr = expr.createAssign(this,
-                                   new BitAndExpr(getLocation(), expr.copy(
+                                   _exprFactory.createBitAnd(expr.copy(
                                      getLocation()),
                                                   parseConditionalExpr()));
 	else
@@ -2430,7 +2448,7 @@ public class QuercusParser {
       case OR_ASSIGN:
 	if (expr.canRead())
 	  expr = expr.createAssign(this,
-                                   new BitOrExpr(getLocation(), expr.copy(
+                                   _exprFactory.createBitOr(expr.copy(
                                      getLocation()),
                                                  parseConditionalExpr()));
 	else
@@ -2440,7 +2458,7 @@ public class QuercusParser {
       case XOR_ASSIGN:
 	if (expr.canRead())
 	  expr = expr.createAssign(this,
-                                   new BitXorExpr(getLocation(), expr.copy(
+                                   _exprFactory.createBitXor(expr.copy(
                                      getLocation()),
                                                   parseConditionalExpr()));
 	else
@@ -2485,7 +2503,7 @@ public class QuercusParser {
 	    Expr index = parseExpr();
 	    token = parseToken();
 
-	    term = new ArrayGetExpr(getLocation(), term, index);
+	    term = _exprFactory.createArrayGet(term, index);
 	  }
 
           if (token != ']')
@@ -2504,11 +2522,11 @@ public class QuercusParser {
         break;
 
       case INCR:
-	term = new PostIncrementExpr(getLocation(), term, 1);
+	term = _exprFactory.createPostIncrement(term, 1);
 	break;
 
       case DECR:
-	term = new PostIncrementExpr(getLocation(), term, -1);
+	term = _exprFactory.createPostIncrement(term, -1);
 	break;
 
       case DEREF:
@@ -2579,11 +2597,11 @@ public class QuercusParser {
         break;
 
       case INCR:
-	term = new PostIncrementExpr(getLocation(), term, 1);
+	term = _exprFactory.createPostIncrement(term, 1);
 	break;
 
       case DECR:
-	term = new PostIncrementExpr(getLocation(), term, -1);
+	term = _exprFactory.createPostIncrement(term, -1);
 	break;
 
       case DEREF:
@@ -2685,27 +2703,27 @@ public class QuercusParser {
 
     switch (token) {
     case STRING:
-      return new StringLiteralExpr(getLocation(), _lexeme);
+      return _exprFactory.createString(_lexeme);
       
     case SYSTEM_STRING:
       {
 	ArrayList<Expr> args = new ArrayList<Expr>();
-	args.add(new StringLiteralExpr(getLocation(), _lexeme));
-	return new FunctionExpr(getLocation(), "shell_exec", args);
+	args.add(_exprFactory.createString(_lexeme));
+	return _exprFactory.createFunction(getLocation(), "shell_exec", args);
       }
       
     case SIMPLE_SYSTEM_STRING:
       {
 	ArrayList<Expr> args = new ArrayList<Expr>();
 	args.add(parseEscapedString(_lexeme, SIMPLE_STRING_ESCAPE, true));
-	return new FunctionExpr(getLocation(), "shell_exec", args);
+	return _exprFactory.createFunction(getLocation(), "shell_exec", args);
       }
 
     case COMPLEX_SYSTEM_STRING:
       {
 	ArrayList<Expr> args = new ArrayList<Expr>();
 	args.add(parseEscapedString(_lexeme, COMPLEX_STRING_ESCAPE, true));
-	return new FunctionExpr(getLocation(), "shell_exec", args);
+	return _exprFactory.createFunction(getLocation(), "shell_exec", args);
       }
       
     case SIMPLE_STRING_ESCAPE:
@@ -2720,19 +2738,19 @@ public class QuercusParser {
       return parseEscapedString(_lexeme, token, false);
 
     case LONG:
-      return new LiteralExpr(getLocation(), LongValue.create(Long.parseLong(_lexeme)));
+      return _exprFactory.createLiteral(LongValue.create(Long.parseLong(_lexeme)));
       
     case DOUBLE:
-      return new LiteralExpr(getLocation(), new DoubleValue(Double.parseDouble(_lexeme)));
+      return _exprFactory.createLiteral(new DoubleValue(Double.parseDouble(_lexeme)));
 
     case NULL:
-      return NullLiteralExpr.NULL;
+      return _exprFactory.createNull();
 
     case TRUE:
-      return new LiteralExpr(getLocation(), BooleanValue.TRUE);
+      return _exprFactory.createLiteral(BooleanValue.TRUE);
 
     case FALSE:
-      return new LiteralExpr(getLocation(), BooleanValue.FALSE);
+      return _exprFactory.createLiteral(BooleanValue.FALSE);
 
     case '$':
       return parseVariable();
@@ -2769,18 +2787,19 @@ public class QuercusParser {
 	token = parseToken();
 
 	if (token == '=') {
-      token = parseToken();
+	  token = parseToken();
 
-      // php/03i6
-      if (token == '&')
-        return new NotExpr(getLocation(),
-            expr.createAssignRef(this, parseBitOrExpr()));
-
-      else {
-        _peekToken = token;
+	  // php/03i6
+	  if (token == '&') {
 	    return new NotExpr(getLocation(),
-            expr.createAssign(this, parseConditionalExpr()));
-      }
+			       expr.createAssignRef(this, parseBitOrExpr()));
+	  }
+	  else {
+	    _peekToken = token;
+	
+	    return new NotExpr(getLocation(),
+			       expr.createAssign(this, parseConditionalExpr()));
+	  }
 
 	}
 	else {
@@ -3034,7 +3053,7 @@ public class QuercusParser {
     else if (_lexeme == null)
       throw error(L.l("Expected identifier at '{0}'", tokenName(token)));
 
-    return new VarExpr(getLocation(), _function.createVar(_lexeme));
+    return _exprFactory.createVar(_function.createVar(_lexeme));
   }
 
   /**
@@ -3065,7 +3084,7 @@ public class QuercusParser {
         return new EachExpr(getLocation(), args.get(0));
       }
 
-      return new FunctionExpr(getLocation(), name, args);     
+      return _exprFactory.createFunction(getLocation(), name, args);     
     }
     else if (isInstantiated)
       return new ClassMethodExpr(getLocation(), className, name, args);
@@ -3081,9 +3100,9 @@ public class QuercusParser {
     if (className != null)
       return new ClassConstExpr(getLocation(), className, name);
     else if (name.equals("__FILE__"))
-      return new StringLiteralExpr(getLocation(), _parserLocation.getFileName());
+      return _exprFactory.createString(_parserLocation.getFileName());
     else if (name.equals("__LINE__"))
-      return new LongLiteralExpr(getLocation(), _parserLocation.getLineNumber());
+      return _exprFactory.createLong(_parserLocation.getLineNumber());
     else
       return new ConstExpr(getLocation(), name);
   }
@@ -4043,7 +4062,7 @@ public class QuercusParser {
     Expr expr;
 
     if (isUnicode)
-      expr = new StringLiteralExpr(getLocation(), prefix);
+      expr = _exprFactory.createString(prefix);
     else
       expr = new BinaryLiteralExpr(getLocation(), prefix.getBytes());
 
@@ -4073,7 +4092,7 @@ public class QuercusParser {
 	if (varName.equals("this"))
 	  tail = new ThisExpr(getLocation(), _quercusClass);
 	else
-	  tail = new VarExpr(getLocation(), _function.createVar(varName));
+	  tail = _exprFactory.createVar(_function.createVar(varName));
 
 	// php/013n
 	if (((ch = read()) == '[' || ch == '-')) {
@@ -4084,7 +4103,7 @@ public class QuercusParser {
 	  }
 	  else {
 	    if ((ch = read()) != '>') {
-	      tail = AppendExpr.create(tail, new StringLiteralExpr(getLocation(), "-"));
+	      tail = _exprFactory.createAppend(tail, _exprFactory.createString("-"));
 	    }
 	    else if (isIdentifierPart((char) (ch = read()))) {
 	      _sb.clear();
@@ -4095,7 +4114,7 @@ public class QuercusParser {
 	      tail = tail.createFieldGet(getLocation(), _sb.toString());
 	    }
 	    else {
-	      tail = AppendExpr.create(tail, new StringLiteralExpr(getLocation(), "->"));
+	      tail = _exprFactory.createAppend(tail, _exprFactory.createString("->"));
 	    }
 
 	    _peek = ch;
@@ -4107,7 +4126,7 @@ public class QuercusParser {
       else
 	throw new IllegalStateException();
 
-      expr = AppendExpr.create(expr, tail);
+      expr = _exprFactory.createAppend(expr, tail);
 
       if (isSystem)
 	token = parseEscapedString('`');
@@ -4115,7 +4134,8 @@ public class QuercusParser {
 	token = parseEscapedString('"');
 
       if (_sb.length() > 0)
-	expr = AppendExpr.create(expr, new StringLiteralExpr(getLocation(), _sb.toString()));
+	expr = _exprFactory.createAppend(expr,
+					 _exprFactory.createString(_sb.toString()));
 
       if (token == STRING)
 	return expr;
@@ -4139,7 +4159,7 @@ public class QuercusParser {
 	_sb.append((char) ch);
       }
 
-      VarExpr var = new VarExpr(getLocation(), _function.createVar(_sb.toString()));
+      VarExpr var = _exprFactory.createVar(_function.createVar(_sb.toString()));
 
       tail = new ArrayGetExpr(getLocation(), tail, var);
     }

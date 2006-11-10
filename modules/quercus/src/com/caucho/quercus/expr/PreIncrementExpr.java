@@ -42,7 +42,7 @@ import com.caucho.quercus.Location;
  * Represents a PHP pre increment expression.
  */
 public class PreIncrementExpr extends UnaryExpr {
-  private final int _incr;
+  protected final int _incr;
 
   public PreIncrementExpr(Location location, Expr expr, int incr)
     throws IOException

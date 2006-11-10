@@ -41,7 +41,7 @@ import com.caucho.quercus.Location;
 /**
  * Represents a PHP comparison expression.
  */
-public final class GeqExpr extends BinaryExpr {
+public class GeqExpr extends BinaryExpr {
   public GeqExpr(Location location, Expr left, Expr right)
   {
     super(location, left, right);

@@ -32,7 +32,7 @@ package com.caucho.quercus;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.*;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.*;
 import java.net.URL;
 import java.util.*;
 import java.util.logging.*;
@@ -90,7 +90,9 @@ public class Quercus {
   private final PageManager _pageManager;
   private final QuercusSessionManager _sessionManager;
 
-  private ModuleContext _moduleContext = new ModuleContext();
+  private final ClassLoader _loader;
+  
+  private ModuleContext _moduleContext;
 
   private HashMap<String, InternStringValue> _internMap
     = new HashMap<String, InternStringValue>();
@@ -166,12 +168,53 @@ public class Quercus {
    */
   public Quercus()
   {
+    _loader = Thread.currentThread().getContextClassLoader();
+    
+    _moduleContext = getLocalContext();
+    
     initStaticFunctions();
     initStaticClasses();
     initStaticClassServices();
 
-    _pageManager = new PageManager(this);
+    PageManager pageManager = null;
+
+    try {
+      Class cl = Class.forName("com.caucho.quercus.page.ProPageManager");
+      Constructor ctor = cl.getConstructor(new Class[] { Quercus.class });
+      
+      pageManager = (PageManager) ctor.newInstance(this);
+    } catch (Exception e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
+
+    if (pageManager == null)
+      pageManager = new PageManager(this);
+    
+    _pageManager = pageManager;
     _sessionManager = new QuercusSessionManager();
+  }
+
+  /**
+   * Returns the context for this class loader.
+   */
+  public final ModuleContext getLocalContext()
+  {
+    return getLocalContext(_loader);
+  }
+
+  public ModuleContext getLocalContext(ClassLoader loader)
+  {
+    synchronized (this) {
+      if (_moduleContext == null)
+	_moduleContext = createModuleContext(loader);
+    }
+
+    return _moduleContext;
+  }
+
+  protected ModuleContext createModuleContext(ClassLoader loader)
+  {
+    return new ModuleContext(loader);
   }
 
   /**
@@ -957,8 +1000,10 @@ public class Quercus {
 
     QuercusModule module = (QuercusModule) cl.newInstance();
 
-    ModuleInfo info = ModuleContext.addModule(module.getClass().getName(),
-                                              module);
+    ModuleContext context = getLocalContext();
+
+    ModuleInfo info = context.addModule(module.getClass().getName(),
+					module);
 
     _modules.put(info.getName(), info.getModule());
 
@@ -1139,17 +1184,20 @@ public class Quercus {
     if (log.isLoggable(Level.FINE))
       log.fine(L.l("Quercus loading class {0}", name));
 
+    ModuleContext context = getLocalContext();
+
     if (type.isAnnotationPresent(ClassImplementation.class)) {
       if (javaClassDefClass != null)
         throw new UnimplementedException();
 
-      ClassDef def = ModuleContext.addClassImpl(name, type, extension);
+      ClassDef def = context.addClassImpl(name, type, extension);
 
       _staticClasses.put(name, def);
       _lowerStaticClasses.put(name.toLowerCase(), def);
     }
     else {
-      JavaClassDef def = ModuleContext.addClass(name, type, extension, javaClassDefClass);
+      JavaClassDef def = context.addClass(name, type,
+					  extension, javaClassDefClass);
 
       _javaClassWrappers.put(name, def);
       _lowerJavaClassWrappers.put(name.toLowerCase(), def);
@@ -1181,7 +1229,9 @@ public class Quercus {
         log.finest(L.l("Quercus loading class {0} with type {1} providing extension {2}", name, type.getName(), extension));
     }
 
-    JavaImplClassDef def = ModuleContext.addClassImpl(name, type, extension);
+    ModuleContext context = getLocalContext();
+
+    JavaImplClassDef def = context.addClassImpl(name, type, extension);
 
     _staticClasses.put(name, def);
     _lowerStaticClasses.put(name.toLowerCase(), def);

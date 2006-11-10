@@ -42,11 +42,7 @@ import com.caucho.java.JavaWriter;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.expr.VarExpr;
-import com.caucho.quercus.expr.VarInfo;
-import com.caucho.quercus.expr.VarState;
-import com.caucho.quercus.expr.NullLiteralExpr;
+import com.caucho.quercus.expr.*;
 
 import com.caucho.util.L10N;
 
@@ -63,16 +59,16 @@ public class Function extends AbstractFunction {
   private static final Logger log = Logger.getLogger(Function.class.getName());
   private static final L10N L = new L10N(Function.class);
 
-  private final FunctionInfo _info;
-  private final boolean _isReturnsReference;
+  protected final FunctionInfo _info;
+  protected final boolean _isReturnsReference;
 
-  private final String _name;
-  private final Arg []_args;
-  private final Statement _statement;
+  protected final String _name;
+  protected final Arg []_args;
+  protected final Statement _statement;
 
-  private boolean _isStatic = true;
+  protected boolean _isStatic = true;
 
-  private boolean _hasReturn;
+  protected boolean _hasReturn;
 
   Function(Location location,
            String name,
@@ -92,7 +88,8 @@ public class Function extends AbstractFunction {
     setGlobal(info.isPageStatic());
   }
 
-  public Function(Location location,
+  public Function(ExprFactory exprFactory,
+		  Location location,
                   String name,
                   FunctionInfo info,
                   ArrayList<Arg> argList,
@@ -111,7 +108,7 @@ public class Function extends AbstractFunction {
     Statement []statements = new Statement[statementList.size()];
     statementList.toArray(statements);
 
-    _statement = new BlockStatement(location, statements);
+    _statement = exprFactory.createBlock(location, statements);
 
     setGlobal(info.isPageStatic());
   }
@@ -354,10 +351,13 @@ public class Function extends AbstractFunction {
     for (int i = 0; i < _args.length; i++) {
       Arg arg = _args[i];
 
-      VarExpr var = new VarExpr(getLocation(), _info.createVar(arg.getName()));
+      throw new UnsupportedOperationException();
+      /*
+      VarExpr var = new VarExpr(_info.createVar(arg.getName()));
       var.setVarState(VarState.VALID);
 
       info.addVar(var);
+      */
     }
 
     _hasReturn = ! _statement.analyze(info);

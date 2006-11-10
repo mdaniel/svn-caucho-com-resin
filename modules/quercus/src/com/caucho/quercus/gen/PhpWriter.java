@@ -181,6 +181,18 @@ public class PhpWriter extends JavaWriterWrapper {
    *
    * @return the generated id for the expression
    */
+  public String addExpr(Object expr)
+  {
+    System.out.println("ADD: " + expr);
+
+    return "ook";
+  }
+
+  /**
+   * Adds an expression
+   *
+   * @return the generated id for the expression
+   */
   public String addExpr(Expr expr)
   {
     String var = _exprMap.get(expr);

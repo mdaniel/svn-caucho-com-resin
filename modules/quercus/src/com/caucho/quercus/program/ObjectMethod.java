@@ -34,7 +34,9 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import com.caucho.util.L10N;
+
 import com.caucho.quercus.Location;
+import com.caucho.quercus.expr.*;
 
 /**
  * Represents sequence of statements.
@@ -57,14 +59,15 @@ public class ObjectMethod extends Function {
     _className = quercusClass.getName();
   }
 
-  public ObjectMethod(Location location,
+  public ObjectMethod(ExprFactory exprFactory,
+		      Location location,
                       InterpretedClassDef quercusClass,
                       String name,
                       FunctionInfo info,
                       ArrayList<Arg> argList,
                       ArrayList<Statement> statementList)
   {
-    super(location, name, info, argList, statementList);
+    super(exprFactory, location, name, info, argList, statementList);
 
     _className = quercusClass.getName();
   }

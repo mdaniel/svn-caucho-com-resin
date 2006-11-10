@@ -42,11 +42,7 @@ import com.caucho.java.JavaWriter;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.expr.VarExpr;
-import com.caucho.quercus.expr.VarInfo;
-import com.caucho.quercus.expr.VarState;
-import com.caucho.quercus.expr.NullLiteralExpr;
+import com.caucho.quercus.expr.*;
 
 import com.caucho.util.L10N;
 
@@ -65,13 +61,15 @@ public class MethodDeclaration extends Function {
 
   private final ClassDef _qClass;
 
-  public MethodDeclaration(Location location,
+  public MethodDeclaration(ExprFactory exprFactory,
+			   Location location,
 			   ClassDef qClass,
 			   String name,
 			   FunctionInfo info,
 			   ArrayList<Arg> argList)
   {
-    super(location, name, info, argList, new ArrayList<Statement>());
+    super(exprFactory, location,
+	  name, info, argList, new ArrayList<Statement>());
 
     _qClass = qClass;
   }

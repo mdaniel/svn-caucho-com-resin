@@ -51,7 +51,7 @@ public class NullLiteralExpr extends Expr {
     super(location);
   }
   
-  private NullLiteralExpr()
+  protected NullLiteralExpr()
   {
   }
 

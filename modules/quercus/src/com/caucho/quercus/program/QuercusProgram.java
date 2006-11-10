@@ -134,6 +134,16 @@ public class QuercusProgram extends GenClass {
     return _sourceFile;
   }
 
+  public FunctionInfo getFunctionInfo()
+  {
+    return _functionInfo;
+  }
+
+  public Statement getStatement()
+  {
+    return _statement;
+  }
+
   /**
    * Adds a dependency.
    */

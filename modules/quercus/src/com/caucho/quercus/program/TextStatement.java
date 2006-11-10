@@ -56,6 +56,11 @@ public class TextStatement extends Statement {
 
     _value = value;
   }
+
+  protected String getValue()
+  {
+    return _value;
+  }
   
   public Value execute(Env env)
   {
@@ -63,7 +68,7 @@ public class TextStatement extends Statement {
       env.getOut().print(_value);
     }
     catch (RuntimeException e) {
-      rethrow(e, RuntimeException.class);
+      throw e;
     }
     catch (IOException e) {
       throw new QuercusException(e);
