@@ -130,7 +130,7 @@ public class EnhancerFixup {
   {
     return _jClassLoader;
   }
-  
+
   /**
    * Gets the work path.
    */
@@ -184,7 +184,7 @@ public class EnhancerFixup {
 
     if (source == null || ! source.canRead())
       return;
-    
+
     Path ext = prePath.lookup(extClassName.replace('.', '/') + ".class");
     Path target = postPath.lookup(className.replace('.', '/') + ".class");
 
@@ -199,7 +199,7 @@ public class EnhancerFixup {
       mergeClasses(className, target, ext);
 
     int p = className.lastIndexOf('.');
-    
+
     Path preTargetDir;
     Path targetDir;
     String classSuffix;
@@ -229,13 +229,13 @@ public class EnhancerFixup {
       extSuffix = extClassName;
 
     fixupPreSubClasses(preTargetDir, targetDir,
-		       extSuffix, classSuffix);
-    
+                       extSuffix, classSuffix);
+
     fixupPostSubClasses(targetDir, prefix, classSuffix);
   }
 
   private void fixupPreSubClasses(Path preTargetDir, Path targetDir,
-				  String extSuffix, String classSuffix)
+                                  String extSuffix, String classSuffix)
     throws Exception
   {
     String []list = preTargetDir.list();
@@ -244,41 +244,41 @@ public class EnhancerFixup {
       String name = list[i];
 
       if (name.startsWith(extSuffix + '$') &&
-	  name.endsWith(".class")) {
-	int p = name.indexOf('$');
-	String targetClass = (classSuffix + '$' +
-			      name.substring(p + 1, name.length() - 6));
-	  
-	Path subTarget = targetDir.lookup(targetClass + ".class");
+          name.endsWith(".class")) {
+        int p = name.indexOf('$');
+        String targetClass = (classSuffix + '$' +
+                              name.substring(p + 1, name.length() - 6));
 
-	Path extPath = preTargetDir.lookup(name);
+        Path subTarget = targetDir.lookup(targetClass + ".class");
 
-	renameSubClass(classSuffix, subTarget, extPath);
+        Path extPath = preTargetDir.lookup(name);
 
-	//if (_loader != null)
-	//  _loader.addPathClass(prefix + targetClass, subTarget);
+        renameSubClass(classSuffix, subTarget, extPath);
+
+        //if (_loader != null)
+        //  _loader.addPathClass(prefix + targetClass, subTarget);
       }
       else if (name.startsWith(extSuffix + '-') &&
-	       name.endsWith(".class")) {
-	int p = name.indexOf('-');
-	String targetClass = (classSuffix + '-' +
-			      name.substring(p + 1, name.length() - 6));
-	  
-	Path subTarget = targetDir.lookup(targetClass + ".class");
-	  
-	Path extPath = preTargetDir.lookup(name);
+               name.endsWith(".class")) {
+        int p = name.indexOf('-');
+        String targetClass = (classSuffix + '-' +
+                              name.substring(p + 1, name.length() - 6));
 
-	renameSubClass(classSuffix, subTarget, extPath);
+        Path subTarget = targetDir.lookup(targetClass + ".class");
 
-	//if (_loader != null)
-	//  _loader.addPathClass(prefix + targetClass, subTarget);
+        Path extPath = preTargetDir.lookup(name);
+
+        renameSubClass(classSuffix, subTarget, extPath);
+
+        //if (_loader != null)
+        //  _loader.addPathClass(prefix + targetClass, subTarget);
       }
     }
   }
 
   private void fixupPostSubClasses(Path targetDir,
-				   String prefix,
-				   String classSuffix)
+                                   String prefix,
+                                   String classSuffix)
     throws Exception
   {
     String []list = targetDir.list();
@@ -287,21 +287,21 @@ public class EnhancerFixup {
       String name = list[i];
 
       if (! name.endsWith(".class"))
-	continue;
+        continue;
 
       String className = name.substring(0, name.length() - ".class".length());
 
       if (name.startsWith(classSuffix + '$')) {
-	if (_loader != null)
-	  _loader.addPathClass(prefix + className, targetDir.lookup(name));
+        if (_loader != null)
+          _loader.addPathClass(prefix + className, targetDir.lookup(name));
       }
       else if (name.startsWith(classSuffix + '-')) {
-	if (_loader != null)
-	  _loader.addPathClass(prefix + className, targetDir.lookup(name));
+        if (_loader != null)
+          _loader.addPathClass(prefix + className, targetDir.lookup(name));
       }
       else if (name.startsWith(classSuffix + '+')) {
-	if (_loader != null)
-	  _loader.addPathClass(prefix + className, targetDir.lookup(name));
+        if (_loader != null)
+          _loader.addPathClass(prefix + className, targetDir.lookup(name));
       }
     }
   }
@@ -310,23 +310,23 @@ public class EnhancerFixup {
    * Merges the two classes.
    */
   protected void renameSubClass(String className,
-				Path targetPath,
-				Path extPath)
+                                Path targetPath,
+                                Path extPath)
     throws Exception
   {
     JavaClass extClass = null;
-    
+
     ByteCodeParser parser = new ByteCodeParser();
-    
+
     parser = new ByteCodeParser();
     parser.setClassLoader(new JavaClassLoader());
-    
+
     ReadStream is = extPath.openRead();
     try {
       extClass = parser.parse(is);
     } finally {
       if (is != null)
-	is.close();
+        is.close();
     }
 
     cleanExtConstantPool(className, extClass);
@@ -343,8 +343,8 @@ public class EnhancerFixup {
    * Renamed the super() methods
    */
   protected void renameExtSuperMethods(String className,
-				       JavaClass baseClass,
-				       JavaClass extClass)
+                                       JavaClass baseClass,
+                                       JavaClass extClass)
     throws Exception
   {
     ArrayList<ConstantPoolEntry> entries;
@@ -358,28 +358,28 @@ public class EnhancerFixup {
       ConstantPoolEntry entry = entries.get(i);
 
       if (entry instanceof MethodRefConstant) {
-	MethodRefConstant methodRef = (MethodRefConstant) entry;
+        MethodRefConstant methodRef = (MethodRefConstant) entry;
 
-	if (! methodRef.getClassName().equals(baseName))
-	  continue;
+        if (! methodRef.getClassName().equals(baseName))
+          continue;
 
-	String methodName = methodRef.getName();
-	String type = methodRef.getType();
+        String methodName = methodRef.getName();
+        String type = methodRef.getType();
 
-	if (findMethod(baseClass, methodName, type) == null)
-	  continue;
-	
-	if (findMethod(extClass, methodName, type) == null)
-	  continue;
+        if (findMethod(baseClass, methodName, type) == null)
+          continue;
 
-	if (methodName.equals("<init>")) {
-	  methodName = "__init__super";
-	  // methodRef.setNameAndType(methodName, type);
-	}
-	else {
-	  methodName = methodName + "__super";
-	  methodRef.setNameAndType(methodName, type);
-	}
+        if (findMethod(extClass, methodName, type) == null)
+          continue;
+
+        if (methodName.equals("<init>")) {
+          methodName = "__init__super";
+          // methodRef.setNameAndType(methodName, type);
+        }
+        else {
+          methodName = methodName + "__super";
+          methodRef.setNameAndType(methodName, type);
+        }
       }
     }
   }
@@ -389,13 +389,13 @@ public class EnhancerFixup {
    * Moves all methods in the base to the __super methods
    */
   private void moveSuperMethods(String className,
-				JavaClass baseClass,
-				JavaClass extClass)
+                                JavaClass baseClass,
+                                JavaClass extClass)
   {
     className = className.replace('.', '/');
-    
+
     ArrayList<JavaMethod> methods = baseClass.getMethodList();
-    
+
     // Move the __super methods
     ArrayList<JavaMethod> extMethods = extClass.getMethodList();
     for (int i = 0; i < extMethods.size(); i++) {
@@ -404,41 +404,41 @@ public class EnhancerFixup {
       String baseName = extMethod.getName();
 
       if (baseName.endsWith("__super"))
-	continue;
+        continue;
 
       String superName = baseName + "__super";
-      
+
       int j;
       for (j = 0; j < methods.size(); j++) {
-	JavaMethod method = methods.get(j);
+        JavaMethod method = methods.get(j);
 
-	String type = method.getDescriptor();
-	
-	if (! method.getName().equals(baseName) ||
-	    ! method.getDescriptor().equals(extMethod.getDescriptor()))
-	  continue;
+        String type = method.getDescriptor();
 
-	if (baseName.equals("<init>")) {
-	  baseClass.getConstantPool().addUTF8("__init__super");
-	  mergeInitMethods(baseClass, method, extClass, extMethod);
-	  break;
-	}
-	
-	if (baseName.equals("<clinit>")) {
-	  concatenateMethods(baseClass, method, extClass, extMethod);
-	  break;
-	}
-	
-	baseClass.getConstantPool().addUTF8(superName);
-	method.setName(superName);
-	baseClass.getConstantPool().addUTF8(type);
-	method.setDescriptor(type);
+        if (! method.getName().equals(baseName) ||
+            ! method.getDescriptor().equals(extMethod.getDescriptor()))
+          continue;
 
-	// set the super methods private
-	int flags = method.getAccessFlags();
-	flags = (flags & ~ACC_PUBLIC & ~ACC_PROTECTED) | ACC_PRIVATE;
-	method.setAccessFlags(flags);
-	break;
+        if (baseName.equals("<init>")) {
+          baseClass.getConstantPool().addUTF8("__init__super");
+          mergeInitMethods(baseClass, method, extClass, extMethod);
+          break;
+        }
+
+        if (baseName.equals("<clinit>")) {
+          concatenateMethods(baseClass, method, extClass, extMethod);
+          break;
+        }
+
+        baseClass.getConstantPool().addUTF8(superName);
+        method.setName(superName);
+        baseClass.getConstantPool().addUTF8(type);
+        method.setDescriptor(type);
+
+        // set the super methods private
+        int flags = method.getAccessFlags();
+        flags = (flags & ~ACC_PUBLIC & ~ACC_PROTECTED) | ACC_PRIVATE;
+        method.setAccessFlags(flags);
+        break;
       }
     }
   }
@@ -447,7 +447,7 @@ public class EnhancerFixup {
    * Concatenates methods
    */
   private void concatenateMethods(JavaClass baseClass, JavaMethod baseMethod,
-				  JavaClass extClass, JavaMethod extMethod)
+                                  JavaClass extClass, JavaMethod extMethod)
   {
     extMethod = extMethod.export(extClass, baseClass);
 
@@ -458,7 +458,7 @@ public class EnhancerFixup {
    * Merges the init methods
    */
   private void mergeInitMethods(JavaClass baseClass, JavaMethod baseMethod,
-				JavaClass extClass, JavaMethod extMethod)
+                                JavaClass extClass, JavaMethod extMethod)
   {
     extMethod = extMethod.export(extClass, baseClass);
 
@@ -475,32 +475,32 @@ public class EnhancerFixup {
       byte []code = new byte[offset];
       byte []oldCode = baseEnhancer.getCode();
       System.arraycopy(oldCode, 0, code, 0, offset);
-      
+
       baseEnhancer.remove(0, offset);
       baseEnhancer.update();
 
       CodeEnhancer extEnhancer = new CodeEnhancer(baseClass, extMethod.getCode());
 
       extEnhancer.add(0, code, 0, code.length);
-      
+
       ExtInitAnalyzer extInitAnalyzer = new ExtInitAnalyzer(offset);
       extEnhancer.analyze(extInitAnalyzer);
       extEnhancer.update();
 
       CodeAttribute baseCode = baseMethod.getCode();
       CodeAttribute extCode = extMethod.getCode();
-      
+
       if (extCode.getMaxStack() < baseCode.getMaxStack())
-	extCode.setMaxStack(baseCode.getMaxStack());
+        extCode.setMaxStack(baseCode.getMaxStack());
 
       // XXX: needs tests badly
       extCode.removeAttribute("LocalVariableTable");
       extCode.removeAttribute("LineNumberTable");
       baseCode.removeAttribute("LocalVariableTable");
       baseCode.removeAttribute("LineNumberTable");
-      
+
       /*
-	baseMethod.concatenate(extMethod);
+        baseMethod.concatenate(extMethod);
       */
     } catch (RuntimeException e) {
       throw e;
@@ -533,17 +533,17 @@ public class EnhancerFixup {
       JavaMethod extMethod = extMethods.get(i);
 
       if (extMethod.getName().equals("<clinit>") &&
-	  findMethod(baseClass, "<clinit>",
-		     extMethod.getDescriptor()) != null) {
-	continue;
+          findMethod(baseClass, "<clinit>",
+                     extMethod.getDescriptor()) != null) {
+        continue;
       }
       else if (extMethod.getName().equals("<init>"))
-	continue;
+        continue;
       else if (extMethod.getName().endsWith("__super"))
-	continue;
+        continue;
 
       log.finest("adding extension method: " + extClass.getThisClass() + ":" + extMethod.getName());
-      
+
       JavaMethod method = extMethod.export(extClass, baseClass);
 
       methods.add(method);
@@ -556,28 +556,28 @@ public class EnhancerFixup {
   private void addExtClasses(JavaClass baseClass, JavaClass extClass)
   {
     /*
-    ArrayList<JavaMethod> methods = baseClass.getMethodList();
-    ArrayList<JavaMethod> extMethods = extClass.getMethodList();
+      ArrayList<JavaMethod> methods = baseClass.getMethodList();
+      ArrayList<JavaMethod> extMethods = extClass.getMethodList();
 
-    for (int i = 0; i < extMethods.size(); i++) {
+      for (int i = 0; i < extMethods.size(); i++) {
       JavaMethod extMethod = extMethods.get(i);
 
       if (extMethod.getName().equals("<clinit>") &&
-	  findMethod(baseClass, "<clinit>",
-		     extMethod.getDescriptor()) != null) {
-	continue;
+      findMethod(baseClass, "<clinit>",
+      extMethod.getDescriptor()) != null) {
+      continue;
       }
       else if (extMethod.getName().equals("<init>"))
-	continue;
+      continue;
       else if (extMethod.getName().endsWith("__super"))
-	continue;
+      continue;
 
       log.finest("adding extension method: " + extClass.getThisClass() + ":" + extMethod.getName());
-      
+
       JavaMethod method = extMethod.export(extClass, baseClass);
 
       methods.add(method);
-    }
+      }
     */
   }
 
@@ -587,14 +587,14 @@ public class EnhancerFixup {
   private JavaMethod findMethod(JavaClass cl, String name, String descriptor)
   {
     ArrayList<JavaMethod> methods = cl.getMethodList();
-    
+
     int j;
     for (j = 0; j < methods.size(); j++) {
       JavaMethod method = methods.get(j);
 
       if (method.getName().equals(name) &&
-	  method.getDescriptor().equals(descriptor))
-	return method;
+          method.getDescriptor().equals(descriptor))
+        return method;
     }
 
     return null;
@@ -619,7 +619,17 @@ public class EnhancerFixup {
       loader = Thread.currentThread().getContextClassLoader();
 
     URL url = loader.getResource(className.replace('.', '/') + ".class");
-    
+
+    // XXX: workaround for tck
+    String s = url.toString();
+    int index = s.indexOf("jar!/");
+    if (index > 0) {
+      s = s.substring(9, index+3);
+      Path path = JarPath.create(Vfs.lookup(s));
+      path = path.lookup(className.replace('.', '/') + ".class");
+      return path;
+    }
+
     return Vfs.lookup(url.toString());
   }
 
@@ -627,14 +637,14 @@ public class EnhancerFixup {
    * Merges the two classes.
    */
   protected void mergeClasses(String className,
-			      Path targetPath,
-			      Path sourcePath,
-			      Path extPath)
+                              Path targetPath,
+                              Path sourcePath,
+                              Path extPath)
     throws Exception
   {
     JavaClass baseClass = null;
     JavaClass extClass = null;
-    
+
     ByteCodeParser parser = new ByteCodeParser();
     parser.setClassLoader(getJavaClassLoader());
 
@@ -643,18 +653,18 @@ public class EnhancerFixup {
       baseClass = parser.parse(is);
     } finally {
       if (is != null)
-	is.close();
+        is.close();
     }
-    
+
     parser = new ByteCodeParser();
     parser.setClassLoader(getJavaClassLoader());
-    
+
     is = extPath.openRead();
     try {
       extClass = parser.parse(is);
     } finally {
       if (is != null)
-	is.close();
+        is.close();
     }
 
     // The base class will have the modified class
@@ -674,22 +684,22 @@ public class EnhancerFixup {
    * Merges the two classes.
    */
   protected void mergeClasses(String className,
-			      Path targetPath,
-			      Path extPath)
+                              Path targetPath,
+                              Path extPath)
     throws Exception
   {
     JavaClass baseClass = null;
     JavaClass extClass = null;
-    
+
     ByteCodeParser parser = new ByteCodeParser();
     parser.setClassLoader(getJavaClassLoader());
-    
+
     ReadStream is = extPath.openRead();
     try {
       extClass = parser.parse(is);
     } finally {
       if (is != null)
-	is.close();
+        is.close();
     }
 
     cleanExtConstantPool(className, extClass);
@@ -719,24 +729,24 @@ public class EnhancerFixup {
    * Merges the two classes.
    */
   protected void mergeClasses(String className,
-			      JavaClass baseClass,
-			      JavaClass extClass)
+                              JavaClass baseClass,
+                              JavaClass extClass)
     throws Exception
   {
     if (baseClass.getMajor() < extClass.getMajor()) {
       baseClass.setMajor(extClass.getMajor());
       baseClass.setMinor(extClass.getMinor());
     }
-    
+
     cleanExtConstantPool(className, extClass);
     renameExtSuperMethods(className, baseClass, extClass);
-    
+
     cleanExtConstantPool(className, baseClass);
 
     addExtInterfaces(baseClass, extClass);
-    
+
     addExtFields(baseClass, extClass);
-    
+
     moveSuperMethods(className, baseClass, extClass);
 
     addExtMethods(baseClass, extClass);
@@ -754,7 +764,7 @@ public class EnhancerFixup {
   {
     extClass.setThisClass(replaceString(className, extClass.getThisClass()));
     extClass.setSuperClass(replaceString(className, extClass.getSuperClassName()));
-    
+
     ArrayList<ConstantPoolEntry> entries;
     entries = extClass.getConstantPool().getEntries();
 
@@ -769,13 +779,13 @@ public class EnhancerFixup {
       ConstantPoolEntry entry = entries.get(i);
 
       if (entry instanceof Utf8Constant) {
-	Utf8Constant utf8 = (Utf8Constant) entry;
+        Utf8Constant utf8 = (Utf8Constant) entry;
 
-	String string = utf8.getValue();
+        String string = utf8.getValue();
 
-	string = replaceString(className, string);
-	
-	utf8.setValue(string);
+        string = replaceString(className, string);
+
+        utf8.setValue(string);
       }
     }
 
@@ -803,18 +813,18 @@ public class EnhancerFixup {
   {
     for (JavaMethod method : baseClass.getMethodList()) {
       if (method.getName().endsWith("__super")) {
-	Attribute ann = method.getAttribute("RuntimeVisibleAnnotations");
+        Attribute ann = method.getAttribute("RuntimeVisibleAnnotations");
 
-	if (ann != null) {
-	  String name = method.getName();
-	  name = name.substring(0, name.length() - "__super".length());
-				
-	  JavaMethod baseMethod;
-	  baseMethod = findMethod(baseClass, name, method.getDescriptor());
+        if (ann != null) {
+          String name = method.getName();
+          name = name.substring(0, name.length() - "__super".length());
 
-	  if (baseMethod != null)
-	    baseMethod.addAttribute(ann);
-	}
+          JavaMethod baseMethod;
+          baseMethod = findMethod(baseClass, name, method.getDescriptor());
+
+          if (baseMethod != null)
+            baseMethod.addAttribute(ann);
+        }
       }
     }
   }
@@ -830,7 +840,7 @@ public class EnhancerFixup {
       JavaField field = extField.export(extClass, baseClass);
 
       if (! fields.contains(field))
-	fields.add(field);
+        fields.add(field);
     }
   }
 
@@ -852,14 +862,14 @@ public class EnhancerFixup {
     String baseName = className + _baseSuffix;
     // String extName = className + "__ResinExt";
     String extName = "__ResinExt";
-    
+
     int p;
     if (! baseName.equals(className)) {
       while ((p = string.indexOf(baseName)) >= 0) {
-	String prefix = string.substring(0, p);
-	String suffix = string.substring(p + baseName.length());
+        String prefix = string.substring(0, p);
+        String suffix = string.substring(p + baseName.length());
 
-	string = prefix + className + suffix;
+        string = prefix + className + suffix;
       }
     }
 
@@ -884,7 +894,7 @@ public class EnhancerFixup {
     {
       return _offset;
     }
-    
+
     /**
      * Analyzes the opcode.
      */
@@ -892,22 +902,22 @@ public class EnhancerFixup {
       throws Exception
     {
       if (_offset >= 0)
-	return;
+        return;
 
       switch (visitor.getOpcode()) {
       case CodeVisitor.INVOKESPECIAL:
-	JavaClass javaClass = visitor.getJavaClass();
-	ConstantPool cp = javaClass.getConstantPool();
-	MethodRefConstant ref = cp.getMethodRef(visitor.getShortArg());
+        JavaClass javaClass = visitor.getJavaClass();
+        ConstantPool cp = javaClass.getConstantPool();
+        MethodRefConstant ref = cp.getMethodRef(visitor.getShortArg());
 
-	// ejb/0l00
-	// handler "super()" and "this()"
-	if (ref.getName().equals("<init>") &&
-	    (ref.getClassName().equals(javaClass.getThisClass()) ||
-	     ref.getClassName().equals(javaClass.getSuperClassName()))) {
-	  _offset = visitor.getOffset() + 3;
-	}
-	break;
+        // ejb/0l00
+        // handler "super()" and "this()"
+        if (ref.getName().equals("<init>") &&
+            (ref.getClassName().equals(javaClass.getThisClass()) ||
+             ref.getClassName().equals(javaClass.getSuperClassName()))) {
+          _offset = visitor.getOffset() + 3;
+        }
+        break;
       }
     }
   }
@@ -915,12 +925,12 @@ public class EnhancerFixup {
   private static class ExtInitAnalyzer extends Analyzer {
     int _startOffset;
     boolean _isEnhanced;
-    
+
     ExtInitAnalyzer(int length)
     {
       _startOffset = length;
     }
-    
+
     /**
      * Analyzes the opcode.
      */
@@ -928,31 +938,31 @@ public class EnhancerFixup {
       throws Exception
     {
       if (_isEnhanced)
-	return;
+        return;
 
       if (visitor.getOffset() < _startOffset)
-	return;
-      
+        return;
+
       switch (visitor.getOpcode()) {
       case CodeVisitor.INVOKESPECIAL:
-	int index = visitor.getShortArg();
+        int index = visitor.getShortArg();
 
-	ConstantPool cp = visitor.getJavaClass().getConstantPool();
-	MethodRefConstant ref;
-	ref = cp.getMethodRef(index);
+        ConstantPool cp = visitor.getJavaClass().getConstantPool();
+        MethodRefConstant ref;
+        ref = cp.getMethodRef(index);
 
-	if (! ref.getName().equals("<init>"))
-	  return;
-	
-	MethodRefConstant newRef;
-	newRef = cp.addMethodRef(ref.getClassName(),
-				 "__init__super",
-				 ref.getType());
+        if (! ref.getName().equals("<init>"))
+          return;
 
-	visitor.setShortArg(1, newRef.getIndex());
+        MethodRefConstant newRef;
+        newRef = cp.addMethodRef(ref.getClassName(),
+                                 "__init__super",
+                                 ref.getType());
 
-	_isEnhanced = true;
-	break;
+        visitor.setShortArg(1, newRef.getIndex());
+
+        _isEnhanced = true;
+        break;
       }
     }
   }

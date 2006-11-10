@@ -84,11 +84,11 @@ public class EnhancerPrepare {
   private static final int ACC_PUBLIC = 0x1;
   private static final int ACC_PRIVATE = 0x2;
   private static final int ACC_PROTECTED = 0x4;
-  
+
   private JavaClassGenerator _javaGen = new JavaClassGenerator();
 
   private ClassLoader _loader;
-  
+
   private Path _workPath;
 
   private ArrayList<ClassEnhancer> _enhancerList =
@@ -106,7 +106,7 @@ public class EnhancerPrepare {
   {
     _loader = loader;
   }
-  
+
   /**
    * Gets the work path.
    */
@@ -164,75 +164,75 @@ public class EnhancerPrepare {
     Path target = path.lookup(targetClass.replace('.', '/') + ".class");
 
     if (target.getLastModified() <= 0 ||
-	target.getLastModified() < source.getLastModified()) {
+        target.getLastModified() < source.getLastModified()) {
       try {
-	target.remove();
+        target.remove();
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
 
       try {
-	ByteCodeParser parser = new ByteCodeParser();
-	ReadStream is = source.openRead();
-	WriteStream os = null;
-	
-	try {
-	  JavaClass cl = parser.parse(is);
+        ByteCodeParser parser = new ByteCodeParser();
+        ReadStream is = source.openRead();
+        WriteStream os = null;
 
-	  String cpOldName = sourceClass.replace('.', '/');
-	  String cpClassName = targetClass.replace('.', '/');
-	  
-	  int utf8Index = cl.getConstantPool().addUTF8(cpClassName).getIndex();
-	  cl.getConstantPool().getClass(cpOldName).setNameIndex(utf8Index);
+        try {
+          JavaClass cl = parser.parse(is);
 
-	  cl.setThisClass(cpClassName);
+          String cpOldName = sourceClass.replace('.', '/');
+          String cpClassName = targetClass.replace('.', '/');
 
-	  // need to set descriptors, too
+          int utf8Index = cl.getConstantPool().addUTF8(cpClassName).getIndex();
+          cl.getConstantPool().getClass(cpOldName).setNameIndex(utf8Index);
 
-	  // set private fields to protected
-	  ArrayList<JavaField> fields = cl.getFieldList();
-	  for (int i = 0; i < fields.size(); i++) {
-	    JavaField field = fields.get(i);
+          cl.setThisClass(cpClassName);
 
-	    int accessFlags = field.getAccessFlags();
+          // need to set descriptors, too
 
-	    if ((accessFlags & ACC_PRIVATE) != 0) {
-	      accessFlags = (accessFlags & ~ ACC_PRIVATE) | ACC_PROTECTED;
-	      field.setAccessFlags(accessFlags);
-	    }
-	  }
+          // set private fields to protected
+          ArrayList<JavaField> fields = cl.getFieldList();
+          for (int i = 0; i < fields.size(); i++) {
+            JavaField field = fields.get(i);
 
-	  // set private methods to protected
-	  ArrayList<JavaMethod> methods = cl.getMethodList();
-	  for (int i = 0; i < methods.size(); i++) {
-	    JavaMethod method = methods.get(i);
+            int accessFlags = field.getAccessFlags();
 
-	    int accessFlags = method.getAccessFlags();
+            if ((accessFlags & ACC_PRIVATE) != 0) {
+              accessFlags = (accessFlags & ~ ACC_PRIVATE) | ACC_PROTECTED;
+              field.setAccessFlags(accessFlags);
+            }
+          }
 
-	    if ((accessFlags & ACC_PRIVATE) != 0) {
-	      accessFlags = (accessFlags & ~ ACC_PRIVATE) | ACC_PROTECTED;
-	      method.setAccessFlags(accessFlags);
-	    }
-	  }
+          // set private methods to protected
+          ArrayList<JavaMethod> methods = cl.getMethodList();
+          for (int i = 0; i < methods.size(); i++) {
+            JavaMethod method = methods.get(i);
 
-	  for (int i = 0; i < _enhancerList.size(); i++) {
-	    _enhancerList.get(i).preEnhance(cl);
-	  }
-	  
-	  target.getParent().mkdirs();
+            int accessFlags = method.getAccessFlags();
 
-	  os = target.openWrite();
+            if ((accessFlags & ACC_PRIVATE) != 0) {
+              accessFlags = (accessFlags & ~ ACC_PRIVATE) | ACC_PROTECTED;
+              method.setAccessFlags(accessFlags);
+            }
+          }
 
-	  cl.write(os);
-	} finally {
-	  if (is != null)
-	    is.close();
-	  
-	  if (os != null)
-	    os.close();
-	}
+          for (int i = 0; i < _enhancerList.size(); i++) {
+            _enhancerList.get(i).preEnhance(cl);
+          }
+
+          target.getParent().mkdirs();
+
+          os = target.openWrite();
+
+          cl.write(os);
+        } finally {
+          if (is != null)
+            is.close();
+
+          if (os != null)
+            os.close();
+        }
       } catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
 
       }
     }
@@ -245,6 +245,16 @@ public class EnhancerPrepare {
       loader = Thread.currentThread().getContextClassLoader();
 
     URL url = loader.getResource(className.replace('.', '/') + ".class");
+
+    // XXX: workaround for tck
+    String s = url.toString();
+    int index = s.indexOf("jar!/");
+    if (index > 0) {
+      s = s.substring(9, index+3);
+      Path path = JarPath.create(Vfs.lookup(s));
+      path = path.lookup(className.replace('.', '/') + ".class");
+      return path;
+    }
 
     if (url != null)
       return Vfs.lookup(url.toString());
@@ -259,7 +269,7 @@ public class EnhancerPrepare {
   {
     String cpOldName = jClass.getThisClass();
     String cpClassName = targetClass.replace('.', '/');
-	  
+
     int utf8Index = jClass.getConstantPool().addUTF8(cpClassName).getIndex();
     jClass.getConstantPool().getClass(cpOldName).setNameIndex(utf8Index);
 
@@ -275,8 +285,8 @@ public class EnhancerPrepare {
       int accessFlags = field.getAccessFlags();
 
       if ((accessFlags & ACC_PRIVATE) != 0) {
-	accessFlags = (accessFlags & ~ ACC_PRIVATE) | ACC_PROTECTED;
-	field.setAccessFlags(accessFlags);
+        accessFlags = (accessFlags & ~ ACC_PRIVATE) | ACC_PROTECTED;
+        field.setAccessFlags(accessFlags);
       }
     }
 
@@ -288,8 +298,8 @@ public class EnhancerPrepare {
       int accessFlags = method.getAccessFlags();
 
       if ((accessFlags & ACC_PRIVATE) != 0) {
-	accessFlags = (accessFlags & ~ ACC_PRIVATE) | ACC_PROTECTED;
-	method.setAccessFlags(accessFlags);
+        accessFlags = (accessFlags & ~ ACC_PRIVATE) | ACC_PROTECTED;
+        method.setAccessFlags(accessFlags);
       }
     }
 

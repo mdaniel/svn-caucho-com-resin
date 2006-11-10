@@ -48,22 +48,32 @@ public class PersistenceEnvironmentListener implements EnvironmentListener {
     throws Throwable
   {
     Path pwd = Vfs.getPwd(loader);
-    
+
     URL []urls = loader.getURLs();
 
     for (int i = 0; i < urls.length; i++) {
-      Path path = pwd.lookup(urls[i].toString());
+
+      // XXX: workaround for tck
+      String s = urls[i].toString();
+      Path path;
+      if (s.endsWith("jar!/")) {
+        s = s.substring(9, s.length()-2);
+        path = JarPath.create(pwd.lookup(s));
+      }
+      else {
+        path = pwd.lookup(s);
+      }
 
       Path persistenceXml = path.lookup("META-INF/persistence.xml");
 
       if (persistenceXml.canRead()) {
-	AmberContainer container = AmberContainer.getLocalContainer();
-	
-	container.addPersistenceRoot(path);
+        AmberContainer container = AmberContainer.getLocalContainer();
+
+        container.addPersistenceRoot(path);
       }
     }
   }
-  
+
   /**
    * Handles the case where the environment is stopping
    */
