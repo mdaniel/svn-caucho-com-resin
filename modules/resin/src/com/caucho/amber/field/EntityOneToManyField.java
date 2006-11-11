@@ -542,6 +542,10 @@ public class EntityOneToManyField extends CollectionField {
     out.println("{");
     out.pushDepth();
 
+    out.println("if (" + generateSuperGetter() + " == value)");
+    out.println("  return;");
+    out.println();
+
     //
     // jpa/0j57 needs to generate the following snippet:
     //

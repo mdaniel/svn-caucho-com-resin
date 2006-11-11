@@ -38,7 +38,9 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import com.caucho.bytecode.CodeAttribute;
 import com.caucho.bytecode.JavaClass;
+import com.caucho.bytecode.JMethod;
 
 import com.caucho.util.L10N;
 
@@ -460,8 +462,14 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
     JClass thisClass = _amberContainer.getJClassLoader().forName(className.replace('/', '.'));
 
-    for (; thisClass != null; thisClass = thisClass.getSuperClass()) {
+    if (thisClass == null)
+      return;
 
+    // Cache entity JClass for next fixup.
+    JClass entityClass = thisClass;
+
+    // Field-based fixup.
+    do {
       EntityType type = _amberContainer.getEntity(thisClass.getName());
 
       if (type == null || ! type.isFieldAccess())
@@ -478,16 +486,108 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
         fieldMaps.add(new FieldMap(baseClass, field.getName()));
       }
     }
+    while ((thisClass = thisClass.getSuperClass()) != null);
 
-    if (fieldMaps.size() == 0)
+    if (fieldMaps.size() > 0) {
+      FieldFixupAnalyzer analyzer = new FieldFixupAnalyzer(fieldMaps);
+
+      for (JavaMethod javaMethod : baseClass.getMethodList()) {
+        CodeVisitor visitor = new CodeVisitor(baseClass, javaMethod.getCode());
+
+        visitor.analyze(analyzer, true);
+      }
+    }
+
+    // Property-based fixup.
+    EntityType type = _amberContainer.getEntity(entityClass.getName());
+
+    if (type.isFieldAccess())
       return;
 
-    FieldFixupAnalyzer analyzer = new FieldFixupAnalyzer(fieldMaps);
+    // jpa/0h28: implied by tck.
+    // Fixup for arg. constructor: appends all setters for
+    // property-based access to the end of constructors.
+    // Actually calls __caucho_postConstructor() which calls
+    // all the setter methods.
 
-    for (JavaMethod javaMethod : baseClass.getMethodList()) {
-      CodeVisitor visitor = new CodeVisitor(baseClass, javaMethod.getCode());
+    ConstantPool pool = baseClass.getConstantPool();
 
-      visitor.analyze(analyzer, true);
+    MethodRefConstant methodRef;
+
+    methodRef = pool.addMethodRef(baseClass.getThisClass(),
+                                  "__caucho_postConstructor",
+                                  "()V");
+
+    JMethod jMethods[] = baseClass.getDeclaredMethods();
+
+    JMethod jMethod = null;
+    for (int i=0; i < jMethods.length; i++)
+      if (jMethods[i].getName().equals("__caucho_postConstructor")) {
+        jMethod = jMethods[i];
+        break;
+      }
+
+    if ((jMethod == null) || ! (jMethod instanceof JavaMethod))
+      return;
+
+    CodeAttribute codeAttr = ((JavaMethod) jMethod).getCode();
+    byte code[] = codeAttr.getCode();
+    int codeLength = code.length;
+
+    CodeVisitor visitor = new CodeVisitor(baseClass, codeAttr);
+
+    for (int i=0; i < code.length; i++) {
+      byte op = code[i];
+
+      if ((op & 0xff) == CodeVisitor.INVOKEVIRTUAL) {
+        int setterIndex = visitor.getShortArg(i + 1);
+        MethodRefConstant ref;
+
+        ref = pool.getMethodRef(setterIndex);
+
+        String refName = ref.getName();
+
+        // replace 'setData__super' with 'setData'
+        if (refName.startsWith("set")) {
+          refName = refName.substring(0, refName.indexOf("_"));
+        }
+
+        ref = pool.addMethodRef(baseClass.getThisClass(),
+                                refName,
+                                ref.getType().toString());
+
+        visitor.setShortArg(i + 1, ref.getIndex());
+      }
+    }
+
+    for (JavaMethod method : baseClass.getMethodList()) {
+      if (! method.getName().equals("<init>"))
+        continue;
+
+      // Do not change default constructors
+      if (method.getParameterTypes().length == 0)
+        continue;
+
+      codeAttr = method.getCode();
+      code = codeAttr.getCode();
+      codeLength = code.length;
+
+      int offset = 0;
+      if ((code[codeLength - 1] & 0xff) == CodeVisitor.RETURN)
+        offset = 1;
+
+      byte []newCode = new byte[codeLength + 4];
+      System.arraycopy(code, 0, newCode, 0, codeLength - offset);
+      codeAttr.setCode(newCode);
+
+      visitor = new CodeVisitor(baseClass, codeAttr);
+      visitor.setOffset(codeLength - offset);
+      visitor.setByteArg(0, CodeVisitor.ALOAD_0);
+      visitor.setByteArg(1, CodeVisitor.INVOKEVIRTUAL);
+      visitor.setShortArg(2, methodRef.getIndex());
+
+      if ((code[codeLength - 1] & 0xff) == CodeVisitor.RETURN)
+        newCode[newCode.length-1] = (byte) (CodeVisitor.RETURN & 0xff);
     }
   }
 

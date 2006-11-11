@@ -375,6 +375,18 @@ abstract public class AbstractField implements AmberField {
   }
 
   /**
+   * Generates the post constructor initialization.
+   */
+  public void generatePostConstructor(JavaWriter out)
+    throws IOException
+  {
+    if (isFieldAccess())
+      return;
+
+    out.println(getSetterName() + "(" + generateSuperGetter() + ");");
+  }
+
+  /**
    * Generates any prologue.
    */
   public void generatePrologue(JavaWriter out, HashSet<Object> completedSet)

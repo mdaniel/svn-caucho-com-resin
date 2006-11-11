@@ -936,6 +936,11 @@ public class EntityManyToManyField extends AssociationField {
     out.print(type.getPrintName() + " value)");
     out.println("{");
     out.pushDepth();
+
+    out.println("if (" + generateSuperGetter() + " == value)");
+    out.println("  return;");
+    out.println();
+
     //
     // jpa/0s2j needs to generate the following snippet:
     //

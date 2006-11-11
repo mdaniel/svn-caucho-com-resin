@@ -47,6 +47,7 @@ import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.SubEntityType;
 import com.caucho.amber.type.Type;
 
+import com.caucho.amber.field.AbstractField;
 import com.caucho.amber.field.AmberField;
 import com.caucho.amber.field.CascadableField;
 //import com.caucho.amber.field.Field;
@@ -265,6 +266,28 @@ public class EntityComponent extends ClassComponent {
   {
     if (_entityType.getParentType() != null)
       return;
+
+    // XXX: needs to handle this with subclasses
+    // but there is an issue in the enhancer fixup
+    // removing the "super." call.
+    out.println();
+    out.println("public void __caucho_postConstructor()");
+    out.println("{");
+    out.pushDepth();
+
+    ArrayList<AmberField> fields = _entityType.getFields();
+
+    for (int i = 0; i < fields.size(); i++) {
+      AmberField field = fields.get(i);
+
+      if (field instanceof AbstractField) {
+        AbstractField f = (AbstractField) field;
+        f.generatePostConstructor(out);
+      }
+    }
+
+    out.popDepth();
+    out.println("}");
 
     out.println();
     out.println("public void __caucho_setPrimaryKey(Object key)");
@@ -717,8 +740,8 @@ public class EntityComponent extends ClassComponent {
 
     out.println();
 
-    out.println("if (isDirty) {");
-    out.pushDepth();
+    out.println("if (! isDirty)");
+    out.println("  return true;");
 
     out.println("com.caucho.util.CharBuffer cb = new com.caucho.util.CharBuffer();");
     out.println("__caucho_home.generateUpdateSQLPrefix(cb);");
@@ -766,29 +789,6 @@ public class EntityComponent extends ClassComponent {
       out.println("}");
       out.println();
     }
-
-    out.popDepth();
-    out.println("}"); // closes if (isDirty) {
-
-    // XXX: cascade
-    // boolean isCascade = false;
-    //
-    // CharBuffer cb = new CharBuffer();
-    //
-    // for (int i = 0; i < fields.size(); i++) {
-    //   AmberField field = fields.get(i);
-    //
-    //   if (field.isCascadable()) {
-    //     CascadableField cascadable = (CascadableField) field;
-    //     isCascade = cascadable.generateFlush(cb);
-    //
-    //     if (isCascade) {
-    //       cb.append("\n");
-    //     }
-    //   }
-    // }
-    //
-    // out.println(cb.toString());
 
     out.println("__caucho_session.postUpdate(this);");
 
@@ -866,6 +866,17 @@ public class EntityComponent extends ClassComponent {
   private void generateAfterCommit(JavaWriter out)
     throws IOException
   {
+    // XXX: needs to handle this with subclasses
+    // but there is an issue in the enhancer fixup
+    // removing the "super." call.
+    // if (_entityType.getParentType() != null) {
+    //   out.println();
+    //   out.println("public void __caucho_super_afterCommit()");
+    //   out.println("{");
+    //   out.println("  super.__caucho_afterCommit();");
+    //   out.println("}");
+    // }
+
     out.println();
     out.println("public void __caucho_afterCommit()");
     out.println("{");
@@ -877,10 +888,12 @@ public class EntityComponent extends ClassComponent {
       out.println("long updateMask_" + i + " = __caucho_updateMask_" + i + ";");
     }
 
-    if (_entityType.getParentType() != null) {
-      out.println();
-      out.println("super.__caucho_afterCommit();");
-    }
+    // XXX: there is an issue in the enhancer fixup
+    // replacing the super but it should not in this case.
+    // if (_entityType.getParentType() != null) {
+    //   out.println();
+    //   out.println("__caucho_super_afterCommit();");
+    // }
 
     out.println();
     out.println("__caucho_state = com.caucho.amber.entity.Entity.P_NON_TRANSACTIONAL;");
@@ -1061,27 +1074,32 @@ public class EntityComponent extends ClassComponent {
     out.println();
     _entityType.getId().generateSetGeneratedKeys(out, "pstmt");
 
-    for (Table subTable : _entityType.getSecondaryTables()) {
-      out.println();
-      out.print("sql = \"");
-      out.print(_entityType.generateCreateSQL(subTable));
-      out.println("\";");
+    EntityType parentType = _entityType;
 
-      out.println("pstmt = aConn.prepareStatement(sql);");
+    do {
+      for (Table subTable : parentType.getSecondaryTables()) {
+        out.println();
+        out.print("sql = \"");
+        out.print(parentType.generateCreateSQL(subTable));
+        out.println("\";");
 
-      out.println("index = 1;");
+        out.println("pstmt = aConn.prepareStatement(sql);");
 
-      out.println();
-      _entityType.getId().generateSetInsert(out, "pstmt", "index");
+        out.println("index = 1;");
 
-      _entityType.generateInsertSet(out, subTable, "pstmt", "index", "super");
+        out.println();
+        parentType.getId().generateSetInsert(out, "pstmt", "index");
 
-      out.println();
-      out.println("pstmt.executeUpdate();");
+        parentType.generateInsertSet(out, subTable, "pstmt", "index", "super");
 
-      out.println();
-      _entityType.getId().generateSetGeneratedKeys(out, "pstmt");
+        out.println();
+        out.println("pstmt.executeUpdate();");
+
+        out.println();
+        parentType.getId().generateSetGeneratedKeys(out, "pstmt");
+      }
     }
+    while ((parentType = parentType.getParentType()) != null);
 
     out.println();
     out.println("__caucho_session = aConn;");
