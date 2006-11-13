@@ -290,6 +290,10 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
   {
     try {
       popContext();
+
+      if (_currentIsEmpty)
+        popContext();
+
       _currentIsEmpty = false;
     } 
     catch (ClassCastException e) {
