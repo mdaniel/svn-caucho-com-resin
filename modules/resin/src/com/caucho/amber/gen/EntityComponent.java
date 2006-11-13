@@ -1007,7 +1007,17 @@ public class EntityComponent extends ClassComponent {
     ArrayList<IdField> fields = _entityType.getId().getKeys();
     IdField idField = fields.size() > 0 ? fields.get(0) : null;
 
-    if (! _entityType.getPersistenceUnit().hasReturnGeneratedKeys() &&
+    boolean hasReturnGeneratedKeys = false;
+
+    try {
+      hasReturnGeneratedKeys = _entityType.getPersistenceUnit().hasReturnGeneratedKeys();
+    } catch (Exception e) {
+      // Meta-data exception which is acceptable or
+      // no data-source configured. The latter will
+      // be thrown on web.xml validation. (ejb/06m0)
+    }
+
+    if (! hasReturnGeneratedKeys &&
         idField != null && idField.getType().isAutoIncrement()) {
       out.println();
       out.println("private static com.caucho.amber.field.Generator __caucho_id_gen;");
