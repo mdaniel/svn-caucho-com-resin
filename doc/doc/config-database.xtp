@@ -532,6 +532,68 @@ will happen even if the code using the connection throws an exception.</p>
 
 </s1> <!-- usage -->
 
+<s1 title="Protecting the database password">
+
+<p>
+Resin provides facilities that allow you to plugin your own custom
+code that returns a password to Resin.  However any solution is vulnerable,
+unless you require a person to type in a password every time Resin starts (or
+restarts).  Typically the security of the machine hosting Resin, and proper
+permissions on the readability of the resin.conf file, are sufficient to
+protect your database password.
+</p>
+
+<p>
+The solution shown below is not really secure because you can disassemble the
+Password code to get the decryption key, but it may be marginally better than
+plaintext.</p>
+ 
+<example>
+&lt;driver type="..."&gt; 
+  &lt;password resin:type="com.hogwarts.Password"&gt;mX9aN9M==&lt;/password&gt; 
+  ...
+</example>
+ 
+<p>
+You will need to provide com.hogwarts.Password:
+</p>
+ 
+<example>
+package com.hogwarts;
+
+public class Password { 
+  private String _value; 
+ 
+  public void addText(String value) 
+  { 
+    _value = value; 
+  } 
+ 
+  public Object replaceObject() 
+  { 
+    return decrypt(_value); 
+  } 
+
+  private String decrypt(String encrypted)
+  {
+    ... custom code ...
+  }
+} 
+</example>
+ 
+<p>
+This solution is completely general, you can use resin:type anywhere in the
+configuration files where a string value is allowed.
+</p>
+ 
+<p>
+Resin does not provide the equivalent of com.hogwarts.Password because it's not
+really secure.  Providing that kind of solution would lead some to believe it
+was a secure solution.
+</p>
+
+</s1>
+
 <s1 title="See also">
 
 <ul>
