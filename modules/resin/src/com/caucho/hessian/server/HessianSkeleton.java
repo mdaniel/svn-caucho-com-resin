@@ -100,7 +100,7 @@ public class HessianSkeleton extends AbstractSkeleton {
   public void invoke(HessianInput in, HessianOutput out)
     throws Throwable
   {
-    invoke(in, out);
+    invoke((AbstractHessianInput) in, (AbstractHessianOutput) out);
   }
 
   /**
