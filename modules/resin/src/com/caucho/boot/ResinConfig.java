@@ -34,7 +34,6 @@ import java.util.*;
 import javax.annotation.*;
 
 import com.caucho.config.*;
-import com.caucho.config.core.*;
 import com.caucho.config.types.*;
 import com.caucho.loader.*;
 import com.caucho.vfs.*;
@@ -142,12 +141,12 @@ public class ResinConfig implements EnvironmentBean {
   /**
    * Finds a server.
    */
-  public Watchdog findServer(String id)
+  public ResinWatchdog findServer(String id)
   {
     for (int i = 0; i < _clusterList.size(); i++) {
       ClusterConfig cluster = _clusterList.get(i);
 
-      Watchdog server = cluster.findServer(id);
+      ResinWatchdog server = cluster.findServer(id);
 
       if (server != null)
 	return server;
@@ -212,7 +211,7 @@ public class ResinConfig implements EnvironmentBean {
     @PostConstruct
       public void init()
     {
-      Watchdog server = findServer(_id);
+      ResinWatchdog server = findServer(_id);
 
       if (server != null)
 	return;

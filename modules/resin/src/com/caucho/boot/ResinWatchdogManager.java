@@ -58,11 +58,11 @@ import java.util.logging.Logger;
 /**
  * Process responsible for watching a backend server.
  */
-public class WatchdogManager extends ProtocolDispatchServer {
+public class ResinWatchdogManager extends ProtocolDispatchServer {
   private static L10N _L;
   private static Logger _log;
 
-  private static WatchdogManager _watchdog;
+  private static ResinWatchdogManager _watchdog;
 
   private Args _args;
 
@@ -74,10 +74,10 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
   private Port _port;
 
-  private HashMap<String,Watchdog> _activeServerMap
-    = new HashMap<String,Watchdog>();
+  private HashMap<String,ResinWatchdog> _activeServerMap
+    = new HashMap<String,ResinWatchdog>();
 
-  WatchdogManager(String []argv)
+  ResinWatchdogManager(String []argv)
     throws Exception
   {
     _watchdog = this;
@@ -88,7 +88,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
     _resin = readConfig(_args);
 
-    Watchdog server = _resin.findServer(_args.getServerId());
+    ResinWatchdog server = _resin.findServer(_args.getServerId());
 
     Cluster cluster = new Cluster();
     ClusterServer clusterServer = new ClusterServer(cluster);
@@ -122,7 +122,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
     servlet.setServletName("watchdog");
     servlet.addURLPattern("/watchdog");
-    servlet.setServletClass("com.caucho.boot.WatchdogServlet");
+    servlet.setServletClass("com.caucho.boot.ResinWatchdogServlet");
     servlet.init();
 
     webApp.addServletMapping(servlet);
@@ -135,7 +135,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
     webApp.start();
   }
 
-  static WatchdogManager getWatchdog()
+  static ResinWatchdogManager getWatchdog()
   {
     return _watchdog;
   }
@@ -195,7 +195,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
       throw new ConfigException(e);
     }
     
-    Watchdog server = resin.findServer(serverId);
+    ResinWatchdog server = resin.findServer(serverId);
 
     if (server == null)
       throw new ConfigException(L().l("No matching <server> found for -server '{0}'",
@@ -218,7 +218,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
   boolean stopServer(String serverId)
   {
-    Watchdog server = null;
+    ResinWatchdog server = null;
     
     synchronized (_activeServerMap) {
       server = _activeServerMap.remove(serverId);
@@ -273,7 +273,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
       //Logger.getLogger("").setLevel(Level.FINER);
 
-      WatchdogManager manager = new WatchdogManager(argv);
+      ResinWatchdogManager manager = new ResinWatchdogManager(argv);
 
       manager.startServer(argv);
     } catch (Exception e) {

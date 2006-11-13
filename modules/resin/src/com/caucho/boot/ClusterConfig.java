@@ -43,8 +43,8 @@ public class ClusterConfig {
   private ArrayList<InitProgram> _serverDefaultList
     = new ArrayList<InitProgram>();
 
-  private ArrayList<Watchdog> _serverList
-    = new ArrayList<Watchdog>();
+  private ArrayList<ResinWatchdog> _serverList
+    = new ArrayList<ResinWatchdog>();
   
   private String _id = "";
 
@@ -77,9 +77,9 @@ public class ClusterConfig {
     _serverDefaultList.add(program);
   }
 
-  public Watchdog createServer()
+  public ResinWatchdog createServer()
   {
-    Watchdog watchdog = new Watchdog(this);
+    ResinWatchdog watchdog = new ResinWatchdog(this);
 
     for (int i = 0; i < _serverDefaultList.size(); i++)
       _serverDefaultList.get(i).configure(watchdog);
@@ -87,7 +87,7 @@ public class ClusterConfig {
     return watchdog;
   }
 
-  public void addServer(Watchdog server)
+  public void addServer(ResinWatchdog server)
     throws ConfigException
   {
     if (_resin.findServer(server.getId()) != null)
@@ -107,10 +107,10 @@ public class ClusterConfig {
   /**
    * Finds a server.
    */
-  public Watchdog findServer(String id)
+  public ResinWatchdog findServer(String id)
   {
     for (int i = 0; i < _serverList.size(); i++) {
-      Watchdog server = _serverList.get(i);
+      ResinWatchdog server = _serverList.get(i);
 
       if (id.equals(server.getId()))
 	return server;

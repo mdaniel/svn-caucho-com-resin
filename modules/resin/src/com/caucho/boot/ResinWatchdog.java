@@ -33,7 +33,7 @@ import com.caucho.config.BuilderProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.management.server.AbstractManagedObject;
-import com.caucho.management.server.WatchdogMXBean;
+import com.caucho.management.server.ResinWatchdogMXBean;
 import com.caucho.server.admin.HessianHmuxProxy;
 import com.caucho.server.port.Port;
 import com.caucho.util.Alarm;
@@ -59,11 +59,11 @@ import java.util.logging.Logger;
 /**
  * Thread responsible for watching a backend server.
  */
-public class Watchdog extends AbstractManagedObject
-  implements Runnable, WatchdogMXBean
+public class ResinWatchdog extends AbstractManagedObject
+  implements Runnable, ResinWatchdogMXBean
 {
   private static final Logger log
-    = Logger.getLogger(Watchdog.class.getName());
+    = Logger.getLogger(ResinWatchdog.class.getName());
 
   private ClusterConfig _cluster;
   
@@ -104,7 +104,7 @@ public class Watchdog extends AbstractManagedObject
   private Date _lastStartTime;
   private int _startCount;
   
-  Watchdog(ClusterConfig cluster)
+  ResinWatchdog(ClusterConfig cluster)
   {
     _cluster = cluster;
 
@@ -322,7 +322,7 @@ public class Watchdog extends AbstractManagedObject
 
     Map<String,String> env = builder.environment();
 
-    String classPath = WatchdogManager.calculateClassPath(resinHome);
+    String classPath = ResinWatchdogManager.calculateClassPath(resinHome);
 
     env.put("CLASSPATH", classPath);
 
@@ -352,7 +352,7 @@ public class Watchdog extends AbstractManagedObject
 
     list.addAll(_watchdogArgs);
     
-    list.add("com.caucho.boot.WatchdogManager");
+    list.add("com.caucho.boot.ResinWatchdogManager");
 
     for (int i = 0; i < argv.length; i++)
       list.add(argv[i]);
@@ -635,7 +635,7 @@ public class Watchdog extends AbstractManagedObject
 				WriteStream out)
     throws IOException
   {
-    String classPath = WatchdogManager.calculateClassPath(resinHome);
+    String classPath = ResinWatchdogManager.calculateClassPath(resinHome);
 
     HashMap<String,String> env = new HashMap<String,String>();
 
@@ -702,8 +702,8 @@ public class Watchdog extends AbstractManagedObject
 	  out.println();
       }
 
-      if (env.get("LD_LIBRARY_PATH") != null)
-	  out.print("LD_LIBRARY_PATH: " + env.get("LD_LIBRARY_PATH"));
+      for (Map.Entry<String, String> envEntry : env.entrySet())
+        out.println("" + envEntry.getKey() + ": " + envEntry.getValue());
     }
 
     if (_jniBoot != null) {

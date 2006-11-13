@@ -29,51 +29,30 @@
 
 package com.caucho.quercus.lib;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
-
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-import java.util.Map;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-
-import com.caucho.util.L10N;
-import com.caucho.util.RandomUtil;
-
 import com.caucho.java.ScriptStackTrace;
-
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusModuleException;
-
+import com.caucho.quercus.env.*;
+import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.Reference;
 import com.caucho.quercus.module.UsesSymbolTable;
-
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.BinaryBuilderValue;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.DoubleValue;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.ObjectValue;
-import com.caucho.quercus.env.StringBuilderValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.UnsetValue;
-import com.caucho.quercus.env.Value;
-
-import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.program.QuercusProgram;
-
+import com.caucho.util.L10N;
+import com.caucho.util.RandomUtil;
 import com.caucho.vfs.Path;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * PHP mysql routines.
@@ -368,35 +347,35 @@ public class MiscModule extends AbstractQuercusModule {
   /**
    * Execute a system command.
    */
-  public static Value passthru(Env env, String command,
+  public static void passthru(Env env, String command,
 			       @Optional @Reference Value result)
   {
-    String []args = new String[3];
 
     try {
+      String []args = new String[3];
       args[0] = "sh";
       args[1] = "-c";
       args[2] = command;
-      Process process = Runtime.getRuntime().exec(args);
 
-      InputStream is = process.getInputStream();
-      OutputStream os = process.getOutputStream();
-      os.close();
+      ProcessBuilder processBuilder = new ProcessBuilder(args);
+      processBuilder.redirectErrorStream(true);
+      final Process process = processBuilder.start();
 
-      StringBuilderValue sb = new StringBuilderValue();
+      try {
+        InputStream is = process.getInputStream();
+        OutputStream os = process.getOutputStream();
+        os.close();
 
-      int ch;
-      boolean hasCr = false;
-      env.getOut().writeStream(is);
-      is.close();
+        env.getOut().writeStream(is);
+        is.close();
 
-      int status = process.waitFor();
-
-      return sb;
+        int status = process.waitFor();
+      }
+      finally {
+        process.destroy();
+      }
     } catch (Exception e) {
       env.warning(e.getMessage(), e);
-
-      return NullValue.NULL;
     }
   }
 

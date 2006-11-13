@@ -30,7 +30,6 @@
 package com.caucho.management.server;
 
 import com.caucho.jmx.Description;
-import com.caucho.jmx.Units;
 
 import java.util.Date;
 
@@ -42,7 +41,7 @@ import java.util.Date;
  * </pre>
  */
 @Description("The Watchdog for a Server")
-public interface WatchdogMXBean {
+public interface ResinWatchdogMXBean {
   //
   // ID attributes
   //
@@ -51,7 +50,7 @@ public interface WatchdogMXBean {
    * Returns the -server id.
    */
   @Description("The server id used when starting this instance"
-               + " of Resin, the value of `-server'")
+               + " of Resin, the value of `--server'")
   public String getId();
 
   //
@@ -67,7 +66,7 @@ public interface WatchdogMXBean {
   /**
    * Returns the last start time.
    */
-  @Description("The time that the watchdog was officially started")
+  @Description("The time that the watchdog was started")
   public Date getInitialStartTime();
 
   /**

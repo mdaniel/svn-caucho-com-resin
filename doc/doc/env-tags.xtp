@@ -493,12 +493,18 @@ and lookup the foreign JNDI objects.</p>
     <td>required</td></tr>
 </deftable-childtags>
 
-<example title="A JNDI symbolic link for an EJB">
-&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
-  &lt;ejb-server name="java:comp/env/ejb"/&gt;
+<example title="A JNDI symbolic link for a DataSource">
+&lt;web-app xmlns="http://caucho.com/ns/resin"dd&gt;
+  &lt;database jndi-name="jdbc/oracle"&gt;
+    ...
+  &lt;/database&gt;
 
-  &lt;jndi-link jndi-name="java:comp/env/ApplicationName"&gt;
-    &lt;foreign-name&gt;java:comp/env/ejb/EjbJarName&lt;/foreign-name&gt;
+  &lt;jndi-link jndi-name="java:comp/env/jdbc/gryffindor"&gt;
+    &lt;foreign-name&gt;java:comp/env/jdbc/oracle&lt;/foreign-name&gt;
+  &lt;/jndi-link&gt;
+
+  &lt;jndi-link jndi-name="java:comp/env/jdbc/slytherin"&gt;
+    &lt;foreign-name&gt;java:comp/env/jdbc/oracle&lt;/foreign-name&gt;
   &lt;/jndi-link&gt;
 &lt;/web-app&gt;
 </example>
@@ -514,8 +520,6 @@ and lookup the foreign JNDI objects.</p>
 
 <example title="A JNDI foreign context for selected EJB">
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
-  &lt;ejb-server jndi-name="java:comp/env/local-ejb"/&gt;
-
   &lt;jndi-link jndi-name='java:comp/env/remote-ejb'&gt;
     &lt;factory&gt;com.caucho.ejb.hessian.HessianContextFactory&lt;/factory&gt;
     &lt;init-param java.naming.provider.url='http://ejb.hogwarts.com:80/hessian'/&gt;

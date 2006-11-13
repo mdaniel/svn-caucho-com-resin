@@ -29,25 +29,22 @@
 
 package com.caucho.boot;
 
-import java.io.*;
-import java.util.logging.*;
-
-import javax.servlet.*;
-
 import com.caucho.hessian.server.HessianServlet;
+
+import java.util.logging.Logger;
 
 /**
  * Process responsible for watching a backend server.
  */
-public class WatchdogServlet extends HessianServlet implements WatchdogAPI {
+public class ResinWatchdogServlet extends HessianServlet implements WatchdogAPI {
   private static final Logger log
-    = Logger.getLogger(WatchdogServlet.class.getName());
+    = Logger.getLogger(ResinWatchdogServlet.class.getName());
 
-  private WatchdogManager _watchdogManager;
+  private ResinWatchdogManager _watchdogManager;
   
   public void init()
   {
-    _watchdogManager = WatchdogManager.getWatchdog();
+    _watchdogManager = ResinWatchdogManager.getWatchdog();
   }
     
   public boolean start(String []argv)

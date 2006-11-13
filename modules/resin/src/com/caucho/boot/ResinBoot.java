@@ -71,7 +71,7 @@ public class ResinBoot {
   private boolean _isVerbose;
   private boolean _isResinProfessional;
 
-  private Watchdog _server;
+  private ResinWatchdog _server;
 
   private StartMode _startMode = StartMode.DIRECT;
 
