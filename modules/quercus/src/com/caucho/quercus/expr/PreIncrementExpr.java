@@ -45,7 +45,6 @@ public class PreIncrementExpr extends UnaryExpr {
   protected final int _incr;
 
   public PreIncrementExpr(Location location, Expr expr, int incr)
-    throws IOException
   {
     // super(expr.createRef());
     super(location, expr);
@@ -54,7 +53,6 @@ public class PreIncrementExpr extends UnaryExpr {
   }
 
   public PreIncrementExpr(Expr expr, int incr)
-    throws IOException
   {
     // super(expr.createRef());
     super(expr);

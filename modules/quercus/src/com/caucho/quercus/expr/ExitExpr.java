@@ -45,7 +45,7 @@ import com.caucho.quercus.program.AnalyzeInfo;
  * Represents the exit expression
  */
 public class ExitExpr extends Expr {
-  private final Expr _value;
+  protected final Expr _value;
 
   public ExitExpr(Location location, Expr value)
   {

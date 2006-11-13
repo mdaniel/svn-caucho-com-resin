@@ -34,6 +34,8 @@ import java.util.HashMap;
 
 import com.caucho.util.L10N;
 
+import com.caucho.quercus.expr.ExprFactory;
+
 import com.caucho.quercus.program.Function;
 
 import com.caucho.quercus.program.ClassDef;
@@ -45,11 +47,18 @@ import com.caucho.quercus.program.InterpretedClassDef;
 public class GlobalScope extends Scope {
   private final static L10N L = new L10N(GlobalScope.class);
 
+  private ExprFactory _exprFactory;
+
   private HashMap<String,Function> _functionMap
     = new HashMap<String,Function>();
 
   private HashMap<String,InterpretedClassDef> _classMap
     = new HashMap<String,InterpretedClassDef>();
+
+  GlobalScope(ExprFactory exprFactory)
+  {
+    _exprFactory = exprFactory;
+  }
 
   /**
    * Adds a function.
@@ -72,7 +81,8 @@ public class GlobalScope extends Scope {
       String []ifaceArray = new String[ifaceList.size()];
       ifaceList.toArray(ifaceArray);
       
-      cl = new InterpretedClassDef(name, parentName, ifaceArray);
+      cl = _exprFactory.createClassDef(name, parentName, ifaceArray);
+      
       _classMap.put(name, cl);
     }
 

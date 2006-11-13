@@ -56,27 +56,28 @@ import com.caucho.quercus.gen.PhpWriter;
  * Represents an interpreted PHP class definition.
  */
 public class InterpretedClassDef extends ClassDef
-  implements InstanceInitializer {
-  private boolean _isAbstract;
-  private boolean _isInterface;
+  implements InstanceInitializer
+{
+  protected boolean _isAbstract;
+  protected boolean _isInterface;
   
-  private final HashMap<String,AbstractFunction> _functionMap
+  protected final HashMap<String,AbstractFunction> _functionMap
     = new HashMap<String,AbstractFunction>();
 
-  private final HashMap<String,Expr> _fieldMap
+  protected final HashMap<String,Expr> _fieldMap
     = new LinkedHashMap<String,Expr>();
 
-  private final HashMap<String,Expr> _staticFieldMap
+  protected final HashMap<String,Expr> _staticFieldMap
     = new LinkedHashMap<String,Expr>();
 
-  private final HashMap<String,Expr> _constMap
+  protected final HashMap<String,Expr> _constMap
     = new HashMap<String,Expr>();
 
-  private AbstractFunction _constructor;
-  private AbstractFunction _destructor;
-  private AbstractFunction _getField;
-  private AbstractFunction _setField;
-  private AbstractFunction _call;
+  protected AbstractFunction _constructor;
+  protected AbstractFunction _destructor;
+  protected AbstractFunction _getField;
+  protected AbstractFunction _setField;
+  protected AbstractFunction _call;
 
   public InterpretedClassDef(String name,
 			     String parentName,
@@ -266,6 +267,9 @@ public class InterpretedClassDef extends ClassDef
    */
   public void analyze()
   {
+    if (true)
+      throw new UnsupportedOperationException();
+    
     for (AbstractFunction fun : _functionMap.values()) {
       fun.analyze();
     }
@@ -277,6 +281,9 @@ public class InterpretedClassDef extends ClassDef
   public void generate(PhpWriter out)
     throws IOException
   {
+    if (true)
+      throw new UnsupportedOperationException();
+    
     out.addClass(this);
 
     out.println();

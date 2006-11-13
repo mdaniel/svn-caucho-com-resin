@@ -50,8 +50,8 @@ import com.caucho.util.L10N;
  */
 public class NewExpr extends Expr {
   private static final L10N L = new L10N(NewExpr.class);
-  private final String _name;
-  private final Expr []_args;
+  protected final String _name;
+  protected final Expr []_args;
 
   public NewExpr(Location location, String name, ArrayList<Expr> args)
   {

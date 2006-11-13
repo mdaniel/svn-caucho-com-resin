@@ -48,8 +48,8 @@ import com.caucho.quercus.Location;
  * Represents the array function
  */
 public class ArrayFunExpr extends Expr {
-  private final Expr []_keys;
-  private final Expr []_values;
+  protected final Expr []_keys;
+  protected final Expr []_values;
 
   public ArrayFunExpr(Location location, ArrayList<Expr> keyList, ArrayList<Expr> valueList)
   {

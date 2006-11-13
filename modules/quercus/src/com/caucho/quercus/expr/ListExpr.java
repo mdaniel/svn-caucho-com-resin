@@ -44,18 +44,17 @@ import com.caucho.quercus.Location;
  * Represents a PHP list assignment expression.
  */
 public class ListExpr extends Expr {
-  private final ListHeadExpr _listHead;
-  private final Expr _value;
+  protected final ListHeadExpr _listHead;
+  protected final Expr _value;
 
-  private ListExpr(Location location, ListHeadExpr head, Expr value)
-    throws IOException
+  protected ListExpr(ListHeadExpr head, Expr value)
   {
-    super(location);
     _listHead = head;
 
     _value = value;
   }
 
+  /*
   public static Expr create(QuercusParser parser,
                             ListHeadExpr head, Expr value)
     throws IOException
@@ -74,13 +73,14 @@ public class ListExpr extends Expr {
       expr = new ListEachExpr(parser.getLocation(), head.getVarList(), (EachExpr) value);
     }
     else
-      expr = new ListExpr(parser.getLocation(), head, value);
+      expr = new ListExpr(head, value);
 
     if (isSuppress)
       return new SuppressErrorExpr(expr.getLocation(), expr);
     else
       return expr;
   }
+  */
 
   /**
    * Evaluates the expression.

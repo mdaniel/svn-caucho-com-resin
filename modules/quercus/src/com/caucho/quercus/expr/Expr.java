@@ -206,7 +206,7 @@ abstract public class Expr {
    * Creates a reference.
    * @param location
    */
-  public Expr createRef(Location location)
+  public Expr createRef(QuercusParser parser)
     throws IOException
   {
     return this;
@@ -809,6 +809,7 @@ abstract public class Expr {
   {
     // XXX: remove when done
     System.out.println("Generate: " + getClass().getName());
+    Thread.dumpStack();
 
     out.print("com.caucho.quercus.expr.NullLiteralExpr.NULL");
   }

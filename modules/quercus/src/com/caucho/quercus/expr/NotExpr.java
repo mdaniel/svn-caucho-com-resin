@@ -41,7 +41,7 @@ import com.caucho.quercus.Location;
 /**
  * Represents a PHP boolean negation
  */
-public final class NotExpr extends UnaryExpr {
+public class NotExpr extends UnaryExpr {
   public NotExpr(Location location, Expr expr)
   {
     super(location, expr);

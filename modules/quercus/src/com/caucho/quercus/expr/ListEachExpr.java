@@ -41,14 +41,12 @@ import com.caucho.quercus.Location;
  * Represents a PHP list() = each() assignment expression.
  */
 public class ListEachExpr extends Expr {
-  private final AbstractVarExpr _keyVar;
-  private final AbstractVarExpr _valueVar;
-  private final Expr _value;
+  protected final AbstractVarExpr _keyVar;
+  protected final AbstractVarExpr _valueVar;
+  protected final Expr _value;
 
-  public ListEachExpr(Location location, Expr []varList, EachExpr each)
-    throws IOException
+  public ListEachExpr(Expr []varList, EachExpr each)
   {
-    super(location);
     if (varList.length > 0) {
       // XXX: need test
       _keyVar = (AbstractVarExpr) varList[0];

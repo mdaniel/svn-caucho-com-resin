@@ -90,11 +90,11 @@ public class ExprFactory {
   }
 
   /**
-   * Creates a string literal expression.
+   * Creates a long literal expression.
    */
-  public Expr createLong(int lexeme)
+  public Expr createLong(long value)
   {
-    return new LongLiteralExpr(lexeme);
+    return new LongLiteralExpr(value);
   }
 
   /**
@@ -127,6 +127,54 @@ public class ExprFactory {
   public PostIncrementExpr createPostIncrement(Expr expr, int incr)
   {
     return new PostIncrementExpr(expr, incr);
+  }
+
+  /**
+   * Creates a pre increment '++a' expression.
+   */
+  public PreIncrementExpr createPreIncrement(Expr expr, int incr)
+  {
+    return new PreIncrementExpr(expr, incr);
+  }
+
+  /**
+   * Creates a unary minus '-a' expression.
+   */
+  public Expr createMinus(Expr expr)
+  {
+    return new MinusExpr(expr);
+  }
+
+  /**
+   * Creates a unary not '!a' expression.
+   */
+  public Expr createNot(Expr expr)
+  {
+    return new NotExpr(expr);
+  }
+
+  /**
+   * Creates an error suppression '@a' expression.
+   */
+  public Expr createSuppress(Expr expr)
+  {
+    return new SuppressErrorExpr(expr);
+  }
+
+  /**
+   * Creates a die 'die("msg")' expression.
+   */
+  public Expr createDie(Expr expr)
+  {
+    return new DieExpr(expr);
+  }
+
+  /**
+   * Creates an exit 'exit("msg")' expression.
+   */
+  public Expr createExit(Expr expr)
+  {
+    return new ExitExpr(expr);
   }
 
   /**
@@ -360,11 +408,19 @@ public class ExprFactory {
   }
 
   /**
-   * Creates an or expression.
+   * Creates an assignment expression.
    */
-  public Expr createOr(Expr left, Expr right)
+  public Expr createAssignRef(AbstractVarExpr left, Expr right)
   {
-    return new OrExpr(left, right);
+    return new AssignRefExpr(left, right);
+  }
+
+  /**
+   * Creates an assignment expression.
+   */
+  public Expr createRef(AbstractVarExpr left)
+  {
+    return new RefExpr(left);
   }
 
   /**
@@ -376,11 +432,87 @@ public class ExprFactory {
   }
 
   /**
+   * Creates an or expression.
+   */
+  public Expr createOr(Expr left, Expr right)
+  {
+    return new OrExpr(left, right);
+  }
+
+  /**
+   * Creates an xor expression.
+   */
+  public Expr createXor(Expr left, Expr right)
+  {
+    return new XorExpr(left, right);
+  }
+
+  /**
+   * Creates a list expression.
+   */
+  public final Expr createList(QuercusParser parser,
+			       ListHeadExpr head, Expr value)
+  {
+    boolean isSuppress = value instanceof SuppressErrorExpr;
+
+    if (isSuppress) {
+      SuppressErrorExpr suppressExpr = (SuppressErrorExpr) value;
+
+      value = suppressExpr.getExpr();
+    }
+
+    Expr expr;
+
+    if (value instanceof EachExpr) {
+      expr = createListEach(head.getVarList(), (EachExpr) value);
+    }
+    else
+      expr = createList(head, value);
+
+    if (isSuppress)
+      return createSuppress(expr);
+    else
+      return expr;
+  }
+
+  /**
+   * Creates a list expression.
+   */
+  public ListHeadExpr createListHead(ArrayList<Expr> keys)
+  {
+    return new ListHeadExpr(keys);
+  }
+
+  /**
+   * Creates a list expression.
+   */
+  public Expr createList(ListHeadExpr head, Expr value)
+  {
+    return new ListExpr(head, value);
+  }
+
+  /**
+   * Creates a list expression.
+   */
+  public Expr createListEach(Expr []varList, EachExpr value)
+  {
+    return new ListEachExpr(varList, value);
+  }
+
+  /**
    * Creates an conditional expression.
    */
   public Expr createConditional(Expr test, Expr left, Expr right)
   {
     return new ConditionalExpr(test, left, right);
+  }
+
+  /**
+   * Creates a array() expression.
+   */
+  public Expr createArrayFun(ArrayList<Expr> keys, ArrayList<Expr> values)
+  {
+    return new ArrayFunExpr(keys, values);
   }
 
   /**
@@ -391,6 +523,27 @@ public class ExprFactory {
 				     ArrayList<Expr> args)
   {
     return new FunctionExpr(loc, name, args);
+  }
+
+  /**
+   * Creates a new method call.
+   */
+  public Expr createMethodCall(Location loc,
+				       Expr objExpr,
+				       String name,
+				       ArrayList<Expr> args)
+  {
+    return new MethodCallExpr(loc, objExpr, name, args);
+  }
+
+  /**
+   * Creates a new function call.
+   */
+  public NewExpr createNew(Location loc,
+			   String name,
+			   ArrayList<Expr> args)
+  {
+    return new NewExpr(loc, name, args);
   }
 
   /**
@@ -487,6 +640,16 @@ public class ExprFactory {
   }
 
   /**
+   * Creates a while statement
+   */
+  public Statement createWhile(Location loc,
+			       Expr test,
+			       Statement block)
+  {
+    return new WhileStatement(loc, test, block);
+  }
+
+  /**
    * Creates a return statement
    */
   public Statement createReturn(Location loc,
@@ -510,7 +673,7 @@ public class ExprFactory {
   /**
    * Creates a new object method definition.
    */
-  public ObjectMethod createObjectMethod(Location loc,
+  public Function createObjectMethod(Location loc,
 					 InterpretedClassDef cl,
 					 String name,
 					 FunctionInfo info,
@@ -530,6 +693,13 @@ public class ExprFactory {
 					 ArrayList<Arg> argList)
   {
     return new MethodDeclaration(this, loc, cl, name, info, argList);
+  }
+
+  public InterpretedClassDef createClassDef(String name,
+					    String parentName,
+					    String []ifaceList)
+  {
+    return new InterpretedClassDef(name, parentName, ifaceList);
   }
 }
 

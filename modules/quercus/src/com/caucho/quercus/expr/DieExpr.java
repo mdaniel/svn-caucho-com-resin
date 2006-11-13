@@ -45,7 +45,7 @@ import com.caucho.quercus.program.AnalyzeInfo;
  * Represents the die expression
  */
 public class DieExpr extends Expr {
-  private final Expr _value;
+  protected Expr _value;
 
   public DieExpr(Location location, Expr value)
   {

@@ -260,16 +260,17 @@ public class PhpWriter extends JavaWriterWrapper {
   public void generateCoda()
     throws IOException
   {
+    /*
     if (! _exprMap.isEmpty())
       println();
     
     for (Map.Entry<Expr,String> entry : _exprMap.entrySet()) {
-      Expr expr = entry.getKey();
+      CompilingExpr expr = (CompilingExpr) entry.getKey();
       String var = entry.getValue();
 
       println("static final com.caucho.quercus.expr.Expr " + var);
       print("  = ");
-      expr.generateExpr(this);
+      expr.getGenerator().generateExpr(this);
       println(";");
     }
     
@@ -287,7 +288,8 @@ public class PhpWriter extends JavaWriterWrapper {
 	if (i != 0)
 	  print(", ");
 
-	exprArray[i].generateExpr(this);
+	CompilingExpr expr = (CompilingExpr) exprArray[i];
+	expr.getGenerator().generateExpr(this);
       }
       println("};");
     }
@@ -343,6 +345,7 @@ public class PhpWriter extends JavaWriterWrapper {
 
     popDepth();
     println("}");
+    */
   }
 }
 

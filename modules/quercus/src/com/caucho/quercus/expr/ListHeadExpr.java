@@ -45,15 +45,13 @@ import com.caucho.quercus.Location;
  * Represents a list assignment expression.
  */
 public class ListHeadExpr extends Expr {
-  private final Expr []_varList;
-  private final Value []_keyList;
+  protected final Expr []_varList;
+  protected final Value []_keyList;
 
   private String _varName;
 
-  public ListHeadExpr(Location location, ArrayList<Expr> varList)
-    throws IOException
+  public ListHeadExpr(ArrayList<Expr> varList)
   {
-    super(location);
     _varList = new Expr[varList.size()];
     varList.toArray(_varList);
 

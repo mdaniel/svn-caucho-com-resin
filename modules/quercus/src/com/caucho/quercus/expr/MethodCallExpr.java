@@ -51,7 +51,7 @@ import com.caucho.util.L10N;
 public class MethodCallExpr extends Expr {
   private static final L10N L = new L10N(MethodCallExpr.class);
 
-  private final Expr _objExpr;
+  protected final Expr _objExpr;
   
   protected final String _name;
   protected final Expr []_args;

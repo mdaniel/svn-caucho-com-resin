@@ -45,8 +45,8 @@ import com.caucho.quercus.Location;
  * Represents a while statement.
  */
 public class WhileStatement extends Statement {
-  private final Expr _test;
-  private final Statement _block;
+  protected final Expr _test;
+  protected final Statement _block;
 
   public WhileStatement(Location location, Expr test, Statement block)
   {

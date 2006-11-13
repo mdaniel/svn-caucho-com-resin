@@ -66,6 +66,7 @@ abstract public class AbstractVarExpr extends Expr {
   /**
    * Creates the assignment.
    */
+  @Override
   public Expr createAssign(QuercusParser parser, Expr value)
   {
     return parser.getExprFactory().createAssign(this, value);
@@ -74,20 +75,21 @@ abstract public class AbstractVarExpr extends Expr {
   /**
    * Creates the assignment.
    */
+  @Override
   public Expr createAssignRef(QuercusParser parser,
-                              Expr value
-  )
+                              Expr value)
   {
-    return new AssignRefExpr(parser.getLocation(), this, value);
+    return parser.getExprFactory().createAssignRef(this, value);
   }
 
   /**
    * Creates the reference
    * @param location
    */
-  public Expr createRef(Location location)
+  @Override
+  public Expr createRef(QuercusParser parser)
   {
-    return new RefExpr(location, this);
+    return parser.getExprFactory().createRef(this);
   }
 
   /**
