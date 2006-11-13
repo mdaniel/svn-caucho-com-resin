@@ -34,7 +34,7 @@ import org.w3c.dom.*;
  * A representation of a node whose value is text. A Text object may represent
  * text that is content or text that is a comment.
  */
-public interface Text extends org.w3c.dom.Node, org.w3c.dom.Text {
+public interface Text extends javax.xml.soap.Node, org.w3c.dom.Text {
 
   /**
    * Retrieves whether this Text object represents a comment.
