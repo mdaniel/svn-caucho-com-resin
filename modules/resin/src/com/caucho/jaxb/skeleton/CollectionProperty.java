@@ -72,6 +72,11 @@ public class CollectionProperty extends IterableProperty {
   {
     throw new UnsupportedOperationException();
   }
+
+  protected boolean isPrimitiveType()
+  {
+    return false;
+  }
 }
 
 

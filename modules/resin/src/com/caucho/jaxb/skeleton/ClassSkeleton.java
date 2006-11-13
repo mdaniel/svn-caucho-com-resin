@@ -29,6 +29,7 @@
 
 package com.caucho.jaxb.skeleton;
 
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -48,6 +49,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -75,6 +78,8 @@ public class ClassSkeleton<C> extends Skeleton {
   private Method _afterUnmarshal;
   private Method _beforeMarshal;
   private Method _afterMarshal;
+
+  private QName _elementName;
 
   public Class<C> getType()
   {
@@ -137,30 +142,46 @@ public class ClassSkeleton<C> extends Skeleton {
 
         if (!"##default".equals(xre.name())) {
           if ("##default".equals(xre.namespace()))
-            _typeName = new QName(xre.name());
+            _elementName = new QName(xre.name());
           else
-            _typeName = new QName(xre.namespace(), xre.name());
+            _elementName = new QName(xre.namespace(), xre.name());
 
           _context.addRootElement(this);
         }
       }
 
-      if (_typeName == null)
-        _typeName = new QName(JAXBUtil.getXmlSchemaDatatype(_class));
-      
-      for(Field f : c.getFields()) {
-        if ((f.getModifiers() & Modifier.PUBLIC) == 0) continue;
-        if ((f.getModifiers() & Modifier.STATIC) != 0) continue;
-        if (f.isAnnotationPresent(XmlTransient.class))
-          continue;
+      _typeName = new QName(JAXBUtil.getXmlSchemaDatatype(_class));
 
-        Accessor a = new Accessor.FieldAccessor(f, _context);
-        Property p = _context.createProperty(a);
+      XmlAccessorType accessorType = c.getAnnotation(XmlAccessorType.class);
+      XmlAccessType accessType = (accessorType == null ? 
+                                  XmlAccessType.PUBLIC_MEMBER :
+                                  accessorType.value());
 
-        if (f.isAnnotationPresent(XmlAttribute.class))
-          _attributeProperties.put(p.getName(), p);
-        else
-          _elementProperties.put(p.getName(), p);
+      if (accessType != XmlAccessType.PROPERTY) {
+        Field[] fields = c.getDeclaredFields();
+        AccessibleObject.setAccessible(fields, true);
+
+        for (Field f : fields) {
+
+          if (Modifier.isStatic(f.getModifiers())) continue;
+          if (Modifier.isTransient(f.getModifiers())) continue;
+          if (f.isAnnotationPresent(XmlTransient.class))
+            continue;
+
+          if (accessType == XmlAccessType.PUBLIC_MEMBER &&
+              ! Modifier.isPublic(f.getModifiers()))
+            continue;
+
+          // XXX : XmlAccessType.NONE
+
+          Accessor a = new Accessor.FieldAccessor(f, _context);
+          Property p = _context.createProperty(a);
+
+          if (f.isAnnotationPresent(XmlAttribute.class))
+            _attributeProperties.put(p.getName(), p);
+          else
+            _elementProperties.put(p.getName(), p);
+        }
       }
       
       // XXX: getter/setter methods
@@ -283,7 +304,7 @@ public class ClassSkeleton<C> extends Skeleton {
       else
         out.writeStartElement(tagName.getNamespaceURI(),
                               tagName.getLocalPart());
-      
+
       for(Property p : _elementProperties.values())
         p.write(m, out, p.get(obj));
       
@@ -340,8 +361,14 @@ public class ClassSkeleton<C> extends Skeleton {
   public void generateSchema(XMLStreamWriter out)
     throws JAXBException, XMLStreamException
   {
+    if (_elementName != null) {
+      out.writeEmptyElement(XML_SCHEMA_PREFIX, "element", XML_SCHEMA_NS);
+      out.writeAttribute("type", _typeName.getLocalPart());
+      out.writeAttribute("name", _elementName.getLocalPart());
+    }
+
     out.writeStartElement(XML_SCHEMA_PREFIX, "complexType", XML_SCHEMA_NS);
-    out.writeAttribute("name", _typeName.toString());
+    out.writeAttribute("name", _typeName.getLocalPart());
 
     out.writeStartElement(XML_SCHEMA_PREFIX, "sequence", XML_SCHEMA_NS);
 

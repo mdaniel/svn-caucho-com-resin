@@ -64,4 +64,9 @@ public class ByteProperty extends CDataProperty {
   {
     return "xsd:byte";
   }
+  
+  protected boolean isPrimitiveType()
+  {
+    return true;
+  }
 }

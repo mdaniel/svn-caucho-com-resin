@@ -64,6 +64,11 @@ public class IntProperty extends CDataProperty {
   {
     return "xsd:int";
   }
+
+  protected boolean isPrimitiveType()
+  {
+    return true;
+  }
 }
 
 

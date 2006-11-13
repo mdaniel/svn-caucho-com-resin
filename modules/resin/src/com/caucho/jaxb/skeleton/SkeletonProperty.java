@@ -60,7 +60,9 @@ public class SkeletonProperty extends Property {
   public void write(Marshaller m, XMLStreamWriter out, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
-    _skeleton.write(m, out, obj, _accessor.getQName());
+    // XXX
+    Skeleton skeleton = getAccessor().getContext().findSkeletonForObject(obj);
+    skeleton.write(m, out, obj, _accessor.getQName());
   }
 
   public void generateSchema(XMLStreamWriter out)
@@ -72,6 +74,11 @@ public class SkeletonProperty extends Property {
   protected String getSchemaType()
   {
     throw new UnsupportedOperationException();
+  }
+
+  protected boolean isPrimitiveType()
+  {
+    return false;
   }
 }
 

@@ -65,6 +65,11 @@ public class DateProperty extends CDataProperty {
   {
     return "xsd:date";
   }
+
+  protected boolean isPrimitiveType()
+  {
+    return false;
+  }
 }
 
 

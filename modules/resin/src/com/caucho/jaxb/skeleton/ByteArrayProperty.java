@@ -66,6 +66,9 @@ public class ByteArrayProperty extends CDataProperty {
   {
     return "xsd:base64Binary";
   }
+
+  protected boolean isPrimitiveType()
+  {
+    return false;
+  }
 }
-
-

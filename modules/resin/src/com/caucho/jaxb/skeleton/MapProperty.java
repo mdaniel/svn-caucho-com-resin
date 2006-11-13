@@ -82,6 +82,11 @@ public class MapProperty extends Property {
   {
     throw new UnsupportedOperationException();
   }
+
+  protected boolean isPrimitiveType()
+  {
+    return false;
+  }
 }
 
 

@@ -100,8 +100,6 @@ public class JAXBContextImpl extends JAXBContext {
   {
     boolean success = false;
 
-    String slashedPackageName = "/" + packageName.replace('.', '/');
-
     try {
       Class cl = CauchoSystem.loadClass(packageName + ".ObjectFactory");
       _objectFactories.add(new ObjectFactorySkeleton(cl));
@@ -113,10 +111,9 @@ public class JAXBContextImpl extends JAXBContext {
     }
 
     try {
-      ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+      String resourceName = "/" + packageName.replace('.', '/') + "/jaxb.index";
+      InputStream is = this.getClass().getResourceAsStream(resourceName);
 
-      InputStream is =
-        classLoader.getResourceAsStream(slashedPackageName + "/jaxb.index");
       InputStreamReader isr = new InputStreamReader(is, "utf-8");
       LineNumberReader in = new LineNumberReader(isr);
 
@@ -161,9 +158,10 @@ public class JAXBContextImpl extends JAXBContext {
         getSkeleton(c);
     }
 
-    if (properties != null)
+    if (properties != null) {
       for(Map.Entry<String,?> e : properties.entrySet())
         setProperty(e.getKey(), e.getValue());
+    }
 
     DatatypeConverter.setDatatypeConverter(new DatatypeConverterImpl());
   }
@@ -190,14 +188,14 @@ public class JAXBContextImpl extends JAXBContext {
     StringBuilder sb = new StringBuilder();
     sb.append("JAXBContext[");
 
-    for(int i=0; i<_classes.length; i++) {
+    for(int i = 0; i < _classes.length; i++) {
       Class c = _classes[i];
-      sb.append(c.getName() + (i<_classes.length-1 ? ":" : ""));
+      sb.append(c.getName() + (i < _classes.length - 1 ? ":" : ""));
     }
 
-    for(int i=0; i<_packages.length; i++) {
+    for(int i = 0; i < _packages.length; i++) {
       String p = _packages[i];
-      sb.append(p + (i<_packages.length-1 ? ":" : ""));
+      sb.append(p + (i < _packages.length - 1 ? ":" : ""));
     }
 
     sb.append("]");
@@ -285,6 +283,22 @@ public class JAXBContextImpl extends JAXBContext {
     }
 
     return skeleton;
+  }
+
+  public ClassSkeleton findSkeletonForObject(Object obj)
+    throws JAXBException
+  {
+    Class cl = obj.getClass();
+    
+    if (_classSkeletons.containsKey(cl))
+      return _classSkeletons.get(cl);
+
+    for (Class jaxbCl : _classes) {
+      if (jaxbCl.isAssignableFrom(cl))
+        return _classSkeletons.get(jaxbCl);
+    }
+
+    throw new JAXBException(L.l("Class {0} unknown to this JAXBContext", cl));
   }
 
   public Property createProperty(Accessor a)

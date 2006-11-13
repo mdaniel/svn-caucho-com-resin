@@ -63,6 +63,9 @@ public class StringProperty extends CDataProperty {
   {
     return "xsd:string";
   }
+
+  protected boolean isPrimitiveType()
+  {
+    return false;
+  }
 }
-
-

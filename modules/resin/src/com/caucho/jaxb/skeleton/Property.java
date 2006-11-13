@@ -170,14 +170,51 @@ public abstract class Property {
     XmlAttribute attribute =
       (XmlAttribute) _accessor.getAnnotation(XmlAttribute.class);
 
-    if (attribute != null)
+    if (attribute != null) {
       out.writeEmptyElement(XML_SCHEMA_PREFIX, "attribute", XML_SCHEMA_NS);
-    else
+
+      // See http://forums.java.net/jive/thread.jspa?messageID=167171
+      // Primitives are always required
+
+      if (attribute.required() || isPrimitiveType())
+        out.writeAttribute("use", "required");
+    }
+    else {
       out.writeEmptyElement(XML_SCHEMA_PREFIX, "element", XML_SCHEMA_NS);
 
-    out.writeAttribute("name", _accessor.getName());
+      XmlElement element =
+        (XmlElement) _accessor.getAnnotation(XmlElement.class);
+
+      if (element != null) {
+        if (element.required())
+          out.writeAttribute("minOccurs", "1");
+        else
+          out.writeAttribute("minOccurs", "0");
+
+        if (element.nillable())
+          out.writeAttribute("nillable", "true");
+      }
+      else
+        out.writeAttribute("minOccurs", "0");
+
+      if (getMaxOccurs() != null)
+        out.writeAttribute("maxOccurs", getMaxOccurs());
+    }
+
     out.writeAttribute("type", getSchemaType());
+    out.writeAttribute("name", _accessor.getName());
   }
 
   protected abstract String getSchemaType();
+  protected abstract boolean isPrimitiveType();
+
+  public Accessor getAccessor()
+  {
+    return _accessor;
+  }
+
+  protected String getMaxOccurs()
+  {
+    return null;
+  }
 }

@@ -62,19 +62,22 @@ public class MarshallerImpl extends AbstractMarshallerImpl {
   public void marshal(Object jaxbElement, XMLStreamWriter writer)
     throws JAXBException
   {
-    Class c = jaxbElement.getClass();
+    ClassSkeleton skeleton = _context.findSkeletonForObject(jaxbElement);
+    Class c = skeleton.getType();
+    System.out.println("marshalling type "  + c);
 
-    if (!_context.createJAXBIntrospector().isElement(jaxbElement) &&
-        !c.isAnnotationPresent(XmlRootElement.class))
+    if (! _context.createJAXBIntrospector().isElement(jaxbElement) &&
+        ! c.isAnnotationPresent(XmlRootElement.class))
       throw new MarshalException("JAXBIntrospector.isElement()==false");
 
     String name = null;
 
-    XmlRootElement xre = (XmlRootElement)c.getAnnotation(XmlRootElement.class);
+    XmlRootElement xre = (XmlRootElement) c.getAnnotation(XmlRootElement.class);
+
     if (xre != null)
       name = xre.name();
 
-    XmlType xmlTypeAnnotation = (XmlType)c.getAnnotation(XmlType.class);
+    XmlType xmlTypeAnnotation = (XmlType) c.getAnnotation(XmlType.class);
     if (name == null)
       name = xmlTypeAnnotation == null
         ? c.getName()
@@ -98,8 +101,7 @@ public class MarshallerImpl extends AbstractMarshallerImpl {
                               getNoNSSchemaLocation());
       */
 
-      _context.getSkeleton(c).write(this, writer, jaxbElement, new QName(name));
-
+      skeleton.write(this, writer, jaxbElement, new QName(name));
     }
     catch (Exception e) {
       throw new JAXBException(e);

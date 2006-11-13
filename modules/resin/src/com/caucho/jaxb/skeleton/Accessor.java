@@ -28,8 +28,8 @@
  */
 
 package com.caucho.jaxb.skeleton;
-import com.caucho.jaxb.*;
 
+import com.caucho.util.*;
 import com.caucho.jaxb.*;
 import javax.xml.bind.*;
 import javax.xml.namespace.*;
@@ -43,6 +43,7 @@ import java.io.*;
 
 /** an Accessor is either a getter/setter pair or a field */
 public abstract class Accessor {
+  public static final L10N L = new L10N(Accessor.class);
 
   private JAXBContextImpl _context;
 
@@ -56,10 +57,11 @@ public abstract class Accessor {
     return _context;
   }
 
-  public abstract Object     get(Object o) throws JAXBException;
-  public abstract void       set(Object o, Object value) throws JAXBException;
-  public abstract String     getName();
-  public abstract Class      getType();
+  public abstract Object get(Object o) throws JAXBException;
+  public abstract void set(Object o, Object value) throws JAXBException;
+  public abstract String getName();
+  public abstract Class getType();
+  public abstract Type getGenericType();
   public abstract Annotation getAnnotation(Class c);
 
   public XmlType getXmlType()
@@ -84,12 +86,14 @@ public abstract class Accessor {
 
     private Field _field;
     private Class _type;
+    private Type _genericType;
 
     public FieldAccessor(Field f, JAXBContextImpl context)
     {
       super(context);
       _field = f;
       _type = _field.getType();
+      _genericType = _field.getGenericType();
     }
 
     public Object     get(Object o)
@@ -124,6 +128,11 @@ public abstract class Accessor {
       return _type;
     }
 
+    public Type getGenericType()
+    {
+      return _genericType;
+    }
+
     public String getName()
     {
       return _field.getName();
@@ -134,6 +143,7 @@ public abstract class Accessor {
     private Method _get;
     private Method _set;
     private Class _type;
+    private Type _genericType;
     private String _name;
 
     public GetterSetterAccessor(Class c, String name, JAXBContextImpl context)
@@ -154,6 +164,7 @@ public abstract class Accessor {
         _get = c.getMethod(getName, new Class[] { });
         
         _type = _get.getReturnType();
+        _genericType = _get.getGenericReturnType();
         
         _set = c.getMethod(setName, new Class[] { _type });
         
@@ -164,7 +175,7 @@ public abstract class Accessor {
       }
     }
 
-    public Object     get(Object o)
+    public Object get(Object o)
       throws JAXBException
     {
       try {
@@ -175,7 +186,7 @@ public abstract class Accessor {
       }
     }
 
-    public void       set(Object o, Object value)
+    public void set(Object o, Object value)
       throws JAXBException
     {
       try {
@@ -202,6 +213,11 @@ public abstract class Accessor {
       return _type;
     }
 
+    public Type getGenericType()
+    {
+      return _genericType;
+    }
+
     public String getName()
     {
       return _name;
@@ -210,26 +226,49 @@ public abstract class Accessor {
 
   public static class ArrayComponentAccessor extends Accessor {
     private Accessor _accessor;
+    private Class _type;
+    private Type _genericType;
+
     public ArrayComponentAccessor(Accessor a) {
       super(a.getContext());
       _accessor = a;
+
+      _type = _accessor.getType().getComponentType();
+
+      if (a.getGenericType() instanceof GenericArrayType) {
+        GenericArrayType arrayType = (GenericArrayType) a.getGenericType();
+        _genericType = arrayType.getGenericComponentType();
+      }
+      else {
+        _genericType = _type;
+      }
     }
-    public Object     get(Object o) throws JAXBException
+
+    public Object get(Object o) throws JAXBException
     {
       throw new JAXBException("cannot invoke ArrayComponentAccessor.get()");
     }
-    public void       set(Object o, Object value) throws JAXBException
+
+    public void set(Object o, Object value) throws JAXBException
     {
       throw new JAXBException("cannot invoke ArrayComponentAccessor.set()");
     }
-    public String     getName()
+
+    public String getName()
     {
       return _accessor.getName();
     }
-    public Class      getType()
+
+    public Class getType()
     {
-      return _accessor.getType().getComponentType();
+      return _type;
     }
+
+    public Type getGenericType()
+    {
+      return _genericType;
+    }
+
     public Annotation getAnnotation(Class c)
     {
       return null;
@@ -238,11 +277,36 @@ public abstract class Accessor {
 
   public static class CollectionComponentAccessor extends Accessor {
     private Accessor _accessor;
+    private Class _type;
+    private Type _genericType;
 
     public CollectionComponentAccessor(Accessor a) 
     {
       super(a.getContext());
       _accessor = a;
+
+      Type collectionGenericType = a.getGenericType();
+
+      if (collectionGenericType instanceof ParameterizedType) {
+        ParameterizedType pType = (ParameterizedType) collectionGenericType;
+
+        Type[] parameters = pType.getActualTypeArguments();
+
+        if (parameters.length < 1)
+          throw new UnsupportedOperationException(L.l("Unsupported type {0}", pType));
+
+        _genericType = parameters[0];
+
+        try {
+          if (_genericType instanceof ParameterizedType)
+            _type = (Class) ((ParameterizedType) _genericType).getRawType();
+          else
+            _type = (Class) _genericType;
+        }
+        catch (ClassCastException e) {
+          throw new UnsupportedOperationException(L.l("Unsupported type {0}", pType));
+        }
+      }
     }
 
     public Object get(Object o) throws JAXBException
@@ -262,8 +326,12 @@ public abstract class Accessor {
 
     public Class getType()
     {
-      // XXX
-      return Object.class;
+      return _type;
+    }
+
+    public Type getGenericType()
+    {
+      return _genericType;
     }
 
     public Annotation getAnnotation(Class c)
@@ -299,6 +367,11 @@ public abstract class Accessor {
     }
 
     public Class getType()
+    {
+      return _type;
+    }
+
+    public Type getGenericType()
     {
       return _type;
     }

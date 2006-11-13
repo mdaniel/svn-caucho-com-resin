@@ -65,4 +65,9 @@ public class ShortProperty extends CDataProperty {
   {
     return "xsd:short";
   }
+
+  protected boolean isPrimitiveType()
+  {
+    return true;
+  }
 }

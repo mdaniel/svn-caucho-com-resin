@@ -68,6 +68,11 @@ public class CharacterProperty extends CDataProperty {
   {
     return "xsd:unsignedShort";
   }
+
+  protected boolean isPrimitiveType()
+  {
+    return true;
+  }
 }
 
 

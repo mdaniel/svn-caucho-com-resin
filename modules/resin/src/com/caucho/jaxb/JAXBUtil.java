@@ -29,7 +29,9 @@
 package com.caucho.jaxb;
 
 import java.lang.reflect.*;
+import java.math.*;
 import java.util.*;
+
 import javax.xml.bind.*;
 import javax.xml.bind.annotation.*;
 
@@ -37,6 +39,9 @@ import javax.xml.bind.annotation.*;
  * JAXB utilities.
  */
 public class JAXBUtil {
+  private static final Map<Class,String> _datatypeMap 
+    = new HashMap<Class,String>();
+
   public static void introspectClass(Class cl, 
                                      Collection<Class> jaxbClasses)
   {
@@ -110,7 +115,18 @@ public class JAXBUtil {
 
   public static String getXmlSchemaDatatype(Class cl)
   {
-    String name = java.beans.Introspector.decapitalize(classBasename(cl));
+    if (_datatypeMap.containsKey(cl))
+      return _datatypeMap.get(cl);
+
+    // XXX The JAXB standard seems to say that we should use the following: 
+    //
+    // String name = java.beans.Introspector.decapitalize(classBasename(cl));
+    //
+    // but the RI does simple decapitalization:
+
+    String basename = classBasename(cl);
+    String name = Character.toLowerCase(basename.charAt(0)) +
+                  (basename.length() > 1 ? basename.substring(1) : "");
 
     if (cl.isAnnotationPresent(XmlType.class)) {
       XmlType xmlType = (XmlType) cl.getAnnotation(XmlType.class);
@@ -119,5 +135,40 @@ public class JAXBUtil {
     }
 
     return name;
+  }
+
+  static {
+    _datatypeMap.put(String.class, "xsd:string");
+
+    _datatypeMap.put(BigDecimal.class, "xsd:decimal");
+
+    _datatypeMap.put(Boolean.class, "xsd:boolean");
+    _datatypeMap.put(boolean.class, "xsd:boolean");
+
+    _datatypeMap.put(Byte[].class, "xsd:base64Binary"); // XXX hexBinary
+    _datatypeMap.put(byte[].class, "xsd:base64Binary"); // XXX hexBinary
+
+    _datatypeMap.put(Byte.class, "xsd:byte");
+    _datatypeMap.put(byte.class, "xsd:byte");
+
+    _datatypeMap.put(Character.class, "xsd:unsignedShort");
+    _datatypeMap.put(char.class, "xsd:unsignedShort");
+
+    _datatypeMap.put(Calendar.class, "xsd:date");
+
+    _datatypeMap.put(Double.class, "xsd:double");
+    _datatypeMap.put(double.class, "xsd:double");
+
+    _datatypeMap.put(Float.class, "xsd:float");
+    _datatypeMap.put(float.class, "xsd:float");
+
+    _datatypeMap.put(Integer.class, "xsd:int");
+    _datatypeMap.put(int.class, "xsd:int");
+
+    _datatypeMap.put(Long.class, "xsd:long");
+    _datatypeMap.put(long.class, "xsd:long");
+
+    _datatypeMap.put(Short.class, "xsd:short");
+    _datatypeMap.put(short.class, "xsd:short");
   }
 }

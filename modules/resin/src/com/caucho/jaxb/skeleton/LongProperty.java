@@ -65,6 +65,11 @@ public class LongProperty extends CDataProperty {
   {
     return "xsd:long";
   }
+
+  protected boolean isPrimitiveType()
+  {
+    return true;
+  }
 }
 
 

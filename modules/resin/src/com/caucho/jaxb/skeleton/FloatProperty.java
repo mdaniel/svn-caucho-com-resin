@@ -64,4 +64,9 @@ public class FloatProperty extends CDataProperty {
   {
     return "xsd:float";
   }
+
+  protected boolean isPrimitiveType()
+  {
+    return true;
+  }
 }

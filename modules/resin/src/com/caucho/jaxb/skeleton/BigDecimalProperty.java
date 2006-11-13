@@ -65,6 +65,11 @@ public class BigDecimalProperty extends CDataProperty {
   {
     return "xsd:decimal";
   }
+
+  protected boolean isPrimitiveType()
+  {
+    return false;
+  }
 }
 
 

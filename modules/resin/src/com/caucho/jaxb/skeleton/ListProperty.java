@@ -28,7 +28,7 @@
  */
 
 package com.caucho.jaxb.skeleton;
-import com.caucho.jaxb.*;
+
 import javax.xml.bind.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
@@ -37,6 +37,7 @@ import java.util.*;
 import java.lang.reflect.*;
 import java.io.*;
 
+import com.caucho.jaxb.*;
 import com.caucho.vfs.WriteStream;
 
 /**
@@ -63,7 +64,20 @@ public class ListProperty extends IterableProperty {
 
   protected String getSchemaType()
   {
-    throw new UnsupportedOperationException();
+    Property p = getComponentProperty();
+    Accessor a = p.getAccessor();
+
+    return JAXBUtil.getXmlSchemaDatatype(a.getType());
+  }
+
+  protected boolean isPrimitiveType()
+  {
+    return false;
+  }
+
+  protected String getMaxOccurs()
+  {
+    return "unbounded";
   }
 }
 

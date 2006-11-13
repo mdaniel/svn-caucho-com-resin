@@ -45,11 +45,10 @@ import com.caucho.vfs.WriteStream;
  */
 public abstract class IterableProperty extends Property {
 
-  private Accessor.ArrayComponentAccessor _componentAccessor;
   private Property _componentProperty;
   private XmlElementWrapper _wrap;
 
-  protected abstract int      size(Object o);
+  protected abstract int size(Object o);
   protected abstract Iterator getIterator(Object o);
 
   public IterableProperty(Accessor a, Property cp)
@@ -87,4 +86,8 @@ public abstract class IterableProperty extends Property {
       writeEndElement(out, obj);
   }
 
+  protected Property getComponentProperty()
+  {
+    return _componentProperty;
+  }
 }

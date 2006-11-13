@@ -97,6 +97,11 @@ public class ArrayProperty extends IterableProperty {
   {
     throw new UnsupportedOperationException();
   }
+
+  protected boolean isPrimitiveType()
+  {
+    return false;
+  }
 }
 
 
