@@ -2522,7 +2522,7 @@ public class QuercusParser {
 
 	  expect('}');
 
-          term = new CharAtExpr(getLocation(), term, index);
+          term = _factory.createCharAt(term, index);
         }
         break;
 
@@ -2583,7 +2583,7 @@ public class QuercusParser {
 	    Expr index = parseExpr();
 	    token = parseToken();
 
-	    term = new ArrayGetExpr(getLocation(), term, index);
+	    term = _factory.createArrayGet(term, index);
 	  }
 
           if (token != ']')
@@ -2597,7 +2597,7 @@ public class QuercusParser {
 
 	  expect('}');
 
-          term = new CharAtExpr(getLocation(), term, index);
+          term = _factory.createCharAt(term, index);
         }
         break;
 
@@ -2650,7 +2650,7 @@ public class QuercusParser {
 	if (token != ']')
 	  throw expect("']'", token);
 
-	nameExpr = new ArrayGetExpr(getLocation(), nameExpr, index);
+	nameExpr = _factory.createArrayGet(nameExpr, index);
 	break;
 	
       default:
@@ -2675,20 +2675,22 @@ public class QuercusParser {
 
       if (nameExpr != null)
 	return new VarMethodCallExpr(getLocation(), term, nameExpr, args);
+      /*
       else if (term instanceof ThisExpr)
 	return new ThisMethodCallExpr(getLocation(), term, name, args);
+      */
       else
 	return _factory.createMethodCall(getLocation(), term, name, args);
     }
     else if (nameExpr != null) {
       _peekToken = token;
 
-      return term.createFieldGet(getLocation(), nameExpr);
+      return term.createFieldGet(nameExpr);
     }
     else {
       _peekToken = token;
 
-      return term.createFieldGet(getLocation(), name);
+      return term.createFieldGet(name);
     }
   }
   
@@ -2736,7 +2738,10 @@ public class QuercusParser {
       return parseEscapedString(_lexeme, token, false);
 
     case BINARY:
-      return new BinaryLiteralExpr(getLocation(), _lexeme.getBytes());
+      {
+	// XXX: getBytes is incorrect
+	return _factory.createBinary(_lexeme.getBytes());
+      }
 
     case SIMPLE_BINARY_ESCAPE:
     case COMPLEX_BINARY_ESCAPE:
@@ -2933,23 +2938,23 @@ public class QuercusParser {
 	  String type = ((ConstExpr) expr).getVar();
 	  
 	  if ("bool".equals(type) || "boolean".equals(type))
-	    return new ToBooleanExpr(getLocation(), parseTerm());
+	    return _factory.createToBoolean(parseTerm());
 	  else if ("int".equals(type) || "integer".equals(type))
-	    return new ToLongExpr(getLocation(), parseTerm());
+	    return _factory.createToLong(parseTerm());
 	  else if ("float".equals(type)
 		   || "double".equals(type)
 		   || "real".equals(type))
-	    return new ToDoubleExpr(getLocation(), parseTerm());
+	    return _factory.createToDouble(parseTerm());
 	  else if ("string".equals(type))
-	    return new ToStringExpr(getLocation(), parseTerm());
+	    return _factory.createToString(parseTerm());
 	  else if ("binary".equals(type))
-	    return new ToBinaryExpr(getLocation(), parseTerm());
+	    return _factory.createToBinary(parseTerm());
 	  else if ("unicode".equals(type))
-	    return new ToUnicodeExpr(getLocation(), parseTerm());
+	    return _factory.createToUnicode(parseTerm());
 	  else if ("object".equals(type))
-	    return new ToObjectExpr(getLocation(), parseTerm());
+	    return _factory.createToObject(parseTerm());
 	  else if ("array".equalsIgnoreCase(type))
-	    return new ToArrayExpr(getLocation(), parseTerm());
+	    return _factory.createToArray(parseTerm());
 	}
 
 	return expr;
@@ -2998,7 +3003,7 @@ public class QuercusParser {
 	    Expr index = parseExpr();
 	    token = parseToken();
 
-	    lhs = new ArrayGetExpr(getLocation(), lhs, index);
+	    lhs = _factory.createArrayGet(lhs, index);
 	  }
 
           if (token != ']')
@@ -3012,7 +3017,7 @@ public class QuercusParser {
 
 	  expect('}');
 
-          lhs = new CharAtExpr(getLocation(), lhs, index);
+          lhs = _factory.createCharAt(lhs, index);
         }
         break;
 
@@ -3038,7 +3043,7 @@ public class QuercusParser {
     int token = parseToken();
 
     if (token == THIS) {
-      return new ThisExpr(getLocation(), _quercusClass);
+      return _factory.createThis(_quercusClass);
     }
     else if (token == '$') {
       _peekToken = token;
@@ -4066,8 +4071,10 @@ public class QuercusParser {
 
     if (isUnicode)
       expr = _factory.createString(prefix);
-    else
-      expr = new BinaryLiteralExpr(getLocation(), prefix.getBytes());
+    else {
+      // XXX: getBytes isn't correct
+      expr = _factory.createBinary(prefix.getBytes());
+    }
 
     while (true) {
       Expr tail;
@@ -4093,7 +4100,7 @@ public class QuercusParser {
 	String varName = _sb.toString();
 
 	if (varName.equals("this"))
-	  tail = new ThisExpr(getLocation(), _quercusClass);
+	  tail = _factory.createThis(_quercusClass);
 	else
 	  tail = _factory.createVar(_function.createVar(varName));
 
@@ -4114,7 +4121,7 @@ public class QuercusParser {
 		_sb.append((char) ch);
 	      }
 
-	      tail = tail.createFieldGet(getLocation(), _sb.toString());
+	      tail = tail.createFieldGet(_sb.toString());
 	    }
 	    else {
 	      tail = _factory.createAppend(tail, _factory.createString("->"));
@@ -4164,7 +4171,7 @@ public class QuercusParser {
 
       VarExpr var = _factory.createVar(_function.createVar(_sb.toString()));
 
-      tail = new ArrayGetExpr(getLocation(), tail, var);
+      tail = _factory.createArrayGet(tail, var);
     }
     else if ('0' <= ch && ch <= '9') {
       long index = ch - '0';
@@ -4175,7 +4182,7 @@ public class QuercusParser {
 	index = 10 * index + ch - '0';
       }
 
-      tail = new ArrayGetExpr(getLocation(), tail, _factory.createLong(index));
+      tail = _factory.createArrayGet(tail, _factory.createLong(index));
     }
     else if (isIdentifierPart((char) ch)) {
       for (;
@@ -4186,7 +4193,7 @@ public class QuercusParser {
 
       Expr constExpr = new ConstExpr(getLocation(), _sb.toString());
 
-      tail = new ArrayGetExpr(getLocation(), tail, constExpr);
+      tail = _factory.createArrayGet(tail, constExpr);
     }
     else
       throw error(L.l("Unexpected character at {0}",

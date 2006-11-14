@@ -44,8 +44,8 @@ import com.caucho.quercus.Location;
  * Represents a PHP long literal expression.
  */
 public class LongLiteralExpr extends Expr {
-  private final long _value;
-  private final LongValue _objValue;
+  protected final long _value;
+  protected final LongValue _objValue;
 
   public LongLiteralExpr(Location location, long value)
   {

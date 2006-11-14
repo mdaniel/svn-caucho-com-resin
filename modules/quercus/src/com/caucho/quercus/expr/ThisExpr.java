@@ -48,7 +48,7 @@ import com.caucho.util.L10N;
 public class ThisExpr extends AbstractVarExpr {
   private static final L10N L = new L10N(ThisExpr.class);
 
-  private final InterpretedClassDef _quercusClass;
+  protected final InterpretedClassDef _quercusClass;
   
   public ThisExpr(Location location, InterpretedClassDef quercusClass)
   {
@@ -64,9 +64,10 @@ public class ThisExpr extends AbstractVarExpr {
   /**
    * Creates a field ref
    */
-  public Expr createFieldGet(Location location, String name)
+  @Override
+  public Expr createFieldGet(String name)
   {
-    return new ThisFieldExpr(location, _quercusClass, name);
+    return new ThisFieldExpr(_quercusClass, name);
   }
   
   /**

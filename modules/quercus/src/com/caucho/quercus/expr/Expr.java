@@ -239,17 +239,17 @@ abstract public class Expr {
   /**
    * Creates a field ref
    */
-  public Expr createFieldGet(Location location, String name)
+  public Expr createFieldGet(String name)
   {
-    return new FieldGetExpr(location, this, name);
+    return new FieldGetExpr(this, name);
   }
 
   /**
    * Creates a field ref
    */
-  public Expr createFieldGet(Location location, Expr name)
+  public Expr createFieldGet(Expr name)
   {
-    return new FieldVarGetExpr(location, this, name);
+    return new FieldVarGetExpr(this, name);
   }
 
   /**
@@ -568,8 +568,11 @@ abstract public class Expr {
   public void generate(PhpWriter out)
     throws IOException
   {
+    if (true)
+      throw new UnsupportedOperationException(getClass().getName());
     String var = out.addExpr(this);
 
+    System.out.println("GETN: " + getClass().getName());
     out.print(var + ".eval(env)");
   }
 

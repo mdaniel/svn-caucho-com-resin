@@ -145,7 +145,8 @@ public class ListHeadExpr extends Expr {
         count++;
       }
 
-      AbstractVarExpr refExpr = new ArrayGetExpr(getLocation(), varExpr, new LongLiteralExpr(getLocation(), i));
+      AbstractVarExpr refExpr = new ArrayGetExpr(getLocation(), varExpr,
+						 new LongLiteralExpr(i));
 
       if (_varList[i] instanceof AbstractVarExpr)
         ((AbstractVarExpr) _varList[i]).generateAssign(out, refExpr, false);

@@ -47,8 +47,8 @@ import com.caucho.util.L10N;
 public class CharAtExpr extends AbstractVarExpr {
   private static final L10N L = new L10N(CharAtExpr.class);
 
-  private final Expr _objExpr;
-  private final Expr _indexExpr;
+  protected final Expr _objExpr;
+  protected final Expr _indexExpr;
 
   public CharAtExpr(Location location, Expr objExpr, Expr indexExpr)
   {

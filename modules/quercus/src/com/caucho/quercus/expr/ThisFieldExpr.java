@@ -48,9 +48,9 @@ import com.caucho.util.L10N;
 public class ThisFieldExpr extends AbstractVarExpr {
   private static final L10N L = new L10N(ThisFieldExpr.class);
 
-  private final InterpretedClassDef _quercusClass;
+  protected final InterpretedClassDef _quercusClass;
   
-  private final String _name;
+  protected final String _name;
 
   public ThisFieldExpr(Location location, InterpretedClassDef quercusClass, String name)
   {

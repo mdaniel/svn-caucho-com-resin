@@ -54,27 +54,27 @@ import com.caucho.quercus.program.InterpretedClassDef;
  * Writer which gathers additional info.
  */
 public class PhpWriter extends JavaWriterWrapper {
-  private QuercusProgram _program;
+  protected QuercusProgram _program;
   
-  private HashMap<Value,String> _valueMap
+  protected HashMap<Value,String> _valueMap
     = new HashMap<Value,String>();
   
-  private HashMap<Expr,String> _exprMap
+  protected HashMap<Expr,String> _exprMap
     = new HashMap<Expr,String>();
   
-  private HashMap<Expr[],String> _exprArrayMap
+  protected HashMap<Expr[],String> _exprArrayMap
     = new HashMap<Expr[],String>();
   
-  private HashMap<QuercusModule,String> _moduleMap
+  protected HashMap<QuercusModule,String> _moduleMap
     = new HashMap<QuercusModule,String>();
 
-  private ArrayList<InterpretedClassDef> _classList
+  protected ArrayList<InterpretedClassDef> _classList
     = new ArrayList<InterpretedClassDef>();
 
-  private ArrayList<String> _staticVarList = new ArrayList<String>();
+  protected ArrayList<String> _staticVarList = new ArrayList<String>();
 
-  private boolean _isSwitch;
-  private String _breakVar;
+  protected boolean _isSwitch;
+  protected String _breakVar;
   
   public PhpWriter(JavaWriter writer, QuercusProgram program)
   {

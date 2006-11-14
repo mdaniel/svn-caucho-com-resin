@@ -90,6 +90,14 @@ public class ExprFactory {
   }
 
   /**
+   * Creates a binary literal expression.
+   */
+  public Expr createBinary(byte []bytes)
+  {
+    return new BinaryLiteralExpr(bytes);
+  }
+
+  /**
    * Creates a long literal expression.
    */
   public Expr createLong(long value)
@@ -114,11 +122,27 @@ public class ExprFactory {
   }
 
   /**
+   * Creates a this expression.
+   */
+  public ThisExpr createThis(InterpretedClassDef cl)
+  {
+    return new ThisExpr(cl);
+  }
+
+  /**
    * Creates an array get 'a[0]' expression.
    */
   public ArrayGetExpr createArrayGet(Expr base, Expr index)
   {
     return new ArrayGetExpr(base, index);
+  }
+
+  /**
+   * Creates a char at 'a{0}' expression.
+   */
+  public CharAtExpr createCharAt(Expr base, Expr index)
+  {
+    return new CharAtExpr(base, index);
   }
 
   /**
@@ -159,6 +183,70 @@ public class ExprFactory {
   public Expr createSuppress(Expr expr)
   {
     return new SuppressErrorExpr(expr);
+  }
+
+  /**
+   * Creates a boolean cast
+   */
+  public Expr createToBoolean(Expr expr)
+  {
+    return new ToBooleanExpr(expr);
+  }
+
+  /**
+   * Creates a long cast
+   */
+  public Expr createToLong(Expr expr)
+  {
+    return new ToLongExpr(expr);
+  }
+
+  /**
+   * Creates a double cast
+   */
+  public Expr createToDouble(Expr expr)
+  {
+    return new ToDoubleExpr(expr);
+  }
+
+  /**
+   * Creates a string cast
+   */
+  public Expr createToString(Expr expr)
+  {
+    return new ToStringExpr(expr);
+  }
+
+  /**
+   * Creates a unicode cast
+   */
+  public Expr createToUnicode(Expr expr)
+  {
+    return new ToUnicodeExpr(expr);
+  }
+
+  /**
+   * Creates a binary string cast
+   */
+  public Expr createToBinary(Expr expr)
+  {
+    return new ToBinaryExpr(expr);
+  }
+
+  /**
+   * Creates an object cast
+   */
+  public Expr createToObject(Expr expr)
+  {
+    return new ToObjectExpr(expr);
+  }
+
+  /**
+   * Creates an array cast
+   */
+  public Expr createToArray(Expr expr)
+  {
+    return new ToArrayExpr(expr);
   }
 
   /**
