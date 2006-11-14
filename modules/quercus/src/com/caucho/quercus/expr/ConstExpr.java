@@ -44,7 +44,7 @@ import com.caucho.quercus.Location;
  * Represents a PHP constant expression.
  */
 public class ConstExpr extends Expr {
-  private final String _var;
+  protected final String _var;
 
   public ConstExpr(Location location, String var)
   {

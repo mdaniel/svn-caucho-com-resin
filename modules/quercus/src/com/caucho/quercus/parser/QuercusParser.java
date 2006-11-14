@@ -616,11 +616,11 @@ public class QuercusParser {
 	break;
 
       case BREAK:
-	statements.add(BreakStatement.BREAK);
+	statements.add(_factory.createBreak());
 	break;
 
       case CONTINUE:
-	statements.add(ContinueStatement.CONTINUE);
+	statements.add(_factory.createContinue());
 	break;
 
       case GLOBAL:
@@ -770,10 +770,10 @@ public class QuercusParser {
       return parseStatic();
 
     case BREAK:
-      return BreakStatement.BREAK;
+      return _factory.createBreak();
 
     case CONTINUE:
-      return ContinueStatement.CONTINUE;
+      return _factory.createContinue();
 
     case RETURN:
       return parseReturn();
@@ -890,7 +890,7 @@ public class QuercusParser {
 	// php/3a6g, php/3a58
 	var.getVarInfo().setReference();
 
-	statementList.add(new GlobalStatement(location, var));
+	statementList.add(_factory.createGlobal(location, var));
       }
       else if (expr instanceof VarVarExpr) {
 	VarVarExpr var = (VarVarExpr) expr;
@@ -938,7 +938,7 @@ public class QuercusParser {
       }
 
       var.getVarInfo().setReference();
-      statementList.add(new StaticStatement(location, var, init));
+      statementList.add(_factory.createStatic(location, var, init));
       
       if (token != ',') {
 	_peekToken = token;
@@ -974,13 +974,13 @@ public class QuercusParser {
     if (token != '(') {
       _peekToken = token;
 
-      statementList.add(parseTopExpr().createUnset(location));
+      statementList.add(parseTopExpr().createUnset(_factory, location));
 
       return;
     }
 
     do {
-      statementList.add(parseTopExpr().createUnset(getLocation()));
+      statementList.add(parseTopExpr().createUnset(_factory, getLocation()));
     } while ((token = parseToken()) == ',');
 
     _peekToken = token;
@@ -1184,7 +1184,9 @@ public class QuercusParser {
       else
 	expect('}');
 
-      return new SwitchStatement(location, test, caseList, blockList, defaultBlock);
+      return _factory.createSwitch(location, test,
+				   caseList, blockList,
+				   defaultBlock);
     } finally {
       _isTop = oldTop;
     }
@@ -1250,7 +1252,7 @@ public class QuercusParser {
 
       expect(')');
     
-      return new DoStatement(location, test, block);
+      return _factory.createDo(location, test, block);
     } finally {
       _isTop = oldTop;
     }
@@ -1390,7 +1392,8 @@ public class QuercusParser {
 	block = parseStatement();
       }
 
-      return new ForeachStatement(location, objExpr, keyVar, valueVar, isRef, block);
+      return _factory.createForeach(location, objExpr, keyVar,
+				    valueVar, isRef, block);
     } finally {
       _isTop = oldTop;
     }
@@ -1628,7 +1631,7 @@ public class QuercusParser {
       */
 
       if (_returnsReference)
-	return new ReturnRefStatement(location, expr);
+	return _factory.createReturnRef(location, expr);
       else
 	return _factory.createReturn(location, expr);
     }
@@ -1940,7 +1943,7 @@ public class QuercusParser {
 
       switch (token) {
       case ',':
-	expr = new CommaExpr(getLocation(), expr, parseExpr());
+	expr = _factory.createComma(expr, parseExpr());
 	break;
       default:
 	_peekToken = token;
@@ -1965,7 +1968,7 @@ public class QuercusParser {
     Expr expr = parseExpr();
 
     if (isRef)
-      expr = new RefExpr(getLocation(), expr);
+      expr = _factory.createRef(expr);
 
     return expr;
   }
@@ -2501,7 +2504,7 @@ public class QuercusParser {
 	  token = parseToken();
 	  
 	  if (token == ']') {
-	    term = new ArrayTailExpr(getLocation(), term);
+	    term = _factory.createArrayTail(term);
 	  }
 	  else {
 	    _peekToken = token;
@@ -2576,7 +2579,7 @@ public class QuercusParser {
 	  token = parseToken();
 	  
 	  if (token == ']') {
-	    term = new ArrayTailExpr(getLocation(), term);
+	    term = _factory.createArrayTail(term);
 	  }
 	  else {
 	    _peekToken = token;
@@ -2674,7 +2677,8 @@ public class QuercusParser {
       parseFunctionArgs(args);
 
       if (nameExpr != null)
-	return new VarMethodCallExpr(getLocation(), term, nameExpr, args);
+	return _factory.createVarMethodCall(getLocation(), term,
+					    nameExpr, args);
       /*
       else if (term instanceof ThisExpr)
 	return new ThisMethodCallExpr(getLocation(), term, name, args);
@@ -2685,12 +2689,12 @@ public class QuercusParser {
     else if (nameExpr != null) {
       _peekToken = token;
 
-      return term.createFieldGet(nameExpr);
+      return term.createFieldGet(_factory, nameExpr);
     }
     else {
       _peekToken = token;
 
-      return term.createFieldGet(name);
+      return term.createFieldGet(_factory, name);
     }
   }
   
@@ -2996,7 +3000,7 @@ public class QuercusParser {
 	  token = parseToken();
 	  
 	  if (token == ']') {
-	    lhs = new ArrayTailExpr(getLocation(), lhs);
+	    lhs = _factory.createArrayTail(lhs);
 	  }
 	  else {
 	    _peekToken = token;
@@ -3049,10 +3053,10 @@ public class QuercusParser {
       _peekToken = token;
 
       // php/0d6c
-      return new VarVarExpr(getLocation(), parseTerm());
+      return _factory.createVarVar(parseTerm());
     }
     else if (token == '{') {
-      AbstractVarExpr expr = new VarVarExpr(getLocation(), parseExpr());
+      AbstractVarExpr expr = _factory.createVarVar(parseExpr());
 
       expect('}');
 
@@ -3112,7 +3116,7 @@ public class QuercusParser {
     else if (name.equals("__LINE__"))
       return _factory.createLong(_parserLocation.getLineNumber());
     else
-      return new ConstExpr(getLocation(), name);
+      return _factory.createConst(name);
   }
 
   /**
@@ -3176,7 +3180,7 @@ public class QuercusParser {
 
     parseFunctionArgs(args);
 
-    return new VarFunctionExpr(getLocation(), name, args);
+    return _factory.createVarFunction(getLocation(), name, args);
   }
 
   /**
@@ -4121,7 +4125,7 @@ public class QuercusParser {
 		_sb.append((char) ch);
 	      }
 
-	      tail = tail.createFieldGet(_sb.toString());
+	      tail = tail.createFieldGet(_factory, _sb.toString());
 	    }
 	    else {
 	      tail = _factory.createAppend(tail, _factory.createString("->"));
@@ -4191,7 +4195,7 @@ public class QuercusParser {
 	_sb.append((char) ch);
       }
 
-      Expr constExpr = new ConstExpr(getLocation(), _sb.toString());
+      Expr constExpr = _factory.createConst(_sb.toString());
 
       tail = _factory.createArrayGet(tail, constExpr);
     }

@@ -47,8 +47,8 @@ import com.caucho.util.L10N;
 public class FieldVarGetExpr extends AbstractVarExpr {
   private static final L10N L = new L10N(FieldVarGetExpr.class);
 
-  private final Expr _objExpr;
-  private final Expr _nameExpr;
+  protected final Expr _objExpr;
+  protected final Expr _nameExpr;
 
   public FieldVarGetExpr(Location location, Expr objExpr, Expr nameExpr)
   {

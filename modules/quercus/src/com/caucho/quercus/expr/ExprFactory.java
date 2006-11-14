@@ -122,6 +122,22 @@ public class ExprFactory {
   }
 
   /**
+   * Creates a var expression.
+   */
+  public VarVarExpr createVarVar(Expr var)
+  {
+    return new VarVarExpr(var);
+  }
+
+  /**
+   * Creates a const expression.
+   */
+  public ConstExpr createConst(String name)
+  {
+    return new ConstExpr(name);
+  }
+
+  /**
    * Creates a this expression.
    */
   public ThisExpr createThis(InterpretedClassDef cl)
@@ -135,6 +151,46 @@ public class ExprFactory {
   public ArrayGetExpr createArrayGet(Expr base, Expr index)
   {
     return new ArrayGetExpr(base, index);
+  }
+
+  /**
+   * Creates an array tail 'a[]' expression.
+   */
+  public ArrayTailExpr createArrayTail(Expr base)
+  {
+    return new ArrayTailExpr(base);
+  }
+
+  /**
+   * Creates an object get '$a->b' expression.
+   */
+  public Expr createFieldGet(Expr base, String name)
+  {
+    return new FieldGetExpr(base, name);
+  }
+
+  /**
+   * Creates an object get '$a->$b' expression.
+   */
+  public Expr createFieldVarGet(Expr base, Expr name)
+  {
+    return new FieldVarGetExpr(base, name);
+  }
+
+  /**
+   * Creates a ref '&$a' expression.
+   */
+  public RefExpr createRef(Expr base)
+  {
+    return new RefExpr(base);
+  }
+
+  /**
+   * Creates an unset '$a' expression.
+   */
+  public Expr createUnsetVar(AbstractVarExpr var)
+  {
+    return new UnsetVarExpr(var);
   }
 
   /**
@@ -536,6 +592,14 @@ public class ExprFactory {
   }
 
   /**
+   * Creates a comma expression.
+   */
+  public Expr createComma(Expr left, Expr right)
+  {
+    return new CommaExpr(left, right);
+  }
+
+  /**
    * Creates a list expression.
    */
   public final Expr createList(QuercusParser parser,
@@ -614,6 +678,16 @@ public class ExprFactory {
   }
 
   /**
+   * Creates a new var function call.
+   */
+  public VarFunctionExpr createVarFunction(Location loc,
+					   Expr name,
+					   ArrayList<Expr> args)
+  {
+    return new VarFunctionExpr(loc, name, args);
+  }
+
+  /**
    * Creates a new method call.
    */
   public Expr createMethodCall(Location loc,
@@ -622,6 +696,17 @@ public class ExprFactory {
 				       ArrayList<Expr> args)
   {
     return new MethodCallExpr(loc, objExpr, name, args);
+  }
+
+  /**
+   * Creates a new method call.
+   */
+  public Expr createVarMethodCall(Location loc,
+				  Expr objExpr,
+				  Expr name,
+				  ArrayList<Expr> args)
+  {
+    return new VarMethodCallExpr(loc, objExpr, name, args);
   }
 
   /**
@@ -716,6 +801,18 @@ public class ExprFactory {
   }
 
   /**
+   * Creates a switch statement
+   */
+  public Statement createSwitch(Location loc,
+				Expr value,
+				ArrayList<Expr[]> caseList,
+				ArrayList<BlockStatement> blockList,
+				Statement defaultBlock)
+  {
+    return new SwitchStatement(loc, value, caseList, blockList, defaultBlock);
+  }
+
+  /**
    * Creates a for statement
    */
   public Statement createFor(Location loc,
@@ -725,6 +822,19 @@ public class ExprFactory {
 			     Statement block)
   {
     return new ForStatement(loc, init, test, incr, block);
+  }
+
+  /**
+   * Creates a foreach statement
+   */
+  public Statement createForeach(Location loc,
+				 Expr objExpr,
+				 AbstractVarExpr key,
+				 AbstractVarExpr value,
+				 boolean isRef,
+				 Statement block)
+  {
+    return new ForeachStatement(loc, objExpr, key, value, isRef, block);
   }
 
   /**
@@ -738,12 +848,66 @@ public class ExprFactory {
   }
 
   /**
+   * Creates a do-while statement
+   */
+  public Statement createDo(Location loc,
+			    Expr test,
+			    Statement block)
+  {
+    return new DoStatement(loc, test, block);
+  }
+
+  /**
+   * Creates a break statement
+   */
+  public BreakStatement createBreak()
+  {
+    return BreakStatement.BREAK;
+  }
+
+  /**
+   * Creates a continue statement
+   */
+  public ContinueStatement createContinue()
+  {
+    return ContinueStatement.CONTINUE;
+  }
+
+  /**
+   * Creates a global statement
+   */
+  public Statement createGlobal(Location loc,
+				VarExpr var)
+  {
+    return new GlobalStatement(loc, var);
+  }
+
+  /**
+   * Creates a static statement
+   */
+  public Statement createStatic(Location loc,
+				VarExpr var,
+				Expr value)
+  {
+    return new StaticStatement(loc, var, value);
+  }
+
+  /**
    * Creates a return statement
    */
   public Statement createReturn(Location loc,
 				Expr value)
   {
     return new ReturnStatement(loc, value);
+  }
+
+  /**
+   * Creates a return ref statement
+   */
+  public Statement createReturnRef(Location loc,
+				   Expr value)
+  {
+    return new ReturnRefStatement(loc, value);
   }
 
   /**

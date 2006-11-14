@@ -52,9 +52,9 @@ import com.caucho.vfs.WriteStream;
  * Represents a static statement in a PHP program.
  */
 public class StaticStatement extends Statement {
-  private VarExpr _var;
-  private Expr _initValue;
-  private String _staticName;
+  protected VarExpr _var;
+  protected Expr _initValue;
+  protected String _staticName;
   
   /**
    * Creates the echo statement.

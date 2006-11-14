@@ -47,12 +47,12 @@ import com.caucho.quercus.Location;
  * Represents a switch statement.
  */
 public class SwitchStatement extends Statement {
-  private final Expr _value;
+  protected final Expr _value;
 
-  private final Expr[][] _cases;
-  private final BlockStatement[] _blocks;
+  protected final Expr[][] _cases;
+  protected final BlockStatement[] _blocks;
 
-  private final Statement _defaultBlock;
+  protected final Statement _defaultBlock;
 
   public SwitchStatement(Location location,
                          Expr value,

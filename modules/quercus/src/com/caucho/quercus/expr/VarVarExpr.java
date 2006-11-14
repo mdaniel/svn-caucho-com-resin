@@ -48,7 +48,7 @@ import com.caucho.quercus.Location;
 public class VarVarExpr extends AbstractVarExpr {
   private static final NullValue NULL = NullValue.create();
 
-  private final Expr _var;
+  protected final Expr _var;
 
   public VarVarExpr(Location location, Expr var)
   {

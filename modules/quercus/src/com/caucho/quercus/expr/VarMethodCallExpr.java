@@ -50,12 +50,12 @@ import com.caucho.util.L10N;
 public class VarMethodCallExpr extends Expr {
   private static final L10N L = new L10N(VarMethodCallExpr.class);
 
-  private final Expr _objExpr;
+  protected final Expr _objExpr;
   
   protected final Expr _name;
   protected final Expr []_args;
 
-  private Expr []_fullArgs;
+  protected Expr []_fullArgs;
 
   private AbstractFunction _fun;
 

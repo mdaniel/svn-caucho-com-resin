@@ -96,6 +96,7 @@ abstract public class AbstractVarExpr extends Expr {
    * Creates the copy.
    * @param location
    */
+  @Override
   public Expr createCopy(Location location)
   {
     return new CopyExpr(location, this);
@@ -104,9 +105,10 @@ abstract public class AbstractVarExpr extends Expr {
   /**
    * Creates the assignment.
    */
-  public Statement createUnset(Location location)
+  @Override
+  public Statement createUnset(ExprFactory factory, Location location)
   {
-    return new ExprStatement(location, new UnsetVarExpr(location, this));
+    return factory.createExpr(location, factory.createUnsetVar(this));
   }
 
   /**

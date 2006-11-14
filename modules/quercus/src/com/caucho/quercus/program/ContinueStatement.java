@@ -50,7 +50,7 @@ public class ContinueStatement extends Statement {
   /**
    * Creates the continue statement.
    */
-  private ContinueStatement()
+  protected ContinueStatement()
   {
     super(Location.UNKNOWN);
   }

@@ -44,7 +44,7 @@ import com.caucho.quercus.Location;
  * Represents unsetting a PHP variable
  */
 public class UnsetVarExpr extends Expr {
-  private final AbstractVarExpr _var;
+  protected final AbstractVarExpr _var;
 
   public UnsetVarExpr(Location location, AbstractVarExpr var)
   {

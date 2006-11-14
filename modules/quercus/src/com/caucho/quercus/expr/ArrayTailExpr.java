@@ -46,7 +46,7 @@ import com.caucho.quercus.Location;
  * Represents a PHP array[] reference expression.
  */
 public class ArrayTailExpr extends AbstractVarExpr {
-  private final Expr _expr;
+  protected final Expr _expr;
 
   public ArrayTailExpr(Location location, Expr expr)
   {

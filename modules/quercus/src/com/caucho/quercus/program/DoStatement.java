@@ -45,8 +45,8 @@ import com.caucho.quercus.Location;
  * Represents a do ... while statement.
  */
 public class DoStatement extends Statement {
-  private final Expr _test;
-  private final Statement _block;
+  protected final Expr _test;
+  protected final Statement _block;
 
   public DoStatement(Location location, Expr test, Statement block)
   {

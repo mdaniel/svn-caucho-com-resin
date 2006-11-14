@@ -46,14 +46,14 @@ import java.io.IOException;
 public class ForeachStatement
   extends Statement
 {
-  private final Expr _objExpr;
+  protected final Expr _objExpr;
 
-  private final AbstractVarExpr _key;
+  protected final AbstractVarExpr _key;
 
-  private final AbstractVarExpr _value;
-  private final boolean _isRef;
+  protected final AbstractVarExpr _value;
+  protected final boolean _isRef;
 
-  private final Statement _block;
+  protected final Statement _block;
 
   public ForeachStatement(Location location,
                           Expr objExpr,

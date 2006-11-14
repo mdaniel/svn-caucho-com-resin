@@ -50,7 +50,7 @@ public class BreakStatement extends Statement {
   /**
    * Creates the break statement.
    */
-  private BreakStatement()
+  protected BreakStatement()
   {
     super(Location.UNKNOWN);
   }

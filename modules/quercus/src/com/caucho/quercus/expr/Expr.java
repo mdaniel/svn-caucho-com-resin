@@ -239,23 +239,23 @@ abstract public class Expr {
   /**
    * Creates a field ref
    */
-  public Expr createFieldGet(String name)
+  public Expr createFieldGet(ExprFactory factory, String name)
   {
-    return new FieldGetExpr(this, name);
+    return factory.createFieldGet(this, name);
   }
 
   /**
    * Creates a field ref
    */
-  public Expr createFieldGet(Expr name)
+  public Expr createFieldGet(ExprFactory factory, Expr name)
   {
-    return new FieldVarGetExpr(this, name);
+    return factory.createFieldVarGet(this, name);
   }
 
   /**
    * Creates a assignment
    */
-  public Statement createUnset(Location location)
+  public Statement createUnset(ExprFactory factory, Location location)
     throws IOException
   {
     throw new IOException(L.l("{0} is an illegal value to unset",
@@ -265,7 +265,7 @@ abstract public class Expr {
   /**
    * Creates an isset expression
    */
-  public Expr createIsset()
+  public Expr createIsset(ExprFactory factory)
     throws IOException
   {
     throw new IOException(L.l("{0} is an illegal value to isset",

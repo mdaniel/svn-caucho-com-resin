@@ -48,8 +48,9 @@ import com.caucho.util.L10N;
  */
 public class VarFunctionExpr extends Expr {
   private static final L10N L = new L10N(FunctionExpr.class);
-  private final Expr _name;
-  private final Expr []_args;
+  
+  protected final Expr _name;
+  protected final Expr []_args;
 
   public VarFunctionExpr(Location location, Expr name, ArrayList<Expr> args)
   {
