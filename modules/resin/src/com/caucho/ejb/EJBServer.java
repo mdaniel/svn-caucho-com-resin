@@ -44,24 +44,24 @@ import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.loader.Loader;
-import com.caucho.loader.SimpleLoader;
 import com.caucho.log.Log;
 import com.caucho.naming.AbstractModel;
-import com.caucho.naming.ContextImpl;
 import com.caucho.naming.Jndi;
-import com.caucho.naming.ObjectProxy;
 import com.caucho.util.L10N;
-import com.caucho.vfs.*;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.MergePath;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.Path;
 
-import java.rmi.*;
-import javax.annotation.*;
-import javax.ejb.*;
+import javax.annotation.PostConstruct;
+import javax.ejb.EJBHome;
 import javax.jms.ConnectionFactory;
+import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import java.io.FileNotFoundException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -72,8 +72,7 @@ import java.util.logging.Logger;
  * <p>Each protocol will extend the container to override Handle creation.
  */
 public class EJBServer
-  implements ObjectProxy, EnvironmentListener, EJBServerInterface,
-             EnvironmentBean
+  implements EnvironmentListener, EJBServerInterface, EnvironmentBean
 {
   static final L10N L = new L10N(EJBServer.class);
   protected static final Logger log = Log.open(EJBServer.class);
@@ -631,7 +630,7 @@ public class EJBServer
     */
 
     if (_localServer.getLevel() == null
-	|| "java:comp/env/cmp".equals(_localJndiName)) {
+        || "java:comp/env/cmp".equals(_localJndiName)) {
       _localServer.set(this);
     }
 
@@ -666,8 +665,8 @@ public class EJBServer
       protocol.setServerManager(_ejbManager); // .getEnvServerManager());
 
       _ejbManager.getProtocolManager().setProtocolContainer(protocol);
-      _ejbManager.getProtocolManager().setLocalJndiName(_localJndiName);
-      _ejbManager.getProtocolManager().setRemoteJndiName(_remoteJndiName);
+      _ejbManager.setLocalJndiName(_localJndiName);
+      _ejbManager.setRemoteJndiName(_remoteJndiName);
 
       _ejbManager.setDataSource(_dataSource);
       _ejbManager.setCreateDatabaseSchema(_createDatabaseSchema);
@@ -790,9 +789,15 @@ public class EJBServer
     }
   }
 
-  public Object createObject(Hashtable env)
+  /**
+   * Return the canonical name for an ejb.
+   *
+   * @param path the archive-path or expand-path of a module
+   */
+  public String getJndiName(Path path, String ejbName)
+    throws FileNotFoundException, NameNotFoundException
   {
-    throw new IllegalStateException();
+    return _ejbManager.getJndiName(path, ejbName);
   }
 
   /**
@@ -814,5 +819,6 @@ public class EJBServer
   {
     _ejbManager.destroy();
   }
+
 }
 

@@ -87,7 +87,17 @@ public class EjbConfig {
 
     _functions.addAll(FunExpr.getStandardFunctions());
   }
-  
+
+  public String getRemoteJndiName()
+  {
+    return _ejbManager.getRemoteJndiName();
+  }
+
+  public String getLocalJndiName()
+  {
+    return _ejbManager.getLocalJndiName();
+  }
+
   /**
    * Adds a path for an EJB config file to the config list.
    */
@@ -890,27 +900,27 @@ public class EjbConfig {
     public int compare(Object a, Object b)
     {
       if (a == b)
-	return 0;
+        return 0;
 
       EjbBean beanA = (EjbBean) a;
       EjbBean beanB = (EjbBean) b;
 
       if (! (a instanceof EjbEntityBean) && ! (b instanceof EjbEntityBean))
-	return beanA.getEJBName().compareTo(beanB.getEJBName());
+        return beanA.getEJBName().compareTo(beanB.getEJBName());
       else if (! (a instanceof EjbEntityBean))
-	return 1;
+        return 1;
       else if (! (b instanceof EjbEntityBean))
-	return -1;
+        return -1;
 
       EjbEntityBean entityA = (EjbEntityBean) a;
       EjbEntityBean entityB = (EjbEntityBean) b;
 
       if (entityB.dependsOn(entityA))
-	return -1;
+        return -1;
       else if (entityA.dependsOn(entityB))
-	return 1;
+        return 1;
       else
-	return entityA.getEJBName().compareTo(entityB.getEJBName());
+        return entityA.getEJBName().compareTo(entityB.getEJBName());
     }
   }
 }

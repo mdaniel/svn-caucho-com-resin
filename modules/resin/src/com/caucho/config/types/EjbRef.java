@@ -29,37 +29,39 @@
 
 package com.caucho.config.types;
 
+import com.caucho.config.ConfigException;
 import com.caucho.ejb.EJBServer;
-import com.caucho.ejb.protocol.IiopProtocolContainer;
 import com.caucho.naming.Jndi;
 import com.caucho.naming.ObjectProxy;
+import com.caucho.vfs.Vfs;
 import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.EJBHome;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import java.rmi.RemoteException;
 import java.util.Hashtable;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * Configuration for the ejb-ref
+ * Configuration for the ejb-ref.
+ *
+ * An ejb-ref is used to make an ejb available within the environment
+ * in which the ejb-ref is declared.
  */
 public class EjbRef implements ObjectProxy {
   private static final L10N L = new L10N(EjbRef.class);
   private static final Logger log
     = Logger.getLogger(EjbRef.class.getName());
 
-  private String _name;
+  private String _ejbRefName;
   private String _type;
   private Class _home;
   private Class _remote;
-
-  private Hashtable _jndiEnv;
-  private String _link;
+  private String _jndiName;
+  private String _ejbLink;
 
   public EjbRef()
   {
@@ -73,9 +75,20 @@ public class EjbRef implements ObjectProxy {
   {
   }
 
+  /**
+   * Sets the name to use in the local jndi context.
+   * This is the jndi lookup name that code uses to obtain the home for
+   * the bean when doing a jndi lookup.
+   *
+   * <pre>
+   *   <ejb-ref-name>ejb/Gryffindor</ejb-ref-name>
+   *   ...
+   *   (new InitialContext()).lookup("java:comp/env/ejb/Gryffindor");
+   * </pre>
+   */
   public void setEjbRefName(String name)
   {
-    _name = name;
+    _ejbRefName = name;
   }
 
   /**
@@ -83,7 +96,7 @@ public class EjbRef implements ObjectProxy {
    */
   public String getEjbRefName()
   {
-    return _name;
+    return _ejbRefName;
   }
 
   public void setEjbRefType(String type)
@@ -117,28 +130,60 @@ public class EjbRef implements ObjectProxy {
     return _remote;
   }
 
-  public void setEjbLink(String link)
+  /**
+   * Sets the canonical jndi name to use to find the bean that
+   * is the target of the reference.
+   * For remote beans, a &lt;jndi-link> {@link com.caucho.naming.LinkProxy} is
+   * used to link the local jndi context referred to in this name to
+   * a remote context.
+   */
+  public void setJndiName(String jndiName)
   {
-    _link = link;
+    _jndiName = jndiName;
   }
 
-  public void putJndiEnv(String key, String value)
+  /**
+   * Set the target of the reference, an alternative to {@link #setJndiName(String)}.
+   * The format of the ejbLink is "bean", or "jarname#bean", where <i>bean</i> is the
+   * ejb-name of a bean within the same enterprise application, and <i>jarname</i>
+   * further qualifies the identity of the target.
+   */
+  public void setEjbLink(String ejbLink)
   {
-    if (_jndiEnv == null)
-      _jndiEnv = new Hashtable();
-
-    _jndiEnv.put(key, value);
+    _ejbLink = ejbLink;
   }
 
   @PostConstruct
   public void init()
     throws Exception
   {
+    if (_ejbRefName == null)
+      throw new ConfigException(L.l("{0} is required", "<ejb-ref-name>"));
+
+    _ejbRefName = Jndi.getFullName(_ejbRefName);
+
+    if (_ejbLink != null &&  _jndiName != null)
+        throw new ConfigException(L.l("either {0} or {1} can be used, but not both", "<ejb-link>", "<jndi-name>"));
+
+    if (_ejbLink != null) {
+      EJBServer server = EJBServer.getLocal();
+
+      if (server == null)
+        throw new ConfigException(L.l("{0} requires a local {1}", "<ejb-link>", "<ejb-server>"));
+
+      Jndi.bindDeep(_ejbRefName, this);
+    }
+    else {
+      if (_jndiName != null) {
+        _jndiName = Jndi.getFullName(_jndiName);
+
+        if (! _jndiName.equals(_ejbRefName))
+          Jndi.bindDeep(_ejbRefName, this);
+      }
+    }
+
     if (log.isLoggable(Level.FINER))
       log.log(Level.FINER, L.l("{0} init", this));
-
-    if (_name != null && ! _name.equals(_link))
-      Jndi.bindDeepShort(_name, this);
   }
 
   /**
@@ -149,35 +194,48 @@ public class EjbRef implements ObjectProxy {
   public Object createObject(Hashtable env)
     throws NamingException
   {
-    if (_jndiEnv != null && _link != null) {
-      return new InitialContext(_jndiEnv).lookup(_link);
-    }
+    if (_jndiName == null) {
+      String archiveName;
+      String ejbName;
 
-    EJBServer server = EJBServer.getLocal();
+      int hashIndex = _ejbLink.indexOf('#');
 
-    if (server != null) {
-      try {
-        EJBHome home = server.findRemoteEJB(_link);
-
-        if (home != null)
-          return home;
-      } catch (RemoteException e) {
-        throw new NamingException(e.toString());
+      if (hashIndex < 0) {
+        archiveName = null;
+        ejbName = _ejbLink;
       }
+      else {
+        archiveName = _ejbLink.substring(0, hashIndex);
+        ejbName = _ejbLink.substring(hashIndex + 1);
+      }
+
+      try {
+        Path path = archiveName == null ? Vfs.getPwd() : Vfs.lookup(archiveName);
+
+        _jndiName = Jndi.getFullName(EJBServer.getLocal().getJndiName(path, ejbName));
+      }
+      catch (Exception e) {
+        throw new NamingException(L.l("invalid {0} '{1}': {2}", "<ejb-link>", _ejbLink, e));
+      }
+
+      if (_jndiName == null)
+        throw new NamingException(L.l("invalid {0} '{1}'", "<ejb-link>", _ejbLink));
+
+      // XXX: might be valid in some circumstances
+      if (_ejbRefName.equals(_jndiName))
+        throw new NamingException(L.l("invalid {0} '{1}': resolves to self", "<ejb-link>", _ejbLink));
+
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, L.l("{0} resolved", this));
     }
-
-    EJBHome home = IiopProtocolContainer.findRemoteEJB(_link);
-
-    if (home != null)
-      return home;
 
     Context ic = new InitialContext(env);
 
-    return ic.lookup(_link);
+    return ic.lookup(_jndiName);
   }
 
   public String toString()
   {
-    return "EjbRef[" + _name + ", " + _link + "]";
+    return "EjbRef[" + _ejbRefName + ", " + _ejbLink + ", " +  _jndiName + "]";
   }
 }

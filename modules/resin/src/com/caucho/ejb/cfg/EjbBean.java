@@ -36,8 +36,6 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-import java.lang.reflect.*;
-
 import javax.annotation.*;
 import javax.ejb.*;
 
@@ -59,7 +57,6 @@ import com.caucho.config.types.*;
 import com.caucho.vfs.*;
 
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentBean;
 
 import com.caucho.make.*;
@@ -75,7 +72,6 @@ import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.AbstractServer;
 
 import com.caucho.ejb.gen.BeanAssembler;
-import com.caucho.ejb.gen.StatelessAssembler;
 import com.caucho.ejb.gen.ViewClass;
 import com.caucho.ejb.gen.TransactionChain;
 import com.caucho.ejb.gen.UserInRoleChain;
@@ -742,11 +738,6 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     return _serverProgram;
   }
 
-  public void addEjbRef(EjbRef ejbRef)
-  {
-    // XXX:
-  }
-
   /**
    * Configure initialization.
    */
@@ -760,6 +751,14 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
       assembleBeanMethods();
       
       createViews();
+
+      if (_jndiName == null) {
+        if (getRemoteHomeClass() != null)
+          _jndiName = getConfig().getRemoteJndiName() + "/" + _ejbName;
+        else
+          _jndiName = getConfig().getLocalJndiName() + "/" + _ejbName;
+      }
+
     } catch (LineConfigException e) {
       throw e;
     } catch (ConfigException e) {

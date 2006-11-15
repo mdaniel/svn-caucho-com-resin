@@ -530,11 +530,17 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   public void invalidate(boolean isLRU)
   {
+
+    if (log.isLoggable(Level.FINE)) {
+
+      if (log.isLoggable(Level.FINEST))
+        log.log(Level.FINEST, "invalidate session " + _id, new Exception());
+      else
+        log.fine("invalidate session " + _id);
+    }
+
     if (! _isValid)
       throw new IllegalStateException(L.l("Can't call invalidate() when session is no longer valid."));
-      
-    if (log.isLoggable(Level.FINE))
-      log.fine("invalidate session " + _id);
 
     ServletAuthenticator auth = getAuthenticator();
     if (! isLRU

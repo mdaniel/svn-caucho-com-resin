@@ -29,18 +29,12 @@
 
 package com.caucho.ejb;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.util.zip.*;
-
-import javax.jms.ConnectionFactory;
-import javax.sql.DataSource;
-
 import com.caucho.amber.entity.AmberEntityHome;
 import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.bytecode.*;
+import com.caucho.bytecode.ByteCodeClassMatcher;
+import com.caucho.bytecode.ByteCodeClassScanner;
+import com.caucho.bytecode.JClassLoader;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.FileSetType;
 import com.caucho.ejb.admin.EJBAdmin;
@@ -56,8 +50,27 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.management.j2ee.EJBModule;
 import com.caucho.management.j2ee.J2EEManagedObject;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.util.L10N;
+import com.caucho.util.CharBuffer;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.TempBuffer;
+
+import javax.jms.ConnectionFactory;
+import javax.sql.DataSource;
+import javax.naming.NameNotFoundException;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * Manages the EJBs.
@@ -66,7 +79,7 @@ public class EjbServerManager
   implements EJBServerInterface, EnvironmentListener
 {
   private static final L10N L = new L10N(EjbServerManager.class);
-  protected static final Logger log = Log.open(EjbServerManager.class);
+  protected static final Logger log = Logger.getLogger(EjbServerManager.class.getName());
 
   private EnvironmentClassLoader _classLoader;
 
@@ -159,7 +172,27 @@ public class EjbServerManager
   {
     return _amberContainer;
   }
-  
+
+  public void setLocalJndiName(String localJndiName)
+  {
+    getProtocolManager().setLocalJndiName(localJndiName);
+  }
+
+  public String getLocalJndiName()
+  {
+    return getProtocolManager().getLocalJndiName();
+  }
+
+  public void setRemoteJndiName(String remoteJndiName)
+  {
+    getProtocolManager().setRemoteJndiName(remoteJndiName);
+  }
+
+  public String getRemoteJndiName()
+  {
+    return getProtocolManager().getRemoteJndiName();
+  }
+
   /**
    * Sets the data source for the container.
    */
@@ -635,6 +668,24 @@ public class EjbServerManager
     _envServerManager.start();
   }
 
+  /**
+   * Return the canonical name for an ejb.
+   *
+   * @param path the archive-path or expand-path of a module
+   */
+  public String getJndiName(Path path, String ejbName)
+    throws FileNotFoundException, NameNotFoundException
+  {
+    // XXX: incorrect, need to use path, throw FileNotFoundException if invalid
+
+    AbstractServer server = _envServerManager.getServerByEJBName(ejbName);
+
+    if (server == null)
+      throw new NameNotFoundException(ejbName);
+
+    return server.getJndiName();
+  }
+
   public AmberEntityHome getAmberEntityHome(String name)
   {
     return _amberPersistenceUnit.getEntityHome(name);
@@ -766,17 +817,17 @@ public class EjbServerManager
     {
       return false;
     }
-  
+
     public boolean isMatch(CharBuffer annotationName)
     {
       if (annotationName.matches("javax.ejb.Stateless"))
-	return true;
+        return true;
       else if (annotationName.matches("javax.ejb.Stateful"))
-	return true;
+        return true;
       else if (annotationName.matches("javax.ejb.Session"))
-	return true;
+        return true;
       else
-	return false;
+        return false;
     }
   }
 

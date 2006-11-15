@@ -29,53 +29,30 @@
 
 package com.caucho.ejb;
 
-import java.util.HashMap;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import java.rmi.RemoteException;
-
-import javax.sql.DataSource;
-
-import javax.transaction.UserTransaction;
-
-import javax.ejb.HomeHandle;
-import javax.ejb.EJBHome;
-import javax.ejb.EJBObject;
-import javax.ejb.EJBLocalHome;
-import javax.ejb.EJBLocalObject;
-import javax.ejb.EJBMetaData;
-import javax.ejb.FinderException;
-
-import com.caucho.util.Log;
-import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
-
-import com.caucho.config.*;
-
+import com.caucho.config.BuilderProgram;
+import com.caucho.ejb.protocol.AbstractHandle;
+import com.caucho.ejb.protocol.EjbProtocolManager;
+import com.caucho.ejb.protocol.HandleEncoder;
+import com.caucho.ejb.protocol.SameJVMClientContainer;
+import com.caucho.ejb.session.SessionServer;
+import com.caucho.ejb.session.StatelessServer;
+import com.caucho.ejb.xa.EjbTransactionManager;
+import com.caucho.ejb.xa.TransactionContext;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.SimpleLoader;
+import com.caucho.util.L10N;
+import com.caucho.util.Log;
 
-import com.caucho.lifecycle.Lifecycle;
-
-import com.caucho.java.gen.JavaClassGenerator;
-
-import com.caucho.ejb.protocol.SameJVMClientContainer;
-import com.caucho.ejb.protocol.HandleEncoder;
-import com.caucho.ejb.protocol.AbstractHandle;
-import com.caucho.ejb.protocol.EjbProtocolManager;
-
-import com.caucho.ejb.xa.EjbTransactionManager;
-import com.caucho.ejb.xa.TransactionContext;
-
-import com.caucho.ejb.session.SessionServer;
-import com.caucho.ejb.session.StatelessServer;
+import javax.ejb.*;
+import javax.sql.DataSource;
+import javax.transaction.UserTransaction;
+import java.rmi.RemoteException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Base server for a single home/object bean pair.
@@ -153,10 +130,13 @@ abstract public class AbstractServer implements EnvironmentBean {
   {
     if (jndiName == null)
       return;
-    
-    if (! jndiName.startsWith("/"))
-      jndiName = "/" + jndiName;
-    
+
+    if (jndiName.startsWith("java:comp/env"))
+      jndiName = jndiName.substring(13);
+
+    while (jndiName.startsWith("/"))
+      jndiName = jndiName.substring(1);
+
     while (jndiName.endsWith("/"))
       jndiName = jndiName.substring(0, jndiName.length() - 1);
     
@@ -164,7 +144,9 @@ abstract public class AbstractServer implements EnvironmentBean {
   }
 
   /**
-   * Gets the jndi name.
+   * Gets the canonical jndi name.  The canonical jndi name
+   * does not include the java:comp/env prefix, and does not start
+   * or end with a '/'.
    */
   public String getJndiName()
   {
