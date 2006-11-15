@@ -54,7 +54,6 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.util.*;
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 /**
  * Abstract class for a log that rolls over based on size or period.

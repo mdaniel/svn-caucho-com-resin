@@ -45,7 +45,6 @@ import com.caucho.bytecode.JMethod;
 import com.caucho.util.L10N;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import com.caucho.log.Log;
 

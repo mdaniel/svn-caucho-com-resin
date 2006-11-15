@@ -49,7 +49,6 @@ import com.caucho.log.Log;
 import com.caucho.loader.EnvironmentLocal;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;

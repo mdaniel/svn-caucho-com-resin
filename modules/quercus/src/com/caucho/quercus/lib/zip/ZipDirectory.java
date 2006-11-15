@@ -40,7 +40,7 @@ import com.caucho.quercus.module.NotNull;
 import com.caucho.quercus.module.Optional;
 
 import com.caucho.util.L10N;
-import com.caucho.server.vfs.Vfs;
+import com.caucho.vfs.*;
 
 import java.io.InputStream;
 import java.io.IOException;

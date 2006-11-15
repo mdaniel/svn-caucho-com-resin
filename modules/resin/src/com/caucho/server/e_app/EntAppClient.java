@@ -45,7 +45,6 @@ import com.caucho.server.deploy.DeployInstance;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import javax.annotation.PostConstruct;
 import javax.naming.InitialContext;

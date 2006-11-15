@@ -69,7 +69,6 @@ import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
 import com.caucho.util.ThreadPool;
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import javax.annotation.PostConstruct;
 import javax.resource.spi.ResourceAdapter;

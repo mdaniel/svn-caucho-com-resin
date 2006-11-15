@@ -58,7 +58,6 @@ import com.caucho.util.CharBuffer;
 import com.caucho.vfs.IOExceptionWrapper;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 /**
  * Parses a PHP program.

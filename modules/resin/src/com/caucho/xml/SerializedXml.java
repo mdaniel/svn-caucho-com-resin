@@ -34,7 +34,6 @@ import java.util.*;
 import org.w3c.dom.*;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 import com.caucho.util.*;
 
 /**

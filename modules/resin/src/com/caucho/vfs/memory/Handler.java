@@ -26,49 +26,18 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.vfs;
+package com.caucho.vfs.memory;
 
-import com.caucho.util.L10N;
-
-import com.caucho.config.ConfigException;
-import com.caucho.vfs.*;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
 
 /**
- * Configures a vfs scheme.
+ * URL memory handler.
  */
-public class VfsSchemeConfig {
-  private static L10N L = new L10N(VfsSchemeConfig.class);
-  
-  private String _name;
-  private Path _path;
-
-  /**
-   * Sets the scheme name.
-   */
-  public void setName(String name)
+public class Handler extends URLStreamHandler {
+  public URLConnection openConnection(URL url)
   {
-    _name = name;
-  }
-
-  /**
-   * Sets the scheme path.
-   */
-  public void setPath(Path path)
-  {
-    _path = path;
-  }
-
-  /**
-   * Initialize the scheme.
-   */
-  public void init()
-    throws ConfigException
-  {
-    if (_name == null)
-      throw new ConfigException(L.l("vfs-scheme requires a name attribute"));
-
-    if (_path != null) {
-      Vfs.getLocalScheme().put(_name, _path);
-    }
+    return new MemoryURLConnection(url);
   }
 }

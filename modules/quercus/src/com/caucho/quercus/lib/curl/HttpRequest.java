@@ -343,7 +343,7 @@ public class HttpRequest
 
       if (len > 0)
         bb.setOffset(bb.getOffset() + len);
-	} while (len > 0);
+    } while (len > 0);
 
     return bb;
   }

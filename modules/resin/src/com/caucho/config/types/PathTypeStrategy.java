@@ -38,7 +38,6 @@ import com.caucho.el.ELParser;
 import com.caucho.el.Expr;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 import org.w3c.dom.Node;
 
 public class PathTypeStrategy extends TypeStrategy {

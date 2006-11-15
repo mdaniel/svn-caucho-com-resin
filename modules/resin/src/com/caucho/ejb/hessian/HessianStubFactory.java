@@ -36,7 +36,6 @@ import java.rmi.*;
 import javax.ejb.*;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 import com.caucho.java.*;
 import com.caucho.util.*;
 import com.caucho.server.util.*;

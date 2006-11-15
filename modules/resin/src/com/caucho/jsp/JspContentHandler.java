@@ -39,7 +39,6 @@ import com.caucho.jsp.java.JspNode;
 
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 /**
  * Generates the nodes for JSP code.

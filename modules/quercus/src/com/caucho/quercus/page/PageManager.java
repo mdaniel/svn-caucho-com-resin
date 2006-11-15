@@ -39,7 +39,6 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import com.caucho.util.ThreadPool;
 

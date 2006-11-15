@@ -59,7 +59,6 @@ import com.caucho.util.Log;
 import com.caucho.util.LruCache;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import com.caucho.xml.QName;
 import com.caucho.xml.DOMBuilder;

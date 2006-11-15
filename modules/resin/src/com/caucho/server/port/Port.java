@@ -53,7 +53,6 @@ import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
 import com.caucho.util.ThreadPool;
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 /**
  * Represents a protocol connection.

@@ -52,7 +52,6 @@ import com.caucho.util.*;
 import com.caucho.util.Semaphore;
 import com.caucho.util.TimeUnit;
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 import com.caucho.xsl.*;
 import com.caucho.xml.*;
 import com.caucho.java.*;

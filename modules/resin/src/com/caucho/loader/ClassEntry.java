@@ -42,7 +42,6 @@ import com.caucho.util.QDate;
 import com.caucho.util.ByteBuffer;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import com.caucho.log.Log;
 

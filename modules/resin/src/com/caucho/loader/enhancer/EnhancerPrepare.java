@@ -71,7 +71,6 @@ import com.caucho.loader.Loader;
 import com.caucho.util.L10N;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 /**
  * Prepares a class for enhancement.

@@ -58,7 +58,6 @@ import com.caucho.util.ByteBuffer;
 import com.caucho.util.TimedCache;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import com.caucho.config.ConfigException;
 

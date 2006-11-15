@@ -49,7 +49,6 @@ import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 /**
  * Library of static config functions.

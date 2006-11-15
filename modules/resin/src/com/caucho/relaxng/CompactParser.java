@@ -40,7 +40,6 @@ import com.caucho.util.CharBuffer;
 import com.caucho.util.IntMap;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import com.caucho.xml.XmlChar;
 import com.caucho.xml.QName;

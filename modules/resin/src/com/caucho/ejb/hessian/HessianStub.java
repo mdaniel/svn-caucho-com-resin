@@ -39,7 +39,6 @@ import java.util.logging.Level;
 import javax.transaction.xa.Xid;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.transaction.TransactionImpl;

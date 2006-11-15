@@ -62,7 +62,6 @@ import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.*;
 import com.caucho.server.util.*;
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import javax.annotation.PostConstruct;
 import javax.management.ObjectName;

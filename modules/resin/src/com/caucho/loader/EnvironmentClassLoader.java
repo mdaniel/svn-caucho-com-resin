@@ -39,7 +39,6 @@ import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.log.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import javax.management.MBeanServerFactory;
 import java.lang.reflect.Method;

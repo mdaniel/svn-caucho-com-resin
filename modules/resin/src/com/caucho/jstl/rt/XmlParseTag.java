@@ -38,7 +38,6 @@ import org.w3c.dom.*;
 import org.xml.sax.*;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 import com.caucho.util.*;
 import com.caucho.jsp.PageContextImpl;
 import com.caucho.jsp.BodyContentImpl;

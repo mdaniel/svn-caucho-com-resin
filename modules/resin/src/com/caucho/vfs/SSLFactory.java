@@ -19,48 +19,31 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.server.vfs;
+package com.caucho.vfs;
 
-import java.lang.reflect.Method;
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import java.security.GeneralSecurityException;
 
-import java.util.Map;
-
-import java.util.logging.Logger;
-
-import java.io.IOException;
-import java.io.FileNotFoundException;
-
-import com.caucho.server.util.CauchoSystem;
+import com.caucho.config.ConfigException;
 import com.caucho.vfs.*;
 
 /**
- * FilePath implements the native filesystem.
+ * Abstract socket to handle both normal sockets and bin/resin sockets.
  */
-public class JniFilePath {
-  public static FilesystemPath create()
-  {
-    try {
-      Class pathClass = Class.forName("com.caucho.vfs.JniFilePathImpl");
-
-      Method isEnabled = pathClass.getMethod("isEnabled", new Class[0]);
-
-      Object result = isEnabled.invoke(null);
-
-      if (Boolean.TRUE.equals(result))
-	return (FilesystemPath) pathClass.newInstance();
-    } catch (ClassNotFoundException e) {
-    } catch (Throwable e) {
-      e.printStackTrace();
-    }
-    
-    return null;
-  }
+public interface SSLFactory {
+  /**
+   * Creates the SSL ServerSocket.
+   */
+  public QServerSocket create(InetAddress host, int port)
+    throws ConfigException, IOException, GeneralSecurityException;
 }
+

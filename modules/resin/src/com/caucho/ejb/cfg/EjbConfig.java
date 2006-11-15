@@ -46,7 +46,6 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import java.util.ArrayList;
 import java.util.Collection;

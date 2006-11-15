@@ -43,7 +43,6 @@ import com.caucho.server.util.*;
 
 import com.caucho.log.Log;
 
-import com.caucho.server.vfs.*;
 import com.caucho.vfs.*;
 
 import com.caucho.java.JavaWriter;

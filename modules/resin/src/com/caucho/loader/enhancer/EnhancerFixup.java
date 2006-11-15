@@ -74,7 +74,6 @@ import com.caucho.loader.Loader;
 import com.caucho.util.L10N;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 /**
  * Class loader which checks for changes in class files and automatically

@@ -19,65 +19,61 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.server.vfs;
+package com.caucho.vfs;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.*;
 
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
 /**
- * JarScheme implements the lookup of the jar scheme.
+ * Logs usage of the path.
  */
-public class JarScheme extends FilesystemPath {
-  JarScheme(String path)
+public class SpyPath extends PathWrapper {
+  protected final static Logger log
+    = Logger.getLogger(SpyPath.class.getName());
+
+  /**
+   * Creates a new Path object.
+   *
+   * @param root the new Path root.
+   */
+  public SpyPath(Path path)
   {
-    super(null, "/", "/");
+    super(path);
   }
 
   /**
-   * Lookup the path, handling windows weirdness
+   * Returns a new path relative to the current one.
+   *
+   * <p>Path only handles scheme:xxx.  Subclasses of Path will specialize
+   * the xxx.
+   *
+   * @param userPath relative or absolute path, essentially any url.
+   * @param newAttributes attributes for the new path.
+   *
+   * @return the new path or null if the scheme doesn't exist
    */
-  protected Path schemeWalk(String userPath,
-                            Map<String,Object> attributes,
-			    String filePath,
-                            int offset)
+   public Path lookup(String userPath, Map<String,Object> newAttributes)
+   {
+     return new SpyPath(super.lookup(userPath, newAttributes));
+   }
+
+  /**
+   * Opens a random-access stream.
+   */
+  public RandomAccessStream openRandomAccess() throws IOException
   {
-    int p = filePath.indexOf('!', offset);
-    String backingPath;
-    String jarPath;
-
-    if (p > 0) {
-      backingPath = filePath.substring(offset, p);
-      jarPath = filePath.substring(p + 1);
-    }
-    else {
-      backingPath = filePath.substring(offset);
-      jarPath = "";
-    }
-
-    Path backing = Vfs.lookup(backingPath);
-
-    return JarPath.create(backing).lookup(jarPath);
-  }
-  
-  public Path fsWalk(String userPath,
-			Map<String,Object> attributes,
-			String path)
-  {
-    return schemeWalk(userPath, attributes, path, 0);
-  }
-
-  public String getScheme()
-  {
-    return "jar";
+    return new SpyRandomAccessStream(getWrappedPath().openRandomAccess());
   }
 }

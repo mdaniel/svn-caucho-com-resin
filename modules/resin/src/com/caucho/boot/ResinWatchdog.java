@@ -39,7 +39,6 @@ import com.caucho.server.port.Port;
 import com.caucho.util.Alarm;
 import com.caucho.log.*;
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import java.io.File;
 import java.io.IOException;

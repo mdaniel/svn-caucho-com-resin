@@ -302,7 +302,7 @@ public abstract class AbstractGenerator {
   protected void printVersionChange()
     throws IOException
   {
-    println("if (com.caucho.util.CauchoSystem.getVersionId() != " +
+    println("if (com.caucho.server.util.CauchoSystem.getVersionId() != " +
             CauchoSystem.getVersionId() + ")");
     println("  return true;");
   }

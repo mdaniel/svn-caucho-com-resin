@@ -36,7 +36,6 @@ import javax.servlet.*;
 
 import com.caucho.util.*;
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.CaseInsensitive;
 import com.caucho.server.webapp.Application;
 import com.caucho.server.connection.CauchoRequest;
 

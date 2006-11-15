@@ -38,7 +38,6 @@ import javax.servlet.jsp.el.VariableResolver;
 
 import com.caucho.util.*;
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 /**
  * Bean utilities.

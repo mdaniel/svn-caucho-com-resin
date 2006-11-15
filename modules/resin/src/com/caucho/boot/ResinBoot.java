@@ -35,7 +35,6 @@ import com.caucho.el.EL;
 import com.caucho.server.resin.ResinELContext;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import java.io.File;
 import java.io.IOException;

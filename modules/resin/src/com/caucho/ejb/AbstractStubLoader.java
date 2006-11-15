@@ -46,7 +46,6 @@ import com.caucho.util.CharBuffer;
 import com.caucho.config.ConfigException;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import com.caucho.java.WorkDir;
 

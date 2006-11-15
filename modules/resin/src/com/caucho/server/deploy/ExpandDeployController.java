@@ -54,7 +54,6 @@ import com.caucho.loader.Environment;
 import com.caucho.util.*;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 /**
  * A deployment entry that expands from an archive (Jar/Zip) file.

@@ -48,7 +48,6 @@ import com.caucho.server.port.Port;
 import com.caucho.server.resin.Resin;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import javax.annotation.PostConstruct;
 import javax.management.ObjectName;

@@ -34,7 +34,6 @@ import javax.annotation.*;
 import com.caucho.loader.EnvironmentLocal;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 public class WorkDir {
   private static final EnvironmentLocal<Path> _localWorkDir =

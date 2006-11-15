@@ -57,7 +57,6 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.Optional;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 /**
  * PHP error handling.

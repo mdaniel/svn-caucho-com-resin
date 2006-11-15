@@ -37,7 +37,6 @@ import com.caucho.util.*;
 import com.caucho.server.util.*;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import com.caucho.log.Log;
 

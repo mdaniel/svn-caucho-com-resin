@@ -48,7 +48,6 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import com.caucho.make.DependencyContainer;
 

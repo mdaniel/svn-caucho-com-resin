@@ -26,24 +26,40 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.vfs;
+package com.caucho.vfs.memory;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.security.GeneralSecurityException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.IOException;
 
-import com.caucho.config.ConfigException;
-import com.caucho.vfs.*;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
+
+import com.caucho.vfs.Vfs;
 
 /**
- * Abstract socket to handle both normal sockets and bin/resin sockets.
+ * URL memory handler.
  */
-public interface SSLFactory {
-  /**
-   * Creates the SSL ServerSocket.
-   */
-  public QServerSocket create(InetAddress host, int port)
-    throws ConfigException, IOException, GeneralSecurityException;
+class MemoryURLConnection extends URLConnection {
+  MemoryURLConnection(URL url)
+  {
+    super(url);
+  }
+  
+  public void connect()
+  {
+  }
+  
+  public InputStream getInputStream()
+    throws IOException
+  {
+    return Vfs.lookup().lookup(url.toString()).openRead();
+  }
+  
+  public OutputStream getOutputStream()
+    throws IOException
+  {
+    return Vfs.lookup().lookup(url.toString()).openWrite();
+  }
 }
-

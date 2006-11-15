@@ -46,7 +46,6 @@ import com.caucho.server.util.*;
 
 import com.caucho.make.DependencyContainer;
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import com.caucho.config.ConfigException;
 

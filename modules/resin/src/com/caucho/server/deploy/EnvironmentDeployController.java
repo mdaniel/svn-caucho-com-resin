@@ -42,7 +42,6 @@ import com.caucho.loader.EnvironmentListener;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import javax.el.ELContext;
 import javax.el.ELException;

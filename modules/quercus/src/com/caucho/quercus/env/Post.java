@@ -35,7 +35,6 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import com.caucho.quercus.lib.string.StringModule;
 

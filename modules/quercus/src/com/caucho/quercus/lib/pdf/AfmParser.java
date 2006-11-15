@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.io.FileNotFoundException;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import com.caucho.util.L10N;
 

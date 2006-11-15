@@ -46,7 +46,6 @@ import com.caucho.jmx.Jmx;
 import com.caucho.management.server.ServerConnectorMXBean;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;

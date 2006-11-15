@@ -26,56 +26,49 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.vfs;
+package com.caucho.vfs;
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
+import com.caucho.util.L10N;
 
-import javax.annotation.*;
-
-import com.caucho.loader.EnvironmentLocal;
+import com.caucho.config.ConfigException;
+import com.caucho.vfs.*;
 
 /**
- * Configuration for CaseInsensitive environments.
+ * Configures a vfs scheme.
  */
-public class CaseInsensitive {
-  private final static EnvironmentLocal<Boolean> _caseInsensitive =
-  new EnvironmentLocal<Boolean>("caucho.vfs.case-insensitive");
+public class VfsSchemeConfig {
+  private static L10N L = new L10N(VfsSchemeConfig.class);
   
-  private boolean _isCaseInsensitive = true;
+  private String _name;
+  private Path _path;
 
-  public CaseInsensitive()
+  /**
+   * Sets the scheme name.
+   */
+  public void setName(String name)
   {
+    _name = name;
   }
 
   /**
-   * Returns true if the local environment is case sensitive.
+   * Sets the scheme path.
    */
-  public static boolean isCaseInsensitive()
+  public void setPath(Path path)
   {
-    Boolean value = _caseInsensitive.get();
-
-    if (value == null)
-      return File.separatorChar == '\\';
-    else
-      return value.booleanValue();
+    _path = path;
   }
 
   /**
-   * Sets true if case sensitive.
+   * Initialize the scheme.
    */
-  public void setValue(boolean isInsensitive)
-  {
-    _isCaseInsensitive = isInsensitive;
-  }
-
-  /**
-   * Init.
-   */
-  @PostConstruct
   public void init()
+    throws ConfigException
   {
-    _caseInsensitive.set(new Boolean(_isCaseInsensitive));
+    if (_name == null)
+      throw new ConfigException(L.l("vfs-scheme requires a name attribute"));
+
+    if (_path != null) {
+      Vfs.getLocalScheme().put(_name, _path);
+    }
   }
 }

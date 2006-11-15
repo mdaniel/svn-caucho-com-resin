@@ -56,7 +56,6 @@ import com.caucho.util.LruCache;
 import com.caucho.util.URLUtil;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterServer;

@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.vfs;
+package com.caucho.vfs;
 
 import java.io.*;
 import java.util.*;
@@ -34,16 +34,24 @@ import java.util.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
-public class MemoryScheme extends MemoryPath {
-  public MemoryScheme()
+public class SpyScheme extends FilesystemPath {
+  public SpyScheme()
   {
-    super(null, "/", null, "/");
+    super(null, "/", "/");
   }
 
   public Path fsWalk(String userPath,
 		     Map<String,Object> attributes,
 		     String path)
   {
-    return Vfs.lookup().lookup(path);
+    if (path.startsWith("/file:"))
+      return new SpyPath(Vfs.lookup().lookup(path.substring(1)));
+    else
+      return new SpyPath(Vfs.lookup().lookup(path));
+  }
+
+  public String getScheme()
+  {
+    return "spy";
   }
 }

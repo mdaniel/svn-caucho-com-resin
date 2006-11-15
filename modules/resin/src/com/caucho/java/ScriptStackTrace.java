@@ -52,7 +52,6 @@ import com.caucho.util.L10N;
 import com.caucho.util.CharBuffer;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 /**
  * Prints a stack trace using JSR-45

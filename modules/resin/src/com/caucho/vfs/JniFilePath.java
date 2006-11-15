@@ -19,47 +19,48 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.server.vfs.memory;
+package com.caucho.vfs;
 
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.lang.reflect.Method;
+
+import java.util.Map;
+
+import java.util.logging.Logger;
+
 import java.io.IOException;
+import java.io.FileNotFoundException;
 
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLStreamHandler;
-
-import com.caucho.server.vfs.Vfs;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.vfs.*;
 
 /**
- * URL memory handler.
+ * FilePath implements the native filesystem.
  */
-class MemoryURLConnection extends URLConnection {
-  MemoryURLConnection(URL url)
+public class JniFilePath {
+  public static FilesystemPath create()
   {
-    super(url);
-  }
-  
-  public void connect()
-  {
-  }
-  
-  public InputStream getInputStream()
-    throws IOException
-  {
-    return Vfs.lookup().lookup(url.toString()).openRead();
-  }
-  
-  public OutputStream getOutputStream()
-    throws IOException
-  {
-    return Vfs.lookup().lookup(url.toString()).openWrite();
+    try {
+      Class pathClass = Class.forName("com.caucho.vfs.JniFilePathImpl");
+
+      Method isEnabled = pathClass.getMethod("isEnabled", new Class[0]);
+
+      Object result = isEnabled.invoke(null);
+
+      if (Boolean.TRUE.equals(result))
+	return (FilesystemPath) pathClass.newInstance();
+    } catch (ClassNotFoundException e) {
+    } catch (Throwable e) {
+      e.printStackTrace();
+    }
+    
+    return null;
   }
 }

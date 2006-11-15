@@ -26,32 +26,56 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.vfs;
+package com.caucho.vfs;
 
-import java.io.*;
 import java.util.*;
+import java.io.*;
+import java.net.*;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import javax.annotation.*;
 
-public class SpyScheme extends FilesystemPath {
-  public SpyScheme()
+import com.caucho.loader.EnvironmentLocal;
+
+/**
+ * Configuration for CaseInsensitive environments.
+ */
+public class CaseInsensitive {
+  private final static EnvironmentLocal<Boolean> _caseInsensitive =
+  new EnvironmentLocal<Boolean>("caucho.vfs.case-insensitive");
+  
+  private boolean _isCaseInsensitive = true;
+
+  public CaseInsensitive()
   {
-    super(null, "/", "/");
   }
 
-  public Path fsWalk(String userPath,
-		     Map<String,Object> attributes,
-		     String path)
+  /**
+   * Returns true if the local environment is case sensitive.
+   */
+  public static boolean isCaseInsensitive()
   {
-    if (path.startsWith("/file:"))
-      return new SpyPath(Vfs.lookup().lookup(path.substring(1)));
+    Boolean value = _caseInsensitive.get();
+
+    if (value == null)
+      return File.separatorChar == '\\';
     else
-      return new SpyPath(Vfs.lookup().lookup(path));
+      return value.booleanValue();
   }
 
-  public String getScheme()
+  /**
+   * Sets true if case sensitive.
+   */
+  public void setValue(boolean isInsensitive)
   {
-    return "spy";
+    _isCaseInsensitive = isInsensitive;
+  }
+
+  /**
+   * Init.
+   */
+  @PostConstruct
+  public void init()
+  {
+    _caseInsensitive.set(new Boolean(_isCaseInsensitive));
   }
 }

@@ -38,7 +38,6 @@ import javax.ejb.*;
 import com.caucho.util.*;
 import com.caucho.server.util.*;
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 import com.caucho.java.*;
 
 public class IiopStubCompiler extends AbstractGenerator {

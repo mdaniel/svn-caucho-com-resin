@@ -49,7 +49,6 @@ import com.caucho.util.CharBuffer;
 import com.caucho.config.ConfigException;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 /**
  * Class loader which checks for changes in class files and automatically

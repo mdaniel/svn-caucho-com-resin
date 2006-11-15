@@ -52,7 +52,6 @@ import com.caucho.naming.ContextImpl;
 import com.caucho.naming.Jndi;
 import com.caucho.naming.ObjectProxy;
 import com.caucho.util.L10N;
-import com.caucho.server.vfs.*;
 import com.caucho.vfs.*;
 
 import java.rmi.*;

@@ -42,7 +42,8 @@ import com.caucho.quercus.QuercusModuleException;
 
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.file.ReadStreamInput;
-import com.caucho.server.vfs.Vfs;
+
+import com.caucho.vfs.*;
 
 /**
  * Input from a compressed stream.

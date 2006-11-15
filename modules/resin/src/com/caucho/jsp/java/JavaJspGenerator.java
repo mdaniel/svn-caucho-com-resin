@@ -45,7 +45,6 @@ import javax.servlet.jsp.el.ELException;
 
 import com.caucho.util.*;
 import com.caucho.server.util.*;
-import com.caucho.server.vfs.*;
 import com.caucho.vfs.*;
 
 import com.caucho.make.ClassDependency;
@@ -1752,7 +1751,7 @@ public class JavaJspGenerator extends JspGenerator {
     }
 
     out.println("com.caucho.vfs.Path resinHome = com.caucho.server.util.CauchoSystem.getResinHome();");
-    out.println("com.caucho.server.vfs.MergePath mergePath = new com.caucho.server.vfs.MergePath();");
+    out.println("com.caucho.vfs.MergePath mergePath = new com.caucho.vfs.MergePath();");
     out.println("mergePath.addMergePath(appDir);");
     out.println("mergePath.addMergePath(resinHome);");
     out.println("com.caucho.loader.DynamicClassLoader loader;");

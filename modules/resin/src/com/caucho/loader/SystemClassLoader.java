@@ -29,7 +29,6 @@
 
 package com.caucho.loader;
 
-import com.caucho.server.vfs.*;
 import com.caucho.vfs.*;
 import com.caucho.config.*;
 

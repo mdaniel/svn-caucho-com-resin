@@ -26,18 +26,24 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.vfs.memory;
+package com.caucho.vfs;
 
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLStreamHandler;
+import java.io.*;
+import java.util.*;
 
-/**
- * URL memory handler.
- */
-public class Handler extends URLStreamHandler {
-  public URLConnection openConnection(URL url)
+import com.caucho.util.*;
+import com.caucho.vfs.*;
+
+public class MemoryScheme extends MemoryPath {
+  public MemoryScheme()
   {
-    return new MemoryURLConnection(url);
+    super(null, "/", null, "/");
+  }
+
+  public Path fsWalk(String userPath,
+		     Map<String,Object> attributes,
+		     String path)
+  {
+    return Vfs.lookup().lookup(path);
   }
 }

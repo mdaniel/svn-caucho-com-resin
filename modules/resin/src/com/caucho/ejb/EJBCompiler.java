@@ -34,7 +34,6 @@ import com.caucho.loader.SimpleLoader;
 import com.caucho.util.ExceptionWrapper;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import java.util.ArrayList;
 import java.util.logging.Logger;

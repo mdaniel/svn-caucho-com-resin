@@ -34,7 +34,6 @@ import java.util.logging.Level;
 import javax.annotation.*;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 /**
  * Class storing distributed objects based on the filesystem.

@@ -37,7 +37,6 @@ import com.caucho.config.types.PathBuilder;
 import com.caucho.config.types.RawString;
 import com.caucho.config.types.Period;
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import java.util.Map;
 import java.util.logging.Level;

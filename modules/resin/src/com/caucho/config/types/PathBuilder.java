@@ -37,7 +37,6 @@ import com.caucho.util.L10N;
 import com.caucho.util.CharBuffer;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import com.caucho.el.MapVariableResolver;
 import com.caucho.el.ELParser;

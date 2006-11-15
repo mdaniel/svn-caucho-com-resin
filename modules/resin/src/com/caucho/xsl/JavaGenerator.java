@@ -2636,7 +2636,7 @@ public class JavaGenerator extends Generator {
     println("public boolean isModified()");
     println("{");
     pushDepth();
-    println("return com.caucho.util.CauchoSystem.getVersionId() != " +
+    println("return com.caucho.server.util.CauchoSystem.getVersionId() != " +
             CauchoSystem.getVersionId() + "L ||");
     println("       super.isModified();");
     popDepth();

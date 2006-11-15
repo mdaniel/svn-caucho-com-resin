@@ -41,7 +41,6 @@ import com.caucho.quercus.page.QuercusPage;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import com.caucho.server.session.SessionManager;
 

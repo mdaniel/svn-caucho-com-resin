@@ -38,7 +38,6 @@ import javax.servlet.*;
 import com.caucho.util.ByteBuffer;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 /**
  * Serves server-side include files.

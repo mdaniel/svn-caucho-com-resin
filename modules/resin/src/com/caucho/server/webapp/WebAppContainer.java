@@ -58,7 +58,6 @@ import com.caucho.server.session.SessionManager;
 import com.caucho.util.*;
 import com.caucho.server.util.*;
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;

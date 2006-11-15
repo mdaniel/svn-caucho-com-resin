@@ -230,7 +230,7 @@ public class MiscModule extends AbstractQuercusModule {
       Exception e = new Exception("Stack trace");
       e.fillInStackTrace();
 
-      com.caucho.vfs.WriteStream out = com.caucho.server.vfs.Vfs.openWrite("stderr:");
+      com.caucho.vfs.WriteStream out = com.caucho.vfs.Vfs.openWrite("stderr:");
       try {
 	ScriptStackTrace.printStackTrace(e, out.getPrintWriter());
       } finally {

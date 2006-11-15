@@ -34,7 +34,6 @@ import com.caucho.util.CharBuffer;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import org.w3c.dom.*;
 import org.xml.sax.Locator;

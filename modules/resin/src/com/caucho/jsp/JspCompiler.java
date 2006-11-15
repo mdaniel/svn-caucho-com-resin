@@ -42,7 +42,6 @@ import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 import javax.servlet.SingleThreadModel;
 import javax.servlet.jsp.HttpJspPage;

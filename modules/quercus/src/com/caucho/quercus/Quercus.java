@@ -75,7 +75,6 @@ import com.caucho.util.TimedCache;
 import com.caucho.util.L10N;
 
 import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
 
 /**
  * Facade for the PHP language.
