@@ -97,9 +97,9 @@ abstract public class AbstractVarExpr extends Expr {
    * @param location
    */
   @Override
-  public Expr createCopy(Location location)
+  public Expr createCopy(ExprFactory factory)
   {
-    return new CopyExpr(location, this);
+    return factory.createCopy(this);
   }
 
   /**

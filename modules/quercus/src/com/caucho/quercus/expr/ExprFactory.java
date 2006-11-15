@@ -139,6 +139,14 @@ public class ExprFactory {
   }
 
   /**
+   * Creates a class const expression.
+   */
+  public ClassConstExpr createClassConst(String className, String name)
+  {
+    return new ClassConstExpr(className, name);
+  }
+
+  /**
    * Creates a this expression.
    */
   public ThisExpr createThis(InterpretedClassDef cl)
@@ -176,6 +184,14 @@ public class ExprFactory {
   public Expr createFieldVarGet(Expr base, Expr name)
   {
     return new FieldVarGetExpr(base, name);
+  }
+
+  /**
+   * Creates an object get 'a::b' expression.
+   */
+  public Expr createStaticFieldGet(String className, String name)
+  {
+    return new StaticFieldGetExpr(className, name);
   }
 
   /**
@@ -248,6 +264,14 @@ public class ExprFactory {
   public Expr createClone(Expr expr)
   {
     return new CloneExpr(expr);
+  }
+
+  /**
+   * Creates a clone 'clone a' expression.
+   */
+  public Expr createCopy(Expr expr)
+  {
+    return new CopyExpr(expr);
   }
 
   /**
@@ -617,6 +641,30 @@ public class ExprFactory {
   }
 
   /**
+   * Creates an instanceof expression.
+   */
+  public Expr createInstanceOf(Expr expr, String name)
+  {
+    return new InstanceOfExpr(expr, name);
+  }
+
+  /**
+   * Creates an instanceof expression.
+   */
+  public Expr createInstanceOfVar(Expr expr, Expr name)
+  {
+    return new InstanceOfVarExpr(expr, name);
+  }
+
+  /**
+   * Creates an each expression.
+   */
+  public Expr createEach(Expr expr)
+  {
+    return new EachExpr(expr);
+  }
+
+  /**
    * Creates a list expression.
    */
   public final Expr createList(QuercusParser parser,
@@ -705,6 +753,28 @@ public class ExprFactory {
   }
 
   /**
+   * Creates a new function call.
+   */
+  public Expr createClassMethod(Location loc,
+				String className,
+				String name,
+				ArrayList<Expr> args)
+  {
+    return new ClassMethodExpr(loc, className, name, args);
+  }
+
+  /**
+   * Creates a new function call.
+   */
+  public Expr createStaticMethod(Location loc,
+				 String className,
+				 String name,
+				 ArrayList<Expr> args)
+  {
+    return new StaticMethodExpr(loc, className, name, args);
+  }
+
+  /**
    * Creates a new method call.
    */
   public Expr createMethodCall(Location loc,
@@ -734,6 +804,16 @@ public class ExprFactory {
 			   ArrayList<Expr> args)
   {
     return new NewExpr(loc, name, args);
+  }
+
+  /**
+   * Creates a new function call.
+   */
+  public VarNewExpr createVarNew(Location loc,
+				 Expr name,
+				 ArrayList<Expr> args)
+  {
+    return new VarNewExpr(loc, name, args);
   }
 
   /**
@@ -992,6 +1072,15 @@ public class ExprFactory {
 				     Function fun)
   {
     return new FunctionDefStatement(loc, fun);
+  }
+
+  /**
+   * Creates a new function def statement
+   */
+  public Statement createClassDef(Location loc,
+				  InterpretedClassDef cl)
+  {
+    return new ClassDefStatement(loc, cl);
   }
 
   /**

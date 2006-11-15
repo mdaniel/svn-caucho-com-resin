@@ -42,7 +42,7 @@ import com.caucho.quercus.Location;
  * Represents a PHP instanceof expression in which the right side is a variable
  * holding the string class name.
  */
-public final class InstanceOfVarExpr extends BinaryExpr {
+public class InstanceOfVarExpr extends BinaryExpr {
 
   public InstanceOfVarExpr(Location location, Expr left, Expr right)
   {

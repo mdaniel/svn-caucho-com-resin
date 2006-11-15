@@ -48,7 +48,6 @@ public class EachExpr extends UnaryExpr {
   }
 
   public EachExpr(Expr expr)
-    throws IOException
   {
     super(expr);
   }

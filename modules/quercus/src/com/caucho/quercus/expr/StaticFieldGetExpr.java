@@ -47,9 +47,9 @@ import com.caucho.util.L10N;
 public class StaticFieldGetExpr extends AbstractVarExpr {
   private static final L10N L = new L10N(StaticFieldGetExpr.class);
 
-  private final String _className;
-  private final String _varName;
-  private final String _envName;
+  protected final String _className;
+  protected final String _varName;
+  protected final String _envName;
 
   public StaticFieldGetExpr(Location location, String className, String varName)
   {

@@ -51,11 +51,11 @@ import com.caucho.util.L10N;
 public class ClassMethodExpr extends Expr {
   private static final L10N L = new L10N(ClassMethodExpr.class);
 
-  private final String _className;
-  private final String _name;
-  private final Expr []_args;
+  protected final String _className;
+  protected final String _name;
+  protected final Expr []_args;
 
-  private boolean _isMethod;
+  protected boolean _isMethod;
 
   public ClassMethodExpr(Location location, String className, String name, ArrayList<Expr> args)
   {

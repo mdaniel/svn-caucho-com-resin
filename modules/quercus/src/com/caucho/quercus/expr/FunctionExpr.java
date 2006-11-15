@@ -35,6 +35,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.gen.PhpWriter;
+import com.caucho.quercus.parser.*;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.quercus.program.QuercusProgram;
@@ -101,16 +102,18 @@ public class FunctionExpr extends Expr {
    * Returns the reference of the value.
    * @param location
    */
-  public Expr createRef(Location location)
+  @Override
+  public Expr createRef(QuercusParser parser)
   {
-    return new RefExpr(location, this);
+    return parser.getFactory().createRef(this);
   }
 
   /**
    * Returns the copy of the value.
    * @param location
    */
-  public Expr createCopy(Location location)
+  @Override
+  public Expr createCopy(ExprFactory factory)
   {
     return this;
   }

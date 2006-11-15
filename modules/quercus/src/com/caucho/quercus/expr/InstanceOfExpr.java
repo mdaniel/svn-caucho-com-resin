@@ -41,8 +41,8 @@ import com.caucho.quercus.Location;
 /**
  * Represents a PHP instanceof expression.
  */
-public final class InstanceOfExpr extends UnaryExpr {
-  private final String _right;
+public class InstanceOfExpr extends UnaryExpr {
+  protected final String _right;
 
   public InstanceOfExpr(Location location, Expr left, String right)
   {

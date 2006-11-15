@@ -212,7 +212,7 @@ abstract public class Expr {
     return this;
   }
 
-  public Expr createDeref()
+  public Expr createDeref(ExprFactory factory)
     throws IOException
   {
     return this;
@@ -222,7 +222,7 @@ abstract public class Expr {
    * Creates a assignment
    * @param location
    */
-  public Expr createCopy(Location location)
+  public Expr createCopy(ExprFactory factory)
   {
     return this;
   }
@@ -231,10 +231,12 @@ abstract public class Expr {
    * Copy for things like $a .= "test";
    * @param location
    */
-  public Expr copy(Location location)
+  /*
+  public Expr copy()
   {
     return this;
   }
+  */
 
   /**
    * Creates a field ref

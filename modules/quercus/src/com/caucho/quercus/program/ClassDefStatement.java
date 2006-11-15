@@ -51,7 +51,7 @@ import com.caucho.vfs.WriteStream;
  * Represents a class definition
  */
 public class ClassDefStatement extends Statement {
-  private InterpretedClassDef _cl;
+  protected InterpretedClassDef _cl;
 
   public ClassDefStatement(Location location, InterpretedClassDef cl)
   {

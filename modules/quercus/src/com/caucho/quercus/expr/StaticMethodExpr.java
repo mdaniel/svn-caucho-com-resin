@@ -40,6 +40,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.QuercusClass;
 
+import com.caucho.quercus.parser.*;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.quercus.Location;
@@ -51,14 +52,15 @@ import com.caucho.util.L10N;
  */
 public class StaticMethodExpr extends Expr {
   private static final L10N L = new L10N(StaticMethodExpr.class);
-  private final String _className;
-  private final String _name;
-  private final Expr []_args;
+  
+  protected final String _className;
+  protected final String _name;
+  protected final Expr []_args;
 
-  private Expr []_fullArgs;
+  protected Expr []_fullArgs;
 
-  private AbstractFunction _fun;
-  private boolean _isMethod;
+  protected AbstractFunction _fun;
+  protected boolean _isMethod;
 
   public StaticMethodExpr(Location location, String className, String name, ArrayList<Expr> args)
   {
@@ -94,18 +96,20 @@ public class StaticMethodExpr extends Expr {
    * Returns the reference of the value.
    * @param location
    */
-  public Expr createRef(Location location)
+  @Override
+  public Expr createRef(QuercusParser parser)
   {
-    return new RefExpr(location, this);
+    return parser.getFactory().createRef(this);
   }
 
   /**
    * Returns the copy of the value.
    * @param location
    */
-  public Expr createCopy(Location location)
+  @Override
+  public Expr createCopy(ExprFactory factory)
   {
-    return new CopyExpr(location, this);
+    return factory.createCopy(this);
   }
   
   /**

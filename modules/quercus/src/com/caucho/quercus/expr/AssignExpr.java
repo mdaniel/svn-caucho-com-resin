@@ -63,10 +63,11 @@ public class AssignExpr extends Expr {
    * Creates a assignment
    * @param location
    */
-  public Expr createCopy(Location location)
+  @Override
+  public Expr createCopy(ExprFactory factory)
   {
     // quercus/3d9e
-    return new CopyExpr(location, this);
+    return factory.createCopy(this);
   }
 
   /**
