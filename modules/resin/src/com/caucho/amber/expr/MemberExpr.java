@@ -28,8 +28,12 @@
 
 package com.caucho.amber.expr;
 
-import com.caucho.amber.query.*;
+import com.caucho.amber.table.Column;
+import com.caucho.amber.table.ForeignColumn;
 
+import java.util.ArrayList;
+
+import com.caucho.amber.query.*;
 
 import com.caucho.util.CharBuffer;
 
@@ -41,10 +45,13 @@ import com.caucho.amber.table.LinkColumns;
  */
 public class MemberExpr extends AbstractAmberExpr {
   private boolean _isNot;
-  private PathExpr _itemExpr;
+
+  // PathExpr or ArgExpr (jpa/10c8)
+  private AmberExpr _itemExpr;
+
   private AmberExpr _collectionExpr;
 
-  private MemberExpr(PathExpr itemExpr,
+  private MemberExpr(AmberExpr itemExpr,
                      AmberExpr collectionExpr, boolean isNot)
   {
     _itemExpr = itemExpr;
@@ -53,20 +60,26 @@ public class MemberExpr extends AbstractAmberExpr {
   }
 
   public static AmberExpr create(QueryParser parser,
-                                 PathExpr itemExpr,
+                                 AmberExpr itemExpr,
                                  AmberExpr collectionExpr,
                                  boolean isNot)
   {
     if (collectionExpr instanceof IdExpr)
       collectionExpr = ((CollectionIdExpr) collectionExpr).getPath();
 
-    if (collectionExpr instanceof OneToManyExpr) {
+    /* commented out: jpa/10c8-jpa/10ca
+    if (itemExpr instanceof ArgExpr) {
+    }
+    else if (collectionExpr instanceof OneToManyExpr) {
       OneToManyExpr oneToMany = (OneToManyExpr) collectionExpr;
       PathExpr parent = oneToMany.getParent();
 
+      FromItem childFromItem = ((PathExpr) itemExpr).getChildFromItem();
+
       AmberExpr expr;
+
       expr = new ManyToOneJoinExpr(oneToMany.getLinkColumns(),
-                                   itemExpr.getChildFromItem(),
+                                   childFromItem,
                                    parent.getChildFromItem());
 
       if (isNot)
@@ -74,8 +87,9 @@ public class MemberExpr extends AbstractAmberExpr {
       else
         return expr;
     }
-    else
-      return new MemberExpr(itemExpr, collectionExpr, isNot);
+    */
+
+    return new MemberExpr(itemExpr, collectionExpr, isNot);
   }
 
   /**
@@ -99,8 +113,11 @@ public class MemberExpr extends AbstractAmberExpr {
    */
   public boolean usesFrom(FromItem from, int type, boolean isNot)
   {
+    if (! (_itemExpr instanceof PathExpr))
+      return false;
+
     return (_collectionExpr.usesFrom(from, type) ||
-            _itemExpr.usesFrom(from, type));
+            ((PathExpr) _itemExpr).usesFrom(from, type));
   }
 
   /**
@@ -108,8 +125,10 @@ public class MemberExpr extends AbstractAmberExpr {
    */
   public AmberExpr replaceJoin(JoinExpr join)
   {
-    _collectionExpr = _collectionExpr.replaceJoin(join);
-    _itemExpr = (PathExpr) _itemExpr.replaceJoin(join);
+    if (_itemExpr instanceof PathExpr) {
+      _collectionExpr = _collectionExpr.replaceJoin(join);
+      _itemExpr = (PathExpr) _itemExpr.replaceJoin(join);
+    }
 
     return this;
   }
@@ -164,7 +183,16 @@ public class MemberExpr extends AbstractAmberExpr {
     if (_isNot)
       cb.append("NOT ");
 
-    cb.append("EXISTS (SELECT *");
+    // jpa/10ca
+    // XXX: needs to handle compound PK.
+    ForeignColumn fk = (ForeignColumn) join.getColumns().get(0);
+    cb.append(oneToMany.getParent().getChildFromItem().getName());
+    cb.append('.');
+    cb.append(fk.getTargetColumn().getName());
+
+    // changed to IN for jpa/10ca cb.append("EXISTS (SELECT *");
+    cb.append(" IN (SELECT "); // SELECT *");
+    cb.append(fk.getName());
     Table table = join.getSourceTable();
     cb.append(" FROM " + table.getName() + " caucho");
     cb.append(" WHERE ");
@@ -173,12 +201,88 @@ public class MemberExpr extends AbstractAmberExpr {
 
     cb.append(join.generateJoin("caucho", targetTable));
 
-    if (_collectionExpr instanceof ManyToOneExpr) {
+    if (_itemExpr instanceof ArgExpr) {
+
+      cb.append(" AND caucho.");
+
+      if (_collectionExpr instanceof ManyToOneExpr) {
+        join = ((ManyToOneExpr) _collectionExpr).getLinkColumns();
+
+        String name = join.getColumns().get(0).getName();
+
+        cb.append(name);
+      }
+      else {
+        // XXX: needs to handle compound PK.
+        ArrayList<Column> idColumns =
+          join.getSourceTable().getIdColumns();
+
+        cb.append(idColumns.get(0).getName());
+      }
+
+      cb.append(" = ?");
+    }
+    else if (_collectionExpr instanceof ManyToOneExpr) {
       join = ((ManyToOneExpr) _collectionExpr).getLinkColumns();
 
-      String where = join.generateJoin("caucho", _itemExpr.getChildFromItem().getName());
+      String itemWhere;
+      boolean isArg = false;
+
+      String where;
+
+      if (_itemExpr instanceof ManyToOneExpr) {
+        LinkColumns manyToOneJoin = ((ManyToOneExpr) _itemExpr).getLinkColumns();
+
+        itemWhere = ((ManyToOneExpr) _itemExpr).getParent().getChildFromItem().getName();
+
+        where = join.generateJoin(manyToOneJoin, "caucho", itemWhere);
+      }
+      else {
+
+        if (_itemExpr instanceof PathExpr) {
+          itemWhere = ((PathExpr) _itemExpr).getChildFromItem().getName();
+        }
+        else {
+          isArg = true;
+          itemWhere = "?";
+        }
+
+        where = join.generateJoin("caucho", itemWhere, isArg);
+      }
 
       cb.append(" AND " + where);
+    }
+    else if (_collectionExpr instanceof OneToManyExpr) {
+      if (_itemExpr instanceof ManyToOneExpr) {
+
+        join = ((ManyToOneExpr) _itemExpr).getLinkColumns();
+
+        String itemWhere = ((ManyToOneExpr) _itemExpr).getParent().getChildFromItem().getName();
+
+        String where = join.generateJoin(itemWhere, "caucho");
+
+        cb.append(" AND " + where);
+      }
+      else {
+        // XXX: needs to handle compound PK.
+        ArrayList<Column> idColumns =
+          join.getSourceTable().getIdColumns();
+
+        String id = idColumns.get(0).getName();
+
+        cb.append(" AND (caucho." + id + " = ");
+
+        FromItem childFromItem = ((PathExpr) _itemExpr).getChildFromItem();
+
+        if (childFromItem != null) {
+          cb.append(childFromItem.getName() + ".");
+
+          // XXX: needs to handle compound PK.
+          idColumns = childFromItem.getTable().getIdColumns();
+
+          cb.append(idColumns.get(0).getName() + ")");
+        }
+      }
     }
 
     cb.append(')');

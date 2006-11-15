@@ -255,6 +255,20 @@ public class LinkColumns {
   public String generateJoin(String sourceTable,
                              String targetTable)
   {
+    return generateJoin(sourceTable, targetTable, false);
+  }
+
+  /**
+   * Generates the linking for a join
+   *
+   * @param sourceTable the SQL table name for the source
+   * @param targetTable the SQL table name for the target
+   * @param isArg true if targetTable is an argument "?"
+   */
+  public String generateJoin(String sourceTable,
+                             String targetTable,
+                             boolean isArg)
+  {
     CharBuffer cb = new CharBuffer();
 
     cb.append('(');
@@ -272,8 +286,60 @@ public class LinkColumns {
       cb.append(" = ");
 
       cb.append(targetTable);
+
+      if (isArg)
+        continue;
+
       cb.append('.');
       cb.append(column.getTargetColumn().getName());
+    }
+
+    cb.append(')');
+
+    return cb.toString();
+  }
+
+  /**
+   * Generates the many-to-many linking.
+   * This join is the one-to-many join and the other
+   * join is passed in as an argument used to link
+   * the two source tables that are pointing to the
+   * same target table.
+   *
+   * @param join the many-to-one join
+   * @param sourceTable1 the SQL table name for the 1st source
+   * @param sourceTable2 the SQL table name for the 2nd source
+   */
+  public String generateJoin(LinkColumns manyToOneJoin,
+                             String sourceTable1,
+                             String sourceTable2)
+  {
+    // Implemented for jpa/10cb
+
+    if (manyToOneJoin._columns.size() != _columns.size())
+      return "";
+
+    CharBuffer cb = new CharBuffer();
+
+    cb.append('(');
+
+    for (int i = 0; i < _columns.size(); i++) {
+      ForeignColumn column = _columns.get(i);
+      ForeignColumn otherColumn = manyToOneJoin._columns.get(i);
+
+      if (i != 0)
+        cb.append(" and ");
+
+      cb.append(sourceTable1);
+      cb.append('.');
+      cb.append(column.getName());
+
+      cb.append(" = ");
+
+      cb.append(sourceTable2);
+
+      cb.append('.');
+      cb.append(otherColumn.getName());
     }
 
     cb.append(')');
@@ -301,17 +367,29 @@ public class LinkColumns {
         cb.append(" and ");
 
       if (! column.isNotNull()) {
-        cb.append(sourceTable);
-        cb.append('.');
-        cb.append(column.getName());
+
+        if (sourceTable == null)
+          cb.append('?');
+        else {
+          cb.append(sourceTable);
+          cb.append('.');
+          cb.append(column.getName());
+        }
+
         cb.append(" is not null ");
       }
 
       cb.append(" and ");
 
-      cb.append(sourceTable);
-      cb.append('.');
-      cb.append(column.getName());
+      // jpa/10c9
+      if (sourceTable == null) {
+        cb.append('?');
+      }
+      else {
+        cb.append(sourceTable);
+        cb.append('.');
+        cb.append(column.getName());
+      }
 
       cb.append(" = ");
 

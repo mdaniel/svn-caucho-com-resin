@@ -1157,7 +1157,11 @@ public class QueryParser {
 
       AmberExpr collection = parseExpr();
 
-      if (! (expr instanceof PathExpr))
+      // jpa/10c8
+      if (expr instanceof ArgExpr) {
+        addArg((ArgExpr) expr);
+      }
+      else if (! (expr instanceof PathExpr))
         throw error(L.l("MEMBER OF requires an entity-valued item."));
 
       // ManyToMany is implemented as a
@@ -1175,7 +1179,7 @@ public class QueryParser {
       }
 
       return parseIs(MemberExpr.create(this,
-                                       (PathExpr) expr,
+                                       expr,
                                        collection,
                                        isNot));
     }
@@ -1354,8 +1358,11 @@ public class QueryParser {
         if (peekToken() != '(') {
           IdExpr tableExpr = getIdentifier(name);
 
-          if (tableExpr != null)
-            return parsePath(tableExpr);
+          if (tableExpr != null) {
+            AmberExpr amberExpr = parsePath(tableExpr);
+
+            return amberExpr;
+          }
 
           if (_query.getFromList().size() == 0)
             throw error(L.l("Expected a FROM clause before '{0}'", name));

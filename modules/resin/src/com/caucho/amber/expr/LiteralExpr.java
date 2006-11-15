@@ -40,6 +40,8 @@ public class LiteralExpr extends AbstractAmberExpr {
   // literal value
   private String _value;
 
+  private Class _javaType;
+
   /**
    * Creates a new literal expression.
    *
@@ -49,6 +51,15 @@ public class LiteralExpr extends AbstractAmberExpr {
   public LiteralExpr(String value, Class javaType)
   {
     _value = value;
+    _javaType = javaType;
+  }
+
+  /**
+   * Returns the java type
+   */
+  public Class getJavaType()
+  {
+    return _javaType;
   }
 
   /**
@@ -72,6 +83,16 @@ public class LiteralExpr extends AbstractAmberExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
+    // XXX: Derby requires 0 or 1 for tck
+    // ejb30/persistence/query/language/queryTest14
+    // if ((_javaType != null) && _javaType.equals(boolean.class)) {
+    //   if (_value.equalsIgnoreCase("false"))
+    //     cb.append("0");
+    //   else
+    //     cb.append("1");
+    // }
+    // else
+
     cb.append(_value);
   }
 

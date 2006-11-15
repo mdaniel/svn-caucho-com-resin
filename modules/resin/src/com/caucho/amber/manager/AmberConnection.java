@@ -337,6 +337,10 @@ public class AmberConnection
       }
       else {
         // managed entity instance: ignored.
+
+        // cascade children
+        entity.__caucho_cascadePrePersist(this);
+        entity.__caucho_cascadePostPersist(this);
       }
 
       // XXX: merge recursively for

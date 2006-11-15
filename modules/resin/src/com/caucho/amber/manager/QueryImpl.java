@@ -397,6 +397,13 @@ public class QueryImpl implements Query {
       _userQuery.setString(index, value.toString()); // commented out (jpa/141a): ((Double) value).doubleValue());
     else if (value instanceof Character)
       _userQuery.setString(index, value.toString());
+    else if (value instanceof Entity) {
+      // XXX: needs to handle Compound PK
+
+      Object pk = ((Entity) value).__caucho_getPrimaryKey();
+
+      _userQuery.setObject(index, pk);
+    }
     else {
       _userQuery.setObject(index, value);
     }

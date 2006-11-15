@@ -2954,7 +2954,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
                                         _field.getName()));
       }
 
-      // jpa/0o03, jpa/0o06, jpa/0o07
+      // jpa/0o03, jpa/0o06, jpa/0o07, jpa/10ca
 
       // jpa/0o06
       boolean isManyToOne = (mappedBy == null) || "".equals(mappedBy);
@@ -2970,8 +2970,14 @@ public class EntityIntrospector extends BaseConfigIntrospector {
           // jpa/0o07: DstBean.getParent()
           // OK: isManyToOne = true;
         }
-        else
-          isManyToOne = false;
+        else {
+          // jpa/10ca
+          OneToOneCompletion otherSide
+            = getSourceCompletion(targetType, mappedBy);
+
+          if (otherSide != null)
+            isManyToOne = false;
+        }
       }
 
       if (isManyToOne) {

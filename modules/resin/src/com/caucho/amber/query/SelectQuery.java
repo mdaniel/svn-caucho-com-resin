@@ -474,6 +474,32 @@ public class SelectQuery extends AbstractQuery {
     if (_hasFrom)
       cb.append(" from ");
 
+    // jpa/114f: reorder from list for left outer join
+    for (int i = 1; i < _fromList.size(); i++) {
+      FromItem item = _fromList.get(i);
+
+      if (item.isOuterJoin()) {
+        JoinExpr join = item.getJoinExpr();
+
+        if (join == null)
+          continue;
+
+        FromItem parent = join.getJoinParent();
+
+        int index = _fromList.indexOf(parent);
+
+        if (index < 0)
+          continue;
+
+        _fromList.remove(i);
+
+        if (index < i)
+          index++;
+
+        _fromList.add(index, item);
+      }
+    }
+
     boolean hasJoinExpr = false;
     for (int i = 0; i < _fromList.size(); i++) {
       FromItem item = _fromList.get(i);

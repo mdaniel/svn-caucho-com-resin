@@ -63,7 +63,10 @@ public class ManyToOneJoinExpr extends JoinExpr {
     _sourceFromItem = source;
     _targetFromItem = target;
 
-    if (source == null || target == null)
+    // commented out: jpa/10c9
+    // if (source == null || target == null)
+
+    if (target == null)
       throw new NullPointerException();
   }
 
@@ -159,8 +162,16 @@ public class ManyToOneJoinExpr extends JoinExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
-    cb.append(_linkColumns.generateWhere(_sourceFromItem.getName(),
-                                         _targetFromItem.getName()));
+    String sourceName = null;
+
+    // jpa/10c9
+    if (_sourceFromItem != null)
+      sourceName = _sourceFromItem.getName();
+
+    String targetName = _targetFromItem.getName();
+
+    cb.append(_linkColumns.generateWhere(sourceName,
+                                         targetName));
   }
 
   /**
