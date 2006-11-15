@@ -47,6 +47,7 @@ import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
+import com.caucho.vfs.*;
 
 /**
  * Factory for creating PHP expressions and statements
@@ -178,14 +179,6 @@ public class ExprFactory {
   }
 
   /**
-   * Creates a ref '&$a' expression.
-   */
-  public RefExpr createRef(Expr base)
-  {
-    return new RefExpr(base);
-  }
-
-  /**
    * Creates an unset '$a' expression.
    */
   public Expr createUnsetVar(AbstractVarExpr var)
@@ -226,11 +219,35 @@ public class ExprFactory {
   }
 
   /**
+   * Creates a unary plus '+a' expression.
+   */
+  public Expr createPlus(Expr expr)
+  {
+    return new PlusExpr(expr);
+  }
+
+  /**
    * Creates a unary not '!a' expression.
    */
   public Expr createNot(Expr expr)
   {
     return new NotExpr(expr);
+  }
+
+  /**
+   * Creates a unary inversion '~a' expression.
+   */
+  public Expr createBitNot(Expr expr)
+  {
+    return new BitNotExpr(expr);
+  }
+
+  /**
+   * Creates a clone 'clone a' expression.
+   */
+  public Expr createClone(Expr expr)
+  {
+    return new CloneExpr(expr);
   }
 
   /**
@@ -560,11 +577,11 @@ public class ExprFactory {
   }
 
   /**
-   * Creates an assignment expression.
+   * Creates a ref '&$a' expression.
    */
-  public Expr createRef(AbstractVarExpr left)
+  public RefExpr createRef(Expr base)
   {
-    return new RefExpr(left);
+    return new RefExpr(base);
   }
 
   /**
@@ -717,6 +734,46 @@ public class ExprFactory {
 			   ArrayList<Expr> args)
   {
     return new NewExpr(loc, name, args);
+  }
+
+  /**
+   * Creates an include expr
+   */
+  public Expr createInclude(Location loc,
+			    Path source,
+			    Expr expr)
+  {
+    return new IncludeExpr(loc, source, expr, false);
+  }
+
+  /**
+   * Creates an include expr
+   */
+  public Expr createRequire(Location loc,
+			    Path source,
+			    Expr expr)
+  {
+    return new IncludeExpr(loc, source, expr, true);
+  }
+
+  /**
+   * Creates an include expr
+   */
+  public Expr createIncludeOnce(Location loc,
+				Path source,
+				Expr expr)
+  {
+    return new IncludeOnceExpr(loc, source, expr, false);
+  }
+
+  /**
+   * Creates an include expr
+   */
+  public Expr createRequireOnce(Location loc,
+				Path source,
+				Expr expr)
+  {
+    return new IncludeOnceExpr(loc, source, expr, true);
   }
 
   /**
@@ -893,6 +950,24 @@ public class ExprFactory {
   }
 
   /**
+   * Creates a throw statement
+   */
+  public Statement createThrow(Location loc,
+				Expr value)
+  {
+    return new ThrowStatement(loc, value);
+  }
+
+  /**
+   * Creates a try statement
+   */
+  public TryStatement createTry(Location loc,
+				Statement block)
+  {
+    return new TryStatement(loc, block);
+  }
+
+  /**
    * Creates a return statement
    */
   public Statement createReturn(Location loc,
@@ -908,6 +983,15 @@ public class ExprFactory {
 				   Expr value)
   {
     return new ReturnRefStatement(loc, value);
+  }
+
+  /**
+   * Creates a new function definition def.
+   */
+  public Statement createFunctionDef(Location loc,
+				     Function fun)
+  {
+    return new FunctionDefStatement(loc, fun);
   }
 
   /**

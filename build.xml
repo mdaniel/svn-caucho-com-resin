@@ -66,7 +66,7 @@
   </target>
 
   <target name="compile" 
-          depends="init, ant, ejb, jpa, j2ee-deploy, j2ee-management, jaxrpc, jca, jms, jsdk, jstl, jta, portlet, script, resin, quercus, ecmascript, webutil, deploy, conf, ext">
+          depends="init, ejb, jpa, j2ee-deploy, j2ee-management, jaxrpc, jca, jms, jsdk, jstl, jta, portlet, script, resin, quercus, ecmascript, webutil, deploy, conf, ext">
   </target>
 
   <target name="ant" depends="init">

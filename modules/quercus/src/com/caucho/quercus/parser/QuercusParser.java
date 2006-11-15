@@ -565,7 +565,7 @@ public class QuercusParser {
           Function fun = parseFunctionDefinition(M_STATIC);
 
 	  if (! _isTop) {
-	    statements.add(new FunctionDefStatement(functionLocation, fun));
+	    statements.add(_factory.createFunctionDef(functionLocation, fun));
 	  }
 	}
 	break;
@@ -1413,7 +1413,7 @@ public class QuercusParser {
 
       Statement block = parseStatement();
 
-      TryStatement stmt = new TryStatement(location, block);
+      TryStatement stmt = _factory.createTry(location, block);
       
       int token = parseToken();
 
@@ -1647,7 +1647,7 @@ public class QuercusParser {
     
     Expr expr = parseExpr();
 
-    return new ThrowStatement(location, expr);
+    return _factory.createThrow(location, expr);
   }
 
   /**
@@ -2789,7 +2789,7 @@ public class QuercusParser {
       {
         Expr expr = parseTerm();
 
-        return new PlusExpr(getLocation(), expr);
+        return _factory.createPlus(expr);
       }
 
     case '!':
@@ -2825,7 +2825,7 @@ public class QuercusParser {
       {
         Expr expr = parseTerm();
 
-        return new BitNotExpr(getLocation(), expr);
+        return _factory.createBitNot(expr);
       }
 
     case '@':
@@ -2839,7 +2839,7 @@ public class QuercusParser {
       {
         Expr expr = parseTerm();
 
-	return new CloneExpr(getLocation(), expr);
+	return _factory.createClone(expr);
       }
 
     case INCR:
@@ -2860,13 +2860,13 @@ public class QuercusParser {
       return parseNew();
 
     case INCLUDE:
-      return new IncludeExpr(getLocation(), _sourceFile, parseExpr());
+      return _factory.createInclude(getLocation(), _sourceFile, parseExpr());
     case REQUIRE:
-      return new IncludeExpr(getLocation(), _sourceFile, parseExpr(), true);
+      return _factory.createRequire(getLocation(), _sourceFile, parseExpr());
     case INCLUDE_ONCE:
-      return new IncludeOnceExpr(getLocation(), _sourceFile, parseExpr());
+      return _factory.createIncludeOnce(getLocation(), _sourceFile, parseExpr());
     case REQUIRE_ONCE:
-      return new IncludeOnceExpr(getLocation(), _sourceFile, parseExpr(), true);
+      return _factory.createRequireOnce(getLocation(), _sourceFile, parseExpr());
 
     case LIST:
       return parseList();
@@ -3237,7 +3237,7 @@ public class QuercusParser {
   {
     Expr name = parseExpr();
 
-    return new IncludeExpr(getLocation(), _sourceFile, name);
+    return _factory.createInclude(getLocation(), _sourceFile, name);
   }
 
   /**

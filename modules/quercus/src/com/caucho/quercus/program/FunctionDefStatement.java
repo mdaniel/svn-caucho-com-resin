@@ -50,7 +50,7 @@ import com.caucho.vfs.WriteStream;
  * Represents a function definition
  */
 public class FunctionDefStatement extends Statement {
-  private Function _fun;
+  protected Function _fun;
 
   public FunctionDefStatement(Location location, Function fun)
   {

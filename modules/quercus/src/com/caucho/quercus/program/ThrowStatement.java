@@ -47,7 +47,7 @@ import com.caucho.vfs.WriteStream;
  * Represents a throw expression statement in a Quercus program.
  */
 public class ThrowStatement extends Statement {
-  private Expr _expr;
+  protected Expr _expr;
   
   /**
    * Creates the echo statement.
