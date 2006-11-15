@@ -292,8 +292,11 @@ public class CurlModule
    * @param curl
    */
   public static void curl_close(Env env,
-                              CurlResource curl)
+                              @NotNull CurlResource curl)
   {
+    if (curl == null)
+      return;
+
     curl.close();
   }
 
@@ -304,7 +307,7 @@ public class CurlModule
    * @param curl
    */
   public static CurlResource curl_copy_handle(Env env,
-                              CurlResource curl)
+                              @NotNull CurlResource curl)
   {
     return curl.clone();
   }
@@ -316,7 +319,7 @@ public class CurlModule
    * @param curl
    */
   public static LongValue curl_errno(Env env,
-                              CurlResource curl)
+                              @NotNull CurlResource curl)
   {
     return LongValue.create(curl.getErrorCode());
   }
@@ -328,7 +331,7 @@ public class CurlModule
    * @param curl
    */
   public static StringValue curl_error(Env env,
-                              CurlResource curl)
+                              @NotNull CurlResource curl)
   {
     return new StringValueImpl(curl.getError());
   }
@@ -338,7 +341,7 @@ public class CurlModule
    * @param curl
    */
   public static Value curl_exec(Env env,
-                              CurlResource curl)
+                              @NotNull CurlResource curl)
   {
     return curl.execute(env);
   }
@@ -351,7 +354,7 @@ public class CurlModule
    * @param option type of information to return
    */
   public static Value curl_getinfo(Env env,
-                              CurlResource curl,
+                              @NotNull CurlResource curl,
                               @Optional Value option)
   {
 //    if (option instanceof DefaultValue)
@@ -578,7 +581,7 @@ public class CurlModule
    * @param options
    */
   public static BooleanValue curl_setopt_array(Env env,
-                              CurlResource curl,
+                              @NotNull CurlResource curl,
                               ArrayValue options)
   {
     for (Map.Entry<Value,Value> entry: options.entrySet()) {
@@ -600,7 +603,7 @@ public class CurlModule
    * @return true if successful
    */
   public static BooleanValue curl_setopt(Env env,
-                              CurlResource curl,
+                              @NotNull CurlResource curl,
                               int option,
                               Value value)
   {

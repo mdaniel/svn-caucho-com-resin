@@ -726,6 +726,8 @@ public class CurlResource
 
     HttpRequest httpRequest = HttpRequest.getRequest(this);
 
+    env.addClose(httpRequest);
+
     httpRequest.execute(env);
 
     if (hasError())

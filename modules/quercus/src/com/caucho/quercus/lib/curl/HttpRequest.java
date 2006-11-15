@@ -40,6 +40,7 @@ import com.caucho.quercus.env.Value;
 
 import com.caucho.util.L10N;
 
+import java.io.Closeable;
 import java.io.InputStream;
 import java.io.IOException;
 import java.net.ConnectException;
@@ -65,6 +66,7 @@ import java.util.zip.GZIPInputStream;
  * Represents a generic Http request.
  */
 public class HttpRequest
+  implements Closeable
 {
   private static final Logger log
     = Logger.getLogger(HttpRequest.class.getName());
@@ -184,7 +186,7 @@ public class HttpRequest
 
     _curl.setCookie(_conn.getHeaderField("Set-Cookie"));
 
-    _conn.disconnect();
+    _conn.close();
   }
 
   /**
@@ -349,8 +351,9 @@ public class HttpRequest
   /**
    * Disconnects the connection.
    */
-  public final void disconnect()
+  public void close()
   {
-    _conn.disconnect();
+    if (_conn != null)
+      _conn.close();
   }
 }
