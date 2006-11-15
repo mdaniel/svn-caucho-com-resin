@@ -306,9 +306,13 @@ public class CurlModule
    * @param env
    * @param curl
    */
+  @ReturnNullAsFalse
   public static CurlResource curl_copy_handle(Env env,
                               @NotNull CurlResource curl)
   {
+    if (curl == null)
+      return null;
+
     return curl.clone();
   }
 
@@ -318,9 +322,12 @@ public class CurlModule
    * @param env
    * @param curl
    */
-  public static LongValue curl_errno(Env env,
+  public static Value curl_errno(Env env,
                               @NotNull CurlResource curl)
   {
+    if (curl == null)
+      return BooleanValue.FALSE;
+
     return LongValue.create(curl.getErrorCode());
   }
 
@@ -330,9 +337,12 @@ public class CurlModule
    * @param env
    * @param curl
    */
-  public static StringValue curl_error(Env env,
+  public static Value curl_error(Env env,
                               @NotNull CurlResource curl)
   {
+    if (curl == null)
+      return BooleanValue.FALSE;
+
     return new StringValueImpl(curl.getError());
   }
 
@@ -343,6 +353,9 @@ public class CurlModule
   public static Value curl_exec(Env env,
                               @NotNull CurlResource curl)
   {
+    if (curl == null)
+      return BooleanValue.FALSE;
+
     return curl.execute(env);
   }
 
@@ -359,6 +372,9 @@ public class CurlModule
   {
 //    if (option instanceof DefaultValue)
 //     return curl.getAllInfo();
+
+    if (curl == null)
+      return BooleanValue.FALSE;
 
     return getInfo(env, curl, option.toInt());
   }
@@ -584,6 +600,9 @@ public class CurlModule
                               @NotNull CurlResource curl,
                               ArrayValue options)
   {
+    if (curl == null)
+      return BooleanValue.FALSE;
+
     for (Map.Entry<Value,Value> entry: options.entrySet()) {
       if (setOption(env, curl, entry.getKey().toInt(), entry.getValue()))
         return BooleanValue.FALSE;
@@ -607,6 +626,9 @@ public class CurlModule
                               int option,
                               Value value)
   {
+    if (curl == null)
+      return BooleanValue.FALSE;
+
     if (setOption(env, curl, option, value))
       return BooleanValue.TRUE;
     else
