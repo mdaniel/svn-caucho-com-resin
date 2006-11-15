@@ -29,16 +29,13 @@
 
 package com.caucho.xtpdoc;
 
-import java.io.PrintWriter;
-import java.io.OutputStreamWriter;
-import java.io.IOException;
-
-import java.util.ArrayList;
-
 import com.caucho.config.Config;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
-import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 
 public class Printer {
   public static void main(String []args)

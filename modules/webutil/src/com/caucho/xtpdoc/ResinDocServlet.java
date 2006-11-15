@@ -29,32 +29,24 @@
 
 package com.caucho.xtpdoc;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.OutputStream;
-
-import java.util.logging.Logger;
+import com.caucho.config.Config;
+import com.caucho.config.LineConfigException;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import javax.xml.stream.XMLStreamWriter;
-import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.FactoryConfigurationError;
-
-import com.caucho.config.Config;
-import com.caucho.config.LineConfigException;
-
-import com.caucho.util.*;
-
-import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
-
-import com.caucho.xml.stream.XMLStreamWriterImpl;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.util.logging.Logger;
 
 public class ResinDocServlet extends HttpServlet {
   private static Logger log = Logger.getLogger(ResinDocServlet.class.getName());

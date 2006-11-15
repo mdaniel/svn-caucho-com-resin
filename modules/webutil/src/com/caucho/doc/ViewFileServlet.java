@@ -28,21 +28,23 @@
 
 package com.caucho.doc;
 
-import java.io.*;
-
-import java.util.logging.Logger;
-
-import java.util.regex.Pattern;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
 
-import com.caucho.vfs.*;
-import com.caucho.server.vfs.*;
+import javax.servlet.GenericServlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  * Servlet to view a source file, with optional emphasis based on regular
