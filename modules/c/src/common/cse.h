@@ -255,6 +255,7 @@ struct stream_t {
 #define HMUX_URL            'U'
 #define HMUX_STRING         'S'
 #define HMUX_HEADER         'H'
+#define HMUX_META_HEADER    'M'
 #define HMUX_PROTOCOL       'P'
 
 #define CSE_NULL            '?'

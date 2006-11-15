@@ -564,6 +564,14 @@ send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config,
 			status_ptr = status + read_len;
 			break;
 
+		case HMUX_META_HEADER:
+			read_len = hmux_read_len(s);
+			cse_skip(s, read_len);
+			code = cse_read_byte(s);
+			read_len = hmux_read_len(s);
+			cse_skip(s, read_len);
+			break;
+
 		case HMUX_HEADER:
 			read_len = hmux_read_len(s);
 			header_ptr += cse_read_limit(s, header_ptr,

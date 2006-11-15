@@ -437,10 +437,10 @@ public class TldManager {
     for (int i = 0; i < _preloadTaglibs.size(); i++) {
       TldPreload preload = _preloadTaglibs.get(i);
 
-      if (uri.equals(preload.getURI()) &&
-	  (mapLocation == null ||
-	   mapLocation.equals(preload.getLocation()) ||
-	   mapLocation.equals(uri))) {
+      if (uri.equals(preload.getURI())
+	  && (mapLocation == null
+	      || mapLocation.equals(preload.getLocation())
+	      || mapLocation.equals(uri))) {
 	return parseTld(preload.getPath());
       }
     }

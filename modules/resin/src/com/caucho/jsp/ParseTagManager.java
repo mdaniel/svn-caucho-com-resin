@@ -266,8 +266,10 @@ public class ParseTagManager {
     taglib = taglib.copy();
 
     for (Taglib oldTaglib : _taglibMap.values()) {
-      oldTaglib.addTaglib(taglib);
-      taglib.addTaglib(oldTaglib);
+      if (oldTaglib != null) {
+	oldTaglib.addTaglib(taglib);
+	taglib.addTaglib(oldTaglib);
+      }
     }
     
     _taglibMap.put(taglib.getPrefixString(), taglib);

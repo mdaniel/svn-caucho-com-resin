@@ -749,6 +749,12 @@ send_data(stream_t *s, request_rec *r)
       else
 	apr_table_add(r->headers_out, key, value);
       break;
+      
+    case HMUX_META_HEADER:
+      len = hmux_read_len(s);
+      cse_read_limit(s, key, sizeof(key), len);
+      cse_read_string(s, value, sizeof(value));
+      break;
 
     case HMUX_DATA:
       len = hmux_read_len(s);
